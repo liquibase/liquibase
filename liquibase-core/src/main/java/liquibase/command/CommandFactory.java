@@ -113,7 +113,14 @@ public class CommandFactory implements SingletonObject {
             String[][] names = step.defineCommandNames();
             if (names != null) {
                 for (String[] name : names) {
-                    stepArguments.addAll(this.commandArgumentDefinitions.getOrDefault(StringUtil.join(name, " "), new HashSet<>()));
+                    for (CommandArgumentDefinition<?> command :
+                            this.commandArgumentDefinitions.getOrDefault(StringUtil.join(name, " "), new HashSet<>())) {
+                        // uses the most specialized version of the argument, allowing overrides
+                        if (!stepArguments.add(command)) {
+                            stepArguments.remove(command);
+                            stepArguments.add(command);
+                        }
+                    }
                 }
             }
         }
