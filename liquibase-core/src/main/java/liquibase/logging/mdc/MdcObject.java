@@ -8,9 +8,9 @@ import java.io.IOException;
 public class MdcObject implements Closeable {
 
     private final String key;
-    private final String value;
+    private final Object value;
 
-    public MdcObject(String key, String value) {
+    public MdcObject(String key, Object value) {
         this.key = key;
         this.value = value;
     }

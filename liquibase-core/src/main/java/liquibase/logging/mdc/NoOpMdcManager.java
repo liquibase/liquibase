@@ -10,7 +10,7 @@ import java.util.Map;
  */
 public class NoOpMdcManager implements MdcManager {
     @Override
-    public MdcObject put(String key, String value) {
+    public MdcObject put(String key, Object value) {
         return new MdcObject(key, value);
     }
 
@@ -30,7 +30,7 @@ public class NoOpMdcManager implements MdcManager {
     }
 
     @Override
-    public Map<String, String> getAll() {
+    public Map<String, Object> getAll() {
         return Collections.emptyMap();
     }
 }

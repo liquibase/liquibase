@@ -14,7 +14,7 @@ public interface MdcManager extends Plugin {
      * do so.
      */
     @Beta
-    MdcObject put(String key, String value);
+    MdcObject put(String key, Object value);
 
     /**
      * Removes the context value identified by the <code>key</code> parameter.
@@ -32,5 +32,5 @@ public interface MdcManager extends Plugin {
     int getPriority();
 
     @Beta
-    Map<String, String> getAll();
+    Map<String, Object> getAll();
 }
