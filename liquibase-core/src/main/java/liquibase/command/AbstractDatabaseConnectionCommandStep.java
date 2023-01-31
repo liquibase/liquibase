@@ -22,7 +22,7 @@ public abstract class AbstractDatabaseConnectionCommandStep extends AbstractComm
     protected static final String[] COMMAND_NAME = {"abstractDatabaseConnectionCommandStep"};
     private static final ResourceBundle coreBundle = getBundle("liquibase/i18n/liquibase-core");
 
-    protected Database database;
+    private Database database;
 
 
     @SuppressWarnings("java:S2095")
@@ -116,6 +116,7 @@ public abstract class AbstractDatabaseConnectionCommandStep extends AbstractComm
 
     @Override
     public void cleanUp(CommandResultsBuilder resultsBuilder) {
+        // this class only closes a database that it created
         if (database != null) {
             try {
                 database.close();

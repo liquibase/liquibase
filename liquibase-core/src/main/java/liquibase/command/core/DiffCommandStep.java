@@ -24,7 +24,7 @@ import java.util.Set;
 
 public class DiffCommandStep extends AbstractCommandStep {
 
-    protected static final String[] COMMAND_NAME = {"diff"};
+    public static final String[] COMMAND_NAME = {"diff"};
 
     public static final CommandArgumentDefinition<Database> REFERENCE_DATABASE_ARG;
     public static final CommandArgumentDefinition<Database> TARGET_DATABASE_ARG;

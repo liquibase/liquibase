@@ -76,8 +76,7 @@ public class ReferenceDbUrlConnectionCommandStep extends AbstractDatabaseConnect
             String driverPropertiesFile = commandScope.getArgumentValue(REFERENCE_DRIVER_PROPERTIES_FILE_ARG);
             return createDatabaseObject(url, username, password, defaultSchemaName, defaultCatalogName, driver, driverPropertiesFile);
         } else {
-            this.database = commandScope.getArgumentValue(REFERENCE_DATABASE_ARG);
-            return this.database;
+            return commandScope.getArgumentValue(REFERENCE_DATABASE_ARG);
         }
     }
 
