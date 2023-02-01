@@ -14,7 +14,7 @@ jobs:
     - uses: castlabs/get-package-version-id-action@v2.1
       id: version
       with:
-        version: "${{ github.ref_name }}-SNAPSHOT"
+        version: "${{ github.event.ref }}-SNAPSHOT"
 
     - uses: actions/delete-package-versions@v4
       if: ${{ steps.version.outputs.ids != '' }}
@@ -23,6 +23,10 @@ jobs:
         # Defaults to an empty string.
         # Required if `package-version-ids` input is not given.
         package-name: org.liquibase.liquibase-core
+
+        # Type of the package. Can be one of container, maven, npm, nuget, or rubygems.
+        # Required
+        package-type: maven
 
         # The number of latest versions to keep.
         # This cannot be specified with `num-old-versions-to-delete`. By default, `num-old-versions-to-delete` takes precedence over `min-versions-to-keep`.
