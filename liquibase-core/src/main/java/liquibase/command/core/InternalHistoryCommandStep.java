@@ -177,10 +177,10 @@ public class InternalHistoryCommandStep extends AbstractCommandStep {
 
         private static final List<String> HEADERS = Arrays.asList(
                 "Deployment ID",
-                "Update date",
-                "Change log path",
-                "Change set author",
-                "Change set ID");
+                "Update Date",
+                "Changelog Path",
+                "Changeset Author",
+                "Changeset ID");
 
         private final List<RanChangeSet> changeSets;
         private final CommandScope commandScope;
