@@ -2341,6 +2341,10 @@ public class Liquibase implements AutoCloseable {
         this.changeExecListener = listener;
     }
 
+    public void setChangeLogSyncListener(ChangeLogSyncListener changeLogSyncListener) {
+        this.changeLogSyncListener = changeLogSyncListener;
+    }
+
     @SafeVarargs
     public final void generateChangeLog(CatalogAndSchema catalogAndSchema, DiffToChangeLog changeLogWriter,
                                         PrintStream outputStream, Class<? extends DatabaseObject>... snapshotTypes)
