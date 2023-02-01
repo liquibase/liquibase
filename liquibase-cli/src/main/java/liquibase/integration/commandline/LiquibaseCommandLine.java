@@ -580,8 +580,6 @@ public class LiquibaseCommandLine {
             Scope.getCurrentScope().getLog(getClass()).fine("Cannot find local defaultsFile " + defaultsFile.getAbsolutePath());
         }
 
-        LiquibaseConfiguration.REGISTERED_VALUE_PROVIDERS = true;
-
         return returnList;
     }
 

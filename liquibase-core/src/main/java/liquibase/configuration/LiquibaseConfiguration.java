@@ -23,10 +23,6 @@ public class LiquibaseConfiguration implements SingletonObject {
 
     private final SortedSet<ConfigurationValueProvider> configurationValueProviders;
     private final SortedSet<ConfigurationDefinition<?>> definitions = new TreeSet<>();
-    /**
-     * Indicates whether value providers have been registered by the integration.
-     */
-    public static boolean REGISTERED_VALUE_PROVIDERS = false;
 
     /**
      * Track looked up values we have logged to avoid infinite loops between this and the log system using configurations
