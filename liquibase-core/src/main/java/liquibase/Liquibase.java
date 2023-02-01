@@ -304,13 +304,18 @@ public class Liquibase implements AutoCloseable {
                 // Update Hub with the operation information
                 //
                 hubUpdater.postUpdateHub(updateOperation, bufferLog);
-                int deployedChangeSetCount = ((DefaultChangeExecListener) changeExecListener).getDeployedChangeSets().size();
+
+                DefaultChangeExecListener defaultListener = findDefaultListener(connection != null);
+                int deployedChangeSetCount = defaultListener.getDeployedChangeSets().size();
+
                 try (MdcObject deploymentOutcomeMdc = Scope.getCurrentScope().addMdcValue(MdcKey.DEPLOYMENT_OUTCOME, MdcValue.COMMAND_SUCCESSFUL);
                      MdcObject deploymentOutcomeCountMdc = Scope.getCurrentScope().addMdcValue(MdcKey.DEPLOYMENT_CHANGESET_COUNT, String.valueOf(deployedChangeSetCount))) {
                     Scope.getCurrentScope().getLog(getClass()).info("Update command completed successfully.");
                 }
             } catch (Throwable e) {
-                int deployedChangeSetCount = ((DefaultChangeExecListener) changeExecListener).getDeployedChangeSets().size();
+                DefaultChangeExecListener defaultListener = findDefaultListener(updateOperation != null);
+                int deployedChangeSetCount = defaultListener.getDeployedChangeSets().size();
+
                 try (MdcObject deploymentOutcomeMdc = Scope.getCurrentScope().addMdcValue(MdcKey.DEPLOYMENT_OUTCOME, MdcValue.COMMAND_FAILED);
                      MdcObject deploymentOutcomeCountMdc = Scope.getCurrentScope().addMdcValue(MdcKey.DEPLOYMENT_CHANGESET_COUNT, String.valueOf(deployedChangeSetCount))) {
                     Scope.getCurrentScope().getLog(getClass()).info("Update command encountered an exception.");
@@ -440,6 +445,14 @@ public class Liquibase implements AutoCloseable {
             connection = hubService.getConnection(new Connection().setId(getHubConnectionId()), true);
         }
         return connection;
+    }
+
+    private DefaultChangeExecListener findDefaultListener(boolean shouldUpdateHub) {
+        if (shouldUpdateHub) {
+            return (DefaultChangeExecListener) ((HubChangeExecListener) changeExecListener).getChangeExecListener();
+        } else {
+            return (DefaultChangeExecListener) changeExecListener;
+        }
     }
 
 
