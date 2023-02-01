@@ -2,7 +2,7 @@ package liquibase.changelog.filter;
 
 /**
  * Contains the result of a {@link liquibase.changelog.filter.ChangeSetFilter#accepts(liquibase.changelog.ChangeSet)}  call.
- *
+ * <p>
  * {@link #getMessage()}, but {@link #getFilter()} can be used to programmatically determine the reason for accepting or not.
  */
 public class ChangeSetFilterResult {

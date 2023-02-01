@@ -98,7 +98,8 @@ public class FilenameUtil {
 
     /**
      * Remove problematic characters from filename and replace them with '_'
-     * https://stackoverflow.com/questions/1976007/what-characters-are-forbidden-in-windows-and-linux-directory-names
+     * @see <a href="https://stackoverflow.com/questions/1976007/what-characters-are-forbidden-in-windows-and-linux-directory-names">
+     *     What characters are forbidden in Windows and Linux directory names?</a>
      * <p>
      * ' ' '/' ':' '"' '\' '|' '*' '?' '<' '>'
      *

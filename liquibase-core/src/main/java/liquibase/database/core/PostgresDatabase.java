@@ -40,7 +40,8 @@ public class PostgresDatabase extends AbstractJdbcDatabase {
 
     /**
      * Maximum length of PostgresSQL identifier.
-     * For details see https://www.postgresql.org/docs/current/sql-syntax-lexical.html#SQL-SYNTAX-IDENTIFIERS.
+     * For details:
+     * @see <a href="https://www.postgresql.org/docs/current/sql-syntax-lexical.html#SQL-SYNTAX-IDENTIFIERS">SQL-SYNTAX-IDENTIFIERS</a>.
      */
     static final int PGSQL_PK_BYTES_LIMIT = 63;
     static final String PGSQL_PK_SUFFIX = "_pkey";

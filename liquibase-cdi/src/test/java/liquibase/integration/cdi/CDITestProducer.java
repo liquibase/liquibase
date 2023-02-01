@@ -11,7 +11,7 @@ import javax.sql.DataSource;
 /**
  * A Test CDI Producer used for testing CDILiquibase
  *
- * @author Aaron Walker (http://github.com/aaronwalker)
+ * @author <a href="http://github.com/aaronwalker">Aaron Walker</a>
  */
 public class CDITestProducer {
 

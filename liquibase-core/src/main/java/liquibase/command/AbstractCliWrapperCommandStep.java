@@ -46,7 +46,7 @@ public abstract class AbstractCliWrapperCommandStep extends AbstractCommandStep 
 
     /**
      * Called by {@link #run(CommandResultsBuilder)} to create the actual arguments passed to {@link Main#run(String[])}.
-     *
+     * <p>
      * Implementations should generally call {@link #collectArguments(CommandScope, List, String)}
      * and possibly {@link #removeArgumentValues(String[], String...)}
      */

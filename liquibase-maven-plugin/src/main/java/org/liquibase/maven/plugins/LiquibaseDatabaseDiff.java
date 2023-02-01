@@ -175,7 +175,7 @@ public class LiquibaseDatabaseDiff extends AbstractLiquibaseChangeLogMojo {
 
     /**
      * Write the output of the diff to a file
-     *
+     * <p>
      *
      * @parameter property="liquibase.outputFile"
      *

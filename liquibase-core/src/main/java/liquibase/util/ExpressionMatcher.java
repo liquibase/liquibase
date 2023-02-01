@@ -13,11 +13,11 @@ import java.util.regex.Pattern;
  * - and - conjunction operator
  * - or - disjunction operator
  * - () - increase evaluation order priority for sub-expression
- *
+ * <p>
  * Examples:
  * "(a and b) or (c and d)"
  * "!a and b"
- *
+ * <p>
  * Usage:
  * @see liquibase.LabelExpression
  * @see liquibase.ContextExpression

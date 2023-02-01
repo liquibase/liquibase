@@ -46,7 +46,7 @@ public class ChangeLogParameters {
     /**
      * Creates a new ChangeLogParameters instance, populated with a set of "database.*" global parameters based on the passed database configuration.
      * If the database is null, no global parameters are added.
-     *
+     * <p>
      * The passed database is used as a default value for {@link #getDatabase()}
      */
     public ChangeLogParameters(Database database) {

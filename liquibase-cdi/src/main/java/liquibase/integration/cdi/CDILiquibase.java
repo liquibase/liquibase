@@ -68,7 +68,7 @@ import java.util.Map;
  *
  * }
  * </p>
- * @author Aaron Walker (http://github.com/aaronwalker)
+ * @author <a href="http://github.com/aaronwalker">Aaron Walker</a>
  */
 @ApplicationScoped
 public class CDILiquibase implements Extension {

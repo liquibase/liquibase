@@ -128,7 +128,7 @@ public class CommandScope {
      * Assign a value to a given provided dependency. So if a CommandStep provides class X, at
      * {@link CommandStep#run(CommandResultsBuilder)} method it needs to provide the value for X using this method.
      * commandScope.provideDependency(LockService.class, lockService);
-     *
+     * <p>
      * Means that this class will LockService.class using object lock
      */
     public  <T> CommandScope provideDependency(Class<T> clazz, T value) {

@@ -7,7 +7,7 @@ import java.util.Enumeration;
 /**
  * To support both javax.servlet and jakarta.servlet implementations, this class wraps the classes we use so that the shared code does not have to depend
  * on a particular implementation.
- *
+ * <p>
  * NOTE: Only methods which Liquibase currently uses are exposed, which may cause breaking changes if/when new abstract methods are added to the wrappers.
  */
 class GenericServletWrapper {

@@ -49,7 +49,7 @@ public class HubServiceFactory extends AbstractPluginFactory<HubService> {
     /**
      * If StandardHubService can't be instantiated for some reason (like a missing snakeyaml), return this implementation
      * to avoid null pointer exceptions.
-     *
+     * <p>
      * Once StandardHubService can always be instantiated, this fallback can be removed
      */
     private static class FallbackHubService implements HubService {
