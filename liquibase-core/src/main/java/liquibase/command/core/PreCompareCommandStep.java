@@ -12,6 +12,9 @@ import liquibase.structure.DatabaseObject;
 import java.util.Arrays;
 import java.util.List;
 
+/**
+ * Prepares objects used by database comparison Commands like diff, diffChangelog, etc
+ */
 public class PreCompareCommandStep extends AbstractCommandStep {
 
     protected static final String[] COMMAND_NAME = {"preCompareCommandStep"};
