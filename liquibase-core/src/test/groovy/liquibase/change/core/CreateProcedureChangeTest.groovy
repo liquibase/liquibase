@@ -5,7 +5,6 @@ import liquibase.change.CheckSum
 import liquibase.change.StandardChangeTest
 import liquibase.changelog.ChangeSet
 import liquibase.changelog.DatabaseChangeLog
-import liquibase.database.core.MSSQLDatabase
 import liquibase.database.core.OracleDatabase
 import liquibase.database.core.PostgresDatabase
 import liquibase.exception.ValidationErrors
@@ -14,14 +13,11 @@ import liquibase.database.core.MockDatabase
 import liquibase.sdk.resource.MockResourceAccessor
 import liquibase.snapshot.MockSnapshotGeneratorFactory
 import liquibase.snapshot.SnapshotGeneratorFactory
-import liquibase.sqlgenerator.core.CreateProcedureGenerator
 import liquibase.test.JUnitResourceAccessor
 import liquibase.util.StreamUtil
-import liquibase.util.StringUtil
-import spock.lang.Shared
 import spock.lang.Unroll
 
-public class CreateProcedureChangeTest extends StandardChangeTest {
+class CreateProcedureChangeTest extends StandardChangeTest {
 
     def getConfirmationMessage() throws Exception {
         when:
@@ -103,7 +99,7 @@ public class CreateProcedureChangeTest extends StandardChangeTest {
         new PostgresDatabase() | "all"                            | ""
     }
 
-    def dbmsIsNotConsideredOnCheckSumGeneration() {
+    def "dbms is not considered on checksum generation"() {
         when:
         CreateProcedureChange change = new CreateProcedureChange()
         change.setProcedureText(PROCEDURE_TEXT)
@@ -114,11 +110,11 @@ public class CreateProcedureChangeTest extends StandardChangeTest {
         CheckSum procedureCheckSumWithDbms = change2.generateCheckSum()
 
         then:
-        procedureCheckSumWithoutDbms == procedureCheckSumWithDbms
+        assert procedureCheckSumWithoutDbms == procedureCheckSumWithDbms
 
     }
 
-    def pathIsNotConsideredOnCheckSumGeneration() {
+    def "path is not considered on checksum generation"() {
         when:
         String testScopeId = Scope.enter([
                 "resourceAccessor": new MockResourceAccessor([
@@ -139,10 +135,10 @@ public class CreateProcedureChangeTest extends StandardChangeTest {
         Scope.exit(testScopeId)
 
         then:
-        procedureCheckSumWithoutPath == procedureCheckSumWithPath
+        assert procedureCheckSumWithoutPath == procedureCheckSumWithPath
     }
 
-    def commentIsNotConsideredOnCheckSumGeneration() {
+    def "comment is not considered on checksum generation"() {
         when:
         CreateProcedureChange change = new CreateProcedureChange()
         change.setProcedureText(PROCEDURE_TEXT)
@@ -153,10 +149,10 @@ public class CreateProcedureChangeTest extends StandardChangeTest {
         CheckSum procedureCheckSumWithComments = change2.generateCheckSum()
 
         then:
-        procedureCheckSumWithoutComments == procedureCheckSumWithComments
+        assert procedureCheckSumWithoutComments == procedureCheckSumWithComments
     }
 
-    def encodingIsNotConsideredOnCheckSumGeneration() {
+    def "encoding is not considered on checksum generation"() {
         when:
         CreateProcedureChange change = new CreateProcedureChange()
         change.setProcedureText(PROCEDURE_TEXT)
@@ -167,10 +163,10 @@ public class CreateProcedureChangeTest extends StandardChangeTest {
         CheckSum procedureCheckSumWithEncoding = change2.generateCheckSum()
 
         then:
-        procedureCheckSumWithoutEncoding == procedureCheckSumWithEncoding
+        assert procedureCheckSumWithoutEncoding == procedureCheckSumWithEncoding
     }
 
-    def procedureTextUpdatedWithWhitespacesAddedShouldNotComputeANewCheckSum() {
+    def "procedure text updated with whitespaces should not compute a new checksum"() {
         when:
         CreateProcedureChange change = new CreateProcedureChange()
         change.setProcedureText(PROCEDURE_TEXT)
@@ -180,6 +176,21 @@ public class CreateProcedureChangeTest extends StandardChangeTest {
         CheckSum procedureTextModifiedCheckSum = change2.generateCheckSum()
 
         then:
-        procedureTextCheckSum == procedureTextModifiedCheckSum
+        assert procedureTextCheckSum == procedureTextModifiedCheckSum
+    }
+
+    def "checksum gets updated having a change on procedure text"() {
+        when:
+        CreateProcedureChange change = new CreateProcedureChange()
+        change.setProcedureText(PROCEDURE_TEXT)
+        CheckSum procedureTextOriginalCheckSum = change.generateCheckSum()
+
+        StringBuilder procedureTextUpdated = new StringBuilder(PROCEDURE_TEXT)
+        procedureTextUpdated.append(" WHERE 1=1")
+        change.setProcedureText(procedureTextUpdated.toString())
+        CheckSum procedureTextUpdatedCheckSum = change.generateCheckSum()
+
+        then:
+        assert procedureTextOriginalCheckSum.equals(procedureTextUpdatedCheckSum) == false
     }
 }
