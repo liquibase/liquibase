@@ -33,6 +33,7 @@ import liquibase.logging.Logger;
 import liquibase.logging.core.BufferedLogService;
 import liquibase.logging.core.CompositeLogService;
 import liquibase.logging.mdc.MdcKey;
+import liquibase.logging.mdc.MdcObject;
 import liquibase.logging.mdc.MdcValue;
 import liquibase.parser.ChangeLogParser;
 import liquibase.parser.ChangeLogParserFactory;
@@ -303,13 +304,13 @@ public class Liquibase implements AutoCloseable {
                 // Update Hub with the operation information
                 //
                 hubUpdater.postUpdateHub(updateOperation, bufferLog);
-                Scope.getCurrentScope().getMdcManager().put(MdcKey.DEPLOYMENT_OUTCOME, MdcValue.COMMAND_SUCCESSFUL);
-                Scope.getCurrentScope().getLog(getClass()).info("Update command completed successfully.");
-                Scope.getCurrentScope().getMdcManager().remove(MdcKey.DEPLOYMENT_OUTCOME);
+                try (MdcObject deploymentOutcomeMdc = Scope.getCurrentScope().addMdcValue(MdcKey.DEPLOYMENT_OUTCOME, MdcValue.COMMAND_SUCCESSFUL)) {
+                    Scope.getCurrentScope().getLog(getClass()).info("Update command completed successfully.");
+                }
             } catch (Throwable e) {
-                Scope.getCurrentScope().addMdcValue(MdcKey.DEPLOYMENT_OUTCOME, MdcValue.COMMAND_FAILED);
-                Scope.getCurrentScope().getLog(getClass()).info("Update command encountered an exception.");
-                Scope.getCurrentScope().getMdcManager().remove(MdcKey.DEPLOYMENT_OUTCOME);
+                try (MdcObject deploymentOutcomeMdc = Scope.getCurrentScope().addMdcValue(MdcKey.DEPLOYMENT_OUTCOME, MdcValue.COMMAND_FAILED)) {
+                    Scope.getCurrentScope().getLog(getClass()).info("Update command encountered an exception.");
+                }
                 if (hubUpdater != null) {
                     hubUpdater.postUpdateHubExceptionHandling(updateOperation, bufferLog, e.getMessage());
                 }
@@ -450,6 +451,7 @@ public class Liquibase implements AutoCloseable {
      */
     private DatabaseChangeLog getDatabaseChangeLog(boolean shouldWarnOnMismatchedXsdVersion) throws LiquibaseException {
         if (databaseChangeLog == null && changeLogFile != null) {
+            Scope.getCurrentScope().addMdcValue(MdcKey.CHANGELOG_FILE, changeLogFile);
             ChangeLogParser parser = ChangeLogParserFactory.getInstance().getParser(changeLogFile, resourceAccessor);
             if (parser instanceof XMLChangeLogSAXParser) {
                 ((XMLChangeLogSAXParser) parser).setShouldWarnOnMismatchedXsdVersion(shouldWarnOnMismatchedXsdVersion);
@@ -1213,9 +1215,17 @@ public class Liquibase implements AutoCloseable {
         runInScope(new Scope.ScopedRunner() {
             @Override
             public void run() throws Exception {
+                Scope.getCurrentScope().addMdcValue(MdcKey.ROLLBACK_TO_TAG, tagToRollBackTo);
+                Scope.getCurrentScope().addMdcValue(MdcKey.ROLLBACK_SCRIPT, rollbackScript);
+                Scope.getCurrentScope().addMdcValue(MdcKey.LIQUIBASE_TARGET_URL, database.getConnection().getURL());
 
                 LockService lockService = LockServiceFactory.getInstance().getLockService(database);
                 lockService.waitForLock();
+
+                ChangeLogHistoryService changelogService = ChangeLogHistoryServiceFactory.getInstance().getChangeLogService(database);
+                if (changelogService instanceof AbstractChangeLogHistoryService) {
+                    Scope.getCurrentScope().addMdcValue(MdcKey.DEPLOYMENT_ID, ((AbstractChangeLogHistoryService) changelogService).getLastDeploymentId());
+                }
 
                 Operation rollbackOperation = null;
                 BufferedLogService bufferLog = new BufferedLogService();
@@ -1292,10 +1302,16 @@ public class Liquibase implements AutoCloseable {
                         removeRunStatus(changeSets, contexts, labelExpression);
                     }
                     hubUpdater.postUpdateHub(rollbackOperation, bufferLog);
+                    try (MdcObject deploymentOutcomeMdc = Scope.getCurrentScope().getMdcManager().put(MdcKey.DEPLOYMENT_OUTCOME, MdcValue.COMMAND_SUCCESSFUL)) {
+                        Scope.getCurrentScope().getLog(getClass()).info("Rollback command completed successfully.");
+                    }
                 }
                 catch (Throwable t) {
                     if (hubUpdater != null) {
                         hubUpdater.postUpdateHubExceptionHandling(rollbackOperation, bufferLog, t.getMessage());
+                    }
+                    try (MdcObject deploymentOutcomeMdc = Scope.getCurrentScope().addMdcValue(MdcKey.DEPLOYMENT_OUTCOME, MdcValue.COMMAND_FAILED)) {
+                        Scope.getCurrentScope().getLog(getClass()).info("Rollback command encountered an exception.");
                     }
                     throw t;
                 } finally {

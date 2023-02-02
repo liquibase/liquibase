@@ -411,6 +411,12 @@ public class Scope {
      */
     public MdcObject addMdcValue(String key, String value, boolean removeWhenScopeExits) {
         MdcObject mdcObject = getMdcManager().put(key, value);
+        removeMdcObjectWhenScopeExits(removeWhenScopeExits, mdcObject);
+
+        return mdcObject;
+    }
+
+    private void removeMdcObjectWhenScopeExits(boolean removeWhenScopeExits, MdcObject mdcObject) {
         if (removeWhenScopeExits) {
             Scope currentScope = getCurrentScope();
             String scopeId = currentScope.scopeId;
@@ -420,6 +426,25 @@ public class Scope {
                 addedMdcEntries.put(scopeId, new ArrayList<>(Collections.singletonList(mdcObject)));
             }
         }
+    }
+
+    /**
+     * Add a key value pair to the MDC using the MDC manager. This key value pair will be automatically removed from the
+     * MDC when this scope exits.
+     */
+    public MdcObject addMdcValue(String key, Map<String, String> value) {
+        return addMdcValue(key, value, true);
+    }
+
+    /**
+     * Add a key value pair to the MDC using the MDC manager.
+     * @param removeWhenScopeExits if true, this key value pair will be automatically removed from the MDC when this
+     *                             scope exits. If there is not a demonstrable reason for setting this parameter to false
+     *                             then it should be set to true.
+     */
+    public MdcObject addMdcValue(String key, Map<String, String> value, boolean removeWhenScopeExits) {
+        MdcObject mdcObject = getMdcManager().put(key, value);
+        removeMdcObjectWhenScopeExits(removeWhenScopeExits, mdcObject);
 
         return mdcObject;
     }

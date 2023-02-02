@@ -45,10 +45,7 @@ public class UpdateVisitor implements ChangeSetVisitor {
     @Override
     public void visit(ChangeSet changeSet, DatabaseChangeLog databaseChangeLog, Database database,
                       Set<ChangeSetFilterResult> filterResults) throws LiquibaseException {
-        Scope scope = Scope.getCurrentScope();
-        scope.addMdcValue(MdcKey.CHANGESET_ID, changeSet.getId());
-        scope.addMdcValue(MdcKey.CHANGESET_AUTHOR, changeSet.getAuthor());
-        scope.addMdcValue(MdcKey.CHANGESET_FILEPATH, changeSet.getFilePath());
+        logMdcData(changeSet);
         Executor executor = Scope.getCurrentScope().getSingleton(ExecutorService.class).getExecutor("jdbc", database);
         if (! (executor instanceof LoggingExecutor)) {
             Scope.getCurrentScope().getUI().sendMessage("Running Changeset: " + changeSet);

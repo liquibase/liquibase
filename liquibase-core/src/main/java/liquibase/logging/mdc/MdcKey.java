@@ -17,4 +17,10 @@ public class MdcKey {
     public static final String LIQUIBASE_VERSION = "liquibaseVersion";
     public static final String LIQUIBASE_SYSTEM_NAME = "liquibaseSystemName";
     public static final String LIQUIBASE_SYSTEM_USER = "liquibaseSystemUser";
+    public static final String ROLLBACK_TO_TAG = "rollbackToTag";
+    public static final String CHANGELOG_FILE = "changelogFile";
+    public static final String ROLLBACK_SCRIPT = "rollbackScript";
+    public static final String CHANGESET_COMMENT = "changesetComment";
+    public static final String CHANGESET_LABEL = "changesetLabel";
+    public static final String CHANGELOG_PROPERTIES = "changelogProperties";
 }
