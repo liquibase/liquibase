@@ -23,4 +23,5 @@ public class MdcKey {
     public static final String CHANGESET_COMMENT = "changesetComment";
     public static final String CHANGESET_LABEL = "changesetLabel";
     public static final String DEPLOYMENT_CHANGESET_COUNT = "deploymentOutcomeCount";
+    public static final String CHANGELOG_PROPERTIES = "changelogProperties";
 }
