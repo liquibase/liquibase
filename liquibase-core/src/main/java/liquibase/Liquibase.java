@@ -82,7 +82,7 @@ public class Liquibase implements AutoCloseable {
     private final ChangeLogParameters changeLogParameters;
     private ChangeExecListener changeExecListener;
     private ChangeLogSyncListener changeLogSyncListener;
-
+    private final DefaultChangeExecListener defaultChangeExecListener = new DefaultChangeExecListener();
     private UUID hubConnectionId;
     private Map<String, Boolean> upToDateFastCheck = new HashMap<>();
 
@@ -284,20 +284,15 @@ public class Liquibase implements AutoCloseable {
                         hubUpdater.preUpdateHub("UPDATE", "update", connection, changeLogFile, contexts, labelExpression, changeLogIterator);
                 }
 
-                //
-                // Make sure we don't already have a listener
-                //
-                if (connection != null) {
-                    changeExecListener = new HubChangeExecListener(updateOperation, changeExecListener);
-                }
-
+                HubChangeExecListener hubChangeExecListener = new HubChangeExecListener(updateOperation, changeExecListener);
                 //
                 // Create another iterator to run
                 //
                 ChangeLogIterator runChangeLogIterator = getStandardChangelogIterator(contexts, labelExpression, changeLog);
                 CompositeLogService compositeLogService = new CompositeLogService(true, bufferLog);
                 Scope.child(Scope.Attr.logService.name(), compositeLogService, () -> {
-                    runChangeLogIterator.run(createUpdateVisitor(), new RuntimeEnvironment(database, contexts, labelExpression));
+                    UpdateVisitor updateVisitor = createUpdateVisitor(connection != null ? hubChangeExecListener : changeExecListener);
+                    runChangeLogIterator.run(updateVisitor, new RuntimeEnvironment(database, contexts, labelExpression));
                 });
 
                 //
@@ -305,16 +300,14 @@ public class Liquibase implements AutoCloseable {
                 //
                 hubUpdater.postUpdateHub(updateOperation, bufferLog);
 
-                DefaultChangeExecListener defaultListener = findDefaultListener(connection != null);
-                int deployedChangeSetCount = defaultListener.getDeployedChangeSets().size();
+                int deployedChangeSetCount = getDefaultChangeExecListener().getDeployedChangeSets().size();
 
                 try (MdcObject deploymentOutcomeMdc = Scope.getCurrentScope().addMdcValue(MdcKey.DEPLOYMENT_OUTCOME, MdcValue.COMMAND_SUCCESSFUL);
                      MdcObject deploymentOutcomeCountMdc = Scope.getCurrentScope().addMdcValue(MdcKey.DEPLOYMENT_CHANGESET_COUNT, String.valueOf(deployedChangeSetCount))) {
                     Scope.getCurrentScope().getLog(getClass()).info("Update command completed successfully.");
                 }
             } catch (Throwable e) {
-                DefaultChangeExecListener defaultListener = findDefaultListener(updateOperation != null);
-                int deployedChangeSetCount = defaultListener.getDeployedChangeSets().size();
+                int deployedChangeSetCount = getDefaultChangeExecListener().getDeployedChangeSets().size();
 
                 try (MdcObject deploymentOutcomeMdc = Scope.getCurrentScope().addMdcValue(MdcKey.DEPLOYMENT_OUTCOME, MdcValue.COMMAND_FAILED);
                      MdcObject deploymentOutcomeCountMdc = Scope.getCurrentScope().addMdcValue(MdcKey.DEPLOYMENT_CHANGESET_COUNT, String.valueOf(deployedChangeSetCount))) {
@@ -447,14 +440,6 @@ public class Liquibase implements AutoCloseable {
         return connection;
     }
 
-    private DefaultChangeExecListener findDefaultListener(boolean shouldUpdateHub) {
-        if (shouldUpdateHub) {
-            return (DefaultChangeExecListener) ((HubChangeExecListener) changeExecListener).getChangeExecListener();
-        } else {
-            return (DefaultChangeExecListener) changeExecListener;
-        }
-    }
-
 
     public DatabaseChangeLog getDatabaseChangeLog() throws LiquibaseException {
         return getDatabaseChangeLog(false);
@@ -482,6 +467,10 @@ public class Liquibase implements AutoCloseable {
 
     protected UpdateVisitor createUpdateVisitor() {
         return new UpdateVisitor(database, changeExecListener);
+    }
+
+    protected UpdateVisitor createUpdateVisitor(ChangeExecListener listener) {
+        return new UpdateVisitor(database, listener);
     }
 
     protected RollbackVisitor createRollbackVisitor() {
@@ -2425,6 +2414,10 @@ public class Liquibase implements AutoCloseable {
 
     public void setChangeLogSyncListener(ChangeLogSyncListener changeLogSyncListener) {
         this.changeLogSyncListener = changeLogSyncListener;
+    }
+
+    public DefaultChangeExecListener getDefaultChangeExecListener() {
+        return defaultChangeExecListener;
     }
 
     @SafeVarargs
