@@ -15,6 +15,11 @@ public class NoOpMdcManager implements MdcManager {
     }
 
     @Override
+    public MdcObject put(String key, Map<String, String> values) {
+        return new MdcObject(key, values);
+    }
+
+    @Override
     public void remove(String key) {
 
     }
@@ -30,7 +35,7 @@ public class NoOpMdcManager implements MdcManager {
     }
 
     @Override
-    public Map<String, String> getAll() {
+    public Map<String, Object> getAll() {
         return Collections.emptyMap();
     }
 }
