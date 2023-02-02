@@ -21,6 +21,7 @@ import liquibase.logging.core.JavaLogService;
 import liquibase.logging.core.LogServiceFactory;
 import liquibase.logging.mdc.MdcKey;
 import liquibase.logging.mdc.MdcManager;
+import liquibase.logging.mdc.MdcObject;
 import liquibase.resource.*;
 import liquibase.ui.ConsoleUIService;
 import liquibase.ui.UIService;
@@ -355,16 +356,9 @@ public class LiquibaseCommandLine {
                             Main.newCliChangelogParameters = changelogParameters;
                         }
 
-                        enableMonitoring();
-                        MdcManager mdcManager = Scope.getCurrentScope().getMdcManager();
-                        mdcManager.put(MdcKey.LIQUIBASE_VERSION, LiquibaseUtil.getBuildVersion());
-                        mdcManager.put(MdcKey.LIQUIBASE_SYSTEM_USER, System.getProperty("user.name"));
-                        mdcManager.put(MdcKey.LIQUIBASE_SYSTEM_NAME, InetAddress.getLocalHost().getHostName());
-                        Scope.getCurrentScope().getLog(getClass()).info("Starting command execution.");
-                        mdcManager.remove(MdcKey.LIQUIBASE_VERSION);
-                        mdcManager.remove(MdcKey.LIQUIBASE_SYSTEM_NAME);
-                        mdcManager.remove(MdcKey.LIQUIBASE_SYSTEM_USER);
-                        int response = commandLine.execute(finalArgs);
+                    enableMonitoring();
+                    logMdcData();
+                    int response = commandLine.execute(finalArgs);
 
                         if (!wasHelpOrVersionRequested()) {
                             final ConfiguredValue<String> logFile = LiquibaseCommandLineConfiguration.LOG_FILE.getCurrentConfiguredValue();
@@ -400,6 +394,18 @@ public class LiquibaseCommandLine {
             return 1;
         } finally {
             cleanup();
+        }
+    }
+
+    /**
+     * Log MDC data related to Liquibase system information.
+     */
+    private void logMdcData() throws IOException {
+        MdcManager mdcManager = Scope.getCurrentScope().getMdcManager();
+        try (MdcObject version = mdcManager.put(MdcKey.LIQUIBASE_VERSION, LiquibaseUtil.getBuildVersion());
+             MdcObject systemUser = mdcManager.put(MdcKey.LIQUIBASE_SYSTEM_USER, System.getProperty("user.name"));
+             MdcObject systemName = mdcManager.put(MdcKey.LIQUIBASE_SYSTEM_NAME, InetAddress.getLocalHost().getHostName())) {
+            Scope.getCurrentScope().getLog(getClass()).info("Starting command execution.");
         }
     }
 

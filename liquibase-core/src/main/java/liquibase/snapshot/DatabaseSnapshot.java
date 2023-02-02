@@ -82,7 +82,7 @@ public abstract class DatabaseSnapshot implements LiquibaseSerializable {
             this.setScratchData("DatabaseSnapshot.allCatalogs", catalogs);
 
             if (catalogs.size() > 1) {
-                List<String> quotedCatalogs = new ArrayList<String>();
+                List<String> quotedCatalogs = new ArrayList<>();
                 for (Catalog catalog : catalogs) {
                     quotedCatalogs.add("'" + catalog.getName() + "'");
                 }
@@ -623,7 +623,7 @@ public abstract class DatabaseSnapshot implements LiquibaseSerializable {
                         // or an actual DatabaseObject. If the element is a reference String then
                         // we go retrieve the actual object, else we just add the object
                         //
-                        List<DatabaseObject> newList = new ArrayList<DatabaseObject>();
+                        List<DatabaseObject> newList = new ArrayList<>();
                         for (Object element : (Collection<Object>)value) {
                             if (element instanceof String) {
                                 newList.add(allObjects.get(element));

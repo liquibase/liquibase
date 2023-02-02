@@ -1,6 +1,5 @@
 package liquibase.command.core;
 
-import liquibase.Beta;
 import liquibase.GlobalConfiguration;
 import liquibase.Scope;
 import liquibase.command.*;
@@ -8,13 +7,12 @@ import liquibase.configuration.ConfigurationValueObfuscator;
 import liquibase.database.Database;
 import liquibase.database.DatabaseFactory;
 import liquibase.database.core.DatabaseUtils;
-import liquibase.exception.CommandValidationException;
 import liquibase.exception.DatabaseException;
 import liquibase.integration.commandline.LiquibaseCommandLineConfiguration;
 import liquibase.resource.ResourceAccessor;
 import liquibase.util.StringUtil;
 
-import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.ResourceBundle;
 
@@ -25,9 +23,7 @@ import static java.util.ResourceBundle.getBundle;
  */
 public class DbUrlConnectionCommandStep extends AbstractCommandStep implements CleanUpCommandStep {
 
-    public static final String[] COMMAND_NAME = {"dbUrlConnectionCommandStep"};
-
-    private static final List<String[][]> APPLICABLE_COMMANDS = new ArrayList<>();
+    protected static final String[] COMMAND_NAME = {"dbUrlConnectionCommandStep"};
     private static final ResourceBundle coreBundle = getBundle("liquibase/i18n/liquibase-core");
 
     public static final CommandArgumentDefinition<Database> DATABASE_ARG;
@@ -38,6 +34,8 @@ public class DbUrlConnectionCommandStep extends AbstractCommandStep implements C
     public static final CommandArgumentDefinition<String> PASSWORD_ARG;
     public static final CommandArgumentDefinition<String> DRIVER_ARG;
     public static final CommandArgumentDefinition<String> DRIVER_PROPERTIES_FILE_ARG;
+
+    public static final int ORDER = 100;
 
     private Database database;
 
@@ -63,18 +61,15 @@ public class DbUrlConnectionCommandStep extends AbstractCommandStep implements C
         DATABASE_ARG.setSupersededBy(URL_ARG);
     }
 
-    /**
-     * Method that allows Commands to register themselves to be able to use this CommandStep.
-     */
-    @Beta
-    public static void addApplicableCommand(String[]... commandName) {
-        APPLICABLE_COMMANDS.add(commandName);
-    }
-
     @Override
     public void run(CommandResultsBuilder resultsBuilder) throws Exception {
         CommandScope commandScope = resultsBuilder.getCommandScope();
-        commandScope.addArgumentValue(DATABASE_ARG.getName(), this.obtainDatabase(commandScope));
+        commandScope.provideDependency(Database.class, this.obtainDatabase(commandScope));
+    }
+
+    @Override
+    public List<Class<?>> providedDependencies() {
+        return Collections.singletonList(Database.class);
     }
 
     /**
@@ -83,7 +78,7 @@ public class DbUrlConnectionCommandStep extends AbstractCommandStep implements C
      * @param commandScope current command scope
      * @throws DatabaseException Thrown when there is a connection error
      */
-    private Database obtainDatabase(CommandScope commandScope) throws DatabaseException, CommandValidationException {
+    private Database obtainDatabase(CommandScope commandScope) throws DatabaseException {
         if (commandScope.getArgumentValue(DATABASE_ARG) == null) {
             String url = commandScope.getArgumentValue(URL_ARG);
             String username = commandScope.getArgumentValue(USERNAME_ARG);
@@ -124,12 +119,12 @@ public class DbUrlConnectionCommandStep extends AbstractCommandStep implements C
             throws DatabaseException {
         ResourceAccessor resourceAccessor = Scope.getCurrentScope().getResourceAccessor();
         String databaseClassName = null;
-        Class databaseClass = LiquibaseCommandLineConfiguration.DATABASE_CLASS.getCurrentValue();
+        Class<?> databaseClass = LiquibaseCommandLineConfiguration.DATABASE_CLASS.getCurrentValue();
         if (databaseClass != null) {
             databaseClassName = databaseClass.getCanonicalName();
         }
         String propertyProviderClass = null;
-        Class clazz = LiquibaseCommandLineConfiguration.PROPERTY_PROVIDER_CLASS.getCurrentValue();
+        Class<?> clazz = LiquibaseCommandLineConfiguration.PROPERTY_PROVIDER_CLASS.getCurrentValue();
         if (clazz != null) {
             propertyProviderClass = clazz.getName();
         }
@@ -191,18 +186,6 @@ public class DbUrlConnectionCommandStep extends AbstractCommandStep implements C
         if (commandDefinition.getPipeline().size() == 1) {
             commandDefinition.setInternal(true);
         }
-    }
-
-    @Override
-    public int getOrder(CommandDefinition commandDefinition) {
-        for (String[][] commandNames : APPLICABLE_COMMANDS) {
-            for (String[] commandName : commandNames) {
-                if (commandDefinition.is(commandName)) {
-                    return 500;
-                }
-            }
-        }
-        return super.getOrder(commandDefinition);
     }
 
     @Override

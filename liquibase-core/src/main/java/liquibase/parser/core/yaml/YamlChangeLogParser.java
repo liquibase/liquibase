@@ -37,7 +37,7 @@ public class YamlChangeLogParser extends YamlParser implements ChangeLogParser {
             if ((parsedYaml == null) || parsedYaml.isEmpty()) {
                 throw new ChangeLogParseException("Empty file " + physicalChangeLogLocation);
             }
-            DatabaseChangeLog changeLog = new DatabaseChangeLog(physicalChangeLogLocation);
+            DatabaseChangeLog changeLog = new DatabaseChangeLog(DatabaseChangeLog.normalizePath(physicalChangeLogLocation));
 
             Object rootList = parsedYaml.get("databaseChangeLog");
             if (rootList == null) {

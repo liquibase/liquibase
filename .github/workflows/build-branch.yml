@@ -32,4 +32,3 @@ jobs:
         run: mvn -B clean deploy -DskipTests=true
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          TARGET_ARTIFACT_REPOSITORY: github

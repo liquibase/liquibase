@@ -182,7 +182,7 @@ public class CatalogAndSchema {
     }
 
     /**
-     * This method does schema or catalog comparision
+     * This method does schema or catalog comparison
      *
      * @param database - it's db object to getSchemaAndCatalogCase
      * @param value1 - schema or catalog to compare with value2

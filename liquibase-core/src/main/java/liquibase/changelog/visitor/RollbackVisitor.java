@@ -42,6 +42,7 @@ public class RollbackVisitor implements ChangeSetVisitor {
 
     @Override
     public void visit(ChangeSet changeSet, DatabaseChangeLog databaseChangeLog, Database database, Set<ChangeSetFilterResult> filterResults) throws LiquibaseException {
+        logMdcData(changeSet);
         Executor executor = Scope.getCurrentScope().getSingleton(ExecutorService.class).getExecutor("jdbc", database);
         if (! (executor instanceof LoggingExecutor)) {
             Scope.getCurrentScope().getUI().sendMessage("Rolling Back Changeset: " + changeSet);

@@ -514,7 +514,7 @@ public class OracleDatabase extends AbstractJdbcDatabase {
     }
 
     public String getSystemTableWhereClause(String tableNameColumn) {
-        List<String> clauses = new ArrayList<String>(Arrays.asList("BIN$",
+        List<String> clauses = new ArrayList<>(Arrays.asList("BIN$",
                 "AQ$",
                 "DR$",
                 "SYS_IOT_OVER",
