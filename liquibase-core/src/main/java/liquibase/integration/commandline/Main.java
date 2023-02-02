@@ -1957,6 +1957,9 @@ public class Main {
         }
     }
 
+    /**
+     * Run commands using the CommandFramework instead of directly setting up and calling other classes
+     */
     private void runUsingCommandFramework() throws CommandLineParsingException, CommandExecutionException, IOException, DatabaseException {
         if (COMMANDS.DIFF.equalsIgnoreCase(command)) {
             runDiffCommandStep();
@@ -1968,13 +1971,16 @@ public class Main {
             .addArgumentValue(DiffCommandStep.FORMAT_ARG, getCommandParam(OPTIONS.FORMAT, "TXT"))
             .setOutput(getOutputStream());
 
-        this.setPreCommandStepsArgumentsToCommand(diffCommand);
+        this.setPreCompareArgumentsToCommand(diffCommand);
         this.setDatabaseArgumentsToCommand(diffCommand);
         this.setReferenceDatabaseArgumentsToCommand(diffCommand);
 
         diffCommand.execute();
     }
 
+    /**
+     * Set database arguments values received by Main class to the provided command scope.
+     */
     private void setDatabaseArgumentsToCommand(CommandScope command) {
         command.addArgumentValue(DbUrlConnectionCommandStep.DEFAULT_SCHEMA_NAME_ARG, defaultSchemaName)
                 .addArgumentValue(DbUrlConnectionCommandStep.DEFAULT_CATALOG_NAME_ARG, defaultCatalogName)
@@ -1985,7 +1991,10 @@ public class Main {
                 .addArgumentValue(DbUrlConnectionCommandStep.URL_ARG, url);
     }
 
-    private void setPreCommandStepsArgumentsToCommand(CommandScope command) {
+    /**
+     * Set database compare arguments values received by Main class to the provided command scope.
+     */
+    private void setPreCompareArgumentsToCommand(CommandScope command) {
         command.addArgumentValue(PreCompareCommandStep.EXCLUDE_OBJECTS_ARG, excludeObjects)
                 .addArgumentValue(PreCompareCommandStep.INCLUDE_OBJECTS_ARG, includeObjects)
                 .addArgumentValue(PreCompareCommandStep.DIFF_TYPES_ARG, diffTypes)
@@ -1994,6 +2003,9 @@ public class Main {
                 .addArgumentValue(PreCompareCommandStep.REFERENCE_SCHEMAS_ARG, referenceSchemas);
     }
 
+    /**
+     * Set reference database arguments values received by Main class to the provided command scope.
+     */
     private void setReferenceDatabaseArgumentsToCommand(CommandScope command) throws CommandLineParsingException {
         String refDriver = referenceDriver;
         String refUrl = referenceUrl;
@@ -2039,6 +2051,9 @@ public class Main {
                 .addArgumentValue(ReferenceDbUrlConnectionCommandStep.REFERENCE_PASSWORD_ARG, refPassword);
     }
 
+    /**
+     * Encapsulate code used to load the correct resource accessor providing legacy Cli compatibility
+     */
     private ResourceAccessor getFileOpenerResourceAccessor() throws FileNotFoundException {
         ResourceAccessor fileOpener;
         if (Main.runningFromNewCli) {
@@ -2052,6 +2067,9 @@ public class Main {
         return fileOpener;
     }
 
+    /**
+     * Creates a new DiffOutputControl object based on the parameters received
+     */
     private DiffOutputControl getDiffOutputControl(CompareControl.SchemaComparison[] finalSchemaComparisons, ObjectChangeFilter objectChangeFilter) {
         DiffOutputControl diffOutputControl = new DiffOutputControl(
                 includeCatalog, includeSchema, includeTablespace, finalSchemaComparisons);
