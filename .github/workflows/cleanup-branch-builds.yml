@@ -16,7 +16,7 @@ jobs:
       with:
         version: "${{ github.event.ref }}-SNAPSHOT"
 
-    - uses: actions/delete-package-versions@v3
+    - uses: actions/delete-package-versions@v4
       if: ${{ steps.version.outputs.ids != '' }}
       with:
         # Name of the package.
