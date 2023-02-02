@@ -1217,14 +1217,14 @@ public class Liquibase implements AutoCloseable {
             public void run() throws Exception {
                 Scope.getCurrentScope().addMdcValue(MdcKey.ROLLBACK_TO_TAG, tagToRollBackTo);
                 Scope.getCurrentScope().addMdcValue(MdcKey.ROLLBACK_SCRIPT, rollbackScript);
-                Scope.getCurrentScope().addMdcValue(MdcKey.LIQUIBASE_TARGET_URL, database.getConnection().getURL(), false);
+                Scope.getCurrentScope().addMdcValue(MdcKey.LIQUIBASE_TARGET_URL, database.getConnection().getURL());
 
                 LockService lockService = LockServiceFactory.getInstance().getLockService(database);
                 lockService.waitForLock();
 
                 ChangeLogHistoryService changelogService = ChangeLogHistoryServiceFactory.getInstance().getChangeLogService(database);
                 if (changelogService instanceof AbstractChangeLogHistoryService) {
-                    Scope.getCurrentScope().addMdcValue(MdcKey.DEPLOYMENT_ID, ((AbstractChangeLogHistoryService) changelogService).getLastDeploymentId(), false);
+                    Scope.getCurrentScope().addMdcValue(MdcKey.DEPLOYMENT_ID, ((AbstractChangeLogHistoryService) changelogService).getLastDeploymentId());
                 }
 
                 Operation rollbackOperation = null;

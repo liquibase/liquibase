@@ -126,12 +126,18 @@ class ScopeTest extends Specification {
 
     private class TestMdcManager implements MdcManager {
 
-        private Map<String, String> values = new ConcurrentHashMap<>()
+        private Map<String, Object> values = new ConcurrentHashMap<>()
 
         @Override
         MdcObject put(String key, String value) {
             values.put(key, value)
             return new MdcObject(key, value)
+        }
+
+        @Override
+        MdcObject put(String key, Map<String, String> values) {
+            this.values.put(key, values)
+            return new MdcObject(key, values)
         }
 
         @Override
@@ -150,11 +156,11 @@ class ScopeTest extends Specification {
         }
 
         @Override
-        Map<String, String> getAll() {
+        Map<String, Object> getAll() {
             return Collections.unmodifiableMap(values)
         }
 
-        Map<String, String> getValues() {
+        Map<String, Object> getValues() {
             return values
         }
     }
