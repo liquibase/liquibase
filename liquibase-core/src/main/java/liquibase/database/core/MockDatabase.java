@@ -116,7 +116,7 @@ public class MockDatabase implements Database, InternalDatabase {
 
     @Override
     public void setConnection(final DatabaseConnection conn) {
-        this.connection = (DatabaseConnection) conn;
+        this.connection = conn;
     }
 
     public void setConnection(final Connection conn) {
