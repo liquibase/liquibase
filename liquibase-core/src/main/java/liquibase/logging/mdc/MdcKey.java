@@ -23,4 +23,6 @@ public class MdcKey {
     public static final String CHANGESET_COMMENT = "changesetComment";
     public static final String CHANGESET_LABEL = "changesetLabel";
     public static final String CHANGELOG_PROPERTIES = "changelogProperties";
+    public static final String ROLLBACK_COUNT = "rollbackCount";
+    public static final String CHANGESETS_ROLLED_BACK = "changesetsRolledback";
 }

@@ -302,6 +302,7 @@
                 <configuration>
                     <services>
                         <param>liquibase.logging.mdc.MdcManager</param>
+                        <param>liquibase.logging.mdc.CustomMdcObject</param>
                     </services>
                 </configuration>
                 <executions>

@@ -221,6 +221,11 @@ public class ChangeSet implements Conditional, ChangeLogChild {
 
     private Map<String, Object> attributes = new HashMap<>();
 
+    /**
+     * Deployment ID stored in the databasechangelog table.
+     */
+    private String deploymentId;
+
     public boolean shouldAlwaysRun() {
         return alwaysRun;
     }
@@ -1456,5 +1461,19 @@ public class ChangeSet implements Conditional, ChangeLogChild {
      */
     public void setStoredCheckSum(CheckSum storedCheckSum) {
         this.storedCheckSum = storedCheckSum;
+    }
+
+    /**
+     * @return Deployment ID stored in the databasechangelog table.
+     */
+    public String getDeploymentId() {
+        return deploymentId;
+    }
+
+    /**
+     * @param deploymentId Deployment ID stored in the databasechangelog table.
+     */
+    public void setDeploymentId(String deploymentId) {
+        this.deploymentId = deploymentId;
     }
 }
