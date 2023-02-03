@@ -19,6 +19,7 @@ import liquibase.util.StringUtil;
 
 import java.io.PrintStream;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 import java.util.Set;
 
@@ -50,7 +51,12 @@ public class DiffCommandStep extends AbstractCommandStep {
 
     @Override
     public List<Class<?>> requiredDependencies() {
-        return Arrays.asList(PreCompareCommandStep.class);
+        return Collections.singletonList(PreCompareCommandStep.class);
+    }
+
+    @Override
+    public List<Class<?>> providedDependencies() {
+        return Collections.singletonList(DiffCommandStep.class);
     }
 
     @Override

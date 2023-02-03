@@ -204,22 +204,24 @@ public class CommandLineUtils {
                                          CompareControl.SchemaComparison[] schemaComparisons)
             throws LiquibaseException, IOException, ParserConfigurationException {
 
-        CommandScope command = new CommandScope("internalDiffChangeLog");
+
+        CommandScope command = new CommandScope("diffChangeLog");
         command
                 .addArgumentValue(ReferenceDbUrlConnectionCommandStep.REFERENCE_DATABASE_ARG, referenceDatabase)
                 .addArgumentValue(DbUrlConnectionCommandStep.DATABASE_ARG, targetDatabase)
-                .addArgumentValue(InternalDiffChangelogCommandStep.SNAPSHOT_TYPES_ARG, InternalDiffChangelogCommandStep.parseSnapshotTypes(snapshotTypes))
-                .addArgumentValue(InternalDiffChangelogCommandStep.COMPARE_CONTROL_ARG, new CompareControl(schemaComparisons, snapshotTypes))
-                .addArgumentValue(InternalDiffChangelogCommandStep.OBJECT_CHANGE_FILTER_ARG, objectChangeFilter)
-                .addArgumentValue(InternalDiffChangelogCommandStep.CHANGELOG_FILE_ARG, changeLogFile)
-                .addArgumentValue(InternalDiffChangelogCommandStep.DIFF_OUTPUT_CONTROL_ARG, diffOutputControl);
+                .addArgumentValue(DiffCommandStep.SNAPSHOT_TYPES_ARG, DiffCommandStep.parseSnapshotTypes(snapshotTypes))
+                .addArgumentValue(DiffCommandStep.COMPARE_CONTROL_ARG, new CompareControl(schemaComparisons, snapshotTypes))
+                .addArgumentValue(DiffCommandStep.OBJECT_CHANGE_FILTER_ARG, objectChangeFilter)
+                .addArgumentValue(DiffChangelogCommandStep.CHANGELOG_FILE_ARG, changeLogFile)
+                .addArgumentValue(DiffChangelogCommandStep.INCLUDE_CATALOG_ARG, diffOutputControl.getIncludeCatalog())
+                .addArgumentValue(DiffChangelogCommandStep.INCLUDE_SCHEMA_ARG, diffOutputControl.getIncludeSchema())
+                .addArgumentValue(DiffChangelogCommandStep.INCLUDE_TABLESPACE_ARG, diffOutputControl.getIncludeTablespace());
         command.setOutput(System.out);
         try {
             command.execute();
         } catch (CommandExecutionException e) {
             throw new LiquibaseException(e);
         }
-
     }
 
     public static void doGenerateChangeLog(String changeLogFile, Database originalDatabase, String catalogName,
@@ -254,10 +256,12 @@ public class CommandLineUtils {
         command
                 .addArgumentValue(ReferenceDbUrlConnectionCommandStep.REFERENCE_DATABASE_ARG, originalDatabase)
                 .addArgumentValue(DbUrlConnectionCommandStep.DATABASE_ARG, originalDatabase)
-                .addArgumentValue(InternalGenerateChangelogCommandStep.SNAPSHOT_TYPES_ARG, InternalGenerateChangelogCommandStep.parseSnapshotTypes(snapshotTypes))
-                .addArgumentValue(InternalGenerateChangelogCommandStep.COMPARE_CONTROL_ARG, compareControl)
-                .addArgumentValue(InternalGenerateChangelogCommandStep.CHANGELOG_FILE_ARG, changeLogFile)
-                .addArgumentValue(InternalGenerateChangelogCommandStep.DIFF_OUTPUT_CONTROL_ARG, diffOutputControl)
+                .addArgumentValue(DiffCommandStep.SNAPSHOT_TYPES_ARG, DiffCommandStep.parseSnapshotTypes(snapshotTypes))
+                .addArgumentValue(DiffCommandStep.COMPARE_CONTROL_ARG, compareControl)
+                .addArgumentValue(DiffChangelogCommandStep.CHANGELOG_FILE_ARG, changeLogFile)
+                .addArgumentValue(DiffChangelogCommandStep.INCLUDE_CATALOG_ARG, diffOutputControl.getIncludeCatalog())
+                .addArgumentValue(DiffChangelogCommandStep.INCLUDE_SCHEMA_ARG, diffOutputControl.getIncludeSchema())
+                .addArgumentValue(DiffChangelogCommandStep.INCLUDE_TABLESPACE_ARG, diffOutputControl.getIncludeTablespace())
                 .addArgumentValue(InternalGenerateChangelogCommandStep.AUTHOR_ARG, author)
                 .addArgumentValue(InternalGenerateChangelogCommandStep.CONTEXT_ARG, context)
                 .addArgumentValue(InternalGenerateChangelogCommandStep.OVERWRITE_OUTPUT_FILE_ARG, overwriteOutputFile);

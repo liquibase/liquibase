@@ -1475,7 +1475,7 @@ public class Main {
 
         final ResourceAccessor fileOpener = this.getFileOpenerResourceAccessor();
 
-        if (COMMANDS.DIFF.equalsIgnoreCase(command)) {
+        if (COMMANDS.DIFF.equalsIgnoreCase(command) || COMMANDS.DIFF_CHANGELOG.equalsIgnoreCase(command)) {
             this.runUsingCommandFramework();
             return;
         }
@@ -1530,14 +1530,7 @@ public class Main {
                         includeObjects);
             }
 
-            if (COMMANDS.DIFF_CHANGELOG.equalsIgnoreCase(command)) {
-                CommandLineUtils.doDiffToChangeLog(changeLogFile,
-                        createReferenceDatabaseFromCommandParams(commandParams, fileOpener),
-                        database,
-                        getDiffOutputControl(finalSchemaComparisons, objectChangeFilter), objectChangeFilter, StringUtil.trimToNull(diffTypes), finalSchemaComparisons
-                );
-                return;
-            } else if (COMMANDS.GENERATE_CHANGELOG.equalsIgnoreCase(command)) {
+            if (COMMANDS.GENERATE_CHANGELOG.equalsIgnoreCase(command)) {
                 String currentChangeLogFile = this.changeLogFile;
                 if (currentChangeLogFile == null) {
                     //will output to stdout:
@@ -1963,7 +1956,24 @@ public class Main {
     private void runUsingCommandFramework() throws CommandLineParsingException, CommandExecutionException, IOException, DatabaseException {
         if (COMMANDS.DIFF.equalsIgnoreCase(command)) {
             runDiffCommandStep();
+        } else if (COMMANDS.DIFF_CHANGELOG.equalsIgnoreCase(command)) {
+            runDiffChangelogCommandStep();
         }
+    }
+
+    private void runDiffChangelogCommandStep() throws CommandExecutionException, CommandLineParsingException, IOException {
+        CommandScope diffCommand = new CommandScope("diffChangelog")
+                .addArgumentValue(DiffChangelogCommandStep.CHANGELOG_FILE_ARG, changeLogFile)
+                .addArgumentValue(DiffChangelogCommandStep.INCLUDE_CATALOG_ARG, includeCatalog)
+                .addArgumentValue(DiffChangelogCommandStep.INCLUDE_SCHEMA_ARG, includeSchema)
+                .addArgumentValue(DiffChangelogCommandStep.INCLUDE_TABLESPACE_ARG, includeTablespace)
+                .setOutput(getOutputStream());
+
+        this.setPreCompareArgumentsToCommand(diffCommand);
+        this.setDatabaseArgumentsToCommand(diffCommand);
+        this.setReferenceDatabaseArgumentsToCommand(diffCommand);
+
+        diffCommand.execute();
     }
 
     private void runDiffCommandStep() throws CommandLineParsingException, CommandExecutionException, IOException {
