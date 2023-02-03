@@ -150,6 +150,12 @@ class ScopeTest extends Specification {
         }
 
         @Override
+        MdcObject put(String key, Map<String, String> values) {
+            this.values.put(key, values)
+            return new MdcObject(key, values)
+        }
+
+        @Override
         void remove(String key) {
             values.remove(key)
         }
