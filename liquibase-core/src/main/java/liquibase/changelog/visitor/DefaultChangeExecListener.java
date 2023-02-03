@@ -111,4 +111,10 @@ public class DefaultChangeExecListener implements ChangeExecListener {
         List<Change> changesDeployed = deployedChangesPerChangeSet.get(changeSet);
         return changesDeployed != null ? changesDeployed : new LinkedList<>();
     }
+
+    public void addListener(ChangeExecListener listener) {
+        if (listener != null) {
+            this.listeners.add(listener);
+        }
+    }
 }
