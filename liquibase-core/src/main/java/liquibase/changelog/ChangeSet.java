@@ -565,8 +565,7 @@ public class ChangeSet implements Conditional, ChangeLogChild {
     public ExecType execute(DatabaseChangeLog databaseChangeLog, ChangeExecListener listener, Database database)
             throws MigrationFailedException {
         Logger log = Scope.getCurrentScope().getLog(getClass());
-        Scope.getCurrentScope().addMdcValue(MdcKey.CHANGESET_COMMENT, comments);
-        Scope.getCurrentScope().addMdcValue(MdcKey.CHANGESET_LABEL, labels.toString());
+        addChangeSetMdcProperties();
         if (validationFailed) {
             return ExecType.MARK_RAN;
         }
@@ -805,8 +804,7 @@ public class ChangeSet implements Conditional, ChangeLogChild {
 
     public void rollback(Database database, ChangeExecListener listener) throws RollbackFailedException {
         Scope.getCurrentScope().addMdcValue(MdcKey.CHANGESET_OPERATION_START_TIME, new ISODateFormat().format(new Date()));
-        Scope.getCurrentScope().addMdcValue(MdcKey.CHANGESET_COMMENT, comments);
-        Scope.getCurrentScope().addMdcValue(MdcKey.CHANGESET_LABEL, labels.toString());
+        addChangeSetMdcProperties();
         Executor originalExecutor = setupCustomExecutorIfNecessary(database);
         try {
             Executor executor = Scope.getCurrentScope().getSingleton(ExecutorService.class).getExecutor("jdbc", database);
@@ -1457,5 +1455,12 @@ public class ChangeSet implements Conditional, ChangeLogChild {
      */
     public void setStoredCheckSum(CheckSum storedCheckSum) {
         this.storedCheckSum = storedCheckSum;
+    }
+
+    private void addChangeSetMdcProperties() {
+        String commentMdc = comments != null ? comments : "";
+        String labelMdc = labels != null ? labels.toString() : "";
+        Scope.getCurrentScope().addMdcValue(MdcKey.CHANGESET_COMMENT, commentMdc);
+        Scope.getCurrentScope().addMdcValue(MdcKey.CHANGESET_LABEL, labelMdc);
     }
 }
