@@ -565,7 +565,8 @@ public class ChangeSet implements Conditional, ChangeLogChild {
     public ExecType execute(DatabaseChangeLog databaseChangeLog, ChangeExecListener listener, Database database)
             throws MigrationFailedException {
         Logger log = Scope.getCurrentScope().getLog(getClass());
-
+        Scope.getCurrentScope().addMdcValue(MdcKey.CHANGESET_COMMENT, comments);
+        Scope.getCurrentScope().addMdcValue(MdcKey.CHANGESET_LABEL, labels.toString());
         if (validationFailed) {
             return ExecType.MARK_RAN;
         }
