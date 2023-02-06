@@ -8,6 +8,8 @@ import java.io.PrintWriter;
 
 public class LiquibaseJakartaStatusServlet extends HttpServlet {
 
+
+    private static final long serialVersionUID = -6601471901927004592L;
     private final GenericStatusServlet delegate;
 
     public LiquibaseJakartaStatusServlet() {

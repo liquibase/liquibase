@@ -7,6 +7,9 @@ import liquibase.hub.model.HubChangeLog;
  */
 public class ChangeLogAlreadyRegisteredException extends Exception {
 
+
+    private static final long serialVersionUID = -8860177597375468123L;
+
     /**
      * If present, the changelog metadata from Hub. If null, it can be assumed that the changelog has been registered
      * with some organization which the current API key cannot access.

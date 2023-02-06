@@ -4,6 +4,9 @@ import liquibase.exception.LiquibaseException;
 
 public class LiquibaseHubException extends LiquibaseException {
 
+
+    private static final long serialVersionUID = 5346735633422612208L;
+
     public LiquibaseHubException() {
     }
 

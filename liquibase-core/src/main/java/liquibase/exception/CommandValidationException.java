@@ -5,6 +5,9 @@ package liquibase.exception;
  */
 public class CommandValidationException extends CommandExecutionException {
 
+
+    private static final long serialVersionUID = 7679286738030355515L;
+
     public CommandValidationException(String argument, String message) {
         super(buildMessage(argument, message));
     }
