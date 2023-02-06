@@ -56,6 +56,27 @@ Optional Args:
         ]
     }
 
+    run "Happy path with a simple changelog log message does not contain 'Executing with' message", {
+        arguments = [
+                url:        { it.url },
+                username:   { it.username },
+                password:   { it.password },
+                changelogFile: "changelogs/h2/complete/simple.changelog.xml"
+        ]
+
+        expectedResults = [
+                statusCode   : 0
+        ]
+
+        expectedDatabaseContent = [
+                "txt": [Pattern.compile(".*liquibase.structure.core.Table:.*ADDRESS.*", Pattern.MULTILINE|Pattern.DOTALL|Pattern.CASE_INSENSITIVE),
+                        Pattern.compile(".*liquibase.structure.core.Table:.*ADDRESS.*columns:.*city.*", Pattern.MULTILINE|Pattern.DOTALL|Pattern.CASE_INSENSITIVE)]
+        ]
+        expectedLogs = [
+                CommandTests.assertNotContains("Executing with 'jdbc' executor")
+        ]
+    }
+
     run "Run without a URL throws an exception", {
         arguments = [
                 url: ""
