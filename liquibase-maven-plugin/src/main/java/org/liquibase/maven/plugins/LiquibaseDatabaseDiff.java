@@ -5,10 +5,10 @@ package org.liquibase.maven.plugins;
 import liquibase.CatalogAndSchema;
 import liquibase.Liquibase;
 import liquibase.command.*;
-import liquibase.command.core.DbUrlConnectionCommandStep;
+import liquibase.command.core.helpers.DbUrlConnectionCommandStep;
 import liquibase.command.core.DiffCommandStep;
-import liquibase.command.core.PreCompareCommandStep;
-import liquibase.command.core.ReferenceDbUrlConnectionCommandStep;
+import liquibase.command.core.helpers.PreCompareCommandStep;
+import liquibase.command.core.helpers.ReferenceDbUrlConnectionCommandStep;
 import liquibase.database.Database;
 import liquibase.diff.compare.CompareControl;
 import liquibase.diff.output.DiffOutputControl;
@@ -269,12 +269,12 @@ public class LiquibaseDatabaseDiff extends AbstractLiquibaseChangeLogMojo {
                 liquibaseCommand.addArgumentValue(DiffCommandStep.FORMAT_ARG, format);
                 liquibaseCommand.addArgumentValue(DbUrlConnectionCommandStep.DATABASE_ARG, db);
                 liquibaseCommand.addArgumentValue(ReferenceDbUrlConnectionCommandStep.REFERENCE_DATABASE_ARG, referenceDatabase);
-                liquibaseCommand.addArgumentValue(DiffCommandStep.COMPARE_CONTROL_ARG, new CompareControl(schemaComparisons, diffTypes));
-                liquibaseCommand.addArgumentValue(DiffCommandStep.OBJECT_CHANGE_FILTER_ARG, objectChangeFilter);
+                liquibaseCommand.addArgumentValue(PreCompareCommandStep.COMPARE_CONTROL_ARG, new CompareControl(schemaComparisons, diffTypes));
+                liquibaseCommand.addArgumentValue(PreCompareCommandStep.OBJECT_CHANGE_FILTER_ARG, objectChangeFilter);
                 if (StringUtil.isEmpty(diffTypes)) {
-                    liquibaseCommand.addArgumentValue(DiffCommandStep.SNAPSHOT_TYPES_ARG, new Class[0]);
+                    liquibaseCommand.addArgumentValue(PreCompareCommandStep.SNAPSHOT_TYPES_ARG, new Class[0]);
                 } else {
-                    liquibaseCommand.addArgumentValue(DiffCommandStep.SNAPSHOT_TYPES_ARG, DiffCommandStep.parseSnapshotTypes(diffTypes));
+                    liquibaseCommand.addArgumentValue(PreCompareCommandStep.SNAPSHOT_TYPES_ARG, DiffCommandStep.parseSnapshotTypes(diffTypes));
                 }
             }
         }

@@ -1,7 +1,7 @@
-package liquibase.command.core;
+package liquibase.command.core.helpers;
 
 import liquibase.command.*;
-import liquibase.command.providers.ReferenceDatabase;
+import liquibase.command.core.DiffCommandStep;
 import liquibase.database.Database;
 import liquibase.diff.compare.CompareControl;
 import liquibase.diff.output.ObjectChangeFilter;
@@ -26,6 +26,14 @@ public class PreCompareCommandStep extends AbstractCommandStep {
     public static final CommandArgumentDefinition<String> REFERENCE_SCHEMAS_ARG;
     public static final CommandArgumentDefinition<String> OUTPUT_SCHEMAS_ARG;
 
+    public static final CommandArgumentDefinition<CompareControl> COMPARE_CONTROL_ARG;
+    public static final CommandArgumentDefinition<Class[]> SNAPSHOT_TYPES_ARG;
+    public static final CommandArgumentDefinition<ObjectChangeFilter> OBJECT_CHANGE_FILTER_ARG;
+
+    public static final CommandResultDefinition<CompareControl> COMPARE_CONTROL_RESULT;
+    public static final CommandResultDefinition<Class[]> SNAPSHOT_TYPES_RESULT;
+    public static final CommandResultDefinition<ObjectChangeFilter> OBJECT_CHANGE_FILTER_RESULT;
+
     static {
         CommandBuilder builder = new CommandBuilder(COMMAND_NAME);
         EXCLUDE_OBJECTS_ARG = builder.argument("excludeObjects", String.class)
@@ -41,16 +49,24 @@ public class PreCompareCommandStep extends AbstractCommandStep {
                 .description("Schemas names on reference database to use in diff. This is a CSV list.").build();
         OUTPUT_SCHEMAS_ARG = builder.argument("outputSchemas", String.class)
                 .description("Output schemas names. This is a CSV list.").build();
+
+        COMPARE_CONTROL_ARG = builder.argument("compareControl", CompareControl.class).hidden().build();
+        SNAPSHOT_TYPES_ARG = builder.argument("snapshotTypes", Class[].class).hidden().build();
+        OBJECT_CHANGE_FILTER_ARG = builder.argument("objectChangeFilter", ObjectChangeFilter.class).hidden().build();
+
+        COMPARE_CONTROL_RESULT = builder.result("compareControl", CompareControl.class).build();
+        SNAPSHOT_TYPES_RESULT = builder.result("snapshotTypes", Class[].class).build();
+        OBJECT_CHANGE_FILTER_RESULT = builder.result("objectChangeFilter", ObjectChangeFilter.class).build();
     }
 
     @Override
     public List<Class<?>> requiredDependencies() {
-        return Arrays.asList(Database.class, ReferenceDatabase.class);
+        return Arrays.asList(Database.class);
     }
 
     @Override
     public List<Class<?>> providedDependencies() {
-        return Arrays.asList(PreCompareCommandStep.class);
+        return Arrays.asList(CompareControl.class, ObjectChangeFilter.class);
     }
 
     @Override
@@ -64,15 +80,24 @@ public class PreCompareCommandStep extends AbstractCommandStep {
         Database targetDatabase = (Database) commandScope.getDependency(Database.class);
         ObjectChangeFilter objectChangeFilter = this.getObjectChangeFilter(commandScope);
         CompareControl compareControl = this.getcompareControl(commandScope, targetDatabase);
-        Class<? extends DatabaseObject>[] snapshotTypes = DiffCommandStep.parseSnapshotTypes(commandScope.getArgumentValue(DIFF_TYPES_ARG));
+        Class<? extends DatabaseObject>[] snapshotTypes = getSnapshotTypes(commandScope);
 
-        commandScope
-                .addArgumentValue(DiffCommandStep.COMPARE_CONTROL_ARG, compareControl)
-                .addArgumentValue(DiffCommandStep.OBJECT_CHANGE_FILTER_ARG, objectChangeFilter)
-                .addArgumentValue(DiffCommandStep.SNAPSHOT_TYPES_ARG, snapshotTypes);
+        resultsBuilder.addResult(COMPARE_CONTROL_RESULT, compareControl)
+                      .addResult(OBJECT_CHANGE_FILTER_RESULT, objectChangeFilter)
+                      .addResult(SNAPSHOT_TYPES_RESULT, snapshotTypes);
+    }
+
+    private static Class<? extends DatabaseObject>[] getSnapshotTypes(CommandScope commandScope) {
+        if (commandScope.getArgumentValue(SNAPSHOT_TYPES_ARG) != null) {
+            return commandScope.getArgumentValue(SNAPSHOT_TYPES_ARG);
+        }
+        return DiffCommandStep.parseSnapshotTypes(commandScope.getArgumentValue(DIFF_TYPES_ARG));
     }
 
     private ObjectChangeFilter getObjectChangeFilter(CommandScope commandScope) {
+        if (commandScope.getArgumentValue(OBJECT_CHANGE_FILTER_ARG) != null) {
+            return commandScope.getArgumentValue(OBJECT_CHANGE_FILTER_ARG);
+        }
         String excludeObjects = commandScope.getArgumentValue(EXCLUDE_OBJECTS_ARG);
         String includeObjects = commandScope.getArgumentValue(INCLUDE_OBJECTS_ARG);
 
@@ -96,6 +121,9 @@ public class PreCompareCommandStep extends AbstractCommandStep {
     }
 
     private CompareControl getcompareControl(CommandScope commandScope, Database database) {
+        if (commandScope.getArgumentValue(COMPARE_CONTROL_ARG) != null) {
+            return commandScope.getArgumentValue(COMPARE_CONTROL_ARG);
+        }
         CompareControl.SchemaComparison[] finalSchemaComparisons = CompareControl.computeSchemas(
                 commandScope.getArgumentValue(SCHEMAS_ARG),
                 commandScope.getArgumentValue(REFERENCE_SCHEMAS_ARG),

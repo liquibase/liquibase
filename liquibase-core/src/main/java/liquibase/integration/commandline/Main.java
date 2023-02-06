@@ -7,6 +7,10 @@ import liquibase.changelog.visitor.DefaultChangeExecListener;
 import liquibase.command.CommandResults;
 import liquibase.command.CommandScope;
 import liquibase.command.core.*;
+import liquibase.command.core.helpers.DbUrlConnectionCommandStep;
+import liquibase.command.core.helpers.DiffOutputControlCommandStep;
+import liquibase.command.core.helpers.PreCompareCommandStep;
+import liquibase.command.core.helpers.ReferenceDbUrlConnectionCommandStep;
 import liquibase.configuration.ConfiguredValue;
 import liquibase.configuration.LiquibaseConfiguration;
 import liquibase.configuration.core.DeprecatedConfigurationValueProvider;
@@ -14,7 +18,6 @@ import liquibase.database.Database;
 import liquibase.diff.compare.CompareControl;
 import liquibase.diff.output.DiffOutputControl;
 import liquibase.diff.output.ObjectChangeFilter;
-import liquibase.diff.output.StandardObjectChangeFilter;
 import liquibase.exception.*;
 import liquibase.hub.HubConfiguration;
 import liquibase.hub.HubServiceFactory;
@@ -28,7 +31,10 @@ import liquibase.lockservice.LockServiceFactory;
 import liquibase.logging.LogService;
 import liquibase.logging.Logger;
 import liquibase.logging.core.JavaLogService;
-import liquibase.resource.*;
+import liquibase.resource.ClassLoaderResourceAccessor;
+import liquibase.resource.CompositeResourceAccessor;
+import liquibase.resource.DirectoryResourceAccessor;
+import liquibase.resource.ResourceAccessor;
 import liquibase.ui.ConsoleUIService;
 import liquibase.util.ISODateFormat;
 import liquibase.util.LiquibaseUtil;
@@ -1475,12 +1481,11 @@ public class Main {
 
         final ResourceAccessor fileOpener = this.getFileOpenerResourceAccessor();
 
-        if (COMMANDS.DIFF.equalsIgnoreCase(command) || COMMANDS.DIFF_CHANGELOG.equalsIgnoreCase(command)) {
+        if (COMMANDS.DIFF.equalsIgnoreCase(command) || COMMANDS.DIFF_CHANGELOG.equalsIgnoreCase(command)
+            || COMMANDS.GENERATE_CHANGELOG.equalsIgnoreCase(command)) {
             this.runUsingCommandFramework();
             return;
         }
-
-        // TODO START: REMOVE WHEN MIGRATING TO COMMAND FRAMEWORK
 
         Database database = null;
         if (dbConnectionNeeded(command) && this.url != null) {
@@ -1497,63 +1502,13 @@ public class Main {
             }
         }
 
+        if (GlobalConfiguration.SHOULD_SNAPSHOT_DATA.getCurrentValue().equals(false) && dataOutputDirectory != null) {
+            // If we are not otherwise going to snapshot data, still snapshot data if dataOutputDirectory is set
+            DeprecatedConfigurationValueProvider.setData(GlobalConfiguration.SHOULD_SNAPSHOT_DATA, true);
+        }
+
         try {
-            if ((excludeObjects != null) && (includeObjects != null)) {
-                throw new UnexpectedLiquibaseException(
-                        String.format(coreBundle.getString("cannot.specify.both"),
-                                OPTIONS.EXCLUDE_OBJECTS, OPTIONS.INCLUDE_OBJECTS));
-            }
-
-            if (GlobalConfiguration.SHOULD_SNAPSHOT_DATA.getCurrentValue().equals(false) && dataOutputDirectory != null) {
-                // If we are not otherwise going to snapshot data, still snapshot data if dataOutputDirectory is set
-                DeprecatedConfigurationValueProvider.setData(GlobalConfiguration.SHOULD_SNAPSHOT_DATA, true);
-            }
-
-            CompareControl.ComputedSchemas computedSchemas = CompareControl.computeSchemas(
-                    schemas,
-                    referenceSchemas,
-                    outputSchemasAs,
-                    defaultCatalogName, defaultSchemaName,
-                    referenceDefaultCatalogName, referenceDefaultSchemaName,
-                    database);
-
-            CompareControl.SchemaComparison[] finalSchemaComparisons = computedSchemas.finalSchemaComparisons;
-
-            ObjectChangeFilter objectChangeFilter = null;
-            if (excludeObjects != null) {
-                objectChangeFilter = new StandardObjectChangeFilter(StandardObjectChangeFilter.FilterType.EXCLUDE,
-                        excludeObjects);
-            }
-
-            if (includeObjects != null) {
-                objectChangeFilter = new StandardObjectChangeFilter(StandardObjectChangeFilter.FilterType.INCLUDE,
-                        includeObjects);
-            }
-
-            if (COMMANDS.GENERATE_CHANGELOG.equalsIgnoreCase(command)) {
-                String currentChangeLogFile = this.changeLogFile;
-                if (currentChangeLogFile == null) {
-                    //will output to stdout:
-                    currentChangeLogFile = "";
-                }
-                final PathHandlerFactory pathHandlerFactory = Scope.getCurrentScope().getSingleton(PathHandlerFactory.class);
-                Resource file = pathHandlerFactory.getResource(currentChangeLogFile);
-                final boolean overwriteOutputFileBool = Boolean.parseBoolean(overwriteOutputFile);
-                if (file.exists() && (!overwriteOutputFileBool)) {
-                    throw new LiquibaseException(
-                            String.format(coreBundle.getString("changelogfile.already.exists"), currentChangeLogFile));
-                }
-
-                CatalogAndSchema[] finalTargetSchemas = computedSchemas.finalTargetSchemas;
-                CommandLineUtils.doGenerateChangeLog(currentChangeLogFile, database, finalTargetSchemas,
-                        StringUtil.trimToNull(diffTypes), StringUtil.trimToNull(changeSetAuthor),
-                        StringUtil.trimToNull(changeSetContext), StringUtil.trimToNull(dataOutputDirectory),
-                        getDiffOutputControl(finalSchemaComparisons, objectChangeFilter), overwriteOutputFileBool);
-                return;
-
-                // TODO END: REMOVE WHEN MIGRATING TO COMMAND FRAMEWORK
-
-            } else if (COMMANDS.SNAPSHOT.equalsIgnoreCase(command)) {
+            if (COMMANDS.SNAPSHOT.equalsIgnoreCase(command)) {
                 CommandScope snapshotCommand = new CommandScope("internalSnapshot");
                 snapshotCommand
                         .addArgumentValue(InternalSnapshotCommandStep.DATABASE_ARG, database)
@@ -1953,27 +1908,47 @@ public class Main {
     /**
      * Run commands using the CommandFramework instead of directly setting up and calling other classes
      */
-    private void runUsingCommandFramework() throws CommandLineParsingException, CommandExecutionException, IOException, DatabaseException {
+    private void runUsingCommandFramework() throws CommandLineParsingException, LiquibaseException, IOException {
         if (COMMANDS.DIFF.equalsIgnoreCase(command)) {
             runDiffCommandStep();
         } else if (COMMANDS.DIFF_CHANGELOG.equalsIgnoreCase(command)) {
             runDiffChangelogCommandStep();
+        } else if (COMMANDS.GENERATE_CHANGELOG.equalsIgnoreCase(command)) {
+            runGenerateChangelogCommandStep();
         }
     }
 
+    private void runGenerateChangelogCommandStep() throws LiquibaseException, IOException, CommandLineParsingException {
+        final boolean shouldOverwriteOutputFile = Boolean.parseBoolean(overwriteOutputFile);
+
+        CommandScope generateChangelogCommand = new CommandScope(GenerateChangelogCommandStep.COMMAND_NAME[0])
+                .addArgumentValue(GenerateChangelogCommandStep.CHANGELOG_FILE_ARG, changeLogFile)
+                .addArgumentValue(DiffOutputControlCommandStep.INCLUDE_CATALOG_ARG, includeCatalog)
+                .addArgumentValue(DiffOutputControlCommandStep.INCLUDE_SCHEMA_ARG, includeSchema)
+                .addArgumentValue(DiffOutputControlCommandStep.INCLUDE_TABLESPACE_ARG, includeTablespace)
+                .addArgumentValue(GenerateChangelogCommandStep.AUTHOR_ARG, StringUtil.trimToNull(changeSetAuthor))
+                .addArgumentValue(GenerateChangelogCommandStep.CONTEXT_ARG, StringUtil.trimToNull(changeSetContext))
+                .addArgumentValue(GenerateChangelogCommandStep.DATA_OUTPUT_DIR_ARG, StringUtil.trimToNull(dataOutputDirectory))
+                .addArgumentValue(GenerateChangelogCommandStep.OVERWRITE_OUTPUT_FILE_ARG, shouldOverwriteOutputFile)
+                .setOutput(System.out);
+
+        this.setDatabaseArgumentsToCommand(generateChangelogCommand);
+        this.setPreCompareArgumentsToCommand(generateChangelogCommand);
+    }
+
     private void runDiffChangelogCommandStep() throws CommandExecutionException, CommandLineParsingException, IOException {
-        CommandScope diffCommand = new CommandScope("diffChangelog")
+        CommandScope diffChangelogCommand = new CommandScope("diffChangelog")
                 .addArgumentValue(DiffChangelogCommandStep.CHANGELOG_FILE_ARG, changeLogFile)
-                .addArgumentValue(DiffChangelogCommandStep.INCLUDE_CATALOG_ARG, includeCatalog)
-                .addArgumentValue(DiffChangelogCommandStep.INCLUDE_SCHEMA_ARG, includeSchema)
-                .addArgumentValue(DiffChangelogCommandStep.INCLUDE_TABLESPACE_ARG, includeTablespace)
+                .addArgumentValue(DiffOutputControlCommandStep.INCLUDE_CATALOG_ARG, includeCatalog)
+                .addArgumentValue(DiffOutputControlCommandStep.INCLUDE_SCHEMA_ARG, includeSchema)
+                .addArgumentValue(DiffOutputControlCommandStep.INCLUDE_TABLESPACE_ARG, includeTablespace)
                 .setOutput(getOutputStream());
 
-        this.setPreCompareArgumentsToCommand(diffCommand);
-        this.setDatabaseArgumentsToCommand(diffCommand);
-        this.setReferenceDatabaseArgumentsToCommand(diffCommand);
+        this.setPreCompareArgumentsToCommand(diffChangelogCommand);
+        this.setDatabaseArgumentsToCommand(diffChangelogCommand);
+        this.setReferenceDatabaseArgumentsToCommand(diffChangelogCommand);
 
-        diffCommand.execute();
+        diffChangelogCommand.execute();
     }
 
     private void runDiffCommandStep() throws CommandLineParsingException, CommandExecutionException, IOException {
@@ -2041,10 +2016,9 @@ public class Main {
                 refCatalogName = value;
             } else if (OPTIONS.REFERENCE_DEFAULT_SCHEMA_NAME.equalsIgnoreCase(attributeName)) {
                 refSchemaName = value;
+            } else if (OPTIONS.DATA_OUTPUT_DIRECTORY.equalsIgnoreCase(attributeName)) {
+                dataOutputDirectory = value;
             }
-//            } else if (OPTIONS.DATA_OUTPUT_DIRECTORY.equalsIgnoreCase(attributeName)) {
-//                dataOutputDirectory = value;
-//            }
         }
 
         if (refUrl == null) {

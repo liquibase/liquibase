@@ -5,6 +5,10 @@ import liquibase.GlobalConfiguration;
 import liquibase.Scope;
 import liquibase.command.CommandScope;
 import liquibase.command.core.*;
+import liquibase.command.core.helpers.DbUrlConnectionCommandStep;
+import liquibase.command.core.helpers.DiffOutputControlCommandStep;
+import liquibase.command.core.helpers.PreCompareCommandStep;
+import liquibase.command.core.helpers.ReferenceDbUrlConnectionCommandStep;
 import liquibase.configuration.ConfiguredValue;
 import liquibase.database.Database;
 import liquibase.database.DatabaseFactory;
@@ -161,9 +165,9 @@ public class CommandLineUtils {
         diffCommand
                 .addArgumentValue(ReferenceDbUrlConnectionCommandStep.REFERENCE_DATABASE_ARG, referenceDatabase)
                 .addArgumentValue(DbUrlConnectionCommandStep.DATABASE_ARG, targetDatabase)
-                .addArgumentValue(DiffCommandStep.COMPARE_CONTROL_ARG, new CompareControl(schemaComparisons, snapshotTypes))
-                .addArgumentValue(DiffCommandStep.OBJECT_CHANGE_FILTER_ARG, objectChangeFilter)
-                .addArgumentValue(DiffCommandStep.SNAPSHOT_TYPES_ARG, DiffCommandStep.parseSnapshotTypes(snapshotTypes))
+                .addArgumentValue(PreCompareCommandStep.COMPARE_CONTROL_ARG, new CompareControl(schemaComparisons, snapshotTypes))
+                .addArgumentValue(PreCompareCommandStep.OBJECT_CHANGE_FILTER_ARG, objectChangeFilter)
+                .addArgumentValue(PreCompareCommandStep.SNAPSHOT_TYPES_ARG, DiffCommandStep.parseSnapshotTypes(snapshotTypes))
         ;
 
         diffCommand.setOutput(output);
@@ -209,13 +213,13 @@ public class CommandLineUtils {
         command
                 .addArgumentValue(ReferenceDbUrlConnectionCommandStep.REFERENCE_DATABASE_ARG, referenceDatabase)
                 .addArgumentValue(DbUrlConnectionCommandStep.DATABASE_ARG, targetDatabase)
-                .addArgumentValue(DiffCommandStep.SNAPSHOT_TYPES_ARG, DiffCommandStep.parseSnapshotTypes(snapshotTypes))
-                .addArgumentValue(DiffCommandStep.COMPARE_CONTROL_ARG, new CompareControl(schemaComparisons, snapshotTypes))
-                .addArgumentValue(DiffCommandStep.OBJECT_CHANGE_FILTER_ARG, objectChangeFilter)
+                .addArgumentValue(PreCompareCommandStep.SNAPSHOT_TYPES_ARG, DiffCommandStep.parseSnapshotTypes(snapshotTypes))
+                .addArgumentValue(PreCompareCommandStep.COMPARE_CONTROL_ARG, new CompareControl(schemaComparisons, snapshotTypes))
+                .addArgumentValue(PreCompareCommandStep.OBJECT_CHANGE_FILTER_ARG, objectChangeFilter)
                 .addArgumentValue(DiffChangelogCommandStep.CHANGELOG_FILE_ARG, changeLogFile)
-                .addArgumentValue(DiffChangelogCommandStep.INCLUDE_CATALOG_ARG, diffOutputControl.getIncludeCatalog())
-                .addArgumentValue(DiffChangelogCommandStep.INCLUDE_SCHEMA_ARG, diffOutputControl.getIncludeSchema())
-                .addArgumentValue(DiffChangelogCommandStep.INCLUDE_TABLESPACE_ARG, diffOutputControl.getIncludeTablespace());
+                .addArgumentValue(DiffOutputControlCommandStep.INCLUDE_CATALOG_ARG, diffOutputControl.getIncludeCatalog())
+                .addArgumentValue(DiffOutputControlCommandStep.INCLUDE_SCHEMA_ARG, diffOutputControl.getIncludeSchema())
+                .addArgumentValue(DiffOutputControlCommandStep.INCLUDE_TABLESPACE_ARG, diffOutputControl.getIncludeTablespace());
         command.setOutput(System.out);
         try {
             command.execute();
@@ -252,19 +256,19 @@ public class CommandLineUtils {
         CompareControl compareControl = new CompareControl(comparisons, snapshotTypes);
         diffOutputControl.setDataDir(dataDir);
 
-        CommandScope command = new CommandScope("internalGenerateChangeLog");
+        CommandScope command = new CommandScope("generateChangeLog");
         command
                 .addArgumentValue(ReferenceDbUrlConnectionCommandStep.REFERENCE_DATABASE_ARG, originalDatabase)
                 .addArgumentValue(DbUrlConnectionCommandStep.DATABASE_ARG, originalDatabase)
-                .addArgumentValue(DiffCommandStep.SNAPSHOT_TYPES_ARG, DiffCommandStep.parseSnapshotTypes(snapshotTypes))
-                .addArgumentValue(DiffCommandStep.COMPARE_CONTROL_ARG, compareControl)
+                .addArgumentValue(PreCompareCommandStep.SNAPSHOT_TYPES_ARG, DiffCommandStep.parseSnapshotTypes(snapshotTypes))
+                .addArgumentValue(PreCompareCommandStep.COMPARE_CONTROL_ARG, compareControl)
                 .addArgumentValue(DiffChangelogCommandStep.CHANGELOG_FILE_ARG, changeLogFile)
-                .addArgumentValue(DiffChangelogCommandStep.INCLUDE_CATALOG_ARG, diffOutputControl.getIncludeCatalog())
-                .addArgumentValue(DiffChangelogCommandStep.INCLUDE_SCHEMA_ARG, diffOutputControl.getIncludeSchema())
-                .addArgumentValue(DiffChangelogCommandStep.INCLUDE_TABLESPACE_ARG, diffOutputControl.getIncludeTablespace())
-                .addArgumentValue(InternalGenerateChangelogCommandStep.AUTHOR_ARG, author)
-                .addArgumentValue(InternalGenerateChangelogCommandStep.CONTEXT_ARG, context)
-                .addArgumentValue(InternalGenerateChangelogCommandStep.OVERWRITE_OUTPUT_FILE_ARG, overwriteOutputFile);
+                .addArgumentValue(DiffOutputControlCommandStep.INCLUDE_CATALOG_ARG, diffOutputControl.getIncludeCatalog())
+                .addArgumentValue(DiffOutputControlCommandStep.INCLUDE_SCHEMA_ARG, diffOutputControl.getIncludeSchema())
+                .addArgumentValue(DiffOutputControlCommandStep.INCLUDE_TABLESPACE_ARG, diffOutputControl.getIncludeTablespace())
+                .addArgumentValue(GenerateChangelogCommandStep.AUTHOR_ARG, author)
+                .addArgumentValue(GenerateChangelogCommandStep.CONTEXT_ARG, context)
+                .addArgumentValue(GenerateChangelogCommandStep.OVERWRITE_OUTPUT_FILE_ARG, overwriteOutputFile);
 
         command.setOutput(System.out);
         try {

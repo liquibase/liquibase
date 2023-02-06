@@ -3,7 +3,6 @@ package liquibase.extension.testing.command
 import liquibase.change.ColumnConfig
 import liquibase.change.core.CreateTableChange
 import liquibase.change.core.TagDatabaseChange
-import liquibase.exception.CommandExecutionException
 import liquibase.exception.CommandValidationException
 import liquibase.extension.testing.setup.SetupCleanResources
 
@@ -13,11 +12,15 @@ CommandTests.define {
 Short Description: Generate a changelog
 Long Description: Writes Change Log XML to copy the current state of the database to standard out or a file
 Required Args:
-  changelogFile (String) File to write changelog to
+  changelogFile (String) Changelog file to write results
   url (String) The JDBC database connection URL
     OBFUSCATED
 Optional Args:
   dataOutputDirectory (String) Directory to write table data to
+    Default: null
+  defaultCatalogName (String) The default catalog name to use for the database connection
+    Default: null
+  defaultSchemaName (String) The default schema name to use for the database connection
     Default: null
   diffTypes (String) Types of objects to compare
     Default: null
@@ -27,16 +30,18 @@ Optional Args:
     Default: null
   excludeObjects (String) Objects to exclude from diff
     Default: null
-  includeCatalog (Boolean) If true, the catalog will be included in generated changeSets
+  includeCatalog (Boolean) If true, the catalog will be included in generated changeSets. Defaults to false.
     Default: false
   includeObjects (String) Objects to include in diff
     Default: null
-  includeSchema (Boolean) If true, the schema will be included in generated changeSets
+  includeSchema (Boolean) If true, the schema will be included in generated changeSets. Defaults to false.
     Default: false
-  includeTablespace (String) Include the tablespace attribute in the changelog
+  includeTablespace (Boolean) Include the tablespace attribute in the changelog. Defaults to false.
+    Default: false
+  outputSchemas (String) Output schemas names. This is a CSV list.
     Default: null
-  overwriteOutputFile (String) Flag to allow overwriting of output changelog file
-    Default: null
+  overwriteOutputFile (Boolean) Flag to allow overwriting of output changelog file. Default: false
+    Default: false
   password (String) Password to use to connect to the database
     Default: null
     OBFUSCATED
@@ -85,9 +90,6 @@ Optional Args:
         expectedFileContent = [
                 "target/test-classes/changelog-test.xml" : [CommandTests.assertContains("<changeSet ", 3)]
         ]
-        expectedResults = [
-                statusCode   : 0
-        ]
     }
 
     run "File already exists and overwrite parameter is provided", {
@@ -131,9 +133,6 @@ Optional Args:
         expectedFileContent = [
                 "target/test-classes/changelog-test2.xml" : [CommandTests.assertContains("<changeSet ", 3)]
         ]
-        expectedResults = [
-                statusCode   : 0
-        ]
     }
 
     run "File already exists and no overwrite parameter provided", {
@@ -147,7 +146,7 @@ Optional Args:
             copyResource("changelogs/diffChangeLog-test-21938109283.xml", "changelog-test.xml")
             cleanResources("changelog-test.xml")
         }
-        expectedException = CommandExecutionException.class
+        expectedException = CommandValidationException.class
         expectedExceptionMessage = "Output ChangeLogFile 'target/test-classes/changelog-test.xml' already exists!"
     }
 
@@ -190,9 +189,6 @@ Optional Args:
         }
         expectedFileContent = [
                 "target/test-classes/changelog-test.xml" : [CommandTests.assertContains("<changeSet ", 1)]
-        ]
-        expectedResults = [
-                statusCode   : 0
         ]
     }
 

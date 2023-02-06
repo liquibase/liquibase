@@ -1,4 +1,4 @@
-package liquibase.command.core;
+package liquibase.command.core.helpers;
 
 import liquibase.command.*;
 import liquibase.command.providers.ReferenceDatabase;

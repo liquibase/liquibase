@@ -2,6 +2,10 @@ package liquibase.command.core;
 
 import liquibase.command.CommandResult;
 import liquibase.command.CommandScope;
+import liquibase.command.core.helpers.DbUrlConnectionCommandStep;
+import liquibase.command.core.helpers.DiffOutputControlCommandStep;
+import liquibase.command.core.helpers.PreCompareCommandStep;
+import liquibase.command.core.helpers.ReferenceDbUrlConnectionCommandStep;
 
 /**
  * @deprecated Implement commands with {@link liquibase.command.CommandStep} and call them with {@link liquibase.command.CommandFactory#getCommandDefinition(String...)}.
@@ -41,21 +45,21 @@ public class GenerateChangeLogCommand extends DiffToChangeLogCommand {
         final CommandScope commandScope = new CommandScope("generateChangeLogInternal");
         commandScope.addArgumentValue(ReferenceDbUrlConnectionCommandStep.REFERENCE_DATABASE_ARG, getReferenceDatabase());
         commandScope.addArgumentValue(DbUrlConnectionCommandStep.DATABASE_ARG, getTargetDatabase());
-        commandScope.addArgumentValue(DiffCommandStep.SNAPSHOT_TYPES_ARG, getSnapshotTypes());
+        commandScope.addArgumentValue(PreCompareCommandStep.SNAPSHOT_TYPES_ARG, getSnapshotTypes());
         commandScope.addArgumentValue(DiffCommandStep.SNAPSHOT_LISTENER_ARG, getSnapshotListener());
         commandScope.addArgumentValue(DiffCommandStep.REFERENCE_SNAPSHOT_CONTROL_ARG, getReferenceSnapshotControl());
         commandScope.addArgumentValue(DiffCommandStep.TARGET_SNAPSHOT_CONTROL_ARG, getTargetSnapshotControl());
-        commandScope.addArgumentValue(DiffCommandStep.OBJECT_CHANGE_FILTER_ARG, getObjectChangeFilter());
-        commandScope.addArgumentValue(DiffCommandStep.COMPARE_CONTROL_ARG, getCompareControl());
+        commandScope.addArgumentValue(PreCompareCommandStep.OBJECT_CHANGE_FILTER_ARG, getObjectChangeFilter());
+        commandScope.addArgumentValue(PreCompareCommandStep.COMPARE_CONTROL_ARG, getCompareControl());
 
         commandScope.addArgumentValue(DiffChangelogCommandStep.CHANGELOG_FILE_ARG, getChangeLogFile());
 
-        commandScope.addArgumentValue(DiffChangelogCommandStep.INCLUDE_SCHEMA_ARG, getDiffOutputControl().getIncludeSchema());
-        commandScope.addArgumentValue(DiffChangelogCommandStep.INCLUDE_CATALOG_ARG, getDiffOutputControl().getIncludeCatalog());
-        commandScope.addArgumentValue(DiffChangelogCommandStep.INCLUDE_TABLESPACE_ARG, getDiffOutputControl().getIncludeTablespace());
+        commandScope.addArgumentValue(DiffOutputControlCommandStep.INCLUDE_SCHEMA_ARG, getDiffOutputControl().getIncludeSchema());
+        commandScope.addArgumentValue(DiffOutputControlCommandStep.INCLUDE_CATALOG_ARG, getDiffOutputControl().getIncludeCatalog());
+        commandScope.addArgumentValue(DiffOutputControlCommandStep.INCLUDE_TABLESPACE_ARG, getDiffOutputControl().getIncludeTablespace());
 
-        commandScope.addArgumentValue(InternalGenerateChangelogCommandStep.AUTHOR_ARG, getAuthor());
-        commandScope.addArgumentValue(InternalGenerateChangelogCommandStep.CONTEXT_ARG, getContext());
+        commandScope.addArgumentValue(GenerateChangelogCommandStep.AUTHOR_ARG, getAuthor());
+        commandScope.addArgumentValue(GenerateChangelogCommandStep.CONTEXT_ARG, getContext());
 
         commandScope.setOutput(getOutputStream());
         commandScope.execute();

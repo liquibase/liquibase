@@ -6,7 +6,7 @@ import liquibase.changelog.ChangeLogParameters
 import liquibase.changelog.ChangeSet
 import liquibase.changelog.DatabaseChangeLog
 import liquibase.command.CommandScope
-import liquibase.command.core.GenerateChangelogCommandStep
+
 import liquibase.command.core.DiffCommandStep
 import liquibase.command.core.SnapshotCommandStep
 import liquibase.database.Database

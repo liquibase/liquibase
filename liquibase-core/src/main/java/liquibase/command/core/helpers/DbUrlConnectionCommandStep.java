@@ -1,9 +1,10 @@
-package liquibase.command.core;
+package liquibase.command.core.helpers;
 
 import liquibase.command.*;
 import liquibase.configuration.ConfigurationValueObfuscator;
 import liquibase.database.Database;
 import liquibase.exception.DatabaseException;
+import liquibase.util.StringUtil;
 
 import java.util.Collections;
 import java.util.List;
@@ -23,6 +24,8 @@ public class DbUrlConnectionCommandStep extends AbstractDatabaseConnectionComman
     public static final CommandArgumentDefinition<String> PASSWORD_ARG;
     public static final CommandArgumentDefinition<String> DRIVER_ARG;
     public static final CommandArgumentDefinition<String> DRIVER_PROPERTIES_FILE_ARG;
+
+    public static final CommandArgumentDefinition<Boolean> FAIL_ON_NULL_DATABASE_ARG;
 
 
     static {
@@ -45,6 +48,8 @@ public class DbUrlConnectionCommandStep extends AbstractDatabaseConnectionComman
         URL_ARG = builder.argument(CommonArgumentNames.URL, String.class).required().supersededBy(DATABASE_ARG)
                 .description("The JDBC database connection URL").build();
         DATABASE_ARG.setSupersededBy(URL_ARG);
+
+        FAIL_ON_NULL_DATABASE_ARG  = builder.argument("failOnNullDatabase", Boolean.class).hidden().defaultValue(true).build();
     }
 
     @Override
@@ -67,6 +72,9 @@ public class DbUrlConnectionCommandStep extends AbstractDatabaseConnectionComman
     private Database obtainDatabase(CommandScope commandScope) throws DatabaseException {
         if (commandScope.getArgumentValue(DATABASE_ARG) == null) {
             String url = commandScope.getArgumentValue(URL_ARG);
+            if (StringUtil.isEmpty(url) && !commandScope.getArgumentValue(FAIL_ON_NULL_DATABASE_ARG)) {
+                return null;
+            }
             String username = commandScope.getArgumentValue(USERNAME_ARG);
             String password = commandScope.getArgumentValue(PASSWORD_ARG);
             String defaultSchemaName = commandScope.getArgumentValue(DEFAULT_SCHEMA_NAME_ARG);
