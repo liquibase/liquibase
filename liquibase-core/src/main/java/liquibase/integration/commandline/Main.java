@@ -394,10 +394,10 @@ public class Main {
                         Map<String, Object> innerScopeObjects = new HashMap<>();
                         innerScopeObjects.put("defaultsFile", LiquibaseCommandLineConfiguration.DEFAULTS_FILE.getCurrentValue());
                         if (!Main.runningFromNewCli) {
-                            new CompositeResourceAccessor(
+                            innerScopeObjects.put(Scope.Attr.resourceAccessor.name(), new CompositeResourceAccessor(
                                     new DirectoryResourceAccessor(Paths.get(".").toAbsolutePath().toFile()),
                                     new ClassLoaderResourceAccessor(main.configureClassLoader())
-                            );
+                            ));
                         }
 
                         Scope.child(innerScopeObjects, () -> {
