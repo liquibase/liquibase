@@ -1242,11 +1242,6 @@ public class Liquibase implements AutoCloseable {
                 LockService lockService = LockServiceFactory.getInstance().getLockService(database);
                 lockService.waitForLock();
 
-                ChangeLogHistoryService changelogService = ChangeLogHistoryServiceFactory.getInstance().getChangeLogService(database);
-                if (changelogService instanceof AbstractChangeLogHistoryService) {
-                    Scope.getCurrentScope().addMdcValue(MdcKey.DEPLOYMENT_ID, ((AbstractChangeLogHistoryService) changelogService).getLastDeploymentId());
-                }
-
                 Operation rollbackOperation = null;
                 BufferedLogService bufferLog = new BufferedLogService();
                 DatabaseChangeLog changeLog = null;
