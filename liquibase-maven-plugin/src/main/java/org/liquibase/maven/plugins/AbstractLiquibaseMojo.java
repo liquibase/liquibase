@@ -37,6 +37,7 @@ import java.lang.reflect.Field;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLClassLoader;
+import java.nio.file.Files;
 import java.text.MessageFormat;
 import java.util.*;
 
@@ -618,7 +619,7 @@ public abstract class AbstractLiquibaseMojo extends AbstractMojo {
         }
         getLog().debug("Writing output file with '" + encoding + "' file encoding.");
 
-        return new BufferedWriter(new OutputStreamWriter(new FileOutputStream(outputFile), encoding));
+        return new BufferedWriter(new OutputStreamWriter(Files.newOutputStream(outputFile.toPath()), encoding));
     }
 
     @Override
