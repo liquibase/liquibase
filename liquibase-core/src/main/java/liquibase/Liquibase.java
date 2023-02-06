@@ -249,6 +249,9 @@ public class Liquibase implements AutoCloseable {
             changeLogParameters.setContexts(contexts);
             changeLogParameters.setLabels(labelExpression);
 
+            Scope.getCurrentScope().addMdcValue(MdcKey.CHANGESET_LABEL_FILTER, labelExpression != null ? labelExpression.toString(): "");
+            Scope.getCurrentScope().addMdcValue(MdcKey.CHANGESET_CONTEXT_FILTER, contexts != null ? contexts.toString() : "");
+
             Operation updateOperation = null;
             BufferedLogService bufferLog = new BufferedLogService();
             DatabaseChangeLog changeLog;
@@ -565,6 +568,8 @@ public class Liquibase implements AutoCloseable {
             throws LiquibaseException {
         changeLogParameters.setContexts(contexts);
         changeLogParameters.setLabels(labelExpression);
+        Scope.getCurrentScope().addMdcValue(MdcKey.CHANGESET_LABEL_FILTER, labelExpression != null ? labelExpression.toString(): "");
+        Scope.getCurrentScope().addMdcValue(MdcKey.CHANGESET_CONTEXT_FILTER, contexts != null ? contexts.toString() : "");
 
         runInScope(new Scope.ScopedRunner() {
             @Override
