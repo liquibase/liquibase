@@ -169,7 +169,7 @@ public class FormattedSqlChangeLogParser implements ChangeLogParser {
     private static final String SINGLE_QUOTE_RESULT_REGEX = "^(?:expectedResult:)?'([^']+)' (.*)";
     private static final String DOUBLE_QUOTE_RESULT_REGEX = "^(?:expectedResult:)?\"([^\"]+)\" (.*)";
 
-    private static final Pattern[] PATTERNS = new Pattern[]{
+    private static final Pattern[] WORD_AND_QUOTING_PATTERNS = new Pattern[]{
             Pattern.compile(WORD_RESULT_REGEX, Pattern.CASE_INSENSITIVE),
             Pattern.compile(SINGLE_QUOTE_RESULT_REGEX, Pattern.CASE_INSENSITIVE),
             Pattern.compile(DOUBLE_QUOTE_RESULT_REGEX, Pattern.CASE_INSENSITIVE)
@@ -711,7 +711,7 @@ public class FormattedSqlChangeLogParser implements ChangeLogParser {
     }
 
     private SqlPrecondition parseSqlCheckCondition(String body) throws ChangeLogParseException{
-        for (Pattern pattern : PATTERNS) {
+        for (Pattern pattern : WORD_AND_QUOTING_PATTERNS) {
             Matcher matcher = pattern.matcher(body);
             if (matcher.matches() && (matcher.groupCount() == 2)) {
                 SqlPrecondition p = new SqlPrecondition();

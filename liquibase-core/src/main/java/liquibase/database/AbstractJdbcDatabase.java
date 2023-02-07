@@ -106,8 +106,8 @@ public abstract class AbstractJdbcDatabase implements Database {
     private static final String TIMESTAMP_REGEX = "^\\d{4}\\-\\d{2}\\-\\d{2}T\\d{2}:\\d{2}:\\d{2}\\.\\d+$";
     private static final Pattern TIMESTAMP_PATTERN = Pattern.compile(TIMESTAMP_REGEX);
 
-    private static final String TIMES_REGEX = "^\\d{2}:\\d{2}:\\d{2}$";
-    private static final Pattern TIME_PATTERN = Pattern.compile(TIMES_REGEX);
+    private static final String TIME_REGEX = "^\\d{2}:\\d{2}:\\d{2}$";
+    private static final Pattern TIME_PATTERN = Pattern.compile(TIME_REGEX);
 
     private static final String  NAME_WITH_DESC_REGEX = "(?i).*\\s+DESC";
     private static final Pattern NAME_WITH_DESC_PATTERN = Pattern.compile(NAME_WITH_DESC_REGEX);
