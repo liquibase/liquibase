@@ -114,7 +114,7 @@ public class DiffCommandStep extends AbstractCommandStep {
         CompareControl compareControl = (CompareControl) resultsBuilder.getResult(PreCompareCommandStep.COMPARE_CONTROL_RESULT.getName());
 
         CatalogAndSchema[] schemas;
-        if ((compareControl == null) || (compareControl.getSchemaComparisons() == null)) {
+        if (compareControl.getSchemaComparisons() == null) {
             schemas = new CatalogAndSchema[]{targetDatabase.getDefaultSchema()};
         } else {
             schemas = new CatalogAndSchema[compareControl.getSchemaComparisons().length];
@@ -138,20 +138,7 @@ public class DiffCommandStep extends AbstractCommandStep {
                     resultsBuilder.getResult(PreCompareCommandStep.SNAPSHOT_TYPES_RESULT.getName()));
         }
 
-        SnapshotListener snapshotListener = commandScope.getArgumentValue(SNAPSHOT_LISTENER_ARG);
-        if (snapshotListener != null) {
-            snapshotControl.setSnapshotListener(snapshotListener);
-        }
-
-        ObjectQuotingStrategy originalStrategy = targetDatabase.getObjectQuotingStrategy();
-        try {
-            targetDatabase.setObjectQuotingStrategy(ObjectQuotingStrategy.QUOTE_ALL_OBJECTS);
-            DatabaseSnapshot snapshot = SnapshotGeneratorFactory.getInstance().createSnapshot(schemas, targetDatabase, snapshotControl);
-            snapshot.setSchemaComparisons(compareControl.getSchemaComparisons());
-            return snapshot;
-        } finally {
-            targetDatabase.setObjectQuotingStrategy(originalStrategy);
-        }
+        return generateDatabaseShapshot(commandScope, targetDatabase, compareControl, schemas, snapshotControl);
     }
 
     protected DatabaseSnapshot createReferenceSnapshot(CommandResultsBuilder resultsBuilder) throws DatabaseException, InvalidExampleException {
@@ -166,7 +153,7 @@ public class DiffCommandStep extends AbstractCommandStep {
                 .getResult(PreCompareCommandStep.OBJECT_CHANGE_FILTER_RESULT.getName());
 
         CatalogAndSchema[] schemas;
-        if ((compareControl == null) || (compareControl.getSchemaComparisons() == null)) {
+        if (compareControl.getSchemaComparisons() == null) {
             schemas = new CatalogAndSchema[]{(targetDatabase != null? targetDatabase.getDefaultSchema() : referenceDatabase.getDefaultSchema())};
         } else {
             schemas = new CatalogAndSchema[compareControl.getSchemaComparisons().length];
@@ -188,6 +175,11 @@ public class DiffCommandStep extends AbstractCommandStep {
             snapshotControl = new SnapshotControl(referenceDatabase, objectChangeFilter, snapshotTypes);
         }
 
+        return generateDatabaseShapshot(commandScope, referenceDatabase, compareControl, schemas, snapshotControl);
+    }
+
+
+    private DatabaseSnapshot generateDatabaseShapshot(CommandScope commandScope, Database referenceDatabase, CompareControl compareControl, CatalogAndSchema[] schemas, SnapshotControl snapshotControl) throws DatabaseException, InvalidExampleException {
         SnapshotListener snapshotListener = commandScope.getArgumentValue(SNAPSHOT_LISTENER_ARG);
         if (snapshotListener != null) {
             snapshotControl.setSnapshotListener(snapshotListener);
