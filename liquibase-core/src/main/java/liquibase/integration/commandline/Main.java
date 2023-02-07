@@ -216,7 +216,7 @@ public class Main {
             scopeObjects.put(Scope.Attr.ui.name(), ui);
         }
 
-        try {
+        //TODO: Reformat
             return Scope.child(scopeObjects, new Scope.ScopedRunnerWithReturn<Integer>() {
                 @Override
                 public Integer run() throws Exception {
@@ -394,7 +394,10 @@ public class Main {
                         Map<String, Object> innerScopeObjects = new HashMap<>();
                         innerScopeObjects.put("defaultsFile", LiquibaseCommandLineConfiguration.DEFAULTS_FILE.getCurrentValue());
                         if (!Main.runningFromNewCli) {
-                            innerScopeObjects.put(Scope.Attr.resourceAccessor.name(), new ClassLoaderResourceAccessor(main.configureClassLoader()));
+                            innerScopeObjects.put(Scope.Attr.resourceAccessor.name(), new CompositeResourceAccessor(
+                                    new DirectoryResourceAccessor(Paths.get(".").toAbsolutePath().toFile()),
+                                    new ClassLoaderResourceAccessor(main.configureClassLoader())
+                            ));
                         }
 
                         Scope.child(innerScopeObjects, () -> {
@@ -409,6 +412,7 @@ public class Main {
                                 }
                             }
                         });
+                        Scope.getCurrentScope().getMdcManager().clear();
                     } catch (Throwable e) {
                         String message = e.getMessage();
                         if (e.getCause() != null) {
@@ -458,9 +462,6 @@ public class Main {
                     return Integer.valueOf(0);
                 }
             });
-        } finally {
-            Scope.getCurrentScope().getMdcManager().clear();
-        }
     }
 
     private static boolean setupNeeded(Main main) throws CommandLineParsingException {
@@ -1909,6 +1910,7 @@ public class Main {
                     liquibase.rollback(new ISODateFormat().parse(getCommandArgument()), getCommandParam
                             (COMMANDS.ROLLBACK_SCRIPT, null), new Contexts(contexts), new LabelExpression(getLabelFilter()));
                 } else if (COMMANDS.ROLLBACK_COUNT.equalsIgnoreCase(command)) {
+                    Scope.getCurrentScope().addMdcValue(MdcKey.OPERATION_TYPE, COMMANDS.ROLLBACK_COUNT);
                     liquibase.rollback(Integer.parseInt(getCommandArgument()), getCommandParam
                             (COMMANDS.ROLLBACK_SCRIPT, null), new Contexts(contexts), new LabelExpression(getLabelFilter()));
 

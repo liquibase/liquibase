@@ -20,6 +20,11 @@ public class NoOpMdcManager implements MdcManager {
     }
 
     @Override
+    public MdcObject put(String key, CustomMdcObject customMdcObject) {
+        return new MdcObject(key, customMdcObject);
+    }
+
+    @Override
     public void remove(String key) {
 
     }

@@ -27,7 +27,9 @@ class ExpressionExpander {
         }
 
         String expressions = expandExpressions(new StringReader(text), changeLog, false);
-        Scope.getCurrentScope().addMdcValue(MdcKey.CHANGELOG_PROPERTIES, expandedParameters);
+        if (!expandedParameters.isEmpty()) {
+            Scope.getCurrentScope().addMdcValue(MdcKey.CHANGELOG_PROPERTIES, expandedParameters);
+        }
         return expressions;
     }
 
