@@ -3,16 +3,17 @@ package liquibase.changelog.visitor;
 import liquibase.Scope;
 import liquibase.change.Change;
 import liquibase.change.core.SQLFileChange;
-import liquibase.changelog.ChangeSet;
-import liquibase.changelog.DatabaseChangeLog;
-import liquibase.changelog.RollbackContainer;
+import liquibase.changelog.*;
 import liquibase.changelog.filter.ChangeSetFilterResult;
 import liquibase.database.Database;
 import liquibase.exception.LiquibaseException;
 import liquibase.executor.Executor;
 import liquibase.executor.ExecutorService;
 import liquibase.executor.LoggingExecutor;
+import liquibase.logging.mdc.MdcKey;
+import liquibase.logging.mdc.customobjects.ChangesetsRolledback;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 
@@ -21,6 +22,7 @@ public class RollbackVisitor implements ChangeSetVisitor {
     private Database database;
 
     private ChangeExecListener execListener;
+    private List<ChangesetsRolledback.ChangeSet> changeSets = new ArrayList<>();
 
     /**
      * @deprecated - please use the constructor with ChangeExecListener, which can be null.
@@ -59,6 +61,8 @@ public class RollbackVisitor implements ChangeSetVisitor {
         sendRollbackEvent(changeSet, databaseChangeLog, database);
         this.database.commit();
         checkForEmptyRollbackFile(changeSet);
+        changeSets.add(new ChangesetsRolledback.ChangeSet(changeSet.getId(), changeSet.getAuthor(), changeSet.getFilePath(), changeSet.getDeploymentId()));
+        Scope.getCurrentScope().addMdcValue(MdcKey.CHANGESETS_ROLLED_BACK, new ChangesetsRolledback(changeSets), false);
     }
 
     protected void fireRollbackFailed(ChangeSet changeSet, DatabaseChangeLog databaseChangeLog, Database database, Exception e) {

@@ -1,6 +1,7 @@
 package liquibase
 
 import liquibase.exception.UnexpectedLiquibaseException
+import liquibase.logging.mdc.CustomMdcObject
 import liquibase.logging.mdc.MdcManager
 import liquibase.logging.mdc.MdcManagerFactory
 import liquibase.logging.mdc.MdcObject
@@ -130,14 +131,22 @@ class ScopeTest extends Specification {
 
         @Override
         MdcObject put(String key, String value) {
-            values.put(key, value)
-            return new MdcObject(key, value)
+            return put(key, (Object) value)
         }
 
         @Override
         MdcObject put(String key, Map<String, String> values) {
-            this.values.put(key, values)
-            return new MdcObject(key, values)
+            return put(key, (Object) values)
+        }
+
+        @Override
+        MdcObject put(String key, CustomMdcObject customMdcObject) {
+            return put(key, (Object) customMdcObject)
+        }
+
+        MdcObject put(String key, Object object) {
+            this.values.put(key, object)
+            return new MdcObject(key, object)
         }
 
         @Override

@@ -10,6 +10,7 @@ import liquibase.listener.LiquibaseListener;
 import liquibase.logging.*;
 import liquibase.logging.core.JavaLogService;
 import liquibase.logging.core.LogServiceFactory;
+import liquibase.logging.mdc.CustomMdcObject;
 import liquibase.logging.mdc.MdcManager;
 import liquibase.logging.mdc.MdcManagerFactory;
 import liquibase.logging.mdc.MdcObject;
@@ -444,6 +445,27 @@ public class Scope {
      */
     public MdcObject addMdcValue(String key, Map<String, String> value, boolean removeWhenScopeExits) {
         MdcObject mdcObject = getMdcManager().put(key, value);
+        removeMdcObjectWhenScopeExits(removeWhenScopeExits, mdcObject);
+
+        return mdcObject;
+    }
+
+    /**
+     * Add a key value pair to the MDC using the MDC manager. This key value pair will be automatically removed from the
+     * MDC when this scope exits.
+     */
+    public MdcObject addMdcValue(String key, CustomMdcObject customMdcObject) {
+        return addMdcValue(key, customMdcObject, true);
+    }
+
+    /**
+     * Add a key value pair to the MDC using the MDC manager.
+     * @param removeWhenScopeExits if true, this key value pair will be automatically removed from the MDC when this
+     *                             scope exits. If there is not a demonstrable reason for setting this parameter to false
+     *                             then it should be set to true.
+     */
+    public MdcObject addMdcValue(String key, CustomMdcObject customMdcObject, boolean removeWhenScopeExits) {
+        MdcObject mdcObject = getMdcManager().put(key, customMdcObject);
         removeMdcObjectWhenScopeExits(removeWhenScopeExits, mdcObject);
 
         return mdcObject;
