@@ -35,7 +35,7 @@ class XMLChangeLogSAXParserTest extends Specification {
 </databaseChangeLog>
 """
 
-    def testIgnoreDuplicateChangeSets() throws ChangeLogParseException, Exception {
+    def testAllProvidedChangesetsAreLoaded() throws ChangeLogParseException, Exception {
         when:
         def xmlParser = new XMLChangeLogSAXParser()
         def changeLog = xmlParser.parse("liquibase/parser/core/xml/ignoreDuplicatedChangeLogs/master.changelog.xml",
@@ -57,7 +57,7 @@ class XMLChangeLogSAXParserTest extends Specification {
 
 
         then:
-        changeSets.size() == 8
+        changeSets.size() == 14
         changeSets.get(0).toString() == "liquibase/parser/core/xml/ignoreDuplicatedChangeLogs/included.changelog4.xml::1::testuser"
         changeSets.get(1).toString() == "liquibase/parser/core/xml/ignoreDuplicatedChangeLogs/included.changelog4.xml::1::testuser"
         changeSets.get(1).getContextFilter().getContexts().size() == 1
@@ -68,8 +68,9 @@ class XMLChangeLogSAXParserTest extends Specification {
         changeSets.get(4).toString() == "liquibase/parser/core/xml/ignoreDuplicatedChangeLogs/included.changelog4.xml::1::testuser"
         changeSets.get(4).getDbmsSet().size() == 1
         changeSets.get(5).toString() == "liquibase/parser/core/xml/ignoreDuplicatedChangeLogs/included.changelog1.xml::1::testuser"
-        changeSets.get(6).toString() == "liquibase/parser/core/xml/ignoreDuplicatedChangeLogs/included.changelog3.xml::1::testuser"
-        changeSets.get(7).toString() == "liquibase/parser/core/xml/ignoreDuplicatedChangeLogs/included.changelog2.xml::1::testuser"
+        changeSets.get(6).toString() == "liquibase/parser/core/xml/ignoreDuplicatedChangeLogs/included.changelog4.xml::1::testuser"
+        changeSets.get(7).toString() == "liquibase/parser/core/xml/ignoreDuplicatedChangeLogs/included.changelog4.xml::1::testuser"
+        changeSets.get(13).toString() == "liquibase/parser/core/xml/ignoreDuplicatedChangeLogs/included.changelog3.xml::1::testuser"
     }
 
     def "uses liquibase.secureParsing by default"() {
