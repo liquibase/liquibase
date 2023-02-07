@@ -248,9 +248,7 @@ public class Liquibase implements AutoCloseable {
 
             changeLogParameters.setContexts(contexts);
             changeLogParameters.setLabels(labelExpression);
-
-            Scope.getCurrentScope().addMdcValue(MdcKey.CHANGESET_LABEL_FILTER, labelExpression != null ? labelExpression.toString(): "");
-            Scope.getCurrentScope().addMdcValue(MdcKey.CHANGESET_CONTEXT_FILTER, contexts != null ? contexts.toString() : "");
+            addChangeSetFiltersMdc(labelExpression, contexts);
 
             Operation updateOperation = null;
             BufferedLogService bufferLog = new BufferedLogService();
@@ -574,8 +572,7 @@ public class Liquibase implements AutoCloseable {
             throws LiquibaseException {
         changeLogParameters.setContexts(contexts);
         changeLogParameters.setLabels(labelExpression);
-        Scope.getCurrentScope().addMdcValue(MdcKey.CHANGESET_LABEL_FILTER, labelExpression != null ? labelExpression.toString(): "");
-        Scope.getCurrentScope().addMdcValue(MdcKey.CHANGESET_CONTEXT_FILTER, contexts != null ? contexts.toString() : "");
+        addChangeSetFiltersMdc(labelExpression, contexts);
 
         runInScope(new Scope.ScopedRunner() {
             @Override
@@ -706,9 +703,7 @@ public class Liquibase implements AutoCloseable {
         }
         changeLogParameters.setContexts(contexts);
         changeLogParameters.setLabels(labelExpression);
-        Scope.getCurrentScope().addMdcValue(MdcKey.CHANGESET_LABEL_FILTER, labelExpression != null ? labelExpression.toString(): "");
-        Scope.getCurrentScope().addMdcValue(MdcKey.CHANGESET_CONTEXT_FILTER, contexts != null ? contexts.toString() : "");
-
+        addChangeSetFiltersMdc(labelExpression, contexts);
 
         runInScope(new Scope.ScopedRunner() {
             @Override
@@ -878,6 +873,11 @@ public class Liquibase implements AutoCloseable {
                 Scope.getCurrentScope().getSingleton(ExecutorService.class).setExecutor("jdbc", database, oldTemplate);
             }
         });
+    }
+
+    private void addChangeSetFiltersMdc(LabelExpression labelExpression, Contexts contexts) {
+        Scope.getCurrentScope().addMdcValue(MdcKey.CHANGESET_LABEL_FILTER, labelExpression != null ? labelExpression.toString(): "");
+        Scope.getCurrentScope().addMdcValue(MdcKey.CHANGESET_CONTEXT_FILTER, contexts != null ? contexts.toString() : "");
     }
 
     public void outputHeader(String message) throws DatabaseException {
