@@ -577,6 +577,7 @@ public class Liquibase implements AutoCloseable {
 
                 LockService lockService = LockServiceFactory.getInstance().getLockService(database);
                 lockService.waitForLock();
+                Scope.getCurrentScope().addMdcValue(MdcKey.LIQUIBASE_TARGET_URL, database.getConnection().getURL());
 
                 Operation updateOperation = null;
                 BufferedLogService bufferLog = new BufferedLogService();
@@ -586,7 +587,10 @@ public class Liquibase implements AutoCloseable {
                     changeLog = getDatabaseChangeLog();
 
                     checkLiquibaseTables(true, changeLog, contexts, labelExpression);
-                    ChangeLogHistoryServiceFactory.getInstance().getChangeLogService(database).generateDeploymentId();
+                    ChangeLogHistoryService changelogService = ChangeLogHistoryServiceFactory.getInstance().getChangeLogService(database);
+                    changelogService.generateDeploymentId();
+                    Scope.getCurrentScope().addMdcValue(MdcKey.DEPLOYMENT_ID, changelogService.getDeploymentId());
+
 
                     changeLog.validate(database, contexts, labelExpression);
 
@@ -641,8 +645,18 @@ public class Liquibase implements AutoCloseable {
                         runChangeLogIterator.run(createUpdateVisitor(), new RuntimeEnvironment(database, contexts, labelExpression));
                     });
                     hubUpdater.postUpdateHub(updateOperation, bufferLog);
+                    int deployedChangeSetCount = getDefaultChangeExecListener().getDeployedChangeSets().size();
+                    try (MdcObject deploymentOutcomeMdc = Scope.getCurrentScope().addMdcValue(MdcKey.DEPLOYMENT_OUTCOME, MdcValue.COMMAND_SUCCESSFUL);
+                         MdcObject deploymentOutcomeCountMdc = Scope.getCurrentScope().addMdcValue(MdcKey.DEPLOYMENT_CHANGESET_COUNT, String.valueOf(deployedChangeSetCount))) {
+                        Scope.getCurrentScope().getLog(getClass()).info("Update command completed successfully.");
+                    }
                 }
                 catch (Throwable e) {
+                    int deployedChangeSetCount = getDefaultChangeExecListener().getDeployedChangeSets().size();
+                    try (MdcObject deploymentOutcomeMdc = Scope.getCurrentScope().addMdcValue(MdcKey.DEPLOYMENT_OUTCOME, MdcValue.COMMAND_FAILED);
+                         MdcObject deploymentOutcomeCountMdc = Scope.getCurrentScope().addMdcValue(MdcKey.DEPLOYMENT_CHANGESET_COUNT, String.valueOf(deployedChangeSetCount))) {
+                        Scope.getCurrentScope().getLog(getClass()).info("Update command encountered an exception.");
+                    }
                     if (hubUpdater != null) {
                         hubUpdater.postUpdateHubExceptionHandling(updateOperation, bufferLog, e.getMessage());
                     }
@@ -695,6 +709,7 @@ public class Liquibase implements AutoCloseable {
             public void run() throws Exception {
                 LockService lockService = LockServiceFactory.getInstance().getLockService(database);
                 lockService.waitForLock();
+                Scope.getCurrentScope().addMdcValue(MdcKey.LIQUIBASE_TARGET_URL, database.getConnection().getURL());
 
                 HubUpdater hubUpdater = null;
                 Operation updateOperation = null;
@@ -706,7 +721,9 @@ public class Liquibase implements AutoCloseable {
 
                     checkLiquibaseTables(true, changeLog, contexts, labelExpression);
 
-                    ChangeLogHistoryServiceFactory.getInstance().getChangeLogService(database).generateDeploymentId();
+                    ChangeLogHistoryService changelogService = ChangeLogHistoryServiceFactory.getInstance().getChangeLogService(database);
+                    changelogService.generateDeploymentId();
+                    Scope.getCurrentScope().addMdcValue(MdcKey.DEPLOYMENT_ID, changelogService.getDeploymentId());
 
                     changeLog.validate(database, contexts, labelExpression);
 
@@ -762,8 +779,18 @@ public class Liquibase implements AutoCloseable {
                         runChangeLogIterator.run(createUpdateVisitor(), new RuntimeEnvironment(database, contexts, labelExpression));
                     });
                     hubUpdater.postUpdateHub(updateOperation, bufferLog);
+                    int deployedChangeSetCount = getDefaultChangeExecListener().getDeployedChangeSets().size();
+                    try (MdcObject deploymentOutcomeMdc = Scope.getCurrentScope().addMdcValue(MdcKey.DEPLOYMENT_OUTCOME, MdcValue.COMMAND_SUCCESSFUL);
+                         MdcObject deploymentOutcomeCountMdc = Scope.getCurrentScope().addMdcValue(MdcKey.DEPLOYMENT_CHANGESET_COUNT, String.valueOf(deployedChangeSetCount))) {
+                        Scope.getCurrentScope().getLog(getClass()).info("Update command completed successfully.");
+                    }
                 }
                 catch (Throwable e) {
+                    int deployedChangeSetCount = getDefaultChangeExecListener().getDeployedChangeSets().size();
+                    try (MdcObject deploymentOutcomeMdc = Scope.getCurrentScope().addMdcValue(MdcKey.DEPLOYMENT_OUTCOME, MdcValue.COMMAND_FAILED);
+                         MdcObject deploymentOutcomeCountMdc = Scope.getCurrentScope().addMdcValue(MdcKey.DEPLOYMENT_CHANGESET_COUNT, String.valueOf(deployedChangeSetCount))) {
+                        Scope.getCurrentScope().getLog(getClass()).info("Update command encountered an exception.");
+                    }
                     if (hubUpdater != null) {
                         hubUpdater.postUpdateHubExceptionHandling(updateOperation, bufferLog, e.getMessage());
                     }
