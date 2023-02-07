@@ -244,7 +244,7 @@ public class Liquibase implements AutoCloseable {
 
             LockService lockService = LockServiceFactory.getInstance().getLockService(database);
             lockService.waitForLock();
-            Scope.getCurrentScope().addMdcValue(MdcKey.LIQUIBASE_TARGET_URL, database.getConnection().getURL());
+            Scope.getCurrentScope().addMdcValue(MdcKey.LIQUIBASE_TARGET_URL, database.getConnection().getURL(), false);
 
             changeLogParameters.setContexts(contexts);
             changeLogParameters.setLabels(labelExpression);
@@ -262,7 +262,7 @@ public class Liquibase implements AutoCloseable {
                 ChangeLogHistoryService changelogService = ChangeLogHistoryServiceFactory.getInstance().getChangeLogService(database);
                 changelogService.generateDeploymentId();
 
-                Scope.getCurrentScope().addMdcValue(MdcKey.DEPLOYMENT_ID, changelogService.getDeploymentId());
+                Scope.getCurrentScope().addMdcValue(MdcKey.DEPLOYMENT_ID, changelogService.getDeploymentId(), false);
 
                 changeLog.validate(database, contexts, labelExpression);
 
