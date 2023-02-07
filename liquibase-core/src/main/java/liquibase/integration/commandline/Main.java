@@ -216,7 +216,7 @@ public class Main {
             scopeObjects.put(Scope.Attr.ui.name(), ui);
         }
 
-        try {
+        //TODO: Reformat
             return Scope.child(scopeObjects, new Scope.ScopedRunnerWithReturn<Integer>() {
                 @Override
                 public Integer run() throws Exception {
@@ -412,6 +412,7 @@ public class Main {
                                 }
                             }
                         });
+                        Scope.getCurrentScope().getMdcManager().clear();
                     } catch (Throwable e) {
                         String message = e.getMessage();
                         if (e.getCause() != null) {
@@ -461,9 +462,6 @@ public class Main {
                     return Integer.valueOf(0);
                 }
             });
-        } finally {
-            Scope.getCurrentScope().getMdcManager().clear();
-        }
     }
 
     private static boolean setupNeeded(Main main) throws CommandLineParsingException {
