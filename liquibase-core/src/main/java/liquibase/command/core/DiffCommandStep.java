@@ -179,20 +179,20 @@ public class DiffCommandStep extends AbstractCommandStep {
     }
 
 
-    private DatabaseSnapshot generateDatabaseShapshot(CommandScope commandScope, Database referenceDatabase, CompareControl compareControl, CatalogAndSchema[] schemas, SnapshotControl snapshotControl) throws DatabaseException, InvalidExampleException {
+    private DatabaseSnapshot generateDatabaseShapshot(CommandScope commandScope, Database database, CompareControl compareControl, CatalogAndSchema[] schemas, SnapshotControl snapshotControl) throws DatabaseException, InvalidExampleException {
         SnapshotListener snapshotListener = commandScope.getArgumentValue(SNAPSHOT_LISTENER_ARG);
         if (snapshotListener != null) {
             snapshotControl.setSnapshotListener(snapshotListener);
         }
 
-        ObjectQuotingStrategy originalStrategy = referenceDatabase.getObjectQuotingStrategy();
+        ObjectQuotingStrategy originalStrategy = database.getObjectQuotingStrategy();
         try {
-            referenceDatabase.setObjectQuotingStrategy(ObjectQuotingStrategy.QUOTE_ALL_OBJECTS);
-            DatabaseSnapshot snapshot = SnapshotGeneratorFactory.getInstance().createSnapshot(schemas, referenceDatabase, snapshotControl);
+            database.setObjectQuotingStrategy(ObjectQuotingStrategy.QUOTE_ALL_OBJECTS);
+            DatabaseSnapshot snapshot = SnapshotGeneratorFactory.getInstance().createSnapshot(schemas, database, snapshotControl);
             snapshot.setSchemaComparisons(compareControl.getSchemaComparisons());
             return snapshot;
         } finally {
-            referenceDatabase.setObjectQuotingStrategy(originalStrategy);
+            database.setObjectQuotingStrategy(originalStrategy);
         }
     }
 
