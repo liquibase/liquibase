@@ -259,11 +259,7 @@ public class Liquibase implements AutoCloseable {
                 if (checkLiquibaseTables) {
                     checkLiquibaseTables(true, changeLog, contexts, labelExpression);
                 }
-
-                ChangeLogHistoryService changelogService = ChangeLogHistoryServiceFactory.getInstance().getChangeLogService(database);
-                changelogService.generateDeploymentId();
-
-                Scope.getCurrentScope().addMdcValue(MdcKey.DEPLOYMENT_ID, changelogService.getDeploymentId());
+                generateDeploymentId();
 
                 changeLog.validate(database, contexts, labelExpression);
 
@@ -579,9 +575,7 @@ public class Liquibase implements AutoCloseable {
                     changeLog = getDatabaseChangeLog();
 
                     checkLiquibaseTables(true, changeLog, contexts, labelExpression);
-                    ChangeLogHistoryService changelogService = ChangeLogHistoryServiceFactory.getInstance().getChangeLogService(database);
-                    changelogService.generateDeploymentId();
-                    Scope.getCurrentScope().addMdcValue(MdcKey.DEPLOYMENT_ID, changelogService.getDeploymentId());
+                    generateDeploymentId();
 
 
                     changeLog.validate(database, contexts, labelExpression);
@@ -703,9 +697,7 @@ public class Liquibase implements AutoCloseable {
 
                     checkLiquibaseTables(true, changeLog, contexts, labelExpression);
 
-                    ChangeLogHistoryService changelogService = ChangeLogHistoryServiceFactory.getInstance().getChangeLogService(database);
-                    changelogService.generateDeploymentId();
-                    Scope.getCurrentScope().addMdcValue(MdcKey.DEPLOYMENT_ID, changelogService.getDeploymentId());
+                    generateDeploymentId();
 
                     changeLog.validate(database, contexts, labelExpression);
 
@@ -851,6 +843,12 @@ public class Liquibase implements AutoCloseable {
     private void addCommandFiltersMdc(LabelExpression labelExpression, Contexts contexts) {
         Scope.getCurrentScope().addMdcValue(MdcKey.COMMAND_LABEL_FILTER, labelExpression != null ? labelExpression.toString(): "");
         Scope.getCurrentScope().addMdcValue(MdcKey.COMMAND_CONTEXT_FILTER, contexts != null ? contexts.toString() : "");
+    }
+
+    private void generateDeploymentId() {
+        ChangeLogHistoryService changelogService = ChangeLogHistoryServiceFactory.getInstance().getChangeLogService(database);
+        changelogService.generateDeploymentId();
+        Scope.getCurrentScope().addMdcValue(MdcKey.DEPLOYMENT_ID, changelogService.getDeploymentId());
     }
 
     private void logDeploymentOutcomeMdc(boolean success) throws IOException {
