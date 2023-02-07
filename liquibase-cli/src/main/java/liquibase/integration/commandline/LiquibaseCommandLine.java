@@ -18,6 +18,7 @@ import liquibase.license.LicenseService;
 import liquibase.license.LicenseServiceFactory;
 import liquibase.logging.LogService;
 import liquibase.logging.core.JavaLogService;
+import liquibase.logging.core.LogServiceFactory;
 import liquibase.logging.mdc.MdcKey;
 import liquibase.logging.mdc.MdcManager;
 import liquibase.logging.mdc.MdcObject;
@@ -318,72 +319,76 @@ public class LiquibaseCommandLine {
             Main.runningFromNewCli = true;
 
             final List<ConfigurationValueProvider> valueProviders = registerValueProviders(finalArgs);
-            try {
-                return Scope.child(configureScope(), () -> {
+            // Get a new log service after registering the value providers, since the log service might need to load parameters using newly registered value providers.
+            LogService newLogService = Scope.getCurrentScope().getSingleton(LogServiceFactory.class).getDefaultLogService();
+            return Scope.child(Collections.singletonMap(Scope.Attr.logService.name(), newLogService), () -> {
+                try {
+                    return Scope.child(configureScope(), () -> {
 
-                    if (!LiquibaseCommandLineConfiguration.SHOULD_RUN.getCurrentValue()) {
-                        Scope.getCurrentScope().getUI().sendErrorMessage((
-                                String.format(coreBundle.getString("did.not.run.because.param.was.set.to.false"),
-                                        LiquibaseCommandLineConfiguration.SHOULD_RUN.getCurrentConfiguredValue().getProvidedValue().getActualKey())));
-                        return 0;
-                    }
-
-                    configureVersionInfo();
-
-                    if (!wasHelpOrVersionRequested()) {
-                        Scope.getCurrentScope().getUI().sendMessage(CommandLineUtils.getBanner());
-                        Scope.getCurrentScope().getUI().sendMessage(String.format(coreBundle.getString("version.number"), LiquibaseUtil.getBuildVersionInfo()));
-
-                        final LicenseService licenseService = Scope.getCurrentScope().getSingleton(LicenseServiceFactory.class).getLicenseService();
-                        if (licenseService == null) {
-                            Scope.getCurrentScope().getUI().sendMessage("WARNING: License service not loaded, cannot determine Liquibase Pro license status. Please consider re-installing Liquibase to include all dependencies. Continuing operation without Pro license.");
-                        } else {
-                            Scope.getCurrentScope().getUI().sendMessage(licenseService.getLicenseInfo());
+                        if (!LiquibaseCommandLineConfiguration.SHOULD_RUN.getCurrentValue()) {
+                            Scope.getCurrentScope().getUI().sendErrorMessage((
+                                    String.format(coreBundle.getString("did.not.run.because.param.was.set.to.false"),
+                                            LiquibaseCommandLineConfiguration.SHOULD_RUN.getCurrentConfiguredValue().getProvidedValue().getActualKey())));
+                            return 0;
                         }
-                    }
 
-                    CommandLine.ParseResult subcommandParseResult = commandLine.getParseResult();
-                    while (subcommandParseResult.hasSubcommand()) {
-                        subcommandParseResult = subcommandParseResult.subcommand();
-                    }
+                        configureVersionInfo();
 
-                    Map<String, String> changelogParameters = subcommandParseResult.matchedOptionValue("-D", new HashMap<>());
-                    if (changelogParameters.size() != 0) {
-                        Main.newCliChangelogParameters = changelogParameters;
-                    }
+                        if (!wasHelpOrVersionRequested()) {
+                            Scope.getCurrentScope().getUI().sendMessage(CommandLineUtils.getBanner());
+                            Scope.getCurrentScope().getUI().sendMessage(String.format(coreBundle.getString("version.number"), LiquibaseUtil.getBuildVersionInfo()));
+
+                            final LicenseService licenseService = Scope.getCurrentScope().getSingleton(LicenseServiceFactory.class).getLicenseService();
+                            if (licenseService == null) {
+                                Scope.getCurrentScope().getUI().sendMessage("WARNING: License service not loaded, cannot determine Liquibase Pro license status. Please consider re-installing Liquibase to include all dependencies. Continuing operation without Pro license.");
+                            } else {
+                                Scope.getCurrentScope().getUI().sendMessage(licenseService.getLicenseInfo());
+                            }
+                        }
+
+                        CommandLine.ParseResult subcommandParseResult = commandLine.getParseResult();
+                        while (subcommandParseResult.hasSubcommand()) {
+                            subcommandParseResult = subcommandParseResult.subcommand();
+                        }
+
+                        Map<String, String> changelogParameters = subcommandParseResult.matchedOptionValue("-D", new HashMap<>());
+                        if (changelogParameters.size() != 0) {
+                            Main.newCliChangelogParameters = changelogParameters;
+                        }
 
                     enableMonitoring();
                     logMdcData();
                     int response = commandLine.execute(finalArgs);
 
-                    if (!wasHelpOrVersionRequested()) {
-                        final ConfiguredValue<String> logFile = LiquibaseCommandLineConfiguration.LOG_FILE.getCurrentConfiguredValue();
-                        if (logFile.found()) {
-                            Scope.getCurrentScope().getUI().sendMessage("Logs saved to " + logFile.getValue());
+                        if (!wasHelpOrVersionRequested()) {
+                            final ConfiguredValue<String> logFile = LiquibaseCommandLineConfiguration.LOG_FILE.getCurrentConfiguredValue();
+                            if (logFile.found()) {
+                                Scope.getCurrentScope().getUI().sendMessage("Logs saved to " + logFile.getValue());
+                            }
+
+                            final ConfiguredValue<String> outputFile = LiquibaseCommandLineConfiguration.OUTPUT_FILE.getCurrentConfiguredValue();
+                            if (outputFile.found()) {
+                                Scope.getCurrentScope().getUI().sendMessage("Output saved to " + outputFile.getValue());
+                            }
+
+                            if (response == 0) {
+                                final List<CommandLine> commandList = commandLine.getParseResult().asCommandLineList();
+                                final String commandName = StringUtil.join(getCommandNames(commandList.get(commandList.size() - 1)), " ");
+                                Scope.getCurrentScope().getUI().sendMessage("Liquibase command '" + commandName + "' was executed successfully.");
+                            }
                         }
 
-                        final ConfiguredValue<String> outputFile = LiquibaseCommandLineConfiguration.OUTPUT_FILE.getCurrentConfiguredValue();
-                        if (outputFile.found()) {
-                            Scope.getCurrentScope().getUI().sendMessage("Output saved to " + outputFile.getValue());
-                        }
 
-                        if (response == 0) {
-                            final List<CommandLine> commandList = commandLine.getParseResult().asCommandLineList();
-                            final String commandName = StringUtil.join(getCommandNames(commandList.get(commandList.size() - 1)), " ");
-                            Scope.getCurrentScope().getUI().sendMessage("Liquibase command '" + commandName + "' was executed successfully.");
-                        }
+                        return response;
+                    });
+                } finally {
+                    final LiquibaseConfiguration liquibaseConfiguration = Scope.getCurrentScope().getSingleton(LiquibaseConfiguration.class);
+
+                    for (ConfigurationValueProvider provider : valueProviders) {
+                        liquibaseConfiguration.unregisterProvider(provider);
                     }
-
-
-                    return response;
-                });
-            } finally {
-                final LiquibaseConfiguration liquibaseConfiguration = Scope.getCurrentScope().getSingleton(LiquibaseConfiguration.class);
-
-                for (ConfigurationValueProvider provider : valueProviders) {
-                    liquibaseConfiguration.unregisterProvider(provider);
                 }
-            }
+            });
         } catch (Throwable e) {
             handleException(e);
             return 1;

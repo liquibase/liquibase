@@ -216,7 +216,7 @@ public class Main {
             scopeObjects.put(Scope.Attr.ui.name(), ui);
         }
 
-        try {
+        //TODO: Reformat
             return Scope.child(scopeObjects, new Scope.ScopedRunnerWithReturn<Integer>() {
                 @Override
                 public Integer run() throws Exception {
@@ -412,6 +412,7 @@ public class Main {
                                 }
                             }
                         });
+                        Scope.getCurrentScope().getMdcManager().clear();
                     } catch (Throwable e) {
                         String message = e.getMessage();
                         if (e.getCause() != null) {
@@ -461,9 +462,6 @@ public class Main {
                     return Integer.valueOf(0);
                 }
             });
-        } finally {
-            Scope.getCurrentScope().getMdcManager().clear();
-        }
     }
 
     private static boolean setupNeeded(Main main) throws CommandLineParsingException {
@@ -1664,9 +1662,9 @@ public class Main {
             ChangeExecListener listener = ChangeExecListenerUtils.getChangeExecListener(
                     liquibase.getDatabase(), liquibase.getResourceAccessor(),
                     changeExecListenerClass, changeExecListenerPropertiesFile);
-            DefaultChangeExecListener defaultChangeExecListener = new DefaultChangeExecListener(listener);
+            DefaultChangeExecListener defaultChangeExecListener = liquibase.getDefaultChangeExecListener();
+            defaultChangeExecListener.addListener(listener);
             liquibase.setChangeExecListener(defaultChangeExecListener);
-
             if (database != null) {
                 database.setCurrentDateTimeFunction(currentDateTimeFunction);
             }
