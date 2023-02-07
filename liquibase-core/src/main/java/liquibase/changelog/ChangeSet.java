@@ -720,7 +720,7 @@ public class ChangeSet implements Conditional, ChangeLogChild {
             if (getFailOnError() == null || getFailOnError()) {
                 Scope.getCurrentScope().addMdcValue(MdcKey.CHANGESET_OUTCOME, ExecType.FAILED.value.toLowerCase());
             }
-            log.info(String.format("ChangeSet %s encountered an exception.", toString(false)));
+            log.severe(String.format("ChangeSet %s encountered an exception.", toString(false)));
             try {
                 database.rollback();
             } catch (Exception e1) {

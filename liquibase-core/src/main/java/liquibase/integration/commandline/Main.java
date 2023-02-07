@@ -1664,9 +1664,9 @@ public class Main {
             ChangeExecListener listener = ChangeExecListenerUtils.getChangeExecListener(
                     liquibase.getDatabase(), liquibase.getResourceAccessor(),
                     changeExecListenerClass, changeExecListenerPropertiesFile);
-            DefaultChangeExecListener defaultChangeExecListener = new DefaultChangeExecListener(listener);
+            DefaultChangeExecListener defaultChangeExecListener = liquibase.getDefaultChangeExecListener();
+            defaultChangeExecListener.addListener(listener);
             liquibase.setChangeExecListener(defaultChangeExecListener);
-
             if (database != null) {
                 database.setCurrentDateTimeFunction(currentDateTimeFunction);
             }
