@@ -1479,7 +1479,9 @@ public class ChangeSet implements Conditional, ChangeLogChild {
     private void addChangeSetMdcProperties() {
         String commentMdc = comments != null ? comments : "";
         String labelMdc = labels != null ? labels.toString() : "";
+        String contextsMdc = contextFilter != null ? contextFilter.toString() : "";
         Scope.getCurrentScope().addMdcValue(MdcKey.CHANGESET_COMMENT, commentMdc);
         Scope.getCurrentScope().addMdcValue(MdcKey.CHANGESET_LABEL, labelMdc);
+        Scope.getCurrentScope().addMdcValue(MdcKey.CHANGESET_CONTEXT, contextsMdc);
     }
 }
