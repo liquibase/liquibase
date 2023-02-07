@@ -2328,7 +2328,6 @@ public class Liquibase implements AutoCloseable {
      * Checks changelogs for bad MD5Sums and preconditions before attempting a migration
      */
     public void validate() throws LiquibaseException {
-
         DatabaseChangeLog changeLog = getDatabaseChangeLog(true);
         changeLog.validate(database);
     }
