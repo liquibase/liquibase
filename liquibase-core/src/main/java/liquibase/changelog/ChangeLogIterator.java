@@ -175,9 +175,13 @@ public class ChangeLogIterator {
 
     }
 
+    /**
+     * Creates a unique key to identify this changeset
+     */
     protected String createKey(ChangeSet changeSet) {
         Labels labels = changeSet.getLabels();
         ContextExpression contexts = changeSet.getContextFilter();
+        changeSet.getRunOrder();
 
         return changeSet.toString(true)
                 + ":" + (labels == null ? null : labels.toString())
