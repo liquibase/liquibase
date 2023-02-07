@@ -248,7 +248,7 @@ public class Liquibase implements AutoCloseable {
 
             changeLogParameters.setContexts(contexts);
             changeLogParameters.setLabels(labelExpression);
-            addChangeSetFiltersMdc(labelExpression, contexts);
+            addCommandFiltersMdc(labelExpression, contexts);
 
             Operation updateOperation = null;
             BufferedLogService bufferLog = new BufferedLogService();
@@ -301,20 +301,9 @@ public class Liquibase implements AutoCloseable {
                 // Update Hub with the operation information
                 //
                 hubUpdater.postUpdateHub(updateOperation, bufferLog);
-
-                int deployedChangeSetCount = getDefaultChangeExecListener().getDeployedChangeSets().size();
-
-                try (MdcObject deploymentOutcomeMdc = Scope.getCurrentScope().addMdcValue(MdcKey.DEPLOYMENT_OUTCOME, MdcValue.COMMAND_SUCCESSFUL);
-                     MdcObject deploymentOutcomeCountMdc = Scope.getCurrentScope().addMdcValue(MdcKey.DEPLOYMENT_CHANGESET_COUNT, String.valueOf(deployedChangeSetCount))) {
-                    Scope.getCurrentScope().getLog(getClass()).info("Update command completed successfully.");
-                }
+                logDeploymentOutcomeMdc(true);
             } catch (Throwable e) {
-                int deployedChangeSetCount = getDefaultChangeExecListener().getDeployedChangeSets().size();
-
-                try (MdcObject deploymentOutcomeMdc = Scope.getCurrentScope().addMdcValue(MdcKey.DEPLOYMENT_OUTCOME, MdcValue.COMMAND_FAILED);
-                     MdcObject deploymentOutcomeCountMdc = Scope.getCurrentScope().addMdcValue(MdcKey.DEPLOYMENT_CHANGESET_COUNT, String.valueOf(deployedChangeSetCount))) {
-                    Scope.getCurrentScope().getLog(getClass()).info("Update command encountered an exception.");
-                }
+                logDeploymentOutcomeMdc(false);
                 if (hubUpdater != null) {
                     hubUpdater.postUpdateHubExceptionHandling(updateOperation, bufferLog, e.getMessage());
                 }
@@ -572,7 +561,7 @@ public class Liquibase implements AutoCloseable {
             throws LiquibaseException {
         changeLogParameters.setContexts(contexts);
         changeLogParameters.setLabels(labelExpression);
-        addChangeSetFiltersMdc(labelExpression, contexts);
+        addCommandFiltersMdc(labelExpression, contexts);
 
         runInScope(new Scope.ScopedRunner() {
             @Override
@@ -648,18 +637,10 @@ public class Liquibase implements AutoCloseable {
                         runChangeLogIterator.run(createUpdateVisitor(), new RuntimeEnvironment(database, contexts, labelExpression));
                     });
                     hubUpdater.postUpdateHub(updateOperation, bufferLog);
-                    int deployedChangeSetCount = getDefaultChangeExecListener().getDeployedChangeSets().size();
-                    try (MdcObject deploymentOutcomeMdc = Scope.getCurrentScope().addMdcValue(MdcKey.DEPLOYMENT_OUTCOME, MdcValue.COMMAND_SUCCESSFUL);
-                         MdcObject deploymentOutcomeCountMdc = Scope.getCurrentScope().addMdcValue(MdcKey.DEPLOYMENT_CHANGESET_COUNT, String.valueOf(deployedChangeSetCount))) {
-                        Scope.getCurrentScope().getLog(getClass()).info("Update command completed successfully.");
-                    }
+                    logDeploymentOutcomeMdc(true);
                 }
                 catch (Throwable e) {
-                    int deployedChangeSetCount = getDefaultChangeExecListener().getDeployedChangeSets().size();
-                    try (MdcObject deploymentOutcomeMdc = Scope.getCurrentScope().addMdcValue(MdcKey.DEPLOYMENT_OUTCOME, MdcValue.COMMAND_FAILED);
-                         MdcObject deploymentOutcomeCountMdc = Scope.getCurrentScope().addMdcValue(MdcKey.DEPLOYMENT_CHANGESET_COUNT, String.valueOf(deployedChangeSetCount))) {
-                        Scope.getCurrentScope().getLog(getClass()).info("Update command encountered an exception.");
-                    }
+                    logDeploymentOutcomeMdc(false);
                     if (hubUpdater != null) {
                         hubUpdater.postUpdateHubExceptionHandling(updateOperation, bufferLog, e.getMessage());
                     }
@@ -703,7 +684,7 @@ public class Liquibase implements AutoCloseable {
         }
         changeLogParameters.setContexts(contexts);
         changeLogParameters.setLabels(labelExpression);
-        addChangeSetFiltersMdc(labelExpression, contexts);
+        addCommandFiltersMdc(labelExpression, contexts);
 
         runInScope(new Scope.ScopedRunner() {
             @Override
@@ -780,18 +761,10 @@ public class Liquibase implements AutoCloseable {
                         runChangeLogIterator.run(createUpdateVisitor(), new RuntimeEnvironment(database, contexts, labelExpression));
                     });
                     hubUpdater.postUpdateHub(updateOperation, bufferLog);
-                    int deployedChangeSetCount = getDefaultChangeExecListener().getDeployedChangeSets().size();
-                    try (MdcObject deploymentOutcomeMdc = Scope.getCurrentScope().addMdcValue(MdcKey.DEPLOYMENT_OUTCOME, MdcValue.COMMAND_SUCCESSFUL);
-                         MdcObject deploymentOutcomeCountMdc = Scope.getCurrentScope().addMdcValue(MdcKey.DEPLOYMENT_CHANGESET_COUNT, String.valueOf(deployedChangeSetCount))) {
-                        Scope.getCurrentScope().getLog(getClass()).info("Update command completed successfully.");
-                    }
+                    logDeploymentOutcomeMdc(true);
                 }
                 catch (Throwable e) {
-                    int deployedChangeSetCount = getDefaultChangeExecListener().getDeployedChangeSets().size();
-                    try (MdcObject deploymentOutcomeMdc = Scope.getCurrentScope().addMdcValue(MdcKey.DEPLOYMENT_OUTCOME, MdcValue.COMMAND_FAILED);
-                         MdcObject deploymentOutcomeCountMdc = Scope.getCurrentScope().addMdcValue(MdcKey.DEPLOYMENT_CHANGESET_COUNT, String.valueOf(deployedChangeSetCount))) {
-                        Scope.getCurrentScope().getLog(getClass()).info("Update command encountered an exception.");
-                    }
+                    logDeploymentOutcomeMdc(false);
                     if (hubUpdater != null) {
                         hubUpdater.postUpdateHubExceptionHandling(updateOperation, bufferLog, e.getMessage());
                     }
@@ -875,9 +848,19 @@ public class Liquibase implements AutoCloseable {
         });
     }
 
-    private void addChangeSetFiltersMdc(LabelExpression labelExpression, Contexts contexts) {
-        Scope.getCurrentScope().addMdcValue(MdcKey.CHANGESET_LABEL_FILTER, labelExpression != null ? labelExpression.toString(): "");
-        Scope.getCurrentScope().addMdcValue(MdcKey.CHANGESET_CONTEXT_FILTER, contexts != null ? contexts.toString() : "");
+    private void addCommandFiltersMdc(LabelExpression labelExpression, Contexts contexts) {
+        Scope.getCurrentScope().addMdcValue(MdcKey.COMMAND_LABEL_FILTER, labelExpression != null ? labelExpression.toString(): "");
+        Scope.getCurrentScope().addMdcValue(MdcKey.COMMAND_CONTEXT_FILTER, contexts != null ? contexts.toString() : "");
+    }
+
+    private void logDeploymentOutcomeMdc(boolean success) throws IOException {
+        int deployedChangeSetCount = getDefaultChangeExecListener().getDeployedChangeSets().size();
+        String successLog = "Update command completed successfully.";
+        String failureLog = "Update command encountered an exception.";
+        try (MdcObject deploymentOutcomeMdc = Scope.getCurrentScope().addMdcValue(MdcKey.DEPLOYMENT_OUTCOME, success ? MdcValue.COMMAND_SUCCESSFUL : MdcValue.COMMAND_FAILED);
+             MdcObject deploymentOutcomeCountMdc = Scope.getCurrentScope().addMdcValue(MdcKey.DEPLOYMENT_CHANGESET_COUNT, String.valueOf(deployedChangeSetCount))) {
+            Scope.getCurrentScope().getLog(getClass()).info(success ? successLog : failureLog);
+        }
     }
 
     public void outputHeader(String message) throws DatabaseException {
