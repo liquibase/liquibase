@@ -652,18 +652,7 @@ public class DatabaseChangeLog implements Comparable<DatabaseChangeLog>, Conditi
                 relativeTo = this.getPhysicalFilePath();
             }
 
-            ResourceAccessor.SearchOptions searchOptions = new ResourceAccessor.SearchOptions();
-            try {
-                if (maxDepth < minDepth) {
-                    throw new IllegalArgumentException("maxDepth argument must be greater than minDepth");
-                }
-
-                searchOptions.setMinDepth(minDepth);
-                searchOptions.setMaxDepth(maxDepth);
-            }
-            catch (IllegalArgumentException e){
-                throw new SetupException("Error in includeAll setup: "+ e.getMessage(), e);
-            }
+            ResourceAccessor.SearchOptions searchOptions = initializeAndSetMinAndMaxDepth(minDepth, maxDepth);
 
             List<Resource> unsortedResources = null;
             Set<String> seenChangelogPaths = Scope.getCurrentScope().get(SEEN_CHANGELOGS_PATHS_SCOPE_KEY, new HashSet<>());
@@ -959,6 +948,29 @@ public class DatabaseChangeLog implements Comparable<DatabaseChangeLog>, Conditi
          * Fail parsing with an error
          */
         FAIL
+    }
+
+    /**
+     * Initialize and set min/max depth values validating maxDepth cannot be a lower value than minDepth
+     * @param minDepth
+     * @param maxDepth
+     * @return ResourceAccessor.SearchOptions
+     * @throws SetupException in case maxDepth is less than minDepth
+     */
+    private ResourceAccessor.SearchOptions initializeAndSetMinAndMaxDepth(int minDepth, int maxDepth) throws SetupException {
+        ResourceAccessor.SearchOptions searchOptions = new ResourceAccessor.SearchOptions();
+        try {
+            if (maxDepth < minDepth) {
+                throw new IllegalArgumentException("maxDepth argument must be greater than minDepth");
+            }
+
+            searchOptions.setMinDepth(minDepth);
+            searchOptions.setMaxDepth(maxDepth);
+        }
+        catch (IllegalArgumentException e){
+            throw new SetupException("Error in includeAll setup: "+ e.getMessage(), e);
+        }
+        return searchOptions;
     }
 
 }

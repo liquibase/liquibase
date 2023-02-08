@@ -12,6 +12,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.URI;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.SortedSet;
 import java.util.TreeSet;
@@ -135,12 +136,12 @@ public interface ResourceAccessor extends AutoCloseable {
      */
     default List<Resource> search(String path, SearchOptions searchOptions) throws IOException {
         List<Resource> recursiveResourceList;
-        List<Resource> depthBoundedResourceList = null;
+        List<Resource> depthBoundedResourceList = new ArrayList<>();
         if(searchOptions == null) {
             searchOptions = new SearchOptions();
         }
 
-        Boolean searchRecursive = searchOptions.getRecursive();
+        boolean searchRecursive = searchOptions.getRecursive();
 
         recursiveResourceList = search(path, searchRecursive);
 
