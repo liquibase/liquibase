@@ -14,9 +14,9 @@ public class ChangeLogIncludeAll extends AbstractLiquibaseSerializable implement
     private String resourceFilter;
     private ContextExpression context;
 
-    private Integer minDepth;
+    private int minDepth;
 
-    private Integer maxDepth;
+    private int maxDepth;
 
     @Override
     public Set<String> getSerializableFields() {
@@ -73,11 +73,11 @@ public class ChangeLogIncludeAll extends AbstractLiquibaseSerializable implement
         this.context = context;
     }
 
-    public Integer getMinDepth() { return minDepth; }
+    public int getMinDepth() { return minDepth; }
 
-    public void setMinDepth (Integer minDepth) { this.minDepth = minDepth; }
+    public void setMinDepth (int minDepth) { this.minDepth = minDepth; }
 
-    public Integer getMaxDepth() { return maxDepth; }
+    public int getMaxDepth() { return maxDepth; }
 
-    public void setMaxDepth (Integer maxDepth) { this.maxDepth = maxDepth; }
+    public void setMaxDepth (int maxDepth) { this.maxDepth = maxDepth; }
 }
