@@ -973,6 +973,7 @@ public class Liquibase implements AutoCloseable {
                 lockService.waitForLock();
 
                 Operation rollbackOperation = null;
+                final String operationCommand = "rollback-count";
                 BufferedLogService bufferLog = new BufferedLogService();
                 DatabaseChangeLog changeLog = null;
                 Date startTime = new Date();
@@ -1007,7 +1008,7 @@ public class Liquibase implements AutoCloseable {
                     //
                     Connection connection = getConnection(changeLog);
                     if (connection != null) {
-                        rollbackOperation = hubUpdater.preUpdateHub("ROLLBACK", "rollback-count", connection, changeLogFile, contexts, labelExpression, listLogIterator);
+                        rollbackOperation = hubUpdater.preUpdateHub("ROLLBACK", operationCommand, connection, changeLogFile, contexts, labelExpression, listLogIterator);
                     }
 
                     //
@@ -1031,22 +1032,10 @@ public class Liquibase implements AutoCloseable {
                     doRollback(bufferLog, rollbackScript, logIterator, contexts, labelExpression, hubUpdater, rollbackOperation);
                 }
                 catch (Throwable t) {
-                    if (hubUpdater != null) {
-                        hubUpdater.postUpdateHubExceptionHandling(rollbackOperation, bufferLog, t.getMessage());
-                    }
-                    try (MdcObject deploymentOutcomeMdc = Scope.getCurrentScope().addMdcValue(MdcKey.DEPLOYMENT_OUTCOME, MdcValue.COMMAND_FAILED)) {
-                        Scope.getCurrentScope().getLog(getClass()).info("Rollback command encountered an exception.");
-                    }
+                    handleRollbackException(t, hubUpdater, rollbackOperation, bufferLog, operationCommand);
                     throw t;
                 } finally {
-                    try {
-                        lockService.releaseLock();
-                    } catch (LockException e) {
-                        LOG.severe("Error releasing lock", e);
-                    }
-                    resetServices();
-                    setChangeExecListener(null);
-                    Scope.getCurrentScope().getMdcManager().remove(MdcKey.CHANGESETS_ROLLED_BACK);
+                    handleRollbackFinally(lockService);
                 }
             }
         });
@@ -1265,6 +1254,7 @@ public class Liquibase implements AutoCloseable {
                 lockService.waitForLock();
 
                 Operation rollbackOperation = null;
+                final String operationCommand = "rollback";
                 BufferedLogService bufferLog = new BufferedLogService();
                 DatabaseChangeLog changeLog = null;
                 Date startTime = new Date();
@@ -1302,7 +1292,7 @@ public class Liquibase implements AutoCloseable {
                     //
                     Connection connection = getConnection(changeLog);
                     if (connection != null) {
-                        rollbackOperation = hubUpdater.preUpdateHub("ROLLBACK", "rollback", connection, changeLogFile, contexts, labelExpression, listLogIterator);
+                        rollbackOperation = hubUpdater.preUpdateHub("ROLLBACK", operationCommand, connection, changeLogFile, contexts, labelExpression, listLogIterator);
                     }
 
                     //
@@ -1326,23 +1316,11 @@ public class Liquibase implements AutoCloseable {
                     doRollback(bufferLog, rollbackScript, logIterator, contexts, labelExpression, hubUpdater, rollbackOperation);
                 }
                 catch (Throwable t) {
-                    if (hubUpdater != null) {
-                        hubUpdater.postUpdateHubExceptionHandling(rollbackOperation, bufferLog, t.getMessage());
-                    }
-                    try (MdcObject deploymentOutcomeMdc = Scope.getCurrentScope().addMdcValue(MdcKey.DEPLOYMENT_OUTCOME, MdcValue.COMMAND_FAILED)) {
-                        Scope.getCurrentScope().getLog(getClass()).info("Rollback command encountered an exception.");
-                    }
+                    handleRollbackException(t, hubUpdater, rollbackOperation, bufferLog, operationCommand);
                     throw t;
                 } finally {
-                    try {
-                        lockService.releaseLock();
-                    } catch (LockException e) {
-                        LOG.severe(MSG_COULD_NOT_RELEASE_LOCK, e);
-                    }
-                    Scope.getCurrentScope().getMdcManager().remove(MdcKey.CHANGESETS_ROLLED_BACK);
+                    handleRollbackFinally(lockService);
                 }
-                resetServices();
-                setChangeExecListener(null);
             }
         });
     }
@@ -1427,6 +1405,7 @@ public class Liquibase implements AutoCloseable {
                 lockService.waitForLock();
 
                 Operation rollbackOperation = null;
+                final String operationCommand = "rollback-to-date";
                 BufferedLogService bufferLog = new BufferedLogService();
                 DatabaseChangeLog changeLog = null;
                 Date startTime = new Date();
@@ -1462,7 +1441,7 @@ public class Liquibase implements AutoCloseable {
                     //
                     Connection connection = getConnection(changeLog);
                     if (connection != null) {
-                        rollbackOperation = hubUpdater.preUpdateHub("ROLLBACK", "rollback-to-date", connection, changeLogFile, contexts, labelExpression, listLogIterator);
+                        rollbackOperation = hubUpdater.preUpdateHub("ROLLBACK", operationCommand, connection, changeLogFile, contexts, labelExpression, listLogIterator);
                     }
 
                     //
@@ -1486,26 +1465,40 @@ public class Liquibase implements AutoCloseable {
                     doRollback(bufferLog, rollbackScript, logIterator, contexts, labelExpression, hubUpdater, rollbackOperation);
                 }
                 catch (Throwable t) {
-                    if (hubUpdater != null) {
-                        hubUpdater.postUpdateHubExceptionHandling(rollbackOperation, bufferLog, t.getMessage());
-                    }
-                    try (MdcObject deploymentOutcomeMdc = Scope.getCurrentScope().addMdcValue(MdcKey.DEPLOYMENT_OUTCOME, MdcValue.COMMAND_FAILED)) {
-                        Scope.getCurrentScope().getLog(getClass()).info("Rollback command encountered an exception.");
-                    }
+                    handleRollbackException(t, hubUpdater, rollbackOperation, bufferLog, operationCommand);
                     throw t;
                 } finally {
-                    try {
-                        lockService.releaseLock();
-                    } catch (LockException e) {
-                        LOG.severe(MSG_COULD_NOT_RELEASE_LOCK, e);
-                    }
-                    resetServices();
-                    setChangeExecListener(null);
-                    Scope.getCurrentScope().getMdcManager().remove(MdcKey.CHANGESETS_ROLLED_BACK);
+                    handleRollbackFinally(lockService);
                 }
             }
         });
 
+    }
+
+    /**
+     * Handle an exception thrown by a rollback method.
+     */
+    private void handleRollbackException(Throwable t, HubUpdater hubUpdater, Operation rollbackOperation, BufferedLogService bufferLog, String operationName) throws IOException {
+        if (hubUpdater != null) {
+            hubUpdater.postUpdateHubExceptionHandling(rollbackOperation, bufferLog, t.getMessage());
+        }
+        try (MdcObject deploymentOutcomeMdc = Scope.getCurrentScope().addMdcValue(MdcKey.DEPLOYMENT_OUTCOME, MdcValue.COMMAND_FAILED)) {
+            Scope.getCurrentScope().getLog(getClass()).info(operationName + " command encountered an exception.");
+        }
+    }
+
+    /**
+     * Cleanup code that should be called in the finally block of a rollback method.
+     */
+    private void handleRollbackFinally(LockService lockService){
+        try {
+            lockService.releaseLock();
+        } catch (LockException e) {
+            LOG.severe("Error releasing lock", e);
+        }
+        resetServices();
+        setChangeExecListener(null);
+        Scope.getCurrentScope().getMdcManager().remove(MdcKey.CHANGESETS_ROLLED_BACK);
     }
 
     public void changeLogSync(String contexts, Writer output) throws LiquibaseException {
