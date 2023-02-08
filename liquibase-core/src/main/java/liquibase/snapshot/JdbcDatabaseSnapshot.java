@@ -566,8 +566,8 @@ public class JdbcDatabaseSnapshot extends DatabaseSnapshot {
                         "object_schema_name(c.object_id" + dbIdParam + ") AS TABLE_SCHEM, " +
                         "object_name(c.object_id" + dbIdParam + ") AS TABLE_NAME, " +
                         "c.name AS COLUMN_NAME, " +
-                        "is_filestream, " +
-                        "is_rowguidcol, " +
+                        "is_filestream AS IS_FILESTREAM, " +
+                        "is_rowguidcol AS IS_ROWGUIDCOL, " +
                         "CASE WHEN c.is_identity = 'true' THEN 'YES' ELSE 'NO' END as IS_AUTOINCREMENT, " +
                         "{REMARKS_COLUMN_PLACEHOLDER}" +
                         "t.name AS TYPE_NAME, " +
@@ -608,7 +608,7 @@ public class JdbcDatabaseSnapshot extends DatabaseSnapshot {
                         "WHEN 'varchar(max)' THEN " + java.sql.Types.VARCHAR + " " +
                         "WHEN 'xml' THEN " + java.sql.Types.LONGVARCHAR + " " +
                         "WHEN 'LONGNVARCHAR' THEN " + java.sql.Types.SQLXML + " " +
-                        "ELSE " + Types.OTHER + " END AS data_type, " +
+                        "ELSE " + Types.OTHER + " END AS DATA_TYPE, " +
                         "CASE WHEN c.is_nullable = 'true' THEN 1 ELSE 0 END AS NULLABLE, " +
                         "10 as NUM_PREC_RADIX, " +
                         "c.column_id as ORDINAL_POSITION, " +

@@ -140,7 +140,7 @@ public class StartH2CommandStep extends AbstractCommandStep {
         final Class<?> serverClass = Class.forName("org.h2.tools.Server");
 
         final Object webServer = Class.forName("org.h2.server.web.WebServer").newInstance();
-        Object web = serverClass.getConstructor(Class.forName("org.h2.server.Service"), String[].class).newInstance(webServer, (Object) new String[]{"-webPort", webPort.toString()});
+        Object web = serverClass.getConstructor(Class.forName("org.h2.server.Service"), String[].class).newInstance(webServer, new String[]{"-webPort", webPort.toString()});
         web.getClass().getMethod("start").invoke(web);
 
         return webServer;
