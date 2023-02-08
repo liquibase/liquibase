@@ -285,7 +285,7 @@ public class CommandLineUtils {
         if (GlobalConfiguration.SHOW_BANNER.getCurrentValue()) {
 
             // Banner is stored in liquibase/banner.txt in resources.
-            Class commandLinUtilsClass = CommandLineUtils.class;
+            Class<CommandLineUtils> commandLinUtilsClass = CommandLineUtils.class;
             InputStream inputStream = commandLinUtilsClass.getResourceAsStream("/liquibase/banner.txt");
             try {
                 banner.append(readFromInputStream(inputStream));

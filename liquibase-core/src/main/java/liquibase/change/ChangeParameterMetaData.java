@@ -72,14 +72,14 @@ public class ChangeParameterMetaData {
         this.description = description;
         this.exampleValues = exampleValues;
         if (dataType instanceof Class) {
-            this.dataType = StringUtil.lowerCaseFirst(((Class) dataType).getSimpleName());
+            this.dataType = StringUtil.lowerCaseFirst(((Class<?>) dataType).getSimpleName());
             this.dataTypeClass = (Class) dataType;
         } else if (dataType instanceof ParameterizedType) {
             this.dataType = StringUtil.lowerCaseFirst(
-                    ((Class) ((ParameterizedType) dataType).getRawType()).getSimpleName() +
+                    ((Class<?>) ((ParameterizedType) dataType).getRawType()).getSimpleName() +
                             " of " +
                             StringUtil.lowerCaseFirst(
-                                    ((Class) ((ParameterizedType) dataType).getActualTypeArguments()[0]).getSimpleName()
+                                    ((Class<?>) ((ParameterizedType) dataType).getActualTypeArguments()[0]).getSimpleName()
                             )
             );
             this.dataTypeClass = (Class) ((ParameterizedType) dataType).getRawType();

@@ -753,7 +753,7 @@ public class StringUtil {
             if (obj == null) {
                 return null;
             } else if (obj instanceof Class) {
-                return ((Class) obj).getName();
+                return ((Class<?>) obj).getName();
             } else if (obj instanceof Object[]) {
                 if (((Object[]) obj).length == 0) {
                     return null;
@@ -761,7 +761,7 @@ public class StringUtil {
                     return "[" + StringUtil.join((Object[]) obj, ", ", this) + "]";
                 }
             } else if (obj instanceof Collection) {
-                if (((Collection) obj).size() == 0) {
+                if (((Collection<?>) obj).size() == 0) {
                     return null;
                 } else {
                     return "[" + StringUtil.join((Collection) obj, ", ", this) + "]";

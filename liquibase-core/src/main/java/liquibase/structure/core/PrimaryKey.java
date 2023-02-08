@@ -11,7 +11,7 @@ import java.util.List;
 public class PrimaryKey extends AbstractDatabaseObject {
 
     public PrimaryKey() {
-        setAttribute("columns", new ArrayList());
+        setAttribute("columns", new ArrayList<>());
     }
 
     public PrimaryKey(String name, String tableCatalogName, String tableSchemaName, String tableName, Column... columns) {

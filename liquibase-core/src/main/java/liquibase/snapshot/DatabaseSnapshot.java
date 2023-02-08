@@ -350,7 +350,7 @@ public abstract class DatabaseSnapshot implements LiquibaseSerializable {
             //
             if ("columns".equals(field) && ((object.getClass() == PrimaryKey.class) || (object.getClass() == Index
                     .class) || (object.getClass() == UniqueConstraint.class))) {
-                if ((fieldValue != null) && !((Collection) fieldValue).isEmpty()) {
+                if ((fieldValue != null) && !((Collection<?>) fieldValue).isEmpty()) {
                     if (descendingColumnExists((Collection<Column>)fieldValue)) {
                         List<Column> columns = (List<Column>)fieldValue;
                         for (Column col : columns) {
@@ -616,7 +616,7 @@ public abstract class DatabaseSnapshot implements LiquibaseSerializable {
                         } else {
                             object.setAttribute(attr, allObjects.get(value));
                         }
-                    } else if ((value instanceof Collection) && !((Collection) value).isEmpty() && allObjects
+                    } else if ((value instanceof Collection) && !((Collection<?>) value).isEmpty() && allObjects
                             .containsKey(((Collection) value).iterator().next())) {
                         //
                         // This collection may contain both references (String with snapshotId)
