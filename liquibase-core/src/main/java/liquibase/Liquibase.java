@@ -1419,6 +1419,9 @@ public class Liquibase implements AutoCloseable {
         runInScope(new Scope.ScopedRunner() {
             @Override
             public void run() throws Exception {
+                Scope.getCurrentScope().addMdcValue(MdcKey.ROLLBACK_TO_DATE, dateToRollBackTo.toString());
+                Scope.getCurrentScope().addMdcValue(MdcKey.ROLLBACK_SCRIPT, rollbackScript);
+                Scope.getCurrentScope().addMdcValue(MdcKey.LIQUIBASE_TARGET_URL, database.getConnection().getURL());
 
                 LockService lockService = LockServiceFactory.getInstance().getLockService(database);
                 lockService.waitForLock();
@@ -1486,6 +1489,9 @@ public class Liquibase implements AutoCloseable {
                     if (hubUpdater != null) {
                         hubUpdater.postUpdateHubExceptionHandling(rollbackOperation, bufferLog, t.getMessage());
                     }
+                    try (MdcObject deploymentOutcomeMdc = Scope.getCurrentScope().addMdcValue(MdcKey.DEPLOYMENT_OUTCOME, MdcValue.COMMAND_FAILED)) {
+                        Scope.getCurrentScope().getLog(getClass()).info("Rollback command encountered an exception.");
+                    }
                     throw t;
                 } finally {
                     try {
@@ -1495,6 +1501,7 @@ public class Liquibase implements AutoCloseable {
                     }
                     resetServices();
                     setChangeExecListener(null);
+                    Scope.getCurrentScope().getMdcManager().remove(MdcKey.CHANGESETS_ROLLED_BACK);
                 }
             }
         });
