@@ -56,6 +56,17 @@ Optional Args:
                 "txt": [Pattern.compile(".*liquibase.structure.core.Table:.*ADDRESS.*", Pattern.MULTILINE|Pattern.DOTALL|Pattern.CASE_INSENSITIVE),
                         Pattern.compile(".*liquibase.structure.core.Table:.*ADDRESS.*columns:.*city.*", Pattern.MULTILINE|Pattern.DOTALL|Pattern.CASE_INSENSITIVE)]
         ]
+        expectedUI = [
+"""
+UPDATE SUMMARY
+Run:                         41
+Previously run:               0
+DBMS mismatch:                0
+Not in filter:                0
+-------------------------------
+Total change sets:           41
+"""
+]
 
     }
 

@@ -347,9 +347,6 @@ public class Liquibase implements AutoCloseable {
         //
         List<ChangeSetStatus> denied = statusVisitor.getChangeSetsToSkip();
         List<ChangeSet> skippedChangeSets = changeLog.getSkippedChangeSets();
-        if (skippedChangeSets.isEmpty() && denied.isEmpty()) {
-            return;
-        }
 
         //
         // Filter the skipped list to remove changes which were:
@@ -369,7 +366,7 @@ public class Liquibase implements AutoCloseable {
         // Only show the summary
         //
         showSummary(changeLog, statusVisitor, skippedChangeSets, filterDenied);
-        if (showSummary == UpdateSummaryEnum.SUMMARY) {
+        if (showSummary == UpdateSummaryEnum.SUMMARY || (skippedChangeSets.isEmpty() && denied.isEmpty())) {
             return;
         }
 
