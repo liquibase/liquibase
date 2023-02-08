@@ -148,8 +148,8 @@ public interface ResourceAccessor extends AutoCloseable {
             return recursiveResourceList;
         }
 
-        int minDepth = searchOptions.getMinDepth().intValue();
-        int maxDepth = searchOptions.getMaxDepth().intValue();
+        int minDepth = searchOptions.getMinDepth();
+        int maxDepth = searchOptions.getMaxDepth();
 
         for (Resource res: recursiveResourceList) {
             String relativePath = res.getPath();
@@ -310,42 +310,48 @@ public interface ResourceAccessor extends AutoCloseable {
     }
 
     class SearchOptions {
-        private Integer minDepth;
-        private Integer maxDepth;
+        private int minDepth;
+        private int maxDepth;
 
         public SearchOptions() {
-            minDepth = 1;
+            minDepth = 0;
             maxDepth = 1;
         }
 
         public boolean getRecursive() {
-            return minDepth == 1 && (maxDepth == null || maxDepth == Integer.MAX_VALUE);
+            return minDepth == 0 && maxDepth == Integer.MAX_VALUE;
         }
 
         public void setRecursive(boolean recursive) {
             if (recursive) {
-                minDepth = 1;
-                maxDepth = null;
+                minDepth = 0;
+                maxDepth = Integer.MAX_VALUE;
             }
             else {
-                minDepth = 1;
+                minDepth = 0;
                 maxDepth = 1;
             }
         }
 
-        public Integer getMinDepth() {
+        public int getMinDepth() {
             return minDepth;
         }
 
-        public void setMinDepth(Integer minDepth) {
+        public void setMinDepth(int minDepth) {
+            if(minDepth < 0) {
+                throw new IllegalArgumentException("minDepth must be non-negative");
+            }
             this.minDepth = minDepth;
         }
 
-        public Integer getMaxDepth() {
+        public int getMaxDepth() {
             return maxDepth;
         }
 
-        public void setMaxDepth(Integer maxDepth) {
+        public void setMaxDepth(int maxDepth) {
+            if(maxDepth < 0) {
+                throw new IllegalArgumentException("maxDepth must be non-negative");
+            }
             this.maxDepth = maxDepth;
         }
     }

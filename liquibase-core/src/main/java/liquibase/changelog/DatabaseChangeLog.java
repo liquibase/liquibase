@@ -610,7 +610,7 @@ public class DatabaseChangeLog implements Comparable<DatabaseChangeLog>, Conditi
                 includeContextFilter,
                 labels,
                 ignore,
-                1,
+                0,
                 Integer.MAX_VALUE);
     }
     public void includeAll(String pathName,
@@ -622,8 +622,8 @@ public class DatabaseChangeLog implements Comparable<DatabaseChangeLog>, Conditi
                            ContextExpression includeContextFilter,
                            Labels labels,
                            boolean ignore,
-                           Integer minDepth,
-                           Integer maxDepth)
+                           int minDepth,
+                           int maxDepth)
             throws SetupException {
         includeAll(pathName, isRelativeToChangelogFile, resourceFilter, errorIfMissingOrEmpty, resourceComparator,
                    resourceAccessor, includeContextFilter, labels, ignore, minDepth, maxDepth, new ModifyChangeSets(null));
@@ -638,8 +638,8 @@ public class DatabaseChangeLog implements Comparable<DatabaseChangeLog>, Conditi
                            ContextExpression includeContextFilter,
                            Labels labels,
                            boolean ignore,
-                           Integer minDepth,
-                           Integer maxDepth,
+                           int minDepth,
+                           int maxDepth,
                            ModifyChangeSets modifyChangeSets)
             throws SetupException {
         try {
@@ -653,9 +653,17 @@ public class DatabaseChangeLog implements Comparable<DatabaseChangeLog>, Conditi
             }
 
             ResourceAccessor.SearchOptions searchOptions = new ResourceAccessor.SearchOptions();
+            try {
+                if (maxDepth < minDepth) {
+                    throw new IllegalArgumentException("maxDepth argument must be greater than minDepth");
+                }
 
-            searchOptions.setMinDepth(minDepth);
-            searchOptions.setMaxDepth(maxDepth);
+                searchOptions.setMinDepth(minDepth);
+                searchOptions.setMaxDepth(maxDepth);
+            }
+            catch (IllegalArgumentException e){
+                throw new SetupException("Error in includeAll setup: "+ e.getMessage(), e);
+            }
 
             List<Resource> unsortedResources = null;
             Set<String> seenChangelogPaths = Scope.getCurrentScope().get(SEEN_CHANGELOGS_PATHS_SCOPE_KEY, new HashSet<>());

@@ -2,7 +2,6 @@ package liquibase.resource;
 
 import liquibase.Scope;
 import liquibase.logging.Logger;
-import liquibase.util.FileUtil;
 
 import java.io.File;
 import java.io.IOException;
@@ -71,8 +70,8 @@ public abstract class AbstractPathResourceAccessor extends AbstractResourceAcces
 
     @Override
     public List<Resource> search(String startPath, SearchOptions searchOptions) throws IOException {
-        Integer minDepth = searchOptions.getMinDepth();
-        Integer maxDepth = searchOptions.getMaxDepth();
+        int minDepth = searchOptions.getMinDepth();
+        int maxDepth = searchOptions.getMaxDepth();
 
         if (startPath == null) {
             throw new IllegalArgumentException("Path must not be null");
@@ -96,15 +95,7 @@ public abstract class AbstractPathResourceAccessor extends AbstractResourceAcces
             throw new IOException("'" + startPath + "' is a file, not a directory");
         }
 
-        if (minDepth == null) {
-            minDepth = 1;
-        }
-
         final int finalMinDepth = minDepth;
-
-        if (maxDepth == null) {
-            maxDepth = Integer.MAX_VALUE;
-        }
 
         SimpleFileVisitor<Path> fileVisitor = new SimpleFileVisitor<Path>() {
             @Override
@@ -124,7 +115,7 @@ public abstract class AbstractPathResourceAccessor extends AbstractResourceAcces
             private boolean residesInDepthBoundaries(Path file) {
                 final int depth = file.getParent().getNameCount() - rootPath.getNameCount();
 
-                return depth >= finalMinDepth;
+                return depth > finalMinDepth;
             }
 
             private void addToReturnList(Path file) {
