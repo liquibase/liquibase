@@ -25,7 +25,7 @@ public class DbUrlConnectionCommandStep extends AbstractDatabaseConnectionComman
     public static final CommandArgumentDefinition<String> DRIVER_ARG;
     public static final CommandArgumentDefinition<String> DRIVER_PROPERTIES_FILE_ARG;
 
-    public static final CommandArgumentDefinition<Boolean> FAIL_ON_NULL_DATABASE_ARG;
+    public static final CommandArgumentDefinition<Boolean> SKIP_DATABASE_STEP_ARG;
 
 
     static {
@@ -49,12 +49,15 @@ public class DbUrlConnectionCommandStep extends AbstractDatabaseConnectionComman
                 .description("The JDBC database connection URL").build();
         DATABASE_ARG.setSupersededBy(URL_ARG);
 
-        FAIL_ON_NULL_DATABASE_ARG  = builder.argument("failOnNullDatabase", Boolean.class).hidden().defaultValue(true).build();
+        SKIP_DATABASE_STEP_ARG = builder.argument("skipDatabaseStep", Boolean.class).hidden().defaultValue(false).build();
     }
 
     @Override
     public void run(CommandResultsBuilder resultsBuilder) throws Exception {
         CommandScope commandScope = resultsBuilder.getCommandScope();
+        if (commandScope.getArgumentValue(SKIP_DATABASE_STEP_ARG)) {
+            return;
+        }
         commandScope.provideDependency(Database.class, this.obtainDatabase(commandScope));
     }
 
@@ -72,9 +75,6 @@ public class DbUrlConnectionCommandStep extends AbstractDatabaseConnectionComman
     private Database obtainDatabase(CommandScope commandScope) throws DatabaseException {
         if (commandScope.getArgumentValue(DATABASE_ARG) == null) {
             String url = commandScope.getArgumentValue(URL_ARG);
-            if (StringUtil.isEmpty(url) && !commandScope.getArgumentValue(FAIL_ON_NULL_DATABASE_ARG)) {
-                return null;
-            }
             String username = commandScope.getArgumentValue(USERNAME_ARG);
             String password = commandScope.getArgumentValue(PASSWORD_ARG);
             String defaultSchemaName = commandScope.getArgumentValue(DEFAULT_SCHEMA_NAME_ARG);
