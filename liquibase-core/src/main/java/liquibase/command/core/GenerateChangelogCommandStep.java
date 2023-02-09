@@ -130,6 +130,7 @@ public class GenerateChangelogCommandStep extends AbstractCommandStep {
     @Override
     public void validate(CommandScope commandScope) throws CommandValidationException {
         // sets the values to the reference database, as this is what we expect.
+        commandScope.addArgumentValue(ReferenceDbUrlConnectionCommandStep.REFERENCE_DATABASE_ARG, commandScope.getArgumentValue(DbUrlConnectionCommandStep.DATABASE_ARG));
         commandScope.addArgumentValue(ReferenceDbUrlConnectionCommandStep.REFERENCE_URL_ARG, commandScope.getArgumentValue(DbUrlConnectionCommandStep.URL_ARG));
         commandScope.addArgumentValue(ReferenceDbUrlConnectionCommandStep.REFERENCE_USERNAME_ARG, commandScope.getArgumentValue(DbUrlConnectionCommandStep.USERNAME_ARG));
         commandScope.addArgumentValue(ReferenceDbUrlConnectionCommandStep.REFERENCE_PASSWORD_ARG, commandScope.getArgumentValue(DbUrlConnectionCommandStep.PASSWORD_ARG));
