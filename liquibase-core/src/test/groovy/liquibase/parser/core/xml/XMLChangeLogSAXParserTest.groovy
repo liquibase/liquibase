@@ -26,11 +26,26 @@ class XMLChangeLogSAXParserTest extends Specification {
 <databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
                    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
                    xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
-                      http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.6.xsd">
+                      http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-latest.xsd">
 
     <changeSet id="1" author="example">
         <output>&insecure;</output>
     </changeSet>
+
+</databaseChangeLog>
+"""
+
+    def INVALID_XML = """
+<!DOCTYPE databaseChangeLog [
+        <!ENTITY insecure SYSTEM "file:///invalid.txt">
+        ]>
+
+<databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+                   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                   xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+                      http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-latest.xsd">
+
+    <iDontKnowWhatImDoing />
 
 </databaseChangeLog>
 """
@@ -95,6 +110,38 @@ class XMLChangeLogSAXParserTest extends Specification {
         then:
         def e = thrown(ChangeLogParseException)
         e.message.contains("Error Reading Changelog File: " + File.separator + "invalid.txt")
+    }
+
+    def "by default validate XML file based on XSD files"() {
+        given:
+        def file = "com/example/invalid.xml"
+
+        when:
+        def resourceAccessor = new MockResourceAccessor(["com/example/invalid.xml": INVALID_XML])
+        new XMLChangeLogSAXParser().parse(file, new ChangeLogParameters(), resourceAccessor)
+
+        then:
+        def e = thrown(ChangeLogParseException)
+        e.message.contains("Error parsing line")
+        e.message.contains("iDontKnowWhatImDoing")
+
+    }
+
+
+    def "setting validation flag to false will cause the XML to not be validated"() {
+        given:
+        def file = "com/example/invalid.xml"
+
+        when:
+        def resourceAccessor = new MockResourceAccessor(["com/example/invalid.xml": INVALID_XML])
+
+        then:
+        Scope.child(GlobalConfiguration.VALIDATE_XML_CHANGELOG_FILES.key, "false", { ->
+            def d = new XMLChangeLogSAXParser().parse(file, new ChangeLogParameters(), resourceAccessor)
+            assert d.physicalFilePath == file
+            assert d.getChangeSets().isEmpty()
+        })
+
     }
 
     def "getSchemaVersion"() {
