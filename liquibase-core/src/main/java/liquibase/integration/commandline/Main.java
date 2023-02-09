@@ -140,6 +140,7 @@ public class Main {
     protected String rollbackScript;
     protected Boolean rollbackOnError = false;
     protected List<CatalogAndSchema> schemaList = new ArrayList<>();
+    protected String format;
     protected String showSummary;
 
     private static final int[] suspiciousCodePoints = {160, 225, 226, 227, 228, 229, 230, 198, 200, 201, 202, 203,
