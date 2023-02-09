@@ -8,6 +8,7 @@ import liquibase.database.ObjectQuotingStrategy;
 import liquibase.diff.DiffResult;
 import liquibase.diff.output.DiffOutputControl;
 import liquibase.diff.output.changelog.DiffToChangeLog;
+import liquibase.exception.CommandValidationException;
 import liquibase.util.StringUtil;
 
 import java.io.PrintStream;
@@ -73,6 +74,11 @@ public class DiffChangelogCommandStep extends AbstractCommandStep {
             referenceDatabase.setObjectQuotingStrategy(originalStrategy);
             outputStream.flush();
         }
+    }
+
+    @Override
+    public void validate(CommandScope commandScope) throws CommandValidationException {
+        commandScope.addArgumentValue(DiffCommandStep.FORMAT_ARG, "none");
     }
 
     protected DiffToChangeLog createDiffToChangeLogObject(DiffResult diffResult, DiffOutputControl diffOutputControl) {

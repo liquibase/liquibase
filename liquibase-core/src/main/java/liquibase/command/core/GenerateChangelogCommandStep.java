@@ -138,6 +138,7 @@ public class GenerateChangelogCommandStep extends AbstractCommandStep {
         commandScope.addArgumentValue(ReferenceDbUrlConnectionCommandStep.REFERENCE_DEFAULT_CATALOG_NAME_ARG, commandScope.getArgumentValue(DbUrlConnectionCommandStep.DEFAULT_CATALOG_NAME_ARG));
         commandScope.addArgumentValue(ReferenceDbUrlConnectionCommandStep.REFERENCE_DRIVER_PROPERTIES_FILE_ARG, commandScope.getArgumentValue(DbUrlConnectionCommandStep.DRIVER_PROPERTIES_FILE_ARG));
         commandScope.addArgumentValue(DbUrlConnectionCommandStep.SKIP_DATABASE_STEP_ARG, true);
+        commandScope.addArgumentValue(DiffCommandStep.FORMAT_ARG, "none");
         validateConditionsToOverwriteChangelogFile(commandScope);
     }
 
