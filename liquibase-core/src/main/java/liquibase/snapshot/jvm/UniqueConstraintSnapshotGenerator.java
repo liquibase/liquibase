@@ -28,6 +28,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
 
 public class UniqueConstraintSnapshotGenerator extends JdbcSnapshotGenerator {
 
@@ -149,7 +150,7 @@ public class UniqueConstraintSnapshotGenerator extends JdbcSnapshotGenerator {
         String cacheKey = "uniqueConstraints-" + example.getClass().getSimpleName() + "-" + example.getSchema().toCatalogAndSchema().customize(database).toString();
         String queryCountKey = "uniqueConstraints-" + example.getClass().getSimpleName() + "-queryCount";
 
-        Map<String, List<Map<String, ?>>> columnCache = (Map<String, List<Map<String, ?>>>) snapshot.getScratchData(cacheKey);
+        Map<String, List<Map<String, ?>>> columnCache = (ConcurrentHashMap<String, List<Map<String, ?>>>) snapshot.getScratchData(cacheKey);
         Integer columnQueryCount = (Integer) snapshot.getScratchData(queryCountKey);
         if (columnQueryCount == null) {
             columnQueryCount = 0;
