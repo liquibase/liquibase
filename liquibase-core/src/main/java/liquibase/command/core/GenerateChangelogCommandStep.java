@@ -48,7 +48,7 @@ public class GenerateChangelogCommandStep extends AbstractCommandStep {
     static {
         final CommandBuilder builder = new CommandBuilder(COMMAND_NAME);
         CHANGELOG_FILE_ARG = builder.argument(CommonArgumentNames.CHANGELOG_FILE, String.class)
-                .description("Changelog file to write results").required().build();
+                .description("Changelog file to write results").build();
 
         AUTHOR_ARG = builder.argument("author", String.class).hidden().build();
         CONTEXT_ARG = builder.argument("context", String.class).hidden().build();
