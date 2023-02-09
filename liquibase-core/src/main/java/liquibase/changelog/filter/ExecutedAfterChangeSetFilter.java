@@ -18,18 +18,14 @@ public class ExecutedAfterChangeSetFilter implements ChangeSetFilter {
         this.date = date;
         for (RanChangeSet ranChangeSet : ranChangeSets) {
             if ((ranChangeSet.getDateExecuted() != null) && (ranChangeSet.getDateExecuted().getTime() > date.getTime())) {
-                changeLogsAfterDate.add(changeLogToString(ranChangeSet.getId(), ranChangeSet.getAuthor(), ranChangeSet.getChangeLog()));
+                changeLogsAfterDate.add(ranChangeSet.toString());
             }
         }
     }
 
-    private String changeLogToString(String id, String author, String changeLog) {
-        return id+":"+author+":"+changeLog;
-    }
-
     @Override
     public ChangeSetFilterResult accepts(ChangeSet changeSet) {
-        if (changeLogsAfterDate.contains(changeLogToString(changeSet.getId(), changeSet.getAuthor(), changeSet.getFilePath()))) {
+        if (changeLogsAfterDate.contains(changeSet.toString())) {
             return new ChangeSetFilterResult(true, "Changeset ran after "+ new ISODateFormat().format(new java.sql.Timestamp(date.getTime())), this.getClass());
         } else {
             return new ChangeSetFilterResult(false, "Changeset ran before "+ new ISODateFormat().format(new java.sql.Timestamp(date.getTime())), this.getClass());

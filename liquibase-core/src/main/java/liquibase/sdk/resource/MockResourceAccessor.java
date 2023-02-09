@@ -11,7 +11,7 @@ public class MockResourceAccessor extends AbstractResourceAccessor {
     private SortedMap<String, String> contentByFileName;
 
     public MockResourceAccessor() {
-        this(new HashMap<String, String>());
+        this(new HashMap<>());
     }
 
     public MockResourceAccessor(Map<String, String> contentByFileName) {

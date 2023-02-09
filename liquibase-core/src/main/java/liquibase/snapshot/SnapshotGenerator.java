@@ -32,7 +32,7 @@ public interface SnapshotGenerator {
      * Commands the SnapshotGenerator to create a snapshot (a representation of a database object in Java object form)
      * of a specific database object.
      * @param example The object we should try to snapshot
-     * @param snapshot The Snapshot object representating the result of the snapshot operations so far
+     * @param snapshot The Snapshot object representing the result of the snapshot operations so far
      * @param chain A list of other SnapshotGenerators that might be asked to try the same
      * @param <T> The Java object type in which we are to return the snapshot result
      * @return An object of type T if our snapshot attempt is successful

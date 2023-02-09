@@ -3,7 +3,7 @@ package liquibase.changelog.filter;
 /**
  * Contains the result of a {@link liquibase.changelog.filter.ChangeSetFilter#accepts(liquibase.changelog.ChangeSet)}  call.
  *
- * {@link #getMessage()}, but {@link #getFilter()} can be used to programatically determine the reason for accepting or not.
+ * {@link #getMessage()}, but {@link #getFilter()} can be used to programmatically determine the reason for accepting or not.
  */
 public class ChangeSetFilterResult {
 
@@ -18,7 +18,7 @@ public class ChangeSetFilterResult {
     }
 
     /**
-     * Was the changeset accepted by the filter
+     * Was the changeSet accepted by the filter
      */
     public boolean isAccepted() {
         return accepted;
@@ -32,7 +32,7 @@ public class ChangeSetFilterResult {
     }
 
     /**
-     * Returns the class of the filter that accepted or rejected this changeset.
+     * Returns the class of the filter that accepted or rejected this changeSet.
      */
     public Class<? extends ChangeSetFilter> getFilter() {
         return filter;

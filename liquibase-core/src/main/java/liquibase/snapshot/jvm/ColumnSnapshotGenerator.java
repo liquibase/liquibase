@@ -200,7 +200,7 @@ public class ColumnSnapshotGenerator extends JdbcSnapshotGenerator {
                     Column column = readColumn(row, relation, database);
                     setAutoIncrementDetails(column, database, snapshot);
                     populateValidateNullableIfNeeded(column, metaDataNotNullConst, database);
-                    column.setAttribute(LIQUIBASE_COMPLETE, !column.isNullable());
+                    column.setAttribute(LIQUIBASE_COMPLETE, true);
                     relation.getColumns().add(column);
                 }
             } catch (SQLException e) {
@@ -288,7 +288,7 @@ public class ColumnSnapshotGenerator extends JdbcSnapshotGenerator {
 
         // TODO Is uppercasing the potential function name always a good idea?
         // In theory, we could get a quoted function name (inprobable, but not impossible)
-        if ((defaultValue != null) && (defaultValue instanceof DatabaseFunction) && ((DatabaseFunction) defaultValue)
+        if ((defaultValue instanceof DatabaseFunction) && ((DatabaseFunction) defaultValue)
                 .getValue().matches("\\w+")) {
             defaultValue = new DatabaseFunction(((DatabaseFunction) defaultValue).getValue().toUpperCase());
         }
@@ -523,7 +523,7 @@ public class ColumnSnapshotGenerator extends JdbcSnapshotGenerator {
         if (database instanceof MSSQLDatabase) {
             Object defaultValue = columnMetadataResultSet.get(COLUMN_DEF_COL);
 
-            if (((defaultValue != null) && (defaultValue instanceof String)) && ("(NULL)".equals(defaultValue))) {
+            if (("(NULL)".equals(defaultValue))) {
                 columnMetadataResultSet.set(COLUMN_DEF_COL, new DatabaseFunction("null"));
             }
         }
@@ -550,7 +550,7 @@ public class ColumnSnapshotGenerator extends JdbcSnapshotGenerator {
             }
 
             Object defaultValue = columnMetadataResultSet.get(COLUMN_DEF_COL);
-            if ((defaultValue != null) && (defaultValue instanceof String)) {
+            if ((defaultValue instanceof String)) {
                 String lowerCaseDefaultValue = ((String) defaultValue).toLowerCase();
                 if (lowerCaseDefaultValue.contains("iseq$$") && lowerCaseDefaultValue.endsWith(".nextval")) {
                     columnMetadataResultSet.set(COLUMN_DEF_COL, null);
@@ -564,7 +564,7 @@ public class ColumnSnapshotGenerator extends JdbcSnapshotGenerator {
                 columnMetadataResultSet.set(COLUMN_DEF_COL, null);
             }
             Object defaultValue = columnMetadataResultSet.get(COLUMN_DEF_COL);
-            if ((defaultValue != null) && (defaultValue instanceof String)) {
+            if ((defaultValue instanceof String)) {
                 Matcher matcher = postgresStringValuePattern.matcher((String) defaultValue);
                 if (matcher.matches()) {
                     defaultValue = matcher.group(1);

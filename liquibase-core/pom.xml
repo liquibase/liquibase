@@ -177,6 +177,10 @@
                             org.yaml.snakeyaml.*,
                             *;resolution:=optional
                         </Import-Package>
+                        <Export-Package>
+                            liquibase.*,
+                            www.liquibase.org.xml.ns.dbchangelog
+                        </Export-Package>
                         <Provide-Capability>
                           osgi.serviceloader; osgi.serviceloader=liquibase.serializer.ChangeLogSerializer,
                           osgi.serviceloader; osgi.serviceloader=liquibase.parser.NamespaceDetails,

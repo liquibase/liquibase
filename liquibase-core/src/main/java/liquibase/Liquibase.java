@@ -5,10 +5,9 @@ import liquibase.change.core.RawSQLChange;
 import liquibase.changelog.*;
 import liquibase.changelog.filter.*;
 import liquibase.changelog.visitor.*;
+import liquibase.command.CommandResults;
 import liquibase.command.CommandScope;
-import liquibase.command.core.DbUrlConnectionCommandStep;
-import liquibase.command.core.InternalDropAllCommandStep;
-import liquibase.command.core.TagCommandStep;
+import liquibase.command.core.*;
 import liquibase.database.Database;
 import liquibase.database.DatabaseConnection;
 import liquibase.database.DatabaseFactory;
@@ -51,12 +50,14 @@ import liquibase.structure.core.Catalog;
 import liquibase.util.LiquibaseUtil;
 import liquibase.util.StreamUtil;
 import liquibase.util.StringUtil;
+import liquibase.util.TableOutput;
 
 import javax.xml.parsers.ParserConfigurationException;
 import java.io.*;
 import java.text.DateFormat;
 import java.util.*;
 import java.util.function.Supplier;
+import java.util.stream.Collectors;
 
 import static java.util.ResourceBundle.getBundle;
 
@@ -67,10 +68,6 @@ import static java.util.ResourceBundle.getBundle;
 public class Liquibase implements AutoCloseable {
 
     private static final Logger LOG = Scope.getCurrentScope().getLog(Liquibase.class);
-    protected static final int CHANGESET_ID_NUM_PARTS = 3;
-    protected static final int CHANGESET_ID_AUTHOR_PART = 2;
-    protected static final int CHANGESET_ID_CHANGESET_PART = 1;
-    protected static final int CHANGESET_ID_CHANGELOG_PART = 0;
     private static final ResourceBundle coreBundle = getBundle("liquibase/i18n/liquibase-core");
     public static final String MSG_COULD_NOT_RELEASE_LOCK = coreBundle.getString("could.not.release.lock");
 
@@ -83,6 +80,7 @@ public class Liquibase implements AutoCloseable {
     private ChangeLogSyncListener changeLogSyncListener;
 
     private UUID hubConnectionId;
+    private Map<String, Boolean> upToDateFastCheck = new HashMap<>();
 
     private enum RollbackMessageType {
         WILL_ROLLBACK, ROLLED_BACK, ROLLBACK_FAILED
@@ -235,6 +233,11 @@ public class Liquibase implements AutoCloseable {
      */
     public void update(Contexts contexts, LabelExpression labelExpression, boolean checkLiquibaseTables) throws LiquibaseException {
         runInScope(() -> {
+            if (isUpToDateFastCheck(contexts, labelExpression)) {
+                Scope.getCurrentScope().getUI().sendMessage("Database is up to date, no changesets to execute");
+                return;
+            }
+
             LockService lockService = LockServiceFactory.getInstance().getLockService(database);
             lockService.waitForLock();
 
@@ -243,7 +246,7 @@ public class Liquibase implements AutoCloseable {
 
             Operation updateOperation = null;
             BufferedLogService bufferLog = new BufferedLogService();
-            DatabaseChangeLog changeLog = null;
+            DatabaseChangeLog changeLog;
             HubUpdater hubUpdater = null;
             try {
                 changeLog = getDatabaseChangeLog();
@@ -269,6 +272,13 @@ public class Liquibase implements AutoCloseable {
                 //
                 ChangeLogIterator changeLogIterator = getStandardChangelogIterator(contexts, labelExpression, changeLog);
 
+                //
+                // Iterate to find the change sets which will be skipped
+                //
+                StatusVisitor statusVisitor = new StatusVisitor(database);
+                ChangeLogIterator shouldRunIterator = getStandardChangelogIterator(contexts, labelExpression, true, changeLog);
+                shouldRunIterator.run(statusVisitor, new RuntimeEnvironment(database, contexts, labelExpression));
+
                 Connection connection = getConnection(changeLog);
                 if (connection != null) {
                     updateOperation =
@@ -291,6 +301,8 @@ public class Liquibase implements AutoCloseable {
                     runChangeLogIterator.run(createUpdateVisitor(), new RuntimeEnvironment(database, contexts, labelExpression));
                 });
 
+                showUpdateSummary(changeLog, statusVisitor);
+
                 //
                 // Update Hub with the operation information
                 //
@@ -311,6 +323,207 @@ public class Liquibase implements AutoCloseable {
                 setChangeExecListener(null);
             }
         });
+    }
+
+    //
+    // Show summary information of the change sets which were skipped, and also
+    // a count of the change sets which were processed during this operation
+    //
+    private void showUpdateSummary(DatabaseChangeLog changeLog, StatusVisitor statusVisitor)
+            throws LiquibaseException, IOException {
+        //
+        // Check the global flag to turn the summary off
+        //
+        String showSummaryString = Scope.getCurrentScope().get("showSummary", String.class);
+        UpdateSummaryEnum showSummary = showSummaryString != null ? UpdateSummaryEnum.valueOf(showSummaryString) : UpdateSummaryEnum.OFF;
+        if (showSummary == UpdateSummaryEnum.OFF) {
+            return;
+        }
+
+        //
+        // Obtain two lists:  the list of filtered change sets that
+        // The StatusVisitor discovered, and also any change sets which
+        // were skipped during parsing, i.e. they had mismatched DBMS values
+        //
+        List<ChangeSetStatus> denied = statusVisitor.getChangeSetsToSkip();
+        List<ChangeSet> skippedChangeSets = changeLog.getSkippedChangeSets();
+
+        //
+        // Filter the skipped list to remove changes which were:
+        // Previously run
+        // After the tag
+        // After the count value
+        //
+        List<ChangeSetStatus> filterDenied =
+                denied.stream()
+                      .filter(status -> status.getFilterResults()
+                      .stream().anyMatch(result ->  result.getFilter() != ShouldRunChangeSetFilter.class &&
+                                                    result.getFilter() != UpToTagChangeSetFilter.class &&
+                                                    result.getFilter() != CountChangeSetFilter.class))
+                      .collect(Collectors.toList());
+
+        //
+        // Only show the summary
+        //
+        showSummary(changeLog, statusVisitor, skippedChangeSets, filterDenied);
+        if (showSummary == UpdateSummaryEnum.SUMMARY || (skippedChangeSets.isEmpty() && denied.isEmpty())) {
+            return;
+        }
+
+        //
+        // Show the details too
+        //
+        showDetailTable(skippedChangeSets, filterDenied);
+    }
+
+    private void showDetailTable(List<ChangeSet> skippedChangeSets, List<ChangeSetStatus> filterDenied)
+            throws IOException, LiquibaseException {
+        List<String> columnHeaders = new ArrayList<>();
+        columnHeaders.add("Changeset Info");
+        columnHeaders.add("Reason Skipped");
+        List<List<String>> table = new ArrayList<>();
+        table.add(columnHeaders);
+
+        //
+        // Skipped during changelog parsing
+        //
+        List<ChangeSetStatus> finalList = new ArrayList<>(filterDenied);
+        skippedChangeSets.forEach(skippedChangeSet -> {
+            String dbmsList = String.format("'%s'", StringUtil.join(skippedChangeSet.getDbmsSet(), ", "));
+            String mismatchMessage = String.format("mismatched DBMS value of %s", dbmsList);
+            ChangeSetStatus changeSetStatus = new ChangeSetStatus(skippedChangeSet);
+            ChangeSetFilterResult filterResult = new ChangeSetFilterResult(false, mismatchMessage, null);
+            changeSetStatus.setFilterResults(Collections.singleton(filterResult));
+            finalList.add(changeSetStatus);
+        });
+
+        finalList.sort(new Comparator<ChangeSetStatus>() {
+            @Override
+            public int compare(ChangeSetStatus o1, ChangeSetStatus o2) {
+                ChangeSet c1 = o1.getChangeSet();
+                ChangeSet c2 = o2.getChangeSet();
+                int order1 = determineOrderInChangelog(c1);
+                int order2 = determineOrderInChangelog(c2);
+                if (order1 == -1 || order2 == -1) {
+                    return -1;
+                }
+                return Integer.compare(order1, order2);
+            }
+        });
+
+        //
+        // Filtered because of labels or context
+        //
+        for (ChangeSetStatus st : finalList) {
+            st.getFilterResults().forEach(consumer -> {
+                String skippedMessage = String.format("   '%s' : %s", st.getChangeSet().toString(), consumer.getMessage());
+                Scope.getCurrentScope().getLog(getClass()).info(skippedMessage);
+
+                List<String> outputRow = new ArrayList<>();
+                outputRow.add(st.getChangeSet().toString());
+                outputRow.add(consumer.getMessage());
+                table.add(outputRow);
+            });
+        }
+
+        List<Integer> widths = new ArrayList<>();
+        widths.add(60);
+        widths.add(40);
+
+        OutputStream outputStream = new ByteArrayOutputStream();
+        Writer writer = createOutputWriter(outputStream);
+        TableOutput.formatOutput(table, widths, true, writer);
+        String outputTableString = outputStream.toString();
+        Scope.getCurrentScope().getUI().sendMessage(outputTableString);
+    }
+
+    private int determineOrderInChangelog(ChangeSet changeSetToMatch) {
+        DatabaseChangeLog changeLog = changeSetToMatch.getChangeLog();
+        int order = 0;
+        for (ChangeSet changeSet : changeLog.getChangeSets()) {
+            if (changeSet == changeSetToMatch) {
+                return order;
+            }
+            order++;
+        }
+        return -1;
+    }
+
+    private void showSummary(DatabaseChangeLog changeLog, StatusVisitor statusVisitor, List<ChangeSet> skippedChangeSets, List<ChangeSetStatus> filterDenied) {
+        Scope.getCurrentScope().getUI().sendMessage("");
+        int totalInChangelog = changeLog.getChangeSets().size() + skippedChangeSets.size();
+        int skipped = skippedChangeSets.size();
+        int filtered = filterDenied.size();
+        int totalAccepted = statusVisitor.getChangeSetsToRun().size();
+        int totalPreviouslyRun = totalInChangelog - filtered - skipped - totalAccepted;
+
+        String message = "UPDATE SUMMARY";
+        Scope.getCurrentScope().getLog(getClass()).info(message);
+        Scope.getCurrentScope().getUI().sendMessage(message);
+
+        message = String.format("Run:                     %6d", totalAccepted);
+        Scope.getCurrentScope().getLog(getClass()).info(message);
+        Scope.getCurrentScope().getUI().sendMessage(message);
+
+        message = String.format("Previously run:          %6d", totalPreviouslyRun);
+        Scope.getCurrentScope().getLog(getClass()).info(message);
+        Scope.getCurrentScope().getUI().sendMessage(message);
+
+        message = String.format("DBMS mismatch:           %6d", skipped);
+        Scope.getCurrentScope().getLog(getClass()).info(message);
+        Scope.getCurrentScope().getUI().sendMessage(message);
+
+        message = String.format("Not in filter:           %6d", filtered);
+        Scope.getCurrentScope().getLog(getClass()).info(message);
+        Scope.getCurrentScope().getUI().sendMessage(message);
+
+        message = "-------------------------------";
+        Scope.getCurrentScope().getLog(getClass()).info(message);
+        Scope.getCurrentScope().getUI().sendMessage(message);
+
+        message = String.format("Total change sets:       %6d%n", totalInChangelog);
+        Scope.getCurrentScope().getLog(getClass()).info(message);
+        Scope.getCurrentScope().getUI().sendMessage(message);
+    }
+
+    private static Writer createOutputWriter(OutputStream outputStream) throws IOException {
+        String charsetName = GlobalConfiguration.OUTPUT_FILE_ENCODING.getCurrentValue();
+        return new OutputStreamWriter(outputStream, charsetName);
+    }
+
+    /**
+     * Performs check of the historyService to determine if there is no unrun changesets without obtaining an exclusive write lock.
+     * This allows multiple peer services to boot in parallel in the common case where there are no changelogs to run.
+     * <p>
+     * If we see that there is nothing in the changelog to run and this returns <b>true</b>, then regardless of the lock status we already know we are "done" and can finish up without waiting for the lock.
+     * <p>
+     * But, if there are changelogs that might have to be ran and this returns <b>false</b>, you MUST get a lock and do a real check to know what changesets actually need to run.
+     * <p>
+     * NOTE: to reduce the number of queries to the databasehistory table, this method will cache the "fast check" results within this instance under the assumption that the total changesets will not change within this instance.
+     */
+    protected boolean isUpToDateFastCheck(Contexts contexts, LabelExpression labelExpression) throws LiquibaseException {
+        String cacheKey = contexts +"/"+ labelExpression;
+        if (!this.upToDateFastCheck.containsKey(cacheKey)) {
+            try {
+                if (listUnrunChangeSets(contexts, labelExpression, false).isEmpty()) {
+                    LOG.fine("Fast check found no un-run changesets");
+                    upToDateFastCheck.put(cacheKey, true);
+                } else {
+                    upToDateFastCheck.put(cacheKey, false);
+                }
+            } catch (DatabaseException e) {
+                LOG.info("Error querying Liquibase tables, disabling fast check for this execution. Reason: " + e.getMessage());
+                upToDateFastCheck.put(cacheKey, false);
+            } finally {
+                // Discard the cached fetched un-run changeset list, as if
+                // another peer is running the changesets in parallel, we may
+                // get a different answer after taking out the write lock
+
+                ChangeLogHistoryService changeLogService = ChangeLogHistoryServiceFactory.getInstance().getChangeLogService(database);
+                changeLogService.reset();
+            }
+        }
+        return upToDateFastCheck.get(cacheKey);
     }
 
     /**
@@ -422,7 +635,28 @@ public class Liquibase implements AutoCloseable {
 
     protected ChangeLogIterator getStandardChangelogIterator(Contexts contexts, LabelExpression labelExpression,
                                                              DatabaseChangeLog changeLog) throws DatabaseException {
+       return getStandardChangelogIterator(contexts, labelExpression, false, changeLog);
+    }
+
+    /**
+     *
+     * Return a ChangeLogIterator constructed with standard filters
+     *
+     * @param   contexts                           Contexts to filter for
+     * @param   labelExpression                    Labels to filter for
+     * @param   collectAllReasons                  Flag to control whether all skip reasons are accumulated
+     *                                             default value is false to only gather the first
+     * @param   changeLog                          The changelog to process
+     *
+     * @return  ChangeLogIterator
+     * @throws DatabaseException
+     *
+     */
+    protected ChangeLogIterator getStandardChangelogIterator(Contexts contexts, LabelExpression labelExpression,
+                                                             boolean collectAllReasons,
+                                                             DatabaseChangeLog changeLog) throws DatabaseException {
         return new ChangeLogIterator(changeLog,
+                collectAllReasons,
                 new ShouldRunChangeSetFilter(database),
                 new ContextChangeSetFilter(contexts),
                 new LabelChangeSetFilter(labelExpression),
@@ -435,7 +669,7 @@ public class Liquibase implements AutoCloseable {
 
         if (tag == null) {
             return new ChangeLogIterator(changeLog,
-                new NotRanChangeSetFilter(database.getRanChangeSetList()),
+                    new NotRanChangeSetFilter(database.getRanChangeSetList()),
                 new ContextChangeSetFilter(contexts),
                 new LabelChangeSetFilter(labelExpression),
                 new IgnoreChangeSetFilter(),
@@ -479,10 +713,14 @@ public class Liquibase implements AutoCloseable {
 
                 outputHeader("Update Database Script");
 
-                LockService lockService = LockServiceFactory.getInstance().getLockService(database);
-                lockService.waitForLock();
+                if (isUpToDateFastCheck(contexts, labelExpression)) {
+                    Scope.getCurrentScope().getSingleton(ExecutorService.class).getExecutor("logging", database).comment("Database is up to date, no changesets to execute");
+                } else {
+                    LockService lockService = LockServiceFactory.getInstance().getLockService(database);
+                    lockService.waitForLock();
 
-                update(contexts, labelExpression, checkLiquibaseTables);
+                    update(contexts, labelExpression, checkLiquibaseTables);
+                }
 
                 flushOutputWriter(output);
 
@@ -565,6 +803,20 @@ public class Liquibase implements AutoCloseable {
                     }
 
                     //
+                    // Iterate to find the change sets which will be skipped
+                    //
+                    StatusVisitor statusVisitor = new StatusVisitor(database);
+                    ChangeLogIterator shouldRunIterator = new ChangeLogIterator(changeLog,
+                            true,
+                            new ShouldRunChangeSetFilter(database),
+                            new ContextChangeSetFilter(contexts),
+                            new LabelChangeSetFilter(labelExpression),
+                            new DbmsChangeSetFilter(database),
+                            new IgnoreChangeSetFilter(),
+                            new CountChangeSetFilter(changesToApply));
+                    shouldRunIterator.run(statusVisitor, new RuntimeEnvironment(database, contexts, labelExpression));
+
+                    //
                     // Create another iterator to run
                     //
                     ChangeLogIterator runChangeLogIterator = new ChangeLogIterator(changeLog,
@@ -579,6 +831,9 @@ public class Liquibase implements AutoCloseable {
                     Scope.child(Scope.Attr.logService.name(), compositeLogService, () -> {
                         runChangeLogIterator.run(createUpdateVisitor(), new RuntimeEnvironment(database, contexts, labelExpression));
                     });
+
+                    showUpdateSummary(changeLog, statusVisitor);
+
                     hubUpdater.postUpdateHub(updateOperation, bufferLog);
                 }
                 catch (Throwable e) {
@@ -683,6 +938,20 @@ public class Liquibase implements AutoCloseable {
                     }
 
                     //
+                    // Iterate to find the change sets which will be skipped
+                    //
+                    StatusVisitor statusVisitor = new StatusVisitor(database);
+                    ChangeLogIterator shouldRunIterator = new ChangeLogIterator(changeLog,
+                            true,
+                            new ShouldRunChangeSetFilter(database),
+                            new ContextChangeSetFilter(contexts),
+                            new LabelChangeSetFilter(labelExpression),
+                            new DbmsChangeSetFilter(database),
+                            new IgnoreChangeSetFilter(),
+                            new UpToTagChangeSetFilter(tag, ranChangeSetList));
+                    shouldRunIterator.run(statusVisitor, new RuntimeEnvironment(database, contexts, labelExpression));
+
+                    //
                     // Create another iterator to run
                     //
                     ChangeLogIterator runChangeLogIterator = new ChangeLogIterator(changeLog,
@@ -697,6 +966,9 @@ public class Liquibase implements AutoCloseable {
                     Scope.child(Scope.Attr.logService.name(), compositeLogService, () -> {
                         runChangeLogIterator.run(createUpdateVisitor(), new RuntimeEnvironment(database, contexts, labelExpression));
                     });
+
+                    showUpdateSummary(changeLog, statusVisitor);
+
                     hubUpdater.postUpdateHub(updateOperation, bufferLog);
                 }
                 catch (Throwable e) {
@@ -1894,20 +2166,11 @@ public class Liquibase implements AutoCloseable {
     }
 
     public boolean tagExists(String tagString) throws LiquibaseException {
-        LockService lockService = LockServiceFactory.getInstance().getLockService(database);
-        lockService.waitForLock();
-
-        try {
-            checkLiquibaseTables(false, null, new Contexts(),
-                    new LabelExpression());
-            return getDatabase().doesTagExist(tagString);
-        } finally {
-            try {
-                lockService.releaseLock();
-            } catch (LockException e) {
-                LOG.severe(MSG_COULD_NOT_RELEASE_LOCK, e);
-            }
-        }
+        CommandResults commandResults = new CommandScope("tagExists")
+                .addArgumentValue(DbUrlConnectionCommandStep.DATABASE_ARG, database)
+                .addArgumentValue(TagExistsCommandStep.TAG_ARG, tagString)
+                .execute();
+        return commandResults.getResult(TagExistsCommandStep.TAG_EXISTS_RESULT);
     }
 
     public void updateTestingRollback(String contexts) throws LiquibaseException {
@@ -2209,53 +2472,45 @@ public class Liquibase implements AutoCloseable {
         });
     }
 
+    /**
+     * Calculate the checksum for a given identifier
+     *
+     * @deprecated Use {link {@link CommandScope(String)}.
+     */
     public final CheckSum calculateCheckSum(final String changeSetIdentifier) throws LiquibaseException {
-        if (changeSetIdentifier == null) {
-            throw new LiquibaseException(new IllegalArgumentException("changeSetIdentifier"));
-        }
-        final List<String> parts = StringUtil.splitAndTrim(changeSetIdentifier, "::");
-        if ((parts == null) || (parts.size() < CHANGESET_ID_NUM_PARTS)) {
-            throw new LiquibaseException(
-                    new IllegalArgumentException("Invalid changeSet identifier: " + changeSetIdentifier)
-            );
-        }
-        return this.calculateCheckSum(parts.get(CHANGESET_ID_CHANGELOG_PART),
-                parts.get(CHANGESET_ID_CHANGESET_PART), parts.get(CHANGESET_ID_AUTHOR_PART));
+        CommandResults commandResults = new CommandScope("calculateChecksum")
+                .addArgumentValue(DbUrlConnectionCommandStep.DATABASE_ARG, database)
+                .addArgumentValue(CalculateChecksumCommandStep.CHANGESET_IDENTIFIER_ARG, changeSetIdentifier)
+                .addArgumentValue(CalculateChecksumCommandStep.CHANGELOG_FILE_ARG, this.changeLogFile)
+                .execute();
+        return commandResults.getResult(CalculateChecksumCommandStep.CHECKSUM_RESULT);
     }
 
+    /**
+     * Calculates the checksum for the values that form a given identifier
+     *
+     * @deprecated Use {link {@link CommandScope(String)}.
+     */
     public CheckSum calculateCheckSum(final String filename, final String id, final String author)
             throws LiquibaseException {
-        LOG.info(String.format("Calculating checksum for changeset %s::%s::%s", filename, id, author));
-        final ChangeLogParameters clParameters = this.getChangeLogParameters();
-        final ResourceAccessor resourceAccessor = this.getResourceAccessor();
-        final DatabaseChangeLog changeLog =
-                ChangeLogParserFactory.getInstance().getParser(
-                        this.changeLogFile, resourceAccessor
-                ).parse(this.changeLogFile, clParameters, resourceAccessor);
-
-        // TODO: validate?
-
-        final ChangeSet changeSet = changeLog.getChangeSet(filename, author, id);
-        if (changeSet == null) {
-            throw new LiquibaseException(
-                    new IllegalArgumentException("No such changeSet: " + filename + "::" + id + "::" + author)
-            );
-        }
-
-        return changeSet.generateCheckSum();
+        return this.calculateCheckSum(String.format("%s::%s::%s", filename, id, author));
     }
 
     public void generateDocumentation(String outputDirectory) throws LiquibaseException {
         // call without context
-        generateDocumentation(outputDirectory, new Contexts(), new LabelExpression());
+        generateDocumentation(outputDirectory, new Contexts(), new LabelExpression(), new CatalogAndSchema(null, null));
     }
 
     public void generateDocumentation(String outputDirectory, String contexts) throws LiquibaseException {
-        generateDocumentation(outputDirectory, new Contexts(contexts), new LabelExpression());
+        generateDocumentation(outputDirectory, new Contexts(contexts), new LabelExpression(), new CatalogAndSchema(null, null));
+    }
+
+    public void generateDocumentation(String outputDirectory, String contexts, CatalogAndSchema... schemaList) throws LiquibaseException {
+        generateDocumentation(outputDirectory, new Contexts(contexts), new LabelExpression(), schemaList);
     }
 
     public void generateDocumentation(String outputDirectory, Contexts contexts,
-                                      LabelExpression labelExpression) throws LiquibaseException {
+                                      LabelExpression labelExpression, CatalogAndSchema... schemaList) throws LiquibaseException {
         runInScope(new Scope.ScopedRunner() {
             @Override
             public void run() throws Exception {
@@ -2280,7 +2535,7 @@ public class Liquibase implements AutoCloseable {
 
                     final PathHandlerFactory pathHandlerFactory = Scope.getCurrentScope().getSingleton(PathHandlerFactory.class);
                     Resource resource = pathHandlerFactory.getResource(outputDirectory);
-                    visitor.writeHTML(resource, resourceAccessor);
+                    visitor.writeHTML(resource, resourceAccessor, schemaList);
                 } catch (IOException e) {
                     throw new LiquibaseException(e);
                 } finally {
@@ -2303,7 +2558,6 @@ public class Liquibase implements AutoCloseable {
      * Checks changelogs for bad MD5Sums and preconditions before attempting a migration
      */
     public void validate() throws LiquibaseException {
-
         DatabaseChangeLog changeLog = getDatabaseChangeLog(true);
         changeLog.validate(database);
     }

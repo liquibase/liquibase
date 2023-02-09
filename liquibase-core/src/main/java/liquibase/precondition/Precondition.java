@@ -17,14 +17,14 @@ import liquibase.serializer.LiquibaseSerializable;
  * Marker interface for preconditions.  May become an annotation in the future.
  */
 public interface Precondition extends LiquibaseSerializable {
-    public String getName();
+    String getName();
 
-    public Warnings warn(Database database);
+    Warnings warn(Database database);
 
-    public ValidationErrors validate(Database database);
+    ValidationErrors validate(Database database);
 
-    public void check(Database database, DatabaseChangeLog changeLog, ChangeSet changeSet, ChangeExecListener changeExecListener)
+    void check(Database database, DatabaseChangeLog changeLog, ChangeSet changeSet, ChangeExecListener changeExecListener)
             throws PreconditionFailedException, PreconditionErrorException;
 
-    public void load(ParsedNode parsedNode, ResourceAccessor resourceAccessor) throws ParsedNodeException;
+    void load(ParsedNode parsedNode, ResourceAccessor resourceAccessor) throws ParsedNodeException;
 }
