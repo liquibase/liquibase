@@ -1,8 +1,8 @@
 package liquibase.diff;
 
 public class StringDiff {
-    private String baseVersion;
-    private String targetVersion;
+    private final String baseVersion;
+    private final String targetVersion;
 
 
     public StringDiff(String baseVersion, String targetVersion) {

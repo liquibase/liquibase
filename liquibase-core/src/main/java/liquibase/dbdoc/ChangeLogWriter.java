@@ -10,7 +10,7 @@ import java.io.*;
 
 public class ChangeLogWriter {
     protected Resource outputDir;
-    private ResourceAccessor resourceAccessor;
+    private final ResourceAccessor resourceAccessor;
 
     public ChangeLogWriter(ResourceAccessor resourceAccessor, Resource rootOutputDir) {
         this.outputDir = rootOutputDir.resolve("changelogs");

@@ -10,7 +10,7 @@ import java.util.*;
  */
 public class ContextExpression {
 
-    private HashSet<String> contexts = new HashSet<>();
+    private final HashSet<String> contexts = new HashSet<>();
     private String originalString;
 
     public ContextExpression() {

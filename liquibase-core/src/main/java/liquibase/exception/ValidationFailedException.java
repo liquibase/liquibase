@@ -18,14 +18,14 @@ public class ValidationFailedException extends MigrationFailedException {
     
     private static final long serialVersionUID = -6824856974397660436L;
     public static final String INDENT_SPACES = "     ";
-    private static ResourceBundle coreBundle = getBundle("liquibase/i18n/liquibase-core");
-    private List<String> invalidMD5Sums;
-    private List<FailedPrecondition> failedPreconditions;
-    private List<ErrorPrecondition> errorPreconditions;
-    private Set<ChangeSet> duplicateChangeSets;
-    private List<SetupException> setupExceptions;
-    private List<Throwable> changeValidationExceptions;
-    private ValidationErrors validationErrors;
+    private static final ResourceBundle coreBundle = getBundle("liquibase/i18n/liquibase-core");
+    private final List<String> invalidMD5Sums;
+    private final List<FailedPrecondition> failedPreconditions;
+    private final List<ErrorPrecondition> errorPreconditions;
+    private final Set<ChangeSet> duplicateChangeSets;
+    private final List<SetupException> setupExceptions;
+    private final List<Throwable> changeValidationExceptions;
+    private final ValidationErrors validationErrors;
 
     public ValidationFailedException(ValidatingVisitor changeLogHandler) {
         this.invalidMD5Sums = changeLogHandler.getInvalidMD5Sums();

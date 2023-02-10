@@ -9,7 +9,7 @@ import java.util.Set;
 
 public class DatabaseObjectComparatorChain {
     private CompareControl.SchemaComparison[] schemaComparisons;
-    private List<DatabaseObjectComparator> comparators;
+    private final List<DatabaseObjectComparator> comparators;
     private int nextIndex; //this class is used often enough that the overhead of an iterator adds up to a significant percentage of the execution time
 
     public DatabaseObjectComparatorChain(List<DatabaseObjectComparator> comparators, CompareControl.SchemaComparison[] schemaComparisons) {

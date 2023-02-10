@@ -15,8 +15,8 @@ import java.util.Locale;
  */
 public class CatalogAndSchema {
     public static final CatalogAndSchema DEFAULT = new CatalogAndSchema(null, null);
-    private String catalogName;
-    private String schemaName;
+    private final String catalogName;
+    private final String schemaName;
 
     public CatalogAndSchema(String catalogName, String schemaName) {
         this.catalogName = catalogName;

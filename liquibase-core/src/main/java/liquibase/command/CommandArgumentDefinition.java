@@ -27,7 +27,7 @@ public class CommandArgumentDefinition<DataType> implements Comparable<CommandAr
     private static final Pattern ALLOWED_ARGUMENT_PATTERN = Pattern.compile("[a-zA-Z0-9]+");
 
     private final String name;
-    private SortedSet<String> aliases = new TreeSet<>();
+    private final SortedSet<String> aliases = new TreeSet<>();
     private final Class<DataType> dataType;
     private String description;
     private boolean required;

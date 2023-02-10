@@ -93,7 +93,7 @@ public class ChangeStatus {
         notApplied("Not Applied"),
         unknown("Unknown");
 
-        private String name;
+        private final String name;
 
         Status(String name) {
             this.name = name;

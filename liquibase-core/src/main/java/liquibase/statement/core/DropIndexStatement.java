@@ -4,10 +4,10 @@ import liquibase.statement.AbstractSqlStatement;
 
 public class DropIndexStatement extends AbstractSqlStatement {
 
-    private String indexName;
-    private String tableCatalogName;
-    private String tableSchemaName;
-    private String tableName;
+    private final String indexName;
+    private final String tableCatalogName;
+    private final String tableSchemaName;
+    private final String tableName;
     private String associatedWith;
 
     public DropIndexStatement(String indexName, String tableCatalogName, String tableSchemaName, String tableName, String associatedWith) {

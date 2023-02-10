@@ -4,7 +4,7 @@ import liquibase.statement.AbstractSqlStatement;
 
 public class TagDatabaseStatement extends AbstractSqlStatement {
 
-    private String tag;
+    private final String tag;
 
     public TagDatabaseStatement(String tag) {
         this.tag = tag;

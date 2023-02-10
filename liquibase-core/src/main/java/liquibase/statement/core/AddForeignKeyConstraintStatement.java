@@ -6,17 +6,17 @@ import liquibase.util.StringUtil;
 
 public class AddForeignKeyConstraintStatement extends AbstractSqlStatement {
 
-    private String baseTableCatalogName;
-    private String baseTableSchemaName;
-    private String baseTableName;
-    private ColumnConfig[] baseColumns;
+    private final String baseTableCatalogName;
+    private final String baseTableSchemaName;
+    private final String baseTableName;
+    private final ColumnConfig[] baseColumns;
 
-    private String referencedTableCatalogName;
-    private String referencedTableSchemaName;
-    private String referencedTableName;
-    private ColumnConfig[] referencedColumns;
+    private final String referencedTableCatalogName;
+    private final String referencedTableSchemaName;
+    private final String referencedTableName;
+    private final ColumnConfig[] referencedColumns;
 
-    private String constraintName;
+    private final String constraintName;
 
     private boolean deferrable;
     private boolean initiallyDeferred;

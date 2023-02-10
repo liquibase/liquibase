@@ -6,11 +6,11 @@ import java.util.LinkedList;
 import java.util.List;
 
 public class InsertSetStatement extends AbstractSqlStatement {
-    private LinkedList<InsertStatement> inserts = new LinkedList<>();
-    private String catalogName;
-    private String schemaName;
-    private String tableName;
-    private int batchSize;
+    private final LinkedList<InsertStatement> inserts = new LinkedList<>();
+    private final String catalogName;
+    private final String schemaName;
+    private final String tableName;
+    private final int batchSize;
 
     public InsertSetStatement(String catalogName, String schemaName, String tableName) {
         this(catalogName, schemaName, tableName, 50);

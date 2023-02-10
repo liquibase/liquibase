@@ -28,7 +28,7 @@ public class ObjectUtil {
     /**
      * Cache for the methods of classes that we have been queried about so far.
      */
-    private static Map<Class<?>, Method[]> methodCache = new HashMap<>();
+    private static final Map<Class<?>, Method[]> methodCache = new HashMap<>();
 
     /**
      * For a given object, try to find the appropriate reader method and return the value, if set

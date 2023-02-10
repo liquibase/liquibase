@@ -29,7 +29,7 @@ import static java.util.ResourceBundle.getBundle;
  * that are common to all tasks.
  */
 public abstract class BaseLiquibaseTask extends Task {
-    private static ResourceBundle coreBundle = getBundle("liquibase/i18n/liquibase-core");
+    private static final ResourceBundle coreBundle = getBundle("liquibase/i18n/liquibase-core");
 
     private final Map<String, Object> scopeValues = new HashMap<>();
 

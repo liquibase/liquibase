@@ -5,7 +5,7 @@ import liquibase.database.Database;
 public class DatabaseIncapableOfOperation extends RuntimeException {
     private static final long serialVersionUID = -2179551294831803877L;
     private String operation;
-    private String reason;
+    private final String reason;
 
     public DatabaseIncapableOfOperation(String operation, String reason, Database database) {
         super(operation + " is not supported on " + database.getDisplayName() + ": " + reason);

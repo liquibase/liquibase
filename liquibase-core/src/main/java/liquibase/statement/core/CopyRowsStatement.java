@@ -7,9 +7,9 @@ import java.util.List;
 
 public class CopyRowsStatement extends AbstractSqlStatement {
 
-    private String sourceTable;
-    private String targetTable;
-    private List<ColumnConfig> copyColumns;
+    private final String sourceTable;
+    private final String targetTable;
+    private final List<ColumnConfig> copyColumns;
 
 
     public CopyRowsStatement(String sourceTable, String targetTable,

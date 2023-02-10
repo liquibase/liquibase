@@ -7,10 +7,10 @@ import java.util.LinkedHashMap;
 import java.util.Map;
 
 public class InsertStatement extends AbstractSqlStatement {
-    private String catalogName;
-    private String schemaName;
-    private String tableName;
-    private Map<String, Object> columnValues = new LinkedHashMap<>();
+    private final String catalogName;
+    private final String schemaName;
+    private final String tableName;
+    private final Map<String, Object> columnValues = new LinkedHashMap<>();
 
     public InsertStatement(String catalogName, String schemaName, String tableName) {
         this.catalogName = catalogName;

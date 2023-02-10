@@ -5,7 +5,7 @@ import liquibase.statement.AbstractSqlStatement;
 
 public class UpdateChangeSetChecksumStatement extends AbstractSqlStatement {
 
-    private ChangeSet changeSet;
+    private final ChangeSet changeSet;
 
     public UpdateChangeSetChecksumStatement(ChangeSet changeSet) {
         this.changeSet = changeSet;

@@ -1,9 +1,9 @@
 package liquibase.statement;
 
 public class ForeignKeyConstraint implements ColumnConstraint {
-    private String foreignKeyName;
+    private final String foreignKeyName;
     private String column;
-    private String references;
+    private final String references;
     private String referencedTableCatalogName;
     private String referencedTableSchemaName;
     private String referencedTableName;

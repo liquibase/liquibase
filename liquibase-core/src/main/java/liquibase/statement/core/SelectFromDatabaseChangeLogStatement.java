@@ -65,7 +65,7 @@ public class SelectFromDatabaseChangeLogStatement extends AbstractSqlStatement {
 
     public static class ByTag implements WhereClause {
 
-        private String tagName;
+        private final String tagName;
 
         public ByTag(String tagName) {
             this.tagName = tagName;

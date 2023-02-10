@@ -6,9 +6,9 @@ import java.util.HashMap;
 import java.util.Map;
 
 public class InsertOrUpdateStatement extends InsertStatement {
-    private String primaryKey;
+    private final String primaryKey;
     private Boolean onlyUpdate = Boolean.FALSE;
-    private Map<String, Boolean> allowUpdates = new HashMap<>();
+    private final Map<String, Boolean> allowUpdates = new HashMap<>();
 
     public InsertOrUpdateStatement(String catalogName, String schemaName, String tableName, String primaryKey) {
         super(catalogName, schemaName, tableName);

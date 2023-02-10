@@ -6,13 +6,13 @@ import liquibase.statement.CompoundStatement;
 
 public class CreateIndexStatement extends AbstractSqlStatement implements CompoundStatement {
 
-    private String tableCatalogName;
-    private String tableSchemaName;
-    private String indexName;
-    private String tableName;
-    private AddColumnConfig[] columns;
+    private final String tableCatalogName;
+    private final String tableSchemaName;
+    private final String indexName;
+    private final String tableName;
+    private final AddColumnConfig[] columns;
     private String tablespace;
-    private Boolean unique;
+    private final Boolean unique;
     // Contain associations of index
     // for example: foreignKey, primaryKey or uniqueConstraint
     private String associatedWith;

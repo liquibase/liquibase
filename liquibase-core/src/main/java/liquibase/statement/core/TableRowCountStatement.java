@@ -4,9 +4,9 @@ import liquibase.statement.AbstractSqlStatement;
 
 public class TableRowCountStatement extends AbstractSqlStatement {
 
-    private String catalogName;
-    private String schemaName;
-    private String tableName;
+    private final String catalogName;
+    private final String schemaName;
+    private final String tableName;
 
     public TableRowCountStatement(String catalogName, String schemaName, String tableName) {
         this.catalogName = catalogName;

@@ -10,7 +10,7 @@ public class NamespaceDetailsFactory {
 
     private static NamespaceDetailsFactory instance;
 
-    private List<NamespaceDetails> namespaceDetails = new ArrayList<>();
+    private final List<NamespaceDetails> namespaceDetails = new ArrayList<>();
 
     public static synchronized void reset() {
         instance = null;

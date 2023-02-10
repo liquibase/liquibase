@@ -6,12 +6,12 @@ import liquibase.util.StringUtil;
 
 public class AddPrimaryKeyStatement extends AbstractSqlStatement {
 
-    private String catalogName;
-    private String schemaName;
-    private String tableName;
+    private final String catalogName;
+    private final String schemaName;
+    private final String tableName;
     private String tablespace;
-    private ColumnConfig[] columns;
-    private String constraintName;
+    private final ColumnConfig[] columns;
+    private final String constraintName;
     private Boolean clustered;
 
     private String forIndexName;

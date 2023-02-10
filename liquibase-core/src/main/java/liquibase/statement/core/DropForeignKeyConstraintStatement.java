@@ -4,10 +4,10 @@ import liquibase.statement.AbstractSqlStatement;
 
 public class DropForeignKeyConstraintStatement extends AbstractSqlStatement {
 
-    private String baseTableCatalogName;
-    private String baseTableSchemaName;
-    private String baseTableName;
-    private String constraintName;
+    private final String baseTableCatalogName;
+    private final String baseTableSchemaName;
+    private final String baseTableName;
+    private final String constraintName;
 
     public DropForeignKeyConstraintStatement(String baseTableCatalogName, String baseTableSchemaName, String baseTableName, String constraintName) {
         this.baseTableCatalogName = baseTableCatalogName;

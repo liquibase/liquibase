@@ -51,7 +51,7 @@ public class MSSQLDatabase extends AbstractJdbcDatabase {
         }
     }
 
-    private HashMap<String, Integer> defaultDataTypeParameters = new HashMap<>();
+    private final HashMap<String, Integer> defaultDataTypeParameters = new HashMap<>();
 
     protected static final int MSSQL_DEFAULT_TCP_PORT = 1433;
 

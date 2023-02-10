@@ -17,13 +17,13 @@ import java.util.*;
 public class ChangeMetaData implements PrioritizedService {
     public static final int PRIORITY_DEFAULT = 1;
 
-    private String name;
-    private String description;
-    private int priority;
+    private final String name;
+    private final String description;
+    private final int priority;
 
     private Map<String, ChangeParameterMetaData> parameters;
     private Set<String> appliesTo;
-    private HashMap<String, String> databaseNotes = new HashMap<>();
+    private final HashMap<String, String> databaseNotes = new HashMap<>();
 
     public ChangeMetaData(String name, String description, int priority, String[] appliesTo, Map<String, String> databaseNotes, Set<ChangeParameterMetaData> parameters) {
         if (parameters == null) {

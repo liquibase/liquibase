@@ -22,8 +22,8 @@ import java.util.*;
 public class DatabaseFactory implements SingletonObject {
     private static final Logger LOG = Scope.getCurrentScope().getLog(DatabaseFactory.class);
     private static DatabaseFactory instance;
-    private Map<String, SortedSet<Database>> implementedDatabases = new HashMap<>();
-    private Map<String, SortedSet<Database>> internalDatabases = new HashMap<>();
+    private final Map<String, SortedSet<Database>> implementedDatabases = new HashMap<>();
+    private final Map<String, SortedSet<Database>> internalDatabases = new HashMap<>();
 
     private DatabaseFactory() {
         try {

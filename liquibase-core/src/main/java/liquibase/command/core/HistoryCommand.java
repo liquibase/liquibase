@@ -15,7 +15,7 @@ import java.text.DateFormat;
 public class HistoryCommand extends AbstractCommand {
 
     private Database database;
-    private DateFormat dateFormat;
+    private final DateFormat dateFormat;
     private HistoryFormat format;
     private PrintStream outputStream = System.out;
 

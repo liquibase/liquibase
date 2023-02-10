@@ -24,12 +24,12 @@ import static java.util.ResourceBundle.getBundle;
 
 public class ChangeLogIterator {
 
-    private DatabaseChangeLog databaseChangeLog;
-    private List<ChangeSetFilter> changeSetFilters;
+    private final DatabaseChangeLog databaseChangeLog;
+    private final List<ChangeSetFilter> changeSetFilters;
     private boolean collectAllReasons = false;
-    private static ResourceBundle coreBundle = getBundle("liquibase/i18n/liquibase-core");
+    private static final ResourceBundle coreBundle = getBundle("liquibase/i18n/liquibase-core");
     protected static final String MSG_COULD_NOT_FIND_EXECUTOR = coreBundle.getString("no.executor.found");
-    private Set<String> seenChangeSets = new HashSet<>();
+    private final Set<String> seenChangeSets = new HashSet<>();
 
     public ChangeLogIterator(DatabaseChangeLog databaseChangeLog, ChangeSetFilter... changeSetFilters) {
         this.databaseChangeLog = databaseChangeLog;

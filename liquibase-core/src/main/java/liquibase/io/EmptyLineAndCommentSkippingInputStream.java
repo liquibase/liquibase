@@ -12,7 +12,7 @@ import java.io.InputStream;
  */
 public class EmptyLineAndCommentSkippingInputStream extends BufferedInputStream {
     public static final int MAX_CHAR_SIZE_IN_BYTES = 4;
-    private String commentLineStartsWith;
+    private final String commentLineStartsWith;
     private final boolean commentSkipEnabled;
 
     private int lastRead = -1;

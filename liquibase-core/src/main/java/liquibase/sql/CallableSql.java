@@ -7,9 +7,9 @@ import java.util.Collections;
 
 public class CallableSql implements Sql {
 
-    private String sql;
-    private String endDelimiter;
-    private String expectedStatus;
+    private final String sql;
+    private final String endDelimiter;
+    private final String expectedStatus;
 
     public CallableSql(String sql, String expectedStatus) {
         this(sql, ";", expectedStatus);

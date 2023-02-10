@@ -15,8 +15,8 @@ public class UpdateExecutablePreparedStatement extends ExecutablePreparedStateme
 
     private String whereClause;
 
-    private List<String> whereColumnNames = new ArrayList<>();
-    private List<Object> whereParameters = new ArrayList<>();
+    private final List<String> whereColumnNames = new ArrayList<>();
+    private final List<Object> whereParameters = new ArrayList<>();
 
     public UpdateExecutablePreparedStatement(Database database, String catalogName, String schemaName, String tableName, List<ColumnConfig> columns, ChangeSet changeSet, ResourceAccessor resourceAccessor) {
         super(database, catalogName, schemaName, tableName, columns, changeSet, resourceAccessor);

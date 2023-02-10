@@ -14,7 +14,7 @@ import java.util.function.Consumer;
  */
 public class InputStreamList implements Iterable<InputStream>, AutoCloseable {
 
-    private LinkedHashMap<URI, InputStream> streams = new LinkedHashMap<>();
+    private final LinkedHashMap<URI, InputStream> streams = new LinkedHashMap<>();
 
     public InputStreamList() {
     }

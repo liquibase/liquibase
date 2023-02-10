@@ -29,8 +29,8 @@ import java.util.Map;
 @LiquibaseService(skip = true)
 public class LoggingExecutor extends AbstractExecutor {
 
-    private Writer output;
-    private Executor delegatedReadExecutor;
+    private final Writer output;
+    private final Executor delegatedReadExecutor;
 
     public LoggingExecutor(Executor delegatedExecutor, Writer output, Database database) {
         if (output != null) {

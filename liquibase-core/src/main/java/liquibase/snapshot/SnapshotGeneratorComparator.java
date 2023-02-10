@@ -7,8 +7,8 @@ import java.util.Comparator;
 
 class SnapshotGeneratorComparator implements Comparator<SnapshotGenerator> {
 
-    private Class<? extends DatabaseObject> objectType;
-    private Database database;
+    private final Class<? extends DatabaseObject> objectType;
+    private final Database database;
 
     public SnapshotGeneratorComparator(Class<? extends DatabaseObject> objectType, Database database) {
         this.objectType = objectType;

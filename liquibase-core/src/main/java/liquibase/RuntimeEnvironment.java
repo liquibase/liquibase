@@ -3,8 +3,8 @@ package liquibase;
 import liquibase.database.Database;
 
 public class RuntimeEnvironment {
-    private Database targetDatabase;
-    private Contexts contexts;
+    private final Database targetDatabase;
+    private final Contexts contexts;
     private final LabelExpression labels;
 
     public RuntimeEnvironment(Database targetDatabase, Contexts contexts, LabelExpression labelExpression) {

@@ -15,8 +15,8 @@ public class SnapshotParserFactory {
 
     private static SnapshotParserFactory instance;
 
-    private List<SnapshotParser> parsers;
-    private Comparator<SnapshotParser> snapshotParserComparator;
+    private final List<SnapshotParser> parsers;
+    private final Comparator<SnapshotParser> snapshotParserComparator;
 
 
     public static synchronized void reset() {

@@ -4,10 +4,10 @@ import liquibase.statement.AbstractSqlStatement;
 
 public class RenameViewStatement extends AbstractSqlStatement {
 
-    private String catalogName;
-    private String schemaName;
-    private String oldViewName;
-    private String newViewName;
+    private final String catalogName;
+    private final String schemaName;
+    private final String oldViewName;
+    private final String newViewName;
 
     public RenameViewStatement(String catalogName, String schemaName, String oldViewName, String newViewName) {
         this.catalogName = catalogName;

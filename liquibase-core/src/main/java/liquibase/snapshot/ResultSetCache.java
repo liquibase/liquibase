@@ -17,13 +17,13 @@ import java.sql.Statement;
 import java.util.*;
 
 public class ResultSetCache {
-    private Map<String, Integer> timesSingleQueried = new HashMap<>();
-    private Map<String, Boolean> didBulkQuery = new HashMap<>();
+    private final Map<String, Integer> timesSingleQueried = new HashMap<>();
+    private final Map<String, Boolean> didBulkQuery = new HashMap<>();
     private boolean bulkTracking = true;
 
-    private Map<String, Map<String, List<CachedRow>>> cacheBySchema = new HashMap<>();
+    private final Map<String, Map<String, List<CachedRow>>> cacheBySchema = new HashMap<>();
 
-    private Map<String, Object> info = new HashMap<>();
+    private final Map<String, Object> info = new HashMap<>();
 
     public List<CachedRow> get(ResultSetExtractor resultSetExtractor) throws DatabaseException {
         try {
@@ -115,10 +115,10 @@ public class ResultSetCache {
     }
 
     public static class RowData {
-        private Database database;
-        private String[] parameters;
-        private String catalog;
-        private String schema;
+        private final Database database;
+        private final String[] parameters;
+        private final String catalog;
+        private final String schema;
 
         private String[] keyPermutations;
 

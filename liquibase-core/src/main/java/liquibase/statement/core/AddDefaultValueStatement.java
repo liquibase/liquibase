@@ -3,12 +3,12 @@ package liquibase.statement.core;
 import liquibase.statement.AbstractSqlStatement;
 
 public class AddDefaultValueStatement extends AbstractSqlStatement {
-    private String catalogName;
-    private String schemaName;
-    private String tableName;
-    private String columnName;
-    private String columnDataType;
-    private Object defaultValue;
+    private final String catalogName;
+    private final String schemaName;
+    private final String tableName;
+    private final String columnName;
+    private final String columnDataType;
+    private final Object defaultValue;
 
     private String defaultValueConstraintName;
 

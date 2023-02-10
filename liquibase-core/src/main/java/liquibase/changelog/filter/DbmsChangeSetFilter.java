@@ -11,7 +11,7 @@ import java.util.List;
 
 public class DbmsChangeSetFilter implements ChangeSetFilter {
 
-    private Database database;
+    private final Database database;
 
     public DbmsChangeSetFilter(Database database) {
         this.database = database;

@@ -16,7 +16,7 @@ import java.util.*;
  */
 public class Contexts {
 
-    private HashSet<String> contextStore = new HashSet<>();
+    private final HashSet<String> contextStore = new HashSet<>();
 
     public Contexts() {
     }

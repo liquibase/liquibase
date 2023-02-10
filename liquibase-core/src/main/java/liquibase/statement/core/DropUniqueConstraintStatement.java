@@ -5,10 +5,10 @@ import liquibase.statement.AbstractSqlStatement;
 
 public class DropUniqueConstraintStatement extends AbstractSqlStatement {
 
-    private String catalogName;
-    private String schemaName;
-    private String tableName;
-    private String constraintName;
+    private final String catalogName;
+    private final String schemaName;
+    private final String tableName;
+    private final String constraintName;
     /**
      * Sybase ASA does drop unique constraint not by name, but using list of the columns in unique clause.
      */

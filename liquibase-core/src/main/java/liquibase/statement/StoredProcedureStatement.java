@@ -6,9 +6,9 @@ import java.util.List;
 
 public class StoredProcedureStatement extends AbstractSqlStatement implements CallableSqlStatement {
 
-    private String procedureName;
-    private List<String> parameters = new ArrayList<>();
-    private List<Integer> types = new ArrayList<>();
+    private final String procedureName;
+    private final List<String> parameters = new ArrayList<>();
+    private final List<Integer> types = new ArrayList<>();
 
 
     public StoredProcedureStatement(String procedureName) {

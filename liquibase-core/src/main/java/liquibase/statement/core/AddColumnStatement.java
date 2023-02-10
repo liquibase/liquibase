@@ -18,9 +18,9 @@ public class AddColumnStatement extends AbstractSqlStatement {
     private String addBeforeColumn;
     private Integer addAtPosition;
     private Boolean computed;
-    private Set<ColumnConstraint> constraints = new HashSet<>();
+    private final Set<ColumnConstraint> constraints = new HashSet<>();
 
-    private List<AddColumnStatement> columns = new ArrayList<>();
+    private final List<AddColumnStatement> columns = new ArrayList<>();
 
     public AddColumnStatement(String catalogName, String schemaName, String tableName, String columnName, String columnType, Object defaultValue, ColumnConstraint... constraints) {
         this.catalogName = catalogName;

@@ -6,11 +6,11 @@ import liquibase.util.StringUtil;
 
 public class AddUniqueConstraintStatement extends AbstractSqlStatement {
 
-    private String catalogName;
-    private String schemaName;
-    private String tableName;
-    private ColumnConfig[] columns;
-    private String constraintName;
+    private final String catalogName;
+    private final String schemaName;
+    private final String tableName;
+    private final ColumnConfig[] columns;
+    private final String constraintName;
     private String tablespace;
 
     private boolean clustered;
