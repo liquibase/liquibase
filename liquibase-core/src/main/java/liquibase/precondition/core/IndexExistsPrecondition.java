@@ -90,7 +90,7 @@ public class IndexExistsPrecondition extends AbstractPrecondition {
             Index example = new Index();
             String tableName = StringUtil.trimToNull(getTableName());
             if (tableName != null) {
-                example.setRelation((Table) new Table()
+                example.setRelation(new Table()
                         .setName(database.correctObjectName(getTableName(), Table.class))
                         .setSchema(schema));
             }
