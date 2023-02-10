@@ -31,7 +31,7 @@ public class StandardHubService implements HubService {
     private UUID userId;
     private final Map<UUID, HubChangeLog> hubChangeLogCache = new HashMap<>();
 
-    private final HttpClient http;
+    private HttpClient http;
 
     public StandardHubService() {
         this.http = createHttpClient();
