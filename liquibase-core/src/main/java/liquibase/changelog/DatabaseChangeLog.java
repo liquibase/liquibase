@@ -21,6 +21,7 @@ import liquibase.precondition.core.PreconditionContainer;
 import liquibase.resource.Resource;
 import liquibase.resource.ResourceAccessor;
 import liquibase.servicelocator.LiquibaseService;
+import liquibase.util.FileUtil;
 import liquibase.util.StringUtil;
 
 import java.io.IOException;
@@ -53,6 +54,7 @@ public class DatabaseChangeLog implements Comparable<DatabaseChangeLog>, Conditi
     private ObjectQuotingStrategy objectQuotingStrategy;
 
     private List<ChangeSet> changeSets = new ArrayList<>();
+    private List<ChangeSet> skippedChangeSets = new ArrayList<>();
     private ChangeLogParameters changeLogParameters;
 
     private RuntimeEnvironment runtimeEnvironment;
@@ -263,6 +265,10 @@ public class DatabaseChangeLog implements Comparable<DatabaseChangeLog>, Conditi
         return changeSets;
     }
 
+    public List<ChangeSet> getSkippedChangeSets() {
+        return skippedChangeSets;
+    }
+
     public void addChangeSet(ChangeSet changeSet) {
         if (changeSet.getRunOrder() == null) {
             ListIterator<ChangeSet> it = this.changeSets.listIterator(this.changeSets.size());
@@ -385,7 +391,7 @@ public class DatabaseChangeLog implements Comparable<DatabaseChangeLog>, Conditi
         }
         try {
             Object value = parsedNode.getValue();
-            if ((value != null) && (value instanceof String)) {
+            if ((value instanceof String)) {
                 parsedNode.setValue(changeLogParameters.expandExpressions(parsedNode.getValue(String.class), this));
             }
 
@@ -413,6 +419,8 @@ public class DatabaseChangeLog implements Comparable<DatabaseChangeLog>, Conditi
             case "changeSet":
                 if (isDbmsMatch(node.getChildValue(null, "dbms", String.class))) {
                     this.addChangeSet(createChangeSet(node, resourceAccessor));
+                } else {
+                    handleSkippedChangeSet(node);
                 }
                 break;
             case "modifyChangeSets":
@@ -567,6 +575,27 @@ public class DatabaseChangeLog implements Comparable<DatabaseChangeLog>, Conditi
                     throw new ParsedNodeException("Unexpected node found under databaseChangeLog: " + nodeName);
                 }
         }
+    }
+
+    //
+    // Handle a mismatched DBMS attribute, if necessary
+    //
+    private void handleSkippedChangeSet(ParsedNode node) throws ParsedNodeException {
+        if (node.getChildValue(null, "dbms", String.class) == null) {
+            return;
+        }
+        String id = node.getChildValue(null, "id", String.class);
+        String author = node.getChildValue(null, "author", String.class);
+        String filePath = StringUtil.trimToNull(node.getChildValue(null, "logicalFilePath", String.class));
+        if (filePath == null) {
+            filePath = getFilePath();
+        } else {
+            filePath = filePath.replace("\\\\", "/").replaceFirst("^/", "");
+        }
+        String dbmsList = node.getChildValue(null, "dbms", String.class);
+        ChangeSet skippedChangeSet =
+            new ChangeSet(id, author, false, false, filePath, null, dbmsList, this);
+        skippedChangeSets.add(skippedChangeSet);
     }
 
     public boolean isDbmsMatch(String dbmsList) {
@@ -783,6 +812,14 @@ public class DatabaseChangeLog implements Comparable<DatabaseChangeLog>, Conditi
             DatabaseChangeLog parentChangeLog = PARENT_CHANGE_LOG.get();
             PARENT_CHANGE_LOG.set(this);
             try {
+                if(!resourceAccessor.get(fileName).exists()) {
+                    if (ChangeLogParserConfiguration.ON_MISSING_INCLUDE_FILE.getCurrentValue().equals(ChangeLogParserConfiguration.MissingIncludeConfiguration.WARN)) {
+                        Scope.getCurrentScope().getLog(getClass()).warning(FileUtil.getFileNotFoundMessage(fileName));
+                        return false;
+                    } else {
+                        throw new ChangeLogParseException(FileUtil.getFileNotFoundMessage(fileName));
+                    }
+                }
                 ChangeLogParser parser = ChangeLogParserFactory.getInstance().getParser(fileName, resourceAccessor);
                 changeLog = parser.parse(fileName, changeLogParameters, resourceAccessor);
                 changeLog.setIncludeContextFilter(includeContextFilter);
@@ -810,6 +847,9 @@ public class DatabaseChangeLog implements Comparable<DatabaseChangeLog>, Conditi
                 );
             }
             return false;
+        }
+        catch (IOException e) {
+            throw new LiquibaseException(e.getMessage(), e);
         }
         PreconditionContainer preconditions = changeLog.getPreconditions();
         if (preconditions != null) {

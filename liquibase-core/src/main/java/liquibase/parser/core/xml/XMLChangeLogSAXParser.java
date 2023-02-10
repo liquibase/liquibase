@@ -17,7 +17,6 @@ import javax.xml.parsers.SAXParser;
 import javax.xml.parsers.SAXParserFactory;
 import java.io.IOException;
 import java.io.InputStream;
-import java.nio.file.InvalidPathException;
 
 public class XMLChangeLogSAXParser extends AbstractChangeLogParser {
 
@@ -32,7 +31,7 @@ public class XMLChangeLogSAXParser extends AbstractChangeLogParser {
 
     public XMLChangeLogSAXParser() {
         saxParserFactory = SAXParserFactory.newInstance();
-        saxParserFactory.setValidating(true);
+        saxParserFactory.setValidating(GlobalConfiguration.VALIDATE_XML_CHANGELOG_FILES.getCurrentValue());
         saxParserFactory.setNamespaceAware(true);
         if (GlobalConfiguration.SECURE_PARSING.getCurrentValue()) {
             try {
@@ -71,7 +70,7 @@ public class XMLChangeLogSAXParser extends AbstractChangeLogParser {
 
     @Override
     protected ParsedNode parseToNode(String physicalChangeLogLocation, ChangeLogParameters changeLogParameters, ResourceAccessor resourceAccessor) throws ChangeLogParseException {
-        try  {
+        try {
             Resource resource = resourceAccessor.get(physicalChangeLogLocation);
             SAXParser parser = saxParserFactory.newSAXParser();
             if (GlobalConfiguration.SECURE_PARSING.getCurrentValue()) {
@@ -160,7 +159,7 @@ public class XMLChangeLogSAXParser extends AbstractChangeLogParser {
      * Try to set the parser property "schemaLanguage", but do not mind if the parser does not understand it.
      *
      * @param parser the parser to configure
-     * @todo If we do not mind, why do we set it in the first place? Need to resarch in git...
+     * @todo If we do not mind, why do we set it in the first place? Need to research in git...
      */
     private void trySetSchemaLanguageProperty(SAXParser parser) {
         try {

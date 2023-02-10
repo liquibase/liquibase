@@ -55,7 +55,7 @@ public class SelectFromDatabaseChangeLogStatement extends AbstractSqlStatement {
         return this;
     }
 
-    public static interface WhereClause {
+    public interface WhereClause {
 
     }
 

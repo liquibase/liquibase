@@ -37,7 +37,7 @@ public class YamlChangeLogParser extends YamlParser implements ChangeLogParser {
             if ((parsedYaml == null) || parsedYaml.isEmpty()) {
                 throw new ChangeLogParseException("Empty file " + physicalChangeLogLocation);
             }
-            DatabaseChangeLog changeLog = new DatabaseChangeLog(physicalChangeLogLocation);
+            DatabaseChangeLog changeLog = new DatabaseChangeLog(DatabaseChangeLog.normalizePath(physicalChangeLogLocation));
 
             Object rootList = parsedYaml.get("databaseChangeLog");
             if (rootList == null) {
@@ -94,7 +94,7 @@ public class YamlChangeLogParser extends YamlParser implements ChangeLogParser {
     private Map parseYamlStream(String physicalChangeLogLocation, Yaml yaml, InputStream changeLogStream) throws ChangeLogParseException {
         Map parsedYaml;
         try {
-            parsedYaml = (Map) yaml.load(changeLogStream);
+            parsedYaml = yaml.load(changeLogStream);
         } catch (Exception e) {
             throw new ChangeLogParseException("Syntax error in file " + physicalChangeLogLocation + ": " + e.getMessage(), e);
         }

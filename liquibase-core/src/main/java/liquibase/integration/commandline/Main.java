@@ -1,7 +1,6 @@
 package liquibase.integration.commandline;
 
 import liquibase.*;
-import liquibase.change.CheckSum;
 import liquibase.changelog.ChangeLogParameters;
 import liquibase.changelog.visitor.ChangeExecListener;
 import liquibase.changelog.visitor.DefaultChangeExecListener;
@@ -20,7 +19,10 @@ import liquibase.exception.*;
 import liquibase.hub.HubConfiguration;
 import liquibase.hub.HubServiceFactory;
 import liquibase.integration.IntegrationDetails;
-import liquibase.license.*;
+import liquibase.license.LicenseInstallResult;
+import liquibase.license.LicenseService;
+import liquibase.license.LicenseServiceFactory;
+import liquibase.license.Location;
 import liquibase.lockservice.LockService;
 import liquibase.lockservice.LockServiceFactory;
 import liquibase.logging.LogService;
@@ -28,7 +30,10 @@ import liquibase.logging.Logger;
 import liquibase.logging.core.JavaLogService;
 import liquibase.resource.*;
 import liquibase.ui.ConsoleUIService;
-import liquibase.util.*;
+import liquibase.util.ISODateFormat;
+import liquibase.util.LiquibaseUtil;
+import liquibase.util.StringUtil;
+import liquibase.util.SystemUtil;
 
 import java.io.*;
 import java.lang.reflect.Field;
@@ -134,8 +139,11 @@ public class Main {
     protected String delimiter;
     protected String rollbackScript;
     protected Boolean rollbackOnError = false;
+    protected List<CatalogAndSchema> schemaList = new ArrayList<>();
+    protected String format;
+    protected String showSummary;
 
-    private static int[] suspiciousCodePoints = {160, 225, 226, 227, 228, 229, 230, 198, 200, 201, 202, 203,
+    private static final int[] suspiciousCodePoints = {160, 225, 226, 227, 228, 229, 230, 198, 200, 201, 202, 203,
             204, 205, 206, 207, 209, 210, 211, 212, 213, 214, 217, 218, 219,
             220, 222, 223, 232, 233, 234, 235, 236, 237, 238, 239, 241,
             249, 250, 251, 252, 255, 284, 332, 333, 334, 335, 336, 337, 359,
@@ -1678,29 +1686,10 @@ public class Main {
                 return;
             } else if (COMMANDS.TAG.equalsIgnoreCase(command)) {
                 liquibase.tag(getCommandArgument());
-                Scope.getCurrentScope().getUI().sendMessage(String.format(
-                                coreBundle.getString("successfully.tagged"), liquibase.getDatabase()
-                                        .getConnection().getConnectionUserName() + "@" +
-                                        liquibase.getDatabase().getConnection().getURL()
-                        )
-                );
                 return;
             } else if (COMMANDS.TAG_EXISTS.equalsIgnoreCase(command)) {
                 String tag = commandParams.iterator().next();
-                boolean exists = liquibase.tagExists(tag);
-                if (exists) {
-                    Scope.getCurrentScope().getUI().sendMessage(String.format(coreBundle.getString("tag.exists"), tag,
-                                    liquibase.getDatabase().getConnection().getConnectionUserName() + "@" +
-                                            liquibase.getDatabase().getConnection().getURL()
-                            )
-                    );
-                } else {
-                    Scope.getCurrentScope().getUI().sendMessage(String.format(coreBundle.getString("tag.does.not.exist"), tag,
-                                    liquibase.getDatabase().getConnection().getConnectionUserName() + "@" +
-                                            liquibase.getDatabase().getConnection().getURL()
-                            )
-                    );
-                }
+                liquibase.tagExists(tag);
                 return;
             } else if (COMMANDS.ROLLBACK_ONE_CHANGE_SET.equalsIgnoreCase(command)) {
                 Map<String, Object> argsMap = new HashMap<>();
@@ -1811,9 +1800,7 @@ public class Main {
                 liquibase.clearCheckSums();
                 return;
             } else if (COMMANDS.CALCULATE_CHECKSUM.equalsIgnoreCase(command)) {
-                CheckSum checkSum = null;
-                checkSum = liquibase.calculateCheckSum(commandParams.iterator().next());
-                Scope.getCurrentScope().getUI().sendMessage(checkSum.toString());
+                liquibase.calculateCheckSum(commandParams.iterator().next());
                 return;
             } else if (COMMANDS.DB_DOC.equalsIgnoreCase(command)) {
                 if (commandParams.isEmpty()) {
@@ -1822,14 +1809,31 @@ public class Main {
                 if (changeLogFile == null) {
                     throw new CommandLineParsingException(coreBundle.getString("dbdoc.requires.changelog.parameter"));
                 }
-                liquibase.generateDocumentation(commandParams.iterator().next(), contexts);
+
+                if (schemas != null) {
+                    for (String schema : schemas.split(",")) {
+                        schemaList.add(new CatalogAndSchema(null, schema).customize(database));
+                    }
+
+                    CatalogAndSchema[] schemaArr = schemaList.stream().toArray(CatalogAndSchema[]::new);
+
+                    liquibase.generateDocumentation(commandParams.iterator().next(), contexts, schemaArr);
+                }
+                else {
+                    liquibase.generateDocumentation(commandParams.iterator().next(), contexts);
+                }
+
                 return;
             }
 
             try {
                 if (COMMANDS.UPDATE.equalsIgnoreCase(command)) {
                     try {
-                        liquibase.update(new Contexts(contexts), new LabelExpression(getLabelFilter()));
+                        Map<String, Object> updateScopedObjects = new HashMap<>();
+                        updateScopedObjects.put("showSummary", showSummary);
+                        Scope.child(updateScopedObjects, () -> {
+                            liquibase.update(new Contexts(contexts), new LabelExpression(getLabelFilter()));
+                        });
                     } catch (LiquibaseException updateException) {
                         handleUpdateException(database, updateException, defaultChangeExecListener, rollbackOnError);
                     }
@@ -1862,8 +1866,12 @@ public class Main {
                             getOutputWriter());
                 } else if (COMMANDS.UPDATE_COUNT.equalsIgnoreCase(command)) {
                     try {
-                        liquibase.update(Integer.parseInt(commandParams.iterator().next()), new Contexts(contexts), new
-                                LabelExpression(getLabelFilter()));
+                        Map<String, Object> updateScopedObjects = new HashMap<>();
+                        updateScopedObjects.put("showSummary", showSummary);
+                        Scope.child(updateScopedObjects, () -> {
+                            liquibase.update(Integer.parseInt(commandParams.iterator().next()), new Contexts(contexts), new
+                                    LabelExpression(getLabelFilter()));
+                        });
                     } catch (LiquibaseException updateException) {
                         handleUpdateException(database, updateException, defaultChangeExecListener, rollbackOnError);
                     }
@@ -1876,7 +1884,11 @@ public class Main {
                                 String.format(coreBundle.getString("command.requires.tag"), COMMANDS.UPDATE_TO_TAG));
                     }
                     try {
-                        liquibase.update(commandParams.iterator().next(), new Contexts(contexts), new LabelExpression(getLabelFilter()));
+                        Map<String, Object> updateScopedObjects = new HashMap<>();
+                        updateScopedObjects.put("showSummary", showSummary);
+                        Scope.child(updateScopedObjects, () -> {
+                            liquibase.update(commandParams.iterator().next(), new Contexts(contexts), new LabelExpression(getLabelFilter()));
+                        });
                     } catch (LiquibaseException updateException) {
                         handleUpdateException(database, updateException, defaultChangeExecListener, rollbackOnError);
                     }
