@@ -5,12 +5,16 @@ import liquibase.changelog.ChangeLogHistoryServiceFactory;
 import liquibase.changelog.RanChangeSet;
 import liquibase.command.*;
 import liquibase.database.Database;
+import liquibase.exception.LiquibaseException;
+import liquibase.util.TableOutput;
 
 import java.io.PrintWriter;
 import java.text.DateFormat;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
+import java.util.stream.Collectors;
 
 public class InternalHistoryCommandStep extends AbstractCommandStep {
 
@@ -18,6 +22,7 @@ public class InternalHistoryCommandStep extends AbstractCommandStep {
 
     public static final CommandArgumentDefinition<Database> DATABASE_ARG;
     public static final CommandArgumentDefinition<DateFormat> DATE_FORMAT_ARG;
+    public static final CommandArgumentDefinition<HistoryFormat> FORMAT_ARG;
 
     public static final CommandResultDefinition<DeploymentHistory> DEPLOYMENTS_RESULT;
 
@@ -27,13 +32,17 @@ public class InternalHistoryCommandStep extends AbstractCommandStep {
         DATE_FORMAT_ARG = builder.argument("dateFormat", DateFormat.class)
                 .defaultValue(DateFormat.getDateTimeInstance(DateFormat.SHORT, DateFormat.SHORT), "Platform specific 'short' format")
                 .build();
+        FORMAT_ARG = builder.argument("format", HistoryFormat.class)
+                .description("History output format")
+                .defaultValue(HistoryFormat.TABULAR)
+                .build();
 
         DEPLOYMENTS_RESULT = builder.result("deployments", DeploymentHistory.class).build();
     }
 
     @Override
     public String[][] defineCommandNames() {
-        return new String[][] { COMMAND_NAME };
+        return new String[][]{COMMAND_NAME};
     }
 
     @Override
@@ -57,17 +66,17 @@ public class InternalHistoryCommandStep extends AbstractCommandStep {
         output.println("Liquibase History for " + database.getConnection().getURL());
         output.println("");
 
-        DeploymentDetails deployment = null;
+        ReportPrinter deployment = null;
         for (RanChangeSet ranChangeSet : historyService.getRanChangeSets()) {
             final String thisDeploymentId = ranChangeSet.getDeploymentId();
             if (deployment == null || !Objects.equals(thisDeploymentId, deployment.getDeploymentId())) {
                 if (deployment != null) {
                     deployment.printReport(output);
                 }
-                deployment = new DeploymentDetails(commandScope);
+                deployment = DeploymentPrinterFactory.create(commandScope);
                 deploymentHistory.deployments.add(deployment);
             }
-            deployment.changeSets.add(ranChangeSet);
+            deployment.addChangeSet(ranChangeSet);
         }
 
         if (deployment == null) {
@@ -81,11 +90,7 @@ public class InternalHistoryCommandStep extends AbstractCommandStep {
     }
 
     public static class DeploymentHistory {
-        private List<DeploymentDetails> deployments = new ArrayList<>();
-
-        public List<DeploymentDetails> getDeployments() {
-            return deployments;
-        }
+        private final List<ReportPrinter> deployments = new ArrayList<>();
 
         @Override
         public String toString() {
@@ -93,15 +98,42 @@ public class InternalHistoryCommandStep extends AbstractCommandStep {
         }
     }
 
-    public static class DeploymentDetails {
+    interface ReportPrinter {
+        String getDeploymentId();
+
+        void addChangeSet(RanChangeSet changeSet);
+
+        void printReport(PrintWriter output) throws LiquibaseException;
+    }
+
+    static class DeploymentPrinterFactory {
+
+        static ReportPrinter create(CommandScope scope) {
+            switch (scope.getArgumentValue(FORMAT_ARG)) {
+                case TABULAR:
+                    return new TabularDeploymentDetails(scope);
+                case TEXT:
+                default:
+                    return new LegacyDeploymentDetails(scope);
+            }
+        }
+    }
+
+    public static class LegacyDeploymentDetails implements ReportPrinter {
         private final CommandScope commandScope;
         List<RanChangeSet> changeSets = new ArrayList<>();
 
-        public DeploymentDetails(CommandScope commandScope) {
+        public LegacyDeploymentDetails(CommandScope commandScope) {
             this.commandScope = commandScope;
         }
 
-        void printReport(PrintWriter output) {
+        @Override
+        public void addChangeSet(RanChangeSet changeSet) {
+            changeSets.add(changeSet);
+        }
+
+        @Override
+        public void printReport(PrintWriter output) {
             DateFormat dateFormat = commandScope.getArgumentValue(DATE_FORMAT_ARG);
             if (dateFormat == null) {
                 dateFormat = DateFormat.getDateTimeInstance(DateFormat.SHORT, DateFormat.SHORT);
@@ -132,12 +164,72 @@ public class InternalHistoryCommandStep extends AbstractCommandStep {
             output.println("");
         }
 
-        String getDeploymentId() {
-            if (changeSets.size() == 0) {
-                return null;
-            }
-            return changeSets.get(0).getDeploymentId();
+        @Override
+        public String getDeploymentId() {
+            return changeSets.stream()
+                    .findFirst()
+                    .map(RanChangeSet::getDeploymentId)
+                    .orElse(null);
         }
     }
+
+    public static class TabularDeploymentDetails implements ReportPrinter {
+
+        private static final List<String> HEADERS = Arrays.asList(
+                "Deployment ID",
+                "Update Date",
+                "Changelog Path",
+                "Changeset Author",
+                "Changeset ID");
+
+        private final List<RanChangeSet> changeSets;
+        private final CommandScope commandScope;
+
+        public TabularDeploymentDetails(CommandScope commandScope) {
+            this.commandScope = commandScope;
+            this.changeSets = new ArrayList<>();
+        }
+
+        @Override
+        public void addChangeSet(RanChangeSet changeSet) {
+            changeSets.add(changeSet);
+        }
+
+        @Override
+        public void printReport(PrintWriter output) throws LiquibaseException {
+            DateFormat dateFormat = getDateFormat();
+            List<List<String>> data = changeSets.stream()
+                    .map(
+                            changeSet -> Arrays.asList(
+                                    changeSet.getDeploymentId(),
+                                    dateFormat.format(changeSet.getDateExecuted()),
+                                    changeSet.getChangeLog(),
+                                    changeSet.getAuthor(),
+                                    changeSet.getId()
+                            )
+                    )
+                    .collect(Collectors.toList());
+            data.add(0, HEADERS);
+            TableOutput.formatUnwrappedOutput(data, true, output);
+            output.println();
+        }
+
+        @Override
+        public String getDeploymentId() {
+            return changeSets.stream()
+                    .findFirst()
+                    .map(RanChangeSet::getDeploymentId)
+                    .orElse(null);
+        }
+
+        private DateFormat getDateFormat() {
+            DateFormat dateFormat = commandScope.getArgumentValue(DATE_FORMAT_ARG);
+            if (dateFormat == null) {
+                dateFormat = DateFormat.getDateTimeInstance(DateFormat.SHORT, DateFormat.SHORT);
+            }
+            return dateFormat;
+        }
+    }
+
 
 }
