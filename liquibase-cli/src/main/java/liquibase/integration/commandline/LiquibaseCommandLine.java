@@ -630,7 +630,7 @@ public class LiquibaseCommandLine {
     }
 
     protected Map<String, Object> configureLogging() throws IOException {
-        Map<String, Object> returnMap = new HashMap<>();
+        Map<String, Object> returnMap = new HashMap<>(1);
         final ConfiguredValue<Level> currentConfiguredValue = LiquibaseCommandLineConfiguration.LOG_LEVEL.getCurrentConfiguredValue();
         final String logFile = LiquibaseCommandLineConfiguration.LOG_FILE.getCurrentValue();
 
@@ -664,6 +664,8 @@ public class LiquibaseCommandLine {
 
         java.util.logging.Logger rootLogger = java.util.logging.Logger.getLogger("");
         Level cliLogLevel = logLevel;
+        // If a log file is set, but no log level is set, this variable represents the log level that should be used.
+        Level fileLogLevelOverride = null;
 
         if (logFile != null) {
             if (fileHandler == null) {
@@ -678,7 +680,8 @@ public class LiquibaseCommandLine {
 
             fileHandler.setLevel(logLevel);
             if (logLevel == Level.OFF) {
-                fileHandler.setLevel(Level.FINE);
+                fileLogLevelOverride = Level.SEVERE;
+                fileHandler.setLevel(fileLogLevelOverride);
             }
 
             cliLogLevel = Level.OFF;
@@ -700,7 +703,11 @@ public class LiquibaseCommandLine {
             if (channel.equalsIgnoreCase("all")) {
                 channel = "";
             }
-            java.util.logging.Logger.getLogger(channel).setLevel(logLevel);
+            if (fileLogLevelOverride != null) {
+                java.util.logging.Logger.getLogger(channel).setLevel(fileLogLevelOverride);
+            } else {
+                java.util.logging.Logger.getLogger(channel).setLevel(logLevel);
+            }
         }
 
         for (Handler handler : rootLogger.getHandlers()) {
