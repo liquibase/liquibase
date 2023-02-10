@@ -1462,6 +1462,7 @@ public class Main {
      *
      * @throws Exception
      */
+    @SuppressWarnings("java:S2095")
     protected void doMigration() throws Exception {
         if (COMMANDS.HELP.equalsIgnoreCase(command)) {
             printHelp(System.err);
