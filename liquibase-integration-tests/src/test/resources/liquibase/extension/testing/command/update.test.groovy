@@ -61,8 +61,7 @@ Optional Args:
 UPDATE SUMMARY
 Run:                         41
 Previously run:               0
-DBMS mismatch:                0
-Not in filter:                0
+Filtered out:                 0
 -------------------------------
 Total change sets:           41
 """
@@ -88,10 +87,14 @@ Total change sets:           41
 UPDATE SUMMARY
 Run:                          2
 Previously run:               0
-DBMS mismatch:                1
-Not in filter:                0
+Filtered out:                 1
 -------------------------------
 Total change sets:            3
+
+
+FILTERED CHANGE SETS SUMMARY
+
+DBMS mismatch:                1
 
 +--------------------------------------------------------------+--------------------------------+
 | Changeset Info                                               | Reason Skipped                 |

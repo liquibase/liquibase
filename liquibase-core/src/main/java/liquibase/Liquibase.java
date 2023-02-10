@@ -80,7 +80,7 @@ public class Liquibase implements AutoCloseable {
     private ChangeLogSyncListener changeLogSyncListener;
 
     private UUID hubConnectionId;
-    private Map<String, Boolean> upToDateFastCheck = new HashMap<>();
+    private final Map<String, Boolean> upToDateFastCheck = new HashMap<>();
 
     private enum RollbackMessageType {
         WILL_ROLLBACK, ROLLED_BACK, ROLLBACK_FAILED
@@ -276,7 +276,7 @@ public class Liquibase implements AutoCloseable {
                 // Iterate to find the change sets which will be skipped
                 //
                 StatusVisitor statusVisitor = new StatusVisitor(database);
-                ChangeLogIterator shouldRunIterator = getStandardChangelogIterator(contexts, labelExpression, true, changeLog);
+                ChangeLogIterator shouldRunIterator = getStandardStatusChangelogIterator(contexts, labelExpression, true, changeLog);
                 shouldRunIterator.run(statusVisitor, new RuntimeEnvironment(database, contexts, labelExpression));
 
                 Connection connection = getConnection(changeLog);
@@ -357,9 +357,7 @@ public class Liquibase implements AutoCloseable {
         List<ChangeSetStatus> filterDenied =
                 denied.stream()
                       .filter(status -> status.getFilterResults()
-                      .stream().anyMatch(result ->  result.getFilter() != ShouldRunChangeSetFilter.class &&
-                                                    result.getFilter() != UpToTagChangeSetFilter.class &&
-                                                    result.getFilter() != CountChangeSetFilter.class))
+                      .stream().anyMatch(result ->  result.getFilter() != ShouldRunChangeSetFilter.class))
                       .collect(Collectors.toList());
 
         //
@@ -384,18 +382,7 @@ public class Liquibase implements AutoCloseable {
         List<List<String>> table = new ArrayList<>();
         table.add(columnHeaders);
 
-        //
-        // Skipped during changelog parsing
-        //
-        List<ChangeSetStatus> finalList = new ArrayList<>(filterDenied);
-        skippedChangeSets.forEach(skippedChangeSet -> {
-            String dbmsList = String.format("'%s'", StringUtil.join(skippedChangeSet.getDbmsSet(), ", "));
-            String mismatchMessage = String.format("mismatched DBMS value of %s", dbmsList);
-            ChangeSetStatus changeSetStatus = new ChangeSetStatus(skippedChangeSet);
-            ChangeSetFilterResult filterResult = new ChangeSetFilterResult(false, mismatchMessage, null);
-            changeSetStatus.setFilterResults(Collections.singleton(filterResult));
-            finalList.add(changeSetStatus);
-        });
+        List<ChangeSetStatus> finalList = createFinalStatusList(skippedChangeSets, filterDenied);
 
         finalList.sort(new Comparator<ChangeSetStatus>() {
             @Override
@@ -437,6 +424,22 @@ public class Liquibase implements AutoCloseable {
         Scope.getCurrentScope().getUI().sendMessage(outputTableString);
     }
 
+    private List<ChangeSetStatus> createFinalStatusList(List<ChangeSet> skippedChangeSets, List<ChangeSetStatus> filterDenied) {
+        //
+        // Add skipped during changelog parsing to the final list
+        //
+        List<ChangeSetStatus> finalList = new ArrayList<>(filterDenied);
+        skippedChangeSets.forEach(skippedChangeSet -> {
+            String dbmsList = String.format("'%s'", StringUtil.join(skippedChangeSet.getDbmsSet(), ", "));
+            String mismatchMessage = String.format("mismatched DBMS value of %s", dbmsList);
+            ChangeSetStatus changeSetStatus = new ChangeSetStatus(skippedChangeSet);
+            ChangeSetFilterResult filterResult = new ChangeSetFilterResult(false, mismatchMessage, DbmsChangeSetFilter.class);
+            changeSetStatus.setFilterResults(Collections.singleton(filterResult));
+            finalList.add(changeSetStatus);
+        });
+        return finalList;
+    }
+
     private int determineOrderInChangelog(ChangeSet changeSetToMatch) {
         DatabaseChangeLog changeLog = changeSetToMatch.getChangeLog();
         int order = 0;
@@ -469,11 +472,7 @@ public class Liquibase implements AutoCloseable {
         Scope.getCurrentScope().getLog(getClass()).info(message);
         Scope.getCurrentScope().getUI().sendMessage(message);
 
-        message = String.format("DBMS mismatch:           %6d", skipped);
-        Scope.getCurrentScope().getLog(getClass()).info(message);
-        Scope.getCurrentScope().getUI().sendMessage(message);
-
-        message = String.format("Not in filter:           %6d", filtered);
+        message = String.format("Filtered out:            %6d", filtered + skipped);
         Scope.getCurrentScope().getLog(getClass()).info(message);
         Scope.getCurrentScope().getUI().sendMessage(message);
 
@@ -484,6 +483,43 @@ public class Liquibase implements AutoCloseable {
         message = String.format("Total change sets:       %6d%n", totalInChangelog);
         Scope.getCurrentScope().getLog(getClass()).info(message);
         Scope.getCurrentScope().getUI().sendMessage(message);
+
+        final Map<Class<? extends ChangeSetFilter>, Integer> filterSummaryMap = new LinkedHashMap<>();
+        List<ChangeSetStatus> finalList = createFinalStatusList(skippedChangeSets, filterDenied);
+        finalList.forEach(status -> {
+            status.getFilterResults().forEach(result -> {
+                if (! result.isAccepted()) {
+                    Class<? extends ChangeSetFilter> clazz = result.getFilter();
+                    filterSummaryMap.computeIfAbsent(clazz, count -> {
+                        return 0;
+                    });
+                    filterSummaryMap.put(clazz, filterSummaryMap.get(clazz)+1);
+                }
+            });
+        });
+
+        if (filterSummaryMap.isEmpty()) {
+            return;
+        }
+
+        message = String.format("%nFILTERED CHANGE SETS SUMMARY%n");
+        Scope.getCurrentScope().getUI().sendMessage(message);
+        Scope.getCurrentScope().getLog(getClass()).info(message);
+        filterSummaryMap.forEach((filterClass, count) -> {
+            String filterSummaryDetailMessage = null;
+            if (filterClass == DbmsChangeSetFilter.class) {
+                filterSummaryDetailMessage = String.format("DBMS mismatch:           %6d", count);
+            } else if (filterClass == LabelChangeSetFilter.class) {
+                filterSummaryDetailMessage = String.format("Label mismatch:          %6d", count);
+            } else if (filterClass == ContextChangeSetFilter.class) {
+                filterSummaryDetailMessage = String.format("Context mismatch:        %6d", count);
+            } else if (filterClass == CountChangeSetFilter.class) {
+                filterSummaryDetailMessage = String.format("After count:             %6d", count);
+            }
+            Scope.getCurrentScope().getLog(getClass()).info(filterSummaryDetailMessage);
+            Scope.getCurrentScope().getUI().sendMessage(filterSummaryDetailMessage);
+        });
+        Scope.getCurrentScope().getUI().sendMessage("");
     }
 
     private static Writer createOutputWriter(OutputStream outputStream) throws IOException {
@@ -656,7 +692,30 @@ public class Liquibase implements AutoCloseable {
                                                              boolean collectAllReasons,
                                                              DatabaseChangeLog changeLog) throws DatabaseException {
         return new ChangeLogIterator(changeLog,
-                collectAllReasons,
+                new ShouldRunChangeSetFilter(database),
+                new ContextChangeSetFilter(contexts),
+                new LabelChangeSetFilter(labelExpression),
+                new DbmsChangeSetFilter(database),
+                new IgnoreChangeSetFilter());
+    }
+    /**
+     *
+     * Return a StatusChangeLogIterator constructed with standard filters
+     *
+     * @param   contexts                           Contexts to filter for
+     * @param   labelExpression                    Labels to filter for
+     * @param   collectAllReasons                  Flag to control whether all skip reasons are accumulated
+     *                                             default value is false to only gather the first
+     * @param   changeLog                          The changelog to process
+     *
+     * @return  StatusChangeLogIterator
+     * @throws DatabaseException
+     *
+     */
+    protected ChangeLogIterator getStandardStatusChangelogIterator(Contexts contexts, LabelExpression labelExpression,
+                                                                   boolean collectAllReasons,
+                                                                   DatabaseChangeLog changeLog) throws DatabaseException {
+        return new ChangeLogIterator(changeLog,
                 new ShouldRunChangeSetFilter(database),
                 new ContextChangeSetFilter(contexts),
                 new LabelChangeSetFilter(labelExpression),
@@ -806,8 +865,7 @@ public class Liquibase implements AutoCloseable {
                     // Iterate to find the change sets which will be skipped
                     //
                     StatusVisitor statusVisitor = new StatusVisitor(database);
-                    ChangeLogIterator shouldRunIterator = new ChangeLogIterator(changeLog,
-                            true,
+                    ChangeLogIterator shouldRunIterator = new StatusChangeLogIterator(changeLog,
                             new ShouldRunChangeSetFilter(database),
                             new ContextChangeSetFilter(contexts),
                             new LabelChangeSetFilter(labelExpression),
@@ -941,8 +999,7 @@ public class Liquibase implements AutoCloseable {
                     // Iterate to find the change sets which will be skipped
                     //
                     StatusVisitor statusVisitor = new StatusVisitor(database);
-                    ChangeLogIterator shouldRunIterator = new ChangeLogIterator(changeLog,
-                            true,
+                    ChangeLogIterator shouldRunIterator = new StatusChangeLogIterator(changeLog,
                             new ShouldRunChangeSetFilter(database),
                             new ContextChangeSetFilter(contexts),
                             new LabelChangeSetFilter(labelExpression),

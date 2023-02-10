@@ -83,13 +83,20 @@ Optional Args:
 
         expectedUI = [
 """
+Running Changeset: changelogs/h2/complete/mismatchedDbms.changelog.xml::1::nvoxland
+
 UPDATE SUMMARY
 Run:                          1
-Previously run:               1
-DBMS mismatch:                1
-Not in filter:                0
+Previously run:               0
+Filtered out:                 2
 -------------------------------
 Total change sets:            3
+
+
+FILTERED CHANGE SETS SUMMARY
+
+After count:                  1
+DBMS mismatch:                1
 
 +--------------------------------------------------------------+--------------------------------+
 | Changeset Info                                               | Reason Skipped                 |
@@ -97,6 +104,10 @@ Total change sets:            3
 |                                                              | mismatched DBMS value of 'foo' |
 | changelogs/h2/complete/mismatchedDbms.changelog.xml::1::nvox |                                |
 | land                                                         |                                |
++--------------------------------------------------------------+--------------------------------+
+|                                                              | Only running 1 changesets      |
+| changelogs/h2/complete/mismatchedDbms.changelog.xml::13.1::t |                                |
+| estuser                                                      |                                |
 +--------------------------------------------------------------+--------------------------------+
 """
         ]

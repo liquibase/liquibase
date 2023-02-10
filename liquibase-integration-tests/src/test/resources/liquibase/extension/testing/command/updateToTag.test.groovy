@@ -69,13 +69,20 @@ Optional Args:
 
         expectedUI = [
 """
+Running Changeset: changelogs/h2/complete/mismatchedDbms.changelog.xml::1::nvoxland
+Running Changeset: changelogs/h2/complete/mismatchedDbms.changelog.xml::13.1::testuser
+
 UPDATE SUMMARY
 Run:                          2
 Previously run:               0
-DBMS mismatch:                1
-Not in filter:                0
+Filtered out:                 1
 -------------------------------
 Total change sets:            3
+
+
+FILTERED CHANGE SETS SUMMARY
+
+DBMS mismatch:                1
 
 +--------------------------------------------------------------+--------------------------------+
 | Changeset Info                                               | Reason Skipped                 |

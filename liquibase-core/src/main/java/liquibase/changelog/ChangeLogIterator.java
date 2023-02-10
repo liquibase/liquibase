@@ -4,8 +4,11 @@ import liquibase.ContextExpression;
 import liquibase.Labels;
 import liquibase.RuntimeEnvironment;
 import liquibase.Scope;
+import liquibase.change.Change;
+import liquibase.change.core.TagDatabaseChange;
 import liquibase.changelog.filter.ChangeSetFilter;
 import liquibase.changelog.filter.ChangeSetFilterResult;
+import liquibase.changelog.filter.UpToTagChangeSetFilter;
 import liquibase.changelog.visitor.ChangeSetVisitor;
 import liquibase.changelog.visitor.SkippedChangeSetVisitor;
 import liquibase.changelog.visitor.ValidatingVisitor;
@@ -18,27 +21,21 @@ import liquibase.logging.core.BufferedLogService;
 import liquibase.logging.core.CompositeLogService;
 import liquibase.util.StringUtil;
 
+import javax.swing.text.html.HTML;
 import java.util.*;
 
 import static java.util.ResourceBundle.getBundle;
 
 public class ChangeLogIterator {
 
-    private DatabaseChangeLog databaseChangeLog;
-    private List<ChangeSetFilter> changeSetFilters;
-    private boolean collectAllReasons = false;
+    protected DatabaseChangeLog databaseChangeLog;
+    protected List<ChangeSetFilter> changeSetFilters;
     private static ResourceBundle coreBundle = getBundle("liquibase/i18n/liquibase-core");
     protected static final String MSG_COULD_NOT_FIND_EXECUTOR = coreBundle.getString("no.executor.found");
-    private Set<String> seenChangeSets = new HashSet<>();
+    protected Set<String> seenChangeSets = new HashSet<>();
 
     public ChangeLogIterator(DatabaseChangeLog databaseChangeLog, ChangeSetFilter... changeSetFilters) {
         this.databaseChangeLog = databaseChangeLog;
-        this.changeSetFilters = Arrays.asList(changeSetFilters);
-    }
-
-    public ChangeLogIterator(DatabaseChangeLog databaseChangeLog, boolean collectAllReasons, ChangeSetFilter... changeSetFilters) {
-        this.databaseChangeLog = databaseChangeLog;
-        this.collectAllReasons = collectAllReasons;
         this.changeSetFilters = Arrays.asList(changeSetFilters);
     }
 
@@ -91,9 +88,7 @@ public class ChangeLogIterator {
                                 } else {
                                     shouldVisit = false;
                                     reasonsDenied.add(acceptsResult);
-                                    if (! collectAllReasons) {
-                                        break;
-                                    }
+                                    break;
                                 }
                             }
                         }
@@ -140,13 +135,27 @@ public class ChangeLogIterator {
         }
     }
 
+    //
+    // Check to see if this change set has a TagDatabase change
+    //
+    private boolean hasTagDatabaseChange(ChangeSet changeSet) {
+        return changeSet.getChanges().stream().anyMatch(TagDatabaseChange.class::isInstance);
+    }
 
     //
-    // Make sure that any changeset which has a runWith=<executor> setting
-    // has a valid Executor, and that the changes in the changeset
-    // are eligible for execution by this Executor
     //
-    private void validateChangeSetExecutor(ChangeSet changeSet, RuntimeEnvironment env) throws LiquibaseException {
+
+    /**
+     *
+     * Make sure that any changeset which has a runWith=<executor> setting
+     * has a valid Executor, and that the changes in the changeset are eligible for execution by this Executor
+     *
+     * @param  changeSet                      The change set to validate
+     * @param  env                            A RuntimeEnvironment instance
+     * @throws LiquibaseException
+     *
+     */
+    protected void validateChangeSetExecutor(ChangeSet changeSet, RuntimeEnvironment env) throws LiquibaseException {
         if (changeSet.getRunWith() == null) {
             return;
         }
