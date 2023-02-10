@@ -1191,6 +1191,7 @@ public class Liquibase implements AutoCloseable {
                          LabelExpression labelExpression) throws LiquibaseException {
         changeLogParameters.setContexts(contexts);
         changeLogParameters.setLabels(labelExpression);
+        addCommandFiltersMdc(labelExpression, contexts);
 
         runInScope(new Scope.ScopedRunner() {
             @Override
@@ -1483,6 +1484,7 @@ public class Liquibase implements AutoCloseable {
                          LabelExpression labelExpression) throws LiquibaseException {
         changeLogParameters.setContexts(contexts);
         changeLogParameters.setLabels(labelExpression);
+        addCommandFiltersMdc(labelExpression, contexts);
 
         runInScope(new Scope.ScopedRunner() {
             @Override
@@ -1645,6 +1647,7 @@ public class Liquibase implements AutoCloseable {
                          LabelExpression labelExpression) throws LiquibaseException {
         changeLogParameters.setContexts(contexts);
         changeLogParameters.setLabels(labelExpression);
+        addCommandFiltersMdc(labelExpression, contexts);
 
         runInScope(new Scope.ScopedRunner() {
             @Override
