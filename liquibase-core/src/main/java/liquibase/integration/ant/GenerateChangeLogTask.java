@@ -68,7 +68,7 @@ public class GenerateChangeLogTask extends BaseLiquibaseTask {
     protected void validateParameters() {
         super.validateParameters();
 
-        if((changeLogOutputFiles == null) || changeLogOutputFiles.isEmpty()) {
+        if(changeLogOutputFiles.isEmpty()) {
             throw new BuildException("Unable to generate a change log. No output file defined. Add at least one <xml>, <json>, <yaml>, or <txt> nested element.");
         }
     }

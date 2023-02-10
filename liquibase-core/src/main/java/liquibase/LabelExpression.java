@@ -126,7 +126,7 @@ public class LabelExpression {
     }
 
     public boolean isEmpty() {
-        return (this.labels == null) || this.labels.isEmpty();
+        return this.labels.isEmpty();
     }
 
 }

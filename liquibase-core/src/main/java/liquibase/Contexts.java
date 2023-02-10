@@ -71,7 +71,7 @@ public class Contexts {
 
 
     public boolean isEmpty() {
-        return (this.contextStore == null) || this.contextStore.isEmpty();
+        return this.contextStore.isEmpty();
     }
 
     public Set<String> getContexts() {

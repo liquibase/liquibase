@@ -103,9 +103,6 @@ public abstract class JdbcSnapshotGenerator implements SnapshotGenerator {
     }
 
     protected void updateListeners(String message) {
-        if (this.statusListeners == null) {
-            return;
-        }
         Scope.getCurrentScope().getLog(getClass()).fine(message);
         for (DiffStatusListener listener : this.statusListeners) {
             listener.statusUpdate(message);

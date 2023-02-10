@@ -878,7 +878,7 @@ public class ChangeSet implements Conditional, ChangeLogChild {
      * Returns whether custom rollback steps are specified for this changeSet, or whether auto-generated ones should be used
      */
     public boolean hasCustomRollbackChanges() {
-        return (rollback != null) && (rollback.getChanges() != null) && !rollback.getChanges().isEmpty();
+        return (rollback.getChanges() != null) && !rollback.getChanges().isEmpty();
     }
 
     /**
@@ -1105,7 +1105,7 @@ public class ChangeSet implements Conditional, ChangeLogChild {
 
 
     public boolean supportsRollback(Database database) {
-        if ((rollback != null) && (rollback.getChanges() != null) && !rollback.getChanges().isEmpty()) {
+        if ((rollback.getChanges() != null) && !rollback.getChanges().isEmpty()) {
             return true;
         }
 
@@ -1350,7 +1350,7 @@ public class ChangeSet implements Conditional, ChangeLogChild {
         }
 
         if ("rollback".equals(field)) {
-            if ((rollback != null) && (rollback.getChanges() != null) && !rollback.getChanges().isEmpty()) {
+            if ((rollback.getChanges() != null) && !rollback.getChanges().isEmpty()) {
                 return rollback;
             } else {
                 return null;

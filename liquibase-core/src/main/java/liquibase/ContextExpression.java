@@ -91,7 +91,7 @@ public class ContextExpression {
     }
 
     public boolean isEmpty() {
-        return (this.contexts == null) || this.contexts.isEmpty();
+        return this.contexts.isEmpty();
     }
 
     public static boolean matchesAll(Collection<ContextExpression> expressions, Contexts contexts) {
