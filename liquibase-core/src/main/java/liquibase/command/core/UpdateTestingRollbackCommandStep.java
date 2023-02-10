@@ -10,7 +10,7 @@ public class UpdateTestingRollbackCommandStep extends AbstractCliWrapperCommandS
 
     public static final CommandArgumentDefinition<String> CHANGELOG_FILE_ARG;
     public static final CommandArgumentDefinition<String> URL_ARG;
-    public static final CommandArgumentDefinition<String> DEFAULT_SCHEMA_NAME;
+    public static final CommandArgumentDefinition<String> DEFAULT_SCHEMA_NAME_ARG;
     public static final CommandArgumentDefinition<String> DEFAULT_CATALOG_NAME_ARG;
     public static final CommandArgumentDefinition<String> USERNAME_ARG;
     public static final CommandArgumentDefinition<String> PASSWORD_ARG;
@@ -21,12 +21,16 @@ public class UpdateTestingRollbackCommandStep extends AbstractCliWrapperCommandS
     public static final CommandArgumentDefinition<String> DRIVER_ARG;
     public static final CommandArgumentDefinition<String> DRIVER_PROPERTIES_FILE_ARG;
 
+    /** Outdated field. Use {@link UpdateTestingRollbackCommandStep#DEFAULT_SCHEMA_NAME_ARG} instead, which is of the same value. */
+    @Deprecated()
+    public static final CommandArgumentDefinition<String> DEFAULT_SCHEMA_NAME;
+
     static {
         CommandBuilder builder = new CommandBuilder(COMMAND_NAME);
 
         URL_ARG = builder.argument(CommonArgumentNames.URL, String.class).required()
                 .description("The JDBC database connection URL").build();
-        DEFAULT_SCHEMA_NAME = builder.argument("defaultSchemaName", String.class)
+        DEFAULT_SCHEMA_NAME_ARG = builder.argument("defaultSchemaName", String.class)
                 .description("The default schema name to use for the database connection").build();
         DEFAULT_CATALOG_NAME_ARG = builder.argument("defaultCatalogName", String.class)
                 .description("The default catalog name to use for the database connection").build();
@@ -51,6 +55,9 @@ public class UpdateTestingRollbackCommandStep extends AbstractCliWrapperCommandS
                 .description("Fully-qualified class which specifies a ChangeExecListener").build();
         CHANGE_EXEC_LISTENER_PROPERTIES_FILE_ARG = builder.argument("changeExecListenerPropertiesFile", String.class)
                 .description("Path to a properties file for the ChangeExecListenerClass").build();
+
+        //remove the following line once the deprecated field in this class has been eliminated:
+        DEFAULT_SCHEMA_NAME = DEFAULT_SCHEMA_NAME_ARG;
     }
 
     @Override

@@ -19,7 +19,7 @@
 		<postgresql.version>42.5.1</postgresql.version>
 		<mssql.version>11.2.1.jre8</mssql.version>
 		<mysql.version>8.0.21</mysql.version>
-		<mariadb.version>3.1.0</mariadb.version>
+		<mariadb.version>3.1.2</mariadb.version>
 		<oracle.version>21.8.0.0</oracle.version>
 		<sqlite.version>3.40.0.0</sqlite.version>
 		<db2.version>11.5.8.0</db2.version>
@@ -76,7 +76,7 @@
         <dependency>
             <groupId>net.snowflake</groupId>
             <artifactId>snowflake-jdbc</artifactId>
-            <version>3.13.26</version>
+            <version>3.13.27</version>
         </dependency>
 
         <!--        CANNOT INCLUDE MYSQL FOR LICENSING REASONS -->
