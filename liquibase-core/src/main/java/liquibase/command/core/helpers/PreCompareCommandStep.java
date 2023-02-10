@@ -2,6 +2,7 @@ package liquibase.command.core.helpers;
 
 import liquibase.command.*;
 import liquibase.command.core.DiffCommandStep;
+import liquibase.command.providers.ReferenceDatabase;
 import liquibase.database.Database;
 import liquibase.diff.compare.CompareControl;
 import liquibase.diff.output.ObjectChangeFilter;
@@ -77,7 +78,7 @@ public class PreCompareCommandStep extends AbstractCommandStep {
     @Override
     public void run(CommandResultsBuilder resultsBuilder) throws Exception {
         CommandScope commandScope = resultsBuilder.getCommandScope();
-        Database targetDatabase = (Database) commandScope.getDependency(Database.class);
+        Database targetDatabase = getTargetDatabase(commandScope);
         ObjectChangeFilter objectChangeFilter = this.getObjectChangeFilter(commandScope);
         CompareControl compareControl = this.getcompareControl(commandScope, targetDatabase);
         Class<? extends DatabaseObject>[] snapshotTypes = getSnapshotTypes(commandScope);
@@ -85,6 +86,14 @@ public class PreCompareCommandStep extends AbstractCommandStep {
         resultsBuilder.addResult(COMPARE_CONTROL_RESULT, compareControl)
                       .addResult(OBJECT_CHANGE_FILTER_RESULT, objectChangeFilter)
                       .addResult(SNAPSHOT_TYPES_RESULT, snapshotTypes);
+    }
+
+    private static Database getTargetDatabase(CommandScope commandScope) {
+        Object database = commandScope.getDependency(Database.class);
+        if (database == null) {
+            database = commandScope.getDependency(ReferenceDatabase.class);
+        }
+        return (Database) database;
     }
 
     private static Class<? extends DatabaseObject>[] getSnapshotTypes(CommandScope commandScope) {
