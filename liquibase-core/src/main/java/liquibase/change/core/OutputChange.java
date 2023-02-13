@@ -27,7 +27,7 @@ public class OutputChange extends AbstractChange {
         return validate;
     }
 
-    @DatabaseChangeProperty(description = "Message to output", exampleValue = "Make sure you feed the cat", serializationType = LiquibaseSerializable.SerializationType.DIRECT_VALUE)
+    @DatabaseChangeProperty(description = "Message to send to output", exampleValue = "Make sure you feed the cat", serializationType = LiquibaseSerializable.SerializationType.DIRECT_VALUE)
     public String getMessage() {
         return message;
     }
@@ -36,7 +36,8 @@ public class OutputChange extends AbstractChange {
         this.message = StringUtil.trimToNull(message);
     }
 
-    @DatabaseChangeProperty(description = "Target for message. Possible values: STDOUT, STDERR, FATAL, WARN, INFO, DEBUG. Default value: STDERR", exampleValue = "STDERR")
+    @DatabaseChangeProperty(description = "Target for message. Possible values: STDOUT, STDERR, FATAL, WARN, INFO, DEBUG. Default: STDERR",
+        exampleValue = "STDERR")
     public String getTarget() {
         if (target == null) {
             return "STDERR";

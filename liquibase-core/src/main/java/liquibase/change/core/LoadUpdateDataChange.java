@@ -46,7 +46,7 @@ public class LoadUpdateDataChange extends LoadDataChange {
         this.primaryKey = primaryKey;
     }
 
-    @DatabaseChangeProperty(description = "Comma delimited list of the columns for the primary key",
+    @DatabaseChangeProperty(description = "Comma-delimited list of columns for the primary key",
             requiredForDatabase = ALL)
     public String getPrimaryKey() {
         return primaryKey;
@@ -83,7 +83,7 @@ public class LoadUpdateDataChange extends LoadDataChange {
             List<LoadDataColumnConfig> columns, ChangeSet changeSet, ResourceAccessor resourceAccessor) {
         // TODO: Not supported yet. When this is implemented, we can remove hasPreparedStatementsImplemented().
         throw new UnsupportedOperationException("Executable Prepared Statements are not supported for " +
-                "LoadUpdateDataChange yet . Very sorry.");
+                "LoadUpdateDataChange yet. Very sorry.");
     }
 
     @Override
