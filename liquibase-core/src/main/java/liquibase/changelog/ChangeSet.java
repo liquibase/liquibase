@@ -1493,10 +1493,12 @@ public class ChangeSet implements Conditional, ChangeLogChild {
     }
 
     private void addSqlMdc(Change change, Database database, boolean generateRollbackStatements) throws RollbackImpossibleException {
-        SqlStatement[] statements = generateRollbackStatements ? change.generateRollbackStatements(database) : change.generateStatements(database);
-        String sqlStatementsMdc = Arrays.stream(statements)
-                .map(statement -> SqlUtil.getSqlString(statement, SqlGeneratorFactory.getInstance(), database))
-                .collect(Collectors.joining("\n"));
-        Scope.getCurrentScope().addMdcValue(MdcKey.CHANGESET_SQL, sqlStatementsMdc);
+        if (change.supports(database)) {
+            SqlStatement[] statements = generateRollbackStatements ? change.generateRollbackStatements(database) : change.generateStatements(database);
+            String sqlStatementsMdc = Arrays.stream(statements)
+                    .map(statement -> SqlUtil.getSqlString(statement, SqlGeneratorFactory.getInstance(), database))
+                    .collect(Collectors.joining("\n"));
+            Scope.getCurrentScope().addMdcValue(MdcKey.CHANGESET_SQL, sqlStatementsMdc);
+        }
     }
 }
