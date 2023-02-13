@@ -4,11 +4,28 @@ import liquibase.exception.LiquibaseException;
 
 import java.io.IOException;
 import java.io.Writer;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
 public class TableOutput {
+    /**
+     *
+     * This method outputs the input data in a tabular format *without* wrapping of lines
+     *
+     * @param table                    2-dimensional array of data
+     * @param leftJustifiedRows        If true then add "-" to format string
+     * @param writer                   Writer to use for output
+     *
+     */
+    public static void formatUnwrappedOutput(List<List<String>> table, boolean leftJustifiedRows, Writer writer) throws LiquibaseException {
+        formatOutput(table, computeMaxWidths(table), leftJustifiedRows, writer);
+    }
     /**
      *
      * This method outputs the input data in a tabular format with wrapping of lines
@@ -137,7 +154,8 @@ public class TableOutput {
                 }
             } while (isMultiLine);
             if (!endLineAdded) {
-                finalTableList.add(new String[]{""});
+                String[] emptyCells = Collections.nCopies(row.length, "").toArray(new String[row.length]);
+                finalTableList.add(emptyCells);
             }
         }
         String[][] finalTable = new String[finalTableList.size()][finalTableList.get(0).length];
@@ -151,36 +169,26 @@ public class TableOutput {
          *
          * Map columnLengths is <column_number, column_length>
          */
-        Map<Integer, Integer> columnLengths = new HashMap<>();
-        Arrays.stream(finalTable).forEach(a -> {
-            for (int i=0; i < a.length; i++) {
-                columnLengths.putIfAbsent(i, 0);
-                if (a[i] != null && columnLengths.get(i) < a[i].length()) {
-                    columnLengths.put(i, a[i].length());
-                }
-            }
-        });
+        List<Integer> columnLengths = computeMaxWidths(finalTable);
 
         /*
          * Prepare format String
          */
         final StringBuilder formatString = new StringBuilder();
         String flag = leftJustifiedRows ? "-" : "";
-        columnLengths.forEach((key, value) -> formatString.append("| %" + flag + value + "s "));
+        columnLengths.forEach((value) -> formatString.append("| %" + flag + value + "s "));
         formatString.append("|\n");
 
         /*
          * Prepare line for top, bottom & below header row.
          */
-        String line = columnLengths.entrySet().stream().reduce("", (ln, b) -> {
-            StringBuilder tempLine = new StringBuilder("+-");
-            for (int i=0; i < b.getValue(); ++i) {
-                tempLine.append("-");
-            }
-            tempLine.append("-");
-            return ln + tempLine;
-        }, (a, b) -> a + b);
-        line = line + "+\n";
+        StringBuilder builder = new StringBuilder();
+        for (Integer columnLength : columnLengths) {
+            builder.append("+-");
+            builder.append(String.join("", Collections.nCopies(columnLength, "-")));
+            builder.append("-");
+        }
+        String line = builder.append("+\n").toString();
 
         /*
          * Output table
@@ -199,6 +207,47 @@ public class TableOutput {
         } catch (IOException ioe) {
             throw new LiquibaseException(ioe);
         }
+    }
+
+    /**
+     * Compute the size of the largest string of each column of the provided table
+     * @param rows the provided table to compute widths from
+     * @return an empty immutable list if the provided table is empty
+     * @throws RuntimeException if rows is null or the column count is not the same for every row
+     */
+    public static List<Integer> computeMaxWidths(List<List<String>> rows) {
+        return computeMaxWidths(rows.stream().map(row -> row.toArray(new String[0])).toArray(String[][]::new));
+    }
+
+    /**
+     * Compute the size of the largest string of each column of the provided table
+     * @param rows the provided table to compute widths from
+     * @return an empty immutable list if the provided table is empty
+     * @throws RuntimeException if rows is null or the column count is not the same for every row
+     */
+    public static List<Integer> computeMaxWidths(String[][] rows) {
+        if (rows.length == 0) {
+            return Collections.emptyList();
+        }
+        int columnCount = rows[0].length;
+        List<Integer> widths = new ArrayList<>(Collections.nCopies(columnCount, 0));
+        for (String[] row : rows) {
+            if (row.length != columnCount) {
+                throw new RuntimeException(
+                        String.format("could not compute table width: heterogeneous tables are not supported. " +
+                                        "Expected each row to have %d column(s), found %d",
+                                columnCount,
+                                row.length)
+                );
+            }
+            for (int i = 0; i < row.length; i++) {
+                String column = row[i];
+                if (column.length() > widths.get(i)) {
+                    widths.set(i, column.length());
+                }
+            }
+        }
+        return widths;
     }
 
     private static boolean allEmptyStrings(String[] strings) {

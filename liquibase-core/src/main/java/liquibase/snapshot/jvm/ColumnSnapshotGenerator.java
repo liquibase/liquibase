@@ -200,7 +200,7 @@ public class ColumnSnapshotGenerator extends JdbcSnapshotGenerator {
                     Column column = readColumn(row, relation, database);
                     setAutoIncrementDetails(column, database, snapshot);
                     populateValidateNullableIfNeeded(column, metaDataNotNullConst, database);
-                    column.setAttribute(LIQUIBASE_COMPLETE, !column.isNullable());
+                    column.setAttribute(LIQUIBASE_COMPLETE, true);
                     relation.getColumns().add(column);
                 }
             } catch (SQLException e) {
