@@ -157,7 +157,7 @@ public class ChangeLogIterator {
             executor = Scope.getCurrentScope().getSingleton(ExecutorService.class).getExecutor(executorName, env.getTargetDatabase());
         }
         catch (UnexpectedLiquibaseException ule) {
-            String message = String.format(MSG_COULD_NOT_FIND_EXECUTOR, executorName, changeSet.toString());
+            String message = String.format(MSG_COULD_NOT_FIND_EXECUTOR, executorName, changeSet);
             Scope.getCurrentScope().getLog(getClass()).severe(message);
             throw new LiquibaseException(message);
         }
