@@ -395,7 +395,7 @@ public class UniqueConstraintSnapshotGenerator extends JdbcSnapshotGenerator {
             List<Map<String, ?>> rows = Scope.getCurrentScope().getSingleton(ExecutorService.class).getExecutor("jdbc", database).queryForList(new RawSqlStatement(sql));
 
             if (bulkQuery) {
-                columnCache = new HashMap<>();
+                columnCache = new ConcurrentHashMap<>();
                 snapshot.setScratchData(cacheKey, columnCache);
                 for (Map<String, ?> row : rows) {
                     String key = getCacheKey(row, database);
