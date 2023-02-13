@@ -873,7 +873,7 @@ public class StringUtil {
         }
         boolean startOfNewLine = false;
         int idxOfDoubleDash = -1;
-        for (int i = 0; i < sqlString.length() - 1; i++) {
+        for (int i = 0; i < sqlString.trim().length() - 1; i++) {
             char c = sqlString.charAt(i);
             // we have not found the start of the line comment yet
             if (c == '-') {
