@@ -9,17 +9,22 @@ import liquibase.database.core.OracleDatabase;
 import liquibase.datatype.DataTypeFactory;
 import liquibase.datatype.LiquibaseDataType;
 import liquibase.datatype.core.*;
+import liquibase.sql.Sql;
+import liquibase.sqlgenerator.SqlGeneratorFactory;
 import liquibase.statement.DatabaseFunction;
+import liquibase.statement.SqlStatement;
 import liquibase.structure.core.Column;
 import liquibase.structure.core.DataType;
 
 import java.math.BigDecimal;
 import java.sql.Types;
+import java.util.Arrays;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Scanner;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import java.util.stream.Collectors;
 
 import static java.util.Locale.US;
 
@@ -340,5 +345,16 @@ public abstract class SqlUtil {
         }
         matcher.appendTail(sb);
         return sb.toString();
+    }
+
+    public static String getSqlString(SqlStatement statement, SqlGeneratorFactory sqlGeneratorFactory, Database database) {
+        Sql[] sqlStatements = sqlGeneratorFactory.generateSql(statement, database);
+        if (sqlStatements != null) {
+            return Arrays.stream(sqlStatements)
+                    .map(sql -> sql.toSql() + sql.getEndDelimiter())
+                    .collect(Collectors.joining("\n"));
+        } else {
+            return "";
+        }
     }
 }

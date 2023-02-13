@@ -424,7 +424,6 @@ public class JdbcExecutor extends AbstractExecutor {
                         statement = statement.replaceFirst("[\\s\\r\\n]*[^*]/[\\s\\r\\n]*$", "");
                     }
                 }
-                Scope.getCurrentScope().addMdcValue(MdcKey.CHANGESET_SQL, statement);
 
                 for (SqlListener listener : Scope.getCurrentScope().getListeners(SqlListener.class)) {
                     listener.writeSqlWillRun(String.format("%s", statement));

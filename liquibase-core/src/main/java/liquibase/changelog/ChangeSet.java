@@ -25,14 +25,18 @@ import liquibase.precondition.ErrorPrecondition;
 import liquibase.precondition.FailedPrecondition;
 import liquibase.precondition.core.PreconditionContainer;
 import liquibase.resource.ResourceAccessor;
+import liquibase.sql.Sql;
 import liquibase.sql.visitor.SqlVisitor;
 import liquibase.sql.visitor.SqlVisitorFactory;
+import liquibase.sqlgenerator.SqlGeneratorFactory;
 import liquibase.statement.SqlStatement;
 import liquibase.util.ISODateFormat;
+import liquibase.util.SqlUtil;
 import liquibase.util.StreamUtil;
 import liquibase.util.StringUtil;
 
 import java.util.*;
+import java.util.stream.Collectors;
 
 /**
  * Encapsulates a changeSet and all its associated changes.
@@ -691,6 +695,7 @@ public class ChangeSet implements Conditional, ChangeLogChild {
                             executor.comment("WARNING The following SQL may change each run and therefore is possibly incorrect and/or invalid:");
                         }
 
+                        addSqlMdc(change, database);
 
                         database.executeStatements(change, databaseChangeLog, sqlVisitors);
                         log.info(change.getConfirmationMessage());
@@ -1483,5 +1488,13 @@ public class ChangeSet implements Conditional, ChangeLogChild {
         Scope.getCurrentScope().addMdcValue(MdcKey.CHANGESET_COMMENT, commentMdc);
         Scope.getCurrentScope().addMdcValue(MdcKey.CHANGESET_LABEL, labelMdc);
         Scope.getCurrentScope().addMdcValue(MdcKey.CHANGESET_CONTEXT, contextsMdc);
+    }
+
+    private void addSqlMdc(Change change, Database database) {
+        SqlStatement[] statements = change.generateStatements(database);
+        String sqlStatementsMdc = Arrays.stream(statements)
+                .map(statement -> SqlUtil.getSqlString(statement, SqlGeneratorFactory.getInstance(), database))
+                .collect(Collectors.joining("\n"));
+        Scope.getCurrentScope().addMdcValue(MdcKey.CHANGESET_SQL, sqlStatementsMdc);
     }
 }
