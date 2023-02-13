@@ -375,7 +375,7 @@ public class CreateTableGenerator extends AbstractSqlGenerator<CreateTableStatem
         String sql = buffer.toString().replaceFirst(",\\s*$", "") + ")";
 
         if ((database instanceof MySQLDatabase) && (mysqlTableOptionStartWith != null)) {
-            Scope.getCurrentScope().getLog(getClass()).info("[MySQL] Using last startWith statement ("+mysqlTableOptionStartWith.toString()+") as table option.");
+            Scope.getCurrentScope().getLog(getClass()).info("[MySQL] Using last startWith statement ("+ mysqlTableOptionStartWith +") as table option.");
             sql += " " + ((MySQLDatabase) database).getTableOptionAutoIncrementStartWithClause(mysqlTableOptionStartWith);
         }
 
