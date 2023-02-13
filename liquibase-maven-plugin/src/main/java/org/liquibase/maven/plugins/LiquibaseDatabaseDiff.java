@@ -276,6 +276,7 @@ public class LiquibaseDatabaseDiff extends AbstractLiquibaseChangeLogMojo {
                 } else {
                     liquibaseCommand.addArgumentValue(PreCompareCommandStep.SNAPSHOT_TYPES_ARG, DiffCommandStep.parseSnapshotTypes(diffTypes));
                 }
+                liquibaseCommand.execute();
             }
         }
     }
