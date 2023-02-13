@@ -270,7 +270,7 @@ public class ColumnSnapshotGenerator extends JdbcSnapshotGenerator {
                     column.setNullable(true);
                 } else if (nullable == DatabaseMetaData.columnNullableUnknown) {
                     Scope.getCurrentScope().getLog(getClass()).info("Unknown nullable state for column "
-                            + column.toString() + ". Assuming nullable");
+                            + column + ". Assuming nullable");
                     column.setNullable(true);
                 }
             }
