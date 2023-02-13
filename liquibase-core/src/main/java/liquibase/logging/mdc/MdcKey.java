@@ -31,5 +31,6 @@ public class MdcKey {
     public static final String CHANGESETS_ROLLED_BACK = "changesetsRolledback";
     public static final String ROLLBACK_ONE_CHANGESET_FORCE = "rollbackOneChangesetForce";
     public static final String ROLLBACK_ONE_UPDATE_FORCE = "rollbackOneUpdateForce";
+    public static final String ROLLBACK_TO_DATE = "rollbackToDate";
     public static final String DATABASE_CHANGELOG_SQL = "databaseChangelogSQL";
 }
