@@ -1,8 +1,12 @@
 package liquibase.command.core;
 
+import liquibase.UpdateSummaryEnum;
 import liquibase.command.*;
 import liquibase.configuration.ConfigurationValueObfuscator;
 import liquibase.exception.CommandExecutionException;
+
+import java.util.Arrays;
+import java.util.List;
 
 public class UpdateCommandStep extends AbstractCliWrapperCommandStep {
 
@@ -22,6 +26,7 @@ public class UpdateCommandStep extends AbstractCliWrapperCommandStep {
     public static final CommandArgumentDefinition<String> CHANGE_EXEC_LISTENER_PROPERTIES_FILE_ARG;
     public static final CommandArgumentDefinition<String> DRIVER_ARG;
     public static final CommandArgumentDefinition<String> DRIVER_PROPERTIES_FILE_ARG;
+    public static final CommandArgumentDefinition<UpdateSummaryEnum> SHOW_SUMMARY;
 
     /** Outdated field. Use {@link UpdateCommandStep#DEFAULT_SCHEMA_NAME_ARG} instead, which is of the same value. */
     @Deprecated()
@@ -57,6 +62,25 @@ public class UpdateCommandStep extends AbstractCliWrapperCommandStep {
                 .description("Fully-qualified class which specifies a ChangeExecListener").build();
         CHANGE_EXEC_LISTENER_PROPERTIES_FILE_ARG = builder.argument("changeExecListenerPropertiesFile", String.class)
                 .description("Path to a properties file for the ChangeExecListenerClass").build();
+        SHOW_SUMMARY = builder.argument("showSummary", UpdateSummaryEnum.class)
+                .description("Type of update results summary to show.  Values can be 'off', 'summary', or 'verbose'.")
+                .defaultValue(UpdateSummaryEnum.SUMMARY)
+                .setValueHandler(value -> {
+                    if (value == null) {
+                        return null;
+                    }
+                    if (value instanceof String && ! value.equals("")) {
+                        final List<String> validValues = Arrays.asList("OFF", "SUMMARY", "VERBOSE");
+                        if (!validValues.contains(((String) value).toUpperCase())) {
+                            throw new IllegalArgumentException("Illegal value for `showUpdateSummary'.  Valid values are 'OFF', 'SUMMARY', or 'VERBOSE'");
+                        }
+                        return UpdateSummaryEnum.valueOf(((String) value).toUpperCase());
+                    } else if (value instanceof UpdateSummaryEnum) {
+                        return (UpdateSummaryEnum) value;
+                    }
+                    return null;
+                })
+                .build();
 
         //remove the following line once the deprecated field in this class has been eliminated:
         DEFAULT_SCHEMA_NAME = DEFAULT_SCHEMA_NAME_ARG;

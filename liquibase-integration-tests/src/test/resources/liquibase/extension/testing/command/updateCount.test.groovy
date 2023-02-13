@@ -32,6 +32,8 @@ Optional Args:
   password (String) Password to use to connect to the database
     Default: null
     OBFUSCATED
+  showSummary (UpdateSummaryEnum) Type of update results summary to show.  Values can be 'off', 'summary', or 'verbose'.
+    Default: SUMMARY
   username (String) Username to use to connect to the database
     Default: null
 """
@@ -50,12 +52,74 @@ Optional Args:
         ]
     }
 
+    run "Happy path with verbose summary output", {
+        arguments = [
+                url:      { it.url },
+                username: { it.username },
+                password: { it.password },
+                count        : 1,
+                showSummary  : "verbose",
+                changelogFile: "changelogs/h2/complete/simple.changelog.xml",
+        ]
+
+        expectedResults = [
+                statusCode   : 0
+        ]
+    }
+
+    run "Mismatched DBMS causes not deployed summary message", {
+        arguments = [
+                url:        { it.url },
+                username:   { it.username },
+                password:   { it.password },
+                count        : 1,
+                showSummary  : "verbose",
+                changelogFile: "changelogs/h2/complete/mismatchedDbms.changelog.xml"
+        ]
+
+        expectedResults = [
+                statusCode   : 0
+        ]
+
+        expectedUI = [
+"""
+UPDATE SUMMARY
+Run:                          1
+Previously run:               1
+DBMS mismatch:                1
+Not in filter:                0
+-------------------------------
+Total change sets:            3
+
++--------------------------------------------------------------+--------------------------------+
+| Changeset Info                                               | Reason Skipped                 |
++--------------------------------------------------------------+--------------------------------+
+|                                                              | mismatched DBMS value of 'foo' |
+| changelogs/h2/complete/mismatchedDbms.changelog.xml::1::nvox |                                |
+| land                                                         |                                |
++--------------------------------------------------------------+--------------------------------+
+"""
+        ]
+    }
+
     run "Run without a URL throws an exception", {
         arguments = [
                 url: "",
                 count : 1
         ]
         expectedException = CommandValidationException.class
+    }
+
+    run "Run with a bad show summary option throws an exception", {
+        arguments = [
+                url                    : { it.url },
+                username               : { it.username },
+                password               : { it.password },
+                changelogFile          : 'changelogs/h2/complete/simple.changelog.xml',
+                showSummary: "foo",
+                count : 1
+        ]
+        expectedException = IllegalArgumentException.class
     }
 
     run "Run without a changeLogFile throws an exception", {
