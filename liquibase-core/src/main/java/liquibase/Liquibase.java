@@ -276,7 +276,7 @@ public class Liquibase implements AutoCloseable {
                 // Iterate to find the change sets which will be skipped
                 //
                 StatusVisitor statusVisitor = new StatusVisitor(database);
-                ChangeLogIterator shouldRunIterator = getStandardStatusChangelogIterator(contexts, labelExpression, true, changeLog);
+                ChangeLogIterator shouldRunIterator = getStandardStatusChangelogIterator(contexts, labelExpression, changeLog);
                 shouldRunIterator.run(statusVisitor, new RuntimeEnvironment(database, contexts, labelExpression));
 
                 Connection connection = getConnection(changeLog);
@@ -669,19 +669,12 @@ public class Liquibase implements AutoCloseable {
         return new RollbackVisitor(database, changeExecListener);
     }
 
-    protected ChangeLogIterator getStandardChangelogIterator(Contexts contexts, LabelExpression labelExpression,
-                                                             DatabaseChangeLog changeLog) throws DatabaseException {
-       return getStandardChangelogIterator(contexts, labelExpression, false, changeLog);
-    }
-
     /**
      *
      * Return a ChangeLogIterator constructed with standard filters
      *
      * @param   contexts                           Contexts to filter for
      * @param   labelExpression                    Labels to filter for
-     * @param   collectAllReasons                  Flag to control whether all skip reasons are accumulated
-     *                                             default value is false to only gather the first
      * @param   changeLog                          The changelog to process
      *
      * @return  ChangeLogIterator
@@ -689,7 +682,6 @@ public class Liquibase implements AutoCloseable {
      *
      */
     protected ChangeLogIterator getStandardChangelogIterator(Contexts contexts, LabelExpression labelExpression,
-                                                             boolean collectAllReasons,
                                                              DatabaseChangeLog changeLog) throws DatabaseException {
         return new ChangeLogIterator(changeLog,
                 new ShouldRunChangeSetFilter(database),
@@ -698,13 +690,13 @@ public class Liquibase implements AutoCloseable {
                 new DbmsChangeSetFilter(database),
                 new IgnoreChangeSetFilter());
     }
+
     /**
      *
      * Return a StatusChangeLogIterator constructed with standard filters
      *
      * @param   contexts                           Contexts to filter for
      * @param   labelExpression                    Labels to filter for
-     * @param   collectAllReasons                  Flag to control whether all skip reasons are accumulated
      *                                             default value is false to only gather the first
      * @param   changeLog                          The changelog to process
      *
@@ -713,9 +705,8 @@ public class Liquibase implements AutoCloseable {
      *
      */
     protected ChangeLogIterator getStandardStatusChangelogIterator(Contexts contexts, LabelExpression labelExpression,
-                                                                   boolean collectAllReasons,
                                                                    DatabaseChangeLog changeLog) throws DatabaseException {
-        return new ChangeLogIterator(changeLog,
+        return new StatusChangeLogIterator(changeLog,
                 new ShouldRunChangeSetFilter(database),
                 new ContextChangeSetFilter(contexts),
                 new LabelChangeSetFilter(labelExpression),
@@ -2615,7 +2606,6 @@ public class Liquibase implements AutoCloseable {
      * Checks changelogs for bad MD5Sums and preconditions before attempting a migration
      */
     public void validate() throws LiquibaseException {
-
         DatabaseChangeLog changeLog = getDatabaseChangeLog(true);
         changeLog.validate(database);
     }
