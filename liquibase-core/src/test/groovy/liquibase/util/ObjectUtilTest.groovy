@@ -4,6 +4,7 @@ import liquibase.change.ColumnConfig
 import liquibase.change.ConstraintsConfig
 import liquibase.change.core.AddAutoIncrementChange
 import liquibase.change.core.CreateTableChange
+import liquibase.command.core.HistoryFormat
 import liquibase.database.ObjectQuotingStrategy
 import liquibase.exception.UnexpectedLiquibaseException
 import liquibase.precondition.core.PreconditionContainer
@@ -84,6 +85,7 @@ class ObjectUtilTest extends Specification {
         "2021-05-09"                           | Date                  | new ISODateFormat().parse("2021-05-09")
         ObjectQuotingStrategy.LEGACY           | String                | "LEGACY"
         "LEGACY"                               | ObjectQuotingStrategy | ObjectQuotingStrategy.LEGACY
+        "legacy"                               | ObjectQuotingStrategy | ObjectQuotingStrategy.LEGACY
         "1"                                    | Integer               | Integer.valueOf(1)
         Long.valueOf(1)                        | Integer               | Integer.valueOf(1)
         Long.valueOf(1)                        | Short                 | Short.valueOf("1")
@@ -115,6 +117,21 @@ class ObjectUtilTest extends Specification {
         Object.class.name                      | Class                 | Object
         "/path/to/file.txt"                    | File                  | new File("/path/to/file.txt")
 
+    }
+
+    @Unroll
+    def "convert with invalid inputs throws an exception"() {
+        when:
+        ObjectUtil.convert(input, targetClass)
+
+        then:
+        def e = thrown(IllegalArgumentException)
+        e.message == expected
+
+        where:
+        input                                  | targetClass            | expected
+        "test"                                 | HistoryFormat          | "Invalid value test. Acceptable values are TABULAR, TEXT"
+        "xyz"                                  | Integer                | "java.lang.NumberFormatException: For input string: \"xyz\""
     }
 
     @Unroll
