@@ -741,7 +741,7 @@ public abstract class AbstractLiquibaseMojo extends AbstractMojo {
                             defaultChangeExecListener = new DefaultChangeExecListener(listener);
                             liquibase.setChangeExecListener(defaultChangeExecListener);
 
-                            getLog().debug("expressionVars = " + String.valueOf(expressionVars));
+                            getLog().debug("expressionVars = " + expressionVars);
 
                             if (expressionVars != null) {
                                 for (Map.Entry<Object, Object> var : expressionVars.entrySet()) {
@@ -749,7 +749,7 @@ public abstract class AbstractLiquibaseMojo extends AbstractMojo {
                                 }
                             }
 
-                            getLog().debug("expressionVariables = " + String.valueOf(expressionVariables));
+                            getLog().debug("expressionVariables = " + expressionVariables);
                             if (expressionVariables != null) {
                                 for (Map.Entry var : (Set<Map.Entry>) expressionVariables.entrySet()) {
                                     if (var.getValue() != null) {
