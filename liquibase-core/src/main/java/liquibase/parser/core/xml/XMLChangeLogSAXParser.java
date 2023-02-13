@@ -17,7 +17,6 @@ import javax.xml.parsers.SAXParser;
 import javax.xml.parsers.SAXParserFactory;
 import java.io.IOException;
 import java.io.InputStream;
-import java.nio.file.InvalidPathException;
 
 public class XMLChangeLogSAXParser extends AbstractChangeLogParser {
 
@@ -32,7 +31,7 @@ public class XMLChangeLogSAXParser extends AbstractChangeLogParser {
 
     public XMLChangeLogSAXParser() {
         saxParserFactory = SAXParserFactory.newInstance();
-        saxParserFactory.setValidating(true);
+        saxParserFactory.setValidating(GlobalConfiguration.VALIDATE_XML_CHANGELOG_FILES.getCurrentValue());
         saxParserFactory.setNamespaceAware(true);
         if (GlobalConfiguration.SECURE_PARSING.getCurrentValue()) {
             try {
