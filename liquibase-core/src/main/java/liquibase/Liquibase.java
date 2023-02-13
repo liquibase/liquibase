@@ -1071,8 +1071,10 @@ public class Liquibase implements AutoCloseable {
     }
 
     private void addCommandFiltersMdc(LabelExpression labelExpression, Contexts contexts) {
-        Scope.getCurrentScope().addMdcValue(MdcKey.COMMAND_LABEL_FILTER, labelExpression != null ? labelExpression.toString(): "");
-        Scope.getCurrentScope().addMdcValue(MdcKey.COMMAND_CONTEXT_FILTER, contexts != null ? contexts.toString() : "");
+        String labelFilterMdc = labelExpression != null && labelExpression.getOriginalString() != null ? labelExpression.getOriginalString() : "";
+        String contextFilterMdc = contexts != null ? contexts.toString() : "";
+        Scope.getCurrentScope().addMdcValue(MdcKey.COMMAND_LABEL_FILTER, labelFilterMdc);
+        Scope.getCurrentScope().addMdcValue(MdcKey.COMMAND_CONTEXT_FILTER, contextFilterMdc);
     }
 
     private void generateDeploymentId() {
