@@ -695,7 +695,7 @@ public class ChangeSet implements Conditional, ChangeLogChild {
                             executor.comment("WARNING The following SQL may change each run and therefore is possibly incorrect and/or invalid:");
                         }
 
-                        addSqlMdc(change, database);
+                        addSqlMdc(change, database, false);
 
                         database.executeStatements(change, databaseChangeLog, sqlVisitors);
                         log.info(change.getConfirmationMessage());
@@ -830,6 +830,7 @@ public class ChangeSet implements Conditional, ChangeLogChild {
             if (hasCustomRollbackChanges()) {
                 final List<SqlStatement> statements = new LinkedList<>();
                 for (Change change : rollback.getChanges()) {
+                    addSqlMdc(change, database, true);
                     if (this.ignoreSpecificChangeTypes(change, database)) {
                         continue;
                     }
@@ -857,6 +858,7 @@ public class ChangeSet implements Conditional, ChangeLogChild {
                 List<Change> changes = getChanges();
                 for (int i = changes.size() - 1; i >= 0; i--) {
                     Change change = changes.get(i);
+                    addSqlMdc(change, database, true);
                     if (change instanceof RawSQLChange && this.getFilePath().toLowerCase().endsWith(".sql")) {
                         throw new RollbackFailedException("Liquibase does not support automatic rollback generation for raw " +
                             "sql changes (did you mean to specify keyword \"empty\" to ignore rolling back this change?)");
@@ -1490,8 +1492,8 @@ public class ChangeSet implements Conditional, ChangeLogChild {
         Scope.getCurrentScope().addMdcValue(MdcKey.CHANGESET_CONTEXT, contextsMdc);
     }
 
-    private void addSqlMdc(Change change, Database database) {
-        SqlStatement[] statements = change.generateStatements(database);
+    private void addSqlMdc(Change change, Database database, boolean isRollback) throws RollbackImpossibleException {
+        SqlStatement[] statements = isRollback ? change.generateRollbackStatements(database) : change.generateStatements(database);
         String sqlStatementsMdc = Arrays.stream(statements)
                 .map(statement -> SqlUtil.getSqlString(statement, SqlGeneratorFactory.getInstance(), database))
                 .collect(Collectors.joining("\n"));
