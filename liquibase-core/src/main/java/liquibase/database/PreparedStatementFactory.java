@@ -30,6 +30,6 @@ public final class PreparedStatementFactory {
 
     @Override
     public String toString() {
-        return "[con: " + con.toString() + "]";
+        return "[con: " + con + "]";
     }
 }

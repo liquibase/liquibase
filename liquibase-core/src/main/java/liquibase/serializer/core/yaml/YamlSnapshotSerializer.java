@@ -65,7 +65,7 @@ public class YamlSnapshotSerializer extends YamlSerializer implements SnapshotSe
                         table = ((DatabaseObject) object).getAttribute("relation", Object.class);
                     }
                     if (table != null) {
-                        name = table.toString() + "." + name;
+                        name = table + "." + name;
                     }
 
                     if (((DatabaseObject) object).getSchema() != null) {

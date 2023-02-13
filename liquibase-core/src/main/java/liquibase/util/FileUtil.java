@@ -4,6 +4,7 @@ import liquibase.Scope;
 import liquibase.GlobalConfiguration;
 
 import java.io.*;
+import java.nio.file.Files;
 
 public class FileUtil {
     
@@ -16,7 +17,7 @@ public class FileUtil {
             return null;
         }
         try (
-            FileInputStream fileInputStream = new FileInputStream(file)
+                InputStream fileInputStream = Files.newInputStream(file.toPath())
         ) {
             
             return StreamUtil.readStreamAsString(fileInputStream);
