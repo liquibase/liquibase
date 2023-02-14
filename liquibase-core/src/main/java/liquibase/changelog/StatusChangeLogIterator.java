@@ -7,6 +7,7 @@ import liquibase.Scope;
 import liquibase.change.core.TagDatabaseChange;
 import liquibase.changelog.filter.ChangeSetFilter;
 import liquibase.changelog.filter.ChangeSetFilterResult;
+import liquibase.changelog.filter.CountChangeSetFilter;
 import liquibase.changelog.filter.UpToTagChangeSetFilter;
 import liquibase.changelog.visitor.ChangeSetVisitor;
 import liquibase.changelog.visitor.SkippedChangeSetVisitor;
@@ -65,6 +66,9 @@ public class StatusChangeLogIterator extends ChangeLogIterator {
         boolean tagDatabaseExists = false;
         for (ChangeSetFilter filter : changeSetFilters) {
             if (! (tagDatabaseExists && filter instanceof UpToTagChangeSetFilter)) {
+                if (! reasonsDenied.isEmpty() && filter instanceof CountChangeSetFilter) {
+                    continue;
+                }
                 ChangeSetFilterResult acceptsResult = filter.accepts(changeSet);
                 if (acceptsResult.isAccepted()) {
                     reasonsAccepted.add(acceptsResult);
