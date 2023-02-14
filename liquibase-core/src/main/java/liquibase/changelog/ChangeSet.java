@@ -1492,6 +1492,13 @@ public class ChangeSet implements Conditional, ChangeLogChild {
         Scope.getCurrentScope().addMdcValue(MdcKey.CHANGESET_CONTEXT, contextsMdc);
     }
 
+    /**
+     * Adds changeset sql to mdc if the change is supported by the database
+     * @param change the change to read sql from
+     * @param database the database to generate change sql against
+     * @param generateRollbackStatements controls generation of rollback sql statements or standard statements sql
+     * @throws RollbackImpossibleException if you cannot generate rollback statements
+     */
     private void addSqlMdc(Change change, Database database, boolean generateRollbackStatements) throws RollbackImpossibleException {
         if (change.supports(database)) {
             SqlStatement[] statements = generateRollbackStatements ? change.generateRollbackStatements(database) : change.generateStatements(database);
