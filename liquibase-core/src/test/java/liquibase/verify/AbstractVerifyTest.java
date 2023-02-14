@@ -60,7 +60,7 @@ public class AbstractVerifyTest {
 
         public void test() throws Exception {
             String existingContent = readExistingValue();
-            if ("".equals(existingContent) && (StringUtil.trimToNull(stateContent.toString()) != null)) {
+            if (existingContent.isEmpty() && (StringUtil.trimToNull(stateContent.toString()) != null)) {
                 save();
             } else {
                 try {

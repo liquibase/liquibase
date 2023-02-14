@@ -309,7 +309,7 @@ public class FormattedSqlChangeLogParser implements ChangeLogParser {
                         labels = changeLogParameters.expandExpressions(labels, changeLog);
                     }
                     String logicalFilePath = parseString(logicalFilePathMatcher);
-                    if ((logicalFilePath == null) || "".equals(logicalFilePath)) {
+                    if ((logicalFilePath == null) || logicalFilePath.isEmpty()) {
                        logicalFilePath = changeLog.getLogicalFilePath();
                     }
                     if (logicalFilePath != null) {
