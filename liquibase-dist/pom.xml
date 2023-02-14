@@ -16,7 +16,7 @@
 		<deploy.url>https://maven.pkg.github.com/liquibase/liquibase</deploy.url>
 		<h2.version>2.1.214</h2.version>
 		<hsqldb.version>2.7.1</hsqldb.version>
-		<postgresql.version>42.5.1</postgresql.version>
+		<postgresql.version>42.5.3</postgresql.version>
 		<mssql.version>11.2.1.jre8</mssql.version>
 		<mysql.version>8.0.21</mysql.version>
 		<mariadb.version>3.1.2</mariadb.version>
@@ -145,7 +145,7 @@
 		<dependency>
             <groupId>org.glassfish.jaxb</groupId>
             <artifactId>jaxb-runtime</artifactId>
-            <version>4.0.1</version>
+            <version>4.0.2</version>
             <optional>true</optional>
 		</dependency>
 	</dependencies>
@@ -185,7 +185,7 @@
 					<dependency>
                         <groupId>com.github.marcosemiao.maven.plugins.shade.resource</groupId>
                         <artifactId>maven-shade-merge-manifest-transformer</artifactId>
-                        <version>0.0.2</version>
+                        <version>0.0.3</version>
 					</dependency>
 				</dependencies>
 				<configuration>
