@@ -4,11 +4,8 @@ import liquibase.ContextExpression;
 import liquibase.Labels;
 import liquibase.RuntimeEnvironment;
 import liquibase.Scope;
-import liquibase.change.Change;
-import liquibase.change.core.TagDatabaseChange;
 import liquibase.changelog.filter.ChangeSetFilter;
 import liquibase.changelog.filter.ChangeSetFilterResult;
-import liquibase.changelog.filter.UpToTagChangeSetFilter;
 import liquibase.changelog.visitor.ChangeSetVisitor;
 import liquibase.changelog.visitor.SkippedChangeSetVisitor;
 import liquibase.changelog.visitor.ValidatingVisitor;
@@ -21,7 +18,6 @@ import liquibase.logging.core.BufferedLogService;
 import liquibase.logging.core.CompositeLogService;
 import liquibase.util.StringUtil;
 
-import javax.swing.text.html.HTML;
 import java.util.*;
 
 import static java.util.ResourceBundle.getBundle;
@@ -31,8 +27,8 @@ public class ChangeLogIterator {
     protected DatabaseChangeLog databaseChangeLog;
     protected List<ChangeSetFilter> changeSetFilters;
     private static ResourceBundle coreBundle = getBundle("liquibase/i18n/liquibase-core");
-    protected static final String MSG_COULD_NOT_FIND_EXECUTOR = coreBundle.getString("no.executor.found");
-    protected Set<String> seenChangeSets = new HashSet<>();
+    private static final String MSG_COULD_NOT_FIND_EXECUTOR = coreBundle.getString("no.executor.found");
+    private Set<String> seenChangeSets = new HashSet<>();
 
     public ChangeLogIterator(DatabaseChangeLog databaseChangeLog, ChangeSetFilter... changeSetFilters) {
         this.databaseChangeLog = databaseChangeLog;
@@ -134,16 +130,6 @@ public class ChangeLogIterator {
             databaseChangeLog.setRuntimeEnvironment(null);
         }
     }
-
-    //
-    // Check to see if this change set has a TagDatabase change
-    //
-    private boolean hasTagDatabaseChange(ChangeSet changeSet) {
-        return changeSet.getChanges().stream().anyMatch(TagDatabaseChange.class::isInstance);
-    }
-
-    //
-    //
 
     /**
      *

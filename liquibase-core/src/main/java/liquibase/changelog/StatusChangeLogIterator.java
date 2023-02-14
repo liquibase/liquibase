@@ -94,13 +94,4 @@ public class StatusChangeLogIterator extends ChangeLogIterator {
     private boolean hasTagDatabaseChange(ChangeSet changeSet) {
         return changeSet.getChanges().stream().anyMatch(TagDatabaseChange.class::isInstance);
     }
-
-    protected void markSeen(ChangeSet changeSet) {
-        if (changeSet.key == null) {
-            changeSet.key = createKey(changeSet);
-        }
-
-        seenChangeSets.add(changeSet.key);
-
-    }
 }
