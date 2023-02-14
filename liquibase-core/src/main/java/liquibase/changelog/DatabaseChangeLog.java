@@ -424,7 +424,9 @@ public class DatabaseChangeLog implements Comparable<DatabaseChangeLog>, Conditi
                 }
                 break;
             case "modifyChangeSets":
-                ModifyChangeSets modifyChangeSets = new ModifyChangeSets((String)node.getChildValue(null, "runWith"));
+                ModifyChangeSets modifyChangeSets = new ModifyChangeSets(
+                        (String)node.getChildValue(null, "runWith"),
+                        (String)node.getChildValue(null, "runWithSpoolFile"));
                 nodeScratch = new HashMap<>();
                 nodeScratch.put("modifyChangeSets", modifyChangeSets);
                 for (ParsedNode modifyChildNode : node.getChildren()) {
@@ -648,7 +650,7 @@ public class DatabaseChangeLog implements Comparable<DatabaseChangeLog>, Conditi
                            boolean ignore)
             throws SetupException {
         includeAll(pathName, isRelativeToChangelogFile, resourceFilter, errorIfMissingOrEmpty, resourceComparator,
-                   resourceAccessor, includeContextFilter, labels, ignore, new ModifyChangeSets(null));
+                   resourceAccessor, includeContextFilter, labels, ignore, new ModifyChangeSets(null, null));
     }
 
     public void includeAll(String pathName,
@@ -778,7 +780,7 @@ public class DatabaseChangeLog implements Comparable<DatabaseChangeLog>, Conditi
                            Boolean ignore,
                            OnUnknownFileFormat onUnknownFileFormat)
             throws LiquibaseException {
-        return include(fileName, isRelativePath, resourceAccessor, includeContextFilter, labels, ignore, onUnknownFileFormat, new ModifyChangeSets(null));
+        return include(fileName, isRelativePath, resourceAccessor, includeContextFilter, labels, ignore, onUnknownFileFormat, new ModifyChangeSets(null, null));
     }
 
     public boolean include(String fileName,
@@ -862,6 +864,9 @@ public class DatabaseChangeLog implements Comparable<DatabaseChangeLog>, Conditi
             if (changeSet.getRunWith() == null) {
                 changeSet.setRunWith(modifyChangeSets != null ? modifyChangeSets.getRunWith() : null);
             }
+            if (changeSet.getRunWithSpoolFile() == null) {
+                changeSet.setRunWithSpoolFile(modifyChangeSets != null ? modifyChangeSets.getRunWithSpool() : null);
+            }
             addChangeSet(changeSet);
         }
 
@@ -912,19 +917,23 @@ public class DatabaseChangeLog implements Comparable<DatabaseChangeLog>, Conditi
      */
     private static class ModifyChangeSets {
         private final String runWith;
+        private final String runWithSpool;
 
         /**
          *
          * @param  runWith                The native executor to execute all included change sets with. Can be null
+         * @param  runWithSpool           The name of the spool file to be created
          *
          */
-        public ModifyChangeSets(String runWith) {
+        public ModifyChangeSets(String runWith, String runWithSpool) {
             this.runWith = runWith;
+            this.runWithSpool = runWithSpool;
         }
 
         public String getRunWith() {
             return runWith;
         }
+        public String getRunWithSpool() { return runWithSpool; }
     }
 
     /**
