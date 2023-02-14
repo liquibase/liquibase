@@ -115,7 +115,7 @@ public abstract class AbstractPathResourceAccessor extends AbstractResourceAcces
             private boolean residesInDepthBoundaries(Path file) {
                 final int depth = file.getParent().getNameCount() - rootPath.getNameCount();
 
-                return depth > finalMinDepth;
+                return depth >= finalMinDepth;
             }
 
             private void addToReturnList(Path file) {
