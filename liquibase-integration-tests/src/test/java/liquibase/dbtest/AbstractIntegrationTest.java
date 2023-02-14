@@ -53,6 +53,7 @@ import org.junit.*;
 import org.junit.rules.TemporaryFolder;
 
 import java.io.*;
+import java.nio.file.Files;
 import java.nio.file.Path;
 import java.sql.Connection;
 import java.sql.DriverManager;
@@ -608,7 +609,7 @@ public abstract class AbstractIntegrationTest {
         liquibase.update(this.contexts);
 
         liquibase.tag("Test Tag");
-        liquibase.tagExists("Test Tag");
+        assertTrue(liquibase.tagExists("Test Tag"));
     }
 
     @Test
@@ -668,7 +669,7 @@ public abstract class AbstractIntegrationTest {
             DiffResult diffResult = DiffGeneratorFactory.getInstance().compare(database, null, compareControl);
 
 
-            FileOutputStream output = new FileOutputStream(tempFile);
+            OutputStream output = Files.newOutputStream(tempFile.toPath());
             try {
                 new DiffToChangeLog(diffResult, new DiffOutputControl()).print(new PrintStream(output));
                 output.flush();
