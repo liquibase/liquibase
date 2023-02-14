@@ -8,13 +8,13 @@ body:
       value: |
         Thank you very much for opening a bug report with Liquibase.
 
-        If you have a question or need help, please go to [our Forum](https://forum.liquibase.com/) or [our Discord](https://discord.gg/NVpqM7nNnT).
+        If you have a question or need help, please go to [our Forum](https://forum.liquibase.org/) or [our Discord](https://discord.gg/pDB5DfE).
 
   - type: checkboxes
     id: confirm-search
     attributes:
       label: Search first
-      description: Please search [existing issues](https://github.com/liquibase/liquibase/issues) and the [Liquibase Forum](https://forum.liquibase.com/) before reporting.
+      description: Please search [existing issues](https://github.com/liquibase/liquibase/issues) and the [Liquibase Forum](https://forum.liquibase.org/) before reporting.
       options:
         - label: I searched and no similar issues were found
           required: true
@@ -48,6 +48,7 @@ body:
         A clear and concise description of what happens in the software with the **version used**.
         - Include console output if relevant
         - Include log files if available.
+        - If applicable, add screenshots or screen recordings to help explain your problem.
     validations:
       required: false
   - type: textarea
@@ -56,14 +57,6 @@ body:
       label: Expected/Desired Behavior
       description: |
         A clear and concise description of what happens in the software **after** a fix is created and merged.
-    validations:
-      required: false
-  - type: textarea
-    id: screenshots
-    attributes:
-      label: Screenshots
-      description: |
-        If applicable, add screenshots or screen recordings to help explain your problem.
     validations:
       required: false
 
