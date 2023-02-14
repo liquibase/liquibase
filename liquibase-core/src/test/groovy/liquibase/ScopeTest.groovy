@@ -8,7 +8,7 @@ class ScopeTest extends Specification {
     def "getCurrentScope() creates root scope"() {
         expect:
         Scope.getCurrentScope().describe() == "scope(database=null)"
-        Scope.getCurrentScope().getParent() == null
+        Scope.getCurrentScope()["parent"] == null
         Scope.getCurrentScope()["scopeId"] == "root"
     }
 
