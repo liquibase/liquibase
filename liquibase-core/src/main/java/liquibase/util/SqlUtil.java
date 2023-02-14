@@ -347,6 +347,13 @@ public abstract class SqlUtil {
         return sb.toString();
     }
 
+    /**
+     * Get the string sql statements from a given SqlStatement
+     * @param statement the statement to stringify
+     * @param sqlGeneratorFactory the SqlGeneratorFactory instance to use to generate the sql
+     * @param database the database to generate sql against
+     * @return the sql string or an empty string if there are no statements to generate
+     */
     public static String getSqlString(SqlStatement statement, SqlGeneratorFactory sqlGeneratorFactory, Database database) {
         Sql[] sqlStatements = sqlGeneratorFactory.generateSql(statement, database);
         if (sqlStatements != null) {
