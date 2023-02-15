@@ -178,6 +178,7 @@ public class LiquibaseCommandLine {
     }
 
     private CommandLine buildPicoCommandLine() {
+        System.setProperty("picocli.usage.width", "AUTO");
         final CommandLine.Model.CommandSpec rootCommandSpec = CommandLine.Model.CommandSpec.wrapWithoutInspection(null, defaultFactory);
         rootCommandSpec.name("liquibase");
         configureHelp(rootCommandSpec, true);
