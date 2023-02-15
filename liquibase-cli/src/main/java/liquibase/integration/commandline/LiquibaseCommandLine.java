@@ -639,7 +639,7 @@ public class LiquibaseCommandLine {
             logLevel = currentConfiguredValue.getValue();
         }
 
-        configureLogging(logLevel, logFile);
+        configureLogging(logLevel, logFile, currentConfiguredValue.wasDefaultValueUsed());
 
         //
         // Set the Liquibase Hub log level if logging is not OFF
@@ -652,6 +652,14 @@ public class LiquibaseCommandLine {
     }
 
     private void configureLogging(Level logLevel, String logFile) throws IOException {
+        configureLogging(logLevel, logFile, false);
+    }
+
+    /**
+     * @param wasDefaultLogLevelUsed indicate whether the user selected the default value for log-level, or whether they
+     *                               provided a value
+     */
+    private void configureLogging(Level logLevel, String logFile, boolean wasDefaultLogLevelUsed) throws IOException {
         configuredLogLevel = logLevel;
 
         final LogService logService = Scope.getCurrentScope().get(Scope.Attr.logService, LogService.class);
@@ -679,7 +687,7 @@ public class LiquibaseCommandLine {
             }
 
             fileHandler.setLevel(logLevel);
-            if (logLevel == Level.OFF) {
+            if (logLevel == Level.OFF && wasDefaultLogLevelUsed) {
                 fileLogLevelOverride = Level.SEVERE;
                 fileHandler.setLevel(fileLogLevelOverride);
             }
