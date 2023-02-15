@@ -802,19 +802,19 @@ public class LiquibaseCommandLine {
                     //
                     String description;
                     if (commandDefinition.getName().length > 1) {
-                        String propertyStringToPresent = "\n(liquibase.command." +
-                                StringUtil.join(commandDefinition.getName(), ".") + "." + def.getName() + ")";
+                        String propertyStringToPresent = "\n(defaults file: 'liquibase.command." +
+                                StringUtil.join(commandDefinition.getName(), ".") + "." + def.getName() + "'";
                         String envStringToPresent =
-                                toEnvVariable("\n(liquibase.command." + StringUtil.join(commandDefinition.getName(), ".") +
-                                        "." + def.getName()) + ")" + argDisplaySuffix;
+                                toEnvVariable("environment variable: 'liquibase.command." + StringUtil.join(commandDefinition.getName(), ".") +
+                                        "." + def.getName()) + "')" + argDisplaySuffix;
                         description = propertyStringToPresent + envStringToPresent;
                     } else {
-                        description =
-                                "\n(liquibase.command." + def.getName() + " OR liquibase.command." +
-                                        StringUtil.join(commandDefinition.getName(), ".") + "." + def.getName() + ")\n" +
-                                        "(" + toEnvVariable("liquibase.command." + def.getName()) + " OR " +
-                                        toEnvVariable("liquibase.command." + StringUtil.join(commandDefinition.getName(), ".") +
-                                                "." + def.getName()) + ")" + argDisplaySuffix;
+                        String propertyStringToPresent = "\n(defaults file: 'liquibase.command." + def.getName() + "' OR 'liquibase.command." +
+                                StringUtil.join(commandDefinition.getName(), ".") + "." + def.getName() + "'";
+                        String envStringToPresent = ", environment variable: '" + toEnvVariable("liquibase.command." + def.getName()) + "' OR '" +
+                                toEnvVariable("liquibase.command." + StringUtil.join(commandDefinition.getName(), ".") +
+                                        "." + def.getName()) + "')" + argDisplaySuffix;
+                        description = propertyStringToPresent + envStringToPresent;
                     }
 
                     if (def.getDefaultValue() != null) {
