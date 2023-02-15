@@ -10,7 +10,9 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.io.InputStream;
 import java.lang.reflect.Constructor;
+import java.nio.file.Files;
 import java.util.Properties;
 
 public final class ChangeExecListenerUtils {
@@ -70,12 +72,12 @@ public final class ChangeExecListenerUtils {
         }
     }
 
-    private static Properties loadProperties(String propertiesFile) throws IOException {
+    private static Properties loadProperties(final String propertiesFile) throws IOException {
         if (propertiesFile != null) {
-            File file = new File(propertiesFile);
+            final File file = new File(propertiesFile);
             if (file.exists()) {
-                Properties properties = new Properties();
-                try (FileInputStream inputStream = new FileInputStream(propertiesFile)) {
+                final Properties properties = new Properties();
+                try (InputStream inputStream = Files.newInputStream(file.toPath())) {
                     properties.load(inputStream);
                 }
                 return properties;

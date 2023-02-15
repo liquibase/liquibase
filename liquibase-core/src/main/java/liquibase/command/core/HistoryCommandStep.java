@@ -16,6 +16,7 @@ public class HistoryCommandStep extends AbstractCliWrapperCommandStep {
     public static final CommandArgumentDefinition<String> CHANGELOG_FILE_ARG;
     public static final CommandArgumentDefinition<String> DRIVER_ARG;
     public static final CommandArgumentDefinition<String> DRIVER_PROPERTIES_FILE_ARG;
+    public static final CommandArgumentDefinition<HistoryFormat> FORMAT_ARG;
 
     static {
         CommandBuilder builder = new CommandBuilder(COMMAND_NAME);
@@ -37,6 +38,10 @@ public class HistoryCommandStep extends AbstractCliWrapperCommandStep {
                 .build();
         CHANGELOG_FILE_ARG = builder.argument(CommonArgumentNames.CHANGELOG_FILE, String.class)
                 .description("The root changelog").build();
+        FORMAT_ARG = builder.argument("format", HistoryFormat.class)
+                .description("History output format")
+                .defaultValue(HistoryFormat.TABULAR)
+                .build();
     }
 
     @Override
