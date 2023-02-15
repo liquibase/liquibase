@@ -1064,7 +1064,7 @@ public class LiquibaseCommandLine {
                 }
 
                 //only show the first/standard variation of a name
-                if (i > 0) {
+                if (i > 0 || def.isHidden()) {
                     optionBuilder.hidden(true);
                 }
 
