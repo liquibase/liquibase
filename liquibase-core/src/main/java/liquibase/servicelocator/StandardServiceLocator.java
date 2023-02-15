@@ -15,8 +15,8 @@ public class StandardServiceLocator implements ServiceLocator {
 
     @Override
     public <T> List<T> findInstances(Class<T> interfaceType) throws ServiceNotFoundException {
-        List<T> allInstances = new ArrayList<>();
-        Set<String> classNameSet = new HashSet<>();
+        final List<T> allInstances = new ArrayList<>();
+        final Set<String> classNameSet = new HashSet<>();
         final Logger log = Scope.getCurrentScope().getLog(getClass());
         ClassLoader classLoader = Scope.getCurrentScope().getClassLoader(true);
         findInstances(interfaceType, allInstances, log, classLoader, classNameSet);
