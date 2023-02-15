@@ -28,3 +28,5 @@ jobs:
         # Takes regex for the version name as input.
         # By default nothing is ignored.
         ignore-versions: '^DAT-.*-SNAPSHOT$'
+
+        package-type: maven

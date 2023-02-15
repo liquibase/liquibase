@@ -33,3 +33,5 @@ jobs:
         # Can be a single package version id, or a comma separated list of package version ids.
         # Defaults to an empty string.
         package-version-ids: "${{ steps.version.outputs.ids }}"
+
+        package-type: maven
