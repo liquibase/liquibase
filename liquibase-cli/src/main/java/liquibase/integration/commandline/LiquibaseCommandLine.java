@@ -796,10 +796,6 @@ public class LiquibaseCommandLine {
 
                     String argDisplaySuffix = "";
                     String argName = argNames[i];
-                    String camelCaseArg = StringUtil.toCamelCase(argName.substring(2));
-                    if (!argName.equals("--" + camelCaseArg)) {
-                        argDisplaySuffix = "\n[deprecated: --" + camelCaseArg + "]";
-                    }
 
                     //
                     // Determine if this is a group command and set the property/environment display strings accordingly
