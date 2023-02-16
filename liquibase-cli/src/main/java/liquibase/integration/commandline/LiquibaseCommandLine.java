@@ -992,8 +992,8 @@ public class LiquibaseCommandLine {
                 final CommandLine.Model.OptionSpec.Builder optionBuilder = CommandLine.Model.OptionSpec.builder(argNames[i])
                         .required(false)
                         .type(String.class);
-                String description = "(" + def.getKey() + ")\n"
-                        + "(" + toEnvVariable(def.getKey()) + ")";
+                String description = "(defaults file: '" + def.getKey() + "', environment variable: '"
+                        + toEnvVariable(def.getKey()) + "')";
 
                 if (def.getDefaultValue() != null) {
                     if (def.getDefaultValueDescription() == null) {
