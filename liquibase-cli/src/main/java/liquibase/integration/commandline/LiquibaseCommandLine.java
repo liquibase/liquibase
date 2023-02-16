@@ -1006,14 +1006,6 @@ public class LiquibaseCommandLine {
                 if (def.getDescription() != null) {
                     description = def.getDescription() + "\n" + description;
                 }
-                if (i == 0) {
-                    String primaryArg = argNames[i];
-                    String camelCaseArg = StringUtil.toCamelCase(primaryArg.substring(2));
-                    if (!primaryArg.equals("--" + camelCaseArg)) {
-                        description = "\n" + description +
-                                "\n[deprecated: --" + camelCaseArg + "]";
-                    }
-                }
 
                 optionBuilder.description(description + "\n");
 
