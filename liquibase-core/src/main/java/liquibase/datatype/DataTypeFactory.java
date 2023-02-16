@@ -200,7 +200,7 @@ public class DataTypeFactory {
             } while ((database != null) && !liquibaseDataType.supports(database) && iterator.hasNext());
         }
         if ((database != null) && !liquibaseDataType.supports(database)) {
-            throw new UnexpectedLiquibaseException("Could not find type for " + liquibaseDataType.toString() +
+            throw new UnexpectedLiquibaseException("Could not find type for " + liquibaseDataType +
                     " for DBMS "+database.getShortName());
         }
         if (liquibaseDataType == null) {
