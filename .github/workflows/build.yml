@@ -176,8 +176,7 @@ jobs:
         uses: s4u/setup-maven-action@v1.6.0
         with:
           java-version: ${{ matrix.java }}
-          distribution: 'temurin'
-          cache: 'maven'
+          java-distribution: 'temurin'
           maven-version: '3.8.7'
       - name: Build & Test
         run: |
