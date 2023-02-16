@@ -4,6 +4,7 @@ import liquibase.configuration.AutoloadedConfigurations;
 import liquibase.configuration.ConfigurationDefinition;
 import liquibase.configuration.ConfigurationValueConverter;
 import liquibase.logging.LogFormat;
+import liquibase.logging.LogOutputStream;
 import liquibase.util.StringUtil;
 
 import java.util.Arrays;
@@ -26,6 +27,7 @@ public class LiquibaseCommandLineConfiguration implements AutoloadedConfiguratio
     public static final ConfigurationDefinition<String> LOG_CHANNELS;
     public static final ConfigurationDefinition<String> LOG_FILE;
     public static final ConfigurationDefinition<LogFormat> LOG_FORMAT;
+    public static final ConfigurationDefinition<LogOutputStream> LOG_STREAM;
     public static final ConfigurationDefinition<String> OUTPUT_FILE;
     public static final ConfigurationDefinition<Boolean> SHOULD_RUN;
     public static final ConfigurationDefinition<ArgumentConverter> ARGUMENT_CONVERTER;
@@ -110,6 +112,22 @@ public class LiquibaseCommandLineConfiguration implements AutoloadedConfiguratio
                 })
                 .build();
 
+        LOG_STREAM = builder.define("logStream", LogOutputStream.class)
+                .setDescription("Redirect all log output to " + LogOutputStream.STDOUT + " or " + LogOutputStream.STDERR + ".")
+                .setDefaultValue(null)
+                .setHidden(true)
+                .setValueHandler((channel) -> {
+                    if (channel == null) {
+                        return null;
+                    } else if (channel instanceof String) {
+                        String channelString = (String) channel;
+                        return LogOutputStream.get(channelString);
+                    } else if (channel instanceof LogOutputStream) {
+                        return (LogOutputStream) channel;
+                    }
+                    return null;
+                })
+                .build();
    }
 
     public interface ArgumentConverter {

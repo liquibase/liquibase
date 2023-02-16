@@ -16,6 +16,7 @@ import liquibase.exception.CommandValidationException;
 import liquibase.hub.HubConfiguration;
 import liquibase.license.LicenseService;
 import liquibase.license.LicenseServiceFactory;
+import liquibase.logging.LogOutputStream;
 import liquibase.logging.LogService;
 import liquibase.logging.core.JavaLogService;
 import liquibase.logging.core.LogServiceFactory;
@@ -723,6 +724,18 @@ public class LiquibaseCommandLine {
                 handler.setLevel(cliLogLevel);
             }
             setFormatterOnHandler(logService, handler);
+        }
+        setOutputStream();
+    }
+
+    /**
+     * Configures the system output stream and error stream based on supplied global parameter.
+     */
+    private void setOutputStream() {
+        final LogOutputStream logOutputStream = LiquibaseCommandLineConfiguration.LOG_STREAM.getCurrentValue();
+        if (logOutputStream != null) {
+            System.setOut(logOutputStream.getOutputStream());
+            System.setErr(logOutputStream.getOutputStream());
         }
     }
 
