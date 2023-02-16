@@ -60,7 +60,8 @@ public class UpdateToTagCommandStep extends AbstractCliWrapperCommandStep {
             .description("Path to a properties file for the ChangeExecListenerClass").build();
         SHOW_SUMMARY = builder.argument("showSummary", UpdateSummaryEnum.class)
                 .description("Type of update results summary to show.  Values can be 'off', 'summary', or 'verbose'.")
-                .defaultValue(UpdateSummaryEnum.SUMMARY)
+                .hidden()
+                .defaultValue(UpdateSummaryEnum.OFF)
                 .setValueHandler(value -> {
                     if (value == null) {
                         return null;
