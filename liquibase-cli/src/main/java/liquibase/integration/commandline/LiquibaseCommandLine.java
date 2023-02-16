@@ -769,15 +769,9 @@ public class LiquibaseCommandLine {
             }
 
             String shortDescription = commandDefinition.getShortDescription();
-            String displayDescription = shortDescription;
-            String legacyCommand = commandName[commandName.length - 1];
-            String camelCaseCommand = StringUtil.toCamelCase(legacyCommand);
-            if (!legacyCommand.equals(camelCaseCommand)) {
-                displayDescription = "\n" + shortDescription + "\n[deprecated: " + camelCaseCommand + "]";
-            }
 
             subCommandSpec.usageMessage()
-                    .header(StringUtil.trimToEmpty(displayDescription) + "\n")
+                    .header(StringUtil.trimToEmpty(shortDescription) + "\n")
                     .description(StringUtil.trimToEmpty(commandDefinition.getLongDescription()));
 
             subCommandSpec.optionsCaseInsensitive(true);
