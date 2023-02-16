@@ -821,9 +821,9 @@ public class LiquibaseCommandLine {
 
                     if (def.getDefaultValue() != null) {
                         if (def.getDefaultValueDescription() == null) {
-                            description = "\nDEFAULT: " + def.getDefaultValue() + "\n" + description;
+                            description = "\nDEFAULT: " + def.getDefaultValue() + description;
                         } else {
-                            description = "\nDEFAULT: " + def.getDefaultValueDescription() + "\n" + description;
+                            description = "\nDEFAULT: " + def.getDefaultValueDescription() + description;
                         }
                     }
 
