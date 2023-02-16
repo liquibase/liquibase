@@ -172,15 +172,12 @@ jobs:
         with:
           key: built-code-${{ github.run_number }}-${{ github.run_attempt }}
           path: ./**/target
-      - name: Set up JDK ${{ matrix.java }}
-        uses: actions/setup-java@v3
+      - name: Set up JDK ${{ matrix.java }} and Maven
+        uses: s4u/setup-maven-action@v1.6.0
         with:
           java-version: ${{ matrix.java }}
           distribution: 'temurin'
           cache: 'maven'
-      - name: Setup Maven
-        uses: s4u/setup-maven-action@v1.6.0
-        with:
           maven-version: '3.8.7'
       - name: Build & Test
         run: |
