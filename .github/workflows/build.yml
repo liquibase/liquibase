@@ -172,12 +172,12 @@ jobs:
         with:
           key: built-code-${{ github.run_number }}-${{ github.run_attempt }}
           path: ./**/target
-      - name: Set up JDK ${{ matrix.java }}
-        uses: actions/setup-java@v3
+      - name: Set up JDK ${{ matrix.java }} and Maven
+        uses: s4u/setup-maven-action@v1.6.0
         with:
           java-version: ${{ matrix.java }}
-          distribution: 'temurin'
-          cache: 'maven'
+          java-distribution: 'temurin'
+          maven-version: '3.8.7'
       - name: Build & Test
         run: |
           mvn -B "-Dbuild.repository.owner=${{ needs.setup.outputs.thisRepositoryOwner }}" "-Dbuild.repository.name=${{ needs.setup.outputs.thisRepositoryName }}" "-Dbuild.branch=${{ needs.setup.outputs.thisBranchName }}" "-Dbuild.number=${{ github.run_number }}" "-Dbuild.commit=${{ needs.setup.outputs.thisSha }}" "-DtrimStackTrace=false" -pl '!liquibase-dist' clean test package surefire-report:report
