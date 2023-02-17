@@ -1031,10 +1031,9 @@ public class JdbcDatabaseSnapshot extends DatabaseSnapshot {
                 }
 
                 resultSet.setFetchSize(database.getFetchSize());
-                List<Map> result;
 
                 try {
-                    result = (List<Map>) new RowMapperNotNullConstraintsResultSetExtractor(new ColumnMapRowMapper(database.isCaseSensitive()) {
+                    List<Map> result = (List<Map>) new RowMapperNotNullConstraintsResultSetExtractor(new ColumnMapRowMapper(database.isCaseSensitive()) {
                         @Override
                         protected Object getColumnValue(ResultSet rs, int index) throws SQLException {
                             Object value = super.getColumnValue(rs, index);
@@ -1370,14 +1369,14 @@ public class JdbcDatabaseSnapshot extends DatabaseSnapshot {
                         if (table == null) {
                             List<CachedRow> tables = CachingDatabaseMetaData.this.getTables(catalogName, schemaName, null);
                             for (CachedRow table : tables) {
-                                List<CachedRow> pkInfo = getPkInfo(schemaName, catalogAndSchema, table.getString("TABLE_NAME"));
+                                List<CachedRow> pkInfo = getPkInfo(catalogAndSchema, table.getString("TABLE_NAME"));
                                 if (pkInfo != null) {
                                     foundPks.addAll(pkInfo);
                                 }
                             }
                             return foundPks;
                         } else {
-                            List<CachedRow> pkInfo = getPkInfo(schemaName, catalogAndSchema, table);
+                            List<CachedRow> pkInfo = getPkInfo(catalogAndSchema, table);
                             if (pkInfo != null) {
                                 foundPks.addAll(pkInfo);
                             }
@@ -1388,7 +1387,7 @@ public class JdbcDatabaseSnapshot extends DatabaseSnapshot {
                     }
                 }
 
-                private List<CachedRow> getPkInfo(String schemaName, CatalogAndSchema catalogAndSchema, String tableName) throws DatabaseException, SQLException {
+                private List<CachedRow> getPkInfo(CatalogAndSchema catalogAndSchema, String tableName) throws DatabaseException, SQLException {
                     List<CachedRow> pkInfo;
                     if (database instanceof MSSQLDatabase) {
                         String sql = mssqlSql(catalogAndSchema, tableName);
@@ -1406,7 +1405,7 @@ public class JdbcDatabaseSnapshot extends DatabaseSnapshot {
                                     "ON SYSTAB.TBCREATOR = COLUSE.TBCREATOR " +
                                     "WHERE SYSTAB.TYPE = 'P' " +
                                     "AND SYSTAB.TBNAME='" + table + "' " +
-                                    "AND SYSTAB.TBCREATOR='" + schemaName + "' " +
+                                    "AND SYSTAB.TBCREATOR='" + ((AbstractJdbcDatabase) database).getJdbcSchemaName(catalogAndSchema) + "' " +
                                     "AND SYSTAB.TBNAME=COLUSE.TBNAME " +
                                     "AND SYSTAB.CONSTNAME=COLUSE.CONSTNAME " +
                                     "ORDER BY COLUSE.COLNAME";
