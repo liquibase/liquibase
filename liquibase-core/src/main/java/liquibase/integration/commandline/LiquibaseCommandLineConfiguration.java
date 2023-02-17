@@ -120,8 +120,8 @@ public class LiquibaseCommandLineConfiguration implements AutoloadedConfiguratio
                     if (stream == null) {
                         return null;
                     } else if (stream instanceof String) {
-                        String channelString = (String) stream;
-                        return LogOutputStream.get(channelString);
+                        String streamString = (String) stream;
+                        return LogOutputStream.getStream(streamString);
                     } else if (stream instanceof LogOutputStream) {
                         return (LogOutputStream) stream;
                     }

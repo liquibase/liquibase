@@ -10,11 +10,11 @@ public enum LogOutputStream {
 
     private final PrintStream outputStream;
 
-    LogOutputStream(PrintStream outputStream) {
+    private LogOutputStream(PrintStream outputStream) {
         this.outputStream = outputStream;
     }
 
-    public static LogOutputStream get(String output) throws IllegalArgumentException {
+    public static LogOutputStream getStream(String output) throws IllegalArgumentException {
         try {
             return LogOutputStream.valueOf(output.toUpperCase());
         } catch (IllegalArgumentException exception) {
