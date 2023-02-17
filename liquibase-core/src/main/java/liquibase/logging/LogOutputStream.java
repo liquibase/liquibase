@@ -10,7 +10,7 @@ public enum LogOutputStream {
 
     private final PrintStream outputStream;
 
-    private LogOutputStream(PrintStream outputStream) {
+    LogOutputStream(PrintStream outputStream) {
         this.outputStream = outputStream;
     }
 
