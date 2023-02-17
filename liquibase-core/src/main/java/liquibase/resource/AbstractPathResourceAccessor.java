@@ -2,7 +2,6 @@ package liquibase.resource;
 
 import liquibase.Scope;
 import liquibase.logging.Logger;
-import liquibase.util.FileUtil;
 
 import java.io.File;
 import java.io.IOException;

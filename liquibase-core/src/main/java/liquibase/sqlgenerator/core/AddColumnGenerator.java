@@ -1,6 +1,5 @@
 package liquibase.sqlgenerator.core;
 
-import liquibase.Scope;
 import liquibase.change.ColumnConfig;
 import liquibase.database.Database;
 import liquibase.database.core.*;
@@ -9,7 +8,6 @@ import liquibase.datatype.DatabaseDataType;
 import liquibase.exception.DatabaseException;
 import liquibase.exception.UnexpectedLiquibaseException;
 import liquibase.exception.ValidationErrors;
-import liquibase.logging.Logger;
 import liquibase.sql.Sql;
 import liquibase.sql.UnparsedSql;
 import liquibase.sqlgenerator.SqlGeneratorChain;
