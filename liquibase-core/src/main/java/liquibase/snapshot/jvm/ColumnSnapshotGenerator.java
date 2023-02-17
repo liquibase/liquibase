@@ -407,15 +407,8 @@ public class ColumnSnapshotGenerator extends JdbcSnapshotGenerator {
                         "'AND TABLE_NAME = '"+column.getRelation().getName()+
                         "' AND COLUMN_NAME = '"+column.getName()+"'"), String.class)[0];
 
-                //String enumClause = "";
-
                 return new DataType(enumValue)
 
-                //for (String enumValue : enumValues) {
-                //    enumClause += "'" + enumValue + "', ";
-                //}
-                //enumClause = enumClause.replaceFirst(", $", "");
-                //return new DataType(columnTypeName + "(" + enumClause + ")");
             } catch (DatabaseException e) {
                 Scope.getCurrentScope().getLog(getClass()).warning("Error fetching enum values", e);
             }
