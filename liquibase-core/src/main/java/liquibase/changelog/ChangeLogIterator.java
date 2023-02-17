@@ -96,18 +96,18 @@ public class ChangeLogIterator {
                         }
                     }
 
-                    boolean finalShouldVisit = shouldVisit;
-                    BufferedLogService bufferLog = new BufferedLogService();
-                    CompositeLogService compositeLogService = new CompositeLogService(true, bufferLog);
-                    Scope.child(Scope.Attr.changeSet.name(), changeSet, () -> {
-                        if (finalShouldVisit && !alreadySaw(changeSet)) {
-                            //
-                            // Go validate any changesets with an Executor if
-                            // we are using a ValidatingVisitor
-                            //
-                            if (visitor instanceof ValidatingVisitor) {
-                                validateChangeSetExecutor(changeSet, env);
-                            }
+                        boolean finalShouldVisit = shouldVisit;
+                        BufferedLogService bufferLog = new BufferedLogService();
+                        CompositeLogService compositeLogService = new CompositeLogService(true, bufferLog);
+                        Scope.child(Scope.Attr.changeSet.name(), changeSet, () -> {
+                            if (finalShouldVisit) {
+                                //
+                                // Go validate any changesets with an Executor if
+                                // we are using a ValidatingVisitor
+                                //
+                                if (visitor instanceof ValidatingVisitor) {
+                                    validateChangeSetExecutor(changeSet, env);
+                                }
 
                             //
                             // Execute the visit call in its own scope with a new
@@ -188,17 +188,10 @@ public class ChangeLogIterator {
         ContextExpression contexts = changeSet.getContextFilter();
         changeSet.getRunOrder();
 
-        return changeSet.toString(true)
+        return changeSet.toString(false)
                 + ":" + (labels == null ? null : labels.toString())
                 + ":" + (contexts == null ? null : contexts.toString())
                 + ":" + StringUtil.join(changeSet.getDbmsSet(), ",");
-    }
-
-    protected boolean alreadySaw(ChangeSet changeSet) {
-        if (changeSet.key == null) {
-            changeSet.key = createKey(changeSet);
-        }
-        return seenChangeSets.contains(changeSet.key);
     }
 
     public List<ChangeSetFilter> getChangeSetFilters() {
