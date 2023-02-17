@@ -8,6 +8,8 @@ import org.junit.Before;
 
 import java.io.File;
 import java.io.FileOutputStream;
+import java.io.OutputStream;
+import java.nio.file.Files;
 import java.util.Properties;
 
 public class ChangeExecListenerUtilsTest extends Assert {
@@ -19,7 +21,7 @@ public class ChangeExecListenerUtilsTest extends Assert {
     @Before
     public void setup() throws Exception {
         tmpFile = File.createTempFile("changeExecListener", ".properties");
-        FileOutputStream out = new FileOutputStream(tmpFile);
+        final OutputStream out = Files.newOutputStream(tmpFile.toPath());
 
         Properties properties = new Properties();
         properties.put("test", "value");

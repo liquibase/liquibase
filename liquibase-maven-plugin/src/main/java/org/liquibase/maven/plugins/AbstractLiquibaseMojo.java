@@ -37,6 +37,7 @@ import java.lang.reflect.Field;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLClassLoader;
+import java.nio.file.Files;
 import java.text.MessageFormat;
 import java.util.*;
 
@@ -618,7 +619,7 @@ public abstract class AbstractLiquibaseMojo extends AbstractMojo {
         }
         getLog().debug("Writing output file with '" + encoding + "' file encoding.");
 
-        return new BufferedWriter(new OutputStreamWriter(new FileOutputStream(outputFile), encoding));
+        return new BufferedWriter(new OutputStreamWriter(Files.newOutputStream(outputFile.toPath()), encoding));
     }
 
     @Override
@@ -741,7 +742,7 @@ public abstract class AbstractLiquibaseMojo extends AbstractMojo {
                             defaultChangeExecListener = new DefaultChangeExecListener(listener);
                             liquibase.setChangeExecListener(defaultChangeExecListener);
 
-                            getLog().debug("expressionVars = " + String.valueOf(expressionVars));
+                            getLog().debug("expressionVars = " + expressionVars);
 
                             if (expressionVars != null) {
                                 for (Map.Entry<Object, Object> var : expressionVars.entrySet()) {
@@ -749,7 +750,7 @@ public abstract class AbstractLiquibaseMojo extends AbstractMojo {
                                 }
                             }
 
-                            getLog().debug("expressionVariables = " + String.valueOf(expressionVariables));
+                            getLog().debug("expressionVariables = " + expressionVariables);
                             if (expressionVariables != null) {
                                 for (Map.Entry var : (Set<Map.Entry>) expressionVariables.entrySet()) {
                                     if (var.getValue() != null) {
