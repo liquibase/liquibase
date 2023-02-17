@@ -116,14 +116,14 @@ public class LiquibaseCommandLineConfiguration implements AutoloadedConfiguratio
                 .setDescription("Redirect all log output to " + LogOutputStream.STDOUT + " or " + LogOutputStream.STDERR + ".")
                 .setDefaultValue(null)
                 .setHidden(true)
-                .setValueHandler((channel) -> {
-                    if (channel == null) {
+                .setValueHandler((stream) -> {
+                    if (stream == null) {
                         return null;
-                    } else if (channel instanceof String) {
-                        String channelString = (String) channel;
+                    } else if (stream instanceof String) {
+                        String channelString = (String) stream;
                         return LogOutputStream.get(channelString);
-                    } else if (channel instanceof LogOutputStream) {
-                        return (LogOutputStream) channel;
+                    } else if (stream instanceof LogOutputStream) {
+                        return (LogOutputStream) stream;
                     }
                     return null;
                 })

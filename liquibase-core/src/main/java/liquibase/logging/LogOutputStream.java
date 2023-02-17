@@ -18,7 +18,7 @@ public enum LogOutputStream {
         try {
             return LogOutputStream.valueOf(output.toUpperCase());
         } catch (IllegalArgumentException exception) {
-            throw new IllegalArgumentException("WARNING: The LogOutputStream value '" + output + "' is not valid. Valid values include: '" + StringUtil.join(LogOutputStream.values(), "', '", Object::toString) + "'");
+            throw new IllegalArgumentException("WARNING: The LogStream value '" + output + "' is not valid. Valid values include: '" + StringUtil.join(LogOutputStream.values(), "', '", Object::toString) + "'");
         }
     }
 

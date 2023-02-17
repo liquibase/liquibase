@@ -725,17 +725,29 @@ public class LiquibaseCommandLine {
             }
             setFormatterOnHandler(logService, handler);
         }
-        setOutputStream();
+        setOutputStream(rootLogger, logService);
     }
 
     /**
      * Configures the system output stream and error stream based on supplied global parameter.
      */
-    private void setOutputStream() {
+    private void setOutputStream(Logger logger, LogService logService) {
         final LogOutputStream logOutputStream = LiquibaseCommandLineConfiguration.LOG_STREAM.getCurrentValue();
+        final Level level = LiquibaseCommandLineConfiguration.LOG_LEVEL.getCurrentValue();
         if (logOutputStream != null) {
-            System.setOut(logOutputStream.getOutputStream());
-            System.setErr(logOutputStream.getOutputStream());
+            Arrays.stream(logger.getHandlers()).forEach(logger::removeHandler); // Unsure of impact of this statement.
+            StreamHandler streamHandler = new StreamHandler() {{
+                setOutputStream(logOutputStream.getOutputStream());
+                setLevel(level);
+            }};
+            setFormatterOnHandler(logService, streamHandler);
+            logger.addHandler(streamHandler);
+            switch (logOutputStream) {
+                case STDOUT:
+                    System.setErr(logOutputStream.getOutputStream());
+                case STDERR:
+                    System.setOut(logOutputStream.getOutputStream());
+            }
         }
     }
 
