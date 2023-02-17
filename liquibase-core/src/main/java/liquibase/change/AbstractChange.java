@@ -607,7 +607,7 @@ public abstract class AbstractChange extends AbstractPlugin implements Change {
             for (ChangeParameterMetaData param : changeParameters) {
                 if (Collection.class.isAssignableFrom(param.getDataTypeClass())) {
                     if (param.getDataTypeClassParameters().length == 1) {
-                        Class collectionType = (Class) param.getDataTypeClassParameters()[0];
+                        Class collectionType = (Class,) param.getDataTypeClassParameters()[0];
                         if (ColumnConfig.class.isAssignableFrom(collectionType)) {
                             List<ParsedNode> columnNodes = new ArrayList<>(
                                 parsedNode.getChildren(null, param.getParameterName())

@@ -13,6 +13,7 @@ import java.io.IOException;
 import java.io.Writer;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 
 public class TableWriter extends HTMLWriter {
@@ -60,7 +61,7 @@ public class TableWriter extends HTMLWriter {
         final String tableRemarks = table.getRemarks();
         if ((tableRemarks != null) && !tableRemarks.isEmpty()) {
         	final List<List<String>> cells = new ArrayList<>();
-        	cells.add(Arrays.asList(tableRemarks));
+        	cells.add(Collections.singletonList(tableRemarks));
         	writeTable("Table Description", cells, fileWriter);
         }
     }

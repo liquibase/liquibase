@@ -37,7 +37,7 @@ public abstract class TestSystem implements TestRule, Plugin {
 
     private final Definition definition;
 
-    private final SortedSet<String> configurationKeys = new TreeSet<>(Arrays.asList(
+    private final SortedSet<String> configurationKeys = new TreeSet<>(Collections.singletonList(
             "keepRunning"
     ));
 

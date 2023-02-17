@@ -24,6 +24,7 @@ import liquibase.util.ISODateFormat;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 
@@ -179,7 +180,7 @@ public class ChangedColumnChangeGenerator extends AbstractChangeGenerator implem
                 addColumnConfig.setName(tempColName);
                 addColumnConfig.setType(typeDifference.getReferenceValue().toString());
                 addColumnConfig.setAfterColumn(column.getName());
-                addColumn.setColumns(Arrays.asList(addColumnConfig));
+                addColumn.setColumns(Collections.singletonList(addColumnConfig));
                 changes.add(addColumn);
 
                 changes.add(new RawSQLChange("UPDATE "+referenceDatabase.escapeObjectName(tableName, Table.class)+" SET "+tempColName+"="+referenceDatabase.escapeObjectName(column.getName(), Column.class)));

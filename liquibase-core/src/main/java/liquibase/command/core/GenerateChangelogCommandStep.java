@@ -5,6 +5,7 @@ import liquibase.configuration.ConfigurationValueObfuscator;
 import liquibase.exception.CommandExecutionException;
 
 import java.util.Arrays;
+import java.util.Collections;
 
 public class GenerateChangelogCommandStep extends AbstractCliWrapperCommandStep {
 
@@ -72,7 +73,7 @@ public class GenerateChangelogCommandStep extends AbstractCliWrapperCommandStep 
 
     @Override
     protected String[] collectArguments(CommandScope commandScope) throws CommandExecutionException {
-        return collectArguments(commandScope, Arrays.asList("dataOutputDirectory"), null);
+        return collectArguments(commandScope, Collections.singletonList("dataOutputDirectory"), null);
     }
 
     @Override

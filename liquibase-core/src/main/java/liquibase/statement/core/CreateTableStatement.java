@@ -103,8 +103,7 @@ public class CreateTableStatement extends AbstractSqlStatement implements Compou
         pkConstraint.addColumns(columnName);
         pkConstraint.setTablespace(tablespace);
 
-        List<ColumnConstraint> allConstraints = new ArrayList<>();
-        allConstraints.addAll(Arrays.asList(constraints));
+        List<ColumnConstraint> allConstraints = new ArrayList<>(Arrays.asList(constraints));
         allConstraints.add(new NotNullConstraint(columnName));
         allConstraints.add(pkConstraint);
 
