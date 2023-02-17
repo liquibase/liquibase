@@ -50,6 +50,7 @@ public class GenerateChangelogCommandStep extends AbstractCommandStep {
         CHANGELOG_FILE_ARG = builder.argument(CommonArgumentNames.CHANGELOG_FILE, String.class)
                 .description("Changelog file to write results").build();
 
+        // hiding parameter names that are not available externally but are used by this step.
         AUTHOR_ARG = builder.argument("author", String.class).hidden().build();
         CONTEXT_ARG = builder.argument("context", String.class).hidden().build();
         DATA_OUTPUT_DIR_ARG = builder.argument("dataOutputDirectory", String.class)
@@ -57,7 +58,6 @@ public class GenerateChangelogCommandStep extends AbstractCommandStep {
         OVERWRITE_OUTPUT_FILE_ARG = builder.argument("overwriteOutputFile", Boolean.class)
                 .defaultValue(false).description("Flag to allow overwriting of output changelog file. Default: false").build();
 
-        // hiding parameter names that are not available externally but are used by this step.
         // this happens because the command line asks for "url", but in fact uses it as "referenceUrl"
         REFERENCE_URL_ARG = builder.argument("referenceUrl", String.class).hidden().build();
         REFERENCE_DEFAULT_SCHEMA_NAME_ARG = builder.argument("referenceDefaultSchemaName", String.class)

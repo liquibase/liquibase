@@ -1,10 +1,14 @@
 package liquibase.extension.testing.command
 
 import liquibase.change.ColumnConfig
+import liquibase.change.ConstraintsConfig
+import liquibase.change.core.AddForeignKeyConstraintChange
 import liquibase.change.core.CreateTableChange
 import liquibase.change.core.TagDatabaseChange
 import liquibase.exception.CommandValidationException
 import liquibase.extension.testing.setup.SetupCleanResources
+
+import java.util.regex.Pattern
 
 CommandTests.define {
     command = ["generateChangelog"]
@@ -206,5 +210,49 @@ Optional Args:
                 changelogFile: "target/test-classes/changeLog-test.xml"
         ]
         expectedException = CommandValidationException.class
+    }
+
+    run "Running generateChangelog should add changesets in the correct order", {
+        arguments = [
+                url              : { it.url },
+                username         : { it.username },
+                password         : { it.password },
+                changelogFile: "target/test-classes/generateChangelog-test.xml",
+        ]
+
+        setup {
+            cleanResources(SetupCleanResources.CleanupMode.CLEAN_ON_SETUP, "generateChangelog-test.xml")
+            database = [
+                    new CreateTableChange(
+                            tableName: "person",
+                            columns: [
+                                    ColumnConfig.fromName("address").setType("VARCHAR(255)"),
+                                    ColumnConfig.fromName("id").setType("VARCHAR(255)")
+                                            .setConstraints(new ConstraintsConfig().setPrimaryKey(true))
+                            ]
+                    ),
+                    new CreateTableChange(
+                            tableName: "child",
+                            columns: [
+                                    ColumnConfig.fromName("name").setType("VARCHAR(255)"),
+                                    ColumnConfig.fromName("person_id").setType("VARCHAR(255)")
+                            ]
+                    ),
+                    new AddForeignKeyConstraintChange(
+                            referencedTableName: "person",
+                            referencedColumnNames: "id",
+                            baseTableName: "child",
+                            baseColumnNames: "person_id",
+                            constraintName: "fk_child_person_id"
+                    )
+
+            ]
+        }
+        expectedFileContent = [
+                "target/test-classes/generateChangelog-test.xml" :
+                        [
+                                CommandTests.assertContains("<changeSet ", 4),
+                                Pattern.compile(".*createTable.*createTable.*createIndex.*addForeignKeyConstraint.*", Pattern.MULTILINE|Pattern.DOTALL|Pattern.CASE_INSENSITIVE)]
+        ]
     }
 }

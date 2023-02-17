@@ -1,10 +1,10 @@
 package liquibase.command.core.helpers;
 
+import liquibase.Beta;
 import liquibase.command.*;
 import liquibase.configuration.ConfigurationValueObfuscator;
 import liquibase.database.Database;
 import liquibase.exception.DatabaseException;
-import liquibase.util.StringUtil;
 
 import java.util.Collections;
 import java.util.List;
@@ -25,6 +25,12 @@ public class DbUrlConnectionCommandStep extends AbstractDatabaseConnectionComman
     public static final CommandArgumentDefinition<String> DRIVER_ARG;
     public static final CommandArgumentDefinition<String> DRIVER_PROPERTIES_FILE_ARG;
 
+    /**
+     * This Argument skips this step. It may not be a definitive solution, as improvements to pipeline may
+     * change the way that we remove/skip steps.
+     */
+    @Beta
+    @Deprecated
     public static final CommandArgumentDefinition<Boolean> SKIP_DATABASE_STEP_ARG;
 
 
