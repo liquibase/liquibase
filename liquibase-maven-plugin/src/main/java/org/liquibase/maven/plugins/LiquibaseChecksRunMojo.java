@@ -10,6 +10,8 @@ import org.liquibase.maven.property.PropertyElement;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
+import java.io.IOException;
+import java.nio.file.Files;
 
 /**
  * Check the changelog for issues
@@ -148,8 +150,8 @@ public class LiquibaseChecksRunMojo extends AbstractLiquibaseChecksMojo {
         addArgumentIfNotEmpty(liquibaseCommand, driverPropertiesFile, "driverPropertiesFile");
         if (outputFile != null) {
             try {
-                liquibaseCommand.setOutput(new FileOutputStream(outputFile));
-            } catch (FileNotFoundException e) {
+                liquibaseCommand.setOutput(Files.newOutputStream(outputFile.toPath()));
+            } catch (IOException e) {
                 throw new CommandExecutionException(e);
             }
         }
