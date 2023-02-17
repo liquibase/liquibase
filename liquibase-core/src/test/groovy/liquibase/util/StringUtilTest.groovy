@@ -587,6 +587,8 @@ class StringUtilTest extends Specification {
         "abc"                             | null
         "select * from x"                 | null
         "select * from -- a comment here" | "-- a comment here"
+        "select * from -- a comment here\n--" | "--"
+        "select * from -- a comment here\n--foobar\n--" | "--"
     }
 
     @Unroll

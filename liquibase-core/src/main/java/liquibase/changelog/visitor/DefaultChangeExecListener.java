@@ -9,6 +9,7 @@ import liquibase.exception.PreconditionFailedException;
 import liquibase.precondition.core.PreconditionContainer;
 
 import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Collectors;
 
 /**
@@ -20,7 +21,7 @@ public class DefaultChangeExecListener implements ChangeExecListener {
     private final List<ChangeExecListener> listeners;
     private final List<ChangeSet> deployedChangeSets = new LinkedList<>();
     private final List<ChangeSet> failedChangeSets = new LinkedList<>();
-    private final Map<ChangeSet, List<Change>> deployedChangesPerChangeSet = new HashMap<>();
+    private final Map<ChangeSet, List<Change>> deployedChangesPerChangeSet = new ConcurrentHashMap<>();
 
     public DefaultChangeExecListener(ChangeExecListener... listeners) {
         this.listeners = Arrays.stream(listeners)
