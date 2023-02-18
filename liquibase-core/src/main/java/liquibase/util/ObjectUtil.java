@@ -16,6 +16,7 @@ import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.text.ParseException;
 import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * Various methods that make it easier to read and write object properties using the propertyName, instead of having
@@ -28,7 +29,7 @@ public class ObjectUtil {
     /**
      * Cache for the methods of classes that we have been queried about so far.
      */
-    private static Map<Class<?>, Method[]> methodCache = new HashMap<>();
+    private static Map<Class<?>, Method[]> methodCache = new ConcurrentHashMap<>();
 
     /**
      * For a given object, try to find the appropriate reader method and return the value, if set
@@ -457,7 +458,7 @@ public class ObjectUtil {
 
     private static class IntrospectionContext {
         private final Class<?> targetClass;
-        private final Map<String, PropertyDescriptor> descriptors = new HashMap<>();
+        private final Map<String, PropertyDescriptor> descriptors = new ConcurrentHashMap<>();
 
         public IntrospectionContext(Class<?> targetClass) {
             if (targetClass == null) {

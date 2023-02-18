@@ -1,10 +1,14 @@
 package liquibase
 
+import liquibase.changelog.ChangeLogHistoryServiceFactory
 import liquibase.changelog.ChangeLogIterator
 import liquibase.changelog.ChangeSet
 import liquibase.changelog.DatabaseChangeLog
+import liquibase.changelog.RanChangeSet
 import liquibase.database.Database
+import liquibase.database.core.H2Database
 import liquibase.database.core.MockDatabase
+import liquibase.database.core.PostgresDatabase
 import liquibase.database.jvm.JdbcConnection
 import liquibase.exception.DatabaseException
 import liquibase.exception.LiquibaseException
@@ -519,15 +523,29 @@ class LiquibaseTest extends Specification {
         when:
         h2Connection = getInMemoryH2DatabaseConnection()
         Liquibase liquibase = new Liquibase("liquibase/test-changelog-fast-check.xml", new ClassLoaderResourceAccessor(),
-                h2Connection);
+                h2Connection)
         Contexts context = new Contexts("testContext")
         LabelExpression label = new LabelExpression("testLabel")
-        liquibase.update();
+        liquibase.update()
 
         then:
         assertTrue(liquibase.isUpToDateFastCheck(context, label))
 
     }
+
+    def "validate checksums from ran changesets have all been reset"() {
+        when:
+        h2Connection = getInMemoryH2DatabaseConnection()
+        Liquibase liquibase = new Liquibase("liquibase/test-changelog-fast-check.xml", new ClassLoaderResourceAccessor(),
+                h2Connection)
+        liquibase.update()
+        liquibase.clearCheckSums()
+
+        then:
+        List<RanChangeSet> ranChangeSets = ChangeLogHistoryServiceFactory.getInstance().getChangeLogService(liquibase.getDatabase()).getRanChangeSets()
+        assert ranChangeSets.get(0).getLastCheckSum() == null
+    }
+
 
     private JdbcConnection getInMemoryH2DatabaseConnection() throws SQLException {
         String urlFormat = "jdbc:h2:mem:%s";
