@@ -128,7 +128,7 @@ public class MergeColumnChange extends AbstractChange {
         statements.addAll(Arrays.asList(addNewColumnChange.generateStatements(database)));
 
         String updateStatement = "";
-        if (database instanceof MySQLDatabase || database instanceof MariaDBDatabase) {
+        if (database instanceof MySQLDatabase) {
             updateStatement = "UPDATE " + database.escapeTableName(getCatalogName(), getSchemaName(), getTableName()) +
                     " SET " + database.escapeObjectName(getFinalColumnName(), Column.class)
                     + " = " + database.getConcatSql("'" + getJoinString() + "'"

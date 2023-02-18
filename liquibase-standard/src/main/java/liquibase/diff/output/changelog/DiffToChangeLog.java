@@ -608,11 +608,9 @@ public class DiffToChangeLog {
                 String tabName = StringUtil.trimToEmpty((String)row.get("REFERENCED_SCHEMA_NAME")) +
                         "." + StringUtil.trimToEmpty((String)row.get("REFERENCED_NAME"));
 
-                if (!(tabName.isEmpty() || bName.isEmpty())) {
-                    graph.add(bName.replace("\"", ""), tabName.replace("\"", ""));
-                    graph.add(bName.replace("\"", "").replaceAll("\\s*\\([^)]*\\)\\s*",""),
-                            tabName.replace("\"", "").replaceAll("\\s*\\([^)]*\\)\\s*", ""));
-                }
+                graph.add(bName.replace("\"", ""), tabName.replace("\"", ""));
+                graph.add(bName.replace("\"", "").replaceAll("\\s*\\([^)]*\\)\\s*",""),
+                        tabName.replace("\"", "").replaceAll("\\s*\\([^)]*\\)\\s*", ""));
             }
         }
     }

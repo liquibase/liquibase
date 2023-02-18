@@ -144,7 +144,7 @@ public class DropPrimaryKeyChange extends AbstractChange {
             sqlStatements = new SqlStatement[statements.size()];
             return statements.toArray(sqlStatements);
         }
-        return sqlStatements;
+        return null;
     }
 
     @Override

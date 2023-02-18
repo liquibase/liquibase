@@ -215,7 +215,7 @@ public class DropColumnChange extends AbstractChange implements ChangeWithColumn
             sqlStatements = new SqlStatement[statements.size()];
             return statements.toArray(sqlStatements);
         }
-        return sqlStatements;
+        return null;
     }
     
     @Override

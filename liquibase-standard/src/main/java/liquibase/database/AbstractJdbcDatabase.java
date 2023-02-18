@@ -1202,7 +1202,7 @@ public abstract class AbstractJdbcDatabase implements Database {
 
         if (connection == null) {
             if (that.connection == null) {
-                return this == that;
+                return false;
             } else {
                 return false;
             }

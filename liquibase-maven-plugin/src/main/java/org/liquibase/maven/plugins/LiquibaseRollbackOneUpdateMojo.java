@@ -65,7 +65,7 @@ public class LiquibaseRollbackOneUpdateMojo extends AbstractLiquibaseChangeLogMo
         Map<String, Object> argsMap = getCommandArgsObjectMap(liquibase);
         ChangeLogParameters clp = new ChangeLogParameters(database);
         argsMap.put("changeLogParameters", clp);
-        if (force == null || (force != null && ! Boolean.parseBoolean(force))) {
+        if (force == null || !Boolean.parseBoolean(force)) {
             throw new LiquibaseException("Invalid value for --force.  You must specify 'liquibase.force=true' to use rollbackOneUpdate.");
         }
         argsMap.put("force", Boolean.TRUE);

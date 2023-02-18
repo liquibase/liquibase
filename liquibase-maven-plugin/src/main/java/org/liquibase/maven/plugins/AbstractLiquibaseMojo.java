@@ -1049,7 +1049,7 @@ public abstract class AbstractLiquibaseMojo extends AbstractMojo {
 
         Object defaultValue = getDefaultValue(f);
         if (defaultValue == null) {
-            return currentValue != null;
+            return true;
         } else {
             // There is a default value, check to see if the user has selected something other
             // than the default

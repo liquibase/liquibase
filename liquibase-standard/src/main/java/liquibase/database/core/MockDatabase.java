@@ -410,7 +410,7 @@ public class MockDatabase implements Database, InternalDatabase {
     @Override
     public String escapeSequenceName(final String catalogName, final String schemaName, final String sequenceName) {
         if (sequenceName == null) {
-            return sequenceName;
+            return null;
         } else {
             return schemaName+"."+sequenceName;
         }

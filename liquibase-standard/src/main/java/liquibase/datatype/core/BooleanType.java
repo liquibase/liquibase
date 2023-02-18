@@ -134,10 +134,9 @@ public class BooleanType extends LiquibaseDataType {
         } else if (database instanceof DB2Database) {
 			return !((DB2Database) database).supportsBooleanDataType();
     	}
-        return (database instanceof Db2zDatabase) || (database instanceof FirebirdDatabase) || (database instanceof
-            MSSQLDatabase) || (database instanceof MySQLDatabase) || (database instanceof OracleDatabase) ||
-            (database instanceof SQLiteDatabase) || (database instanceof SybaseASADatabase) || (database instanceof
-            SybaseDatabase);
+        return database instanceof Db2zDatabase || database instanceof
+                MSSQLDatabase || database instanceof MySQLDatabase || database instanceof OracleDatabase || database instanceof SQLiteDatabase || database instanceof SybaseASADatabase || database instanceof
+                SybaseDatabase;
     }
 
     /**

@@ -203,9 +203,6 @@ public class DataTypeFactory {
             throw new UnexpectedLiquibaseException("Could not find type for " + liquibaseDataType +
                     " for DBMS "+database.getShortName());
         }
-        if (liquibaseDataType == null) {
-            liquibaseDataType = new UnknownType(dataTypeName);
-        }
         liquibaseDataType.setAdditionalInformation(additionalInfo);
 
         // Does the type string have the form "some_data_type(additional,info,separated,by,commas)"?

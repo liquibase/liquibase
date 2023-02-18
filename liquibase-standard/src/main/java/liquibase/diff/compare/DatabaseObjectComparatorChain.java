@@ -29,11 +29,11 @@ public class DatabaseObjectComparatorChain {
         if ((object1 == null) && (object2 == null)) {
             return true;
         }
-        if ((object1 == null) && (object2 != null)) {
+        if (object1 == null) {
             return false;
         }
 
-        if ((object1 != null) && (object2 == null)) {
+        if (object2 == null) {
             return false;
         }
 
@@ -82,11 +82,11 @@ public class DatabaseObjectComparatorChain {
         if ((object1 == null) && (object2 == null)) {
             return new ObjectDifferences(compareControl);
         }
-        if ((object1 == null) && (object2 != null)) {
+        if (object1 == null) {
             return new ObjectDifferences(compareControl).addDifference("Reference value was null", "this", null, null);
         }
 
-        if ((object1 != null) && (object2 == null)) {
+        if (object2 == null) {
             return new ObjectDifferences(compareControl).addDifference("Compared value was null", "this", null, null);
         }
 

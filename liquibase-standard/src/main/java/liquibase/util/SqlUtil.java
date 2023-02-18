@@ -242,7 +242,7 @@ public abstract class SqlUtil {
                 return new DatabaseFunction(stringVal);
             } else if (typeId == Types.LONGVARCHAR) {
                 return stringVal;
-            } else if (liquibaseDataType instanceof NCharType || typeId == Types.NCHAR || liquibaseDataType.getName().equalsIgnoreCase("NCLOB")) {
+            } else if (typeId == Types.NCHAR || liquibaseDataType.getName().equalsIgnoreCase("NCLOB")) {
                 return stringVal;
             } else if (typeId == Types.NCLOB) {
                 return stringVal;
@@ -262,7 +262,7 @@ public abstract class SqlUtil {
                     }
                     return new DatabaseFunction(stringVal);
                 }
-            } else if (liquibaseDataType instanceof NVarcharType || typeId == Types.NVARCHAR) {
+            } else if (typeId == Types.NVARCHAR) {
                 return stringVal;
             } else if (typeId == Types.OTHER) {
                 if (database instanceof AbstractDb2Database && typeName.equalsIgnoreCase("DECFLOAT")) {
@@ -288,8 +288,7 @@ public abstract class SqlUtil {
             } else if (liquibaseDataType instanceof TimeType || typeId == Types.TIME) {
                 return DataTypeFactory.getInstance().fromDescription("time", database)
                         .sqlToObject(stringVal, database);
-            } else if (liquibaseDataType instanceof DateTimeType || liquibaseDataType instanceof TimestampType ||
-                    typeId == Types.TIMESTAMP) {
+            } else if (liquibaseDataType instanceof DateTimeType || typeId == Types.TIMESTAMP) {
                 return DataTypeFactory.getInstance().fromDescription("datetime", database)
                         .sqlToObject(stringVal, database);
             } else if ((liquibaseDataType instanceof TinyIntType || typeId == Types.TINYINT)) {
@@ -300,7 +299,7 @@ public abstract class SqlUtil {
                 }
             } else if (typeId == Types.VARBINARY) {
                 return new DatabaseFunction(stringVal);
-            } else if (liquibaseDataType instanceof VarcharType || typeId == Types.VARCHAR) {
+            } else if (typeId == Types.VARCHAR) {
                 return stringVal;
             } else if (database instanceof MySQLDatabase && typeName.toLowerCase().startsWith("enum")) {
                 return stringVal;

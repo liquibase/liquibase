@@ -120,7 +120,7 @@ abstract class GenericServletListener {
 
         InitialContext ic = null;
         String failOnError = null;
-        final ServletConfigurationValueProvider servletConfigurationValueProvider = new ServletConfigurationValueProvider(servletContext, ic);
+        final ServletConfigurationValueProvider servletConfigurationValueProvider = new ServletConfigurationValueProvider(servletContext, null);
         try {
             ic = new InitialContext();
 
