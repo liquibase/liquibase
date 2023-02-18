@@ -124,16 +124,14 @@ public class DockerDatabaseWrapper extends DatabaseWrapper {
             }
         }
 
-        if (ports != null) {
-            List<PortBinding> portBindings = new ArrayList<>();
-            for (int port : ports) {
-                portBindings.add(new PortBinding(Ports.Binding.bindPort(port), new ExposedPort(port)));
-            }
-
-            container.withCreateContainerCmdModifier((Consumer<CreateContainerCmd>) cmd ->
-                    cmd.withHostConfig(new HostConfig().withPortBindings(portBindings))
-            );
+        List<PortBinding> portBindings = new ArrayList<>();
+        for (int port : ports) {
+            portBindings.add(new PortBinding(Ports.Binding.bindPort(port), new ExposedPort(port)));
         }
+
+        container.withCreateContainerCmdModifier((Consumer<CreateContainerCmd>) cmd ->
+                cmd.withHostConfig(new HostConfig().withPortBindings(portBindings))
+        );
     }
 
     @Override

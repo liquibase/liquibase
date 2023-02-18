@@ -54,7 +54,7 @@ public class ConfigurationProperty {
     protected Object valueOf(Object value) {
         Class type = definition.getDataType();
         if (value == null) {
-            return value;
+            return null;
         } else if (type.isAssignableFrom(value.getClass())) {
             return value;
         } else if (value instanceof String) {

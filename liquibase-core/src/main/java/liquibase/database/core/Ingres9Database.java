@@ -61,9 +61,6 @@ public class Ingres9Database extends AbstractJdbcDatabase {
         finally {
             JdbcUtil.closeStatement(stmt);
         }
-        if (definition == null) {
-            return null;
-        }
         return CREATE_VIEW_AS_PATTERN.matcher(definition).replaceFirst("");
     }
 

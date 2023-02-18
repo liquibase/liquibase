@@ -75,9 +75,9 @@ public class CompareControl {
         // make them equal
         if ((schemaNames == null) && (referenceSchemaNames == null)) {
             //they will be set to the defaults
-        } else if ((schemaNames == null) && (referenceSchemaNames != null)) {
+        } else if (schemaNames == null) {
             schemaNames = referenceSchemaNames;
-        } else if ((schemaNames != null) && (referenceSchemaNames == null)) {
+        } else if (referenceSchemaNames == null) {
             referenceSchemaNames = schemaNames;
         }
 

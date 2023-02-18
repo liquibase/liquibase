@@ -164,7 +164,7 @@ public class JdbcConnection implements DatabaseConnection {
     }
 
     private static String obfuscateCredentialsPropFromJdbcUrl(String jdbcUrl) {
-        if (jdbcUrl == null || (jdbcUrl != null && jdbcUrl.equals(""))) {
+        if (jdbcUrl == null || jdbcUrl.equals("")) {
             return jdbcUrl;
         }
 
@@ -203,7 +203,7 @@ public class JdbcConnection implements DatabaseConnection {
     }
 
     private static String stripPasswordPropFromJdbcUrl(String jdbcUrl) {
-        if (jdbcUrl == null || (jdbcUrl != null && jdbcUrl.equals(""))) {
+        if (jdbcUrl == null || jdbcUrl.equals("")) {
             return jdbcUrl;
         }
 

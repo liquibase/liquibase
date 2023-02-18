@@ -48,7 +48,7 @@ public class BomAwareInputStream extends PushbackInputStream {
         } else if ((bom[0] == _0xFF) && (bom[1] == _0xFE)) {
             if ((n == 4) && (bom[2] == _0x00) && (bom[3] == _0x00)) {
                 detectedCharset = Charset.forName("UTF-32LE");
-                unread = n - 4;
+                unread = 0;
             } else {
                 detectedCharset = StandardCharsets.UTF_16LE;
                 unread = n - 2;

@@ -500,8 +500,8 @@ public class HsqlDatabase extends AbstractJdbcDatabase {
         if (quotingStrategy == ObjectQuotingStrategy.QUOTE_ALL_OBJECTS) {
             return super.escapeObjectName(objectName, objectType);
         }
-        if ((objectName != null) && (quotingStrategy != ObjectQuotingStrategy.QUOTE_ALL_OBJECTS) && isReservedWord
-            (objectName.toUpperCase(Locale.US))) {
+        if (objectName != null && isReservedWord
+                (objectName.toUpperCase(Locale.US))) {
                 return "\""+objectName.toUpperCase(Locale.US)+"\"";
         }
         return objectName;

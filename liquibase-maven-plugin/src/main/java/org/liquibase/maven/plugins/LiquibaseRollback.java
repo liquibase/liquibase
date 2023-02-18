@@ -81,14 +81,11 @@ public class LiquibaseRollback extends AbstractLiquibaseChangeLogMojo {
             }
             type = RollbackType.COUNT;
         } else if (rollbackDate != null) {
-            if ((rollbackTag != null) || (rollbackCount > 0)) {
+            if (rollbackTag != null) {
                 throw new MojoFailureException(message);
             }
             type = RollbackType.DATE;
-        } else if (rollbackTag != null) {
-            if ((rollbackCount > 0) || (rollbackDate != null)) {
-                throw new MojoFailureException(message);
-            }
+        } else {
             type = RollbackType.TAG;
         }
     }

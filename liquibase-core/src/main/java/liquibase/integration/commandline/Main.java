@@ -1289,7 +1289,7 @@ public class Main {
             return;
         }
 
-        if (arg.toLowerCase().equals("--" + OPTIONS.FORCE) || arg.toLowerCase().equals("--" + OPTIONS.HELP)) {
+        if (arg.toLowerCase().equals("--" + OPTIONS.FORCE)) {
             arg = arg + "=true";
         }
 
@@ -2189,7 +2189,7 @@ public class Main {
                 throw e;
             }
         } else {
-            return outputStream;
+            return null;
         }
     }
 

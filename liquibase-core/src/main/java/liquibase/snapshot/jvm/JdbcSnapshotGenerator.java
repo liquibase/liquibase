@@ -74,9 +74,7 @@ public abstract class JdbcSnapshotGenerator implements SnapshotGenerator {
             if (addsTo() != null) {
                 for (Class<? extends DatabaseObject> addType : addsTo()) {
                     if (addType.isAssignableFrom(example.getClass())) {
-                        if (chainResponse != null) {
-                            addTo(chainResponse, snapshot);
-                        }
+                        addTo(chainResponse, snapshot);
                     }
                 }
             }

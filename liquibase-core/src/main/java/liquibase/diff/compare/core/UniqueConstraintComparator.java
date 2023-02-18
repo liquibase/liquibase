@@ -72,7 +72,7 @@ public class UniqueConstraintComparator implements DatabaseObjectComparator {
                     return DefaultDatabaseObjectComparator.nameMatches(databaseObject1, databaseObject2, accordingTo);
                 }
 
-                if ((thisConstraintSize > 0) && (otherConstraintSize > 0) && (thisConstraintSize != otherConstraintSize)) {
+                if (thisConstraintSize > 0 && thisConstraintSize != otherConstraintSize) {
                     return false;
                 }
 

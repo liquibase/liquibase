@@ -447,9 +447,9 @@ public abstract class DatabaseSnapshot implements LiquibaseSerializable {
             List<Object> newValues = new ArrayList<>();
             while (fieldValueIterator.hasNext()) {
                 Object obj = fieldValueIterator.next();
-                if ((fieldValue instanceof DatabaseObject) && !snapshotControl.shouldInclude(((DatabaseObject)
-                        fieldValue).getClass())) {
-                    return fieldValue;
+                if ((fieldValue instanceof DatabaseObject)) {
+                    snapshotControl.shouldInclude(((DatabaseObject)
+                            fieldValue).getClass());
                 }
 
                 if ((obj instanceof DatabaseObject) && (((DatabaseObject) obj).getSnapshotId() == null)) {

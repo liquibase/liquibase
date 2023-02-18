@@ -43,7 +43,7 @@ public class ChangeMetaData implements PrioritizedService {
         this.parameters = Collections.unmodifiableMap(this.parameters);
 
         this.appliesTo = null;
-        if ((appliesTo != null) && (appliesTo.length > 0)) {
+        if (appliesTo != null) {
             this.appliesTo = Collections.unmodifiableSet(new HashSet<>(Arrays.asList(appliesTo)));
         }
 

@@ -160,7 +160,7 @@ class SingleColumnRowMapper implements RowMapper {
 
             // Perform was-null check if demanded (for results that the
             // JDBC driver returns as primitives).
-            if (wasNullCheck && (value != null) && rs.wasNull()) {
+            if (wasNullCheck && rs.wasNull()) {
                 value = null;
             }
             return value;

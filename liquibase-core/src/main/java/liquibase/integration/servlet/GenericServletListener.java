@@ -120,7 +120,7 @@ abstract class GenericServletListener {
 
         InitialContext ic = null;
         String failOnError = null;
-        final ServletConfigurationValueProvider servletConfigurationValueProvider = new ServletConfigurationValueProvider(servletContext, ic);
+        final ServletConfigurationValueProvider servletConfigurationValueProvider = new ServletConfigurationValueProvider(servletContext, null);
         try {
             ic = new InitialContext();
 
@@ -181,7 +181,7 @@ abstract class GenericServletListener {
                     break;
                 }
             }
-        } else if (machineExcludes != null) {
+        } else {
             shouldRun = true;
             for (String machine : machineExcludes.split(",")) {
                 machine = machine.trim();

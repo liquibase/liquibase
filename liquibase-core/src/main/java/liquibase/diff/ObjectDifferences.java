@@ -63,8 +63,7 @@ public class ObjectDifferences {
         boolean different;
         if ((referenceValue == null) && (compareValue == null)) {
             different = false;
-        } else if (((referenceValue == null) && (compareValue != null)) || ((referenceValue != null) && (compareValue
-            == null))) {
+        } else if (referenceValue == null && compareValue != null || compareValue == null) {
             different = true;
         } else {
             different = !compareFunction.areEqual(referenceValue, compareValue);

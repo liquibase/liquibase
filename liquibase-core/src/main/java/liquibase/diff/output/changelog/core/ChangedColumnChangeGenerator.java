@@ -262,7 +262,7 @@ public class ChangedColumnChangeGenerator extends AbstractChangeGenerator implem
                     if (value instanceof Boolean) {
                         change.setDefaultValueBoolean((Boolean) value);
                     }
-                    else if (columnDataType instanceof BooleanType) {
+                    else {
                         if (value instanceof DatabaseFunction) {
                             if (value.equals(new DatabaseFunction("'false'"))) {
                                 change.setDefaultValueBoolean(false);
