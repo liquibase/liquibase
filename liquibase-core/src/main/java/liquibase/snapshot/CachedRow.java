@@ -72,8 +72,10 @@ public class CachedRow {
     }
 
     /**
-     * Convert 'YES'/'NO' value to TRUE/FALSE
-     * @nullable
+     * Converts a 'YES'/'NO' value to a boolean value.
+     *
+     * @param columnName the name of the column whose value should be converted
+     * @return {@code true} if the column value is 'YES', {@code false} otherwise; or {@code null} if the column value is {@code null}
      */
     public Boolean yesNoToBoolean(String columnName) {
         Object o = row.get(columnName);

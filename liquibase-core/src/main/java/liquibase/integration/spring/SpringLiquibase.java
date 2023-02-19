@@ -348,14 +348,13 @@ public class SpringLiquibase implements InitializingBean, BeanNameAware, Resourc
 		return liquibase;
 	}
 
-	/**
-	 * Subclasses may override this method add change some database settings such as
-	 * default schema before returning the database object.
-	 *
-	 * @param c
-	 * @return a Database implementation retrieved from the {@link DatabaseFactory}.
-	 * @throws DatabaseException
-	 */
+    /**
+     * Subclasses may override this method to modify the database settings, such as the default schema, before returning the database object.
+     *
+     * @param c the connection to the database
+     * @return a Database implementation retrieved from the {@link DatabaseFactory}
+     * @throws DatabaseException if there is an error retrieving the database implementation
+     */
 	protected Database createDatabase(Connection c, ResourceAccessor resourceAccessor) throws DatabaseException {
 
         DatabaseConnection liquibaseConnection;

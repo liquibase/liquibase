@@ -8,9 +8,10 @@ import liquibase.exception.DatabaseException;
  */
 public interface ExecutablePreparedStatement extends SqlStatement {
     /**
-     * Execute the prepared statement
-     * @param factory for creating a <code>PreparedStatement</code> object
-     * @throws DatabaseException
+     * Executes the prepared statement created by the given factory.
+     *
+     * @param factory a factory for creating a <code>PreparedStatement</code> object.
+     * @throws DatabaseException if an exception occurs while executing the prepared statement.
      */
     void execute(PreparedStatementFactory factory) throws DatabaseException;
 }
