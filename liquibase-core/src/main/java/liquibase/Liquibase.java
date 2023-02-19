@@ -2442,33 +2442,21 @@ public class Liquibase implements AutoCloseable {
      */
     public void clearCheckSums() throws LiquibaseException {
         LOG.info("Clearing database change log checksums");
-        runInScope(new Scope.ScopedRunner() {
-            @Override
-            public void run() throws Exception {
+        runInScope(() -> {
+            LockService lockService = LockServiceFactory.getInstance().getLockService(database);
+            lockService.waitForLock();
 
-                LockService lockService = LockServiceFactory.getInstance().getLockService(database);
-                lockService.waitForLock();
-
+            try {
+                checkLiquibaseTables(false, null, new Contexts(), new LabelExpression());
+                ChangeLogHistoryServiceFactory.getInstance().getChangeLogService(database).clearAllCheckSums();
+            } finally {
                 try {
-                    checkLiquibaseTables(false, null, new Contexts(), new LabelExpression());
-
-                    UpdateStatement updateStatement = new UpdateStatement(
-                            getDatabase().getLiquibaseCatalogName(),
-                            getDatabase().getLiquibaseSchemaName(),
-                            getDatabase().getDatabaseChangeLogTableName()
-                    );
-                    updateStatement.addNewColumnValue("MD5SUM", null);
-                    Scope.getCurrentScope().getSingleton(ExecutorService.class).getExecutor("jdbc", database).execute(updateStatement);
-                    getDatabase().commit();
-                } finally {
-                    try {
-                        lockService.releaseLock();
-                    } catch (LockException e) {
-                        LOG.severe(MSG_COULD_NOT_RELEASE_LOCK, e);
-                    }
+                    lockService.releaseLock();
+                } catch (LockException e) {
+                    LOG.severe(MSG_COULD_NOT_RELEASE_LOCK, e);
                 }
-                resetServices();
             }
+            resetServices();
         });
     }
 
