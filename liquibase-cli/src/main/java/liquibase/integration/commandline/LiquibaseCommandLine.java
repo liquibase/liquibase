@@ -1055,13 +1055,13 @@ public class LiquibaseCommandLine {
 
 
         commandSpec.addOption(CommandLine.Model.OptionSpec.builder("--help", "-h")
-                .description("Show this help message and exit")
+                .description("Show this help message and exit\n")
                 .usageHelp(true)
                 .build());
 
         if (includeVersion) {
             commandSpec.addOption(CommandLine.Model.OptionSpec.builder("--version", "-v")
-                    .description("Print version information and exit")
+                    .description("Print version information and exit\n")
                     .versionHelp(true)
                     .build());
         }
