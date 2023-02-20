@@ -1,9 +1,11 @@
 package liquibase.logging.mdc.customobjects;
 
-import liquibase.change.AbstractSQLChange;
 import liquibase.change.core.SQLFileChange;
 import liquibase.logging.mdc.CustomMdcObject;
 
+/**
+ * This class is used to represent MDC data related to a sqlFile type change inside a rollback.
+ */
 public class RollbackSqlFile implements CustomMdcObject {
     private String dbms;
     private String encoding;
