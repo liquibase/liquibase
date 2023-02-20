@@ -736,10 +736,8 @@ public class LiquibaseCommandLine {
         final Level level = LiquibaseCommandLineConfiguration.LOG_LEVEL.getCurrentValue();
         if (logOutputStream != null) {
             Arrays.stream(logger.getHandlers()).forEach(logger::removeHandler); // Unsure of impact of this statement.
-            StreamHandler streamHandler = new StreamHandler() {{
-                setOutputStream(logOutputStream.getOutputStream());
-                setLevel(level);
-            }};
+            StreamHandler streamHandler = new StreamHandler(logOutputStream.getOutputStream(), new SimpleFormatter());
+            streamHandler.setLevel(level);
             setFormatterOnHandler(logService, streamHandler);
             logger.addHandler(streamHandler);
             switch (logOutputStream) {
