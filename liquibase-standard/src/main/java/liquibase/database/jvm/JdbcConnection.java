@@ -80,6 +80,7 @@ public class JdbcConnection implements DatabaseConnection {
         String driverClassName = driverObject.getClass().getName();
         String errorMessage = "Connection could not be created to " + sanitizeUrl(url) + " with driver " + driverClassName;
         try {
+            url = url + "&tinyInt1isBit=true&transformedBitIsBoolean=true";
             this.con = driverObject.connect(url, driverProperties);
             if (this.con == null) {
                 throw new DatabaseException(errorMessage + ".  Possibly the wrong driver for the given database URL");

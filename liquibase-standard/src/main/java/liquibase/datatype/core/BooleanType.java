@@ -15,7 +15,7 @@ import liquibase.util.StringUtil;
 import java.util.Locale;
 import java.util.regex.Pattern;
 
-@DataTypeInfo(name = "boolean", aliases = {"java.sql.Types.BOOLEAN", "java.lang.Boolean", "bit", "bool"}, minParameters = 0, maxParameters = 0, priority = LiquibaseDataType.PRIORITY_DEFAULT)
+@DataTypeInfo(name = "boolean", aliases = {"java.sql.Types.BOOLEAN", "java.lang.Boolean", "bit", "bool", "tinyint(1)"}, minParameters = 0, maxParameters = 0, priority = LiquibaseDataType.PRIORITY_DEFAULT)
 public class BooleanType extends LiquibaseDataType {
 
     @Override
@@ -40,7 +40,7 @@ public class BooleanType extends LiquibaseDataType {
             if (originalDefinition.toLowerCase(Locale.US).startsWith("bit")) {
                 return new DatabaseDataType("BIT", getParameters());
             }
-            return new DatabaseDataType("BIT", 1);
+            return new DatabaseDataType("TINYINT", 1);
         } else if (database instanceof OracleDatabase) {
             return new DatabaseDataType("NUMBER", 1);
         } else if ((database instanceof SybaseASADatabase) || (database instanceof SybaseDatabase)) {
