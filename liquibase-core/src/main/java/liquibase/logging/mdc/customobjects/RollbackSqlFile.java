@@ -60,7 +60,7 @@ public class RollbackSqlFile implements CustomMdcObject {
         this.path = path;
     }
 
-    public Boolean isRelativeToChangelogFile() {
+    public Boolean getRelativeToChangelogFile() {
         return relativeToChangelogFile;
     }
 
@@ -68,7 +68,7 @@ public class RollbackSqlFile implements CustomMdcObject {
         this.relativeToChangelogFile = relativeToChangelogFile;
     }
 
-    public Boolean isSplitStatements() {
+    public Boolean getSplitStatements() {
         return splitStatements;
     }
 
@@ -76,7 +76,7 @@ public class RollbackSqlFile implements CustomMdcObject {
         this.splitStatements = splitStatements;
     }
 
-    public Boolean isStripComments() {
+    public Boolean getStripComments() {
         return stripComments;
     }
 
