@@ -10,7 +10,6 @@ import liquibase.exception.LiquibaseException;
 import liquibase.executor.Executor;
 import liquibase.executor.ExecutorService;
 import liquibase.executor.LoggingExecutor;
-import liquibase.logging.mdc.MdcKey;
 import liquibase.logging.mdc.customobjects.ChangesetsRolledback;
 
 import java.util.ArrayList;
@@ -22,7 +21,7 @@ public class RollbackVisitor implements ChangeSetVisitor {
     private Database database;
 
     private ChangeExecListener execListener;
-    private List<ChangesetsRolledback.ChangeSet> changeSets = new ArrayList<>();
+    private List<ChangesetsRolledback.ChangeSet> processedChangesets = new ArrayList<>();
 
     /**
      * @deprecated - please use the constructor with ChangeExecListener, which can be null.
@@ -35,6 +34,12 @@ public class RollbackVisitor implements ChangeSetVisitor {
     public RollbackVisitor(Database database, ChangeExecListener listener) {
         this(database);
         this.execListener = listener;
+    }
+
+    public RollbackVisitor(Database database, ChangeExecListener listener, List<ChangesetsRolledback.ChangeSet> processedChangesets) {
+        this(database);
+        this.execListener = listener;
+        this.processedChangesets = processedChangesets;
     }
 
     @Override
@@ -61,8 +66,9 @@ public class RollbackVisitor implements ChangeSetVisitor {
         sendRollbackEvent(changeSet, databaseChangeLog, database);
         this.database.commit();
         checkForEmptyRollbackFile(changeSet);
-        changeSets.add(new ChangesetsRolledback.ChangeSet(changeSet.getId(), changeSet.getAuthor(), changeSet.getFilePath(), changeSet.getDeploymentId()));
-        Scope.getCurrentScope().addMdcValue(MdcKey.CHANGESETS_ROLLED_BACK, new ChangesetsRolledback(changeSets), false);
+        if (processedChangesets != null) {
+            processedChangesets.add(new ChangesetsRolledback.ChangeSet(changeSet.getId(), changeSet.getAuthor(), changeSet.getFilePath(), changeSet.getDeploymentId()));
+        }
     }
 
     protected void fireRollbackFailed(ChangeSet changeSet, DatabaseChangeLog databaseChangeLog, Database database, Exception e) {
