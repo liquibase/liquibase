@@ -11,9 +11,9 @@ public class RollbackSqlFile implements CustomMdcObject {
     private String encoding;
     private String endDelimiter;
     private String path;
-    private boolean relativeToChangelogFile;
-    private boolean splitStatements;
-    private boolean stripComments;
+    private Boolean relativeToChangelogFile;
+    private Boolean splitStatements;
+    private Boolean stripComments;
 
     public RollbackSqlFile() {
     }
@@ -60,27 +60,27 @@ public class RollbackSqlFile implements CustomMdcObject {
         this.path = path;
     }
 
-    public boolean isRelativeToChangelogFile() {
+    public Boolean isRelativeToChangelogFile() {
         return relativeToChangelogFile;
     }
 
-    public void setRelativeToChangelogFile(boolean relativeToChangelogFile) {
+    public void setRelativeToChangelogFile(Boolean relativeToChangelogFile) {
         this.relativeToChangelogFile = relativeToChangelogFile;
     }
 
-    public boolean isSplitStatements() {
+    public Boolean isSplitStatements() {
         return splitStatements;
     }
 
-    public void setSplitStatements(boolean splitStatements) {
+    public void setSplitStatements(Boolean splitStatements) {
         this.splitStatements = splitStatements;
     }
 
-    public boolean isStripComments() {
+    public Boolean isStripComments() {
         return stripComments;
     }
 
-    public void setStripComments(boolean stripComments) {
+    public void setStripComments(Boolean stripComments) {
         this.stripComments = stripComments;
     }
 }
