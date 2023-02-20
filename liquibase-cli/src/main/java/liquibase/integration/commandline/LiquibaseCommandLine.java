@@ -672,6 +672,7 @@ public class LiquibaseCommandLine {
         System.setProperty("java.util.logging.SimpleFormatter.format", "[%1$tF %1$tT] %4$s [%2$s] %5$s%6$s%n");
 
         java.util.logging.Logger rootLogger = java.util.logging.Logger.getLogger("");
+        setOutputStream(rootLogger, logService);
         Level cliLogLevel = logLevel;
         // If a log file is set, but no log level is set, this variable represents the log level that should be used.
         Level fileLogLevelOverride = null;
@@ -725,7 +726,6 @@ public class LiquibaseCommandLine {
             }
             setFormatterOnHandler(logService, handler);
         }
-        setOutputStream(rootLogger, logService);
     }
 
     /**
