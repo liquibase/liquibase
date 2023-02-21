@@ -11,6 +11,7 @@ import liquibase.servicelocator.LiquibaseService;
 import liquibase.util.StringUtil;
 
 import java.io.*;
+import java.nio.file.Files;
 import java.util.Map;
 import java.util.Properties;
 import java.util.SortedSet;
@@ -37,7 +38,7 @@ public class DefaultsFileValueProvider extends AbstractMapConfigurationValueProv
     public DefaultsFileValueProvider(File path) throws IOException {
         this.sourceDescription = "File " + path.getAbsolutePath();
 
-        try (InputStream stream = new FileInputStream(path)) {
+        try (InputStream stream = Files.newInputStream(path.toPath())) {
             this.properties = new Properties();
             this.properties.load(stream);
             trimAllProperties();

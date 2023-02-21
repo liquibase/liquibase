@@ -153,8 +153,8 @@ abstract class GenericServletListener {
      * Checks if the update is supposed to be executed. That depends on several conditions:
      * <ol>
      * <li>if liquibase.shouldRun is <code>false</code> the update will not be executed.</li>
-     * <li>if {@value LiquibaseServletListener#LIQUIBASE_HOST_INCLUDES} contains the current hostname, the the update will be executed.</li>
-     * <li>if {@value LiquibaseServletListener#LIQUIBASE_HOST_EXCLUDES} contains the current hostname, the the update will not be executed.</li>
+     * <li>if {@value GenericServletListener.java#LIQUIBASE_HOST_INCLUDES} contains the current hostname, the the update will be executed.</li>
+     * <li>if {@value GenericServletListener.java#LIQUIBASE_HOST_EXCLUDES} contains the current hostname, the the update will not be executed.</li>
      * </ol>
      */
     private boolean checkPreconditions(GenericServletWrapper.ServletContext servletContext, InitialContext ic) {
@@ -200,7 +200,7 @@ abstract class GenericServletListener {
                     + "=true");
         }
         if (!shouldRun) {
-            servletContext.log("LiquibaseServletListener did not run due to "
+            servletContext.log(getClass().getSimpleName() + " did not run due to "
                     + LIQUIBASE_HOST_INCLUDES + " and/or " + LIQUIBASE_HOST_EXCLUDES + "");
             return false;
         }

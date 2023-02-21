@@ -19,6 +19,7 @@ class TableOutputTest extends Specification {
          table                  | maxWidths     | leftJustified | expected
          [["data1","data2"]]    | [30,30]       | true          | "+-------+-------+\n| data1 | data2 |\n+-------+-------+"
     }
+
     def "Data array length must match widths"() {
         when:
         ConsoleUIService console = Scope.getCurrentScope().getUI() as ConsoleUIService
@@ -32,5 +33,45 @@ class TableOutputTest extends Specification {
         where:
         table                  | maxWidths     | leftJustified | expected
         [["data1","data2"]]    | [30]          | true          | "+-------+-------+\n| data1 | data2 |\n+-------+-------+"
+    }
+
+    def "Computes max width for each table column"() {
+        given:
+        def data = [
+                ["a", "bb", "ccc"],
+                ["aaa", "b", "cc"],
+        ]
+
+        when:
+        def result = TableOutput.computeMaxWidths(data)
+
+        then:
+        result == [3, 2, 3]
+    }
+
+    def "Computes no widths if table is empty"() {
+        given:
+        def data = []
+
+        when:
+        def result = TableOutput.computeMaxWidths(data)
+
+        then:
+        result.isEmpty()
+    }
+
+    def "Fails to compute max if column count differs between rows"() {
+        given:
+        def data = [
+                ["a", "bb", "ccc"],
+                ["aaa", "b", "cc", "oopsie"],
+        ]
+
+        when:
+        def result = TableOutput.computeMaxWidths(data)
+
+        then:
+        def exception = thrown(RuntimeException)
+        exception.message == "could not compute table width: heterogeneous tables are not supported. Expected each row to have 3 column(s), found 4"
     }
 }

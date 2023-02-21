@@ -1,5 +1,7 @@
 package liquibase.extension.testing.setup
 
+import java.nio.file.Files
+
 class SetupModifyProperties extends TestSetup {
 
     private final File propsFile
@@ -15,8 +17,8 @@ class SetupModifyProperties extends TestSetup {
     @Override
     void setup(TestSetupEnvironment testSetupEnvironment) throws Exception {
         Properties properties = new Properties()
-        properties.load(new FileInputStream(propsFile))
+        properties.load(Files.newInputStream(propsFile.toPath()))
         properties.put(key, value)
-        properties.store(new FileOutputStream(propsFile), "Modified " + key)
+        properties.store(Files.newOutputStream(propsFile.toPath()), "Modified " + key)
     }
 }
