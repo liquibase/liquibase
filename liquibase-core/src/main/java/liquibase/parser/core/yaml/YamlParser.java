@@ -4,6 +4,7 @@ import liquibase.Scope;
 import liquibase.logging.Logger;
 import liquibase.parser.LiquibaseParser;
 import liquibase.resource.ResourceAccessor;
+import liquibase.util.SnakeYamlUtil;
 import org.yaml.snakeyaml.LoaderOptions;
 
 public abstract class YamlParser implements LiquibaseParser {
@@ -12,7 +13,7 @@ public abstract class YamlParser implements LiquibaseParser {
 
     public static LoaderOptions createLoaderOptions() {
         LoaderOptions options = new LoaderOptions();
-        options.setCodePointLimit(Integer.MAX_VALUE);
+        SnakeYamlUtil.setCodePointLimitSafely(options, Integer.MAX_VALUE);
         options.setProcessComments(false);
         options.setAllowDuplicateKeys(false);
         options.setAllowRecursiveKeys(false);
