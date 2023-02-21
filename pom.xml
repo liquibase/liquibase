@@ -194,7 +194,7 @@
         <dependency>
             <groupId>org.postgresql</groupId>
             <artifactId>postgresql</artifactId>
-            <version>42.5.3</version>
+            <version>42.5.4</version>
             <scope>test</scope>
         </dependency>
 
@@ -215,7 +215,7 @@
         <dependency>
             <groupId>com.oracle.database.jdbc</groupId>
             <artifactId>ojdbc8</artifactId>
-            <version>21.8.0.0</version>
+            <version>21.9.0.0</version>
             <scope>test</scope>
         </dependency>
 
