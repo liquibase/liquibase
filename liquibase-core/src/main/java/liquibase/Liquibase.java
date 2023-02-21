@@ -297,9 +297,7 @@ public class Liquibase implements AutoCloseable {
                 //
                 ChangeLogIterator runChangeLogIterator = getStandardChangelogIterator(contexts, labelExpression, changeLog);
                 CompositeLogService compositeLogService = new CompositeLogService(true, bufferLog);
-                Scope.child(Scope.Attr.logService.name(), compositeLogService, () -> {
-                    runChangeLogIterator.run(createUpdateVisitor(), new RuntimeEnvironment(database, contexts, labelExpression));
-                });
+                Scope.child(Scope.Attr.logService.name(), compositeLogService, () -> runChangeLogIterator.run(createUpdateVisitor(), new RuntimeEnvironment(database, contexts, labelExpression)));
 
                 showUpdateSummary(changeLog, statusVisitor);
 
@@ -828,12 +826,9 @@ public class Liquibase implements AutoCloseable {
                             new CountChangeSetFilter(changesToApply));
 
                     CompositeLogService compositeLogService = new CompositeLogService(true, bufferLog);
-                    Scope.child(Scope.Attr.logService.name(), compositeLogService, () -> {
-                        runChangeLogIterator.run(createUpdateVisitor(), new RuntimeEnvironment(database, contexts, labelExpression));
-                    });
+                    Scope.child(Scope.Attr.logService.name(), compositeLogService, () -> runChangeLogIterator.run(createUpdateVisitor(), new RuntimeEnvironment(database, contexts, labelExpression)));
 
                     showUpdateSummary(changeLog, statusVisitor);
-
                     hubUpdater.postUpdateHub(updateOperation, bufferLog);
                 }
                 catch (Throwable e) {
@@ -963,12 +958,9 @@ public class Liquibase implements AutoCloseable {
                             new UpToTagChangeSetFilter(tag, ranChangeSetList));
 
                     CompositeLogService compositeLogService = new CompositeLogService(true, bufferLog);
-                    Scope.child(Scope.Attr.logService.name(), compositeLogService, () -> {
-                        runChangeLogIterator.run(createUpdateVisitor(), new RuntimeEnvironment(database, contexts, labelExpression));
-                    });
+                    Scope.child(Scope.Attr.logService.name(), compositeLogService, () -> runChangeLogIterator.run(createUpdateVisitor(), new RuntimeEnvironment(database, contexts, labelExpression)));
 
                     showUpdateSummary(changeLog, statusVisitor);
-
                     hubUpdater.postUpdateHub(updateOperation, bufferLog);
                 }
                 catch (Throwable e) {
@@ -1221,17 +1213,13 @@ public class Liquibase implements AutoCloseable {
 
                     CompositeLogService compositeLogService = new CompositeLogService(true, bufferLog);
                     if (rollbackScript == null) {
-                        Scope.child(Scope.Attr.logService.name(), compositeLogService, () -> {
-                            logIterator.run(createRollbackVisitor(), new RuntimeEnvironment(database, contexts, labelExpression));
-                        });
+                        Scope.child(Scope.Attr.logService.name(), compositeLogService, () -> logIterator.run(createRollbackVisitor(), new RuntimeEnvironment(database, contexts, labelExpression)));
                     } else {
                         List<ChangeSet> changeSets = determineRollbacks(logIterator, contexts, labelExpression);
                         Map<String, Object> values = new HashMap<>();
                         values.put(Scope.Attr.logService.name(), compositeLogService);
                         values.put(BufferedLogService.class.getName(), bufferLog);
-                        Scope.child(values, () -> {
-                            executeRollbackScript(rollbackScript, changeSets, contexts, labelExpression);
-                        });
+                        Scope.child(values, () -> executeRollbackScript(rollbackScript, changeSets, contexts, labelExpression));
                         removeRunStatus(changeSets, contexts, labelExpression);
                     }
                     hubUpdater.postUpdateHub(rollbackOperation, bufferLog);
@@ -1497,17 +1485,13 @@ public class Liquibase implements AutoCloseable {
 
                     CompositeLogService compositeLogService = new CompositeLogService(true, bufferLog);
                     if (rollbackScript == null) {
-                        Scope.child(Scope.Attr.logService.name(), compositeLogService, () -> {
-                            logIterator.run(createRollbackVisitor(), new RuntimeEnvironment(database, contexts, labelExpression));
-                        });
+                        Scope.child(Scope.Attr.logService.name(), compositeLogService, () -> logIterator.run(createRollbackVisitor(), new RuntimeEnvironment(database, contexts, labelExpression)));
                     } else {
                         List<ChangeSet> changeSets = determineRollbacks(logIterator, contexts, labelExpression);
                         Map<String, Object> values = new HashMap<>();
                         values.put(Scope.Attr.logService.name(), compositeLogService);
                         values.put(BufferedLogService.class.getName(), bufferLog);
-                        Scope.child(values, () -> {
-                            executeRollbackScript(rollbackScript, changeSets, contexts, labelExpression);
-                        });
+                        Scope.child(values, () -> executeRollbackScript(rollbackScript, changeSets, contexts, labelExpression));
                         removeRunStatus(changeSets, contexts, labelExpression);
                     }
                     hubUpdater.postUpdateHub(rollbackOperation, bufferLog);
@@ -1665,17 +1649,13 @@ public class Liquibase implements AutoCloseable {
 
                     CompositeLogService compositeLogService = new CompositeLogService(true, bufferLog);
                     if (rollbackScript == null) {
-                        Scope.child(Scope.Attr.logService.name(), compositeLogService, () -> {
-                            logIterator.run(createRollbackVisitor(), new RuntimeEnvironment(database, contexts, labelExpression));
-                        });
+                        Scope.child(Scope.Attr.logService.name(), compositeLogService, () -> logIterator.run(createRollbackVisitor(), new RuntimeEnvironment(database, contexts, labelExpression)));
                     } else {
                         List<ChangeSet> changeSets = determineRollbacks(logIterator, contexts, labelExpression);
                         Map<String, Object> values = new HashMap<>();
                         values.put(Scope.Attr.logService.name(), compositeLogService);
                         values.put(BufferedLogService.class.getName(), bufferLog);
-                        Scope.child(values, () -> {
-                            executeRollbackScript(rollbackScript, changeSets, contexts, labelExpression);
-                        });
+                        Scope.child(values, () -> executeRollbackScript(rollbackScript, changeSets, contexts, labelExpression));
                         removeRunStatus(changeSets, contexts, labelExpression);
                     }
                     hubUpdater.postUpdateHub(rollbackOperation, bufferLog);
@@ -1807,10 +1787,8 @@ public class Liquibase implements AutoCloseable {
 
                     ChangeLogIterator runChangeLogIterator = buildChangeLogIterator(tag, changeLog, contexts, labelExpression);
                     CompositeLogService compositeLogService = new CompositeLogService(true, bufferLog);
-                    Scope.child(Scope.Attr.logService.name(), compositeLogService, () -> {
-                        runChangeLogIterator.run(new ChangeLogSyncVisitor(database, changeLogSyncListener),
-                                new RuntimeEnvironment(database, contexts, labelExpression));
-                    });
+                    Scope.child(Scope.Attr.logService.name(), compositeLogService, () -> runChangeLogIterator.run(new ChangeLogSyncVisitor(database, changeLogSyncListener),
+                            new RuntimeEnvironment(database, contexts, labelExpression)));
                     hubUpdater.postUpdateHub(changeLogSyncOperation, bufferLog);
                 }
                 catch (Exception e) {
