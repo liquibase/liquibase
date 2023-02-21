@@ -390,6 +390,10 @@ public class ColumnSnapshotGenerator extends JdbcSnapshotGenerator {
             }
         }
 
+        if ((database instanceof MySQLDatabase) && "JSON".equalsIgnoreCase(columnTypeName)){
+            return new DataType("JSON");
+        }
+
         if ((database instanceof MySQLDatabase) && ("ENUM".equalsIgnoreCase(columnTypeName) || "SET".equalsIgnoreCase
                 (columnTypeName))) {
             try {
