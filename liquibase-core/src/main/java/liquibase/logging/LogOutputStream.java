@@ -25,4 +25,16 @@ public enum LogOutputStream {
     public PrintStream getOutputStream() {
         return outputStream;
     }
+
+    /**
+     * Set the system output stream or error stream based on enum's value
+     */
+    public void configureSystemOutputStream() {
+        switch (this) {
+            case STDOUT:
+                System.setErr(this.getOutputStream());
+            case STDERR:
+                System.setOut(this.getOutputStream());
+        }
+    }
 }

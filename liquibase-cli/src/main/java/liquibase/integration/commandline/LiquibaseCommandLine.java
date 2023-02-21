@@ -735,17 +735,14 @@ public class LiquibaseCommandLine {
         final LogOutputStream logOutputStream = LiquibaseCommandLineConfiguration.LOG_STREAM.getCurrentValue();
         final Level level = LiquibaseCommandLineConfiguration.LOG_LEVEL.getCurrentValue();
         if (logOutputStream != null) {
-            Arrays.stream(logger.getHandlers()).forEach(logger::removeHandler); // Unsure of impact of this statement.
+            Arrays.stream(logger.getHandlers())
+                    .filter(handler -> handler instanceof StreamHandler)
+                    .forEach(logger::removeHandler); // Unsure of impact of this statement.
             StreamHandler streamHandler = new StreamHandler(logOutputStream.getOutputStream(), new SimpleFormatter());
             streamHandler.setLevel(level);
             setFormatterOnHandler(logService, streamHandler);
             logger.addHandler(streamHandler);
-            switch (logOutputStream) {
-                case STDOUT:
-                    System.setErr(logOutputStream.getOutputStream());
-                case STDERR:
-                    System.setOut(logOutputStream.getOutputStream());
-            }
+            logOutputStream.configureSystemOutputStream();
         }
     }
 
