@@ -5,11 +5,12 @@ import liquibase.exception.UnexpectedLiquibaseException;
 import liquibase.servicelocator.PrioritizedService;
 
 import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
 
 public class ChangeLogSerializerFactory {
     private static ChangeLogSerializerFactory instance;
 
-    private Map<String, List<ChangeLogSerializer>> serializers = new HashMap<>();
+    private Map<String, List<ChangeLogSerializer>> serializers = new ConcurrentHashMap<>();
 
     public static synchronized void reset() {
         instance = new ChangeLogSerializerFactory();
