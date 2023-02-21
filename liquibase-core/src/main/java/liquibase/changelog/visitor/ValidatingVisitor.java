@@ -107,7 +107,7 @@ public class ValidatingVisitor implements ChangeSetVisitor {
         if (!areChangeSetAttributesValid(changeSet)) {
             changeSet.setValidationFailed(true);
             shouldValidate = false;
-        };
+        }
 
         for (Change change : changeSet.getChanges()) {
             try {

@@ -151,7 +151,7 @@ public class StandardHubService implements HubService {
         final AtomicReference<UUID> organizationId = new AtomicReference<>(getOrganization().getId());
         String searchParam = null;
         if (connectionId != null) {
-            searchParam = "connections.id:\"" + connectionId.toString() + "\"";
+            searchParam = "connections.id:\"" + connectionId + "\"";
         } else if (jdbcUrl != null) {
             searchParam = "connections.jdbcUrl:\"" + jdbcUrl + "\"";
         } else {
@@ -159,7 +159,7 @@ public class StandardHubService implements HubService {
         }
         Map<String, String> parameters = new LinkedHashMap<>();
         parameters.put("search", searchParam);
-        final Map<String, List<Map>> response = http.doGet("/api/v1/organizations/" + organizationId.toString() + "/projects", parameters, Map.class);
+        final Map<String, List<Map>> response = http.doGet("/api/v1/organizations/" + organizationId + "/projects", parameters, Map.class);
         List<Project> returnList = transformProjectResponseToList(response);
         if (returnList.size() > 1) {
             Scope.getCurrentScope().getLog(getClass()).warning(String.format("JDBC URL: %s was associated with multiple projects.", jdbcUrl));
@@ -205,7 +205,7 @@ public class StandardHubService implements HubService {
     public List<Project> getProjects() throws LiquibaseHubException {
         final AtomicReference<UUID> organizationId = new AtomicReference<>(getOrganization().getId());
 
-        final Map<String, List<Map>> response = http.doGet("/api/v1/organizations/" + organizationId.toString() + "/projects", Map.class);
+        final Map<String, List<Map>> response = http.doGet("/api/v1/organizations/" + organizationId + "/projects", Map.class);
 
         return transformProjectResponseToList(response);
     }

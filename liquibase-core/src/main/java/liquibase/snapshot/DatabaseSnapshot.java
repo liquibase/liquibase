@@ -25,6 +25,7 @@ import liquibase.util.StringUtil;
 
 import java.sql.Timestamp;
 import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.CopyOnWriteArrayList;
 
 public abstract class DatabaseSnapshot implements LiquibaseSerializable {
@@ -38,14 +39,14 @@ public abstract class DatabaseSnapshot implements LiquibaseSerializable {
     private final Database database;
     private final DatabaseObjectCollection allFound;
     private final DatabaseObjectCollection referencedObjects;
-    private final Map<Class<? extends DatabaseObject>, Set<DatabaseObject>> knownNull = new HashMap<>();
+    private final Map<Class<? extends DatabaseObject>, Set<DatabaseObject>> knownNull = new ConcurrentHashMap<>();
 
-    private final Map<String, Object> snapshotScratchPad = new HashMap<>();
+    private final Map<String, Object> snapshotScratchPad = new ConcurrentHashMap<>();
 
-    private final Map<String, ResultSetCache> resultSetCaches = new HashMap<>();
+    private final Map<String, ResultSetCache> resultSetCaches = new ConcurrentHashMap<>();
     private CompareControl.SchemaComparison[] schemaComparisons;
 
-    private Map<String, Object> metadata = new HashMap<>();
+    private Map<String, Object> metadata = new ConcurrentHashMap<>();
 
     DatabaseSnapshot(DatabaseObject[] examples, Database database, SnapshotControl snapshotControl) throws DatabaseException, InvalidExampleException {
         this.database = database;

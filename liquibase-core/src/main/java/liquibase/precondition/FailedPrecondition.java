@@ -29,7 +29,7 @@ public class FailedPrecondition {
         if (changeLog == null) {
             return message;
         } else {
-            return changeLog.toString()+" : "+message;
+            return changeLog +" : "+message;
         }
     }
 }

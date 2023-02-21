@@ -15,15 +15,16 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
 
 public class ResultSetCache {
     private final Map<String, Integer> timesSingleQueried = new HashMap<>();
     private final Map<String, Boolean> didBulkQuery = new HashMap<>();
     private boolean bulkTracking = true;
 
-    private final Map<String, Map<String, List<CachedRow>>> cacheBySchema = new HashMap<>();
+    private final Map<String, Map<String, List<CachedRow>>> cacheBySchema = new ConcurrentHashMap<>();
 
-    private final Map<String, Object> info = new HashMap<>();
+    private final Map<String, Object> info = new ConcurrentHashMap<>();
 
     public List<CachedRow> get(ResultSetExtractor resultSetExtractor) throws DatabaseException {
         try {

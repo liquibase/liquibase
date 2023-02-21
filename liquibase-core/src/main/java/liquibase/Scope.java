@@ -126,6 +126,8 @@ public class Scope {
      * Defaults serviceLocator to {@link StandardServiceLocator}
      */
     private Scope() {
+        scopeId = "root";
+        parent = null;
     }
 
     /**

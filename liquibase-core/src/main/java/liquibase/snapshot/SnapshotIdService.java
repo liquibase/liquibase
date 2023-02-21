@@ -18,6 +18,6 @@ public class SnapshotIdService {
     }
 
     public String generateId() {
-        return base+Integer.toString(nextId++);
+        return base+ nextId++;
     }
 }

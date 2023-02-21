@@ -38,7 +38,7 @@ public class ErrorPrecondition {
         if (changeLog == null) {
             return causeMessage;
         } else {
-            return changeLog.toString()+" : "+ precondition.toString()+" : "+causeMessage;
+            return changeLog +" : "+ precondition.toString()+" : "+causeMessage;
         }
     }
 }
