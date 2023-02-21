@@ -6,11 +6,12 @@ import liquibase.structure.DatabaseObject;
 import liquibase.util.StringUtil;
 
 import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
 
 public class Schema extends AbstractDatabaseObject {
 
     public Schema() {
-        setAttribute("objects",  new HashMap<Class<? extends DatabaseObject>, Set<DatabaseObject>>());
+        setAttribute("objects",  new ConcurrentHashMap<Class<? extends DatabaseObject>, Set<DatabaseObject>>());
     }
 
     public Schema(String catalog, String schemaName) {
@@ -22,7 +23,7 @@ public class Schema extends AbstractDatabaseObject {
 
         setAttribute("name", schemaName);
         setAttribute("catalog", catalog);
-        setAttribute("objects", new HashMap<Class<? extends DatabaseObject>, Set<DatabaseObject>>());
+        setAttribute("objects", new ConcurrentHashMap<Class<? extends DatabaseObject>, Set<DatabaseObject>>());
     }
 
     @Override
