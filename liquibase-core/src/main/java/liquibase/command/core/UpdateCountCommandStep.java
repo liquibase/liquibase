@@ -1,8 +1,12 @@
 package liquibase.command.core;
 
+import liquibase.UpdateSummaryEnum;
 import liquibase.command.*;
 import liquibase.configuration.ConfigurationValueObfuscator;
 import liquibase.exception.CommandExecutionException;
+
+import java.util.Arrays;
+import java.util.List;
 
 public class UpdateCountCommandStep extends AbstractCliWrapperCommandStep {
 
@@ -21,6 +25,7 @@ public class UpdateCountCommandStep extends AbstractCliWrapperCommandStep {
     public static final CommandArgumentDefinition<String> CHANGE_EXEC_LISTENER_PROPERTIES_FILE_ARG;
     public static final CommandArgumentDefinition<String> DRIVER_ARG;
     public static final CommandArgumentDefinition<String> DRIVER_PROPERTIES_FILE_ARG;
+    public static final CommandArgumentDefinition<UpdateSummaryEnum> SHOW_SUMMARY;
 
     static {
         CommandBuilder builder = new CommandBuilder(COMMAND_NAME);
@@ -48,11 +53,30 @@ public class UpdateCountCommandStep extends AbstractCliWrapperCommandStep {
         CONTEXTS_ARG = builder.argument("contexts", String.class)
                 .description("Changeset contexts to match").build();
         COUNT_ARG = builder.argument("count", Integer.class).required()
-            .description("The number of changes in the changelog to deploy").build();
+                .description("The number of changes in the changelog to deploy").build();
         CHANGE_EXEC_LISTENER_CLASS_ARG = builder.argument("changeExecListenerClass", String.class)
-            .description("Fully-qualified class which specifies a ChangeExecListener").build();
+                .description("Fully-qualified class which specifies a ChangeExecListener").build();
         CHANGE_EXEC_LISTENER_PROPERTIES_FILE_ARG = builder.argument("changeExecListenerPropertiesFile", String.class)
-            .description("Path to a properties file for the ChangeExecListenerClass").build();
+                .description("Path to a properties file for the ChangeExecListenerClass").build();
+        SHOW_SUMMARY = builder.argument("showSummary", UpdateSummaryEnum.class)
+                .description("Type of update results summary to show.  Values can be 'off', 'summary', or 'verbose'.")
+                .defaultValue(UpdateSummaryEnum.SUMMARY)
+                .setValueHandler(value -> {
+                    if (value == null) {
+                        return null;
+                    }
+                    if (value instanceof String && ! value.equals("")) {
+                        final List<String> validValues = Arrays.asList("OFF", "SUMMARY", "VERBOSE");
+                        if (!validValues.contains(((String) value).toUpperCase())) {
+                            throw new IllegalArgumentException("Illegal value for `showUpdateSummary'.  Valid values are 'OFF', 'SUMMARY', or 'VERBOSE'");
+                        }
+                        return UpdateSummaryEnum.valueOf(((String) value).toUpperCase());
+                    } else if (value instanceof UpdateSummaryEnum) {
+                        return (UpdateSummaryEnum) value;
+                    }
+                    return null;
+                })
+                .build();
     }
 
     @Override

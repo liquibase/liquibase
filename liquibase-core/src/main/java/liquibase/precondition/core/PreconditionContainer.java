@@ -246,10 +246,10 @@ public class PreconditionContainer extends AndPrecondition implements ChangeLogC
             }
 
             if (this.getOnError().equals(PreconditionContainer.ErrorOption.CONTINUE)) {
-                Scope.getCurrentScope().getLog(getClass()).info("Continuing past: " + toString() + " despite precondition error:\n " + message);
+                Scope.getCurrentScope().getLog(getClass()).info("Continuing past: " + this + " despite precondition error:\n " + message);
                 throw e;
             } else if (this.getOnError().equals(PreconditionContainer.ErrorOption.WARN)) {
-                Scope.getCurrentScope().getLog(getClass()).warning("Continuing past: " + toString() + " despite precondition error:\n " + message);
+                Scope.getCurrentScope().getLog(getClass()).warning("Continuing past: " + this + " despite precondition error:\n " + message);
                 if (changeExecListener != null) {
                     changeExecListener.preconditionErrored(e, ErrorOption.WARN);
                 }
