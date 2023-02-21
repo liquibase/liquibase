@@ -42,6 +42,8 @@ import java.util.*;
 import java.util.regex.Pattern;
 import java.util.zip.GZIPInputStream;
 
+import org.apache.commons.lang3.StringUtils;
+
 import static java.util.ResourceBundle.getBundle;
 import static liquibase.change.ChangeParameterMetaData.ALL;
 
@@ -366,7 +368,7 @@ public class LoadDataChange extends AbstractTableChange implements ChangeWithCol
                         } else if (columnConfig.getType().equalsIgnoreCase("date")
                                 || columnConfig.getType().equalsIgnoreCase("datetime")
                                 || columnConfig.getType().equalsIgnoreCase("time")) {
-                            if ("NULL".equalsIgnoreCase(value) ||value.isEmpty()) {
+                            if ("NULL".equalsIgnoreCase(value) || StringUtils.isBlank(value)) {
                                 valueConfig.setValue(null);
                             } else {
                                 try {
