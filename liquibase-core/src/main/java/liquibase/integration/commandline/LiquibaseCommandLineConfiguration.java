@@ -4,7 +4,7 @@ import liquibase.configuration.AutoloadedConfigurations;
 import liquibase.configuration.ConfigurationDefinition;
 import liquibase.configuration.ConfigurationValueConverter;
 import liquibase.logging.LogFormat;
-import liquibase.logging.LogOutputStream;
+import liquibase.logging.SystemOutputStream;
 import liquibase.util.StringUtil;
 
 import java.util.Arrays;
@@ -27,7 +27,7 @@ public class LiquibaseCommandLineConfiguration implements AutoloadedConfiguratio
     public static final ConfigurationDefinition<String> LOG_CHANNELS;
     public static final ConfigurationDefinition<String> LOG_FILE;
     public static final ConfigurationDefinition<LogFormat> LOG_FORMAT;
-    public static final ConfigurationDefinition<LogOutputStream> LOG_STREAM;
+    public static final ConfigurationDefinition<SystemOutputStream> OUTPUT_STREAM;
     public static final ConfigurationDefinition<String> OUTPUT_FILE;
     public static final ConfigurationDefinition<Boolean> SHOULD_RUN;
     public static final ConfigurationDefinition<ArgumentConverter> ARGUMENT_CONVERTER;
@@ -112,8 +112,8 @@ public class LiquibaseCommandLineConfiguration implements AutoloadedConfiguratio
                 })
                 .build();
 
-        LOG_STREAM = builder.define("logStream", LogOutputStream.class)
-                .setDescription("Redirect all log output to " + LogOutputStream.STDOUT + " or " + LogOutputStream.STDERR + ".")
+        OUTPUT_STREAM = builder.define("outputStream", SystemOutputStream.class)
+                .setDescription("Redirects all output to " + SystemOutputStream.STDOUT + " or " + SystemOutputStream.STDERR + ".")
                 .setDefaultValue(null)
                 .setHidden(true)
                 .setValueHandler((stream) -> {
@@ -121,9 +121,9 @@ public class LiquibaseCommandLineConfiguration implements AutoloadedConfiguratio
                         return null;
                     } else if (stream instanceof String) {
                         String streamString = (String) stream;
-                        return LogOutputStream.getStream(streamString);
-                    } else if (stream instanceof LogOutputStream) {
-                        return (LogOutputStream) stream;
+                        return SystemOutputStream.getStream(streamString);
+                    } else if (stream instanceof SystemOutputStream) {
+                        return (SystemOutputStream) stream;
                     }
                     return null;
                 })

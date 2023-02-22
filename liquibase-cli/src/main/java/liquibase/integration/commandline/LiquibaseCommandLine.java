@@ -16,7 +16,7 @@ import liquibase.exception.CommandValidationException;
 import liquibase.hub.HubConfiguration;
 import liquibase.license.LicenseService;
 import liquibase.license.LicenseServiceFactory;
-import liquibase.logging.LogOutputStream;
+import liquibase.logging.SystemOutputStream;
 import liquibase.logging.LogService;
 import liquibase.logging.core.JavaLogService;
 import liquibase.logging.core.LogServiceFactory;
@@ -732,17 +732,18 @@ public class LiquibaseCommandLine {
      * Configures the system output stream and error stream based on supplied global parameter.
      */
     private void setOutputStream(Logger logger, LogService logService) {
-        final LogOutputStream logOutputStream = LiquibaseCommandLineConfiguration.LOG_STREAM.getCurrentValue();
+        final SystemOutputStream systemOutputStream = LiquibaseCommandLineConfiguration.OUTPUT_STREAM.getCurrentValue();
         final Level level = LiquibaseCommandLineConfiguration.LOG_LEVEL.getCurrentValue();
-        if (logOutputStream != null) {
+        if (systemOutputStream != null) {
+            // Remove all existing StreamHandlers that may redirect output
             Arrays.stream(logger.getHandlers())
                     .filter(handler -> handler instanceof StreamHandler)
-                    .forEach(logger::removeHandler); // Unsure of impact of this statement.
-            StreamHandler streamHandler = new StreamHandler(logOutputStream.getOutputStream(), new SimpleFormatter());
+                    .forEach(logger::removeHandler);
+            StreamHandler streamHandler = new StreamHandler(systemOutputStream.getOutputStream(), new SimpleFormatter());
             streamHandler.setLevel(level);
             setFormatterOnHandler(logService, streamHandler);
             logger.addHandler(streamHandler);
-            logOutputStream.configureSystemOutputStream();
+            systemOutputStream.configureSystemOutputStream();
         }
     }
 
