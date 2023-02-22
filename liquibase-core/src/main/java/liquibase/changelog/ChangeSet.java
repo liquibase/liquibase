@@ -766,6 +766,7 @@ public class ChangeSet implements Conditional, ChangeLogChild {
         if (getRunWith() == null || originalExecutor instanceof LoggingExecutor) {
             return originalExecutor;
         }
+        Scope.getCurrentScope().addMdcValue(MdcKey.RUN_WITH, getRunWith());
         String executorName = ChangeSet.lookupExecutor(getRunWith());
         Executor customExecutor = Scope.getCurrentScope().getSingleton(ExecutorService.class).getExecutor(executorName, database);
         Scope.getCurrentScope().getSingleton(ExecutorService.class).setExecutor("jdbc", database, customExecutor);
