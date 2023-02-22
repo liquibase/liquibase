@@ -4,6 +4,7 @@ import liquibase.Scope;
 import liquibase.configuration.*;
 import liquibase.exception.CommandExecutionException;
 import liquibase.exception.CommandValidationException;
+import liquibase.logging.mdc.MdcKey;
 import liquibase.util.StringUtil;
 
 import java.io.FilterOutputStream;
@@ -188,6 +189,7 @@ public class CommandScope {
         CommandResultsBuilder resultsBuilder = new CommandResultsBuilder(this, outputStream);
         final List<CommandStep> pipeline = commandDefinition.getPipeline();
         validate();
+        Scope.getCurrentScope().addMdcValue(MdcKey.OPERATION_TYPE, StringUtil.join(commandDefinition.getName(), "-"));
         try {
             for (CommandStep command : pipeline) {
                 command.run(resultsBuilder);
