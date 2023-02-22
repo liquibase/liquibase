@@ -294,7 +294,25 @@
                     </execution>
                 </executions>
             </plugin>
-
+            <!-- Generate META-INF/services files automatically for the services specified below. -->
+            <plugin>
+                <groupId>eu.somatik.serviceloader-maven-plugin</groupId>
+                <artifactId>serviceloader-maven-plugin</artifactId>
+                <version>1.4.0</version>
+                <configuration>
+                    <services>
+                        <param>liquibase.logging.mdc.MdcManager</param>
+                        <param>liquibase.logging.mdc.CustomMdcObject</param>
+                    </services>
+                </configuration>
+                <executions>
+                    <execution>
+                        <goals>
+                            <goal>generate</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
         </plugins>
     </build>
 </project>
