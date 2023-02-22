@@ -115,7 +115,7 @@ class HttpClient {
         List<String> paramArray = new ArrayList<>();
         try {
             for (Map.Entry<String, String> entry : parameters.entrySet()) {
-                paramArray.add(entry.getKey() + "=" + URLEncoder.encode(entry.getValue(), "UTF-8"));
+                paramArray.add(entry.getKey() + "=" + URLEncoder.encode(entry.getValue(), StandardCharsets.UTF_8.name()));
             }
         } catch (UnsupportedEncodingException e) {
             throw new RuntimeException(e);
