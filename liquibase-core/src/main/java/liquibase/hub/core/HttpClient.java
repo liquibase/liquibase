@@ -8,6 +8,7 @@ import liquibase.hub.LiquibaseHubObjectNotFoundException;
 import liquibase.hub.LiquibaseHubRedirectException;
 import liquibase.hub.LiquibaseHubSecurityException;
 import liquibase.hub.model.ListResponse;
+import liquibase.parser.core.yaml.YamlParser;
 import liquibase.util.LiquibaseUtil;
 import liquibase.util.StringUtil;
 import org.yaml.snakeyaml.DumperOptions;
@@ -45,7 +46,7 @@ class HttpClient {
         dumperOptions.setDefaultScalarStyle(DumperOptions.ScalarStyle.DOUBLE_QUOTED);
         dumperOptions.setWidth(Integer.MAX_VALUE);
 
-        yaml = new Yaml(new Constructor(), new HubRepresenter(), dumperOptions);
+        yaml = new Yaml(new Constructor(YamlParser.createLoaderOptions()), new HubRepresenter(dumperOptions), dumperOptions);
 
         yaml.setBeanAccess(BeanAccess.FIELD);
 
@@ -238,7 +239,8 @@ class HttpClient {
 
     private static class HubRepresenter extends Representer {
 
-        HubRepresenter() {
+        HubRepresenter(DumperOptions options) {
+            super(options);
             getPropertyUtils().setSkipMissingProperties(true);
         }
 
