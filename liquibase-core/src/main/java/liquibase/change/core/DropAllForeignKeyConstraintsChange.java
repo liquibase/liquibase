@@ -62,7 +62,7 @@ public class DropAllForeignKeyConstraintsChange extends AbstractChange {
             sqlStatements.addAll(Arrays.asList(change.generateStatements(database)));
         }
 
-        return sqlStatements.toArray(new SqlStatement[0]);
+        return sqlStatements.toArray(SqlStatement.EMPTY_SQL_STATEMENT);
     }
 
     @Override
