@@ -110,7 +110,7 @@ public class DatabaseType extends DataType {
 
             return database;
         } catch (DatabaseException e) {
-            throw new BuildException("Unable to create Liquibase database instance. " + e.toString(), e);
+            throw new BuildException("Unable to create Liquibase database instance. " + e, e);
         }
     }
 

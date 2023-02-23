@@ -21,7 +21,7 @@ public class YamlChangeLogParser extends YamlParser implements ChangeLogParser {
 
     @Override
     public DatabaseChangeLog parse(String physicalChangeLogLocation, ChangeLogParameters changeLogParameters, ResourceAccessor resourceAccessor) throws ChangeLogParseException {
-        Yaml yaml = new Yaml(new SafeConstructor());
+        Yaml yaml = new Yaml(new SafeConstructor(createLoaderOptions()));
 
         try {
             Resource changelog = resourceAccessor.get(physicalChangeLogLocation);
@@ -94,7 +94,7 @@ public class YamlChangeLogParser extends YamlParser implements ChangeLogParser {
     private Map parseYamlStream(String physicalChangeLogLocation, Yaml yaml, InputStream changeLogStream) throws ChangeLogParseException {
         Map parsedYaml;
         try {
-            parsedYaml = (Map) yaml.load(changeLogStream);
+            parsedYaml = yaml.load(changeLogStream);
         } catch (Exception e) {
             throw new ChangeLogParseException("Syntax error in file " + physicalChangeLogLocation + ": " + e.getMessage(), e);
         }

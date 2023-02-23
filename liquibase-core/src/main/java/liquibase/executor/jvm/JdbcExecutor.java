@@ -11,6 +11,7 @@ import liquibase.exception.DatabaseException;
 import liquibase.executor.AbstractExecutor;
 import liquibase.listener.SqlListener;
 import liquibase.logging.Logger;
+import liquibase.logging.mdc.MdcKey;
 import liquibase.servicelocator.PrioritizedService;
 import liquibase.sql.CallableSql;
 import liquibase.sql.Sql;
@@ -26,7 +27,6 @@ import liquibase.util.JdbcUtil;
 import liquibase.util.StringUtil;
 
 import java.sql.*;
-
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -65,7 +65,6 @@ public class JdbcExecutor extends AbstractExecutor {
     }
 
     public Object execute(StatementCallback action, List<SqlVisitor> sqlVisitors) throws DatabaseException {
-        Scope.getCurrentScope().getLog(getClass()).fine("Executing with the '" + getName() + "' executor");
         DatabaseConnection con = database.getConnection();
         Statement stmt = null;
         try {

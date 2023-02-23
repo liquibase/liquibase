@@ -64,12 +64,11 @@ public class AddColumnGenerator extends AbstractSqlGenerator<AddColumnStatement>
 
         try {
             if (statement.isPrimaryKey() && ((database instanceof AbstractDb2Database) ||
-                    (database instanceof DerbyDatabase) || (database instanceof SQLiteDatabase)) ||
-                    (database instanceof H2Database && database.getDatabaseMajorVersion() < 2)) {
+                    (database instanceof DerbyDatabase) || (database instanceof SQLiteDatabase) ||
+                    (database instanceof H2Database && database.getDatabaseMajorVersion() < 2))) {
                 validationErrors.addError("Cannot add a primary key column");
             }
-        }
-        catch (DatabaseException e) {
+        } catch (DatabaseException e) {
             //do nothing
         }
 
@@ -179,7 +178,7 @@ public class AddColumnGenerator extends AbstractSqlGenerator<AddColumnStatement>
             }
         } else {
             if ((database instanceof SybaseDatabase) || (database instanceof SybaseASADatabase) || (database
-                    instanceof MySQLDatabase) || ((database instanceof MSSQLDatabase) && columnType != null && "timestamp".equalsIgnoreCase (columnType.toString()))) {
+                    instanceof MySQLDatabase) || ((database instanceof MSSQLDatabase) && columnType != null && "timestamp".equalsIgnoreCase(columnType.toString()))) {
                 alterTable += " NULL";
             }
         }
