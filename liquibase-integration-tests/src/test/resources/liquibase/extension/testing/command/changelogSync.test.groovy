@@ -28,10 +28,10 @@ Optional Args:
     Default: null
   labelFilter (String) Label expression to use for filtering which changes to mark as executed
     Default: null
-  password (String) The database password
+  password (String) Password to use to connect to the database
     Default: null
     OBFUSCATED
-  username (String) The database username
+  username (String) Username to use to connect to the database
     Default: null
 """
     run "Happy path", {
@@ -70,10 +70,6 @@ Optional Args:
                     ),
             ]
         }
-
-        expectedResults = [
-                statusCode   : 0
-        ]
     }
 
     run "Run without URL should throw an exception",  {
