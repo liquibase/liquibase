@@ -34,8 +34,6 @@ Optional Args:
   password (String) Password to use to connect to the database
     Default: null
     OBFUSCATED
-  showSummary (UpdateSummaryEnum) Type of update results summary to show.  Values can be 'off', 'summary', or 'verbose'.
-    Default: SUMMARY
   username (String) Username to use to connect to the database
     Default: null
 """
@@ -56,17 +54,6 @@ Optional Args:
                 "txt": [Pattern.compile(".*liquibase.structure.core.Table:.*ADDRESS.*", Pattern.MULTILINE|Pattern.DOTALL|Pattern.CASE_INSENSITIVE),
                         Pattern.compile(".*liquibase.structure.core.Table:.*ADDRESS.*columns:.*city.*", Pattern.MULTILINE|Pattern.DOTALL|Pattern.CASE_INSENSITIVE)]
         ]
-        expectedUI = [
-"""
-UPDATE SUMMARY
-Run:                         41
-Previously run:               0
-DBMS mismatch:                0
-Not in filter:                0
--------------------------------
-Total change sets:           41
-"""
-]
 
     }
 
@@ -101,6 +88,27 @@ Total change sets:            3
 | land                                                         |                                |
 +--------------------------------------------------------------+--------------------------------+
 """
+        ]
+    }
+
+    run "Happy path with a simple changelog log message does not contain 'Executing with' message", {
+        arguments = [
+                url:        { it.url },
+                username:   { it.username },
+                password:   { it.password },
+                changelogFile: "changelogs/h2/complete/simple.changelog.xml"
+        ]
+
+        expectedResults = [
+                statusCode   : 0
+        ]
+
+        expectedDatabaseContent = [
+                "txt": [Pattern.compile(".*liquibase.structure.core.Table:.*ADDRESS.*", Pattern.MULTILINE|Pattern.DOTALL|Pattern.CASE_INSENSITIVE),
+                        Pattern.compile(".*liquibase.structure.core.Table:.*ADDRESS.*columns:.*city.*", Pattern.MULTILINE|Pattern.DOTALL|Pattern.CASE_INSENSITIVE)]
+        ]
+        expectedLogs = [
+                CommandTests.assertNotContains("Executing with 'jdbc' executor")
         ]
     }
 
