@@ -1,87 +1,14 @@
 package liquibase.configuration.core
 
 import liquibase.GlobalConfiguration
-import liquibase.Scope
 import liquibase.hub.HubConfiguration
-import liquibase.license.LicenseInstallResult
-import liquibase.license.LicenseService
-import liquibase.license.LicenseServiceFactory
-import liquibase.license.Location
 import spock.lang.Specification
 import spock.lang.Unroll
 
 class EnvironmentValueProviderTest extends Specification {
-    static boolean licenseValid = false;
-    static final mockLicenseService = new LicenseService() {
-        @Override
-        int getPriority() {
-            return Integer.MAX_VALUE
-        }
-
-        @Override
-        boolean licenseIsInstalled() {
-            return false
-        }
-
-        @Override
-        boolean licenseIsValid(String subject) {
-            return licenseValid
-        }
-
-        @Override
-        String getLicenseInfo() {
-            return "Mock license"
-        }
-
-        @Override
-        LicenseInstallResult installLicense(Location... locations) {
-            return null
-        }
-
-        @Override
-        void disable() {
-
-        }
-
-        @Override
-        boolean licenseIsAboutToExpire() {
-            return false
-        }
-
-        @Override
-        int daysTilExpiration() {
-            return 100
-        }
-
-        void setLicenseValid(boolean aBoolean) {
-            this.licenseValid = aBoolean
-        }
-    }
-
-    def setup() {
-        def licenseFactory = Scope.currentScope.getSingleton(LicenseServiceFactory)
-        licenseFactory.register(mockLicenseService)
-    }
-
-    def cleanup() {
-        def licenseFactory = Scope.currentScope.getSingleton(LicenseServiceFactory)
-        licenseFactory.unregister(mockLicenseService)
-    }
 
     @Unroll
-    def "getProvidedValue doesn't require license"() {
-        setup:
-        mockLicenseService.setLicenseValid(false)
-
-        expect:
-        new EnvironmentValueProvider().getProvidedValue("java.home") != null
-    }
-
-    @Unroll
-    def "getProvidedValue with license"() {
-        setup:
-        mockLicenseService.setLicenseValid(true)
-
+    def "getProvidedValue"() {
         when:
         def provider = new EnvironmentValueProvider() {
             @Override
