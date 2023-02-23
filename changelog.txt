@@ -1,6 +1,113 @@
 Liquibase Core Changelog
 ===========================================
 
+Changes in version Liquibase v4.19.1
+
+* Fixes generate-changelog table/view comment and table/view column comment generation for MSSQL by @abrackx in https://github.com/liquibase/liquibase/pull/3563
+* Publish liquibase-extension-testing to github packages  by @abrackx in https://github.com/liquibase/liquibase/pull/3697
+* Fully qualified path to the changelog or snapshot in S3 is not allowed, so needs better msg by @diadiushko in https://github.com/liquibase/liquibase/pull/3564
+* detect circular references in includeAll statement by @StevenMassaro in https://github.com/liquibase/liquibase/pull/3695
+* Bump junit-jupiter-params from 5.9.1 to 5.9.2 by @dependabot in https://github.com/liquibase/liquibase/pull/3673
+* Bump ant from 1.10.11 to 1.10.13 by @dependabot in https://github.com/liquibase/liquibase/pull/3672
+* Bump firebird-testcontainers-java from 1.2.0 to 1.3.0 by @dependabot in https://github.com/liquibase/liquibase/pull/3653
+* Add support for multiple schemas to dbDoc command by @zpanderson in https://github.com/liquibase/liquibase/pull/1834
+* No need redundant conditions. by @arturobernalg in https://github.com/liquibase/liquibase/pull/3553
+* Replace expressions with type arguments with diamond type <>. by @arturobernalg in https://github.com/liquibase/liquibase/pull/3591
+* Fix typos. by @arturobernalg in https://github.com/liquibase/liquibase/pull/3586
+* Remove duplicate conditions in expressions and branches of if statements. They are used due to oversight. by @arturobernalg in https://github.com/liquibase/liquibase/pull/3548
+* Replace constant charset String literal with the predefined StandardC… by @arturobernalg in https://github.com/liquibase/liquibase/pull/3568
+* normalize path of SQL changelog file when parsing by @StevenMassaro in https://github.com/liquibase/liquibase/pull/3664
+* Delegate change set equality tests by @droy-sandbox in https://github.com/liquibase/liquibase/pull/3550
+* improve logging around paths that do not exist by @StevenMassaro in https://github.com/liquibase/liquibase/pull/3669
+* PR template: add comments around help text by @StevenMassaro in https://github.com/liquibase/liquibase/pull/3715
+* normalize path of json and yaml changelogs when parsing by @StevenMassaro in https://github.com/liquibase/liquibase/pull/3711
+* deprecate DefaultLoggerConfiguration by @StevenMassaro in https://github.com/liquibase/liquibase/pull/3706
+* Refactor of TagExistsCommandStep and extraction of code to new LockServiceCommandStep  by @filipelautert in https://github.com/liquibase/liquibase/pull/3667
+* Refactors CalculateChecksumCommandStep  by @filipelautert in https://github.com/liquibase/liquibase/pull/3696
+* CORE-3044 avoid locking if no updates pending by @RichardBradley in https://github.com/liquibase/liquibase/pull/2190
+* Warning in case of missing liquibase files instead of throwing an exception by @mhewedy in https://github.com/liquibase/liquibase/pull/3081
+* Document new TestSystem functionality by @nvoxland in https://github.com/liquibase/liquibase/pull/2463
+* Remove redundant modifiers. by @arturobernalg in https://github.com/liquibase/liquibase/pull/3594
+* Update maven-bundle-plugin instructions to export package containing XSD files by @GeertZondervan in https://github.com/liquibase/liquibase/pull/3597
+* Bump actions/delete-package-versions from 3 to 4 by @dependabot in https://github.com/liquibase/liquibase/pull/3649
+* Bump maven-plugin-plugin from 3.7.0 to 3.7.1 by @dependabot in https://github.com/liquibase/liquibase/pull/3698
+* Bump assertj-core from 3.23.1 to 3.24.2 by @dependabot in https://github.com/liquibase/liquibase/pull/3705
+* Bump jaybird from 4.0.8.java8 to 5.0.0.java8 by @dependabot in https://github.com/liquibase/liquibase/pull/3659
+* Rework dropProcedure for Snowflake Log message when dropAll fails  by @wwillard7800 in https://github.com/liquibase/liquibase/pull/3702
+* Bump mariadb-java-client from 3.1.0 to 3.1.2 by @dependabot in https://github.com/liquibase/liquibase/pull/3729
+* Remove redundant conditions tha covered by a subsequent condition. by @arturobernalg in https://github.com/liquibase/liquibase/pull/3590
+* fix: snowflake has wrong priority by @Yogurt-lei in https://github.com/liquibase/liquibase/pull/3572
+* Do not add default schema name to getSchemas method to avoid one schema by @LonwoLonwo in https://github.com/liquibase/liquibase/pull/3704
+* #3035 add Double data type class to avoid incorrect double(0) database by @LonwoLonwo in https://github.com/liquibase/liquibase/pull/3703
+* Stop publishing liquibase-extension-testing to Github on branch builds by @abrackx in https://github.com/liquibase/liquibase/pull/3726
+* do not support setting column comments on a view in Snowflake  by @StevenMassaro in https://github.com/liquibase/liquibase/pull/3710
+* Migrate setup-java action to use Temurin by @gdams in https://github.com/liquibase/liquibase/pull/3607
+* Add support for db2 view comments by @abrackx in https://github.com/liquibase/liquibase/pull/3723
+* Fix NullPointerException for case sensitive collations by @ivan909020 in https://github.com/liquibase/liquibase/pull/3699
+* pass proper branch name and add required field by @jnewton03 in https://github.com/liquibase/liquibase/pull/3765
+* Bump snowflake-jdbc from 3.13.26 to 3.13.27 by @dependabot in https://github.com/liquibase/liquibase/pull/3751
+* Consistent ARG-suffix for 'defaultSchemaName'-Parameter by @SIEDA-EliasHeydrich in https://github.com/liquibase/liquibase/pull/3662
+* Remove unnecessary cast expressions. by @arturobernalg in https://github.com/liquibase/liquibase/pull/3670
+* Bump picocli from 4.7.0 to 4.7.1 by @dependabot in https://github.com/liquibase/liquibase/pull/3742
+* Bump actions/cache from 3.2.3 to 3.2.4 by @dependabot in https://github.com/liquibase/liquibase/pull/3750
+* Performance improvements by @filipelautert in https://github.com/liquibase/liquibase/pull/3588
+* Implemented a summary of change sets which get filtered out during update by @wwillard7800 in https://github.com/liquibase/liquibase/pull/3730
+* Support tabular format for history command by @fbiville in https://github.com/liquibase/liquibase/pull/3541
+* Removing explicit LiquibaseServletListener references by @Thunderforge in https://github.com/liquibase/liquibase/pull/3677
+* Add Snowflake structured data types to unmodifiable Data Types by @LonwoLonwo in https://github.com/liquibase/liquibase/pull/3752
+* Fix #3690 primaryKeyExists does not work on DB2z by @MichaelKern-IVV in https://github.com/liquibase/liquibase/pull/3691
+* Remove Unnecessary operation/modifier: by @arturobernalg in https://github.com/liquibase/liquibase/pull/3657
+* Replace old stream creation with java.nio. by @arturobernalg in https://github.com/liquibase/liquibase/pull/3686
+* Bump actions/cache from 3.2.4 to 3.2.5 by @dependabot in https://github.com/liquibase/liquibase/pull/3809
+* Bump maven-deploy-plugin from 3.0.0 to 3.1.0 by @dependabot in https://github.com/liquibase/liquibase/pull/3802
+* Bump maven-shade-merge-manifest-transformer from 0.0.2 to 0.0.3 by @dependabot in https://github.com/liquibase/liquibase/pull/3779
+* Bump postgresql from 42.5.1 to 42.5.3 by @dependabot in https://github.com/liquibase/liquibase/pull/3778
+* Bump jaxb-runtime from 4.0.1 to 4.0.2 by @dependabot in https://github.com/liquibase/liquibase/pull/3786
+* Bump jaxb-core from 4.0.1 to 4.0.2 by @dependabot in https://github.com/liquibase/liquibase/pull/3787
+* Bump sqlite-jdbc from 3.40.0.0 to 3.40.1.0 by @dependabot in https://github.com/liquibase/liquibase/pull/3772
+* Bump maven-enforcer-plugin from 3.1.0 to 3.2.1 by @dependabot in https://github.com/liquibase/liquibase/pull/3759
+* Bump jaybird from 5.0.0.java8 to 5.0.1.java8 by @dependabot in https://github.com/liquibase/liquibase/pull/3760
+* Bump mssql-jdbc from 11.2.1.jre8 to 12.2.0.jre8 by @dependabot in https://github.com/liquibase/liquibase/pull/3761
+* Bump ojdbc8 from 21.8.0.0 to 21.9.0.0 by @dependabot in https://github.com/liquibase/liquibase/pull/3808
+* Update and rename bug_report.md to bug_report.yaml by @kevin-atx in https://github.com/liquibase/liquibase/pull/3728
+* github-action-13527 by @jnewton03 in https://github.com/liquibase/liquibase/pull/3827
+* Bump postgresql from 42.5.3 to 42.5.4 by @dependabot in https://github.com/liquibase/liquibase/pull/3831
+* Do not duplicate clearCheckSums logic by @fbiville in https://github.com/liquibase/liquibase/pull/3628
+* Fixing #3708 - AddColumn fix for H2 version 1.4.200 by @KarolyNevelos in https://github.com/liquibase/liquibase/pull/3709
+* Added default values to private Scope constructor by @MarkTJohnson in https://github.com/liquibase/liquibase/pull/3756
+* Improved concurrency support by using ConcurrentHashMaps by @jurgenkleverwal in https://github.com/liquibase/liquibase/pull/3799
+* fixing lookahead for lastline comment method by @mwiede in https://github.com/liquibase/liquibase/pull/3717
+* Do not calculate checksum when loading changelogs by @filipelautert in https://github.com/liquibase/liquibase/pull/3790
+* set up maven using simpler GitHub action by @StevenMassaro in https://github.com/liquibase/liquibase/pull/3835
+* safely set code point limit for SnakeYaml by @StevenMassaro in https://github.com/liquibase/liquibase/pull/3807
+* improve command line help message format  by @StevenMassaro in https://github.com/liquibase/liquibase/pull/3829
+* Use StandardCharsets constant instead. by @arturobernalg in https://github.com/liquibase/liquibase/pull/3725
+* Fix failing EnvironmentValueProviderTest by @nvoxland in https://github.com/liquibase/liquibase/pull/3783
+* Structured logging  by @StevenMassaro in https://github.com/liquibase/liquibase/pull/3574
+* Update SnakeYAML usage - do not call deprecated methods by @asomov in https://github.com/liquibase/liquibase/pull/3632
+* Avoid global mutable state of Non-final fields in enumeration types. by @arturobernalg in https://github.com/liquibase/liquibase/pull/3727
+* Use constants instead of arrays with known lengths of zero by @arturobernalg in https://github.com/liquibase/liquibase/pull/3716
+* Simplify lambda expressions when possible by @arturobernalg in https://github.com/liquibase/liquibase/pull/3736
+
+## New Contributors
+* @zpanderson made their first contribution in https://github.com/liquibase/liquibase/pull/1834
+* @droy-sandbox made their first contribution in https://github.com/liquibase/liquibase/pull/3550
+* @mhewedy made their first contribution in https://github.com/liquibase/liquibase/pull/3081
+* @GeertZondervan made their first contribution in https://github.com/liquibase/liquibase/pull/3597
+* @Yogurt-lei made their first contribution in https://github.com/liquibase/liquibase/pull/3572
+* @gdams made their first contribution in https://github.com/liquibase/liquibase/pull/3607
+* @ivan909020 made their first contribution in https://github.com/liquibase/liquibase/pull/3699
+* @SIEDA-EliasHeydrich made their first contribution in https://github.com/liquibase/liquibase/pull/3662
+* @Thunderforge made their first contribution in https://github.com/liquibase/liquibase/pull/3677
+* @KarolyNevelos made their first contribution in https://github.com/liquibase/liquibase/pull/3709
+* @MarkTJohnson made their first contribution in https://github.com/liquibase/liquibase/pull/3756
+* @jurgenkleverwal made their first contribution in https://github.com/liquibase/liquibase/pull/3799
+* @mwiede made their first contribution in https://github.com/liquibase/liquibase/pull/3717
+
+**Full Changelog**: https://github.com/liquibase/liquibase/compare/v4.19.0...v4.19.1
+
+
+
 Changes in version Liquibase v4.19.0
 
 * Update release-published.yml by @jnewton03 in https://github.com/liquibase/liquibase/pull/3540
