@@ -837,12 +837,9 @@ public class Liquibase implements AutoCloseable {
                             new CountChangeSetFilter(changesToApply));
 
                     CompositeLogService compositeLogService = new CompositeLogService(true, bufferLog);
-                    Scope.child(Scope.Attr.logService.name(), compositeLogService, () -> {
-                        runChangeLogIterator.run(createUpdateVisitor(), new RuntimeEnvironment(database, contexts, labelExpression));
-                    });
+                    Scope.child(Scope.Attr.logService.name(), compositeLogService, () -> runChangeLogIterator.run(createUpdateVisitor(), new RuntimeEnvironment(database, contexts, labelExpression)));
 
                     showUpdateSummary(changeLog, statusVisitor);
-
                     hubUpdater.postUpdateHub(updateOperation, bufferLog);
                     logDeploymentOutcomeMdc(true);
                 }
@@ -976,12 +973,9 @@ public class Liquibase implements AutoCloseable {
                             new UpToTagChangeSetFilter(tag, ranChangeSetList));
 
                     CompositeLogService compositeLogService = new CompositeLogService(true, bufferLog);
-                    Scope.child(Scope.Attr.logService.name(), compositeLogService, () -> {
-                        runChangeLogIterator.run(createUpdateVisitor(), new RuntimeEnvironment(database, contexts, labelExpression));
-                    });
+                    Scope.child(Scope.Attr.logService.name(), compositeLogService, () -> runChangeLogIterator.run(createUpdateVisitor(), new RuntimeEnvironment(database, contexts, labelExpression)));
 
                     showUpdateSummary(changeLog, statusVisitor);
-
                     hubUpdater.postUpdateHub(updateOperation, bufferLog);
                     logDeploymentOutcomeMdc(true);
                 }
@@ -1844,10 +1838,8 @@ public class Liquibase implements AutoCloseable {
 
                     ChangeLogIterator runChangeLogIterator = buildChangeLogIterator(tag, changeLog, contexts, labelExpression);
                     CompositeLogService compositeLogService = new CompositeLogService(true, bufferLog);
-                    Scope.child(Scope.Attr.logService.name(), compositeLogService, () -> {
-                        runChangeLogIterator.run(new ChangeLogSyncVisitor(database, changeLogSyncListener),
-                                new RuntimeEnvironment(database, contexts, labelExpression));
-                    });
+                    Scope.child(Scope.Attr.logService.name(), compositeLogService, () -> runChangeLogIterator.run(new ChangeLogSyncVisitor(database, changeLogSyncListener),
+                            new RuntimeEnvironment(database, contexts, labelExpression)));
                     hubUpdater.postUpdateHub(changeLogSyncOperation, bufferLog);
                 }
                 catch (Exception e) {
@@ -2479,33 +2471,21 @@ public class Liquibase implements AutoCloseable {
      */
     public void clearCheckSums() throws LiquibaseException {
         LOG.info("Clearing database change log checksums");
-        runInScope(new Scope.ScopedRunner() {
-            @Override
-            public void run() throws Exception {
+        runInScope(() -> {
+            LockService lockService = LockServiceFactory.getInstance().getLockService(database);
+            lockService.waitForLock();
 
-                LockService lockService = LockServiceFactory.getInstance().getLockService(database);
-                lockService.waitForLock();
-
+            try {
+                checkLiquibaseTables(false, null, new Contexts(), new LabelExpression());
+                ChangeLogHistoryServiceFactory.getInstance().getChangeLogService(database).clearAllCheckSums();
+            } finally {
                 try {
-                    checkLiquibaseTables(false, null, new Contexts(), new LabelExpression());
-
-                    UpdateStatement updateStatement = new UpdateStatement(
-                            getDatabase().getLiquibaseCatalogName(),
-                            getDatabase().getLiquibaseSchemaName(),
-                            getDatabase().getDatabaseChangeLogTableName()
-                    );
-                    updateStatement.addNewColumnValue("MD5SUM", null);
-                    Scope.getCurrentScope().getSingleton(ExecutorService.class).getExecutor("jdbc", database).execute(updateStatement);
-                    getDatabase().commit();
-                } finally {
-                    try {
-                        lockService.releaseLock();
-                    } catch (LockException e) {
-                        LOG.severe(MSG_COULD_NOT_RELEASE_LOCK, e);
-                    }
+                    lockService.releaseLock();
+                } catch (LockException e) {
+                    LOG.severe(MSG_COULD_NOT_RELEASE_LOCK, e);
                 }
-                resetServices();
             }
+            resetServices();
         });
     }
 

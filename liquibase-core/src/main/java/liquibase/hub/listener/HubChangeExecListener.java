@@ -30,6 +30,7 @@ import liquibase.util.StringUtil;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
+import java.nio.charset.StandardCharsets;
 import java.util.*;
 import java.util.logging.Level;
 
@@ -273,7 +274,7 @@ public class HubChangeExecListener extends AbstractChangeExecListener
                 ChangeLogSerializerFactory.getInstance().getSerializer(".json");
         try {
             serializer.write(Collections.singletonList(changeSet), baos);
-            operationChangeEvent.setChangesetBody(baos.toString("UTF-8"));
+            operationChangeEvent.setChangesetBody(baos.toString(StandardCharsets.UTF_8.name()));
         }
         catch (IOException ioe) {
             //
@@ -396,7 +397,7 @@ public class HubChangeExecListener extends AbstractChangeExecListener
             ChangeLogSerializer serializer = ChangeLogSerializerFactory.getInstance().getSerializer(".json");
             try {
                 serializer.write(Collections.singletonList(changeSet), baos);
-                operationChangeEvent.setChangesetBody(baos.toString("UTF-8"));
+                operationChangeEvent.setChangesetBody(baos.toString(StandardCharsets.UTF_8.name()));
             } catch (IOException ioe) {
                 //
                 // Just log message

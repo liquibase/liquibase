@@ -16,6 +16,7 @@ public class HistoryCommand extends AbstractCommand {
 
     private Database database;
     private DateFormat dateFormat;
+    private HistoryFormat format;
     private PrintStream outputStream = System.out;
 
     public HistoryCommand() {
@@ -55,6 +56,7 @@ public class HistoryCommand extends AbstractCommand {
 
         commandScope.addArgumentValue(InternalHistoryCommandStep.DATABASE_ARG, this.getDatabase());
         commandScope.addArgumentValue(InternalHistoryCommandStep.DATE_FORMAT_ARG, this.dateFormat);
+        commandScope.addArgumentValue(InternalHistoryCommandStep.FORMAT_ARG, this.format);
 
         commandScope.execute();
 

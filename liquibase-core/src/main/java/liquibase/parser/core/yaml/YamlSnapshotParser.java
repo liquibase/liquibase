@@ -11,6 +11,7 @@ import liquibase.resource.Resource;
 import liquibase.resource.ResourceAccessor;
 import liquibase.snapshot.DatabaseSnapshot;
 import liquibase.snapshot.RestoredDatabaseSnapshot;
+import liquibase.util.SnakeYamlUtil;
 import org.yaml.snakeyaml.DumperOptions;
 import org.yaml.snakeyaml.LoaderOptions;
 import org.yaml.snakeyaml.Yaml;
@@ -74,7 +75,7 @@ public class YamlSnapshotParser extends YamlParser implements SnapshotParser {
 
     private Yaml createYaml() {
         LoaderOptions loaderOptions = new LoaderOptions();
-        loaderOptions.setCodePointLimit(CODE_POINT_LIMIT);
+        SnakeYamlUtil.setCodePointLimitSafely(loaderOptions, CODE_POINT_LIMIT);
         Representer representer = new Representer(new DumperOptions());
         DumperOptions dumperOptions = initDumperOptions(representer);
         return new Yaml(new SafeConstructor(loaderOptions), representer, dumperOptions, loaderOptions, new Resolver());
@@ -95,7 +96,7 @@ public class YamlSnapshotParser extends YamlParser implements SnapshotParser {
         try (
             InputStreamReader inputStreamReader = new InputStreamReader(
                 stream, GlobalConfiguration.OUTPUT_FILE_ENCODING.getCurrentValue()
-            );
+            )
         ) {
             parsedYaml = (Map) yaml.load(inputStreamReader);
         } catch (Exception e) {
