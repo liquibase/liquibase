@@ -12,10 +12,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.URI;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.SortedSet;
-import java.util.TreeSet;
+import java.util.*;
 
 /**
  * ResourceAccessors abstract file access so they can be read in a variety of environments.
@@ -120,7 +117,7 @@ public interface ResourceAccessor extends AutoCloseable {
      * <br><br>
      * Should return an empty list if:
      * <ul>
-     *     <li>Path does not exist</li>
+     *     <li>Path does not exist or maxDepth less or equals than zero</li>
      * </ul>
      * Should throw an exception if:
      * <ul>
@@ -135,17 +132,19 @@ public interface ResourceAccessor extends AutoCloseable {
      * @throws IOException if there is an error searching the system.
      */
     default List<Resource> search(String path, SearchOptions searchOptions) throws IOException {
+        if (searchOptions.getMaxDepth() <= 0) {
+            return Collections.EMPTY_LIST;
+        }
         List<Resource> recursiveResourceList;
         List<Resource> depthBoundedResourceList = new ArrayList<>();
         if(searchOptions == null) {
             searchOptions = new SearchOptions();
         }
 
-        boolean searchRecursive = searchOptions.getRecursive();
-
+        boolean searchRecursive = searchOptions.getMaxDepth() > 1;
         recursiveResourceList = search(path, searchRecursive);
 
-        if (searchRecursive) {
+        if (!searchRecursive || searchOptions.getRecursive()) {
             return recursiveResourceList;
         }
 

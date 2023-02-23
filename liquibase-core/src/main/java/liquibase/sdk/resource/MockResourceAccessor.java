@@ -39,24 +39,18 @@ public class MockResourceAccessor extends AbstractResourceAccessor {
     }
 
     @Override
-    public List<Resource> search(String path, SearchOptions searchOptions) throws IOException {
+    public List<Resource> search(String path, boolean recursive) throws IOException {
         path = path.replace("\\", "/");
         List<Resource> returnList = new ArrayList<>();
         for (String file : contentByFileName.keySet()) {
             if (file.startsWith(path)) {
+                if (!recursive && file.split("/").length > 2) {
+                    continue;
+                }
                 returnList.add(new MockResource(file, contentByFileName.get(file)));
             }
         }
         return returnList;
-    }
-
-    @Override
-    public List<Resource> search(String path, boolean recursive) throws IOException {
-        SearchOptions searchOptions = new SearchOptions();
-
-        searchOptions.setRecursive(recursive);
-
-        return search(path, searchOptions);
     }
 
     @Override
