@@ -1,7 +1,7 @@
 Liquibase Core Changelog
 ===========================================
 
-Changes in version Liquibase v4.19.1
+Changes in version Liquibase v4.19.1 (2023.02.24)
 
 * Fixes generate-changelog table/view comment and table/view column comment generation for MSSQL by @abrackx in https://github.com/liquibase/liquibase/pull/3563
 * Publish liquibase-extension-testing to github packages  by @abrackx in https://github.com/liquibase/liquibase/pull/3697
@@ -108,7 +108,7 @@ Changes in version Liquibase v4.19.1
 
 
 
-Changes in version Liquibase v4.19.0
+Changes in version Liquibase v4.19.0 (2023.01.12)
 
 * Update release-published.yml by @jnewton03 in https://github.com/liquibase/liquibase/pull/3540
 * when generating changelogs for MySQL, ignore table column order for PKs by @StevenMassaro in https://github.com/liquibase/liquibase/pull/3486
@@ -190,7 +190,7 @@ Changes in version Liquibase v4.19.0
 **Full Changelog**: https://github.com/liquibase/liquibase/compare/v4.18.0...v4.19.0
 
 
-Changes in version Liquibase v4.18.0
+Changes in version Liquibase v4.18.0 (2022.11.30)
 
 ## Notable Changes
 * [PRO] Hashicorp Vault extension and Liquibase Pro
