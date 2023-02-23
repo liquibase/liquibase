@@ -1791,77 +1791,74 @@ public class Liquibase implements AutoCloseable {
         changeLogParameters.setContexts(contexts);
         changeLogParameters.setLabels(labelExpression);
 
-        runInScope(new Scope.ScopedRunner() {
-            @Override
-            public void run() throws Exception {
+        runInScope(() -> {
 
-                LockService lockService = LockServiceFactory.getInstance().getLockService(database);
-                lockService.waitForLock();
+            LockService lockService = LockServiceFactory.getInstance().getLockService(database);
+            lockService.waitForLock();
 
-                Operation changeLogSyncOperation = null;
-                BufferedLogService bufferLog = new BufferedLogService();
-                DatabaseChangeLog changeLog = null;
-                HubUpdater hubUpdater = null;
+            Operation changeLogSyncOperation = null;
+            BufferedLogService bufferLog = new BufferedLogService();
+            DatabaseChangeLog changeLog = null;
+            HubUpdater hubUpdater = null;
 
+            try {
+                changeLog = getDatabaseChangeLog();
+                checkLiquibaseTables(true, changeLog, contexts, labelExpression);
+                ChangeLogHistoryServiceFactory.getInstance().getChangeLogService(database).generateDeploymentId();
+
+                changeLog.validate(database, contexts, labelExpression);
+
+                //
+                // Let the user know that they can register for Hub
+                //
+                hubUpdater = new HubUpdater(new Date(), changeLog, database);
+                hubUpdater.register(changeLogFile);
+
+                //
+                // Create an iterator which will be used with a ListVisitor
+                // to grab the list of changesets for the update
+                //
+                ChangeLogIterator listLogIterator = buildChangeLogIterator(tag, changeLog, contexts, labelExpression);
+
+                //
+                // Create or retrieve the Connection
+                // Make sure the Hub is available here by checking the return
+                //
+                Connection connection = getConnection(changeLog);
+                if (connection != null) {
+                    String operationCommand = (tag == null ? "changelog-sync" : "changelog-sync-to-tag");
+                    changeLogSyncOperation =
+                        hubUpdater.preUpdateHub("CHANGELOGSYNC", operationCommand, connection, changeLogFile, contexts, labelExpression, listLogIterator);
+                }
+
+                //
+                // If we are doing Hub then set up a HubChangeExecListener
+                //
+                if (connection != null) {
+                    changeLogSyncListener = new HubChangeExecListener(changeLogSyncOperation, changeExecListener);
+                }
+
+                ChangeLogIterator runChangeLogIterator = buildChangeLogIterator(tag, changeLog, contexts, labelExpression);
+                CompositeLogService compositeLogService = new CompositeLogService(true, bufferLog);
+                Scope.child(Scope.Attr.logService.name(), compositeLogService, () -> {
+                    runChangeLogIterator.run(new ChangeLogSyncVisitor(database, changeLogSyncListener),
+                            new RuntimeEnvironment(database, contexts, labelExpression));
+                });
+                hubUpdater.postUpdateHub(changeLogSyncOperation, bufferLog);
+            }
+            catch (Exception e) {
+                if (changeLogSyncOperation != null) {
+                    hubUpdater.postUpdateHubExceptionHandling(changeLogSyncOperation, bufferLog, e.getMessage());
+                }
+                throw e;
+            } finally {
                 try {
-                    changeLog = getDatabaseChangeLog();
-                    checkLiquibaseTables(true, changeLog, contexts, labelExpression);
-                    ChangeLogHistoryServiceFactory.getInstance().getChangeLogService(database).generateDeploymentId();
-
-                    changeLog.validate(database, contexts, labelExpression);
-
-                    //
-                    // Let the user know that they can register for Hub
-                    //
-                    hubUpdater = new HubUpdater(new Date(), changeLog, database);
-                    hubUpdater.register(changeLogFile);
-
-                    //
-                    // Create an iterator which will be used with a ListVisitor
-                    // to grab the list of changesets for the update
-                    //
-                    ChangeLogIterator listLogIterator = buildChangeLogIterator(tag, changeLog, contexts, labelExpression);
-
-                    //
-                    // Create or retrieve the Connection
-                    // Make sure the Hub is available here by checking the return
-                    //
-                    Connection connection = getConnection(changeLog);
-                    if (connection != null) {
-                        String operationCommand = (tag == null ? "changelog-sync" : "changelog-sync-to-tag");
-                        changeLogSyncOperation =
-                            hubUpdater.preUpdateHub("CHANGELOGSYNC", operationCommand, connection, changeLogFile, contexts, labelExpression, listLogIterator);
-                    }
-
-                    //
-                    // If we are doing Hub then set up a HubChangeExecListener
-                    //
-                    if (connection != null) {
-                        changeLogSyncListener = new HubChangeExecListener(changeLogSyncOperation, changeExecListener);
-                    }
-
-                    ChangeLogIterator runChangeLogIterator = buildChangeLogIterator(tag, changeLog, contexts, labelExpression);
-                    CompositeLogService compositeLogService = new CompositeLogService(true, bufferLog);
-                    Scope.child(Scope.Attr.logService.name(), compositeLogService, () -> {
-                        runChangeLogIterator.run(new ChangeLogSyncVisitor(database, changeLogSyncListener),
-                                new RuntimeEnvironment(database, contexts, labelExpression));
-                    });
-                    hubUpdater.postUpdateHub(changeLogSyncOperation, bufferLog);
+                    lockService.releaseLock();
+                } catch (LockException e) {
+                    LOG.severe(MSG_COULD_NOT_RELEASE_LOCK, e);
                 }
-                catch (Exception e) {
-                    if (changeLogSyncOperation != null) {
-                        hubUpdater.postUpdateHubExceptionHandling(changeLogSyncOperation, bufferLog, e.getMessage());
-                    }
-                    throw e;
-                } finally {
-                    try {
-                        lockService.releaseLock();
-                    } catch (LockException e) {
-                        LOG.severe(MSG_COULD_NOT_RELEASE_LOCK, e);
-                    }
-                    resetServices();
-                    setChangeExecListener(null);
-                }
+                resetServices();
+                setChangeExecListener(null);
             }
         });
 
