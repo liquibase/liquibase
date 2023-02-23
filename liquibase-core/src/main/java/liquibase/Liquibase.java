@@ -837,12 +837,9 @@ public class Liquibase implements AutoCloseable {
                             new CountChangeSetFilter(changesToApply));
 
                     CompositeLogService compositeLogService = new CompositeLogService(true, bufferLog);
-                    Scope.child(Scope.Attr.logService.name(), compositeLogService, () -> {
-                        runChangeLogIterator.run(createUpdateVisitor(), new RuntimeEnvironment(database, contexts, labelExpression));
-                    });
+                    Scope.child(Scope.Attr.logService.name(), compositeLogService, () -> runChangeLogIterator.run(createUpdateVisitor(), new RuntimeEnvironment(database, contexts, labelExpression)));
 
                     showUpdateSummary(changeLog, statusVisitor);
-
                     hubUpdater.postUpdateHub(updateOperation, bufferLog);
                     logDeploymentOutcomeMdc(true);
                 }
@@ -976,12 +973,9 @@ public class Liquibase implements AutoCloseable {
                             new UpToTagChangeSetFilter(tag, ranChangeSetList));
 
                     CompositeLogService compositeLogService = new CompositeLogService(true, bufferLog);
-                    Scope.child(Scope.Attr.logService.name(), compositeLogService, () -> {
-                        runChangeLogIterator.run(createUpdateVisitor(), new RuntimeEnvironment(database, contexts, labelExpression));
-                    });
+                    Scope.child(Scope.Attr.logService.name(), compositeLogService, () -> runChangeLogIterator.run(createUpdateVisitor(), new RuntimeEnvironment(database, contexts, labelExpression)));
 
                     showUpdateSummary(changeLog, statusVisitor);
-
                     hubUpdater.postUpdateHub(updateOperation, bufferLog);
                     logDeploymentOutcomeMdc(true);
                 }
@@ -1261,7 +1255,6 @@ public class Liquibase implements AutoCloseable {
                             new DbmsChangeSetFilter(database),
                             new IgnoreChangeSetFilter(),
                             new CountChangeSetFilter(changesToRollback));
-
                     doRollback(bufferLog, rollbackScript, logIterator, contexts, labelExpression, hubUpdater, rollbackOperation);
                 }
                 catch (Throwable t) {
@@ -1546,7 +1539,6 @@ public class Liquibase implements AutoCloseable {
                             new LabelChangeSetFilter(labelExpression),
                             new IgnoreChangeSetFilter(),
                             new DbmsChangeSetFilter(database));
-
                     doRollback(bufferLog, rollbackScript, logIterator, contexts, labelExpression, hubUpdater, rollbackOperation);
                 }
                 catch (Throwable t) {
@@ -1696,7 +1688,6 @@ public class Liquibase implements AutoCloseable {
                             new LabelChangeSetFilter(labelExpression),
                             new IgnoreChangeSetFilter(),
                             new DbmsChangeSetFilter(database));
-
                     doRollback(bufferLog, rollbackScript, logIterator, contexts, labelExpression, hubUpdater, rollbackOperation);
                 }
                 catch (Throwable t) {

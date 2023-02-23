@@ -167,7 +167,7 @@ public class ExecuteShellCommandChange extends AbstractChange {
             }
         }
 
-        return new SqlStatement[0];
+        return SqlStatement.EMPTY_SQL_STATEMENT;
     }
 
     protected void nonExecutedCleanup() {
