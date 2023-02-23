@@ -1255,6 +1255,7 @@ public class Liquibase implements AutoCloseable {
                             new DbmsChangeSetFilter(database),
                             new IgnoreChangeSetFilter(),
                             new CountChangeSetFilter(changesToRollback));
+
                     doRollback(bufferLog, rollbackScript, logIterator, contexts, labelExpression, hubUpdater, rollbackOperation);
                 }
                 catch (Throwable t) {
@@ -1539,6 +1540,7 @@ public class Liquibase implements AutoCloseable {
                             new LabelChangeSetFilter(labelExpression),
                             new IgnoreChangeSetFilter(),
                             new DbmsChangeSetFilter(database));
+
                     doRollback(bufferLog, rollbackScript, logIterator, contexts, labelExpression, hubUpdater, rollbackOperation);
                 }
                 catch (Throwable t) {
@@ -1688,6 +1690,7 @@ public class Liquibase implements AutoCloseable {
                             new LabelChangeSetFilter(labelExpression),
                             new IgnoreChangeSetFilter(),
                             new DbmsChangeSetFilter(database));
+
                     doRollback(bufferLog, rollbackScript, logIterator, contexts, labelExpression, hubUpdater, rollbackOperation);
                 }
                 catch (Throwable t) {
