@@ -132,13 +132,13 @@ public interface ResourceAccessor extends AutoCloseable {
      * @throws IOException if there is an error searching the system.
      */
     default List<Resource> search(String path, SearchOptions searchOptions) throws IOException {
-        if (searchOptions.getMaxDepth() <= 0) {
-            return Collections.EMPTY_LIST;
-        }
         List<Resource> recursiveResourceList;
         List<Resource> depthBoundedResourceList = new ArrayList<>();
         if(searchOptions == null) {
             searchOptions = new SearchOptions();
+        }
+        if (searchOptions.getMaxDepth() <= 0) {
+            return Collections.emptyList();
         }
 
         boolean searchRecursive = searchOptions.getMaxDepth() > 1;
