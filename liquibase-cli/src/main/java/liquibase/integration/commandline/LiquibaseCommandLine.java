@@ -210,6 +210,8 @@ public class LiquibaseCommandLine {
 
         commandLine.setExecutionExceptionHandler((ex, commandLine1, parseResult) -> LiquibaseCommandLine.this.handleException(ex));
 
+        commandLine.setUsageHelpAutoWidth(true);
+
         return commandLine;
     }
 
@@ -821,15 +823,9 @@ public class LiquibaseCommandLine {
             }
 
             String shortDescription = commandDefinition.getShortDescription();
-            String displayDescription = shortDescription;
-            String legacyCommand = commandName[commandName.length - 1];
-            String camelCaseCommand = StringUtil.toCamelCase(legacyCommand);
-            if (!legacyCommand.equals(camelCaseCommand)) {
-                displayDescription = "\n" + shortDescription + "\n[deprecated: " + camelCaseCommand + "]";
-            }
 
             subCommandSpec.usageMessage()
-                    .header(StringUtil.trimToEmpty(displayDescription) + "\n")
+                    .header(StringUtil.trimToEmpty(shortDescription) + "\n")
                     .description(StringUtil.trimToEmpty(commandDefinition.getLongDescription()));
 
             subCommandSpec.optionsCaseInsensitive(true);
@@ -850,36 +846,32 @@ public class LiquibaseCommandLine {
 
                     String argDisplaySuffix = "";
                     String argName = argNames[i];
-                    String camelCaseArg = StringUtil.toCamelCase(argName.substring(2));
-                    if (!argName.equals("--" + camelCaseArg)) {
-                        argDisplaySuffix = "\n[deprecated: --" + camelCaseArg + "]";
-                    }
 
                     //
                     // Determine if this is a group command and set the property/environment display strings accordingly
                     //
                     String description;
                     if (commandDefinition.getName().length > 1) {
-                        String propertyStringToPresent = "\n(liquibase.command." +
-                                StringUtil.join(commandDefinition.getName(), ".") + "." + def.getName() + ")";
+                        String propertyStringToPresent = "\n(defaults file: 'liquibase.command." +
+                                StringUtil.join(commandDefinition.getName(), ".") + "." + def.getName() + "'";
                         String envStringToPresent =
-                                toEnvVariable("\n(liquibase.command." + StringUtil.join(commandDefinition.getName(), ".") +
-                                        "." + def.getName()) + ")" + argDisplaySuffix;
+                                toEnvVariable("environment variable: 'liquibase.command." + StringUtil.join(commandDefinition.getName(), ".") +
+                                        "." + def.getName()) + "')" + argDisplaySuffix;
                         description = propertyStringToPresent + envStringToPresent;
                     } else {
-                        description =
-                                "\n(liquibase.command." + def.getName() + " OR liquibase.command." +
-                                        StringUtil.join(commandDefinition.getName(), ".") + "." + def.getName() + ")\n" +
-                                        "(" + toEnvVariable("liquibase.command." + def.getName()) + " OR " +
-                                        toEnvVariable("liquibase.command." + StringUtil.join(commandDefinition.getName(), ".") +
-                                                "." + def.getName()) + ")" + argDisplaySuffix;
+                        String propertyStringToPresent = "\n(defaults file: 'liquibase.command." + def.getName() + "' OR 'liquibase.command." +
+                                StringUtil.join(commandDefinition.getName(), ".") + "." + def.getName() + "'";
+                        String envStringToPresent = ", environment variable: '" + toEnvVariable("liquibase.command." + def.getName()) + "' OR '" +
+                                toEnvVariable("liquibase.command." + StringUtil.join(commandDefinition.getName(), ".") +
+                                        "." + def.getName()) + "')" + argDisplaySuffix;
+                        description = propertyStringToPresent + envStringToPresent;
                     }
 
                     if (def.getDefaultValue() != null) {
                         if (def.getDefaultValueDescription() == null) {
-                            description = "\nDEFAULT: " + def.getDefaultValue() + "\n" + description;
+                            description = "\nDEFAULT: " + def.getDefaultValue() + description;
                         } else {
-                            description = "\nDEFAULT: " + def.getDefaultValueDescription() + "\n" + description;
+                            description = "\nDEFAULT: " + def.getDefaultValueDescription() + description;
                         }
                     }
 
@@ -1049,8 +1041,8 @@ public class LiquibaseCommandLine {
                 final CommandLine.Model.OptionSpec.Builder optionBuilder = CommandLine.Model.OptionSpec.builder(argNames[i])
                         .required(false)
                         .type(String.class);
-                String description = "(" + def.getKey() + ")\n"
-                        + "(" + toEnvVariable(def.getKey()) + ")";
+                String description = "(defaults file: '" + def.getKey() + "', environment variable: '"
+                        + toEnvVariable(def.getKey()) + "')";
 
                 if (def.getDefaultValue() != null) {
                     if (def.getDefaultValueDescription() == null) {
@@ -1062,14 +1054,6 @@ public class LiquibaseCommandLine {
 
                 if (def.getDescription() != null) {
                     description = def.getDescription() + "\n" + description;
-                }
-                if (i == 0) {
-                    String primaryArg = argNames[i];
-                    String camelCaseArg = StringUtil.toCamelCase(primaryArg.substring(2));
-                    if (!primaryArg.equals("--" + camelCaseArg)) {
-                        description = "\n" + description +
-                                "\n[deprecated: --" + camelCaseArg + "]";
-                    }
                 }
 
                 optionBuilder.description(description + "\n");
@@ -1125,13 +1109,13 @@ public class LiquibaseCommandLine {
 
 
         commandSpec.addOption(CommandLine.Model.OptionSpec.builder("--help", "-h")
-                .description("Show this help message and exit")
+                .description("Show this help message and exit\n")
                 .usageHelp(true)
                 .build());
 
         if (includeVersion) {
             commandSpec.addOption(CommandLine.Model.OptionSpec.builder("--version", "-v")
-                    .description("Print version information and exit")
+                    .description("Print version information and exit\n")
                     .versionHelp(true)
                     .build());
         }

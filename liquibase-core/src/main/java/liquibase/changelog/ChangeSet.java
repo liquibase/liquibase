@@ -83,7 +83,7 @@ public class ChangeSet implements Conditional, ChangeLogChild {
         HALT("HALT"),
         MARK_RAN("MARK_RAN");
 
-        String key;
+        final String key;
 
         ValidationFailOption(String key) {
             this.key = key;
@@ -851,7 +851,7 @@ public class ChangeSet implements Conditional, ChangeLogChild {
                     }
                 }
                 if (!statements.isEmpty()) {
-                    database.executeRollbackStatements(statements.toArray(new SqlStatement[]{}), sqlVisitors);
+                    database.executeRollbackStatements(statements.toArray(SqlStatement.EMPTY_SQL_STATEMENT), sqlVisitors);
                 }
 
             } else {
