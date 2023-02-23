@@ -48,20 +48,21 @@ import liquibase.snapshot.InvalidExampleException;
 import liquibase.snapshot.SnapshotControl;
 import liquibase.snapshot.SnapshotGeneratorFactory;
 import liquibase.statement.core.RawSqlStatement;
-import liquibase.statement.core.UpdateStatement;
 import liquibase.structure.DatabaseObject;
 import liquibase.structure.core.Catalog;
 import liquibase.util.LiquibaseUtil;
+import liquibase.util.ShowSummaryUtil;
 import liquibase.util.StreamUtil;
 import liquibase.util.StringUtil;
-import liquibase.util.TableOutput;
 
 import javax.xml.parsers.ParserConfigurationException;
-import java.io.*;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.PrintStream;
+import java.io.Writer;
 import java.text.DateFormat;
 import java.util.*;
 import java.util.function.Supplier;
-import java.util.stream.Collectors;
 
 import static java.util.ResourceBundle.getBundle;
 
@@ -88,6 +89,17 @@ public class Liquibase implements AutoCloseable {
 
     private enum RollbackMessageType {
         WILL_ROLLBACK, ROLLED_BACK, ROLLBACK_FAILED
+    }
+
+    private static final Map<Class<?>, String> filterSummaryLabelMap = new HashMap<>();
+    static {
+        filterSummaryLabelMap.put(ShouldRunChangeSetFilter.class, "Already ran:             %6d");
+        filterSummaryLabelMap.put(DbmsChangeSetFilter.class,      "DBMS mismatch:           %6d");
+        filterSummaryLabelMap.put(LabelChangeSetFilter.class,     "Label mismatch:          %6d");
+        filterSummaryLabelMap.put(ContextChangeSetFilter.class,   "Context mismatch:        %6d");
+        filterSummaryLabelMap.put(CountChangeSetFilter.class,     "After count:             %6d");
+        filterSummaryLabelMap.put(UpToTagChangeSetFilter.class,   "After tag:               %6d");
+        filterSummaryLabelMap.put(IgnoreChangeSetFilter.class,    "Ignored:                 %6d");
     }
 
     /**
@@ -238,7 +250,15 @@ public class Liquibase implements AutoCloseable {
     public void update(Contexts contexts, LabelExpression labelExpression, boolean checkLiquibaseTables) throws LiquibaseException {
         runInScope(() -> {
             if (isUpToDateFastCheck(contexts, labelExpression)) {
+                //
+                // Iterate to find the change sets which will be skipped
+                //
                 Scope.getCurrentScope().getUI().sendMessage("Database is up to date, no changesets to execute");
+                StatusVisitor statusVisitor = new StatusVisitor(database);
+                DatabaseChangeLog databaseChangeLog = getDatabaseChangeLog();
+                ChangeLogIterator shouldRunIterator = getStandardStatusChangelogIterator(contexts, labelExpression, databaseChangeLog);
+                shouldRunIterator.run(statusVisitor, new RuntimeEnvironment(database, contexts, labelExpression));
+                ShowSummaryUtil.showUpdateSummary(databaseChangeLog, statusVisitor);
                 return;
             }
 
@@ -300,7 +320,7 @@ public class Liquibase implements AutoCloseable {
                     runChangeLogIterator.run(updateVisitor, new RuntimeEnvironment(database, contexts, labelExpression));
                 });
 
-                showUpdateSummary(changeLog, statusVisitor);
+                ShowSummaryUtil.showUpdateSummary(changeLog, statusVisitor);
 
                 //
                 // Update Hub with the operation information
@@ -324,208 +344,6 @@ public class Liquibase implements AutoCloseable {
                 setChangeExecListener(null);
             }
         });
-    }
-
-    //
-    // Show summary information of the change sets which were skipped, and also
-    // a count of the change sets which were processed during this operation
-    //
-    private void showUpdateSummary(DatabaseChangeLog changeLog, StatusVisitor statusVisitor)
-            throws LiquibaseException, IOException {
-        //
-        // Check the global flag to turn the summary off
-        //
-        String showSummaryString = Scope.getCurrentScope().get("showSummary", String.class);
-        UpdateSummaryEnum showSummary = showSummaryString != null ? UpdateSummaryEnum.valueOf(showSummaryString) : UpdateSummaryEnum.OFF;
-        if (showSummary == UpdateSummaryEnum.OFF) {
-            return;
-        }
-
-        //
-        // Obtain two lists:  the list of filtered change sets that
-        // The StatusVisitor discovered, and also any change sets which
-        // were skipped during parsing, i.e. they had mismatched DBMS values
-        //
-        List<ChangeSetStatus> denied = statusVisitor.getChangeSetsToSkip();
-        List<ChangeSet> skippedChangeSets = changeLog.getSkippedChangeSets();
-
-        //
-        // Filter the skipped list to remove changes which were:
-        // Previously run
-        // After the tag
-        // After the count value
-        //
-        List<ChangeSetStatus> filterDenied =
-                denied.stream()
-                      .filter(status -> status.getFilterResults()
-                      .stream().anyMatch(result ->  result.getFilter() != ShouldRunChangeSetFilter.class))
-                      .collect(Collectors.toList());
-
-        //
-        // Only show the summary
-        //
-        showSummary(changeLog, statusVisitor, skippedChangeSets, filterDenied);
-        if (showSummary == UpdateSummaryEnum.SUMMARY || (skippedChangeSets.isEmpty() && denied.isEmpty())) {
-            return;
-        }
-
-        //
-        // Show the details too
-        //
-        showDetailTable(skippedChangeSets, filterDenied);
-    }
-
-    private void showDetailTable(List<ChangeSet> skippedChangeSets, List<ChangeSetStatus> filterDenied)
-            throws IOException, LiquibaseException {
-        List<String> columnHeaders = new ArrayList<>();
-        columnHeaders.add("Changeset Info");
-        columnHeaders.add("Reason Skipped");
-        List<List<String>> table = new ArrayList<>();
-        table.add(columnHeaders);
-
-        List<ChangeSetStatus> finalList = createFinalStatusList(skippedChangeSets, filterDenied);
-
-        finalList.sort(new Comparator<ChangeSetStatus>() {
-            @Override
-            public int compare(ChangeSetStatus o1, ChangeSetStatus o2) {
-                ChangeSet c1 = o1.getChangeSet();
-                ChangeSet c2 = o2.getChangeSet();
-                int order1 = determineOrderInChangelog(c1);
-                int order2 = determineOrderInChangelog(c2);
-                if (order1 == -1 || order2 == -1) {
-                    return -1;
-                }
-                return Integer.compare(order1, order2);
-            }
-        });
-
-        //
-        // Filtered because of labels or context
-        //
-        for (ChangeSetStatus st : finalList) {
-            st.getFilterResults().forEach(consumer -> {
-                String skippedMessage = String.format("   '%s' : %s", st.getChangeSet().toString(), consumer.getMessage());
-                Scope.getCurrentScope().getLog(getClass()).info(skippedMessage);
-
-                List<String> outputRow = new ArrayList<>();
-                outputRow.add(st.getChangeSet().toString());
-                outputRow.add(consumer.getMessage());
-                table.add(outputRow);
-            });
-        }
-
-        List<Integer> widths = new ArrayList<>();
-        widths.add(60);
-        widths.add(40);
-
-        OutputStream outputStream = new ByteArrayOutputStream();
-        Writer writer = createOutputWriter(outputStream);
-        TableOutput.formatOutput(table, widths, true, writer);
-        String outputTableString = outputStream.toString();
-        Scope.getCurrentScope().getUI().sendMessage(outputTableString);
-    }
-
-    private List<ChangeSetStatus> createFinalStatusList(List<ChangeSet> skippedChangeSets, List<ChangeSetStatus> filterDenied) {
-        //
-        // Add skipped during changelog parsing to the final list
-        //
-        List<ChangeSetStatus> finalList = new ArrayList<>(filterDenied);
-        skippedChangeSets.forEach(skippedChangeSet -> {
-            String dbmsList = String.format("'%s'", StringUtil.join(skippedChangeSet.getDbmsSet(), ", "));
-            String mismatchMessage = String.format("mismatched DBMS value of %s", dbmsList);
-            ChangeSetStatus changeSetStatus = new ChangeSetStatus(skippedChangeSet);
-            ChangeSetFilterResult filterResult = new ChangeSetFilterResult(false, mismatchMessage, DbmsChangeSetFilter.class);
-            changeSetStatus.setFilterResults(Collections.singleton(filterResult));
-            finalList.add(changeSetStatus);
-        });
-        return finalList;
-    }
-
-    private int determineOrderInChangelog(ChangeSet changeSetToMatch) {
-        DatabaseChangeLog changeLog = changeSetToMatch.getChangeLog();
-        int order = 0;
-        for (ChangeSet changeSet : changeLog.getChangeSets()) {
-            if (changeSet == changeSetToMatch) {
-                return order;
-            }
-            order++;
-        }
-        return -1;
-    }
-
-    private void showSummary(DatabaseChangeLog changeLog, StatusVisitor statusVisitor, List<ChangeSet> skippedChangeSets, List<ChangeSetStatus> filterDenied) {
-        Scope.getCurrentScope().getUI().sendMessage("");
-        int totalInChangelog = changeLog.getChangeSets().size() + skippedChangeSets.size();
-        int skipped = skippedChangeSets.size();
-        int filtered = filterDenied.size();
-        int totalAccepted = statusVisitor.getChangeSetsToRun().size();
-        int totalPreviouslyRun = totalInChangelog - filtered - skipped - totalAccepted;
-
-        String message = "UPDATE SUMMARY";
-        Scope.getCurrentScope().getLog(getClass()).info(message);
-        Scope.getCurrentScope().getUI().sendMessage(message);
-
-        message = String.format("Run:                     %6d", totalAccepted);
-        Scope.getCurrentScope().getLog(getClass()).info(message);
-        Scope.getCurrentScope().getUI().sendMessage(message);
-
-        message = String.format("Previously run:          %6d", totalPreviouslyRun);
-        Scope.getCurrentScope().getLog(getClass()).info(message);
-        Scope.getCurrentScope().getUI().sendMessage(message);
-
-        message = String.format("Filtered out:            %6d", filtered + skipped);
-        Scope.getCurrentScope().getLog(getClass()).info(message);
-        Scope.getCurrentScope().getUI().sendMessage(message);
-
-        message = "-------------------------------";
-        Scope.getCurrentScope().getLog(getClass()).info(message);
-        Scope.getCurrentScope().getUI().sendMessage(message);
-
-        message = String.format("Total change sets:       %6d%n", totalInChangelog);
-        Scope.getCurrentScope().getLog(getClass()).info(message);
-        Scope.getCurrentScope().getUI().sendMessage(message);
-
-        final Map<Class<? extends ChangeSetFilter>, Integer> filterSummaryMap = new LinkedHashMap<>();
-        List<ChangeSetStatus> finalList = createFinalStatusList(skippedChangeSets, filterDenied);
-        finalList.forEach(status -> {
-            status.getFilterResults().forEach(result -> {
-                if (! result.isAccepted()) {
-                    Class<? extends ChangeSetFilter> clazz = result.getFilter();
-                    filterSummaryMap.computeIfAbsent(clazz, count -> {
-                        return 0;
-                    });
-                    filterSummaryMap.put(clazz, filterSummaryMap.get(clazz)+1);
-                }
-            });
-        });
-
-        if (filterSummaryMap.isEmpty()) {
-            return;
-        }
-
-        message = String.format("%nFILTERED CHANGE SETS SUMMARY%n");
-        Scope.getCurrentScope().getUI().sendMessage(message);
-        Scope.getCurrentScope().getLog(getClass()).info(message);
-        filterSummaryMap.forEach((filterClass, count) -> {
-            String filterSummaryDetailMessage = null;
-            if (filterClass == DbmsChangeSetFilter.class) {
-                filterSummaryDetailMessage = String.format("DBMS mismatch:           %6d", count);
-            } else if (filterClass == LabelChangeSetFilter.class) {
-                filterSummaryDetailMessage = String.format("Label mismatch:          %6d", count);
-            } else if (filterClass == ContextChangeSetFilter.class) {
-                filterSummaryDetailMessage = String.format("Context mismatch:        %6d", count);
-            } else if (filterClass == CountChangeSetFilter.class) {
-                filterSummaryDetailMessage = String.format("After count:             %6d", count);
-            }
-            Scope.getCurrentScope().getLog(getClass()).info(filterSummaryDetailMessage);
-            Scope.getCurrentScope().getUI().sendMessage(filterSummaryDetailMessage);
-        });
-        Scope.getCurrentScope().getUI().sendMessage("");
-    }
-
-    private static Writer createOutputWriter(OutputStream outputStream) throws IOException {
-        String charsetName = GlobalConfiguration.OUTPUT_FILE_ENCODING.getCurrentValue();
-        return new OutputStreamWriter(outputStream, charsetName);
     }
 
     /**
@@ -888,7 +706,8 @@ public class Liquibase implements AutoCloseable {
                     CompositeLogService compositeLogService = new CompositeLogService(true, bufferLog);
                     Scope.child(Scope.Attr.logService.name(), compositeLogService, () -> runChangeLogIterator.run(createUpdateVisitor(), new RuntimeEnvironment(database, contexts, labelExpression)));
 
-                    showUpdateSummary(changeLog, statusVisitor);
+                    ShowSummaryUtil.showUpdateSummary(changeLog, statusVisitor);
+
                     hubUpdater.postUpdateHub(updateOperation, bufferLog);
                     logDeploymentOutcomeMdc(true);
                 }
@@ -1000,7 +819,7 @@ public class Liquibase implements AutoCloseable {
                     // Iterate to find the change sets which will be skipped
                     //
                     StatusVisitor statusVisitor = new StatusVisitor(database);
-                    ChangeLogIterator shouldRunIterator = new StatusChangeLogIterator(changeLog,
+                    ChangeLogIterator shouldRunIterator = new StatusChangeLogIterator(changeLog, tag,
                             new ShouldRunChangeSetFilter(database),
                             new ContextChangeSetFilter(contexts),
                             new LabelChangeSetFilter(labelExpression),
@@ -1023,7 +842,8 @@ public class Liquibase implements AutoCloseable {
                     CompositeLogService compositeLogService = new CompositeLogService(true, bufferLog);
                     Scope.child(Scope.Attr.logService.name(), compositeLogService, () -> runChangeLogIterator.run(createUpdateVisitor(), new RuntimeEnvironment(database, contexts, labelExpression)));
 
-                    showUpdateSummary(changeLog, statusVisitor);
+                    ShowSummaryUtil.showUpdateSummary(changeLog, statusVisitor);
+
                     hubUpdater.postUpdateHub(updateOperation, bufferLog);
                     logDeploymentOutcomeMdc(true);
                 }

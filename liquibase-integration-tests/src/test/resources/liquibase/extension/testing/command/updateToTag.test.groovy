@@ -51,6 +51,42 @@ Optional Args:
         ]
     }
 
+    run "Happy path with a change set that has complicated labels and contexts", {
+        arguments = [
+                url:        { it.url },
+                username:   { it.username },
+                password:   { it.password },
+                changelogFile: "changelogs/h2/complete/summary-changelog.xml",
+                tag: "updateTag",
+                labelFilter: "testtable1,tagit",
+                contexts: "none,tagit",
+                showSummary: "summary"
+        ]
+
+        expectedResults = [
+                statusCode   : 0
+        ]
+
+        expectedUI = [
+                """
+UPDATE SUMMARY
+Run:                          2
+Previously run:               0
+Filtered out:                 4
+-------------------------------
+Total change sets:            6
+
+FILTERED CHANGE SETS SUMMARY
+
+Context mismatch:             1
+Label mismatch:               2
+After tag:                    1
+DBMS mismatch:                1
+"""
+        ]
+
+    }
+
     run "Mismatched DBMS causes not deployed summary message", {
         arguments = [
                 url:        { it.url },

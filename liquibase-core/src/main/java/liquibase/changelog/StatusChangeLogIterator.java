@@ -1,7 +1,5 @@
 package liquibase.changelog;
 
-import liquibase.ContextExpression;
-import liquibase.Labels;
 import liquibase.RuntimeEnvironment;
 import liquibase.Scope;
 import liquibase.change.core.TagDatabaseChange;
@@ -11,17 +9,20 @@ import liquibase.changelog.filter.CountChangeSetFilter;
 import liquibase.changelog.filter.UpToTagChangeSetFilter;
 import liquibase.changelog.visitor.ChangeSetVisitor;
 import liquibase.changelog.visitor.SkippedChangeSetVisitor;
-import liquibase.database.Database;
 import liquibase.exception.LiquibaseException;
-import liquibase.util.StringUtil;
 
 import java.util.*;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 public class StatusChangeLogIterator extends ChangeLogIterator {
-
+    private String tag;
     public StatusChangeLogIterator(DatabaseChangeLog databaseChangeLog, ChangeSetFilter... changeSetFilters) {
         super(databaseChangeLog, changeSetFilters);
+    }
+
+    public StatusChangeLogIterator(DatabaseChangeLog databaseChangeLog, String tag, ChangeSetFilter... changeSetFilters) {
+        super(databaseChangeLog, changeSetFilters);
+        this.tag = tag;
     }
 
     @Override
@@ -37,13 +38,13 @@ public class StatusChangeLogIterator extends ChangeLogIterator {
                     }
                     for (ChangeSet changeSet : changeSetList) {
                         AtomicBoolean shouldVisit = new AtomicBoolean(true);
-                        Set<ChangeSetFilterResult> reasonsAccepted = new HashSet<>();
-                        Set<ChangeSetFilterResult> reasonsDenied = new HashSet<>();
+                        Set<ChangeSetFilterResult> reasonsAccepted = new LinkedHashSet<>();
+                        Set<ChangeSetFilterResult> reasonsDenied = new LinkedHashSet<>();
                         if (changeSetFilters != null) {
                             shouldVisit.set(iterateFilters(changeSet, reasonsAccepted, reasonsDenied));
                         }
 
-                        if (shouldVisit.get() && !alreadySaw(changeSet)) {
+                        if (shouldVisit.get()) {
                             visitor.visit(changeSet, databaseChangeLog, env.getTargetDatabase(), reasonsAccepted);
                             markSeen(changeSet);
                         } else{
@@ -61,30 +62,51 @@ public class StatusChangeLogIterator extends ChangeLogIterator {
         }
     }
 
+    //
+    // Do not process the tag change and tag filter if this change set was already denied
+    //
+    private boolean alreadyDeniedForTagChangeAndTagFilter(Set<ChangeSetFilterResult> reasonsDenied, ChangeSet changeSet, ChangeSetFilter filter) {
+        return ! (reasonsDenied.isEmpty() || hasTagDatabaseChange(changeSet)) && filter instanceof UpToTagChangeSetFilter;
+    }
+
+    //
+    // Do not process the count filter if we have already denied the change set
+    //
+    private boolean alreadyDeniedForCountFilter(Set<ChangeSetFilterResult> reasonsDenied, ChangeSetFilter filter) {
+        return ! reasonsDenied.isEmpty() && filter instanceof CountChangeSetFilter;
+    }
+
     private boolean iterateFilters(ChangeSet changeSet, Set<ChangeSetFilterResult> reasonsAccepted, Set<ChangeSetFilterResult> reasonsDenied) {
         boolean shouldVisit = true;
-        boolean tagDatabaseExists = false;
+        boolean tagDatabaseAlreadyFound = false;
         for (ChangeSetFilter filter : changeSetFilters) {
-            if (! (tagDatabaseExists && filter instanceof UpToTagChangeSetFilter)) {
-                if (! reasonsDenied.isEmpty() && filter instanceof CountChangeSetFilter) {
-                    continue;
-                }
+            //
+            // Do not process if:
+            //
+            // The tag change has been found and this is the tag filter or
+            // The change set has been denied and this is the tag change and filter or
+            // The change set has been denied and this is the count filter
+            //
+            if (! (tagDatabaseAlreadyFound && filter instanceof UpToTagChangeSetFilter) &&
+                ! alreadyDeniedForTagChangeAndTagFilter(reasonsDenied, changeSet, filter) &&
+                ! alreadyDeniedForCountFilter(reasonsDenied, filter)) {
                 ChangeSetFilterResult acceptsResult = filter.accepts(changeSet);
                 if (acceptsResult.isAccepted()) {
                     reasonsAccepted.add(acceptsResult);
                 } else {
                     shouldVisit = false;
                     reasonsDenied.add(acceptsResult);
+
                     //
                     // We are collecting all reasons for skipping
                     // We are skipping this change set, so check to see
-                    // if the change set has a tagDatabaseChange.  If it does
+                    // if the change set has the tagDatabaseChange.  If it does
                     // then we do not want to process the UpToTagChangeSetFilter
                     // since it will act differently in the case where we are
-                    // collection all reasons
+                    // collecting all reasons
                     //
-                    if (! tagDatabaseExists) {
-                        tagDatabaseExists = hasTagDatabaseChange(changeSet);
+                    if (! tagDatabaseAlreadyFound) {
+                        tagDatabaseAlreadyFound = hasTagDatabaseChange(changeSet);
                     }
                 }
             }
@@ -96,6 +118,15 @@ public class StatusChangeLogIterator extends ChangeLogIterator {
     // Check to see if this change set has a TagDatabase change
     //
     private boolean hasTagDatabaseChange(ChangeSet changeSet) {
-        return changeSet.getChanges().stream().anyMatch(TagDatabaseChange.class::isInstance);
+        if (this.tag == null) {
+            return false;
+        }
+        return changeSet.getChanges().stream().anyMatch( change -> {
+            if (!(change instanceof TagDatabaseChange)) {
+                return false;
+            }
+            TagDatabaseChange tagDatabaseChange = (TagDatabaseChange) change;
+            return tagDatabaseChange.getTag().equals(tag);
+        });
     }
 }
