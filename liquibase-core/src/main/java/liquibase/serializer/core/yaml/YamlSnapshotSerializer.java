@@ -14,6 +14,7 @@ import liquibase.structure.DatabaseObjectCollection;
 import liquibase.structure.core.Column;
 import liquibase.util.ISODateFormat;
 import liquibase.util.StringUtil;
+import org.yaml.snakeyaml.DumperOptions;
 import org.yaml.snakeyaml.nodes.Node;
 import org.yaml.snakeyaml.nodes.Tag;
 import org.yaml.snakeyaml.representer.Represent;
@@ -95,8 +96,8 @@ public class YamlSnapshotSerializer extends YamlSerializer implements SnapshotSe
     }
 
     @Override
-    protected LiquibaseRepresenter getLiquibaseRepresenter() {
-        return new SnapshotLiquibaseRepresenter();
+    protected LiquibaseRepresenter getLiquibaseRepresenter(DumperOptions options) {
+        return new SnapshotLiquibaseRepresenter(options);
     }
 
     @Override
@@ -105,6 +106,10 @@ public class YamlSnapshotSerializer extends YamlSerializer implements SnapshotSe
     }
 
     public static class SnapshotLiquibaseRepresenter extends LiquibaseRepresenter {
+
+        public SnapshotLiquibaseRepresenter(DumperOptions options) {
+            super(options);
+        }
 
         @Override
         protected void init() {
