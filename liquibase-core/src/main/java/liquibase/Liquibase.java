@@ -48,7 +48,6 @@ import liquibase.snapshot.InvalidExampleException;
 import liquibase.snapshot.SnapshotControl;
 import liquibase.snapshot.SnapshotGeneratorFactory;
 import liquibase.statement.core.RawSqlStatement;
-import liquibase.statement.core.UpdateStatement;
 import liquibase.structure.DatabaseObject;
 import liquibase.structure.core.Catalog;
 import liquibase.util.LiquibaseUtil;
@@ -60,7 +59,6 @@ import javax.xml.parsers.ParserConfigurationException;
 import java.io.*;
 import java.text.DateFormat;
 import java.util.*;
-import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
 import static java.util.ResourceBundle.getBundle;
@@ -1347,14 +1345,14 @@ public class Liquibase implements AutoCloseable {
 
         try {
             ((HubChangeExecListener)changeExecListener).setRollbackScriptContents(rollbackScriptContents);
-            sendRollbackMessages(changeSets, changelog, RollbackMessageType.WILL_ROLLBACK, contexts, labelExpression, null);
+            sendRollbackMessages(changeSets, RollbackMessageType.WILL_ROLLBACK, null);
             executor.execute(rollbackChange);
-            sendRollbackMessages(changeSets, changelog, RollbackMessageType.ROLLED_BACK, contexts, labelExpression, null);
+            sendRollbackMessages(changeSets, RollbackMessageType.ROLLED_BACK, null);
         } catch (DatabaseException e) {
             Scope.getCurrentScope().getLog(getClass()).warning(e.getMessage());
             LOG.severe("Error executing rollback script: " + e.getMessage());
             if (changeExecListener != null) {
-                sendRollbackMessages(changeSets, changelog, RollbackMessageType.ROLLBACK_FAILED, contexts, labelExpression, e);
+                sendRollbackMessages(changeSets, RollbackMessageType.ROLLBACK_FAILED, e);
             }
             throw new DatabaseException("Error executing rollback script", e);
         }
@@ -1362,10 +1360,7 @@ public class Liquibase implements AutoCloseable {
     }
 
     private void sendRollbackMessages(List<ChangeSet> changeSets,
-                                      DatabaseChangeLog changelog,
                                       RollbackMessageType messageType,
-                                      Contexts contexts,
-                                      LabelExpression labelExpression,
                                       Exception exception) throws LiquibaseException {
         for (ChangeSet changeSet : changeSets) {
             if (messageType == RollbackMessageType.WILL_ROLLBACK) {
@@ -1734,8 +1729,8 @@ public class Liquibase implements AutoCloseable {
     public void changeLogSync(Contexts contexts, LabelExpression labelExpression, Writer output)
         throws LiquibaseException {
 
-        doChangeLogSyncSql(null, contexts, labelExpression, output,
-            () -> "SQL to add all changesets to database history table");
+        doChangeLogSyncSql(null, contexts, labelExpression, output
+        );
     }
 
     private void flushOutputWriter(Writer output) throws LiquibaseException {
@@ -1865,12 +1860,11 @@ public class Liquibase implements AutoCloseable {
     public void changeLogSync(String tag, Contexts contexts, LabelExpression labelExpression, Writer output)
         throws LiquibaseException {
 
-        doChangeLogSyncSql(tag, contexts, labelExpression, output,
-            () -> "SQL to add changesets upto '" + tag + "' to database history table");
+        doChangeLogSyncSql(tag, contexts, labelExpression, output
+        );
     }
 
-    private void doChangeLogSyncSql(String tag, Contexts contexts, LabelExpression labelExpression, Writer output,
-                                    Supplier<String> header) throws LiquibaseException {
+    private void doChangeLogSyncSql(String tag, Contexts contexts, LabelExpression labelExpression, Writer output) throws LiquibaseException {
 
         changeLogParameters.setContexts(contexts);
         changeLogParameters.setLabels(labelExpression);
