@@ -40,6 +40,9 @@ public class ChangelogSyncCommandStep extends AbstractCommandStep implements Cle
     public static final CommandArgumentDefinition<String> CONTEXTS_ARG;
 
     public static final CommandArgumentDefinition<ChangeExecListener> HUB_CHANGE_EXEC_LISTENER_ARG;
+
+    private String tag = null;
+
     static {
         CommandBuilder builder = new CommandBuilder(COMMAND_NAME);
         CHANGELOG_FILE_ARG = builder.argument(CommonArgumentNames.CHANGELOG_FILE, String.class).required()
@@ -92,12 +95,12 @@ public class ChangelogSyncCommandStep extends AbstractCommandStep implements Cle
 
             changeLog.validate(database, changeLogParameters.getContexts(), changeLogParameters.getLabels());
 
-            ChangeLogIterator runChangeLogIterator = buildChangeLogIterator(null, changeLog, changeLogParameters.getContexts(), changeLogParameters.getLabels(), database);
+            ChangeLogIterator runChangeLogIterator = buildChangeLogIterator(tag, changeLog, changeLogParameters.getContexts(), changeLogParameters.getLabels(), database);
             CompositeLogService compositeLogService = new CompositeLogService(true, bufferLog);
 
             hubHandler = new HubHandler(database, changeLog, changeLogFile, commandScope.getArgumentValue(HUB_CHANGE_EXEC_LISTENER_ARG));
-            HubChangeExecListener changeLogSyncListener = hubHandler.startHubForChangelogSync(changeLogParameters, null,
-                    buildChangeLogIterator(null, changeLog, changeLogParameters.getContexts(), changeLogParameters.getLabels(), database));
+            HubChangeExecListener changeLogSyncListener = hubHandler.startHubForChangelogSync(changeLogParameters, tag,
+                    buildChangeLogIterator(tag, changeLog, changeLogParameters.getContexts(), changeLogParameters.getLabels(), database));
 
             Scope.child(Scope.Attr.logService.name(), compositeLogService, () ->
                     runChangeLogIterator.run(new ChangeLogSyncVisitor(database, changeLogSyncListener),
@@ -105,7 +108,9 @@ public class ChangelogSyncCommandStep extends AbstractCommandStep implements Cle
 
             hubHandler.postUpdateHub(bufferLog);
         } catch (Exception e) {
-            hubHandler.postUpdateHubExceptionHandling(bufferLog, e.getMessage());
+            if (hubHandler != null) {
+                hubHandler.postUpdateHubExceptionHandling(bufferLog, e.getMessage());
+            }
             throw e;
         } finally {
             try {
@@ -163,5 +168,12 @@ public class ChangelogSyncCommandStep extends AbstractCommandStep implements Cle
         LockServiceFactory.getInstance().resetAll();
         ChangeLogHistoryServiceFactory.getInstance().resetAll();
         Scope.getCurrentScope().getSingleton(ExecutorService.class).reset();
+    }
+
+    /**
+     * Tag value can be set by subclasses that implements "SyncToTag"
+     */
+    protected void setTag(String tag) {
+        this.tag = tag;
     }
 }

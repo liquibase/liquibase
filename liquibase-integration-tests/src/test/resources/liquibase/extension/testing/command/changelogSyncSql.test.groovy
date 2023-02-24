@@ -31,10 +31,10 @@ Optional Args:
     Default: true
   outputDefaultSchema (Boolean) Control whether names of objects in the default schema are fully qualified or not. If true they are. If false, only objects outside the default schema are fully qualified
     Default: true
-  password (String) The database password
+  password (String) Password to use to connect to the database
     Default: null
     OBFUSCATED
-  username (String) The database username
+  username (String) Username to use to connect to the database
     Default: null
 """
 
@@ -75,9 +75,6 @@ Optional Args:
             ]
         }
 
-        expectedResults = [
-                statusCode   : 0
-        ]
     }
 
     run "Happy path with output SQL", {
@@ -125,10 +122,6 @@ Optional Args:
                 // Find the " -- Release Database Lock" line
                 //
                 "target/test-classes/changelogSync.sql" : [CommandTests.assertContains("-- Release Database Lock")]
-        ]
-
-        expectedResults = [
-                statusCode   : 0
         ]
     }
 
