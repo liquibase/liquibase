@@ -107,7 +107,7 @@ public class FormattedSqlChangeLogParser implements ChangeLogParser {
             Pattern altIgnoreLinesOneDashPattern = Pattern.compile("\\-[\\s]*?ignoreLines:(\\w+).*$", Pattern.CASE_INSENSITIVE);
             Pattern altIgnorePattern = Pattern.compile("\\-\\-[\\s]*ignore:(\\w+)", Pattern.CASE_INSENSITIVE);
             Pattern runWithPattern = Pattern.compile(".*runWith:([\\w\\$\\{\\}]+).*", Pattern.CASE_INSENSITIVE);
-            Pattern runWithSpoolFilePattern = Pattern.compile(".*runWithSpoolFile:([\\w\\$\\{\\}]+).*", Pattern.CASE_INSENSITIVE);
+            Pattern runWithSpoolFilePattern = Pattern.compile(".*runWithSpoolFile:(.*).*", Pattern.CASE_INSENSITIVE);
 
             Pattern runOnChangePattern = Pattern.compile(".*runOnChange:(\\w+).*", Pattern.CASE_INSENSITIVE);
             Pattern runAlwaysPattern = Pattern.compile(".*runAlways:(\\w+).*", Pattern.CASE_INSENSITIVE);
@@ -356,7 +356,11 @@ public class FormattedSqlChangeLogParser implements ChangeLogParser {
                         changeLogParameters.expandExpressions(StringUtil.stripEnclosingQuotes(authorGroup), changeLog);
 
                     changeSet =
-                       new ChangeSet(changeSetId, changeSetAuthor, runAlways, runOnChange, DatabaseChangeLog.normalizePath(logicalFilePath), context, dbms, runWith, runWithSpoolFile, runInTransaction, changeLog.getObjectQuotingStrategy(), changeLog);
+                       new ChangeSet(changeSetId, changeSetAuthor, runAlways, runOnChange,
+                                     DatabaseChangeLog.normalizePath(logicalFilePath),
+                                     context, dbms, runWith, runWithSpoolFile,
+                                     runInTransaction,
+                                     changeLog.getObjectQuotingStrategy(), changeLog);
                     changeSet.setLabels(new Labels(labels));
                     changeSet.setIgnore(Boolean.parseBoolean(ignore));
                     changeSet.setFailOnError(failOnError);

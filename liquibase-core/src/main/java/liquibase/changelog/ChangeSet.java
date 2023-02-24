@@ -27,7 +27,6 @@ import liquibase.precondition.ErrorPrecondition;
 import liquibase.precondition.FailedPrecondition;
 import liquibase.precondition.core.PreconditionContainer;
 import liquibase.resource.ResourceAccessor;
-import liquibase.sql.Sql;
 import liquibase.sql.visitor.SqlVisitor;
 import liquibase.sql.visitor.SqlVisitorFactory;
 import liquibase.sqlgenerator.SqlGeneratorFactory;
@@ -363,6 +362,7 @@ public class ChangeSet implements Conditional, ChangeLogChild {
         this.alwaysRun = node.getChildValue(null, "runAlways", node.getChildValue(null, "alwaysRun", false));
         this.runOnChange = node.getChildValue(null, "runOnChange", false);
         this.runWith = node.getChildValue(null, "runWith", String.class);
+        this.runWithSpoolFile = node.getChildValue(null, "runWithSpoolFile", String.class);
         this.contextFilter = new ContextExpression(node.getChildValue(null, "contextFilter", String.class));
         if (this.contextFilter.isEmpty()) {
             contextFilter = new ContextExpression(node.getChildValue(null, "context", String.class));
