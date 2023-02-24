@@ -90,11 +90,11 @@ Changes in version Liquibase v4.18.0
 - Use together for increased security and convenience of centralized properties
 
 * [PRO]Security
-- Vaults offer much greater security than defaults files or environment variables 
+- Vaults offer much greater security than defaults files orenvironment variables
 
 * [PRO] Centralization
 - Secure your database credentials, Pro license key, secure urls, and more in one central location.
-- Update your critical properties in one place, and all linked tools and jobs use the new values .
+- Update your critical properties in one place, and all linked tools and jobs use the new values.
 
 * [PRO] `rollback-on-error` command argument
 - When set to `true` will attempt to rollback a failed update operation.
