@@ -131,7 +131,7 @@ public class YamlSnapshotSerializer extends YamlSerializer implements SnapshotSe
                 if (data instanceof Date) {
                     value = new ISODateFormat().format((Date) data);
                 } else if (data instanceof Enum) {
-                    value = ((Enum) data).name();
+                    value = ((Enum<?>) data).name();
                 } else {
                     value = data.toString();
                 }

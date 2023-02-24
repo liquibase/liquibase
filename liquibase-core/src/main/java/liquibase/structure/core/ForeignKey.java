@@ -224,7 +224,7 @@ public class ForeignKey extends AbstractDatabaseObject{
             return this.getName().equalsIgnoreCase(that.getName());
         }
 
-        StringUtil.StringUtilFormatter formatter = new StringUtil.StringUtilFormatter<Column>() {
+        StringUtil.StringUtilFormatter<Column> formatter = new StringUtil.StringUtilFormatter<Column>() {
             @Override
             public String toString(Column obj) {
                 return obj.toString(false);
@@ -241,7 +241,7 @@ public class ForeignKey extends AbstractDatabaseObject{
 
     @Override
     public int hashCode() {
-        StringUtil.StringUtilFormatter formatter = new StringUtil.StringUtilFormatter<Column>() {
+        StringUtil.StringUtilFormatter<Column> formatter = new StringUtil.StringUtilFormatter<Column>() {
             @Override
             public String toString(Column obj) {
                 return obj.toString(false);
@@ -270,7 +270,7 @@ public class ForeignKey extends AbstractDatabaseObject{
 
     @Override
     public int compareTo(Object other) {
-        StringUtil.StringUtilFormatter formatter = new StringUtil.StringUtilFormatter<Column>() {
+        StringUtil.StringUtilFormatter<Column> formatter = new StringUtil.StringUtilFormatter<Column>() {
             @Override
             public String toString(Column obj) {
                 return obj.toString(false);

@@ -467,7 +467,7 @@ public class StringClauses {
             return "";
         }
 
-        List finalList = new ArrayList<>(clauses.values());
+        List<Object> finalList = new ArrayList<>(clauses.values());
         ListIterator iterator = finalList.listIterator();
         while (iterator.hasNext()) {
             Object next = iterator.next();
