@@ -14,7 +14,6 @@ import liquibase.database.Database;
 import liquibase.database.DatabaseConnection;
 import liquibase.database.DatabaseFactory;
 import liquibase.database.ObjectQuotingStrategy;
-import liquibase.database.core.MSSQLDatabase;
 import liquibase.diff.DiffGeneratorFactory;
 import liquibase.diff.DiffResult;
 import liquibase.diff.compare.CompareControl;
@@ -48,13 +47,9 @@ import liquibase.resource.PathHandlerFactory;
 import liquibase.resource.Resource;
 import liquibase.resource.ResourceAccessor;
 import liquibase.serializer.ChangeLogSerializer;
-import liquibase.statement.core.RawSqlStatement;
 import liquibase.structure.DatabaseObject;
-import liquibase.structure.core.Catalog;
-import liquibase.util.LiquibaseUtil;
-import liquibase.util.StreamUtil;
-import liquibase.util.StringUtil;
-import liquibase.util.TableOutput;
+import liquibase.util.*;
+import org.apache.commons.io.output.WriterOutputStream;
 
 import javax.xml.parsers.ParserConfigurationException;
 import java.io.*;
@@ -1087,29 +1082,12 @@ public class Liquibase implements AutoCloseable {
         }
     }
 
+    /**
+     * @deprecated use {@link LoggingExecutorTextUtil#outputHeader(String, Database, String))}
+     */
+    @Deprecated
     public void outputHeader(String message) throws DatabaseException {
-        Executor executor = Scope.getCurrentScope().getSingleton(ExecutorService.class).getExecutor("logging", database);
-        executor.comment("*********************************************************************");
-        executor.comment(message);
-        executor.comment("*********************************************************************");
-        executor.comment("Change Log: " + changeLogFile);
-        executor.comment("Ran at: " +
-                DateFormat.getDateTimeInstance(DateFormat.SHORT, DateFormat.SHORT).format(new Date())
-        );
-        DatabaseConnection connection = getDatabase().getConnection();
-        if (connection != null) {
-            executor.comment("Against: " + connection.getConnectionUserName() + "@" + connection.getURL());
-        }
-        executor.comment("Liquibase version: " + LiquibaseUtil.getBuildVersionInfo());
-        executor.comment("*********************************************************************" +
-                StreamUtil.getLineSeparator()
-        );
-
-        if ((database instanceof MSSQLDatabase) && (database.getDefaultCatalogName() != null)) {
-            executor.execute(new RawSqlStatement("USE " +
-                    database.escapeObjectName(database.getDefaultCatalogName(), Catalog.class) + ";")
-            );
-        }
+        LoggingExecutorTextUtil.outputHeader(message, database, changeLogFile);
     }
 
     public void rollback(int changesToRollback, String contexts, Writer output) throws LiquibaseException {
@@ -1774,11 +1752,7 @@ public class Liquibase implements AutoCloseable {
      *
      * Changelogsync or changelogsync to tag
      *
-     * @param tag
-     * @param contexts
-     * @param labelExpression
-     * @throws LiquibaseException
-     *
+     * @deprecated Use CommandStep
      */
     public void changeLogSync(String tag, Contexts contexts, LabelExpression labelExpression) throws LiquibaseException {
         runInScope(() -> {
@@ -1807,30 +1781,16 @@ public class Liquibase implements AutoCloseable {
 
     private void doChangeLogSyncSql(String tag, Contexts contexts, LabelExpression labelExpression, Writer output,
                                     Supplier<String> header) throws LiquibaseException {
-
-        changeLogParameters.setContexts(contexts);
-        changeLogParameters.setLabels(labelExpression);
-
         runInScope(() -> {
-
-            LoggingExecutor outputTemplate = new LoggingExecutor(
-                    Scope.getCurrentScope().getSingleton(ExecutorService.class).getExecutor(database), output, database
-            );
-
-                /* We have no other choice than to save the current Executer here. */
-                @SuppressWarnings("squid:S1941")
-                Executor oldTemplate = getAndReplaceJdbcExecutor(output);
-
-                outputHeader("SQL to add all changesets to database history table");
-
-            changeLogSync(tag, contexts, labelExpression);
-
-            flushOutputWriter(output);
-
-            Scope.getCurrentScope().getSingleton(ExecutorService.class).setExecutor("jdbc", database, oldTemplate);
-            resetServices();
+            CommandScope changelogSync = new CommandScope(ChangelogSyncToTagCommandStep.COMMAND_NAME[0])
+                    .addArgumentValue(DbUrlConnectionCommandStep.DATABASE_ARG, Liquibase.this.getDatabase())
+                    .addArgumentValue(ChangelogSyncCommandStep.CHANGELOG_FILE_ARG, changeLogFile)
+                    .addArgumentValue(ChangelogSyncCommandStep.HUB_CHANGE_EXEC_LISTENER_ARG, changeExecListener)
+                    .addArgumentValue(ChangelogSyncCommandStep.CONTEXTS_ARG, contexts.toString())
+                    .addArgumentValue(ChangelogSyncCommandStep.LABEL_FILTER_ARG, labelExpression.getOriginalString())
+                    .setOutput(new WriterOutputStream(output, GlobalConfiguration.OUTPUT_FILE_ENCODING.getCurrentValue()));
+            changelogSync.execute();
         });
-
     }
 
     public void markNextChangeSetRan(String contexts, Writer output) throws LiquibaseException {
@@ -1842,21 +1802,18 @@ public class Liquibase implements AutoCloseable {
         changeLogParameters.setContexts(contexts);
         changeLogParameters.setLabels(labelExpression);
 
-        runInScope(new Scope.ScopedRunner() {
-            @Override
-            public void run() throws Exception {
+        runInScope(() -> {
 
-                @SuppressWarnings("squid:S1941")
-                Executor oldTemplate = getAndReplaceJdbcExecutor(output);
-                outputHeader("SQL to add all changesets to database history table");
+            @SuppressWarnings("squid:S1941")
+            Executor oldTemplate = getAndReplaceJdbcExecutor(output);
+            outputHeader("SQL to add all changesets to database history table");
 
-                markNextChangeSetRan(contexts, labelExpression);
+            markNextChangeSetRan(contexts, labelExpression);
 
-                flushOutputWriter(output);
+            flushOutputWriter(output);
 
-                Scope.getCurrentScope().getSingleton(ExecutorService.class).setExecutor("jdbc", database, oldTemplate);
-                resetServices();
-            }
+            Scope.getCurrentScope().getSingleton(ExecutorService.class).setExecutor("jdbc", database, oldTemplate);
+            resetServices();
         });
     }
 
@@ -2118,7 +2075,7 @@ public class Liquibase implements AutoCloseable {
     /**
      * 'Tags' the database for future rollback
      *
-     * @deprecated Use {link {@link CommandScope(String)} to tag instead of this method.
+     * @deprecated Use {@link CommandScope(String)} to tag instead of this method.
      */
     @Deprecated
     public void tag(String tagString) throws LiquibaseException {
