@@ -180,9 +180,12 @@ public class UpdateCommandStep extends AbstractCommandStep implements CleanUpCom
     }
 
     @Override
-    public void cleanUp(CommandResultsBuilder resultsBuilder) {
+    public void cleanUp(CommandResultsBuilder resultsBuilder) throws Exception {
         LockServiceFactory.getInstance().resetAll();
         ChangeLogHistoryServiceFactory.getInstance().resetAll();
         Scope.getCurrentScope().getSingleton(ExecutorService.class).reset();
+        if (resultsBuilder.getResult("exception") != null) {
+            throw (Exception) resultsBuilder.getResult("exception");
+        }
     }
 }
