@@ -293,14 +293,7 @@ public class SnowflakeDatabase extends AbstractJdbcDatabase {
     }
     
     public String getViewDefinition(CatalogAndSchema schema, String viewName) throws DatabaseException {
-        schema = schema.customize(this);
-        // We can use non quoted schema/catalog/view names here.
-        // SELECT GET_DDL('VIEW', 'TEST.BAD$SCHEMA_NAME.BAD$%^VIEW_NAME', TRUE) - works fine.
-        String sqlStatement = "SELECT GET_DDL('VIEW', '"
-            + schema.getCatalogName() + "." + schema.getSchemaName() + "." + viewName
-            + "', TRUE)"; // This "TRUE" means that the returned result will be in the full representation
-        String definition = Scope.getCurrentScope().getSingleton(ExecutorService.class).getExecutor("jdbc", this)
-            .queryForObject(new RawSqlStatement(sqlStatement), String.class);
+        String definition = super.getViewDefinition(schema, viewName);
         if (definition == null || definition.isEmpty()) {
             return null;
         }
