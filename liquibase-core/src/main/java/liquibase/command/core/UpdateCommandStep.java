@@ -106,7 +106,7 @@ public class UpdateCommandStep extends AbstractCommandStep implements CleanUpCom
 
     @Override
     public List<Class<?>> providedDependencies() {
-        return Collections.singletonList(ChangeExecListener.class);
+        return Arrays.asList(ChangeExecListener.class, Exception.class);
     }
 
     @Override
@@ -168,7 +168,8 @@ public class UpdateCommandStep extends AbstractCommandStep implements CleanUpCom
             if (hubHandler != null) {
                 hubHandler.postUpdateHubExceptionHandling(bufferLog, e.getMessage());
             }
-            throw e;
+            commandScope.provideDependency(Exception.class, e);
+            resultsBuilder.addResult("exception", e);
         } finally {
             try {
                 lockService.releaseLock();
