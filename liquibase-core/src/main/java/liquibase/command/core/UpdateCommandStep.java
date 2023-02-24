@@ -169,7 +169,6 @@ public class UpdateCommandStep extends AbstractCommandStep implements CleanUpCom
                 hubHandler.postUpdateHubExceptionHandling(bufferLog, e.getMessage());
             }
             commandScope.provideDependency(Exception.class, e);
-            resultsBuilder.addResult("exception", e);
         } finally {
             try {
                 lockService.releaseLock();
@@ -184,8 +183,8 @@ public class UpdateCommandStep extends AbstractCommandStep implements CleanUpCom
         LockServiceFactory.getInstance().resetAll();
         ChangeLogHistoryServiceFactory.getInstance().resetAll();
         Scope.getCurrentScope().getSingleton(ExecutorService.class).reset();
-        if (resultsBuilder.getResult("exception") != null) {
-            throw (Exception) resultsBuilder.getResult("exception");
+        if (resultsBuilder.getCommandScope().getDependency(Exception.class) != null) {
+            throw (Exception) resultsBuilder.getCommandScope().getDependency(Exception.class);
         }
     }
 }
