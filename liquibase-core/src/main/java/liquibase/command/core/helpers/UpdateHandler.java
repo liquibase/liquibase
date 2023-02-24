@@ -7,6 +7,7 @@ import liquibase.Scope;
 import liquibase.changelog.*;
 import liquibase.changelog.filter.*;
 import liquibase.changelog.visitor.ListVisitor;
+import liquibase.changelog.visitor.StatusVisitor;
 import liquibase.database.Database;
 import liquibase.exception.DatabaseException;
 import liquibase.exception.LiquibaseException;
@@ -15,7 +16,9 @@ import liquibase.parser.ChangeLogParser;
 import liquibase.parser.ChangeLogParserFactory;
 import liquibase.parser.core.xml.XMLChangeLogSAXParser;
 import liquibase.resource.ResourceAccessor;
+import liquibase.util.ShowSummaryUtil;
 
+import java.io.IOException;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
@@ -52,7 +55,7 @@ public class UpdateHandler {
             checkLiquibaseTables(database, true, databaseChangeLog, contexts, labels);
         }
         databaseChangeLog.validate(database, contexts, labels);
-        ChangeLogIterator logIterator = getStandardChangelogIterator(database, contexts, labels, false, databaseChangeLog);
+        ChangeLogIterator logIterator = getStandardChangelogIterator(database, contexts, labels, databaseChangeLog);
         logIterator.run(visitor, new RuntimeEnvironment(database, contexts, labels));
         return visitor.getSeenChangeSets();
     }
@@ -79,13 +82,24 @@ public class UpdateHandler {
         LockServiceFactory.getInstance().getLockService(database).init();
     }
 
-    public static ChangeLogIterator getStandardChangelogIterator(Database database, Contexts contexts, LabelExpression labelExpression, boolean collectAllReasons, DatabaseChangeLog changeLog) throws DatabaseException {
+    public static ChangeLogIterator getStandardChangelogIterator(Database database, Contexts contexts, LabelExpression labelExpression, DatabaseChangeLog changeLog) throws DatabaseException {
         return new ChangeLogIterator(changeLog,
-                collectAllReasons,
                 new ShouldRunChangeSetFilter(database),
                 new ContextChangeSetFilter(contexts),
                 new LabelChangeSetFilter(labelExpression),
                 new DbmsChangeSetFilter(database),
                 new IgnoreChangeSetFilter());
+    }
+
+    public static boolean isUpToDate(Database database, DatabaseChangeLog databaseChangeLog, Contexts contexts, LabelExpression labelExpression) throws LiquibaseException, IOException {
+        if (isUpToDateFastCheck(database, databaseChangeLog, contexts, labelExpression)) {
+            Scope.getCurrentScope().getUI().sendMessage("Database is up to date, no changesets to execute");
+            StatusVisitor statusVisitor = new StatusVisitor(database);
+            ChangeLogIterator shouldRunIterator = getStandardChangelogIterator(database, contexts, labelExpression, databaseChangeLog);
+            shouldRunIterator.run(statusVisitor, new RuntimeEnvironment(database, contexts, labelExpression));
+            ShowSummaryUtil.showUpdateSummary(databaseChangeLog, statusVisitor);
+            return true;
+        }
+        return false;
     }
 }

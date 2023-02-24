@@ -28,6 +28,7 @@ import liquibase.parser.ChangeLogParser;
 import liquibase.parser.ChangeLogParserFactory;
 import liquibase.parser.core.xml.XMLChangeLogSAXParser;
 import liquibase.resource.ResourceAccessor;
+import liquibase.util.ShowSummaryUtil;
 import liquibase.util.StringUtil;
 
 import java.util.*;
@@ -47,7 +48,6 @@ public class UpdateCommandStep extends AbstractCommandStep implements CleanUpCom
     public static final CommandArgumentDefinition<String> CHANGE_EXEC_LISTENER_PROPERTIES_FILE_ARG;
     public static final CommandArgumentDefinition<ChangeExecListener> CHANGE_EXEC_LISTENER_ARG;
     public static final CommandArgumentDefinition<UpdateSummaryEnum> SHOW_SUMMARY;
-    private final Map<String, Boolean> upToDateFastCheck = new HashMap<>();
     private UUID hubConnectionId;
 
     static {
@@ -117,9 +117,8 @@ public class UpdateCommandStep extends AbstractCommandStep implements CleanUpCom
         Contexts contexts = commandScope.getArgumentValue(CONTEXTS_ARG);
         LabelExpression labelExpression = commandScope.getArgumentValue(LABEL_FILTER_ARG);
         ChangeLogParameters changeLogParameters = new ChangeLogParameters(database);
-        DatabaseChangeLog changeLog = getDatabaseChangeLog(changeLogFile, changeLogParameters, true);
-        if (isUpToDateFastCheck(database, changeLog, contexts, labelExpression)) {
-            Scope.getCurrentScope().getUI().sendMessage("Database is up to date, no changesets to execute");
+        DatabaseChangeLog databaseChangeLog = getDatabaseChangeLog(changeLogFile, changeLogParameters, true);
+        if (isUpToDate(database, databaseChangeLog, contexts, labelExpression)) {
             return;
         }
         LockService lockService = LockServiceFactory.getInstance().getLockService(database);
@@ -131,33 +130,38 @@ public class UpdateCommandStep extends AbstractCommandStep implements CleanUpCom
         BufferedLogService bufferLog = new BufferedLogService();
         HubHandler hubHandler = null;
         try {
-            checkLiquibaseTables(database, true, changeLog, contexts, labelExpression);
+            checkLiquibaseTables(database, true, databaseChangeLog, contexts, labelExpression);
             ChangeLogHistoryService changelogService = ChangeLogHistoryServiceFactory.getInstance().getChangeLogService(database);
             changelogService.generateDeploymentId();
-            changeLog.validate(database, contexts, labelExpression);
+            databaseChangeLog.validate(database, contexts, labelExpression);
 
+            //Set up a "chain" of ChangeExecListeners. Starting with the custom change exec listener
+            //then wrapping that in the DefaultChangeExecListener.
             ChangeExecListener listener = ChangeExecListenerUtils.getChangeExecListener(database,
                     Scope.getCurrentScope().getResourceAccessor(),
                     commandScope.getArgumentValue(CHANGE_EXEC_LISTENER_CLASS_ARG),
                     commandScope.getArgumentValue(CHANGE_EXEC_LISTENER_PROPERTIES_FILE_ARG));
             DefaultChangeExecListener defaultChangeExecListener = new DefaultChangeExecListener(listener);
-            hubHandler = new HubHandler(database, changeLog, changeLogFile, defaultChangeExecListener);
+            hubHandler = new HubHandler(database, databaseChangeLog, changeLogFile, defaultChangeExecListener);
 
-            ChangeLogIterator changeLogIterator = getStandardChangelogIterator(database, contexts, labelExpression, false, changeLog);
+            ChangeLogIterator changeLogIterator = getStandardChangelogIterator(database, contexts, labelExpression, databaseChangeLog);
             StatusVisitor statusVisitor = new StatusVisitor(database);
-            ChangeLogIterator shouldRunIterator = getStandardChangelogIterator(database, contexts, labelExpression, false, changeLog);
+            ChangeLogIterator shouldRunIterator = getStandardChangelogIterator(database, contexts, labelExpression, databaseChangeLog);
             shouldRunIterator.run(statusVisitor, new RuntimeEnvironment(database, contexts, labelExpression));
+
+            //Remember we built our hubHandler with our DefaultChangeExecListener so this HubChangeExecListener is delegating to them.
             ChangeExecListener hubChangeExecListener = hubHandler.startHubForUpdate(changeLogParameters, changeLogIterator);
 
             commandScope.provideDependency(ChangeExecListener.class, defaultChangeExecListener);
-            ChangeLogIterator runChangeLogIterator = getStandardChangelogIterator(database, contexts, labelExpression, false, changeLog);
+            ChangeLogIterator runChangeLogIterator = getStandardChangelogIterator(database, contexts, labelExpression, databaseChangeLog);
             CompositeLogService compositeLogService = new CompositeLogService(true, bufferLog);
             Scope.child(Scope.Attr.logService.name(), compositeLogService, () -> {
+                //If we are using hub, we want to use the HubChangeExecListener, which is wrapping all the others. Otherwise, use the default.
                 ChangeExecListener listenerToUse = hubChangeExecListener != null ? hubChangeExecListener : defaultChangeExecListener;
                 runChangeLogIterator.run(new UpdateVisitor(database, listenerToUse), new RuntimeEnvironment(database, contexts, labelExpression));
             });
-//TODO
-//            showUpdateSummary(changeLog, statusVisitor);
+
+            ShowSummaryUtil.showUpdateSummary(databaseChangeLog, statusVisitor);
 
             hubHandler.postUpdateHub(bufferLog);
         } catch (Exception e) {
