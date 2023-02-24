@@ -237,92 +237,11 @@ public class Liquibase implements AutoCloseable {
      */
     public void update(Contexts contexts, LabelExpression labelExpression, boolean checkLiquibaseTables) throws LiquibaseException {
         runInScope(() -> {
-            if (isUpToDateFastCheck(contexts, labelExpression)) {
-                Scope.getCurrentScope().getUI().sendMessage("Database is up to date, no changesets to execute");
-                return;
-            }
-
-            LockService lockService = LockServiceFactory.getInstance().getLockService(database);
-            lockService.waitForLock();
-            Scope.getCurrentScope().addMdcValue(MdcKey.LIQUIBASE_TARGET_URL, database.getConnection().getURL(), false);
-
-            changeLogParameters.setContexts(contexts);
-            changeLogParameters.setLabels(labelExpression);
-            addCommandFiltersMdc(labelExpression, contexts);
-
-            Operation updateOperation = null;
-            BufferedLogService bufferLog = new BufferedLogService();
-            DatabaseChangeLog changeLog;
-            HubUpdater hubUpdater = null;
-            try {
-                changeLog = getDatabaseChangeLog();
-                if (checkLiquibaseTables) {
-                    checkLiquibaseTables(true, changeLog, contexts, labelExpression);
-                }
-                generateDeploymentId();
-
-                changeLog.validate(database, contexts, labelExpression);
-
-                //
-                // Let the user know that they can register for Hub
-                //
-                hubUpdater = new HubUpdater(new Date(), changeLog, database);
-                hubUpdater.register(changeLogFile);
-
-                //
-                // Create or retrieve the Connection if this is not SQL generation
-                // Make sure the Hub is available here by checking the return
-                // We do not need a connection if we are using a LoggingExecutor
-                //
-                ChangeLogIterator changeLogIterator = getStandardChangelogIterator(contexts, labelExpression, changeLog);
-
-                //
-                // Iterate to find the change sets which will be skipped
-                //
-                StatusVisitor statusVisitor = new StatusVisitor(database);
-                ChangeLogIterator shouldRunIterator = getStandardChangelogIterator(contexts, labelExpression, true, changeLog);
-                shouldRunIterator.run(statusVisitor, new RuntimeEnvironment(database, contexts, labelExpression));
-
-                Connection connection = getConnection(changeLog);
-                if (connection != null) {
-                    updateOperation =
-                        hubUpdater.preUpdateHub("UPDATE", "update", connection, changeLogFile, contexts, labelExpression, changeLogIterator);
-                }
-
-                HubChangeExecListener hubChangeExecListener = new HubChangeExecListener(updateOperation, changeExecListener);
-                //
-                // Create another iterator to run
-                //
-                ChangeLogIterator runChangeLogIterator = getStandardChangelogIterator(contexts, labelExpression, changeLog);
-                CompositeLogService compositeLogService = new CompositeLogService(true, bufferLog);
-                Scope.child(Scope.Attr.logService.name(), compositeLogService, () -> {
-                    UpdateVisitor updateVisitor = createUpdateVisitor(connection != null ? hubChangeExecListener : changeExecListener);
-                    runChangeLogIterator.run(updateVisitor, new RuntimeEnvironment(database, contexts, labelExpression));
-                });
-
-                showUpdateSummary(changeLog, statusVisitor);
-
-                //
-                // Update Hub with the operation information
-                //
-                hubUpdater.postUpdateHub(updateOperation, bufferLog);
-                logDeploymentOutcomeMdc(true);
-            } catch (Throwable e) {
-                logDeploymentOutcomeMdc(false);
-                if (hubUpdater != null) {
-                    hubUpdater.postUpdateHubExceptionHandling(updateOperation, bufferLog, e.getMessage());
-                }
-                throw e;
-            } finally {
-                database.setObjectQuotingStrategy(ObjectQuotingStrategy.LEGACY);
-                try {
-                    lockService.releaseLock();
-                } catch (LockException e) {
-                    LOG.severe(MSG_COULD_NOT_RELEASE_LOCK, e);
-                }
-                resetServices();
-                setChangeExecListener(null);
-            }
+            CommandScope updateCommand = new CommandScope("update");
+            updateCommand.addArgumentValue(UpdateCommandStep.CONTEXTS_ARG, contexts);
+            updateCommand.addArgumentValue(UpdateCommandStep.LABEL_FILTER_ARG, labelExpression);
+            updateCommand.addArgumentValue(UpdateCommandStep.CHANGE_EXEC_LISTENER_ARG, changeExecListener);
+            updateCommand.execute();
         });
     }
 

@@ -1750,16 +1750,15 @@ public class Main {
             try {
                 if (COMMANDS.UPDATE.equalsIgnoreCase(command)) {
                     Scope.getCurrentScope().addMdcValue(MdcKey.OPERATION_TYPE, COMMANDS.UPDATE);
-//                    try {
-//                        Map<String, Object> updateScopedObjects = new HashMap<>();
-//                        updateScopedObjects.put("showSummary", showSummary);
-//                        Scope.child(updateScopedObjects, () -> {
-//                            liquibase.update(new Contexts(contexts), new LabelExpression(getLabelFilter()));
-//                        });
-//                    } catch (LiquibaseException updateException) {
-//                        handleUpdateException(database, updateException, defaultChangeExecListener, rollbackOnError);
-//                    }
-                    runUsingCommandFramework();
+                    try {
+                        Map<String, Object> updateScopedObjects = new HashMap<>();
+                        updateScopedObjects.put("showSummary", showSummary);
+                        Scope.child(updateScopedObjects, () -> {
+                            liquibase.update(new Contexts(contexts), new LabelExpression(getLabelFilter()));
+                        });
+                    } catch (LiquibaseException updateException) {
+                        handleUpdateException(database, updateException, defaultChangeExecListener, rollbackOnError);
+                    }
                 } else if (COMMANDS.CHANGELOG_SYNC.equalsIgnoreCase(command)) {
                     liquibase.changeLogSync(new Contexts(contexts), new LabelExpression(getLabelFilter()));
                 } else if (COMMANDS.CHANGELOG_SYNC_SQL.equalsIgnoreCase(command)) {
@@ -1992,8 +1991,8 @@ public class Main {
 
     private void runUpdateCommandStep() throws CommandLineParsingException, CommandExecutionException, IOException {
         CommandScope updateCommand = new CommandScope("update");
-        updateCommand.addArgumentValue(UpdateCommandStep.CONTEXTS_ARG, contexts);
-        updateCommand.addArgumentValue(UpdateCommandStep.LABEL_FILTER_ARG, labelFilter);
+        updateCommand.addArgumentValue(UpdateCommandStep.CONTEXTS_ARG, new Contexts(contexts));
+        updateCommand.addArgumentValue(UpdateCommandStep.LABEL_FILTER_ARG, new LabelExpression(labelFilter));
         updateCommand.addArgumentValue(UpdateCommandStep.CHANGE_EXEC_LISTENER_CLASS_ARG, changeExecListenerClass);
         updateCommand.addArgumentValue(UpdateCommandStep.CHANGE_EXEC_LISTENER_PROPERTIES_FILE_ARG, changeExecListenerPropertiesFile);
         setDatabaseArgumentsToCommand(updateCommand);
