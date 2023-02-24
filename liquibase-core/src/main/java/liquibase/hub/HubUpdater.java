@@ -11,6 +11,7 @@ import liquibase.command.CommandScope;
 import liquibase.command.core.InternalSyncHubCommandStep;
 import liquibase.command.core.RegisterChangelogCommandStep;
 import liquibase.configuration.ConfiguredValue;
+import liquibase.configuration.LiquibaseConfiguration;
 import liquibase.configuration.core.DeprecatedConfigurationValueProvider;
 import liquibase.database.Database;
 import liquibase.database.DatabaseConnection;
@@ -449,7 +450,7 @@ public class HubUpdater {
         lockService.reset();
         lockService.waitForLock();
 
-        String defaultsFilePath = Scope.getCurrentScope().get("defaultsFile", String.class);
+        String defaultsFilePath = (String) Scope.getCurrentScope().getSingleton(LiquibaseConfiguration.class).getRegisteredDefinition("liquibase.defaultsFile").getCurrentValue();
         File defaultsFile = null;
         if (defaultsFilePath != null) {
             defaultsFile = new File(defaultsFilePath);
