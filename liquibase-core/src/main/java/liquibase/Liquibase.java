@@ -260,15 +260,13 @@ public class Liquibase implements AutoCloseable {
                     checkLiquibaseTables(true, changeLog, contexts, labelExpression);
                 }
 
-                //
+                changeLog.validate(database, contexts, labelExpression);
+
                 // Let the user know that they can register for Hub
-                //
                 hubUpdater = new HubUpdater(new Date(), changeLog, database);
                 hubUpdater.register(changeLogFile);
 
                 generateDeploymentId();
-
-                changeLog.validate(database, contexts, labelExpression);
 
                 //
                 // Create or retrieve the Connection if this is not SQL generation
