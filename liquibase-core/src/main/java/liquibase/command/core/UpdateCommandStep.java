@@ -195,6 +195,7 @@ public class UpdateCommandStep extends AbstractCommandStep implements CleanUpCom
             }
             commandScope.provideDependency(Exception.class, e);
         } finally {
+            // TODO: Can I remove this finally block? Breaks {db:h2,command:updateSql} Happy path with output file
             try {
                 lockService.releaseLock();
             } catch (LockException e) {
