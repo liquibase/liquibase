@@ -295,6 +295,9 @@ public class SnowflakeDatabase extends AbstractJdbcDatabase {
     public String getViewDefinition(CatalogAndSchema schema, String viewName) throws DatabaseException {
         String definition = super.getViewDefinition(schema, viewName);
         if (definition == null || definition.isEmpty()) {
+            Scope.getCurrentScope()
+                .getLog(getClass())
+                .info("Error reading '" + (viewName != null && viewName.isEmpty() ? viewName : "") + "' view definition");
             return null;
         }
         if (definition.endsWith(";")) {
