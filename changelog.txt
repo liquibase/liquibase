@@ -197,7 +197,7 @@ Changes in version Liquibase v4.18.0 (2022.11.30)
 - Use together for increased security and convenience of centralized properties
 
 * [PRO]Security
-- Vaults offer much greater security than defaults files orenvironment variables
+- Vaults offer much greater security than defaults files for environment variables
 
 * [PRO] Centralization
 - Secure your database credentials, Pro license key, secure urls, and more in one central location.
