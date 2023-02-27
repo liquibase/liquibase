@@ -1809,7 +1809,6 @@ public class Liquibase implements AutoCloseable {
                 try {
                     changeLog = getDatabaseChangeLog();
                     checkLiquibaseTables(true, changeLog, contexts, labelExpression);
-                    ChangeLogHistoryServiceFactory.getInstance().getChangeLogService(database).generateDeploymentId();
 
                     changeLog.validate(database, contexts, labelExpression);
 
@@ -1818,6 +1817,8 @@ public class Liquibase implements AutoCloseable {
                     //
                     hubUpdater = new HubUpdater(new Date(), changeLog, database);
                     hubUpdater.register(changeLogFile);
+
+                    ChangeLogHistoryServiceFactory.getInstance().getChangeLogService(database).generateDeploymentId();
 
                     //
                     // Create an iterator which will be used with a ListVisitor
