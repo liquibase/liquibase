@@ -230,6 +230,8 @@ jobs:
       runs-on: ubuntu-20.04
       steps:
       - name: Download liquibase xsd
+        env: 
+          working_directory_liquibase: $GITHUB_WORKSPACE/liquibase-core/src/main/resources/www.liquibase.org/xml/ns/dbchangelog/
         uses: actions/checkout@v3
         with:
           # Relative path under $GITHUB_WORKSPACE to place the repository
@@ -237,17 +239,19 @@ jobs:
           repository: "liquibase/liquibase"
 
       - name: Download liquibase-pro xsd
+        env: 
+          working_directory_liquibase-pro: $GITHUB_WORKSPACE/liquibase-pro/pro/src/main/resources/www.liquibase.org/xml/ns/pro/
         uses: actions/checkout@v3
         with:
         # Relative path under $GITHUB_WORKSPACE to place the repository
           path: liquibase-pro
           repository: "liquibase/liquibase-pro"
-      
+
       - name: Upload to s3
         env:
           AWS_ACCESS_KEY_ID: ${{ secrets.LIQUIBASEORIGIN_ACCESS_KEY_ID }}
           AWS_SECRET_ACCESS_KEY: ${{ secrets.LIQUIBASEORIGIN_SECRET_ACCESS_KEY }}
           AWS_DEFAULT_REGION: us-east-1
         run: |
-          aws s3 sync $GITHUB_WORKSPACE/liquibase-core/src/main/resources/www.liquibase.org/xml/ns/dbchangelog/dbchangelog-${{ needs.setup.outputs.version }}.xsd s3://liquibaseorg-origin --only-show-errors
-          aws s3 sync $GITHUB_WORKSPACE/liquibase-pro/pro/src/main/resources/www.liquibase.org/xml/ns/pro/liquibase-pro-${{ needs.setup.outputs.version }}.xsd s3://liquibaseorg-origin --only-show-errors
+          aws s3 sync {{ env.working_directory_liquibase }}/dbchangelog-${{ needs.setup.outputs.version }}.xsd s3://liquibaseorg-origin --only-show-errors
+          aws s3 sync {{ env.working_directory_liquibase-pro }}/liquibase-pro-${{ needs.setup.outputs.version }}.xsd s3://liquibaseorg-origin --only-show-errors
