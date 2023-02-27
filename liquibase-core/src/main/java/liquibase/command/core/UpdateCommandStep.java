@@ -130,19 +130,18 @@ public class UpdateCommandStep extends AbstractCommandStep implements CleanUpCom
         if (changeLogParameters == null) {
             changeLogParameters = new ChangeLogParameters(database);
         }
-        DatabaseChangeLog databaseChangeLog = getDatabaseChangeLog(changeLogFile, changeLogParameters, true);
-        if (isUpToDate(database, databaseChangeLog, contexts, labelExpression)) {
-            return;
-        }
-        LockService lockService = LockServiceFactory.getInstance().getLockService(database);
-        lockService.waitForLock();
-
         changeLogParameters.setContexts(contexts);
         changeLogParameters.setLabels(labelExpression);
 
+        LockService lockService = (LockService) commandScope.getDependency(LockService.class);
         BufferedLogService bufferLog = new BufferedLogService();
         HubHandler hubHandler = null;
+
         try {
+            DatabaseChangeLog databaseChangeLog = getDatabaseChangeLog(changeLogFile, changeLogParameters, true);
+            if (isUpToDate(database, databaseChangeLog, contexts, labelExpression)) {
+                return;
+            }
             checkLiquibaseTables(database, true, databaseChangeLog, contexts, labelExpression);
             ChangeLogHistoryService changelogService = ChangeLogHistoryServiceFactory.getInstance().getChangeLogService(database);
             changelogService.generateDeploymentId();

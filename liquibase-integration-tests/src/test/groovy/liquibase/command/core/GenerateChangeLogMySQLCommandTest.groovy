@@ -75,9 +75,9 @@ drop table str4;
         UpdateCommandStep step = new UpdateCommandStep()
 
         CommandScope commandScope = new CommandScope(UpdateCommandStep.COMMAND_NAME)
-        commandScope.addArgumentValue(UpdateCommandStep.URL_ARG, mysql.getConnectionUrl())
-        commandScope.addArgumentValue(UpdateCommandStep.USERNAME_ARG, mysql.getUsername())
-        commandScope.addArgumentValue(UpdateCommandStep.PASSWORD_ARG, mysql.getPassword())
+        commandScope.addArgumentValue(DbUrlConnectionCommandStep.URL_ARG, mysql.getConnectionUrl())
+        commandScope.addArgumentValue(DbUrlConnectionCommandStep.USERNAME_ARG, mysql.getUsername())
+        commandScope.addArgumentValue(DbUrlConnectionCommandStep.PASSWORD_ARG, mysql.getPassword())
         commandScope.addArgumentValue(UpdateCommandStep.CHANGELOG_FILE_ARG, "output.xml")
 
         OutputStream outputStream = new ByteArrayOutputStream()
