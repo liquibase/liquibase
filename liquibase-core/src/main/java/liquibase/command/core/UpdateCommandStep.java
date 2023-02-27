@@ -151,6 +151,7 @@ public class UpdateCommandStep extends AbstractCommandStep implements CleanUpCom
             ChangeLogHistoryService changelogService = ChangeLogHistoryServiceFactory.getInstance().getChangeLogService(database);
             changelogService.generateDeploymentId();
             Scope.getCurrentScope().addMdcValue(MdcKey.DEPLOYMENT_ID, changelogService.getDeploymentId());
+            Scope.getCurrentScope().getLog(getClass()).info(String.format("Using deploymentId: %s", changelogService.getDeploymentId()));
 
             databaseChangeLog.validate(database, contexts, labelExpression);
 
