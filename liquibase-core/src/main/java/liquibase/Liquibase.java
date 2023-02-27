@@ -88,17 +88,6 @@ public class Liquibase implements AutoCloseable {
         WILL_ROLLBACK, ROLLED_BACK, ROLLBACK_FAILED
     }
 
-    private static final Map<Class<?>, String> filterSummaryLabelMap = new HashMap<>();
-    static {
-        filterSummaryLabelMap.put(ShouldRunChangeSetFilter.class, "Already ran:             %6d");
-        filterSummaryLabelMap.put(DbmsChangeSetFilter.class,      "DBMS mismatch:           %6d");
-        filterSummaryLabelMap.put(LabelChangeSetFilter.class,     "Label mismatch:          %6d");
-        filterSummaryLabelMap.put(ContextChangeSetFilter.class,   "Context mismatch:        %6d");
-        filterSummaryLabelMap.put(CountChangeSetFilter.class,     "After count:             %6d");
-        filterSummaryLabelMap.put(UpToTagChangeSetFilter.class,   "After tag:               %6d");
-        filterSummaryLabelMap.put(IgnoreChangeSetFilter.class,    "Ignored:                 %6d");
-    }
-
     /**
      * Creates a Liquibase instance for a given DatabaseConnection. The Database instance used will be found with {@link DatabaseFactory#findCorrectDatabaseImplementation(liquibase.database.DatabaseConnection)}
      *
