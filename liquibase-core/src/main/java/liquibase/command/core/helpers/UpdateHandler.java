@@ -25,6 +25,7 @@ import java.util.concurrent.ConcurrentHashMap;
 
 public class UpdateHandler {
     private static final Map<String, Boolean> upToDateFastCheck = new ConcurrentHashMap<>();
+
     public static boolean isUpToDateFastCheck(Database database, DatabaseChangeLog databaseChangeLog, Contexts contexts, LabelExpression labelExpression) throws LiquibaseException {
         String cacheKey = contexts + "/" + labelExpression;
         if (!upToDateFastCheck.containsKey(cacheKey)) {
@@ -84,6 +85,15 @@ public class UpdateHandler {
 
     public static ChangeLogIterator getStandardChangelogIterator(Database database, Contexts contexts, LabelExpression labelExpression, DatabaseChangeLog changeLog) throws DatabaseException {
         return new ChangeLogIterator(changeLog,
+                new ShouldRunChangeSetFilter(database),
+                new ContextChangeSetFilter(contexts),
+                new LabelChangeSetFilter(labelExpression),
+                new DbmsChangeSetFilter(database),
+                new IgnoreChangeSetFilter());
+    }
+
+    public static ChangeLogIterator getStatusChangelogIterator(Database database, Contexts contexts, LabelExpression labelExpression, DatabaseChangeLog changeLog) throws DatabaseException {
+        return new StatusChangeLogIterator(changeLog,
                 new ShouldRunChangeSetFilter(database),
                 new ContextChangeSetFilter(contexts),
                 new LabelChangeSetFilter(labelExpression),
