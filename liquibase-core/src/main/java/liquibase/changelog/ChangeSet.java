@@ -6,6 +6,7 @@ import liquibase.Scope;
 import liquibase.change.*;
 import liquibase.change.core.EmptyChange;
 import liquibase.change.core.RawSQLChange;
+import liquibase.change.core.SQLFileChange;
 import liquibase.changelog.visitor.ChangeExecListener;
 import liquibase.configuration.LiquibaseConfiguration;
 import liquibase.database.Database;
@@ -17,6 +18,7 @@ import liquibase.executor.ExecutorService;
 import liquibase.executor.LoggingExecutor;
 import liquibase.logging.Logger;
 import liquibase.logging.mdc.MdcKey;
+import liquibase.logging.mdc.customobjects.RollbackSqlFile;
 import liquibase.parser.ChangeLogParserConfiguration;
 import liquibase.parser.core.ParsedNode;
 import liquibase.parser.core.ParsedNodeException;
@@ -843,6 +845,9 @@ public class ChangeSet implements Conditional, ChangeLogChild {
                     //
                     SqlStatement[] changeStatements = change.generateStatements(database);
                     addSqlMdc(change, database, false);
+                    if (change instanceof SQLFileChange) {
+                        addSqlFileMdc((SQLFileChange) change);
+                    }
                     if (changeStatements != null) {
                         statements.addAll(Arrays.asList(changeStatements));
                     }
@@ -894,6 +899,11 @@ public class ChangeSet implements Conditional, ChangeLogChild {
             }
         }
 
+    }
+
+    private void addSqlFileMdc(SQLFileChange change) {
+        RollbackSqlFile rollbackSqlFile = new RollbackSqlFile(change);
+        Scope.getCurrentScope().addMdcValue(MdcKey.ROLLBACK_SQL_FILE, rollbackSqlFile);
     }
 
     private boolean ignoreSpecificChangeTypes(Change change, Database database) {
