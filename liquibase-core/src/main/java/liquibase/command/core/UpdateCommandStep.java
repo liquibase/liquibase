@@ -48,6 +48,7 @@ public class UpdateCommandStep extends AbstractCommandStep implements CleanUpCom
     public static final CommandArgumentDefinition<String> CHANGE_EXEC_LISTENER_PROPERTIES_FILE_ARG;
     public static final CommandArgumentDefinition<ChangeExecListener> CHANGE_EXEC_LISTENER_ARG;
     public static final CommandArgumentDefinition<UpdateSummaryEnum> SHOW_SUMMARY;
+    public static final CommandArgumentDefinition<ChangeLogParameters> CHANGELOG_PARAMETERS;
 
     static {
         CommandBuilder builder = new CommandBuilder(COMMAND_NAME, LEGACY_COMMAND_NAME);
@@ -68,6 +69,9 @@ public class UpdateCommandStep extends AbstractCommandStep implements CleanUpCom
                 .description("Path to a properties file for the ChangeExecListenerClass")
                 .build();
         CHANGE_EXEC_LISTENER_ARG = builder.argument("changeExecListener", ChangeExecListener.class)
+                .hidden()
+                .build();
+        CHANGELOG_PARAMETERS = builder.argument("changelogParameters", ChangeLogParameters.class)
                 .hidden()
                 .build();
         SHOW_SUMMARY = builder.argument("showSummary", UpdateSummaryEnum.class).description("Type of update results summary to show.  Values can be 'off', 'summary', or 'verbose'.")
@@ -122,7 +126,10 @@ public class UpdateCommandStep extends AbstractCommandStep implements CleanUpCom
         Database database = (Database) commandScope.getDependency(Database.class);
         Contexts contexts = new Contexts(commandScope.getArgumentValue(CONTEXTS_ARG));
         LabelExpression labelExpression = new LabelExpression(commandScope.getArgumentValue(LABEL_FILTER_ARG));
-        ChangeLogParameters changeLogParameters = new ChangeLogParameters(database);
+        ChangeLogParameters changeLogParameters = commandScope.getArgumentValue(CHANGELOG_PARAMETERS);
+        if (changeLogParameters == null) {
+            changeLogParameters = new ChangeLogParameters(database);
+        }
         DatabaseChangeLog databaseChangeLog = getDatabaseChangeLog(changeLogFile, changeLogParameters, true);
         if (isUpToDate(database, databaseChangeLog, contexts, labelExpression)) {
             return;

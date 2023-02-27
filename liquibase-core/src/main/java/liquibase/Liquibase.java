@@ -241,6 +241,7 @@ public class Liquibase implements AutoCloseable {
             updateCommand.addArgumentValue(UpdateCommandStep.CONTEXTS_ARG, contexts != null ? contexts.toString() : null);
             updateCommand.addArgumentValue(UpdateCommandStep.LABEL_FILTER_ARG, labelExpression != null ? labelExpression.getOriginalString() : null);
             updateCommand.addArgumentValue(UpdateCommandStep.CHANGE_EXEC_LISTENER_ARG, changeExecListener);
+            updateCommand.addArgumentValue(UpdateCommandStep.CHANGELOG_PARAMETERS, changeLogParameters);
             updateCommand.execute();
         });
     }
