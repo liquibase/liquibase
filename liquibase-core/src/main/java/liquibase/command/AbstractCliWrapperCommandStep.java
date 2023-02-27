@@ -70,6 +70,9 @@ public abstract class AbstractCliWrapperCommandStep extends AbstractCommandStep 
         List<String> argsList = new ArrayList<>();
         Map<String, CommandArgumentDefinition<?>> arguments = commandScope.getCommand().getArguments();
         arguments.forEach((key, value) -> {
+            if (value.getHidden()) {
+                return;
+            }
             if (finalLegacyCommandArguments.contains(key)) {
                 return;
             }

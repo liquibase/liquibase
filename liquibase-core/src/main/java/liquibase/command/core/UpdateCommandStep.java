@@ -48,41 +48,47 @@ public class UpdateCommandStep extends AbstractCommandStep implements CleanUpCom
     public static final CommandArgumentDefinition<String> CHANGE_EXEC_LISTENER_PROPERTIES_FILE_ARG;
     public static final CommandArgumentDefinition<ChangeExecListener> CHANGE_EXEC_LISTENER_ARG;
     public static final CommandArgumentDefinition<UpdateSummaryEnum> SHOW_SUMMARY;
-    private UUID hubConnectionId;
 
     static {
         CommandBuilder builder = new CommandBuilder(COMMAND_NAME, LEGACY_COMMAND_NAME);
-        CHANGELOG_FILE_ARG = builder.argument(CommonArgumentNames.CHANGELOG_FILE, String.class).required().description("The root changelog").build();
-        LABEL_FILTER_ARG = builder.argument("labelFilter", LabelExpression.class).addAlias("labels").description("Changeset labels to match").build();
-        CONTEXTS_ARG = builder.argument("contexts", Contexts.class).description("Changeset contexts to match").build();
-        CHANGE_EXEC_LISTENER_CLASS_ARG = builder.argument("changeExecListenerClass", String.class).description("Fully-qualified class which specifies a ChangeExecListener").build();
-        CHANGE_EXEC_LISTENER_PROPERTIES_FILE_ARG = builder.argument("changeExecListenerPropertiesFile", String.class).description("Path to a properties file for the ChangeExecListenerClass").build();
-        CHANGE_EXEC_LISTENER_ARG = builder.argument("changeExecListener", ChangeExecListener.class).hidden().build();
-        SHOW_SUMMARY = builder.argument("showSummary", UpdateSummaryEnum.class).description("Type of update results summary to show.  Values can be 'off', 'summary', or 'verbose'.").defaultValue(UpdateSummaryEnum.OFF).hidden().setValueHandler(value -> {
-            if (value == null) {
-                return null;
-            }
-            if (value instanceof String && !value.equals("")) {
-                final List<String> validValues = Arrays.asList("OFF", "SUMMARY", "VERBOSE");
-                if (!validValues.contains(((String) value).toUpperCase())) {
-                    throw new IllegalArgumentException("Illegal value for `showUpdateSummary'.  Valid values are 'OFF', 'SUMMARY', or 'VERBOSE'");
-                }
-                return UpdateSummaryEnum.valueOf(((String) value).toUpperCase());
-            } else if (value instanceof UpdateSummaryEnum) {
-                return (UpdateSummaryEnum) value;
-            }
-            return null;
-        }).build();
+        CHANGELOG_FILE_ARG = builder.argument(CommonArgumentNames.CHANGELOG_FILE, String.class)
+                .required().description("The root changelog")
+                .build();
+        LABEL_FILTER_ARG = builder.argument("labelFilter", LabelExpression.class)
+                .addAlias("labels")
+                .description("Changeset labels to match")
+                .build();
+        CONTEXTS_ARG = builder.argument("contexts", Contexts.class)
+                .description("Changeset contexts to match")
+                .build();
+        CHANGE_EXEC_LISTENER_CLASS_ARG = builder.argument("changeExecListenerClass", String.class)
+                .description("Fully-qualified class which specifies a ChangeExecListener")
+                .build();
+        CHANGE_EXEC_LISTENER_PROPERTIES_FILE_ARG = builder.argument("changeExecListenerPropertiesFile", String.class)
+                .description("Path to a properties file for the ChangeExecListenerClass")
+                .build();
+        CHANGE_EXEC_LISTENER_ARG = builder.argument("changeExecListener", ChangeExecListener.class)
+                .hidden()
+                .build();
+        SHOW_SUMMARY = builder.argument("showSummary", UpdateSummaryEnum.class).description("Type of update results summary to show.  Values can be 'off', 'summary', or 'verbose'.")
+                .defaultValue(UpdateSummaryEnum.OFF)
+                .hidden()
+                .setValueHandler(value -> {
+                    if (value == null) {
+                        return null;
+                    }
+                    if (value instanceof String && !value.equals("")) {
+                        final List<String> validValues = Arrays.asList("OFF", "SUMMARY", "VERBOSE");
+                        if (!validValues.contains(((String) value).toUpperCase())) {
+                            throw new IllegalArgumentException("Illegal value for `showUpdateSummary'.  Valid values are 'OFF', 'SUMMARY', or 'VERBOSE'");
+                        }
+                        return UpdateSummaryEnum.valueOf(((String) value).toUpperCase());
+                    } else if (value instanceof UpdateSummaryEnum) {
+                        return (UpdateSummaryEnum) value;
+                    }
+                    return null;
+                }).build();
     }
-
-    public UUID getHubConnectionId() {
-        return hubConnectionId;
-    }
-
-    public void setHubConnectionId(UUID hubConnectionId) {
-        this.hubConnectionId = hubConnectionId;
-    }
-
 
     @Override
     public String[][] defineCommandNames() {

@@ -49,10 +49,7 @@ import liquibase.resource.ResourceAccessor;
 import liquibase.serializer.ChangeLogSerializer;
 import liquibase.structure.DatabaseObject;
 import liquibase.structure.core.Catalog;
-import liquibase.util.LiquibaseUtil;
-import liquibase.util.ShowSummaryUtil;
-import liquibase.util.StreamUtil;
-import liquibase.util.StringUtil;
+import liquibase.util.*;
 import org.apache.commons.io.output.WriterOutputStream;
 
 import javax.xml.parsers.ParserConfigurationException;
@@ -250,6 +247,8 @@ public class Liquibase implements AutoCloseable {
     public void update(Contexts contexts, LabelExpression labelExpression, boolean checkLiquibaseTables) throws LiquibaseException {
         runInScope(() -> {
             CommandScope updateCommand = new CommandScope("update");
+            updateCommand.addArgumentValue(DbUrlConnectionCommandStep.DATABASE_ARG, getDatabase());
+            updateCommand.addArgumentValue(UpdateCommandStep.CHANGELOG_FILE_ARG, changeLogFile);
             updateCommand.addArgumentValue(UpdateCommandStep.CONTEXTS_ARG, contexts);
             updateCommand.addArgumentValue(UpdateCommandStep.LABEL_FILTER_ARG, labelExpression);
             updateCommand.addArgumentValue(UpdateCommandStep.CHANGE_EXEC_LISTENER_ARG, changeExecListener);

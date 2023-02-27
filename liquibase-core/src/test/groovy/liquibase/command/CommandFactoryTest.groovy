@@ -11,7 +11,7 @@ class CommandFactoryTest extends Specification {
 
         then:
         command.name*.toString() == ["update"]
-        command.pipeline*.class*.name == ["liquibase.command.core.UpdateCommandStep"]
+        command.pipeline*.class*.name.contains("liquibase.command.core.UpdateCommandStep")
         command.arguments.keySet().contains("changelogFile")
     }
 
