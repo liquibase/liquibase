@@ -23,6 +23,7 @@ import liquibase.util.StringUtil;
 import java.io.File;
 import java.io.UnsupportedEncodingException;
 import java.net.URLDecoder;
+import java.nio.charset.StandardCharsets;
 import java.sql.Driver;
 import java.util.HashMap;
 import java.util.Map;
@@ -63,7 +64,7 @@ public class OfflineConnection implements DatabaseConnection {
                 String[] keyValues = params.split("&");
                 for (String param : keyValues) {
                     String[] split = param.split("=");
-                    params1.put(URLDecoder.decode(split[0], "UTF-8"), URLDecoder.decode(split[1], "UTF-8"));
+                    params1.put(URLDecoder.decode(split[0], StandardCharsets.UTF_8.name()), URLDecoder.decode(split[1], StandardCharsets.UTF_8.name()));
                 }
             }
 
