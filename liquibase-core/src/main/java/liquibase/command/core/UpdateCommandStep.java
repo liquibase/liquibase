@@ -24,6 +24,9 @@ import liquibase.lockservice.LockService;
 import liquibase.lockservice.LockServiceFactory;
 import liquibase.logging.core.BufferedLogService;
 import liquibase.logging.core.CompositeLogService;
+import liquibase.logging.mdc.MdcKey;
+import liquibase.logging.mdc.MdcObject;
+import liquibase.logging.mdc.MdcValue;
 import liquibase.parser.ChangeLogParser;
 import liquibase.parser.ChangeLogParserFactory;
 import liquibase.parser.core.xml.XMLChangeLogSAXParser;
@@ -31,6 +34,7 @@ import liquibase.resource.ResourceAccessor;
 import liquibase.util.ShowSummaryUtil;
 import liquibase.util.StringUtil;
 
+import java.io.IOException;
 import java.util.*;
 
 import static liquibase.Liquibase.MSG_COULD_NOT_RELEASE_LOCK;
@@ -132,11 +136,12 @@ public class UpdateCommandStep extends AbstractCommandStep implements CleanUpCom
         }
         changeLogParameters.setContexts(contexts);
         changeLogParameters.setLabels(labelExpression);
+        addCommandFiltersMdc(labelExpression, contexts);
 
         LockService lockService = (LockService) commandScope.getDependency(LockService.class);
         BufferedLogService bufferLog = new BufferedLogService();
         HubHandler hubHandler = null;
-
+        DefaultChangeExecListener defaultChangeExecListener = new DefaultChangeExecListener();
         try {
             DatabaseChangeLog databaseChangeLog = getDatabaseChangeLog(changeLogFile, changeLogParameters, true);
             if (isUpToDate(database, databaseChangeLog, contexts, labelExpression)) {
@@ -153,7 +158,7 @@ public class UpdateCommandStep extends AbstractCommandStep implements CleanUpCom
                     Scope.getCurrentScope().getResourceAccessor(),
                     commandScope.getArgumentValue(CHANGE_EXEC_LISTENER_CLASS_ARG),
                     commandScope.getArgumentValue(CHANGE_EXEC_LISTENER_PROPERTIES_FILE_ARG));
-            DefaultChangeExecListener defaultChangeExecListener = new DefaultChangeExecListener(listener);
+            defaultChangeExecListener.addListener(listener);
             hubHandler = new HubHandler(database, databaseChangeLog, changeLogFile, defaultChangeExecListener);
 
             ChangeLogIterator changeLogIterator = getStandardChangelogIterator(database, contexts, labelExpression, databaseChangeLog);
@@ -179,7 +184,9 @@ public class UpdateCommandStep extends AbstractCommandStep implements CleanUpCom
 
             hubHandler.postUpdateHub(bufferLog);
             resultsBuilder.addResult("statusCode", 0);
+            logDeploymentOutcomeMdc(defaultChangeExecListener, true);
         } catch (Exception e) {
+            logDeploymentOutcomeMdc(defaultChangeExecListener, false);
             resultsBuilder.addResult("statusCode", 1);
             if (hubHandler != null) {
                 hubHandler.postUpdateHubExceptionHandling(bufferLog, e.getMessage());
@@ -201,6 +208,23 @@ public class UpdateCommandStep extends AbstractCommandStep implements CleanUpCom
         Scope.getCurrentScope().getSingleton(ExecutorService.class).reset();
         if (resultsBuilder.getCommandScope().getDependency(Exception.class) != null) {
             throw (Exception) resultsBuilder.getCommandScope().getDependency(Exception.class);
+        }
+    }
+
+    private void addCommandFiltersMdc(LabelExpression labelExpression, Contexts contexts) {
+        String labelFilterMdc = labelExpression != null && labelExpression.getOriginalString() != null ? labelExpression.getOriginalString() : "";
+        String contextFilterMdc = contexts != null ? contexts.toString() : "";
+        Scope.getCurrentScope().addMdcValue(MdcKey.COMMAND_LABEL_FILTER, labelFilterMdc);
+        Scope.getCurrentScope().addMdcValue(MdcKey.COMMAND_CONTEXT_FILTER, contextFilterMdc);
+    }
+
+    private void logDeploymentOutcomeMdc(DefaultChangeExecListener defaultListener, boolean success) throws IOException {
+        int deployedChangeSetCount = defaultListener.getDeployedChangeSets().size();
+        String successLog = "Update command completed successfully.";
+        String failureLog = "Update command encountered an exception.";
+        try (MdcObject deploymentOutcomeMdc = Scope.getCurrentScope().addMdcValue(MdcKey.DEPLOYMENT_OUTCOME, success ? MdcValue.COMMAND_SUCCESSFUL : MdcValue.COMMAND_FAILED);
+             MdcObject deploymentOutcomeCountMdc = Scope.getCurrentScope().addMdcValue(MdcKey.DEPLOYMENT_CHANGESET_COUNT, String.valueOf(deployedChangeSetCount))) {
+            Scope.getCurrentScope().getLog(getClass()).info(success ? successLog : failureLog);
         }
     }
 }

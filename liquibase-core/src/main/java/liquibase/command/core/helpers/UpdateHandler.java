@@ -105,7 +105,7 @@ public class UpdateHandler {
         if (isUpToDateFastCheck(database, databaseChangeLog, contexts, labelExpression)) {
             Scope.getCurrentScope().getUI().sendMessage("Database is up to date, no changesets to execute");
             StatusVisitor statusVisitor = new StatusVisitor(database);
-            ChangeLogIterator shouldRunIterator = getStandardChangelogIterator(database, contexts, labelExpression, databaseChangeLog);
+            ChangeLogIterator shouldRunIterator = getStatusChangelogIterator(database, contexts, labelExpression, databaseChangeLog);
             shouldRunIterator.run(statusVisitor, new RuntimeEnvironment(database, contexts, labelExpression));
             ShowSummaryUtil.showUpdateSummary(databaseChangeLog, statusVisitor);
             return true;
