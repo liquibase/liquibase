@@ -42,8 +42,8 @@ public class UpdateCommandStep extends AbstractCommandStep implements CleanUpCom
     public static String[] COMMAND_NAME = {"update"};
 
     public static final CommandArgumentDefinition<String> CHANGELOG_FILE_ARG;
-    public static final CommandArgumentDefinition<LabelExpression> LABEL_FILTER_ARG;
-    public static final CommandArgumentDefinition<Contexts> CONTEXTS_ARG;
+    public static final CommandArgumentDefinition<String> LABEL_FILTER_ARG;
+    public static final CommandArgumentDefinition<String> CONTEXTS_ARG;
     public static final CommandArgumentDefinition<String> CHANGE_EXEC_LISTENER_CLASS_ARG;
     public static final CommandArgumentDefinition<String> CHANGE_EXEC_LISTENER_PROPERTIES_FILE_ARG;
     public static final CommandArgumentDefinition<ChangeExecListener> CHANGE_EXEC_LISTENER_ARG;
@@ -54,11 +54,11 @@ public class UpdateCommandStep extends AbstractCommandStep implements CleanUpCom
         CHANGELOG_FILE_ARG = builder.argument(CommonArgumentNames.CHANGELOG_FILE, String.class)
                 .required().description("The root changelog")
                 .build();
-        LABEL_FILTER_ARG = builder.argument("labelFilter", LabelExpression.class)
+        LABEL_FILTER_ARG = builder.argument("labelFilter", String.class)
                 .addAlias("labels")
                 .description("Changeset labels to match")
                 .build();
-        CONTEXTS_ARG = builder.argument("contexts", Contexts.class)
+        CONTEXTS_ARG = builder.argument("contexts", String.class)
                 .description("Changeset contexts to match")
                 .build();
         CHANGE_EXEC_LISTENER_CLASS_ARG = builder.argument("changeExecListenerClass", String.class)
@@ -120,8 +120,8 @@ public class UpdateCommandStep extends AbstractCommandStep implements CleanUpCom
         CommandScope commandScope = resultsBuilder.getCommandScope();
         String changeLogFile = commandScope.getArgumentValue(CHANGELOG_FILE_ARG);
         Database database = (Database) commandScope.getDependency(Database.class);
-        Contexts contexts = commandScope.getArgumentValue(CONTEXTS_ARG);
-        LabelExpression labelExpression = commandScope.getArgumentValue(LABEL_FILTER_ARG);
+        Contexts contexts = new Contexts(commandScope.getArgumentValue(CONTEXTS_ARG));
+        LabelExpression labelExpression = new LabelExpression(commandScope.getArgumentValue(LABEL_FILTER_ARG));
         ChangeLogParameters changeLogParameters = new ChangeLogParameters(database);
         DatabaseChangeLog databaseChangeLog = getDatabaseChangeLog(changeLogFile, changeLogParameters, true);
         if (isUpToDate(database, databaseChangeLog, contexts, labelExpression)) {
@@ -161,16 +161,20 @@ public class UpdateCommandStep extends AbstractCommandStep implements CleanUpCom
             commandScope.provideDependency(ChangeExecListener.class, defaultChangeExecListener);
             ChangeLogIterator runChangeLogIterator = getStandardChangelogIterator(database, contexts, labelExpression, databaseChangeLog);
             CompositeLogService compositeLogService = new CompositeLogService(true, bufferLog);
-            Scope.child(Scope.Attr.logService.name(), compositeLogService, () -> {
+            HashMap<String, Object> scopeValues = new HashMap<>();
+            scopeValues.put(Scope.Attr.logService.name(), compositeLogService);
+            scopeValues.put("showSummary", commandScope.getArgumentValue(SHOW_SUMMARY));
+            Scope.child(scopeValues, () -> {
                 //If we are using hub, we want to use the HubChangeExecListener, which is wrapping all the others. Otherwise, use the default.
                 ChangeExecListener listenerToUse = hubChangeExecListener != null ? hubChangeExecListener : defaultChangeExecListener;
                 runChangeLogIterator.run(new UpdateVisitor(database, listenerToUse), new RuntimeEnvironment(database, contexts, labelExpression));
+                ShowSummaryUtil.showUpdateSummary(databaseChangeLog, statusVisitor);
             });
 
-            ShowSummaryUtil.showUpdateSummary(databaseChangeLog, statusVisitor);
-
             hubHandler.postUpdateHub(bufferLog);
+            resultsBuilder.addResult("statusCode", 0);
         } catch (Exception e) {
+            resultsBuilder.addResult("statusCode", 1);
             if (hubHandler != null) {
                 hubHandler.postUpdateHubExceptionHandling(bufferLog, e.getMessage());
             }

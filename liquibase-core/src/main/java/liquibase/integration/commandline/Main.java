@@ -1977,8 +1977,8 @@ public class Main {
 
     private void runUpdateCommandStep() throws CommandLineParsingException, CommandExecutionException, IOException {
         CommandScope updateCommand = new CommandScope("update");
-        updateCommand.addArgumentValue(UpdateCommandStep.CONTEXTS_ARG, new Contexts(contexts));
-        updateCommand.addArgumentValue(UpdateCommandStep.LABEL_FILTER_ARG, new LabelExpression(labelFilter));
+        updateCommand.addArgumentValue(UpdateCommandStep.CONTEXTS_ARG, contexts);
+        updateCommand.addArgumentValue(UpdateCommandStep.LABEL_FILTER_ARG, labelFilter);
         updateCommand.addArgumentValue(UpdateCommandStep.CHANGE_EXEC_LISTENER_CLASS_ARG, changeExecListenerClass);
         updateCommand.addArgumentValue(UpdateCommandStep.CHANGE_EXEC_LISTENER_PROPERTIES_FILE_ARG, changeExecListenerPropertiesFile);
         setDatabaseArgumentsToCommand(updateCommand);

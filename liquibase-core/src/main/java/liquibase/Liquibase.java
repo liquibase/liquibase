@@ -238,8 +238,8 @@ public class Liquibase implements AutoCloseable {
             CommandScope updateCommand = new CommandScope("update");
             updateCommand.addArgumentValue(DbUrlConnectionCommandStep.DATABASE_ARG, getDatabase());
             updateCommand.addArgumentValue(UpdateCommandStep.CHANGELOG_FILE_ARG, changeLogFile);
-            updateCommand.addArgumentValue(UpdateCommandStep.CONTEXTS_ARG, contexts);
-            updateCommand.addArgumentValue(UpdateCommandStep.LABEL_FILTER_ARG, labelExpression);
+            updateCommand.addArgumentValue(UpdateCommandStep.CONTEXTS_ARG, contexts != null ? contexts.toString() : null);
+            updateCommand.addArgumentValue(UpdateCommandStep.LABEL_FILTER_ARG, labelExpression != null ? labelExpression.getOriginalString() : null);
             updateCommand.addArgumentValue(UpdateCommandStep.CHANGE_EXEC_LISTENER_ARG, changeExecListener);
             updateCommand.execute();
         });
@@ -395,11 +395,6 @@ public class Liquibase implements AutoCloseable {
 
     protected RollbackVisitor createRollbackVisitor(List<ChangesetsRolledback.ChangeSet> processedChangesets) {
         return new RollbackVisitor(database, changeExecListener, processedChangesets);
-    }
-
-    protected ChangeLogIterator getStandardChangelogIterator(Contexts contexts, LabelExpression labelExpression,
-                                                             DatabaseChangeLog changeLog) throws DatabaseException {
-       return getStandardChangelogIterator(contexts, labelExpression, false, changeLog);
     }
 
     /**
