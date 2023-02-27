@@ -150,6 +150,8 @@ public class UpdateCommandStep extends AbstractCommandStep implements CleanUpCom
             checkLiquibaseTables(database, true, databaseChangeLog, contexts, labelExpression);
             ChangeLogHistoryService changelogService = ChangeLogHistoryServiceFactory.getInstance().getChangeLogService(database);
             changelogService.generateDeploymentId();
+            Scope.getCurrentScope().addMdcValue(MdcKey.DEPLOYMENT_ID, changelogService.getDeploymentId());
+
             databaseChangeLog.validate(database, contexts, labelExpression);
 
             //Set up a "chain" of ChangeExecListeners. Starting with the custom change exec listener

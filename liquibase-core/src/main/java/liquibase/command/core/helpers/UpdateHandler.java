@@ -12,6 +12,7 @@ import liquibase.database.Database;
 import liquibase.exception.DatabaseException;
 import liquibase.exception.LiquibaseException;
 import liquibase.lockservice.LockServiceFactory;
+import liquibase.logging.mdc.MdcKey;
 import liquibase.parser.ChangeLogParser;
 import liquibase.parser.ChangeLogParserFactory;
 import liquibase.parser.core.xml.XMLChangeLogSAXParser;
@@ -64,6 +65,7 @@ public class UpdateHandler {
     public static DatabaseChangeLog getDatabaseChangeLog(String changeLogFile, ChangeLogParameters changeLogParameters, boolean shouldWarnOnMismatchedXsdVersion) throws LiquibaseException {
         ResourceAccessor resourceAccessor = Scope.getCurrentScope().getResourceAccessor();
         if (changeLogFile != null) {
+            Scope.getCurrentScope().addMdcValue(MdcKey.CHANGELOG_FILE, changeLogFile);
             ChangeLogParser parser = ChangeLogParserFactory.getInstance().getParser(changeLogFile, resourceAccessor);
             if (parser instanceof XMLChangeLogSAXParser) {
                 ((XMLChangeLogSAXParser) parser).setShouldWarnOnMismatchedXsdVersion(shouldWarnOnMismatchedXsdVersion);
