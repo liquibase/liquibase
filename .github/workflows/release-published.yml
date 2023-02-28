@@ -253,8 +253,8 @@ jobs:
           arr=(${version//./ })
           xsd_version=${arr[0]}"."${arr[1]}
           patch_version=${arr[2]}
-          echo ::set-env name=XSD_VERSION::${xsd_version}
-          echo ::set-env name=PATCH_VERSION::${patch_version}
+          echo "XSD_VERSION=${xsd_version}" >> $GITHUB_ENV
+          echo "PATCH_VERSION=${patch_version}" >> $GITHUB_ENV
 
       - name: Upload to s3
         # if patch_version is 0, only then upload to s3 as it's a new minor release 
