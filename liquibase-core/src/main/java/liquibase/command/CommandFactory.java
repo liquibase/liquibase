@@ -284,7 +284,7 @@ public class CommandFactory implements SingletonObject {
         if (overrideSteps != null) {
             Optional<CommandStep> overrideStep = overrideSteps.stream().findFirst();
             if (overrideStep.isPresent() && overrideStep.get().getClass() != step.getClass()) {
-                Scope.getCurrentScope().getLog(getClass()).info(String.format("Found %s override for %s! Using %s in pipeline.", overrideStep.getClass().getSimpleName(), step.getClass().getSimpleName(), overrideStep.getClass().getSimpleName()));
+                Scope.getCurrentScope().getLog(getClass()).fine(String.format("Found %s override for %s! Using %s in pipeline.", overrideStep.get().getClass().getSimpleName(), step.getClass().getSimpleName(), overrideStep.get().getClass().getSimpleName()));
                 return overrideStep;
             }
         }

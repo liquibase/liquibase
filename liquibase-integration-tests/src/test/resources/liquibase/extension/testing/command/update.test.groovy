@@ -47,7 +47,8 @@ Optional Args:
         ]
 
         expectedResults = [
-                statusCode: 0
+                statusCode: 0,
+                defaultChangeExecListener: 'not_null'
         ]
 
         expectedDatabaseContent = [
@@ -67,7 +68,8 @@ Optional Args:
         ]
 
         expectedResults = [
-                statusCode: 0
+                statusCode: 0,
+                defaultChangeExecListener: 'not_null'
         ]
 
         expectedUI = [
@@ -98,7 +100,8 @@ Ignored:                      1
         ]
 
         expectedResults = [
-                statusCode: 0
+                statusCode: 0,
+                defaultChangeExecListener: 'not_null'
         ]
 
         expectedUI = [
@@ -294,7 +297,8 @@ Label mismatch:              40
         ]
 
         expectedResults = [
-                statusCode: 0
+                statusCode: 0,
+                defaultChangeExecListener: 'not_null'
         ]
 
         expectedUI = [
@@ -335,7 +339,8 @@ Label mismatch:               1
         ]
 
         expectedResults = [
-                statusCode: 0
+                statusCode: 0,
+                defaultChangeExecListener: 'not_null'
         ]
 
         expectedUI = [
@@ -367,7 +372,8 @@ DBMS mismatch:                1
         ]
 
         expectedResults = [
-                statusCode: 0
+                statusCode: 0,
+                defaultChangeExecListener: 'not_null'
         ]
 
         expectedUI = [
@@ -404,7 +410,8 @@ DBMS mismatch:                1
         ]
 
         expectedResults = [
-                statusCode: 0
+                statusCode: 0,
+                defaultChangeExecListener: 'not_null'
         ]
 
         expectedDatabaseContent = [
@@ -468,7 +475,8 @@ DBMS mismatch:                1
         ]
 
         expectedResults = [
-                statusCode: 0
+                statusCode: 0,
+                defaultChangeExecListener: 'not_null'
         ]
 
         expectedLogs = [
