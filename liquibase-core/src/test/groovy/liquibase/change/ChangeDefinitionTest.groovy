@@ -10,6 +10,11 @@ class ChangeDefinitionTest extends Specification {
 
     Map<String, String> changeDefinitions = new Yaml().load((InputStream) this.class.getClassLoader().getResourceAsStream("liquibase/change/ChangeDefinitionTest.yaml"))
 
+    def setupSpec() {
+        //reset change metadata in case other tests modified it and didn't clean up correctly
+        Scope.currentScope.getSingleton(ChangeFactory).metaDataByClass.clear()
+    }
+
     /**
      * Compare the current change metadata with the golden master stored in source as ChangeDefinitionTest.yaml.
      * Helpful for seeing/catching changes to the Change definitions and ensuring docs match the code
