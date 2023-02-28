@@ -6,7 +6,7 @@ public class MdcKey {
     public static final String CHANGESET_AUTHOR = "changesetAuthor";
     public static final String CHANGESET_FILEPATH = "changesetFilepath";
     public static final String CHANGESET_OUTCOME = "changesetOutcome";
-    public static final String OPERATION_TYPE = "liquibaseOperation";
+    public static final String LIQUIBASE_OPERATION = "liquibaseOperation";
     public static final String LIQUIBASE_TARGET_URL = "liquibaseTargetUrl";
     public static final String LIQUIBASE_REF_URL = "liquibaseRefUrl";
     public static final String CHANGESET_OPERATION_START_TIME = "changesetOperationStart";
@@ -25,7 +25,7 @@ public class MdcKey {
     public static final String COMMAND_LABEL_FILTER = "commandLabelFilter";
     public static final String CHANGESET_CONTEXT = "changesetContext";
     public static final String COMMAND_CONTEXT_FILTER = "commandContextFilter";
-    public static final String DEPLOYMENT_CHANGESET_COUNT = "deploymentOutcomeCount";
+    public static final String DEPLOYMENT_OUTCOME_COUNT = "deploymentOutcomeCount";
     public static final String CHANGELOG_PROPERTIES = "changelogProperties";
     public static final String ROLLBACK_COUNT = "rollbackCount";
     public static final String CHANGESETS_ROLLED_BACK = "changesetsRolledback";
@@ -33,7 +33,6 @@ public class MdcKey {
     public static final String ROLLBACK_ONE_UPDATE_FORCE = "rollbackOneUpdateForce";
     public static final String ROLLBACK_TO_DATE = "rollbackToDate";
     public static final String DATABASE_CHANGELOG_SQL = "databaseChangelogSQL";
-    public static final String DATABASE_CHANGELOG_OUTCOME = "databaseChangelogTableOutcome";
     public static final String LIQUIBASE_PSQL_PATH = "liquibasePsqlPath";
     public static final String LIQUIBASE_PSQL_TIMEOUT = "liquibasePsqlTimeout";
     public static final String LIQUIBASE_PSQL_KEEP_TEMP = "liquibasePsqlKeepTemp";
@@ -42,4 +41,6 @@ public class MdcKey {
     public static final String LIQUIBASE_PSQL_ARGS = "liquibasePsqlArgs";
     public static final String LIQUIBASE_PSQL_LOG_FILE = "liquibasePsqlLogFile";
     public static final String RUN_WITH = "runWith";
+    public static final String DATABASE_CHANGELOG_TABLE_OUTCOME = "databaseChangelogTableOutcome";
+    public static final String ROLLBACK_SQL_FILE = "rollbackSqlFile";
 }

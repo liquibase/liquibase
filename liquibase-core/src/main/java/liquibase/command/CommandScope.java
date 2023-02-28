@@ -190,7 +190,7 @@ public class CommandScope {
         CommandResultsBuilder resultsBuilder = new CommandResultsBuilder(this, outputStream);
         final List<CommandStep> pipeline = commandDefinition.getPipeline();
         validate();
-        Scope.getCurrentScope().addMdcValue(MdcKey.OPERATION_TYPE, StringUtil.join(commandDefinition.getName(), "-"));
+        Scope.getCurrentScope().addMdcValue(MdcKey.LIQUIBASE_OPERATION, StringUtil.join(commandDefinition.getName(), "-"));
         try {
             for (CommandStep command : pipeline) {
                 command.run(resultsBuilder);
