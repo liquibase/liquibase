@@ -77,7 +77,7 @@ jobs:
 
       - name: BigQuery Test Run
         run: mvn -Dit.test=LiquibaseHarnessSuiteIT -DoutputDefaultCatalog=false verify
-        continue-on-error: true
+        continue-on-error: false
 
       - name: Archive Bigquery Database Test Results
         continue-on-error: true
@@ -87,7 +87,7 @@ jobs:
           path: target/surefire-reports
 
       - name: Test Summary
-        continue-on-error: true
+        continue-on-error: false
         uses: test-summary/action@v1
         with:
           paths: "target/surefire-reports/**/TEST-*.xml"
