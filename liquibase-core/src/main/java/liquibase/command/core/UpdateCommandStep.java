@@ -119,11 +119,6 @@ public class UpdateCommandStep extends AbstractCommandStep implements CleanUpCom
     }
 
     @Override
-    public List<Class<?>> providedDependencies() {
-        return Arrays.asList(ChangeExecListener.class, Exception.class);
-    }
-
-    @Override
     public void run(CommandResultsBuilder resultsBuilder) throws Exception {
         CommandScope commandScope = resultsBuilder.getCommandScope();
         String changeLogFile = commandScope.getArgumentValue(CHANGELOG_FILE_ARG);
@@ -171,8 +166,7 @@ public class UpdateCommandStep extends AbstractCommandStep implements CleanUpCom
 
             //Remember we built our hubHandler with our DefaultChangeExecListener so this HubChangeExecListener is delegating to them.
             ChangeExecListener hubChangeExecListener = hubHandler.startHubForUpdate(changeLogParameters, changeLogIterator);
-
-            commandScope.provideDependency(ChangeExecListener.class, defaultChangeExecListener);
+            resultsBuilder.addResult("defaultChangeExecListener", defaultChangeExecListener);
             ChangeLogIterator runChangeLogIterator = getStandardChangelogIterator(database, contexts, labelExpression, databaseChangeLog);
             CompositeLogService compositeLogService = new CompositeLogService(true, bufferLog);
             HashMap<String, Object> scopeValues = new HashMap<>();
@@ -194,7 +188,7 @@ public class UpdateCommandStep extends AbstractCommandStep implements CleanUpCom
             if (hubHandler != null) {
                 hubHandler.postUpdateHubExceptionHandling(bufferLog, e.getMessage());
             }
-            commandScope.provideDependency(Exception.class, e);
+            throw e;
         } finally {
             // TODO: Can I remove this finally block? Breaks {db:h2,command:updateSql} Happy path with output file
             try {

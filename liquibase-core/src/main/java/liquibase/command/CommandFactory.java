@@ -8,6 +8,7 @@ import liquibase.util.StringUtil;
 
 import java.lang.reflect.InvocationTargetException;
 import java.util.*;
+import java.util.stream.Collectors;
 
 /**
  * Manages the command related implementations.
@@ -55,10 +56,12 @@ public class CommandFactory implements SingletonObject {
         );
 
         Collection<CommandStep> allCommandStepInstances = findAllInstances();
+        Map<Class<? extends CommandStep>, List<CommandStep>> overrides = findAllOverrides(allCommandStepInstances);
         for (CommandStep step : allCommandStepInstances) {
             // order > 0 means is means that this CommandStep has been declared as part of this command
             if (step.getOrder(commandDefinition) > 0) {
-                findDependenciesForCommand(pipelineGraph, allCommandStepInstances, step);
+                Optional<CommandStep> overrideStep = getOverride(overrides, step);
+                findDependenciesForCommand(pipelineGraph, allCommandStepInstances, overrideStep.orElse(step));
             }
         }
         pipelineGraph.computeDependencies();
@@ -228,5 +231,63 @@ public class CommandFactory implements SingletonObject {
         }
 
         return this.allInstances;
+    }
+
+    /**
+     * Find all commands that override other commands. Validates that only a single command is overriding another.
+     * @param allCommandSteps all commands found during runtime
+     * @return a map with key of the CommandStep intended to override and value of all present overriding command steps
+     * @throws RuntimeException if more than one command step overrides another command step
+     */
+    private Map<Class<? extends CommandStep>, List<CommandStep>> findAllOverrides(Collection<CommandStep> allCommandSteps) throws RuntimeException {
+        Map<Class<? extends CommandStep>, List<CommandStep>> overrides = new HashMap<>();
+        allCommandSteps.stream()
+                .filter(commandStep -> commandStep.getClass().isAnnotationPresent(CommandOverride.class))
+                .forEach(overrideStep -> {
+                    Class<? extends CommandStep> classToOverride = overrideStep.getClass().getAnnotation(CommandOverride.class).override();
+                    overrides.computeIfAbsent(classToOverride, val -> new ArrayList<>()).add(overrideStep);
+                });
+        validateOverrides(overrides);
+        return overrides;
+    }
+
+    /**
+     * Validates that for all overrides, there is only a single override per command step. Logs all invalid overrides found.
+     * @param overrides the list of overrides
+     * @throws RuntimeException if more than one command step overrides a command step
+     */
+    private void validateOverrides(Map<Class<? extends CommandStep>, List<CommandStep>> overrides) throws RuntimeException {
+        Map<Class<? extends CommandStep>, List<CommandStep>> invalidOverrides = new HashMap<>();
+        overrides.forEach((step, overrideSteps) -> {
+            if (overrideSteps.size() > 1) {
+                invalidOverrides.put(step, overrideSteps);
+            }
+        });
+        invalidOverrides.forEach((step, overrideSteps) -> {
+            Scope.getCurrentScope().getLog(getClass()).severe(String.format("Found multiple command steps overriding %s! A command may have at most one override. Invalid overrides include: %s",
+                    step.getSimpleName(),
+                    overrideSteps.stream().map(ovrr -> ovrr.getClass().getSimpleName()).collect(Collectors.joining(", "))));
+        });
+        if (!invalidOverrides.isEmpty()) {
+            throw new RuntimeException(String.format("Found more than one CommandOverride for CommandStep(s): %s! A command may have at most one override.", invalidOverrides.keySet().stream().map(Class::getSimpleName).collect(Collectors.joining(", "))));
+        }
+    }
+
+    /**
+     * Get the override for a given CommandStep.
+     * @param overrides the list of overrides
+     * @param step the step to check for overrides
+     * @return an optional containing the CommandStep override if present
+     */
+    private Optional<CommandStep> getOverride(Map<Class<? extends CommandStep>, List<CommandStep>> overrides, CommandStep step) {
+        List<CommandStep> overrideSteps = overrides.get(step.getClass());
+        if (overrideSteps != null) {
+            Optional<CommandStep> overrideStep = overrideSteps.stream().findFirst();
+            if (overrideStep.isPresent() && overrideStep.get().getClass() != step.getClass()) {
+                Scope.getCurrentScope().getLog(getClass()).info(String.format("Found %s override for %s! Using %s in pipeline.", overrideStep.getClass().getSimpleName(), step.getClass().getSimpleName(), overrideStep.getClass().getSimpleName()));
+                return overrideStep;
+            }
+        }
+        return Optional.empty();
     }
 }
