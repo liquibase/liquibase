@@ -26,7 +26,7 @@ class XMLChangeLogSAXParserTest extends Specification {
 <databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
                    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
                    xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
-                      http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.6.xsd">
+                      http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-latest.xsd">
 
     <changeSet id="1" author="example">
         <output>&insecure;</output>
@@ -35,7 +35,22 @@ class XMLChangeLogSAXParserTest extends Specification {
 </databaseChangeLog>
 """
 
-    def testIgnoreDuplicateChangeSets() throws ChangeLogParseException, Exception {
+    def INVALID_XML = """
+<!DOCTYPE databaseChangeLog [
+        <!ENTITY insecure SYSTEM "file:///invalid.txt">
+        ]>
+
+<databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+                   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                   xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+                      http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-latest.xsd">
+
+    <iDontKnowWhatImDoing />
+
+</databaseChangeLog>
+"""
+
+    def testAllProvidedChangesetsAreLoaded() throws ChangeLogParseException, Exception {
         when:
         def xmlParser = new XMLChangeLogSAXParser()
         def changeLog = xmlParser.parse("liquibase/parser/core/xml/ignoreDuplicatedChangeLogs/master.changelog.xml",
@@ -57,7 +72,7 @@ class XMLChangeLogSAXParserTest extends Specification {
 
 
         then:
-        changeSets.size() == 8
+        changeSets.size() == 14
         changeSets.get(0).toString() == "liquibase/parser/core/xml/ignoreDuplicatedChangeLogs/included.changelog4.xml::1::testuser"
         changeSets.get(1).toString() == "liquibase/parser/core/xml/ignoreDuplicatedChangeLogs/included.changelog4.xml::1::testuser"
         changeSets.get(1).getContextFilter().getContexts().size() == 1
@@ -68,8 +83,9 @@ class XMLChangeLogSAXParserTest extends Specification {
         changeSets.get(4).toString() == "liquibase/parser/core/xml/ignoreDuplicatedChangeLogs/included.changelog4.xml::1::testuser"
         changeSets.get(4).getDbmsSet().size() == 1
         changeSets.get(5).toString() == "liquibase/parser/core/xml/ignoreDuplicatedChangeLogs/included.changelog1.xml::1::testuser"
-        changeSets.get(6).toString() == "liquibase/parser/core/xml/ignoreDuplicatedChangeLogs/included.changelog3.xml::1::testuser"
-        changeSets.get(7).toString() == "liquibase/parser/core/xml/ignoreDuplicatedChangeLogs/included.changelog2.xml::1::testuser"
+        changeSets.get(6).toString() == "liquibase/parser/core/xml/ignoreDuplicatedChangeLogs/included.changelog4.xml::1::testuser"
+        changeSets.get(7).toString() == "liquibase/parser/core/xml/ignoreDuplicatedChangeLogs/included.changelog4.xml::1::testuser"
+        changeSets.get(13).toString() == "liquibase/parser/core/xml/ignoreDuplicatedChangeLogs/included.changelog3.xml::1::testuser"
     }
 
     def "uses liquibase.secureParsing by default"() {
@@ -95,6 +111,38 @@ class XMLChangeLogSAXParserTest extends Specification {
         then:
         def e = thrown(ChangeLogParseException)
         e.message.contains("Error Reading Changelog File: " + File.separator + "invalid.txt")
+    }
+
+    def "by default validate XML file based on XSD files"() {
+        given:
+        def file = "com/example/invalid.xml"
+
+        when:
+        def resourceAccessor = new MockResourceAccessor(["com/example/invalid.xml": INVALID_XML])
+        new XMLChangeLogSAXParser().parse(file, new ChangeLogParameters(), resourceAccessor)
+
+        then:
+        def e = thrown(ChangeLogParseException)
+        e.message.contains("Error parsing line")
+        e.message.contains("iDontKnowWhatImDoing")
+
+    }
+
+
+    def "setting validation flag to false will cause the XML to not be validated"() {
+        given:
+        def file = "com/example/invalid.xml"
+
+        when:
+        def resourceAccessor = new MockResourceAccessor(["com/example/invalid.xml": INVALID_XML])
+
+        then:
+        Scope.child(GlobalConfiguration.VALIDATE_XML_CHANGELOG_FILES.key, "false", { ->
+            def d = new XMLChangeLogSAXParser().parse(file, new ChangeLogParameters(), resourceAccessor)
+            assert d.physicalFilePath == file
+            assert d.getChangeSets().isEmpty()
+        })
+
     }
 
     def "getSchemaVersion"() {

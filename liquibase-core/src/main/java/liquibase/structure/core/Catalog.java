@@ -4,11 +4,12 @@ import liquibase.structure.AbstractDatabaseObject;
 import liquibase.structure.DatabaseObject;
 
 import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
 
 public class Catalog extends AbstractDatabaseObject {
 
     public Catalog() {
-        setAttribute("objects",  new HashMap<Class<? extends DatabaseObject>, Set<DatabaseObject>>());
+        setAttribute("objects",  new ConcurrentHashMap<Class<? extends DatabaseObject>, Set<DatabaseObject>>());
     }
 
     public Catalog(String name) {

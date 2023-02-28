@@ -51,7 +51,7 @@ public class BufferedLogService extends AbstractLogService {
                         message.getThrowable().printStackTrace(printWriter);
                         printWriter.flush();
 
-                        returnLog.append(stringWriter.toString()).append("\n");
+                        returnLog.append(stringWriter).append("\n");
                     } catch (IOException e) {
                         e.printStackTrace();
                     }

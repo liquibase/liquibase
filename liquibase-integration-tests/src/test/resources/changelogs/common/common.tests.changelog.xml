@@ -481,7 +481,7 @@
             <column name="locked" type="boolean"/>
         </createTable>
     </changeSet>
-    <changeSet id="sampleCSVData" author="nvoxland">
+    <changeSet id="sampleCSVData1" author="nvoxland">
         <loadData tableName="csvdata" file="changelogs/sample.data1.csv"/>
     </changeSet>
     <changeSet id="sampleTSVData" author="nvoxland">
@@ -507,7 +507,7 @@
         </loadData>
     </changeSet>
 
-    <changeSet id="sampleCSVData" author="nvoxland">
+    <changeSet id="sampleCSVData4" author="nvoxland">
         <loadData tableName="csvdata" file="changelogs/sample.data1.csv.gz"/>
     </changeSet>
 

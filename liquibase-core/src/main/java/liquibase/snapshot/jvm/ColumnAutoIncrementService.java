@@ -24,6 +24,7 @@ import java.sql.Statement;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * Service class that centralizes database specific auto increment parameters information.
@@ -47,7 +48,7 @@ public class ColumnAutoIncrementService {
         if (autoIncrementColumns != null) {
             return autoIncrementColumns;
         } else {
-            autoIncrementColumns = new HashMap<>();
+            autoIncrementColumns = new ConcurrentHashMap<>();
             Executor executor = Scope.getCurrentScope().getSingleton(ExecutorService.class).getExecutor("jdbc", database);
             try {
                 String query = this.getQueryForDatabase(database);
