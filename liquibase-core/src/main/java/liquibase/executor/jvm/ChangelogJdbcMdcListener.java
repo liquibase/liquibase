@@ -9,6 +9,7 @@ import liquibase.logging.mdc.MdcKey;
 import liquibase.logging.mdc.MdcValue;
 import liquibase.sqlgenerator.SqlGeneratorFactory;
 import liquibase.statement.SqlStatement;
+import liquibase.statement.core.MarkChangeSetRanStatement;
 import liquibase.util.SqlUtil;
 
 /**
@@ -25,7 +26,9 @@ public class ChangelogJdbcMdcListener {
      * @throws DatabaseException if there was a problem running the sql statement
      */
     public static void execute(SqlStatement statement, Database database, ExecuteJdbc jdbcQuery) throws DatabaseException {
-        addSqlMdc(statement, database);
+        if (!(statement instanceof MarkChangeSetRanStatement)) {
+            addSqlMdc(statement, database);
+        }
         try {
             jdbcQuery.execute(Scope.getCurrentScope().getSingleton(ExecutorService.class).getExecutor("jdbc", database));
             logSuccess();
