@@ -1,0 +1,52 @@
+{
+  "createTable": [
+    {
+      "COMMENTS":"test_comment",
+      "AUTHOR":"as",
+      "DESCRIPTION":"sql",
+      "CONTEXTS":"test_context",
+      "EXECTYPE":"EXECUTED",
+      "LABELS":"test_label",
+      "FILENAME":"liquibase\/harness\/compatibility\/foundational\/changelogs\/createTable.xml",
+      "MD5SUM":"8:4e697074d57029d3e267ce7507da5cf5",
+      "ID":"1",
+      "TAG":""
+    },
+    {
+      "COMMENTS":"test_comment",
+      "AUTHOR":"as",
+      "DESCRIPTION":"createTable tableName=test_table_yaml",
+      "CONTEXTS":"test_context",
+      "EXECTYPE":"EXECUTED",
+      "LABELS":"test_label",
+      "FILENAME":"liquibase\/harness\/compatibility\/foundational\/changelogs\/createTable.yml",
+      "MD5SUM":"8:13bf5dadad410884e263691bc66ee760",
+      "ID":"1",
+      "TAG":""
+    },
+    {
+      "COMMENTS":"test_comment",
+      "AUTHOR":"as",
+      "DESCRIPTION":"createTable tableName=test_table_json",
+      "CONTEXTS":"test_context",
+      "EXECTYPE":"EXECUTED",
+      "LABELS":"test_label",
+      "FILENAME":"liquibase\/harness\/compatibility\/foundational\/changelogs\/createTable.json",
+      "MD5SUM":"8:b9ab89365e024967a1da5704f0441428",
+      "ID":"1",
+      "TAG":""
+    },
+    {
+      "COMMENTS":"test_comment",
+      "AUTHOR":"as",
+      "DESCRIPTION":"sql",
+      "CONTEXTS":"test_context",
+      "EXECTYPE":"EXECUTED",
+      "LABELS":"test_label",
+      "FILENAME":"liquibase\/harness\/compatibility\/foundational\/changelogs\/createTable.sql",
+      "MD5SUM":"8:3e89383340c9b7c69e4902c53534b7ac",
+      "ID":"1",
+      "TAG":"test_tag"
+    }
+  ]
+}

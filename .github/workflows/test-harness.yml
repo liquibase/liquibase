@@ -76,7 +76,7 @@ jobs:
             create_credentials_file: 'true'
 
       - name: BigQuery Test Run
-        run: mvn -Dit.test=LiquibaseHarnessSuiteIT -DoutputDefaultCatalog=false verify
+        run: mvn -Dit.test=LiquibaseFoundationalHarnessSuiteIT -DoutputDefaultCatalog=false verify
         continue-on-error: false
 
       - name: Archive Bigquery Database Test Results
@@ -86,8 +86,26 @@ jobs:
           name: bigquery-test-results
           path: target/surefire-reports
 
-      - name: Test Summary
+      - name: Foundational Test Summary
         continue-on-error: false
+        uses: test-summary/action@v1
+        with:
+          paths: "target/surefire-reports/**/TEST-*.xml"
+        if: always()
+
+      - name: BigQuery Advanced Test Run
+        run: mvn -Dit.test=LiquibaseAdvancedHarnessSuiteIT -DoutputDefaultCatalog=false verify
+        continue-on-error: true
+
+      - name: Archive Bigquery Advanced Database Test Results
+        continue-on-error: true
+        uses: actions/upload-artifact@v3
+        with:
+          name: bigquery-advanced-test-results
+          path: target/surefire-reports
+
+      - name: Advanced Test Summary
+        continue-on-error: true
         uses: test-summary/action@v1
         with:
           paths: "target/surefire-reports/**/TEST-*.xml"
