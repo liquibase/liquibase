@@ -5,20 +5,14 @@ import liquibase.changelog.*;
 import liquibase.changelog.filter.*;
 import liquibase.changelog.visitor.*;
 import liquibase.command.*;
+import liquibase.command.core.helpers.FastCheck;
 import liquibase.command.core.helpers.HubHandler;
+import liquibase.command.core.helpers.UpdateHandler;
 import liquibase.database.Database;
-import liquibase.database.ObjectQuotingStrategy;
 import liquibase.exception.DatabaseException;
 import liquibase.exception.LiquibaseException;
 import liquibase.exception.LockException;
-import liquibase.executor.Executor;
 import liquibase.executor.ExecutorService;
-import liquibase.executor.LoggingExecutor;
-import liquibase.hub.*;
-import liquibase.hub.listener.HubChangeExecListener;
-import liquibase.hub.model.Connection;
-import liquibase.hub.model.HubChangeLog;
-import liquibase.hub.model.Operation;
 import liquibase.integration.commandline.ChangeExecListenerUtils;
 import liquibase.lockservice.LockService;
 import liquibase.lockservice.LockServiceFactory;
@@ -32,13 +26,11 @@ import liquibase.parser.ChangeLogParserFactory;
 import liquibase.parser.core.xml.XMLChangeLogSAXParser;
 import liquibase.resource.ResourceAccessor;
 import liquibase.util.ShowSummaryUtil;
-import liquibase.util.StringUtil;
 
 import java.io.IOException;
 import java.util.*;
 
 import static liquibase.Liquibase.MSG_COULD_NOT_RELEASE_LOCK;
-import static liquibase.command.core.helpers.UpdateHandler.*;
 
 public class UpdateCommandStep extends AbstractCommandStep implements CleanUpCommandStep {
 
@@ -138,11 +130,12 @@ public class UpdateCommandStep extends AbstractCommandStep implements CleanUpCom
         HubHandler hubHandler = null;
         DefaultChangeExecListener defaultChangeExecListener = new DefaultChangeExecListener();
         try {
-            DatabaseChangeLog databaseChangeLog = getDatabaseChangeLog(changeLogFile, changeLogParameters, true);
-            if (isUpToDate(database, databaseChangeLog, contexts, labelExpression)) {
+            DatabaseChangeLog databaseChangeLog = UpdateHandler.getDatabaseChangeLog(changeLogFile, changeLogParameters, true);
+            FastCheck fastCheck = new FastCheck();
+            if (fastCheck.isUpToDate(database, databaseChangeLog, contexts, labelExpression)) {
                 return;
             }
-            checkLiquibaseTables(database, true, databaseChangeLog, contexts, labelExpression);
+            UpdateHandler.checkLiquibaseTables(database, true, databaseChangeLog, contexts, labelExpression);
             ChangeLogHistoryService changelogService = ChangeLogHistoryServiceFactory.getInstance().getChangeLogService(database);
             changelogService.generateDeploymentId();
             Scope.getCurrentScope().addMdcValue(MdcKey.DEPLOYMENT_ID, changelogService.getDeploymentId());
@@ -159,15 +152,15 @@ public class UpdateCommandStep extends AbstractCommandStep implements CleanUpCom
             defaultChangeExecListener.addListener(listener);
             hubHandler = new HubHandler(database, databaseChangeLog, changeLogFile, defaultChangeExecListener);
 
-            ChangeLogIterator changeLogIterator = getStandardChangelogIterator(database, contexts, labelExpression, databaseChangeLog);
+            ChangeLogIterator changeLogIterator = UpdateHandler.getStandardChangelogIterator(database, contexts, labelExpression, databaseChangeLog);
             StatusVisitor statusVisitor = new StatusVisitor(database);
-            ChangeLogIterator shouldRunIterator = getStatusChangelogIterator(database, contexts, labelExpression, databaseChangeLog);
+            ChangeLogIterator shouldRunIterator = UpdateHandler.getStatusChangelogIterator(database, contexts, labelExpression, databaseChangeLog);
             shouldRunIterator.run(statusVisitor, new RuntimeEnvironment(database, contexts, labelExpression));
 
             //Remember we built our hubHandler with our DefaultChangeExecListener so this HubChangeExecListener is delegating to them.
             ChangeExecListener hubChangeExecListener = hubHandler.startHubForUpdate(changeLogParameters, changeLogIterator);
             resultsBuilder.addResult("defaultChangeExecListener", defaultChangeExecListener);
-            ChangeLogIterator runChangeLogIterator = getStandardChangelogIterator(database, contexts, labelExpression, databaseChangeLog);
+            ChangeLogIterator runChangeLogIterator = UpdateHandler.getStandardChangelogIterator(database, contexts, labelExpression, databaseChangeLog);
             CompositeLogService compositeLogService = new CompositeLogService(true, bufferLog);
             HashMap<String, Object> scopeValues = new HashMap<>();
             scopeValues.put(Scope.Attr.logService.name(), compositeLogService);

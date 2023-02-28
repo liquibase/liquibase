@@ -1,0 +1,94 @@
+package liquibase.command.core.helpers;
+
+import liquibase.*;
+import liquibase.changelog.*;
+import liquibase.changelog.visitor.ListVisitor;
+import liquibase.changelog.visitor.StatusVisitor;
+import liquibase.database.Database;
+import liquibase.exception.DatabaseException;
+import liquibase.exception.LiquibaseException;
+import liquibase.util.ShowSummaryUtil;
+
+import java.io.IOException;
+import java.util.List;
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
+
+@Beta
+public class FastCheck {
+    private static final Map<String, Boolean> upToDateFastCheck = new ConcurrentHashMap<>();
+
+    public FastCheck() {
+
+    }
+
+    /**
+     * Performs check of the historyService to determine if there is no unrun changesets without obtaining an exclusive write lock.
+     * This allows multiple peer services to boot in parallel in the common case where there are no changelogs to run.
+     * <p>
+     * If we see that there is nothing in the changelog to run and this returns <b>true</b>, then regardless of the lock status we already know we are "done" and can finish up without waiting for the lock.
+     * <p>
+     * But, if there are changelogs that might have to be ran and this returns <b>false</b>, you MUST get a lock and do a real check to know what changesets actually need to run.
+     * <p>
+     * NOTE: to reduce the number of queries to the databasehistory table, this method will cache the "fast check" results within this instance under the assumption that the total changesets will not change within this instance.
+     */
+    private boolean isUpToDateFastCheck(Database database, DatabaseChangeLog databaseChangeLog, Contexts contexts, LabelExpression labelExpression) throws LiquibaseException {
+        String cacheKey = contexts + "/" + labelExpression;
+        if (!upToDateFastCheck.containsKey(cacheKey)) {
+            try {
+                if (listUnrunChangeSets(database, databaseChangeLog, contexts, labelExpression, false).isEmpty()) {
+                    Scope.getCurrentScope().getLog(UpdateHandler.class).fine("Fast check found no un-run changesets");
+                    upToDateFastCheck.put(cacheKey, true);
+                } else {
+                    upToDateFastCheck.put(cacheKey, false);
+                }
+            } catch (DatabaseException e) {
+                Scope.getCurrentScope().getLog(UpdateHandler.class).info("Error querying Liquibase tables, disabling fast check for this execution. Reason: " + e.getMessage());
+                upToDateFastCheck.put(cacheKey, false);
+            } finally {
+                // Discard the cached fetched un-run changeset list, as if
+                // another peer is running the changesets in parallel, we may
+                // get a different answer after taking out the write lock
+                ChangeLogHistoryService changeLogService = ChangeLogHistoryServiceFactory.getInstance().getChangeLogService(database);
+                changeLogService.reset();
+            }
+        }
+        return upToDateFastCheck.get(cacheKey);
+    }
+
+    private static List<ChangeSet> listUnrunChangeSets(Database database, DatabaseChangeLog databaseChangeLog, Contexts contexts, LabelExpression labels, boolean checkLiquibaseTables) throws LiquibaseException {
+        ListVisitor visitor = new ListVisitor();
+        if (checkLiquibaseTables) {
+            UpdateHandler.checkLiquibaseTables(database, true, databaseChangeLog, contexts, labels);
+        }
+        databaseChangeLog.validate(database, contexts, labels);
+        ChangeLogIterator logIterator = UpdateHandler.getStandardChangelogIterator(database, contexts, labels, databaseChangeLog);
+        logIterator.run(visitor, new RuntimeEnvironment(database, contexts, labels));
+        return visitor.getSeenChangeSets();
+    }
+
+
+    /**
+     * Checks if the database is up-to-date.
+     * @param database the database to check
+     * @param databaseChangeLog the databaseChangeLog of the database
+     * @param contexts the command contexts
+     * @param labelExpression the command label expressions
+     * @return true if there are no additional changes to execute, otherwise false
+     * @throws LiquibaseException if there was a problem running any queries
+     * @throws IOException if there was a problem handling the update summary
+     */
+    @Beta
+    public boolean isUpToDate(Database database, DatabaseChangeLog databaseChangeLog, Contexts contexts, LabelExpression labelExpression) throws LiquibaseException, IOException {
+        if (isUpToDateFastCheck(database, databaseChangeLog, contexts, labelExpression)) {
+            Scope.getCurrentScope().getUI().sendMessage("Database is up to date, no changesets to execute");
+            StatusVisitor statusVisitor = new StatusVisitor(database);
+            ChangeLogIterator shouldRunIterator = UpdateHandler.getStatusChangelogIterator(database, contexts, labelExpression, databaseChangeLog);
+            shouldRunIterator.run(statusVisitor, new RuntimeEnvironment(database, contexts, labelExpression));
+            ShowSummaryUtil.showUpdateSummary(databaseChangeLog, statusVisitor);
+            return true;
+        }
+        return false;
+    }
+
+}
