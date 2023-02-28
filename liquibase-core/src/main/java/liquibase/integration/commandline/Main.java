@@ -1837,7 +1837,7 @@ public class Main {
 
             try {
                 if (COMMANDS.UPDATE.equalsIgnoreCase(command)) {
-                    Scope.getCurrentScope().addMdcValue(MdcKey.OPERATION_TYPE, COMMANDS.UPDATE);
+                    Scope.getCurrentScope().addMdcValue(MdcKey.LIQUIBASE_OPERATION, COMMANDS.UPDATE);
                     try {
                         Map<String, Object> updateScopedObjects = new HashMap<>();
                         updateScopedObjects.put("showSummary", showSummary);
@@ -1914,7 +1914,7 @@ public class Main {
                 } else if (COMMANDS.UPDATE_SQL.equalsIgnoreCase(command)) {
                     liquibase.update(new Contexts(contexts), new LabelExpression(getLabelFilter()), getOutputWriter());
                 } else if (COMMANDS.ROLLBACK.equalsIgnoreCase(command)) {
-                    Scope.getCurrentScope().addMdcValue(MdcKey.OPERATION_TYPE, COMMANDS.ROLLBACK);
+                    Scope.getCurrentScope().addMdcValue(MdcKey.LIQUIBASE_OPERATION, COMMANDS.ROLLBACK);
                     if (getCommandArgument() == null) {
                         throw new CommandLineParsingException(
                                 String.format(coreBundle.getString("command.requires.tag"), COMMANDS.ROLLBACK));
@@ -1930,7 +1930,7 @@ public class Main {
                     liquibase.rollback(new ISODateFormat().parse(getCommandArgument()), getCommandParam
                             (COMMANDS.ROLLBACK_SCRIPT, null), new Contexts(contexts), new LabelExpression(getLabelFilter()));
                 } else if (COMMANDS.ROLLBACK_COUNT.equalsIgnoreCase(command)) {
-                    Scope.getCurrentScope().addMdcValue(MdcKey.OPERATION_TYPE, COMMANDS.ROLLBACK_COUNT);
+                    Scope.getCurrentScope().addMdcValue(MdcKey.LIQUIBASE_OPERATION, COMMANDS.ROLLBACK_COUNT);
                     liquibase.rollback(Integer.parseInt(getCommandArgument()), getCommandParam
                             (COMMANDS.ROLLBACK_SCRIPT, null), new Contexts(contexts), new LabelExpression(getLabelFilter()));
 
