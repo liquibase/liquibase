@@ -259,7 +259,6 @@ public class Liquibase implements AutoCloseable {
                 if (checkLiquibaseTables) {
                     checkLiquibaseTables(true, changeLog, contexts, labelExpression);
                 }
-                generateDeploymentId();
 
                 changeLog.validate(database, contexts, labelExpression);
 
@@ -268,6 +267,8 @@ public class Liquibase implements AutoCloseable {
                 //
                 hubUpdater = new HubUpdater(new Date(), changeLog, database);
                 hubUpdater.register(changeLogFile);
+
+                generateDeploymentId();
 
                 //
                 // Create or retrieve the Connection if this is not SQL generation
@@ -639,6 +640,10 @@ public class Liquibase implements AutoCloseable {
         return new RollbackVisitor(database, changeExecListener);
     }
 
+    protected RollbackVisitor createRollbackVisitor(List<ChangesetsRolledback.ChangeSet> processedChangesets) {
+        return new RollbackVisitor(database, changeExecListener, processedChangesets);
+    }
+
     protected ChangeLogIterator getStandardChangelogIterator(Contexts contexts, LabelExpression labelExpression,
                                                              DatabaseChangeLog changeLog) throws DatabaseException {
        return getStandardChangelogIterator(contexts, labelExpression, false, changeLog);
@@ -771,8 +776,6 @@ public class Liquibase implements AutoCloseable {
                     changeLog = getDatabaseChangeLog();
 
                     checkLiquibaseTables(true, changeLog, contexts, labelExpression);
-                    generateDeploymentId();
-
 
                     changeLog.validate(database, contexts, labelExpression);
 
@@ -781,6 +784,8 @@ public class Liquibase implements AutoCloseable {
                     //
                     hubUpdater = new HubUpdater(new Date(), changeLog, database);
                     hubUpdater.register(changeLogFile);
+
+                    generateDeploymentId();
 
                     //
                     // Create an iterator which will be used with a ListVisitor
@@ -907,8 +912,6 @@ public class Liquibase implements AutoCloseable {
 
                     checkLiquibaseTables(true, changeLog, contexts, labelExpression);
 
-                    generateDeploymentId();
-
                     changeLog.validate(database, contexts, labelExpression);
 
                     //
@@ -916,6 +919,8 @@ public class Liquibase implements AutoCloseable {
                     //
                     hubUpdater = new HubUpdater(new Date(), changeLog, database);
                     hubUpdater.register(changeLogFile);
+
+                    generateDeploymentId();
 
                     //
                     // Create an iterator which will be used with a ListVisitor
@@ -1255,6 +1260,7 @@ public class Liquibase implements AutoCloseable {
                             new DbmsChangeSetFilter(database),
                             new IgnoreChangeSetFilter(),
                             new CountChangeSetFilter(changesToRollback));
+
                     doRollback(bufferLog, rollbackScript, logIterator, contexts, labelExpression, hubUpdater, rollbackOperation);
                 }
                 catch (Throwable t) {
@@ -1274,9 +1280,11 @@ public class Liquibase implements AutoCloseable {
     private void doRollback(BufferedLogService bufferLog, String rollbackScript, ChangeLogIterator logIterator, Contexts contexts, LabelExpression labelExpression, HubUpdater hubUpdater, Operation rollbackOperation) throws Exception {
         CompositeLogService compositeLogService = new CompositeLogService(true, bufferLog);
         if (rollbackScript == null) {
+            List<ChangesetsRolledback.ChangeSet> processedChangesets = new ArrayList<>();
             Scope.child(Scope.Attr.logService.name(), compositeLogService, () -> {
-                logIterator.run(createRollbackVisitor(), new RuntimeEnvironment(database, contexts, labelExpression));
+                logIterator.run(createRollbackVisitor(processedChangesets), new RuntimeEnvironment(database, contexts, labelExpression));
             });
+            Scope.getCurrentScope().addMdcValue(MdcKey.CHANGESETS_ROLLED_BACK, new ChangesetsRolledback(processedChangesets), false);
         } else {
             List<ChangeSet> changeSets = determineRollbacks(logIterator, contexts, labelExpression);
             Map<String, Object> values = new HashMap<>();
@@ -1539,6 +1547,7 @@ public class Liquibase implements AutoCloseable {
                             new LabelChangeSetFilter(labelExpression),
                             new IgnoreChangeSetFilter(),
                             new DbmsChangeSetFilter(database));
+
                     doRollback(bufferLog, rollbackScript, logIterator, contexts, labelExpression, hubUpdater, rollbackOperation);
                 }
                 catch (Throwable t) {
@@ -1688,6 +1697,7 @@ public class Liquibase implements AutoCloseable {
                             new LabelChangeSetFilter(labelExpression),
                             new IgnoreChangeSetFilter(),
                             new DbmsChangeSetFilter(database));
+
                     doRollback(bufferLog, rollbackScript, logIterator, contexts, labelExpression, hubUpdater, rollbackOperation);
                 }
                 catch (Throwable t) {
@@ -1799,7 +1809,6 @@ public class Liquibase implements AutoCloseable {
                 try {
                     changeLog = getDatabaseChangeLog();
                     checkLiquibaseTables(true, changeLog, contexts, labelExpression);
-                    ChangeLogHistoryServiceFactory.getInstance().getChangeLogService(database).generateDeploymentId();
 
                     changeLog.validate(database, contexts, labelExpression);
 
@@ -1808,6 +1817,8 @@ public class Liquibase implements AutoCloseable {
                     //
                     hubUpdater = new HubUpdater(new Date(), changeLog, database);
                     hubUpdater.register(changeLogFile);
+
+                    ChangeLogHistoryServiceFactory.getInstance().getChangeLogService(database).generateDeploymentId();
 
                     //
                     // Create an iterator which will be used with a ListVisitor
