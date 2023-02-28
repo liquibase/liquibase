@@ -83,7 +83,7 @@ jobs:
         continue-on-error: true
         uses: actions/upload-artifact@v3
         with:
-          name: bigquery-test-results
+          name: bigquery-foundational-test-results
           path: target/surefire-reports
 
       - name: Foundational Test Summary
