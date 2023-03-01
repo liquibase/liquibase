@@ -8,6 +8,8 @@ import liquibase.changelog.visitor.*;
 import liquibase.command.CommandResults;
 import liquibase.command.CommandScope;
 import liquibase.command.core.*;
+import liquibase.command.core.helpers.DbUrlConnectionCommandStep;
+import liquibase.command.core.helpers.PreCompareCommandStep;
 import liquibase.database.Database;
 import liquibase.database.DatabaseConnection;
 import liquibase.database.DatabaseFactory;
@@ -43,10 +45,6 @@ import liquibase.resource.PathHandlerFactory;
 import liquibase.resource.Resource;
 import liquibase.resource.ResourceAccessor;
 import liquibase.serializer.ChangeLogSerializer;
-import liquibase.snapshot.DatabaseSnapshot;
-import liquibase.snapshot.InvalidExampleException;
-import liquibase.snapshot.SnapshotControl;
-import liquibase.snapshot.SnapshotGeneratorFactory;
 import liquibase.statement.core.RawSqlStatement;
 import liquibase.structure.DatabaseObject;
 import liquibase.structure.core.Catalog;
@@ -2191,6 +2189,7 @@ public class Liquibase implements AutoCloseable {
      *
      * @deprecated Use {link {@link CommandScope(String)} to tag instead of this method.
      */
+    @Deprecated
     public void tag(String tagString) throws LiquibaseException {
         new CommandScope("tag")
                 .addArgumentValue(DbUrlConnectionCommandStep.DATABASE_ARG, database)
@@ -2198,6 +2197,12 @@ public class Liquibase implements AutoCloseable {
                 .execute();
     }
 
+    /**
+     *  Verifies if a given tag exist in the database
+     *
+     * @deprecated Use {link {@link CommandScope(String)} to verify tag exist instead of this method.
+     */
+    @Deprecated
     public boolean tagExists(String tagString) throws LiquibaseException {
         CommandResults commandResults = new CommandScope("tagExists")
                 .addArgumentValue(DbUrlConnectionCommandStep.DATABASE_ARG, database)
@@ -2498,6 +2503,7 @@ public class Liquibase implements AutoCloseable {
      *
      * @deprecated Use {link {@link CommandScope(String)}.
      */
+    @Deprecated
     public final CheckSum calculateCheckSum(final String changeSetIdentifier) throws LiquibaseException {
         CommandResults commandResults = new CommandScope("calculateChecksum")
                 .addArgumentValue(DbUrlConnectionCommandStep.DATABASE_ARG, database)
@@ -2512,6 +2518,7 @@ public class Liquibase implements AutoCloseable {
      *
      * @deprecated Use {link {@link CommandScope(String)}.
      */
+    @Deprecated
     public CheckSum calculateCheckSum(final String filename, final String id, final String author)
             throws LiquibaseException {
         return this.calculateCheckSum(String.format("%s::%s::%s", filename, id, author));
@@ -2570,6 +2577,10 @@ public class Liquibase implements AutoCloseable {
         });
     }
 
+    /**
+     * @deprecated Use {link {@link CommandScope(String)} to generate diff instead of this method.
+     */
+    @Deprecated
     public DiffResult diff(Database referenceDatabase, Database targetDatabase, CompareControl compareControl)
             throws LiquibaseException {
         return DiffGeneratorFactory.getInstance().compare(referenceDatabase, targetDatabase, compareControl);
@@ -2601,68 +2612,41 @@ public class Liquibase implements AutoCloseable {
         return defaultChangeExecListener;
     }
 
+    /**
+     * @deprecated Use {link {@link CommandScope(String)} to generateChangelog instead of this method.
+     */
+    @Deprecated
     @SafeVarargs
     public final void generateChangeLog(CatalogAndSchema catalogAndSchema, DiffToChangeLog changeLogWriter,
                                         PrintStream outputStream, Class<? extends DatabaseObject>... snapshotTypes)
-            throws DatabaseException {
+            throws DatabaseException, CommandExecutionException {
         generateChangeLog(catalogAndSchema, changeLogWriter, outputStream, null, snapshotTypes);
     }
 
+    /**
+     * @deprecated Use {link {@link CommandScope(String)} to generateChangelog instead of this method.
+     */
+    @Deprecated
     @SafeVarargs
     public final void generateChangeLog(CatalogAndSchema catalogAndSchema, DiffToChangeLog changeLogWriter,
                                         PrintStream outputStream, ChangeLogSerializer changeLogSerializer,
                                         Class<? extends DatabaseObject>... snapshotTypes)
-            throws DatabaseException {
-
-        try {
-            runInScope(new Scope.ScopedRunner() {
-                @Override
-                public void run() throws Exception {
-
-                    Set<Class<? extends DatabaseObject>> finalCompareTypes = null;
-                    if ((snapshotTypes != null) && (snapshotTypes.length > 0)) {
-                        finalCompareTypes = new HashSet<>(Arrays.asList(snapshotTypes));
-                    }
-
-                    SnapshotControl snapshotControl = new SnapshotControl(Liquibase.this.getDatabase(), snapshotTypes);
-                    CompareControl compareControl = new CompareControl(new CompareControl.SchemaComparison[]{
-                            new CompareControl.SchemaComparison(catalogAndSchema, catalogAndSchema)
-                    }, finalCompareTypes);
-
-                    DatabaseSnapshot originalDatabaseSnapshot = null;
-                    try {
-                        originalDatabaseSnapshot = SnapshotGeneratorFactory.getInstance().createSnapshot(
-                                compareControl.getSchemas(CompareControl.DatabaseRole.REFERENCE),
-                                getDatabase(),
-                                snapshotControl
-                        );
-
-                        DiffResult diffResult = DiffGeneratorFactory.getInstance().compare(
-                                originalDatabaseSnapshot,
-                                SnapshotGeneratorFactory.getInstance().createSnapshot(
-                                        compareControl.getSchemas(CompareControl.DatabaseRole.REFERENCE),
-                                        null,
-                                        snapshotControl
-                                ),
-                                compareControl
-                        );
-
-                        changeLogWriter.setDiffResult(diffResult);
-
-                        if (changeLogSerializer != null) {
-                            changeLogWriter.print(outputStream, changeLogSerializer);
-                        } else {
-                            changeLogWriter.print(outputStream);
-                        }
-                    } catch (InvalidExampleException e) {
-                        throw new UnexpectedLiquibaseException(e);
-                    }
-                }
-            });
-        } catch (LiquibaseException e) {
-            throw new DatabaseException(e);
+            throws DatabaseException, CommandExecutionException {
+        Set<Class<? extends DatabaseObject>> finalCompareTypes = null;
+        if ((snapshotTypes != null) && (snapshotTypes.length > 0)) {
+            finalCompareTypes = new HashSet<>(Arrays.asList(snapshotTypes));
         }
+        CompareControl compareControl = new CompareControl(new CompareControl.SchemaComparison[]{
+                new CompareControl.SchemaComparison(catalogAndSchema, catalogAndSchema)
+        }, finalCompareTypes);
 
+        new CommandScope(GenerateChangelogCommandStep.COMMAND_NAME[0])
+                .addArgumentValue(GenerateChangelogCommandStep.CHANGELOG_FILE_ARG, changeLogFile)
+                .addArgumentValue(PreCompareCommandStep.COMPARE_CONTROL_ARG, compareControl)
+                .addArgumentValue(DbUrlConnectionCommandStep.DATABASE_ARG, getDatabase())
+                .addArgumentValue(PreCompareCommandStep.SNAPSHOT_TYPES_ARG, snapshotTypes)
+                .setOutput(outputStream)
+                .execute();
     }
 
     private void runInScope(Scope.ScopedRunner scopedRunner) throws LiquibaseException {

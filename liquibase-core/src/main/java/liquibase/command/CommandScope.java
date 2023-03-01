@@ -131,7 +131,7 @@ public class CommandScope {
      *
      * Means that this class will LockService.class using object lock
      */
-    public  <T> CommandScope provideDependency(Class<T> clazz, T value) {
+    public  CommandScope provideDependency(Class<?> clazz, Object value) {
         this.dependencies.put(clazz, value);
 
         return this;
