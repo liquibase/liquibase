@@ -130,7 +130,7 @@ public class UpdateCommandStep extends AbstractCommandStep implements CleanUpCom
         HubHandler hubHandler = null;
         DefaultChangeExecListener defaultChangeExecListener = new DefaultChangeExecListener();
         try {
-            DatabaseChangeLog databaseChangeLog = UpdateHandler.getDatabaseChangeLog(changeLogFile, changeLogParameters, true);
+            DatabaseChangeLog databaseChangeLog = UpdateHandler.getDatabaseChangeLog(changeLogFile, changeLogParameters, false);
             FastCheck fastCheck = new FastCheck();
             if (fastCheck.isUpToDate(database, databaseChangeLog, contexts, labelExpression)) {
                 return;
