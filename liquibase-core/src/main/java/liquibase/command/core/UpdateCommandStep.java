@@ -29,6 +29,7 @@ public class UpdateCommandStep extends AbstractCommandStep implements CleanUpCom
 
     public static final String[] LEGACY_COMMAND_NAME = {"migrate"};
     public static String[] COMMAND_NAME = {"update"};
+    public static final String DEFAULT_CHANGE_EXEC_LISTENER_RESULT_KEY = "defaultChangeExecListener";
 
     public static final CommandArgumentDefinition<String> CHANGELOG_FILE_ARG;
     public static final CommandArgumentDefinition<String> LABEL_FILTER_ARG;
@@ -153,7 +154,7 @@ public class UpdateCommandStep extends AbstractCommandStep implements CleanUpCom
 
             //Remember we built our hubHandler with our DefaultChangeExecListener so this HubChangeExecListener is delegating to them.
             ChangeExecListener hubChangeExecListener = hubHandler.startHubForUpdate(changeLogParameters, changeLogIterator);
-            resultsBuilder.addResult("defaultChangeExecListener", defaultChangeExecListener);
+            resultsBuilder.addResult(DEFAULT_CHANGE_EXEC_LISTENER_RESULT_KEY, defaultChangeExecListener);
             ChangeLogIterator runChangeLogIterator = UpdateHandler.getStandardChangelogIterator(database, contexts, labelExpression, databaseChangeLog);
             CompositeLogService compositeLogService = new CompositeLogService(true, bufferLog);
             HashMap<String, Object> scopeValues = new HashMap<>();
