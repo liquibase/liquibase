@@ -94,9 +94,15 @@ public class StatusChangeLogIterator extends ChangeLogIterator {
                 if (acceptsResult.isAccepted()) {
                     reasonsAccepted.add(acceptsResult);
                 } else {
+                    //
+                    // If the change set has already run, then there is no reason
+                    // to iterate the other filters
+                    //
                     shouldVisit = false;
                     reasonsDenied.add(acceptsResult);
-
+                    if (acceptsResult.getMessage().toLowerCase().contains("changeset already ran")) {
+                        break;
+                    }
                     //
                     // We are collecting all reasons for skipping
                     // We are skipping this change set, so check to see
