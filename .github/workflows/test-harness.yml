@@ -93,9 +93,47 @@ jobs:
           paths: "target/surefire-reports/**/TEST-*.xml"
         if: always()
 
-  destroy:
+  test-advanced:
     runs-on: ubuntu-latest
     needs: [setup,test-foundations]
+
+    permissions:
+      contents: 'read'
+      id-token: 'write'
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+
+      - name: configure auth
+        id: auth
+        uses: 'google-github-actions/auth@v0'
+        with:
+          workload_identity_provider: 'projects/263903559714/locations/global/workloadIdentityPools/github-identity-pool/providers/github-identity-provider'
+          service_account: 'gh-bq-deployer@gh-integration-tests.iam.gserviceaccount.com'
+          create_credentials_file: 'true'
+
+      - name: BigQuery Advanced Test Run
+        run: mvn -Dtest=liquibase.ext.bigquery.LiquibaseAdvancedHarnessSuiteIT -DoutputDefaultCatalog=false verify
+        continue-on-error: true
+
+      - name: Archive Bigquery Database Advanced Test Results
+        continue-on-error: true
+        uses: actions/upload-artifact@v3
+        with:
+          name: bigquery-advanced-test-results
+          path: target/surefire-reports
+
+      - name: Advanced Test Summary
+        continue-on-error: true
+        uses: test-summary/action@v1
+        with:
+          paths: "target/surefire-reports/**/TEST-*.xml"
+        if: always()
+
+  destroy:
+    runs-on: ubuntu-latest
+    needs: [setup,test-foundations,test-advanced]
     defaults:
       run:
         working-directory: src/test/resources/terraform
