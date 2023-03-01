@@ -48,8 +48,11 @@ import liquibase.resource.Resource;
 import liquibase.resource.ResourceAccessor;
 import liquibase.serializer.ChangeLogSerializer;
 import liquibase.structure.DatabaseObject;
-import liquibase.util.*;
-import org.apache.commons.io.output.WriterOutputStream;
+import liquibase.util.LoggingExecutorTextUtil;
+import liquibase.util.StreamUtil;
+import liquibase.util.StringUtil;
+import liquibase.util.TableOutput;
+import net.snowflake.client.jdbc.internal.apache.commons.io.output.WriterOutputStream;
 
 import javax.xml.parsers.ParserConfigurationException;
 import java.io.*;
