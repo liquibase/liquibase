@@ -95,7 +95,7 @@ jobs:
 
   destroy:
     runs-on: ubuntu-latest
-    needs: [setup,test]
+    needs: [setup,test-foundations]
     defaults:
       run:
         working-directory: src/test/resources/terraform
