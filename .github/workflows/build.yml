@@ -223,7 +223,10 @@ jobs:
           java-version: 11
           distribution: 'adopt'
           cache: 'maven'
-
+      - name: Set up Maven
+        uses: stCarolas/setup-maven@v4.5
+        with:
+          maven-version: '3.8.7'
       - name: Cache SonarCloud packages
         uses: actions/cache@v3.2.5
         with:
