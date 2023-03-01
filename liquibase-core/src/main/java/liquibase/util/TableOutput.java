@@ -242,7 +242,7 @@ public class TableOutput {
             }
             for (int i = 0; i < row.length; i++) {
                 String column = row[i];
-                if (column.length() > widths.get(i)) {
+                if (column != null && column.length() > widths.get(i)) {
                     widths.set(i, column.length());
                 }
             }
@@ -263,7 +263,7 @@ public class TableOutput {
         // If the column is null or shorter than the maxWidth AND the column does not contain a line separator,
         // return it unmodified. If it contains a line separator, then it does not matter if it is shorter than the max
         // width, because it must be split on the line separator to flow into multiple lines.
-        if ((col == null || col.length() <= maxWidth) && (col != null && !col.contains(System.lineSeparator()))) {
+        if (col == null || (col.length() <= maxWidth && !col.contains(System.lineSeparator()))) {
             return col;
         }
         String[] parts = col.split(" ");
