@@ -108,7 +108,6 @@ public class CommandScope {
             ConfigurationDefinition<T> noCommandConfigDef = createConfigurationDefinition(argument, false);
             ConfiguredValue<T> noCommandNameProvidedValue = noCommandConfigDef.getCurrentConfiguredValue();
             if (noCommandNameProvidedValue.found() && !noCommandNameProvidedValue.wasDefaultValueUsed()) {
-                configDef = noCommandConfigDef;
                 providedValue = noCommandNameProvidedValue;
             }
         }
@@ -281,11 +280,6 @@ public class CommandScope {
         @Override
         protected String getSourceDescription() {
             return "Command argument";
-        }
-
-        @Override
-        public ProvidedValue getProvidedValue(String... keyAndAliases) {
-            return super.getProvidedValue(keyAndAliases);
         }
 
         @Override

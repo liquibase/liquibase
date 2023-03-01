@@ -48,7 +48,6 @@ import liquibase.snapshot.InvalidExampleException;
 import liquibase.snapshot.SnapshotControl;
 import liquibase.snapshot.SnapshotGeneratorFactory;
 import liquibase.statement.core.RawSqlStatement;
-import liquibase.statement.core.UpdateStatement;
 import liquibase.structure.DatabaseObject;
 import liquibase.structure.core.Catalog;
 import liquibase.util.LiquibaseUtil;
@@ -1375,7 +1374,7 @@ public class Liquibase implements AutoCloseable {
                                       RollbackMessageType messageType,
                                       Contexts contexts,
                                       LabelExpression labelExpression,
-                                      Exception exception) throws LiquibaseException {
+                                      Exception exception) {
         for (ChangeSet changeSet : changeSets) {
             if (messageType == RollbackMessageType.WILL_ROLLBACK) {
                 changeExecListener.willRollback(changeSet, databaseChangeLog, database);
@@ -1889,15 +1888,11 @@ public class Liquibase implements AutoCloseable {
 
         runInScope(() -> {
 
-            LoggingExecutor outputTemplate = new LoggingExecutor(
-                    Scope.getCurrentScope().getSingleton(ExecutorService.class).getExecutor(database), output, database
-            );
+            /* We have no other choice than to save the current Executer here. */
+            @SuppressWarnings("squid:S1941")
+            Executor oldTemplate = getAndReplaceJdbcExecutor(output);
 
-                /* We have no other choice than to save the current Executer here. */
-                @SuppressWarnings("squid:S1941")
-                Executor oldTemplate = getAndReplaceJdbcExecutor(output);
-
-                outputHeader("SQL to add all changesets to database history table");
+            outputHeader("SQL to add all changesets to database history table");
 
             changeLogSync(tag, contexts, labelExpression);
 
@@ -2585,49 +2580,13 @@ public class Liquibase implements AutoCloseable {
      */
     public void validate() throws LiquibaseException {
         DatabaseChangeLog changeLog = getDatabaseChangeLog(true);
-        changeLog.validate(database);
+        if (changeLog != null) {
+            changeLog.validate(database);
+        }
     }
 
     public void setChangeLogParameter(String key, Object value) {
         this.changeLogParameters.set(key, value);
-    }
-
-    /**
-     * Add safe database properties as changelog parameters.<br/>
-     * Safe properties are the ones that doesn't have side effects in liquibase state and also don't change in during the liquibase execution
-     *
-     * @param database Database which propeties are put in the changelog
-     * @throws DatabaseException
-     */
-    private void setDatabasePropertiesAsChangelogParameters(Database database) throws DatabaseException {
-        setChangeLogParameter("database.autoIncrementClause", database.getAutoIncrementClause(null, null, null, null));
-        setChangeLogParameter("database.currentDateTimeFunction", database.getCurrentDateTimeFunction());
-        setChangeLogParameter("database.databaseChangeLogLockTableName", database.getDatabaseChangeLogLockTableName());
-        setChangeLogParameter("database.databaseChangeLogTableName", database.getDatabaseChangeLogTableName());
-        setChangeLogParameter("database.databaseMajorVersion", database.getDatabaseMajorVersion());
-        setChangeLogParameter("database.databaseMinorVersion", database.getDatabaseMinorVersion());
-        setChangeLogParameter("database.databaseProductName", database.getDatabaseProductName());
-        setChangeLogParameter("database.databaseProductVersion", database.getDatabaseProductVersion());
-        setChangeLogParameter("database.defaultCatalogName", database.getDefaultCatalogName());
-        setChangeLogParameter("database.defaultSchemaName", database.getDefaultSchemaName());
-        setChangeLogParameter("database.defaultSchemaNamePrefix", StringUtil.trimToNull(database.getDefaultSchemaName()) == null ? "" : "." + database.getDefaultSchemaName());
-        setChangeLogParameter("database.lineComment", database.getLineComment());
-        setChangeLogParameter("database.liquibaseSchemaName", database.getLiquibaseSchemaName());
-        setChangeLogParameter("database.liquibaseTablespaceName", database.getLiquibaseTablespaceName());
-        setChangeLogParameter("database.typeName", database.getShortName());
-        setChangeLogParameter("database.isSafeToRunUpdate", database.isSafeToRunUpdate());
-        setChangeLogParameter("database.requiresPassword", database.requiresPassword());
-        setChangeLogParameter("database.requiresUsername", database.requiresUsername());
-        setChangeLogParameter("database.supportsForeignKeyDisable", database.supportsForeignKeyDisable());
-        setChangeLogParameter("database.supportsInitiallyDeferrableColumns", database.supportsInitiallyDeferrableColumns());
-        setChangeLogParameter("database.supportsRestrictForeignKeys", database.supportsRestrictForeignKeys());
-        setChangeLogParameter("database.supportsSchemas", database.supportsSchemas());
-        setChangeLogParameter("database.supportsSequences", database.supportsSequences());
-        setChangeLogParameter("database.supportsTablespaces", database.supportsTablespaces());
-    }
-
-    private LockService getLockService() {
-        return LockServiceFactory.getInstance().getLockService(database);
     }
 
     public void setChangeExecListener(ChangeExecListener listener) {
@@ -2645,7 +2604,7 @@ public class Liquibase implements AutoCloseable {
     @SafeVarargs
     public final void generateChangeLog(CatalogAndSchema catalogAndSchema, DiffToChangeLog changeLogWriter,
                                         PrintStream outputStream, Class<? extends DatabaseObject>... snapshotTypes)
-            throws DatabaseException, IOException, ParserConfigurationException {
+            throws DatabaseException {
         generateChangeLog(catalogAndSchema, changeLogWriter, outputStream, null, snapshotTypes);
     }
 
@@ -2653,7 +2612,7 @@ public class Liquibase implements AutoCloseable {
     public final void generateChangeLog(CatalogAndSchema catalogAndSchema, DiffToChangeLog changeLogWriter,
                                         PrintStream outputStream, ChangeLogSerializer changeLogSerializer,
                                         Class<? extends DatabaseObject>... snapshotTypes)
-            throws DatabaseException, IOException, ParserConfigurationException {
+            throws DatabaseException {
 
         try {
             runInScope(new Scope.ScopedRunner() {
