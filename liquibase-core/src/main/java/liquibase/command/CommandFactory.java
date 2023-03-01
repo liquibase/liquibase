@@ -8,6 +8,7 @@ import liquibase.util.StringUtil;
 
 import java.lang.reflect.InvocationTargetException;
 import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Collectors;
 
 /**
@@ -15,6 +16,10 @@ import java.util.stream.Collectors;
  */
 public class CommandFactory implements SingletonObject {
     private Collection<CommandStep> allInstances;
+    /**
+     * A cache of all found command names and their corresponding command definition.
+     */
+    private final Map<String[], CommandDefinition> commandDefinitions = new ConcurrentHashMap<>();
 
     private final Map<String, Set<CommandArgumentDefinition<?>>> commandArgumentDefinitions = new HashMap<>();
 
@@ -34,11 +39,14 @@ public class CommandFactory implements SingletonObject {
      * @throws IllegalArgumentException if the commandName is not known
      */
     public CommandDefinition getCommandDefinition(String... commandName) throws IllegalArgumentException{
-        CommandDefinition commandDefinition = new CommandDefinition(commandName);
-        computePipelineForCommandDefinition(commandDefinition);
-        consolidateCommandArgumentsForCommand(commandDefinition);
-        adjustCommandDefinitionForSteps(commandDefinition);
-
+        CommandDefinition commandDefinition = commandDefinitions.get(commandName);
+        if (commandDefinition == null) { //Check if we have already computed arguments, dependencies, pipeline and adjusted definition
+            commandDefinition = new CommandDefinition(commandName);
+            computePipelineForCommandDefinition(commandDefinition);
+            consolidateCommandArgumentsForCommand(commandDefinition);
+            adjustCommandDefinitionForSteps(commandDefinition);
+            commandDefinitions.put(commandName, commandDefinition);
+        }
         return commandDefinition;
     }
 
@@ -234,7 +242,8 @@ public class CommandFactory implements SingletonObject {
     }
 
     /**
-     * Find all commands that override other commands. Validates that only a single command is overriding another.
+     * Find all commands that override other commands based on {@link CommandOverride#override()}.
+     * Validates that only a single command is overriding another.
      * @param allCommandSteps all commands found during runtime
      * @return a map with key of the CommandStep intended to override and value of all present overriding command steps
      * @throws RuntimeException if more than one command step overrides another command step

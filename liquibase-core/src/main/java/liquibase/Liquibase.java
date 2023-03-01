@@ -184,6 +184,7 @@ public class Liquibase implements AutoCloseable {
      *
      * @see <a href="https://docs.liquibase.com/concepts/advanced/contexts.html" target="_top">contexts</a> in documentation
      */
+    @Deprecated
     public void update() throws LiquibaseException {
         this.update(new Contexts());
     }
@@ -194,6 +195,7 @@ public class Liquibase implements AutoCloseable {
      *
      * @see <a href="https://docs.liquibase.com/concepts/advanced/contexts.html" target="_top">contexts</a> in documentation
      */
+    @Deprecated
     public void update(String contexts) throws LiquibaseException {
         this.update(new Contexts(contexts));
     }
@@ -204,6 +206,7 @@ public class Liquibase implements AutoCloseable {
      *
      * @see <a href="https://docs.liquibase.com/concepts/advanced/contexts.html" target="_top">contexts</a> in documentation
      */
+    @Deprecated
     public void update(Contexts contexts) throws LiquibaseException {
         update(contexts, new LabelExpression());
     }
@@ -218,13 +221,14 @@ public class Liquibase implements AutoCloseable {
      * @see <a href="https://docs.liquibase.com/concepts/advanced/contexts.html" target="_top">contexts</a> in documentation
      * @see <a href="https://docs.liquibase.com/concepts/advanced/labels.html" target="_top">labels</a> in documentation
      */
+    @Deprecated
     public void update(Contexts contexts, LabelExpression labelExpression) throws LiquibaseException {
         update(contexts, labelExpression, true);
     }
 
     /**
      * Liquibase update
-     *
+     * @deprecated Use CommandStep
      * @param   contexts
      * @param   labelExpression
      * @param   checkLiquibaseTables
@@ -233,6 +237,7 @@ public class Liquibase implements AutoCloseable {
      * @see <a href="https://docs.liquibase.com/concepts/advanced/contexts.html" target="_top">contexts</a> in documentation
      * @see <a href="https://docs.liquibase.com/concepts/advanced/labels.html" target="_top">labels</a> in documentation
      */
+    @Deprecated
     public void update(Contexts contexts, LabelExpression labelExpression, boolean checkLiquibaseTables) throws LiquibaseException {
         runInScope(() -> {
             CommandScope updateCommand = new CommandScope("update");
