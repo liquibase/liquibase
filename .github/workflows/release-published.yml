@@ -213,6 +213,10 @@ jobs:
           distribution: 'temurin'
           cache: 'maven'
           server-id: github
+      - name: Set up Maven
+        uses: stCarolas/setup-maven@v4.5
+        with:
+          maven-version: '3.8.7'
 
       - name: Version artifact
         run: mvn versions:set -DnewVersion="${{ needs.setup.outputs.version }}"
