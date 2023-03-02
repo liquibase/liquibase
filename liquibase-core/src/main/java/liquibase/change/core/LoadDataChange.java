@@ -42,8 +42,6 @@ import java.util.*;
 import java.util.regex.Pattern;
 import java.util.zip.GZIPInputStream;
 
-import org.apache.commons.lang3.StringUtils;
-
 import static java.util.ResourceBundle.getBundle;
 import static liquibase.change.ChangeParameterMetaData.ALL;
 
@@ -161,7 +159,7 @@ public class LoadDataChange extends AbstractTableChange implements ChangeWithCol
         //if the value is null (not provided) we want to use default value
         if (commentLineStartsWith == null) {
             this.commentLineStartsWith = DEFAULT_COMMENT_PATTERN;
-        } else if (commentLineStartsWith.isEmpty()) {
+        } else if (StringUtil.isEmpty(commentLineStartsWith)) {
             this.commentLineStartsWith = null;
         } else {
             this.commentLineStartsWith = commentLineStartsWith;
@@ -368,7 +366,7 @@ public class LoadDataChange extends AbstractTableChange implements ChangeWithCol
                         } else if (columnConfig.getType().equalsIgnoreCase("date")
                                 || columnConfig.getType().equalsIgnoreCase("datetime")
                                 || columnConfig.getType().equalsIgnoreCase("time")) {
-                            if ("NULL".equalsIgnoreCase(value) || StringUtils.isBlank(value)) {
+                            if ("NULL".equalsIgnoreCase(value) || StringUtil.isBlank(value)) {
                                 valueConfig.setValue(null);
                             } else {
                                 try {

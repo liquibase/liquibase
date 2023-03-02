@@ -5,8 +5,6 @@ import liquibase.util.grammar.*;
 
 import java.io.StringReader;
 
-import org.apache.commons.lang3.StringUtils;
-
 public class SqlParser {
 
     public static StringClauses parse(String sqlBlock) {
@@ -20,7 +18,7 @@ public class SqlParser {
         SimpleSqlGrammar t = new SimpleSqlGrammar(tokenManager);
         try {
             Token token = t.getNextToken();
-            while (StringUtils.isNotBlank(token.toString())) {
+            while (StringUtil.isNotBlank(token.toString())) {
                 if (token.kind == SimpleSqlGrammarConstants.WHITESPACE) {
                     if (preserveWhitespace) {
                         clauses.append(new StringClauses.Whitespace(token.image));

@@ -18,8 +18,6 @@ import liquibase.util.StringUtil;
 
 import java.util.Set;
 
-import org.apache.commons.lang3.StringUtils;
-
 public class StandardDiffGenerator implements DiffGenerator {
 
     @Override
@@ -103,7 +101,7 @@ public class StandardDiffGenerator implements DiffGenerator {
                         String schemaComparisonName1 = StringUtil.trimToEmpty(schemaComparison.getComparisonSchema().standardize(comparisonDatabase).getSchemaName());
                         String schemaComparisonName2 = StringUtil.trimToEmpty(schemaComparison.getReferenceSchema().standardize(comparisonDatabase).getSchemaName());
 
-                        if (StringUtils.isBlank(comparisonObjectSchemaName) && StringUtils.isNotBlank(schemaComparisonName1) && StringUtils.isNotBlank(schemaComparisonName2)) {
+                        if (StringUtil.isBlank(comparisonObjectSchemaName) && StringUtil.isNotBlank(schemaComparisonName1) && StringUtil.isNotBlank(schemaComparisonName2)) {
                             comparisonObjectSchemaName = StringUtil.trimToEmpty(comparisonObjectSchema.getName());
                         }
                         if (!(comparisonObjectSchemaName.equalsIgnoreCase(schemaComparisonName1) || comparisonObjectSchemaName.equals(schemaComparisonName2))) {

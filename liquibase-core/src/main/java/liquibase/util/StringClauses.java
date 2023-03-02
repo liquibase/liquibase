@@ -4,8 +4,6 @@ import java.math.BigInteger;
 import java.security.SecureRandom;
 import java.util.*;
 
-import org.apache.commons.lang3.StringUtils;
-
 /**
  * Defines a list of clauses that can be manipulated and rearranged based on keys associated with each.
  * On {@link #toString()}, the clauses will be joined by the separator passed at construction time and prepended/postpended by the start/end strings set at construction time.
@@ -315,7 +313,7 @@ public class StringClauses {
         if (!clauses.containsKey(existingKey)) {
             throw new IllegalArgumentException("Existing key '" + existingKey + "' does not exist");
         }
-        if (StringUtils.isBlank(newKey)) {
+        if (StringUtil.isBlank(newKey)) {
             throw new IllegalArgumentException("New key cannot be null or empty");
         }
 
@@ -473,7 +471,7 @@ public class StringClauses {
         ListIterator iterator = finalList.listIterator();
         while (iterator.hasNext()) {
             Object next = iterator.next();
-            if ((next == null) || next.toString().isEmpty()) {
+            if (StringUtil.isEmpty(next.toString())) {
                 iterator.remove();
             }
         }
@@ -503,7 +501,7 @@ public class StringClauses {
             return true;
         }
         for (Object clause : clauses.values()) {
-            if (StringUtils.isNotBlank(clause.toString())) {
+            if (StringUtil.isNotBlank(clause.toString())) {
                 return false;
             }
         }

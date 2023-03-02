@@ -30,8 +30,6 @@ import liquibase.util.StringUtil;
 import java.math.BigInteger;
 import java.util.*;
 
-import org.apache.commons.lang3.StringUtils;
-
 public class CreateTableGenerator extends AbstractSqlGenerator<CreateTableStatement> {
 
     @Override
@@ -169,7 +167,7 @@ public class CreateTableGenerator extends AbstractSqlGenerator<CreateTableStatem
                     // TODO: check if database supports auto increment on non primary key column
                     String autoIncrementClause = database.getAutoIncrementClause(autoIncrementConstraint.getStartWith(), autoIncrementConstraint.getIncrementBy(), autoIncrementConstraint.getGenerationType(), autoIncrementConstraint.getDefaultOnNull());
 
-                    if (StringUtils.isNotBlank(autoIncrementClause)) {
+                    if (StringUtil.isNotBlank(autoIncrementClause)) {
                         buffer.append(" ").append(autoIncrementClause);
                     }
 
