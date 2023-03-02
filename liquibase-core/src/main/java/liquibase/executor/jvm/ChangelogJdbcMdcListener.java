@@ -33,7 +33,7 @@ public class ChangelogJdbcMdcListener {
             jdbcQuery.execute(Scope.getCurrentScope().getSingleton(ExecutorService.class).getExecutor("jdbc", database));
             logSuccess();
         } catch (DatabaseException e) {
-            Scope.getCurrentScope().addMdcValue(MdcKey.DATABASE_CHANGELOG_OUTCOME, MdcValue.DATABASE_CHANGELOG_OUTCOME_FAILED);
+            Scope.getCurrentScope().addMdcValue(MdcKey.DATABASE_CHANGELOG_TABLE_OUTCOME, MdcValue.DATABASE_CHANGELOG_OUTCOME_FAILED);
             throw new DatabaseException(e);
         }
     }
@@ -54,7 +54,7 @@ public class ChangelogJdbcMdcListener {
             logSuccess();
             return value;
         } catch (DatabaseException e) {
-            Scope.getCurrentScope().addMdcValue(MdcKey.DATABASE_CHANGELOG_OUTCOME, MdcValue.DATABASE_CHANGELOG_OUTCOME_FAILED);
+            Scope.getCurrentScope().addMdcValue(MdcKey.DATABASE_CHANGELOG_TABLE_OUTCOME, MdcValue.DATABASE_CHANGELOG_OUTCOME_FAILED);
             throw new DatabaseException(e);
         }
     }
@@ -64,9 +64,9 @@ public class ChangelogJdbcMdcListener {
     }
 
     private static void logSuccess() {
-        Scope.getCurrentScope().addMdcValue(MdcKey.DATABASE_CHANGELOG_OUTCOME, MdcValue.DATABASE_CHANGELOG_OUTCOME_SUCCESS);
+        Scope.getCurrentScope().addMdcValue(MdcKey.DATABASE_CHANGELOG_TABLE_OUTCOME, MdcValue.DATABASE_CHANGELOG_OUTCOME_SUCCESS);
         Scope.getCurrentScope().getLog(ChangelogJdbcMdcListener.class).info("Changelog query completed.");
-        Scope.getCurrentScope().getMdcManager().remove(MdcKey.DATABASE_CHANGELOG_OUTCOME);
+        Scope.getCurrentScope().getMdcManager().remove(MdcKey.DATABASE_CHANGELOG_TABLE_OUTCOME);
         Scope.getCurrentScope().getMdcManager().remove(MdcKey.DATABASE_CHANGELOG_SQL);
     }
 
