@@ -5,10 +5,11 @@ import liquibase.exception.UnexpectedLiquibaseException;
 import liquibase.servicelocator.PrioritizedService;
 
 import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Predicate;
 
 public abstract class BaseSerializerFactory<T extends LiquibaseSerializer> {
-    protected final Map<String, List<T>> serializers = new HashMap<>();
+    protected final Map<String, List<T>> serializers = new ConcurrentHashMap<>();
 
     protected BaseSerializerFactory(Class<T> serializerClass) {
         try {
