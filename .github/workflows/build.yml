@@ -273,6 +273,10 @@ jobs:
           java-version: '8'
           distribution: 'temurin'
           cache: 'maven'
+      - name: Set up Maven
+        uses: stCarolas/setup-maven@v4.5
+        with:
+          maven-version: '3.8.7'
       - name: Restore Built Code Cache
         uses: actions/cache@v3.2.5
         with:
@@ -329,6 +333,11 @@ jobs:
           cache: 'maven'
         env:
           GPG_PASSWORD: ${{ secrets.GPG_PASSPHRASE }}
+
+      - name: Set up Maven
+        uses: stCarolas/setup-maven@v4.5
+        with:
+          maven-version: '3.8.7'
 
       - name: Download liquibase-commercial
         uses: liquibase/action-download-artifact@v2-liquibase
