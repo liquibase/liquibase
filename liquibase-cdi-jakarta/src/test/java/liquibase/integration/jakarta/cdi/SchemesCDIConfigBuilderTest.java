@@ -1,31 +1,38 @@
-package liquibase.integration.cdi;
+package liquibase.integration.jakarta.cdi;
 
-import liquibase.Scope;
-import liquibase.integration.cdi.annotations.Liquibase;
-import liquibase.integration.cdi.annotations.LiquibaseSchema;
-import liquibase.logging.Logger;
-import org.junit.Assert;
-import org.junit.Before;
-import org.junit.BeforeClass;
-import org.junit.Test;
-
-import javax.enterprise.context.ApplicationScoped;
-import javax.enterprise.context.spi.CreationalContext;
-import javax.enterprise.inject.Default;
-import javax.enterprise.inject.spi.Bean;
-import javax.enterprise.inject.spi.BeanManager;
-import javax.enterprise.inject.spi.InjectionPoint;
 import java.io.File;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Field;
 import java.lang.reflect.Modifier;
 import java.lang.reflect.Type;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Iterator;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Random;
+import java.util.Set;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 import java.util.concurrent.atomic.AtomicLong;
+
+import org.junit.Assert;
+import org.junit.Before;
+import org.junit.BeforeClass;
+import org.junit.Test;
+
+import jakarta.enterprise.context.ApplicationScoped;
+import jakarta.enterprise.context.spi.CreationalContext;
+import jakarta.enterprise.inject.Default;
+import jakarta.enterprise.inject.spi.Bean;
+import jakarta.enterprise.inject.spi.BeanManager;
+import jakarta.enterprise.inject.spi.InjectionPoint;
+import liquibase.Scope;
+import liquibase.integration.jakarta.cdi.annotations.Liquibase;
+import liquibase.integration.jakarta.cdi.annotations.LiquibaseSchema;
+import liquibase.logging.Logger;
 
 
 /**
@@ -83,67 +90,9 @@ public class SchemesCDIConfigBuilderTest {
     @Before
     public void setUp() {
         COUNTER = new AtomicLong(0L);
+
         treeBuilder = new SchemesTreeBuilder();
         schemesCDIConfigBuilder = new SchemesCDIConfigBuilder(bm, treeBuilder);
-    }
-
-    private Bean mockBean(final Object object) {
-        return new Bean() {
-            @Override
-            public Set<Type> getTypes() {
-                return null;
-            }
-
-            @Override
-            public Set<Annotation> getQualifiers() {
-                return null;
-            }
-
-            @Override
-            public Class<? extends Annotation> getScope() {
-                return null;
-            }
-
-            @Override
-            public String getName() {
-                return null;
-            }
-
-            @Override
-            public Set<Class<? extends Annotation>> getStereotypes() {
-                return null;
-            }
-
-            @Override
-            public Class<?> getBeanClass() {
-                return object.getClass();
-            }
-
-            @Override
-            public boolean isAlternative() {
-                return false;
-            }
-
-            @Override
-            public boolean isNullable() {
-                return false;
-            }
-
-            @Override
-            public Set<InjectionPoint> getInjectionPoints() {
-                return null;
-            }
-
-            @Override
-            public Object create(CreationalContext creationalContext) {
-                return null;
-            }
-
-            @Override
-            public void destroy(Object o, CreationalContext creationalContext) {
-
-            }
-        };
     }
 
     /**

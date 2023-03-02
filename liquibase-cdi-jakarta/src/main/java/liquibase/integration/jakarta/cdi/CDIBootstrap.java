@@ -1,17 +1,26 @@
-package liquibase.integration.cdi;
+package liquibase.integration.jakarta.cdi;
 
-import javax.enterprise.context.ApplicationScoped;
-import javax.enterprise.context.spi.CreationalContext;
-import javax.enterprise.event.Observes;
-import javax.enterprise.inject.Any;
-import javax.enterprise.inject.Default;
-import javax.enterprise.inject.spi.*;
-import javax.enterprise.util.AnnotationLiteral;
+
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Type;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;
+
+import jakarta.enterprise.context.ApplicationScoped;
+import jakarta.enterprise.context.spi.CreationalContext;
+import jakarta.enterprise.event.Observes;
+import jakarta.enterprise.inject.Any;
+import jakarta.enterprise.inject.Default;
+import jakarta.enterprise.inject.spi.AfterBeanDiscovery;
+import jakarta.enterprise.inject.spi.AfterDeploymentValidation;
+import jakarta.enterprise.inject.spi.AnnotatedType;
+import jakarta.enterprise.inject.spi.Bean;
+import jakarta.enterprise.inject.spi.BeanManager;
+import jakarta.enterprise.inject.spi.Extension;
+import jakarta.enterprise.inject.spi.InjectionPoint;
+import jakarta.enterprise.inject.spi.InjectionTarget;
+import jakarta.enterprise.util.AnnotationLiteral;
 
 /**
  * CDI Bootstrap
@@ -19,17 +28,18 @@ import java.util.Set;
  * Observes CDI container startup events and triggers the Liquibase update
  * process via @PostConstruct on CDILiquibase
  *
- * @author Aaron Walker (http://github.com/aaronwalker)
+ * @author Aaron Walker (http://github.com/aaronwalker), Jeroen Peschier (https://github.com/xazap)
  */
 public class CDIBootstrap implements Extension {
     
     private Bean<CDILiquibase> instance;
 
     void afterBeanDiscovery(@Observes AfterBeanDiscovery abd, BeanManager bm) {
-        AnnotatedType<CDILiquibase> at = bm.createAnnotatedType(CDILiquibase.class);
-        final InjectionTarget<CDILiquibase> it = bm.createInjectionTarget(at);
+        
         instance = new Bean<CDILiquibase>() {
-
+        	final AnnotatedType<CDILiquibase> at = bm.createAnnotatedType(CDILiquibase.class);	
+        	final InjectionTarget<CDILiquibase> it = bm.getInjectionTargetFactory(at).createInjectionTarget(this);
+        	
             @Override
             public Set<Type> getTypes() {
                 Set<Type> types = new HashSet<>();
@@ -87,10 +97,10 @@ public class CDIBootstrap implements Extension {
 
             @Override
             public CDILiquibase create(CreationalContext<CDILiquibase> ctx) {
-                CDILiquibase localInstance = it.produce(ctx);
-                it.inject(localInstance, ctx);
-                it.postConstruct(localInstance);
-                return localInstance;
+                CDILiquibase instance = it.produce(ctx);
+                it.inject(instance, ctx);
+                it.postConstruct(instance);
+                return instance;
             }
 
             @Override
@@ -110,5 +120,4 @@ public class CDIBootstrap implements Extension {
             event.addDeploymentProblem(ex);
         }
     }
-
 }

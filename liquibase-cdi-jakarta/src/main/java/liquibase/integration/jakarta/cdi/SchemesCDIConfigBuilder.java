@@ -1,19 +1,6 @@
-package liquibase.integration.cdi;
+package liquibase.integration.jakarta.cdi;
 
-import liquibase.Scope;
-import liquibase.integration.cdi.annotations.Liquibase;
-import liquibase.integration.cdi.annotations.LiquibaseSchema;
-import liquibase.logging.Logger;
-import liquibase.resource.DirectoryResourceAccessor;
-import liquibase.resource.ResourceAccessor;
-import liquibase.util.FileUtil;
-import liquibase.util.StreamUtil;
 
-import javax.enterprise.inject.spi.Bean;
-import javax.enterprise.inject.spi.BeanManager;
-import javax.enterprise.util.AnnotationLiteral;
-import javax.inject.Inject;
-import javax.inject.Singleton;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
@@ -22,8 +9,27 @@ import java.lang.annotation.Annotation;
 import java.nio.channels.FileChannel;
 import java.nio.channels.FileLock;
 import java.nio.channels.OverlappingFileLockException;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.LinkedHashSet;
+import java.util.List;
+import java.util.Set;
+import java.util.UUID;
 import java.util.concurrent.Callable;
+
+import jakarta.enterprise.inject.spi.Bean;
+import jakarta.enterprise.inject.spi.BeanManager;
+import jakarta.enterprise.util.AnnotationLiteral;
+import jakarta.inject.Inject;
+import jakarta.inject.Singleton;
+import liquibase.Scope;
+import liquibase.integration.jakarta.cdi.annotations.Liquibase;
+import liquibase.integration.jakarta.cdi.annotations.LiquibaseSchema;
+import liquibase.logging.Logger;
+import liquibase.resource.DirectoryResourceAccessor;
+import liquibase.resource.ResourceAccessor;
+import liquibase.util.FileUtil;
+import liquibase.util.StreamUtil;
 
 /**
  * @author Nikita Lipatov (https://github.com/islonik)
@@ -68,7 +74,6 @@ public class SchemesCDIConfigBuilder {
         final InputStream is = SchemesCDIConfigBuilder.class.getResourceAsStream(SCHEMA_NAME);
         try {
             return jvmLocked(id, new Callable<CDILiquibaseConfig>() {
-                @Override
                 public CDILiquibaseConfig call() throws Exception {
                     return createCDILiquibaseConfig(id, is);
                 }
@@ -121,7 +126,7 @@ public class SchemesCDIConfigBuilder {
         }
 
         Set<Annotation> annotationsSet = new LinkedHashSet<>();
-        for (Class clazz : classesSet) {
+        for (Class<?> clazz : classesSet) {
             annotationsSet.add(clazz.getAnnotation(LiquibaseSchema.class));
         }
 
@@ -176,7 +181,7 @@ public class SchemesCDIConfigBuilder {
     /**
      * Synchronization among multiple JVM's.
      */
-    @SuppressWarnings("squid:S2142") // false positive ignored as per https://sonarsource.atlassian.net/browse/SONARJAVA-4406
+    @SuppressWarnings("java:S2142") // false positive ignored as per https://sonarsource.atlassian.net/browse/SONARJAVA-4406
     CDILiquibaseConfig fileLocked(final String id, Callable<CDILiquibaseConfig> action) throws Exception {
         log.info(String.format("[id = %s] JVM lock acquired, acquiring file lock", id));
         String lockPath = String.format("%s/schema.liquibase.lock", ROOT_PATH);
@@ -192,7 +197,7 @@ public class SchemesCDIConfigBuilder {
         FileLock lock = null;
         try (
                 FileOutputStream fileStream = new FileOutputStream(lockPath);
-                FileChannel fileChannel = fileStream.getChannel()
+                FileChannel fileChannel = fileStream.getChannel();
         )
         {
             while (null == lock) {
