@@ -14,6 +14,9 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
+/**
+ * Handles checking ChangeLogHistoryService to determine if there are no un-run ChangeSets without obtaining an exclusive write lock.
+ */
 @Beta
 public class FastCheck {
     private static final Map<String, Boolean> upToDateFastCheck = new ConcurrentHashMap<>();
