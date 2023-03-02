@@ -106,7 +106,7 @@ public class UpdateCommandStep extends AbstractCommandStep implements CleanUpCom
 
     @Override
     public void run(CommandResultsBuilder resultsBuilder) throws Exception {
-        Scope.getCurrentScope().addMdcValue(MdcKey.OPERATION_TYPE, COMMAND_NAME[0]);
+        Scope.getCurrentScope().addMdcValue(MdcKey.LIQUIBASE_OPERATION, COMMAND_NAME[0]);
         CommandScope commandScope = resultsBuilder.getCommandScope();
         String changeLogFile = commandScope.getArgumentValue(CHANGELOG_FILE_ARG);
         Database database = (Database) commandScope.getDependency(Database.class);
@@ -208,7 +208,7 @@ public class UpdateCommandStep extends AbstractCommandStep implements CleanUpCom
         String successLog = "Update command completed successfully.";
         String failureLog = "Update command encountered an exception.";
         try (MdcObject deploymentOutcomeMdc = Scope.getCurrentScope().addMdcValue(MdcKey.DEPLOYMENT_OUTCOME, success ? MdcValue.COMMAND_SUCCESSFUL : MdcValue.COMMAND_FAILED);
-             MdcObject deploymentOutcomeCountMdc = Scope.getCurrentScope().addMdcValue(MdcKey.DEPLOYMENT_CHANGESET_COUNT, String.valueOf(deployedChangeSetCount))) {
+             MdcObject deploymentOutcomeCountMdc = Scope.getCurrentScope().addMdcValue(MdcKey.DEPLOYMENT_OUTCOME_COUNT, String.valueOf(deployedChangeSetCount))) {
             Scope.getCurrentScope().getLog(getClass()).info(success ? successLog : failureLog);
         }
     }
