@@ -2,12 +2,13 @@ package liquibase.command.core;
 
 import liquibase.*;
 import liquibase.changelog.*;
+import liquibase.changelog.filter.*;
 import liquibase.changelog.visitor.*;
 import liquibase.command.*;
 import liquibase.command.core.helpers.FastCheck;
 import liquibase.command.core.helpers.HubHandler;
-import liquibase.command.core.helpers.UpdateHandler;
 import liquibase.database.Database;
+import liquibase.exception.DatabaseException;
 import liquibase.exception.LockException;
 import liquibase.executor.ExecutorService;
 import liquibase.integration.commandline.ChangeExecListenerUtils;
@@ -101,7 +102,7 @@ public class UpdateCommandStep extends AbstractCommandStep implements CleanUpCom
 
     @Override
     public List<Class<?>> requiredDependencies() {
-        return Arrays.asList(Database.class, LockService.class);
+        return Arrays.asList(Database.class, LockService.class, DatabaseChangeLog.class, ChangeLogParameters.class);
     }
 
     @Override
@@ -114,10 +115,8 @@ public class UpdateCommandStep extends AbstractCommandStep implements CleanUpCom
         LabelExpression labelExpression = new LabelExpression(commandScope.getArgumentValue(LABEL_FILTER_ARG));
         ChangeLogParameters changeLogParameters = commandScope.getArgumentValue(CHANGELOG_PARAMETERS);
         if (changeLogParameters == null) {
-            changeLogParameters = new ChangeLogParameters(database);
+            changeLogParameters = (ChangeLogParameters) commandScope.getDependency(ChangeLogParameters.class);
         }
-        changeLogParameters.setContexts(contexts);
-        changeLogParameters.setLabels(labelExpression);
         addCommandFiltersMdc(labelExpression, contexts);
 
         LockService lockService = (LockService) commandScope.getDependency(LockService.class);
@@ -125,18 +124,14 @@ public class UpdateCommandStep extends AbstractCommandStep implements CleanUpCom
         HubHandler hubHandler = null;
         DefaultChangeExecListener defaultChangeExecListener = new DefaultChangeExecListener();
         try {
-            DatabaseChangeLog databaseChangeLog = UpdateHandler.getDatabaseChangeLog(changeLogFile, changeLogParameters, false);
+            DatabaseChangeLog databaseChangeLog = (DatabaseChangeLog) commandScope.getDependency(DatabaseChangeLog.class);
             FastCheck fastCheck = new FastCheck();
             if (fastCheck.isUpToDate(database, databaseChangeLog, contexts, labelExpression)) {
                 return;
             }
-            UpdateHandler.checkLiquibaseTables(database, true, databaseChangeLog, contexts, labelExpression);
             ChangeLogHistoryService changelogService = ChangeLogHistoryServiceFactory.getInstance().getChangeLogService(database);
-            changelogService.generateDeploymentId();
             Scope.getCurrentScope().addMdcValue(MdcKey.DEPLOYMENT_ID, changelogService.getDeploymentId());
             Scope.getCurrentScope().getLog(getClass()).info(String.format("Using deploymentId: %s", changelogService.getDeploymentId()));
-
-            databaseChangeLog.validate(database, contexts, labelExpression);
 
             //Set up a "chain" of ChangeExecListeners. Starting with the custom change exec listener
             //then wrapping that in the DefaultChangeExecListener.
@@ -147,15 +142,15 @@ public class UpdateCommandStep extends AbstractCommandStep implements CleanUpCom
             defaultChangeExecListener.addListener(listener);
             hubHandler = new HubHandler(database, databaseChangeLog, changeLogFile, defaultChangeExecListener);
 
-            ChangeLogIterator changeLogIterator = UpdateHandler.getStandardChangelogIterator(database, contexts, labelExpression, databaseChangeLog);
+            ChangeLogIterator changeLogIterator = getStandardChangelogIterator(database, contexts, labelExpression, databaseChangeLog);
             StatusVisitor statusVisitor = new StatusVisitor(database);
-            ChangeLogIterator shouldRunIterator = UpdateHandler.getStatusChangelogIterator(database, contexts, labelExpression, databaseChangeLog);
+            ChangeLogIterator shouldRunIterator = getStatusChangelogIterator(database, contexts, labelExpression, databaseChangeLog);
             shouldRunIterator.run(statusVisitor, new RuntimeEnvironment(database, contexts, labelExpression));
 
             //Remember we built our hubHandler with our DefaultChangeExecListener so this HubChangeExecListener is delegating to them.
             ChangeExecListener hubChangeExecListener = hubHandler.startHubForUpdate(changeLogParameters, changeLogIterator);
             resultsBuilder.addResult(DEFAULT_CHANGE_EXEC_LISTENER_RESULT_KEY, defaultChangeExecListener);
-            ChangeLogIterator runChangeLogIterator = UpdateHandler.getStandardChangelogIterator(database, contexts, labelExpression, databaseChangeLog);
+            ChangeLogIterator runChangeLogIterator = getStandardChangelogIterator(database, contexts, labelExpression, databaseChangeLog);
             CompositeLogService compositeLogService = new CompositeLogService(true, bufferLog);
             HashMap<String, Object> scopeValues = new HashMap<>();
             scopeValues.put(Scope.Attr.logService.name(), compositeLogService);
@@ -211,5 +206,25 @@ public class UpdateCommandStep extends AbstractCommandStep implements CleanUpCom
              MdcObject deploymentOutcomeCountMdc = Scope.getCurrentScope().addMdcValue(MdcKey.DEPLOYMENT_CHANGESET_COUNT, String.valueOf(deployedChangeSetCount))) {
             Scope.getCurrentScope().getLog(getClass()).info(success ? successLog : failureLog);
         }
+    }
+
+    @Beta
+    public static ChangeLogIterator getStandardChangelogIterator(Database database, Contexts contexts, LabelExpression labelExpression, DatabaseChangeLog changeLog) throws DatabaseException {
+        return new ChangeLogIterator(changeLog,
+                new ShouldRunChangeSetFilter(database),
+                new ContextChangeSetFilter(contexts),
+                new LabelChangeSetFilter(labelExpression),
+                new DbmsChangeSetFilter(database),
+                new IgnoreChangeSetFilter());
+    }
+
+    @Beta
+    public static ChangeLogIterator getStatusChangelogIterator(Database database, Contexts contexts, LabelExpression labelExpression, DatabaseChangeLog changeLog) throws DatabaseException {
+        return new StatusChangeLogIterator(changeLog,
+                new ShouldRunChangeSetFilter(database),
+                new ContextChangeSetFilter(contexts),
+                new LabelChangeSetFilter(labelExpression),
+                new DbmsChangeSetFilter(database),
+                new IgnoreChangeSetFilter());
     }
 }

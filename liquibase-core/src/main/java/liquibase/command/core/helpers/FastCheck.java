@@ -4,6 +4,7 @@ import liquibase.*;
 import liquibase.changelog.*;
 import liquibase.changelog.visitor.ListVisitor;
 import liquibase.changelog.visitor.StatusVisitor;
+import liquibase.command.core.UpdateCommandStep;
 import liquibase.database.Database;
 import liquibase.exception.DatabaseException;
 import liquibase.exception.LiquibaseException;
@@ -39,14 +40,14 @@ public class FastCheck {
         String cacheKey = contexts + "/" + labelExpression;
         if (!upToDateFastCheck.containsKey(cacheKey)) {
             try {
-                if (listUnrunChangeSets(database, databaseChangeLog, contexts, labelExpression, false).isEmpty()) {
-                    Scope.getCurrentScope().getLog(UpdateHandler.class).fine("Fast check found no un-run changesets");
+                if (listUnrunChangeSets(database, databaseChangeLog, contexts, labelExpression).isEmpty()) {
+                    Scope.getCurrentScope().getLog(FastCheck.class).fine("Fast check found no un-run changesets");
                     upToDateFastCheck.put(cacheKey, true);
                 } else {
                     upToDateFastCheck.put(cacheKey, false);
                 }
             } catch (DatabaseException e) {
-                Scope.getCurrentScope().getLog(UpdateHandler.class).info("Error querying Liquibase tables, disabling fast check for this execution. Reason: " + e.getMessage());
+                Scope.getCurrentScope().getLog(FastCheck.class).info("Error querying Liquibase tables, disabling fast check for this execution. Reason: " + e.getMessage());
                 upToDateFastCheck.put(cacheKey, false);
             } finally {
                 // Discard the cached fetched un-run changeset list, as if
@@ -59,13 +60,19 @@ public class FastCheck {
         return upToDateFastCheck.get(cacheKey);
     }
 
-    private static List<ChangeSet> listUnrunChangeSets(Database database, DatabaseChangeLog databaseChangeLog, Contexts contexts, LabelExpression labels, boolean checkLiquibaseTables) throws LiquibaseException {
+    /**
+     * Get list of ChangeSet which have not been applied
+     * @param database the target database
+     * @param databaseChangeLog the database changelog
+     * @param contexts the command contexts
+     * @param labels the command label expressions
+     * @return a list of ChangeSet that have not been applied
+     * @throws LiquibaseException if there was a problem building our ChangeLogIterator or checking the database
+     */
+    private static List<ChangeSet> listUnrunChangeSets(Database database, DatabaseChangeLog databaseChangeLog, Contexts contexts, LabelExpression labels) throws LiquibaseException {
         ListVisitor visitor = new ListVisitor();
-        if (checkLiquibaseTables) {
-            UpdateHandler.checkLiquibaseTables(database, true, databaseChangeLog, contexts, labels);
-        }
         databaseChangeLog.validate(database, contexts, labels);
-        ChangeLogIterator logIterator = UpdateHandler.getStandardChangelogIterator(database, contexts, labels, databaseChangeLog);
+        ChangeLogIterator logIterator = UpdateCommandStep.getStandardChangelogIterator(database, contexts, labels, databaseChangeLog);
         logIterator.run(visitor, new RuntimeEnvironment(database, contexts, labels));
         return visitor.getSeenChangeSets();
     }
@@ -86,7 +93,7 @@ public class FastCheck {
         if (isUpToDateFastCheck(database, databaseChangeLog, contexts, labelExpression)) {
             Scope.getCurrentScope().getUI().sendMessage("Database is up to date, no changesets to execute");
             StatusVisitor statusVisitor = new StatusVisitor(database);
-            ChangeLogIterator shouldRunIterator = UpdateHandler.getStatusChangelogIterator(database, contexts, labelExpression, databaseChangeLog);
+            ChangeLogIterator shouldRunIterator = UpdateCommandStep.getStatusChangelogIterator(database, contexts, labelExpression, databaseChangeLog);
             shouldRunIterator.run(statusVisitor, new RuntimeEnvironment(database, contexts, labelExpression));
             ShowSummaryUtil.showUpdateSummary(databaseChangeLog, statusVisitor);
             return true;
