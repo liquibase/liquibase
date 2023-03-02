@@ -250,8 +250,8 @@ jobs:
           # Relative path under $GITHUB_WORKSPACE to place the repository
           path: liquibase-pro-repo
           repository: "liquibase/liquibase-pro"
-          fetch-depth: 0
-          ref: ${{ github.head_ref }}
+#          fetch-depth: 0
+#          ref: ${{ github.head_ref }}
 
       - name: Upload to s3
         env:
@@ -260,5 +260,8 @@ jobs:
           AWS_DEFAULT_REGION: us-east-1
         # aws s3 sync syncs directories and S3 prefixes. 
         run: |
-          aws s3 sync $GITHUB_WORKSPACE/liquibase-pro-repo/liquibase-pro/pro/src/main/resources/www.liquibase.org/xml/ns/pro/ s3://liquibaseorg-origin/xml/ns/pro/ --only-show-errors
+          pwd
+          ls
+          tree
+        # aws s3 sync $GITHUB_WORKSPACE/liquibase-pro-repo/liquibase-pro/pro/src/main/resources/www.liquibase.org/xml/ns/pro/ s3://liquibaseorg-origin/xml/ns/pro/ --only-show-errors
         # aws s3 sync $GITHUB_WORKSPACE/liquibase-core-repo/liquibase-core/src/main/resources/www.liquibase.org/xml/ns/dbchangelog/ s3://liquibaseorg-origin/xml/ns/dbchangelog/ --only-show-errors
