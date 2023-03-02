@@ -69,7 +69,7 @@ public class ChangedIndexChangeGenerator extends AbstractChangeGenerator impleme
                 return ChangeGeneratorFactory.getInstance().fixChanged(((Table) index.getRelation()).getPrimaryKey(), differences, control, referenceDatabase, comparisonDatabase);
             }
 
-            List<UniqueConstraint> uniqueConstraints = ((Table) index.getRelation()).getUniqueConstraints();
+            List<UniqueConstraint> uniqueConstraints = index.getRelation().getUniqueConstraints();
             if (uniqueConstraints != null) {
                 for (UniqueConstraint constraint : uniqueConstraints) {
                     if ((constraint.getBackingIndex() != null) && DatabaseObjectComparatorFactory.getInstance()

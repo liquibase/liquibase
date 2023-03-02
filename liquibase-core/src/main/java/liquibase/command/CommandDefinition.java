@@ -36,12 +36,11 @@ public class CommandDefinition implements Comparable<CommandDefinition> {
         pipeline = new TreeSet<>((o1, o2) -> {
             final int order = Integer.compare(o1.getOrder(this), o2.getOrder(this));
             if (order == 0) {
-                return o1.getClass().getName().compareTo(o2.getClass().getName());
+                // keep the provided order
+                return 1;
             }
-
             return order;
         });
-
     }
 
     /**

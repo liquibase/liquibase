@@ -54,6 +54,62 @@ Optional Args:
                 "txt": [Pattern.compile(".*liquibase.structure.core.Table:.*ADDRESS.*", Pattern.MULTILINE|Pattern.DOTALL|Pattern.CASE_INSENSITIVE),
                         Pattern.compile(".*liquibase.structure.core.Table:.*ADDRESS.*columns:.*city.*", Pattern.MULTILINE|Pattern.DOTALL|Pattern.CASE_INSENSITIVE)]
         ]
+
+    }
+
+    run "Mismatched DBMS causes not deployed summary message", {
+        arguments = [
+                url:        { it.url },
+                username:   { it.username },
+                password:   { it.password },
+                showSummary: "verbose",
+                changelogFile: "changelogs/h2/complete/mismatchedDbms.changelog.xml"
+        ]
+
+        expectedResults = [
+                statusCode   : 0
+        ]
+
+        expectedUI = [
+"""
+UPDATE SUMMARY
+Run:                          2
+Previously run:               0
+DBMS mismatch:                1
+Not in filter:                0
+-------------------------------
+Total change sets:            3
+
++--------------------------------------------------------------+--------------------------------+
+| Changeset Info                                               | Reason Skipped                 |
++--------------------------------------------------------------+--------------------------------+
+|                                                              | mismatched DBMS value of 'foo' |
+| changelogs/h2/complete/mismatchedDbms.changelog.xml::1::nvox |                                |
+| land                                                         |                                |
++--------------------------------------------------------------+--------------------------------+
+"""
+        ]
+    }
+
+    run "Happy path with a simple changelog log message does not contain 'Executing with' message", {
+        arguments = [
+                url:        { it.url },
+                username:   { it.username },
+                password:   { it.password },
+                changelogFile: "changelogs/h2/complete/simple.changelog.xml"
+        ]
+
+        expectedResults = [
+                statusCode   : 0
+        ]
+
+        expectedDatabaseContent = [
+                "txt": [Pattern.compile(".*liquibase.structure.core.Table:.*ADDRESS.*", Pattern.MULTILINE|Pattern.DOTALL|Pattern.CASE_INSENSITIVE),
+                        Pattern.compile(".*liquibase.structure.core.Table:.*ADDRESS.*columns:.*city.*", Pattern.MULTILINE|Pattern.DOTALL|Pattern.CASE_INSENSITIVE)]
+        ]
+        expectedLogs = [
+                CommandTests.assertNotContains("Executing with 'jdbc' executor")
+        ]
     }
 
     run "Run without a URL throws an exception", {
@@ -85,6 +141,17 @@ Optional Args:
                 changelogFile: ""
         ]
         expectedException = CommandValidationException.class
+    }
+
+    run "Run with a bad show summary option throws an exception", {
+        arguments = [
+                url                    : { it.url },
+                username               : { it.username },
+                password               : { it.password },
+                changelogFile          : 'changelogs/h2/complete/simple.changelog.xml',
+                showSummary: "foo"
+        ]
+        expectedException = IllegalArgumentException.class
     }
 
     run "Should use LoggingChangeExecListener", {

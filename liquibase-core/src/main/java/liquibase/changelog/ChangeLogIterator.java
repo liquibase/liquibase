@@ -1,6 +1,9 @@
 package liquibase.changelog;
 
-import liquibase.*;
+import liquibase.ContextExpression;
+import liquibase.Labels;
+import liquibase.RuntimeEnvironment;
+import liquibase.Scope;
 import liquibase.changelog.filter.ChangeSetFilter;
 import liquibase.changelog.filter.ChangeSetFilterResult;
 import liquibase.changelog.visitor.ChangeSetVisitor;
@@ -11,7 +14,6 @@ import liquibase.exception.UnexpectedLiquibaseException;
 import liquibase.exception.ValidationErrors;
 import liquibase.executor.Executor;
 import liquibase.executor.ExecutorService;
-import liquibase.logging.Logger;
 import liquibase.logging.core.BufferedLogService;
 import liquibase.logging.core.CompositeLogService;
 import liquibase.util.StringUtil;
@@ -24,12 +26,19 @@ public class ChangeLogIterator {
 
     private DatabaseChangeLog databaseChangeLog;
     private List<ChangeSetFilter> changeSetFilters;
+    private boolean collectAllReasons = false;
     private static ResourceBundle coreBundle = getBundle("liquibase/i18n/liquibase-core");
     protected static final String MSG_COULD_NOT_FIND_EXECUTOR = coreBundle.getString("no.executor.found");
     private Set<String> seenChangeSets = new HashSet<>();
 
     public ChangeLogIterator(DatabaseChangeLog databaseChangeLog, ChangeSetFilter... changeSetFilters) {
         this.databaseChangeLog = databaseChangeLog;
+        this.changeSetFilters = Arrays.asList(changeSetFilters);
+    }
+
+    public ChangeLogIterator(DatabaseChangeLog databaseChangeLog, boolean collectAllReasons, ChangeSetFilter... changeSetFilters) {
+        this.databaseChangeLog = databaseChangeLog;
+        this.collectAllReasons = collectAllReasons;
         this.changeSetFilters = Arrays.asList(changeSetFilters);
     }
 
@@ -40,6 +49,7 @@ public class ChangeLogIterator {
 	        for (ChangeSet changeSet : changeSetsForRanChangeSet) {
                 if (changeSet != null) {
                     changeSet.setFilePath(DatabaseChangeLog.normalizePath(ranChangeSet.getChangeLog()));
+                    changeSet.setDeploymentId(ranChangeSet.getDeploymentId());
                     changeSets.add(changeSet);
                 }
 	        }
@@ -60,7 +70,6 @@ public class ChangeLogIterator {
     }
 
     public void run(ChangeSetVisitor visitor, RuntimeEnvironment env) throws LiquibaseException {
-        Logger log = Scope.getCurrentScope().getLog(getClass());
         databaseChangeLog.setRuntimeEnvironment(env);
         try {
             Scope.child(Scope.Attr.databaseChangeLog, databaseChangeLog, new Scope.ScopedRunner() {
@@ -83,7 +92,9 @@ public class ChangeLogIterator {
                                 } else {
                                     shouldVisit = false;
                                     reasonsDenied.add(acceptsResult);
-                                    break;
+                                    if (! collectAllReasons) {
+                                        break;
+                                    }
                                 }
                             }
                         }
@@ -92,7 +103,7 @@ public class ChangeLogIterator {
                         BufferedLogService bufferLog = new BufferedLogService();
                         CompositeLogService compositeLogService = new CompositeLogService(true, bufferLog);
                         Scope.child(Scope.Attr.changeSet.name(), changeSet, () -> {
-                            if (finalShouldVisit && !alreadySaw(changeSet)) {
+                            if (finalShouldVisit) {
                                 //
                                 // Go validate any changesets with an Executor if
                                 // we are using a ValidatingVisitor
@@ -110,9 +121,7 @@ public class ChangeLogIterator {
                                 Map<String, Object> values = new HashMap<>();
                                 values.put(Scope.Attr.logService.name(), compositeLogService);
                                 values.put(BufferedLogService.class.getName(), bufferLog);
-                                Scope.child(values, () -> {
-                                    visitor.visit(changeSet, databaseChangeLog, env.getTargetDatabase(), reasonsAccepted);
-                                });
+                                Scope.child(values, () -> visitor.visit(changeSet, databaseChangeLog, env.getTargetDatabase(), reasonsAccepted));
                                 markSeen(changeSet);
                             } else {
                                 if (visitor instanceof SkippedChangeSetVisitor) {
@@ -147,7 +156,7 @@ public class ChangeLogIterator {
             executor = Scope.getCurrentScope().getSingleton(ExecutorService.class).getExecutor(executorName, env.getTargetDatabase());
         }
         catch (UnexpectedLiquibaseException ule) {
-            String message = String.format(MSG_COULD_NOT_FIND_EXECUTOR, executorName, changeSet.toString());
+            String message = String.format(MSG_COULD_NOT_FIND_EXECUTOR, executorName, changeSet);
             Scope.getCurrentScope().getLog(getClass()).severe(message);
             throw new LiquibaseException(message);
         }
@@ -175,21 +184,18 @@ public class ChangeLogIterator {
 
     }
 
+    /**
+     * Creates a unique key to identify this changeset
+     */
     protected String createKey(ChangeSet changeSet) {
         Labels labels = changeSet.getLabels();
         ContextExpression contexts = changeSet.getContextFilter();
+        changeSet.getRunOrder();
 
-        return changeSet.toString(true)
+        return changeSet.toString(false)
                 + ":" + (labels == null ? null : labels.toString())
                 + ":" + (contexts == null ? null : contexts.toString())
                 + ":" + StringUtil.join(changeSet.getDbmsSet(), ",");
-    }
-
-    protected boolean alreadySaw(ChangeSet changeSet) {
-        if (changeSet.key == null) {
-            changeSet.key = createKey(changeSet);
-        }
-        return seenChangeSets.contains(changeSet.key);
     }
 
     public List<ChangeSetFilter> getChangeSetFilters() {

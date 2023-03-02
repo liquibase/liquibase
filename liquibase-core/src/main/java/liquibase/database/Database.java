@@ -84,6 +84,14 @@ public interface Database extends PrioritizedService, AutoCloseable {
      */
     String getShortName();
 
+    /**
+     * @return a properly formatted name of the product. Used for situations where the database is printed to the
+     * console. Example: "Snowflake" (note the capitalization)
+     */
+    default String getDisplayName() {
+        return getShortName();
+    }
+
     String getDefaultCatalogName();
 
     void setDefaultCatalogName(String catalogName) throws DatabaseException;

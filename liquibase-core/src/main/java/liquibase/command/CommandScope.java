@@ -4,6 +4,7 @@ import liquibase.Scope;
 import liquibase.configuration.*;
 import liquibase.exception.CommandExecutionException;
 import liquibase.exception.CommandValidationException;
+import liquibase.logging.mdc.MdcKey;
 import liquibase.util.StringUtil;
 
 import java.io.FilterOutputStream;
@@ -26,6 +27,8 @@ public class CommandScope {
     private final CommandDefinition commandDefinition;
 
     private final SortedMap<String, Object> argumentValues = new TreeMap<>();
+
+    private final Map<Class<?>, Object> dependencies = new HashMap<>();
 
     /**
      * Config key including the command name. Example `liquibase.command.update`
@@ -105,7 +108,6 @@ public class CommandScope {
             ConfigurationDefinition<T> noCommandConfigDef = createConfigurationDefinition(argument, false);
             ConfiguredValue<T> noCommandNameProvidedValue = noCommandConfigDef.getCurrentConfiguredValue();
             if (noCommandNameProvidedValue.found() && !noCommandNameProvidedValue.wasDefaultValueUsed()) {
-                configDef = noCommandConfigDef;
                 providedValue = noCommandNameProvidedValue;
             }
         }
@@ -120,6 +122,26 @@ public class CommandScope {
     public <T> T getArgumentValue(CommandArgumentDefinition<T> argument) {
         final T value = getConfiguredValue(argument).getValue();
         return argument.getValueConverter().convert(value);
+    }
+
+    /**
+     * Assign a value to a given provided dependency. So if a CommandStep provides class X, at
+     * {@link CommandStep#run(CommandResultsBuilder)} method it needs to provide the value for X using this method.
+     * commandScope.provideDependency(LockService.class, lockService);
+     *
+     * Means that this class will LockService.class using object lock
+     */
+    public  CommandScope provideDependency(Class<?> clazz, Object value) {
+        this.dependencies.put(clazz, value);
+
+        return this;
+    }
+
+    /**
+     * Retrieves the registered dependency object provided by this class identifier
+     */
+    public <T> Object getDependency(Class<T> clazz) {
+        return this.dependencies.get(clazz);
     }
 
     /**
@@ -167,6 +189,7 @@ public class CommandScope {
         CommandResultsBuilder resultsBuilder = new CommandResultsBuilder(this, outputStream);
         final List<CommandStep> pipeline = commandDefinition.getPipeline();
         validate();
+        Scope.getCurrentScope().addMdcValue(MdcKey.OPERATION_TYPE, StringUtil.join(commandDefinition.getName(), "-"));
         try {
             for (CommandStep command : pipeline) {
                 command.run(resultsBuilder);
@@ -260,11 +283,6 @@ public class CommandScope {
         }
 
         @Override
-        public ProvidedValue getProvidedValue(String... keyAndAliases) {
-            return super.getProvidedValue(keyAndAliases);
-        }
-
-        @Override
         protected boolean keyMatches(String wantedKey, String storedKey) {
             if (wantedKey.contains(".")) {
                 return super.keyMatches(NO_PREFIX_PATTERN.matcher(wantedKey).replaceFirst(""), storedKey);
@@ -272,5 +290,6 @@ public class CommandScope {
                 return super.keyMatches(wantedKey, storedKey);
             }
         }
+
     }
 }

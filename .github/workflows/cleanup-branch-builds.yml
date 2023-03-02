@@ -14,7 +14,7 @@ jobs:
     - uses: castlabs/get-package-version-id-action@v2.1
       id: version
       with:
-        version: "${{ github.ref_name }}-SNAPSHOT"
+        version: "${{ github.event.ref }}-SNAPSHOT"
 
     - uses: actions/delete-package-versions@v3
       if: ${{ steps.version.outputs.ids != '' }}
