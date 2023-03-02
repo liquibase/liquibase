@@ -163,7 +163,7 @@ public class MissingDataExternalFileChangeGenerator extends MissingDataChangeGen
                         change
                 };
             }
-            return new Change[]{};
+            return Change.EMPTY_CHANGE;
         } catch (Exception e) {
             throw new UnexpectedLiquibaseException(e);
         } finally {
