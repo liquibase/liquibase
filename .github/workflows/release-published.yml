@@ -251,6 +251,7 @@ jobs:
           path: liquibase-pro-repo
           repository: "liquibase/liquibase-pro"
           fetch-depth: 0
+          ref: ${{ github.head_ref }}
 
       - name: Upload to s3
         env:
