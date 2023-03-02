@@ -9,7 +9,6 @@ import liquibase.command.core.helpers.FastCheck;
 import liquibase.command.core.helpers.HubHandler;
 import liquibase.database.Database;
 import liquibase.exception.DatabaseException;
-import liquibase.exception.LockException;
 import liquibase.executor.ExecutorService;
 import liquibase.integration.commandline.ChangeExecListenerUtils;
 import liquibase.lockservice.LockService;
@@ -165,23 +164,14 @@ public class UpdateCommandStep extends AbstractCommandStep implements CleanUpCom
                 hubHandler.postUpdateHubExceptionHandling(bufferLog, e.getMessage());
             }
             throw e;
-        } finally {
-            try {
-                lockService.releaseLock();
-            } catch (LockException e) {
-                Scope.getCurrentScope().getLog(ChangelogSyncCommandStep.class).severe(MSG_COULD_NOT_RELEASE_LOCK, e);
-            }
         }
     }
 
     @Override
-    public void cleanUp(CommandResultsBuilder resultsBuilder) throws Exception {
+    public void cleanUp(CommandResultsBuilder resultsBuilder) {
         LockServiceFactory.getInstance().resetAll();
         ChangeLogHistoryServiceFactory.getInstance().resetAll();
         Scope.getCurrentScope().getSingleton(ExecutorService.class).reset();
-        if (resultsBuilder.getCommandScope().getDependency(Exception.class) != null) {
-            throw (Exception) resultsBuilder.getCommandScope().getDependency(Exception.class);
-        }
     }
 
     private void addCommandFiltersMdc(LabelExpression labelExpression, Contexts contexts) {

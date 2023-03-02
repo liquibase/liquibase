@@ -69,17 +69,14 @@ public class DatabaseChangelogCommandStep extends AbstractCommandStep implements
         changeLogParameters.setContexts(new Contexts(commandScope.getArgumentValue(CONTEXTS_ARG)));
         changeLogParameters.setLabels(new LabelExpression(commandScope.getArgumentValue(LABEL_FILTER_ARG)));
 
-        try {
-            DatabaseChangeLog databaseChangeLog = getDatabaseChangeLog(changeLogFile, changeLogParameters);
-            checkLiquibaseTables(true, databaseChangeLog, changeLogParameters.getContexts(), changeLogParameters.getLabels(), database);
-            ChangeLogHistoryServiceFactory.getInstance().getChangeLogService(database).generateDeploymentId();
-            databaseChangeLog.validate(database, changeLogParameters.getContexts(), changeLogParameters.getLabels());
+        DatabaseChangeLog databaseChangeLog = getDatabaseChangeLog(changeLogFile, changeLogParameters);
+        checkLiquibaseTables(true, databaseChangeLog, changeLogParameters.getContexts(), changeLogParameters.getLabels(), database);
+        ChangeLogHistoryServiceFactory.getInstance().getChangeLogService(database).generateDeploymentId();
+        databaseChangeLog.validate(database, changeLogParameters.getContexts(), changeLogParameters.getLabels());
 
-            commandScope.provideDependency(DatabaseChangeLog.class, databaseChangeLog);
-            commandScope.provideDependency(ChangeLogParameters.class, changeLogParameters);
-        } finally {
-            LockServiceFactory.getInstance().getLockService(database).releaseLock();
-        }
+        commandScope.provideDependency(DatabaseChangeLog.class, databaseChangeLog);
+        commandScope.provideDependency(ChangeLogParameters.class, changeLogParameters);
+
     }
 
     private DatabaseChangeLog getDatabaseChangeLog(String changeLogFile, ChangeLogParameters changeLogParameters) throws LiquibaseException {
@@ -104,7 +101,7 @@ public class DatabaseChangelogCommandStep extends AbstractCommandStep implements
 
     @Override
     public String[][] defineCommandNames() {
-        return new String[][] { COMMAND_NAME };
+        return new String[][]{COMMAND_NAME};
     }
 
     @Override

@@ -12,5 +12,5 @@ public interface CleanUpCommandStep {
      * Method invoked to execute the cleanup action.
      * @param resultsBuilder builder used in this pipeline
      */
-    void cleanUp(CommandResultsBuilder resultsBuilder) throws Exception;
+    void cleanUp(CommandResultsBuilder resultsBuilder);
 }
