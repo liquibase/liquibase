@@ -250,6 +250,7 @@ jobs:
           # Relative path under $GITHUB_WORKSPACE to place the repository
           path: liquibase-pro-repo
           repository: "liquibase/liquibase-pro"
+          fetch-depth: 0
 
       - name: Upload to s3
         env:
