@@ -31,6 +31,7 @@ public class DatabaseChangelogCommandStep extends AbstractCommandStep implements
     public static final CommandArgumentDefinition<String> CHANGELOG_FILE_ARG;
     public static final CommandArgumentDefinition<String> LABEL_FILTER_ARG;
     public static final CommandArgumentDefinition<String> CONTEXTS_ARG;
+    public static final CommandArgumentDefinition<ChangeLogParameters> CHANGELOG_PARAMETERS;
 
     static {
         CommandBuilder builder = new CommandBuilder(COMMAND_NAME);
@@ -41,6 +42,9 @@ public class DatabaseChangelogCommandStep extends AbstractCommandStep implements
                 .description("Label expression to use for filtering").build();
         CONTEXTS_ARG = builder.argument("contexts", String.class)
                 .description("Context string to use for filtering").build();
+        CHANGELOG_PARAMETERS = builder.argument("changelogParameters", ChangeLogParameters.class)
+                .hidden()
+                .build();
     }
 
     @Override
@@ -58,17 +62,24 @@ public class DatabaseChangelogCommandStep extends AbstractCommandStep implements
         CommandScope commandScope = resultsBuilder.getCommandScope();
         final Database database = (Database) commandScope.getDependency(Database.class);
         final String changeLogFile = commandScope.getArgumentValue(CHANGELOG_FILE_ARG);
-        final ChangeLogParameters changeLogParameters = new ChangeLogParameters(database);
+        ChangeLogParameters changeLogParameters = commandScope.getArgumentValue(CHANGELOG_PARAMETERS);
+        if (changeLogParameters == null) {
+            changeLogParameters = new ChangeLogParameters(database);
+        }
         changeLogParameters.setContexts(new Contexts(commandScope.getArgumentValue(CONTEXTS_ARG)));
         changeLogParameters.setLabels(new LabelExpression(commandScope.getArgumentValue(LABEL_FILTER_ARG)));
 
-        DatabaseChangeLog databaseChangeLog = getDatabaseChangeLog(changeLogFile, changeLogParameters);
-        checkLiquibaseTables(true, databaseChangeLog, changeLogParameters.getContexts(), changeLogParameters.getLabels(), database);
-        ChangeLogHistoryServiceFactory.getInstance().getChangeLogService(database).generateDeploymentId();
-        databaseChangeLog.validate(database, changeLogParameters.getContexts(), changeLogParameters.getLabels());
+        try {
+            DatabaseChangeLog databaseChangeLog = getDatabaseChangeLog(changeLogFile, changeLogParameters);
+            checkLiquibaseTables(true, databaseChangeLog, changeLogParameters.getContexts(), changeLogParameters.getLabels(), database);
+            ChangeLogHistoryServiceFactory.getInstance().getChangeLogService(database).generateDeploymentId();
+            databaseChangeLog.validate(database, changeLogParameters.getContexts(), changeLogParameters.getLabels());
 
-        commandScope.provideDependency(DatabaseChangeLog.class, databaseChangeLog);
-        commandScope.provideDependency(ChangeLogParameters.class, changeLogParameters);
+            commandScope.provideDependency(DatabaseChangeLog.class, databaseChangeLog);
+            commandScope.provideDependency(ChangeLogParameters.class, changeLogParameters);
+        } finally {
+            LockServiceFactory.getInstance().getLockService(database).releaseLock();
+        }
     }
 
     private DatabaseChangeLog getDatabaseChangeLog(String changeLogFile, ChangeLogParameters changeLogParameters) throws LiquibaseException {
