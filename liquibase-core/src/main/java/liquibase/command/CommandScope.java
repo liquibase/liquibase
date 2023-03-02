@@ -108,7 +108,6 @@ public class CommandScope {
             ConfigurationDefinition<T> noCommandConfigDef = createConfigurationDefinition(argument, false);
             ConfiguredValue<T> noCommandNameProvidedValue = noCommandConfigDef.getCurrentConfiguredValue();
             if (noCommandNameProvidedValue.found() && !noCommandNameProvidedValue.wasDefaultValueUsed()) {
-                configDef = noCommandConfigDef;
                 providedValue = noCommandNameProvidedValue;
             }
         }
@@ -132,7 +131,7 @@ public class CommandScope {
      *
      * Means that this class will LockService.class using object lock
      */
-    public  <T> CommandScope provideDependency(Class<T> clazz, T value) {
+    public  CommandScope provideDependency(Class<?> clazz, Object value) {
         this.dependencies.put(clazz, value);
 
         return this;
@@ -281,11 +280,6 @@ public class CommandScope {
         @Override
         protected String getSourceDescription() {
             return "Command argument";
-        }
-
-        @Override
-        public ProvidedValue getProvidedValue(String... keyAndAliases) {
-            return super.getProvidedValue(keyAndAliases);
         }
 
         @Override
