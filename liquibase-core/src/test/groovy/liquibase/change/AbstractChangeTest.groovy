@@ -1,8 +1,8 @@
 package liquibase.change
 
+import liquibase.ContextExpression
+import liquibase.Labels
 import liquibase.change.core.CreateProcedureChange
-import liquibase.change.core.CreateTableChange
-import liquibase.change.core.CreateViewChange
 import liquibase.change.core.SQLFileChange
 import liquibase.changelog.ChangeSet
 import liquibase.changelog.DatabaseChangeLog
@@ -341,6 +341,45 @@ class AbstractChangeTest extends Specification {
         path | change
         "This/is/a/test/change/path" | new SQLFileChange()
         "This/is/a/very/very/very/very/very/very/very/very/very/very/very/very/very/very/very/very/very/very/very/very/very/very/very/very/very/very/ver/long/test/change/path" | new CreateProcedureChange()
+    }
+
+    def contextIsNotConsideredOnCheckSumGeneration() {
+        when:
+        ChangeSet originalChange = new ChangeSet("testId", "testAuthor", false, false, "path/changelog", null, null, null);
+        ChangeSet changeWithContext = originalChange;
+
+        CheckSum changeWithoutContextCheckSum = originalChange.generateCheckSum()
+        changeWithContext.setContextFilter(new ContextExpression("test"))
+        CheckSum changeWithContextCheckSum = changeWithContext.generateCheckSum()
+
+        then:
+        changeWithoutContextCheckSum == changeWithContextCheckSum
+    }
+
+    def labelIsNotConsideredOnCheckSumGeneration() {
+        when:
+        ChangeSet originalChange = new ChangeSet("testId", "testAuthor", false, false, "path/changelog", null, null, null);
+        ChangeSet changeWithLabel = originalChange;
+
+        CheckSum changeWithoutLabelCheckSum = originalChange.generateCheckSum()
+        changeWithLabel.setLabels(new Labels("test"))
+        CheckSum changeWithLabelCheckSum = changeWithLabel.generateCheckSum()
+
+        then:
+        changeWithoutLabelCheckSum == changeWithLabelCheckSum
+    }
+
+    def dbmsIsNotConsideredOnCheckSumGeneration() {
+        when:
+        ChangeSet originalChange = new ChangeSet("testId", "testAuthor", false, false, "path/changelog", null, null, null);
+        ChangeSet changeWithLabel = originalChange;
+
+        CheckSum changeWithoutDbmsCheckSum = originalChange.generateCheckSum()
+        changeWithLabel.setDbms("postgresql")
+        CheckSum changeWithDbmsCheckSum = changeWithLabel.generateCheckSum()
+
+        then:
+        changeWithoutDbmsCheckSum == changeWithDbmsCheckSum
     }
 
     @DatabaseChange(name = "exampleParamelessAbstractChange", description = "Used for the AbstractChangeTest unit test", priority = 1)
