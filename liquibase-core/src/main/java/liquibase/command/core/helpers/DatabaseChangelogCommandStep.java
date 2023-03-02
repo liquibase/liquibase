@@ -76,7 +76,6 @@ public class DatabaseChangelogCommandStep extends AbstractCommandStep implements
 
         commandScope.provideDependency(DatabaseChangeLog.class, databaseChangeLog);
         commandScope.provideDependency(ChangeLogParameters.class, changeLogParameters);
-
     }
 
     private DatabaseChangeLog getDatabaseChangeLog(String changeLogFile, ChangeLogParameters changeLogParameters) throws LiquibaseException {

@@ -199,6 +199,7 @@ public class CommandScope {
                 } catch (Exception runException) {
                     // Suppress the exception for now so that we can run the cleanup steps even when encountering an exception.
                     thrownException = Optional.of(runException);
+                    break;
                 }
                 executedCommands.add(command);
             }
