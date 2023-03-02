@@ -40,7 +40,7 @@ Optional Args:
         ]
 
         expectedResults = [
-                checksumResult   : "8:b6084e5d5f46b534bbbe18a0d35d34e0"
+                checksumResult   : "9:10de8cd690aed1d88d837cbe555d1684"
         ]
     }
 
