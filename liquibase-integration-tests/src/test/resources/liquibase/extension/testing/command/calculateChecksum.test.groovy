@@ -23,10 +23,10 @@ Optional Args:
     Default: null
   driverPropertiesFile (String) The JDBC driver properties file
     Default: null
-  password (String) The database password
+  password (String) Password to use to connect to the database
     Default: null
     OBFUSCATED
-  username (String) The database username
+  username (String) Username to use to connect to the database
     Default: null
 """
 
@@ -40,7 +40,7 @@ Optional Args:
         ]
 
         expectedResults = [
-                statusCode   : 0
+                checksumResult   : "9:10de8cd690aed1d88d837cbe555d1684"
         ]
     }
 
@@ -50,6 +50,7 @@ Optional Args:
         ]
 
         expectedException = CommandValidationException.class
+        expectedExceptionMessage = 'Invalid argument \'changelogFile\': missing required argument'
     }
 
     run "Run without changesetIdentifier should throw an exception",  {
@@ -58,14 +59,17 @@ Optional Args:
         ]
 
         expectedException = CommandValidationException.class
+        expectedExceptionMessage = "Invalid argument \'changesetIdentifier\': missing required argument"
     }
 
     run "Run without URL should throw an exception",  {
         arguments = [
                 url: "",
-                changelogFile    : "changelogs/h2/complete/rollback.tag.changelog.xml"
+                changelogFile    : "changelogs/h2/complete/rollback.tag.changelog.xml",
+                changesetIdentifier: "changelogs/h2/complete/rollback.tag.changelog.xml::1::nvoxland",
         ]
 
         expectedException = CommandValidationException.class
+        expectedExceptionMessage = "Invalid argument \'url\': missing required argument"
     }
 }

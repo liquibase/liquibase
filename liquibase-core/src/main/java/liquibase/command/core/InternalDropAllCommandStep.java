@@ -100,6 +100,12 @@ public class InternalDropAllCommandStep extends AbstractCommandStep {
                     commandScope.getArgumentValue(DATABASE_ARG).dropDatabaseObjects(schema);
                 }
             } catch (LiquibaseException liquibaseException) {
+                String message =
+                   String.format("Error occurred during dropAll: %s%nIt is possible that not all objects were dropped.%n",
+                           liquibaseException.getMessage());
+
+                Scope.getCurrentScope().getUI().sendMessage(message);
+                log.severe(message, liquibaseException);
                 hubUpdater.postUpdateHubExceptionHandling(dropAllOperation, bufferLog, liquibaseException.getMessage());
                 return;
             }

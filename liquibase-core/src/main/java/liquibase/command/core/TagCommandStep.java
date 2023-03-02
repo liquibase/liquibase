@@ -1,48 +1,52 @@
 package liquibase.command.core;
 
-import liquibase.Liquibase;
 import liquibase.Scope;
 import liquibase.changelog.ChangeLogHistoryService;
 import liquibase.changelog.ChangeLogHistoryServiceFactory;
 import liquibase.command.*;
 import liquibase.database.Database;
-import liquibase.exception.LockException;
 import liquibase.lockservice.LockService;
 import liquibase.lockservice.LockServiceFactory;
 
+import java.util.Arrays;
+import java.util.List;
+
 public class TagCommandStep extends AbstractCommandStep {
 
-    public static final String[] COMMAND_NAME = {"tag"};
+    protected static final String[] COMMAND_NAME = {"tag"};
 
     public static final CommandArgumentDefinition<String> TAG_ARG;
-    public static final CommandArgumentDefinition<Database> DATABASE_ARG;
 
     static {
         CommandBuilder builder = new CommandBuilder(COMMAND_NAME);
         TAG_ARG = builder.argument("tag", String.class).required().description("Tag to add to the database changelog table").build();
-        DATABASE_ARG = builder.databaseArgument().build();
     }
 
     @Override
+    public List<Class<?>> requiredDependencies() {
+        return Arrays.asList(Database.class, LockService.class);
+    }
+    
+    @Override
     public void run(CommandResultsBuilder resultsBuilder) throws Exception {
         CommandScope commandScope = resultsBuilder.getCommandScope();
-        Database database = commandScope.getArgumentValue(DATABASE_ARG);
-        LockService lockService = LockServiceFactory.getInstance().getLockService(database);
-        lockService.waitForLock();
+        Database database = (Database) commandScope.getDependency(Database.class);
+        ChangeLogHistoryService changeLogService = ChangeLogHistoryServiceFactory.getInstance().getChangeLogService(database);
+        changeLogService.generateDeploymentId();
+        changeLogService.init();
+        LockServiceFactory.getInstance().getLockService(database).init();
+        changeLogService.tag(commandScope.getArgumentValue(TagCommandStep.TAG_ARG));
 
-        try {
-            ChangeLogHistoryService changeLogService = ChangeLogHistoryServiceFactory.getInstance().getChangeLogService(database);
-            changeLogService.generateDeploymentId();
-            changeLogService.init();
-            LockServiceFactory.getInstance().getLockService(database).init();
-            changeLogService.tag(commandScope.getArgumentValue(TagCommandStep.TAG_ARG));
-        } finally {
-            try {
-                lockService.releaseLock();
-            } catch (LockException e) {
-                Scope.getCurrentScope().getLog(getClass()).severe(Liquibase.MSG_COULD_NOT_RELEASE_LOCK, e);
-            }
-        }
+        sendResults(database);
+    }
+
+    private void sendResults(Database database) {
+        Scope.getCurrentScope().getUI().sendMessage(String.format(
+                        coreBundle.getString("successfully.tagged"), database
+                                .getConnection().getConnectionUserName() + "@" +
+                                database.getConnection().getURL()
+                )
+        );
     }
 
     @Override

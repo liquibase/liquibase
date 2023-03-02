@@ -8,5 +8,5 @@ import liquibase.structure.DatabaseObject;
 
 public interface ChangedObjectChangeGenerator extends ChangeGenerator {
 
-    public Change[] fixChanged(DatabaseObject changedObject, ObjectDifferences differences, DiffOutputControl control, Database referenceDatabase, Database comparisonDatabase, ChangeGeneratorChain chain);
+    Change[] fixChanged(DatabaseObject changedObject, ObjectDifferences differences, DiffOutputControl control, Database referenceDatabase, Database comparisonDatabase, ChangeGeneratorChain chain);
 }

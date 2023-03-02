@@ -1,103 +1,29 @@
-package liquibase.command.core;
+package liquibase.command;
 
-import liquibase.Beta;
 import liquibase.GlobalConfiguration;
 import liquibase.Scope;
-import liquibase.command.*;
-import liquibase.configuration.ConfigurationValueObfuscator;
 import liquibase.database.Database;
 import liquibase.database.DatabaseFactory;
 import liquibase.database.core.DatabaseUtils;
-import liquibase.exception.CommandValidationException;
 import liquibase.exception.DatabaseException;
 import liquibase.integration.commandline.LiquibaseCommandLineConfiguration;
 import liquibase.resource.ResourceAccessor;
 import liquibase.util.StringUtil;
 
-import java.util.ArrayList;
-import java.util.List;
 import java.util.ResourceBundle;
 
 import static java.util.ResourceBundle.getBundle;
 
 /**
- * Internal command step to be used on CommandStep pipeline to manage the database connection.
+ * Abstract CommandStep providing database connectivity.
  */
-public class DbUrlConnectionCommandStep extends AbstractCommandStep implements CleanUpCommandStep {
+public abstract class AbstractDatabaseConnectionCommandStep extends AbstractCommandStep implements CleanUpCommandStep {
 
-    public static final String[] COMMAND_NAME = {"dbUrlConnectionCommandStep"};
-
-    private static final List<String[][]> APPLICABLE_COMMANDS = new ArrayList<>();
+    protected static final String[] COMMAND_NAME = {"abstractDatabaseConnectionCommandStep"};
     private static final ResourceBundle coreBundle = getBundle("liquibase/i18n/liquibase-core");
-
-    public static final CommandArgumentDefinition<Database> DATABASE_ARG;
-    public static final CommandArgumentDefinition<String> URL_ARG;
-    public static final CommandArgumentDefinition<String> DEFAULT_SCHEMA_NAME_ARG;
-    public static final CommandArgumentDefinition<String> DEFAULT_CATALOG_NAME_ARG;
-    public static final CommandArgumentDefinition<String> USERNAME_ARG;
-    public static final CommandArgumentDefinition<String> PASSWORD_ARG;
-    public static final CommandArgumentDefinition<String> DRIVER_ARG;
-    public static final CommandArgumentDefinition<String> DRIVER_PROPERTIES_FILE_ARG;
 
     private Database database;
 
-    static {
-        CommandBuilder builder = new CommandBuilder(COMMAND_NAME);
-        DEFAULT_SCHEMA_NAME_ARG = builder.argument("defaultSchemaName", String.class)
-                .description("The default schema name to use for the database connection").build();
-        DEFAULT_CATALOG_NAME_ARG = builder.argument("defaultCatalogName", String.class)
-                .description("The default catalog name to use for the database connection").build();
-        DRIVER_ARG = builder.argument("driver", String.class)
-                .description("The JDBC driver class").build();
-        DRIVER_PROPERTIES_FILE_ARG = builder.argument("driverPropertiesFile", String.class)
-                .description("The JDBC driver properties file").build();
-        USERNAME_ARG = builder.argument(CommonArgumentNames.USERNAME, String.class)
-                .description("Username to use to connect to the database").build();
-        PASSWORD_ARG = builder.argument(CommonArgumentNames.PASSWORD, String.class)
-                .description("Password to use to connect to the database")
-                .setValueObfuscator(ConfigurationValueObfuscator.STANDARD)
-                .build();
-        DATABASE_ARG = builder.argument("database", Database.class).hidden().build();
-        URL_ARG = builder.argument(CommonArgumentNames.URL, String.class).required().supersededBy(DATABASE_ARG)
-                .description("The JDBC database connection URL").build();
-        DATABASE_ARG.setSupersededBy(URL_ARG);
-    }
-
-    /**
-     * Method that allows Commands to register themselves to be able to use this CommandStep.
-     */
-    @Beta
-    public static void addApplicableCommand(String[]... commandName) {
-        APPLICABLE_COMMANDS.add(commandName);
-    }
-
-    @Override
-    public void run(CommandResultsBuilder resultsBuilder) throws Exception {
-        CommandScope commandScope = resultsBuilder.getCommandScope();
-        commandScope.addArgumentValue(DATABASE_ARG.getName(), this.obtainDatabase(commandScope));
-    }
-
-    /**
-     * Try to retrieve and set the database object from the command scope, otherwise creates a new one .
-     *
-     * @param commandScope current command scope
-     * @throws DatabaseException Thrown when there is a connection error
-     */
-    private Database obtainDatabase(CommandScope commandScope) throws DatabaseException, CommandValidationException {
-        if (commandScope.getArgumentValue(DATABASE_ARG) == null) {
-            String url = commandScope.getArgumentValue(URL_ARG);
-            String username = commandScope.getArgumentValue(USERNAME_ARG);
-            String password = commandScope.getArgumentValue(PASSWORD_ARG);
-            String defaultSchemaName = commandScope.getArgumentValue(DEFAULT_SCHEMA_NAME_ARG);
-            String defaultCatalogName = commandScope.getArgumentValue(DEFAULT_CATALOG_NAME_ARG);
-            String driver = commandScope.getArgumentValue(DRIVER_ARG);
-            String driverPropertiesFile = commandScope.getArgumentValue(DRIVER_PROPERTIES_FILE_ARG);
-            this.database = createDatabaseObject(url, username, password, defaultSchemaName, defaultCatalogName, driver, driverPropertiesFile);
-            return this.database;
-        } else {
-            return commandScope.getArgumentValue(DATABASE_ARG);
-        }
-    }
 
     @SuppressWarnings("java:S2095")
     /**
@@ -114,7 +40,7 @@ public class DbUrlConnectionCommandStep extends AbstractCommandStep implements C
      * @throws DatabaseException         Thrown when there is a connection error
      *
      */
-    private Database createDatabaseObject(String url,
+    protected Database createDatabaseObject(String url,
                                         String username,
                                         String password,
                                         String defaultSchemaName,
@@ -124,12 +50,12 @@ public class DbUrlConnectionCommandStep extends AbstractCommandStep implements C
             throws DatabaseException {
         ResourceAccessor resourceAccessor = Scope.getCurrentScope().getResourceAccessor();
         String databaseClassName = null;
-        Class databaseClass = LiquibaseCommandLineConfiguration.DATABASE_CLASS.getCurrentValue();
+        Class<?> databaseClass = LiquibaseCommandLineConfiguration.DATABASE_CLASS.getCurrentValue();
         if (databaseClass != null) {
             databaseClassName = databaseClass.getCanonicalName();
         }
         String propertyProviderClass = null;
-        Class clazz = LiquibaseCommandLineConfiguration.PROPERTY_PROVIDER_CLASS.getCurrentValue();
+        Class<?> clazz = LiquibaseCommandLineConfiguration.PROPERTY_PROVIDER_CLASS.getCurrentValue();
         if (clazz != null) {
             propertyProviderClass = clazz.getName();
         }
@@ -182,11 +108,6 @@ public class DbUrlConnectionCommandStep extends AbstractCommandStep implements C
     }
 
     @Override
-    public String[][] defineCommandNames() {
-        return new String[][] { COMMAND_NAME };
-    }
-
-    @Override
     public void adjustCommandDefinition(CommandDefinition commandDefinition) {
         if (commandDefinition.getPipeline().size() == 1) {
             commandDefinition.setInternal(true);
@@ -194,19 +115,8 @@ public class DbUrlConnectionCommandStep extends AbstractCommandStep implements C
     }
 
     @Override
-    public int getOrder(CommandDefinition commandDefinition) {
-        for (String[][] commandNames : APPLICABLE_COMMANDS) {
-            for (String[] commandName : commandNames) {
-                if (commandDefinition.is(commandName)) {
-                    return 500;
-                }
-            }
-        }
-        return super.getOrder(commandDefinition);
-    }
-
-    @Override
     public void cleanUp(CommandResultsBuilder resultsBuilder) {
+        // this class only closes a database that it created
         if (database != null) {
             try {
                 database.close();

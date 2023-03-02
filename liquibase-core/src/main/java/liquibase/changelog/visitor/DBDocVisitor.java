@@ -70,10 +70,10 @@ public class DBDocVisitor implements ChangeSetVisitor {
         }
 
         if (!changesByAuthor.containsKey(changeSet.getAuthor())) {
-            changesByAuthor.put(changeSet.getAuthor(), new ArrayList<Change>());
+            changesByAuthor.put(changeSet.getAuthor(), new ArrayList<>());
         }
         if (!changesToRunByAuthor.containsKey(changeSet.getAuthor())) {
-            changesToRunByAuthor.put(changeSet.getAuthor(), new ArrayList<Change>());
+            changesToRunByAuthor.put(changeSet.getAuthor(), new ArrayList<>());
         }
 
         boolean toRun = runStatus.equals(ChangeSet.RunStatus.NOT_RAN) || runStatus.equals(ChangeSet.RunStatus.RUN_AGAIN);
@@ -99,12 +99,12 @@ public class DBDocVisitor implements ChangeSetVisitor {
                 for (DatabaseObject dbObject : affectedDatabaseObjects) {
                     if (toRun) {
                         if (!changesToRunByObject.containsKey(dbObject)) {
-                            changesToRunByObject.put(dbObject, new ArrayList<Change>());
+                            changesToRunByObject.put(dbObject, new ArrayList<>());
                         }
                         changesToRunByObject.get(dbObject).add(change);
                     } else {
                        if (!changesByObject.containsKey(dbObject)) {
-                           changesByObject.put(dbObject, new ArrayList<Change>());
+                           changesByObject.put(dbObject, new ArrayList<>());
                        }
                        changesByObject.get(dbObject).add(change);
                     }

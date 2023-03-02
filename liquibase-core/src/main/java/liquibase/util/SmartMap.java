@@ -14,7 +14,7 @@ import java.util.*;
 @Deprecated
 public class SmartMap implements Map<String, Object> {
 
-    private SortedMap<String, Object> values = new TreeMap<String, Object>();
+    private SortedMap<String, Object> values = new TreeMap<>();
 
     @Override
     public int size() {
@@ -48,7 +48,7 @@ public class SmartMap implements Map<String, Object> {
      * Any conversion is done only on the return value. The stored value is unchanged.
      */
     public <T> T get(String key, Class<T> type) {
-        return (T) ObjectUtil.convert(values.get(key), type);
+        return ObjectUtil.convert(values.get(key), type);
     }
 
     /**

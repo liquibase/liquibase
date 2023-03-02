@@ -2,9 +2,12 @@ package liquibase.changelog
 
 import liquibase.ContextExpression
 import liquibase.Labels
+import liquibase.Scope
 import liquibase.change.core.CreateTableChange
 import liquibase.change.core.RawSQLChange
 import liquibase.exception.SetupException
+import liquibase.logging.core.BufferedLogService
+import liquibase.parser.ChangeLogParserConfiguration
 import liquibase.parser.core.ParsedNode
 import liquibase.precondition.core.OrPrecondition
 import liquibase.precondition.core.PreconditionContainer
@@ -12,9 +15,12 @@ import liquibase.precondition.core.RunningAsPrecondition
 import liquibase.resource.Resource
 import liquibase.sdk.resource.MockResourceAccessor
 import liquibase.sdk.supplier.resource.ResourceSupplier
+import liquibase.util.FileUtil
 import spock.lang.Shared
 import spock.lang.Specification
 import spock.lang.Unroll
+
+import java.util.logging.Level
 
 class DatabaseChangeLogTest extends Specification {
 
@@ -50,6 +56,7 @@ class DatabaseChangeLogTest extends Specification {
 create table sql_table (id int);
 create view sql_view as select * from sql_table;'''
 
+    def testProperties = '''context: test'''
 
     def "getChangeSet passing id, author and file"() {
         def path = "com/example/path.xml"
@@ -466,7 +473,7 @@ http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbch
 
     def "include fails if no parser supports the file"() {
         when:
-        def resourceAccessor = new MockResourceAccessor(["com/example/test1.xml": test1Xml])
+        def resourceAccessor = new MockResourceAccessor(["com/example/test1.invalid": test1Xml])
 
         def rootChangeLog = new DatabaseChangeLog("com/example/root.xml")
 
@@ -496,8 +503,42 @@ http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbch
 
 
         then:
+        ChangeLogParserConfiguration.ON_MISSING_INCLUDE_FILE.getCurrentValue() == ChangeLogParserConfiguration.MissingIncludeConfiguration.FAIL
         def e = thrown(SetupException)
         e.message.startsWith("The file com/example/invalid.xml was not found in")
+    }
+
+    def "properties values are correctly loaded and stored when properties file is relative to changelog"() {
+        when:
+        def propertiesResourceAccessor = new MockResourceAccessor(["com/example/file.properties": testProperties])
+
+        def rootChangeLog = new DatabaseChangeLog("com/example/root.xml")
+        rootChangeLog.setChangeLogParameters(new ChangeLogParameters())
+
+        rootChangeLog.load(new ParsedNode(null, "databaseChangeLog")
+                .addChildren([changeSet: [id: "1", author: "nvoxland", createTable: [tableName: "test_table", schemaName: "test_schema"]]])
+                .addChildren([property: [file: "file.properties", relativeToChangelogFile: "true"]]),
+                propertiesResourceAccessor)
+
+        then:
+        rootChangeLog.getChangeLogParameters().hasValue("context", rootChangeLog)
+        rootChangeLog.getChangeLogParameters().getValue("context", rootChangeLog) == "test"
+    }
+
+    def "properties values are not loaded and stored when file it's not relative to changelog"() {
+        when:
+        def propertiesResourceAccessor = new MockResourceAccessor(["com/example/file.properties": testProperties])
+
+        def rootChangeLog = new DatabaseChangeLog("com/example/root.xml")
+        rootChangeLog.setChangeLogParameters(new ChangeLogParameters())
+
+        rootChangeLog.load(new ParsedNode(null, "databaseChangeLog")
+                .addChildren([changeSet: [id: "1", author: "nvoxland", createTable: [tableName: "test_table", schemaName: "test_schema"]]])
+                .addChildren([property: [file: "file.properties"]]),
+                propertiesResourceAccessor)
+
+        then:
+        rootChangeLog.getChangeLogParameters().hasValue("context", rootChangeLog) == false
     }
 
     @Unroll
@@ -521,6 +562,32 @@ http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbch
         "c:\\path\\to\\changelog.xml"         | "path/to/changelog.xml"
         "c:/path/to/changelog.xml"            | "path/to/changelog.xml"
         "D:\\a\\liquibase\\DBDocTaskTest.xml" | "a/liquibase/DBDocTaskTest.xml"
+    }
+
+    def "warning message is logged when changelog include fails because file does not exist"() {
+        when:
+        def rootChangeLogPath = "com/example/root.xml"
+        def includedChangeLogPath = "com/example/test1.xml"
+        def resourceAccessor = new MockResourceAccessor([(rootChangeLogPath): test1Xml])
+
+        def rootChangeLog = new DatabaseChangeLog(rootChangeLogPath)
+        rootChangeLog.load(new ParsedNode(null, "databaseChangeLog"), resourceAccessor)
+
+        BufferedLogService bufferLog = new BufferedLogService()
+
+        Scope.child([
+                (Scope.Attr.logService.name())                                 : bufferLog,
+                (ChangeLogParserConfiguration.ON_MISSING_INCLUDE_FILE.getKey()): ChangeLogParserConfiguration.MissingIncludeConfiguration.WARN,
+        ], new Scope.ScopedRunner() {
+            @Override
+            void run() throws Exception {
+                    rootChangeLog
+                            .include(includedChangeLogPath, false, resourceAccessor, null, null, false, null, null);
+            }
+        })
+
+        then:
+        bufferLog.getLogAsString(Level.WARNING).contains(FileUtil.getFileNotFoundMessage(includedChangeLogPath));
     }
 
 }

@@ -1,10 +1,12 @@
 package liquibase.changelog.visitor;
 
+import liquibase.Scope;
 import liquibase.changelog.ChangeSet;
 import liquibase.changelog.DatabaseChangeLog;
 import liquibase.changelog.filter.ChangeSetFilterResult;
 import liquibase.database.Database;
 import liquibase.exception.LiquibaseException;
+import liquibase.logging.mdc.MdcKey;
 
 import java.util.Set;
 
@@ -16,7 +18,7 @@ import java.util.Set;
  */
 public interface ChangeSetVisitor {
 
-    public enum Direction {
+    enum Direction {
         FORWARD,
         REVERSE
     }
@@ -24,4 +26,11 @@ public interface ChangeSetVisitor {
     Direction getDirection(); 
 
     void visit(ChangeSet changeSet, DatabaseChangeLog databaseChangeLog, Database database, Set<ChangeSetFilterResult> filterResults) throws LiquibaseException;
+
+    default void logMdcData(ChangeSet changeSet) {
+        Scope scope = Scope.getCurrentScope();
+        scope.addMdcValue(MdcKey.CHANGESET_ID, changeSet.getId());
+        scope.addMdcValue(MdcKey.CHANGESET_AUTHOR, changeSet.getAuthor());
+        scope.addMdcValue(MdcKey.CHANGESET_FILEPATH, changeSet.getFilePath());
+    }
 }

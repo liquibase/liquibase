@@ -6,6 +6,7 @@ import liquibase.changelog.ChangeLogParameters;
 import liquibase.changelog.DatabaseChangeLog;
 import liquibase.exception.ChangeLogParseException;
 import liquibase.exception.LiquibaseException;
+import liquibase.exception.UnexpectedLiquibaseException;
 import liquibase.parser.ChangeLogParser;
 import liquibase.parser.core.ParsedNode;
 import liquibase.resource.Resource;
@@ -15,13 +16,14 @@ import org.yaml.snakeyaml.constructor.SafeConstructor;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.nio.file.Paths;
 import java.util.*;
 
 public class YamlChangeLogParser extends YamlParser implements ChangeLogParser {
 
     @Override
     public DatabaseChangeLog parse(String physicalChangeLogLocation, ChangeLogParameters changeLogParameters, ResourceAccessor resourceAccessor) throws ChangeLogParseException {
-        Yaml yaml = new Yaml(new SafeConstructor());
+        Yaml yaml = new Yaml(new SafeConstructor(createLoaderOptions()));
 
         try {
             Resource changelog = resourceAccessor.get(physicalChangeLogLocation);
@@ -37,7 +39,7 @@ public class YamlChangeLogParser extends YamlParser implements ChangeLogParser {
             if ((parsedYaml == null) || parsedYaml.isEmpty()) {
                 throw new ChangeLogParseException("Empty file " + physicalChangeLogLocation);
             }
-            DatabaseChangeLog changeLog = new DatabaseChangeLog(physicalChangeLogLocation);
+            DatabaseChangeLog changeLog = new DatabaseChangeLog(DatabaseChangeLog.normalizePath(physicalChangeLogLocation));
 
             Object rootList = parsedYaml.get("databaseChangeLog");
             if (rootList == null) {
@@ -94,7 +96,7 @@ public class YamlChangeLogParser extends YamlParser implements ChangeLogParser {
     private Map parseYamlStream(String physicalChangeLogLocation, Yaml yaml, InputStream changeLogStream) throws ChangeLogParseException {
         Map parsedYaml;
         try {
-            parsedYaml = (Map) yaml.load(changeLogStream);
+            parsedYaml = yaml.load(changeLogStream);
         } catch (Exception e) {
             throw new ChangeLogParseException("Syntax error in file " + physicalChangeLogLocation + ": " + e.getMessage(), e);
         }
@@ -103,9 +105,22 @@ public class YamlChangeLogParser extends YamlParser implements ChangeLogParser {
 
     private void loadChangeLogParametersFromFile(ChangeLogParameters changeLogParameters, ResourceAccessor resourceAccessor, DatabaseChangeLog changeLog, Map property, ContextExpression context, Labels labels, Boolean global) throws IOException, LiquibaseException {
         Properties props = new Properties();
-        Resource resource =  resourceAccessor.get((String) property.get("file"));
+        Boolean relativeToChangelogFile = (Boolean) property.get("relativeToChangelogFile");
+        String file = (String) property.get("file");
 
-        if (resource == null) {
+        if (relativeToChangelogFile == null) {
+            relativeToChangelogFile = false;
+        }
+
+        Resource resource;
+
+        if (relativeToChangelogFile) {
+            resource = resourceAccessor.get(changeLog.getPhysicalFilePath()).resolveSibling(file);
+        } else {
+            resource = resourceAccessor.get(file);
+        }
+
+        if (!resource.exists()) {
             log.info("Could not open properties file " + property.get("file"));
         } else {
             try (InputStream stream = resource.openInputStream()) {
