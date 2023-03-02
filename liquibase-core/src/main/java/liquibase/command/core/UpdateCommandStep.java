@@ -2,15 +2,12 @@ package liquibase.command.core;
 
 import liquibase.*;
 import liquibase.changelog.*;
-import liquibase.changelog.filter.*;
 import liquibase.changelog.visitor.*;
 import liquibase.command.*;
 import liquibase.command.core.helpers.FastCheck;
 import liquibase.command.core.helpers.HubHandler;
 import liquibase.command.core.helpers.UpdateHandler;
 import liquibase.database.Database;
-import liquibase.exception.DatabaseException;
-import liquibase.exception.LiquibaseException;
 import liquibase.exception.LockException;
 import liquibase.executor.ExecutorService;
 import liquibase.integration.commandline.ChangeExecListenerUtils;
@@ -21,10 +18,6 @@ import liquibase.logging.core.CompositeLogService;
 import liquibase.logging.mdc.MdcKey;
 import liquibase.logging.mdc.MdcObject;
 import liquibase.logging.mdc.MdcValue;
-import liquibase.parser.ChangeLogParser;
-import liquibase.parser.ChangeLogParserFactory;
-import liquibase.parser.core.xml.XMLChangeLogSAXParser;
-import liquibase.resource.ResourceAccessor;
 import liquibase.util.ShowSummaryUtil;
 
 import java.io.IOException;
@@ -36,6 +29,7 @@ public class UpdateCommandStep extends AbstractCommandStep implements CleanUpCom
 
     public static final String[] LEGACY_COMMAND_NAME = {"migrate"};
     public static String[] COMMAND_NAME = {"update"};
+    public static final String DEFAULT_CHANGE_EXEC_LISTENER_RESULT_KEY = "defaultChangeExecListener";
 
     public static final CommandArgumentDefinition<String> CHANGELOG_FILE_ARG;
     public static final CommandArgumentDefinition<String> LABEL_FILTER_ARG;
@@ -112,6 +106,7 @@ public class UpdateCommandStep extends AbstractCommandStep implements CleanUpCom
 
     @Override
     public void run(CommandResultsBuilder resultsBuilder) throws Exception {
+        Scope.getCurrentScope().addMdcValue(MdcKey.OPERATION_TYPE, COMMAND_NAME[0]);
         CommandScope commandScope = resultsBuilder.getCommandScope();
         String changeLogFile = commandScope.getArgumentValue(CHANGELOG_FILE_ARG);
         Database database = (Database) commandScope.getDependency(Database.class);
@@ -159,7 +154,7 @@ public class UpdateCommandStep extends AbstractCommandStep implements CleanUpCom
 
             //Remember we built our hubHandler with our DefaultChangeExecListener so this HubChangeExecListener is delegating to them.
             ChangeExecListener hubChangeExecListener = hubHandler.startHubForUpdate(changeLogParameters, changeLogIterator);
-            resultsBuilder.addResult("defaultChangeExecListener", defaultChangeExecListener);
+            resultsBuilder.addResult(DEFAULT_CHANGE_EXEC_LISTENER_RESULT_KEY, defaultChangeExecListener);
             ChangeLogIterator runChangeLogIterator = UpdateHandler.getStandardChangelogIterator(database, contexts, labelExpression, databaseChangeLog);
             CompositeLogService compositeLogService = new CompositeLogService(true, bufferLog);
             HashMap<String, Object> scopeValues = new HashMap<>();
@@ -183,7 +178,6 @@ public class UpdateCommandStep extends AbstractCommandStep implements CleanUpCom
             }
             throw e;
         } finally {
-            // TODO: Can I remove this finally block? Breaks {db:h2,command:updateSql} Happy path with output file
             try {
                 lockService.releaseLock();
             } catch (LockException e) {

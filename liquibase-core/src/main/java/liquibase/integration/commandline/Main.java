@@ -1491,7 +1491,7 @@ public class Main {
         final ResourceAccessor fileOpener = this.getFileOpenerResourceAccessor();
 
         if (COMMANDS.DIFF.equalsIgnoreCase(command) || COMMANDS.DIFF_CHANGELOG.equalsIgnoreCase(command)
-            || COMMANDS.GENERATE_CHANGELOG.equalsIgnoreCase(command)) {
+            || COMMANDS.GENERATE_CHANGELOG.equalsIgnoreCase(command) || COMMANDS.UPDATE.equalsIgnoreCase(command)) {
             this.runUsingCommandFramework();
             return;
         }
@@ -1748,18 +1748,7 @@ public class Main {
             }
 
             try {
-                if (COMMANDS.UPDATE.equalsIgnoreCase(command)) {
-                    Scope.getCurrentScope().addMdcValue(MdcKey.OPERATION_TYPE, COMMANDS.UPDATE);
-                    try {
-                        Map<String, Object> updateScopedObjects = new HashMap<>();
-                        updateScopedObjects.put("showSummary", showSummary);
-                        Scope.child(updateScopedObjects, () -> {
-                            liquibase.update(new Contexts(contexts), new LabelExpression(getLabelFilter()));
-                        });
-                    } catch (LiquibaseException updateException) {
-                        handleUpdateException(database, updateException, defaultChangeExecListener, rollbackOnError);
-                    }
-                } else if (COMMANDS.CHANGELOG_SYNC.equalsIgnoreCase(command)) {
+                if (COMMANDS.CHANGELOG_SYNC.equalsIgnoreCase(command)) {
                     liquibase.changeLogSync(new Contexts(contexts), new LabelExpression(getLabelFilter()));
                 } else if (COMMANDS.CHANGELOG_SYNC_SQL.equalsIgnoreCase(command)) {
                     liquibase.changeLogSync(new Contexts(contexts), new LabelExpression(getLabelFilter()), getOutputWriter());
