@@ -268,5 +268,7 @@ jobs:
           AWS_SECRET_ACCESS_KEY: ${{ secrets.LIQUIBASEORIGIN_SECRET_ACCESS_KEY }}
           AWS_DEFAULT_REGION: us-east-1
         run: |
+          ls $GITHUB_WORKSPACE
+          echo $GITHUB_WORKSPACE
           aws s3 sync $GITHUB_WORKSPACE/liquibase-core/src/main/resources/www.liquibase.org/xml/ns/dbchangelog/dbchangelog-${{ env.XSD_VERSION }}.xsd s3://liquibaseorg-origin/xml/ns/dbchangelog/ --only-show-errors
           aws s3 sync $GITHUB_WORKSPACE/liquibase-pro/pro/src/main/resources/www.liquibase.org/xml/ns/pro/liquibase-pro-${{ env.XSD_VERSION }}.xsd s3://liquibaseorg-origin/xml/ns/pro/ --only-show-errors
