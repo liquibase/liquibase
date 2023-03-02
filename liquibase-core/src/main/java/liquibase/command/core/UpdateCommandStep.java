@@ -9,6 +9,7 @@ import liquibase.command.core.helpers.FastCheck;
 import liquibase.command.core.helpers.HubHandler;
 import liquibase.database.Database;
 import liquibase.exception.DatabaseException;
+import liquibase.exception.LockException;
 import liquibase.executor.ExecutorService;
 import liquibase.integration.commandline.ChangeExecListenerUtils;
 import liquibase.lockservice.LockService;
@@ -164,6 +165,14 @@ public class UpdateCommandStep extends AbstractCommandStep implements CleanUpCom
                 hubHandler.postUpdateHubExceptionHandling(bufferLog, e.getMessage());
             }
             throw e;
+        } finally {
+            //TODO: We should be able to remove this once we get the rest of the update family
+            // set up with the CommandFramework
+            try {
+                lockService.releaseLock();
+            } catch (LockException e) {
+                Scope.getCurrentScope().getLog(ChangelogSyncCommandStep.class).severe(MSG_COULD_NOT_RELEASE_LOCK, e);
+            }
         }
     }
 
