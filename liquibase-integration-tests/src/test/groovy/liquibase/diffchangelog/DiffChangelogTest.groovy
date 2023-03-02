@@ -28,7 +28,7 @@ import spock.lang.Specification
  */
 @Ignore
 @LiquibaseIntegrationTest
-class DiffChangelogIntegrationTest extends Specification {
+class DiffChangelogTest extends Specification {
 
     @Shared
     private DatabaseTestSystem postgres =

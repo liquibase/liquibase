@@ -14,7 +14,7 @@ import org.junit.Rule
 import spock.lang.Specification
 import spock.lang.Unroll
 
-class JdbcDatabaseSnapshotIntegrationTest extends Specification {
+class JdbcDatabaseSnapshotTest extends Specification {
 
     @Rule
     public DatabaseTestSystem h2 = Scope.currentScope.getSingleton(TestSystemFactory).getTestSystem("h2")

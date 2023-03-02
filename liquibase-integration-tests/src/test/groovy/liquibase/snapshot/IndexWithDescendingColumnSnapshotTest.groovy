@@ -28,7 +28,7 @@ import org.junit.Rule
 import spock.lang.Specification
 import spock.lang.Unroll
 
-class IndexWithDescendingColumnSnapshotIntegrationTest extends Specification {
+class IndexWithDescendingColumnSnapshotTest extends Specification {
     @Rule
     public DatabaseTestSystem mssqlDb = Scope.currentScope.getSingleton(TestSystemFactory).getTestSystem("mssql")
 

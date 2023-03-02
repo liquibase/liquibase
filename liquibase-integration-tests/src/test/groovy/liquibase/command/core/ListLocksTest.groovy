@@ -10,7 +10,7 @@ import spock.lang.Shared
 import spock.lang.Specification
 
 @LiquibaseIntegrationTest
-class ListLocksIntegrationTest extends Specification {
+class ListLocksTest extends Specification {
 
     @Shared
     private DatabaseTestSystem mariadb =
