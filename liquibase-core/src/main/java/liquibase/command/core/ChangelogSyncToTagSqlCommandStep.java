@@ -2,6 +2,10 @@ package liquibase.command.core;
 
 import liquibase.command.*;
 
+import java.io.Writer;
+import java.util.ArrayList;
+import java.util.List;
+
 public class ChangelogSyncToTagSqlCommandStep extends ChangelogSyncSqlCommandStep {
 
     public static final String[] COMMAND_NAME = {"changelogSyncToTagSql"};
@@ -16,9 +20,14 @@ public class ChangelogSyncToTagSqlCommandStep extends ChangelogSyncSqlCommandSte
 
         builder.addArgument(OUTPUT_DEFAULT_SCHEMA_ARG).build();
         builder.addArgument(OUTPUT_DEFAULT_CATALOG_ARG).build();
-        builder.addArgument(CHANGELOG_FILE_ARG).build();
-        builder.addArgument(LABEL_FILTER_ARG).build();
-        builder.addArgument(CONTEXTS_ARG).build();
+    }
+
+    @Override
+    public List<Class<?>> requiredDependencies() {
+        List<Class<?>> dependencies = new ArrayList<>();
+        dependencies.add(Writer.class);
+        dependencies.addAll(super.requiredDependencies());
+        return dependencies;
     }
 
     @Override

@@ -16,7 +16,7 @@ Required Args:
   url (String) The JDBC database connection URL
     OBFUSCATED
 Optional Args:
-  contexts (String) Context string to use for filtering which changes to mark as executed
+  contexts (String) Context string to use for filtering
     Default: null
   defaultCatalogName (String) The default catalog name to use for the database connection
     Default: null
@@ -26,7 +26,7 @@ Optional Args:
     Default: null
   driverPropertiesFile (String) The JDBC driver properties file
     Default: null
-  labelFilter (String) Label expression to use for filtering which changes to mark as executed
+  labelFilter (String) Label expression to use for filtering
     Default: null
   password (String) Password to use to connect to the database
     Default: null
