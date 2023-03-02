@@ -70,21 +70,20 @@ Optional Args:
                 statusCode: 0
         ]
 
-        expectedUI = [
-                """
-UPDATE SUMMARY
-Run:                         40
-Previously run:               0
-Filtered out:                 1
--------------------------------
-Total change sets:           41
+        outputFile = new File("target/test-classes/ignoredChangeset.txt")
 
-FILTERED CHANGE SETS SUMMARY
-
-Ignored:                      1
-"""
+        expectedFileContent = [ "target/test-classes/ignoredChangeset.txt":
+                [
+                  "UPDATE SUMMARY",
+                  "Run:                         40",
+                  "Previously run:               0",
+                  "Filtered out:                 1",
+                  "-------------------------------",
+                  "Total change sets:           41",
+                  "FILTERED CHANGE SETS SUMMARY",
+                  "Ignored:                      1"
+                ]
         ]
-
     }
 
     run "Happy path with a change set that has labels", {
@@ -101,183 +100,38 @@ Ignored:                      1
                 statusCode: 0
         ]
 
-        expectedUI = [
-                """
-UPDATE SUMMARY
-Run:                          1
-Previously run:               0
-Filtered out:                40
--------------------------------
-Total change sets:           41
+        outputFile = new File("target/test-classes/changeSetWithLabels.txt")
 
-FILTERED CHANGE SETS SUMMARY
-
-Label mismatch:              40
-
-+--------------------------------------------------------------+-------------------------------+
-| Changeset Info                                               | Reason Skipped                |
-+--------------------------------------------------------------+-------------------------------+
-|                                                              | Labels does not match 'first' |
-| changelogs/h2/complete/simple.changelog.labels.xml::1.1::nvo |                               |
-| xland                                                        |                               |
-+--------------------------------------------------------------+-------------------------------+
-|                                                              | Labels does not match 'first' |
-| changelogs/h2/complete/simple.changelog.labels.xml::2::nvoxl |                               |
-| and                                                          |                               |
-+--------------------------------------------------------------+-------------------------------+
-|                                                              | Labels does not match 'first' |
-| changelogs/h2/complete/simple.changelog.labels.xml::3::nvoxl |                               |
-| and                                                          |                               |
-+--------------------------------------------------------------+-------------------------------+
-|                                                              | Labels does not match 'first' |
-| changelogs/h2/complete/simple.changelog.labels.xml::5::nvoxl |                               |
-| and                                                          |                               |
-+--------------------------------------------------------------+-------------------------------+
-|                                                              | Labels does not match 'first' |
-| changelogs/h2/complete/simple.changelog.labels.xml::6::nvoxl |                               |
-| and                                                          |                               |
-+--------------------------------------------------------------+-------------------------------+
-|                                                              | Labels does not match 'first' |
-| changelogs/h2/complete/simple.changelog.labels.xml::7::nvoxl |                               |
-| and                                                          |                               |
-+--------------------------------------------------------------+-------------------------------+
-|                                                              | Labels does not match 'first' |
-| changelogs/h2/complete/simple.changelog.labels.xml::7::bjohn |                               |
-| son                                                          |                               |
-+--------------------------------------------------------------+-------------------------------+
-|                                                              | Labels does not match 'first' |
-| changelogs/h2/complete/simple.changelog.labels.xml::7a::nvox |                               |
-| land                                                         |                               |
-+--------------------------------------------------------------+-------------------------------+
-|                                                              | Labels does not match 'first' |
-| changelogs/h2/complete/simple.changelog.labels.xml::8::bjohn |                               |
-| son                                                          |                               |
-+--------------------------------------------------------------+-------------------------------+
-|                                                              | Labels does not match 'first' |
-| changelogs/h2/complete/simple.changelog.labels.xml::9::nvoxl |                               |
-| and                                                          |                               |
-+--------------------------------------------------------------+-------------------------------+
-|                                                              | Labels does not match 'first' |
-| changelogs/h2/complete/simple.changelog.labels.xml::10::nvox |                               |
-| land                                                         |                               |
-+--------------------------------------------------------------+-------------------------------+
-|                                                              | Labels does not match 'first' |
-| changelogs/h2/complete/simple.changelog.labels.xml::11::nvox |                               |
-| land                                                         |                               |
-+--------------------------------------------------------------+-------------------------------+
-|                                                              | Labels does not match 'first' |
-| changelogs/h2/complete/simple.changelog.labels.xml::12::nvox |                               |
-| land                                                         |                               |
-+--------------------------------------------------------------+-------------------------------+
-|                                                              | Labels does not match 'first' |
-| changelogs/h2/complete/simple.changelog.labels.xml::13::nvox |                               |
-| land                                                         |                               |
-+--------------------------------------------------------------+-------------------------------+
-|                                                              | Labels does not match 'first' |
-| changelogs/h2/complete/simple.changelog.labels.xml::14::nvox |                               |
-| land                                                         |                               |
-+--------------------------------------------------------------+-------------------------------+
-|                                                              | Labels does not match 'first' |
-| changelogs/h2/complete/simple.changelog.labels.xml::15::nvox |                               |
-| land                                                         |                               |
-+--------------------------------------------------------------+-------------------------------+
-|                                                              | Labels does not match 'first' |
-| changelogs/h2/complete/simple.changelog.labels.xml::16::nvox |                               |
-| land                                                         |                               |
-+--------------------------------------------------------------+-------------------------------+
-|                                                              | Labels does not match 'first' |
-| changelogs/h2/complete/simple.changelog.labels.xml::16a::nvo |                               |
-| xland                                                        |                               |
-+--------------------------------------------------------------+-------------------------------+
-|                                                              | Labels does not match 'first' |
-| changelogs/h2/complete/simple.changelog.labels.xml::17::nvox |                               |
-| land                                                         |                               |
-+--------------------------------------------------------------+-------------------------------+
-|                                                              | Labels does not match 'first' |
-| changelogs/h2/complete/simple.changelog.labels.xml::18a::nvo |                               |
-| xland                                                        |                               |
-+--------------------------------------------------------------+-------------------------------+
-|                                                              | Labels does not match 'first' |
-| changelogs/h2/complete/simple.changelog.labels.xml::18::nvox |                               |
-| land                                                         |                               |
-+--------------------------------------------------------------+-------------------------------+
-|                                                              | Labels does not match 'first' |
-| changelogs/h2/complete/simple.changelog.labels.xml::19::nvox |                               |
-| land                                                         |                               |
-+--------------------------------------------------------------+-------------------------------+
-|                                                              | Labels does not match 'first' |
-| changelogs/h2/complete/simple.changelog.labels.xml::20::nvox |                               |
-| land                                                         |                               |
-+--------------------------------------------------------------+-------------------------------+
-|                                                              | Labels does not match 'first' |
-| changelogs/h2/complete/simple.changelog.labels.xml::22::nvox |                               |
-| land                                                         |                               |
-+--------------------------------------------------------------+-------------------------------+
-|                                                              | Labels does not match 'first' |
-| changelogs/h2/complete/simple.changelog.labels.xml::23::nvox |                               |
-| land                                                         |                               |
-+--------------------------------------------------------------+-------------------------------+
-|                                                              | Labels does not match 'first' |
-| changelogs/h2/complete/simple.changelog.labels.xml::24::nvox |                               |
-| land                                                         |                               |
-+--------------------------------------------------------------+-------------------------------+
-|                                                              | Labels does not match 'first' |
-| changelogs/h2/complete/simple.changelog.labels.xml::25::nvox |                               |
-| land                                                         |                               |
-+--------------------------------------------------------------+-------------------------------+
-|                                                              | Labels does not match 'first' |
-| changelogs/h2/complete/simple.changelog.labels.xml::25.1::nv |                               |
-| oxland                                                       |                               |
-+--------------------------------------------------------------+-------------------------------+
-|                                                              | Labels does not match 'first' |
-| changelogs/h2/complete/simple.changelog.labels.xml::25.2::nv |                               |
-| oxland                                                       |                               |
-+--------------------------------------------------------------+-------------------------------+
-|                                                              | Labels does not match 'first' |
-| changelogs/h2/complete/simple.changelog.labels.xml::25.3::nv |                               |
-| oxland                                                       |                               |
-+--------------------------------------------------------------+-------------------------------+
-|                                                              | Labels does not match 'first' |
-| changelogs/h2/complete/simple.changelog.labels.xml::26::nvox |                               |
-| land                                                         |                               |
-+--------------------------------------------------------------+-------------------------------+
-|                                                              | Labels does not match 'first' |
-| changelogs/h2/complete/simple.changelog.labels.xml::28::nvox |                               |
-| land                                                         |                               |
-+--------------------------------------------------------------+-------------------------------+
-|                                                              | Labels does not match 'first' |
-| changelogs/h2/complete/simple.changelog.labels.xml::29::nvox |                               |
-| land                                                         |                               |
-+--------------------------------------------------------------+-------------------------------+
-|                                                              | Labels does not match 'first' |
-| changelogs/h2/complete/simple.changelog.labels.xml::30::nvox |                               |
-| land                                                         |                               |
-+--------------------------------------------------------------+-------------------------------+
-|                                                              | Labels does not match 'first' |
-| changelogs/h2/complete/simple.changelog.labels.xml::31::nvox |                               |
-| land                                                         |                               |
-+--------------------------------------------------------------+-------------------------------+
-|                                                              | Labels does not match 'first' |
-| changelogs/h2/complete/simple.changelog.labels.xml::32::nvox |                               |
-| land                                                         |                               |
-+--------------------------------------------------------------+-------------------------------+
-|                                                              | Labels does not match 'first' |
-| changelogs/h2/complete/simple.changelog.labels.xml::33::nvox |                               |
-| land                                                         |                               |
-+--------------------------------------------------------------+-------------------------------+
-|                                                              | Labels does not match 'first' |
-| changelogs/h2/complete/simple.changelog.labels.xml::34::nvox |                               |
-| land                                                         |                               |
-+--------------------------------------------------------------+-------------------------------+
-|                                                              | Labels does not match 'first' |
-| changelogs/h2/complete/simple.changelog.labels.xml::35::nvox |                               |
-| land                                                         |                               |
-+--------------------------------------------------------------+-------------------------------+
-|                                                              | Labels does not match 'first' |
-| changelogs/h2/complete/simple.changelog.labels.xml::50::nvox |                               |
-| land                                                         |                               |
-+--------------------------------------------------------------+-------------------------------+
-"""
+        expectedFileContent = [ "target/test-classes/changeSetWithLabels.txt":
+                   [
+                     "UPDATE SUMMARY",
+                     "Run:                          1",
+                     "Previously run:               0",
+                     "Filtered out:                40",
+                     "-------------------------------",
+                     "Total change sets:           41",
+                     "FILTERED CHANGE SETS SUMMARY",
+                     "Label mismatch:              40",
+                     "+--------------------------------------------------------------+-------------------------------+",
+                     "| Changeset Info                                               | Reason Skipped                |",
+                     "+--------------------------------------------------------------+-------------------------------+",
+                     "|                                                              | Labels does not match 'first' |",
+                     "| changelogs/h2/complete/simple.changelog.labels.xml::1.1::nvo |                               |",
+                     "| xland                                                        |                               |",
+                     "+--------------------------------------------------------------+-------------------------------+",
+                     "|                                                              | Labels does not match 'first' |",
+                     "| changelogs/h2/complete/simple.changelog.labels.xml::2::nvoxl |                               |",
+                     "| and                                                          |                               |",
+                     "+--------------------------------------------------------------+-------------------------------+",
+                     "|                                                              | Labels does not match 'first' |",
+                     "| changelogs/h2/complete/simple.changelog.labels.xml::3::nvoxl |                               |",
+                     "| and                                                          |                               |",
+                     "+--------------------------------------------------------------+-------------------------------+",
+                     "|                                                              | Labels does not match 'first' |",
+                     "| changelogs/h2/complete/simple.changelog.labels.xml::5::nvoxl |                               |",
+                     "| and                                                          |                               |",
+                     "+--------------------------------------------------------------+-------------------------------+"
+                     ]
         ]
 
     }
@@ -297,30 +151,28 @@ Label mismatch:              40
                 statusCode: 0
         ]
 
-        expectedUI = [
-                """
-UPDATE SUMMARY
-Run:                          2
-Previously run:               0
-Filtered out:                 1
--------------------------------
-Total change sets:            3
+        outputFile = new File("target/test-classes/changeSetWithLabels.txt")
 
-FILTERED CHANGE SETS SUMMARY
-
-Context mismatch:             1
-Label mismatch:               1
-
-+--------------------------------------------------------------+------------------------------------------+
-| Changeset Info                                               | Reason Skipped                           |
-+--------------------------------------------------------------+------------------------------------------+
-|                                                              | Context does not match 'firstcontext'    |
-| changelogs/h2/complete/simple.changelog.labels.context.xml:: | Labels does not match 'first'            |
-| 2::nvoxland                                                  |                                          |
-+--------------------------------------------------------------+------------------------------------------+
-"""
+        expectedFileContent = [ "target/test-classes/changeSetWithLabels.txt":
+           [
+                "UPDATE SUMMARY",
+                "Run:                          2",
+                "Previously run:               0",
+                "Filtered out:                 1",
+                "-------------------------------",
+                "Total change sets:            3",
+                "FILTERED CHANGE SETS SUMMARY",
+                "Context mismatch:             1",
+                "Label mismatch:               1",
+                "+--------------------------------------------------------------+------------------------------------------+",
+                "| Changeset Info                                               | Reason Skipped                           |",
+                "+--------------------------------------------------------------+------------------------------------------+",
+                "|                                                              | Context does not match 'firstcontext'    |",
+                "| changelogs/h2/complete/simple.changelog.labels.context.xml:: | Labels does not match 'first'            |",
+                "| 2::nvoxland                                                  |                                          |",
+                "+--------------------------------------------------------------+------------------------------------------+"
+           ]
         ]
-
     }
 
     run "Happy path with a change set that has complicated labels and contexts", {
@@ -338,23 +190,22 @@ Label mismatch:               1
                 statusCode: 0
         ]
 
-        expectedUI = [
-                """
-UPDATE SUMMARY
-Run:                          2
-Previously run:               0
-Filtered out:                 4
--------------------------------
-Total change sets:            6
+        outputFile = new File("target/test-classes/changeSetWithComplicatedLabelsAndContext.txt")
 
-FILTERED CHANGE SETS SUMMARY
-
-Context mismatch:             2
-Label mismatch:               3
-DBMS mismatch:                1
-"""
+        expectedFileContent = [ "target/test-classes/changeSetWithComplicatedLabelsAndContext.txt":
+             [
+               "UPDATE SUMMARY",
+               "Run:                          2",
+               "Previously run:               0",
+               "Filtered out:                 4",
+               "-------------------------------",
+               "Total change sets:            6",
+               "FILTERED CHANGE SETS SUMMARY",
+               "Context mismatch:             2",
+               "Label mismatch:               3",
+               "DBMS mismatch:                1"
+             ]
         ]
-
     }
 
     run "Mismatched DBMS causes not deployed summary message", {
@@ -370,28 +221,26 @@ DBMS mismatch:                1
                 statusCode: 0
         ]
 
-        expectedUI = [
-                """
-UPDATE SUMMARY
-Run:                          2
-Previously run:               0
-Filtered out:                 1
--------------------------------
-Total change sets:            3
+        outputFile = new File("target/test-classes/mismatchedDBMS.txt")
 
-
-FILTERED CHANGE SETS SUMMARY
-
-DBMS mismatch:                1
-
-+--------------------------------------------------------------+--------------------------------+
-| Changeset Info                                               | Reason Skipped                 |
-+--------------------------------------------------------------+--------------------------------+
-|                                                              | mismatched DBMS value of 'foo' |
-| changelogs/h2/complete/mismatchedDbms.changelog.xml::1::nvox |                                |
-| land                                                         |                                |
-+--------------------------------------------------------------+--------------------------------+
-"""
+        expectedFileContent = [ "target/test-classes/mismatchedDBMS.txt":
+            [
+              "UPDATE SUMMARY",
+              "Run:                          2",
+              "Previously run:               0",
+              "Filtered out:                 1",
+              "-------------------------------",
+              "Total change sets:            3",
+              "FILTERED CHANGE SETS SUMMARY",
+              "DBMS mismatch:                1",
+              "+--------------------------------------------------------------+--------------------------------+",
+              "| Changeset Info                                               | Reason Skipped                 |",
+              "+--------------------------------------------------------------+--------------------------------+",
+              "|                                                              | mismatched DBMS value of 'foo' |",
+              "| changelogs/h2/complete/mismatchedDbms.changelog.xml::1::nvox |                                |",
+              "| land                                                         |                                |",
+              "+--------------------------------------------------------------+--------------------------------+"
+           ]
         ]
     }
 

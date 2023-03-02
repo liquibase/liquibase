@@ -80,25 +80,23 @@ Optional Args:
         expectedResults = [
                 statusCode   : 0
         ]
+        outputFile = new File("target/test-classes/labelsAndContent.txt")
 
-        expectedUI = [
-"""
-UPDATE SUMMARY
-Run:                          1
-Previously run:               0
-Filtered out:                 5
--------------------------------
-Total change sets:            6
-
-FILTERED CHANGE SETS SUMMARY
-
-Label mismatch:               2
-Context mismatch:             2
-After count:                  1
-DBMS mismatch:                1
-"""
+        expectedFileContent = [ "target/test-classes/labelsAndContent.txt":
+                    [
+                      "UPDATE SUMMARY",
+                      "Run:                          1",
+                      "Previously run:               0",
+                      "Filtered out:                 5",
+                      "-------------------------------",
+                      "Total change sets:            6",
+                      "FILTERED CHANGE SETS SUMMARY",
+                      "Label mismatch:               2",
+                      "Context mismatch:             2",
+                      "After count:                  1",
+                      "DBMS mismatch:                1"
+                    ]
         ]
-
     }
 
     run "Mismatched DBMS causes not deployed summary message", {
@@ -115,35 +113,30 @@ DBMS mismatch:                1
                 statusCode   : 0
         ]
 
-        expectedUI = [
-"""
-Running Changeset: changelogs/h2/complete/mismatchedDbms.changelog.xml::1::nvoxland
-
-UPDATE SUMMARY
-Run:                          1
-Previously run:               0
-Filtered out:                 2
--------------------------------
-Total change sets:            3
-
-
-FILTERED CHANGE SETS SUMMARY
-
-After count:                  1
-DBMS mismatch:                1
-
-+--------------------------------------------------------------+--------------------------------+
-| Changeset Info                                               | Reason Skipped                 |
-+--------------------------------------------------------------+--------------------------------+
-|                                                              | mismatched DBMS value of 'foo' |
-| changelogs/h2/complete/mismatchedDbms.changelog.xml::1::nvox |                                |
-| land                                                         |                                |
-+--------------------------------------------------------------+--------------------------------+
-|                                                              | Only running 1 changeset       |
-| changelogs/h2/complete/mismatchedDbms.changelog.xml::13.1::t |                                |
-| estuser                                                      |                                |
-+--------------------------------------------------------------+--------------------------------+
-"""
+        outputFile = new File("target/test-classes/mismatchedDBMS.txt")
+        expectedFileContent = [ "target/test-classes/mismatchedDBMS.txt":
+                 [
+                   "UPDATE SUMMARY",
+                   "Run:                          1",
+                   "Previously run:               0",
+                   "Filtered out:                 2",
+                   "-------------------------------",
+                   "Total change sets:            3",
+                   "FILTERED CHANGE SETS SUMMARY",
+                   "After count:                  1",
+                   "DBMS mismatch:                1",
+                   "+--------------------------------------------------------------+--------------------------------+",
+                   "| Changeset Info                                               | Reason Skipped                 |",
+                   "+--------------------------------------------------------------+--------------------------------+",
+                   "|                                                              | mismatched DBMS value of 'foo' |",
+                   "| changelogs/h2/complete/mismatchedDbms.changelog.xml::1::nvox |                                |",
+                   "| land                                                         |                                |",
+                   "+--------------------------------------------------------------+--------------------------------+",
+                   "|                                                              | Only running 1 changeset       |",
+                   "| changelogs/h2/complete/mismatchedDbms.changelog.xml::13.1::t |                                |",
+                   "| estuser                                                      |                                |",
+                   "+--------------------------------------------------------------+--------------------------------+"
+                 ]
         ]
     }
 

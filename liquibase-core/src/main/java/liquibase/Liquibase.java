@@ -56,10 +56,7 @@ import liquibase.util.StreamUtil;
 import liquibase.util.StringUtil;
 
 import javax.xml.parsers.ParserConfigurationException;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.PrintStream;
-import java.io.Writer;
+import java.io.*;
 import java.text.DateFormat;
 import java.util.*;
 import java.util.function.Supplier;
@@ -247,7 +244,8 @@ public class Liquibase implements AutoCloseable {
                 DatabaseChangeLog databaseChangeLog = getDatabaseChangeLog();
                 ChangeLogIterator shouldRunIterator = getStandardStatusChangelogIterator(contexts, labelExpression, databaseChangeLog);
                 shouldRunIterator.run(statusVisitor, new RuntimeEnvironment(database, contexts, labelExpression));
-                ShowSummaryUtil.showUpdateSummary(databaseChangeLog, statusVisitor);
+                OutputStream outputStream = Scope.getCurrentScope().get("outputStream", OutputStream.class);
+                ShowSummaryUtil.showUpdateSummary(databaseChangeLog, statusVisitor, outputStream);
                 return;
             }
 
@@ -309,7 +307,8 @@ public class Liquibase implements AutoCloseable {
                     runChangeLogIterator.run(updateVisitor, new RuntimeEnvironment(database, contexts, labelExpression));
                 });
 
-                ShowSummaryUtil.showUpdateSummary(changeLog, statusVisitor);
+                OutputStream outputStream = Scope.getCurrentScope().get("outputStream", OutputStream.class);
+                ShowSummaryUtil.showUpdateSummary(changeLog, statusVisitor, outputStream);
 
                 //
                 // Update Hub with the operation information
@@ -696,7 +695,8 @@ public class Liquibase implements AutoCloseable {
                     CompositeLogService compositeLogService = new CompositeLogService(true, bufferLog);
                     Scope.child(Scope.Attr.logService.name(), compositeLogService, () -> runChangeLogIterator.run(createUpdateVisitor(), new RuntimeEnvironment(database, contexts, labelExpression)));
 
-                    ShowSummaryUtil.showUpdateSummary(changeLog, statusVisitor);
+                    OutputStream outputStream = Scope.getCurrentScope().get("outputStream", OutputStream.class);
+                    ShowSummaryUtil.showUpdateSummary(changeLog, statusVisitor, outputStream);
 
                     hubUpdater.postUpdateHub(updateOperation, bufferLog);
                     logDeploymentOutcomeMdc(true);
@@ -832,7 +832,8 @@ public class Liquibase implements AutoCloseable {
                     CompositeLogService compositeLogService = new CompositeLogService(true, bufferLog);
                     Scope.child(Scope.Attr.logService.name(), compositeLogService, () -> runChangeLogIterator.run(createUpdateVisitor(), new RuntimeEnvironment(database, contexts, labelExpression)));
 
-                    ShowSummaryUtil.showUpdateSummary(changeLog, statusVisitor);
+                    OutputStream outputStream = Scope.getCurrentScope().get("outputStream", OutputStream.class);
+                    ShowSummaryUtil.showUpdateSummary(changeLog, statusVisitor, outputStream);
 
                     hubUpdater.postUpdateHub(updateOperation, bufferLog);
                     logDeploymentOutcomeMdc(true);
