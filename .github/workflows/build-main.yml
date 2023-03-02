@@ -26,6 +26,10 @@ jobs:
           distribution: 'temurin'
           cache: 'maven'
           server-id: github
+      - name: Set up Maven
+        uses: stCarolas/setup-maven@v4.5
+        with:
+          maven-version: '3.8.7'
 
       # Version artifact based off of branch and commit SHA.
       - name: Version Artifact
@@ -54,6 +58,10 @@ jobs:
           distribution: 'temurin'
           cache: 'maven'
           server-id: github
+      - name: Set up Maven
+        uses: stCarolas/setup-maven@v4.5
+        with:
+          maven-version: '3.8.7'
 
       # Version artifact based off of branch and commit SHA.
       - name: Version Artifact
