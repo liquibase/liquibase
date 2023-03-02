@@ -24,7 +24,8 @@ public class SnowflakeDatabase extends AbstractJdbcDatabase {
 
     public SnowflakeDatabase() {
         super.setCurrentDateTimeFunction("current_timestamp::timestamp_ntz");
-        super.unmodifiableDataTypes.addAll(Arrays.asList("integer", "bool", "boolean", "int4", "int8", "float4", "float8", "numeric", "bigserial", "serial", "bytea", "timestamptz"));
+        super.unmodifiableDataTypes.addAll(Arrays.asList("integer", "bool", "boolean", "int4", "int8", "float4", "float8", "numeric",
+            "bigserial", "serial", "bytea", "timestamptz", "array", "object", "variant"));
         super.unquotedObjectsAreUppercased = true;
         super.addReservedWords(getDefaultReservedWords());
         super.defaultAutoIncrementStartWith = BigInteger.ONE;

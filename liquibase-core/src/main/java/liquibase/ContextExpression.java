@@ -108,4 +108,8 @@ public class ContextExpression {
         }
         return true;
     }
+
+    public String getOriginalString() {
+        return originalString;
+    }
 }

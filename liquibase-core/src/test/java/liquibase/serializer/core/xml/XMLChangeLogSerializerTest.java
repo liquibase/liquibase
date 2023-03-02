@@ -19,6 +19,7 @@ import org.w3c.dom.NodeList;
 
 import javax.xml.parsers.DocumentBuilderFactory;
 import java.math.BigInteger;
+import java.nio.charset.StandardCharsets;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
@@ -698,14 +699,14 @@ public class XMLChangeLogSerializerTest {
         refactoring.setSchemaName("SCHEMA_NAME");
         refactoring.setTableName("TABLE_NAME");
         refactoring.setFile("FILE_NAME");
-        refactoring.setEncoding("UTF-8");
+        refactoring.setEncoding(StandardCharsets.UTF_8.name());
 
         Element node = new XMLChangeLogSerializer(DocumentBuilderFactory.newInstance().newDocumentBuilder().newDocument()).createNode(refactoring);
         assertEquals("loadData", node.getNodeName());
         assertEquals("SCHEMA_NAME", node.getAttribute("schemaName"));
         assertEquals("TABLE_NAME", node.getAttribute("tableName"));
         assertEquals("FILE_NAME", node.getAttribute("file"));
-        assertEquals("UTF-8", node.getAttribute("encoding"));
+        assertEquals(StandardCharsets.UTF_8.name(), node.getAttribute("encoding"));
     }
 
     @Test

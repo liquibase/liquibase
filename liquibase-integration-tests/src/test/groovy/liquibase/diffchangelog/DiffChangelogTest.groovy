@@ -3,8 +3,8 @@ package liquibase.diffchangelog
 import liquibase.Scope
 import liquibase.command.CommandResultsBuilder
 import liquibase.command.CommandScope
-import liquibase.command.core.InternalDiffChangelogCommandStep
-import liquibase.command.core.InternalDiffCommandStep
+import liquibase.command.core.DiffChangelogCommandStep
+import liquibase.command.core.DiffCommandStep
 import liquibase.database.Database
 import liquibase.database.DatabaseFactory
 import liquibase.diff.compare.CompareControl
@@ -46,17 +46,16 @@ CREATE TABLE $tableName ( product_no varchar(20) DEFAULT nextval('$sequenceName'
         Database targetDatabase =
             DatabaseFactory.instance.openDatabase(postgres.getConnectionUrl().replace("lbcat", "lbcat2"), postgres.getUsername(), postgres.getPassword(), null, null)
 
-        CommandScope commandScope = new CommandScope(InternalDiffChangelogCommandStep.COMMAND_NAME)
-        commandScope.addArgumentValue(InternalDiffCommandStep.REFERENCE_DATABASE_ARG, refDatabase)
-        commandScope.addArgumentValue(InternalDiffChangelogCommandStep.CHANGELOG_FILE_ARG, changelogfile)
-        commandScope.addArgumentValue(InternalDiffCommandStep.TARGET_DATABASE_ARG, targetDatabase)
-        commandScope.addArgumentValue(InternalDiffCommandStep.COMPARE_CONTROL_ARG, CompareControl.STANDARD)
-        commandScope.addArgumentValue(InternalDiffChangelogCommandStep.DIFF_OUTPUT_CONTROL_ARG,  new DiffOutputControl())
+        CommandScope commandScope = new CommandScope(DiffChangelogCommandStep.COMMAND_NAME)
+        commandScope.addArgumentValue(DiffCommandStep.REFERENCE_DATABASE_ARG, refDatabase)
+        commandScope.addArgumentValue(DiffChangelogCommandStep.CHANGELOG_FILE_ARG, changelogfile)
+        commandScope.addArgumentValue(DiffCommandStep.TARGET_DATABASE_ARG, targetDatabase)
+        commandScope.addArgumentValue(DiffCommandStep.COMPARE_CONTROL_ARG, CompareControl.STANDARD)
         OutputStream outputStream = new ByteArrayOutputStream()
         CommandResultsBuilder commandResultsBuilder = new CommandResultsBuilder(commandScope, outputStream)
 
         then:
-        InternalDiffChangelogCommandStep diffChangelogCommandStep = new InternalDiffChangelogCommandStep()
+        DiffChangelogCommandStep diffChangelogCommandStep = new DiffChangelogCommandStep()
         diffChangelogCommandStep.run(commandResultsBuilder)
         def generatedChangelog = new File(changelogfile)
         def generatedChangelogContents = FileUtil.getContents(generatedChangelog)
@@ -93,17 +92,17 @@ COMMENT ON COLUMN $viewName.$columnName IS '$columnComment';
         Database targetDatabase =
                 DatabaseFactory.instance.openDatabase(postgres.getConnectionUrl().replace("lbcat", "lbcat2"), postgres.getUsername(), postgres.getPassword(), null, null)
 
-        CommandScope commandScope = new CommandScope(InternalDiffChangelogCommandStep.COMMAND_NAME)
-        commandScope.addArgumentValue(InternalDiffCommandStep.REFERENCE_DATABASE_ARG, refDatabase)
-        commandScope.addArgumentValue(InternalDiffChangelogCommandStep.CHANGELOG_FILE_ARG, changelogfile)
-        commandScope.addArgumentValue(InternalDiffCommandStep.TARGET_DATABASE_ARG, targetDatabase)
-        commandScope.addArgumentValue(InternalDiffCommandStep.COMPARE_CONTROL_ARG, CompareControl.STANDARD)
-        commandScope.addArgumentValue(InternalDiffChangelogCommandStep.DIFF_OUTPUT_CONTROL_ARG,  new DiffOutputControl())
+        CommandScope commandScope = new CommandScope(DiffChangelogCommandStep.COMMAND_NAME)
+        commandScope.addArgumentValue(DiffCommandStep.REFERENCE_DATABASE_ARG, refDatabase)
+        commandScope.addArgumentValue(DiffChangelogCommandStep.CHANGELOG_FILE_ARG, changelogfile)
+        commandScope.addArgumentValue(DiffCommandStep.TARGET_DATABASE_ARG, targetDatabase)
+        commandScope.addArgumentValue(DiffCommandStep.COMPARE_CONTROL_ARG, CompareControl.STANDARD)
+        commandScope.addArgumentValue(DiffChangelogCommandStep.DIFF_OUTPUT_CONTROL_ARG,  new DiffOutputControl())
         OutputStream outputStream = new ByteArrayOutputStream()
         CommandResultsBuilder commandResultsBuilder = new CommandResultsBuilder(commandScope, outputStream)
 
         then:
-        InternalDiffChangelogCommandStep diffChangelogCommandStep = new InternalDiffChangelogCommandStep()
+        DiffChangelogCommandStep diffChangelogCommandStep = new DiffChangelogCommandStep()
         diffChangelogCommandStep.run(commandResultsBuilder)
         def generatedChangelog = new File(changelogfile)
         def generatedChangelogContents = FileUtil.getContents(generatedChangelog)
