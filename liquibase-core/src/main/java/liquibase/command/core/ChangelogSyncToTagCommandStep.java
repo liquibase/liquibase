@@ -11,9 +11,6 @@ public class ChangelogSyncToTagCommandStep extends ChangelogSyncCommandStep {
     static {
         CommandBuilder builder = new CommandBuilder(COMMAND_NAME);
         TAG_ARG = builder.argument("tag", String.class).required().description("Tag ID to execute changelogSync to").build();
-        builder.addArgument(CHANGELOG_FILE_ARG).build();
-        builder.addArgument(LABEL_FILTER_ARG).build();
-        builder.addArgument(CONTEXTS_ARG).build();
     }
 
     @Override

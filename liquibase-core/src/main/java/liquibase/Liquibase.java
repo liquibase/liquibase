@@ -8,6 +8,7 @@ import liquibase.changelog.visitor.*;
 import liquibase.command.CommandResults;
 import liquibase.command.CommandScope;
 import liquibase.command.core.*;
+import liquibase.command.core.helpers.DatabaseChangelogCommandStep;
 import liquibase.command.core.helpers.DbUrlConnectionCommandStep;
 import liquibase.command.core.helpers.PreCompareCommandStep;
 import liquibase.database.Database;
@@ -1772,10 +1773,10 @@ public class Liquibase implements AutoCloseable {
         runInScope(() -> {
             new CommandScope(commandToRun)
                     .addArgumentValue(DbUrlConnectionCommandStep.DATABASE_ARG, Liquibase.this.getDatabase())
-                    .addArgumentValue(ChangelogSyncCommandStep.CHANGELOG_FILE_ARG, changeLogFile)
+                    .addArgumentValue(DatabaseChangelogCommandStep.CHANGELOG_FILE_ARG, changeLogFile)
                     .addArgumentValue(ChangelogSyncCommandStep.HUB_CHANGE_EXEC_LISTENER_ARG, changeExecListener)
-                    .addArgumentValue(ChangelogSyncCommandStep.CONTEXTS_ARG, (contexts != null? contexts.toString() : null))
-                    .addArgumentValue(ChangelogSyncCommandStep.LABEL_FILTER_ARG, (labelExpression != null ? labelExpression.getOriginalString() : null))
+                    .addArgumentValue(DatabaseChangelogCommandStep.CONTEXTS_ARG, (contexts != null? contexts.toString() : null))
+                    .addArgumentValue(DatabaseChangelogCommandStep.LABEL_FILTER_ARG, (labelExpression != null ? labelExpression.getOriginalString() : null))
                     .addArgumentValue(ChangelogSyncToTagCommandStep.TAG_ARG, tag)
                     .execute();
         });
@@ -1798,10 +1799,10 @@ public class Liquibase implements AutoCloseable {
         runInScope(() -> {
             new CommandScope(commandToRun)
                     .addArgumentValue(DbUrlConnectionCommandStep.DATABASE_ARG, Liquibase.this.getDatabase())
-                    .addArgumentValue(ChangelogSyncSqlCommandStep.CHANGELOG_FILE_ARG, changeLogFile)
+                    .addArgumentValue(DatabaseChangelogCommandStep.CHANGELOG_FILE_ARG, changeLogFile)
                     .addArgumentValue(ChangelogSyncSqlCommandStep.HUB_CHANGE_EXEC_LISTENER_ARG, changeExecListener)
-                    .addArgumentValue(ChangelogSyncSqlCommandStep.CONTEXTS_ARG, (contexts != null? contexts.toString() : null))
-                    .addArgumentValue(ChangelogSyncSqlCommandStep.LABEL_FILTER_ARG, (labelExpression != null ? labelExpression.getOriginalString() : null))
+                    .addArgumentValue(DatabaseChangelogCommandStep.CONTEXTS_ARG, (contexts != null? contexts.toString() : null))
+                    .addArgumentValue(DatabaseChangelogCommandStep.LABEL_FILTER_ARG, (labelExpression != null ? labelExpression.getOriginalString() : null))
                     .addArgumentValue(ChangelogSyncToTagSqlCommandStep.TAG_ARG, tag)
                     .setOutput(new WriterOutputStream(output, GlobalConfiguration.OUTPUT_FILE_ENCODING.getCurrentValue()))
                     .execute();
