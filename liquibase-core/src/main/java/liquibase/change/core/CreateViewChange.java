@@ -210,6 +210,26 @@ public class CreateViewChange extends AbstractChange {
 
         } catch (IOException e) {
             throw new UnexpectedLiquibaseException(e);
+        }
+
+        try {
+            String selectQuery = this.selectQuery;
+            if ((stream == null) && (selectQuery == null)) {
+                selectQuery = "";
+            }
+
+            String encoding = GlobalConfiguration.OUTPUT_FILE_ENCODING.getCurrentValue();
+            if (selectQuery != null) {
+                try {
+                    stream = new ByteArrayInputStream(selectQuery.getBytes(encoding));
+                } catch (UnsupportedEncodingException e) {
+                    throw new AssertionError(encoding+" is not supported by the JVM, this should not happen according to the JavaDoc of the Charset class");
+                }
+            }
+
+			CheckSum checkSum = CheckSum.compute(new AbstractSQLChange.NormalizingStream(";", false, false, stream), false);
+
+            return CheckSum.compute(super.generateCheckSum().toString() + ":" + checkSum);
         } finally {
             if (stream != null) {
                 try {

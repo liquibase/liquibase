@@ -114,7 +114,7 @@ public class InternalSnapshotCommandStep extends AbstractCommandStep {
     }
 
     public static void logUnsupportedDatabase(Database database, Class callingClass) {
-        if (LicenseServiceUtils.isProLicenseValid()) {
+        if (LicenseServiceUtils.isProLicenseValid() && database != null) {
             if (!(database instanceof MSSQLDatabase
                     || database instanceof OracleDatabase
                     || database instanceof MySQLDatabase
