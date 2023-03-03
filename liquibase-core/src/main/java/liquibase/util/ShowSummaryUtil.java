@@ -244,28 +244,26 @@ public class ShowSummaryUtil {
             });
         });
 
-        if (filterSummaryMap.isEmpty()) {
-            return;
-        }
-
-        message = String.format("%nFILTERED CHANGE SETS SUMMARY%n");
-        builder.append(message);
-        builder.append(System.lineSeparator());
-        Scope.getCurrentScope().getLog(ShowSummaryUtil.class).info(message);
-        filterSummaryMap.forEach((filterClass, count) -> {
-            String filterSummaryDetailMessage;
-            String formatString = (filterSummaryLabelMap.containsKey(filterClass) ? String.valueOf(filterSummaryLabelMap.get(filterClass)) : null);
-            if (formatString != null) {
-                filterSummaryDetailMessage = String.format(formatString, count);
-            } else {
-                filterSummaryDetailMessage = String.format("%-18s       %6d",
-                        filterClass.getSimpleName().replace("ChangeSetFilter","Filter:"), count);
-            }
-            Scope.getCurrentScope().getLog(ShowSummaryUtil.class).info(filterSummaryDetailMessage);
-            builder.append(filterSummaryDetailMessage);
+        if (! filterSummaryMap.isEmpty()) {
+            message = String.format("%nFILTERED CHANGE SETS SUMMARY%n");
+            builder.append(message);
             builder.append(System.lineSeparator());
-        });
-        builder.append(System.lineSeparator());
+            Scope.getCurrentScope().getLog(ShowSummaryUtil.class).info(message);
+            filterSummaryMap.forEach((filterClass, count) -> {
+                String filterSummaryDetailMessage;
+                String formatString = (filterSummaryLabelMap.containsKey(filterClass) ? String.valueOf(filterSummaryLabelMap.get(filterClass)) : null);
+                if (formatString != null) {
+                    filterSummaryDetailMessage = String.format(formatString, count);
+                } else {
+                    filterSummaryDetailMessage = String.format("%-18s       %6d",
+                            filterClass.getSimpleName().replace("ChangeSetFilter", "Filter:"), count);
+                }
+                Scope.getCurrentScope().getLog(ShowSummaryUtil.class).info(filterSummaryDetailMessage);
+                builder.append(filterSummaryDetailMessage);
+                builder.append(System.lineSeparator());
+            });
+            builder.append(System.lineSeparator());
+        }
 
         try {
             Writer writer = createOutputWriter(outputStream);
