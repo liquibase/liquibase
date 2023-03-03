@@ -34,6 +34,8 @@ Optional Args:
   password (String) Password to use to connect to the database
     Default: null
     OBFUSCATED
+  showSummary (UpdateSummaryEnum) Type of update results summary to show.  Values can be 'off', 'summary', or 'verbose'.
+    Default: OFF
   username (String) Username to use to connect to the database
     Default: null
 """

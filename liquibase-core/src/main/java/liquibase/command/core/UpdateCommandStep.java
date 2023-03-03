@@ -65,7 +65,6 @@ public class UpdateCommandStep extends AbstractCliWrapperCommandStep {
         SHOW_SUMMARY = builder.argument("showSummary", UpdateSummaryEnum.class)
                 .description("Type of update results summary to show.  Values can be 'off', 'summary', or 'verbose'.")
                 .defaultValue(UpdateSummaryEnum.OFF)
-                .hidden()
                 .setValueHandler(value -> {
                     if (value == null) {
                         return null;
