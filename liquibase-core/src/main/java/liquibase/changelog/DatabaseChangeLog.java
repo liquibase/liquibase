@@ -535,6 +535,8 @@ public class DatabaseChangeLog implements Comparable<DatabaseChangeLog>, Conditi
                     }
 
                     String file = node.getChildValue(null, "file", String.class);
+                    Boolean relativeToChangelogFile = node.getChildValue(null, "relativeToChangelogFile", Boolean.FALSE);
+                    Resource resource;
 
                     if (file == null) {
                         // direct referenced property, no file
@@ -543,10 +545,16 @@ public class DatabaseChangeLog implements Comparable<DatabaseChangeLog>, Conditi
 
                         this.changeLogParameters.set(name, value, contextFilter, labels, dbms, global, this);
                     } else {
+                        // get relative path if specified
+                        if (relativeToChangelogFile) {
+                            resource = resourceAccessor.get(this.getPhysicalFilePath()).resolveSibling(file);
+                        } else {
+                            resource = resourceAccessor.get(file);
+                        }
+
                         // read properties from the file
                         Properties props = new Properties();
-                        Resource resource = resourceAccessor.get(file);
-                        if (resource == null) {
+                        if (!resource.exists()) {
                             Scope.getCurrentScope().getLog(getClass()).info("Could not open properties file " + file);
                         } else {
                             try (InputStream propertiesStream = resource.openInputStream()) {
