@@ -56,7 +56,11 @@ public abstract class AbstractSQLChange extends AbstractChange implements DbmsTa
     }
 
     @Override
-    @DatabaseChangeProperty(since = "3.0", exampleValue = "h2, oracle")
+    @DatabaseChangeProperty(since = "3.0", exampleValue = "h2, oracle",
+        description = "Specifies which database type(s) a changeset is to be used for. " +
+            "See valid database type names on Supported Databases docs page. Separate multiple databases with commas. " +
+            "Specify that a changeset is not applicable to a particular database type by prefixing with !. " +
+            "The keywords 'all' and 'none' are also available.")
     public String getDbms() {
         return dbms;
     }

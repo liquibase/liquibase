@@ -20,29 +20,9 @@ import java.io.InputStream;
 
 /**
  * Represents a Change for custom SQL stored in a File.
- * <p/>
  */
 @DatabaseChange(name = "sqlFile",
-        description = "The 'sqlFile' tag allows you to specify any sql statements and have it stored external in a " +
-                "file. It is useful for complex changes that are not supported through Liquibase's automated refactoring " +
-                "tags such as stored procedures.\n" +
-                "\n" +
-                "The sqlFile refactoring finds the file by searching in the following order:\n" +
-                "\n" +
-                "The file is searched for in the classpath. This can be manually set and by default the Liquibase " +
-                "startup script adds the current directory when run.\n" +
-                "The file is searched for using the file attribute as a file name. This allows absolute paths to be " +
-                "used or relative paths to the working directory to be used.\n" +
-                "The 'sqlFile' tag can also support multiline statements in the same file. Statements can either be " +
-                "split using a ; at the end of the last line of the SQL or a go on its own on the line between the " +
-                "statements can be used.Multiline SQL statements are also supported and only a ; or go statement " +
-                "will finish a statement, a new line is not enough. Files containing a single statement do not " +
-                "need to use a ; or go.\n" +
-                "\n" +
-                "The sql file can also contain comments of either of the following formats:\n" +
-                "\n" +
-                "A multiline comment that starts with /* and ends with */.\n" +
-                "A single line comment starting with <space>--<space> and finishing at the end of the line",
+        description = "Allows you to specify any SQL statement and have it stored external in a file.",
         priority = ChangeMetaData.PRIORITY_DEFAULT)
 public class SQLFileChange extends AbstractSQLChange {
 
@@ -79,7 +59,7 @@ public class SQLFileChange extends AbstractSQLChange {
      *
      * @return the encoding
      */
-    @DatabaseChangeProperty(exampleValue = "utf8")
+    @DatabaseChangeProperty(exampleValue = "utf8", description = "Encoding used in the file you specify in 'path'")
     public String getEncoding() {
         return encoding;
     }
@@ -91,7 +71,8 @@ public class SQLFileChange extends AbstractSQLChange {
         this.encoding = encoding;
     }
 
-
+    @DatabaseChangeProperty(description = "Specifies whether the file path is relative to the changelog file " +
+        "rather than looked up in the search path. Default: false.")
     public Boolean isRelativeToChangelogFile() {
         return relativeToChangelogFile;
     }

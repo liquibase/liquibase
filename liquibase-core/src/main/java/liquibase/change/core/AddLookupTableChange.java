@@ -32,9 +32,8 @@ import static liquibase.statement.SqlStatement.EMPTY_SQL_STATEMENT;
  * Extracts data from an existing column to create a lookup table.
  * A foreign key is created between the old column and the new lookup table.
  */
-@DatabaseChange(name="addLookupTable",
-        description = "Creates a lookup table containing values stored in a column and creates a foreign key to the new table.",
-        priority = ChangeMetaData.PRIORITY_DEFAULT, appliesTo = "column")
+@DatabaseChange(name = "addLookupTable", priority = ChangeMetaData.PRIORITY_DEFAULT, appliesTo = "column",
+        description = "Creates a lookup table containing values stored in a column and creates a foreign key to the new table.")
 public class AddLookupTableChange extends AbstractChange {
 
     private String existingTableCatalogName;
@@ -60,6 +59,7 @@ public class AddLookupTableChange extends AbstractChange {
         return errors;
     }
 
+    @DatabaseChangeProperty(description = "Name of the database catalog of the existing table")
     public String getExistingTableCatalogName() {
         return existingTableCatalogName;
     }
@@ -68,7 +68,7 @@ public class AddLookupTableChange extends AbstractChange {
         this.existingTableCatalogName = existingTableCatalogName;
     }
 
-    @DatabaseChangeProperty(mustEqualExisting ="column.relation.schema")
+    @DatabaseChangeProperty(mustEqualExisting ="column.relation.schema", description = "Name of the database schema of the existing table")
     public String getExistingTableSchemaName() {
         return existingTableSchemaName;
     }
@@ -77,7 +77,8 @@ public class AddLookupTableChange extends AbstractChange {
         this.existingTableSchemaName = existingTableSchemaName;
     }
 
-    @DatabaseChangeProperty(mustEqualExisting = "column.relation", description = "Name of the table containing the data to extract", exampleValue = "address")
+    @DatabaseChangeProperty(mustEqualExisting = "column.relation", description = "Name of the table containing the data to extract",
+        exampleValue = "address")
     public String getExistingTableName() {
         return existingTableName;
     }
@@ -86,7 +87,8 @@ public class AddLookupTableChange extends AbstractChange {
         this.existingTableName = existingTableName;
     }
 
-    @DatabaseChangeProperty(mustEqualExisting = "column", description = "Name of the column containing the data to extract", exampleValue = "state")
+    @DatabaseChangeProperty(mustEqualExisting = "column", description = "Name of the column containing the data to extract",
+        exampleValue = "state")
     public String getExistingColumnName() {
         return existingColumnName;
     }
@@ -95,8 +97,7 @@ public class AddLookupTableChange extends AbstractChange {
         this.existingColumnName = existingColumnName;
     }
 
-
-    @DatabaseChangeProperty(since = "3.0")
+    @DatabaseChangeProperty(since = "3.0", description = "Name of the database catalog of the table to create")
     public String getNewTableCatalogName() {
         return newTableCatalogName;
     }
@@ -105,6 +106,7 @@ public class AddLookupTableChange extends AbstractChange {
         this.newTableCatalogName = newTableCatalogName;
     }
 
+    @DatabaseChangeProperty(description = "Name of the database schema of the table to create")
     public String getNewTableSchemaName() {
         return newTableSchemaName;
     }
@@ -140,7 +142,8 @@ public class AddLookupTableChange extends AbstractChange {
         this.newColumnDataType = newColumnDataType;
     }
 
-    @DatabaseChangeProperty(description = "Name of the foreign-key constraint to create between the existing table and the lookup table", exampleValue = "fk_address_state")
+    @DatabaseChangeProperty(description = "Name of the foreign key constraint to create between the existing table and the lookup table",
+        exampleValue = "fk_address_state")
     public String getConstraintName() {
         return constraintName;
     }

@@ -1,14 +1,12 @@
 package liquibase.change.core;
 
-import liquibase.change.AbstractChange;
-import liquibase.change.ChangeMetaData;
-import liquibase.change.DatabaseChange;
+import liquibase.change.*;
 import liquibase.database.Database;
 import liquibase.exception.ValidationErrors;
 import liquibase.statement.SqlStatement;
 import liquibase.statement.core.SetTableRemarksStatement;
 
-@DatabaseChange(name="setTableRemarks", description = "Set remarks on a table", priority = ChangeMetaData.PRIORITY_DEFAULT)
+@DatabaseChange(name = "setTableRemarks", description = "Set remarks on a table", priority = ChangeMetaData.PRIORITY_DEFAULT)
 public class SetTableRemarksChange extends AbstractChange {
 
     private String catalogName;
@@ -31,6 +29,7 @@ public class SetTableRemarksChange extends AbstractChange {
         };
     }
 
+    @DatabaseChangeProperty(description = "Name of the database catalog")
     public String getCatalogName() {
         return catalogName;
     }
@@ -39,6 +38,7 @@ public class SetTableRemarksChange extends AbstractChange {
         this.catalogName = catalogName;
     }
 
+    @DatabaseChangeProperty(description = "Name of the database schema")
     public String getSchemaName() {
         return schemaName;
     }
@@ -47,6 +47,7 @@ public class SetTableRemarksChange extends AbstractChange {
         this.schemaName = schemaName;
     }
 
+    @DatabaseChangeProperty(description = "Name of the table to set remarks on")
     public String getTableName() {
         return tableName;
     }
@@ -55,6 +56,7 @@ public class SetTableRemarksChange extends AbstractChange {
         this.tableName = tableName;
     }
 
+    @DatabaseChangeProperty(description = "A brief descriptive comment")
     public String getRemarks() {
         return remarks;
     }

@@ -1,6 +1,19 @@
 package liquibase.change.core;
 
-import liquibase.change.*;
+import static liquibase.statement.SqlStatement.EMPTY_SQL_STATEMENT;
+
+import java.util.ArrayList;
+import java.util.List;
+
+import liquibase.change.AbstractChange;
+import liquibase.change.Change;
+import liquibase.change.ChangeMetaData;
+import liquibase.change.ChangeStatus;
+import liquibase.change.ChangeWithColumns;
+import liquibase.change.ColumnConfig;
+import liquibase.change.ConstraintsConfig;
+import liquibase.change.DatabaseChange;
+import liquibase.change.DatabaseChangeProperty;
 import liquibase.database.Database;
 import liquibase.database.core.MySQLDatabase;
 import liquibase.datatype.DataTypeFactory;
@@ -9,7 +22,11 @@ import liquibase.exception.UnexpectedLiquibaseException;
 import liquibase.exception.ValidationErrors;
 import liquibase.snapshot.SnapshotGeneratorFactory;
 import liquibase.sqlgenerator.SqlGeneratorFactory;
-import liquibase.statement.*;
+import liquibase.statement.AutoIncrementConstraint;
+import liquibase.statement.ForeignKeyConstraint;
+import liquibase.statement.NotNullConstraint;
+import liquibase.statement.SqlStatement;
+import liquibase.statement.UniqueConstraint;
 import liquibase.statement.core.CreateTableStatement;
 import liquibase.statement.core.SetColumnRemarksStatement;
 import liquibase.statement.core.SetTableRemarksStatement;
@@ -19,15 +36,10 @@ import liquibase.structure.core.Table;
 import liquibase.util.ObjectUtil;
 import liquibase.util.StringUtil;
 
-import java.util.ArrayList;
-import java.util.List;
-
-import static liquibase.statement.SqlStatement.EMPTY_SQL_STATEMENT;
-
 /**
  * Creates a new table.
  */
-@DatabaseChange(name="createTable", description = "Create Table", priority = ChangeMetaData.PRIORITY_DEFAULT)
+@DatabaseChange(name = "createTable", description = "Creates a table", priority = ChangeMetaData.PRIORITY_DEFAULT)
 public class CreateTableChange extends AbstractChange implements ChangeWithColumns<ColumnConfig> {
 
     private List<ColumnConfig> columns;
@@ -223,7 +235,7 @@ public class CreateTableChange extends AbstractChange implements ChangeWithColum
     }
 
     @Override
-    @DatabaseChangeProperty(requiredForDatabase = "all")
+    @DatabaseChangeProperty(requiredForDatabase = "all", description = "Column definitions")
     public List<ColumnConfig> getColumns() {
         if (columns == null) {
             return new ArrayList<>();
@@ -236,7 +248,7 @@ public class CreateTableChange extends AbstractChange implements ChangeWithColum
         this.columns = columns;
     }
 
-    @DatabaseChangeProperty(since = "3.0")
+    @DatabaseChangeProperty(since = "3.0", description = "Name of the database catalog")
     public String getCatalogName() {
         return catalogName;
     }
@@ -245,6 +257,7 @@ public class CreateTableChange extends AbstractChange implements ChangeWithColum
         this.catalogName = catalogName;
     }
 
+    @DatabaseChangeProperty(description = "Name of the database schema")
     public String getSchemaName() {
         return schemaName;
     }
@@ -253,7 +266,7 @@ public class CreateTableChange extends AbstractChange implements ChangeWithColum
         this.schemaName = schemaName;
     }
 
-    @DatabaseChangeProperty()
+    @DatabaseChangeProperty(description = "Name of the table to create")
     public String getTableName() {
         return tableName;
     }
@@ -262,7 +275,7 @@ public class CreateTableChange extends AbstractChange implements ChangeWithColum
         this.tableName = tableName;
     }
 
-
+    @DatabaseChangeProperty(description = "Tablespace to create the table in. Corresponds to file group in mssql")
     public String getTablespace() {
         return tablespace;
     }
@@ -276,6 +289,7 @@ public class CreateTableChange extends AbstractChange implements ChangeWithColum
         columns.add(column);
     }
 
+    @DatabaseChangeProperty(description = "A brief descriptive comment")
     public String getRemarks() {
         return remarks;
     }
@@ -294,6 +308,7 @@ public class CreateTableChange extends AbstractChange implements ChangeWithColum
         return STANDARD_CHANGELOG_NAMESPACE;
     }
 
+    @DatabaseChangeProperty(description = "In some databases, specifies the type of the table (column-based, row-based...)")
     public String getTableType() {
         return tableType;
     }
