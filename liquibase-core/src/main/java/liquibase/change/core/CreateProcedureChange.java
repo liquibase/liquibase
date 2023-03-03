@@ -19,7 +19,6 @@ import liquibase.util.StringUtil;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.UnsupportedEncodingException;
 import java.nio.charset.Charset;
 import java.util.Map;
 
@@ -122,7 +121,7 @@ public class CreateProcedureChange extends AbstractChange implements DbmsTargete
         this.procedureText = procedureText;
     }
 
-    @DatabaseChangeProperty(isChangeProperty = false,
+    @DatabaseChangeProperty(
         description = "The SQL creating the procedure. You need to define either this attribute or 'path'. " +
             "procedureText is not supported in the XML format; however, you can specify the procedure SQL in a nested format.",
             serializationType = SerializationType.DIRECT_VALUE)
