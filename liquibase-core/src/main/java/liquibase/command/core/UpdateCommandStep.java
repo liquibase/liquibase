@@ -104,6 +104,7 @@ public class UpdateCommandStep extends AbstractCommandStep implements CleanUpCom
     @Override
     public void run(CommandResultsBuilder resultsBuilder) throws Exception {
         Scope.getCurrentScope().addMdcValue(MdcKey.LIQUIBASE_OPERATION, COMMAND_NAME[0]);
+        Scope.getCurrentScope().addMdcValue(MdcKey.LIQUIBASE_COMMAND_NAME, COMMAND_NAME[0]);
         CommandScope commandScope = resultsBuilder.getCommandScope();
         String changeLogFile = commandScope.getArgumentValue(CHANGELOG_FILE_ARG);
         Database database = (Database) commandScope.getDependency(Database.class);
