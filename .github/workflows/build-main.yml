@@ -26,18 +26,15 @@ jobs:
           distribution: 'temurin'
           cache: 'maven'
           server-id: github
-      - name: Set up Maven
-        uses: stCarolas/setup-maven@v4.5
-        with:
-          maven-version: '3.8.7'
+
 
       # Version artifact based off of branch and commit SHA.
       - name: Version Artifact
-        run: mvn versions:set -DnewVersion="master-SNAPSHOT"
+        run: ./mvnw  versions:set -DnewVersion="master-SNAPSHOT"
 
       # Publish to GitHub Packages
       - name: Publish package
-        run: mvn -B clean deploy -DskipTests=true
+        run: ./mvnw  -B clean deploy -DskipTests=true
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
@@ -58,17 +55,14 @@ jobs:
           distribution: 'temurin'
           cache: 'maven'
           server-id: github
-      - name: Set up Maven
-        uses: stCarolas/setup-maven@v4.5
-        with:
-          maven-version: '3.8.7'
+
 
       # Version artifact based off of branch and commit SHA.
       - name: Version Artifact
-        run: mvn versions:set -DnewVersion="$(git rev-parse --short HEAD)-SNAPSHOT"
+        run: ./mvnw  versions:set -DnewVersion="$(git rev-parse --short HEAD)-SNAPSHOT"
 
       # Publish to GitHub Packages
       - name: Publish package
-        run: mvn -B clean deploy -DskipTests=true
+        run: ./mvnw  -B clean deploy -DskipTests=true
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
