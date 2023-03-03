@@ -19,7 +19,7 @@ import liquibase.util.StringUtil;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.nio.charset.Charset;
+import java.io.UnsupportedEncodingException;
 import java.util.Map;
 
 @DatabaseChange(name = "createProcedure", description = "Defines a stored procedure.", priority = ChangeMetaData.PRIORITY_DEFAULT)
