@@ -31,7 +31,7 @@ jobs:
       - name: Set up Maven
         uses: stCarolas/setup-maven@v4.5
         with:
-          maven-version: "$MAVEN_VERSION"
+          maven-version: env.MAVEN_VERSION
 
       # Version artifact based off of branch and commit SHA.
       - name: Version Artifact
@@ -63,7 +63,7 @@ jobs:
       - name: Set up Maven
         uses: stCarolas/setup-maven@v4.5
         with:
-          maven-version: "$MAVEN_VERSION"
+          maven-version: env.MAVEN_VERSION
 
       # Version artifact based off of branch and commit SHA.
       - name: Version Artifact

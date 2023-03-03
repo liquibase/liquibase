@@ -217,7 +217,7 @@ jobs:
       - name: Set up Maven
         uses: stCarolas/setup-maven@v4.5
         with:
-          maven-version: "$MAVEN_VERSION"
+          maven-version: env.MAVEN_VERSION
 
       - name: Version artifact
         run: mvn versions:set -DnewVersion="${{ needs.setup.outputs.version }}"

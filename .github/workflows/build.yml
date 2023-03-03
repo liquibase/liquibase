@@ -184,7 +184,7 @@ jobs:
       - name: Set up Maven
         uses: stCarolas/setup-maven@v4.5
         with:
-          maven-version: "$MAVEN_VERSION"
+          maven-version: env.MAVEN_VERSION
       - name: Build & Test
         run: |
           mvn -B "-Dbuild.repository.owner=${{ needs.setup.outputs.thisRepositoryOwner }}" "-Dbuild.repository.name=${{ needs.setup.outputs.thisRepositoryName }}" "-Dbuild.branch=${{ needs.setup.outputs.thisBranchName }}" "-Dbuild.number=${{ github.run_number }}" "-Dbuild.commit=${{ needs.setup.outputs.thisSha }}" "-DtrimStackTrace=false" -pl '!liquibase-dist' clean test package surefire-report:report
@@ -229,7 +229,7 @@ jobs:
       - name: Set up Maven
         uses: stCarolas/setup-maven@v4.5
         with:
-          maven-version: "$MAVEN_VERSION"
+          maven-version: env.MAVEN_VERSION
       - name: Cache SonarCloud packages
         uses: actions/cache@v3.2.6
         with:
@@ -282,7 +282,7 @@ jobs:
       - name: Set up Maven
         uses: stCarolas/setup-maven@v4.5
         with:
-          maven-version: "$MAVEN_VERSION"
+          maven-version: env.MAVEN_VERSION
       - name: Restore Built Code Cache
         uses: actions/cache@v3.2.6
         with:
@@ -343,7 +343,7 @@ jobs:
       - name: Set up Maven
         uses: stCarolas/setup-maven@v4.5
         with:
-          maven-version: "$MAVEN_VERSION"
+          maven-version: env.MAVEN_VERSION
 
       - name: Download liquibase-commercial
         uses: liquibase/action-download-artifact@v2-liquibase
