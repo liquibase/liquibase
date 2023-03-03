@@ -841,6 +841,8 @@ public class ChangeSet implements Conditional, ChangeLogChild {
                 database.setAutoCommit(!runInTransaction);
             }
 
+            executor.modifyChangeSet(this);
+
             if (hasCustomRollbackChanges()) {
                 final List<SqlStatement> statements = new LinkedList<>();
                 for (Change change : rollback.getChanges()) {
