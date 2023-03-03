@@ -24,10 +24,18 @@ public class SnakeYamlUtil {
     }
 
     /**
-     * Safely set the default tag inspector  when configuring a new SnakeYaml instance.
+     * Safely set the default tag inspector when configuring a new SnakeYaml instance.
      */
-    public static void setDefaultTagInspector(LoaderOptions loaderOptions) {
+    public static void setDefaultTagInspector(LoaderOptions loaderOptions) { // pro uses this method
         safelyCallNewSnakeYamlMethod(() -> loaderOptions.setTagInspector(tag -> true));
+    }
+
+    /**
+     * Safely set configuration to process comments when configuring a new SnakeYaml instance. This method
+     * had the return type changed.
+     */
+    public static void setProcessCommentsSafely(LoaderOptions loaderOptions, boolean enable) {
+        safelyCallNewSnakeYamlMethod(() -> loaderOptions.setProcessComments(enable));
     }
 
     /**
