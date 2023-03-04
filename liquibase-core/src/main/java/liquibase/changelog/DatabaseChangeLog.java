@@ -555,7 +555,7 @@ public class DatabaseChangeLog implements Comparable<DatabaseChangeLog>, Conditi
                         Properties props = new Properties();
                         if (!resource.exists()) {
                             if (errorIfMissingOrEmpty) {
-                                throw new UnexpectedLiquibaseException("Could not open properties file '" + file + "' and errorIfMissingOrEmpty is true");
+                                throw new UnexpectedLiquibaseException("Property has errorIfMissingOrEmpty set to true and could not open properties file '" + file + "'");
                             }
                             else {
                                 Scope.getCurrentScope().getLog(getClass()).info("Could not open properties file " + file);
