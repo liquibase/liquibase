@@ -6,6 +6,7 @@ import liquibase.Scope
 import liquibase.change.core.CreateTableChange
 import liquibase.change.core.RawSQLChange
 import liquibase.exception.SetupException
+import liquibase.exception.UnexpectedLiquibaseException
 import liquibase.logging.core.BufferedLogService
 import liquibase.parser.ChangeLogParserConfiguration
 import liquibase.parser.core.ParsedNode
@@ -517,7 +518,7 @@ http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbch
 
         rootChangeLog.load(new ParsedNode(null, "databaseChangeLog")
                 .addChildren([changeSet: [id: "1", author: "nvoxland", createTable: [tableName: "test_table", schemaName: "test_schema"]]])
-                .addChildren([property: [file: "file.properties", relativeToChangelogFile: "true"]]),
+                .addChildren([property: [file: "file.properties", relativeToChangelogFile: "true", errorIfMissingOrEmpty: "true"]]),
                 propertiesResourceAccessor)
 
         then:
@@ -534,11 +535,91 @@ http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbch
 
         rootChangeLog.load(new ParsedNode(null, "databaseChangeLog")
                 .addChildren([changeSet: [id: "1", author: "nvoxland", createTable: [tableName: "test_table", schemaName: "test_schema"]]])
-                .addChildren([property: [file: "file.properties"]]),
+                .addChildren([property: [file: "file.properties", errorIfMissingOrEmpty: "false"]]),
                 propertiesResourceAccessor)
 
         then:
         rootChangeLog.getChangeLogParameters().hasValue("context", rootChangeLog) == false
+    }
+
+    @Unroll
+    def "an error is thrown when properties file is not found and is set to error"() {
+        when:
+        def propertiesResourceAccessor = new MockResourceAccessor(["com/example/file.properties": testProperties])
+
+        def rootChangeLog = new DatabaseChangeLog("com/example/root.xml")
+        rootChangeLog.setChangeLogParameters(new ChangeLogParameters())
+
+        rootChangeLog.load(new ParsedNode(null, "databaseChangeLog")
+                .addChildren([changeSet: [id: "1", author: "nvoxland", createTable: [tableName: "test_table", schemaName: "test_schema"]]])
+                .addChildren([property: [errorIfMissingOrEmpty: errorIfMissingOrEmptyDef, relativeToChangelogFile: relativeToChangelogFileDef, file: fileDef]]),
+                propertiesResourceAccessor)
+
+        then:
+        def e = thrown(UnexpectedLiquibaseException)
+        assert e.getMessage().startsWith("Property has errorIfMissingOrEmpty set to true and could not open properties file '")
+
+        where:
+        errorIfMissingOrEmptyDef    | relativeToChangelogFileDef    | fileDef
+        null                        | null                          | "file.properties"
+        null                        | false                         | "file.properties"
+        null                        | true                          | "com/example/file.properties"
+        true                        | null                          | "file.properties"
+        true                        | false                         | "file.properties"
+        true                        | true                          | "com/example/file.properties"
+    }
+
+    @Unroll
+    def "no error is thrown when properties file is not found and is set to not error and property is not set"() {
+        when:
+        def propertiesResourceAccessor = new MockResourceAccessor(["com/example/file.properties": testProperties])
+
+        def rootChangeLog = new DatabaseChangeLog("com/example/root.xml")
+        rootChangeLog.setChangeLogParameters(new ChangeLogParameters())
+
+        rootChangeLog.load(new ParsedNode(null, "databaseChangeLog")
+                .addChildren([changeSet: [id: "1", author: "nvoxland", createTable: [tableName: "test_table", schemaName: "test_schema"]]])
+                .addChildren([property: [errorIfMissingOrEmpty: errorIfMissingOrEmptyDef, relativeToChangelogFile: relativeToChangelogFileDef, file: fileDef]]),
+                propertiesResourceAccessor)
+
+        then:
+        rootChangeLog.getChangeLogParameters().hasValue("context", rootChangeLog) == false
+
+        where:
+        errorIfMissingOrEmptyDef    | relativeToChangelogFileDef    | fileDef
+        false                       | null                          | "file.properties"
+        false                       | false                         | "file.properties"
+        false                       | true                          | "com/example/file.properties"
+    }
+
+    @Unroll
+    def "no error is thrown when properties file is not found and is set to not error and property is not set"() {
+        when:
+        def propertiesResourceAccessor = new MockResourceAccessor(["com/example/file.properties": testProperties])
+
+        def rootChangeLog = new DatabaseChangeLog("com/example/root.xml")
+        rootChangeLog.setChangeLogParameters(new ChangeLogParameters())
+
+        rootChangeLog.load(new ParsedNode(null, "databaseChangeLog")
+                .addChildren([changeSet: [id: "1", author: "nvoxland", createTable: [tableName: "test_table", schemaName: "test_schema"]]])
+                .addChildren([property: [errorIfMissingOrEmpty: errorIfMissingOrEmptyDef, relativeToChangelogFile: relativeToChangelogFileDef, file: fileDef]]),
+                propertiesResourceAccessor)
+
+        then:
+        rootChangeLog.getChangeLogParameters().hasValue("context", rootChangeLog)
+        rootChangeLog.getChangeLogParameters().getValue("context", rootChangeLog) == "test"
+
+        where:
+        errorIfMissingOrEmptyDef    | relativeToChangelogFileDef    | fileDef
+        null                        | null                          | "com/example/file.properties"
+        null                        | false                         | "com/example/file.properties"
+        null                        | true                          | "file.properties"
+        true                        | null                          | "com/example/file.properties"
+        true                        | false                         | "com/example/file.properties"
+        true                        | true                          | "file.properties"
+        false                       | null                          | "com/example/file.properties"
+        false                       | false                         | "com/example/file.properties"
+        false                       | true                          | "file.properties"
     }
 
     @Unroll
