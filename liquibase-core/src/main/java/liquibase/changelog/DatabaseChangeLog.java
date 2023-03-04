@@ -534,6 +534,7 @@ public class DatabaseChangeLog implements Comparable<DatabaseChangeLog>, Conditi
 
                     String file = node.getChildValue(null, "file", String.class);
                     Boolean relativeToChangelogFile = node.getChildValue(null, "relativeToChangelogFile", Boolean.FALSE);
+                    Boolean errorIfMissingOrEmpty = node.getChildValue(null, "errorIfMissingOrEmpty", Boolean.TRUE);
                     Resource resource;
 
                     if (file == null) {
@@ -553,7 +554,12 @@ public class DatabaseChangeLog implements Comparable<DatabaseChangeLog>, Conditi
                         // read properties from the file
                         Properties props = new Properties();
                         if (!resource.exists()) {
-                            Scope.getCurrentScope().getLog(getClass()).info("Could not open properties file " + file);
+                            if (errorIfMissingOrEmpty) {
+                                throw new UnexpectedLiquibaseException("Could not open properties file '" + file + "' and errorIfMissingOrEmpty is true");
+                            }
+                            else {
+                                Scope.getCurrentScope().getLog(getClass()).info("Could not open properties file " + file);
+                            }
                         } else {
                             try (InputStream propertiesStream = resource.openInputStream()) {
                                 props.load(propertiesStream);
