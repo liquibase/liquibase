@@ -31,33 +31,33 @@ public abstract class BaseSerializerFactory<T extends LiquibaseSerializer> {
     }
 
     public T getSerializer(String fileNameOrExtension) {
-        List<T> Ts = getSerializers(fileNameOrExtension);
-        if (Ts.isEmpty()) {
+        List<T> forExtension = getSerializers(fileNameOrExtension);
+        if (forExtension.isEmpty()) {
             throw new RuntimeException("No serializers associated with the filename or extension '" + fileNameOrExtension + "'");
         }
-        return Ts.get(0);
+        return forExtension.get(0);
     }
 
     public void register(T serializer) {
         for (String extensionPtr : serializer.getValidFileExtensions()) {
-            serializers.compute(extensionPtr, (extension, serializers) -> {
-                if (serializers == null) {
-                    serializers = new ArrayList<>();
+            serializers.compute(extensionPtr, (extension, forExtension) -> {
+                if (forExtension == null) {
+                    forExtension = new ArrayList<>();
                 }
-                serializers.add(serializer);
-                serializers.sort(PrioritizedService.COMPARATOR);
-                return serializers;
+                forExtension.add(serializer);
+                forExtension.sort(PrioritizedService.COMPARATOR);
+                return forExtension;
             });
         }
     }
 
     public void unregister(T serializer) {
         for (String extensionPtr : serializers.keySet()) {
-            serializers.compute(extensionPtr, (extension, serializers) -> {
-                if (serializers == null) return null;
-                serializers.removeIf(Predicate.isEqual(serializer));
-                if (serializers.isEmpty()) return null;
-                return serializers;
+            serializers.compute(extensionPtr, (extension, forExtension) -> {
+                if (forExtension == null) return null;
+                forExtension.removeIf(Predicate.isEqual(serializer));
+                if (forExtension.isEmpty()) return null;
+                return forExtension;
             });
         }
     }

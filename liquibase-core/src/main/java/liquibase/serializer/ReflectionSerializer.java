@@ -54,7 +54,7 @@ public class ReflectionSerializer {
     }
 
     private Field findField(Object object, String field) {
-        Field foundField = getFieldMap(object).get(field);;
+        Field foundField = getFieldMap(object).get(field);
         if (foundField == null) {
             throw new UnexpectedLiquibaseException("No field " + field + " on " + object.getClass());
         }
