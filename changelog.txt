@@ -1,7 +1,7 @@
 Liquibase Core Changelog
 ===========================================
 
-Changes in version Liquibase v4.19.1 (2023.02.24)
+Changes in version Liquibase v4.19.1 (2023.02.28)
 
 * Fixes generate-changelog table/view comment and table/view column comment generation for MSSQL by @abrackx in https://github.com/liquibase/liquibase/pull/3563
 * Publish liquibase-extension-testing to github packages  by @abrackx in https://github.com/liquibase/liquibase/pull/3697
@@ -88,6 +88,8 @@ Changes in version Liquibase v4.19.1 (2023.02.24)
 * Avoid global mutable state of Non-final fields in enumeration types. by @arturobernalg in https://github.com/liquibase/liquibase/pull/3727
 * Use constants instead of arrays with known lengths of zero by @arturobernalg in https://github.com/liquibase/liquibase/pull/3716
 * Simplify lambda expressions when possible by @arturobernalg in https://github.com/liquibase/liquibase/pull/3736
+* Skip MDC logging for MarkChangeSetRanStatement SQLs by @filipelautert in https://github.com/liquibase/liquibase/pull/3869
+* Fix null pointers on table output by @filipelautert in https://github.com/liquibase/liquibase/pull/3868
 
 ## New Contributors
 * @zpanderson made their first contribution in https://github.com/liquibase/liquibase/pull/1834
@@ -197,11 +199,11 @@ Changes in version Liquibase v4.18.0 (2022.11.30)
 - Use together for increased security and convenience of centralized properties
 
 * [PRO]Security
-- Vaults offer much greater security than defaults files or environment variables 
+- Vaults offer much greater security than defaults files for environment variables
 
 * [PRO] Centralization
 - Secure your database credentials, Pro license key, secure urls, and more in one central location.
-- Update your critical properties in one place, and all linked tools and jobs use the new values .
+- Update your critical properties in one place, and all linked tools and jobs use the new values.
 
 * [PRO] `rollback-on-error` command argument
 - When set to `true` will attempt to rollback a failed update operation.
