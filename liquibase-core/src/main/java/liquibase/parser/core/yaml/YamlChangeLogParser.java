@@ -12,6 +12,7 @@ import liquibase.parser.ChangeLogParser;
 import liquibase.parser.core.ParsedNode;
 import liquibase.resource.Resource;
 import liquibase.resource.ResourceAccessor;
+import liquibase.util.FileUtil;
 import org.yaml.snakeyaml.Yaml;
 import org.yaml.snakeyaml.constructor.SafeConstructor;
 
@@ -128,10 +129,10 @@ public class YamlChangeLogParser extends YamlParser implements ChangeLogParser {
 
         if (!resource.exists()) {
             if (errorIfMissingOrEmpty) {
-                throw new UnexpectedLiquibaseException("Property has errorIfMissingOrEmpty set to true and could not open properties file '" + file + "'");
+                throw new UnexpectedLiquibaseException(FileUtil.getFileNotFoundMessage(file));
             }
             else {
-                log.info("Could not open properties file " + file);
+                Scope.getCurrentScope().getLog(getClass()).warning(FileUtil.getFileNotFoundMessage(file));
             }
         } else {
             try (InputStream stream = resource.openInputStream()) {

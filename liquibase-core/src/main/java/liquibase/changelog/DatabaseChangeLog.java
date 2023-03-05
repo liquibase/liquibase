@@ -451,6 +451,7 @@ public class DatabaseChangeLog implements Comparable<DatabaseChangeLog>, Conditi
                 try {
                     include(path,
                             node.getChildValue(null, "relativeToChangelogFile", false),
+                            node.getChildValue(null, "errorIfMissingOrEmpty", true),
                             resourceAccessor,
                             includeContextFilter,
                             labels,
@@ -555,10 +556,10 @@ public class DatabaseChangeLog implements Comparable<DatabaseChangeLog>, Conditi
                         Properties props = new Properties();
                         if (!resource.exists()) {
                             if (errorIfMissingOrEmpty) {
-                                throw new UnexpectedLiquibaseException("Property has errorIfMissingOrEmpty set to true and could not open properties file '" + file + "'");
+                                throw new UnexpectedLiquibaseException(FileUtil.getFileNotFoundMessage(file));
                             }
                             else {
-                                Scope.getCurrentScope().getLog(getClass()).info("Could not open properties file " + file);
+                                Scope.getCurrentScope().getLog(getClass()).warning(FileUtil.getFileNotFoundMessage(file));
                             }
                         } else {
                             try (InputStream propertiesStream = resource.openInputStream()) {
@@ -739,7 +740,7 @@ public class DatabaseChangeLog implements Comparable<DatabaseChangeLog>, Conditi
             Scope.child(Collections.singletonMap(SEEN_CHANGELOGS_PATHS_SCOPE_KEY, seenChangelogPaths), () -> {
                 for (Resource resource : resources) {
                     Scope.getCurrentScope().getLog(getClass()).info("Reading resource: " + resource);
-                    include(resource.getPath(), false, resourceAccessor, includeContextFilter,
+                    include(resource.getPath(), false, errorIfMissingOrEmpty, resourceAccessor, includeContextFilter,
                             labels, ignore, OnUnknownFileFormat.WARN, modifyChangeSets);
                 }
             });
@@ -754,6 +755,7 @@ public class DatabaseChangeLog implements Comparable<DatabaseChangeLog>, Conditi
     @Deprecated
     public boolean include(String fileName,
                            boolean isRelativePath,
+                           boolean errorIfMissingOrEmpty,
                            ResourceAccessor resourceAccessor,
                            ContextExpression includeContextFilter,
                            LabelExpression labelExpression,
@@ -767,6 +769,7 @@ public class DatabaseChangeLog implements Comparable<DatabaseChangeLog>, Conditi
 
         return include(fileName,
                 isRelativePath,
+                errorIfMissingOrEmpty,
                 resourceAccessor,
                 includeContextFilter,
                 labels,
@@ -779,28 +782,31 @@ public class DatabaseChangeLog implements Comparable<DatabaseChangeLog>, Conditi
      */
     public boolean include(String fileName,
                            boolean isRelativePath,
+                           boolean errorIfMissingOrEmpty,
                            ResourceAccessor resourceAccessor,
                            ContextExpression includeContextFilter,
                            Labels labels,
                            Boolean ignore,
                            boolean logEveryUnknownFileFormat)
             throws LiquibaseException {
-        return include(fileName, isRelativePath, resourceAccessor, includeContextFilter, labels, ignore, logEveryUnknownFileFormat ? OnUnknownFileFormat.WARN : OnUnknownFileFormat.SKIP);
+        return include(fileName, isRelativePath, errorIfMissingOrEmpty, resourceAccessor, includeContextFilter, labels, ignore, logEveryUnknownFileFormat ? OnUnknownFileFormat.WARN : OnUnknownFileFormat.SKIP);
     }
 
     public boolean include(String fileName,
                            boolean isRelativePath,
+                           boolean errorIfMissingOrEmpty,
                            ResourceAccessor resourceAccessor,
                            ContextExpression includeContextFilter,
                            Labels labels,
                            Boolean ignore,
                            OnUnknownFileFormat onUnknownFileFormat)
             throws LiquibaseException {
-        return include(fileName, isRelativePath, resourceAccessor, includeContextFilter, labels, ignore, onUnknownFileFormat, new ModifyChangeSets(null));
+        return include(fileName, isRelativePath, errorIfMissingOrEmpty, resourceAccessor, includeContextFilter, labels, ignore, onUnknownFileFormat, new ModifyChangeSets(null));
     }
 
     public boolean include(String fileName,
                            boolean isRelativePath,
+                           boolean errorIfMissingOrEmpty,
                            ResourceAccessor resourceAccessor,
                            ContextExpression includeContextFilter,
                            Labels labels,
@@ -831,7 +837,10 @@ public class DatabaseChangeLog implements Comparable<DatabaseChangeLog>, Conditi
             PARENT_CHANGE_LOG.set(this);
             try {
                 if(!resourceAccessor.get(fileName).exists()) {
-                    if (ChangeLogParserConfiguration.ON_MISSING_INCLUDE_FILE.getCurrentValue().equals(ChangeLogParserConfiguration.MissingIncludeConfiguration.WARN)) {
+                    if (
+                            ChangeLogParserConfiguration.ON_MISSING_INCLUDE_FILE.getCurrentValue().equals(ChangeLogParserConfiguration.MissingIncludeConfiguration.WARN)
+                                    || errorIfMissingOrEmpty == false
+                    ) {
                         Scope.getCurrentScope().getLog(getClass()).warning(FileUtil.getFileNotFoundMessage(fileName));
                         return false;
                     } else {
@@ -898,7 +907,7 @@ public class DatabaseChangeLog implements Comparable<DatabaseChangeLog>, Conditi
             @Override
             public int compare(String o1, String o2) {
                 //by ignoring WEB-INF/classes in path all changelog Files independent
-                //whehther they are in a WAR or in a JAR are order following the same rule
+                //whether they are in a WAR or in a JAR are order following the same rule
                 return o1.replace("WEB-INF/classes/", "").compareTo(o2.replace("WEB-INF/classes/", ""));
             }
         };

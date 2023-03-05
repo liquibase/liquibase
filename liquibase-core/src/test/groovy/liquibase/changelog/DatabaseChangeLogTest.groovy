@@ -321,8 +321,8 @@ create view sql_view as select * from sql_table;'''
         ])
 
         def rootChangeLog = new DatabaseChangeLog("com/example/root.xml")
-        rootChangeLog.include("com/example/test1.xml", false, resourceAccessor, new ContextExpression("context1"), new Labels("label1"), false, false)
-        rootChangeLog.include("com/example/test2.xml", false, resourceAccessor, new ContextExpression("context2"), new Labels("label2"), true, false)
+        rootChangeLog.include("com/example/test1.xml", false, true, resourceAccessor, new ContextExpression("context1"), new Labels("label1"), false, false)
+        rootChangeLog.include("com/example/test2.xml", false, true, resourceAccessor, new ContextExpression("context2"), new Labels("label2"), true, false)
 
         def test1ChangeLog = rootChangeLog.getChangeSet("com/example/test1.xml", "nvoxland", "1").getChangeLog()
         def test2ChangeLog = rootChangeLog.getChangeSet("com/example/test2.xml", "nvoxland", "1").getChangeLog()
@@ -557,7 +557,7 @@ http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbch
 
         then:
         def e = thrown(UnexpectedLiquibaseException)
-        assert e.getMessage().startsWith("Property has errorIfMissingOrEmpty set to true and could not open properties file '")
+        assert e.getMessage() == FileUtil.getFileNotFoundMessage(fileDef)
 
         where:
         errorIfMissingOrEmptyDef    | relativeToChangelogFileDef    | fileDef
@@ -663,12 +663,65 @@ http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbch
             @Override
             void run() throws Exception {
                     rootChangeLog
-                            .include(includedChangeLogPath, false, resourceAccessor, null, null, false, null, null);
+                            .include(includedChangeLogPath, false, true, resourceAccessor, null, null, false, null, null);
             }
         })
 
         then:
         bufferLog.getLogAsString(Level.WARNING).contains(FileUtil.getFileNotFoundMessage(includedChangeLogPath));
+    }
+
+    def "warning message is logged when changelog include fails because file does not exist and not set to error"() {
+        when:
+        def rootChangeLogPath = "com/example/root.xml"
+        def includedChangeLogPath = "com/example/test1.xml"
+        def resourceAccessor = new MockResourceAccessor([(rootChangeLogPath): test1Xml])
+
+        def rootChangeLog = new DatabaseChangeLog(rootChangeLogPath)
+        rootChangeLog.load(new ParsedNode(null, "databaseChangeLog"), resourceAccessor)
+
+        BufferedLogService bufferLog = new BufferedLogService()
+
+        Scope.child([
+                (Scope.Attr.logService.name())                                 : bufferLog,
+                (ChangeLogParserConfiguration.ON_MISSING_INCLUDE_FILE.getKey()): ChangeLogParserConfiguration.MissingIncludeConfiguration.FAIL,
+        ], new Scope.ScopedRunner() {
+            @Override
+            void run() throws Exception {
+                rootChangeLog
+                        .include(includedChangeLogPath, false, false, resourceAccessor, null, null, false, null, null);
+            }
+        })
+
+        then:
+        bufferLog.getLogAsString(Level.WARNING).contains(FileUtil.getFileNotFoundMessage(includedChangeLogPath));
+    }
+
+    def "warning message is logged when changelog include fails because file does not exist and not set to error"() {
+        when:
+        def rootChangeLogPath = "com/example"
+        def rootChangeLogFile = rootChangeLogPath + "/root.xml"
+        def includedChangeLogFile = "test1.xml"
+        def resourceAccessor = new MockResourceAccessor([(rootChangeLogFile): test1Xml])
+
+        def rootChangeLog = new DatabaseChangeLog(rootChangeLogFile)
+        rootChangeLog.load(new ParsedNode(null, "databaseChangeLog"), resourceAccessor)
+
+        BufferedLogService bufferLog = new BufferedLogService()
+
+        Scope.child([
+                (Scope.Attr.logService.name())                                 : bufferLog,
+                (ChangeLogParserConfiguration.ON_MISSING_INCLUDE_FILE.getKey()): ChangeLogParserConfiguration.MissingIncludeConfiguration.FAIL,
+        ], new Scope.ScopedRunner() {
+            @Override
+            void run() throws Exception {
+                rootChangeLog
+                        .include(includedChangeLogFile, true, false, resourceAccessor, null, null, false, null, null);
+            }
+        })
+
+        then:
+        bufferLog.getLogAsString(Level.WARNING).contains(FileUtil.getFileNotFoundMessage(rootChangeLogPath + "/" + includedChangeLogFile));
     }
 
 }
