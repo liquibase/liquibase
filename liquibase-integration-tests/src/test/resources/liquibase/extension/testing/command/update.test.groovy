@@ -59,6 +59,38 @@ Optional Args:
 
     }
 
+    run "Happy path with a simple changelog showing summary", {
+        arguments = [
+                url          : { it.url },
+                username     : { it.username },
+                password     : { it.password },
+                changelogFile: "changelogs/h2/complete/simple.changelog.xml",
+                showSummary: "SUMMARY"
+        ]
+
+        expectedResults = [
+                statusCode: 0
+        ]
+
+        expectedDatabaseContent = [
+                "txt": [Pattern.compile(".*liquibase.structure.core.Table:.*ADDRESS.*", Pattern.MULTILINE | Pattern.DOTALL | Pattern.CASE_INSENSITIVE),
+                        Pattern.compile(".*liquibase.structure.core.Table:.*ADDRESS.*columns:.*city.*", Pattern.MULTILINE | Pattern.DOTALL | Pattern.CASE_INSENSITIVE)]
+        ]
+
+        outputFile = new File("target/test-classes/happyPath.txt")
+
+        expectedFileContent = [ "target/test-classes/happyPath.txt":
+                [
+                  "UPDATE SUMMARY",
+                  "Run:                         41",
+                  "Previously run:               0",
+                  "Filtered out:                 0",
+                  "-------------------------------",
+                  "Total change sets:           41",
+                ]
+        ]
+    }
+
     run "Happy path with an ignored change set", {
         arguments = [
                 url          : { it.url },
