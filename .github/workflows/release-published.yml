@@ -243,7 +243,8 @@ jobs:
           # Relative path under $GITHUB_WORKSPACE to place the repository
           path: liquibase-core  
           repository: "liquibase/liquibase"
-    
+          content-type: application/octet-stream
+
       - name: Download liquibase-pro xsd
         uses: actions/checkout@v3
         with:
@@ -251,7 +252,8 @@ jobs:
         # Relative path under $GITHUB_WORKSPACE to place the repository
           path: liquibase-pro
           repository: "liquibase/liquibase-pro"
-
+          content-type: application/octet-stream
+          
       - name: Get major.minor xsd
         run: |
           version=${{ needs.setup.outputs.version }}
