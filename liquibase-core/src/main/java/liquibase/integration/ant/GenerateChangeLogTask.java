@@ -6,6 +6,7 @@ import liquibase.database.Database;
 import liquibase.diff.output.DiffOutputControl;
 import liquibase.diff.output.StandardObjectChangeFilter;
 import liquibase.diff.output.changelog.DiffToChangeLog;
+import liquibase.exception.CommandExecutionException;
 import liquibase.exception.DatabaseException;
 import liquibase.exception.UnexpectedLiquibaseException;
 import liquibase.integration.ant.type.ChangeLogOutputFile;
@@ -58,6 +59,8 @@ public class GenerateChangeLogTask extends BaseLiquibaseTask {
                 throw new BuildException("Unable to generate a change log. Error configuring parser.", e);
             } catch (DatabaseException e) {
                 throw new BuildException("Unable to generate a change log: " + e.getMessage(), e);
+            } catch (CommandExecutionException e) {
+                throw new BuildException("Unable to generate a change log, command not found: " + e.getMessage(), e);
             } finally {
                 FileUtils.close(printStream);
             }

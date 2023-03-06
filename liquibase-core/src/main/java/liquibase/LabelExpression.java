@@ -129,4 +129,7 @@ public class LabelExpression {
         return (this.labels == null) || this.labels.isEmpty();
     }
 
+    public String getOriginalString() {
+        return originalString;
+    }
 }
