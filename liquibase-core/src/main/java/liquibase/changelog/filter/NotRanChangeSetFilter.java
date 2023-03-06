@@ -1,7 +1,6 @@
 package liquibase.changelog.filter;
 
 import liquibase.changelog.ChangeSet;
-import liquibase.changelog.DatabaseChangeLog;
 import liquibase.changelog.RanChangeSet;
 
 import java.util.List;
@@ -19,9 +18,9 @@ public class NotRanChangeSetFilter implements ChangeSetFilter {
     public ChangeSetFilterResult accepts(ChangeSet changeSet) {
         for (RanChangeSet ranChangeSet : ranChangeSets) {
             if (ranChangeSet.isSameAs(changeSet)) {
-                return new ChangeSetFilterResult(false, "Changeset already ran", this.getClass());
+                return new ChangeSetFilterResult(false, "Changeset already ran", this.getClass(), getDisplayName());
             }
         }
-        return new ChangeSetFilterResult(true, "Changeset not yet ran", this.getClass());
+        return new ChangeSetFilterResult(true, "Changeset not yet ran", this.getClass(), getDisplayName());
     }
 }

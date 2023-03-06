@@ -22,7 +22,7 @@ public class DbmsChangeSetFilter implements ChangeSetFilter {
     @Override
     public ChangeSetFilterResult accepts(ChangeSet changeSet) {
         if (database == null) {
-            return new ChangeSetFilterResult(true, "No database connection, cannot evaluate dbms attribute", this.getClass());
+            return new ChangeSetFilterResult(true, "No database connection, cannot evaluate dbms attribute", this.getClass(), getDisplayName());
         }
         List<SqlVisitor> visitorsToRemove = new ArrayList<>();
         List<Change> changesToRemove = new ArrayList<>();
@@ -48,9 +48,9 @@ public class DbmsChangeSetFilter implements ChangeSetFilter {
         }
 
         if (DatabaseList.definitionMatches(changeSet.getDbmsSet(), database, true)) {
-            return new ChangeSetFilterResult(true, "Database '" + database.getShortName() + "' matches " + dbmsList, this.getClass());
+            return new ChangeSetFilterResult(true, "Database '" + database.getShortName() + "' matches " + dbmsList, this.getClass(), getDisplayName());
         } else {
-            return new ChangeSetFilterResult(false, "Database '"+database.getShortName()+"' does not match "+dbmsList, this.getClass());
+            return new ChangeSetFilterResult(false, "Database '"+database.getShortName()+"' does not match "+dbmsList, this.getClass(), getDisplayName());
         }
     }
 }

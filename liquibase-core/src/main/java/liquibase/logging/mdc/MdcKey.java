@@ -35,4 +35,5 @@ public class MdcKey {
     public static final String DATABASE_CHANGELOG_SQL = "databaseChangelogSQL";
     public static final String DATABASE_CHANGELOG_TABLE_OUTCOME = "databaseChangelogTableOutcome";
     public static final String ROLLBACK_SQL_FILE = "rollbackSqlFile";
+    public static final String UPDATE_SUMMARY = "updateSummary";
 }

@@ -38,6 +38,7 @@ import liquibase.logging.mdc.MdcKey;
 import liquibase.logging.mdc.MdcObject;
 import liquibase.logging.mdc.MdcValue;
 import liquibase.logging.mdc.customobjects.ChangesetsRolledback;
+import liquibase.logging.mdc.customobjects.UpdateSummary;
 import liquibase.parser.ChangeLogParser;
 import liquibase.parser.ChangeLogParserFactory;
 import liquibase.parser.core.xml.XMLChangeLogSAXParser;
@@ -46,7 +47,6 @@ import liquibase.resource.Resource;
 import liquibase.resource.ResourceAccessor;
 import liquibase.serializer.ChangeLogSerializer;
 import liquibase.statement.core.RawSqlStatement;
-import liquibase.statement.core.UpdateStatement;
 import liquibase.structure.DatabaseObject;
 import liquibase.structure.core.Catalog;
 import liquibase.util.LiquibaseUtil;
@@ -365,24 +365,29 @@ public class Liquibase implements AutoCloseable {
         //
         // Only show the summary
         //
-        showSummary(changeLog, statusVisitor, skippedChangeSets, filterDenied);
+        UpdateSummary updateSummaryMdc = showSummary(changeLog, statusVisitor, skippedChangeSets, filterDenied);
+        updateSummaryMdc.setValue(showSummary.toString());
         if (showSummary == UpdateSummaryEnum.SUMMARY || (skippedChangeSets.isEmpty() && denied.isEmpty())) {
+            Scope.getCurrentScope().addMdcValue(MdcKey.UPDATE_SUMMARY, updateSummaryMdc);
             return;
         }
 
         //
         // Show the details too
         //
-        showDetailTable(skippedChangeSets, filterDenied);
+        Map<String, Integer> skippedMdc = showDetailTable(skippedChangeSets, filterDenied);
+        updateSummaryMdc.setSkipped(skippedMdc);
+        Scope.getCurrentScope().addMdcValue(MdcKey.UPDATE_SUMMARY, updateSummaryMdc);
     }
 
-    private void showDetailTable(List<ChangeSet> skippedChangeSets, List<ChangeSetStatus> filterDenied)
+    private Map<String, Integer> showDetailTable(List<ChangeSet> skippedChangeSets, List<ChangeSetStatus> filterDenied)
             throws IOException, LiquibaseException {
         List<String> columnHeaders = new ArrayList<>();
         columnHeaders.add("Changeset Info");
         columnHeaders.add("Reason Skipped");
         List<List<String>> table = new ArrayList<>();
         table.add(columnHeaders);
+        Map<String, Integer> mdcSkipCounts = new HashMap<>();
 
         //
         // Skipped during changelog parsing
@@ -395,6 +400,7 @@ public class Liquibase implements AutoCloseable {
             ChangeSetFilterResult filterResult = new ChangeSetFilterResult(false, mismatchMessage, null);
             changeSetStatus.setFilterResults(Collections.singleton(filterResult));
             finalList.add(changeSetStatus);
+            mdcSkipCounts.merge("dbmsUnknown", 1, Integer::sum);
         });
 
         finalList.sort(new Comparator<ChangeSetStatus>() {
@@ -414,8 +420,13 @@ public class Liquibase implements AutoCloseable {
         //
         // Filtered because of labels or context
         //
+        mdcSkipCounts.put("totalSkipped", skippedChangeSets.size() + filterDenied.size());
         for (ChangeSetStatus st : finalList) {
             st.getFilterResults().forEach(consumer -> {
+                if (consumer.getFilter() != null) {
+                    String displayName = consumer.getDisplayName();
+                    mdcSkipCounts.merge(displayName, 1, Integer::sum);
+                }
                 String skippedMessage = String.format("   '%s' : %s", st.getChangeSet().toString(), consumer.getMessage());
                 Scope.getCurrentScope().getLog(getClass()).info(skippedMessage);
 
@@ -435,6 +446,8 @@ public class Liquibase implements AutoCloseable {
         TableOutput.formatOutput(table, widths, true, writer);
         String outputTableString = outputStream.toString();
         Scope.getCurrentScope().getUI().sendMessage(outputTableString);
+
+        return mdcSkipCounts;
     }
 
     private int determineOrderInChangelog(ChangeSet changeSetToMatch) {
@@ -449,13 +462,14 @@ public class Liquibase implements AutoCloseable {
         return -1;
     }
 
-    private void showSummary(DatabaseChangeLog changeLog, StatusVisitor statusVisitor, List<ChangeSet> skippedChangeSets, List<ChangeSetStatus> filterDenied) {
+    private UpdateSummary showSummary(DatabaseChangeLog changeLog, StatusVisitor statusVisitor, List<ChangeSet> skippedChangeSets, List<ChangeSetStatus> filterDenied) {
         Scope.getCurrentScope().getUI().sendMessage("");
         int totalInChangelog = changeLog.getChangeSets().size() + skippedChangeSets.size();
         int skipped = skippedChangeSets.size();
         int filtered = filterDenied.size();
         int totalAccepted = statusVisitor.getChangeSetsToRun().size();
         int totalPreviouslyRun = totalInChangelog - filtered - skipped - totalAccepted;
+        UpdateSummary updateSummaryMdc = new UpdateSummary(null, totalAccepted, totalPreviouslyRun, null, totalInChangelog);
 
         String message = "UPDATE SUMMARY";
         Scope.getCurrentScope().getLog(getClass()).info(message);
@@ -484,6 +498,7 @@ public class Liquibase implements AutoCloseable {
         message = String.format("Total change sets:       %6d%n", totalInChangelog);
         Scope.getCurrentScope().getLog(getClass()).info(message);
         Scope.getCurrentScope().getUI().sendMessage(message);
+        return updateSummaryMdc;
     }
 
     private static Writer createOutputWriter(OutputStream outputStream) throws IOException {
@@ -2083,8 +2098,8 @@ public class Liquibase implements AutoCloseable {
                                     @Override
                                     public ChangeSetFilterResult accepts(ChangeSet changeSet) {
                                         return new ChangeSetFilterResult(
-                                                listVisitor.getSeenChangeSets().contains(changeSet), null, null
-                                        );
+                                                listVisitor.getSeenChangeSets().contains(changeSet), null, null,
+                                                getDisplayName());
                                     }
                                 });
                     } else {
@@ -2120,8 +2135,8 @@ public class Liquibase implements AutoCloseable {
                                     @Override
                                     public ChangeSetFilterResult accepts(ChangeSet changeSet) {
                                         return new ChangeSetFilterResult(
-                                                listVisitor.getSeenChangeSets().contains(changeSet), null, null
-                                        );
+                                                listVisitor.getSeenChangeSets().contains(changeSet), null, null,
+                                                getDisplayName());
                                     }
                                 });
                     }

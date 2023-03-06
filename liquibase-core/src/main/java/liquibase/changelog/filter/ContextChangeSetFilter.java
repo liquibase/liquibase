@@ -31,18 +31,23 @@ public class ContextChangeSetFilter implements ChangeSetFilter {
         changeSet.getSqlVisitors().removeAll(visitorsToRemove);
 
         if ((contexts == null) || contexts.isEmpty()) {
-            return new ChangeSetFilterResult(true, "No runtime context specified, all contexts will run", this.getClass());
+            return new ChangeSetFilterResult(true, "No runtime context specified, all contexts will run", this.getClass(), getDisplayName());
         }
 
         Collection<ContextExpression> inheritableContexts = changeSet.getInheritableContextFilter();
         if (changeSet.getContextFilter().isEmpty() && inheritableContexts.isEmpty()) {
-            return new ChangeSetFilterResult(true, "Changeset runs under all contexts", this.getClass());
+            return new ChangeSetFilterResult(true, "Changeset runs under all contexts", this.getClass(), getDisplayName());
         }
 
         if (changeSet.getContextFilter().matches(contexts) && ContextExpression.matchesAll(inheritableContexts, contexts)) {
-            return new ChangeSetFilterResult(true, "Context matches '"+contexts.toString()+"'", this.getClass());
+            return new ChangeSetFilterResult(true, "Context matches '"+contexts.toString()+"'", this.getClass(), getDisplayName());
         } else {
-            return new ChangeSetFilterResult(false, "Context does not match '"+contexts.toString()+"'", this.getClass());
+            return new ChangeSetFilterResult(false, "Context does not match '"+contexts.toString()+"'", this.getClass(), getDisplayName());
         }
+    }
+
+    @Override
+    public String getDisplayName() {
+        return "context";
     }
 }
