@@ -243,7 +243,6 @@ jobs:
           # Relative path under $GITHUB_WORKSPACE to place the repository
           path: liquibase-core  
           repository: "liquibase/liquibase"
-          content-type: application/octet-stream
 
       - name: Download liquibase-pro xsd
         uses: actions/checkout@v3
@@ -252,7 +251,7 @@ jobs:
         # Relative path under $GITHUB_WORKSPACE to place the repository
           path: liquibase-pro
           repository: "liquibase/liquibase-pro"
-          content-type: application/octet-stream
+          
 
       - name: Get major.minor xsd
         run: |
@@ -262,7 +261,7 @@ jobs:
           patch_version=${arr[2]}
           echo "XSD_VERSION=${xsd_version}" >> $GITHUB_ENV
           echo "PATCH_VERSION=${patch_version}" >> $GITHUB_ENV
-
+          
       - name: Upload to s3
         # if patch_version is 0, only then upload to s3 as it's a new minor release 
         if: ${{ env.PATCH_VERSION }} == 0
@@ -271,5 +270,5 @@ jobs:
           AWS_SECRET_ACCESS_KEY: ${{ secrets.LIQUIBASEORIGIN_SECRET_ACCESS_KEY }}
           AWS_DEFAULT_REGION: us-east-1
         run: |
-          aws s3 sync $GITHUB_WORKSPACE/liquibase-core/src/main/resources/www.liquibase.org/xml/ns/dbchangelog/dbchangelog-${{ env.XSD_VERSION }}.xsd s3://liquibaseorg-origin/xml/ns/dbchangelog/ --only-show-errors
-          aws s3 sync $GITHUB_WORKSPACE/liquibase-pro/pro/src/main/resources/www.liquibase.org/xml/ns/pro/liquibase-pro-${{ env.XSD_VERSION }}.xsd s3://liquibaseorg-origin/xml/ns/pro/ --only-show-errors
+          aws s3 sync $GITHUB_WORKSPACE/liquibase-core/src/main/resources/www.liquibase.org/xml/ns/dbchangelog/dbchangelog-${{ env.XSD_VERSION }}.xsd s3://liquibaseorg-origin/xml/ns/dbchangelog/ --content-type application/octet-stream --only-show-errors
+          aws s3 sync $GITHUB_WORKSPACE/liquibase-pro/pro/src/main/resources/www.liquibase.org/xml/ns/pro/liquibase-pro-${{ env.XSD_VERSION }}.xsd s3://liquibaseorg-origin/xml/ns/pro/ --content-type application/octet-stream --only-show-errors
