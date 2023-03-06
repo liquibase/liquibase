@@ -266,7 +266,7 @@ public class IndexSnapshotGenerator extends JdbcSnapshotGenerator {
                     foundIndexes.put(correctedIndexName, returnIndex);
                 }
 
-                if ((database instanceof MSSQLDatabase) && (Boolean) row.get("IS_INCLUDED_COLUMN")) {
+                if ((database instanceof MSSQLDatabase) && Boolean.valueOf(row.get("IS_INCLUDED_COLUMN").booleanValue()) {
                     List<String> includedColumns = returnIndex.getAttribute("includedColumns", List.class);
                     if (includedColumns == null) {
                         includedColumns = new ArrayList<>();
