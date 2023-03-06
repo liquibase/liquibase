@@ -41,7 +41,7 @@ public class SnakeYamlUtil {
             if (showErrorMessage) {
                 showErrorMessage = false;
                 Scope.getCurrentScope().getLog(SnakeYamlUtil.class).warning(
-                        "Failed to set code point limit for SnakeYaml, because the version of SnakeYaml being used is too old. " +
+                        "Failed to perform a method call for SnakeYaml because the version of SnakeYaml being used is too old. " +
                                 "Consider upgrading to a SnakeYaml version equal to or newer than 1.32, by downloading and " +
                                 "installing a newer version of Liquibase (which includes a newer version of SnakeYaml). " +
                                 "Loading particularly large JSON and YAML documents (like snapshots) in Liquibase may fail if SnakeYaml is not upgraded.", e);
