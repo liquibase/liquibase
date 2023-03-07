@@ -374,19 +374,19 @@ public class Liquibase implements AutoCloseable {
         //
         // Show the details too
         //
-        Map<String, Integer> skippedMdc = showDetailTable(skippedChangeSets, filterDenied);
+        SortedMap<String, Integer> skippedMdc = showDetailTable(skippedChangeSets, filterDenied);
         updateSummaryMdc.setSkipped(skippedMdc);
         Scope.getCurrentScope().addMdcValue(MdcKey.UPDATE_SUMMARY, updateSummaryMdc);
     }
 
-    private Map<String, Integer> showDetailTable(List<ChangeSet> skippedChangeSets, List<ChangeSetStatus> filterDenied)
+    private SortedMap<String, Integer> showDetailTable(List<ChangeSet> skippedChangeSets, List<ChangeSetStatus> filterDenied)
             throws IOException, LiquibaseException {
         List<String> columnHeaders = new ArrayList<>();
         columnHeaders.add("Changeset Info");
         columnHeaders.add("Reason Skipped");
         List<List<String>> table = new ArrayList<>();
         table.add(columnHeaders);
-        Map<String, Integer> mdcSkipCounts = new HashMap<>();
+        SortedMap<String, Integer> mdcSkipCounts = new TreeMap<>();
 
         //
         // Skipped during changelog parsing

@@ -1,9 +1,8 @@
 package liquibase.logging.mdc.customobjects;
 
 import liquibase.logging.mdc.CustomMdcObject;
-import net.snowflake.client.jdbc.internal.apache.arrow.flatbuf.Int;
 
-import java.util.Map;
+import java.util.SortedMap;
 
 /**
  * This class is the representation of the summary available in the update command.
@@ -12,7 +11,7 @@ public class UpdateSummary implements CustomMdcObject {
     private String value;
     private int run;
     private int runPreviously;
-    private Map<String, Integer> skipped;
+    private SortedMap<String, Integer> skipped;
     private int totalChangesets;
 
     /**
@@ -21,7 +20,7 @@ public class UpdateSummary implements CustomMdcObject {
     public UpdateSummary() {
     }
 
-    public UpdateSummary(String value, int run, int runPreviously, Map<String, Integer> skipped, int totalChangesets) {
+    public UpdateSummary(String value, int run, int runPreviously, SortedMap<String, Integer> skipped, int totalChangesets) {
         this.value = value;
         this.run = run;
         this.runPreviously = runPreviously;
@@ -53,11 +52,11 @@ public class UpdateSummary implements CustomMdcObject {
         this.runPreviously = runPreviously;
     }
 
-    public Map<String, Integer> getSkipped() {
+    public SortedMap<String, Integer> getSkipped() {
         return skipped;
     }
 
-    public void setSkipped(Map<String, Integer> skipped) {
+    public void setSkipped(SortedMap<String, Integer> skipped) {
         this.skipped = skipped;
     }
 
