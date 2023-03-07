@@ -188,19 +188,31 @@ public class CommandScope {
     public CommandResults execute() throws CommandExecutionException {
         CommandResultsBuilder resultsBuilder = new CommandResultsBuilder(this, outputStream);
         final List<CommandStep> pipeline = commandDefinition.getPipeline();
+        final List<CommandStep> executedCommands = new ArrayList<>();
+        Optional<Exception> thrownException = Optional.empty();
         validate();
         Scope.getCurrentScope().addMdcValue(MdcKey.LIQUIBASE_OPERATION, StringUtil.join(commandDefinition.getName(), "-"));
         try {
             for (CommandStep command : pipeline) {
-                command.run(resultsBuilder);
+                try {
+                    command.run(resultsBuilder);
+                } catch (Exception runException) {
+                    // Suppress the exception for now so that we can run the cleanup steps even when encountering an exception.
+                    thrownException = Optional.of(runException);
+                    break;
+                }
+                executedCommands.add(command);
             }
 
             // after executing our pipeline, runs cleanup in inverse order
-            for (int i = pipeline.size() -1; i >= 0; i--) {
+            for (int i = executedCommands.size() -1; i >= 0; i--) {
                 CommandStep command = pipeline.get(i);
                 if (command instanceof CleanUpCommandStep) {
                     ((CleanUpCommandStep)command).cleanUp(resultsBuilder);
                 }
+            }
+            if (thrownException.isPresent()) { // Now that we've executed all our cleanup, rethrow the exception if there was one
+                throw thrownException.get();
             }
         } catch (Exception e) {
             if (e instanceof CommandExecutionException) {

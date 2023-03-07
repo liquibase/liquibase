@@ -49,7 +49,8 @@ Optional Args:
         ]
 
         expectedResults = [
-                statusCode: 0
+                statusCode: 0,
+                defaultChangeExecListener: 'not_null'
         ]
 
         expectedDatabaseContent = [
@@ -69,7 +70,8 @@ Optional Args:
         ]
 
         expectedResults = [
-                statusCode: 0
+                statusCode: 0,
+                defaultChangeExecListener: 'not_null'
         ]
 
         expectedDatabaseContent = [
@@ -131,7 +133,8 @@ Optional Args:
         ]
 
         expectedResults = [
-                statusCode: 0
+                statusCode: 0,
+                defaultChangeExecListener: 'not_null'
         ]
 
         outputFile = new File("target/test-classes/changeSetWithLabels.txt")
@@ -182,7 +185,8 @@ Optional Args:
         ]
 
         expectedResults = [
-                statusCode: 0
+                statusCode: 0,
+                defaultChangeExecListener: 'not_null'
         ]
 
         outputFile = new File("target/test-classes/changeSetWithLabels.txt")
@@ -221,7 +225,8 @@ Optional Args:
         ]
 
         expectedResults = [
-                statusCode: 0
+                statusCode: 0,
+                defaultChangeExecListener: 'not_null'
         ]
 
         outputFile = new File("target/test-classes/changeSetWithComplicatedLabelsAndContext.txt")
@@ -252,7 +257,8 @@ Optional Args:
         ]
 
         expectedResults = [
-                statusCode: 0
+                statusCode: 0,
+                defaultChangeExecListener: 'not_null'
         ]
 
         outputFile = new File("target/test-classes/mismatchedDBMS.txt")
@@ -287,7 +293,8 @@ Optional Args:
         ]
 
         expectedResults = [
-                statusCode: 0
+                statusCode: 0,
+                defaultChangeExecListener: 'not_null'
         ]
 
         expectedDatabaseContent = [
@@ -351,7 +358,8 @@ Optional Args:
         ]
 
         expectedResults = [
-                statusCode: 0
+                statusCode: 0,
+                defaultChangeExecListener: 'not_null'
         ]
 
         expectedLogs = [
