@@ -49,7 +49,8 @@ Optional Args:
 
 
         expectedResults = [
-                statusCode   : 0
+                statusCode   : 0,
+                defaultChangeExecListener: 'not_null'
         ]
     }
 
@@ -66,7 +67,8 @@ Optional Args:
         ]
 
         expectedResults = [
-                statusCode   : 0
+                statusCode   : 0,
+                defaultChangeExecListener: 'not_null'
         ]
 
         expectedUI = [
@@ -100,7 +102,8 @@ DBMS mismatch:                1
         ]
 
         expectedResults = [
-                statusCode   : 0
+                statusCode   : 0,
+                defaultChangeExecListener: 'not_null'
         ]
 
         expectedUI = [
