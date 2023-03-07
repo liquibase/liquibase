@@ -566,6 +566,11 @@ public class Liquibase implements AutoCloseable {
      */
     @Deprecated
     public void update(String tag, Contexts contexts, LabelExpression labelExpression) throws LiquibaseException {
+        if (tag == null) {
+            update(contexts, labelExpression);
+            return;
+        }
+
         runInScope(() -> {
             CommandScope updateCommand = new CommandScope(UpdateToTagCommandStep.COMMAND_NAME);
             updateCommand.addArgumentValue(DbUrlConnectionCommandStep.DATABASE_ARG, getDatabase());
