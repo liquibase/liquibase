@@ -16,9 +16,9 @@ public class ActuallyExecutedChangeSetFilter extends RanChangeSetFilter {
         RanChangeSet ranChangeSet = getRanChangeSet(changeSet);
         if ((ranChangeSet != null) && ((ranChangeSet.getExecType() == null) || ranChangeSet.getExecType().equals
             (ChangeSet.ExecType.EXECUTED) || ranChangeSet.getExecType().equals(ChangeSet.ExecType.RERAN))) {
-            return new ChangeSetFilterResult(true, "Changeset was executed previously", this.getClass(), getDisplayName());
+            return new ChangeSetFilterResult(true, "Changeset was executed previously", this.getClass(), getMdcName());
         } else {
-            return new ChangeSetFilterResult(false, "Changeset was not previously executed", this.getClass(), getDisplayName());
+            return new ChangeSetFilterResult(false, "Changeset was not previously executed", this.getClass(), getMdcName());
         }
     }
 }

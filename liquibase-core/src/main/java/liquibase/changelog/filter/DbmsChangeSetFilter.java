@@ -20,7 +20,7 @@ public class DbmsChangeSetFilter implements ChangeSetFilter {
     @Override
     public ChangeSetFilterResult accepts(ChangeSet changeSet) {
         if (database == null) {
-            return new ChangeSetFilterResult(true, "No database connection, cannot evaluate dbms attribute", this.getClass(), getDisplayName());
+            return new ChangeSetFilterResult(true, "No database connection, cannot evaluate dbms attribute", this.getClass(), getMdcName());
         }
          List<SqlVisitor> visitorsToRemove = new ArrayList<>();
         for (SqlVisitor visitor : changeSet.getSqlVisitors()) {
@@ -38,14 +38,14 @@ public class DbmsChangeSetFilter implements ChangeSetFilter {
         }
 
         if (DatabaseList.definitionMatches(changeSet.getDbmsSet(), database, true)) {
-            return new ChangeSetFilterResult(true, "Database '" + database.getShortName() + "' matches " + dbmsList, this.getClass(), getDisplayName());
+            return new ChangeSetFilterResult(true, "Database '" + database.getShortName() + "' matches " + dbmsList, this.getClass(), getMdcName());
         } else {
-            return new ChangeSetFilterResult(false, "Database '"+database.getShortName()+"' does not match "+dbmsList, this.getClass(), getDisplayName());
+            return new ChangeSetFilterResult(false, "Database '"+database.getShortName()+"' does not match "+dbmsList, this.getClass(), getMdcName());
         }
     }
 
     @Override
-    public String getDisplayName() {
+    public String getMdcName() {
         return "dbmsUnknown";
     }
 }
