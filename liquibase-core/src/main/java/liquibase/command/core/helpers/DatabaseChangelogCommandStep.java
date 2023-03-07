@@ -8,8 +8,11 @@ import liquibase.changelog.ChangeLogHistoryServiceFactory;
 import liquibase.changelog.ChangeLogParameters;
 import liquibase.changelog.DatabaseChangeLog;
 import liquibase.command.*;
+import liquibase.configuration.LiquibaseConfiguration;
+import liquibase.configuration.ProvidedValue;
 import liquibase.database.Database;
 import liquibase.exception.LiquibaseException;
+import liquibase.integration.commandline.LiquibaseCommandLineConfiguration;
 import liquibase.lockservice.LockService;
 import liquibase.lockservice.LockServiceFactory;
 import liquibase.logging.mdc.MdcKey;
@@ -19,7 +22,10 @@ import liquibase.parser.core.xml.XMLChangeLogSAXParser;
 import liquibase.resource.ResourceAccessor;
 
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
 
 /**
  * This helper class provides two objects: a valid and verified DatabaseChangeLog and the ChangeLogParameters
@@ -65,6 +71,7 @@ public class DatabaseChangelogCommandStep extends AbstractCommandStep implements
         ChangeLogParameters changeLogParameters = commandScope.getArgumentValue(CHANGELOG_PARAMETERS);
         if (changeLogParameters == null) {
             changeLogParameters = new ChangeLogParameters(database);
+            addCliArguments(changeLogParameters);
         }
         changeLogParameters.setContexts(new Contexts(commandScope.getArgumentValue(CONTEXTS_ARG)));
         changeLogParameters.setLabels(new LabelExpression(commandScope.getArgumentValue(LABEL_FILTER_ARG)));
@@ -113,5 +120,25 @@ public class DatabaseChangelogCommandStep extends AbstractCommandStep implements
     @Override
     public void cleanUp(CommandResultsBuilder resultsBuilder) {
         ChangeLogHistoryServiceFactory.getInstance().resetAll();
+    }
+
+    /**
+     * Add java system parameter arguments to changelog parameters
+     * @param changeLogParameters the changelog parameters to update
+     */
+    public void addCliArguments(ChangeLogParameters changeLogParameters) {
+        List<ProvidedValue> systemParameters = Scope.getCurrentScope().getSingleton(LiquibaseConfiguration.class).getProviders().stream()
+                .filter(provider -> provider.getProvidedValue("-D") != null)
+                .map(provider -> provider.getProvidedValue("-D"))
+                .collect(Collectors.toList());
+        for (ProvidedValue providedValue : systemParameters) {
+            if (providedValue.getValue() instanceof Map) {
+                // We know this is safe because the only thing keeping track of -D parameters is the CommandLineArgumentValueProvider
+                // which is not in this module thus we can't use it directly.
+                ((Map) providedValue.getValue()).forEach((key, value) -> {
+                    changeLogParameters.set((String) key, value);
+                });
+            }
+        }
     }
 }
