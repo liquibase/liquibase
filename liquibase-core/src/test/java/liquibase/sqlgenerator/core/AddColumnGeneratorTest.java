@@ -26,13 +26,13 @@ import static org.junit.Assert.*;
 public class AddColumnGeneratorTest extends AbstractSqlGeneratorTest<AddColumnStatement> {
     private static final String SCHEMA_NAME = "schema_name";
     private static final String CATALOG_NAME = "catalog_name";
-    private static final String TABLE_NAME = "table_name";    
+    private static final String TABLE_NAME = "table_name";
     private static final String COLUMN_NAME = "column_name";
     private static final String COLUMN_TYPE = "column_type";
 
     public AddColumnGeneratorTest() throws Exception {
         this(new AddColumnGenerator());
-    } 
+    }
 
     protected AddColumnGeneratorTest(SqlGenerator<AddColumnStatement> generatorUnderTest) throws Exception {
         super(generatorUnderTest);
@@ -63,6 +63,17 @@ public class AddColumnGeneratorTest extends AbstractSqlGeneratorTest<AddColumnSt
                 new AddColumnStatement(null, null, TABLE_NAME, COLUMN_NAME, COLUMN_TYPE, null),
                 new AddColumnStatement(null, null, "other_table", "other_column", COLUMN_TYPE, null)
             ), new MySQLDatabase(), new MockSqlGeneratorChain()).getErrorMessages().contains("All columns must be targeted at the same table"));
+    }
+
+    @Test
+    public void isValidH2Version1() {
+        H2Database h2DatabaseV1 = new H2Database() {
+            @Override
+            public int getDatabaseMajorVersion() {
+                return 1;
+            }
+        };
+        assertFalse(generatorUnderTest.validate(createSampleSqlStatement(), h2DatabaseV1, new MockSqlGeneratorChain()).hasErrors());
     }
 
     @Test
@@ -106,7 +117,7 @@ public class AddColumnGeneratorTest extends AbstractSqlGeneratorTest<AddColumnSt
     public void testAddPrimaryKeyColumnH2() {
         AddColumnStatement columns = new AddColumnStatement(null, null, TABLE_NAME, "ID", "BIGINT", null, new PrimaryKeyConstraint());
 
-        H2Database h2Database =  new H2Database();
+        H2Database h2Database = new H2Database();
         assertFalse(generatorUnderTest.validate(columns, h2Database, new MockSqlGeneratorChain()).hasErrors());
         assertTrue(generatorUnderTest.validate(columns, new H2Database() {
             @Override

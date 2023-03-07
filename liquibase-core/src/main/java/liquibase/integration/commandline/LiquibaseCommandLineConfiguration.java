@@ -3,7 +3,10 @@ package liquibase.integration.commandline;
 import liquibase.configuration.AutoloadedConfigurations;
 import liquibase.configuration.ConfigurationDefinition;
 import liquibase.configuration.ConfigurationValueConverter;
+import liquibase.logging.LogFormat;
+import liquibase.util.StringUtil;
 
+import java.util.Arrays;
 import java.util.logging.Level;
 
 /**
@@ -22,6 +25,7 @@ public class LiquibaseCommandLineConfiguration implements AutoloadedConfiguratio
     public static final ConfigurationDefinition<Level> LOG_LEVEL;
     public static final ConfigurationDefinition<String> LOG_CHANNELS;
     public static final ConfigurationDefinition<String> LOG_FILE;
+    public static final ConfigurationDefinition<LogFormat> LOG_FORMAT;
     public static final ConfigurationDefinition<String> OUTPUT_FILE;
     public static final ConfigurationDefinition<Boolean> SHOULD_RUN;
     public static final ConfigurationDefinition<ArgumentConverter> ARGUMENT_CONVERTER;
@@ -77,6 +81,33 @@ public class LiquibaseCommandLineConfiguration implements AutoloadedConfiguratio
                 .setInternal(true)
                 .setDescription("Configured by the integration to convert arguments in user messages to something that matches the formats they expect")
                 .setDefaultValue(argument -> argument)
+                .build();
+
+        LOG_FORMAT = builder.define("logFormat", LogFormat.class)
+                .setDescription("Sets the format of log output to console or log files. " +
+                        "Open Source users default to unstructured \"" + LogFormat.TEXT + "\" logs to the console or output log files. " +
+                        "Pro users have the option to set value as \"" + LogFormat.JSON + "\" or \"" + LogFormat.JSON_PRETTY + "\" to enable json-structured log files to the console or output log files.")
+                .setDefaultValue(LogFormat.TEXT)
+                .setHidden(true)
+                .setValueHandler((logFormat) -> {
+                    if (logFormat == null) {
+                        return null;
+                    }
+
+                    if (logFormat instanceof String) {
+                        String logFormatString = (String) logFormat;
+
+                        if (Arrays.stream(LogFormat.values()).noneMatch(lf -> lf.toString().equalsIgnoreCase(logFormatString))) {
+                            throw new IllegalArgumentException("WARNING: The log format value '"+logFormatString+"' is not valid. Valid values include: '" + StringUtil.join(LogFormat.values(), "', '", Object::toString) + "'");
+                        }
+
+                        return Enum.valueOf(LogFormat.class, logFormatString.toUpperCase());
+                    } else if (logFormat instanceof LogFormat) {
+                        return (LogFormat) logFormat;
+                    } else {
+                        return null;
+                    }
+                })
                 .build();
 
    }

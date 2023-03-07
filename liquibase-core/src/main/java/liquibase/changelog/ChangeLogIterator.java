@@ -49,6 +49,7 @@ public class ChangeLogIterator {
 	        for (ChangeSet changeSet : changeSetsForRanChangeSet) {
                 if (changeSet != null) {
                     changeSet.setFilePath(DatabaseChangeLog.normalizePath(ranChangeSet.getChangeLog()));
+                    changeSet.setDeploymentId(ranChangeSet.getDeploymentId());
                     changeSets.add(changeSet);
                 }
 	        }
@@ -102,7 +103,7 @@ public class ChangeLogIterator {
                         BufferedLogService bufferLog = new BufferedLogService();
                         CompositeLogService compositeLogService = new CompositeLogService(true, bufferLog);
                         Scope.child(Scope.Attr.changeSet.name(), changeSet, () -> {
-                            if (finalShouldVisit && !alreadySaw(changeSet)) {
+                            if (finalShouldVisit) {
                                 //
                                 // Go validate any changesets with an Executor if
                                 // we are using a ValidatingVisitor
@@ -120,9 +121,7 @@ public class ChangeLogIterator {
                                 Map<String, Object> values = new HashMap<>();
                                 values.put(Scope.Attr.logService.name(), compositeLogService);
                                 values.put(BufferedLogService.class.getName(), bufferLog);
-                                Scope.child(values, () -> {
-                                    visitor.visit(changeSet, databaseChangeLog, env.getTargetDatabase(), reasonsAccepted);
-                                });
+                                Scope.child(values, () -> visitor.visit(changeSet, databaseChangeLog, env.getTargetDatabase(), reasonsAccepted));
                                 markSeen(changeSet);
                             } else {
                                 if (visitor instanceof SkippedChangeSetVisitor) {
@@ -193,17 +192,10 @@ public class ChangeLogIterator {
         ContextExpression contexts = changeSet.getContextFilter();
         changeSet.getRunOrder();
 
-        return changeSet.toString(true)
+        return changeSet.toString(false)
                 + ":" + (labels == null ? null : labels.toString())
                 + ":" + (contexts == null ? null : contexts.toString())
                 + ":" + StringUtil.join(changeSet.getDbmsSet(), ",");
-    }
-
-    protected boolean alreadySaw(ChangeSet changeSet) {
-        if (changeSet.key == null) {
-            changeSet.key = createKey(changeSet);
-        }
-        return seenChangeSets.contains(changeSet.key);
     }
 
     public List<ChangeSetFilter> getChangeSetFilters() {
