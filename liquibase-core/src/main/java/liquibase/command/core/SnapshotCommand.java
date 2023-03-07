@@ -9,6 +9,7 @@ import liquibase.database.ObjectQuotingStrategy;
 import liquibase.exception.LiquibaseException;
 import liquibase.serializer.SnapshotSerializerFactory;
 import liquibase.snapshot.*;
+import liquibase.structure.DatabaseObject;
 import liquibase.util.StringUtils;
 
 import java.util.ArrayList;
@@ -22,6 +23,7 @@ public class SnapshotCommand extends AbstractCommand<SnapshotCommand.SnapshotCom
     private String serializerFormat;
     private SnapshotListener snapshotListener;
     private Map<String, Object> snapshotMetadata;
+    private Class<? extends DatabaseObject>[] snapshotTypes;
 
     @Override
     public String getName() {
@@ -86,9 +88,17 @@ public class SnapshotCommand extends AbstractCommand<SnapshotCommand.SnapshotCom
         this.snapshotMetadata = snapshotMetadata;
     }
 
+    public Class<? extends DatabaseObject>[] getSnapshotTypes() {
+        return snapshotTypes;
+    }
+
+    public void setSnapshotTypes(Class<? extends DatabaseObject>[] snapshotTypes) {
+        this.snapshotTypes = snapshotTypes;
+    }
+
     @Override
     protected SnapshotCommandResult run() throws Exception {
-        SnapshotControl snapshotControl = new SnapshotControl(database);
+        SnapshotControl snapshotControl = new SnapshotControl(database, snapshotTypes);
         snapshotControl.setSnapshotListener(snapshotListener);
 
         CatalogAndSchema[] schemas = this.schemas;
