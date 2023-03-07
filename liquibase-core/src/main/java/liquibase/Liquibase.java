@@ -264,7 +264,6 @@ public class Liquibase implements AutoCloseable {
                 // Let the user know that they can register for Hub
                 //
                 hubUpdater = new HubUpdater(new Date(), changeLog, database);
-                hubUpdater.register(changeLogFile);
 
                 generateDeploymentId();
 
@@ -561,14 +560,6 @@ public class Liquibase implements AutoCloseable {
         String changeLogId = changeLog.getChangeLogId();
         HubUpdater hubUpdater = new HubUpdater(new Date(), changeLog, database);
         if (hubUpdater.hubIsNotAvailable(changeLogId)) {
-            if (StringUtil.isNotEmpty(HubConfiguration.LIQUIBASE_HUB_API_KEY.getCurrentValue()) && changeLogId == null) {
-                String message =
-                    "An API key was configured, but no changelog ID exists.\n" +
-                    "No operations will be reported. Register this changelog with Liquibase Hub to generate free deployment reports.\n" +
-                    "Learn more at https://hub.liquibase.com.";
-                Scope.getCurrentScope().getUI().sendMessage("WARNING: " + message);
-                Scope.getCurrentScope().getLog(getClass()).warning(message);
-            }
             return null;
         }
 
@@ -576,11 +567,6 @@ public class Liquibase implements AutoCloseable {
         // Warn about the situation where there is a changeLog ID, but no API key
         //
         if (StringUtil.isEmpty(HubConfiguration.LIQUIBASE_HUB_API_KEY.getCurrentValue()) && changeLogId != null) {
-            String message = "The changelog ID '" + changeLogId + "' was found, but no API Key exists.\n" +
-                             "No operations will be reported. Simply add a liquibase.hub.apiKey setting to generate free deployment reports.\n" +
-                             "Learn more at https://hub.liquibase.com.";
-            Scope.getCurrentScope().getUI().sendMessage("WARNING: " + message);
-            Scope.getCurrentScope().getLog(getClass()).warning(message);
             return null;
         }
         Connection connection;
@@ -796,7 +782,6 @@ public class Liquibase implements AutoCloseable {
                     // Let the user know that they can register for Hub
                     //
                     hubUpdater = new HubUpdater(new Date(), changeLog, database);
-                    hubUpdater.register(changeLogFile);
 
                     generateDeploymentId();
 
@@ -931,7 +916,6 @@ public class Liquibase implements AutoCloseable {
                     // Let the user know that they can register for Hub
                     //
                     hubUpdater = new HubUpdater(new Date(), changeLog, database);
-                    hubUpdater.register(changeLogFile);
 
                     generateDeploymentId();
 
@@ -1233,7 +1217,6 @@ public class Liquibase implements AutoCloseable {
                     // Let the user know that they can register for Hub
                     //
                     hubUpdater = new HubUpdater(startTime, changeLog, database);
-                    hubUpdater.register(changeLogFile);
 
                     //
                     // Create an iterator which will be used with a ListVisitor
@@ -1519,7 +1502,6 @@ public class Liquibase implements AutoCloseable {
                     // Let the user know that they can register for Hub
                     //
                     hubUpdater = new HubUpdater(startTime, changeLog, database);
-                    hubUpdater.register(changeLogFile);
 
                     //
                     // Create an iterator which will be used with a ListVisitor
@@ -1669,7 +1651,6 @@ public class Liquibase implements AutoCloseable {
                     // Let the user know that they can register for Hub
                     //
                     hubUpdater = new HubUpdater(startTime, changeLog, database);
-                    hubUpdater.register(changeLogFile);
 
                     //
                     // Create an iterator which will be used with a ListVisitor
@@ -1829,7 +1810,6 @@ public class Liquibase implements AutoCloseable {
                     // Let the user know that they can register for Hub
                     //
                     hubUpdater = new HubUpdater(new Date(), changeLog, database);
-                    hubUpdater.register(changeLogFile);
 
                     ChangeLogHistoryServiceFactory.getInstance().getChangeLogService(database).generateDeploymentId();
 

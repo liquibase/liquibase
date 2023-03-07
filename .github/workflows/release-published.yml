@@ -7,7 +7,8 @@ on:
       tag:
         description: 'Release Tag'
         required: true
-
+env:
+  MAVEN_VERSION: '3.8.7'
 jobs:
   setup:
     name: Setup
@@ -216,7 +217,7 @@ jobs:
       - name: Set up Maven
         uses: stCarolas/setup-maven@v4.5
         with:
-          maven-version: '3.8.7'
+          maven-version: ${{ env.MAVEN_VERSION }}
 
       - name: Version artifact
         run: mvn versions:set -DnewVersion="${{ needs.setup.outputs.version }}"

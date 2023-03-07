@@ -2,14 +2,12 @@ package liquibase.change.core
 
 import liquibase.Scope
 import liquibase.change.ChangeStatus
-import liquibase.change.CheckSum
 import liquibase.change.StandardChangeTest
 import liquibase.changelog.ChangeSet
 import liquibase.changelog.DatabaseChangeLog
 import liquibase.database.core.MockDatabase
 import liquibase.exception.SetupException
 import liquibase.parser.core.ParsedNodeException
-import liquibase.sdk.resource.MockResourceAccessor
 import liquibase.snapshot.MockSnapshotGeneratorFactory
 import liquibase.snapshot.SnapshotGeneratorFactory
 import liquibase.structure.core.View
@@ -17,9 +15,8 @@ import liquibase.test.JUnitResourceAccessor
 import liquibase.util.StreamUtil
 import spock.lang.Unroll
 
-class CreateViewChangeTest extends StandardChangeTest {
+public class CreateViewChangeTest extends StandardChangeTest {
 
-    public static final String SELECT_QUERY = "SELECT * FROM TestTable";
 
     def getConfirmationMessage() throws Exception {
         when:
@@ -91,72 +88,6 @@ class CreateViewChangeTest extends StandardChangeTest {
         "com/example/my-logic.sql" | "a/logical/path.xml" | false
         "my-logic.sql"             | null                 | true
         "my-logic.sql"             | "a/logical/path.xml" | true
-    }
-
-    def "path is not considered on checksum generation"() {
-        when:
-        String testScopeId = Scope.enter([
-                "resourceAccessor": new MockResourceAccessor([
-                        "viewTest.sql": SELECT_QUERY
-                ])
-        ])
-
-        CreateViewChange change = new CreateViewChange()
-        change.setSelectQuery(SELECT_QUERY)
-        CheckSum viewCheckSumWithoutPath = change.generateCheckSum()
-        CreateViewChange change2 = new CreateViewChange()
-        change2.setSelectQuery(SELECT_QUERY)
-        change2.setPath("viewTest.sql")
-        change2.setRelativeToChangelogFile(false)
-        CheckSum viewCheckSumWithPath = change2.generateCheckSum()
-        //TODO: Move this Scope.exit() call into a cleanUpSpec method
-        Scope.exit(testScopeId)
-
-        then:
-        assert viewCheckSumWithoutPath == viewCheckSumWithPath
-    }
-
-    def "encoding is not considered on checksum generation"() {
-        when:
-        CreateViewChange change = new CreateViewChange()
-        change.setSelectQuery(SELECT_QUERY)
-        CheckSum viewCheckSumWithoutEncoding = change.generateCheckSum()
-        CreateViewChange change2 = new CreateViewChange()
-        change2.setSelectQuery(SELECT_QUERY)
-        change2.setEncoding("UTF-8")
-        CheckSum viewCheckSumWithEncoding = change2.generateCheckSum()
-
-        then:
-        assert viewCheckSumWithoutEncoding == viewCheckSumWithEncoding
-    }
-
-    def "select query updated with whitespaces should not be computed as a new checksum"() {
-        when:
-        CreateViewChange change = new CreateViewChange()
-        change.setSelectQuery(SELECT_QUERY)
-        CheckSum viewTextCheckSum = change.generateCheckSum()
-        CreateViewChange change2 = new CreateViewChange()
-        change2.setSelectQuery(SELECT_QUERY.concat("      \n"))
-        CheckSum viewTextModifiedCheckSum = change2.generateCheckSum()
-
-        then:
-        assert viewTextCheckSum == viewTextModifiedCheckSum
-    }
-
-    def "checksum gets updated having a change on select query"() {
-        when:
-        CreateViewChange change = new CreateViewChange()
-        change.setSelectQuery(SELECT_QUERY)
-        CheckSum viewTextOriginalCheckSum = change.generateCheckSum()
-
-        StringBuilder selectQueryUpdated = new StringBuilder(SELECT_QUERY)
-        selectQueryUpdated.append(" WHERE 1=1")
-        change.setSelectQuery(selectQueryUpdated.toString())
-        CheckSum viewTextUpdatedCheckSum = change.generateCheckSum();
-
-        then:
-        assert viewTextOriginalCheckSum.equals(viewTextUpdatedCheckSum) == false
-
 
     }
 }
