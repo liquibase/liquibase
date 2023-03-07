@@ -43,4 +43,9 @@ public class DbmsChangeSetFilter implements ChangeSetFilter {
             return new ChangeSetFilterResult(false, "Database '"+database.getShortName()+"' does not match "+dbmsList, this.getClass(), getDisplayName());
         }
     }
+
+    @Override
+    public String getDisplayName() {
+        return "dbmsUnknown";
+    }
 }

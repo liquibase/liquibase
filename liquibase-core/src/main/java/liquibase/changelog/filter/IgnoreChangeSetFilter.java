@@ -15,4 +15,9 @@ public class IgnoreChangeSetFilter implements ChangeSetFilter {
         }
         return new ChangeSetFilterResult(true, "Changeset is not ignored", this.getClass(), getDisplayName());
     }
+
+    @Override
+    public String getDisplayName() {
+        return "ignored";
+    }
 }

@@ -25,4 +25,9 @@ public class CountChangeSetFilter implements ChangeSetFilter {
             return new ChangeSetFilterResult(false, "Only running "+changeSetsToAllow+" " + plurality, this.getClass(), getDisplayName());
         }
     }
+
+    @Override
+    public String getDisplayName() {
+        return "afterCount";
+    }
 }

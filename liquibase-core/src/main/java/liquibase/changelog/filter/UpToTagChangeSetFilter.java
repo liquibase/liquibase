@@ -44,4 +44,9 @@ public class UpToTagChangeSetFilter implements ChangeSetFilter {
 
         return new ChangeSetFilterResult(true, "Changeset is at or before tag '" + this.tag + "'", this.getClass(), getDisplayName());
     }
+
+    @Override
+    public String getDisplayName() {
+        return "afterTag";
+    }
 }
