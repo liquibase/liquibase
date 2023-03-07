@@ -425,29 +425,6 @@ public class Liquibase implements AutoCloseable {
                 new IgnoreChangeSetFilter());
     }
 
-    /**
-     *
-     * Return a StatusChangeLogIterator constructed with standard filters
-     *
-     * @param   contexts                           Contexts to filter for
-     * @param   labelExpression                    Labels to filter for
-     *                                             default value is false to only gather the first
-     * @param   changeLog                          The changelog to process
-     *
-     * @return  StatusChangeLogIterator
-     * @throws DatabaseException
-     *
-     */
-    protected ChangeLogIterator getStandardStatusChangelogIterator(Contexts contexts, LabelExpression labelExpression,
-                                                                   DatabaseChangeLog changeLog) throws DatabaseException {
-        return new StatusChangeLogIterator(changeLog,
-                new ShouldRunChangeSetFilter(database),
-                new ContextChangeSetFilter(contexts),
-                new LabelChangeSetFilter(labelExpression),
-                new DbmsChangeSetFilter(database),
-                new IgnoreChangeSetFilter());
-    }
-
     protected ChangeLogIterator buildChangeLogIterator(String tag, DatabaseChangeLog changeLog, Contexts contexts,
                                                        LabelExpression labelExpression) throws DatabaseException {
 
