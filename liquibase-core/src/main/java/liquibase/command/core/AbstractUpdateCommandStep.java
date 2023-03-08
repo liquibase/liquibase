@@ -25,6 +25,7 @@ import liquibase.logging.mdc.MdcValue;
 import liquibase.util.ShowSummaryUtil;
 
 import java.io.IOException;
+import java.io.OutputStream;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
@@ -67,7 +68,7 @@ public abstract class AbstractUpdateCommandStep extends AbstractCommandStep impl
         DefaultChangeExecListener defaultChangeExecListener = new DefaultChangeExecListener();
         try {
             DatabaseChangeLog databaseChangeLog = (DatabaseChangeLog) commandScope.getDependency(DatabaseChangeLog.class);
-            if (isUpToDate(commandScope, database, databaseChangeLog, contexts, labelExpression)) {
+            if (isUpToDate(commandScope, database, databaseChangeLog, contexts, labelExpression, resultsBuilder.getOutputStream())) {
                 return;
             }
             ChangeLogHistoryService changelogService = ChangeLogHistoryServiceFactory.getInstance().getChangeLogService(database);
@@ -100,7 +101,7 @@ public abstract class AbstractUpdateCommandStep extends AbstractCommandStep impl
                 //If we are using hub, we want to use the HubChangeExecListener, which is wrapping all the others. Otherwise, use the default.
                 ChangeExecListener listenerToUse = hubChangeExecListener != null ? hubChangeExecListener : defaultChangeExecListener;
                 runChangeLogIterator.run(new UpdateVisitor(database, listenerToUse), new RuntimeEnvironment(database, contexts, labelExpression));
-                ShowSummaryUtil.showUpdateSummary(databaseChangeLog, statusVisitor);
+                ShowSummaryUtil.showUpdateSummary(databaseChangeLog, statusVisitor, resultsBuilder.getOutputStream());
             });
 
             hubHandler.postUpdateHub(bufferLog);
@@ -232,18 +233,19 @@ public abstract class AbstractUpdateCommandStep extends AbstractCommandStep impl
      * @param databaseChangeLog the databaseChangeLog of the database
      * @param contexts          the command contexts
      * @param labelExpression   the command label expressions
+     * @param outputStream      the current global OutputStream
      * @return true if there are no additional changes to execute, otherwise false
      * @throws LiquibaseException if there was a problem running any queries
      * @throws IOException        if there was a problem handling the update summary
      */
     @Beta
-    public boolean isUpToDate(CommandScope commandScope, Database database, DatabaseChangeLog databaseChangeLog, Contexts contexts, LabelExpression labelExpression) throws LiquibaseException, IOException {
+    public boolean isUpToDate(CommandScope commandScope, Database database, DatabaseChangeLog databaseChangeLog, Contexts contexts, LabelExpression labelExpression, OutputStream outputStream) throws LiquibaseException, IOException {
         if (isUpToDateFastCheck(commandScope, database, databaseChangeLog, contexts, labelExpression)) {
             Scope.getCurrentScope().getUI().sendMessage("Database is up to date, no changesets to execute");
             StatusVisitor statusVisitor = new StatusVisitor(database);
             ChangeLogIterator shouldRunIterator = getStatusChangelogIterator(commandScope, database, contexts, labelExpression, databaseChangeLog);
             shouldRunIterator.run(statusVisitor, new RuntimeEnvironment(database, contexts, labelExpression));
-            ShowSummaryUtil.showUpdateSummary(databaseChangeLog, statusVisitor);
+            ShowSummaryUtil.showUpdateSummary(databaseChangeLog, statusVisitor, outputStream);
             return true;
         }
         return false;

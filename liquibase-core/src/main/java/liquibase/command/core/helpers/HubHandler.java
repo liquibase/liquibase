@@ -43,9 +43,7 @@ public class HubHandler {
         this.changeExecListener = changeExecListener;
         this.changeLogFile = changeLogFile;
 
-        // Let the user know that they can register for Hub
         hubUpdater = new HubUpdater(new Date(), changeLog, database);
-        hubUpdater.register(changeLogFile);
 
         // Create or retrieve the Connection
         connection = getConnection(changeLog, database);

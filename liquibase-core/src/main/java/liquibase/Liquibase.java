@@ -50,13 +50,13 @@ import liquibase.resource.Resource;
 import liquibase.resource.ResourceAccessor;
 import liquibase.serializer.ChangeLogSerializer;
 import liquibase.structure.DatabaseObject;
-import liquibase.util.*;
+import liquibase.util.LoggingExecutorTextUtil;
+import liquibase.util.ShowSummaryUtil;
+import liquibase.util.StreamUtil;
+import liquibase.util.StringUtil;
 
 import javax.xml.parsers.ParserConfigurationException;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.PrintStream;
-import java.io.Writer;
+import java.io.*;
 import java.text.DateFormat;
 import java.util.*;
 import java.util.function.Supplier;
@@ -306,14 +306,6 @@ public class Liquibase implements AutoCloseable {
         String changeLogId = changeLog.getChangeLogId();
         HubUpdater hubUpdater = new HubUpdater(new Date(), changeLog, database);
         if (hubUpdater.hubIsNotAvailable(changeLogId)) {
-            if (StringUtil.isNotEmpty(HubConfiguration.LIQUIBASE_HUB_API_KEY.getCurrentValue()) && changeLogId == null) {
-                String message =
-                    "An API key was configured, but no changelog ID exists.\n" +
-                    "No operations will be reported. Register this changelog with Liquibase Hub to generate free deployment reports.\n" +
-                    "Learn more at https://hub.liquibase.com.";
-                Scope.getCurrentScope().getUI().sendMessage("WARNING: " + message);
-                Scope.getCurrentScope().getLog(getClass()).warning(message);
-            }
             return null;
         }
 
@@ -321,11 +313,6 @@ public class Liquibase implements AutoCloseable {
         // Warn about the situation where there is a changeLog ID, but no API key
         //
         if (StringUtil.isEmpty(HubConfiguration.LIQUIBASE_HUB_API_KEY.getCurrentValue()) && changeLogId != null) {
-            String message = "The changelog ID '" + changeLogId + "' was found, but no API Key exists.\n" +
-                             "No operations will be reported. Simply add a liquibase.hub.apiKey setting to generate free deployment reports.\n" +
-                             "Learn more at https://hub.liquibase.com.";
-            Scope.getCurrentScope().getUI().sendMessage("WARNING: " + message);
-            Scope.getCurrentScope().getLog(getClass()).warning(message);
             return null;
         }
         Connection connection;
@@ -423,28 +410,6 @@ public class Liquibase implements AutoCloseable {
                 new LabelChangeSetFilter(labelExpression),
                 new DbmsChangeSetFilter(database),
                 new IgnoreChangeSetFilter());
-    }
-
-    protected ChangeLogIterator buildChangeLogIterator(String tag, DatabaseChangeLog changeLog, Contexts contexts,
-                                                       LabelExpression labelExpression) throws DatabaseException {
-
-        if (tag == null) {
-            return new ChangeLogIterator(changeLog,
-                    new NotRanChangeSetFilter(database.getRanChangeSetList()),
-                new ContextChangeSetFilter(contexts),
-                new LabelChangeSetFilter(labelExpression),
-                new IgnoreChangeSetFilter(),
-                new DbmsChangeSetFilter(database));
-        } else {
-            List<RanChangeSet> ranChangeSetList = database.getRanChangeSetList();
-            return new ChangeLogIterator(changeLog,
-                new NotRanChangeSetFilter(database.getRanChangeSetList()),
-                new ContextChangeSetFilter(contexts),
-                new LabelChangeSetFilter(labelExpression),
-                new IgnoreChangeSetFilter(),
-                new DbmsChangeSetFilter(database),
-                new UpToTagChangeSetFilter(tag, ranChangeSetList));
-        }
     }
 
     public void update(String contexts, Writer output) throws LiquibaseException {
@@ -555,7 +520,6 @@ public class Liquibase implements AutoCloseable {
                     // Let the user know that they can register for Hub
                     //
                     hubUpdater = new HubUpdater(new Date(), changeLog, database);
-                    hubUpdater.register(changeLogFile);
 
                     generateDeploymentId();
 
@@ -615,8 +579,8 @@ public class Liquibase implements AutoCloseable {
 
                     CompositeLogService compositeLogService = new CompositeLogService(true, bufferLog);
                     Scope.child(Scope.Attr.logService.name(), compositeLogService, () -> runChangeLogIterator.run(createUpdateVisitor(), new RuntimeEnvironment(database, contexts, labelExpression)));
-
-                    ShowSummaryUtil.showUpdateSummary(changeLog, statusVisitor);
+                    OutputStream outputStream = Scope.getCurrentScope().get("outputStream", OutputStream.class);
+                    ShowSummaryUtil.showUpdateSummary(changeLog, statusVisitor, outputStream);
 
                     hubUpdater.postUpdateHub(updateOperation, bufferLog);
                     logDeploymentOutcomeMdc(true);
@@ -842,7 +806,6 @@ public class Liquibase implements AutoCloseable {
                     // Let the user know that they can register for Hub
                     //
                     hubUpdater = new HubUpdater(startTime, changeLog, database);
-                    hubUpdater.register(changeLogFile);
 
                     //
                     // Create an iterator which will be used with a ListVisitor
@@ -1128,7 +1091,6 @@ public class Liquibase implements AutoCloseable {
                     // Let the user know that they can register for Hub
                     //
                     hubUpdater = new HubUpdater(startTime, changeLog, database);
-                    hubUpdater.register(changeLogFile);
 
                     //
                     // Create an iterator which will be used with a ListVisitor
@@ -1278,7 +1240,6 @@ public class Liquibase implements AutoCloseable {
                     // Let the user know that they can register for Hub
                     //
                     hubUpdater = new HubUpdater(startTime, changeLog, database);
-                    hubUpdater.register(changeLogFile);
 
                     //
                     // Create an iterator which will be used with a ListVisitor

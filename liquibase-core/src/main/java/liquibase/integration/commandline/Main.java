@@ -1765,6 +1765,7 @@ public class Main {
                     try {
                         Map<String, Object> updateScopedObjects = new HashMap<>();
                         updateScopedObjects.put("showSummary", showSummary);
+                        updateScopedObjects.put("outputStream", outputStream);
                         Scope.child(updateScopedObjects, () -> {
                             liquibase.update(Integer.parseInt(commandParams.iterator().next()), new Contexts(contexts), new
                                     LabelExpression(getLabelFilter()));
@@ -1783,6 +1784,7 @@ public class Main {
                     try {
                         Map<String, Object> updateScopedObjects = new HashMap<>();
                         updateScopedObjects.put("showSummary", showSummary);
+                        updateScopedObjects.put("outputStream", outputStream);
                         Scope.child(updateScopedObjects, () -> {
                             liquibase.update(commandParams.iterator().next(), new Contexts(contexts), new LabelExpression(getLabelFilter()));
                         });
