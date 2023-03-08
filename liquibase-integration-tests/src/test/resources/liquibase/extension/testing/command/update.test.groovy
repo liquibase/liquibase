@@ -103,7 +103,8 @@ Optional Args:
         ]
 
         expectedResults = [
-                statusCode: 0
+                statusCode: 0,
+                defaultChangeExecListener: 'not_null'
         ]
 
         outputFile = new File("target/test-classes/ignoredChangeset.txt")
