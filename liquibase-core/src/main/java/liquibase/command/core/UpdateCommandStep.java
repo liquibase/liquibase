@@ -102,10 +102,13 @@ public class UpdateCommandStep extends AbstractUpdateCommandStep implements Clea
     @Override
     public void adjustCommandDefinition(CommandDefinition commandDefinition) {
         commandDefinition.setShortDescription("Deploy any changes in the changelog file that have not been deployed");
-
         if (commandDefinition.is(LEGACY_COMMAND_NAME)) {
             commandDefinition.setHidden(true);
         }
+    }
 
+    @Override
+    public void postUpdateLog() {
+        Scope.getCurrentScope().getUI().sendMessage(coreBundle.getString("update.successful"));
     }
 }

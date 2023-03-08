@@ -409,29 +409,6 @@ public class Liquibase implements AutoCloseable {
                 new IgnoreChangeSetFilter());
     }
 
-    /**
-     *
-     * Return a StatusChangeLogIterator constructed with standard filters
-     *
-     * @param   contexts                           Contexts to filter for
-     * @param   labelExpression                    Labels to filter for
-     *                                             default value is false to only gather the first
-     * @param   changeLog                          The changelog to process
-     *
-     * @return  StatusChangeLogIterator
-     * @throws DatabaseException
-     *
-     */
-    protected ChangeLogIterator getStandardStatusChangelogIterator(Contexts contexts, LabelExpression labelExpression,
-                                                                   DatabaseChangeLog changeLog) throws DatabaseException {
-        return new StatusChangeLogIterator(changeLog,
-                new ShouldRunChangeSetFilter(database),
-                new ContextChangeSetFilter(contexts),
-                new LabelChangeSetFilter(labelExpression),
-                new DbmsChangeSetFilter(database),
-                new IgnoreChangeSetFilter());
-    }
-
     protected ChangeLogIterator buildChangeLogIterator(String tag, DatabaseChangeLog changeLog, Contexts contexts,
                                                        LabelExpression labelExpression) throws DatabaseException {
 
@@ -468,32 +445,16 @@ public class Liquibase implements AutoCloseable {
 
     public void update(Contexts contexts, LabelExpression labelExpression, Writer output, boolean checkLiquibaseTables)
             throws LiquibaseException {
-        changeLogParameters.setContexts(contexts);
-        changeLogParameters.setLabels(labelExpression);
-
-        runInScope(new Scope.ScopedRunner() {
-            @Override
-            public void run() throws Exception {
-
-                /* We have no other choice than to save the current Executer here. */
-                @SuppressWarnings("squid:S1941")
-                Executor oldTemplate = getAndReplaceJdbcExecutor(output);
-
-                outputHeader("Update Database Script");
-
-                if (isUpToDateFastCheck(contexts, labelExpression)) {
-                    Scope.getCurrentScope().getSingleton(ExecutorService.class).getExecutor("logging", database).comment("Database is up to date, no changesets to execute");
-                } else {
-                    LockService lockService = LockServiceFactory.getInstance().getLockService(database);
-                    lockService.waitForLock();
-
-                    update(contexts, labelExpression, checkLiquibaseTables);
-                }
-
-                flushOutputWriter(output);
-
-                Scope.getCurrentScope().getSingleton(ExecutorService.class).setExecutor("jdbc", database, oldTemplate);
-            }
+        runInScope(() -> {
+            CommandScope updateCommand = new CommandScope(UpdateSqlCommandStep.COMMAND_NAME);
+            updateCommand.addArgumentValue(DbUrlConnectionCommandStep.DATABASE_ARG, getDatabase());
+            updateCommand.addArgumentValue(UpdateSqlCommandStep.CHANGELOG_FILE_ARG, changeLogFile);
+            updateCommand.addArgumentValue(UpdateSqlCommandStep.CONTEXTS_ARG, contexts != null ? contexts.toString() : null);
+            updateCommand.addArgumentValue(UpdateSqlCommandStep.LABEL_FILTER_ARG, labelExpression != null ? labelExpression.getOriginalString() : null);
+            updateCommand.addArgumentValue(UpdateSqlCommandStep.CHANGE_EXEC_LISTENER_ARG, changeExecListener);
+            updateCommand.addArgumentValue(DatabaseChangelogCommandStep.CHANGELOG_PARAMETERS, changeLogParameters);
+            updateCommand.setOutput(new WriterOutputStream(output, GlobalConfiguration.OUTPUT_FILE_ENCODING.getCurrentValue()));
+            updateCommand.execute();
         });
     }
 

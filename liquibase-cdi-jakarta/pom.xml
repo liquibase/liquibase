@@ -105,8 +105,7 @@
                     <artifactId>${project.artifactId}</artifactId>
                     <file>${project.build.directory}/${project.artifactId}-${project.version}.jar</file>
                     <sources>${project.build.directory}/${project.artifactId}-${project.version}-sources.jar</sources>
-<!--                    TODO: Investigate why this fails for me when building core and pro-->
-<!--                    <javadoc>${project.build.directory}/${project.artifactId}-${project.version}-javadoc.jar</javadoc>-->
+                    <javadoc>${project.build.directory}/${project.artifactId}-${project.version}-javadoc.jar</javadoc>
                     <pomFile>${project.build.directory}/release.pom.xml</pomFile>
                 </configuration>
                 <executions>
