@@ -1,6 +1,47 @@
 Liquibase Core Changelog
 ===========================================
 
+Changes in version Liquibase v4.20 (2023.03.07)
+
+* feat : https://datical.atlassian.net/browse/DAT-12842 by @sayaliM0412 in https://github.com/liquibase/liquibase/pull/3867
+* Issue 3584: Add support for relativeToChangelogFile for ChangeLogProperty class/property attribute by @jasonlyle88 in https://github.com/liquibase/liquibase/pull/3595
+* Jakartaee CDI for liquibase by @xazap in https://github.com/liquibase/liquibase/pull/3642
+* use variable for maven version by @StevenMassaro in https://github.com/liquibase/liquibase/pull/3895
+* update db changelog xsd to 4.20 by @suryaaki2 in https://github.com/liquibase/liquibase/pull/3918
+* [PRO]DAT-6606, DAT-6607 and DAT-6613 by @filipelautert in https://github.com/liquibase/liquibase-pro/pull/824
+* structured logging test updates by @StevenMassaro in https://github.com/liquibase/liquibase-pro/pull/851
+* [PRO] update pro xsd and flow schema to 4.20 by @suryaaki2 in https://github.com/liquibase/liquibase-pro/pull/861
+* DAT-6606, DAT-6607 (DAT-6623 too) and DAT-6613 by @filipelautert in https://github.com/liquibase/liquibase/pull/3775
+* remove Liquibase Hub autoregistration prompts (DAT-13419) by @StevenMassaro in https://github.com/liquibase/liquibase/pull/3886
+* Bump actions/cache from 3.2.5 to 3.2.6 by @dependabot in https://github.com/liquibase/liquibase/pull/3851
+* [PRO] Bump jsqlparser from 4.5 to 4.6 by @dependabot in https://github.com/liquibase/liquibase-pro/pull/842
+* [PRO] Bump mockito-core from 3.8.0 to 3.12.4 by @dependabot in https://github.com/liquibase/liquibase-pro/pull/845
+* [PRO] Bump actions/checkout from 2 to 3 by @dependabot in https://github.com/liquibase/liquibase-pro/pull/846
+* [PRO] Bump actions/setup-java from 2 to 3 by @dependabot in https://github.com/liquibase/liquibase-pro/pull/847
+* [PRO] Bump schdck/create-env-json from 1 to 2 by @dependabot in https://github.com/liquibase/liquibase-pro/pull/848
+* [PRO] Bump maven-compiler-plugin from 3.10.1 to 3.11.0 by @dependabot in https://github.com/liquibase/liquibase-pro/pull/850
+* only show structured log license message after value providers are registered (DAT-13362) by @StevenMassaro in https://github.com/liquibase/liquibase/pull/3850
+* pin maven version for sonar scan by @StevenMassaro in https://github.com/liquibase/liquibase/pull/3880
+* Fix CheckSum generation issues + improvements  by @MalloD12 in https://github.com/liquibase/liquibase/pull/3616
+* One more pin to maven 3.8.7 by @filipelautert in https://github.com/liquibase/liquibase/pull/3885
+* Pin Maven to 3.8.7 in other places by @wwillard7800 in https://github.com/liquibase/liquibase/pull/3884
+* more maven version pinning by @StevenMassaro in https://github.com/liquibase/liquibase/pull/3887
+* structured logging MdcKey renaming by @StevenMassaro in https://github.com/liquibase/liquibase/pull/3875
+* Revert "Fix CheckSum generation issues + CURRENT_CHECKSUM_ALGORITHM_VERSION updated from 8 to 9." by @filipelautert in https://github.com/liquibase/liquibase/pull/3892
+* Safely call snakeyaml methods that have been changed in last versions. by @filipelautert in https://github.com/liquibase/liquibase/pull/3904
+* [PRO] only show structured log license message after value providers are registered (DAT-13362) by @StevenMassaro in https://github.com/liquibase/liquibase-pro/pull/839
+* [PRO] Pin maven to 3.8.7 by @wwillard7800 in https://github.com/liquibase/liquibase-pro/pull/855
+* [PRO] GitHub action maven version pin by @StevenMassaro in https://github.com/liquibase/liquibase-pro/pull/859
+
+
+## New Contributors
+* @sayaliM0412 made their first contribution in https://github.com/liquibase/liquibase/pull/3867
+* @jasonlyle88 made their first contribution in https://github.com/liquibase/liquibase/pull/3595
+* @xazap made their first contribution in https://github.com/liquibase/liquibase/pull/3642
+
+
+**Full Changelog**: https://github.com/liquibase/liquibase/compare/v4.19.1...v4.20.0
+
 Changes in version Liquibase v4.19.1 (2023.02.28)
 
 * Fixes generate-changelog table/view comment and table/view column comment generation for MSSQL by @abrackx in https://github.com/liquibase/liquibase/pull/3563
@@ -199,11 +240,11 @@ Changes in version Liquibase v4.18.0 (2022.11.30)
 - Use together for increased security and convenience of centralized properties
 
 * [PRO]Security
-- Vaults offer much greater security than defaults files or environment variables 
+- Vaults offer much greater security than defaults files for environment variables
 
 * [PRO] Centralization
 - Secure your database credentials, Pro license key, secure urls, and more in one central location.
-- Update your critical properties in one place, and all linked tools and jobs use the new values .
+- Update your critical properties in one place, and all linked tools and jobs use the new values.
 
 * [PRO] `rollback-on-error` command argument
 - When set to `true` will attempt to rollback a failed update operation.
