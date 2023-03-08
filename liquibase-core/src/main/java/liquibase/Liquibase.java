@@ -2238,25 +2238,20 @@ public class Liquibase implements AutoCloseable {
     /**
      * Display change log lock information.
      */
+    @Deprecated
     public DatabaseChangeLogLock[] listLocks() throws LiquibaseException {
-        checkLiquibaseTables(false, null, new Contexts(), new LabelExpression());
-
-        return LockServiceFactory.getInstance().getLockService(database).listLocks();
+        return ListLocksCommandStep.listLocks(database);
     }
 
+    @Deprecated
     public void reportLocks(PrintStream out) throws LiquibaseException {
-        DatabaseChangeLogLock[] locks = listLocks();
-        out.println("Database change log locks for " + getDatabase().getConnection().getConnectionUserName()
-                + "@" + getDatabase().getConnection().getURL());
-        if (locks.length == 0) {
-            out.println(" - No locks");
-            return;
-        }
-        for (DatabaseChangeLogLock lock : locks) {
-            out.println(" - " + lock.getLockedBy() + " at " +
-                    DateFormat.getDateTimeInstance().format(lock.getLockGranted()));
-        }
-        out.println("NOTE:  The lock time displayed is based on the database's configured time");
+        runInScope(() -> {
+            CommandScope listLocksCommand = new CommandScope(ListLocksCommandStep.COMMAND_NAME);
+            listLocksCommand.addArgumentValue(DbUrlConnectionCommandStep.DATABASE_ARG, getDatabase());
+            listLocksCommand.addArgumentValue(ListLocksCommandStep.CHANGELOG_FILE_ARG, changeLogFile);
+            listLocksCommand.addArgumentValue(ListLocksCommandStep.PRINT_STREAM, out);
+            listLocksCommand.execute();
+        });
     }
 
     public void forceReleaseLocks() throws LiquibaseException {
