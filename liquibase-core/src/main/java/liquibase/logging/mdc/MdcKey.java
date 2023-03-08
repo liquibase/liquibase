@@ -40,6 +40,13 @@ public class MdcKey {
     public static final String LIQUIBASE_PSQL_KEEP_TEMP_NAME = "liquibasePsqlKeepTempName";
     public static final String LIQUIBASE_PSQL_ARGS = "liquibasePsqlArgs";
     public static final String LIQUIBASE_PSQL_LOG_FILE = "liquibasePsqlLogFile";
+    public static final String LIQUIBASE_SQLCMD_PATH = "liquibaseSqlcmdPath";
+    public static final String LIQUIBASE_SQLCMD_TIMEOUT = "liquibaseSqlcmdTimeout";
+    public static final String LIQUIBASE_SQLCMD_KEEP_TEMP = "liquibaseSqlcmdKeepTemp";
+    public static final String LIQUIBASE_SQLCMD_KEEP_TEMP_PATH = "liquibaseSqlcmdKeepTempPath";
+    public static final String LIQUIBASE_SQLCMD_KEEP_TEMP_NAME = "liquibaseSqlcmdKeepTempName";
+    public static final String LIQUIBASE_SQLCMD_ARGS = "liquibaseSqlcmdArgs";
+    public static final String LIQUIBASE_SQLCMD_LOG_FILE = "liquibaseSqlcmdLogFile";
     public static final String RUN_WITH = "runWith";
     public static final String DATABASE_CHANGELOG_TABLE_OUTCOME = "databaseChangelogTableOutcome";
     public static final String ROLLBACK_SQL_FILE = "rollbackSqlFile";
