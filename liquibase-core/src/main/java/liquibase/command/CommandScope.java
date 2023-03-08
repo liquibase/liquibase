@@ -108,7 +108,6 @@ public class CommandScope {
             ConfigurationDefinition<T> noCommandConfigDef = createConfigurationDefinition(argument, false);
             ConfiguredValue<T> noCommandNameProvidedValue = noCommandConfigDef.getCurrentConfiguredValue();
             if (noCommandNameProvidedValue.found() && !noCommandNameProvidedValue.wasDefaultValueUsed()) {
-                configDef = noCommandConfigDef;
                 providedValue = noCommandNameProvidedValue;
             }
         }
@@ -132,7 +131,7 @@ public class CommandScope {
      *
      * Means that this class will LockService.class using object lock
      */
-    public  <T> CommandScope provideDependency(Class<T> clazz, T value) {
+    public  CommandScope provideDependency(Class<?> clazz, Object value) {
         this.dependencies.put(clazz, value);
 
         return this;
@@ -190,7 +189,7 @@ public class CommandScope {
         CommandResultsBuilder resultsBuilder = new CommandResultsBuilder(this, outputStream);
         final List<CommandStep> pipeline = commandDefinition.getPipeline();
         validate();
-        Scope.getCurrentScope().addMdcValue(MdcKey.OPERATION_TYPE, StringUtil.join(commandDefinition.getName(), "-"));
+        Scope.getCurrentScope().addMdcValue(MdcKey.LIQUIBASE_OPERATION, StringUtil.join(commandDefinition.getName(), "-"));
         try {
             for (CommandStep command : pipeline) {
                 command.run(resultsBuilder);
@@ -281,11 +280,6 @@ public class CommandScope {
         @Override
         protected String getSourceDescription() {
             return "Command argument";
-        }
-
-        @Override
-        public ProvidedValue getProvidedValue(String... keyAndAliases) {
-            return super.getProvidedValue(keyAndAliases);
         }
 
         @Override
