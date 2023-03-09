@@ -21,6 +21,8 @@ import java.util.regex.Pattern;
  */
 public class LiquibaseEntityResolver implements EntityResolver2 {
 
+    private static final String XSD_VERSION_REGEX = "(?:-pro-|-)(?<version>[\\d.]*)\\.xsd";
+    private static final Pattern XSD_VERSION_PATTERN = Pattern.compile(XSD_VERSION_REGEX);
     private boolean shouldWarnOnMismatchedXsdVersion = false;
     /**
      * The warning message should only be printed once.
@@ -88,8 +90,7 @@ public class LiquibaseEntityResolver implements EntityResolver2 {
      */
     private void warnForMismatchedXsdVersion(String systemId) {
         try {
-            Pattern versionPattern = Pattern.compile("(?:-pro-|-)(?<version>[\\d.]*)\\.xsd");
-            Matcher versionMatcher = versionPattern.matcher(systemId);
+            Matcher versionMatcher = XSD_VERSION_PATTERN.matcher(systemId);
             boolean found = versionMatcher.find();
             if (found) {
                 String buildVersion = LiquibaseUtil.getBuildVersion();

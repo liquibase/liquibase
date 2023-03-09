@@ -337,23 +337,6 @@ public class HubChangeExecListener extends AbstractChangeExecListener
         // If not connected to Hub but we are supposed to be then show message
         //
         if (operation == null) {
-            String apiKey = StringUtil.trimToNull(HubConfiguration.LIQUIBASE_HUB_API_KEY.getCurrentValueObfuscated());
-            boolean hubOn = HubConfiguration.LIQUIBASE_HUB_MODE.getCurrentValue() != HubConfiguration.HubMode.OFF;
-            if (apiKey != null && hubOn) {
-                String message;
-                if (databaseChangeLog.getChangeLogId() == null) {
-                    message = "The changelog '" + databaseChangeLog.getPhysicalFilePath() + "' has not been registered with Liquibase Hub.\n" +
-                            "To register the changelog with your Hub Project run 'liquibase registerChangeLog'.\n" +
-                            "Learn more at https://hub.liquibase.com.";
-                }
-                else {
-                    message = "The changelog file specified is not registered with any Liquibase Hub project, so the results will not be recorded in Liquibase Hub.\n" +
-                            "To register the changelog with your Hub Project run 'liquibase registerChangeLog'.\n" +
-                            "Learn more at https://hub.liquibase.com.";
-                }
-                Scope.getCurrentScope().getUI().sendMessage(message);
-                logger.info(message);
-            }
             return;
         }
         HubChangeLog hubChangeLog;
