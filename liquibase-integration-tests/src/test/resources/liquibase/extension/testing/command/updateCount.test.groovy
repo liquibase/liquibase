@@ -110,21 +110,7 @@ Optional Args:
         ]
 
         expectedUI = [
-"""
-UPDATE SUMMARY
-Run:                          1
-Previously run:               0
-Filtered out:                 5
--------------------------------
-Total change sets:            6
-
-FILTERED CHANGE SETS SUMMARY
-
-Label mismatch:               2
-Context mismatch:             2
-After count:                  1
-DBMS mismatch:                1
-"""
+            "Running Changeset: changelogs/h2/complete/summary-changelog.xml::4-table::lbuser"
         ]
 
     }
