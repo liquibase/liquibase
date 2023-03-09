@@ -1491,7 +1491,7 @@ public class Main {
         final ResourceAccessor fileOpener = this.getFileOpenerResourceAccessor();
 
         if (COMMANDS.DIFF.equalsIgnoreCase(command) || COMMANDS.DIFF_CHANGELOG.equalsIgnoreCase(command)
-            || COMMANDS.GENERATE_CHANGELOG.equalsIgnoreCase(command)) {
+            || COMMANDS.GENERATE_CHANGELOG.equalsIgnoreCase(command) || COMMANDS.UPDATE.equalsIgnoreCase(command)) {
             this.runUsingCommandFramework();
             return;
         }
@@ -1748,19 +1748,7 @@ public class Main {
             }
 
             try {
-                if (COMMANDS.UPDATE.equalsIgnoreCase(command)) {
-                    Scope.getCurrentScope().addMdcValue(MdcKey.LIQUIBASE_OPERATION, COMMANDS.UPDATE);
-                    try {
-                        Map<String, Object> updateScopedObjects = new HashMap<>();
-                        updateScopedObjects.put("showSummary", showSummary);
-                        updateScopedObjects.put("outputStream", outputStream);
-                        Scope.child(updateScopedObjects, () -> {
-                            liquibase.update(new Contexts(contexts), new LabelExpression(getLabelFilter()));
-                        });
-                    } catch (LiquibaseException updateException) {
-                        handleUpdateException(database, updateException, defaultChangeExecListener, rollbackOnError);
-                    }
-                } else if (COMMANDS.CHANGELOG_SYNC.equalsIgnoreCase(command)) {
+                if (COMMANDS.CHANGELOG_SYNC.equalsIgnoreCase(command)) {
                     liquibase.changeLogSync(new Contexts(contexts), new LabelExpression(getLabelFilter()));
                 } else if (COMMANDS.CHANGELOG_SYNC_SQL.equalsIgnoreCase(command)) {
                     liquibase.changeLogSync(new Contexts(contexts), new LabelExpression(getLabelFilter()), getOutputWriter());
@@ -1928,6 +1916,8 @@ public class Main {
             runDiffChangelogCommandStep();
         } else if (COMMANDS.GENERATE_CHANGELOG.equalsIgnoreCase(command)) {
             runGenerateChangelogCommandStep();
+        } else if (COMMANDS.UPDATE.equalsIgnoreCase(command)) {
+            runUpdateCommandStep();
         }
     }
 
@@ -1974,6 +1964,16 @@ public class Main {
         this.setReferenceDatabaseArgumentsToCommand(diffCommand);
 
         diffCommand.execute();
+    }
+
+    private void runUpdateCommandStep() throws CommandLineParsingException, CommandExecutionException, IOException {
+        CommandScope updateCommand = new CommandScope("update");
+        updateCommand.addArgumentValue(UpdateCommandStep.CONTEXTS_ARG, contexts);
+        updateCommand.addArgumentValue(UpdateCommandStep.LABEL_FILTER_ARG, labelFilter);
+        updateCommand.addArgumentValue(UpdateCommandStep.CHANGE_EXEC_LISTENER_CLASS_ARG, changeExecListenerClass);
+        updateCommand.addArgumentValue(UpdateCommandStep.CHANGE_EXEC_LISTENER_PROPERTIES_FILE_ARG, changeExecListenerPropertiesFile);
+        setDatabaseArgumentsToCommand(updateCommand);
+        updateCommand.execute();
     }
 
     /**

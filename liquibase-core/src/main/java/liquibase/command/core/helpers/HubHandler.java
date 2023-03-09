@@ -36,7 +36,7 @@ public class HubHandler {
 
     private HubUpdater hubUpdater;
 
-    private Operation changeLogSyncOperation;
+    private Operation operation;
 
     public HubHandler(Database database, DatabaseChangeLog changeLog, String changeLogFile,
                       ChangeExecListener changeExecListener) throws LiquibaseException {
@@ -52,22 +52,36 @@ public class HubHandler {
     public HubChangeExecListener startHubForChangelogSync(ChangeLogParameters changeLogParameters, String tag, ChangeLogIterator listLogIterator) throws LiquibaseException, SQLException {
         if (isConnected()) {
             String operationCommand = (tag == null ? "changelog-sync" : "changelog-sync-to-tag");
-            changeLogSyncOperation = hubUpdater.preUpdateHub("CHANGELOGSYNC", operationCommand, connection, changeLogFile,
+            operation = hubUpdater.preUpdateHub("CHANGELOGSYNC", operationCommand, connection, changeLogFile,
                     changeLogParameters.getContexts(), changeLogParameters.getLabels(), listLogIterator);
-            return new HubChangeExecListener(changeLogSyncOperation, changeExecListener);
+            return new HubChangeExecListener(operation, changeExecListener);
+        }
+        return null;
+    }
+
+    public HubChangeExecListener startHubForUpdate(ChangeLogParameters changeLogParameters, ChangeLogIterator listLogIterator, String operationCommand) throws LiquibaseException, SQLException {
+        if (isConnected()) {
+            operation = hubUpdater.preUpdateHub("UPDATE",
+                    operationCommand,
+                    connection,
+                    changeLogFile,
+                    changeLogParameters.getContexts(),
+                    changeLogParameters.getLabels(),
+                    listLogIterator);
+            return new HubChangeExecListener(operation, changeExecListener);
         }
         return null;
     }
 
     public void postUpdateHub(BufferedLogService bufferLog) {
         if (this.hubUpdater != null) {
-            this.hubUpdater.postUpdateHub(this.changeLogSyncOperation, bufferLog);
+            this.hubUpdater.postUpdateHub(this.operation, bufferLog);
         }
     }
 
     public void postUpdateHubExceptionHandling(BufferedLogService bufferLog, String message) {
-        if (this.changeLogSyncOperation != null) {
-            hubUpdater.postUpdateHubExceptionHandling(changeLogSyncOperation, bufferLog, message);
+        if (this.operation != null) {
+            hubUpdater.postUpdateHubExceptionHandling(operation, bufferLog, message);
         }
     }
 

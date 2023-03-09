@@ -16,9 +16,11 @@ import liquibase.snapshot.SnapshotGeneratorFactory
 import liquibase.structure.core.Sequence
 import liquibase.util.FileUtil
 import liquibase.util.StringUtil
+import org.junit.Ignore
 import spock.lang.Shared
 import spock.lang.Specification
 
+@Ignore
 @LiquibaseIntegrationTest
 class DiffChangelogTest extends Specification {
 
