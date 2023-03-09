@@ -1765,23 +1765,9 @@ public class Main {
                 } else if (COMMANDS.CHANGELOG_SYNC_SQL.equalsIgnoreCase(command)) {
                     liquibase.changeLogSync(new Contexts(contexts), new LabelExpression(getLabelFilter()), getOutputWriter());
                 } else if (COMMANDS.CHANGELOG_SYNC_TO_TAG.equalsIgnoreCase(command)) {
-                    if ((commandParams == null) || commandParams.isEmpty()) {
-                        throw new CommandLineParsingException(
-                                String.format(coreBundle.getString("command.requires.tag"),
-                                        COMMANDS.CHANGELOG_SYNC_TO_TAG));
-                    }
-
-                    liquibase.changeLogSync(commandParams.iterator().next(), new Contexts(contexts),
-                            new LabelExpression(getLabelFilter()));
+                    liquibase.changeLogSync(commandParams.iterator().next(), new Contexts(contexts), new LabelExpression(getLabelFilter()));
                 } else if (COMMANDS.CHANGELOG_SYNC_TO_TAG_SQL.equalsIgnoreCase(command)) {
-                    if ((commandParams == null) || commandParams.isEmpty()) {
-                        throw new CommandLineParsingException(
-                                String.format(coreBundle.getString("command.requires.tag"),
-                                        COMMANDS.CHANGELOG_SYNC_TO_TAG_SQL));
-                    }
-
-                    liquibase.changeLogSync(commandParams.iterator().next(), new Contexts(contexts),
-                            new LabelExpression(getLabelFilter()), getOutputWriter());
+                    liquibase.changeLogSync(commandParams.iterator().next(), new Contexts(contexts), new LabelExpression(getLabelFilter()), getOutputWriter());
                 } else if (COMMANDS.MARK_NEXT_CHANGESET_RAN.equalsIgnoreCase(command)) {
                     liquibase.markNextChangeSetRan(new Contexts(contexts), new LabelExpression(getLabelFilter()));
                 } else if (COMMANDS.MARK_NEXT_CHANGESET_RAN_SQL.equalsIgnoreCase(command)) {
