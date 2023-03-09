@@ -48,7 +48,8 @@ Optional Args:
         ]
 
         expectedResults = [
-                statusCode   : 0
+                statusCode   : 0,
+                defaultChangeExecListener: 'not_null'
         ]
     }
 
@@ -63,7 +64,44 @@ Optional Args:
         ]
 
         expectedResults = [
-                statusCode   : 0
+                statusCode   : 0,
+                defaultChangeExecListener: 'not_null'
+        ]
+    }
+
+    run "Happy path with a change set that has complicated labels and contexts", {
+        arguments = [
+                url:        { it.url },
+                username:   { it.username },
+                password:   { it.password },
+                changelogFile: "changelogs/h2/complete/summary-changelog.xml",
+                count: "1",
+                labelFilter: "testtable4,tagit and !testtable2",
+                contexts: "none",
+                showSummary: "summary"
+        ]
+
+        expectedResults = [
+                statusCode   : 0,
+                defaultChangeExecListener: 'not_null'
+        ]
+
+        outputFile = new File("target/test-classes/labelsAndContent.txt")
+
+        expectedFileContent = [ "target/test-classes/labelsAndContent.txt":
+                    [
+                      "UPDATE SUMMARY",
+                      "Run:                          1",
+                      "Previously run:               0",
+                      "Filtered out:                 5",
+                      "-------------------------------",
+                      "Total change sets:            6",
+                      "FILTERED CHANGE SETS SUMMARY",
+                      "Label mismatch:               2",
+                      "Context mismatch:             2",
+                      "After count:                  1",
+                      "DBMS mismatch:                1"
+                    ]
         ]
     }
 
@@ -112,7 +150,8 @@ Optional Args:
         ]
 
         expectedResults = [
-                statusCode   : 0
+                statusCode   : 0,
+                defaultChangeExecListener: 'not_null'
         ]
 
         outputFile = new File("target/test-classes/mismatchedDBMS.txt")
