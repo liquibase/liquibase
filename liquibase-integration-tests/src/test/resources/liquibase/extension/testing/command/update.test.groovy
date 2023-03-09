@@ -49,7 +49,8 @@ Optional Args:
         ]
 
         expectedResults = [
-                statusCode: 0
+                statusCode: 0,
+                defaultChangeExecListener: 'not_null'
         ]
 
         expectedDatabaseContent = [
@@ -69,7 +70,8 @@ Optional Args:
         ]
 
         expectedResults = [
-                statusCode: 0
+                statusCode: 0,
+                defaultChangeExecListener: 'not_null'
         ]
 
         expectedDatabaseContent = [
@@ -101,7 +103,8 @@ Optional Args:
         ]
 
         expectedResults = [
-                statusCode: 0
+                statusCode: 0,
+                defaultChangeExecListener: 'not_null'
         ]
 
         outputFile = new File("target/test-classes/ignoredChangeset.txt")
@@ -131,7 +134,8 @@ Optional Args:
         ]
 
         expectedResults = [
-                statusCode: 0
+                statusCode: 0,
+                defaultChangeExecListener: 'not_null'
         ]
 
         outputFile = new File("target/test-classes/changeSetWithLabels.txt")
@@ -182,7 +186,8 @@ Optional Args:
         ]
 
         expectedResults = [
-                statusCode: 0
+                statusCode: 0,
+                defaultChangeExecListener: 'not_null'
         ]
 
         outputFile = new File("target/test-classes/changeSetWithLabels.txt")
@@ -221,7 +226,8 @@ Optional Args:
         ]
 
         expectedResults = [
-                statusCode: 0
+                statusCode: 0,
+                defaultChangeExecListener: 'not_null'
         ]
 
         outputFile = new File("target/test-classes/changeSetWithComplicatedLabelsAndContext.txt")
@@ -244,15 +250,16 @@ Optional Args:
 
     run "Mismatched DBMS causes not deployed summary message", {
         arguments = [
-                url          : { it.url },
-                username     : { it.username },
-                password     : { it.password },
-                showSummary  : "verbose",
-                changelogFile: "changelogs/h2/complete/mismatchedDbms.changelog.xml",
+                url:        { it.url },
+                username:   { it.username },
+                password:   { it.password },
+                showSummary: "verbose",
+                changelogFile: "changelogs/h2/complete/mismatchedDbms.changelog.xml"
         ]
 
         expectedResults = [
-                statusCode: 0
+                statusCode: 0,
+                defaultChangeExecListener: 'not_null'
         ]
 
         outputFile = new File("target/test-classes/mismatchedDBMS.txt")
@@ -287,7 +294,8 @@ Optional Args:
         ]
 
         expectedResults = [
-                statusCode: 0
+                statusCode: 0,
+                defaultChangeExecListener: 'not_null'
         ]
 
         expectedDatabaseContent = [
@@ -351,7 +359,8 @@ Optional Args:
         ]
 
         expectedResults = [
-                statusCode: 0
+                statusCode: 0,
+                defaultChangeExecListener: 'not_null'
         ]
 
         expectedLogs = [
