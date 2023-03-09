@@ -1287,7 +1287,7 @@ public abstract class AbstractJdbcDatabase implements Database {
                 Scope.getCurrentScope().getSingleton(ExecutorService.class).getExecutor("jdbc", this).execute(statement, sqlVisitors);
             } catch (DatabaseException e) {
                 if (statement.continueOnError()) {
-                    Scope.getCurrentScope().getLog(getClass()).severe("Error executing statement '" + statement.toString() + "', but continuing", e);
+                    Scope.getCurrentScope().getLog(getClass()).severe("Error executing statement '" + statement + "', but continuing", e);
                 } else {
                     throw e;
                 }

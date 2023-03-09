@@ -176,7 +176,7 @@ public class CustomChangeWrapper extends AbstractChange {
         }
 
         if (statements == null) {
-            statements = new SqlStatement[0];
+            statements = SqlStatement.EMPTY_SQL_STATEMENT;
         }
         return statements;
     }
@@ -205,7 +205,7 @@ public class CustomChangeWrapper extends AbstractChange {
         }
 
         if (statements == null) {
-            statements = new SqlStatement[0];
+            statements = SqlStatement.EMPTY_SQL_STATEMENT;
         }
         return statements;
 
