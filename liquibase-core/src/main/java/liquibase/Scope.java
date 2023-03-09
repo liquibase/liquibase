@@ -28,6 +28,7 @@ import liquibase.util.StringUtil;
 import java.lang.reflect.Constructor;
 import java.nio.charset.Charset;
 import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * This scope object is used to hold configuration and other parameters within a call without needing complex method signatures.
@@ -68,7 +69,7 @@ public class Scope {
     private Scope parent;
     private SmartMap values = new SmartMap();
     private String scopeId;
-    private static final Map<String, List<MdcObject>> addedMdcEntries = new HashMap<>();
+    private static final Map<String, List<MdcObject>> addedMdcEntries = new ConcurrentHashMap<>();
 
     private LiquibaseListener listener;
 
@@ -242,6 +243,7 @@ public class Scope {
         for (MdcObject mdcObject : CollectionUtil.createIfNull(mdcObjects)) {
             mdcObject.close();
         }
+        addedMdcEntries.remove(currentScope.scopeId);
 
         scopeManager.setCurrentScope(currentScope.getParent());
     }
