@@ -29,6 +29,8 @@ import java.util.regex.Pattern;
 
 public class H2Database extends AbstractJdbcDatabase {
 
+    private static final String PATCH_VERSION_REGEX = "^(?:\\d+\\.)(?:\\d+\\.)(\\d+).*$";
+    private static final Pattern PATCH_VERSION_PATTERN = Pattern.compile(PATCH_VERSION_REGEX);
     private static String START_CONCAT = "CONCAT(";
     private static String END_CONCAT = ")";
     private static String SEP_CONCAT = ", ";
@@ -384,8 +386,7 @@ public class H2Database extends AbstractJdbcDatabase {
 
     private int getBuildVersion() throws DatabaseException {
 
-        Pattern patchVersionPattern = Pattern.compile("^(?:\\d+\\.)(?:\\d+\\.)(\\d+).*$");
-        Matcher matcher = patchVersionPattern.matcher(getDatabaseProductVersion());
+        Matcher matcher = PATCH_VERSION_PATTERN.matcher(getDatabaseProductVersion());
 
         if (matcher.matches()) {
             return Integer.parseInt(matcher.group(1));

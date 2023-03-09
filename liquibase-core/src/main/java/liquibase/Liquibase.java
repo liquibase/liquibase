@@ -184,6 +184,7 @@ public class Liquibase implements AutoCloseable {
      *
      * @see <a href="https://docs.liquibase.com/concepts/advanced/contexts.html" target="_top">contexts</a> in documentation
      */
+    @Deprecated
     public void update() throws LiquibaseException {
         this.update(new Contexts());
     }
@@ -194,6 +195,7 @@ public class Liquibase implements AutoCloseable {
      *
      * @see <a href="https://docs.liquibase.com/concepts/advanced/contexts.html" target="_top">contexts</a> in documentation
      */
+    @Deprecated
     public void update(String contexts) throws LiquibaseException {
         this.update(new Contexts(contexts));
     }
@@ -204,6 +206,7 @@ public class Liquibase implements AutoCloseable {
      *
      * @see <a href="https://docs.liquibase.com/concepts/advanced/contexts.html" target="_top">contexts</a> in documentation
      */
+    @Deprecated
     public void update(Contexts contexts) throws LiquibaseException {
         update(contexts, new LabelExpression());
     }
@@ -218,13 +221,14 @@ public class Liquibase implements AutoCloseable {
      * @see <a href="https://docs.liquibase.com/concepts/advanced/contexts.html" target="_top">contexts</a> in documentation
      * @see <a href="https://docs.liquibase.com/concepts/advanced/labels.html" target="_top">labels</a> in documentation
      */
+    @Deprecated
     public void update(Contexts contexts, LabelExpression labelExpression) throws LiquibaseException {
         update(contexts, labelExpression, true);
     }
 
     /**
      * Liquibase update
-     *
+     * @deprecated Use CommandStep
      * @param   contexts
      * @param   labelExpression
      * @param   checkLiquibaseTables
@@ -233,104 +237,17 @@ public class Liquibase implements AutoCloseable {
      * @see <a href="https://docs.liquibase.com/concepts/advanced/contexts.html" target="_top">contexts</a> in documentation
      * @see <a href="https://docs.liquibase.com/concepts/advanced/labels.html" target="_top">labels</a> in documentation
      */
+    @Deprecated
     public void update(Contexts contexts, LabelExpression labelExpression, boolean checkLiquibaseTables) throws LiquibaseException {
         runInScope(() -> {
-            if (isUpToDateFastCheck(contexts, labelExpression)) {
-                //
-                // Iterate to find the change sets which will be skipped
-                //
-                Scope.getCurrentScope().getUI().sendMessage("Database is up to date, no changesets to execute");
-                StatusVisitor statusVisitor = new StatusVisitor(database);
-                DatabaseChangeLog databaseChangeLog = getDatabaseChangeLog();
-                ChangeLogIterator shouldRunIterator = getStandardStatusChangelogIterator(contexts, labelExpression, databaseChangeLog);
-                shouldRunIterator.run(statusVisitor, new RuntimeEnvironment(database, contexts, labelExpression));
-                OutputStream outputStream = Scope.getCurrentScope().get("outputStream", OutputStream.class);
-                ShowSummaryUtil.showUpdateSummary(databaseChangeLog, statusVisitor, outputStream);
-                return;
-            }
-
-            LockService lockService = LockServiceFactory.getInstance().getLockService(database);
-            lockService.waitForLock();
-            Scope.getCurrentScope().addMdcValue(MdcKey.LIQUIBASE_TARGET_URL, database.getConnection().getURL(), false);
-
-            changeLogParameters.setContexts(contexts);
-            changeLogParameters.setLabels(labelExpression);
-            addCommandFiltersMdc(labelExpression, contexts);
-
-            Operation updateOperation = null;
-            BufferedLogService bufferLog = new BufferedLogService();
-            DatabaseChangeLog changeLog;
-            HubUpdater hubUpdater = null;
-            try {
-                changeLog = getDatabaseChangeLog();
-                if (checkLiquibaseTables) {
-                    checkLiquibaseTables(true, changeLog, contexts, labelExpression);
-                }
-
-                changeLog.validate(database, contexts, labelExpression);
-
-                //
-                // Let the user know that they can register for Hub
-                //
-                hubUpdater = new HubUpdater(new Date(), changeLog, database);
-
-                generateDeploymentId();
-
-                //
-                // Create or retrieve the Connection if this is not SQL generation
-                // Make sure the Hub is available here by checking the return
-                // We do not need a connection if we are using a LoggingExecutor
-                //
-                ChangeLogIterator changeLogIterator = getStandardChangelogIterator(contexts, labelExpression, changeLog);
-
-                //
-                // Iterate to find the change sets which will be skipped
-                //
-                StatusVisitor statusVisitor = new StatusVisitor(database);
-                ChangeLogIterator shouldRunIterator = getStandardStatusChangelogIterator(contexts, labelExpression, changeLog);
-                shouldRunIterator.run(statusVisitor, new RuntimeEnvironment(database, contexts, labelExpression));
-
-                Connection connection = getConnection(changeLog);
-                if (connection != null) {
-                    updateOperation =
-                        hubUpdater.preUpdateHub("UPDATE", "update", connection, changeLogFile, contexts, labelExpression, changeLogIterator);
-                }
-
-                HubChangeExecListener hubChangeExecListener = new HubChangeExecListener(updateOperation, changeExecListener);
-                //
-                // Create another iterator to run
-                //
-                ChangeLogIterator runChangeLogIterator = getStandardChangelogIterator(contexts, labelExpression, changeLog);
-                CompositeLogService compositeLogService = new CompositeLogService(true, bufferLog);
-                Scope.child(Scope.Attr.logService.name(), compositeLogService, () -> {
-                    UpdateVisitor updateVisitor = createUpdateVisitor(connection != null ? hubChangeExecListener : changeExecListener);
-                    runChangeLogIterator.run(updateVisitor, new RuntimeEnvironment(database, contexts, labelExpression));
-                });
-
-                OutputStream outputStream = Scope.getCurrentScope().get("outputStream", OutputStream.class);
-                ShowSummaryUtil.showUpdateSummary(changeLog, statusVisitor, outputStream);
-
-                //
-                // Update Hub with the operation information
-                //
-                hubUpdater.postUpdateHub(updateOperation, bufferLog);
-                logDeploymentOutcomeMdc(true);
-            } catch (Throwable e) {
-                logDeploymentOutcomeMdc(false);
-                if (hubUpdater != null) {
-                    hubUpdater.postUpdateHubExceptionHandling(updateOperation, bufferLog, e.getMessage());
-                }
-                throw e;
-            } finally {
-                database.setObjectQuotingStrategy(ObjectQuotingStrategy.LEGACY);
-                try {
-                    lockService.releaseLock();
-                } catch (LockException e) {
-                    LOG.severe(MSG_COULD_NOT_RELEASE_LOCK, e);
-                }
-                resetServices();
-                setChangeExecListener(null);
-            }
+            CommandScope updateCommand = new CommandScope(UpdateCommandStep.COMMAND_NAME);
+            updateCommand.addArgumentValue(DbUrlConnectionCommandStep.DATABASE_ARG, getDatabase());
+            updateCommand.addArgumentValue(UpdateCommandStep.CHANGELOG_FILE_ARG, changeLogFile);
+            updateCommand.addArgumentValue(UpdateCommandStep.CONTEXTS_ARG, contexts != null ? contexts.toString() : null);
+            updateCommand.addArgumentValue(UpdateCommandStep.LABEL_FILTER_ARG, labelExpression != null ? labelExpression.getOriginalString() : null);
+            updateCommand.addArgumentValue(UpdateCommandStep.CHANGE_EXEC_LISTENER_ARG, changeExecListener);
+            updateCommand.addArgumentValue(DatabaseChangelogCommandStep.CHANGELOG_PARAMETERS, changeLogParameters);
+            updateCommand.execute();
         });
     }
 
@@ -495,51 +412,6 @@ public class Liquibase implements AutoCloseable {
                 new IgnoreChangeSetFilter());
     }
 
-    /**
-     *
-     * Return a StatusChangeLogIterator constructed with standard filters
-     *
-     * @param   contexts                           Contexts to filter for
-     * @param   labelExpression                    Labels to filter for
-     *                                             default value is false to only gather the first
-     * @param   changeLog                          The changelog to process
-     *
-     * @return  StatusChangeLogIterator
-     * @throws DatabaseException
-     *
-     */
-    protected ChangeLogIterator getStandardStatusChangelogIterator(Contexts contexts, LabelExpression labelExpression,
-                                                                   DatabaseChangeLog changeLog) throws DatabaseException {
-        return new StatusChangeLogIterator(changeLog,
-                new ShouldRunChangeSetFilter(database),
-                new ContextChangeSetFilter(contexts),
-                new LabelChangeSetFilter(labelExpression),
-                new DbmsChangeSetFilter(database),
-                new IgnoreChangeSetFilter());
-    }
-
-    protected ChangeLogIterator buildChangeLogIterator(String tag, DatabaseChangeLog changeLog, Contexts contexts,
-                                                       LabelExpression labelExpression) throws DatabaseException {
-
-        if (tag == null) {
-            return new ChangeLogIterator(changeLog,
-                    new NotRanChangeSetFilter(database.getRanChangeSetList()),
-                new ContextChangeSetFilter(contexts),
-                new LabelChangeSetFilter(labelExpression),
-                new IgnoreChangeSetFilter(),
-                new DbmsChangeSetFilter(database));
-        } else {
-            List<RanChangeSet> ranChangeSetList = database.getRanChangeSetList();
-            return new ChangeLogIterator(changeLog,
-                new NotRanChangeSetFilter(database.getRanChangeSetList()),
-                new ContextChangeSetFilter(contexts),
-                new LabelChangeSetFilter(labelExpression),
-                new IgnoreChangeSetFilter(),
-                new DbmsChangeSetFilter(database),
-                new UpToTagChangeSetFilter(tag, ranChangeSetList));
-        }
-    }
-
     public void update(String contexts, Writer output) throws LiquibaseException {
         this.update(new Contexts(contexts), output);
     }
@@ -554,35 +426,20 @@ public class Liquibase implements AutoCloseable {
 
     public void update(Contexts contexts, LabelExpression labelExpression, Writer output, boolean checkLiquibaseTables)
             throws LiquibaseException {
-        changeLogParameters.setContexts(contexts);
-        changeLogParameters.setLabels(labelExpression);
-
-        runInScope(new Scope.ScopedRunner() {
-            @Override
-            public void run() throws Exception {
-
-                /* We have no other choice than to save the current Executer here. */
-                @SuppressWarnings("squid:S1941")
-                Executor oldTemplate = getAndReplaceJdbcExecutor(output);
-
-                outputHeader("Update Database Script");
-
-                if (isUpToDateFastCheck(contexts, labelExpression)) {
-                    Scope.getCurrentScope().getSingleton(ExecutorService.class).getExecutor("logging", database).comment("Database is up to date, no changesets to execute");
-                } else {
-                    LockService lockService = LockServiceFactory.getInstance().getLockService(database);
-                    lockService.waitForLock();
-
-                    update(contexts, labelExpression, checkLiquibaseTables);
-                }
-
-                flushOutputWriter(output);
-
-                Scope.getCurrentScope().getSingleton(ExecutorService.class).setExecutor("jdbc", database, oldTemplate);
-            }
+        runInScope(() -> {
+            CommandScope updateCommand = new CommandScope(UpdateSqlCommandStep.COMMAND_NAME);
+            updateCommand.addArgumentValue(DbUrlConnectionCommandStep.DATABASE_ARG, getDatabase());
+            updateCommand.addArgumentValue(UpdateSqlCommandStep.CHANGELOG_FILE_ARG, changeLogFile);
+            updateCommand.addArgumentValue(UpdateSqlCommandStep.CONTEXTS_ARG, contexts != null ? contexts.toString() : null);
+            updateCommand.addArgumentValue(UpdateSqlCommandStep.LABEL_FILTER_ARG, labelExpression != null ? labelExpression.getOriginalString() : null);
+            updateCommand.addArgumentValue(UpdateSqlCommandStep.CHANGE_EXEC_LISTENER_ARG, changeExecListener);
+            updateCommand.addArgumentValue(DatabaseChangelogCommandStep.CHANGELOG_PARAMETERS, changeLogParameters);
+            updateCommand.setOutput(new WriterOutputStream(output, GlobalConfiguration.OUTPUT_FILE_ENCODING.getCurrentValue()));
+            updateCommand.execute();
         });
     }
 
+    @Deprecated
     public void update(int changesToApply, String contexts) throws LiquibaseException {
         update(changesToApply, new Contexts(contexts), new LabelExpression());
     }
@@ -597,117 +454,19 @@ public class Liquibase implements AutoCloseable {
      * @throws LiquibaseException
      *
      */
+    @Deprecated
     public void update(int changesToApply, Contexts contexts, LabelExpression labelExpression)
             throws LiquibaseException {
-        changeLogParameters.setContexts(contexts);
-        changeLogParameters.setLabels(labelExpression);
-        addCommandFiltersMdc(labelExpression, contexts);
-
-        runInScope(new Scope.ScopedRunner() {
-            @Override
-            public void run() throws Exception {
-
-                LockService lockService = LockServiceFactory.getInstance().getLockService(database);
-                lockService.waitForLock();
-                Scope.getCurrentScope().addMdcValue(MdcKey.LIQUIBASE_TARGET_URL, database.getConnection().getURL());
-
-                Operation updateOperation = null;
-                BufferedLogService bufferLog = new BufferedLogService();
-                DatabaseChangeLog changeLog = null;
-                HubUpdater hubUpdater = null;
-                try {
-                    changeLog = getDatabaseChangeLog();
-
-                    checkLiquibaseTables(true, changeLog, contexts, labelExpression);
-
-                    changeLog.validate(database, contexts, labelExpression);
-
-                    //
-                    // Let the user know that they can register for Hub
-                    //
-                    hubUpdater = new HubUpdater(new Date(), changeLog, database);
-
-                    generateDeploymentId();
-
-                    //
-                    // Create an iterator which will be used with a ListVisitor
-                    // to grab the list of changesets for the update
-                    //
-                    ChangeLogIterator listLogIterator = new ChangeLogIterator(changeLog,
-                            new ShouldRunChangeSetFilter(database),
-                            new ContextChangeSetFilter(contexts),
-                            new LabelChangeSetFilter(labelExpression),
-                            new DbmsChangeSetFilter(database),
-                            new IgnoreChangeSetFilter(),
-                            new CountChangeSetFilter(changesToApply));
-
-                    //
-                    // Create or retrieve the Connection
-                    // Make sure the Hub is available here by checking the return
-                    //
-                    Connection connection = getConnection(changeLog);
-                    if (connection != null) {
-                        updateOperation =
-                            hubUpdater.preUpdateHub("UPDATE", "update-count", connection, changeLogFile, contexts, labelExpression, listLogIterator);
-                    }
-
-                    //
-                    // If we are doing Hub then set up a HubChangeExecListener
-                    //
-                    if (connection != null) {
-                        changeExecListener = new HubChangeExecListener(updateOperation, changeExecListener);
-                    }
-
-                    //
-                    // Iterate to find the change sets which will be skipped
-                    //
-                    StatusVisitor statusVisitor = new StatusVisitor(database);
-                    ChangeLogIterator shouldRunIterator = new StatusChangeLogIterator(changeLog,
-                            new ShouldRunChangeSetFilter(database),
-                            new ContextChangeSetFilter(contexts),
-                            new LabelChangeSetFilter(labelExpression),
-                            new DbmsChangeSetFilter(database),
-                            new IgnoreChangeSetFilter(),
-                            new CountChangeSetFilter(changesToApply));
-                    shouldRunIterator.run(statusVisitor, new RuntimeEnvironment(database, contexts, labelExpression));
-
-                    //
-                    // Create another iterator to run
-                    //
-                    ChangeLogIterator runChangeLogIterator = new ChangeLogIterator(changeLog,
-                            new ShouldRunChangeSetFilter(database),
-                            new ContextChangeSetFilter(contexts),
-                            new LabelChangeSetFilter(labelExpression),
-                            new DbmsChangeSetFilter(database),
-                            new IgnoreChangeSetFilter(),
-                            new CountChangeSetFilter(changesToApply));
-
-                    CompositeLogService compositeLogService = new CompositeLogService(true, bufferLog);
-                    Scope.child(Scope.Attr.logService.name(), compositeLogService, () -> runChangeLogIterator.run(createUpdateVisitor(), new RuntimeEnvironment(database, contexts, labelExpression)));
-
-                    OutputStream outputStream = Scope.getCurrentScope().get("outputStream", OutputStream.class);
-                    ShowSummaryUtil.showUpdateSummary(changeLog, statusVisitor, outputStream);
-
-                    hubUpdater.postUpdateHub(updateOperation, bufferLog);
-                    logDeploymentOutcomeMdc(true);
-                }
-                catch (Throwable e) {
-                    logDeploymentOutcomeMdc(false);
-                    if (hubUpdater != null) {
-                        hubUpdater.postUpdateHubExceptionHandling(updateOperation, bufferLog, e.getMessage());
-                    }
-                    throw e;
-                } finally {
-                    database.setObjectQuotingStrategy(ObjectQuotingStrategy.LEGACY);
-                    try {
-                        lockService.releaseLock();
-                    } catch (LockException e) {
-                        LOG.severe(MSG_COULD_NOT_RELEASE_LOCK, e);
-                    }
-                    resetServices();
-                    setChangeExecListener(null);
-                }
-            }
+        runInScope(() -> {
+            CommandScope updateCommand = new CommandScope(UpdateCountCommandStep.COMMAND_NAME);
+            updateCommand.addArgumentValue(DbUrlConnectionCommandStep.DATABASE_ARG, getDatabase());
+            updateCommand.addArgumentValue(UpdateCountCommandStep.CHANGELOG_FILE_ARG, changeLogFile);
+            updateCommand.addArgumentValue(UpdateCountCommandStep.CONTEXTS_ARG, contexts != null ? contexts.toString() : null);
+            updateCommand.addArgumentValue(UpdateCountCommandStep.LABEL_FILTER_ARG, labelExpression != null ? labelExpression.getOriginalString() : null);
+            updateCommand.addArgumentValue(UpdateCountCommandStep.CHANGE_EXEC_LISTENER_ARG, changeExecListener);
+            updateCommand.addArgumentValue(UpdateCountCommandStep.COUNT_ARG, changesToApply);
+            updateCommand.addArgumentValue(DatabaseChangelogCommandStep.CHANGELOG_PARAMETERS, changeLogParameters);
+            updateCommand.execute();
         });
     }
 
@@ -820,7 +579,6 @@ public class Liquibase implements AutoCloseable {
 
                     CompositeLogService compositeLogService = new CompositeLogService(true, bufferLog);
                     Scope.child(Scope.Attr.logService.name(), compositeLogService, () -> runChangeLogIterator.run(createUpdateVisitor(), new RuntimeEnvironment(database, contexts, labelExpression)));
-
                     OutputStream outputStream = Scope.getCurrentScope().get("outputStream", OutputStream.class);
                     ShowSummaryUtil.showUpdateSummary(changeLog, statusVisitor, outputStream);
 
@@ -847,10 +605,12 @@ public class Liquibase implements AutoCloseable {
         });
     }
 
+    @Deprecated
     public void update(int changesToApply, String contexts, Writer output) throws LiquibaseException {
         this.update(changesToApply, new Contexts(contexts), new LabelExpression(), output);
     }
 
+    @Deprecated
     public void update(int changesToApply, Contexts contexts, LabelExpression labelExpression, Writer output) throws LiquibaseException {
         changeLogParameters.setContexts(contexts);
         changeLogParameters.setLabels(labelExpression);

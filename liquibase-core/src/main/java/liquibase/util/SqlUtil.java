@@ -30,6 +30,9 @@ import static java.util.Locale.US;
 
 public abstract class SqlUtil {
 
+    private static final String NAME_REGEX = ":name|\\?|:value";
+    public static final Pattern NAME_PATTERN = Pattern.compile(NAME_REGEX);
+
     public static boolean isNumeric(int dataType) {
         switch (dataType) {
             case Types.BIGINT:
@@ -320,7 +323,7 @@ public abstract class SqlUtil {
 
     public static String replacePredicatePlaceholders(Database database, String predicate, List<String> columnNames,
                                                       List<Object> parameters) {
-        Matcher matcher = Pattern.compile(":name|\\?|:value").matcher(predicate.trim());
+        Matcher matcher = NAME_PATTERN.matcher(predicate.trim());
         StringBuffer sb = new StringBuffer();
         Iterator<String> columnNameIter = columnNames.iterator();
         Iterator<Object> paramIter = parameters.iterator();

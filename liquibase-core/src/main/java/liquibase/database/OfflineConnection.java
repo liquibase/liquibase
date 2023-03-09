@@ -48,11 +48,14 @@ public class OfflineConnection implements DatabaseConnection {
     private boolean sendsStringParametersAsUnicode = true;
     private String connectionUserName;
 
+    private static final String OFFLINE_COMMAND_REGEX = "offline:(\\w+)\\??(.*)";
+    private static final Pattern OFFLINE_COMMAND_PATTERN = Pattern.compile(OFFLINE_COMMAND_REGEX);
+
     public OfflineConnection() {}
 
     public OfflineConnection(String url, ResourceAccessor resourceAccessor) {
         this.url = url;
-        Matcher matcher = Pattern.compile("offline:(\\w+)\\??(.*)").matcher(url);
+        Matcher matcher = OFFLINE_COMMAND_PATTERN.matcher(url);
         if (!matcher.matches()) {
             throw new UnexpectedLiquibaseException("Could not parse offline url " + url);
         }
