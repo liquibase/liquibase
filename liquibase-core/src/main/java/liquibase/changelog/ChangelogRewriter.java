@@ -15,6 +15,12 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 public class ChangelogRewriter {
+
+    public static final String XSD_FILE_REGEX = "([dbchangelog|liquibase-pro])-3.[0-9]?[0-9]?.xsd";
+    public static final Pattern XSD_FILE_PATTERN = Pattern.compile(XSD_FILE_REGEX);
+    private static final String CHANGELOG_TAG_REGEX = "(?ms).*<databaseChangeLog[^>]*>";
+    private static final Pattern CHANGELOG_TAG_PATTERN = Pattern.compile(CHANGELOG_TAG_REGEX);
+
     /**
      *
      * Remove the changelog ID from the changelog file
@@ -117,17 +123,13 @@ public class ChangelogRewriter {
             String encoding = GlobalConfiguration.OUTPUT_FILE_ENCODING.getCurrentValue();
             String changeLogString = StreamUtil.readStreamAsString(is, encoding);
             if (changeLogFile.toLowerCase().endsWith(".xml")) {
-                String patternString = "(?ms).*<databaseChangeLog[^>]*>";
-                Pattern pattern = Pattern.compile(patternString);
-                Matcher matcher = pattern.matcher(changeLogString);
+                Matcher matcher = CHANGELOG_TAG_PATTERN.matcher(changeLogString);
                 if (matcher.find()) {
                     //
                     // Update the XSD versions
                     //
                     String header = changeLogString.substring(matcher.start(), matcher.end() - 1);
-                    String xsdPatternString = "([dbchangelog|liquibase-pro])-3.[0-9]?[0-9]?.xsd";
-                    Pattern xsdPattern = Pattern.compile(xsdPatternString);
-                    Matcher xsdMatcher = xsdPattern.matcher(header);
+                    Matcher xsdMatcher = XSD_FILE_PATTERN.matcher(header);
                     String editedString = xsdMatcher.replaceAll("$1-" + XMLChangeLogSAXParser.getSchemaVersion() + ".xsd");
 
                     //
@@ -138,7 +140,7 @@ public class ChangelogRewriter {
                         changeLogString = changeLogString.replaceFirst("/>", outputChangeLogString + "/>");
                     } else {
                         String outputHeader = editedString + outputChangeLogString + ">";
-                        changeLogString = changeLogString.replaceFirst(patternString, outputHeader);
+                        changeLogString = changeLogString.replaceFirst(CHANGELOG_TAG_REGEX, outputHeader);
                     }
                 }
             } else if (changeLogFile.toLowerCase().endsWith(".sql")) {
