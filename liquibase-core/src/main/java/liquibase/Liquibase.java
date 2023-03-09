@@ -50,8 +50,6 @@ import liquibase.resource.Resource;
 import liquibase.resource.ResourceAccessor;
 import liquibase.serializer.ChangeLogSerializer;
 import liquibase.structure.DatabaseObject;
-import liquibase.structure.core.Catalog;
-import liquibase.util.LiquibaseUtil;
 import liquibase.util.LoggingExecutorTextUtil;
 import liquibase.util.ShowSummaryUtil;
 import liquibase.util.StreamUtil;
