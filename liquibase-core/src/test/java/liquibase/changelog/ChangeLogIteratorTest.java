@@ -34,7 +34,7 @@ public class ChangeLogIteratorTest {
         changeLog.addChangeSet(new ChangeSet("4", "nvoxland", false, false, "/path/to/changelog",  null, null, null));
         changeLog.addChangeSet(new ChangeSet("5", "nvoxland", false, false, "/path/to/changelog",  null, "mysql", null));
         changeLog.addChangeSet(new ChangeSet("6", "nvoxland", false, false, "/path/to/changelog",  "test2", null, null));
-        changeLog.addChangeSet(new ChangeSet("7", "nvoxland", false, false, "/path/to/changelog",  "test2", null, "jdbc", true, ObjectQuotingStrategy.LEGACY, null));
+        changeLog.addChangeSet(new ChangeSet("7", "nvoxland", false, false, "/path/to/changelog",  "test2", null, "jdbc", null, true, ObjectQuotingStrategy.LEGACY, null));
     }
 
     @Test
@@ -50,7 +50,7 @@ public class ChangeLogIteratorTest {
     public void runChangeSet_withBogusExecutor() throws Exception {
         changeLog.addChangeSet(new ChangeSet("8", "nvoxland", false, false,
                 "/path/to/changelog",  "test2", null,
-                "foo", true, ObjectQuotingStrategy.LEGACY, null));
+                "foo", null, true, ObjectQuotingStrategy.LEGACY, null));
         TestChangeSetVisitor testChangeLogVisitor = new TestChangeSetVisitor();
 
         ChangeLogIterator iterator = new ChangeLogIterator(changeLog);

@@ -88,7 +88,7 @@ create table my_table (
 --changeset complexContext:1 contextFilter:"a or b"
 select 1
 
--- changeset the_user:the_user-1 runWith:\${runWith}
+-- changeset the_user:the_user-1 runWith:\${runWith} runWithSpoolFile:out.spool
 create table table2 (
     id int primary key
 );
@@ -363,6 +363,7 @@ CREATE TABLE ALL_CAPS_TABLE_2 (
         assert changeLog.getChangeSets().get(7).getContextFilter().toString().contains("third")
 
         changeLog.getChangeSets().get(10).getRunWith() == "sqlplus"
+        changeLog.getChangeSets().get(10).getRunWithSpoolFile() == "out.spool"
 
         ChangeSet cs = changeLog.getChangeSets().get(8)
         cs.getAuthor() == "bboisvert"

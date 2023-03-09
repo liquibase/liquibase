@@ -885,7 +885,7 @@ public class XMLChangeLogSerializerTest {
     
     @Test
     public void createNode_ChangeSetParameters() throws Exception {
-    	ChangeSet changeSet = new ChangeSet("1", "tms", true, true, "path/to/file.json", "context", "mssql",null,false,ObjectQuotingStrategy.LEGACY, null);
+    	ChangeSet changeSet = new ChangeSet("1", "tms", true, true, "path/to/file.json", "context", "mssql",null,null, false,ObjectQuotingStrategy.LEGACY, null);
     	changeSet.setCreated("created");
     	changeSet.setFailOnError(true);
     	changeSet.setLabels(new Labels("label"));
@@ -932,7 +932,7 @@ public class XMLChangeLogSerializerTest {
     
     @Test
     public void serialize_pretty_ChangeSetParameters() throws Exception {
-    	ChangeSet changeSet = new ChangeSet("1", "tms", true, true, "path/to/file.json", "context", "mssql","runWith",false,ObjectQuotingStrategy.LEGACY, null);
+    	ChangeSet changeSet = new ChangeSet("1", "tms", true, true, "path/to/file.json", "context", "mssql","runWith","runWithSpoolFile", false,ObjectQuotingStrategy.LEGACY, null);
     	changeSet.setCreated("created");
     	changeSet.setFailOnError(true);
     	changeSet.setLabels(new Labels("label"));
