@@ -348,6 +348,7 @@ public class LiquibaseCommandLine {
                             if (licenseService == null) {
                                 Scope.getCurrentScope().getUI().sendMessage("WARNING: License service not loaded, cannot determine Liquibase Pro license status. Please consider re-installing Liquibase to include all dependencies. Continuing operation without Pro license.");
                             } else {
+                                licenseService.licenseIsInstalled();
                                 Scope.getCurrentScope().getUI().sendMessage(licenseService.getLicenseInfo());
                             }
                         }
