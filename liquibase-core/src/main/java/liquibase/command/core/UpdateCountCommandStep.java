@@ -138,4 +138,9 @@ public class UpdateCountCommandStep extends AbstractUpdateCommandStep {
                 new IgnoreChangeSetFilter(),
                 new CountChangeSetFilter(commandScope.getArgumentValue(COUNT_ARG)));
     }
+
+    @Override
+    public String getHubOperation() {
+        return "update-count";
+    }
 }

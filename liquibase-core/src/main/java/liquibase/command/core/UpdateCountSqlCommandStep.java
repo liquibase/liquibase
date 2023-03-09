@@ -68,4 +68,9 @@ public class UpdateCountSqlCommandStep extends UpdateCountCommandStep {
         dependencies.addAll(super.requiredDependencies());
         return dependencies;
     }
+
+    @Override
+    public String getHubOperation() {
+        return "update-count";
+    }
 }
