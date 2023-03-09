@@ -59,9 +59,8 @@ public class HubHandler {
         return null;
     }
 
-    public HubChangeExecListener startHubForUpdate(ChangeLogParameters changeLogParameters, ChangeLogIterator listLogIterator) throws LiquibaseException, SQLException {
+    public HubChangeExecListener startHubForUpdate(ChangeLogParameters changeLogParameters, ChangeLogIterator listLogIterator, String operationCommand) throws LiquibaseException, SQLException {
         if (isConnected()) {
-            String operationCommand = "update";
             operation = hubUpdater.preUpdateHub("UPDATE",
                     operationCommand,
                     connection,

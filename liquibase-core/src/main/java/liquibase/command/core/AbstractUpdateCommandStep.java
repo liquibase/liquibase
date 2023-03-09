@@ -44,6 +44,7 @@ public abstract class AbstractUpdateCommandStep extends AbstractCommandStep impl
     public abstract UpdateSummaryEnum getShowSummary(CommandScope commandScope);
     public abstract String getChangeExecListenerClassArg(CommandScope commandScope);
     protected abstract String getChangeExecListenerPropertiesFileArg(CommandScope commandScope);
+    protected abstract String getHubOperation();
 
     @Override
     public List<Class<?>> requiredDependencies() {
@@ -90,7 +91,7 @@ public abstract class AbstractUpdateCommandStep extends AbstractCommandStep impl
             shouldRunIterator.run(statusVisitor, new RuntimeEnvironment(database, contexts, labelExpression));
 
             //Remember we built our hubHandler with our DefaultChangeExecListener so this HubChangeExecListener is delegating to them.
-            ChangeExecListener hubChangeExecListener = hubHandler.startHubForUpdate(changeLogParameters, changeLogIterator);
+            ChangeExecListener hubChangeExecListener = hubHandler.startHubForUpdate(changeLogParameters, changeLogIterator, getHubOperation());
             resultsBuilder.addResult(DEFAULT_CHANGE_EXEC_LISTENER_RESULT_KEY, defaultChangeExecListener);
             ChangeLogIterator runChangeLogIterator = getStandardChangelogIterator(commandScope, database, contexts, labelExpression, databaseChangeLog);
             CompositeLogService compositeLogService = new CompositeLogService(true, bufferLog);
