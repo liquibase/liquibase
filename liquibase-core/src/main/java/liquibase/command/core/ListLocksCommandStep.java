@@ -5,7 +5,10 @@ import liquibase.LabelExpression;
 import liquibase.changelog.ChangeLogHistoryService;
 import liquibase.changelog.ChangeLogHistoryServiceFactory;
 import liquibase.changelog.DatabaseChangeLog;
-import liquibase.command.*;
+import liquibase.command.AbstractCommandStep;
+import liquibase.command.CommandDefinition;
+import liquibase.command.CommandResultsBuilder;
+import liquibase.command.CommandScope;
 import liquibase.database.Database;
 import liquibase.exception.LiquibaseException;
 import liquibase.lockservice.DatabaseChangeLogLock;
@@ -20,14 +23,6 @@ import java.util.List;
 public class ListLocksCommandStep extends AbstractCommandStep {
 
     public static final String[] COMMAND_NAME = {"listLocks"};
-
-    public static final CommandArgumentDefinition<String> CHANGELOG_FILE_ARG;
-
-    static {
-        CommandBuilder builder = new CommandBuilder(COMMAND_NAME);
-        CHANGELOG_FILE_ARG = builder.argument(CommonArgumentNames.CHANGELOG_FILE, String.class)
-                .description("The root changelog").build();
-    }
 
     @Override
     public String[][] defineCommandNames() {

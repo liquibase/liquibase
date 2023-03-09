@@ -1769,7 +1769,6 @@ public class Liquibase implements AutoCloseable {
         runInScope(() -> {
             CommandScope listLocksCommand = new CommandScope(ListLocksCommandStep.COMMAND_NAME);
             listLocksCommand.addArgumentValue(DbUrlConnectionCommandStep.DATABASE_ARG, getDatabase());
-            listLocksCommand.addArgumentValue(ListLocksCommandStep.CHANGELOG_FILE_ARG, changeLogFile);
             listLocksCommand.setOutput(out);
             listLocksCommand.execute();
         });
