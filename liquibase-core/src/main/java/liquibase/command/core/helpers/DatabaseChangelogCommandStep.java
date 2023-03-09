@@ -8,6 +8,8 @@ import liquibase.changelog.ChangeLogHistoryServiceFactory;
 import liquibase.changelog.ChangeLogParameters;
 import liquibase.changelog.DatabaseChangeLog;
 import liquibase.command.*;
+import liquibase.configuration.LiquibaseConfiguration;
+import liquibase.configuration.ProvidedValue;
 import liquibase.database.Database;
 import liquibase.exception.LiquibaseException;
 import liquibase.lockservice.LockService;
@@ -19,7 +21,10 @@ import liquibase.parser.core.xml.XMLChangeLogSAXParser;
 import liquibase.resource.ResourceAccessor;
 
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
 
 /**
  * This helper class provides two objects: a valid and verified DatabaseChangeLog and the ChangeLogParameters
@@ -65,6 +70,7 @@ public class DatabaseChangelogCommandStep extends AbstractCommandStep implements
         ChangeLogParameters changeLogParameters = commandScope.getArgumentValue(CHANGELOG_PARAMETERS);
         if (changeLogParameters == null) {
             changeLogParameters = new ChangeLogParameters(database);
+            addJavaProperties(changeLogParameters);
         }
         changeLogParameters.setContexts(new Contexts(commandScope.getArgumentValue(CONTEXTS_ARG)));
         changeLogParameters.setLabels(new LabelExpression(commandScope.getArgumentValue(LABEL_FILTER_ARG)));
@@ -113,5 +119,16 @@ public class DatabaseChangelogCommandStep extends AbstractCommandStep implements
     @Override
     public void cleanUp(CommandResultsBuilder resultsBuilder) {
         ChangeLogHistoryServiceFactory.getInstance().resetAll();
+    }
+
+    /**
+     * Add java property arguments to changelog parameters
+     * @param changeLogParameters the changelog parameters to update
+     */
+    public void addJavaProperties(ChangeLogParameters changeLogParameters) {
+        HashMap javaProperties = Scope.getCurrentScope().get("javaProperties", HashMap.class);
+        if (javaProperties != null) {
+            javaProperties.forEach((key, value) -> changeLogParameters.set((String) key, value));
+        }
     }
 }

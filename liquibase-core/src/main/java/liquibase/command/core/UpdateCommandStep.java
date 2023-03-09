@@ -42,7 +42,6 @@ public class UpdateCommandStep extends AbstractUpdateCommandStep implements Clea
                 .build();
         SHOW_SUMMARY = builder.argument("showSummary", UpdateSummaryEnum.class).description("Type of update results summary to show.  Values can be 'off', 'summary', or 'verbose'.")
                 .defaultValue(UpdateSummaryEnum.OFF)
-                .hidden()
                 .setValueHandler(value -> {
                     if (value == null) {
                         return null;
@@ -103,10 +102,18 @@ public class UpdateCommandStep extends AbstractUpdateCommandStep implements Clea
     @Override
     public void adjustCommandDefinition(CommandDefinition commandDefinition) {
         commandDefinition.setShortDescription("Deploy any changes in the changelog file that have not been deployed");
-
         if (commandDefinition.is(LEGACY_COMMAND_NAME)) {
             commandDefinition.setHidden(true);
         }
+    }
 
+    @Override
+    public void postUpdateLog() {
+        Scope.getCurrentScope().getUI().sendMessage(coreBundle.getString("update.successful"));
+    }
+
+    @Override
+    public String getHubOperation() {
+        return "update";
     }
 }

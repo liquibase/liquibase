@@ -25,6 +25,7 @@ import liquibase.logging.mdc.MdcValue;
 import liquibase.util.ShowSummaryUtil;
 
 import java.io.IOException;
+import java.io.OutputStream;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
@@ -43,6 +44,7 @@ public abstract class AbstractUpdateCommandStep extends AbstractCommandStep impl
     public abstract UpdateSummaryEnum getShowSummary(CommandScope commandScope);
     public abstract String getChangeExecListenerClassArg(CommandScope commandScope);
     protected abstract String getChangeExecListenerPropertiesFileArg(CommandScope commandScope);
+    protected abstract String getHubOperation();
 
     @Override
     public List<Class<?>> requiredDependencies() {
@@ -67,7 +69,7 @@ public abstract class AbstractUpdateCommandStep extends AbstractCommandStep impl
         DefaultChangeExecListener defaultChangeExecListener = new DefaultChangeExecListener();
         try {
             DatabaseChangeLog databaseChangeLog = (DatabaseChangeLog) commandScope.getDependency(DatabaseChangeLog.class);
-            if (isUpToDate(commandScope, database, databaseChangeLog, contexts, labelExpression)) {
+            if (isUpToDate(commandScope, database, databaseChangeLog, contexts, labelExpression, resultsBuilder.getOutputStream())) {
                 return;
             }
             ChangeLogHistoryService changelogService = ChangeLogHistoryServiceFactory.getInstance().getChangeLogService(database);
@@ -89,7 +91,7 @@ public abstract class AbstractUpdateCommandStep extends AbstractCommandStep impl
             shouldRunIterator.run(statusVisitor, new RuntimeEnvironment(database, contexts, labelExpression));
 
             //Remember we built our hubHandler with our DefaultChangeExecListener so this HubChangeExecListener is delegating to them.
-            ChangeExecListener hubChangeExecListener = hubHandler.startHubForUpdate(changeLogParameters, changeLogIterator);
+            ChangeExecListener hubChangeExecListener = hubHandler.startHubForUpdate(changeLogParameters, changeLogIterator, getHubOperation());
             resultsBuilder.addResult(DEFAULT_CHANGE_EXEC_LISTENER_RESULT_KEY, defaultChangeExecListener);
             ChangeLogIterator runChangeLogIterator = getStandardChangelogIterator(commandScope, database, contexts, labelExpression, databaseChangeLog);
             CompositeLogService compositeLogService = new CompositeLogService(true, bufferLog);
@@ -100,12 +102,13 @@ public abstract class AbstractUpdateCommandStep extends AbstractCommandStep impl
                 //If we are using hub, we want to use the HubChangeExecListener, which is wrapping all the others. Otherwise, use the default.
                 ChangeExecListener listenerToUse = hubChangeExecListener != null ? hubChangeExecListener : defaultChangeExecListener;
                 runChangeLogIterator.run(new UpdateVisitor(database, listenerToUse), new RuntimeEnvironment(database, contexts, labelExpression));
-                ShowSummaryUtil.showUpdateSummary(databaseChangeLog, statusVisitor);
+                ShowSummaryUtil.showUpdateSummary(databaseChangeLog, statusVisitor, resultsBuilder.getOutputStream());
             });
 
             hubHandler.postUpdateHub(bufferLog);
             resultsBuilder.addResult("statusCode", 0);
             logDeploymentOutcomeMdc(defaultChangeExecListener, true);
+            postUpdateLog();
         } catch (Exception e) {
             logDeploymentOutcomeMdc(defaultChangeExecListener, false);
             resultsBuilder.addResult("statusCode", 1);
@@ -119,7 +122,7 @@ public abstract class AbstractUpdateCommandStep extends AbstractCommandStep impl
             try {
                 lockService.releaseLock();
             } catch (LockException e) {
-                Scope.getCurrentScope().getLog(ChangelogSyncCommandStep.class).severe(MSG_COULD_NOT_RELEASE_LOCK, e);
+                Scope.getCurrentScope().getLog(getClass()).severe(MSG_COULD_NOT_RELEASE_LOCK, e);
             }
         }
     }
@@ -179,6 +182,7 @@ public abstract class AbstractUpdateCommandStep extends AbstractCommandStep impl
      * NOTE: to reduce the number of queries to the databasehistory table, this method will cache the "fast check" results within this instance under the assumption that the total changesets will not change within this instance.
      */
     private static final Map<String, Boolean> upToDateFastCheck = new ConcurrentHashMap<>();
+
     private boolean isUpToDateFastCheck(CommandScope commandScope, Database database, DatabaseChangeLog databaseChangeLog, Contexts contexts, LabelExpression labelExpression) throws LiquibaseException {
         String cacheKey = contexts + "/" + labelExpression;
         if (!upToDateFastCheck.containsKey(cacheKey)) {
@@ -205,10 +209,11 @@ public abstract class AbstractUpdateCommandStep extends AbstractCommandStep impl
 
     /**
      * Get list of ChangeSet which have not been applied
-     * @param database the target database
+     *
+     * @param database          the target database
      * @param databaseChangeLog the database changelog
-     * @param contexts the command contexts
-     * @param labels the command label expressions
+     * @param contexts          the command contexts
+     * @param labels            the command label expressions
      * @return a list of ChangeSet that have not been applied
      * @throws LiquibaseException if there was a problem building our ChangeLogIterator or checking the database
      */
@@ -225,24 +230,33 @@ public abstract class AbstractUpdateCommandStep extends AbstractCommandStep impl
      * Checks if the database is up-to-date.
      *
      * @param commandScope
-     * @param database the database to check
+     * @param database          the database to check
      * @param databaseChangeLog the databaseChangeLog of the database
-     * @param contexts the command contexts
-     * @param labelExpression the command label expressions
+     * @param contexts          the command contexts
+     * @param labelExpression   the command label expressions
+     * @param outputStream      the current global OutputStream
      * @return true if there are no additional changes to execute, otherwise false
      * @throws LiquibaseException if there was a problem running any queries
-     * @throws IOException if there was a problem handling the update summary
+     * @throws IOException        if there was a problem handling the update summary
      */
     @Beta
-    public boolean isUpToDate(CommandScope commandScope, Database database, DatabaseChangeLog databaseChangeLog, Contexts contexts, LabelExpression labelExpression) throws LiquibaseException, IOException {
+    public boolean isUpToDate(CommandScope commandScope, Database database, DatabaseChangeLog databaseChangeLog, Contexts contexts, LabelExpression labelExpression, OutputStream outputStream) throws LiquibaseException, IOException {
         if (isUpToDateFastCheck(commandScope, database, databaseChangeLog, contexts, labelExpression)) {
             Scope.getCurrentScope().getUI().sendMessage("Database is up to date, no changesets to execute");
             StatusVisitor statusVisitor = new StatusVisitor(database);
             ChangeLogIterator shouldRunIterator = getStatusChangelogIterator(commandScope, database, contexts, labelExpression, databaseChangeLog);
             shouldRunIterator.run(statusVisitor, new RuntimeEnvironment(database, contexts, labelExpression));
-            ShowSummaryUtil.showUpdateSummary(databaseChangeLog, statusVisitor);
+            ShowSummaryUtil.showUpdateSummary(databaseChangeLog, statusVisitor, outputStream);
             return true;
         }
         return false;
+    }
+
+    /**
+     * Log
+     */
+    @Beta
+    public void postUpdateLog() {
+
     }
 }

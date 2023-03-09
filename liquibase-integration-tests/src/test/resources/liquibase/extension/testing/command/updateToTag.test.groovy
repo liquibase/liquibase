@@ -91,6 +91,40 @@ DBMS mismatch:                1
 
     }
 
+    run "Happy path with a change set that has complicated labels and contexts", {
+        arguments = [
+                url:        { it.url },
+                username:   { it.username },
+                password:   { it.password },
+                changelogFile: "changelogs/h2/complete/summary-changelog.xml",
+                tag: "updateTag",
+                labelFilter: "testtable1,tagit",
+                contexts: "none,tagit",
+                showSummary: "summary"
+        ]
+
+        expectedResults = [
+                statusCode   : 0
+        ]
+
+        outputFile = new File("target/test-classes/labelsAndContent.txt")
+
+        expectedFileContent = [ "target/test-classes/labelsAndContent.txt":
+                                ["UPDATE SUMMARY",
+                                 "Run:                          2",
+                                 "Previously run:               0",
+                                 "Filtered out:                 4",
+                                 "-------------------------------",
+                                 "Total change sets:            6",
+                                 "FILTERED CHANGE SETS SUMMARY",
+                                 "Context mismatch:             1",
+                                 "Label mismatch:               2",
+                                 "After tag:                    1",
+                                 "DBMS mismatch:                1"
+                                ]
+        ]
+    }
+
     run "Mismatched DBMS causes not deployed summary message", {
         arguments = [
                 url:        { it.url },
@@ -106,33 +140,29 @@ DBMS mismatch:                1
                 defaultChangeExecListener: 'not_null'
         ]
 
-        expectedUI = [
-"""
-Running Changeset: changelogs/h2/complete/mismatchedDbms.changelog.xml::1::nvoxland
-Running Changeset: changelogs/h2/complete/mismatchedDbms.changelog.xml::13.1::testuser
+        outputFile = new File("target/test-classes/mismatchedDBMS.txt")
 
-UPDATE SUMMARY
-Run:                          2
-Previously run:               0
-Filtered out:                 1
--------------------------------
-Total change sets:            3
-
-
-FILTERED CHANGE SETS SUMMARY
-
-DBMS mismatch:                1
-
-+--------------------------------------------------------------+--------------------------------+
-| Changeset Info                                               | Reason Skipped                 |
-+--------------------------------------------------------------+--------------------------------+
-|                                                              | mismatched DBMS value of 'foo' |
-| changelogs/h2/complete/mismatchedDbms.changelog.xml::1::nvox |                                |
-| land                                                         |                                |
-+--------------------------------------------------------------+--------------------------------+
-"""
+        expectedFileContent = [ "target/test-classes/mismatchedDBMS.txt":
+            [
+              "UPDATE SUMMARY",
+              "Run:                          2",
+              "Previously run:               0",
+              "Filtered out:                 1",
+              "-------------------------------",
+              "Total change sets:            3",
+              "FILTERED CHANGE SETS SUMMARY",
+              "DBMS mismatch:                1",
+              "+--------------------------------------------------------------+--------------------------------+",
+              "| Changeset Info                                               | Reason Skipped                 |",
+              "+--------------------------------------------------------------+--------------------------------+",
+              "|                                                              | mismatched DBMS value of 'foo' |",
+              "| changelogs/h2/complete/mismatchedDbms.changelog.xml::1::nvox |                                |",
+              "| land                                                         |                                |",
+              "+--------------------------------------------------------------+--------------------------------+"
+            ]
         ]
     }
+
     run "Run without a tag throws an exception", {
         arguments = [
                 url          : "",

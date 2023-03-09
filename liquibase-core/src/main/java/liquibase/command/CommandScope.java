@@ -23,7 +23,8 @@ import java.util.regex.Pattern;
  */
 public class CommandScope {
 
-    public static final Pattern NO_PREFIX_PATTERN = Pattern.compile(".*\\.");
+    private static final String NO_PREFIX_REGEX = ".*\\.";
+    public static final Pattern NO_PREFIX_PATTERN = Pattern.compile(NO_PREFIX_REGEX);
     private final CommandDefinition commandDefinition;
 
     private final SortedMap<String, Object> argumentValues = new TreeMap<>();

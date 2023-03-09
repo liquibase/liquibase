@@ -43,10 +43,7 @@ public class HubHandler {
         this.changeExecListener = changeExecListener;
         this.changeLogFile = changeLogFile;
 
-        // Let the user know that they can register for Hub
         hubUpdater = new HubUpdater(new Date(), changeLog, database);
-        hubUpdater.register(changeLogFile);
-
         // Create or retrieve the Connection
         connection = getConnection(changeLog, database);
     }
@@ -62,9 +59,8 @@ public class HubHandler {
         return null;
     }
 
-    public HubChangeExecListener startHubForUpdate(ChangeLogParameters changeLogParameters, ChangeLogIterator listLogIterator) throws LiquibaseException, SQLException {
+    public HubChangeExecListener startHubForUpdate(ChangeLogParameters changeLogParameters, ChangeLogIterator listLogIterator, String operationCommand) throws LiquibaseException, SQLException {
         if (isConnected()) {
-            String operationCommand = "update";
             operation = hubUpdater.preUpdateHub("UPDATE",
                     operationCommand,
                     connection,
