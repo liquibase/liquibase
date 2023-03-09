@@ -57,7 +57,6 @@ import liquibase.util.StringUtil;
 
 import javax.xml.parsers.ParserConfigurationException;
 import java.io.*;
-import java.text.DateFormat;
 import java.util.*;
 import java.util.function.Supplier;
 
@@ -1771,7 +1770,7 @@ public class Liquibase implements AutoCloseable {
             CommandScope listLocksCommand = new CommandScope(ListLocksCommandStep.COMMAND_NAME);
             listLocksCommand.addArgumentValue(DbUrlConnectionCommandStep.DATABASE_ARG, getDatabase());
             listLocksCommand.addArgumentValue(ListLocksCommandStep.CHANGELOG_FILE_ARG, changeLogFile);
-            listLocksCommand.addArgumentValue(ListLocksCommandStep.PRINT_STREAM, out);
+            listLocksCommand.setOutput(out);
             listLocksCommand.execute();
         });
     }

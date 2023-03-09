@@ -11,6 +11,7 @@ import liquibase.exception.LiquibaseException;
 import liquibase.lockservice.DatabaseChangeLogLock;
 import liquibase.lockservice.LockServiceFactory;
 
+import java.io.OutputStream;
 import java.io.PrintStream;
 import java.text.DateFormat;
 import java.util.Collections;
@@ -21,16 +22,11 @@ public class ListLocksCommandStep extends AbstractCommandStep {
     public static final String[] COMMAND_NAME = {"listLocks"};
 
     public static final CommandArgumentDefinition<String> CHANGELOG_FILE_ARG;
-    public static final CommandArgumentDefinition<PrintStream> PRINT_STREAM;
 
     static {
         CommandBuilder builder = new CommandBuilder(COMMAND_NAME);
         CHANGELOG_FILE_ARG = builder.argument(CommonArgumentNames.CHANGELOG_FILE, String.class)
                 .description("The root changelog").build();
-        PRINT_STREAM = builder.argument("printStream", PrintStream.class)
-                .hidden()
-                .defaultValue(System.err)
-                .build();
     }
 
     @Override
@@ -46,7 +42,7 @@ public class ListLocksCommandStep extends AbstractCommandStep {
     @Override
     public void run(CommandResultsBuilder resultsBuilder) throws Exception {
         CommandScope commandScope = resultsBuilder.getCommandScope();
-        reportLocks(commandScope.getArgumentValue(PRINT_STREAM), (Database) commandScope.getDependency(Database.class));
+        reportLocks(this.getPrintStream(resultsBuilder), (Database) commandScope.getDependency(Database.class));
         resultsBuilder.addResult("statusCode", 0);
     }
 
@@ -88,5 +84,16 @@ public class ListLocksCommandStep extends AbstractCommandStep {
             changeLogHistoryService.upgradeChecksums(databaseChangeLog, contexts, labelExpression);
         }
         LockServiceFactory.getInstance().getLockService(database).init();
+    }
+
+    private PrintStream getPrintStream(CommandResultsBuilder resultsBuilder) {
+        OutputStream os = resultsBuilder.getOutputStream();
+        if (os == null) {
+            return System.err;
+        } else if (os instanceof PrintStream) {
+            return (PrintStream) os;
+        } else {
+            return new PrintStream(os);
+        }
     }
 }
