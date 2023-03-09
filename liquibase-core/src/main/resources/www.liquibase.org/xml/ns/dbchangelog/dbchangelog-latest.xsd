@@ -121,6 +121,7 @@
                 <xsd:element name="property" minOccurs="0" maxOccurs="unbounded">
                     <xsd:complexType>
                         <xsd:attribute name="file" type="xsd:string"/>
+                        <xsd:attribute name="relativeToChangelogFile" type="booleanExp" default="false"/>
                         <xsd:attribute name="name" type="xsd:string"/>
                         <xsd:attribute name="value" type="xsd:string"/>
                         <xsd:attribute name="dbms" type="xsd:string"/>

@@ -47,6 +47,7 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import static java.util.ResourceBundle.getBundle;
+import static liquibase.configuration.LiquibaseConfiguration.REGISTERED_VALUE_PROVIDERS_KEY;
 import static liquibase.util.SystemUtil.isWindows;
 
 
@@ -321,8 +322,11 @@ public class LiquibaseCommandLine {
             Main.runningFromNewCli = true;
 
             final List<ConfigurationValueProvider> valueProviders = registerValueProviders(finalArgs);
-            // Get a new log service after registering the value providers, since the log service might need to load parameters using newly registered value providers.
-            LogService newLogService = Scope.getCurrentScope().getSingleton(LogServiceFactory.class).getDefaultLogService();
+            LogService newLogService = Scope.child(Collections.singletonMap(REGISTERED_VALUE_PROVIDERS_KEY, true), () -> {
+                // Get a new log service after registering the value providers, since the log service might need to load parameters using newly registered value providers.
+                return Scope.getCurrentScope().getSingleton(LogServiceFactory.class).getDefaultLogService();
+            });
+
             return Scope.child(Collections.singletonMap(Scope.Attr.logService.name(), newLogService), () -> {
                 try {
                     return Scope.child(configureScope(), () -> {

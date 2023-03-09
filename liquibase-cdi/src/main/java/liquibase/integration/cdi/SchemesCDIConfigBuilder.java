@@ -176,6 +176,7 @@ public class SchemesCDIConfigBuilder {
     /**
      * Synchronization among multiple JVM's.
      */
+    @SuppressWarnings("squid:S2142") // false positive ignored as per https://sonarsource.atlassian.net/browse/SONARJAVA-4406
     CDILiquibaseConfig fileLocked(final String id, Callable<CDILiquibaseConfig> action) throws Exception {
         log.info(String.format("[id = %s] JVM lock acquired, acquiring file lock", id));
         String lockPath = String.format("%s/schema.liquibase.lock", ROOT_PATH);
