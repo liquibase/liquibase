@@ -1,10 +1,14 @@
 package liquibase
 
+import liquibase.changelog.ChangeLogHistoryServiceFactory
 import liquibase.changelog.ChangeLogIterator
 import liquibase.changelog.ChangeSet
 import liquibase.changelog.DatabaseChangeLog
+import liquibase.changelog.RanChangeSet
 import liquibase.database.Database
+import liquibase.database.core.H2Database
 import liquibase.database.core.MockDatabase
+import liquibase.database.core.PostgresDatabase
 import liquibase.database.jvm.JdbcConnection
 import liquibase.exception.DatabaseException
 import liquibase.exception.LiquibaseException
@@ -252,37 +256,7 @@ class LiquibaseTest extends Specification {
 
     }
 
-    def "getConnection returns warning message if API key does not exist and the changelog is registered"() {
-        given:
-        Map<String, Object> scopedObjects = new HashMap<>()
-        TestConsoleUIService uiService = new TestConsoleUIService()
-        scopedObjects.put(Scope.Attr.ui.name(), uiService)
-        def scopeId = Scope.enter(null, scopedObjects)
-
-        when:
-        Liquibase liquibase = new Liquibase("com/example/changelog.mock", mockResourceAccessor, mockDatabase)
-        Connection connection = null;
-        String message = null;
-        def changeLogId = UUID.randomUUID().toString()
-
-        Scope.child(HubConfiguration.LIQUIBASE_HUB_API_KEY.getKey(), null, {
-            DatabaseChangeLog changeLog = liquibase.getDatabaseChangeLog()
-            changeLog.setChangeLogId(changeLogId)
-            connection = liquibase.getConnection(changeLog)
-            List<String> messages = uiService.getMessages()
-            message = messages.get(0)
-        })
-        Scope.exit(scopeId)
-
-        then:
-        connection == null
-        message ==
-                "WARNING: The changelog ID '" + changeLogId + "' was found, but no API Key exists.\n" +
-                "No operations will be reported. Simply add a liquibase.hub.apiKey setting to generate free deployment reports.\n" +
-                "Learn more at https://hub.liquibase.com."
-    }
-
-    def "getConnection returns warning message if API key exists but the changelog is not registered"() {
+    def "getConnection does not return warning message if API key does not exist and the changelog is registered"() {
         given:
         Map<String, Object> scopedObjects = new HashMap<>()
         TestConsoleUIService uiService = new TestConsoleUIService()
@@ -292,22 +266,45 @@ class LiquibaseTest extends Specification {
         when:
         Liquibase liquibase = new Liquibase("com/example/changelog.mock", mockResourceAccessor, mockDatabase)
         Connection connection = null
-        String message = null
-        Scope.child(HubConfiguration.LIQUIBASE_HUB_API_KEY.getKey(), "API_KEY", {
+        List<String> messages = null
+        def changeLogId = UUID.randomUUID().toString()
+
+        Scope.child(HubConfiguration.LIQUIBASE_HUB_API_KEY.getKey(), null, {
             DatabaseChangeLog changeLog = liquibase.getDatabaseChangeLog()
-            changeLog.setChangeLogId(null)
+            changeLog.setChangeLogId(changeLogId)
             connection = liquibase.getConnection(changeLog)
-            List<String> messages = uiService.getMessages()
-            message = messages.get(0)
+            messages = uiService.getMessages()
         })
         Scope.exit(scopeId)
 
         then:
         connection == null
-        message ==
-                "WARNING: An API key was configured, but no changelog ID exists.\n" +
-                "No operations will be reported. Register this changelog with Liquibase Hub to generate free deployment reports.\n" +
-                "Learn more at https://hub.liquibase.com."
+        messages.isEmpty()
+    }
+
+    def "getConnection does not return warning message if API key exists but the changelog is not registered"() {
+        given:
+        Map<String, Object> scopedObjects = new HashMap<>()
+        TestConsoleUIService uiService = new TestConsoleUIService()
+        scopedObjects.put(Scope.Attr.ui.name(), uiService)
+        def scopeId = Scope.enter(null, scopedObjects)
+        List<String> messages = null
+
+        when:
+        Liquibase liquibase = new Liquibase("com/example/changelog.mock", mockResourceAccessor, mockDatabase)
+        Connection connection = null
+        String message = null
+        Scope.child(HubConfiguration.LIQUIBASE_HUB_API_KEY.getKey(), "API_KEY", {
+            DatabaseChangeLog changeLog = liquibase.getDatabaseChangeLog()
+            changeLog.setChangeLogId(null)
+            connection = liquibase.getConnection(changeLog)
+            messages = uiService.getMessages()
+        })
+        Scope.exit(scopeId)
+
+        then:
+        connection == null
+        messages.isEmpty()
     }
 
 //    @Test(expected = LockException.class)
@@ -519,15 +516,29 @@ class LiquibaseTest extends Specification {
         when:
         h2Connection = getInMemoryH2DatabaseConnection()
         Liquibase liquibase = new Liquibase("liquibase/test-changelog-fast-check.xml", new ClassLoaderResourceAccessor(),
-                h2Connection);
+                h2Connection)
         Contexts context = new Contexts("testContext")
         LabelExpression label = new LabelExpression("testLabel")
-        liquibase.update();
+        liquibase.update()
 
         then:
         assertTrue(liquibase.isUpToDateFastCheck(context, label))
 
     }
+
+    def "validate checksums from ran changesets have all been reset"() {
+        when:
+        h2Connection = getInMemoryH2DatabaseConnection()
+        Liquibase liquibase = new Liquibase("liquibase/test-changelog-fast-check.xml", new ClassLoaderResourceAccessor(),
+                h2Connection)
+        liquibase.update()
+        liquibase.clearCheckSums()
+
+        then:
+        List<RanChangeSet> ranChangeSets = ChangeLogHistoryServiceFactory.getInstance().getChangeLogService(liquibase.getDatabase()).getRanChangeSets()
+        assert ranChangeSets.get(0).getLastCheckSum() == null
+    }
+
 
     private JdbcConnection getInMemoryH2DatabaseConnection() throws SQLException {
         String urlFormat = "jdbc:h2:mem:%s";

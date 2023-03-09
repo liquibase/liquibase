@@ -29,6 +29,13 @@ public class CommandBuilder {
     }
 
     /**
+     * Uses an existing {@link CommandArgumentDefinition} as template
+     */
+    public <DataType> CommandArgumentDefinition.Building<DataType> addArgument(CommandArgumentDefinition<DataType> example) {
+        return new CommandArgumentDefinition.Building<>(commandNames, example);
+    }
+
+    /**
      * Starts the building of a new {@link CommandResultDefinition}.
      */
     public <DataType> CommandResultDefinition.Building<DataType> result(String name, Class<DataType> type) {

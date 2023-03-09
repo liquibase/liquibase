@@ -25,7 +25,7 @@ jobs:
         uses: actions/setup-java@v3
         with:
           java-version: 8
-          distribution: 'adopt'
+          distribution: 'temurin'
           cache: 'maven'
 
       ## Need to install the snyk CLI and not use the github action because the action runs snyk in a separate docker container which does not have access to the installed sub-modules.

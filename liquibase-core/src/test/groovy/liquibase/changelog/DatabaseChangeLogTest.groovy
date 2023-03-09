@@ -56,6 +56,7 @@ class DatabaseChangeLogTest extends Specification {
 create table sql_table (id int);
 create view sql_view as select * from sql_table;'''
 
+    def testProperties = '''context: test'''
 
     def "getChangeSet passing id, author and file"() {
         def path = "com/example/path.xml"
@@ -505,6 +506,39 @@ http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbch
         ChangeLogParserConfiguration.ON_MISSING_INCLUDE_FILE.getCurrentValue() == ChangeLogParserConfiguration.MissingIncludeConfiguration.FAIL
         def e = thrown(SetupException)
         e.message.startsWith("The file com/example/invalid.xml was not found in")
+    }
+
+    def "properties values are correctly loaded and stored when properties file is relative to changelog"() {
+        when:
+        def propertiesResourceAccessor = new MockResourceAccessor(["com/example/file.properties": testProperties])
+
+        def rootChangeLog = new DatabaseChangeLog("com/example/root.xml")
+        rootChangeLog.setChangeLogParameters(new ChangeLogParameters())
+
+        rootChangeLog.load(new ParsedNode(null, "databaseChangeLog")
+                .addChildren([changeSet: [id: "1", author: "nvoxland", createTable: [tableName: "test_table", schemaName: "test_schema"]]])
+                .addChildren([property: [file: "file.properties", relativeToChangelogFile: "true"]]),
+                propertiesResourceAccessor)
+
+        then:
+        rootChangeLog.getChangeLogParameters().hasValue("context", rootChangeLog)
+        rootChangeLog.getChangeLogParameters().getValue("context", rootChangeLog) == "test"
+    }
+
+    def "properties values are not loaded and stored when file it's not relative to changelog"() {
+        when:
+        def propertiesResourceAccessor = new MockResourceAccessor(["com/example/file.properties": testProperties])
+
+        def rootChangeLog = new DatabaseChangeLog("com/example/root.xml")
+        rootChangeLog.setChangeLogParameters(new ChangeLogParameters())
+
+        rootChangeLog.load(new ParsedNode(null, "databaseChangeLog")
+                .addChildren([changeSet: [id: "1", author: "nvoxland", createTable: [tableName: "test_table", schemaName: "test_schema"]]])
+                .addChildren([property: [file: "file.properties"]]),
+                propertiesResourceAccessor)
+
+        then:
+        rootChangeLog.getChangeLogParameters().hasValue("context", rootChangeLog) == false
     }
 
     @Unroll
