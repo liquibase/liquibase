@@ -352,16 +352,6 @@ public class LiquibaseCommandLine {
                             }
                         }
 
-                        CommandLine.ParseResult subcommandParseResult = commandLine.getParseResult();
-                        while (subcommandParseResult.hasSubcommand()) {
-                            subcommandParseResult = subcommandParseResult.subcommand();
-                        }
-
-                        Map<String, String> changelogParameters = subcommandParseResult.matchedOptionValue("-D", new HashMap<>());
-                        if (changelogParameters.size() != 0) {
-                            Main.newCliChangelogParameters = changelogParameters;
-                        }
-
                     enableMonitoring();
                     logMdcData();
                     int response = commandLine.execute(finalArgs);
@@ -472,6 +462,19 @@ public class LiquibaseCommandLine {
         }
 
         return false;
+    }
+
+    private Map<String, String> addJavaPropertiesToChangelogParameters() {
+        CommandLine.ParseResult subcommandParseResult = commandLine.getParseResult();
+        while (subcommandParseResult.hasSubcommand()) {
+            subcommandParseResult = subcommandParseResult.subcommand();
+        }
+
+        Map<String, String> changelogParameters = subcommandParseResult.matchedOptionValue("-D", new HashMap<>());
+        if (changelogParameters.size() != 0) {
+            Main.newCliChangelogParameters = changelogParameters;
+        }
+        return changelogParameters;
     }
 
     protected String[] adjustLegacyArgs(String[] args) {
@@ -627,6 +630,8 @@ public class LiquibaseCommandLine {
         returnMap.put(LiquibaseCommandLineConfiguration.ARGUMENT_CONVERTER.getKey(),
                 (LiquibaseCommandLineConfiguration.ArgumentConverter) argument -> "--" + StringUtil.toKabobCase(argument));
 
+        Map<String, String> javaProperties = addJavaPropertiesToChangelogParameters();
+        returnMap.put("javaProperties", javaProperties);
 
         return returnMap;
     }

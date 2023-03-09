@@ -1491,7 +1491,7 @@ public class Main {
         final ResourceAccessor fileOpener = this.getFileOpenerResourceAccessor();
 
         if (COMMANDS.DIFF.equalsIgnoreCase(command) || COMMANDS.DIFF_CHANGELOG.equalsIgnoreCase(command)
-            || COMMANDS.GENERATE_CHANGELOG.equalsIgnoreCase(command)) {
+            || COMMANDS.GENERATE_CHANGELOG.equalsIgnoreCase(command) || COMMANDS.UPDATE.equalsIgnoreCase(command)) {
             this.runUsingCommandFramework();
             return;
         }
@@ -1748,39 +1748,14 @@ public class Main {
             }
 
             try {
-                if (COMMANDS.UPDATE.equalsIgnoreCase(command)) {
-                    Scope.getCurrentScope().addMdcValue(MdcKey.LIQUIBASE_OPERATION, COMMANDS.UPDATE);
-                    try {
-                        Map<String, Object> updateScopedObjects = new HashMap<>();
-                        updateScopedObjects.put("showSummary", showSummary);
-                        Scope.child(updateScopedObjects, () -> {
-                            liquibase.update(new Contexts(contexts), new LabelExpression(getLabelFilter()));
-                        });
-                    } catch (LiquibaseException updateException) {
-                        handleUpdateException(database, updateException, defaultChangeExecListener, rollbackOnError);
-                    }
-                } else if (COMMANDS.CHANGELOG_SYNC.equalsIgnoreCase(command)) {
+                if (COMMANDS.CHANGELOG_SYNC.equalsIgnoreCase(command)) {
                     liquibase.changeLogSync(new Contexts(contexts), new LabelExpression(getLabelFilter()));
                 } else if (COMMANDS.CHANGELOG_SYNC_SQL.equalsIgnoreCase(command)) {
                     liquibase.changeLogSync(new Contexts(contexts), new LabelExpression(getLabelFilter()), getOutputWriter());
                 } else if (COMMANDS.CHANGELOG_SYNC_TO_TAG.equalsIgnoreCase(command)) {
-                    if ((commandParams == null) || commandParams.isEmpty()) {
-                        throw new CommandLineParsingException(
-                                String.format(coreBundle.getString("command.requires.tag"),
-                                        COMMANDS.CHANGELOG_SYNC_TO_TAG));
-                    }
-
-                    liquibase.changeLogSync(commandParams.iterator().next(), new Contexts(contexts),
-                            new LabelExpression(getLabelFilter()));
+                    liquibase.changeLogSync(commandParams.iterator().next(), new Contexts(contexts), new LabelExpression(getLabelFilter()));
                 } else if (COMMANDS.CHANGELOG_SYNC_TO_TAG_SQL.equalsIgnoreCase(command)) {
-                    if ((commandParams == null) || commandParams.isEmpty()) {
-                        throw new CommandLineParsingException(
-                                String.format(coreBundle.getString("command.requires.tag"),
-                                        COMMANDS.CHANGELOG_SYNC_TO_TAG_SQL));
-                    }
-
-                    liquibase.changeLogSync(commandParams.iterator().next(), new Contexts(contexts),
-                            new LabelExpression(getLabelFilter()), getOutputWriter());
+                    liquibase.changeLogSync(commandParams.iterator().next(), new Contexts(contexts), new LabelExpression(getLabelFilter()), getOutputWriter());
                 } else if (COMMANDS.MARK_NEXT_CHANGESET_RAN.equalsIgnoreCase(command)) {
                     liquibase.markNextChangeSetRan(new Contexts(contexts), new LabelExpression(getLabelFilter()));
                 } else if (COMMANDS.MARK_NEXT_CHANGESET_RAN_SQL.equalsIgnoreCase(command)) {
@@ -1790,6 +1765,7 @@ public class Main {
                     try {
                         Map<String, Object> updateScopedObjects = new HashMap<>();
                         updateScopedObjects.put("showSummary", showSummary);
+                        updateScopedObjects.put("outputStream", outputStream);
                         Scope.child(updateScopedObjects, () -> {
                             liquibase.update(Integer.parseInt(commandParams.iterator().next()), new Contexts(contexts), new
                                     LabelExpression(getLabelFilter()));
@@ -1808,6 +1784,7 @@ public class Main {
                     try {
                         Map<String, Object> updateScopedObjects = new HashMap<>();
                         updateScopedObjects.put("showSummary", showSummary);
+                        updateScopedObjects.put("outputStream", outputStream);
                         Scope.child(updateScopedObjects, () -> {
                             liquibase.update(commandParams.iterator().next(), new Contexts(contexts), new LabelExpression(getLabelFilter()));
                         });
@@ -1939,6 +1916,8 @@ public class Main {
             runDiffChangelogCommandStep();
         } else if (COMMANDS.GENERATE_CHANGELOG.equalsIgnoreCase(command)) {
             runGenerateChangelogCommandStep();
+        } else if (COMMANDS.UPDATE.equalsIgnoreCase(command)) {
+            runUpdateCommandStep();
         }
     }
 
@@ -1985,6 +1964,16 @@ public class Main {
         this.setReferenceDatabaseArgumentsToCommand(diffCommand);
 
         diffCommand.execute();
+    }
+
+    private void runUpdateCommandStep() throws CommandLineParsingException, CommandExecutionException, IOException {
+        CommandScope updateCommand = new CommandScope("update");
+        updateCommand.addArgumentValue(UpdateCommandStep.CONTEXTS_ARG, contexts);
+        updateCommand.addArgumentValue(UpdateCommandStep.LABEL_FILTER_ARG, labelFilter);
+        updateCommand.addArgumentValue(UpdateCommandStep.CHANGE_EXEC_LISTENER_CLASS_ARG, changeExecListenerClass);
+        updateCommand.addArgumentValue(UpdateCommandStep.CHANGE_EXEC_LISTENER_PROPERTIES_FILE_ARG, changeExecListenerPropertiesFile);
+        setDatabaseArgumentsToCommand(updateCommand);
+        updateCommand.execute();
     }
 
     /**
