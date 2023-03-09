@@ -4,6 +4,7 @@ import liquibase.Scope;
 import liquibase.configuration.*;
 import liquibase.exception.CommandExecutionException;
 import liquibase.exception.CommandValidationException;
+import liquibase.logging.mdc.MdcKey;
 import liquibase.util.StringUtil;
 
 import java.io.FilterOutputStream;
@@ -22,7 +23,8 @@ import java.util.regex.Pattern;
  */
 public class CommandScope {
 
-    public static final Pattern NO_PREFIX_PATTERN = Pattern.compile(".*\\.");
+    private static final String NO_PREFIX_REGEX = ".*\\.";
+    public static final Pattern NO_PREFIX_PATTERN = Pattern.compile(NO_PREFIX_REGEX);
     private final CommandDefinition commandDefinition;
 
     private final SortedMap<String, Object> argumentValues = new TreeMap<>();
@@ -107,7 +109,6 @@ public class CommandScope {
             ConfigurationDefinition<T> noCommandConfigDef = createConfigurationDefinition(argument, false);
             ConfiguredValue<T> noCommandNameProvidedValue = noCommandConfigDef.getCurrentConfiguredValue();
             if (noCommandNameProvidedValue.found() && !noCommandNameProvidedValue.wasDefaultValueUsed()) {
-                configDef = noCommandConfigDef;
                 providedValue = noCommandNameProvidedValue;
             }
         }
@@ -131,7 +132,7 @@ public class CommandScope {
      *
      * Means that this class will LockService.class using object lock
      */
-    public  <T> CommandScope provideDependency(Class<T> clazz, T value) {
+    public  CommandScope provideDependency(Class<?> clazz, Object value) {
         this.dependencies.put(clazz, value);
 
         return this;
@@ -189,6 +190,7 @@ public class CommandScope {
         CommandResultsBuilder resultsBuilder = new CommandResultsBuilder(this, outputStream);
         final List<CommandStep> pipeline = commandDefinition.getPipeline();
         validate();
+        Scope.getCurrentScope().addMdcValue(MdcKey.LIQUIBASE_OPERATION, StringUtil.join(commandDefinition.getName(), "-"));
         try {
             for (CommandStep command : pipeline) {
                 command.run(resultsBuilder);
@@ -279,11 +281,6 @@ public class CommandScope {
         @Override
         protected String getSourceDescription() {
             return "Command argument";
-        }
-
-        @Override
-        public ProvidedValue getProvidedValue(String... keyAndAliases) {
-            return super.getProvidedValue(keyAndAliases);
         }
 
         @Override

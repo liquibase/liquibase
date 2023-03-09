@@ -10,6 +10,8 @@ import liquibase.database.DatabaseList;
 import liquibase.database.ObjectQuotingStrategy;
 import liquibase.exception.*;
 import liquibase.logging.Logger;
+import liquibase.logging.mdc.MdcKey;
+import liquibase.logging.mdc.MdcValue;
 import liquibase.parser.ChangeLogParser;
 import liquibase.parser.ChangeLogParserConfiguration;
 import liquibase.parser.ChangeLogParserFactory;
@@ -38,13 +40,28 @@ public class DatabaseChangeLog implements Comparable<DatabaseChangeLog>, Conditi
     private static final ThreadLocal<DatabaseChangeLog> ROOT_CHANGE_LOG = new ThreadLocal<>();
     private static final ThreadLocal<DatabaseChangeLog> PARENT_CHANGE_LOG = new ThreadLocal<>();
     private static final Logger LOG = Scope.getCurrentScope().getLog(DatabaseChangeLog.class);
-    private static final Pattern SLASH_PATTERN = Pattern.compile("^/");
-    private static final Pattern NON_CLASSPATH_PATTERN = Pattern.compile("^classpath:");
-    private static final Pattern DOUBLE_BACK_SLASH_PATTERN = Pattern.compile("\\\\");
-    private static final Pattern DOUBLE_SLASH_PATTERN = Pattern.compile("//+");
-    private static final Pattern SLASH_DOT_SLASH_PATTERN = Pattern.compile("/\\./");
-    private static final Pattern NO_LETTER_PATTERN = Pattern.compile("^[a-zA-Z]:");
-    private static final Pattern DOT_SLASH_PATTERN = Pattern.compile("^\\.?/");
+
+    private static final String SLASH_REGEX = "^/";
+    private static final Pattern SLASH_PATTERN = Pattern.compile(SLASH_REGEX);
+
+    private static final String NON_CLASSPATH_REGEX = "^classpath:";
+    private static final Pattern NON_CLASSPATH_PATTERN = Pattern.compile(NON_CLASSPATH_REGEX);
+
+    private static final String DOUBLE_BACK_SLASH_REGEX = "\\\\";
+    private static final Pattern DOUBLE_BACK_SLASH_PATTERN = Pattern.compile(DOUBLE_BACK_SLASH_REGEX);
+
+    private static final String DOUBLE_SLASH_REGEX = "//+";
+    private static final Pattern DOUBLE_SLASH_PATTERN = Pattern.compile(DOUBLE_SLASH_REGEX);
+
+    private static final String SLASH_DOT_SLASH_REGEX = "/\\./";
+    private static final Pattern SLASH_DOT_SLASH_PATTERN = Pattern.compile(SLASH_DOT_SLASH_REGEX);
+
+    private static final String NO_LETTER_REGEX = "^[a-zA-Z]:";
+    private static final Pattern NO_LETTER_PATTERN = Pattern.compile(NO_LETTER_REGEX);
+
+    private static final String DOT_SLASH_REGEX = "^\\.?/";
+    private static final Pattern DOT_SLASH_PATTERN = Pattern.compile(DOT_SLASH_REGEX);
+
     private static final String SEEN_CHANGELOGS_PATHS_SCOPE_KEY = "SEEN_CHANGELOG_PATHS";
 
     private PreconditionContainer preconditionContainer = new GlobalPreconditionContainer();
@@ -350,6 +367,8 @@ public class DatabaseChangeLog implements Comparable<DatabaseChangeLog>, Conditi
         }
 
         if (!validatingVisitor.validationPassed()) {
+            Scope.getCurrentScope().addMdcValue(MdcKey.DEPLOYMENT_OUTCOME, MdcValue.COMMAND_FAILED);
+            Scope.getCurrentScope().getLog(getClass()).info("Change failed validation!");
             throw new ValidationFailedException(validatingVisitor);
         }
     }
@@ -529,6 +548,8 @@ public class DatabaseChangeLog implements Comparable<DatabaseChangeLog>, Conditi
                     }
 
                     String file = node.getChildValue(null, "file", String.class);
+                    Boolean relativeToChangelogFile = node.getChildValue(null, "relativeToChangelogFile", Boolean.FALSE);
+                    Resource resource;
 
                     if (file == null) {
                         // direct referenced property, no file
@@ -537,10 +558,16 @@ public class DatabaseChangeLog implements Comparable<DatabaseChangeLog>, Conditi
 
                         this.changeLogParameters.set(name, value, contextFilter, labels, dbms, global, this);
                     } else {
+                        // get relative path if specified
+                        if (relativeToChangelogFile) {
+                            resource = resourceAccessor.get(this.getPhysicalFilePath()).resolveSibling(file);
+                        } else {
+                            resource = resourceAccessor.get(file);
+                        }
+
                         // read properties from the file
                         Properties props = new Properties();
-                        Resource resource = resourceAccessor.get(file);
-                        if (resource == null) {
+                        if (!resource.exists()) {
                             Scope.getCurrentScope().getLog(getClass()).info("Could not open properties file " + file);
                         } else {
                             try (InputStream propertiesStream = resource.openInputStream()) {
