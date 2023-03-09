@@ -44,7 +44,6 @@ public class HubHandler {
         this.changeLogFile = changeLogFile;
 
         hubUpdater = new HubUpdater(new Date(), changeLog, database);
-
         // Create or retrieve the Connection
         connection = getConnection(changeLog, database);
     }
