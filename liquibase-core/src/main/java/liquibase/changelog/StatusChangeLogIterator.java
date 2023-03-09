@@ -14,6 +14,13 @@ import liquibase.exception.LiquibaseException;
 import java.util.*;
 import java.util.concurrent.atomic.AtomicBoolean;
 
+/**
+ *
+ * This class calculates the status of all change sets involved in an update operation
+ * It allows us to determine ALL reasons that a ChangeSet will not be deployed, unlike
+ * the standard iterator which breaks upon finding a reason to deny the change set.
+ *
+ */
 public class StatusChangeLogIterator extends ChangeLogIterator {
     private String tag;
     public StatusChangeLogIterator(DatabaseChangeLog databaseChangeLog, ChangeSetFilter... changeSetFilters) {
@@ -76,6 +83,9 @@ public class StatusChangeLogIterator extends ChangeLogIterator {
         return ! reasonsDenied.isEmpty() && filter instanceof CountChangeSetFilter;
     }
 
+    //
+    // Iterate through the ChangeSetFilter list to assess the status of the ChangeSet
+    //
     private boolean iterateFilters(ChangeSet changeSet, Set<ChangeSetFilterResult> reasonsAccepted, Set<ChangeSetFilterResult> reasonsDenied) {
         boolean shouldVisit = true;
         boolean tagDatabaseAlreadyFound = false;
@@ -94,9 +104,15 @@ public class StatusChangeLogIterator extends ChangeLogIterator {
                 if (acceptsResult.isAccepted()) {
                     reasonsAccepted.add(acceptsResult);
                 } else {
+                    //
+                    // If the change set has already run, then there is no reason
+                    // to iterate the other filters
+                    //
                     shouldVisit = false;
                     reasonsDenied.add(acceptsResult);
-
+                    if (acceptsResult.getMessage().toLowerCase().contains("changeset already ran")) {
+                        break;
+                    }
                     //
                     // We are collecting all reasons for skipping
                     // We are skipping this change set, so check to see

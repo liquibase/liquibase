@@ -31,7 +31,7 @@ public class CheckSumTest {
 
     @Test
     public void getCurrentVersion() {
-        assertEquals(9, CheckSum.getCurrentVersion());
+        assertEquals(8, CheckSum.getCurrentVersion());
     }
 
     @Test
