@@ -5,6 +5,7 @@ import liquibase.serializer.LiquibaseSerializable;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.logging.Formatter;
 
 public class JavaLogService extends AbstractLogService {
 
@@ -89,5 +90,9 @@ public class JavaLogService extends AbstractLogService {
      */
     public void setParent(java.util.logging.Logger parent) {
         this.parent = parent;
+    }
+
+    public Formatter getCustomFormatter() {
+        return null;
     }
 }

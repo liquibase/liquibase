@@ -29,7 +29,7 @@ public class TagDatabaseChange extends AbstractChange {
      */
     @Override
     public SqlStatement[] generateStatements(Database database) {
-        return new SqlStatement[0];
+        return SqlStatement.EMPTY_SQL_STATEMENT;
     }
 
     @Override

@@ -3,6 +3,7 @@ package liquibase.serializer.core.yaml;
 import liquibase.change.ConstraintsConfig;
 import liquibase.changelog.ChangeSet;
 import liquibase.exception.UnexpectedLiquibaseException;
+import liquibase.parser.core.yaml.YamlParser;
 import liquibase.serializer.LiquibaseSerializable;
 import liquibase.serializer.LiquibaseSerializer;
 import liquibase.statement.DatabaseFunction;
@@ -12,7 +13,7 @@ import liquibase.structure.core.Column;
 import liquibase.structure.core.DataType;
 import org.yaml.snakeyaml.DumperOptions;
 import org.yaml.snakeyaml.Yaml;
-import org.yaml.snakeyaml.constructor.Constructor;
+import org.yaml.snakeyaml.constructor.SafeConstructor;
 import org.yaml.snakeyaml.introspector.GenericProperty;
 import org.yaml.snakeyaml.introspector.Property;
 import org.yaml.snakeyaml.nodes.Node;
@@ -33,7 +34,7 @@ public abstract class YamlSerializer implements LiquibaseSerializer {
         yaml = createYaml();
     }
 
-    protected Yaml createYaml() {
+    protected DumperOptions createDumperOptions() {
         DumperOptions dumperOptions = new DumperOptions();
 
         if (isJson()) {
@@ -44,11 +45,16 @@ public abstract class YamlSerializer implements LiquibaseSerializer {
         } else {
             dumperOptions.setDefaultFlowStyle(DumperOptions.FlowStyle.BLOCK);
         }
-        return new Yaml(new Constructor(), getLiquibaseRepresenter(), dumperOptions, getLiquibaseResolver());
+        return dumperOptions;
     }
 
-    protected LiquibaseRepresenter getLiquibaseRepresenter() {
-        return new LiquibaseRepresenter();
+    protected Yaml createYaml() {
+        DumperOptions dumperOptions= createDumperOptions();
+        return new Yaml(new SafeConstructor(YamlParser.createLoaderOptions()), getLiquibaseRepresenter(dumperOptions), dumperOptions, getLiquibaseResolver());
+    }
+
+    protected LiquibaseRepresenter getLiquibaseRepresenter(DumperOptions options) {
+        return new LiquibaseRepresenter(options);
     }
 
     protected LiquibaseResolver getLiquibaseResolver() {
@@ -161,7 +167,7 @@ public abstract class YamlSerializer implements LiquibaseSerializer {
         return Comparator.naturalOrder();
     }
 
-    private String removeClassTypeMarksFromSerializedJson(String json) {
+    public static String removeClassTypeMarksFromSerializedJson(String json) {
         // Handle both negative and positive numbers
         json = json.replaceAll("!!int \"(-?\\d+)\"", "$1");
         json = json.replaceAll("!!bool \"(\\w+)\"", "$1");
@@ -173,7 +179,8 @@ public abstract class YamlSerializer implements LiquibaseSerializer {
 
     public static class LiquibaseRepresenter extends Representer {
 
-        public LiquibaseRepresenter() {
+        public LiquibaseRepresenter(DumperOptions options) {
+            super(options);
             init();
         }
 

@@ -15,6 +15,7 @@ public class JavaLogger extends AbstractLogger {
     /**
      * @deprecated use {@link #JavaLogger(java.util.logging.Logger)}
      */
+    @Deprecated
     public JavaLogger(java.util.logging.Logger logger, LogMessageFilter filter) {
        this(logger);
     }

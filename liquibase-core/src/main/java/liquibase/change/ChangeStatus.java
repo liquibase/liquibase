@@ -77,7 +77,7 @@ public class ChangeStatus {
 
     @Override
     public String toString() {
-        String out = getStatus().name;
+        String out = getStatus().getName();
 
         String message = getMessage();
         if (message != null) {
@@ -93,10 +93,14 @@ public class ChangeStatus {
         notApplied("Not Applied"),
         unknown("Unknown");
 
-        private String name;
+        private final String name;
 
         Status(String name) {
             this.name = name;
+        }
+
+        public String getName() {
+            return name;
         }
     }
 }
