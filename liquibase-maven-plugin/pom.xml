@@ -14,7 +14,7 @@
     <description>A Maven plugin wraps up some of the functionality of Liquibase</description>
 
     <properties>
-        <targetMavenVersion>3.8.7</targetMavenVersion>
+        <targetMavenVersion>3.9.0</targetMavenVersion>
     </properties>
     <dependencies>
         <dependency>
