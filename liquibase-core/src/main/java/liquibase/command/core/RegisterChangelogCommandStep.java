@@ -208,13 +208,10 @@ public class RegisterChangelogCommandStep extends AbstractHubChangelogCommandSte
     private List<Project> getProjectsFromHub() throws LiquibaseHubException {
         final HubService service = Scope.getCurrentScope().getSingleton(HubServiceFactory.class).getService();
         List<Project> projects = service.getProjects();
-        Collections.sort(projects, new Comparator<Project>() {
-            @Override
-            public int compare(Project o1, Project o2) {
-                Date date1 = o1.getCreateDate();
-                Date date2 = o2.getCreateDate();
-                return date2.compareTo(date1);
-            }
+        projects.sort((o1, o2) -> {
+            Date date1 = o1.getCreateDate();
+            Date date2 = o2.getCreateDate();
+            return date2.compareTo(date1);
         });
         return projects;
     }
