@@ -1,6 +1,7 @@
 package liquibase.command.core
 
 import liquibase.Scope
+import liquibase.command.CommandResultsBuilder
 import liquibase.command.CommandScope
 import liquibase.command.core.helpers.DbUrlConnectionCommandStep
 import liquibase.command.util.CommandUtil

@@ -3,6 +3,7 @@ package org.liquibase.maven.plugins;
 import liquibase.Contexts;
 import liquibase.LabelExpression;
 import liquibase.Liquibase;
+import liquibase.Scope;
 import liquibase.exception.LiquibaseException;
 import org.liquibase.maven.property.PropertyElement;
 
@@ -30,13 +31,20 @@ public class LiquibaseUpdate extends AbstractLiquibaseUpdateMojo {
             liquibase.dropAll();
         }
         try {
-            if (changesToApply > 0) {
-                liquibase.update(changesToApply, new Contexts(contexts), new LabelExpression(getLabelFilter()));
+            Scope.child("rollbackOnError", rollbackOnError, () -> {
+                if (changesToApply > 0) {
+                    liquibase.update(changesToApply, new Contexts(contexts), new LabelExpression(getLabelFilter()));
+                } else {
+                    liquibase.update(toTag, new Contexts(contexts), new LabelExpression(getLabelFilter()));
+                }
+            });
+        } catch (Exception exception) {
+            if (exception instanceof LiquibaseException) {
+                handleUpdateException((LiquibaseException) exception); //need this until update-to-tag and update-count are refactored
+                throw (LiquibaseException) exception;
             } else {
-                liquibase.update(toTag, new Contexts(contexts), new LabelExpression(getLabelFilter()));
+                throw new LiquibaseException(exception);
             }
-        } catch (LiquibaseException exception) {
-            handleUpdateException(exception);
         }
     }
 
