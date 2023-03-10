@@ -39,12 +39,7 @@ public class ChangedForeignKeyChangeGenerator extends AbstractChangeGenerator im
     public Change[] fixChanged(DatabaseObject changedObject, ObjectDifferences differences, DiffOutputControl control, Database referenceDatabase, Database comparisonDatabase, ChangeGeneratorChain chain) {
         ForeignKey fk = (ForeignKey) changedObject;
 
-        StringUtil.StringUtilFormatter formatter = new StringUtil.StringUtilFormatter<Column>() {
-            @Override
-            public String toString(Column obj) {
-                return obj.toString(false);
-            }
-        };
+        StringUtil.StringUtilFormatter formatter = (StringUtil.StringUtilFormatter<Column>) obj -> obj.toString(false);
 
         DropForeignKeyConstraintChange dropFkChange = new DropForeignKeyConstraintChange();
         dropFkChange.setConstraintName(fk.getName());
