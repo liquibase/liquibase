@@ -20,6 +20,11 @@ import org.junit.Ignore
 import spock.lang.Shared
 import spock.lang.Specification
 
+/**
+ *
+ * Marking this test as IGNORED until it is fixed
+ *
+ */
 @Ignore
 @LiquibaseIntegrationTest
 class DiffChangelogTest extends Specification {

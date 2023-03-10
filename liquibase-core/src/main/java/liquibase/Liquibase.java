@@ -959,7 +959,7 @@ public class Liquibase implements AutoCloseable {
                                       RollbackMessageType messageType,
                                       Contexts contexts,
                                       LabelExpression labelExpression,
-                                      Exception exception) throws LiquibaseException {
+                                      Exception exception) {
         for (ChangeSet changeSet : changeSets) {
             if (messageType == RollbackMessageType.WILL_ROLLBACK) {
                 changeExecListener.willRollback(changeSet, databaseChangeLog, database);
@@ -2093,7 +2093,9 @@ public class Liquibase implements AutoCloseable {
      */
     public void validate() throws LiquibaseException {
         DatabaseChangeLog changeLog = getDatabaseChangeLog(true);
-        changeLog.validate(database);
+        if (changeLog != null) {
+            changeLog.validate(database);
+        }
     }
 
     public void setChangeLogParameter(String key, Object value) {
@@ -2119,7 +2121,7 @@ public class Liquibase implements AutoCloseable {
     @SafeVarargs
     public final void generateChangeLog(CatalogAndSchema catalogAndSchema, DiffToChangeLog changeLogWriter,
                                         PrintStream outputStream, Class<? extends DatabaseObject>... snapshotTypes)
-            throws DatabaseException, IOException, ParserConfigurationException, CommandExecutionException {
+            throws DatabaseException, CommandExecutionException {
         generateChangeLog(catalogAndSchema, changeLogWriter, outputStream, null, snapshotTypes);
     }
 
@@ -2131,7 +2133,7 @@ public class Liquibase implements AutoCloseable {
     public final void generateChangeLog(CatalogAndSchema catalogAndSchema, DiffToChangeLog changeLogWriter,
                                         PrintStream outputStream, ChangeLogSerializer changeLogSerializer,
                                         Class<? extends DatabaseObject>... snapshotTypes)
-            throws DatabaseException, IOException, ParserConfigurationException, CommandExecutionException {
+            throws DatabaseException, CommandExecutionException {
         Set<Class<? extends DatabaseObject>> finalCompareTypes = null;
         if ((snapshotTypes != null) && (snapshotTypes.length > 0)) {
             finalCompareTypes = new HashSet<>(Arrays.asList(snapshotTypes));
