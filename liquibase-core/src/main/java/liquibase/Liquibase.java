@@ -42,6 +42,7 @@ import liquibase.logging.mdc.MdcKey;
 import liquibase.logging.mdc.MdcObject;
 import liquibase.logging.mdc.MdcValue;
 import liquibase.logging.mdc.customobjects.ChangesetsRolledback;
+import liquibase.logging.mdc.customobjects.ChangesetsUpdated;
 import liquibase.parser.ChangeLogParser;
 import liquibase.parser.ChangeLogParserFactory;
 import liquibase.parser.core.xml.XMLChangeLogSAXParser;
@@ -686,11 +687,14 @@ public class Liquibase implements AutoCloseable {
     }
 
     private void logDeploymentOutcomeMdc(boolean success) throws IOException {
-        int deployedChangeSetCount = getDefaultChangeExecListener().getDeployedChangeSets().size();
+        List<ChangeSet> deployedChangeSets = getDefaultChangeExecListener().getDeployedChangeSets();
+        int deployedChangeSetCount = deployedChangeSets.size();
+        ChangesetsUpdated changesetsUpdated = new ChangesetsUpdated(deployedChangeSets);
         String successLog = "Update command completed successfully.";
         String failureLog = "Update command encountered an exception.";
         try (MdcObject deploymentOutcomeMdc = Scope.getCurrentScope().addMdcValue(MdcKey.DEPLOYMENT_OUTCOME, success ? MdcValue.COMMAND_SUCCESSFUL : MdcValue.COMMAND_FAILED);
-             MdcObject deploymentOutcomeCountMdc = Scope.getCurrentScope().addMdcValue(MdcKey.DEPLOYMENT_OUTCOME_COUNT, String.valueOf(deployedChangeSetCount))) {
+             MdcObject deploymentOutcomeCountMdc = Scope.getCurrentScope().addMdcValue(MdcKey.DEPLOYMENT_OUTCOME_COUNT, String.valueOf(deployedChangeSetCount));
+             MdcObject changesetsUpdatesMdc = Scope.getCurrentScope().addMdcValue(MdcKey.CHANGESETS_UPDATED, changesetsUpdated)) {
             Scope.getCurrentScope().getLog(getClass()).info(success ? successLog : failureLog);
         }
     }
