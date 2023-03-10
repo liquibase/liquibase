@@ -24,18 +24,18 @@ public class SnakeYamlUtil {
     }
 
     /**
-     * Safely set the default tag inspector when configuring a new SnakeYaml instance.
-     */
-    public static void setDefaultTagInspector(LoaderOptions loaderOptions) { // pro uses this method
-        safelyCallNewSnakeYamlMethod(() -> loaderOptions.setTagInspector(tag -> true));
-    }
-
-    /**
      * Safely set configuration to process comments when configuring a new SnakeYaml instance. This method
      * had the return type changed.
      */
     public static void setProcessCommentsSafely(LoaderOptions loaderOptions, boolean enable) {
         safelyCallNewSnakeYamlMethod(() -> loaderOptions.setProcessComments(enable));
+    }
+
+    /**
+     * Safely set the default tag inspector when configuring a new SnakeYaml instance.
+     */
+    public static void setDefaultTagInspector(LoaderOptions loaderOptions) { // pro uses this method
+        safelyCallNewSnakeYamlMethod(() -> loaderOptions.setTagInspector(tag -> true));
     }
 
     /**
@@ -48,7 +48,7 @@ public class SnakeYamlUtil {
             if (showErrorMessage) {
                 showErrorMessage = false;
                 Scope.getCurrentScope().getLog(SnakeYamlUtil.class).warning(
-                        "Failed to set code point limit for SnakeYaml, because the version of SnakeYaml being used is too old. " +
+                        "Failed to perform a method call for SnakeYaml because the version of SnakeYaml being used is too old. " +
                                 "Consider upgrading to a SnakeYaml version equal to or newer than 1.32, by downloading and " +
                                 "installing a newer version of Liquibase (which includes a newer version of SnakeYaml). " +
                                 "Loading particularly large JSON and YAML documents (like snapshots) in Liquibase may fail if SnakeYaml is not upgraded.", e);
