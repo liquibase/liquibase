@@ -14,6 +14,7 @@ import liquibase.structure.DatabaseObjectCollection;
 import liquibase.structure.core.Column;
 import liquibase.util.ISODateFormat;
 import liquibase.util.StringUtil;
+import org.yaml.snakeyaml.DumperOptions;
 import org.yaml.snakeyaml.nodes.Node;
 import org.yaml.snakeyaml.nodes.Tag;
 import org.yaml.snakeyaml.representer.Represent;
@@ -65,7 +66,7 @@ public class YamlSnapshotSerializer extends YamlSerializer implements SnapshotSe
                         table = ((DatabaseObject) object).getAttribute("relation", Object.class);
                     }
                     if (table != null) {
-                        name = table.toString() + "." + name;
+                        name = table + "." + name;
                     }
 
                     if (((DatabaseObject) object).getSchema() != null) {
@@ -94,8 +95,9 @@ public class YamlSnapshotSerializer extends YamlSerializer implements SnapshotSe
         return super.toMap(object);
     }
 
-    protected LiquibaseRepresenter getLiquibaseRepresenter() {
-        return new SnapshotLiquibaseRepresenter();
+    @Override
+    protected LiquibaseRepresenter getLiquibaseRepresenter(DumperOptions options) {
+        return new SnapshotLiquibaseRepresenter(options);
     }
 
     @Override
@@ -105,6 +107,11 @@ public class YamlSnapshotSerializer extends YamlSerializer implements SnapshotSe
 
     public static class SnapshotLiquibaseRepresenter extends LiquibaseRepresenter {
 
+        public SnapshotLiquibaseRepresenter(DumperOptions options) {
+            super(options);
+        }
+
+        @Override
         protected void init() {
             multiRepresenters.put(DatabaseFunction.class, new TypeStoringAsStringRepresenter());
             multiRepresenters.put(SequenceNextValueFunction.class, new TypeStoringAsStringRepresenter());

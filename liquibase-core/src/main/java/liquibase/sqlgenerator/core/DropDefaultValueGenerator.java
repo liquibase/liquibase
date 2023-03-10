@@ -14,16 +14,14 @@ import java.util.function.BiFunction;
 
 public class DropDefaultValueGenerator extends AbstractSqlGenerator<DropDefaultValueStatement> {
 
-    public static BiFunction DROP_DF_MSSQL = (tableName, columnName) -> {
-        return "DECLARE @sql [nvarchar](MAX)\r\n" +
-                "SELECT @sql = N'ALTER TABLE " + tableName + " DROP CONSTRAINT ' + QUOTENAME([df].[name]) " +
-                "FROM [sys].[columns] AS [c] " +
-                "INNER JOIN [sys].[default_constraints] AS [df] " +
-                "ON [df].[object_id] = [c].[default_object_id] " +
-                "WHERE [c].[object_id] = OBJECT_ID(N'" + tableName + "') " +
-                "AND [c].[name] = N'" + columnName + "'\r\n" +
-                "EXEC sp_executesql @sql";
-    };
+    public static BiFunction DROP_DF_MSSQL = (tableName, columnName) -> "DECLARE @sql [nvarchar](MAX)\r\n" +
+            "SELECT @sql = N'ALTER TABLE " + tableName + " DROP CONSTRAINT ' + QUOTENAME([df].[name]) " +
+            "FROM [sys].[columns] AS [c] " +
+            "INNER JOIN [sys].[default_constraints] AS [df] " +
+            "ON [df].[object_id] = [c].[default_object_id] " +
+            "WHERE [c].[object_id] = OBJECT_ID(N'" + tableName + "') " +
+            "AND [c].[name] = N'" + columnName + "'\r\n" +
+            "EXEC sp_executesql @sql";
 
     @Override
     public boolean supports(DropDefaultValueStatement statement, Database database) {

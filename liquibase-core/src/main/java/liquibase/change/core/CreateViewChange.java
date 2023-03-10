@@ -14,9 +14,7 @@ import liquibase.resource.ResourceAccessor;
 import liquibase.snapshot.SnapshotGeneratorFactory;
 import liquibase.sqlgenerator.SqlGeneratorFactory;
 import liquibase.statement.SqlStatement;
-import liquibase.statement.core.CreateViewStatement;
-import liquibase.statement.core.DropViewStatement;
-import liquibase.statement.core.SetViewRemarksStatement;
+import liquibase.statement.core.*;
 import liquibase.structure.core.View;
 import liquibase.util.FileUtil;
 import liquibase.util.ObjectUtil;
@@ -212,7 +210,7 @@ public class CreateViewChange extends AbstractChange {
 
 			CheckSum checkSum = CheckSum.compute(new AbstractSQLChange.NormalizingStream(";", false, false, stream), false);
 
-            return CheckSum.compute(super.generateCheckSum().toString() + ":" + checkSum.toString());
+            return CheckSum.compute(super.generateCheckSum().toString() + ":" + checkSum);
         } finally {
             if (stream != null) {
                 try {
@@ -266,7 +264,7 @@ public class CreateViewChange extends AbstractChange {
                     .setFullDefinition(fullDefinition));
         }
 
-        List<Class<?>> databaseSupportsViewComments = Arrays.asList(OracleDatabase.class, PostgresDatabase.class);
+        List<Class<?>> databaseSupportsViewComments = Arrays.asList(OracleDatabase.class, PostgresDatabase.class, MSSQLDatabase.class, DB2Database.class);
         boolean supportsViewComments = databaseSupportsViewComments.stream().anyMatch(clazz -> clazz.isInstance(database));
 
         if (supportsViewComments && (StringUtil.trimToNull(remarks) != null)) {

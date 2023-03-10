@@ -88,15 +88,32 @@ public abstract class AbstractJdbcDatabase implements Database {
     private static final int FETCH_SIZE = 1000;
     private static final int DEFAULT_MAX_TIMESTAMP_FRACTIONAL_DIGITS = 9;
 
-    private static final Pattern STARTS_WITH_NUMBER_PATTERN = Pattern.compile("^[0-9].*");
-    private static final Pattern NON_WORD_PATTERN = Pattern.compile(".*\\W.*");
-    private static final Pattern CREATE_VIEW_AS_PATTERN = Pattern.compile("^CREATE\\s+.*?VIEW\\s+.*?AS\\s+", Pattern.CASE_INSENSITIVE | Pattern.DOTALL);
-    private static final Pattern DATE_ONLY_PATTERN = Pattern.compile("^\\d{4}\\-\\d{2}\\-\\d{2}$");
-    private static final Pattern DATE_TIME_PATTERN = Pattern.compile("^\\d{4}\\-\\d{2}\\-\\d{2}[T ]\\d{2}:\\d{2}:\\d{2}(?:\\.\\d+)?$");
-    private static final Pattern TIMESTAMP_PATTERN = Pattern.compile("^\\d{4}\\-\\d{2}\\-\\d{2}T\\d{2}:\\d{2}:\\d{2}\\.\\d+$");
-    private static final Pattern TIME_PATTERN = Pattern.compile("^\\d{2}:\\d{2}:\\d{2}$");
-    private static final Pattern NAME_WITH_DESC_PATTERN = Pattern.compile("(?i).*\\s+DESC");
-    private static final Pattern NAME_WITH_ASC_PATTERN = Pattern.compile("(?i).*\\s+ASC");
+    private static final String STARTS_WITH_NUMBER_REGEX = "^[0-9].*";
+    private static final Pattern STARTS_WITH_NUMBER_PATTERN = Pattern.compile(STARTS_WITH_NUMBER_REGEX);
+
+    private static final String NON_WORD_REGEX = ".*\\W.*";
+    private static final Pattern NON_WORD_PATTERN = Pattern.compile(NON_WORD_REGEX);
+
+    private static final String CREATE_VIEW_AS_REGEX = "^CREATE\\s+.*?VIEW\\s+.*?AS\\s+";
+    private static final Pattern CREATE_VIEW_AS_PATTERN = Pattern.compile(CREATE_VIEW_AS_REGEX, Pattern.CASE_INSENSITIVE | Pattern.DOTALL);
+
+    private static final String DATE_ONLY_REGEX = "^\\d{4}\\-\\d{2}\\-\\d{2}$";
+    private static final Pattern DATE_ONLY_PATTERN = Pattern.compile(DATE_ONLY_REGEX);
+
+    private static final String DATE_TIME_REGEX = "^\\d{4}\\-\\d{2}\\-\\d{2}[T ]\\d{2}:\\d{2}:\\d{2}(?:\\.\\d+)?$";
+    private static final Pattern DATE_TIME_PATTERN = Pattern.compile(DATE_TIME_REGEX);
+
+    private static final String TIMESTAMP_REGEX = "^\\d{4}\\-\\d{2}\\-\\d{2}T\\d{2}:\\d{2}:\\d{2}\\.\\d+$";
+    private static final Pattern TIMESTAMP_PATTERN = Pattern.compile(TIMESTAMP_REGEX);
+
+    private static final String TIME_REGEX = "^\\d{2}:\\d{2}:\\d{2}$";
+    private static final Pattern TIME_PATTERN = Pattern.compile(TIME_REGEX);
+
+    private static final String  NAME_WITH_DESC_REGEX = "(?i).*\\s+DESC";
+    private static final Pattern NAME_WITH_DESC_PATTERN = Pattern.compile(NAME_WITH_DESC_REGEX);
+
+    private static final String  NAME_WITH_ASC_REGEX = "(?i).*\\s+ASC";
+    private static final Pattern NAME_WITH_ASC_PATTERN = Pattern.compile(NAME_WITH_ASC_REGEX);
 
     private final Set<String> reservedWords = new HashSet<>();
     protected String defaultCatalogName;
@@ -1202,7 +1219,7 @@ public abstract class AbstractJdbcDatabase implements Database {
     @Override
     public void close() throws DatabaseException {
       Scope.getCurrentScope().getSingleton(ExecutorService.class).clearExecutor("jdbc", this);
-      try (final DatabaseConnection connection = getConnection();) {
+      try (final DatabaseConnection connection = getConnection()) {
         if (connection != null && previousAutoCommit != null) {
           connection.setAutoCommit(previousAutoCommit);
         }
@@ -1270,7 +1287,7 @@ public abstract class AbstractJdbcDatabase implements Database {
                 Scope.getCurrentScope().getSingleton(ExecutorService.class).getExecutor("jdbc", this).execute(statement, sqlVisitors);
             } catch (DatabaseException e) {
                 if (statement.continueOnError()) {
-                    Scope.getCurrentScope().getLog(getClass()).severe("Error executing statement '" + statement.toString() + "', but continuing", e);
+                    Scope.getCurrentScope().getLog(getClass()).severe("Error executing statement '" + statement + "', but continuing", e);
                 } else {
                     throw e;
                 }

@@ -19,10 +19,12 @@ import java.util.List;
 
 public abstract class HTMLWriter {
     protected Resource outputDir;
+    protected Resource baseOutputDir;
     protected Database database;
 
     public HTMLWriter(Resource outputDir, Database database) {
         this.outputDir = outputDir;
+        this.baseOutputDir = outputDir;
         this.database = database;
     }
 

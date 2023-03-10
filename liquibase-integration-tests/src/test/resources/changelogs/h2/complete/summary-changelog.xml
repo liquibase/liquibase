@@ -1,0 +1,47 @@
+<?xml version="1.1" encoding="UTF-8" standalone="no"?>
+<databaseChangeLog 
+xmlns="http://www.liquibase.org/xml/ns/dbchangelog" xmlns:ext="http://www.liquibase.org/xml/ns/dbchangelog-ext" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" 
+xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog-ext http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-ext.xsd 
+http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-latest.xsd">
+	
+
+	<changeSet author="lbuser" id="1-table" labels="testtable1" contextFilter="none">
+        <createTable tableName="testtable1">
+            <column name="supplier_id" type="numeric(4)"/>
+            <column name="supplier_name" type="VARCHAR(50)"/>
+        </createTable>
+    </changeSet>
+	
+	<changeSet author="lbuser" id="2-table" labels="testtable2" context="some">
+        <createTable tableName="testtable2">
+            <column name="supplier_id" type="numeric(4)"/>
+            <column name="supplier_name" type="VARCHAR(50)"/>
+        </createTable>
+    </changeSet>
+	
+	<changeSet author="lbuser" id="3-table" labels="testtable3" context="none" dbms="postgres">
+        <createTable tableName="testtable3">
+            <column name="supplier_id" type="numeric(4)"/>
+            <column name="supplier_name" type="VARCHAR(50)"/>
+        </createTable>
+    </changeSet>
+	
+	<changeSet  author="Liquibase Pro User" id="tagDatabaseforUpdate" labels="tagIt" contextFilter="tagIt">  
+		<tagDatabase tag="updateTag"/>  
+	</changeSet>
+	
+	<changeSet author="lbuser" id="4-table" labels="testtable4" contextFilter="none">
+        <createTable tableName="testtable4">
+            <column name="supplier_id" type="numeric(4)"/>
+            <column name="supplier_name" type="VARCHAR(50)"/>
+        </createTable>
+    </changeSet>
+	
+	<changeSet author="lbuser" id="5-table">
+        <createTable tableName="testtable5">
+            <column name="supplier_id" type="numeric(4)"/>
+            <column name="supplier_name" type="VARCHAR(50)"/>
+        </createTable>
+    </changeSet>
+	
+</databaseChangeLog>

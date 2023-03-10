@@ -27,6 +27,8 @@ import java.util.regex.Pattern;
  */
 public abstract class AbstractDatabaseObject implements DatabaseObject {
 
+    private static final String CURLY_BRACKET_REGEX = "(.*)!\\{(.*)\\}";
+    public static final Pattern CURLY_BRACKET_PATTERN = Pattern.compile(CURLY_BRACKET_REGEX);
     private Map<String, Object> attributes = new HashMap<>();
 
     private String snapshotId;
@@ -195,8 +197,8 @@ public abstract class AbstractDatabaseObject implements DatabaseObject {
                 this.getAttribute(name, List.class).add(child.getValue());
             } else {
                 Object childValue = child.getValue();
-                if ((childValue != null) && (childValue instanceof String)) {
-                    Matcher matcher = Pattern.compile("(.*)!\\{(.*)\\}").matcher((String) childValue);
+                if ((childValue instanceof String)) {
+                    Matcher matcher = CURLY_BRACKET_PATTERN.matcher((String) childValue);
                     if (matcher.matches()) {
                         String stringValue = matcher.group(1);
                         try {
@@ -232,7 +234,7 @@ public abstract class AbstractDatabaseObject implements DatabaseObject {
 
     /**
      * Convenience method to check if the object types should consider catalog name
-     * also during comparision (equals(), hashcode() and compareTo())
+     * also during comparison (equals(), hashcode() and compareTo())
      *
      * @return
      */

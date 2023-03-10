@@ -2,6 +2,10 @@ package liquibase.command.core;
 
 import liquibase.command.CommandResult;
 import liquibase.command.CommandScope;
+import liquibase.command.core.helpers.DbUrlConnectionCommandStep;
+import liquibase.command.core.helpers.DiffOutputControlCommandStep;
+import liquibase.command.core.helpers.PreCompareCommandStep;
+import liquibase.command.core.helpers.ReferenceDbUrlConnectionCommandStep;
 import liquibase.diff.output.DiffOutputControl;
 
 import java.io.PrintStream;
@@ -29,10 +33,12 @@ public class DiffToChangeLogCommand extends DiffCommand {
         return this;
     }
 
+    @Override
     public PrintStream getOutputStream() {
         return outputStream;
     }
 
+    @Override
     public DiffToChangeLogCommand setOutputStream(PrintStream outputStream) {
         this.outputStream = outputStream;
         return this;
@@ -51,18 +57,20 @@ public class DiffToChangeLogCommand extends DiffCommand {
     public CommandResult run() throws Exception {
         InternalSnapshotCommandStep.logUnsupportedDatabase(this.getReferenceDatabase(), this.getClass());
 
-        final CommandScope commandScope = new CommandScope("diffToChangeLogInternal");
-        commandScope.addArgumentValue(InternalDiffChangelogCommandStep.REFERENCE_DATABASE_ARG, getReferenceDatabase());
-        commandScope.addArgumentValue(InternalDiffChangelogCommandStep.TARGET_DATABASE_ARG, getTargetDatabase());
-        commandScope.addArgumentValue(InternalDiffChangelogCommandStep.SNAPSHOT_TYPES_ARG, getSnapshotTypes());
-        commandScope.addArgumentValue(InternalDiffChangelogCommandStep.SNAPSHOT_LISTENER_ARG, getSnapshotListener());
-        commandScope.addArgumentValue(InternalDiffChangelogCommandStep.REFERENCE_SNAPSHOT_CONTROL_ARG, getReferenceSnapshotControl());
-        commandScope.addArgumentValue(InternalDiffChangelogCommandStep.TARGET_SNAPSHOT_CONTROL_ARG, getTargetSnapshotControl());
-        commandScope.addArgumentValue(InternalDiffChangelogCommandStep.OBJECT_CHANGE_FILTER_ARG, getObjectChangeFilter());
-        commandScope.addArgumentValue(InternalDiffChangelogCommandStep.COMPARE_CONTROL_ARG, getCompareControl());
+        final CommandScope commandScope = new CommandScope("diffChangelog");
+        commandScope.addArgumentValue(ReferenceDbUrlConnectionCommandStep.REFERENCE_DATABASE_ARG, getReferenceDatabase());
+        commandScope.addArgumentValue(DbUrlConnectionCommandStep.DATABASE_ARG, getTargetDatabase());
+        commandScope.addArgumentValue(PreCompareCommandStep.SNAPSHOT_TYPES_ARG, getSnapshotTypes());
+        commandScope.addArgumentValue(DiffCommandStep.SNAPSHOT_LISTENER_ARG, getSnapshotListener());
+        commandScope.addArgumentValue(DiffCommandStep.REFERENCE_SNAPSHOT_CONTROL_ARG, getReferenceSnapshotControl());
+        commandScope.addArgumentValue(DiffCommandStep.TARGET_SNAPSHOT_CONTROL_ARG, getTargetSnapshotControl());
+        commandScope.addArgumentValue(PreCompareCommandStep.OBJECT_CHANGE_FILTER_ARG, getObjectChangeFilter());
+        commandScope.addArgumentValue(PreCompareCommandStep.COMPARE_CONTROL_ARG, getCompareControl());
 
-        commandScope.addArgumentValue(InternalDiffChangelogCommandStep.CHANGELOG_FILE_ARG, getChangeLogFile());
-        commandScope.addArgumentValue(InternalDiffChangelogCommandStep.DIFF_OUTPUT_CONTROL_ARG, getDiffOutputControl());
+        commandScope.addArgumentValue(DiffChangelogCommandStep.CHANGELOG_FILE_ARG, getChangeLogFile());
+        commandScope.addArgumentValue(DiffOutputControlCommandStep.INCLUDE_SCHEMA_ARG, getDiffOutputControl().getIncludeSchema());
+        commandScope.addArgumentValue(DiffOutputControlCommandStep.INCLUDE_CATALOG_ARG, getDiffOutputControl().getIncludeCatalog());
+        commandScope.addArgumentValue(DiffOutputControlCommandStep.INCLUDE_TABLESPACE_ARG, getDiffOutputControl().getIncludeTablespace());
 
         commandScope.setOutput(getOutputStream());
         commandScope.execute();

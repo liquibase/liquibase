@@ -121,6 +121,7 @@ public class LoadDataChange extends AbstractTableChange implements ChangeWithCol
         return true;
     }
 
+    @Override
     @DatabaseChangeProperty(description = "Name of the table to insert data into",
             requiredForDatabase = ALL, mustEqualExisting = "table")
     public String getTableName() {
@@ -192,7 +193,7 @@ public class LoadDataChange extends AbstractTableChange implements ChangeWithCol
     }
 
     public void setSeparator(String separator) {
-        if ((separator != null) && "\\t".equals(separator)) {
+        if ("\\t".equals(separator)) {
             separator = "\t";
         }
         this.separator = separator;
@@ -483,7 +484,7 @@ public class LoadDataChange extends AbstractTableChange implements ChangeWithCol
                     .getFailOnError()) {
                 LOG.info("Changeset " + getChangeSet().toString(false) +
                         " failed, but failOnError was false.  Error: " + ule.getMessage());
-                return new SqlStatement[0];
+                return SqlStatement.EMPTY_SQL_STATEMENT;
             } else {
                 throw ule;
             }
@@ -865,7 +866,7 @@ public class LoadDataChange extends AbstractTableChange implements ChangeWithCol
                 if (database instanceof PostgresDatabase || database instanceof MySQLDatabase) {
                     // we don't do batch updates for Postgres but we still send as a prepared statement, see LB-744
                     // mysql supports batch updates, but the performance vs. the big insert is worse
-                    return preparedStatements.toArray(new SqlStatement[0]);
+                    return preparedStatements.toArray(SqlStatement.EMPTY_SQL_STATEMENT);
                 } else {
                     return new SqlStatement[]{
                             new BatchDmlExecutablePreparedStatement(
@@ -876,12 +877,12 @@ public class LoadDataChange extends AbstractTableChange implements ChangeWithCol
                     };
                 }
             } else {
-                return statements.toArray(new SqlStatement[0]);
+                return statements.toArray(SqlStatement.EMPTY_SQL_STATEMENT);
             }
         } else {
             if (statements.isEmpty()) {
                 // avoid returning unnecessary dummy statement
-                return new SqlStatement[0];
+                return SqlStatement.EMPTY_SQL_STATEMENT;
             }
 
             InsertSetStatement statementSet = this.createStatementSet(

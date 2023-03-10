@@ -16,6 +16,7 @@ import liquibase.exception.LiquibaseException;
 import liquibase.exception.UnexpectedLiquibaseException;
 import liquibase.executor.Executor;
 import liquibase.executor.ExecutorService;
+import liquibase.executor.jvm.ChangelogJdbcMdcListener;
 import liquibase.snapshot.InvalidExampleException;
 import liquibase.snapshot.SnapshotControl;
 import liquibase.snapshot.SnapshotGeneratorFactory;
@@ -98,6 +99,7 @@ public class StandardChangeLogHistoryService extends AbstractChangeLogHistorySer
         return "varchar";
     }
 
+    @Override
     public void init() throws DatabaseException {
         if (serviceInitialized) {
             return;
@@ -115,7 +117,7 @@ public class StandardChangeLogHistoryService extends AbstractChangeLogHistorySer
         List<SqlStatement> statementsToExecute = new ArrayList<>();
 
         boolean changeLogCreateAttempted = false;
-        Executor executor = Scope.getCurrentScope().getSingleton(ExecutorService.class).getExecutor("jdbc", database);
+        Executor executor = Scope.getCurrentScope().getSingleton(ExecutorService.class).getExecutor( "jdbc", getDatabase());
         if (changeLogTable != null) {
             boolean hasDescription = changeLogTable.getColumn("DESCRIPTION") != null;
             boolean hasComments = changeLogTable.getColumn("COMMENTS") != null;
@@ -242,9 +244,10 @@ public class StandardChangeLogHistoryService extends AbstractChangeLogHistorySer
                 }
             }
 
-            List<Map<String, ?>> md5sumRS = Scope.getCurrentScope().getSingleton(ExecutorService.class).getExecutor("jdbc", database).queryForList(new
-                SelectFromDatabaseChangeLogStatement(new SelectFromDatabaseChangeLogStatement.ByNotNullCheckSum(),
-                new ColumnConfig().setName("MD5SUM")).setLimit(1));
+            SqlStatement databaseChangeLogStatement = new SelectFromDatabaseChangeLogStatement(new SelectFromDatabaseChangeLogStatement.ByNotNullCheckSum(),
+                    new ColumnConfig().setName("MD5SUM")).setLimit(1);
+            List<Map<String, ?>> md5sumRS = ChangelogJdbcMdcListener.query(databaseChangeLogStatement, getDatabase(), ex -> ex.queryForList(databaseChangeLogStatement));
+
             if (!md5sumRS.isEmpty()) {
                 String md5sum = md5sumRS.get(0).get("MD5SUM").toString();
                 if (!md5sum.startsWith(CheckSum.getCurrentVersion() + ":")) {
@@ -279,7 +282,7 @@ public class StandardChangeLogHistoryService extends AbstractChangeLogHistorySer
 
         for (SqlStatement sql : statementsToExecute) {
             if (SqlGeneratorFactory.getInstance().supports(sql, database)) {
-                executor.execute(sql);
+                ChangelogJdbcMdcListener.execute(sql, getDatabase(), ex -> ex.execute(sql));
                 getDatabase().commit();
             } else {
                 Scope.getCurrentScope().getLog(getClass()).info("Cannot run " + sql.getClass().getSimpleName() + " on" +
@@ -304,6 +307,7 @@ public class StandardChangeLogHistoryService extends AbstractChangeLogHistorySer
     /**
      * Returns the ChangeSets that have been run against the current getDatabase().
      */
+    @Override
     public List<RanChangeSet> getRanChangeSets() throws DatabaseException {
         if (this.ranChangeSetList == null) {
             Database database = getDatabase();
@@ -368,7 +372,7 @@ public class StandardChangeLogHistoryService extends AbstractChangeLogHistorySer
     public List<Map<String, ?>> queryDatabaseChangeLogTable(Database database) throws DatabaseException {
         SelectFromDatabaseChangeLogStatement select = new SelectFromDatabaseChangeLogStatement(new ColumnConfig()
             .setName("*").setComputed(true)).setOrderBy("DATEEXECUTED ASC", "ORDEREXECUTED ASC");
-        return Scope.getCurrentScope().getSingleton(ExecutorService.class).getExecutor("jdbc", database).queryForList(select);
+        return ChangelogJdbcMdcListener.query(select, getDatabase(), executor -> executor.queryForList(select));
     }
 
     @Override
@@ -391,9 +395,8 @@ public class StandardChangeLogHistoryService extends AbstractChangeLogHistorySer
 
     @Override
     public void setExecType(ChangeSet changeSet, ChangeSet.ExecType execType) throws DatabaseException {
-        Database database = getDatabase();
-
-        Scope.getCurrentScope().getSingleton(ExecutorService.class).getExecutor("jdbc", database).execute(new MarkChangeSetRanStatement(changeSet, execType));
+        SqlStatement markChangeSetRanStatement = new MarkChangeSetRanStatement(changeSet, execType);
+        ChangelogJdbcMdcListener.execute(markChangeSetRanStatement, getDatabase(), executor -> executor.execute(markChangeSetRanStatement));
         getDatabase().commit();
         if (this.ranChangeSetList != null) {
             this.ranChangeSetList.add(new RanChangeSet(changeSet, execType, null, null));
@@ -403,8 +406,8 @@ public class StandardChangeLogHistoryService extends AbstractChangeLogHistorySer
 
     @Override
     public void removeFromHistory(final ChangeSet changeSet) throws DatabaseException {
-        Database database = getDatabase();
-        Scope.getCurrentScope().getSingleton(ExecutorService.class).getExecutor("jdbc", database).execute(new RemoveChangeSetRanStatusStatement(changeSet));
+        SqlStatement removeChangeSetRanStatusStatement = new RemoveChangeSetRanStatusStatement(changeSet);
+        ChangelogJdbcMdcListener.execute(removeChangeSetRanStatusStatement, getDatabase(), executor -> executor.execute(removeChangeSetRanStatusStatement));
         getDatabase().commit();
 
         if (this.ranChangeSetList != null) {
@@ -418,8 +421,8 @@ public class StandardChangeLogHistoryService extends AbstractChangeLogHistorySer
             if (getDatabase().getConnection() == null) {
                 lastChangeSetSequenceValue = 0;
             } else {
-                lastChangeSetSequenceValue = Scope.getCurrentScope().getSingleton(ExecutorService.class).getExecutor("jdbc", getDatabase()).queryForInt(new
-                    GetNextChangeSetSequenceValueStatement());
+                SqlStatement nextChangeSetSequenceValueStatement = new GetNextChangeSetSequenceValueStatement();
+                lastChangeSetSequenceValue = ChangelogJdbcMdcListener.query(nextChangeSetSequenceValueStatement, getDatabase(), executor -> executor.queryForInt(nextChangeSetSequenceValueStatement));
             }
         }
 
@@ -431,18 +434,16 @@ public class StandardChangeLogHistoryService extends AbstractChangeLogHistorySer
      */
     @Override
     public void tag(final String tagString) throws DatabaseException {
-        Database database = getDatabase();
-        Executor executor = Scope.getCurrentScope().getSingleton(ExecutorService.class).getExecutor("jdbc", database);
-        int totalRows = Scope.getCurrentScope().getSingleton(ExecutorService.class).getExecutor("jdbc", database).queryForInt(new
-            SelectFromDatabaseChangeLogStatement(new ColumnConfig().setName("COUNT(*)", true)));
+        SqlStatement totalRowsStatement = new SelectFromDatabaseChangeLogStatement(new ColumnConfig().setName("COUNT(*)", true));
+        int totalRows = ChangelogJdbcMdcListener.query(totalRowsStatement, getDatabase(), executor -> executor.queryForInt(totalRowsStatement));
         if (totalRows == 0) {
             ChangeSet emptyChangeSet = new ChangeSet(String.valueOf(new Date().getTime()), "liquibase",
                 false,false, "liquibase-internal", null, null,
                 getDatabase().getObjectQuotingStrategy(), null);
             this.setExecType(emptyChangeSet, ChangeSet.ExecType.EXECUTED);
         }
-
-        executor.execute(new TagDatabaseStatement(tagString));
+        SqlStatement tagStatement = new TagDatabaseStatement(tagString);
+        ChangelogJdbcMdcListener.execute(tagStatement, getDatabase(), executor -> executor.execute(tagStatement));
         getDatabase().commit();
 
         if (this.ranChangeSetList != null) {
@@ -452,9 +453,9 @@ public class StandardChangeLogHistoryService extends AbstractChangeLogHistorySer
 
     @Override
     public boolean tagExists(final String tag) throws DatabaseException {
-        int count = Scope.getCurrentScope().getSingleton(ExecutorService.class).getExecutor("jdbc", getDatabase()).queryForInt(new
-            SelectFromDatabaseChangeLogStatement(new SelectFromDatabaseChangeLogStatement.ByTag(tag), new
-            ColumnConfig().setName("COUNT(*)", true)));
+        SqlStatement selectChangelogStatement = new SelectFromDatabaseChangeLogStatement(new SelectFromDatabaseChangeLogStatement.ByTag(tag),
+                new ColumnConfig().setName("COUNT(*)", true));
+        int count = ChangelogJdbcMdcListener.query(selectChangelogStatement, getDatabase(), executor -> executor.queryForInt(selectChangelogStatement));
         return count > 0;
     }
 
@@ -464,7 +465,7 @@ public class StandardChangeLogHistoryService extends AbstractChangeLogHistorySer
         UpdateStatement updateStatement = new UpdateStatement(database.getLiquibaseCatalogName(), database
             .getLiquibaseSchemaName(), database.getDatabaseChangeLogTableName());
         updateStatement.addNewColumnValue("MD5SUM", null);
-        Scope.getCurrentScope().getSingleton(ExecutorService.class).getExecutor("jdbc", database).execute(updateStatement);
+        ChangelogJdbcMdcListener.execute(updateStatement, getDatabase(), executor -> executor.execute(updateStatement));
         database.commit();
     }
 
@@ -491,7 +492,7 @@ public class StandardChangeLogHistoryService extends AbstractChangeLogHistorySer
                 Change[] change = ChangeGeneratorFactory.getInstance().fixUnexpected(table, diffOutputControl,database
                     , database);
                 SqlStatement[] sqlStatement = change[0].generateStatements(database);
-                Scope.getCurrentScope().getSingleton(ExecutorService.class).getExecutor( "jdbc", database).execute(sqlStatement[0]);
+                ChangelogJdbcMdcListener.execute(sqlStatement[0], getDatabase(), executor -> executor.execute(sqlStatement[0]));
             }
             reset();
         } catch (InvalidExampleException e) {

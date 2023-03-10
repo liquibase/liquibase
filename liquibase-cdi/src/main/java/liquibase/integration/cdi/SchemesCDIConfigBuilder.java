@@ -68,6 +68,7 @@ public class SchemesCDIConfigBuilder {
         final InputStream is = SchemesCDIConfigBuilder.class.getResourceAsStream(SCHEMA_NAME);
         try {
             return jvmLocked(id, new Callable<CDILiquibaseConfig>() {
+                @Override
                 public CDILiquibaseConfig call() throws Exception {
                     return createCDILiquibaseConfig(id, is);
                 }
@@ -175,6 +176,7 @@ public class SchemesCDIConfigBuilder {
     /**
      * Synchronization among multiple JVM's.
      */
+    @SuppressWarnings("squid:S2142") // false positive ignored as per https://sonarsource.atlassian.net/browse/SONARJAVA-4406
     CDILiquibaseConfig fileLocked(final String id, Callable<CDILiquibaseConfig> action) throws Exception {
         log.info(String.format("[id = %s] JVM lock acquired, acquiring file lock", id));
         String lockPath = String.format("%s/schema.liquibase.lock", ROOT_PATH);
@@ -190,7 +192,7 @@ public class SchemesCDIConfigBuilder {
         FileLock lock = null;
         try (
                 FileOutputStream fileStream = new FileOutputStream(lockPath);
-                FileChannel fileChannel = fileStream.getChannel();
+                FileChannel fileChannel = fileStream.getChannel()
         )
         {
             while (null == lock) {

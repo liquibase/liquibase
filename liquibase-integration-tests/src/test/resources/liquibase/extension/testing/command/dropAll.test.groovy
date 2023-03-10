@@ -74,9 +74,13 @@ Optional Args:
         expectedResults = [
                 statusCode   : 0,
         ]
+
+        expectedUI = [
+                "All objects dropped from LBUSER@jdbc:h2:mem:lbcat"
+        ]
     }
 
-    run "Happy path with an unregistered changelog file", {
+    run "Happy path with an unregistered changelog file does not show Hub messaging", {
         arguments = [
                 url       : { it.url },
                 username  : { it.username },
@@ -113,7 +117,7 @@ Optional Args:
         }
 
         expectedUI = [
-            CommandTests.assertContains("WARNING: The changelog file specified is not registered with any Liquibase Hub project")
+            CommandTests.assertNotContains("WARNING: The changelog file specified is not registered with any Liquibase Hub project")
         ]
         expectedResults = [
                 statusCode   : 0,

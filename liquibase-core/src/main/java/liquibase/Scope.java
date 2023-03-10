@@ -7,10 +7,13 @@ import liquibase.database.OfflineConnection;
 import liquibase.database.jvm.JdbcConnection;
 import liquibase.exception.UnexpectedLiquibaseException;
 import liquibase.listener.LiquibaseListener;
-import liquibase.logging.LogService;
-import liquibase.logging.Logger;
+import liquibase.logging.*;
 import liquibase.logging.core.JavaLogService;
 import liquibase.logging.core.LogServiceFactory;
+import liquibase.logging.mdc.CustomMdcObject;
+import liquibase.logging.mdc.MdcManager;
+import liquibase.logging.mdc.MdcManagerFactory;
+import liquibase.logging.mdc.MdcObject;
 import liquibase.osgi.Activator;
 import liquibase.resource.ClassLoaderResourceAccessor;
 import liquibase.resource.ResourceAccessor;
@@ -18,6 +21,7 @@ import liquibase.servicelocator.ServiceLocator;
 import liquibase.servicelocator.StandardServiceLocator;
 import liquibase.ui.ConsoleUIService;
 import liquibase.ui.UIService;
+import liquibase.util.CollectionUtil;
 import liquibase.util.SmartMap;
 import liquibase.util.StringUtil;
 
@@ -64,6 +68,7 @@ public class Scope {
     private Scope parent;
     private SmartMap values = new SmartMap();
     private String scopeId;
+    private static final Map<String, List<MdcObject>> addedMdcEntries = new HashMap<>();
 
     private LiquibaseListener listener;
 
@@ -126,6 +131,8 @@ public class Scope {
      * Defaults serviceLocator to {@link StandardServiceLocator}
      */
     private Scope() {
+        scopeId = "root";
+        parent = null;
     }
 
     /**
@@ -230,6 +237,12 @@ public class Scope {
             throw new RuntimeException("Cannot end scope " + scopeId + " when currently at scope " + currentScope.scopeId);
         }
 
+        // clear the MDC values added in this scope
+        List<MdcObject> mdcObjects = addedMdcEntries.get(currentScope.scopeId);
+        for (MdcObject mdcObject : CollectionUtil.createIfNull(mdcObjects)) {
+            mdcObject.close();
+        }
+
         scopeManager.setCurrentScope(currentScope.getParent());
     }
 
@@ -237,7 +250,7 @@ public class Scope {
      * Creates a new scope that is a child of this scope.
      */
     public static void child(String newValueKey, Object newValue, ScopedRunner runner) throws Exception {
-        Map<String, Object> scopeValues = new HashMap<String, Object>();
+        Map<String, Object> scopeValues = new HashMap<>();
         scopeValues.put(newValueKey, newValue);
 
         child(scopeValues, runner);
@@ -375,6 +388,89 @@ public class Scope {
      */
     public Charset getFileEncoding() {
         return get(Attr.fileEncoding, Charset.defaultCharset());
+    }
+
+    /**
+     * Get the current MDC manager.
+     */
+    public MdcManager getMdcManager() {
+        MdcManagerFactory mdcManagerFactory = getSingleton(MdcManagerFactory.class);
+        return mdcManagerFactory.getMdcManager();
+    }
+
+    /**
+     * Add a key value pair to the MDC using the MDC manager. This key value pair will be automatically removed from the
+     * MDC when this scope exits.
+     */
+    public MdcObject addMdcValue(String key, String value) {
+        return addMdcValue(key, value, true);
+    }
+
+    /**
+     * Add a key value pair to the MDC using the MDC manager.
+     * @param removeWhenScopeExits if true, this key value pair will be automatically removed from the MDC when this
+     *                             scope exits. If there is not a demonstrable reason for setting this parameter to false
+     *                             then it should be set to true.
+     */
+    public MdcObject addMdcValue(String key, String value, boolean removeWhenScopeExits) {
+        MdcObject mdcObject = getMdcManager().put(key, value);
+        removeMdcObjectWhenScopeExits(removeWhenScopeExits, mdcObject);
+
+        return mdcObject;
+    }
+
+    private void removeMdcObjectWhenScopeExits(boolean removeWhenScopeExits, MdcObject mdcObject) {
+        if (removeWhenScopeExits) {
+            Scope currentScope = getCurrentScope();
+            String scopeId = currentScope.scopeId;
+            if (addedMdcEntries.containsKey(scopeId)) {
+                addedMdcEntries.get(scopeId).add(mdcObject);
+            } else {
+                addedMdcEntries.put(scopeId, new ArrayList<>(Collections.singletonList(mdcObject)));
+            }
+        }
+    }
+
+    /**
+     * Add a key value pair to the MDC using the MDC manager. This key value pair will be automatically removed from the
+     * MDC when this scope exits.
+     */
+    public MdcObject addMdcValue(String key, Map<String, String> value) {
+        return addMdcValue(key, value, true);
+    }
+
+    /**
+     * Add a key value pair to the MDC using the MDC manager.
+     * @param removeWhenScopeExits if true, this key value pair will be automatically removed from the MDC when this
+     *                             scope exits. If there is not a demonstrable reason for setting this parameter to false
+     *                             then it should be set to true.
+     */
+    public MdcObject addMdcValue(String key, Map<String, String> value, boolean removeWhenScopeExits) {
+        MdcObject mdcObject = getMdcManager().put(key, value);
+        removeMdcObjectWhenScopeExits(removeWhenScopeExits, mdcObject);
+
+        return mdcObject;
+    }
+
+    /**
+     * Add a key value pair to the MDC using the MDC manager. This key value pair will be automatically removed from the
+     * MDC when this scope exits.
+     */
+    public MdcObject addMdcValue(String key, CustomMdcObject customMdcObject) {
+        return addMdcValue(key, customMdcObject, true);
+    }
+
+    /**
+     * Add a key value pair to the MDC using the MDC manager.
+     * @param removeWhenScopeExits if true, this key value pair will be automatically removed from the MDC when this
+     *                             scope exits. If there is not a demonstrable reason for setting this parameter to false
+     *                             then it should be set to true.
+     */
+    public MdcObject addMdcValue(String key, CustomMdcObject customMdcObject, boolean removeWhenScopeExits) {
+        MdcObject mdcObject = getMdcManager().put(key, customMdcObject);
+        removeMdcObjectWhenScopeExits(removeWhenScopeExits, mdcObject);
+
+        return mdcObject;
     }
 
     /**
