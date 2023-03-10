@@ -1,7 +1,6 @@
 package liquibase.command.core
 
 import liquibase.Scope
-import liquibase.command.CommandResultsBuilder
 import liquibase.command.CommandScope
 import liquibase.command.core.helpers.DbUrlConnectionCommandStep
 import liquibase.command.util.CommandUtil
@@ -74,7 +73,7 @@ drop table str4;
 
     def "Ensure Enum Output On generatedChangelog"() throws Exception {
         given:
-        CommandUtil.runUpdate(mysql,"changelogs/mysql/complete/enum.changelog.xml")
+        CommandUtil.runUpdateWithTestChangelog(mysql,"changelogs/mysql/complete/enum.changelog.xml")
 
         CommandScope commandScope = new CommandScope(GenerateChangelogCommandStep.COMMAND_NAME)
         commandScope.addArgumentValue(DbUrlConnectionCommandStep.URL_ARG, mysql.getConnectionUrl())
