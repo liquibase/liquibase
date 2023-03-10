@@ -10,6 +10,7 @@ import liquibase.changelog.filter.*;
 import liquibase.changelog.visitor.StatusVisitor;
 import liquibase.exception.LiquibaseException;
 import liquibase.logging.mdc.MdcKey;
+import liquibase.logging.mdc.MdcObject;
 import liquibase.logging.mdc.customobjects.UpdateSummary;
 
 import java.io.*;
@@ -82,7 +83,9 @@ public class ShowSummaryUtil {
         UpdateSummary updateSummaryMdc = showSummary(changeLog, statusVisitor, skippedChangeSets, filterDenied, outputStream);
         updateSummaryMdc.setValue(showSummary.toString());
         if (showSummary == UpdateSummaryEnum.SUMMARY || (skippedChangeSets.isEmpty() && denied.isEmpty())) {
-            Scope.getCurrentScope().addMdcValue(MdcKey.UPDATE_SUMMARY, updateSummaryMdc);
+            try (MdcObject updateSummaryMdcObject = Scope.getCurrentScope().addMdcValue(MdcKey.UPDATE_SUMMARY, updateSummaryMdc)) {
+                Scope.getCurrentScope().getLog(ShowSummaryUtil.class).fine("Update summary");
+            }
             return;
         }
 
@@ -91,7 +94,9 @@ public class ShowSummaryUtil {
         //
         SortedMap<String, Integer> skippedMdc = showDetailTable(skippedChangeSets, filterDenied, outputStream);
         updateSummaryMdc.setSkipped(skippedMdc);
-        Scope.getCurrentScope().addMdcValue(MdcKey.UPDATE_SUMMARY, updateSummaryMdc);
+        try (MdcObject updateSummaryMdcObject = Scope.getCurrentScope().addMdcValue(MdcKey.UPDATE_SUMMARY, updateSummaryMdc)) {
+            Scope.getCurrentScope().getLog(ShowSummaryUtil.class).fine("Update summary");
+        }
     }
 
     //
