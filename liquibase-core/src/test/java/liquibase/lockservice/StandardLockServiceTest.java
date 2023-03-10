@@ -1,10 +1,14 @@
 package liquibase.lockservice;
 
 import liquibase.Scope;
+import liquibase.database.core.MockDatabase;
 import liquibase.exception.DatabaseException;
 import liquibase.exception.LockException;
 import liquibase.executor.Executor;
 import liquibase.executor.ExecutorService;
+import liquibase.logging.Logger;
+import liquibase.logging.mdc.MdcManager;
+import liquibase.sqlgenerator.SqlGeneratorFactory;
 import org.assertj.core.api.Assertions;
 import org.junit.Before;
 import org.junit.Test;
@@ -44,9 +48,14 @@ public class StandardLockServiceTest {
         Map<String, Object> scopeValues = new TreeMap<>();
 
         scopeValues.put(ExecutorService.class.getName(), executorService);
+        scopeValues.put(SqlGeneratorFactory.class.getName(), SqlGeneratorFactory.getInstance());
 
         mockedScope = Mockito.mock(Scope.class);
         Mockito.when(mockedScope.getSingleton(ExecutorService.class)).thenReturn(executorService);
+        Logger logger = Mockito.mock(Logger.class);
+        MdcManager mdcManager = Mockito.mock(MdcManager.class);
+        Mockito.when(mockedScope.getLog(Mockito.any())).thenReturn(logger);
+        Mockito.when(mockedScope.getMdcManager()).thenReturn(mdcManager);
 
         lockService = new StandardLockService() {
             @Override
@@ -54,6 +63,7 @@ public class StandardLockServiceTest {
                 return true;
             }
         };
+        lockService.setDatabase(new MockDatabase());
     }
 
     @Test

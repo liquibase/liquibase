@@ -7,6 +7,7 @@ import liquibase.exception.CommandValidationException;
 import liquibase.exception.MissingRequiredArgumentException;
 import liquibase.integration.commandline.LiquibaseCommandLineConfiguration;
 import liquibase.util.ObjectUtil;
+import liquibase.util.StringUtil;
 
 import java.util.Collections;
 import java.util.Objects;
@@ -24,7 +25,8 @@ import java.util.regex.Pattern;
  */
 public class CommandArgumentDefinition<DataType> implements Comparable<CommandArgumentDefinition<?>> {
 
-    private static final Pattern ALLOWED_ARGUMENT_PATTERN = Pattern.compile("[a-zA-Z0-9]+");
+    private static final String ALLOWED_ARGUMENT_REGEX = "[a-zA-Z0-9]+";
+    private static final Pattern ALLOWED_ARGUMENT_PATTERN = Pattern.compile(ALLOWED_ARGUMENT_REGEX);
 
     private final String name;
     private SortedSet<String> aliases = new TreeSet<>();
@@ -296,7 +298,7 @@ public class CommandArgumentDefinition<DataType> implements Comparable<CommandAr
                     Scope.getCurrentScope().getSingleton(CommandFactory.class).register(commandName, newCommandArgument);
                 } catch (IllegalArgumentException iae) {
                     Scope.getCurrentScope().getLog(CommandArgumentDefinition.class).warning(
-                            "Unable to register command '" + commandName + "' argument '" + newCommandArgument.getName() + "': " + iae.getMessage());
+                            "Unable to register command '" + StringUtil.join(commandName, " ") + "' argument '" + newCommandArgument.getName() + "': " + iae.getMessage());
                     throw iae;
                 }
             }

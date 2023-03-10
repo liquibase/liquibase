@@ -24,21 +24,14 @@ import static java.util.ResourceBundle.getBundle;
 
 public class ChangeLogIterator {
 
-    private DatabaseChangeLog databaseChangeLog;
-    private List<ChangeSetFilter> changeSetFilters;
-    private boolean collectAllReasons = false;
+    protected DatabaseChangeLog databaseChangeLog;
+    protected List<ChangeSetFilter> changeSetFilters;
     private static ResourceBundle coreBundle = getBundle("liquibase/i18n/liquibase-core");
-    protected static final String MSG_COULD_NOT_FIND_EXECUTOR = coreBundle.getString("no.executor.found");
+    private static final String MSG_COULD_NOT_FIND_EXECUTOR = coreBundle.getString("no.executor.found");
     private Set<String> seenChangeSets = new HashSet<>();
 
     public ChangeLogIterator(DatabaseChangeLog databaseChangeLog, ChangeSetFilter... changeSetFilters) {
         this.databaseChangeLog = databaseChangeLog;
-        this.changeSetFilters = Arrays.asList(changeSetFilters);
-    }
-
-    public ChangeLogIterator(DatabaseChangeLog databaseChangeLog, boolean collectAllReasons, ChangeSetFilter... changeSetFilters) {
-        this.databaseChangeLog = databaseChangeLog;
-        this.collectAllReasons = collectAllReasons;
         this.changeSetFilters = Arrays.asList(changeSetFilters);
     }
 
@@ -49,6 +42,7 @@ public class ChangeLogIterator {
 	        for (ChangeSet changeSet : changeSetsForRanChangeSet) {
                 if (changeSet != null) {
                     changeSet.setFilePath(DatabaseChangeLog.normalizePath(ranChangeSet.getChangeLog()));
+                    changeSet.setDeploymentId(ranChangeSet.getDeploymentId());
                     changeSets.add(changeSet);
                 }
 	        }
@@ -91,9 +85,7 @@ public class ChangeLogIterator {
                                 } else {
                                     shouldVisit = false;
                                     reasonsDenied.add(acceptsResult);
-                                    if (! collectAllReasons) {
-                                        break;
-                                    }
+                                    break;
                                 }
                             }
                         }
@@ -120,9 +112,7 @@ public class ChangeLogIterator {
                                 Map<String, Object> values = new HashMap<>();
                                 values.put(Scope.Attr.logService.name(), compositeLogService);
                                 values.put(BufferedLogService.class.getName(), bufferLog);
-                                Scope.child(values, () -> {
-                                    visitor.visit(changeSet, databaseChangeLog, env.getTargetDatabase(), reasonsAccepted);
-                                });
+                                Scope.child(values, () -> visitor.visit(changeSet, databaseChangeLog, env.getTargetDatabase(), reasonsAccepted));
                                 markSeen(changeSet);
                             } else {
                                 if (visitor instanceof SkippedChangeSetVisitor) {
@@ -140,13 +130,17 @@ public class ChangeLogIterator {
         }
     }
 
-
-    //
-    // Make sure that any changeset which has a runWith=<executor> setting
-    // has a valid Executor, and that the changes in the changeset
-    // are eligible for execution by this Executor
-    //
-    private void validateChangeSetExecutor(ChangeSet changeSet, RuntimeEnvironment env) throws LiquibaseException {
+    /**
+     *
+     * Make sure that any changeset which has a runWith=<executor> setting
+     * has a valid Executor, and that the changes in the changeset are eligible for execution by this Executor
+     *
+     * @param  changeSet                      The change set to validate
+     * @param  env                            A RuntimeEnvironment instance
+     * @throws LiquibaseException
+     *
+     */
+    protected void validateChangeSetExecutor(ChangeSet changeSet, RuntimeEnvironment env) throws LiquibaseException {
         if (changeSet.getRunWith() == null) {
             return;
         }
