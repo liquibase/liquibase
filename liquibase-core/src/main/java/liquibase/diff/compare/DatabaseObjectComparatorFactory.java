@@ -91,7 +91,7 @@ public class DatabaseObjectComparatorFactory {
             }
         }
 
-        Collections.sort(validComparators, new DatabaseObjectComparatorComparator(comparatorClass, database));
+        validComparators.sort(new DatabaseObjectComparatorComparator(comparatorClass, database));
 
         validComparatorsByClassAndDatabase.put(key, validComparators);
 
