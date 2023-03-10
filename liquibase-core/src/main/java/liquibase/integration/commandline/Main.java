@@ -1441,21 +1441,11 @@ public class Main {
             }
         }
         if (includeSystemClasspath) {
-            classLoader = AccessController.doPrivileged(new PrivilegedAction<URLClassLoader>() {
-                @Override
-                public URLClassLoader run() {
-                    return new URLClassLoader(urls.toArray(new URL[0]), Thread.currentThread()
-                            .getContextClassLoader());
-                }
-            });
+            classLoader = AccessController.doPrivileged((PrivilegedAction<URLClassLoader>) () -> new URLClassLoader(urls.toArray(new URL[0]), Thread.currentThread()
+                    .getContextClassLoader()));
 
         } else {
-            classLoader = AccessController.doPrivileged(new PrivilegedAction<URLClassLoader>() {
-                @Override
-                public URLClassLoader run() {
-                    return new URLClassLoader(urls.toArray(new URL[0]), null);
-                }
-            });
+            classLoader = AccessController.doPrivileged((PrivilegedAction<URLClassLoader>) () -> new URLClassLoader(urls.toArray(new URL[0]), null));
         }
 
         Thread.currentThread().setContextClassLoader(classLoader);

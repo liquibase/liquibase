@@ -169,7 +169,7 @@ public class ConfigurationProperty {
      * @deprecated
      */
     public ConfigurationProperty setValueHandler(ConfigurationValueHandler handler) {
-        this.definitionBuilder.setValueHandler(value -> handler.convert(value));
+        this.definitionBuilder.setValueHandler(handler::convert);
         this.definition = definitionBuilder.buildTemporary();
 
         return this;
