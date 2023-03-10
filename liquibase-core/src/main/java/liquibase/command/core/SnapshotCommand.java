@@ -23,6 +23,8 @@ public class SnapshotCommand extends AbstractCommand<SnapshotCommand.SnapshotCom
     private String serializerFormat;
     private SnapshotListener snapshotListener;
     private Map<String, Object> snapshotMetadata;
+
+    private SnapshotControl snapshotControl;
     private Class<? extends DatabaseObject>[] snapshotTypes;
 
     @Override
@@ -96,9 +98,20 @@ public class SnapshotCommand extends AbstractCommand<SnapshotCommand.SnapshotCom
         this.snapshotTypes = snapshotTypes;
     }
 
+    public SnapshotControl getSnapshotControl() {
+        return snapshotControl;
+    }
+
+    public void setSnapshotControl(SnapshotControl snapshotControl) {
+        this.snapshotControl = snapshotControl;
+    }
+
     @Override
     protected SnapshotCommandResult run() throws Exception {
-        SnapshotControl snapshotControl = new SnapshotControl(database, snapshotTypes);
+        SnapshotControl snapshotControl = getSnapshotControl();
+        if (snapshotControl == null) {
+            snapshotControl = new SnapshotControl(database, snapshotTypes);
+        }
         snapshotControl.setSnapshotListener(snapshotListener);
 
         CatalogAndSchema[] schemas = this.schemas;
