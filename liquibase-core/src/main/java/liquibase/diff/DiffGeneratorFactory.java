@@ -39,12 +39,7 @@ public class DiffGeneratorFactory {
 
 
     public DiffGenerator getGenerator(Database referenceDatabase, Database comparisonDatabase) {
-        SortedSet<DiffGenerator> foundGenerators = new TreeSet<>(new Comparator<DiffGenerator>() {
-            @Override
-            public int compare(DiffGenerator o1, DiffGenerator o2) {
-                return -1 * Integer.valueOf(o1.getPriority()).compareTo(o2.getPriority());
-            }
-        });
+        SortedSet<DiffGenerator> foundGenerators = new TreeSet<>((o1, o2) -> -1 * Integer.compare(o1.getPriority(), o2.getPriority()));
 
         for (DiffGenerator diffGenerator : implementedGenerators) {
             if (diffGenerator.supports(referenceDatabase, comparisonDatabase)) {

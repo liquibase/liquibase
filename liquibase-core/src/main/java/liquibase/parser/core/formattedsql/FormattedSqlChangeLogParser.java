@@ -107,6 +107,9 @@ public class FormattedSqlChangeLogParser implements ChangeLogParser {
     private static final String RUN_WITH_REGEX = ".*runWith:([\\w\\$\\{\\}]+).*";
     private static final Pattern RUN_WITH_PATTERN = Pattern.compile(RUN_WITH_REGEX, Pattern.CASE_INSENSITIVE);
 
+    private static final String RUN_WITH_SPOOL_FILE_REGEX = ".*runWithSpoolFile:(.*).*";
+    private static final Pattern RUN_WITH_SPOOL_FILE_PATTERN = Pattern.compile(".*runWithSpoolFile:(.*).*", Pattern.CASE_INSENSITIVE);
+
     private static final String RUN_ON_CHANGE_REGEX = ".*runOnChange:(\\w+).*";
     private static final Pattern RUN_ON_CHANGE_PATTERN = Pattern.compile(RUN_ON_CHANGE_REGEX, Pattern.CASE_INSENSITIVE);
 
@@ -362,6 +365,7 @@ public class FormattedSqlChangeLogParser implements ChangeLogParser {
                     Matcher stripCommentsPatternMatcher = STRIP_COMMENTS_PATTERN.matcher(line);
                     Matcher splitStatementsPatternMatcher = SPLIT_STATEMENTS_PATTERN.matcher(line);
                     Matcher runWithMatcher = RUN_WITH_PATTERN.matcher(line);
+                    Matcher runWithSpoolFileMatcher = RUN_WITH_SPOOL_FILE_PATTERN.matcher(line);
                     rollbackSplitStatementsPatternMatcher = ROLLBACK_SPLIT_STATEMENTS_PATTERN.matcher(line);
                     Matcher endDelimiterPatternMatcher = END_DELIMITER_PATTERN.matcher(line);
                     Matcher rollbackEndDelimiterPatternMatcher = ROLLBACK_END_DELIMITER_PATTERN.matcher(line);
@@ -388,6 +392,10 @@ public class FormattedSqlChangeLogParser implements ChangeLogParser {
                     String runWith = parseString(runWithMatcher);
                     if (runWith != null) {
                         runWith = changeLogParameters.expandExpressions(runWith, changeLog);
+                    }
+                    String runWithSpoolFile = parseString(runWithSpoolFileMatcher);
+                    if (runWithSpoolFile != null) {
+                        runWithSpoolFile = changeLogParameters.expandExpressions(runWithSpoolFile, changeLog);
                     }
                     String endDelimiter = parseString(endDelimiterPatternMatcher);
                     rollbackEndDelimiter = parseString(rollbackEndDelimiterPatternMatcher);
@@ -449,7 +457,11 @@ public class FormattedSqlChangeLogParser implements ChangeLogParser {
                         changeLogParameters.expandExpressions(StringUtil.stripEnclosingQuotes(authorGroup), changeLog);
 
                     changeSet =
-                       new ChangeSet(changeSetId, changeSetAuthor, runAlways, runOnChange, DatabaseChangeLog.normalizePath(logicalFilePath), context, dbms, runWith, runInTransaction, changeLog.getObjectQuotingStrategy(), changeLog);
+                       new ChangeSet(changeSetId, changeSetAuthor, runAlways, runOnChange,
+                                     DatabaseChangeLog.normalizePath(logicalFilePath),
+                                     context, dbms, runWith, runWithSpoolFile,
+                                     runInTransaction,
+                                     changeLog.getObjectQuotingStrategy(), changeLog);
                     changeSet.setLabels(new Labels(labels));
                     changeSet.setIgnore(Boolean.parseBoolean(ignore));
                     changeSet.setFailOnError(failOnError);
