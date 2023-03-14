@@ -250,11 +250,11 @@ Optional Args:
 
     run "Mismatched DBMS causes not deployed summary message", {
         arguments = [
-                url:        { it.url },
-                username:   { it.username },
-                password:   { it.password },
-                showSummary: "verbose",
-                changelogFile: "changelogs/h2/complete/mismatchedDbms.changelog.xml"
+                url          : { it.url },
+                username     : { it.username },
+                password     : { it.password },
+                showSummary  : "verbose",
+                changelogFile: "changelogs/h2/complete/mismatchedDbms.changelog.xml",
         ]
 
         expectedResults = [

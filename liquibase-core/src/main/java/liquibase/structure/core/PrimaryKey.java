@@ -58,12 +58,7 @@ public class PrimaryKey extends AbstractDatabaseObject {
     }
 
     public String getColumnNames() {
-        return StringUtil.join(getColumns(), ", ", new StringUtil.StringUtilFormatter() {
-            @Override
-            public String toString(Object obj) {
-                return ((Column) obj).toString(false);
-            }
-        });
+        return StringUtil.join(getColumns(), ", ", obj -> ((Column) obj).toString(false));
     }
 
     /**
