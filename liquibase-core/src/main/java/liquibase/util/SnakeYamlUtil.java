@@ -32,6 +32,13 @@ public class SnakeYamlUtil {
     }
 
     /**
+     * Safely set the default tag inspector when configuring a new SnakeYaml instance.
+     */
+    public static void setDefaultTagInspector(LoaderOptions loaderOptions) { // pro uses this method
+        safelyCallNewSnakeYamlMethod(() -> loaderOptions.setTagInspector(tag -> true));
+    }
+
+    /**
      * Helper method to make sure that we display the error message only once.
      */
     private static void safelyCallNewSnakeYamlMethod(Runnable code) {
