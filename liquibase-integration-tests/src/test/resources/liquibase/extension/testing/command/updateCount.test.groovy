@@ -103,6 +103,16 @@ Optional Args:
                       "DBMS mismatch:                1"
                     ]
         ]
+
+        expectedResults = [
+                statusCode   : 0,
+                defaultChangeExecListener: 'not_null'
+        ]
+
+        expectedUI = [
+            "Running Changeset: changelogs/h2/complete/summary-changelog.xml::4-table::lbuser"
+        ]
+
     }
 
     run "Mismatched DBMS causes not deployed summary message", {
