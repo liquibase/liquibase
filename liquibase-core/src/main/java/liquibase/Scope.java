@@ -7,7 +7,8 @@ import liquibase.database.OfflineConnection;
 import liquibase.database.jvm.JdbcConnection;
 import liquibase.exception.UnexpectedLiquibaseException;
 import liquibase.listener.LiquibaseListener;
-import liquibase.logging.*;
+import liquibase.logging.LogService;
+import liquibase.logging.Logger;
 import liquibase.logging.core.JavaLogService;
 import liquibase.logging.core.LogServiceFactory;
 import liquibase.logging.mdc.CustomMdcObject;
@@ -239,11 +240,12 @@ public class Scope {
         }
 
         // clear the MDC values added in this scope
-        List<MdcObject> mdcObjects = addedMdcEntries.get(currentScope.scopeId);
-        for (MdcObject mdcObject : CollectionUtil.createIfNull(mdcObjects)) {
-            mdcObject.close();
+        List<MdcObject> mdcObjects = addedMdcEntries.remove(currentScope.scopeId);
+        if (mdcObjects != null) {
+            for (MdcObject mdcObject : CollectionUtil.createIfNull(mdcObjects)) {
+                mdcObject.close();
+            }
         }
-        addedMdcEntries.remove(currentScope.scopeId);
 
         scopeManager.setCurrentScope(currentScope.getParent());
     }
@@ -424,14 +426,12 @@ public class Scope {
     private void removeMdcObjectWhenScopeExits(boolean removeWhenScopeExits, MdcObject mdcObject) {
         if (removeWhenScopeExits) {
             Scope currentScope = getCurrentScope();
-            String scopeId = currentScope.scopeId;
-            if (addedMdcEntries.containsKey(scopeId)) {
-                addedMdcEntries.get(scopeId).add(mdcObject);
-            } else {
-                addedMdcEntries.put(scopeId, new ArrayList<>(Collections.singletonList(mdcObject)));
-            }
+            addedMdcEntries
+                    .computeIfAbsent(currentScope.scopeId, k -> new ArrayList<>())
+                    .add(mdcObject);
         }
     }
+
 
     /**
      * Add a key value pair to the MDC using the MDC manager. This key value pair will be automatically removed from the
