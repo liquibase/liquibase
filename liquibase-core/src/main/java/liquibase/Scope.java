@@ -146,12 +146,16 @@ public class Scope {
             throw new UnexpectedLiquibaseException("Cannot pass a null parent to a new Scope. Use Scope.child to correctly create a nested scope");
         }
         this.parent = parent;
-        scopeId = parent.scopeId + "-child";
+        scopeId = generateScopeId();
         if (scopeValues != null) {
             for (Map.Entry<String, Object> entry : scopeValues.entrySet()) {
                 values.put(entry.getKey(), entry.getValue());
             }
         }
+    }
+
+    private String generateScopeId() {
+        return StringUtil.randomIdentifer(10).toLowerCase();
     }
 
     /**
@@ -218,15 +222,12 @@ public class Scope {
      * @return Returns the scopeId to pass to to {@link #exit(String)}
      */
     public static String enter(LiquibaseListener listener, Map<String, Object> scopeValues) throws Exception {
-        String scopeId = StringUtil.randomIdentifer(10).toLowerCase();
-
         Scope originalScope = getCurrentScope();
         Scope child = new Scope(originalScope, scopeValues);
         child.listener = listener;
-        child.scopeId = scopeId;
         scopeManager.setCurrentScope(child);
 
-        return scopeId;
+        return child.scopeId;
     }
 
     /**
