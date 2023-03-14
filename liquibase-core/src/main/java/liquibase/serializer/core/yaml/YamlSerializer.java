@@ -164,12 +164,7 @@ public abstract class YamlSerializer implements LiquibaseSerializer {
     }
 
     protected Comparator<String> getComparator(LiquibaseSerializable object) {
-        return new Comparator<String>() {
-            @Override
-            public int compare(String o1, String o2) {
-                return o1.compareTo(o2);
-            }
-        };
+        return Comparator.naturalOrder();
     }
 
     public static String removeClassTypeMarksFromSerializedJson(String json) {
