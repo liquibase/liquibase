@@ -140,13 +140,10 @@ public class OfflineChangeLogHistoryService extends AbstractChangeLogHistoryServ
         if (isExecuteDmlAgainstDatabase()) {
             Scope.getCurrentScope().getSingleton(ExecutorService.class).getExecutor("jdbc", getDatabase()).execute(new UpdateChangeSetChecksumStatement(changeSet));
         }
-        replaceChangeSet(changeSet, new ReplaceChangeSetLogic() {
-            @Override
-            public String[] execute(String[] line) {
-                line[Columns.MD5SUM.ordinal()] = changeSet.generateCheckSum().toString();
-                return line;
-            }
-            });
+        replaceChangeSet(changeSet, line -> {
+            line[Columns.MD5SUM.ordinal()] = changeSet.generateCheckSum().toString();
+            return line;
+        });
     }
 
     @Override
@@ -293,14 +290,11 @@ public class OfflineChangeLogHistoryService extends AbstractChangeLogHistoryServ
         if (execType.equals(ChangeSet.ExecType.FAILED) || execType.equals(ChangeSet.ExecType.SKIPPED)) {
             return; //do nothing
         } else  if (execType.ranBefore) {
-            replaceChangeSet(changeSet, new ReplaceChangeSetLogic() {
-                @Override
-                public String[] execute(String[] line) {
-                    line[Columns.DATEEXECUTED.ordinal()] = new ISODateFormat().format(new java.sql.Timestamp(new Date().getTime()));
-                    line[Columns.MD5SUM.ordinal()] = changeSet.generateCheckSum().toString();
-                    line[Columns.EXECTYPE.ordinal()] = execType.value;
-                    return line;
-                }
+            replaceChangeSet(changeSet, line -> {
+                line[Columns.DATEEXECUTED.ordinal()] = new ISODateFormat().format(new java.sql.Timestamp(new Date().getTime()));
+                line[Columns.MD5SUM.ordinal()] = changeSet.generateCheckSum().toString();
+                line[Columns.EXECTYPE.ordinal()] = execType.value;
+                return line;
             });
         } else {
             appendChangeSet(changeSet, execType);
@@ -314,12 +308,7 @@ public class OfflineChangeLogHistoryService extends AbstractChangeLogHistoryServ
             getDatabase().commit();
         }
 
-        replaceChangeSet(changeSet, new ReplaceChangeSetLogic() {
-            @Override
-            public String[] execute(String[] line) {
-                return null;
-            }
-        });
+        replaceChangeSet(changeSet, line -> null);
     }
 
     @Override
@@ -364,12 +353,9 @@ public class OfflineChangeLogHistoryService extends AbstractChangeLogHistoryServ
         }
 
         ChangeSet lastChangeSet = new ChangeSet(last.getId(), last.getAuthor(), false, false, last.getChangeLog(), null, null, true, null, null);
-        replaceChangeSet(lastChangeSet, new ReplaceChangeSetLogic() {
-            @Override
-            public String[] execute(String[] line) {
-                line[Columns.TAG.ordinal()] = tagString;
-                return line;
-            }
+        replaceChangeSet(lastChangeSet, line -> {
+            line[Columns.TAG.ordinal()] = tagString;
+            return line;
         });
     }
 
@@ -390,12 +376,9 @@ public class OfflineChangeLogHistoryService extends AbstractChangeLogHistoryServ
 
     @Override
     public void clearAllCheckSums() throws LiquibaseException {
-        replaceChangeSet(null, new ReplaceChangeSetLogic() {
-            @Override
-            public String[] execute(String[] line) {
-                line[Columns.MD5SUM.ordinal()] = null;
-                return line;
-            }
+        replaceChangeSet(null, line -> {
+            line[Columns.MD5SUM.ordinal()] = null;
+            return line;
         });
 
     }

@@ -7,6 +7,7 @@ import liquibase.database.DatabaseFactory;
 import liquibase.database.core.DatabaseUtils;
 import liquibase.exception.DatabaseException;
 import liquibase.integration.commandline.LiquibaseCommandLineConfiguration;
+import liquibase.logging.mdc.MdcKey;
 import liquibase.resource.ResourceAccessor;
 import liquibase.util.StringUtil;
 
@@ -103,7 +104,7 @@ public abstract class AbstractDatabaseConnectionCommandStep extends AbstractComm
         } catch (Exception e) {
             throw new DatabaseException(e);
         }
-
+        Scope.getCurrentScope().addMdcValue(MdcKey.LIQUIBASE_TARGET_URL, database.getConnection().getURL());
         return database;
     }
 
