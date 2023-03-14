@@ -14,6 +14,8 @@ import java.util.Set;
 public class DatabaseObjectFactory {
 
     private static DatabaseObjectFactory instance;
+    //We use it within double-check synchronized pattern, volatile is what we only need.
+    @SuppressWarnings("java:S3077")
     private volatile Set<Class<? extends DatabaseObject>> standardTypes;
 
     public static synchronized DatabaseObjectFactory getInstance() {

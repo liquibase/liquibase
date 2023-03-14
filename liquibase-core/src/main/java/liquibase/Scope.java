@@ -304,18 +304,9 @@ public class Scope {
      * The value is converted to the given type if necessary using {@link liquibase.util.ObjectUtil#convert(Object, Class)}.
      */
     public <T> T get(String key, T defaultValue) {
-        Class type;
-        if (defaultValue == null) {
-            type = Object.class;
-        } else {
-            type = defaultValue.getClass();
-        }
+        Class<?> type = defaultValue == null ? Object.class : defaultValue.getClass();
         Object value = get(key, type);
-
-        if (value == null) {
-            return defaultValue;
-        }
-        return (T) value;
+        return value == null ? defaultValue : (T) value;
     }
 
     /**

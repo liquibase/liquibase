@@ -48,6 +48,8 @@ public abstract class ExecutablePreparedStatementBase implements ExecutablePrepa
     private ResourceAccessor resourceAccessor;
 
     //Cache the executeWithFlags method of Postgres'es PreparedStatement to avoid reflection overhead
+    //We use it within double-check synchronized pattern, volatile is what we only need.
+    @SuppressWarnings("java:S3077")
     private static volatile Method postgresExecuteWithFlagsMethod;
 
     private Map<String, Object> snapshotScratchPad = new HashMap<>();
@@ -107,8 +109,9 @@ public abstract class ExecutablePreparedStatementBase implements ExecutablePrepa
                 if (postgresExecuteWithFlagsMethod == null) {
                     synchronized (ExecutablePreparedStatementBase.class) {
                         if (postgresExecuteWithFlagsMethod == null) {
-                            postgresExecuteWithFlagsMethod = stmt.getClass().getMethod("executeWithFlags", int.class);
-                            postgresExecuteWithFlagsMethod.setAccessible(true);
+                            Method method = stmt.getClass().getMethod("executeWithFlags", int.class);
+                            method.setAccessible(true);
+                            postgresExecuteWithFlagsMethod = method;
                         }
                     }
                 }

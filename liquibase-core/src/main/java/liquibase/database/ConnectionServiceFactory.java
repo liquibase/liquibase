@@ -50,7 +50,7 @@ public class ConnectionServiceFactory {
                 .stream()
                 .filter(c -> c.supports(url))
                 .min(PrioritizedService.COMPARATOR)
-                .orElse(null);
+                .orElseThrow(() -> new UnexpectedLiquibaseException("no-connection-found"));
 
         try {
             Class<? extends DatabaseConnection> aClass = exampleService.getClass();
