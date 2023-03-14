@@ -11,6 +11,8 @@ Required Args:
   url (String) The JDBC database connection URL
     OBFUSCATED
 Optional Args:
+  changelogFile (String) The root changelog
+    Default: null
   defaultCatalogName (String) The default catalog name to use for the database connection
     Default: null
   defaultSchemaName (String) The default schema name to use for the database connection
