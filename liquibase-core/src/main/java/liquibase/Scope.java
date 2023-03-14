@@ -146,6 +146,7 @@ public class Scope {
             throw new UnexpectedLiquibaseException("Cannot pass a null parent to a new Scope. Use Scope.child to correctly create a nested scope");
         }
         this.parent = parent;
+        scopeId = parent.scopeId + "-child";
         if (scopeValues != null) {
             for (Map.Entry<String, Object> entry : scopeValues.entrySet()) {
                 values.put(entry.getKey(), entry.getValue());
@@ -241,10 +242,8 @@ public class Scope {
 
         // clear the MDC values added in this scope
         List<MdcObject> mdcObjects = addedMdcEntries.remove(currentScope.scopeId);
-        if (mdcObjects != null) {
-            for (MdcObject mdcObject : CollectionUtil.createIfNull(mdcObjects)) {
-                mdcObject.close();
-            }
+        for (MdcObject mdcObject : CollectionUtil.createIfNull(mdcObjects)) {
+            mdcObject.close();
         }
 
         scopeManager.setCurrentScope(currentScope.getParent());
