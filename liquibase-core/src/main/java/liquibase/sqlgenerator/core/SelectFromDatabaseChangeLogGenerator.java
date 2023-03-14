@@ -37,14 +37,11 @@ public class SelectFromDatabaseChangeLogGenerator extends AbstractSqlGenerator<S
         ObjectQuotingStrategy currentStrategy = database.getObjectQuotingStrategy();
         database.setObjectQuotingStrategy(ObjectQuotingStrategy.LEGACY);
         try {
-            String sql = "SELECT " + (database instanceof MSSQLDatabase && statement.getLimit() != null ? "TOP "+statement.getLimit()+" " : "") + StringUtil.join(columnsToSelect, ",", new StringUtil.StringUtilFormatter<ColumnConfig>() {
-                @Override
-                public String toString(ColumnConfig column) {
-                    if ((column.getComputed() != null) && column.getComputed()) {
-                        return column.getName();
-                    } else {
-                        return database.escapeColumnName(null, null, null, column.getName());
-                    }
+            String sql = "SELECT " + (database instanceof MSSQLDatabase && statement.getLimit() != null ? "TOP "+statement.getLimit()+" " : "") + StringUtil.join(columnsToSelect, ",", (StringUtil.StringUtilFormatter<ColumnConfig>) column -> {
+                if ((column.getComputed() != null) && column.getComputed()) {
+                    return column.getName();
+                } else {
+                    return database.escapeColumnName(null, null, null, column.getName());
                 }
             }).toUpperCase() + " FROM " +
                     database.escapeTableName(database.getLiquibaseCatalogName(), database.getLiquibaseSchemaName(), database.getDatabaseChangeLogTableName());

@@ -34,7 +34,7 @@ class DoubleTypeTest extends Specification {
         "double"                         | new PostgresDatabase() | "DOUBLE PRECISION"
         "double"                         | new InformixDatabase() | "DOUBLE PRECISION"
         "double"                         | new FirebirdDatabase() | "DOUBLE PRECISION"
-        "double"                         | new OracleDatabase()   | "FLOAT(24)"
+        "double"                         | new OracleDatabase()   | "DOUBLE PRECISION"
     }
 
     def "too many parameters"() {
