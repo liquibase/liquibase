@@ -7,7 +7,8 @@ on:
       tag:
         description: 'Release Tag'
         required: true
-
+env:
+  MAVEN_VERSION: '3.8.7'
 jobs:
   setup:
     name: Setup
@@ -213,6 +214,10 @@ jobs:
           distribution: 'temurin'
           cache: 'maven'
           server-id: github
+      - name: Set up Maven
+        uses: stCarolas/setup-maven@v4.5
+        with:
+          maven-version: ${{ env.MAVEN_VERSION }}
 
       - name: Version artifact
         run: mvn versions:set -DnewVersion="${{ needs.setup.outputs.version }}"
@@ -223,3 +228,36 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           TARGET_ARTIFACT_REPOSITORY: github
+
+  deploy_xsd:
+      name: Upload xsds
+      needs: [ setup ]
+      runs-on: ubuntu-20.04
+      outputs:
+          tag: ${{ steps.collect-data.outputs.tag }}
+          version: ${{ needs.setup.outputs.version }}
+      steps:
+      - name: Download liquibase xsd
+        uses: actions/checkout@v3
+        with:
+          # Relative path under $GITHUB_WORKSPACE to place the repository
+          path: liquibase-core-repo 
+          repository: "liquibase/liquibase"
+    
+      - name: Download liquibase-pro xsd
+        uses: actions/checkout@v3
+        with:
+          token: ${{ secrets.BOT_TOKEN }}
+          # Relative path under $GITHUB_WORKSPACE to place the repository
+          path: liquibase-pro-repo
+          repository: "liquibase/liquibase-pro"
+
+      - name: Upload to s3
+        env:
+          AWS_ACCESS_KEY_ID: ${{ secrets.LIQUIBASEORIGIN_ACCESS_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.LIQUIBASEORIGIN_SECRET_ACCESS_KEY }}
+          AWS_DEFAULT_REGION: us-east-1
+        # aws s3 sync syncs directories and S3 prefixes.
+        run: |
+          aws s3 sync liquibase-pro-repo/pro/src/main/resources/www.liquibase.org/xml/ns/pro/ s3://liquibaseorg-origin/xml/ns/pro/ --content-type application/octet-stream --only-show-errors
+          aws s3 sync liquibase-core-repo/liquibase-core/src/main/resources/www.liquibase.org/xml/ns/dbchangelog/ s3://liquibaseorg-origin/xml/ns/dbchangelog/ --content-type application/octet-stream --only-show-errors

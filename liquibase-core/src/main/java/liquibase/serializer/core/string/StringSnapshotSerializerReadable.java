@@ -42,20 +42,10 @@ public class StringSnapshotSerializerReadable implements SnapshotSerializer {
             SnapshotControl snapshotControl = snapshot.getSnapshotControl();
             List<Class> includedTypes = sort(snapshotControl.getTypesToInclude());
 
-            buffer.append("Included types:\n" ).append(StringUtil.indent(StringUtil.join(includedTypes, "\n", new StringUtil.StringUtilFormatter<Class>() {
-                @Override
-                public String toString(Class obj) {
-                    return obj.getName();
-                }
-            }))).append("\n");
+            buffer.append("Included types:\n" ).append(StringUtil.indent(StringUtil.join(includedTypes, "\n", (StringUtil.StringUtilFormatter<Class>) Class::getName))).append("\n");
 
 
-            List<Schema> schemas = sort(snapshot.get(Schema.class), new Comparator<Schema>() {
-                @Override
-                public int compare(Schema o1, Schema o2) {
-                    return o1.toString().compareTo(o2.toString());
-                }
-            });
+            List<Schema> schemas = sort(snapshot.get(Schema.class), Comparator.comparing(Schema::toString));
 
             for (Schema schema : schemas) {
                 if (database.supportsSchemas()) {
@@ -157,18 +147,15 @@ public class StringSnapshotSerializerReadable implements SnapshotSerializer {
                     value = null;
                 } else {
                     if (((Collection) value).iterator().next() instanceof DatabaseObject) {
-                        value = StringUtil.join(new TreeSet<>((Collection<DatabaseObject>) value), "\n", new StringUtil.StringUtilFormatter() {
-                            @Override
-                            public String toString(Object obj) {
-                                if (obj instanceof DatabaseObject) {
-                                    if (shouldExpandNestedObject(obj, databaseObject)) {
-                                        return ((DatabaseObject) obj).getName()+"\n"+ StringUtil.indent(serialize(((DatabaseObject) obj), databaseObject), INDENT_LENGTH);
-                                    } else {
-                                        return ((DatabaseObject) obj).getName();
-                                    }
+                        value = StringUtil.join(new TreeSet<>((Collection<DatabaseObject>) value), "\n", obj -> {
+                            if (obj instanceof DatabaseObject) {
+                                if (shouldExpandNestedObject(obj, databaseObject)) {
+                                    return ((DatabaseObject) obj).getName()+"\n"+ StringUtil.indent(serialize(((DatabaseObject) obj), databaseObject), INDENT_LENGTH);
                                 } else {
-                                    return obj.toString();
+                                    return ((DatabaseObject) obj).getName();
                                 }
+                            } else {
+                                return obj.toString();
                             }
                         });
                         value = "\n"+ StringUtil.indent((String) value, INDENT_LENGTH);
@@ -197,23 +184,20 @@ public class StringSnapshotSerializerReadable implements SnapshotSerializer {
     }
 
     private List sort(Collection objects) {
-        return sort(objects, new Comparator() {
-            @Override
-            public int compare(Object o1, Object o2) {
-                if (o1 instanceof Comparable) {
-                    return ((Comparable) o1).compareTo(o2);
-                } else if (o1 instanceof Class) {
-                    return ((Class<?>) o1).getName().compareTo(((Class<?>) o2).getName());
-                } else {
-                    throw new ClassCastException(o1.getClass().getName()+" cannot be cast to java.lang.Comparable or java.lang.Class");
-                }
+        return sort(objects, (Comparator) (o1, o2) -> {
+            if (o1 instanceof Comparable) {
+                return ((Comparable) o1).compareTo(o2);
+            } else if (o1 instanceof Class) {
+                return ((Class<?>) o1).getName().compareTo(((Class<?>) o2).getName());
+            } else {
+                throw new ClassCastException(o1.getClass().getName()+" cannot be cast to java.lang.Comparable or java.lang.Class");
             }
         });
     }
 
     private <T> List<T> sort(Collection objects, Comparator<T> comparator) {
         List returnList = new ArrayList(objects);
-        Collections.sort(returnList, comparator);
+        returnList.sort(comparator);
 
         return returnList;
     }
