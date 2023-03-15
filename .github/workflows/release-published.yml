@@ -266,6 +266,7 @@ jobs:
         run: |
           ls 
           tree
+          cd liquibase-core-repo/
           sed -e 's#</ul>/i# <li><a href="/xml/ns/dbchangelog/dbchangelog-{version}.xsd">dbchangelog-{version}.xsd</a></li> </ul>#g' index.htm
           aws s3 sync liquibase-core-repo/liquibase-core/index.htm s3://liquibaseorg-origin/xml/ns/dbchangelog/ --only-show-errors
       
