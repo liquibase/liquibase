@@ -265,6 +265,6 @@ jobs:
       - name: Version artifact
         run: |
           sed -e -i 's#<li><a href="/xml/ns/dbchangelog/dbchangelog-ext.xsd">dbchangelog-ext.xsd</a></li># <li><a href="/xml/ns/dbchangelog/dbchangelog-4.18.xsd">dbchangelog-{version}.xsd</a></li>#g' index.htm
-          aws s3 sync liquibase-core-repo/liquibase-core/index.html s3://liquibaseorg-origin/xml/ns/dbchangelog
+          aws s3 sync liquibase-core-repo/liquibase-core/index.htm s3://liquibaseorg-origin/xml/ns/dbchangelog
       
 
