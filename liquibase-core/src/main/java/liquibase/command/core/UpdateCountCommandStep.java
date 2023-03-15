@@ -13,6 +13,7 @@ import liquibase.command.*;
 import liquibase.database.Database;
 import liquibase.exception.DatabaseException;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
@@ -27,7 +28,6 @@ public class UpdateCountCommandStep extends AbstractUpdateCommandStep {
     public static final CommandArgumentDefinition<String> CHANGE_EXEC_LISTENER_CLASS_ARG;
     public static final CommandArgumentDefinition<String> CHANGE_EXEC_LISTENER_PROPERTIES_FILE_ARG;
     public static final CommandArgumentDefinition<ChangeExecListener> CHANGE_EXEC_LISTENER_ARG;
-    public static final CommandArgumentDefinition<UpdateSummaryEnum> SHOW_SUMMARY;
     public static final CommandArgumentDefinition<ChangeLogParameters> CHANGELOG_PARAMETERS;
 
     static {
@@ -50,25 +50,6 @@ public class UpdateCountCommandStep extends AbstractUpdateCommandStep {
                 .build();
         CHANGELOG_PARAMETERS = builder.argument("changelogParameters", ChangeLogParameters.class)
                 .hidden()
-                .build();
-        SHOW_SUMMARY = builder.argument("showSummary", UpdateSummaryEnum.class)
-                .description("Type of update results summary to show.  Values can be 'off', 'summary', or 'verbose'.")
-                .defaultValue(UpdateSummaryEnum.OFF)
-                .setValueHandler(value -> {
-                    if (value == null) {
-                        return null;
-                    }
-                    if (value instanceof String && ! value.equals("")) {
-                        final List<String> validValues = Arrays.asList("OFF", "SUMMARY", "VERBOSE");
-                        if (!validValues.contains(((String) value).toUpperCase())) {
-                            throw new IllegalArgumentException("Illegal value for `showUpdateSummary'.  Valid values are 'OFF', 'SUMMARY', or 'VERBOSE'");
-                        }
-                        return UpdateSummaryEnum.valueOf(((String) value).toUpperCase());
-                    } else if (value instanceof UpdateSummaryEnum) {
-                        return (UpdateSummaryEnum) value;
-                    }
-                    return null;
-                })
                 .build();
     }
 
@@ -104,7 +85,7 @@ public class UpdateCountCommandStep extends AbstractUpdateCommandStep {
 
     @Override
     public UpdateSummaryEnum getShowSummary(CommandScope commandScope) {
-        return commandScope.getArgumentValue(SHOW_SUMMARY);
+        return (UpdateSummaryEnum) commandScope.getDependency(UpdateSummaryEnum.class);
     }
 
     @Override
@@ -142,5 +123,12 @@ public class UpdateCountCommandStep extends AbstractUpdateCommandStep {
     @Override
     public String getHubOperation() {
         return "update-count";
+    }
+
+    @Override
+    public List<Class<?>> requiredDependencies() {
+        List<Class<?>> deps = new ArrayList<>(super.requiredDependencies());
+        deps.add(UpdateSummaryEnum.class);
+        return deps;
     }
 }
