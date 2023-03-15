@@ -111,12 +111,7 @@ public class ChangedIndexChangeGenerator extends AbstractChangeGenerator impleme
             List<Column> referenceColumns = (List<Column>) columnsDifference.getReferenceValue();
             List<Column> comparedColumns = (List<Column>) columnsDifference.getComparedValue();
 
-            StringUtil.StringUtilFormatter<Column> formatter = new StringUtil.StringUtilFormatter<Column>() {
-                @Override
-                public String toString(Column obj) {
-                    return obj.toString(false);
-                }
-            };
+            StringUtil.StringUtilFormatter<Column> formatter = obj -> obj.toString(false);
 
             control.setAlreadyHandledChanged(new Index().setRelation(index.getRelation()).setColumns(referenceColumns));
             if (!StringUtil.join(referenceColumns, ",", formatter).equalsIgnoreCase(StringUtil.join(comparedColumns, ",", formatter))) {

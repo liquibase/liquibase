@@ -890,14 +890,7 @@ public class DatabaseChangeLog implements Comparable<DatabaseChangeLog>, Conditi
     }
 
     protected Comparator<String> getStandardChangeLogComparator() {
-        return new Comparator<String>() {
-            @Override
-            public int compare(String o1, String o2) {
-                //by ignoring WEB-INF/classes in path all changelog Files independent
-                //whehther they are in a WAR or in a JAR are order following the same rule
-                return o1.replace("WEB-INF/classes/", "").compareTo(o2.replace("WEB-INF/classes/", ""));
-            }
-        };
+        return Comparator.comparing(o -> o.replace("WEB-INF/classes/", ""));
     }
 
     public static String normalizePath(String filePath) {
