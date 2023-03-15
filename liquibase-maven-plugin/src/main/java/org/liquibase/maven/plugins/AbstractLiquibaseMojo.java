@@ -930,7 +930,7 @@ public abstract class AbstractLiquibaseMojo extends AbstractMojo {
      */
     protected ClassLoader getClassLoaderIncludingProjectClasspath() throws MojoExecutionException {
         try {
-            List classpathElements = project.getCompileClasspathElements();
+            List<String> classpathElements = project.getCompileClasspathElements();
             classpathElements.add(project.getBuild().getOutputDirectory());
             URL urls[] = new URL[classpathElements.size()];
             for (int i = 0; i < classpathElements.size(); ++i) {
@@ -1035,7 +1035,7 @@ public abstract class AbstractLiquibaseMojo extends AbstractMojo {
         }
         Properties props = loadProperties(propertiesInputStream);
 
-        for (Iterator it = props.keySet().iterator(); it.hasNext(); ) {
+        for (Iterator<Object> it = props.keySet().iterator(); it.hasNext(); ) {
             String key = null;
             try {
                 key = (String) it.next();
@@ -1111,7 +1111,7 @@ public abstract class AbstractLiquibaseMojo extends AbstractMojo {
             systemProperties = new Properties();
         }
         // Add all system properties configured by the user
-        Iterator iter = systemProperties.keySet().iterator();
+        Iterator<Object> iter = systemProperties.keySet().iterator();
         while (iter.hasNext()) {
             String key = (String) iter.next();
             String value = systemProperties.getProperty(key);
