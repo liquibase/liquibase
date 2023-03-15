@@ -13,7 +13,7 @@
     <dependencies>
         <dependency>
             <groupId>org.liquibase</groupId>
-            <artifactId>liquibase-core</artifactId>
+            <artifactId>liquibase-standard</artifactId>
             <version>${project.version}</version>
         </dependency>
         <dependency>
@@ -24,7 +24,7 @@
 
         <dependency>
             <groupId>org.liquibase</groupId>
-            <artifactId>liquibase-core</artifactId>
+            <artifactId>liquibase-standard</artifactId>
             <version>${project.version}</version>
             <type>test-jar</type>
             <scope>test</scope>
