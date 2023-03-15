@@ -2,8 +2,11 @@ package liquibase.change.core
 
 import liquibase.change.AddColumnConfig
 import liquibase.change.Change
+import liquibase.change.ChangeFactory
 import liquibase.change.ChangeStatus
 import liquibase.change.StandardChangeTest
+import liquibase.change.visitor.ChangeVisitor
+import liquibase.change.visitor.ChangeVisitorFactory
 import liquibase.database.core.H2Database
 import liquibase.database.core.MSSQLDatabase
 import liquibase.database.core.MockDatabase
@@ -175,6 +178,120 @@ class AddColumnChangeTest extends StandardChangeTest {
         change.columns[1].name == "col_2"
         change.columns[1].type == "int"
         change.columns[1].position == 3
+    }
+    def "modify method works for removing afterColumn"() {
+        when:
+        def modifyChange = new ParsedNode(null, "modifyChange")
+                .addChildren([change: "addColumn", dbms: "postgresql", remove: "afterColumn"])
+        def changeVisitor = ChangeVisitorFactory.getInstance().create("addColumn");
+        changeVisitor.load(modifyChange, resourceSupplier.simpleResourceAccessor)
+        def node = new ParsedNode(null, "addColumn")
+                .addChildren([tableName: "table_name"])
+                .addChild(new ParsedNode(null, "column").addChildren([name: "col_1", type: "int", beforeColumn: "before_col"]))
+                .addChild(new ParsedNode(null, "column").addChildren([name: "col_2", type: "int", afterColumn: "after_col"]))
+                .addChild(new ParsedNode(null, "column").addChildren([name: "col_3", type: "int", position: "3"]))
+        def change = new AddColumnChange()
+
+        try {
+            change.load(node, resourceSupplier.simpleResourceAccessor)
+            change.modify(changeVisitor)
+        } catch (ParsedNodeException e) {
+            e.printStackTrace()
+        } catch (SetupException e) {
+            e.printStackTrace()
+        }
+
+        then:
+        change.tableName == "table_name"
+        change.columns.size() == 3
+
+        change.columns[0].name == "col_1"
+        change.columns[0].type == "int"
+        change.columns[0].beforeColumn == "before_col"
+
+        change.columns[1].name == "col_2"
+        change.columns[1].type == "int"
+        change.columns[1].afterColumn == null
+
+        change.columns[2].name == "col_3"
+        change.columns[2].type == "int"
+        change.columns[2].position == 3
+    }
+    def "modify method works for removing beforeColumn"() {
+        when:
+        def modifyChange = new ParsedNode(null, "modifyChange")
+                .addChildren([change: "addColumn", dbms: "postgresql", remove: "beforeColumn"])
+        def changeVisitor = ChangeVisitorFactory.getInstance().create("addColumn");
+        changeVisitor.load(modifyChange, resourceSupplier.simpleResourceAccessor)
+        def node = new ParsedNode(null, "addColumn")
+                .addChildren([tableName: "table_name"])
+                .addChild(new ParsedNode(null, "column").addChildren([name: "col_1", type: "int", beforeColumn: "before_col"]))
+                .addChild(new ParsedNode(null, "column").addChildren([name: "col_2", type: "int", afterColumn: "after_col"]))
+                .addChild(new ParsedNode(null, "column").addChildren([name: "col_3", type: "int", position: "3"]))
+        def change = new AddColumnChange()
+
+        try {
+            change.load(node, resourceSupplier.simpleResourceAccessor)
+            change.modify(changeVisitor)
+        } catch (ParsedNodeException e) {
+            e.printStackTrace()
+        } catch (SetupException e) {
+            e.printStackTrace()
+        }
+
+        then:
+        change.tableName == "table_name"
+        change.columns.size() == 3
+
+        change.columns[0].name == "col_1"
+        change.columns[0].type == "int"
+        change.columns[0].beforeColumn == null
+
+        change.columns[1].name == "col_2"
+        change.columns[1].type == "int"
+        change.columns[1].afterColumn == "after_col"
+
+        change.columns[2].name == "col_3"
+        change.columns[2].type == "int"
+        change.columns[2].position == 3
+    }
+    def "modify method works for removing position"() {
+        when:
+        def modifyChange = new ParsedNode(null, "modifyChange")
+                .addChildren([change: "addColumn", dbms: "postgresql", remove: "position"])
+        def changeVisitor = ChangeVisitorFactory.getInstance().create("addColumn");
+        changeVisitor.load(modifyChange, resourceSupplier.simpleResourceAccessor)
+        def node = new ParsedNode(null, "addColumn")
+                .addChildren([tableName: "table_name"])
+                .addChild(new ParsedNode(null, "column").addChildren([name: "col_1", type: "int", beforeColumn: "before_col"]))
+                .addChild(new ParsedNode(null, "column").addChildren([name: "col_2", type: "int", afterColumn: "after_col"]))
+                .addChild(new ParsedNode(null, "column").addChildren([name: "col_3", type: "int", position: "3"]))
+        def change = new AddColumnChange()
+
+        try {
+            change.load(node, resourceSupplier.simpleResourceAccessor)
+            change.modify(changeVisitor)
+        } catch (ParsedNodeException e) {
+            e.printStackTrace()
+        } catch (SetupException e) {
+            e.printStackTrace()
+        }
+
+        then:
+        change.tableName == "table_name"
+        change.columns.size() == 3
+
+        change.columns[0].name == "col_1"
+        change.columns[0].type == "int"
+        change.columns[0].beforeColumn == "before_col"
+
+        change.columns[1].name == "col_2"
+        change.columns[1].type == "int"
+        change.columns[1].afterColumn == "after_col"
+
+        change.columns[2].name == "col_3"
+        change.columns[2].type == "int"
+        change.columns[2].position == null
     }
 
     protected void addColumnsToSnapshot(Table table, Change change, MockSnapshotGeneratorFactory snapshotFactory) {
