@@ -271,7 +271,7 @@ jobs:
           version=${{ needs.setup.outputs.version }}
           mkdir index-file
           aws s3 cp s3://liquibaseorg-origin/xml/ns/dbchangelog/index.htm index-file
-          sed -ie 's/<\/ul>/  <li><a href=\"\/xml\/ns\/dbchangelog\/dbchangelog-${version}.xsd\">dbchangelog.${version}.xsd<\/a><\/li>\n<\/ul>/' index-file/index.htm
+          sed -ie "s/<\/ul>/  <li><a href=\"\/xml\/ns\/dbchangelog\/dbchangelog-${version}.xsd\">dbchangelog-${version}.xsd<\/a><\/li>\n<\/ul>/" index-file/index.htm
           aws s3 sync index-file s3://liquibaseorg-origin/xml/ns/dbchangelog/ --only-show-errors
       
 
