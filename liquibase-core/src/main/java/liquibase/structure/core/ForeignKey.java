@@ -219,7 +219,7 @@ public class ForeignKey extends AbstractDatabaseObject{
             return this.getName().equalsIgnoreCase(that.getName());
         }
 
-        StringUtil.StringUtilFormatter<Column> formatter = (StringUtil.StringUtilFormatter<Column>) obj -> obj.toString(false);
+        StringUtil.StringUtilFormatter<Column> formatter = obj -> obj.toString(false);
 
         return (StringUtil.join(getForeignKeyColumns(), ",", formatter).equalsIgnoreCase(StringUtil.join(that
             .getForeignKeyColumns(), ",", formatter)) && ((getForeignKeyTable() != null) && (that.getForeignKeyTable
@@ -231,7 +231,7 @@ public class ForeignKey extends AbstractDatabaseObject{
 
     @Override
     public int hashCode() {
-        StringUtil.StringUtilFormatter<Column> formatter = (StringUtil.StringUtilFormatter<Column>) obj -> obj.toString(false);
+        StringUtil.StringUtilFormatter<Column> formatter = obj -> obj.toString(false);
 
         int result = 0;
         if (getPrimaryKeyTable() != null) {
@@ -255,7 +255,7 @@ public class ForeignKey extends AbstractDatabaseObject{
 
     @Override
     public int compareTo(Object other) {
-        StringUtil.StringUtilFormatter<Column> formatter = (StringUtil.StringUtilFormatter<Column>) obj -> obj.toString(false);
+        StringUtil.StringUtilFormatter<Column> formatter = obj -> obj.toString(false);
 
         ForeignKey o = (ForeignKey) other;
         int returnValue = 0;
