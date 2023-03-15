@@ -270,6 +270,6 @@ jobs:
         run: |
           version=${{ needs.setup.outputs.version }}
           sed -ie 's#</ul>#  <li><a href="/xml/ns/dbchangelog/dbchangelog-{version}.xsd">dbchangelog.{version}.xsd</a></li>\n</ul>#g' liquibase-core-repo/index.htm
-          aws s3 sync liquibase-core-repo/liquibase-core/index.htm s3://liquibaseorg-origin/xml/ns/dbchangelog/ --only-show-errors
+          aws s3 sync liquibase-core-repo/index.htm s3://liquibaseorg-origin/xml/ns/dbchangelog/ --only-show-errors
       
 
