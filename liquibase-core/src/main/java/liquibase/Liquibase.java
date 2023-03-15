@@ -1643,9 +1643,9 @@ public class Liquibase implements AutoCloseable {
     }
 
     public void forceReleaseLocks() throws LiquibaseException {
-        checkLiquibaseTables(false, null, new Contexts(), new LabelExpression());
-
-        LockServiceFactory.getInstance().getLockService(database).forceReleaseLock();
+        new CommandScope(ReleaseLocksCommandStep.COMMAND_NAME[0])
+                .addArgumentValue(DbUrlConnectionCommandStep.DATABASE_ARG, getDatabase())
+                .execute();
     }
 
     /**
