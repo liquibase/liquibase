@@ -263,11 +263,13 @@ jobs:
           aws s3 sync liquibase-core-repo/liquibase-core/src/main/resources/www.liquibase.org/xml/ns/dbchangelog/ s3://liquibaseorg-origin/xml/ns/dbchangelog/ --content-type application/octet-stream --only-show-errors
 
       - name: Index.htm file upload
+        env:
+          AWS_ACCESS_KEY_ID: ${{ secrets.LIQUIBASEORIGIN_ACCESS_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.LIQUIBASEORIGIN_SECRET_ACCESS_KEY }}
+          AWS_DEFAULT_REGION: us-east-1
         run: |
-          ls 
-          tree
-          cd liquibase-core-repo/
-          sed -e 's#</ul>/i# <li><a href="/xml/ns/dbchangelog/dbchangelog-{version}.xsd">dbchangelog-{version}.xsd</a></li> </ul>#g' index.htm
-          
+          version=${{ needs.setup.outputs.version }}
+          sed -e 's#</ul># <li><a href="/xml/ns/dbchangelog/dbchangelog-{version}.xsd">dbchangelog-{version}.xsd</a></li> </ul>#g' liquibase-core-repo/index.htm
+          aws s3 sync liquibase-core-repo/liquibase-core/index.htm s3://liquibaseorg-origin/xml/ns/dbchangelog/ --only-show-errors
       
 
