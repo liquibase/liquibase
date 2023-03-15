@@ -52,8 +52,8 @@ public class YamlChangeLogParser extends YamlParser implements ChangeLogParser {
 
             for (Object obj : (List) rootList) {
                 if (obj instanceof Map) {
-                    if (((Map) obj).containsKey("property")) {
-                        Map property = (Map) ((Map) obj).get("property");
+                    if (((Map<?, ?>) obj).containsKey("property")) {
+                        Map property = (Map) ((Map<?, ?>) obj).get("property");
                         ContextExpression context = new ContextExpression((String) property.get("context"));
                         Labels labels = new Labels((String) property.get("labels"));
 
@@ -69,8 +69,8 @@ public class YamlChangeLogParser extends YamlParser implements ChangeLogParser {
                         }
                     }
 
-                    if (((Map) obj).containsKey("changeLogId")) {
-                        String changeLogId = (String) ((Map) obj).get("changeLogId");
+                    if (((Map<?, ?>) obj).containsKey("changeLogId")) {
+                        String changeLogId = (String) ((Map<?, ?>) obj).get("changeLogId");
                         changeLog.setChangeLogId(changeLogId);
                     }
                 }

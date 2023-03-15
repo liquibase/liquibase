@@ -10,7 +10,7 @@ import java.util.List;
 public class RawParameterizedSqlStatement extends AbstractSqlStatement {
 
     private final String sql;
-    private final List parameters = new ArrayList<>();
+    private final List<Object> parameters = new ArrayList<>();
 
     public RawParameterizedSqlStatement(String sql, Object... parameters) {
         this.sql = sql;
@@ -23,7 +23,7 @@ public class RawParameterizedSqlStatement extends AbstractSqlStatement {
         return sql;
     }
 
-    public List<?> getParameters() {
+    public List<Object> getParameters() {
         return parameters;
     }
 
