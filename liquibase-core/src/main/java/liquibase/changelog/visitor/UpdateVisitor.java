@@ -1,6 +1,8 @@
 package liquibase.changelog.visitor;
 
 import liquibase.Scope;
+import liquibase.changelog.ChangeLogHistoryService;
+import liquibase.changelog.ChangeLogHistoryServiceFactory;
 import liquibase.changelog.ChangeSet;
 import liquibase.changelog.ChangeSet.ExecType;
 import liquibase.changelog.ChangeSet.RunStatus;
@@ -65,6 +67,7 @@ public class UpdateVisitor implements ChangeSetVisitor {
             execType = ChangeSet.ExecType.RERAN;
         }
         fireRan(changeSet, databaseChangeLog, database, execType);
+        addAttributesForMdc(changeSet, execType);
         // reset object quoting strategy after running changeset
         this.database.setObjectQuotingStrategy(previousStr);
         this.database.markChangeSetExecStatus(changeSet, execType);
@@ -88,5 +91,12 @@ public class UpdateVisitor implements ChangeSetVisitor {
       if (execListener != null) {
         execListener.ran(changeSet, databaseChangeLog, database, execType);
       }
+    }
+
+    private void addAttributesForMdc(ChangeSet changeSet, ExecType execType) {
+        changeSet.setAttribute("updateExecType", execType);
+        ChangeLogHistoryService changelogService = ChangeLogHistoryServiceFactory.getInstance().getChangeLogService(database);
+        String deploymentId = changelogService.getDeploymentId();
+        changeSet.setAttribute("deploymentId", deploymentId);
     }
 }
