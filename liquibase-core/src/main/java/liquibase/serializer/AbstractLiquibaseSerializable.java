@@ -219,7 +219,7 @@ public abstract class AbstractLiquibaseSerializable implements LiquibaseSerializ
                     returnList.add(objValue);
                 }
             }
-            if (((Collection) value).isEmpty()) {
+            if (((Collection<?>) value).isEmpty()) {
                 return null;
             } else {
                 return returnList;
