@@ -37,12 +37,15 @@ import liquibase.util.StreamUtil;
 import liquibase.util.StringUtil;
 
 import java.util.*;
+import java.util.concurrent.atomic.AtomicReference;
 import java.util.stream.Collectors;
 
 /**
  * Encapsulates a changeSet and all its associated changes.
  */
 public class ChangeSet implements Conditional, ChangeLogChild {
+
+    public static final String NO_EXECUTE_MODE = "noExecuteMode";
 
     protected CheckSum checkSum;
     /**
@@ -1526,13 +1529,23 @@ public class ChangeSet implements Conditional, ChangeLogChild {
      * @param generateRollbackStatements controls generation of rollback sql statements or standard statements sql
      * @throws RollbackImpossibleException if you cannot generate rollback statements
      */
-    private void addSqlMdc(Change change, Database database, boolean generateRollbackStatements) throws RollbackImpossibleException {
-        if (change.supports(database)) {
-            SqlStatement[] statements = generateRollbackStatements ? change.generateRollbackStatements(database) : change.generateStatements(database);
-            String sqlStatementsMdc = Arrays.stream(statements)
+    private void addSqlMdc(Change change, Database database, boolean generateRollbackStatements) throws Exception {
+        //
+        // If the change is for this Database
+        // If the change allows
+        // add a Boolean flag to Scope to indicate that the Change should not be executed
+        //
+        if (! change.supports(database)) {
+            return;
+        }
+        Map<String, Object> scopeValues = new HashMap<>();
+        scopeValues.put(NO_EXECUTE_MODE, change.allowNonExecuteMode());
+        AtomicReference<SqlStatement[]> statementsReference = new AtomicReference<>();
+        Scope.child(scopeValues, () -> statementsReference.set(generateRollbackStatements ?
+               change.generateRollbackStatements(database) : change.generateStatements(database)));
+        String sqlStatementsMdc = Arrays.stream(statementsReference.get())
                     .map(statement -> SqlUtil.getSqlString(statement, SqlGeneratorFactory.getInstance(), database))
                     .collect(Collectors.joining("\n"));
-            Scope.getCurrentScope().addMdcValue(MdcKey.CHANGESET_SQL, sqlStatementsMdc);
-        }
+        Scope.getCurrentScope().addMdcValue(MdcKey.CHANGESET_SQL, sqlStatementsMdc);
     }
 }
