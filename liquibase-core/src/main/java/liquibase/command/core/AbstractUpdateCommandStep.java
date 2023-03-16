@@ -22,6 +22,7 @@ import liquibase.logging.core.CompositeLogService;
 import liquibase.logging.mdc.MdcKey;
 import liquibase.logging.mdc.MdcObject;
 import liquibase.logging.mdc.MdcValue;
+import liquibase.logging.mdc.customobjects.ChangesetsUpdated;
 import liquibase.util.ShowSummaryUtil;
 
 import java.io.IOException;
@@ -147,11 +148,14 @@ public abstract class AbstractUpdateCommandStep extends AbstractCommandStep impl
     }
 
     private void logDeploymentOutcomeMdc(DefaultChangeExecListener defaultListener, boolean success) throws IOException {
-        int deployedChangeSetCount = defaultListener.getDeployedChangeSets().size();
+        List<ChangeSet> deployedChangeSets = defaultListener.getDeployedChangeSets();
+        int deployedChangeSetCount = deployedChangeSets.size();
+        ChangesetsUpdated changesetsUpdated = new ChangesetsUpdated(deployedChangeSets);
         String successLog = "Update command completed successfully.";
         String failureLog = "Update command encountered an exception.";
         try (MdcObject deploymentOutcomeMdc = Scope.getCurrentScope().addMdcValue(MdcKey.DEPLOYMENT_OUTCOME, success ? MdcValue.COMMAND_SUCCESSFUL : MdcValue.COMMAND_FAILED);
-             MdcObject deploymentOutcomeCountMdc = Scope.getCurrentScope().addMdcValue(MdcKey.DEPLOYMENT_OUTCOME_COUNT, String.valueOf(deployedChangeSetCount))) {
+             MdcObject deploymentOutcomeCountMdc = Scope.getCurrentScope().addMdcValue(MdcKey.DEPLOYMENT_OUTCOME_COUNT, String.valueOf(deployedChangeSetCount));
+             MdcObject changesetsUpdatesMdc = Scope.getCurrentScope().addMdcValue(MdcKey.CHANGESETS_UPDATED, changesetsUpdated)) {
             Scope.getCurrentScope().getLog(getClass()).info(success ? successLog : failureLog);
         }
     }

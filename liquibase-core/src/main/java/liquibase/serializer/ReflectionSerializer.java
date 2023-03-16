@@ -29,7 +29,7 @@ public class ReflectionSerializer {
             Map<String, Field> fields = new HashMap<>();
             Set<Field> allFields = new HashSet<>();
 
-            Class classToExtractFieldsFrom = object.getClass();
+            Class<? extends Object> classToExtractFieldsFrom = object.getClass();
             while (!classToExtractFieldsFrom.equals(Object.class)) {
                 allFields.addAll(Arrays.asList(classToExtractFieldsFrom.getDeclaredFields()));
                 classToExtractFieldsFrom = classToExtractFieldsFrom.getSuperclass();
