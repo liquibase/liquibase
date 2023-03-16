@@ -202,7 +202,7 @@ public class JdbcExecutor extends AbstractExecutor {
     }
 
     public List query(SqlStatement sql, RowMapper rowMapper) throws DatabaseException {
-        return query(sql, rowMapper, new ArrayList());
+        return query(sql, rowMapper, new ArrayList<>());
     }
 
     public List query(SqlStatement sql, RowMapper rowMapper, List<SqlVisitor> sqlVisitors) throws DatabaseException {
@@ -210,7 +210,7 @@ public class JdbcExecutor extends AbstractExecutor {
     }
 
     public Object queryForObject(SqlStatement sql, RowMapper rowMapper) throws DatabaseException {
-        return queryForObject(sql, rowMapper, new ArrayList());
+        return queryForObject(sql, rowMapper, new ArrayList<>());
     }
 
     public Object queryForObject(SqlStatement sql, RowMapper rowMapper, List<SqlVisitor> sqlVisitors) throws DatabaseException {
@@ -224,7 +224,7 @@ public class JdbcExecutor extends AbstractExecutor {
 
     @Override
     public <T> T queryForObject(SqlStatement sql, Class<T> requiredType) throws DatabaseException {
-        return (T) queryForObject(sql, requiredType, new ArrayList());
+        return (T) queryForObject(sql, requiredType, new ArrayList<>());
     }
 
     @Override
@@ -234,7 +234,7 @@ public class JdbcExecutor extends AbstractExecutor {
 
     @Override
     public long queryForLong(SqlStatement sql) throws DatabaseException {
-        return queryForLong(sql, new ArrayList());
+        return queryForLong(sql, new ArrayList<>());
     }
 
     @Override
@@ -245,7 +245,7 @@ public class JdbcExecutor extends AbstractExecutor {
 
     @Override
     public int queryForInt(SqlStatement sql) throws DatabaseException {
-        return queryForInt(sql, new ArrayList());
+        return queryForInt(sql, new ArrayList<>());
     }
 
     @Override
@@ -256,7 +256,7 @@ public class JdbcExecutor extends AbstractExecutor {
 
     @Override
     public List queryForList(SqlStatement sql, Class elementType) throws DatabaseException {
-        return queryForList(sql, elementType, new ArrayList());
+        return queryForList(sql, elementType, new ArrayList<>());
     }
 
     @Override
@@ -266,7 +266,7 @@ public class JdbcExecutor extends AbstractExecutor {
 
     @Override
     public List<Map<String, ?>> queryForList(SqlStatement sql) throws DatabaseException {
-        return queryForList(sql, new ArrayList());
+        return queryForList(sql, new ArrayList<>());
     }
 
     @Override
@@ -276,7 +276,7 @@ public class JdbcExecutor extends AbstractExecutor {
 
     @Override
     public int update(final SqlStatement sql) throws DatabaseException {
-        return update(sql, new ArrayList());
+        return update(sql, new ArrayList<>());
     }
 
     // Incorrect warning, at least at this point. The situation here is not that we inject some unsanitised parameter
