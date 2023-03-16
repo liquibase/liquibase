@@ -1,7 +1,6 @@
 package liquibase.changelog.filter;
 
 import liquibase.changelog.ChangeSet;
-import liquibase.changelog.DatabaseChangeLog;
 import liquibase.changelog.RanChangeSet;
 import liquibase.database.Database;
 import liquibase.exception.DatabaseException;
@@ -58,19 +57,24 @@ public class ShouldRunChangeSetFilter implements ChangeSetFilter {
         for (RanChangeSet ranChangeSet : this.ranChangeSets.values()) {
             if (ranChangeSet.isSameAs(changeSet)) {
                 if (changeSet.shouldAlwaysRun()) {
-                    return new ChangeSetFilterResult(true, "Changeset always runs", this.getClass());
+                    return new ChangeSetFilterResult(true, "Changeset always runs", this.getClass(), getMdcName());
                 }
                 if (changeSet.shouldRunOnChange() && checksumChanged(changeSet, ranChangeSet)) {
-                    return new ChangeSetFilterResult(true, "Changeset checksum changed", this.getClass());
+                    return new ChangeSetFilterResult(true, "Changeset checksum changed", this.getClass(), getMdcName());
                 }
-                return new ChangeSetFilterResult(false, "Changeset already ran", this.getClass());
+                return new ChangeSetFilterResult(false, "Changeset already ran", this.getClass(), getMdcName());
             }
         }
-        return new ChangeSetFilterResult(true, "Changeset has not ran yet", this.getClass());
+        return new ChangeSetFilterResult(true, "Changeset has not ran yet", this.getClass(), getMdcName());
     }
 
 
     protected boolean checksumChanged(ChangeSet changeSet, RanChangeSet ranChangeSet) {
         return !changeSet.generateCheckSum().equals(ranChangeSet.getLastCheckSum());
+    }
+
+    @Override
+    public String getMdcName() {
+        return "alreadyRan";
     }
 }
