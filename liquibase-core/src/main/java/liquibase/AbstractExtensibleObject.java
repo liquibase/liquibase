@@ -147,7 +147,7 @@ public class AbstractExtensibleObject implements ExtensibleObject {
             } else if (lastValue instanceof ExtensibleObject) {
                 newValue = ((ExtensibleObject) lastValue).get(baseField, typeToGet);
             } else if (lastValue instanceof Collection) {
-                newValue = new ArrayList();
+                newValue = new ArrayList<>();
                 boolean foundNonNullValue = false;
                 for (Object object : (Collection) lastValue) {
                     if (object == null) {
