@@ -262,6 +262,7 @@ jobs:
           aws s3 sync liquibase-pro-repo/pro/src/main/resources/www.liquibase.org/xml/ns/pro/ s3://liquibaseorg-origin/xml/ns/pro/ --content-type application/octet-stream --only-show-errors
           aws s3 sync liquibase-core-repo/liquibase-core/src/main/resources/www.liquibase.org/xml/ns/dbchangelog/ s3://liquibaseorg-origin/xml/ns/dbchangelog/ --content-type application/octet-stream --only-show-errors
 
+
       - name: Index.htm file upload
         env:
           AWS_ACCESS_KEY_ID: ${{ secrets.LIQUIBASEORIGIN_ACCESS_KEY_ID }}
@@ -269,9 +270,14 @@ jobs:
           AWS_DEFAULT_REGION: us-east-1
         run: |
           version=${{ needs.setup.outputs.version }}
+          arr=(${version//./ })
+          xsd_version=${arr[0]}"."${arr[1]}
+          patch_version=${arr[2]}
+          echo "XSD_VERSION=${xsd_version}" >> $GITHUB_ENV
+          echo "PATCH_VERSION=${patch_version}" >> $GITHUB_ENV
           mkdir index-file
           aws s3 cp s3://liquibaseorg-origin/xml/ns/dbchangelog/index.htm index-file
-          sed -ie "s/<\/ul>/  <li><a href=\"\/xml\/ns\/dbchangelog\/dbchangelog-${version}.xsd\">dbchangelog-${version}.xsd<\/a><\/li>\n<\/ul>/" index-file/index.htm
+          sed -ie "s/<\/ul>/  <li><a href=\"\/xml\/ns\/dbchangelog\/dbchangelog-${{ env.XSD_VERSION }}.xsd\">dbchangelog-${{ env.XSD_VERSION }}.xsd<\/a><\/li>\n<\/ul>/" index-file/index.htm
           aws s3 sync index-file s3://liquibaseorg-origin/xml/ns/dbchangelog/ --only-show-errors
       
 
