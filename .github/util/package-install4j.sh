@@ -10,7 +10,7 @@ set -e
 if [ -z ${1+x} ]; then
   echo "This script requires the version to be passed to it. Example: package-install4j.sh 4.5.0";
   exit 1;
-fi
+fi  
 version=$1
 
 if [ -z ${INSTALL4J_10_LICENSE+x} ]; then

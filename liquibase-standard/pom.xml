@@ -267,7 +267,7 @@
                             <Build-Time>${build.timestamp}</Build-Time>
                             <Build-Number>${build.number}</Build-Number>
 			    <Liquibase-Version>${project.version}</Liquibase-Version>
-			    <Automatic-Module-Name>liquibase.core</Automatic-Module-Name>
+			    <Automatic-Module-Name>liquibase.standard</Automatic-Module-Name>
                         </manifestEntries>
                         <manifestFile>${project.build.outputDirectory}/META-INF/MANIFEST.MF</manifestFile>
 
