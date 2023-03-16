@@ -7,14 +7,20 @@ package liquibase.changelog.filter;
  */
 public class ChangeSetFilterResult {
 
-    private boolean accepted;
-    private String message;
+    private final boolean accepted;
+    private final String message;
     private final Class<? extends ChangeSetFilter> filter;
+    private final String displayName;
 
     public ChangeSetFilterResult(boolean accepted, String message, Class<? extends ChangeSetFilter> filter) {
+        this(accepted, message, filter, filter == null ? null : filter.getSimpleName());
+    }
+
+    public ChangeSetFilterResult(boolean accepted, String message, Class<? extends ChangeSetFilter> filter, String displayName) {
         this.accepted = accepted;
         this.message = message;
         this.filter = filter;
+        this.displayName = displayName;
     }
 
     /**
@@ -36,6 +42,10 @@ public class ChangeSetFilterResult {
      */
     public Class<? extends ChangeSetFilter> getFilter() {
         return filter;
+    }
+
+    public String getDisplayName() {
+        return displayName;
     }
 
     @Override
