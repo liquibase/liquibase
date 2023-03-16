@@ -275,7 +275,9 @@ jobs:
           xsd_version=${arr[0]}"."${arr[1]}
           mkdir index-file
           aws s3 cp s3://liquibaseorg-origin/xml/ns/dbchangelog/index.htm index-file
-          sed -ie "s/<\/ul>/  <li><a href=\"\/xml\/ns\/dbchangelog\/dbchangelog-${xsd_version}.xsd\">dbchangelog-${xsd_version}.xsd<\/a><\/li>\n<\/ul>/" index-file/index.htm
-          aws s3 sync index-file s3://liquibaseorg-origin/xml/ns/dbchangelog/ --only-show-errors
+          if ! grep -q ${xsd_version} index-file/index.htm ; then
+            sed -ie "s/<\/ul>/  <li><a href=\"\/xml\/ns\/dbchangelog\/dbchangelog-${xsd_version}.xsd\">dbchangelog-${xsd_version}.xsd<\/a><\/li>\n<\/ul>/" index-file/index.htm
+            aws s3 sync index-file s3://liquibaseorg-origin/xml/ns/dbchangelog/ --only-show-errors
+          fi
+          
       
-
