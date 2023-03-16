@@ -13,7 +13,7 @@ public class NetUtil {
     private static InetAddress localHost;
     private static String hostName;
 
-    private static final String UNKNOW_HOST_NAME = "unknown";
+    private static final String UNKNOWN_HOST_NAME = "unknown";
 
     private NetUtil() {}
 
@@ -58,11 +58,11 @@ public class NetUtil {
                 return localHost.getHostAddress();
             }
             else {
-                return UNKNOW_HOST_NAME;
+                return UNKNOWN_HOST_NAME;
             }
         } catch (Exception e) {
             Scope.getCurrentScope().getLog(NetUtil.class).fine("Error getting hostname", e);
-            return UNKNOW_HOST_NAME;
+            return UNKNOWN_HOST_NAME;
         }
     }
 
@@ -85,12 +85,12 @@ public class NetUtil {
                     }
                 }
                 else {
-                    hostName = UNKNOW_HOST_NAME;
+                    hostName = UNKNOWN_HOST_NAME;
                 }
             } catch (Exception e) {
                 Scope.getCurrentScope().getLog(NetUtil.class).fine("Error getting hostname", e);
                 if (hostName == null) {
-                    hostName = UNKNOW_HOST_NAME;
+                    hostName = UNKNOWN_HOST_NAME;
                 }
             }
         }
