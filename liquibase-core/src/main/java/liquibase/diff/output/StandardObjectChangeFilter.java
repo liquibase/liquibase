@@ -10,6 +10,7 @@ import liquibase.structure.core.*;
 import liquibase.util.StringUtil;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 import java.util.regex.Pattern;
@@ -30,16 +31,16 @@ public class StandardObjectChangeFilter implements ObjectChangeFilter {
     private final FilterType filterType;
 
     private final List<Filter> filters = new ArrayList<>();
-    private final static List<DatabaseObject> databaseObjects = new ArrayList<>();
+    private volatile static List<DatabaseObject> databaseObjects;
     private boolean catalogOrSchemaFilter;
 
     public StandardObjectChangeFilter(FilterType type, String filter) {
         this.filterType = type;
-        if (databaseObjects.isEmpty()) {
+        if (databaseObjects == null) {
             synchronized (StandardObjectChangeFilter.class) {
-                if (databaseObjects.isEmpty()) {
+                if (databaseObjects == null) {
                     ServiceLocator serviceLocator = Scope.getCurrentScope().getServiceLocator();
-                    databaseObjects.addAll(serviceLocator.findInstances(DatabaseObject.class));
+                    databaseObjects = Collections.unmodifiableList(serviceLocator.findInstances(DatabaseObject.class));
                 }
             }
         }
