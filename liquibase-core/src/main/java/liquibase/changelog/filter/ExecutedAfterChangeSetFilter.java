@@ -26,9 +26,9 @@ public class ExecutedAfterChangeSetFilter implements ChangeSetFilter {
     @Override
     public ChangeSetFilterResult accepts(ChangeSet changeSet) {
         if (changeLogsAfterDate.contains(changeSet.toString())) {
-            return new ChangeSetFilterResult(true, "Changeset ran after "+ new ISODateFormat().format(new java.sql.Timestamp(date.getTime())), this.getClass());
+            return new ChangeSetFilterResult(true, "Changeset ran after "+ new ISODateFormat().format(new java.sql.Timestamp(date.getTime())), this.getClass(), getMdcName());
         } else {
-            return new ChangeSetFilterResult(false, "Changeset ran before "+ new ISODateFormat().format(new java.sql.Timestamp(date.getTime())), this.getClass());
+            return new ChangeSetFilterResult(false, "Changeset ran before "+ new ISODateFormat().format(new java.sql.Timestamp(date.getTime())), this.getClass(), getMdcName());
         }
     }
 }
