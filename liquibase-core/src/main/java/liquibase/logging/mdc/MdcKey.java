@@ -63,4 +63,5 @@ public class MdcKey {
     public static final String UPDATE_ONE_CHANGESET_FORCE = "updateOneChangesetForce";
     public static final String UPDATE_TO_TAG = "updateToTag";
     public static final String UPDATE_COUNT = "updateCount";
+    public static final String ROLLBACK_ON_ERROR = "rollbackOnError";
 }
