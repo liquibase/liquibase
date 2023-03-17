@@ -49,12 +49,7 @@ public class AddUniqueConstraintStatement extends AbstractSqlStatement {
     }
 
     public String getColumnNames() {
-        return StringUtil.join(columns, ", ", new StringUtil.StringUtilFormatter<ColumnConfig>() {
-            @Override
-            public String toString(ColumnConfig obj) {
-                return obj.getName() + (obj.getDescending() != null && obj.getDescending() ? " DESC" : "");
-            }
-        });
+        return StringUtil.join(columns, ", ", (StringUtil.StringUtilFormatter<ColumnConfig>) obj -> obj.getName() + (obj.getDescending() != null && obj.getDescending() ? " DESC" : ""));
     }
 
     public String getConstraintName() {
