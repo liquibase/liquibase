@@ -15,7 +15,7 @@ public class ShowSummaryArgument extends AbstractCommandStep {
     static {
         CommandBuilder commandBuilder = new CommandBuilder(COMMAND_NAME);
         SHOW_SUMMARY = commandBuilder.argument("showSummary", UpdateSummaryEnum.class).description("Type of update results summary to show.  Values can be 'off', 'summary', or 'verbose'.")
-                .defaultValue(UpdateSummaryEnum.OFF)
+                .defaultValue(UpdateSummaryEnum.SUMMARY)
                 .setValueHandler(value -> {
                     if (value == null) {
                         return null;
