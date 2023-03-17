@@ -1,4 +1,4 @@
-package liquibase.command.core;
+package liquibase.command.core.helpers;
 
 import liquibase.Liquibase;
 import liquibase.Scope;
@@ -57,5 +57,6 @@ public class LockServiceCommandStep extends AbstractCommandStep implements Clean
         } catch (LockException e) {
             Scope.getCurrentScope().getLog(getClass()).severe(Liquibase.MSG_COULD_NOT_RELEASE_LOCK, e);
         }
+        LockServiceFactory.getInstance().resetAll();
     }
 }

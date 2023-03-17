@@ -88,12 +88,14 @@
 	</target>
 
 	<target name="testRelativeChangeLogDirectoryStartsWithSlash">
-        <au:expectfailure expectedmessage="Unable to update database: The file simple-changelog.xml was not found">
-			<lb:updateDatabase
-					changelogdirectory="/src/test/resources/liquibase/integration/ant/changelog"
-					changelogfile="simple-changelog.xml">
-				<lb:database refid="test-db" />
-			</lb:updateDatabase>
+		<au:expectfailure>
+			<au:logcontains text="Unable to rollback database: The file changelog-with-rollback.xml was not found">
+				<lb:updateDatabase
+						changelogdirectory="/src/test/resources/liquibase/integration/ant/changelog"
+						changelogfile="simple-changelog.xml">
+					<lb:database refid="test-db" />
+				</lb:updateDatabase>
+			</au:logcontains>
 		</au:expectfailure>
 	</target>
 
@@ -118,12 +120,14 @@
 	</target>
 
 	<target name="testRelativeBackslashedChangeLogDirectoryStartsWithBackslash">
-        <au:expectfailure expectedmessage="Unable to update database: The file simple-changelog.xml was not found">
-			<lb:updateDatabase
-					changelogdirectory="\src\test\resources\liquibase\integration\ant\changelog"
-					changelogfile="simple-changelog.xml">
-				<lb:database refid="test-db" />
-			</lb:updateDatabase>
+		<au:expectfailure>
+			<au:logcontains text="Unable to rollback database: The file changelog-with-rollback.xml was not found">
+				<lb:updateDatabase
+						changelogdirectory="\src\test\resources\liquibase\integration\ant\changelog"
+						changelogfile="simple-changelog.xml">
+					<lb:database refid="test-db" />
+				</lb:updateDatabase>
+			</au:logcontains>
         </au:expectfailure>
 	</target>
 

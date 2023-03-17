@@ -33,8 +33,10 @@ public class ColumnSnapshotGenerator extends JdbcSnapshotGenerator {
     private static final String LIQUIBASE_COMPLETE = "liquibase-complete";
     protected static final String COLUMN_DEF_COL = "COLUMN_DEF";
 
-    private Pattern postgresStringValuePattern = Pattern.compile("'(.*)'::[\\w .]+");
-    private Pattern postgresNumberValuePattern = Pattern.compile("\\(?(\\d*)\\)?::[\\w .]+");
+    private static final String POSTGRES_STRING_VALUE_REGEX = "'(.*)'::[\\w .]+";
+    private static final Pattern POSTGRES_STRING_VALUE_PATTERN = Pattern.compile(POSTGRES_STRING_VALUE_REGEX);
+    private static final String POSTGRES_NUMBER_VALUE_REGEX = "\\(?(\\d*)\\)?::[\\w .]+";
+    private static final Pattern POSTGRES_NUMBER_VALUE_PATTERN = Pattern.compile(POSTGRES_NUMBER_VALUE_REGEX);
 
     private final ColumnAutoIncrementService columnAutoIncrementService = new ColumnAutoIncrementService();
 
@@ -397,34 +399,18 @@ public class ColumnSnapshotGenerator extends JdbcSnapshotGenerator {
         if ((database instanceof MySQLDatabase) && ("ENUM".equalsIgnoreCase(columnTypeName) || "SET".equalsIgnoreCase
                 (columnTypeName))) {
             try {
-                String boilerLength;
-                if ("ENUM".equalsIgnoreCase(columnTypeName)) {
-                    boilerLength = "7";
-                } else {
-                    // SET
-                    boilerLength = "6";
-                }
 
-                List<String> enumValues = Scope.getCurrentScope().getSingleton(ExecutorService.class).getExecutor("jdbc", database).queryForList(
-                        new RawSqlStatement(
-                                "SELECT DISTINCT SUBSTRING_INDEX(SUBSTRING_INDEX(SUBSTRING(COLUMN_TYPE, " + boilerLength +
-                                        ", LENGTH(COLUMN_TYPE) - " + boilerLength +
-                                        " - 1 ), \"','\", 1 + units.i + tens.i * 10) , \"','\", -1)\n" +
-                                        "FROM INFORMATION_SCHEMA.COLUMNS\n" +
-                                        "CROSS JOIN (SELECT 0 AS i UNION SELECT 1 UNION SELECT 2 UNION SELECT 3 UNION SELECT 4 " +
-                                        "UNION SELECT 5 UNION SELECT 6 UNION SELECT 7 UNION SELECT 8 UNION SELECT 9) units\n" +
-                                        "CROSS JOIN (SELECT 0 AS i UNION SELECT 1 UNION SELECT 2 UNION SELECT 3 UNION SELECT 4 " +
-                                        "UNION SELECT 5 UNION SELECT 6 UNION SELECT 7 UNION SELECT 8 UNION SELECT 9) tens\n" +
-                                        "WHERE TABLE_SCHEMA = '" + column.getSchema().getName() + "' \n" +
-                                        "AND TABLE_NAME = '" + column.getRelation().getName() + "' \n" +
-                                        "AND COLUMN_NAME = '" + column.getName() + "'\n" +
-                                        "ORDER BY tens.i, units.i"), String.class);
-                String enumClause = "";
-                for (String enumValue : enumValues) {
-                    enumClause += "'" + enumValue + "', ";
-                }
-                enumClause = enumClause.replaceFirst(", $", "");
-                return new DataType(columnTypeName + "(" + enumClause + ")");
+                String enumValue = Scope.getCurrentScope().getSingleton(ExecutorService.class)
+                        .getExecutor("jdbc", database)
+                        .queryForObject(new RawSqlStatement("SELECT COLUMN_TYPE FROM INFORMATION_SCHEMA.COLUMNS\n" +
+                                "WHERE TABLE_SCHEMA = '" + column.getSchema().getName() + "'\n" +
+                                "AND TABLE_NAME = '" + column.getRelation().getName() + "'\n" +
+                                "AND COLUMN_NAME = '" + column.getName() + "'"), String.class);
+
+                enumValue = enumValue.replace("enum(", "ENUM(");
+                enumValue = enumValue.replace("set(", "SET(");
+
+                return new DataType(enumValue);
             } catch (DatabaseException e) {
                 Scope.getCurrentScope().getLog(getClass()).warning("Error fetching enum values", e);
             }
@@ -569,11 +555,11 @@ public class ColumnSnapshotGenerator extends JdbcSnapshotGenerator {
             }
             Object defaultValue = columnMetadataResultSet.get(COLUMN_DEF_COL);
             if ((defaultValue instanceof String)) {
-                Matcher matcher = postgresStringValuePattern.matcher((String) defaultValue);
+                Matcher matcher = POSTGRES_STRING_VALUE_PATTERN.matcher((String) defaultValue);
                 if (matcher.matches()) {
                     defaultValue = matcher.group(1);
                 } else {
-                    matcher = postgresNumberValuePattern.matcher((String) defaultValue);
+                    matcher = POSTGRES_NUMBER_VALUE_PATTERN.matcher((String) defaultValue);
                     if (matcher.matches()) {
                         defaultValue = matcher.group(1);
                     }
