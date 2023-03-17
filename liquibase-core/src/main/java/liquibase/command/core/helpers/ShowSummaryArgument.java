@@ -7,6 +7,11 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
+/**
+ * This class encapsulates the argument "show-summary", which applies to the update family of commands. The show-summary
+ * feature will display a formatted summary table when performing an update command.
+ * See {@link liquibase.util.ShowSummaryUtil} for implementation.
+ */
 public class ShowSummaryArgument extends AbstractCommandStep {
     protected static final String[] COMMAND_NAME = {"showSummary"};
 
