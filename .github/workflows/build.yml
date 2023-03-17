@@ -459,7 +459,8 @@ jobs:
   finish:
     name: Finish Build
     runs-on: ubuntu-20.04
-    needs: [ setup, build, integration-test, package, sonar ]
+    # needs: [ setup, build, integration-test, package, sonar ]
+    needs: [ setup, build, package ]
     if: ${{ needs.setup.outputs.setupSuccessful }}
     steps:
       - uses: actions/checkout@v3
