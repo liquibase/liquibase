@@ -50,7 +50,7 @@ public class TestContext {
     }
 
     public File findCoreJvmProjectRoot() throws URISyntaxException {
-        return new File(findCoreProjectRoot().getParentFile(), "liquibase-core");
+        return new File(findCoreProjectRoot().getParentFile(), "liquibase-standard");
     }
 
     public File findIntegrationTestProjectRoot() throws URISyntaxException {
@@ -66,14 +66,14 @@ public class TestContext {
         uri = new URI(this.getClass().getClassLoader().getResource("liquibase/integration/commandline/Main.class").toExternalForm());
         if(!uri.isOpaque()) {
             File thisClassFile = new File(uri);
-            return new File(thisClassFile.getParentFile().getParentFile().getParentFile().getParentFile().getParentFile().getParentFile(), "liquibase-core");
+            return new File(thisClassFile.getParentFile().getParentFile().getParentFile().getParentFile().getParentFile().getParentFile(), "liquibase-standard");
         }
         uri = new URI(this.getClass().getClassLoader().getResource("liquibase/dbtest/AbstractIntegrationTest.class").toExternalForm());
         if(!uri.isOpaque()) {
             File thisClassFile = new File(uri);
-            return new File(thisClassFile.getParentFile().getParentFile().getParentFile().getParentFile().getParentFile().getParentFile(), "liquibase-core");
+            return new File(thisClassFile.getParentFile().getParentFile().getParentFile().getParentFile().getParentFile().getParentFile(), "liquibase-standard");
         }
-        throw new IllegalStateException("Cannot find liquibase-core project root");
+        throw new IllegalStateException("Cannot find liquibase-standard project root");
     }
 
     public ResourceAccessor getTestResourceAccessor() throws URISyntaxException, MalformedURLException {

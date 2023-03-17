@@ -253,7 +253,7 @@
 					</execution>
 				</executions>
 			</plugin>
-			<!-- install the shaded jar as liquibase-core like the final artifact ends up as -->
+			<!-- install the shaded jar as liquibase-standard like the final artifact ends up as -->
 			<plugin>
                 <artifactId>maven-install-plugin</artifactId>
 				<configuration>

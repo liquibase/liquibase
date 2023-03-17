@@ -26,7 +26,7 @@ public class ChangeLogIterator {
 
     protected DatabaseChangeLog databaseChangeLog;
     protected List<ChangeSetFilter> changeSetFilters;
-    private static ResourceBundle coreBundle = getBundle("liquibase/i18n/liquibase-core");
+    private static ResourceBundle coreBundle = getBundle("liquibase/i18n/liquibase-standard");
     private static final String MSG_COULD_NOT_FIND_EXECUTOR = coreBundle.getString("no.executor.found");
     private Set<String> seenChangeSets = new HashSet<>();
 

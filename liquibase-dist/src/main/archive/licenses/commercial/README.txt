@@ -15,7 +15,7 @@ Apache 2.0 License
 - com.fasterxml.jackson.core:jackson-databind
 - com.fasterxml.jackson.core:jackson-annotations
 - com.github.jsqlparser:jsqlparser (Dual licence: Apache 2.0, LGPL 2.1)
-- org.liquibase:liquibase-core
+- org.liquibase:liquibase-standard
 
 GNU Affero General Public License (AGPL) version 3
 - net.java.truelicense:truelicense

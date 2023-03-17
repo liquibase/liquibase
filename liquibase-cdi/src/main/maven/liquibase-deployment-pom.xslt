@@ -12,8 +12,8 @@
     <!-- remove all profiles -->
     <xsl:template match="maven:profiles"/>
 
-    <!-- remove all org.liquibase sub-module dependencies except liquibase-core -->
-    <xsl:template match="maven:dependencies/maven:dependency[maven:groupId = 'org.liquibase'  and maven:artifactId != 'liquibase-core']"/>
+    <!-- remove all org.liquibase sub-module dependencies except liquibase-standard -->
+    <xsl:template match="maven:dependencies/maven:dependency[maven:groupId = 'org.liquibase'  and maven:artifactId != 'liquibase-standard']"/>
 
     <!--
     Set module <name> as "Liquibase".

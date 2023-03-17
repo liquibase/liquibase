@@ -499,7 +499,7 @@ Changes in version 4.15.0 (2022.08.04)
 Changes in version 4.14.0 (2022.07.26)
 
 ## Notable Changes
-* Split liquibase-core and liquibase-commercial jar files by @nvoxland in https://github.com/liquibase/liquibase/pull/3050
+* Split liquibase-standard and liquibase-commercial jar files by @nvoxland in https://github.com/liquibase/liquibase/pull/3050
 * Added liquibase.changelogParseMode setting by @nvoxland in https://github.com/liquibase/liquibase/pull/3057
 
 ## Enhancements
@@ -806,7 +806,7 @@ Fixes
 - [Snyk] Security upgrade com.h2database:h2 from 2.0.206 to 2.1.210 by @snyk-bot in https://github.com/liquibase/liquibase/pull/2392
 - Enable FEATURE_SECURE_PROCESSING XML setting by default by @nvoxland in https://github.com/liquibase/liquibase/pull/2384
 - Correctly set Bundle-Version in META-INF on release by @nvoxland in https://github.com/liquibase/liquibase/pull/2505
-- Bump ant from 1.9.15 to 1.10.9 in /liquibase-core by @dependabot in https://github.com/liquibase/liquibase/pull/1808
+- Bump ant from 1.9.15 to 1.10.9 in /liquibase-standard by @dependabot in https://github.com/liquibase/liquibase/pull/1808
 - Bump postgresql from 42.2.12 to 42.3.2 by @dependabot in https://github.com/liquibase/liquibase/pull/2459
 - Use path instead of absolutePath for resources by @liefke in https://github.com/liquibase/liquibase/pull/2122
 - Bump junit from 4.12 to 4.13.2 by @dependabot in https://github.com/liquibase/liquibase/pull/2411
@@ -1259,7 +1259,7 @@ Changes in version 3.10.1 (2020.7.2)
  - GH PR#986 - XMLSerializer: Correct Map value serialization
  - GH PR#993 - Improve ChangeFactory initialization time
  - GH Issue#1035 - Change how Liquibase produces debug logs
- - GH Issue#1051 - Update liquibase-core.jar to exclude ServiceLoader files
+ - GH Issue#1051 - Update liquibase-standard.jar to exclude ServiceLoader files
  - GH PR#1053 - Update liquibase_autocomplete.shape
  - GH PR#1059 - Allow multiple column unique constraints on table creation.
  - GH Issue#1069 - Patch Liquibase Runner plugin for Jenkins
@@ -2326,7 +2326,7 @@ Changes in version 3.2.0 (2014.06.02)
 - [CORE-1743] - Snapshot VARCHAR(MAX) correctly on sqlserver
 - [CORE-1744] - Derby: UpdateSQL not including creating databasechangeloglock table if needed
 - [CORE-1748] - Maven Plugin does not use outputDefaultCatalog property
-- [CORE-1750] - liquibase-modify-column 3.0 broken with liquibase-core 3.1.1
+- [CORE-1750] - liquibase-modify-column 3.0 broken with liquibase-standard 3.1.1
 - [CORE-1752] - Oracle XML Datatype snapshot containing size
 - [CORE-1753] - HSQLDB 1.8 does not support catalogs
 - [CORE-1754] - Default value functions on Oracle snapshoted as "defaultValue"

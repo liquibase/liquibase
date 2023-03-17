@@ -51,7 +51,7 @@ public class LiquibaseRollbackOneUpdateSQL extends AbstractLiquibaseChangeLogMoj
     @PropertyElement
     protected String outputFile;
 
-    private static ResourceBundle coreBundle = getBundle("liquibase/i18n/liquibase-core");
+    private static ResourceBundle coreBundle = getBundle("liquibase/i18n/liquibase-standard");
 
     @Override
     public void execute() throws MojoExecutionException, MojoFailureException {

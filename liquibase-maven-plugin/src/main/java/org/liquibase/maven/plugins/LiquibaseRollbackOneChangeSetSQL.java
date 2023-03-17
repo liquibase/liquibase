@@ -80,7 +80,7 @@ public class LiquibaseRollbackOneChangeSetSQL extends AbstractLiquibaseChangeLog
 
 
 
-    private static ResourceBundle coreBundle = getBundle("liquibase/i18n/liquibase-core");
+    private static ResourceBundle coreBundle = getBundle("liquibase/i18n/liquibase-standard");
 
     @Override
     protected void printSettings(String indent) {

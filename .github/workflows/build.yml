@@ -386,27 +386,22 @@ jobs:
           mkdir -p liquibase-dist/target/liquibase-0-SNAPSHOT
           (cd liquibase-dist/target/liquibase-0-SNAPSHOT && tar xfz ../liquibase-0-SNAPSHOT.tar.gz)
 
-          echo "HULK"
           ##create zip file from tar content
           (cd liquibase-dist/target/liquibase-0-SNAPSHOT && zip -r ../liquibase-0-SNAPSHOT.zip *)
 
-          echo "GIANT"
           ##create installer - disabled here but run as nightly job and as part of release workflow
           # (cd liquibase-dist && ${{ github.workspace }}/.github/util/package-install4j.sh 0-SNAPSHOT)
 
           find . -name original-*.jar -exec rm {} \;
 
-          echo "HERE"
           mkdir -p artifacts
           cp liquibase-dist/target/liquibase-0-SNAPSHOT.tar.gz artifacts
           cp liquibase-dist/target/liquibase-0-SNAPSHOT.zip artifacts
           
-          echo "ROBBIN"
           cp liquibase-dist/target/liquibase-0-SNAPSHOT.jar artifacts/liquibase-standard-0-SNAPSHOT.jar
           cp liquibase-dist/target/liquibase-0-SNAPSHOT-sources.jar artifacts/liquibase-standard-0-SNAPSHOT-sources.jar
           cp target/liquibase-0-SNAPSHOT-javadoc.jar artifacts/liquibase-standard-0-SNAPSHOT-javadoc.jar
           
-          echo "FIRE"
           ##create installer - disabled here but run as nightly job and as part of release workflow
           #cp liquibase-dist/target/liquibase-*-installer-* artifacts
 

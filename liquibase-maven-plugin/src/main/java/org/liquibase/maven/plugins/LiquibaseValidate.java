@@ -28,7 +28,7 @@ public class LiquibaseValidate extends AbstractLiquibaseChangeLogMojo{
     @Override
     protected void performLiquibaseTask(Liquibase liquibase) throws LiquibaseException {
         liquibase.validate();
-        getLog().info(ResourceBundle.getBundle("liquibase/i18n/liquibase-core").getString("no.validation.errors.found"));
+        getLog().info(ResourceBundle.getBundle("liquibase/i18n/liquibase-standard").getString("no.validation.errors.found"));
     }
 }
 

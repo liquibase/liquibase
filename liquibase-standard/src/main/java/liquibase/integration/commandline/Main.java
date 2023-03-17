@@ -74,7 +74,7 @@ public class Main {
 
     private static final String ERRORMSG_UNEXPECTED_PARAMETERS = "unexpected.command.parameters";
     private static final Logger LOG = Scope.getCurrentScope().getLog(Main.class);
-    private static ResourceBundle coreBundle = getBundle("liquibase/i18n/liquibase-core");
+    private static ResourceBundle coreBundle = getBundle("liquibase/i18n/liquibase-standard");
 
     protected ClassLoader classLoader;
     protected String driver;

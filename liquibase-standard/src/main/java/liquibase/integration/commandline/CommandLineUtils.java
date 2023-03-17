@@ -39,7 +39,7 @@ import static java.util.ResourceBundle.getBundle;
  * @author Peter Murray
  */
 public class CommandLineUtils {
-    private static ResourceBundle coreBundle = getBundle("liquibase/i18n/liquibase-core");
+    private static ResourceBundle coreBundle = getBundle("liquibase/i18n/liquibase-standard");
 
     /**
      * @deprecated Use ResourceAccessor version

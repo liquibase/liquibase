@@ -18,7 +18,7 @@ public class ValidationFailedException extends MigrationFailedException {
     
     private static final long serialVersionUID = -6824856974397660436L;
     public static final String INDENT_SPACES = "     ";
-    private static ResourceBundle coreBundle = getBundle("liquibase/i18n/liquibase-core");
+    private static ResourceBundle coreBundle = getBundle("liquibase/i18n/liquibase-standard");
     private List<String> invalidMD5Sums;
     private List<FailedPrecondition> failedPreconditions;
     private List<ErrorPrecondition> errorPreconditions;

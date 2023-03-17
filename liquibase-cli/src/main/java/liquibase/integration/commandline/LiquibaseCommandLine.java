@@ -69,7 +69,7 @@ public class LiquibaseCommandLine {
     private final CommandLine commandLine;
     private Handler fileHandler;
 
-    private final ResourceBundle coreBundle = getBundle("liquibase/i18n/liquibase-core");
+    private final ResourceBundle coreBundle = getBundle("liquibase/i18n/liquibase-standard");
 
     /**
      * Pico's defaultFactory does a lot of reflection, checking for classes we know we don't have.
@@ -1221,7 +1221,7 @@ public class LiquibaseCommandLine {
                         continue;
                     }
                     final File file = new File(url.toURI());
-                    if (file.getName().equals("liquibase-core.jar")) {
+                    if (file.getName().equals("liquibase-standard.jar")) {
                         continue;
                     }
                     if (file.exists() && file.getName().toLowerCase().endsWith(".jar")) {
