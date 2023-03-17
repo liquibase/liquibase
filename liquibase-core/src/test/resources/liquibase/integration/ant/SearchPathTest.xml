@@ -88,12 +88,14 @@
 	</target>
 
 	<target name="testRelativeSearchPathStartsWithSlash">
-        <au:expectfailure expectedmessage="Unable to update database: The file simple-changelog.xml was not found">
-			<lb:updateDatabase
-					searchPath="/src/test/resources/liquibase/integration/ant/changelog"
-					changelogfile="simple-changelog.xml">
-				<lb:database refid="test-db" />
-			</lb:updateDatabase>
+		<au:expectfailure>
+			<au:logcontains text="Unable to update database: The file simple-changelog.xml was not found">
+				<lb:updateDatabase
+						searchPath="/src/test/resources/liquibase/integration/ant/changelog"
+						changelogfile="simple-changelog.xml">
+					<lb:database refid="test-db" />
+				</lb:updateDatabase>
+			</au:logcontains>
 		</au:expectfailure>
 	</target>
 
@@ -118,12 +120,14 @@
 	</target>
 
 	<target name="testRelativeBackslashedSearchPathStartsWithBackslash">
-        <au:expectfailure expectedmessage="Unable to update database: The file simple-changelog.xml was not found">
-			<lb:updateDatabase
-					searchPath="\src\test\resources\liquibase\integration\ant\changelog"
-					changelogfile="simple-changelog.xml">
-				<lb:database refid="test-db" />
-			</lb:updateDatabase>
+		<au:expectfailure>
+			<au:logcontains text="Unable to update database: The file simple-changelog.xml was not found">
+				<lb:updateDatabase
+						searchPath="\src\test\resources\liquibase\integration\ant\changelog"
+						changelogfile="simple-changelog.xml">
+					<lb:database refid="test-db" />
+				</lb:updateDatabase>
+			</au:logcontains>
         </au:expectfailure>
 	</target>
 

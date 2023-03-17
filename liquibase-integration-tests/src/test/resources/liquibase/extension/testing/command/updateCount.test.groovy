@@ -48,7 +48,8 @@ Optional Args:
         ]
 
         expectedResults = [
-                statusCode   : 0
+                statusCode   : 0,
+                defaultChangeExecListener: 'not_null'
         ]
     }
 
@@ -63,7 +64,8 @@ Optional Args:
         ]
 
         expectedResults = [
-                statusCode   : 0
+                statusCode   : 0,
+                defaultChangeExecListener: 'not_null'
         ]
     }
 
@@ -80,8 +82,10 @@ Optional Args:
         ]
 
         expectedResults = [
-                statusCode   : 0
+                statusCode   : 0,
+                defaultChangeExecListener: 'not_null'
         ]
+
         outputFile = new File("target/test-classes/labelsAndContent.txt")
 
         expectedFileContent = [ "target/test-classes/labelsAndContent.txt":
@@ -99,6 +103,16 @@ Optional Args:
                       "DBMS mismatch:                1"
                     ]
         ]
+
+        expectedResults = [
+                statusCode   : 0,
+                defaultChangeExecListener: 'not_null'
+        ]
+
+        expectedUI = [
+            "Running Changeset: changelogs/h2/complete/summary-changelog.xml::4-table::lbuser"
+        ]
+
     }
 
     run "Mismatched DBMS causes not deployed summary message", {
@@ -112,7 +126,8 @@ Optional Args:
         ]
 
         expectedResults = [
-                statusCode   : 0
+                statusCode   : 0,
+                defaultChangeExecListener: 'not_null'
         ]
 
         outputFile = new File("target/test-classes/mismatchedDBMS.txt")

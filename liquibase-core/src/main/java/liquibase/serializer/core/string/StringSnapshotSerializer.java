@@ -127,7 +127,7 @@ public class StringSnapshotSerializer implements SnapshotSerializer {
             if (o1 instanceof Comparable) {
                 return ((Comparable) o1).compareTo(o2);
             } else if (o1 instanceof Class) {
-                return ((Class) o1).getName().compareTo(((Class) o2).getName());
+                return ((Class<?>) o1).getName().compareTo(((Class<?>) o2).getName());
             } else {
                 throw new ClassCastException(o1.getClass().getName()+" cannot be cast to java.lang.Comparable or java.lang.Class");
             }

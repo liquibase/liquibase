@@ -241,33 +241,43 @@ jobs:
         uses: actions/checkout@v3
         with:
           # Relative path under $GITHUB_WORKSPACE to place the repository
-          path: liquibase-core  
+          path: liquibase-core-repo 
           repository: "liquibase/liquibase"
     
       - name: Download liquibase-pro xsd
         uses: actions/checkout@v3
         with:
-          github-token: ${{ secrets.BOT_TOKEN }}
-        # Relative path under $GITHUB_WORKSPACE to place the repository
-          path: liquibase-pro
+          token: ${{ secrets.BOT_TOKEN }}
+          # Relative path under $GITHUB_WORKSPACE to place the repository
+          path: liquibase-pro-repo
           repository: "liquibase/liquibase-pro"
 
-      - name: Get major.minor xsd
-        run: |
-          version=${{ needs.setup.outputs.version }}
-          arr=(${version//./ })
-          xsd_version=${arr[0]}"."${arr[1]}
-          patch_version=${arr[2]}
-          echo "XSD_VERSION=${xsd_version}" >> $GITHUB_ENV
-          echo "PATCH_VERSION=${patch_version}" >> $GITHUB_ENV
-
       - name: Upload to s3
-        # if patch_version is 0, only then upload to s3 as it's a new minor release 
-        if: ${{ env.PATCH_VERSION }} == 0
         env:
           AWS_ACCESS_KEY_ID: ${{ secrets.LIQUIBASEORIGIN_ACCESS_KEY_ID }}
           AWS_SECRET_ACCESS_KEY: ${{ secrets.LIQUIBASEORIGIN_SECRET_ACCESS_KEY }}
           AWS_DEFAULT_REGION: us-east-1
+        # aws s3 sync syncs directories and S3 prefixes.
         run: |
-          aws s3 sync $GITHUB_WORKSPACE/liquibase-core/src/main/resources/www.liquibase.org/xml/ns/dbchangelog/dbchangelog-${{ env.XSD_VERSION }}.xsd s3://liquibaseorg-origin/xml/ns/dbchangelog/ --only-show-errors
-          aws s3 sync $GITHUB_WORKSPACE/liquibase-pro/pro/src/main/resources/www.liquibase.org/xml/ns/pro/liquibase-pro-${{ env.XSD_VERSION }}.xsd s3://liquibaseorg-origin/xml/ns/pro/ --only-show-errors
+          aws s3 sync liquibase-pro-repo/pro/src/main/resources/www.liquibase.org/xml/ns/pro/ s3://liquibaseorg-origin/xml/ns/pro/ --content-type application/octet-stream --only-show-errors
+          aws s3 sync liquibase-core-repo/liquibase-core/src/main/resources/www.liquibase.org/xml/ns/dbchangelog/ s3://liquibaseorg-origin/xml/ns/dbchangelog/ --content-type application/octet-stream --only-show-errors
+
+
+      - name: Index.htm file upload
+        env:
+          AWS_ACCESS_KEY_ID: ${{ secrets.LIQUIBASEORIGIN_ACCESS_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.LIQUIBASEORIGIN_SECRET_ACCESS_KEY }}
+          AWS_DEFAULT_REGION: us-east-1
+        # get the major.minor xsd version. grab the index.htm from s3, add the new verison of xsd and sync with the s3 again
+        run: |
+          version=${{ needs.setup.outputs.version }}
+          arr=(${version//./ })
+          xsd_version=${arr[0]}"."${arr[1]}
+          mkdir index-file
+          aws s3 cp s3://liquibaseorg-origin/xml/ns/dbchangelog/index.htm index-file
+          if ! grep -q ${xsd_version} index-file/index.htm ; then
+            sed -ie "s/<\/ul>/  <li><a href=\"\/xml\/ns\/dbchangelog\/dbchangelog-${xsd_version}.xsd\">dbchangelog-${xsd_version}.xsd<\/a><\/li>\n<\/ul>/" index-file/index.htm
+            aws s3 sync index-file s3://liquibaseorg-origin/xml/ns/dbchangelog/ --only-show-errors
+          fi
+          
+      

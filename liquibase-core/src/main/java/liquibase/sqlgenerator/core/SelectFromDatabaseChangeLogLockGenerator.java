@@ -32,14 +32,11 @@ public class SelectFromDatabaseChangeLogLockGenerator extends AbstractSqlGenerat
         ObjectQuotingStrategy currentStrategy = database.getObjectQuotingStrategy();
         database.setObjectQuotingStrategy(ObjectQuotingStrategy.LEGACY);
         try {
-            String sql = "SELECT " + StringUtil.join(statement.getColumnsToSelect(), ",", new StringUtil.StringUtilFormatter<ColumnConfig>() {
-                @Override
-                public String toString(ColumnConfig col) {
-                    if ((col.getComputed() != null) && col.getComputed()) {
-                        return col.getName();
-                    } else {
-                        return database.escapeColumnName(null, null, null, col.getName());
-                    }
+            String sql = "SELECT " + StringUtil.join(statement.getColumnsToSelect(), ",", (StringUtil.StringUtilFormatter<ColumnConfig>) col -> {
+                if ((col.getComputed() != null) && col.getComputed()) {
+                    return col.getName();
+                } else {
+                    return database.escapeColumnName(null, null, null, col.getName());
                 }
             }) + " FROM " +
                     database.escapeTableName(database.getLiquibaseCatalogName(), liquibaseSchema, database.getDatabaseChangeLogLockTableName()) +
