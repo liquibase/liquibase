@@ -72,7 +72,7 @@ import static java.util.ResourceBundle.getBundle;
 public class Liquibase implements AutoCloseable {
 
     private static final Logger LOG = Scope.getCurrentScope().getLog(Liquibase.class);
-    private static final ResourceBundle coreBundle = getBundle("liquibase/i18n/liquibase-standard");
+    private static final ResourceBundle coreBundle = getBundle("liquibase/i18n/liquibase-core");
     public static final String MSG_COULD_NOT_RELEASE_LOCK = coreBundle.getString("could.not.release.lock");
 
     protected Database database;

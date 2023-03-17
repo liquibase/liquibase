@@ -10,8 +10,8 @@
             <!--<fileset dir="../../lib-compile">-->
                 <!--<include name="**/*.jar"/>-->
             <!--</fileset>-->
-            <pathelement location="../../../../liquibase-standard/target/classes"/>
-            <pathelement location="../../../../liquibase-standard/target/test-classes"/>
+            <pathelement location="../../../../liquibase-core/target/classes"/>
+            <pathelement location="../../../../liquibase-core/target/test-classes"/>
             <pathelement location="../../test/resources"/>
             <!--<fileset dir="../../release">-->
                 <!--<include name="**/*.jar"/>-->

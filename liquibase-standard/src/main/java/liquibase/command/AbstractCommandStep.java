@@ -15,7 +15,7 @@ import static java.util.ResourceBundle.getBundle;
  */
 public abstract class AbstractCommandStep implements CommandStep {
 
-    protected static ResourceBundle coreBundle = getBundle("liquibase/i18n/liquibase-standard");
+    protected static ResourceBundle coreBundle = getBundle("liquibase/i18n/liquibase-core");
 
     @Override
     public List<Class<?>> requiredDependencies() {

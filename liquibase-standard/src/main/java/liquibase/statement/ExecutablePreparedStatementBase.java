@@ -35,7 +35,7 @@ import static java.util.ResourceBundle.getBundle;
 
 public abstract class ExecutablePreparedStatementBase implements ExecutablePreparedStatement {
 
-    protected static ResourceBundle coreBundle = getBundle("liquibase/i18n/liquibase-standard");
+    protected static ResourceBundle coreBundle = getBundle("liquibase/i18n/liquibase-core");
 
     protected Database database;
     private String catalogName;

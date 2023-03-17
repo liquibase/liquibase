@@ -4,7 +4,7 @@
 
 Liquibase is implemented in Java, and uses Maven as its build system. 
 
-The code structure follows the standard Maven directory structure divided into modules, with `liquibase-standard` being the most central module.
+The code structure follows the standard Maven directory structure divided into modules, with `liquibase-core` being the most central module.
 
 ## Testing
 

@@ -38,7 +38,7 @@ import java.util.*;
 import static java.util.ResourceBundle.getBundle;
 
 public class StandardLockService implements LockService {
-    protected static final ResourceBundle coreBundle = getBundle("liquibase/i18n/liquibase-standard");
+    protected static final ResourceBundle coreBundle = getBundle("liquibase/i18n/liquibase-core");
 
     protected Database database;
 

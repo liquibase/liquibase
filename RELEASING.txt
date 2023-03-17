@@ -1,4 +1,4 @@
-!!! update project.version in liquibase-standard/pom.xml to the new version without snapshot!!!
+!!! update project.version in liquibase-core/pom.xml to the new version without snapshot!!!
 release version in jira
 update changelog.txt
 
@@ -7,7 +7,7 @@ Manually run branch in the "Release" buildserver project
 Download liquibase-X.Y.Z-*.zip and *-.tar.gz and *-.deb and *-.rpm artifacts from the buildserver and upload to github
 
 upload target/checkout/liquibase-maven-plugin/target/site to liquibase.org/documentation\maven\generated
-copy target/checkout/liquibase-standard/target/site/apidocs to liquibase.org/javadoc
+copy target/checkout/liquibase-core/target/site/apidocs to liquibase.org/javadoc
 update version info and links in liquibase.org/download/index.md
 commit and push liquibase.org
 
@@ -20,7 +20,7 @@ release on sonatype
 
 Test:
 - download files from download/index.html
-- new jars are at http://mvnrepository.com/artifact/org.liquibase/liquibase-standard
+- new jars are at http://mvnrepository.com/artifact/org.liquibase/liquibase-core
 
 POST MESSAGES TO:
 - blog

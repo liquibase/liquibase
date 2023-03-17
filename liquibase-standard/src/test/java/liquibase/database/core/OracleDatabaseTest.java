@@ -34,7 +34,7 @@ import liquibase.test.JUnitResourceAccessor;
  * Tests for {@link liquibase.database.core.OracleDatabase}.
  */
 public class OracleDatabaseTest extends AbstractJdbcDatabaseTest {
-    private static ResourceBundle coreBundle = getBundle("liquibase/i18n/liquibase-standard");
+    private static ResourceBundle coreBundle = getBundle("liquibase/i18n/liquibase-core");
 
 
     public OracleDatabaseTest() throws Exception {

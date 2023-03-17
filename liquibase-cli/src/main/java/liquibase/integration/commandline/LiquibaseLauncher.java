@@ -38,7 +38,7 @@ public class LiquibaseLauncher {
         File liquibaseHome = new File(liquibaseHomeEnv);
 
         List<URL> urls = new ArrayList<>();
-        urls.add(new File(liquibaseHome, "internal/lib/liquibase-standard.jar").toURI().toURL()); //make sure liquibase-standard.jar is first in the list
+        urls.add(new File(liquibaseHome, "internal/lib/liquibase-core.jar").toURI().toURL()); //make sure liquibase-core.jar is first in the list
 
         File[] libDirs = new File[]{
                 new File("./liquibase_libs"),
@@ -60,7 +60,7 @@ public class LiquibaseLauncher {
             }
 
             for (File lib : files) {
-                if (lib.getName().toLowerCase(Locale.US).endsWith(".jar") && !lib.getName().toLowerCase(Locale.US).equals("liquibase-standard.jar")) {
+                if (lib.getName().toLowerCase(Locale.US).endsWith(".jar") && !lib.getName().toLowerCase(Locale.US).equals("liquibase-core.jar")) {
                     try {
                         urls.add(lib.toURI().toURL());
                         debug("Added " + lib.getAbsolutePath() + " to classpath");
@@ -90,7 +90,7 @@ public class LiquibaseLauncher {
         if (parentLoaderSetting.equalsIgnoreCase("system")) {
         //loading with the regular system classloader includes liquibase.jar in the parent.
             //That causes the parent classloader to load LiquibaseCommandLine which makes it not able to access files in the child classloader
-        //The system classloader's parent is the boot classloader, which keeps the only classloader with liquibase-standard.jar the same as the rest of the classes it needs to access.
+        //The system classloader's parent is the boot classloader, which keeps the only classloader with liquibase-core.jar the same as the rest of the classes it needs to access.
             parentLoader = ClassLoader.getSystemClassLoader().getParent();
 
         } else if (parentLoaderSetting.equalsIgnoreCase("thread")) {

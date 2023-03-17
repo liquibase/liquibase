@@ -19,7 +19,7 @@
     <dependencies>
         <dependency>
             <groupId>org.liquibase</groupId>
-            <artifactId>liquibase-standard</artifactId>
+            <artifactId>liquibase-core</artifactId>
             <version>${project.version}</version>
         </dependency>
 

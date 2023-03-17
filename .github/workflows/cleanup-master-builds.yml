@@ -16,7 +16,7 @@ jobs:
         # Name of the package.
         # Defaults to an empty string.
         # Required if `package-version-ids` input is not given.
-        package-name: org.liquibase.liquibase-standard
+        package-name: org.liquibase.liquibase-core
 
         # The number of latest versions to keep.
         # This cannot be specified with `num-old-versions-to-delete`. By default, `num-old-versions-to-delete` takes precedence over `min-versions-to-keep`.
