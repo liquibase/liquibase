@@ -11,6 +11,7 @@ import liquibase.snapshot.InvalidExampleException;
 import liquibase.snapshot.JdbcDatabaseSnapshot;
 import liquibase.structure.DatabaseObject;
 import liquibase.structure.core.*;
+import liquibase.util.ObjectUtil;
 import liquibase.util.StringUtil;
 
 import java.sql.DatabaseMetaData;
