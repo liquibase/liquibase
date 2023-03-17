@@ -95,9 +95,12 @@ public abstract class AbstractUpdateCommandStep extends AbstractCommandStep impl
             ChangeExecListener hubChangeExecListener = hubHandler.startHubForUpdate(changeLogParameters, changeLogIterator, getHubOperation());
             resultsBuilder.addResult(DEFAULT_CHANGE_EXEC_LISTENER_RESULT_KEY, defaultChangeExecListener);
             ChangeLogIterator runChangeLogIterator = getStandardChangelogIterator(commandScope, database, contexts, labelExpression, databaseChangeLog);
-            CompositeLogService compositeLogService = new CompositeLogService(true, bufferLog);
+
             HashMap<String, Object> scopeValues = new HashMap<>();
-            scopeValues.put(Scope.Attr.logService.name(), compositeLogService);
+            if (hubChangeExecListener != null) {
+                CompositeLogService compositeLogService = new CompositeLogService(true, bufferLog);
+                scopeValues.put(Scope.Attr.logService.name(), compositeLogService);
+            }
             scopeValues.put("showSummary", getShowSummary(commandScope));
             Scope.child(scopeValues, () -> {
                 //If we are using hub, we want to use the HubChangeExecListener, which is wrapping all the others. Otherwise, use the default.
