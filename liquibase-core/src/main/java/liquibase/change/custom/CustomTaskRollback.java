@@ -17,5 +17,5 @@ public interface CustomTaskRollback {
      * @throws liquibase.exception.CustomChangeException an exception occurs while processing this rollback
      * @throws liquibase.exception.RollbackImpossibleException if rollback is not supported for this change
      */
-    public void rollback(Database database) throws CustomChangeException, RollbackImpossibleException;
+    void rollback(Database database) throws CustomChangeException, RollbackImpossibleException;
 }

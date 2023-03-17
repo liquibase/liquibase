@@ -23,6 +23,7 @@ public class LiquibaseConfiguration implements SingletonObject {
 
     private final SortedSet<ConfigurationValueProvider> configurationValueProviders;
     private final SortedSet<ConfigurationDefinition<?>> definitions = new TreeSet<>();
+    public static final String REGISTERED_VALUE_PROVIDERS_KEY = "REGISTERED_VALUE_PROVIDERS";
 
     /**
      * Track looked up values we have logged to avoid infinite loops between this and the log system using configurations

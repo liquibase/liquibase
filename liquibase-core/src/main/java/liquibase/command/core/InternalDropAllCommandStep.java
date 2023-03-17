@@ -79,14 +79,8 @@ public class InternalDropAllCommandStep extends AbstractCommandStep {
                 // Let the user know they can register for Hub
                 changeLog = parseChangeLogFile(commandScope.getArgumentValue(CHANGELOG_FILE_ARG));
                 hubUpdater = new HubUpdater(new Date(), changeLog, commandScope.getArgumentValue(DATABASE_ARG));
-                hubRegisterResponse = hubUpdater.register(commandScope.getArgumentValue(CHANGELOG_FILE_ARG));
-
-                // Access the HubChangeLog and check to see if we should run syncHub
-                HubChangeLog hubChangeLog = getHubChangeLog(changeLog);
-                checkForRegisteredChangeLog(changeLog, hubChangeLog);
             } else {
                 hubUpdater = new HubUpdater(new Date(), commandScope.getArgumentValue(DATABASE_ARG));
-                hubRegisterResponse = hubUpdater.register(null/*changelogFile*/);
             }
             Connection hubConnection = getHubConnection(commandScope);
             attachProjectToConnection(commandScope, hubConnection, hubRegisterResponse);
@@ -100,6 +94,12 @@ public class InternalDropAllCommandStep extends AbstractCommandStep {
                     commandScope.getArgumentValue(DATABASE_ARG).dropDatabaseObjects(schema);
                 }
             } catch (LiquibaseException liquibaseException) {
+                String message =
+                   String.format("Error occurred during dropAll: %s%nIt is possible that not all objects were dropped.%n",
+                           liquibaseException.getMessage());
+
+                Scope.getCurrentScope().getUI().sendMessage(message);
+                log.severe(message, liquibaseException);
                 hubUpdater.postUpdateHubExceptionHandling(dropAllOperation, bufferLog, liquibaseException.getMessage());
                 return;
             }
@@ -184,57 +184,6 @@ public class InternalDropAllCommandStep extends AbstractCommandStep {
             throw new CommandExecutionException("No valid Hub API Key detected. Please add liquibase.hub.apikey to \n" +
                     "defaults file or pass --hub-api-key=<yourkey> on the command line.");
         }
-    }
-
-    //
-    // Return a HubChangeLog object if available
-    // If not available then return null
-    // If the HubChangeLog has been deleted then throw
-    // a LiquibaseHubException
-    //
-    private HubChangeLog getHubChangeLog(DatabaseChangeLog changeLog) throws LiquibaseHubException {
-        String apiKey = StringUtil.trimToNull(HubConfiguration.LIQUIBASE_HUB_API_KEY.getCurrentValue());
-        HubConfiguration.HubMode hubMode = HubConfiguration.LIQUIBASE_HUB_MODE.getCurrentValue();
-        String changeLogId = changeLog.getChangeLogId();
-        final HubServiceFactory hubServiceFactory = Scope.getCurrentScope().getSingleton(HubServiceFactory.class);
-        if (apiKey == null || hubMode == HubConfiguration.HubMode.OFF || !hubServiceFactory.isOnline()) {
-            return null;
-        }
-        final HubService service = Scope.getCurrentScope().getSingleton(HubServiceFactory.class).getService();
-        HubChangeLog hubChangeLog = (changeLogId != null ? service.getHubChangeLog(UUID.fromString(changeLogId), "*") : null);
-        if (hubChangeLog == null) {
-            return null;
-        }
-
-        //
-        // Stop the operation if the HubChangeLog has been deleted
-        //
-        if (hubChangeLog.isDeleted()) {
-            //
-            // Complain and stop the operation
-            //
-            String message =
-                    "\n" +
-                            "The operation did not complete and will not be reported to Hub because the\n" + "" +
-                            "registered changelog has been deleted by someone in your organization.\n" +
-                            "Learn more at http://hub.liquibase.com";
-            throw new LiquibaseHubException(message);
-        }
-        return hubChangeLog;
-    }
-
-    private void checkForRegisteredChangeLog(DatabaseChangeLog changeLog, HubChangeLog hubChangeLog) {
-        String changeLogId = changeLog.getChangeLogId();
-        if (changeLogId != null && hubChangeLog != null) {
-            return;
-        }
-        String message =
-                "The changelog file specified is not registered with any Liquibase Hub project,\n" +
-                        "so the results will not be recorded in Liquibase Hub.\n" +
-                        "To register the changelog with your Hub Project run 'liquibase registerchangelog'.\n" +
-                        "Learn more at https://hub.liquibase.com.";
-        Scope.getCurrentScope().getUI().sendMessage("WARNING: " + message);
-        log.warning(message);
     }
 
     protected void checkLiquibaseTables(Database database) throws LiquibaseException {

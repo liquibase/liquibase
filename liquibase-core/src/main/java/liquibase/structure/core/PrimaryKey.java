@@ -11,7 +11,7 @@ import java.util.List;
 public class PrimaryKey extends AbstractDatabaseObject {
 
     public PrimaryKey() {
-        setAttribute("columns", new ArrayList());
+        setAttribute("columns", new ArrayList<>());
     }
 
     public PrimaryKey(String name, String tableCatalogName, String tableSchemaName, String tableName, Column... columns) {
@@ -58,12 +58,7 @@ public class PrimaryKey extends AbstractDatabaseObject {
     }
 
     public String getColumnNames() {
-        return StringUtil.join(getColumns(), ", ", new StringUtil.StringUtilFormatter() {
-            @Override
-            public String toString(Object obj) {
-                return ((Column) obj).toString(false);
-            }
-        });
+        return StringUtil.join(getColumns(), ", ", obj -> ((Column) obj).toString(false));
     }
 
     /**

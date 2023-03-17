@@ -109,7 +109,7 @@ public class LoadUpdateDataChange extends LoadDataChange {
             statements.add(delete);
         }
 
-        return statements.toArray(new SqlStatement[0]);
+        return statements.toArray(SqlStatement.EMPTY_SQL_STATEMENT);
     }
 
     private String getWhere(InsertOrUpdateStatement insertOrUpdateStatement, Database database) {

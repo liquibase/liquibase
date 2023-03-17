@@ -1,45 +1,34 @@
 package liquibase.command.core;
 
+import liquibase.Contexts;
+import liquibase.LabelExpression;
+import liquibase.UpdateSummaryEnum;
+import liquibase.changelog.*;
+import liquibase.changelog.filter.*;
+import liquibase.changelog.visitor.ChangeExecListener;
 import liquibase.command.*;
-import liquibase.configuration.ConfigurationValueObfuscator;
-import liquibase.exception.CommandExecutionException;
+import liquibase.database.Database;
+import liquibase.exception.DatabaseException;
 
-public class UpdateToTagCommandStep extends AbstractCliWrapperCommandStep {
+import java.util.Arrays;
+import java.util.List;
+
+public class UpdateToTagCommandStep extends AbstractUpdateCommandStep {
 
     public static final String[] COMMAND_NAME = {"updateToTag"};
 
-    public static final CommandArgumentDefinition<String> URL_ARG;
-    public static final CommandArgumentDefinition<String> DEFAULT_SCHEMA_NAME_ARG;
-    public static final CommandArgumentDefinition<String> DEFAULT_CATALOG_NAME_ARG;
-    public static final CommandArgumentDefinition<String> USERNAME_ARG;
-    public static final CommandArgumentDefinition<String> PASSWORD_ARG;
     public static final CommandArgumentDefinition<String> CHANGELOG_FILE_ARG;
     public static final CommandArgumentDefinition<String> LABEL_FILTER_ARG;
     public static final CommandArgumentDefinition<String> CONTEXTS_ARG;
     public static final CommandArgumentDefinition<String> TAG_ARG;
     public static final CommandArgumentDefinition<String> CHANGE_EXEC_LISTENER_CLASS_ARG;
     public static final CommandArgumentDefinition<String> CHANGE_EXEC_LISTENER_PROPERTIES_FILE_ARG;
-    public static final CommandArgumentDefinition<String> DRIVER_ARG;
-    public static final CommandArgumentDefinition<String> DRIVER_PROPERTIES_FILE_ARG;
+    public static final CommandArgumentDefinition<ChangeExecListener> CHANGE_EXEC_LISTENER_ARG;
+    public static final CommandArgumentDefinition<UpdateSummaryEnum> SHOW_SUMMARY;
+    public static final CommandArgumentDefinition<ChangeLogParameters> CHANGELOG_PARAMETERS;
 
     static {
         CommandBuilder builder = new CommandBuilder(COMMAND_NAME);
-        URL_ARG = builder.argument(CommonArgumentNames.URL, String.class).required()
-                .description("The JDBC database connection URL").build();
-        DEFAULT_SCHEMA_NAME_ARG = builder.argument("defaultSchemaName", String.class)
-                .description("The default schema name to use for the database connection").build();
-        DEFAULT_CATALOG_NAME_ARG = builder.argument("defaultCatalogName", String.class)
-                .description("The default catalog name to use for the database connection").build();
-        DRIVER_ARG = builder.argument("driver", String.class)
-                .description("The JDBC driver class").build();
-        DRIVER_PROPERTIES_FILE_ARG = builder.argument("driverPropertiesFile", String.class)
-                .description("The JDBC driver properties file").build();
-        USERNAME_ARG = builder.argument(CommonArgumentNames.USERNAME, String.class)
-                .description("Username to use to connect to the database").build();
-        PASSWORD_ARG = builder.argument(CommonArgumentNames.PASSWORD, String.class)
-                .description("Password to use to connect to the database")
-                .setValueObfuscator(ConfigurationValueObfuscator.STANDARD)
-                .build();
         CHANGELOG_FILE_ARG = builder.argument(CommonArgumentNames.CHANGELOG_FILE, String.class).required()
                 .description("The root changelog").build();
         LABEL_FILTER_ARG = builder.argument("labelFilter", String.class)
@@ -53,6 +42,31 @@ public class UpdateToTagCommandStep extends AbstractCliWrapperCommandStep {
             .description("Fully-qualified class which specifies a ChangeExecListener").build();
         CHANGE_EXEC_LISTENER_PROPERTIES_FILE_ARG = builder.argument("changeExecListenerPropertiesFile", String.class)
             .description("Path to a properties file for the ChangeExecListenerClass").build();
+        CHANGE_EXEC_LISTENER_ARG = builder.argument("changeExecListener", ChangeExecListener.class)
+                .hidden()
+                .build();
+        CHANGELOG_PARAMETERS = builder.argument("changelogParameters", ChangeLogParameters.class)
+                .hidden()
+                .build();
+        SHOW_SUMMARY = builder.argument("showSummary", UpdateSummaryEnum.class)
+                .description("Type of update results summary to show.  Values can be 'off', 'summary', or 'verbose'.")
+                .defaultValue(UpdateSummaryEnum.OFF)
+                .setValueHandler(value -> {
+                    if (value == null) {
+                        return null;
+                    }
+                    if (value instanceof String && ! value.equals("")) {
+                        final List<String> validValues = Arrays.asList("OFF", "SUMMARY", "VERBOSE");
+                        if (!validValues.contains(((String) value).toUpperCase())) {
+                            throw new IllegalArgumentException("Illegal value for `showUpdateSummary'.  Valid values are 'OFF', 'SUMMARY', or 'VERBOSE'");
+                        }
+                        return UpdateSummaryEnum.valueOf(((String) value).toUpperCase());
+                    } else if (value instanceof UpdateSummaryEnum) {
+                        return (UpdateSummaryEnum) value;
+                    }
+                    return null;
+                })
+                .build();
     }
 
     @Override
@@ -61,12 +75,73 @@ public class UpdateToTagCommandStep extends AbstractCliWrapperCommandStep {
     }
 
     @Override
-    protected String[] collectArguments(CommandScope commandScope) throws CommandExecutionException {
-        return collectArguments(commandScope, null, "tag");
+    public void adjustCommandDefinition(CommandDefinition commandDefinition) {
+        commandDefinition.setShortDescription("Deploy changes from the changelog file to the specified tag");
     }
 
     @Override
-    public void adjustCommandDefinition(CommandDefinition commandDefinition) {
-        commandDefinition.setShortDescription("Deploy changes from the changelog file to the specified tag");
+    public String getChangelogFileArg(CommandScope commandScope) {
+        return commandScope.getArgumentValue(CHANGELOG_FILE_ARG);
+    }
+
+    @Override
+    public String getContextsArg(CommandScope commandScope) {
+        return commandScope.getArgumentValue(CONTEXTS_ARG);
+    }
+
+    @Override
+    public String getLabelFilterArg(CommandScope commandScope) {
+        return commandScope.getArgumentValue(LABEL_FILTER_ARG);
+    }
+
+    @Override
+    public String[] getCommandName() {
+        return COMMAND_NAME;
+    }
+
+    @Override
+    public UpdateSummaryEnum getShowSummary(CommandScope commandScope) {
+        return commandScope.getArgumentValue(SHOW_SUMMARY);
+    }
+
+    @Override
+    public String getChangeExecListenerClassArg(CommandScope commandScope) {
+        return commandScope.getArgumentValue(CHANGE_EXEC_LISTENER_CLASS_ARG);
+    }
+
+    @Override
+    protected String getChangeExecListenerPropertiesFileArg(CommandScope commandScope) {
+        return commandScope.getArgumentValue(CHANGE_EXEC_LISTENER_PROPERTIES_FILE_ARG);
+    }
+
+    @Override
+    protected String getHubOperation() {
+        return "update-to-tag";
+    }
+
+    @Override
+    public ChangeLogIterator getStandardChangelogIterator(CommandScope commandScope, Database database, Contexts contexts, LabelExpression labelExpression, DatabaseChangeLog changeLog) throws DatabaseException {
+        List<RanChangeSet> ranChangeSetList = database.getRanChangeSetList();
+        String tag = commandScope.getArgumentValue(TAG_ARG);
+        return new ChangeLogIterator(changeLog,
+                new ShouldRunChangeSetFilter(database),
+                new ContextChangeSetFilter(contexts),
+                new LabelChangeSetFilter(labelExpression),
+                new DbmsChangeSetFilter(database),
+                new IgnoreChangeSetFilter(),
+                new UpToTagChangeSetFilter(tag, ranChangeSetList));
+    }
+
+    @Override
+    public ChangeLogIterator getStatusChangelogIterator(CommandScope commandScope, Database database, Contexts contexts, LabelExpression labelExpression, DatabaseChangeLog changeLog) throws DatabaseException {
+        List<RanChangeSet> ranChangeSetList = database.getRanChangeSetList();
+        String tag = commandScope.getArgumentValue(TAG_ARG);
+        return new StatusChangeLogIterator(changeLog, tag,
+                new ShouldRunChangeSetFilter(database),
+                new ContextChangeSetFilter(contexts),
+                new LabelChangeSetFilter(labelExpression),
+                new DbmsChangeSetFilter(database),
+                new IgnoreChangeSetFilter(),
+                new UpToTagChangeSetFilter(tag, ranChangeSetList));
     }
 }

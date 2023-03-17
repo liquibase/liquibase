@@ -36,7 +36,12 @@ import static java.util.ResourceBundle.getBundle;
  * Encapsulates Oracle database support.
  */
 public class OracleDatabase extends AbstractJdbcDatabase {
-	public static final Pattern PROXY_USER = Pattern.compile(".*(?:thin|oci)\\:(.+)/@.*");
+
+    private static final String PROXY_USER_REGEX = ".*(?:thin|oci)\\:(.+)/@.*";
+	public static final Pattern PROXY_USER_PATTERN = Pattern.compile(PROXY_USER_REGEX);
+
+    private static final String VERSION_REGEX = "(\\d+)\\.(\\d+)\\..*";
+    private static final Pattern VERSION_PATTERN = Pattern.compile(VERSION_REGEX);
 
     public static final String PRODUCT_NAME = "oracle";
     private static ResourceBundle coreBundle = getBundle("liquibase/i18n/liquibase-core");
@@ -78,7 +83,7 @@ public class OracleDatabase extends AbstractJdbcDatabase {
     }
 
     private void tryProxySession(final String url, final Connection con) {
-        Matcher m = PROXY_USER.matcher(url);
+        Matcher m = PROXY_USER_PATTERN.matcher(url);
         if (m.matches()) {
             Properties props = new Properties();
             props.put("PROXY_USER_NAME", m.group(1));
@@ -156,7 +161,7 @@ public class OracleDatabase extends AbstractJdbcDatabase {
 
                     String compatibleVersion = statement.getString(2);
                     if (compatibleVersion != null) {
-                        Matcher majorVersionMatcher = Pattern.compile("(\\d+)\\.(\\d+)\\..*").matcher(compatibleVersion);
+                        Matcher majorVersionMatcher = VERSION_PATTERN.matcher(compatibleVersion);
                         if (majorVersionMatcher.matches()) {
                             this.databaseMajorVersion = Integer.valueOf(majorVersionMatcher.group(1));
                             this.databaseMinorVersion = Integer.valueOf(majorVersionMatcher.group(2));
@@ -514,7 +519,7 @@ public class OracleDatabase extends AbstractJdbcDatabase {
     }
 
     public String getSystemTableWhereClause(String tableNameColumn) {
-        List<String> clauses = new ArrayList<String>(Arrays.asList("BIN$",
+        List<String> clauses = new ArrayList<>(Arrays.asList("BIN$",
                 "AQ$",
                 "DR$",
                 "SYS_IOT_OVER",
@@ -525,9 +530,7 @@ public class OracleDatabase extends AbstractJdbcDatabase {
                 "USLOG$",
                 "SYS_FBA"));
 
-        for (int i = 0;i<clauses.size(); i++) {
-            clauses.set(i, tableNameColumn+" NOT LIKE '"+clauses.get(i)+"%'");
-            }
+        clauses.replaceAll(s -> tableNameColumn + " NOT LIKE '" + s + "%'");
         return "("+ StringUtil.join(clauses, " AND ") + ")";
     }
 

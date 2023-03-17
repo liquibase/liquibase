@@ -380,7 +380,7 @@ public abstract class AbstractChange extends AbstractPlugin implements Change {
                 warnings.addAll(SqlGeneratorFactory.getInstance().warn(statement, database));
             } else if (statement.skipOnUnsupported()) {
                 warnings.addWarning(
-                    statement.getClass().getName() + " is not supported on " + database.getShortName() +
+                    statement.getClass().getName() + " is not supported on " + database.getDisplayName() +
                         ", but " + Scope.getCurrentScope().getSingleton(ChangeFactory.class).getChangeMetaData(this).getName() +
                         " will still execute");
             }
@@ -420,7 +420,7 @@ public abstract class AbstractChange extends AbstractPlugin implements Change {
         // Record warnings if statements are unsupported on database
         if (!generateStatementsVolatile(database)) {
             String unsupportedWarning = Scope.getCurrentScope().getSingleton(ChangeFactory.class).getChangeMetaData(this).getName()
-                    + " is not supported on " + database.getShortName();
+                    + " is not supported on " + database.getDisplayName();
             boolean sawUnsupportedError = false;
 
             SqlStatement[] statements = generateStatements(database);
@@ -489,7 +489,7 @@ public abstract class AbstractChange extends AbstractPlugin implements Change {
                 if (!inverse.supports(database)) {
                     throw new RollbackImpossibleException(
                         Scope.getCurrentScope().getSingleton(ChangeFactory.class).getChangeMetaData(inverse).getName() + " is not supported on " +
-                            database.getShortName()
+                            database.getDisplayName()
                     );
                 }
                 statements.addAll(Arrays.asList(inverse.generateStatements(database)));
@@ -503,7 +503,7 @@ public abstract class AbstractChange extends AbstractPlugin implements Change {
 
     /**
      * Create inverse changes that can roll back this change. This method is intended
-     * to be overriden by Change implementations that have a logical inverse operation. Default implementation
+     * to be overridden by Change implementations that have a logical inverse operation. Default implementation
      * returns null.
      * <p/>
      * If {@link #generateRollbackStatements(liquibase.database.Database)} is overridden, this method may not be called.
@@ -760,7 +760,7 @@ public abstract class AbstractChange extends AbstractPlugin implements Change {
                     returnList.add(objValue);
                 }
             }
-            if (((Collection) value).isEmpty()) {
+            if (((Collection<?>) value).isEmpty()) {
                 return null;
             } else {
                 return returnList;

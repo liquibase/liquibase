@@ -13,6 +13,7 @@ import liquibase.structure.DatabaseObject;
 import liquibase.structure.core.Column;
 import liquibase.structure.core.Table;
 import liquibase.structure.core.View;
+import liquibase.util.ColumnParentType;
 import liquibase.util.StringUtil;
 
 import java.util.ArrayList;
@@ -70,16 +71,13 @@ public class MissingViewChangeGenerator extends AbstractChangeGenerator implemen
                 viewName = comparisonDatabase.escapeViewName(createViewChange.getCatalogName(), createViewChange.getSchemaName(), createViewChange.getViewName());
             }
             selectQuery = "CREATE OR REPLACE FORCE VIEW "+ viewName
-                    + " (" + StringUtil.join(view.getColumns(), ", ", new StringUtil.StringUtilFormatter() {
-                @Override
-                public String toString(Object obj) {
-                    if ((((Column) obj).getComputed() != null) && ((Column) obj).getComputed()) {
-                        return ((Column) obj).getName();
-                    } else {
-                        return comparisonDatabase.escapeColumnName(null, null, null, ((Column) obj).getName(), false);
-                    }
-                }
-            }) + ") AS "+selectQuery;
+                    + " (" + StringUtil.join(view.getColumns(), ", ", obj -> {
+                        if ((((Column) obj).getComputed() != null) && ((Column) obj).getComputed()) {
+                            return ((Column) obj).getName();
+                        } else {
+                            return comparisonDatabase.escapeColumnName(null, null, null, ((Column) obj).getName(), false);
+                        }
+                    }) + ") AS "+selectQuery;
             createViewChange.setFullDefinition(true);
             fullDefinitionOverridden = true;
 
@@ -101,6 +99,7 @@ public class MissingViewChangeGenerator extends AbstractChangeGenerator implemen
                             columnRemarks.setCatalogName(control.getIncludeCatalog() ? view.getSchema().getCatalogName() : null);
                             columnRemarks.setSchemaName(control.getIncludeSchema() ? view.getSchema().getName() : null);
                             columnRemarks.setTableName(column.getRelation().getName());
+                            columnRemarks.setColumnParentType(ColumnParentType.VIEW.name());
                             columnRemarksList.add(columnRemarks);
                         }
                 );

@@ -146,7 +146,7 @@ public class DropColumnChange extends AbstractChange implements ChangeWithColumn
             statements.add(new ReorganizeTableStatement(getCatalogName(), getSchemaName(), getTableName()));
         }
         
-        return statements.toArray(new SqlStatement[0]);
+        return statements.toArray(SqlStatement.EMPTY_SQL_STATEMENT);
     }
     
     private SqlStatement[] generateSingleColumn(Database database) throws DatabaseException {
@@ -162,7 +162,7 @@ public class DropColumnChange extends AbstractChange implements ChangeWithColumn
             statements.add(new ReorganizeTableStatement(getCatalogName(), getSchemaName(), getTableName()));
         }
         
-        return statements.toArray(new SqlStatement[0]);
+        return statements.toArray(SqlStatement.EMPTY_SQL_STATEMENT);
     }
     
     @Override
@@ -211,6 +211,7 @@ public class DropColumnChange extends AbstractChange implements ChangeWithColumn
                 for (Column column : index.getColumns()) {
                     if (removedColumnNames.contains(column.getName())) {
                         indexContainsColumn = true;
+                        break;
                     }
                 }
                 return !indexContainsColumn;
@@ -245,7 +246,7 @@ public class DropColumnChange extends AbstractChange implements ChangeWithColumn
     @Override
     public Object getSerializableFieldValue(String field) {
         Object value = super.getSerializableFieldValue(field);
-        if ("columns".equals(field) && ((List) value).isEmpty()) {
+        if ("columns".equals(field) && ((List<?>) value).isEmpty()) {
             return null;
         }
         return value;

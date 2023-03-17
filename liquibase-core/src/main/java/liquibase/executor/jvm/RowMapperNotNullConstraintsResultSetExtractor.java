@@ -37,7 +37,7 @@ public class RowMapperNotNullConstraintsResultSetExtractor extends RowMapperResu
 
     @Override
     public Object extractData(ResultSet resultSet) throws SQLException {
-        List<Object> resultList = (this.rowsExpected > 0 ? new ArrayList<Object>(this.rowsExpected) : new ArrayList<Object>());
+        List<Object> resultList = (this.rowsExpected > 0 ? new ArrayList<>(this.rowsExpected) : new ArrayList<>());
         int rowNum = 0;
         while (resultSet.next()) {
             Map mapOfColValues = (Map) this.rowMapper.mapRow(resultSet, rowNum++);
