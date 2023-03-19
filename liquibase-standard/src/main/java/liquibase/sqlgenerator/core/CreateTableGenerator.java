@@ -24,7 +24,6 @@ import liquibase.structure.core.ForeignKey;
 import liquibase.structure.core.Relation;
 import liquibase.structure.core.Schema;
 import liquibase.structure.core.Sequence;
-import liquibase.structure.core.StoredProcedure;
 import liquibase.structure.core.Table;
 import liquibase.util.StringUtil;
 
@@ -61,8 +60,8 @@ public class CreateTableGenerator extends AbstractSqlGenerator<CreateTableStatem
 
         buffer.append("TABLE ");
 
-        if (database.supportsCreateIfNotExists(StoredProcedure.class)) {
-            buffer.append("IF NOT EXISTS ");
+        if (statement.isEnableIfNotExistsStatement() && database.supportsCreateIfNotExists(Table.class)) {
+            buffer.append(" IF NOT EXISTS ");
         }
 
         buffer.append(generateTableName(database, statement)).append(" ");

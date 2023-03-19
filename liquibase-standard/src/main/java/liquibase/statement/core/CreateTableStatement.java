@@ -35,6 +35,8 @@ public class CreateTableStatement extends AbstractSqlStatement implements Compou
     private final Set<UniqueConstraint> uniqueConstraints = new LinkedHashSet<>();
     private final Set<String> computedColumns = new HashSet<>();
 
+    private boolean enableIfNotExistsStatement;
+
     public CreateTableStatement(String catalogName, String schemaName, String tableName) {
         this(catalogName, schemaName, tableName, null, null);
     }
@@ -49,6 +51,16 @@ public class CreateTableStatement extends AbstractSqlStatement implements Compou
         this.tableName = tableName;
         this.remarks = remarks;
         this.tableType = tableType;
+    }
+
+    public CreateTableStatement(String catalogName, String schemaName, String tableName, boolean enableIfNotExistsStatement) {
+        this(catalogName, schemaName, tableName);
+        this.enableIfNotExistsStatement = enableIfNotExistsStatement;
+    }
+
+    public CreateTableStatement(String catalogName, String schemaName, String tableName, String remarks, String tableType, boolean enableIfNotExistsStatement) {
+        this(catalogName, schemaName, tableName, remarks, tableType);
+        this.enableIfNotExistsStatement = enableIfNotExistsStatement;
     }
 
     public String getCatalogName() {
@@ -283,5 +295,13 @@ public class CreateTableStatement extends AbstractSqlStatement implements Compou
 
     public void setTableType(String tableType) {
         this.tableType = tableType;
+    }
+
+    public boolean isEnableIfNotExistsStatement() {
+        return enableIfNotExistsStatement;
+    }
+
+    public void setEnableIfNotExistsStatement(boolean enableIfNotExistsStatement) {
+        this.enableIfNotExistsStatement = enableIfNotExistsStatement;
     }
 }

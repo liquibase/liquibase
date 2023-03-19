@@ -265,7 +265,7 @@ public class SQLiteDatabase extends AbstractJdbcDatabase {
 
     @Override
     public boolean supportsCreateIfNotExists(Class<? extends DatabaseObject> type) {
-        return type.isAssignableFrom(StoredProcedure.class);
+        return type.isAssignableFrom(Table.class);
     }
 
     public interface AlterTableVisitor {

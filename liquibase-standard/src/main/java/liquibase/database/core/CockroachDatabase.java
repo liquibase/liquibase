@@ -7,7 +7,7 @@ import liquibase.exception.DatabaseException;
 import liquibase.executor.ExecutorService;
 import liquibase.statement.core.RawSqlStatement;
 import liquibase.structure.DatabaseObject;
-import liquibase.structure.core.StoredProcedure;
+import liquibase.structure.core.Table;
 import liquibase.util.JdbcUtil;
 
 import java.sql.ResultSet;
@@ -118,7 +118,7 @@ public class CockroachDatabase extends PostgresDatabase {
                     this.databaseMinorVersion = Integer.parseInt(versionMatcher.group(2));
                 }
             } catch (Throwable e) {
-                Scope.getCurrentScope().getLog(getClass()).fine("Cannot determine cockroachdb version: "+e.getMessage(), e);
+                Scope.getCurrentScope().getLog(getClass()).fine("Cannot determine cockroachdb version: " + e.getMessage(), e);
             }
         } else {
             Scope.getCurrentScope().getLog(getClass()).fine("Cannot determine cockroachdb version: cannot query database");
@@ -136,6 +136,6 @@ public class CockroachDatabase extends PostgresDatabase {
 
     @Override
     public boolean supportsCreateIfNotExists(Class<? extends DatabaseObject> type) {
-        return type.isAssignableFrom(StoredProcedure.class);
+        return type.isAssignableFrom(Table.class);
     }
 }
