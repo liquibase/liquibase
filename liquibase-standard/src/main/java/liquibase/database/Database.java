@@ -483,6 +483,11 @@ public interface Database extends PrioritizedService, AutoCloseable {
         // Do nothing by default
     }
 
+    /**
+     * Does the database support the "if not exits" syntax?
+     * @param type the DatabaseObject type to be checked.
+     * @return true if the "if not exists" syntax is supported, false otherwise.
+     */
     boolean supportsCreateIfNotExists(Class<? extends DatabaseObject> type);
 }
 

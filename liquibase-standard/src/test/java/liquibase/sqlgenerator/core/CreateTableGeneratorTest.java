@@ -7,7 +7,6 @@ import liquibase.datatype.LiquibaseDataType;
 import liquibase.exception.DatabaseException;
 import liquibase.statement.*;
 import liquibase.structure.core.Table;
-import liquibase.structure.core.StoredProcedure;
 import org.junit.Test;
 
 import liquibase.change.ColumnConfig;
@@ -1249,19 +1248,6 @@ public class CreateTableGeneratorTest extends AbstractSqlGeneratorTest<CreateTab
         for (Database database : TestContext.getInstance().getAllDatabases()) {
             if (database.supportsCreateIfNotExists(Table.class)) {
                 CreateTableStatement statement = new CreateTableStatement(CATALOG_NAME, SCHEMA_NAME, TABLE_NAME, true);
-                statement.addColumn(COLUMN_NAME1, DataTypeFactory.getInstance().fromDescription("java.sql.Types.TIMESTAMP", database), new ColumnConfig().setDefaultValue("null").getDefaultValueObject());
-                if (shouldBeImplementation(database)) {
-                    assertTrue(this.generatorUnderTest.generateSql(statement, database, null)[0].toSql().startsWith("CREATE TABLE IF NOT EXISTS "));
-                }
-            }
-        }
-    }
-
-    @Test
-    public void testWithCreateIfNotExistsInH2Database() {
-        for (Database database : TestContext.getInstance().getAllDatabases()) {
-            if (database.supportsCreateIfNotExists(StoredProcedure.class)) {
-                CreateTableStatement statement = new CreateTableStatement(CATALOG_NAME, SCHEMA_NAME, TABLE_NAME);
                 statement.addColumn(COLUMN_NAME1, DataTypeFactory.getInstance().fromDescription("java.sql.Types.TIMESTAMP", database), new ColumnConfig().setDefaultValue("null").getDefaultValueObject());
                 if (shouldBeImplementation(database)) {
                     assertTrue(this.generatorUnderTest.generateSql(statement, database, null)[0].toSql().startsWith("CREATE TABLE IF NOT EXISTS "));

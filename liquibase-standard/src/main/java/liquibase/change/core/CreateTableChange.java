@@ -51,7 +51,7 @@ public class CreateTableChange extends AbstractChange implements ChangeWithColum
     private String tablespace;
     private String remarks;
 
-    private Boolean ifNotExists = false;
+    private boolean enableIfNotExistsStatement;
 
     public CreateTableChange() {
         super();
@@ -181,7 +181,7 @@ public class CreateTableChange extends AbstractChange implements ChangeWithColum
     }
 
     protected CreateTableStatement generateCreateTableStatement() {
-        return new CreateTableStatement(getCatalogName(), getSchemaName(), getTableName(), getRemarks(), getTableType(), getIfNotExists());
+        return new CreateTableStatement(getCatalogName(), getSchemaName(), getTableName(), getRemarks(), getTableType(), isEnableIfNotExistsStatement());
     }
 
     @Override
@@ -319,11 +319,11 @@ public class CreateTableChange extends AbstractChange implements ChangeWithColum
         this.tableType = tableType;
     }
 
-    public Boolean getIfNotExists() {
-        return ifNotExists;
+    public boolean isEnableIfNotExistsStatement() {
+        return enableIfNotExistsStatement;
     }
 
-    public void setIfNotExists(Boolean ifNotExists) {
-        this.ifNotExists = ifNotExists;
+    public void setEnableIfNotExistsStatement(boolean enableIfNotExistsStatement) {
+        this.enableIfNotExistsStatement = enableIfNotExistsStatement;
     }
 }

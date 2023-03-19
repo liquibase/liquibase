@@ -35,7 +35,7 @@ public class CreateTableStatement extends AbstractSqlStatement implements Compou
     private final Set<UniqueConstraint> uniqueConstraints = new LinkedHashSet<>();
     private final Set<String> computedColumns = new HashSet<>();
 
-    private boolean ifNotExists;
+    private boolean enableIfNotExistsStatement;
 
     public CreateTableStatement(String catalogName, String schemaName, String tableName) {
         this(catalogName, schemaName, tableName, null, null);
@@ -53,14 +53,14 @@ public class CreateTableStatement extends AbstractSqlStatement implements Compou
         this.tableType = tableType;
     }
 
-    public CreateTableStatement(String catalogName, String schemaName, String tableName, boolean ifNotExists) {
+    public CreateTableStatement(String catalogName, String schemaName, String tableName, boolean enableIfNotExistsStatement) {
         this(catalogName, schemaName, tableName);
-        this.ifNotExists = ifNotExists;
+        this.enableIfNotExistsStatement = enableIfNotExistsStatement;
     }
 
-    public CreateTableStatement(String catalogName, String schemaName, String tableName, String remarks, String tableType, boolean ifNotExists) {
+    public CreateTableStatement(String catalogName, String schemaName, String tableName, String remarks, String tableType, boolean enableIfNotExistsStatement) {
         this(catalogName, schemaName, tableName, remarks, tableType);
-        this.ifNotExists = ifNotExists;
+        this.enableIfNotExistsStatement = enableIfNotExistsStatement;
     }
 
     public String getCatalogName() {
@@ -297,11 +297,11 @@ public class CreateTableStatement extends AbstractSqlStatement implements Compou
         this.tableType = tableType;
     }
 
-    public boolean isIfNotExists() {
-        return ifNotExists;
+    public boolean isEnableIfNotExistsStatement() {
+        return enableIfNotExistsStatement;
     }
 
-    public void setIfNotExists(boolean ifNotExists) {
-        this.ifNotExists = ifNotExists;
+    public void setEnableIfNotExistsStatement(boolean enableIfNotExistsStatement) {
+        this.enableIfNotExistsStatement = enableIfNotExistsStatement;
     }
 }

@@ -12,7 +12,6 @@ import liquibase.statement.core.GetViewDefinitionStatement;
 import liquibase.statement.core.RawSqlStatement;
 import liquibase.structure.DatabaseObject;
 import liquibase.structure.core.Table;
-import liquibase.structure.core.StoredProcedure;
 
 import java.math.BigInteger;
 import java.util.HashSet;
@@ -262,6 +261,6 @@ public class InformixDatabase extends AbstractJdbcDatabase {
 
     @Override
     public boolean supportsCreateIfNotExists(Class<? extends DatabaseObject> type) {
-        return type.isAssignableFrom(StoredProcedure.class);
+        return type.isAssignableFrom(Table.class);
     }
 }
