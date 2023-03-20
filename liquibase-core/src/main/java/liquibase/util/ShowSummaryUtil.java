@@ -24,16 +24,6 @@ import java.util.stream.Collectors;
  *
  */
 public class ShowSummaryUtil {
-    private static final Map<Class<?>, String> filterSummaryLabelMap = new HashMap<>();
-    static {
-        filterSummaryLabelMap.put(ShouldRunChangeSetFilter.class, "Already ran:             %6d");
-        filterSummaryLabelMap.put(DbmsChangeSetFilter.class,      "DBMS mismatch:           %6d");
-        filterSummaryLabelMap.put(LabelChangeSetFilter.class,     "Label mismatch:          %6d");
-        filterSummaryLabelMap.put(ContextChangeSetFilter.class,   "Context mismatch:        %6d");
-        filterSummaryLabelMap.put(CountChangeSetFilter.class,     "After count:             %6d");
-        filterSummaryLabelMap.put(UpToTagChangeSetFilter.class,   "After tag:               %6d");
-        filterSummaryLabelMap.put(IgnoreChangeSetFilter.class,    "Ignored:                 %6d");
-    }
 
     /**
      *
@@ -142,7 +132,7 @@ public class ShowSummaryUtil {
             StringBuilder builder = new StringBuilder();
             st.getFilterResults().forEach(consumer -> {
                 if (consumer.getFilter() != null) {
-                    String displayName = consumer.getDisplayName();
+                    String displayName = consumer.getMdcName();
                     mdcSkipCounts.merge(displayName, 1, Integer::sum);
                 }
                 String skippedMessage = String.format("   '%s' : %s", st.getChangeSet().toString(), consumer.getMessage());
@@ -180,7 +170,7 @@ public class ShowSummaryUtil {
             String dbmsList = String.format("'%s'", StringUtil.join(skippedChangeSet.getDbmsSet(), ", "));
             String mismatchMessage = String.format("mismatched DBMS value of %s", dbmsList);
             ChangeSetStatus changeSetStatus = new ChangeSetStatus(skippedChangeSet);
-            ChangeSetFilterResult filterResult = new ChangeSetFilterResult(false, mismatchMessage, DbmsChangeSetFilter.class);
+            ChangeSetFilterResult filterResult = new ChangeSetFilterResult(false, mismatchMessage, DbmsChangeSetFilter.class, "dbmsUnknown", "DBMS mismatch");
             changeSetStatus.setFilterResults(Collections.singleton(filterResult));
             finalList.add(changeSetStatus);
             if (mdcSkipCounts != null) {
@@ -252,16 +242,13 @@ public class ShowSummaryUtil {
         builder.append(message);
         builder.append(System.lineSeparator());
 
-        final Map<Class<? extends ChangeSetFilter>, Integer> filterSummaryMap = new LinkedHashMap<>();
+        final Map<String, Integer> filterSummaryMap = new LinkedHashMap<>();
         List<ChangeSetStatus> finalList = createFinalStatusList(skippedChangeSets, filterDenied, null);
         finalList.forEach(status -> {
             status.getFilterResults().forEach(result -> {
                 if (! result.isAccepted()) {
-                    Class<? extends ChangeSetFilter> clazz = result.getFilter();
-                    filterSummaryMap.computeIfAbsent(clazz, count -> {
-                        return 0;
-                    });
-                    filterSummaryMap.put(clazz, filterSummaryMap.get(clazz)+1);
+                    String displayName = result.getDisplayName();
+                    filterSummaryMap.merge(displayName, 1, Integer::sum);
                 }
             });
         });
@@ -271,15 +258,9 @@ public class ShowSummaryUtil {
             builder.append(message);
             builder.append(System.lineSeparator());
             Scope.getCurrentScope().getLog(ShowSummaryUtil.class).info(message);
-            filterSummaryMap.forEach((filterClass, count) -> {
-                String filterSummaryDetailMessage;
-                String formatString = (filterSummaryLabelMap.containsKey(filterClass) ? String.valueOf(filterSummaryLabelMap.get(filterClass)) : null);
-                if (formatString != null) {
-                    filterSummaryDetailMessage = String.format(formatString, count);
-                } else {
-                    filterSummaryDetailMessage = String.format("%-18s       %6d",
-                            filterClass.getSimpleName().replace("ChangeSetFilter", "Filter:"), count);
-                }
+            filterSummaryMap.forEach((filterDisplayName, count) -> {
+                String filterSummaryDetailMessage = String.format("%-18s       %6d",
+                        filterDisplayName + ":", count);
                 Scope.getCurrentScope().getLog(ShowSummaryUtil.class).info(filterSummaryDetailMessage);
                 builder.append(filterSummaryDetailMessage);
                 builder.append(System.lineSeparator());
