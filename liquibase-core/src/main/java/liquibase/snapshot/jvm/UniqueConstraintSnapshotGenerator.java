@@ -295,7 +295,7 @@ public class UniqueConstraintSnapshotGenerator extends JdbcSnapshotGenerator {
                 } else if (rows.size() > 1) {
                     throw new UnexpectedLiquibaseException("Got multiple rows back querying unique constraints");
                 } else {
-                    Map rowData = rows.get(0);
+                    Map<String, ?> rowData = rows.get(0);
                     String descriptor = rowData.get("DESCRIPTOR").toString();
                     descriptor = descriptor.replaceFirst(".*\\(", "").replaceFirst("\\).*", "");
                     for (String columnNumber : StringUtil.splitAndTrim(descriptor, ",")) {

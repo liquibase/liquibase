@@ -76,12 +76,7 @@ public class MissingForeignKeyChangeGenerator extends AbstractChangeGenerator im
             }
         }
 
-        change.setReferencedColumnNames(StringUtil.join(fk.getPrimaryKeyColumns(), ",", new StringUtil.StringUtilFormatter<Column>() {
-            @Override
-            public String toString(Column obj) {
-                return obj.getName();
-            }
-        }));
+        change.setReferencedColumnNames(StringUtil.join(fk.getPrimaryKeyColumns(), ",", (StringUtil.StringUtilFormatter<Column>) Column::getName));
 
         change.setBaseTableName(fk.getForeignKeyTable().getName());
         if (control.getIncludeCatalog()) {
@@ -90,12 +85,7 @@ public class MissingForeignKeyChangeGenerator extends AbstractChangeGenerator im
         if (control.getIncludeSchema()) {
             change.setBaseTableSchemaName(fk.getForeignKeyTable().getSchema().getName());
         }
-        change.setBaseColumnNames(StringUtil.join(fk.getForeignKeyColumns(), ",", new StringUtil.StringUtilFormatter<Column>() {
-            @Override
-            public String toString(Column obj) {
-                return obj.getName();
-            }
-        }));
+        change.setBaseColumnNames(StringUtil.join(fk.getForeignKeyColumns(), ",", (StringUtil.StringUtilFormatter<Column>) Column::getName));
 
         change.setDeferrable(fk.isDeferrable());
         change.setInitiallyDeferred(fk.isInitiallyDeferred());
