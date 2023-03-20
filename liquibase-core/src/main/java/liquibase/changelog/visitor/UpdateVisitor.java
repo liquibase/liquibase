@@ -63,7 +63,7 @@ public class UpdateVisitor implements ChangeSetVisitor {
             fireRunFailed(changeSet, databaseChangeLog, database, e);
             throw e;
         }
-        if (!Objects.equals(runStatus, ChangeSet.RunStatus.NOT_RAN)) {
+        if (!Objects.equals(runStatus, ChangeSet.RunStatus.NOT_RAN) && Objects.equals(execType, ExecType.EXECUTED)) {
             execType = ChangeSet.ExecType.RERAN;
         }
         fireRan(changeSet, databaseChangeLog, database, execType);
