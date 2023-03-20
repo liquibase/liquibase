@@ -48,7 +48,7 @@ public class YamlSnapshotParser extends YamlParser implements SnapshotParser {
                 throw new LiquibaseParseException("Could not find root snapshot node");
             }
 
-            String shortName = (String) ((Map) rootList.get("database")).get("shortName");
+            String shortName = (String) ((Map<?, ?>) rootList.get("database")).get("shortName");
 
             Database database = DatabaseFactory.getInstance().getDatabase(shortName).getClass().getConstructor().newInstance();
             database.setConnection(new OfflineConnection("offline:" + shortName, null));

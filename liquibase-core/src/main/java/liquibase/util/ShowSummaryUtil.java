@@ -84,7 +84,7 @@ public class ShowSummaryUtil {
         //
         SortedMap<String, Integer> skippedMdc = showDetailTable(skippedChangeSets, filterDenied, outputStream);
         updateSummaryMdc.setSkipped(skippedMdc);
-        try(MdcObject updateSummaryMdcObject = Scope.getCurrentScope().addMdcValue(MdcKey.UPDATE_SUMMARY, updateSummaryMdc);) {
+        try(MdcObject updateSummaryMdcObject = Scope.getCurrentScope().addMdcValue(MdcKey.UPDATE_SUMMARY, updateSummaryMdc)) {
             Scope.getCurrentScope().getLog(ShowSummaryUtil.class).info("Update summary generated");
         }
     }
