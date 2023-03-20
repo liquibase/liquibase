@@ -13,6 +13,7 @@ import liquibase.diff.compare.CompareControl;
 import liquibase.diff.output.ObjectChangeFilter;
 import liquibase.diff.output.report.DiffToReport;
 import liquibase.exception.DatabaseException;
+import liquibase.logging.mdc.MdcKey;
 import liquibase.snapshot.*;
 import liquibase.structure.DatabaseObject;
 import liquibase.structure.core.DatabaseObjectFactory;
@@ -87,7 +88,9 @@ public class DiffCommandStep extends AbstractCommandStep {
         resultsBuilder.addResult(DIFF_RESULT.getName(), diffResult);
 
         String printResult = commandScope.getArgumentValue(FORMAT_ARG);
+        Scope.getCurrentScope().addMdcValue(MdcKey.FORMAT, printResult);
         if (printResult == null || printResult.equalsIgnoreCase("TXT")) {
+            Scope.getCurrentScope().addMdcValue(MdcKey.FORMAT, "TXT");
             Scope.getCurrentScope().getUI().sendMessage("");
             Scope.getCurrentScope().getUI().sendMessage(coreBundle.getString("diff.results"));
 
@@ -95,6 +98,7 @@ public class DiffCommandStep extends AbstractCommandStep {
             new DiffToReport(diffResult, printStream).print();
             printStream.flush();
         }
+        Scope.getCurrentScope().getLog(getClass()).info("Diff command completed");
     }
 
     public DiffResult createDiffResult(CommandResultsBuilder resultsBuilder) throws DatabaseException, InvalidExampleException {

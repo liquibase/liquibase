@@ -8,7 +8,7 @@ public class MdcKey {
     public static final String CHANGESET_OUTCOME = "changesetOutcome";
     public static final String LIQUIBASE_OPERATION = "liquibaseOperation";
     public static final String LIQUIBASE_TARGET_URL = "liquibaseTargetUrl";
-    public static final String LIQUIBASE_REF_URL = "liquibaseRefUrl";
+    public static final String REFERENCE_URL = "referenceUrl";
     public static final String CHANGESET_OPERATION_START_TIME = "changesetOperationStart";
     public static final String CHANGESET_OPERATION_STOP_TIME = "changesetOperationStop";
     public static final String CHANGESET_SQL = "changesetSql";
@@ -63,4 +63,10 @@ public class MdcKey {
     public static final String UPDATE_SUMMARY = "updateSummary";
     public static final String CHANGESETS_UPDATED = "changesetsUpdated";
     public static final String UPDATE_ONE_CHANGESET_FORCE = "updateOneChangesetForce";
+    public static final String REFERENCE_USERNAME = "referenceUsername";
+    public static final String EXCLUDE_OBJECTS = "excludeObjects";
+    public static final String INCLUDE_OBJECTS = "includeObjects";
+    public static final String FORMAT = "format";
+    public static final String DIFF_TYPES = "diffTypes";
+    public static final String DIFF_RESULTS_SUMMARY = "diffResultsSummary";
 }
