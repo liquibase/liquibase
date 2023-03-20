@@ -1124,10 +1124,6 @@ Long Description: ${commandDefinition.getLongDescription() ?: "NOT SET"}
             println "Copied file " + originalFile + " to file " + newFile
         }
 
-        void modifyChangeLogId(String originalFile, String newChangeLogId) {
-            this.setups.add(new SetupModifyChangelog(originalFile, newChangeLogId))
-        }
-
         /**
          *
          * Delete the specified resources

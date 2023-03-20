@@ -47,7 +47,6 @@ Optional Args:
         ]
         setup {
             createTempResource "changelogs/h2/complete/simple.changelog.xml", "simple.changelog.xml"
-            modifyChangeLogId "simple.changelog.xml", UUID.randomUUID().toString()
         }
         expectedUI = "has a changelog ID but was not found in Hub"
     }

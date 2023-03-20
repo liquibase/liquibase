@@ -87,8 +87,8 @@ class LiquibaseTest extends Specification {
 //        });
 
         mockDatabase = new MockDatabase()
-
-        def databaseChangeLog = new DatabaseChangeLog(changeLogId: UUID.randomUUID())
+        setupScopeId = Scope.enter(null)
+        def databaseChangeLog = new DatabaseChangeLog()
         databaseChangeLog.addChangeSet(new ChangeSet(
                 "test",
                 "test",
