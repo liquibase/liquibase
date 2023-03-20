@@ -441,7 +441,9 @@ jobs:
         with:
           name: liquibase-artifacts
           path: artifacts/*
-
+          run: |
+            tree -P '*standard*' -f
+            
       - name: Archive Convenience Zip
         uses: actions/upload-artifact@v3
         with:
