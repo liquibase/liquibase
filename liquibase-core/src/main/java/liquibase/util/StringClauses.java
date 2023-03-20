@@ -467,7 +467,7 @@ public class StringClauses {
             return "";
         }
 
-        List finalList = new ArrayList<>(clauses.values());
+        List<Object> finalList = new ArrayList<>(clauses.values());
         finalList.removeIf(next -> (next == null) || "".equals(next.toString()));
 
         return start

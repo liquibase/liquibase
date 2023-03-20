@@ -14,7 +14,7 @@ import java.util.List;
 public class UniqueConstraint extends AbstractDatabaseObject {
 
     public UniqueConstraint() {
-        setAttribute("columns", new ArrayList());
+        setAttribute("columns", new ArrayList<>());
         setAttribute("deferrable", false);
         setAttribute("initiallyDeferred", false);
         setAttribute("disabled", false);
