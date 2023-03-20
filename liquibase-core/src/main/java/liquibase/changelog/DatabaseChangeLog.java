@@ -41,12 +41,9 @@ public class DatabaseChangeLog implements Comparable<DatabaseChangeLog>, Conditi
     private static final ThreadLocal<DatabaseChangeLog> PARENT_CHANGE_LOG = new ThreadLocal<>();
     private static final Logger LOG = Scope.getCurrentScope().getLog(DatabaseChangeLog.class);
     private static final Pattern SLASH_PATTERN = Pattern.compile("^/");
-    private static final Pattern NON_CLASSPATH_PATTERN = Pattern.compile("^classpath:");
+
     private static final Pattern DOUBLE_BACK_SLASH_PATTERN = Pattern.compile("\\\\");
-    private static final Pattern DOUBLE_SLASH_PATTERN = Pattern.compile("//+");
-    private static final Pattern SLASH_DOT_SLASH_PATTERN = Pattern.compile("/\\./");
     private static final Pattern NO_LETTER_PATTERN = Pattern.compile("^[a-zA-Z]:");
-    private static final Pattern DOT_SLASH_PATTERN = Pattern.compile("^\\.?/");
     private static final String SEEN_CHANGELOGS_PATHS_SCOPE_KEY = "SEEN_CHANGELOG_PATHS";
 
     private PreconditionContainer preconditionContainer = new GlobalPreconditionContainer();
@@ -428,7 +425,9 @@ public class DatabaseChangeLog implements Comparable<DatabaseChangeLog>, Conditi
                 }
                 break;
             case "modifyChangeSets":
-                ModifyChangeSets modifyChangeSets = new ModifyChangeSets((String)node.getChildValue(null, "runWith"));
+                ModifyChangeSets modifyChangeSets = new ModifyChangeSets(
+                        (String)node.getChildValue(null, "runWith"),
+                        (String)node.getChildValue(null, "runWithSpoolFile"));
                 nodeScratch = new HashMap<>();
                 nodeScratch.put("modifyChangeSets", modifyChangeSets);
                 for (ParsedNode modifyChildNode : node.getChildren()) {
@@ -660,7 +659,7 @@ public class DatabaseChangeLog implements Comparable<DatabaseChangeLog>, Conditi
                            boolean ignore)
             throws SetupException {
         includeAll(pathName, isRelativeToChangelogFile, resourceFilter, errorIfMissingOrEmpty, resourceComparator,
-                   resourceAccessor, includeContextFilter, labels, ignore, new ModifyChangeSets(null));
+                   resourceAccessor, includeContextFilter, labels, ignore, new ModifyChangeSets(null, null));
     }
 
     public void includeAll(String pathName,
@@ -790,7 +789,7 @@ public class DatabaseChangeLog implements Comparable<DatabaseChangeLog>, Conditi
                            Boolean ignore,
                            OnUnknownFileFormat onUnknownFileFormat)
             throws LiquibaseException {
-        return include(fileName, isRelativePath, resourceAccessor, includeContextFilter, labels, ignore, onUnknownFileFormat, new ModifyChangeSets(null));
+        return include(fileName, isRelativePath, resourceAccessor, includeContextFilter, labels, ignore, onUnknownFileFormat, new ModifyChangeSets(null, null));
     }
 
     public boolean include(String fileName,
@@ -874,6 +873,9 @@ public class DatabaseChangeLog implements Comparable<DatabaseChangeLog>, Conditi
             if (changeSet.getRunWith() == null) {
                 changeSet.setRunWith(modifyChangeSets != null ? modifyChangeSets.getRunWith() : null);
             }
+            if (changeSet.getRunWithSpoolFile() == null) {
+                changeSet.setRunWithSpoolFile(modifyChangeSets != null ? modifyChangeSets.getRunWithSpool() : null);
+            }
             addChangeSet(changeSet);
         }
 
@@ -888,26 +890,42 @@ public class DatabaseChangeLog implements Comparable<DatabaseChangeLog>, Conditi
     }
 
     protected Comparator<String> getStandardChangeLogComparator() {
-        return new Comparator<String>() {
-            @Override
-            public int compare(String o1, String o2) {
-                //by ignoring WEB-INF/classes in path all changelog Files independent
-                //whehther they are in a WAR or in a JAR are order following the same rule
-                return o1.replace("WEB-INF/classes/", "").compareTo(o2.replace("WEB-INF/classes/", ""));
-            }
-        };
+        return Comparator.comparing(o -> o.replace("WEB-INF/classes/", ""));
     }
 
     public static String normalizePath(String filePath) {
         if (filePath == null) {
             return null;
         }
-        String noClassPathReplaced = NON_CLASSPATH_PATTERN.matcher(filePath).replaceFirst("");
-        String doubleBackSlashReplaced = DOUBLE_BACK_SLASH_PATTERN.matcher(noClassPathReplaced).replaceAll("/");
-        String doubleSlashReplaced = DOUBLE_SLASH_PATTERN.matcher(doubleBackSlashReplaced).replaceAll("/");
-        String slashDotSlashReplaced = SLASH_DOT_SLASH_PATTERN.matcher(doubleSlashReplaced).replaceAll("/");
-        String noLetterReplaced = NO_LETTER_PATTERN.matcher(slashDotSlashReplaced).replaceFirst("");
-        return DOT_SLASH_PATTERN.matcher(noLetterReplaced).replaceFirst("");
+
+        if (filePath.startsWith("classpath:")) {
+            filePath = filePath.substring("classpath:".length());
+        }
+
+        if (filePath.contains("\\")) {
+            filePath = filePath.replace("\\", "/");
+        }
+
+        while (filePath.contains("//")) {
+            filePath = filePath.replace("//", "/");
+        }
+
+        if (filePath.contains("/./")) {
+            filePath = filePath.replace("/./", "/");
+        }
+
+        if (filePath.indexOf(":") == 1) {
+            filePath = NO_LETTER_PATTERN.matcher(filePath).replaceFirst("");
+        }
+
+        if (filePath.startsWith(".")) {
+            filePath = filePath.substring(1);
+        }
+        if (filePath.startsWith("/")) {
+            filePath = filePath.substring(1);
+        }
+
+        return filePath;
     }
 
     public void clearCheckSums() {
@@ -924,19 +942,23 @@ public class DatabaseChangeLog implements Comparable<DatabaseChangeLog>, Conditi
      */
     private static class ModifyChangeSets {
         private final String runWith;
+        private final String runWithSpool;
 
         /**
          *
          * @param  runWith                The native executor to execute all included change sets with. Can be null
+         * @param  runWithSpool           The name of the spool file to be created
          *
          */
-        public ModifyChangeSets(String runWith) {
+        public ModifyChangeSets(String runWith, String runWithSpool) {
             this.runWith = runWith;
+            this.runWithSpool = runWithSpool;
         }
 
         public String getRunWith() {
             return runWith;
         }
+        public String getRunWithSpool() { return runWithSpool; }
     }
 
     /**

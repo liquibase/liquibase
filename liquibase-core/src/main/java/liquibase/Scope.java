@@ -7,7 +7,8 @@ import liquibase.database.OfflineConnection;
 import liquibase.database.jvm.JdbcConnection;
 import liquibase.exception.UnexpectedLiquibaseException;
 import liquibase.listener.LiquibaseListener;
-import liquibase.logging.*;
+import liquibase.logging.LogService;
+import liquibase.logging.Logger;
 import liquibase.logging.core.JavaLogService;
 import liquibase.logging.core.LogServiceFactory;
 import liquibase.logging.mdc.CustomMdcObject;
@@ -28,6 +29,7 @@ import liquibase.util.StringUtil;
 import java.lang.reflect.Constructor;
 import java.nio.charset.Charset;
 import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * This scope object is used to hold configuration and other parameters within a call without needing complex method signatures.
@@ -68,7 +70,7 @@ public class Scope {
     private Scope parent;
     private SmartMap values = new SmartMap();
     private String scopeId;
-    private static final Map<String, List<MdcObject>> addedMdcEntries = new HashMap<>();
+    private static final Map<String, List<MdcObject>> addedMdcEntries = new ConcurrentHashMap<>();
 
     private LiquibaseListener listener;
 
@@ -144,11 +146,16 @@ public class Scope {
             throw new UnexpectedLiquibaseException("Cannot pass a null parent to a new Scope. Use Scope.child to correctly create a nested scope");
         }
         this.parent = parent;
+        scopeId = generateScopeId();
         if (scopeValues != null) {
             for (Map.Entry<String, Object> entry : scopeValues.entrySet()) {
                 values.put(entry.getKey(), entry.getValue());
             }
         }
+    }
+
+    private String generateScopeId() {
+        return StringUtil.randomIdentifer(10).toLowerCase();
     }
 
     /**
@@ -215,15 +222,12 @@ public class Scope {
      * @return Returns the scopeId to pass to to {@link #exit(String)}
      */
     public static String enter(LiquibaseListener listener, Map<String, Object> scopeValues) throws Exception {
-        String scopeId = StringUtil.randomIdentifer(10).toLowerCase();
-
         Scope originalScope = getCurrentScope();
         Scope child = new Scope(originalScope, scopeValues);
         child.listener = listener;
-        child.scopeId = scopeId;
         scopeManager.setCurrentScope(child);
 
-        return scopeId;
+        return child.scopeId;
     }
 
     /**
@@ -238,7 +242,7 @@ public class Scope {
         }
 
         // clear the MDC values added in this scope
-        List<MdcObject> mdcObjects = addedMdcEntries.get(currentScope.scopeId);
+        List<MdcObject> mdcObjects = addedMdcEntries.remove(currentScope.scopeId);
         for (MdcObject mdcObject : CollectionUtil.createIfNull(mdcObjects)) {
             mdcObject.close();
         }
@@ -422,14 +426,12 @@ public class Scope {
     private void removeMdcObjectWhenScopeExits(boolean removeWhenScopeExits, MdcObject mdcObject) {
         if (removeWhenScopeExits) {
             Scope currentScope = getCurrentScope();
-            String scopeId = currentScope.scopeId;
-            if (addedMdcEntries.containsKey(scopeId)) {
-                addedMdcEntries.get(scopeId).add(mdcObject);
-            } else {
-                addedMdcEntries.put(scopeId, new ArrayList<>(Collections.singletonList(mdcObject)));
-            }
+            addedMdcEntries
+                    .computeIfAbsent(currentScope.scopeId, k -> new ArrayList<>())
+                    .add(mdcObject);
         }
     }
+
 
     /**
      * Add a key value pair to the MDC using the MDC manager. This key value pair will be automatically removed from the

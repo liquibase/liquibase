@@ -1,49 +1,40 @@
 package liquibase.command.core;
 
+import liquibase.Contexts;
+import liquibase.LabelExpression;
+import liquibase.RuntimeEnvironment;
+import liquibase.Scope;
+import liquibase.changelog.*;
+import liquibase.changelog.filter.*;
+import liquibase.changelog.visitor.ChangeExecListener;
+import liquibase.changelog.visitor.ChangeLogSyncVisitor;
 import liquibase.command.*;
-import liquibase.configuration.ConfigurationValueObfuscator;
-import liquibase.exception.CommandExecutionException;
+import liquibase.command.core.helpers.DatabaseChangelogCommandStep;
+import liquibase.command.core.helpers.HubHandler;
+import liquibase.database.Database;
+import liquibase.exception.DatabaseException;
+import liquibase.hub.listener.HubChangeExecListener;
+import liquibase.lockservice.LockService;
+import liquibase.logging.core.BufferedLogService;
+import liquibase.logging.core.CompositeLogService;
 
-public class ChangelogSyncCommandStep extends AbstractCliWrapperCommandStep {
+import java.util.Arrays;
+import java.util.List;
+
+public class ChangelogSyncCommandStep extends AbstractCommandStep {
 
     public static final String[] COMMAND_NAME = {"changelogSync"};
 
-    public static final CommandArgumentDefinition<String> CHANGELOG_FILE_ARG;
-    public static final CommandArgumentDefinition<String> URL_ARG;
-    public static final CommandArgumentDefinition<String> DEFAULT_SCHEMA_NAME_ARG;
-    public static final CommandArgumentDefinition<String> DEFAULT_CATALOG_NAME_ARG;
-    public static final CommandArgumentDefinition<String> USERNAME_ARG;
-    public static final CommandArgumentDefinition<String> PASSWORD_ARG;
-    public static final CommandArgumentDefinition<String> LABEL_FILTER_ARG;
-    public static final CommandArgumentDefinition<String> CONTEXTS_ARG;
-    public static final CommandArgumentDefinition<String> DRIVER_ARG;
-    public static final CommandArgumentDefinition<String> DRIVER_PROPERTIES_FILE_ARG;
+    public static final CommandArgumentDefinition<ChangeExecListener> HUB_CHANGE_EXEC_LISTENER_ARG;
+
+    private String tag = null;
 
     static {
         CommandBuilder builder = new CommandBuilder(COMMAND_NAME);
-        CHANGELOG_FILE_ARG = builder.argument(CommonArgumentNames.CHANGELOG_FILE, String.class).required()
-            .description("The root changelog file").build();
-        URL_ARG = builder.argument(CommonArgumentNames.URL, String.class).required()
-            .description("The JDBC database connection URL").build();
-        DEFAULT_SCHEMA_NAME_ARG = builder.argument("defaultSchemaName", String.class)
-            .description("The default schema name to use for the database connection").build();
-        DEFAULT_CATALOG_NAME_ARG = builder.argument("defaultCatalogName", String.class)
-            .description("The default catalog name to use for the database connection").build();
-        DRIVER_ARG = builder.argument("driver", String.class)
-            .description("The JDBC driver class").build();
-        DRIVER_PROPERTIES_FILE_ARG = builder.argument("driverPropertiesFile", String.class)
-            .description("The JDBC driver properties file").build();
-        USERNAME_ARG = builder.argument(CommonArgumentNames.USERNAME, String.class)
-            .description("The database username").build();
-        PASSWORD_ARG = builder.argument(CommonArgumentNames.PASSWORD, String.class)
-            .description("The database password")
-                .setValueObfuscator(ConfigurationValueObfuscator.STANDARD)
-                .build();
-        LABEL_FILTER_ARG = builder.argument("labelFilter", String.class)
-                .addAlias("labels")
-                .description("Label expression to use for filtering which changes to mark as executed").build();
-        CONTEXTS_ARG = builder.argument("contexts", String.class)
-            .description("Context string to use for filtering which changes to mark as executed").build();
+
+        HUB_CHANGE_EXEC_LISTENER_ARG = builder.argument("changeExecListener", ChangeExecListener.class)
+                .hidden().description("Class that will be used to listen to changes to be sent to Hub (if required)").build();
+
     }
 
     @Override
@@ -57,8 +48,68 @@ public class ChangelogSyncCommandStep extends AbstractCliWrapperCommandStep {
     }
 
     @Override
-    protected String[] collectArguments(CommandScope commandScope) throws CommandExecutionException {
-        return collectArguments(commandScope, null, null);
+    public List<Class<?>> requiredDependencies() {
+        return Arrays.asList(LockService.class, DatabaseChangeLog.class, ChangeLogParameters.class);
     }
 
+    @Override
+    public void run(CommandResultsBuilder resultsBuilder) throws Exception {
+        final CommandScope commandScope = resultsBuilder.getCommandScope();
+        final Database database = (Database) commandScope.getDependency(Database.class);
+        final String changeLogFile = commandScope.getArgumentValue(DatabaseChangelogCommandStep.CHANGELOG_FILE_ARG);
+        final DatabaseChangeLog changeLog = (DatabaseChangeLog) commandScope.getDependency(DatabaseChangeLog.class);
+        final ChangeLogParameters changeLogParameters = (ChangeLogParameters) commandScope.getDependency(ChangeLogParameters.class);
+
+        BufferedLogService bufferLog = new BufferedLogService();
+        HubHandler hubHandler = null;
+
+        try {
+            ChangeLogIterator runChangeLogIterator = buildChangeLogIterator(tag, changeLog, changeLogParameters.getContexts(), changeLogParameters.getLabels(), database);
+            CompositeLogService compositeLogService = new CompositeLogService(true, bufferLog);
+
+            hubHandler = new HubHandler(database, changeLog, changeLogFile, commandScope.getArgumentValue(HUB_CHANGE_EXEC_LISTENER_ARG));
+            HubChangeExecListener changeLogSyncListener = hubHandler.startHubForChangelogSync(changeLogParameters, tag,
+                    buildChangeLogIterator(tag, changeLog, changeLogParameters.getContexts(), changeLogParameters.getLabels(), database));
+
+            Scope.child(Scope.Attr.logService.name(), compositeLogService, () ->
+                    runChangeLogIterator.run(new ChangeLogSyncVisitor(database, changeLogSyncListener),
+                    new RuntimeEnvironment(database, changeLogParameters.getContexts(), changeLogParameters.getLabels())));
+
+            hubHandler.postUpdateHub(bufferLog);
+        } catch (Exception e) {
+            if (hubHandler != null) {
+                hubHandler.postUpdateHubExceptionHandling(bufferLog, e.getMessage());
+            }
+            throw e;
+        }
+    }
+
+    private ChangeLogIterator buildChangeLogIterator(String tag, DatabaseChangeLog changeLog, Contexts contexts,
+                                                       LabelExpression labelExpression, Database database) throws DatabaseException {
+
+        if (tag == null) {
+            return new ChangeLogIterator(changeLog,
+                    new NotRanChangeSetFilter(database.getRanChangeSetList()),
+                    new ContextChangeSetFilter(contexts),
+                    new LabelChangeSetFilter(labelExpression),
+                    new IgnoreChangeSetFilter(),
+                    new DbmsChangeSetFilter(database));
+        } else {
+            List<RanChangeSet> ranChangeSetList = database.getRanChangeSetList();
+            return new ChangeLogIterator(changeLog,
+                    new NotRanChangeSetFilter(database.getRanChangeSetList()),
+                    new ContextChangeSetFilter(contexts),
+                    new LabelChangeSetFilter(labelExpression),
+                    new IgnoreChangeSetFilter(),
+                    new DbmsChangeSetFilter(database),
+                    new UpToTagChangeSetFilter(tag, ranChangeSetList));
+        }
+    }
+
+    /**
+     * Tag value can be set by subclasses that implements "SyncToTag"
+     */
+    protected void setTag(String tag) {
+        this.tag = tag;
+    }
 }
