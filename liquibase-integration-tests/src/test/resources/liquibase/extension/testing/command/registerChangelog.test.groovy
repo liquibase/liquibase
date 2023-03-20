@@ -2,7 +2,6 @@ package liquibase.extension.testing.command
 
 import liquibase.exception.CommandExecutionException
 import liquibase.exception.CommandValidationException
-import liquibase.hub.core.MockHubService
 
 import java.util.regex.Pattern
 
@@ -29,7 +28,6 @@ Optional Args:
         }
         expectedResults = [
                 statusCode   : 0,
-                registeredChangeLogId  : { MockHubService.randomUUID.toString() }
         ]
     }
 
@@ -44,7 +42,6 @@ Optional Args:
         expectedUI = "Please enter your Project name and press [enter]"
         expectedResults = [
                 statusCode   : 0,
-                registeredChangeLogId  : { MockHubService.randomUUID.toString() }
         ]
     }
 
@@ -67,7 +64,6 @@ Optional Args:
 
         setup {
             copyResource "changelogs/h2/complete/simple.changelog.xml", "simple.changelog.with.id.xml"
-            modifyChangeLogId "simple.changelog.with.id.xml", MockHubService.alreadyRegisteredUUID.toString()
             runChangelog "changelogs/h2/complete/simple.changelog.xml"
         }
         expectedException = CommandExecutionException.class

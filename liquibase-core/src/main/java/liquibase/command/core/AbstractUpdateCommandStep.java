@@ -8,7 +8,6 @@ import liquibase.command.AbstractCommandStep;
 import liquibase.command.CleanUpCommandStep;
 import liquibase.command.CommandResultsBuilder;
 import liquibase.command.CommandScope;
-import liquibase.command.core.helpers.HubHandler;
 import liquibase.database.Database;
 import liquibase.exception.DatabaseException;
 import liquibase.exception.LiquibaseException;
@@ -17,7 +16,6 @@ import liquibase.executor.ExecutorService;
 import liquibase.integration.commandline.ChangeExecListenerUtils;
 import liquibase.lockservice.LockService;
 import liquibase.lockservice.LockServiceFactory;
-import liquibase.logging.core.BufferedLogService;
 import liquibase.logging.core.CompositeLogService;
 import liquibase.logging.mdc.MdcKey;
 import liquibase.logging.mdc.MdcObject;
@@ -65,8 +63,6 @@ public abstract class AbstractUpdateCommandStep extends AbstractCommandStep impl
         addCommandFiltersMdc(labelExpression, contexts);
 
         LockService lockService = (LockService) commandScope.getDependency(LockService.class);
-        BufferedLogService bufferLog = new BufferedLogService();
-        HubHandler hubHandler = null;
         DefaultChangeExecListener defaultChangeExecListener = new DefaultChangeExecListener();
         try {
             DatabaseChangeLog databaseChangeLog = (DatabaseChangeLog) commandScope.getDependency(DatabaseChangeLog.class);
@@ -84,38 +80,29 @@ public abstract class AbstractUpdateCommandStep extends AbstractCommandStep impl
                     getChangeExecListenerClassArg(commandScope),
                     getChangeExecListenerPropertiesFileArg(commandScope));
             defaultChangeExecListener.addListener(listener);
-            hubHandler = new HubHandler(database, databaseChangeLog, changeLogFile, defaultChangeExecListener);
 
-            ChangeLogIterator changeLogIterator = getStandardChangelogIterator(commandScope, database, contexts, labelExpression, databaseChangeLog);
             StatusVisitor statusVisitor = new StatusVisitor(database);
             ChangeLogIterator shouldRunIterator = getStatusChangelogIterator(commandScope, database, contexts, labelExpression, databaseChangeLog);
             shouldRunIterator.run(statusVisitor, new RuntimeEnvironment(database, contexts, labelExpression));
 
-            //Remember we built our hubHandler with our DefaultChangeExecListener so this HubChangeExecListener is delegating to them.
-            ChangeExecListener hubChangeExecListener = hubHandler.startHubForUpdate(changeLogParameters, changeLogIterator, getHubOperation());
             resultsBuilder.addResult(DEFAULT_CHANGE_EXEC_LISTENER_RESULT_KEY, defaultChangeExecListener);
             ChangeLogIterator runChangeLogIterator = getStandardChangelogIterator(commandScope, database, contexts, labelExpression, databaseChangeLog);
-            CompositeLogService compositeLogService = new CompositeLogService(true, bufferLog);
+            CompositeLogService compositeLogService = new CompositeLogService(true);
             HashMap<String, Object> scopeValues = new HashMap<>();
             scopeValues.put(Scope.Attr.logService.name(), compositeLogService);
             scopeValues.put("showSummary", getShowSummary(commandScope));
             Scope.child(scopeValues, () -> {
                 //If we are using hub, we want to use the HubChangeExecListener, which is wrapping all the others. Otherwise, use the default.
-                ChangeExecListener listenerToUse = hubChangeExecListener != null ? hubChangeExecListener : defaultChangeExecListener;
-                runChangeLogIterator.run(new UpdateVisitor(database, listenerToUse), new RuntimeEnvironment(database, contexts, labelExpression));
+                runChangeLogIterator.run(new UpdateVisitor(database, defaultChangeExecListener), new RuntimeEnvironment(database, contexts, labelExpression));
                 ShowSummaryUtil.showUpdateSummary(databaseChangeLog, statusVisitor, resultsBuilder.getOutputStream());
             });
 
-            hubHandler.postUpdateHub(bufferLog);
             resultsBuilder.addResult("statusCode", 0);
             logDeploymentOutcomeMdc(defaultChangeExecListener, true);
             postUpdateLog();
         } catch (Exception e) {
             logDeploymentOutcomeMdc(defaultChangeExecListener, false);
             resultsBuilder.addResult("statusCode", 1);
-            if (hubHandler != null) {
-                hubHandler.postUpdateHubExceptionHandling(bufferLog, e.getMessage());
-            }
             throw e;
         } finally {
             //TODO: We should be able to remove this once we get the rest of the update family

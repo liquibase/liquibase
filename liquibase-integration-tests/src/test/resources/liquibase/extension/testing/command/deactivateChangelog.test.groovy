@@ -2,7 +2,6 @@ package liquibase.extension.testing.command
 
 import liquibase.exception.CommandExecutionException
 import liquibase.exception.CommandValidationException
-import liquibase.hub.core.MockHubService
 
 CommandTests.define {
     command = ["deactivateChangelog"]
@@ -22,7 +21,6 @@ Optional Args:
         ]
         setup {
             createTempResource "changelogs/h2/complete/simple.changelog.xml", "simple.changelog.with.id-test.xml"
-            modifyChangeLogId "simple.changelog.with.id-test.xml", MockHubService.alreadyRegisteredUUID.toString()
         }
         expectedResults = [
                 statusCode   : 0

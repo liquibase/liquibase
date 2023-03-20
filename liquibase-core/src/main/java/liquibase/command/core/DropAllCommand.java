@@ -8,11 +8,6 @@ import liquibase.command.*;
 import liquibase.database.Database;
 import liquibase.exception.LiquibaseException;
 import liquibase.executor.ExecutorService;
-import liquibase.hub.HubConfiguration;
-import liquibase.hub.HubService;
-import liquibase.hub.HubServiceFactory;
-import liquibase.hub.LiquibaseHubException;
-import liquibase.hub.model.HubChangeLog;
 import liquibase.lockservice.LockServiceFactory;
 import liquibase.logging.Logger;
 import liquibase.util.StringUtil;
@@ -102,7 +97,6 @@ public class DropAllCommand extends AbstractCommand<CommandResult> {
         commandScope.addArgumentValue(InternalDropAllCommandStep.CHANGELOG_ARG, this.liquibase.getDatabaseChangeLog());
         commandScope.addArgumentValue(InternalDropAllCommandStep.CHANGELOG_FILE_ARG, this.changeLogFile);
         commandScope.addArgumentValue(InternalDropAllCommandStep.DATABASE_ARG, this.database);
-        commandScope.addArgumentValue(InternalDropAllCommandStep.HUB_CONNECTION_ID_ARG, this.hubConnectionId);
         commandScope.addArgumentValue(InternalDropAllCommandStep.SCHEMAS_ARG, this.schemas);
 
         final CommandResults results = commandScope.execute();
