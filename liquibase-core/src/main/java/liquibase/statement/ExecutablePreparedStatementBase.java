@@ -49,6 +49,7 @@ public abstract class ExecutablePreparedStatementBase implements ExecutablePrepa
 
     //Cache the executeWithFlags method of Postgres'es PreparedStatement to avoid reflection overhead
     //We use it within double-check synchronized pattern, volatile is what we only need.
+    //Additionally, there is no forseeable need to modify the value (method handler) after initialization.
     @SuppressWarnings("java:S3077")
     private static volatile Method postgresExecuteWithFlagsMethod;
 

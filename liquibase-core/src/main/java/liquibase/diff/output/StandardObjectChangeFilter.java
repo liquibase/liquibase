@@ -31,7 +31,10 @@ public class StandardObjectChangeFilter implements ObjectChangeFilter {
     private final FilterType filterType;
 
     private final List<Filter> filters = new ArrayList<>();
-    private volatile static List<DatabaseObject> databaseObjects;
+    //We use it within double-check synchronized pattern, volatile is what we only need.
+    //On top of that, we set a read-only collection.
+    @SuppressWarnings("java:S3077")
+    private static volatile List<DatabaseObject> databaseObjects;
     private boolean catalogOrSchemaFilter;
 
     public StandardObjectChangeFilter(FilterType type, String filter) {
