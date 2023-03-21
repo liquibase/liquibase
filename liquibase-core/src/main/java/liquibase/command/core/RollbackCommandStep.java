@@ -1,12 +1,11 @@
 package liquibase.command.core;
 
-import liquibase.Contexts;
-import liquibase.LabelExpression;
 import liquibase.RuntimeEnvironment;
 import liquibase.Scope;
 import liquibase.change.core.RawSQLChange;
 import liquibase.changelog.*;
 import liquibase.changelog.filter.*;
+import liquibase.changelog.visitor.ChangeExecListener;
 import liquibase.changelog.visitor.ChangeSetVisitor;
 import liquibase.changelog.visitor.RollbackVisitor;
 import liquibase.command.*;
@@ -36,8 +35,6 @@ public class RollbackCommandStep extends AbstractCommandStep {
 
     public static final CommandArgumentDefinition<String> ROLLBACK_SCRIPT_ARG;
     public static final CommandArgumentDefinition<String> TAG_ARG;
-    public static final CommandArgumentDefinition<String> CHANGE_EXEC_LISTENER_CLASS_ARG;
-    public static final CommandArgumentDefinition<String> CHANGE_EXEC_LISTENER_PROPERTIES_FILE_ARG;
 
     static {
         CommandBuilder builder = new CommandBuilder(COMMAND_NAME);
@@ -46,13 +43,13 @@ public class RollbackCommandStep extends AbstractCommandStep {
                 .description("Rollback script to execute").build();
         TAG_ARG = builder.argument("tag", String.class).required()
             .description("Tag to rollback to").build();
-        CHANGE_EXEC_LISTENER_CLASS_ARG = builder.argument("changeExecListenerClass", String.class)
-            .description("Fully-qualified class which specifies a ChangeExecListener").build();
-        CHANGE_EXEC_LISTENER_PROPERTIES_FILE_ARG = builder.argument("changeExecListenerPropertiesFile", String.class)
-            .description("Path to a properties file for the ChangeExecListenerClass").build();
     }
 
-    public String operationCommand = "rollback";
+    private enum RollbackMessageType {
+        WILL_ROLLBACK, ROLLED_BACK, ROLLBACK_FAILED
+    }
+
+    private String operationCommand = "rollback";
 
     @Override
     public void run(CommandResultsBuilder resultsBuilder) throws Exception {
@@ -71,12 +68,9 @@ public class RollbackCommandStep extends AbstractCommandStep {
         DatabaseChangeLog databaseChangeLog = (DatabaseChangeLog) commandScope.getDependency(DatabaseChangeLog.class);
         Database database = (Database) commandScope.getDependency(Database.class);
 
-        //final String operationCommand = "rollback";
-
-
         try {
             List<RanChangeSet> ranChangeSetList = database.getRanChangeSetList();
-            // Create another iterator to run
+
             ChangeLogIterator logIterator = new ChangeLogIterator(ranChangeSetList, databaseChangeLog,
                     new AfterTagChangeSetFilter(tagToRollBackTo, ranChangeSetList),
                     new AlreadyRanChangeSetFilter(ranChangeSetList),
@@ -85,10 +79,11 @@ public class RollbackCommandStep extends AbstractCommandStep {
                     new IgnoreChangeSetFilter(),
                     new DbmsChangeSetFilter(database));
 
-            doRollback(database, rollbackScript, logIterator, changeLogParameters.getContexts(), changeLogParameters.getLabels(), databaseChangeLog, changeLogParameters);
+            doRollback(database, rollbackScript, logIterator, changeLogParameters, databaseChangeLog,
+                    (ChangeExecListener) commandScope.getDependency(ChangeExecListener.class));
         }
         catch (Throwable t) {
-            handleRollbackException(t, operationCommand);
+            handleRollbackException(operationCommand);
             throw t;
         } finally {
             Scope.getCurrentScope().getMdcManager().remove(MdcKey.CHANGESETS_ROLLED_BACK);
@@ -99,16 +94,17 @@ public class RollbackCommandStep extends AbstractCommandStep {
      * Actually perform the rollback operation. Determining which changesets to roll back is the responsibility of the
      * logIterator.
      */
-    public static void doRollback(Database database, String rollbackScript, ChangeLogIterator logIterator, Contexts contexts, LabelExpression labelExpression, DatabaseChangeLog databaseChangeLog, ChangeLogParameters changeLogParameters) throws Exception {
+    public static void doRollback(Database database, String rollbackScript, ChangeLogIterator logIterator,ChangeLogParameters changeLogParameters,
+                                  DatabaseChangeLog databaseChangeLog, ChangeExecListener changeExecListener) throws Exception {
         if (rollbackScript == null) {
             List<ChangesetsRolledback.ChangeSet> processedChangesets = new ArrayList<>();
 
-            logIterator.run(new RollbackVisitor(database, null, processedChangesets), new RuntimeEnvironment(database, contexts, labelExpression));
+            logIterator.run(new RollbackVisitor(database, changeExecListener, processedChangesets), new RuntimeEnvironment(database, changeLogParameters.getContexts(), changeLogParameters.getLabels()));
 
             Scope.getCurrentScope().addMdcValue(MdcKey.CHANGESETS_ROLLED_BACK, new ChangesetsRolledback(processedChangesets), false);
         } else {
-            List<ChangeSet> changeSets = determineRollbacks(database, logIterator, contexts, labelExpression);
-            executeRollbackScript(database, rollbackScript, changeSets, databaseChangeLog, changeLogParameters);
+            List<ChangeSet> changeSets = determineRollbacks(database, logIterator, changeLogParameters);
+            executeRollbackScript(database, rollbackScript, changeSets, databaseChangeLog, changeLogParameters, changeExecListener);
             removeRunStatus(changeSets, database);
             Scope.getCurrentScope().addMdcValue(MdcKey.CHANGESETS_ROLLED_BACK, ChangesetsRolledback.fromChangesetList(changeSets));
         }
@@ -117,7 +113,7 @@ public class RollbackCommandStep extends AbstractCommandStep {
         }
     }
 
-    private static List<ChangeSet> determineRollbacks(Database database, ChangeLogIterator logIterator, Contexts contexts, LabelExpression labelExpression)
+    private static List<ChangeSet> determineRollbacks(Database database, ChangeLogIterator logIterator, ChangeLogParameters changeLogParameters)
             throws LiquibaseException {
         List<ChangeSet> changeSetsToRollback = new ArrayList<>();
         logIterator.run(new ChangeSetVisitor() {
@@ -131,12 +127,12 @@ public class RollbackCommandStep extends AbstractCommandStep {
                               Set<ChangeSetFilterResult> filterResults) throws LiquibaseException {
                 changeSetsToRollback.add(changeSet);
             }
-        }, new RuntimeEnvironment(database, contexts, labelExpression));
+        }, new RuntimeEnvironment(database, changeLogParameters.getContexts(), changeLogParameters.getLabels()));
         return changeSetsToRollback;
     }
 
     private static void executeRollbackScript(Database database, String rollbackScript, List<ChangeSet> changeSets,
-                                              DatabaseChangeLog changelog, ChangeLogParameters changeLogParameters) throws LiquibaseException {
+                                              DatabaseChangeLog changelog, ChangeLogParameters changeLogParameters, ChangeExecListener changeExecListener) throws LiquibaseException {
         final Executor executor = Scope.getCurrentScope().getSingleton(ExecutorService.class).getExecutor("jdbc", database);
         String rollbackScriptContents;
         try {
@@ -155,11 +151,16 @@ public class RollbackCommandStep extends AbstractCommandStep {
         rollbackScriptContents = changeLogParameters.expandExpressions(rollbackScriptContents, changelog);
 
         RawSQLChange rollbackChange = buildRawSQLChange(rollbackScriptContents);
+
         try {
+            sendRollbackMessages(changeSets, changelog, RollbackMessageType.WILL_ROLLBACK, database, changeExecListener, null);
             executor.execute(rollbackChange);
-            sendRollbackMessages(changeSets);
+            sendRollbackMessages(changeSets, changelog, RollbackMessageType.ROLLED_BACK,  database, changeExecListener, null);
         } catch (DatabaseException e) {
             Scope.getCurrentScope().getLog(RollbackCommandStep.class).severe("Error executing rollback script: " + e.getMessage());
+            if (changeExecListener != null) {
+                sendRollbackMessages(changeSets, changelog, RollbackMessageType.ROLLBACK_FAILED,  database, changeExecListener, e);
+            }
             throw new DatabaseException("Error executing rollback script", e);
         }
         database.commit();
@@ -172,10 +173,28 @@ public class RollbackCommandStep extends AbstractCommandStep {
         return rollbackChange;
     }
 
-    private static void sendRollbackMessages(List<ChangeSet> changeSets) {
-        for (ChangeSet changeSet : changeSets) {
-            Scope.getCurrentScope().getUI().sendMessage(String.format("Rolled Back Changeset: %s", changeSet.toString(false)));
-        }
+    private static void sendRollbackMessages(List<ChangeSet> changeSets,
+                                      DatabaseChangeLog databaseChangeLog,
+                                      RollbackMessageType messageType,
+                                      Database database,
+                                      ChangeExecListener changeExecListener,
+                                      Exception exception) {
+        changeSets.forEach(changeSet -> {
+            if (messageType == RollbackMessageType.WILL_ROLLBACK) {
+                changeExecListener.willRollback(changeSet, databaseChangeLog, database);
+            }
+            else if (messageType == RollbackMessageType.ROLLED_BACK) {
+                final String message = "Rolled Back Changeset:" + changeSet.toString(false);
+                Scope.getCurrentScope().getUI().sendMessage(message);
+                Scope.getCurrentScope().getLog(RollbackCommandStep.class).info(message);
+                changeExecListener.rolledBack(changeSet, databaseChangeLog, database);
+            }
+            else if (messageType == RollbackMessageType.ROLLBACK_FAILED) {
+                final String message = "Failed rolling back Changeset:" + changeSet.toString(false);
+                Scope.getCurrentScope().getUI().sendMessage(message);
+                changeExecListener.rollbackFailed(changeSet, databaseChangeLog, database, exception);
+            }
+        });
     }
 
     private static void removeRunStatus(List<ChangeSet> changeSets, Database database) throws LiquibaseException {
@@ -185,7 +204,7 @@ public class RollbackCommandStep extends AbstractCommandStep {
         }
     }
 
-    private static void handleRollbackException(Throwable t, String operationName) throws IOException {
+    private static void handleRollbackException(String operationName) throws IOException {
         try (MdcObject deploymentOutcomeMdc = Scope.getCurrentScope().addMdcValue(MdcKey.DEPLOYMENT_OUTCOME, MdcValue.COMMAND_FAILED)) {
             Scope.getCurrentScope().getLog(RollbackCommandStep.class).info(operationName + " command encountered an exception.");
         }
@@ -193,7 +212,7 @@ public class RollbackCommandStep extends AbstractCommandStep {
 
     @Override
     public List<Class<?>> requiredDependencies() {
-        return Arrays.asList(DatabaseChangeLog.class, LockService.class);
+        return Arrays.asList(DatabaseChangeLog.class, LockService.class, ChangeExecListener.class);
     }
 
     @Override
