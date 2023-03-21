@@ -9,6 +9,8 @@ public class MdcKey {
     public static final String LIQUIBASE_OPERATION = "liquibaseOperation";
     public static final String LIQUIBASE_TARGET_URL = "liquibaseTargetUrl";
     public static final String LIQUIBASE_REF_URL = "liquibaseRefUrl";
+    public static final String LIQUIBASE_CATALOG_NAME = "liquibaseCatalogName";
+    public static final String LIQUIBASE_SCHEMA_NAME = "liquibaseSchemaName";
     public static final String CHANGESET_OPERATION_START_TIME = "changesetOperationStart";
     public static final String CHANGESET_OPERATION_STOP_TIME = "changesetOperationStop";
     public static final String CHANGESET_SQL = "changesetSql";
