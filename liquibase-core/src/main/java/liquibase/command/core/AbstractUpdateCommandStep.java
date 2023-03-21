@@ -61,6 +61,7 @@ public abstract class AbstractUpdateCommandStep extends AbstractCommandStep impl
 
         LockService lockService = (LockService) commandScope.getDependency(LockService.class);
         DefaultChangeExecListener defaultChangeExecListener = new DefaultChangeExecListener();
+        resultsBuilder.addResult(DEFAULT_CHANGE_EXEC_LISTENER_RESULT_KEY, defaultChangeExecListener);
         try {
             DatabaseChangeLog databaseChangeLog = (DatabaseChangeLog) commandScope.getDependency(DatabaseChangeLog.class);
             if (isUpToDate(commandScope, database, databaseChangeLog, contexts, labelExpression, resultsBuilder.getOutputStream())) {
@@ -82,7 +83,6 @@ public abstract class AbstractUpdateCommandStep extends AbstractCommandStep impl
             ChangeLogIterator shouldRunIterator = getStatusChangelogIterator(commandScope, database, contexts, labelExpression, databaseChangeLog);
             shouldRunIterator.run(statusVisitor, new RuntimeEnvironment(database, contexts, labelExpression));
 
-            resultsBuilder.addResult(DEFAULT_CHANGE_EXEC_LISTENER_RESULT_KEY, defaultChangeExecListener);
             ChangeLogIterator runChangeLogIterator = getStandardChangelogIterator(commandScope, database, contexts, labelExpression, databaseChangeLog);
             CompositeLogService compositeLogService = new CompositeLogService(true);
             HashMap<String, Object> scopeValues = new HashMap<>();
