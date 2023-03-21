@@ -112,9 +112,6 @@ Optional Args:
             ]
         }
 
-        expectedUI = [
-            CommandTests.assertNotContains("WARNING: The changelog file specified is not registered with any Liquibase Hub project")
-        ]
         expectedResults = [
                 statusCode   : 0,
         ]

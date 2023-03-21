@@ -2224,7 +2224,6 @@ public class Main {
         private static final String INCLUDE_OBJECTS = "includeObjects";
         private static final String INCLUDE_SCHEMA = "includeSchema";
         private static final String INCLUDE_TABLESPACE = "includeTablespace";
-        private static final String DEACTIVATE = "deactivate";
         private static final String OUTPUT_SCHEMAS_AS = "outputSchemasAs";
         private static final String REFERENCE_DEFAULT_CATALOG_NAME = "referenceDefaultCatalogName";
         private static final String REFERENCE_DEFAULT_SCHEMA_NAME = "referenceDefaultSchemaName";
