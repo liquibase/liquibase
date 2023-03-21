@@ -10,12 +10,9 @@ import liquibase.changelog.visitor.ChangeExecListener;
 import liquibase.changelog.visitor.ChangeLogSyncVisitor;
 import liquibase.changelog.visitor.DefaultChangeExecListener;
 import liquibase.command.*;
-import liquibase.command.core.helpers.DatabaseChangelogCommandStep;
 import liquibase.database.Database;
 import liquibase.exception.DatabaseException;
 import liquibase.lockservice.LockService;
-import liquibase.logging.core.BufferedLogService;
-import liquibase.logging.core.CompositeLogService;
 
 import java.util.Arrays;
 import java.util.List;
@@ -53,11 +50,8 @@ public class ChangelogSyncCommandStep extends AbstractCommandStep {
         final ChangeLogParameters changeLogParameters = (ChangeLogParameters) commandScope.getDependency(ChangeLogParameters.class);
 
         ChangeLogIterator runChangeLogIterator = buildChangeLogIterator(tag, changeLog, changeLogParameters.getContexts(), changeLogParameters.getLabels(), database);
-        CompositeLogService compositeLogService = new CompositeLogService(true);
-
-        Scope.child(Scope.Attr.logService.name(), compositeLogService, () ->
-                runChangeLogIterator.run(new ChangeLogSyncVisitor(database, new DefaultChangeExecListener()),
-                new RuntimeEnvironment(database, changeLogParameters.getContexts(), changeLogParameters.getLabels())));
+        runChangeLogIterator.run(new ChangeLogSyncVisitor(database, new DefaultChangeExecListener()),
+                new RuntimeEnvironment(database, changeLogParameters.getContexts(), changeLogParameters.getLabels()));
     }
 
     private ChangeLogIterator buildChangeLogIterator(String tag, DatabaseChangeLog changeLog, Contexts contexts,

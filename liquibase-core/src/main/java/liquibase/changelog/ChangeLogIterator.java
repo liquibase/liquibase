@@ -14,7 +14,6 @@ import liquibase.exception.UnexpectedLiquibaseException;
 import liquibase.exception.ValidationErrors;
 import liquibase.executor.Executor;
 import liquibase.executor.ExecutorService;
-import liquibase.logging.core.CompositeLogService;
 import liquibase.util.StringUtil;
 
 import java.util.*;
@@ -89,7 +88,6 @@ public class ChangeLogIterator {
                         }
 
                         boolean finalShouldVisit = shouldVisit;
-                        CompositeLogService compositeLogService = new CompositeLogService(true);
                         Scope.child(Scope.Attr.changeSet.name(), changeSet, () -> {
                             if (finalShouldVisit) {
                                 //
@@ -101,7 +99,6 @@ public class ChangeLogIterator {
                                 }
 
                                 Map<String, Object> values = new HashMap<>();
-                                values.put(Scope.Attr.logService.name(), compositeLogService);
                                 Scope.child(values, () -> visitor.visit(changeSet, databaseChangeLog, env.getTargetDatabase(), reasonsAccepted));
                                 markSeen(changeSet);
                             } else {
