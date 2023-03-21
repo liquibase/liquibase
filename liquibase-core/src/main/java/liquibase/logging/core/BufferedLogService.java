@@ -12,6 +12,7 @@ import java.util.Date;
 import java.util.List;
 import java.util.logging.Level;
 
+@Deprecated
 public class BufferedLogService extends AbstractLogService {
     //
     // Truncate the return value at 10MB = 10,000,000 bytes

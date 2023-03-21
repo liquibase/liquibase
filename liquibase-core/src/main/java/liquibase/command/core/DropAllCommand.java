@@ -8,11 +8,6 @@ import liquibase.command.*;
 import liquibase.database.Database;
 import liquibase.exception.LiquibaseException;
 import liquibase.executor.ExecutorService;
-import liquibase.hub.HubConfiguration;
-import liquibase.hub.HubService;
-import liquibase.hub.HubServiceFactory;
-import liquibase.hub.LiquibaseHubException;
-import liquibase.hub.model.HubChangeLog;
 import liquibase.lockservice.LockServiceFactory;
 import liquibase.logging.Logger;
 import liquibase.util.StringUtil;
@@ -29,7 +24,6 @@ public class DropAllCommand extends AbstractCommand<CommandResult> {
     private Database database;
     private CatalogAndSchema[] schemas;
     private String changeLogFile;
-    private UUID hubConnectionId;
     private Liquibase liquibase;
 
     @Override
@@ -89,40 +83,16 @@ public class DropAllCommand extends AbstractCommand<CommandResult> {
         this.changeLogFile = changeLogFile;
     }
 
-    public void setHubConnectionId(String hubConnectionIdString) {
-        if (hubConnectionIdString == null) {
-            return;
-        }
-        this.hubConnectionId = UUID.fromString(hubConnectionIdString);
-    }
-
     @Override
     public CommandResult run() throws Exception {
         final CommandScope commandScope = new CommandScope("dropAllInternal");
         commandScope.addArgumentValue(InternalDropAllCommandStep.CHANGELOG_ARG, this.liquibase.getDatabaseChangeLog());
         commandScope.addArgumentValue(InternalDropAllCommandStep.CHANGELOG_FILE_ARG, this.changeLogFile);
         commandScope.addArgumentValue(InternalDropAllCommandStep.DATABASE_ARG, this.database);
-        commandScope.addArgumentValue(InternalDropAllCommandStep.HUB_CONNECTION_ID_ARG, this.hubConnectionId);
         commandScope.addArgumentValue(InternalDropAllCommandStep.SCHEMAS_ARG, this.schemas);
 
         final CommandResults results = commandScope.execute();
 
         return new CommandResult("All objects dropped from " + database.getConnection().getConnectionUserName() + "@" + database.getConnection().getURL());
     }
-
-    protected void checkLiquibaseTables(boolean updateExistingNullChecksums, DatabaseChangeLog databaseChangeLog, Contexts contexts, LabelExpression labelExpression) throws LiquibaseException {
-        ChangeLogHistoryService changeLogHistoryService = ChangeLogHistoryServiceFactory.getInstance().getChangeLogService(database);
-        changeLogHistoryService.init();
-        if (updateExistingNullChecksums) {
-            changeLogHistoryService.upgradeChecksums(databaseChangeLog, contexts, labelExpression);
-        }
-        LockServiceFactory.getInstance().getLockService(database).init();
-    }
-
-    protected void resetServices() {
-        LockServiceFactory.getInstance().resetAll();
-        ChangeLogHistoryServiceFactory.getInstance().resetAll();
-        Scope.getCurrentScope().getSingleton(ExecutorService.class).reset();
-    }
-
 }

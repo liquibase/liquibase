@@ -206,7 +206,6 @@
                           osgi.serviceloader; osgi.serviceloader=liquibase.executor.Executor,
                           osgi.serviceloader; osgi.serviceloader=liquibase.structure.DatabaseObject,
                           osgi.serviceloader; osgi.serviceloader=liquibase.parser.SnapshotParser,
-                          osgi.serviceloader; osgi.serviceloader=liquibase.hub.HubService,
                           osgi.serviceloader; osgi.serviceloader=liquibase.command.CommandStep,
                           osgi.serviceloader; osgi.serviceloader=liquibase.sqlgenerator.SqlGenerator,
                           osgi.serviceloader; osgi.serviceloader=liquibase.logging.mdc.MdcManager,

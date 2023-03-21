@@ -14,8 +14,6 @@ import liquibase.exception.UnexpectedLiquibaseException;
 import liquibase.exception.ValidationErrors;
 import liquibase.executor.Executor;
 import liquibase.executor.ExecutorService;
-import liquibase.logging.core.BufferedLogService;
-import liquibase.logging.core.CompositeLogService;
 import liquibase.util.StringUtil;
 
 import java.util.*;
@@ -58,7 +56,6 @@ public class ChangeLogIterator {
                 return "";
             }
         });
-        this.databaseChangeLog.setChangeLogId(changeLog.getChangeLogId());
         this.changeSetFilters = Arrays.asList(changeSetFilters);
     }
 
@@ -91,8 +88,6 @@ public class ChangeLogIterator {
                         }
 
                         boolean finalShouldVisit = shouldVisit;
-                        BufferedLogService bufferLog = new BufferedLogService();
-                        CompositeLogService compositeLogService = new CompositeLogService(true, bufferLog);
                         Scope.child(Scope.Attr.changeSet.name(), changeSet, () -> {
                             if (finalShouldVisit) {
                                 //
@@ -103,16 +98,7 @@ public class ChangeLogIterator {
                                     validateChangeSetExecutor(changeSet, env);
                                 }
 
-                                //
-                                // Execute the visit call in its own scope with a new
-                                // CompositeLogService and BufferLogService in order
-                                // to capture the logging for just this changeset.  The
-                                // log is sent to Hub if available
-                                //
-                                Map<String, Object> values = new HashMap<>();
-                                values.put(Scope.Attr.logService.name(), compositeLogService);
-                                values.put(BufferedLogService.class.getName(), bufferLog);
-                                Scope.child(values, () -> visitor.visit(changeSet, databaseChangeLog, env.getTargetDatabase(), reasonsAccepted));
+                                visitor.visit(changeSet, databaseChangeLog, env.getTargetDatabase(), reasonsAccepted);
                                 markSeen(changeSet);
                             } else {
                                 if (visitor instanceof SkippedChangeSetVisitor) {

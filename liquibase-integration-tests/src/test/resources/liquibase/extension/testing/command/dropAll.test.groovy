@@ -24,10 +24,6 @@ Optional Args:
     Default: null
   driverPropertiesFile (String) The JDBC driver properties file
     Default: null
-  hubConnectionId (UUID) Used to identify the specific Connection in which to record or extract data at Liquibase Hub. Available in your Liquibase Hub Project at https://hub.liquibase.com.
-    Default: null
-  hubProjectId (UUID) Used to identify the specific Project in which to record at Liquibase Hub. Available in your Liquibase Hub account at https://hub.liquibase.com.
-    Default: null
   password (String) Password to use to connect to the database
     Default: null
     OBFUSCATED
@@ -116,9 +112,6 @@ Optional Args:
             ]
         }
 
-        expectedUI = [
-            CommandTests.assertNotContains("WARNING: The changelog file specified is not registered with any Liquibase Hub project")
-        ]
         expectedResults = [
                 statusCode   : 0,
         ]

@@ -14,7 +14,6 @@ import liquibase.command.core.helpers.PreCompareCommandStep;
 import liquibase.database.Database;
 import liquibase.database.DatabaseConnection;
 import liquibase.database.DatabaseFactory;
-import liquibase.database.ObjectQuotingStrategy;
 import liquibase.diff.DiffGeneratorFactory;
 import liquibase.diff.DiffResult;
 import liquibase.diff.compare.CompareControl;
@@ -26,23 +25,16 @@ import liquibase.exception.LockException;
 import liquibase.executor.Executor;
 import liquibase.executor.ExecutorService;
 import liquibase.executor.LoggingExecutor;
-import liquibase.hub.*;
-import liquibase.hub.listener.HubChangeExecListener;
-import liquibase.hub.model.Connection;
-import liquibase.hub.model.HubChangeLog;
-import liquibase.hub.model.Operation;
 import liquibase.io.WriterOutputStream;
 import liquibase.lockservice.DatabaseChangeLogLock;
 import liquibase.lockservice.LockService;
 import liquibase.lockservice.LockServiceFactory;
+import liquibase.logging.LogService;
 import liquibase.logging.Logger;
-import liquibase.logging.core.BufferedLogService;
-import liquibase.logging.core.CompositeLogService;
 import liquibase.logging.mdc.MdcKey;
 import liquibase.logging.mdc.MdcObject;
 import liquibase.logging.mdc.MdcValue;
 import liquibase.logging.mdc.customobjects.ChangesetsRolledback;
-import liquibase.logging.mdc.customobjects.ChangesetsUpdated;
 import liquibase.parser.ChangeLogParser;
 import liquibase.parser.ChangeLogParserFactory;
 import liquibase.parser.core.xml.XMLChangeLogSAXParser;
@@ -53,13 +45,10 @@ import liquibase.serializer.ChangeLogSerializer;
 import liquibase.structure.DatabaseObject;
 import liquibase.util.*;
 
-import javax.xml.parsers.ParserConfigurationException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.PrintStream;
 import java.io.Writer;
-import java.text.DateFormat;
-import java.io.*;
 import java.util.*;
 import java.util.function.Supplier;
 
@@ -83,7 +72,6 @@ public class Liquibase implements AutoCloseable {
     private ChangeExecListener changeExecListener;
     private ChangeLogSyncListener changeLogSyncListener;
     private final DefaultChangeExecListener defaultChangeExecListener = new DefaultChangeExecListener();
-    private UUID hubConnectionId;
     private final Map<String, Boolean> upToDateFastCheck = new HashMap<>();
 
     private enum RollbackMessageType {
@@ -136,14 +124,6 @@ public class Liquibase implements AutoCloseable {
         this.resourceAccessor = resourceAccessor;
         this.database = database;
         this.changeLogParameters = new ChangeLogParameters(database);
-    }
-
-    public UUID getHubConnectionId() {
-        return hubConnectionId;
-    }
-
-    public void setHubConnectionId(UUID hubConnectionId) {
-        this.hubConnectionId = hubConnectionId;
     }
 
     /**
@@ -287,69 +267,6 @@ public class Liquibase implements AutoCloseable {
         }
         return upToDateFastCheck.get(cacheKey);
     }
-
-    /**
-     *
-     * Create or retrieve the Connection object
-     *
-     * @param   changeLog              Database changelog
-     * @return  Connection
-     * @throws  LiquibaseHubException  Thrown by HubService
-     *
-     */
-    public Connection getConnection(DatabaseChangeLog changeLog) throws LiquibaseHubException {
-        //
-        // If our current Executor is a LoggingExecutor then just return since we will not update Hub
-        //
-        Executor executor = Scope.getCurrentScope().getSingleton(ExecutorService.class).getExecutor("jdbc", database);
-        if (executor instanceof LoggingExecutor) {
-            return null;
-        }
-        String changeLogId = changeLog.getChangeLogId();
-        HubUpdater hubUpdater = new HubUpdater(new Date(), changeLog, database);
-        if (hubUpdater.hubIsNotAvailable(changeLogId)) {
-            return null;
-        }
-
-        //
-        // Warn about the situation where there is a changeLog ID, but no API key
-        //
-        if (StringUtil.isEmpty(HubConfiguration.LIQUIBASE_HUB_API_KEY.getCurrentValue()) && changeLogId != null) {
-            return null;
-        }
-        Connection connection;
-        final HubService hubService = Scope.getCurrentScope().getSingleton(HubServiceFactory.class).getService();
-        if (getHubConnectionId() == null) {
-            HubChangeLog hubChangeLog = hubService.getHubChangeLog(UUID.fromString(changeLogId), "*");
-            if (hubChangeLog == null) {
-                Scope.getCurrentScope().getLog(getClass()).warning(
-                    "Retrieving Hub Change Log failed for Changelog ID: " + changeLogId);
-                return null;
-            }
-            if (hubChangeLog.isDeleted()) {
-                //
-                // Complain and stop the operation
-                //
-                String message =
-                    "\n" +
-                        "The operation did not complete and will not be reported to Hub because the\n" +  "" +
-                        "registered changelog has been deleted by someone in your organization.\n" +
-                        "Learn more at http://hub.liquibase.com.";
-                throw new LiquibaseHubException(message);
-            }
-
-            Connection exampleConnection = new Connection();
-            exampleConnection.setProject(hubChangeLog.getProject());
-            exampleConnection.setJdbcUrl(Liquibase.this.database.getConnection().getURL());
-            connection = hubService.getConnection(exampleConnection, true);
-
-            setHubConnectionId(connection.getId());
-        } else {
-            connection = hubService.getConnection(new Connection().setId(getHubConnectionId()), true);
-        }
-        return connection;
-    }
-
 
     public DatabaseChangeLog getDatabaseChangeLog() throws LiquibaseException {
         return getDatabaseChangeLog(false);
@@ -674,54 +591,15 @@ public class Liquibase implements AutoCloseable {
                 LockService lockService = LockServiceFactory.getInstance().getLockService(database);
                 lockService.waitForLock();
 
-                Operation rollbackOperation = null;
                 final String operationCommand = "rollback-count";
-                BufferedLogService bufferLog = new BufferedLogService();
                 DatabaseChangeLog changeLog = null;
-                Date startTime = new Date();
-                HubUpdater hubUpdater = null;
                 try {
                     changeLog = getDatabaseChangeLog();
                     checkLiquibaseTables(false, changeLog, contexts, labelExpression);
 
                     changeLog.validate(database, contexts, labelExpression);
 
-                    //
-                    // Let the user know that they can register for Hub
-                    //
-                    hubUpdater = new HubUpdater(startTime, changeLog, database);
-
-                    //
-                    // Create an iterator which will be used with a ListVisitor
-                    // to grab the list of changesets for the update
-                    //
-                    ChangeLogIterator listLogIterator = new ChangeLogIterator(database.getRanChangeSetList(), changeLog,
-                            new AlreadyRanChangeSetFilter(database.getRanChangeSetList()),
-                            new ContextChangeSetFilter(contexts),
-                            new LabelChangeSetFilter(labelExpression),
-                            new DbmsChangeSetFilter(database),
-                            new IgnoreChangeSetFilter(),
-                            new CountChangeSetFilter(changesToRollback));
-
-                    //
-                    // Create or retrieve the Connection
-                    // Make sure the Hub is available here by checking the return
-                    //
-                    Connection connection = getConnection(changeLog);
-                    if (connection != null) {
-                        rollbackOperation = hubUpdater.preUpdateHub("ROLLBACK", operationCommand, connection, changeLogFile, contexts, labelExpression, listLogIterator);
-                    }
-
-                    //
-                    // If we are doing Hub then set up a HubChangeExecListener
-                    //
-                    if (connection != null) {
-                        changeExecListener = new HubChangeExecListener(rollbackOperation, changeExecListener);
-                    }
-
-                    //
                     // Create another iterator to run
-                    //
                     ChangeLogIterator logIterator = new ChangeLogIterator(database.getRanChangeSetList(), changeLog,
                             new AlreadyRanChangeSetFilter(database.getRanChangeSetList()),
                             new ContextChangeSetFilter(contexts),
@@ -730,10 +608,10 @@ public class Liquibase implements AutoCloseable {
                             new IgnoreChangeSetFilter(),
                             new CountChangeSetFilter(changesToRollback));
 
-                    doRollback(bufferLog, rollbackScript, logIterator, contexts, labelExpression, hubUpdater, rollbackOperation);
+                    doRollback(rollbackScript, logIterator, contexts, labelExpression);
                 }
                 catch (Throwable t) {
-                    handleRollbackException(t, hubUpdater, rollbackOperation, bufferLog, operationCommand);
+                    handleRollbackException(t, operationCommand);
                     throw t;
                 } finally {
                     handleRollbackFinally(lockService);
@@ -746,26 +624,17 @@ public class Liquibase implements AutoCloseable {
      * Actually perform the rollback operation. Determining which changesets to roll back is the responsibility of the
      * logIterator.
      */
-    private void doRollback(BufferedLogService bufferLog, String rollbackScript, ChangeLogIterator logIterator, Contexts contexts, LabelExpression labelExpression, HubUpdater hubUpdater, Operation rollbackOperation) throws Exception {
-        CompositeLogService compositeLogService = new CompositeLogService(true, bufferLog);
+    private void doRollback(String rollbackScript, ChangeLogIterator logIterator, Contexts contexts, LabelExpression labelExpression) throws Exception {
         if (rollbackScript == null) {
             List<ChangesetsRolledback.ChangeSet> processedChangesets = new ArrayList<>();
-            Scope.child(Scope.Attr.logService.name(), compositeLogService, () -> {
-                logIterator.run(createRollbackVisitor(processedChangesets), new RuntimeEnvironment(database, contexts, labelExpression));
-            });
+            logIterator.run(createRollbackVisitor(processedChangesets), new RuntimeEnvironment(database, contexts, labelExpression));
             Scope.getCurrentScope().addMdcValue(MdcKey.CHANGESETS_ROLLED_BACK, new ChangesetsRolledback(processedChangesets), false);
         } else {
             List<ChangeSet> changeSets = determineRollbacks(logIterator, contexts, labelExpression);
-            Map<String, Object> values = new HashMap<>();
-            values.put(Scope.Attr.logService.name(), compositeLogService);
-            values.put(BufferedLogService.class.getName(), bufferLog);
-            Scope.child(values, () -> {
-                executeRollbackScript(rollbackScript, changeSets, contexts, labelExpression);
-            });
+            executeRollbackScript(rollbackScript, changeSets, contexts, labelExpression);
             removeRunStatus(changeSets, contexts, labelExpression);
             Scope.getCurrentScope().addMdcValue(MdcKey.CHANGESETS_ROLLED_BACK, ChangesetsRolledback.fromChangesetList(changeSets));
         }
-        hubUpdater.postUpdateHub(rollbackOperation, bufferLog);
         try (MdcObject deploymentOutcomeMdc = Scope.getCurrentScope().getMdcManager().put(MdcKey.DEPLOYMENT_OUTCOME, MdcValue.COMMAND_SUCCESSFUL)) {
             Scope.getCurrentScope().getLog(getClass()).info("Rollback command completed successfully.");
         }
@@ -823,7 +692,6 @@ public class Liquibase implements AutoCloseable {
         RawSQLChange rollbackChange = buildRawSQLChange(rollbackScriptContents);
 
         try {
-            ((HubChangeExecListener)changeExecListener).setRollbackScriptContents(rollbackScriptContents);
             sendRollbackMessages(changeSets, changelog, RollbackMessageType.WILL_ROLLBACK, contexts, labelExpression, null);
             executor.execute(rollbackChange);
             sendRollbackMessages(changeSets, changelog, RollbackMessageType.ROLLED_BACK, contexts, labelExpression, null);
@@ -957,12 +825,8 @@ public class Liquibase implements AutoCloseable {
                 LockService lockService = LockServiceFactory.getInstance().getLockService(database);
                 lockService.waitForLock();
 
-                Operation rollbackOperation = null;
                 final String operationCommand = "rollback";
-                BufferedLogService bufferLog = new BufferedLogService();
                 DatabaseChangeLog changeLog = null;
-                Date startTime = new Date();
-                HubUpdater hubUpdater = null;
 
                 try {
 
@@ -971,43 +835,11 @@ public class Liquibase implements AutoCloseable {
 
                     changeLog.validate(database, contexts, labelExpression);
 
-                    //
-                    // Let the user know that they can register for Hub
-                    //
-                    hubUpdater = new HubUpdater(startTime, changeLog, database);
-
-                    //
                     // Create an iterator which will be used with a ListVisitor
                     // to grab the list of changesets for the update
-                    //
                     List<RanChangeSet> ranChangeSetList = database.getRanChangeSetList();
-                    ChangeLogIterator listLogIterator = new ChangeLogIterator(ranChangeSetList, changeLog,
-                            new AfterTagChangeSetFilter(tagToRollBackTo, ranChangeSetList),
-                            new AlreadyRanChangeSetFilter(ranChangeSetList),
-                            new ContextChangeSetFilter(contexts),
-                            new LabelChangeSetFilter(labelExpression),
-                            new IgnoreChangeSetFilter(),
-                            new DbmsChangeSetFilter(database));
 
-                    //
-                    // Create or retrieve the Connection
-                    // Make sure the Hub is available here by checking the return
-                    //
-                    Connection connection = getConnection(changeLog);
-                    if (connection != null) {
-                        rollbackOperation = hubUpdater.preUpdateHub("ROLLBACK", operationCommand, connection, changeLogFile, contexts, labelExpression, listLogIterator);
-                    }
-
-                    //
-                    // If we are doing Hub then set up a HubChangeExecListener
-                    //
-                    if (connection != null) {
-                        changeExecListener = new HubChangeExecListener(rollbackOperation, changeExecListener);
-                    }
-
-                    //
                     // Create another iterator to run
-                    //
                     ChangeLogIterator logIterator = new ChangeLogIterator(ranChangeSetList, changeLog,
                             new AfterTagChangeSetFilter(tagToRollBackTo, ranChangeSetList),
                             new AlreadyRanChangeSetFilter(ranChangeSetList),
@@ -1016,10 +848,10 @@ public class Liquibase implements AutoCloseable {
                             new IgnoreChangeSetFilter(),
                             new DbmsChangeSetFilter(database));
 
-                    doRollback(bufferLog, rollbackScript, logIterator, contexts, labelExpression, hubUpdater, rollbackOperation);
+                    doRollback(rollbackScript, logIterator, contexts, labelExpression);
                 }
                 catch (Throwable t) {
-                    handleRollbackException(t, hubUpdater, rollbackOperation, bufferLog, operationCommand);
+                    handleRollbackException(t, operationCommand);
                     throw t;
                 } finally {
                     handleRollbackFinally(lockService);
@@ -1108,55 +940,19 @@ public class Liquibase implements AutoCloseable {
                 LockService lockService = LockServiceFactory.getInstance().getLockService(database);
                 lockService.waitForLock();
 
-                Operation rollbackOperation = null;
                 final String operationCommand = "rollback-to-date";
-                BufferedLogService bufferLog = new BufferedLogService();
                 DatabaseChangeLog changeLog = null;
-                Date startTime = new Date();
-                HubUpdater hubUpdater = null;
 
                 try {
                     changeLog = getDatabaseChangeLog();
                     checkLiquibaseTables(false, changeLog, contexts, labelExpression);
                     changeLog.validate(database, contexts, labelExpression);
 
-                    //
-                    // Let the user know that they can register for Hub
-                    //
-                    hubUpdater = new HubUpdater(startTime, changeLog, database);
-
-                    //
                     // Create an iterator which will be used with a ListVisitor
                     // to grab the list of changesets for the update
-                    //
                     List<RanChangeSet> ranChangeSetList = database.getRanChangeSetList();
-                    ChangeLogIterator listLogIterator = new ChangeLogIterator(ranChangeSetList, changeLog,
-                            new ExecutedAfterChangeSetFilter(dateToRollBackTo, ranChangeSetList),
-                            new AlreadyRanChangeSetFilter(ranChangeSetList),
-                            new ContextChangeSetFilter(contexts),
-                            new LabelChangeSetFilter(labelExpression),
-                            new IgnoreChangeSetFilter(),
-                            new DbmsChangeSetFilter(database));
 
-                    //
-                    // Create or retrieve the Connection
-                    // Make sure the Hub is available here by checking the return
-                    //
-                    Connection connection = getConnection(changeLog);
-                    if (connection != null) {
-                        rollbackOperation = hubUpdater.preUpdateHub("ROLLBACK", operationCommand, connection, changeLogFile, contexts, labelExpression, listLogIterator);
-                    }
-
-                    //
-                    // If we are doing Hub then set up a HubChangeExecListener
-                    //
-                    if (connection != null) {
-                        changeExecListener = new HubChangeExecListener(rollbackOperation, changeExecListener);
-                    }
-
-                    //
                     // Create another iterator to run
-                    //
                     ChangeLogIterator logIterator = new ChangeLogIterator(ranChangeSetList, changeLog,
                             new ExecutedAfterChangeSetFilter(dateToRollBackTo, ranChangeSetList),
                             new AlreadyRanChangeSetFilter(ranChangeSetList),
@@ -1165,10 +961,10 @@ public class Liquibase implements AutoCloseable {
                             new IgnoreChangeSetFilter(),
                             new DbmsChangeSetFilter(database));
 
-                    doRollback(bufferLog, rollbackScript, logIterator, contexts, labelExpression, hubUpdater, rollbackOperation);
+                    doRollback(rollbackScript, logIterator, contexts, labelExpression);
                 }
                 catch (Throwable t) {
-                    handleRollbackException(t, hubUpdater, rollbackOperation, bufferLog, operationCommand);
+                    handleRollbackException(t, operationCommand);
                     throw t;
                 } finally {
                     handleRollbackFinally(lockService);
@@ -1181,10 +977,7 @@ public class Liquibase implements AutoCloseable {
     /**
      * Handle an exception thrown by a rollback method.
      */
-    private void handleRollbackException(Throwable t, HubUpdater hubUpdater, Operation rollbackOperation, BufferedLogService bufferLog, String operationName) throws IOException {
-        if (hubUpdater != null) {
-            hubUpdater.postUpdateHubExceptionHandling(rollbackOperation, bufferLog, t.getMessage());
-        }
+    private void handleRollbackException(Throwable t, String operationName) throws IOException {
         try (MdcObject deploymentOutcomeMdc = Scope.getCurrentScope().addMdcValue(MdcKey.DEPLOYMENT_OUTCOME, MdcValue.COMMAND_FAILED)) {
             Scope.getCurrentScope().getLog(getClass()).info(operationName + " command encountered an exception.");
         }
@@ -1259,7 +1052,6 @@ public class Liquibase implements AutoCloseable {
             new CommandScope(commandToRun)
                     .addArgumentValue(DbUrlConnectionCommandStep.DATABASE_ARG, Liquibase.this.getDatabase())
                     .addArgumentValue(DatabaseChangelogCommandStep.CHANGELOG_FILE_ARG, changeLogFile)
-                    .addArgumentValue(ChangelogSyncCommandStep.HUB_CHANGE_EXEC_LISTENER_ARG, changeExecListener)
                     .addArgumentValue(DatabaseChangelogCommandStep.CONTEXTS_ARG, (contexts != null? contexts.toString() : null))
                     .addArgumentValue(DatabaseChangelogCommandStep.LABEL_FILTER_ARG, (labelExpression != null ? labelExpression.getOriginalString() : null))
                     .addArgumentValue(ChangelogSyncToTagCommandStep.TAG_ARG, tag)
@@ -1285,7 +1077,6 @@ public class Liquibase implements AutoCloseable {
             new CommandScope(commandToRun)
                     .addArgumentValue(DbUrlConnectionCommandStep.DATABASE_ARG, Liquibase.this.getDatabase())
                     .addArgumentValue(DatabaseChangelogCommandStep.CHANGELOG_FILE_ARG, changeLogFile)
-                    .addArgumentValue(ChangelogSyncSqlCommandStep.HUB_CHANGE_EXEC_LISTENER_ARG, changeExecListener)
                     .addArgumentValue(DatabaseChangelogCommandStep.CONTEXTS_ARG, (contexts != null? contexts.toString() : null))
                     .addArgumentValue(DatabaseChangelogCommandStep.LABEL_FILTER_ARG, (labelExpression != null ? labelExpression.getOriginalString() : null))
                     .addArgumentValue(ChangelogSyncToTagSqlCommandStep.TAG_ARG, tag)

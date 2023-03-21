@@ -9,8 +9,6 @@ complete -W \
   updateToTag \
   updateToTagSQL \
   'status --verbose' \
-  'registerChangeLog --changeLogFile=<changelogFile>' \
-  'syncHub --changeLogFile=<changelogFile>' \
   rollback \
   rollbackSQL \
   'rollbackOneChangeSet --changeSetAuthor=<author> --changeSetId=<id> --changeSetPath=<changelogFile> --force' \
