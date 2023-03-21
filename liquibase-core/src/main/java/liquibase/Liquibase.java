@@ -625,20 +625,13 @@ public class Liquibase implements AutoCloseable {
      * logIterator.
      */
     private void doRollback(String rollbackScript, ChangeLogIterator logIterator, Contexts contexts, LabelExpression labelExpression) throws Exception {
-        LogService logService = Scope.getCurrentScope().get(Scope.Attr.logService, LogService.class);
         if (rollbackScript == null) {
             List<ChangesetsRolledback.ChangeSet> processedChangesets = new ArrayList<>();
-            Scope.child(Scope.Attr.logService.name(), logService, () -> {
-                logIterator.run(createRollbackVisitor(processedChangesets), new RuntimeEnvironment(database, contexts, labelExpression));
-            });
+            logIterator.run(createRollbackVisitor(processedChangesets), new RuntimeEnvironment(database, contexts, labelExpression));
             Scope.getCurrentScope().addMdcValue(MdcKey.CHANGESETS_ROLLED_BACK, new ChangesetsRolledback(processedChangesets), false);
         } else {
             List<ChangeSet> changeSets = determineRollbacks(logIterator, contexts, labelExpression);
-            Map<String, Object> values = new HashMap<>();
-            values.put(Scope.Attr.logService.name(), logService);
-            Scope.child(values, () -> {
-                executeRollbackScript(rollbackScript, changeSets, contexts, labelExpression);
-            });
+            executeRollbackScript(rollbackScript, changeSets, contexts, labelExpression);
             removeRunStatus(changeSets, contexts, labelExpression);
             Scope.getCurrentScope().addMdcValue(MdcKey.CHANGESETS_ROLLED_BACK, ChangesetsRolledback.fromChangesetList(changeSets));
         }
