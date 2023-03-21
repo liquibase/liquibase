@@ -83,9 +83,7 @@ public abstract class AbstractUpdateCommandStep extends AbstractCommandStep impl
             shouldRunIterator.run(statusVisitor, new RuntimeEnvironment(database, contexts, labelExpression));
 
             ChangeLogIterator runChangeLogIterator = getStandardChangelogIterator(commandScope, database, contexts, labelExpression, databaseChangeLog);
-            HashMap<String, Object> scopeValues = new HashMap<>();
-            scopeValues.put("showSummary", getShowSummary(commandScope));
-            Scope.child(scopeValues, () -> {
+            Scope.child("showSummary", getShowSummary(commandScope), () -> {
                 runChangeLogIterator.run(new UpdateVisitor(database, defaultChangeExecListener), new RuntimeEnvironment(database, contexts, labelExpression));
                 ShowSummaryUtil.showUpdateSummary(databaseChangeLog, statusVisitor, resultsBuilder.getOutputStream());
             });

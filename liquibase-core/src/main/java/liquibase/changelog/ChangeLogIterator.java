@@ -98,8 +98,7 @@ public class ChangeLogIterator {
                                     validateChangeSetExecutor(changeSet, env);
                                 }
 
-                                Map<String, Object> values = new HashMap<>();
-                                Scope.child(values, () -> visitor.visit(changeSet, databaseChangeLog, env.getTargetDatabase(), reasonsAccepted));
+                                visitor.visit(changeSet, databaseChangeLog, env.getTargetDatabase(), reasonsAccepted);
                                 markSeen(changeSet);
                             } else {
                                 if (visitor instanceof SkippedChangeSetVisitor) {
