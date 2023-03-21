@@ -1221,7 +1221,7 @@ public class LiquibaseCommandLine {
                         continue;
                     }
                     final File file = new File(url.toURI());
-                    if (file.getName().equals("liquibase-core.jar")) {
+                    if (file.getName().equals("liquibase-standard.jar")) {
                         continue;
                     }
                     if (file.exists() && file.getName().toLowerCase().endsWith(".jar")) {
