@@ -447,10 +447,6 @@ public class Main {
     }
 
     private static boolean setupNeeded(Main main) throws CommandLineParsingException {
-        if (main.command.toLowerCase().startsWith(COMMANDS.REGISTER_CHANGELOG.toLowerCase()) ||
-                main.command.toLowerCase().startsWith(COMMANDS.DEACTIVATE_CHANGELOG.toLowerCase())) {
-            return false;
-        }
         if (!main.commandParams.contains("--help")) {
             return true;
         }
@@ -568,8 +564,6 @@ public class Main {
                 || (command.toLowerCase().startsWith(COMMANDS.ROLLBACK) &&
                 (!command.equalsIgnoreCase(COMMANDS.ROLLBACK_ONE_CHANGE_SET) &&
                         !command.equalsIgnoreCase(COMMANDS.ROLLBACK_ONE_UPDATE)))
-                || COMMANDS.REGISTER_CHANGELOG.equalsIgnoreCase(command)
-                || COMMANDS.DEACTIVATE_CHANGELOG.equalsIgnoreCase(command)
                 || COMMANDS.CALCULATE_CHECKSUM.equalsIgnoreCase(command)
                 || COMMANDS.STATUS.equalsIgnoreCase(command)
                 || COMMANDS.VALIDATE.equalsIgnoreCase(command)
@@ -605,8 +599,6 @@ public class Main {
                 || COMMANDS.ROLLBACK_SQL.equalsIgnoreCase(arg)
                 || COMMANDS.ROLLBACK_TO_DATE_SQL.equalsIgnoreCase(arg)
                 || COMMANDS.ROLLBACK_COUNT_SQL.equalsIgnoreCase(arg)
-                || COMMANDS.REGISTER_CHANGELOG.equalsIgnoreCase(arg)
-                || COMMANDS.DEACTIVATE_CHANGELOG.equalsIgnoreCase(arg)
                 || COMMANDS.FUTURE_ROLLBACK_SQL.equalsIgnoreCase(arg)
                 || COMMANDS.FUTURE_ROLLBACK_COUNT_SQL.equalsIgnoreCase(arg)
                 || COMMANDS.FUTURE_ROLLBACK_FROM_TAG_SQL.equalsIgnoreCase(arg)
@@ -1419,7 +1411,7 @@ public class Main {
         }
 
         Database database = null;
-        if (dbConnectionNeeded(command) && this.url != null) {
+        if (this.url != null) {
             database = CommandLineUtils.createDatabaseObject(fileOpener, this.url,
                     this.username, this.password, this.driver, this.defaultCatalogName, this.defaultSchemaName,
                     Boolean.parseBoolean(outputDefaultCatalog), Boolean.parseBoolean(outputDefaultSchema),
@@ -1956,11 +1948,6 @@ public class Main {
         return labelFilter;
     }
 
-    private boolean dbConnectionNeeded(String command) {
-        return !COMMANDS.REGISTER_CHANGELOG.equalsIgnoreCase(command) &&
-                !COMMANDS.DEACTIVATE_CHANGELOG.equalsIgnoreCase(command);
-    }
-
     private void loadChangeSetInfoToMap(Map<String, Object> argsMap) throws CommandLineParsingException {
         argsMap.put("changeSetId", getCommandParam(OPTIONS.CHANGE_SET_ID, null));
         argsMap.put("changeSetAuthor", getCommandParam(OPTIONS.CHANGE_SET_AUTHOR, null));
@@ -2193,8 +2180,6 @@ public class Main {
         private static final String ROLLBACK_ONE_CHANGE_SET_SQL = "rollbackOneChangeSetSQL";
         private static final String ROLLBACK_ONE_UPDATE = "rollbackOneUpdate";
         private static final String ROLLBACK_ONE_UPDATE_SQL = "rollbackOneUpdateSQL";
-        private static final String REGISTER_CHANGELOG = "registerChangeLog";
-        private static final String DEACTIVATE_CHANGELOG = "deactivateChangeLog";
         private static final String FORMATTED_DIFF = "formattedDiff";
         private static final String ROLLBACK = "rollback";
         private static final String ROLLBACK_COUNT = "rollbackCount";
