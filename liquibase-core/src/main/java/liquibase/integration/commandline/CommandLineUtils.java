@@ -191,17 +191,19 @@ public class CommandLineUtils {
     public static void doDiffToChangeLog(String changeLogFile,
                                          Database referenceDatabase,
                                          Database targetDatabase,
+                                         String author,
                                          DiffOutputControl diffOutputControl,
                                          ObjectChangeFilter objectChangeFilter,
                                          String snapshotTypes)
             throws LiquibaseException, IOException, ParserConfigurationException {
-        doDiffToChangeLog(changeLogFile, referenceDatabase, targetDatabase, diffOutputControl, objectChangeFilter,
+        doDiffToChangeLog(changeLogFile, referenceDatabase, targetDatabase, author, diffOutputControl, objectChangeFilter,
                 snapshotTypes, null);
     }
 
     public static void doDiffToChangeLog(String changeLogFile,
                                          Database referenceDatabase,
                                          Database targetDatabase,
+                                         String author,
                                          DiffOutputControl diffOutputControl,
                                          ObjectChangeFilter objectChangeFilter,
                                          String snapshotTypes,
@@ -219,7 +221,8 @@ public class CommandLineUtils {
                 .addArgumentValue(DiffChangelogCommandStep.CHANGELOG_FILE_ARG, changeLogFile)
                 .addArgumentValue(DiffOutputControlCommandStep.INCLUDE_CATALOG_ARG, diffOutputControl.getIncludeCatalog())
                 .addArgumentValue(DiffOutputControlCommandStep.INCLUDE_SCHEMA_ARG, diffOutputControl.getIncludeSchema())
-                .addArgumentValue(DiffOutputControlCommandStep.INCLUDE_TABLESPACE_ARG, diffOutputControl.getIncludeTablespace());
+                .addArgumentValue(DiffOutputControlCommandStep.INCLUDE_TABLESPACE_ARG, diffOutputControl.getIncludeTablespace())
+                .addArgumentValue(DiffChangelogCommandStep.AUTHOR_ARG, author);
         command.setOutput(System.out);
         try {
             command.execute();
