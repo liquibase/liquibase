@@ -38,7 +38,7 @@ public class LiquibaseLauncher {
         File liquibaseHome = new File(liquibaseHomeEnv);
 
         List<URL> urls = new ArrayList<>();
-        urls.add(new File(liquibaseHome, "internal/lib/liquibase-standard.jar").toURI().toURL()); //make sure liquibase-core.jar is first in the list
+        urls.add(new File(liquibaseHome, "internal/lib/liquibase-standard.jar").toURI().toURL()); //make sure liquibase-standard.jar is first in the list
 
         File[] libDirs = new File[]{
                 new File("./liquibase_libs"),
