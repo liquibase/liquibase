@@ -24,7 +24,6 @@ public class DropAllCommand extends AbstractCommand<CommandResult> {
     private Database database;
     private CatalogAndSchema[] schemas;
     private String changeLogFile;
-    private UUID hubConnectionId;
     private Liquibase liquibase;
 
     @Override
@@ -84,13 +83,6 @@ public class DropAllCommand extends AbstractCommand<CommandResult> {
         this.changeLogFile = changeLogFile;
     }
 
-    public void setHubConnectionId(String hubConnectionIdString) {
-        if (hubConnectionIdString == null) {
-            return;
-        }
-        this.hubConnectionId = UUID.fromString(hubConnectionIdString);
-    }
-
     @Override
     public CommandResult run() throws Exception {
         final CommandScope commandScope = new CommandScope("dropAllInternal");
@@ -103,20 +95,4 @@ public class DropAllCommand extends AbstractCommand<CommandResult> {
 
         return new CommandResult("All objects dropped from " + database.getConnection().getConnectionUserName() + "@" + database.getConnection().getURL());
     }
-
-    protected void checkLiquibaseTables(boolean updateExistingNullChecksums, DatabaseChangeLog databaseChangeLog, Contexts contexts, LabelExpression labelExpression) throws LiquibaseException {
-        ChangeLogHistoryService changeLogHistoryService = ChangeLogHistoryServiceFactory.getInstance().getChangeLogService(database);
-        changeLogHistoryService.init();
-        if (updateExistingNullChecksums) {
-            changeLogHistoryService.upgradeChecksums(databaseChangeLog, contexts, labelExpression);
-        }
-        LockServiceFactory.getInstance().getLockService(database).init();
-    }
-
-    protected void resetServices() {
-        LockServiceFactory.getInstance().resetAll();
-        ChangeLogHistoryServiceFactory.getInstance().resetAll();
-        Scope.getCurrentScope().getSingleton(ExecutorService.class).reset();
-    }
-
 }

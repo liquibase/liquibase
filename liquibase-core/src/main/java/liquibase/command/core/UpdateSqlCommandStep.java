@@ -128,9 +128,4 @@ public class UpdateSqlCommandStep extends AbstractUpdateCommandStep {
     protected String getChangeExecListenerPropertiesFileArg(CommandScope commandScope) {
         return commandScope.getArgumentValue(CHANGE_EXEC_LISTENER_PROPERTIES_FILE_ARG);
     }
-
-    @Override
-    public String getHubOperation() {
-        return "update";
-    }
 }

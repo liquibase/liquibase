@@ -17,8 +17,6 @@ public class DropAllCommandStep extends AbstractCliWrapperCommandStep {
     public static final CommandArgumentDefinition<String> DEFAULT_SCHEMA_NAME_ARG;
     public static final CommandArgumentDefinition<String> SCHEMAS_ARG;
     public static final CommandArgumentDefinition<String> CHANGELOG_FILE_ARG;
-    public static final CommandArgumentDefinition<UUID> HUB_CONNECTION_ID_ARG;
-    public static final CommandArgumentDefinition<UUID> HUB_PROJECT_ID_ARG;
     public static final CommandArgumentDefinition<String> DRIVER_ARG;
     public static final CommandArgumentDefinition<String> DRIVER_PROPERTIES_FILE_ARG;
 
@@ -44,10 +42,6 @@ public class DropAllCommandStep extends AbstractCliWrapperCommandStep {
                 .build();
         CHANGELOG_FILE_ARG = builder.argument(CommonArgumentNames.CHANGELOG_FILE, String.class)
                 .description("The root changelog").build();
-        HUB_CONNECTION_ID_ARG = builder.argument("hubConnectionId", UUID.class)
-                .description("Used to identify the specific Connection in which to record or extract data at Liquibase Hub. Available in your Liquibase Hub Project at https://hub.liquibase.com.").build();
-        HUB_PROJECT_ID_ARG = builder.argument("hubProjectId", UUID.class)
-                .description("Used to identify the specific Project in which to record at Liquibase Hub. Available in your Liquibase Hub account at https://hub.liquibase.com.").build();
     }
 
     @Override

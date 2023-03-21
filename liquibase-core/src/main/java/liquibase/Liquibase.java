@@ -593,27 +593,13 @@ public class Liquibase implements AutoCloseable {
 
                 final String operationCommand = "rollback-count";
                 DatabaseChangeLog changeLog = null;
-                Date startTime = new Date();
                 try {
                     changeLog = getDatabaseChangeLog();
                     checkLiquibaseTables(false, changeLog, contexts, labelExpression);
 
                     changeLog.validate(database, contexts, labelExpression);
 
-                    //
-                    // Create an iterator which will be used with a ListVisitor
-                    // to grab the list of changesets for the update
-                    //
-                    ChangeLogIterator listLogIterator = new ChangeLogIterator(database.getRanChangeSetList(), changeLog,
-                            new AlreadyRanChangeSetFilter(database.getRanChangeSetList()),
-                            new ContextChangeSetFilter(contexts),
-                            new LabelChangeSetFilter(labelExpression),
-                            new DbmsChangeSetFilter(database),
-                            new IgnoreChangeSetFilter(),
-                            new CountChangeSetFilter(changesToRollback));
-                    //
                     // Create another iterator to run
-                    //
                     ChangeLogIterator logIterator = new ChangeLogIterator(database.getRanChangeSetList(), changeLog,
                             new AlreadyRanChangeSetFilter(database.getRanChangeSetList()),
                             new ContextChangeSetFilter(contexts),
@@ -848,7 +834,6 @@ public class Liquibase implements AutoCloseable {
 
                 final String operationCommand = "rollback";
                 DatabaseChangeLog changeLog = null;
-                Date startTime = new Date();
 
                 try {
 
@@ -857,22 +842,11 @@ public class Liquibase implements AutoCloseable {
 
                     changeLog.validate(database, contexts, labelExpression);
 
-                    //
                     // Create an iterator which will be used with a ListVisitor
                     // to grab the list of changesets for the update
-                    //
                     List<RanChangeSet> ranChangeSetList = database.getRanChangeSetList();
-                    ChangeLogIterator listLogIterator = new ChangeLogIterator(ranChangeSetList, changeLog,
-                            new AfterTagChangeSetFilter(tagToRollBackTo, ranChangeSetList),
-                            new AlreadyRanChangeSetFilter(ranChangeSetList),
-                            new ContextChangeSetFilter(contexts),
-                            new LabelChangeSetFilter(labelExpression),
-                            new IgnoreChangeSetFilter(),
-                            new DbmsChangeSetFilter(database));
 
-                    //
                     // Create another iterator to run
-                    //
                     ChangeLogIterator logIterator = new ChangeLogIterator(ranChangeSetList, changeLog,
                             new AfterTagChangeSetFilter(tagToRollBackTo, ranChangeSetList),
                             new AlreadyRanChangeSetFilter(ranChangeSetList),
@@ -981,22 +955,11 @@ public class Liquibase implements AutoCloseable {
                     checkLiquibaseTables(false, changeLog, contexts, labelExpression);
                     changeLog.validate(database, contexts, labelExpression);
 
-                    //
                     // Create an iterator which will be used with a ListVisitor
                     // to grab the list of changesets for the update
-                    //
                     List<RanChangeSet> ranChangeSetList = database.getRanChangeSetList();
-                    ChangeLogIterator listLogIterator = new ChangeLogIterator(ranChangeSetList, changeLog,
-                            new ExecutedAfterChangeSetFilter(dateToRollBackTo, ranChangeSetList),
-                            new AlreadyRanChangeSetFilter(ranChangeSetList),
-                            new ContextChangeSetFilter(contexts),
-                            new LabelChangeSetFilter(labelExpression),
-                            new IgnoreChangeSetFilter(),
-                            new DbmsChangeSetFilter(database));
 
-                    //
                     // Create another iterator to run
-                    //
                     ChangeLogIterator logIterator = new ChangeLogIterator(ranChangeSetList, changeLog,
                             new ExecutedAfterChangeSetFilter(dateToRollBackTo, ranChangeSetList),
                             new AlreadyRanChangeSetFilter(ranChangeSetList),

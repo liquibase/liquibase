@@ -111,9 +111,4 @@ public class UpdateCommandStep extends AbstractUpdateCommandStep implements Clea
     public void postUpdateLog() {
         Scope.getCurrentScope().getUI().sendMessage(coreBundle.getString("update.successful"));
     }
-
-    @Override
-    public String getHubOperation() {
-        return "update";
-    }
 }

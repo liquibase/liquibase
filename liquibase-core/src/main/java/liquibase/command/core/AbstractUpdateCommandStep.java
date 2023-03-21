@@ -43,7 +43,6 @@ public abstract class AbstractUpdateCommandStep extends AbstractCommandStep impl
     public abstract UpdateSummaryEnum getShowSummary(CommandScope commandScope);
     public abstract String getChangeExecListenerClassArg(CommandScope commandScope);
     protected abstract String getChangeExecListenerPropertiesFileArg(CommandScope commandScope);
-    protected abstract String getHubOperation();
 
     @Override
     public List<Class<?>> requiredDependencies() {
@@ -55,11 +54,9 @@ public abstract class AbstractUpdateCommandStep extends AbstractCommandStep impl
         Scope.getCurrentScope().addMdcValue(MdcKey.LIQUIBASE_OPERATION, getCommandName()[0]);
         Scope.getCurrentScope().addMdcValue(MdcKey.LIQUIBASE_COMMAND_NAME, getCommandName()[0]);
         CommandScope commandScope = resultsBuilder.getCommandScope();
-        String changeLogFile = getChangelogFileArg(commandScope);
         Database database = (Database) commandScope.getDependency(Database.class);
         Contexts contexts = new Contexts(getContextsArg(commandScope));
         LabelExpression labelExpression = new LabelExpression(getLabelFilterArg(commandScope));
-        ChangeLogParameters changeLogParameters = (ChangeLogParameters) commandScope.getDependency(ChangeLogParameters.class);
         addCommandFiltersMdc(labelExpression, contexts);
 
         LockService lockService = (LockService) commandScope.getDependency(LockService.class);
@@ -92,7 +89,6 @@ public abstract class AbstractUpdateCommandStep extends AbstractCommandStep impl
             scopeValues.put(Scope.Attr.logService.name(), compositeLogService);
             scopeValues.put("showSummary", getShowSummary(commandScope));
             Scope.child(scopeValues, () -> {
-                //If we are using hub, we want to use the HubChangeExecListener, which is wrapping all the others. Otherwise, use the default.
                 runChangeLogIterator.run(new UpdateVisitor(database, defaultChangeExecListener), new RuntimeEnvironment(database, contexts, labelExpression));
                 ShowSummaryUtil.showUpdateSummary(databaseChangeLog, statusVisitor, resultsBuilder.getOutputStream());
             });

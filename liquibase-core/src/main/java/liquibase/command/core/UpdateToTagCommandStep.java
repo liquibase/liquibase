@@ -115,11 +115,6 @@ public class UpdateToTagCommandStep extends AbstractUpdateCommandStep {
     }
 
     @Override
-    protected String getHubOperation() {
-        return "update-to-tag";
-    }
-
-    @Override
     public ChangeLogIterator getStandardChangelogIterator(CommandScope commandScope, Database database, Contexts contexts, LabelExpression labelExpression, DatabaseChangeLog changeLog) throws DatabaseException {
         List<RanChangeSet> ranChangeSetList = database.getRanChangeSetList();
         String tag = commandScope.getArgumentValue(TAG_ARG);

@@ -62,7 +62,6 @@ public class InternalDropAllCommandStep extends AbstractCommandStep {
 
                 Scope.getCurrentScope().getUI().sendMessage(message);
                 log.severe(message, liquibaseException);
-                return;
             }
         } catch (Exception e) {
             throw new DatabaseException(e);
