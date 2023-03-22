@@ -57,6 +57,7 @@ public abstract class AbstractUpdateCommandStep extends AbstractCommandStep impl
         Contexts contexts = new Contexts(getContextsArg(commandScope));
         LabelExpression labelExpression = new LabelExpression(getLabelFilterArg(commandScope));
         addCommandFiltersMdc(labelExpression, contexts);
+        customMdcLogging(commandScope);
 
         LockService lockService = (LockService) commandScope.getDependency(LockService.class);
         DefaultChangeExecListener defaultChangeExecListener = new DefaultChangeExecListener();
@@ -106,6 +107,10 @@ public abstract class AbstractUpdateCommandStep extends AbstractCommandStep impl
                 Scope.getCurrentScope().getLog(getClass()).severe(MSG_COULD_NOT_RELEASE_LOCK, e);
             }
         }
+    }
+
+    protected void customMdcLogging(CommandScope commandScope) {
+        // do nothing by default
     }
 
     @Override
