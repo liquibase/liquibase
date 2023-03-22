@@ -9,6 +9,9 @@ import java.io.Writer;
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * RollbackSqlCommandStep performs the rollback-to-tag-sql logic.
+ */
 public class RollbackSqlCommandStep extends RollbackCommandStep {
 
     public static final String[] COMMAND_NAME = {"rollbackSql"};

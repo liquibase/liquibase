@@ -29,6 +29,9 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Set;
 
+/**
+ * RollbackCommandStep performs the rollback-to-tag logic. For backwards compatibility issues it is not called "RollbackToTag"
+ */
 public class RollbackCommandStep extends AbstractCommandStep {
 
     public static final String[] COMMAND_NAME = {"rollback"};
