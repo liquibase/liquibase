@@ -51,7 +51,7 @@ public class CreateTableChange extends AbstractChange implements ChangeWithColum
     private String tablespace;
     private String remarks;
 
-    private boolean ifNotExists;
+    private Boolean ifNotExists;
 
     public CreateTableChange() {
         super();
@@ -320,10 +320,10 @@ public class CreateTableChange extends AbstractChange implements ChangeWithColum
     }
 
     public boolean isIfNotExists() {
-        return ifNotExists;
+        return ObjectUtil.defaultIfNull(ifNotExists, false);
     }
 
-    public void setIfNotExists(boolean ifNotExists) {
+    public void setIfNotExists(Boolean ifNotExists) {
         this.ifNotExists = ifNotExists;
     }
 }
