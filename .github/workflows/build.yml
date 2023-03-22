@@ -384,7 +384,7 @@ jobs:
 
           ## extract tar content for other artifacts
           mkdir -p liquibase-dist/target/liquibase-0-SNAPSHOT
-          # (cd liquibase-dist/target/liquibase-0-SNAPSHOT && tar xfz ../liquibase-0-SNAPSHOT.tar.gz)
+          (cd liquibase-dist/target/liquibase-0-SNAPSHOT && tar xfz ../liquibase-0-SNAPSHOT.tar.gz)
 
           ##create zip file from tar content
           (cd liquibase-dist/target/liquibase-0-SNAPSHOT && zip -r ../liquibase-0-SNAPSHOT.zip *)
@@ -396,14 +396,14 @@ jobs:
 
           mkdir -p artifacts
           cp liquibase-dist/target/liquibase-0-SNAPSHOT.tar.gz artifacts
-          # cp liquibase-dist/target/liquibase-0-SNAPSHOT.zip artifacts
+          cp liquibase-dist/target/liquibase-0-SNAPSHOT.zip artifacts
           
           # cp liquibase-dist/target/liquibase-0-SNAPSHOT.jar artifacts/liquibase-core-0-SNAPSHOT.jar
-          # cp liquibase-dist/target/liquibase-0-SNAPSHOT-sources.jar artifacts/liquibase-core-0-SNAPSHOT-sources.jar
+          cp liquibase-dist/target/liquibase-0-SNAPSHOT-sources.jar artifacts/liquibase-core-0-SNAPSHOT-sources.jar
           cp target/liquibase-0-SNAPSHOT-javadoc.jar artifacts/liquibase-core-0-SNAPSHOT-javadoc.jar
           
           ##create installer - disabled here but run as nightly job and as part of release workflow
-          ## cp liquibase-dist/target/liquibase-*-installer-* artifacts
+          # cp liquibase-dist/target/liquibase-*-installer-* artifacts
 
           cp liquibase-maven-plugin/target/liquibase-maven-plugin-0-SNAPSHOT.jar artifacts
           cp liquibase-maven-plugin/target/liquibase-maven-plugin-0-SNAPSHOT-sources.jar artifacts
