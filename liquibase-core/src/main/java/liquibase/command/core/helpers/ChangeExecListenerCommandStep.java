@@ -3,7 +3,10 @@ package liquibase.command.core.helpers;
 import liquibase.Scope;
 import liquibase.changelog.visitor.ChangeExecListener;
 import liquibase.changelog.visitor.DefaultChangeExecListener;
-import liquibase.command.*;
+import liquibase.command.CommandArgumentDefinition;
+import liquibase.command.CommandBuilder;
+import liquibase.command.CommandResultsBuilder;
+import liquibase.command.CommandScope;
 import liquibase.database.Database;
 import liquibase.integration.commandline.ChangeExecListenerUtils;
 
@@ -13,7 +16,7 @@ import java.util.List;
 /**
  * Creates a ChangeExecListener or utilizes the one provided as argument
  */
-public class ChangeExecListenerCommandStep extends AbstractCommandStep {
+public class ChangeExecListenerCommandStep extends AbstractHelperCommandStep {
 
     protected static final String[] COMMAND_NAME = {"changeExecListener"};
 
@@ -69,13 +72,6 @@ public class ChangeExecListenerCommandStep extends AbstractCommandStep {
     @Override
     public String[][] defineCommandNames() {
         return new String[][] { COMMAND_NAME };
-    }
-
-    @Override
-    public void adjustCommandDefinition(CommandDefinition commandDefinition) {
-        if (commandDefinition.getPipeline().size() == 1) {
-            commandDefinition.setInternal(true);
-        }
     }
 
 }
