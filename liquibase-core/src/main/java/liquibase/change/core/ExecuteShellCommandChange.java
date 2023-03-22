@@ -34,7 +34,7 @@ import java.util.regex.Pattern;
  */
 @DatabaseChange(name = "executeCommand",
         description = "Executes a system command. Because this refactoring doesn't generate SQL, using " +
-            "Liquibase commands such as migrateSQL may not work as expected. Therefore, prefer " +
+            "Liquibase commands such as update-sql may not work as expected. Therefore, prefer " +
             "refactorings that generate SQL.",
         priority = ChangeMetaData.PRIORITY_DEFAULT)
 public class ExecuteShellCommandChange extends AbstractChange {
