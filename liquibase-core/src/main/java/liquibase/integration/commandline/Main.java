@@ -1975,8 +1975,8 @@ public class Main {
         CommandScope updateCommand = new CommandScope("update");
         updateCommand.addArgumentValue(UpdateCommandStep.CONTEXTS_ARG, contexts);
         updateCommand.addArgumentValue(UpdateCommandStep.LABEL_FILTER_ARG, labelFilter);
-        updateCommand.addArgumentValue(UpdateCommandStep.CHANGE_EXEC_LISTENER_CLASS_ARG, changeExecListenerClass);
-        updateCommand.addArgumentValue(UpdateCommandStep.CHANGE_EXEC_LISTENER_PROPERTIES_FILE_ARG, changeExecListenerPropertiesFile);
+        updateCommand.addArgumentValue(ChangeExecListenerCommandStep.CHANGE_EXEC_LISTENER_CLASS_ARG, changeExecListenerClass);
+        updateCommand.addArgumentValue(ChangeExecListenerCommandStep.CHANGE_EXEC_LISTENER_PROPERTIES_FILE_ARG, changeExecListenerPropertiesFile);
         setDatabaseArgumentsToCommand(updateCommand);
         updateCommand.execute();
     }

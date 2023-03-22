@@ -14,7 +14,6 @@ import liquibase.exception.DatabaseException;
 import liquibase.exception.LiquibaseException;
 import liquibase.exception.LockException;
 import liquibase.executor.ExecutorService;
-import liquibase.integration.commandline.ChangeExecListenerUtils;
 import liquibase.lockservice.LockService;
 import liquibase.lockservice.LockServiceFactory;
 import liquibase.logging.core.BufferedLogService;
@@ -43,13 +42,11 @@ public abstract class AbstractUpdateCommandStep extends AbstractCommandStep impl
     public abstract String getLabelFilterArg(CommandScope commandScope);
     public abstract String[] getCommandName();
     public abstract UpdateSummaryEnum getShowSummary(CommandScope commandScope);
-    public abstract String getChangeExecListenerClassArg(CommandScope commandScope);
-    protected abstract String getChangeExecListenerPropertiesFileArg(CommandScope commandScope);
     protected abstract String getHubOperation();
 
     @Override
     public List<Class<?>> requiredDependencies() {
-        return Arrays.asList(Database.class, LockService.class, DatabaseChangeLog.class, ChangeLogParameters.class);
+        return Arrays.asList(Database.class, LockService.class, DatabaseChangeLog.class, ChangeExecListener.class, ChangeLogParameters.class);
     }
 
     @Override
@@ -67,7 +64,7 @@ public abstract class AbstractUpdateCommandStep extends AbstractCommandStep impl
         LockService lockService = (LockService) commandScope.getDependency(LockService.class);
         BufferedLogService bufferLog = new BufferedLogService();
         HubHandler hubHandler = null;
-        DefaultChangeExecListener defaultChangeExecListener = new DefaultChangeExecListener();
+        DefaultChangeExecListener defaultChangeExecListener = (DefaultChangeExecListener) commandScope.getDependency(ChangeExecListener.class);
         try {
             DatabaseChangeLog databaseChangeLog = (DatabaseChangeLog) commandScope.getDependency(DatabaseChangeLog.class);
             if (isUpToDate(commandScope, database, databaseChangeLog, contexts, labelExpression, resultsBuilder.getOutputStream())) {
@@ -77,13 +74,6 @@ public abstract class AbstractUpdateCommandStep extends AbstractCommandStep impl
             Scope.getCurrentScope().addMdcValue(MdcKey.DEPLOYMENT_ID, changelogService.getDeploymentId());
             Scope.getCurrentScope().getLog(getClass()).info(String.format("Using deploymentId: %s", changelogService.getDeploymentId()));
 
-            //Set up a "chain" of ChangeExecListeners. Starting with the custom change exec listener
-            //then wrapping that in the DefaultChangeExecListener.
-            ChangeExecListener listener = ChangeExecListenerUtils.getChangeExecListener(database,
-                    Scope.getCurrentScope().getResourceAccessor(),
-                    getChangeExecListenerClassArg(commandScope),
-                    getChangeExecListenerPropertiesFileArg(commandScope));
-            defaultChangeExecListener.addListener(listener);
             hubHandler = new HubHandler(database, databaseChangeLog, changeLogFile, defaultChangeExecListener);
 
             ChangeLogIterator changeLogIterator = getStandardChangelogIterator(commandScope, database, contexts, labelExpression, databaseChangeLog);
