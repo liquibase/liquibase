@@ -9,7 +9,7 @@ import liquibase.sqlgenerator.core.MarkChangeSetRanGenerator;
 import liquibase.statement.SqlStatement;
 import liquibase.statement.core.MarkChangeSetRanStatement;
 
-@DatabaseChange(name = "tagDatabase", description = "Applies a tag to the database for future rollback",
+@DatabaseChange(name = "tagDatabase", description = "Applies a tag to the database to specify where to stop a rollback",
     priority = ChangeMetaData.PRIORITY_DEFAULT, since = "1.6")
 public class TagDatabaseChange extends AbstractChange {
 
