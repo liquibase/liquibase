@@ -133,7 +133,7 @@ public class CreateViewChange extends AbstractChange {
         this.encoding = encoding;
     }
 
-    @DatabaseChangeProperty(description = "A brief descriptive comment")
+    @DatabaseChangeProperty(description = "A brief descriptive comment stored in the view metadata")
     public String getRemarks() {
         return remarks;
     }
