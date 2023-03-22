@@ -12,9 +12,6 @@ import liquibase.configuration.ConfiguredValue;
 import liquibase.configuration.LiquibaseConfiguration;
 import liquibase.configuration.core.DeprecatedConfigurationValueProvider;
 import liquibase.database.Database;
-import liquibase.diff.compare.CompareControl;
-import liquibase.diff.output.DiffOutputControl;
-import liquibase.diff.output.ObjectChangeFilter;
 import liquibase.exception.*;
 import liquibase.hub.HubConfiguration;
 import liquibase.hub.HubServiceFactory;
@@ -134,10 +131,8 @@ public class Main {
     protected String schemas;
     protected String snapshotFormat;
     protected String liquibaseProLicenseKey;
-    private boolean liquibaseProLicenseValid = false;
     protected String liquibaseHubApiKey;
     protected String liquibaseHubUrl;
-    private Boolean managingLogConfig = null;
     private boolean outputsLogMessages = false;
     protected String sqlFile;
     protected String delimiter;
@@ -351,17 +346,9 @@ public class Main {
                                     if (!Main.runningFromNewCli) {
                                         Scope.getCurrentScope().getUI().sendMessage(allMessages);
                                     }
-                                } else {
-                                    main.liquibaseProLicenseValid = true;
                                 }
                             }
 
-                            //
-                            // Check to see if we have an expired license
-                            //
-                            if (licenseService.daysTilExpiration() < 0) {
-                                main.liquibaseProLicenseValid = false;
-                            }
                             if (!Main.runningFromNewCli) {
                                 Scope.getCurrentScope().getUI().sendMessage(licenseService.getLicenseInfo());
                             }
@@ -530,21 +517,6 @@ public class Main {
             }
         }
         return logLevel;
-    }
-
-    /**
-     * Warns the user that some logging was suppressed because the --logLevel command line switch was not set high
-     * enough
-     *
-     * @param outputLoggingEnabled if a warning should be printed
-     * @return the warning message (if outputLoggingEnabled==true), an empty String otherwise
-     */
-    private static String generateLogLevelWarningMessage(boolean outputLoggingEnabled) {
-        if (outputLoggingEnabled) {
-            return "";
-        } else {
-            return "\n\n" + coreBundle.getString("for.more.information.use.loglevel.flag");
-        }
     }
 
     /**
@@ -1324,7 +1296,7 @@ public class Main {
         }
 
         try {
-            Field field = getDeclaredField(attributeName); //getClass().getDeclaredField(attributeName);
+            Field field = getDeclaredField(attributeName);
             if (field.getType().equals(Boolean.class)) {
                 field.set(this, Boolean.valueOf(value));
             } else {
@@ -1747,10 +1719,8 @@ public class Main {
                         Map<String, Object> updateScopedObjects = new HashMap<>();
                         updateScopedObjects.put("showSummary", showSummary);
                         updateScopedObjects.put("outputStream", outputStream);
-                        Scope.child(updateScopedObjects, () -> {
-                            liquibase.update(Integer.parseInt(commandParams.iterator().next()), new Contexts(contexts), new
-                                    LabelExpression(getLabelFilter()));
-                        });
+                        Scope.child(updateScopedObjects, () -> liquibase.update(Integer.parseInt(commandParams.iterator().next()), new Contexts(contexts),
+                                new LabelExpression(getLabelFilter())));
                     } catch (LiquibaseException updateException) {
                         handleUpdateException(database, updateException, defaultChangeExecListener, rollbackOnError);
                     }
@@ -1766,9 +1736,7 @@ public class Main {
                         Map<String, Object> updateScopedObjects = new HashMap<>();
                         updateScopedObjects.put("showSummary", showSummary);
                         updateScopedObjects.put("outputStream", outputStream);
-                        Scope.child(updateScopedObjects, () -> {
-                            liquibase.update(commandParams.iterator().next(), new Contexts(contexts), new LabelExpression(getLabelFilter()));
-                        });
+                        Scope.child(updateScopedObjects, () -> liquibase.update(commandParams.iterator().next(), new Contexts(contexts), new LabelExpression(getLabelFilter())));
                     } catch (LiquibaseException updateException) {
                         handleUpdateException(database, updateException, defaultChangeExecListener, rollbackOnError);
                     }
@@ -2069,24 +2037,6 @@ public class Main {
         return fileOpener;
     }
 
-    /**
-     * Creates a new DiffOutputControl object based on the parameters received
-     */
-    private DiffOutputControl getDiffOutputControl(CompareControl.SchemaComparison[] finalSchemaComparisons, ObjectChangeFilter objectChangeFilter) {
-        DiffOutputControl diffOutputControl = new DiffOutputControl(
-                includeCatalog, includeSchema, includeTablespace, finalSchemaComparisons);
-        for (CompareControl.SchemaComparison schema : finalSchemaComparisons) {
-            diffOutputControl.addIncludedSchema(schema.getReferenceSchema());
-            diffOutputControl.addIncludedSchema(schema.getComparisonSchema());
-        }
-
-        if (objectChangeFilter != null) {
-            diffOutputControl.setObjectChangeFilter(objectChangeFilter);
-        }
-
-        return diffOutputControl;
-    }
-
     private String getLabelFilter() {
         if (labelFilter == null) {
             return labels;
@@ -2155,9 +2105,9 @@ public class Main {
         if (liquibaseProLicenseKey != null) {
             argsMap.put("liquibaseProLicenseKey", liquibaseProLicenseKey);
         }
-        String liquibaseHubApiKey = HubConfiguration.LIQUIBASE_HUB_API_KEY.getCurrentValue();
-        if (liquibaseHubApiKey != null) {
-            argsMap.put("liquibaseHubApiKey", liquibaseHubApiKey);
+        String liquibaseHubApiKeyLocal = HubConfiguration.LIQUIBASE_HUB_API_KEY.getCurrentValue();
+        if (liquibaseHubApiKeyLocal != null) {
+            argsMap.put("liquibaseHubApiKey", liquibaseHubApiKeyLocal);
         }
         CommandScope liquibaseCommand = new CommandScope(commandName);
         for (Map.Entry<String, Object> entry : argsMap.entrySet()) {

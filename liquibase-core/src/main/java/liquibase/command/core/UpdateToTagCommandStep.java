@@ -5,7 +5,6 @@ import liquibase.LabelExpression;
 import liquibase.UpdateSummaryEnum;
 import liquibase.changelog.*;
 import liquibase.changelog.filter.*;
-import liquibase.changelog.visitor.ChangeExecListener;
 import liquibase.command.*;
 import liquibase.database.Database;
 import liquibase.exception.DatabaseException;
