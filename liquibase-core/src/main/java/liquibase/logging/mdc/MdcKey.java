@@ -63,4 +63,6 @@ public class MdcKey {
     public static final String UPDATE_SUMMARY = "updateSummary";
     public static final String CHANGESETS_UPDATED = "changesetsUpdated";
     public static final String UPDATE_ONE_CHANGESET_FORCE = "updateOneChangesetForce";
+    public static final String UPDATE_TO_TAG = "updateToTag";
+    public static final String UPDATE_COUNT = "updateCount";
 }
