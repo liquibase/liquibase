@@ -11,6 +11,8 @@ public class MdcKey {
     public static final String LIQUIBASE_REF_URL = "liquibaseReferenceUrl";
     public static final String CHANGESET_OPERATION_START_TIME = "changesetOperationStart";
     public static final String CHANGESET_OPERATION_STOP_TIME = "changesetOperationStop";
+    public static final String OPERATION_START_TIME = "operationStart";
+    public static final String OPERATION_STOP_TIME = "operationStop";
     public static final String CHANGESET_SQL = "changesetSql";
     public static final String DEPLOYMENT_OUTCOME = "deploymentOutcome";
     public static final String LIQUIBASE_COMMAND_NAME = "liquibaseCommandName";
@@ -73,4 +75,9 @@ public class MdcKey {
     public static final String REFERENCE_DEFAULT_SCHEMA_NAME = "referenceDefaultSchemaName";
     public static final String REFERENCE_SCHEMAS = "referenceSchemas";
     public static final String OUTPUT_SCHEMAS = "outputSchemas";
+    public static final String INCLUDE_CATALOG = "includeCatalog";
+    public static final String INCLUDE_SCHEMA = "includeSchema";
+    public static final String INCLUDE_TABLESPACE = "includeTablespace";
+    public static final String SCHEMAS = "schemas";
+    public static final String DIFF_OUTCOME = "diffOutcome";
 }

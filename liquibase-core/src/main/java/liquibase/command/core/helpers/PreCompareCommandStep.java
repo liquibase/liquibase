@@ -141,12 +141,12 @@ public class PreCompareCommandStep extends AbstractCommandStep {
             return commandScope.getArgumentValue(COMPARE_CONTROL_ARG);
         }
         String schemas = commandScope.getArgumentValue(SCHEMAS_ARG);
-        Scope.getCurrentScope().addMdcValue(MdcKey.REFERENCE_SCHEMAS, schemas);
         String outputSchemas = commandScope.getArgumentValue(OUTPUT_SCHEMAS_ARG);
-        Scope.getCurrentScope().addMdcValue(MdcKey.OUTPUT_SCHEMAS, outputSchemas);
+        String referenceSchemas = commandScope.getArgumentValue(REFERENCE_SCHEMAS_ARG);
+        logMdcProperties(schemas, outputSchemas, referenceSchemas);
         CompareControl.SchemaComparison[] finalSchemaComparisons = CompareControl.computeSchemas(
                 schemas,
-                commandScope.getArgumentValue(REFERENCE_SCHEMAS_ARG),
+                referenceSchemas,
                 outputSchemas,
                 commandScope.getArgumentValue(DbUrlConnectionCommandStep.DEFAULT_CATALOG_NAME_ARG),
                 commandScope.getArgumentValue(DbUrlConnectionCommandStep.DEFAULT_SCHEMA_NAME_ARG),
@@ -155,6 +155,12 @@ public class PreCompareCommandStep extends AbstractCommandStep {
                 database).finalSchemaComparisons;
 
         return new CompareControl(finalSchemaComparisons, diffTypes);
+    }
+
+    private void logMdcProperties(String schemas, String outputSchemas, String referenceSchemas) {
+        Scope.getCurrentScope().addMdcValue(MdcKey.SCHEMAS, schemas);
+        Scope.getCurrentScope().addMdcValue(MdcKey.OUTPUT_SCHEMAS, outputSchemas);
+        Scope.getCurrentScope().addMdcValue(MdcKey.REFERENCE_SCHEMAS, referenceSchemas);
     }
 
     @Override
