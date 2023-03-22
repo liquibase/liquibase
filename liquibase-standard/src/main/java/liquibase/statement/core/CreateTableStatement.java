@@ -35,7 +35,7 @@ public class CreateTableStatement extends AbstractSqlStatement implements Compou
     private final Set<UniqueConstraint> uniqueConstraints = new LinkedHashSet<>();
     private final Set<String> computedColumns = new HashSet<>();
 
-    private boolean enableIfNotExistsStatement;
+    private boolean ifNotExists;
 
     public CreateTableStatement(String catalogName, String schemaName, String tableName) {
         this(catalogName, schemaName, tableName, null, null);
@@ -53,14 +53,14 @@ public class CreateTableStatement extends AbstractSqlStatement implements Compou
         this.tableType = tableType;
     }
 
-    public CreateTableStatement(String catalogName, String schemaName, String tableName, boolean enableIfNotExistsStatement) {
+    public CreateTableStatement(String catalogName, String schemaName, String tableName, boolean ifNotExists) {
         this(catalogName, schemaName, tableName);
-        this.enableIfNotExistsStatement = enableIfNotExistsStatement;
+        this.ifNotExists = ifNotExists;
     }
 
-    public CreateTableStatement(String catalogName, String schemaName, String tableName, String remarks, String tableType, boolean enableIfNotExistsStatement) {
+    public CreateTableStatement(String catalogName, String schemaName, String tableName, String remarks, String tableType, boolean ifNotExists) {
         this(catalogName, schemaName, tableName, remarks, tableType);
-        this.enableIfNotExistsStatement = enableIfNotExistsStatement;
+        this.ifNotExists = ifNotExists;
     }
 
     public String getCatalogName() {
@@ -297,11 +297,11 @@ public class CreateTableStatement extends AbstractSqlStatement implements Compou
         this.tableType = tableType;
     }
 
-    public boolean isEnableIfNotExistsStatement() {
-        return enableIfNotExistsStatement;
+    public boolean isIfNotExists() {
+        return ifNotExists;
     }
 
-    public void setEnableIfNotExistsStatement(boolean enableIfNotExistsStatement) {
-        this.enableIfNotExistsStatement = enableIfNotExistsStatement;
+    public void setIfNotExists(boolean ifNotExists) {
+        this.ifNotExists = ifNotExists;
     }
 }
