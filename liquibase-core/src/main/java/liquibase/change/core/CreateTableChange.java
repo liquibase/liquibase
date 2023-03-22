@@ -289,7 +289,7 @@ public class CreateTableChange extends AbstractChange implements ChangeWithColum
         columns.add(column);
     }
 
-    @DatabaseChangeProperty(description = "A brief descriptive comment")
+    @DatabaseChangeProperty(description = "A brief descriptive comment to store in the table metadata")
     public String getRemarks() {
         return remarks;
     }
