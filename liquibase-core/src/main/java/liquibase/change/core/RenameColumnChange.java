@@ -88,7 +88,7 @@ public class RenameColumnChange extends AbstractChange {
         this.columnDataType = columnDataType;
     }
 
-    @DatabaseChangeProperty(description = "A brief descriptive comment")
+    @DatabaseChangeProperty(description = "A brief descriptive comment written to the column metadata")
     public String getRemarks() {
         return remarks;
     }
