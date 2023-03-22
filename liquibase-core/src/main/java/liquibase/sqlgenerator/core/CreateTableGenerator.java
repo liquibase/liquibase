@@ -401,7 +401,7 @@ public class CreateTableGenerator extends AbstractSqlGenerator<CreateTableStatem
         if (!(database instanceof PostgresDatabase) || StringUtil.isEmpty(statement.getTableType()) || !statement.getTableType().trim().toLowerCase().contains("temp")) {
             return database.escapeTableName(statement.getCatalogName(), statement.getSchemaName(), statement.getTableName());
         } else {
-            return database.escapeTableName(null, null, statement.getTableName());
+            return database.escapeObjectName(statement.getTableName(), Table.class);
         }
     }
 
