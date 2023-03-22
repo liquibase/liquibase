@@ -453,7 +453,8 @@ jobs:
         with:
           name: liquibase-artifacts-${{ needs.setup.outputs.thisBranchFileName }}
           path: artifacts-named/*
-
+          run: |
+            ls artifacts-named/ 
 
   finish:
     name: Finish Build
