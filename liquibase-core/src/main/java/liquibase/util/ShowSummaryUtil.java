@@ -89,11 +89,12 @@ public class ShowSummaryUtil {
     //
     private static SortedMap<String, Integer> showDetailTable(List<ChangeSet> skippedChangeSets, List<ChangeSetStatus> filterDenied, OutputStream outputStream, boolean shouldPrintDetailTable)
             throws IOException, LiquibaseException {
+        String totalSkippedMdcKey = "totalSkipped";
         //
         // Nothing to do
         //
         if (filterDenied.isEmpty() && skippedChangeSets.isEmpty()) {
-            return Collections.emptySortedMap();
+            return new TreeMap<>(Collections.singletonMap(totalSkippedMdcKey, 0));
         }
         List<String> columnHeaders = new ArrayList<>();
         columnHeaders.add("Changeset Info");
@@ -101,7 +102,7 @@ public class ShowSummaryUtil {
         List<List<String>> table = new ArrayList<>();
         table.add(columnHeaders);
         SortedMap<String, Integer> mdcSkipCounts = new TreeMap<>();
-        mdcSkipCounts.put("totalSkipped", skippedChangeSets.size() + filterDenied.size());
+        mdcSkipCounts.put(totalSkippedMdcKey, skippedChangeSets.size() + filterDenied.size());
 
         List<ChangeSetStatus> finalList = createFinalStatusList(skippedChangeSets, filterDenied, mdcSkipCounts);
 
