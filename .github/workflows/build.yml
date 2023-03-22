@@ -387,7 +387,7 @@ jobs:
           (cd liquibase-dist/target/liquibase-0-SNAPSHOT && tar xfz ../liquibase-0-SNAPSHOT.tar.gz)
 
           ##create zip file from tar content
-          (cd liquibase-dist/target/liquibase-0-SNAPSHOT && zip -r ../liquibase-0-SNAPSHOT.zip *)
+          # (cd liquibase-dist/target/liquibase-0-SNAPSHOT && zip -r ../liquibase-0-SNAPSHOT.zip *)
 
           ##create installer - disabled here but run as nightly job and as part of release workflow
           # (cd liquibase-dist && ${{ github.workspace }}/.github/util/package-install4j.sh 0-SNAPSHOT)
@@ -396,11 +396,11 @@ jobs:
 
           mkdir -p artifacts
           cp liquibase-dist/target/liquibase-0-SNAPSHOT.tar.gz artifacts
-          cp liquibase-dist/target/liquibase-0-SNAPSHOT.zip artifacts
+          # cp liquibase-dist/target/liquibase-0-SNAPSHOT.zip artifacts
           
-          cp liquibase-dist/target/liquibase-0-SNAPSHOT.jar artifacts/liquibase-core-0-SNAPSHOT.jar
-          cp liquibase-dist/target/liquibase-0-SNAPSHOT-sources.jar artifacts/liquibase-core-0-SNAPSHOT-sources.jar
-          cp target/liquibase-0-SNAPSHOT-javadoc.jar artifacts/liquibase-core-0-SNAPSHOT-javadoc.jar
+          # cp liquibase-dist/target/liquibase-0-SNAPSHOT.jar artifacts/liquibase-core-0-SNAPSHOT.jar
+          # cp liquibase-dist/target/liquibase-0-SNAPSHOT-sources.jar artifacts/liquibase-core-0-SNAPSHOT-sources.jar
+          # cp target/liquibase-0-SNAPSHOT-javadoc.jar artifacts/liquibase-core-0-SNAPSHOT-javadoc.jar
           
           ##create installer - disabled here but run as nightly job and as part of release workflow
           #cp liquibase-dist/target/liquibase-*-installer-* artifacts
@@ -429,7 +429,7 @@ jobs:
           ##prepare branch-named convenience artifacts directories
           mkdir artifacts-named
           cp liquibase-dist/target/liquibase-0-SNAPSHOT.tar.gz artifacts-named/liquibase-${{ needs.setup.outputs.thisBranchFileName }}.tar.gz
-          cp liquibase-dist/target/liquibase-0-SNAPSHOT.jar artifacts-named/liquibase-core-${{ needs.setup.outputs.thisBranchFileName }}.jar
+          # cp liquibase-dist/target/liquibase-0-SNAPSHOT.jar artifacts-named/liquibase-core-${{ needs.setup.outputs.thisBranchFileName }}.jar
           cp liquibase-maven-plugin/target/liquibase-maven-plugin-0-SNAPSHOT.jar artifacts-named/liquibase-maven-plugin-${{ needs.setup.outputs.thisBranchFileName }}.jar
           cp liquibase-cdi/target/liquibase-cdi-0-SNAPSHOT.jar artifacts-named/liquibase-cdi-${{ needs.setup.outputs.thisBranchFileName }}.jar
           cp liquibase-extension-testing/target/liquibase-extension-testing-0-SNAPSHOT.jar artifacts-named/liquibase-extension-testing-${{ needs.setup.outputs.thisBranchFileName }}.jar
@@ -442,11 +442,11 @@ jobs:
           name: liquibase-artifacts
           path: artifacts/*
 
-      - name: Archive Convenience Zip
-        uses: actions/upload-artifact@v3
-        with:
-          name: liquibase-zip-${{ needs.setup.outputs.thisBranchFileName }}
-          path: liquibase-dist/target/liquibase-0-SNAPSHOT/*
+      # - name: Archive Convenience Zip
+      #   uses: actions/upload-artifact@v3
+      #   with:
+      #     name: liquibase-zip-${{ needs.setup.outputs.thisBranchFileName }}
+      #     path: liquibase-dist/target/liquibase-0-SNAPSHOT/*
 
       - name: Archive Convenience Artifacts
         uses: actions/upload-artifact@v3
