@@ -3,10 +3,7 @@ package liquibase.change.core;
 import static liquibase.statement.SqlStatement.EMPTY_SQL_STATEMENT;
 
 import java.util.ArrayList;
-import java.util.Collections;
-import java.util.HashSet;
 import java.util.List;
-import java.util.Set;
 
 import liquibase.change.AbstractChange;
 import liquibase.change.Change;
@@ -59,13 +56,6 @@ public class CreateTableChange extends AbstractChange implements ChangeWithColum
     public CreateTableChange() {
         super();
         columns = new ArrayList<>();
-    }
-
-    @Override
-    public Set<String> getSerializableFields() {
-        Set<String> fields = new HashSet<>(super.getSerializableFields());
-        fields.add("ifNotExists");
-        return Collections.unmodifiableSet(fields);
     }
 
     @Override
@@ -330,7 +320,7 @@ public class CreateTableChange extends AbstractChange implements ChangeWithColum
     }
 
     public Boolean getIfNotExists() {
-        return ObjectUtil.defaultIfNull(ifNotExists, false);
+        return ifNotExists;
     }
 
     public void setIfNotExists(Boolean ifNotExists) {
