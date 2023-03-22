@@ -1,18 +1,13 @@
 package liquibase.structure.core;
 
-import liquibase.exception.UnexpectedLiquibaseException;
 import liquibase.parser.core.ParsedNode;
 import liquibase.parser.core.ParsedNodeException;
 import liquibase.resource.ResourceAccessor;
 import liquibase.structure.AbstractDatabaseObject;
 import liquibase.structure.DatabaseObject;
-import liquibase.util.ISODateFormat;
-import liquibase.util.ObjectUtil;
 import liquibase.util.StringUtil;
 
 import java.util.*;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 public class Index extends AbstractDatabaseObject {
 
@@ -87,7 +82,7 @@ public class Index extends AbstractDatabaseObject {
      * @deprecated Use {@link #setRelation(Relation)}
      */
     @Deprecated
-	public Index setTable(Table table) {
+	public Index setTable(Relation table) {
         return setRelation(table);
     }
 
@@ -210,17 +205,6 @@ public class Index extends AbstractDatabaseObject {
                 newList.add(column);
             }
             setColumns(newList);
-        }
-        //
-        // Switch the "table" attributes to be "relation" in the model
-        // This will enable the subsequent ObjectUtil.setProperty(Index, name, value)
-        // call to call setRelation(view) instead of setTable(table), and avoid
-        // an exception.  For MSSQL, Index can be on either Table or View.
-        //
-        Object relation = getAttribute("table", Object.class);
-        if (relation != null) {
-            this.setAttribute("table", null);
-            this.setAttribute("relation", relation);
         }
     }
 
