@@ -56,7 +56,7 @@ public class SetTableRemarksChange extends AbstractChange {
         this.tableName = tableName;
     }
 
-    @DatabaseChangeProperty(description = "A brief descriptive comment")
+    @DatabaseChangeProperty(description = "A brief descriptive comment stored in the table metadata")
     public String getRemarks() {
         return remarks;
     }
