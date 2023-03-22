@@ -72,17 +72,12 @@ public class ShowSummaryUtil {
         //
         UpdateSummary updateSummaryMdc = showSummary(changeLog, statusVisitor, skippedChangeSets, filterDenied, outputStream);
         updateSummaryMdc.setValue(showSummary.toString());
-        if (showSummary == UpdateSummaryEnum.SUMMARY || (skippedChangeSets.isEmpty() && denied.isEmpty())) {
-            try (MdcObject updateSummaryMdcObject = Scope.getCurrentScope().addMdcValue(MdcKey.UPDATE_SUMMARY, updateSummaryMdc)) {
-                Scope.getCurrentScope().getLog(ShowSummaryUtil.class).fine("Update summary");
-            }
-            return;
-        }
+        boolean shouldPrintDetailTable = showSummary != UpdateSummaryEnum.SUMMARY && (!skippedChangeSets.isEmpty() || !denied.isEmpty());
 
         //
         // Show the details too
         //
-        SortedMap<String, Integer> skippedMdc = showDetailTable(skippedChangeSets, filterDenied, outputStream);
+        SortedMap<String, Integer> skippedMdc = showDetailTable(skippedChangeSets, filterDenied, outputStream, shouldPrintDetailTable);
         updateSummaryMdc.setSkipped(skippedMdc);
         try(MdcObject updateSummaryMdcObject = Scope.getCurrentScope().addMdcValue(MdcKey.UPDATE_SUMMARY, updateSummaryMdc)) {
             Scope.getCurrentScope().getLog(ShowSummaryUtil.class).info("Update summary generated");
@@ -92,7 +87,7 @@ public class ShowSummaryUtil {
     //
     // Show the details
     //
-    private static SortedMap<String, Integer> showDetailTable(List<ChangeSet> skippedChangeSets, List<ChangeSetStatus> filterDenied, OutputStream outputStream)
+    private static SortedMap<String, Integer> showDetailTable(List<ChangeSet> skippedChangeSets, List<ChangeSetStatus> filterDenied, OutputStream outputStream, boolean shouldPrintDetailTable)
             throws IOException, LiquibaseException {
         //
         // Nothing to do
@@ -149,12 +144,14 @@ public class ShowSummaryUtil {
             table.add(outputRow);
         }
 
-        List<Integer> widths = new ArrayList<>();
-        widths.add(60);
-        widths.add(40);
+        if (shouldPrintDetailTable) {
+            List<Integer> widths = new ArrayList<>();
+            widths.add(60);
+            widths.add(40);
 
-        Writer writer = createOutputWriter(outputStream);
-        TableOutput.formatOutput(table, widths, true, writer);
+            Writer writer = createOutputWriter(outputStream);
+            TableOutput.formatOutput(table, widths, true, writer);
+        }
         return mdcSkipCounts;
     }
 
