@@ -454,7 +454,8 @@ jobs:
           name: liquibase-artifacts-${{ needs.setup.outputs.thisBranchFileName }}
           path: artifacts-named/*
           run: |
-            ls artifacts-named/ 
+            ls -R artifacts-named
+            tree -P '*.zip' -f
 
   finish:
     name: Finish Build
