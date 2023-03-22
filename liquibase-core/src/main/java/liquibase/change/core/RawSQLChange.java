@@ -10,11 +10,11 @@ import liquibase.resource.ResourceAccessor;
 import liquibase.util.StringUtil;
 
 /**
- * Allows execution of arbitrary SQL. This change can be used when existing changes are either don't exist,
- * are not flexible enough, or buggy. 
+ * Allows execution of arbitrary SQL. This change can be used when existing change types don't exist
+ * or are not flexible enough.
  */
 @DatabaseChange(name = "sql",
-        description = "Allows you to directly specify whatever SQL you want.",
+        description = "Allows you to specify raw SQL to execute against the database",
         priority = ChangeMetaData.PRIORITY_DEFAULT)
 public class RawSQLChange extends AbstractSQLChange {
 
@@ -35,7 +35,7 @@ public class RawSQLChange extends AbstractSQLChange {
         return super.getSql();
     }
 
-    @DatabaseChangeProperty(serializationType = SerializationType.NESTED_OBJECT, description = "A brief descriptive comment",
+    @DatabaseChangeProperty(serializationType = SerializationType.NESTED_OBJECT, description = "A brief descriptive inline comment. Not stored in the database",
         exampleValue = "What about Bob?")
     public String getComment() {
         return comment;
