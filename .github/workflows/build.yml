@@ -435,6 +435,8 @@ jobs:
           cp liquibase-extension-testing/target/liquibase-extension-testing-0-SNAPSHOT.jar artifacts-named/liquibase-extension-testing-${{ needs.setup.outputs.thisBranchFileName }}.jar
           cp liquibase-extension-testing/target/liquibase-extension-testing-0-SNAPSHOT-deps.jar artifacts-named/liquibase-extension-testing-${{ needs.setup.outputs.thisBranchFileName }}-deps.jar
           cp download/liquibase-commercial/liquibase-commercial-0-SNAPSHOT.jar artifacts-named/liquibase-commercial-${{ needs.setup.outputs.thisBranchFileName }}.jar
+          ls -R artifacts-named
+          tree
 
       - name: Archive Packages
         uses: actions/upload-artifact@v3
@@ -453,9 +455,6 @@ jobs:
         with:
           name: liquibase-artifacts-${{ needs.setup.outputs.thisBranchFileName }}
           path: artifacts-named/*
-          run: |
-            ls -R artifacts-named
-            tree -P '*.zip' -f
 
   finish:
     name: Finish Build
