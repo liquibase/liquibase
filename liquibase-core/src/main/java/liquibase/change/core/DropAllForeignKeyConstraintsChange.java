@@ -22,7 +22,7 @@ import liquibase.statement.SqlStatement;
 import liquibase.structure.core.ForeignKey;
 import liquibase.structure.core.Table;
 
-@DatabaseChange(name = "dropAllForeignKeyConstraints", description = "Drops all foreign key constraints for a table", priority = ChangeMetaData.PRIORITY_DEFAULT, appliesTo = "table")
+@DatabaseChange(name = "dropAllForeignKeyConstraints", description = "Drops all foreign key constraints on a table", priority = ChangeMetaData.PRIORITY_DEFAULT, appliesTo = "table")
 public class DropAllForeignKeyConstraintsChange extends AbstractChange {
 
     private String baseTableCatalogName;
