@@ -403,7 +403,7 @@ jobs:
           cp target/liquibase-0-SNAPSHOT-javadoc.jar artifacts/liquibase-core-0-SNAPSHOT-javadoc.jar
           
           ##create installer - disabled here but run as nightly job and as part of release workflow
-          #cp liquibase-dist/target/liquibase-*-installer-* artifacts
+          ## cp liquibase-dist/target/liquibase-*-installer-* artifacts
 
           cp liquibase-maven-plugin/target/liquibase-maven-plugin-0-SNAPSHOT.jar artifacts
           cp liquibase-maven-plugin/target/liquibase-maven-plugin-0-SNAPSHOT-sources.jar artifacts
