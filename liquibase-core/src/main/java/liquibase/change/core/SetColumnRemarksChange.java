@@ -71,7 +71,7 @@ public class SetColumnRemarksChange extends AbstractChange {
         this.columnName = columnName;
     }
 
-    @DatabaseChangeProperty(description = "A brief descriptive comment")
+    @DatabaseChangeProperty(description = "A brief descriptive comment written to the column metadata.")
     public String getRemarks() {
         return remarks;
     }
