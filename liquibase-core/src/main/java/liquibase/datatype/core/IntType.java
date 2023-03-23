@@ -70,7 +70,7 @@ public class IntType extends LiquibaseDataType {
         }
 
         String rawDefinitionDataType = getRawDefinition().toLowerCase();
-        if (database instanceof H2Database && rawDefinitionDataType.matches("int\\([1-9]?[0-9]\\)")) {
+        if (database instanceof H2Database && rawDefinitionDataType.matches("int\\([1-9]?[0-9]\\)(\\{autoincrement:true\\})?")) {
             int intParameter = Integer.valueOf(getParameters()[0].toString());
             if(intParameter >= 1 && intParameter <= 3) {
                 return new DatabaseDataType("TINYINT");
