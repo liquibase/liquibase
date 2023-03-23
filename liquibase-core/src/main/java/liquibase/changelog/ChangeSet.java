@@ -1514,7 +1514,11 @@ public class ChangeSet implements Conditional, ChangeLogChild {
         String commentMdc = comments != null ? comments : "";
         String labelMdc = labels != null ? labels.toString() : "";
         String contextsMdc = contextFilter != null && contextFilter.getOriginalString() != null ? contextFilter.getOriginalString() : "";
-        Scope.getCurrentScope().addMdcValue(MdcKey.CHANGELOG_FILE, getChangeLog().getLogicalFilePath());
+        String logicalPath = logicalFilePath;
+        if (logicalPath == null && getChangeLog() != null) {
+            logicalPath = getChangeLog().getLogicalFilePath();
+        }
+        Scope.getCurrentScope().addMdcValue(MdcKey.CHANGELOG_FILE, logicalPath);
         Scope.getCurrentScope().addMdcValue(MdcKey.CHANGESET_COMMENT, commentMdc);
         Scope.getCurrentScope().addMdcValue(MdcKey.CHANGESET_LABEL, labelMdc);
         Scope.getCurrentScope().addMdcValue(MdcKey.CHANGESET_CONTEXT, contextsMdc);
