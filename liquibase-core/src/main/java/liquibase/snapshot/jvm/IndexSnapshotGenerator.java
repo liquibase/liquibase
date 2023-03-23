@@ -128,6 +128,7 @@ public class IndexSnapshotGenerator extends JdbcSnapshotGenerator {
     }
 
     @Override
+    @SuppressWarnings("java:S5411")
     protected DatabaseObject snapshotObject(DatabaseObject example, DatabaseSnapshot snapshot) throws DatabaseException, InvalidExampleException {
         Database database = snapshot.getDatabase();
         Relation exampleIndex = ((Index) example).getRelation();
