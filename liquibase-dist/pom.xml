@@ -113,7 +113,6 @@
 
 
     <!-- needed for inclusion in CLI when running in newer java versions -->
-	<dependencies>
 		<dependency>
             <groupId>javax.xml.bind</groupId>
             <artifactId>jaxb-api</artifactId>
