@@ -208,7 +208,10 @@
                           osgi.serviceloader; osgi.serviceloader=liquibase.parser.SnapshotParser,
                           osgi.serviceloader; osgi.serviceloader=liquibase.hub.HubService,
                           osgi.serviceloader; osgi.serviceloader=liquibase.command.CommandStep,
-                          osgi.serviceloader; osgi.serviceloader=liquibase.sqlgenerator.SqlGenerator
+                          osgi.serviceloader; osgi.serviceloader=liquibase.sqlgenerator.SqlGenerator,
+                          osgi.serviceloader; osgi.serviceloader=liquibase.logging.mdc.MdcManager,
+                          osgi.serviceloader; osgi.serviceloader=liquibase.logging.mdc.CustomMdcObject,
+                          osgi.serviceloader; osgi.serviceloader=liquibase.resource.PathHandler
                         </Provide-Capability>
                         <Require-Capability>
                         osgi.extender; filter:="(osgi.extender=osgi.serviceloader.registrar)",
@@ -239,7 +242,10 @@
                         osgi.serviceloader; filter:="(osgi.serviceloader=liquibase.parser.SnapshotParser)"; cardinality:=multiple,
                         osgi.serviceloader; filter:="(osgi.serviceloader=liquibase.hub.HubService)"; cardinality:=multiple,
                         osgi.serviceloader; filter:="(osgi.serviceloader=liquibase.command.CommandStep)"; cardinality:=multiple,
-                        osgi.serviceloader; filter:="(osgi.serviceloader=liquibase.sqlgenerator.SqlGenerator)"; cardinality:=multiple
+                        osgi.serviceloader; filter:="(osgi.serviceloader=liquibase.sqlgenerator.SqlGenerator)"; cardinality:=multiple,
+                        osgi.serviceloader; filter:="(osgi.serviceloader=liquibase.logging.mdc.MdcManager)"; cardinality:=multiple,
+                        osgi.serviceloader; filter:="(osgi.serviceloader=liquibase.logging.mdc.CustomMdcObject)"; cardinality:=multiple,
+                        osgi.serviceloader; filter:="(osgi.serviceloader=liquibase.resource.PathHandler)"; cardinality:=multiple
                         </Require-Capability>
                     </instructions>
                 </configuration>
