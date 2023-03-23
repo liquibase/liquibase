@@ -42,7 +42,7 @@ public class ShowSummaryUtil {
         //
         // Check the global flag to turn the summary off
         //
-        if (showSummary == UpdateSummaryEnum.OFF) {
+        if (showSummary == null || showSummary == UpdateSummaryEnum.OFF) {
             return;
         }
 
