@@ -30,19 +30,18 @@ public class ShowSummaryUtil {
      * Show a summary of the changesets which were executed
      *
      * @param   changeLog                          The changelog used in this update
+     * @param   showSummary                        Flag to control whether or not we show the summary
      * @param   statusVisitor                      The StatusVisitor used to determine statuses
      * @param   outputStream                       The OutputStream to use for the summary
      * @throws  LiquibaseException                 Thrown by this method
      * @throws  IOException                        Thrown by this method
      *
      */
-    public static void showUpdateSummary(DatabaseChangeLog changeLog, StatusVisitor statusVisitor, OutputStream outputStream)
+    public static void showUpdateSummary(DatabaseChangeLog changeLog, UpdateSummaryEnum showSummary, StatusVisitor statusVisitor, OutputStream outputStream)
             throws LiquibaseException, IOException {
         //
         // Check the global flag to turn the summary off
         //
-        String showSummaryString = Scope.getCurrentScope().get("showSummary", String.class);
-        UpdateSummaryEnum showSummary = showSummaryString != null ? UpdateSummaryEnum.valueOf(showSummaryString) : UpdateSummaryEnum.OFF;
         if (showSummary == UpdateSummaryEnum.OFF) {
             return;
         }

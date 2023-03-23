@@ -2,6 +2,7 @@ package liquibase.command.core;
 
 import liquibase.Contexts;
 import liquibase.LabelExpression;
+import liquibase.Scope;
 import liquibase.UpdateSummaryEnum;
 import liquibase.changelog.*;
 import liquibase.changelog.filter.*;
@@ -9,6 +10,7 @@ import liquibase.changelog.visitor.ChangeExecListener;
 import liquibase.command.*;
 import liquibase.database.Database;
 import liquibase.exception.DatabaseException;
+import liquibase.logging.mdc.MdcKey;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -131,5 +133,10 @@ public class UpdateToTagCommandStep extends AbstractUpdateCommandStep {
         List<Class<?>> deps = new ArrayList<>(super.requiredDependencies());
         deps.add(UpdateSummaryEnum.class);
         return deps;
+    }
+
+    @Override
+    protected void customMdcLogging(CommandScope commandScope) {
+        Scope.getCurrentScope().addMdcValue(MdcKey.UPDATE_TO_TAG, commandScope.getArgumentValue(TAG_ARG));
     }
 }

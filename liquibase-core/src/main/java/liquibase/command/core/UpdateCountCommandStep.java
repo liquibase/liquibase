@@ -2,6 +2,7 @@ package liquibase.command.core;
 
 import liquibase.Contexts;
 import liquibase.LabelExpression;
+import liquibase.Scope;
 import liquibase.UpdateSummaryEnum;
 import liquibase.changelog.ChangeLogIterator;
 import liquibase.changelog.ChangeLogParameters;
@@ -12,6 +13,7 @@ import liquibase.changelog.visitor.ChangeExecListener;
 import liquibase.command.*;
 import liquibase.database.Database;
 import liquibase.exception.DatabaseException;
+import liquibase.logging.mdc.MdcKey;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -130,5 +132,10 @@ public class UpdateCountCommandStep extends AbstractUpdateCommandStep {
         List<Class<?>> deps = new ArrayList<>(super.requiredDependencies());
         deps.add(UpdateSummaryEnum.class);
         return deps;
+    }
+
+    @Override
+    protected void customMdcLogging(CommandScope commandScope) {
+        Scope.getCurrentScope().addMdcValue(MdcKey.UPDATE_COUNT, String.valueOf(commandScope.getArgumentValue(COUNT_ARG)));
     }
 }
