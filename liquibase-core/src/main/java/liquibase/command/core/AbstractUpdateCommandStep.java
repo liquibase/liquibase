@@ -103,12 +103,11 @@ public abstract class AbstractUpdateCommandStep extends AbstractCommandStep impl
             CompositeLogService compositeLogService = new CompositeLogService(true, bufferLog);
             HashMap<String, Object> scopeValues = new HashMap<>();
             scopeValues.put(Scope.Attr.logService.name(), compositeLogService);
-            scopeValues.put("showSummary", getShowSummary(commandScope));
             Scope.child(scopeValues, () -> {
                 //If we are using hub, we want to use the HubChangeExecListener, which is wrapping all the others. Otherwise, use the default.
                 ChangeExecListener listenerToUse = hubChangeExecListener != null ? hubChangeExecListener : defaultChangeExecListener;
                 runChangeLogIterator.run(new UpdateVisitor(database, listenerToUse), new RuntimeEnvironment(database, contexts, labelExpression));
-                ShowSummaryUtil.showUpdateSummary(databaseChangeLog, statusVisitor, resultsBuilder.getOutputStream());
+                ShowSummaryUtil.showUpdateSummary(databaseChangeLog, getShowSummary(commandScope), statusVisitor, resultsBuilder.getOutputStream());
             });
 
             hubHandler.postUpdateHub(bufferLog);
@@ -259,7 +258,8 @@ public abstract class AbstractUpdateCommandStep extends AbstractCommandStep impl
             StatusVisitor statusVisitor = new StatusVisitor(database);
             ChangeLogIterator shouldRunIterator = getStatusChangelogIterator(commandScope, database, contexts, labelExpression, databaseChangeLog);
             shouldRunIterator.run(statusVisitor, new RuntimeEnvironment(database, contexts, labelExpression));
-            ShowSummaryUtil.showUpdateSummary(databaseChangeLog, statusVisitor, outputStream);
+            UpdateSummaryEnum showSummary = getShowSummary(commandScope);
+            ShowSummaryUtil.showUpdateSummary(databaseChangeLog, showSummary, statusVisitor, outputStream);
             return true;
         }
         return false;
