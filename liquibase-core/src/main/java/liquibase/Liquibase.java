@@ -14,7 +14,6 @@ import liquibase.command.core.helpers.PreCompareCommandStep;
 import liquibase.database.Database;
 import liquibase.database.DatabaseConnection;
 import liquibase.database.DatabaseFactory;
-import liquibase.database.ObjectQuotingStrategy;
 import liquibase.diff.DiffGeneratorFactory;
 import liquibase.diff.DiffResult;
 import liquibase.diff.compare.CompareControl;
@@ -42,7 +41,6 @@ import liquibase.logging.mdc.MdcKey;
 import liquibase.logging.mdc.MdcObject;
 import liquibase.logging.mdc.MdcValue;
 import liquibase.logging.mdc.customobjects.ChangesetsRolledback;
-import liquibase.logging.mdc.customobjects.ChangesetsUpdated;
 import liquibase.parser.ChangeLogParser;
 import liquibase.parser.ChangeLogParserFactory;
 import liquibase.parser.core.xml.XMLChangeLogSAXParser;
@@ -53,13 +51,10 @@ import liquibase.serializer.ChangeLogSerializer;
 import liquibase.structure.DatabaseObject;
 import liquibase.util.*;
 
-import javax.xml.parsers.ParserConfigurationException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.PrintStream;
 import java.io.Writer;
-import java.text.DateFormat;
-import java.io.*;
 import java.util.*;
 import java.util.function.Supplier;
 
@@ -84,7 +79,6 @@ public class Liquibase implements AutoCloseable {
     private ChangeLogSyncListener changeLogSyncListener;
     private final DefaultChangeExecListener defaultChangeExecListener = new DefaultChangeExecListener();
     private UUID hubConnectionId;
-    private final Map<String, Boolean> upToDateFastCheck = new HashMap<>();
 
     private enum RollbackMessageType {
         WILL_ROLLBACK, ROLLED_BACK, ROLLBACK_FAILED
@@ -251,41 +245,6 @@ public class Liquibase implements AutoCloseable {
             updateCommand.addArgumentValue(DatabaseChangelogCommandStep.CHANGELOG_PARAMETERS, changeLogParameters);
             updateCommand.execute();
         });
-    }
-
-    /**
-     * Performs check of the historyService to determine if there is no unrun changesets without obtaining an exclusive write lock.
-     * This allows multiple peer services to boot in parallel in the common case where there are no changelogs to run.
-     * <p>
-     * If we see that there is nothing in the changelog to run and this returns <b>true</b>, then regardless of the lock status we already know we are "done" and can finish up without waiting for the lock.
-     * <p>
-     * But, if there are changelogs that might have to be ran and this returns <b>false</b>, you MUST get a lock and do a real check to know what changesets actually need to run.
-     * <p>
-     * NOTE: to reduce the number of queries to the databasehistory table, this method will cache the "fast check" results within this instance under the assumption that the total changesets will not change within this instance.
-     */
-    protected boolean isUpToDateFastCheck(Contexts contexts, LabelExpression labelExpression) throws LiquibaseException {
-        String cacheKey = contexts +"/"+ labelExpression;
-        if (!this.upToDateFastCheck.containsKey(cacheKey)) {
-            try {
-                if (listUnrunChangeSets(contexts, labelExpression, false).isEmpty()) {
-                    LOG.fine("Fast check found no un-run changesets");
-                    upToDateFastCheck.put(cacheKey, true);
-                } else {
-                    upToDateFastCheck.put(cacheKey, false);
-                }
-            } catch (DatabaseException e) {
-                LOG.info("Error querying Liquibase tables, disabling fast check for this execution. Reason: " + e.getMessage());
-                upToDateFastCheck.put(cacheKey, false);
-            } finally {
-                // Discard the cached fetched un-run changeset list, as if
-                // another peer is running the changesets in parallel, we may
-                // get a different answer after taking out the write lock
-
-                ChangeLogHistoryService changeLogService = ChangeLogHistoryServiceFactory.getInstance().getChangeLogService(database);
-                changeLogService.reset();
-            }
-        }
-        return upToDateFastCheck.get(cacheKey);
     }
 
     /**

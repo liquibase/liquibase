@@ -122,7 +122,7 @@ public abstract class AbstractUpdateCommandStep extends AbstractCommandStep impl
             }
             throw e;
         } finally {
-            //TODO: We should be able to remove this once we get the rest of the update family
+            //gTODO: We should be able to remove this once we get the rest of the update family
             // set up with the CommandFramework
             try {
                 lockService.releaseLock();
@@ -191,7 +191,7 @@ public abstract class AbstractUpdateCommandStep extends AbstractCommandStep impl
      */
     private static final Map<String, Boolean> upToDateFastCheck = new ConcurrentHashMap<>();
 
-    private boolean isUpToDateFastCheck(CommandScope commandScope, Database database, DatabaseChangeLog databaseChangeLog, Contexts contexts, LabelExpression labelExpression) throws LiquibaseException {
+    public boolean isUpToDateFastCheck(CommandScope commandScope, Database database, DatabaseChangeLog databaseChangeLog, Contexts contexts, LabelExpression labelExpression) throws LiquibaseException {
         String cacheKey = contexts + "/" + labelExpression;
         if (!upToDateFastCheck.containsKey(cacheKey)) {
             try {
