@@ -27,6 +27,7 @@
 
 		<assemblyConfigFile>src/main/assembly/assembly-bin.xml</assemblyConfigFile>
 	</properties>
+	<dependencies>
 		<dependency>
 			<groupId>com.h2database</groupId>
 			<artifactId>h2</artifactId>
