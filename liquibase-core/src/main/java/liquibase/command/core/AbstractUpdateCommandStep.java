@@ -22,6 +22,7 @@ import liquibase.logging.core.CompositeLogService;
 import liquibase.logging.mdc.MdcKey;
 import liquibase.logging.mdc.MdcObject;
 import liquibase.logging.mdc.MdcValue;
+import liquibase.logging.mdc.customobjects.ChangesetsUpdated;
 import liquibase.util.ShowSummaryUtil;
 
 import java.io.IOException;
@@ -62,11 +63,17 @@ public abstract class AbstractUpdateCommandStep extends AbstractCommandStep impl
         LabelExpression labelExpression = new LabelExpression(getLabelFilterArg(commandScope));
         ChangeLogParameters changeLogParameters = (ChangeLogParameters) commandScope.getDependency(ChangeLogParameters.class);
         addCommandFiltersMdc(labelExpression, contexts);
+        customMdcLogging(commandScope);
 
         LockService lockService = (LockService) commandScope.getDependency(LockService.class);
         BufferedLogService bufferLog = new BufferedLogService();
         HubHandler hubHandler = null;
+        //
+        // Create and add the listener to the resultsBuilder so that it is available
+        // for exception handling when there is an error
+        //
         DefaultChangeExecListener defaultChangeExecListener = new DefaultChangeExecListener();
+        resultsBuilder.addResult(DEFAULT_CHANGE_EXEC_LISTENER_RESULT_KEY, defaultChangeExecListener);
         try {
             DatabaseChangeLog databaseChangeLog = (DatabaseChangeLog) commandScope.getDependency(DatabaseChangeLog.class);
             if (isUpToDate(commandScope, database, databaseChangeLog, contexts, labelExpression, resultsBuilder.getOutputStream())) {
@@ -86,23 +93,21 @@ public abstract class AbstractUpdateCommandStep extends AbstractCommandStep impl
             hubHandler = new HubHandler(database, databaseChangeLog, changeLogFile, defaultChangeExecListener);
 
             ChangeLogIterator changeLogIterator = getStandardChangelogIterator(commandScope, database, contexts, labelExpression, databaseChangeLog);
+            ChangeExecListener hubChangeExecListener = hubHandler.startHubForUpdate(changeLogParameters, changeLogIterator, getHubOperation());
+            //Remember we built our hubHandler with our DefaultChangeExecListener so this HubChangeExecListener is delegating to them.
             StatusVisitor statusVisitor = new StatusVisitor(database);
             ChangeLogIterator shouldRunIterator = getStatusChangelogIterator(commandScope, database, contexts, labelExpression, databaseChangeLog);
             shouldRunIterator.run(statusVisitor, new RuntimeEnvironment(database, contexts, labelExpression));
 
-            //Remember we built our hubHandler with our DefaultChangeExecListener so this HubChangeExecListener is delegating to them.
-            ChangeExecListener hubChangeExecListener = hubHandler.startHubForUpdate(changeLogParameters, changeLogIterator, getHubOperation());
-            resultsBuilder.addResult(DEFAULT_CHANGE_EXEC_LISTENER_RESULT_KEY, defaultChangeExecListener);
             ChangeLogIterator runChangeLogIterator = getStandardChangelogIterator(commandScope, database, contexts, labelExpression, databaseChangeLog);
             CompositeLogService compositeLogService = new CompositeLogService(true, bufferLog);
             HashMap<String, Object> scopeValues = new HashMap<>();
             scopeValues.put(Scope.Attr.logService.name(), compositeLogService);
-            scopeValues.put("showSummary", getShowSummary(commandScope));
             Scope.child(scopeValues, () -> {
                 //If we are using hub, we want to use the HubChangeExecListener, which is wrapping all the others. Otherwise, use the default.
                 ChangeExecListener listenerToUse = hubChangeExecListener != null ? hubChangeExecListener : defaultChangeExecListener;
                 runChangeLogIterator.run(new UpdateVisitor(database, listenerToUse), new RuntimeEnvironment(database, contexts, labelExpression));
-                ShowSummaryUtil.showUpdateSummary(databaseChangeLog, statusVisitor, resultsBuilder.getOutputStream());
+                ShowSummaryUtil.showUpdateSummary(databaseChangeLog, getShowSummary(commandScope), statusVisitor, resultsBuilder.getOutputStream());
             });
 
             hubHandler.postUpdateHub(bufferLog);
@@ -127,6 +132,10 @@ public abstract class AbstractUpdateCommandStep extends AbstractCommandStep impl
         }
     }
 
+    protected void customMdcLogging(CommandScope commandScope) {
+        // do nothing by default
+    }
+
     @Override
     public void cleanUp(CommandResultsBuilder resultsBuilder) {
         LockServiceFactory.getInstance().resetAll();
@@ -142,11 +151,14 @@ public abstract class AbstractUpdateCommandStep extends AbstractCommandStep impl
     }
 
     private void logDeploymentOutcomeMdc(DefaultChangeExecListener defaultListener, boolean success) throws IOException {
-        int deployedChangeSetCount = defaultListener.getDeployedChangeSets().size();
+        List<ChangeSet> deployedChangeSets = defaultListener.getDeployedChangeSets();
+        int deployedChangeSetCount = deployedChangeSets.size();
+        ChangesetsUpdated changesetsUpdated = new ChangesetsUpdated(deployedChangeSets);
         String successLog = "Update command completed successfully.";
         String failureLog = "Update command encountered an exception.";
         try (MdcObject deploymentOutcomeMdc = Scope.getCurrentScope().addMdcValue(MdcKey.DEPLOYMENT_OUTCOME, success ? MdcValue.COMMAND_SUCCESSFUL : MdcValue.COMMAND_FAILED);
-             MdcObject deploymentOutcomeCountMdc = Scope.getCurrentScope().addMdcValue(MdcKey.DEPLOYMENT_OUTCOME_COUNT, String.valueOf(deployedChangeSetCount))) {
+             MdcObject deploymentOutcomeCountMdc = Scope.getCurrentScope().addMdcValue(MdcKey.DEPLOYMENT_OUTCOME_COUNT, String.valueOf(deployedChangeSetCount));
+             MdcObject changesetsUpdatesMdc = Scope.getCurrentScope().addMdcValue(MdcKey.CHANGESETS_UPDATED, changesetsUpdated)) {
             Scope.getCurrentScope().getLog(getClass()).info(success ? successLog : failureLog);
         }
     }
@@ -246,7 +258,8 @@ public abstract class AbstractUpdateCommandStep extends AbstractCommandStep impl
             StatusVisitor statusVisitor = new StatusVisitor(database);
             ChangeLogIterator shouldRunIterator = getStatusChangelogIterator(commandScope, database, contexts, labelExpression, databaseChangeLog);
             shouldRunIterator.run(statusVisitor, new RuntimeEnvironment(database, contexts, labelExpression));
-            ShowSummaryUtil.showUpdateSummary(databaseChangeLog, statusVisitor, outputStream);
+            UpdateSummaryEnum showSummary = getShowSummary(commandScope);
+            ShowSummaryUtil.showUpdateSummary(databaseChangeLog, showSummary, statusVisitor, outputStream);
             return true;
         }
         return false;

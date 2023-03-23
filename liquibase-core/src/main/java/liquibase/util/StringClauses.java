@@ -467,14 +467,8 @@ public class StringClauses {
             return "";
         }
 
-        List finalList = new ArrayList<>(clauses.values());
-        ListIterator iterator = finalList.listIterator();
-        while (iterator.hasNext()) {
-            Object next = iterator.next();
-            if ((next == null) || "".equals(next.toString())) {
-                iterator.remove();
-            }
-        }
+        List<Object> finalList = new ArrayList<>(clauses.values());
+        finalList.removeIf(next -> (next == null) || "".equals(next.toString()));
 
         return start
                 + StringUtil.join(finalList, separator, new StringUtil.ToStringFormatter())

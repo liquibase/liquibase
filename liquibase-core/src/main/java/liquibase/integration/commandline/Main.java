@@ -1441,21 +1441,11 @@ public class Main {
             }
         }
         if (includeSystemClasspath) {
-            classLoader = AccessController.doPrivileged(new PrivilegedAction<URLClassLoader>() {
-                @Override
-                public URLClassLoader run() {
-                    return new URLClassLoader(urls.toArray(new URL[0]), Thread.currentThread()
-                            .getContextClassLoader());
-                }
-            });
+            classLoader = AccessController.doPrivileged((PrivilegedAction<URLClassLoader>) () -> new URLClassLoader(urls.toArray(new URL[0]), Thread.currentThread()
+                    .getContextClassLoader()));
 
         } else {
-            classLoader = AccessController.doPrivileged(new PrivilegedAction<URLClassLoader>() {
-                @Override
-                public URLClassLoader run() {
-                    return new URLClassLoader(urls.toArray(new URL[0]), null);
-                }
-            });
+            classLoader = AccessController.doPrivileged((PrivilegedAction<URLClassLoader>) () -> new URLClassLoader(urls.toArray(new URL[0]), null));
         }
 
         Thread.currentThread().setContextClassLoader(classLoader);
@@ -1491,7 +1481,8 @@ public class Main {
         final ResourceAccessor fileOpener = this.getFileOpenerResourceAccessor();
 
         if (COMMANDS.DIFF.equalsIgnoreCase(command) || COMMANDS.DIFF_CHANGELOG.equalsIgnoreCase(command)
-            || COMMANDS.GENERATE_CHANGELOG.equalsIgnoreCase(command) || COMMANDS.UPDATE.equalsIgnoreCase(command)) {
+            || COMMANDS.GENERATE_CHANGELOG.equalsIgnoreCase(command) || COMMANDS.UPDATE.equalsIgnoreCase(command)
+            || COMMANDS.RELEASE_LOCKS.equalsIgnoreCase(command)) {
             this.runUsingCommandFramework();
             return;
         }
@@ -1594,16 +1585,6 @@ public class Main {
 
             if (COMMANDS.LIST_LOCKS.equalsIgnoreCase(command)) {
                 liquibase.reportLocks(System.err);
-                return;
-            } else if (COMMANDS.RELEASE_LOCKS.equalsIgnoreCase(command)) {
-                LockService lockService = LockServiceFactory.getInstance().getLockService(database);
-                lockService.forceReleaseLock();
-                Scope.getCurrentScope().getUI().sendMessage(String.format(
-                                coreBundle.getString("successfully.released.database.change.log.locks"),
-                                liquibase.getDatabase().getConnection().getConnectionUserName() +
-                                        "@" + liquibase.getDatabase().getConnection().getURL()
-                        )
-                );
                 return;
             } else if (COMMANDS.TAG.equalsIgnoreCase(command)) {
                 liquibase.tag(getCommandArgument());
@@ -1918,7 +1899,15 @@ public class Main {
             runGenerateChangelogCommandStep();
         } else if (COMMANDS.UPDATE.equalsIgnoreCase(command)) {
             runUpdateCommandStep();
+        } else if (COMMANDS.RELEASE_LOCKS.equalsIgnoreCase(command)) {
+            runReleaseLocksCommand();
         }
+    }
+
+    private void runReleaseLocksCommand() throws CommandExecutionException {
+        CommandScope commandScope = new CommandScope(ReleaseLocksCommandStep.COMMAND_NAME[0]);
+        this.setDatabaseArgumentsToCommand(commandScope);
+        commandScope.execute();
     }
 
     private void runGenerateChangelogCommandStep() throws LiquibaseException, IOException, CommandLineParsingException {

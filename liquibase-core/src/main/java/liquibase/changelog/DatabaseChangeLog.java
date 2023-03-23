@@ -40,28 +40,10 @@ public class DatabaseChangeLog implements Comparable<DatabaseChangeLog>, Conditi
     private static final ThreadLocal<DatabaseChangeLog> ROOT_CHANGE_LOG = new ThreadLocal<>();
     private static final ThreadLocal<DatabaseChangeLog> PARENT_CHANGE_LOG = new ThreadLocal<>();
     private static final Logger LOG = Scope.getCurrentScope().getLog(DatabaseChangeLog.class);
+    private static final Pattern SLASH_PATTERN = Pattern.compile("^/");
 
-    private static final String SLASH_REGEX = "^/";
-    private static final Pattern SLASH_PATTERN = Pattern.compile(SLASH_REGEX);
-
-    private static final String NON_CLASSPATH_REGEX = "^classpath:";
-    private static final Pattern NON_CLASSPATH_PATTERN = Pattern.compile(NON_CLASSPATH_REGEX);
-
-    private static final String DOUBLE_BACK_SLASH_REGEX = "\\\\";
-    private static final Pattern DOUBLE_BACK_SLASH_PATTERN = Pattern.compile(DOUBLE_BACK_SLASH_REGEX);
-
-    private static final String DOUBLE_SLASH_REGEX = "//+";
-    private static final Pattern DOUBLE_SLASH_PATTERN = Pattern.compile(DOUBLE_SLASH_REGEX);
-
-    private static final String SLASH_DOT_SLASH_REGEX = "/\\./";
-    private static final Pattern SLASH_DOT_SLASH_PATTERN = Pattern.compile(SLASH_DOT_SLASH_REGEX);
-
-    private static final String NO_LETTER_REGEX = "^[a-zA-Z]:";
-    private static final Pattern NO_LETTER_PATTERN = Pattern.compile(NO_LETTER_REGEX);
-
-    private static final String DOT_SLASH_REGEX = "^\\.?/";
-    private static final Pattern DOT_SLASH_PATTERN = Pattern.compile(DOT_SLASH_REGEX);
-
+    private static final Pattern DOUBLE_BACK_SLASH_PATTERN = Pattern.compile("\\\\");
+    private static final Pattern NO_LETTER_PATTERN = Pattern.compile("^[a-zA-Z]:");
     private static final String SEEN_CHANGELOGS_PATHS_SCOPE_KEY = "SEEN_CHANGELOG_PATHS";
 
     private PreconditionContainer preconditionContainer = new GlobalPreconditionContainer();
@@ -908,26 +890,42 @@ public class DatabaseChangeLog implements Comparable<DatabaseChangeLog>, Conditi
     }
 
     protected Comparator<String> getStandardChangeLogComparator() {
-        return new Comparator<String>() {
-            @Override
-            public int compare(String o1, String o2) {
-                //by ignoring WEB-INF/classes in path all changelog Files independent
-                //whehther they are in a WAR or in a JAR are order following the same rule
-                return o1.replace("WEB-INF/classes/", "").compareTo(o2.replace("WEB-INF/classes/", ""));
-            }
-        };
+        return Comparator.comparing(o -> o.replace("WEB-INF/classes/", ""));
     }
 
     public static String normalizePath(String filePath) {
         if (filePath == null) {
             return null;
         }
-        String noClassPathReplaced = NON_CLASSPATH_PATTERN.matcher(filePath).replaceFirst("");
-        String doubleBackSlashReplaced = DOUBLE_BACK_SLASH_PATTERN.matcher(noClassPathReplaced).replaceAll("/");
-        String doubleSlashReplaced = DOUBLE_SLASH_PATTERN.matcher(doubleBackSlashReplaced).replaceAll("/");
-        String slashDotSlashReplaced = SLASH_DOT_SLASH_PATTERN.matcher(doubleSlashReplaced).replaceAll("/");
-        String noLetterReplaced = NO_LETTER_PATTERN.matcher(slashDotSlashReplaced).replaceFirst("");
-        return DOT_SLASH_PATTERN.matcher(noLetterReplaced).replaceFirst("");
+
+        if (filePath.startsWith("classpath:")) {
+            filePath = filePath.substring("classpath:".length());
+        }
+
+        if (filePath.contains("\\")) {
+            filePath = filePath.replace("\\", "/");
+        }
+
+        while (filePath.contains("//")) {
+            filePath = filePath.replace("//", "/");
+        }
+
+        if (filePath.contains("/./")) {
+            filePath = filePath.replace("/./", "/");
+        }
+
+        if (filePath.indexOf(":") == 1) {
+            filePath = NO_LETTER_PATTERN.matcher(filePath).replaceFirst("");
+        }
+
+        if (filePath.startsWith(".")) {
+            filePath = filePath.substring(1);
+        }
+        if (filePath.startsWith("/")) {
+            filePath = filePath.substring(1);
+        }
+
+        return filePath;
     }
 
     public void clearCheckSums() {

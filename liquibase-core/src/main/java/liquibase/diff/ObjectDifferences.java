@@ -84,7 +84,7 @@ public class ObjectDifferences {
     protected Object undoCollection(Object potentialCollection, Object otherObject) {
         if ((otherObject != null) && (potentialCollection instanceof Collection) &&
                 !(otherObject instanceof Collection)) {
-            if ((((Collection) potentialCollection).size() == 1) && ((Collection) potentialCollection).iterator()
+            if ((((Collection<?>) potentialCollection).size() == 1) && ((Collection) potentialCollection).iterator()
                 .next().getClass().equals(otherObject.getClass())) {
                 potentialCollection = ((Collection) potentialCollection).iterator().next();
             }
@@ -185,7 +185,7 @@ public class ObjectDifferences {
                 if (!(compareToValue instanceof Collection)) {
                     return false;
                 }
-                if (((Collection) referenceValue).size() != ((Collection) compareToValue).size()) {
+                if (((Collection<?>) referenceValue).size() != ((Collection<?>) compareToValue).size()) {
                     return false;
                 } else {
                     Iterator referenceIterator = ((Collection) referenceValue).iterator();
@@ -294,14 +294,14 @@ public class ObjectDifferences {
                 return false;
             }
 
-            if (((Collection) referenceValue).size() != ((Collection) compareToValue).size()) {
+            if (((Collection<?>) referenceValue).size() != ((Collection<?>) compareToValue).size()) {
                 return false;
             }
 
             Iterator referenceIterator = ((Collection) referenceValue).iterator();
             Iterator compareIterator = ((Collection) compareToValue).iterator();
 
-            if (((Collection) referenceValue).size() != ((Collection) compareToValue).size()) {
+            if (((Collection<?>) referenceValue).size() != ((Collection<?>) compareToValue).size()) {
                 return false;
             }
 
@@ -340,7 +340,7 @@ public class ObjectDifferences {
                 return false;
             }
 
-            if (((Collection) referenceValue).size() != ((Collection) compareToValue).size()) {
+            if (((Collection<?>) referenceValue).size() != ((Collection<?>) compareToValue).size()) {
                 return false;
             }
 
