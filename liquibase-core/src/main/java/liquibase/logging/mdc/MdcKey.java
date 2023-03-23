@@ -75,6 +75,7 @@ public class MdcKey {
     public static final String REFERENCE_DEFAULT_SCHEMA_NAME = "referenceDefaultSchemaName";
     public static final String REFERENCE_SCHEMAS = "referenceSchemas";
     public static final String OUTPUT_SCHEMAS = "outputSchemas";
+    public static final String DIFF_CHANGELOG_FILE = "diffChangelogFile";
     public static final String INCLUDE_CATALOG = "includeCatalog";
     public static final String INCLUDE_SCHEMA = "includeSchema";
     public static final String INCLUDE_TABLESPACE = "includeTablespace";

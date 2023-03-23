@@ -1,5 +1,6 @@
 package liquibase.command.core;
 
+import liquibase.Scope;
 import liquibase.command.*;
 import liquibase.command.core.helpers.DiffOutputControlCommandStep;
 import liquibase.command.providers.ReferenceDatabase;
@@ -9,6 +10,7 @@ import liquibase.diff.DiffResult;
 import liquibase.diff.output.DiffOutputControl;
 import liquibase.diff.output.changelog.DiffToChangeLog;
 import liquibase.exception.CommandValidationException;
+import liquibase.logging.mdc.MdcKey;
 import liquibase.util.StringUtil;
 
 import java.io.PrintStream;
@@ -63,6 +65,7 @@ public class DiffChangelogCommandStep extends AbstractCommandStep {
         ObjectQuotingStrategy originalStrategy = referenceDatabase.getObjectQuotingStrategy();
         try {
             String changeLogFile = commandScope.getArgumentValue(CHANGELOG_FILE_ARG);
+            Scope.getCurrentScope().addMdcValue(MdcKey.DIFF_CHANGELOG_FILE, changeLogFile);
             referenceDatabase.setObjectQuotingStrategy(ObjectQuotingStrategy.QUOTE_ALL_OBJECTS);
             if (StringUtil.trimToNull(changeLogFile) == null) {
                 createDiffToChangeLogObject(diffResult, diffOutputControl).print(outputStream);
