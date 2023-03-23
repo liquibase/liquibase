@@ -170,9 +170,6 @@ public class ShowSummaryUtil {
             ChangeSetFilterResult filterResult = new ChangeSetFilterResult(false, mismatchMessage, DbmsChangeSetFilter.class, "dbmsUnknown", "DBMS mismatch");
             changeSetStatus.setFilterResults(Collections.singleton(filterResult));
             finalList.add(changeSetStatus);
-            if (mdcSkipCounts != null) {
-                mdcSkipCounts.merge("dbmsUnknown", 1, Integer::sum);
-            }
         });
         return finalList;
     }
