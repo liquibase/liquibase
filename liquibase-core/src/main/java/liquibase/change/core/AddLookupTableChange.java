@@ -68,7 +68,7 @@ public class AddLookupTableChange extends AbstractChange {
         this.existingTableCatalogName = existingTableCatalogName;
     }
 
-    @DatabaseChangeProperty(mustEqualExisting ="column.relation.schema", description = "Name of the database schema of the existing table")
+    @DatabaseChangeProperty(mustEqualExisting ="column.relation.schema", description = "Name of the database schema where the table containing data to extract resides")
     public String getExistingTableSchemaName() {
         return existingTableSchemaName;
     }
@@ -97,7 +97,7 @@ public class AddLookupTableChange extends AbstractChange {
         this.existingColumnName = existingColumnName;
     }
 
-    @DatabaseChangeProperty(since = "3.0", description = "Name of the database catalog of the table to create")
+    @DatabaseChangeProperty(since = "3.0", description = "Name of the database catalog for the lookup table")
     public String getNewTableCatalogName() {
         return newTableCatalogName;
     }
@@ -106,7 +106,7 @@ public class AddLookupTableChange extends AbstractChange {
         this.newTableCatalogName = newTableCatalogName;
     }
 
-    @DatabaseChangeProperty(description = "Name of the database schema of the table to create")
+    @DatabaseChangeProperty(description = "Name of the database schema for the lookup table")
     public String getNewTableSchemaName() {
         return newTableSchemaName;
     }
