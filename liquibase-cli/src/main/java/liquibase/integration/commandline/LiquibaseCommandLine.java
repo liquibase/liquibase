@@ -352,9 +352,9 @@ public class LiquibaseCommandLine {
                             }
                         }
 
-                    enableMonitoring();
-                    logMdcData();
-                    int response = commandLine.execute(finalArgs);
+                        enableMonitoring();
+                        logMdcData();
+                        int response = commandLine.execute(finalArgs);
 
                         if (!wasHelpOrVersionRequested()) {
                             final ConfiguredValue<String> logFile = LiquibaseCommandLineConfiguration.LOG_FILE.getCurrentConfiguredValue();
