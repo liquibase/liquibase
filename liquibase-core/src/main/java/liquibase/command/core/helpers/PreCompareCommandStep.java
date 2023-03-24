@@ -16,7 +16,7 @@ import java.util.List;
 /**
  * Prepares objects used by database comparison Commands like diff, diffChangelog, etc
  */
-public class PreCompareCommandStep extends AbstractCommandStep {
+public class PreCompareCommandStep extends AbstractHelperCommandStep {
 
     protected static final String[] COMMAND_NAME = {"preCompareCommandStep"};
     public static final CommandArgumentDefinition<String> EXCLUDE_OBJECTS_ARG;
@@ -146,10 +146,4 @@ public class PreCompareCommandStep extends AbstractCommandStep {
         return new CompareControl(finalSchemaComparisons, commandScope.getArgumentValue(DIFF_TYPES_ARG));
     }
 
-    @Override
-    public void adjustCommandDefinition(CommandDefinition commandDefinition) {
-        if (commandDefinition.getPipeline().size() == 1) {
-            commandDefinition.setInternal(true);
-        }
-    }
 }

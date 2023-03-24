@@ -9,6 +9,8 @@ public class MdcKey {
     public static final String LIQUIBASE_OPERATION = "liquibaseOperation";
     public static final String LIQUIBASE_TARGET_URL = "liquibaseTargetUrl";
     public static final String LIQUIBASE_REF_URL = "liquibaseRefUrl";
+    public static final String LIQUIBASE_CATALOG_NAME = "liquibaseCatalogName";
+    public static final String LIQUIBASE_SCHEMA_NAME = "liquibaseSchemaName";
     public static final String CHANGESET_OPERATION_START_TIME = "changesetOperationStart";
     public static final String CHANGESET_OPERATION_STOP_TIME = "changesetOperationStop";
     public static final String CHANGESET_SQL = "changesetSql";
@@ -47,6 +49,8 @@ public class MdcKey {
     public static final String LIQUIBASE_SQLCMD_KEEP_TEMP_NAME = "liquibaseSqlcmdKeepTempName";
     public static final String LIQUIBASE_SQLCMD_ARGS = "liquibaseSqlcmdArgs";
     public static final String LIQUIBASE_SQLCMD_LOG_FILE = "liquibaseSqlcmdLogFile";
+    public static final String LIQUIBASE_SQLCMD_TEMP_OVERWRITE = "liquibaseSqlcmdTempOverwrite";
+    public static final String LIQUIBASE_SQLCMD_CATALOG_NAME = "liquibaseSqlcmdCatalogName";
     public static final String LIQUIBASE_SQLPLUS_PATH = "liquibaseSqlplusPath";
     public static final String LIQUIBASE_SQLPLUS_TIMEOUT = "liquibaseSqlplusTimeout";
     public static final String LIQUIBASE_SQLPLUS_KEEP_TEMP = "liquibaseSqlplusKeepTemp";
@@ -58,4 +62,10 @@ public class MdcKey {
     public static final String RUN_WITH = "runWith";
     public static final String DATABASE_CHANGELOG_TABLE_OUTCOME = "databaseChangelogTableOutcome";
     public static final String ROLLBACK_SQL_FILE = "rollbackSqlFile";
+    public static final String UPDATE_SUMMARY = "updateSummary";
+    public static final String CHANGESETS_UPDATED = "changesetsUpdated";
+    public static final String UPDATE_ONE_CHANGESET_FORCE = "updateOneChangesetForce";
+    public static final String UPDATE_TO_TAG = "updateToTag";
+    public static final String UPDATE_COUNT = "updateCount";
+    public static final String ROLLBACK_ON_ERROR = "rollbackOnError";
 }
