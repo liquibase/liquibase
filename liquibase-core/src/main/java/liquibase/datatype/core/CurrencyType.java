@@ -41,7 +41,7 @@ public class CurrencyType  extends LiquibaseDataType {
         if (database instanceof AbstractDb2Database) {
             return new DatabaseDataType("DECIMAL", 19,4);
         }
-        if (database instanceof FirebirdDatabase) {
+        if (database instanceof FirebirdDatabase || database instanceof H2Database) {
             return new DatabaseDataType("DECIMAL", 18, 4);
         }
         if (database instanceof SQLiteDatabase) {
