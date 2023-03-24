@@ -1,6 +1,7 @@
 package liquibase.command.util;
 
-import liquibase.Scope;
+import liquibase.Scope
+import liquibase.UpdateSummaryEnum;
 import liquibase.command.CommandResultsBuilder;
 import liquibase.command.CommandScope;
 import liquibase.command.core.DropAllCommandStep;
@@ -10,7 +11,8 @@ import liquibase.command.core.helpers.DbUrlConnectionCommandStep;
 import liquibase.exception.CommandExecutionException;
 import liquibase.extension.testing.testsystem.DatabaseTestSystem;
 import liquibase.resource.SearchPathResourceAccessor
-import liquibase.sdk.resource.MockResourceAccessor;
+import liquibase.sdk.resource.MockResourceAccessor
+import org.h2.command.dml.Update;
 
 class CommandUtil {
 
@@ -47,6 +49,10 @@ class CommandUtil {
         execUpdateCommandInScope(resourceAccessor, db, changelogFile)
     }
 
+    static void runUpdate(DatabaseTestSystem db, String changelogFile, String labels, String contexts, String outputFile) throws Exception {
+        SearchPathResourceAccessor resourceAccessor = new SearchPathResourceAccessor(".,target/test-classes")
+        execUpdateCommandInScope(resourceAccessor, db, changelogFile, labels, contexts, outputFile)
+    }
     static void runGenerateChangelog(DatabaseTestSystem db, String outputFile) throws CommandExecutionException {
         CommandScope commandScope = new CommandScope(GenerateChangelogCommandStep.COMMAND_NAME)
         commandScope.addArgumentValue(DbUrlConnectionCommandStep.URL_ARG, db.getConnectionUrl())
@@ -69,7 +75,8 @@ class CommandUtil {
         step.run(commandResultsBuilder)
     }
 
-    private static void execUpdateCommandInScope(SearchPathResourceAccessor resourceAccessor, db, String changelogFile) {
+    private static void execUpdateCommandInScope(SearchPathResourceAccessor resourceAccessor, DatabaseTestSystem db, String changelogFile,
+                                                 String labels, String contexts, String outputFile) {
         def scopeSettings = [
                 (Scope.Attr.resourceAccessor.name()): resourceAccessor
         ]
@@ -79,6 +86,28 @@ class CommandUtil {
             commandScope.addArgumentValue(DbUrlConnectionCommandStep.USERNAME_ARG, db.getUsername())
             commandScope.addArgumentValue(DbUrlConnectionCommandStep.PASSWORD_ARG, db.getPassword())
             commandScope.addArgumentValue(UpdateCommandStep.CHANGELOG_FILE_ARG, changelogFile)
+            commandScope.addArgumentValue(UpdateCommandStep.LABEL_FILTER_ARG, labels)
+            commandScope.addArgumentValue(UpdateCommandStep.CONTEXTS_ARG, contexts)
+            commandScope.addArgumentValue(UpdateCommandStep.SHOW_SUMMARY, UpdateSummaryEnum.SUMMARY)
+            if (outputFile != null) {
+                OutputStream outputStream = new FileOutputStream(new File(outputFile))
+                commandScope.setOutput(outputStream)
+            }
+            commandScope.execute()
+        } as Scope.ScopedRunnerWithReturn<Void>)
+    }
+
+    private static void execUpdateCommandInScope(SearchPathResourceAccessor resourceAccessor, DatabaseTestSystem db, String changelogFile) {
+        def scopeSettings = [
+                (Scope.Attr.resourceAccessor.name()): resourceAccessor
+        ]
+        Scope.child(scopeSettings, {
+            CommandScope commandScope = new CommandScope(UpdateCommandStep.COMMAND_NAME)
+            commandScope.addArgumentValue(DbUrlConnectionCommandStep.URL_ARG, db.getConnectionUrl())
+            commandScope.addArgumentValue(DbUrlConnectionCommandStep.USERNAME_ARG, db.getUsername())
+            commandScope.addArgumentValue(DbUrlConnectionCommandStep.PASSWORD_ARG, db.getPassword())
+            commandScope.addArgumentValue(UpdateCommandStep.CHANGELOG_FILE_ARG, changelogFile)
+            commandScope.addArgumentValue(UpdateCommandStep.SHOW_SUMMARY, UpdateSummaryEnum.SUMMARY)
             commandScope.execute()
         } as Scope.ScopedRunnerWithReturn<Void>)
     }

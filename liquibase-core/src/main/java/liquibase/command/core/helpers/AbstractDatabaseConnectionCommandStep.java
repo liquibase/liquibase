@@ -107,6 +107,8 @@ public abstract class AbstractDatabaseConnectionCommandStep extends AbstractHelp
             throw new DatabaseException(e);
         }
         Scope.getCurrentScope().addMdcValue(MdcKey.LIQUIBASE_TARGET_URL, database.getConnection().getURL());
+        Scope.getCurrentScope().addMdcValue(MdcKey.LIQUIBASE_CATALOG_NAME, liquibaseCatalogName);
+        Scope.getCurrentScope().addMdcValue(MdcKey.LIQUIBASE_SCHEMA_NAME, liquibaseSchemaName);
         return database;
     }
 
