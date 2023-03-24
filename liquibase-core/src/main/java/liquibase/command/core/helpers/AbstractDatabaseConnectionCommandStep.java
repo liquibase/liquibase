@@ -1,7 +1,9 @@
-package liquibase.command;
+package liquibase.command.core.helpers;
 
 import liquibase.GlobalConfiguration;
 import liquibase.Scope;
+import liquibase.command.CleanUpCommandStep;
+import liquibase.command.CommandResultsBuilder;
 import liquibase.database.Database;
 import liquibase.database.DatabaseFactory;
 import liquibase.database.core.DatabaseUtils;
@@ -18,7 +20,7 @@ import static java.util.ResourceBundle.getBundle;
 /**
  * Abstract CommandStep providing database connectivity.
  */
-public abstract class AbstractDatabaseConnectionCommandStep extends AbstractCommandStep implements CleanUpCommandStep {
+public abstract class AbstractDatabaseConnectionCommandStep extends AbstractHelperCommandStep implements CleanUpCommandStep {
 
     protected static final String[] COMMAND_NAME = {"abstractDatabaseConnectionCommandStep"};
     private static final ResourceBundle coreBundle = getBundle("liquibase/i18n/liquibase-core");
@@ -108,13 +110,6 @@ public abstract class AbstractDatabaseConnectionCommandStep extends AbstractComm
         Scope.getCurrentScope().addMdcValue(MdcKey.LIQUIBASE_CATALOG_NAME, liquibaseCatalogName);
         Scope.getCurrentScope().addMdcValue(MdcKey.LIQUIBASE_SCHEMA_NAME, liquibaseSchemaName);
         return database;
-    }
-
-    @Override
-    public void adjustCommandDefinition(CommandDefinition commandDefinition) {
-        if (commandDefinition.getPipeline().size() == 1) {
-            commandDefinition.setInternal(true);
-        }
     }
 
     @Override
