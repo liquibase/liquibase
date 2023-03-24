@@ -121,6 +121,7 @@
                 <xsd:element name="property" minOccurs="0" maxOccurs="unbounded">
                     <xsd:complexType>
                         <xsd:attribute name="file" type="xsd:string"/>
+                        <xsd:attribute name="relativeToChangelogFile" type="booleanExp" default="false"/>
                         <xsd:attribute name="name" type="xsd:string"/>
                         <xsd:attribute name="value" type="xsd:string"/>
                         <xsd:attribute name="dbms" type="xsd:string"/>
@@ -227,6 +228,7 @@
                                 <xsd:element ref="includeAll" minOccurs="0" maxOccurs="unbounded"/>
                             </xsd:choice>
                             <xsd:attribute name="runWith" type="xsd:string" />
+                            <xsd:attribute name="runWithSpoolFile" type="xsd:string" />
                         </xsd:complexType>
                     </xsd:element>
                 </xsd:choice>
@@ -292,6 +294,7 @@
         <xsd:attribute name="runOrder" type="xsd:string"/>
         <xsd:attribute name="ignore" type="booleanExp"/>
         <xsd:attribute name="runWith" type="xsd:string" />
+        <xsd:attribute name="runWithSpoolFile" type="xsd:string" />
     </xsd:attributeGroup>
 
     <!-- Attributes for changes -->

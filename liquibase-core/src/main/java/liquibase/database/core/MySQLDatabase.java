@@ -30,7 +30,8 @@ public class MySQLDatabase extends AbstractJdbcDatabase {
     private static final Set<String> RESERVED_WORDS = createReservedWords();
 
     /** Pattern used to extract function precision like 3 in CURRENT_TIMESTAMP(3) */
-    public static final Pattern PRECISION_PATTERN = Pattern.compile("\\(\\d+\\)");
+    private static final String  PRECISION_REGEX = "\\(\\d+\\)";
+    public static final Pattern PRECISION_PATTERN = Pattern.compile(PRECISION_REGEX);
 
     public MySQLDatabase() {
         super.setCurrentDateTimeFunction("NOW()");

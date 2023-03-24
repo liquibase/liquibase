@@ -6,6 +6,7 @@ import liquibase.changelog.ChangeLogParameters;
 import liquibase.changelog.DatabaseChangeLog;
 import liquibase.exception.ChangeLogParseException;
 import liquibase.exception.LiquibaseException;
+import liquibase.exception.UnexpectedLiquibaseException;
 import liquibase.parser.ChangeLogParser;
 import liquibase.parser.core.ParsedNode;
 import liquibase.resource.Resource;
@@ -15,6 +16,7 @@ import org.yaml.snakeyaml.constructor.SafeConstructor;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.nio.file.Paths;
 import java.util.*;
 
 public class YamlChangeLogParser extends YamlParser implements ChangeLogParser {
@@ -50,8 +52,8 @@ public class YamlChangeLogParser extends YamlParser implements ChangeLogParser {
 
             for (Object obj : (List) rootList) {
                 if (obj instanceof Map) {
-                    if (((Map) obj).containsKey("property")) {
-                        Map property = (Map) ((Map) obj).get("property");
+                    if (((Map<?, ?>) obj).containsKey("property")) {
+                        Map property = (Map) ((Map<?, ?>) obj).get("property");
                         ContextExpression context = new ContextExpression((String) property.get("context"));
                         Labels labels = new Labels((String) property.get("labels"));
 
@@ -67,8 +69,8 @@ public class YamlChangeLogParser extends YamlParser implements ChangeLogParser {
                         }
                     }
 
-                    if (((Map) obj).containsKey("changeLogId")) {
-                        String changeLogId = (String) ((Map) obj).get("changeLogId");
+                    if (((Map<?, ?>) obj).containsKey("changeLogId")) {
+                        String changeLogId = (String) ((Map<?, ?>) obj).get("changeLogId");
                         changeLog.setChangeLogId(changeLogId);
                     }
                 }
@@ -103,9 +105,22 @@ public class YamlChangeLogParser extends YamlParser implements ChangeLogParser {
 
     private void loadChangeLogParametersFromFile(ChangeLogParameters changeLogParameters, ResourceAccessor resourceAccessor, DatabaseChangeLog changeLog, Map property, ContextExpression context, Labels labels, Boolean global) throws IOException, LiquibaseException {
         Properties props = new Properties();
-        Resource resource =  resourceAccessor.get((String) property.get("file"));
+        Boolean relativeToChangelogFile = (Boolean) property.get("relativeToChangelogFile");
+        String file = (String) property.get("file");
 
-        if (resource == null) {
+        if (relativeToChangelogFile == null) {
+            relativeToChangelogFile = false;
+        }
+
+        Resource resource;
+
+        if (relativeToChangelogFile) {
+            resource = resourceAccessor.get(changeLog.getPhysicalFilePath()).resolveSibling(file);
+        } else {
+            resource = resourceAccessor.get(file);
+        }
+
+        if (!resource.exists()) {
             log.info("Could not open properties file " + property.get("file"));
         } else {
             try (InputStream stream = resource.openInputStream()) {

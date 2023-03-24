@@ -39,20 +39,8 @@ public class DoubleType  extends LiquibaseDataType {
         if ((database instanceof AbstractDb2Database) || (database instanceof DerbyDatabase) || (database instanceof HsqlDatabase)) {
             return new DatabaseDataType("DOUBLE");
         }
-        if (database instanceof H2Database) {
-            return new DatabaseDataType("DOUBLE PRECISION");
-        }
-
-        if (database instanceof OracleDatabase) {
-            return new DatabaseDataType("FLOAT", 24);
-        }
-        if (database instanceof PostgresDatabase) {
-            return new DatabaseDataType("DOUBLE PRECISION");
-        }
-        if (database instanceof InformixDatabase) {
-            return new DatabaseDataType("DOUBLE PRECISION");
-        }
-        if (database instanceof FirebirdDatabase) {
+        if ((database instanceof H2Database) || (database instanceof OracleDatabase) || (database instanceof PostgresDatabase)
+              || (database instanceof InformixDatabase) || (database instanceof FirebirdDatabase)) {
             return new DatabaseDataType("DOUBLE PRECISION");
         }
         return super.toDatabaseDataType(database);

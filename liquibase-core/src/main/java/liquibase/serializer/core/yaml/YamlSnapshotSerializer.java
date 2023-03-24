@@ -87,7 +87,7 @@ public class YamlSnapshotSerializer extends YamlSerializer implements SnapshotSe
             SortedMap<String, Object> returnMap = new TreeMap<>();
             for (Map.Entry<Class<? extends DatabaseObject>, Set<? extends DatabaseObject>> entry : ((DatabaseObjectCollection) object).toMap().entrySet()) {
                 ArrayList value = new ArrayList(entry.getValue());
-                Collections.sort(value, new DatabaseObjectCollectionComparator());
+                value.sort(new DatabaseObjectCollectionComparator());
                 returnMap.put(entry.getKey().getName(), value);
             }
             return returnMap;
@@ -131,7 +131,7 @@ public class YamlSnapshotSerializer extends YamlSerializer implements SnapshotSe
                 if (data instanceof Date) {
                     value = new ISODateFormat().format((Date) data);
                 } else if (data instanceof Enum) {
-                    value = ((Enum) data).name();
+                    value = ((Enum<?>) data).name();
                 } else {
                     value = data.toString();
                 }
