@@ -246,7 +246,7 @@ public class DropColumnChange extends AbstractChange implements ChangeWithColumn
     @Override
     public Object getSerializableFieldValue(String field) {
         Object value = super.getSerializableFieldValue(field);
-        if ("columns".equals(field) && ((List) value).isEmpty()) {
+        if ("columns".equals(field) && ((List<?>) value).isEmpty()) {
             return null;
         }
         return value;

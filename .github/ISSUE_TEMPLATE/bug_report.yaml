@@ -6,7 +6,7 @@ body:
   - type: markdown
     attributes:
       value: |
-        Thank you very much for opening a bug report with Liquibase.
+        Thank you very much for opening a bug report/feature request with Liquibase.
 
         If you have a question or need help, please go to [our Forum](https://forum.liquibase.org/) or [our Discord](https://discord.gg/pDB5DfE).
 
@@ -26,6 +26,8 @@ body:
         A clear and concise description of the issue being addressed.
         - Describe the actual problematic behavior.
         - Ensure private information is redacted.
+        - Include console output or log files if relevant.
+        - If applicable, add screenshots or screen recordings to help explain your problem.
     validations:
       required: true
   - type: textarea
@@ -41,24 +43,13 @@ body:
     validations:
       required: true
   - type: textarea
-    id: actual
-    attributes:
-      label: Actual Behavior
-      description: |
-        A clear and concise description of what happens in the software with the **version used**.
-        - Include console output if relevant
-        - Include log files if available.
-        - If applicable, add screenshots or screen recordings to help explain your problem.
-    validations:
-      required: false
-  - type: textarea
     id: expected
     attributes:
       label: Expected/Desired Behavior
       description: |
         A clear and concise description of what happens in the software **after** a fix is created and merged.
     validations:
-      required: false
+      required: true
 
   - type: input
     id: version
