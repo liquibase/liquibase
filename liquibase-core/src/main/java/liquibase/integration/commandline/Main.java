@@ -7,32 +7,28 @@ import liquibase.changelog.visitor.DefaultChangeExecListener;
 import liquibase.command.CommandResults;
 import liquibase.command.CommandScope;
 import liquibase.command.core.*;
-import liquibase.command.core.helpers.DbUrlConnectionCommandStep;
-import liquibase.command.core.helpers.DiffOutputControlCommandStep;
-import liquibase.command.core.helpers.PreCompareCommandStep;
-import liquibase.command.core.helpers.ReferenceDbUrlConnectionCommandStep;
+import liquibase.command.core.helpers.*;
 import liquibase.configuration.ConfiguredValue;
 import liquibase.configuration.LiquibaseConfiguration;
 import liquibase.configuration.core.DeprecatedConfigurationValueProvider;
 import liquibase.database.Database;
-import liquibase.diff.compare.CompareControl;
-import liquibase.diff.output.DiffOutputControl;
-import liquibase.diff.output.ObjectChangeFilter;
 import liquibase.exception.*;
 import liquibase.hub.HubConfiguration;
 import liquibase.hub.HubServiceFactory;
 import liquibase.integration.IntegrationDetails;
+import liquibase.io.WriterOutputStream;
 import liquibase.license.LicenseInstallResult;
 import liquibase.license.LicenseService;
 import liquibase.license.LicenseServiceFactory;
 import liquibase.license.Location;
-import liquibase.lockservice.LockService;
-import liquibase.lockservice.LockServiceFactory;
 import liquibase.logging.LogService;
 import liquibase.logging.Logger;
 import liquibase.logging.core.JavaLogService;
 import liquibase.logging.mdc.MdcKey;
-import liquibase.resource.*;
+import liquibase.resource.ClassLoaderResourceAccessor;
+import liquibase.resource.CompositeResourceAccessor;
+import liquibase.resource.DirectoryResourceAccessor;
+import liquibase.resource.ResourceAccessor;
 import liquibase.ui.ConsoleUIService;
 import liquibase.util.ISODateFormat;
 import liquibase.util.LiquibaseUtil;
@@ -135,10 +131,8 @@ public class Main {
     protected String schemas;
     protected String snapshotFormat;
     protected String liquibaseProLicenseKey;
-    private boolean liquibaseProLicenseValid = false;
     protected String liquibaseHubApiKey;
     protected String liquibaseHubUrl;
-    private Boolean managingLogConfig = null;
     private boolean outputsLogMessages = false;
     protected String sqlFile;
     protected String delimiter;
@@ -352,17 +346,9 @@ public class Main {
                                     if (!Main.runningFromNewCli) {
                                         Scope.getCurrentScope().getUI().sendMessage(allMessages);
                                     }
-                                } else {
-                                    main.liquibaseProLicenseValid = true;
                                 }
                             }
 
-                            //
-                            // Check to see if we have an expired license
-                            //
-                            if (licenseService.daysTilExpiration() < 0) {
-                                main.liquibaseProLicenseValid = false;
-                            }
                             if (!Main.runningFromNewCli) {
                                 Scope.getCurrentScope().getUI().sendMessage(licenseService.getLicenseInfo());
                             }
@@ -531,21 +517,6 @@ public class Main {
             }
         }
         return logLevel;
-    }
-
-    /**
-     * Warns the user that some logging was suppressed because the --logLevel command line switch was not set high
-     * enough
-     *
-     * @param outputLoggingEnabled if a warning should be printed
-     * @return the warning message (if outputLoggingEnabled==true), an empty String otherwise
-     */
-    private static String generateLogLevelWarningMessage(boolean outputLoggingEnabled) {
-        if (outputLoggingEnabled) {
-            return "";
-        } else {
-            return "\n\n" + coreBundle.getString("for.more.information.use.loglevel.flag");
-        }
     }
 
     /**
@@ -1325,7 +1296,7 @@ public class Main {
         }
 
         try {
-            Field field = getDeclaredField(attributeName); //getClass().getDeclaredField(attributeName);
+            Field field = getDeclaredField(attributeName);
             if (field.getType().equals(Boolean.class)) {
                 field.set(this, Boolean.valueOf(value));
             } else {
@@ -1482,7 +1453,8 @@ public class Main {
 
         if (COMMANDS.DIFF.equalsIgnoreCase(command) || COMMANDS.DIFF_CHANGELOG.equalsIgnoreCase(command)
             || COMMANDS.GENERATE_CHANGELOG.equalsIgnoreCase(command) || COMMANDS.UPDATE.equalsIgnoreCase(command)
-            || COMMANDS.RELEASE_LOCKS.equalsIgnoreCase(command)) {
+            || COMMANDS.RELEASE_LOCKS.equalsIgnoreCase(command)
+            || COMMANDS.ROLLBACK.equalsIgnoreCase(command) || COMMANDS.ROLLBACK_SQL.equalsIgnoreCase(command)) {
             this.runUsingCommandFramework();
             return;
         }
@@ -1747,10 +1719,8 @@ public class Main {
                         Map<String, Object> updateScopedObjects = new HashMap<>();
                         updateScopedObjects.put("showSummary", showSummary);
                         updateScopedObjects.put("outputStream", outputStream);
-                        Scope.child(updateScopedObjects, () -> {
-                            liquibase.update(Integer.parseInt(commandParams.iterator().next()), new Contexts(contexts), new
-                                    LabelExpression(getLabelFilter()));
-                        });
+                        Scope.child(updateScopedObjects, () -> liquibase.update(Integer.parseInt(commandParams.iterator().next()), new Contexts(contexts),
+                                new LabelExpression(getLabelFilter())));
                     } catch (LiquibaseException updateException) {
                         handleUpdateException(database, updateException, defaultChangeExecListener, rollbackOnError);
                     }
@@ -1766,9 +1736,7 @@ public class Main {
                         Map<String, Object> updateScopedObjects = new HashMap<>();
                         updateScopedObjects.put("showSummary", showSummary);
                         updateScopedObjects.put("outputStream", outputStream);
-                        Scope.child(updateScopedObjects, () -> {
-                            liquibase.update(commandParams.iterator().next(), new Contexts(contexts), new LabelExpression(getLabelFilter()));
-                        });
+                        Scope.child(updateScopedObjects, () -> liquibase.update(commandParams.iterator().next(), new Contexts(contexts), new LabelExpression(getLabelFilter())));
                     } catch (LiquibaseException updateException) {
                         handleUpdateException(database, updateException, defaultChangeExecListener, rollbackOnError);
                     }
@@ -1783,14 +1751,6 @@ public class Main {
                             (getLabelFilter()), getOutputWriter());
                 } else if (COMMANDS.UPDATE_SQL.equalsIgnoreCase(command)) {
                     liquibase.update(new Contexts(contexts), new LabelExpression(getLabelFilter()), getOutputWriter());
-                } else if (COMMANDS.ROLLBACK.equalsIgnoreCase(command)) {
-                    Scope.getCurrentScope().addMdcValue(MdcKey.LIQUIBASE_OPERATION, COMMANDS.ROLLBACK);
-                    if (getCommandArgument() == null) {
-                        throw new CommandLineParsingException(
-                                String.format(coreBundle.getString("command.requires.tag"), COMMANDS.ROLLBACK));
-                    }
-                    liquibase.rollback(getCommandArgument(), getCommandParam(COMMANDS.ROLLBACK_SCRIPT, null), new
-                            Contexts(contexts), new LabelExpression(getLabelFilter()));
                 } else if (COMMANDS.ROLLBACK_TO_DATE.equalsIgnoreCase(command)) {
                     if (getCommandArgument() == null) {
                         throw new CommandLineParsingException(
@@ -1804,14 +1764,6 @@ public class Main {
                     liquibase.rollback(Integer.parseInt(getCommandArgument()), getCommandParam
                             (COMMANDS.ROLLBACK_SCRIPT, null), new Contexts(contexts), new LabelExpression(getLabelFilter()));
 
-                } else if (COMMANDS.ROLLBACK_SQL.equalsIgnoreCase(command)) {
-                    if (getCommandArgument() == null) {
-                        throw new CommandLineParsingException(
-                                String.format(coreBundle.getString("command.requires.tag"),
-                                        COMMANDS.ROLLBACK_SQL));
-                    }
-                    liquibase.rollback(getCommandArgument(), getCommandParam(COMMANDS.ROLLBACK_SCRIPT, null), new
-                            Contexts(contexts), new LabelExpression(getLabelFilter()), getOutputWriter());
                 } else if (COMMANDS.ROLLBACK_TO_DATE_SQL.equalsIgnoreCase(command)) {
                     if (getCommandArgument() == null) {
                         throw new CommandLineParsingException(
@@ -1901,7 +1853,39 @@ public class Main {
             runUpdateCommandStep();
         } else if (COMMANDS.RELEASE_LOCKS.equalsIgnoreCase(command)) {
             runReleaseLocksCommand();
+        } else if (COMMANDS.ROLLBACK.equalsIgnoreCase(command)) {
+            runRollbackCommand(null);
+        } else if (COMMANDS.ROLLBACK_SQL.equalsIgnoreCase(command)) {
+            runRollbackSqlCommand();
         }
+    }
+
+    private void runRollbackSqlCommand() throws CommandLineParsingException, IOException, CommandExecutionException {
+        this.runRollbackCommand(getOutputWriter());
+    }
+
+    private void runRollbackCommand(Writer outputWriter) throws CommandLineParsingException, CommandExecutionException {
+        Scope.getCurrentScope().addMdcValue(MdcKey.LIQUIBASE_OPERATION, COMMANDS.ROLLBACK);
+        if (getCommandArgument() == null) {
+            throw new CommandLineParsingException(
+                    String.format(coreBundle.getString("command.requires.tag"), COMMANDS.ROLLBACK));
+        }
+
+        String[] commandToRun = outputWriter == null ? RollbackCommandStep.COMMAND_NAME : RollbackSqlCommandStep.COMMAND_NAME;
+
+        CommandScope commandScope = new CommandScope(commandToRun)
+                .addArgumentValue(DatabaseChangelogCommandStep.CHANGELOG_FILE_ARG, changeLogFile)
+                .addArgumentValue(DatabaseChangelogCommandStep.CONTEXTS_ARG, contexts)
+                .addArgumentValue(DatabaseChangelogCommandStep.LABEL_FILTER_ARG, getLabelFilter())
+                .addArgumentValue(ChangeExecListenerCommandStep.CHANGE_EXEC_LISTENER_CLASS_ARG, changeExecListenerClass)
+                .addArgumentValue(ChangeExecListenerCommandStep.CHANGE_EXEC_LISTENER_PROPERTIES_FILE_ARG, changeExecListenerPropertiesFile)
+                .addArgumentValue(RollbackCommandStep.TAG_ARG, getCommandArgument())
+                .addArgumentValue(RollbackCommandStep.ROLLBACK_SCRIPT_ARG, getCommandParam(COMMANDS.ROLLBACK_SCRIPT, null));
+        this.setDatabaseArgumentsToCommand(commandScope);
+        if (outputWriter != null) {
+            commandScope.setOutput(new WriterOutputStream(outputWriter, GlobalConfiguration.OUTPUT_FILE_ENCODING.getCurrentValue()));
+        }
+        commandScope.execute();
     }
 
     private void runReleaseLocksCommand() throws CommandExecutionException {
@@ -1959,8 +1943,8 @@ public class Main {
         CommandScope updateCommand = new CommandScope("update");
         updateCommand.addArgumentValue(UpdateCommandStep.CONTEXTS_ARG, contexts);
         updateCommand.addArgumentValue(UpdateCommandStep.LABEL_FILTER_ARG, labelFilter);
-        updateCommand.addArgumentValue(UpdateCommandStep.CHANGE_EXEC_LISTENER_CLASS_ARG, changeExecListenerClass);
-        updateCommand.addArgumentValue(UpdateCommandStep.CHANGE_EXEC_LISTENER_PROPERTIES_FILE_ARG, changeExecListenerPropertiesFile);
+        updateCommand.addArgumentValue(ChangeExecListenerCommandStep.CHANGE_EXEC_LISTENER_CLASS_ARG, changeExecListenerClass);
+        updateCommand.addArgumentValue(ChangeExecListenerCommandStep.CHANGE_EXEC_LISTENER_PROPERTIES_FILE_ARG, changeExecListenerPropertiesFile);
         setDatabaseArgumentsToCommand(updateCommand);
         updateCommand.execute();
     }
@@ -2053,24 +2037,6 @@ public class Main {
         return fileOpener;
     }
 
-    /**
-     * Creates a new DiffOutputControl object based on the parameters received
-     */
-    private DiffOutputControl getDiffOutputControl(CompareControl.SchemaComparison[] finalSchemaComparisons, ObjectChangeFilter objectChangeFilter) {
-        DiffOutputControl diffOutputControl = new DiffOutputControl(
-                includeCatalog, includeSchema, includeTablespace, finalSchemaComparisons);
-        for (CompareControl.SchemaComparison schema : finalSchemaComparisons) {
-            diffOutputControl.addIncludedSchema(schema.getReferenceSchema());
-            diffOutputControl.addIncludedSchema(schema.getComparisonSchema());
-        }
-
-        if (objectChangeFilter != null) {
-            diffOutputControl.setObjectChangeFilter(objectChangeFilter);
-        }
-
-        return diffOutputControl;
-    }
-
     private String getLabelFilter() {
         if (labelFilter == null) {
             return labels;
@@ -2139,9 +2105,9 @@ public class Main {
         if (liquibaseProLicenseKey != null) {
             argsMap.put("liquibaseProLicenseKey", liquibaseProLicenseKey);
         }
-        String liquibaseHubApiKey = HubConfiguration.LIQUIBASE_HUB_API_KEY.getCurrentValue();
-        if (liquibaseHubApiKey != null) {
-            argsMap.put("liquibaseHubApiKey", liquibaseHubApiKey);
+        String liquibaseHubApiKeyLocal = HubConfiguration.LIQUIBASE_HUB_API_KEY.getCurrentValue();
+        if (liquibaseHubApiKeyLocal != null) {
+            argsMap.put("liquibaseHubApiKey", liquibaseHubApiKeyLocal);
         }
         CommandScope liquibaseCommand = new CommandScope(commandName);
         for (Map.Entry<String, Object> entry : argsMap.entrySet()) {
