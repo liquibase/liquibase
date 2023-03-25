@@ -40,7 +40,7 @@ public class DatabaseUtils {
             } else if (database instanceof PostgresDatabase && defaultSchemaName != null) {
                 String searchPath = executor.queryForObject(new RawSqlStatement("SHOW SEARCH_PATH"), String.class);
 
-                if (!searchPath.equals(defaultCatalogName) && !searchPath.startsWith(defaultSchemaName + ",") && !searchPath.startsWith("\"" + defaultSchemaName + "\",")) {
+                if (!searchPath.equals(defaultCatalogName) && !searchPath.equals(defaultSchemaName) && !searchPath.equals("\"" + defaultSchemaName + "\"") && !searchPath.startsWith(defaultSchemaName + ",") && !searchPath.startsWith("\"" + defaultSchemaName + "\",")) {
                     String finalSearchPath;
                     if (GlobalConfiguration.PRESERVE_SCHEMA_CASE.getCurrentValue()) {
                         finalSearchPath = ((PostgresDatabase) database).quoteObject(defaultSchemaName, Schema.class);
