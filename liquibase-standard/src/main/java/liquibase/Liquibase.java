@@ -947,7 +947,7 @@ public class Liquibase implements AutoCloseable {
 
     protected void resetServices() {
         LockServiceFactory.getInstance().resetAll();
-        ChangeLogHistoryServiceFactory.getInstance().resetAll();
+        Scope.getCurrentScope().getSingleton(ChangeLogHistoryServiceFactory.class).resetAll();
         Scope.getCurrentScope().getSingleton(ExecutorService.class).reset();
     }
 
@@ -1040,7 +1040,7 @@ public class Liquibase implements AutoCloseable {
     public void checkLiquibaseTables(boolean updateExistingNullChecksums, DatabaseChangeLog databaseChangeLog,
                                      Contexts contexts, LabelExpression labelExpression) throws LiquibaseException {
         ChangeLogHistoryService changeLogHistoryService =
-                ChangeLogHistoryServiceFactory.getInstance().getChangeLogService(getDatabase());
+            Scope.getCurrentScope().getSingleton(ChangeLogHistoryServiceFactory.class).getChangeLogService(getDatabase());
         changeLogHistoryService.init();
         if (updateExistingNullChecksums) {
             changeLogHistoryService.upgradeChecksums(databaseChangeLog, contexts, labelExpression);
@@ -1230,7 +1230,7 @@ public class Liquibase implements AutoCloseable {
 
             try {
                 checkLiquibaseTables(false, null, new Contexts(), new LabelExpression());
-                ChangeLogHistoryServiceFactory.getInstance().getChangeLogService(database).clearAllCheckSums();
+                Scope.getCurrentScope().getSingleton(ChangeLogHistoryServiceFactory.class).getChangeLogService(database).clearAllCheckSums();
             } finally {
                 try {
                     lockService.releaseLock();
