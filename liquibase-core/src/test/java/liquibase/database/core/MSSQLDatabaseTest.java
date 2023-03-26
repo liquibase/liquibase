@@ -1,20 +1,22 @@
 package liquibase.database.core;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
-import org.junit.Test;
 import liquibase.database.AbstractJdbcDatabaseTest;
 import liquibase.database.Database;
 import liquibase.database.DatabaseFactory;
 import liquibase.exception.DatabaseException;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.CsvSource;
 
 /**
  * Tests for {@link MSSQLDatabase}
  */
-public class MSSQLDatabaseTest extends AbstractJdbcDatabaseTest {
+public class MSSQLDatabaseTest extends AbstractJdbcDatabaseTest<MSSQLDatabase> {
 
     public MSSQLDatabaseTest() throws Exception {
         super(new MSSQLDatabase());
@@ -43,31 +45,29 @@ public class MSSQLDatabaseTest extends AbstractJdbcDatabaseTest {
             assertEquals("com.microsoft.sqlserver.jdbc.SQLServerDriver", database.getDefaultDriver("jdbc:sqlserver://localhost;databaseName=liquibase"));
 
             assertNull(database.getDefaultDriver("jdbc:oracle:thin://localhost;databaseName=liquibase"));
-        } catch (final DatabaseException e) {
-            throw e;
         }
     }
 
     @Override
-    @Test
-    public void escapeTableName_noSchema() throws DatabaseException {
-        try (Database database = new MSSQLDatabase()) {
-            assertEquals("tableName", database.escapeTableName(null, null, "tableName"));
-            assertEquals("[tableName€]", database.escapeTableName(null, null, "tableName€"));
-        } catch (final DatabaseException e) {
-            throw e;
-        }
+    @ParameterizedTest
+    @CsvSource(delimiter = '|', value = {
+        " tableName  | tableName    ",
+        " tableName€ | [tableName€] ",
+    })
+    public void escapeTableName_noSchema(String tableName, String expected) throws DatabaseException {
+        final Database database = getDatabase();
+        assertEquals(expected, database.escapeTableName(null, null, tableName));
     }
 
     @Override
-    @Test
-    public void escapeTableName_withSchema() throws DatabaseException {
-        try (Database database = new MSSQLDatabase()) {
-            assertEquals("catalogName.schemaName.tableName", database.escapeTableName("catalogName", "schemaName", "tableName"));
-            assertEquals("[catalogName€].[schemaName€].[tableName€]", database.escapeTableName("catalogName€", "schemaName€", "tableName€"));
-        } catch (final DatabaseException e) {
-            throw e;
-        }
+    @ParameterizedTest
+    @CsvSource(delimiter = '|', value = {
+        " catalogName  | schemaName  | tableName  | catalogName.schemaName.tableName          ",
+        " catalogName€ | schemaName€ | tableName€ | [catalogName€].[schemaName€].[tableName€] ",
+    })
+    public void escapeTableName_withSchema(String catalogName, String schemaName, String tableName, String expected) throws DatabaseException {
+        final Database database = getDatabase();
+        assertEquals(expected, database.escapeTableName(catalogName, schemaName, tableName));
     }
 
     private Database createOfflineDatabase(String url) throws Exception {

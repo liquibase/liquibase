@@ -1,11 +1,9 @@
 package liquibase.database.core;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
-import org.junit.Assert;
-import org.junit.Test;
 import liquibase.GlobalConfiguration;
 import liquibase.changelog.column.LiquibaseColumn;
 import liquibase.database.AbstractJdbcDatabaseTest;
@@ -14,11 +12,14 @@ import liquibase.database.ObjectQuotingStrategy;
 import liquibase.exception.DatabaseException;
 import liquibase.structure.core.Table;
 import liquibase.util.StringUtil;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.CsvSource;
 
 /**
  * Tests for {@link PostgresDatabase}
  */
-public class PostgresDatabaseTest extends AbstractJdbcDatabaseTest {
+public class PostgresDatabaseTest extends AbstractJdbcDatabaseTest<PostgresDatabase> {
 
     public PostgresDatabaseTest() throws Exception {
         super(new PostgresDatabase());
@@ -35,11 +36,10 @@ public class PostgresDatabaseTest extends AbstractJdbcDatabaseTest {
         assertTrue(getDatabase().supportsInitiallyDeferrableColumns());
     }
 
-
     @Override
     @Test
     public void getCurrentDateTimeFunction() {
-        Assert.assertEquals("NOW()", getDatabase().getCurrentDateTimeFunction());
+        assertEquals("NOW()", getDatabase().getCurrentDateTimeFunction());
     }
 
     @Test
@@ -52,23 +52,23 @@ public class PostgresDatabaseTest extends AbstractJdbcDatabaseTest {
         ; //TODO: test has troubles, fix later
     }
 
+    @Test
     public void testGetDefaultDriver() throws DatabaseException {
         try (Database database = new PostgresDatabase()) {
             assertEquals("org.postgresql.Driver", database.getDefaultDriver("jdbc:postgresql://localhost/liquibase"));
 
             assertNull(database.getDefaultDriver("jdbc:db2://localhost;databaseName=liquibase"));
-        } catch (final DatabaseException e) {
-            throw e;
         }
     }
 
-
-    @Override
-    @Test
-    public void escapeTableName_noSchema() {
-        Database database = getDatabase();
-        assertEquals("\"tableName\"", database.escapeTableName(null, null, "tableName"));
-        assertEquals("tbl", database.escapeTableName(null, null, "tbl"));
+    @ParameterizedTest
+    @CsvSource(delimiter = '|', value = {
+        " tableName | \"tableName\" ",
+        " tbl       | tbl           ",
+    })
+    public void escapeTableName_noSchema(String tableName, String expected) throws DatabaseException {
+        final Database database = getDatabase();
+        assertEquals(expected, database.escapeTableName(null, null, tableName));
     }
 
     @Test
@@ -78,10 +78,13 @@ public class PostgresDatabaseTest extends AbstractJdbcDatabaseTest {
     }
 
     @Override
-    @Test
-    public void escapeTableName_withSchema() {
+    @ParameterizedTest
+    @CsvSource(delimiter = '|', value = {
+        " catalogName | schemaName | tableName | \"schemaName\".\"tableName\" ",
+    })
+    public void escapeTableName_withSchema(String catalogName, String schemaName, String tableName, String expected) {
         Database database = getDatabase();
-        assertEquals("\"schemaName\".\"tableName\"", database.escapeTableName("catalogName", "schemaName", "tableName"));
+        assertEquals(expected, database.escapeTableName(catalogName, schemaName, tableName));
     }
 
     @Test
@@ -102,7 +105,7 @@ public class PostgresDatabaseTest extends AbstractJdbcDatabaseTest {
 
     @Test
     public void testIfEscapeLogicNotImpactOnChangeLog() {
-        PostgresDatabase database = (PostgresDatabase) getDatabase();
+        PostgresDatabase database = getDatabase();
         database.setObjectQuotingStrategy(ObjectQuotingStrategy.QUOTE_ALL_OBJECTS);
 
         final String COLUMN_AUTHOR = "AUTHOR"; //one column from changeLog table should be enough for test
@@ -167,5 +170,4 @@ public class PostgresDatabaseTest extends AbstractJdbcDatabaseTest {
         assertTrue(expected.getBytes(GlobalConfiguration.FILE_ENCODING.getCurrentValue()).length <= PostgresDatabase.PGSQL_PK_BYTES_LIMIT);
         assert expected.equals(actual) : "Invalid " + actual + " vs expected " + expected;
     }
-
 }

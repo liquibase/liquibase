@@ -1,11 +1,11 @@
 package liquibase.database;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+
 import java.util.ArrayList;
 import java.util.List;
-import org.junit.Test;
 import liquibase.Scope;
 import liquibase.change.core.CreateTableChange;
 import liquibase.exception.DatabaseException;
@@ -16,19 +16,22 @@ import liquibase.sql.visitor.SqlVisitor;
 import liquibase.statement.SqlStatement;
 import liquibase.statement.core.DropTableStatement;
 import liquibase.structure.core.Table;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.CsvSource;
 
 /**
  * Base test class for database-specific tests
  */
-public abstract class AbstractJdbcDatabaseTest {
+public abstract class AbstractJdbcDatabaseTest<D extends AbstractJdbcDatabase> {
 
-    protected AbstractJdbcDatabase database;
+    protected D database;
 
-    protected AbstractJdbcDatabaseTest(AbstractJdbcDatabase database) throws Exception {
+    protected AbstractJdbcDatabaseTest(D database) throws Exception {
         this.database = database;
     }
 
-    public AbstractJdbcDatabase getDatabase() {
+    public D getDatabase() {
         return database;
     }
 
@@ -60,7 +63,6 @@ public abstract class AbstractJdbcDatabaseTest {
 //        verify(connection);
 //    }
 
-
     @Test
     public void defaultsWorkWithoutAConnection() {
         database.getDatabaseProductName();
@@ -68,6 +70,7 @@ public abstract class AbstractJdbcDatabaseTest {
         database.getDefaultSchemaName();
         database.getDefaultPort();
     }
+
 //    @Test
 //    public void isCorrectDatabaseImplementation() throws Exception {
 //        assertTrue(getDatabase().isCorrectDatabaseImplementation(getMockConnection()));
@@ -86,19 +89,25 @@ public abstract class AbstractJdbcDatabaseTest {
 //        return conn;
 //    }
 
-    @Test
-    public void escapeTableName_noSchema() throws DatabaseException {
+    @ParameterizedTest
+    @CsvSource(delimiter = '|', value = {
+        " tableName | tableName "
+    })
+    public void escapeTableName_noSchema(String tableName, String expected) throws DatabaseException {
         final Database database = getDatabase();
-        assertEquals("tableName", database.escapeTableName(null, null, "tableName"));
+        assertEquals(expected, database.escapeTableName(null, null, tableName));
     }
 
-    @Test
-    public void escapeTableName_withSchema() throws DatabaseException {
+    @ParameterizedTest
+    @CsvSource(delimiter = '|', value = {
+        " catalogName | schemaName | tableName | schemaName.tableName ",
+    })
+    public void escapeTableName_withSchema(String catalogName, String schemaName, String tableName, String expected) throws DatabaseException {
         final Database database = getDatabase();
         if (database.supportsCatalogInObjectName(Table.class)) {
-            assertEquals("catalogName.schemaName.tableName", database.escapeTableName("catalogName", "schemaName", "tableName"));
+            assertEquals("catalogName." + expected, database.escapeTableName(catalogName, schemaName, tableName));
         } else {
-            assertEquals("schemaName.tableName", database.escapeTableName("catalogName", "schemaName", "tableName"));
+            assertEquals(expected, database.escapeTableName(catalogName, schemaName, tableName));
         }
     }
 
@@ -110,7 +119,7 @@ public abstract class AbstractJdbcDatabaseTest {
 
         Scope.getCurrentScope().getSingleton(ExecutorService.class).setExecutor("jdbc", database, mockExecutor);
 
-        final List<SqlVisitor> sqlVisitors = new ArrayList<SqlVisitor>();
+        final List<SqlVisitor> sqlVisitors = new ArrayList<>();
 
         final SqlStatement dropTableStatement = new DropTableStatement(null, null, "test_table", false);
 
@@ -133,7 +142,7 @@ public abstract class AbstractJdbcDatabaseTest {
 
         Scope.getCurrentScope().getSingleton(ExecutorService.class).setExecutor("jdbc", database, mockExecutor);
 
-        final List<SqlVisitor> sqlVisitors = new ArrayList<SqlVisitor>();
+        final List<SqlVisitor> sqlVisitors = new ArrayList<>();
 
         final SqlStatement dropTableStatement = new DropTableStatement(null, null, "test_table", false);
 
@@ -157,7 +166,7 @@ public abstract class AbstractJdbcDatabaseTest {
 
         Scope.getCurrentScope().getSingleton(ExecutorService.class).setExecutor("jdbc", database, mockExecutor);
 
-        final List<SqlVisitor> sqlVisitors = new ArrayList<SqlVisitor>();
+        final List<SqlVisitor> sqlVisitors = new ArrayList<>();
 
         final CreateTableChange change = new CreateTableChange();
         change.setTableName("test_table");
@@ -181,7 +190,7 @@ public abstract class AbstractJdbcDatabaseTest {
 
         Scope.getCurrentScope().getSingleton(ExecutorService.class).setExecutor("jdbc", database, mockExecutor);
 
-        final List<SqlVisitor> sqlVisitors = new ArrayList<SqlVisitor>();
+        final List<SqlVisitor> sqlVisitors = new ArrayList<>();
 
         final CreateTableChange change = new CreateTableChange();
         change.setTableName("test_table");

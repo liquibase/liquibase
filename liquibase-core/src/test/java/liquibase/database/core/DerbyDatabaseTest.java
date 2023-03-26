@@ -1,5 +1,7 @@
 package liquibase.database.core;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.RETURNS_SMART_NULLS;
 import static org.mockito.Mockito.doNothing;
@@ -12,31 +14,36 @@ import static org.mockito.Mockito.when;
 import java.sql.Connection;
 import java.sql.DatabaseMetaData;
 import java.sql.SQLException;
-
-import junit.framework.TestCase;
 import liquibase.database.Database;
 import liquibase.database.jvm.JdbcConnection;
 import liquibase.exception.DatabaseException;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.CsvSource;
 
-public class DerbyDatabaseTest extends TestCase {
+public class DerbyDatabaseTest {
 
+    @Test
     public void testGetDefaultDriver() throws DatabaseException {
         try (Database database = new DerbyDatabase()) {
             assertEquals("org.apache.derby.jdbc.EmbeddedDriver", database.getDefaultDriver("java:derby:liquibase;create=true"));
 
             assertNull(database.getDefaultDriver("jdbc:oracle://localhost;databaseName=liquibase"));
-        } catch (final DatabaseException e) {
-            throw e;
         }
     }
 
-    public void testGetDateLiteral() {
-        assertEquals("TIMESTAMP('2008-01-25 13:57:41')", new DerbyDatabase().getDateLiteral("2008-01-25 13:57:41"));
-        assertEquals("TIMESTAMP('2008-01-25 13:57:41.300000')", new DerbyDatabase().getDateLiteral("2008-01-25 13:57:41.3"));
-        assertEquals("TIMESTAMP('2008-01-25 13:57:41.340000')", new DerbyDatabase().getDateLiteral("2008-01-25 13:57:41.34"));
-        assertEquals("TIMESTAMP('2008-01-25 13:57:41.347000')", new DerbyDatabase().getDateLiteral("2008-01-25 13:57:41.347"));
+    @ParameterizedTest
+    @CsvSource(delimiter = '|', value = {
+        " 2008-01-25 13:57:41     | TIMESTAMP('2008-01-25 13:57:41')        ",
+        " 2008-01-25 13:57:41.3   | TIMESTAMP('2008-01-25 13:57:41.300000') ",
+        " 2008-01-25 13:57:41.34  | TIMESTAMP('2008-01-25 13:57:41.340000') ",
+        " 2008-01-25 13:57:41.347 | TIMESTAMP('2008-01-25 13:57:41.347000') ",
+    })
+    public void testGetDateLiteral(String isoDate, String expected) {
+        assertEquals(expected, new DerbyDatabase().getDateLiteral(isoDate));
     }
 
+    @Test
     public void testCloseShutsEmbeddedDerbyDown() throws Exception {
         Connection con = mockConnection();
         DerbyDatabase database = spyDatabase(con);
@@ -47,6 +54,7 @@ public class DerbyDatabaseTest extends TestCase {
         verify(con).close();
     }
 
+    @Test
     public void testCloseDoesNotShutEmbeddedDerbyDown() throws Exception {
         Connection con = mockConnection();
         DerbyDatabase database = spyDatabase(con);
@@ -73,5 +81,4 @@ public class DerbyDatabaseTest extends TestCase {
         when(con.getMetaData()).thenReturn(metaData);
         return con;
     }
-
 }

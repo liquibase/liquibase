@@ -1,16 +1,20 @@
 package liquibase.database.core;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNull;
+
 import liquibase.database.AbstractJdbcDatabaseTest;
 import liquibase.database.Database;
-import org.junit.Assert;
-import org.junit.Test;
-
-import static org.junit.Assert.*;
+import liquibase.exception.DatabaseException;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.CsvSource;
 
 /**
  * Tests for {@link MariaDBDatabase}
  */
-public class MariaDBDatabaseTest extends AbstractJdbcDatabaseTest {
+public class MariaDBDatabaseTest extends AbstractJdbcDatabaseTest<MariaDBDatabase> {
 
     public MariaDBDatabaseTest() throws Exception {
         super(new MariaDBDatabase());
@@ -18,7 +22,7 @@ public class MariaDBDatabaseTest extends AbstractJdbcDatabaseTest {
 
     @Override
     protected String getProductNameString() {
-      return "MariaDB";
+        return "MariaDB";
     }
 
     @Override
@@ -30,7 +34,7 @@ public class MariaDBDatabaseTest extends AbstractJdbcDatabaseTest {
     @Override
     @Test
     public void getCurrentDateTimeFunction() {
-        Assert.assertEquals("NOW()", getDatabase().getCurrentDateTimeFunction());
+        assertEquals("NOW()", getDatabase().getCurrentDateTimeFunction());
     }
 
     @Test
@@ -41,22 +45,17 @@ public class MariaDBDatabaseTest extends AbstractJdbcDatabaseTest {
     }
 
     @Override
-    @Test
-    public void escapeTableName_noSchema() {
-        Database database = getDatabase();
-        assertEquals("tableName", database.escapeTableName(null, null, "tableName"));
-    }
-
-    @Override
-    @Test
-    public void escapeTableName_withSchema() {
-        Database database = getDatabase();
-        assertEquals("catalogName.tableName", database.escapeTableName("catalogName", "schemaName", "tableName"));
+    @ParameterizedTest
+    @CsvSource(delimiter = '|', value = {
+        " catalogName | schemaName | tableName | catalogName.tableName ",
+    })
+    public void escapeTableName_withSchema(String catalogName, String schemaName, String tableName, String expected) throws DatabaseException {
+        final Database database = getDatabase();
+        assertEquals(expected, database.escapeTableName(catalogName, schemaName, tableName));
     }
 
     @Test
     public void escapeStringForDatabase_withBackslashes() {
-        Assert.assertEquals("\\\\0", database.escapeStringForDatabase("\\0"));
+        assertEquals("\\\\0", database.escapeStringForDatabase("\\0"));
     }
-
 }

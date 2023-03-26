@@ -1,22 +1,26 @@
 package liquibase.database.core;
 
-import junit.framework.TestCase;
+import static org.junit.jupiter.api.Assertions.assertNull;
+
 import liquibase.database.Database;
 import liquibase.exception.DatabaseException;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
 
-public class UnsupportedDatabaseTest extends TestCase {
+public class UnsupportedDatabaseTest {
 
-    public void testGetDefaultDriver() throws DatabaseException {
+    @ParameterizedTest
+    @ValueSource(strings = {
+       "jdbc:oracle://localhost;databaseName=liquibase",
+       "jdbc:db2://localhost;databaseName=liquibase",
+       "jdbc:hsqldb://localhost;databaseName=liquibase",
+       "jdbc:derby://localhost;databaseName=liquibase",
+       "jdbc:sqlserver://localhost;databaseName=liquibase",
+       "jdbc:postgresql://localhost;databaseName=liquibase",
+    })
+    public void testGetDefaultDriver(String url) throws DatabaseException {
         try (Database database = new UnsupportedDatabase()) {
-            assertNull(database.getDefaultDriver("jdbc:oracle://localhost;databaseName=liquibase"));
-            assertNull(database.getDefaultDriver("jdbc:db2://localhost;databaseName=liquibase"));
-            assertNull(database.getDefaultDriver("jdbc:hsqldb://localhost;databaseName=liquibase"));
-            assertNull(database.getDefaultDriver("jdbc:derby://localhost;databaseName=liquibase"));
-            assertNull(database.getDefaultDriver("jdbc:sqlserver://localhost;databaseName=liquibase"));
-            assertNull(database.getDefaultDriver("jdbc:postgresql://localhost;databaseName=liquibase"));
-        } catch (final DatabaseException e) {
-            throw e;
+            assertNull(database.getDefaultDriver(url));
         }
     }
-
 }

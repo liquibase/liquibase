@@ -1,17 +1,14 @@
 package liquibase.database.core;
 
 import static java.util.ResourceBundle.getBundle;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertThat;
-import static org.junit.Assert.assertTrue;
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.is;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.util.ArrayList;
 import java.util.ResourceBundle;
-
-import org.hamcrest.CoreMatchers;
-import org.junit.Assert;
-import org.junit.Test;
 import liquibase.Scope;
 import liquibase.database.AbstractJdbcDatabaseTest;
 import liquibase.database.Database;
@@ -24,18 +21,20 @@ import liquibase.exception.LiquibaseException;
 import liquibase.executor.ExecutorService;
 import liquibase.resource.ResourceAccessor;
 import liquibase.sdk.executor.MockExecutor;
-import liquibase.sql.visitor.SqlVisitor;
 import liquibase.statement.SequenceNextValueFunction;
 import liquibase.statement.SqlStatement;
 import liquibase.statement.core.UpdateStatement;
 import liquibase.test.JUnitResourceAccessor;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.CsvSource;
 
 /**
  * Tests for {@link liquibase.database.core.OracleDatabase}.
  */
-public class OracleDatabaseTest extends AbstractJdbcDatabaseTest {
-    private static ResourceBundle coreBundle = getBundle("liquibase/i18n/liquibase-core");
+public class OracleDatabaseTest extends AbstractJdbcDatabaseTest<OracleDatabase> {
 
+    private static ResourceBundle coreBundle = getBundle("liquibase/i18n/liquibase-core");
 
     public OracleDatabaseTest() throws Exception {
         super(new OracleDatabase());
@@ -46,11 +45,13 @@ public class OracleDatabaseTest extends AbstractJdbcDatabaseTest {
         return "Oracle";
     }
 
-    @Override
-    @Test
-    public void escapeTableName_noSchema() {
+    @ParameterizedTest
+    @CsvSource(delimiter = '|', value = {
+        " tableName | tableName ",
+    })
+    public void escapeTableName_noSchema(String tableName, String expected) throws DatabaseException {
         final Database database = getDatabase();
-        assertEquals("table name without schema is correctly escaped as simply tableName", "tableName", database.escapeTableName(null, null, "tableName"));
+        assertEquals(expected, database.escapeTableName(null, null, tableName), "table name without schema is correctly escaped as simply tableName");
     }
 
     @Test
@@ -62,22 +63,25 @@ public class OracleDatabaseTest extends AbstractJdbcDatabaseTest {
     }
 
     @Override
-    @Test
-    public void escapeTableName_withSchema() {
+    @ParameterizedTest
+    @CsvSource(delimiter = '|', value = {
+        " catalogName | schemaName | tableName | catalogName.tableName ",
+    })
+    public void escapeTableName_withSchema(String catalogName, String schemaName, String tableName, String expected) {
         final Database database = getDatabase();
-        assertEquals("table name without schema but with catalog is correctly escaped as catalogName.tableName", "catalogName.tableName", database.escapeTableName("catalogName", "schemaName", "tableName"));
+        assertEquals(expected, database.escapeTableName(catalogName, schemaName, tableName), "table name without schema but with catalog is correctly escaped as catalogName.tableName");
     }
 
     @Override
     @Test
     public void supportsInitiallyDeferrableColumns() {
-        assertTrue("Oracle Database is correctly reported as being able to do INITIALLY DEFERRED column constraints.", getDatabase().supportsInitiallyDeferrableColumns());
+        assertTrue(getDatabase().supportsInitiallyDeferrableColumns(), "Oracle Database is correctly reported as being able to do INITIALLY DEFERRED column constraints.");
     }
 
     @Override
     @Test
     public void getCurrentDateTimeFunction() {
-        Assert.assertEquals("Oracle Database's 'give me the current timestamp' function is correctly reported.", "SYSTIMESTAMP", getDatabase().getCurrentDateTimeFunction());
+        assertEquals("SYSTIMESTAMP", getDatabase().getCurrentDateTimeFunction(), "Oracle Database's 'give me the current timestamp' function is correctly reported.");
     }
 
     @Test
@@ -85,16 +89,15 @@ public class OracleDatabaseTest extends AbstractJdbcDatabaseTest {
         final TimestampType ts = new TimestampType();
         ts.setAdditionalInformation("WITHOUT TIME ZONE");
         final DatabaseDataType oracleDataType = ts.toDatabaseDataType(getDatabase());
-        assertThat(oracleDataType.getType(), CoreMatchers.is("TIMESTAMP"));
+        assertThat(oracleDataType.getType(), is("TIMESTAMP"));
     }
 
+    @Test
     public void testGetDefaultDriver() throws DatabaseException {
         try (Database database = new OracleDatabase()) {
-            assertEquals("The correct JDBC driver class name is reported if the URL is a Oracle JDBC URL", "oracle.jdbc.OracleDriver", database.getDefaultDriver("jdbc:oracle:thin:@localhost/XE"));
+            assertEquals("oracle.jdbc.OracleDriver", database.getDefaultDriver("jdbc:oracle:thin:@localhost/XE"), "The correct JDBC driver class name is reported if the URL is a Oracle JDBC URL");
 
-            assertNull("No JDBC driver class is returned if the URL is NOT an Oracle Database JDBC URL.", database.getDefaultDriver("jdbc:db2://localhost;databaseName=liquibase"));
-        } catch (final DatabaseException e) {
-            throw e;
+            assertNull(database.getDefaultDriver("jdbc:db2://localhost;databaseName=liquibase"), "No JDBC driver class is returned if the URL is NOT an Oracle Database JDBC URL.");
         }
     }
 
@@ -112,45 +115,24 @@ public class OracleDatabaseTest extends AbstractJdbcDatabaseTest {
         final UpdateStatement updateStatement = new UpdateStatement(null, null, "test_table");
         updateStatement.addNewColumnValue("id", new SequenceNextValueFunction("test_table_id_seq"));
 
-        database.execute(new SqlStatement[]{updateStatement}, new ArrayList<SqlVisitor>());
+        database.execute(new SqlStatement[]{updateStatement}, new ArrayList<>());
 
         assertEquals("UPDATE \"SAMPLESCHEMA\".\"test_table\" SET \"id\" = \"SAMPLESCHEMA\".\"test_table_id_seq\".nextval;", mockExecutor.getRanSql().trim());
     }
 
-    @Test
-    public void getDateLiteral_date() {
+    @ParameterizedTest
+    @CsvSource(delimiter = '|', value = {
         // DATE in Oracle can have hours/minutes/seconds.
-        assertEquals("TO_DATE('2017-08-16 16:32:55', 'YYYY-MM-DD HH24:MI:SS')", database.getDateLiteral("2017-08-16T16:32:55"));
-    }
-
-    @Test
-    public void getDateLiteral_dateOnly() {
-        assertEquals("TO_DATE('2017-08-16', 'YYYY-MM-DD')", database.getDateLiteral("2017-08-16"));
-    }
-
-    @Test
-    public void getDateLiteral_timeOnly() {
-        assertEquals("TO_DATE('16:32:55', 'HH24:MI:SS')", database.getDateLiteral("16:32:55"));
-    }
-
-    @Test
-    public void getDateLiteral_timestamp() {
-        assertEquals("TO_TIMESTAMP('2017-08-16 16:32:55.125', 'YYYY-MM-DD HH24:MI:SS.FF')", database.getDateLiteral("2017-08-16T16:32:55.125"));
-    }
-
-    @Test
-    public void getDateLiteral_datetime() {
-        assertEquals("TO_TIMESTAMP('2017-08-16 16:32:55.3', 'YYYY-MM-DD HH24:MI:SS.FF')", database.getDateLiteral("2017-08-16T16:32:55.3"));
-    }
-
-    @Test
-    public void getDateLiteral_datetime_invalid() {
-        assertEquals("UNSUPPORTED:2017-08-16T16:32:55_3", database.getDateLiteral("2017-08-16T16:32:55_3"));
-    }
-
-    @Test
-    public void getDateLiteral_unsupported() {
-        assertEquals("UNSUPPORTED:123", database.getDateLiteral("123"));
+        " 2017-08-16T16:32:55     | TO_DATE('2017-08-16 16:32:55', 'YYYY-MM-DD HH24:MI:SS')             ",
+        " 2017-08-16              | TO_DATE('2017-08-16', 'YYYY-MM-DD')                                 ",
+        " 16:32:55                | TO_DATE('16:32:55', 'HH24:MI:SS')                                   ",
+        " 2017-08-16T16:32:55.125 | TO_TIMESTAMP('2017-08-16 16:32:55.125', 'YYYY-MM-DD HH24:MI:SS.FF') ",
+        " 2017-08-16T16:32:55.3   | TO_TIMESTAMP('2017-08-16 16:32:55.3', 'YYYY-MM-DD HH24:MI:SS.FF')   ",
+        " 2017-08-16T16:32:55_3   | UNSUPPORTED:2017-08-16T16:32:55_3                                   ",
+        " 123                     | UNSUPPORTED:123                                                     ",
+    })
+    public void getDateLiteral(String isoDate, String expected) {
+        assertEquals(expected, database.getDateLiteral(isoDate));
     }
 }
 
