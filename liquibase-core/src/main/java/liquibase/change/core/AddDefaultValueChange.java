@@ -1,6 +1,16 @@
 package liquibase.change.core;
 
-import liquibase.change.*;
+import java.text.NumberFormat;
+import java.text.ParseException;
+import java.util.Date;
+import java.util.Locale;
+
+import liquibase.change.AbstractChange;
+import liquibase.change.Change;
+import liquibase.change.ChangeMetaData;
+import liquibase.change.ChangeStatus;
+import liquibase.change.DatabaseChange;
+import liquibase.change.DatabaseChangeProperty;
 import liquibase.database.Database;
 import liquibase.exception.ValidationErrors;
 import liquibase.snapshot.SnapshotGeneratorFactory;
@@ -11,11 +21,6 @@ import liquibase.statement.core.AddDefaultValueStatement;
 import liquibase.structure.core.Column;
 import liquibase.structure.core.Table;
 import liquibase.util.ISODateFormat;
-
-import java.text.NumberFormat;
-import java.text.ParseException;
-import java.util.Date;
-import java.util.Locale;
 
 /**
  * Sets a new default value to an existing column.
@@ -73,7 +78,7 @@ public class AddDefaultValueChange extends AbstractChange {
         return validate;
     }
 
-    @DatabaseChangeProperty(mustEqualExisting = "column.relation.catalog", since = "3.0")
+    @DatabaseChangeProperty(mustEqualExisting = "column.relation.catalog", since = "3.0", description = "Name of the database catalog")
     public String getCatalogName() {
         return catalogName;
     }
@@ -82,7 +87,7 @@ public class AddDefaultValueChange extends AbstractChange {
         this.catalogName = catalogName;
     }
 
-    @DatabaseChangeProperty(mustEqualExisting = "column.relation.schema")
+    @DatabaseChangeProperty(mustEqualExisting = "column.relation.schema", description = "Name of the database schema")
     public String getSchemaName() {
         return schemaName;
     }
@@ -91,7 +96,8 @@ public class AddDefaultValueChange extends AbstractChange {
         this.schemaName = schemaName;
     }
 
-    @DatabaseChangeProperty(mustEqualExisting = "column.relation", description = "Name of the table to containing the column", exampleValue = "file")
+    @DatabaseChangeProperty(mustEqualExisting = "column.relation", description = "Name of the table containing the column to modify",
+        exampleValue = "file")
     public String getTableName() {
         return tableName;
     }
@@ -100,7 +106,8 @@ public class AddDefaultValueChange extends AbstractChange {
         this.tableName = tableName;
     }
 
-    @DatabaseChangeProperty(mustEqualExisting = "column", description = "Name of the column to add a default value to", exampleValue = "fileName")
+    @DatabaseChangeProperty(mustEqualExisting = "column", description = "Name of the column to add a default value to",
+        exampleValue = "fileName")
     public String getColumnName() {
         return columnName;
     }
@@ -109,7 +116,7 @@ public class AddDefaultValueChange extends AbstractChange {
         this.columnName = columnName;
     }
 
-    @DatabaseChangeProperty(description = "Current data type of the column to add default value to", exampleValue = "varchar(50)")
+    @DatabaseChangeProperty(description = "Current data type of the column to add a default value to", exampleValue = "varchar(50)")
     public String getColumnDataType() {
         return columnDataType;
     }
@@ -118,7 +125,8 @@ public class AddDefaultValueChange extends AbstractChange {
         this.columnDataType = columnDataType;
     }
 
-    @DatabaseChangeProperty(description = "Default value. Either this property or one of the other defaultValue* properties are required.", exampleValue = "Something Else", requiredForDatabase = "none")
+    @DatabaseChangeProperty(exampleValue = "Something Else", requiredForDatabase = "none",
+        description = "Default value for fields in the column. Either this property or another defaultValue* property is required.")
     public String getDefaultValue() {
         return defaultValue;
     }
@@ -127,8 +135,8 @@ public class AddDefaultValueChange extends AbstractChange {
         this.defaultValue = defaultValue;
     }
 
-
-    @DatabaseChangeProperty(requiredForDatabase = "none", exampleValue = "439.2")
+    @DatabaseChangeProperty(requiredForDatabase = "none", exampleValue = "439.2",
+        description = "Default value for a column of a numeric type. For example: integer, bigint, bigdecimal, and others.")
     public String getDefaultValueNumeric() {
         return defaultValueNumeric;
     }
@@ -137,7 +145,9 @@ public class AddDefaultValueChange extends AbstractChange {
         this.defaultValueNumeric = defaultValueNumeric;
     }
 
-    @DatabaseChangeProperty(requiredForDatabase = "none", exampleValue = "2008-02-12T12:34:03")
+    @DatabaseChangeProperty(requiredForDatabase = "none", exampleValue = "2008-02-12T12:34:03",
+        description = "Default date and time value for column. The value is specified in one of the following forms: " +
+            "YYYY-MM-DD, hh:mm:ss, or YYYY-MM-DDThh:mm:ss.")
     public String getDefaultValueDate() {
         return defaultValueDate;
     }
@@ -146,8 +156,7 @@ public class AddDefaultValueChange extends AbstractChange {
         this.defaultValueDate = defaultValueDate;
     }
 
-
-    @DatabaseChangeProperty(requiredForDatabase = "none")
+    @DatabaseChangeProperty(requiredForDatabase = "none", description = "Default value for a column of a boolean type.")
     public Boolean getDefaultValueBoolean() {
         return defaultValueBoolean;
     }
@@ -156,7 +165,10 @@ public class AddDefaultValueChange extends AbstractChange {
         this.defaultValueBoolean = defaultValueBoolean;
     }
 
-    @DatabaseChangeProperty(requiredForDatabase = "none")
+    @DatabaseChangeProperty(requiredForDatabase = "none",
+        description = "Default value that is returned from a function or procedure call of the same type as the column. " +
+            "Contains the function or column name to call. Differs from defaultValue by returning the value of the function or column " +
+            "you specify instead of the name of the function/column as a string. Can also perform operations on the returned value.")
     public DatabaseFunction getDefaultValueComputed() {
         return defaultValueComputed;
     }
@@ -165,7 +177,9 @@ public class AddDefaultValueChange extends AbstractChange {
         this.defaultValueComputed = defaultValueComputed;
     }
 
-    @DatabaseChangeProperty(requiredForDatabase = "none")
+    @DatabaseChangeProperty(requiredForDatabase = "none",
+        description = "Sets value for a specified column by using the value of the existing sequence. " +
+            "With every new input, the next value of the sequence will be taken.")
     public SequenceNextValueFunction getDefaultValueSequenceNext() {
         return defaultValueSequenceNext;
     }
@@ -174,6 +188,8 @@ public class AddDefaultValueChange extends AbstractChange {
         this.defaultValueSequenceNext = defaultValueSequenceNext;
     }
 
+    @DatabaseChangeProperty(description = "Sets a unique name for the default constraint used for a specific column. " +
+        "Works only along with any of the defaultValue* properties listed.")
     public String getDefaultValueConstraintName() {
         return defaultValueConstraintName;
     }
