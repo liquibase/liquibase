@@ -108,6 +108,8 @@
             <xsd:attribute name="context" type="xsd:string"/>
             <xsd:attribute name="labels" type="xsd:string"/>
             <xsd:attribute name="contextFilter" type="xsd:string"/>
+            <xsd:attribute name="minDepth" type="integerExp"/>
+            <xsd:attribute name="maxDepth" type="integerExp"/>
             <xsd:anyAttribute namespace="##other" processContents="lax"/>
         </xsd:complexType>
     </xsd:element>

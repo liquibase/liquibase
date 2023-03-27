@@ -12,9 +12,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.URI;
-import java.util.List;
-import java.util.SortedSet;
-import java.util.TreeSet;
+import java.util.*;
 
 /**
  * ResourceAccessors abstract file access so they can be read in a variety of environments.
@@ -113,6 +111,59 @@ public interface ResourceAccessor extends AutoCloseable {
     }
 
     /**
+     * Returns the path to all resources contained in the given path that match the searchOptions criteria.
+     * Multiple resources may be returned with the same path, but only if they are actually unique files.
+     * Order is important to pay attention to, they should be returned in a user-expected manner based on this resource accessor.
+     * <br><br>
+     * Should return an empty list if:
+     * <ul>
+     *     <li>Path does not exist or maxDepth less or equals than zero</li>
+     * </ul>
+     * Should throw an exception if:
+     * <ul>
+     *     <li>Path is null</li>
+     *     <li>Path is not a "directory"</li>
+     *     <li>Path exists but cannot be read from</li>
+     * </ul>
+     *
+     * @param path      The path to lookup resources in.
+     * @param searchOptions A set of criteria for how resources should be found/filtered
+     * @return empty set if nothing was found
+     * @throws IOException if there is an error searching the system.
+     */
+    default List<Resource> search(String path, SearchOptions searchOptions) throws IOException {
+        List<Resource> recursiveResourceList;
+        List<Resource> depthBoundedResourceList = new ArrayList<>();
+        if(searchOptions == null) {
+            searchOptions = new SearchOptions();
+        }
+        if (searchOptions.getMaxDepth() <= 0) {
+            return Collections.emptyList();
+        }
+
+        boolean searchRecursive = searchOptions.getMaxDepth() > 1;
+        recursiveResourceList = search(path, searchRecursive);
+
+        if (!searchRecursive || searchOptions.getRecursive()) {
+            return recursiveResourceList;
+        }
+
+        int minDepth = searchOptions.getMinDepth();
+        int maxDepth = searchOptions.getMaxDepth();
+
+        for (Resource res: recursiveResourceList) {
+            String relativePath = res.getPath();
+            int depth = (int) relativePath.chars().filter(ch -> ch == '/').count();
+
+            if (depth >= minDepth && depth <= maxDepth) {
+                depthBoundedResourceList.add(res);
+            }
+        }
+
+        return depthBoundedResourceList;
+    }
+
+    /**
      * Returns the path to all resources contained in the given path.
      * Multiple resources may be returned with the same path, but only if they are actually unique files.
      * Order is important to pay attention to, they should be returned in a user-expected manner based on this resource accessor.
@@ -178,15 +229,15 @@ public interface ResourceAccessor extends AutoCloseable {
         } else if (resources.size() == 1) {
             return resources.iterator().next();
         } else {
-            String message = "Found " + resources.size() + " files with the path '" + path + "':" + System.lineSeparator();
+            final StringBuilder message = new StringBuilder("Found " + resources.size() + " files with the path '" + path + "':" + System.lineSeparator());
             for (Resource resource : resources) {
-                message += "    - " + resource.getUri() + System.lineSeparator();
+                message.append("    - ").append(resource.getUri()).append(System.lineSeparator());
             }
-            message += "  Search Path: " + System.lineSeparator();
+            message.append("  Search Path: ").append(System.lineSeparator());
             for (String location : Scope.getCurrentScope().getResourceAccessor().describeLocations()) {
-                message += "    - " + location + System.lineSeparator();
+                message.append("    - ").append(location).append(System.lineSeparator());
             }
-            message += "  You can limit the search path to remove duplicates with the liquibase.searchPath setting.";
+            message.append("  You can limit the search path to remove duplicates with the liquibase.searchPath setting.");
 
             final GlobalConfiguration.DuplicateFileMode mode = GlobalConfiguration.DUPLICATE_FILE_MODE.getCurrentValue();
             final Logger log = Scope.getCurrentScope().getLog(getClass());
@@ -255,6 +306,53 @@ public interface ResourceAccessor extends AutoCloseable {
         @Override
         public OutputStream openOutputStream(OpenOptions openOptions) throws IOException {
             return openOutputStream(new OpenOptions());
+        }
+    }
+
+    class SearchOptions {
+        private int minDepth;
+        private int maxDepth;
+
+        public SearchOptions() {
+            minDepth = 0;
+            maxDepth = 1;
+        }
+
+        public boolean getRecursive() {
+            return minDepth == 0 && maxDepth == Integer.MAX_VALUE;
+        }
+
+        public void setRecursive(boolean recursive) {
+            if (recursive) {
+                minDepth = 0;
+                maxDepth = Integer.MAX_VALUE;
+            }
+            else {
+                minDepth = 0;
+                maxDepth = 1;
+            }
+        }
+
+        public int getMinDepth() {
+            return minDepth;
+        }
+
+        public void setMinDepth(int minDepth) {
+            if(minDepth < 0) {
+                throw new IllegalArgumentException("minDepth must be non-negative");
+            }
+            this.minDepth = minDepth;
+        }
+
+        public int getMaxDepth() {
+            return maxDepth;
+        }
+
+        public void setMaxDepth(int maxDepth) {
+            if(maxDepth < 0) {
+                throw new IllegalArgumentException("maxDepth must be non-negative");
+            }
+            this.maxDepth = maxDepth;
         }
     }
 }
