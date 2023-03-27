@@ -229,15 +229,15 @@ public interface ResourceAccessor extends AutoCloseable {
         } else if (resources.size() == 1) {
             return resources.iterator().next();
         } else {
-            String message = "Found " + resources.size() + " files with the path '" + path + "':" + System.lineSeparator();
+            final StringBuilder message = new StringBuilder("Found " + resources.size() + " files with the path '" + path + "':" + System.lineSeparator());
             for (Resource resource : resources) {
-                message += "    - " + resource.getUri() + System.lineSeparator();
+                message.append("    - ").append(resource.getUri()).append(System.lineSeparator());
             }
-            message += "  Search Path: " + System.lineSeparator();
+            message.append("  Search Path: ").append(System.lineSeparator());
             for (String location : Scope.getCurrentScope().getResourceAccessor().describeLocations()) {
-                message += "    - " + location + System.lineSeparator();
+                message.append("    - ").append(location).append(System.lineSeparator());
             }
-            message += "  You can limit the search path to remove duplicates with the liquibase.searchPath setting.";
+            message.append("  You can limit the search path to remove duplicates with the liquibase.searchPath setting.");
 
             final GlobalConfiguration.DuplicateFileMode mode = GlobalConfiguration.DUPLICATE_FILE_MODE.getCurrentValue();
             final Logger log = Scope.getCurrentScope().getLog(getClass());
