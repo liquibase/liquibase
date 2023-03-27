@@ -1,8 +1,11 @@
 package liquibase.ui
 
-
+import liquibase.Scope
+import liquibase.logging.core.BufferedLogService
 import spock.lang.Specification
 import spock.lang.Unroll
+
+import java.util.logging.Level
 
 class ConsoleUIServiceTest extends Specification {
 
@@ -23,14 +26,39 @@ class ConsoleUIServiceTest extends Specification {
         outputStream.toString().trim().replaceAll("\r", "") == expectedPrompts.trim().replaceAll("\r", "")
 
         where:
-        input                     | defaultValue     | expectedOutput   | expectedPrompts                                                                             | type
-        "a string"                | "something else" | "a string"       | "Prompt here [something else]: "                                                            | String
-        ""                        | "something else" | "something else" | "Prompt here [something else]: "                                                            | String
-        ""                        | null             | null             | "Prompt here: "                                                                             | String
-        "x"                       | null             | "x"              | "Prompt here: "                                                                             | String
-        "1234"                    | null             | 1234             | "Prompt here: "                                                                             | Integer
-        ["x", "1234"] as String[] | 0                | 1234             | "Prompt here [0]: \nInvalid value: 'x': For input string: \"x\"\nPrompt here [0]:"          | Integer
-        "true"                    | false            | true             | "Prompt here [false]: "                                                                     | Boolean
-        "false"                   | false            | false            | "Prompt here [false]: "                                                                     | Boolean
+        input                     | defaultValue     | expectedOutput   | expectedPrompts                                                                    | type
+        "a string"                | "something else" | "a string"       | "Prompt here [something else]: "                                                   | String
+        ""                        | "something else" | "something else" | "Prompt here [something else]: "                                                   | String
+        ""                        | null             | null             | "Prompt here: "                                                                    | String
+        "x"                       | null             | "x"              | "Prompt here: "                                                                    | String
+        "1234"                    | null             | 1234             | "Prompt here: "                                                                    | Integer
+        ["x", "1234"] as String[] | 0                | 1234             | "Prompt here [0]: \nInvalid value: 'x': For input string: \"x\"\nPrompt here [0]:" | Integer
+        "true"                    | false            | true             | "Prompt here [false]: "                                                            | Boolean
+        "false"                   | false            | false            | "Prompt here [false]: "                                                            | Boolean
+    }
+
+    def "Should mirror messages to log with setLogConsoleMessage set to true"(String message, boolean error, Level level) {
+        when:
+        BufferedLogService bufferLog = new BufferedLogService()
+        def uiService = new ConsoleUIService()
+        uiService.setLogConsoleMessages(true)
+        Scope.child(Scope.Attr.logService.name(), bufferLog, new Scope.ScopedRunner() {
+            @Override
+            void run() throws Exception {
+                if (error) {
+                    uiService.sendErrorMessage(message)
+                } else {
+                    uiService.sendMessage(message)
+                }
+            }
+        })
+
+        then:
+        bufferLog.getLogAsString(level).contains(message)
+
+        where:
+        message              | error | level
+        "Some info message"  | false | Level.INFO
+        "Some error message" | true  | Level.SEVERE
     }
 }

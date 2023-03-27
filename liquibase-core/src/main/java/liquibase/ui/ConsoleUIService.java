@@ -1,9 +1,11 @@
 package liquibase.ui;
 
 import liquibase.AbstractExtensibleObject;
+import liquibase.Beta;
 import liquibase.GlobalConfiguration;
 import liquibase.Scope;
 import liquibase.configuration.ConfiguredValue;
+import liquibase.integration.commandline.LiquibaseCommandLineConfiguration;
 import liquibase.logging.Logger;
 import liquibase.util.StringUtil;
 
@@ -18,6 +20,7 @@ public class ConsoleUIService extends AbstractExtensibleObject implements UIServ
     private PrintStream errorStream = System.out;
     private boolean outputStackTraces = false;
     private boolean allowPrompt = false;
+    private boolean logConsoleMessages = false;
 
     private ConsoleWrapper console;
 
@@ -43,11 +46,17 @@ public class ConsoleUIService extends AbstractExtensibleObject implements UIServ
 
     @Override
     public void sendMessage(String message) {
+        if (shouldLogConsoleMessages()) {
+            Scope.getCurrentScope().getLog(getClass()).info(message);
+        }
         getOutputStream().println(message);
     }
 
     @Override
     public void sendErrorMessage(String message) {
+        if (shouldLogConsoleMessages()) {
+            Scope.getCurrentScope().getLog(getClass()).severe(message);
+        }
         getErrorStream().println(message);
     }
 
@@ -202,6 +211,19 @@ public class ConsoleUIService extends AbstractExtensibleObject implements UIServ
     @SuppressWarnings("unused")
     public void setOutputStackTraces(boolean outputStackTraces) {
         this.outputStackTraces = outputStackTraces;
+    }
+
+    @Beta
+    public void setLogConsoleMessages(boolean logConsoleMessages) {
+        this.logConsoleMessages = logConsoleMessages;
+    }
+
+    /**
+     * Check if we should mirror console output to logs
+     * @return true if {@link liquibase.integration.commandline.LiquibaseCommandLineConfiguration#LOG_CONSOLE_MESSAGES} configuration is set to true, false otherwise
+     */
+    private boolean shouldLogConsoleMessages() {
+        return logConsoleMessages;
     }
 
     /**

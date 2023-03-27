@@ -624,6 +624,8 @@ public class LiquibaseCommandLine {
 
         ui.setAllowPrompt(true);
         ui.setOutputStream(System.err);
+        ui.setLogConsoleMessages(LiquibaseCommandLineConfiguration.LOG_CONSOLE_MESSAGES.getCurrentValue());
+
         returnMap.put(Scope.Attr.ui.name(), ui);
 
         returnMap.put(LiquibaseCommandLineConfiguration.ARGUMENT_CONVERTER.getKey(),

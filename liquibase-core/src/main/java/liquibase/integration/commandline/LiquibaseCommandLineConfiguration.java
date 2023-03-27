@@ -25,6 +25,7 @@ public class LiquibaseCommandLineConfiguration implements AutoloadedConfiguratio
     public static final ConfigurationDefinition<Level> LOG_LEVEL;
     public static final ConfigurationDefinition<String> LOG_CHANNELS;
     public static final ConfigurationDefinition<String> LOG_FILE;
+    public static final ConfigurationDefinition<Boolean> LOG_CONSOLE_MESSAGES;
     public static final ConfigurationDefinition<LogFormat> LOG_FORMAT;
     public static final ConfigurationDefinition<String> OUTPUT_FILE;
     public static final ConfigurationDefinition<Boolean> SHOULD_RUN;
@@ -70,6 +71,10 @@ public class LiquibaseCommandLineConfiguration implements AutoloadedConfiguratio
                 .build();
 
         LOG_FILE = builder.define("logFile", String.class).build();
+        LOG_CONSOLE_MESSAGES = builder.define("logConsoleMessages", Boolean.class)
+                .setDefaultValue(Boolean.FALSE)
+                .setHidden(true)
+                .build();
         OUTPUT_FILE = builder.define("outputFile", String.class).build();
 
         MONITOR_PERFORMANCE = builder.define("monitorPerformance", String.class)

@@ -218,6 +218,7 @@ public class Main {
         if (!Main.runningFromNewCli) {
             ConsoleUIService ui = new ConsoleUIService();
             ui.setAllowPrompt(true);
+            ui.setLogConsoleMessages(LiquibaseCommandLineConfiguration.LOG_CONSOLE_MESSAGES.getCurrentValue());
             scopeObjects.put(Scope.Attr.ui.name(), ui);
         }
 
