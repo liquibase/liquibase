@@ -112,7 +112,7 @@ public abstract class AbstractUpdateCommandStep extends AbstractCommandStep impl
             }
             throw e;
         } finally {
-            //gTODO: We should be able to remove this once we get the rest of the update family
+            //TODO: We should be able to remove this once we get the rest of the update family
             // set up with the CommandFramework
             try {
                 lockService.releaseLock();
