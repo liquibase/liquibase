@@ -259,6 +259,7 @@ public class Liquibase implements AutoCloseable {
      * But, if there are changelogs that might have to be ran and this returns <b>false</b>, you MUST get a lock and do a real check to know what changesets actually need to run.
      * <p>
      * NOTE: to reduce the number of queries to the databasehistory table, this method will cache the "fast check" results within this instance under the assumption that the total changesets will not change within this instance.
+     * @deprecated this method has been moved to {@link AbstractUpdateCommandStep}, use that one instead.
      */
     @Deprecated
     protected boolean isUpToDateFastCheck(Contexts contexts, LabelExpression labelExpression) throws LiquibaseException {
