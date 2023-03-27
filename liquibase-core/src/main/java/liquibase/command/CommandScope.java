@@ -192,7 +192,13 @@ public class CommandScope {
         final List<CommandStep> executedCommands = new ArrayList<>();
         Optional<Exception> thrownException = Optional.empty();
         validate();
-        Scope.getCurrentScope().addMdcValue(MdcKey.LIQUIBASE_OPERATION, StringUtil.join(commandDefinition.getName(), "-"));
+        //
+        // NOTE:
+        // When all commands have been refactored we will be able to remove this string manipulation
+        //
+        String commandNameForMdc = StringUtil.join(commandDefinition.getName(), "-");
+        commandNameForMdc = StringUtil.lowerCaseFirst(commandNameForMdc.replaceAll("^internal",""));
+        Scope.getCurrentScope().addMdcValue(MdcKey.LIQUIBASE_OPERATION, commandNameForMdc);
         try {
             for (CommandStep command : pipeline) {
                 try {
