@@ -5,7 +5,6 @@ import liquibase.Beta;
 import liquibase.GlobalConfiguration;
 import liquibase.Scope;
 import liquibase.configuration.ConfiguredValue;
-import liquibase.integration.commandline.LiquibaseCommandLineConfiguration;
 import liquibase.logging.Logger;
 import liquibase.util.StringUtil;
 
@@ -220,7 +219,7 @@ public class ConsoleUIService extends AbstractExtensibleObject implements UIServ
 
     /**
      * Check if we should mirror console output to logs
-     * @return true if {@link liquibase.integration.commandline.LiquibaseCommandLineConfiguration#LOG_CONSOLE_MESSAGES} configuration is set to true, false otherwise
+     * @return should return true if {@link liquibase.integration.commandline.LiquibaseCommandLineConfiguration#MIRROR_CONSOLE_MESSAGES_TO_LOG} configuration is set to true, false otherwise
      */
     private boolean shouldLogConsoleMessages() {
         return logConsoleMessages;

@@ -42,14 +42,11 @@ class ConsoleUIServiceTest extends Specification {
         BufferedLogService bufferLog = new BufferedLogService()
         def uiService = new ConsoleUIService()
         uiService.setLogConsoleMessages(true)
-        Scope.child(Scope.Attr.logService.name(), bufferLog, new Scope.ScopedRunner() {
-            @Override
-            void run() throws Exception {
-                if (error) {
-                    uiService.sendErrorMessage(message)
-                } else {
-                    uiService.sendMessage(message)
-                }
+        Scope.child(Scope.Attr.logService.name(), bufferLog, {
+            if (error) {
+                uiService.sendErrorMessage(message)
+            } else {
+                uiService.sendMessage(message)
             }
         })
 
