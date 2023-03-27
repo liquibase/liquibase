@@ -1510,7 +1510,7 @@ public class ChangeSet implements Conditional, ChangeLogChild {
         this.deploymentId = deploymentId;
     }
 
-    private void addChangeSetMdcProperties() {
+    public void addChangeSetMdcProperties() {
         String commentMdc = comments != null ? comments : "";
         String labelMdc = labels != null ? labels.toString() : "";
         String contextsMdc = contextFilter != null && contextFilter.getOriginalString() != null ? contextFilter.getOriginalString() : "";

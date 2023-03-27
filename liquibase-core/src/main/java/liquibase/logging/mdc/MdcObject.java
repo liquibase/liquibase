@@ -16,7 +16,7 @@ public class MdcObject implements Closeable {
     }
 
     @Override
-    public void close() throws IOException {
+    public void close() {
         Scope.getCurrentScope().getMdcManager().remove(key);
     }
 }

@@ -66,4 +66,8 @@ public class MdcKey {
     public static final String UPDATE_TO_TAG = "updateToTag";
     public static final String UPDATE_COUNT = "updateCount";
     public static final String ROLLBACK_ON_ERROR = "rollbackOnError";
+    public static final String CHANGESET_SYNC_COUNT = "changesetSyncCount";
+    public static final String CHANGELOG_SYNC_OUTCOME = "changesetSyncOutcome";
+    public static final String OPERATION_START = "operationStart";
+    public static final String OPERATION_STOP = "operationStop";
 }

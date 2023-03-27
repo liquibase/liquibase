@@ -5,6 +5,8 @@ import liquibase.configuration.*;
 import liquibase.exception.CommandExecutionException;
 import liquibase.exception.CommandValidationException;
 import liquibase.logging.mdc.MdcKey;
+import liquibase.logging.mdc.MdcObject;
+import liquibase.util.ISODateFormat;
 import liquibase.util.StringUtil;
 
 import java.io.FilterOutputStream;
@@ -187,6 +189,7 @@ public class CommandScope {
      * Executes the command in this scope, and returns the results.
      */
     public CommandResults execute() throws CommandExecutionException {
+        Scope.getCurrentScope().addMdcValue(MdcKey.OPERATION_START, new ISODateFormat().format(new Date()));
         CommandResultsBuilder resultsBuilder = new CommandResultsBuilder(this, outputStream);
         final List<CommandStep> pipeline = commandDefinition.getPipeline();
         final List<CommandStep> executedCommands = new ArrayList<>();
@@ -196,6 +199,7 @@ public class CommandScope {
         try {
             for (CommandStep command : pipeline) {
                 try {
+                    Scope.getCurrentScope().addMdcValue(MdcKey.LIQUIBASE_COMMAND_NAME, StringUtil.join(command.defineCommandNames()[0], " "));
                     command.run(resultsBuilder);
                 } catch (Exception runException) {
                     // Suppress the exception for now so that we can run the cleanup steps even when encountering an exception.
@@ -222,6 +226,9 @@ public class CommandScope {
                 throw new CommandExecutionException(e);
             }
         } finally {
+            try (MdcObject operationStopTime = Scope.getCurrentScope().addMdcValue(MdcKey.OPERATION_STOP, new ISODateFormat().format(new Date()))) {
+                Scope.getCurrentScope().getLog(getClass()).info("Command execution complete");
+            }
             try {
                 if (this.outputStream != null) {
                     this.outputStream.flush();
