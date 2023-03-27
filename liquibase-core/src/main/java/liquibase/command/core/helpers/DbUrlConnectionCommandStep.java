@@ -1,10 +1,12 @@
 package liquibase.command.core.helpers;
 
 import liquibase.Beta;
+import liquibase.Scope;
 import liquibase.command.*;
 import liquibase.configuration.ConfigurationValueObfuscator;
 import liquibase.database.Database;
 import liquibase.exception.DatabaseException;
+import liquibase.logging.mdc.MdcKey;
 
 import java.util.Collections;
 import java.util.List;
@@ -81,6 +83,7 @@ public class DbUrlConnectionCommandStep extends AbstractDatabaseConnectionComman
     private Database obtainDatabase(CommandScope commandScope) throws DatabaseException {
         if (commandScope.getArgumentValue(DATABASE_ARG) == null) {
             String url = commandScope.getArgumentValue(URL_ARG);
+            Scope.getCurrentScope().addMdcValue(MdcKey.LIQUIBASE_TARGET_URL, url);
             String username = commandScope.getArgumentValue(USERNAME_ARG);
             String password = commandScope.getArgumentValue(PASSWORD_ARG);
             String defaultSchemaName = commandScope.getArgumentValue(DEFAULT_SCHEMA_NAME_ARG);

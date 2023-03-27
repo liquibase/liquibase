@@ -16,7 +16,8 @@ import java.util.List;
 /**
  * Removes an existing primary key.
  */
-@DatabaseChange(name="dropPrimaryKey", description = "Drops an existing primary key", priority = ChangeMetaData.PRIORITY_DEFAULT, appliesTo = "primaryKey")
+@DatabaseChange(name = "dropPrimaryKey", description = "Drops an existing primary key", priority = ChangeMetaData.PRIORITY_DEFAULT,
+    appliesTo = "primaryKey")
 public class DropPrimaryKeyChange extends AbstractChange {
     private String catalogName;
     private String schemaName;
@@ -29,7 +30,7 @@ public class DropPrimaryKeyChange extends AbstractChange {
         return database instanceof SQLiteDatabase;
     }
 
-    @DatabaseChangeProperty(mustEqualExisting ="primaryKey.catalog")
+    @DatabaseChangeProperty(mustEqualExisting ="primaryKey.catalog", description = "Name of the database catalog")
     public String getCatalogName() {
         return catalogName;
     }
@@ -38,7 +39,7 @@ public class DropPrimaryKeyChange extends AbstractChange {
         this.catalogName = catalogName;
     }
 
-    @DatabaseChangeProperty(mustEqualExisting ="primaryKey.schema")
+    @DatabaseChangeProperty(mustEqualExisting ="primaryKey.schema", description = "Name of the database schema")
     public String getSchemaName() {
         return schemaName;
     }
@@ -47,7 +48,7 @@ public class DropPrimaryKeyChange extends AbstractChange {
         this.schemaName = schemaName;
     }
 
-    @DatabaseChangeProperty(mustEqualExisting = "primaryKey.table", description = "Name of the table to drop the primary key of")
+    @DatabaseChangeProperty(mustEqualExisting = "primaryKey.table", description = "Name of the table to drop the primary key from")
     public String getTableName() {
         return tableName;
     }
@@ -56,7 +57,7 @@ public class DropPrimaryKeyChange extends AbstractChange {
         this.tableName = tableName;
     }
 
-    @DatabaseChangeProperty(mustEqualExisting = "primaryKey", description = "Name of the primary key")
+    @DatabaseChangeProperty(mustEqualExisting = "primaryKey", description = "Name of the primary key to drop")
     public String getConstraintName() {
         return constraintName;
     }
@@ -65,6 +66,7 @@ public class DropPrimaryKeyChange extends AbstractChange {
         this.constraintName = constraintName;
     }
 
+    @DatabaseChangeProperty(description = "Whether to drop the index associated with the primary key")
     public Boolean getDropIndex() {
         return dropIndex;
     }
@@ -100,7 +102,6 @@ public class DropPrimaryKeyChange extends AbstractChange {
 
     private SqlStatement[] generateStatementsForSQLiteDatabase(Database database) {
         SqlStatement[] sqlStatements = null;
-
 
         // Since SQLite does not support a drop column statement, use alter table visitor to copy the table
         // and disabling the primary key constraint from the column
