@@ -699,11 +699,11 @@ public class DiffToChangeLog {
         }
         List<Class<? extends DatabaseObject>> types = graph.sort(comparisonDatabase, generatorType);
         if (!loggedOrderFor.contains(generatorType)) {
-            String log = generatorType.getSimpleName() + " type order: ";
+            final StringBuilder log = new StringBuilder(generatorType.getSimpleName() + " type order: ");
             for (Class<? extends DatabaseObject> type : types) {
-                log += "    " + type.getName();
+                log.append("    ").append(type.getName());
             }
-            Scope.getCurrentScope().getLog(getClass()).fine(log);
+            Scope.getCurrentScope().getLog(getClass()).fine(log.toString());
             loggedOrderFor.add(generatorType);
         }
 
@@ -925,8 +925,8 @@ public class DiffToChangeLog {
             //Check to see if all edges are removed
             for (Node n : allNodes.values()) {
                 if (!n.inEdges.isEmpty()) {
-                    String message = "Could not resolve " + generatorType.getSimpleName() + " dependencies due " +
-                            "to dependency cycle. Dependencies: \n";
+                    StringBuilder message = new StringBuilder("Could not resolve " + generatorType.getSimpleName() + " dependencies due " +
+                            "to dependency cycle. Dependencies: \n");
 
                     for (Node node : allNodes.values()) {
                         SortedSet<String> fromTypes = new TreeSet<>();
@@ -939,10 +939,10 @@ public class DiffToChangeLog {
                         }
                         String from = StringUtil.join(fromTypes, ",");
                         String to = StringUtil.join(toTypes, ",");
-                        message += "    [" + from + "] -> " + node.type.getSimpleName() + " -> [" + to + "]\n";
+                        message.append("    [").append(from).append("] -> ").append(node.type.getSimpleName()).append(" -> [").append(to).append("]\n");
                     }
 
-                    throw new UnexpectedLiquibaseException(message);
+                    throw new UnexpectedLiquibaseException(message.toString());
                 }
             }
         }
