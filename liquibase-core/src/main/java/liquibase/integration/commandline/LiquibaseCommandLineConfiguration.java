@@ -72,8 +72,8 @@ public class LiquibaseCommandLineConfiguration implements AutoloadedConfiguratio
 
         LOG_FILE = builder.define("logFile", String.class).build();
         LOG_CONSOLE_MESSAGES = builder.define("logConsoleMessages", Boolean.class)
-                .setDefaultValue(Boolean.FALSE)
-                .setHidden(true)
+                .setDefaultValue(Boolean.TRUE)
+                .setDescription("When set to true, the console messages are mirrored to the logs as [liquibase.ui] to provide a more complete picture of liquibase operations to log analysis tools. Set to false to change this behavior.")
                 .build();
         OUTPUT_FILE = builder.define("outputFile", String.class).build();
 
