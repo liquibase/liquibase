@@ -36,26 +36,4 @@ class ConsoleUIServiceTest extends Specification {
         "true"                    | false            | true             | "Prompt here [false]: "                                                            | Boolean
         "false"                   | false            | false            | "Prompt here [false]: "                                                            | Boolean
     }
-
-    def "Should mirror messages to log with setLogConsoleMessage set to true"(String message, boolean error, Level level) {
-        when:
-        BufferedLogService bufferLog = new BufferedLogService()
-        def uiService = new ConsoleUIService()
-        uiService.setLogConsoleMessages(true)
-        Scope.child(Scope.Attr.logService.name(), bufferLog, {
-            if (error) {
-                uiService.sendErrorMessage(message)
-            } else {
-                uiService.sendMessage(message)
-            }
-        })
-
-        then:
-        bufferLog.getLogAsString(level).contains(message)
-
-        where:
-        message              | error | level
-        "Some info message"  | false | Level.INFO
-        "Some error message" | true  | Level.SEVERE
-    }
 }

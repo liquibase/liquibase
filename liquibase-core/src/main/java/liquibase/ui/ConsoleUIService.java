@@ -19,7 +19,6 @@ public class ConsoleUIService extends AbstractExtensibleObject implements UIServ
     private PrintStream errorStream = System.out;
     private boolean outputStackTraces = false;
     private boolean allowPrompt = false;
-    private boolean logConsoleMessages = false;
 
     private ConsoleWrapper console;
 
@@ -45,17 +44,11 @@ public class ConsoleUIService extends AbstractExtensibleObject implements UIServ
 
     @Override
     public void sendMessage(String message) {
-        if (shouldLogConsoleMessages()) {
-            Scope.getCurrentScope().getLog(getClass()).info(message);
-        }
         getOutputStream().println(message);
     }
 
     @Override
     public void sendErrorMessage(String message) {
-        if (shouldLogConsoleMessages()) {
-            Scope.getCurrentScope().getLog(getClass()).severe(message);
-        }
         getErrorStream().println(message);
     }
 
@@ -210,19 +203,6 @@ public class ConsoleUIService extends AbstractExtensibleObject implements UIServ
     @SuppressWarnings("unused")
     public void setOutputStackTraces(boolean outputStackTraces) {
         this.outputStackTraces = outputStackTraces;
-    }
-
-    @Beta
-    public void setLogConsoleMessages(boolean logConsoleMessages) {
-        this.logConsoleMessages = logConsoleMessages;
-    }
-
-    /**
-     * Check if we should mirror console output to logs
-     * @return should return true if {@link liquibase.integration.commandline.LiquibaseCommandLineConfiguration#MIRROR_CONSOLE_MESSAGES_TO_LOG} configuration is set to true, false otherwise
-     */
-    private boolean shouldLogConsoleMessages() {
-        return logConsoleMessages;
     }
 
     /**

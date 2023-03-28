@@ -29,7 +29,10 @@ import liquibase.resource.ClassLoaderResourceAccessor;
 import liquibase.resource.CompositeResourceAccessor;
 import liquibase.resource.DirectoryResourceAccessor;
 import liquibase.resource.ResourceAccessor;
+import liquibase.ui.CompositeUIService;
 import liquibase.ui.ConsoleUIService;
+import liquibase.ui.LoggerUIService;
+import liquibase.ui.UIService;
 import liquibase.util.ISODateFormat;
 import liquibase.util.LiquibaseUtil;
 import liquibase.util.StringUtil;
@@ -216,10 +219,15 @@ public class Main {
         scopeObjects.put("integrationDetails", integrationDetails);
 
         if (!Main.runningFromNewCli) {
-            ConsoleUIService ui = new ConsoleUIService();
-            ui.setAllowPrompt(true);
-            ui.setLogConsoleMessages(LiquibaseCommandLineConfiguration.MIRROR_CONSOLE_MESSAGES_TO_LOG.getCurrentValue());
-            scopeObjects.put(Scope.Attr.ui.name(), ui);
+            List<UIService> uiOutputServices = new ArrayList<>();
+            ConsoleUIService console = new ConsoleUIService();
+            console.setAllowPrompt(true);
+            uiOutputServices.add(console);
+            if (LiquibaseCommandLineConfiguration.MIRROR_CONSOLE_MESSAGES_TO_LOG.getCurrentValue()) {
+                uiOutputServices.add(new LoggerUIService());
+            }
+            CompositeUIService compositeUIService = new CompositeUIService(console, uiOutputServices);
+            scopeObjects.put(Scope.Attr.ui.name(), compositeUIService);
         }
 
         //TODO: Reformat
