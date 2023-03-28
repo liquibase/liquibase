@@ -1523,6 +1523,7 @@ public class Liquibase implements AutoCloseable {
         update(tag, contexts, labelExpression);
         changeLogService.reset();
         int changesetsToRollback = changeLogService.getRanChangeSets().size() - originalSize;
+        Scope.getCurrentScope().getLog(getClass()).info(String.format("Rolling back %d changeset(s).", changesetsToRollback));
         rollback(changesetsToRollback, null, contexts, labelExpression);
         update(tag, contexts, labelExpression);
     }
