@@ -1,7 +1,6 @@
 package liquibase.ui;
 
 import liquibase.AbstractExtensibleObject;
-import liquibase.Beta;
 import liquibase.GlobalConfiguration;
 import liquibase.Scope;
 import liquibase.configuration.ConfiguredValue;
