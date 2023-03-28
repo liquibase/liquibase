@@ -9,6 +9,8 @@ public class MdcKey {
     public static final String LIQUIBASE_OPERATION = "liquibaseOperation";
     public static final String LIQUIBASE_TARGET_URL = "liquibaseTargetUrl";
     public static final String LIQUIBASE_REF_URL = "liquibaseReferenceUrl";
+    public static final String LIQUIBASE_CATALOG_NAME = "liquibaseCatalogName";
+    public static final String LIQUIBASE_SCHEMA_NAME = "liquibaseSchemaName";
     public static final String CHANGESET_OPERATION_START_TIME = "changesetOperationStart";
     public static final String CHANGESET_OPERATION_STOP_TIME = "changesetOperationStop";
     public static final String OPERATION_START_TIME = "operationStart";
@@ -80,4 +82,7 @@ public class MdcKey {
     public static final String INCLUDE_TABLESPACE = "includeTablespace";
     public static final String SCHEMAS = "schemas";
     public static final String DIFF_OUTCOME = "diffOutcome";
+    public static final String UPDATE_TO_TAG = "updateToTag";
+    public static final String UPDATE_COUNT = "updateCount";
+    public static final String ROLLBACK_ON_ERROR = "rollbackOnError";
 }
