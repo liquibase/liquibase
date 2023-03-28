@@ -13,6 +13,10 @@ public class NetUtil {
     private static InetAddress localHost;
     private static String hostName;
 
+    private static final String UNKNOWN_HOST_NAME = "unknown";
+
+    private NetUtil() {}
+
     /**
      * Smarter way to get localhost than InetAddress.getLocalHost.  See https://bugs.java.com/bugdatabase/view_bug.do?bug_id=4665037
      */
@@ -47,18 +51,18 @@ public class NetUtil {
     /**
      * @return Machine's IP address
      */
-    public static String getLocalHostAddress() throws UnknownHostException, SocketException {
+    public static String getLocalHostAddress() {
         try {
             InetAddress localHost = getLocalHost();
             if(localHost != null) {
                 return localHost.getHostAddress();
             }
             else {
-                return "unknown";
+                return UNKNOWN_HOST_NAME;
             }
         } catch (Exception e) {
             Scope.getCurrentScope().getLog(NetUtil.class).fine("Error getting hostname", e);
-            return "unknown";
+            return UNKNOWN_HOST_NAME;
         }
     }
 
@@ -66,7 +70,7 @@ public class NetUtil {
      * @return Machine's host name. This method can be better to call than getting it off {@link #getLocalHost()} because sometimes the external address returned by that function does not have a useful hostname attached to it.
      * This function will make sure a good value is returned.
      */
-    public static String getLocalHostName() throws UnknownHostException, SocketException {
+    public static String getLocalHostName() {
         if (hostName == null ) {
             try {
                 InetAddress localHost = getLocalHost();
@@ -81,12 +85,12 @@ public class NetUtil {
                     }
                 }
                 else {
-                    hostName = "unknown";
+                    hostName = UNKNOWN_HOST_NAME;
                 }
             } catch (Exception e) {
                 Scope.getCurrentScope().getLog(NetUtil.class).fine("Error getting hostname", e);
                 if (hostName == null) {
-                    hostName = "unknown";
+                    hostName = UNKNOWN_HOST_NAME;
                 }
             }
         }
