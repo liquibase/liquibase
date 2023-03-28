@@ -1,5 +1,6 @@
 package liquibase.changelog.visitor;
 
+import liquibase.GlobalConfiguration;
 import liquibase.Scope;
 import liquibase.change.Change;
 import liquibase.changelog.ChangeSet;
@@ -169,7 +170,12 @@ public class ValidatingVisitor implements ChangeSetVisitor {
         if (authorEmpty && idEmpty) {
             validationErrors.addError("ChangeSet Id and Author are empty", changeSet);
         } else if (authorEmpty) {
-            validationErrors.addError("ChangeSet Author is empty", changeSet);
+            if(GlobalConfiguration.STRICT.getCurrentValue()) {
+                validationErrors.addError("ChangeSet Author is empty", changeSet);
+            }
+            else {
+                valid = true;
+            }
         } else if (idEmpty) {
             validationErrors.addError("ChangeSet Id is empty", changeSet);
         } else {
