@@ -151,7 +151,7 @@ public interface ResourceAccessor extends AutoCloseable {
         int minDepth = searchOptions.getMinDepth();
         int maxDepth = searchOptions.getMaxDepth();
 
-        for (Resource res: recursiveResourceList) {
+        for (Resource res: CollectionUtil.createIfNull(recursiveResourceList)) {
             String relativePath = res.getPath();
             int depth = (int) relativePath.chars().filter(ch -> ch == '/').count();
 
