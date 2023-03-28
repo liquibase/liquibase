@@ -39,7 +39,7 @@ public class InsertDataChange extends AbstractChange implements ChangeWithColumn
         return validate;
     }
 
-    @DatabaseChangeProperty(mustEqualExisting ="table.catalog", since = "3.0")
+    @DatabaseChangeProperty(mustEqualExisting ="table.catalog", since = "3.0", description = "Name of the database catalog")
     public String getCatalogName() {
         return catalogName;
     }
@@ -48,7 +48,7 @@ public class InsertDataChange extends AbstractChange implements ChangeWithColumn
         this.catalogName = catalogName;
     }
 
-    @DatabaseChangeProperty(mustEqualExisting ="table.schema")
+    @DatabaseChangeProperty(mustEqualExisting ="table.schema", description = "Name of the database schema")
     public String getSchemaName() {
         return schemaName;
     }
@@ -67,7 +67,8 @@ public class InsertDataChange extends AbstractChange implements ChangeWithColumn
     }
 
     @Override
-    @DatabaseChangeProperty(mustEqualExisting = "table.column", description = "Data to insert into columns", requiredForDatabase = "all")
+    @DatabaseChangeProperty(mustEqualExisting = "table.column", description = "Data to insert into columns",
+        requiredForDatabase = "all")
     public List<ColumnConfig> getColumns() {
         return columns;
     }
@@ -162,7 +163,11 @@ public class InsertDataChange extends AbstractChange implements ChangeWithColumn
     }
 
     @Override
-    @DatabaseChangeProperty(since = "3.0", exampleValue = "h2, oracle")
+    @DatabaseChangeProperty(since = "3.0", exampleValue = "h2, oracle",
+        description = "Specifies which database type(s) a changeset is to be used for. " +
+            "See valid database type names on Supported Databases docs page. Separate multiple databases with commas. " +
+            "Specify that a changeset is not applicable to a particular database type by prefixing with !. " +
+            "The keywords 'all' and 'none' are also available.")
     public String getDbms() {
         return dbms;
     }
