@@ -1,5 +1,6 @@
 package liquibase.command.core.helpers;
 
+import liquibase.Scope;
 import liquibase.command.*;
 import liquibase.command.core.DiffCommandStep;
 import liquibase.command.providers.ReferenceDatabase;
@@ -8,6 +9,7 @@ import liquibase.diff.compare.CompareControl;
 import liquibase.diff.output.ObjectChangeFilter;
 import liquibase.diff.output.StandardObjectChangeFilter;
 import liquibase.exception.UnexpectedLiquibaseException;
+import liquibase.logging.mdc.MdcKey;
 import liquibase.structure.DatabaseObject;
 
 import java.util.Arrays;
@@ -80,8 +82,10 @@ public class PreCompareCommandStep extends AbstractHelperCommandStep {
         CommandScope commandScope = resultsBuilder.getCommandScope();
         Database targetDatabase = getTargetDatabase(commandScope);
         ObjectChangeFilter objectChangeFilter = this.getObjectChangeFilter(commandScope);
-        CompareControl compareControl = this.getcompareControl(commandScope, targetDatabase);
-        Class<? extends DatabaseObject>[] snapshotTypes = getSnapshotTypes(commandScope);
+        String diffTypes = commandScope.getArgumentValue(DIFF_TYPES_ARG);
+        CompareControl compareControl = this.getCompareControl(commandScope, targetDatabase, diffTypes);
+        Scope.getCurrentScope().addMdcValue(MdcKey.DIFF_TYPES, diffTypes);
+        Class<? extends DatabaseObject>[] snapshotTypes = getSnapshotTypes(commandScope, diffTypes);
 
         resultsBuilder.addResult(COMPARE_CONTROL_RESULT, compareControl)
                       .addResult(OBJECT_CHANGE_FILTER_RESULT, objectChangeFilter)
@@ -96,11 +100,11 @@ public class PreCompareCommandStep extends AbstractHelperCommandStep {
         return (Database) database;
     }
 
-    private static Class<? extends DatabaseObject>[] getSnapshotTypes(CommandScope commandScope) {
+    private static Class<? extends DatabaseObject>[] getSnapshotTypes(CommandScope commandScope, String diffTypes) {
         if (commandScope.getArgumentValue(SNAPSHOT_TYPES_ARG) != null) {
             return commandScope.getArgumentValue(SNAPSHOT_TYPES_ARG);
         }
-        return DiffCommandStep.parseSnapshotTypes(commandScope.getArgumentValue(DIFF_TYPES_ARG));
+        return DiffCommandStep.parseSnapshotTypes(diffTypes);
     }
 
     private ObjectChangeFilter getObjectChangeFilter(CommandScope commandScope) {
@@ -116,6 +120,9 @@ public class PreCompareCommandStep extends AbstractHelperCommandStep {
                             EXCLUDE_OBJECTS_ARG.getName(), INCLUDE_OBJECTS_ARG.getName()));
         }
 
+        Scope.getCurrentScope().addMdcValue(MdcKey.EXCLUDE_OBJECTS, excludeObjects);
+        Scope.getCurrentScope().addMdcValue(MdcKey.INCLUDE_OBJECTS, includeObjects);
+
         ObjectChangeFilter objectChangeFilter = null;
         if (excludeObjects != null) {
             objectChangeFilter = new StandardObjectChangeFilter(StandardObjectChangeFilter.FilterType.EXCLUDE,
@@ -129,21 +136,31 @@ public class PreCompareCommandStep extends AbstractHelperCommandStep {
         return objectChangeFilter;
     }
 
-    private CompareControl getcompareControl(CommandScope commandScope, Database database) {
+    private CompareControl getCompareControl(CommandScope commandScope, Database database, String diffTypes) {
         if (commandScope.getArgumentValue(COMPARE_CONTROL_ARG) != null) {
             return commandScope.getArgumentValue(COMPARE_CONTROL_ARG);
         }
+        String schemas = commandScope.getArgumentValue(SCHEMAS_ARG);
+        String outputSchemas = commandScope.getArgumentValue(OUTPUT_SCHEMAS_ARG);
+        String referenceSchemas = commandScope.getArgumentValue(REFERENCE_SCHEMAS_ARG);
+        logMdcProperties(schemas, outputSchemas, referenceSchemas);
         CompareControl.SchemaComparison[] finalSchemaComparisons = CompareControl.computeSchemas(
-                commandScope.getArgumentValue(SCHEMAS_ARG),
-                commandScope.getArgumentValue(REFERENCE_SCHEMAS_ARG),
-                commandScope.getArgumentValue(OUTPUT_SCHEMAS_ARG),
+                schemas,
+                referenceSchemas,
+                outputSchemas,
                 commandScope.getArgumentValue(DbUrlConnectionCommandStep.DEFAULT_CATALOG_NAME_ARG),
                 commandScope.getArgumentValue(DbUrlConnectionCommandStep.DEFAULT_SCHEMA_NAME_ARG),
                 commandScope.getArgumentValue(ReferenceDbUrlConnectionCommandStep.REFERENCE_DEFAULT_CATALOG_NAME_ARG),
                 commandScope.getArgumentValue(ReferenceDbUrlConnectionCommandStep.REFERENCE_DEFAULT_SCHEMA_NAME_ARG),
                 database).finalSchemaComparisons;
 
-        return new CompareControl(finalSchemaComparisons, commandScope.getArgumentValue(DIFF_TYPES_ARG));
+        return new CompareControl(finalSchemaComparisons, diffTypes);
+    }
+
+    private void logMdcProperties(String schemas, String outputSchemas, String referenceSchemas) {
+        Scope.getCurrentScope().addMdcValue(MdcKey.SCHEMAS, schemas);
+        Scope.getCurrentScope().addMdcValue(MdcKey.OUTPUT_SCHEMAS, outputSchemas);
+        Scope.getCurrentScope().addMdcValue(MdcKey.REFERENCE_SCHEMAS, referenceSchemas);
     }
 
 }
