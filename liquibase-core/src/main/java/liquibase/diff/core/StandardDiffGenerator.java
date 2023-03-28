@@ -1,5 +1,6 @@
 package liquibase.diff.core;
 
+import liquibase.Scope;
 import liquibase.database.Database;
 import liquibase.diff.DiffGenerator;
 import liquibase.diff.DiffResult;
@@ -9,6 +10,8 @@ import liquibase.diff.compare.CompareControl;
 import liquibase.diff.compare.DatabaseObjectComparatorFactory;
 import liquibase.exception.DatabaseException;
 import liquibase.exception.UnexpectedLiquibaseException;
+import liquibase.logging.mdc.MdcKey;
+import liquibase.logging.mdc.customobjects.DiffResultsSummary;
 import liquibase.snapshot.DatabaseSnapshot;
 import liquibase.snapshot.EmptyDatabaseSnapshot;
 import liquibase.snapshot.InvalidExampleException;
@@ -16,6 +19,7 @@ import liquibase.structure.DatabaseObject;
 import liquibase.structure.core.Schema;
 import liquibase.util.StringUtil;
 
+import java.util.Scanner;
 import java.util.Set;
 
 public class StandardDiffGenerator implements DiffGenerator {
@@ -51,6 +55,8 @@ public class StandardDiffGenerator implements DiffGenerator {
         for (Class<? extends DatabaseObject> typeToCompare : typesToCompare) {
             compareObjectType(typeToCompare, referenceSnapshot, comparisonSnapshot, diffResult);
         }
+
+        Scope.getCurrentScope().addMdcValue(MdcKey.DIFF_RESULTS_SUMMARY, new DiffResultsSummary(diffResult));
 
         return diffResult;
     }
