@@ -13,6 +13,8 @@ import liquibase.diff.compare.CompareControl;
 import liquibase.diff.output.ObjectChangeFilter;
 import liquibase.diff.output.report.DiffToReport;
 import liquibase.exception.DatabaseException;
+import liquibase.logging.mdc.MdcKey;
+import liquibase.logging.mdc.MdcValue;
 import liquibase.snapshot.*;
 import liquibase.structure.DatabaseObject;
 import liquibase.structure.core.DatabaseObjectFactory;
@@ -80,21 +82,31 @@ public class DiffCommandStep extends AbstractCommandStep {
 
     @Override
     public void run(CommandResultsBuilder resultsBuilder) throws Exception {
-        CommandScope commandScope = resultsBuilder.getCommandScope();
-        InternalSnapshotCommandStep.logUnsupportedDatabase((Database) commandScope.getDependency(Database.class), this.getClass());
+        try {
+            CommandScope commandScope = resultsBuilder.getCommandScope();
+            InternalSnapshotCommandStep.logUnsupportedDatabase((Database) commandScope.getDependency(Database.class), this.getClass());
 
-        DiffResult diffResult = createDiffResult(resultsBuilder);
-        resultsBuilder.addResult(DIFF_RESULT.getName(), diffResult);
+            DiffResult diffResult = createDiffResult(resultsBuilder);
+            resultsBuilder.addResult(DIFF_RESULT.getName(), diffResult);
 
-        String printResult = commandScope.getArgumentValue(FORMAT_ARG);
-        if (printResult == null || printResult.equalsIgnoreCase("TXT")) {
-            Scope.getCurrentScope().getUI().sendMessage("");
-            Scope.getCurrentScope().getUI().sendMessage(coreBundle.getString("diff.results"));
+            String printResult = commandScope.getArgumentValue(FORMAT_ARG);
+            Scope.getCurrentScope().addMdcValue(MdcKey.FORMAT, printResult);
+            if (printResult == null || printResult.equalsIgnoreCase("TXT")) {
+                Scope.getCurrentScope().addMdcValue(MdcKey.FORMAT, "TXT");
+                Scope.getCurrentScope().getUI().sendMessage("");
+                Scope.getCurrentScope().getUI().sendMessage(coreBundle.getString("diff.results"));
 
-            final PrintStream printStream = new PrintStream(resultsBuilder.getOutputStream());
-            new DiffToReport(diffResult, printStream).print();
-            printStream.flush();
+                final PrintStream printStream = new PrintStream(resultsBuilder.getOutputStream());
+                new DiffToReport(diffResult, printStream).print();
+                printStream.flush();
+            }
+            Scope.getCurrentScope().addMdcValue(MdcKey.DIFF_OUTCOME, MdcValue.COMMAND_SUCCESSFUL);
+            Scope.getCurrentScope().getLog(getClass()).info("Diff command completed");
+        } catch (Exception e) {
+            Scope.getCurrentScope().addMdcValue(MdcKey.DIFF_OUTCOME, MdcValue.COMMAND_FAILED);
+            throw e;
         }
+
     }
 
     public DiffResult createDiffResult(CommandResultsBuilder resultsBuilder) throws DatabaseException, InvalidExampleException {

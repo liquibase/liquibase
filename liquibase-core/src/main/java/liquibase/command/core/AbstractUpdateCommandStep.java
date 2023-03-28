@@ -51,8 +51,6 @@ public abstract class AbstractUpdateCommandStep extends AbstractCommandStep impl
 
     @Override
     public void run(CommandResultsBuilder resultsBuilder) throws Exception {
-        Scope.getCurrentScope().addMdcValue(MdcKey.LIQUIBASE_OPERATION, getCommandName()[0]);
-        Scope.getCurrentScope().addMdcValue(MdcKey.LIQUIBASE_COMMAND_NAME, getCommandName()[0]);
         CommandScope commandScope = resultsBuilder.getCommandScope();
         String changeLogFile = getChangelogFileArg(commandScope);
         Database database = (Database) commandScope.getDependency(Database.class);
