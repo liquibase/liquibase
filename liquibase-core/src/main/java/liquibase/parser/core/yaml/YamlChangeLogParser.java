@@ -2,6 +2,7 @@ package liquibase.parser.core.yaml;
 
 import liquibase.ContextExpression;
 import liquibase.Labels;
+import liquibase.Scope;
 import liquibase.changelog.ChangeLogParameters;
 import liquibase.changelog.DatabaseChangeLog;
 import liquibase.exception.ChangeLogParseException;
@@ -11,6 +12,7 @@ import liquibase.parser.ChangeLogParser;
 import liquibase.parser.core.ParsedNode;
 import liquibase.resource.Resource;
 import liquibase.resource.ResourceAccessor;
+import liquibase.util.FileUtil;
 import org.yaml.snakeyaml.Yaml;
 import org.yaml.snakeyaml.constructor.SafeConstructor;
 
@@ -106,10 +108,15 @@ public class YamlChangeLogParser extends YamlParser implements ChangeLogParser {
     private void loadChangeLogParametersFromFile(ChangeLogParameters changeLogParameters, ResourceAccessor resourceAccessor, DatabaseChangeLog changeLog, Map property, ContextExpression context, Labels labels, Boolean global) throws IOException, LiquibaseException {
         Properties props = new Properties();
         Boolean relativeToChangelogFile = (Boolean) property.get("relativeToChangelogFile");
+        Boolean errorIfMissingOrEmpty = (Boolean) property.get("errorIfMissingOrEmpty");
         String file = (String) property.get("file");
 
         if (relativeToChangelogFile == null) {
             relativeToChangelogFile = false;
+        }
+
+        if (errorIfMissingOrEmpty == null) {
+            errorIfMissingOrEmpty = true;
         }
 
         Resource resource;
@@ -121,7 +128,12 @@ public class YamlChangeLogParser extends YamlParser implements ChangeLogParser {
         }
 
         if (!resource.exists()) {
-            log.info("Could not open properties file " + property.get("file"));
+            if (errorIfMissingOrEmpty) {
+                throw new UnexpectedLiquibaseException(FileUtil.getFileNotFoundMessage(file));
+            }
+            else {
+                Scope.getCurrentScope().getLog(getClass()).warning(FileUtil.getFileNotFoundMessage(file));
+            }
         } else {
             try (InputStream stream = resource.openInputStream()) {
                 props.load(stream);

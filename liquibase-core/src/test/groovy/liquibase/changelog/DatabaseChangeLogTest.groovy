@@ -7,6 +7,7 @@ import liquibase.Scope
 import liquibase.change.core.CreateTableChange
 import liquibase.change.core.RawSQLChange
 import liquibase.exception.SetupException
+import liquibase.exception.UnexpectedLiquibaseException
 import liquibase.logging.core.BufferedLogService
 import liquibase.parser.ChangeLogParserConfiguration
 import liquibase.parser.core.ParsedNode
@@ -340,8 +341,8 @@ create view sql_view as select * from sql_table;'''
         ])
 
         def rootChangeLog = new DatabaseChangeLog("com/example/root.xml")
-        rootChangeLog.include("com/example/test1.xml", false, resourceAccessor, new ContextExpression("context1"), new Labels("label1"), false, false)
-        rootChangeLog.include("com/example/test2.xml", false, resourceAccessor, new ContextExpression("context2"), new Labels("label2"), true, false)
+        rootChangeLog.include("com/example/test1.xml", false, true, resourceAccessor, new ContextExpression("context1"), new Labels("label1"), false, false)
+        rootChangeLog.include("com/example/test2.xml", false, true, resourceAccessor, new ContextExpression("context2"), new Labels("label2"), true, false)
 
         def test1ChangeLog = rootChangeLog.getChangeSet("com/example/test1.xml", "nvoxland", "1").getChangeLog()
         def test2ChangeLog = rootChangeLog.getChangeSet("com/example/test2.xml", "nvoxland", "1").getChangeLog()
@@ -369,11 +370,7 @@ create view sql_view as select * from sql_table;'''
                 "com/example/not/fileX.sql"     : "file X",
         ])
         def changeLogFile = new DatabaseChangeLog("com/example/root.xml")
-        changeLogFile.includeAll("com/example/children",
-                false, null,
-                true,
-                changeLogFile.getStandardChangeLogComparator(),
-                resourceAccessor, new ContextExpression(), new LabelExpression(), false)
+        changeLogFile.includeAll("com/example/children", false, null, true, changeLogFile.getStandardChangeLogComparator(), resourceAccessor, new ContextExpression(), new Labels(), false)
 
         then:
         changeLogFile.changeSets.collect { it.filePath } == ["com/example/children/file1.sql",
@@ -443,7 +440,7 @@ create view sql_view as select * from sql_table;'''
                 "com/example/not/fileX.sql"     : "file X",
         ])
         def changeLogFile = new DatabaseChangeLog("com/example/root.xml")
-        changeLogFile.includeAll("com/example/missing", false, null, true, changeLogFile.getStandardChangeLogComparator(), resourceAccessor, new ContextExpression(), new LabelExpression(), false)
+        changeLogFile.includeAll("com/example/missing", false, null, true, changeLogFile.getStandardChangeLogComparator(), resourceAccessor, new ContextExpression(), new Labels(), false)
 
         then:
         SetupException e = thrown()
@@ -473,7 +470,7 @@ http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbch
                 "include-all-dir/include-all.xml": changelogText,
         ])
         def changeLogFile = new DatabaseChangeLog("com/example/root.xml")
-        changeLogFile.includeAll("include-all-dir", false, null, true, changeLogFile.getStandardChangeLogComparator(), resourceAccessor, new ContextExpression(), new LabelExpression(), false)
+        changeLogFile.includeAll("include-all-dir", false, null, true, changeLogFile.getStandardChangeLogComparator(), resourceAccessor, new ContextExpression(), new Labels(), false)
 
         then:
         SetupException e = thrown()
@@ -489,7 +486,7 @@ http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbch
                 "com/example/not/fileX.sql"     : "file X",
         ])
         def changeLogFile = new DatabaseChangeLog("com/example/root.xml")
-        changeLogFile.includeAll("com/example/missing", false, null, false, changeLogFile.getStandardChangeLogComparator(), resourceAccessor, new ContextExpression(), new LabelExpression(), false)
+        changeLogFile.includeAll("com/example/missing", false, null, false, changeLogFile.getStandardChangeLogComparator(), resourceAccessor, new ContextExpression(), new Labels(), false)
         then:
         changeLogFile.changeSets.collect { it.filePath } == []
 
@@ -541,7 +538,7 @@ http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbch
 
         rootChangeLog.load(new ParsedNode(null, "databaseChangeLog")
                 .addChildren([changeSet: [id: "1", author: "nvoxland", createTable: [tableName: "test_table", schemaName: "test_schema"]]])
-                .addChildren([property: [file: "file.properties", relativeToChangelogFile: "true"]]),
+                .addChildren([property: [file: "file.properties", relativeToChangelogFile: "true", errorIfMissingOrEmpty: "true"]]),
                 propertiesResourceAccessor)
 
         then:
@@ -558,11 +555,91 @@ http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbch
 
         rootChangeLog.load(new ParsedNode(null, "databaseChangeLog")
                 .addChildren([changeSet: [id: "1", author: "nvoxland", createTable: [tableName: "test_table", schemaName: "test_schema"]]])
-                .addChildren([property: [file: "file.properties"]]),
+                .addChildren([property: [file: "file.properties", errorIfMissingOrEmpty: "false"]]),
                 propertiesResourceAccessor)
 
         then:
         rootChangeLog.getChangeLogParameters().hasValue("context", rootChangeLog) == false
+    }
+
+    @Unroll
+    def "an error is thrown when properties file is not found and is set to error"() {
+        when:
+        def propertiesResourceAccessor = new MockResourceAccessor(["com/example/file.properties": testProperties])
+
+        def rootChangeLog = new DatabaseChangeLog("com/example/root.xml")
+        rootChangeLog.setChangeLogParameters(new ChangeLogParameters())
+
+        rootChangeLog.load(new ParsedNode(null, "databaseChangeLog")
+                .addChildren([changeSet: [id: "1", author: "nvoxland", createTable: [tableName: "test_table", schemaName: "test_schema"]]])
+                .addChildren([property: [errorIfMissingOrEmpty: errorIfMissingOrEmptyDef, relativeToChangelogFile: relativeToChangelogFileDef, file: fileDef]]),
+                propertiesResourceAccessor)
+
+        then:
+        def e = thrown(UnexpectedLiquibaseException)
+        assert e.getMessage() == FileUtil.getFileNotFoundMessage(fileDef)
+
+        where:
+        errorIfMissingOrEmptyDef    | relativeToChangelogFileDef    | fileDef
+        null                        | null                          | "file.properties"
+        null                        | false                         | "file.properties"
+        null                        | true                          | "com/example/file.properties"
+        true                        | null                          | "file.properties"
+        true                        | false                         | "file.properties"
+        true                        | true                          | "com/example/file.properties"
+    }
+
+    @Unroll
+    def "no error is thrown when properties file is not found and is set to not error and property is not set"() {
+        when:
+        def propertiesResourceAccessor = new MockResourceAccessor(["com/example/file.properties": testProperties])
+
+        def rootChangeLog = new DatabaseChangeLog("com/example/root.xml")
+        rootChangeLog.setChangeLogParameters(new ChangeLogParameters())
+
+        rootChangeLog.load(new ParsedNode(null, "databaseChangeLog")
+                .addChildren([changeSet: [id: "1", author: "nvoxland", createTable: [tableName: "test_table", schemaName: "test_schema"]]])
+                .addChildren([property: [errorIfMissingOrEmpty: errorIfMissingOrEmptyDef, relativeToChangelogFile: relativeToChangelogFileDef, file: fileDef]]),
+                propertiesResourceAccessor)
+
+        then:
+        rootChangeLog.getChangeLogParameters().hasValue("context", rootChangeLog) == false
+
+        where:
+        errorIfMissingOrEmptyDef    | relativeToChangelogFileDef    | fileDef
+        false                       | null                          | "file.properties"
+        false                       | false                         | "file.properties"
+        false                       | true                          | "com/example/file.properties"
+    }
+
+    @Unroll
+    def "no error is thrown when properties file is not found and is set to not error and property is not set"() {
+        when:
+        def propertiesResourceAccessor = new MockResourceAccessor(["com/example/file.properties": testProperties])
+
+        def rootChangeLog = new DatabaseChangeLog("com/example/root.xml")
+        rootChangeLog.setChangeLogParameters(new ChangeLogParameters())
+
+        rootChangeLog.load(new ParsedNode(null, "databaseChangeLog")
+                .addChildren([changeSet: [id: "1", author: "nvoxland", createTable: [tableName: "test_table", schemaName: "test_schema"]]])
+                .addChildren([property: [errorIfMissingOrEmpty: errorIfMissingOrEmptyDef, relativeToChangelogFile: relativeToChangelogFileDef, file: fileDef]]),
+                propertiesResourceAccessor)
+
+        then:
+        rootChangeLog.getChangeLogParameters().hasValue("context", rootChangeLog)
+        rootChangeLog.getChangeLogParameters().getValue("context", rootChangeLog) == "test"
+
+        where:
+        errorIfMissingOrEmptyDef    | relativeToChangelogFileDef    | fileDef
+        null                        | null                          | "com/example/file.properties"
+        null                        | false                         | "com/example/file.properties"
+        null                        | true                          | "file.properties"
+        true                        | null                          | "com/example/file.properties"
+        true                        | false                         | "com/example/file.properties"
+        true                        | true                          | "file.properties"
+        false                       | null                          | "com/example/file.properties"
+        false                       | false                         | "com/example/file.properties"
+        false                       | true                          | "file.properties"
     }
 
     @Unroll
@@ -606,7 +683,7 @@ http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbch
             @Override
             void run() throws Exception {
                     rootChangeLog
-                            .include(includedChangeLogPath, false, resourceAccessor, null, null, false, null, null);
+                            .include(includedChangeLogPath, false, true, resourceAccessor, null, null, false, null, null);
             }
         })
 
