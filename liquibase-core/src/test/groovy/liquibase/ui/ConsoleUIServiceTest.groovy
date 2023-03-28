@@ -1,11 +1,7 @@
 package liquibase.ui
 
-import liquibase.Scope
-import liquibase.logging.core.BufferedLogService
 import spock.lang.Specification
 import spock.lang.Unroll
-
-import java.util.logging.Level
 
 class ConsoleUIServiceTest extends Specification {
 
