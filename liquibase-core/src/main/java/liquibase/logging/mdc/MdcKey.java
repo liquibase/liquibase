@@ -81,4 +81,5 @@ public class MdcKey {
     public static final String INCLUDE_TABLESPACE = "includeTablespace";
     public static final String SCHEMAS = "schemas";
     public static final String DIFF_OUTCOME = "diffOutcome";
+    public static final String DIFF_CHANGELOG_OUTCOME = "diffChangelogOutcome";
 }
