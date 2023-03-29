@@ -16,8 +16,6 @@ public class UpdateCommandStep extends AbstractUpdateCommandStep implements Clea
     public static final CommandArgumentDefinition<String> CHANGELOG_FILE_ARG;
     public static final CommandArgumentDefinition<String> LABEL_FILTER_ARG;
     public static final CommandArgumentDefinition<String> CONTEXTS_ARG;
-    public static final CommandArgumentDefinition<String> CHANGE_EXEC_LISTENER_CLASS_ARG;
-    public static final CommandArgumentDefinition<String> CHANGE_EXEC_LISTENER_PROPERTIES_FILE_ARG;
     public static final CommandArgumentDefinition<UpdateSummaryEnum> SHOW_SUMMARY;
 
     static {
@@ -31,12 +29,6 @@ public class UpdateCommandStep extends AbstractUpdateCommandStep implements Clea
                 .build();
         CONTEXTS_ARG = builder.argument("contexts", String.class)
                 .description("Changeset contexts to match")
-                .build();
-        CHANGE_EXEC_LISTENER_CLASS_ARG = builder.argument("changeExecListenerClass", String.class)
-                .description("Fully-qualified class which specifies a ChangeExecListener")
-                .build();
-        CHANGE_EXEC_LISTENER_PROPERTIES_FILE_ARG = builder.argument("changeExecListenerPropertiesFile", String.class)
-                .description("Path to a properties file for the ChangeExecListenerClass")
                 .build();
         SHOW_SUMMARY = builder.argument("showSummary", UpdateSummaryEnum.class).description("Type of update results summary to show.  Values can be 'off', 'summary', or 'verbose'.")
                 .defaultValue(UpdateSummaryEnum.OFF)
