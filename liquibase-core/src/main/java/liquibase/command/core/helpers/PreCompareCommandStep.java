@@ -162,11 +162,4 @@ public class PreCompareCommandStep extends AbstractHelperCommandStep {
         Scope.getCurrentScope().addMdcValue(MdcKey.OUTPUT_SCHEMAS, outputSchemas);
         Scope.getCurrentScope().addMdcValue(MdcKey.REFERENCE_SCHEMAS, referenceSchemas);
     }
-
-    private void logMdcProperties(String schemas, String outputSchemas, String referenceSchemas) {
-        Scope.getCurrentScope().addMdcValue(MdcKey.SCHEMAS, schemas);
-        Scope.getCurrentScope().addMdcValue(MdcKey.OUTPUT_SCHEMAS, outputSchemas);
-        Scope.getCurrentScope().addMdcValue(MdcKey.REFERENCE_SCHEMAS, referenceSchemas);
-    }
-
 }
