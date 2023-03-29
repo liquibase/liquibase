@@ -1,6 +1,7 @@
 package liquibase.changelog.visitor;
 
 import liquibase.Scope;
+import liquibase.changelog.ChangeLogHistoryServiceFactory;
 import liquibase.changelog.ChangeSet;
 import liquibase.changelog.DatabaseChangeLog;
 import liquibase.changelog.filter.ChangeSetFilterResult;
@@ -36,13 +37,29 @@ public class ChangeLogSyncVisitor implements ChangeSetVisitor {
 
     @Override
     public void visit(ChangeSet changeSet, DatabaseChangeLog databaseChangeLog, Database database, Set<ChangeSetFilterResult> filterResults) throws LiquibaseException {
-        Scope.getCurrentScope().addMdcValue(MdcKey.CHANGESET_OPERATION_START_TIME, new ISODateFormat().format(new Date()));
-        logMdcData(changeSet);
-        changeSet.addChangeSetMdcProperties();
+        preRunMdc(changeSet);
         this.database.markChangeSetExecStatus(changeSet, ChangeSet.ExecType.EXECUTED);
         if(listener != null) {
             listener.markedRan(changeSet, databaseChangeLog, database);
         }
+        postRunMdc();
+    }
+
+    private void preRunMdc(ChangeSet changeSet) {
+        Scope.getCurrentScope().addMdcValue(MdcKey.CHANGESET_OPERATION_START_TIME, new ISODateFormat().format(new Date()));
+        logMdcData(changeSet);
+        changeSet.addChangeSetMdcProperties();
+    }
+
+    private void postRunMdc() {
+        try {
+            ChangeLogHistoryServiceFactory instance = ChangeLogHistoryServiceFactory.getInstance();
+            String deploymentId = instance.getChangeLogService(database).getDeploymentId();
+            Scope.getCurrentScope().addMdcValue(MdcKey.DEPLOYMENT_ID, deploymentId);
+        } catch (Exception e) {
+            Scope.getCurrentScope().getLog(getClass()).fine("Failed to retrieve deployment ID for MDC", e);
+        }
+
         AtomicInteger changesetCount = Scope.getCurrentScope().get("changesetCount", AtomicInteger.class);
         if (changesetCount != null) {
             changesetCount.getAndIncrement();
