@@ -13,7 +13,7 @@
         <maven.deploy.skip>false</maven.deploy.skip>
     </properties>
 
-    <artifactId>liquibase-core</artifactId>
+    <artifactId>liquibase-standard</artifactId>
     <packaging>jar</packaging>
 
     <dependencies>
@@ -167,7 +167,7 @@
                 <version>5.1.8</version>
                 <configuration>
                     <instructions>
-                        <Bundle-SymbolicName>org.liquibase.core</Bundle-SymbolicName>
+                        <Bundle-SymbolicName>org.liquibase.standard</Bundle-SymbolicName>
                         <Bundle-Activator>liquibase.osgi.Activator</Bundle-Activator>
                         <Import-Package>
                             javax.activation*;resolution:=optional,
