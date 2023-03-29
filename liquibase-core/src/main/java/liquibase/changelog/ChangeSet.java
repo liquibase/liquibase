@@ -1547,6 +1547,6 @@ public class ChangeSet implements Conditional, ChangeLogChild {
         String sqlStatementsMdc = Arrays.stream(statementsReference.get())
                     .map(statement -> SqlUtil.getSqlString(statement, SqlGeneratorFactory.getInstance(), database))
                     .collect(Collectors.joining("\n"));
-            Scope.getCurrentScope().addMdcValue(MdcKey.CHANGESET_SQL, sqlStatementsMdc);
+        Scope.getCurrentScope().addMdcValue(MdcKey.CHANGESET_SQL, sqlStatementsMdc);
     }
 }
