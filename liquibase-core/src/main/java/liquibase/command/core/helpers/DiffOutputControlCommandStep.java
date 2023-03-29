@@ -14,7 +14,7 @@ import java.util.List;
  * Internal command step to be used on pipeline to instantiate a DiffOutputControl object that is mainly used
  * by diffChangeLog/generateChangeLog .
  */
-public class DiffOutputControlCommandStep extends AbstractCommandStep {
+public class DiffOutputControlCommandStep extends AbstractHelperCommandStep {
 
     public static final String[] COMMAND_NAME = {"diffOutputControl"};
     public static final CommandArgumentDefinition<Boolean> INCLUDE_CATALOG_ARG;
@@ -44,14 +44,6 @@ public class DiffOutputControlCommandStep extends AbstractCommandStep {
     @Override
     public List<Class<?>> providedDependencies() {
         return Collections.singletonList(DiffOutputControl.class);
-    }
-
-
-    @Override
-    public void adjustCommandDefinition(CommandDefinition commandDefinition) {
-        if (commandDefinition.getPipeline().size() == 1) {
-            commandDefinition.setInternal(true);
-        }
     }
 
     @Override

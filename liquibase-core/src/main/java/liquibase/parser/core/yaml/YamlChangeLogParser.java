@@ -89,7 +89,7 @@ public class YamlChangeLogParser extends YamlParser implements ChangeLogParser {
         } catch (ChangeLogParseException e) {
             throw e;
         } catch (Exception e) {
-            throw new ChangeLogParseException("Error parsing " + physicalChangeLogLocation, e);
+            throw new ChangeLogParseException("Error parsing " + physicalChangeLogLocation + " : " + e.getMessage(), e);
         }
     }
 

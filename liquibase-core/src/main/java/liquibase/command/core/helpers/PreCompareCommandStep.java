@@ -18,7 +18,7 @@ import java.util.List;
 /**
  * Prepares objects used by database comparison Commands like diff, diffChangelog, etc
  */
-public class PreCompareCommandStep extends AbstractCommandStep {
+public class PreCompareCommandStep extends AbstractHelperCommandStep {
 
     protected static final String[] COMMAND_NAME = {"preCompareCommandStep"};
     public static final CommandArgumentDefinition<String> EXCLUDE_OBJECTS_ARG;
@@ -163,10 +163,10 @@ public class PreCompareCommandStep extends AbstractCommandStep {
         Scope.getCurrentScope().addMdcValue(MdcKey.REFERENCE_SCHEMAS, referenceSchemas);
     }
 
-    @Override
-    public void adjustCommandDefinition(CommandDefinition commandDefinition) {
-        if (commandDefinition.getPipeline().size() == 1) {
-            commandDefinition.setInternal(true);
-        }
+    private void logMdcProperties(String schemas, String outputSchemas, String referenceSchemas) {
+        Scope.getCurrentScope().addMdcValue(MdcKey.SCHEMAS, schemas);
+        Scope.getCurrentScope().addMdcValue(MdcKey.OUTPUT_SCHEMAS, outputSchemas);
+        Scope.getCurrentScope().addMdcValue(MdcKey.REFERENCE_SCHEMAS, referenceSchemas);
     }
+
 }

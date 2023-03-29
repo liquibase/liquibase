@@ -10,14 +10,15 @@ import liquibase.structure.core.ForeignKey;
 /**
  * Drops an existing foreign key constraint.
  */
-@DatabaseChange(name="dropForeignKeyConstraint", description = "Drops an existing foreign key", priority = ChangeMetaData.PRIORITY_DEFAULT, appliesTo = "foreignKey")
+@DatabaseChange(name = "dropForeignKeyConstraint", description = "Drops an existing foreign key", priority = ChangeMetaData.PRIORITY_DEFAULT, appliesTo = "foreignKey")
 public class DropForeignKeyConstraintChange extends AbstractChange {
     private String baseTableCatalogName;
     private String baseTableSchemaName;
     private String baseTableName;
     private String constraintName;
 
-    @DatabaseChangeProperty(mustEqualExisting ="foreignKey.table.catalog", since = "3.0")
+    @DatabaseChangeProperty(mustEqualExisting ="foreignKey.table.catalog", since = "3.0",
+        description = "Name of the database catalog of the base table")
     public String getBaseTableCatalogName() {
         return baseTableCatalogName;
     }
@@ -26,7 +27,8 @@ public class DropForeignKeyConstraintChange extends AbstractChange {
         this.baseTableCatalogName = baseTableCatalogName;
     }
 
-    @DatabaseChangeProperty(mustEqualExisting ="foreignKey.table.schema")
+    @DatabaseChangeProperty(mustEqualExisting ="foreignKey.table.schema",
+        description = "Name of the database schema of the base table")
     public String getBaseTableSchemaName() {
         return baseTableSchemaName;
     }
@@ -35,7 +37,8 @@ public class DropForeignKeyConstraintChange extends AbstractChange {
         this.baseTableSchemaName = baseTableSchemaName;
     }
 
-    @DatabaseChangeProperty(mustEqualExisting = "foreignKey.table", description = "Name of the table containing the column constrained by the foreign key")
+    @DatabaseChangeProperty(mustEqualExisting = "foreignKey.table",
+        description = "Name of the table containing the column constrained by the foreign key")
     public String getBaseTableName() {
         return baseTableName;
     }
@@ -44,7 +47,8 @@ public class DropForeignKeyConstraintChange extends AbstractChange {
         this.baseTableName = baseTableName;
     }
 
-    @DatabaseChangeProperty(mustEqualExisting = "foreignKey", description = "Name of the foreign key constraint to drop", exampleValue = "fk_address_person")
+    @DatabaseChangeProperty(mustEqualExisting = "foreignKey", description = "Name of the foreign key constraint to drop",
+        exampleValue = "fk_address_person")
     public String getConstraintName() {
         return constraintName;
     }
