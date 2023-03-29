@@ -3,7 +3,9 @@ package liquibase.changelog.visitor;
 import liquibase.Scope;
 import liquibase.change.Change;
 import liquibase.change.core.SQLFileChange;
-import liquibase.changelog.*;
+import liquibase.changelog.ChangeSet;
+import liquibase.changelog.DatabaseChangeLog;
+import liquibase.changelog.RollbackContainer;
 import liquibase.changelog.filter.ChangeSetFilterResult;
 import liquibase.database.Database;
 import liquibase.exception.LiquibaseException;
@@ -51,6 +53,7 @@ public class RollbackVisitor implements ChangeSetVisitor {
     @Override
     public void visit(ChangeSet changeSet, DatabaseChangeLog databaseChangeLog, Database database, Set<ChangeSetFilterResult> filterResults) throws LiquibaseException {
         logMdcData(changeSet);
+        Scope.getCurrentScope().addMdcValue(MdcKey.DEPLOYMENT_ID, changeSet.getDeploymentId());
         Executor executor = Scope.getCurrentScope().getSingleton(ExecutorService.class).getExecutor("jdbc", database);
         if (! (executor instanceof LoggingExecutor)) {
             Scope.getCurrentScope().getUI().sendMessage("Rolling Back Changeset: " + changeSet);

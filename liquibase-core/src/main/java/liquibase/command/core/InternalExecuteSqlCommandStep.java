@@ -67,36 +67,36 @@ public class InternalExecuteSqlCommandStep extends AbstractCommandStep {
             sqlText = StreamUtil.readStreamAsString(resource.openInputStream());
         }
 
-        String out = "";
+        final StringBuilder out = new StringBuilder();
         String[] sqlStrings = StringUtil.processMultiLineSQL(sqlText, true, true, commandScope.getArgumentValue(DELIMITER_ARG));
         for (String sqlString : sqlStrings) {
             if (sqlString.toLowerCase().matches("\\s*select .*")) {
                 List<Map<String, ?>> rows = executor.queryForList(new RawSqlStatement(sqlString));
-                out += "Output of "+sqlString+":\n";
+                out.append("Output of ").append(sqlString).append(":\n");
                 if (rows.isEmpty()) {
-                    out += "-- Empty Resultset --\n";
+                    out.append("-- Empty Resultset --\n");
                 } else {
                     SortedSet<String> keys = new TreeSet<>();
                     for (Map<String, ?> row : rows) {
                         keys.addAll(row.keySet());
                     }
-                    out += StringUtil.join(keys, " | ")+" |\n";
+                    out.append(StringUtil.join(keys, " | ")).append(" |\n");
 
                     for (Map<String, ?> row : rows) {
                         for (String key : keys) {
-                            out += row.get(key)+" | ";
+                            out.append(row.get(key)).append(" | ");
                         }
-                        out += "\n";
+                        out.append("\n");
                     }
                 }
             } else {
                 executor.execute(new RawSqlStatement(sqlString));
-                out += "Successfully Executed: "+ sqlString+"\n";
+                out.append("Successfully Executed: ").append(sqlString).append("\n");
             }
-            out += "\n";
+            out.append("\n");
         }
         database.commit();
-        resultsBuilder.addResult("output", out.trim());
+        resultsBuilder.addResult("output", out.toString().trim());
         // Scope.getCurrentScope().getUI().sendMessage(out.trim());
     }
 
