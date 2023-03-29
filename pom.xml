@@ -367,23 +367,6 @@
                     <includeDependencySources>false</includeDependencySources>
                     <excludePackageNames>com.datical.*,*.pro,*.pro.*</excludePackageNames>
                 </configuration>
-                <executions>
-                    <execution>
-                        <id>javadoc-default</id>
-                        <goals>
-                            <goal>jar</goal>
-                        </goals>
-                        <phase>package</phase>
-                    </execution>
-                    <execution>
-                        <id>javadoc-aggregate</id>
-                        <inherited>false</inherited>
-                        <goals>
-                            <goal>aggregate-jar</goal>
-                        </goals>
-                        <phase>package</phase>
-                    </execution>
-                </executions>
             </plugin>
 
             <plugin>
