@@ -1,4 +1,4 @@
-package liquibase.command.core;
+package liquibase.command.core.helpers;
 
 import liquibase.Liquibase;
 import liquibase.Scope;
@@ -14,7 +14,7 @@ import java.util.List;
 /**
  * Internal command step to be used on CommandStep pipeline to create lock services.
  */
-public class LockServiceCommandStep extends AbstractCommandStep implements CleanUpCommandStep {
+public class LockServiceCommandStep extends AbstractHelperCommandStep implements CleanUpCommandStep {
 
     protected static final String[] COMMAND_NAME = {"lockServiceCommandStep"};
 
@@ -45,17 +45,12 @@ public class LockServiceCommandStep extends AbstractCommandStep implements Clean
     }
 
     @Override
-    public void adjustCommandDefinition(CommandDefinition commandDefinition) {
-        if (commandDefinition.getPipeline().size() == 1) {
-            commandDefinition.setInternal(true);
-        }
-    }
-    @Override
     public void cleanUp(CommandResultsBuilder resultsBuilder) {
         try {
             lockService.releaseLock();
         } catch (LockException e) {
             Scope.getCurrentScope().getLog(getClass()).severe(Liquibase.MSG_COULD_NOT_RELEASE_LOCK, e);
         }
+        LockServiceFactory.getInstance().resetAll();
     }
 }

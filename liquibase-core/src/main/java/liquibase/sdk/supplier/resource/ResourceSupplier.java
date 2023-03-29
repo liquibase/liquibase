@@ -53,6 +53,11 @@ public class ResourceSupplier {
         }
 
         @Override
+        public List<Resource> search(String path, SearchOptions searchOptions) throws IOException {
+            return null;
+        }
+
+        @Override
         public List<Resource> search(String path, boolean recursive) throws IOException {
             return null;
         }

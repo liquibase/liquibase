@@ -10,14 +10,15 @@ import liquibase.structure.core.View;
 /**
  * Renames an existing view.
  */
-@DatabaseChange(name="renameView", description = "Renames an existing view", priority = ChangeMetaData.PRIORITY_DEFAULT, appliesTo = "view")
+@DatabaseChange(name = "renameView", description = "Renames an existing view", priority = ChangeMetaData.PRIORITY_DEFAULT,
+    appliesTo = "view")
 public class RenameViewChange extends AbstractChange {
     private String catalogName;
     private String schemaName;
     private String oldViewName;
     private String newViewName;
 
-    @DatabaseChangeProperty(mustEqualExisting ="view.catalog", since = "3.0")
+    @DatabaseChangeProperty(mustEqualExisting = "view.catalog", since = "3.0", description = "Name of the database catalog")
     public String getCatalogName() {
         return catalogName;
     }
@@ -26,7 +27,7 @@ public class RenameViewChange extends AbstractChange {
         this.catalogName = catalogName;
     }
 
-    @DatabaseChangeProperty(mustEqualExisting ="view.schema")
+    @DatabaseChangeProperty(mustEqualExisting = "view.schema", description = "Name of the database schema")
     public String getSchemaName() {
         return schemaName;
     }
@@ -35,7 +36,7 @@ public class RenameViewChange extends AbstractChange {
         this.schemaName = schemaName;
     }
 
-    @DatabaseChangeProperty(mustEqualExisting = "view", description = "Name of the view to rename")
+    @DatabaseChangeProperty(mustEqualExisting = "view", description = "Name of the existing view to rename")
     public String getOldViewName() {
         return oldViewName;
     }
@@ -44,7 +45,7 @@ public class RenameViewChange extends AbstractChange {
         this.oldViewName = oldViewName;
     }
 
-    @DatabaseChangeProperty(description = "Name to rename the view to")
+    @DatabaseChangeProperty(description = "New name for the view")
     public String getNewViewName() {
         return newViewName;
     }

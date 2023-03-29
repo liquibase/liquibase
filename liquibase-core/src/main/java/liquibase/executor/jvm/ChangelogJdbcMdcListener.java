@@ -9,6 +9,7 @@ import liquibase.logging.mdc.MdcKey;
 import liquibase.logging.mdc.MdcValue;
 import liquibase.sqlgenerator.SqlGeneratorFactory;
 import liquibase.statement.SqlStatement;
+import liquibase.statement.core.MarkChangeSetRanStatement;
 import liquibase.util.SqlUtil;
 
 /**
@@ -25,12 +26,14 @@ public class ChangelogJdbcMdcListener {
      * @throws DatabaseException if there was a problem running the sql statement
      */
     public static void execute(SqlStatement statement, Database database, ExecuteJdbc jdbcQuery) throws DatabaseException {
-        addSqlMdc(statement, database);
+        if (!(statement instanceof MarkChangeSetRanStatement)) {
+            addSqlMdc(statement, database);
+        }
         try {
             jdbcQuery.execute(Scope.getCurrentScope().getSingleton(ExecutorService.class).getExecutor("jdbc", database));
             logSuccess();
         } catch (DatabaseException e) {
-            Scope.getCurrentScope().addMdcValue(MdcKey.DATABASE_CHANGELOG_OUTCOME, MdcValue.DATABASE_CHANGELOG_OUTCOME_FAILED);
+            Scope.getCurrentScope().addMdcValue(MdcKey.DATABASE_CHANGELOG_TABLE_OUTCOME, MdcValue.DATABASE_CHANGELOG_OUTCOME_FAILED);
             throw new DatabaseException(e);
         }
     }
@@ -51,7 +54,7 @@ public class ChangelogJdbcMdcListener {
             logSuccess();
             return value;
         } catch (DatabaseException e) {
-            Scope.getCurrentScope().addMdcValue(MdcKey.DATABASE_CHANGELOG_OUTCOME, MdcValue.DATABASE_CHANGELOG_OUTCOME_FAILED);
+            Scope.getCurrentScope().addMdcValue(MdcKey.DATABASE_CHANGELOG_TABLE_OUTCOME, MdcValue.DATABASE_CHANGELOG_OUTCOME_FAILED);
             throw new DatabaseException(e);
         }
     }
@@ -61,9 +64,9 @@ public class ChangelogJdbcMdcListener {
     }
 
     private static void logSuccess() {
-        Scope.getCurrentScope().addMdcValue(MdcKey.DATABASE_CHANGELOG_OUTCOME, MdcValue.DATABASE_CHANGELOG_OUTCOME_SUCCESS);
-        Scope.getCurrentScope().getLog(ChangelogJdbcMdcListener.class).info("Changelog query completed.");
-        Scope.getCurrentScope().getMdcManager().remove(MdcKey.DATABASE_CHANGELOG_OUTCOME);
+        Scope.getCurrentScope().addMdcValue(MdcKey.DATABASE_CHANGELOG_TABLE_OUTCOME, MdcValue.DATABASE_CHANGELOG_OUTCOME_SUCCESS);
+        Scope.getCurrentScope().getLog(ChangelogJdbcMdcListener.class).fine("Changelog query completed.");
+        Scope.getCurrentScope().getMdcManager().remove(MdcKey.DATABASE_CHANGELOG_TABLE_OUTCOME);
         Scope.getCurrentScope().getMdcManager().remove(MdcKey.DATABASE_CHANGELOG_SQL);
     }
 

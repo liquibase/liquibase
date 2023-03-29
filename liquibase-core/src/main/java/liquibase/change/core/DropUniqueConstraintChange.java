@@ -13,7 +13,7 @@ import liquibase.structure.core.UniqueConstraint;
  * Removes an existing unique constraint.
  */
 @DatabaseChange(
-    name="dropUniqueConstraint",
+    name = "dropUniqueConstraint",
     description = "Drops an existing unique constraint",
     priority = ChangeMetaData.PRIORITY_DEFAULT,
     appliesTo = "uniqueConstraint"
@@ -24,11 +24,12 @@ public class DropUniqueConstraintChange extends AbstractChange {
     private String tableName;
     private String constraintName;
     /**
-     * Sybase ASA does drop unique constraint not by name, but using list of the columns in unique clause.
+     * SAP SQL Anywhere (Sybase ASA) drops unique constraint not by name, but using list of the columns in UNIQUE clause.
      */
     private String uniqueColumns;
 
-    @DatabaseChangeProperty(since = "3.0", mustEqualExisting ="uniqueConstraint.table.catalog")
+    @DatabaseChangeProperty(since = "3.0", mustEqualExisting ="uniqueConstraint.table.catalog",
+        description = "Name of the database catalog")
     public String getCatalogName() {
         return catalogName;
     }
@@ -37,7 +38,7 @@ public class DropUniqueConstraintChange extends AbstractChange {
         this.catalogName = catalogName;
     }
 
-    @DatabaseChangeProperty(mustEqualExisting ="uniqueConstraint.table.schema")
+    @DatabaseChangeProperty(mustEqualExisting ="uniqueConstraint.table.schema", description = "Name of the database schema")
     public String getSchemaName() {
         return schemaName;
     }
@@ -58,7 +59,7 @@ public class DropUniqueConstraintChange extends AbstractChange {
         this.tableName = tableName;
     }
 
-    @DatabaseChangeProperty( description = "Name of unique constraint to drop", mustEqualExisting = "uniqueConstraint")
+    @DatabaseChangeProperty(description = "Name of the unique constraint to drop", mustEqualExisting = "uniqueConstraint")
     public String getConstraintName() {
         return constraintName;
     }
@@ -67,7 +68,9 @@ public class DropUniqueConstraintChange extends AbstractChange {
         this.constraintName = constraintName;
     }
 
-    @DatabaseChangeProperty(exampleValue = "name")
+    @DatabaseChangeProperty(exampleValue = "name",
+        description = "For SAP SQL Anywhere, a list of columns in the UNIQUE clause",
+        supportsDatabase = "sybase")
     public String getUniqueColumns() {
         return uniqueColumns;
     }

@@ -14,7 +14,7 @@ public abstract class Relation extends AbstractDatabaseObject {
     private String name;
 
     protected Relation() {
-        setAttribute("columns", new ArrayList());
+        setAttribute("columns", new ArrayList<>());
         setAttribute("uniqueConstraints", new ArrayList<UniqueConstraint>());
         setAttribute("indexes", new ArrayList<Index>());
     }

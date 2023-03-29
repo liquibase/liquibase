@@ -29,7 +29,6 @@ import liquibase.util.*;
 import picocli.CommandLine;
 
 import java.io.*;
-import java.net.InetAddress;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLClassLoader;
@@ -41,12 +40,13 @@ import java.time.Duration;
 import java.util.*;
 import java.util.jar.JarFile;
 import java.util.jar.Manifest;
-import java.util.logging.*;
 import java.util.logging.Formatter;
+import java.util.logging.*;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import static java.util.ResourceBundle.getBundle;
+import static liquibase.configuration.LiquibaseConfiguration.REGISTERED_VALUE_PROVIDERS_KEY;
 import static liquibase.util.SystemUtil.isWindows;
 
 
@@ -321,8 +321,11 @@ public class LiquibaseCommandLine {
             Main.runningFromNewCli = true;
 
             final List<ConfigurationValueProvider> valueProviders = registerValueProviders(finalArgs);
-            // Get a new log service after registering the value providers, since the log service might need to load parameters using newly registered value providers.
-            LogService newLogService = Scope.getCurrentScope().getSingleton(LogServiceFactory.class).getDefaultLogService();
+            LogService newLogService = Scope.child(Collections.singletonMap(REGISTERED_VALUE_PROVIDERS_KEY, true), () -> {
+                // Get a new log service after registering the value providers, since the log service might need to load parameters using newly registered value providers.
+                return Scope.getCurrentScope().getSingleton(LogServiceFactory.class).getDefaultLogService();
+            });
+
             return Scope.child(Collections.singletonMap(Scope.Attr.logService.name(), newLogService), () -> {
                 try {
                     return Scope.child(configureScope(), () -> {
@@ -346,16 +349,6 @@ public class LiquibaseCommandLine {
                             } else {
                                 Scope.getCurrentScope().getUI().sendMessage(licenseService.getLicenseInfo());
                             }
-                        }
-
-                        CommandLine.ParseResult subcommandParseResult = commandLine.getParseResult();
-                        while (subcommandParseResult.hasSubcommand()) {
-                            subcommandParseResult = subcommandParseResult.subcommand();
-                        }
-
-                        Map<String, String> changelogParameters = subcommandParseResult.matchedOptionValue("-D", new HashMap<>());
-                        if (changelogParameters.size() != 0) {
-                            Main.newCliChangelogParameters = changelogParameters;
                         }
 
                     enableMonitoring();
@@ -406,7 +399,7 @@ public class LiquibaseCommandLine {
         MdcManager mdcManager = Scope.getCurrentScope().getMdcManager();
         try (MdcObject version = mdcManager.put(MdcKey.LIQUIBASE_VERSION, LiquibaseUtil.getBuildVersion());
              MdcObject systemUser = mdcManager.put(MdcKey.LIQUIBASE_SYSTEM_USER, System.getProperty("user.name"));
-             MdcObject systemName = mdcManager.put(MdcKey.LIQUIBASE_SYSTEM_NAME, InetAddress.getLocalHost().getHostName())) {
+             MdcObject systemName = mdcManager.put(MdcKey.LIQUIBASE_SYSTEM_NAME, NetUtil.getLocalHostName())) {
             Scope.getCurrentScope().getLog(getClass()).info("Starting command execution.");
         }
     }
@@ -468,6 +461,19 @@ public class LiquibaseCommandLine {
         }
 
         return false;
+    }
+
+    private Map<String, String> addJavaPropertiesToChangelogParameters() {
+        CommandLine.ParseResult subcommandParseResult = commandLine.getParseResult();
+        while (subcommandParseResult.hasSubcommand()) {
+            subcommandParseResult = subcommandParseResult.subcommand();
+        }
+
+        Map<String, String> changelogParameters = subcommandParseResult.matchedOptionValue("-D", new HashMap<>());
+        if (changelogParameters.size() != 0) {
+            Main.newCliChangelogParameters = changelogParameters;
+        }
+        return changelogParameters;
     }
 
     protected String[] adjustLegacyArgs(String[] args) {
@@ -623,6 +629,8 @@ public class LiquibaseCommandLine {
         returnMap.put(LiquibaseCommandLineConfiguration.ARGUMENT_CONVERTER.getKey(),
                 (LiquibaseCommandLineConfiguration.ArgumentConverter) argument -> "--" + StringUtil.toKabobCase(argument));
 
+        Map<String, String> javaProperties = addJavaPropertiesToChangelogParameters();
+        returnMap.put("javaProperties", javaProperties);
 
         return returnMap;
     }
