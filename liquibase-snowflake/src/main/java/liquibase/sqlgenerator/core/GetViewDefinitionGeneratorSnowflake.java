@@ -8,6 +8,10 @@ import liquibase.sql.UnparsedSql;
 import liquibase.sqlgenerator.SqlGeneratorChain;
 import liquibase.statement.core.GetViewDefinitionStatement;
 
+/**
+ * Snowflake-specific view definition generator.
+ * Uses Snowflake-specific query to read full view definition statement from a database.
+ */
 public class GetViewDefinitionGeneratorSnowflake extends GetViewDefinitionGenerator {
 
     @Override
