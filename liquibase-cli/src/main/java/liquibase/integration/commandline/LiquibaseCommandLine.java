@@ -216,7 +216,7 @@ public class LiquibaseCommandLine {
         return commandLine;
     }
 
-    private int handleException(Throwable exception) {
+    protected int handleException(Throwable exception) {
         Throwable cause = exception;
 
         String uiMessage = "";
@@ -298,16 +298,23 @@ public class LiquibaseCommandLine {
         return 1;
     }
 
+    //
+    // Look for a logLevel setting on any LiquibaseException
+    // and use that for the Level to pass to the logger.
+    // The lowest level of the exception stack will be used.
+    //
     private Level determineLogLevel(Throwable throwable) {
+        //
+        // Default to severe
+        //
         if (throwable == null) {
             return Level.SEVERE;
         }
         Level returnLevel = Level.SEVERE;
         Throwable t = throwable;
         while (t != null) {
-            if (t instanceof LiquibaseException) {
-                LiquibaseException le = (LiquibaseException) t;
-                returnLevel = le.getLogLevel();
+            if (t instanceof LiquibaseException && ((LiquibaseException)t).getLogLevel() != null) {
+                returnLevel = ((LiquibaseException)t).getLogLevel();
             }
             t = t.getCause();
         }
