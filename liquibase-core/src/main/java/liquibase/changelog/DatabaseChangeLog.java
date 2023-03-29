@@ -729,7 +729,7 @@ public class DatabaseChangeLog implements Comparable<DatabaseChangeLog>, Conditi
                 unsortedResources = resourceAccessor.search(path, searchOptions);
             } catch (IOException e) {
                 if (errorIfMissing) {
-                    throw e;
+                    throw new IOException(String.format("Could not find/read changelogs from %s directory", pathName));
                 }
             }
             SortedSet<Resource> resources = new TreeSet<>((o1, o2) -> resourceComparator.compare(o1.getPath(), o2.getPath()));
