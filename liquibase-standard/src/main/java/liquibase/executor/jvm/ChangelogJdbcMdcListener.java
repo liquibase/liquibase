@@ -65,7 +65,7 @@ public class ChangelogJdbcMdcListener {
 
     private static void logSuccess() {
         Scope.getCurrentScope().addMdcValue(MdcKey.DATABASE_CHANGELOG_TABLE_OUTCOME, MdcValue.DATABASE_CHANGELOG_OUTCOME_SUCCESS);
-        Scope.getCurrentScope().getLog(ChangelogJdbcMdcListener.class).info("Changelog query completed.");
+        Scope.getCurrentScope().getLog(ChangelogJdbcMdcListener.class).fine("Changelog query completed.");
         Scope.getCurrentScope().getMdcManager().remove(MdcKey.DATABASE_CHANGELOG_TABLE_OUTCOME);
         Scope.getCurrentScope().getMdcManager().remove(MdcKey.DATABASE_CHANGELOG_SQL);
     }
