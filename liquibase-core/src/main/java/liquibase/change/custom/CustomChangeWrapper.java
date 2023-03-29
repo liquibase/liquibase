@@ -5,12 +5,17 @@ import liquibase.change.AbstractChange;
 import liquibase.change.ChangeMetaData;
 import liquibase.change.DatabaseChange;
 import liquibase.change.DatabaseChangeProperty;
+import liquibase.changelog.ChangeSet;
 import liquibase.database.Database;
 import liquibase.exception.*;
+import liquibase.executor.Executor;
+import liquibase.executor.ExecutorService;
+import liquibase.executor.LoggingExecutor;
 import liquibase.parser.core.ParsedNode;
 import liquibase.parser.core.ParsedNodeException;
 import liquibase.resource.ResourceAccessor;
 import liquibase.statement.SqlStatement;
+import liquibase.util.BooleanUtil;
 import liquibase.util.ObjectUtil;
 
 import java.util.*;
@@ -167,7 +172,9 @@ public class CustomChangeWrapper extends AbstractChange {
             if (customChange instanceof CustomSqlChange) {
                 statements = ((CustomSqlChange) customChange).generateStatements(database);
             } else if (customChange instanceof CustomTaskChange) {
-                ((CustomTaskChange) customChange).execute(database);
+                if (! isNonExecutedMode(database)) {
+                    ((CustomTaskChange) customChange).execute(database);
+                }
             } else {
                 throw new UnexpectedLiquibaseException(customChange.getClass().getName() + " does not implement " + CustomSqlChange.class.getName() + " or " + CustomTaskChange.class.getName());
             }
@@ -179,6 +186,15 @@ public class CustomChangeWrapper extends AbstractChange {
             statements = SqlStatement.EMPTY_SQL_STATEMENT;
         }
         return statements;
+    }
+
+    //
+    // Return true if LoggingExecutor or flag was set in Scope to indicate not to execute
+    //
+    public static boolean isNonExecutedMode(Database database) {
+        Boolean nonExecuteModeFromScope = Scope.getCurrentScope().get(ChangeSet.NO_EXECUTE_MODE, Boolean.class);
+        Executor executor = Scope.getCurrentScope().getSingleton(ExecutorService.class).getExecutor("jdbc", database);
+        return executor instanceof LoggingExecutor || BooleanUtil.isTrue(nonExecuteModeFromScope);
     }
 
     /**
