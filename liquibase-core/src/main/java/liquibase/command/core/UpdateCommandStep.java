@@ -16,7 +16,6 @@ public class UpdateCommandStep extends AbstractUpdateCommandStep implements Clea
     public static final CommandArgumentDefinition<String> CHANGELOG_FILE_ARG;
     public static final CommandArgumentDefinition<String> LABEL_FILTER_ARG;
     public static final CommandArgumentDefinition<String> CONTEXTS_ARG;
-    public static final CommandArgumentDefinition<UpdateSummaryEnum> SHOW_SUMMARY;
 
     static {
         CommandBuilder builder = new CommandBuilder(COMMAND_NAME, LEGACY_COMMAND_NAME);
@@ -30,23 +29,6 @@ public class UpdateCommandStep extends AbstractUpdateCommandStep implements Clea
         CONTEXTS_ARG = builder.argument("contexts", String.class)
                 .description("Changeset contexts to match")
                 .build();
-        SHOW_SUMMARY = builder.argument("showSummary", UpdateSummaryEnum.class).description("Type of update results summary to show.  Values can be 'off', 'summary', or 'verbose'.")
-                .defaultValue(UpdateSummaryEnum.OFF)
-                .setValueHandler(value -> {
-                    if (value == null) {
-                        return null;
-                    }
-                    if (value instanceof String && !value.equals("")) {
-                        final List<String> validValues = Arrays.asList("OFF", "SUMMARY", "VERBOSE");
-                        if (!validValues.contains(((String) value).toUpperCase())) {
-                            throw new IllegalArgumentException("Illegal value for `showUpdateSummary'.  Valid values are 'OFF', 'SUMMARY', or 'VERBOSE'");
-                        }
-                        return UpdateSummaryEnum.valueOf(((String) value).toUpperCase());
-                    } else if (value instanceof UpdateSummaryEnum) {
-                        return (UpdateSummaryEnum) value;
-                    }
-                    return null;
-                }).build();
     }
 
     @Override
