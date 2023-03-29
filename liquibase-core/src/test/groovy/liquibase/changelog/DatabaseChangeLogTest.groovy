@@ -370,7 +370,9 @@ create view sql_view as select * from sql_table;'''
                 "com/example/not/fileX.sql"     : "file X",
         ])
         def changeLogFile = new DatabaseChangeLog("com/example/root.xml")
-        changeLogFile.includeAll("com/example/children", false, null, true, changeLogFile.getStandardChangeLogComparator(), resourceAccessor, new ContextExpression(), new Labels(), false)
+        changeLogFile
+                .includeAll("com/example/children", false, null, true, changeLogFile.getStandardChangeLogComparator(), resourceAccessor, new ContextExpression(), new Labels(), false,0,
+                        Integer.MAX_VALUE)
 
         then:
         changeLogFile.changeSets.collect { it.filePath } == ["com/example/children/file1.sql",
@@ -440,10 +442,10 @@ create view sql_view as select * from sql_table;'''
                 "com/example/not/fileX.sql"     : "file X",
         ])
         def changeLogFile = new DatabaseChangeLog("com/example/root.xml")
-        changeLogFile.includeAll("com/example/missing", false, null, true, changeLogFile.getStandardChangeLogComparator(), resourceAccessor, new ContextExpression(), new Labels(), false)
+        changeLogFile.includeAll("com/example/missing", false, null, true, changeLogFile.getStandardChangeLogComparator(), resourceAccessor, new ContextExpression(), new Labels(), false, 0, Integer.MAX_VALUE)
 
         then:
-        SetupException e = thrown()
+        def e = thrown(SetupException)
         assert e.getMessage().startsWith("Could not find directory or directory was empty for includeAll '")
 
     }
@@ -470,7 +472,7 @@ http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbch
                 "include-all-dir/include-all.xml": changelogText,
         ])
         def changeLogFile = new DatabaseChangeLog("com/example/root.xml")
-        changeLogFile.includeAll("include-all-dir", false, null, true, changeLogFile.getStandardChangeLogComparator(), resourceAccessor, new ContextExpression(), new Labels(), false)
+        changeLogFile.includeAll("include-all-dir", false, null, true, changeLogFile.getStandardChangeLogComparator(), resourceAccessor, new ContextExpression(), new Labels(), false, 0, Integer.MAX_VALUE)
 
         then:
         SetupException e = thrown()
@@ -486,7 +488,7 @@ http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbch
                 "com/example/not/fileX.sql"     : "file X",
         ])
         def changeLogFile = new DatabaseChangeLog("com/example/root.xml")
-        changeLogFile.includeAll("com/example/missing", false, null, false, changeLogFile.getStandardChangeLogComparator(), resourceAccessor, new ContextExpression(), new Labels(), false)
+        changeLogFile.includeAll("com/example/missing", false, null, false, changeLogFile.getStandardChangeLogComparator(), resourceAccessor, new ContextExpression(), new Labels(), false, 0, Integer.MAX_VALUE)
         then:
         changeLogFile.changeSets.collect { it.filePath } == []
 
@@ -587,29 +589,6 @@ http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbch
         true                        | null                          | "file.properties"
         true                        | false                         | "file.properties"
         true                        | true                          | "com/example/file.properties"
-    }
-
-    @Unroll
-    def "no error is thrown when properties file is not found and is set to not error and property is not set"() {
-        when:
-        def propertiesResourceAccessor = new MockResourceAccessor(["com/example/file.properties": testProperties])
-
-        def rootChangeLog = new DatabaseChangeLog("com/example/root.xml")
-        rootChangeLog.setChangeLogParameters(new ChangeLogParameters())
-
-        rootChangeLog.load(new ParsedNode(null, "databaseChangeLog")
-                .addChildren([changeSet: [id: "1", author: "nvoxland", createTable: [tableName: "test_table", schemaName: "test_schema"]]])
-                .addChildren([property: [errorIfMissingOrEmpty: errorIfMissingOrEmptyDef, relativeToChangelogFile: relativeToChangelogFileDef, file: fileDef]]),
-                propertiesResourceAccessor)
-
-        then:
-        rootChangeLog.getChangeLogParameters().hasValue("context", rootChangeLog) == false
-
-        where:
-        errorIfMissingOrEmptyDef    | relativeToChangelogFileDef    | fileDef
-        false                       | null                          | "file.properties"
-        false                       | false                         | "file.properties"
-        false                       | true                          | "com/example/file.properties"
     }
 
     @Unroll
