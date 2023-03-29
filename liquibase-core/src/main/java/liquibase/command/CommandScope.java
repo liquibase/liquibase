@@ -5,6 +5,8 @@ import liquibase.configuration.*;
 import liquibase.exception.CommandExecutionException;
 import liquibase.exception.CommandValidationException;
 import liquibase.logging.mdc.MdcKey;
+import liquibase.logging.mdc.MdcObject;
+import liquibase.util.ISODateFormat;
 import liquibase.util.StringUtil;
 
 import java.io.FilterOutputStream;
@@ -23,7 +25,8 @@ import java.util.regex.Pattern;
  */
 public class CommandScope {
 
-    public static final Pattern NO_PREFIX_PATTERN = Pattern.compile(".*\\.");
+    private static final String NO_PREFIX_REGEX = ".*\\.";
+    public static final Pattern NO_PREFIX_PATTERN = Pattern.compile(NO_PREFIX_REGEX);
     private final CommandDefinition commandDefinition;
 
     private final SortedMap<String, Object> argumentValues = new TreeMap<>();
@@ -186,21 +189,41 @@ public class CommandScope {
      * Executes the command in this scope, and returns the results.
      */
     public CommandResults execute() throws CommandExecutionException {
+        Scope.getCurrentScope().addMdcValue(MdcKey.OPERATION_START_TIME, new ISODateFormat().format(new Date()));
         CommandResultsBuilder resultsBuilder = new CommandResultsBuilder(this, outputStream);
         final List<CommandStep> pipeline = commandDefinition.getPipeline();
+        final List<CommandStep> executedCommands = new ArrayList<>();
+        Optional<Exception> thrownException = Optional.empty();
         validate();
-        Scope.getCurrentScope().addMdcValue(MdcKey.LIQUIBASE_OPERATION, StringUtil.join(commandDefinition.getName(), "-"));
+        //
+        // NOTE:
+        // When all commands have been refactored we will be able to remove this string manipulation
+        //
+        String commandNameForMdc = StringUtil.join(commandDefinition.getName(), "-");
+        commandNameForMdc = StringUtil.lowerCaseFirst(commandNameForMdc.replaceAll("^internal",""));
+        Scope.getCurrentScope().addMdcValue(MdcKey.LIQUIBASE_OPERATION, commandNameForMdc);
         try {
             for (CommandStep command : pipeline) {
-                command.run(resultsBuilder);
+                try {
+                    Scope.getCurrentScope().addMdcValue(MdcKey.LIQUIBASE_COMMAND_NAME, StringUtil.join(command.defineCommandNames()[0], " "));
+                    command.run(resultsBuilder);
+                } catch (Exception runException) {
+                    // Suppress the exception for now so that we can run the cleanup steps even when encountering an exception.
+                    thrownException = Optional.of(runException);
+                    break;
+                }
+                executedCommands.add(command);
             }
 
             // after executing our pipeline, runs cleanup in inverse order
-            for (int i = pipeline.size() -1; i >= 0; i--) {
+            for (int i = executedCommands.size() -1; i >= 0; i--) {
                 CommandStep command = pipeline.get(i);
                 if (command instanceof CleanUpCommandStep) {
                     ((CleanUpCommandStep)command).cleanUp(resultsBuilder);
                 }
+            }
+            if (thrownException.isPresent()) { // Now that we've executed all our cleanup, rethrow the exception if there was one
+                throw thrownException.get();
             }
         } catch (Exception e) {
             if (e instanceof CommandExecutionException) {
@@ -209,6 +232,9 @@ public class CommandScope {
                 throw new CommandExecutionException(e);
             }
         } finally {
+            try (MdcObject operationStopTime = Scope.getCurrentScope().addMdcValue(MdcKey.OPERATION_STOP_TIME, new ISODateFormat().format(new Date()))) {
+                Scope.getCurrentScope().getLog(getClass()).info("Command execution complete");
+            }
             try {
                 if (this.outputStream != null) {
                     this.outputStream.flush();

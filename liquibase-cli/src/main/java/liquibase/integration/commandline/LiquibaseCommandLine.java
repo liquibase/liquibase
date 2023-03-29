@@ -29,7 +29,6 @@ import liquibase.util.*;
 import picocli.CommandLine;
 
 import java.io.*;
-import java.net.InetAddress;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLClassLoader;
@@ -41,8 +40,8 @@ import java.time.Duration;
 import java.util.*;
 import java.util.jar.JarFile;
 import java.util.jar.Manifest;
-import java.util.logging.*;
 import java.util.logging.Formatter;
+import java.util.logging.*;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -352,16 +351,6 @@ public class LiquibaseCommandLine {
                             }
                         }
 
-                        CommandLine.ParseResult subcommandParseResult = commandLine.getParseResult();
-                        while (subcommandParseResult.hasSubcommand()) {
-                            subcommandParseResult = subcommandParseResult.subcommand();
-                        }
-
-                        Map<String, String> changelogParameters = subcommandParseResult.matchedOptionValue("-D", new HashMap<>());
-                        if (changelogParameters.size() != 0) {
-                            Main.newCliChangelogParameters = changelogParameters;
-                        }
-
                     enableMonitoring();
                     logMdcData();
                     int response = commandLine.execute(finalArgs);
@@ -410,7 +399,7 @@ public class LiquibaseCommandLine {
         MdcManager mdcManager = Scope.getCurrentScope().getMdcManager();
         try (MdcObject version = mdcManager.put(MdcKey.LIQUIBASE_VERSION, LiquibaseUtil.getBuildVersion());
              MdcObject systemUser = mdcManager.put(MdcKey.LIQUIBASE_SYSTEM_USER, System.getProperty("user.name"));
-             MdcObject systemName = mdcManager.put(MdcKey.LIQUIBASE_SYSTEM_NAME, InetAddress.getLocalHost().getHostName())) {
+             MdcObject systemName = mdcManager.put(MdcKey.LIQUIBASE_SYSTEM_NAME, NetUtil.getLocalHostName())) {
             Scope.getCurrentScope().getLog(getClass()).info("Starting command execution.");
         }
     }
@@ -472,6 +461,19 @@ public class LiquibaseCommandLine {
         }
 
         return false;
+    }
+
+    private Map<String, String> addJavaPropertiesToChangelogParameters() {
+        CommandLine.ParseResult subcommandParseResult = commandLine.getParseResult();
+        while (subcommandParseResult.hasSubcommand()) {
+            subcommandParseResult = subcommandParseResult.subcommand();
+        }
+
+        Map<String, String> changelogParameters = subcommandParseResult.matchedOptionValue("-D", new HashMap<>());
+        if (changelogParameters.size() != 0) {
+            Main.newCliChangelogParameters = changelogParameters;
+        }
+        return changelogParameters;
     }
 
     protected String[] adjustLegacyArgs(String[] args) {
@@ -627,6 +629,8 @@ public class LiquibaseCommandLine {
         returnMap.put(LiquibaseCommandLineConfiguration.ARGUMENT_CONVERTER.getKey(),
                 (LiquibaseCommandLineConfiguration.ArgumentConverter) argument -> "--" + StringUtil.toKabobCase(argument));
 
+        Map<String, String> javaProperties = addJavaPropertiesToChangelogParameters();
+        returnMap.put("javaProperties", javaProperties);
 
         return returnMap;
     }

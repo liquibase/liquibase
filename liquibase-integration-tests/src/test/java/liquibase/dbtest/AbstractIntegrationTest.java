@@ -22,10 +22,7 @@ import liquibase.diff.compare.CompareControl;
 import liquibase.diff.output.DiffOutputControl;
 import liquibase.diff.output.changelog.DiffToChangeLog;
 import liquibase.diff.output.report.DiffToReport;
-import liquibase.exception.ChangeLogParseException;
-import liquibase.exception.DatabaseException;
-import liquibase.exception.LiquibaseException;
-import liquibase.exception.ValidationFailedException;
+import liquibase.exception.*;
 import liquibase.executor.Executor;
 import liquibase.executor.ExecutorService;
 import liquibase.extension.testing.testsystem.DatabaseTestSystem;
@@ -966,7 +963,7 @@ public abstract class AbstractIntegrationTest {
         try {
             liquibase.update(new Contexts());
             fail("Did not fail with invalid include");
-        } catch (ChangeLogParseException ignored) {
+        } catch (CommandExecutionException executionException) {
             //expected
         }
 

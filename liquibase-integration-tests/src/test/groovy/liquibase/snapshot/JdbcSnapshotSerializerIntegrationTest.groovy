@@ -37,7 +37,7 @@ class JdbcSnapshotSerializerIntegrationTest extends Specification {
 
         ChangeSet changeSet =
                 new ChangeSet("1", "mock-author", false, false, "test/changelog.xml",
-                        (String)null, (String)null, "sqlplus", false, null, null)
+                        (String)null, (String)null, "sqlplus", null, false, null, null)
 
         CreateTableChange exampleChange = new CreateTableChange()
         exampleChange.setTableName("first")

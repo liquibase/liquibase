@@ -71,16 +71,13 @@ public class MissingViewChangeGenerator extends AbstractChangeGenerator implemen
                 viewName = comparisonDatabase.escapeViewName(createViewChange.getCatalogName(), createViewChange.getSchemaName(), createViewChange.getViewName());
             }
             selectQuery = "CREATE OR REPLACE FORCE VIEW "+ viewName
-                    + " (" + StringUtil.join(view.getColumns(), ", ", new StringUtil.StringUtilFormatter() {
-                @Override
-                public String toString(Object obj) {
-                    if ((((Column) obj).getComputed() != null) && ((Column) obj).getComputed()) {
-                        return ((Column) obj).getName();
-                    } else {
-                        return comparisonDatabase.escapeColumnName(null, null, null, ((Column) obj).getName(), false);
-                    }
-                }
-            }) + ") AS "+selectQuery;
+                    + " (" + StringUtil.join(view.getColumns(), ", ", obj -> {
+                        if ((((Column) obj).getComputed() != null) && ((Column) obj).getComputed()) {
+                            return ((Column) obj).getName();
+                        } else {
+                            return comparisonDatabase.escapeColumnName(null, null, null, ((Column) obj).getName(), false);
+                        }
+                    }) + ") AS "+selectQuery;
             createViewChange.setFullDefinition(true);
             fullDefinitionOverridden = true;
 
