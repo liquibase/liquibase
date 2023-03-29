@@ -1,17 +1,10 @@
 package liquibase.command.core;
 
-import liquibase.Scope;
 import liquibase.UpdateSummaryEnum;
-import liquibase.changelog.visitor.ChangeExecListener;
 import liquibase.command.*;
 import liquibase.command.core.helpers.DatabaseChangelogCommandStep;
-import liquibase.configuration.ConfigurationValueObfuscator;
 import liquibase.database.Database;
-import liquibase.exception.CommandExecutionException;
-import liquibase.executor.Executor;
-import liquibase.executor.ExecutorService;
 import liquibase.util.LoggingExecutorTextUtil;
-import liquibase.util.ShowSummaryUtil;
 
 import java.io.Writer;
 import java.util.ArrayList;
@@ -25,9 +18,6 @@ public class UpdateSqlCommandStep extends AbstractUpdateCommandStep {
     public static final CommandArgumentDefinition<String> CHANGELOG_FILE_ARG;
     public static final CommandArgumentDefinition<String> LABEL_FILTER_ARG;
     public static final CommandArgumentDefinition<String> CONTEXTS_ARG;
-    public static final CommandArgumentDefinition<String> CHANGE_EXEC_LISTENER_CLASS_ARG;
-    public static final CommandArgumentDefinition<String> CHANGE_EXEC_LISTENER_PROPERTIES_FILE_ARG;
-    public static final CommandArgumentDefinition<ChangeExecListener> CHANGE_EXEC_LISTENER_ARG;
     public static final CommandArgumentDefinition<Writer> OUTPUT_WRITER;
     public static final CommandArgumentDefinition<Boolean> OUTPUT_DEFAULT_SCHEMA_ARG;
     public static final CommandArgumentDefinition<Boolean> OUTPUT_DEFAULT_CATALOG_ARG;
@@ -41,13 +31,6 @@ public class UpdateSqlCommandStep extends AbstractUpdateCommandStep {
                 .description("Changeset labels to match").build();
         CONTEXTS_ARG = builder.argument("contexts", String.class)
                 .description("Changeset contexts to match").build();
-        CHANGE_EXEC_LISTENER_CLASS_ARG = builder.argument("changeExecListenerClass", String.class)
-                .description("Fully-qualified class which specifies a ChangeExecListener").build();
-        CHANGE_EXEC_LISTENER_PROPERTIES_FILE_ARG = builder.argument("changeExecListenerPropertiesFile", String.class)
-                .description("Path to a properties file for the ChangeExecListenerClass").build();
-        CHANGE_EXEC_LISTENER_ARG = builder.argument("changeExecListener", ChangeExecListener.class)
-                .hidden()
-                .build();
         OUTPUT_WRITER = builder.argument("outputWriter", Writer.class)
                 .hidden().build();
         OUTPUT_DEFAULT_SCHEMA_ARG = builder.argument("outputDefaultSchema", Boolean.class)
@@ -117,16 +100,6 @@ public class UpdateSqlCommandStep extends AbstractUpdateCommandStep {
     @Override
     public UpdateSummaryEnum getShowSummary(CommandScope commandScope) {
         return UpdateSummaryEnum.OFF;
-    }
-
-    @Override
-    public String getChangeExecListenerClassArg(CommandScope commandScope) {
-        return commandScope.getArgumentValue(CHANGE_EXEC_LISTENER_CLASS_ARG);
-    }
-
-    @Override
-    protected String getChangeExecListenerPropertiesFileArg(CommandScope commandScope) {
-        return commandScope.getArgumentValue(CHANGE_EXEC_LISTENER_PROPERTIES_FILE_ARG);
     }
 
     @Override
