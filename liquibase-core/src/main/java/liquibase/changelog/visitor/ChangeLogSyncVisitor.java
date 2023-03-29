@@ -8,6 +8,7 @@ import liquibase.database.Database;
 import liquibase.exception.LiquibaseException;
 import liquibase.logging.mdc.MdcKey;
 import liquibase.logging.mdc.MdcObject;
+import liquibase.logging.mdc.MdcValue;
 import liquibase.util.ISODateFormat;
 
 import java.util.Date;
@@ -46,7 +47,8 @@ public class ChangeLogSyncVisitor implements ChangeSetVisitor {
         if (changesetCount != null) {
             changesetCount.getAndIncrement();
         }
-        try (MdcObject stopTime = Scope.getCurrentScope().addMdcValue(MdcKey.CHANGESET_OPERATION_STOP_TIME, new ISODateFormat().format(new Date()))) {
+        try (MdcObject stopTime = Scope.getCurrentScope().addMdcValue(MdcKey.CHANGESET_OPERATION_STOP_TIME, new ISODateFormat().format(new Date()));
+             MdcObject changelogSyncOutcome = Scope.getCurrentScope().addMdcValue(MdcKey.CHANGELOG_SYNC_OUTCOME, MdcValue.COMMAND_SUCCESSFUL)) {
             Scope.getCurrentScope().getLog(getClass()).info("Finished syncing changeset");
         }
     }
