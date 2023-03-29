@@ -1,6 +1,7 @@
 package liquibase.ui;
 
 import liquibase.AbstractExtensibleObject;
+import liquibase.Beta;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -9,6 +10,7 @@ import java.util.List;
 /**
  * Used for handling multiple UI output services.
  */
+@Beta
 public class CompositeUIService extends AbstractExtensibleObject implements UIService {
     public final List<UIService> outputServices = new ArrayList<>();
     public final UIService inputService; // Because we are only one liquibase, we can only prompt with a single service
@@ -16,6 +18,10 @@ public class CompositeUIService extends AbstractExtensibleObject implements UISe
     public CompositeUIService(UIService inputService, Collection<UIService> outputServices) {
         this.inputService = inputService;
         this.outputServices.addAll(outputServices);
+    }
+
+    public List<UIService> getOutputServices() {
+        return outputServices;
     }
 
     @Override

@@ -297,7 +297,7 @@ public class Main {
                         }
 
                         if (!Main.runningFromNewCli) {
-                            final ConsoleUIService ui = (ConsoleUIService) Scope.getCurrentScope().getUI();
+                            final UIService ui = Scope.getCurrentScope().getUI();
                             System.setProperty("java.util.logging.SimpleFormatter.format", "[%1$tF %1$tT] %4$s [%2$s] %5$s%6$s%n");
 
                             java.util.logging.Logger rootLogger = java.util.logging.Logger.getLogger("");
@@ -336,7 +336,13 @@ public class Main {
                             }
 
                             if (main.command != null && main.command.toLowerCase().endsWith("sql")) {
-                                ui.setOutputStream(System.err);
+                                if (ui instanceof CompositeUIService) {
+                                    ((CompositeUIService) ui).getOutputServices().stream()
+                                            .filter(service -> service instanceof ConsoleUIService)
+                                            .forEach(console -> ((ConsoleUIService) console).setOutputStream(System.err));
+                                } else if (ui instanceof ConsoleUIService) {
+                                    ((ConsoleUIService) ui).setOutputStream(System.err);
+                                }
                             }
                         }
 
@@ -508,7 +514,7 @@ public class Main {
         }
     }
 
-    private static Level parseLogLevel(String logLevelName, ConsoleUIService ui) {
+    private static Level parseLogLevel(String logLevelName, UIService ui) {
         logLevelName = logLevelName.toUpperCase();
         Level logLevel;
         if (logLevelName.equals("DEBUG")) {
