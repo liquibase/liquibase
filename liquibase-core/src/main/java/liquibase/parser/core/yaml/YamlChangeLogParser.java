@@ -18,7 +18,6 @@ import org.yaml.snakeyaml.constructor.SafeConstructor;
 
 import java.io.IOException;
 import java.io.InputStream;
-import java.nio.file.Paths;
 import java.util.*;
 
 public class YamlChangeLogParser extends YamlParser implements ChangeLogParser {
@@ -108,15 +107,15 @@ public class YamlChangeLogParser extends YamlParser implements ChangeLogParser {
     private void loadChangeLogParametersFromFile(ChangeLogParameters changeLogParameters, ResourceAccessor resourceAccessor, DatabaseChangeLog changeLog, Map property, ContextExpression context, Labels labels, Boolean global) throws IOException, LiquibaseException {
         Properties props = new Properties();
         Boolean relativeToChangelogFile = (Boolean) property.get("relativeToChangelogFile");
-        Boolean errorIfMissingOrEmpty = (Boolean) property.get("errorIfMissingOrEmpty");
+        Boolean errorIfMissing = (Boolean) property.get("errorIfMissing");
         String file = (String) property.get("file");
 
         if (relativeToChangelogFile == null) {
             relativeToChangelogFile = false;
         }
 
-        if (errorIfMissingOrEmpty == null) {
-            errorIfMissingOrEmpty = true;
+        if (errorIfMissing == null) {
+            errorIfMissing = true;
         }
 
         Resource resource;
@@ -128,7 +127,7 @@ public class YamlChangeLogParser extends YamlParser implements ChangeLogParser {
         }
 
         if (!resource.exists()) {
-            if (errorIfMissingOrEmpty) {
+            if (errorIfMissing) {
                 throw new UnexpectedLiquibaseException(FileUtil.getFileNotFoundMessage(file));
             }
             else {

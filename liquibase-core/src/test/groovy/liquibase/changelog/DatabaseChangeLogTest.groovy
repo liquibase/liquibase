@@ -479,7 +479,7 @@ http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbch
         assert e.getMessage().startsWith("liquibase.exception.SetupException: Circular reference detected in 'include-all-dir/'. Set liquibase.errorOnCircularIncludeAll if you'd like to ignore this error.")
     }
 
-    def "includeAll throws no exception when directory not found and errorIfMissingOrEmpty is false"() {
+    def "includeAll throws no exception when directory not found and errorIfMissing is false"() {
         when:
         def resourceAccessor = new MockResourceAccessor([
                 "com/example/children/file2.sql": "file 2",
@@ -540,7 +540,7 @@ http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbch
 
         rootChangeLog.load(new ParsedNode(null, "databaseChangeLog")
                 .addChildren([changeSet: [id: "1", author: "nvoxland", createTable: [tableName: "test_table", schemaName: "test_schema"]]])
-                .addChildren([property: [file: "file.properties", relativeToChangelogFile: "true", errorIfMissingOrEmpty: "true"]]),
+                .addChildren([property: [file: "file.properties", relativeToChangelogFile: "true", errorIfMissing: "true"]]),
                 propertiesResourceAccessor)
 
         then:
@@ -557,7 +557,7 @@ http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbch
 
         rootChangeLog.load(new ParsedNode(null, "databaseChangeLog")
                 .addChildren([changeSet: [id: "1", author: "nvoxland", createTable: [tableName: "test_table", schemaName: "test_schema"]]])
-                .addChildren([property: [file: "file.properties", errorIfMissingOrEmpty: "false"]]),
+                .addChildren([property: [file: "file.properties", errorIfMissing: "false"]]),
                 propertiesResourceAccessor)
 
         then:
@@ -574,7 +574,7 @@ http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbch
 
         rootChangeLog.load(new ParsedNode(null, "databaseChangeLog")
                 .addChildren([changeSet: [id: "1", author: "nvoxland", createTable: [tableName: "test_table", schemaName: "test_schema"]]])
-                .addChildren([property: [errorIfMissingOrEmpty: errorIfMissingOrEmptyDef, relativeToChangelogFile: relativeToChangelogFileDef, file: fileDef]]),
+                .addChildren([property: [errorIfMissing: errorIfMissingDef, relativeToChangelogFile: relativeToChangelogFileDef, file: fileDef]]),
                 propertiesResourceAccessor)
 
         then:
@@ -582,7 +582,7 @@ http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbch
         assert e.getMessage() == FileUtil.getFileNotFoundMessage(fileDef)
 
         where:
-        errorIfMissingOrEmptyDef    | relativeToChangelogFileDef    | fileDef
+        errorIfMissingDef    | relativeToChangelogFileDef    | fileDef
         null                        | null                          | "file.properties"
         null                        | false                         | "file.properties"
         null                        | true                          | "com/example/file.properties"
@@ -601,7 +601,7 @@ http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbch
 
         rootChangeLog.load(new ParsedNode(null, "databaseChangeLog")
                 .addChildren([changeSet: [id: "1", author: "nvoxland", createTable: [tableName: "test_table", schemaName: "test_schema"]]])
-                .addChildren([property: [errorIfMissingOrEmpty: errorIfMissingOrEmptyDef, relativeToChangelogFile: relativeToChangelogFileDef, file: fileDef]]),
+                .addChildren([property: [errorIfMissing: errorIfMissingDef, relativeToChangelogFile: relativeToChangelogFileDef, file: fileDef]]),
                 propertiesResourceAccessor)
 
         then:
@@ -609,7 +609,7 @@ http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbch
         rootChangeLog.getChangeLogParameters().getValue("context", rootChangeLog) == "test"
 
         where:
-        errorIfMissingOrEmptyDef    | relativeToChangelogFileDef    | fileDef
+        errorIfMissingDef    | relativeToChangelogFileDef    | fileDef
         null                        | null                          | "com/example/file.properties"
         null                        | false                         | "com/example/file.properties"
         null                        | true                          | "file.properties"
@@ -683,7 +683,7 @@ http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbch
 
         def rootChangeLog = new DatabaseChangeLog(rootChangeLogPath)
         rootChangeLog.load(new ParsedNode(null, "databaseChangeLog")
-                .addChildren([includeAll: [path: includedAllChangeLogPath, minDepth:minDepth, maxDepth:maxDepth, errorIfMissingOrEmpty:false]]), resourceAccessor)
+                .addChildren([includeAll: [path: includedAllChangeLogPath, minDepth:minDepth, maxDepth:maxDepth, errorIfMissing:false]]), resourceAccessor)
 
         then:
         rootChangeLog.getChangeSets().size() == expectedIncludeAllChangesetsToDeploy

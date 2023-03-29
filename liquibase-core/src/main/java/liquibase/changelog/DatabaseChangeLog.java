@@ -450,7 +450,7 @@ public class DatabaseChangeLog implements Comparable<DatabaseChangeLog>, Conditi
                 try {
                     include(path,
                             node.getChildValue(null, "relativeToChangelogFile", false),
-                            node.getChildValue(null, "errorIfMissingOrEmpty", true),
+                            node.getChildValue(null, "errorIfMissing", true),
                             resourceAccessor,
                             includeContextFilter,
                             labels,
@@ -502,7 +502,7 @@ public class DatabaseChangeLog implements Comparable<DatabaseChangeLog>, Conditi
                     ignore = false;
                 }
                 includeAll(path, node.getChildValue(null, "relativeToChangelogFile", false), resourceFilter,
-                        node.getChildValue(null, "errorIfMissingOrEmpty", true),
+                        node.getChildValue(null, "errorIfMissing", true),
                         resourceComparator,
                         resourceAccessor,
                         includeContextFilter,
@@ -536,7 +536,7 @@ public class DatabaseChangeLog implements Comparable<DatabaseChangeLog>, Conditi
 
                     String file = node.getChildValue(null, "file", String.class);
                     Boolean relativeToChangelogFile = node.getChildValue(null, "relativeToChangelogFile", Boolean.FALSE);
-                    Boolean errorIfMissingOrEmpty = node.getChildValue(null, "errorIfMissingOrEmpty", Boolean.TRUE);
+                    Boolean errorIfMissing = node.getChildValue(null, "errorIfMissing", Boolean.TRUE);
                     Resource resource;
 
                     if (file == null) {
@@ -556,7 +556,7 @@ public class DatabaseChangeLog implements Comparable<DatabaseChangeLog>, Conditi
                         // read properties from the file
                         Properties props = new Properties();
                         if (!resource.exists()) {
-                            if (errorIfMissingOrEmpty) {
+                            if (errorIfMissing) {
                                 throw new UnexpectedLiquibaseException(FileUtil.getFileNotFoundMessage(file));
                             }
                             else {
@@ -636,7 +636,7 @@ public class DatabaseChangeLog implements Comparable<DatabaseChangeLog>, Conditi
     public void includeAll(String pathName,
                            boolean isRelativeToChangelogFile,
                            IncludeAllFilter resourceFilter,
-                           boolean errorIfMissingOrEmpty,
+                           boolean errorIfMissing,
                            Comparator<String> resourceComparator,
                            ResourceAccessor resourceAccessor,
                            ContextExpression includeContextFilter,
@@ -650,7 +650,7 @@ public class DatabaseChangeLog implements Comparable<DatabaseChangeLog>, Conditi
         includeAll(pathName,
                 isRelativeToChangelogFile,
                 resourceFilter,
-                errorIfMissingOrEmpty,
+                errorIfMissing,
                 resourceComparator,
                 resourceAccessor,
                 includeContextFilter,
@@ -662,7 +662,7 @@ public class DatabaseChangeLog implements Comparable<DatabaseChangeLog>, Conditi
     public void includeAll(String pathName,
                            boolean isRelativeToChangelogFile,
                            IncludeAllFilter resourceFilter,
-                           boolean errorIfMissingOrEmpty,
+                           boolean errorIfMissing,
                            Comparator<String> resourceComparator,
                            ResourceAccessor resourceAccessor,
                            ContextExpression includeContextFilter,
@@ -671,14 +671,14 @@ public class DatabaseChangeLog implements Comparable<DatabaseChangeLog>, Conditi
                            int minDepth,
                            int maxDepth)
             throws SetupException {
-        includeAll(pathName, isRelativeToChangelogFile, resourceFilter, errorIfMissingOrEmpty, resourceComparator,
+        includeAll(pathName, isRelativeToChangelogFile, resourceFilter, errorIfMissing, resourceComparator,
                    resourceAccessor, includeContextFilter, labels, ignore, minDepth, maxDepth, new ModifyChangeSets(null, null));
     }
 
     public void includeAll(String pathName,
                            boolean isRelativeToChangelogFile,
                            IncludeAllFilter resourceFilter,
-                           boolean errorIfMissingOrEmpty,
+                           boolean errorIfMissing,
                            Comparator<String> resourceComparator,
                            ResourceAccessor resourceAccessor,
                            ContextExpression includeContextFilter,
@@ -728,7 +728,7 @@ public class DatabaseChangeLog implements Comparable<DatabaseChangeLog>, Conditi
 
                 unsortedResources = resourceAccessor.search(path, searchOptions);
             } catch (IOException e) {
-                if (errorIfMissingOrEmpty) {
+                if (errorIfMissing) {
                     throw e;
                 }
             }
@@ -741,7 +741,7 @@ public class DatabaseChangeLog implements Comparable<DatabaseChangeLog>, Conditi
                 }
             }
 
-            if (resources.isEmpty() && errorIfMissingOrEmpty) {
+            if (resources.isEmpty() && errorIfMissing) {
                 throw new SetupException(
                         "Could not find directory or directory was empty for includeAll '" + pathName + "'");
             }
@@ -749,7 +749,7 @@ public class DatabaseChangeLog implements Comparable<DatabaseChangeLog>, Conditi
             Scope.child(Collections.singletonMap(SEEN_CHANGELOGS_PATHS_SCOPE_KEY, seenChangelogPaths), () -> {
                 for (Resource resource : resources) {
                     Scope.getCurrentScope().getLog(getClass()).info("Reading resource: " + resource);
-                    include(resource.getPath(), false, errorIfMissingOrEmpty, resourceAccessor, includeContextFilter,
+                    include(resource.getPath(), false, errorIfMissing, resourceAccessor, includeContextFilter,
                             labels, ignore, OnUnknownFileFormat.WARN, modifyChangeSets);
                 }
             });
@@ -764,7 +764,7 @@ public class DatabaseChangeLog implements Comparable<DatabaseChangeLog>, Conditi
     @Deprecated
     public boolean include(String fileName,
                            boolean isRelativePath,
-                           boolean errorIfMissingOrEmpty,
+                           boolean errorIfMissing,
                            ResourceAccessor resourceAccessor,
                            ContextExpression includeContextFilter,
                            LabelExpression labelExpression,
@@ -778,7 +778,7 @@ public class DatabaseChangeLog implements Comparable<DatabaseChangeLog>, Conditi
 
         return include(fileName,
                 isRelativePath,
-                errorIfMissingOrEmpty,
+                errorIfMissing,
                 resourceAccessor,
                 includeContextFilter,
                 labels,
@@ -791,31 +791,31 @@ public class DatabaseChangeLog implements Comparable<DatabaseChangeLog>, Conditi
      */
     public boolean include(String fileName,
                            boolean isRelativePath,
-                           boolean errorIfMissingOrEmpty,
+                           boolean errorIfMissing,
                            ResourceAccessor resourceAccessor,
                            ContextExpression includeContextFilter,
                            Labels labels,
                            Boolean ignore,
                            boolean logEveryUnknownFileFormat)
             throws LiquibaseException {
-        return include(fileName, isRelativePath, errorIfMissingOrEmpty, resourceAccessor, includeContextFilter, labels, ignore, logEveryUnknownFileFormat ? OnUnknownFileFormat.WARN : OnUnknownFileFormat.SKIP);
+        return include(fileName, isRelativePath, errorIfMissing, resourceAccessor, includeContextFilter, labels, ignore, logEveryUnknownFileFormat ? OnUnknownFileFormat.WARN : OnUnknownFileFormat.SKIP);
     }
 
     public boolean include(String fileName,
                            boolean isRelativePath,
-                           boolean errorIfMissingOrEmpty,
+                           boolean errorIfMissing,
                            ResourceAccessor resourceAccessor,
                            ContextExpression includeContextFilter,
                            Labels labels,
                            Boolean ignore,
                            OnUnknownFileFormat onUnknownFileFormat)
             throws LiquibaseException {
-        return include(fileName, isRelativePath, errorIfMissingOrEmpty, resourceAccessor, includeContextFilter, labels, ignore, onUnknownFileFormat, new ModifyChangeSets(null, null));
+        return include(fileName, isRelativePath, errorIfMissing, resourceAccessor, includeContextFilter, labels, ignore, onUnknownFileFormat, new ModifyChangeSets(null, null));
     }
 
     public boolean include(String fileName,
                            boolean isRelativePath,
-                           boolean errorIfMissingOrEmpty,
+                           boolean errorIfMissing,
                            ResourceAccessor resourceAccessor,
                            ContextExpression includeContextFilter,
                            Labels labels,
@@ -848,7 +848,7 @@ public class DatabaseChangeLog implements Comparable<DatabaseChangeLog>, Conditi
                 if(!resourceAccessor.get(fileName).exists()) {
                     if (
                             ChangeLogParserConfiguration.ON_MISSING_INCLUDE_CHANGELOG.getCurrentValue().equals(ChangeLogParserConfiguration.MissingIncludeConfiguration.WARN)
-                                    || errorIfMissingOrEmpty == false
+                                    || errorIfMissing == false
                     ) {
                         Scope.getCurrentScope().getLog(getClass()).warning(FileUtil.getFileNotFoundMessage(fileName));
                         return false;

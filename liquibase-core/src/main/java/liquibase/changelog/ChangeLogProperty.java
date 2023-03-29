@@ -9,7 +9,7 @@ import java.util.Set;
 public class ChangeLogProperty extends AbstractLiquibaseSerializable implements ChangeLogChild {
     private String file;
     private Boolean relativeToChangelogFile;
-    private Boolean errorIfMissingOrEmpty;
+    private Boolean errorIfMissing;
     private String name;
     private String value;
     private String contextFilter;
@@ -19,7 +19,7 @@ public class ChangeLogProperty extends AbstractLiquibaseSerializable implements 
 
     @Override
     public Set<String> getSerializableFields() {
-        return new LinkedHashSet<>(Arrays.asList("file", "relativeToChangelogFile", "errorIfMissingOrEmpty", "name", "value", "contextFilter", "labels", "dbms", "global"));
+        return new LinkedHashSet<>(Arrays.asList("file", "relativeToChangelogFile", "errorIfMissing", "name", "value", "contextFilter", "labels", "dbms", "global"));
     }
 
     @Override
@@ -48,12 +48,12 @@ public class ChangeLogProperty extends AbstractLiquibaseSerializable implements 
         this.relativeToChangelogFile = getRelativeToChangelogFile;
     }
 
-    public Boolean getErrorIfMissingOrEmpty() {
-        return errorIfMissingOrEmpty;
+    public Boolean getErrorIfMissing() {
+        return errorIfMissing;
     }
 
-    public void setErrorIfMissingOrEmpty(Boolean errorIfMissingOrEmpty) {
-        this.errorIfMissingOrEmpty = errorIfMissingOrEmpty;
+    public void setErrorIfMissing(Boolean errorIfMissing) {
+        this.errorIfMissing = errorIfMissing;
     }
 
     public String getName() {
