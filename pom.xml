@@ -82,7 +82,7 @@
     </distributionManagement>
 
     <modules>
-        <module>liquibase-core</module>
+        <module>liquibase-standard</module>
         <module>liquibase-cli</module>
 	<module>liquibase-maven-plugin</module>
 	<module>liquibase-cdi-jakarta</module>
