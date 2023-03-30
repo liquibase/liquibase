@@ -1,5 +1,7 @@
 package liquibase.change.core;
 
+import static liquibase.change.ChangeParameterMetaData.ALL;
+
 import liquibase.change.*;
 import liquibase.database.Database;
 import liquibase.snapshot.SnapshotGeneratorFactory;
@@ -11,7 +13,9 @@ import liquibase.structure.core.Table;
 /**
  * Removes the default value from an existing column.
  */
-@DatabaseChange(name="dropDefaultValue", description="Removes the database default value for a column", priority = ChangeMetaData.PRIORITY_DEFAULT, appliesTo = "column")
+@DatabaseChange(name = "dropDefaultValue", description = "Removes the database default value for a column",
+    priority = ChangeMetaData.PRIORITY_DEFAULT,
+    appliesTo = "column")
 public class DropDefaultValueChange extends AbstractChange {
 
     private String catalogName;
@@ -20,7 +24,7 @@ public class DropDefaultValueChange extends AbstractChange {
     private String columnName;
     private String columnDataType;
 
-    @DatabaseChangeProperty(mustEqualExisting ="column.relation.catalog", since = "3.0")
+    @DatabaseChangeProperty(mustEqualExisting ="column.relation.catalog", since = "3.0", description = "Name of the database catalog")
     public String getCatalogName() {
         return catalogName;
     }
@@ -29,7 +33,7 @@ public class DropDefaultValueChange extends AbstractChange {
         this.catalogName = catalogName;
     }
 
-    @DatabaseChangeProperty(mustEqualExisting ="column.relation.schema")
+    @DatabaseChangeProperty(mustEqualExisting ="column.relation.schema", description = "Name of the database schema")
     public String getSchemaName() {
         return schemaName;
     }
@@ -38,7 +42,7 @@ public class DropDefaultValueChange extends AbstractChange {
         this.schemaName = schemaName;
     }
 
-    @DatabaseChangeProperty(mustEqualExisting = "column.relation", description = "Name of the table to containing the column")
+    @DatabaseChangeProperty(mustEqualExisting = "column.relation", description = "Name of the table containing the column")
     public String getTableName() {
         return tableName;
     }
@@ -47,7 +51,7 @@ public class DropDefaultValueChange extends AbstractChange {
         this.tableName = tableName;
     }
 
-    @DatabaseChangeProperty(mustEqualExisting = "column", description = "Name of column to drop the default value from")
+    @DatabaseChangeProperty(mustEqualExisting = "column", description = "Name of the column to drop the default value from")
     public String getColumnName() {
         return columnName;
     }
@@ -56,7 +60,7 @@ public class DropDefaultValueChange extends AbstractChange {
         this.columnName = columnName;
     }
 
-    @DatabaseChangeProperty()
+    @DatabaseChangeProperty(supportsDatabase = ALL, description = "Data type of the column")
     public String getColumnDataType() {
 		return columnDataType;
 	}

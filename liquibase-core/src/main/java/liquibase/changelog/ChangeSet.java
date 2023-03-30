@@ -832,6 +832,7 @@ public class ChangeSet implements Conditional, ChangeLogChild {
     public void rollback(Database database, ChangeExecListener listener) throws RollbackFailedException {
         Scope.getCurrentScope().addMdcValue(MdcKey.CHANGESET_OPERATION_START_TIME, new ISODateFormat().format(new Date()));
         addChangeSetMdcProperties();
+        Scope.getCurrentScope().addMdcValue(MdcKey.DEPLOYMENT_ID, getDeploymentId());
         Executor originalExecutor = setupCustomExecutorIfNecessary(database);
         try {
             Executor executor = Scope.getCurrentScope().getSingleton(ExecutorService.class).getExecutor("jdbc", database);

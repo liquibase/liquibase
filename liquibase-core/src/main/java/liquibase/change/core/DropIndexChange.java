@@ -1,5 +1,7 @@
 package liquibase.change.core;
 
+import static liquibase.change.ChangeParameterMetaData.ALL;
+
 import liquibase.change.*;
 import liquibase.database.Database;
 import liquibase.snapshot.SnapshotGeneratorFactory;
@@ -10,7 +12,7 @@ import liquibase.structure.core.Index;
 /**
  * Drops an existing index.
  */
-@DatabaseChange(name="dropIndex", description = "Drops an existing index", priority = ChangeMetaData.PRIORITY_DEFAULT, appliesTo = "index")
+@DatabaseChange(name = "dropIndex", description = "Drops an existing index", priority = ChangeMetaData.PRIORITY_DEFAULT, appliesTo = "index")
 public class DropIndexChange extends AbstractChange {
 
     private String schemaName;
@@ -20,7 +22,7 @@ public class DropIndexChange extends AbstractChange {
     private String associatedWith;
     private String catalogName;
 
-    @DatabaseChangeProperty(mustEqualExisting ="index.schema")
+    @DatabaseChangeProperty(mustEqualExisting ="index.schema", description = "Name of the database schema", supportsDatabase = ALL)
     public String getSchemaName() {
         return schemaName;
     }
@@ -29,7 +31,7 @@ public class DropIndexChange extends AbstractChange {
         this.schemaName = schemaName;
     }
 
-    @DatabaseChangeProperty(mustEqualExisting = "index", description = "Name of the index to drop")
+    @DatabaseChangeProperty(mustEqualExisting = "index", description = "Name of the index to drop", supportsDatabase = ALL)
     public String getIndexName() {
         return indexName;
     }
@@ -38,7 +40,9 @@ public class DropIndexChange extends AbstractChange {
         this.indexName = indexName;
     }
 
-    @DatabaseChangeProperty(mustEqualExisting = "index.table", description = "Name fo the indexed table.", requiredForDatabase = { "sybase","mysql","mssql","mariadb", "asany" })
+    @DatabaseChangeProperty(mustEqualExisting = "index.table", description = "Name of the indexed table",
+        requiredForDatabase = { "sybase","mysql","mssql","mariadb", "asany" },
+        supportsDatabase = ALL)
     public String getTableName() {
         return tableName;
     }
@@ -68,7 +72,8 @@ public class DropIndexChange extends AbstractChange {
         return "Index " + getIndexName() + " dropped from table " + getTableName();
     }
 
-    @DatabaseChangeProperty(isChangeProperty = false)
+    @DatabaseChangeProperty(isChangeProperty = false,
+        description = "Index associations. Valid values: primaryKey, foreignKey, uniqueConstriant, none")
     public String getAssociatedWith() {
         return associatedWith;
     }
@@ -77,7 +82,8 @@ public class DropIndexChange extends AbstractChange {
         this.associatedWith = associatedWith;
     }
 
-    @DatabaseChangeProperty(mustEqualExisting = "index.catalog", since = "3.0")
+    @DatabaseChangeProperty(mustEqualExisting = "index.catalog", since = "3.0", description = "Name of the database catalog",
+        supportsDatabase = ALL)
     public String getCatalogName() {
         return catalogName;
     }

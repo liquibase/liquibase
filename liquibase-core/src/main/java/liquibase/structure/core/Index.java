@@ -82,8 +82,8 @@ public class Index extends AbstractDatabaseObject {
      * @deprecated Use {@link #setRelation(Relation)}
      */
     @Deprecated
-	public Index setTable(Table table) {
-		return setRelation(table);
+	public Index setTable(Relation table) {
+        return setRelation(table);
     }
 
     public Relation getRelation() {
