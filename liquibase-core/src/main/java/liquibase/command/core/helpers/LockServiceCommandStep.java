@@ -50,12 +50,7 @@ public class LockServiceCommandStep extends AbstractHelperCommandStep implements
     @Override
     public void cleanUp(CommandResultsBuilder resultsBuilder) {
         try {
-            CommandScope commandScope = resultsBuilder.getCommandScope();
-            Database database = (Database) commandScope.getDependency(Database.class);
-            Executor executor = Scope.getCurrentScope().getSingleton(ExecutorService.class).getExecutor("jdbc",  database);
-            if (! (executor instanceof LoggingExecutor)) {
-                lockService.releaseLock();
-            }
+            lockService.releaseLock();
         } catch (LockException e) {
             Scope.getCurrentScope().getLog(getClass()).severe(Liquibase.MSG_COULD_NOT_RELEASE_LOCK, e);
         }

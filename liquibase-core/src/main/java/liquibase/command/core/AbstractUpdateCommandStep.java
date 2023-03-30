@@ -115,10 +115,7 @@ public abstract class AbstractUpdateCommandStep extends AbstractCommandStep impl
             //TODO: We should be able to remove this once we get the rest of the update family
             // set up with the CommandFramework
             try {
-                Executor executor = Scope.getCurrentScope().getSingleton(ExecutorService.class).getExecutor("jdbc",  database);
-                if (! (executor instanceof LoggingExecutor)) {
-                    lockService.releaseLock();
-                }
+                lockService.releaseLock();
             } catch (LockException e) {
                 Scope.getCurrentScope().getLog(getClass()).severe(MSG_COULD_NOT_RELEASE_LOCK, e);
             }
