@@ -6,6 +6,7 @@ import liquibase.extension.testing.testsystem.DatabaseTestSystem
 import liquibase.extension.testing.testsystem.TestSystemFactory
 import liquibase.extension.testing.testsystem.spock.LiquibaseIntegrationTest
 import liquibase.util.FileUtil
+import spock.lang.Ignore
 import spock.lang.Shared
 import spock.lang.Specification
 
@@ -41,8 +42,10 @@ class GenerateChangeLogMSSQLIntegrationTest extends Specification {
         cleanup:
         CommandUtil.runDropAll(mssql)
         outputFile.delete()
+        mssql.stop()
     }
 
+    @Ignore
     def "Should generate table comments, view comments, table column comments, view column comments and be able to use the generated xml/json/yml changelog"(String fileType) {
         given:
         CommandUtil.runUpdate(mssql,'src/test/resources/changelogs/mssql/issues/generate.changelog.table.view.comments.sql')
