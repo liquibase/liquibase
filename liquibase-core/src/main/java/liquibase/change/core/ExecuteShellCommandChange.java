@@ -146,7 +146,7 @@ public class ExecuteShellCommandChange extends AbstractChange {
                         throw new UnexpectedLiquibaseException("Error executing command: " + e.getLocalizedMessage(), e);
                     }
 
-                    return new Sql[0];
+                    return null;
                 }
             }};
         }
@@ -368,11 +368,6 @@ public class ExecuteShellCommandChange extends AbstractChange {
                 this.os = os;
             }
         }
-    }
-
-    @Override
-    public boolean allowNonExecuteMode() {
-        return true;
     }
 
     public class StreamGobbler extends Thread {

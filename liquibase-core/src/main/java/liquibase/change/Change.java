@@ -142,16 +142,4 @@ public interface Change extends LiquibaseSerializable, Plugin, ExtensibleObject 
      * Short, scannable description for the DATABASECHANGELOG.DESCRIPTION column
      */
     String getDescription();
-
-    /**
-     *
-     * Override this to allow this instance be in non-execute mode
-     * Default return is false
-     *
-     * @return   boolean       True if non-execute mode
-     *
-     */
-    default boolean allowNonExecuteMode() {
-        return false;
-    }
 }
