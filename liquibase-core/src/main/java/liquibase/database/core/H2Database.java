@@ -305,6 +305,32 @@ public class H2Database extends AbstractJdbcDatabase {
     }
 
     @Override
+    protected String getAutoIncrementStartWithClause() {
+        try {
+            if (getDatabaseMajorVersion() == 1) {
+                return "%d";
+            } else {
+                return super.getAutoIncrementStartWithClause();
+            }
+        } catch (DatabaseException e) {
+            return "%d";
+        }
+    }
+
+    @Override
+    protected String getAutoIncrementByClause() {
+        try {
+            if (getDatabaseMajorVersion() == 1) {
+                return "%d";
+            } else {
+                return super.getAutoIncrementByClause();
+            }
+        } catch (DatabaseException e) {
+            return "%d";
+        }
+    }
+
+    @Override
     public String getAutoIncrementClause(BigInteger startWith, BigInteger incrementBy, String generationType, Boolean defaultOnNull) {
         final String clause = super.getAutoIncrementClause(startWith, incrementBy, generationType, defaultOnNull);
         if (clause.startsWith("AUTO_INCREMENT")) {
