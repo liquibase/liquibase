@@ -361,7 +361,7 @@ public abstract class SqlUtil {
         Sql[] sqlStatements = sqlGeneratorFactory.generateSql(statement, database);
         if (sqlStatements != null) {
             return Arrays.stream(sqlStatements)
-                    .map(sql -> sql.toSql() + sql.getEndDelimiter())
+                    .map(sql -> sql.toSql().endsWith(sql.getEndDelimiter()) ? sql.toSql() : sql.toSql() + sql.getEndDelimiter())
                     .collect(Collectors.joining("\n"));
         } else {
             return "";

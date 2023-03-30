@@ -50,7 +50,7 @@ public abstract class AbstractConfigurationContainer implements ConfigurationCon
      */
     @Override
     public <T> T getValue(String propertyName, Class<T> returnType) {
-        final ConfiguredValue currentValue = Scope.getCurrentScope().getSingleton(LiquibaseConfiguration.class).getCurrentConfiguredValue(null, null, namespace + "." + propertyName);
+        final ConfiguredValue<Object> currentValue = Scope.getCurrentScope().getSingleton(LiquibaseConfiguration.class).getCurrentConfiguredValue(null, null, namespace + "." + propertyName);
         return (T) currentValue.getValue();
     }
 
