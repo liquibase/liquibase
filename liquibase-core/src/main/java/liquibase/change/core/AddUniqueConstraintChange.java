@@ -11,7 +11,10 @@ import liquibase.structure.core.UniqueConstraint;
 /**
  * Adds a unique constraint to an existing column.
  */
-@DatabaseChange(name="addUniqueConstraint", description = "Adds a unique constrant to an existing column or set of columns.", priority = ChangeMetaData.PRIORITY_DEFAULT, appliesTo = "column")
+@DatabaseChange(name = "addUniqueConstraint",
+    description = "Adds a unique constraint to an existing column or set of columns.",
+    priority = ChangeMetaData.PRIORITY_DEFAULT,
+    appliesTo = "column")
 public class AddUniqueConstraintChange extends AbstractChange {
 
     private String catalogName;
@@ -32,7 +35,8 @@ public class AddUniqueConstraintChange extends AbstractChange {
     private Boolean initiallyDeferred;
     private Boolean disabled;
 
-    @DatabaseChangeProperty(mustEqualExisting ="column.relation.catalog", since = "3.0")
+    @DatabaseChangeProperty(mustEqualExisting ="column.relation.catalog", since = "3.0",
+        description = "Name of the database catalog")
     public String getCatalogName() {
         return catalogName;
     }
@@ -41,7 +45,8 @@ public class AddUniqueConstraintChange extends AbstractChange {
         this.catalogName = catalogName;
     }
 
-    @DatabaseChangeProperty(mustEqualExisting ="column.relation.schema")
+    @DatabaseChangeProperty(mustEqualExisting ="column.relation.schema",
+        description = "Name of the database schema")
     public String getSchemaName() {
         return schemaName;
     }
@@ -60,8 +65,8 @@ public class AddUniqueConstraintChange extends AbstractChange {
         this.tableName = tableName;
     }
 
-    @DatabaseChangeProperty(mustEqualExisting = "column", description =
-        "Name of the column(s) to create the unique constraint on. Comma separated if multiple")
+    @DatabaseChangeProperty(mustEqualExisting = "column",
+        description = "Name of the column(s) to create the unique constraint on. Comma separated if multiple")
     public String getColumnNames() {
         return columnNames;
     }
@@ -79,8 +84,7 @@ public class AddUniqueConstraintChange extends AbstractChange {
         this.constraintName = constraintName;
     }
 
-
-    @DatabaseChangeProperty(description = "'Tablespace' to create the index in. Corresponds to file group in mssql")
+    @DatabaseChangeProperty(description = "Tablespace to create the index in. Corresponds to file group in mssql")
     public String getTablespace() {
         return tablespace;
     }
@@ -89,7 +93,7 @@ public class AddUniqueConstraintChange extends AbstractChange {
         this.tablespace = tablespace;
     }
 
-    @DatabaseChangeProperty(description = "True if this constraint is deferrable, False otherwise")
+    @DatabaseChangeProperty(description = "Defines whether the constraint is deferrable")
     public Boolean getDeferrable() {
         return deferrable;
     }
@@ -98,7 +102,7 @@ public class AddUniqueConstraintChange extends AbstractChange {
         this.deferrable = deferrable;
     }
 
-    @DatabaseChangeProperty(description = "True if this constraint is initially deferred, False otherwise")
+    @DatabaseChangeProperty(description = "Defines whether the constraint is initially deferred")
     public Boolean getInitiallyDeferred() {
         return initiallyDeferred;
     }
@@ -107,7 +111,7 @@ public class AddUniqueConstraintChange extends AbstractChange {
         this.initiallyDeferred = initiallyDeferred;
     }
 
-    @DatabaseChangeProperty(description = "True if this constraint is disabled, False otherwise")
+    @DatabaseChangeProperty(description = "Specifies whether the constraint is disabled")
     public Boolean getDisabled() {
         return disabled;
     }
@@ -122,7 +126,8 @@ public class AddUniqueConstraintChange extends AbstractChange {
      * uniqueness constraint or not. 
      * @return true if ENABLE VALIDATE (this is the default), or false if ENABLE NOVALIDATE.
      */
-    @DatabaseChangeProperty(description = "This is true if the unique constraint has 'ENABLE VALIDATE' set, or false if the foreign key has 'ENABLE NOVALIDATE' set.")
+    @DatabaseChangeProperty(description = "Defines whether to check if the unique constraint refers to a valid row. " +
+        "This is true if the constraint has 'ENABLE VALIDATE' set, or false if the constraint has 'ENABLE NOVALIDATE' set.")
     public Boolean getValidate() {
         return shouldValidate;
     }
@@ -138,6 +143,7 @@ public class AddUniqueConstraintChange extends AbstractChange {
         this.shouldValidate = validate;
     }
 
+    @DatabaseChangeProperty(description = "Whether to create a clustered index")
     public Boolean getClustered() {
         return clustered;
     }
@@ -146,6 +152,7 @@ public class AddUniqueConstraintChange extends AbstractChange {
         this.clustered = clustered;
     }
 
+    @DatabaseChangeProperty(description = "Name of the index to associate with the constraint")
     public String getForIndexName() {
         return forIndexName;
     }
@@ -154,6 +161,7 @@ public class AddUniqueConstraintChange extends AbstractChange {
         this.forIndexName = forIndexName;
     }
 
+    @DatabaseChangeProperty(description = "Name of the schema of the index to associate with the constraint")
     public String getForIndexSchemaName() {
         return forIndexSchemaName;
     }
@@ -162,6 +170,7 @@ public class AddUniqueConstraintChange extends AbstractChange {
         this.forIndexSchemaName = forIndexSchemaName;
     }
 
+    @DatabaseChangeProperty(description = "Name of the catalog of the index to associate with the constraint")
     public String getForIndexCatalogName() {
         return forIndexCatalogName;
     }

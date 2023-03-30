@@ -14,6 +14,7 @@ import liquibase.structure.DatabaseObjectCollection;
 import liquibase.structure.core.Column;
 import liquibase.util.ISODateFormat;
 import liquibase.util.StringUtil;
+import org.yaml.snakeyaml.DumperOptions;
 import org.yaml.snakeyaml.nodes.Node;
 import org.yaml.snakeyaml.nodes.Tag;
 import org.yaml.snakeyaml.representer.Represent;
@@ -50,7 +51,7 @@ public class YamlSnapshotSerializer extends YamlSerializer implements SnapshotSe
                         table = ((DatabaseObject) object).getAttribute("relation", Object.class);
                     }
                     if (table != null) {
-                        name = table.toString() + "." + name;
+                        name = table + "." + name;
                     }
 
                     if (((DatabaseObject) object).getSchema() != null) {
@@ -71,7 +72,7 @@ public class YamlSnapshotSerializer extends YamlSerializer implements SnapshotSe
             SortedMap<String, Object> returnMap = new TreeMap<>();
             for (Map.Entry<Class<? extends DatabaseObject>, Set<? extends DatabaseObject>> entry : ((DatabaseObjectCollection) object).toMap().entrySet()) {
                 ArrayList value = new ArrayList(entry.getValue());
-                Collections.sort(value, new DatabaseObjectCollectionComparator());
+                value.sort(new DatabaseObjectCollectionComparator());
                 returnMap.put(entry.getKey().getName(), value);
             }
             return returnMap;
@@ -80,8 +81,8 @@ public class YamlSnapshotSerializer extends YamlSerializer implements SnapshotSe
     }
 
     @Override
-    protected LiquibaseRepresenter getLiquibaseRepresenter() {
-        return new SnapshotLiquibaseRepresenter();
+    protected LiquibaseRepresenter getLiquibaseRepresenter(DumperOptions options) {
+        return new SnapshotLiquibaseRepresenter(options);
     }
 
     @Override
@@ -90,6 +91,10 @@ public class YamlSnapshotSerializer extends YamlSerializer implements SnapshotSe
     }
 
     public static class SnapshotLiquibaseRepresenter extends LiquibaseRepresenter {
+
+        public SnapshotLiquibaseRepresenter(DumperOptions options) {
+            super(options);
+        }
 
         @Override
         protected void init() {
@@ -111,7 +116,7 @@ public class YamlSnapshotSerializer extends YamlSerializer implements SnapshotSe
                 if (data instanceof Date) {
                     value = new ISODateFormat().format((Date) data);
                 } else if (data instanceof Enum) {
-                    value = ((Enum) data).name();
+                    value = ((Enum<?>) data).name();
                 } else {
                     value = data.toString();
                 }

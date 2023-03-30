@@ -1,9 +1,5 @@
 package liquibase.command;
 
-import liquibase.Beta;
-import liquibase.command.core.DbUrlConnectionCommandStep;
-import liquibase.database.Database;
-
 /**
  * Builder for configuring {@link CommandStep} settings, such as {@link CommandArgumentDefinition}s and {@link CommandResultDefinition}s
  */
@@ -32,17 +28,11 @@ public class CommandBuilder {
         return new CommandArgumentDefinition.Building<>(commandNames, new CommandArgumentDefinition<>(argument.getArgumentName(), type));
     }
 
-
     /**
-     * Creates a database argument and registers the current Step as an applicable command
-     * to the InternalDatabaseCommandStep.
+     * Uses an existing {@link CommandArgumentDefinition} as template
      */
-    @Beta
-    public CommandArgumentDefinition.Building<Database> databaseArgument() {
-        DbUrlConnectionCommandStep.addApplicableCommand(this.commandNames);
-        return new CommandArgumentDefinition.Building<>(commandNames,
-                new CommandArgumentDefinition<>("database", Database.class))
-                .description("Database connection");
+    public <DataType> CommandArgumentDefinition.Building<DataType> addArgument(CommandArgumentDefinition<DataType> example) {
+        return new CommandArgumentDefinition.Building<>(commandNames, example);
     }
 
     /**

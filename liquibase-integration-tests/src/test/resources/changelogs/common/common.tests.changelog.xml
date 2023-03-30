@@ -481,7 +481,7 @@
             <column name="locked" type="boolean"/>
         </createTable>
     </changeSet>
-    <changeSet id="sampleCSVData" author="nvoxland">
+    <changeSet id="sampleCSVData1" author="nvoxland">
         <loadData tableName="csvdata" file="changelogs/sample.data1.csv"/>
     </changeSet>
     <changeSet id="sampleTSVData" author="nvoxland">
@@ -507,7 +507,7 @@
         </loadData>
     </changeSet>
 
-    <changeSet id="sampleCSVData" author="nvoxland">
+    <changeSet id="sampleCSVData4" author="nvoxland">
         <loadData tableName="csvdata" file="changelogs/sample.data1.csv.gz"/>
     </changeSet>
 
@@ -648,7 +648,7 @@
         </modifySql>
     </changeSet>
 
-    <includeAll path="changelogs/common/pathincluded/"/>
+    <includeAll path="changelogs/common/pathincluded/" minDepth="0" maxDepth="1"/>
 
     <include file="includerelative\pathinclude1.changelog.xml" relativeToChangelogFile="true"/> <!-- try with dos style path -->
 

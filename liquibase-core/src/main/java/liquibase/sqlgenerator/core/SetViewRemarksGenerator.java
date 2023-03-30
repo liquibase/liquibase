@@ -15,7 +15,7 @@ public class SetViewRemarksGenerator extends AbstractSqlGenerator<SetViewRemarks
 
     @Override
     public boolean supports(SetViewRemarksStatement statement, Database database) {
-        return (database instanceof OracleDatabase) || (database instanceof PostgresDatabase);
+        return (database instanceof OracleDatabase) || (database instanceof PostgresDatabase) || (database instanceof MSSQLDatabase) || (database instanceof DB2Database);
     }
 
     @Override
@@ -27,17 +27,52 @@ public class SetViewRemarksGenerator extends AbstractSqlGenerator<SetViewRemarks
 
     @Override
     public Sql[] generateSql(SetViewRemarksStatement statement, Database database, SqlGeneratorChain sqlGeneratorChain) {
-        String sqlPlaceholder = "COMMENT ON %s %s IS '%s'";
+        String sql = "";
         String remarksEscaped = database.escapeStringForDatabase(StringUtil.trimToEmpty(statement.getRemarks()));
-        String targetNameEscaped = database.escapeTableName(statement.getCatalogName(), statement.getSchemaName(), statement.getViewName());
-        String targetObject;
-        if (database instanceof OracleDatabase) {
-            //Oracle considers views as tables for their comment syntax
-            targetObject = "TABLE";
-        } else {
-            targetObject = "VIEW";
+        if (database instanceof OracleDatabase || database instanceof PostgresDatabase || database instanceof DB2Database) {
+            String sqlPlaceholder = "COMMENT ON %s %s IS '%s'";
+            String targetNameEscaped = database.escapeTableName(statement.getCatalogName(), statement.getSchemaName(), statement.getViewName());
+            String targetObject;
+            if (database instanceof OracleDatabase || database instanceof DB2Database) {
+                //Oracle and DB2 consider views as tables for their comment syntax
+                targetObject = "TABLE";
+            } else {
+                targetObject = "VIEW";
+            }
+            sql = String.format(sqlPlaceholder, targetObject, targetNameEscaped, remarksEscaped);
+        } else if (database instanceof MSSQLDatabase) {
+            String schemaName = statement.getSchemaName();
+            if (schemaName == null) {
+                schemaName = database.getDefaultSchemaName() != null ? database.getDefaultSchemaName() : "dbo";
+            }
+            String viewName = statement.getViewName();
+            String qualifiedTableName = String.format("%s.%s", schemaName, statement.getViewName());
+
+            sql = "IF EXISTS( " +
+                    " SELECT extended_properties.value" +
+                    " FROM SYS.EXTENDED_PROPERTIES" +
+                    " WHERE major_id = OBJECT_ID('" + qualifiedTableName + "')" +
+                    " AND name = N'MS_DESCRIPTION'" +
+                    " AND minor_id = 0" +
+                    " )" +
+                    " BEGIN " +
+                    " EXEC sys.sp_updateextendedproperty @name = N'MS_Description'" +
+                    " , @value = N'" + remarksEscaped + "'" +
+                    " , @level0type = N'SCHEMA'" +
+                    " , @level0name = N'" + schemaName + "'" +
+                    " , @level1type = N'VIEW'" +
+                    " , @level1name = N'" + viewName + "'" +
+                    " END " +
+                    " ELSE " +
+                    " BEGIN " +
+                    " EXEC sys.sp_addextendedproperty @name = N'MS_Description'" +
+                    " , @value = N'" + remarksEscaped + "'" +
+                    " , @level0type = N'SCHEMA'" +
+                    " , @level0name = N'" + schemaName + "'" +
+                    " , @level1type = N'VIEW'" +
+                    " , @level1name = N'" + viewName + "'" +
+                    " END";
         }
-        String sql = String.format(sqlPlaceholder, targetObject, targetNameEscaped, remarksEscaped);
         return new Sql[]{new UnparsedSql(sql, getAffectedTable(statement))};
     }
 

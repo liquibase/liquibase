@@ -4,6 +4,9 @@ import liquibase.command.AbstractCommand;
 import liquibase.command.CommandResult;
 import liquibase.command.CommandScope;
 import liquibase.command.CommandValidationErrors;
+import liquibase.command.core.helpers.DbUrlConnectionCommandStep;
+import liquibase.command.core.helpers.PreCompareCommandStep;
+import liquibase.command.core.helpers.ReferenceDbUrlConnectionCommandStep;
 import liquibase.database.Database;
 import liquibase.diff.compare.CompareControl;
 import liquibase.diff.output.ObjectChangeFilter;
@@ -139,15 +142,16 @@ public class DiffCommand extends AbstractCommand<CommandResult> {
 
     @Override
     public CommandResult run() throws Exception {
-        final CommandScope commandScope = new CommandScope("diffInternal");
-        commandScope.addArgumentValue(InternalDiffCommandStep.REFERENCE_DATABASE_ARG, this.referenceDatabase);
-        commandScope.addArgumentValue(InternalDiffCommandStep.TARGET_DATABASE_ARG, this.targetDatabase);
-        commandScope.addArgumentValue(InternalDiffCommandStep.SNAPSHOT_TYPES_ARG, this.snapshotTypes);
-        commandScope.addArgumentValue(InternalDiffCommandStep.SNAPSHOT_LISTENER_ARG, this.snapshotListener);
-        commandScope.addArgumentValue(InternalDiffCommandStep.REFERENCE_SNAPSHOT_CONTROL_ARG, this.referenceSnapshotControl);
-        commandScope.addArgumentValue(InternalDiffCommandStep.TARGET_SNAPSHOT_CONTROL_ARG, this.targetSnapshotControl);
-        commandScope.addArgumentValue(InternalDiffCommandStep.OBJECT_CHANGE_FILTER_ARG, this.objectChangeFilter);
-        commandScope.addArgumentValue(InternalDiffCommandStep.COMPARE_CONTROL_ARG, this.compareControl);
+        final CommandScope commandScope = new CommandScope("diff");
+        commandScope.addArgumentValue(ReferenceDbUrlConnectionCommandStep.REFERENCE_DATABASE_ARG, this.referenceDatabase);
+        commandScope.addArgumentValue(DbUrlConnectionCommandStep.DATABASE_ARG, this.targetDatabase);
+        commandScope.addArgumentValue(DiffCommandStep.SNAPSHOT_LISTENER_ARG, this.snapshotListener);
+        commandScope.addArgumentValue(DiffCommandStep.REFERENCE_SNAPSHOT_CONTROL_ARG, this.referenceSnapshotControl);
+        commandScope.addArgumentValue(DiffCommandStep.TARGET_SNAPSHOT_CONTROL_ARG, this.targetSnapshotControl);
+
+        commandScope.addArgumentValue(PreCompareCommandStep.SNAPSHOT_TYPES_ARG, this.snapshotTypes);
+        commandScope.addArgumentValue(PreCompareCommandStep.OBJECT_CHANGE_FILTER_ARG, this.objectChangeFilter);
+        commandScope.addArgumentValue(PreCompareCommandStep.COMPARE_CONTROL_ARG, this.compareControl);
 
         commandScope.setOutput(this.outputStream);
         commandScope.execute();

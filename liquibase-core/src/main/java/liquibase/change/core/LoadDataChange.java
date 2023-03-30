@@ -46,28 +46,7 @@ import static java.util.ResourceBundle.getBundle;
 import static liquibase.change.ChangeParameterMetaData.ALL;
 
 @DatabaseChange(name = "loadData",
-        description = "Loads data from a CSV file into an existing table. A value of NULL in a cell will be " +
-                "converted to a database NULL rather than the string 'NULL'.\n" +
-                "Lines starting with # (hash) sign are treated as comments. You can change comment pattern by " +
-                "specifying 'commentLineStartsWith' attribute." +
-                "To disable comments set 'commentLineStartsWith' to empty value'\n" +
-                "\n" +
-                "If the data type for a load column is set to NUMERIC, numbers are parsed in US locale (e.g. 123.45)." +
-                "\n" +
-                "Date/Time values included in the CSV file should be in ISO format " +
-                "http://en.wikipedia.org/wiki/ISO_8601 in order to be parsed correctly by Liquibase. Liquibase will " +
-                "initially set the date format to be 'yyyy-MM-dd'T'HH:mm:ss' and then it checks for two special " +
-                "cases which will override the data format string.\n" +
-                "\n" +
-                "If the string representing the date/time includes a '.', then the date format is changed to " +
-                "'yyyy-MM-dd'T'HH:mm:ss.SSS'\n" +
-                "If the string representing the date/time includes a space, then the date format is changed " +
-                "to 'yyyy-MM-dd HH:mm:ss'\n" +
-                "Once the date format string is set, Liquibase will then call the SimpleDateFormat.parse() method " +
-                "attempting to parse the input string so that it can return a Date/Time. If problems occur, " +
-                "then a ParseException is thrown and the input string is treated as a String for the INSERT command " +
-                "to be generated.\n" +
-                "If UUID type is used UUID value is stored as string and NULL in cell is supported.",
+        description = "Loads data from a CSV file into an existing table",
         priority = ChangeMetaData.PRIORITY_DEFAULT, appliesTo = "table",
         since = "1.7")
 @SuppressWarnings("java:S2583")
@@ -123,14 +102,14 @@ public class LoadDataChange extends AbstractTableChange implements ChangeWithCol
 
     @Override
     @DatabaseChangeProperty(description = "Name of the table to insert data into",
-            requiredForDatabase = ALL, mustEqualExisting = "table")
+        requiredForDatabase = ALL, mustEqualExisting = "table")
     public String getTableName() {
         return super.getTableName();
     }
 
     @DatabaseChangeProperty(
-            description = "CSV file to load", exampleValue = "com/example/users.csv",
-            requiredForDatabase = ALL)
+        description = "CSV file to load", exampleValue = "com/example/users.csv",
+        requiredForDatabase = ALL)
     public String getFile() {
         return file;
     }
@@ -140,7 +119,7 @@ public class LoadDataChange extends AbstractTableChange implements ChangeWithCol
     }
 
     @DatabaseChangeProperty(
-            description = "Use prepared statements instead of insert statement strings if the DB supports it")
+        description = "Whether to use prepared statements instead of INSERT statement strings (if the database supports it)")
     public Boolean getUsePreparedStatements() {
         return usePreparedStatements;
     }
@@ -150,7 +129,8 @@ public class LoadDataChange extends AbstractTableChange implements ChangeWithCol
     }
 
     @DatabaseChangeProperty(supportsDatabase = ALL,
-            description = "Lines staring with this are treated as comment and ignored. Default: " + DEFAULT_COMMENT_PATTERN)
+        description = "Lines starting with this are treated as comments and ignored. "+
+            "To disable comments, set 'commentLineStartsWith' to an empty value. Default: " + DEFAULT_COMMENT_PATTERN)
     public String getCommentLineStartsWith() {
         return commentLineStartsWith;
     }
@@ -166,8 +146,8 @@ public class LoadDataChange extends AbstractTableChange implements ChangeWithCol
         }
     }
 
-    @DatabaseChangeProperty(supportsDatabase = ALL,
-            description = "Option whether the 'file' is relative to the changelog file")
+    @DatabaseChangeProperty(supportsDatabase = ALL, description = "Specifies whether the file path is relative to the changelog file " +
+        "rather than looked up in the search path. Default: false.")
     public Boolean isRelativeToChangelogFile() {
         return relativeToChangelogFile;
     }
@@ -177,7 +157,7 @@ public class LoadDataChange extends AbstractTableChange implements ChangeWithCol
     }
 
     @DatabaseChangeProperty(exampleValue = "UTF-8", supportsDatabase = ALL,
-            description = "Encoding of the CSV file (defaults to UTF-8)")
+        description = "Encoding of the CSV file (defaults to UTF-8)")
     public String getEncoding() {
         return encoding;
     }
@@ -187,21 +167,21 @@ public class LoadDataChange extends AbstractTableChange implements ChangeWithCol
     }
 
     @DatabaseChangeProperty(exampleValue = ",", supportsDatabase = ALL,
-            description = "Character separating the fields. Default: " + CSVReader.DEFAULT_SEPARATOR)
+        description = "Character separating the fields. Default: " + CSVReader.DEFAULT_SEPARATOR)
     public String getSeparator() {
         return separator;
     }
 
     public void setSeparator(String separator) {
-        if ((separator != null) && "\\t".equals(separator)) {
+        if ("\\t".equals(separator)) {
             separator = "\t";
         }
         this.separator = separator;
     }
 
     @DatabaseChangeProperty(exampleValue = "'", supportsDatabase = ALL,
-            description = "The quote character for string fields containing the separator character. " +
-                    "Default: " + CSVReader.DEFAULT_QUOTE_CHARACTER)
+        description = "The quote character for string fields containing the separator character. " +
+            "Default: " + CSVReader.DEFAULT_QUOTE_CHARACTER)
     public String getQuotchar() {
         return quotchar;
     }
@@ -210,7 +190,6 @@ public class LoadDataChange extends AbstractTableChange implements ChangeWithCol
         this.quotchar = quotchar;
     }
 
-
     @Override
     public void addColumn(LoadDataColumnConfig column) {
         columns.add(column);
@@ -218,11 +197,12 @@ public class LoadDataChange extends AbstractTableChange implements ChangeWithCol
 
     @Override
     @DatabaseChangeProperty(supportsDatabase = ALL, serializationType = SerializationType.NESTED_OBJECT,
-            description = "Column mapping and defaults can be defined.\n\n" +
-                    "'header' or 'index' attributes needs to be defined if the header name in the CSV " +
-                    "is different than the column name needs to be inserted\n" +
-                    "Not defined column type it is taken from the DB.\n" +
-                    "The 'defaultValue[XXX]' attributes can define value for empty fields.")
+        description = "Column mapping and defaults can be defined.\n\n" +
+            "'header' or 'index' attributes need to be defined. If the header name in the CSV " +
+            "is different than the column, 'name' needs to be inserted.\n" +
+            "If column 'type' is not defined, the type is taken from the database. " +
+            "Otherwise, for non-string columns, the type definition might be required.\n" +
+            "The 'defaultValue*' attributes can define values for empty fields.")
     public List<LoadDataColumnConfig> getColumns() {
         return columns;
     }
@@ -484,7 +464,7 @@ public class LoadDataChange extends AbstractTableChange implements ChangeWithCol
                     .getFailOnError()) {
                 LOG.info("Changeset " + getChangeSet().toString(false) +
                         " failed, but failOnError was false.  Error: " + ule.getMessage());
-                return new SqlStatement[0];
+                return SqlStatement.EMPTY_SQL_STATEMENT;
             } else {
                 throw ule;
             }
@@ -866,7 +846,7 @@ public class LoadDataChange extends AbstractTableChange implements ChangeWithCol
                 if (database instanceof PostgresDatabase || database instanceof MySQLDatabase) {
                     // we don't do batch updates for Postgres but we still send as a prepared statement, see LB-744
                     // mysql supports batch updates, but the performance vs. the big insert is worse
-                    return preparedStatements.toArray(new SqlStatement[0]);
+                    return preparedStatements.toArray(SqlStatement.EMPTY_SQL_STATEMENT);
                 } else {
                     return new SqlStatement[]{
                             new BatchDmlExecutablePreparedStatement(
@@ -877,12 +857,12 @@ public class LoadDataChange extends AbstractTableChange implements ChangeWithCol
                     };
                 }
             } else {
-                return statements.toArray(new SqlStatement[0]);
+                return statements.toArray(SqlStatement.EMPTY_SQL_STATEMENT);
             }
         } else {
             if (statements.isEmpty()) {
                 // avoid returning unnecessary dummy statement
-                return new SqlStatement[0];
+                return SqlStatement.EMPTY_SQL_STATEMENT;
             }
 
             InsertSetStatement statementSet = this.createStatementSet(

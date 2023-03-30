@@ -8,6 +8,7 @@ import liquibase.hub.LiquibaseHubObjectNotFoundException;
 import liquibase.hub.LiquibaseHubRedirectException;
 import liquibase.hub.LiquibaseHubSecurityException;
 import liquibase.hub.model.ListResponse;
+import liquibase.parser.core.yaml.YamlParser;
 import liquibase.util.LiquibaseUtil;
 import liquibase.util.StringUtil;
 import org.yaml.snakeyaml.DumperOptions;
@@ -45,7 +46,7 @@ class HttpClient {
         dumperOptions.setDefaultScalarStyle(DumperOptions.ScalarStyle.DOUBLE_QUOTED);
         dumperOptions.setWidth(Integer.MAX_VALUE);
 
-        yaml = new Yaml(new Constructor(), new HubRepresenter(), dumperOptions);
+        yaml = new Yaml(new Constructor(YamlParser.createLoaderOptions()), new HubRepresenter(dumperOptions), dumperOptions);
 
         yaml.setBeanAccess(BeanAccess.FIELD);
 
@@ -114,7 +115,7 @@ class HttpClient {
         List<String> paramArray = new ArrayList<>();
         try {
             for (Map.Entry<String, String> entry : parameters.entrySet()) {
-                paramArray.add(entry.getKey() + "=" + URLEncoder.encode(entry.getValue(), "UTF-8"));
+                paramArray.add(entry.getKey() + "=" + URLEncoder.encode(entry.getValue(), StandardCharsets.UTF_8.name()));
             }
         } catch (UnsupportedEncodingException e) {
             throw new RuntimeException(e);
@@ -233,7 +234,8 @@ class HttpClient {
 
     private static class HubRepresenter extends Representer {
 
-        HubRepresenter() {
+        HubRepresenter(DumperOptions options) {
+            super(options);
             getPropertyUtils().setSkipMissingProperties(true);
         }
 

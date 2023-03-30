@@ -17,7 +17,9 @@ import java.util.List;
 /**
  * Combines data from two existing columns into a new column and drops the original columns.
  */
-@DatabaseChange(name="mergeColumns", description = "Concatenates the values in two columns, joins them by with string, and stores the resulting value in a new column.", priority = ChangeMetaData.PRIORITY_DEFAULT)
+@DatabaseChange(name = "mergeColumns",
+    description = "Concatenates the values in two columns, joins them with a string, and stores the resulting value in a new column.",
+    priority = ChangeMetaData.PRIORITY_DEFAULT)
 public class MergeColumnChange extends AbstractChange {
 
     private String catalogName;
@@ -34,6 +36,7 @@ public class MergeColumnChange extends AbstractChange {
         return super.supports(database) && !(database instanceof DerbyDatabase) && !(database instanceof Db2zDatabase);
     }
 
+    @DatabaseChangeProperty(description = "Name of the database catalog")
     public String getCatalogName() {
         return catalogName;
     }
@@ -42,6 +45,7 @@ public class MergeColumnChange extends AbstractChange {
         this.catalogName = catalogName;
     }
 
+    @DatabaseChangeProperty(description = "Name of the database schema")
     public String getSchemaName() {
         return schemaName;
     }
@@ -68,15 +72,6 @@ public class MergeColumnChange extends AbstractChange {
         this.column1Name = column1Name;
     }
 
-    @DatabaseChangeProperty(description = "String to place include between the values from column1 and column2 (may be empty)", exampleValue = " ")
-    public String getJoinString() {
-        return joinString;
-    }
-
-    public void setJoinString(String joinString) {
-        this.joinString = joinString;
-    }
-
     @DatabaseChangeProperty(description = "Name of the column containing the second half of the data", exampleValue = "last_name")
     public String getColumn2Name() {
         return column2Name;
@@ -84,6 +79,16 @@ public class MergeColumnChange extends AbstractChange {
 
     public void setColumn2Name(String column2Name) {
         this.column2Name = column2Name;
+    }
+
+    @DatabaseChangeProperty(description = "String to place between the values from column1 and column2 (may be empty)",
+        exampleValue = " ")
+    public String getJoinString() {
+        return joinString;
+    }
+
+    public void setJoinString(String joinString) {
+        this.joinString = joinString;
     }
 
     @DatabaseChangeProperty(description = "Name of the column to create", exampleValue = "full_name")
@@ -202,7 +207,7 @@ public class MergeColumnChange extends AbstractChange {
 	        statements.addAll(Arrays.asList(dropColumn2Change.generateStatements(database)));
         
         }
-        return statements.toArray(new SqlStatement[0]);
+        return statements.toArray(SqlStatement.EMPTY_SQL_STATEMENT);
 
     }
 

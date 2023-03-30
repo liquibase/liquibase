@@ -72,14 +72,14 @@ public class ChangeParameterMetaData {
         this.description = description;
         this.exampleValues = exampleValues;
         if (dataType instanceof Class) {
-            this.dataType = StringUtil.lowerCaseFirst(((Class) dataType).getSimpleName());
+            this.dataType = StringUtil.lowerCaseFirst(((Class<?>) dataType).getSimpleName());
             this.dataTypeClass = (Class) dataType;
         } else if (dataType instanceof ParameterizedType) {
             this.dataType = StringUtil.lowerCaseFirst(
-                    ((Class) ((ParameterizedType) dataType).getRawType()).getSimpleName() +
+                    ((Class<?>) ((ParameterizedType) dataType).getRawType()).getSimpleName() +
                             " of " +
                             StringUtil.lowerCaseFirst(
-                                    ((Class) ((ParameterizedType) dataType).getActualTypeArguments()[0]).getSimpleName()
+                                    ((Class<?>) ((ParameterizedType) dataType).getActualTypeArguments()[0]).getSimpleName()
                             )
             );
             this.dataTypeClass = (Class) ((ParameterizedType) dataType).getRawType();
@@ -240,7 +240,7 @@ public class ChangeParameterMetaData {
     /**
      * Return the database types for which this parameter is required. The strings returned correspond to the values
      * returned by {@link liquibase.database.Database#getShortName()}.
-     * If the parameter is required for all datatabases, this will return the string "all" as an element.
+     * If the parameter is required for all databases, this will return the string "all" as an element.
      * If the parameter is required for no databases, this will return an empty set. Passing the string "none" to the
      * constructor also results in an empty set.
      * This method will never return a null value
@@ -504,6 +504,6 @@ public class ChangeParameterMetaData {
 
     @Override
     public String toString() {
-        return (change != null ? (change.toString() + ".") : "") + getParameterName();
+        return (change != null ? (change + ".") : "") + getParameterName();
     }
 }

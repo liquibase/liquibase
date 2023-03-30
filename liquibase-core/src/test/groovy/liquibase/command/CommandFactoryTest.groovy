@@ -11,7 +11,7 @@ class CommandFactoryTest extends Specification {
 
         then:
         command.name*.toString() == ["update"]
-        command.pipeline*.class*.name == ["liquibase.command.core.UpdateCommandStep"]
+        command.pipeline*.class*.name.contains("liquibase.command.core.UpdateCommandStep")
         command.arguments.keySet().contains("changelogFile")
     }
 
@@ -36,6 +36,18 @@ class CommandFactoryTest extends Specification {
 
         sampleCommand.name == ["calculateChecksum"]
         sampleCommand.arguments.keySet().contains("changelogFile")
+
+    }
+
+    def "getCommand brings all the dependencies for a given command in correct oreder"() {
+        when:
+        def command = Scope.currentScope.getSingleton(CommandFactory).getCommandDefinition("tag")
+
+        then:
+        command.name*.toString() == ["tag"]
+        command.arguments.keySet().contains("tag")
+        command.arguments.keySet().contains("database")
+        command.pipeline*.class*.name == ["liquibase.command.core.helpers.DbUrlConnectionCommandStep", "liquibase.command.core.helpers.LockServiceCommandStep", "liquibase.command.core.TagCommandStep"]
 
     }
 }

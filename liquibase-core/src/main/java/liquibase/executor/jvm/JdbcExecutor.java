@@ -11,6 +11,7 @@ import liquibase.exception.DatabaseException;
 import liquibase.executor.AbstractExecutor;
 import liquibase.listener.SqlListener;
 import liquibase.logging.Logger;
+import liquibase.logging.mdc.MdcKey;
 import liquibase.servicelocator.PrioritizedService;
 import liquibase.sql.CallableSql;
 import liquibase.sql.Sql;
@@ -26,7 +27,6 @@ import liquibase.util.JdbcUtil;
 import liquibase.util.StringUtil;
 
 import java.sql.*;
-
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -65,7 +65,6 @@ public class JdbcExecutor extends AbstractExecutor {
     }
 
     public Object execute(StatementCallback action, List<SqlVisitor> sqlVisitors) throws DatabaseException {
-        Scope.getCurrentScope().getLog(getClass()).fine("Executing with the '" + getName() + "' executor");
         DatabaseConnection con = database.getConnection();
         Statement stmt = null;
         try {
@@ -123,7 +122,7 @@ public class JdbcExecutor extends AbstractExecutor {
 
     @Override
     public void execute(final SqlStatement sql) throws DatabaseException {
-        execute(sql, new ArrayList<SqlVisitor>());
+        execute(sql, new ArrayList<>());
     }
 
     @Override
@@ -175,7 +174,7 @@ public class JdbcExecutor extends AbstractExecutor {
 
 
     public Object query(final SqlStatement sql, final ResultSetExtractor rse) throws DatabaseException {
-        return query(sql, rse, new ArrayList<SqlVisitor>());
+        return query(sql, rse, new ArrayList<>());
     }
 
     public Object query(final SqlStatement sql, final ResultSetExtractor rse, final List<SqlVisitor> sqlVisitors) throws DatabaseException {
@@ -203,7 +202,7 @@ public class JdbcExecutor extends AbstractExecutor {
     }
 
     public List query(SqlStatement sql, RowMapper rowMapper) throws DatabaseException {
-        return query(sql, rowMapper, new ArrayList());
+        return query(sql, rowMapper, new ArrayList<>());
     }
 
     public List query(SqlStatement sql, RowMapper rowMapper, List<SqlVisitor> sqlVisitors) throws DatabaseException {
@@ -211,7 +210,7 @@ public class JdbcExecutor extends AbstractExecutor {
     }
 
     public Object queryForObject(SqlStatement sql, RowMapper rowMapper) throws DatabaseException {
-        return queryForObject(sql, rowMapper, new ArrayList());
+        return queryForObject(sql, rowMapper, new ArrayList<>());
     }
 
     public Object queryForObject(SqlStatement sql, RowMapper rowMapper, List<SqlVisitor> sqlVisitors) throws DatabaseException {
@@ -225,7 +224,7 @@ public class JdbcExecutor extends AbstractExecutor {
 
     @Override
     public <T> T queryForObject(SqlStatement sql, Class<T> requiredType) throws DatabaseException {
-        return (T) queryForObject(sql, requiredType, new ArrayList());
+        return (T) queryForObject(sql, requiredType, new ArrayList<>());
     }
 
     @Override
@@ -235,7 +234,7 @@ public class JdbcExecutor extends AbstractExecutor {
 
     @Override
     public long queryForLong(SqlStatement sql) throws DatabaseException {
-        return queryForLong(sql, new ArrayList());
+        return queryForLong(sql, new ArrayList<>());
     }
 
     @Override
@@ -246,7 +245,7 @@ public class JdbcExecutor extends AbstractExecutor {
 
     @Override
     public int queryForInt(SqlStatement sql) throws DatabaseException {
-        return queryForInt(sql, new ArrayList());
+        return queryForInt(sql, new ArrayList<>());
     }
 
     @Override
@@ -257,7 +256,7 @@ public class JdbcExecutor extends AbstractExecutor {
 
     @Override
     public List queryForList(SqlStatement sql, Class elementType) throws DatabaseException {
-        return queryForList(sql, elementType, new ArrayList());
+        return queryForList(sql, elementType, new ArrayList<>());
     }
 
     @Override
@@ -267,7 +266,7 @@ public class JdbcExecutor extends AbstractExecutor {
 
     @Override
     public List<Map<String, ?>> queryForList(SqlStatement sql) throws DatabaseException {
-        return queryForList(sql, new ArrayList());
+        return queryForList(sql, new ArrayList<>());
     }
 
     @Override
@@ -277,7 +276,7 @@ public class JdbcExecutor extends AbstractExecutor {
 
     @Override
     public int update(final SqlStatement sql) throws DatabaseException {
-        return update(sql, new ArrayList());
+        return update(sql, new ArrayList<>());
     }
 
     // Incorrect warning, at least at this point. The situation here is not that we inject some unsanitised parameter

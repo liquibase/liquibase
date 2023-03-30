@@ -37,6 +37,7 @@ import java.lang.reflect.Field;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLClassLoader;
+import java.nio.file.Files;
 import java.text.MessageFormat;
 import java.util.*;
 
@@ -618,7 +619,7 @@ public abstract class AbstractLiquibaseMojo extends AbstractMojo {
         }
         getLog().debug("Writing output file with '" + encoding + "' file encoding.");
 
-        return new BufferedWriter(new OutputStreamWriter(new FileOutputStream(outputFile), encoding));
+        return new BufferedWriter(new OutputStreamWriter(Files.newOutputStream(outputFile.toPath()), encoding));
     }
 
     @Override
@@ -741,7 +742,7 @@ public abstract class AbstractLiquibaseMojo extends AbstractMojo {
                             defaultChangeExecListener = new DefaultChangeExecListener(listener);
                             liquibase.setChangeExecListener(defaultChangeExecListener);
 
-                            getLog().debug("expressionVars = " + String.valueOf(expressionVars));
+                            getLog().debug("expressionVars = " + expressionVars);
 
                             if (expressionVars != null) {
                                 for (Map.Entry<Object, Object> var : expressionVars.entrySet()) {
@@ -749,7 +750,7 @@ public abstract class AbstractLiquibaseMojo extends AbstractMojo {
                                 }
                             }
 
-                            getLog().debug("expressionVariables = " + String.valueOf(expressionVariables));
+                            getLog().debug("expressionVariables = " + expressionVariables);
                             if (expressionVariables != null) {
                                 for (Map.Entry var : (Set<Map.Entry>) expressionVariables.entrySet()) {
                                     if (var.getValue() != null) {
@@ -778,9 +779,7 @@ public abstract class AbstractLiquibaseMojo extends AbstractMojo {
                         //
                         Map<String, Object> innerScopeValues = new HashMap<>();
                         innerScopeValues.put(key, preserveSchemaCase);
-                        Scope.child(innerScopeValues, () -> {
-                            performLiquibaseTask(liquibase);
-                        });
+                        Scope.child(innerScopeValues, () -> performLiquibaseTask(liquibase));
                     } catch (LiquibaseException e) {
                         cleanup(database);
                         throw new MojoExecutionException("\nError setting up or running Liquibase:\n" + e.getMessage(), e);
@@ -859,7 +858,7 @@ public abstract class AbstractLiquibaseMojo extends AbstractMojo {
         return new Liquibase("", Scope.getCurrentScope().getResourceAccessor(), db);
     }
 
-    public void configureFieldsAndValues() throws MojoExecutionException, MojoFailureException {
+    public void configureFieldsAndValues() throws MojoExecutionException {
         // Load the properties file if there is one, but only for values that the user has not
         // already specified.
         if (propertyFile != null) {
@@ -869,21 +868,16 @@ public abstract class AbstractLiquibaseMojo extends AbstractMojo {
                 if (is == null) {
                     throw new MojoExecutionException(FileUtil.getFileNotFoundMessage(propertyFile));
                 }
-
                 parsePropertiesFile(is);
                 getLog().info(MavenUtils.LOG_SEPARATOR);
-            } catch (IOException e) {
+            } catch (IOException | MojoFailureException e) {
                 throw new UnexpectedLiquibaseException(e);
             }
             try (InputStream is = handlePropertyFileInputStream(propertyFile)) {
-                if (is == null) {
-                    throw new MojoExecutionException(FileUtil.getFileNotFoundMessage(propertyFile));
-                }
-
                 LiquibaseConfiguration liquibaseConfiguration = Scope.getCurrentScope().getSingleton(LiquibaseConfiguration.class);
-                final DefaultsFileValueProvider fileProvider = new DefaultsFileValueProvider(is, "Property file "+propertyFile);
+                final DefaultsFileValueProvider fileProvider = new DefaultsFileValueProvider(is, "Property file " + propertyFile);
                 liquibaseConfiguration.registerProvider(fileProvider);
-            } catch (IOException e) {
+            } catch (IOException | MojoFailureException e) {
                 throw new UnexpectedLiquibaseException(e);
             }
         }
@@ -936,7 +930,7 @@ public abstract class AbstractLiquibaseMojo extends AbstractMojo {
      */
     protected ClassLoader getClassLoaderIncludingProjectClasspath() throws MojoExecutionException {
         try {
-            List classpathElements = project.getCompileClasspathElements();
+            List<String> classpathElements = project.getCompileClasspathElements();
             classpathElements.add(project.getBuild().getOutputDirectory());
             URL urls[] = new URL[classpathElements.size()];
             for (int i = 0; i < classpathElements.size(); ++i) {
@@ -1041,7 +1035,7 @@ public abstract class AbstractLiquibaseMojo extends AbstractMojo {
         }
         Properties props = loadProperties(propertiesInputStream);
 
-        for (Iterator it = props.keySet().iterator(); it.hasNext(); ) {
+        for (Iterator<Object> it = props.keySet().iterator(); it.hasNext(); ) {
             String key = null;
             try {
                 key = (String) it.next();
@@ -1117,7 +1111,7 @@ public abstract class AbstractLiquibaseMojo extends AbstractMojo {
             systemProperties = new Properties();
         }
         // Add all system properties configured by the user
-        Iterator iter = systemProperties.keySet().iterator();
+        Iterator<Object> iter = systemProperties.keySet().iterator();
         while (iter.hasNext()) {
             String key = (String) iter.next();
             String value = systemProperties.getProperty(key);

@@ -42,7 +42,7 @@ public class InsertOrUpdateGeneratorHsql extends InsertOrUpdateGenerator {
 		}
 		columns.deleteCharAt(0);
 		values.deleteCharAt(0);
-		return "INSERT (" + columns.toString() + ") VALUES (" + values.toString() + ")";
+		return "INSERT (" + columns + ") VALUES (" + values + ")";
 	}
 
 	@Override

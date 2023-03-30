@@ -14,9 +14,7 @@ import liquibase.resource.ResourceAccessor;
 import liquibase.snapshot.SnapshotGeneratorFactory;
 import liquibase.sqlgenerator.SqlGeneratorFactory;
 import liquibase.statement.SqlStatement;
-import liquibase.statement.core.CreateViewStatement;
-import liquibase.statement.core.DropViewStatement;
-import liquibase.statement.core.SetViewRemarksStatement;
+import liquibase.statement.core.*;
 import liquibase.structure.core.View;
 import liquibase.util.FileUtil;
 import liquibase.util.ObjectUtil;
@@ -36,7 +34,7 @@ import static liquibase.statement.SqlStatement.EMPTY_SQL_STATEMENT;
 /**
  * Creates a new view.
  */
-@DatabaseChange(name="createView", description = "Create a new database view", priority = ChangeMetaData.PRIORITY_DEFAULT)
+@DatabaseChange(name = "createView", description = "Create a new database view", priority = ChangeMetaData.PRIORITY_DEFAULT)
 public class CreateViewChange extends AbstractChange {
 
     private String catalogName;
@@ -51,7 +49,7 @@ public class CreateViewChange extends AbstractChange {
     private String encoding;
     private String remarks;
 
-    @DatabaseChangeProperty(since = "3.0")
+    @DatabaseChangeProperty(since = "3.0", description = "Name of the database catalog")
     public String getCatalogName() {
         return catalogName;
     }
@@ -60,6 +58,7 @@ public class CreateViewChange extends AbstractChange {
         this.catalogName = catalogName;
     }
 
+    @DatabaseChangeProperty(description = "Name of the database schema")
     public String getSchemaName() {
         return schemaName;
     }
@@ -77,7 +76,8 @@ public class CreateViewChange extends AbstractChange {
         this.viewName = viewName;
     }
 
-    @DatabaseChangeProperty(serializationType = SerializationType.DIRECT_VALUE, description = "SQL for generating the view", exampleValue = "select id, name from person where id > 10")
+    @DatabaseChangeProperty(serializationType = SerializationType.DIRECT_VALUE, description = "SQL for generating the view",
+        exampleValue = "SELECT id, name FROM person WHERE id > 10")
     public String getSelectQuery() {
         return selectQuery;
     }
@@ -86,7 +86,7 @@ public class CreateViewChange extends AbstractChange {
         this.selectQuery = selectQuery;
     }
 
-    @DatabaseChangeProperty(description = "Use 'create or replace' syntax", since = "1.5")
+    @DatabaseChangeProperty(description = "Use 'CREATE OR REPLACE' syntax", since = "1.5")
     public Boolean getReplaceIfExists() {
         return replaceIfExists;
     }
@@ -95,7 +95,8 @@ public class CreateViewChange extends AbstractChange {
         this.replaceIfExists = replaceIfExists;
     }
 
-    @DatabaseChangeProperty(description = "Set to true if selectQuery is the entire view definition. False if the CREATE VIEW header should be added", since = "3.3")
+    @DatabaseChangeProperty(since = "3.3",
+        description = "Set to true if selectQuery is the entire view definition. Set to false if the CREATE VIEW header should be added")
     public Boolean getFullDefinition() {
         return fullDefinition;
     }
@@ -104,7 +105,7 @@ public class CreateViewChange extends AbstractChange {
         this.fullDefinition = fullDefinition;
     }
 
-    @DatabaseChangeProperty(description = "Path to file containing view definition", since = "3.6")
+    @DatabaseChangeProperty(description = "Path to the file containing the view definition. Specifying 'path' is an alternative to selectQuery.", since = "3.6")
     public String getPath() {
         return path;
     }
@@ -113,6 +114,8 @@ public class CreateViewChange extends AbstractChange {
         this.path = path;
     }
 
+    @DatabaseChangeProperty(description = "Specifies whether the file path is relative to the changelog file " +
+        "rather than looked up in the search path. Default: false.")
     public Boolean getRelativeToChangelogFile() {
         return relativeToChangelogFile;
     }
@@ -121,6 +124,7 @@ public class CreateViewChange extends AbstractChange {
         this.relativeToChangelogFile = relativeToChangelogFile;
     }
 
+    @DatabaseChangeProperty(description = "Encoding used in the file you specify in 'path'")
     public String getEncoding() {
         return encoding;
     }
@@ -129,6 +133,7 @@ public class CreateViewChange extends AbstractChange {
         this.encoding = encoding;
     }
 
+    @DatabaseChangeProperty(description = "A brief descriptive comment stored in the view metadata")
     public String getRemarks() {
         return remarks;
     }
@@ -212,7 +217,7 @@ public class CreateViewChange extends AbstractChange {
 
 			CheckSum checkSum = CheckSum.compute(new AbstractSQLChange.NormalizingStream(";", false, false, stream), false);
 
-            return CheckSum.compute(super.generateCheckSum().toString() + ":" + checkSum.toString());
+            return CheckSum.compute(super.generateCheckSum().toString() + ":" + checkSum);
         } finally {
             if (stream != null) {
                 try {
@@ -266,7 +271,7 @@ public class CreateViewChange extends AbstractChange {
                     .setFullDefinition(fullDefinition));
         }
 
-        List<Class<?>> databaseSupportsViewComments = Arrays.asList(OracleDatabase.class, PostgresDatabase.class);
+        List<Class<?>> databaseSupportsViewComments = Arrays.asList(OracleDatabase.class, PostgresDatabase.class, MSSQLDatabase.class, DB2Database.class);
         boolean supportsViewComments = databaseSupportsViewComments.stream().anyMatch(clazz -> clazz.isInstance(database));
 
         if (supportsViewComments && (StringUtil.trimToNull(remarks) != null)) {
