@@ -189,13 +189,19 @@ public class CommandScope {
      * Executes the command in this scope, and returns the results.
      */
     public CommandResults execute() throws CommandExecutionException {
-        Scope.getCurrentScope().addMdcValue(MdcKey.OPERATION_START, new ISODateFormat().format(new Date()));
+        Scope.getCurrentScope().addMdcValue(MdcKey.OPERATION_START_TIME, new ISODateFormat().format(new Date()));
         CommandResultsBuilder resultsBuilder = new CommandResultsBuilder(this, outputStream);
         final List<CommandStep> pipeline = commandDefinition.getPipeline();
         final List<CommandStep> executedCommands = new ArrayList<>();
         Optional<Exception> thrownException = Optional.empty();
         validate();
-        Scope.getCurrentScope().addMdcValue(MdcKey.LIQUIBASE_OPERATION, StringUtil.join(commandDefinition.getName(), "-"));
+        //
+        // NOTE:
+        // When all commands have been refactored we will be able to remove this string manipulation
+        //
+        String commandNameForMdc = StringUtil.join(commandDefinition.getName(), "-");
+        commandNameForMdc = StringUtil.lowerCaseFirst(commandNameForMdc.replaceAll("^internal",""));
+        Scope.getCurrentScope().addMdcValue(MdcKey.LIQUIBASE_OPERATION, commandNameForMdc);
         try {
             for (CommandStep command : pipeline) {
                 try {
@@ -226,7 +232,7 @@ public class CommandScope {
                 throw new CommandExecutionException(e);
             }
         } finally {
-            try (MdcObject operationStopTime = Scope.getCurrentScope().addMdcValue(MdcKey.OPERATION_STOP, new ISODateFormat().format(new Date()))) {
+            try (MdcObject operationStopTime = Scope.getCurrentScope().addMdcValue(MdcKey.OPERATION_STOP_TIME, new ISODateFormat().format(new Date()))) {
                 Scope.getCurrentScope().getLog(getClass()).info("Command execution complete");
             }
             try {

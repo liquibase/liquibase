@@ -5,6 +5,7 @@ import liquibase.command.*;
 import liquibase.diff.compare.CompareControl;
 import liquibase.diff.output.DiffOutputControl;
 import liquibase.diff.output.ObjectChangeFilter;
+import liquibase.logging.mdc.MdcKey;
 
 import java.util.Collections;
 import java.util.List;
@@ -13,7 +14,7 @@ import java.util.List;
  * Internal command step to be used on pipeline to instantiate a DiffOutputControl object that is mainly used
  * by diffChangeLog/generateChangeLog .
  */
-public class DiffOutputControlCommandStep extends AbstractCommandStep {
+public class DiffOutputControlCommandStep extends AbstractHelperCommandStep {
 
     public static final String[] COMMAND_NAME = {"diffOutputControl"};
     public static final CommandArgumentDefinition<Boolean> INCLUDE_CATALOG_ARG;
@@ -45,14 +46,6 @@ public class DiffOutputControlCommandStep extends AbstractCommandStep {
         return Collections.singletonList(DiffOutputControl.class);
     }
 
-
-    @Override
-    public void adjustCommandDefinition(CommandDefinition commandDefinition) {
-        if (commandDefinition.getPipeline().size() == 1) {
-            commandDefinition.setInternal(true);
-        }
-    }
-
     @Override
     public String[][] defineCommandNames() {
         return new String[][] { COMMAND_NAME };
@@ -73,9 +66,13 @@ public class DiffOutputControlCommandStep extends AbstractCommandStep {
         CompareControl compareControl = (CompareControl) resultsBuilder.getResult(PreCompareCommandStep.COMPARE_CONTROL_RESULT.getName());
         ObjectChangeFilter objectChangeFilter = (ObjectChangeFilter) resultsBuilder.getResult(PreCompareCommandStep.OBJECT_CHANGE_FILTER_RESULT.getName());
 
+        Boolean includeCatalog = commandScope.getArgumentValue(INCLUDE_CATALOG_ARG);
+        Boolean includeSchema = commandScope.getArgumentValue(INCLUDE_SCHEMA_ARG);
+        Boolean includeTablespace = commandScope.getArgumentValue(INCLUDE_TABLESPACE_ARG);
+        addMdcProperties(includeCatalog, includeSchema, includeTablespace);
         DiffOutputControl diffOutputControl = new DiffOutputControl(
-                commandScope.getArgumentValue(INCLUDE_CATALOG_ARG), commandScope.getArgumentValue(INCLUDE_SCHEMA_ARG),
-                commandScope.getArgumentValue(INCLUDE_TABLESPACE_ARG), compareControl.getSchemaComparisons());
+                includeCatalog, includeSchema,
+                includeTablespace, compareControl.getSchemaComparisons());
         for (CompareControl.SchemaComparison schema : compareControl.getSchemaComparisons()) {
             diffOutputControl.addIncludedSchema(schema.getReferenceSchema());
             diffOutputControl.addIncludedSchema(schema.getComparisonSchema());
@@ -86,6 +83,12 @@ public class DiffOutputControlCommandStep extends AbstractCommandStep {
         }
 
         return diffOutputControl;
+    }
+
+    private void addMdcProperties(Boolean includeCatalog, Boolean includeSchema, Boolean includeTablespace) {
+        Scope.getCurrentScope().addMdcValue(MdcKey.INCLUDE_CATALOG, String.valueOf(includeCatalog));
+        Scope.getCurrentScope().addMdcValue(MdcKey.INCLUDE_SCHEMA, String.valueOf(includeSchema));
+        Scope.getCurrentScope().addMdcValue(MdcKey.INCLUDE_TABLESPACE, String.valueOf(includeTablespace));
     }
 
     protected void outputBestPracticeMessage() {

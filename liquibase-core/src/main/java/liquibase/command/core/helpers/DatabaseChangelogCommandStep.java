@@ -8,8 +8,6 @@ import liquibase.changelog.ChangeLogHistoryServiceFactory;
 import liquibase.changelog.ChangeLogParameters;
 import liquibase.changelog.DatabaseChangeLog;
 import liquibase.command.*;
-import liquibase.configuration.LiquibaseConfiguration;
-import liquibase.configuration.ProvidedValue;
 import liquibase.database.Database;
 import liquibase.exception.LiquibaseException;
 import liquibase.lockservice.LockService;
@@ -23,14 +21,12 @@ import liquibase.resource.ResourceAccessor;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
-import java.util.stream.Collectors;
 
 /**
  * This helper class provides two objects: a valid and verified DatabaseChangeLog and the ChangeLogParameters
  * object used to instantiate it.
  */
-public class DatabaseChangelogCommandStep extends AbstractCommandStep implements CleanUpCommandStep {
+public class DatabaseChangelogCommandStep extends AbstractHelperCommandStep implements CleanUpCommandStep {
     protected static final String[] COMMAND_NAME = {"changelogCommandStep"};
 
     public static final CommandArgumentDefinition<String> CHANGELOG_FILE_ARG;
@@ -117,13 +113,6 @@ public class DatabaseChangelogCommandStep extends AbstractCommandStep implements
     @Override
     public String[][] defineCommandNames() {
         return new String[][]{COMMAND_NAME};
-    }
-
-    @Override
-    public void adjustCommandDefinition(CommandDefinition commandDefinition) {
-        if (commandDefinition.getPipeline().size() == 1) {
-            commandDefinition.setInternal(true);
-        }
     }
 
     @Override

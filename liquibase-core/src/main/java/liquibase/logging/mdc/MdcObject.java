@@ -3,7 +3,6 @@ package liquibase.logging.mdc;
 import liquibase.Scope;
 
 import java.io.Closeable;
-import java.io.IOException;
 
 public class MdcObject implements Closeable {
 

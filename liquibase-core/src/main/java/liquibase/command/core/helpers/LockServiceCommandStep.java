@@ -14,7 +14,7 @@ import java.util.List;
 /**
  * Internal command step to be used on CommandStep pipeline to create lock services.
  */
-public class LockServiceCommandStep extends AbstractCommandStep implements CleanUpCommandStep {
+public class LockServiceCommandStep extends AbstractHelperCommandStep implements CleanUpCommandStep {
 
     protected static final String[] COMMAND_NAME = {"lockServiceCommandStep"};
 
@@ -44,12 +44,6 @@ public class LockServiceCommandStep extends AbstractCommandStep implements Clean
         return new String[][] { COMMAND_NAME };
     }
 
-    @Override
-    public void adjustCommandDefinition(CommandDefinition commandDefinition) {
-        if (commandDefinition.getPipeline().size() == 1) {
-            commandDefinition.setInternal(true);
-        }
-    }
     @Override
     public void cleanUp(CommandResultsBuilder resultsBuilder) {
         try {
