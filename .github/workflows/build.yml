@@ -454,7 +454,6 @@ jobs:
           name: liquibase-artifacts-${{ needs.setup.outputs.thisBranchFileName }}
           path: artifacts-named/*
 
-
   finish:
     name: Finish Build
     runs-on: ubuntu-20.04

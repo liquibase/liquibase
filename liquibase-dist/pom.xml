@@ -29,6 +29,12 @@
 	</properties>
 	<dependencies>
 		<dependency>
+            <groupId>${project.groupId}</groupId>
+			<artifactId>liquibase-core-new</artifactId>
+            <version>${project.version}</version>
+		</dependency>
+
+		<dependency>
 			<groupId>com.h2database</groupId>
 			<artifactId>h2</artifactId>
 			<version>${h2.version}</version>
@@ -134,16 +140,18 @@
 	</dependencies>
 
 	<build>
-        <finalName>liquibase-${project.version}</finalName>
-		<resources>
-			<resource>
-                <directory>${project.basedir}/src/main/archive</directory>
-                <targetPath>${project.build.directory}/archive</targetPath>
-                <filtering>true</filtering>
-			</resource>
-		</resources>
-
 		<plugins>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-jar-plugin</artifactId>
+				<version>3.8.1</version>
+				<executions>
+				  <execution>
+					<id>default-jar</id>
+					<phase/>
+				  </execution>
+				</executions>
+			</plugin>
 		    <plugin>
                 <groupId>org.liquibase.ext</groupId>
                 <artifactId>liquibase-sdk-maven-plugin</artifactId>
