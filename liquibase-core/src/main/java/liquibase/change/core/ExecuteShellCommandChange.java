@@ -1,19 +1,15 @@
 package liquibase.change.core;
 
+import liquibase.GlobalConfiguration;
 import liquibase.Scope;
 import liquibase.change.AbstractChange;
 import liquibase.change.ChangeMetaData;
 import liquibase.change.DatabaseChange;
 import liquibase.change.DatabaseChangeProperty;
-import liquibase.GlobalConfiguration;
-import liquibase.changelog.ChangeSet;
 import liquibase.database.Database;
 import liquibase.exception.UnexpectedLiquibaseException;
 import liquibase.exception.ValidationErrors;
 import liquibase.exception.Warnings;
-import liquibase.executor.Executor;
-import liquibase.executor.ExecutorService;
-import liquibase.executor.LoggingExecutor;
 import liquibase.parser.core.ParsedNode;
 import liquibase.parser.core.ParsedNodeException;
 import liquibase.resource.ResourceAccessor;
@@ -21,7 +17,6 @@ import liquibase.sql.Sql;
 import liquibase.statement.SqlStatement;
 import liquibase.statement.core.CommentStatement;
 import liquibase.statement.core.RuntimeStatement;
-import liquibase.util.BooleanUtil;
 import liquibase.util.StringUtil;
 
 import java.io.*;
@@ -133,14 +128,12 @@ public class ExecuteShellCommandChange extends AbstractChange {
             }
         }
 
-        // check if running under not-executed mode (logging output)
-        // or generating statements
-        boolean nonExecutedMode = isNonExecutedMode(database);
+        // Do not run if just logging output or generating statements
+        boolean shouldExecuteChange = shouldExecuteChange(database);
 
         this.finalCommandArray = createFinalCommandArray(database);
 
-        if (shouldRun && !nonExecutedMode) {
-
+        if (shouldRun && shouldExecuteChange) {
 
             return new SqlStatement[]{new RuntimeStatement() {
 
@@ -153,12 +146,12 @@ public class ExecuteShellCommandChange extends AbstractChange {
                         throw new UnexpectedLiquibaseException("Error executing command: " + e.getLocalizedMessage(), e);
                     }
 
-                    return null;
+                    return new Sql[0];
                 }
             }};
         }
 
-        if (nonExecutedMode) {
+        if (! shouldExecuteChange) {
             try {
                 return new SqlStatement[]{
                         new CommentStatement(getCommandString())
@@ -169,15 +162,6 @@ public class ExecuteShellCommandChange extends AbstractChange {
         }
 
         return SqlStatement.EMPTY_SQL_STATEMENT;
-    }
-
-    //
-    // Return true if LoggingExecutor or flag was set in Scope to indicate not to execute
-    //
-    private boolean isNonExecutedMode(Database database) {
-        Boolean nonExecuteModeFromScope = Scope.getCurrentScope().get(ChangeSet.NO_EXECUTE_MODE, Boolean.class);
-        Executor executor = Scope.getCurrentScope().getSingleton(ExecutorService.class).getExecutor("jdbc", database);
-        return executor instanceof LoggingExecutor || BooleanUtil.isTrue(nonExecuteModeFromScope);
     }
 
     protected void nonExecutedCleanup() {

@@ -45,8 +45,6 @@ import java.util.stream.Collectors;
  */
 public class ChangeSet implements Conditional, ChangeLogChild {
 
-    public static final String NO_EXECUTE_MODE = "noExecuteMode";
-
     protected CheckSum checkSum;
     /**
      * storedChecksum is used to make the checksum of a changeset that has already been run
@@ -1524,24 +1522,25 @@ public class ChangeSet implements Conditional, ChangeLogChild {
     }
 
     /**
+     *
      * Adds changeset sql to mdc if the change is supported by the database
      * @param change the change to read sql from
      * @param database the database to generate change sql against
      * @param generateRollbackStatements controls generation of rollback sql statements or standard statements sql
      * @throws RollbackImpossibleException if you cannot generate rollback statements
+     *
      */
     private void addSqlMdc(Change change, Database database, boolean generateRollbackStatements) throws Exception {
         //
         // If the change is for this Database
-        // If the change allows
-        // add a Boolean flag to Scope to indicate that the Change should not be executed
+        // add a Boolean flag to Scope to indicate that the Change should not be executed when adding MDC context
         //
         if (! change.supports(database)) {
             return;
         }
-        Map<String, Object> scopeValues = new HashMap<>();
-        scopeValues.put(NO_EXECUTE_MODE, Boolean.TRUE);
         AtomicReference<SqlStatement[]> statementsReference = new AtomicReference<>();
+        Map<String, Object> scopeValues = new HashMap<>();
+        scopeValues.put(Change.SHOULD_EXECUTE, Boolean.FALSE);
         Scope.child(scopeValues, () -> statementsReference.set(generateRollbackStatements ?
                change.generateRollbackStatements(database) : change.generateStatements(database)));
         String sqlStatementsMdc = Arrays.stream(statementsReference.get())

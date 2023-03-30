@@ -1,21 +1,13 @@
 package liquibase.change.custom;
 
 import liquibase.Scope;
-import liquibase.change.AbstractChange;
-import liquibase.change.ChangeMetaData;
-import liquibase.change.DatabaseChange;
-import liquibase.change.DatabaseChangeProperty;
-import liquibase.changelog.ChangeSet;
+import liquibase.change.*;
 import liquibase.database.Database;
 import liquibase.exception.*;
-import liquibase.executor.Executor;
-import liquibase.executor.ExecutorService;
-import liquibase.executor.LoggingExecutor;
 import liquibase.parser.core.ParsedNode;
 import liquibase.parser.core.ParsedNodeException;
 import liquibase.resource.ResourceAccessor;
 import liquibase.statement.SqlStatement;
-import liquibase.util.BooleanUtil;
 import liquibase.util.ObjectUtil;
 
 import java.util.*;
@@ -167,34 +159,25 @@ public class CustomChangeWrapper extends AbstractChange {
     @Override
     public SqlStatement[] generateStatements(Database database) {
         SqlStatement[] statements = null;
-        try {
-            configureCustomChange();
-            if (customChange instanceof CustomSqlChange) {
-                statements = ((CustomSqlChange) customChange).generateStatements(database);
-            } else if (customChange instanceof CustomTaskChange) {
-                if (! isNonExecutedMode(database)) {
+        if (shouldExecuteChange(database)) {
+            try {
+                configureCustomChange();
+                if (customChange instanceof CustomSqlChange) {
+                    statements = ((CustomSqlChange) customChange).generateStatements(database);
+                } else if (customChange instanceof CustomTaskChange) {
                     ((CustomTaskChange) customChange).execute(database);
+                } else {
+                    throw new UnexpectedLiquibaseException(customChange.getClass().getName() + " does not implement " + CustomSqlChange.class.getName() + " or " + CustomTaskChange.class.getName());
                 }
-            } else {
-                throw new UnexpectedLiquibaseException(customChange.getClass().getName() + " does not implement " + CustomSqlChange.class.getName() + " or " + CustomTaskChange.class.getName());
+            } catch (CustomChangeException e) {
+                throw new UnexpectedLiquibaseException(e);
             }
-        } catch (CustomChangeException e) {
-            throw new UnexpectedLiquibaseException(e);
         }
 
         if (statements == null) {
             statements = SqlStatement.EMPTY_SQL_STATEMENT;
         }
         return statements;
-    }
-
-    //
-    // Return true if LoggingExecutor or flag was set in Scope to indicate not to execute
-    //
-    public static boolean isNonExecutedMode(Database database) {
-        Boolean nonExecuteModeFromScope = Scope.getCurrentScope().get(ChangeSet.NO_EXECUTE_MODE, Boolean.class);
-        Executor executor = Scope.getCurrentScope().getSingleton(ExecutorService.class).getExecutor("jdbc", database);
-        return executor instanceof LoggingExecutor || BooleanUtil.isTrue(nonExecuteModeFromScope);
     }
 
     /**
