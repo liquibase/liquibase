@@ -12,7 +12,7 @@ import liquibase.structure.core.Table;
  * Renames an existing column.
  */
 @DatabaseChange(
-    name="renameColumn",
+    name = "renameColumn",
     description = "Renames an existing column",
     priority = ChangeMetaData.PRIORITY_DEFAULT,
     appliesTo = "column"
@@ -27,7 +27,7 @@ public class RenameColumnChange extends AbstractChange {
     private String columnDataType;
     private String remarks;
 
-    @DatabaseChangeProperty(since = "3.0", mustEqualExisting ="column.relation.catalog")
+    @DatabaseChangeProperty(since = "3.0", mustEqualExisting = "column.relation.catalog", description = "Name of the database catalog")
     public String getCatalogName() {
         return catalogName;
     }
@@ -36,7 +36,7 @@ public class RenameColumnChange extends AbstractChange {
         this.catalogName = catalogName;
     }
 
-    @DatabaseChangeProperty(mustEqualExisting ="column.relation.schema")
+    @DatabaseChangeProperty(mustEqualExisting = "column.relation.schema", description = "Name of the database schema")
     public String getSchemaName() {
         return schemaName;
     }
@@ -46,7 +46,7 @@ public class RenameColumnChange extends AbstractChange {
     }
 
     @DatabaseChangeProperty(
-        description = "Name of the table containing that the column to rename",
+        description = "Name of the table containing the column to rename",
         mustEqualExisting = "column.relation"
     )
     public String getTableName() {
@@ -70,7 +70,7 @@ public class RenameColumnChange extends AbstractChange {
         this.oldColumnName = oldColumnName;
     }
 
-    @DatabaseChangeProperty(description = "Name to rename the column to", exampleValue = "full_name")
+    @DatabaseChangeProperty(description = "New name for the column", exampleValue = "full_name")
     public String getNewColumnName() {
         return newColumnName;
     }
@@ -88,7 +88,7 @@ public class RenameColumnChange extends AbstractChange {
         this.columnDataType = columnDataType;
     }
 
-    @DatabaseChangeProperty(description = "Remarks of the column")
+    @DatabaseChangeProperty(description = "A brief descriptive comment written to the column metadata")
     public String getRemarks() {
         return remarks;
     }
