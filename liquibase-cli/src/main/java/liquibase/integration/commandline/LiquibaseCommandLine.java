@@ -436,6 +436,12 @@ public class LiquibaseCommandLine {
             recordingClass.getMethod("setMaxAge", Duration.class).invoke(recording, (Duration) null);
             recordingClass.getMethod("setDumpOnExit", boolean.class).invoke(recording, true);
             recordingClass.getMethod("setToDisk", boolean.class).invoke(recording, true);
+
+            recordingClass.getMethod("disable", String.class).invoke(recording, "jdk.InitialEnvironmentVariable");
+            recordingClass.getMethod("disable", String.class).invoke(recording, "jdk.InitialSystemProperty");
+            recordingClass.getMethod("disable", String.class).invoke(recording, "jdk.SystemProcess");
+            recordingClass.getMethod("disable", String.class).invoke(recording, "jdk.JVMInformation");
+
             final File filePath = new File(filename).getAbsoluteFile();
             filePath.getParentFile().mkdirs();
 

@@ -85,4 +85,7 @@ public class MdcKey {
     public static final String UPDATE_TO_TAG = "updateToTag";
     public static final String UPDATE_COUNT = "updateCount";
     public static final String ROLLBACK_ON_ERROR = "rollbackOnError";
+    public static final String DIFF_CHANGELOG_FILE = "diffChangelogFile";
+    public static final String DIFF_CHANGELOG_OUTCOME = "diffChangelogOutcome";
+
 }
