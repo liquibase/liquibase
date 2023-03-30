@@ -76,6 +76,10 @@ public class UpdateSqlCommandStep extends AbstractUpdateCommandStep {
         }
     }
 
+    @Override
+    public void cleanUp(CommandResultsBuilder resultsBuilder) {
+        // do nothing for now
+    }
 
     @Override
     public String getChangelogFileArg(CommandScope commandScope) {

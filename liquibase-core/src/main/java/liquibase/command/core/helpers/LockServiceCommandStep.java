@@ -5,6 +5,9 @@ import liquibase.Scope;
 import liquibase.command.*;
 import liquibase.database.Database;
 import liquibase.exception.LockException;
+import liquibase.executor.Executor;
+import liquibase.executor.ExecutorService;
+import liquibase.executor.LoggingExecutor;
 import liquibase.lockservice.LockService;
 import liquibase.lockservice.LockServiceFactory;
 
@@ -47,7 +50,12 @@ public class LockServiceCommandStep extends AbstractHelperCommandStep implements
     @Override
     public void cleanUp(CommandResultsBuilder resultsBuilder) {
         try {
-            lockService.releaseLock();
+            CommandScope commandScope = resultsBuilder.getCommandScope();
+            Database database = (Database) commandScope.getDependency(Database.class);
+            Executor executor = Scope.getCurrentScope().getSingleton(ExecutorService.class).getExecutor("jdbc",  database);
+            if (! (executor instanceof LoggingExecutor)) {
+                lockService.releaseLock();
+            }
         } catch (LockException e) {
             Scope.getCurrentScope().getLog(getClass()).severe(Liquibase.MSG_COULD_NOT_RELEASE_LOCK, e);
         }

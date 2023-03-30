@@ -13,7 +13,9 @@ import liquibase.database.Database;
 import liquibase.exception.DatabaseException;
 import liquibase.exception.LiquibaseException;
 import liquibase.exception.LockException;
+import liquibase.executor.Executor;
 import liquibase.executor.ExecutorService;
+import liquibase.executor.LoggingExecutor;
 import liquibase.lockservice.LockService;
 import liquibase.lockservice.LockServiceFactory;
 import liquibase.logging.core.BufferedLogService;
@@ -113,7 +115,10 @@ public abstract class AbstractUpdateCommandStep extends AbstractCommandStep impl
             //TODO: We should be able to remove this once we get the rest of the update family
             // set up with the CommandFramework
             try {
-                lockService.releaseLock();
+                Executor executor = Scope.getCurrentScope().getSingleton(ExecutorService.class).getExecutor("jdbc",  database);
+                if (! (executor instanceof LoggingExecutor)) {
+                    lockService.releaseLock();
+                }
             } catch (LockException e) {
                 Scope.getCurrentScope().getLog(getClass()).severe(MSG_COULD_NOT_RELEASE_LOCK, e);
             }
