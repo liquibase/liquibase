@@ -88,7 +88,7 @@
             <useTransitiveFiltering>true</useTransitiveFiltering>
             <scope>runtime</scope>
 			<includes>
-				<include>org.liquibase:liquibase-core-new:</include>
+				<include>org.liquibase:liquibase-core:</include>
 				<include>org.liquibase:liquibase-commercial:</include>
                 <include>com.opencsv:opencsv:</include>
 				<include>org.yaml:snakeyaml:jar:</include>
@@ -124,9 +124,9 @@
                 <exclude>jakarta.xml.bind:jakarta.xml.bind-api:jar:</exclude> <!-- from jaxb-runtime -->
                 <exclude>com.sun.activation:jakarta.activation:jar:</exclude> <!-- from jaxb-runtime -->
                 <exclude>javax.activation:javax.activation-api:jar:</exclude> <!-- from jaxb-api -->
-				<exclude>org.liquibase:liquibase-snowflake:jar:</exclude> <!-- from liquibase-core-new -->
-				<exclude>org.liquibase:liquibase-cli:jar:</exclude> <!-- from liquibase-core-new  -->
-				<exclude>org.liquibase:liquibase-core:jar:</exclude> <!-- from liquibase-core-new  -->
+				<exclude>org.liquibase:liquibase-snowflake:jar:</exclude> <!-- from liquibase-core -->
+				<exclude>org.liquibase:liquibase-cli:jar:</exclude> <!-- from liquibase-core  -->
+				<exclude>org.liquibase:liquibase-standard:jar:</exclude> <!-- from liquibase-standard  -->
 				<exclude>net.java.truelicense:*:jar:</exclude> <!-- from liquibase-commercial -->
 				<exclude>com.github.jsqlparser:jsqlparser:jar:</exclude> <!-- from liquibase-commercial -->
 				<exclude>commons-codec:commons-codec:jar:</exclude> <!-- from liquibase-commercial -->

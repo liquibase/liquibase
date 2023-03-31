@@ -168,6 +168,7 @@
                 <configuration>
                     <instructions>
                         <Bundle-SymbolicName>org.liquibase.core</Bundle-SymbolicName>
+                        <Bundle-Name>liquibase-core</Bundle-Name>
                         <Bundle-Activator>liquibase.osgi.Activator</Bundle-Activator>
                         <Import-Package>
                             javax.activation*;resolution:=optional,
