@@ -14,7 +14,7 @@
 	<dependencies>
 		<dependency>
 			<groupId>${project.groupId}</groupId>
-			<artifactId>liquibase-core</artifactId>
+			<artifactId>liquibase-standard</artifactId>
 			<version>${project.version}</version>
 		</dependency>
 		<dependency>
@@ -61,7 +61,7 @@
 				<configuration>
 					<artifactSet>
 						<includes>
-                            <include>${project.groupId}:liquibase-core</include>
+                            <include>${project.groupId}:liquibase-standard</include>
                             <include>${project.groupId}:liquibase-cli</include>
                             <include>${project.groupId}:liquibase-snowflake</include>
 						</includes>

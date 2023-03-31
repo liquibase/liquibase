@@ -13,7 +13,7 @@
         <maven.deploy.skip>false</maven.deploy.skip>
     </properties>
 
-    <artifactId>liquibase-core</artifactId>
+    <artifactId>liquibase-standard</artifactId>
     <packaging>jar</packaging>
 
     <dependencies>
@@ -288,19 +288,6 @@
                 </executions>
             </plugin>
 
-            <plugin>
-                <!-- liquibase-core jar is actually the one from liquibase-dist. So don't install just this sub-module -->
-                <artifactId>maven-install-plugin</artifactId>
-                <configuration>
-                    <skip>true</skip>
-                </configuration>
-                <executions>
-                    <execution>
-                        <id>default-install</id>
-                        <phase>none</phase>
-                    </execution>
-                </executions>
-            </plugin>
             <!-- Generate META-INF/services files automatically for the services specified below. -->
             <plugin>
                 <groupId>eu.somatik.serviceloader-maven-plugin</groupId>
