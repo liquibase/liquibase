@@ -167,7 +167,7 @@ public class ShowSummaryUtil {
             String dbmsList = String.format("'%s'", StringUtil.join(skippedChangeSet.getDbmsSet(), ", "));
             String mismatchMessage = String.format("mismatched DBMS value of %s", dbmsList);
             ChangeSetStatus changeSetStatus = new ChangeSetStatus(skippedChangeSet);
-            ChangeSetFilterResult filterResult = new ChangeSetFilterResult(false, mismatchMessage, DbmsChangeSetFilter.class, "dbmsUnknown", "DBMS mismatch");
+            ChangeSetFilterResult filterResult = new ChangeSetFilterResult(false, mismatchMessage, DbmsChangeSetFilter.class, DbmsChangeSetFilter.MDC_NAME, DbmsChangeSetFilter.DISPLAY_NAME);
             changeSetStatus.setFilterResults(Collections.singleton(filterResult));
             finalList.add(changeSetStatus);
         });
