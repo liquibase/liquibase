@@ -89,17 +89,18 @@ public class DbUrlConnectionCommandStep extends AbstractDatabaseConnectionComman
             String defaultCatalogName = commandScope.getArgumentValue(DEFAULT_CATALOG_NAME_ARG);
             String driver = commandScope.getArgumentValue(DRIVER_ARG);
             String driverPropertiesFile = commandScope.getArgumentValue(DRIVER_PROPERTIES_FILE_ARG);
-            logMdc(url, defaultSchemaName, defaultCatalogName);
-            return createDatabaseObject(url, username, password, defaultSchemaName, defaultCatalogName, driver, driverPropertiesFile);
+            Database database = createDatabaseObject(url, username, password, defaultSchemaName, defaultCatalogName, driver, driverPropertiesFile);
+            logMdc(url, database);
+            return database;
         } else {
             return commandScope.getArgumentValue(DATABASE_ARG);
         }
     }
 
-    private void logMdc(String url, String defaultSchemaName, String defaultCatalogName) {
+    private void logMdc(String url, Database database) {
         Scope.getCurrentScope().addMdcValue(MdcKey.LIQUIBASE_TARGET_URL, url);
-        Scope.getCurrentScope().addMdcValue(MdcKey.LIQUIBASE_SCHEMA_NAME, defaultSchemaName);
-        Scope.getCurrentScope().addMdcValue(MdcKey.LIQUIBASE_CATALOG_NAME, defaultCatalogName);
+        Scope.getCurrentScope().addMdcValue(MdcKey.LIQUIBASE_CATALOG_NAME, database.getLiquibaseCatalogName());
+        Scope.getCurrentScope().addMdcValue(MdcKey.LIQUIBASE_SCHEMA_NAME, database.getLiquibaseSchemaName());
     }
 
     @Override
