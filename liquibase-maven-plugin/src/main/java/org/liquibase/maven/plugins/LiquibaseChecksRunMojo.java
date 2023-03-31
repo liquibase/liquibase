@@ -8,8 +8,6 @@ import liquibase.util.StringUtil;
 import org.liquibase.maven.property.PropertyElement;
 
 import java.io.File;
-import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
 import java.io.IOException;
 import java.nio.file.Files;
 
