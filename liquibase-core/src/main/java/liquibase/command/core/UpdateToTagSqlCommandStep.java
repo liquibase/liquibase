@@ -63,6 +63,7 @@ public class UpdateToTagSqlCommandStep extends UpdateToTagCommandStep {
         dependencies.add(Writer.class);
         dependencies.add(Database.class);
         dependencies.addAll(super.requiredDependencies());
+        dependencies.remove(UpdateSummaryEnum.class); // no update summary for this command, despite the class it is extending having an update summary option
         return dependencies;
     }
 }
