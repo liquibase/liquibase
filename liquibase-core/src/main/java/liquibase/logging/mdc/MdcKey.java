@@ -89,4 +89,7 @@ public class MdcKey {
     public static final String CHANGELOG_SYNC_OUTCOME = "changesetSyncOutcome";
     public static final String OPERATION_START = "operationStart";
     public static final String OPERATION_STOP = "operationStop";
+    public static final String DIFF_CHANGELOG_FILE = "diffChangelogFile";
+    public static final String DIFF_CHANGELOG_OUTCOME = "diffChangelogOutcome";
+
 }
