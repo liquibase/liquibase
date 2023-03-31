@@ -37,12 +37,20 @@ public class ChangeLogSyncVisitor implements ChangeSetVisitor {
 
     @Override
     public void visit(ChangeSet changeSet, DatabaseChangeLog databaseChangeLog, Database database, Set<ChangeSetFilterResult> filterResults) throws LiquibaseException {
-        preRunMdc(changeSet);
-        this.database.markChangeSetExecStatus(changeSet, ChangeSet.ExecType.EXECUTED);
-        if(listener != null) {
-            listener.markedRan(changeSet, databaseChangeLog, database);
+        try {
+            preRunMdc(changeSet);
+            this.database.markChangeSetExecStatus(changeSet, ChangeSet.ExecType.EXECUTED);
+            if(listener != null) {
+                listener.markedRan(changeSet, databaseChangeLog, database);
+            }
+            postRunMdc();
+        } catch (Exception e) {
+            try (MdcObject stopTime = Scope.getCurrentScope().addMdcValue(MdcKey.CHANGESET_OPERATION_STOP_TIME, new ISODateFormat().format(new Date()));
+                 MdcObject changelogSyncOutcome = Scope.getCurrentScope().addMdcValue(MdcKey.CHANGESET_SYNC_OUTCOME, MdcValue.COMMAND_FAILED)) {
+                Scope.getCurrentScope().getLog(getClass()).fine("Failed syncing changeset");
+            }
         }
-        postRunMdc();
+
     }
 
     private void preRunMdc(ChangeSet changeSet) {
@@ -65,8 +73,8 @@ public class ChangeLogSyncVisitor implements ChangeSetVisitor {
             changesetCount.getAndIncrement();
         }
         try (MdcObject stopTime = Scope.getCurrentScope().addMdcValue(MdcKey.CHANGESET_OPERATION_STOP_TIME, new ISODateFormat().format(new Date()));
-             MdcObject changelogSyncOutcome = Scope.getCurrentScope().addMdcValue(MdcKey.CHANGELOG_SYNC_OUTCOME, MdcValue.COMMAND_SUCCESSFUL)) {
-            Scope.getCurrentScope().getLog(getClass()).info("Finished syncing changeset");
+             MdcObject changelogSyncOutcome = Scope.getCurrentScope().addMdcValue(MdcKey.CHANGESET_SYNC_OUTCOME, MdcValue.COMMAND_SUCCESSFUL)) {
+            Scope.getCurrentScope().getLog(getClass()).fine("Finished syncing changeset");
         }
     }
 }

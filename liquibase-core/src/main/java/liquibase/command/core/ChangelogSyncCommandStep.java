@@ -87,6 +87,9 @@ public class ChangelogSyncCommandStep extends AbstractCommandStep {
             Scope.getCurrentScope().addMdcValue(MdcKey.CHANGESET_SYNC_COUNT, changesetCount.toString());
 
             hubHandler.postUpdateHub(bufferLog);
+            try (MdcObject changelogSyncOutcome = Scope.getCurrentScope().addMdcValue(MdcKey.CHANGELOG_SYNC_OUTCOME, MdcValue.COMMAND_SUCCESSFUL)) {
+                Scope.getCurrentScope().getLog(getClass()).info("Finished executing " + defineCommandNames()[0][0] + " command");
+            }
         } catch (Exception e) {
             if (hubHandler != null) {
                 hubHandler.postUpdateHubExceptionHandling(bufferLog, e.getMessage());
