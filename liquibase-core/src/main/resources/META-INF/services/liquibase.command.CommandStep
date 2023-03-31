@@ -55,3 +55,4 @@ liquibase.command.core.helpers.LockServiceCommandStep
 liquibase.command.core.helpers.OutputWriterCommandStep
 liquibase.command.core.helpers.PreCompareCommandStep
 liquibase.command.core.helpers.ReferenceDbUrlConnectionCommandStep
+liquibase.command.core.helpers.ShowSummaryArgument
