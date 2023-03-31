@@ -70,15 +70,11 @@ public class CreateProcedureGenerator extends AbstractSqlGenerator<CreateProcedu
             }
             sql.add(new UnparsedSql("if object_id('" + fullyQualifiedName + "', 'p') is null exec ('create procedure " + fullyQualifiedName + " as select 1 a')"));
 
-            StringClauses parsedSql = SqlParser.parse(procedureText, true, true);
-            StringClauses.ClauseIterator clauseIterator = parsedSql.getClauseIterator();
-            Object next = "START";
-            while (next != null && !(next.toString().equalsIgnoreCase("create") || next.toString().equalsIgnoreCase("alter")) && clauseIterator.hasNext()) {
-                next = clauseIterator.nextNonWhitespace();
+            StringClauses parsedProcedureDefinition = SqlParser.parse(procedureText, true, true);
+            if (parsedProcedureDefinition.contains("CREATE") && !(parsedProcedureDefinition.contains("OR") && parsedProcedureDefinition.contains("ALTER"))) {
+                parsedProcedureDefinition.replace("CREATE", "ALTER");
             }
-            clauseIterator.replace("ALTER");
-
-            procedureText = parsedSql.toString();
+            procedureText = parsedProcedureDefinition.toString();
         }
 
         procedureText = removeTrailingDelimiter(procedureText, statement.getEndDelimiter());
