@@ -3,7 +3,6 @@ package liquibase.extension.testing.command
 import liquibase.exception.CommandValidationException
 import liquibase.extension.testing.setup.HistoryEntry
 
-import java.util.regex.Pattern
 
 CommandTests.define {
     command = ["history"]
@@ -24,6 +23,8 @@ Optional Args:
     Default: null
   driverPropertiesFile (String) The JDBC driver properties file
     Default: null
+  format (HistoryFormat) History output format
+    Default: TABULAR
   password (String) Password to use to connect to the database
     Default: null
     OBFUSCATED
@@ -62,11 +63,15 @@ Optional Args:
         }
 
         expectedOutput = [
-~/- Database updated at .+\. Applied 4 changeset\(s\) in \d+.\d+s, DeploymentId: \d+
-\s+db\/changelog\/db.changelog-master.xml::1::nvoxland
-\s+db\/changelog\/sql\/create_test2.sql::raw::includeAll
-\s+db\/changelog\/sql\/create_test3.sql::raw::includeAll
-\s+db\/changelog\/changelog-x.xml::1571079854679-2::nathan \(generated\)/]
+                """
+Liquibase History for jdbc:h2:mem:lbcat
+""",
+~/[-+]+/,
+"| db/changelog/db.changelog-master.xml | nvoxland | 1 |",
+"| db/changelog/sql/create_test2.sql | includeAll | raw |",
+"| db/changelog/sql/create_test3.sql | includeAll | raw |",
+"| db/changelog/changelog-x.xml | nathan (generated) | 1571079854679-2 |"]
+
         expectedResults = [
                 deployments: "1 past deployments",
                 statusCode : 0
@@ -111,7 +116,15 @@ Optional Args:
                 //
                 // Find the " -- Release Database Lock" line
                 //
-                "target/test-classes/history.sql" : [CommandTests.assertContains("Database updated at")]
+                "target/test-classes/history.sql" : [
+                        """
+Liquibase History for jdbc:h2:mem:lbcat
+""",
+~/[-+]+/,
+"| db/changelog/db.changelog-master.xml | nvoxland | 1 |",
+"| db/changelog/sql/create_test2.sql | includeAll | raw |",
+"| db/changelog/sql/create_test3.sql | includeAll | raw |",
+"| db/changelog/changelog-x.xml | nathan (generated) | 1571079854679-2 |" ]
         ]
 
         expectedResults = [

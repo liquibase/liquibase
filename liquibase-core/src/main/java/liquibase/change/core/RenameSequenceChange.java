@@ -11,7 +11,8 @@ import java.util.List;
 /**
  * Renames an existing table.
  */
-@DatabaseChange(name="renameSequence", description = "Renames an existing sequence", priority = ChangeMetaData.PRIORITY_DEFAULT, appliesTo = "sequence")
+@DatabaseChange(name = "renameSequence", description = "Renames an existing sequence", priority = ChangeMetaData.PRIORITY_DEFAULT,
+    appliesTo = "sequence")
 public class RenameSequenceChange extends AbstractChange {
 
     private String catalogName;
@@ -23,7 +24,7 @@ public class RenameSequenceChange extends AbstractChange {
     public RenameSequenceChange() {
     }
 
-    @DatabaseChangeProperty(mustEqualExisting ="sequence.catalog", since = "3.0")
+    @DatabaseChangeProperty(mustEqualExisting = "sequence.catalog", since = "3.0", description = "Name of the database catalog")
     public String getCatalogName() {
         return catalogName;
     }
@@ -32,7 +33,7 @@ public class RenameSequenceChange extends AbstractChange {
         this.catalogName = catalogName;
     }
 
-    @DatabaseChangeProperty(mustEqualExisting ="sequence.schema")
+    @DatabaseChangeProperty(mustEqualExisting = "sequence.schema", description = "Name of the database schema")
     public String getSchemaName() {
         return schemaName;
     }
@@ -41,7 +42,7 @@ public class RenameSequenceChange extends AbstractChange {
         this.schemaName = schemaName;
     }
 
-    @DatabaseChangeProperty(mustEqualExisting = "sequence", description = "Name of the sequence to rename")
+    @DatabaseChangeProperty(mustEqualExisting = "sequence", description = "Name of the existing sequence to rename")
     public String getOldSequenceName() {
         return oldSequenceName;
     }
@@ -63,7 +64,7 @@ public class RenameSequenceChange extends AbstractChange {
     public SqlStatement[] generateStatements(Database database) {
         List<SqlStatement> statements = new ArrayList<>();
         statements.add(new RenameSequenceStatement(getCatalogName(), getSchemaName(), getOldSequenceName(), getNewSequenceName()));
-        return statements.toArray(new SqlStatement[0]);
+        return statements.toArray(SqlStatement.EMPTY_SQL_STATEMENT);
     }
 
     @Override

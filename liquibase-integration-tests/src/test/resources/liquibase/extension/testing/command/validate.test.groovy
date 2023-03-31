@@ -1,6 +1,7 @@
 package liquibase.extension.testing.command
 
 import liquibase.exception.CommandValidationException
+import liquibase.exception.CommandExecutionException
 
 CommandTests.define {
     command = ["validate"]
@@ -60,5 +61,16 @@ Optional Args:
                 changelogFile: ""
         ]
         expectedException = CommandValidationException.class
+    }
+
+    run "Run with changeset having invalid tag throws an exception", {
+        arguments = [
+                url:        { it.url },
+                username:   { it.username },
+                password:   { it.password },
+                changelogFile: "changelogs/common/invalid.xsd.changelog.xml"
+        ]
+
+        expectedException = CommandExecutionException.class
     }
 }

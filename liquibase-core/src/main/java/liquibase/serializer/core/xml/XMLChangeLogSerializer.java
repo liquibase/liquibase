@@ -29,10 +29,10 @@ import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
 import java.io.ByteArrayInputStream;
 import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.OutputStream;
+import java.nio.file.Files;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashMap;
@@ -158,11 +158,11 @@ public class XMLChangeLogSerializer implements ChangeLogSerializer {
     @Override
     public void append(ChangeSet changeSet, File changeLogFile) throws IOException {
         String existingChangeLog;
-        try (FileInputStream in = new FileInputStream(changeLogFile)) {
+        try (InputStream in = Files.newInputStream(changeLogFile.toPath())) {
             existingChangeLog = StreamUtil.readStreamAsString(in);
         }
 
-        try (FileOutputStream out = new FileOutputStream(changeLogFile)) {
+        try (OutputStream out = Files.newOutputStream(changeLogFile.toPath())) {
             if (!existingChangeLog.contains("</databaseChangeLog>")) {
                 write(Arrays.asList(changeSet), out);
             } else {
