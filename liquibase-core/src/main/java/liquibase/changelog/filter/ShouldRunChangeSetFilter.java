@@ -57,15 +57,15 @@ public class ShouldRunChangeSetFilter implements ChangeSetFilter {
         for (RanChangeSet ranChangeSet : this.ranChangeSets.values()) {
             if (ranChangeSet.isSameAs(changeSet)) {
                 if (changeSet.shouldAlwaysRun()) {
-                    return new ChangeSetFilterResult(true, "Changeset always runs", this.getClass(), getMdcName());
+                    return new ChangeSetFilterResult(true, "Changeset always runs", this.getClass(), getMdcName(), getDisplayName());
                 }
                 if (changeSet.shouldRunOnChange() && checksumChanged(changeSet, ranChangeSet)) {
-                    return new ChangeSetFilterResult(true, "Changeset checksum changed", this.getClass(), getMdcName());
+                    return new ChangeSetFilterResult(true, "Changeset checksum changed", this.getClass(), getMdcName(), getDisplayName());
                 }
-                return new ChangeSetFilterResult(false, "Changeset already ran", this.getClass(), getMdcName());
+                return new ChangeSetFilterResult(false, "Changeset already ran", this.getClass(), getMdcName(), getDisplayName());
             }
         }
-        return new ChangeSetFilterResult(true, "Changeset has not ran yet", this.getClass(), getMdcName());
+        return new ChangeSetFilterResult(true, "Changeset has not ran yet", this.getClass(), getMdcName(), getDisplayName());
     }
 
 
@@ -76,5 +76,10 @@ public class ShouldRunChangeSetFilter implements ChangeSetFilter {
     @Override
     public String getMdcName() {
         return "alreadyRan";
+    }
+
+    @Override
+    public String getDisplayName() {
+        return "Already ran";
     }
 }
