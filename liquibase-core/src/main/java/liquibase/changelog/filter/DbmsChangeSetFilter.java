@@ -12,6 +12,8 @@ import java.util.List;
 public class DbmsChangeSetFilter implements ChangeSetFilter {
 
     private Database database;
+    public static final String MDC_NAME = "dbmsMismatch";
+    public static final String DISPLAY_NAME = "DBMS mismatch";
 
     public DbmsChangeSetFilter(Database database) {
         this.database = database;
@@ -46,11 +48,11 @@ public class DbmsChangeSetFilter implements ChangeSetFilter {
 
     @Override
     public String getMdcName() {
-        return "dbmsUnknown";
+        return MDC_NAME;
     }
 
     @Override
     public String getDisplayName() {
-        return "DBMS mismatch";
+        return DISPLAY_NAME;
     }
 }
