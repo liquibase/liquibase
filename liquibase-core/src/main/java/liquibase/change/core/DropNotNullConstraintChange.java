@@ -1,5 +1,7 @@
 package liquibase.change.core;
 
+import static liquibase.change.ChangeParameterMetaData.ALL;
+
 import liquibase.change.*;
 import liquibase.database.Database;
 import liquibase.snapshot.SnapshotGeneratorFactory;
@@ -12,7 +14,7 @@ import liquibase.structure.core.Table;
  * Drops a not-null constraint from an existing column.
  */
 @DatabaseChange(
-    name="dropNotNullConstraint",
+    name = "dropNotNullConstraint",
     description = "Makes a column nullable",
     priority = ChangeMetaData.PRIORITY_DEFAULT,
     appliesTo = "column")
@@ -26,7 +28,8 @@ public class DropNotNullConstraintChange extends AbstractChange {
     private String constraintName;
     private Boolean shouldValidate;
 
-    @DatabaseChangeProperty(since = "3.0", mustEqualExisting ="notNullConstraint.table.catalog")
+    @DatabaseChangeProperty(since = "3.0", mustEqualExisting ="notNullConstraint.table.catalog",
+        description = "Name of the database catalog")
     public String getCatalogName() {
         return catalogName;
     }
@@ -35,7 +38,7 @@ public class DropNotNullConstraintChange extends AbstractChange {
         this.catalogName = catalogName;
     }
 
-    @DatabaseChangeProperty(mustEqualExisting ="notNullConstraint.table.schema")
+    @DatabaseChangeProperty(mustEqualExisting ="notNullConstraint.table.schema", description = "Name of the database schema")
     public String getSchemaName() {
         return schemaName;
     }
@@ -45,7 +48,7 @@ public class DropNotNullConstraintChange extends AbstractChange {
     }
 
     @DatabaseChangeProperty(
-        description = "Name of the table containing that the column to drop the constraint from",
+        description = "Name of the table containing the column to drop the constraint from",
         mustEqualExisting = "notNullConstraint.table"
     )
     public String getTableName() {
@@ -68,7 +71,9 @@ public class DropNotNullConstraintChange extends AbstractChange {
         this.columnName = columnName;
     }
 
-    @DatabaseChangeProperty(description = "Current data type of the column")
+    @DatabaseChangeProperty(description = "Current data type of the column",
+        requiredForDatabase = {"informix", "mariadb", "mssql", "mysql"},
+        supportsDatabase = ALL)
     public String getColumnDataType() {
         return columnDataType;
     }
@@ -77,7 +82,7 @@ public class DropNotNullConstraintChange extends AbstractChange {
         this.columnDataType = columnDataType;
     }
 
-    @DatabaseChangeProperty(description = "Name of not null constraint")
+    @DatabaseChangeProperty(description = "Name of the constraint to drop (if database supports names for NOT NULL constraints)")
     public String getConstraintName() {
         return constraintName;
     }
