@@ -23,6 +23,7 @@ import liquibase.util.StringUtil;
 import java.io.File;
 import java.io.UnsupportedEncodingException;
 import java.net.URLDecoder;
+import java.nio.charset.StandardCharsets;
 import java.sql.Driver;
 import java.util.HashMap;
 import java.util.Map;
@@ -47,11 +48,14 @@ public class OfflineConnection implements DatabaseConnection {
     private boolean sendsStringParametersAsUnicode = true;
     private String connectionUserName;
 
+    private static final String OFFLINE_COMMAND_REGEX = "offline:(\\w+)\\??(.*)";
+    private static final Pattern OFFLINE_COMMAND_PATTERN = Pattern.compile(OFFLINE_COMMAND_REGEX);
+
     public OfflineConnection() {}
 
     public OfflineConnection(String url, ResourceAccessor resourceAccessor) {
         this.url = url;
-        Matcher matcher = Pattern.compile("offline:(\\w+)\\??(.*)").matcher(url);
+        Matcher matcher = OFFLINE_COMMAND_PATTERN.matcher(url);
         if (!matcher.matches()) {
             throw new UnexpectedLiquibaseException("Could not parse offline url " + url);
         }
@@ -63,7 +67,7 @@ public class OfflineConnection implements DatabaseConnection {
                 String[] keyValues = params.split("&");
                 for (String param : keyValues) {
                     String[] split = param.split("=");
-                    params1.put(URLDecoder.decode(split[0], "UTF-8"), URLDecoder.decode(split[1], "UTF-8"));
+                    params1.put(URLDecoder.decode(split[0], StandardCharsets.UTF_8.name()), URLDecoder.decode(split[1], StandardCharsets.UTF_8.name()));
                 }
             }
 

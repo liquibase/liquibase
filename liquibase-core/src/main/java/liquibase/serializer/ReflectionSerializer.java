@@ -6,6 +6,7 @@ import java.lang.reflect.Field;
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
 import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
 
 public class ReflectionSerializer {
 
@@ -15,7 +16,7 @@ public class ReflectionSerializer {
         return instance;
     }
 
-    private Map<Class, Map<String, Field>> reflectionCache = new HashMap<>();
+    private Map<Class, Map<String, Field>> reflectionCache = new ConcurrentHashMap<>();
 
     private ReflectionSerializer() {
 
@@ -28,7 +29,7 @@ public class ReflectionSerializer {
             Map<String, Field> fields = new HashMap<>();
             Set<Field> allFields = new HashSet<>();
 
-            Class classToExtractFieldsFrom = object.getClass();
+            Class<? extends Object> classToExtractFieldsFrom = object.getClass();
             while (!classToExtractFieldsFrom.equals(Object.class)) {
                 allFields.addAll(Arrays.asList(classToExtractFieldsFrom.getDeclaredFields()));
                 classToExtractFieldsFrom = classToExtractFieldsFrom.getSuperclass();

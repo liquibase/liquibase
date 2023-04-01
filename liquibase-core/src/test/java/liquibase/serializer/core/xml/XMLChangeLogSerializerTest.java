@@ -19,6 +19,7 @@ import org.w3c.dom.NodeList;
 
 import javax.xml.parsers.DocumentBuilderFactory;
 import java.math.BigInteger;
+import java.nio.charset.StandardCharsets;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
@@ -698,14 +699,14 @@ public class XMLChangeLogSerializerTest {
         refactoring.setSchemaName("SCHEMA_NAME");
         refactoring.setTableName("TABLE_NAME");
         refactoring.setFile("FILE_NAME");
-        refactoring.setEncoding("UTF-8");
+        refactoring.setEncoding(StandardCharsets.UTF_8.name());
 
         Element node = new XMLChangeLogSerializer(DocumentBuilderFactory.newInstance().newDocumentBuilder().newDocument()).createNode(refactoring);
         assertEquals("loadData", node.getNodeName());
         assertEquals("SCHEMA_NAME", node.getAttribute("schemaName"));
         assertEquals("TABLE_NAME", node.getAttribute("tableName"));
         assertEquals("FILE_NAME", node.getAttribute("file"));
-        assertEquals("UTF-8", node.getAttribute("encoding"));
+        assertEquals(StandardCharsets.UTF_8.name(), node.getAttribute("encoding"));
     }
 
     @Test
@@ -884,7 +885,7 @@ public class XMLChangeLogSerializerTest {
     
     @Test
     public void createNode_ChangeSetParameters() throws Exception {
-    	ChangeSet changeSet = new ChangeSet("1", "tms", true, true, "path/to/file.json", "context", "mssql",null,false,ObjectQuotingStrategy.LEGACY, null);
+    	ChangeSet changeSet = new ChangeSet("1", "tms", true, true, "path/to/file.json", "context", "mssql",null,null, false,ObjectQuotingStrategy.LEGACY, null);
     	changeSet.setCreated("created");
     	changeSet.setFailOnError(true);
     	changeSet.setLabels(new Labels("label"));
@@ -931,7 +932,7 @@ public class XMLChangeLogSerializerTest {
     
     @Test
     public void serialize_pretty_ChangeSetParameters() throws Exception {
-    	ChangeSet changeSet = new ChangeSet("1", "tms", true, true, "path/to/file.json", "context", "mssql","runWith",false,ObjectQuotingStrategy.LEGACY, null);
+    	ChangeSet changeSet = new ChangeSet("1", "tms", true, true, "path/to/file.json", "context", "mssql","runWith","runWithSpoolFile", false,ObjectQuotingStrategy.LEGACY, null);
     	changeSet.setCreated("created");
     	changeSet.setFailOnError(true);
     	changeSet.setLabels(new Labels("label"));

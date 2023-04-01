@@ -28,6 +28,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
 
 public class UniqueConstraintSnapshotGenerator extends JdbcSnapshotGenerator {
 
@@ -149,7 +150,7 @@ public class UniqueConstraintSnapshotGenerator extends JdbcSnapshotGenerator {
         String cacheKey = "uniqueConstraints-" + example.getClass().getSimpleName() + "-" + example.getSchema().toCatalogAndSchema().customize(database).toString();
         String queryCountKey = "uniqueConstraints-" + example.getClass().getSimpleName() + "-queryCount";
 
-        Map<String, List<Map<String, ?>>> columnCache = (Map<String, List<Map<String, ?>>>) snapshot.getScratchData(cacheKey);
+        Map<String, List<Map<String, ?>>> columnCache = (ConcurrentHashMap<String, List<Map<String, ?>>>) snapshot.getScratchData(cacheKey);
         Integer columnQueryCount = (Integer) snapshot.getScratchData(queryCountKey);
         if (columnQueryCount == null) {
             columnQueryCount = 0;
@@ -295,7 +296,7 @@ public class UniqueConstraintSnapshotGenerator extends JdbcSnapshotGenerator {
                 } else if (rows.size() > 1) {
                     throw new UnexpectedLiquibaseException("Got multiple rows back querying unique constraints");
                 } else {
-                    Map rowData = rows.get(0);
+                    Map<String, ?> rowData = rows.get(0);
                     String descriptor = rowData.get("DESCRIPTOR").toString();
                     descriptor = descriptor.replaceFirst(".*\\(", "").replaceFirst("\\).*", "");
                     for (String columnNumber : StringUtil.splitAndTrim(descriptor, ",")) {
@@ -394,7 +395,7 @@ public class UniqueConstraintSnapshotGenerator extends JdbcSnapshotGenerator {
             List<Map<String, ?>> rows = Scope.getCurrentScope().getSingleton(ExecutorService.class).getExecutor("jdbc", database).queryForList(new RawSqlStatement(sql));
 
             if (bulkQuery) {
-                columnCache = new HashMap<>();
+                columnCache = new ConcurrentHashMap<>();
                 snapshot.setScratchData(cacheKey, columnCache);
                 for (Map<String, ?> row : rows) {
                     String key = getCacheKey(row, database);

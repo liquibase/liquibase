@@ -9,21 +9,29 @@ import liquibase.database.core.OracleDatabase;
 import liquibase.datatype.DataTypeFactory;
 import liquibase.datatype.LiquibaseDataType;
 import liquibase.datatype.core.*;
+import liquibase.sql.Sql;
+import liquibase.sqlgenerator.SqlGeneratorFactory;
 import liquibase.statement.DatabaseFunction;
+import liquibase.statement.SqlStatement;
 import liquibase.structure.core.Column;
 import liquibase.structure.core.DataType;
 
 import java.math.BigDecimal;
 import java.sql.Types;
+import java.util.Arrays;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Scanner;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import java.util.stream.Collectors;
 
 import static java.util.Locale.US;
 
 public abstract class SqlUtil {
+
+    private static final String NAME_REGEX = ":name|\\?|:value";
+    public static final Pattern NAME_PATTERN = Pattern.compile(NAME_REGEX);
 
     public static boolean isNumeric(int dataType) {
         switch (dataType) {
@@ -315,7 +323,7 @@ public abstract class SqlUtil {
 
     public static String replacePredicatePlaceholders(Database database, String predicate, List<String> columnNames,
                                                       List<Object> parameters) {
-        Matcher matcher = Pattern.compile(":name|\\?|:value").matcher(predicate.trim());
+        Matcher matcher = NAME_PATTERN.matcher(predicate.trim());
         StringBuffer sb = new StringBuffer();
         Iterator<String> columnNameIter = columnNames.iterator();
         Iterator<Object> paramIter = parameters.iterator();
@@ -340,5 +348,23 @@ public abstract class SqlUtil {
         }
         matcher.appendTail(sb);
         return sb.toString();
+    }
+
+    /**
+     * Get the string sql statements from a given SqlStatement
+     * @param statement the statement to stringify
+     * @param sqlGeneratorFactory the SqlGeneratorFactory instance to use to generate the sql
+     * @param database the database to generate sql against
+     * @return the sql string or an empty string if there are no statements to generate
+     */
+    public static String getSqlString(SqlStatement statement, SqlGeneratorFactory sqlGeneratorFactory, Database database) {
+        Sql[] sqlStatements = sqlGeneratorFactory.generateSql(statement, database);
+        if (sqlStatements != null) {
+            return Arrays.stream(sqlStatements)
+                    .map(sql -> sql.toSql().endsWith(sql.getEndDelimiter()) ? sql.toSql() : sql.toSql() + sql.getEndDelimiter())
+                    .collect(Collectors.joining("\n"));
+        } else {
+            return "";
+        }
     }
 }
