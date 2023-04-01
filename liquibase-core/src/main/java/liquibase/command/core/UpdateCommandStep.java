@@ -5,7 +5,6 @@ import liquibase.UpdateSummaryEnum;
 import liquibase.command.*;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 
 public class UpdateCommandStep extends AbstractUpdateCommandStep implements CleanUpCommandStep {
@@ -16,6 +15,7 @@ public class UpdateCommandStep extends AbstractUpdateCommandStep implements Clea
     public static final CommandArgumentDefinition<String> CHANGELOG_FILE_ARG;
     public static final CommandArgumentDefinition<String> LABEL_FILTER_ARG;
     public static final CommandArgumentDefinition<String> CONTEXTS_ARG;
+    public static final CommandArgumentDefinition<UpdateSummaryEnum> SHOW_SUMMARY;
 
     static {
         CommandBuilder builder = new CommandBuilder(COMMAND_NAME, LEGACY_COMMAND_NAME);
@@ -28,6 +28,10 @@ public class UpdateCommandStep extends AbstractUpdateCommandStep implements Clea
                 .build();
         CONTEXTS_ARG = builder.argument("contexts", String.class)
                 .description("Changeset contexts to match")
+                .build();
+        SHOW_SUMMARY = builder.argument("showSummary", UpdateSummaryEnum.class)
+                .description("Type of update results summary to show.  Values can be 'off', 'summary', or 'verbose'.")
+                .defaultValue(UpdateSummaryEnum.SUMMARY)
                 .build();
     }
 
