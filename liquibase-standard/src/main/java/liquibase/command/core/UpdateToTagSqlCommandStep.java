@@ -1,10 +1,7 @@
 package liquibase.command.core;
 
 import liquibase.UpdateSummaryEnum;
-import liquibase.command.CommandArgumentDefinition;
-import liquibase.command.CommandBuilder;
-import liquibase.command.CommandDefinition;
-import liquibase.command.CommonArgumentNames;
+import liquibase.command.*;
 import liquibase.database.Database;
 
 import java.io.Writer;
@@ -41,6 +38,11 @@ public class UpdateToTagSqlCommandStep extends UpdateToTagCommandStep {
                 .description("Control whether names of objects in the default catalog are fully qualified or not. If true they are. If false, only objects outside the default catalog are fully qualified")
                 .defaultValue(true)
                 .build();
+    }
+
+    @Override
+    public UpdateSummaryEnum getShowSummary(CommandScope commandScope) {
+        return UpdateSummaryEnum.OFF;
     }
 
     @Override
