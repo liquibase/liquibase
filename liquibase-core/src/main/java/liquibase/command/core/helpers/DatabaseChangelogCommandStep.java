@@ -68,9 +68,11 @@ public class DatabaseChangelogCommandStep extends AbstractHelperCommandStep impl
             changeLogParameters = new ChangeLogParameters(database);
             addJavaProperties(changeLogParameters);
         }
-        changeLogParameters.setContexts(new Contexts(commandScope.getArgumentValue(CONTEXTS_ARG)));
-        changeLogParameters.setLabels(new LabelExpression(commandScope.getArgumentValue(LABEL_FILTER_ARG)));
-        this.addCommandFiltersMdc(changeLogParameters.getLabels(), changeLogParameters.getContexts());
+        Contexts contexts = new Contexts(commandScope.getArgumentValue(CONTEXTS_ARG));
+        changeLogParameters.setContexts(contexts);
+        LabelExpression labels = new LabelExpression(commandScope.getArgumentValue(LABEL_FILTER_ARG));
+        changeLogParameters.setLabels(labels);
+        addCommandFiltersMdc(labels, contexts);
 
         DatabaseChangeLog databaseChangeLog = getDatabaseChangeLog(changeLogFile, changeLogParameters);
         checkLiquibaseTables(true, databaseChangeLog, changeLogParameters.getContexts(), changeLogParameters.getLabels(), database);
@@ -81,7 +83,7 @@ public class DatabaseChangelogCommandStep extends AbstractHelperCommandStep impl
         commandScope.provideDependency(ChangeLogParameters.class, changeLogParameters);
     }
 
-    private void addCommandFiltersMdc(LabelExpression labelExpression, Contexts contexts) {
+    public static void addCommandFiltersMdc(LabelExpression labelExpression, Contexts contexts) {
         String labelFilterMdc = labelExpression != null && labelExpression.getOriginalString() != null ? labelExpression.getOriginalString() : "";
         String contextFilterMdc = contexts != null ? contexts.toString() : "";
         Scope.getCurrentScope().addMdcValue(MdcKey.COMMAND_LABEL_FILTER, labelFilterMdc);
