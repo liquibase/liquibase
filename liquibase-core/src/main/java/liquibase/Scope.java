@@ -476,6 +476,19 @@ public class Scope {
     }
 
     /**
+     * Add a key value pair to the MDC using the MDC manager if a key does not already exist. Removes when scope exits.
+     * @return the new MdcObject if it has been created, null if the key already exists
+     */
+    @Beta
+    public MdcObject addMdcValueIfAbsent(String key, String value) {
+        Object mdc = getMdcManager().getAll().get(key);
+        if (mdc == null) {
+            return addMdcValue(key, value, true);
+        }
+        return null;
+    }
+
+    /**
      * Returns {@link LiquibaseListener}s defined in this scope and/or all its parents that are of the given type.
      */
     public <T extends LiquibaseListener> Collection<T> getListeners(Class<T> type) {

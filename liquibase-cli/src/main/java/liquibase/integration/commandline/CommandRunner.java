@@ -38,8 +38,6 @@ class CommandRunner implements Callable<CommandResults> {
         }
 
         final String[] commandName = LiquibaseCommandLine.getCommandNames(spec.commandLine());
-        Scope.getCurrentScope().addMdcValue(MdcKey.LIQUIBASE_COMMAND_NAME, String.join(" ", commandName));
-
         for (int i=0; i<commandName.length; i++) {
             commandName[i] = StringUtil.toCamelCase(commandName[i]);
         }
