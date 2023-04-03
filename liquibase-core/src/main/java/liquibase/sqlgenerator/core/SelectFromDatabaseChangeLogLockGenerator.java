@@ -25,8 +25,7 @@ public class SelectFromDatabaseChangeLogLockGenerator extends AbstractSqlGenerat
     public Sql[] generateSql(SelectFromDatabaseChangeLogLockStatement statement, final Database database, SqlGeneratorChain sqlGeneratorChain) {
     	String liquibaseSchema;
    		liquibaseSchema = database.getLiquibaseSchemaName();
-		
-		ColumnConfig[] columns = statement.getColumnsToSelect();
+
         // use LEGACY quoting since we're dealing with system objects
         ObjectQuotingStrategy currentStrategy = database.getObjectQuotingStrategy();
         database.setObjectQuotingStrategy(ObjectQuotingStrategy.LEGACY);
