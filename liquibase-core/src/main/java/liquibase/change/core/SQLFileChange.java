@@ -153,4 +153,12 @@ public class SQLFileChange extends AbstractSQLChange {
     public String getSerializedObjectNamespace() {
         return STANDARD_CHANGELOG_NAMESPACE;
     }
+
+    @Override
+    public String describe() {
+        return "SQLFileChange{" +
+                "path='" + path + '\'' +
+                ", relativeToChangelogFile=" + relativeToChangelogFile +
+                '}';
+    }
 }
