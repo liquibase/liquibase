@@ -7,6 +7,7 @@ import liquibase.database.Database;
 import liquibase.exception.LockException;
 import liquibase.lockservice.LockService;
 import liquibase.lockservice.LockServiceFactory;
+import liquibase.logging.mdc.MdcKey;
 
 import java.util.Collections;
 import java.util.List;
@@ -32,6 +33,7 @@ public class LockServiceCommandStep extends AbstractHelperCommandStep implements
 
     @Override
     public void run(CommandResultsBuilder resultsBuilder) throws Exception {
+        Scope.getCurrentScope().addMdcValue(MdcKey.LIQUIBASE_INTERNAL_OPERATION, COMMAND_NAME[0]);
         CommandScope commandScope = resultsBuilder.getCommandScope();
         Database database = (Database) commandScope.getDependency(Database.class);
         lockService = LockServiceFactory.getInstance().getLockService(database);

@@ -57,6 +57,7 @@ public class ReferenceDbUrlConnectionCommandStep extends AbstractDatabaseConnect
 
     @Override
     public void run(CommandResultsBuilder resultsBuilder) throws Exception {
+        Scope.getCurrentScope().addMdcValue(MdcKey.LIQUIBASE_INTERNAL_OPERATION, COMMAND_NAME[0]);
         CommandScope commandScope = resultsBuilder.getCommandScope();
         commandScope.provideDependency(ReferenceDatabase.class, this.obtainDatabase(commandScope));
     }

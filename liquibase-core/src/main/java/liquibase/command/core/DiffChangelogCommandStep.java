@@ -56,6 +56,7 @@ public class DiffChangelogCommandStep extends AbstractCommandStep {
     @Override
     public void run(CommandResultsBuilder resultsBuilder) throws Exception {
         try {
+            Scope.getCurrentScope().addMdcValue(MdcKey.LIQUIBASE_INTERNAL_OPERATION, COMMAND_NAME[0]);
             CommandScope commandScope = resultsBuilder.getCommandScope();
             Database referenceDatabase = (Database) commandScope.getDependency(ReferenceDatabase.class);
             DiffOutputControl diffOutputControl = (DiffOutputControl) resultsBuilder.getResult(DiffOutputControlCommandStep.DIFF_OUTPUT_CONTROL.getName());

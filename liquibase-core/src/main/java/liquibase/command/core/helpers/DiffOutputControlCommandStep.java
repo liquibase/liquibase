@@ -53,6 +53,7 @@ public class DiffOutputControlCommandStep extends AbstractHelperCommandStep {
 
     @Override
     public void run(CommandResultsBuilder resultsBuilder) throws Exception {
+        Scope.getCurrentScope().addMdcValue(MdcKey.LIQUIBASE_INTERNAL_OPERATION, COMMAND_NAME[0]);
         DiffOutputControl diffOutputControl = getDiffOutputControl(resultsBuilder);
         resultsBuilder.addResult(DIFF_OUTPUT_CONTROL.getName(), diffOutputControl);
         this.outputBestPracticeMessage();

@@ -62,6 +62,7 @@ public class DbUrlConnectionCommandStep extends AbstractDatabaseConnectionComman
 
     @Override
     public void run(CommandResultsBuilder resultsBuilder) throws Exception {
+        Scope.getCurrentScope().addMdcValue(MdcKey.LIQUIBASE_INTERNAL_OPERATION, COMMAND_NAME[0]);
         CommandScope commandScope = resultsBuilder.getCommandScope();
         if (commandScope.getArgumentValue(SKIP_DATABASE_STEP_ARG)) {
             return;

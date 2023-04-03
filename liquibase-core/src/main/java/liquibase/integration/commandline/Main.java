@@ -1569,7 +1569,9 @@ public class Main {
                 Map<String, Object> argsMap = new HashMap<>();
                 loadChangeSetInfoToMap(argsMap);
                 argsMap.put("changeLogFile", changeLogFile);
-                CommandScope liquibaseCommand = createLiquibaseCommand(database, liquibase, "internalRollbackOneChangeSet", argsMap);
+                String internalCommand = "internalRollbackOneChangeSet";
+                Scope.getCurrentScope().addMdcValue(MdcKey.LIQUIBASE_INTERNAL_OPERATION, internalCommand);
+                CommandScope liquibaseCommand = createLiquibaseCommand(database, liquibase, internalCommand, argsMap);
                 liquibaseCommand.execute();
                 return;
             } else if (COMMANDS.ROLLBACK_ONE_CHANGE_SET_SQL.equalsIgnoreCase(command)) {
@@ -1579,14 +1581,18 @@ public class Main {
                 argsMap.put("changeLogFile", changeLogFile);
                 argsMap.put("outputWriter", outputWriter);
                 argsMap.put("force", Boolean.TRUE);
-                CommandScope liquibaseCommand = createLiquibaseCommand(database, liquibase, "internalRollbackOneChangeSetSQL", argsMap);
+                String internalCommand = "internalRollbackOneChangeSetSQL";
+                Scope.getCurrentScope().addMdcValue(MdcKey.LIQUIBASE_INTERNAL_OPERATION, internalCommand);
+                CommandScope liquibaseCommand = createLiquibaseCommand(database, liquibase, internalCommand, argsMap);
                 liquibaseCommand.execute();
                 return;
             } else if (COMMANDS.ROLLBACK_ONE_UPDATE.equalsIgnoreCase(command)) {
                 Map<String, Object> argsMap = new HashMap<>();
                 argsMap.put("changeLogFile", changeLogFile);
                 argsMap.put("deploymentId", getCommandParam(OPTIONS.DEPLOYMENT_ID, null));
-                CommandScope liquibaseCommand = createLiquibaseCommand(database, liquibase, "internalRollbackOneUpdate", argsMap);
+                String internalCommand = "internalRollbackOneUpdate";
+                Scope.getCurrentScope().addMdcValue(MdcKey.LIQUIBASE_INTERNAL_OPERATION, internalCommand);
+                CommandScope liquibaseCommand = createLiquibaseCommand(database, liquibase, internalCommand, argsMap);
                 liquibaseCommand.execute();
                 return;
             } else if (COMMANDS.ROLLBACK_ONE_UPDATE_SQL.equalsIgnoreCase(command)) {
@@ -1595,7 +1601,9 @@ public class Main {
                 argsMap.put("deploymentId", getCommandParam(OPTIONS.DEPLOYMENT_ID, null));
                 argsMap.put("force", Boolean.TRUE);
                 argsMap.put("outputWriter", outputWriter);
-                CommandScope liquibaseCommand = createLiquibaseCommand(database, liquibase, "internalRollbackOneUpdateSQL", argsMap);
+                String internalCommand = "internalRollbackOneUpdateSQL";
+                Scope.getCurrentScope().addMdcValue(MdcKey.LIQUIBASE_INTERNAL_OPERATION, internalCommand);
+                CommandScope liquibaseCommand = createLiquibaseCommand(database, liquibase, internalCommand, argsMap);
                 liquibaseCommand.execute();
                 return;
             } else if (COMMANDS.DEACTIVATE_CHANGELOG.equalsIgnoreCase(command)) {
@@ -1760,7 +1768,7 @@ public class Main {
                     liquibase.rollback(new ISODateFormat().parse(getCommandArgument()), getCommandParam
                             (COMMANDS.ROLLBACK_SCRIPT, null), new Contexts(contexts), new LabelExpression(getLabelFilter()));
                 } else if (COMMANDS.ROLLBACK_COUNT.equalsIgnoreCase(command)) {
-                    Scope.getCurrentScope().addMdcValue(MdcKey.LIQUIBASE_OPERATION, COMMANDS.ROLLBACK_COUNT);
+                    Scope.getCurrentScope().addMdcValue(MdcKey.LIQUIBASE_INTERNAL_OPERATION, COMMANDS.ROLLBACK_COUNT);
                     liquibase.rollback(Integer.parseInt(getCommandArgument()), getCommandParam
                             (COMMANDS.ROLLBACK_SCRIPT, null), new Contexts(contexts), new LabelExpression(getLabelFilter()));
 
@@ -1865,7 +1873,7 @@ public class Main {
     }
 
     private void runRollbackCommand(Writer outputWriter) throws CommandLineParsingException, CommandExecutionException {
-        Scope.getCurrentScope().addMdcValue(MdcKey.LIQUIBASE_OPERATION, COMMANDS.ROLLBACK);
+        Scope.getCurrentScope().addMdcValue(MdcKey.LIQUIBASE_INTERNAL_OPERATION, COMMANDS.ROLLBACK);
         if (getCommandArgument() == null) {
             throw new CommandLineParsingException(
                     String.format(coreBundle.getString("command.requires.tag"), COMMANDS.ROLLBACK));

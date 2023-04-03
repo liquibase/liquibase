@@ -201,7 +201,7 @@ public class CommandScope {
         //
         String commandNameForMdc = StringUtil.join(commandDefinition.getName(), "-");
         commandNameForMdc = StringUtil.lowerCaseFirst(commandNameForMdc.replaceAll("^internal",""));
-        Scope.getCurrentScope().addMdcValue(MdcKey.LIQUIBASE_OPERATION, commandNameForMdc);
+        Scope.getCurrentScope().addMdcValue(MdcKey.LIQUIBASE_INTERNAL_OPERATION, commandNameForMdc);
         try {
             for (CommandStep command : pipeline) {
                 try {

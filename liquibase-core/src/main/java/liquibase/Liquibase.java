@@ -658,6 +658,7 @@ public class Liquibase implements AutoCloseable {
 
         runInScope(() -> {
             Scope.getCurrentScope().addMdcValue(MdcKey.ROLLBACK_COUNT, String.valueOf(changesToRollback));
+            Scope.getCurrentScope().addMdcValue(MdcKey.LIQUIBASE_INTERNAL_OPERATION, "rollbackCount");
             Scope.getCurrentScope().addMdcValue(MdcKey.ROLLBACK_SCRIPT, rollbackScript);
             Scope.getCurrentScope().addMdcValue(MdcKey.LIQUIBASE_TARGET_URL, database.getConnection().getURL());
 
@@ -1010,6 +1011,7 @@ public class Liquibase implements AutoCloseable {
         runInScope(new Scope.ScopedRunner() {
             @Override
             public void run() throws Exception {
+                Scope.getCurrentScope().addMdcValue(MdcKey.LIQUIBASE_INTERNAL_OPERATION, "rollbackToDate");
                 Scope.getCurrentScope().addMdcValue(MdcKey.ROLLBACK_TO_DATE, dateToRollBackTo.toString());
                 Scope.getCurrentScope().addMdcValue(MdcKey.ROLLBACK_SCRIPT, rollbackScript);
                 Scope.getCurrentScope().addMdcValue(MdcKey.LIQUIBASE_TARGET_URL, database.getConnection().getURL());

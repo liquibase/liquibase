@@ -31,6 +31,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.stream.Collectors;
 
 import static liquibase.Liquibase.MSG_COULD_NOT_RELEASE_LOCK;
 
@@ -51,6 +52,7 @@ public abstract class AbstractUpdateCommandStep extends AbstractCommandStep impl
 
     @Override
     public void run(CommandResultsBuilder resultsBuilder) throws Exception {
+        Scope.getCurrentScope().addMdcValue(MdcKey.LIQUIBASE_INTERNAL_OPERATION, String.join(" ", getCommandName()));
         CommandScope commandScope = resultsBuilder.getCommandScope();
         String changeLogFile = getChangelogFileArg(commandScope);
         Database database = (Database) commandScope.getDependency(Database.class);

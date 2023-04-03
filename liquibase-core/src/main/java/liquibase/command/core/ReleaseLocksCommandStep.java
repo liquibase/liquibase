@@ -6,6 +6,7 @@ import liquibase.command.CommandDefinition;
 import liquibase.command.CommandResultsBuilder;
 import liquibase.database.Database;
 import liquibase.lockservice.LockServiceFactory;
+import liquibase.logging.mdc.MdcKey;
 
 import java.util.Arrays;
 import java.util.List;
@@ -16,6 +17,7 @@ public class ReleaseLocksCommandStep extends AbstractCommandStep {
 
     @Override
     public void run(CommandResultsBuilder resultsBuilder) throws Exception {
+        Scope.getCurrentScope().addMdcValue(MdcKey.LIQUIBASE_INTERNAL_OPERATION, COMMAND_NAME[0]);
         Database database = (Database) resultsBuilder.getCommandScope().getDependency(Database.class);
         LockServiceFactory.getInstance().getLockService(database).forceReleaseLock();
         Scope.getCurrentScope().getUI().sendMessage(String.format(
