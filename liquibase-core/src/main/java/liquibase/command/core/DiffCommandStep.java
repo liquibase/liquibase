@@ -83,8 +83,6 @@ public class DiffCommandStep extends AbstractCommandStep {
     @Override
     public void run(CommandResultsBuilder resultsBuilder) throws Exception {
         try {
-            Scope.getCurrentScope().addMdcValue(MdcKey.LIQUIBASE_INTERNAL_OPERATION, COMMAND_NAME[0]);
-
             CommandScope commandScope = resultsBuilder.getCommandScope();
             InternalSnapshotCommandStep.logUnsupportedDatabase((Database) commandScope.getDependency(Database.class), this.getClass());
 

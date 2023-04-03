@@ -53,7 +53,6 @@ public class DiffOutputControlCommandStep extends AbstractHelperCommandStep {
 
     @Override
     public void run(CommandResultsBuilder resultsBuilder) throws Exception {
-        Scope.getCurrentScope().addMdcValue(MdcKey.LIQUIBASE_INTERNAL_OPERATION, COMMAND_NAME[0]);
         DiffOutputControl diffOutputControl = getDiffOutputControl(resultsBuilder);
         resultsBuilder.addResult(DIFF_OUTPUT_CONTROL.getName(), diffOutputControl);
         this.outputBestPracticeMessage();
@@ -63,7 +62,6 @@ public class DiffOutputControlCommandStep extends AbstractHelperCommandStep {
      * Creates a new DiffOutputControl object based on the parameters received by the command
      */
     private DiffOutputControl getDiffOutputControl(CommandResultsBuilder resultsBuilder) {
-        Scope.getCurrentScope().addMdcValue(MdcKey.LIQUIBASE_INTERNAL_OPERATION, COMMAND_NAME[0]);
         CommandScope commandScope = resultsBuilder.getCommandScope();
         CompareControl compareControl = (CompareControl) resultsBuilder.getResult(PreCompareCommandStep.COMPARE_CONTROL_RESULT.getName());
         ObjectChangeFilter objectChangeFilter = (ObjectChangeFilter) resultsBuilder.getResult(PreCompareCommandStep.OBJECT_CHANGE_FILTER_RESULT.getName());

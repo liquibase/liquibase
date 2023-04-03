@@ -195,11 +195,10 @@ public class CommandScope {
         final List<CommandStep> executedCommands = new ArrayList<>();
         Optional<Exception> thrownException = Optional.empty();
         validate();
-        String commandNameForMdc = StringUtil.join(commandDefinition.getName(), " ");
-        Scope.getCurrentScope().addMdcValue(MdcKey.LIQUIBASE_INTERNAL_OPERATION, commandNameForMdc);
         try {
             for (CommandStep command : pipeline) {
                 try {
+                    Scope.getCurrentScope().addMdcValue(MdcKey.LIQUIBASE_INTERNAL_OPERATION, getCommandStepName(command));
                     command.run(resultsBuilder);
                 } catch (Exception runException) {
                     // Suppress the exception for now so that we can run the cleanup steps even when encountering an exception.
@@ -257,6 +256,25 @@ public class CommandScope {
                 .setValueHandler(argument.getValueConverter())
                 .setValueObfuscator(argument.getValueObfuscator())
                 .buildTemporary();
+    }
+
+    /**
+     * Returns a string of the entire defined command names, joined together with spaces
+     * @param commandStep the command step to get the name of
+     * @return the full command step name definition delimited by spaces or an empty string if there are no defined command names
+     */
+    private String getCommandStepName(CommandStep commandStep) {
+        StringBuilder commandStepName = new StringBuilder();
+        String[][] commandDefinition = commandStep.defineCommandNames();
+        if (commandDefinition != null) {
+            for (String[] commandNames : commandDefinition) {
+                if (commandStepName.length() != 0) {
+                    commandStepName.append(" ");
+                }
+                commandStepName.append(String.join(" ", commandNames));
+            }
+        }
+        return commandStepName.toString();
     }
 
     /**

@@ -46,7 +46,6 @@ public class RollbackSqlCommandStep extends RollbackCommandStep {
 
     @Override
     public void run(CommandResultsBuilder resultsBuilder) throws Exception {
-        Scope.getCurrentScope().addMdcValue(MdcKey.LIQUIBASE_INTERNAL_OPERATION, COMMAND_NAME[0]);
         CommandScope commandScope = resultsBuilder.getCommandScope();
         String tagToRollBackTo = commandScope.getArgumentValue(RollbackCommandStep.TAG_ARG);
         String changeLogFile = commandScope.getArgumentValue(DatabaseChangelogCommandStep.CHANGELOG_FILE_ARG);

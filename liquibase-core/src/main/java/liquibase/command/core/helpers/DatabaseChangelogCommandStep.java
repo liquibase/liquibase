@@ -60,7 +60,6 @@ public class DatabaseChangelogCommandStep extends AbstractHelperCommandStep impl
 
     @Override
     public void run(CommandResultsBuilder resultsBuilder) throws Exception {
-        Scope.getCurrentScope().addMdcValue(MdcKey.LIQUIBASE_INTERNAL_OPERATION, COMMAND_NAME[0]);
         CommandScope commandScope = resultsBuilder.getCommandScope();
         final Database database = (Database) commandScope.getDependency(Database.class);
         final String changeLogFile = commandScope.getArgumentValue(CHANGELOG_FILE_ARG);

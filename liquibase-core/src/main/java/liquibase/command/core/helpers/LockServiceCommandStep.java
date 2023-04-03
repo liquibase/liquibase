@@ -33,7 +33,6 @@ public class LockServiceCommandStep extends AbstractHelperCommandStep implements
 
     @Override
     public void run(CommandResultsBuilder resultsBuilder) throws Exception {
-        Scope.getCurrentScope().addMdcValue(MdcKey.LIQUIBASE_INTERNAL_OPERATION, COMMAND_NAME[0]);
         CommandScope commandScope = resultsBuilder.getCommandScope();
         Database database = (Database) commandScope.getDependency(Database.class);
         lockService = LockServiceFactory.getInstance().getLockService(database);

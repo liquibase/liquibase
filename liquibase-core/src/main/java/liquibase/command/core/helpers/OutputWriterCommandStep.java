@@ -36,7 +36,6 @@ public class OutputWriterCommandStep extends AbstractHelperCommandStep implement
 
     @Override
     public void run(CommandResultsBuilder resultsBuilder) throws Exception {
-        Scope.getCurrentScope().addMdcValue(MdcKey.LIQUIBASE_INTERNAL_OPERATION, COMMAND_NAME[0]);
         CommandScope commandScope = resultsBuilder.getCommandScope();
         String charsetName = GlobalConfiguration.OUTPUT_FILE_ENCODING.getCurrentValue();
         outputStreamWriter = new OutputStreamWriter(resultsBuilder.getOutputStream(), charsetName);

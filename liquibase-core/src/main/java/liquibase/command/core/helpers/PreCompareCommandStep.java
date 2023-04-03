@@ -79,7 +79,6 @@ public class PreCompareCommandStep extends AbstractHelperCommandStep {
 
     @Override
     public void run(CommandResultsBuilder resultsBuilder) throws Exception {
-        Scope.getCurrentScope().addMdcValue(MdcKey.LIQUIBASE_INTERNAL_OPERATION, COMMAND_NAME[0]);
         CommandScope commandScope = resultsBuilder.getCommandScope();
         Database targetDatabase = getTargetDatabase(commandScope);
         ObjectChangeFilter objectChangeFilter = this.getObjectChangeFilter(commandScope);
