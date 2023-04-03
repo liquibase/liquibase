@@ -1,9 +1,7 @@
 package liquibase.command.core;
 
-import liquibase.command.CommandArgumentDefinition;
-import liquibase.command.CommandBuilder;
-import liquibase.command.CommandDefinition;
-import liquibase.command.CommonArgumentNames;
+import liquibase.UpdateSummaryEnum;
+import liquibase.command.*;
 import liquibase.database.Database;
 
 import java.io.Writer;
@@ -43,6 +41,11 @@ public class UpdateCountSqlCommandStep extends UpdateCountCommandStep {
     }
 
     @Override
+    public UpdateSummaryEnum getShowSummary(CommandScope commandScope) {
+        return UpdateSummaryEnum.OFF;
+    }
+
+    @Override
     public String[][] defineCommandNames() {
         return new String[][] { COMMAND_NAME };
     }
@@ -60,6 +63,7 @@ public class UpdateCountSqlCommandStep extends UpdateCountCommandStep {
         dependencies.add(Writer.class);
         dependencies.add(Database.class);
         dependencies.addAll(super.requiredDependencies());
+        dependencies.remove(UpdateSummaryEnum.class); // no update summary for this command, despite the class it is extending having an update summary option
         return dependencies;
     }
 

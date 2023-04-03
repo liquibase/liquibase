@@ -61,6 +61,7 @@ public class MdcKey {
     public static final String LIQUIBASE_SQLPLUS_ARGS = "liquibaseSqlplusArgs";
     public static final String LIQUIBASE_SQLPLUS_CREATE_SPOOL = "liquibaseSqlplusCreateSpool";
     public static final String LIQUIBASE_SQLPLUS_SPOOL_FILE = "liquibaseSqlplusSpoolFile";
+    public static final String LIQUIBASE_SQLPLUS_TEMP_OVERWRITE = "liquibaseSqlplusTempOverwrite";
     public static final String RUN_WITH = "runWith";
     public static final String DATABASE_CHANGELOG_TABLE_OUTCOME = "databaseChangelogTableOutcome";
     public static final String ROLLBACK_SQL_FILE = "rollbackSqlFile";
@@ -85,4 +86,12 @@ public class MdcKey {
     public static final String UPDATE_TO_TAG = "updateToTag";
     public static final String UPDATE_COUNT = "updateCount";
     public static final String ROLLBACK_ON_ERROR = "rollbackOnError";
+    public static final String CHANGESET_SYNC_COUNT = "changesetSyncCount";
+    public static final String CHANGELOG_SYNC_OUTCOME = "changelogSyncOutcome";
+    public static final String OPERATION_START = "operationStart";
+    public static final String OPERATION_STOP = "operationStop";
+    public static final String DIFF_CHANGELOG_FILE = "diffChangelogFile";
+    public static final String DIFF_CHANGELOG_OUTCOME = "diffChangelogOutcome";
+
+    public static final String CHANGESET_SYNC_OUTCOME = "changesetSyncOutcome";
 }
