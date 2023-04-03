@@ -6,7 +6,6 @@ import liquibase.command.CommandScope;
 import liquibase.command.CommonArgumentNames;
 import liquibase.exception.CommandValidationException;
 import liquibase.exception.MissingRequiredArgumentException;
-import liquibase.logging.mdc.MdcKey;
 import liquibase.resource.OpenOptions;
 import liquibase.resource.PathHandlerFactory;
 import liquibase.util.StringUtil;
