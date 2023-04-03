@@ -1,10 +1,8 @@
 package liquibase.command.core;
 
-import liquibase.Scope;
 import liquibase.command.*;
 import liquibase.command.core.helpers.DatabaseChangelogCommandStep;
 import liquibase.database.Database;
-import liquibase.logging.mdc.MdcKey;
 import liquibase.util.LoggingExecutorTextUtil;
 
 import java.io.Writer;

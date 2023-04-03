@@ -7,7 +7,6 @@ import liquibase.database.Database;
 import liquibase.exception.LockException;
 import liquibase.lockservice.LockService;
 import liquibase.lockservice.LockServiceFactory;
-import liquibase.logging.mdc.MdcKey;
 
 import java.util.Collections;
 import java.util.List;

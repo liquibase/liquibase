@@ -9,7 +9,6 @@ import liquibase.command.CommandResultsBuilder;
 import liquibase.command.CommandScope;
 import liquibase.database.Database;
 import liquibase.integration.commandline.ChangeExecListenerUtils;
-import liquibase.logging.mdc.MdcKey;
 
 import java.util.Collections;
 import java.util.List;

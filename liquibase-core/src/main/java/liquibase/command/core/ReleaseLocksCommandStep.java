@@ -6,7 +6,6 @@ import liquibase.command.CommandDefinition;
 import liquibase.command.CommandResultsBuilder;
 import liquibase.database.Database;
 import liquibase.lockservice.LockServiceFactory;
-import liquibase.logging.mdc.MdcKey;
 
 import java.util.Arrays;
 import java.util.List;
