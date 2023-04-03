@@ -528,11 +528,6 @@ public class StandardHubService implements HubService {
         return http.doPost("/api/v1/organizations/" + organizationId + ((operation.getConnection() == null || operation.getConnection().getProject() == null) ? "" : "/projects/" + operation.getConnection().getProject().getId()) + "/operations/" + operation.getId() + "/operation-events", requestParams, OperationEvent.class);
     }
 
-    private Date convertDateToUTC(Date dateInString) {
-        //LocalDateTime ldt = LocalDateTime.parse(dateInString, DateTimeFormatter.ofPattern(DATE_TIME_FORMAT_STRING));
-        return null;
-    }
-
     @Override
     public void sendOperationChangeEvent(OperationChangeEvent operationChangeEvent) throws LiquibaseException {
         String changesetBody = null;

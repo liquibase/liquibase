@@ -48,7 +48,12 @@ public class ContextChangeSetFilter implements ChangeSetFilter {
 
     @Override
     public String getMdcName() {
-        return "context";
+        return "contextMismatch";
+    }
+
+    @Override
+    public String getDisplayName() {
+        return "Context mismatch";
     }
 
     @Override
