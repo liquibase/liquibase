@@ -57,9 +57,4 @@ public class LabelChangeSetFilter implements ChangeSetFilter {
     public String getDisplayName() {
         return "Label mismatch";
     }
-
-    @Override
-    public String getDisplayName() {
-        return "Label mismatch";
-    }
 }

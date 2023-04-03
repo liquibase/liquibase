@@ -55,9 +55,4 @@ public class DbmsChangeSetFilter implements ChangeSetFilter {
     public String getDisplayName() {
         return DISPLAY_NAME;
     }
-
-    @Override
-    public String getDisplayName() {
-        return "DBMS mismatch";
-    }
 }

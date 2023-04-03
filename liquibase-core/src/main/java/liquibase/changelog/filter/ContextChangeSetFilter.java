@@ -55,9 +55,4 @@ public class ContextChangeSetFilter implements ChangeSetFilter {
     public String getDisplayName() {
         return "Context mismatch";
     }
-
-    @Override
-    public String getDisplayName() {
-        return "Context mismatch";
-    }
 }
