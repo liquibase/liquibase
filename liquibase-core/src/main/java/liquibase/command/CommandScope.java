@@ -190,7 +190,10 @@ public class CommandScope {
      */
     public CommandResults execute() throws CommandExecutionException {
         Scope.getCurrentScope().addMdcValue(MdcKey.OPERATION_START_TIME, new ISODateFormat().format(new Date()));
-        Scope.getCurrentScope().addMdcValueIfAbsent(MdcKey.LIQUIBASE_COMMAND_NAME, String.join(" ", commandDefinition.getName()));
+        // We don't want to reset the command name even when defining another CommandScope during execution because we intend on keeping this value as the command entered to the console
+        if (!Scope.getCurrentScope().isMdcKeyPresent(MdcKey.LIQUIBASE_COMMAND_NAME)) {
+            Scope.getCurrentScope().addMdcValue(MdcKey.LIQUIBASE_COMMAND_NAME, String.join(" ", commandDefinition.getName()));
+        }
         CommandResultsBuilder resultsBuilder = new CommandResultsBuilder(this, outputStream);
         final List<CommandStep> pipeline = commandDefinition.getPipeline();
         final List<CommandStep> executedCommands = new ArrayList<>();

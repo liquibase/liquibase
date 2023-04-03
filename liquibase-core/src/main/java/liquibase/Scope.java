@@ -476,16 +476,13 @@ public class Scope {
     }
 
     /**
-     * Add a key value pair to the MDC using the MDC manager if a key does not already exist. Removes when scope exits.
-     * @return the new MdcObject if it has been created, null if the key already exists
+     * Check if the provided mdc key is present
+     * @return true if there is an existing key, false otherwise
      */
     @Beta
-    public MdcObject addMdcValueIfAbsent(String key, String value) {
+    public boolean isMdcKeyPresent(String key) {
         Object mdc = getMdcManager().getAll().get(key);
-        if (mdc == null) {
-            return addMdcValue(key, value, true);
-        }
-        return null;
+        return mdc != null;
     }
 
     /**
