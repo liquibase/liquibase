@@ -10,7 +10,9 @@
 	<packaging>jar</packaging>
 
     <description>Liquibase is a tool for managing and executing database changes.</description>
-
+    <properties>
+        <maven.deploy.skip>false</maven.deploy.skip>
+    </properties>
 	<dependencies>
 		<dependency>
 			<groupId>${project.groupId}</groupId>
