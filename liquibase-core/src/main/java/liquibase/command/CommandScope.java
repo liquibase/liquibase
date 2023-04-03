@@ -264,9 +264,9 @@ public class CommandScope {
                 Scope.getCurrentScope().addMdcValue(MdcKey.OUTPUT_FILE_ENCODING, outputFileEncoding);
             }
             if (outputFilePath != null) {
-                Scope.getCurrentScope().getLog(CommandScope.class).info("Writing output to '" + outputFilePath + "' with encoding '" + outputFileEncoding + "'");
+                Scope.getCurrentScope().getLog(CommandScope.class).fine("Writing output to '" + outputFilePath + "' with encoding '" + outputFileEncoding + "'");
             } else {
-                Scope.getCurrentScope().getLog(CommandScope.class).info("Writing output with encoding '" + outputFileEncoding + "'");
+                Scope.getCurrentScope().getLog(CommandScope.class).fine("Writing output with encoding '" + outputFileEncoding + "'");
             }
         });
     }
