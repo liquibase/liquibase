@@ -92,7 +92,7 @@ public class CreateViewGenerator extends AbstractSqlGenerator<CreateViewStatemen
                         + "] AS SELECT " +
                         "''This is a code stub which will be replaced by an Alter Statement'' as [code_stub]'"));
                 viewDefinition.replace("CREATE", "ALTER");
-            } else if (shouldPrependDropViewStatement(database, statement)) {
+            } else if (shouldPrependDropViewStatement(database)) {
                 sql.add(new UnparsedSql(
                     "DROP VIEW IF EXISTS " + database.escapeViewName(statement.getCatalogName(),
                     statement.getSchemaName(), statement.getViewName())));
@@ -111,7 +111,7 @@ public class CreateViewGenerator extends AbstractSqlGenerator<CreateViewStatemen
         return sql.toArray(EMPTY_SQL);
     }
 
-    private boolean shouldPrependDropViewStatement(Database database, CreateViewStatement statement) {
+    private boolean shouldPrependDropViewStatement(Database database) {
         // allow overriding the value of the dropIfCannotReplace attribute
         // from liquibase.properties or command line
         boolean dropIfCannotReplace = false;
