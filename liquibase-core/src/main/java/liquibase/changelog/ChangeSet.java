@@ -36,6 +36,7 @@ import liquibase.util.SqlUtil;
 import liquibase.util.StreamUtil;
 import liquibase.util.StringUtil;
 
+import java.time.Instant;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -596,7 +597,8 @@ public class ChangeSet implements Conditional, ChangeLogChild {
         }
 
         long startTime = new Date().getTime();
-        Scope.getCurrentScope().addMdcValue(MdcKey.CHANGESET_OPERATION_START_TIME, new ISODateFormat().format(new Date()));
+        String startTimeString = Instant.ofEpochMilli(startTime).toString();
+        Scope.getCurrentScope().addMdcValue(MdcKey.CHANGESET_OPERATION_START_TIME, startTimeString);
 
         ExecType execType = null;
 
@@ -729,15 +731,19 @@ public class ChangeSet implements Conditional, ChangeLogChild {
                 if (execType == null) {
                     execType = ExecType.EXECUTED;
                 }
-                Date stopTime = new Date();
-                Scope.getCurrentScope().addMdcValue(MdcKey.CHANGESET_OPERATION_STOP_TIME, new ISODateFormat().format(stopTime));
+                long stopTime = new Date().getTime();
+                String stopTimeString = Instant.ofEpochMilli(stopTime).toString();
+                Scope.getCurrentScope().addMdcValue(MdcKey.CHANGESET_OPERATION_STOP_TIME, stopTimeString);
                 Scope.getCurrentScope().addMdcValue(MdcKey.CHANGESET_OUTCOME, execType.value.toLowerCase());
-                log.info("ChangeSet " + toString(false) + " ran successfully in " + (stopTime.getTime() - startTime) + "ms");
+                log.info("ChangeSet " + toString(false) + " ran successfully in " + (stopTime - startTime) + "ms");
             } else {
                 log.fine("Skipping ChangeSet: " + this);
             }
 
         } catch (Exception e) {
+            long stopTime = new Date().getTime();
+            String stopTimeString = Instant.ofEpochMilli(stopTime).toString();
+            Scope.getCurrentScope().addMdcValue(MdcKey.CHANGESET_OPERATION_STOP_TIME, stopTimeString);
             if (getFailOnError() == null || getFailOnError()) {
                 Scope.getCurrentScope().addMdcValue(MdcKey.CHANGESET_OUTCOME, ExecType.FAILED.value.toLowerCase());
             }
@@ -830,7 +836,9 @@ public class ChangeSet implements Conditional, ChangeLogChild {
     }
 
     public void rollback(Database database, ChangeExecListener listener) throws RollbackFailedException {
-        Scope.getCurrentScope().addMdcValue(MdcKey.CHANGESET_OPERATION_START_TIME, new ISODateFormat().format(new Date()));
+        long startTime = new Date().getTime();
+        String startTimeString = Instant.ofEpochMilli(startTime).toString();
+        Scope.getCurrentScope().addMdcValue(MdcKey.CHANGESET_OPERATION_START_TIME, startTimeString);
         addChangeSetMdcProperties();
         Scope.getCurrentScope().addMdcValue(MdcKey.DEPLOYMENT_ID, getDeploymentId());
         Executor originalExecutor = setupCustomExecutorIfNecessary(database);
@@ -894,9 +902,14 @@ public class ChangeSet implements Conditional, ChangeLogChild {
                 database.commit();
             }
             Scope.getCurrentScope().addMdcValue(MdcKey.CHANGESET_OUTCOME, ExecType.EXECUTED.value.toLowerCase());
-            Scope.getCurrentScope().addMdcValue(MdcKey.CHANGESET_OPERATION_STOP_TIME, new ISODateFormat().format(new Date()));
+            long stopTime = new Date().getTime();
+            String stopTimeString = Instant.ofEpochMilli(stopTime).toString();
+            Scope.getCurrentScope().addMdcValue(MdcKey.CHANGESET_OPERATION_STOP_TIME, stopTimeString);
             Scope.getCurrentScope().getLog(getClass()).fine("ChangeSet " + toString() + " has been successfully rolled back.");
         } catch (Exception e) {
+            long stopTime = new Date().getTime();
+            String stopTimeString = Instant.ofEpochMilli(stopTime).toString();
+            Scope.getCurrentScope().addMdcValue(MdcKey.CHANGESET_OPERATION_STOP_TIME, stopTimeString);
             try {
                 Scope.getCurrentScope().addMdcValue(MdcKey.CHANGESET_OUTCOME, ExecType.FAILED.value.toLowerCase());
                 database.rollback();
