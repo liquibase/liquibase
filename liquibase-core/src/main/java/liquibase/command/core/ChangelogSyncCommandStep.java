@@ -17,9 +17,15 @@ import liquibase.hub.listener.HubChangeExecListener;
 import liquibase.lockservice.LockService;
 import liquibase.logging.core.BufferedLogService;
 import liquibase.logging.core.CompositeLogService;
+import liquibase.logging.mdc.MdcKey;
+import liquibase.logging.mdc.MdcObject;
+import liquibase.logging.mdc.MdcValue;
 
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.concurrent.atomic.AtomicInteger;
 
 public class ChangelogSyncCommandStep extends AbstractCommandStep {
 
@@ -71,14 +77,25 @@ public class ChangelogSyncCommandStep extends AbstractCommandStep {
             HubChangeExecListener changeLogSyncListener = hubHandler.startHubForChangelogSync(changeLogParameters, tag,
                     buildChangeLogIterator(tag, changeLog, changeLogParameters.getContexts(), changeLogParameters.getLabels(), database));
 
-            Scope.child(Scope.Attr.logService.name(), compositeLogService, () ->
+            AtomicInteger changesetCount = new AtomicInteger(0);
+            Map<String, Object> scopeVars = new HashMap<>(2);
+            scopeVars.put(Scope.Attr.logService.name(), compositeLogService);
+            scopeVars.put("changesetCount", changesetCount);
+            Scope.child(scopeVars, () ->
                     runChangeLogIterator.run(new ChangeLogSyncVisitor(database, changeLogSyncListener),
                     new RuntimeEnvironment(database, changeLogParameters.getContexts(), changeLogParameters.getLabels())));
+            Scope.getCurrentScope().addMdcValue(MdcKey.CHANGESET_SYNC_COUNT, changesetCount.toString());
 
             hubHandler.postUpdateHub(bufferLog);
+            try (MdcObject changelogSyncOutcome = Scope.getCurrentScope().addMdcValue(MdcKey.CHANGELOG_SYNC_OUTCOME, MdcValue.COMMAND_SUCCESSFUL)) {
+                Scope.getCurrentScope().getLog(getClass()).info("Finished executing " + defineCommandNames()[0][0] + " command");
+            }
         } catch (Exception e) {
             if (hubHandler != null) {
                 hubHandler.postUpdateHubExceptionHandling(bufferLog, e.getMessage());
+            }
+            try (MdcObject changelogSyncOutcome = Scope.getCurrentScope().addMdcValue(MdcKey.CHANGELOG_SYNC_OUTCOME, MdcValue.COMMAND_FAILED)) {
+                Scope.getCurrentScope().getLog(getClass()).warning("Failed executing " + defineCommandNames()[0][0] + " command");
             }
             throw e;
         }
