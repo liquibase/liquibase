@@ -10,16 +10,18 @@ public class ChangeSetFilterResult {
     private final boolean accepted;
     private final String message;
     private final Class<? extends ChangeSetFilter> filter;
+    private final String mdcName;
     private final String displayName;
 
     public ChangeSetFilterResult(boolean accepted, String message, Class<? extends ChangeSetFilter> filter) {
-        this(accepted, message, filter, filter == null ? null : filter.getSimpleName());
+        this(accepted, message, filter, filter == null ? null : filter.getSimpleName(), filter == null ? null : filter.getSimpleName());
     }
 
-    public ChangeSetFilterResult(boolean accepted, String message, Class<? extends ChangeSetFilter> filter, String displayName) {
+    public ChangeSetFilterResult(boolean accepted, String message, Class<? extends ChangeSetFilter> filter, String mdcName, String displayName) {
         this.accepted = accepted;
         this.message = message;
         this.filter = filter;
+        this.mdcName = mdcName;
         this.displayName = displayName;
     }
 
@@ -42,6 +44,10 @@ public class ChangeSetFilterResult {
      */
     public Class<? extends ChangeSetFilter> getFilter() {
         return filter;
+    }
+
+    public String getMdcName() {
+        return mdcName;
     }
 
     public String getDisplayName() {

@@ -31,25 +31,30 @@ public class LabelChangeSetFilter implements ChangeSetFilter {
         changeSet.getSqlVisitors().removeAll(visitorsToRemove);
 
         if ((labelExpression == null) || labelExpression.isEmpty()) {
-            return new ChangeSetFilterResult(true, "No runtime labels specified, all labels will run", this.getClass(), getMdcName());
+            return new ChangeSetFilterResult(true, "No runtime labels specified, all labels will run", this.getClass(), getMdcName(), getDisplayName());
         }
 
         Collection<Labels> inheritableLabels = changeSet.getInheritableLabels();
         if ((changeSet.getLabels() == null || changeSet.getLabels().isEmpty()) &&
             (inheritableLabels == null || inheritableLabels.isEmpty())) {
-            return new ChangeSetFilterResult(true, "Changeset runs under all labels", this.getClass(), getMdcName());
+            return new ChangeSetFilterResult(true, "Changeset runs under all labels", this.getClass(), getMdcName(), getDisplayName());
         }
 
         if (labelExpression.matches(changeSet.getLabels()) && LabelExpression.matchesAll(inheritableLabels, labelExpression)) {
-            return new ChangeSetFilterResult(true, "Labels matches '" + labelExpression.toString() + "'", this.getClass(), getMdcName());
+            return new ChangeSetFilterResult(true, "Labels matches '" + labelExpression.toString() + "'", this.getClass(), getMdcName(), getDisplayName());
         }
         else {
-            return new ChangeSetFilterResult(false, "Labels does not match '" + labelExpression.toString() + "'", this.getClass(), getMdcName());
+            return new ChangeSetFilterResult(false, "Labels does not match '" + labelExpression.toString() + "'", this.getClass(), getMdcName(), getDisplayName());
         }
     }
 
     @Override
     public String getMdcName() {
-        return "labels";
+        return "labelsMismatch";
+    }
+
+    @Override
+    public String getDisplayName() {
+        return "Label mismatch";
     }
 }
