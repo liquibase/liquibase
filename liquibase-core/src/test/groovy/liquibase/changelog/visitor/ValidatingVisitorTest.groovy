@@ -116,7 +116,7 @@ class ValidatingVisitorTest extends Specification {
          handler.getValidationErrors().getErrorMessages().get(0).contains("ChangeSet Author is empty")
     }
 
-    void "validate error on empty author when strict configuration is set as false"() {
+    void "validate there is no error on empty author when strict configuration is set as false"() {
         when:
         ChangeSet changeSet = new ChangeSet("emptyAuthor", "", false, false, "path/changelog", null, null, null)
         ValidatingVisitor handler = new ValidatingVisitor(new ArrayList<>())
