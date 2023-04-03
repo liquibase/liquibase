@@ -134,7 +134,6 @@ public class DiffToChangeLog {
             //
             // Get a Database instance and save it in the scope for later use
             //
-            DatabaseSnapshot snapshot = diffResult.getReferenceSnapshot();
             Database database = determineDatabase(diffResult.getReferenceSnapshot());
             if (database == null) {
                 database = determineDatabase(diffResult.getComparisonSnapshot());

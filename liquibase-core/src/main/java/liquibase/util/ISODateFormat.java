@@ -109,11 +109,6 @@ public class ISODateFormat {
                 if (dateAsString.contains(" ")) {
                     dateAsString = dateAsString.replaceAll(" ", "T");
                 }
-                DateTimeFormatter formatter =
-                           new DateTimeFormatterBuilder()
-                                .appendPattern(DATE_TIME_FORMAT_STRING)
-                                .appendFraction(ChronoField.MILLI_OF_SECOND, 0, 9, true)
-                                .toFormatter();
                 nanos = Integer.parseInt(dateAsString.substring(20));
                 for (; length < 29; length++) {
                     nanos *= 10;
