@@ -7,7 +7,8 @@ import liquibase.command.CommandScope;
 import liquibase.command.core.DropAllCommandStep;
 import liquibase.command.core.GenerateChangelogCommandStep;
 import liquibase.command.core.UpdateCommandStep;
-import liquibase.command.core.helpers.DbUrlConnectionCommandStep;
+import liquibase.command.core.helpers.DbUrlConnectionCommandStep
+import liquibase.command.core.helpers.ShowSummaryArgument;
 import liquibase.exception.CommandExecutionException;
 import liquibase.extension.testing.testsystem.DatabaseTestSystem;
 import liquibase.resource.SearchPathResourceAccessor
@@ -89,7 +90,7 @@ class CommandUtil {
             commandScope.addArgumentValue(UpdateCommandStep.CHANGELOG_FILE_ARG, changelogFile)
             commandScope.addArgumentValue(UpdateCommandStep.LABEL_FILTER_ARG, labels)
             commandScope.addArgumentValue(UpdateCommandStep.CONTEXTS_ARG, contexts)
-            commandScope.addArgumentValue(UpdateCommandStep.SHOW_SUMMARY, UpdateSummaryEnum.SUMMARY)
+            commandScope.addArgumentValue(ShowSummaryArgument.SHOW_SUMMARY, UpdateSummaryEnum.SUMMARY)
             if (outputFile != null) {
                 OutputStream outputStream = new FileOutputStream(new File(outputFile))
                 commandScope.setOutput(outputStream)
