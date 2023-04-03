@@ -51,7 +51,6 @@ public abstract class AbstractDatabaseConnectionCommandStep extends AbstractHelp
                                         String driver,
                                         String driverPropertiesFile)
             throws DatabaseException {
-        Scope.getCurrentScope().addMdcValue(MdcKey.LIQUIBASE_INTERNAL_OPERATION, COMMAND_NAME[0]);
         ResourceAccessor resourceAccessor = Scope.getCurrentScope().getResourceAccessor();
         String databaseClassName = null;
         Class<?> databaseClass = LiquibaseCommandLineConfiguration.DATABASE_CLASS.getCurrentValue();

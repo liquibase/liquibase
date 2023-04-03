@@ -195,17 +195,11 @@ public class CommandScope {
         final List<CommandStep> executedCommands = new ArrayList<>();
         Optional<Exception> thrownException = Optional.empty();
         validate();
-        //
-        // NOTE:
-        // When all commands have been refactored we will be able to remove this string manipulation
-        //
-        String commandNameForMdc = StringUtil.join(commandDefinition.getName(), "-");
-        commandNameForMdc = StringUtil.lowerCaseFirst(commandNameForMdc.replaceAll("^internal",""));
+        String commandNameForMdc = StringUtil.join(commandDefinition.getName(), " ");
         Scope.getCurrentScope().addMdcValue(MdcKey.LIQUIBASE_INTERNAL_OPERATION, commandNameForMdc);
         try {
             for (CommandStep command : pipeline) {
                 try {
-                    Scope.getCurrentScope().addMdcValue(MdcKey.LIQUIBASE_COMMAND_NAME, StringUtil.join(command.defineCommandNames()[0], " "));
                     command.run(resultsBuilder);
                 } catch (Exception runException) {
                     // Suppress the exception for now so that we can run the cleanup steps even when encountering an exception.

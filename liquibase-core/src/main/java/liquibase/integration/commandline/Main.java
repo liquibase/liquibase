@@ -290,6 +290,7 @@ public class Main {
                                 main.printHelp(outputStream);
                                 return Integer.valueOf(0);
                             }
+                            Scope.getCurrentScope().addMdcValue(MdcKey.LIQUIBASE_COMMAND_NAME, main.command);
                         } catch (CommandLineParsingException e) {
                             Scope.getCurrentScope().getUI().sendMessage(CommandLineUtils.getBanner());
                             Scope.getCurrentScope().getUI().sendMessage(coreBundle.getString("how.to.display.help"));
@@ -1447,7 +1448,6 @@ public class Main {
      */
     @SuppressWarnings("java:S2095")
     protected void doMigration() throws Exception {
-        Scope.getCurrentScope().addMdcValue(MdcKey.LIQUIBASE_COMMAND_NAME, command);
         if (COMMANDS.HELP.equalsIgnoreCase(command)) {
             printHelp(System.err);
             return;
