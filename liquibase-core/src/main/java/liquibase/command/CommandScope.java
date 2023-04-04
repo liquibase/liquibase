@@ -190,9 +190,7 @@ public class CommandScope {
      * Executes the command in this scope, and returns the results.
      */
     public CommandResults execute() throws CommandExecutionException {
-        long startTime = new Date().getTime();
-        String startTimeString = Instant.ofEpochMilli(startTime).toString();
-        Scope.getCurrentScope().addMdcValue(MdcKey.OPERATION_START_TIME, startTimeString);
+        Scope.getCurrentScope().addMdcValue(MdcKey.OPERATION_START_TIME, Instant.ofEpochMilli(new Date().getTime()).toString());
         CommandResultsBuilder resultsBuilder = new CommandResultsBuilder(this, outputStream);
         final List<CommandStep> pipeline = commandDefinition.getPipeline();
         final List<CommandStep> executedCommands = new ArrayList<>();
@@ -235,9 +233,7 @@ public class CommandScope {
                 throw new CommandExecutionException(e);
             }
         } finally {
-            long stopTime = new Date().getTime();
-            String stopTimeString = Instant.ofEpochMilli(stopTime).toString();
-            try (MdcObject operationStopTime = Scope.getCurrentScope().addMdcValue(MdcKey.OPERATION_STOP_TIME, stopTimeString)) {
+            try (MdcObject operationStopTime = Scope.getCurrentScope().addMdcValue(MdcKey.OPERATION_STOP_TIME, Instant.ofEpochMilli(new Date().getTime()).toString())) {
                 Scope.getCurrentScope().getLog(getClass()).info("Command execution complete");
             }
             try {
