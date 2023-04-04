@@ -24,16 +24,6 @@ import java.util.stream.Collectors;
  *
  */
 public class ShowSummaryUtil {
-    private static final Map<Class<?>, String> filterSummaryLabelMap = new HashMap<>();
-    static {
-        filterSummaryLabelMap.put(ShouldRunChangeSetFilter.class, "Already ran:             %6d");
-        filterSummaryLabelMap.put(DbmsChangeSetFilter.class,      "DBMS mismatch:           %6d");
-        filterSummaryLabelMap.put(LabelChangeSetFilter.class,     "Label mismatch:          %6d");
-        filterSummaryLabelMap.put(ContextChangeSetFilter.class,   "Context mismatch:        %6d");
-        filterSummaryLabelMap.put(CountChangeSetFilter.class,     "After count:             %6d");
-        filterSummaryLabelMap.put(UpToTagChangeSetFilter.class,   "After tag:               %6d");
-        filterSummaryLabelMap.put(IgnoreChangeSetFilter.class,    "Ignored:                 %6d");
-    }
 
     /**
      *
@@ -52,7 +42,7 @@ public class ShowSummaryUtil {
         //
         // Check the global flag to turn the summary off
         //
-        if (showSummary == UpdateSummaryEnum.OFF) {
+        if (showSummary == null || showSummary == UpdateSummaryEnum.OFF) {
             return;
         }
 
@@ -81,17 +71,14 @@ public class ShowSummaryUtil {
         //
         UpdateSummary updateSummaryMdc = showSummary(changeLog, statusVisitor, skippedChangeSets, filterDenied, outputStream);
         updateSummaryMdc.setValue(showSummary.toString());
-        if (showSummary == UpdateSummaryEnum.SUMMARY || (skippedChangeSets.isEmpty() && denied.isEmpty())) {
-            Scope.getCurrentScope().addMdcValue(MdcKey.UPDATE_SUMMARY, updateSummaryMdc);
-            return;
-        }
+        boolean shouldPrintDetailTable = showSummary != UpdateSummaryEnum.SUMMARY && (!skippedChangeSets.isEmpty() || !denied.isEmpty());
 
         //
         // Show the details too
         //
-        SortedMap<String, Integer> skippedMdc = showDetailTable(skippedChangeSets, filterDenied, outputStream);
+        SortedMap<String, Integer> skippedMdc = showDetailTable(skippedChangeSets, filterDenied, outputStream, shouldPrintDetailTable);
         updateSummaryMdc.setSkipped(skippedMdc);
-        try(MdcObject updateSummaryMdcObject = Scope.getCurrentScope().addMdcValue(MdcKey.UPDATE_SUMMARY, updateSummaryMdc);) {
+        try(MdcObject updateSummaryMdcObject = Scope.getCurrentScope().addMdcValue(MdcKey.UPDATE_SUMMARY, updateSummaryMdc)) {
             Scope.getCurrentScope().getLog(ShowSummaryUtil.class).info("Update summary generated");
         }
     }
@@ -99,13 +86,14 @@ public class ShowSummaryUtil {
     //
     // Show the details
     //
-    private static SortedMap<String, Integer> showDetailTable(List<ChangeSet> skippedChangeSets, List<ChangeSetStatus> filterDenied, OutputStream outputStream)
+    private static SortedMap<String, Integer> showDetailTable(List<ChangeSet> skippedChangeSets, List<ChangeSetStatus> filterDenied, OutputStream outputStream, boolean shouldPrintDetailTable)
             throws IOException, LiquibaseException {
+        String totalSkippedMdcKey = "totalSkipped";
         //
         // Nothing to do
         //
         if (filterDenied.isEmpty() && skippedChangeSets.isEmpty()) {
-            return Collections.emptySortedMap();
+            return new TreeMap<>(Collections.singletonMap(totalSkippedMdcKey, 0));
         }
         List<String> columnHeaders = new ArrayList<>();
         columnHeaders.add("Changeset Info");
@@ -113,7 +101,7 @@ public class ShowSummaryUtil {
         List<List<String>> table = new ArrayList<>();
         table.add(columnHeaders);
         SortedMap<String, Integer> mdcSkipCounts = new TreeMap<>();
-        mdcSkipCounts.put("totalSkipped", skippedChangeSets.size() + filterDenied.size());
+        mdcSkipCounts.put(totalSkippedMdcKey, skippedChangeSets.size() + filterDenied.size());
 
         List<ChangeSetStatus> finalList = createFinalStatusList(skippedChangeSets, filterDenied, mdcSkipCounts);
 
@@ -139,7 +127,7 @@ public class ShowSummaryUtil {
             StringBuilder builder = new StringBuilder();
             st.getFilterResults().forEach(consumer -> {
                 if (consumer.getFilter() != null) {
-                    String displayName = consumer.getDisplayName();
+                    String displayName = consumer.getMdcName();
                     mdcSkipCounts.merge(displayName, 1, Integer::sum);
                 }
                 String skippedMessage = String.format("   '%s' : %s", st.getChangeSet().toString(), consumer.getMessage());
@@ -156,12 +144,14 @@ public class ShowSummaryUtil {
             table.add(outputRow);
         }
 
-        List<Integer> widths = new ArrayList<>();
-        widths.add(60);
-        widths.add(40);
+        if (shouldPrintDetailTable) {
+            List<Integer> widths = new ArrayList<>();
+            widths.add(60);
+            widths.add(40);
 
-        Writer writer = createOutputWriter(outputStream);
-        TableOutput.formatOutput(table, widths, true, writer);
+            Writer writer = createOutputWriter(outputStream);
+            TableOutput.formatOutput(table, widths, true, writer);
+        }
         return mdcSkipCounts;
     }
 
@@ -177,12 +167,9 @@ public class ShowSummaryUtil {
             String dbmsList = String.format("'%s'", StringUtil.join(skippedChangeSet.getDbmsSet(), ", "));
             String mismatchMessage = String.format("mismatched DBMS value of %s", dbmsList);
             ChangeSetStatus changeSetStatus = new ChangeSetStatus(skippedChangeSet);
-            ChangeSetFilterResult filterResult = new ChangeSetFilterResult(false, mismatchMessage, DbmsChangeSetFilter.class);
+            ChangeSetFilterResult filterResult = new ChangeSetFilterResult(false, mismatchMessage, DbmsChangeSetFilter.class, DbmsChangeSetFilter.MDC_NAME, DbmsChangeSetFilter.DISPLAY_NAME);
             changeSetStatus.setFilterResults(Collections.singleton(filterResult));
             finalList.add(changeSetStatus);
-            if (mdcSkipCounts != null) {
-                mdcSkipCounts.merge("dbmsUnknown", 1, Integer::sum);
-            }
         });
         return finalList;
     }
@@ -249,16 +236,13 @@ public class ShowSummaryUtil {
         builder.append(message);
         builder.append(System.lineSeparator());
 
-        final Map<Class<? extends ChangeSetFilter>, Integer> filterSummaryMap = new LinkedHashMap<>();
+        final Map<String, Integer> filterSummaryMap = new LinkedHashMap<>();
         List<ChangeSetStatus> finalList = createFinalStatusList(skippedChangeSets, filterDenied, null);
         finalList.forEach(status -> {
             status.getFilterResults().forEach(result -> {
                 if (! result.isAccepted()) {
-                    Class<? extends ChangeSetFilter> clazz = result.getFilter();
-                    filterSummaryMap.computeIfAbsent(clazz, count -> {
-                        return 0;
-                    });
-                    filterSummaryMap.put(clazz, filterSummaryMap.get(clazz)+1);
+                    String displayName = result.getDisplayName();
+                    filterSummaryMap.merge(displayName, 1, Integer::sum);
                 }
             });
         });
@@ -268,15 +252,9 @@ public class ShowSummaryUtil {
             builder.append(message);
             builder.append(System.lineSeparator());
             Scope.getCurrentScope().getLog(ShowSummaryUtil.class).info(message);
-            filterSummaryMap.forEach((filterClass, count) -> {
-                String filterSummaryDetailMessage;
-                String formatString = (filterSummaryLabelMap.containsKey(filterClass) ? String.valueOf(filterSummaryLabelMap.get(filterClass)) : null);
-                if (formatString != null) {
-                    filterSummaryDetailMessage = String.format(formatString, count);
-                } else {
-                    filterSummaryDetailMessage = String.format("%-18s       %6d",
-                            filterClass.getSimpleName().replace("ChangeSetFilter", "Filter:"), count);
-                }
+            filterSummaryMap.forEach((filterDisplayName, count) -> {
+                String filterSummaryDetailMessage = String.format("%-18s       %6d",
+                        filterDisplayName + ":", count);
                 Scope.getCurrentScope().getLog(ShowSummaryUtil.class).info(filterSummaryDetailMessage);
                 builder.append(filterSummaryDetailMessage);
                 builder.append(System.lineSeparator());
