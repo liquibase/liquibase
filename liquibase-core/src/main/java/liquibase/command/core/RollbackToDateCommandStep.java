@@ -26,8 +26,6 @@ public class RollbackToDateCommandStep extends AbstractRollbackCommandStep {
 
     @Override
     public void run(CommandResultsBuilder resultsBuilder) throws Exception {
-        Scope.getCurrentScope().addMdcValue(MdcKey.LIQUIBASE_OPERATION, COMMAND_NAME[0]);
-        Scope.getCurrentScope().addMdcValue(MdcKey.LIQUIBASE_COMMAND_NAME, COMMAND_NAME[0]);
         CommandScope commandScope = resultsBuilder.getCommandScope();
         Date dateToRollBackTo = commandScope.getArgumentValue(DATE_ARG);
         Scope.getCurrentScope().addMdcValue(MdcKey.ROLLBACK_TO_DATE, dateToRollBackTo.toString());
