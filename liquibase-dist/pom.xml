@@ -26,11 +26,13 @@
 		<firebird.version>5.0.1.java8</firebird.version>
 
 		<assemblyConfigFile>src/main/assembly/assembly-bin.xml</assemblyConfigFile>
+		<maven.deploy.skip>true</maven.deploy.skip>
+		<maven.install.skip>true</maven.install.skip>
 	</properties>
 	<dependencies>
 		<dependency>
             <groupId>${project.groupId}</groupId>
-			<artifactId>liquibase-core-new</artifactId>
+			<artifactId>liquibase-core</artifactId>
             <version>${project.version}</version>
 		</dependency>
 
@@ -144,7 +146,7 @@
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-jar-plugin</artifactId>
-				<version>3.8.1</version>
+				<version>3.3.0</version>
 				<executions>
 				  <execution>
 					<id>default-jar</id>
