@@ -12,6 +12,7 @@ import liquibase.util.StringUtil;
 import java.io.FilterOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
+import java.time.Instant;
 import java.util.*;
 import java.util.regex.Pattern;
 
@@ -189,7 +190,9 @@ public class CommandScope {
      * Executes the command in this scope, and returns the results.
      */
     public CommandResults execute() throws CommandExecutionException {
-        Scope.getCurrentScope().addMdcValue(MdcKey.OPERATION_START_TIME, new ISODateFormat().format(new Date()));
+        long startTime = new Date().getTime();
+        String startTimeString = Instant.ofEpochMilli(startTime).toString();
+        Scope.getCurrentScope().addMdcValue(MdcKey.OPERATION_START_TIME, startTimeString);
         CommandResultsBuilder resultsBuilder = new CommandResultsBuilder(this, outputStream);
         final List<CommandStep> pipeline = commandDefinition.getPipeline();
         final List<CommandStep> executedCommands = new ArrayList<>();
@@ -232,7 +235,9 @@ public class CommandScope {
                 throw new CommandExecutionException(e);
             }
         } finally {
-            try (MdcObject operationStopTime = Scope.getCurrentScope().addMdcValue(MdcKey.OPERATION_STOP_TIME, new ISODateFormat().format(new Date()))) {
+            long stopTime = new Date().getTime();
+            String stopTimeString = Instant.ofEpochMilli(stopTime).toString();
+            try (MdcObject operationStopTime = Scope.getCurrentScope().addMdcValue(MdcKey.OPERATION_STOP_TIME, stopTimeString)) {
                 Scope.getCurrentScope().getLog(getClass()).info("Command execution complete");
             }
             try {
