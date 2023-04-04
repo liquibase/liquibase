@@ -49,7 +49,8 @@ public abstract class AbstractRollbackCommandStep extends AbstractCommandStep {
     protected abstract String getOperationCommand();
 
 
-    protected void doRollback(CommandResultsBuilder resultsBuilder, ChangeSetFilter changeSetFilter, List<RanChangeSet> ranChangeSetList) throws Exception {
+    protected void doRollback(CommandResultsBuilder resultsBuilder, List<RanChangeSet> ranChangeSetList,
+                              ChangeSetFilter changeSetFilter) throws Exception {
         CommandScope commandScope = resultsBuilder.getCommandScope();
         String rollbackScript = commandScope.getArgumentValue(ROLLBACK_SCRIPT_ARG);
         Scope.getCurrentScope().addMdcValue(MdcKey.ROLLBACK_SCRIPT, rollbackScript);
@@ -61,12 +62,12 @@ public abstract class AbstractRollbackCommandStep extends AbstractCommandStep {
 
         try {
             ChangeLogIterator logIterator = new ChangeLogIterator(ranChangeSetList, databaseChangeLog,
-                    changeSetFilter,
                     new AlreadyRanChangeSetFilter(ranChangeSetList),
                     new ContextChangeSetFilter(changeLogParameters.getContexts()),
                     new LabelChangeSetFilter(changeLogParameters.getLabels()),
                     new IgnoreChangeSetFilter(),
-                    new DbmsChangeSetFilter(database));
+                    new DbmsChangeSetFilter(database),
+                    changeSetFilter);
 
             doRollback(database, rollbackScript, logIterator, changeLogParameters, databaseChangeLog,
                     (ChangeExecListener) commandScope.getDependency(ChangeExecListener.class));

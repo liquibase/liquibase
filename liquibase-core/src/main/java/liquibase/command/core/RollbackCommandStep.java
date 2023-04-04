@@ -43,7 +43,7 @@ public class RollbackCommandStep extends AbstractRollbackCommandStep {
         Database database = (Database) commandScope.getDependency(Database.class);
 
         List<RanChangeSet> ranChangeSetList = database.getRanChangeSetList();
-        this.doRollback(resultsBuilder, new AfterTagChangeSetFilter(tagToRollBackTo, ranChangeSetList), ranChangeSetList);
+        this.doRollback(resultsBuilder, ranChangeSetList, new AfterTagChangeSetFilter(tagToRollBackTo, ranChangeSetList));
     }
 
     @Override

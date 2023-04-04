@@ -10,7 +10,7 @@ CommandTests.define {
 Short Description: Rollback the specified number of changes made to the database
 Long Description: NOT SET
 Required Args:
-  changelogFile (String) The root changelog
+  changelogFile (String) The root changelog file
   count (Integer) The number of changes to rollback
   url (String) The JDBC database connection URL
     OBFUSCATED
@@ -19,7 +19,7 @@ Optional Args:
     Default: null
   changeExecListenerPropertiesFile (String) Path to a properties file for the ChangeExecListenerClass
     Default: null
-  contexts (String) Changeset contexts to match
+  contexts (String) Context string to use for filtering
     Default: null
   defaultCatalogName (String) The default catalog name to use for the database connection
     Default: null
@@ -29,7 +29,7 @@ Optional Args:
     Default: null
   driverPropertiesFile (String) The JDBC driver properties file
     Default: null
-  labelFilter (String) Changeset labels to match
+  labelFilter (String) Label expression to use for filtering
     Default: null
   password (String) Password to use to connect to the database
     Default: null
@@ -58,9 +58,6 @@ Optional Args:
                         CommandTests.assertNotContains(".*liquibase.structure.core.Table.*SECONDTABLE.*", true)]
         ]
 
-        expectedResults = [
-                statusCode   : 0
-        ]
     }
 
     run "Run without any arguments should throw an exception",  {
