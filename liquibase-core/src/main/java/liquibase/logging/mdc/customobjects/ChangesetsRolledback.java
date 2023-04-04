@@ -43,7 +43,7 @@ public class ChangesetsRolledback implements CustomMdcObject {
      */
     public static ChangesetsRolledback fromChangesetList(List<liquibase.changelog.ChangeSet> changeSets) {
         if (changeSets != null) {
-            List<ChangeSet> changesets = changeSets.stream().map(cs -> new ChangeSet(cs.getId(), cs.getAuthor(), cs.getFilePath(), cs.getDeploymentId())).collect(Collectors.toList());
+            List<ChangeSet> changesets = changeSets.stream().map(ChangeSet::fromChangeSet).collect(Collectors.toList());
             return new ChangesetsRolledback(changesets);
         } else {
             return new ChangesetsRolledback(Collections.emptyList());
@@ -94,6 +94,10 @@ public class ChangesetsRolledback implements CustomMdcObject {
 
         public void setDeploymentId(String deploymentId) {
             this.deploymentId = deploymentId;
+        }
+
+        public static ChangeSet fromChangeSet(liquibase.changelog.ChangeSet changeSet) {
+            return new ChangeSet(changeSet.getId(), changeSet.getAuthor(), changeSet.getFilePath(), changeSet.getDeploymentId());
         }
     }
 
