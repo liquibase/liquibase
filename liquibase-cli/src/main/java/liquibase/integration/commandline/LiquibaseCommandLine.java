@@ -13,6 +13,7 @@ import liquibase.configuration.LiquibaseConfiguration;
 import liquibase.configuration.core.DefaultsFileValueProvider;
 import liquibase.exception.CommandLineParsingException;
 import liquibase.exception.CommandValidationException;
+import liquibase.exception.LiquibaseException;
 import liquibase.hub.HubConfiguration;
 import liquibase.license.LicenseService;
 import liquibase.license.LicenseServiceFactory;
@@ -217,7 +218,7 @@ public class LiquibaseCommandLine {
         return commandLine;
     }
 
-    private int handleException(Throwable exception) {
+    protected int handleException(Throwable exception) {
         Throwable cause = exception;
 
         String uiMessage = "";
@@ -239,11 +240,12 @@ public class LiquibaseCommandLine {
             uiMessage = exception.getClass().getName();
         }
 
-        if (cause instanceof CommandFailedException && ((CommandFailedException) cause).isExpected()) {
-            Scope.getCurrentScope().getLog(getClass()).severe(uiMessage);
-        } else {
-            Scope.getCurrentScope().getLog(getClass()).severe(uiMessage, exception);
-        }
+        //
+        // For LiquibaseException, we can control the logging level
+        //
+        Level level = determineLogLevel(exception);
+
+        Scope.getCurrentScope().getLog(getClass()).log(level, uiMessage, exception);
 
         boolean printUsage = false;
         try (final StringWriter suggestionWriter = new StringWriter();
@@ -296,6 +298,29 @@ public class LiquibaseCommandLine {
             return cfe.getExitCode();
         }
         return 1;
+    }
+
+    //
+    // Look for a logLevel setting on any LiquibaseException
+    // and use that for the Level to pass to the logger.
+    // The lowest level of the exception stack will be used.
+    //
+    private Level determineLogLevel(Throwable throwable) {
+        //
+        // Default to severe
+        //
+        if (throwable == null) {
+            return Level.SEVERE;
+        }
+        Level returnLevel = Level.SEVERE;
+        Throwable t = throwable;
+        while (t != null) {
+            if (t instanceof LiquibaseException && ((LiquibaseException)t).getLogLevel() != null) {
+                returnLevel = ((LiquibaseException)t).getLogLevel();
+            }
+            t = t.getCause();
+        }
+        return returnLevel;
     }
 
     protected String cleanExceptionMessage(String message) {
