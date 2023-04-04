@@ -19,6 +19,9 @@ public class CockroachDatabase extends PostgresDatabase {
     private Integer databaseMajorVersion;
     private Integer databaseMinorVersion;
 
+    private static final String VERSION_NUMBER_REGEX = "v(\\d+)\\.(\\d+)\\.(\\d+)";
+    private static final Pattern VERSION_NUMBER_PATTERN = Pattern.compile(VERSION_NUMBER_REGEX);
+
     public CockroachDatabase() {
         super.setCurrentDateTimeFunction("NOW()");
     }
@@ -107,7 +110,7 @@ public class CockroachDatabase extends PostgresDatabase {
                 String version = Scope.getCurrentScope().getSingleton(ExecutorService.class).
                         getExecutor("jdbc", this).queryForObject(new RawSqlStatement("SELECT version()"), String.class);
 
-                final Matcher versionMatcher = Pattern.compile("v(\\d+)\\.(\\d+)\\.(\\d+)").matcher(version);
+                final Matcher versionMatcher = VERSION_NUMBER_PATTERN.matcher(version);
                 if (versionMatcher.find()) {
                     this.databaseMajorVersion = Integer.parseInt(versionMatcher.group(1));
                     this.databaseMinorVersion = Integer.parseInt(versionMatcher.group(2));

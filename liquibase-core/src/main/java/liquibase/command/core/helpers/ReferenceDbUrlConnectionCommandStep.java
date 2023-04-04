@@ -1,10 +1,12 @@
 package liquibase.command.core.helpers;
 
+import liquibase.Scope;
 import liquibase.command.*;
 import liquibase.command.providers.ReferenceDatabase;
 import liquibase.configuration.ConfigurationValueObfuscator;
 import liquibase.database.Database;
 import liquibase.exception.DatabaseException;
+import liquibase.logging.mdc.MdcKey;
 
 import java.util.Collections;
 import java.util.List;
@@ -74,10 +76,18 @@ public class ReferenceDbUrlConnectionCommandStep extends AbstractDatabaseConnect
             String defaultCatalogName = commandScope.getArgumentValue(REFERENCE_DEFAULT_CATALOG_NAME_ARG);
             String driver = commandScope.getArgumentValue(REFERENCE_DRIVER_ARG);
             String driverPropertiesFile = commandScope.getArgumentValue(REFERENCE_DRIVER_PROPERTIES_FILE_ARG);
+            logMdc(url, username, defaultSchemaName, defaultCatalogName);
             return createDatabaseObject(url, username, password, defaultSchemaName, defaultCatalogName, driver, driverPropertiesFile);
         } else {
             return commandScope.getArgumentValue(REFERENCE_DATABASE_ARG);
         }
+    }
+
+    private void logMdc(String url, String username, String defaultSchemaName, String defaultCatalogName) {
+        Scope.getCurrentScope().addMdcValue(MdcKey.LIQUIBASE_REF_URL, url);
+        Scope.getCurrentScope().addMdcValue(MdcKey.REFERENCE_USERNAME, username);
+        Scope.getCurrentScope().addMdcValue(MdcKey.REFERENCE_DEFAULT_SCHEMA_NAME, defaultSchemaName);
+        Scope.getCurrentScope().addMdcValue(MdcKey.REFERENCE_DEFAULT_CATALOG_NAME, defaultCatalogName);
     }
 
     @Override

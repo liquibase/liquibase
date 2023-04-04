@@ -25,7 +25,8 @@ import java.util.regex.Pattern;
  */
 public class CommandArgumentDefinition<DataType> implements Comparable<CommandArgumentDefinition<?>> {
 
-    private static final Pattern ALLOWED_ARGUMENT_PATTERN = Pattern.compile("[a-zA-Z0-9]+");
+    private static final String ALLOWED_ARGUMENT_REGEX = "[a-zA-Z0-9]+";
+    private static final Pattern ALLOWED_ARGUMENT_PATTERN = Pattern.compile(ALLOWED_ARGUMENT_REGEX);
 
     private final String name;
     private SortedSet<String> aliases = new TreeSet<>();

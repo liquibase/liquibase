@@ -32,6 +32,13 @@ public class SnakeYamlUtil {
     }
 
     /**
+     * Safely set the default tag inspector when configuring a new SnakeYaml instance.
+     */
+    public static void setDefaultTagInspector(LoaderOptions loaderOptions) { // pro uses this method
+        safelyCallNewSnakeYamlMethod(() -> loaderOptions.setTagInspector(tag -> true));
+    }
+
+    /**
      * Helper method to make sure that we display the error message only once.
      */
     private static void safelyCallNewSnakeYamlMethod(Runnable code) {
@@ -44,7 +51,8 @@ public class SnakeYamlUtil {
                         "Failed to perform a method call for SnakeYaml because the version of SnakeYaml being used is too old. " +
                                 "Consider upgrading to a SnakeYaml version equal to or newer than 1.32, by downloading and " +
                                 "installing a newer version of Liquibase (which includes a newer version of SnakeYaml). " +
-                                "Loading particularly large JSON and YAML documents (like snapshots) in Liquibase may fail if SnakeYaml is not upgraded.", e);
+                                "Loading particularly large JSON and YAML documents (like snapshots) in Liquibase may fail if SnakeYaml is not upgraded.");
+                Scope.getCurrentScope().getLog(SnakeYamlUtil.class).fine("Missing Snakeyaml feature: ", e);
             }
         }
     }

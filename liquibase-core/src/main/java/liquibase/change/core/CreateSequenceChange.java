@@ -12,7 +12,7 @@ import java.math.BigInteger;
 /**
  * Creates a new sequence.
  */
-@DatabaseChange(name="createSequence", description = "Creates a new database sequence", priority = ChangeMetaData.PRIORITY_DEFAULT)
+@DatabaseChange(name = "createSequence", description = "Creates a new database sequence", priority = ChangeMetaData.PRIORITY_DEFAULT)
 public class CreateSequenceChange extends AbstractChange {
 
     private String catalogName;
@@ -27,7 +27,7 @@ public class CreateSequenceChange extends AbstractChange {
     private BigInteger cacheSize;
     private String dataType;
 
-    @DatabaseChangeProperty(since = "3.0")
+    @DatabaseChangeProperty(since = "3.0", description = "Name of the database catalog")
     public String getCatalogName() {
         return catalogName;
     }
@@ -36,6 +36,7 @@ public class CreateSequenceChange extends AbstractChange {
         this.catalogName = catalogName;
     }
 
+    @DatabaseChangeProperty(description = "Name of the database schema")
     public String getSchemaName() {
         return schemaName;
     }
@@ -53,7 +54,7 @@ public class CreateSequenceChange extends AbstractChange {
         this.sequenceName = sequenceName;
     }
 
-    @DatabaseChangeProperty(description = "The first sequence number to be generated.", exampleValue = "5")
+    @DatabaseChangeProperty(description = "First sequence number to be generated.", exampleValue = "5")
     public BigInteger getStartValue() {
         return startValue;
     }
@@ -71,7 +72,7 @@ public class CreateSequenceChange extends AbstractChange {
         this.incrementBy = incrementBy;
     }
 
-    @DatabaseChangeProperty(description = "The maximum value of the sequence", exampleValue = "1000")
+    @DatabaseChangeProperty(description = "Maximum value of the sequence", exampleValue = "1000")
     public BigInteger getMaxValue() {
         return maxValue;
     }
@@ -80,7 +81,7 @@ public class CreateSequenceChange extends AbstractChange {
         this.maxValue = maxValue;
     }
 
-    @DatabaseChangeProperty(description = "The minimum value of the sequence", exampleValue = "10")
+    @DatabaseChangeProperty(description = "Minimum value of the sequence", exampleValue = "10")
     public BigInteger getMinValue() {
         return minValue;
     }
@@ -89,7 +90,7 @@ public class CreateSequenceChange extends AbstractChange {
         this.minValue = minValue;
     }
 
-    @DatabaseChangeProperty(description = "Is the sequence generated in the requested order?")
+    @DatabaseChangeProperty(description = "Whether the sequence is generated in the requested order")
     public Boolean isOrdered() {
         return ordered;
     }
@@ -98,7 +99,7 @@ public class CreateSequenceChange extends AbstractChange {
         this.ordered = ordered;
     }
 
-    @DatabaseChangeProperty(description = "Can the sequence cycle when it hits the max value?")
+    @DatabaseChangeProperty(description = "Whether the sequence cycles when it hits its max value")
     public Boolean getCycle() {
         return cycle;
     }

@@ -26,7 +26,6 @@ jobs:
           - liquibase-hibernate
           - liquibase-maxdb
           - liquibase-modify-column
-          - liquibase-mongodb
           - liquibase-mssql
           - liquibase-oracle
           - liquibase-postgresql

@@ -47,7 +47,7 @@ public class HubChangeExecListener extends AbstractChangeExecListener
     private int postCount;
     private int failedToPostCount;
 
-    private ChangeExecListener changeExecListener;
+    private final ChangeExecListener changeExecListener;
 
     public HubChangeExecListener(Operation operation, ChangeExecListener changeExecListener) {
         this.operation = operation;
@@ -430,5 +430,9 @@ public class HubChangeExecListener extends AbstractChangeExecListener
                     " changeset '" + changeSet.toString(false));
             failedToPostCount++;
         }
+    }
+
+    public ChangeExecListener getChangeExecListener() {
+        return changeExecListener;
     }
 }

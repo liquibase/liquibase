@@ -21,7 +21,8 @@ public class Ingres9Database extends AbstractJdbcDatabase {
 
     public static final String PRODUCT_NAME = "INGRES";
 
-    private static Pattern CREATE_VIEW_AS_PATTERN = Pattern.compile("^CREATE\\s+.*?VIEW\\s+.*?AS\\s+", Pattern.CASE_INSENSITIVE | Pattern.DOTALL);
+    private static final String CREATE_VIEW_REGEX = "^CREATE\\s+.*?VIEW\\s+.*?AS\\s+";
+    private static Pattern CREATE_VIEW_AS_PATTERN = Pattern.compile(CREATE_VIEW_REGEX, Pattern.CASE_INSENSITIVE | Pattern.DOTALL);
 
     public Ingres9Database() {
         setCurrentDateTimeFunction("date('now')");
@@ -41,7 +42,7 @@ public class Ingres9Database extends AbstractJdbcDatabase {
     public String getViewDefinition(CatalogAndSchema schema, String viewName) throws DatabaseException {
         final String sql = "select text_segment from iiviews where table_name = '" + viewName + "'";
         Statement stmt = null;
-        String definition = "";
+        final StringBuilder definition = new StringBuilder();
         try {
             if (getConnection() instanceof OfflineConnection) {
                 throw new DatabaseException("Cannot execute commands against an offline database");
@@ -49,7 +50,7 @@ public class Ingres9Database extends AbstractJdbcDatabase {
             stmt = ((JdbcConnection) getConnection()).getUnderlyingConnection().createStatement();
             try (ResultSet rs = stmt.executeQuery(sql)) {
                 while (rs.next()) {
-                    definition += rs.getString("text_segment");
+                    definition.append(rs.getString("text_segment"));
                 }
             }
         }
@@ -61,10 +62,7 @@ public class Ingres9Database extends AbstractJdbcDatabase {
         finally {
             JdbcUtil.closeStatement(stmt);
         }
-        if (definition == null) {
-            return null;
-        }
-        return CREATE_VIEW_AS_PATTERN.matcher(definition).replaceFirst("");
+        return CREATE_VIEW_AS_PATTERN.matcher(definition.toString()).replaceFirst("");
     }
 
     @Override

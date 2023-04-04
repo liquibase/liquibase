@@ -3,7 +3,6 @@ package liquibase.logging.mdc;
 import liquibase.Scope;
 
 import java.io.Closeable;
-import java.io.IOException;
 
 public class MdcObject implements Closeable {
 
@@ -16,7 +15,7 @@ public class MdcObject implements Closeable {
     }
 
     @Override
-    public void close() throws IOException {
+    public void close() {
         Scope.getCurrentScope().getMdcManager().remove(key);
     }
 }

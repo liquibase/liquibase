@@ -124,10 +124,12 @@
     </target>
 
 	<target name="testUpdateDatabaseChangeLogDirectoryDoesNotExist">
-        <au:expectfailure expectedmessage="Unable to update database: The file simple-changelog.xml was not found">
-	        <lb:updateDatabase changelogdirectory="${liquibase.test.ant.basedir}/bad_changelog" changelogfile="simple-changelog.xml">
-	            <lb:database driver="${jdbc.driver}" url="${jdbc.url}" user="${db.user}" password="${db.password}"/>
-	        </lb:updateDatabase>
+        <au:expectfailure>
+            <au:logcontains text="Unable to update database: The file simple-changelog.xml was not found">
+                    <lb:updateDatabase changelogdirectory="${liquibase.test.ant.basedir}/bad_changelog" changelogfile="simple-changelog.xml">
+                        <lb:database driver="${jdbc.driver}" url="${jdbc.url}" user="${db.user}" password="${db.password}"/>
+                    </lb:updateDatabase>
+            </au:logcontains>
         </au:expectfailure>
     </target>
 </project>
