@@ -165,11 +165,12 @@ public class ValidatingVisitor implements ChangeSetVisitor {
     private boolean areChangeSetAttributesValid(ChangeSet changeSet) {
         boolean authorEmpty = StringUtil.isEmpty(changeSet.getAuthor());
         boolean idEmpty = StringUtil.isEmpty(changeSet.getId());
+        boolean strictCurrentValue = GlobalConfiguration.STRICT.getCurrentValue();
 
         boolean valid = false;
         if (authorEmpty && idEmpty) {
             validationErrors.addError("ChangeSet Id and Author are empty", changeSet);
-        } else if (authorEmpty && GlobalConfiguration.STRICT.getCurrentValue()) {
+        } else if (authorEmpty && strictCurrentValue) {
             validationErrors.addError("ChangeSet Author is empty", changeSet);
         } else if (idEmpty) {
             validationErrors.addError("ChangeSet Id is empty", changeSet);
