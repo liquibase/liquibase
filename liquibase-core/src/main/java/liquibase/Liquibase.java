@@ -898,7 +898,7 @@ public class Liquibase implements AutoCloseable {
                 .addArgumentValue(DatabaseChangelogCommandStep.LABEL_FILTER_ARG, (labelExpression != null ? labelExpression.getOriginalString() : null))
                 .addArgumentValue(ChangeExecListenerCommandStep.CHANGE_EXEC_LISTENER_ARG, changeExecListener)
                 .addArgumentValue(RollbackCommandStep.TAG_ARG, tagToRollBackTo)
-                .addArgumentValue(RollbackCommandStep.ROLLBACK_SCRIPT_ARG, rollbackScript)
+                .addArgumentValue(AbstractRollbackCommandStep.ROLLBACK_SCRIPT_ARG, rollbackScript)
                 .setOutput(new WriterOutputStream(output, GlobalConfiguration.OUTPUT_FILE_ENCODING.getCurrentValue()))
                 .execute();
     }
@@ -937,7 +937,6 @@ public class Liquibase implements AutoCloseable {
      */
     public void rollback(String tagToRollBackTo, String rollbackScript, Contexts contexts,
                          LabelExpression labelExpression) throws LiquibaseException {
-
         new CommandScope(RollbackCommandStep.COMMAND_NAME)
                 .addArgumentValue(DbUrlConnectionCommandStep.DATABASE_ARG, Liquibase.this.getDatabase())
                 .addArgumentValue(DatabaseChangelogCommandStep.CHANGELOG_FILE_ARG, changeLogFile)
@@ -967,21 +966,17 @@ public class Liquibase implements AutoCloseable {
 
     public void rollback(Date dateToRollBackTo, String rollbackScript, Contexts contexts,
                          LabelExpression labelExpression, Writer output) throws LiquibaseException {
-        changeLogParameters.setContexts(contexts);
-        changeLogParameters.setLabels(labelExpression);
-
-        @SuppressWarnings("squid:S1941")
-        Executor oldTemplate = getAndReplaceJdbcExecutor(output);
-
-        outputHeader("Rollback to " + dateToRollBackTo + " Script");
-
-        rollback(dateToRollBackTo, contexts, labelExpression);
-
-        flushOutputWriter(output);
-        Scope.getCurrentScope().getSingleton(ExecutorService.class).setExecutor("jdbc", database, oldTemplate);
-        resetServices();
+        new CommandScope(RollbackToDateSqlCommandStep.COMMAND_NAME)
+                .addArgumentValue(DbUrlConnectionCommandStep.DATABASE_ARG, Liquibase.this.getDatabase())
+                .addArgumentValue(DatabaseChangelogCommandStep.CHANGELOG_FILE_ARG, changeLogFile)
+                .addArgumentValue(DatabaseChangelogCommandStep.CONTEXTS_ARG, (contexts != null? contexts.toString() : null))
+                .addArgumentValue(DatabaseChangelogCommandStep.LABEL_FILTER_ARG, (labelExpression != null ? labelExpression.getOriginalString() : null))
+                .addArgumentValue(ChangeExecListenerCommandStep.CHANGE_EXEC_LISTENER_ARG, changeExecListener)
+                .addArgumentValue(RollbackToDateCommandStep.DATE_ARG, dateToRollBackTo)
+                .addArgumentValue(AbstractRollbackCommandStep.ROLLBACK_SCRIPT_ARG, rollbackScript)
+                .setOutput(new WriterOutputStream(output, GlobalConfiguration.OUTPUT_FILE_ENCODING.getCurrentValue()))
+                .execute();
     }
-
     // ---------- End RollbackToDateSql Family of methods
 
     // ---------- RollbackToDate Family of methods
