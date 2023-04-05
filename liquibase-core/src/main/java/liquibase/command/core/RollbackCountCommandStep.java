@@ -39,12 +39,6 @@ public class RollbackCountCommandStep extends AbstractRollbackCommandStep {
         return new String[][] { COMMAND_NAME };
     }
 
-
-    @Override
-    protected String getOperationCommand() {
-        return "rollbackCount";
-    }
-
     @Override
     public void adjustCommandDefinition(CommandDefinition commandDefinition) {
         commandDefinition.setShortDescription("Rollback the specified number of changes made to the database");
