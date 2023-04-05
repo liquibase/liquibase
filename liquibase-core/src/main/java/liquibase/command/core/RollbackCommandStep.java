@@ -27,11 +27,6 @@ public class RollbackCommandStep extends AbstractRollbackCommandStep {
     }
 
     @Override
-    protected String getOperationCommand() {
-        return "rollback";
-    }
-
-    @Override
     public void run(CommandResultsBuilder resultsBuilder) throws Exception {
         Scope.getCurrentScope().addMdcValue(MdcKey.LIQUIBASE_OPERATION, COMMAND_NAME[0]);
         Scope.getCurrentScope().addMdcValue(MdcKey.LIQUIBASE_COMMAND_NAME, COMMAND_NAME[0]);

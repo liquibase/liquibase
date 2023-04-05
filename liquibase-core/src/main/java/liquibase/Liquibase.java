@@ -35,6 +35,7 @@ import liquibase.lockservice.LockServiceFactory;
 import liquibase.logging.Logger;
 import liquibase.logging.mdc.MdcKey;
 import liquibase.logging.mdc.customobjects.ChangesetsRolledback;
+import liquibase.logging.mdc.customobjects.ChangesetsUpdated;
 import liquibase.parser.ChangeLogParser;
 import liquibase.parser.ChangeLogParserFactory;
 import liquibase.parser.core.xml.XMLChangeLogSAXParser;
@@ -1203,9 +1204,13 @@ public class Liquibase implements AutoCloseable {
         changeLogParameters.setContexts(contexts);
         changeLogParameters.setLabels(labelExpression);
 
-        Date baseDate = new Date();
+        ChangeLogHistoryService changeLogService = ChangeLogHistoryServiceFactory.getInstance().getChangeLogService(database);
+        int originalSize = changeLogService.getRanChangeSets().size();
         update(tag, contexts, labelExpression);
-        rollback(baseDate, null, contexts, labelExpression);
+        changeLogService.reset();
+        int changesetsToRollback = changeLogService.getRanChangeSets().size() - originalSize;
+        Scope.getCurrentScope().getLog(getClass()).info(String.format("Rolling back %d changeset(s).", changesetsToRollback));
+        rollback(changesetsToRollback, null, contexts, labelExpression);
         update(tag, contexts, labelExpression);
     }
 

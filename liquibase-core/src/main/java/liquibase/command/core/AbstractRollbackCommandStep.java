@@ -46,9 +46,6 @@ public abstract class AbstractRollbackCommandStep extends AbstractCommandStep {
         WILL_ROLLBACK, ROLLED_BACK, ROLLBACK_FAILED
     }
 
-    protected abstract String getOperationCommand();
-
-
     protected void doRollback(CommandResultsBuilder resultsBuilder, List<RanChangeSet> ranChangeSetList,
                               ChangeSetFilter changeSetFilter) throws Exception {
         CommandScope commandScope = resultsBuilder.getCommandScope();
@@ -73,7 +70,7 @@ public abstract class AbstractRollbackCommandStep extends AbstractCommandStep {
                     (ChangeExecListener) commandScope.getDependency(ChangeExecListener.class));
         }
         catch (Throwable t) {
-            handleRollbackException(getOperationCommand());
+            handleRollbackException(defineCommandNames()[0][0]);
             throw t;
         } finally {
             Scope.getCurrentScope().getMdcManager().remove(MdcKey.CHANGESETS_ROLLED_BACK);
