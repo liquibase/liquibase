@@ -271,6 +271,16 @@ public class CreateProcedureChange extends AbstractChange implements DbmsTargete
 
     }
 
+    /**
+     * Listing SQL content fields (for example procedureText, triggerBody, etc.) we don't want to include as part of
+     * the checksum computes, because have a separate part that computes that checksum for that part doing the
+     * "normalizing" logic, so it is not impacted by the reformatting of the SQL. We are also excluding fields from the
+     * checksum generation which does not have a direct impact on the DB, such as dbms, path, comments, etc.
+     *
+     * Besides it has an impact on the DB, we have decided to do not add replaceIfExists as part of this list of fields
+     * as we are already avoiding the recalculation of the checksum by listing the main content fields of the different
+     * change types.
+     */
     @Override
     public String[] getExcludedFieldFilters() {
         return new String[]{
@@ -279,7 +289,11 @@ public class CreateProcedureChange extends AbstractChange implements DbmsTargete
                 "relativeToChangelogFile",
                 "procedureText",
                 "encoding",
-                "comments"
+                "comments",
+                "triggerBody",
+                "functionBody",
+                "packageText",
+                "packageBodyText"
         };
     }
 
