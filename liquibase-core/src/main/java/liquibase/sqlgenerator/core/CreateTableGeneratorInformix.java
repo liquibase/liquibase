@@ -172,14 +172,14 @@ public class CreateTableGeneratorInformix extends CreateTableGenerator {
 
         // TODO: code duplication. Maybe we can merge this whole class into CreateTableGenerator again.
         for (UniqueConstraint uniqueConstraint : statement.getUniqueConstraints()) {
-            if ((uniqueConstraint.getConstraintName() != null) && !constraintNameAfterUnique(database)) {
+            if ((uniqueConstraint.getConstraintName() != null) && !constraintNameAfterUnique()) {
                 buffer.append(" CONSTRAINT ");
                 buffer.append(database.escapeConstraintName(uniqueConstraint.getConstraintName()));
             }
             buffer.append(" UNIQUE (");
             buffer.append(database.escapeColumnNameList(StringUtil.join(uniqueConstraint.getColumns(), ", ")));
             buffer.append(")");
-            if ((uniqueConstraint.getConstraintName() != null) && constraintNameAfterUnique(database)) {
+            if ((uniqueConstraint.getConstraintName() != null) && constraintNameAfterUnique()) {
                 buffer.append(" CONSTRAINT ");
                 buffer.append(database.escapeConstraintName(uniqueConstraint.getConstraintName()));
             }
@@ -200,7 +200,7 @@ public class CreateTableGeneratorInformix extends CreateTableGenerator {
         return new Sql[] { new UnparsedSql(sql, new Table().setName(statement.getTableName()).setSchema(new Schema(statement.getCatalogName(), statement.getSchemaName()))) };
     }
 
-    private boolean constraintNameAfterUnique(Database database) {
+    private boolean constraintNameAfterUnique() {
         return true;
     }
 }

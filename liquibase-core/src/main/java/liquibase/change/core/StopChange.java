@@ -14,18 +14,17 @@ import liquibase.statement.core.RuntimeStatement;
 import liquibase.util.StringUtil;
 
 @DatabaseChange(name = "stop", description = "Stops Liquibase execution with a message. Mainly useful for debugging " +
-    "and " +
- "stepping through a changelog", priority = ChangeMetaData.PRIORITY_DEFAULT, since = "1.9")
+    "and stepping through a changelog", priority = ChangeMetaData.PRIORITY_DEFAULT, since = "1.9")
 public class StopChange extends AbstractChange {
 
-    private String message ="Stop command in changelog file";
+    private String message = "Stop command in changelog file";
 
     @Override
     public boolean generateStatementsVolatile(Database database) {
         return true;
     }
 
-    @DatabaseChangeProperty(description = "Message to output when execution stops", exampleValue = "What just happened???")
+    @DatabaseChangeProperty(description = "Message to send to output when execution stops", exampleValue = "What just happened???")
     public String getMessage() {
         return message;
     }

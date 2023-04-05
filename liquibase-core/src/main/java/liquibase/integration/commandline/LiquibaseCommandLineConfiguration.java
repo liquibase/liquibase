@@ -25,6 +25,7 @@ public class LiquibaseCommandLineConfiguration implements AutoloadedConfiguratio
     public static final ConfigurationDefinition<Level> LOG_LEVEL;
     public static final ConfigurationDefinition<String> LOG_CHANNELS;
     public static final ConfigurationDefinition<String> LOG_FILE;
+    public static final ConfigurationDefinition<Boolean> MIRROR_CONSOLE_MESSAGES_TO_LOG;
     public static final ConfigurationDefinition<LogFormat> LOG_FORMAT;
     public static final ConfigurationDefinition<String> OUTPUT_FILE;
     public static final ConfigurationDefinition<Boolean> SHOULD_RUN;
@@ -70,6 +71,10 @@ public class LiquibaseCommandLineConfiguration implements AutoloadedConfiguratio
                 .build();
 
         LOG_FILE = builder.define("logFile", String.class).build();
+        MIRROR_CONSOLE_MESSAGES_TO_LOG = builder.define("mirrorConsoleMessagesToLog", Boolean.class)
+                .setDefaultValue(Boolean.TRUE)
+                .setDescription("When set to true, the console messages are mirrored to the logs as [liquibase.ui] to provide a more complete picture of liquibase operations to log analysis tools. Set to false to change this behavior.")
+                .build();
         OUTPUT_FILE = builder.define("outputFile", String.class).build();
 
         MONITOR_PERFORMANCE = builder.define("monitorPerformance", String.class)

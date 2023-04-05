@@ -772,7 +772,7 @@ public abstract class AbstractChange extends AbstractPlugin implements Change {
                     returnList.add(objValue);
                 }
             }
-            if (((Collection) value).isEmpty()) {
+            if (((Collection<?>) value).isEmpty()) {
                 return null;
             } else {
                 return returnList;

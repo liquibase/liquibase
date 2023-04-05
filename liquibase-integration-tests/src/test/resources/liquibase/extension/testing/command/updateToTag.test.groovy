@@ -32,6 +32,8 @@ Optional Args:
   password (String) Password to use to connect to the database
     Default: null
     OBFUSCATED
+  showSummary (UpdateSummaryEnum) Type of update results summary to show.  Values can be 'off', 'summary', or 'verbose'.
+    Default: SUMMARY
   username (String) Username to use to connect to the database
     Default: null
 """
@@ -47,7 +49,43 @@ Optional Args:
 
 
         expectedResults = [
-                statusCode   : 0
+                statusCode   : 0,
+                defaultChangeExecListener: 'not_null'
+        ]
+    }
+
+    run "Happy path with a change set that has complicated labels and contexts", {
+        arguments = [
+                url:        { it.url },
+                username:   { it.username },
+                password:   { it.password },
+                changelogFile: "changelogs/h2/complete/summary-changelog.xml",
+                tag: "updateTag",
+                labelFilter: "testtable1,tagit",
+                contexts: "none,tagit",
+                showSummary: "summary"
+        ]
+
+        expectedResults = [
+                statusCode   : 0,
+                defaultChangeExecListener: 'not_null'
+        ]
+
+        outputFile = new File("target/test-classes/labelsAndContent.txt")
+
+        expectedFileContent = [ "target/test-classes/labelsAndContent.txt":
+                                ["UPDATE SUMMARY",
+                                 "Run:                          2",
+                                 "Previously run:               0",
+                                 "Filtered out:                 4",
+                                 "-------------------------------",
+                                 "Total change sets:            6",
+                                 "FILTERED CHANGE SETS SUMMARY",
+                                 "Context mismatch:             1",
+                                 "Label mismatch:               2",
+                                 "After tag:                    1",
+                                 "DBMS mismatch:                1"
+                                ]
         ]
     }
 
@@ -62,29 +100,33 @@ Optional Args:
         ]
 
         expectedResults = [
-                statusCode   : 0
+                statusCode   : 0,
+                defaultChangeExecListener: 'not_null'
         ]
 
-        expectedUI = [
-"""
-UPDATE SUMMARY
-Run:                          2
-Previously run:               0
-DBMS mismatch:                1
-Not in filter:                0
--------------------------------
-Total change sets:            3
+        outputFile = new File("target/test-classes/mismatchedDBMS.txt")
 
-+--------------------------------------------------------------+--------------------------------+
-| Changeset Info                                               | Reason Skipped                 |
-+--------------------------------------------------------------+--------------------------------+
-|                                                              | mismatched DBMS value of 'foo' |
-| changelogs/h2/complete/mismatchedDbms.changelog.xml::1::nvox |                                |
-| land                                                         |                                |
-+--------------------------------------------------------------+--------------------------------+
-"""
+        expectedFileContent = [ "target/test-classes/mismatchedDBMS.txt":
+            [
+              "UPDATE SUMMARY",
+              "Run:                          2",
+              "Previously run:               0",
+              "Filtered out:                 1",
+              "-------------------------------",
+              "Total change sets:            3",
+              "FILTERED CHANGE SETS SUMMARY",
+              "DBMS mismatch:                1",
+              "+--------------------------------------------------------------+--------------------------------+",
+              "| Changeset Info                                               | Reason Skipped                 |",
+              "+--------------------------------------------------------------+--------------------------------+",
+              "|                                                              | mismatched DBMS value of 'foo' |",
+              "| changelogs/h2/complete/mismatchedDbms.changelog.xml::1::nvox |                                |",
+              "| land                                                         |                                |",
+              "+--------------------------------------------------------------+--------------------------------+"
+            ]
         ]
     }
+
     run "Run without a tag throws an exception", {
         arguments = [
                 url          : "",

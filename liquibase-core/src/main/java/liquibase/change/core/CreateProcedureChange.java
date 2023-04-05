@@ -19,20 +19,10 @@ import liquibase.util.StringUtil;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.UnsupportedEncodingException;
 import java.nio.charset.Charset;
 import java.util.Map;
 
-@DatabaseChange(
-    name = "createProcedure",
-    description = "Defines the definition for a stored procedure. This command is better to use for creating " +
-        "procedures than the raw sql command because it will not attempt to strip comments or break up lines.\n\n" +
-        "Often times it is best to use the CREATE OR REPLACE syntax along with setting runOnChange='true' on the " +
-        "enclosing changeSet tag. That way if you need to make a change to your procedure you can simply change your " +
-        "existing code rather than creating a new REPLACE PROCEDURE call. The advantage to this approach is that it " +
-        "keeps your change log smaller and allows you to more easily see what has changed in your procedure code " +
-        "through your source control system's diff command.",
-    priority = ChangeMetaData.PRIORITY_DEFAULT)
+@DatabaseChange(name = "createProcedure", description = "Defines a stored procedure.", priority = ChangeMetaData.PRIORITY_DEFAULT)
 public class CreateProcedureChange extends AbstractChange implements DbmsTargetedChange {
     private String comments;
     private String catalogName;
@@ -56,6 +46,7 @@ public class CreateProcedureChange extends AbstractChange implements DbmsTargete
         return false;
     }
 
+    @DatabaseChangeProperty(description = "Name of the database catalog")
     public String getCatalogName() {
         return catalogName;
     }
@@ -64,6 +55,7 @@ public class CreateProcedureChange extends AbstractChange implements DbmsTargete
         this.catalogName = catalogName;
     }
 
+    @DatabaseChangeProperty(description = "Name of the database schema")
     public String getSchemaName() {
         return schemaName;
     }
@@ -72,7 +64,8 @@ public class CreateProcedureChange extends AbstractChange implements DbmsTargete
         this.schemaName = schemaName;
     }
 
-    @DatabaseChangeProperty(exampleValue = "new_customer")
+    @DatabaseChangeProperty(exampleValue = "new_customer",
+        description = "Name of the stored procedure to create. Required if replaceIfExists=true")
     public String getProcedureName() {
         return procedureName;
     }
@@ -81,7 +74,7 @@ public class CreateProcedureChange extends AbstractChange implements DbmsTargete
         this.procedureName = procedureName;
     }
 
-    @DatabaseChangeProperty(exampleValue = "utf8")
+    @DatabaseChangeProperty(exampleValue = "utf8", description = "Encoding used in the file you specify in 'path'")
     public String getEncoding() {
         return encoding;
     }
@@ -91,8 +84,7 @@ public class CreateProcedureChange extends AbstractChange implements DbmsTargete
     }
 
     @DatabaseChangeProperty(
-        description = "File containing the procedure text. Either this attribute or a nested procedure text is " +
-            "required.",
+        description = "File containing the procedure text. You must either use this attribute or write inline SQL within the createProcedure definition.",
         exampleValue = "com/example/my-logic.sql"
     )
     public String getPath() {
@@ -103,6 +95,8 @@ public class CreateProcedureChange extends AbstractChange implements DbmsTargete
         this.path = path;
     }
 
+    @DatabaseChangeProperty(description = "Specifies whether the file path is relative to the changelog file " +
+        "rather than looked up in the search path. Default: false.")
     public Boolean isRelativeToChangelogFile() {
         return relativeToChangelogFile;
     }
@@ -128,11 +122,8 @@ public class CreateProcedureChange extends AbstractChange implements DbmsTargete
     }
 
     @DatabaseChangeProperty(
-            exampleValue = "CREATE OR REPLACE PROCEDURE testHello\n" +
-                    "    IS\n" +
-                    "    BEGIN\n" +
-                    "      DBMS_OUTPUT.PUT_LINE('Hello From The Database!');\n" +
-                    "    END;",
+        description = "The SQL creating the procedure. You need to define either this attribute or 'path'. " +
+            "procedureText is not supported in the XML format; however, you can specify the procedure SQL inline within the createProcedure definition.",
             serializationType = SerializationType.DIRECT_VALUE)
     public String getProcedureText() {
         return procedureText;
@@ -145,7 +136,11 @@ public class CreateProcedureChange extends AbstractChange implements DbmsTargete
     @Override
     @DatabaseChangeProperty(
         exampleValue = "h2, oracle",
-        since = "3.1"
+        since = "3.1",
+        description = "Specifies which database type(s) a changeset is to be used for. " +
+        "See valid database type names on Supported Databases docs page. Separate multiple databases with commas. " +
+        "Specify that a changeset is not applicable to a particular database type by prefixing with !. " +
+        "The keywords 'all' and 'none' are also available."
     )
     public String getDbms() {
         return dbms;
@@ -156,6 +151,7 @@ public class CreateProcedureChange extends AbstractChange implements DbmsTargete
         this.dbms = dbms;
     }
 
+    @DatabaseChangeProperty(description = "Inline comments generated by update-sql. Not applied to the database")
     public String getComments() {
         return comments;
     }
@@ -164,7 +160,8 @@ public class CreateProcedureChange extends AbstractChange implements DbmsTargete
         this.comments = comments;
     }
 
-    @DatabaseChangeProperty
+    @DatabaseChangeProperty(description = "If the stored procedure defined by createProcedure already exists, " +
+        "alter it instead of creating it. Default: false")
     public Boolean getReplaceIfExists() {
         return replaceIfExists;
     }

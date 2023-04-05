@@ -33,9 +33,9 @@ import java.util.regex.Pattern;
  * Executes a given shell executable.
  */
 @DatabaseChange(name = "executeCommand",
-        description = "Executes a system command. Because this refactoring doesn't generate SQL like most, using " +
-            "Liquibase commands such as migrateSQL may not work as expected. Therefore, if at all possible use " +
-                "refactorings that generate SQL.",
+        description = "Executes a system command. Because this refactoring doesn't generate SQL, using " +
+            "Liquibase commands such as update-sql may not work as expected. Therefore, prefer " +
+            "refactorings that generate SQL.",
         priority = ChangeMetaData.PRIORITY_DEFAULT)
 public class ExecuteShellCommandChange extends AbstractChange {
 
@@ -44,7 +44,8 @@ public class ExecuteShellCommandChange extends AbstractChange {
     private List<String> os;
     private final List<String> args = new ArrayList<>();
     private String timeout;
-    private static final Pattern TIMEOUT_PATTERN = Pattern.compile("^\\s*(\\d+)\\s*([sSmMhH]?)\\s*$");
+    private static final String TIMEOUT_REGEX = "^\\s*(\\d+)\\s*([sSmMhH]?)\\s*$";
+    private static final Pattern TIMEOUT_PATTERN = Pattern.compile(TIMEOUT_REGEX);
     private static final Long SECS_IN_MILLIS = 1000L;
     private static final Long MIN_IN_MILLIS = SECS_IN_MILLIS * 60;
     private static final Long HOUR_IN_MILLIS = MIN_IN_MILLIS * 60;
@@ -71,15 +72,15 @@ public class ExecuteShellCommandChange extends AbstractChange {
         this.executable = executable;
     }
 
-    public void addArg(String arg) {
-        this.args.add(arg);
-    }
-
     public List<String> getArgs() {
         return Collections.unmodifiableList(args);
     }
 
-    @DatabaseChangeProperty(description = "Timeout value for executable to run", exampleValue = "10s")
+    public void addArg(String arg) {
+        this.args.add(arg);
+    }
+
+    @DatabaseChangeProperty(description = "Timeout value for the executable to run", exampleValue = "10s")
     public String getTimeout() {
         return timeout;
     }
@@ -88,7 +89,8 @@ public class ExecuteShellCommandChange extends AbstractChange {
         this.timeout = timeout;
     }
 
-    @DatabaseChangeProperty(description = "List of operating systems on which to execute the command (taken from the os.name Java system property)", exampleValue = "Windows 7")
+    @DatabaseChangeProperty(exampleValue = "Windows 7",
+        description = "List of operating systems on which to execute the command (taken from the os.name Java system property)")
     public List<String> getOs() {
         return os;
     }

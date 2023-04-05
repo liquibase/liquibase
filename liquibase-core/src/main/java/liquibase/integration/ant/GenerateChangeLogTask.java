@@ -55,8 +55,6 @@ public class GenerateChangeLogTask extends BaseLiquibaseTask {
                 throw new BuildException("Unable to generate a change log. Encoding [" + encoding + "] is not supported.", e);
             } catch (IOException e) {
                 throw new BuildException("Unable to generate a change log. Error creating output stream.", e);
-            } catch (ParserConfigurationException e) {
-                throw new BuildException("Unable to generate a change log. Error configuring parser.", e);
             } catch (DatabaseException e) {
                 throw new BuildException("Unable to generate a change log: " + e.getMessage(), e);
             } catch (CommandExecutionException e) {

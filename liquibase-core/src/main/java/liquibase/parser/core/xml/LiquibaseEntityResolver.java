@@ -3,7 +3,11 @@ package liquibase.parser.core.xml;
 import liquibase.GlobalConfiguration;
 import liquibase.Scope;
 import liquibase.logging.Logger;
+import liquibase.resource.ClassLoaderResourceAccessor;
+import liquibase.resource.CompositeResourceAccessor;
+import liquibase.resource.InputStreamList;
 import liquibase.resource.Resource;
+import liquibase.resource.ResourceAccessor;
 import liquibase.util.LiquibaseUtil;
 import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
@@ -12,6 +16,9 @@ import org.xml.sax.ext.EntityResolver2;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URL;
+import java.net.URLClassLoader;
+import java.util.Arrays;
+import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -21,6 +28,8 @@ import java.util.regex.Pattern;
  */
 public class LiquibaseEntityResolver implements EntityResolver2 {
 
+    private static final String XSD_VERSION_REGEX = "(?:-pro-|-)(?<version>[\\d.]*)\\.xsd";
+    private static final Pattern XSD_VERSION_PATTERN = Pattern.compile(XSD_VERSION_REGEX);
     private boolean shouldWarnOnMismatchedXsdVersion = false;
     /**
      * The warning message should only be printed once.
@@ -78,8 +87,11 @@ public class LiquibaseEntityResolver implements EntityResolver2 {
 
     }
 
+    /**
+     * Return the classloader used to look for XSD files in the classpath.
+     */
     protected ClassLoader getSearchClassloader() {
-        return Thread.currentThread().getContextClassLoader();
+        return new CombinedClassLoader();
     }
 
     /**
@@ -88,8 +100,7 @@ public class LiquibaseEntityResolver implements EntityResolver2 {
      */
     private void warnForMismatchedXsdVersion(String systemId) {
         try {
-            Pattern versionPattern = Pattern.compile("(?:-pro-|-)(?<version>[\\d.]*)\\.xsd");
-            Matcher versionMatcher = versionPattern.matcher(systemId);
+            Matcher versionMatcher = XSD_VERSION_PATTERN.matcher(systemId);
             boolean found = versionMatcher.find();
             if (found) {
                 String buildVersion = LiquibaseUtil.getBuildVersion();
@@ -125,5 +136,29 @@ public class LiquibaseEntityResolver implements EntityResolver2 {
      */
     public void setShouldWarnOnMismatchedXsdVersion(boolean shouldWarnOnMismatchedXsdVersion) {
         this.shouldWarnOnMismatchedXsdVersion = shouldWarnOnMismatchedXsdVersion;
+    }
+
+    /**
+     * Only currently implementing getResource() since that's the only method used by our logic
+     */
+    private static class CombinedClassLoader extends ClassLoader {
+
+        private final List<ClassLoader> classLoaders;
+
+        public CombinedClassLoader() {
+            this.classLoaders = Arrays.asList(Thread.currentThread().getContextClassLoader(), getClass().getClassLoader());
+        }
+
+        @Override
+        public URL getResource(String name) {
+            for (ClassLoader classLoader : classLoaders) {
+                URL resource = classLoader.getResource(name);
+                if (resource != null) {
+                    return resource;
+                }
+            }
+
+            return null;
+        }
     }
 }

@@ -122,14 +122,14 @@ public abstract class YamlSerializer implements LiquibaseSerializer {
 
                 }
                 if (value instanceof Map) {
-                    if  (((Map) value).isEmpty()) {
+                    if  (((Map<?, ?>) value).isEmpty()) {
                         continue;
                     }
 
                     for (Object key : new HashSet<>(((Map) value).keySet())) {
-                        Object mapValue = ((Map) value).get(key);
+                        Object mapValue = ((Map<?, ?>) value).get(key);
                         if (mapValue == null) {
-                            ((Map) value).remove(key);
+                            ((Map<?, ?>) value).remove(key);
                         }
 
                         if (mapValue instanceof LiquibaseSerializable) {
@@ -164,12 +164,7 @@ public abstract class YamlSerializer implements LiquibaseSerializer {
     }
 
     protected Comparator<String> getComparator(LiquibaseSerializable object) {
-        return new Comparator<String>() {
-            @Override
-            public int compare(String o1, String o2) {
-                return o1.compareTo(o2);
-            }
-        };
+        return Comparator.naturalOrder();
     }
 
     public static String removeClassTypeMarksFromSerializedJson(String json) {
