@@ -208,9 +208,9 @@ public class CommandScope {
         Scope.getCurrentScope().addMdcValue(MdcKey.LIQUIBASE_OPERATION, commandNameForMdc);
 
         try {
+            addOutputFileToMdc();
             for (CommandStep command : pipeline) {
                 try {
-                    addOutputFileToMdc();
                     Scope.getCurrentScope().addMdcValue(MdcKey.LIQUIBASE_COMMAND_NAME, StringUtil.join(command.defineCommandNames()[0], " "));
                     command.run(resultsBuilder);
                 } catch (Exception runException) {
