@@ -30,7 +30,7 @@ import java.util.List;
 import java.util.Set;
 
 /**
- * RollbackCommandStep performs the rollback-to-tag logic. For backwards compatibility issues it is not called "RollbackToTag"
+ * AbstractRollbackCommandStep provides the common operations to all the rollback* commands.
  */
 public abstract class AbstractRollbackCommandStep extends AbstractCommandStep {
 
