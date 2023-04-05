@@ -8,7 +8,6 @@ import liquibase.command.AbstractCommandStep;
 import liquibase.command.CleanUpCommandStep;
 import liquibase.command.CommandResultsBuilder;
 import liquibase.command.CommandScope;
-import liquibase.command.core.helpers.DatabaseChangelogCommandStep;
 import liquibase.command.core.helpers.HubHandler;
 import liquibase.database.Database;
 import liquibase.exception.DatabaseException;
@@ -58,7 +57,7 @@ public abstract class AbstractUpdateCommandStep extends AbstractCommandStep impl
         Contexts contexts = new Contexts(getContextsArg(commandScope));
         LabelExpression labelExpression = new LabelExpression(getLabelFilterArg(commandScope));
         ChangeLogParameters changeLogParameters = (ChangeLogParameters) commandScope.getDependency(ChangeLogParameters.class);
-        DatabaseChangelogCommandStep.addCommandFiltersMdc(labelExpression, contexts);
+        addCommandFiltersMdc(labelExpression, contexts);
         customMdcLogging(commandScope);
 
         LockService lockService = (LockService) commandScope.getDependency(LockService.class);
@@ -130,6 +129,13 @@ public abstract class AbstractUpdateCommandStep extends AbstractCommandStep impl
         LockServiceFactory.getInstance().resetAll();
         ChangeLogHistoryServiceFactory.getInstance().resetAll();
         Scope.getCurrentScope().getSingleton(ExecutorService.class).reset();
+    }
+
+    private void addCommandFiltersMdc(LabelExpression labelExpression, Contexts contexts) {
+        String labelFilterMdc = labelExpression != null && labelExpression.getOriginalString() != null ? labelExpression.getOriginalString() : "";
+        String contextFilterMdc = contexts != null ? contexts.toString() : "";
+        Scope.getCurrentScope().addMdcValue(MdcKey.COMMAND_LABEL_FILTER, labelFilterMdc);
+        Scope.getCurrentScope().addMdcValue(MdcKey.COMMAND_CONTEXT_FILTER, contextFilterMdc);
     }
 
     private void logDeploymentOutcomeMdc(DefaultChangeExecListener defaultListener, boolean success) throws IOException {
