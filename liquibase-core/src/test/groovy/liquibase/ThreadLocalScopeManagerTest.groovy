@@ -4,7 +4,6 @@ import liquibase.changelog.ChangeSet
 import liquibase.database.jvm.JdbcConnection
 import liquibase.exception.LiquibaseException
 import liquibase.resource.ClassLoaderResourceAccessor
-import spock.lang.Ignore
 import spock.lang.Specification
 
 import java.sql.*
@@ -35,7 +34,6 @@ class ThreadLocalScopeManagerTest extends Specification {
 
     }
 
-    @Ignore
     void "maintain databases in parallel"() {
         when:
         /*
