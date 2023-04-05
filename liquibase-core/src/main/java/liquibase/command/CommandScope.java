@@ -202,7 +202,7 @@ public class CommandScope {
         try {
             for (CommandStep command : pipeline) {
                 try {
-                    Scope.getCurrentScope().addMdcValue(MdcKey.LIQUIBASE_INTERNAL_OPERATION, getCommandStepName(command));
+                    Scope.getCurrentScope().addMdcValue(MdcKey.LIQUIBASE_INTERNAL_COMMAND, getCommandStepName(command));
                     command.run(resultsBuilder);
                 } catch (Exception runException) {
                     // Suppress the exception for now so that we can run the cleanup steps even when encountering an exception.
