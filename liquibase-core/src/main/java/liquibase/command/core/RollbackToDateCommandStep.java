@@ -37,11 +37,6 @@ public class RollbackToDateCommandStep extends AbstractRollbackCommandStep {
     }
 
     @Override
-    protected String getOperationCommand() {
-        return "rollbackToDate";
-    }
-
-    @Override
     public String[][] defineCommandNames() {
         return new String[][] { COMMAND_NAME };
     }
