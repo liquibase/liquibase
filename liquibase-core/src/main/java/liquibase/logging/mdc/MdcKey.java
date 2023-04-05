@@ -21,8 +21,6 @@ public class MdcKey {
     public static final String LIQUIBASE_VERSION = "liquibaseVersion";
     public static final String LIQUIBASE_SYSTEM_NAME = "liquibaseSystemName";
     public static final String LIQUIBASE_SYSTEM_USER = "liquibaseSystemUser";
-    public static final String OUTPUT_FILE = "outputFile";
-    public static final String OUTPUT_FILE_ENCODING = "outputFileEncoding";
     public static final String ROLLBACK_TO_TAG = "rollbackToTag";
     public static final String CHANGELOG_FILE = "changelogFile";
     public static final String ROLLBACK_SCRIPT = "rollbackScript";
