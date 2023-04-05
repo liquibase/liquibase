@@ -1519,13 +1519,9 @@ public class Liquibase implements AutoCloseable {
         changeLogParameters.setContexts(contexts);
         changeLogParameters.setLabels(labelExpression);
 
-        ChangeLogHistoryService changeLogService = ChangeLogHistoryServiceFactory.getInstance().getChangeLogService(database);
-        int originalSize = changeLogService.getRanChangeSets().size();
+        Date baseDate = new Date();
         update(tag, contexts, labelExpression);
-        changeLogService.reset();
-        int changesetsToRollback = changeLogService.getRanChangeSets().size() - originalSize;
-        Scope.getCurrentScope().getLog(getClass()).info(String.format("Rolling back %d changeset(s).", changesetsToRollback));
-        rollback(changesetsToRollback, null, contexts, labelExpression);
+        rollback(baseDate, null, contexts, labelExpression);
         update(tag, contexts, labelExpression);
     }
 
