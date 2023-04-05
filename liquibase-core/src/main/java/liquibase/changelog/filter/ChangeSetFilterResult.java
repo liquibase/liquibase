@@ -1,5 +1,7 @@
 package liquibase.changelog.filter;
 
+import java.util.Objects;
+
 /**
  * Contains the result of a {@link liquibase.changelog.filter.ChangeSetFilter#accepts(liquibase.changelog.ChangeSet)}  call.
  *
@@ -61,5 +63,20 @@ public class ChangeSetFilterResult {
         } else {
             return "Will NOT run because "+message;
         }
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        ChangeSetFilterResult that = (ChangeSetFilterResult) o;
+        return accepted == that.accepted
+                && Objects.equals(message, that.message)
+                && Objects.equals(filter, that.filter);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(accepted, message, filter);
     }
 }

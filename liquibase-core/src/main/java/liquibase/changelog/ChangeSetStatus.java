@@ -5,6 +5,7 @@ import liquibase.changelog.filter.ChangeSetFilter;
 import liquibase.changelog.filter.ChangeSetFilterResult;
 
 import java.util.Date;
+import java.util.Objects;
 import java.util.Set;
 
 /**
@@ -146,5 +147,27 @@ public class ChangeSetStatus {
 
     public void setRanChangeSet(RanChangeSet ranChangeSet) {
         this.ranChangeSet = ranChangeSet;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        ChangeSetStatus that = (ChangeSetStatus) o;
+        return willRun == that.willRun
+                && previouslyRan == that.previouslyRan
+                && Objects.equals(changeSet, that.changeSet)
+                && Objects.equals(currentCheckSum, that.currentCheckSum)
+                && Objects.equals(description, that.description)
+                && Objects.equals(comments, that.comments)
+                && Objects.equals(filterResults, that.filterResults)
+                && Objects.equals(storedCheckSum, that.storedCheckSum)
+                && Objects.equals(dateLastExecuted, that.dateLastExecuted)
+                && Objects.equals(ranChangeSet, that.ranChangeSet);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(changeSet, currentCheckSum, description, comments, willRun, filterResults, storedCheckSum, dateLastExecuted, previouslyRan, ranChangeSet);
     }
 }
