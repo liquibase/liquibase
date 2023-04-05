@@ -54,11 +54,12 @@ public class CreateTableGenerator extends AbstractSqlGenerator<CreateTableStatem
         StringBuilder buffer = new StringBuilder();
         buffer.append("CREATE ");
 
-        if (StringUtil.isNotEmpty(statement.getTableType())) {
-            buffer.append(statement.getTableType().trim().toUpperCase()).append(" ");
+        if (statement.getTableType() != null && statement.getTableType().trim().isEmpty()) {
+            buffer.append(statement.getTableType().toUpperCase());
         }
-        buffer.append("TABLE ").append(generateTableName(database, statement)).append(" ");
 
+        buffer.append("TABLE ").append(database.escapeTableName(statement.getCatalogName(),
+                statement.getSchemaName(), statement.getTableName())).append(" ");
         buffer.append("(");
 
         boolean isSinglePrimaryKeyColumn = (statement.getPrimaryKeyConstraint() != null) && (statement
@@ -393,16 +394,6 @@ public class CreateTableGenerator extends AbstractSqlGenerator<CreateTableStatem
         }
         additionalSql.add(0, new UnparsedSql(sql, getAffectedTable(statement)));
         return additionalSql.toArray(EMPTY_SQL);
-    }
-
-    private String generateTableName(Database database, CreateTableStatement statement) {
-        // In Postgresql, temp tables get their own schema and each session (connection) gets
-        //its own temp schema. So - don't qualify them by schema.
-        if (!(database instanceof PostgresDatabase) || StringUtil.isEmpty(statement.getTableType()) || !statement.getTableType().trim().toLowerCase().contains("temp")) {
-            return database.escapeTableName(statement.getCatalogName(), statement.getSchemaName(), statement.getTableName());
-        } else {
-            return database.escapeObjectName(statement.getTableName(), Table.class);
-        }
     }
 
     /**
