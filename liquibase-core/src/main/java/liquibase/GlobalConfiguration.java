@@ -47,6 +47,7 @@ public class GlobalConfiguration implements AutoloadedConfigurations {
     public static final ConfigurationDefinition<Boolean> STRICT;
     public static final ConfigurationDefinition<Integer> DDL_LOCK_TIMEOUT;
     public static final ConfigurationDefinition<Boolean> SECURE_PARSING;
+    public static final ConfigurationDefinition<Boolean> DISABLE_CHECKSUM_VERIFICATION;
     public static final ConfigurationDefinition<String> SEARCH_PATH;
 
     static {
@@ -196,6 +197,11 @@ public class GlobalConfiguration implements AutoloadedConfigurations {
                 .setDefaultValue(true)
                 .build();
 
+        DISABLE_CHECKSUM_VERIFICATION = builder.define("disableChecksumVerification", Boolean.class)
+                .setDescription("If true, disable the checksum verification when running the migrations and only shows a warning message.")
+                .setDefaultValue(false)
+                .build();
+      
         PRESERVE_SCHEMA_CASE = builder.define("preserveSchemaCase", Boolean.class)
                 .setDescription("Should liquibase treat schema and catalog names as case sensitive?")
                 .setDefaultValue(false)
