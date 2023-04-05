@@ -1,9 +1,12 @@
 package liquibase.command;
 
+import liquibase.GlobalConfiguration;
 import liquibase.Scope;
 import liquibase.configuration.*;
 import liquibase.exception.CommandExecutionException;
 import liquibase.exception.CommandValidationException;
+import liquibase.integration.commandline.LiquibaseCommandLineConfiguration;
+import liquibase.listener.LiquibaseListener;
 import liquibase.logging.mdc.MdcKey;
 import liquibase.logging.mdc.MdcObject;
 import liquibase.util.ISODateFormat;
@@ -202,6 +205,7 @@ public class CommandScope {
         try {
             for (CommandStep command : pipeline) {
                 try {
+                    addOutputFileToMdc();
                     Scope.getCurrentScope().addMdcValue(MdcKey.LIQUIBASE_INTERNAL_COMMAND, getCommandStepName(command));
                     command.run(resultsBuilder);
                 } catch (Exception runException) {
@@ -242,6 +246,24 @@ public class CommandScope {
         }
 
         return resultsBuilder.build();
+    }
+
+    private void addOutputFileToMdc() throws Exception {
+        Scope.child((LiquibaseListener) null, () -> {
+            String outputFilePath = LiquibaseCommandLineConfiguration.OUTPUT_FILE.getCurrentValue();
+            if (outputFilePath != null) {
+                Scope.getCurrentScope().addMdcValue(MdcKey.OUTPUT_FILE, outputFilePath);
+            }
+            String outputFileEncoding = GlobalConfiguration.OUTPUT_FILE_ENCODING.getCurrentValue();
+            if (outputFileEncoding != null) {
+                Scope.getCurrentScope().addMdcValue(MdcKey.OUTPUT_FILE_ENCODING, outputFileEncoding);
+            }
+            if (outputFilePath != null) {
+                Scope.getCurrentScope().getLog(CommandScope.class).fine("Writing output to '" + outputFilePath + "' with encoding '" + outputFileEncoding + "'");
+            } else {
+                Scope.getCurrentScope().getLog(CommandScope.class).fine("Writing output with encoding '" + outputFileEncoding + "'");
+            }
+        });
     }
 
     private <T> ConfigurationDefinition<T> createConfigurationDefinition(CommandArgumentDefinition<T> argument, boolean includeCommandName) {
