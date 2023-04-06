@@ -15,6 +15,7 @@ import liquibase.util.StringUtil;
 import java.io.FilterOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
+import java.time.Instant;
 import java.util.*;
 import java.util.regex.Pattern;
 
@@ -203,9 +204,9 @@ public class CommandScope {
         Optional<Exception> thrownException = Optional.empty();
         validate();
         try {
+            addOutputFileToMdc();
             for (CommandStep command : pipeline) {
                 try {
-                    addOutputFileToMdc();
                     Scope.getCurrentScope().addMdcValue(MdcKey.LIQUIBASE_INTERNAL_COMMAND, getCommandStepName(command));
                     command.run(resultsBuilder);
                 } catch (Exception runException) {
@@ -233,7 +234,7 @@ public class CommandScope {
                 throw new CommandExecutionException(e);
             }
         } finally {
-            try (MdcObject operationStopTime = Scope.getCurrentScope().addMdcValue(MdcKey.OPERATION_STOP_TIME, new ISODateFormat().format(new Date()))) {
+            try (MdcObject operationStopTime = Scope.getCurrentScope().addMdcValue(MdcKey.OPERATION_STOP_TIME, Instant.ofEpochMilli(new Date().getTime()).toString())) {
                 Scope.getCurrentScope().getLog(getClass()).info("Command execution complete");
             }
             try {
