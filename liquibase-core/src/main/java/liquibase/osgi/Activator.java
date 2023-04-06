@@ -40,7 +40,7 @@ public class Activator implements BundleActivator, BundleTrackerCustomizer<Liqui
         if (bundle.getBundleId() == 0) {
             return null;
         }
-        String customWrapperPackages = (String) bundle.getHeaders().get(LIQUIBASE_CUSTOM_CHANGE_WRAPPER_PACKAGES);
+        String customWrapperPackages = bundle.getHeaders().get(LIQUIBASE_CUSTOM_CHANGE_WRAPPER_PACKAGES);
         if (customWrapperPackages != null) {
             LiquibaseBundle lb = new LiquibaseBundle(bundle, customWrapperPackages);
             liquibaseBundles.add(lb);

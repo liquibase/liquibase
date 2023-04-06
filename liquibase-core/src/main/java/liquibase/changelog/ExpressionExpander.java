@@ -1,15 +1,20 @@
 package liquibase.changelog;
 
+import liquibase.Scope;
 import liquibase.exception.UnexpectedLiquibaseException;
 import liquibase.exception.UnknownChangeLogParameterException;
+import liquibase.logging.mdc.MdcKey;
 import liquibase.parser.ChangeLogParserConfiguration;
 
 import java.io.IOException;
 import java.io.StringReader;
+import java.util.LinkedHashMap;
+import java.util.Map;
 
 class ExpressionExpander {
     private final boolean enableEscaping;
     private final ChangeLogParameters parameters;
+    private final static Map<String, String> expandedParameters = new LinkedHashMap<>();
 
     public ExpressionExpander(ChangeLogParameters parameters) {
         this.enableEscaping = ChangeLogParserConfiguration.SUPPORT_PROPERTY_ESCAPING.getCurrentValue();
@@ -21,7 +26,11 @@ class ExpressionExpander {
             return null;
         }
 
-        return expandExpressions(new StringReader(text), changeLog, false);
+        String expressions = expandExpressions(new StringReader(text), changeLog, false);
+        if (!expandedParameters.isEmpty()) {
+            Scope.getCurrentScope().addMdcValue(MdcKey.CHANGELOG_PROPERTIES, expandedParameters);
+        }
+        return expressions;
     }
 
     private String expandExpressions(StringReader reader, DatabaseChangeLog changeLog, boolean inExpression) throws UnknownChangeLogParameterException {
@@ -59,6 +68,7 @@ class ExpressionExpander {
                             } else {
                                 if (paramValue instanceof String) {
                                     paramValue = expandExpressions((String) paramValue, changeLog);
+                                    expandedParameters.put(paramExpression, String.valueOf(paramValue));
                                 }
                             }
                         }

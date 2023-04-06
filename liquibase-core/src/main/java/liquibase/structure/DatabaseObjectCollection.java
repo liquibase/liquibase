@@ -11,10 +11,11 @@ import liquibase.resource.ResourceAccessor;
 import liquibase.serializer.LiquibaseSerializable;
 
 import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
 
 public class DatabaseObjectCollection implements LiquibaseSerializable {
 
-    private Map<Class<? extends DatabaseObject>, Map<String, Set<DatabaseObject>>> cache = new LinkedHashMap<>();
+    private Map<Class<? extends DatabaseObject>, Map<String, Set<DatabaseObject>>> cache = Collections.synchronizedMap(new LinkedHashMap<>());
     private Database database;
 
     public DatabaseObjectCollection(Database database) {
@@ -73,7 +74,7 @@ public class DatabaseObjectCollection implements LiquibaseSerializable {
         if (databaseObject == null) {
             return;
         }
-        Map<String, Set<DatabaseObject>> collectionMap = cache.computeIfAbsent(databaseObject.getClass(), k -> new HashMap<>());
+        Map<String, Set<DatabaseObject>> collectionMap = cache.computeIfAbsent(databaseObject.getClass(), k -> new ConcurrentHashMap<>());
 
         String[] hashes = DatabaseObjectComparatorFactory.getInstance().hash(databaseObject, null, database);
 
@@ -95,15 +96,12 @@ public class DatabaseObjectCollection implements LiquibaseSerializable {
 
         String[] hashes = DatabaseObjectComparatorFactory.getInstance().hash(example, null, database);
 
-        SortedSet<Set<DatabaseObject>> objectSets = new TreeSet<>(new Comparator<Set<DatabaseObject>>() {
-            @Override
-            public int compare(Set<DatabaseObject> o1, Set<DatabaseObject> o2) {
-                int sizeComparison = Integer.valueOf(o1.size()).compareTo(o2.size());
-                if (sizeComparison == 0) {
-                    return o1.toString().compareTo(o2.toString());
-                }
-                return sizeComparison;
+        SortedSet<Set<DatabaseObject>> objectSets = new TreeSet<>((o1, o2) -> {
+            int sizeComparison = Integer.compare(o1.size(), o2.size());
+            if (sizeComparison == 0) {
+                return o1.toString().compareTo(o2.toString());
             }
+            return sizeComparison;
         });
 
         for (String hash : hashes) {
@@ -159,7 +157,7 @@ public class DatabaseObjectCollection implements LiquibaseSerializable {
 
     public Map<Class<? extends DatabaseObject>, Set<? extends DatabaseObject>> toMap() {
         Map<Class<? extends DatabaseObject>, Set<? extends DatabaseObject>> returnMap =
-            new LinkedHashMap<>();
+            Collections.synchronizedMap(new LinkedHashMap<>());
         for (Class<? extends DatabaseObject> type : this.cache.keySet()) {
             returnMap.put(type, get(type));
         }

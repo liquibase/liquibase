@@ -4,9 +4,11 @@ import liquibase.CatalogAndSchema;
 import liquibase.GlobalConfiguration;
 import liquibase.Scope;
 import liquibase.command.CommandScope;
-import liquibase.command.core.InternalDiffCommandStep;
-import liquibase.command.core.InternalDiffChangelogCommandStep;
-import liquibase.command.core.InternalGenerateChangelogCommandStep;
+import liquibase.command.core.*;
+import liquibase.command.core.helpers.DbUrlConnectionCommandStep;
+import liquibase.command.core.helpers.DiffOutputControlCommandStep;
+import liquibase.command.core.helpers.PreCompareCommandStep;
+import liquibase.command.core.helpers.ReferenceDbUrlConnectionCommandStep;
 import liquibase.configuration.ConfiguredValue;
 import liquibase.database.Database;
 import liquibase.database.DatabaseFactory;
@@ -161,11 +163,11 @@ public class CommandLineUtils {
         CommandScope diffCommand = new CommandScope("internalDiff");
 
         diffCommand
-                .addArgumentValue(InternalDiffCommandStep.REFERENCE_DATABASE_ARG, referenceDatabase)
-                .addArgumentValue(InternalDiffCommandStep.TARGET_DATABASE_ARG, targetDatabase)
-                .addArgumentValue(InternalDiffCommandStep.COMPARE_CONTROL_ARG, new CompareControl(schemaComparisons, snapshotTypes))
-                .addArgumentValue(InternalDiffCommandStep.OBJECT_CHANGE_FILTER_ARG, objectChangeFilter)
-                .addArgumentValue(InternalDiffCommandStep.SNAPSHOT_TYPES_ARG, InternalDiffCommandStep.parseSnapshotTypes(snapshotTypes))
+                .addArgumentValue(ReferenceDbUrlConnectionCommandStep.REFERENCE_DATABASE_ARG, referenceDatabase)
+                .addArgumentValue(DbUrlConnectionCommandStep.DATABASE_ARG, targetDatabase)
+                .addArgumentValue(PreCompareCommandStep.COMPARE_CONTROL_ARG, new CompareControl(schemaComparisons, snapshotTypes))
+                .addArgumentValue(PreCompareCommandStep.OBJECT_CHANGE_FILTER_ARG, objectChangeFilter)
+                .addArgumentValue(PreCompareCommandStep.SNAPSHOT_TYPES_ARG, DiffCommandStep.parseSnapshotTypes(snapshotTypes))
         ;
 
         diffCommand.setOutput(output);
@@ -206,22 +208,24 @@ public class CommandLineUtils {
                                          CompareControl.SchemaComparison[] schemaComparisons)
             throws LiquibaseException, IOException, ParserConfigurationException {
 
-        CommandScope command = new CommandScope("internalDiffChangeLog");
+
+        CommandScope command = new CommandScope("diffChangeLog");
         command
-                .addArgumentValue(InternalDiffChangelogCommandStep.REFERENCE_DATABASE_ARG, referenceDatabase)
-                .addArgumentValue(InternalDiffChangelogCommandStep.TARGET_DATABASE_ARG, targetDatabase)
-                .addArgumentValue(InternalDiffChangelogCommandStep.SNAPSHOT_TYPES_ARG, InternalDiffChangelogCommandStep.parseSnapshotTypes(snapshotTypes))
-                .addArgumentValue(InternalDiffChangelogCommandStep.COMPARE_CONTROL_ARG, new CompareControl(schemaComparisons, snapshotTypes))
-                .addArgumentValue(InternalDiffChangelogCommandStep.OBJECT_CHANGE_FILTER_ARG, objectChangeFilter)
-                .addArgumentValue(InternalDiffChangelogCommandStep.CHANGELOG_FILE_ARG, changeLogFile)
-                .addArgumentValue(InternalDiffChangelogCommandStep.DIFF_OUTPUT_CONTROL_ARG, diffOutputControl);
+                .addArgumentValue(ReferenceDbUrlConnectionCommandStep.REFERENCE_DATABASE_ARG, referenceDatabase)
+                .addArgumentValue(DbUrlConnectionCommandStep.DATABASE_ARG, targetDatabase)
+                .addArgumentValue(PreCompareCommandStep.SNAPSHOT_TYPES_ARG, DiffCommandStep.parseSnapshotTypes(snapshotTypes))
+                .addArgumentValue(PreCompareCommandStep.COMPARE_CONTROL_ARG, new CompareControl(schemaComparisons, snapshotTypes))
+                .addArgumentValue(PreCompareCommandStep.OBJECT_CHANGE_FILTER_ARG, objectChangeFilter)
+                .addArgumentValue(DiffChangelogCommandStep.CHANGELOG_FILE_ARG, changeLogFile)
+                .addArgumentValue(DiffOutputControlCommandStep.INCLUDE_CATALOG_ARG, diffOutputControl.getIncludeCatalog())
+                .addArgumentValue(DiffOutputControlCommandStep.INCLUDE_SCHEMA_ARG, diffOutputControl.getIncludeSchema())
+                .addArgumentValue(DiffOutputControlCommandStep.INCLUDE_TABLESPACE_ARG, diffOutputControl.getIncludeTablespace());
         command.setOutput(System.out);
         try {
             command.execute();
         } catch (CommandExecutionException e) {
             throw new LiquibaseException(e);
         }
-
     }
 
     public static void doGenerateChangeLog(String changeLogFile, Database originalDatabase, String catalogName,
@@ -252,16 +256,19 @@ public class CommandLineUtils {
         CompareControl compareControl = new CompareControl(comparisons, snapshotTypes);
         diffOutputControl.setDataDir(dataDir);
 
-        CommandScope command = new CommandScope("internalGenerateChangeLog");
+        CommandScope command = new CommandScope("generateChangeLog");
         command
-                .addArgumentValue(InternalGenerateChangelogCommandStep.REFERENCE_DATABASE_ARG, originalDatabase)
-                .addArgumentValue(InternalGenerateChangelogCommandStep.SNAPSHOT_TYPES_ARG, InternalGenerateChangelogCommandStep.parseSnapshotTypes(snapshotTypes))
-                .addArgumentValue(InternalGenerateChangelogCommandStep.COMPARE_CONTROL_ARG, compareControl)
-                .addArgumentValue(InternalGenerateChangelogCommandStep.CHANGELOG_FILE_ARG, changeLogFile)
-                .addArgumentValue(InternalGenerateChangelogCommandStep.DIFF_OUTPUT_CONTROL_ARG, diffOutputControl)
-                .addArgumentValue(InternalGenerateChangelogCommandStep.AUTHOR_ARG, author)
-                .addArgumentValue(InternalGenerateChangelogCommandStep.CONTEXT_ARG, context)
-                .addArgumentValue(InternalGenerateChangelogCommandStep.OVERWRITE_OUTPUT_FILE_ARG, overwriteOutputFile);
+                .addArgumentValue(ReferenceDbUrlConnectionCommandStep.REFERENCE_DATABASE_ARG, originalDatabase)
+                .addArgumentValue(DbUrlConnectionCommandStep.DATABASE_ARG, originalDatabase)
+                .addArgumentValue(PreCompareCommandStep.SNAPSHOT_TYPES_ARG, DiffCommandStep.parseSnapshotTypes(snapshotTypes))
+                .addArgumentValue(PreCompareCommandStep.COMPARE_CONTROL_ARG, compareControl)
+                .addArgumentValue(DiffChangelogCommandStep.CHANGELOG_FILE_ARG, changeLogFile)
+                .addArgumentValue(DiffOutputControlCommandStep.INCLUDE_CATALOG_ARG, diffOutputControl.getIncludeCatalog())
+                .addArgumentValue(DiffOutputControlCommandStep.INCLUDE_SCHEMA_ARG, diffOutputControl.getIncludeSchema())
+                .addArgumentValue(DiffOutputControlCommandStep.INCLUDE_TABLESPACE_ARG, diffOutputControl.getIncludeTablespace())
+                .addArgumentValue(GenerateChangelogCommandStep.AUTHOR_ARG, author)
+                .addArgumentValue(GenerateChangelogCommandStep.CONTEXT_ARG, context)
+                .addArgumentValue(GenerateChangelogCommandStep.OVERWRITE_OUTPUT_FILE_ARG, overwriteOutputFile);
 
         command.setOutput(System.out);
         try {
@@ -285,7 +292,7 @@ public class CommandLineUtils {
         if (GlobalConfiguration.SHOW_BANNER.getCurrentValue()) {
 
             // Banner is stored in liquibase/banner.txt in resources.
-            Class commandLinUtilsClass = CommandLineUtils.class;
+            Class<CommandLineUtils> commandLinUtilsClass = CommandLineUtils.class;
             InputStream inputStream = commandLinUtilsClass.getResourceAsStream("/liquibase/banner.txt");
             try {
                 banner.append(readFromInputStream(inputStream));

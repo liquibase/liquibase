@@ -9,14 +9,15 @@ import liquibase.serializer.LiquibaseSerializable;
 import liquibase.statement.SqlStatement;
 import liquibase.statement.core.DropProcedureStatement;
 
-@DatabaseChange(name="dropProcedure", description = "Drops an existing procedure", priority = ChangeMetaData.PRIORITY_DEFAULT+100, appliesTo = "storedProcedure")
+@DatabaseChange(name = "dropProcedure", description = "Drops an existing procedure", priority = ChangeMetaData.PRIORITY_DEFAULT+100,
+    appliesTo = "storedProcedure")
 public class DropProcedureChange extends AbstractChange {
 
     private String catalogName;
     private String schemaName;
     private String procedureName;
 
-    @DatabaseChangeProperty(mustEqualExisting ="storedProcedure.catalog")
+    @DatabaseChangeProperty(mustEqualExisting ="storedProcedure.catalog", description = "Name of the database catalog")
     public String getCatalogName() {
         return catalogName;
     }
@@ -25,7 +26,7 @@ public class DropProcedureChange extends AbstractChange {
         this.catalogName = catalogName;
     }
 
-    @DatabaseChangeProperty(mustEqualExisting ="storedProcedure.schema")
+    @DatabaseChangeProperty(mustEqualExisting ="storedProcedure.schema", description = "Name of the database schema")
     public String getSchemaName() {
         return schemaName;
     }
@@ -34,7 +35,8 @@ public class DropProcedureChange extends AbstractChange {
         this.schemaName = schemaName;
     }
 
-    @DatabaseChangeProperty(mustEqualExisting = "storedProcedure", description = "Name of the stored procedure to drop", exampleValue = "new_customer")
+    @DatabaseChangeProperty(mustEqualExisting = "storedProcedure", description = "Name of the stored procedure to drop",
+        exampleValue = "new_customer")
     public String getProcedureName() {
         return procedureName;
     }

@@ -1,14 +1,21 @@
 package liquibase.command;
 
+import liquibase.GlobalConfiguration;
 import liquibase.Scope;
 import liquibase.configuration.*;
 import liquibase.exception.CommandExecutionException;
 import liquibase.exception.CommandValidationException;
+import liquibase.integration.commandline.LiquibaseCommandLineConfiguration;
+import liquibase.listener.LiquibaseListener;
+import liquibase.logging.mdc.MdcKey;
+import liquibase.logging.mdc.MdcObject;
+import liquibase.util.ISODateFormat;
 import liquibase.util.StringUtil;
 
 import java.io.FilterOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
+import java.time.Instant;
 import java.util.*;
 import java.util.regex.Pattern;
 
@@ -22,7 +29,8 @@ import java.util.regex.Pattern;
  */
 public class CommandScope {
 
-    public static final Pattern NO_PREFIX_PATTERN = Pattern.compile(".*\\.");
+    private static final String NO_PREFIX_REGEX = ".*\\.";
+    public static final Pattern NO_PREFIX_PATTERN = Pattern.compile(NO_PREFIX_REGEX);
     private final CommandDefinition commandDefinition;
 
     private final SortedMap<String, Object> argumentValues = new TreeMap<>();
@@ -107,7 +115,6 @@ public class CommandScope {
             ConfigurationDefinition<T> noCommandConfigDef = createConfigurationDefinition(argument, false);
             ConfiguredValue<T> noCommandNameProvidedValue = noCommandConfigDef.getCurrentConfiguredValue();
             if (noCommandNameProvidedValue.found() && !noCommandNameProvidedValue.wasDefaultValueUsed()) {
-                configDef = noCommandConfigDef;
                 providedValue = noCommandNameProvidedValue;
             }
         }
@@ -131,7 +138,7 @@ public class CommandScope {
      * <p>
      * Means that this class will LockService.class using object lock
      */
-    public  <T> CommandScope provideDependency(Class<T> clazz, T value) {
+    public  CommandScope provideDependency(Class<?> clazz, Object value) {
         this.dependencies.put(clazz, value);
 
         return this;
@@ -186,20 +193,44 @@ public class CommandScope {
      * Executes the command in this scope, and returns the results.
      */
     public CommandResults execute() throws CommandExecutionException {
+        Scope.getCurrentScope().addMdcValue(MdcKey.OPERATION_START_TIME, Instant.ofEpochMilli(new Date().getTime()).toString());
         CommandResultsBuilder resultsBuilder = new CommandResultsBuilder(this, outputStream);
         final List<CommandStep> pipeline = commandDefinition.getPipeline();
+        final List<CommandStep> executedCommands = new ArrayList<>();
+        Optional<Exception> thrownException = Optional.empty();
         validate();
+
+        //
+        // NOTE:
+        // When all commands have been refactored we will be able to remove this string manipulation
+        //
+        String commandNameForMdc = StringUtil.join(commandDefinition.getName(), "-");
+        commandNameForMdc = StringUtil.lowerCaseFirst(commandNameForMdc.replaceAll("^internal",""));
+        Scope.getCurrentScope().addMdcValue(MdcKey.LIQUIBASE_OPERATION, commandNameForMdc);
+
         try {
+            addOutputFileToMdc();
             for (CommandStep command : pipeline) {
-                command.run(resultsBuilder);
+                try {
+                    Scope.getCurrentScope().addMdcValue(MdcKey.LIQUIBASE_COMMAND_NAME, StringUtil.join(command.defineCommandNames()[0], " "));
+                    command.run(resultsBuilder);
+                } catch (Exception runException) {
+                    // Suppress the exception for now so that we can run the cleanup steps even when encountering an exception.
+                    thrownException = Optional.of(runException);
+                    break;
+                }
+                executedCommands.add(command);
             }
 
             // after executing our pipeline, runs cleanup in inverse order
-            for (int i = pipeline.size() -1; i >= 0; i--) {
+            for (int i = executedCommands.size() -1; i >= 0; i--) {
                 CommandStep command = pipeline.get(i);
                 if (command instanceof CleanUpCommandStep) {
                     ((CleanUpCommandStep)command).cleanUp(resultsBuilder);
                 }
+            }
+            if (thrownException.isPresent()) { // Now that we've executed all our cleanup, rethrow the exception if there was one
+                throw thrownException.get();
             }
         } catch (Exception e) {
             if (e instanceof CommandExecutionException) {
@@ -208,6 +239,9 @@ public class CommandScope {
                 throw new CommandExecutionException(e);
             }
         } finally {
+            try (MdcObject operationStopTime = Scope.getCurrentScope().addMdcValue(MdcKey.OPERATION_STOP_TIME, Instant.ofEpochMilli(new Date().getTime()).toString())) {
+                Scope.getCurrentScope().getLog(getClass()).info("Command execution complete");
+            }
             try {
                 if (this.outputStream != null) {
                     this.outputStream.flush();
@@ -218,6 +252,24 @@ public class CommandScope {
         }
 
         return resultsBuilder.build();
+    }
+
+    private void addOutputFileToMdc() throws Exception {
+        Scope.child((LiquibaseListener) null, () -> {
+            String outputFilePath = LiquibaseCommandLineConfiguration.OUTPUT_FILE.getCurrentValue();
+            if (outputFilePath != null) {
+                Scope.getCurrentScope().addMdcValue(MdcKey.OUTPUT_FILE, outputFilePath);
+            }
+            String outputFileEncoding = GlobalConfiguration.OUTPUT_FILE_ENCODING.getCurrentValue();
+            if (outputFileEncoding != null) {
+                Scope.getCurrentScope().addMdcValue(MdcKey.OUTPUT_FILE_ENCODING, outputFileEncoding);
+            }
+            if (outputFilePath != null) {
+                Scope.getCurrentScope().getLog(CommandScope.class).fine("Writing output to '" + outputFilePath + "' with encoding '" + outputFileEncoding + "'");
+            } else {
+                Scope.getCurrentScope().getLog(CommandScope.class).fine("Writing output with encoding '" + outputFileEncoding + "'");
+            }
+        });
     }
 
     private <T> ConfigurationDefinition<T> createConfigurationDefinition(CommandArgumentDefinition<T> argument, boolean includeCommandName) {
@@ -279,11 +331,6 @@ public class CommandScope {
         @Override
         protected String getSourceDescription() {
             return "Command argument";
-        }
-
-        @Override
-        public ProvidedValue getProvidedValue(String... keyAndAliases) {
-            return super.getProvidedValue(keyAndAliases);
         }
 
         @Override

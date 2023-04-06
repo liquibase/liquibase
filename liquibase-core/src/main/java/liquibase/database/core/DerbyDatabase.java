@@ -133,9 +133,9 @@ public class DerbyDatabase extends AbstractJdbcDatabase {
         } else {
             String dateString = super.getDateLiteral(isoDate);
             int decimalDigits = dateString.length() - dateString.indexOf('.') - 2;
-            String padding = "";
+            final StringBuilder padding = new StringBuilder();
             for (int i = 6; i > decimalDigits; i--) {
-                padding += "0";
+                padding.append("0");
             }
             return "TIMESTAMP(" + dateString.replaceFirst("'$", padding + "'") + ")";
         }
