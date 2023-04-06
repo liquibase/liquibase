@@ -1,18 +1,15 @@
 package liquibase.change.core;
 
+import liquibase.GlobalConfiguration;
 import liquibase.Scope;
 import liquibase.change.AbstractChange;
 import liquibase.change.ChangeMetaData;
 import liquibase.change.DatabaseChange;
 import liquibase.change.DatabaseChangeProperty;
-import liquibase.GlobalConfiguration;
 import liquibase.database.Database;
 import liquibase.exception.UnexpectedLiquibaseException;
 import liquibase.exception.ValidationErrors;
 import liquibase.exception.Warnings;
-import liquibase.executor.Executor;
-import liquibase.executor.ExecutorService;
-import liquibase.executor.LoggingExecutor;
 import liquibase.parser.core.ParsedNode;
 import liquibase.parser.core.ParsedNodeException;
 import liquibase.resource.ResourceAccessor;
@@ -131,17 +128,12 @@ public class ExecuteShellCommandChange extends AbstractChange {
             }
         }
 
-        // check if running under not-executed mode (logging output)
-        boolean nonExecutedMode = false;
-        Executor executor = Scope.getCurrentScope().getSingleton(ExecutorService.class).getExecutor("jdbc", database);
-        if (executor instanceof LoggingExecutor) {
-            nonExecutedMode = true;
-        }
+        // Do not run if just logging output or generating statements
+        boolean shouldExecuteChange = shouldExecuteChange(database);
 
         this.finalCommandArray = createFinalCommandArray(database);
 
-        if (shouldRun && !nonExecutedMode) {
-
+        if (shouldRun && shouldExecuteChange) {
 
             return new SqlStatement[]{new RuntimeStatement() {
 
@@ -159,7 +151,7 @@ public class ExecuteShellCommandChange extends AbstractChange {
             }};
         }
 
-        if (nonExecutedMode) {
+        if (! shouldExecuteChange) {
             try {
                 return new SqlStatement[]{
                         new CommentStatement(getCommandString())
@@ -443,8 +435,6 @@ public class ExecuteShellCommandChange extends AbstractChange {
                 copiedSize += r;
             }
         }
-
-
     }
 
     @Override
