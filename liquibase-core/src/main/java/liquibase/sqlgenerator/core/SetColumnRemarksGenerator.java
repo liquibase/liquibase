@@ -76,12 +76,12 @@ public class SetColumnRemarksGenerator extends AbstractSqlGenerator<SetColumnRem
 
             Sql[] generatedSql = {new UnparsedSql("IF EXISTS( " +
                     " SELECT extended_properties.value" +
-                    " FROM SYS.EXTENDED_PROPERTIES" +
+                    " FROM sys.extended_properties" +
                     " WHERE major_id = OBJECT_ID('" + qualifiedTableName + "')" +
                     " AND name = N'MS_DESCRIPTION'" +
                     " AND minor_id = (" +
                     " SELECT column_id" +
-                    " FROM SYS.COLUMNS" +
+                    " FROM sys.columns" +
                     " WHERE name = '" + columnName + "'" +
                     " AND object_id = OBJECT_ID('" + qualifiedTableName + "'))" +
                     " )" +

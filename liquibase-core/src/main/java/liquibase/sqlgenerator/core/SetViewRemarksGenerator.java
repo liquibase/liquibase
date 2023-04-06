@@ -50,7 +50,7 @@ public class SetViewRemarksGenerator extends AbstractSqlGenerator<SetViewRemarks
 
             sql = "IF EXISTS( " +
                     " SELECT extended_properties.value" +
-                    " FROM SYS.EXTENDED_PROPERTIES" +
+                    " FROM sys.extended_properties" +
                     " WHERE major_id = OBJECT_ID('" + qualifiedTableName + "')" +
                     " AND name = N'MS_DESCRIPTION'" +
                     " AND minor_id = 0" +

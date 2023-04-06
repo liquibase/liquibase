@@ -44,7 +44,7 @@ public class SetTableRemarksGenerator extends AbstractSqlGenerator<SetTableRemar
 
 			sql = "IF EXISTS( " +
 					" SELECT extended_properties.value" +
-					" FROM SYS.EXTENDED_PROPERTIES" +
+					" FROM sys.extended_properties" +
 					" WHERE major_id = OBJECT_ID('" + qualifiedTableName + "')" +
 					" AND name = N'MS_DESCRIPTION'" +
 					" AND minor_id = 0" +
