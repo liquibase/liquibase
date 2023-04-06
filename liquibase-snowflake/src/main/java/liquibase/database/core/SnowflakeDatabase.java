@@ -9,6 +9,9 @@ import liquibase.exception.DatabaseException;
 import liquibase.executor.ExecutorService;
 import liquibase.statement.core.RawSqlStatement;
 import liquibase.structure.DatabaseObject;
+import liquibase.structure.core.StoredProcedure;
+import liquibase.structure.core.Table;
+import liquibase.structure.core.View;
 import liquibase.util.SystemUtil;
 
 import java.math.BigInteger;
@@ -102,7 +105,7 @@ public class SnowflakeDatabase extends AbstractJdbcDatabase {
 
     @Override
     public boolean supportsCatalogInObjectName(Class<? extends DatabaseObject> type) {
-        return false;
+        return type == Table.class || type == View.class || type == StoredProcedure.class;
     }
 
     @Override
