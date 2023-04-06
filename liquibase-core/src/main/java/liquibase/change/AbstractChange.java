@@ -4,6 +4,9 @@ import liquibase.Scope;
 import liquibase.changelog.ChangeSet;
 import liquibase.database.Database;
 import liquibase.exception.*;
+import liquibase.executor.Executor;
+import liquibase.executor.ExecutorService;
+import liquibase.executor.LoggingExecutor;
 import liquibase.parser.core.ParsedNode;
 import liquibase.parser.core.ParsedNodeException;
 import liquibase.plugin.AbstractPlugin;
@@ -13,6 +16,7 @@ import liquibase.serializer.core.string.StringChangeLogSerializer;
 import liquibase.sqlgenerator.SqlGeneratorFactory;
 import liquibase.statement.SqlStatement;
 import liquibase.structure.DatabaseObject;
+import liquibase.util.BooleanUtil;
 import liquibase.util.ObjectUtil;
 import liquibase.util.StringUtil;
 
@@ -445,6 +449,23 @@ public abstract class AbstractChange extends AbstractPlugin implements Change {
     @Override
     public ChangeStatus checkStatus(Database database) {
         return new ChangeStatus().unknown("Not implemented");
+    }
+
+    //
+    //
+
+    /**
+     *
+     * Return if this change should execute
+     *
+     * @param   database            Database we are working on
+     * @return  boolean
+     *
+     */
+    public boolean shouldExecuteChange(Database database) {
+        Boolean shouldExecute = Scope.getCurrentScope().get(Change.SHOULD_EXECUTE, Boolean.class);
+        Executor executor = Scope.getCurrentScope().getSingleton(ExecutorService.class).getExecutor("jdbc", database);
+        return ! (executor instanceof LoggingExecutor) && (shouldExecute == null || BooleanUtil.isTrue(shouldExecute));
     }
 
     /**
