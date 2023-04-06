@@ -71,7 +71,7 @@ public class CreateProcedureGenerator extends AbstractSqlGenerator<CreateProcedu
             sql.add(new UnparsedSql("if object_id('" + fullyQualifiedName + "', 'p') is null exec ('create procedure " + fullyQualifiedName + " as select 1 a')"));
 
             StringClauses parsedProcedureDefinition = SqlParser.parse(procedureText, true, true);
-            if (!isCreateOrAlterStatement(parsedProcedureDefinition)) {
+            if (!isCreateOrAlterStatement(parsedProcedureDefinition) && parsedProcedureDefinition.contains("CREATE")) {
                 parsedProcedureDefinition.replace("CREATE", "ALTER");
             }
             procedureText = parsedProcedureDefinition.toString();
