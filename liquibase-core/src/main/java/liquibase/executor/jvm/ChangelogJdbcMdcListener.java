@@ -9,7 +9,6 @@ import liquibase.logging.mdc.MdcKey;
 import liquibase.logging.mdc.MdcValue;
 import liquibase.sql.Sql;
 import liquibase.sqlgenerator.SqlGeneratorFactory;
-import liquibase.statement.SqlStatement;
 import liquibase.util.SqlUtil;
 
 import java.util.Collections;
@@ -23,12 +22,11 @@ public class ChangelogJdbcMdcListener {
     /**
      * Execute the given statement via the jdbc executor. Adds MDC of the statement sql and outcome to logging.
      *
-     * @param statement the statement to execute
      * @param database  the database to execute against
      * @param jdbcQuery the executor function to apply
      * @throws DatabaseException if there was a problem running the sql statement
      */
-    public static void execute(SqlStatement statement, Database database, ExecuteJdbc jdbcQuery) throws DatabaseException {
+    public static void execute(Database database, ExecuteJdbc jdbcQuery) throws DatabaseException {
         try {
             AtomicReference<Sql[]> sqls = new AtomicReference<>(null);
             Scope.child(Collections.singletonMap(SqlGeneratorFactory.GENERATED_SQL_ARRAY_SCOPE_KEY, sqls), () -> {
@@ -45,13 +43,12 @@ public class ChangelogJdbcMdcListener {
     /**
      * Execute the given statement via the jdbc executor. Adds MDC of the statement sql and outcome to logging.
      *
-     * @param statement the statement to execute
      * @param database  the database to execute against
      * @param jdbcQuery the executor function to apply
      * @return the result of the executor function
      * @throws DatabaseException if there was a problem running the sql statement
      */
-    public static <T> T query(SqlStatement statement, Database database, QueryJdbc<T> jdbcQuery) throws DatabaseException {
+    public static <T> T query(Database database, QueryJdbc<T> jdbcQuery) throws DatabaseException {
         try {
             AtomicReference<Sql[]> sqls = new AtomicReference<>(null);
             T value = Scope.child(Collections.singletonMap(SqlGeneratorFactory.GENERATED_SQL_ARRAY_SCOPE_KEY, sqls), () -> jdbcQuery.execute(Scope.getCurrentScope().getSingleton(ExecutorService.class).getExecutor("jdbc", database)));
