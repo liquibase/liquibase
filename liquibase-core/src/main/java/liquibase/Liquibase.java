@@ -42,6 +42,7 @@ import liquibase.logging.mdc.MdcKey;
 import liquibase.logging.mdc.MdcObject;
 import liquibase.logging.mdc.MdcValue;
 import liquibase.logging.mdc.customobjects.ChangesetsRolledback;
+import liquibase.logging.mdc.customobjects.ChangesetsUpdated;
 import liquibase.parser.ChangeLogParser;
 import liquibase.parser.ChangeLogParserFactory;
 import liquibase.parser.core.xml.XMLChangeLogSAXParser;
@@ -898,7 +899,7 @@ public class Liquibase implements AutoCloseable {
                 .addArgumentValue(DatabaseChangelogCommandStep.LABEL_FILTER_ARG, (labelExpression != null ? labelExpression.getOriginalString() : null))
                 .addArgumentValue(ChangeExecListenerCommandStep.CHANGE_EXEC_LISTENER_ARG, changeExecListener)
                 .addArgumentValue(RollbackCommandStep.TAG_ARG, tagToRollBackTo)
-                .addArgumentValue(RollbackCommandStep.ROLLBACK_SCRIPT_ARG, rollbackScript)
+                .addArgumentValue(AbstractRollbackCommandStep.ROLLBACK_SCRIPT_ARG, rollbackScript)
                 .setOutput(new WriterOutputStream(output, GlobalConfiguration.OUTPUT_FILE_ENCODING.getCurrentValue()))
                 .execute();
     }
@@ -937,7 +938,6 @@ public class Liquibase implements AutoCloseable {
      */
     public void rollback(String tagToRollBackTo, String rollbackScript, Contexts contexts,
                          LabelExpression labelExpression) throws LiquibaseException {
-
         new CommandScope(RollbackCommandStep.COMMAND_NAME)
                 .addArgumentValue(DbUrlConnectionCommandStep.DATABASE_ARG, Liquibase.this.getDatabase())
                 .addArgumentValue(DatabaseChangelogCommandStep.CHANGELOG_FILE_ARG, changeLogFile)
@@ -967,21 +967,17 @@ public class Liquibase implements AutoCloseable {
 
     public void rollback(Date dateToRollBackTo, String rollbackScript, Contexts contexts,
                          LabelExpression labelExpression, Writer output) throws LiquibaseException {
-        changeLogParameters.setContexts(contexts);
-        changeLogParameters.setLabels(labelExpression);
-
-        @SuppressWarnings("squid:S1941")
-        Executor oldTemplate = getAndReplaceJdbcExecutor(output);
-
-        outputHeader("Rollback to " + dateToRollBackTo + " Script");
-
-        rollback(dateToRollBackTo, contexts, labelExpression);
-
-        flushOutputWriter(output);
-        Scope.getCurrentScope().getSingleton(ExecutorService.class).setExecutor("jdbc", database, oldTemplate);
-        resetServices();
+        new CommandScope(RollbackToDateSqlCommandStep.COMMAND_NAME)
+                .addArgumentValue(DbUrlConnectionCommandStep.DATABASE_ARG, Liquibase.this.getDatabase())
+                .addArgumentValue(DatabaseChangelogCommandStep.CHANGELOG_FILE_ARG, changeLogFile)
+                .addArgumentValue(DatabaseChangelogCommandStep.CONTEXTS_ARG, (contexts != null? contexts.toString() : null))
+                .addArgumentValue(DatabaseChangelogCommandStep.LABEL_FILTER_ARG, (labelExpression != null ? labelExpression.getOriginalString() : null))
+                .addArgumentValue(ChangeExecListenerCommandStep.CHANGE_EXEC_LISTENER_ARG, changeExecListener)
+                .addArgumentValue(RollbackToDateCommandStep.DATE_ARG, dateToRollBackTo)
+                .addArgumentValue(AbstractRollbackCommandStep.ROLLBACK_SCRIPT_ARG, rollbackScript)
+                .setOutput(new WriterOutputStream(output, GlobalConfiguration.OUTPUT_FILE_ENCODING.getCurrentValue()))
+                .execute();
     }
-
     // ---------- End RollbackToDateSql Family of methods
 
     // ---------- RollbackToDate Family of methods
@@ -1007,83 +1003,15 @@ public class Liquibase implements AutoCloseable {
         changeLogParameters.setLabels(labelExpression);
         addCommandFiltersMdc(labelExpression, contexts);
 
-        runInScope(new Scope.ScopedRunner() {
-            @Override
-            public void run() throws Exception {
-                Scope.getCurrentScope().addMdcValue(MdcKey.ROLLBACK_TO_DATE, dateToRollBackTo.toString());
-                Scope.getCurrentScope().addMdcValue(MdcKey.ROLLBACK_SCRIPT, rollbackScript);
-                Scope.getCurrentScope().addMdcValue(MdcKey.LIQUIBASE_TARGET_URL, database.getConnection().getURL());
-
-                LockService lockService = LockServiceFactory.getInstance().getLockService(database);
-                lockService.waitForLock();
-
-                Operation rollbackOperation = null;
-                final String operationCommand = "rollback-to-date";
-                BufferedLogService bufferLog = new BufferedLogService();
-                DatabaseChangeLog changeLog = null;
-                Date startTime = new Date();
-                HubUpdater hubUpdater = null;
-
-                try {
-                    changeLog = getDatabaseChangeLog();
-                    checkLiquibaseTables(false, changeLog, contexts, labelExpression);
-                    changeLog.validate(database, contexts, labelExpression);
-
-                    //
-                    // Let the user know that they can register for Hub
-                    //
-                    hubUpdater = new HubUpdater(startTime, changeLog, database);
-
-                    //
-                    // Create an iterator which will be used with a ListVisitor
-                    // to grab the list of changesets for the update
-                    //
-                    List<RanChangeSet> ranChangeSetList = database.getRanChangeSetList();
-                    ChangeLogIterator listLogIterator = new ChangeLogIterator(ranChangeSetList, changeLog,
-                            new ExecutedAfterChangeSetFilter(dateToRollBackTo, ranChangeSetList),
-                            new AlreadyRanChangeSetFilter(ranChangeSetList),
-                            new ContextChangeSetFilter(contexts),
-                            new LabelChangeSetFilter(labelExpression),
-                            new IgnoreChangeSetFilter(),
-                            new DbmsChangeSetFilter(database));
-
-                    //
-                    // Create or retrieve the Connection
-                    // Make sure the Hub is available here by checking the return
-                    //
-                    Connection connection = getConnection(changeLog);
-                    if (connection != null) {
-                        rollbackOperation = hubUpdater.preUpdateHub("ROLLBACK", operationCommand, connection, changeLogFile, contexts, labelExpression, listLogIterator);
-                    }
-
-                    //
-                    // If we are doing Hub then set up a HubChangeExecListener
-                    //
-                    if (connection != null) {
-                        changeExecListener = new HubChangeExecListener(rollbackOperation, changeExecListener);
-                    }
-
-                    //
-                    // Create another iterator to run
-                    //
-                    ChangeLogIterator logIterator = new ChangeLogIterator(ranChangeSetList, changeLog,
-                            new ExecutedAfterChangeSetFilter(dateToRollBackTo, ranChangeSetList),
-                            new AlreadyRanChangeSetFilter(ranChangeSetList),
-                            new ContextChangeSetFilter(contexts),
-                            new LabelChangeSetFilter(labelExpression),
-                            new IgnoreChangeSetFilter(),
-                            new DbmsChangeSetFilter(database));
-
-                    doRollback(bufferLog, rollbackScript, logIterator, contexts, labelExpression, hubUpdater, rollbackOperation);
-                }
-                catch (Throwable t) {
-                    handleRollbackException(t, hubUpdater, rollbackOperation, bufferLog, operationCommand);
-                    throw t;
-                } finally {
-                    handleRollbackFinally(lockService);
-                }
-            }
-        });
+        new CommandScope(RollbackToDateCommandStep.COMMAND_NAME)
+                .addArgumentValue(DbUrlConnectionCommandStep.DATABASE_ARG, Liquibase.this.getDatabase())
+                .addArgumentValue(DatabaseChangelogCommandStep.CHANGELOG_FILE_ARG, changeLogFile)
+                .addArgumentValue(DatabaseChangelogCommandStep.CONTEXTS_ARG, (contexts != null? contexts.toString() : null))
+                .addArgumentValue(DatabaseChangelogCommandStep.LABEL_FILTER_ARG, (labelExpression != null ? labelExpression.getOriginalString() : null))
+                .addArgumentValue(ChangeExecListenerCommandStep.CHANGE_EXEC_LISTENER_ARG, changeExecListener)
+                .addArgumentValue(RollbackToDateCommandStep.DATE_ARG, dateToRollBackTo)
+                .addArgumentValue(AbstractRollbackCommandStep.ROLLBACK_SCRIPT_ARG, rollbackScript)
+                .execute();
 
     }
     // ---------- End RollbackToDate Family of methods
@@ -1518,9 +1446,13 @@ public class Liquibase implements AutoCloseable {
         changeLogParameters.setContexts(contexts);
         changeLogParameters.setLabels(labelExpression);
 
-        Date baseDate = new Date();
+        ChangeLogHistoryService changeLogService = ChangeLogHistoryServiceFactory.getInstance().getChangeLogService(database);
+        int originalSize = changeLogService.getRanChangeSets().size();
         update(tag, contexts, labelExpression);
-        rollback(baseDate, null, contexts, labelExpression);
+        changeLogService.reset();
+        int changesetsToRollback = changeLogService.getRanChangeSets().size() - originalSize;
+        Scope.getCurrentScope().getLog(getClass()).info(String.format("Rolling back %d changeset(s).", changesetsToRollback));
+        rollback(changesetsToRollback, null, contexts, labelExpression);
         update(tag, contexts, labelExpression);
     }
 

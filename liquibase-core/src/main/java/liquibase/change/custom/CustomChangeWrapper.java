@@ -1,10 +1,7 @@
 package liquibase.change.custom;
 
 import liquibase.Scope;
-import liquibase.change.AbstractChange;
-import liquibase.change.ChangeMetaData;
-import liquibase.change.DatabaseChange;
-import liquibase.change.DatabaseChangeProperty;
+import liquibase.change.*;
 import liquibase.database.Database;
 import liquibase.exception.*;
 import liquibase.parser.core.ParsedNode;
@@ -162,17 +159,19 @@ public class CustomChangeWrapper extends AbstractChange {
     @Override
     public SqlStatement[] generateStatements(Database database) {
         SqlStatement[] statements = null;
-        try {
-            configureCustomChange();
-            if (customChange instanceof CustomSqlChange) {
-                statements = ((CustomSqlChange) customChange).generateStatements(database);
-            } else if (customChange instanceof CustomTaskChange) {
-                ((CustomTaskChange) customChange).execute(database);
-            } else {
-                throw new UnexpectedLiquibaseException(customChange.getClass().getName() + " does not implement " + CustomSqlChange.class.getName() + " or " + CustomTaskChange.class.getName());
+        if (shouldExecuteChange(database)) {
+            try {
+                configureCustomChange();
+                if (customChange instanceof CustomSqlChange) {
+                    statements = ((CustomSqlChange) customChange).generateStatements(database);
+                } else if (customChange instanceof CustomTaskChange) {
+                    ((CustomTaskChange) customChange).execute(database);
+                } else {
+                    throw new UnexpectedLiquibaseException(customChange.getClass().getName() + " does not implement " + CustomSqlChange.class.getName() + " or " + CustomTaskChange.class.getName());
+                }
+            } catch (CustomChangeException e) {
+                throw new UnexpectedLiquibaseException(e);
             }
-        } catch (CustomChangeException e) {
-            throw new UnexpectedLiquibaseException(e);
         }
 
         if (statements == null) {
