@@ -12,6 +12,12 @@
 
     <artifactId>liquibase-cdi</artifactId>
 
+    <properties>
+        <maven.install.skip>false</maven.install.skip>
+        <maven.deploy.skip>false</maven.deploy.skip>
+        <maven.javadoc.skip>false</maven.javadoc.skip>
+    </properties>
+
     <dependencies>
         <dependency>
             <groupId>org.liquibase</groupId>

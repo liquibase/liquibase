@@ -1,111 +1,112 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
-	<modelVersion>4.0.0</modelVersion>
-	<parent>
-		<groupId>org.liquibase</groupId>
-		<artifactId>liquibase</artifactId>
-		<version>0-SNAPSHOT</version>
-	</parent>
-	<artifactId>liquibase-core</artifactId>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+    <parent>
+        <groupId>org.liquibase</groupId>
+        <artifactId>liquibase</artifactId>
+        <version>0-SNAPSHOT</version>
+    </parent>
+    <artifactId>liquibase-core</artifactId>
 	<packaging>jar</packaging>
 
     <properties>
         <maven.deploy.skip>false</maven.deploy.skip>
+        <maven.javadoc.skip>true</maven.javadoc.skip> <!-- javadocs created in the root pom currently -->
     </properties>
-    
+
     <description>Liquibase is a tool for managing and executing database changes.</description>
-	<dependencies>
-		<dependency>
-			<groupId>${project.groupId}</groupId>
-			<artifactId>liquibase-standard</artifactId>
-			<version>${project.version}</version>
-		</dependency>
-		<dependency>
-			<groupId>${project.groupId}</groupId>
-			<artifactId>liquibase-cli</artifactId>
-			<version>${project.version}</version>
-		</dependency>
+    <dependencies>
+        <dependency>
+            <groupId>${project.groupId}</groupId>
+            <artifactId>liquibase-standard</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>${project.groupId}</groupId>
+            <artifactId>liquibase-cli</artifactId>
+            <version>${project.version}</version>
+        </dependency>
         <dependency>
             <groupId>${project.groupId}</groupId>
             <artifactId>liquibase-snowflake</artifactId>
             <version>${project.version}</version>
         </dependency>
-	</dependencies>
+    </dependencies>
 
-	<build>
-		<plugins>
-		    <plugin>
+    <build>
+        <plugins>
+            <plugin>
                 <groupId>org.liquibase.ext</groupId>
                 <artifactId>liquibase-sdk-maven-plugin</artifactId>
                 <version>0.10.18</version>
             </plugin>
 
-			<plugin>
+            <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-source-plugin</artifactId>
                 <version>3.2.1</version>
-				<configuration>
-					<!-- sources.jar from this module is the shaded sources of others  -->
+                <configuration>
+                    <!-- sources.jar from this module is the shaded sources of others  -->
                     <skipSource>true</skipSource>
-				</configuration>
-			</plugin>
+                </configuration>
+            </plugin>
 
-			<plugin>
+            <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-shade-plugin</artifactId>
                 <version>3.4.1</version>
-				<dependencies>
-					<dependency>
+                <dependencies>
+                    <dependency>
                         <groupId>com.github.marcosemiao.maven.plugins.shade.resource</groupId>
                         <artifactId>maven-shade-merge-manifest-transformer</artifactId>
                         <version>0.0.3</version>
-					</dependency>
-				</dependencies>
-				<configuration>
-					<artifactSet>
-						<includes>
+                    </dependency>
+                </dependencies>
+                <configuration>
+                    <artifactSet>
+                        <includes>
                             <include>${project.groupId}:liquibase-standard</include>
                             <include>${project.groupId}:liquibase-cli</include>
                             <include>${project.groupId}:liquibase-snowflake</include>
-						</includes>
-					</artifactSet>
-					<filters>
-						<filter>
+                        </includes>
+                    </artifactSet>
+                    <filters>
+                        <filter>
                             <artifact>*:*</artifact>
-							<excludes>
+                            <excludes>
                                 <exclude>META-INF/maven/**</exclude>
-							</excludes>
-						</filter>
-					</filters>
+                            </excludes>
+                        </filter>
+                    </filters>
                     <createDependencyReducedPom>false</createDependencyReducedPom>
                     <createSourcesJar>true</createSourcesJar>
                     <createTestSourcesJar>false</createTestSourcesJar>
                     <keepDependenciesWithProvidedScope>false</keepDependenciesWithProvidedScope>
-					<transformers>
-                        <transformer implementation="org.apache.maven.plugins.shade.resource.ServicesResourceTransformer"/>
+                    <transformers>
+                        <transformer
+                                implementation="org.apache.maven.plugins.shade.resource.ServicesResourceTransformer"/>
                         <transformer implementation="fr.ms.maven.shade.transformers.MergeManifestResourceTransformer"/>
-                        <transformer implementation="org.apache.maven.plugins.shade.resource.IncludeResourceTransformer">
-							Use a hand-crafted pom for distribution in this jar vs. what gets generated by maven 
+                        <transformer
+                                implementation="org.apache.maven.plugins.shade.resource.IncludeResourceTransformer">
+                            Use a hand-crafted pom for distribution in this jar vs. what gets generated by maven
                             <resource>META-INF/maven/org.liquibase/liquibase-core/pom.xml</resource>
                             <file>${basedir}/src/main/maven/release.pom.xml</file>
-						</transformer>
-						<transformer implementation="org.apache.maven.plugins.shade.resource.AppendingTransformer">
+                        </transformer>
+                        <transformer implementation="org.apache.maven.plugins.shade.resource.AppendingTransformer">
                             <resource>liquibase.build.properties</resource>
-						</transformer>
-					</transformers>
-				</configuration>
-				<executions>
-					<execution>
+                        </transformer>
+                    </transformers>
+                </configuration>
+                <executions>
+                    <execution>
                         <phase>package</phase>
-						<goals>
+                        <goals>
                             <goal>shade</goal>
-						</goals>
-					</execution>
-				</executions>
-			</plugin>
-
-			<!-- install the shaded jar as liquibase-core like the final artifact ends up as  -->
-			<!-- might need to use different logic to install the liquibase-core module -->
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
 
            <plugin>
                <groupId>org.jacoco</groupId>
@@ -126,7 +127,7 @@
                    </execution>
                </executions>
             </plugin>
-		 <plugin>
+        <plugin>
                 <groupId>org.codehaus.mojo</groupId>
                 <artifactId>build-helper-maven-plugin</artifactId>
                 <version>3.3.0</version>
@@ -143,6 +144,7 @@
                         </configuration>
                     </execution>
                 </executions>
-            </plugin></plugins>
-	</build>
+            </plugin>
+        </plugins>
+    </build>
 </project>
