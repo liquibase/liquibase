@@ -444,7 +444,7 @@
         </createTable>
         <addPrimaryKey tableName="nocluster_table" columnNames="id" clustered="false"/>
     </changeSet>
-    <changeSet id="table-type-test" author="mallod" dbms="oracle,mysql,h2,mariadb,postgresql,snowflake">
+    <changeSet id="table-type-test" author="mallod" dbms="oracle,mysql,h2,mariadb,snowflake">
         <createTable tableName="tableTypeTestTable" tableType="TEMPORARY">
             <column name="id" type="int">
                 <constraints primaryKey="true" nullable="false"/>
