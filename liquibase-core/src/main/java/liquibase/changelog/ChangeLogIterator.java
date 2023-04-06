@@ -91,8 +91,6 @@ public class ChangeLogIterator {
                         }
 
                         boolean finalShouldVisit = shouldVisit;
-                        BufferedLogService bufferLog = new BufferedLogService();
-                        CompositeLogService compositeLogService = new CompositeLogService(true, bufferLog);
                         Scope.child(Scope.Attr.changeSet.name(), changeSet, () -> {
                             if (finalShouldVisit) {
                                 //
@@ -110,8 +108,6 @@ public class ChangeLogIterator {
                                 // log is sent to Hub if available
                                 //
                                 Map<String, Object> values = new HashMap<>();
-                                values.put(Scope.Attr.logService.name(), compositeLogService);
-                                values.put(BufferedLogService.class.getName(), bufferLog);
                                 Scope.child(values, () -> visitor.visit(changeSet, databaseChangeLog, env.getTargetDatabase(), reasonsAccepted));
                                 markSeen(changeSet);
                             } else {
