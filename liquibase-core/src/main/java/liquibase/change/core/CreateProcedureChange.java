@@ -238,13 +238,17 @@ public class CreateProcedureChange extends AbstractChange implements DbmsTargete
      */
     @Override
     public CheckSum generateCheckSum() {
+        return generateCheckSum(this.procedureText);
+    }
+
+    protected CheckSum generateCheckSum(String sqlText) {
         InputStream stream = null;
         try {
-            if (this.path == null) {
-                String procedureText = this.procedureText;
+            if (getPath() == null) {
+                String procedureText = sqlText;
                 Charset encoding = GlobalConfiguration.FILE_ENCODING.getCurrentValue();
                 if (procedureText != null) {
-                    stream = new ByteArrayInputStream(procedureText.getBytes(encoding));
+                    stream = new ByteArrayInputStream(sqlText.getBytes(encoding));
                 }
             }
             else {
@@ -265,7 +269,6 @@ public class CreateProcedureChange extends AbstractChange implements DbmsTargete
                 }
             }
         }
-
     }
 
     /**
