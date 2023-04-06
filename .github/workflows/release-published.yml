@@ -87,6 +87,11 @@ jobs:
           sed -i -e "s/<description>/<name>Liquibase CDI Plugin<\/name><description>/" liquibase-cdi-${version}.pom   ## name didn't end up in pom. Hack it in for now
           gpg --batch --pinentry-mode=loopback --passphrase "$GPG_PASSWORD" -ab liquibase-cdi-${version}.pom
 
+          unzip -j liquibase-cdi-jakarta-${version}.jar META-INF/maven/org.liquibase/liquibase-cdi-jakarta/pom.xml
+          mv pom.xml liquibase-cdi-jakarta-${version}.pom
+          sed -i -e "s/<description>/<name>Liquibase cdi-jakarta Plugin<\/name><description>/" liquibase-cdi-jakarta-${version}.pom   ## name didn't end up in pom. Hack it in for now
+          gpg --batch --pinentry-mode=loopback --passphrase "$GPG_PASSWORD" -ab liquibase-cdi-jakarta-${version}.pom
+
           unzip -j liquibase-commercial-${version}.jar META-INF/maven/org.liquibase/liquibase-commercial/pom.xml
           mv pom.xml liquibase-commercial-${version}.pom
           sed -i -e "s/<\/licenses>/<\/licenses><scm><connection>private<\/connection><developerConnection>private<\/developerConnection><url>private<\/url><\/scm>/" liquibase-commercial-${version}.pom   ## scm info not in the pom          
@@ -137,6 +142,18 @@ jobs:
             -Dsources=liquibase-cdi-${version}-sources.jar \
             -Djavadoc=liquibase-cdi-${version}-javadoc.jar \
             -Dfiles=liquibase-cdi-${version}.jar.asc,liquibase-cdi-${version}-sources.jar.asc,liquibase-cdi-${version}-javadoc.jar.asc,liquibase-cdi-${version}.pom.asc \
+            -Dtypes=jar.asc,jar.asc,jar.asc,pom.asc \
+            -Dclassifiers=,sources,javadoc,
+
+          mvn -B org.apache.maven.plugins:maven-deploy-plugin:3.0.0-M1:deploy-file \
+            -Durl=https://oss.sonatype.org/service/local/staging/deploy/maven2/ \
+            -DrepositoryId=sonatype-nexus-staging \
+            -DpomFile=liquibase-cdi-jakarta-${version}.pom \
+            -DgeneratePom=false \
+            -Dfile=liquibase-cdi-jakarta-${version}.jar \
+            -Dsources=liquibase-cdi-jakarta-${version}-sources.jar \
+            -Djavadoc=liquibase-cdi-jakarta-${version}-javadoc.jar \
+            -Dfiles=liquibase-cdi-jakarta-${version}.jar.asc,liquibase-cdi-jakarta-${version}-sources.jar.asc,liquibase-cdi-jakarta-${version}-javadoc.jar.asc,liquibase-cdi-jakarta-${version}.pom.asc \
             -Dtypes=jar.asc,jar.asc,jar.asc,pom.asc \
             -Dclassifiers=,sources,javadoc,
 
