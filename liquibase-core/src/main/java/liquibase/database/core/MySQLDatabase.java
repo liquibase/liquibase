@@ -329,7 +329,7 @@ public class MySQLDatabase extends AbstractJdbcDatabase {
 
     /**
      * <p>Returns the default timestamp fractional digits if nothing is specified.</p>
-     * <a href="https://dev.mysql.com/doc/refman/5.7/en/fractional-seconds.html">fractional seconds</a> :
+     * <a href="https://dev.mysql.com/doc/refman/5.7/en/fractional-seconds.html">fractional seconds</a>:
      * "The fsp value, if given, must be in the range 0 to 6. A value of 0 signifies that there is no fractional part.
      * If omitted, the default precision is 0. (This differs from the STANDARD SQL default of 6, for compatibility
      * with previous MySQL versions.)"

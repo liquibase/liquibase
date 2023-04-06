@@ -10,7 +10,7 @@ import static java.lang.annotation.ElementType.*;
 /**
  * Qualifier Annotation
  *
- *  @author (<a href="http://github.com/aaronwalker">Aaron Walker </a>)
+ *  @author <a href="http://github.com/aaronwalker">Aaron Walker </a>
  */
 @Retention(RetentionPolicy.RUNTIME)
 @Target({FIELD,METHOD,PARAMETER,TYPE})

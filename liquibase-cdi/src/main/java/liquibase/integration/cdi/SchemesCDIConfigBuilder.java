@@ -26,7 +26,7 @@ import java.util.*;
 import java.util.concurrent.Callable;
 
 /**
- * @author  (<a href="https://github.com/islonik)">Nikita Lipatov</a>
+ * @author <a href="https://github.com/islonik)">Nikita Lipatov</a>
  *
  * @since 27/5/17.
  */

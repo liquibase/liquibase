@@ -29,7 +29,7 @@ import java.util.concurrent.atomic.AtomicLong;
 
 
 /**
- * @author  (<a href="https://github.com/islonik)">Nikita Lipatov</a>,
+ * @author  <a href="https://github.com/islonik)">Nikita Lipatov</a>
  * @since 27/5/17.
  */
 public class SchemesCDIConfigBuilderTest {
