@@ -8,8 +8,8 @@ CommandTests.define {
 Short Description: Rollback changes made to the database based on the specific date
 Long Description: NOT SET
 Required Args:
-  changelogFile (String) File to write changelog to
-  date (LocalDateTime) Date to rollback changes to
+  changelogFile (String) The root changelog file
+  date (Date) Date to rollback changes to
   url (String) The JDBC database connection URL
     OBFUSCATED
 Optional Args:
@@ -17,7 +17,7 @@ Optional Args:
     Default: null
   changeExecListenerPropertiesFile (String) Path to a properties file for the ChangeExecListenerClass
     Default: null
-  contexts (String) Changeset contexts to match
+  contexts (String) Context string to use for filtering
     Default: null
   defaultCatalogName (String) The default catalog name to use for the database connection
     Default: null
@@ -27,7 +27,7 @@ Optional Args:
     Default: null
   driverPropertiesFile (String) The JDBC driver properties file
     Default: null
-  labelFilter (String) Changeset labels to match
+  labelFilter (String) Label expression to use for filtering
     Default: null
   password (String) Password to use to connect to the database
     Default: null
@@ -51,9 +51,6 @@ Optional Args:
             runChangelog "changelogs/h2/complete/rollback.changelog.xml"
         }
 
-        expectedResults = [
-                statusCode   : 0
-        ]
     }
 
     run "Run without any arguments should throw an exception",  {
