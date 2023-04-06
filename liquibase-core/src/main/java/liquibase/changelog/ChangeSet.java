@@ -38,6 +38,7 @@ import liquibase.util.StringUtil;
 
 import java.time.Instant;
 import java.util.*;
+import java.util.concurrent.atomic.AtomicReference;
 import java.util.stream.Collectors;
 
 /**
@@ -896,14 +897,14 @@ public class ChangeSet implements Conditional, ChangeLogChild {
                 database.commit();
             }
             Scope.getCurrentScope().addMdcValue(MdcKey.CHANGESET_OUTCOME, ExecType.EXECUTED.value.toLowerCase());
-            long stopTime = new Date().getTime();
-            Scope.getCurrentScope().addMdcValue(MdcKey.CHANGESET_OPERATION_STOP_TIME, Instant.ofEpochMilli(stopTime).toString());
+            Scope.getCurrentScope().addMdcValue(MdcKey.CHANGESET_OPERATION_STOP_TIME, Instant.ofEpochMilli(new Date().getTime()).toString());
             Scope.getCurrentScope().getLog(getClass()).fine("ChangeSet " + toString() + " has been successfully rolled back.");
         } catch (Exception e) {
             long stopTime = new Date().getTime();
             Scope.getCurrentScope().addMdcValue(MdcKey.CHANGESET_OPERATION_STOP_TIME, Instant.ofEpochMilli(stopTime).toString());
             try {
                 Scope.getCurrentScope().addMdcValue(MdcKey.CHANGESET_OUTCOME, ExecType.FAILED.value.toLowerCase());
+                Scope.getCurrentScope().getLog(getClass()).fine("ChangeSet " + this + " rollback failed.");
                 database.rollback();
             } catch (DatabaseException e1) {
                 //ok
@@ -1526,19 +1527,30 @@ public class ChangeSet implements Conditional, ChangeLogChild {
     }
 
     /**
+     *
      * Adds changeset sql to mdc if the change is supported by the database
      * @param change the change to read sql from
      * @param database the database to generate change sql against
      * @param generateRollbackStatements controls generation of rollback sql statements or standard statements sql
      * @throws RollbackImpossibleException if you cannot generate rollback statements
+     *
      */
-    private void addSqlMdc(Change change, Database database, boolean generateRollbackStatements) throws RollbackImpossibleException {
-        if (change.supports(database)) {
-            SqlStatement[] statements = generateRollbackStatements ? change.generateRollbackStatements(database) : change.generateStatements(database);
-            String sqlStatementsMdc = Arrays.stream(statements)
+    private void addSqlMdc(Change change, Database database, boolean generateRollbackStatements) throws Exception {
+        //
+        // If the change is for this Database
+        // add a Boolean flag to Scope to indicate that the Change should not be executed when adding MDC context
+        //
+        if (! change.supports(database)) {
+            return;
+        }
+        AtomicReference<SqlStatement[]> statementsReference = new AtomicReference<>();
+        Map<String, Object> scopeValues = new HashMap<>();
+        scopeValues.put(Change.SHOULD_EXECUTE, Boolean.FALSE);
+        Scope.child(scopeValues, () -> statementsReference.set(generateRollbackStatements ?
+               change.generateRollbackStatements(database) : change.generateStatements(database)));
+        String sqlStatementsMdc = Arrays.stream(statementsReference.get())
                     .map(statement -> SqlUtil.getSqlString(statement, SqlGeneratorFactory.getInstance(), database))
                     .collect(Collectors.joining("\n"));
-            Scope.getCurrentScope().addMdcValue(MdcKey.CHANGESET_SQL, sqlStatementsMdc);
-        }
+        Scope.getCurrentScope().addMdcValue(MdcKey.CHANGESET_SQL, sqlStatementsMdc);
     }
 }

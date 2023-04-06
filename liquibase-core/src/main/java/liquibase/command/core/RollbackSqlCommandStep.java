@@ -31,7 +31,7 @@ public class RollbackSqlCommandStep extends RollbackCommandStep {
                 .build();
 
         builder.addArgument(RollbackCommandStep.TAG_ARG).build();
-        builder.addArgument(RollbackCommandStep.ROLLBACK_SCRIPT_ARG).build();
+        builder.addArgument(AbstractRollbackCommandStep.ROLLBACK_SCRIPT_ARG).build();
     }
 
     @Override
