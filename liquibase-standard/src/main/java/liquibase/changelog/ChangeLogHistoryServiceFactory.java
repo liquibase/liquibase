@@ -1,5 +1,6 @@
 package liquibase.changelog;
 
+import liquibase.Scope;
 import liquibase.database.Database;
 import liquibase.exception.UnexpectedLiquibaseException;
 import liquibase.plugin.AbstractPluginFactory;
@@ -13,6 +14,11 @@ public class ChangeLogHistoryServiceFactory extends AbstractPluginFactory<Change
 
     private final List<ChangeLogHistoryService> explicitRegistered = new ArrayList<>();
     private final Map<Database, ChangeLogHistoryService> services = new ConcurrentHashMap<>();
+
+    @Deprecated // use Scope instead
+    public static synchronized ChangeLogHistoryServiceFactory getInstance() {
+        return Scope.getCurrentScope().getSingleton(ChangeLogHistoryServiceFactory.class);
+    }
 
     private ChangeLogHistoryServiceFactory() {
     }
