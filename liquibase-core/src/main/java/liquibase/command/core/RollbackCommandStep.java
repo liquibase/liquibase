@@ -28,8 +28,6 @@ public class RollbackCommandStep extends AbstractRollbackCommandStep {
 
     @Override
     public void run(CommandResultsBuilder resultsBuilder) throws Exception {
-        Scope.getCurrentScope().addMdcValue(MdcKey.LIQUIBASE_OPERATION, COMMAND_NAME[0]);
-        Scope.getCurrentScope().addMdcValue(MdcKey.LIQUIBASE_COMMAND_NAME, COMMAND_NAME[0]);
         CommandScope commandScope = resultsBuilder.getCommandScope();
 
         String tagToRollBackTo = commandScope.getArgumentValue(TAG_ARG);

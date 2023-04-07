@@ -35,7 +35,6 @@ import liquibase.lockservice.LockServiceFactory;
 import liquibase.logging.Logger;
 import liquibase.logging.mdc.MdcKey;
 import liquibase.logging.mdc.customobjects.ChangesetsRolledback;
-import liquibase.logging.mdc.customobjects.ChangesetsUpdated;
 import liquibase.parser.ChangeLogParser;
 import liquibase.parser.ChangeLogParserFactory;
 import liquibase.parser.core.xml.XMLChangeLogSAXParser;
