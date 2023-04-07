@@ -53,6 +53,9 @@ fi
 
 # add any JVM options here
 JAVA_OPTS="${JAVA_OPTS-}"
+if [ "$LIQUIBASE_ORACLE_DISABLE_OOB" = "true" ]; then
+  JAVA_OPTS="${JAVA_OPTS} -Doracle.net.disableOob=true"
+fi
 
 java -cp "$CP" $JAVA_OPTS liquibase.integration.commandline.Main ${1+"$@"}
 
