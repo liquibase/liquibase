@@ -15,6 +15,7 @@ import liquibase.util.StringUtil;
 import java.io.FilterOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
+import java.time.Instant;
 import java.util.*;
 import java.util.regex.Pattern;
 
@@ -193,25 +194,20 @@ public class CommandScope {
      */
     public CommandResults execute() throws CommandExecutionException {
         Scope.getCurrentScope().addMdcValue(MdcKey.OPERATION_START_TIME, new ISODateFormat().format(new Date()));
+        // We don't want to reset the command name even when defining another CommandScope during execution because we intend on keeping this value as the command entered to the console
+        if (!Scope.getCurrentScope().isMdcKeyPresent(MdcKey.LIQUIBASE_COMMAND_NAME)) {
+            Scope.getCurrentScope().addMdcValue(MdcKey.LIQUIBASE_COMMAND_NAME, String.join(" ", commandDefinition.getName()));
+        }
         CommandResultsBuilder resultsBuilder = new CommandResultsBuilder(this, outputStream);
         final List<CommandStep> pipeline = commandDefinition.getPipeline();
         final List<CommandStep> executedCommands = new ArrayList<>();
         Optional<Exception> thrownException = Optional.empty();
         validate();
-
-        //
-        // NOTE:
-        // When all commands have been refactored we will be able to remove this string manipulation
-        //
-        String commandNameForMdc = StringUtil.join(commandDefinition.getName(), "-");
-        commandNameForMdc = StringUtil.lowerCaseFirst(commandNameForMdc.replaceAll("^internal",""));
-        Scope.getCurrentScope().addMdcValue(MdcKey.LIQUIBASE_OPERATION, commandNameForMdc);
-
         try {
+            addOutputFileToMdc();
             for (CommandStep command : pipeline) {
                 try {
-                    addOutputFileToMdc();
-                    Scope.getCurrentScope().addMdcValue(MdcKey.LIQUIBASE_COMMAND_NAME, StringUtil.join(command.defineCommandNames()[0], " "));
+                    Scope.getCurrentScope().addMdcValue(MdcKey.LIQUIBASE_INTERNAL_COMMAND, getCommandStepName(command));
                     command.run(resultsBuilder);
                 } catch (Exception runException) {
                     // Suppress the exception for now so that we can run the cleanup steps even when encountering an exception.
@@ -238,7 +234,7 @@ public class CommandScope {
                 throw new CommandExecutionException(e);
             }
         } finally {
-            try (MdcObject operationStopTime = Scope.getCurrentScope().addMdcValue(MdcKey.OPERATION_STOP_TIME, new ISODateFormat().format(new Date()))) {
+            try (MdcObject operationStopTime = Scope.getCurrentScope().addMdcValue(MdcKey.OPERATION_STOP_TIME, Instant.ofEpochMilli(new Date().getTime()).toString())) {
                 Scope.getCurrentScope().getLog(getClass()).info("Command execution complete");
             }
             try {
@@ -287,6 +283,25 @@ public class CommandScope {
                 .setValueHandler(argument.getValueConverter())
                 .setValueObfuscator(argument.getValueObfuscator())
                 .buildTemporary();
+    }
+
+    /**
+     * Returns a string of the entire defined command names, joined together with spaces
+     * @param commandStep the command step to get the name of
+     * @return the full command step name definition delimited by spaces or an empty string if there are no defined command names
+     */
+    private String getCommandStepName(CommandStep commandStep) {
+        StringBuilder commandStepName = new StringBuilder();
+        String[][] commandDefinition = commandStep.defineCommandNames();
+        if (commandDefinition != null) {
+            for (String[] commandNames : commandDefinition) {
+                if (commandStepName.length() != 0) {
+                    commandStepName.append(" ");
+                }
+                commandStepName.append(String.join(" ", commandNames));
+            }
+        }
+        return commandStepName.toString();
     }
 
     /**

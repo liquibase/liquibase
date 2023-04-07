@@ -28,8 +28,6 @@ public class RollbackCommandStep extends AbstractRollbackCommandStep {
 
     @Override
     public void run(CommandResultsBuilder resultsBuilder) throws Exception {
-        Scope.getCurrentScope().addMdcValue(MdcKey.LIQUIBASE_OPERATION, COMMAND_NAME[0]);
-        Scope.getCurrentScope().addMdcValue(MdcKey.LIQUIBASE_COMMAND_NAME, COMMAND_NAME[0]);
         CommandScope commandScope = resultsBuilder.getCommandScope();
 
         String tagToRollBackTo = commandScope.getArgumentValue(TAG_ARG);
@@ -38,7 +36,7 @@ public class RollbackCommandStep extends AbstractRollbackCommandStep {
         Database database = (Database) commandScope.getDependency(Database.class);
 
         List<RanChangeSet> ranChangeSetList = database.getRanChangeSetList();
-        this.doRollback(resultsBuilder, new AfterTagChangeSetFilter(tagToRollBackTo, ranChangeSetList), ranChangeSetList);
+        this.doRollback(resultsBuilder, ranChangeSetList, new AfterTagChangeSetFilter(tagToRollBackTo, ranChangeSetList));
     }
 
     @Override
