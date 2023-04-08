@@ -10,7 +10,16 @@ import java.util.Locale;
 /**
  * Launcher which builds up the classpath needed to run Liquibase, then calls {@link LiquibaseCommandLine#main(String[])}.
  * <p>
- * It looks for a LIQUIBASE_LAUNCHER_DEBUG env variable to determine if it should log what it is doing to stderr.
+ * Supports three configuration options:
+ * <ul>
+ *   <li><code>LIQUIBASE_LAUNCHER_DEBUG</code></li>: to determine if it should, when <code>true</code>, log what it is
+ *   doing to stderr. Defaults to <code>false</code>.
+ *   <li><code>LIQUIBASE_LAUNCHER_PARENT_CLASSLOADER</code></li>: classloader that will be used to run Liquibase, either
+ *   <code>system</code> or <code>thread</code>. Defaults to <code>system</code>.
+ *   <li><code>LIQUIBASE_HOME</code></li>: Liquibase home. This option is mandatory.
+ * </ul>
+ * These options can be passed as JVM properties, using the `-D` option, and/or environment variables, taking the former,
+ * more explicit, precedence over the latter.
  */
 public class LiquibaseLauncher {
 
@@ -18,19 +27,19 @@ public class LiquibaseLauncher {
 
     public static void main(final String[] args) throws Exception {
 
-        final String debugSetting = System.getenv("LIQUIBASE_LAUNCHER_DEBUG");
+        final String debugSetting = getValueFromJvmPropertyOrEnv("LIQUIBASE_LAUNCHER_DEBUG");
         if (debugSetting != null && debugSetting.equals("true")) {
             LiquibaseLauncher.debug = true;
             debug("Debug mode enabled because LIQUIBASE_LAUNCHER_DEBUG is set to " + debugSetting);
         }
 
-        String parentLoaderSetting = System.getenv("LIQUIBASE_LAUNCHER_PARENT_CLASSLOADER");
+        String parentLoaderSetting = getValueFromJvmPropertyOrEnv("LIQUIBASE_LAUNCHER_PARENT_CLASSLOADER");
         if (parentLoaderSetting == null) {
              parentLoaderSetting = "system";
         }
         debug("LIQUIBASE_LAUNCHER_PARENT_CLASSLOADER is set to " + parentLoaderSetting);
 
-        final String liquibaseHomeEnv = System.getenv("LIQUIBASE_HOME");
+        final String liquibaseHomeEnv = getValueFromJvmPropertyOrEnv("LIQUIBASE_HOME");
         debug("LIQUIBASE_HOME: " + liquibaseHomeEnv);
         if (liquibaseHomeEnv == null || liquibaseHomeEnv.equals("")) {
             throw new IllegalArgumentException("Unable to find LIQUIBASE_HOME environment variable");
@@ -121,5 +130,14 @@ public class LiquibaseLauncher {
                 e.printStackTrace(System.err);
             }
         }
+    }
+
+    private static String getValueFromJvmPropertyOrEnv(String name) {
+        String value = System.getProperty(name);
+        if (value != null) {
+            return value;
+        }
+
+        return System.getenv(name);
     }
 }
