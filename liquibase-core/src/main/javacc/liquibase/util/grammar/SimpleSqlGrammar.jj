@@ -370,6 +370,8 @@ Built list from http://stackoverflow.com/a/37668315/45756
     "\u213C"-"\u213F",
     "\u2145"-"\u2149",
     "\u214E",
+    "\u2160"-"\u216F", //Roman numerals
+    "\u2170"-"\u217F", //Small roman numerals
     "\u2183",
     "\u2184",
     "\u2C00"-"\u2C2E",
