@@ -5,6 +5,7 @@ import liquibase.configuration.ConfigurationValueObfuscator;
 import liquibase.exception.CommandExecutionException;
 
 import java.util.Arrays;
+import java.util.Collections;
 
 public class StatusCommandStep extends AbstractCliWrapperCommandStep {
 
@@ -59,7 +60,7 @@ public class StatusCommandStep extends AbstractCliWrapperCommandStep {
 
     @Override
     protected String[] collectArguments(CommandScope commandScope) throws CommandExecutionException {
-        return removeArgumentValues(collectArguments(commandScope, Arrays.asList("verbose"), null), "verbose");
+        return removeArgumentValues(collectArguments(commandScope, Collections.singletonList("verbose"), null), "verbose");
     }
 
     @Override

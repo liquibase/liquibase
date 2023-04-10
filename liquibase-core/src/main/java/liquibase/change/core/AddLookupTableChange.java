@@ -187,7 +187,6 @@ public class AddLookupTableChange extends AbstractChange {
 
     @Override
     public SqlStatement[] generateStatements(Database database) {
-        List<SqlStatement> statements = new ArrayList<>();
 
         String newTableCatalogName = getNewTableCatalogName();
         String newTableSchemaName = getNewTableSchemaName();
@@ -222,7 +221,7 @@ public class AddLookupTableChange extends AbstractChange {
             };
         }
 
-        statements.addAll(Arrays.asList(createTablesSQL));
+        List<SqlStatement> statements = new ArrayList<>(Arrays.asList(createTablesSQL));
 
         if (!(database instanceof OracleDatabase) && !(database instanceof Db2zDatabase)) {
             AddNotNullConstraintChange addNotNullChange = new AddNotNullConstraintChange();

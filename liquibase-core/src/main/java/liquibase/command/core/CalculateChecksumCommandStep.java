@@ -13,6 +13,7 @@ import liquibase.resource.ResourceAccessor;
 import liquibase.util.StringUtil;
 
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 
 public class CalculateChecksumCommandStep extends AbstractCommandStep {
@@ -42,7 +43,7 @@ public class CalculateChecksumCommandStep extends AbstractCommandStep {
 
     @Override
     public List<Class<?>> requiredDependencies() {
-        return Arrays.asList(Database.class);
+        return Collections.singletonList(Database.class);
     }
 
     @Override
