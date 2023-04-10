@@ -4,45 +4,90 @@ import java.io.File;
 import java.net.URL;
 import java.net.URLClassLoader;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
+import java.util.Map;
 
 /**
  * Launcher which builds up the classpath needed to run Liquibase, then calls {@link LiquibaseCommandLine#main(String[])}.
  * <p>
- * Supports three configuration options:
- * <ul>
- *   <li><code>LIQUIBASE_LAUNCHER_DEBUG</code></li>: to determine if it should, when <code>true</code>, log what it is
- *   doing to stderr. Defaults to <code>false</code>.
- *   <li><code>LIQUIBASE_LAUNCHER_PARENT_CLASSLOADER</code></li>: classloader that will be used to run Liquibase, either
- *   <code>system</code> or <code>thread</code>. Defaults to <code>system</code>.
- *   <li><code>LIQUIBASE_HOME</code></li>: Liquibase home. This option is mandatory.
- * </ul>
- * These options can be passed as JVM properties, using the `-D` option, and/or environment variables, taking the former,
- * more explicit, precedence over the latter.
+ * Supports the following configuration options that can be passed as JVM properties and/or environment variables, taking
+ * the former, more Java specific, precedence over the latter:
+ * <table>
+ *   <thead>
+ *     <tr>
+ *       <th><b>Environment variable</b></th>
+ *       <th><b>JVM property</b></th>
+ *     </tr>
+ *     <tr>
+ *       <th colspan="2"><b>Meaning</b></th>
+ *     </tr>
+ *   </thead>
+ *   <tbody>
+ *     <tr>
+ *       <td><code>LIQUIBASE_HOME</code></td>
+ *       <td><code>liquibase.home</code></td>
+ *     </tr>
+ *     <tr>
+ *       <td colspan="2">Liquibase home. This option is mandatory.</td>
+ *     </tr>
+ *     <tr>
+ *       <td><code>LIQUIBASE_LAUNCHER_DEBUG</code></td>
+ *       <td><code>liquibase.launcher.debug</code></td>
+ *     </tr>
+ *     <tr>
+ *       <td colspan="2">Determine if it should, when <code>true</code>, log what it is doing to <code>stderr</code>.
+ *       Defaults to <code>false</code>.</td>
+ *     </tr>
+ *     <tr>
+ *       <td><code>LIQUIBASE_LAUNCHER_PARENT_CLASSLOADER</code></td>
+ *       <td><code>liquibase.launcher.parent_classloader</code></td>
+ *     </tr>
+ *     <tr>
+ *       <td colspan="2">Classloader that will be used to run Liquibase, either <code>system</code> or <code>thread</code>.
+ *       Defaults to <code>system</code>.</td>
+ *     </tr>
+ *   </tbody>
+ * </table>
  */
 public class LiquibaseLauncher {
+
+    public static final String LIQUIBASE_HOME_JVM_PROPERTY_NAME = "liquibase.home";
+    public static final String LIQUIBASE_LAUNCHER_DEBUG_JVM_PROPERTY_NAME = "liquibase.launcher.debug";
+    public static final String LIQUIBASE_LAUNCHER_PARENT_CLASSLOADER_JVM_PROPERTY_NAME = "liquibase.launcher.parent_classloader";
+    public static final String LIQUIBASE_HOME_ENVIRONMENT_VARIABLE_NAME = "LIQUIBASE_HOME";
+    public static final String LIQUIBASE_LAUNCHER_DEBUG_ENVIRONMENT_VARIABLE_NAME = "LIQUIBASE_LAUNCHER_DEBUG";
+    public static final String LIQUIBASE_LAUNCHER_PARENT_CLASSLOADER_ENVIRONMENT_VARIABLE_NAME =
+        "LIQUIBASE_LAUNCHER_PARENT_CLASSLOADER";
+
+    private static final Map<String, String> jvmPropertiesToEnvironmentVariablesMap =
+        initializeJvmPropertiesToEnvironmentVariablesMap();
 
     private static boolean debug = false;
 
     public static void main(final String[] args) throws Exception {
 
-        final String debugSetting = getValueFromJvmPropertyOrEnv("LIQUIBASE_LAUNCHER_DEBUG");
+        final String debugSetting =
+            getValueFromJvmPropertyOrEnvironmentVariable(LIQUIBASE_LAUNCHER_DEBUG_JVM_PROPERTY_NAME);
         if (debugSetting != null && debugSetting.equals("true")) {
             LiquibaseLauncher.debug = true;
-            debug("Debug mode enabled because LIQUIBASE_LAUNCHER_DEBUG is set to " + debugSetting);
+            debug("Debug mode enabled because either the JVM property 'liquibase.launcher.debug' or the environment " +
+                "variable 'LIQUIBASE_LAUNCHER_DEBUG' is set to " + debugSetting);
         }
 
-        String parentLoaderSetting = getValueFromJvmPropertyOrEnv("LIQUIBASE_LAUNCHER_PARENT_CLASSLOADER");
+        String parentLoaderSetting =
+            getValueFromJvmPropertyOrEnvironmentVariable(LIQUIBASE_LAUNCHER_PARENT_CLASSLOADER_JVM_PROPERTY_NAME);
         if (parentLoaderSetting == null) {
              parentLoaderSetting = "system";
         }
-        debug("LIQUIBASE_LAUNCHER_PARENT_CLASSLOADER is set to " + parentLoaderSetting);
+        debug("Liquibase launcher parent classloader is set to " + parentLoaderSetting);
 
-        final String liquibaseHomeEnv = getValueFromJvmPropertyOrEnv("LIQUIBASE_HOME");
-        debug("LIQUIBASE_HOME: " + liquibaseHomeEnv);
+        final String liquibaseHomeEnv = getValueFromJvmPropertyOrEnvironmentVariable(LIQUIBASE_HOME_JVM_PROPERTY_NAME);
+        debug("Liquibase home: " + liquibaseHomeEnv);
         if (liquibaseHomeEnv == null || liquibaseHomeEnv.equals("")) {
-            throw new IllegalArgumentException("Unable to find LIQUIBASE_HOME environment variable");
+            throw new IllegalArgumentException("Unable to find either 'liquibase.home' JVM property nor " +
+                "'LIQUIBASE_HOME' environment variable");
         }
         File liquibaseHome = new File(liquibaseHomeEnv);
 
@@ -105,7 +150,7 @@ public class LiquibaseLauncher {
         } else if (parentLoaderSetting.equalsIgnoreCase("thread")) {
             parentLoader = Thread.currentThread().getContextClassLoader();
         } else {
-            throw new RuntimeException("Unknown LIQUIBASE_LAUNCHER_PARENT_CLASSLOADER value: "+parentLoaderSetting);
+            throw new RuntimeException("Unknown liquibase launcher parent classloader value: "+parentLoaderSetting);
         }
 
         final URLClassLoader classloader = new URLClassLoader(urls.toArray(new URL[0]), parentLoader);
@@ -132,12 +177,29 @@ public class LiquibaseLauncher {
         }
     }
 
-    private static String getValueFromJvmPropertyOrEnv(String name) {
-        String value = System.getProperty(name);
+    private static Map<String, String> initializeJvmPropertiesToEnvironmentVariablesMap() {
+        Map<String,String> jvmPropertiesToEnvironmentVariablesMap = new HashMap<>(3);
+        jvmPropertiesToEnvironmentVariablesMap.put(
+            LIQUIBASE_HOME_JVM_PROPERTY_NAME, LIQUIBASE_HOME_ENVIRONMENT_VARIABLE_NAME
+        );
+        jvmPropertiesToEnvironmentVariablesMap.put(
+            LIQUIBASE_LAUNCHER_DEBUG_JVM_PROPERTY_NAME, LIQUIBASE_LAUNCHER_DEBUG_ENVIRONMENT_VARIABLE_NAME
+        );
+        jvmPropertiesToEnvironmentVariablesMap.put(
+            LIQUIBASE_LAUNCHER_PARENT_CLASSLOADER_JVM_PROPERTY_NAME,
+            LIQUIBASE_LAUNCHER_PARENT_CLASSLOADER_ENVIRONMENT_VARIABLE_NAME
+        );
+        return jvmPropertiesToEnvironmentVariablesMap;
+    }
+
+    private static String getValueFromJvmPropertyOrEnvironmentVariable(String jvmPropertyName) {
+        String value = System.getProperty(jvmPropertyName);
         if (value != null) {
             return value;
         }
 
-        return System.getenv(name);
+        String environmentVariableName = jvmPropertiesToEnvironmentVariablesMap.get(jvmPropertyName);
+        // Due to the nature of the Map we assume that environmentVariableName must not be null
+        return System.getenv(environmentVariableName);
     }
 }
