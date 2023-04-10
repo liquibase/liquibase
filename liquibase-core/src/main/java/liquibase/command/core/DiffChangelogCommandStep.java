@@ -1,5 +1,6 @@
 package liquibase.command.core;
 
+import liquibase.Scope;
 import liquibase.command.*;
 import liquibase.command.core.helpers.DiffOutputControlCommandStep;
 import liquibase.command.providers.ReferenceDatabase;
