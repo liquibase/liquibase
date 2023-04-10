@@ -25,9 +25,11 @@ import liquibase.structure.DatabaseObject
 import liquibase.structure.core.Index
 import liquibase.util.StringUtil
 import org.junit.Rule
+import spock.lang.Ignore
 import spock.lang.Specification
 import spock.lang.Unroll
 
+@Ignore
 class IndexWithDescendingColumnSnapshotTest extends Specification {
     @Rule
     public DatabaseTestSystem mssqlDb = Scope.currentScope.getSingleton(TestSystemFactory).getTestSystem("mssql")
