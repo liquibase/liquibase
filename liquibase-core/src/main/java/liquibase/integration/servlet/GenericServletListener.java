@@ -127,7 +127,7 @@ abstract class GenericServletListener {
             liquibaseConfiguration.registerProvider(servletConfigurationValueProvider);
 
             failOnError = (String) liquibaseConfiguration.getCurrentConfiguredValue(null, null, LIQUIBASE_ONERROR_FAIL).getValue();
-            if (checkPreconditions(servletContext, ic)) {
+            if (checkPreconditions(servletContext)) {
                 executeUpdate(servletContext, ic);
             }
 
@@ -157,7 +157,7 @@ abstract class GenericServletListener {
      * <li>if {@value GenericServletListener.java#LIQUIBASE_HOST_EXCLUDES} contains the current hostname, the the update will not be executed.</li>
      * </ol>
      */
-    private boolean checkPreconditions(GenericServletWrapper.ServletContext servletContext, InitialContext ic) {
+    private boolean checkPreconditions(GenericServletWrapper.ServletContext servletContext) {
         if (!LiquibaseCommandLineConfiguration.SHOULD_RUN.getCurrentValue()) {
             Scope.getCurrentScope().getLog(getClass()).info("Liquibase did not run on " + hostName
                     + " because " + LiquibaseCommandLineConfiguration.SHOULD_RUN.getKey()

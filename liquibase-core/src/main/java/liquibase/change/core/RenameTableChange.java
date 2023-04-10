@@ -15,7 +15,8 @@ import java.util.List;
 /**
  * Renames an existing table.
  */
-@DatabaseChange(name="renameTable", description = "Renames an existing table", priority = ChangeMetaData.PRIORITY_DEFAULT, appliesTo = "table")
+@DatabaseChange(name = "renameTable", description = "Renames an existing table", priority = ChangeMetaData.PRIORITY_DEFAULT,
+    appliesTo = "table")
 public class RenameTableChange extends AbstractChange {
 
     private String catalogName;
@@ -27,7 +28,7 @@ public class RenameTableChange extends AbstractChange {
     public RenameTableChange() {
     }
 
-    @DatabaseChangeProperty(mustEqualExisting ="table.catalog")
+    @DatabaseChangeProperty(mustEqualExisting = "table.catalog", description = "Name of the database catalog")
     public String getCatalogName() {
         return catalogName;
     }
@@ -36,7 +37,7 @@ public class RenameTableChange extends AbstractChange {
         this.catalogName = catalogName;
     }
 
-    @DatabaseChangeProperty(mustEqualExisting ="table.schema")
+    @DatabaseChangeProperty(mustEqualExisting = "table.schema", description = "Name of the database schema")
     public String getSchemaName() {
         return schemaName;
     }
@@ -45,7 +46,8 @@ public class RenameTableChange extends AbstractChange {
         this.schemaName = schemaName;
     }
 
-    @DatabaseChangeProperty(mustEqualExisting = "table", description = "Name of the table to rename", exampleValue = "person")
+    @DatabaseChangeProperty(mustEqualExisting = "table", description = "Name of the existing table to rename",
+        exampleValue = "person")
     public String getOldTableName() {
         return oldTableName;
     }

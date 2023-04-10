@@ -12,6 +12,8 @@ import java.util.List;
 public class DbmsChangeSetFilter implements ChangeSetFilter {
 
     private Database database;
+    public static final String MDC_NAME = "dbmsMismatch";
+    public static final String DISPLAY_NAME = "DBMS mismatch";
 
     public DbmsChangeSetFilter(Database database) {
         this.database = database;
@@ -20,7 +22,7 @@ public class DbmsChangeSetFilter implements ChangeSetFilter {
     @Override
     public ChangeSetFilterResult accepts(ChangeSet changeSet) {
         if (database == null) {
-            return new ChangeSetFilterResult(true, "No database connection, cannot evaluate dbms attribute", this.getClass(), getMdcName());
+            return new ChangeSetFilterResult(true, "No database connection, cannot evaluate dbms attribute", this.getClass(), getMdcName(), getDisplayName());
         }
          List<SqlVisitor> visitorsToRemove = new ArrayList<>();
         for (SqlVisitor visitor : changeSet.getSqlVisitors()) {
@@ -38,14 +40,19 @@ public class DbmsChangeSetFilter implements ChangeSetFilter {
         }
 
         if (DatabaseList.definitionMatches(changeSet.getDbmsSet(), database, true)) {
-            return new ChangeSetFilterResult(true, "Database '" + database.getShortName() + "' matches " + dbmsList, this.getClass(), getMdcName());
+            return new ChangeSetFilterResult(true, "Database '" + database.getShortName() + "' matches " + dbmsList, this.getClass(), getMdcName(), getDisplayName());
         } else {
-            return new ChangeSetFilterResult(false, "Database '"+database.getShortName()+"' does not match "+dbmsList, this.getClass(), getMdcName());
+            return new ChangeSetFilterResult(false, "Database '"+database.getShortName()+"' does not match "+dbmsList, this.getClass(), getMdcName(), getDisplayName());
         }
     }
 
     @Override
     public String getMdcName() {
-        return "dbmsUnknown";
+        return MDC_NAME;
+    }
+
+    @Override
+    public String getDisplayName() {
+        return DISPLAY_NAME;
     }
 }

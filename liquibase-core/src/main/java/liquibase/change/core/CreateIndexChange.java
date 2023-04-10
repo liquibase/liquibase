@@ -16,7 +16,10 @@ import java.util.List;
 /**
  * Creates an index on an existing column.
  */
-@DatabaseChange(name="createIndex", description = "Creates an index on an existing column or set of columns.", priority = ChangeMetaData.PRIORITY_DEFAULT, appliesTo = "index")
+@DatabaseChange(name = "createIndex", 
+    description = "Creates an index on an existing column or set of columns.",
+    priority = ChangeMetaData.PRIORITY_DEFAULT,
+    appliesTo = "index")
 public class CreateIndexChange extends AbstractChange implements ChangeWithColumns<AddColumnConfig> {
 
     private String catalogName;
@@ -46,7 +49,16 @@ public class CreateIndexChange extends AbstractChange implements ChangeWithColum
         this.indexName = indexName;
     }
 
-    @DatabaseChangeProperty(mustEqualExisting ="index.schema")
+    @DatabaseChangeProperty(since = "3.0", description = "Name of the database catalog")
+    public String getCatalogName() {
+        return catalogName;
+    }
+
+    public void setCatalogName(String catalogName) {
+        this.catalogName = catalogName;
+    }
+
+    @DatabaseChangeProperty(mustEqualExisting ="index.schema", description = "Name of the database schema")
     public String getSchemaName() {
         return schemaName;
     }
@@ -55,7 +67,8 @@ public class CreateIndexChange extends AbstractChange implements ChangeWithColum
         this.schemaName = schemaName;
     }
 
-    @DatabaseChangeProperty(mustEqualExisting = "index.table", description = "Name of the table to add the index to", exampleValue = "person")
+    @DatabaseChangeProperty(mustEqualExisting = "index.table", description = "Name of the table to add the index on",
+        exampleValue = "person")
     public String getTableName() {
         return tableName;
     }
@@ -65,7 +78,8 @@ public class CreateIndexChange extends AbstractChange implements ChangeWithColum
     }
 
     @Override
-    @DatabaseChangeProperty(mustEqualExisting = "index.column", description = "Column(s) to add to the index", requiredForDatabase = "all")
+    @DatabaseChangeProperty(mustEqualExisting = "index.column", description = "Column(s) in the table to add the index on",
+        requiredForDatabase = "all")
     public List<AddColumnConfig> getColumns() {
         if (columns == null) {
             return new ArrayList<>();
@@ -84,7 +98,7 @@ public class CreateIndexChange extends AbstractChange implements ChangeWithColum
     }
 
 
-    @DatabaseChangeProperty(description = "Tablepace to create the index in.")
+    @DatabaseChangeProperty(description = "Tablepace to create the index in. Corresponds to file group in mssql")
     public String getTablespace() {
         return tablespace;
     }
@@ -153,16 +167,16 @@ public class CreateIndexChange extends AbstractChange implements ChangeWithColum
         return "Index " + getIndexName() + " created";
     }
 
+    @DatabaseChangeProperty(description = "Whether the index is unique (contains no duplicate values)", since = "1.8")
+    public Boolean isUnique() {
+        return this.unique;
+    }
+
     /**
      * @param isUnique the isUnique to set
      */
     public void setUnique(Boolean isUnique) {
         this.unique = isUnique;
-    }
-
-    @DatabaseChangeProperty(description = "Unique values index", since = "1.8")
-    public Boolean isUnique() {
-        return this.unique;
     }
 
     /**
@@ -172,7 +186,8 @@ public class CreateIndexChange extends AbstractChange implements ChangeWithColum
      * <li>uniqueConstraint</li>
      * <li>none</li>
      * */
-    @DatabaseChangeProperty(isChangeProperty = false)
+    @DatabaseChangeProperty(isChangeProperty = false,
+        description = "Index associations. Valid values: primaryKey, foreignKey, uniqueConstriant, none")
     public String getAssociatedWith() {
         return associatedWith;
     }
@@ -181,16 +196,7 @@ public class CreateIndexChange extends AbstractChange implements ChangeWithColum
         this.associatedWith = associatedWith;
     }
 
-
-    @DatabaseChangeProperty(since = "3.0")
-    public String getCatalogName() {
-        return catalogName;
-    }
-
-    public void setCatalogName(String catalogName) {
-        this.catalogName = catalogName;
-    }
-
+    @DatabaseChangeProperty(description = "Whether to create a clustered index")
     public Boolean getClustered() {
         return clustered;
     }
