@@ -70,20 +70,24 @@ public class ReferenceDbUrlConnectionCommandStep extends AbstractDatabaseConnect
     private Database obtainDatabase(CommandScope commandScope) throws DatabaseException {
         if (commandScope.getArgumentValue(REFERENCE_DATABASE_ARG) == null) {
             String url = commandScope.getArgumentValue(REFERENCE_URL_ARG);
-            Scope.getCurrentScope().addMdcValue(MdcKey.LIQUIBASE_REF_URL, url);
             String username = commandScope.getArgumentValue(REFERENCE_USERNAME_ARG);
-            Scope.getCurrentScope().addMdcValue(MdcKey.REFERENCE_USERNAME, username);
             String password = commandScope.getArgumentValue(REFERENCE_PASSWORD_ARG);
             String defaultSchemaName = commandScope.getArgumentValue(REFERENCE_DEFAULT_SCHEMA_NAME_ARG);
-            Scope.getCurrentScope().addMdcValue(MdcKey.REFERENCE_DEFAULT_SCHEMA_NAME, defaultSchemaName);
             String defaultCatalogName = commandScope.getArgumentValue(REFERENCE_DEFAULT_CATALOG_NAME_ARG);
-            Scope.getCurrentScope().addMdcValue(MdcKey.REFERENCE_DEFAULT_CATALOG_NAME, defaultCatalogName);
             String driver = commandScope.getArgumentValue(REFERENCE_DRIVER_ARG);
             String driverPropertiesFile = commandScope.getArgumentValue(REFERENCE_DRIVER_PROPERTIES_FILE_ARG);
+            logMdc(url, username, defaultSchemaName, defaultCatalogName);
             return createDatabaseObject(url, username, password, defaultSchemaName, defaultCatalogName, driver, driverPropertiesFile);
         } else {
             return commandScope.getArgumentValue(REFERENCE_DATABASE_ARG);
         }
+    }
+
+    private void logMdc(String url, String username, String defaultSchemaName, String defaultCatalogName) {
+        Scope.getCurrentScope().addMdcValue(MdcKey.LIQUIBASE_REF_URL, url);
+        Scope.getCurrentScope().addMdcValue(MdcKey.REFERENCE_USERNAME, username);
+        Scope.getCurrentScope().addMdcValue(MdcKey.REFERENCE_DEFAULT_SCHEMA_NAME, defaultSchemaName);
+        Scope.getCurrentScope().addMdcValue(MdcKey.REFERENCE_DEFAULT_CATALOG_NAME, defaultCatalogName);
     }
 
     @Override
