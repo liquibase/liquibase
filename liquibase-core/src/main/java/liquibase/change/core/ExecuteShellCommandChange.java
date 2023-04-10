@@ -1,18 +1,15 @@
 package liquibase.change.core;
 
+import liquibase.GlobalConfiguration;
 import liquibase.Scope;
 import liquibase.change.AbstractChange;
 import liquibase.change.ChangeMetaData;
 import liquibase.change.DatabaseChange;
 import liquibase.change.DatabaseChangeProperty;
-import liquibase.GlobalConfiguration;
 import liquibase.database.Database;
 import liquibase.exception.UnexpectedLiquibaseException;
 import liquibase.exception.ValidationErrors;
 import liquibase.exception.Warnings;
-import liquibase.executor.Executor;
-import liquibase.executor.ExecutorService;
-import liquibase.executor.LoggingExecutor;
 import liquibase.parser.core.ParsedNode;
 import liquibase.parser.core.ParsedNodeException;
 import liquibase.resource.ResourceAccessor;
@@ -33,9 +30,9 @@ import java.util.regex.Pattern;
  * Executes a given shell executable.
  */
 @DatabaseChange(name = "executeCommand",
-        description = "Executes a system command. Because this refactoring doesn't generate SQL like most, using " +
-            "Liquibase commands such as migrateSQL may not work as expected. Therefore, if at all possible use " +
-                "refactorings that generate SQL.",
+        description = "Executes a system command. Because this refactoring doesn't generate SQL, using " +
+            "Liquibase commands such as update-sql may not work as expected. Therefore, prefer " +
+            "refactorings that generate SQL.",
         priority = ChangeMetaData.PRIORITY_DEFAULT)
 public class ExecuteShellCommandChange extends AbstractChange {
 
@@ -72,15 +69,15 @@ public class ExecuteShellCommandChange extends AbstractChange {
         this.executable = executable;
     }
 
-    public void addArg(String arg) {
-        this.args.add(arg);
-    }
-
     public List<String> getArgs() {
         return Collections.unmodifiableList(args);
     }
 
-    @DatabaseChangeProperty(description = "Timeout value for executable to run", exampleValue = "10s")
+    public void addArg(String arg) {
+        this.args.add(arg);
+    }
+
+    @DatabaseChangeProperty(description = "Timeout value for the executable to run", exampleValue = "10s")
     public String getTimeout() {
         return timeout;
     }
@@ -89,7 +86,8 @@ public class ExecuteShellCommandChange extends AbstractChange {
         this.timeout = timeout;
     }
 
-    @DatabaseChangeProperty(description = "List of operating systems on which to execute the command (taken from the os.name Java system property)", exampleValue = "Windows 7")
+    @DatabaseChangeProperty(exampleValue = "Windows 7",
+        description = "List of operating systems on which to execute the command (taken from the os.name Java system property)")
     public List<String> getOs() {
         return os;
     }
@@ -130,17 +128,12 @@ public class ExecuteShellCommandChange extends AbstractChange {
             }
         }
 
-        // check if running under not-executed mode (logging output)
-        boolean nonExecutedMode = false;
-        Executor executor = Scope.getCurrentScope().getSingleton(ExecutorService.class).getExecutor("jdbc", database);
-        if (executor instanceof LoggingExecutor) {
-            nonExecutedMode = true;
-        }
+        // Do not run if just logging output or generating statements
+        boolean shouldExecuteChange = shouldExecuteChange(database);
 
         this.finalCommandArray = createFinalCommandArray(database);
 
-        if (shouldRun && !nonExecutedMode) {
-
+        if (shouldRun && shouldExecuteChange) {
 
             return new SqlStatement[]{new RuntimeStatement() {
 
@@ -158,7 +151,7 @@ public class ExecuteShellCommandChange extends AbstractChange {
             }};
         }
 
-        if (nonExecutedMode) {
+        if (! shouldExecuteChange) {
             try {
                 return new SqlStatement[]{
                         new CommentStatement(getCommandString())
@@ -442,8 +435,6 @@ public class ExecuteShellCommandChange extends AbstractChange {
                 copiedSize += r;
             }
         }
-
-
     }
 
     @Override

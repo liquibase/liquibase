@@ -43,6 +43,7 @@ drop table str4;
         commandScope.addArgumentValue(DbUrlConnectionCommandStep.URL_ARG, mysql.getConnectionUrl())
         commandScope.addArgumentValue(DbUrlConnectionCommandStep.USERNAME_ARG, mysql.getUsername())
         commandScope.addArgumentValue(DbUrlConnectionCommandStep.PASSWORD_ARG, mysql.getPassword())
+        commandScope.addArgumentValue(GenerateChangelogCommandStep.OVERWRITE_OUTPUT_FILE_ARG, true)
         commandScope.addArgumentValue(GenerateChangelogCommandStep.CHANGELOG_FILE_ARG, "output.xml")
 
         OutputStream outputStream = new ByteArrayOutputStream()
@@ -89,6 +90,26 @@ drop table str4;
         then:
         noExceptionThrown()
         outputStream.toString().contains("ENUM('FAILED', 'CANCELLED', 'INGEST', 'IN_PROGRESS', 'COMPLETE')")
+    }
+
+    def "Ensure generated changelog map JSON columns correctly"() {
+        given:
+        mysql.executeSql("""create table foo(               
+                id numeric not null primary key, 
+                some_json json null)""")
+
+        when:
+        CommandUtil.runGenerateChangelog(mysql, "output.mysql.sql")
+        def outputFile = new File("output.mysql.sql")
+        def contents = FileUtil.getContents(outputFile)
+
+        then:
+        contents.contains("some_json JSON NULL")
+
+        cleanup:
+        outputFile.delete()
+        CommandUtil.runDropAll(mysql)
+
     }
 }
 

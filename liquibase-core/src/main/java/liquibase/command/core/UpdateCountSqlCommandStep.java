@@ -1,9 +1,7 @@
 package liquibase.command.core;
 
-import liquibase.command.CommandArgumentDefinition;
-import liquibase.command.CommandBuilder;
-import liquibase.command.CommandDefinition;
-import liquibase.command.CommonArgumentNames;
+import liquibase.UpdateSummaryEnum;
+import liquibase.command.*;
 import liquibase.database.Database;
 
 import java.io.Writer;
@@ -18,8 +16,6 @@ public class UpdateCountSqlCommandStep extends UpdateCountCommandStep {
     public static final CommandArgumentDefinition<String> LABEL_FILTER_ARG;
     public static final CommandArgumentDefinition<String> CONTEXTS_ARG;
     public static final CommandArgumentDefinition<Integer> COUNT_ARG;
-    public static final CommandArgumentDefinition<String> CHANGE_EXEC_LISTENER_CLASS_ARG;
-    public static final CommandArgumentDefinition<String> CHANGE_EXEC_LISTENER_PROPERTIES_FILE_ARG;
     public static final CommandArgumentDefinition<Boolean> OUTPUT_DEFAULT_SCHEMA_ARG;
     public static final CommandArgumentDefinition<Boolean> OUTPUT_DEFAULT_CATALOG_ARG;
 
@@ -34,10 +30,6 @@ public class UpdateCountSqlCommandStep extends UpdateCountCommandStep {
                 .description("Changeset contexts to match").build();
         COUNT_ARG = builder.argument("count", Integer.class).required()
             .description("The number of changes to generate SQL for").build();
-        CHANGE_EXEC_LISTENER_CLASS_ARG = builder.argument("changeExecListenerClass", String.class)
-            .description("Fully-qualified class which specifies a ChangeExecListener").build();
-        CHANGE_EXEC_LISTENER_PROPERTIES_FILE_ARG = builder.argument("changeExecListenerPropertiesFile", String.class)
-            .description("Path to a properties file for the ChangeExecListenerClass").build();
         OUTPUT_DEFAULT_SCHEMA_ARG = builder.argument("outputDefaultSchema", Boolean.class)
                 .description("Control whether names of objects in the default schema are fully qualified or not. If true they are. If false, only objects outside the default schema are fully qualified")
                 .defaultValue(true)
@@ -46,6 +38,11 @@ public class UpdateCountSqlCommandStep extends UpdateCountCommandStep {
                 .description("Control whether names of objects in the default catalog are fully qualified or not. If true they are. If false, only objects outside the default catalog are fully qualified")
                 .defaultValue(true)
                 .build();
+    }
+
+    @Override
+    public UpdateSummaryEnum getShowSummary(CommandScope commandScope) {
+        return UpdateSummaryEnum.OFF;
     }
 
     @Override
@@ -66,6 +63,7 @@ public class UpdateCountSqlCommandStep extends UpdateCountCommandStep {
         dependencies.add(Writer.class);
         dependencies.add(Database.class);
         dependencies.addAll(super.requiredDependencies());
+        dependencies.remove(UpdateSummaryEnum.class); // no update summary for this command, despite the class it is extending having an update summary option
         return dependencies;
     }
 

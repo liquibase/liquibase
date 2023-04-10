@@ -41,7 +41,7 @@ public class BlobType extends LiquibaseDataType {
                     || originalDefinition.matches("(?i)varbinary\\s*\\(.+")
                     || originalDefinition.matches("\\[varbinary\\]\\s*\\(.+")) {
 
-                return new DatabaseDataType(database.escapeDataTypeName("varbinary"), maybeMaxParam(parameters, database));
+                return new DatabaseDataType(database.escapeDataTypeName("varbinary"), maybeMaxParam(parameters));
             } else if ("binary".equals(originalDefinition.toLowerCase(Locale.US))
                     || "[binary]".equals(originalDefinition)
                     || originalDefinition.matches("(?i)binary\\s*\\(.+")
@@ -64,7 +64,7 @@ public class BlobType extends LiquibaseDataType {
             if (parameters.length == 0) {
                 return new DatabaseDataType(database.escapeDataTypeName("varbinary"), "MAX");
             } else {
-                return new DatabaseDataType(database.escapeDataTypeName("varbinary"), maybeMaxParam(parameters, database));
+                return new DatabaseDataType(database.escapeDataTypeName("varbinary"), maybeMaxParam(parameters));
             }
         }
 
@@ -134,7 +134,7 @@ public class BlobType extends LiquibaseDataType {
         return super.toDatabaseDataType(database);
     }
 
-    private Object[] maybeMaxParam(Object[] parameters, Database database) {
+    private Object[] maybeMaxParam(Object[] parameters) {
         if (parameters.length < 1) {
             parameters = new Object[]{1};
         } else if (parameters.length > 1) {

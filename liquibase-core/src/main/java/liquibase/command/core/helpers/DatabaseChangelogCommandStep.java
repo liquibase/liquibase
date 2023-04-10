@@ -8,8 +8,6 @@ import liquibase.changelog.ChangeLogHistoryServiceFactory;
 import liquibase.changelog.ChangeLogParameters;
 import liquibase.changelog.DatabaseChangeLog;
 import liquibase.command.*;
-import liquibase.configuration.LiquibaseConfiguration;
-import liquibase.configuration.ProvidedValue;
 import liquibase.database.Database;
 import liquibase.exception.LiquibaseException;
 import liquibase.lockservice.LockService;
@@ -23,14 +21,12 @@ import liquibase.resource.ResourceAccessor;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
-import java.util.stream.Collectors;
 
 /**
  * This helper class provides two objects: a valid and verified DatabaseChangeLog and the ChangeLogParameters
  * object used to instantiate it.
  */
-public class DatabaseChangelogCommandStep extends AbstractCommandStep implements CleanUpCommandStep {
+public class DatabaseChangelogCommandStep extends AbstractHelperCommandStep implements CleanUpCommandStep {
     protected static final String[] COMMAND_NAME = {"changelogCommandStep"};
 
     public static final CommandArgumentDefinition<String> CHANGELOG_FILE_ARG;
@@ -72,8 +68,11 @@ public class DatabaseChangelogCommandStep extends AbstractCommandStep implements
             changeLogParameters = new ChangeLogParameters(database);
             addJavaProperties(changeLogParameters);
         }
-        changeLogParameters.setContexts(new Contexts(commandScope.getArgumentValue(CONTEXTS_ARG)));
-        changeLogParameters.setLabels(new LabelExpression(commandScope.getArgumentValue(LABEL_FILTER_ARG)));
+        Contexts contexts = new Contexts(commandScope.getArgumentValue(CONTEXTS_ARG));
+        changeLogParameters.setContexts(contexts);
+        LabelExpression labels = new LabelExpression(commandScope.getArgumentValue(LABEL_FILTER_ARG));
+        changeLogParameters.setLabels(labels);
+        addCommandFiltersMdc(labels, contexts);
 
         DatabaseChangeLog databaseChangeLog = getDatabaseChangeLog(changeLogFile, changeLogParameters);
         checkLiquibaseTables(true, databaseChangeLog, changeLogParameters.getContexts(), changeLogParameters.getLabels(), database);
@@ -82,6 +81,13 @@ public class DatabaseChangelogCommandStep extends AbstractCommandStep implements
 
         commandScope.provideDependency(DatabaseChangeLog.class, databaseChangeLog);
         commandScope.provideDependency(ChangeLogParameters.class, changeLogParameters);
+    }
+
+    public static void addCommandFiltersMdc(LabelExpression labelExpression, Contexts contexts) {
+        String labelFilterMdc = labelExpression != null && labelExpression.getOriginalString() != null ? labelExpression.getOriginalString() : "";
+        String contextFilterMdc = contexts != null ? contexts.toString() : "";
+        Scope.getCurrentScope().addMdcValue(MdcKey.COMMAND_LABEL_FILTER, labelFilterMdc);
+        Scope.getCurrentScope().addMdcValue(MdcKey.COMMAND_CONTEXT_FILTER, contextFilterMdc);
     }
 
     private DatabaseChangeLog getDatabaseChangeLog(String changeLogFile, ChangeLogParameters changeLogParameters) throws LiquibaseException {
@@ -107,13 +113,6 @@ public class DatabaseChangelogCommandStep extends AbstractCommandStep implements
     @Override
     public String[][] defineCommandNames() {
         return new String[][]{COMMAND_NAME};
-    }
-
-    @Override
-    public void adjustCommandDefinition(CommandDefinition commandDefinition) {
-        if (commandDefinition.getPipeline().size() == 1) {
-            commandDefinition.setInternal(true);
-        }
     }
 
     @Override
