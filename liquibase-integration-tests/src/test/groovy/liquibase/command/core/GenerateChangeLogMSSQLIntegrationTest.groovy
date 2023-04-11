@@ -12,6 +12,7 @@ import spock.lang.Specification
 
 @LiquibaseIntegrationTest
 class GenerateChangeLogMSSQLIntegrationTest extends Specification {
+    @Shared
     private DatabaseTestSystem mssql = (DatabaseTestSystem) Scope.getCurrentScope().getSingleton(TestSystemFactory.class).getTestSystem("mssql")
 
     def "Should generate table comments, view comments, table column comments, view column comments and be able to use the generated sql changelog"() {
