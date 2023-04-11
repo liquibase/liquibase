@@ -100,6 +100,9 @@ public abstract class AbstractIntegrationTest {
     protected AbstractIntegrationTest(String changelogDir, Database dbms) throws Exception {
         if (dbms != null) {
             this.testSystem = (DatabaseTestSystem) Scope.getCurrentScope().getSingleton(TestSystemFactory.class).getTestSystem(dbms.getShortName());
+        } else if (dbms.getConnection().isClosed()) {
+            this.testSystem.start();
+            openConnection();
         }
 
         this.completeChangeLog = "changelogs/" + changelogDir + "/complete/root.changelog.xml";
@@ -119,7 +122,6 @@ public abstract class AbstractIntegrationTest {
     }
 
     private void openConnection() throws Exception {
-        testSystem.start();
         DatabaseConnection connection = new JdbcConnection(testSystem.getConnection());
 
         database = DatabaseFactory.getInstance().findCorrectDatabaseImplementation(connection);
