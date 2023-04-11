@@ -119,6 +119,7 @@ public abstract class AbstractIntegrationTest {
     }
 
     private void openConnection() throws Exception {
+        testSystem.start();
         DatabaseConnection connection = new JdbcConnection(testSystem.getConnection());
 
         database = DatabaseFactory.getInstance().findCorrectDatabaseImplementation(connection);
