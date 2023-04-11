@@ -1351,7 +1351,7 @@ public class Liquibase implements AutoCloseable {
         changeLogParameters.setContexts(contexts);
         changeLogParameters.setLabels(labels);
         runInScope(() -> {
-            CommandScope statusCommand = new CommandScope(ListLocksCommandStep.COMMAND_NAME);
+            CommandScope statusCommand = new CommandScope(StatusCommandStep.COMMAND_NAME);
             statusCommand.addArgumentValue(DbUrlConnectionCommandStep.DATABASE_ARG, getDatabase());
             statusCommand.addArgumentValue(DatabaseChangelogCommandStep.CHANGELOG_PARAMETERS, changeLogParameters);
             statusCommand.addArgumentValue(StatusCommandStep.VERBOSE_ARG, verbose);
