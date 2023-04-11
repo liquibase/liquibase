@@ -7,10 +7,12 @@ import liquibase.executor.Executor;
 import liquibase.executor.ExecutorService;
 import liquibase.logging.mdc.MdcKey;
 import liquibase.logging.mdc.MdcValue;
+import liquibase.sql.Sql;
 import liquibase.sqlgenerator.SqlGeneratorFactory;
-import liquibase.statement.SqlStatement;
-import liquibase.statement.core.MarkChangeSetRanStatement;
 import liquibase.util.SqlUtil;
+
+import java.util.Collections;
+import java.util.concurrent.atomic.AtomicReference;
 
 /**
  * A wrapper utility class around the standard JdbcExecutor used to monitor and log sql from Jdbc queries
@@ -20,19 +22,19 @@ public class ChangelogJdbcMdcListener {
     /**
      * Execute the given statement via the jdbc executor. Adds MDC of the statement sql and outcome to logging.
      *
-     * @param statement the statement to execute
      * @param database  the database to execute against
      * @param jdbcQuery the executor function to apply
      * @throws DatabaseException if there was a problem running the sql statement
      */
-    public static void execute(SqlStatement statement, Database database, ExecuteJdbc jdbcQuery) throws DatabaseException {
-        if (!(statement instanceof MarkChangeSetRanStatement)) {
-            addSqlMdc(statement, database);
-        }
+    public static void execute(Database database, ExecuteJdbc jdbcQuery) throws DatabaseException {
         try {
-            jdbcQuery.execute(Scope.getCurrentScope().getSingleton(ExecutorService.class).getExecutor("jdbc", database));
+            AtomicReference<Sql[]> sqls = new AtomicReference<>(null);
+            Scope.child(Collections.singletonMap(SqlGeneratorFactory.GENERATED_SQL_ARRAY_SCOPE_KEY, sqls), () -> {
+                jdbcQuery.execute(Scope.getCurrentScope().getSingleton(ExecutorService.class).getExecutor("jdbc", database));
+            });
+            addSqlMdc(sqls);
             logSuccess();
-        } catch (DatabaseException e) {
+        } catch (Exception e) {
             Scope.getCurrentScope().addMdcValue(MdcKey.DATABASE_CHANGELOG_TABLE_OUTCOME, MdcValue.DATABASE_CHANGELOG_OUTCOME_FAILED);
             throw new DatabaseException(e);
         }
@@ -41,26 +43,31 @@ public class ChangelogJdbcMdcListener {
     /**
      * Execute the given statement via the jdbc executor. Adds MDC of the statement sql and outcome to logging.
      *
-     * @param statement the statement to execute
      * @param database  the database to execute against
      * @param jdbcQuery the executor function to apply
      * @return the result of the executor function
      * @throws DatabaseException if there was a problem running the sql statement
      */
-    public static <T> T query(SqlStatement statement, Database database, QueryJdbc<T> jdbcQuery) throws DatabaseException {
-        addSqlMdc(statement, database);
+    public static <T> T query(Database database, QueryJdbc<T> jdbcQuery) throws DatabaseException {
         try {
-            T value = jdbcQuery.execute(Scope.getCurrentScope().getSingleton(ExecutorService.class).getExecutor("jdbc", database));
+            AtomicReference<Sql[]> sqls = new AtomicReference<>(null);
+            T value = Scope.child(Collections.singletonMap(SqlGeneratorFactory.GENERATED_SQL_ARRAY_SCOPE_KEY, sqls), () -> jdbcQuery.execute(Scope.getCurrentScope().getSingleton(ExecutorService.class).getExecutor("jdbc", database)));
+            addSqlMdc(sqls);
             logSuccess();
             return value;
-        } catch (DatabaseException e) {
+        } catch (Exception e) {
             Scope.getCurrentScope().addMdcValue(MdcKey.DATABASE_CHANGELOG_TABLE_OUTCOME, MdcValue.DATABASE_CHANGELOG_OUTCOME_FAILED);
             throw new DatabaseException(e);
         }
     }
 
-    private static void addSqlMdc(SqlStatement statement, Database database) {
-        Scope.getCurrentScope().addMdcValue(MdcKey.DATABASE_CHANGELOG_SQL, SqlUtil.getSqlString(statement, SqlGeneratorFactory.getInstance(), database));
+    private static void addSqlMdc(AtomicReference<Sql[]> sqlsRef) {
+        if (sqlsRef != null) {
+            Sql[] sqls = sqlsRef.get();
+            if (sqls != null) {
+                Scope.getCurrentScope().addMdcValue(MdcKey.DATABASE_CHANGELOG_SQL, SqlUtil.convertSqlArrayToString(sqls));
+            }
+        }
     }
 
     private static void logSuccess() {
