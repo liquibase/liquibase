@@ -815,8 +815,12 @@ public class ChangeSet implements Conditional, ChangeLogChild {
             return null;
         }
         String key = "liquibase." + executorName.toLowerCase() + ".executor";
-        String replacementExecutorName =
-                (String) Scope.getCurrentScope().getSingleton(LiquibaseConfiguration.class).getCurrentConfiguredValue(null, null, key).getValue();
+        if (executorName.equalsIgnoreCase("psql") || executorName.equalsIgnoreCase("sqlcmd") || executorName.equalsIgnoreCase("sqlplus")) {
+            return executorName;
+        }
+        String replacementExecutorName = (String) Scope.getCurrentScope().getSingleton(LiquibaseConfiguration.class)
+                .getCurrentConfiguredValue(null, null, key)
+                .getValue();
         if (replacementExecutorName != null) {
             Scope.getCurrentScope().getLog(ChangeSet.class).info("Mapped '" + executorName + "' to executor '" + replacementExecutorName + "'");
             return replacementExecutorName;
