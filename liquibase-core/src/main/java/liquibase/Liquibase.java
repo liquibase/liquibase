@@ -201,11 +201,11 @@ public class Liquibase implements AutoCloseable {
     /**
      * Executes Liquibase update with given contexts and label expression.
      *
-     * @param contexts        The contexts to execute the update against. May be {@code null} or empty.
-     * @param labelExpression The label expression to execute the update against. May be {@code null} or empty.
+     * @param contexts        the set of contexts to execute the update against. If empty or {@code null}, all contexts are used.
+     * @param labelExpression the label expression to use during the update. If empty or {@code null}, no labels are used.
      * @throws LiquibaseException If an error occurs while executing the update.
-     * @see <a href="https://docs.liquibase.com/concepts/advanced/contexts.html" target="_top">contexts</a> in the Liquibase documentation
-     * @see <a href="https://docs.liquibase.com/concepts/advanced/labels.html" target="_top">labels</a> in the Liquibase documentation
+     * @see <a href="https://docs.liquibase.com/concepts/changelogs/attributes/contexts.html" target="_top">Liquibase Contexts</a> in the Liquibase documentation
+     * @see <a href="https://docs.liquibase.com/concepts/changelogs/attributes/labels.html" target="_top">Liquibase Labels</a> in the Liquibase documentation
      */
     @Deprecated
     public void update(Contexts contexts, LabelExpression labelExpression) throws LiquibaseException {
@@ -222,8 +222,8 @@ public class Liquibase implements AutoCloseable {
      *                             assume that the metadata tables already exist and will not attempt to create them.
      * @throws LiquibaseException if an error occurs while updating the database schema.
      *
-     * @see <a href="https://docs.liquibase.com/concepts/advanced/contexts.html" target="_top">Liquibase Contexts</a>
-     * @see <a href="https://docs.liquibase.com/concepts/advanced/labels.html" target="_top">Liquibase Labels</a>
+     * @see <a href="https://docs.liquibase.com/concepts/changelogs/attributes/contexts.html" target="_top">Liquibase Contexts</a>
+     * @see <a href="https://docs.liquibase.com/concepts/changelogs/attributes/labels.html" target="_top">Liquibase Labels</a>
      */
     @Deprecated
     public void update(Contexts contexts, LabelExpression labelExpression, boolean checkLiquibaseTables) throws LiquibaseException {

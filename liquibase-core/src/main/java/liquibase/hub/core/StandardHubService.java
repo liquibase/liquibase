@@ -357,11 +357,11 @@ public class StandardHubService implements HubService {
     }
 
     /**
-     * Queries for a changelog ID. If no result is found, it returns null.
+     * Queries for a changelog ID. If no result is found, it returns {@code null}.
      * The result is cached in a map.
      *
      * @param changeLogId The changelog ID to query for.
-     * @return A HubChangeLog object containing the result, or null if no result is found.
+     * @return A {@code HubChangeLog} object containing the result, or {@code null} if no result is found.
      * @throws LiquibaseHubException If an error occurs while querying the Hub.
      */
     @Override

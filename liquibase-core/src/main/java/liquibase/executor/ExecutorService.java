@@ -50,7 +50,7 @@ public class ExecutorService extends AbstractPluginFactory<Executor>  {
      *
      * @param name     the name of the executor
      * @param database the database for which to retrieve the executor
-     * @return the executor associated with the given name and database
+     * @return the {@code Executor} associated with the given name and database
      * @throws UnexpectedLiquibaseException if there was an error retrieving the executor
      */
     public Executor getExecutor(final String name, final Database database) {
@@ -70,19 +70,19 @@ public class ExecutorService extends AbstractPluginFactory<Executor>  {
      *
      * @param name     the name of the executor
      * @param database the database to which the executor is connected
-     * @return true if an executor exists for the given name and database, false otherwise
+     * @return {@code true} if an executor exists for the given name and database, {@code false} otherwise
      */
     public boolean executorExists(final String name, final Database database) {
         return executors.containsKey(createKey(name, database));
     }
 
     /**
-     * Returns an Executor for the specified database and name.
-     * This method is deprecated; please use getExecutor(name, database) instead.
+     * Returns an {@code Executor} for the specified database and name.
+     * This method is deprecated; please use {@link #getExecutor(String, Database)} instead.
      *
-     * @param database the database to execute the statements on
-     * @return Executor for the specified database and name
-     * @deprecated Please use getExecutor(name, database) instead
+     * @param database the {@code Database} to execute the statements on
+     * @return {@code Executor} for the specified database and name
+     * @deprecated Please use {@link #getExecutor(String, Database) } instead.
      */
     public Executor getExecutor(Database database) {
         return getExecutor("jdbc", database);
@@ -92,8 +92,8 @@ public class ExecutorService extends AbstractPluginFactory<Executor>  {
      * Sets the executor for the given database with the default name "jdbc". If an executor with the same name and database already exists,
      * it will be replaced by the new one.
      *
-     * @param database the database for which the executor is set
-     * @param executor the executor to set
+     * @param database the {@code Database} for which the executor is set
+     * @param executor the {@code Executor} to set
      */
     public void setExecutor(Database database, Executor executor) {
         setExecutor("jdbc", database, executor);

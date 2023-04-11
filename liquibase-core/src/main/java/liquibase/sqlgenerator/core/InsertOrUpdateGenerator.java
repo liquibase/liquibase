@@ -88,7 +88,7 @@ public abstract class InsertOrUpdateGenerator extends AbstractSqlGenerator<Inser
      * @param database                the database to generate the update statement for
      * @param whereClause             the WHERE clause to use in the update statement
      * @param sqlGeneratorChain       the SQL generator chain to use in the update statement
-     * @return the generated update statement, or null if there is nothing to update
+     * @return the generated update statement, or {@code null} if there is nothing to update
      * @throws LiquibaseException if there is an error generating the update statement
      */
     protected String getUpdateStatement(InsertOrUpdateStatement insertOrUpdateStatement, Database database, String whereClause, SqlGeneratorChain sqlGeneratorChain) throws LiquibaseException {

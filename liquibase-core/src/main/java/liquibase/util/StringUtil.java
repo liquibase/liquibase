@@ -823,7 +823,7 @@ public class StringUtil {
      * Retrieves the last block comment in a SQL string, if any.
      *
      * @param sqlString the SQL string to search for the last block comment
-     * @return the last block comment in the SQL string, or null if none was found
+     * @return the last block comment in the SQL string, or {@code null} if none was found
      */
     public static String getLastBlockComment(String sqlString) {
         if (isEmpty(sqlString) || sqlString.length() < 4) {
@@ -872,7 +872,7 @@ public class StringUtil {
      * Returns the last line comment from a given SQL string, if there is one.
      *
      * @param sqlString the SQL string to search
-     * @return the last line comment from the SQL string, or null if there is no line comment
+     * @return the last line comment from the SQL string, or {@code null} if there is no line comment
      */
     public static String getLastLineComment(String sqlString) {
         if (isEmpty(sqlString) || sqlString.length() < 2) {
