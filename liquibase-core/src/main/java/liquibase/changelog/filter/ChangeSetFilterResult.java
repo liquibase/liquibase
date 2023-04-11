@@ -3,22 +3,30 @@ package liquibase.changelog.filter;
 /**
  * Contains the result of a {@link liquibase.changelog.filter.ChangeSetFilter#accepts(liquibase.changelog.ChangeSet)}  call.
  *
- * {@link #getMessage()}, but {@link #getFilter()} can be used to programatically determine the reason for accepting or not.
+ * {@link #getMessage()}, but {@link #getFilter()} can be used to programmatically determine the reason for accepting or not.
  */
 public class ChangeSetFilterResult {
 
-    private boolean accepted;
-    private String message;
+    private final boolean accepted;
+    private final String message;
     private final Class<? extends ChangeSetFilter> filter;
+    private final String mdcName;
+    private final String displayName;
 
     public ChangeSetFilterResult(boolean accepted, String message, Class<? extends ChangeSetFilter> filter) {
+        this(accepted, message, filter, filter == null ? null : filter.getSimpleName(), filter == null ? null : filter.getSimpleName());
+    }
+
+    public ChangeSetFilterResult(boolean accepted, String message, Class<? extends ChangeSetFilter> filter, String mdcName, String displayName) {
         this.accepted = accepted;
         this.message = message;
         this.filter = filter;
+        this.mdcName = mdcName;
+        this.displayName = displayName;
     }
 
     /**
-     * Was the changeset accepted by the filter
+     * Was the changeSet accepted by the filter
      */
     public boolean isAccepted() {
         return accepted;
@@ -32,10 +40,18 @@ public class ChangeSetFilterResult {
     }
 
     /**
-     * Returns the class of the filter that accepted or rejected this changeset.
+     * Returns the class of the filter that accepted or rejected this changeSet.
      */
     public Class<? extends ChangeSetFilter> getFilter() {
         return filter;
+    }
+
+    public String getMdcName() {
+        return mdcName;
+    }
+
+    public String getDisplayName() {
+        return displayName;
     }
 
     @Override

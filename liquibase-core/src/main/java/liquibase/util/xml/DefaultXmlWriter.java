@@ -23,7 +23,7 @@ public class DefaultXmlWriter implements XmlWriter {
             try {
                 factory.setAttribute("indent-number", 4);
             } catch (Exception e) {
-                ; //guess we can't set it, that's ok
+                //guess we can't set it, that's ok
             }
 
             Transformer transformer = factory.newTransformer();

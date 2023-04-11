@@ -25,6 +25,7 @@ import liquibase.util.StringUtil;
 
 import java.sql.Timestamp;
 import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.CopyOnWriteArrayList;
 
 public abstract class DatabaseSnapshot implements LiquibaseSerializable {
@@ -38,14 +39,14 @@ public abstract class DatabaseSnapshot implements LiquibaseSerializable {
     private Database database;
     private DatabaseObjectCollection allFound;
     private DatabaseObjectCollection referencedObjects;
-    private Map<Class<? extends DatabaseObject>, Set<DatabaseObject>> knownNull = new HashMap<>();
+    private Map<Class<? extends DatabaseObject>, Set<DatabaseObject>> knownNull = new ConcurrentHashMap<>();
 
-    private Map<String, Object> snapshotScratchPad = new HashMap<>();
+    private Map<String, Object> snapshotScratchPad = new ConcurrentHashMap<>();
 
-    private Map<String, ResultSetCache> resultSetCaches = new HashMap<>();
+    private Map<String, ResultSetCache> resultSetCaches = new ConcurrentHashMap<>();
     private CompareControl.SchemaComparison[] schemaComparisons;
 
-    private Map<String, Object> metadata = new HashMap<>();
+    private Map<String, Object> metadata = new ConcurrentHashMap<>();
 
     DatabaseSnapshot(DatabaseObject[] examples, Database database, SnapshotControl snapshotControl) throws DatabaseException, InvalidExampleException {
         this.database = database;
@@ -82,7 +83,7 @@ public abstract class DatabaseSnapshot implements LiquibaseSerializable {
             this.setScratchData("DatabaseSnapshot.allCatalogs", catalogs);
 
             if (catalogs.size() > 1) {
-                List<String> quotedCatalogs = new ArrayList<String>();
+                List<String> quotedCatalogs = new ArrayList<>();
                 for (Catalog catalog : catalogs) {
                     quotedCatalogs.add("'" + catalog.getName() + "'");
                 }
@@ -312,11 +313,7 @@ public abstract class DatabaseSnapshot implements LiquibaseSerializable {
         T object = chain.snapshot(example, this);
 
         if (object == null) {
-            Set<DatabaseObject> collection = knownNull.get(example.getClass());
-            if (collection == null) {
-                collection = new HashSet<>();
-                knownNull.put(example.getClass(), collection);
-            }
+            Set<DatabaseObject> collection = knownNull.computeIfAbsent(example.getClass(), k -> new HashSet<>());
             collection.add(example);
 
             if (example instanceof Schema) {
@@ -354,7 +351,7 @@ public abstract class DatabaseSnapshot implements LiquibaseSerializable {
             //
             if ("columns".equals(field) && ((object.getClass() == PrimaryKey.class) || (object.getClass() == Index
                     .class) || (object.getClass() == UniqueConstraint.class))) {
-                if ((fieldValue != null) && !((Collection) fieldValue).isEmpty()) {
+                if ((fieldValue != null) && !((Collection<?>) fieldValue).isEmpty()) {
                     if (descendingColumnExists((Collection<Column>)fieldValue)) {
                         List<Column> columns = (List<Column>)fieldValue;
                         for (Column col : columns) {
@@ -620,14 +617,14 @@ public abstract class DatabaseSnapshot implements LiquibaseSerializable {
                         } else {
                             object.setAttribute(attr, allObjects.get(value));
                         }
-                    } else if ((value instanceof Collection) && !((Collection) value).isEmpty() && allObjects
+                    } else if ((value instanceof Collection) && !((Collection<?>) value).isEmpty() && allObjects
                             .containsKey(((Collection) value).iterator().next())) {
                         //
                         // This collection may contain both references (String with snapshotId)
                         // or an actual DatabaseObject. If the element is a reference String then
                         // we go retrieve the actual object, else we just add the object
                         //
-                        List<DatabaseObject> newList = new ArrayList<DatabaseObject>();
+                        List<DatabaseObject> newList = new ArrayList<>();
                         for (Object element : (Collection<Object>)value) {
                             if (element instanceof String) {
                                 newList.add(allObjects.get(element));

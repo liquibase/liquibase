@@ -110,7 +110,7 @@ public class StringUtil {
             returnArray.add(trimmedString);
         }
 
-        return returnArray.toArray(new String[returnArray.size()]);
+        return returnArray.toArray(new String[0]);
     }
 
     /**
@@ -753,7 +753,7 @@ public class StringUtil {
             if (obj == null) {
                 return null;
             } else if (obj instanceof Class) {
-                return ((Class) obj).getName();
+                return ((Class<?>) obj).getName();
             } else if (obj instanceof Object[]) {
                 if (((Object[]) obj).length == 0) {
                     return null;
@@ -761,7 +761,7 @@ public class StringUtil {
                     return "[" + StringUtil.join((Object[]) obj, ", ", this) + "]";
                 }
             } else if (obj instanceof Collection) {
-                if (((Collection) obj).size() == 0) {
+                if (((Collection<?>) obj).size() == 0) {
                     return null;
                 } else {
                     return "[" + StringUtil.join((Collection) obj, ", ", this) + "]";
@@ -873,7 +873,7 @@ public class StringUtil {
         }
         boolean startOfNewLine = false;
         int idxOfDoubleDash = -1;
-        for (int i = 0; i < sqlString.length(); i++) {
+        for (int i = 0; i < sqlString.trim().length() - 1; i++) {
             char c = sqlString.charAt(i);
             // we have not found the start of the line comment yet
             if (c == '-') {
@@ -893,6 +893,7 @@ public class StringUtil {
             } else if (c == '\r' || c == '\n') {
                 // new line found
                 startOfNewLine = true;
+				idxOfDoubleDash = -1;
             }
 
         }

@@ -1,7 +1,6 @@
 package liquibase.changelog.filter;
 
 import liquibase.changelog.ChangeSet;
-import liquibase.changelog.DatabaseChangeLog;
 import liquibase.changelog.RanChangeSet;
 import liquibase.database.Database;
 import liquibase.exception.DatabaseException;
@@ -56,54 +55,31 @@ public class ShouldRunChangeSetFilter implements ChangeSetFilter {
     @SuppressWarnings({"RedundantIfStatement"})
     public ChangeSetFilterResult accepts(ChangeSet changeSet) {
         for (RanChangeSet ranChangeSet : this.ranChangeSets.values()) {
-            if (changeSetsMatch(changeSet, ranChangeSet)) {
+            if (ranChangeSet.isSameAs(changeSet)) {
                 if (changeSet.shouldAlwaysRun()) {
-                    return new ChangeSetFilterResult(true, "Changeset always runs", this.getClass());
+                    return new ChangeSetFilterResult(true, "Changeset always runs", this.getClass(), getMdcName(), getDisplayName());
                 }
                 if (changeSet.shouldRunOnChange() && checksumChanged(changeSet, ranChangeSet)) {
-                    return new ChangeSetFilterResult(true, "Changeset checksum changed", this.getClass());
+                    return new ChangeSetFilterResult(true, "Changeset checksum changed", this.getClass(), getMdcName(), getDisplayName());
                 }
-                return new ChangeSetFilterResult(false, "Changeset already ran", this.getClass());
+                return new ChangeSetFilterResult(false, "Changeset already ran", this.getClass(), getMdcName(), getDisplayName());
             }
         }
-        return new ChangeSetFilterResult(true, "Changeset has not ran yet", this.getClass());
+        return new ChangeSetFilterResult(true, "Changeset has not ran yet", this.getClass(), getMdcName(), getDisplayName());
     }
 
-    protected boolean changeSetsMatch(ChangeSet changeSet, RanChangeSet ranChangeSet) {
-        return idsAreEqual(changeSet, ranChangeSet)
-                && authorsAreEqual(changeSet, ranChangeSet)
-                && pathsAreEqual(changeSet, ranChangeSet);
-    }
-
-    protected boolean idsAreEqual(ChangeSet changeSet, RanChangeSet ranChangeSet) {
-        return ranChangeSet.getId().equals(changeSet.getId());
-    }
-
-    protected boolean authorsAreEqual(ChangeSet changeSet, RanChangeSet ranChangeSet) {
-        return ranChangeSet.getAuthor().equals(changeSet.getAuthor());
-    }
-
-    private boolean pathsAreEqual(ChangeSet changeSet, RanChangeSet ranChangeSet) {
-        String ranChangeSetPath = getPath(ranChangeSet);
-        String changeSetPath = getPath(changeSet);
-        if (ranChangeSetPath == null) {
-            return changeSetPath == null;
-        } else {
-            return ranChangeSetPath.equalsIgnoreCase(changeSetPath);
-        }
-    }
 
     protected boolean checksumChanged(ChangeSet changeSet, RanChangeSet ranChangeSet) {
         return !changeSet.generateCheckSum().equals(ranChangeSet.getLastCheckSum());
     }
 
-
-    private String getPath(RanChangeSet ranChangeSet) {
-        return DatabaseChangeLog.normalizePath(ranChangeSet.getChangeLog());
+    @Override
+    public String getMdcName() {
+        return "alreadyRan";
     }
 
-    private String getPath(ChangeSet changeSet) {
-        return DatabaseChangeLog.normalizePath(changeSet.getFilePath());
+    @Override
+    public String getDisplayName() {
+        return "Already ran";
     }
-
 }

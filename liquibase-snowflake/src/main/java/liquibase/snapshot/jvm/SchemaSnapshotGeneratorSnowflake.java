@@ -15,30 +15,24 @@ import java.util.List;
 public class SchemaSnapshotGeneratorSnowflake extends SchemaSnapshotGenerator {
     @Override
     public int getPriority(Class<? extends DatabaseObject> objectType, Database database) {
-        int priority = super.getPriority(objectType, database);
         if (database instanceof SnowflakeDatabase) {
-            priority += PRIORITY_DATABASE;
+            return super.getPriority(objectType, database) + PRIORITY_DATABASE;
+        } else {
+            return PRIORITY_NONE;
         }
-        return priority;
     }
 
     @Override
     protected String[] getDatabaseSchemaNames(Database database) throws SQLException, DatabaseException {
         List<String> returnList = new ArrayList<>();
 
-        ResultSet schemas = null;
-        try {
-            schemas = ((JdbcConnection) database.getConnection()).getMetaData().getSchemas(database
-                    .getDefaultCatalogName(), database.getDefaultSchemaName());
+        try (ResultSet schemas = ((JdbcConnection) database.getConnection()).getMetaData().getSchemas(database
+                .getDefaultCatalogName(), null)) {
             while (schemas.next()) {
                 returnList.add(JdbcUtil.getValueForColumn(schemas, "TABLE_SCHEM", database));
             }
-        } finally {
-            if (schemas != null) {
-                schemas.close();
-            }
         }
 
-        return returnList.toArray(new String[returnList.size()]);
+        return returnList.toArray(new String[0]);
     }
 }

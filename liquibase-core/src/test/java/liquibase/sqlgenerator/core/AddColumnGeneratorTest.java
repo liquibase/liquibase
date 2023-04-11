@@ -4,6 +4,7 @@ import liquibase.change.AddColumnConfig;
 import liquibase.change.ConstraintsConfig;
 import liquibase.change.core.AddColumnChange;
 import liquibase.database.core.*;
+import liquibase.exception.DatabaseException;
 import liquibase.sql.Sql;
 import liquibase.sqlgenerator.AbstractSqlGeneratorTest;
 import liquibase.sqlgenerator.MockSqlGeneratorChain;
@@ -25,13 +26,13 @@ import static org.junit.Assert.*;
 public class AddColumnGeneratorTest extends AbstractSqlGeneratorTest<AddColumnStatement> {
     private static final String SCHEMA_NAME = "schema_name";
     private static final String CATALOG_NAME = "catalog_name";
-    private static final String TABLE_NAME = "table_name";    
+    private static final String TABLE_NAME = "table_name";
     private static final String COLUMN_NAME = "column_name";
     private static final String COLUMN_TYPE = "column_type";
 
     public AddColumnGeneratorTest() throws Exception {
         this(new AddColumnGenerator());
-    } 
+    }
 
     protected AddColumnGeneratorTest(SqlGenerator<AddColumnStatement> generatorUnderTest) throws Exception {
         super(generatorUnderTest);
@@ -49,7 +50,7 @@ public class AddColumnGeneratorTest extends AbstractSqlGeneratorTest<AddColumnSt
         AddColumnStatement addPKColumn = new AddColumnStatement(null, null, TABLE_NAME, COLUMN_NAME, COLUMN_TYPE, null, new PrimaryKeyConstraint("pk_name"));
 
         assertFalse(generatorUnderTest.validate(addPKColumn, new OracleDatabase(), new MockSqlGeneratorChain()).hasErrors());
-        assertTrue(generatorUnderTest.validate(addPKColumn, new H2Database(), new MockSqlGeneratorChain()).getErrorMessages().contains("Cannot add a primary key column"));
+        assertFalse(generatorUnderTest.validate(addPKColumn, new H2Database(), new MockSqlGeneratorChain()).hasErrors());
         assertTrue(generatorUnderTest.validate(addPKColumn, new DB2Database(), new MockSqlGeneratorChain()).getErrorMessages().contains("Cannot add a primary key column"));
         assertTrue(generatorUnderTest.validate(addPKColumn, new DerbyDatabase(), new MockSqlGeneratorChain()).getErrorMessages().contains("Cannot add a primary key column"));
         assertTrue(generatorUnderTest.validate(addPKColumn, new SQLiteDatabase(), new MockSqlGeneratorChain()).getErrorMessages().contains("Cannot add a primary key column"));
@@ -62,6 +63,17 @@ public class AddColumnGeneratorTest extends AbstractSqlGeneratorTest<AddColumnSt
                 new AddColumnStatement(null, null, TABLE_NAME, COLUMN_NAME, COLUMN_TYPE, null),
                 new AddColumnStatement(null, null, "other_table", "other_column", COLUMN_TYPE, null)
             ), new MySQLDatabase(), new MockSqlGeneratorChain()).getErrorMessages().contains("All columns must be targeted at the same table"));
+    }
+
+    @Test
+    public void isValidH2Version1() {
+        H2Database h2DatabaseV1 = new H2Database() {
+            @Override
+            public int getDatabaseMajorVersion() {
+                return 1;
+            }
+        };
+        assertFalse(generatorUnderTest.validate(createSampleSqlStatement(), h2DatabaseV1, new MockSqlGeneratorChain()).hasErrors());
     }
 
     @Test
@@ -99,6 +111,26 @@ public class AddColumnGeneratorTest extends AbstractSqlGeneratorTest<AddColumnSt
 
         assertEquals(1, sql.length);
         assertEquals("ALTER TABLE " + TABLE_NAME + " ADD `PERIOD` INT NOT NULL", sql[0].toSql());
+    }
+
+    @Test
+    public void testAddPrimaryKeyColumnH2() {
+        AddColumnStatement columns = new AddColumnStatement(null, null, TABLE_NAME, "ID", "BIGINT", null, new PrimaryKeyConstraint());
+
+        H2Database h2Database = new H2Database();
+        assertFalse(generatorUnderTest.validate(columns, h2Database, new MockSqlGeneratorChain()).hasErrors());
+        assertTrue(generatorUnderTest.validate(columns, new H2Database() {
+            @Override
+            public int getDatabaseMajorVersion() throws DatabaseException {
+                return 1;
+            }
+        }, new MockSqlGeneratorChain()).hasErrors());
+
+        Sql[] sql = generatorUnderTest.generateSql(columns, h2Database, new MockSqlGeneratorChain());
+
+
+        assertEquals(1, sql.length);
+        assertEquals("ALTER TABLE table_name ADD ID BIGINT NOT NULL PRIMARY KEY", sql[0].toSql());
     }
 
     @Test

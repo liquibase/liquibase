@@ -1,10 +1,14 @@
 package liquibase.lockservice;
 
 import liquibase.Scope;
+import liquibase.database.core.MockDatabase;
 import liquibase.exception.DatabaseException;
 import liquibase.exception.LockException;
 import liquibase.executor.Executor;
 import liquibase.executor.ExecutorService;
+import liquibase.logging.Logger;
+import liquibase.logging.mdc.MdcManager;
+import liquibase.sqlgenerator.SqlGeneratorFactory;
 import org.assertj.core.api.Assertions;
 import org.junit.Before;
 import org.junit.Test;
@@ -32,21 +36,11 @@ public class StandardLockServiceTest {
 
     @Before
     public void before() throws Exception {
-        Executor executor = Mockito.mock(Executor.class);
-        Mockito
-            .when(executor.queryForList(Mockito.any()))
-            .thenReturn(sampleLockData());
-        ExecutorService executorService = Mockito.mock(ExecutorService.class);
-        Mockito
-            .when(executorService.getExecutor(Mockito.any(), Mockito.any()))
-            .thenReturn(executor);
-
-        Map<String, Object> scopeValues = new TreeMap<>();
-
-        scopeValues.put(ExecutorService.class.getName(), executorService);
-
         mockedScope = Mockito.mock(Scope.class);
-        Mockito.when(mockedScope.getSingleton(ExecutorService.class)).thenReturn(executorService);
+        Logger logger = Mockito.mock(Logger.class);
+        MdcManager mdcManager = Mockito.mock(MdcManager.class);
+        Mockito.when(mockedScope.getLog(Mockito.any())).thenReturn(logger);
+        Mockito.when(mockedScope.getMdcManager()).thenReturn(mdcManager);
 
         lockService = new StandardLockService() {
             @Override
@@ -54,12 +48,14 @@ public class StandardLockServiceTest {
                 return true;
             }
         };
+        lockService.setDatabase(new MockDatabase());
     }
 
     @Test
     public void shouldAcceptLocaldatetimeInLOCKGRANTED() throws LockException {
         try (MockedStatic<Scope> scope = Mockito.mockStatic(Scope.class)) {
             scope.when(Scope::getCurrentScope).thenReturn(mockedScope);
+            scope.when(() -> Scope.child(Mockito.anyMap(), Mockito.any(Scope.ScopedRunnerWithReturn.class))).thenReturn(sampleLockData());
             DatabaseChangeLogLock[] databaseChangeLogLocks = lockService.listLocks();
 
             Assertions.assertThat(databaseChangeLogLocks)

@@ -75,7 +75,8 @@ public class JdbcDatabaseSnapshot extends DatabaseSnapshot {
         }
 
         public List<CachedRow> getIndexInfo(final String catalogName, final String schemaName, final String tableName, final String indexName) throws DatabaseException, SQLException {
-            List<CachedRow> indexes = getResultSetCache("getIndexInfo").get(new ResultSetCache.UnionResultSetExtractor(database) {
+
+            return getResultSetCache("getIndexInfo").get(new ResultSetCache.UnionResultSetExtractor(database) {
 
                 public boolean isBulkFetchMode;
 
@@ -256,11 +257,11 @@ public class JdbcDatabaseSnapshot extends DatabaseSnapshot {
                         }
 
                         // Iterate through all the candidate tables and try to find the index.
-                        for (String tableName : tables) {
+                        for (String tableName1 : tables) {
                             ResultSet rs = databaseMetaData.getIndexInfo(
                                     ((AbstractJdbcDatabase) database).getJdbcCatalogName(catalogAndSchema),
                                     ((AbstractJdbcDatabase) database).getJdbcSchemaName(catalogAndSchema),
-                                    tableName,
+                                    tableName1,
                                     false,
                                     true);
                             List<CachedRow> rows = extract(rs, (database instanceof InformixDatabase));
@@ -285,8 +286,6 @@ public class JdbcDatabaseSnapshot extends DatabaseSnapshot {
                     return false;
                 }
             });
-
-            return indexes;
         }
 
         protected void warnAboutDbaRecycleBin() {
@@ -567,8 +566,8 @@ public class JdbcDatabaseSnapshot extends DatabaseSnapshot {
                         "object_schema_name(c.object_id" + dbIdParam + ") AS TABLE_SCHEM, " +
                         "object_name(c.object_id" + dbIdParam + ") AS TABLE_NAME, " +
                         "c.name AS COLUMN_NAME, " +
-                        "is_filestream, " +
-                        "is_rowguidcol, " +
+                        "is_filestream AS IS_FILESTREAM, " +
+                        "is_rowguidcol AS IS_ROWGUIDCOL, " +
                         "CASE WHEN c.is_identity = 'true' THEN 'YES' ELSE 'NO' END as IS_AUTOINCREMENT, " +
                         "{REMARKS_COLUMN_PLACEHOLDER}" +
                         "t.name AS TYPE_NAME, " +
@@ -609,7 +608,7 @@ public class JdbcDatabaseSnapshot extends DatabaseSnapshot {
                         "WHEN 'varchar(max)' THEN " + java.sql.Types.VARCHAR + " " +
                         "WHEN 'xml' THEN " + java.sql.Types.LONGVARCHAR + " " +
                         "WHEN 'LONGNVARCHAR' THEN " + java.sql.Types.SQLXML + " " +
-                        "ELSE " + Types.OTHER + " END AS data_type, " +
+                        "ELSE " + Types.OTHER + " END AS DATA_TYPE, " +
                         "CASE WHEN c.is_nullable = 'true' THEN 1 ELSE 0 END AS NULLABLE, " +
                         "10 as NUM_PREC_RADIX, " +
                         "c.column_id as ORDINAL_POSITION, " +
@@ -721,9 +720,9 @@ public class JdbcDatabaseSnapshot extends DatabaseSnapshot {
             public List<CachedRow> fastFetch() throws SQLException, DatabaseException {
                 CatalogAndSchema catalogAndSchema = new CatalogAndSchema(catalogName, schemaName).customize(database);
 
-                List<CachedRow> returnList = new ArrayList<CachedRow>();
+                List<CachedRow> returnList = new ArrayList<>();
 
-                List<String> tables = new ArrayList<String>();
+                List<String> tables = new ArrayList<>();
                 String jdbcCatalogName = ((AbstractJdbcDatabase) database).getJdbcCatalogName(catalogAndSchema);
                 String jdbcSchemaName = ((AbstractJdbcDatabase) database).getJdbcSchemaName(catalogAndSchema);
 
@@ -1026,20 +1025,19 @@ public class JdbcDatabaseSnapshot extends DatabaseSnapshot {
 
             @Override
             protected List<CachedRow> extract(ResultSet resultSet, boolean informixIndexTrimHint) throws SQLException {
-                List<CachedRow> cachedRowList = new ArrayList<CachedRow>();
+                List<CachedRow> cachedRowList = new ArrayList<>();
                 if (!(database instanceof OracleDatabase)) {
                     return cachedRowList;
                 }
 
                 resultSet.setFetchSize(database.getFetchSize());
-                List<Map> result;
 
                 try {
-                    result = (List<Map>) new RowMapperNotNullConstraintsResultSetExtractor(new ColumnMapRowMapper(database.isCaseSensitive()) {
+                    List<Map> result = (List<Map>) new RowMapperNotNullConstraintsResultSetExtractor(new ColumnMapRowMapper(database.isCaseSensitive()) {
                         @Override
                         protected Object getColumnValue(ResultSet rs, int index) throws SQLException {
                             Object value = super.getColumnValue(rs, index);
-                            if (value == null || !(value instanceof String)) {
+                            if (!(value instanceof String)) {
                                 return value;
                             }
                             return value.toString().trim();
@@ -1254,6 +1252,8 @@ public class JdbcDatabaseSnapshot extends DatabaseSnapshot {
 
                     if (database instanceof OracleDatabase) {
                         return queryOracle(catalogAndSchema, view);
+                    } else if (database instanceof MSSQLDatabase) {
+                        return queryMssql(catalogAndSchema, view);
                     }
 
                     String catalog = ((AbstractJdbcDatabase) database).getJdbcCatalogName(catalogAndSchema);
@@ -1268,11 +1268,48 @@ public class JdbcDatabaseSnapshot extends DatabaseSnapshot {
 
                     if (database instanceof OracleDatabase) {
                         return queryOracle(catalogAndSchema, null);
+                    } else if (database instanceof MSSQLDatabase) {
+                        return queryMssql(catalogAndSchema, null);
                     }
 
                     String catalog = ((AbstractJdbcDatabase) database).getJdbcCatalogName(catalogAndSchema);
                     String schema = ((AbstractJdbcDatabase) database).getJdbcSchemaName(catalogAndSchema);
                     return extract(databaseMetaData.getTables(catalog, escapeForLike(schema, database), SQL_FILTER_MATCH_ALL, new String[]{"VIEW"}));
+                }
+
+                private List<CachedRow> queryMssql(CatalogAndSchema catalogAndSchema, String viewName) throws DatabaseException, SQLException {
+                    String ownerName = database.correctObjectName(catalogAndSchema.getSchemaName(), Schema.class);
+                    String databaseName = StringUtil.trimToNull(database.correctObjectName(catalogAndSchema.getCatalogName(), Catalog.class));
+                    String dbIdParam = "";
+                    String databasePrefix = "";
+                    boolean haveDatabaseName = databaseName != null;
+
+                    if (haveDatabaseName) {
+                        dbIdParam = ", db_id('" + databaseName + "')";
+                        databasePrefix = "[" + databaseName + "].";
+                    }
+                    String tableCatParam = haveDatabaseName ? "db_id('" + databaseName + "')" : "";
+                    String permsParam = haveDatabaseName ? "quotename('" + databaseName + "') + '.' + " : "";
+
+                    String sql = "select " +
+                            "db_name(" + tableCatParam + ") AS TABLE_CAT, " +
+                            "convert(sysname,object_schema_name(o.object_id" + dbIdParam + ")) AS TABLE_SCHEM, " +
+                            "convert(sysname,o.name) AS TABLE_NAME, " +
+                            "'VIEW' AS TABLE_TYPE, " +
+                            "CAST(ep.value as varchar(max)) as REMARKS " +
+                            "from " + databasePrefix + "sys.all_objects o " +
+                            "left join sys.extended_properties ep on ep.name='MS_Description' and major_id=o.object_id and minor_id=0 " +
+                            "where " +
+                            "o.type in ('V') " +
+                            "and has_perms_by_name(" + permsParam + "quotename(object_schema_name(o.object_id" + dbIdParam + ")) + '.' + quotename(o.name), 'object', 'select') = 1 " +
+                            "and charindex(substring(o.type,1,1),'V') <> 0 " +
+                            "and object_schema_name(o.object_id" + dbIdParam + ")='" + database.escapeStringForDatabase(ownerName) + "'";
+                    if (viewName != null) {
+                        sql += " AND o.name='" + database.escapeStringForDatabase(viewName) + "' ";
+                    }
+                    sql += "order by 4, 1, 2, 3";
+
+                    return executeAndExtract(sql, database);
                 }
 
 
@@ -1332,14 +1369,14 @@ public class JdbcDatabaseSnapshot extends DatabaseSnapshot {
                         if (table == null) {
                             List<CachedRow> tables = CachingDatabaseMetaData.this.getTables(catalogName, schemaName, null);
                             for (CachedRow table : tables) {
-                                List<CachedRow> pkInfo = getPkInfo(schemaName, catalogAndSchema, table.getString("TABLE_NAME"));
+                                List<CachedRow> pkInfo = getPkInfo(catalogAndSchema, table.getString("TABLE_NAME"));
                                 if (pkInfo != null) {
                                     foundPks.addAll(pkInfo);
                                 }
                             }
                             return foundPks;
                         } else {
-                            List<CachedRow> pkInfo = getPkInfo(schemaName, catalogAndSchema, table);
+                            List<CachedRow> pkInfo = getPkInfo(catalogAndSchema, table);
                             if (pkInfo != null) {
                                 foundPks.addAll(pkInfo);
                             }
@@ -1350,7 +1387,7 @@ public class JdbcDatabaseSnapshot extends DatabaseSnapshot {
                     }
                 }
 
-                private List<CachedRow> getPkInfo(String schemaName, CatalogAndSchema catalogAndSchema, String tableName) throws DatabaseException, SQLException {
+                private List<CachedRow> getPkInfo(CatalogAndSchema catalogAndSchema, String tableName) throws DatabaseException, SQLException {
                     List<CachedRow> pkInfo;
                     if (database instanceof MSSQLDatabase) {
                         String sql = mssqlSql(catalogAndSchema, tableName);
@@ -1368,7 +1405,7 @@ public class JdbcDatabaseSnapshot extends DatabaseSnapshot {
                                     "ON SYSTAB.TBCREATOR = COLUSE.TBCREATOR " +
                                     "WHERE SYSTAB.TYPE = 'P' " +
                                     "AND SYSTAB.TBNAME='" + table + "' " +
-                                    "AND SYSTAB.TBCREATOR='" + schemaName + "' " +
+                                    "AND SYSTAB.TBCREATOR='" + ((AbstractJdbcDatabase) database).getJdbcSchemaName(catalogAndSchema) + "' " +
                                     "AND SYSTAB.TBNAME=COLUSE.TBNAME " +
                                     "AND SYSTAB.CONSTNAME=COLUSE.CONSTNAME " +
                                     "ORDER BY COLUSE.COLNAME";
@@ -1719,8 +1756,15 @@ public class JdbcDatabaseSnapshot extends DatabaseSnapshot {
                             sql += " and systables.tabname = '" + database.correctObjectName(tableName, Table.class) + "'";
                         }
                     } else if (database instanceof SybaseDatabase) {
-                        Scope.getCurrentScope().getLog(getClass()).warning("Finding unique constraints not currently supported for Sybase");
-                        return null; //TODO: find sybase sql
+                        sql = "select idx.name as CONSTRAINT_NAME, tbl.name as TABLE_NAME "
+                                + "from sysindexes idx "
+                                + "inner join sysobjects tbl on tbl.id = idx.id "
+                                + "where idx.indid between 1 and 254 "
+                                + "and (idx.status & 2) = 2 "
+                                + "and tbl.type = 'U'";
+                        if (tableName != null) {
+                            sql += " and tbl.name = '" + database.correctObjectName(tableName, Table.class) + "'";
+                        }
                     } else if (database instanceof SybaseASADatabase) {
                         sql = "select sysconstraint.constraint_name, sysconstraint.constraint_type, systable.table_name " +
                                 "from sysconstraint, systable " +

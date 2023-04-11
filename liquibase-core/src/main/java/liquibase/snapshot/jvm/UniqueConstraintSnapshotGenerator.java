@@ -1,5 +1,13 @@
 package liquibase.snapshot.jvm;
 
+import java.sql.SQLException;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Collectors;
 import liquibase.Scope;
 import liquibase.database.Database;
@@ -20,14 +28,6 @@ import liquibase.structure.core.Schema;
 import liquibase.structure.core.Table;
 import liquibase.structure.core.UniqueConstraint;
 import liquibase.util.StringUtil;
-
-import java.sql.SQLException;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
 
 public class UniqueConstraintSnapshotGenerator extends JdbcSnapshotGenerator {
 
@@ -149,7 +149,7 @@ public class UniqueConstraintSnapshotGenerator extends JdbcSnapshotGenerator {
         String cacheKey = "uniqueConstraints-" + example.getClass().getSimpleName() + "-" + example.getSchema().toCatalogAndSchema().customize(database).toString();
         String queryCountKey = "uniqueConstraints-" + example.getClass().getSimpleName() + "-queryCount";
 
-        Map<String, List<Map<String, ?>>> columnCache = (Map<String, List<Map<String, ?>>>) snapshot.getScratchData(cacheKey);
+        Map<String, List<Map<String, ?>>> columnCache = (ConcurrentHashMap<String, List<Map<String, ?>>>) snapshot.getScratchData(cacheKey);
         Integer columnQueryCount = (Integer) snapshot.getScratchData(queryCountKey);
         if (columnQueryCount == null) {
             columnQueryCount = 0;
@@ -295,7 +295,7 @@ public class UniqueConstraintSnapshotGenerator extends JdbcSnapshotGenerator {
                 } else if (rows.size() > 1) {
                     throw new UnexpectedLiquibaseException("Got multiple rows back querying unique constraints");
                 } else {
-                    Map rowData = rows.get(0);
+                    Map<String, ?> rowData = rows.get(0);
                     String descriptor = rowData.get("DESCRIPTOR").toString();
                     descriptor = descriptor.replaceFirst(".*\\(", "").replaceFirst("\\).*", "");
                     for (String columnNumber : StringUtil.splitAndTrim(descriptor, ",")) {
@@ -320,6 +320,15 @@ public class UniqueConstraintSnapshotGenerator extends JdbcSnapshotGenerator {
                         "LEFT JOIN RDB$INDICES ON RDB$INDICES.RDB$INDEX_NAME = RDB$INDEX_SEGMENTS.RDB$INDEX_NAME " +
                         "WHERE UPPER(TRIM(RDB$INDICES.RDB$INDEX_NAME))='" + database.correctObjectName(name, UniqueConstraint.class) + "' " +
                         "ORDER BY RDB$INDEX_SEGMENTS.RDB$FIELD_POSITION";
+            } else if (database instanceof SybaseDatabase) {
+                //does not support bulkQuery,  supportsBulkQuery should return false()
+                sql = "select soc.name as constraint_name"
+                    + ", (select scl.name from dbo.syscolumns scl where scl.id = sc.tableid and scl.colid = sc.colid) as column_name "
+                    + "from dbo.sysconstraints sc "
+                    + "inner join dbo.sysobjects soc on soc.id = sc.constrid "
+                    + "inner join dbo.sysobjects sot on sot.id = sc.tableid "
+                    + "where sot.id = OBJECT_ID('" + database.correctObjectName(example.getRelation().getName(), Table.class) + "') "
+                    + "and soc.id = OBJECT_ID('" + database.correctObjectName(name, UniqueConstraint.class) + "')";
             } else if (database instanceof SybaseASADatabase) {
                 //does not support bulkQuery,  supportsBulkQuery should return false()
 
@@ -341,14 +350,6 @@ public class UniqueConstraintSnapshotGenerator extends JdbcSnapshotGenerator {
                 //does not support bulkQuery,  supportsBulkQuery should return false()
 
                 sql = getUniqueConstraintsSqlInformix((InformixDatabase) database, schema, name);
-            } else if (database instanceof Db2zDatabase) {
-                sql = "select KC.TBCREATOR as CONSTRAINT_CONTAINER, KC.CONSTNAME as CONSTRAINT_NAME, KC.COLNAME as COLUMN_NAME from SYSIBM.SYSKEYCOLUSE KC, SYSIBM.SYSTABCONST TC "
-                        + "where KC.CONSTNAME = TC.CONSTNAME "
-                        + "and KC.TBCREATOR = TC.TBCREATOR "
-                        + "and TC.TYPE='U' "
-                        + (bulkQuery ? "" : "and KC.CONSTNAME='" + database.correctObjectName(name, UniqueConstraint.class) + "' ")
-                        + "and TC.TBCREATOR = '" + database.correctObjectName(schema.getName(), Schema.class) + "' "
-                        + "order by KC.COLSEQ";
             } else if (database instanceof H2Database && database.getDatabaseMajorVersion() >= 2) {
                 String catalogName = database.correctObjectName(schema.getCatalogName(), Catalog.class);
                 String schemaName = database.correctObjectName(schema.getName(), Schema.class);
@@ -402,15 +403,11 @@ public class UniqueConstraintSnapshotGenerator extends JdbcSnapshotGenerator {
             List<Map<String, ?>> rows = Scope.getCurrentScope().getSingleton(ExecutorService.class).getExecutor("jdbc", database).queryForList(new RawSqlStatement(sql));
 
             if (bulkQuery) {
-                columnCache = new HashMap<>();
+                columnCache = new ConcurrentHashMap<>();
                 snapshot.setScratchData(cacheKey, columnCache);
                 for (Map<String, ?> row : rows) {
                     String key = getCacheKey(row, database);
-                    List<Map<String, ?>> constraintRows = columnCache.get(key);
-                    if (constraintRows == null) {
-                        constraintRows = new ArrayList<>();
-                        columnCache.put(key, constraintRows);
-                    }
+                    List<Map<String, ?>> constraintRows = columnCache.computeIfAbsent(key, k -> new ArrayList<>());
                     constraintRows.add(row);
                 }
 
@@ -475,6 +472,7 @@ public class UniqueConstraintSnapshotGenerator extends JdbcSnapshotGenerator {
     protected boolean supportsBulkQuery(Database database) {
         return !(database instanceof DerbyDatabase)
                 && !(database instanceof FirebirdDatabase)
+                && !(database instanceof SybaseDatabase)
                 && !(database instanceof SybaseASADatabase)
                 && !(database instanceof Ingres9Database)
                 && !(database instanceof InformixDatabase);

@@ -41,7 +41,7 @@ public class BlobType extends LiquibaseDataType {
                     || originalDefinition.matches("(?i)varbinary\\s*\\(.+")
                     || originalDefinition.matches("\\[varbinary\\]\\s*\\(.+")) {
 
-                return new DatabaseDataType(database.escapeDataTypeName("varbinary"), maybeMaxParam(parameters, database));
+                return new DatabaseDataType(database.escapeDataTypeName("varbinary"), maybeMaxParam(parameters));
             } else if ("binary".equals(originalDefinition.toLowerCase(Locale.US))
                     || "[binary]".equals(originalDefinition)
                     || originalDefinition.matches("(?i)binary\\s*\\(.+")
@@ -64,7 +64,7 @@ public class BlobType extends LiquibaseDataType {
             if (parameters.length == 0) {
                 return new DatabaseDataType(database.escapeDataTypeName("varbinary"), "MAX");
             } else {
-                return new DatabaseDataType(database.escapeDataTypeName("varbinary"), maybeMaxParam(parameters, database));
+                return new DatabaseDataType(database.escapeDataTypeName("varbinary"), maybeMaxParam(parameters));
             }
         }
 
@@ -72,7 +72,7 @@ public class BlobType extends LiquibaseDataType {
             if (originalDefinition.toLowerCase(Locale.US).startsWith("blob") || "java.sql.Types.BLOB".equals(originalDefinition)) {
                 return new DatabaseDataType("BLOB");
             } else if (originalDefinition.toLowerCase(Locale.US).startsWith("varbinary") || "java.sql.Types.VARBINARY".equals
-                (originalDefinition)) {
+                    (originalDefinition)) {
                 return new DatabaseDataType("VARBINARY", getParameters());
             } else if (originalDefinition.toLowerCase(Locale.US).startsWith("tinyblob")) {
                 return new DatabaseDataType("TINYBLOB");
@@ -121,10 +121,20 @@ public class BlobType extends LiquibaseDataType {
             return new DatabaseDataType("BLOB");
         }
 
+        if ((database instanceof DB2Database) || (database instanceof Db2zDatabase)) {
+            if (originalDefinition.toLowerCase(Locale.US).startsWith("varbinary") || originalDefinition.startsWith("java.sql.Types.VARBINARY")) {
+                return new DatabaseDataType("VARBINARY", getParameters());
+            } else if (originalDefinition.toLowerCase(Locale.US).startsWith("binary")) {
+                return new DatabaseDataType("BINARY", getParameters());
+            } else {
+                return new DatabaseDataType("BLOB");
+            }
+        }
+
         return super.toDatabaseDataType(database);
     }
 
-    private Object[] maybeMaxParam(Object[] parameters, Database database) {
+    private Object[] maybeMaxParam(Object[] parameters) {
         if (parameters.length < 1) {
             parameters = new Object[]{1};
         } else if (parameters.length > 1) {

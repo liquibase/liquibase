@@ -5,11 +5,12 @@ import liquibase.exception.UnexpectedLiquibaseException;
 import liquibase.servicelocator.PrioritizedService;
 
 import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
 
 public class ChangeLogSerializerFactory {
     private static ChangeLogSerializerFactory instance;
 
-    private Map<String, List<ChangeLogSerializer>> serializers = new HashMap<>();
+    private Map<String, List<ChangeLogSerializer>> serializers = new ConcurrentHashMap<>();
 
     public static synchronized void reset() {
         instance = new ChangeLogSerializerFactory();
@@ -56,13 +57,9 @@ public class ChangeLogSerializerFactory {
 
     public void register(ChangeLogSerializer changeLogSerializer) {
         for (String extension : changeLogSerializer.getValidFileExtensions()) {
-            List<ChangeLogSerializer> changeLogSerializers = serializers.get(extension);
-            if (changeLogSerializers == null) {
-                changeLogSerializers = new ArrayList<>();
-                serializers.put(extension, changeLogSerializers);
-            }
+            List<ChangeLogSerializer> changeLogSerializers = serializers.computeIfAbsent(extension, k -> new ArrayList<>());
             changeLogSerializers.add(changeLogSerializer);
-            Collections.sort(changeLogSerializers, PrioritizedService.COMPARATOR);
+            changeLogSerializers.sort(PrioritizedService.COMPARATOR);
         }
     }
 
@@ -70,12 +67,7 @@ public class ChangeLogSerializerFactory {
         for (Iterator<Map.Entry<String, List<ChangeLogSerializer>>> entryIterator = serializers.entrySet().iterator(); entryIterator.hasNext();) {
             Map.Entry<String, List<ChangeLogSerializer>> entry = entryIterator.next();
             List<ChangeLogSerializer> changeLogSerializers = entry.getValue();
-            for (Iterator<ChangeLogSerializer> iterator = changeLogSerializers.iterator(); iterator.hasNext();) {
-                ChangeLogSerializer value = iterator.next();
-                if (value.equals(changeLogSerializer)) {
-                    iterator.remove();
-                }
-            }
+            changeLogSerializers.removeIf(value -> value.equals(changeLogSerializer));
             if (changeLogSerializers.isEmpty()) {
                 entryIterator.remove();
             }

@@ -83,7 +83,7 @@ public class AddUniqueConstraintGenerator extends AbstractSqlGenerator<AddUnique
                 sql += " ON " + statement.getTablespace();
             } else if ((database instanceof AbstractDb2Database) || (database instanceof SybaseASADatabase) || (database
                 instanceof InformixDatabase)) {
-                ; //not supported
+                //not supported
             } else if (database instanceof OracleDatabase) {
                 /*
                  * In Oracle, you can use only exactly one of these clauses:
@@ -115,7 +115,7 @@ public class AddUniqueConstraintGenerator extends AbstractSqlGenerator<AddUnique
     protected UniqueConstraint getAffectedUniqueConstraint(AddUniqueConstraintStatement statement) {
         UniqueConstraint uniqueConstraint = new UniqueConstraint()
                 .setName(statement.getConstraintName())
-                .setRelation((Table) new Table().setName(statement.getTableName()).setSchema(statement.getCatalogName(), statement.getSchemaName()));
+                .setRelation(new Table().setName(statement.getTableName()).setSchema(statement.getCatalogName(), statement.getSchemaName()));
         int i = 0;
         for (Column column : Column.listFromNames(statement.getColumnNames())) {
             uniqueConstraint.addColumn(i++, column);

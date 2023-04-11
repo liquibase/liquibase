@@ -4,10 +4,20 @@ import liquibase.Scope;
 import liquibase.logging.Logger;
 import liquibase.parser.LiquibaseParser;
 import liquibase.resource.ResourceAccessor;
+import liquibase.util.SnakeYamlUtil;
+import org.yaml.snakeyaml.LoaderOptions;
 
 public abstract class YamlParser implements LiquibaseParser {
 
     protected Logger log = Scope.getCurrentScope().getLog(getClass());
+
+    public static LoaderOptions createLoaderOptions() {
+        LoaderOptions options = new LoaderOptions();
+        SnakeYamlUtil.setCodePointLimitSafely(options, Integer.MAX_VALUE);
+        SnakeYamlUtil.setProcessCommentsSafely(options, false);
+        options.setAllowRecursiveKeys(false);
+        return options;
+    }
 
     public boolean supports(String changeLogFile, ResourceAccessor resourceAccessor) {
         for (String extension : getSupportedFileExtensions()) {

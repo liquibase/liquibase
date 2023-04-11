@@ -127,7 +127,7 @@ abstract class GenericServletListener {
             liquibaseConfiguration.registerProvider(servletConfigurationValueProvider);
 
             failOnError = (String) liquibaseConfiguration.getCurrentConfiguredValue(null, null, LIQUIBASE_ONERROR_FAIL).getValue();
-            if (checkPreconditions(servletContext, ic)) {
+            if (checkPreconditions(servletContext)) {
                 executeUpdate(servletContext, ic);
             }
 
@@ -153,11 +153,11 @@ abstract class GenericServletListener {
      * Checks if the update is supposed to be executed. That depends on several conditions:
      * <ol>
      * <li>if liquibase.shouldRun is <code>false</code> the update will not be executed.</li>
-     * <li>if {@value LiquibaseServletListener#LIQUIBASE_HOST_INCLUDES} contains the current hostname, the the update will be executed.</li>
-     * <li>if {@value LiquibaseServletListener#LIQUIBASE_HOST_EXCLUDES} contains the current hostname, the the update will not be executed.</li>
+     * <li>if {@value GenericServletListener.java#LIQUIBASE_HOST_INCLUDES} contains the current hostname, the the update will be executed.</li>
+     * <li>if {@value GenericServletListener.java#LIQUIBASE_HOST_EXCLUDES} contains the current hostname, the the update will not be executed.</li>
      * </ol>
      */
-    private boolean checkPreconditions(GenericServletWrapper.ServletContext servletContext, InitialContext ic) {
+    private boolean checkPreconditions(GenericServletWrapper.ServletContext servletContext) {
         if (!LiquibaseCommandLineConfiguration.SHOULD_RUN.getCurrentValue()) {
             Scope.getCurrentScope().getLog(getClass()).info("Liquibase did not run on " + hostName
                     + " because " + LiquibaseCommandLineConfiguration.SHOULD_RUN.getKey()
@@ -178,6 +178,7 @@ abstract class GenericServletListener {
                 machine = machine.trim();
                 if (hostName.equalsIgnoreCase(machine)) {
                     shouldRun = true;
+                    break;
                 }
             }
         } else if (machineExcludes != null) {
@@ -186,6 +187,7 @@ abstract class GenericServletListener {
                 machine = machine.trim();
                 if (hostName.equalsIgnoreCase(machine)) {
                     shouldRun = false;
+                    break;
                 }
             }
         }
@@ -198,7 +200,7 @@ abstract class GenericServletListener {
                     + "=true");
         }
         if (!shouldRun) {
-            servletContext.log("LiquibaseServletListener did not run due to "
+            servletContext.log(getClass().getSimpleName() + " did not run due to "
                     + LIQUIBASE_HOST_INCLUDES + " and/or " + LIQUIBASE_HOST_EXCLUDES + "");
             return false;
         }

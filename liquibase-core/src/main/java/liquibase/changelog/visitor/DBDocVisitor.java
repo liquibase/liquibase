@@ -1,10 +1,12 @@
 package liquibase.changelog.visitor;
 
+import liquibase.CatalogAndSchema;
 import liquibase.change.Change;
 import liquibase.changelog.ChangeSet;
 import liquibase.changelog.DatabaseChangeLog;
 import liquibase.changelog.filter.ChangeSetFilterResult;
 import liquibase.database.Database;
+import liquibase.database.core.FirebirdDatabase;
 import liquibase.dbdoc.*;
 import liquibase.exception.LiquibaseException;
 import liquibase.resource.OpenOptions;
@@ -15,11 +17,14 @@ import liquibase.snapshot.SnapshotControl;
 import liquibase.snapshot.SnapshotGeneratorFactory;
 import liquibase.structure.DatabaseObject;
 import liquibase.structure.core.Column;
+import liquibase.structure.core.Schema;
 import liquibase.structure.core.Table;
 import liquibase.util.StreamUtil;
+import liquibase.util.StringUtil;
 
 import java.io.*;
 import java.util.*;
+import java.util.stream.Collectors;
 
 public class DBDocVisitor implements ChangeSetVisitor {
 
@@ -65,10 +70,10 @@ public class DBDocVisitor implements ChangeSetVisitor {
         }
 
         if (!changesByAuthor.containsKey(changeSet.getAuthor())) {
-            changesByAuthor.put(changeSet.getAuthor(), new ArrayList<Change>());
+            changesByAuthor.put(changeSet.getAuthor(), new ArrayList<>());
         }
         if (!changesToRunByAuthor.containsKey(changeSet.getAuthor())) {
-            changesToRunByAuthor.put(changeSet.getAuthor(), new ArrayList<Change>());
+            changesToRunByAuthor.put(changeSet.getAuthor(), new ArrayList<>());
         }
 
         boolean toRun = runStatus.equals(ChangeSet.RunStatus.NOT_RAN) || runStatus.equals(ChangeSet.RunStatus.RUN_AGAIN);
@@ -94,12 +99,12 @@ public class DBDocVisitor implements ChangeSetVisitor {
                 for (DatabaseObject dbObject : affectedDatabaseObjects) {
                     if (toRun) {
                         if (!changesToRunByObject.containsKey(dbObject)) {
-                            changesToRunByObject.put(dbObject, new ArrayList<Change>());
+                            changesToRunByObject.put(dbObject, new ArrayList<>());
                         }
                         changesToRunByObject.get(dbObject).add(change);
                     } else {
                        if (!changesByObject.containsKey(dbObject)) {
-                           changesByObject.put(dbObject, new ArrayList<Change>());
+                           changesByObject.put(dbObject, new ArrayList<>());
                        }
                        changesByObject.get(dbObject).add(change);
                     }
@@ -108,32 +113,34 @@ public class DBDocVisitor implements ChangeSetVisitor {
         }
     }
 
-    public void writeHTML(Resource rootOutputDir, ResourceAccessor resourceAccessor) throws IOException,
+    public void writeHTML(Resource rootOutputDir, ResourceAccessor resourceAccessor, CatalogAndSchema... schemaList) throws IOException,
         LiquibaseException {
         ChangeLogWriter changeLogWriter = new ChangeLogWriter(resourceAccessor, rootOutputDir);
         HTMLWriter authorWriter = new AuthorWriter(rootOutputDir, database);
-        HTMLWriter tableWriter = new TableWriter(rootOutputDir, database);
+        TableWriter tableWriter = new TableWriter(rootOutputDir, database);
         HTMLWriter columnWriter = new ColumnWriter(rootOutputDir, database);
         HTMLWriter pendingChangesWriter = new PendingChangesWriter(rootOutputDir, database);
         HTMLWriter recentChangesWriter = new RecentChangesWriter(rootOutputDir, database);
         HTMLWriter pendingSQLWriter = new PendingSQLWriter(rootOutputDir, database, rootChangeLog);
+
+        CatalogAndSchema[] computedSchemaList = schemaList;
+        if (schemaList == null) {
+            computedSchemaList = new CatalogAndSchema[]{database.getDefaultSchema()};
+        }
+
+        DatabaseSnapshot snapshot = SnapshotGeneratorFactory.getInstance().createSnapshot(computedSchemaList, database, new SnapshotControl(database));
+        if (schemaList != null && schemaList.length != 0 && !(database instanceof FirebirdDatabase)) {
+            this.validateRequiredSchemas(snapshot, computedSchemaList);
+        }
 
         copyFile("liquibase/dbdoc/stylesheet.css", rootOutputDir);
         copyFile("liquibase/dbdoc/index.html", rootOutputDir);
         copyFile("liquibase/dbdoc/globalnav.html", rootOutputDir);
         copyFile("liquibase/dbdoc/overview-summary.html", rootOutputDir);
 
-        DatabaseSnapshot snapshot = SnapshotGeneratorFactory.getInstance().createSnapshot(database.getDefaultSchema(), database, new SnapshotControl(database));
-
         new ChangeLogListWriter(rootOutputDir).writeHTML(changeLogs);
         SortedSet<Table> tables = new TreeSet<>(snapshot.get(Table.class));
-        Iterator<Table> tableIterator = tables.iterator();
-        while (tableIterator.hasNext()) {
-            if (database.isLiquibaseObject(tableIterator.next())) {
-                tableIterator.remove();
-            }
-
-        }
+        tables.removeIf(table -> database.isLiquibaseObject(table));
 
         new TableListWriter(rootOutputDir).writeHTML(tables);
         new AuthorListWriter(rootOutputDir).writeHTML(new TreeSet<Object>(changesByAuthor.keySet()));
@@ -146,7 +153,7 @@ public class DBDocVisitor implements ChangeSetVisitor {
             if (database.isLiquibaseObject(table)) {
                 continue;
             }
-            tableWriter.writeHTML(table, changesByObject.get(table), changesToRunByObject.get(table), rootChangeLogName);
+            tableWriter.writeHTML(table, changesByObject.get(table), changesToRunByObject.get(table), rootChangeLogName, table.getAttribute("schema", new Schema()).toString());
         }
 
         for (Column column : snapshot.get(Column.class)) {
@@ -168,6 +175,28 @@ public class DBDocVisitor implements ChangeSetVisitor {
         }
         recentChangesWriter.writeHTML("index", recentChanges, null, rootChangeLogName);
 
+    }
+
+    private void validateRequiredSchemas(DatabaseSnapshot snapshot, CatalogAndSchema[] schemaList) throws LiquibaseException {
+        Set<Schema> schemasFoundAtDb = snapshot.get(Schema.class);
+        if (schemasFoundAtDb == null || schemasFoundAtDb.isEmpty()) {
+            throw new LiquibaseException("Could not find any of the required schemas at the configured database.");
+        }
+
+        Set<String> schemasNamesAtDb = schemasFoundAtDb.stream().filter(s -> !StringUtil.isEmpty(s.getName()))
+                .map(s -> s.getName().toLowerCase()).collect(Collectors.toSet());
+        Set<String> requiredSchemaNames = Arrays.stream(schemaList).filter(s -> !StringUtil.isEmpty(s.getSchemaName()))
+                .map(s -> s.getSchemaName().toLowerCase()).collect(Collectors.toSet());
+        List<String> notFoundSchemas = new ArrayList<>();
+
+        for (String required : requiredSchemaNames) {
+            if (!schemasNamesAtDb.contains(required)) {
+                notFoundSchemas.add(required);
+            }
+        }
+        if (!notFoundSchemas.isEmpty()) {
+            throw new LiquibaseException("The following schema(s) could not be found at database: " + StringUtil.join(notFoundSchemas, ","));
+        }
     }
 
     private boolean shouldNotWriteColumnHtml(Column column) {

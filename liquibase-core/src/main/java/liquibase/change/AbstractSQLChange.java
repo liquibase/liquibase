@@ -19,6 +19,8 @@ import java.io.*;
 import java.util.ArrayList;
 import java.util.List;
 
+import static liquibase.statement.SqlStatement.EMPTY_SQL_STATEMENT;
+
 /**
  * A common parent for all raw SQL related changes regardless of where the sql was sourced from.
  * 
@@ -54,7 +56,11 @@ public abstract class AbstractSQLChange extends AbstractChange implements DbmsTa
     }
 
     @Override
-    @DatabaseChangeProperty(since = "3.0", exampleValue = "h2, oracle")
+    @DatabaseChangeProperty(since = "3.0", exampleValue = "h2, oracle",
+        description = "Specifies which database type(s) a changeset is to be used for. " +
+            "See valid database type names on Supported Databases docs page. Separate multiple databases with commas. " +
+            "Specify that a changeset is not applicable to a particular database type by prefixing with !. " +
+            "The keywords 'all' and 'none' are also available.")
     public String getDbms() {
         return dbms;
     }
@@ -228,13 +234,13 @@ public abstract class AbstractSQLChange extends AbstractChange implements DbmsTa
 
         String sql = StringUtil.trimToNull(getSql());
         if (sql == null) {
-            return new SqlStatement[0];
+            return EMPTY_SQL_STATEMENT;
         }
 
         String processedSQL = normalizeLineEndings(sql);
         if (this instanceof RawSQLChange && ((RawSQLChange) this).isRerunnable()) {
             returnStatements.add(new RawSqlStatement(processedSQL, getEndDelimiter()));
-            return returnStatements.toArray(new SqlStatement[returnStatements.size()]);
+            return returnStatements.toArray(EMPTY_SQL_STATEMENT);
         }
         for (String statement : StringUtil.processMultiLineSQL(processedSQL, isStripComments(), isSplitStatements(), getEndDelimiter())) {
             if (database instanceof MSSQLDatabase) {
@@ -257,7 +263,7 @@ public abstract class AbstractSQLChange extends AbstractChange implements DbmsTa
             }
         }
 
-        return returnStatements.toArray(new SqlStatement[returnStatements.size()]);
+        return returnStatements.toArray(EMPTY_SQL_STATEMENT);
     }
 
     @Override

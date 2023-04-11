@@ -23,6 +23,7 @@ public class LiquibaseConfiguration implements SingletonObject {
 
     private final SortedSet<ConfigurationValueProvider> configurationValueProviders;
     private final SortedSet<ConfigurationDefinition<?>> definitions = new TreeSet<>();
+    public static final String REGISTERED_VALUE_PROVIDERS_KEY = "REGISTERED_VALUE_PROVIDERS";
 
     /**
      * Track looked up values we have logged to avoid infinite loops between this and the log system using configurations
@@ -158,7 +159,19 @@ public class LiquibaseConfiguration implements SingletonObject {
                     if (foundFirstValue) {
                         logMessage.append("Overrides ");
                     }
-                    logMessage.append(StringUtil.lowerCaseFirst(providedValue.describe()));
+
+                    //
+                    // Only lower case the first character is
+                    // the first two characters are NOT uppercase.  This allows provider
+                    // strings like 'AWS' to be displayed correctly, i.e. as 'AWS', not 'aWS'
+                    //
+                    String describe = providedValue.describe();
+                    char[] chars = describe.toCharArray();
+                    if (chars.length >= 2 && Character.isUpperCase(chars[0]) && Character.isUpperCase(chars[1])) {
+                        logMessage.append(describe);
+                    } else {
+                        logMessage.append(StringUtil.lowerCaseFirst(describe));
+                    }
                     Object value = providedValue.getValue();
                     if (value != null) {
                         String finalValue = String.valueOf(value);

@@ -11,12 +11,15 @@ import java.util.regex.Pattern;
 public class StandardNamespaceDetails implements NamespaceDetails {
 
     public static final String GENERIC_EXTENSION_XSD = "http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-ext.xsd";
-    private final Pattern standardUrlPattern;
-    private final Pattern oldStandardUrlPattern;
+    private static final String STANDARD_XSD_URL_REGEX = "http://www.liquibase.org/xml/ns/dbchangelog/(dbchangelog-[\\w\\.]+.xsd)";
+    private static final Pattern STANDARD_XSD_URL_PATTERN = Pattern.compile(STANDARD_XSD_URL_REGEX);
+
+    private static final String OLD_STANDARD_XSD_URL_REGEX = "http://www.liquibase.org/xml/ns/migrator/(dbchangelog-[\\w\\.]+.xsd)";
+
+    private static final Pattern OLD_STANDARD_XSD_URL_PATTERN = Pattern.compile(OLD_STANDARD_XSD_URL_REGEX);
 
     public StandardNamespaceDetails() {
-        standardUrlPattern = Pattern.compile("http://www.liquibase.org/xml/ns/dbchangelog/(dbchangelog-[\\w\\.]+.xsd)");
-        oldStandardUrlPattern = Pattern.compile("http://www.liquibase.org/xml/ns/migrator/(dbchangelog-[\\w\\.]+.xsd)");
+
     }
 
     @Override

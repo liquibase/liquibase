@@ -5,11 +5,12 @@ import liquibase.exception.UnexpectedLiquibaseException;
 import liquibase.servicelocator.PrioritizedService;
 
 import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
 
 public class SnapshotSerializerFactory {
     private static SnapshotSerializerFactory instance;
 
-    private Map<String, List<SnapshotSerializer>> serializers = new HashMap<>();
+    private Map<String, List<SnapshotSerializer>> serializers = new ConcurrentHashMap<>();
 
     public static synchronized void reset() {
         instance = new SnapshotSerializerFactory();
@@ -56,13 +57,9 @@ public class SnapshotSerializerFactory {
 
     public void register(SnapshotSerializer snapshotSerializer) {
         for (String extension : snapshotSerializer.getValidFileExtensions()) {
-            List<SnapshotSerializer> snapshotSerializers = serializers.get(extension);
-            if (snapshotSerializers == null) {
-                snapshotSerializers = new ArrayList<>();
-                serializers.put(extension, snapshotSerializers);
-            }
+            List<SnapshotSerializer> snapshotSerializers = serializers.computeIfAbsent(extension, k -> new ArrayList<>());
             snapshotSerializers.add(snapshotSerializer);
-            Collections.sort(snapshotSerializers, PrioritizedService.COMPARATOR);
+            snapshotSerializers.sort(PrioritizedService.COMPARATOR);
         }
     }
 
@@ -70,12 +67,7 @@ public class SnapshotSerializerFactory {
         for (Iterator<Map.Entry<String, List<SnapshotSerializer>>> entryIterator = serializers.entrySet().iterator(); entryIterator.hasNext();) {
             Map.Entry<String, List<SnapshotSerializer>> entry = entryIterator.next();
             List<SnapshotSerializer> snapshotSerializers = entry.getValue();
-            for (Iterator<SnapshotSerializer> iterator = snapshotSerializers.iterator(); iterator.hasNext();) {
-                SnapshotSerializer value = iterator.next();
-                if (value.equals(snapshotSerializer)) {
-                    iterator.remove();
-                }
-            }
+            snapshotSerializers.removeIf(value -> value.equals(snapshotSerializer));
             if (snapshotSerializers.isEmpty()) {
                 entryIterator.remove();
             }

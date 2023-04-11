@@ -38,7 +38,7 @@ public class UniqueConstraintComparator implements DatabaseObjectComparator {
             hashes.addAll(Arrays.asList(DatabaseObjectComparatorFactory.getInstance().hash(table, chain.getSchemaComparisons(), accordingTo)));
         }
 
-        return hashes.toArray(new String[hashes.size()]);
+        return hashes.toArray(new String[0]);
     }
 
 
@@ -109,22 +109,19 @@ public class UniqueConstraintComparator implements DatabaseObjectComparator {
         exclude.add("backingIndex");
         ObjectDifferences differences = chain.findDifferences(databaseObject1, databaseObject2, accordingTo, compareControl, exclude);
 
-        differences.compare("columns", databaseObject1, databaseObject2, new ObjectDifferences.CompareFunction() {
-            @Override
-            public boolean areEqual(Object referenceValue, Object compareToValue) {
-                List<Column> referenceList = (List) referenceValue;
-                List<Column> compareList = (List) compareToValue;
+        differences.compare("columns", databaseObject1, databaseObject2, (referenceValue, compareToValue) -> {
+            List<Column> referenceList = (List) referenceValue;
+            List<Column> compareList = (List) compareToValue;
 
-                if (referenceList.size() != compareList.size()) {
+            if (referenceList.size() != compareList.size()) {
+                return false;
+            }
+            for (int i=0; i<referenceList.size(); i++) {
+                if (!StringUtil.trimToEmpty((referenceList.get(i)).getName()).equalsIgnoreCase(StringUtil.trimToEmpty(compareList.get(i).getName()))) {
                     return false;
                 }
-                for (int i=0; i<referenceList.size(); i++) {
-                    if (!StringUtil.trimToEmpty((referenceList.get(i)).getName()).equalsIgnoreCase(StringUtil.trimToEmpty(compareList.get(i).getName()))) {
-                        return false;
-                    }
-                }
-                return true;
             }
+            return true;
         });
 
         differences.compare("backingIndex", databaseObject1, databaseObject2, new ObjectDifferences.StandardCompareFunction(chain.getSchemaComparisons(), accordingTo));

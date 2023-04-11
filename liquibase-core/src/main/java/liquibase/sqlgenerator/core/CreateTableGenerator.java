@@ -52,8 +52,13 @@ public class CreateTableGenerator extends AbstractSqlGenerator<CreateTableStatem
         List<Sql> additionalSql = new ArrayList<>();
 
         StringBuilder buffer = new StringBuilder();
-        buffer.append("CREATE TABLE ").append(database.escapeTableName(statement.getCatalogName(),
-                statement.getSchemaName(), statement.getTableName())).append(" ");
+        buffer.append("CREATE ");
+
+        if (StringUtil.isNotEmpty(statement.getTableType())) {
+            buffer.append(statement.getTableType().trim().toUpperCase()).append(" ");
+        }
+        buffer.append("TABLE ").append(generateTableName(database, statement)).append(" ");
+
         buffer.append("(");
 
         boolean isSinglePrimaryKeyColumn = (statement.getPrimaryKeyConstraint() != null) && (statement
@@ -282,7 +287,7 @@ public class CreateTableGenerator extends AbstractSqlGenerator<CreateTableStatem
                     .append(") REFERENCES ");
             if (referencesString != null) {
                 if (!referencesString.contains(".") && (database.getDefaultSchemaName() != null) && database
-                        .getOutputDefaultSchema()) {
+                        .getOutputDefaultSchema() && (database.supportsSchemas() || database.supportsCatalogs())) {
                     referencesString = database.escapeObjectName(database.getDefaultSchemaName(), Schema.class) + "." + referencesString;
                 }
                 buffer.append(referencesString);
@@ -369,7 +374,7 @@ public class CreateTableGenerator extends AbstractSqlGenerator<CreateTableStatem
         String sql = buffer.toString().replaceFirst(",\\s*$", "") + ")";
 
         if ((database instanceof MySQLDatabase) && (mysqlTableOptionStartWith != null)) {
-            Scope.getCurrentScope().getLog(getClass()).info("[MySQL] Using last startWith statement ("+mysqlTableOptionStartWith.toString()+") as table option.");
+            Scope.getCurrentScope().getLog(getClass()).info("[MySQL] Using last startWith statement ("+ mysqlTableOptionStartWith +") as table option.");
             sql += " " + ((MySQLDatabase) database).getTableOptionAutoIncrementStartWithClause(mysqlTableOptionStartWith);
         }
 
@@ -387,7 +392,17 @@ public class CreateTableGenerator extends AbstractSqlGenerator<CreateTableStatem
             sql += " COMMENT='" + database.escapeStringForDatabase(statement.getRemarks()) + "' ";
         }
         additionalSql.add(0, new UnparsedSql(sql, getAffectedTable(statement)));
-        return additionalSql.toArray(new Sql[additionalSql.size()]);
+        return additionalSql.toArray(EMPTY_SQL);
+    }
+
+    private String generateTableName(Database database, CreateTableStatement statement) {
+        // In Postgresql, temp tables get their own schema and each session (connection) gets
+        //its own temp schema. So - don't qualify them by schema.
+        if (!(database instanceof PostgresDatabase) || StringUtil.isEmpty(statement.getTableType()) || !statement.getTableType().trim().toLowerCase().contains("temp")) {
+            return database.escapeTableName(statement.getCatalogName(), statement.getSchemaName(), statement.getTableName());
+        } else {
+            return database.escapeObjectName(statement.getTableName(), Table.class);
+        }
     }
 
     /**

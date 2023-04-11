@@ -19,10 +19,12 @@ import java.util.List;
 
 public abstract class HTMLWriter {
     protected Resource outputDir;
+    protected Resource baseOutputDir;
     protected Database database;
 
     public HTMLWriter(Resource outputDir, Database database) {
         this.outputDir = outputDir;
+        this.baseOutputDir = outputDir;
         this.database = database;
     }
 
@@ -33,10 +35,9 @@ public abstract class HTMLWriter {
     }
 
     public void writeHTML(Object object, List<Change> ranChanges, List<Change> changesToRun, String changeLog) throws IOException, DatabaseHistoryException, DatabaseException {
-        Writer fileWriter = createFileWriter(object);
 
 
-        try {
+        try (Writer fileWriter = createFileWriter(object)) {
             fileWriter.append("<html>");
             writeHeader(object, fileWriter);
             fileWriter.append("<body BGCOLOR=\"white\" onload=\"windowTitle();\">");
@@ -49,8 +50,6 @@ public abstract class HTMLWriter {
 
             fileWriter.append("</body>");
             fileWriter.append("</html>");
-        } finally {
-            fileWriter.close();
         }
 
     }

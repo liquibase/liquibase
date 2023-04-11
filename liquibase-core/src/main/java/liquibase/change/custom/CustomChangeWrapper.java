@@ -1,10 +1,7 @@
 package liquibase.change.custom;
 
 import liquibase.Scope;
-import liquibase.change.AbstractChange;
-import liquibase.change.ChangeMetaData;
-import liquibase.change.DatabaseChange;
-import liquibase.change.DatabaseChangeProperty;
+import liquibase.change.*;
 import liquibase.database.Database;
 import liquibase.exception.*;
 import liquibase.parser.core.ParsedNode;
@@ -162,21 +159,23 @@ public class CustomChangeWrapper extends AbstractChange {
     @Override
     public SqlStatement[] generateStatements(Database database) {
         SqlStatement[] statements = null;
-        try {
-            configureCustomChange();
-            if (customChange instanceof CustomSqlChange) {
-                statements = ((CustomSqlChange) customChange).generateStatements(database);
-            } else if (customChange instanceof CustomTaskChange) {
-                ((CustomTaskChange) customChange).execute(database);
-            } else {
-                throw new UnexpectedLiquibaseException(customChange.getClass().getName() + " does not implement " + CustomSqlChange.class.getName() + " or " + CustomTaskChange.class.getName());
+        if (shouldExecuteChange(database)) {
+            try {
+                configureCustomChange();
+                if (customChange instanceof CustomSqlChange) {
+                    statements = ((CustomSqlChange) customChange).generateStatements(database);
+                } else if (customChange instanceof CustomTaskChange) {
+                    ((CustomTaskChange) customChange).execute(database);
+                } else {
+                    throw new UnexpectedLiquibaseException(customChange.getClass().getName() + " does not implement " + CustomSqlChange.class.getName() + " or " + CustomTaskChange.class.getName());
+                }
+            } catch (CustomChangeException e) {
+                throw new UnexpectedLiquibaseException(e);
             }
-        } catch (CustomChangeException e) {
-            throw new UnexpectedLiquibaseException(e);
         }
 
         if (statements == null) {
-            statements = new SqlStatement[0];
+            statements = SqlStatement.EMPTY_SQL_STATEMENT;
         }
         return statements;
     }
@@ -205,7 +204,7 @@ public class CustomChangeWrapper extends AbstractChange {
         }
 
         if (statements == null) {
-            statements = new SqlStatement[0];
+            statements = SqlStatement.EMPTY_SQL_STATEMENT;
         }
         return statements;
 
@@ -214,7 +213,7 @@ public class CustomChangeWrapper extends AbstractChange {
 
     /**
      * Returns true if the customChange supports rolling back.
-     * {@link #generateRollbackStatements} may still trow a {@link RollbackImpossibleException} when it is actually exectued, even if this method returns true.
+     * {@link #generateRollbackStatements} may still throw a {@link RollbackImpossibleException} when it is actually executed, even if this method returns true.
      * Currently only checks if the customChange implements {@link CustomSqlRollback}
      */
     @Override

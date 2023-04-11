@@ -16,6 +16,7 @@ import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.text.ParseException;
 import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * Various methods that make it easier to read and write object properties using the propertyName, instead of having
@@ -28,7 +29,7 @@ public class ObjectUtil {
     /**
      * Cache for the methods of classes that we have been queried about so far.
      */
-    private static Map<Class<?>, Method[]> methodCache = new HashMap<>();
+    private static Map<Class<?>, Method[]> methodCache = new ConcurrentHashMap<>();
 
     /**
      * For a given object, try to find the appropriate reader method and return the value, if set
@@ -150,10 +151,10 @@ public class ObjectUtil {
             throw new UnexpectedLiquibaseException(e);
         } catch (IllegalArgumentException e) {
             if (finalValue != null) {
-                throw new UnexpectedLiquibaseException("Cannot call " + method.toString()
+                throw new UnexpectedLiquibaseException("Cannot call " + method
                         + " with value of type " + finalValue.getClass().getName());
             } else {
-                throw new UnexpectedLiquibaseException("Cannot call " + method.toString() + " with a null argument");
+                throw new UnexpectedLiquibaseException("Cannot call " + method + " with a null argument");
             }
         }
     }
@@ -188,7 +189,7 @@ public class ObjectUtil {
         } catch (IllegalAccessException | InvocationTargetException e) {
             throw new UnexpectedLiquibaseException(e);
         } catch (IllegalArgumentException e) {
-            throw new UnexpectedLiquibaseException("Cannot call " + method.toString() + " with value of type "
+            throw new UnexpectedLiquibaseException("Cannot call " + method + " with value of type "
                 + (propertyValue == null ? "null" : propertyValue.getClass().getName()));
         }
     }
@@ -242,13 +243,7 @@ public class ObjectUtil {
      * @return a list of methods belonging to the class of the object
      */
     private static Method[] getMethods(Object object) {
-        Method[] methods = methodCache.get(object.getClass());
-
-        if (methods == null) {
-            methods = object.getClass().getMethods();
-            methodCache.put(object.getClass(), methods);
-        }
-        return methods;
+        return methodCache.computeIfAbsent(object.getClass(), k -> object.getClass().getMethods());
     }
 
       /**
@@ -463,7 +458,7 @@ public class ObjectUtil {
 
     private static class IntrospectionContext {
         private final Class<?> targetClass;
-        private final Map<String, PropertyDescriptor> descriptors = new HashMap<>();
+        private final Map<String, PropertyDescriptor> descriptors = new ConcurrentHashMap<>();
 
         public IntrospectionContext(Class<?> targetClass) {
             if (targetClass == null) {
@@ -487,7 +482,7 @@ public class ObjectUtil {
         }
 
         public PropertyDescriptor[] getDescriptors() {
-            return descriptors.values().toArray(new PropertyDescriptor[descriptors.values().size()]);
+            return descriptors.values().toArray(new PropertyDescriptor[0]);
         }
 
         public Class<?> getTargetClass() {

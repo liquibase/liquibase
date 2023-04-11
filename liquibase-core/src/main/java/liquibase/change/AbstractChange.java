@@ -4,6 +4,9 @@ import liquibase.Scope;
 import liquibase.changelog.ChangeSet;
 import liquibase.database.Database;
 import liquibase.exception.*;
+import liquibase.executor.Executor;
+import liquibase.executor.ExecutorService;
+import liquibase.executor.LoggingExecutor;
 import liquibase.parser.core.ParsedNode;
 import liquibase.parser.core.ParsedNodeException;
 import liquibase.plugin.AbstractPlugin;
@@ -13,6 +16,7 @@ import liquibase.serializer.core.string.StringChangeLogSerializer;
 import liquibase.sqlgenerator.SqlGeneratorFactory;
 import liquibase.statement.SqlStatement;
 import liquibase.structure.DatabaseObject;
+import liquibase.util.BooleanUtil;
 import liquibase.util.ObjectUtil;
 import liquibase.util.StringUtil;
 
@@ -22,6 +26,8 @@ import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.lang.reflect.Type;
 import java.util.*;
+
+import static liquibase.statement.SqlStatement.EMPTY_SQL_STATEMENT;
 
 /**
  * Standard superclass to simplify {@link Change } implementations. You can implement Change directly, this class is
@@ -378,7 +384,7 @@ public abstract class AbstractChange extends AbstractPlugin implements Change {
                 warnings.addAll(SqlGeneratorFactory.getInstance().warn(statement, database));
             } else if (statement.skipOnUnsupported()) {
                 warnings.addWarning(
-                    statement.getClass().getName() + " is not supported on " + database.getShortName() +
+                    statement.getClass().getName() + " is not supported on " + database.getDisplayName() +
                         ", but " + Scope.getCurrentScope().getSingleton(ChangeFactory.class).getChangeMetaData(this).getName() +
                         " will still execute");
             }
@@ -418,7 +424,7 @@ public abstract class AbstractChange extends AbstractPlugin implements Change {
         // Record warnings if statements are unsupported on database
         if (!generateStatementsVolatile(database)) {
             String unsupportedWarning = Scope.getCurrentScope().getSingleton(ChangeFactory.class).getChangeMetaData(this).getName()
-                    + " is not supported on " + database.getShortName();
+                    + " is not supported on " + database.getDisplayName();
             boolean sawUnsupportedError = false;
 
             SqlStatement[] statements = generateStatements(database);
@@ -443,6 +449,23 @@ public abstract class AbstractChange extends AbstractPlugin implements Change {
     @Override
     public ChangeStatus checkStatus(Database database) {
         return new ChangeStatus().unknown("Not implemented");
+    }
+
+    //
+    //
+
+    /**
+     *
+     * Return if this change should execute
+     *
+     * @param   database            Database we are working on
+     * @return  boolean
+     *
+     */
+    public boolean shouldExecuteChange(Database database) {
+        Boolean shouldExecute = Scope.getCurrentScope().get(Change.SHOULD_EXECUTE, Boolean.class);
+        Executor executor = Scope.getCurrentScope().getSingleton(ExecutorService.class).getExecutor("jdbc", database);
+        return ! (executor instanceof LoggingExecutor) && (shouldExecute == null || BooleanUtil.isTrue(shouldExecute));
     }
 
     /**
@@ -487,7 +510,7 @@ public abstract class AbstractChange extends AbstractPlugin implements Change {
                 if (!inverse.supports(database)) {
                     throw new RollbackImpossibleException(
                         Scope.getCurrentScope().getSingleton(ChangeFactory.class).getChangeMetaData(inverse).getName() + " is not supported on " +
-                            database.getShortName()
+                            database.getDisplayName()
                     );
                 }
                 statements.addAll(Arrays.asList(inverse.generateStatements(database)));
@@ -496,12 +519,12 @@ public abstract class AbstractChange extends AbstractPlugin implements Change {
             throw new RollbackImpossibleException(e);
         }
 
-        return statements.toArray(new SqlStatement[statements.size()]);
+        return statements.toArray(EMPTY_SQL_STATEMENT);
     }
 
     /**
      * Create inverse changes that can roll back this change. This method is intended
-     * to be overriden by Change implementations that have a logical inverse operation. Default implementation
+     * to be overridden by Change implementations that have a logical inverse operation. Default implementation
      * returns null.
      * <p/>
      * If {@link #generateRollbackStatements(liquibase.database.Database)} is overridden, this method may not be called.
@@ -758,7 +781,7 @@ public abstract class AbstractChange extends AbstractPlugin implements Change {
                     returnList.add(objValue);
                 }
             }
-            if (((Collection) value).isEmpty()) {
+            if (((Collection<?>) value).isEmpty()) {
                 return null;
             } else {
                 return returnList;
@@ -778,9 +801,10 @@ public abstract class AbstractChange extends AbstractPlugin implements Change {
         SortedSet<String> names = new TreeSet<>();
         for (Map.Entry<String, ChangeParameterMetaData> entry : metaData.getParameters().entrySet()) {
             String lowerCaseKey = entry.getKey().toLowerCase();
-            if (lowerCaseKey.endsWith("name")
-                && !lowerCaseKey.contains("schema")
-                && !lowerCaseKey.contains("catalog")) {
+            if ((lowerCaseKey.endsWith("name")
+                        && !lowerCaseKey.contains("schema")
+                        && !lowerCaseKey.contains("catalog"))
+                    || lowerCaseKey.equals("path")) {
                 Object currentValue = entry.getValue().getCurrentValue(this);
                 if (currentValue != null) {
                     names.add(entry.getKey()+"="+ currentValue);

@@ -1,7 +1,11 @@
 package liquibase.dbdoc;
 
+import liquibase.Scope;
 import liquibase.change.Change;
 import liquibase.database.Database;
+import liquibase.exception.DatabaseException;
+import liquibase.exception.DatabaseHistoryException;
+import liquibase.resource.PathHandlerFactory;
 import liquibase.resource.Resource;
 import liquibase.structure.core.*;
 
@@ -25,13 +29,19 @@ public class TableWriter extends HTMLWriter {
     @Override
     protected void writeCustomHTML(Writer fileWriter, Object object, List<Change> changes, Database database) throws IOException {
         final Table table = (Table) object;
-        writeTableRemarks(fileWriter, table, database);
-        writeColumns(fileWriter, table, database);
-        writeTableIndexes(fileWriter, table, database);
-        writeTableForeignKeys(fileWriter, table, database);
+        writeTableRemarks(fileWriter, table);
+        writeColumns(fileWriter, table);
+        writeTableIndexes(fileWriter, table);
+        writeTableForeignKeys(fileWriter, table);
     }
 
-    private void writeColumns(Writer fileWriter, Table table, Database database) throws IOException {
+    public void writeHTML(Object object, List<Change> ranChanges, List<Change> changesToRun, String changeLog, String schema) throws DatabaseHistoryException, IOException, DatabaseException {
+        super.outputDir = Scope.getCurrentScope().getSingleton(PathHandlerFactory.class).getResource(super.baseOutputDir.getPath() + System.getProperty("file.separator") + schema);
+        super.writeHTML(object, ranChanges, changesToRun, changeLog);
+
+    }
+
+    private void writeColumns(Writer fileWriter, Table table) throws IOException {
         List<List<String>> cells = new ArrayList<>();
 
         for (Column column : table.getColumns()) {
@@ -46,7 +56,7 @@ public class TableWriter extends HTMLWriter {
         writeTable("Current Columns", cells, fileWriter);
     }
 
-    private void writeTableRemarks(Writer fileWriter, Table table, Database database) throws IOException {
+    private void writeTableRemarks(Writer fileWriter, Table table) throws IOException {
         final String tableRemarks = table.getRemarks();
         if ((tableRemarks != null) && !tableRemarks.isEmpty()) {
         	final List<List<String>> cells = new ArrayList<>();
@@ -55,7 +65,7 @@ public class TableWriter extends HTMLWriter {
         }
     }
 
-    private void writeTableIndexes(Writer fileWriter, Table table, Database database) throws IOException {
+    private void writeTableIndexes(Writer fileWriter, Table table) throws IOException {
         final List<List<String>> cells = new ArrayList<>();
         final PrimaryKey primaryKey = table.getPrimaryKey();
         if (!table.getIndexes().isEmpty()) {
@@ -69,7 +79,7 @@ public class TableWriter extends HTMLWriter {
         }
     }
 
-    private void writeTableForeignKeys(Writer fileWriter, Table table, Database database) throws IOException {
+    private void writeTableForeignKeys(Writer fileWriter, Table table) throws IOException {
         final List<List<String>> cells = new ArrayList<>();
         if(!table.getOutgoingForeignKeys().isEmpty())
         {

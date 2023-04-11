@@ -25,7 +25,7 @@ import java.util.List;
 
 /**
  *
- * This is an example of a custom <a href="#{@link}">{@link Executor}</a> implemention which can be specified
+ * This is an example of a custom <a href="#{@link}">{@link Executor}</a> implementation which can be specified
  * in a changelog with the "runWith" attribute
  *
  */
@@ -91,22 +91,20 @@ public class ExampleExecutor extends JdbcExecutor {
         //
         List<Change> changes = changeSet.getChanges();
         for (Change change : changes) {
-            validateChange(changeSet, validationErrors, change, "");
+            validateChange(change, "");
         }
         if (changeSet.getRollback() != null) {
             RollbackContainer container = changeSet.getRollback();
             List<Change> rollbackChanges = container.getChanges();
             for (Change change : rollbackChanges) {
                 Scope.getCurrentScope().getLog(getClass()).info("Validating rollback change " + change.getDescription());
-                validateChange(changeSet, validationErrors, change, "");
+                validateChange(change, "");
             }
         }
         return validationErrors;
     }
 
-    private void validateChange(ChangeSet changeSet,
-                                ValidationErrors validationErrors,
-                                Change change,
+    private void validateChange(Change change,
                                 String type) {
         Scope.getCurrentScope().getLog(getClass()).info("Validating " + type + " change " + change.getDescription());
     }

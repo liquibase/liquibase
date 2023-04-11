@@ -11,8 +11,8 @@ import java.util.List;
 public class ForeignKey extends AbstractDatabaseObject{
 
     public ForeignKey() {
-        setForeignKeyColumns(new ArrayList<Column>());
-        setPrimaryKeyColumns(new ArrayList<Column>());
+        setForeignKeyColumns(new ArrayList<>());
+        setPrimaryKeyColumns(new ArrayList<>());
     }
 
     public ForeignKey(String name) {
@@ -137,12 +137,7 @@ public class ForeignKey extends AbstractDatabaseObject{
 
     @Override
     public String toString() {
-        StringUtil.StringUtilFormatter<Column> columnFormatter = new StringUtil.StringUtilFormatter<Column>() {
-            @Override
-            public String toString(Column obj) {
-                return obj.getName();
-            }
-        };
+        StringUtil.StringUtilFormatter<Column> columnFormatter = Column::getName;
         return getName() + "(" + getForeignKeyTable() + "[" + StringUtil.join(getForeignKeyColumns(), ", ", columnFormatter) + "] -> " + getPrimaryKeyTable() + "[" + StringUtil.join(getPrimaryKeyColumns(), ", ", columnFormatter) + "])";
     }
 
@@ -224,12 +219,7 @@ public class ForeignKey extends AbstractDatabaseObject{
             return this.getName().equalsIgnoreCase(that.getName());
         }
 
-        StringUtil.StringUtilFormatter formatter = new StringUtil.StringUtilFormatter<Column>() {
-            @Override
-            public String toString(Column obj) {
-                return obj.toString(false);
-            }
-        };
+        StringUtil.StringUtilFormatter<Column> formatter = obj -> obj.toString(false);
 
         return (StringUtil.join(getForeignKeyColumns(), ",", formatter).equalsIgnoreCase(StringUtil.join(that
             .getForeignKeyColumns(), ",", formatter)) && ((getForeignKeyTable() != null) && (that.getForeignKeyTable
@@ -241,12 +231,7 @@ public class ForeignKey extends AbstractDatabaseObject{
 
     @Override
     public int hashCode() {
-        StringUtil.StringUtilFormatter formatter = new StringUtil.StringUtilFormatter<Column>() {
-            @Override
-            public String toString(Column obj) {
-                return obj.toString(false);
-            }
-        };
+        StringUtil.StringUtilFormatter<Column> formatter = obj -> obj.toString(false);
 
         int result = 0;
         if (getPrimaryKeyTable() != null) {
@@ -270,12 +255,7 @@ public class ForeignKey extends AbstractDatabaseObject{
 
     @Override
     public int compareTo(Object other) {
-        StringUtil.StringUtilFormatter formatter = new StringUtil.StringUtilFormatter<Column>() {
-            @Override
-            public String toString(Column obj) {
-                return obj.toString(false);
-            }
-        };
+        StringUtil.StringUtilFormatter<Column> formatter = obj -> obj.toString(false);
 
         ForeignKey o = (ForeignKey) other;
         int returnValue = 0;

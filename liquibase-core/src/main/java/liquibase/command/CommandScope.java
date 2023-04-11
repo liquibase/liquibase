@@ -1,14 +1,21 @@
 package liquibase.command;
 
+import liquibase.GlobalConfiguration;
 import liquibase.Scope;
 import liquibase.configuration.*;
 import liquibase.exception.CommandExecutionException;
 import liquibase.exception.CommandValidationException;
+import liquibase.integration.commandline.LiquibaseCommandLineConfiguration;
+import liquibase.listener.LiquibaseListener;
+import liquibase.logging.mdc.MdcKey;
+import liquibase.logging.mdc.MdcObject;
+import liquibase.util.ISODateFormat;
 import liquibase.util.StringUtil;
 
 import java.io.FilterOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
+import java.time.Instant;
 import java.util.*;
 import java.util.regex.Pattern;
 
@@ -22,10 +29,13 @@ import java.util.regex.Pattern;
  */
 public class CommandScope {
 
-    public static final Pattern NO_PREFIX_PATTERN = Pattern.compile(".*\\.");
+    private static final String NO_PREFIX_REGEX = ".*\\.";
+    public static final Pattern NO_PREFIX_PATTERN = Pattern.compile(NO_PREFIX_REGEX);
     private final CommandDefinition commandDefinition;
 
     private final SortedMap<String, Object> argumentValues = new TreeMap<>();
+
+    private final Map<Class<?>, Object> dependencies = new HashMap<>();
 
     /**
      * Config key including the command name. Example `liquibase.command.update`
@@ -105,7 +115,6 @@ public class CommandScope {
             ConfigurationDefinition<T> noCommandConfigDef = createConfigurationDefinition(argument, false);
             ConfiguredValue<T> noCommandNameProvidedValue = noCommandConfigDef.getCurrentConfiguredValue();
             if (noCommandNameProvidedValue.found() && !noCommandNameProvidedValue.wasDefaultValueUsed()) {
-                configDef = noCommandConfigDef;
                 providedValue = noCommandNameProvidedValue;
             }
         }
@@ -120,6 +129,26 @@ public class CommandScope {
     public <T> T getArgumentValue(CommandArgumentDefinition<T> argument) {
         final T value = getConfiguredValue(argument).getValue();
         return argument.getValueConverter().convert(value);
+    }
+
+    /**
+     * Assign a value to a given provided dependency. So if a CommandStep provides class X, at
+     * {@link CommandStep#run(CommandResultsBuilder)} method it needs to provide the value for X using this method.
+     * commandScope.provideDependency(LockService.class, lockService);
+     *
+     * Means that this class will LockService.class using object lock
+     */
+    public  CommandScope provideDependency(Class<?> clazz, Object value) {
+        this.dependencies.put(clazz, value);
+
+        return this;
+    }
+
+    /**
+     * Retrieves the registered dependency object provided by this class identifier
+     */
+    public <T> Object getDependency(Class<T> clazz) {
+        return this.dependencies.get(clazz);
     }
 
     /**
@@ -164,12 +193,39 @@ public class CommandScope {
      * Executes the command in this scope, and returns the results.
      */
     public CommandResults execute() throws CommandExecutionException {
+        Scope.getCurrentScope().addMdcValue(MdcKey.OPERATION_START_TIME, new ISODateFormat().format(new Date()));
+        // We don't want to reset the command name even when defining another CommandScope during execution because we intend on keeping this value as the command entered to the console
+        if (!Scope.getCurrentScope().isMdcKeyPresent(MdcKey.LIQUIBASE_COMMAND_NAME)) {
+            Scope.getCurrentScope().addMdcValue(MdcKey.LIQUIBASE_COMMAND_NAME, String.join(" ", commandDefinition.getName()));
+        }
         CommandResultsBuilder resultsBuilder = new CommandResultsBuilder(this, outputStream);
         final List<CommandStep> pipeline = commandDefinition.getPipeline();
+        final List<CommandStep> executedCommands = new ArrayList<>();
+        Optional<Exception> thrownException = Optional.empty();
         validate();
         try {
+            addOutputFileToMdc();
             for (CommandStep command : pipeline) {
-                command.run(resultsBuilder);
+                try {
+                    Scope.getCurrentScope().addMdcValue(MdcKey.LIQUIBASE_INTERNAL_COMMAND, getCommandStepName(command));
+                    command.run(resultsBuilder);
+                } catch (Exception runException) {
+                    // Suppress the exception for now so that we can run the cleanup steps even when encountering an exception.
+                    thrownException = Optional.of(runException);
+                    break;
+                }
+                executedCommands.add(command);
+            }
+
+            // after executing our pipeline, runs cleanup in inverse order
+            for (int i = executedCommands.size() -1; i >= 0; i--) {
+                CommandStep command = pipeline.get(i);
+                if (command instanceof CleanUpCommandStep) {
+                    ((CleanUpCommandStep)command).cleanUp(resultsBuilder);
+                }
+            }
+            if (thrownException.isPresent()) { // Now that we've executed all our cleanup, rethrow the exception if there was one
+                throw thrownException.get();
             }
         } catch (Exception e) {
             if (e instanceof CommandExecutionException) {
@@ -178,6 +234,9 @@ public class CommandScope {
                 throw new CommandExecutionException(e);
             }
         } finally {
+            try (MdcObject operationStopTime = Scope.getCurrentScope().addMdcValue(MdcKey.OPERATION_STOP_TIME, Instant.ofEpochMilli(new Date().getTime()).toString())) {
+                Scope.getCurrentScope().getLog(getClass()).info("Command execution complete");
+            }
             try {
                 if (this.outputStream != null) {
                     this.outputStream.flush();
@@ -188,6 +247,24 @@ public class CommandScope {
         }
 
         return resultsBuilder.build();
+    }
+
+    private void addOutputFileToMdc() throws Exception {
+        Scope.child((LiquibaseListener) null, () -> {
+            String outputFilePath = LiquibaseCommandLineConfiguration.OUTPUT_FILE.getCurrentValue();
+            if (outputFilePath != null) {
+                Scope.getCurrentScope().addMdcValue(MdcKey.OUTPUT_FILE, outputFilePath);
+            }
+            String outputFileEncoding = GlobalConfiguration.OUTPUT_FILE_ENCODING.getCurrentValue();
+            if (outputFileEncoding != null) {
+                Scope.getCurrentScope().addMdcValue(MdcKey.OUTPUT_FILE_ENCODING, outputFileEncoding);
+            }
+            if (outputFilePath != null) {
+                Scope.getCurrentScope().getLog(CommandScope.class).fine("Writing output to '" + outputFilePath + "' with encoding '" + outputFileEncoding + "'");
+            } else {
+                Scope.getCurrentScope().getLog(CommandScope.class).fine("Writing output with encoding '" + outputFileEncoding + "'");
+            }
+        });
     }
 
     private <T> ConfigurationDefinition<T> createConfigurationDefinition(CommandArgumentDefinition<T> argument, boolean includeCommandName) {
@@ -206,6 +283,25 @@ public class CommandScope {
                 .setValueHandler(argument.getValueConverter())
                 .setValueObfuscator(argument.getValueObfuscator())
                 .buildTemporary();
+    }
+
+    /**
+     * Returns a string of the entire defined command names, joined together with spaces
+     * @param commandStep the command step to get the name of
+     * @return the full command step name definition delimited by spaces or an empty string if there are no defined command names
+     */
+    private String getCommandStepName(CommandStep commandStep) {
+        StringBuilder commandStepName = new StringBuilder();
+        String[][] commandDefinition = commandStep.defineCommandNames();
+        if (commandDefinition != null) {
+            for (String[] commandNames : commandDefinition) {
+                if (commandStepName.length() != 0) {
+                    commandStepName.append(" ");
+                }
+                commandStepName.append(String.join(" ", commandNames));
+            }
+        }
+        return commandStepName.toString();
     }
 
     /**
@@ -252,11 +348,6 @@ public class CommandScope {
         }
 
         @Override
-        public ProvidedValue getProvidedValue(String... keyAndAliases) {
-            return super.getProvidedValue(keyAndAliases);
-        }
-
-        @Override
         protected boolean keyMatches(String wantedKey, String storedKey) {
             if (wantedKey.contains(".")) {
                 return super.keyMatches(NO_PREFIX_PATTERN.matcher(wantedKey).replaceFirst(""), storedKey);
@@ -264,5 +355,6 @@ public class CommandScope {
                 return super.keyMatches(wantedKey, storedKey);
             }
         }
+
     }
 }

@@ -18,7 +18,7 @@ import java.util.List;
 /**
  * Adds a foreign key constraint to an existing column.
  */
-@DatabaseChange(name="addForeignKeyConstraint",
+@DatabaseChange(name = "addForeignKeyConstraint",
                 description = "Adds a foreign key constraint to an existing column",
                 priority = ChangeMetaData.PRIORITY_DEFAULT,
                 appliesTo = "column")
@@ -54,14 +54,15 @@ public class AddForeignKeyConstraintChange extends AbstractChange {
                     supported.add(database.getShortName());
                 }
             }
-            return supported.toArray(new String[supported.size()]);
+            return supported.toArray(new String[0]);
 
         } else {
             return super.createSupportedDatabasesMetaData(parameterName, changePropertyAnnotation);
         }
     }
 
-    @DatabaseChangeProperty(since = "3.0", mustEqualExisting ="column.relation.catalog")
+    @DatabaseChangeProperty(since = "3.0", mustEqualExisting ="column.relation.catalog",
+        description = "Name of the database catalog of the base table")
     public String getBaseTableCatalogName() {
         return baseTableCatalogName;
     }
@@ -70,7 +71,7 @@ public class AddForeignKeyConstraintChange extends AbstractChange {
         this.baseTableCatalogName = baseTableCatalogName;
     }
 
-    @DatabaseChangeProperty(mustEqualExisting ="column.relation.schema")
+    @DatabaseChangeProperty(mustEqualExisting ="column.relation.schema", description = "Name of the database schema of the base table")
     public String getBaseTableSchemaName() {
         return baseTableSchemaName;
     }
@@ -93,7 +94,7 @@ public class AddForeignKeyConstraintChange extends AbstractChange {
     }
 
     @DatabaseChangeProperty(
-        description = "Name of column(s) to place the foreign key constraint on. Comma-separate if multiple",
+        description = "Name of the column(s) to place the foreign key constraint on. Comma-separate if multiple",
         exampleValue = "person_id",
         mustEqualExisting = "column"
     )
@@ -105,7 +106,8 @@ public class AddForeignKeyConstraintChange extends AbstractChange {
         this.baseColumnNames = baseColumnNames;
     }
 
-    @DatabaseChangeProperty(since = "3.0", mustEqualExisting = "column")
+    @DatabaseChangeProperty(since = "3.0", mustEqualExisting = "column",
+        description = "Name of the database catalog of the referenced table")
     public String getReferencedTableCatalogName() {
         return referencedTableCatalogName;
     }
@@ -114,6 +116,7 @@ public class AddForeignKeyConstraintChange extends AbstractChange {
         this.referencedTableCatalogName = referencedTableCatalogName;
     }
 
+    @DatabaseChangeProperty(description = "Name of the database schema of the referenced table")
     public String getReferencedTableSchemaName() {
         return referencedTableSchemaName;
     }
@@ -134,7 +137,7 @@ public class AddForeignKeyConstraintChange extends AbstractChange {
     }
 
     @DatabaseChangeProperty(
-        description = "Column(s) the foreign key points to. Comma-separate if multiple",
+        description = "Name of the column(s) the foreign key points to. Comma-separate if multiple",
         exampleValue = "id")
     public String getReferencedColumnNames() {
         return referencedColumnNames;
@@ -153,7 +156,7 @@ public class AddForeignKeyConstraintChange extends AbstractChange {
         this.constraintName = constraintName;
     }
 
-    @DatabaseChangeProperty(description = "Is the foreign key deferrable")
+    @DatabaseChangeProperty(description = "Defines whether the foreign key is deferrable")
     public Boolean getDeferrable() {
         return deferrable;
     }
@@ -162,17 +165,22 @@ public class AddForeignKeyConstraintChange extends AbstractChange {
         this.deferrable = deferrable;
     }
 
-    @DatabaseChangeProperty(description = "Is the foreign key initially deferred")
+    @DatabaseChangeProperty(description = "Defines whether the foreign key is initially deferred")
     public Boolean getInitiallyDeferred() {
         return initiallyDeferred;
     }
+    
+    public void setInitiallyDeferred(Boolean initiallyDeferred) {
+        this.initiallyDeferred = initiallyDeferred;
+    }
 
     /**
-     * the VALIDATE keyword defines whether a foreign key constraint on a column in a table
-     * should be checked if it refers to a valid row or not.
+     * the VALIDATE keyword defines whether to check if a foreign key constraint
+     * on a column in a table refers to a valid row or not.
      * @return true if ENABLE VALIDATE (this is the default), or false if ENABLE NOVALIDATE.
      */
-    @DatabaseChangeProperty(description = "This is true if the foreign key has 'ENABLE VALIDATE' set, or false if the foreign key has 'ENABLE NOVALIDATE' set.")
+    @DatabaseChangeProperty(description = "Defines whether to check if the foreign key constraint refers to a valid row. " +
+        "This is true if the foreign key has 'ENABLE VALIDATE' set, or false if the foreign key has 'ENABLE NOVALIDATE' set.")
     public Boolean getValidate() {
         return shouldValidate;
     }
@@ -188,16 +196,13 @@ public class AddForeignKeyConstraintChange extends AbstractChange {
     public void setValidate(Boolean shouldValidate) {
         this.shouldValidate = shouldValidate;
     }
-    
-    public void setInitiallyDeferred(Boolean initiallyDeferred) {
-        this.initiallyDeferred = initiallyDeferred;
-    }
 
     /**
      * @deprecated Use {@link #getOnDelete()}.
      * <b>This always returns null</b> so it doesn't impact checksums when settings onDelete vs. deleteCascade
      */
-    @DatabaseChangeProperty(description = "This is true to set onDelete to Cascade, priority given to onDelete tag if one exists")
+    @DatabaseChangeProperty(
+        description = "Deprecated. This is true to set onDelete to Cascade, priority given to onDelete tag if one exists")
     public Boolean getDeleteCascade() {
         return null;
     }
@@ -222,15 +227,15 @@ public class AddForeignKeyConstraintChange extends AbstractChange {
         return onUpdate;
     }
 
-    public void setOnDelete(String onDelete) {
-        this.onDelete = onDelete;
-    }
-
     @DatabaseChangeProperty(description = "ON DELETE functionality. Possible values: 'CASCADE', 'SET NULL', " +
         "'SET DEFAULT', 'RESTRICT', 'NO ACTION'",
         exampleValue = "CASCADE")
     public String getOnDelete() {
         return this.onDelete;
+    }
+
+    public void setOnDelete(String onDelete) {
+        this.onDelete = onDelete;
     }
 
     public void setOnDelete(ForeignKeyConstraintType rule) {
@@ -256,7 +261,7 @@ public class AddForeignKeyConstraintChange extends AbstractChange {
             //nothing
         } else if (rule == ForeignKeyConstraintType.importedKeyCascade) {
             setOnUpdate("CASCADE");
-        } else  if (rule == ForeignKeyConstraintType.importedKeySetNull) {
+        } else if (rule == ForeignKeyConstraintType.importedKeySetNull) {
             setOnUpdate("SET NULL");
         } else if (rule == ForeignKeyConstraintType.importedKeySetDefault) {
             setOnUpdate("SET DEFAULT");
@@ -369,6 +374,7 @@ public class AddForeignKeyConstraintChange extends AbstractChange {
      * @deprecated No longer supported in 3.0
      */
     @Deprecated
+    @DatabaseChangeProperty(description = "Deprecated")
     public Boolean getReferencesUniqueColumn() {
         return null;
     }

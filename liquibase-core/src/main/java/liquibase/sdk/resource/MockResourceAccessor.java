@@ -11,7 +11,7 @@ public class MockResourceAccessor extends AbstractResourceAccessor {
     private SortedMap<String, String> contentByFileName;
 
     public MockResourceAccessor() {
-        this(new HashMap<String, String>());
+        this(new HashMap<>());
     }
 
     public MockResourceAccessor(Map<String, String> contentByFileName) {
@@ -44,6 +44,9 @@ public class MockResourceAccessor extends AbstractResourceAccessor {
         List<Resource> returnList = new ArrayList<>();
         for (String file : contentByFileName.keySet()) {
             if (file.startsWith(path)) {
+                if (!recursive && file.split("/").length > 2) {
+                    continue;
+                }
                 returnList.add(new MockResource(file, contentByFileName.get(file)));
             }
         }
@@ -53,5 +56,9 @@ public class MockResourceAccessor extends AbstractResourceAccessor {
     @Override
     public List<String> describeLocations() {
         return Collections.singletonList("MockResouceAccessor.java");
+    }
+
+    public void setContent(String fileName, String content) {
+        this.contentByFileName.put(fileName, content);
     }
 }

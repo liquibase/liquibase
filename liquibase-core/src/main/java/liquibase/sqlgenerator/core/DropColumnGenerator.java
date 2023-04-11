@@ -55,14 +55,14 @@ public class DropColumnGenerator extends AbstractSqlGenerator<DropColumnStatemen
     private Sql[] generateMultipleColumnSql(List<DropColumnStatement> columns, Database database) {
         List<Sql> result = new ArrayList<>();
         if (database instanceof MySQLDatabase) {
-            String alterTable = "ALTER TABLE " + database.escapeTableName(columns.get(0).getCatalogName(), columns.get(0).getSchemaName(), columns.get(0).getTableName());
+            final StringBuilder alterTable = new StringBuilder("ALTER TABLE " + database.escapeTableName(columns.get(0).getCatalogName(), columns.get(0).getSchemaName(), columns.get(0).getTableName()));
             for (int i = 0; i < columns.size(); i++) {
-                alterTable +=  " DROP " + database.escapeColumnName(columns.get(i).getCatalogName(), columns.get(i).getSchemaName(), columns.get(i).getTableName(), columns.get(i).getColumnName());
+                alterTable.append(" DROP ").append(database.escapeColumnName(columns.get(i).getCatalogName(), columns.get(i).getSchemaName(), columns.get(i).getTableName(), columns.get(i).getColumnName()));
                 if (i < (columns.size() - 1)) {
-                    alterTable += ",";
+                    alterTable.append(",");
                 }
             }
-            result.add(new UnparsedSql(alterTable, getAffectedColumns(columns)));
+            result.add(new UnparsedSql(alterTable.toString(), getAffectedColumns(columns)));
         } else {
             if (database instanceof MSSQLDatabase) {
                 for (DropColumnStatement column : columns) {
@@ -76,7 +76,7 @@ public class DropColumnGenerator extends AbstractSqlGenerator<DropColumnStatemen
                 }
             }
         }
-        return result.toArray(new Sql[result.size()]);
+        return result.toArray(EMPTY_SQL);
     }
 
     private Sql[] generateSingleColumnSql(DropColumnStatement statement, Database database) {
@@ -102,7 +102,7 @@ public class DropColumnGenerator extends AbstractSqlGenerator<DropColumnStatemen
         for (DropColumnStatement column : columns) {
             affected.add(getAffectedColumn(column));
         }
-        return affected.toArray(new Column[affected.size()]);
+        return affected.toArray(new Column[0]);
     }
 
     protected Column getAffectedColumn(DropColumnStatement statement) {

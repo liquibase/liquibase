@@ -32,6 +32,9 @@ public class Contexts {
     }
 
     public Contexts(String contexts) {
+        if (contexts != null) {
+            contexts = contexts.replace("\\", "");
+        }
         parseContextString(contexts);
     }
 
@@ -66,7 +69,7 @@ public class Contexts {
 
     @Override
     public String toString() {
-        return StringUtil.join(new TreeSet<String>(this.contextStore), ",");
+        return StringUtil.join(new TreeSet<>(this.contextStore), ",");
     }
 
 

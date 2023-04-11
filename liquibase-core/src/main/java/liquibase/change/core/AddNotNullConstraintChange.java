@@ -21,11 +21,13 @@ import liquibase.util.StringUtil;
 import java.util.ArrayList;
 import java.util.List;
 
+import static liquibase.statement.SqlStatement.EMPTY_SQL_STATEMENT;
+
 /**
- * Adds a not-null constraint to an existing column.
+ * Adds a NOT NULL constraint to an existing column.
  */
-@DatabaseChange(name="addNotNullConstraint",
-                description = "Adds a not-null constraint to an existing table. If a defaultNullValue attribute is " +
+@DatabaseChange(name = "addNotNullConstraint",
+                description = "Adds a NOT NULL constraint to an existing table. If a defaultNullValue attribute is " +
                 "passed, all null values for the column will be updated to the passed value before the constraint " +
                 "is applied.",
                 priority = ChangeMetaData.PRIORITY_DEFAULT, appliesTo = "column")
@@ -67,7 +69,7 @@ public class AddNotNullConstraintChange extends AbstractChange {
     private String constraintName;
     private Boolean shouldValidate;
 
-    @DatabaseChangeProperty(since = "3.0", mustEqualExisting ="column.relation.catalog")
+    @DatabaseChangeProperty(since = "3.0", mustEqualExisting ="column.relation.catalog", description = "Name of the database catalog")
     public String getCatalogName() {
         return catalogName;
     }
@@ -76,7 +78,7 @@ public class AddNotNullConstraintChange extends AbstractChange {
         this.catalogName = catalogName;
     }
 
-    @DatabaseChangeProperty(mustEqualExisting ="column.relation.schema")
+    @DatabaseChangeProperty(mustEqualExisting ="column.relation.schema", description = "Name of the database schema")
     public String getSchemaName() {
         return schemaName;
     }
@@ -85,9 +87,8 @@ public class AddNotNullConstraintChange extends AbstractChange {
         this.schemaName = schemaName;
     }
 
-    @DatabaseChangeProperty(description = "Adds a not-null constraint to an " +
-     "existing table. If a defaultNullValue attribute is passed, all null values for the column will be updated to " +
-     "the passed value before the constraint is applied.", mustEqualExisting = "column.relation")
+    @DatabaseChangeProperty(description = "Name of the table to add a NOT NULL constraint to.",
+        mustEqualExisting = "column.relation")
     public String getTableName() {
         return tableName;
     }
@@ -106,8 +107,8 @@ public class AddNotNullConstraintChange extends AbstractChange {
         this.columnName = columnName;
     }
 
-    @DatabaseChangeProperty(description = "Value to set all currently null values to. If not set, change will fail " +
-     "if null values exist")
+    @DatabaseChangeProperty(description = "Value to set all currently null values to. " +
+        "If defaultNullValue is not set and null values exist, the change fails")
     public String getDefaultNullValue() {
         return defaultNullValue;
     }
@@ -125,8 +126,7 @@ public class AddNotNullConstraintChange extends AbstractChange {
         this.columnDataType = columnDataType;
     }
 
-    @DatabaseChangeProperty(description = "Created constraint name (if database supports names for NOT NULL " +
-     "constraints)")
+    @DatabaseChangeProperty(description = "Name of the constraint to add (if database supports names for NOT NULL constraints)")
     public String getConstraintName() {
         return constraintName;
     }
@@ -185,7 +185,7 @@ public class AddNotNullConstraintChange extends AbstractChange {
             statements.add(new ReorganizeTableStatement(getCatalogName(), getSchemaName(), getTableName()));
         }
         
-        return statements.toArray(new SqlStatement[statements.size()]);
+        return statements.toArray(EMPTY_SQL_STATEMENT);
     }
 
     @Override
@@ -219,7 +219,8 @@ public class AddNotNullConstraintChange extends AbstractChange {
      * should be checked if it refers to a valid row or not.
      * @return true if ENABLE VALIDATE (this is the default), or false if ENABLE NOVALIDATE.
      */
-    @DatabaseChangeProperty(description = "This is true if the not null constraint has 'ENABLE VALIDATE' set, or false if the not null constrain has 'ENABLE NOVALIDATE' set.")
+    @DatabaseChangeProperty(description = "Defines whether to check if the NOT NULL constraint refers to a valid row. " +
+        "This is true if the constraint has 'ENABLE VALIDATE' set, or false if the constraint has 'ENABLE NOVALIDATE' set.")
     public Boolean getValidate() {
         return shouldValidate;
     }

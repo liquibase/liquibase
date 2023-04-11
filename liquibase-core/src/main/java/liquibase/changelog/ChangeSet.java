@@ -6,6 +6,7 @@ import liquibase.Scope;
 import liquibase.change.*;
 import liquibase.change.core.EmptyChange;
 import liquibase.change.core.RawSQLChange;
+import liquibase.change.core.SQLFileChange;
 import liquibase.changelog.visitor.ChangeExecListener;
 import liquibase.configuration.LiquibaseConfiguration;
 import liquibase.database.Database;
@@ -16,6 +17,8 @@ import liquibase.executor.Executor;
 import liquibase.executor.ExecutorService;
 import liquibase.executor.LoggingExecutor;
 import liquibase.logging.Logger;
+import liquibase.logging.mdc.MdcKey;
+import liquibase.logging.mdc.customobjects.RollbackSqlFile;
 import liquibase.parser.ChangeLogParserConfiguration;
 import liquibase.parser.core.ParsedNode;
 import liquibase.parser.core.ParsedNodeException;
@@ -26,11 +29,17 @@ import liquibase.precondition.core.PreconditionContainer;
 import liquibase.resource.ResourceAccessor;
 import liquibase.sql.visitor.SqlVisitor;
 import liquibase.sql.visitor.SqlVisitorFactory;
+import liquibase.sqlgenerator.SqlGeneratorFactory;
 import liquibase.statement.SqlStatement;
+import liquibase.util.ISODateFormat;
+import liquibase.util.SqlUtil;
 import liquibase.util.StreamUtil;
 import liquibase.util.StringUtil;
 
+import java.time.Instant;
 import java.util.*;
+import java.util.concurrent.atomic.AtomicReference;
+import java.util.stream.Collectors;
 
 /**
  * Encapsulates a changeSet and all its associated changes.
@@ -77,7 +86,7 @@ public class ChangeSet implements Conditional, ChangeLogChild {
         HALT("HALT"),
         MARK_RAN("MARK_RAN");
 
-        String key;
+        final String key;
 
         ValidationFailOption(String key) {
             this.key = key;
@@ -191,7 +200,7 @@ public class ChangeSet implements Conditional, ChangeLogChild {
     private String comments;
 
     /**
-     * ChangeSet level precondtions defined for this changeSet
+     * ChangeSet level preconditions defined for this changeSet
      */
     private PreconditionContainer preconditions;
 
@@ -199,6 +208,11 @@ public class ChangeSet implements Conditional, ChangeLogChild {
      * ChangeSet level attribute to specify an Executor
      */
     private String runWith;
+
+    /**
+     * ChangeSet level attribute to specify a spool file name
+     */
+    private String runWithSpoolFile;
 
     /**
      * SqlVisitors defined for this changeset.
@@ -219,6 +233,11 @@ public class ChangeSet implements Conditional, ChangeLogChild {
 
     private Map<String, Object> attributes = new HashMap<>();
 
+    /**
+     * Deployment ID stored in the databasechangelog table.
+     */
+    private String deploymentId;
+
     public boolean shouldAlwaysRun() {
         return alwaysRun;
     }
@@ -233,24 +252,24 @@ public class ChangeSet implements Conditional, ChangeLogChild {
     }
 
     public ChangeSet(String id, String author, boolean alwaysRun, boolean runOnChange, String filePath, String contextFilter, String dbmsList, DatabaseChangeLog databaseChangeLog) {
-        this(id, author, alwaysRun, runOnChange, filePath, contextFilter, dbmsList, null, true, ObjectQuotingStrategy.LEGACY, databaseChangeLog);
+        this(id, author, alwaysRun, runOnChange, filePath, contextFilter, dbmsList, null, null, true, ObjectQuotingStrategy.LEGACY, databaseChangeLog);
     }
 
     public ChangeSet(String id, String author, boolean alwaysRun, boolean runOnChange, String filePath, String contextFilter, String dbmsList, boolean runInTransaction, DatabaseChangeLog databaseChangeLog) {
-        this(id, author, alwaysRun, runOnChange, filePath, contextFilter, dbmsList, null, runInTransaction, ObjectQuotingStrategy.LEGACY, databaseChangeLog);
+        this(id, author, alwaysRun, runOnChange, filePath, contextFilter, dbmsList, null, null, runInTransaction, ObjectQuotingStrategy.LEGACY, databaseChangeLog);
     }
 
     public ChangeSet(String id, String author, boolean alwaysRun, boolean runOnChange, String filePath, String contextFilter, String dbmsList, ObjectQuotingStrategy quotingStrategy, DatabaseChangeLog databaseChangeLog) {
-        this(id, author, alwaysRun, runOnChange, filePath, contextFilter, dbmsList, null, true, quotingStrategy, databaseChangeLog);
+        this(id, author, alwaysRun, runOnChange, filePath, contextFilter, dbmsList, null, null, true, quotingStrategy, databaseChangeLog);
     }
 
     public ChangeSet(String id, String author, boolean alwaysRun, boolean runOnChange, String filePath, String contextFilter, String dbmsList,
                      boolean runInTransaction, ObjectQuotingStrategy quotingStrategy, DatabaseChangeLog databaseChangeLog) {
-        this(id, author, alwaysRun, runOnChange, filePath, contextFilter, dbmsList, null, runInTransaction, quotingStrategy, databaseChangeLog);
+        this(id, author, alwaysRun, runOnChange, filePath, contextFilter, dbmsList, null, null, runInTransaction, quotingStrategy, databaseChangeLog);
     }
 
     public ChangeSet(String id, String author, boolean alwaysRun, boolean runOnChange, String filePath, String contextFilter, String dbmsList,
-                     String runWith, boolean runInTransaction, ObjectQuotingStrategy quotingStrategy, DatabaseChangeLog databaseChangeLog) {
+                     String runWith, String runWithSpoolFile, boolean runInTransaction, ObjectQuotingStrategy quotingStrategy, DatabaseChangeLog databaseChangeLog) {
         this(databaseChangeLog);
         this.id = id;
         this.author = author;
@@ -262,6 +281,7 @@ public class ChangeSet implements Conditional, ChangeLogChild {
         this.contextFilter = new ContextExpression(contextFilter);
         setDbms(dbmsList);
         this.runWith = runWith;
+        this.runWithSpoolFile = runWithSpoolFile;
     }
 
     protected void setDbms(String dbmsList) {
@@ -307,6 +327,14 @@ public class ChangeSet implements Conditional, ChangeLogChild {
         this.runWith = runWith;
     }
 
+    public String getRunWithSpoolFile() {
+        return runWithSpoolFile;
+    }
+
+    public void setRunWithSpoolFile(String runWithSpoolFile) {
+        this.runWithSpoolFile = runWithSpoolFile;
+    }
+
     public void clearCheckSum() {
         this.checkSum = null;
     }
@@ -336,6 +364,7 @@ public class ChangeSet implements Conditional, ChangeLogChild {
         this.alwaysRun = node.getChildValue(null, "runAlways", node.getChildValue(null, "alwaysRun", false));
         this.runOnChange = node.getChildValue(null, "runOnChange", false);
         this.runWith = node.getChildValue(null, "runWith", String.class);
+        this.runWithSpoolFile = node.getChildValue(null, "runWithSpoolFile", String.class);
         this.contextFilter = new ContextExpression(node.getChildValue(null, "contextFilter", String.class));
         if (this.contextFilter.isEmpty()) {
             contextFilter = new ContextExpression(node.getChildValue(null, "context", String.class));
@@ -517,7 +546,7 @@ public class ChangeSet implements Conditional, ChangeLogChild {
                     }
                 }
             } else {
-                throw new ParsedNodeException("Unexpected object: " + value.getClass().getName() + " '" + value.toString() + "'");
+                throw new ParsedNodeException("Unexpected object: " + value.getClass().getName() + " '" + value + "'");
             }
         }
         if (!foundValue) {
@@ -563,12 +592,13 @@ public class ChangeSet implements Conditional, ChangeLogChild {
     public ExecType execute(DatabaseChangeLog databaseChangeLog, ChangeExecListener listener, Database database)
             throws MigrationFailedException {
         Logger log = Scope.getCurrentScope().getLog(getClass());
-
+        addChangeSetMdcProperties();
         if (validationFailed) {
             return ExecType.MARK_RAN;
         }
 
         long startTime = new Date().getTime();
+        Scope.getCurrentScope().addMdcValue(MdcKey.CHANGESET_OPERATION_START_TIME, Instant.ofEpochMilli(startTime).toString());
 
         ExecType execType = null;
 
@@ -619,12 +649,12 @@ public class ChangeSet implements Conditional, ChangeLogChild {
                     skipChange = true;
                     execType = ExecType.SKIPPED;
 
-                    Scope.getCurrentScope().getLog(getClass()).info("Continuing past: " + toString() + " despite precondition failure due to onFail='CONTINUE': " + message);
+                    Scope.getCurrentScope().getLog(getClass()).info("Continuing past: " + this + " despite precondition failure due to onFail='CONTINUE': " + message);
                 } else if (preconditions.getOnFail().equals(PreconditionContainer.FailOption.MARK_RAN)) {
                     execType = ExecType.MARK_RAN;
                     skipChange = true;
 
-                    log.info("Marking ChangeSet: \"" + toString() + "\" as ran despite precondition failure due to onFail='MARK_RAN': " + message);
+                    log.info("Marking ChangeSet: \"" + this + "\" as ran despite precondition failure due to onFail='MARK_RAN': " + message);
                 } else if (preconditions.getOnFail().equals(PreconditionContainer.FailOption.WARN)) {
                     execType = null; //already warned
                 } else {
@@ -652,7 +682,7 @@ public class ChangeSet implements Conditional, ChangeLogChild {
                     execType = ExecType.MARK_RAN;
                     skipChange = true;
 
-                    log.info("Marking ChangeSet: " + toString() + " ran despite precondition error: " + message);
+                    log.info("Marking ChangeSet: " + this + " ran despite precondition error: " + message);
                 } else if (preconditions.getOnError().equals(PreconditionContainer.ErrorOption.WARN)) {
                     execType = null; //already logged
                 } else {
@@ -673,7 +703,7 @@ public class ChangeSet implements Conditional, ChangeLogChild {
                     }
                 }
 
-                log.fine("Reading ChangeSet: " + toString());
+                log.fine("Reading ChangeSet: " + this);
                 for (Change change : getChanges()) {
                     if ((!(change instanceof DbmsTargetedChange)) || DatabaseList.definitionMatches(((DbmsTargetedChange) change).getDbms(), database, true)) {
                         if (listener != null) {
@@ -683,6 +713,7 @@ public class ChangeSet implements Conditional, ChangeLogChild {
                             executor.comment("WARNING The following SQL may change each run and therefore is possibly incorrect and/or invalid:");
                         }
 
+                        addSqlMdc(change, database, false);
 
                         database.executeStatements(change, databaseChangeLog, sqlVisitors);
                         log.info(change.getConfirmationMessage());
@@ -697,15 +728,23 @@ public class ChangeSet implements Conditional, ChangeLogChild {
                 if (runInTransaction) {
                     database.commit();
                 }
-                log.info("ChangeSet " + toString(false) + " ran successfully in " + (new Date().getTime() - startTime + "ms"));
                 if (execType == null) {
                     execType = ExecType.EXECUTED;
                 }
+                long stopTime = new Date().getTime();
+                Scope.getCurrentScope().addMdcValue(MdcKey.CHANGESET_OPERATION_STOP_TIME, Instant.ofEpochMilli(stopTime).toString());
+                Scope.getCurrentScope().addMdcValue(MdcKey.CHANGESET_OUTCOME, execType.value.toLowerCase());
+                log.info("ChangeSet " + toString(false) + " ran successfully in " + (stopTime - startTime) + "ms");
             } else {
-                log.fine("Skipping ChangeSet: " + toString());
+                log.fine("Skipping ChangeSet: " + this);
             }
 
         } catch (Exception e) {
+            Scope.getCurrentScope().addMdcValue(MdcKey.CHANGESET_OPERATION_STOP_TIME, Instant.ofEpochMilli(new Date().getTime()).toString());
+            if (getFailOnError() == null || getFailOnError()) {
+                Scope.getCurrentScope().addMdcValue(MdcKey.CHANGESET_OUTCOME, ExecType.FAILED.value.toLowerCase());
+            }
+            log.severe(String.format("ChangeSet %s encountered an exception.", toString(false)));
             try {
                 database.rollback();
             } catch (Exception e1) {
@@ -746,6 +785,7 @@ public class ChangeSet implements Conditional, ChangeLogChild {
         if (getRunWith() == null || originalExecutor instanceof LoggingExecutor) {
             return originalExecutor;
         }
+        Scope.getCurrentScope().addMdcValue(MdcKey.RUN_WITH, getRunWith());
         String executorName = ChangeSet.lookupExecutor(getRunWith());
         Executor customExecutor = Scope.getCurrentScope().getSingleton(ExecutorService.class).getExecutor(executorName, database);
         Scope.getCurrentScope().getSingleton(ExecutorService.class).setExecutor("jdbc", database, customExecutor);
@@ -793,10 +833,13 @@ public class ChangeSet implements Conditional, ChangeLogChild {
     }
 
     public void rollback(Database database, ChangeExecListener listener) throws RollbackFailedException {
+        Scope.getCurrentScope().addMdcValue(MdcKey.CHANGESET_OPERATION_START_TIME, Instant.ofEpochMilli(new Date().getTime()).toString());
+        addChangeSetMdcProperties();
+        Scope.getCurrentScope().addMdcValue(MdcKey.DEPLOYMENT_ID, getDeploymentId());
         Executor originalExecutor = setupCustomExecutorIfNecessary(database);
         try {
             Executor executor = Scope.getCurrentScope().getSingleton(ExecutorService.class).getExecutor("jdbc", database);
-            executor.comment("Rolling Back ChangeSet: " + toString());
+            executor.comment("Rolling Back ChangeSet: " + this);
 
             database.setObjectQuotingStrategy(objectQuotingStrategy);
 
@@ -804,6 +847,8 @@ public class ChangeSet implements Conditional, ChangeLogChild {
             if (database.supportsDDLInTransaction()) {
                 database.setAutoCommit(!runInTransaction);
             }
+
+            executor.modifyChangeSet(this);
 
             if (hasCustomRollbackChanges()) {
                 final List<SqlStatement> statements = new LinkedList<>();
@@ -816,10 +861,14 @@ public class ChangeSet implements Conditional, ChangeLogChild {
                     }
                     ValidationErrors errors = change.validate(database);
                     if (errors.hasErrors()) {
-                        throw new RollbackFailedException("Rollback statement failed validation: " + errors.toString());
+                        throw new RollbackFailedException("Rollback statement failed validation: " + errors);
                     }
                     //
                     SqlStatement[] changeStatements = change.generateStatements(database);
+                    addSqlMdc(change, database, false);
+                    if (change instanceof SQLFileChange) {
+                        addSqlFileMdc((SQLFileChange) change);
+                    }
                     if (changeStatements != null) {
                         statements.addAll(Arrays.asList(changeStatements));
                     }
@@ -828,7 +877,7 @@ public class ChangeSet implements Conditional, ChangeLogChild {
                     }
                 }
                 if (!statements.isEmpty()) {
-                    database.executeRollbackStatements(statements.toArray(new SqlStatement[]{}), sqlVisitors);
+                    database.executeRollbackStatements(statements.toArray(SqlStatement.EMPTY_SQL_STATEMENT), sqlVisitors);
                 }
 
             } else {
@@ -839,6 +888,7 @@ public class ChangeSet implements Conditional, ChangeLogChild {
                         throw new RollbackFailedException("Liquibase does not support automatic rollback generation for raw " +
                             "sql changes (did you mean to specify keyword \"empty\" to ignore rolling back this change?)");
                     }
+                    addSqlMdc(change, database, true);
                     database.executeRollbackStatements(change, sqlVisitors);
                 }
             }
@@ -846,9 +896,14 @@ public class ChangeSet implements Conditional, ChangeLogChild {
             if (runInTransaction) {
                 database.commit();
             }
+            Scope.getCurrentScope().addMdcValue(MdcKey.CHANGESET_OUTCOME, ExecType.EXECUTED.value.toLowerCase());
+            Scope.getCurrentScope().addMdcValue(MdcKey.CHANGESET_OPERATION_STOP_TIME, Instant.ofEpochMilli(new Date().getTime()).toString());
             Scope.getCurrentScope().getLog(getClass()).fine("ChangeSet " + toString() + " has been successfully rolled back.");
         } catch (Exception e) {
+            Scope.getCurrentScope().addMdcValue(MdcKey.CHANGESET_OPERATION_STOP_TIME, Instant.ofEpochMilli(new Date().getTime()).toString());
             try {
+                Scope.getCurrentScope().addMdcValue(MdcKey.CHANGESET_OUTCOME, ExecType.FAILED.value.toLowerCase());
+                Scope.getCurrentScope().getLog(getClass()).fine("ChangeSet " + this + " rollback failed.");
                 database.rollback();
             } catch (DatabaseException e1) {
                 //ok
@@ -869,6 +924,11 @@ public class ChangeSet implements Conditional, ChangeLogChild {
 
     }
 
+    private void addSqlFileMdc(SQLFileChange change) {
+        RollbackSqlFile rollbackSqlFile = new RollbackSqlFile(change);
+        Scope.getCurrentScope().addMdcValue(MdcKey.ROLLBACK_SQL_FILE, rollbackSqlFile);
+    }
+
     private boolean ignoreSpecificChangeTypes(Change change, Database database) {
         return ((change instanceof DbmsTargetedChange) && !DatabaseList.definitionMatches(((DbmsTargetedChange) change).getDbms(), database, true))
              || ((change instanceof RawSQLChange) && "empty".equalsIgnoreCase(((RawSQLChange)change).getSql()));
@@ -882,7 +942,7 @@ public class ChangeSet implements Conditional, ChangeLogChild {
     }
 
     /**
-     * Returns an unmodifiable list of changes.  To add one, use the addRefactoing method.
+     * Returns an unmodifiable list of changes.  To add one, use the addRefactoring method.
      */
     public List<Change> getChanges() {
         return Collections.unmodifiableList(changes);
@@ -1440,5 +1500,56 @@ public class ChangeSet implements Conditional, ChangeLogChild {
      */
     public void setStoredCheckSum(CheckSum storedCheckSum) {
         this.storedCheckSum = storedCheckSum;
+    }
+
+    /**
+     * @return Deployment ID stored in the databasechangelog table.
+     */
+    public String getDeploymentId() {
+        return deploymentId;
+    }
+
+    /**
+     * @param deploymentId Deployment ID stored in the databasechangelog table.
+     */
+    public void setDeploymentId(String deploymentId) {
+        this.deploymentId = deploymentId;
+    }
+
+    public void addChangeSetMdcProperties() {
+        String commentMdc = comments != null ? comments : "";
+        String labelMdc = labels != null ? labels.toString() : "";
+        String contextsMdc = contextFilter != null && contextFilter.getOriginalString() != null ? contextFilter.getOriginalString() : "";
+        Scope.getCurrentScope().addMdcValue(MdcKey.CHANGESET_COMMENT, commentMdc);
+        Scope.getCurrentScope().addMdcValue(MdcKey.CHANGESET_LABEL, labelMdc);
+        Scope.getCurrentScope().addMdcValue(MdcKey.CHANGESET_CONTEXT, contextsMdc);
+    }
+
+    /**
+     *
+     * Adds changeset sql to mdc if the change is supported by the database
+     * @param change the change to read sql from
+     * @param database the database to generate change sql against
+     * @param generateRollbackStatements controls generation of rollback sql statements or standard statements sql
+     * @throws RollbackImpossibleException if you cannot generate rollback statements
+     *
+     */
+    private void addSqlMdc(Change change, Database database, boolean generateRollbackStatements) throws Exception {
+        //
+        // If the change is for this Database
+        // add a Boolean flag to Scope to indicate that the Change should not be executed when adding MDC context
+        //
+        if (! change.supports(database)) {
+            return;
+        }
+        AtomicReference<SqlStatement[]> statementsReference = new AtomicReference<>();
+        Map<String, Object> scopeValues = new HashMap<>();
+        scopeValues.put(Change.SHOULD_EXECUTE, Boolean.FALSE);
+        Scope.child(scopeValues, () -> statementsReference.set(generateRollbackStatements ?
+               change.generateRollbackStatements(database) : change.generateStatements(database)));
+        String sqlStatementsMdc = Arrays.stream(statementsReference.get())
+                    .map(statement -> SqlUtil.getSqlString(statement, SqlGeneratorFactory.getInstance(), database))
+                    .collect(Collectors.joining("\n"));
+        Scope.getCurrentScope().addMdcValue(MdcKey.CHANGESET_SQL, sqlStatementsMdc);
     }
 }

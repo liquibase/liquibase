@@ -6,11 +6,12 @@ import liquibase.structure.DatabaseObject;
 import liquibase.util.StringUtil;
 
 import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
 
 public class Schema extends AbstractDatabaseObject {
 
     public Schema() {
-        setAttribute("objects",  new HashMap<Class<? extends DatabaseObject>, Set<DatabaseObject>>());
+        setAttribute("objects",  new ConcurrentHashMap<Class<? extends DatabaseObject>, Set<DatabaseObject>>());
     }
 
     public Schema(String catalog, String schemaName) {
@@ -22,7 +23,7 @@ public class Schema extends AbstractDatabaseObject {
 
         setAttribute("name", schemaName);
         setAttribute("catalog", catalog);
-        setAttribute("objects", new HashMap<Class<? extends DatabaseObject>, Set<DatabaseObject>>());
+        setAttribute("objects", new ConcurrentHashMap<Class<? extends DatabaseObject>, Set<DatabaseObject>>());
     }
 
     @Override
@@ -138,11 +139,7 @@ public class Schema extends AbstractDatabaseObject {
         if (databaseObject == null) {
             return;
         }
-        Set<DatabaseObject> objects = this.getObjects().get(databaseObject.getClass());
-        if (objects == null) {
-            objects = new HashSet<>();
-            this.getObjects().put(databaseObject.getClass(), objects);
-        }
+        Set<DatabaseObject> objects = this.getObjects().computeIfAbsent(databaseObject.getClass(), k -> new HashSet<>());
         objects.add(databaseObject);
 
     }

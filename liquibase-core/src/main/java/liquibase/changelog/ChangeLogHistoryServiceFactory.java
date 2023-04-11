@@ -53,12 +53,7 @@ public class ChangeLogHistoryServiceFactory {
             if (services.containsKey(database)) {
                 return services.get(database);
             }
-            SortedSet<ChangeLogHistoryService> foundServices = new TreeSet<>(new Comparator<ChangeLogHistoryService>() {
-                @Override
-                public int compare(ChangeLogHistoryService o1, ChangeLogHistoryService o2) {
-                    return -1 * Integer.valueOf(o1.getPriority()).compareTo(o2.getPriority());
-                }
-            });
+            SortedSet<ChangeLogHistoryService> foundServices = new TreeSet<>((o1, o2) -> -1 * Integer.compare(o1.getPriority(), o2.getPriority()));
 
             for (ChangeLogHistoryService service : registry) {
                 if (service.supports(database)) {

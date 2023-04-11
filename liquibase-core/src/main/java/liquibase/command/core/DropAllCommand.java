@@ -74,7 +74,7 @@ public class DropAllCommand extends AbstractCommand<CommandResult> {
             finalList.add(new CatalogAndSchema(null, schema).customize(database));
         }
 
-        this.schemas = finalList.toArray(new CatalogAndSchema[finalList.size()]);
+        this.schemas = finalList.toArray(new CatalogAndSchema[0]);
 
 
         return this;
@@ -108,59 +108,6 @@ public class DropAllCommand extends AbstractCommand<CommandResult> {
         final CommandResults results = commandScope.execute();
 
         return new CommandResult("All objects dropped from " + database.getConnection().getConnectionUserName() + "@" + database.getConnection().getURL());
-    }
-
-    //
-    // Return a HubChangeLog object if available
-    // If not available then return null
-    // If the HubChangeLog has been deleted then throw
-    // a LiquibaseHubException
-    //
-    private HubChangeLog getHubChangeLog(DatabaseChangeLog changeLog) throws LiquibaseHubException {
-        String apiKey = StringUtil.trimToNull(HubConfiguration.LIQUIBASE_HUB_API_KEY.getCurrentValue());
-        HubConfiguration.HubMode hubMode = HubConfiguration.LIQUIBASE_HUB_MODE.getCurrentValue();
-        String changeLogId = changeLog.getChangeLogId();
-        final HubServiceFactory hubServiceFactory = Scope.getCurrentScope().getSingleton(HubServiceFactory.class);
-        if (apiKey == null || hubMode == HubConfiguration.HubMode.OFF || !hubServiceFactory.isOnline()) {
-            return null;
-        }
-        final HubService service = Scope.getCurrentScope().getSingleton(HubServiceFactory.class).getService();
-        HubChangeLog hubChangeLog = (changeLogId != null ? service.getHubChangeLog(UUID.fromString(changeLogId), "*") : null);
-        if (hubChangeLog == null) {
-            return null;
-        }
-
-        //
-        // Stop the operation if the HubChangeLog has been deleted
-        //
-        if (hubChangeLog.isDeleted()) {
-            //
-            // Complain and stop the operation
-            //
-            String message =
-                    "\n" +
-                            "The operation did not complete and will not be reported to Hub because the\n" +  "" +
-                            "registered changelog has been deleted by someone in your organization.\n" +
-                            "Learn more at http://hub.liquibase.com";
-            throw new LiquibaseHubException(message);
-        }
-        return hubChangeLog;
-    }
-
-    private boolean checkForRegisteredChangeLog(DatabaseChangeLog changeLog, HubChangeLog hubChangeLog) {
-        Logger log = Scope.getCurrentScope().getLog(getClass());
-        String changeLogId = changeLog.getChangeLogId();
-        if (changeLogId != null && hubChangeLog != null) {
-            return true;
-        }
-        String message =
-                "The changelog file specified is not registered with any Liquibase Hub project,\n" +
-                        "so the results will not be recorded in Liquibase Hub.\n" +
-                        "To register the changelog with your Hub Project run 'liquibase registerchangelog'.\n" +
-                        "Learn more at https://hub.liquibase.com.";
-        Scope.getCurrentScope().getUI().sendMessage("WARNING: " + message);
-        log.warning(message);
-        return false;
     }
 
     protected void checkLiquibaseTables(boolean updateExistingNullChecksums, DatabaseChangeLog databaseChangeLog, Contexts contexts, LabelExpression labelExpression) throws LiquibaseException {

@@ -70,6 +70,7 @@ public class AbstractExtensibleObject implements ExtensibleObject {
     /**
      * Return true if the given key is defined.
      */
+    @Override
     public boolean has(String key) {
         return get(key, Object.class) != null;
     }
@@ -119,6 +120,7 @@ public class AbstractExtensibleObject implements ExtensibleObject {
         }
     }
 
+    @Override
     public List getValuePath(String attributes, Class lastType) {
         List path = new ArrayList();
 
@@ -145,7 +147,7 @@ public class AbstractExtensibleObject implements ExtensibleObject {
             } else if (lastValue instanceof ExtensibleObject) {
                 newValue = ((ExtensibleObject) lastValue).get(baseField, typeToGet);
             } else if (lastValue instanceof Collection) {
-                newValue = new ArrayList();
+                newValue = new ArrayList<>();
                 boolean foundNonNullValue = false;
                 for (Object object : (Collection) lastValue) {
                     if (object == null) {
@@ -230,6 +232,7 @@ public class AbstractExtensibleObject implements ExtensibleObject {
         return this;
     }
 
+    @Override
     public String describe() {
         String name = getClass().getSimpleName();
         return name + "{" + StringUtil.join(this, ", ", new StringUtil.DefaultFormatter()) + "}";

@@ -11,6 +11,7 @@ import liquibase.snapshot.InvalidExampleException;
 import liquibase.snapshot.JdbcDatabaseSnapshot;
 import liquibase.structure.DatabaseObject;
 import liquibase.structure.core.*;
+import liquibase.util.ObjectUtil;
 import liquibase.util.StringUtil;
 
 import java.sql.DatabaseMetaData;
@@ -127,6 +128,7 @@ public class IndexSnapshotGenerator extends JdbcSnapshotGenerator {
     }
 
     @Override
+    @SuppressWarnings("java:S5411")
     protected DatabaseObject snapshotObject(DatabaseObject example, DatabaseSnapshot snapshot) throws DatabaseException, InvalidExampleException {
         Database database = snapshot.getDatabase();
         Relation exampleIndex = ((Index) example).getRelation();
@@ -266,7 +268,7 @@ public class IndexSnapshotGenerator extends JdbcSnapshotGenerator {
                     foundIndexes.put(correctedIndexName, returnIndex);
                 }
 
-                if ((database instanceof MSSQLDatabase) && (Boolean) row.get("IS_INCLUDED_COLUMN")) {
+                if ((database instanceof MSSQLDatabase) && ObjectUtil.defaultIfNull((Boolean) row.get("IS_INCLUDED_COLUMN"), false)) {
                     List<String> includedColumns = returnIndex.getAttribute("includedColumns", List.class);
                     if (includedColumns == null) {
                         includedColumns = new ArrayList<>();
@@ -305,8 +307,7 @@ public class IndexSnapshotGenerator extends JdbcSnapshotGenerator {
         }
 
         if (exampleName != null) {
-            Index index = foundIndexes.get(exampleName);
-            return index;
+            return foundIndexes.get(exampleName);
         } else {
             //prefer clustered version of the index
             List<Index> nonClusteredIndexes = new ArrayList<>();

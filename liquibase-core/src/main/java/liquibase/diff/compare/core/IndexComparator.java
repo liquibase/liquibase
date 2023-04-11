@@ -38,7 +38,7 @@ public class IndexComparator implements DatabaseObjectComparator {
             hashes.addAll(Arrays.asList(DatabaseObjectComparatorFactory.getInstance().hash(table, chain.getSchemaComparisons(), accordingTo)));
         }
 
-        return hashes.toArray(new String[hashes.size()]);
+        return hashes.toArray(new String[0]);
     }
 
 
@@ -110,30 +110,27 @@ public class IndexComparator implements DatabaseObjectComparator {
         exclude.add("columns");
         ObjectDifferences differences = chain.findDifferences(databaseObject1, databaseObject2, accordingTo, compareControl, exclude);
 
-        differences.compare("columns", databaseObject1, databaseObject2, new ObjectDifferences.CompareFunction() {
-            @Override
-            public boolean areEqual(Object referenceValue, Object compareToValue) {
-                List<Column> referenceList = (List) referenceValue;
-                List<Column> compareList = (List) compareToValue;
+        differences.compare("columns", databaseObject1, databaseObject2, (referenceValue, compareToValue) -> {
+            List<Column> referenceList = (List) referenceValue;
+            List<Column> compareList = (List) compareToValue;
 
-                if (referenceList.size() != compareList.size()) {
+            if (referenceList.size() != compareList.size()) {
+                return false;
+            }
+            for (int i=0; i<referenceList.size(); i++) {
+                //
+                // Check for nulls
+                // If both reference and comparison objects are null then return true
+                // else if only one is null then return false
+                //
+                if (referenceList.get(i) == null || compareList.get(i) == null) {
+                    return referenceList.get(i) == compareList.get(i);
+                }
+                if (!StringUtil.trimToEmpty((referenceList.get(i)).getName()).equalsIgnoreCase(StringUtil.trimToEmpty(compareList.get(i).getName()))) {
                     return false;
                 }
-                for (int i=0; i<referenceList.size(); i++) {
-                    //
-                    // Check for nulls
-                    // If both reference and comparison objects are null then return true
-                    // else if only one is null then return false
-                    //
-                    if (referenceList.get(i) == null || compareList.get(i) == null) {
-                        return referenceList.get(i) == compareList.get(i);
-                    }
-                    if (!StringUtil.trimToEmpty((referenceList.get(i)).getName()).equalsIgnoreCase(StringUtil.trimToEmpty(compareList.get(i).getName()))) {
-                        return false;
-                    }
-                }
-                return true;
             }
+            return true;
         });
 
         return differences;

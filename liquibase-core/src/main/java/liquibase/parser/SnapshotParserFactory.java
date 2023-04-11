@@ -38,12 +38,7 @@ public class SnapshotParserFactory {
     }
 
     private SnapshotParserFactory() {
-        snapshotParserComparator = new Comparator<SnapshotParser>() {
-            @Override
-            public int compare(SnapshotParser o1, SnapshotParser o2) {
-                return Integer.valueOf(o2.getPriority()).compareTo(o1.getPriority());
-            }
-        };
+        snapshotParserComparator = (o1, o2) -> Integer.compare(o2.getPriority(), o1.getPriority());
 
         parsers = new ArrayList<>();
         try {
@@ -72,7 +67,7 @@ public class SnapshotParserFactory {
 
     public void register(SnapshotParser snapshotParser) {
         parsers.add(snapshotParser);
-        Collections.sort(parsers, snapshotParserComparator);
+        parsers.sort(snapshotParserComparator);
     }
 
     public void unregister(SnapshotParser snapshotParser) {

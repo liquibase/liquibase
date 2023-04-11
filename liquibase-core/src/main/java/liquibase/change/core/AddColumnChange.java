@@ -16,10 +16,13 @@ import liquibase.util.StringUtil;
 
 import java.util.*;
 
+import static liquibase.statement.SqlStatement.EMPTY_SQL_STATEMENT;
+
 /**
  * Adds a column to an existing table.
  */
-@DatabaseChange(name = "addColumn", description = "Adds a new column to an existing table", priority = ChangeMetaData.PRIORITY_DEFAULT, appliesTo = "table")
+@DatabaseChange(name = "addColumn", priority = ChangeMetaData.PRIORITY_DEFAULT, appliesTo = "table",
+    description = "Adds a new column to an existing table")
 public class AddColumnChange extends AbstractChange implements ChangeWithColumns<AddColumnConfig> {
 
     private String catalogName;
@@ -31,7 +34,7 @@ public class AddColumnChange extends AbstractChange implements ChangeWithColumns
         columns = new ArrayList<>();
     }
 
-    @DatabaseChangeProperty(mustEqualExisting = "relation.catalog", since = "3.0")
+    @DatabaseChangeProperty(mustEqualExisting = "relation.catalog", since = "3.0", description = "Name of the database catalog")
     public String getCatalogName() {
         return catalogName;
     }
@@ -40,7 +43,7 @@ public class AddColumnChange extends AbstractChange implements ChangeWithColumns
         this.catalogName = catalogName;
     }
 
-    @DatabaseChangeProperty(mustEqualExisting = "relation.schema")
+    @DatabaseChangeProperty(mustEqualExisting = "relation.schema", description = "Name of the database schema")
     public String getSchemaName() {
         return schemaName;
     }
@@ -59,7 +62,9 @@ public class AddColumnChange extends AbstractChange implements ChangeWithColumns
     }
 
     @Override
-    @DatabaseChangeProperty(description = "Column constraint and foreign key information. Setting the \"defaultValue\" attribute will specify a default value for the column. Setting the \"value\" attribute will set all rows existing to the specified value without modifying the column default.", requiredForDatabase = "all")
+    @DatabaseChangeProperty(requiredForDatabase = "all", description = "Column constraint and foreign key information. " +
+        "Setting the \"defaultValue\" attribute specifies a default value for the column. " +
+        "Setting the \"value\" attribute sets all rows existing to the specified value without modifying the column default.")
     public List<AddColumnConfig> getColumns() {
         return columns;
     }
@@ -152,7 +157,7 @@ public class AddColumnChange extends AbstractChange implements ChangeWithColumns
                     column.getType(),
                     column.getDefaultValueObject(),
                     column.getRemarks(),
-                    constraints.toArray(new ColumnConstraint[constraints.size()]));
+                    constraints.toArray(new ColumnConstraint[0]));
             addColumnStatement.setDefaultValueConstraintName(column.getDefaultValueConstraintName());
             addColumnStatement.setComputed(column.getComputed());
 
@@ -201,7 +206,7 @@ public class AddColumnChange extends AbstractChange implements ChangeWithColumns
             }
         }
 
-        return sql.toArray(new SqlStatement[sql.size()]);
+        return sql.toArray(EMPTY_SQL_STATEMENT);
     }
 
     @Override
@@ -226,7 +231,7 @@ public class AddColumnChange extends AbstractChange implements ChangeWithColumns
             inverse.addColumn(aColumn);
         }
         inverses.add(inverse);
-        return inverses.toArray(new Change[inverses.size()]);
+        return inverses.toArray(EMPTY_CHANGE);
     }
 
     @Override

@@ -62,7 +62,7 @@ public class InternalSnapshotCommandStep extends AbstractCommandStep {
             finalList.add(new CatalogAndSchema(null, schema).customize(database));
         }
 
-        return finalList.toArray(new CatalogAndSchema[finalList.size()]);
+        return finalList.toArray(new CatalogAndSchema[0]);
     }
 
     public Map<String, Object> getSnapshotMetadata() {
@@ -114,7 +114,7 @@ public class InternalSnapshotCommandStep extends AbstractCommandStep {
     }
 
     public static void logUnsupportedDatabase(Database database, Class callingClass) {
-        if (LicenseServiceUtils.isProLicenseValid()) {
+        if (LicenseServiceUtils.isProLicenseValid() && database != null) {
             if (!(database instanceof MSSQLDatabase
                     || database instanceof OracleDatabase
                     || database instanceof MySQLDatabase

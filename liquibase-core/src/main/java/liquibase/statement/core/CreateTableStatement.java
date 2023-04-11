@@ -6,6 +6,9 @@ import liquibase.statement.*;
 import java.util.*;
 
 public class CreateTableStatement extends AbstractSqlStatement implements CompoundStatement {
+    /** Table type used by some RDBMS (Snowflake, SAP HANA) supporting different ... types ... of tables (e.g. column- vs. row-based) */
+    private String tableType;
+
     private String catalogName;
     private String schemaName;
     private String tableName;
@@ -19,8 +22,8 @@ public class CreateTableStatement extends AbstractSqlStatement implements Compou
     private Map<String, String> columnRemarks = new HashMap<>();
 
     private PrimaryKeyConstraint primaryKeyConstraint;
-    private Map<String, NotNullConstraint> notNullConstraints = new HashMap<String, NotNullConstraint>();
-    private Set<ForeignKeyConstraint> foreignKeyConstraints = new HashSet<ForeignKeyConstraint>();
+    private Map<String, NotNullConstraint> notNullConstraints = new HashMap<>();
+    private Set<ForeignKeyConstraint> foreignKeyConstraints = new HashSet<>();
 
     /* NOT NULL constraints in RDBMSs are curious beasts. In some RDBMS, they do not exist as constraints at all, i.e.
        they are merely a property of the column. In others, like Oracle DB, they can exist in both forms, and to be
@@ -38,9 +41,10 @@ public class CreateTableStatement extends AbstractSqlStatement implements Compou
         this.tableName = tableName;
     }
 
-    public CreateTableStatement(String catalogName, String schemaName, String tableName, String remarks) {
+    public CreateTableStatement(String catalogName, String schemaName, String tableName, String remarks, String tableType) {
         this(catalogName, schemaName, tableName);
         this.remarks = remarks;
+        this.tableType = tableType;
     }
 
     public String getCatalogName() {
@@ -104,7 +108,7 @@ public class CreateTableStatement extends AbstractSqlStatement implements Compou
         allConstraints.add(new NotNullConstraint(columnName));
         allConstraints.add(pkConstraint);
 
-        addColumn(columnName, columnType, defaultValue, allConstraints.toArray(new ColumnConstraint[allConstraints.size()]));
+        addColumn(columnName, columnType, defaultValue, allConstraints.toArray(new ColumnConstraint[0]));
 
         return this;
     }
@@ -131,12 +135,12 @@ public class CreateTableStatement extends AbstractSqlStatement implements Compou
         pkConstraint.setDeferrable(deferrable);
         pkConstraint.setInitiallyDeferred(initiallyDeferred);
 
-        List<ColumnConstraint> allConstraints = new ArrayList<ColumnConstraint>(Arrays.asList(constraints));
+        List<ColumnConstraint> allConstraints = new ArrayList<>(Arrays.asList(constraints));
         allConstraints.add(new NotNullConstraint(columnName));
         allConstraints.add(pkConstraint);
 
 
-        addColumn(columnName, columnType, defaultValue, remarks, allConstraints.toArray(new ColumnConstraint[allConstraints.size()]));
+        addColumn(columnName, columnType, defaultValue, remarks, allConstraints.toArray(new ColumnConstraint[0]));
 
         return this;
     }
@@ -268,5 +272,13 @@ public class CreateTableStatement extends AbstractSqlStatement implements Compou
 
     public boolean isComputed(String columnName) {
         return this.computedColumns.contains(columnName);
+    }
+
+    public String getTableType() {
+        return tableType;
+    }
+
+    public void setTableType(String tableType) {
+        this.tableType = tableType;
     }
 }

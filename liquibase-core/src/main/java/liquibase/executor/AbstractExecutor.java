@@ -97,6 +97,7 @@ public abstract class AbstractExecutor implements Executor {
         this.resourceAccessor = resourceAccessor;
     }
 
+    @Override
     public void setDatabase(Database database) {
         this.database = database;
     }
@@ -125,7 +126,7 @@ public abstract class AbstractExecutor implements Executor {
 
     @Override
     public void execute(Change change) throws DatabaseException {
-        execute(change, new ArrayList<SqlVisitor>());
+        execute(change, new ArrayList<>());
     }
 
     @Override

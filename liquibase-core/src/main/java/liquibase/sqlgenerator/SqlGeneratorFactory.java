@@ -14,6 +14,9 @@ import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
 import java.lang.reflect.TypeVariable;
 import java.util.*;
+import java.util.concurrent.atomic.AtomicReference;
+
+import static liquibase.sqlgenerator.SqlGenerator.EMPTY_SQL;
 
 /**
  * SqlGeneratorFactory is a singleton registry of SqlGenerators.
@@ -28,6 +31,7 @@ public class SqlGeneratorFactory {
     private final Map<Class<?>, Type> genericSuperClassCache = new HashMap<>();
     private List<SqlGenerator> generators = new ArrayList<>();
     private Map<String, SortedSet<SqlGenerator>> generatorsByKey = new HashMap<>();
+    public static final String GENERATED_SQL_ARRAY_SCOPE_KEY = "generatedSqlArray";
 
     private SqlGeneratorFactory() {
         try {
@@ -192,7 +196,7 @@ public class SqlGeneratorFactory {
     public Sql[] generateSql(Change change, Database database) {
         SqlStatement[] sqlStatements = change.generateStatements(database);
         if (sqlStatements == null) {
-            return new Sql[0];
+            return EMPTY_SQL;
         } else {
             return generateSql(sqlStatements, database);
         }
@@ -208,7 +212,7 @@ public class SqlGeneratorFactory {
               returnList.addAll(sqlList);
             }
         }
-        return returnList.toArray(new Sql[returnList.size()]);
+        return putSqlArrayInScope(returnList.toArray(EMPTY_SQL));
     }
 
     public Sql[] generateSql(SqlStatement statement, Database database) {
@@ -216,7 +220,20 @@ public class SqlGeneratorFactory {
         if (generatorChain == null) {
             throw new IllegalStateException("Cannot find generators for database " + database.getClass() + ", statement: " + statement);
         }
-        return generatorChain.generateSql(statement, database);
+        return putSqlArrayInScope(generatorChain.generateSql(statement, database));
+    }
+
+    /**
+     * Save the generated SQL in the scope.
+     * @param sqls the generated SQL
+     * @return the generated SQL
+     */
+    private Sql[] putSqlArrayInScope(Sql[] sqls) {
+        AtomicReference<Sql[]> sqlsReference = Scope.getCurrentScope().get(GENERATED_SQL_ARRAY_SCOPE_KEY, AtomicReference.class);
+        if (sqlsReference != null) {
+            sqlsReference.set(sqls);
+        }
+        return sqls;
     }
 
     /**

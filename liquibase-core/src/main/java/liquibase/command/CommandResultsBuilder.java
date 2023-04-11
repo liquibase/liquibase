@@ -49,6 +49,13 @@ public class CommandResultsBuilder {
     }
 
     /**
+     * Allows any step of the pipeline to access any of the results.
+     */
+    public Object getResult(String key) {
+        return this.resultValues.get(key);
+    }
+
+    /**
      * Sets the value for a known {@link CommandResultDefinition} to the command results.
      */
     public <T> CommandResultsBuilder addResult(CommandResultDefinition<T> definition, T value) {

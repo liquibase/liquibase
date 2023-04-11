@@ -1,86 +1,51 @@
 package liquibase.command.core;
 
+import liquibase.Scope;
 import liquibase.command.*;
-import liquibase.configuration.ConfigurationValueObfuscator;
-import liquibase.exception.CommandExecutionException;
+import liquibase.command.core.helpers.DiffOutputControlCommandStep;
+import liquibase.command.providers.ReferenceDatabase;
+import liquibase.database.Database;
+import liquibase.database.ObjectQuotingStrategy;
+import liquibase.diff.DiffResult;
+import liquibase.diff.output.DiffOutputControl;
+import liquibase.diff.output.changelog.DiffToChangeLog;
+import liquibase.exception.CommandValidationException;
+import liquibase.logging.mdc.MdcKey;
+import liquibase.logging.mdc.MdcObject;
+import liquibase.logging.mdc.MdcValue;
+import liquibase.util.StringUtil;
 
-public class DiffChangelogCommandStep extends AbstractCliWrapperCommandStep {
+import java.io.PrintStream;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.List;
+
+public class DiffChangelogCommandStep extends AbstractCommandStep {
 
     public static final String[] COMMAND_NAME = {"diffChangelog"};
 
-    public static final CommandArgumentDefinition<String> REFERENCE_USERNAME_ARG;
-    public static final CommandArgumentDefinition<String> REFERENCE_PASSWORD_ARG;
-    public static final CommandArgumentDefinition<String> REFERENCE_URL_ARG;
-    public static final CommandArgumentDefinition<String> REFERENCE_DEFAULT_CATALOG_NAME_ARG;
-    public static final CommandArgumentDefinition<String> REFERENCE_DEFAULT_SCHEMA_NAME_ARG;
-    public static final CommandArgumentDefinition<String> USERNAME_ARG;
-    public static final CommandArgumentDefinition<String> PASSWORD_ARG;
-    public static final CommandArgumentDefinition<String> URL_ARG;
-    public static final CommandArgumentDefinition<String> DEFAULT_CATALOG_NAME_ARG;
-    public static final CommandArgumentDefinition<String> DEFAULT_SCHEMA_NAME_ARG;
     public static final CommandArgumentDefinition<String> CHANGELOG_FILE_ARG;
-    public static final CommandArgumentDefinition<String> EXCLUDE_OBJECTS_ARG;
-    public static final CommandArgumentDefinition<String> INCLUDE_OBJECTS_ARG;
-    public static final CommandArgumentDefinition<String> INCLUDE_TABLESPACE_ARG;
-    public static final CommandArgumentDefinition<String> SCHEMAS_ARG;
-    public static final CommandArgumentDefinition<Boolean> INCLUDE_SCHEMA_ARG;
-    public static final CommandArgumentDefinition<Boolean> INCLUDE_CATALOG_ARG;
-    public static final CommandArgumentDefinition<String> DIFF_TYPES_ARG;
-    public static final CommandArgumentDefinition<String> DRIVER_ARG;
-    public static final CommandArgumentDefinition<String> DRIVER_PROPERTIES_FILE_ARG;
 
     static {
-        CommandBuilder builder = new CommandBuilder(COMMAND_NAME);
-        REFERENCE_URL_ARG = builder.argument("referenceUrl", String.class).required()
-                .description("The JDBC reference database connection URL").build();
-        REFERENCE_USERNAME_ARG = builder.argument("referenceUsername", String.class)
-                .description("The reference database username").build();
-        REFERENCE_PASSWORD_ARG = builder.argument("referencePassword", String.class)
-                .description("The reference database password")
-                .setValueObfuscator(ConfigurationValueObfuscator.STANDARD).build();
-        REFERENCE_DEFAULT_SCHEMA_NAME_ARG = builder.argument("referenceDefaultSchemaName", String.class)
-                .description("The reference default schema name to use for the database connection").build();
-        REFERENCE_DEFAULT_CATALOG_NAME_ARG = builder.argument("referenceDefaultCatalogName", String.class)
-                .description("The reference default catalog name to use for the database connection").build();
-        URL_ARG = builder.argument(CommonArgumentNames.URL, String.class).required()
-                .description("The JDBC target database connection URL").build();
-        DEFAULT_SCHEMA_NAME_ARG = builder.argument("defaultSchemaName", String.class)
-                .description("The default schema name to use for the database connection").build();
-        DEFAULT_CATALOG_NAME_ARG = builder.argument("defaultCatalogName", String.class)
-                .description("The default catalog name to use for the database connection").build();
-        DRIVER_ARG = builder.argument("driver", String.class)
-                .description("The JDBC driver class").build();
-        DRIVER_PROPERTIES_FILE_ARG = builder.argument("driverPropertiesFile", String.class)
-                .description("The JDBC driver properties file").build();
-        USERNAME_ARG = builder.argument(CommonArgumentNames.USERNAME, String.class)
-                .description("The target database username").build();
-        PASSWORD_ARG = builder.argument(CommonArgumentNames.PASSWORD, String.class)
-                .description("The target database password")
-                .setValueObfuscator(ConfigurationValueObfuscator.STANDARD)
-                .build();
-        CHANGELOG_FILE_ARG = builder.argument(CommonArgumentNames.CHANGELOG_FILE, String.class).required()
-                .description("Changelog file to write results").build();
-        EXCLUDE_OBJECTS_ARG = builder.argument("excludeObjects", String.class)
-                .description("Objects to exclude from diff").build();
-        INCLUDE_OBJECTS_ARG = builder.argument("includeObjects", String.class)
-                .description("Objects to include in diff").build();
-        INCLUDE_TABLESPACE_ARG = builder.argument("includeTablespace", String.class)
-            .description("Include the tablespace attribute in the changelog").build();
-        SCHEMAS_ARG = builder.argument("schemas", String.class)
-                .description("Schemas to include in diff").build();
-        INCLUDE_SCHEMA_ARG = builder.argument("includeSchema", Boolean.class)
-                .defaultValue(false)
-                .description("If true, the schema will be included in generated changeSets").build();
-        INCLUDE_CATALOG_ARG = builder.argument("includeCatalog", Boolean.class)
-                .defaultValue(false)
-                .description("If true, the catalog will be included in generated changeSets").build();
-        DIFF_TYPES_ARG = builder.argument("diffTypes", String.class)
-                .description("Types of objects to compare").build();
+        final CommandBuilder builder = new CommandBuilder(COMMAND_NAME);
+        CHANGELOG_FILE_ARG = builder.argument(CommonArgumentNames.CHANGELOG_FILE, String.class)
+                .description("Changelog file to write results").required().build();
     }
 
     @Override
+    public List<Class<?>> requiredDependencies() {
+        return Arrays.asList(DiffResult.class, DiffOutputControl.class);
+    }
+
+    @Override
+    public List<Class<?>> providedDependencies() {
+        return Collections.singletonList(DiffChangelogCommandStep.class);
+    }
+
+
+    @Override
     public String[][] defineCommandNames() {
-        return new String[][] { COMMAND_NAME};
+        return new String[][] { COMMAND_NAME };
     }
 
     @Override
@@ -89,7 +54,50 @@ public class DiffChangelogCommandStep extends AbstractCliWrapperCommandStep {
     }
 
     @Override
-    protected String[] collectArguments(CommandScope commandScope) throws CommandExecutionException {
-        return collectArguments(commandScope, null, null);
+    public void run(CommandResultsBuilder resultsBuilder) throws Exception {
+        try {
+            CommandScope commandScope = resultsBuilder.getCommandScope();
+            Database referenceDatabase = (Database) commandScope.getDependency(ReferenceDatabase.class);
+            DiffOutputControl diffOutputControl = (DiffOutputControl) resultsBuilder.getResult(DiffOutputControlCommandStep.DIFF_OUTPUT_CONTROL.getName());
+            referenceDatabase.setOutputDefaultSchema(diffOutputControl.getIncludeSchema());
+
+            InternalSnapshotCommandStep.logUnsupportedDatabase(referenceDatabase, this.getClass());
+            DiffResult diffResult = (DiffResult) resultsBuilder.getResult(DiffCommandStep.DIFF_RESULT.getName());
+            PrintStream outputStream = new PrintStream(resultsBuilder.getOutputStream());
+
+            ObjectQuotingStrategy originalStrategy = referenceDatabase.getObjectQuotingStrategy();
+            try {
+                String changeLogFile = commandScope.getArgumentValue(CHANGELOG_FILE_ARG);
+                Scope.getCurrentScope().addMdcValue(MdcKey.DIFF_CHANGELOG_FILE, changeLogFile);
+                referenceDatabase.setObjectQuotingStrategy(ObjectQuotingStrategy.QUOTE_ALL_OBJECTS);
+                if (StringUtil.trimToNull(changeLogFile) == null) {
+                    createDiffToChangeLogObject(diffResult, diffOutputControl).print(outputStream);
+                } else {
+                    createDiffToChangeLogObject(diffResult, diffOutputControl).print(changeLogFile);
+                }
+            }
+            finally {
+                referenceDatabase.setObjectQuotingStrategy(originalStrategy);
+                outputStream.flush();
+            }
+            try (MdcObject diffChangelogOutcome = Scope.getCurrentScope().addMdcValue(MdcKey.DIFF_CHANGELOG_OUTCOME, MdcValue.COMMAND_SUCCESSFUL)) {
+                Scope.getCurrentScope().getLog(getClass()).info("Diff changelog command succeeded");
+            }
+        } catch (Exception e) {
+            try (MdcObject diffChangelogOutcome = Scope.getCurrentScope().addMdcValue(MdcKey.DIFF_CHANGELOG_OUTCOME, MdcValue.COMMAND_FAILED)) {
+                Scope.getCurrentScope().getLog(getClass()).warning("Diff changelog command failed");
+            }
+        }
+
     }
+
+    @Override
+    public void validate(CommandScope commandScope) throws CommandValidationException {
+        commandScope.addArgumentValue(DiffCommandStep.FORMAT_ARG, "none");
+    }
+
+    protected DiffToChangeLog createDiffToChangeLogObject(DiffResult diffResult, DiffOutputControl diffOutputControl) {
+        return new DiffToChangeLog(diffResult, diffOutputControl);
+    }
+
 }

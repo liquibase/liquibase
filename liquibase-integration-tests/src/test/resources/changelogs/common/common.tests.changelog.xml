@@ -86,12 +86,7 @@
 
     </changeSet>
 
-    <changeSet id="defaultValueTest-1" author="nvoxland">
-        <preConditions onFail="MARK_RAN">
-            <not><dbms type="derby"/></not>
-            <not><dbms type="mysql"/></not> <!-- @todo: fails on set default now() -->
-            <not><dbms type="mariadb"/></not>
-        </preConditions>
+    <changeSet id="defaultValueTest-1" author="nvoxland" dbms="!mysql,!derby,!mariadb">
         <createTable tableName="defaultValueTest">
             <column name="id" type="int"/>
             <column name="intA" type="int"/>
@@ -486,7 +481,7 @@
             <column name="locked" type="boolean"/>
         </createTable>
     </changeSet>
-    <changeSet id="sampleCSVData" author="nvoxland">
+    <changeSet id="sampleCSVData1" author="nvoxland">
         <loadData tableName="csvdata" file="changelogs/sample.data1.csv"/>
     </changeSet>
     <changeSet id="sampleTSVData" author="nvoxland">
@@ -510,6 +505,10 @@
             <column header="locked" type="BOOLEAN"/>
             <column header="security_level" type="NUMERIC"/>
         </loadData>
+    </changeSet>
+
+    <changeSet id="sampleCSVData4" author="nvoxland">
+        <loadData tableName="csvdata" file="changelogs/sample.data1.csv.gz"/>
     </changeSet>
 
     <changeSet id="createTableNamedPKRef" author="nvoxland">
@@ -649,7 +648,7 @@
         </modifySql>
     </changeSet>
 
-    <includeAll path="changelogs/common/pathincluded/"/>
+    <includeAll path="changelogs/common/pathincluded/" minDepth="0" maxDepth="1"/>
 
     <include file="includerelative\pathinclude1.changelog.xml" relativeToChangelogFile="true"/> <!-- try with dos style path -->
 
@@ -730,10 +729,7 @@
         </preConditions>
     </changeSet>
 
-    <changeSet id="createTableWithDefault" author="nvoxland">
-        <preConditions onFail="MARK_RAN">
-            <not><dbms type="mysql"/></not> <!-- doesn't support default values as function -->
-        </preConditions>
+    <changeSet id="createTableWithDefault" author="nvoxland" dbms="!mysql">
         <createTable tableName="default_val_computed">
             <column name="id" type="int"/>
             <column name="testcol" type="datetime" defaultValueComputed="CURRENT_TIMESTAMP()">
@@ -745,10 +741,7 @@
         <sql>insert into default_val_computed (id) values (1);</sql>
     </changeSet>
 
-    <changeSet id="createTableWithDefault-checkConstraint" author="nvoxland" dbms="h2,oracle,db2,mysql,postgresql,mssql"> <!-- not derby -->
-        <preConditions onFail="MARK_RAN">
-            <not><dbms type="mysql"/></not> <!-- doesn't support default values as function -->
-        </preConditions>
+    <changeSet id="createTableWithDefault-checkConstraint" author="nvoxland" dbms="h2,oracle,db2,postgresql,mssql,!mysql"> <!-- not derby -->
         <addDefaultValue tableName="default_val_computed" columnName="added_col" defaultValueComputed="CURRENT_TIMESTAMP()"/>
     </changeSet>
 
@@ -1173,8 +1166,39 @@
         </preConditions>
     </changeSet>
 
-    <changeSet id="example" author="view-if-exists" dbms="!oracle">
+    <changeSet id="example" author="view-if-exists" dbms="!oracle,!firebird">
         <dropView viewName="does_not_exist" ifExists="true"/>
+    </changeSet>
+
+    <changeSet id="relative-import" author="mallod">
+        <createTable tableName="my_table">
+            <column name="test_col" type="int"/>
+            <column name="other_col" type="varchar(100)">
+                <constraints primaryKey="true" primaryKeyName="pk_other_col"/>
+            </column>
+        </createTable>
+        <loadData tableName="my_table"
+                  file="computedValueData.csv"
+                  relativeToChangelogFile="true">
+            <column name="test_col" type="COMPUTED"/>
+            <column name="other_col" type="varchar(100)"/>
+        </loadData>
+        <insert tableName="my_table">
+            <column name="test_col" valueComputed="1 + 1"/>
+            <column name="other_col" value="test"/>
+        </insert>
+        <update tableName="my_table">
+            <column name="test_col" valueComputed="2 + 2"/>
+        </update>
+    </changeSet>
+    <changeSet id="load-update-data-with-csv-file" author="mallod">
+        <loadUpdateData tableName="my_table"
+                  file="updatedComputedValueData.csv"
+                  relativeToChangelogFile="true"
+                        primaryKey="other_col">
+            <column name="test_col" type="COMPUTED"/>
+            <column name="other_col" type="varchar(100)"/>
+        </loadUpdateData>
     </changeSet>
 
 </databaseChangeLog>

@@ -5,6 +5,7 @@ import liquibase.database.Database;
 import liquibase.database.core.*;
 import liquibase.datatype.DataTypeFactory;
 import liquibase.datatype.DatabaseDataType;
+import liquibase.exception.DatabaseException;
 import liquibase.exception.UnexpectedLiquibaseException;
 import liquibase.exception.ValidationErrors;
 import liquibase.sql.Sql;
@@ -28,6 +29,9 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 public class AddColumnGenerator extends AbstractSqlGenerator<AddColumnStatement> {
+
+    private static final String REFERENCE_REGEX = "([\\w\\._]+)\\(([\\w_]+)\\)";
+    public static final Pattern REFERENCE_PATTERN = Pattern.compile(REFERENCE_REGEX);
 
     @Override
     public ValidationErrors validate(AddColumnStatement statement, Database database, SqlGeneratorChain sqlGeneratorChain) {
@@ -59,9 +63,14 @@ public class AddColumnGenerator extends AbstractSqlGenerator<AddColumnStatement>
         }
         validationErrors.checkRequiredField("tableName", statement.getTableName());
 
-        if (statement.isPrimaryKey() && ((database instanceof H2Database) || (database instanceof AbstractDb2Database) ||
-                (database instanceof DerbyDatabase) || (database instanceof SQLiteDatabase))) {
-            validationErrors.addError("Cannot add a primary key column");
+        try {
+            if (statement.isPrimaryKey() && ((database instanceof AbstractDb2Database) ||
+                    (database instanceof DerbyDatabase) || (database instanceof SQLiteDatabase) ||
+                    (database instanceof H2Database && database.getDatabaseMajorVersion() < 2))) {
+                validationErrors.addError("Cannot add a primary key column");
+            }
+        } catch (DatabaseException e) {
+            //do nothing
         }
 
         // TODO HsqlDatabase autoincrement on non primary key? other databases?
@@ -95,14 +104,14 @@ public class AddColumnGenerator extends AbstractSqlGenerator<AddColumnStatement>
     private Sql[] generateMultipleColumns(List<AddColumnStatement> columns, Database database) {
         List<Sql> result = new ArrayList<>();
         if (database instanceof MySQLDatabase) {
-            String alterTable = generateSingleColumBaseSQL(columns.get(0), database);
+            final StringBuilder alterTable = new StringBuilder(generateSingleColumBaseSQL(columns.get(0), database));
             for (int i = 0; i < columns.size(); i++) {
-                alterTable += generateSingleColumnSQL(columns.get(i), database);
+                alterTable.append(generateSingleColumnSQL(columns.get(i), database));
                 if (i < (columns.size() - 1)) {
-                    alterTable += ",";
+                    alterTable.append(",");
                 }
             }
-            result.add(new UnparsedSql(alterTable, getAffectedColumns(columns)));
+            result.add(new UnparsedSql(alterTable.toString(), getAffectedColumns(columns)));
 
             for (AddColumnStatement statement : columns) {
                 addUniqueConstraintStatements(statement, database, result);
@@ -114,7 +123,7 @@ public class AddColumnGenerator extends AbstractSqlGenerator<AddColumnStatement>
                 result.addAll(Arrays.asList(generateSingleColumn(column, database)));
             }
         }
-        return result.toArray(new Sql[result.size()]);
+        return result.toArray(EMPTY_SQL);
     }
 
     protected Sql[] generateSingleColumn(AddColumnStatement statement, Database database) {
@@ -127,7 +136,7 @@ public class AddColumnGenerator extends AbstractSqlGenerator<AddColumnStatement>
         addUniqueConstraintStatements(statement, database, returnSql);
         addForeignKeyStatements(statement, database, returnSql);
 
-        return returnSql.toArray(new Sql[returnSql.size()]);
+        return returnSql.toArray(EMPTY_SQL);
     }
 
     protected String generateSingleColumBaseSQL(AddColumnStatement statement, Database database) {
@@ -170,7 +179,7 @@ public class AddColumnGenerator extends AbstractSqlGenerator<AddColumnStatement>
             }
         } else {
             if ((database instanceof SybaseDatabase) || (database instanceof SybaseASADatabase) || (database
-                    instanceof MySQLDatabase) || ((database instanceof MSSQLDatabase) && columnType != null && "timestamp".equalsIgnoreCase (columnType.toString()))) {
+                    instanceof MySQLDatabase) || ((database instanceof MSSQLDatabase) && columnType != null && "timestamp".equalsIgnoreCase(columnType.toString()))) {
                 alterTable += " NULL";
             }
         }
@@ -202,7 +211,7 @@ public class AddColumnGenerator extends AbstractSqlGenerator<AddColumnStatement>
         for (AddColumnStatement c : columns) {
             cols.add(getAffectedColumn(c));
         }
-        return cols.toArray(new Column[cols.size()]);
+        return cols.toArray(new Column[0]);
     }
 
     protected Column getAffectedColumn(AddColumnStatement statement) {
@@ -227,7 +236,7 @@ public class AddColumnGenerator extends AbstractSqlGenerator<AddColumnStatement>
                 String refTableName;
                 String refColName;
                 if (fkConstraint.getReferences() != null) {
-                    Matcher referencesMatcher = Pattern.compile("([\\w\\._]+)\\(([\\w_]+)\\)").matcher(fkConstraint.getReferences());
+                    Matcher referencesMatcher = REFERENCE_PATTERN.matcher(fkConstraint.getReferences());
                     if (!referencesMatcher.matches()) {
                         throw new UnexpectedLiquibaseException("Don't know how to find table and column names from " + fkConstraint.getReferences());
                     }

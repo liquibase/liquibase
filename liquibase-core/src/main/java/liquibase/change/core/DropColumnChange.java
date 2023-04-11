@@ -27,15 +27,8 @@ import java.util.stream.Collectors;
 /**
  * Drops an existing column from a table.
  */
-@DatabaseChange(name = "dropColumn",
-        description = "Drop existing column(s).\n" +
-        "\n" +
-        "To drop a single column, use the simple form of this element where the tableName and " +
-        "columnName are specified as attributes. To drop several columns, specify the tableName " +
-        "as an attribute, and then specify a set of nested <column> tags. If nested <column> tags " +
-        "are present, the columnName attribute will be ignored.",
-        priority = ChangeMetaData
-.PRIORITY_DEFAULT, appliesTo = "column")
+@DatabaseChange(name = "dropColumn", description = "Drop existing column(s).", priority = ChangeMetaData.PRIORITY_DEFAULT,
+    appliesTo = "column")
 public class DropColumnChange extends AbstractChange implements ChangeWithColumns<ColumnConfig> {
     
     private String catalogName;
@@ -69,8 +62,8 @@ public class DropColumnChange extends AbstractChange implements ChangeWithColumn
         return super.validate(database);
     }
     
-    @DatabaseChangeProperty(description = "Name of the column to drop, if dropping a single column", requiredForDatabase = "none",
-        mustEqualExisting = "column")
+    @DatabaseChangeProperty(requiredForDatabase = "none", mustEqualExisting = "column",
+        description = "Name of the column to drop, if dropping a single column. Ignore if nested columns are defined")
     public String getColumnName() {
         return columnName;
     }
@@ -79,8 +72,8 @@ public class DropColumnChange extends AbstractChange implements ChangeWithColumn
         this.columnName = columnName;
     }
     
-    
-    @DatabaseChangeProperty(since = "3.0", mustEqualExisting = "column.relation.schema.catalog")
+    @DatabaseChangeProperty(since = "3.0", mustEqualExisting = "column.relation.schema.catalog",
+        description = "Name of the database catalog")
     public String getCatalogName() {
         return catalogName;
     }
@@ -89,7 +82,7 @@ public class DropColumnChange extends AbstractChange implements ChangeWithColumn
         this.catalogName = catalogName;
     }
     
-    @DatabaseChangeProperty(mustEqualExisting = "column.relation.schema")
+    @DatabaseChangeProperty(mustEqualExisting = "column.relation.schema", description = "Name of the database schema")
     public String getSchemaName() {
         return schemaName;
     }
@@ -146,7 +139,7 @@ public class DropColumnChange extends AbstractChange implements ChangeWithColumn
             statements.add(new ReorganizeTableStatement(getCatalogName(), getSchemaName(), getTableName()));
         }
         
-        return statements.toArray(new SqlStatement[statements.size()]);
+        return statements.toArray(SqlStatement.EMPTY_SQL_STATEMENT);
     }
     
     private SqlStatement[] generateSingleColumn(Database database) throws DatabaseException {
@@ -162,7 +155,7 @@ public class DropColumnChange extends AbstractChange implements ChangeWithColumn
             statements.add(new ReorganizeTableStatement(getCatalogName(), getSchemaName(), getTableName()));
         }
         
-        return statements.toArray(new SqlStatement[statements.size()]);
+        return statements.toArray(SqlStatement.EMPTY_SQL_STATEMENT);
     }
     
     @Override
@@ -211,6 +204,7 @@ public class DropColumnChange extends AbstractChange implements ChangeWithColumn
                 for (Column column : index.getColumns()) {
                     if (removedColumnNames.contains(column.getName())) {
                         indexContainsColumn = true;
+                        break;
                     }
                 }
                 return !indexContainsColumn;
@@ -245,7 +239,7 @@ public class DropColumnChange extends AbstractChange implements ChangeWithColumn
     @Override
     public Object getSerializableFieldValue(String field) {
         Object value = super.getSerializableFieldValue(field);
-        if ("columns".equals(field) && ((List) value).isEmpty()) {
+        if ("columns".equals(field) && ((List<?>) value).isEmpty()) {
             return null;
         }
         return value;
@@ -257,7 +251,8 @@ public class DropColumnChange extends AbstractChange implements ChangeWithColumn
     }
     
     @Override
-    @DatabaseChangeProperty(description = "Columns to be dropped if dropping multiple columns. If this is populated, the columnName attribute is ignored.", requiredForDatabase = "none")
+    @DatabaseChangeProperty(
+        description = "Columns to be dropped if dropping multiple columns. If this is populated, the columnName attribute is ignored.", requiredForDatabase = "none")
     public List<ColumnConfig> getColumns() {
         return columns;
     }
