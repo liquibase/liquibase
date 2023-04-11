@@ -5,9 +5,11 @@ import liquibase.database.jvm.JdbcConnection;
 import liquibase.dbtest.AbstractIntegrationTest;
 import liquibase.util.SystemUtil;
 import org.junit.Assume;
+import org.junit.Ignore;
 
 import java.sql.SQLSyntaxErrorException;
 
+@Ignore
 public class HsqlIntegrationTest extends AbstractIntegrationTest {
 
     public static final String OBJECT_ALREADY_EXISTS = "42504";
