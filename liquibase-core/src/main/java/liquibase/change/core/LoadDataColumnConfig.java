@@ -55,8 +55,10 @@ public class LoadDataColumnConfig extends ColumnConfig {
     }
 
     /**
-     * Return {@link #getType()} as a standard enum, or null if the type is null OR {@link liquibase.change.core.LoadDataChange.LOAD_DATA_TYPE#UNKNOWN} if it doesn't match a standard type.
-     * @return
+     * Returns the type of this {@link LoadDataChange} as a standard enum, or null if the type is {@code null},
+     * OR {@link liquibase.change.core.LoadDataChange.LOAD_DATA_TYPE#UNKNOWN} if it doesn't match a standard type.
+     *
+     * @return LoadDataChange.LOAD_DATA_TYPE enum or null
      */
     public LoadDataChange.LOAD_DATA_TYPE getTypeEnum() {
         final String type = this.getType();

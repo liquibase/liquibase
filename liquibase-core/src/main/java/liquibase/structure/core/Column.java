@@ -217,9 +217,9 @@ public class Column extends AbstractDatabaseObject {
     }
 
     /**
-     * This returns false for Not Null constraints created with ENABLE NOVALIDATE mode,
-     * otherwise returns true.
-     * @return
+     * Returns {@code false} for Nor {@code null} constraints created with {@code ENABLE NOVALIDATE} mode, otherwise returns {@code true}.
+     *
+     * @return {@code true} if validation is required for nullable constraints, {@code false} otherwise
      */
     public boolean getValidateNullable() {
         return getAttribute("validateNullable", true);

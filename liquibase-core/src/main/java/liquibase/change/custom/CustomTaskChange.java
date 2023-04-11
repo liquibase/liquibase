@@ -14,11 +14,12 @@ import liquibase.exception.CustomChangeException;
  * @see liquibase.change.custom.CustomSqlChange
   */
 public interface CustomTaskChange extends CustomChange {
-    
+
     /**
-     * Method called to run the change logic.
-     * @param database
-     * @throws liquibase.exception.CustomChangeException an exception occurs while processing this change
+     * Runs the change logic for this custom change.
+     *
+     * @param database the target database to apply the change to
+     * @throws CustomChangeException if an exception occurs while processing the change
      */
     void execute(Database database) throws CustomChangeException;
 }

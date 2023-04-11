@@ -18,11 +18,12 @@ public final class PreparedStatementFactory {
     }
 
     /**
-     * Create a <code>PreparedStatement</code> object,
-     * sql pre-compilation might take place, depending on driver support. 
-     * @param sql to execute
-     * @return a <code>PreparedStatement</code> object
-     * @throws DatabaseException
+     * Creates a <code>PreparedStatement</code> object for the specified SQL statement.
+     * The SQL statement may be pre-compiled by the driver depending on its support.
+     *
+     * @param sql the SQL statement to execute
+     * @return a <code>PreparedStatement</code> object representing the specified SQL statement
+     * @throws DatabaseException if a database access error occurs or the given SQL statement is invalid
      */
     public PreparedStatement create(String sql) throws DatabaseException {
         return con.prepareStatement(sql);

@@ -1244,10 +1244,14 @@ public abstract class AbstractJdbcDatabase implements Database {
         getConnection().setAutoCommit(b);
     }
 
+
     /**
-     * Default implementation, just look for "local" IPs. If the database returns a null URL we return false since we don't know it's safe to run the update.
+     * Default implementation of the {@link  #isSafeToRunUpdate()} method. It checks if the database connection URL contains
+     * "localhost" or "127.0.0.1". If the database returns a {@code null} URL, the method returns {@code false} because it's
+     * not known whether it's safe to run the update.
      *
-     * @throws liquibase.exception.DatabaseException
+     * @return {@code true} if the database connection URL contains "localhost" or "127.0.0.1", otherwise {@code false}.
+     * @throws DatabaseException if there is an error accessing the database
      */
     @Override
     public boolean isSafeToRunUpdate() throws DatabaseException {

@@ -128,14 +128,15 @@ public class SQLiteDatabase extends AbstractJdbcDatabase {
     }
 
     /**
-     * Uses {@link SqlGeneratorFactory} to generate {@link Sql} for the specified visitor and db objects.
+     * Uses the {@link SqlGeneratorFactory} to generate SQL statements for altering the specified table in the given database.
      *
-     * @param database
-     * @param alterTableVisitor
-     * @param catalogName
-     * @param schemaName
-     * @param tableName
-     * @return
+     * @param database          the database to generate SQL for
+     * @param alterTableVisitor the visitor to use for generating the ALTER TABLE statements
+     * @param catalogName       the name of the catalog containing the table (may be {@code null})
+     * @param schemaName        the name of the schema containing the table (may be {@code null})
+     * @param tableName         the name of the table to alter
+     * @return an array of {@link Sql} objects containing the generated SQL statements
+     * @throws UnexpectedLiquibaseException if an error occurs during SQL generation
      */
     public static Sql[] getAlterTableSqls(Database database, SQLiteDatabase.AlterTableVisitor alterTableVisitor,
                                           String catalogName, String schemaName, String tableName) {

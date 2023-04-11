@@ -73,8 +73,9 @@ public class CommandScope {
     }
 
     /**
-     * Returns the complete config prefix (without a trailing period) for the command in this scope.
-     * @return
+     * Returns the complete configuration prefix (without a trailing period) for the command in this scope.
+     *
+     * @return the complete configuration prefix for the command in this scope
      */
     public String getCompleteConfigPrefix() {
         return completeConfigPrefix;
