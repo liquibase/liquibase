@@ -1,5 +1,6 @@
 package liquibase.database.core;
 
+import liquibase.CatalogAndSchema;
 import liquibase.Scope;
 import liquibase.database.AbstractJdbcDatabase;
 import liquibase.database.DatabaseConnection;
@@ -15,10 +16,12 @@ import java.sql.ResultSet;
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Set;
+import java.util.regex.Pattern;
 
 public class SnowflakeDatabase extends AbstractJdbcDatabase {
 
     public static final String PRODUCT_NAME = "Snowflake";
+    private static final Pattern CREATE_VIEW_AS_PATTERN = Pattern.compile("^CREATE\\s+.*?VIEW\\s+.*?AS\\s+", Pattern.CASE_INSENSITIVE | Pattern.DOTALL);
     private Set<String> systemTables = new HashSet<>();
     private Set<String> systemViews = new HashSet<>();
 
@@ -287,5 +290,19 @@ public class SnowflakeDatabase extends AbstractJdbcDatabase {
         reservedWords.add("WITH");
 
         return reservedWords;
+    }
+    
+    public String getViewDefinition(CatalogAndSchema schema, String viewName) throws DatabaseException {
+        String definition = super.getViewDefinition(schema, viewName);
+        if (definition == null || definition.isEmpty()) {
+            Scope.getCurrentScope()
+                .getLog(getClass())
+                .info("Error reading '" + (viewName != null && viewName.isEmpty() ? viewName : "") + "' view definition");
+            return null;
+        }
+        if (definition.endsWith(";")) {
+            definition = definition.substring(0, definition.length() - 1);
+        }
+        return CREATE_VIEW_AS_PATTERN.matcher(definition).replaceFirst("");
     }
 }

@@ -157,7 +157,7 @@
     </target>
 
     <target name="testRollbackDatabaseByCountChangeLogDirectoryDoesNotExist">
-        <au:expectfailure expectedmessage="Unable to rollback database: The file changelog-with-rollback.xml was not found">
+        <au:expectfailure expectedmessage="Unable to initialize Liquibase: Unable to rollback database: liquibase.exception.ChangeLogParseException: The file changelog-with-rollback.xml was not found in the configured search path">
 	        <lb:rollbackDatabase rollbackCount="1"
                                  changelogdirectory="${liquibase.test.ant.basedir}/bad_changelog"
                                  changelogfile="changelog-with-rollback.xml">
