@@ -72,7 +72,6 @@ import static org.junit.Assume.assumeNotNull;
  */
 public abstract class AbstractIntegrationTest {
 
-    @Shared
     @Rule
     public DatabaseTestSystem testSystem;
 
