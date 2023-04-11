@@ -23,8 +23,6 @@ import spock.lang.Specification
 
 @LiquibaseIntegrationTest
 class DiffChangelogIntegrationTest extends Specification {
-
-    @Shared
     private DatabaseTestSystem postgres =
             (DatabaseTestSystem) Scope.getCurrentScope().getSingleton(TestSystemFactory.class).getTestSystem("postgresql")
 

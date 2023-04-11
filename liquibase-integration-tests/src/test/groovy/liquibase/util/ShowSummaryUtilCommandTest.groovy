@@ -11,7 +11,6 @@ import spock.lang.Specification
 
 @LiquibaseIntegrationTest
 class ShowSummaryUtilCommandTest extends Specification {
-    @Shared
     private DatabaseTestSystem postgres = (DatabaseTestSystem) Scope.getCurrentScope().getSingleton(TestSystemFactory.class).getTestSystem("postgresql")
 
     def "Should show summary output when run multiple times"() {
