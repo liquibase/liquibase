@@ -131,10 +131,6 @@ Structured Logging makes Liquibase operation data easily available for automated
 * @quonas made their first contribution in https://github.com/liquibase/liquibase/pull/4008
 
 
-
-
-**Full Changelog**: https://github.com/liquibase/liquibase/compare/v4.19.1...v4.20.0
-
 ### Get Certified
 Learn all the Liquibase fundamentals from free online courses by Liquibase experts and see how to apply them in the real world at https://learn.liquibase.com/.
 
