@@ -17,7 +17,6 @@ import liquibase.snapshot.SnapshotGeneratorFactory
 import liquibase.structure.core.Sequence
 import liquibase.util.FileUtil
 import liquibase.util.StringUtil
-import spock.lang.Ignore
 import spock.lang.Shared
 import spock.lang.Specification
 
@@ -70,7 +69,6 @@ CREATE TABLE $tableName ( product_no varchar(20) DEFAULT nextval('$sequenceName'
         }
     }
 
-    @Ignore
     def "should include view comments"() {
         when:
         postgres.getConnection().setAutoCommit(false)

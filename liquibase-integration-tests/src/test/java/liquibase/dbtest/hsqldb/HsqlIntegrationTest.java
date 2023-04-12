@@ -5,7 +5,6 @@ import liquibase.database.jvm.JdbcConnection;
 import liquibase.dbtest.AbstractIntegrationTest;
 import liquibase.util.SystemUtil;
 import org.junit.Assume;
-import org.junit.Ignore;
 
 import java.sql.SQLSyntaxErrorException;
 
