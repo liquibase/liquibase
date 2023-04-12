@@ -7,12 +7,12 @@ import liquibase.command.CommandScope;
 import liquibase.command.core.DropAllCommandStep;
 import liquibase.command.core.GenerateChangelogCommandStep;
 import liquibase.command.core.UpdateCommandStep;
-import liquibase.command.core.helpers.DbUrlConnectionCommandStep;
+import liquibase.command.core.helpers.DbUrlConnectionCommandStep
+import liquibase.command.core.helpers.ShowSummaryArgument;
 import liquibase.exception.CommandExecutionException;
 import liquibase.extension.testing.testsystem.DatabaseTestSystem;
 import liquibase.resource.SearchPathResourceAccessor
 import liquibase.sdk.resource.MockResourceAccessor
-import org.h2.command.dml.Update;
 
 class CommandUtil {
 
@@ -89,7 +89,7 @@ class CommandUtil {
             commandScope.addArgumentValue(UpdateCommandStep.CHANGELOG_FILE_ARG, changelogFile)
             commandScope.addArgumentValue(UpdateCommandStep.LABEL_FILTER_ARG, labels)
             commandScope.addArgumentValue(UpdateCommandStep.CONTEXTS_ARG, contexts)
-            commandScope.addArgumentValue(UpdateCommandStep.SHOW_SUMMARY, UpdateSummaryEnum.SUMMARY)
+            commandScope.addArgumentValue(ShowSummaryArgument.SHOW_SUMMARY, UpdateSummaryEnum.SUMMARY)
             if (outputFile != null) {
                 OutputStream outputStream = new FileOutputStream(new File(outputFile))
                 commandScope.setOutput(outputStream)
@@ -108,7 +108,7 @@ class CommandUtil {
             commandScope.addArgumentValue(DbUrlConnectionCommandStep.USERNAME_ARG, db.getUsername())
             commandScope.addArgumentValue(DbUrlConnectionCommandStep.PASSWORD_ARG, db.getPassword())
             commandScope.addArgumentValue(UpdateCommandStep.CHANGELOG_FILE_ARG, changelogFile)
-            commandScope.addArgumentValue(UpdateCommandStep.SHOW_SUMMARY, UpdateSummaryEnum.SUMMARY)
+            commandScope.addArgumentValue(ShowSummaryArgument.SHOW_SUMMARY, UpdateSummaryEnum.SUMMARY)
             commandScope.execute()
         } as Scope.ScopedRunnerWithReturn<Void>)
     }

@@ -6,3 +6,4 @@ liquibase.sqlgenerator.core.RenameTableGeneratorSnowflake
 liquibase.sqlgenerator.core.RenameViewGeneratorSnowflake
 liquibase.sqlgenerator.core.SetColumnRemarksGeneratorSnowflake
 liquibase.sqlgenerator.core.SetTableRemarksGeneratorSnowflake
+liquibase.sqlgenerator.core.GetViewDefinitionGeneratorSnowflake

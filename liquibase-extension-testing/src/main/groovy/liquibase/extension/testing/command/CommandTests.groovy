@@ -1361,7 +1361,9 @@ Long Description: ${commandDefinition.getLongDescription() ?: "NOT SET"}
         @Override
         void sendErrorMessage(String message, Throwable exception) {
             errorOutput.println(message)
-            exception.printStackTrace(errorOutput)
+            if (exception != null) {
+                exception.printStackTrace(errorOutput)
+            }
         }
 
         @Override

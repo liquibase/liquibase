@@ -8,7 +8,7 @@ CommandTests.define {
 Short Description: Generate the SQL to rollback the specified number of changes
 Long Description: NOT SET
 Required Args:
-  changelogFile (String) The root changelog
+  changelogFile (String) The root changelog file
   count (Integer) The number of changes to rollback
   url (String) The JDBC database connection URL
     OBFUSCATED
@@ -17,7 +17,7 @@ Optional Args:
     Default: null
   changeExecListenerPropertiesFile (String) Path to a properties file for the ChangeExecListenerClass
     Default: null
-  contexts (String) Changeset contexts to match
+  contexts (String) Context string to use for filtering
     Default: null
   defaultCatalogName (String) The default catalog name to use for the database connection
     Default: null
@@ -27,7 +27,7 @@ Optional Args:
     Default: null
   driverPropertiesFile (String) The JDBC driver properties file
     Default: null
-  labelFilter (String) Changeset labels to match
+  labelFilter (String) Label expression to use for filtering
     Default: null
   outputDefaultCatalog (Boolean) Control whether names of objects in the default catalog are fully qualified or not. If true they are. If false, only objects outside the default catalog are fully qualified
     Default: true
@@ -56,9 +56,6 @@ Optional Args:
             runChangelog "changelogs/h2/complete/rollback.changelog.xml"
         }
 
-        expectedResults = [
-                statusCode   : 0
-        ]
     }
 
     run "Happy path with an output file", {
@@ -66,7 +63,7 @@ Optional Args:
                 url      : { it.url },
                 username : { it.username },
                 password : { it.password },
-                count        : 1,
+                count        : 2,
                 changelogFile: "changelogs/h2/complete/rollback.changelog.xml",
         ]
 
@@ -81,11 +78,8 @@ Optional Args:
                 //
                 // Find the " -- Release Database Lock" line
                 //
-                "target/test-classes/rollbackCount.sql" : [CommandTests.assertContains("-- Release Database Lock")]
-        ]
-
-        expectedResults = [
-                statusCode   : 0
+                "target/test-classes/rollbackCount.sql" : [CommandTests.assertContains("-- Release Database Lock"),
+                                                           CommandTests.assertContains("DROP TABLE PUBLIC.FIRSTTABLE")]
         ]
     }
 
