@@ -28,7 +28,7 @@ class NVarcharTypeTest extends Specification {
         []           | new MSSQLDatabase()    | "nvarchar(1)"
         [13]         | new MSSQLDatabase()    | "nvarchar(13)"
         [2147483647] | new MSSQLDatabase()    | "nvarchar(MAX)"
-        [13]         | new MySQLDatabase()    | "NVARCHAR(13)"
+        [13]         | new MySQLDatabase()    | "VARCHAR(13) CHARACTER SET utf8mb4"
     }
 
     def "too many parameters"() {

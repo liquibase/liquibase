@@ -3,6 +3,7 @@ package liquibase.datatype.core;
 import liquibase.database.Database;
 import liquibase.database.core.HsqlDatabase;
 import liquibase.database.core.MSSQLDatabase;
+import liquibase.database.core.MySQLDatabase;
 import liquibase.database.core.OracleDatabase;
 import liquibase.datatype.DataTypeInfo;
 import liquibase.datatype.DatabaseDataType;
@@ -22,6 +23,13 @@ public class NCharType extends CharType {
         if (database instanceof OracleDatabase) {
             return new DatabaseDataType("NCHAR", getParameters());
         }
+
+        if (database instanceof MySQLDatabase) {
+            final DatabaseDataType type = new DatabaseDataType("CHAR", getParameters());
+            type.addAdditionalInformation("CHARACTER SET utf8mb4");
+            return type;
+        }
+
         if (database instanceof MSSQLDatabase) {
             Object[] parameters = getParameters();
             if (parameters.length > 0) {

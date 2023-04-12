@@ -27,6 +27,13 @@ public class NVarcharType extends CharType {
         if (database instanceof OracleDatabase) {
             return new DatabaseDataType("NVARCHAR2", getParameters());
         }
+
+        if (database instanceof MySQLDatabase) {
+            final DatabaseDataType type = new DatabaseDataType("VARCHAR", getParameters());
+            type.addAdditionalInformation("CHARACTER SET utf8mb4");
+            return type;
+        }
+
         if (database instanceof MSSQLDatabase) {
             Object[] parameters = getParameters();
             if (parameters.length > 0) {
