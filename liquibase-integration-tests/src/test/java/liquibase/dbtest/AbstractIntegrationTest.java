@@ -48,7 +48,6 @@ import liquibase.test.JUnitResourceAccessor;
 import liquibase.util.RegexMatcher;
 import org.junit.*;
 import org.junit.rules.TemporaryFolder;
-import spock.lang.Shared;
 
 import java.io.*;
 import java.nio.file.Files;

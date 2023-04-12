@@ -9,7 +9,6 @@ import org.junit.Ignore;
 
 import java.sql.SQLSyntaxErrorException;
 
-@Ignore
 public class HsqlIntegrationTest extends AbstractIntegrationTest {
 
     public static final String OBJECT_ALREADY_EXISTS = "42504";
