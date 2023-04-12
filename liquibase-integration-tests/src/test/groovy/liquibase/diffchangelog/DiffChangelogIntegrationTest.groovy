@@ -68,7 +68,6 @@ CREATE TABLE $tableName ( product_no varchar(20) DEFAULT nextval('$sequenceName'
         } catch (Exception ignored) {
 
         }
-        postgres.stop()
     }
 
     @Ignore
