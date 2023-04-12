@@ -12,13 +12,17 @@
 
     <artifactId>liquibase-cdi-jakarta</artifactId>
 
+    <properties>
+        <maven.compiler.source>1.8</maven.compiler.source>
+        <maven.compiler.target>11</maven.compiler.target>
+    </properties>
+
     <dependencies>
         <dependency>
             <groupId>org.liquibase</groupId>
             <artifactId>liquibase-core</artifactId>
             <version>${project.version}</version>
         </dependency>
-
 
         <dependency>
             <groupId>org.liquibase</groupId>
@@ -31,7 +35,7 @@
         <dependency>
             <groupId>org.jboss.weld.se</groupId>
             <artifactId>weld-se-core</artifactId>
-            <version>4.0.3.Final</version>
+            <version>5.1.0.Final</version>
             <scope>test</scope>
         </dependency>
 
