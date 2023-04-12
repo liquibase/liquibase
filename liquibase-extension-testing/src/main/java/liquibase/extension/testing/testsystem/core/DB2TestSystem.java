@@ -25,7 +25,8 @@ public class DB2TestSystem extends DatabaseTestSystem {
                         .withUsername(getUsername())
                         .withPassword(getPassword())
                         .withDatabaseName(getCatalog())
-                        .withUrlParam("retrieveMessagesFromServerOnGetMessage", "true"),
+                        .withUrlParam("retrieveMessagesFromServerOnGetMessage", "true")
+                        .acceptLicense(),
                 this
         ) {
             @Override

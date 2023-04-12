@@ -42,7 +42,6 @@ class GenerateChangeLogMSSQLIntegrationTest extends Specification {
         cleanup:
         CommandUtil.runDropAll(mssql)
         outputFile.delete()
-        mssql.stop()
     }
 
     @Ignore
