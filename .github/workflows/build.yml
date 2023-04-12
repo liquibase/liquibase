@@ -154,8 +154,6 @@ jobs:
             java: 11
           - os: windows-2019
             java: 11
-          - os: macos-latest
-            java: 17
           - os: windows-2019
             java: 17
           - os: macos-latest
@@ -335,10 +333,10 @@ jobs:
           key: install4j-A${{ hashFiles('liquibase-dist/src/main/install4j/liquibase.install4j') }}
           path: ~/.install4j8/**
 
-      - name: Set up JDK 8
+      - name: Set up JDK 17
         uses: actions/setup-java@v3
         with:
-          java-version: '8'
+          java-version: '17'
           distribution: 'temurin'
           gpg-private-key: ${{ secrets.GPG_SECRET }}
           gpg-passphrase: GPG_PASSPHRASE
