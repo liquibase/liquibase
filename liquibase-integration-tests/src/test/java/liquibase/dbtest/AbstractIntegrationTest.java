@@ -99,7 +99,6 @@ public abstract class AbstractIntegrationTest {
     protected AbstractIntegrationTest(String changelogDir, Database dbms) throws Exception {
         if (dbms != null) {
             this.testSystem = (DatabaseTestSystem) Scope.getCurrentScope().getSingleton(TestSystemFactory.class).getTestSystem(dbms.getShortName());
-            testSystem.start();
         }
 
         this.completeChangeLog = "changelogs/" + changelogDir + "/complete/root.changelog.xml";
