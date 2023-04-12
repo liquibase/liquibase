@@ -245,9 +245,6 @@ public class Index extends AbstractDatabaseObject {
             returnValue = thisName.compareTo(oName);
         }
 
-        //We should not have two indexes that have the same name and tablename
-
-
         return returnValue;
     }
 

@@ -63,49 +63,8 @@ public class UnsupportedDatabase extends AbstractJdbcDatabase {
     }
 
     private String findCurrentDateTimeFunction() {
-//todo: reintroduce        try {
-//            String nowFunction = null;
-//            String dateFunction = null;
-//            String dateTimeFunction = null;
-//            String timeStampFunction = null;
-//
-//            String[] timeDateFunctions = getConnection().getMetaData().getTimeDateFunctions().split(",");
-//            for (String functionName : timeDateFunctions) {
-//                String function = functionName.trim().toUpperCase();
-//                if (function.endsWith("TIMESTAMP")) {
-//                    timeStampFunction = functionName.trim();
-//                }
-//                if (function.endsWith("DATETIME")) {
-//                    dateTimeFunction = functionName.trim();
-//                }
-//                if (function.endsWith("DATE")) {
-//                    dateFunction = functionName.trim();
-//                }
-//                if ("NOW".equals(function)) {
-//                    nowFunction = functionName.trim();
-//                }
-//            }
-//
-//            if (nowFunction != null) {
-//                return "{fn "+nowFunction+"()"+"}";
-//            } else if (timeStampFunction != null) {
-//                return "{fn "+timeStampFunction+"()"+"}";
-//            } else if (dateTimeFunction != null) {
-//                return "{fn "+dateTimeFunction+"()"+"}";
-//            } else if (dateFunction != null) {
-//                return "{fn "+dateFunction+"()"+"}";
-//            } else {
-//                return "CURRENT_TIMESTAMP";
-//            }
-//
-//        } catch (SQLException e) {
-//            throw new RuntimeException(e);
-//        }
         return "CURRENT_TIMESTAMP";
     }
-
-
-//todo: reintroduce?    @Override
 
     @Override
     public boolean supportsTablespaces() {

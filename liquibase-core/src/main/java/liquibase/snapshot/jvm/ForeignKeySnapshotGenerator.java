@@ -277,14 +277,4 @@ public class ForeignKeySnapshotGenerator extends JdbcSnapshotGenerator {
         }
     }
 
-    //from SQLiteDatabaseSnapshotGenerator
-    //    protected void readForeignKeys(DatabaseSnapshot snapshot, String schema, DatabaseMetaData databaseMetaData) throws DatabaseException, SQLException {
-//        updateListeners("Reading foreign keys for " + snapshot.getDatabase().toString() + " ...");
-//        // Foreign keys are not supported in SQLite until now.
-//        // ...do nothing here
-//    }
-
-
-    //Code from OracleDatabaseSnapshotGenerator
-
 }

@@ -151,6 +151,4 @@ public class ViewSnapshotGenerator extends JdbcSnapshotGenerator {
             }
         }
     }
-
-    //from SQLIteSnapshotGenerator
 }

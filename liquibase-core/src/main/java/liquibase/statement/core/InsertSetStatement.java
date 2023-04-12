@@ -41,7 +41,6 @@ public class InsertSetStatement extends AbstractSqlStatement {
 
     public InsertSetStatement addInsertStatement(InsertStatement statement) {
         inserts.add(statement);
-
         return this;
     }
     public InsertStatement peek() {

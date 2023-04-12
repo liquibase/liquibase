@@ -101,8 +101,6 @@ public class DiffToReport {
             printChangedComparison("Changed " + getTypeName(type), diffResult.getChangedObjects(type, comparator), out);
 
         }
-
-//        printColumnComparison(diffResult.getColumns().getChanged(), out);
     }
 
     protected String getTypeName(Class<? extends DatabaseObject> type) {
