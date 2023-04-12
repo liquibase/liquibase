@@ -17,6 +17,7 @@ import liquibase.snapshot.SnapshotGeneratorFactory
 import liquibase.structure.core.Sequence
 import liquibase.util.FileUtil
 import liquibase.util.StringUtil
+import spock.lang.Ignore
 import spock.lang.Shared
 import spock.lang.Specification
 
@@ -69,6 +70,7 @@ CREATE TABLE $tableName ( product_no varchar(20) DEFAULT nextval('$sequenceName'
         }
     }
 
+    @Ignore("This test causes the pipeline to time out.")
     def "should include view comments"() {
         when:
         postgres.getConnection().setAutoCommit(false)
