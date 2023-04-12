@@ -110,14 +110,12 @@ public class CreateSequenceGenerator extends AbstractSqlGenerator<CreateSequence
             }
         }
 
-        if (!(database instanceof MariaDBDatabase) && statement.getOrdered() != null) {
-            if (!(database instanceof SybaseASADatabase)) {
-                if (statement.getOrdered()) {
-                    queryStringBuilder.append(" ORDER");
-                } else {
-                   if (database instanceof OracleDatabase) {
-                       queryStringBuilder.append(" NOORDER");
-                   }
+        if (!(database instanceof MariaDBDatabase || database instanceof SybaseASADatabase || database instanceof MSSQLDatabase) && statement.getOrdered() != null) {
+            if (statement.getOrdered()) {
+                queryStringBuilder.append(" ORDER");
+            } else {
+                if (database instanceof OracleDatabase) {
+                    queryStringBuilder.append(" NOORDER");
                 }
             }
         }
