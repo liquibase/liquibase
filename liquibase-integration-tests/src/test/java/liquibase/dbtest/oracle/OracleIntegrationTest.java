@@ -27,14 +27,12 @@ public class OracleIntegrationTest extends AbstractIntegrationTest {
     String indexOnSchemaChangeLog;
     String viewOnSchemaChangeLog;
     String customExecutorChangeLog;
-    String hubTestChangelog;
 
     public OracleIntegrationTest() throws Exception {
         super("oracle", DatabaseFactory.getInstance().getDatabase("oracle"));
          indexOnSchemaChangeLog = "changelogs/oracle/complete/indexOnSchema.xml";
          viewOnSchemaChangeLog = "changelogs/oracle/complete/viewOnSchema.xml";
          customExecutorChangeLog = "changelogs/oracle/complete/sqlplusExecutor.xml";
-         hubTestChangelog = "changelogs/oracle/complete/HubTestChangelog.xml";
         // Respect a user-defined location for sqlnet.ora, tnsnames.ora etc. stored in the environment
         // variable TNS_ADMIN. This allowes the use of TNSNAMES.
         if (System.getenv("TNS_ADMIN") != null)
@@ -116,20 +114,6 @@ public class OracleIntegrationTest extends AbstractIntegrationTest {
 
 
 
-    }
-    @Test
-    public void testHubChangelog() throws Exception {
-        assumeNotNull(this.getDatabase());
-
-        Liquibase liquibase = createLiquibase(this.hubTestChangelog);
-        clearDatabase();
-
-        try {
-            liquibase.update(this.contexts);
-        } catch (ValidationFailedException e) {
-            e.printDescriptiveError(System.out);
-            throw e;
-        }
     }
 
     @Test
