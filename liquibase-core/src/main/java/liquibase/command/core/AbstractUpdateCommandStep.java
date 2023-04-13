@@ -8,14 +8,15 @@ import liquibase.command.AbstractCommandStep;
 import liquibase.command.CleanUpCommandStep;
 import liquibase.command.CommandResultsBuilder;
 import liquibase.command.CommandScope;
+import liquibase.command.core.helpers.DatabaseChangelogCommandStep;
 import liquibase.database.Database;
 import liquibase.exception.DatabaseException;
 import liquibase.exception.LiquibaseException;
 import liquibase.exception.LockException;
 import liquibase.executor.ExecutorService;
-import liquibase.integration.commandline.ChangeExecListenerUtils;
 import liquibase.lockservice.LockService;
 import liquibase.lockservice.LockServiceFactory;
+import liquibase.logging.core.BufferedLogService;
 import liquibase.logging.mdc.MdcKey;
 import liquibase.logging.mdc.MdcObject;
 import liquibase.logging.mdc.MdcValue;
@@ -40,26 +41,30 @@ public abstract class AbstractUpdateCommandStep extends AbstractCommandStep impl
     public abstract String getLabelFilterArg(CommandScope commandScope);
     public abstract String[] getCommandName();
     public abstract UpdateSummaryEnum getShowSummary(CommandScope commandScope);
-    public abstract String getChangeExecListenerClassArg(CommandScope commandScope);
-    protected abstract String getChangeExecListenerPropertiesFileArg(CommandScope commandScope);
 
     @Override
     public List<Class<?>> requiredDependencies() {
-        return Arrays.asList(Database.class, LockService.class, DatabaseChangeLog.class, ChangeLogParameters.class);
+        return Arrays.asList(Database.class, LockService.class, DatabaseChangeLog.class, ChangeExecListener.class, ChangeLogParameters.class);
     }
 
     @Override
     public void run(CommandResultsBuilder resultsBuilder) throws Exception {
-        Scope.getCurrentScope().addMdcValue(MdcKey.LIQUIBASE_OPERATION, getCommandName()[0]);
-        Scope.getCurrentScope().addMdcValue(MdcKey.LIQUIBASE_COMMAND_NAME, getCommandName()[0]);
         CommandScope commandScope = resultsBuilder.getCommandScope();
+        String changeLogFile = getChangelogFileArg(commandScope);
         Database database = (Database) commandScope.getDependency(Database.class);
         Contexts contexts = new Contexts(getContextsArg(commandScope));
         LabelExpression labelExpression = new LabelExpression(getLabelFilterArg(commandScope));
-        addCommandFiltersMdc(labelExpression, contexts);
+        ChangeLogParameters changeLogParameters = (ChangeLogParameters) commandScope.getDependency(ChangeLogParameters.class);
+        DatabaseChangelogCommandStep.addCommandFiltersMdc(labelExpression, contexts);
+        customMdcLogging(commandScope);
 
         LockService lockService = (LockService) commandScope.getDependency(LockService.class);
-        DefaultChangeExecListener defaultChangeExecListener = new DefaultChangeExecListener();
+        BufferedLogService bufferLog = new BufferedLogService();
+        //
+        // Create and add the listener to the resultsBuilder so that it is available
+        // for exception handling when there is an error
+        //
+        DefaultChangeExecListener defaultChangeExecListener = (DefaultChangeExecListener) commandScope.getDependency(ChangeExecListener.class);
         resultsBuilder.addResult(DEFAULT_CHANGE_EXEC_LISTENER_RESULT_KEY, defaultChangeExecListener);
         try {
             DatabaseChangeLog databaseChangeLog = (DatabaseChangeLog) commandScope.getDependency(DatabaseChangeLog.class);
@@ -70,24 +75,18 @@ public abstract class AbstractUpdateCommandStep extends AbstractCommandStep impl
             Scope.getCurrentScope().addMdcValue(MdcKey.DEPLOYMENT_ID, changelogService.getDeploymentId());
             Scope.getCurrentScope().getLog(getClass()).info(String.format("Using deploymentId: %s", changelogService.getDeploymentId()));
 
-            //Set up a "chain" of ChangeExecListeners. Starting with the custom change exec listener
-            //then wrapping that in the DefaultChangeExecListener.
-            ChangeExecListener listener = ChangeExecListenerUtils.getChangeExecListener(database,
-                    Scope.getCurrentScope().getResourceAccessor(),
-                    getChangeExecListenerClassArg(commandScope),
-                    getChangeExecListenerPropertiesFileArg(commandScope));
-            defaultChangeExecListener.addListener(listener);
-
             StatusVisitor statusVisitor = new StatusVisitor(database);
             ChangeLogIterator shouldRunIterator = getStatusChangelogIterator(commandScope, database, contexts, labelExpression, databaseChangeLog);
             shouldRunIterator.run(statusVisitor, new RuntimeEnvironment(database, contexts, labelExpression));
 
             ChangeLogIterator runChangeLogIterator = getStandardChangelogIterator(commandScope, database, contexts, labelExpression, databaseChangeLog);
-            Scope.child("showSummary", getShowSummary(commandScope), () -> {
-                runChangeLogIterator.run(new UpdateVisitor(database, defaultChangeExecListener), new RuntimeEnvironment(database, contexts, labelExpression));
-                ShowSummaryUtil.showUpdateSummary(databaseChangeLog, statusVisitor, resultsBuilder.getOutputStream());
-            });
 
+            HashMap<String, Object> scopeValues = new HashMap<>();
+            scopeValues.put("showSummary", getShowSummary(commandScope));
+            Scope.child(scopeValues, () -> {
+                runChangeLogIterator.run(new UpdateVisitor(database, defaultChangeExecListener), new RuntimeEnvironment(database, contexts, labelExpression));
+                ShowSummaryUtil.showUpdateSummary(databaseChangeLog, getShowSummary(commandScope), statusVisitor, resultsBuilder.getOutputStream());
+            });
             resultsBuilder.addResult("statusCode", 0);
             logDeploymentOutcomeMdc(defaultChangeExecListener, true);
             postUpdateLog();
@@ -106,18 +105,15 @@ public abstract class AbstractUpdateCommandStep extends AbstractCommandStep impl
         }
     }
 
+    protected void customMdcLogging(CommandScope commandScope) {
+        // do nothing by default
+    }
+
     @Override
     public void cleanUp(CommandResultsBuilder resultsBuilder) {
         LockServiceFactory.getInstance().resetAll();
         ChangeLogHistoryServiceFactory.getInstance().resetAll();
         Scope.getCurrentScope().getSingleton(ExecutorService.class).reset();
-    }
-
-    private void addCommandFiltersMdc(LabelExpression labelExpression, Contexts contexts) {
-        String labelFilterMdc = labelExpression != null && labelExpression.getOriginalString() != null ? labelExpression.getOriginalString() : "";
-        String contextFilterMdc = contexts != null ? contexts.toString() : "";
-        Scope.getCurrentScope().addMdcValue(MdcKey.COMMAND_LABEL_FILTER, labelFilterMdc);
-        Scope.getCurrentScope().addMdcValue(MdcKey.COMMAND_CONTEXT_FILTER, contextFilterMdc);
     }
 
     private void logDeploymentOutcomeMdc(DefaultChangeExecListener defaultListener, boolean success) throws IOException {
@@ -228,7 +224,8 @@ public abstract class AbstractUpdateCommandStep extends AbstractCommandStep impl
             StatusVisitor statusVisitor = new StatusVisitor(database);
             ChangeLogIterator shouldRunIterator = getStatusChangelogIterator(commandScope, database, contexts, labelExpression, databaseChangeLog);
             shouldRunIterator.run(statusVisitor, new RuntimeEnvironment(database, contexts, labelExpression));
-            ShowSummaryUtil.showUpdateSummary(databaseChangeLog, statusVisitor, outputStream);
+            UpdateSummaryEnum showSummary = getShowSummary(commandScope);
+            ShowSummaryUtil.showUpdateSummary(databaseChangeLog, showSummary, statusVisitor, outputStream);
             return true;
         }
         return false;

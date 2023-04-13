@@ -497,6 +497,8 @@ public class DatabaseChangeLog implements Comparable<DatabaseChangeLog>, Conditi
                         includeContextFilter,
                         labels,
                         ignore,
+                        node.getChildValue(null, "minDepth", 1),
+                        node.getChildValue(null, "maxDepth", Integer.MAX_VALUE),
                         (ModifyChangeSets)nodeScratch.get("modifyChangeSets"));
                 break;
             }
@@ -636,7 +638,9 @@ public class DatabaseChangeLog implements Comparable<DatabaseChangeLog>, Conditi
                 resourceAccessor,
                 includeContextFilter,
                 labels,
-                ignore);
+                ignore,
+                0,
+                Integer.MAX_VALUE);
     }
     public void includeAll(String pathName,
                            boolean isRelativeToChangelogFile,
@@ -646,10 +650,12 @@ public class DatabaseChangeLog implements Comparable<DatabaseChangeLog>, Conditi
                            ResourceAccessor resourceAccessor,
                            ContextExpression includeContextFilter,
                            Labels labels,
-                           boolean ignore)
+                           boolean ignore,
+                           int minDepth,
+                           int maxDepth)
             throws SetupException {
         includeAll(pathName, isRelativeToChangelogFile, resourceFilter, errorIfMissingOrEmpty, resourceComparator,
-                   resourceAccessor, includeContextFilter, labels, ignore, new ModifyChangeSets(null, null));
+                   resourceAccessor, includeContextFilter, labels, ignore, minDepth, maxDepth, new ModifyChangeSets(null, null));
     }
 
     public void includeAll(String pathName,
@@ -661,6 +667,8 @@ public class DatabaseChangeLog implements Comparable<DatabaseChangeLog>, Conditi
                            ContextExpression includeContextFilter,
                            Labels labels,
                            boolean ignore,
+                           int minDepth,
+                           int maxDepth,
                            ModifyChangeSets modifyChangeSets)
             throws SetupException {
         try {
@@ -672,6 +680,8 @@ public class DatabaseChangeLog implements Comparable<DatabaseChangeLog>, Conditi
             if (isRelativeToChangelogFile) {
                 relativeTo = this.getPhysicalFilePath();
             }
+
+            ResourceAccessor.SearchOptions searchOptions = initializeAndSetMinAndMaxDepth(minDepth, maxDepth);
 
             List<Resource> unsortedResources = null;
             Set<String> seenChangelogPaths = Scope.getCurrentScope().get(SEEN_CHANGELOGS_PATHS_SCOPE_KEY, new HashSet<>());
@@ -699,7 +709,7 @@ public class DatabaseChangeLog implements Comparable<DatabaseChangeLog>, Conditi
                 LOG.fine("includeAll for " + pathName);
                 LOG.fine("Using file opener for includeAll: " + resourceAccessor.toString());
 
-                unsortedResources = resourceAccessor.search(path, true);
+                unsortedResources = resourceAccessor.search(path, searchOptions);
             } catch (IOException e) {
                 if (errorIfMissingOrEmpty) {
                     throw e;
@@ -814,7 +824,7 @@ public class DatabaseChangeLog implements Comparable<DatabaseChangeLog>, Conditi
             PARENT_CHANGE_LOG.set(this);
             try {
                 if(!resourceAccessor.get(fileName).exists()) {
-                    if (ChangeLogParserConfiguration.ON_MISSING_INCLUDE_FILE.getCurrentValue().equals(ChangeLogParserConfiguration.MissingIncludeConfiguration.WARN)) {
+                    if (ChangeLogParserConfiguration.ON_MISSING_INCLUDE_CHANGELOG.getCurrentValue().equals(ChangeLogParserConfiguration.MissingIncludeConfiguration.WARN)) {
                         Scope.getCurrentScope().getLog(getClass()).warning(FileUtil.getFileNotFoundMessage(fileName));
                         return false;
                     } else {
@@ -990,6 +1000,29 @@ public class DatabaseChangeLog implements Comparable<DatabaseChangeLog>, Conditi
          * Fail parsing with an error
          */
         FAIL
+    }
+
+    /**
+     * Initialize and set min/max depth values validating maxDepth cannot be a lower value than minDepth
+     * @param minDepth
+     * @param maxDepth
+     * @return ResourceAccessor.SearchOptions
+     * @throws SetupException in case maxDepth is less than minDepth
+     */
+    private ResourceAccessor.SearchOptions initializeAndSetMinAndMaxDepth(int minDepth, int maxDepth) throws SetupException {
+        ResourceAccessor.SearchOptions searchOptions = new ResourceAccessor.SearchOptions();
+        try {
+            if (maxDepth < minDepth) {
+                throw new IllegalArgumentException("maxDepth argument must be greater than minDepth");
+            }
+
+            searchOptions.setMinDepth(minDepth);
+            searchOptions.setMaxDepth(maxDepth);
+        }
+        catch (IllegalArgumentException e){
+            throw new SetupException("Error in includeAll setup: "+ e.getMessage(), e);
+        }
+        return searchOptions;
     }
 
 }

@@ -43,6 +43,7 @@ liquibase.command.core.UpdateTestingRollbackCommandStep
 liquibase.command.core.UpdateToTagCommandStep
 liquibase.command.core.UpdateToTagSqlCommandStep
 liquibase.command.core.ValidateCommandStep
+liquibase.command.core.helpers.ChangeExecListenerCommandStep
 liquibase.command.core.helpers.DatabaseChangelogCommandStep
 liquibase.command.core.helpers.DbUrlConnectionCommandStep
 liquibase.command.core.helpers.DiffOutputControlCommandStep
@@ -50,3 +51,4 @@ liquibase.command.core.helpers.LockServiceCommandStep
 liquibase.command.core.helpers.OutputWriterCommandStep
 liquibase.command.core.helpers.PreCompareCommandStep
 liquibase.command.core.helpers.ReferenceDbUrlConnectionCommandStep
+liquibase.command.core.helpers.ShowSummaryArgument

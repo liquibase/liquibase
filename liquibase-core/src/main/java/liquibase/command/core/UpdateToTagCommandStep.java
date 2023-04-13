@@ -2,14 +2,16 @@ package liquibase.command.core;
 
 import liquibase.Contexts;
 import liquibase.LabelExpression;
+import liquibase.Scope;
 import liquibase.UpdateSummaryEnum;
 import liquibase.changelog.*;
 import liquibase.changelog.filter.*;
-import liquibase.changelog.visitor.ChangeExecListener;
 import liquibase.command.*;
 import liquibase.database.Database;
 import liquibase.exception.DatabaseException;
+import liquibase.logging.mdc.MdcKey;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
@@ -21,10 +23,6 @@ public class UpdateToTagCommandStep extends AbstractUpdateCommandStep {
     public static final CommandArgumentDefinition<String> LABEL_FILTER_ARG;
     public static final CommandArgumentDefinition<String> CONTEXTS_ARG;
     public static final CommandArgumentDefinition<String> TAG_ARG;
-    public static final CommandArgumentDefinition<String> CHANGE_EXEC_LISTENER_CLASS_ARG;
-    public static final CommandArgumentDefinition<String> CHANGE_EXEC_LISTENER_PROPERTIES_FILE_ARG;
-    public static final CommandArgumentDefinition<ChangeExecListener> CHANGE_EXEC_LISTENER_ARG;
-    public static final CommandArgumentDefinition<UpdateSummaryEnum> SHOW_SUMMARY;
     public static final CommandArgumentDefinition<ChangeLogParameters> CHANGELOG_PARAMETERS;
 
     static {
@@ -38,34 +36,8 @@ public class UpdateToTagCommandStep extends AbstractUpdateCommandStep {
                 .description("Changeset contexts to match").build();
         TAG_ARG = builder.argument("tag", String.class).required()
             .description("The tag to update to").build();
-        CHANGE_EXEC_LISTENER_CLASS_ARG = builder.argument("changeExecListenerClass", String.class)
-            .description("Fully-qualified class which specifies a ChangeExecListener").build();
-        CHANGE_EXEC_LISTENER_PROPERTIES_FILE_ARG = builder.argument("changeExecListenerPropertiesFile", String.class)
-            .description("Path to a properties file for the ChangeExecListenerClass").build();
-        CHANGE_EXEC_LISTENER_ARG = builder.argument("changeExecListener", ChangeExecListener.class)
-                .hidden()
-                .build();
         CHANGELOG_PARAMETERS = builder.argument("changelogParameters", ChangeLogParameters.class)
                 .hidden()
-                .build();
-        SHOW_SUMMARY = builder.argument("showSummary", UpdateSummaryEnum.class)
-                .description("Type of update results summary to show.  Values can be 'off', 'summary', or 'verbose'.")
-                .defaultValue(UpdateSummaryEnum.OFF)
-                .setValueHandler(value -> {
-                    if (value == null) {
-                        return null;
-                    }
-                    if (value instanceof String && ! value.equals("")) {
-                        final List<String> validValues = Arrays.asList("OFF", "SUMMARY", "VERBOSE");
-                        if (!validValues.contains(((String) value).toUpperCase())) {
-                            throw new IllegalArgumentException("Illegal value for `showUpdateSummary'.  Valid values are 'OFF', 'SUMMARY', or 'VERBOSE'");
-                        }
-                        return UpdateSummaryEnum.valueOf(((String) value).toUpperCase());
-                    } else if (value instanceof UpdateSummaryEnum) {
-                        return (UpdateSummaryEnum) value;
-                    }
-                    return null;
-                })
                 .build();
     }
 
@@ -101,17 +73,7 @@ public class UpdateToTagCommandStep extends AbstractUpdateCommandStep {
 
     @Override
     public UpdateSummaryEnum getShowSummary(CommandScope commandScope) {
-        return commandScope.getArgumentValue(SHOW_SUMMARY);
-    }
-
-    @Override
-    public String getChangeExecListenerClassArg(CommandScope commandScope) {
-        return commandScope.getArgumentValue(CHANGE_EXEC_LISTENER_CLASS_ARG);
-    }
-
-    @Override
-    protected String getChangeExecListenerPropertiesFileArg(CommandScope commandScope) {
-        return commandScope.getArgumentValue(CHANGE_EXEC_LISTENER_PROPERTIES_FILE_ARG);
+        return (UpdateSummaryEnum) commandScope.getDependency(UpdateSummaryEnum.class);
     }
 
     @Override
@@ -138,5 +100,17 @@ public class UpdateToTagCommandStep extends AbstractUpdateCommandStep {
                 new DbmsChangeSetFilter(database),
                 new IgnoreChangeSetFilter(),
                 new UpToTagChangeSetFilter(tag, ranChangeSetList));
+    }
+
+    @Override
+    public List<Class<?>> requiredDependencies() {
+        List<Class<?>> deps = new ArrayList<>(super.requiredDependencies());
+        deps.add(UpdateSummaryEnum.class);
+        return deps;
+    }
+
+    @Override
+    protected void customMdcLogging(CommandScope commandScope) {
+        Scope.getCurrentScope().addMdcValue(MdcKey.UPDATE_TO_TAG, commandScope.getArgumentValue(TAG_ARG));
     }
 }

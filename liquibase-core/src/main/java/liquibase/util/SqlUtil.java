@@ -359,9 +359,18 @@ public abstract class SqlUtil {
      */
     public static String getSqlString(SqlStatement statement, SqlGeneratorFactory sqlGeneratorFactory, Database database) {
         Sql[] sqlStatements = sqlGeneratorFactory.generateSql(statement, database);
+        return convertSqlArrayToString(sqlStatements);
+    }
+
+    /**
+     * Given an array of sql, get the string sql statements.
+     * @param sqlStatements the statements to stringify
+     * @return the sql string or an empty string if there are no statements to generate
+     */
+    public static String convertSqlArrayToString(Sql[] sqlStatements) {
         if (sqlStatements != null) {
             return Arrays.stream(sqlStatements)
-                    .map(sql -> sql.toSql() + sql.getEndDelimiter())
+                    .map(sql -> sql.toSql().endsWith(sql.getEndDelimiter()) ? sql.toSql() : sql.toSql() + sql.getEndDelimiter())
                     .collect(Collectors.joining("\n"));
         } else {
             return "";
