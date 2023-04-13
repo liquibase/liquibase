@@ -191,7 +191,7 @@ public class GlobalConfiguration implements AutoloadedConfigurations {
                 .build();
 
         STRICT = builder.define("strict", Boolean.class)
-                .setDescription("If true, restricts Liquibase configuration and setup: requires changeset author to be non-empty and requires LIQUIBASE_* environment variable names to be valid.")
+                .setDescription("If true, Liquibase enforces certain best practices and proactively looks for common errors")
                 .setDefaultValue(false)
                 .build();
 
