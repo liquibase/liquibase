@@ -15,8 +15,6 @@ on:
       - master
       - main
       - github-action-*
-    paths-ignore:
-      - '**.md'
 
 env:
   MAVEN_VERSION: '3.8.7'
