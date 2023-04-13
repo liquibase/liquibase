@@ -50,16 +50,13 @@ public abstract class AbstractUpdateCommandStep extends AbstractCommandStep impl
     @Override
     public void run(CommandResultsBuilder resultsBuilder) throws Exception {
         CommandScope commandScope = resultsBuilder.getCommandScope();
-        String changeLogFile = getChangelogFileArg(commandScope);
         Database database = (Database) commandScope.getDependency(Database.class);
         Contexts contexts = new Contexts(getContextsArg(commandScope));
         LabelExpression labelExpression = new LabelExpression(getLabelFilterArg(commandScope));
-        ChangeLogParameters changeLogParameters = (ChangeLogParameters) commandScope.getDependency(ChangeLogParameters.class);
         DatabaseChangelogCommandStep.addCommandFiltersMdc(labelExpression, contexts);
         customMdcLogging(commandScope);
 
         LockService lockService = (LockService) commandScope.getDependency(LockService.class);
-        BufferedLogService bufferLog = new BufferedLogService();
         //
         // Create and add the listener to the resultsBuilder so that it is available
         // for exception handling when there is an error
