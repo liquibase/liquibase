@@ -1964,6 +1964,7 @@ public class Main {
 
     private void runUpdateCommandStep() throws CommandLineParsingException, CommandExecutionException, IOException {
         CommandScope updateCommand = new CommandScope("update");
+        updateCommand.addArgumentValue(UpdateCommandStep.CHANGELOG_FILE_ARG, changeLogFile);
         updateCommand.addArgumentValue(UpdateCommandStep.CONTEXTS_ARG, contexts);
         updateCommand.addArgumentValue(UpdateCommandStep.LABEL_FILTER_ARG, labelFilter);
         updateCommand.addArgumentValue(ChangeExecListenerCommandStep.CHANGE_EXEC_LISTENER_CLASS_ARG, changeExecListenerClass);
