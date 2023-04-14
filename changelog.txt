@@ -3,7 +3,22 @@ Liquibase Core Changelog
 
 Changes in version Liquibase v4.21.1 (2023.04.12)
 
-* DAT-14365: unhide log-format parameter
+### Liquibase 4.21.1 is a patch release
+
+## Notable Changes
+### [PRO] Observability Initiative - Structured Logging
+Structured Logging makes Liquibase operation data easily available for automated monitoring and analysis tools to read, query, and act upon in automated workflows. This feature significantly improves the way Liquibase logs its actions and events to make records machine-readable, easily-ingested, and queryable by industry-standard observability and analysis tools. Learn more at https://docs.liquibase.com/structured-logging
+
+## What's Changed
+* DAT-14365: unhide log-format parameter by @StevenMassaro in https://github.com/liquibase/liquibase/pull/4120
+* updated changelog txt to 4.21 by @suryaaki2 in https://github.com/liquibase/liquibase/pull/4121
+* remove Hub mention from readme by @mariochampion in https://github.com/liquibase/liquibase/pull/4127
+* Add missing parameter changeLogFile to update command when running from Main by @filipelautert in https://github.com/liquibase/liquibase/pull/4126
+
+## New Contributors
+* @mariochampion made their first contribution in https://github.com/liquibase/liquibase/pull/4127
+
+**Full Changelog**: https://github.com/liquibase/liquibase/compare/v4.21.0...v4.21.1
 
 
 Changes in version Liquibase v4.21.0 (2023.04.12)
