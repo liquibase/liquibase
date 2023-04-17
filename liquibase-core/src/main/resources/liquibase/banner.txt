@@ -9,6 +9,6 @@
 ##              |_|                               ##
 ##                                                ## 
 ##  Get documentation at docs.liquibase.com       ##
-##  Get certified courses at learn.liquibase.com  ##
+##  Get certified courses at learn.liquibase.com  ## 
 ##                                                ##
 ####################################################
