@@ -74,6 +74,7 @@ do
   mv $workdir/finalize-jar/META-INF/MANIFEST.MF $workdir/tmp-manifest.mf
   (cd $workdir/finalize-jar && jar cfm $workdir/$jar $workdir/tmp-manifest.mf .)
 
+  cp $workdir/$jar $outdir
   RENAME_SNAPSHOTS=$(ls $outdir/$jar | sed -e "s/0-SNAPSHOT/$version/g")
   mv -v $outdir/$jar $RENAME_SNAPSHOTS
   
