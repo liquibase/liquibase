@@ -1,54 +1,43 @@
 package liquibase.command.core;
 
+import liquibase.Contexts;
+import liquibase.LabelExpression;
+import liquibase.RuntimeEnvironment;
+import liquibase.Scope;
+import liquibase.changelog.ChangeLogIterator;
+import liquibase.changelog.ChangeLogParameters;
+import liquibase.changelog.ChangeSet;
+import liquibase.changelog.DatabaseChangeLog;
+import liquibase.changelog.filter.*;
+import liquibase.changelog.visitor.ListVisitor;
 import liquibase.command.*;
-import liquibase.configuration.ConfigurationValueObfuscator;
-import liquibase.exception.CommandExecutionException;
+import liquibase.database.Database;
+import liquibase.exception.DatabaseException;
+import liquibase.util.StreamUtil;
 
+import java.io.OutputStream;
+import java.io.OutputStreamWriter;
 import java.util.Arrays;
+import java.util.Collections;
+import java.util.List;
 
-public class StatusCommandStep extends AbstractCliWrapperCommandStep {
+public class StatusCommandStep extends AbstractCommandStep {
 
     public static final String[] COMMAND_NAME = {"status"};
 
-    public static final CommandArgumentDefinition<String> URL_ARG;
-    public static final CommandArgumentDefinition<String> DEFAULT_SCHEMA_NAME_ARG;
-    public static final CommandArgumentDefinition<String> DEFAULT_CATALOG_NAME_ARG;
-    public static final CommandArgumentDefinition<String> USERNAME_ARG;
-    public static final CommandArgumentDefinition<String> PASSWORD_ARG;
-    public static final CommandArgumentDefinition<String> CHANGELOG_FILE_ARG;
-    public static final CommandArgumentDefinition<String> CONTEXTS_ARG;
-    public static final CommandArgumentDefinition<String> LABEL_FILTER_ARG;
     public static final CommandArgumentDefinition<Boolean> VERBOSE_ARG;
-    public static final CommandArgumentDefinition<String> DRIVER_ARG;
-    public static final CommandArgumentDefinition<String> DRIVER_PROPERTIES_FILE_ARG;
 
     static {
         CommandBuilder builder = new CommandBuilder(COMMAND_NAME);
-        URL_ARG = builder.argument(CommonArgumentNames.URL, String.class).required()
-                .description("The JDBC database connection URL").build();
-        DEFAULT_SCHEMA_NAME_ARG = builder.argument("defaultSchemaName", String.class)
-                .description("The default schema name to use for the database connection").build();
-        DEFAULT_CATALOG_NAME_ARG = builder.argument("defaultCatalogName", String.class)
-                .description("The default catalog name to use for the database connection").build();
-        DRIVER_ARG = builder.argument("driver", String.class)
-                .description("The JDBC driver class").build();
-        DRIVER_PROPERTIES_FILE_ARG = builder.argument("driverPropertiesFile", String.class)
-                .description("The JDBC driver properties file").build();
-        USERNAME_ARG = builder.argument(CommonArgumentNames.USERNAME, String.class)
-                .description("Username to use to connect to the database").build();
-        PASSWORD_ARG = builder.argument(CommonArgumentNames.PASSWORD, String.class)
-                .description("Password to use to connect to the database")
-                .setValueObfuscator(ConfigurationValueObfuscator.STANDARD)
-                .build();
-        CHANGELOG_FILE_ARG = builder.argument(CommonArgumentNames.CHANGELOG_FILE, String.class).required()
-                .description("The root changelog").build();
-        CONTEXTS_ARG = builder.argument("contexts", String.class)
-                .description("Changeset contexts to match").build();
-        LABEL_FILTER_ARG = builder.argument("labelFilter", String.class)
-                .addAlias("labels")
-                .description("Changeset labels to match").build();
         VERBOSE_ARG = builder.argument("verbose", Boolean.class)
-                .description("Verbose flag with optional values of 'True' or 'False'. The default is 'True'.").build();
+                .description("Verbose flag with optional values of 'True' or 'False'. The default is 'True'.")
+                .defaultValue(true)
+                .build();
+    }
+
+    @Override
+    public List<Class<?>> requiredDependencies() {
+        return Arrays.asList(Database.class, DatabaseChangeLog.class);
     }
 
     @Override
@@ -56,14 +45,66 @@ public class StatusCommandStep extends AbstractCliWrapperCommandStep {
         return new String[][] { COMMAND_NAME };
     }
 
-
-    @Override
-    protected String[] collectArguments(CommandScope commandScope) throws CommandExecutionException {
-        return removeArgumentValues(collectArguments(commandScope, Arrays.asList("verbose"), null), "verbose");
-    }
-
     @Override
     public void adjustCommandDefinition(CommandDefinition commandDefinition) {
         commandDefinition.setShortDescription("Generate a list of pending changesets");
+    }
+
+    @Override
+    public void run(CommandResultsBuilder resultsBuilder) throws Exception {
+        CommandScope commandScope = resultsBuilder.getCommandScope();
+        OutputStream outputStream = resultsBuilder.getOutputStream();
+        OutputStreamWriter out = new OutputStreamWriter(outputStream);
+        Database database = (Database) commandScope.getDependency(Database.class);
+        DatabaseChangeLog changeLog = (DatabaseChangeLog) commandScope.getDependency(DatabaseChangeLog.class);
+        ChangeLogParameters changeLogParameters = (ChangeLogParameters) commandScope.getDependency(ChangeLogParameters.class);
+        Contexts contexts = changeLogParameters.getContexts();
+        LabelExpression labels = changeLogParameters.getLabels();
+        boolean verbose = commandScope.getArgumentValue(VERBOSE_ARG);
+
+        List<ChangeSet> unrunChangeSets = listUnrunChangeSets(contexts, labels, changeLog, database);
+        if (unrunChangeSets.isEmpty()) {
+            out.append(database.getConnection().getConnectionUserName());
+            out.append("@");
+            out.append(database.getConnection().getURL());
+            out.append(" is up to date");
+            out.append(StreamUtil.getLineSeparator());
+        } else {
+            out.append(String.valueOf(unrunChangeSets.size()));
+            out.append(" changesets have not been applied to ");
+            out.append(database.getConnection().getConnectionUserName());
+            out.append("@");
+            out.append(database.getConnection().getURL());
+            out.append(StreamUtil.getLineSeparator());
+            if (verbose) {
+                for (ChangeSet changeSet : unrunChangeSets) {
+                    out.append("     ").append(changeSet.toString(false))
+                            .append(StreamUtil.getLineSeparator());
+                }
+            }
+        }
+
+        out.flush();
+    }
+
+    public List<ChangeSet> listUnrunChangeSets(Contexts contexts, LabelExpression labels, DatabaseChangeLog changeLog, Database database) throws Exception {
+        ListVisitor visitor = new ListVisitor();
+
+        Scope.child(Collections.singletonMap(Scope.Attr.database.name(), database), () -> {
+            ChangeLogIterator logIterator = getStandardChangelogIterator(contexts, labels, changeLog, database);
+
+            logIterator.run(visitor, new RuntimeEnvironment(database, contexts, labels));
+        });
+        return visitor.getSeenChangeSets();
+    }
+
+    protected ChangeLogIterator getStandardChangelogIterator(Contexts contexts, LabelExpression labelExpression,
+                                                             DatabaseChangeLog changeLog, Database database) throws DatabaseException {
+        return new ChangeLogIterator(changeLog,
+                new ShouldRunChangeSetFilter(database),
+                new ContextChangeSetFilter(contexts),
+                new LabelChangeSetFilter(labelExpression),
+                new DbmsChangeSetFilter(database),
+                new IgnoreChangeSetFilter());
     }
 }
