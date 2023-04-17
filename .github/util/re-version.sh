@@ -74,8 +74,9 @@ do
   mv $workdir/finalize-jar/META-INF/MANIFEST.MF $workdir/tmp-manifest.mf
   (cd $workdir/finalize-jar && jar cfm $workdir/$jar $workdir/tmp-manifest.mf .)
 
-  cp $workdir/$jar $outdir
-  rename.ul 0-SNAPSHOT $version $outdir/$jar
+  RENAME_SNAPSHOTS=$(ls $outdir/$jar | sed -e "s/0-SNAPSHOT/$version/g")
+  mv $outdir/$jar $RENAME_SNAPSHOTS
+  
 done
 
 #### Update  javadoc jars
