@@ -7,6 +7,7 @@ import liquibase.database.Database;
 import liquibase.executor.Executor;
 import liquibase.executor.ExecutorService;
 import liquibase.executor.LoggingExecutor;
+import liquibase.logging.mdc.MdcKey;
 
 import java.io.IOException;
 import java.io.OutputStreamWriter;
@@ -18,7 +19,7 @@ import java.util.List;
  * This helper class can be run prior to any command (but usually the *-sql commands, like update-sql) to redirect
  * the SQL to the console, rather than running it against an actual database.
  */
-public class OutputWriterCommandStep extends AbstractCommandStep implements CleanUpCommandStep {
+public class OutputWriterCommandStep extends AbstractHelperCommandStep implements CleanUpCommandStep {
     protected static final String[] COMMAND_NAME = {"outputWriterCommandStep"};
 
     private static OutputStreamWriter outputStreamWriter;
@@ -50,13 +51,6 @@ public class OutputWriterCommandStep extends AbstractCommandStep implements Clea
     @Override
     public String[][] defineCommandNames() {
         return new String[][] { COMMAND_NAME };
-    }
-
-    @Override
-    public void adjustCommandDefinition(CommandDefinition commandDefinition) {
-        if (commandDefinition.getPipeline().size() == 1) {
-            commandDefinition.setInternal(true);
-        }
     }
 
     @Override

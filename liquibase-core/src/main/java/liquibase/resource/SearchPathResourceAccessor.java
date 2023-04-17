@@ -46,11 +46,11 @@ public class SearchPathResourceAccessor extends CompositeResourceAccessor {
             });
         }
 
-        String logMessage = "Overall search path: " + System.lineSeparator();
+        final StringBuilder logMessage = new StringBuilder("Overall search path: " + System.lineSeparator());
         for (String location : describeLocations()) {
-            logMessage += "  - " + location + System.lineSeparator();
+            logMessage.append("  - ").append(location).append(System.lineSeparator());
         }
-        log.fine(logMessage.trim());
+        log.fine(logMessage.toString().trim());
     }
 
     /**

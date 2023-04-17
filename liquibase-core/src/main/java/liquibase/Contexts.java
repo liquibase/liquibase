@@ -32,6 +32,9 @@ public class Contexts {
     }
 
     public Contexts(String contexts) {
+        if (contexts != null) {
+            contexts = contexts.replace("\\", "");
+        }
         parseContextString(contexts);
     }
 

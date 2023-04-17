@@ -29,7 +29,9 @@ public interface Change extends LiquibaseSerializable, Plugin, ExtensibleObject 
     /**
      * Represent an empty array of {@link Change}
      */
-     Change[] EMPTY_CHANGE = {};
+    Change[] EMPTY_CHANGE = {};
+
+    String SHOULD_EXECUTE = "shouldExecute";
 
     /**
      * This method will be called by the changelog parsing process after all of the

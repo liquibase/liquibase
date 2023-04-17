@@ -1,6 +1,12 @@
 package liquibase.change.core;
 
-import liquibase.change.*;
+import liquibase.change.AbstractChange;
+import liquibase.change.Change;
+import liquibase.change.ChangeMetaData;
+import liquibase.change.ChangeStatus;
+import liquibase.change.ColumnConfig;
+import liquibase.change.DatabaseChange;
+import liquibase.change.DatabaseChangeProperty;
 import liquibase.database.Database;
 import liquibase.database.core.DB2Database;
 import liquibase.snapshot.SnapshotGeneratorFactory;
@@ -13,7 +19,10 @@ import liquibase.structure.core.PrimaryKey;
 /**
  * Creates a primary key out of an existing column or set of columns.
  */
-@DatabaseChange(name="addPrimaryKey", description = "Adds a primary key out of an existing column or set of columns.", priority = ChangeMetaData.PRIORITY_DEFAULT, appliesTo = "column")
+@DatabaseChange(name = "addPrimaryKey",
+    description = "Adds a primary key out of an existing column or set of columns.",
+    priority = ChangeMetaData.PRIORITY_DEFAULT,
+    appliesTo = "column")
 public class AddPrimaryKeyChange extends AbstractChange {
 
     private String catalogName;
@@ -37,7 +46,7 @@ public class AddPrimaryKeyChange extends AbstractChange {
         this.tableName = tableName;
     }
 
-    @DatabaseChangeProperty(mustEqualExisting ="column.relation.catalog", since = "3.0")
+    @DatabaseChangeProperty(mustEqualExisting ="column.relation.catalog", since = "3.0", description = "Name of the database catalog")
     public String getCatalogName() {
         return catalogName;
     }
@@ -46,7 +55,7 @@ public class AddPrimaryKeyChange extends AbstractChange {
         this.catalogName = catalogName;
     }
 
-    @DatabaseChangeProperty(mustEqualExisting ="column.relation.schema")
+    @DatabaseChangeProperty(mustEqualExisting ="column.relation.schema", description = "Name of the database schema")
     public String getSchemaName() {
         return schemaName;
     }
@@ -55,7 +64,8 @@ public class AddPrimaryKeyChange extends AbstractChange {
         this.schemaName = schemaName;
     }
 
-    @DatabaseChangeProperty(mustEqualExisting = "column", description = "Name of the column(s) to create the primary key on. Comma separated if multiple")
+    @DatabaseChangeProperty(mustEqualExisting = "column",
+        description = "Name of the column(s) to create the primary key on. Comma separated if multiple")
     public String getColumnNames() {
         return columnNames;
     }
@@ -73,6 +83,7 @@ public class AddPrimaryKeyChange extends AbstractChange {
         this.constraintName = constraintName;
     }
 
+    @DatabaseChangeProperty(description = "Name of the index to associate with the primary key")
     public String getForIndexName() {
         return forIndexName;
     }
@@ -81,6 +92,7 @@ public class AddPrimaryKeyChange extends AbstractChange {
         this.forIndexName = forIndexName;
     }
 
+    @DatabaseChangeProperty(description = "Name of the database schema of the index to associate with the primary key")
     public String getForIndexSchemaName() {
         return forIndexSchemaName;
     }
@@ -89,6 +101,7 @@ public class AddPrimaryKeyChange extends AbstractChange {
         this.forIndexSchemaName = forIndexSchemaName;
     }
 
+    @DatabaseChangeProperty(description = "Name of the database catalog of the index to associate with the primary key")
     public String getForIndexCatalogName() {
         return forIndexCatalogName;
     }
@@ -97,6 +110,7 @@ public class AddPrimaryKeyChange extends AbstractChange {
         this.forIndexCatalogName = forIndexCatalogName;
     }
 
+    @DatabaseChangeProperty(description = "Tablespace to create the primary key in. Corresponds to file group in mssql")
     public String getTablespace() {
         return tablespace;
     }
@@ -105,6 +119,7 @@ public class AddPrimaryKeyChange extends AbstractChange {
         this.tablespace = tablespace;
     }
 
+    @DatabaseChangeProperty(description = "Whether to create a clustered index")
     public Boolean getClustered() {
         return clustered;
     }
@@ -118,7 +133,8 @@ public class AddPrimaryKeyChange extends AbstractChange {
      * should be checked if it refers to a valid row or not.
      * @return true if ENABLE VALIDATE (this is the default), or false if ENABLE NOVALIDATE.
      */
-    @DatabaseChangeProperty(description = "This is true if the primary key has 'ENABLE VALIDATE' set, or false if the primary key has 'ENABLE NOVALIDATE' set.")
+    @DatabaseChangeProperty(description = "Defines whether to check if the primary key constraint refers to a valid row. " +
+        "This is true if the primary key has 'ENABLE VALIDATE' set, or false if the primary key has 'ENABLE NOVALIDATE' set.")
     public Boolean getValidate() {
         return shouldValidate;
     }

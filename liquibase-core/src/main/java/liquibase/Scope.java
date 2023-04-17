@@ -476,6 +476,16 @@ public class Scope {
     }
 
     /**
+     * Check if the provided mdc key is present
+     * @return true if there is an existing key, false otherwise
+     */
+    @Beta
+    public boolean isMdcKeyPresent(String key) {
+        Object mdc = getMdcManager().getAll().get(key);
+        return mdc != null;
+    }
+
+    /**
      * Returns {@link LiquibaseListener}s defined in this scope and/or all its parents that are of the given type.
      */
     public <T extends LiquibaseListener> Collection<T> getListeners(Class<T> type) {
