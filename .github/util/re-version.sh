@@ -75,7 +75,7 @@ do
   (cd $workdir/finalize-jar && jar cfm $workdir/$jar $workdir/tmp-manifest.mf .)
 
   RENAME_SNAPSHOTS=$(ls $outdir/$jar | sed -e "s/0-SNAPSHOT/$version/g")
-  mv $outdir/$jar $RENAME_SNAPSHOTS
+  mv $outdir/$jar "$RENAME_SNAPSHOTS"
   
 done
 
