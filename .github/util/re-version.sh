@@ -95,7 +95,7 @@ do
   rm -rf $workdir/rebuild
 
   cp $workdir/$jar $outdir
-  rename 0-SNAPSHOT $version $outdir/$jar
+  mv -v 0-SNAPSHOT $version $outdir/$jar
 done
 
 ## Test jar structure
