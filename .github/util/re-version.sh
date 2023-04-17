@@ -95,7 +95,8 @@ do
   rm -rf $workdir/rebuild
 
   cp $workdir/$jar $outdir
-  mv -v 0-SNAPSHOT $version $outdir/$jar
+  RENAME_JAVADOC_SNAPSHOTS=$(ls $outdir/$jar | sed -e "s/0-SNAPSHOT/$version/g")
+  mv -v $outdir/$jar $RENAME_JAVADOC_SNAPSHOTS
 done
 
 ## Test jar structure
