@@ -83,18 +83,18 @@ public class ViewSnapshotGenerator extends JdbcSnapshotGenerator {
                     database.setObjectQuotingStrategy(ObjectQuotingStrategy.QUOTE_ALL_OBJECTS);
                     String definition = database.getViewDefinition(schemaFromJdbcInfo, view.getName());
 
-                    if (definition.startsWith("FULL_DEFINITION: ")) {
+                    if (definition != null && definition.startsWith("FULL_DEFINITION: ")) {
                         definition = definition.replaceFirst("^FULL_DEFINITION: ", "");
                         view.setContainsFullDefinition(true);
                     }
 
                     // remove strange zero-termination seen on some Oracle view definitions
-                    int length = definition.length();
+                    int length = definition != null ? definition.length() : 0;
                     if (length > 0 && definition.charAt(length-1) == 0) {
                       definition = definition.substring(0, length-1);
                     }
 
-                    if (database instanceof InformixDatabase) {
+                    if (database instanceof InformixDatabase && definition != null) {
                         // Cleanup
                         definition = definition.trim();
                         definition = definition.replaceAll("\\s*,\\s*", ", ");

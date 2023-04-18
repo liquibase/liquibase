@@ -51,7 +51,7 @@ public class EnvironmentValueProvider extends AbstractMapConfigurationValueProvi
         for (Map.Entry<?, ?> entry : getMap().entrySet()) {
             String originalKey = ((String)entry.getKey());
             String key = ((String)entry.getKey()).toLowerCase();
-            if (! key.startsWith("liquibase_") || key.equals("liquibase_home")) {
+            if (! key.startsWith("liquibase_") || key.equals("liquibase_home")  || key.startsWith("liquibase_launcher_")) {
                 continue;
             }
 

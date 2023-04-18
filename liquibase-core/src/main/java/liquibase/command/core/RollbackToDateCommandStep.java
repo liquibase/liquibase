@@ -7,6 +7,7 @@ import liquibase.command.*;
 import liquibase.database.Database;
 import liquibase.logging.mdc.MdcKey;
 
+import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.List;
 
@@ -28,12 +29,13 @@ public class RollbackToDateCommandStep extends AbstractRollbackCommandStep {
     public void run(CommandResultsBuilder resultsBuilder) throws Exception {
         CommandScope commandScope = resultsBuilder.getCommandScope();
         Date dateToRollBackTo = commandScope.getArgumentValue(DATE_ARG);
-        Scope.getCurrentScope().addMdcValue(MdcKey.ROLLBACK_TO_DATE, dateToRollBackTo.toString());
+        SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss.S");
+        Scope.getCurrentScope().addMdcValue(MdcKey.ROLLBACK_TO_DATE, formatter.format(dateToRollBackTo));
 
         Database database = (Database) commandScope.getDependency(Database.class);
 
         List<RanChangeSet> ranChangeSetList = database.getRanChangeSetList();
-        this.doRollback(resultsBuilder, new ExecutedAfterChangeSetFilter(dateToRollBackTo, ranChangeSetList), ranChangeSetList);
+        this.doRollback(resultsBuilder, ranChangeSetList, new ExecutedAfterChangeSetFilter(dateToRollBackTo, ranChangeSetList));
     }
 
     @Override

@@ -30,7 +30,7 @@ import java.util.List;
 import java.util.Set;
 
 /**
- * RollbackCommandStep performs the rollback-to-tag logic. For backwards compatibility issues it is not called "RollbackToTag"
+ * AbstractRollbackCommandStep provides the common operations to all the rollback* commands.
  */
 public abstract class AbstractRollbackCommandStep extends AbstractCommandStep {
 
@@ -46,7 +46,8 @@ public abstract class AbstractRollbackCommandStep extends AbstractCommandStep {
         WILL_ROLLBACK, ROLLED_BACK, ROLLBACK_FAILED
     }
 
-    protected void doRollback(CommandResultsBuilder resultsBuilder, ChangeSetFilter changeSetFilter, List<RanChangeSet> ranChangeSetList) throws Exception {
+    protected void doRollback(CommandResultsBuilder resultsBuilder, List<RanChangeSet> ranChangeSetList,
+                              ChangeSetFilter changeSetFilter) throws Exception {
         CommandScope commandScope = resultsBuilder.getCommandScope();
         String rollbackScript = commandScope.getArgumentValue(ROLLBACK_SCRIPT_ARG);
         Scope.getCurrentScope().addMdcValue(MdcKey.ROLLBACK_SCRIPT, rollbackScript);
@@ -58,12 +59,12 @@ public abstract class AbstractRollbackCommandStep extends AbstractCommandStep {
 
         try {
             ChangeLogIterator logIterator = new ChangeLogIterator(ranChangeSetList, databaseChangeLog,
-                    changeSetFilter,
                     new AlreadyRanChangeSetFilter(ranChangeSetList),
                     new ContextChangeSetFilter(changeLogParameters.getContexts()),
                     new LabelChangeSetFilter(changeLogParameters.getLabels()),
                     new IgnoreChangeSetFilter(),
-                    new DbmsChangeSetFilter(database));
+                    new DbmsChangeSetFilter(database),
+                    changeSetFilter);
 
             doRollback(database, rollbackScript, logIterator, changeLogParameters, databaseChangeLog,
                     (ChangeExecListener) commandScope.getDependency(ChangeExecListener.class));
