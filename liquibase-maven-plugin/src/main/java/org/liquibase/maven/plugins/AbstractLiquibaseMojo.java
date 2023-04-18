@@ -635,21 +635,16 @@ public abstract class AbstractLiquibaseMojo extends AbstractMojo {
         } else {
             // The log format requires the use of the standard Liquibase logger, so set it up.
             scopeAttrs.put(LiquibaseCommandLineConfiguration.LOG_FORMAT.getKey(), this.logFormat);
-            return Scope.child(scopeAttrs, () -> {
-                Map<String, Object> innerScopeAttrs = new HashMap<>();
-                // Get a new log service after registering the value providers, since the log service might need to load parameters using newly registered value providers.
-                LogService newLogService = Scope.child(Collections.singletonMap(REGISTERED_VALUE_PROVIDERS_KEY, true), () -> {
-                    return Scope.getCurrentScope().getSingleton(LogServiceFactory.class).getDefaultLogService();
-                });
-                // Set the formatter on all the handlers.
-                java.util.logging.Logger rootLogger = java.util.logging.Logger.getLogger("");
-                for (Handler handler : rootLogger.getHandlers()) {
-                    JavaLogService.setFormatterOnHandler(newLogService, handler);
-                }
-                innerScopeAttrs.put(Scope.Attr.logService.name(), newLogService);
-                innerScopeAttrs.put(LiquibaseCommandLineConfiguration.LOG_FORMAT.getKey(), this.logFormat);
-                return innerScopeAttrs;
-            });
+            scopeAttrs.put(REGISTERED_VALUE_PROVIDERS_KEY, true);
+            // Get a new log service after registering the value providers, since the log service might need to load parameters using newly registered value providers.
+            LogService newLogService = Scope.child(scopeAttrs, () -> Scope.getCurrentScope().getSingleton(LogServiceFactory.class).getDefaultLogService());
+            // Set the formatter on all the handlers.
+            java.util.logging.Logger rootLogger = java.util.logging.Logger.getLogger("");
+            for (Handler handler : rootLogger.getHandlers()) {
+                JavaLogService.setFormatterOnHandler(newLogService, handler);
+            }
+            scopeAttrs.put(Scope.Attr.logService.name(), newLogService);
+            return scopeAttrs;
         }
     }
 
