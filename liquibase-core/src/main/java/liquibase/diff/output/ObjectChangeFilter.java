@@ -12,4 +12,6 @@ public interface ObjectChangeFilter {
 
     public boolean includeChanged(DatabaseObject object, ObjectDifferences differences, Database referenceDatabase, Database comparisionDatabase);
 
+    boolean include(DatabaseObject object);
+
 }

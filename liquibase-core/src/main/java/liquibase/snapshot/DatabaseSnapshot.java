@@ -275,7 +275,7 @@ public abstract class DatabaseSnapshot implements LiquibaseSerializable {
             example = (T) new Schema(catalogAndSchema.getCatalogName(), catalogAndSchema.getSchemaName());
         }
 
-        if (!snapshotControl.shouldInclude(example.getClass())) {
+        if (!snapshotControl.shouldInclude(example)) {
             return example;
         }
 
