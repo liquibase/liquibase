@@ -205,12 +205,17 @@ jobs:
         AWS_ACCESS_KEY_ID: ${{ secrets.JAVADOCS_ACCESS_KEY_ID }}
         AWS_SECRET_ACCESS_KEY: ${{ secrets.JAVADOCS_SECRET_ACCESS_KEY }}
         AWS_DEFAULT_REGION: us-east-1
+      # unzip archives, create directory for each jar, and extract jar contents to directory.  Then delete the jar and zip files.  Then upload to s3.
       run: |
-        unzip -j '*.zip' '*javadoc*.jar'
-        unzip '*liquibase-cdi*.jar' -d liquibase-cdi/
-        unzip '*liquibase-commercial*.jar' -d liquibase-commercial/
-        unzip '*liquibase-core*.jar' -d liquibase-core/
-        unzip '*liquibase-maven-plugin*.jar' -d liquibase-maven-plugin/
+        unzip -j '*.zip' '*javadoc*.jar' 
+        
+        for jar in *liquibase*.jar; do
+          dir_name=$(basename "$jar" .jar)
+          dir_name=$(echo "$dir_name" | sed -E 's/(-[0-9]+(\.[0-9]+)*(-javadoc)?)//')
+          mkdir -p "$dir_name"
+          unzip -o "$jar" -d "$dir_name"
+        done
+        
         rm -rf *.jar *.zip
         aws s3 sync . s3://javadocsliquibasecom-origin --only-show-errors
 
