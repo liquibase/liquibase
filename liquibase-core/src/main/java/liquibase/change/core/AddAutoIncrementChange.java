@@ -1,6 +1,14 @@
 package liquibase.change.core;
 
-import liquibase.change.*;
+import java.math.BigInteger;
+import java.util.Locale;
+
+import liquibase.change.AbstractChange;
+import liquibase.change.ChangeMetaData;
+import liquibase.change.ChangeStatus;
+import liquibase.change.DatabaseChange;
+import liquibase.change.DatabaseChangeNote;
+import liquibase.change.DatabaseChangeProperty;
 import liquibase.database.Database;
 import liquibase.database.core.PostgresDatabase;
 import liquibase.exception.DatabaseException;
@@ -14,9 +22,6 @@ import liquibase.statement.core.CreateSequenceStatement;
 import liquibase.statement.core.SetNullableStatement;
 import liquibase.structure.core.Column;
 import liquibase.structure.core.Table;
-
-import java.math.BigInteger;
-import java.util.Locale;
 
 /**
  * Makes an existing column into an auto-increment column.
@@ -42,7 +47,7 @@ public class AddAutoIncrementChange extends AbstractChange {
     private Boolean defaultOnNull;
     private String generationType;
 
-    @DatabaseChangeProperty(since = "3.0", mustEqualExisting = "column.relation.catalog")
+    @DatabaseChangeProperty(since = "3.0", mustEqualExisting = "column.relation.catalog", description = "Name of the database catalog")
     public String getCatalogName() {
         return catalogName;
     }
@@ -51,7 +56,7 @@ public class AddAutoIncrementChange extends AbstractChange {
         this.catalogName = catalogName;
     }
 
-    @DatabaseChangeProperty(mustEqualExisting = "column.relation.schema")
+    @DatabaseChangeProperty(mustEqualExisting = "column.relation.schema", description = "Name of the database schema")
     public String getSchemaName() {
         return schemaName;
     }
@@ -60,7 +65,7 @@ public class AddAutoIncrementChange extends AbstractChange {
         this.schemaName = schemaName;
     }
 
-    @DatabaseChangeProperty(mustEqualExisting = "column.relation")
+    @DatabaseChangeProperty(mustEqualExisting = "column.relation", description = "Name of the table")
     public String getTableName() {
         return tableName;
     }
@@ -69,7 +74,7 @@ public class AddAutoIncrementChange extends AbstractChange {
         this.tableName = tableName;
     }
 
-    @DatabaseChangeProperty(mustEqualExisting = "column")
+    @DatabaseChangeProperty(mustEqualExisting = "column", description = "Name of the column")
     public String getColumnName() {
         return columnName;
     }
@@ -78,8 +83,7 @@ public class AddAutoIncrementChange extends AbstractChange {
         this.columnName = columnName;
     }
 
-    @DatabaseChangeProperty(description = "Current data type of the column to make auto-increment",
-        exampleValue = "int")
+    @DatabaseChangeProperty(exampleValue = "int", description = "Current data type of the column to make auto-increment")
     public String getColumnDataType() {
         return columnDataType;
     }
@@ -88,7 +92,7 @@ public class AddAutoIncrementChange extends AbstractChange {
         this.columnDataType = columnDataType;
     }
 
-    @DatabaseChangeProperty(exampleValue = "100")
+    @DatabaseChangeProperty(exampleValue = "100", description = "Initial value of the increment")
     public BigInteger getStartWith() {
         return startWith;
     }
@@ -97,7 +101,7 @@ public class AddAutoIncrementChange extends AbstractChange {
         this.startWith = startWith;
     }
 
-    @DatabaseChangeProperty(exampleValue = "1")
+    @DatabaseChangeProperty(exampleValue = "1", description = "Amount to increment by at each call")
     public BigInteger getIncrementBy() {
         return incrementBy;
     }
@@ -105,7 +109,10 @@ public class AddAutoIncrementChange extends AbstractChange {
     public void setIncrementBy(BigInteger incrementBy) {
         this.incrementBy = incrementBy;
     }
-@DatabaseChangeProperty(exampleValue = "true", since = "3.6")
+
+    @DatabaseChangeProperty(exampleValue = "true", since = "3.6",
+        description = "When using generationType of BY DEFAULT then defaultOnNull=true allows the identity to be used " +
+            "if the identity column is referenced, but a value of NULL is specified.")
     public Boolean getDefaultOnNull() {
         return defaultOnNull;
     }
@@ -114,7 +121,8 @@ public class AddAutoIncrementChange extends AbstractChange {
         this.defaultOnNull = defaultOnNull;
     }
 
-    @DatabaseChangeProperty(exampleValue = "ALWAYS", since = "3.6")
+    @DatabaseChangeProperty(exampleValue = "ALWAYS", since = "3.6",
+        description = "Type of the generation in \"GENERATED %s AS IDENTITY\". Default: \"|\".")
     public String getGenerationType() {
         return generationType;
     }
@@ -122,6 +130,7 @@ public class AddAutoIncrementChange extends AbstractChange {
     public void setGenerationType(String generationType) {
         this.generationType = generationType;
     }
+
     @Override
     public SqlStatement[] generateStatements(Database database) {
         if (database instanceof PostgresDatabase) {
@@ -186,11 +195,13 @@ public class AddAutoIncrementChange extends AbstractChange {
             }
 
             if (getGenerationType() != null && column.getAutoIncrementInformation().getGenerationType() != null) {
-                result.assertCorrect(getGenerationType().equals(column.getAutoIncrementInformation().getGenerationType()), "Generation type is incorrect");
+                result.assertCorrect(getGenerationType().equals(column.getAutoIncrementInformation().getGenerationType()),
+                     "Generation type is incorrect");
             }
 
             if (getDefaultOnNull() != null && column.getAutoIncrementInformation().getDefaultOnNull() != null) {
-                result.assertCorrect(getDefaultOnNull().equals(column.getAutoIncrementInformation().getDefaultOnNull()), "Default on null is incorrect");
+                result.assertCorrect(getDefaultOnNull().equals(column.getAutoIncrementInformation().getDefaultOnNull()),
+                     "Default on null is incorrect");
             }
 
             return result;

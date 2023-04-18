@@ -96,7 +96,7 @@ public class ClassLoaderResourceAccessor extends AbstractResourceAccessor {
 //    }
 
     @Override
-    public List<Resource> search(String path, boolean recursive) throws IOException {
+    public List<Resource> search(String path, SearchOptions searchOptions) throws IOException {
         init();
 
         final LinkedHashSet<Resource> returnList = new LinkedHashSet<>();
@@ -116,16 +116,25 @@ public class ClassLoaderResourceAccessor extends AbstractResourceAccessor {
             urlExternalForm = urlExternalForm.replaceFirst(Pattern.quote(path) + "/?$", "");
 
             try (ResourceAccessor resourceAccessor = pathHandlerFactory.getResourceAccessor(urlExternalForm)) {
-                returnList.addAll(resourceAccessor.search(path, recursive));
+                returnList.addAll(resourceAccessor.search(path, searchOptions));
             } catch (Exception e) {
                 throw new IOException(e.getMessage(), e);
             }
         }
 
-        returnList.addAll(additionalResourceAccessors.search(path, recursive));
+        returnList.addAll(additionalResourceAccessors.search(path, searchOptions));
 
 
         return new ArrayList<>(returnList);
+    }
+
+    @Override
+    public List<Resource> search(String path, boolean recursive) throws IOException {
+        SearchOptions searchOptions = new SearchOptions();
+
+        searchOptions.setRecursive(recursive);
+
+        return search(path, searchOptions);
     }
 
     @Override

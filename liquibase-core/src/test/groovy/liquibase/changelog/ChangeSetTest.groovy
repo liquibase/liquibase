@@ -647,4 +647,22 @@ public class ChangeSetTest extends Specification {
         changeSet.execute(databaseChangeLog, new MockDatabase()) == ChangeSet.ExecType.EXECUTED
     }
 
+    def "execute does not execute shell command against when adding MDC"() {
+        when:
+        DatabaseChangeLog databaseChangeLog = new DatabaseChangeLog("com/example/test.xml")
+        def changeSet = new ChangeSet(databaseChangeLog)
+        ExecuteShellCommandChange executeShellCommandChange = new ExecuteShellCommandChange()
+        executeShellCommandChange.setExecutable("/bin/bash")
+        executeShellCommandChange.addArg("-c")
+        executeShellCommandChange.addArg("echo hi >> liquibase_shell_out")
+        changeSet.addChange(executeShellCommandChange)
+
+        then:
+        changeSet.execute(databaseChangeLog, new MockDatabase()) == ChangeSet.ExecType.EXECUTED
+        ! new File("liquibase_shell_out").exists()
+
+        cleanup:
+        new File("liquibase_shell_out").delete()
+    }
+
 }
