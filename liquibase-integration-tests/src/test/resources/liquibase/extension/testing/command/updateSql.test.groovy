@@ -74,7 +74,7 @@ Optional Args:
                 // Find the " -- Release Database Lock" line
                 //
                 "target/test-classes/update.sql" : [CommandTests.assertContains("-- Release Database Lock"),
-                                                    CommandTests.assertNotContains("SET LOCKED = FALSE")]
+                                                    CommandTests.assertContains("SET LOCKED = FALSE")]
         ]
 
         expectedResults = [
