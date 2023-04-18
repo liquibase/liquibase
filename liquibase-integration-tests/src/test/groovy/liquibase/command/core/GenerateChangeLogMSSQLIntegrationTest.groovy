@@ -10,13 +10,13 @@ import spock.lang.Shared
 import spock.lang.Specification
 
 @LiquibaseIntegrationTest
-class GenerateChangeLogMSSQLCommandTest extends Specification {
+class GenerateChangeLogMSSQLIntegrationTest extends Specification {
     @Shared
     private DatabaseTestSystem mssql = (DatabaseTestSystem) Scope.getCurrentScope().getSingleton(TestSystemFactory.class).getTestSystem("mssql")
 
     def "Should generate table comments, view comments, table column comments, view column comments and be able to use the generated sql changelog"() {
         given:
-        CommandUtil.runUpdate(mssql,'changelogs/mssql/issues/generate.changelog.table.view.comments.sql')
+        CommandUtil.runUpdate(mssql,'src/test/resources/changelogs/mssql/issues/generate.changelog.table.view.comments.sql')
 
         when:
         CommandUtil.runGenerateChangelog(mssql,'output.mssql.sql')
@@ -45,7 +45,7 @@ class GenerateChangeLogMSSQLCommandTest extends Specification {
 
     def "Should generate table comments, view comments, table column comments, view column comments and be able to use the generated xml/json/yml changelog"(String fileType) {
         given:
-        CommandUtil.runUpdate(mssql,'changelogs/mssql/issues/generate.changelog.table.view.comments.sql')
+        CommandUtil.runUpdate(mssql,'src/test/resources/changelogs/mssql/issues/generate.changelog.table.view.comments.sql')
 
         when:
         CommandUtil.runGenerateChangelog(mssql,"output.mssql.$fileType")
