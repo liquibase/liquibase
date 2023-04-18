@@ -18,7 +18,7 @@ public class LockServiceCommandStep extends AbstractHelperCommandStep implements
 
     protected static final String[] COMMAND_NAME = {"lockServiceCommandStep"};
 
-    private LockService lockService;
+    private Database database;
 
     @Override
     public List<Class<?>> requiredDependencies() {
@@ -33,10 +33,8 @@ public class LockServiceCommandStep extends AbstractHelperCommandStep implements
     @Override
     public void run(CommandResultsBuilder resultsBuilder) throws Exception {
         CommandScope commandScope = resultsBuilder.getCommandScope();
-        Database database = (Database) commandScope.getDependency(Database.class);
-        lockService = LockServiceFactory.getInstance().getLockService(database);
-        lockService.waitForLock();
-        commandScope.provideDependency(LockService.class, lockService);
+        database = (Database) commandScope.getDependency(Database.class);
+        LockServiceFactory.getInstance().getLockService(database).waitForLock();
     }
 
     @Override
@@ -47,7 +45,7 @@ public class LockServiceCommandStep extends AbstractHelperCommandStep implements
     @Override
     public void cleanUp(CommandResultsBuilder resultsBuilder) {
         try {
-            lockService.releaseLock();
+            LockServiceFactory.getInstance().getLockService(database).releaseLock();
         } catch (LockException e) {
             Scope.getCurrentScope().getLog(getClass()).severe(Liquibase.MSG_COULD_NOT_RELEASE_LOCK, e);
         }
