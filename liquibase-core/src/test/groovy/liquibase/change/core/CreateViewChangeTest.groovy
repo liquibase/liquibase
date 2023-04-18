@@ -105,9 +105,7 @@ class CreateViewChangeTest extends StandardChangeTest {
         change.setSelectQuery(SELECT_QUERY)
         CheckSum viewCheckSumWithoutPath = change.generateCheckSum()
         CreateViewChange change2 = new CreateViewChange()
-        change2.setSelectQuery(SELECT_QUERY)
         change2.setPath("viewTest.sql")
-        change2.setRelativeToChangelogFile(false)
         CheckSum viewCheckSumWithPath = change2.generateCheckSum()
         //TODO: Move this Scope.exit() call into a cleanUpSpec method
         Scope.exit(testScopeId)
@@ -156,7 +154,24 @@ class CreateViewChangeTest extends StandardChangeTest {
 
         then:
         assert viewTextOriginalCheckSum.equals(viewTextUpdatedCheckSum) == false
+    }
 
+    def "validate checksum gets re-computed if select query text gets updated"() {
+        when:
+        String selectQueryText = "SELECT id, name FROM person WHERE id > valueToReplace;"
 
+        selectQueryText = selectQueryText.replace("valueToReplace", "value1")
+        def change = new CreateViewChange();
+        change.setSelectQuery(selectQueryText)
+
+        def checkSumFirstReplacement = change.generateCheckSum().toString()
+
+        selectQueryText = selectQueryText.replace("value1", "value2")
+        change.setSelectQuery(selectQueryText)
+
+        def checkSumSecondReplacement = change.generateCheckSum().toString()
+
+        then:
+        checkSumFirstReplacement != checkSumSecondReplacement
     }
 }

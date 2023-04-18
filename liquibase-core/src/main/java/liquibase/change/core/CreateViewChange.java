@@ -201,18 +201,26 @@ public class CreateViewChange extends AbstractChange {
      */
     @Override
     public CheckSum generateCheckSum() {
-
         InputStream stream = null;
+        InputStream updatedContentStream = null;
+        CheckSum checkSum;
         try {
             if (this.path == null) {
                 String selectQuery = this.selectQuery;
                 Charset encoding = GlobalConfiguration.FILE_ENCODING.getCurrentValue();
                 stream = new ByteArrayInputStream(selectQuery.getBytes(encoding));
-            } else {
-                stream = openSqlStream();
             }
-
-            CheckSum checkSum = CheckSum.compute(new AbstractSQLChange.NormalizingStream(stream), false);
+            else {
+                stream = openSqlStream();
+                updatedContentStream = updateStreamContentIfApplicable(stream);
+            }
+            if(updatedContentStream == null) {
+                stream.reset();
+                checkSum = CheckSum.compute(new AbstractSQLChange.NormalizingStream(stream), false);
+            }
+            else {
+                checkSum = CheckSum.compute(new AbstractSQLChange.NormalizingStream(updatedContentStream), false);
+            }
             return CheckSum.compute(super.generateCheckSum().toString() + ":" + checkSum.toString());
 
         } catch (IOException e) {
@@ -222,6 +230,13 @@ public class CreateViewChange extends AbstractChange {
                 try {
                     stream.close();
                 } catch (IOException ignore) {
+                }
+            }
+            if (updatedContentStream != null) {
+                try {
+                    updatedContentStream.close();
+                } catch (IOException ignore) {
+                    // Do nothing
                 }
             }
         }

@@ -243,6 +243,7 @@ public class CreateProcedureChange extends AbstractChange implements DbmsTargete
 
     protected CheckSum generateCheckSum(String sqlText) {
         InputStream stream = null;
+        CheckSum checkSum;
         try {
             if (getPath() == null) {
                 String procedureText = sqlText;
@@ -253,9 +254,10 @@ public class CreateProcedureChange extends AbstractChange implements DbmsTargete
             }
             else {
                 stream = openSqlStream();
+                stream = updateStreamContentIfApplicable(stream);
             }
-            CheckSum checkSum = CheckSum.compute(new AbstractSQLChange.NormalizingStream(stream), false);
-            return CheckSum.compute(super.generateCheckSum().toString() + ":" + checkSum.toString());
+            checkSum = CheckSum.compute(new AbstractSQLChange.NormalizingStream(stream), false);
+            return CheckSum.compute(super.generateCheckSum().toString() + ":" + checkSum);
 
         } catch (IOException e) {
             throw new UnexpectedLiquibaseException(e);

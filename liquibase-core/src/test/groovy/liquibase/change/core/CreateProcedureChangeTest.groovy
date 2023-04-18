@@ -126,10 +126,8 @@ class CreateProcedureChangeTest extends StandardChangeTest {
         change.setProcedureText(PROCEDURE_TEXT)
         CheckSum procedureCheckSumWithoutPath = change.generateCheckSum()
         CreateProcedureChange change2 = new CreateProcedureChange()
-        change2.setProcedureText(PROCEDURE_TEXT)
         change2.setPath("test.sql")
-        change2.setRelativeToChangelogFile(false)
-        //Below check sum generation should not take either path nor relativeToChangeLogFile properties into account
+        //Below check sum generation should not take path property into account
         CheckSum procedureCheckSumWithPath = change2.generateCheckSum()
         //TODO: Move this Scope.exit() call into a cleanUpSpec method
         Scope.exit(testScopeId)
@@ -192,5 +190,30 @@ class CreateProcedureChangeTest extends StandardChangeTest {
 
         then:
         assert procedureTextOriginalCheckSum.equals(procedureTextUpdatedCheckSum) == false
+    }
+
+    def "validate checksum gets re-computed if procedure text gets updated "() {
+        when:
+        String procedureText =
+                """CREATE OR REPLACE PROCEDURE testHello()
+                  LANGUAGE plpgsql
+                  AS \$\$
+        BEGIN
+                  raise notice 'valueToReplace';
+        END \$\$"""
+
+        def change = new CreateProcedureChange();
+        procedureText = procedureText.replace("valueToReplace", "value1")
+        change.setProcedureText(procedureText)
+
+        def checkSumFirstReplacement = change.generateCheckSum().toString()
+
+        procedureText = procedureText.replace("value1", "value2")
+        change.setProcedureText(procedureText)
+
+        def checkSumSecondReplacement = change.generateCheckSum().toString()
+
+        then:
+        checkSumFirstReplacement != checkSumSecondReplacement
     }
 }
