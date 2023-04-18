@@ -7,6 +7,7 @@ import liquibase.database.Database;
 import liquibase.executor.Executor;
 import liquibase.executor.ExecutorService;
 import liquibase.executor.LoggingExecutor;
+import liquibase.logging.mdc.MdcKey;
 
 import java.io.IOException;
 import java.io.OutputStreamWriter;

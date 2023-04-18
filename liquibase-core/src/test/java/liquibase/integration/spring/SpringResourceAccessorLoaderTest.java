@@ -17,7 +17,7 @@ import org.springframework.core.io.Resource;
 import org.springframework.core.io.ResourceLoader;
 
 @RunWith(MockitoJUnitRunner.class)
-public class SpringResourceAccessorTest {
+public class SpringResourceAccessorLoaderTest {
 
     @Mock
     ResourceLoader resourceLoader;
