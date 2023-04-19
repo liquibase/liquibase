@@ -490,7 +490,7 @@ public abstract class AbstractLiquibaseMojo extends AbstractMojo {
      */
     @PropertyElement
     protected String sqlPlusLogFile;
-    
+
     /**
      * Specifies your sqlcmd path.
      *
@@ -631,6 +631,7 @@ public abstract class AbstractLiquibaseMojo extends AbstractMojo {
             // If the specified log format does not require the use of the standard Liquibase logger, just return the
             // Maven log service as is traditionally done.
             scopeAttrs.put(Scope.Attr.logService.name(), new MavenLogService(getLog()));
+            scopeAttrs.put(Scope.Attr.ui.name(), new MavenUi(getLog()));
             return scopeAttrs;
         } else {
             // The log format requires the use of the standard Liquibase logger, so set it up.
