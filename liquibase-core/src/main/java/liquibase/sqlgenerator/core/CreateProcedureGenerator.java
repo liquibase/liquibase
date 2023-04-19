@@ -70,15 +70,11 @@ public class CreateProcedureGenerator extends AbstractSqlGenerator<CreateProcedu
             }
             sql.add(new UnparsedSql("if object_id('" + fullyQualifiedName + "', 'p') is null exec ('create procedure " + fullyQualifiedName + " as select 1 a')"));
 
-            StringClauses parsedSql = SqlParser.parse(procedureText, true, true);
-            StringClauses.ClauseIterator clauseIterator = parsedSql.getClauseIterator();
-            Object next = "START";
-            while (next != null && !(next.toString().equalsIgnoreCase("create") || next.toString().equalsIgnoreCase("alter")) && clauseIterator.hasNext()) {
-                next = clauseIterator.nextNonWhitespace();
+            StringClauses parsedProcedureDefinition = SqlParser.parse(procedureText, true, true);
+            if (!isCreateOrAlterStatement(parsedProcedureDefinition) && parsedProcedureDefinition.contains("CREATE")) {
+                parsedProcedureDefinition.replace("CREATE", "ALTER");
             }
-            clauseIterator.replace("ALTER");
-
-            procedureText = parsedSql.toString();
+            procedureText = parsedProcedureDefinition.toString();
         }
 
         procedureText = removeTrailingDelimiter(procedureText, statement.getEndDelimiter());
@@ -238,6 +234,19 @@ public class CreateProcedureGenerator extends AbstractSqlGenerator<CreateProcedu
         mssqlSplitStatements.setSetStatementsAfter(afterStatements);
 
         return mssqlSplitStatements;
+    }
+
+    public static boolean isCreateOrAlterStatement(StringClauses definition) {
+        StringClauses.ClauseIterator procedureClauseIterator = definition.getClauseIterator();
+        Object next = "START";
+        while (next != null && !(next.toString().equalsIgnoreCase("create") || next.toString().equalsIgnoreCase("alter")) && procedureClauseIterator.hasNext()) {
+            next = procedureClauseIterator.nextNonWhitespace();
+            if ((procedureClauseIterator.hasNext() && procedureClauseIterator.nextNonWhitespace().toString().equalsIgnoreCase("or"))
+                    && (procedureClauseIterator.hasNext() && procedureClauseIterator.nextNonWhitespace().toString().equalsIgnoreCase("alter"))) {
+                return true;
+            }
+        }
+        return false;
     }
 
     private static Object splitOutIfSetStatement(Object next, StringClauses.ClauseIterator clauseIterator,
