@@ -12,7 +12,7 @@ env:
 jobs:
   setup:
     name: Setup
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-22.04
     outputs:
       tag: ${{ steps.collect-data.outputs.tag }}
       version: ${{ steps.collect-data.outputs.version }}
@@ -40,7 +40,7 @@ jobs:
   deploy_maven:
     name: Deploy to Maven
     needs: [ setup ]
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-22.04
     steps:
       - name: Download release assets
         uses: robinraju/release-downloader@v1.7
@@ -186,7 +186,7 @@ jobs:
   deploy_javadocs:
     name: Upload Javadocs
     needs: [ setup ]
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-22.04
     # These permissions are needed to interact with GitHub's OIDC Token endpoint.
     permissions:
       id-token: write
@@ -205,18 +205,23 @@ jobs:
         AWS_ACCESS_KEY_ID: ${{ secrets.JAVADOCS_ACCESS_KEY_ID }}
         AWS_SECRET_ACCESS_KEY: ${{ secrets.JAVADOCS_SECRET_ACCESS_KEY }}
         AWS_DEFAULT_REGION: us-east-1
+      # unzip archives, create directory for each jar, and extract jar contents to directory.  Then delete the jar and zip files.  Then upload to s3.
       run: |
-        unzip -j '*.zip' '*javadoc*.jar'
-        unzip '*liquibase-cdi*.jar' -d liquibase-cdi/
-        unzip '*liquibase-commercial*.jar' -d liquibase-commercial/
-        unzip '*liquibase-core*.jar' -d liquibase-core/
-        unzip '*liquibase-maven-plugin*.jar' -d liquibase-maven-plugin/
+        unzip -j '*.zip' '*javadoc*.jar' 
+        
+        for jar in *liquibase*.jar; do
+          dir_name=$(basename "$jar" .jar)
+          dir_name=$(echo "$dir_name" | sed -E 's/(-[0-9]+(\.[0-9]+)*(-javadoc)?)//')
+          mkdir -p "$dir_name"
+          unzip -o "$jar" -d "$dir_name"
+        done
+        
         rm -rf *.jar *.zip
         aws s3 sync . s3://javadocsliquibasecom-origin --only-show-errors
 
   publish_to_github_packages:
     name: Publish artifacts to Github Packages
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-22.04
     needs: [ setup ]
     permissions:
       contents: read
@@ -249,7 +254,7 @@ jobs:
   deploy_xsd:
       name: Upload xsds
       needs: [ setup ]
-      runs-on: ubuntu-20.04
+      runs-on: ubuntu-22.04
       outputs:
           tag: ${{ steps.collect-data.outputs.tag }}
           version: ${{ needs.setup.outputs.version }}
@@ -277,7 +282,7 @@ jobs:
         # aws s3 sync syncs directories and S3 prefixes.
         run: |
           aws s3 sync liquibase-pro-repo/pro/src/main/resources/www.liquibase.org/xml/ns/pro/ s3://liquibaseorg-origin/xml/ns/pro/ --content-type application/octet-stream --only-show-errors
-          aws s3 sync liquibase-core-repo/liquibase-core/src/main/resources/www.liquibase.org/xml/ns/dbchangelog/ s3://liquibaseorg-origin/xml/ns/dbchangelog/ --content-type application/octet-stream --only-show-errors
+          aws s3 sync liquibase-core-repo/liquibase-standard/src/main/resources/www.liquibase.org/xml/ns/dbchangelog/ s3://liquibaseorg-origin/xml/ns/dbchangelog/ --content-type application/octet-stream --only-show-errors
 
 
       - name: Index.htm file upload

@@ -10,7 +10,7 @@ env:
 jobs:
   build:
     name: Build & Package
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-22.04
     permissions:
       contents: read
       packages: write
@@ -33,6 +33,8 @@ jobs:
       - name: Version Artifact
         run: mvn versions:set -DnewVersion="${{ github.ref_name }}-SNAPSHOT"
 
+
+      # This would still deploy a package if there are test failures. Might help to have build.yml complete and then run this workflow
       # Publish to GitHub Packages
       - name: Publish package
         run: mvn -B clean deploy -DskipTests=true
