@@ -593,6 +593,7 @@ public class ChangeSet implements Conditional, ChangeLogChild {
             throws MigrationFailedException {
         Logger log = Scope.getCurrentScope().getLog(getClass());
         addChangeSetMdcProperties();
+        Scope.getCurrentScope().addMdcValue(MdcKey.FAIL_ON_ERROR, String.valueOf(getFailOnError()));
         if (validationFailed) {
             return ExecType.MARK_RAN;
         }
@@ -741,9 +742,7 @@ public class ChangeSet implements Conditional, ChangeLogChild {
 
         } catch (Exception e) {
             Scope.getCurrentScope().addMdcValue(MdcKey.CHANGESET_OPERATION_STOP_TIME, Instant.ofEpochMilli(new Date().getTime()).toString());
-            if (getFailOnError() == null || getFailOnError()) {
-                Scope.getCurrentScope().addMdcValue(MdcKey.CHANGESET_OUTCOME, ExecType.FAILED.value.toLowerCase());
-            }
+            Scope.getCurrentScope().addMdcValue(MdcKey.CHANGESET_OUTCOME, ExecType.FAILED.value.toLowerCase());
             log.severe(String.format("ChangeSet %s encountered an exception.", toString(false)));
             try {
                 database.rollback();
