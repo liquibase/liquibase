@@ -82,11 +82,11 @@ public class ColumnExistsPrecondition extends AbstractPrecondition {
 			checkFast(database, changeLog);
 
         } else {
-            checkUsingSnapshot(database, changeLog, changeSet);
+            checkUsingSnapshot(database, changeLog);
         }
     }
 
-    private void checkUsingSnapshot(Database database, DatabaseChangeLog changeLog, ChangeSet changeSet) throws PreconditionFailedException, PreconditionErrorException {
+    private void checkUsingSnapshot(Database database, DatabaseChangeLog changeLog) throws PreconditionFailedException, PreconditionErrorException {
         Column example = new Column();
         if (StringUtil.trimToNull(getTableName()) != null) {
             example.setRelation(new Table().setName(database.correctObjectName(getTableName(), Table.class)).setSchema(new Schema(getCatalogName(), getSchemaName())));

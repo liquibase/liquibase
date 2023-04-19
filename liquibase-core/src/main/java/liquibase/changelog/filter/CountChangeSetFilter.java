@@ -16,18 +16,23 @@ public class CountChangeSetFilter implements ChangeSetFilter {
         changeSetsSeen++;
 
         if (changeSetsSeen <= changeSetsToAllow) {
-            return new ChangeSetFilterResult(true, "One of "+changeSetsToAllow+" changesets to run", this.getClass(), getMdcName());
+            return new ChangeSetFilterResult(true, "One of "+changeSetsToAllow+" changesets to run", this.getClass(), getMdcName(), getDisplayName());
         } else {
             String plurality = "changesets";
             if (changeSetsToAllow == 1) {
                 plurality = "changeset";
             }
-            return new ChangeSetFilterResult(false, "Only running "+changeSetsToAllow+" " + plurality, this.getClass(), getMdcName());
+            return new ChangeSetFilterResult(false, "Only running "+changeSetsToAllow+" " + plurality, this.getClass(), getMdcName(), getDisplayName());
         }
     }
 
     @Override
     public String getMdcName() {
         return "afterCount";
+    }
+
+    @Override
+    public String getDisplayName() {
+        return "After count";
     }
 }

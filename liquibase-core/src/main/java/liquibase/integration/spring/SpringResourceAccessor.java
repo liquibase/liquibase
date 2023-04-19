@@ -7,6 +7,7 @@ import org.springframework.core.io.support.ResourcePatternUtils;
 import org.springframework.util.StringUtils;
 
 import java.io.IOException;
+import java.lang.UnsupportedOperationException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -153,8 +154,13 @@ public class SpringResourceAccessor extends AbstractResourceAccessor {
      */
     protected boolean resourceIsFile(Resource resource) throws IOException {
         if (resource.exists() && resource.isFile()) {
-            //we can know for sure
-            return resource.getFile().isFile();
+            try {
+                //we can know for sure
+                return resource.getFile().isFile();
+            } catch (UnsupportedOperationException e) {
+                //native image throws on getFile
+                return true;
+            }
         } else {
             //we have to guess
             final String filename = resource.getFilename();

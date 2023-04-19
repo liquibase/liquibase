@@ -12,7 +12,7 @@ import spock.lang.Specification
 
 @LiquibaseIntegrationTest
 @Ignore
-class GenerateChangeLogDb2CommandTest extends Specification {
+class GenerateChangeLogDb2IntegrationTest extends Specification {
     @Shared
     private DatabaseTestSystem db2 = (DatabaseTestSystem) Scope.getCurrentScope().getSingleton(TestSystemFactory.class).getTestSystem("db2")
 

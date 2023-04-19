@@ -10,7 +10,8 @@ import liquibase.structure.core.Table;
 /**
  * Drops an existing table.
  */
-@DatabaseChange(name="dropTable", description = "Drops an existing table", priority = ChangeMetaData.PRIORITY_DEFAULT, appliesTo = "table")
+@DatabaseChange(name = "dropTable", description = "Drops an existing table", priority = ChangeMetaData.PRIORITY_DEFAULT,
+    appliesTo = "table")
 public class DropTableChange extends AbstractChange {
 
     private String catalogName;
@@ -18,7 +19,7 @@ public class DropTableChange extends AbstractChange {
     private String tableName;
     private Boolean cascadeConstraints;
 
-    @DatabaseChangeProperty(mustEqualExisting ="table.catalog", since = "3.0")
+    @DatabaseChangeProperty(mustEqualExisting ="table.catalog", since = "3.0", description = "Name of the database catalog")
     public String getCatalogName() {
         return catalogName;
     }
@@ -27,7 +28,7 @@ public class DropTableChange extends AbstractChange {
         this.catalogName = catalogName;
     }
 
-    @DatabaseChangeProperty(mustEqualExisting ="table.schema")
+    @DatabaseChangeProperty(mustEqualExisting ="table.schema", description = "Name of the database schema")
     public String getSchemaName() {
         return schemaName;
     }
@@ -45,6 +46,7 @@ public class DropTableChange extends AbstractChange {
         this.tableName = tableName;
     }
 
+    @DatabaseChangeProperty(description = "Whether to add CASCADE CONSTRAINTS to the SQL statement")
     public Boolean isCascadeConstraints() {
         return cascadeConstraints;
     }
