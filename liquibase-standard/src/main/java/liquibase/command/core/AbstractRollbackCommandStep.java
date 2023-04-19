@@ -161,11 +161,11 @@ public abstract class AbstractRollbackCommandStep extends AbstractCommandStep {
     }
 
     private static void sendRollbackMessages(List<ChangeSet> changeSets,
-                                      DatabaseChangeLog databaseChangeLog,
-                                      RollbackMessageType messageType,
-                                      Database database,
-                                      ChangeExecListener changeExecListener,
-                                      Exception exception) {
+                                             DatabaseChangeLog databaseChangeLog,
+                                             RollbackMessageType messageType,
+                                             Database database,
+                                             ChangeExecListener changeExecListener,
+                                             Exception exception) {
         changeSets.forEach(changeSet -> {
             if (messageType == RollbackMessageType.WILL_ROLLBACK) {
                 changeExecListener.willRollback(changeSet, databaseChangeLog, database);
