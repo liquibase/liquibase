@@ -77,7 +77,7 @@ Optional Args:
                 // Find the " -- Release Database Lock" line
                 //
                 "target/test-classes/rollbackToDate.sql" : [CommandTests.assertContains("-- Release Database Lock"),
-                                                            CommandTests.assertContains("DROP TABLE PUBLIC.FIRSTTABLE")],
+                                                            CommandTests.assertContains("DROP TABLE PUBLIC.FIRSTTABLE")]
         ]
     }
 

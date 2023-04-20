@@ -3,9 +3,11 @@ package liquibase.dbtest.derby;
 import liquibase.database.DatabaseFactory;
 import liquibase.database.jvm.JdbcConnection;
 import liquibase.dbtest.AbstractIntegrationTest;
+import org.junit.Ignore;
 
 import java.sql.SQLException;
 
+@Ignore("Not officially supported")
 public class DerbyIntegrationTest extends AbstractIntegrationTest {
 
     public static final String DERBY_SQLSTATE_OBJECT_ALREADY_EXISTS = "X0Y68";
