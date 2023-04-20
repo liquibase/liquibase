@@ -69,6 +69,7 @@ jobs:
       - name: Version Artifact
         run: mvn versions:set -DnewVersion="$(git rev-parse --short HEAD)-SNAPSHOT"
 
+      # This would still deploy a package if there are test failures. Might help to have build.yml complete and then run this workflow
       # Publish to GitHub Packages
       - name: Publish package
         run: mvn -B clean deploy -DskipTests=true

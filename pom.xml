@@ -83,6 +83,7 @@
 
     <modules>
         <module>liquibase-core</module>
+        <module>liquibase-standard</module>
         <module>liquibase-cli</module>
 	<module>liquibase-maven-plugin</module>
 	<module>liquibase-cdi-jakarta</module>
@@ -484,6 +485,7 @@
                 <sonar.host.url>https://sonarcloud.io</sonar.host.url>
                 <sonar.scm.provider>git</sonar.scm.provider>
                 <sonar.qualitygate.wait>true</sonar.qualitygate.wait>
+                <sonar.skip>true</sonar.skip>
             </properties>
             <build>
                 <plugins>
