@@ -10,21 +10,10 @@
 
     <artifactId>liquibase-extension-testing</artifactId>
     <packaging>jar</packaging>
-
-    <profiles>
-        <profile>
-            <id>github-package</id>
-            <activation>
-                <property>
-                    <name>env.TARGET_ARTIFACT_REPOSITORY</name>
-                    <value>github</value> <!-- This is case-sensitive! -->
-                </property>
-            </activation>
-            <properties>
-                <maven.deploy.skip>false</maven.deploy.skip>
-            </properties>
-        </profile>
-    </profiles>
+    
+    <properties>
+        <maven.deploy.skip>false</maven.deploy.skip>
+    </properties>
 
     <dependencyManagement>
         <dependencies>
@@ -82,7 +71,7 @@
         <dependency>
             <groupId>org.slf4j</groupId>
             <artifactId>slf4j-jdk14</artifactId>
-            <version>2.0.6</version>
+            <version>2.0.7</version>
         </dependency>
 
         <dependency>

@@ -1,0 +1,272 @@
+package liquibase.changelog.visitor
+
+import liquibase.GlobalConfiguration
+import liquibase.Scope
+import liquibase.change.ColumnConfig
+import liquibase.change.core.CreateTableChange
+import liquibase.changelog.ChangeSet
+import liquibase.changelog.DatabaseChangeLog
+import liquibase.changelog.RanChangeSet
+import liquibase.database.Database
+import liquibase.database.core.MockDatabase
+import liquibase.exception.SetupException
+import liquibase.exception.ValidationErrors
+import spock.lang.Specification
+
+class ValidatingVisitorTest extends Specification {
+
+     void "validate successful visit"() throws Exception {
+         when:
+         def changeSet1 = new ChangeSet("1", "testAuthor", false, false, "path/changelog", null, null, null)
+         def changeSet2 = new ChangeSet("2", "testAuthor", false, false, "path/changelog", null, null, null)
+
+        CreateTableChange change1 = new CreateTableChange()
+        change1.setTableName("table1")
+        ColumnConfig column1 = new ColumnConfig()
+        change1.addColumn(column1)
+        column1.setName("col1")
+        column1.setType("int")
+
+        CreateTableChange change2 = new CreateTableChange()
+        change2.setTableName("table2")
+        ColumnConfig column2 = new ColumnConfig()
+        change2.addColumn(column2)
+        column2.setName("col2")
+        column2.setType("int")
+
+        changeSet1.addChange(change1)
+        changeSet2.addChange(change2)
+
+        ValidatingVisitor handler = new ValidatingVisitor(new ArrayList<RanChangeSet>())
+        handler.visit(changeSet1, new DatabaseChangeLog(), new MockDatabase(), null)
+        handler.visit(changeSet2, new DatabaseChangeLog(), new MockDatabase(), null)
+
+        then:
+        handler.validationPassed()
+    }
+
+    void "validate visit setup exception"() throws Exception {
+        when:
+        def changeSet1 = new ChangeSet("1", "testAuthor", false, false, "path/changelog", null, null, null)
+        changeSet1.addChange(new CreateTableChange() {
+            @Override
+            void finishInitialization() throws SetupException {
+                throw new SetupException("Test message")
+            }
+        });
+
+        ValidatingVisitor handler = new ValidatingVisitor(new ArrayList<RanChangeSet>())
+        handler.visit(changeSet1, new DatabaseChangeLog(), null, null)
+
+        then:
+        handler.getSetupExceptions().size() == 1
+        handler.getSetupExceptions().get(0).getMessage().equalsIgnoreCase("Test message")
+        !handler.validationPassed()
+    }
+
+    void "validate visit error"() throws Exception {
+        when:
+        def changeSet1 = new ChangeSet("1", "testAuthor", false, false, "path/changelog", null, null, null)
+        changeSet1.addChange(new CreateTableChange() {
+            @Override
+            ValidationErrors validate(Database database) {
+                ValidationErrors changeValidationErrors = new ValidationErrors()
+                changeValidationErrors.addError("Test message")
+                return changeValidationErrors;
+            }
+        })
+
+        List<RanChangeSet> ran = new ArrayList<RanChangeSet>()
+        ValidatingVisitor handler = new ValidatingVisitor(ran)
+        handler.visit(changeSet1, new DatabaseChangeLog(), null, null)
+
+        then:
+        handler.getValidationErrors().getErrorMessages().size() == 1
+        handler.getValidationErrors().getErrorMessages().get(0).startsWith("Test message")
+        !handler.validationPassed()
+    }
+
+    void "validate visit duplicate"() throws Exception {
+        when:
+        def changeSet1 = new ChangeSet("1", "testAuthor", false, false, "path/changelog", null, null, null)
+        ValidatingVisitor handler = new ValidatingVisitor(new ArrayList<RanChangeSet>())
+        handler.visit(changeSet1, new DatabaseChangeLog(), null, null)
+        handler.visit(changeSet1, new DatabaseChangeLog(), null, null)
+
+        then:
+        handler.getDuplicateChangeSets().size() == 1
+        !handler.validationPassed()
+    }
+
+    void "validate error on empty author when strict configuration is set as true"() {
+        when:
+        ChangeSet changeSet = new ChangeSet("emptyAuthor", "", false, false, "path/changelog", null, null, null)
+        ValidatingVisitor handler = new ValidatingVisitor(new ArrayList<>())
+
+        Scope.child([
+                (GlobalConfiguration.STRICT.getKey()): Boolean.TRUE,
+        ], new Scope.ScopedRunner() {
+            @Override
+            void run() throws Exception {
+                handler.visit(changeSet, new DatabaseChangeLog(), null, null)
+            }
+        })
+
+        then:
+         handler.getValidationErrors().getErrorMessages().get(0).contains("ChangeSet Author is empty")
+    }
+
+    void "validate there is no error on empty author when strict configuration is set as false"() {
+        when:
+        ChangeSet changeSet = new ChangeSet("emptyAuthor", "", false, false, "path/changelog", null, null, null)
+        ValidatingVisitor handler = new ValidatingVisitor(new ArrayList<>())
+
+        Scope.child([
+                (GlobalConfiguration.STRICT.getKey()): Boolean.FALSE,
+        ], new Scope.ScopedRunner() {
+            @Override
+            void run() throws Exception {
+                handler.visit(changeSet, new DatabaseChangeLog(), null, null)
+            }
+        })
+
+        then:
+        handler.validationPassed()
+    }
+
+    void "validate visit error on empty id"() throws Exception {
+        when:
+        def changeSet = new ChangeSet("", "emptyId", false, false, "path/changelog", null, null, null)
+        ValidatingVisitor handler = new ValidatingVisitor(new ArrayList<>())
+        handler.visit(changeSet, new DatabaseChangeLog(), null, null)
+
+        then:
+        handler.getValidationErrors().getErrorMessages().size() == 1
+        handler.getValidationErrors().getErrorMessages().get(0).contains("ChangeSet Id is empty")
+        !handler.validationPassed()
+    }
+
+    void "validate visit error on empty author and id"() throws Exception {
+        when:
+        def changeSet = new ChangeSet("", "", false, false, "path/changelog", null, null, null)
+        ValidatingVisitor handler = new ValidatingVisitor(new ArrayList<>())
+        handler.visit(changeSet, new DatabaseChangeLog(), null, null)
+
+        then:
+        handler.getValidationErrors().getErrorMessages().size() == 1
+        handler.getValidationErrors().getErrorMessages().get(0).contains("ChangeSet Id and Author are empty")
+        !handler.validationPassed()
+    }
+
+    void "validate visit to run only"() throws Exception {
+        when:
+        def changeSet = new ChangeSet("1", "testAuthor", false, false, "path/changelog", null, null, null);
+        changeSet.addChange(new CreateTableChange() {
+            @Override
+            ValidationErrors validate(Database database) {
+                ValidationErrors changeValidationErrors = new ValidationErrors()
+                changeValidationErrors.addError("Test message")
+                return changeValidationErrors;
+            }
+        })
+
+        List<RanChangeSet> ran = new ArrayList<RanChangeSet>()
+        ran.add(new RanChangeSet(changeSet))
+        ValidatingVisitor handler = new ValidatingVisitor(ran)
+        handler.visit(changeSet, new DatabaseChangeLog(), null, null)
+
+        then:
+        handler.getSetupExceptions().size() == 0
+        handler.validationPassed()
+    }
+
+    void "validate successful visit with single valid dbms set"() throws Exception {
+        when:
+        CreateTableChange change = new CreateTableChange()
+        change.setTableName("table1")
+        ColumnConfig column1 = new ColumnConfig()
+        change.addColumn(column1)
+        column1.setName("col1")
+        column1.setType("int")
+
+        ChangeSet changeSet = new ChangeSet("1", "testAuthor", false, false, "path/changelog", null, "postgresql", null)
+        changeSet.addChange(change)
+        ValidatingVisitor handler = new ValidatingVisitor(new ArrayList<RanChangeSet>())
+        handler.visit(changeSet, new DatabaseChangeLog(), new MockDatabase(), null)
+
+        then:
+        handler.validationPassed()
+    }
+
+    void "validate successful visit with valid list of dbms set"() throws Exception {
+        when:
+        CreateTableChange change = new CreateTableChange()
+        change.setTableName("table1")
+        ColumnConfig column1 = new ColumnConfig()
+        change.addColumn(column1)
+        column1.setName("col1")
+        column1.setType("int")
+        ChangeSet changeSet = new ChangeSet("1", "testAuthor", false, false, "path/changelog", null, "postgresql, mssql, h2", null)
+        changeSet.addChange(change)
+
+        ValidatingVisitor handler = new ValidatingVisitor(new ArrayList<RanChangeSet>())
+        handler.visit(changeSet, new DatabaseChangeLog(), new MockDatabase(), null)
+
+        then:
+        handler.validationPassed()
+    }
+
+    void "validate unsuccessful visit with invalid dbms set"() throws Exception {
+        when:
+        CreateTableChange change = new CreateTableChange()
+        change.setTableName("table1")
+        ColumnConfig column1 = new ColumnConfig()
+        change.addColumn(column1)
+        column1.setName("col1")
+        column1.setType("int")
+        ChangeSet changeSet = new ChangeSet("1", "testAuthor", false, false, "path/changelog", null, "post", null)
+        changeSet.addChange(change)
+
+        ValidatingVisitor handler = new ValidatingVisitor(new ArrayList<RanChangeSet>())
+        handler.visit(changeSet, new DatabaseChangeLog(), new MockDatabase(), null)
+
+        then:
+        !handler.validationPassed()
+    }
+
+    void "validate successful visit with none dbms set"() throws Exception {
+        when:
+        CreateTableChange change = new CreateTableChange()
+        change.setTableName("table1")
+        ColumnConfig column1 = new ColumnConfig()
+        change.addColumn(column1)
+        column1.setName("col1")
+        column1.setType("int")
+        ChangeSet changeSet = new ChangeSet("1", "testAuthor", false, false, "path/changelog", null, "none", null)
+        changeSet.addChange(change)
+
+        ValidatingVisitor handler = new ValidatingVisitor(new ArrayList<RanChangeSet>())
+        handler.visit(changeSet, new DatabaseChangeLog(), new MockDatabase(), null)
+
+        then:
+        handler.validationPassed()
+    }
+
+    void "validate successful visit with all dbms value set"() throws Exception {
+        when:
+        CreateTableChange change = new CreateTableChange()
+        change.setTableName("table1")
+        ColumnConfig column1 = new ColumnConfig()
+        change.addColumn(column1)
+        column1.setName("col1")
+        column1.setType("int")
+        ChangeSet changeSet = new ChangeSet("1", "testAuthor", false, false, "path/changelog", null, "all", null)
+        changeSet.addChange(change)
+
+        ValidatingVisitor handler = new ValidatingVisitor(new ArrayList<RanChangeSet>())
+        handler.visit(changeSet, new DatabaseChangeLog(), new MockDatabase(), null)
+
+        then:
+        handler.validationPassed()
+    }
+}
