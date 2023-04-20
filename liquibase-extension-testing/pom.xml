@@ -10,21 +10,10 @@
 
     <artifactId>liquibase-extension-testing</artifactId>
     <packaging>jar</packaging>
-
-    <profiles>
-        <profile>
-            <id>github-package</id>
-            <activation>
-                <property>
-                    <name>env.TARGET_ARTIFACT_REPOSITORY</name>
-                    <value>github</value> <!-- This is case-sensitive! -->
-                </property>
-            </activation>
-            <properties>
-                <maven.deploy.skip>false</maven.deploy.skip>
-            </properties>
-        </profile>
-    </profiles>
+    
+    <properties>
+        <maven.deploy.skip>false</maven.deploy.skip>
+    </properties>
 
     <dependencyManagement>
         <dependencies>
