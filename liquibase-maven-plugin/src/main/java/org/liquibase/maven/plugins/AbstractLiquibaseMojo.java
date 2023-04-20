@@ -414,14 +414,6 @@ public abstract class AbstractLiquibaseMojo extends AbstractMojo {
     protected String psqlArgs;
 
     /**
-     * Specifies psql executor name.
-     *
-     * @parameter property="liquibase.psql.executor"
-     */
-    @PropertyElement
-    protected String psqlExecutorName;
-
-    /**
      * Specifies psql timeout.
      *
      * @parameter property="liquibase.psql.timeout"
@@ -486,14 +478,6 @@ public abstract class AbstractLiquibaseMojo extends AbstractMojo {
     protected String sqlPlusArgs;
 
     /**
-     * Specifies sqlPlus executor name.
-     *
-     * @parameter property="liquibase.sqlplus.executor"
-     */
-    @PropertyElement
-    protected String sqlPlusExecutorName;
-
-    /**
      * Specifies sqlplus timeout.
      *
      * @parameter property="liquibase.sqlplus.timeout"
@@ -556,14 +540,6 @@ public abstract class AbstractLiquibaseMojo extends AbstractMojo {
      */
     @PropertyElement
     protected String sqlcmdArgs;
-
-    /**
-     * Specifies sqlcmd executor name.
-     *
-     * @parameter property="liquibase.sqlcmd.executor"
-     */
-    @PropertyElement
-    protected String sqlcmdExecutorName;
 
     /**
      * Specifies sqlcmd timeout.
@@ -1144,7 +1120,6 @@ public abstract class AbstractLiquibaseMojo extends AbstractMojo {
         nativeProperties.computeIfAbsent("liquibase.psql.keep.temp.name", val -> psqlKeepTempName);
         nativeProperties.computeIfAbsent("liquibase.psql.keep.temp.path", val -> psqlKeepTempPath);
         nativeProperties.computeIfAbsent("liquibase.psql.args", val -> psqlArgs);
-        nativeProperties.computeIfAbsent("liquibase.psql.executor", val -> psqlExecutorName);
         nativeProperties.computeIfAbsent("liquibase.psql.timeout", val -> psqlTimeout);
         nativeProperties.computeIfAbsent("liquibase.psql.logFile", val -> psqlLogFile);
         nativeProperties.computeIfAbsent("liquibase.sqlplus.path", val -> sqlPlusPath);
@@ -1153,7 +1128,6 @@ public abstract class AbstractLiquibaseMojo extends AbstractMojo {
         nativeProperties.computeIfAbsent("liquibase.sqlplus.keep.temp.path", val -> sqlPlusKeepTempPath);
         nativeProperties.computeIfAbsent("liquibase.sqlplus.keep.temp.overwrite", val -> sqlPlusKeepTempOverwrite);
         nativeProperties.computeIfAbsent("liquibase.sqlplus.args", val -> sqlPlusArgs);
-        nativeProperties.computeIfAbsent("liquibase.sqlplus.executor", val -> sqlPlusExecutorName);
         nativeProperties.computeIfAbsent("liquibase.sqlplus.timeout", val -> sqlPlusTimeout);
         nativeProperties.computeIfAbsent("liquibase.sqlplus.logFile", val -> sqlPlusLogFile);
         nativeProperties.computeIfAbsent("liquibase.sqlcmd.path", val -> sqlcmdPath);
@@ -1162,7 +1136,6 @@ public abstract class AbstractLiquibaseMojo extends AbstractMojo {
         nativeProperties.computeIfAbsent("liquibase.sqlcmd.keep.temp.path", val -> sqlcmdKeepTempPath);
         nativeProperties.computeIfAbsent("liquibase.sqlcmd.keep.temp.overwrite", val -> sqlcmdKeepTempOverwrite);
         nativeProperties.computeIfAbsent("liquibase.sqlcmd.args", val -> sqlcmdArgs);
-        nativeProperties.computeIfAbsent("liquibase.sqlcmd.executor", val -> sqlcmdExecutorName);
         nativeProperties.computeIfAbsent("liquibase.sqlcmd.timeout", val -> sqlcmdTimeout);
         nativeProperties.computeIfAbsent("liquibase.sqlcmd.logFile", val -> sqlcmdLogFile);
         nativeProperties.computeIfAbsent("liquibase.sqlcmd.catalogName", val -> sqlcmdCatalogName);

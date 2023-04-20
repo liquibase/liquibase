@@ -2,7 +2,9 @@ package liquibase.dbtest.asany;
 
 import liquibase.database.DatabaseFactory;
 import liquibase.dbtest.AbstractIntegrationTest;
+import org.junit.Ignore;
 
+@Ignore("No test database implementation")
 public class SybaseASAIntegrationTest extends AbstractIntegrationTest {
 
     public SybaseASAIntegrationTest() throws Exception {
