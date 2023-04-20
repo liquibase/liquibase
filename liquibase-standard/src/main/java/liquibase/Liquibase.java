@@ -1266,10 +1266,12 @@ public class Liquibase implements AutoCloseable {
         return listUnrunChangeSets(contexts, new LabelExpression());
     }
 
+    @Deprecated
     public List<ChangeSet> listUnrunChangeSets(Contexts contexts, LabelExpression labels) throws LiquibaseException {
         return listUnrunChangeSets(contexts, labels, true);
     }
 
+    @Deprecated
     public List<ChangeSet> listUnrunChangeSets(Contexts contexts, LabelExpression labels, boolean checkLiquibaseTables) throws LiquibaseException {
         changeLogParameters.setContexts(contexts);
         changeLogParameters.setLabels(labels);
@@ -1333,47 +1335,29 @@ public class Liquibase implements AutoCloseable {
         return visitor.getStatuses();
     }
 
+    @Deprecated
     public void reportStatus(boolean verbose, String contexts, Writer out) throws LiquibaseException {
         reportStatus(verbose, new Contexts(contexts), new LabelExpression(), out);
     }
 
+    @Deprecated
     public void reportStatus(boolean verbose, Contexts contexts, Writer out) throws LiquibaseException {
         reportStatus(verbose, contexts, new LabelExpression(), out);
     }
 
+    @Deprecated
     public void reportStatus(boolean verbose, Contexts contexts, LabelExpression labels, Writer out)
             throws LiquibaseException {
         changeLogParameters.setContexts(contexts);
         changeLogParameters.setLabels(labels);
-
-        try {
-            List<ChangeSet> unrunChangeSets = listUnrunChangeSets(contexts, labels, false);
-            if (unrunChangeSets.isEmpty()) {
-                out.append(getDatabase().getConnection().getConnectionUserName());
-                out.append("@");
-                out.append(getDatabase().getConnection().getURL());
-                out.append(" is up to date");
-                out.append(StreamUtil.getLineSeparator());
-            } else {
-                out.append(String.valueOf(unrunChangeSets.size()));
-                out.append(" changesets have not been applied to ");
-                out.append(getDatabase().getConnection().getConnectionUserName());
-                out.append("@");
-                out.append(getDatabase().getConnection().getURL());
-                out.append(StreamUtil.getLineSeparator());
-                if (verbose) {
-                    for (ChangeSet changeSet : unrunChangeSets) {
-                        out.append("     ").append(changeSet.toString(false))
-                                .append(StreamUtil.getLineSeparator());
-                    }
-                }
-            }
-
-            out.flush();
-        } catch (IOException e) {
-            throw new LiquibaseException(e);
-        }
-
+        runInScope(() -> {
+            CommandScope statusCommand = new CommandScope(StatusCommandStep.COMMAND_NAME);
+            statusCommand.addArgumentValue(DbUrlConnectionCommandStep.DATABASE_ARG, getDatabase());
+            statusCommand.addArgumentValue(DatabaseChangelogCommandStep.CHANGELOG_PARAMETERS, changeLogParameters);
+            statusCommand.addArgumentValue(StatusCommandStep.VERBOSE_ARG, verbose);
+            statusCommand.setOutput(new WriterOutputStream(out, GlobalConfiguration.OUTPUT_FILE_ENCODING.getCurrentValue()));
+            statusCommand.execute();
+        });
     }
 
     public Collection<RanChangeSet> listUnexpectedChangeSets(String contexts) throws LiquibaseException {
