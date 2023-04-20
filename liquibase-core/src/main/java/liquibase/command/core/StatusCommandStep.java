@@ -4,7 +4,6 @@ import liquibase.command.*;
 import liquibase.configuration.ConfigurationValueObfuscator;
 import liquibase.exception.CommandExecutionException;
 
-import java.util.Arrays;
 import java.util.Collections;
 
 public class StatusCommandStep extends AbstractCliWrapperCommandStep {
