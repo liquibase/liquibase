@@ -13,7 +13,6 @@ import liquibase.exception.CommandExecutionException;
 import liquibase.extension.testing.testsystem.DatabaseTestSystem;
 import liquibase.resource.SearchPathResourceAccessor
 import liquibase.sdk.resource.MockResourceAccessor
-import org.h2.command.dml.Update;
 
 class CommandUtil {
 
