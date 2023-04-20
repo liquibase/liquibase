@@ -648,7 +648,7 @@
         </modifySql>
     </changeSet>
 
-    <includeAll path="changelogs/common/pathincluded/"/>
+    <includeAll path="changelogs/common/pathincluded/" minDepth="0" maxDepth="1"/>
 
     <include file="includerelative\pathinclude1.changelog.xml" relativeToChangelogFile="true"/> <!-- try with dos style path -->
 

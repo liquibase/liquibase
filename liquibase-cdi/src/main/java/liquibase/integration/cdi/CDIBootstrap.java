@@ -87,10 +87,10 @@ public class CDIBootstrap implements Extension {
 
             @Override
             public CDILiquibase create(CreationalContext<CDILiquibase> ctx) {
-                CDILiquibase instance = it.produce(ctx);
-                it.inject(instance, ctx);
-                it.postConstruct(instance);
-                return instance;
+                CDILiquibase localInstance = it.produce(ctx);
+                it.inject(localInstance, ctx);
+                it.postConstruct(localInstance);
+                return localInstance;
             }
 
             @Override

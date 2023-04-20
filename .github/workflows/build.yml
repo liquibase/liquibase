@@ -18,12 +18,15 @@ on:
     paths-ignore:
       - '**.md'
 
+env:
+  MAVEN_VERSION: '3.8.7'
+
 jobs:
   check_build_safety:
     permissions:
       contents: none
     name: Check if Build should be done
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-22.04
     steps:
       - name: Supress builds for PRs from branch github-action-*
         if: github.event.pull_request && contains(github.head_ref, 'github-action')
@@ -44,7 +47,7 @@ jobs:
   setup:
     name: Setup
     needs: check_build_safety
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-22.04
     outputs:
       proBranchName: ${{ steps.find-branches.outputs.proBranchName }}
       proBranchSha: ${{ steps.find-branches.outputs.proBranchSha }}
@@ -143,7 +146,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        os: [ ubuntu-20.04, macos-latest, windows-2019 ]
+        os: [ ubuntu-22.04, macos-latest, windows-2019 ]
         java: [ 8, 11, 17, 18 ]
         exclude:
           # exclude non-java 8 on macos and windows builds
@@ -168,7 +171,7 @@ jobs:
           ref: ${{ github.event.pull_request.head.sha || github.event.after}}
       - name: Built Code Cache
         if: ${{ matrix.java == 8}}
-        uses: actions/cache@v3.2.5
+        uses: actions/cache@v3.3.1
         with:
           key: built-code-${{ github.run_number }}-${{ github.run_attempt }}
           path: ./**/target
@@ -181,7 +184,7 @@ jobs:
       - name: Set up Maven
         uses: stCarolas/setup-maven@v4.5
         with:
-          maven-version: '3.8.7'
+          maven-version: ${{ env.MAVEN_VERSION }}
       - name: Build & Test
         run: |
           mvn -B "-Dbuild.repository.owner=${{ needs.setup.outputs.thisRepositoryOwner }}" "-Dbuild.repository.name=${{ needs.setup.outputs.thisRepositoryName }}" "-Dbuild.branch=${{ needs.setup.outputs.thisBranchName }}" "-Dbuild.number=${{ github.run_number }}" "-Dbuild.commit=${{ needs.setup.outputs.thisSha }}" "-DtrimStackTrace=false" -pl '!liquibase-dist' clean test package surefire-report:report
@@ -201,7 +204,7 @@ jobs:
             ./**/target/site
 
       - name: Archive Modules
-        if: ${{ matrix.java == 8 && matrix.os == 'ubuntu-20.04'}}
+        if: ${{ matrix.java == 8 && matrix.os == 'ubuntu-22.04'}}
         uses: actions/upload-artifact@v3
         with:
           name: liquibase-modules
@@ -210,7 +213,7 @@ jobs:
 
   sonar:
     name: Sonar Scan
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-22.04
     needs: build
     steps:
       - uses: actions/checkout@v3
@@ -223,9 +226,12 @@ jobs:
           java-version: 11
           distribution: 'adopt'
           cache: 'maven'
-
+      - name: Set up Maven
+        uses: stCarolas/setup-maven@v4.5
+        with:
+          maven-version: ${{ env.MAVEN_VERSION }}
       - name: Cache SonarCloud packages
-        uses: actions/cache@v3.2.5
+        uses: actions/cache@v3.3.1
         with:
           path: ~/.sonar/cache
           key: ${{ runner.os }}-sonar
@@ -238,7 +244,7 @@ jobs:
 
   integration-test:
     name: Integration Test
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-22.04
     strategy:
       fail-fast: false
       matrix:
@@ -273,8 +279,12 @@ jobs:
           java-version: '8'
           distribution: 'temurin'
           cache: 'maven'
+      - name: Set up Maven
+        uses: stCarolas/setup-maven@v4.5
+        with:
+          maven-version: ${{ env.MAVEN_VERSION }}
       - name: Restore Built Code Cache
-        uses: actions/cache@v3.2.5
+        uses: actions/cache@v3.3.1
         with:
           key: built-code-${{ github.run_number }}-${{ github.run_attempt }}
           path: ./**/target
@@ -287,7 +297,7 @@ jobs:
           password: ${{ secrets.ARTIFACTORY_TOKEN }}
 
       - name: Run Tests
-        run: mvn -B jar:jar jar:test-jar surefire:test -DtrimStackTrace=false -Dliquibase.sdk.testSystem.test=${{ matrix.testSystem }} -Dliquibase.sdk.testSystem.acceptLicenses=${{ matrix.testSystem }} -Dtest=*IntegrationTest,*ExecutorTest -DfailIfNoTests=false -Dhttp.keepAlive=false -Dmaven.wagon.http.pool=false -Dmaven.wagon.httpconnectionManager.ttlSeconds=120
+        run: mvn -B jar:jar jar:test-jar surefire:test -DtrimStackTrace=false -Dliquibase.sdk.testSystem.test=${{ matrix.testSystem }} -Dliquibase.sdk.testSystem.acceptLicenses=${{ matrix.testSystem }} -Dtest=*IntegrationTest,*ExecutorTest -DfailIfNoTests=false
 
       - name: Archive Test Results
         if: ${{ always() }}
@@ -307,14 +317,14 @@ jobs:
           ref: ${{ github.event.pull_request.head.sha || github.event.after}}
 
       - name: Built Code Cache
-        uses: actions/cache@v3.2.5
+        uses: actions/cache@v3.3.1
         with:
           key: built-code-${{ github.run_number }}-${{ github.run_attempt }}
           path: ./**/target
 
       ##Cache based on install4j file, since changes to JVM is seen in there. If install4j version changes without changing the file, change the prefix letter before hashFiles to force a new cache
       - name: Install4j Cache
-        uses: actions/cache@v3.2.5
+        uses: actions/cache@v3.3.1
         with:
           key: install4j-A${{ hashFiles('liquibase-dist/src/main/install4j/liquibase.install4j') }}
           path: ~/.install4j8/**
@@ -329,6 +339,11 @@ jobs:
           cache: 'maven'
         env:
           GPG_PASSWORD: ${{ secrets.GPG_PASSPHRASE }}
+
+      - name: Set up Maven
+        uses: stCarolas/setup-maven@v4.5
+        with:
+          maven-version: ${{ env.MAVEN_VERSION }}
 
       - name: Download liquibase-commercial
         uses: liquibase/action-download-artifact@v2-liquibase
@@ -383,8 +398,8 @@ jobs:
           cp liquibase-dist/target/liquibase-0-SNAPSHOT.tar.gz artifacts
           cp liquibase-dist/target/liquibase-0-SNAPSHOT.zip artifacts
           
-          cp liquibase-dist/target/liquibase-0-SNAPSHOT.jar artifacts/liquibase-core-0-SNAPSHOT.jar
-          cp liquibase-dist/target/liquibase-0-SNAPSHOT-sources.jar artifacts/liquibase-core-0-SNAPSHOT-sources.jar
+          cp liquibase-core/target/liquibase-core-0-SNAPSHOT.jar artifacts/liquibase-core-0-SNAPSHOT.jar
+          cp liquibase-core/target/liquibase-core-0-SNAPSHOT-sources.jar artifacts/liquibase-core-0-SNAPSHOT-sources.jar
           cp target/liquibase-0-SNAPSHOT-javadoc.jar artifacts/liquibase-core-0-SNAPSHOT-javadoc.jar
           
           ##create installer - disabled here but run as nightly job and as part of release workflow
@@ -397,7 +412,10 @@ jobs:
           cp liquibase-cdi/target/liquibase-cdi-0-SNAPSHOT.jar artifacts
           cp liquibase-cdi/target/liquibase-cdi-0-SNAPSHOT-sources.jar artifacts
           cp liquibase-cdi/target/liquibase-cdi-0-SNAPSHOT-javadoc.jar artifacts
-          
+
+          cp liquibase-cdi-jakarta/target/liquibase-cdi-jakarta-0-SNAPSHOT.jar artifacts
+          cp liquibase-cdi-jakarta/target/liquibase-cdi-jakarta-0-SNAPSHOT-sources.jar artifacts
+          cp liquibase-cdi-jakarta/target/liquibase-cdi-jakarta-0-SNAPSHOT-javadoc.jar artifacts
           
           echo "Source code not available for liquibase-commercial" > /tmp/readme.source.txt
           (cd /tmp && jar cf liquibase-commercial-0-SNAPSHOT-sources.jar readme.source.txt)
@@ -414,9 +432,10 @@ jobs:
           ##prepare branch-named convenience artifacts directories
           mkdir artifacts-named
           cp liquibase-dist/target/liquibase-0-SNAPSHOT.tar.gz artifacts-named/liquibase-${{ needs.setup.outputs.thisBranchFileName }}.tar.gz
-          cp liquibase-dist/target/liquibase-0-SNAPSHOT.jar artifacts-named/liquibase-core-${{ needs.setup.outputs.thisBranchFileName }}.jar
+          cp liquibase-core/target/liquibase-core-0-SNAPSHOT.jar artifacts-named/liquibase-core-${{ needs.setup.outputs.thisBranchFileName }}.jar
           cp liquibase-maven-plugin/target/liquibase-maven-plugin-0-SNAPSHOT.jar artifacts-named/liquibase-maven-plugin-${{ needs.setup.outputs.thisBranchFileName }}.jar
           cp liquibase-cdi/target/liquibase-cdi-0-SNAPSHOT.jar artifacts-named/liquibase-cdi-${{ needs.setup.outputs.thisBranchFileName }}.jar
+          cp liquibase-cdi-jakarta/target/liquibase-cdi-jakarta-0-SNAPSHOT.jar artifacts-named/liquibase-cdi-jakarta-${{ needs.setup.outputs.thisBranchFileName }}.jar
           cp liquibase-extension-testing/target/liquibase-extension-testing-0-SNAPSHOT.jar artifacts-named/liquibase-extension-testing-${{ needs.setup.outputs.thisBranchFileName }}.jar
           cp liquibase-extension-testing/target/liquibase-extension-testing-0-SNAPSHOT-deps.jar artifacts-named/liquibase-extension-testing-${{ needs.setup.outputs.thisBranchFileName }}-deps.jar
           cp download/liquibase-commercial/liquibase-commercial-0-SNAPSHOT.jar artifacts-named/liquibase-commercial-${{ needs.setup.outputs.thisBranchFileName }}.jar
@@ -442,7 +461,7 @@ jobs:
 
   finish:
     name: Finish Build
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-22.04
     needs: [ setup, build, integration-test, package, sonar ]
     if: ${{ needs.setup.outputs.setupSuccessful }}
     steps:

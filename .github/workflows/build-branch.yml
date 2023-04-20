@@ -5,10 +5,12 @@ on:
   push:
     branches:
       - '**DAT-**'
+env:
+  MAVEN_VERSION: '3.8.7'
 jobs:
   build:
     name: Build & Package
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-22.04
     permissions:
       contents: read
       packages: write
@@ -22,11 +24,17 @@ jobs:
           distribution: 'temurin'
           cache: 'maven'
           server-id: github
+      - name: Set up Maven
+        uses: stCarolas/setup-maven@v4.5
+        with:
+          maven-version: ${{ env.MAVEN_VERSION }}
 
       # Version artifact based off of branch and commit SHA.
       - name: Version Artifact
         run: mvn versions:set -DnewVersion="${{ github.ref_name }}-SNAPSHOT"
 
+
+      # This would still deploy a package if there are test failures. Might help to have build.yml complete and then run this workflow
       # Publish to GitHub Packages
       - name: Publish package
         run: mvn -B clean deploy -DskipTests=true
