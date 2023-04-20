@@ -10,8 +10,8 @@ import org.liquibase.maven.property.PropertyElement;
 import org.liquibase.maven.provider.FlowCommandArgumentValueProvider;
 
 import java.io.File;
-import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
+import java.io.IOException;
+import java.nio.file.Files;
 import java.util.Map;
 
 public abstract class AbstractLiquibaseFlowMojo extends AbstractLiquibaseMojo {
@@ -55,8 +55,8 @@ public abstract class AbstractLiquibaseFlowMojo extends AbstractLiquibaseMojo {
         }
         if (outputFile != null) {
             try {
-                liquibaseCommand.setOutput(new FileOutputStream(outputFile));
-            } catch (FileNotFoundException e) {
+                liquibaseCommand.setOutput(Files.newOutputStream(outputFile.toPath()));
+            } catch (IOException e) {
                 throw new CommandExecutionException(e);
             }
         }

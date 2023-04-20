@@ -8,7 +8,7 @@ CommandTests.define {
 Short Description: Rollback changes made to the database based on the specific tag
 Long Description: NOT SET
 Required Args:
-  changelogFile (String) The root changelog
+  changelogFile (String) The root changelog file
   tag (String) Tag to rollback to
   url (String) The JDBC database connection URL
     OBFUSCATED
@@ -17,7 +17,7 @@ Optional Args:
     Default: null
   changeExecListenerPropertiesFile (String) Path to a properties file for the ChangeExecListenerClass
     Default: null
-  contexts (String) Changeset contexts to match
+  contexts (String) Context string to use for filtering
     Default: null
   defaultCatalogName (String) The default catalog name to use for the database connection
     Default: null
@@ -27,7 +27,7 @@ Optional Args:
     Default: null
   driverPropertiesFile (String) The JDBC driver properties file
     Default: null
-  labelFilter (String) Changeset labels to match
+  labelFilter (String) Label expression to use for filtering
     Default: null
   password (String) Password to use to connect to the database
     Default: null
@@ -50,10 +50,6 @@ Optional Args:
         setup {
             runChangelog "changelogs/h2/complete/rollback.tag.changelog.xml"
         }
-
-        expectedResults = [
-                statusCode   : 0
-        ]
     }
 
     run "Run without any arguments should throw an exception",  {

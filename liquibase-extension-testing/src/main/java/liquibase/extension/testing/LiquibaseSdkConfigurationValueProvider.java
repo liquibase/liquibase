@@ -2,6 +2,7 @@ package liquibase.extension.testing;
 
 import liquibase.Scope;
 import liquibase.configuration.AbstractMapConfigurationValueProvider;
+import liquibase.parser.core.yaml.YamlParser;
 import liquibase.util.CollectionUtil;
 import org.yaml.snakeyaml.Yaml;
 import org.yaml.snakeyaml.constructor.SafeConstructor;
@@ -20,7 +21,7 @@ public class LiquibaseSdkConfigurationValueProvider extends AbstractMapConfigura
 
     public LiquibaseSdkConfigurationValueProvider() {
         properties = new HashMap<>();
-        Yaml yaml = new Yaml(new SafeConstructor());
+        Yaml yaml = new Yaml(new SafeConstructor(YamlParser.createLoaderOptions()));
         try {
             final ArrayList<URL> urls = new ArrayList<>();
             urls.addAll(Collections.list(this.getClass().getClassLoader().getResources("liquibase.sdk.yaml")));

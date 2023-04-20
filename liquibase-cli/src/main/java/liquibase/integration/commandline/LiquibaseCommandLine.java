@@ -13,13 +13,20 @@ import liquibase.configuration.LiquibaseConfiguration;
 import liquibase.configuration.core.DefaultsFileValueProvider;
 import liquibase.exception.CommandLineParsingException;
 import liquibase.exception.CommandValidationException;
+import liquibase.exception.LiquibaseException;
 import liquibase.hub.HubConfiguration;
 import liquibase.license.LicenseService;
 import liquibase.license.LicenseServiceFactory;
 import liquibase.logging.LogService;
 import liquibase.logging.core.JavaLogService;
+import liquibase.logging.core.LogServiceFactory;
+import liquibase.logging.mdc.MdcKey;
+import liquibase.logging.mdc.MdcManager;
+import liquibase.logging.mdc.MdcObject;
 import liquibase.resource.*;
+import liquibase.ui.CompositeUIService;
 import liquibase.ui.ConsoleUIService;
+import liquibase.ui.LoggerUIService;
 import liquibase.ui.UIService;
 import liquibase.util.*;
 import picocli.CommandLine;
@@ -36,11 +43,13 @@ import java.time.Duration;
 import java.util.*;
 import java.util.jar.JarFile;
 import java.util.jar.Manifest;
+import java.util.logging.Formatter;
 import java.util.logging.*;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import static java.util.ResourceBundle.getBundle;
+import static liquibase.configuration.LiquibaseConfiguration.REGISTERED_VALUE_PROVIDERS_KEY;
 import static liquibase.util.SystemUtil.isWindows;
 
 
@@ -204,10 +213,12 @@ public class LiquibaseCommandLine {
 
         commandLine.setExecutionExceptionHandler((ex, commandLine1, parseResult) -> LiquibaseCommandLine.this.handleException(ex));
 
+        commandLine.setUsageHelpAutoWidth(true);
+
         return commandLine;
     }
 
-    private int handleException(Throwable exception) {
+    protected int handleException(Throwable exception) {
         Throwable cause = exception;
 
         String uiMessage = "";
@@ -229,11 +240,12 @@ public class LiquibaseCommandLine {
             uiMessage = exception.getClass().getName();
         }
 
-        if (cause instanceof CommandFailedException && ((CommandFailedException) cause).isExpected()) {
-            Scope.getCurrentScope().getLog(getClass()).severe(uiMessage);
-        } else {
-            Scope.getCurrentScope().getLog(getClass()).severe(uiMessage, exception);
-        }
+        //
+        // For LiquibaseException, we can control the logging level
+        //
+        Level level = determineLogLevel(exception);
+
+        Scope.getCurrentScope().getLog(getClass()).log(level, uiMessage, exception);
 
         boolean printUsage = false;
         try (final StringWriter suggestionWriter = new StringWriter();
@@ -288,6 +300,29 @@ public class LiquibaseCommandLine {
         return 1;
     }
 
+    //
+    // Look for a logLevel setting on any LiquibaseException
+    // and use that for the Level to pass to the logger.
+    // The lowest level of the exception stack will be used.
+    //
+    private Level determineLogLevel(Throwable throwable) {
+        //
+        // Default to severe
+        //
+        if (throwable == null) {
+            return Level.SEVERE;
+        }
+        Level returnLevel = Level.SEVERE;
+        Throwable t = throwable;
+        while (t != null) {
+            if (t instanceof LiquibaseException && ((LiquibaseException)t).getLogLevel() != null) {
+                returnLevel = ((LiquibaseException)t).getLogLevel();
+            }
+            t = t.getCause();
+        }
+        return returnLevel;
+    }
+
     protected String cleanExceptionMessage(String message) {
         if (message == null) {
             return null;
@@ -313,77 +348,86 @@ public class LiquibaseCommandLine {
             Main.runningFromNewCli = true;
 
             final List<ConfigurationValueProvider> valueProviders = registerValueProviders(finalArgs);
-            try {
-                return Scope.child(configureScope(), () -> {
+            LogService newLogService = Scope.child(Collections.singletonMap(REGISTERED_VALUE_PROVIDERS_KEY, true), () -> {
+                // Get a new log service after registering the value providers, since the log service might need to load parameters using newly registered value providers.
+                return Scope.getCurrentScope().getSingleton(LogServiceFactory.class).getDefaultLogService();
+            });
 
-                    if (!LiquibaseCommandLineConfiguration.SHOULD_RUN.getCurrentValue()) {
-                        Scope.getCurrentScope().getUI().sendErrorMessage((
-                                String.format(coreBundle.getString("did.not.run.because.param.was.set.to.false"),
-                                        LiquibaseCommandLineConfiguration.SHOULD_RUN.getCurrentConfiguredValue().getProvidedValue().getActualKey())));
-                        return 0;
-                    }
+            return Scope.child(Collections.singletonMap(Scope.Attr.logService.name(), newLogService), () -> {
+                try {
+                    return Scope.child(configureScope(), () -> {
 
-                    configureVersionInfo();
-
-                    if (!wasHelpOrVersionRequested()) {
-                        Scope.getCurrentScope().getUI().sendMessage(CommandLineUtils.getBanner());
-                        Scope.getCurrentScope().getUI().sendMessage(String.format(coreBundle.getString("version.number"), LiquibaseUtil.getBuildVersionInfo()));
-
-                        final LicenseService licenseService = Scope.getCurrentScope().getSingleton(LicenseServiceFactory.class).getLicenseService();
-                        if (licenseService == null) {
-                            Scope.getCurrentScope().getUI().sendMessage("WARNING: License service not loaded, cannot determine Liquibase Pro license status. Please consider re-installing Liquibase to include all dependencies. Continuing operation without Pro license.");
-                        } else {
-                            Scope.getCurrentScope().getUI().sendMessage(licenseService.getLicenseInfo());
-                        }
-                    }
-
-                    CommandLine.ParseResult subcommandParseResult = commandLine.getParseResult();
-                    while (subcommandParseResult.hasSubcommand()) {
-                        subcommandParseResult = subcommandParseResult.subcommand();
-                    }
-
-                    Map<String, String> changelogParameters = subcommandParseResult.matchedOptionValue("-D", new HashMap<>());
-                    if (changelogParameters.size() != 0) {
-                        Main.newCliChangelogParameters = changelogParameters;
-                    }
-
-                    enableMonitoring();
-
-                    int response = commandLine.execute(finalArgs);
-
-                    if (!wasHelpOrVersionRequested()) {
-                        final ConfiguredValue<String> logFile = LiquibaseCommandLineConfiguration.LOG_FILE.getCurrentConfiguredValue();
-                        if (logFile.found()) {
-                            Scope.getCurrentScope().getUI().sendMessage("Logs saved to " + logFile.getValue());
+                        if (!LiquibaseCommandLineConfiguration.SHOULD_RUN.getCurrentValue()) {
+                            Scope.getCurrentScope().getUI().sendErrorMessage((
+                                    String.format(coreBundle.getString("did.not.run.because.param.was.set.to.false"),
+                                            LiquibaseCommandLineConfiguration.SHOULD_RUN.getCurrentConfiguredValue().getProvidedValue().getActualKey())));
+                            return 0;
                         }
 
-                        final ConfiguredValue<String> outputFile = LiquibaseCommandLineConfiguration.OUTPUT_FILE.getCurrentConfiguredValue();
-                        if (outputFile.found()) {
-                            Scope.getCurrentScope().getUI().sendMessage("Output saved to " + outputFile.getValue());
+                        configureVersionInfo();
+
+                        if (!wasHelpOrVersionRequested()) {
+                            Scope.getCurrentScope().getUI().sendMessage(CommandLineUtils.getBanner());
+                            Scope.getCurrentScope().getUI().sendMessage(String.format(coreBundle.getString("version.number"), LiquibaseUtil.getBuildVersionInfo()));
+
+                            final LicenseService licenseService = Scope.getCurrentScope().getSingleton(LicenseServiceFactory.class).getLicenseService();
+                            if (licenseService == null) {
+                                Scope.getCurrentScope().getUI().sendMessage("WARNING: License service not loaded, cannot determine Liquibase Pro license status. Please consider re-installing Liquibase to include all dependencies. Continuing operation without Pro license.");
+                            } else {
+                                Scope.getCurrentScope().getUI().sendMessage(licenseService.getLicenseInfo());
+                            }
                         }
 
-                        if (response == 0) {
-                            final List<CommandLine> commandList = commandLine.getParseResult().asCommandLineList();
-                            final String commandName = StringUtil.join(getCommandNames(commandList.get(commandList.size() - 1)), " ");
-                            Scope.getCurrentScope().getUI().sendMessage("Liquibase command '" + commandName + "' was executed successfully.");
+                        enableMonitoring();
+                        logMdcData();
+                        int response = commandLine.execute(finalArgs);
+
+                        if (!wasHelpOrVersionRequested()) {
+                            final ConfiguredValue<String> logFile = LiquibaseCommandLineConfiguration.LOG_FILE.getCurrentConfiguredValue();
+                            if (logFile.found()) {
+                                Scope.getCurrentScope().getUI().sendMessage("Logs saved to " + logFile.getValue());
+                            }
+
+                            final ConfiguredValue<String> outputFile = LiquibaseCommandLineConfiguration.OUTPUT_FILE.getCurrentConfiguredValue();
+                            if (outputFile.found()) {
+                                Scope.getCurrentScope().getUI().sendMessage("Output saved to " + outputFile.getValue());
+                            }
+
+                            if (response == 0) {
+                                final List<CommandLine> commandList = commandLine.getParseResult().asCommandLineList();
+                                final String commandName = StringUtil.join(getCommandNames(commandList.get(commandList.size() - 1)), " ");
+                                Scope.getCurrentScope().getUI().sendMessage("Liquibase command '" + commandName + "' was executed successfully.");
+                            }
                         }
+
+
+                        return response;
+                    });
+                } finally {
+                    final LiquibaseConfiguration liquibaseConfiguration = Scope.getCurrentScope().getSingleton(LiquibaseConfiguration.class);
+
+                    for (ConfigurationValueProvider provider : valueProviders) {
+                        liquibaseConfiguration.unregisterProvider(provider);
                     }
-
-
-                    return response;
-                });
-            } finally {
-                final LiquibaseConfiguration liquibaseConfiguration = Scope.getCurrentScope().getSingleton(LiquibaseConfiguration.class);
-
-                for (ConfigurationValueProvider provider : valueProviders) {
-                    liquibaseConfiguration.unregisterProvider(provider);
                 }
-            }
+            });
         } catch (Throwable e) {
             handleException(e);
             return 1;
         } finally {
             cleanup();
+        }
+    }
+
+    /**
+     * Log MDC data related to Liquibase system information.
+     */
+    private void logMdcData() throws IOException {
+        MdcManager mdcManager = Scope.getCurrentScope().getMdcManager();
+        try (MdcObject version = mdcManager.put(MdcKey.LIQUIBASE_VERSION, LiquibaseUtil.getBuildVersion());
+             MdcObject systemUser = mdcManager.put(MdcKey.LIQUIBASE_SYSTEM_USER, System.getProperty("user.name"));
+             MdcObject systemName = mdcManager.put(MdcKey.LIQUIBASE_SYSTEM_NAME, NetUtil.getLocalHostName())) {
+            Scope.getCurrentScope().getLog(getClass()).info("Starting command execution.");
         }
     }
 
@@ -419,6 +463,12 @@ public class LiquibaseCommandLine {
             recordingClass.getMethod("setMaxAge", Duration.class).invoke(recording, (Duration) null);
             recordingClass.getMethod("setDumpOnExit", boolean.class).invoke(recording, true);
             recordingClass.getMethod("setToDisk", boolean.class).invoke(recording, true);
+
+            recordingClass.getMethod("disable", String.class).invoke(recording, "jdk.InitialEnvironmentVariable");
+            recordingClass.getMethod("disable", String.class).invoke(recording, "jdk.InitialSystemProperty");
+            recordingClass.getMethod("disable", String.class).invoke(recording, "jdk.SystemProcess");
+            recordingClass.getMethod("disable", String.class).invoke(recording, "jdk.JVMInformation");
+
             final File filePath = new File(filename).getAbsoluteFile();
             filePath.getParentFile().mkdirs();
 
@@ -444,6 +494,19 @@ public class LiquibaseCommandLine {
         }
 
         return false;
+    }
+
+    private Map<String, String> addJavaPropertiesToChangelogParameters() {
+        CommandLine.ParseResult subcommandParseResult = commandLine.getParseResult();
+        while (subcommandParseResult.hasSubcommand()) {
+            subcommandParseResult = subcommandParseResult.subcommand();
+        }
+
+        Map<String, String> changelogParameters = subcommandParseResult.matchedOptionValue("-D", new HashMap<>());
+        if (changelogParameters.size() != 0) {
+            Main.newCliChangelogParameters = changelogParameters;
+        }
+        return changelogParameters;
     }
 
     protected String[] adjustLegacyArgs(String[] args) {
@@ -580,25 +643,33 @@ public class LiquibaseCommandLine {
         returnMap.putAll(configureLogging());
         returnMap.putAll(configureResourceAccessor(classLoader));
 
-        ConsoleUIService ui = null;
+        ConsoleUIService console = null;
         List<UIService> uiServices = Scope.getCurrentScope().getServiceLocator().findInstances(UIService.class);
         for (UIService uiService : uiServices) {
             if (uiService instanceof ConsoleUIService) {
-                ui = (ConsoleUIService) uiService;
+                console = (ConsoleUIService) uiService;
                 break;
             }
         }
-        if (ui == null) {
-            ui = new ConsoleUIService();
+        if (console == null) {
+            console = new ConsoleUIService();
         }
 
-        ui.setAllowPrompt(true);
-        ui.setOutputStream(System.err);
-        returnMap.put(Scope.Attr.ui.name(), ui);
+        console.setAllowPrompt(true);
+        console.setOutputStream(System.err);
+        List<UIService> outputServices = new ArrayList<>();
+        outputServices.add(console);
+        if (LiquibaseCommandLineConfiguration.MIRROR_CONSOLE_MESSAGES_TO_LOG.getCurrentValue()) {
+            outputServices.add(new LoggerUIService());
+        }
+        CompositeUIService compositeUIService = new CompositeUIService(console, outputServices);
+        returnMap.put(Scope.Attr.ui.name(), compositeUIService);
 
         returnMap.put(LiquibaseCommandLineConfiguration.ARGUMENT_CONVERTER.getKey(),
                 (LiquibaseCommandLineConfiguration.ArgumentConverter) argument -> "--" + StringUtil.toKabobCase(argument));
 
+        Map<String, String> javaProperties = addJavaPropertiesToChangelogParameters();
+        returnMap.put("javaProperties", javaProperties);
 
         return returnMap;
     }
@@ -608,7 +679,7 @@ public class LiquibaseCommandLine {
     }
 
     protected Map<String, Object> configureLogging() throws IOException {
-        Map<String, Object> returnMap = new HashMap<>();
+        Map<String, Object> returnMap = new HashMap<>(1);
         final ConfiguredValue<Level> currentConfiguredValue = LiquibaseCommandLineConfiguration.LOG_LEVEL.getCurrentConfiguredValue();
         final String logFile = LiquibaseCommandLineConfiguration.LOG_FILE.getCurrentValue();
 
@@ -617,7 +688,7 @@ public class LiquibaseCommandLine {
             logLevel = currentConfiguredValue.getValue();
         }
 
-        configureLogging(logLevel, logFile);
+        configureLogging(logLevel, logFile, currentConfiguredValue.wasDefaultValueUsed());
 
         //
         // Set the Liquibase Hub log level if logging is not OFF
@@ -630,6 +701,14 @@ public class LiquibaseCommandLine {
     }
 
     private void configureLogging(Level logLevel, String logFile) throws IOException {
+        configureLogging(logLevel, logFile, false);
+    }
+
+    /**
+     * @param wasDefaultLogLevelUsed indicate whether the user selected the default value for log-level, or whether they
+     *                               provided a value
+     */
+    private void configureLogging(Level logLevel, String logFile, boolean wasDefaultLogLevelUsed) throws IOException {
         configuredLogLevel = logLevel;
 
         final LogService logService = Scope.getCurrentScope().get(Scope.Attr.logService, LogService.class);
@@ -642,18 +721,24 @@ public class LiquibaseCommandLine {
 
         java.util.logging.Logger rootLogger = java.util.logging.Logger.getLogger("");
         Level cliLogLevel = logLevel;
+        // If a log file is set, but no log level is set, this variable represents the log level that should be used.
+        Level fileLogLevelOverride = null;
 
         if (logFile != null) {
             if (fileHandler == null) {
                 final PathHandlerFactory pathHandlerFactory = Scope.getCurrentScope().getSingleton(PathHandlerFactory.class);
                 OutputStream outputStream = pathHandlerFactory.openResourceOutputStream(logFile, new OpenOptions().setAppend(true));
                 fileHandler = new StreamHandler(outputStream, new SimpleFormatter());
+
+                setFormatterOnHandler(logService, fileHandler);
+
                 rootLogger.addHandler(fileHandler);
             }
 
             fileHandler.setLevel(logLevel);
-            if (logLevel == Level.OFF) {
-                fileHandler.setLevel(Level.FINE);
+            if (logLevel == Level.OFF && wasDefaultLogLevelUsed) {
+                fileLogLevelOverride = Level.SEVERE;
+                fileHandler.setLevel(fileLogLevelOverride);
             }
 
             cliLogLevel = Level.OFF;
@@ -675,12 +760,30 @@ public class LiquibaseCommandLine {
             if (channel.equalsIgnoreCase("all")) {
                 channel = "";
             }
-            java.util.logging.Logger.getLogger(channel).setLevel(logLevel);
+            if (fileLogLevelOverride != null) {
+                java.util.logging.Logger.getLogger(channel).setLevel(fileLogLevelOverride);
+            } else {
+                java.util.logging.Logger.getLogger(channel).setLevel(logLevel);
+            }
         }
 
         for (Handler handler : rootLogger.getHandlers()) {
             if (handler instanceof ConsoleHandler) {
                 handler.setLevel(cliLogLevel);
+            }
+            setFormatterOnHandler(logService, handler);
+        }
+    }
+
+    /**
+     * Set the formatter for the supplied handler if the supplied log service
+     * is a JavaLogService and that service specifies a custom formatter.
+     */
+    private void setFormatterOnHandler(LogService logService, Handler handler) {
+        if (logService instanceof JavaLogService && handler != null) {
+            Formatter customFormatter = ((JavaLogService) logService).getCustomFormatter();
+            if (customFormatter != null) {
+                handler.setFormatter(customFormatter);
             }
         }
     }
@@ -767,15 +870,9 @@ public class LiquibaseCommandLine {
             }
 
             String shortDescription = commandDefinition.getShortDescription();
-            String displayDescription = shortDescription;
-            String legacyCommand = commandName[commandName.length - 1];
-            String camelCaseCommand = StringUtil.toCamelCase(legacyCommand);
-            if (!legacyCommand.equals(camelCaseCommand)) {
-                displayDescription = "\n" + shortDescription + "\n[deprecated: " + camelCaseCommand + "]";
-            }
 
             subCommandSpec.usageMessage()
-                    .header(StringUtil.trimToEmpty(displayDescription) + "\n")
+                    .header(StringUtil.trimToEmpty(shortDescription) + "\n")
                     .description(StringUtil.trimToEmpty(commandDefinition.getLongDescription()));
 
             subCommandSpec.optionsCaseInsensitive(true);
@@ -796,36 +893,32 @@ public class LiquibaseCommandLine {
 
                     String argDisplaySuffix = "";
                     String argName = argNames[i];
-                    String camelCaseArg = StringUtil.toCamelCase(argName.substring(2));
-                    if (!argName.equals("--" + camelCaseArg)) {
-                        argDisplaySuffix = "\n[deprecated: --" + camelCaseArg + "]";
-                    }
 
                     //
                     // Determine if this is a group command and set the property/environment display strings accordingly
                     //
                     String description;
                     if (commandDefinition.getName().length > 1) {
-                        String propertyStringToPresent = "\n(liquibase.command." +
-                                StringUtil.join(commandDefinition.getName(), ".") + "." + def.getName() + ")";
+                        String propertyStringToPresent = "\n(defaults file: 'liquibase.command." +
+                                StringUtil.join(commandDefinition.getName(), ".") + "." + def.getName() + "'";
                         String envStringToPresent =
-                                toEnvVariable("\n(liquibase.command." + StringUtil.join(commandDefinition.getName(), ".") +
-                                        "." + def.getName()) + ")" + argDisplaySuffix;
+                                toEnvVariable("environment variable: 'liquibase.command." + StringUtil.join(commandDefinition.getName(), ".") +
+                                        "." + def.getName()) + "')" + argDisplaySuffix;
                         description = propertyStringToPresent + envStringToPresent;
                     } else {
-                        description =
-                                "\n(liquibase.command." + def.getName() + " OR liquibase.command." +
-                                        StringUtil.join(commandDefinition.getName(), ".") + "." + def.getName() + ")\n" +
-                                        "(" + toEnvVariable("liquibase.command." + def.getName()) + " OR " +
-                                        toEnvVariable("liquibase.command." + StringUtil.join(commandDefinition.getName(), ".") +
-                                                "." + def.getName()) + ")" + argDisplaySuffix;
+                        String propertyStringToPresent = "\n(defaults file: 'liquibase.command." + def.getName() + "' OR 'liquibase.command." +
+                                StringUtil.join(commandDefinition.getName(), ".") + "." + def.getName() + "'";
+                        String envStringToPresent = ", environment variable: '" + toEnvVariable("liquibase.command." + def.getName()) + "' OR '" +
+                                toEnvVariable("liquibase.command." + StringUtil.join(commandDefinition.getName(), ".") +
+                                        "." + def.getName()) + "')" + argDisplaySuffix;
+                        description = propertyStringToPresent + envStringToPresent;
                     }
 
                     if (def.getDefaultValue() != null) {
                         if (def.getDefaultValueDescription() == null) {
-                            description = "\nDEFAULT: " + def.getDefaultValue() + "\n" + description;
+                            description = "\nDEFAULT: " + def.getDefaultValue() + description;
                         } else {
-                            description = "\nDEFAULT: " + def.getDefaultValueDescription() + "\n" + description;
+                            description = "\nDEFAULT: " + def.getDefaultValueDescription() + description;
                         }
                     }
 
@@ -995,8 +1088,8 @@ public class LiquibaseCommandLine {
                 final CommandLine.Model.OptionSpec.Builder optionBuilder = CommandLine.Model.OptionSpec.builder(argNames[i])
                         .required(false)
                         .type(String.class);
-                String description = "(" + def.getKey() + ")\n"
-                        + "(" + toEnvVariable(def.getKey()) + ")";
+                String description = "(defaults file: '" + def.getKey() + "', environment variable: '"
+                        + toEnvVariable(def.getKey()) + "')";
 
                 if (def.getDefaultValue() != null) {
                     if (def.getDefaultValueDescription() == null) {
@@ -1009,14 +1102,6 @@ public class LiquibaseCommandLine {
                 if (def.getDescription() != null) {
                     description = def.getDescription() + "\n" + description;
                 }
-                if (i == 0) {
-                    String primaryArg = argNames[i];
-                    String camelCaseArg = StringUtil.toCamelCase(primaryArg.substring(2));
-                    if (!primaryArg.equals("--" + camelCaseArg)) {
-                        description = "\n" + description +
-                                "\n[deprecated: --" + camelCaseArg + "]";
-                    }
-                }
 
                 optionBuilder.description(description + "\n");
 
@@ -1025,7 +1110,7 @@ public class LiquibaseCommandLine {
                 }
 
                 //only show the first/standard variation of a name
-                if (i > 0) {
+                if (i > 0 || def.isHidden()) {
                     optionBuilder.hidden(true);
                 }
 
@@ -1071,13 +1156,13 @@ public class LiquibaseCommandLine {
 
 
         commandSpec.addOption(CommandLine.Model.OptionSpec.builder("--help", "-h")
-                .description("Show this help message and exit")
+                .description("Show this help message and exit\n")
                 .usageHelp(true)
                 .build());
 
         if (includeVersion) {
             commandSpec.addOption(CommandLine.Model.OptionSpec.builder("--version", "-v")
-                    .description("Print version information and exit")
+                    .description("Print version information and exit\n")
                     .versionHelp(true)
                     .build());
         }

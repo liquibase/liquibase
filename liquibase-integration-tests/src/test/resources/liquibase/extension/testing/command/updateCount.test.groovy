@@ -32,6 +32,8 @@ Optional Args:
   password (String) Password to use to connect to the database
     Default: null
     OBFUSCATED
+  showSummary (UpdateSummaryEnum) Type of update results summary to show.  Values can be 'off', 'summary', or 'verbose'.
+    Default: SUMMARY
   username (String) Username to use to connect to the database
     Default: null
 """
@@ -46,7 +48,112 @@ Optional Args:
         ]
 
         expectedResults = [
-                statusCode   : 0
+                statusCode   : 0,
+                defaultChangeExecListener: 'not_null'
+        ]
+    }
+
+    run "Happy path with verbose summary output", {
+        arguments = [
+                url:      { it.url },
+                username: { it.username },
+                password: { it.password },
+                count        : 1,
+                showSummary  : "verbose",
+                changelogFile: "changelogs/h2/complete/simple.changelog.xml",
+        ]
+
+        expectedResults = [
+                statusCode   : 0,
+                defaultChangeExecListener: 'not_null'
+        ]
+    }
+
+    run "Happy path with a change set that has complicated labels and contexts", {
+        arguments = [
+                url:        { it.url },
+                username:   { it.username },
+                password:   { it.password },
+                changelogFile: "changelogs/h2/complete/summary-changelog.xml",
+                count: "1",
+                labelFilter: "testtable4,tagit and !testtable2",
+                contexts: "none",
+                showSummary: "summary"
+        ]
+
+        expectedResults = [
+                statusCode   : 0,
+                defaultChangeExecListener: 'not_null'
+        ]
+
+        outputFile = new File("target/test-classes/labelsAndContent.txt")
+
+        expectedFileContent = [ "target/test-classes/labelsAndContent.txt":
+                    [
+                      "UPDATE SUMMARY",
+                      "Run:                          1",
+                      "Previously run:               0",
+                      "Filtered out:                 5",
+                      "-------------------------------",
+                      "Total change sets:            6",
+                      "FILTERED CHANGE SETS SUMMARY",
+                      "Label mismatch:               2",
+                      "Context mismatch:             2",
+                      "After count:                  1",
+                      "DBMS mismatch:                1"
+                    ]
+        ]
+
+        expectedResults = [
+                statusCode   : 0,
+                defaultChangeExecListener: 'not_null'
+        ]
+
+        expectedUI = [
+            "Running Changeset: changelogs/h2/complete/summary-changelog.xml::4-table::lbuser"
+        ]
+
+    }
+
+    run "Mismatched DBMS causes not deployed summary message", {
+        arguments = [
+                url:        { it.url },
+                username:   { it.username },
+                password:   { it.password },
+                count        : 1,
+                showSummary  : "verbose",
+                changelogFile: "changelogs/h2/complete/mismatchedDbms.changelog.xml"
+        ]
+
+        expectedResults = [
+                statusCode   : 0,
+                defaultChangeExecListener: 'not_null'
+        ]
+
+        outputFile = new File("target/test-classes/mismatchedDBMS.txt")
+        expectedFileContent = [ "target/test-classes/mismatchedDBMS.txt":
+                 [
+                   "UPDATE SUMMARY",
+                   "Run:                          1",
+                   "Previously run:               0",
+                   "Filtered out:                 2",
+                   "-------------------------------",
+                   "Total change sets:            3",
+                   "FILTERED CHANGE SETS SUMMARY",
+                   "After count:                  1",
+                   "DBMS mismatch:                1",
+                   "+--------------------------------------------------------------+--------------------------------+",
+                   "| Changeset Info                                               | Reason Skipped                 |",
+                   "+--------------------------------------------------------------+--------------------------------+",
+                   "|                                                              | mismatched DBMS value of 'foo' |",
+                   "| changelogs/h2/complete/mismatchedDbms.changelog.xml::1::nvox |                                |",
+                   "| land                                                         |                                |",
+                   "+--------------------------------------------------------------+--------------------------------+",
+                   "|                                                              | Only running 1 changeset       |",
+                   "| changelogs/h2/complete/mismatchedDbms.changelog.xml::13.1::t |                                |",
+                   "| estuser                                                      |                                |",
+                   "+--------------------------------------------------------------+--------------------------------+"
+                 ]
         ]
     }
 
@@ -56,6 +163,18 @@ Optional Args:
                 count : 1
         ]
         expectedException = CommandValidationException.class
+    }
+
+    run "Run with a bad show summary option throws an exception", {
+        arguments = [
+                url                    : { it.url },
+                username               : { it.username },
+                password               : { it.password },
+                changelogFile          : 'changelogs/h2/complete/simple.changelog.xml',
+                showSummary: "foo",
+                count : 1
+        ]
+        expectedException = IllegalArgumentException.class
     }
 
     run "Run without a changeLogFile throws an exception", {
