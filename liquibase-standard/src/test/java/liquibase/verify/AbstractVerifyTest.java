@@ -32,11 +32,11 @@ public class AbstractVerifyTest {
             this.stateName = stateName;
 
             File liquibaseRootDir = new File("");
-            if (liquibaseRootDir.getAbsolutePath().endsWith("liquibase-core")) { //sometimes running in liquibase-core, especially in maven
+            if (liquibaseRootDir.getAbsolutePath().endsWith("liquibase-standard")) { //sometimes running in liquibase-standard, especially in maven
                 liquibaseRootDir = liquibaseRootDir.getAbsoluteFile().getParentFile();
             }
 
-            this.savedStateDir = new File(liquibaseRootDir.getAbsoluteFile(), "liquibase-core/src/test/java/liquibase/verify/saved_state/"+testName+"/"+testGroup);
+            this.savedStateDir = new File(liquibaseRootDir.getAbsoluteFile(), "liquibase-standard/src/test/java/liquibase/verify/saved_state/"+testName+"/"+testGroup);
             this.stateFile = new File(savedStateDir, stateName+"."+type.name().toLowerCase());
 
         }

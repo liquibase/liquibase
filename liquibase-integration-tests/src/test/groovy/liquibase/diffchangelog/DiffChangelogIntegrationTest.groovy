@@ -1,14 +1,15 @@
 package liquibase.diffchangelog
 
 import liquibase.Scope
-import liquibase.command.CommandResultsBuilder
 import liquibase.command.CommandScope
 import liquibase.command.core.DiffChangelogCommandStep
-import liquibase.command.core.DiffCommandStep
+import liquibase.command.core.helpers.DbUrlConnectionCommandStep
+import liquibase.command.core.helpers.DiffOutputControlCommandStep
+import liquibase.command.core.helpers.PreCompareCommandStep
+import liquibase.command.core.helpers.ReferenceDbUrlConnectionCommandStep
 import liquibase.database.Database
 import liquibase.database.DatabaseFactory
 import liquibase.diff.compare.CompareControl
-import liquibase.diff.output.DiffOutputControl
 import liquibase.extension.testing.testsystem.DatabaseTestSystem
 import liquibase.extension.testing.testsystem.TestSystemFactory
 import liquibase.extension.testing.testsystem.spock.LiquibaseIntegrationTest
@@ -16,18 +17,12 @@ import liquibase.snapshot.SnapshotGeneratorFactory
 import liquibase.structure.core.Sequence
 import liquibase.util.FileUtil
 import liquibase.util.StringUtil
-import org.junit.Ignore
+import spock.lang.Ignore
 import spock.lang.Shared
 import spock.lang.Specification
 
-/**
- *
- * Marking this test as IGNORED until it is fixed
- *
- */
-@Ignore
 @LiquibaseIntegrationTest
-class DiffChangelogTest extends Specification {
+class DiffChangelogIntegrationTest extends Specification {
 
     @Shared
     private DatabaseTestSystem postgres =
@@ -54,16 +49,14 @@ CREATE TABLE $tableName ( product_no varchar(20) DEFAULT nextval('$sequenceName'
             DatabaseFactory.instance.openDatabase(postgres.getConnectionUrl().replace("lbcat", "lbcat2"), postgres.getUsername(), postgres.getPassword(), null, null)
 
         CommandScope commandScope = new CommandScope(DiffChangelogCommandStep.COMMAND_NAME)
-        commandScope.addArgumentValue(DiffCommandStep.REFERENCE_DATABASE_ARG, refDatabase)
+        commandScope.addArgumentValue(ReferenceDbUrlConnectionCommandStep.REFERENCE_DATABASE_ARG, refDatabase)
         commandScope.addArgumentValue(DiffChangelogCommandStep.CHANGELOG_FILE_ARG, changelogfile)
-        commandScope.addArgumentValue(DiffCommandStep.TARGET_DATABASE_ARG, targetDatabase)
-        commandScope.addArgumentValue(DiffCommandStep.COMPARE_CONTROL_ARG, CompareControl.STANDARD)
-        OutputStream outputStream = new ByteArrayOutputStream()
-        CommandResultsBuilder commandResultsBuilder = new CommandResultsBuilder(commandScope, outputStream)
+        commandScope.addArgumentValue(PreCompareCommandStep.COMPARE_CONTROL_ARG, CompareControl.STANDARD)
+        commandScope.addArgumentValue(DbUrlConnectionCommandStep.DATABASE_ARG, targetDatabase)
+        commandScope.addArgumentValue(DiffOutputControlCommandStep.INCLUDE_SCHEMA_ARG, true)
 
         then:
-        DiffChangelogCommandStep diffChangelogCommandStep = new DiffChangelogCommandStep()
-        diffChangelogCommandStep.run(commandResultsBuilder)
+        commandScope.execute()
         def generatedChangelog = new File(changelogfile)
         def generatedChangelogContents = FileUtil.getContents(generatedChangelog)
         generatedChangelogContents.contains("""CREATE SEQUENCE  IF NOT EXISTS "public"."${sequenceName.toLowerCase()}";""")
@@ -77,6 +70,7 @@ CREATE TABLE $tableName ( product_no varchar(20) DEFAULT nextval('$sequenceName'
         }
     }
 
+    @Ignore("This test causes the pipeline to time out.")
     def "should include view comments"() {
         when:
         postgres.getConnection().setAutoCommit(false)
@@ -100,17 +94,14 @@ COMMENT ON COLUMN $viewName.$columnName IS '$columnComment';
                 DatabaseFactory.instance.openDatabase(postgres.getConnectionUrl().replace("lbcat", "lbcat2"), postgres.getUsername(), postgres.getPassword(), null, null)
 
         CommandScope commandScope = new CommandScope(DiffChangelogCommandStep.COMMAND_NAME)
-        commandScope.addArgumentValue(DiffCommandStep.REFERENCE_DATABASE_ARG, refDatabase)
+        commandScope.addArgumentValue(ReferenceDbUrlConnectionCommandStep.REFERENCE_DATABASE_ARG, refDatabase)
         commandScope.addArgumentValue(DiffChangelogCommandStep.CHANGELOG_FILE_ARG, changelogfile)
-        commandScope.addArgumentValue(DiffCommandStep.TARGET_DATABASE_ARG, targetDatabase)
-        commandScope.addArgumentValue(DiffCommandStep.COMPARE_CONTROL_ARG, CompareControl.STANDARD)
-        commandScope.addArgumentValue(DiffChangelogCommandStep.DIFF_OUTPUT_CONTROL_ARG,  new DiffOutputControl())
-        OutputStream outputStream = new ByteArrayOutputStream()
-        CommandResultsBuilder commandResultsBuilder = new CommandResultsBuilder(commandScope, outputStream)
+        commandScope.addArgumentValue(PreCompareCommandStep.COMPARE_CONTROL_ARG, CompareControl.STANDARD)
+        commandScope.addArgumentValue(DbUrlConnectionCommandStep.DATABASE_ARG, targetDatabase)
+        commandScope.addArgumentValue(DiffOutputControlCommandStep.INCLUDE_SCHEMA_ARG, true)
 
         then:
-        DiffChangelogCommandStep diffChangelogCommandStep = new DiffChangelogCommandStep()
-        diffChangelogCommandStep.run(commandResultsBuilder)
+        commandScope.execute()
         def generatedChangelog = new File(changelogfile)
         def generatedChangelogContents = FileUtil.getContents(generatedChangelog)
         generatedChangelogContents.contains(viewComment)

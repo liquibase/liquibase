@@ -12,7 +12,7 @@ env:
 jobs:
   setup:
     name: Setup
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-22.04
     outputs:
       tag: ${{ steps.collect-data.outputs.tag }}
       version: ${{ steps.collect-data.outputs.version }}
@@ -40,7 +40,7 @@ jobs:
   deploy_maven:
     name: Deploy to Maven
     needs: [ setup ]
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-22.04
     steps:
       - name: Download release assets
         uses: robinraju/release-downloader@v1.7
@@ -186,7 +186,7 @@ jobs:
   deploy_javadocs:
     name: Upload Javadocs
     needs: [ setup ]
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-22.04
     # These permissions are needed to interact with GitHub's OIDC Token endpoint.
     permissions:
       id-token: write
@@ -221,7 +221,7 @@ jobs:
 
   publish_to_github_packages:
     name: Publish artifacts to Github Packages
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-22.04
     needs: [ setup ]
     permissions:
       contents: read
@@ -254,7 +254,7 @@ jobs:
   deploy_xsd:
       name: Upload xsds
       needs: [ setup ]
-      runs-on: ubuntu-20.04
+      runs-on: ubuntu-22.04
       outputs:
           tag: ${{ steps.collect-data.outputs.tag }}
           version: ${{ needs.setup.outputs.version }}
@@ -282,7 +282,7 @@ jobs:
         # aws s3 sync syncs directories and S3 prefixes.
         run: |
           aws s3 sync liquibase-pro-repo/pro/src/main/resources/www.liquibase.org/xml/ns/pro/ s3://liquibaseorg-origin/xml/ns/pro/ --content-type application/octet-stream --only-show-errors
-          aws s3 sync liquibase-core-repo/liquibase-core/src/main/resources/www.liquibase.org/xml/ns/dbchangelog/ s3://liquibaseorg-origin/xml/ns/dbchangelog/ --content-type application/octet-stream --only-show-errors
+          aws s3 sync liquibase-core-repo/liquibase-standard/src/main/resources/www.liquibase.org/xml/ns/dbchangelog/ s3://liquibaseorg-origin/xml/ns/dbchangelog/ --content-type application/octet-stream --only-show-errors
 
 
       - name: Index.htm file upload
