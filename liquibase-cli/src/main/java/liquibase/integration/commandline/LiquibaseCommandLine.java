@@ -13,6 +13,7 @@ import liquibase.configuration.LiquibaseConfiguration;
 import liquibase.configuration.core.DefaultsFileValueProvider;
 import liquibase.exception.CommandLineParsingException;
 import liquibase.exception.CommandValidationException;
+import liquibase.exception.LiquibaseException;
 import liquibase.hub.HubConfiguration;
 import liquibase.license.LicenseService;
 import liquibase.license.LicenseServiceFactory;
@@ -23,7 +24,9 @@ import liquibase.logging.mdc.MdcKey;
 import liquibase.logging.mdc.MdcManager;
 import liquibase.logging.mdc.MdcObject;
 import liquibase.resource.*;
+import liquibase.ui.CompositeUIService;
 import liquibase.ui.ConsoleUIService;
+import liquibase.ui.LoggerUIService;
 import liquibase.ui.UIService;
 import liquibase.util.*;
 import picocli.CommandLine;
@@ -215,7 +218,7 @@ public class LiquibaseCommandLine {
         return commandLine;
     }
 
-    private int handleException(Throwable exception) {
+    protected int handleException(Throwable exception) {
         Throwable cause = exception;
 
         String uiMessage = "";
@@ -237,11 +240,12 @@ public class LiquibaseCommandLine {
             uiMessage = exception.getClass().getName();
         }
 
-        if (cause instanceof CommandFailedException && ((CommandFailedException) cause).isExpected()) {
-            Scope.getCurrentScope().getLog(getClass()).severe(uiMessage);
-        } else {
-            Scope.getCurrentScope().getLog(getClass()).severe(uiMessage, exception);
-        }
+        //
+        // For LiquibaseException, we can control the logging level
+        //
+        Level level = determineLogLevel(exception);
+
+        Scope.getCurrentScope().getLog(getClass()).log(level, uiMessage, exception);
 
         boolean printUsage = false;
         try (final StringWriter suggestionWriter = new StringWriter();
@@ -294,6 +298,29 @@ public class LiquibaseCommandLine {
             return cfe.getExitCode();
         }
         return 1;
+    }
+
+    //
+    // Look for a logLevel setting on any LiquibaseException
+    // and use that for the Level to pass to the logger.
+    // The lowest level of the exception stack will be used.
+    //
+    private Level determineLogLevel(Throwable throwable) {
+        //
+        // Default to severe
+        //
+        if (throwable == null) {
+            return Level.SEVERE;
+        }
+        Level returnLevel = Level.SEVERE;
+        Throwable t = throwable;
+        while (t != null) {
+            if (t instanceof LiquibaseException && ((LiquibaseException)t).getLogLevel() != null) {
+                returnLevel = ((LiquibaseException)t).getLogLevel();
+            }
+            t = t.getCause();
+        }
+        return returnLevel;
     }
 
     protected String cleanExceptionMessage(String message) {
@@ -351,9 +378,9 @@ public class LiquibaseCommandLine {
                             }
                         }
 
-                    enableMonitoring();
-                    logMdcData();
-                    int response = commandLine.execute(finalArgs);
+                        enableMonitoring();
+                        logMdcData();
+                        int response = commandLine.execute(finalArgs);
 
                         if (!wasHelpOrVersionRequested()) {
                             final ConfiguredValue<String> logFile = LiquibaseCommandLineConfiguration.LOG_FILE.getCurrentConfiguredValue();
@@ -436,6 +463,12 @@ public class LiquibaseCommandLine {
             recordingClass.getMethod("setMaxAge", Duration.class).invoke(recording, (Duration) null);
             recordingClass.getMethod("setDumpOnExit", boolean.class).invoke(recording, true);
             recordingClass.getMethod("setToDisk", boolean.class).invoke(recording, true);
+
+            recordingClass.getMethod("disable", String.class).invoke(recording, "jdk.InitialEnvironmentVariable");
+            recordingClass.getMethod("disable", String.class).invoke(recording, "jdk.InitialSystemProperty");
+            recordingClass.getMethod("disable", String.class).invoke(recording, "jdk.SystemProcess");
+            recordingClass.getMethod("disable", String.class).invoke(recording, "jdk.JVMInformation");
+
             final File filePath = new File(filename).getAbsoluteFile();
             filePath.getParentFile().mkdirs();
 
@@ -610,21 +643,27 @@ public class LiquibaseCommandLine {
         returnMap.putAll(configureLogging());
         returnMap.putAll(configureResourceAccessor(classLoader));
 
-        ConsoleUIService ui = null;
+        ConsoleUIService console = null;
         List<UIService> uiServices = Scope.getCurrentScope().getServiceLocator().findInstances(UIService.class);
         for (UIService uiService : uiServices) {
             if (uiService instanceof ConsoleUIService) {
-                ui = (ConsoleUIService) uiService;
+                console = (ConsoleUIService) uiService;
                 break;
             }
         }
-        if (ui == null) {
-            ui = new ConsoleUIService();
+        if (console == null) {
+            console = new ConsoleUIService();
         }
 
-        ui.setAllowPrompt(true);
-        ui.setOutputStream(System.err);
-        returnMap.put(Scope.Attr.ui.name(), ui);
+        console.setAllowPrompt(true);
+        console.setOutputStream(System.err);
+        List<UIService> outputServices = new ArrayList<>();
+        outputServices.add(console);
+        if (LiquibaseCommandLineConfiguration.MIRROR_CONSOLE_MESSAGES_TO_LOG.getCurrentValue()) {
+            outputServices.add(new LoggerUIService());
+        }
+        CompositeUIService compositeUIService = new CompositeUIService(console, outputServices);
+        returnMap.put(Scope.Attr.ui.name(), compositeUIService);
 
         returnMap.put(LiquibaseCommandLineConfiguration.ARGUMENT_CONVERTER.getKey(),
                 (LiquibaseCommandLineConfiguration.ArgumentConverter) argument -> "--" + StringUtil.toKabobCase(argument));

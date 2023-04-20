@@ -33,7 +33,7 @@ Optional Args:
     Default: null
     OBFUSCATED
   showSummary (UpdateSummaryEnum) Type of update results summary to show.  Values can be 'off', 'summary', or 'verbose'.
-    Default: OFF
+    Default: SUMMARY
   username (String) Username to use to connect to the database
     Default: null
 """

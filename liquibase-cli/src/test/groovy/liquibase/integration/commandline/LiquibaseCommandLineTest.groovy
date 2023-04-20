@@ -1,13 +1,14 @@
 package liquibase.integration.commandline
 
-
+import liquibase.Scope
 import liquibase.command.CommandBuilder
 import liquibase.configuration.ConfigurationDefinition
-import liquibase.logging.LogMessageFilter
+import liquibase.exception.LiquibaseException
+import liquibase.logging.core.BufferedLogService
 import spock.lang.Specification
 import spock.lang.Unroll
 
-import java.util.logging.LogRecord
+import java.util.logging.Level
 
 class LiquibaseCommandLineTest extends Specification {
 
@@ -101,5 +102,36 @@ class LiquibaseCommandLineTest extends Specification {
         "java.lang.RuntimeException: message here"                           | "message here"
         "java.lang.ParseError: message here"                                 | "message here"
         "java.io.RuntimeException: java.lang.RuntimeException: message here" | "message here"
+    }
+
+    @Unroll
+    def "handleException should show WARNING if specified"(def level, def expected) {
+        when:
+        BufferedLogService logService = new BufferedLogService()
+        Map<String, Object> scopeValues = new HashMap<>()
+        scopeValues.put(Scope.Attr.logService.name(), logService)
+        Scope.child(scopeValues, new Scope.ScopedRunner() {
+            @Override
+            void run() throws Exception {
+                LiquibaseException le = null
+                if (level != null) {
+                    le = new LiquibaseException("Test exception", level)
+                } else {
+                    le = new LiquibaseException("Test exception")
+                }
+                new LiquibaseCommandLine().handleException(le)
+            }
+        })
+
+        then:
+        String logString = logService.getLogAsString(level)
+        assert logString != null
+        assert logString.contains(expected)
+
+        where:
+        level                                                                | expected
+        null                                                                 | "SEVERE Test exception"
+        Level.SEVERE                                                         | "SEVERE Test exception"
+        Level.WARNING                                                        | "WARNING Test exception"
     }
 }
