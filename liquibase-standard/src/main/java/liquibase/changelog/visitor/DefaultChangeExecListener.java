@@ -118,4 +118,10 @@ public class DefaultChangeExecListener implements ChangeExecListener {
             this.listeners.add(listener);
         }
     }
+
+    public void reset() {
+        this.deployedChangeSets.clear();
+        this.failedChangeSets.clear();
+        this.deployedChangesPerChangeSet.clear();
+    }
 }

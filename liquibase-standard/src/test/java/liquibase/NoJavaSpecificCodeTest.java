@@ -17,7 +17,7 @@ public class NoJavaSpecificCodeTest {
     
 //    @Test
 //    public void checkJavaCode() throws Exception {
-//        checkJavaClasses(new File(TestContext.getInstance().findCoreProjectRoot(), "src/java"));
+//        checkJavaClasses(new File(TestContext.getInstance().findStandardProjectRoot(), "src/java"));
 //    }
 
     private void checkJavaClasses(File directory) throws Exception {
