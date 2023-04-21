@@ -1,0 +1,14 @@
+#### ADDING NEW METADATA AS STANDALONE OBJECT
+## Using liquibase.usermetadata, the subset key-values
+## are added to that command's MDC structured log output
+
+## template of standalone format
+userMetadata:
+  outputTologlevel: FINE
+  data:
+    <somekey1>: <somevalue>
+    <somekey2: <somevalue>
+    <somenestedkey>:
+      <nestedkey1>: <somevalue>
+      <nestedkey2>: <somevalue>
+      etc:etc
