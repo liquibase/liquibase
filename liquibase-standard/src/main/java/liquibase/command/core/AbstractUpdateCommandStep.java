@@ -62,6 +62,8 @@ public abstract class AbstractUpdateCommandStep extends AbstractCommandStep impl
         // for exception handling when there is an error
         //
         DefaultChangeExecListener defaultChangeExecListener = (DefaultChangeExecListener) commandScope.getDependency(ChangeExecListener.class);
+        // Need to reset the cached changesets in the listener, because in the case of something like update-testing-rollback, the same listener is used for both updates
+        defaultChangeExecListener.reset();
         resultsBuilder.addResult(DEFAULT_CHANGE_EXEC_LISTENER_RESULT_KEY, defaultChangeExecListener);
         try {
             DatabaseChangeLog databaseChangeLog = (DatabaseChangeLog) commandScope.getDependency(DatabaseChangeLog.class);

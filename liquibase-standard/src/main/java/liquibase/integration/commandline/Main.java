@@ -1407,6 +1407,9 @@ public class Main {
                     this.databaseClass, this.driverPropertiesFile, this.propertyProviderClass,
                     this.liquibaseCatalogName, this.liquibaseSchemaName, this.databaseChangeLogTableName,
                     this.databaseChangeLogLockTableName);
+            Scope.getCurrentScope().addMdcValue(MdcKey.LIQUIBASE_TARGET_URL, this.url);
+            Scope.getCurrentScope().addMdcValue(MdcKey.LIQUIBASE_CATALOG_NAME, database.getLiquibaseCatalogName());
+            Scope.getCurrentScope().addMdcValue(MdcKey.LIQUIBASE_SCHEMA_NAME, database.getLiquibaseSchemaName());
             if (this.databaseChangeLogTablespaceName != null) {
                 database.setLiquibaseTablespaceName(this.databaseChangeLogTablespaceName);
             } else {

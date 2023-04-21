@@ -128,4 +128,10 @@ public class DefaultChangeExecListener implements ChangeExecListener, ChangeLogS
     public void markedRan(ChangeSet changeSet, DatabaseChangeLog databaseChangeLog, Database database) {
         // no-op
     }
+
+    public void reset() {
+        this.deployedChangeSets.clear();
+        this.failedChangeSets.clear();
+        this.deployedChangesPerChangeSet.clear();
+    }
 }
