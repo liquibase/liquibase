@@ -64,7 +64,7 @@
         <build.repository.owner>unknown</build.repository.owner>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
-        <spring.version>5.3.26</spring.version>
+        <spring.version>5.3.27</spring.version>
         <sonar.moduleKey>${project.artifactId}</sonar.moduleKey>
         <groovy.version>2.4.17</groovy.version>
         <dependency.spock.version>1.3-groovy-2.4</dependency.spock.version>
@@ -83,6 +83,7 @@
 
     <modules>
         <module>liquibase-core</module>
+        <module>liquibase-standard</module>
         <module>liquibase-cli</module>
 	<module>liquibase-maven-plugin</module>
 	<module>liquibase-cdi-jakarta</module>
@@ -484,6 +485,7 @@
                 <sonar.host.url>https://sonarcloud.io</sonar.host.url>
                 <sonar.scm.provider>git</sonar.scm.provider>
                 <sonar.qualitygate.wait>true</sonar.qualitygate.wait>
+                <sonar.skip>true</sonar.skip>
             </properties>
             <build>
                 <plugins>
