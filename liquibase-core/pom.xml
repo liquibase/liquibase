@@ -129,10 +129,6 @@
                 <configuration>
                     <outputDirectory>${project.build.directory}/classes/META-INF/maven/org.liquibase/liquibase-core/</outputDirectory>
                     <flattenedPomFilename>pom.xml</flattenedPomFilename>
-
-                    <pomElements>
-                        <name>Liquibase</name>
-                    </pomElements>
                 </configuration>
                 <executions>
                     <execution>
