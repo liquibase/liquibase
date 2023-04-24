@@ -3,6 +3,7 @@ package liquibase.change;
 import liquibase.change.core.RawSQLChange;
 import liquibase.Scope;
 import liquibase.GlobalConfiguration;
+import liquibase.change.core.SQLFileChange;
 import liquibase.database.Database;
 import liquibase.database.core.Db2zDatabase;
 import liquibase.database.core.MSSQLDatabase;
@@ -206,15 +207,8 @@ public abstract class AbstractSQLChange extends AbstractChange implements DbmsTa
                 stream = new ByteArrayInputStream(sql.getBytes(GlobalConfiguration.FILE_ENCODING.getCurrentValue())
                 );
             }
-            return CheckSum.compute(new StringChangeLogSerializer(new StringChangeLogSerializer.FieldFilter() {
-                @Override
-                public boolean include(Object obj, String field, Object value) {
-                    if(Arrays.stream(getExcludedFieldFilters()).anyMatch(filter -> filter.equals(field))) {
-                        return false;
-                    }
-                    return super.include(obj, field, value);
-                }
-            }).serialize(this, false));
+
+            return CheckSum.compute(new AbstractSQLChange.NormalizingStream(stream), false);
 
         } catch (IOException e) {
             throw new UnexpectedLiquibaseException(e);
@@ -357,8 +351,5 @@ public abstract class AbstractSQLChange extends AbstractChange implements DbmsTa
         public void close() throws IOException {
             stream.close();
         }
-    }
-    public String[] getExcludedFieldFilters() {
-        return new String[0];
     }
 }
