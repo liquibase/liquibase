@@ -8,7 +8,7 @@ on:
         description: 'Release Tag'
         required: true
 env:
-  MAVEN_VERSION: '3.8.7'
+  MAVEN_VERSION: '3.9.1'
 jobs:
   setup:
     name: Setup
@@ -302,4 +302,3 @@ jobs:
             aws s3 sync index-file s3://liquibaseorg-origin/xml/ns/dbchangelog/ --only-show-errors
           fi
           
-      
