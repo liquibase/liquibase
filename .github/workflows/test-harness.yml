@@ -55,13 +55,19 @@ jobs:
           tf_actions_working_dir: src/test/resources/terraform
           args: '-var-file=gh.tfvars'
 
-  test-foundations:
+  test:
+    name: Run Test Harness
     runs-on: ubuntu-latest
     needs: [setup]
+    strategy:
+      matrix:
+        liquibase-support-level: [Foundational ] # Define the different test levels to run
+      fail-fast: false # Set fail-fast to false to run all test levels even if some of them fail
 
     permissions:
       contents: 'read'
       id-token: 'write'
+      checks: write
 
     steps:
       - name: Checkout
@@ -75,95 +81,28 @@ jobs:
             service_account: 'gh-bq-deployer@gh-integration-tests.iam.gserviceaccount.com'
             create_credentials_file: 'true'
 
-      - name: BigQuery Test Run
-        run: mvn -Dtest=liquibase.ext.bigquery.LiquibaseFoundationalHarnessSuiteIT -DoutputDefaultCatalog=false verify
-        continue-on-error: false
+      - name: Run ${{ matrix.liquibase-support-level }} Liquibase Test Harness # Run the Liquibase test harness at each test level
+        continue-on-error: true # Continue to run the action even if the previous steps fail
+        env:
+          LIQUIBASE_PRO_LICENSE_KEY: ${{ secrets.PRO_LICENSE_KEY }} # Set the environment variable for the Liquibase Pro license key
+        run: mvn -ntp -Dtest=liquibase.ext.bigquery.${{ matrix.liquibase-support-level }}HarnessSuiteIT test # Run the Liquibase test harness at each test level
+
+      - name: Test Reporter # Generate a test report using the Test Reporter action
+        uses: dorny/test-reporter@v1.6.0
+        if: always() # Run the action even if the previous steps fail
+        with:
+          name: Liquibase Test Harness - ${{ matrix.liquibase-support-level }} Reports # Set the name of the test report
+          path: target/surefire-reports/TEST-*.xml # Set the path to the test report files
+          reporter: java-junit # Set the reporter to use
+          fail-on-error: false # Set fail-on-error to false to show report even if it has failed tests
 
       - name: Archive Bigquery Database Test Results
-        continue-on-error: true
         uses: actions/upload-artifact@v3
         with:
-          name: bigquery-foundational-test-results
+          name: bigquery-test-results
           path: target/surefire-reports
 
-      - name: Foundational Test Summary
-        continue-on-error: false
-        uses: test-summary/action@v1
-        with:
-          paths: "target/surefire-reports/**/TEST-*.xml"
-        if: always()
-
-  test-base-harness-suite:
-    runs-on: ubuntu-latest
-    needs: [ setup, test-foundations ]
-
-    permissions:
-      contents: 'read'
-      id-token: 'write'
-
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v3
-
-      - name: configure auth
-        id: auth
-        uses: 'google-github-actions/auth@v0'
-        with:
-          workload_identity_provider: 'projects/263903559714/locations/global/workloadIdentityPools/github-identity-pool/providers/github-identity-provider'
-          service_account: 'gh-bq-deployer@gh-integration-tests.iam.gserviceaccount.com'
-          create_credentials_file: 'true'
-
-      - name: BigQuery Test Run
-        run: mvn -Dtest=liquibase.ext.bigquery.LiquibaseBaseHarnessSuiteIT -DoutputDefaultCatalog=false verify
-        continue-on-error: false
-
-      - name: Archive Bigquery Base Database Test Results
-        continue-on-error: true
-        uses: actions/upload-artifact@v3
-        with:
-          name: bigquery-base-test-results
-          path: target/surefire-reports
-
-      - name: Base Test Summary
-        continue-on-error: false
-        uses: test-summary/action@v1
-        with:
-          paths: "target/surefire-reports/**/TEST-*.xml"
-        if: always()
-
-  test-advanced:
-    runs-on: ubuntu-latest
-    needs: [setup,test-foundations,test-base-harness-suite]
-
-    permissions:
-      contents: 'read'
-      id-token: 'write'
-
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v3
-
-      - name: configure auth
-        id: auth
-        uses: 'google-github-actions/auth@v0'
-        with:
-          workload_identity_provider: 'projects/263903559714/locations/global/workloadIdentityPools/github-identity-pool/providers/github-identity-provider'
-          service_account: 'gh-bq-deployer@gh-integration-tests.iam.gserviceaccount.com'
-          create_credentials_file: 'true'
-
-      - name: BigQuery Advanced Test Run
-        run: mvn -Dtest=liquibase.ext.bigquery.LiquibaseAdvancedHarnessSuiteIT -DoutputDefaultCatalog=false verify
-        continue-on-error: true
-
-      - name: Archive Bigquery Database Advanced Test Results
-        continue-on-error: true
-        uses: actions/upload-artifact@v3
-        with:
-          name: bigquery-advanced-test-results
-          path: target/surefire-reports
-
-      - name: Advanced Test Summary
-        continue-on-error: true
+      - name: Test Summary
         uses: test-summary/action@v1
         with:
           paths: "target/surefire-reports/**/TEST-*.xml"
@@ -171,7 +110,7 @@ jobs:
 
   destroy:
     runs-on: ubuntu-latest
-    needs: [setup,test-foundations,test-advanced]
+    needs: [setup,test]
     defaults:
       run:
         working-directory: src/test/resources/terraform
