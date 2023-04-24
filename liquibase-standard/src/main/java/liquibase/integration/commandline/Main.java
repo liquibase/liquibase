@@ -1661,17 +1661,17 @@ public class Main {
                 executeSyncHub(database, liquibase);
                 return;
             } else if (COMMANDS.DROP_ALL.equalsIgnoreCase(command)) {
-                CommandScope dropAllCommand = new CommandScope("internalDropAll");
+                CommandScope dropAllCommand = new CommandScope("dropAll");
                 if (hubConnectionId != null) {
-                    dropAllCommand.addArgumentValue(InternalDropAllCommandStep.HUB_CONNECTION_ID_ARG, UUID.fromString(hubConnectionId));
+                    dropAllCommand.addArgumentValue(DropAllCommandStep.HUB_CONNECTION_ID_ARG, UUID.fromString(hubConnectionId));
                 }
                 if (hubProjectId != null) {
-                    dropAllCommand.addArgumentValue(InternalDropAllCommandStep.HUB_PROJECT_ID_ARG, UUID.fromString(hubProjectId));
+                    dropAllCommand.addArgumentValue(DropAllCommandStep.HUB_PROJECT_ID_ARG, UUID.fromString(hubProjectId));
                 }
                 dropAllCommand
-                        .addArgumentValue(InternalDropAllCommandStep.DATABASE_ARG, liquibase.getDatabase())
-                        .addArgumentValue(InternalDropAllCommandStep.SCHEMAS_ARG, InternalSnapshotCommandStep.parseSchemas(database, getSchemaParams(database)))
-                        .addArgumentValue(InternalDropAllCommandStep.CHANGELOG_FILE_ARG, changeLogFile);
+                        .addArgumentValue(DbUrlConnectionCommandStep.DATABASE_ARG, liquibase.getDatabase())
+                        .addArgumentValue(DropAllCommandStep.CATALOG_AND_SCHEMAS_ARG, InternalSnapshotCommandStep.parseSchemas(database, getSchemaParams(database)))
+                        .addArgumentValue(GenerateChangelogCommandStep.CHANGELOG_FILE_ARG, changeLogFile);
 
                 dropAllCommand.execute();
                 return;
