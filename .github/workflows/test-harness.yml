@@ -3,6 +3,11 @@ on:
   pull_request:
     branches:
       - '*'
+  push:
+    branches:
+      - 'main'
+      - 'master'
+
 env:
   tf_version: 'latest'
 
