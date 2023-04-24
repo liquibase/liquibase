@@ -4,6 +4,7 @@ import liquibase.GlobalConfiguration;
 import liquibase.Scope;
 import liquibase.change.*;
 import liquibase.changelog.ChangeLogParameters;
+import liquibase.changelog.PropertyExpandingStream;
 import liquibase.database.Database;
 import liquibase.database.core.*;
 import liquibase.exception.UnexpectedLiquibaseException;
@@ -202,26 +203,21 @@ public class CreateViewChange extends AbstractChange {
     @Override
     public CheckSum generateCheckSum() {
         InputStream stream = null;
-        InputStream updatedContentStream = null;
         CheckSum checkSum;
         try {
-            if (this.path == null) {
+            if (getPath() == null) {
                 String selectQuery = this.selectQuery;
                 Charset encoding = GlobalConfiguration.FILE_ENCODING.getCurrentValue();
-                stream = new ByteArrayInputStream(selectQuery.getBytes(encoding));
+                if(selectQuery != null) {
+                    stream = new ByteArrayInputStream(selectQuery.getBytes(encoding));
+                }
             }
             else {
                 stream = openSqlStream();
-                updatedContentStream = updateStreamContentIfApplicable(stream);
+                stream = new PropertyExpandingStream(this.getChangeSet(), stream);
             }
-            if(updatedContentStream == null) {
-                stream.reset();
-                checkSum = CheckSum.compute(new AbstractSQLChange.NormalizingStream(stream), false);
-            }
-            else {
-                checkSum = CheckSum.compute(new AbstractSQLChange.NormalizingStream(updatedContentStream), false);
-            }
-            return CheckSum.compute(super.generateCheckSum().toString() + ":" + checkSum.toString());
+            checkSum = CheckSum.compute(new AbstractSQLChange.NormalizingStream(stream), false);
+            return CheckSum.compute(super.generateCheckSum().toString() + ":" + checkSum);
 
         } catch (IOException e) {
             throw new UnexpectedLiquibaseException(e);
@@ -230,13 +226,6 @@ public class CreateViewChange extends AbstractChange {
                 try {
                     stream.close();
                 } catch (IOException ignore) {
-                }
-            }
-            if (updatedContentStream != null) {
-                try {
-                    updatedContentStream.close();
-                } catch (IOException ignore) {
-                    // Do nothing
                 }
             }
         }

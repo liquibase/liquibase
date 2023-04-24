@@ -4,6 +4,7 @@ import liquibase.GlobalConfiguration;
 import liquibase.Scope;
 import liquibase.change.*;
 import liquibase.changelog.ChangeLogParameters;
+import liquibase.changelog.PropertyExpandingStream;
 import liquibase.database.Database;
 import liquibase.database.DatabaseList;
 import liquibase.database.core.*;
@@ -254,7 +255,7 @@ public class CreateProcedureChange extends AbstractChange implements DbmsTargete
             }
             else {
                 stream = openSqlStream();
-                stream = updateStreamContentIfApplicable(stream);
+                stream = new PropertyExpandingStream(this.getChangeSet(), stream);
             }
             checkSum = CheckSum.compute(new AbstractSQLChange.NormalizingStream(stream), false);
             return CheckSum.compute(super.generateCheckSum().toString() + ":" + checkSum);

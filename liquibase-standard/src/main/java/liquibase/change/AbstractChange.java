@@ -1,8 +1,6 @@
 package liquibase.change;
 
-import liquibase.GlobalConfiguration;
 import liquibase.Scope;
-import liquibase.changelog.ChangeLogParameters;
 import liquibase.changelog.ChangeSet;
 import liquibase.database.Database;
 import liquibase.exception.*;
@@ -20,18 +18,13 @@ import liquibase.statement.SqlStatement;
 import liquibase.structure.DatabaseObject;
 import liquibase.util.BooleanUtil;
 import liquibase.util.ObjectUtil;
-import liquibase.util.StreamUtil;
 import liquibase.util.StringUtil;
 
 import java.beans.IntrospectionException;
 import java.beans.PropertyDescriptor;
-import java.io.ByteArrayInputStream;
-import java.io.IOException;
-import java.io.InputStream;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.lang.reflect.Type;
-import java.nio.charset.Charset;
 import java.util.*;
 
 import static liquibase.statement.SqlStatement.EMPTY_SQL_STATEMENT;
@@ -838,28 +831,4 @@ public abstract class AbstractChange extends AbstractPlugin implements Change {
         return description;
     }
 
-    /**
-     * This method will read the content of the given stream and make any parameter update on the content. For example,
-     * making a property replacement into procedure text read from the sql file.
-     * @param stream
-     * @return an updated {@link InputStream} if any replacement has been performed in the content of the original stream.
-     */
-    protected InputStream updateStreamContentIfApplicable(InputStream stream) {
-        InputStream updatedContentStream;
-        try {
-            Charset encoding = GlobalConfiguration.FILE_ENCODING.getCurrentValue();
-            String streamContent = StreamUtil.readStreamAsString(stream, encoding.toString());
-            if (getChangeSet() != null) {
-                ChangeLogParameters parameters = getChangeSet().getChangeLogParameters();
-                if (parameters != null) {
-                    streamContent = parameters.expandExpressions(streamContent, getChangeSet().getChangeLog());
-                }
-            }
-            updatedContentStream = new ByteArrayInputStream(streamContent.getBytes(encoding));
-        }
-        catch (IOException e) {
-            throw new UnexpectedLiquibaseException(e);
-        }
-        return updatedContentStream;
-    }
 }

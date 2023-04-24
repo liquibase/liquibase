@@ -170,7 +170,7 @@ public class SQLFileChange extends AbstractSQLChange {
             Charset encoding = GlobalConfiguration.FILE_ENCODING.getCurrentValue();
             stream = new ByteArrayInputStream(sqlContent.getBytes(encoding));
             CheckSum checkSum = CheckSum.compute(new AbstractSQLChange.NormalizingStream(stream), false);
-            return CheckSum.compute(super.generateCheckSum().toString() + ":" + checkSum.toString());
+            return CheckSum.compute(super.generateCheckSum().toString() + ":" + checkSum);
         }
         finally {
             if (stream != null) {
@@ -181,5 +181,18 @@ public class SQLFileChange extends AbstractSQLChange {
                 }
             }
         }
+    }
+
+    @Override
+    public String[] getExcludedFieldFilters() {
+        return new String[]{
+                "path",
+                "relativeToChangelogFile",
+                "encoding",
+                "dbms",
+                "endDelimiter",
+                "splitStatements",
+                "stripComments"
+        };
     }
 }

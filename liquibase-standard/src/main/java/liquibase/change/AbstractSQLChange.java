@@ -10,6 +10,7 @@ import liquibase.exception.DatabaseException;
 import liquibase.exception.UnexpectedLiquibaseException;
 import liquibase.exception.ValidationErrors;
 import liquibase.exception.Warnings;
+import liquibase.serializer.core.string.StringChangeLogSerializer;
 import liquibase.statement.SqlStatement;
 import liquibase.statement.core.RawCompoundStatement;
 import liquibase.statement.core.RawSqlStatement;
@@ -17,6 +18,7 @@ import liquibase.util.StringUtil;
 
 import java.io.*;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 import static liquibase.statement.SqlStatement.EMPTY_SQL_STATEMENT;
@@ -204,8 +206,16 @@ public abstract class AbstractSQLChange extends AbstractChange implements DbmsTa
                 stream = new ByteArrayInputStream(sql.getBytes(GlobalConfiguration.FILE_ENCODING.getCurrentValue())
                 );
             }
+            return CheckSum.compute(new StringChangeLogSerializer(new StringChangeLogSerializer.FieldFilter() {
+                @Override
+                public boolean include(Object obj, String field, Object value) {
+                    if(Arrays.stream(getExcludedFieldFilters()).anyMatch(filter -> filter.equals(field))) {
+                        return false;
+                    }
+                    return super.include(obj, field, value);
+                }
+            }).serialize(this, false));
 
-            return CheckSum.compute(new NormalizingStream(stream), false);
         } catch (IOException e) {
             throw new UnexpectedLiquibaseException(e);
         } finally {
@@ -347,5 +357,8 @@ public abstract class AbstractSQLChange extends AbstractChange implements DbmsTa
         public void close() throws IOException {
             stream.close();
         }
+    }
+    public String[] getExcludedFieldFilters() {
+        return new String[0];
     }
 }
