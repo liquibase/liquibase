@@ -4,11 +4,14 @@
 
 ## template of standalone format
 userMetadata:
-  outputTologlevel: FINE
-  data:
-    <somekey1>: <somevalue>
-    <somekey2: <somevalue>
-    <somenestedkey>:
-      <nestedkey1>: <somevalue>
-      <nestedkey2>: <somevalue>
-      etc:etc
+  - outputTologlevel: FINE
+    data:
+      <somekey1>: <somevalue>
+      <somekey2: <somevalue>
+      <somenestedkey>:
+        <nestedkey1>: <somevalue>
+        <nestedkey2>: <somevalue>
+        etc:etc
+  - outputTologlevel: INFO
+    data:
+      <infokey1>: <somevalue>
