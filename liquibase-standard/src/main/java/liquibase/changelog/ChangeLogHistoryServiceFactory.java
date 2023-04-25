@@ -39,7 +39,7 @@ public class ChangeLogHistoryServiceFactory extends AbstractPluginFactory<Change
     }
 
     @Override
-    public void register(final ChangeLogHistoryService plugin) {
+    public synchronized void register(final ChangeLogHistoryService plugin) {
         super.register(plugin);
         explicitRegistered.add(plugin);
     }
@@ -76,11 +76,11 @@ public class ChangeLogHistoryServiceFactory extends AbstractPluginFactory<Change
             }
     }
 
-    public void unregister(final ChangeLogHistoryService service) {
+    public synchronized void unregister(final ChangeLogHistoryService service) {
         removeInstance(service);
     }
 
-    public void resetAll() {
+    public synchronized void resetAll() {
         for (ChangeLogHistoryService changeLogHistoryService : findAllInstances()) {
             changeLogHistoryService.reset();
         }
