@@ -19,7 +19,7 @@ public class DropAllCommandStep extends AbstractCommandStep {
 
     public static final String[] COMMAND_NAME = {"dropAll"};
 
-    private static final Logger LOG = Scope.getCurrentScope().getLog(DropAllCommandStep.class);
+    private final Logger log = Scope.getCurrentScope().getLog(DropAllCommandStep.class);
 
     public static final CommandArgumentDefinition<String> SCHEMAS_ARG;
     public static final CommandArgumentDefinition<CatalogAndSchema[]> CATALOG_AND_SCHEMAS_ARG;
@@ -62,7 +62,7 @@ public class DropAllCommandStep extends AbstractCommandStep {
 
         try {
             for (CatalogAndSchema catalogAndSchema : catalogAndSchemas) {
-                LOG.info("Dropping Database Objects in schema: " + catalogAndSchema);
+                log.info("Dropping Database Objects in schema: " + catalogAndSchema);
                 database.dropDatabaseObjects(catalogAndSchema);
             }
         } catch (LiquibaseException liquibaseException) {
@@ -71,7 +71,7 @@ public class DropAllCommandStep extends AbstractCommandStep {
                             liquibaseException.getMessage());
 
             Scope.getCurrentScope().getUI().sendMessage(message);
-            LOG.severe(message, liquibaseException);
+            log.severe(message, liquibaseException);
         } catch (Exception e) {
             throw new DatabaseException(e);
         }
