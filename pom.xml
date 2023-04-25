@@ -3,12 +3,14 @@
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
 
+    <!-- Cannot use "liquibase" as the name since "Liquibase" is used by liquibase-core -->
+    <name>Liquibase Parent</name>
     <groupId>org.liquibase</groupId>
     <artifactId>liquibase</artifactId>
     <version>0-SNAPSHOT</version>
     <packaging>pom</packaging>
 
-    <url>http://www.liquibase.org</url>
+    <url>http://www.liquibase.com</url>
 
     <organization>
         <name>Liquibase.org</name>
@@ -96,13 +98,6 @@
     </modules>
 
     <dependencies>
-
-        <dependency>
-            <groupId>org.yaml</groupId>
-            <artifactId>snakeyaml</artifactId>
-            <version>2.0</version>
-            <optional>true</optional>
-        </dependency>
 
         <dependency>
             <groupId>junit</groupId>
@@ -232,6 +227,7 @@
             <groupId>net.snowflake</groupId>
             <artifactId>snowflake-jdbc</artifactId>
             <version>3.13.29</version>
+            <scope>test</scope>
         </dependency>
 
         <dependency>
@@ -242,12 +238,6 @@
         </dependency>
 
         <!-- needed for newer java versions -->
-        <dependency>
-            <groupId>javax.xml.bind</groupId>
-            <artifactId>jaxb-api</artifactId>
-            <version>2.3.1</version>
-            <scope>test</scope>
-        </dependency>
         <dependency>
             <groupId>org.glassfish.jaxb</groupId>
             <artifactId>jaxb-core</artifactId>
