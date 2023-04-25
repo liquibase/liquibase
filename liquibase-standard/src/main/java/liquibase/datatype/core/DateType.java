@@ -7,6 +7,7 @@ import liquibase.datatype.DataTypeInfo;
 import liquibase.datatype.DatabaseDataType;
 import liquibase.datatype.LiquibaseDataType;
 import liquibase.statement.DatabaseFunction;
+import liquibase.util.StringUtil;
 
 import java.text.DateFormat;
 import java.text.ParseException;
@@ -78,7 +79,8 @@ public class DateType extends LiquibaseDataType {
     }
 
     private boolean zeroTime(String stringVal) {
-        return "".equals(stringVal.replace("-", "").replace(":", "").replace(" ", "").replace("0", ""));
+        return StringUtil
+                .isEmpty(stringVal.replace("-", "").replace(":", "").replace(" ", "").replace("0", ""));
     }
 
     protected DateFormat getDateFormat(Database database) {

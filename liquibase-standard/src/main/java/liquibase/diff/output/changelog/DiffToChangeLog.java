@@ -166,7 +166,7 @@ public class DiffToChangeLog {
 
                                 innerXml = innerXml.replaceFirst(DATABASE_CHANGE_LOG_CLOSING_XML_TAG, "");
                                 innerXml = innerXml.trim();
-                                if ("".equals(innerXml)) {
+                                if (StringUtil.isEmpty(innerXml)) {
                                     Scope.getCurrentScope().getLog(getClass()).info("No changes found, nothing to do");
                                     return;
                                 }

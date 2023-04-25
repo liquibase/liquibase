@@ -166,7 +166,7 @@ public class CreateTableGenerator extends AbstractSqlGenerator<CreateTableStatem
                     // TODO: check if database supports auto increment on non primary key column
                     String autoIncrementClause = database.getAutoIncrementClause(autoIncrementConstraint.getStartWith(), autoIncrementConstraint.getIncrementBy(), autoIncrementConstraint.getGenerationType(), autoIncrementConstraint.getDefaultOnNull());
 
-                    if (!"".equals(autoIncrementClause)) {
+                    if (StringUtil.isNotBlank(autoIncrementClause)) {
                         buffer.append(" ").append(autoIncrementClause);
                     }
 

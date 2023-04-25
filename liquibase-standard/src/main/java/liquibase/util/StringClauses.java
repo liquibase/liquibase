@@ -313,7 +313,7 @@ public class StringClauses {
         if (!clauses.containsKey(existingKey)) {
             throw new IllegalArgumentException("Existing key '" + existingKey + "' does not exist");
         }
-        if ("".equals(newKey)) {
+        if (StringUtil.isBlank(newKey)) {
             throw new IllegalArgumentException("New key cannot be null or empty");
         }
 
@@ -468,7 +468,7 @@ public class StringClauses {
         }
 
         List<Object> finalList = new ArrayList<>(clauses.values());
-        finalList.removeIf(next -> (next == null) || "".equals(next.toString()));
+        finalList.removeIf(next -> (next == null) || StringUtil.isBlank(next.toString()));
 
         return start
                 + StringUtil.join(finalList, separator, new StringUtil.ToStringFormatter())
@@ -495,7 +495,7 @@ public class StringClauses {
             return true;
         }
         for (Object clause : clauses.values()) {
-            if (!"".equals(clause.toString().trim())) {
+            if (StringUtil.isNotBlank(clause.toString())) {
                 return false;
             }
         }
