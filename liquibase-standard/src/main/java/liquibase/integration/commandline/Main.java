@@ -518,19 +518,24 @@ public class Main {
     private static Level parseLogLevel(String logLevelName, UIService ui) {
         logLevelName = logLevelName.toUpperCase();
         Level logLevel;
-        if (logLevelName.equals("DEBUG")) {
-            logLevel = Level.FINE;
-        } else if (logLevelName.equals("WARN")) {
-            logLevel = Level.WARNING;
-        } else if (logLevelName.equals("ERROR")) {
-            logLevel = Level.SEVERE;
-        } else {
-            try {
-                logLevel = Level.parse(logLevelName);
-            } catch (IllegalArgumentException e) {
-                ui.sendErrorMessage("Unknown log level " + logLevelName);
-                logLevel = Level.OFF;
-            }
+        switch (logLevelName) {
+            case "DEBUG":
+                logLevel = Level.FINE;
+                break;
+            case "WARN":
+                logLevel = Level.WARNING;
+                break;
+            case "ERROR":
+                logLevel = Level.SEVERE;
+                break;
+            default:
+                try {
+                    logLevel = Level.parse(logLevelName);
+                } catch (IllegalArgumentException e) {
+                    ui.sendErrorMessage("Unknown log level " + logLevelName);
+                    logLevel = Level.OFF;
+                }
+                break;
         }
         return logLevel;
     }
