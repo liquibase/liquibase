@@ -29,6 +29,11 @@ public class OfflineChangeLogHistoryServiceTest {
     @Rule
     public TemporaryFolder temporaryFolder = new TemporaryFolder();
 
+    @Before
+    public void setUp() throws Exception {
+        Scope.getCurrentScope().getSingleton(ChangeLogHistoryServiceFactory.class).resetAll();
+    }
+
     /**
      * Test ChangeLog table update SQL generation with outputLiquibaseSql=true and outputLiquibaseSql=true
      */
