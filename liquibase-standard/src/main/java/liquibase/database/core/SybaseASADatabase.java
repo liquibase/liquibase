@@ -145,7 +145,9 @@ public class SybaseASADatabase extends AbstractJdbcDatabase {
      */
     @Override
     public String getDefaultDriver(String url) {
-        if (url.startsWith("jdbc:sybase")) {
+        if (url.startsWith("jdbc:sqlanywhere")) {
+            return "sap.jdbc4.sqlanywhere.IDriver";
+        } else if (url.startsWith("jdbc:sybase")) {
             return "com.sybase.jdbc4.jdbc.SybDriver";
         } else {
             return null;
