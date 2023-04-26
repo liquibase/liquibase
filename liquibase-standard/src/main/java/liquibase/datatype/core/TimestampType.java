@@ -101,7 +101,7 @@ public class TimestampType extends DateTimeType {
          */
         DatabaseDataType type;
 
-        if (getParameters().length > 0) {
+        if (getParameters().length > 0 && !(database instanceof SybaseASADatabase)) {
             int fractionalDigits = 0;
             String fractionalDigitsInput = getParameters()[0].toString();
             try {
@@ -130,9 +130,12 @@ public class TimestampType extends DateTimeType {
             && (database instanceof PostgresDatabase
             || database instanceof OracleDatabase
             || database instanceof H2Database
-            || database instanceof HsqlDatabase)) {
+            || database instanceof HsqlDatabase
+            || database instanceof SybaseASADatabase)) {
 
-            if (database instanceof PostgresDatabase || database instanceof H2Database) {
+            if (database instanceof PostgresDatabase
+            || database instanceof H2Database
+            || database instanceof SybaseASADatabase) {
                 type.addAdditionalInformation("WITH TIME ZONE");
             } else {
                 type.addAdditionalInformation("WITH TIMEZONE");
@@ -145,12 +148,14 @@ public class TimestampType extends DateTimeType {
                 && (database instanceof PostgresDatabase
                 || database instanceof OracleDatabase)
                 || database instanceof H2Database
-                || database instanceof HsqlDatabase){
+                || database instanceof HsqlDatabase
+                || database instanceof SybaseASADatabase){
             String additionalInformation = this.getAdditionalInformation();
 
             if (additionalInformation != null) {
                 String additionInformation = additionalInformation.toUpperCase(Locale.US);
-                if ((database instanceof PostgresDatabase || database instanceof H2Database) && additionInformation.toUpperCase(Locale.US).contains("TIMEZONE")) {
+                if ((database instanceof PostgresDatabase || database instanceof H2Database || database instanceof SybaseASADatabase)
+                        && additionInformation.toUpperCase(Locale.US).contains("TIMEZONE")) {
                     additionalInformation = additionInformation.toUpperCase(Locale.US).replace("TIMEZONE", "TIME ZONE");
                 }
                 // CORE-3229 Oracle 11g doesn't support WITHOUT clause in TIMESTAMP data type
@@ -161,6 +166,11 @@ public class TimestampType extends DateTimeType {
 
                 if ((database instanceof H2Database) && additionInformation.startsWith("WITHOUT")) {
                     // http://www.h2database.com/html/datatypes.html
+                    additionalInformation = null;
+                }
+
+                if ((database instanceof SybaseASADatabase) && additionInformation.startsWith("WITHOUT")) {
+                    // https://help.sap.com/docs/SAP_SQL_Anywhere/93079d4ba8e44920ae63ffb4def91f5b/81fe3e6b6ce2101487d8acce02f6aba5.html
                     additionalInformation = null;
                 }
             }
