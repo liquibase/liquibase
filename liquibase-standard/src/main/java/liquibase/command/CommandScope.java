@@ -287,9 +287,11 @@ public class CommandScope {
     }
 
     /**
-     * Returns a string of the entire defined command names, joined together with spaces
+     * Returns a string of the entire defined command names, joined together with the specified delimiter.
      * @param commandStep the command step to get the name of
-     * @return the full command step name definition delimited by spaces or an empty string if there are no defined command names
+     * @param delimiter the delimiter to use for joining the command names
+     * @return the full command step name definition delimited by the specified delimiter or an empty string if there are
+     * no defined command names
      */
     public static String getCommandStepName(CommandStep commandStep, String delimiter) {
         StringBuilder commandStepName = new StringBuilder();
