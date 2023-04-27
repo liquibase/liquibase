@@ -37,6 +37,21 @@ jobs:
       - run: |
           echo "Publishing version ${{ steps.collect-data.outputs.version }} from ${{ steps.collect-data.outputs.tag }}"
 
+  manual_trigger_deployment:
+    name: Manually trigger deployment 
+    needs: [ setup ]
+    runs-on: ubuntu-22.04
+    steps:
+      - uses: trstringer/manual-approval@v1
+        with:
+          secret: ${{ secrets.GITHUB_TOKEN }}
+          approvers: suryaaki2,mariochampion
+          minimum-approvals: 2
+          issue-title: "Deploying ${{ steps.collect-data.outputs.version }} to sonatype"
+          issue-body: "Please approve or deny the deployment of version ${{ steps.collect-data.outputs.version }}"
+          additional-approved-words: 'lgtm,✅,👍,proceed,shipit,:shipit:'
+          additional-denied-words: 'stop,error,failed,fail,broken,:x:,👎'
+
   deploy_maven:
     name: Deploy to Maven
     needs: [ setup ]
