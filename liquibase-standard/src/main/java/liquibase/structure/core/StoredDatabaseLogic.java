@@ -76,7 +76,7 @@ public abstract class StoredDatabaseLogic<T extends StoredDatabaseLogic> extends
             }
         }
 
-        return getName().equalsIgnoreCase(that.getName());
+        return StringUtil.trimToEmpty(getName()).equalsIgnoreCase(that.getName());
     }
 
     @Override
