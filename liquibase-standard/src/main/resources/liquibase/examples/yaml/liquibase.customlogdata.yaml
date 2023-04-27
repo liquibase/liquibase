@@ -3,7 +3,20 @@
 ## are added to that command's MDC structured log output
 
 ## template of standalone format
-userMetadata:
+liquibase.userMetadata:
+  - outputTologlevel: FINE
+    data:
+      <somekey1>: <somevalue>
+      <somekey2: <somevalue>
+      <somenestedkey>:
+        <nestedkey1>: <somevalue>
+        <nestedkey2>: <somevalue>
+        etc:etc
+  - outputTologlevel: INFO
+    data:
+      <infokey1>: <somevalue>
+
+liquibase.command.<commandName>:
   - outputTologlevel: FINE
     data:
       <somekey1>: <somevalue>
