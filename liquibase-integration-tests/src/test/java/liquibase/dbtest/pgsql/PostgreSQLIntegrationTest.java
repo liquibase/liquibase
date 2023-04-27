@@ -247,14 +247,13 @@ public class PostgreSQLIntegrationTest extends AbstractIntegrationTest {
     @Test
     public void testGeneratedColumn() throws Exception {
         assumeNotNull(getDatabase());
-
         assumeTrue(getDatabase().getDatabaseMajorVersion() >= 12);
-
         clearDatabase();
+        String textToTest = "GENERATED ALWAYS AS (height_cm / 2.54) STORED";
 
         Scope.getCurrentScope().getSingleton(ExecutorService.class).getExecutor("jdbc", getDatabase())
                 .execute(
-                        new RawSqlStatement("CREATE TABLE generated_test (height_cm numeric, height_stored numeric GENERATED ALWAYS AS (height_cm / 2.54) STORED)"));
+                        new RawSqlStatement(String.format("CREATE TABLE generated_test (height_cm numeric, height_stored numeric %s)", textToTest)));
 
             ByteArrayOutputStream baos = new ByteArrayOutputStream();
             new CommandScope(GenerateChangelogCommandStep.COMMAND_NAME)
@@ -262,7 +261,7 @@ public class PostgreSQLIntegrationTest extends AbstractIntegrationTest {
                     .setOutput(baos)
                     .execute();
 
-            assertTrue(baos.toString().contains("GENERATED ALWAYS AS (height_cm / 2.54) STORED"));
+            assertTrue(baos.toString().contains(textToTest));
 
     }
 }
