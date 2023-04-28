@@ -97,6 +97,9 @@ public class MdcKey {
 
     public static final String CHANGESET_SYNC_OUTCOME = "changesetSyncOutcome";
 
+    //
+    // Flow File MDC keys
+    //
     public static final String FLOW_FILE_ROOT = "flowFileRoot";
     public static final String FLOW_START_TIME = "flowStart";
     public static final String FLOW_STOP_TIME = "flowStop";
