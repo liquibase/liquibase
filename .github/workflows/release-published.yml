@@ -45,7 +45,7 @@ jobs:
       - uses: trstringer/manual-approval@v1
         with:
           secret: ${{ secrets.GITHUB_TOKEN }}
-          approvers: suryaaki2,mariochampion
+          approvers: suryaaki2,mariochampion,sayaliM0412
           minimum-approvals: 2
           issue-title: "Deploying ${{ steps.collect-data.outputs.version }} to sonatype"
           issue-body: "Please approve or deny the deployment of version ${{ steps.collect-data.outputs.version }}"
