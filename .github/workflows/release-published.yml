@@ -45,7 +45,7 @@ jobs:
       - uses: trstringer/manual-approval@v1
         with:
           secret: ${{ secrets.GITHUB_TOKEN }}
-          approvers: sayaliM0412
+          approvers: suryaaki2,mariochampion
           minimum-approvals: 1
           issue-title: "Deploying ${version} to sonatype"
           issue-body: "Please approve or deny the deployment of version ${version}"
