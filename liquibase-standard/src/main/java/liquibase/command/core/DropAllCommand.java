@@ -1,20 +1,9 @@
 package liquibase.command.core;
 
-import liquibase.*;
-import liquibase.changelog.ChangeLogHistoryService;
-import liquibase.changelog.ChangeLogHistoryServiceFactory;
-import liquibase.changelog.DatabaseChangeLog;
+import liquibase.CatalogAndSchema;
+import liquibase.Liquibase;
 import liquibase.command.*;
 import liquibase.database.Database;
-import liquibase.exception.LiquibaseException;
-import liquibase.executor.ExecutorService;
-import liquibase.hub.HubConfiguration;
-import liquibase.hub.HubService;
-import liquibase.hub.HubServiceFactory;
-import liquibase.hub.LiquibaseHubException;
-import liquibase.hub.model.HubChangeLog;
-import liquibase.lockservice.LockServiceFactory;
-import liquibase.logging.Logger;
 import liquibase.util.StringUtil;
 
 import java.util.ArrayList;
@@ -105,24 +94,9 @@ public class DropAllCommand extends AbstractCommand<CommandResult> {
         commandScope.addArgumentValue(InternalDropAllCommandStep.HUB_CONNECTION_ID_ARG, this.hubConnectionId);
         commandScope.addArgumentValue(InternalDropAllCommandStep.SCHEMAS_ARG, this.schemas);
 
-        final CommandResults results = commandScope.execute();
+        commandScope.execute();
 
         return new CommandResult("All objects dropped from " + database.getConnection().getConnectionUserName() + "@" + database.getConnection().getURL());
-    }
-
-    protected void checkLiquibaseTables(boolean updateExistingNullChecksums, DatabaseChangeLog databaseChangeLog, Contexts contexts, LabelExpression labelExpression) throws LiquibaseException {
-        ChangeLogHistoryService changeLogHistoryService = ChangeLogHistoryServiceFactory.getInstance().getChangeLogService(database);
-        changeLogHistoryService.init();
-        if (updateExistingNullChecksums) {
-            changeLogHistoryService.upgradeChecksums(databaseChangeLog, contexts, labelExpression);
-        }
-        LockServiceFactory.getInstance().getLockService(database).init();
-    }
-
-    protected void resetServices() {
-        LockServiceFactory.getInstance().resetAll();
-        ChangeLogHistoryServiceFactory.getInstance().resetAll();
-        Scope.getCurrentScope().getSingleton(ExecutorService.class).reset();
     }
 
 }

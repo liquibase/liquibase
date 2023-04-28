@@ -1220,6 +1220,7 @@ public class Liquibase implements AutoCloseable {
         changeLogHistoryService.init();
         if (updateExistingNullChecksums) {
             changeLogHistoryService.upgradeChecksums(databaseChangeLog, contexts, labelExpression);
+            ChangeLogHistoryServiceFactory.getInstance().resetAll();
         }
         LockServiceFactory.getInstance().getLockService(getDatabase()).init();
     }

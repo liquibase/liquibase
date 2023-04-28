@@ -77,6 +77,7 @@ public class ListLocksCommandStep extends AbstractCommandStep {
         changeLogHistoryService.init();
         if (updateExistingNullChecksums) {
             changeLogHistoryService.upgradeChecksums(databaseChangeLog, contexts, labelExpression);
+            ChangeLogHistoryServiceFactory.getInstance().resetAll();
         }
         LockServiceFactory.getInstance().getLockService(database).init();
     }
