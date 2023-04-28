@@ -111,7 +111,7 @@ class CreateViewChangeTest extends StandardChangeTest {
         Scope.exit(testScopeId)
 
         then:
-        assert viewCheckSumWithoutPath == viewCheckSumWithPath
+        viewCheckSumWithoutPath == viewCheckSumWithPath
     }
 
     def "encoding is not considered on checksum generation"() {
@@ -125,7 +125,7 @@ class CreateViewChangeTest extends StandardChangeTest {
         CheckSum viewCheckSumWithEncoding = change2.generateCheckSum()
 
         then:
-        assert viewCheckSumWithoutEncoding == viewCheckSumWithEncoding
+        viewCheckSumWithoutEncoding == viewCheckSumWithEncoding
     }
 
     def "select query updated with whitespaces should not be computed as a new checksum"() {
@@ -138,7 +138,7 @@ class CreateViewChangeTest extends StandardChangeTest {
         CheckSum viewTextModifiedCheckSum = change2.generateCheckSum()
 
         then:
-        assert viewTextCheckSum == viewTextModifiedCheckSum
+        viewTextCheckSum == viewTextModifiedCheckSum
     }
 
     def "checksum gets updated having a change on select query"() {
@@ -153,7 +153,7 @@ class CreateViewChangeTest extends StandardChangeTest {
         CheckSum viewTextUpdatedCheckSum = change.generateCheckSum();
 
         then:
-        assert viewTextOriginalCheckSum.equals(viewTextUpdatedCheckSum) == false
+        viewTextOriginalCheckSum != viewTextUpdatedCheckSum
     }
 
     def "validate checksum gets re-computed if select query text gets updated"() {
@@ -173,5 +173,20 @@ class CreateViewChangeTest extends StandardChangeTest {
 
         then:
         checkSumFirstReplacement != checkSumSecondReplacement
+    }
+
+    def "relativeToChangelogFile attribute is not considered on checksum generation"() {
+        when:
+        CreateViewChange changeWithoutRelativeToChangelogFileAttribSet = new CreateViewChange()
+        changeWithoutRelativeToChangelogFileAttribSet.setSelectQuery(SELECT_QUERY)
+        CheckSum changeWithoutRelativeToChangelogFileAttribSetCheckSum = changeWithoutRelativeToChangelogFileAttribSet.generateCheckSum()
+
+        CreateViewChange changeWithRelativeToChangelogFileAttribSet = new CreateViewChange()
+        changeWithRelativeToChangelogFileAttribSet.setSelectQuery(SELECT_QUERY)
+        changeWithRelativeToChangelogFileAttribSet.setRelativeToChangelogFile(true)
+        CheckSum changeWithRelativeToChangelogFileAttribSetCheckSum = changeWithRelativeToChangelogFileAttribSet.generateCheckSum()
+
+        then:
+        changeWithoutRelativeToChangelogFileAttribSetCheckSum == changeWithRelativeToChangelogFileAttribSetCheckSum
     }
 }

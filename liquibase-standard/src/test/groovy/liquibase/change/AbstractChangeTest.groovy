@@ -343,10 +343,10 @@ class AbstractChangeTest extends Specification {
         "This/is/a/very/very/very/very/very/very/very/very/very/very/very/very/very/very/very/very/very/very/very/very/very/very/very/very/very/very/ver/long/test/change/path" | new CreateProcedureChange()
     }
 
-    def contextIsNotConsideredOnCheckSumGeneration() {
+    def "context filter is not considered on checksum generation"() {
         when:
-        ChangeSet originalChange = new ChangeSet("testId", "testAuthor", false, false, "path/changelog", null, null, null);
-        ChangeSet changeWithContext = originalChange;
+        ChangeSet originalChange = new ChangeSet("testId", "testAuthor", false, false, "path/changelog", null, null, null)
+        ChangeSet changeWithContext = originalChange
 
         CheckSum changeWithoutContextCheckSum = originalChange.generateCheckSum()
         changeWithContext.setContextFilter(new ContextExpression("test"))
@@ -356,10 +356,10 @@ class AbstractChangeTest extends Specification {
         changeWithoutContextCheckSum == changeWithContextCheckSum
     }
 
-    def labelIsNotConsideredOnCheckSumGeneration() {
+    def "label is not considered on checksum generation"() {
         when:
-        ChangeSet originalChange = new ChangeSet("testId", "testAuthor", false, false, "path/changelog", null, null, null);
-        ChangeSet changeWithLabel = originalChange;
+        ChangeSet originalChange = new ChangeSet("testId", "testAuthor", false, false, "path/changelog", null, null, null)
+        ChangeSet changeWithLabel = originalChange
 
         CheckSum changeWithoutLabelCheckSum = originalChange.generateCheckSum()
         changeWithLabel.setLabels(new Labels("test"))
@@ -369,17 +369,30 @@ class AbstractChangeTest extends Specification {
         changeWithoutLabelCheckSum == changeWithLabelCheckSum
     }
 
-    def dbmsIsNotConsideredOnCheckSumGeneration() {
+    def "dbms is not considered on checksum generation"() {
         when:
-        ChangeSet originalChange = new ChangeSet("testId", "testAuthor", false, false, "path/changelog", null, null, null);
-        ChangeSet changeWithLabel = originalChange;
+        ChangeSet originalChange = new ChangeSet("testId", "testAuthor", false, false, "path/changelog", null, null, null)
+        ChangeSet changeWithDbms = originalChange
 
         CheckSum changeWithoutDbmsCheckSum = originalChange.generateCheckSum()
-        changeWithLabel.setDbms("postgresql")
-        CheckSum changeWithDbmsCheckSum = changeWithLabel.generateCheckSum()
+        changeWithDbms.setDbms("postgresql")
+        CheckSum changeWithDbmsCheckSum = changeWithDbms.generateCheckSum()
 
         then:
         changeWithoutDbmsCheckSum == changeWithDbmsCheckSum
+    }
+
+    def "comment is not considered on checksum generation"() {
+        when:
+        ChangeSet originalChange = new ChangeSet("testId", "testAuthor", false, false, "path/changelog", null, null, null)
+        ChangeSet changeWithComment = originalChange
+
+        CheckSum changeWithoutCommentCheckSum = originalChange.generateCheckSum()
+        changeWithComment.setComments("This is a test comment")
+        CheckSum changeWithCommentCheckSum = changeWithComment.generateCheckSum()
+
+        then:
+        changeWithoutCommentCheckSum == changeWithCommentCheckSum
     }
 
     @DatabaseChange(name = "exampleParamelessAbstractChange", description = "Used for the AbstractChangeTest unit test", priority = 1)

@@ -110,7 +110,7 @@ class CreateProcedureChangeTest extends StandardChangeTest {
         CheckSum procedureCheckSumWithDbms = change2.generateCheckSum()
 
         then:
-        assert procedureCheckSumWithoutDbms == procedureCheckSumWithDbms
+        procedureCheckSumWithoutDbms == procedureCheckSumWithDbms
 
     }
 
@@ -133,7 +133,7 @@ class CreateProcedureChangeTest extends StandardChangeTest {
         Scope.exit(testScopeId)
 
         then:
-        assert procedureCheckSumWithoutPath == procedureCheckSumWithPath
+        procedureCheckSumWithoutPath == procedureCheckSumWithPath
     }
 
     def "comment is not considered on checksum generation"() {
@@ -147,7 +147,7 @@ class CreateProcedureChangeTest extends StandardChangeTest {
         CheckSum procedureCheckSumWithComments = change2.generateCheckSum()
 
         then:
-        assert procedureCheckSumWithoutComments == procedureCheckSumWithComments
+        procedureCheckSumWithoutComments == procedureCheckSumWithComments
     }
 
     def "encoding is not considered on checksum generation"() {
@@ -161,7 +161,7 @@ class CreateProcedureChangeTest extends StandardChangeTest {
         CheckSum procedureCheckSumWithEncoding = change2.generateCheckSum()
 
         then:
-        assert procedureCheckSumWithoutEncoding == procedureCheckSumWithEncoding
+        procedureCheckSumWithoutEncoding == procedureCheckSumWithEncoding
     }
 
     def "procedure text updated with whitespaces should not compute a new checksum"() {
@@ -174,7 +174,7 @@ class CreateProcedureChangeTest extends StandardChangeTest {
         CheckSum procedureTextModifiedCheckSum = change2.generateCheckSum()
 
         then:
-        assert procedureTextCheckSum == procedureTextModifiedCheckSum
+        procedureTextCheckSum == procedureTextModifiedCheckSum
     }
 
     def "checksum gets updated having a change on procedure text"() {
@@ -189,7 +189,7 @@ class CreateProcedureChangeTest extends StandardChangeTest {
         CheckSum procedureTextUpdatedCheckSum = change.generateCheckSum()
 
         then:
-        assert procedureTextOriginalCheckSum.equals(procedureTextUpdatedCheckSum) == false
+        procedureTextOriginalCheckSum != procedureTextUpdatedCheckSum
     }
 
     def "validate checksum gets re-computed if procedure text gets updated "() {
@@ -215,5 +215,20 @@ class CreateProcedureChangeTest extends StandardChangeTest {
 
         then:
         checkSumFirstReplacement != checkSumSecondReplacement
+    }
+
+    def "relativeToChangelogFile attribute is not considered on checksum generation"() {
+        when:
+        CreateProcedureChange changeWithoutRelativeToChangelogFileAttribSet = new CreateProcedureChange()
+        changeWithoutRelativeToChangelogFileAttribSet.setProcedureText(PROCEDURE_TEXT)
+        CheckSum changeWithoutRelativeToChangelogFileAttribSetCheckSum = changeWithoutRelativeToChangelogFileAttribSet.generateCheckSum()
+
+        CreateProcedureChange changeWithRelativeToChangelogFileAttribSet = new CreateProcedureChange()
+        changeWithRelativeToChangelogFileAttribSet.setProcedureText(PROCEDURE_TEXT)
+        changeWithRelativeToChangelogFileAttribSet.setRelativeToChangelogFile(true)
+        CheckSum changeWithRelativeToChangelogFileAttribSetCheckSum = changeWithRelativeToChangelogFileAttribSet.generateCheckSum()
+
+        then:
+        changeWithoutRelativeToChangelogFileAttribSetCheckSum == changeWithRelativeToChangelogFileAttribSetCheckSum
     }
 }
