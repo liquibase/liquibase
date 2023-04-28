@@ -47,8 +47,8 @@ jobs:
           secret: ${{ secrets.GITHUB_TOKEN }}
           approvers: suryaaki2,mariochampion,sayaliM0412
           minimum-approvals: 2
-          issue-title: "Deploying ${{ steps.collect-data.outputs.version }} to sonatype"
-          issue-body: "Please approve or deny the deployment of version ${{ steps.collect-data.outputs.version }}"
+          issue-title: "Deploying ${version} to sonatype"
+          issue-body: "Please approve or deny the deployment of version ${version}"
           additional-approved-words: 'lgtm,✅,👍,proceed,shipit,:shipit:'
           additional-denied-words: 'stop,error,failed,fail,broken,:x:,👎'
 
