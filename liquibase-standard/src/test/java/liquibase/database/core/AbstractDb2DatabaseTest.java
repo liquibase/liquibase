@@ -15,5 +15,4 @@ public class AbstractDb2DatabaseTest extends TestCase {
             throw e;
         }
     }
-
 }

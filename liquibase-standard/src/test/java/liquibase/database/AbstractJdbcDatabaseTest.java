@@ -60,7 +60,6 @@ public abstract class AbstractJdbcDatabaseTest {
 //        verify(connection);
 //    }
 
-
     @Test
     public void defaultsWorkWithoutAConnection() {
         database.getDatabaseProductName();
@@ -68,6 +67,7 @@ public abstract class AbstractJdbcDatabaseTest {
         database.getDefaultSchemaName();
         database.getDefaultPort();
     }
+
 //    @Test
 //    public void isCorrectDatabaseImplementation() throws Exception {
 //        assertTrue(getDatabase().isCorrectDatabaseImplementation(getMockConnection()));

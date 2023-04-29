@@ -18,7 +18,6 @@ public class H2DatabaseTest extends AbstractJdbcDatabaseTest {
         return "H2";
     }
 
-
     @Override
     @Test
     public void supportsInitiallyDeferrableColumns() {

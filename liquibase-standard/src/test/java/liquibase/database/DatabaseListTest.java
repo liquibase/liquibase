@@ -11,7 +11,6 @@ import static org.junit.Assert.assertTrue;
 
 public class DatabaseListTest {
 
-
     @Test
     public void databaseMatchesDbmsDefinition() {
         assertTrue("'all' should match any database", DatabaseList.definitionMatches("all", new MySQLDatabase(), false));
@@ -44,5 +43,4 @@ public class DatabaseListTest {
         assertFalse(DatabaseList.definitionMatches("!h2,mysql", new H2Database(), false));
         assertTrue(DatabaseList.definitionMatches("!h2,mysql", new MySQLDatabase(), false));
     }
-
 }
