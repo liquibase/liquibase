@@ -339,6 +339,13 @@
                 <configuration>
                     <redirectTestOutputToFile>true</redirectTestOutputToFile>
                     <argLine>-Dfile.encoding=${project.build.sourceEncoding}</argLine>
+                    <includes>
+                        <include>**/Test*.java</include>
+                        <include>**/*Test.java</include>
+                        <include>**/*Tests.java</include>
+                        <include>**/*TestCase.java</include>
+                        <include>**/*Spec.java</include>
+                    </includes>
                 </configuration>
             </plugin>
 
