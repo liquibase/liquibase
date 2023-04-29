@@ -18,6 +18,7 @@ class GenerateChangeLogMySQLIntegrationTest extends Specification {
     private DatabaseTestSystem mysql = (DatabaseTestSystem) Scope.getCurrentScope().getSingleton(TestSystemFactory.class).getTestSystem("mysql")
 
     def setupSpec() {
+        CommandUtil.runDropAll(mysql)
         mysql.executeSql("""
 create table str4 (
     col1 int ,
@@ -62,6 +63,7 @@ drop table str4;
         !mysql.executeSql("drop table str4")
 
         when:
+        CommandUtil.runDropAll(mysql)
         CommandUtil.runUpdate(mysql,"output.xml")
 
         then:
