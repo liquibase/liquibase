@@ -1,15 +1,23 @@
 package liquibase.database.core;
 
+import static liquibase.util.BooleanUtil.isTrue;
+
 import liquibase.CatalogAndSchema;
+import liquibase.CatalogAndSchema.CatalogAndSchemaCase;
+import liquibase.GlobalConfiguration;
 import liquibase.Scope;
 import liquibase.database.AbstractJdbcDatabase;
 import liquibase.database.DatabaseConnection;
+import liquibase.database.ObjectQuotingStrategy;
 import liquibase.database.OfflineConnection;
 import liquibase.database.jvm.JdbcConnection;
 import liquibase.exception.DatabaseException;
 import liquibase.exception.DateParseException;
 import liquibase.exception.UnexpectedLiquibaseException;
 import liquibase.statement.DatabaseFunction;
+import liquibase.structure.DatabaseObject;
+import liquibase.structure.core.Catalog;
+import liquibase.structure.core.Schema;
 import liquibase.util.ISODateFormat;
 import liquibase.util.JdbcUtil;
 
@@ -37,6 +45,8 @@ public class H2Database extends AbstractJdbcDatabase {
     private static final String START_CONCAT = "CONCAT(";
     private static final String END_CONCAT = ")";
     private static final String SEP_CONCAT = ", ";
+    private static final String LEGAL_IDENTIFIER_REGEX = "^[a-zA-Z_][a-zA-Z_0-9]*$";
+    private static final Pattern LEGAL_IDENTIFIER_PATTERN = Pattern.compile(LEGAL_IDENTIFIER_REGEX);
     protected static final Set<String> V2_RESERVED_WORDS = Collections.unmodifiableSet(new LinkedHashSet<>(Arrays.asList(
             "ALL",
             "AND",
@@ -379,6 +389,58 @@ public class H2Database extends AbstractJdbcDatabase {
                     .warning("Failed to determine database version, reported error: " + e.getMessage());
         }
         return V1_RESERVED_WORDS;
+    }
+
+    @Override
+    public String correctObjectName(String objectName, Class<? extends DatabaseObject> objectType) {
+        if (objectName == null) {
+            return null;
+        }
+        if (isCatalogOrSchemaType(objectType)) {
+            if (isTrue(GlobalConfiguration.PRESERVE_SCHEMA_CASE.getCurrentValue())
+                    || getSchemaAndCatalogCase() == CatalogAndSchemaCase.ORIGINAL_CASE) {
+                return objectName;
+            }
+            if (getSchemaAndCatalogCase() == CatalogAndSchemaCase.UPPER_CASE) {
+                return objectName.toUpperCase(Locale.US);
+            }
+            if (getSchemaAndCatalogCase() == CatalogAndSchemaCase.LOWER_CASE) {
+                return objectName.toLowerCase(Locale.US);
+            }
+        }
+        if (unquotedObjectsAreUppercased == null || quotingStrategy == ObjectQuotingStrategy.QUOTE_ALL_OBJECTS) {
+            return objectName;
+        }
+        if (isTrue(unquotedObjectsAreUppercased)) {
+            return objectName.toUpperCase(Locale.US);
+        }
+        return objectName.toLowerCase(Locale.US);
+    }
+
+    @Override
+    public String escapeObjectName(String objectName, final Class<? extends DatabaseObject> objectType) {
+        if (objectName == null) {
+            return null;
+        }
+        return mustQuoteObjectName(objectName, objectType)
+                ? quoteObject(correctObjectName(objectName, objectType), objectType) : objectName;
+    }
+
+    @Override
+    protected boolean mustQuoteObjectName(String objectName, Class<? extends DatabaseObject> objectType) {
+        return quotingStrategy == ObjectQuotingStrategy.QUOTE_ALL_OBJECTS
+                || isCatalogOrSchemaType(objectType)
+                        && (isTrue(GlobalConfiguration.PRESERVE_SCHEMA_CASE.getCurrentValue())
+                                || getSchemaAndCatalogCase() == CatalogAndSchemaCase.ORIGINAL_CASE)
+                || isIllegalIdentifier(objectName) || isReservedWord(objectName);
+    }
+
+    private boolean isCatalogOrSchemaType(Class<? extends DatabaseObject> objectType) {
+        return objectType == Catalog.class || objectType == Schema.class;
+    }
+
+    private boolean isIllegalIdentifier(String objectName) {
+        return !LEGAL_IDENTIFIER_PATTERN.matcher(objectName).matches();
     }
 
     @Override
