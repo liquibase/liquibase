@@ -21,9 +21,12 @@ import java.sql.SQLException;
 import java.sql.Statement;
 import java.text.ParseException;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.Date;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Locale;
+import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -34,7 +37,7 @@ public class H2Database extends AbstractJdbcDatabase {
     private static final String START_CONCAT = "CONCAT(";
     private static final String END_CONCAT = ")";
     private static final String SEP_CONCAT = ", ";
-    private static final List<String> keywords = Arrays.asList(
+    protected static final Set<String> V2_RESERVED_WORDS = Collections.unmodifiableSet(new LinkedHashSet<>(Arrays.asList(
             "ALL",
             "AND",
             "ANY",
@@ -78,8 +81,6 @@ public class H2Database extends AbstractJdbcDatabase {
             "IF",
             "ILIKE",
             "IN",
-            "ILIKE",
-            "IN",
             "INNER",
             "INTERSECT",
             "INTERSECTS",
@@ -118,8 +119,8 @@ public class H2Database extends AbstractJdbcDatabase {
             "SET",
             "SOME",
             "SYMMETRIC",
-            "SYSTEM_USER",
             "SYSDATE",
+            "SYSTEM_USER",
             "SYSTIME",
             "SYSTIMESTAMP",
             "TABLE",
@@ -142,7 +143,89 @@ public class H2Database extends AbstractJdbcDatabase {
             "WITH",
             "YEAR",
             "_ROWID_"
-    );
+    )));
+    protected static final Set<String> V1_RESERVED_WORDS = Collections.unmodifiableSet(new LinkedHashSet<>(Arrays.asList(
+            "ALL",
+            "AND",
+            "ARRAY",
+            "AS",
+            "BETWEEN",
+            "BOTH",
+            "CASE",
+            "CHECK",
+            "CONSTRAINT",
+            "CROSS",
+            "CURRENT_CATALOG",
+            "CURRENT_DATE",
+            "CURRENT_SCHEMA",
+            "CURRENT_TIME",
+            "CURRENT_TIMESTAMP",
+            "CURRENT_USER",
+            "DISTINCT",
+            "EXCEPT",
+            "EXISTS",
+            "FALSE",
+            "FETCH",
+            "FILTER",
+            "FOR",
+            "FOREIGN",
+            "FROM",
+            "FULL",
+            "GROUP",
+            "GROUPS",
+            "HAVING",
+            "IF",
+            "ILIKE",
+            "IN",
+            "INNER",
+            "INTERSECT",
+            "INTERSECTS",
+            "INTERVAL",
+            "IS",
+            "JOIN",
+            "LEADING",
+            "LEFT",
+            "LIKE",
+            "LIMIT",
+            "LOCALTIME",
+            "LOCALTIMESTAMP",
+            "MINUS",
+            "NATURAL",
+            "NOT",
+            "NULL",
+            "OFFSET",
+            "ON",
+            "OR",
+            "ORDER",
+            "OVER",
+            "PARTITION",
+            "PRIMARY",
+            "QUALIFY",
+            "RANGE",
+            "REGEXP",
+            "RIGHT",
+            "ROW",
+            "ROWNUM",
+            "ROWS",
+            "SELECT",
+            "SYSDATE",
+            "SYSTIME",
+            "SYSTIMESTAMP",
+            "TABLE",
+            "TODAY",
+            "TOP",
+            "TRAILING",
+            "TRUE",
+            "UNION",
+            "UNIQUE",
+            "UNKNOWN",
+            "USING",
+            "VALUES",
+            "WHERE",
+            "WINDOW",
+            "WITH",
+            "_ROWID_"
+    )));
     private String connectionSchemaName = "PUBLIC";
 
     private static final int MAJOR_VERSION_FOR_MINMAX_IN_SEQUENCES = 1;
@@ -283,7 +366,19 @@ public class H2Database extends AbstractJdbcDatabase {
 
     @Override
     public boolean isReservedWord(String objectName) {
-        return keywords.contains(objectName.toUpperCase(Locale.US));
+        return super.isReservedWord(objectName) || getReservedWords().contains(objectName.toUpperCase(Locale.US));
+    }
+
+    protected Set<String> getReservedWords() {
+        try {
+            if (getDatabaseMajorVersion() >= 2) {
+                return V2_RESERVED_WORDS;
+            }
+        } catch (DatabaseException e) {
+            Scope.getCurrentScope().getLog(getClass())
+                    .warning("Failed to determine database version, reported error: " + e.getMessage());
+        }
+        return V1_RESERVED_WORDS;
     }
 
     @Override
