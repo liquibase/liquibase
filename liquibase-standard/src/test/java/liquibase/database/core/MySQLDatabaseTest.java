@@ -93,5 +93,4 @@ public class MySQLDatabaseTest extends AbstractJdbcDatabaseTest {
     public void escapeStringForDatabase_withBackslashes() {
         Assert.assertEquals("\\\\0", database.escapeStringForDatabase("\\0"));
     }
-
 }

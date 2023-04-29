@@ -114,7 +114,7 @@ public class DatabaseFactoryTest {
 
         databaseFactory.openConnection("jdbc:h2:mem:DatabaseFactoryTest", "sa", "", null, null, "unknown file", null, resourceAccessor);
     }
-    
+
     @Test
     public void openConnectionReturnsAConnection() throws Exception {
         DatabaseConnection dbConnection = databaseFactory.openConnection("jdbc:h2:mem:DatabaseFactoryTest", "sa", "", null, resourceAccessor);

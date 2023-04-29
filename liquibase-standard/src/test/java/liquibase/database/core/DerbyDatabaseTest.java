@@ -73,5 +73,4 @@ public class DerbyDatabaseTest extends TestCase {
         when(con.getMetaData()).thenReturn(metaData);
         return con;
     }
-
 }

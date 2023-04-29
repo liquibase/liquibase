@@ -20,5 +20,4 @@ public class DB2zDatabaseTest extends TestCase {
         Database database = new Db2zDatabase();
         assertEquals(12, database.getMaxFractionalDigitsForTimestamp());
     }
-
 }

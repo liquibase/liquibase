@@ -35,7 +35,6 @@ public class PostgresDatabaseTest extends AbstractJdbcDatabaseTest {
         assertTrue(getDatabase().supportsInitiallyDeferrableColumns());
     }
 
-
     @Override
     @Test
     public void getCurrentDateTimeFunction() {
@@ -61,7 +60,6 @@ public class PostgresDatabaseTest extends AbstractJdbcDatabaseTest {
             throw e;
         }
     }
-
 
     @Override
     @Test
@@ -167,5 +165,4 @@ public class PostgresDatabaseTest extends AbstractJdbcDatabaseTest {
         assertTrue(expected.getBytes(GlobalConfiguration.FILE_ENCODING.getCurrentValue()).length <= PostgresDatabase.PGSQL_PK_BYTES_LIMIT);
         assert expected.equals(actual) : "Invalid " + actual + " vs expected " + expected;
     }
-
 }

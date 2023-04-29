@@ -18,5 +18,4 @@ public class UnsupportedDatabaseTest extends TestCase {
             throw e;
         }
     }
-
 }
