@@ -1,18 +1,5 @@
 package liquibase.database.core;
 
-import static java.util.ResourceBundle.getBundle;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertThat;
-import static org.junit.Assert.assertTrue;
-
-import java.util.ArrayList;
-import java.util.ResourceBundle;
-
-import org.hamcrest.CoreMatchers;
-import org.junit.Assert;
-import org.junit.Test;
-import liquibase.Scope;
 import liquibase.database.AbstractJdbcDatabaseTest;
 import liquibase.database.Database;
 import liquibase.database.ObjectQuotingStrategy;
@@ -29,6 +16,18 @@ import liquibase.statement.SequenceNextValueFunction;
 import liquibase.statement.SqlStatement;
 import liquibase.statement.core.UpdateStatement;
 import liquibase.test.JUnitResourceAccessor;
+import org.junit.jupiter.api.Test;
+
+import java.util.ArrayList;
+import java.util.ResourceBundle;
+import liquibase.Scope;
+
+import static java.util.ResourceBundle.getBundle;
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.is;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 /**
  * Tests for {@link liquibase.database.core.OracleDatabase}.
@@ -50,7 +49,7 @@ public class OracleDatabaseTest extends AbstractJdbcDatabaseTest {
     @Test
     public void escapeTableName_noSchema() {
         final Database database = getDatabase();
-        assertEquals("table name without schema is correctly escaped as simply tableName", "tableName", database.escapeTableName(null, null, "tableName"));
+        assertEquals("tableName", database.escapeTableName(null, null, "tableName"), "table name without schema is correctly escaped as simply tableName");
     }
 
     @Test
@@ -65,19 +64,19 @@ public class OracleDatabaseTest extends AbstractJdbcDatabaseTest {
     @Test
     public void escapeTableName_withSchema() {
         final Database database = getDatabase();
-        assertEquals("table name without schema but with catalog is correctly escaped as catalogName.tableName", "catalogName.tableName", database.escapeTableName("catalogName", "schemaName", "tableName"));
+        assertEquals("catalogName.tableName",database.escapeTableName("catalogName", "schemaName", "tableName"), "table name without schema but with catalog is correctly escaped as catalogName.tableName");
     }
 
     @Override
     @Test
     public void supportsInitiallyDeferrableColumns() {
-        assertTrue("Oracle Database is correctly reported as being able to do INITIALLY DEFERRED column constraints.", getDatabase().supportsInitiallyDeferrableColumns());
+        assertTrue(getDatabase().supportsInitiallyDeferrableColumns(), "Oracle Database is correctly reported as being able to do INITIALLY DEFERRED column constraints.");
     }
 
     @Override
     @Test
     public void getCurrentDateTimeFunction() {
-        Assert.assertEquals("Oracle Database's 'give me the current timestamp' function is correctly reported.", "SYSTIMESTAMP", getDatabase().getCurrentDateTimeFunction());
+        assertEquals("SYSTIMESTAMP", getDatabase().getCurrentDateTimeFunction(), "Oracle Database's 'give me the current timestamp' function is correctly reported.");
     }
 
     @Test
@@ -85,7 +84,7 @@ public class OracleDatabaseTest extends AbstractJdbcDatabaseTest {
         final TimestampType ts = new TimestampType();
         ts.setAdditionalInformation("WITHOUT TIME ZONE");
         final DatabaseDataType oracleDataType = ts.toDatabaseDataType(getDatabase());
-        assertThat(oracleDataType.getType(), CoreMatchers.is("TIMESTAMP"));
+        assertThat(oracleDataType.getType(), is("TIMESTAMP"));
     }
 
     public void testGetDefaultDriver() throws DatabaseException {

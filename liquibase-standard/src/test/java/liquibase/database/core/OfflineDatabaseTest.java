@@ -10,8 +10,11 @@ import liquibase.exception.DatabaseException;
 import liquibase.statement.SqlStatement;
 import liquibase.statement.core.AddColumnStatement;
 import liquibase.test.JUnitResourceAccessor;
-import org.junit.Assert;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
+
+import static org.assertj.core.api.Fail.fail;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 public class OfflineDatabaseTest {
 
@@ -42,12 +45,12 @@ public class OfflineDatabaseTest {
         try {
             statements = change.generateStatements(createOfflineDatabase("offline:oracle"));
         } catch (DatabaseException e) {
-            Assert.fail("Can't generate statements from an Offline Oracle database.");
+            fail("Can't generate statements from an Offline Oracle database.");
         }
-        Assert.assertEquals(1, statements.length);
-        Assert.assertTrue(statements[0] instanceof AddColumnStatement);
+        assertEquals(1, statements.length);
+        assertTrue(statements[0] instanceof AddColumnStatement);
         AddColumnStatement stmt = (AddColumnStatement) statements[0];
-        Assert.assertTrue(stmt.isMultiple());
-        Assert.assertEquals(2, stmt.getColumns().size());
+        assertTrue(stmt.isMultiple());
+        assertEquals(2, stmt.getColumns().size());
     }
 }

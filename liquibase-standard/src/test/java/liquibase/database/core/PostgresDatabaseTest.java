@@ -1,11 +1,5 @@
 package liquibase.database.core;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertTrue;
-
-import org.junit.Assert;
-import org.junit.Test;
 import liquibase.GlobalConfiguration;
 import liquibase.changelog.column.LiquibaseColumn;
 import liquibase.database.AbstractJdbcDatabaseTest;
@@ -14,6 +8,11 @@ import liquibase.database.ObjectQuotingStrategy;
 import liquibase.exception.DatabaseException;
 import liquibase.structure.core.Table;
 import liquibase.util.StringUtil;
+import org.junit.jupiter.api.Test;
+
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 /**
  * Tests for {@link PostgresDatabase}
@@ -38,7 +37,7 @@ public class PostgresDatabaseTest extends AbstractJdbcDatabaseTest {
     @Override
     @Test
     public void getCurrentDateTimeFunction() {
-        Assert.assertEquals("NOW()", getDatabase().getCurrentDateTimeFunction());
+        assertEquals("NOW()", getDatabase().getCurrentDateTimeFunction());
     }
 
     @Test
@@ -109,6 +108,7 @@ public class PostgresDatabaseTest extends AbstractJdbcDatabaseTest {
         assertEquals(COLUMN_AUTHOR, result);
     }
 
+    @Override
     @Test
     public void test_escapeObjectName() {
         String tableName = database.escapeObjectName("My Table  ", Table.class);
