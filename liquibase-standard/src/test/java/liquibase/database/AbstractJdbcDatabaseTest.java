@@ -15,6 +15,7 @@ import org.junit.jupiter.api.Test;
 import java.util.ArrayList;
 import java.util.List;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -281,13 +282,15 @@ public abstract class AbstractJdbcDatabaseTest {
     @Test
     public void test_escapeObjectName() {
         String tableName = database.escapeObjectName("My Table  ", Table.class);
-        assertTrue(tableName.matches("[\\[\\\"`]?My Table  [\\]\\\"`]?"));
+        assertThat(tableName).isEqualToIgnoringCase(
+            database.getQuotingStartCharacter() + "My Table  " + database.getQuotingEndCharacter());
 
         tableName = database.escapeObjectName("MyTable", Table.class);
-        assertEquals("MyTable", tableName);
+        assertThat(tableName).isEqualTo("MyTable");
 
         tableName = database.escapeObjectName("My Table", Table.class);
-        assertTrue(tableName.matches("[\\[\\\"`]?My Table[\\]\\\"`]?"));
+        assertThat(tableName).isEqualToIgnoringCase(
+            database.getQuotingStartCharacter() + "My Table" + database.getQuotingEndCharacter());
     }
 
 //    @Test

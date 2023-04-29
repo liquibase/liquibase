@@ -170,9 +170,9 @@ class SqlUtilTest extends Specification {
         where:
         quotingStrategy           || predicate                          | columnNames                | parameters     || expected
         null                      || 'query :name'                      | ['col1']                   | ['value 1']    || 'query col1'
-        null                      || 'query :name=:value, :name=:value' | ['col1', 'col with space'] | ['value 1', 6] || 'query col1=\'value 1\', "col with space"=6'
+        null                      || 'query :name=:value, :name=:value' | ['col1', 'col with space'] | ['value 1', 6] || 'query col1=\'value 1\', "COL WITH SPACE"=6'
         QUOTE_ONLY_RESERVED_WORDS || 'query :name'                      | ['col1']                   | ['value 1']    || 'query col1'
-        QUOTE_ONLY_RESERVED_WORDS || 'query :name=:value, :name=:value' | ['col1', 'col with space'] | ['value 1', 6] || 'query col1=\'value 1\', "col with space"=6'
+        QUOTE_ONLY_RESERVED_WORDS || 'query :name=:value, :name=:value' | ['col1', 'col with space'] | ['value 1', 6] || 'query col1=\'value 1\', "COL WITH SPACE"=6'
         QUOTE_ALL_OBJECTS         || 'query :name'                      | ['col1']                   | ['value 1']    || 'query "col1"'
         QUOTE_ALL_OBJECTS         || 'query :name=:value, :name=:value' | ['col1', 'col with space'] | ['value 1', 6] || 'query "col1"=\'value 1\', "col with space"=6'
     }
