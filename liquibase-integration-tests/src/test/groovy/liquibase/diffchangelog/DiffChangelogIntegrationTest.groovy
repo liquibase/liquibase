@@ -9,6 +9,7 @@ import liquibase.command.core.helpers.DbUrlConnectionCommandStep
 import liquibase.command.core.helpers.DiffOutputControlCommandStep
 import liquibase.command.core.helpers.PreCompareCommandStep
 import liquibase.command.core.helpers.ReferenceDbUrlConnectionCommandStep
+import liquibase.command.util.CommandUtil
 import liquibase.database.Database
 import liquibase.database.DatabaseFactory
 import liquibase.diff.compare.CompareControl
@@ -34,7 +35,6 @@ class DiffChangelogIntegrationTest extends Specification {
 
     def "auto increment on varchar column" () {
         when:
-        def updateChangelogFile = "target/test-classes/diffChangelog-test-sequence.sql"
         def changelogfile = StringUtil.randomIdentifer(10) + ".sql"
         def sequenceName = "customer_customer_id_seq"
         def tableName = StringUtil.randomIdentifer(10)
@@ -42,19 +42,10 @@ class DiffChangelogIntegrationTest extends Specification {
 CREATE SEQUENCE $sequenceName INCREMENT 5 START 100;
 CREATE TABLE $tableName ( product_no varchar(20) DEFAULT nextval('$sequenceName'));
 """
+        def updateChangelogFile = "target/test-classes/diffChangelog-test-sequence.sql"
         File updateFile = new File(updateChangelogFile)
         updateFile.write(sql.toString())
-        Scope.child(Scope.Attr.resourceAccessor.name(), new SearchPathResourceAccessor("."), new Scope.ScopedRunner() {
-            @Override
-            void run() throws Exception {
-                CommandScope updateCommandScope = new CommandScope(UpdateCommandStep.COMMAND_NAME)
-                updateCommandScope.addArgumentValue(DbUrlConnectionCommandStep.URL_ARG, postgres.getConnectionUrl())
-                updateCommandScope.addArgumentValue(DbUrlConnectionCommandStep.USERNAME_ARG, postgres.getUsername())
-                updateCommandScope.addArgumentValue(DbUrlConnectionCommandStep.PASSWORD_ARG, postgres.getPassword())
-                updateCommandScope.addArgumentValue(UpdateCommandStep.CHANGELOG_FILE_ARG, updateChangelogFile)
-                updateCommandScope.execute()
-            }
-        })
+        CommandUtil.runUpdate(postgres, updateChangelogFile)
         Database refDatabase = DatabaseFactory.instance.openDatabase(postgres.getConnectionUrl(), postgres.getUsername(), postgres.getPassword(), null, null)
         boolean b = SnapshotGeneratorFactory.instance.has(new Sequence(null, "public", sequenceName), refDatabase)
         assert b : "The sequence was not created on the database"
@@ -85,13 +76,12 @@ CREATE TABLE $tableName ( product_no varchar(20) DEFAULT nextval('$sequenceName'
         postgres.getConnection().close()
         refDatabase.close()
         targetDatabase.close()
-        doDropAll(postgres)
+        CommandUtil.runDropAll(postgres)
     }
 
     //@Ignore("This test causes the pipeline to time out.")
     def "should include view comments"() {
         when:
-        def updateChangelogFile = "target/test-classes/diffChangelog-test-view-comments.sql"
         def changelogfile = StringUtil.randomIdentifer(10) + ".sql"
         def viewName = StringUtil.randomIdentifer(10)
         def columnName = StringUtil.randomIdentifer(10)
@@ -103,19 +93,10 @@ CREATE VIEW $viewName AS
 COMMENT ON VIEW $viewName IS '$viewComment';
 COMMENT ON COLUMN $viewName.$columnName IS '$columnComment';
 """
+        def updateChangelogFile = "target/test-classes/diffChangelog-test-view-comments.sql"
         File updateFile = new File(updateChangelogFile)
-        updateFile.write(sql)
-        Scope.child(Scope.Attr.resourceAccessor.name(), new SearchPathResourceAccessor("."), new Scope.ScopedRunner() {
-            @Override
-            void run() throws Exception {
-                CommandScope updateCommandScope = new CommandScope(UpdateCommandStep.COMMAND_NAME)
-                updateCommandScope.addArgumentValue(DbUrlConnectionCommandStep.URL_ARG, postgres.getConnectionUrl())
-                updateCommandScope.addArgumentValue(DbUrlConnectionCommandStep.USERNAME_ARG, postgres.getUsername())
-                updateCommandScope.addArgumentValue(DbUrlConnectionCommandStep.PASSWORD_ARG, postgres.getPassword())
-                updateCommandScope.addArgumentValue(UpdateCommandStep.CHANGELOG_FILE_ARG, updateChangelogFile)
-                updateCommandScope.execute()
-            }
-        })
+        updateFile.write(sql.toString())
+        CommandUtil.runUpdate(postgres, updateChangelogFile)
         Database refDatabase = DatabaseFactory.instance.openDatabase(postgres.getConnectionUrl(), postgres.getUsername(), postgres.getPassword(), null, null)
 
         Database targetDatabase =
@@ -144,18 +125,6 @@ COMMENT ON COLUMN $viewName.$columnName IS '$columnComment';
         postgres.getConnection().close()
         refDatabase.close()
         targetDatabase.close()
-        doDropAll(postgres)
-    }
-    void doDropAll(DatabaseTestSystem testSystem) {
-        Scope.child(new HashMap<String, Object>(), new Scope.ScopedRunner() {
-            @Override
-            void run() throws Exception {
-                CommandScope dropAllCommandScope = new CommandScope(DropAllCommandStep.COMMAND_NAME)
-                dropAllCommandScope.addArgumentValue(DbUrlConnectionCommandStep.URL_ARG, testSystem.getConnectionUrl())
-                dropAllCommandScope.addArgumentValue(DbUrlConnectionCommandStep.USERNAME_ARG, testSystem.getUsername())
-                dropAllCommandScope.addArgumentValue(DbUrlConnectionCommandStep.PASSWORD_ARG, testSystem.getPassword())
-                dropAllCommandScope.execute()
-            }
-        })
+        CommandUtil.runDropAll(postgres)
     }
 }
