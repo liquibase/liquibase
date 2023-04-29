@@ -1,12 +1,14 @@
 package liquibase.database.core;
 
-import junit.framework.TestCase;
+import org.junit.jupiter.api.BeforeEach;
 
-public class InformixDatabaseTest extends TestCase {
+import static org.junit.jupiter.api.Assertions.assertEquals;
+
+public class InformixDatabaseTest {
 
     private InformixDatabase database;
 
-    @Override
+    @BeforeEach
     protected void setUp() throws Exception {
         database = new InformixDatabase();
     }

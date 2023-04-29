@@ -1,11 +1,15 @@
 package liquibase.database.core;
 
-import junit.framework.TestCase;
 import liquibase.database.Database;
 import liquibase.exception.DatabaseException;
+import org.junit.jupiter.api.Test;
 
-public class DB2zDatabaseTest extends TestCase {
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNull;
 
+public class DB2zDatabaseTest {
+
+    @Test
     public void testGetDefaultDriver() throws DatabaseException {
         try (Database database = new Db2zDatabase()) {
             assertEquals("com.ibm.db2.jcc.DB2Driver", database.getDefaultDriver("jdbc:db2://localhost:50000/liquibas"));
@@ -16,6 +20,7 @@ public class DB2zDatabaseTest extends TestCase {
         }
     }
 
+    @Test
     public void testMaxFractionDigits() {
         Database database = new Db2zDatabase();
         assertEquals(12, database.getMaxFractionalDigitsForTimestamp());
