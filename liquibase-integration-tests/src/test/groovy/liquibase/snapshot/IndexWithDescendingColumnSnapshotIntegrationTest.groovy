@@ -12,6 +12,7 @@ import liquibase.command.core.SnapshotCommandStep
 import liquibase.command.core.helpers.DbUrlConnectionCommandStep
 import liquibase.command.core.helpers.PreCompareCommandStep
 import liquibase.command.core.helpers.ReferenceDbUrlConnectionCommandStep
+import liquibase.command.util.CommandUtil
 import liquibase.database.Database
 import liquibase.database.DatabaseFactory
 import liquibase.database.jvm.JdbcConnection
@@ -130,6 +131,8 @@ class IndexWithDescendingColumnSnapshotIntegrationTest extends Specification {
                         "DROP TABLE tbl_Preferences"
                 )
         ] as SqlStatement[], null)
+        mssqlDb.getConnection().close()
+        db.close()
         if (outputStream != null) {
             outputStream.close()
         }
@@ -195,5 +198,8 @@ class IndexWithDescendingColumnSnapshotIntegrationTest extends Specification {
         if (f.exists()) {
             f.delete()
         }
+
+        CommandUtil.runDropAll(mssqlDb)
+        mssqlDb.getConnection().close()
     }
 }
