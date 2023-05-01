@@ -360,7 +360,6 @@ jobs:
         run: |
           (find . -name *-SNAPSHOT.jar -exec mvn -B org.apache.maven.plugins:maven-install-plugin:3.0.0-M1:install-file -Dfile={} \;)
           (find . -name *-SNAPSHOT-sources.jar -exec mvn -B org.apache.maven.plugins:maven-install-plugin:3.0.0-M1:install-file -Dclassifier=sources -Dfile={} \;)
-          # Install liquibase-commercial from GPM
           mvn org.apache.maven.plugins:maven-dependency-plugin:3.5.0:get -Dartifact=org.liquibase:liquibase-commercial:0-SNAPSHOT -DrepoUrl=https://maven.pkg.github.com/liquibase/liquibase-pro
           mkdir -p download/liquibase-commercial
           mvn org.apache.maven.plugins:maven-dependency-plugin:3.5.0:copy -Dartifact=org.liquibase:liquibase-commercial:0-SNAPSHOT -DoutputDirectory=download/liquibase-commercial
