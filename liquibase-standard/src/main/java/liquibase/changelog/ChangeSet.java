@@ -714,8 +714,7 @@ public class ChangeSet implements Conditional, ChangeLogChild {
 
                         addSqlMdc(change, database, false);
 
-                        List<SqlVisitor> sqlChangeVisitors = addSqlVisitorsIfNecessary(database, change);
-                        database.executeStatements(change, databaseChangeLog, sqlChangeVisitors);
+                        database.executeStatements(change, databaseChangeLog, sqlVisitors);
                         log.info(change.getConfirmationMessage());
                         if (listener != null) {
                             listener.ran(change, this, changeLog, database);
@@ -774,22 +773,6 @@ public class ChangeSet implements Conditional, ChangeLogChild {
             }
         }
         return execType;
-    }
-
-    //
-    // If this is for MSSQL and we have an AbstractSqlChange
-    // then we add an appending SQL visitor that will add
-    // on the end delimiter if necessary
-    //
-    private List<SqlVisitor> addSqlVisitorsIfNecessary(Database database, Change change) {
-        if (! (database instanceof MSSQLDatabase && change instanceof AbstractSQLChange) || ((AbstractSQLChange)change).getEndDelimiter() != null) {
-            return getSqlVisitors();
-        }
-        AppendSqlIfNotPresentVisitor appendVisitor = new AppendSqlIfNotPresentVisitor();
-        appendVisitor.setValue(";");
-        List<SqlVisitor> sqlChangeVisitors = new ArrayList<>(getSqlVisitors());
-        sqlChangeVisitors.add(appendVisitor);
-        return sqlChangeVisitors;
     }
 
     //
