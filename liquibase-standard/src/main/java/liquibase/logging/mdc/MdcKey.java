@@ -96,14 +96,4 @@ public class MdcKey {
     public static final String DIFF_CHANGELOG_OUTCOME = "diffChangelogOutcome";
 
     public static final String CHANGESET_SYNC_OUTCOME = "changesetSyncOutcome";
-
-    //
-    // Flow File MDC keys
-    //
-    public static final String FLOW_FILE_ROOT = "flowFileRoot";
-    public static final String FLOW_START_TIME = "flowStart";
-    public static final String FLOW_STOP_TIME = "flowStop";
-    public static final String FLOW_FILE_OUTCOME = "flowFileOutcome";
-    public static final String FLOW_FILE_FAILED_MESSAGE = "flowFileFailedMessage";
-    public static final String FLOW_FILE_FAILED_STAGE = "flowFileFailedStage";
 }
