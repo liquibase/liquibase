@@ -593,7 +593,10 @@ public class ChangeSet implements Conditional, ChangeLogChild {
             throws MigrationFailedException {
         Logger log = Scope.getCurrentScope().getLog(getClass());
         addChangeSetMdcProperties();
-        Scope.getCurrentScope().addMdcValue(MdcKey.FAIL_ON_ERROR, String.valueOf(getFailOnError()));
+        Boolean failOnError = getFailOnError();
+        if (failOnError != null) {
+            Scope.getCurrentScope().addMdcValue(MdcKey.FAIL_ON_ERROR, String.valueOf(failOnError));
+        }
         if (validationFailed) {
             return ExecType.MARK_RAN;
         }
@@ -749,7 +752,7 @@ public class ChangeSet implements Conditional, ChangeLogChild {
             } catch (Exception e1) {
                 throw new MigrationFailedException(this, e);
             }
-            if ((getFailOnError() != null) && !getFailOnError()) {
+            if ((failOnError != null) && !failOnError) {
                 log.info("Changeset " + toString(false) + " failed, but failOnError was false.  Error: " + e.getMessage());
                 log.fine("Failure Stacktrace", e);
                 execType = ExecType.FAILED;
