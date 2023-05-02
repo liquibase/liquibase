@@ -106,7 +106,6 @@ public class DatabaseChangelogCommandStep extends AbstractHelperCommandStep impl
         changeLogHistoryService.init();
         if (updateExistingNullChecksums) {
             changeLogHistoryService.upgradeChecksums(databaseChangeLog, contexts, labelExpression);
-            ChangeLogHistoryServiceFactory.getInstance().resetAll();
         }
         LockServiceFactory.getInstance().getLockService(database).init();
     }
