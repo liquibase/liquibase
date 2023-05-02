@@ -34,12 +34,12 @@ class UpdateCommandsTest extends Specification {
 
     def "run UpdateSql from CommandStep"() {
         when:
-        def updateCommand = new CommandScope(UpdateSqlCommandStep.COMMAND_NAME)
-        updateCommand.addArgumentValue(DbUrlConnectionCommandStep.DATABASE_ARG, database)
-        updateCommand.addArgumentValue(UpdateSqlCommandStep.CHANGELOG_FILE_ARG, "liquibase/update-tests.yml")
+        def updateSqlCommand = new CommandScope(UpdateSqlCommandStep.COMMAND_NAME)
+        updateSqlCommand.addArgumentValue(DbUrlConnectionCommandStep.DATABASE_ARG, database)
+        updateSqlCommand.addArgumentValue(UpdateSqlCommandStep.CHANGELOG_FILE_ARG, "liquibase/update-tests.yml")
 
         then:
-        def result = updateCommand.execute().getResults()
+        def result = updateSqlCommand.execute().getResults()
         def a = ((DefaultChangeExecListener)result.get("defaultChangeExecListener"))
         a.getDeployedChangeSets().get(0).getId() == "1"
 
