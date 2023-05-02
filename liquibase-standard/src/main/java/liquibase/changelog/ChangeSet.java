@@ -12,6 +12,7 @@ import liquibase.configuration.LiquibaseConfiguration;
 import liquibase.database.Database;
 import liquibase.database.DatabaseList;
 import liquibase.database.ObjectQuotingStrategy;
+import liquibase.database.core.MSSQLDatabase;
 import liquibase.exception.*;
 import liquibase.executor.Executor;
 import liquibase.executor.ExecutorService;
@@ -27,11 +28,9 @@ import liquibase.precondition.ErrorPrecondition;
 import liquibase.precondition.FailedPrecondition;
 import liquibase.precondition.core.PreconditionContainer;
 import liquibase.resource.ResourceAccessor;
-import liquibase.sql.visitor.SqlVisitor;
-import liquibase.sql.visitor.SqlVisitorFactory;
+import liquibase.sql.visitor.*;
 import liquibase.sqlgenerator.SqlGeneratorFactory;
 import liquibase.statement.SqlStatement;
-import liquibase.util.ISODateFormat;
 import liquibase.util.SqlUtil;
 import liquibase.util.StreamUtil;
 import liquibase.util.StringUtil;
@@ -715,7 +714,8 @@ public class ChangeSet implements Conditional, ChangeLogChild {
 
                         addSqlMdc(change, database, false);
 
-                        database.executeStatements(change, databaseChangeLog, sqlVisitors);
+                        List<SqlVisitor> sqlChangeVisitors = addSqlVisitorsIfNecessary(database, change);
+                        database.executeStatements(change, databaseChangeLog, sqlChangeVisitors);
                         log.info(change.getConfirmationMessage());
                         if (listener != null) {
                             listener.ran(change, this, changeLog, database);
@@ -774,6 +774,22 @@ public class ChangeSet implements Conditional, ChangeLogChild {
             }
         }
         return execType;
+    }
+
+    //
+    // If this is for MSSQL and we have an AbstractSqlChange
+    // then we add an appending SQL visitor that will add
+    // on the end delimiter if necessary
+    //
+    private List<SqlVisitor> addSqlVisitorsIfNecessary(Database database, Change change) {
+        if (! (database instanceof MSSQLDatabase && change instanceof AbstractSQLChange) || ((AbstractSQLChange)change).getEndDelimiter() != null) {
+            return getSqlVisitors();
+        }
+        AppendSqlIfNotPresentVisitor appendVisitor = new AppendSqlIfNotPresentVisitor();
+        appendVisitor.setValue(";");
+        List<SqlVisitor> sqlChangeVisitors = new ArrayList<>(getSqlVisitors());
+        sqlChangeVisitors.add(appendVisitor);
+        return sqlChangeVisitors;
     }
 
     //
