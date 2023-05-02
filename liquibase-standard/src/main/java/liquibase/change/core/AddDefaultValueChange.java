@@ -219,7 +219,7 @@ public class AddDefaultValueChange extends AbstractChange {
                 defaultValue = new DatabaseFunction(getDefaultValueDate());
             }
         } else if (getDefaultValueComputed() != null) {
-            defaultValue = new DatabaseFunction(getDefaultValueComputed().getValue(), getDefaultValueComputed().getSchemaName());
+            defaultValue = getDefaultValueComputed();
         } else if (getDefaultValueSequenceNext() != null) {
             defaultValue = new SequenceNextValueFunction(this.getSchemaName(), getDefaultValueSequenceNext().getValue());
         }
