@@ -1355,6 +1355,7 @@ public class Liquibase implements AutoCloseable {
             statusCommand.addArgumentValue(DbUrlConnectionCommandStep.DATABASE_ARG, getDatabase());
             statusCommand.addArgumentValue(DatabaseChangelogCommandStep.CHANGELOG_PARAMETERS, changeLogParameters);
             statusCommand.addArgumentValue(StatusCommandStep.VERBOSE_ARG, verbose);
+            statusCommand.addArgumentValue(DatabaseChangelogCommandStep.CHANGELOG_FILE_ARG, changeLogFile);
             statusCommand.setOutput(new WriterOutputStream(out, GlobalConfiguration.OUTPUT_FILE_ENCODING.getCurrentValue()));
             statusCommand.execute();
         });
