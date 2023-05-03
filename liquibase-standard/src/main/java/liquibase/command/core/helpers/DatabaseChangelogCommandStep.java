@@ -8,6 +8,9 @@ import liquibase.changelog.ChangeLogHistoryServiceFactory;
 import liquibase.changelog.ChangeLogParameters;
 import liquibase.changelog.DatabaseChangeLog;
 import liquibase.command.*;
+import liquibase.configuration.ConfigurationValueProvider;
+import liquibase.configuration.LiquibaseConfiguration;
+import liquibase.configuration.core.DefaultsFileValueProvider;
 import liquibase.database.Database;
 import liquibase.exception.LiquibaseException;
 import liquibase.lockservice.LockService;
@@ -67,6 +70,7 @@ public class DatabaseChangelogCommandStep extends AbstractHelperCommandStep impl
         if (changeLogParameters == null) {
             changeLogParameters = new ChangeLogParameters(database);
             addJavaProperties(changeLogParameters);
+            addDefaultFileProperties(changeLogParameters);
         }
         Contexts contexts = new Contexts(commandScope.getArgumentValue(CONTEXTS_ARG));
         changeLogParameters.setContexts(contexts);
@@ -124,10 +128,25 @@ public class DatabaseChangelogCommandStep extends AbstractHelperCommandStep impl
      * Add java property arguments to changelog parameters
      * @param changeLogParameters the changelog parameters to update
      */
-    public void addJavaProperties(ChangeLogParameters changeLogParameters) {
+    private void addJavaProperties(ChangeLogParameters changeLogParameters) {
         HashMap javaProperties = Scope.getCurrentScope().get("javaProperties", HashMap.class);
         if (javaProperties != null) {
             javaProperties.forEach((key, value) -> changeLogParameters.set((String) key, value));
         }
     }
+
+    /**
+     * Add default-file properties to changelog parameters
+     * @param changeLogParameters the changelog parameters to update
+     */
+    private void addDefaultFileProperties(ChangeLogParameters changeLogParameters) {
+        final LiquibaseConfiguration liquibaseConfiguration = Scope.getCurrentScope().getSingleton(LiquibaseConfiguration.class);
+        for (ConfigurationValueProvider cvp : liquibaseConfiguration.getProviders()) {
+            if (cvp instanceof DefaultsFileValueProvider) {
+                DefaultsFileValueProvider dfvp = (DefaultsFileValueProvider)  cvp;
+                dfvp.getMap().forEach((key, value) -> changeLogParameters.set((String) key, value));
+            }
+        }
+    }
+
 }
