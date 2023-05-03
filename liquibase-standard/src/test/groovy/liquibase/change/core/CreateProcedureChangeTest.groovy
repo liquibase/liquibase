@@ -47,7 +47,7 @@ public class CreateProcedureChangeTest extends StandardChangeTest {
         change.validate(new OracleDatabase())
 
         then:
-        change.serialize().toString() == "createProcedure[procedureText=create procedure sql]"
+        change.serialize().toString() == "createProcedure[procedureBody=create procedure sql]"
     }
 
     @Unroll
