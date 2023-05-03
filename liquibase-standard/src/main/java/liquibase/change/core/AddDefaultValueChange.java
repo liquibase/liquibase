@@ -221,8 +221,7 @@ public class AddDefaultValueChange extends AbstractChange {
         } else if (getDefaultValueComputed() != null) {
             defaultValue = getDefaultValueComputed();
         } else if (getDefaultValueSequenceNext() != null) {
-            defaultValue = getDefaultValueSequenceNext();
-            ((SequenceNextValueFunction) defaultValue).setSchemaName(this.getSchemaName());
+            defaultValue = new SequenceNextValueFunction(this.getSchemaName(), getDefaultValueSequenceNext().getValue());
         }
 
         AddDefaultValueStatement statement = new AddDefaultValueStatement(getCatalogName(), getSchemaName(), getTableName(), getColumnName(), getColumnDataType(), defaultValue);
