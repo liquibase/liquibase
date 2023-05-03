@@ -6,6 +6,7 @@ import liquibase.configuration.ConfigurationDefinition
 import liquibase.exception.LiquibaseException
 import liquibase.logging.core.BufferedLogService
 import liquibase.ui.ConsoleUIService
+import liquibase.util.StringUtil
 import spock.lang.Specification
 import spock.lang.Unroll
 
@@ -717,7 +718,7 @@ https://docs.liquibase.com
         new LiquibaseCommandLine().execute("--help")
 
         then:
-        liquibase.util.StringUtil.standardizeLineEndings(bytes.toString().trim()) == liquibase.util.StringUtil.standardizeLineEndings(expectedHelpOutput.trim())
+        StringUtil.standardizeLineEndings(bytes.toString().trim()) == StringUtil.standardizeLineEndings(expectedHelpOutput.trim())
 
         cleanup:
         System.setOut(oldOut)
