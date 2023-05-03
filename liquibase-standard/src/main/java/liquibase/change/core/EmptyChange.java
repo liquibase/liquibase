@@ -1,6 +1,7 @@
 package liquibase.change.core;
 
 import liquibase.change.AbstractChange;
+import liquibase.change.Change;
 import liquibase.change.ChangeMetaData;
 import liquibase.change.DatabaseChange;
 import liquibase.database.Database;
@@ -22,5 +23,10 @@ public class EmptyChange extends AbstractChange {
     @Override
     public String getSerializedObjectNamespace() {
         return STANDARD_CHANGELOG_NAMESPACE;
+    }
+
+    @Override
+    protected Change[] createInverses() {
+        return EMPTY_CHANGE;
     }
 }
