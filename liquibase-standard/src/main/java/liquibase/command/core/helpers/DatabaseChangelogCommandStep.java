@@ -128,7 +128,7 @@ public class DatabaseChangelogCommandStep extends AbstractHelperCommandStep impl
      * Add java property arguments to changelog parameters
      * @param changeLogParameters the changelog parameters to update
      */
-    private void addJavaProperties(ChangeLogParameters changeLogParameters) {
+    public void addJavaProperties(ChangeLogParameters changeLogParameters) {
         HashMap javaProperties = Scope.getCurrentScope().get("javaProperties", HashMap.class);
         if (javaProperties != null) {
             javaProperties.forEach((key, value) -> changeLogParameters.set((String) key, value));
@@ -144,7 +144,9 @@ public class DatabaseChangelogCommandStep extends AbstractHelperCommandStep impl
         for (ConfigurationValueProvider cvp : liquibaseConfiguration.getProviders()) {
             if (cvp instanceof DefaultsFileValueProvider) {
                 DefaultsFileValueProvider dfvp = (DefaultsFileValueProvider)  cvp;
-                dfvp.getMap().forEach((key, value) -> changeLogParameters.set((String) key, value));
+                dfvp.getMap().entrySet().stream()
+                        .filter(entry -> ((String) entry.getKey()).startsWith("parameter."))
+                        .forEach(entry -> changeLogParameters.set(((String) entry.getKey()).replaceFirst("^parameter.", ""), entry.getValue()));
             }
         }
     }
