@@ -41,7 +41,6 @@ public class ChangeLogIterator {
                 if (changeSet != null) {
                     changeSet.setFilePath(DatabaseChangeLog.normalizePath(ranChangeSet.getChangeLog()));
                     changeSet.setDeploymentId(ranChangeSet.getDeploymentId());
-                    changeSet.setStoredFilePath(ranChangeSet.getStoredChangeLog());
                     changeSets.add(changeSet);
                 }
 	        }

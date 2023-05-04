@@ -74,8 +74,6 @@ public abstract class AbstractChangeLogHistoryService implements ChangeLogHistor
                         Scope.getCurrentScope().getLog(getClass()).fine(
                                 "Updating null or out of date checksum on changeSet " + changeSet + " to correct value"
                         );
-                        // to allow switching between saving normalized or configured path
-                        changeSet.setStoredFilePath(ranChangeSet.getStoredChangeLog());
                         replaceChecksum(changeSet);
                     }
                 }
