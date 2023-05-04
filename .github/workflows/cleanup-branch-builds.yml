@@ -6,9 +6,23 @@ on:
     branches:
       - '**DAT-**'
 jobs:
+  setup:
+    runs-on: ubuntu-22.04
+    outputs:
+      packages_to_delete: ${{ steps.get_packages.outputs.packages_to_delete }}
+    steps:
+      - id: get_packages 
+        run: |
+          packages_to_delete=($(mvn -B exec:exec -Dexec.executable=echo -Dexec.args='###MODULE_GAV### ${project.groupId}:${project.artifactId}' | grep '###MODULE_GAV### ' | cut -f2 -d' ' ))
+          echo '::set-output packages_to_delete=${packages_to_delete}'
+
   delete-package:
+    needs: [ setup ]
     name: Delete Github Package for Branch
     runs-on: ubuntu-22.04
+    strategy:
+      matrix:
+        value: ${{fromJson(needs.setup.outputs.packages_to_delete)}}
     steps:
       # Get version id(s) based on version name
     - uses: castlabs/get-package-version-id-action@v2.1
@@ -22,7 +36,7 @@ jobs:
         # Name of the package.
         # Defaults to an empty string.
         # Required if `package-version-ids` input is not given.
-        package-name: org.liquibase.liquibase-core
+        package-name: ${{ matrix.value }}
 
         # The number of latest versions to keep.
         # This cannot be specified with `num-old-versions-to-delete`. By default, `num-old-versions-to-delete` takes precedence over `min-versions-to-keep`.
