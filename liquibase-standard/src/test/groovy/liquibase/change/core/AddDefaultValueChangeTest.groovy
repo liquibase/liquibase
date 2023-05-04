@@ -1,12 +1,13 @@
 package liquibase.change.core
 
 import liquibase.change.ChangeStatus
-import liquibase.change.StandardChangeTest;
+import liquibase.change.StandardChangeTest
 import liquibase.database.core.MockDatabase
 import liquibase.snapshot.MockSnapshotGeneratorFactory
 import liquibase.snapshot.SnapshotGeneratorFactory
 import liquibase.statement.DatabaseFunction
 import liquibase.statement.SequenceNextValueFunction
+import liquibase.statement.core.AddDefaultValueStatement
 import liquibase.structure.core.Column
 import liquibase.structure.core.Table
 import liquibase.util.ISODateFormat
@@ -16,13 +17,33 @@ public class AddDefaultValueChangeTest extends StandardChangeTest {
 
     def getConfirmationMessage() throws Exception {
         when:
-        def change = new AddDefaultValueChange();
-        change.setSchemaName("SCHEMA_NAME");
-        change.setTableName("TABLE_NAME");
-        change.setColumnName("COLUMN_NAME");
+        def change = new AddDefaultValueChange()
+        change.setSchemaName("SCHEMA_NAME")
+        change.setTableName("TABLE_NAME")
+        change.setColumnName("COLUMN_NAME")
 
         then:
         change.getConfirmationMessage() == "Default value added to TABLE_NAME.COLUMN_NAME"
+    }
+
+    @Unroll
+    def "Make sure that generateStatements is not changing internal structures"() {
+        given:
+        def database = new MockDatabase()
+        def change = new AddDefaultValueChange()
+        change.schemaName = "schema"
+        change.setDefaultValueSequenceNext(new SequenceNextValueFunction("seq_name"))
+
+        when:
+        def statements = change.generateStatements(database)
+        def defaultValueStatement = (SequenceNextValueFunction)((AddDefaultValueStatement)statements[0]).defaultValue
+
+        then:
+        assert defaultValueStatement != change.defaultValueSequenceNext
+        assert defaultValueStatement.getValue() == change.defaultValueSequenceNext.value
+
+        assert change.defaultValueSequenceNext.schemaName == null
+        assert defaultValueStatement.schemaName == change.schemaName
     }
 
     @Unroll
