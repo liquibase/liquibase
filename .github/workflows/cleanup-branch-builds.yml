@@ -5,6 +5,7 @@ on:
   delete:
     branches:
       - '**DAT-**'
+      
 jobs:
   setup:
     runs-on: ubuntu-22.04
