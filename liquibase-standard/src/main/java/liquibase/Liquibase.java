@@ -1540,6 +1540,7 @@ public class Liquibase implements AutoCloseable {
      */
     public void validate() throws LiquibaseException {
         DatabaseChangeLog changeLog = getDatabaseChangeLog(true);
+        checkLiquibaseTables(false, changeLog, null, null);
         if (changeLog != null) {
             changeLog.validate(database);
         }
