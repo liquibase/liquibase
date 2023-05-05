@@ -15,7 +15,7 @@ jobs:
         run: |
           packages_to_delete=($(mvn -B exec:exec -Dexec.executable=echo -Dexec.args='###MODULE_GAV### ${project.groupId}:${project.artifactId}' | grep '###MODULE_GAV### ' | cut -f2 -d' ' ))
           echo "PACKAGES_TO_DELETE=$packages_to_delete" >> $GITHUB_ENV
-          echo "$packages_to_delete"
+          echo "$PACKAGES_TO_DELETE"
 
   # delete-package:
   #   needs: [ setup ]
