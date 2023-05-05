@@ -8,42 +8,27 @@ on:
 jobs:
   setup:
     runs-on: ubuntu-22.04
-    outputs:
-      PACKAGES_TO_DELETE: ${{ steps.get_packages.outputs.PACKAGES_TO_DELETE }}
     steps:
-      - id: get_packages 
-        run: |
-          packages_to_delete=$( mvn -B exec:exec -Dexec.executable=echo -Dexec.args='###MODULE_GAV### ${project.groupId}:${project.artifactId}' | grep '###MODULE_GAV### ' | cut -f2 -d' ' )
-          echo "PACKAGES_TO_DELETE=$packages_to_delete" >> $GITHUB_ENV
-
-  delete-package:
-    needs: [ setup ]
-    name: Delete Github Package for Branch
-    runs-on: ubuntu-22.04
-    strategy:
-      matrix:
-        value: ${{ fromJson(needs.setup.outputs.PACKAGES_TO_DELETE) }}
-    steps:
-      # Get version id(s) based on version name
-    - uses: castlabs/get-package-version-id-action@v2.1
+    - name: Get Package Version
+      uses: castlabs/get-package-version-id-action@v2.1
       id: version
       with:
         version: "${{ github.event.ref }}-SNAPSHOT"
-
-    - uses: actions/delete-package-versions@v3
+    
+    - name: Delete Packages
       if: ${{ steps.version.outputs.ids != '' }}
-      with:
-        # Name of the package.
-        # Defaults to an empty string.
-        # Required if `package-version-ids` input is not given.
-        package-name: ${{ matrix.value }}
-
-        # The number of latest versions to keep.
-        # This cannot be specified with `num-old-versions-to-delete`. By default, `num-old-versions-to-delete` takes precedence over `min-versions-to-keep`.
-        # When set to 0, all deletable versions will be deleted.
-        # When set greater than 0, all deletable package versions except the specified number will be deleted.
-        min-versions-to-keep: 0
-
-        # Can be a single package version id, or a comma separated list of package version ids.
-        # Defaults to an empty string.
-        package-version-ids: "${{ steps.version.outputs.ids }}"
+      run: |
+        packages_to_delete=($( mvn -B exec:exec -Dexec.executable=echo -Dexec.args='###MODULE_GAV### ${project.groupId}:${project.artifactId}' | grep '###MODULE_GAV### ' | cut -f2 -d' ' ))
+        echo "PACKAGES_TO_DELETE=$packages_to_delete" >> $GITHUB_ENV
+        echo $packages_to_delete
+        for package_name in "${packages_to_delete[@]}"
+        do
+          for version_id in ${{ steps.version.outputs.ids }}
+          do
+            curl -X DELETE \
+            -H "Accept: application/vnd.github+json" \
+            -H "Authorization: Bearer ${{ secrets.LIQUIBOT_LIQUIBASE_PAT }}"\
+            -H "X-GitHub-Api-Version: 2022-11-28" \
+            https://api.github.com/user/packages/maven/$package_name/versions/$version_id 
+          done
+        done 
