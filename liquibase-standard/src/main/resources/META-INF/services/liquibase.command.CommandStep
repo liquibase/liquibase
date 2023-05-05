@@ -16,7 +16,6 @@ liquibase.command.core.FutureRollbackSqlCommandStep
 liquibase.command.core.GenerateChangelogCommandStep
 liquibase.command.core.HistoryCommandStep
 liquibase.command.core.InternalDropAllCommandStep
-liquibase.command.core.InternalExecuteSqlCommandStep
 liquibase.command.core.InternalHistoryCommandStep
 liquibase.command.core.InternalSnapshotCommandStep
 liquibase.command.core.InternalSyncHubCommandStep

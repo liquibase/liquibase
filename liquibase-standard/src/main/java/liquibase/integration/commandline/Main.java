@@ -1516,18 +1516,6 @@ public class Main {
                 outputWriter.write(result);
                 outputWriter.flush();
                 return;
-            } else if (COMMANDS.EXECUTE_SQL.equalsIgnoreCase(command)) {
-                CommandScope executeSqlCommand = new CommandScope("internalExecuteSql")
-                        .addArgumentValue(InternalExecuteSqlCommandStep.DATABASE_ARG, database)
-                        .addArgumentValue(InternalExecuteSqlCommandStep.SQL_ARG, getCommandParam("sql", null))
-                        .addArgumentValue(InternalExecuteSqlCommandStep.SQLFILE_ARG, getCommandParam("sqlFile", null))
-                        .addArgumentValue(InternalExecuteSqlCommandStep.DELIMITER_ARG, getCommandParam("delimiter", ";"));
-                CommandResults results = executeSqlCommand.execute();
-                Writer outputWriter = getOutputWriter();
-                String output = (String) results.getResult("output");
-                outputWriter.write(output);
-                outputWriter.flush();
-                return;
             } else if (COMMANDS.SNAPSHOT_REFERENCE.equalsIgnoreCase(command)) {
                 CommandScope snapshotCommand = new CommandScope("internalSnapshot");
                 Database referenceDatabase = createReferenceDatabaseFromCommandParams(commandParams, fileOpener);

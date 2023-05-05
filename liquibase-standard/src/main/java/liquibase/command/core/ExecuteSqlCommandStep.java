@@ -1,44 +1,32 @@
 package liquibase.command.core;
 
+import liquibase.Scope;
+import liquibase.changelog.DatabaseChangeLog;
 import liquibase.command.*;
-import liquibase.configuration.ConfigurationValueObfuscator;
-import liquibase.exception.CommandExecutionException;
+import liquibase.database.Database;
+import liquibase.exception.LiquibaseException;
+import liquibase.executor.Executor;
+import liquibase.executor.ExecutorService;
+import liquibase.lockservice.LockService;
+import liquibase.resource.PathHandlerFactory;
+import liquibase.resource.Resource;
+import liquibase.statement.core.RawSqlStatement;
+import liquibase.util.FileUtil;
+import liquibase.util.StreamUtil;
+import liquibase.util.StringUtil;
 
-import java.util.Arrays;
+import java.io.Writer;
+import java.util.*;
 
-public class ExecuteSqlCommandStep extends AbstractCliWrapperCommandStep {
+public class ExecuteSqlCommandStep extends AbstractCommandStep {
 
     public static final String[] COMMAND_NAME = {"executeSql"};
-
-    public static final CommandArgumentDefinition<String> URL_ARG;
-    public static final CommandArgumentDefinition<String> DEFAULT_SCHEMA_NAME_ARG;
-    public static final CommandArgumentDefinition<String> DEFAULT_CATALOG_NAME_ARG;
-    public static final CommandArgumentDefinition<String> USERNAME_ARG;
-    public static final CommandArgumentDefinition<String> PASSWORD_ARG;
     public static final CommandArgumentDefinition<String> SQL_ARG;
     public static final CommandArgumentDefinition<String> SQLFILE_ARG;
     public static final CommandArgumentDefinition<String> DELIMITER_ARG;
-    public static final CommandArgumentDefinition<String> DRIVER_ARG;
-    public static final CommandArgumentDefinition<String> DRIVER_PROPERTIES_FILE_ARG;
 
     static {
         CommandBuilder builder = new CommandBuilder(COMMAND_NAME);
-        URL_ARG = builder.argument(CommonArgumentNames.URL, String.class).required()
-                .description("The JDBC database connection URL").build();
-        DEFAULT_SCHEMA_NAME_ARG = builder.argument("defaultSchemaName", String.class)
-                .description("The default schema name to use for the database connection").build();
-        DEFAULT_CATALOG_NAME_ARG = builder.argument("defaultCatalogName", String.class)
-                .description("The default catalog name to use for the database connection").build();
-        DRIVER_ARG = builder.argument("driver", String.class)
-            .description("The JDBC driver class").build();
-        DRIVER_PROPERTIES_FILE_ARG = builder.argument("driverPropertiesFile", String.class)
-            .description("The JDBC driver properties file").build();
-        USERNAME_ARG = builder.argument(CommonArgumentNames.USERNAME, String.class)
-                .description("Username to use to connect to the database").build();
-        PASSWORD_ARG = builder.argument(CommonArgumentNames.PASSWORD, String.class)
-                .description("Password to use to connect to the database")
-                .setValueObfuscator(ConfigurationValueObfuscator.STANDARD)
-                .build();
         SQL_ARG = builder.argument("sql", String.class)
                 .description("SQL string to execute").build();
         SQLFILE_ARG = builder.argument("sqlFile", String.class)
@@ -49,7 +37,7 @@ public class ExecuteSqlCommandStep extends AbstractCliWrapperCommandStep {
 
     @Override
     public String[][] defineCommandNames() {
-        return new String[][] { COMMAND_NAME };
+        return new String[][]{COMMAND_NAME};
     }
 
     @Override
@@ -58,7 +46,62 @@ public class ExecuteSqlCommandStep extends AbstractCliWrapperCommandStep {
     }
 
     @Override
-    protected String[] collectArguments(CommandScope commandScope) throws CommandExecutionException {
-        return collectArguments(commandScope, Arrays.asList("delimiter", "sql", "sqlFile"), null);
+    public List<Class<?>> requiredDependencies() {
+        return Arrays.asList(Database.class, LockService.class, DatabaseChangeLog.class, Writer.class);
+    }
+
+    @Override
+    public void run(CommandResultsBuilder resultsBuilder) throws Exception {
+        final CommandScope commandScope = resultsBuilder.getCommandScope();
+        final Database database = (Database) commandScope.getDependency(Database.class);
+        final String sql = commandScope.getArgumentValue(SQL_ARG);
+        final String sqlFile = commandScope.getArgumentValue(SQLFILE_ARG);
+        final Executor executor = Scope.getCurrentScope().getSingleton(ExecutorService.class).getExecutor("jdbc", database);
+
+        String sqlText;
+        if (sqlFile == null) {
+            sqlText = sql;
+        } else {
+            final PathHandlerFactory pathHandlerFactory = Scope.getCurrentScope().getSingleton(PathHandlerFactory.class);
+            Resource resource = pathHandlerFactory.getResource(sqlFile);
+            if (!resource.exists()) {
+                throw new LiquibaseException(FileUtil.getFileNotFoundMessage(sqlFile));
+            }
+            sqlText = StreamUtil.readStreamAsString(resource.openInputStream());
+        }
+
+        final StringBuilder out = new StringBuilder();
+        String[] sqlStrings = StringUtil.processMultiLineSQL(sqlText, true, true, commandScope.getArgumentValue(DELIMITER_ARG));
+        for (String sqlString : sqlStrings) {
+            if (sqlString.toLowerCase().matches("\\s*select .*")) {
+                List<Map<String, ?>> rows = executor.queryForList(new RawSqlStatement(sqlString));
+                out.append("Output of ").append(sqlString).append(":\n");
+                if (rows.isEmpty()) {
+                    out.append("-- Empty Resultset --\n");
+                } else {
+                    SortedSet<String> keys = new TreeSet<>();
+                    for (Map<String, ?> row : rows) {
+                        keys.addAll(row.keySet());
+                    }
+                    out.append(StringUtil.join(keys, " | ")).append(" |\n");
+
+                    for (Map<String, ?> row : rows) {
+                        for (String key : keys) {
+                            out.append(row.get(key)).append(" | ");
+                        }
+                        out.append("\n");
+                    }
+                }
+            } else {
+                executor.execute(new RawSqlStatement(sqlString));
+                out.append("Successfully Executed: ").append(sqlString).append("\n");
+            }
+            out.append("\n");
+        }
+        database.commit();
+        Writer outputWriter = (Writer) commandScope.getDependency(Writer.class);
+        outputWriter.write(out.toString());
+        outputWriter.flush();
+        resultsBuilder.addResult("output", out.toString());
     }
 }
