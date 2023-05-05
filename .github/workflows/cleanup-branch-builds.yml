@@ -9,13 +9,14 @@ jobs:
   setup:
     runs-on: ubuntu-22.04
     outputs:
-      packages_to_delete: ${{ steps.get_packages.outputs.packages_to_delete }}
+      packages_to_delete: ${{ steps.get_packages.outputs.PACKAGES_TO_DELETE }}
     steps:
       - id: get_packages 
         run: |
           packages_to_delete=($(mvn -B exec:exec -Dexec.executable=echo -Dexec.args='###MODULE_GAV### ${project.groupId}:${project.artifactId}' | grep '###MODULE_GAV### ' | cut -f2 -d' ' ))
-          echo '::set-output packages_to_delete=${packages_to_delete}'
-          # echo "PACKAGES_TO_DELETE=$packages_to_delete" >> $GITHUB_ENV
+          # echo '::set-output packages_to_delete=${packages_to_delete}'
+          echo "PACKAGES_TO_DELETE=$packages_to_delete" >> $GITHUB_ENV
+
 
   delete-package:
     needs: [ setup ]
@@ -23,7 +24,7 @@ jobs:
     runs-on: ubuntu-22.04
     strategy:
       matrix:
-        value: ${{fromJson(needs.setup.outputs.packages_to_delete)}}
+        value: ${{fromJson(needs.setup.outputs.PACKAGES_TO_DELETE)}}
     steps:
       # Get version id(s) based on version name
     - uses: castlabs/get-package-version-id-action@v2.1
