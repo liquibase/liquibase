@@ -1871,6 +1871,8 @@ public class Main {
             runRollbackCommand(null);
         } else if (COMMANDS.ROLLBACK_SQL.equalsIgnoreCase(command)) {
             runRollbackSqlCommand();
+        } else if (COMMANDS.EXECUTE_SQL.equalsIgnoreCase(command)) {
+            runExecuteSqlCommand();
         }
     }
 
@@ -2034,6 +2036,15 @@ public class Main {
                 .addArgumentValue(ReferenceDbUrlConnectionCommandStep.REFERENCE_DRIVER_PROPERTIES_FILE_ARG, null)
                 .addArgumentValue(ReferenceDbUrlConnectionCommandStep.REFERENCE_USERNAME_ARG, refUsername)
                 .addArgumentValue(ReferenceDbUrlConnectionCommandStep.REFERENCE_PASSWORD_ARG, refPassword);
+    }
+
+    private void runExecuteSqlCommand() throws CommandExecutionException, CommandLineParsingException {
+        CommandScope executeSql = new CommandScope(ExecuteSqlCommandStep.COMMAND_NAME[0]);
+        executeSql.addArgumentValue(ExecuteSqlCommandStep.SQL_ARG, getCommandParam("sql", null));
+        executeSql.addArgumentValue(ExecuteSqlCommandStep.SQLFILE_ARG, getCommandParam("sqlFile", null));
+        executeSql.addArgumentValue(ExecuteSqlCommandStep.DELIMITER_ARG, getCommandParam("delimiter", ";"));
+        setDatabaseArgumentsToCommand(executeSql);
+        executeSql.execute();
     }
 
     /**
