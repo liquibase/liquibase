@@ -2,7 +2,6 @@ package liquibase.command.core;
 
 import liquibase.GlobalConfiguration;
 import liquibase.Scope;
-import liquibase.changelog.DatabaseChangeLog;
 import liquibase.command.*;
 import liquibase.database.Database;
 import liquibase.exception.DatabaseException;
@@ -51,7 +50,7 @@ public class ExecuteSqlCommandStep extends AbstractCommandStep {
 
     @Override
     public List<Class<?>> requiredDependencies() {
-        return Arrays.asList(Database.class, LockService.class, DatabaseChangeLog.class);
+        return Arrays.asList(Database.class, LockService.class);
     }
 
     @Override
