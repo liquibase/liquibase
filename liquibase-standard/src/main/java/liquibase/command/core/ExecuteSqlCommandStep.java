@@ -1,9 +1,11 @@
 package liquibase.command.core;
 
+import liquibase.GlobalConfiguration;
 import liquibase.Scope;
 import liquibase.changelog.DatabaseChangeLog;
 import liquibase.command.*;
 import liquibase.database.Database;
+import liquibase.exception.DatabaseException;
 import liquibase.exception.LiquibaseException;
 import liquibase.executor.Executor;
 import liquibase.executor.ExecutorService;
@@ -15,6 +17,8 @@ import liquibase.util.FileUtil;
 import liquibase.util.StreamUtil;
 import liquibase.util.StringUtil;
 
+import java.io.IOException;
+import java.io.OutputStreamWriter;
 import java.io.Writer;
 import java.util.*;
 
@@ -47,7 +51,7 @@ public class ExecuteSqlCommandStep extends AbstractCommandStep {
 
     @Override
     public List<Class<?>> requiredDependencies() {
-        return Arrays.asList(Database.class, LockService.class, DatabaseChangeLog.class, Writer.class);
+        return Arrays.asList(Database.class, LockService.class, DatabaseChangeLog.class);
     }
 
     @Override
@@ -57,51 +61,65 @@ public class ExecuteSqlCommandStep extends AbstractCommandStep {
         final String sql = commandScope.getArgumentValue(SQL_ARG);
         final String sqlFile = commandScope.getArgumentValue(SQLFILE_ARG);
         final Executor executor = Scope.getCurrentScope().getSingleton(ExecutorService.class).getExecutor("jdbc", database);
-
-        String sqlText;
-        if (sqlFile == null) {
-            sqlText = sql;
-        } else {
-            final PathHandlerFactory pathHandlerFactory = Scope.getCurrentScope().getSingleton(PathHandlerFactory.class);
-            Resource resource = pathHandlerFactory.getResource(sqlFile);
-            if (!resource.exists()) {
-                throw new LiquibaseException(FileUtil.getFileNotFoundMessage(sqlFile));
-            }
-            sqlText = StreamUtil.readStreamAsString(resource.openInputStream());
-        }
-
+        final String sqlText = getSqlScript(sql, sqlFile);
         final StringBuilder out = new StringBuilder();
-        String[] sqlStrings = StringUtil.processMultiLineSQL(sqlText, true, true, commandScope.getArgumentValue(DELIMITER_ARG));
+        final String[] sqlStrings = StringUtil.processMultiLineSQL(sqlText, true, true, commandScope.getArgumentValue(DELIMITER_ARG));
+
         for (String sqlString : sqlStrings) {
             if (sqlString.toLowerCase().matches("\\s*select .*")) {
-                List<Map<String, ?>> rows = executor.queryForList(new RawSqlStatement(sqlString));
-                out.append("Output of ").append(sqlString).append(":\n");
-                if (rows.isEmpty()) {
-                    out.append("-- Empty Resultset --\n");
-                } else {
-                    SortedSet<String> keys = new TreeSet<>();
-                    for (Map<String, ?> row : rows) {
-                        keys.addAll(row.keySet());
-                    }
-                    out.append(StringUtil.join(keys, " | ")).append(" |\n");
-
-                    for (Map<String, ?> row : rows) {
-                        for (String key : keys) {
-                            out.append(row.get(key)).append(" | ");
-                        }
-                        out.append("\n");
-                    }
-                }
+                out.append(handleSelect(sqlString, executor));
             } else {
                 executor.execute(new RawSqlStatement(sqlString));
                 out.append("Successfully Executed: ").append(sqlString).append("\n");
             }
             out.append("\n");
         }
+
         database.commit();
-        Writer outputWriter = (Writer) commandScope.getDependency(Writer.class);
-        outputWriter.write(out.toString());
-        outputWriter.flush();
+        handleOutput(resultsBuilder, out.toString());
         resultsBuilder.addResult("output", out.toString());
+    }
+
+    private void handleOutput(CommandResultsBuilder resultsBuilder, String output) throws IOException {
+        String charsetName = GlobalConfiguration.OUTPUT_FILE_ENCODING.getCurrentValue();
+        Writer outputWriter = new OutputStreamWriter(resultsBuilder.getOutputStream(), charsetName);
+        outputWriter.write(output);
+        outputWriter.flush();
+    }
+
+    private String getSqlScript(String sql, String sqlFile) throws IOException, LiquibaseException {
+        if (sqlFile == null) {
+            return sql;
+        } else {
+            final PathHandlerFactory pathHandlerFactory = Scope.getCurrentScope().getSingleton(PathHandlerFactory.class);
+            Resource resource = pathHandlerFactory.getResource(sqlFile);
+            if (!resource.exists()) {
+                throw new LiquibaseException(FileUtil.getFileNotFoundMessage(sqlFile));
+            }
+            return StreamUtil.readStreamAsString(resource.openInputStream());
+        }
+    }
+
+    private String handleSelect(String sqlString, Executor executor) throws DatabaseException {
+        StringBuilder out = new StringBuilder();
+        List<Map<String, ?>> rows = executor.queryForList(new RawSqlStatement(sqlString));
+        out.append("Output of ").append(sqlString).append(":\n");
+        if (rows.isEmpty()) {
+            out.append("-- Empty Resultset --\n");
+        } else {
+            SortedSet<String> keys = new TreeSet<>();
+            for (Map<String, ?> row : rows) {
+                keys.addAll(row.keySet());
+            }
+            out.append(StringUtil.join(keys, " | ")).append(" |\n");
+
+            for (Map<String, ?> row : rows) {
+                for (String key : keys) {
+                    out.append(row.get(key)).append(" | ");
+                }
+                out.append("\n");
+            }
+        }
+        return out.toString();
     }
 }
