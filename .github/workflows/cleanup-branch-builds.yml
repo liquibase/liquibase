@@ -9,7 +9,7 @@ jobs:
   setup:
     runs-on: ubuntu-22.04
     outputs:
-      packages_to_delete: ${{ steps.get_packages.outputs.PACKAGES_TO_DELETE }}
+      PACKAGES_TO_DELETE: ${{ steps.get_packages.outputs.PACKAGES_TO_DELETE }}
     steps:
       - id: get_packages 
         run: |
