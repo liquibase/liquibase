@@ -1397,6 +1397,7 @@ public class Liquibase implements AutoCloseable {
                                            Writer out) throws LiquibaseException {
         changeLogParameters.setContexts(contexts);
         changeLogParameters.setLabels(labelExpression);
+        checkLiquibaseTables(false, getDatabaseChangeLog(true), null, null);
 
         try {
             Collection<RanChangeSet> unexpectedChangeSets = listUnexpectedChangeSets(contexts, labelExpression);
@@ -1540,6 +1541,7 @@ public class Liquibase implements AutoCloseable {
      */
     public void validate() throws LiquibaseException {
         DatabaseChangeLog changeLog = getDatabaseChangeLog(true);
+        checkLiquibaseTables(false, changeLog, null, null);
         if (changeLog != null) {
             changeLog.validate(database);
         }

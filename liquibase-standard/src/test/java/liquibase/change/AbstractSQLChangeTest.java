@@ -71,7 +71,7 @@ public class AbstractSQLChangeTest {
     }
 
     @Test
-    public void setEndDelmiter() {
+    public void setEndDelimiter() {
         AbstractSQLChange change = new ExampleAbstractSQLChange();
 
         change.setEndDelimiter("GO");
@@ -104,15 +104,15 @@ public class AbstractSQLChangeTest {
 
         ExampleAbstractSQLChange change = new ExampleAbstractSQLChange("SOME SQL");
         change.setSplitStatements(false);
-        assertNotEquals(baseCheckSum.toString(), change.generateCheckSum().toString());
+        assertEquals(baseCheckSum.toString(), change.generateCheckSum().toString());
 
         change = new ExampleAbstractSQLChange("SOME SQL");
         change.setEndDelimiter("X");
-        assertNotEquals(baseCheckSum.toString(), change.generateCheckSum().toString());
+        assertEquals(baseCheckSum.toString(), change.generateCheckSum().toString());
 
         change = new ExampleAbstractSQLChange("SOME SQL");
         change.setStripComments(true);
-        assertNotEquals(baseCheckSum.toString(), change.generateCheckSum().toString());
+        assertEquals(baseCheckSum.toString(), change.generateCheckSum().toString());
     }
 
 //    @Test
@@ -194,21 +194,21 @@ public class AbstractSQLChangeTest {
 
     @Test
     public void normalizeSql() throws IOException {
-        assertNormalizingStreamCorrect("single line String", "single line String");
-        assertNormalizingStreamCorrect("single line string with whitespace", "single line string with      whitespace");
-        assertNormalizingStreamCorrect("multiple line string", "\r\nmultiple\r\nline\r\nstring\r\n");
-        assertNormalizingStreamCorrect("multiple line string", "\rmultiple\rline\rstring\r");
-        assertNormalizingStreamCorrect("multiple line string", "\nmultiple\nline\nstring\n");
-        assertNormalizingStreamCorrect("a line with double newlines", "\n\na\nline \n with \r\n \r\n double \n \n \n \n newlines");
+        assertNormalizingStreamCorrect("singlelineString", "single line String");
+        assertNormalizingStreamCorrect("singlelinestringwithwhitespace", "single line string with      whitespace");
+        assertNormalizingStreamCorrect("multiplelinestring", "\r\nmultiple\r\nline\r\nstring\r\n");
+        assertNormalizingStreamCorrect("multiplelinestring", "\rmultiple\rline\rstring\r");
+        assertNormalizingStreamCorrect("multiplelinestring", "\nmultiple\nline\nstring\n");
+        assertNormalizingStreamCorrect("alinewithdoublenewlines", "\n\na\nline \n with \r\n \r\n double \n \n \n \n newlines");
 //        assertNormalizingStreamCorrect("", null);
         assertNormalizingStreamCorrect("", "    ");
         assertNormalizingStreamCorrect("", " \n \n \n   \n  ");
 
         //test quickBuffer -> resizingBuffer handoff
         String longSpaceString = "a line with a lot of: wait for it....                                                                                                                                                                                                                                                                                         spaces";
-        assertNormalizingStreamCorrect("a line with a lot of: wait for it.... spaces", longSpaceString);
+        assertNormalizingStreamCorrect("alinewithalotof:waitforit....spaces", longSpaceString);
 
-        String versionNormalized = "INSERT INTO recommendation_list(instanceId, name, publicId) SELECT DISTINCT instanceId, \"default\" as name, \"default\" as publicId FROM recommendation;";
+        String versionNormalized = "INSERTINTOrecommendation_list(instanceId,name,publicId)SELECTDISTINCTinstanceId,\"default\"asname,\"default\"aspublicIdFROMrecommendation;";
 
         String version1 = "INSERT INTO recommendation_list(instanceId, name, publicId)\n" +
                 "SELECT DISTINCT instanceId, \"default\" as name, \"default\" as publicId\n" +
@@ -228,8 +228,8 @@ public class AbstractSQLChangeTest {
     }
 
     private void assertNormalizingStreamCorrect(String expected, String toCorrect) throws IOException {
-        AbstractSQLChange.NormalizingStream normalizingStream = new AbstractSQLChange.NormalizingStream("x", true, false, new ByteArrayInputStream(toCorrect.getBytes()));
-        assertEquals("x:true:false:"+expected, StreamUtil.readStreamAsString(normalizingStream));
+        AbstractSQLChange.NormalizingStream normalizingStream = new AbstractSQLChange.NormalizingStream(new ByteArrayInputStream(toCorrect.getBytes()));
+        assertEquals(expected, StreamUtil.readStreamAsString(normalizingStream));
     }
 
 //    @Test
