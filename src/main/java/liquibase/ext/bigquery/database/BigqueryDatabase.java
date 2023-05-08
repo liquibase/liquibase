@@ -88,6 +88,16 @@ public class BigqueryDatabase extends AbstractJdbcDatabase {
     }
 
     @Override
+    protected String getQuotingStartCharacter() {
+        return "`";
+    }
+
+    @Override
+    protected String getQuotingEndCharacter() {
+        return "`";
+    }
+
+    @Override
     public boolean isCorrectDatabaseImplementation(DatabaseConnection conn) throws DatabaseException {
         return PRODUCT_NAME.trim().equalsIgnoreCase(conn.getDatabaseProductName().trim());
     }
