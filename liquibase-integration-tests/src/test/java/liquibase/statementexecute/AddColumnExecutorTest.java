@@ -1,19 +1,46 @@
 package liquibase.statementexecute;
 
+import liquibase.Scope;
+import liquibase.command.util.CommandUtil;
 import liquibase.database.Database;
 import liquibase.database.core.*;
 import liquibase.datatype.DataTypeFactory;
+import liquibase.extension.testing.testsystem.DatabaseTestSystem;
+import liquibase.extension.testing.testsystem.TestSystemFactory;
+import liquibase.lockservice.LockService;
+import liquibase.lockservice.LockServiceFactory;
 import liquibase.statement.*;
 import liquibase.statement.core.AddColumnStatement;
 import liquibase.statement.core.CreateTableStatement;
+import org.junit.Before;
 import org.junit.Test;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
 
 public class AddColumnExecutorTest extends AbstractExecuteTest {
 
     protected static final String TABLE_NAME = "table_name";
+
+    @Before
+    public void setup() {
+        Set<String> systems =
+                Scope.getCurrentScope().getSingleton(TestSystemFactory.class).getTestSystemNames();
+        for (String systemName : systems) {
+            DatabaseTestSystem system = (DatabaseTestSystem) Scope.getCurrentScope().getSingleton(TestSystemFactory.class).getTestSystem(systemName);
+            if (! system.shouldTest()) {
+                continue;
+            }
+            try {
+                LockService lockService = LockServiceFactory.getInstance().getLockService(system.getDatabaseFromFactory());
+                lockService.releaseLock();
+                CommandUtil.runDropAll(system);
+            } catch (Exception e) {
+                //ok
+            }
+        }
+    }
 
     @Override
     protected List<? extends SqlStatement> setupStatements(Database database) {
