@@ -15,7 +15,7 @@
     <dependencies>
         <dependency>
             <groupId>org.liquibase</groupId>
-            <artifactId>liquibase-core</artifactId>
+            <artifactId>liquibase-standard</artifactId>
             <version>${project.version}</version>
         </dependency>
 
@@ -23,6 +23,7 @@
             <groupId>info.picocli</groupId>
             <artifactId>picocli</artifactId>
             <version>4.7.1</version>
+            <scope>compile</scope>
         </dependency>
     </dependencies>
 
