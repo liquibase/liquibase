@@ -1336,6 +1336,7 @@ public class Liquibase implements AutoCloseable {
             statusCommand.addArgumentValue(DbUrlConnectionCommandStep.DATABASE_ARG, getDatabase());
             statusCommand.addArgumentValue(DatabaseChangelogCommandStep.CHANGELOG_PARAMETERS, changeLogParameters);
             statusCommand.addArgumentValue(StatusCommandStep.VERBOSE_ARG, verbose);
+            statusCommand.addArgumentValue(DatabaseChangelogCommandStep.CHANGELOG_FILE_ARG, changeLogFile);
             statusCommand.setOutput(new WriterOutputStream(out, GlobalConfiguration.OUTPUT_FILE_ENCODING.getCurrentValue()));
             statusCommand.execute();
         });
@@ -1377,6 +1378,7 @@ public class Liquibase implements AutoCloseable {
                                            Writer out) throws LiquibaseException {
         changeLogParameters.setContexts(contexts);
         changeLogParameters.setLabels(labelExpression);
+        checkLiquibaseTables(false, getDatabaseChangeLog(true), null, null);
 
         try {
             Collection<RanChangeSet> unexpectedChangeSets = listUnexpectedChangeSets(contexts, labelExpression);
@@ -1520,6 +1522,7 @@ public class Liquibase implements AutoCloseable {
      */
     public void validate() throws LiquibaseException {
         DatabaseChangeLog changeLog = getDatabaseChangeLog(true);
+        checkLiquibaseTables(false, changeLog, null, null);
         if (changeLog != null) {
             changeLog.validate(database);
         }
