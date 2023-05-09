@@ -19,7 +19,7 @@ class CommandLineUtilsTest extends Specification {
         then:
         banner.contains("Get documentation at docs.liquibase.com")
         banner.contains(coreBundle.getString("starting.liquibase.at.timestamp").replace("%s", ""))
-        banner.toLowerCase().contains("version ")
+        banner.contains(coreBundle.getString("liquibase.version.builddate").replaceFirst("%s.*", ""))
     }
 
     def "getBanner with banner disabled"() {
@@ -31,6 +31,6 @@ class CommandLineUtilsTest extends Specification {
         then:
         !banner.contains("Get documentation at docs.liquibase.com")
         banner.contains(coreBundle.getString("starting.liquibase.at.timestamp").replace("%s", ""))
-        banner.toLowerCase().contains("version ")
+        banner.contains(coreBundle.getString("liquibase.version.builddate").replaceFirst("%s.*", ""))
     }
 }
