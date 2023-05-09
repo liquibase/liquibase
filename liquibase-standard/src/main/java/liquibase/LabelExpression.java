@@ -82,8 +82,8 @@ public class LabelExpression {
      * Returns true if the passed runtime labels match this label expression
      */
     public boolean matches(Labels runtimeLabels) {
-        if ((runtimeLabels == null) || runtimeLabels.isEmpty()) {
-            return true;
+        if (runtimeLabels == null) {
+            runtimeLabels = new Labels();
         }
         if (this.labels.isEmpty()) {
             return true;
@@ -110,9 +110,7 @@ public class LabelExpression {
         if (changesetLabels == null || changesetLabels.isEmpty()) {
             return true;
         }
-        if (labelExpression == null || labelExpression.isEmpty()) {
-            return true;
-        }
+
         for (Labels changesetLabel : changesetLabels) {
             if (!labelExpression.matches(changesetLabel)) {
                 return false;
@@ -122,6 +120,9 @@ public class LabelExpression {
     }
 
     private boolean matches(String expression, Labels runtimeLabels) {
+        if (runtimeLabels == null) {
+            runtimeLabels = new Labels();
+        }
         return ExpressionMatcher.matches(expression, runtimeLabels.getLabels());
     }
 
