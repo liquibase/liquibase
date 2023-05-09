@@ -16,19 +16,14 @@ No actions is required for the vast majority of users. However, for users who re
 
 ## Enhancements
 * Improve liquibase-core pom.xml handling (DAT-14546) by @nvoxland in https://github.com/liquibase/liquibase/pull/4169
-* DAT-14367 by @sayaliM0412 in https://github.com/liquibase/liquibase/pull/4186
-* New test fixes by @wwillard7800 in https://github.com/liquibase/liquibase/pull/4199
-* Update release-published.yml by @jnewton03 in https://github.com/liquibase/liquibase/pull/4206
+* DAT-14367 - Restructured Liquibase modules by @sayaliM0412 in https://github.com/liquibase/liquibase/pull/4186
 * Adding support for Postgresql generated columns. by @filipelautert in https://github.com/liquibase/liquibase/pull/4185
-* update changelog to 4.22 by @suryaaki2 in https://github.com/liquibase/liquibase/pull/4231
 * DAT-13972: add rollback-on-error ability and its MDC to update-one-changeset command by @StevenMassaro in https://github.com/liquibase/liquibase-pro/pull/934
-* update pom.xml by @sayaliM0412 in https://github.com/liquibase/liquibase-pro/pull/929
 * MDC for update-testing-rollback by @StevenMassaro in https://github.com/liquibase/liquibase-pro/pull/943
-* update pro key for test by @StevenMassaro in https://github.com/liquibase/liquibase-pro/pull/962
+* Update pro key for test by @StevenMassaro in https://github.com/liquibase/liquibase-pro/pull/962
 * DAT-12568 pro license key automation by @jnewton03 in https://github.com/liquibase/liquibase-pro/pull/966
 * DAT- 13285 :: Update stored logic checksum logic to match new OSS checksum logic for procedures by @MalloD12 in https://github.com/liquibase/liquibase-pro/pull/931
 * DAT-14674: add help test for pro side by @StevenMassaro in https://github.com/liquibase/liquibase-pro/pull/965
-* update pro xsd and schema to 4.22 by @suryaaki2 in https://github.com/liquibase/liquibase-pro/pull/971
 
 ## Security, Driver and other updates
 * Bump maven-surefire-plugin from 2.22.2 to 3.0.0 by @filipelautert in https://github.com/liquibase/liquibase/pull/4113
@@ -48,7 +43,6 @@ No actions is required for the vast majority of users. However, for users who re
 * Fixes undesired change to CreateProcedureChange checksum generation by @filipelautert in https://github.com/liquibase/liquibase/pull/4161
 * Fixed #3722 auto-increment column starting with a custom value no longer works with H2 v1 by @quonas in https://github.com/liquibase/liquibase/pull/4013
 * Fix addDefaultValue checksum calculation when providing schema name by @filipelautert in https://github.com/liquibase/liquibase/pull/4203
-* Fix flaky postgres tests by @abrackx in https://github.com/liquibase/liquibase/pull/4234
 * DAT-13953: fix integration name log message for native tools by @StevenMassaro in https://github.com/liquibase/liquibase-pro/pull/937
 * Fix tests because of output change from Postgres 9.6 to 15. by @filipelautert in https://github.com/liquibase/liquibase-pro/pull/970
 * DAT-14642 - Fix Update-one-changeset problem that shows up during checksum upgrade by @filipelautert in https://github.com/liquibase/liquibase-pro/pull/968
@@ -58,12 +52,11 @@ No actions is required for the vast majority of users. However, for users who re
 * SnowflakeDatabase allows catalog name in identifiers in https://github.com/liquibase/liquibase/pull/4092
 * Change the case of sys.extended_properties. by @jccampanero in https://github.com/liquibase/liquibase/pull/4101
 * Load properties from defaults-file fixing variable replacement for refactored commands by @filipelautert in https://github.com/liquibase/liquibase/pull/4204
-* remove helper commands from help output (DAT-14674) by @StevenMassaro in https://github.com/liquibase/liquibase/pull/4207
+* Remove helper commands from help output (DAT-14674) by @StevenMassaro in https://github.com/liquibase/liquibase/pull/4207
 * DAT-14177: add changesetsRolledback for failed rollback-on-error rollback by @StevenMassaro in https://github.com/liquibase/liquibase-pro/pull/932
 
 ## New Contributors
 * @sayaliM0412 made their first contribution in https://github.com/liquibase/liquibase-pro/pull/929
-* @MalloD12 made their first contribution in https://github.com/liquibase/liquibase-pro/pull/931
 * @jccampanero made their first contribution in https://github.com/liquibase/liquibase/pull/4019
 
 ### Get Certified
