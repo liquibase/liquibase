@@ -37,9 +37,24 @@ jobs:
       - run: |
           echo "Publishing version ${{ steps.collect-data.outputs.version }} from ${{ steps.collect-data.outputs.tag }}"
 
+  manual_trigger_deployment:
+    name: Manually trigger deployment 
+    needs: [ setup ]
+    runs-on: ubuntu-22.04
+    steps:
+      - uses: trstringer/manual-approval@v1
+        with:
+          secret: ${{ secrets.GITHUB_TOKEN }}
+          approvers: suryaaki2,XDelphiGrl,jnewton03,kristyldatical
+          minimum-approvals: 2
+          issue-title: "Deploying ${version} to sonatype"
+          issue-body: "Please approve or deny the deployment of version ${version}"
+          additional-approved-words: 'lgtm,✅,👍,proceed,shipit,:shipit:'
+          additional-denied-words: 'stop,error,failed,fail,broken,:x:,👎'
+
   deploy_maven:
     name: Deploy to Maven
-    needs: [ setup ]
+    needs: [ setup, manual_trigger_deployment ]
     runs-on: ubuntu-22.04
     steps:
       - name: Download release assets
@@ -282,7 +297,7 @@ jobs:
         # aws s3 sync syncs directories and S3 prefixes.
         run: |
           aws s3 sync liquibase-pro-repo/pro/src/main/resources/www.liquibase.org/xml/ns/pro/ s3://liquibaseorg-origin/xml/ns/pro/ --content-type application/octet-stream --only-show-errors
-          aws s3 sync liquibase-core-repo/liquibase-core/src/main/resources/www.liquibase.org/xml/ns/dbchangelog/ s3://liquibaseorg-origin/xml/ns/dbchangelog/ --content-type application/octet-stream --only-show-errors
+          aws s3 sync liquibase-core-repo/liquibase-standard/src/main/resources/www.liquibase.org/xml/ns/dbchangelog/ s3://liquibaseorg-origin/xml/ns/dbchangelog/ --content-type application/octet-stream --only-show-errors
 
 
       - name: Index.htm file upload

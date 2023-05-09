@@ -16,17 +16,20 @@
             <artifactId>liquibase-core</artifactId>
             <version>${project.version}</version>
         </dependency>
+
+        <!-- we have a liquibase-standard dependency here for tests-jar -->
         <dependency>
             <groupId>org.liquibase</groupId>
-            <artifactId>liquibase-snowflake</artifactId>
+            <artifactId>liquibase-standard</artifactId>
             <version>${project.version}</version>
+            <type>test-jar</type>
+            <scope>test</scope>
         </dependency>
 
         <dependency>
-            <groupId>org.liquibase</groupId>
-            <artifactId>liquibase-core</artifactId>
-            <version>${project.version}</version>
-            <type>test-jar</type>
+            <groupId>info.picocli</groupId>
+            <artifactId>picocli</artifactId>
+            <version>4.7.1</version>
             <scope>test</scope>
         </dependency>
 
