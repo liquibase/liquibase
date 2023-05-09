@@ -24,6 +24,7 @@ import liquibase.logging.mdc.MdcObject;
 import liquibase.logging.mdc.MdcValue;
 import liquibase.logging.mdc.customobjects.ChangesetsUpdated;
 import liquibase.util.ShowSummaryUtil;
+import liquibase.util.StringUtil;
 
 import java.io.IOException;
 import java.io.OutputStream;
@@ -106,6 +107,11 @@ public abstract class AbstractUpdateCommandStep extends AbstractCommandStep impl
 
             hubHandler.postUpdateHub(bufferLog);
             resultsBuilder.addResult("statusCode", 0);
+            if (StringUtil.isNotEmpty(databaseChangeLog.getLogicalFilePath())) {
+                Scope.getCurrentScope().addMdcValue(MdcKey.CHANGELOG_FILE, databaseChangeLog.getLogicalFilePath());
+            } else {
+                Scope.getCurrentScope().addMdcValue(MdcKey.CHANGELOG_FILE, changeLogFile);
+            }
             logDeploymentOutcomeMdc(defaultChangeExecListener, true);
             postUpdateLog();
         } catch (Exception e) {
