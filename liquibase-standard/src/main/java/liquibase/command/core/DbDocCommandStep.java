@@ -101,7 +101,9 @@ public class DbDocCommandStep extends AbstractCommandStep {
             final PathHandlerFactory pathHandlerFactory = Scope.getCurrentScope().getSingleton(PathHandlerFactory.class);
             Resource resource = pathHandlerFactory.getResource(outputDirectory);
             visitor.writeHTML(resource, resourceAccessor, catalogAndSchemas);
+            resultsBuilder.addResult("statusCode", 0);
         } catch (IOException e) {
+            resultsBuilder.addResult("statusCode", 1);
             throw new LiquibaseException(e);
         }
     }
@@ -127,6 +129,7 @@ public class DbDocCommandStep extends AbstractCommandStep {
         return new CatalogAndSchema[]{new CatalogAndSchema(null, null)};
     }
 
+    // Unsure if this method is still needed with the refactoring, but I'm leaving it in now to keep the logic the same.
     public void checkLiquibaseTables(boolean updateExistingNullChecksums, DatabaseChangeLog databaseChangeLog,
                                      Contexts contexts, LabelExpression labelExpression, Database database) throws LiquibaseException {
         ChangeLogHistoryService changeLogHistoryService = ChangeLogHistoryServiceFactory.getInstance().getChangeLogService(database);
