@@ -1329,7 +1329,9 @@ public class LiquibaseCommandLine {
             }
             banner.setPath(liquibaseHome);
             mdcVersion.setLiquibaseVersion(banner);
-            Scope.getCurrentScope().addMdcValue(MdcKey.VERSION, mdcVersion);
+            try (MdcObject version = Scope.getCurrentScope().addMdcValue(MdcKey.VERSION, mdcVersion)) {
+                Scope.getCurrentScope().getLog(getClass()).info("Generated version info");
+            }
         }
 
         private LibraryInfo getLibraryInfo(File pathEntryFile) throws IOException {
