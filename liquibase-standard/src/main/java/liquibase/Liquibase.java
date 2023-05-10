@@ -1503,8 +1503,8 @@ public class Liquibase implements AutoCloseable {
                 .addArgumentValue(DbUrlConnectionCommandStep.DATABASE_ARG, Liquibase.this.getDatabase())
                 .addArgumentValue(DatabaseChangelogCommandStep.CHANGELOG_FILE_ARG, changeLogFile)
                 .addArgumentValue(DatabaseChangelogCommandStep.CHANGELOG_PARAMETERS, changeLogParameters)
-                .addArgumentValue(DbDocCommandStep.CONTEXTS_ARG, (contexts != null ? contexts.toString() : null))
-                .addArgumentValue(DbDocCommandStep.LABEL_FILTER_ARG, (labelExpression != null ? labelExpression.getOriginalString() : null))
+                .addArgumentValue(DatabaseChangelogCommandStep.CONTEXTS_ARG, (contexts != null ? contexts.toString() : null))
+                .addArgumentValue(DatabaseChangelogCommandStep.LABEL_FILTER_ARG, (labelExpression != null ? labelExpression.getOriginalString() : null))
                 .addArgumentValue(DbDocCommandStep.CATALOG_AND_SCHEMAS_ARG, schemaList)
                 .addArgumentValue(DbDocCommandStep.OUTPUT_DIRECTORY_ARG, outputDirectory)
                 .execute());

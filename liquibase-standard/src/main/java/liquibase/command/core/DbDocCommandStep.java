@@ -29,8 +29,6 @@ public class DbDocCommandStep extends AbstractCommandStep {
     public static final String[] COMMAND_NAME = {"dbDoc"};
     public static final CommandArgumentDefinition<String> OUTPUT_DIRECTORY_ARG;
     public static final CommandArgumentDefinition<String> SCHEMAS_ARG;
-    public static final CommandArgumentDefinition<String> LABEL_FILTER_ARG;
-    public static final CommandArgumentDefinition<String> CONTEXTS_ARG;
     public static final CommandArgumentDefinition<CatalogAndSchema[]> CATALOG_AND_SCHEMAS_ARG;
 
     static {
@@ -45,13 +43,6 @@ public class DbDocCommandStep extends AbstractCommandStep {
         CATALOG_AND_SCHEMAS_ARG = builder.argument("catalogAndSchemas", CatalogAndSchema[].class)
                 .hidden()
                 .optional()
-                .build();
-        LABEL_FILTER_ARG = builder.argument("labelFilter", String.class)
-                .addAlias("labels")
-                .description("Changeset labels to match")
-                .build();
-        CONTEXTS_ARG = builder.argument("contexts", String.class)
-                .description("Changeset contexts to match")
                 .build();
     }
 
@@ -74,22 +65,19 @@ public class DbDocCommandStep extends AbstractCommandStep {
     public void run(CommandResultsBuilder resultsBuilder) throws Exception {
         final CommandScope commandScope = resultsBuilder.getCommandScope();
         final Database database = (Database) commandScope.getDependency(Database.class);
-        final Contexts contexts = new Contexts(commandScope.getArgumentValue(CONTEXTS_ARG));
-        final LabelExpression labelExpression = new LabelExpression(commandScope.getArgumentValue(LABEL_FILTER_ARG));
         final ChangeLogParameters changeLogParameters = (ChangeLogParameters) commandScope.getDependency(ChangeLogParameters.class);
         final String outputDirectory = commandScope.getArgumentValue(OUTPUT_DIRECTORY_ARG);
         final String schemaList = commandScope.getArgumentValue(SCHEMAS_ARG);
         final ResourceAccessor resourceAccessor = Scope.getCurrentScope().getResourceAccessor();
         final CatalogAndSchema[] catalogAndSchemaArg = commandScope.getArgumentValue(CATALOG_AND_SCHEMAS_ARG);
         final CatalogAndSchema[] catalogAndSchemas = getCatalogAndSchema(schemaList, catalogAndSchemaArg, database);
+        final Contexts contexts = changeLogParameters.getContexts();
+        final LabelExpression labelExpression = changeLogParameters.getLabels();
 
         Scope.getCurrentScope().getLog(getClass()).info("Generating Database Documentation");
-        changeLogParameters.setContexts(contexts);
-        changeLogParameters.setLabels(labelExpression);
 
         try {
             final DatabaseChangeLog databaseChangeLog = (DatabaseChangeLog) commandScope.getDependency(DatabaseChangeLog.class);
-            checkLiquibaseTables(false, databaseChangeLog, new Contexts(), new LabelExpression(), database);
 
             databaseChangeLog.validate(database, contexts, labelExpression);
 
@@ -127,16 +115,5 @@ public class DbDocCommandStep extends AbstractCommandStep {
             return schemaList.toArray(new CatalogAndSchema[0]);
         }
         return new CatalogAndSchema[]{new CatalogAndSchema(null, null)};
-    }
-
-    // Unsure if this method is still needed with the refactoring, but I'm leaving it in now to keep the logic the same.
-    public void checkLiquibaseTables(boolean updateExistingNullChecksums, DatabaseChangeLog databaseChangeLog,
-                                     Contexts contexts, LabelExpression labelExpression, Database database) throws LiquibaseException {
-        ChangeLogHistoryService changeLogHistoryService = ChangeLogHistoryServiceFactory.getInstance().getChangeLogService(database);
-        changeLogHistoryService.init();
-        if (updateExistingNullChecksums) {
-            changeLogHistoryService.upgradeChecksums(databaseChangeLog, contexts, labelExpression);
-        }
-        LockServiceFactory.getInstance().getLockService(database).init();
     }
 }
