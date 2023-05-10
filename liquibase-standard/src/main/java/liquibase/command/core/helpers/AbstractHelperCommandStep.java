@@ -10,8 +10,11 @@ public abstract class AbstractHelperCommandStep extends AbstractCommandStep {
 
     @Override
     public void adjustCommandDefinition(CommandDefinition commandDefinition) {
-        if (commandDefinition.getPipeline().size() == 1) {
-            commandDefinition.setInternal(true);
+        // Some helper classes require other helpers (as dependencies). We only want to hide entire pipelines where all the commands are helpers.
+        boolean allHelpers = commandDefinition.getPipeline().stream().allMatch(cs -> cs instanceof AbstractHelperCommandStep);
+
+        if (allHelpers) {
+            commandDefinition.setHidden(true);
         }
     }
 
