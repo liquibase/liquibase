@@ -287,13 +287,11 @@ public class CommandScope {
     }
 
     /**
-     * Returns a string of the entire defined command names, joined together with the specified delimiter.
+     * Returns a string of the entire defined command names, joined together with spaces
      * @param commandStep the command step to get the name of
-     * @param delimiter the delimiter to use for joining the command names
-     * @return the full command step name definition delimited by the specified delimiter or an empty string if there are
-     * no defined command names
+     * @return the full command step name definition delimited by spaces or an empty string if there are no defined command names
      */
-    public static String getCommandStepName(CommandStep commandStep, String delimiter) {
+    private String getCommandStepName(CommandStep commandStep) {
         StringBuilder commandStepName = new StringBuilder();
         String[][] commandDefinition = commandStep.defineCommandNames();
         if (commandDefinition != null) {
@@ -301,18 +299,10 @@ public class CommandScope {
                 if (commandStepName.length() != 0) {
                     commandStepName.append(" ");
                 }
-                commandStepName.append(String.join(delimiter, commandNames));
+                commandStepName.append(String.join(" ", commandNames));
             }
         }
         return commandStepName.toString();
-    }
-    /**
-     * Returns a string of the entire defined command names, joined together with spaces
-     * @param commandStep the command step to get the name of
-     * @return the full command step name definition delimited by spaces or an empty string if there are no defined command names
-     */
-    public static String getCommandStepName(CommandStep commandStep) {
-        return getCommandStepName(commandStep, " ");
     }
 
     /**
