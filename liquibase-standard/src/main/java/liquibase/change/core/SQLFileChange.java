@@ -1,10 +1,8 @@
 package liquibase.change.core;
 
+import liquibase.GlobalConfiguration;
 import liquibase.Scope;
-import liquibase.change.AbstractSQLChange;
-import liquibase.change.ChangeMetaData;
-import liquibase.change.DatabaseChange;
-import liquibase.change.DatabaseChangeProperty;
+import liquibase.change.*;
 import liquibase.changelog.ChangeLogParameters;
 import liquibase.database.Database;
 import liquibase.exception.SetupException;
@@ -15,8 +13,10 @@ import liquibase.util.ObjectUtil;
 import liquibase.util.StreamUtil;
 import liquibase.util.StringUtil;
 
+import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.nio.charset.Charset;
 
 /**
  * Represents a Change for custom SQL stored in a File.
@@ -160,5 +160,26 @@ public class SQLFileChange extends AbstractSQLChange {
                 "path='" + path + '\'' +
                 ", relativeToChangelogFile=" + relativeToChangelogFile +
                 '}';
+    }
+
+    @Override
+    public CheckSum generateCheckSum() {
+        InputStream stream = null;
+        try {
+            String sqlContent = getSql();
+            Charset encoding = GlobalConfiguration.FILE_ENCODING.getCurrentValue();
+            stream = new ByteArrayInputStream(sqlContent.getBytes(encoding));
+            CheckSum checkSum = CheckSum.compute(new AbstractSQLChange.NormalizingStream(stream), false);
+            return checkSum;
+        }
+        finally {
+            if (stream != null) {
+                try {
+                    stream.close();
+                } catch (IOException ignore) {
+                    // Do nothing
+                }
+            }
+        }
     }
 }
