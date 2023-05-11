@@ -75,7 +75,7 @@ liquibase:
 
       postgresql:
         imageName: postgres
-        version: 9.6
+        version: 15
 
       sqlite:
         url: "jdbc:sqlite::memory:"
