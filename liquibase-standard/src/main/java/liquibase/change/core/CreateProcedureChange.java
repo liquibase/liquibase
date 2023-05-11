@@ -4,6 +4,7 @@ import liquibase.GlobalConfiguration;
 import liquibase.Scope;
 import liquibase.change.*;
 import liquibase.changelog.ChangeLogParameters;
+import liquibase.changelog.PropertyExpandingStream;
 import liquibase.database.Database;
 import liquibase.database.DatabaseList;
 import liquibase.database.core.*;
@@ -19,7 +20,7 @@ import liquibase.util.StringUtil;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.UnsupportedEncodingException;
+import java.nio.charset.Charset;
 import java.util.Map;
 
 @DatabaseChange(name = "createProcedure", description = "Defines a stored procedure.", priority = ChangeMetaData.PRIORITY_DEFAULT)
@@ -238,39 +239,31 @@ public class CreateProcedureChange extends AbstractChange implements DbmsTargete
      */
     @Override
     public CheckSum generateCheckSum() {
-        if (this.path == null) {
-            return super.generateCheckSum();
-        }
+        return generateCheckSum(this.procedureText);
+    }
 
+    protected CheckSum generateCheckSum(String sqlText) {
         InputStream stream = null;
+        CheckSum checkSum;
         try {
-            stream = openSqlStream();
+            if (getPath() == null) {
+                String procedureText = sqlText;
+                Charset encoding = GlobalConfiguration.FILE_ENCODING.getCurrentValue();
+                if (procedureText != null) {
+                    stream = new ByteArrayInputStream(sqlText.getBytes(encoding));
+                }
+            }
+            else {
+                stream = openSqlStream();
+                stream = new PropertyExpandingStream(this.getChangeSet(), stream);
+            }
+            checkSum = CheckSum.compute(new AbstractSQLChange.NormalizingStream(stream), false);
+            return CheckSum.compute(super.generateCheckSum().toString() + ":" + checkSum);
+
         } catch (IOException e) {
             throw new UnexpectedLiquibaseException(e);
         }
-
-        try {
-            String procedureText = this.procedureText;
-            if ((stream == null) && (procedureText == null)) {
-                procedureText = "";
-            }
-
-            String encoding = GlobalConfiguration.OUTPUT_FILE_ENCODING.getCurrentValue();
-            if (procedureText != null) {
-                try {
-                    stream = new ByteArrayInputStream(procedureText.getBytes(encoding));
-                } catch (UnsupportedEncodingException e) {
-                    throw new AssertionError(encoding +
-                        " is not supported by the JVM, this should not happen according to the JavaDoc of " +
-                        "the Charset class"
-                    );
-                }
-            }
-
-            CheckSum checkSum = CheckSum.compute(new AbstractSQLChange.NormalizingStream(";", false, false, stream), false);
-
-            return CheckSum.compute(super.generateCheckSum().toString() + ":" + checkSum);
-        } finally {
+        finally {
             if (stream != null) {
                 try {
                     stream.close();
@@ -279,7 +272,32 @@ public class CreateProcedureChange extends AbstractChange implements DbmsTargete
                 }
             }
         }
+    }
 
+    /**
+     * Listing SQL content fields (for example procedureText, triggerBody, etc.) we don't want to include as part of
+     * the checksum computes, because have a separate part that computes that checksum for that part doing the
+     * "normalizing" logic, so it is not impacted by the reformatting of the SQL. We are also excluding fields from the
+     * checksum generation which does not have a direct impact on the DB, such as dbms, path, comments, etc.
+     *
+     * Besides it has an impact on the DB, we have decided to do not add replaceIfExists as part of this list of fields
+     * as we are already avoiding the recalculation of the checksum by listing the main content fields of the different
+     * change types.
+     */
+    @Override
+    public String[] getExcludedFieldFilters() {
+        return new String[]{
+                "path",
+                "dbms",
+                "relativeToChangelogFile",
+                "procedureText",
+                "encoding",
+                "comments",
+                "triggerBody",
+                "functionBody",
+                "packageText",
+                "packageBodyText"
+        };
     }
 
     @Override
