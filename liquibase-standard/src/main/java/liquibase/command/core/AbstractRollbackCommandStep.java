@@ -9,6 +9,7 @@ import liquibase.changelog.visitor.ChangeExecListener;
 import liquibase.changelog.visitor.ChangeSetVisitor;
 import liquibase.changelog.visitor.RollbackVisitor;
 import liquibase.command.*;
+import liquibase.command.core.helpers.DatabaseChangelogCommandStep;
 import liquibase.database.Database;
 import liquibase.exception.DatabaseException;
 import liquibase.exception.LiquibaseException;
@@ -21,6 +22,7 @@ import liquibase.logging.mdc.MdcValue;
 import liquibase.logging.mdc.customobjects.ChangesetsRolledback;
 import liquibase.resource.Resource;
 import liquibase.util.StreamUtil;
+import liquibase.util.StringUtil;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -49,6 +51,7 @@ public abstract class AbstractRollbackCommandStep extends AbstractCommandStep {
     protected void doRollback(CommandResultsBuilder resultsBuilder, List<RanChangeSet> ranChangeSetList,
                               ChangeSetFilter changeSetFilter) throws Exception {
         CommandScope commandScope = resultsBuilder.getCommandScope();
+        String changelogFile = commandScope.getArgumentValue(DatabaseChangelogCommandStep.CHANGELOG_FILE_ARG);
         String rollbackScript = commandScope.getArgumentValue(ROLLBACK_SCRIPT_ARG);
         Scope.getCurrentScope().addMdcValue(MdcKey.ROLLBACK_SCRIPT, rollbackScript);
 
@@ -66,7 +69,7 @@ public abstract class AbstractRollbackCommandStep extends AbstractCommandStep {
                     new DbmsChangeSetFilter(database),
                     changeSetFilter);
 
-            doRollback(database, rollbackScript, logIterator, changeLogParameters, databaseChangeLog,
+            doRollback(database, changelogFile, rollbackScript, logIterator, changeLogParameters, databaseChangeLog,
                     (ChangeExecListener) commandScope.getDependency(ChangeExecListener.class));
         }
         catch (Throwable t) {
@@ -81,22 +84,30 @@ public abstract class AbstractRollbackCommandStep extends AbstractCommandStep {
      * Actually perform the rollback operation. Determining which changesets to roll back is the responsibility of the
      * logIterator.
      */
-    public static void doRollback(Database database, String rollbackScript, ChangeLogIterator logIterator,ChangeLogParameters changeLogParameters,
+    public static void doRollback(Database database, String changelogFile, String rollbackScript, ChangeLogIterator logIterator,ChangeLogParameters changeLogParameters,
                                   DatabaseChangeLog databaseChangeLog, ChangeExecListener changeExecListener) throws Exception {
         if (rollbackScript == null) {
             List<ChangesetsRolledback.ChangeSet> processedChangesets = new ArrayList<>();
-
             logIterator.run(new RollbackVisitor(database, changeExecListener, processedChangesets), new RuntimeEnvironment(database, changeLogParameters.getContexts(), changeLogParameters.getLabels()));
-
+            addChangelogFileToMdc(changelogFile, databaseChangeLog);
             Scope.getCurrentScope().addMdcValue(MdcKey.CHANGESETS_ROLLED_BACK, new ChangesetsRolledback(processedChangesets), false);
         } else {
             List<ChangeSet> changeSets = determineRollbacks(database, logIterator, changeLogParameters);
             executeRollbackScript(database, rollbackScript, changeSets, databaseChangeLog, changeLogParameters, changeExecListener);
             removeRunStatus(changeSets, database);
+            addChangelogFileToMdc(changelogFile, databaseChangeLog);
             Scope.getCurrentScope().addMdcValue(MdcKey.CHANGESETS_ROLLED_BACK, ChangesetsRolledback.fromChangesetList(changeSets));
         }
         try (MdcObject deploymentOutcomeMdc = Scope.getCurrentScope().getMdcManager().put(MdcKey.DEPLOYMENT_OUTCOME, MdcValue.COMMAND_SUCCESSFUL)) {
             Scope.getCurrentScope().getLog(AbstractRollbackCommandStep.class).info("Rollback command completed successfully.");
+        }
+    }
+
+    private static void addChangelogFileToMdc(String changelogFile, DatabaseChangeLog databaseChangeLog) {
+        if (StringUtil.isNotEmpty(databaseChangeLog.getLogicalFilePath())) {
+            Scope.getCurrentScope().addMdcValue(MdcKey.CHANGELOG_FILE, databaseChangeLog.getLogicalFilePath());
+        } else {
+            Scope.getCurrentScope().addMdcValue(MdcKey.CHANGELOG_FILE, changelogFile);
         }
     }
 
