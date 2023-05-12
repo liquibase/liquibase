@@ -1,11 +1,15 @@
 package liquibase.command.core;
 
+import liquibase.Scope;
 import liquibase.changelog.ChangeLogHistoryService;
 import liquibase.changelog.ChangeLogHistoryServiceFactory;
 import liquibase.changelog.RanChangeSet;
 import liquibase.command.*;
 import liquibase.database.Database;
 import liquibase.exception.LiquibaseException;
+import liquibase.logging.mdc.MdcKey;
+import liquibase.logging.mdc.MdcObject;
+import liquibase.logging.mdc.customobjects.History;
 import liquibase.util.TableOutput;
 
 import java.io.PrintWriter;
@@ -63,11 +67,14 @@ public class InternalHistoryCommandStep extends AbstractCommandStep {
 
         ChangeLogHistoryService historyService = ChangeLogHistoryServiceFactory.getInstance().getChangeLogService(database);
 
-        output.println("Liquibase History for " + database.getConnection().getURL());
+        String headerMsg = "Liquibase History for " + database.getConnection().getURL();
+        output.println(headerMsg);
         output.println("");
 
         ReportPrinter deployment = null;
-        for (RanChangeSet ranChangeSet : historyService.getRanChangeSets()) {
+        List<RanChangeSet> ranChangeSets = historyService.getRanChangeSets();
+        List<History.Changeset> mdcChangesets = new ArrayList<>(ranChangeSets.size());
+        for (RanChangeSet ranChangeSet : ranChangeSets) {
             final String thisDeploymentId = ranChangeSet.getDeploymentId();
             if (deployment == null || !Objects.equals(thisDeploymentId, deployment.getDeploymentId())) {
                 if (deployment != null) {
@@ -77,12 +84,17 @@ public class InternalHistoryCommandStep extends AbstractCommandStep {
                 deploymentHistory.deployments.add(deployment);
             }
             deployment.addChangeSet(ranChangeSet);
+            mdcChangesets.add(new History.Changeset(ranChangeSet));
         }
 
         if (deployment == null) {
             output.println("No changesets deployed");
         } else {
             deployment.printReport(output);
+        }
+
+        try (MdcObject historyMdcObject = Scope.getCurrentScope().addMdcValue(MdcKey.HISTORY, new History(database.getConnection().getURL(), ranChangeSets.size(), mdcChangesets))) {
+            Scope.getCurrentScope().getLog(getClass()).fine(headerMsg);
         }
 
         resultsBuilder.addResult(DEPLOYMENTS_RESULT, deploymentHistory);
