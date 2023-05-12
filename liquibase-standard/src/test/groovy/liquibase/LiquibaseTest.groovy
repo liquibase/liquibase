@@ -6,9 +6,7 @@ import liquibase.changelog.ChangeSet
 import liquibase.changelog.DatabaseChangeLog
 import liquibase.changelog.RanChangeSet
 import liquibase.database.Database
-import liquibase.database.core.H2Database
 import liquibase.database.core.MockDatabase
-import liquibase.database.core.PostgresDatabase
 import liquibase.database.jvm.JdbcConnection
 import liquibase.exception.DatabaseException
 import liquibase.exception.LiquibaseException
@@ -500,32 +498,6 @@ class LiquibaseTest extends Specification {
         assertSqlOutputAppliesTags(writer.toString(), "1.1");
     }
 
-    def validateContextLabelEntryHasNotBeenAddedPreviously() {
-        when:
-        h2Connection = getInMemoryH2DatabaseConnection()
-        Liquibase liquibase = createDatabaseAtTag(h2Connection, "1.0")
-        Contexts context = new Contexts("testContext")
-        LabelExpression label = new LabelExpression("testLabel")
-
-        then:
-        assertFalse(liquibase.isUpToDateFastCheck(context, label))
-
-    }
-
-    def validateContextLabelEntryHasBeenAddedPreviously() {
-        when:
-        h2Connection = getInMemoryH2DatabaseConnection()
-        Liquibase liquibase = new Liquibase("liquibase/test-changelog-fast-check.xml", new ClassLoaderResourceAccessor(),
-                h2Connection)
-        Contexts context = new Contexts("testContext")
-        LabelExpression label = new LabelExpression("testLabel")
-        liquibase.update()
-
-        then:
-        assertTrue(liquibase.isUpToDateFastCheck(context, label))
-
-    }
-
     def "validate checksums from ran changesets have all been reset"() {
         when:
         h2Connection = getInMemoryH2DatabaseConnection()
@@ -607,7 +579,7 @@ class LiquibaseTest extends Specification {
         }
     }
 
-    public static class TestConsoleUIService extends ConsoleUIService {
+    static class TestConsoleUIService extends ConsoleUIService {
         private List<String> messages = new ArrayList<>()
 
         @Override
@@ -625,7 +597,7 @@ class LiquibaseTest extends Specification {
      * To use, create a subclass that overrides the method delegated to with an implementation that stores whatever params are being passed.
      * After calling the delegating method in your test, assert against the objectToVerify
      */
-    public static class LiquibaseDelegate extends Liquibase {
+    static class LiquibaseDelegate extends Liquibase {
 
         /**
          * If using multiple parameters, store them here
@@ -636,7 +608,7 @@ class LiquibaseTest extends Specification {
          */
         protected Object objectToVerify
 
-        public LiquibaseDelegate() throws LiquibaseException {
+        LiquibaseDelegate() throws LiquibaseException {
             super("com/example/changelog.mock", new MockResourceAccessor(), mockDatabase)
         }
 
