@@ -1,24 +1,26 @@
 package liquibase.database.core;
 
 import liquibase.CatalogAndSchema;
-import liquibase.Scope;
 import liquibase.GlobalConfiguration;
+import liquibase.Scope;
+import liquibase.change.AbstractSQLChange;
+import liquibase.change.Change;
+import liquibase.changelog.DatabaseChangeLog;
 import liquibase.database.AbstractJdbcDatabase;
 import liquibase.database.DatabaseConnection;
 import liquibase.database.OfflineConnection;
 import liquibase.database.jvm.JdbcConnection;
 import liquibase.exception.DatabaseException;
+import liquibase.exception.LiquibaseException;
 import liquibase.exception.UnexpectedLiquibaseException;
 import liquibase.executor.ExecutorService;
+import liquibase.sql.visitor.AppendSqlIfNotPresentVisitor;
+import liquibase.sql.visitor.SqlVisitor;
 import liquibase.statement.SqlStatement;
 import liquibase.statement.core.GetViewDefinitionStatement;
 import liquibase.statement.core.RawSqlStatement;
 import liquibase.structure.DatabaseObject;
-import liquibase.structure.core.Index;
-import liquibase.structure.core.Relation;
-import liquibase.structure.core.Schema;
-import liquibase.structure.core.Table;
-import liquibase.structure.core.View;
+import liquibase.structure.core.*;
 import liquibase.util.JdbcUtil;
 import liquibase.util.StringUtil;
 
@@ -26,11 +28,7 @@ import java.math.BigInteger;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 import java.util.regex.Pattern;
 
 /**
@@ -113,6 +111,23 @@ public class MSSQLDatabase extends AbstractJdbcDatabase {
         unmodifiableDataTypes.add("datetime");
 
         addReservedWords(createReservedWordsCollection());
+    }
+
+    @Override
+    public void executeStatements(Change change, DatabaseChangeLog changeLog, List<SqlVisitor> sqlVisitors) throws LiquibaseException {
+        super.executeStatements(change, changeLog, addSqlVisitors(sqlVisitors));
+    }
+
+    //
+    //  Setup up an appending SQL visitor if this is not an AbstractSQLChange or
+    //  if there is no end delimiter
+    //
+    private List<SqlVisitor> addSqlVisitors(List<SqlVisitor> sqlVisitors) {
+        List<SqlVisitor> sqlChangeVisitors = new ArrayList<>(sqlVisitors);
+        AppendSqlIfNotPresentVisitor appendVisitor = new AppendSqlIfNotPresentVisitor();
+        appendVisitor.setValue(";");
+        sqlChangeVisitors.add(appendVisitor);
+        return sqlChangeVisitors;
     }
 
     @Override

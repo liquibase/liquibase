@@ -96,6 +96,7 @@ public class MdcKey {
     public static final String DIFF_CHANGELOG_OUTCOME = "diffChangelogOutcome";
 
     public static final String CHANGESET_SYNC_OUTCOME = "changesetSyncOutcome";
+    public static final String VERSION = "version";
     public static final String FAIL_ON_ERROR = "failOnError";
     public static final String STATUS = "status";
 }
