@@ -65,6 +65,9 @@ class CommandUtil {
     }
 
     static void runDropAll(DatabaseTestSystem db) throws Exception {
+        if (! db.shouldTest()) {
+            return;
+        }
         CommandScope commandScope = new CommandScope(DropAllCommandStep.COMMAND_NAME)
         commandScope.addArgumentValue(DbUrlConnectionCommandStep.URL_ARG, db.getConnectionUrl())
         commandScope.addArgumentValue(DbUrlConnectionCommandStep.USERNAME_ARG, db.getUsername())
