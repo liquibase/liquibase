@@ -107,14 +107,12 @@ public abstract class AbstractUpdateCommandStep extends AbstractCommandStep impl
 
             hubHandler.postUpdateHub(bufferLog);
             resultsBuilder.addResult("statusCode", 0);
-            if (StringUtil.isNotEmpty(databaseChangeLog.getLogicalFilePath())) {
-                Scope.getCurrentScope().addMdcValue(MdcKey.CHANGELOG_FILE, databaseChangeLog.getLogicalFilePath());
-            } else {
-                Scope.getCurrentScope().addMdcValue(MdcKey.CHANGELOG_FILE, changeLogFile);
-            }
+            addChangelogFileToMdc(changeLogFile, databaseChangeLog);
             logDeploymentOutcomeMdc(defaultChangeExecListener, true);
             postUpdateLog();
         } catch (Exception e) {
+            DatabaseChangeLog databaseChangeLog = (DatabaseChangeLog) commandScope.getDependency(DatabaseChangeLog.class);
+            addChangelogFileToMdc(changeLogFile, databaseChangeLog);
             logDeploymentOutcomeMdc(defaultChangeExecListener, false);
             resultsBuilder.addResult("statusCode", 1);
             if (hubHandler != null) {
@@ -129,6 +127,14 @@ public abstract class AbstractUpdateCommandStep extends AbstractCommandStep impl
             } catch (LockException e) {
                 Scope.getCurrentScope().getLog(getClass()).severe(MSG_COULD_NOT_RELEASE_LOCK, e);
             }
+        }
+    }
+
+    private void addChangelogFileToMdc(String changeLogFile, DatabaseChangeLog databaseChangeLog) {
+        if (StringUtil.isNotEmpty(databaseChangeLog.getLogicalFilePath())) {
+            Scope.getCurrentScope().addMdcValue(MdcKey.CHANGELOG_FILE, databaseChangeLog.getLogicalFilePath());
+        } else {
+            Scope.getCurrentScope().addMdcValue(MdcKey.CHANGELOG_FILE, changeLogFile);
         }
     }
 
