@@ -1140,17 +1140,11 @@ public class Liquibase implements AutoCloseable {
      */
     public final void dropAll(CatalogAndSchema... schemas) throws DatabaseException {
 
-        if ((schemas == null) || (schemas.length == 0)) {
-            schemas = new CatalogAndSchema[]{
-                    new CatalogAndSchema(getDatabase().getDefaultCatalogName(), getDatabase().getDefaultSchemaName())
-            };
-        }
-
         CatalogAndSchema[] finalSchemas = schemas;
         try {
-            CommandScope dropAll = new CommandScope("internalDropAll")
-                    .addArgumentValue(InternalDropAllCommandStep.DATABASE_ARG, Liquibase.this.getDatabase())
-                    .addArgumentValue(InternalDropAllCommandStep.SCHEMAS_ARG, finalSchemas);
+            CommandScope dropAll = new CommandScope("dropAll")
+                    .addArgumentValue(DbUrlConnectionCommandStep.DATABASE_ARG, Liquibase.this.getDatabase())
+                    .addArgumentValue(DropAllCommandStep.CATALOG_AND_SCHEMAS_ARG, finalSchemas);
 
             try {
                 dropAll.execute();

@@ -91,6 +91,9 @@ public abstract class AbstractRollbackCommandStep extends AbstractCommandStep {
             logIterator.run(new RollbackVisitor(database, changeExecListener, processedChangesets), new RuntimeEnvironment(database, changeLogParameters.getContexts(), changeLogParameters.getLabels()));
             addChangelogFileToMdc(changelogFile, databaseChangeLog);
             Scope.getCurrentScope().addMdcValue(MdcKey.CHANGESETS_ROLLED_BACK, new ChangesetsRolledback(processedChangesets), false);
+            if (processedChangesets.isEmpty()) {
+                Scope.getCurrentScope().getUI().sendMessage("INFO: 0 changesets rolled back.");
+            }
         } else {
             List<ChangeSet> changeSets = determineRollbacks(database, logIterator, changeLogParameters);
             executeRollbackScript(database, rollbackScript, changeSets, databaseChangeLog, changeLogParameters, changeExecListener);
