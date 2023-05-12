@@ -12,6 +12,7 @@ import liquibase.configuration.LiquibaseConfiguration;
 import liquibase.database.Database;
 import liquibase.database.DatabaseList;
 import liquibase.database.ObjectQuotingStrategy;
+import liquibase.database.core.MSSQLDatabase;
 import liquibase.exception.*;
 import liquibase.executor.Executor;
 import liquibase.executor.ExecutorService;
@@ -27,11 +28,9 @@ import liquibase.precondition.ErrorPrecondition;
 import liquibase.precondition.FailedPrecondition;
 import liquibase.precondition.core.PreconditionContainer;
 import liquibase.resource.ResourceAccessor;
-import liquibase.sql.visitor.SqlVisitor;
-import liquibase.sql.visitor.SqlVisitorFactory;
+import liquibase.sql.visitor.*;
 import liquibase.sqlgenerator.SqlGeneratorFactory;
 import liquibase.statement.SqlStatement;
-import liquibase.util.ISODateFormat;
 import liquibase.util.SqlUtil;
 import liquibase.util.StreamUtil;
 import liquibase.util.StringUtil;
@@ -593,6 +592,10 @@ public class ChangeSet implements Conditional, ChangeLogChild {
             throws MigrationFailedException {
         Logger log = Scope.getCurrentScope().getLog(getClass());
         addChangeSetMdcProperties();
+        Boolean failOnError = getFailOnError();
+        if (failOnError != null) {
+            Scope.getCurrentScope().addMdcValue(MdcKey.FAIL_ON_ERROR, String.valueOf(failOnError));
+        }
         if (validationFailed) {
             return ExecType.MARK_RAN;
         }
@@ -739,16 +742,14 @@ public class ChangeSet implements Conditional, ChangeLogChild {
 
         } catch (Exception e) {
             Scope.getCurrentScope().addMdcValue(MdcKey.CHANGESET_OPERATION_STOP_TIME, Instant.ofEpochMilli(new Date().getTime()).toString());
-            if (getFailOnError() == null || getFailOnError()) {
-                Scope.getCurrentScope().addMdcValue(MdcKey.CHANGESET_OUTCOME, ExecType.FAILED.value.toLowerCase());
-            }
+            Scope.getCurrentScope().addMdcValue(MdcKey.CHANGESET_OUTCOME, ExecType.FAILED.value.toLowerCase());
             log.severe(String.format("ChangeSet %s encountered an exception.", toString(false)));
             try {
                 database.rollback();
             } catch (Exception e1) {
                 throw new MigrationFailedException(this, e);
             }
-            if ((getFailOnError() != null) && !getFailOnError()) {
+            if ((failOnError != null) && !failOnError) {
                 log.info("Changeset " + toString(false) + " failed, but failOnError was false.  Error: " + e.getMessage());
                 log.fine("Failure Stacktrace", e);
                 execType = ExecType.FAILED;

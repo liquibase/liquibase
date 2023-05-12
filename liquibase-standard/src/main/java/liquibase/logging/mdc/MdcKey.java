@@ -103,4 +103,7 @@ public class MdcKey {
     public static final String FLOW_FILE_OUTCOME = "flowFileOutcome";
     public static final String FLOW_FILE_FAILED_MESSAGE = "flowFileFailedMessage";
     public static final String FLOW_FILE_FAILED_STAGE = "flowFileFailedStage";
+
+    public static final String VERSION = "version";
+    public static final String FAIL_ON_ERROR = "failOnError";
 }
