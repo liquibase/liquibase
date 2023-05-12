@@ -13,6 +13,9 @@ import liquibase.changelog.visitor.ListVisitor;
 import liquibase.command.*;
 import liquibase.database.Database;
 import liquibase.exception.DatabaseException;
+import liquibase.logging.mdc.MdcKey;
+import liquibase.logging.mdc.MdcObject;
+import liquibase.logging.mdc.customobjects.Status;
 import liquibase.util.StreamUtil;
 
 import java.io.OutputStream;
@@ -63,13 +66,16 @@ public class StatusCommandStep extends AbstractCommandStep {
         boolean verbose = commandScope.getArgumentValue(VERBOSE_ARG);
 
         List<ChangeSet> unrunChangeSets = listUnrunChangeSets(contexts, labels, changeLog, database);
+        String message;
         if (unrunChangeSets.isEmpty()) {
+            message = "up-to-date";
             out.append(database.getConnection().getConnectionUserName());
             out.append("@");
             out.append(database.getConnection().getURL());
             out.append(" is up to date");
             out.append(StreamUtil.getLineSeparator());
         } else {
+            message = "undeployed";
             out.append(String.valueOf(unrunChangeSets.size()));
             out.append(" changesets have not been applied to ");
             out.append(database.getConnection().getConnectionUserName());
@@ -82,6 +88,12 @@ public class StatusCommandStep extends AbstractCommandStep {
                             .append(StreamUtil.getLineSeparator());
                 }
             }
+        }
+
+
+        Status statusMdc = new Status(message, database.getConnection().getURL(), unrunChangeSets);
+        try (MdcObject statusMdcObject = Scope.getCurrentScope().addMdcValue(MdcKey.STATUS, statusMdc)) {
+            Scope.getCurrentScope().getLog(getClass()).fine("Status");
         }
 
         out.flush();
