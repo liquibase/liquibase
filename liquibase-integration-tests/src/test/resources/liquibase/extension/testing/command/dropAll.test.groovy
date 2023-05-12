@@ -14,8 +14,6 @@ Required Args:
   url (String) The JDBC database connection URL
     OBFUSCATED
 Optional Args:
-  changelogFile (String) The root changelog
-    Default: null
   defaultCatalogName (String) The default catalog name to use for the database connection
     Default: null
   defaultSchemaName (String) The default schema name to use for the database connection
@@ -77,50 +75,6 @@ Optional Args:
 
         expectedUI = [
                 "All objects dropped from LBUSER@jdbc:h2:mem:lbcat"
-        ]
-    }
-
-    run "Happy path with an unregistered changelog file does not show Hub messaging", {
-        arguments = [
-                url       : { it.url },
-                username  : { it.username },
-                password  : { it.password },
-                changelogFile: "changelogs/h2/complete/simple.changelog.xml"
-        ]
-        setup {
-            database = [
-                    new CreateTableChange(
-                            tableName: "FirstTable",
-                            columns: [
-                                    ColumnConfig.fromName("FirstColumn")
-                                            .setType("VARCHAR(255)")
-                            ]
-                    ),
-                    new CreateTableChange(
-                            tableName: "SecondTable",
-                            columns: [
-                                    ColumnConfig.fromName("SecondColumn")
-                                            .setType("VARCHAR(255)")
-                            ]
-                    ),
-                    new TagDatabaseChange(
-                            tag: "version_2.0"
-                    ),
-                    new CreateTableChange(
-                            tableName: "liquibaseRunInfo",
-                            columns: [
-                                    ColumnConfig.fromName("timesRan")
-                                            .setType("INT")
-                            ]
-                    ),
-            ]
-        }
-
-        expectedUI = [
-            CommandTests.assertNotContains("WARNING: The changelog file specified is not registered with any Liquibase Hub project")
-        ]
-        expectedResults = [
-                statusCode   : 0,
         ]
     }
 
