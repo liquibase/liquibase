@@ -37,6 +37,7 @@ import java.text.DateFormat;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.util.*;
+import java.util.logging.Level;
 
 import static java.util.ResourceBundle.getBundle;
 
@@ -406,7 +407,7 @@ public class StandardLockService implements LockService {
 
                 database.setCanCacheLiquibaseTableInfo(false);
                 try (MdcObject releaseLocksOutcome = Scope.getCurrentScope().addMdcValue(MdcKey.RELEASE_LOCKS_OUTCOME, success ? MdcValue.COMMAND_SUCCESSFUL : MdcValue.COMMAND_FAILED)) {
-                    Scope.getCurrentScope().getLog(getClass()).info(success ? "Successfully released" : "Failed to release" + " change log lock");
+                    Scope.getCurrentScope().getLog(getClass()).log(success ? Level.INFO : Level.WARNING, success ? "Successfully released" : "Failed to release" + " change log lock", null);
                 }
 
                 database.rollback();
