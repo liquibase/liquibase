@@ -80,10 +80,16 @@ public class StringUtil {
                 nextIndex++;
             }
 
-            if (piece instanceof String && ((String) piece).equalsIgnoreCase("BEGIN") &&  (!"transaction".equalsIgnoreCase(nextPiece) && !"trans".equalsIgnoreCase(nextPiece))) {
+            if (piece instanceof String && ((String) piece).equalsIgnoreCase("BEGIN")
+                    &&  (!"transaction".equalsIgnoreCase(nextPiece)
+                        && !"trans".equalsIgnoreCase(nextPiece)
+                        && !"tran".equalsIgnoreCase(nextPiece))) {
                 isInClause++;
             }
-            if (piece instanceof String && ((String) piece).equalsIgnoreCase("END") && isInClause > 0  && (!"transaction".equalsIgnoreCase(nextPiece) && !"trans".equalsIgnoreCase(nextPiece))) {
+            if (piece instanceof String && ((String) piece).equalsIgnoreCase("END") && isInClause > 0
+                && (!"transaction".equalsIgnoreCase(nextPiece)
+                    && !"trans".equalsIgnoreCase(nextPiece)
+                    && !"tran".equalsIgnoreCase(nextPiece))) {
                 isInClause--;
             }
 
