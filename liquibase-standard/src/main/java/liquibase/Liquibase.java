@@ -247,30 +247,11 @@ public class Liquibase implements AutoCloseable {
      * But, if there are changelogs that might have to be ran and this returns <b>false</b>, you MUST get a lock and do a real check to know what changesets actually need to run.
      * <p>
      * NOTE: to reduce the number of queries to the databasehistory table, this method will cache the "fast check" results within this instance under the assumption that the total changesets will not change within this instance.
+     * @deprecated this method has been moved to {@link AbstractUpdateCommandStep}, use that one instead.
      */
+    @Deprecated
     protected boolean isUpToDateFastCheck(Contexts contexts, LabelExpression labelExpression) throws LiquibaseException {
-        String cacheKey = contexts +"/"+ labelExpression;
-        if (!this.upToDateFastCheck.containsKey(cacheKey)) {
-            try {
-                if (listUnrunChangeSets(contexts, labelExpression, false).isEmpty()) {
-                    LOG.fine("Fast check found no un-run changesets");
-                    upToDateFastCheck.put(cacheKey, true);
-                } else {
-                    upToDateFastCheck.put(cacheKey, false);
-                }
-            } catch (DatabaseException e) {
-                LOG.info("Error querying Liquibase tables, disabling fast check for this execution. Reason: " + e.getMessage());
-                upToDateFastCheck.put(cacheKey, false);
-            } finally {
-                // Discard the cached fetched un-run changeset list, as if
-                // another peer is running the changesets in parallel, we may
-                // get a different answer after taking out the write lock
-
-                ChangeLogHistoryService changeLogService = ChangeLogHistoryServiceFactory.getInstance().getChangeLogService(database);
-                changeLogService.reset();
-            }
-        }
-        return upToDateFastCheck.get(cacheKey);
+        return new UpdateCommandStep().isUpToDateFastCheck(null, database, databaseChangeLog, contexts, labelExpression);
     }
 
     /**
@@ -1136,17 +1117,11 @@ public class Liquibase implements AutoCloseable {
      */
     public final void dropAll(CatalogAndSchema... schemas) throws DatabaseException {
 
-        if ((schemas == null) || (schemas.length == 0)) {
-            schemas = new CatalogAndSchema[]{
-                    new CatalogAndSchema(getDatabase().getDefaultCatalogName(), getDatabase().getDefaultSchemaName())
-            };
-        }
-
         CatalogAndSchema[] finalSchemas = schemas;
         try {
-            CommandScope dropAll = new CommandScope("internalDropAll")
-                    .addArgumentValue(InternalDropAllCommandStep.DATABASE_ARG, Liquibase.this.getDatabase())
-                    .addArgumentValue(InternalDropAllCommandStep.SCHEMAS_ARG, finalSchemas);
+            CommandScope dropAll = new CommandScope("dropAll")
+                    .addArgumentValue(DbUrlConnectionCommandStep.DATABASE_ARG, Liquibase.this.getDatabase())
+                    .addArgumentValue(DropAllCommandStep.CATALOG_AND_SCHEMAS_ARG, finalSchemas);
 
             try {
                 dropAll.execute();

@@ -280,49 +280,7 @@ public class CommandLineUtils {
     }
 
     public static String getBanner() {
-        String myVersion = "";
-        String buildTimeString = "";
-        Calendar calendar = Calendar.getInstance();
-        SimpleDateFormat dateFormat = new SimpleDateFormat("HH:mm:ss");
-
-        myVersion = LiquibaseUtil.getBuildVersionInfo();
-        buildTimeString = LiquibaseUtil.getBuildTime();
-
-        StringBuilder banner = new StringBuilder();
-        if (GlobalConfiguration.SHOW_BANNER.getCurrentValue()) {
-
-            // Banner is stored in liquibase/banner.txt in resources.
-            Class<CommandLineUtils> commandLinUtilsClass = CommandLineUtils.class;
-            InputStream inputStream = commandLinUtilsClass.getResourceAsStream("/liquibase/banner.txt");
-            try {
-                banner.append(readFromInputStream(inputStream));
-            } catch (IOException e) {
-                Scope.getCurrentScope().getLog(commandLinUtilsClass).fine("Unable to locate banner file.");
-            }
-        }
-
-        banner.append(String.format(
-                coreBundle.getString("starting.liquibase.at.timestamp"), dateFormat.format(calendar.getTime())
-        ));
-
-        if (StringUtil.isNotEmpty(myVersion) && StringUtil.isNotEmpty(buildTimeString)) {
-            myVersion = myVersion + " #" + LiquibaseUtil.getBuildNumber();
-            banner.append(String.format(coreBundle.getString("liquibase.version.builddate"), myVersion, buildTimeString));
-        }
-
-        return banner.toString();
-    }
-
-    private static String readFromInputStream(InputStream inputStream) throws IOException {
-        StringBuilder resultStringBuilder = new StringBuilder();
-        try (BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(inputStream))) {
-            String line;
-            while ((line = bufferedReader.readLine()) != null) {
-                resultStringBuilder.append(line + "\n");
-
-            }
-        }
-        return resultStringBuilder.toString();
+        return new Banner().toString();
     }
 
 }
