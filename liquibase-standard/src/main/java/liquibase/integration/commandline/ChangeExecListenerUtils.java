@@ -7,7 +7,6 @@ import liquibase.logging.Logger;
 import liquibase.resource.ResourceAccessor;
 
 import java.io.File;
-import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;

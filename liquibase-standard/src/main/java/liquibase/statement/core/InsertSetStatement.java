@@ -40,14 +40,7 @@ public class InsertSetStatement extends AbstractSqlStatement {
     }
 
     public InsertSetStatement addInsertStatement(InsertStatement statement) {
-        /*
-        if(statement.getCatalogName() != this.getCatalogName() 
-        || statement.getShemaName() != this.getSchemaName()
-        || statement.getTableName() != this.getTableName()) {
-        // HANDLE ERROR CONDITION
-        }*/
         inserts.add(statement);
-
         return this;
     }
     public InsertStatement peek() {

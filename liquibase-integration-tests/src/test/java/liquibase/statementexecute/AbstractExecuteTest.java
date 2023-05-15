@@ -232,7 +232,11 @@ public abstract class AbstractExecuteTest {
             connection.commit();
 
             if (database.supportsSchemas()) {
+                try {
                 database.dropDatabaseObjects(new CatalogAndSchema(null, testSystem.getAltSchema()));
+                } catch (DatabaseException e) {
+                    //ok
+                }
                 connection.commit();
 
                 try {
