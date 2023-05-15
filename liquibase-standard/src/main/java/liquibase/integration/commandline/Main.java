@@ -518,19 +518,24 @@ public class Main {
     private static Level parseLogLevel(String logLevelName, UIService ui) {
         logLevelName = logLevelName.toUpperCase();
         Level logLevel;
-        if (logLevelName.equals("DEBUG")) {
-            logLevel = Level.FINE;
-        } else if (logLevelName.equals("WARN")) {
-            logLevel = Level.WARNING;
-        } else if (logLevelName.equals("ERROR")) {
-            logLevel = Level.SEVERE;
-        } else {
-            try {
-                logLevel = Level.parse(logLevelName);
-            } catch (IllegalArgumentException e) {
-                ui.sendErrorMessage("Unknown log level " + logLevelName);
-                logLevel = Level.OFF;
-            }
+        switch (logLevelName) {
+            case "DEBUG":
+                logLevel = Level.FINE;
+                break;
+            case "WARN":
+                logLevel = Level.WARNING;
+                break;
+            case "ERROR":
+                logLevel = Level.SEVERE;
+                break;
+            default:
+                try {
+                    logLevel = Level.parse(logLevelName);
+                } catch (IllegalArgumentException e) {
+                    ui.sendErrorMessage("Unknown log level " + logLevelName);
+                    logLevel = Level.OFF;
+                }
+                break;
         }
         return logLevel;
     }
@@ -1482,6 +1487,9 @@ public class Main {
                     this.databaseClass, this.driverPropertiesFile, this.propertyProviderClass,
                     this.liquibaseCatalogName, this.liquibaseSchemaName, this.databaseChangeLogTableName,
                     this.databaseChangeLogLockTableName);
+            Scope.getCurrentScope().addMdcValue(MdcKey.LIQUIBASE_TARGET_URL, this.url);
+            Scope.getCurrentScope().addMdcValue(MdcKey.LIQUIBASE_CATALOG_NAME, database.getLiquibaseCatalogName());
+            Scope.getCurrentScope().addMdcValue(MdcKey.LIQUIBASE_SCHEMA_NAME, database.getLiquibaseSchemaName());
             if (this.databaseChangeLogTablespaceName != null) {
                 database.setLiquibaseTablespaceName(this.databaseChangeLogTablespaceName);
             } else {
@@ -1658,17 +1666,17 @@ public class Main {
                 executeSyncHub(database, liquibase);
                 return;
             } else if (COMMANDS.DROP_ALL.equalsIgnoreCase(command)) {
-                CommandScope dropAllCommand = new CommandScope("internalDropAll");
+                CommandScope dropAllCommand = new CommandScope("dropAll");
                 if (hubConnectionId != null) {
-                    dropAllCommand.addArgumentValue(InternalDropAllCommandStep.HUB_CONNECTION_ID_ARG, UUID.fromString(hubConnectionId));
+                    dropAllCommand.addArgumentValue(DropAllCommandStep.HUB_CONNECTION_ID_ARG, UUID.fromString(hubConnectionId));
                 }
                 if (hubProjectId != null) {
-                    dropAllCommand.addArgumentValue(InternalDropAllCommandStep.HUB_PROJECT_ID_ARG, UUID.fromString(hubProjectId));
+                    dropAllCommand.addArgumentValue(DropAllCommandStep.HUB_PROJECT_ID_ARG, UUID.fromString(hubProjectId));
                 }
                 dropAllCommand
-                        .addArgumentValue(InternalDropAllCommandStep.DATABASE_ARG, liquibase.getDatabase())
-                        .addArgumentValue(InternalDropAllCommandStep.SCHEMAS_ARG, InternalSnapshotCommandStep.parseSchemas(database, getSchemaParams(database)))
-                        .addArgumentValue(InternalDropAllCommandStep.CHANGELOG_FILE_ARG, changeLogFile);
+                        .addArgumentValue(DbUrlConnectionCommandStep.DATABASE_ARG, liquibase.getDatabase())
+                        .addArgumentValue(DropAllCommandStep.CATALOG_AND_SCHEMAS_ARG, InternalSnapshotCommandStep.parseSchemas(database, getSchemaParams(database)))
+                        .addArgumentValue(GenerateChangelogCommandStep.CHANGELOG_FILE_ARG, changeLogFile);
 
                 dropAllCommand.execute();
                 return;

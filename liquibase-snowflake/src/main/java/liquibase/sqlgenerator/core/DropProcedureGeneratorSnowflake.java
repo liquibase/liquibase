@@ -6,7 +6,6 @@ import liquibase.sql.Sql;
 import liquibase.sql.UnparsedSql;
 import liquibase.sqlgenerator.SqlGeneratorChain;
 import liquibase.statement.core.DropProcedureStatement;
-import liquibase.structure.core.Catalog;
 import liquibase.structure.core.Schema;
 
 public class DropProcedureGeneratorSnowflake extends DropProcedureGenerator {

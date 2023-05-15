@@ -1,16 +1,15 @@
-package liquibase.command.util;
+package liquibase.command.util
 
 import liquibase.Scope
-import liquibase.UpdateSummaryEnum;
-import liquibase.command.CommandResultsBuilder;
-import liquibase.command.CommandScope;
-import liquibase.command.core.DropAllCommandStep;
-import liquibase.command.core.GenerateChangelogCommandStep;
-import liquibase.command.core.UpdateCommandStep;
+import liquibase.UpdateSummaryEnum
+import liquibase.command.CommandScope
+import liquibase.command.core.DropAllCommandStep
+import liquibase.command.core.GenerateChangelogCommandStep
+import liquibase.command.core.UpdateCommandStep
 import liquibase.command.core.helpers.DbUrlConnectionCommandStep
-import liquibase.command.core.helpers.ShowSummaryArgument;
-import liquibase.exception.CommandExecutionException;
-import liquibase.extension.testing.testsystem.DatabaseTestSystem;
+import liquibase.command.core.helpers.ShowSummaryArgument
+import liquibase.exception.CommandExecutionException
+import liquibase.extension.testing.testsystem.DatabaseTestSystem
 import liquibase.resource.SearchPathResourceAccessor
 import liquibase.sdk.resource.MockResourceAccessor
 
@@ -66,14 +65,15 @@ class CommandUtil {
     }
 
     static void runDropAll(DatabaseTestSystem db) throws Exception {
-        DropAllCommandStep step = new DropAllCommandStep()
+        if (! db.shouldTest()) {
+            return;
+        }
         CommandScope commandScope = new CommandScope(DropAllCommandStep.COMMAND_NAME)
         commandScope.addArgumentValue(DbUrlConnectionCommandStep.URL_ARG, db.getConnectionUrl())
         commandScope.addArgumentValue(DbUrlConnectionCommandStep.USERNAME_ARG, db.getUsername())
         commandScope.addArgumentValue(DbUrlConnectionCommandStep.PASSWORD_ARG, db.getPassword())
-        OutputStream outputStream = new ByteArrayOutputStream()
-        CommandResultsBuilder commandResultsBuilder = new CommandResultsBuilder(commandScope, outputStream)
-        step.run(commandResultsBuilder)
+        commandScope.setOutput(new ByteArrayOutputStream())
+        commandScope.execute()
     }
 
     private static void execUpdateCommandInScope(SearchPathResourceAccessor resourceAccessor, DatabaseTestSystem db, String changelogFile,

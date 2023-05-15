@@ -21,12 +21,13 @@ public interface ConfigurationValueConverter<DataType> {
             return (Level) value;
         }
         String stringLevel = String.valueOf(value).toUpperCase();
-        if (stringLevel.equals("DEBUG")) {
-            return Level.FINE;
-        } else if (stringLevel.equals("WARN")) {
-            return Level.WARNING;
-        } else if (stringLevel.equals("ERROR")) {
-            return Level.SEVERE;
+        switch (stringLevel) {
+            case "DEBUG":
+                return Level.FINE;
+            case "WARN":
+                return Level.WARNING;
+            case "ERROR":
+                return Level.SEVERE;
         }
 
         try {
