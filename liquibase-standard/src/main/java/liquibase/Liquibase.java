@@ -1452,54 +1452,37 @@ public class Liquibase implements AutoCloseable {
         return this.calculateCheckSum(String.format("%s::%s::%s", filename, id, author));
     }
 
+    @Deprecated
     public void generateDocumentation(String outputDirectory) throws LiquibaseException {
         // call without context
         generateDocumentation(outputDirectory, new Contexts(), new LabelExpression(), new CatalogAndSchema(null, null));
     }
 
+    @Deprecated
     public void generateDocumentation(String outputDirectory, String contexts) throws LiquibaseException {
         generateDocumentation(outputDirectory, new Contexts(contexts), new LabelExpression(), new CatalogAndSchema(null, null));
     }
 
+    @Deprecated
     public void generateDocumentation(String outputDirectory, String contexts, CatalogAndSchema... schemaList) throws LiquibaseException {
         generateDocumentation(outputDirectory, new Contexts(contexts), new LabelExpression(), schemaList);
     }
 
+    /**
+     * @deprecated Use {@link CommandScope} to generate dbDoc instead of this method.
+     */
+    @Deprecated
     public void generateDocumentation(String outputDirectory, Contexts contexts,
                                       LabelExpression labelExpression, CatalogAndSchema... schemaList) throws LiquibaseException {
-        runInScope(() -> {
-
-            LOG.info("Generating Database Documentation");
-            changeLogParameters.setContexts(contexts);
-            changeLogParameters.setLabels(labelExpression);
-            LockService lockService = LockServiceFactory.getInstance().getLockService(database);
-            lockService.waitForLock();
-
-            try {
-                DatabaseChangeLog changeLog = getDatabaseChangeLog();
-                checkLiquibaseTables(false, changeLog, new Contexts(), new LabelExpression());
-
-                changeLog.validate(database, contexts, labelExpression);
-
-                ChangeLogIterator logIterator = new ChangeLogIterator(changeLog,
-                        new DbmsChangeSetFilter(database));
-
-                DBDocVisitor visitor = new DBDocVisitor(database);
-                logIterator.run(visitor, new RuntimeEnvironment(database, contexts, labelExpression));
-
-                final PathHandlerFactory pathHandlerFactory = Scope.getCurrentScope().getSingleton(PathHandlerFactory.class);
-                Resource resource = pathHandlerFactory.getResource(outputDirectory);
-                visitor.writeHTML(resource, resourceAccessor, schemaList);
-            } catch (IOException e) {
-                throw new LiquibaseException(e);
-            } finally {
-                try {
-                    lockService.releaseLock();
-                } catch (LockException e) {
-                    LOG.severe(MSG_COULD_NOT_RELEASE_LOCK, e);
-                }
-            }
-        });
+        runInScope(() -> new CommandScope(DbDocCommandStep.COMMAND_NAME[0])
+                .addArgumentValue(DbUrlConnectionCommandStep.DATABASE_ARG, Liquibase.this.getDatabase())
+                .addArgumentValue(DatabaseChangelogCommandStep.CHANGELOG_FILE_ARG, changeLogFile)
+                .addArgumentValue(DatabaseChangelogCommandStep.CHANGELOG_PARAMETERS, changeLogParameters)
+                .addArgumentValue(DatabaseChangelogCommandStep.CONTEXTS_ARG, (contexts != null ? contexts.toString() : null))
+                .addArgumentValue(DatabaseChangelogCommandStep.LABEL_FILTER_ARG, (labelExpression != null ? labelExpression.getOriginalString() : null))
+                .addArgumentValue(DbDocCommandStep.CATALOG_AND_SCHEMAS_ARG, schemaList)
+                .addArgumentValue(DbDocCommandStep.OUTPUT_DIRECTORY_ARG, outputDirectory)
+                .execute());
     }
 
     /**
