@@ -131,8 +131,8 @@ class IndexWithDescendingColumnSnapshotIntegrationTest extends Specification {
                         "DROP TABLE tbl_Preferences"
                 )
         ] as SqlStatement[], null)
-        mssqlDb.getConnection().close()
         db.close()
+        mssqlDb.getConnection().close()
         if (outputStream != null) {
             outputStream.close()
         }
