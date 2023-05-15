@@ -42,11 +42,15 @@ jobs:
     needs: [ setup ]
     runs-on: ubuntu-22.04
     steps:
+      - name: Get Version to deploy
+        run: |
+          version=${{ needs.setup.outputs.version }}
       - uses: trstringer/manual-approval@v1
         with:
           secret: ${{ secrets.GITHUB_TOKEN }}
-          approvers: suryaaki2,mariochampion,jnewton03
-          minimum-approvals: 2
+          # approvers: suryaaki2,XDelphiGrl,jnewton03,kristyldatical
+          approvers: sayaliM0412
+          minimum-approvals: 1
           issue-title: "Deploying ${version} to sonatype"
           issue-body: "Please approve or deny the deployment of version ${version}"
           additional-approved-words: 'lgtm,✅,👍,proceed,shipit,:shipit:'
@@ -58,7 +62,7 @@ jobs:
     runs-on: ubuntu-22.04
     steps:
       - name: Download release assets
-        uses: robinraju/release-downloader@v1.7
+        uses: robinraju/release-downloader@v1.8
         with:
           repository: "liquibase/liquibase"
           tag: "${{ needs.setup.outputs.tag }}"
@@ -208,7 +212,7 @@ jobs:
       contents: read
     steps:
     - name: Download release javadocs
-      uses: robinraju/release-downloader@v1.7
+      uses: robinraju/release-downloader@v1.8
       with:
         repository: "liquibase/liquibase"
         tag: "${{ needs.setup.outputs.tag }}"

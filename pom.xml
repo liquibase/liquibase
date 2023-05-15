@@ -222,7 +222,7 @@
         <dependency>
             <groupId>com.oracle.database.jdbc</groupId>
             <artifactId>ojdbc8</artifactId>
-            <version>21.9.0.0</version>
+            <version>23.2.0.0</version>
             <scope>test</scope>
         </dependency>
 
@@ -319,12 +319,12 @@
 
             <plugin>
                 <artifactId>maven-surefire-plugin</artifactId>
-                <version>3.0.0</version>
+                <version>3.1.0</version>
                 <dependencies>
                     <dependency>
                         <groupId>org.apache.maven.surefire</groupId>
                         <artifactId>surefire-junit4</artifactId>
-                        <version>3.0.0</version>
+                        <version>3.1.0</version>
                     </dependency>
                 </dependencies>
                 <configuration>
@@ -390,7 +390,7 @@
             <plugin>
                 <groupId>org.codehaus.mojo</groupId>
                 <artifactId>flatten-maven-plugin</artifactId>
-                <version>1.4.1</version>
+                <version>1.5.0</version>
                 <configuration>
                     <updatePomFile>true</updatePomFile>
                     <outputDirectory>${project.build.directory}/flattened-pom</outputDirectory>
