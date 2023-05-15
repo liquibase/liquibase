@@ -7,8 +7,14 @@
 http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.1.xsd
   http://www.liquibase.org/xml/ns/pro http://www.liquibase.org/xml/ns/pro/liquibase-pro-4.1.xsd" changeLogId="dacc59c9-e3b3-4afc-8f88-2e949374623e">
 
-    <!-- SETUP: Create tables for other objects to use. -->
-    <changeSet author="Liquibase Test User" id="1::testFastCheck2" context="testContext2" labels="testLabel2">
-        <tagDatabase tag="Test Tag Database"></tagDatabase>
+    <changeSet author="Liquibase Test User" id="test-fast-check" labels="testLabel" context="testContext">
+        <createTable tableName="magazine">
+            <column name="id" type="int">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="title" type="varchar(50)">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
     </changeSet>
 </databaseChangeLog>
