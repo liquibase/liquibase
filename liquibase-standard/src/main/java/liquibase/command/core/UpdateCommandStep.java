@@ -5,7 +5,6 @@ import liquibase.UpdateSummaryEnum;
 import liquibase.command.*;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 
 public class UpdateCommandStep extends AbstractUpdateCommandStep implements CleanUpCommandStep {
