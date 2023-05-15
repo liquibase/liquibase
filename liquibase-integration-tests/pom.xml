@@ -27,6 +27,13 @@
         </dependency>
 
         <dependency>
+            <groupId>info.picocli</groupId>
+            <artifactId>picocli</artifactId>
+            <version>4.7.3</version>
+            <scope>test</scope>
+        </dependency>
+
+        <dependency>
             <groupId>org.liquibase</groupId>
             <artifactId>liquibase-extension-testing</artifactId>
             <version>${project.version}</version>

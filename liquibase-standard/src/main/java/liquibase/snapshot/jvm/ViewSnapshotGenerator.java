@@ -29,28 +29,6 @@ public class ViewSnapshotGenerator extends JdbcSnapshotGenerator {
         super(View.class, new Class[] { Schema.class });
     }
 
-//    public Boolean has(DatabaseObject example, DatabaseSnapshot snapshot, SnapshotGeneratorChain chain) throws DatabaseException {
-//        Database database = snapshot.getDatabase();
-//        if (!(example instanceof View)) {
-//            return chain.has(example, snapshot);
-//        }
-//        String viewName = example.getName();
-//        Schema schema = example.getSchema();
-//        try {
-//            ResultSet rs = getMetaDataFromCache(database).getTables(database.getJdbcCatalogName(schema), database.getJdbcSchemaName(schema), database.correctObjectName(viewName, View.class), new String[]{"VIEW"});
-//            try {
-//                return rs.next();
-//            } finally {
-//                try {
-//                    rs.close();
-//                } catch (SQLException ignore) {
-//                }
-//            }
-//        } catch (SQLException e) {
-//            throw new DatabaseException(e);
-//        }
-//    }
-
 
     @Override
     protected DatabaseObject snapshotObject(DatabaseObject example, DatabaseSnapshot snapshot) throws DatabaseException {
@@ -173,54 +151,4 @@ public class ViewSnapshotGenerator extends JdbcSnapshotGenerator {
             }
         }
     }
-
-    //from SQLIteSnapshotGenerator
-    //    protected void readViews(DatabaseSnapshot snapshot, String schema, DatabaseMetaData databaseMetaData) throws SQLException, DatabaseException {
-//
-//        Database database = snapshot.getDatabase();
-//
-//        updateListeners("Reading tables for " + database.toString() + " ...");
-//        ResultSet rs = databaseMetaData.getTables(
-//                database.convertRequestedSchemaToCatalog(schema),
-//                database.convertRequestedSchemaToSchema(schema),
-//                null,
-//                new String[]{"TABLE", "VIEW"});
-//
-//        try {
-//            while (rs.next()) {
-//                String type = rs.getString("TABLE_TYPE");
-//                String name = rs.getString("TABLE_NAME");
-//                String schemaName = rs.getString("TABLE_SCHEM");
-//                String catalogName = rs.getString("TABLE_CAT");
-//                String remarks = rs.getString("REMARKS");
-//
-//                if (database.isSystemTable(catalogName, schemaName, name) ||
-//                        database.isLiquibaseTable(name) ||
-//                        database.isSystemView(catalogName, schemaName, name)) {
-//                    continue;
-//                }
-//
-//                if ("TABLE".equals(type)) {
-//                    Table table = new Table(name);
-//                    table.setRemarks(StringUtil.trimToNull(remarks));
-//                    table.setDatabase(database);
-//                    table.setSchema(schemaName);
-//                    snapshot.getTables().add(table);
-//                } else if ("VIEW".equals(type)) {
-//                    View view = new View(name);
-//                    view.setSchema(schemaName);
-//                    try {
-//                        view.setDefinition(database.
-//                                getViewDefinition(schema, name));
-//                    } catch (DatabaseException e) {
-//                        System.out.println("Error getting view with " + new GetViewDefinitionStatement(schema, name));
-//                        throw e;
-//                    }
-//                    snapshot.getViews().add(view);
-//                }
-//            }
-//        } finally {
-//            rs.close();
-//        }
-//    }
 }
