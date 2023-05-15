@@ -212,7 +212,7 @@
         <dependency>
             <groupId>com.oracle.database.jdbc</groupId>
             <artifactId>ojdbc8</artifactId>
-            <version>21.9.0.0</version>
+            <version>23.2.0.0</version>
             <scope>test</scope>
         </dependency>
 
@@ -380,7 +380,7 @@
             <plugin>
                 <groupId>org.codehaus.mojo</groupId>
                 <artifactId>flatten-maven-plugin</artifactId>
-                <version>1.4.1</version>
+                <version>1.5.0</version>
                 <configuration>
                     <updatePomFile>true</updatePomFile>
                     <outputDirectory>${project.build.directory}/flattened-pom</outputDirectory>

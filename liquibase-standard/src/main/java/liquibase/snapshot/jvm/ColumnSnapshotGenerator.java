@@ -321,14 +321,7 @@ public class ColumnSnapshotGenerator extends JdbcSnapshotGenerator {
             type.setDataTypeId(columnMetadataResultSet.getInt("DATA_TYPE"));
             if (dataType.equalsIgnoreCase("NUMBER")) {
                 type.setColumnSize(columnMetadataResultSet.getInt("DATA_PRECISION"));
-//                if (type.getColumnSize() == null) {
-//                    type.setColumnSize(38);
-//                }
                 type.setDecimalDigits(columnMetadataResultSet.getInt("DATA_SCALE"));
-//                if (type.getDecimalDigits() == null) {
-//                    type.setDecimalDigits(0);
-//                }
-//            type.setRadix(10);
             } else {
                 if ("FLOAT".equalsIgnoreCase(dataType)) { //FLOAT [(precision)]
                     type.setColumnSize(columnMetadataResultSet.getInt("DATA_PRECISION"));
