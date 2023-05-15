@@ -29,7 +29,9 @@ public abstract class AbstractFutureRollbackCommandStep extends AbstractCommandS
 
     @Override
     public List<Class<?>> requiredDependencies() {
-        return Arrays.asList(Database.class, DatabaseChangeLog.class, ChangeLogParameters.class, ChangeExecListener.class, Writer.class);
+        // The order of these dependencies is important, because we want the writer to be executed before any of the
+        // parent dependencies.
+        return Arrays.asList(Writer.class, Database.class, DatabaseChangeLog.class, ChangeLogParameters.class, ChangeExecListener.class);
     }
 
     @Override
