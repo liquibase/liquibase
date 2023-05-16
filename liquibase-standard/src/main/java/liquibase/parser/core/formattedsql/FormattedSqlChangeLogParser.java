@@ -263,9 +263,6 @@ public class FormattedSqlChangeLogParser implements ChangeLogParser {
                 if (changeLogPatterMatcher.matches ()) {
                     Matcher logicalFilePathMatcher = LOGICAL_FILE_PATH_PATTERN.matcher (line);
                     changeLog.setLogicalFilePath (parseString(logicalFilePathMatcher));
-
-                    Matcher changeLogIdMatcher = CHANGE_LOG_ID_PATTERN.matcher (line);
-                    changeLog.setChangeLogId (parseString(changeLogIdMatcher));
                 }
 
                 Matcher ignoreLinesMatcher = IGNORE_LINES_PATTERN.matcher(line);
