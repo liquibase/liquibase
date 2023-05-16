@@ -15,6 +15,7 @@ import liquibase.snapshot.CachedRow;
 import liquibase.snapshot.DatabaseSnapshot;
 import liquibase.statement.core.RawSqlStatement;
 import liquibase.structure.core.Column;
+import liquibase.structure.core.Schema;
 import liquibase.util.StringUtil;
 
 import java.sql.Connection;
@@ -79,8 +80,8 @@ public class ColumnAutoIncrementService {
                     "object_name(object_id) AS table_name, name AS column_name, " +
                     "CAST(seed_value AS bigint) AS start_value, " +
                     "CAST(increment_value AS bigint) AS increment_by " +
-                    ()
-                    "FROM sys.identity_columns";
+                    "FROM sys.identity_columns " +
+                    "WHERE sys.schemas = '" + schema.getName() + "'";
         } else if (database instanceof PostgresDatabase) {
             int version = 9;
             try {
@@ -101,7 +102,7 @@ public class ColumnAutoIncrementService {
                         "    JOIN pg_depend d ON c.oid = d.objid " +
                         "    JOIN pg_class td ON td.oid = d.refobjid " +
                         "    JOIN pg_attribute pa ON  pa.attrelid=td.oid AND pa.attnum=d.refobjsubid " +
-                        "WHERE c.relkind = 'S' AND d.deptype = 'a'";
+                        "WHERE c.relkind = 'S' AND d.deptype = 'a' AND ns.nspname = '" + schema.getName() + "'";
             } else {
                 return "SELECT " +
                         "    ns.nspname as SCHEMA_NAME, " +
