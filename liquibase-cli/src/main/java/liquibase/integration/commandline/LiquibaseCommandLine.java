@@ -15,6 +15,7 @@ import liquibase.exception.CommandLineParsingException;
 import liquibase.exception.CommandValidationException;
 import liquibase.exception.LiquibaseException;
 import liquibase.hub.HubConfiguration;
+import liquibase.license.LicenseInfo;
 import liquibase.license.LicenseService;
 import liquibase.license.LicenseServiceFactory;
 import liquibase.logging.LogService;
@@ -23,6 +24,7 @@ import liquibase.logging.core.LogServiceFactory;
 import liquibase.logging.mdc.MdcKey;
 import liquibase.logging.mdc.MdcManager;
 import liquibase.logging.mdc.MdcObject;
+import liquibase.logging.mdc.customobjects.Version;
 import liquibase.resource.*;
 import liquibase.ui.CompositeUIService;
 import liquibase.ui.ConsoleUIService;
@@ -730,7 +732,7 @@ public class LiquibaseCommandLine {
                 OutputStream outputStream = pathHandlerFactory.openResourceOutputStream(logFile, new OpenOptions().setAppend(true));
                 fileHandler = new StreamHandler(outputStream, new SimpleFormatter());
 
-                setFormatterOnHandler(logService, fileHandler);
+                JavaLogService.setFormatterOnHandler(logService, fileHandler);
 
                 rootLogger.addHandler(fileHandler);
             }
@@ -771,20 +773,7 @@ public class LiquibaseCommandLine {
             if (handler instanceof ConsoleHandler) {
                 handler.setLevel(cliLogLevel);
             }
-            setFormatterOnHandler(logService, handler);
-        }
-    }
-
-    /**
-     * Set the formatter for the supplied handler if the supplied log service
-     * is a JavaLogService and that service specifies a custom formatter.
-     */
-    private void setFormatterOnHandler(LogService logService, Handler handler) {
-        if (logService instanceof JavaLogService && handler != null) {
-            Formatter customFormatter = ((JavaLogService) logService).getCustomFormatter();
-            if (customFormatter != null) {
-                handler.setFormatter(customFormatter);
-            }
+            JavaLogService.setFormatterOnHandler(logService, handler);
         }
     }
 
@@ -1231,6 +1220,7 @@ public class LiquibaseCommandLine {
 
         @Override
         public String[] getVersion() throws Exception {
+            Version mdcVersion = new Version();
             final LicenseService licenseService = Scope.getCurrentScope().getSingleton(LicenseServiceFactory.class).getLicenseService();
             String licenseInfo = "";
             if (licenseService == null) {
@@ -1273,6 +1263,7 @@ public class LiquibaseCommandLine {
             if (libraryInfo.size() == 0) {
                 libraryDescription.append("- UNKNOWN");
             } else {
+                List<Version.Library> mdcLibraries = new ArrayList<>(libraryInfo.size());
                 for (LibraryInfo info : new TreeSet<>(libraryInfo.values())) {
                     String filePath = info.file.getCanonicalPath();
 
@@ -1289,21 +1280,45 @@ public class LiquibaseCommandLine {
                             .append(" ").append(info.version == null ? "UNKNOWN" : info.version)
                             .append(info.vendor == null ? "" : " By " + info.vendor)
                             .append("\n");
+
+                    mdcLibraries.add(new Version.Library(info.name, filePath));
                 }
+                mdcVersion.setLiquibaseLibraries(new Version.LiquibaseLibraries(libraryInfo.size(), mdcLibraries));
             }
+            String javaHome = System.getProperties().getProperty("java.home");
+            String javaVersion = System.getProperty("java.version");
+            addMdc(mdcVersion, licenseService, liquibaseHome, javaHome, javaVersion);
 
             return new String[]{
                     CommandLineUtils.getBanner(),
                     String.format("Liquibase Home: %s", liquibaseHome),
                     String.format("Java Home %s (Version %s)",
-                            System.getProperties().getProperty("java.home"),
-                            System.getProperty("java.version")
+                            javaHome,
+                            javaVersion
                     ),
                     libraryDescription.toString(),
                     "",
                     "Liquibase Version: " + LiquibaseUtil.getBuildVersionInfo(),
                     licenseInfo,
             };
+        }
+
+        private void addMdc(Version mdcVersion, LicenseService licenseService, String liquibaseHome, String javaHome, String javaVersion) {
+            mdcVersion.setJavaHome(new Version.JavaHome(javaHome, javaVersion));
+            Banner banner = new Banner();
+            LicenseInfo licenseInfoObject = null;
+            if (licenseService != null) {
+                licenseInfoObject = licenseService.getLicenseInfoObject();
+            }
+            if (licenseInfoObject != null) {
+                banner.setLicensee(licenseInfoObject.getIssuedTo());
+                banner.setLicenseEndDate(licenseInfoObject.formatExpirationDate());
+            }
+            banner.setPath(liquibaseHome);
+            mdcVersion.setLiquibaseVersion(banner);
+            try (MdcObject version = Scope.getCurrentScope().addMdcValue(MdcKey.VERSION, mdcVersion)) {
+                Scope.getCurrentScope().getLog(getClass()).info("Generated version info");
+            }
         }
 
         private LibraryInfo getLibraryInfo(File pathEntryFile) throws IOException {

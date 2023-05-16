@@ -16,8 +16,6 @@ Liquibase Open Source has built-in support for a variety of databases. Databases
 
 Liquibase can be integrated with Maven, Ant, Gradle, Spring Boot, and other CI/CD tools. For a full list, see [Liquibase Tools & Integrations](https://docs.liquibase.com/tools-integrations/home.html). You can use Liquibase with [GitHub Actions](https://github.com/liquibase/liquibase-github-action-example), [Spinnaker](https://github.com/liquibase/liquibase-spinnaker-plugin), and many different [workflows](https://docs.liquibase.com/workflows/home.html).
 
-## Real-time monitoring and visibility
-Try [Liquibase Hub](https://hub.liquibase.com/) to get real-time information about your deployments, an overview of recent commands for the specific database you’re working on, and a place for your team collaboration.
 
 ## Install and Run Liquibase
 
@@ -79,3 +77,9 @@ LIQUIBASE is a registered trademark of [Liquibase Inc.](https://www.liquibase.co
 
 .
 
+## Publish Release Manual Trigger to Sonatype 
+
+1. When a PO (Product Owner) or a Team Leader navigates to Publish a release from here -> https://github.com/liquibase/liquibase/releases/new, the workflow from /workflow/release-published.yml job is triggered. 
+2. When a release is triggered, the workflow file will stop after `Setup` step and an email will be sent out to the list of `approvers` mentioned in job `manual_trigger_deployment`. You can click on the link and perform anyone of the options mentioned in description. 
+3. A minimum of 2 approvers are needed in order for the other jobs such as `deploy_maven`, `deploy_javadocs`, `publish_to_github_packages`, etc to be executed.
+4. When you view the GitHub PR, make sure to verify the version which is being published. It should say something like `Deploying v4.20.0 to sonatype`
