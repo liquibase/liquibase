@@ -651,4 +651,18 @@ public class YamlChangeLogParser_RealFile_Test extends Specification {
         cleanup:
         Scope.getCurrentScope().getSingleton(ChangeFactory.class).unregister("createTableExample");
     }
+
+
+    def "change set have to empty when change log has only databaseChangeLog tag"() throws ChangeLogParseException {
+        def path = "liquibase/parser/core/yaml/emptyChangeLog.yaml"
+        when:
+        def changeLog = new YamlChangeLogParser().parse(path, new ChangeLogParameters(), new JUnitResourceAccessor());
+
+        then:
+        changeLog.logicalFilePath == path
+        changeLog.physicalFilePath == path
+
+        changeLog.preconditions.nestedPreconditions.size() == 0
+        changeLog.changeSets.size() == 0
+    }
 }
