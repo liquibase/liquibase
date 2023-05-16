@@ -1521,18 +1521,6 @@ public class Main {
                 outputWriter.write(result);
                 outputWriter.flush();
                 return;
-            } else if (COMMANDS.EXECUTE_SQL.equalsIgnoreCase(command)) {
-                CommandScope executeSqlCommand = new CommandScope("internalExecuteSql")
-                        .addArgumentValue(InternalExecuteSqlCommandStep.DATABASE_ARG, database)
-                        .addArgumentValue(InternalExecuteSqlCommandStep.SQL_ARG, getCommandParam("sql", null))
-                        .addArgumentValue(InternalExecuteSqlCommandStep.SQLFILE_ARG, getCommandParam("sqlFile", null))
-                        .addArgumentValue(InternalExecuteSqlCommandStep.DELIMITER_ARG, getCommandParam("delimiter", ";"));
-                CommandResults results = executeSqlCommand.execute();
-                Writer outputWriter = getOutputWriter();
-                String output = (String) results.getResult("output");
-                outputWriter.write(output);
-                outputWriter.flush();
-                return;
             } else if (COMMANDS.SNAPSHOT_REFERENCE.equalsIgnoreCase(command)) {
                 CommandScope snapshotCommand = new CommandScope("internalSnapshot");
                 Database referenceDatabase = createReferenceDatabaseFromCommandParams(commandParams, fileOpener);
@@ -1888,6 +1876,8 @@ public class Main {
             runRollbackCommand(null);
         } else if (COMMANDS.ROLLBACK_SQL.equalsIgnoreCase(command)) {
             runRollbackSqlCommand();
+        } else if (COMMANDS.EXECUTE_SQL.equalsIgnoreCase(command)) {
+            runExecuteSqlCommand();
         }
     }
 
@@ -2051,6 +2041,15 @@ public class Main {
                 .addArgumentValue(ReferenceDbUrlConnectionCommandStep.REFERENCE_DRIVER_PROPERTIES_FILE_ARG, null)
                 .addArgumentValue(ReferenceDbUrlConnectionCommandStep.REFERENCE_USERNAME_ARG, refUsername)
                 .addArgumentValue(ReferenceDbUrlConnectionCommandStep.REFERENCE_PASSWORD_ARG, refPassword);
+    }
+
+    private void runExecuteSqlCommand() throws CommandExecutionException, CommandLineParsingException {
+        CommandScope executeSql = new CommandScope(ExecuteSqlCommandStep.COMMAND_NAME[0]);
+        executeSql.addArgumentValue(ExecuteSqlCommandStep.SQL_ARG, getCommandParam("sql", null));
+        executeSql.addArgumentValue(ExecuteSqlCommandStep.SQLFILE_ARG, getCommandParam("sqlFile", null));
+        executeSql.addArgumentValue(ExecuteSqlCommandStep.DELIMITER_ARG, getCommandParam("delimiter", ";"));
+        setDatabaseArgumentsToCommand(executeSql);
+        executeSql.execute();
     }
 
     /**
