@@ -56,7 +56,6 @@ public abstract class AbstractUpdateCommandStep extends AbstractCommandStep impl
         DatabaseChangelogCommandStep.addCommandFiltersMdc(labelExpression, contexts);
         customMdcLogging(commandScope);
 
-        LockService lockService = (LockService) commandScope.getDependency(LockService.class);
         //
         // Create and add the listener to the resultsBuilder so that it is available
         // for exception handling when there is an error
@@ -97,7 +96,7 @@ public abstract class AbstractUpdateCommandStep extends AbstractCommandStep impl
             //TODO: We should be able to remove this once we get the rest of the update family
             // set up with the CommandFramework
             try {
-                lockService.releaseLock();
+                LockServiceFactory.getInstance().getLockService(database).releaseLock();
             } catch (LockException e) {
                 Scope.getCurrentScope().getLog(getClass()).severe(MSG_COULD_NOT_RELEASE_LOCK, e);
             }
@@ -160,7 +159,7 @@ public abstract class AbstractUpdateCommandStep extends AbstractCommandStep impl
      */
     private static final Map<String, Boolean> upToDateFastCheck = new ConcurrentHashMap<>();
 
-    private boolean isUpToDateFastCheck(CommandScope commandScope, Database database, DatabaseChangeLog databaseChangeLog, Contexts contexts, LabelExpression labelExpression) throws LiquibaseException {
+    public boolean isUpToDateFastCheck(CommandScope commandScope, Database database, DatabaseChangeLog databaseChangeLog, Contexts contexts, LabelExpression labelExpression) throws LiquibaseException {
         String cacheKey = contexts + "/" + labelExpression;
         if (!upToDateFastCheck.containsKey(cacheKey)) {
             try {

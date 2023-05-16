@@ -481,19 +481,24 @@ public class Main {
     private static Level parseLogLevel(String logLevelName, UIService ui) {
         logLevelName = logLevelName.toUpperCase();
         Level logLevel;
-        if (logLevelName.equals("DEBUG")) {
-            logLevel = Level.FINE;
-        } else if (logLevelName.equals("WARN")) {
-            logLevel = Level.WARNING;
-        } else if (logLevelName.equals("ERROR")) {
-            logLevel = Level.SEVERE;
-        } else {
-            try {
-                logLevel = Level.parse(logLevelName);
-            } catch (IllegalArgumentException e) {
-                ui.sendErrorMessage("Unknown log level " + logLevelName);
-                logLevel = Level.OFF;
-            }
+        switch (logLevelName) {
+            case "DEBUG":
+                logLevel = Level.FINE;
+                break;
+            case "WARN":
+                logLevel = Level.WARNING;
+                break;
+            case "ERROR":
+                logLevel = Level.SEVERE;
+                break;
+            default:
+                try {
+                    logLevel = Level.parse(logLevelName);
+                } catch (IllegalArgumentException e) {
+                    ui.sendErrorMessage("Unknown log level " + logLevelName);
+                    logLevel = Level.OFF;
+                }
+                break;
         }
         return logLevel;
     }
@@ -1539,11 +1544,17 @@ public class Main {
                 liquibaseCommand.execute();
                 return;
             } else if (COMMANDS.DROP_ALL.equalsIgnoreCase(command)) {
-                CommandScope dropAllCommand = new CommandScope("internalDropAll");
+                CommandScope dropAllCommand = new CommandScope("dropAll");
+                if (hubConnectionId != null) {
+                    dropAllCommand.addArgumentValue(DropAllCommandStep.HUB_CONNECTION_ID_ARG, UUID.fromString(hubConnectionId));
+                }
+                if (hubProjectId != null) {
+                    dropAllCommand.addArgumentValue(DropAllCommandStep.HUB_PROJECT_ID_ARG, UUID.fromString(hubProjectId));
+                }
                 dropAllCommand
-                        .addArgumentValue(InternalDropAllCommandStep.DATABASE_ARG, liquibase.getDatabase())
-                        .addArgumentValue(InternalDropAllCommandStep.SCHEMAS_ARG, InternalSnapshotCommandStep.parseSchemas(database, getSchemaParams(database)))
-                        .addArgumentValue(InternalDropAllCommandStep.CHANGELOG_FILE_ARG, changeLogFile);
+                        .addArgumentValue(DbUrlConnectionCommandStep.DATABASE_ARG, liquibase.getDatabase())
+                        .addArgumentValue(DropAllCommandStep.CATALOG_AND_SCHEMAS_ARG, InternalSnapshotCommandStep.parseSchemas(database, getSchemaParams(database)))
+                        .addArgumentValue(GenerateChangelogCommandStep.CHANGELOG_FILE_ARG, changeLogFile);
 
                 dropAllCommand.execute();
                 return;

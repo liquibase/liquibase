@@ -36,21 +36,6 @@ public class YamlSnapshotSerializer extends YamlSerializer implements SnapshotSe
         writer.write(serialize(snapshot, true));
     }
 
-//    @Override
-//    public String serialize(LiquibaseSerializable object, boolean pretty) {
-//        if (object instanceof DatabaseObject) {
-//            if (alreadySerializingObject) {
-//                return ((DatabaseObject) object).getObjectTypeName()+"#"+((DatabaseObject) object).getSnapshotId();
-//            } else {
-//                alreadySerializingObject = true;
-//                String string = super.serialize(object, pretty);
-//                alreadySerializingObject = false;
-//                return string;
-//            }
-//        }
-//        return super.serialize(object, pretty);
-//    }
-
     @Override
     protected Object toMap(final LiquibaseSerializable object) {
         if (object instanceof DatabaseObject) {

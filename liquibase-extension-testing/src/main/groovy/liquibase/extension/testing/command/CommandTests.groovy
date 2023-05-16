@@ -1202,6 +1202,11 @@ Long Description: ${commandDefinition.getLongDescription() ?: "NOT SET"}
         Database altDatabase
     }
 
+    public static String createRandomFilePath(String suffix) {
+        String rand = "target/test-classes/" + StringUtil.randomIdentifer(10) + "." + suffix
+        rand
+    }
+
     interface OutputCheck {
         def check(String actual) throws AssertionError
         /**

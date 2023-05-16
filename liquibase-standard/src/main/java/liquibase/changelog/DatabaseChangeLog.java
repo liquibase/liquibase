@@ -355,7 +355,9 @@ public class DatabaseChangeLog implements Comparable<DatabaseChangeLog>, Conditi
     }
 
     public List<ChangeSet> getChangeSets(RanChangeSet ranChangeSet) {
-        return getChangeSets(ranChangeSet.getChangeLog(), ranChangeSet.getAuthor(), ranChangeSet.getId());
+        List<ChangeSet> changesets = getChangeSets(ranChangeSet.getChangeLog(), ranChangeSet.getAuthor(), ranChangeSet.getId());
+        changesets.forEach(c -> c.setStoredFilePath(ranChangeSet.getStoredChangeLog()));
+        return changesets;
     }
 
     public void load(ParsedNode parsedNode, ResourceAccessor resourceAccessor) throws ParsedNodeException, SetupException {
