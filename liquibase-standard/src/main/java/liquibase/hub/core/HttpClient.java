@@ -166,11 +166,6 @@ class HttpClient {
 
             try (InputStream response = connection.getInputStream()) {
                 //TODO: figure out how to populate ListResponse.content with objects rather than maps
-//                if (contentReturnType != null) {
-//                    final TypeDescription peopleDescription = new TypeDescription(contentReturnType);
-//                    peopleDescription.addPropertyParameters("content", List.class, contentReturnType);
-//                    yaml.addTypeDescription(peopleDescription);
-//                }
                 int responseCode = connection.getResponseCode();
                 if (responseCode != HttpURLConnection.HTTP_OK) {
                     if (responseCode == HttpURLConnection.HTTP_MOVED_TEMP ||

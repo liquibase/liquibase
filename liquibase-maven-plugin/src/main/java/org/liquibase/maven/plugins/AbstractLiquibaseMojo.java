@@ -15,6 +15,10 @@ import liquibase.integration.IntegrationDetails;
 import liquibase.integration.commandline.ChangeExecListenerUtils;
 import liquibase.integration.commandline.CommandLineUtils;
 import liquibase.integration.commandline.LiquibaseCommandLineConfiguration;
+import liquibase.logging.LogFormat;
+import liquibase.logging.LogService;
+import liquibase.logging.core.JavaLogService;
+import liquibase.logging.core.LogServiceFactory;
 import liquibase.resource.DirectoryResourceAccessor;
 import liquibase.resource.ResourceAccessor;
 import liquibase.resource.SearchPathResourceAccessor;
@@ -40,6 +44,9 @@ import java.net.URLClassLoader;
 import java.nio.file.Files;
 import java.text.MessageFormat;
 import java.util.*;
+import java.util.logging.Handler;
+
+import static liquibase.configuration.LiquibaseConfiguration.REGISTERED_VALUE_PROVIDERS_KEY;
 
 /**
  * A base class for providing Liquibase {@link liquibase.Liquibase} functionality.
@@ -572,6 +579,16 @@ public abstract class AbstractLiquibaseMojo extends AbstractMojo {
     @PropertyElement
     protected String changeExecListenerPropertiesFile;
 
+    /**
+     * Sets the format of log output to console or log files.
+     * Open Source users default to unstructured TXT logs to the console or output log files.
+     * Pro users have the option to set value as JSON or JSON_PRETTY to enable json-structured log files to the console or output log files.
+     *
+     * @parameter property="liquibase.logFormat"
+     */
+    @PropertyElement
+    protected String logFormat;
+
     protected String commandName;
     protected DefaultChangeExecListener defaultChangeExecListener;
 
@@ -598,6 +615,39 @@ public abstract class AbstractLiquibaseMojo extends AbstractMojo {
         return new BufferedWriter(new OutputStreamWriter(Files.newOutputStream(outputFile.toPath()), encoding));
     }
 
+    private Map<String, Object> setUpLogging() throws Exception {
+        // First determine whether the specified log format requires the use of the standard Scope logger.
+        boolean useScopeLogger = false;
+        if (this.logFormat != null) {
+            try {
+                useScopeLogger = LogFormat.valueOf(this.logFormat.toUpperCase()).isUseScopeLoggerInMaven();
+            } catch (Exception ignored) {
+
+            }
+        }
+
+        Map<String, Object> scopeAttrs = new HashMap<>();
+        if (!useScopeLogger) {
+            // If the specified log format does not require the use of the standard Liquibase logger, just return the
+            // Maven log service as is traditionally done.
+            scopeAttrs.put(Scope.Attr.logService.name(), new MavenLogService(getLog()));
+            return scopeAttrs;
+        } else {
+            // The log format requires the use of the standard Liquibase logger, so set it up.
+            scopeAttrs.put(LiquibaseCommandLineConfiguration.LOG_FORMAT.getKey(), this.logFormat);
+            scopeAttrs.put(REGISTERED_VALUE_PROVIDERS_KEY, true);
+            // Get a new log service after registering the value providers, since the log service might need to load parameters using newly registered value providers.
+            LogService newLogService = Scope.child(scopeAttrs, () -> Scope.getCurrentScope().getSingleton(LogServiceFactory.class).getDefaultLogService());
+            // Set the formatter on all the handlers.
+            java.util.logging.Logger rootLogger = java.util.logging.Logger.getLogger("");
+            for (Handler handler : rootLogger.getHandlers()) {
+                JavaLogService.setFormatterOnHandler(newLogService, handler);
+            }
+            scopeAttrs.put(Scope.Attr.logService.name(), newLogService);
+            return scopeAttrs;
+        }
+    }
+
     @Override
     public void execute() throws MojoExecutionException, MojoFailureException {
         if (StringUtil.trimToNull(logging) != null) {
@@ -605,7 +655,7 @@ public abstract class AbstractLiquibaseMojo extends AbstractMojo {
         }
 
         try {
-            Scope.child(Scope.Attr.logService, new MavenLogService(getLog()), () -> {
+            Scope.child(setUpLogging(), () -> {
 
                 getLog().info(MavenUtils.LOG_SEPARATOR);
 
