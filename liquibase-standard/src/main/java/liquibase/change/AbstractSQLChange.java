@@ -180,8 +180,9 @@ public abstract class AbstractSQLChange extends AbstractChange implements DbmsTa
     }
 
     /**
-     * Set the end delimiter for splitting SQL statements. Set to null to use the default delimiter.
-     * @param endDelimiter
+     * Sets the end delimiter for splitting SQL statements. Set to {@code null} to use the default delimiter.
+     *
+     * @param endDelimiter the end delimiter to set
      */
     public void setEndDelimiter(String endDelimiter) {
         this.endDelimiter = endDelimiter;

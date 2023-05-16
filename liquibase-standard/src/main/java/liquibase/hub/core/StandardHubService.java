@@ -357,12 +357,12 @@ public class StandardHubService implements HubService {
     }
 
     /**
-     * Query for a changelog ID.  If no result we return null
-     * We cache this result and a map
+     * Queries for a changelog ID. If no result is found, it returns {@code null}.
+     * The result is cached in a map.
      *
-     * @param changeLogId Changelog ID for query
-     * @return HubChangeLog               Object container for result
-     * @throws LiquibaseHubException
+     * @param changeLogId The changelog ID to query for.
+     * @return A {@code HubChangeLog} object containing the result, or {@code null} if no result is found.
+     * @throws LiquibaseHubException If an error occurs while querying the Hub.
      */
     @Override
     public HubChangeLog getHubChangeLog(UUID changeLogId) throws LiquibaseHubException {
@@ -376,7 +376,6 @@ public class StandardHubService implements HubService {
      * @param changeLogId   Changelog ID for query
      * @param includeStatus Allowable status for returned changelog
      * @return HubChangeLog               Object container for result
-     * @throws LiquibaseHubException
      */
     @Override
     public HubChangeLog getHubChangeLog(UUID changeLogId, String includeStatus)  {

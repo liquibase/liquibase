@@ -286,13 +286,10 @@ public class MySQLDatabase extends AbstractJdbcDatabase {
     }
 
     /**
+     * Checks whether this instance of a MySQL database is equal to or greater than the specified version.
      *
-     * Check to see if this instance of a MySQL database is equal to or greater
-     * than the specified version
-     *
-     * @param   minimumVersion
-     * @return  boolean
-     *
+     * @param minimumVersion the minimum version to check
+     * @return {@code true} if this instance of a MySQL database is equal to or greater than the specified version,  {@code false} otherwise
      */
     public boolean isMinimumMySQLVersion(String minimumVersion) {
         int major = 0;
