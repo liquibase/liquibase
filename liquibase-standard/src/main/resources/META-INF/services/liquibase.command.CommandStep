@@ -5,7 +5,6 @@ liquibase.command.core.ChangelogSyncToTagCommandStep
 liquibase.command.core.ChangelogSyncToTagSqlCommandStep
 liquibase.command.core.ClearChecksumsCommandStep
 liquibase.command.core.DbDocCommandStep
-liquibase.command.core.DeactivateChangelogCommandStep
 liquibase.command.core.DiffChangelogCommandStep
 liquibase.command.core.DiffCommandStep
 liquibase.command.core.DropAllCommandStep
@@ -17,11 +16,9 @@ liquibase.command.core.GenerateChangelogCommandStep
 liquibase.command.core.HistoryCommandStep
 liquibase.command.core.InternalHistoryCommandStep
 liquibase.command.core.InternalSnapshotCommandStep
-liquibase.command.core.InternalSyncHubCommandStep
 liquibase.command.core.ListLocksCommandStep
 liquibase.command.core.MarkNextChangesetRanCommandStep
 liquibase.command.core.MarkNextChangesetRanSqlCommandStep
-liquibase.command.core.RegisterChangelogCommandStep
 liquibase.command.core.ReleaseLocksCommandStep
 liquibase.command.core.RollbackCommandStep
 liquibase.command.core.RollbackCountCommandStep
@@ -33,7 +30,6 @@ liquibase.command.core.SnapshotCommandStep
 liquibase.command.core.SnapshotReferenceCommandStep
 liquibase.command.core.StartH2CommandStep
 liquibase.command.core.StatusCommandStep
-liquibase.command.core.SyncHubCommandStep
 liquibase.command.core.TagCommandStep
 liquibase.command.core.TagExistsCommandStep
 liquibase.command.core.UnexpectedChangesetsCommandStep
