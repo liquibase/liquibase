@@ -254,7 +254,11 @@ public class ChangeLogParameters {
                 continue;
             }
 
-            for (ChangeLogParameter parameter : paramList) {
+            /*
+             * Getting from the last to first, allowing override parameters, usefully to enable inherits
+             */
+            for (int i = paramList.size() - 1; i >= 0; i--) {
+                ChangeLogParameter parameter = paramList.get(i);
                 if (parameter.getKey().equalsIgnoreCase(key) && (filter == null || filter.matches(parameter))) {
                     return parameter;
                 }
