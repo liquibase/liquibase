@@ -60,8 +60,6 @@ public class InsertOrUpdateGeneratorHsql extends InsertOrUpdateGenerator {
 
 		StringBuilder sql = new StringBuilder("UPDATE SET ");
 
-//		String[] pkFields = insertOrUpdateStatement.getPrimaryKey().split(",");
-//		HashSet<String> hashPkFields = new HashSet<String>(Arrays.asList(pkFields));
 		for (String columnKey : insertOrUpdateStatement.getColumnValues().keySet()) {
 			if (insertOrUpdateStatement.getAllowColumnUpdate(columnKey)) {
 				sql.append(columnKey).append(" = ");
