@@ -1545,12 +1545,6 @@ public class Main {
                 return;
             } else if (COMMANDS.DROP_ALL.equalsIgnoreCase(command)) {
                 CommandScope dropAllCommand = new CommandScope("dropAll");
-                if (hubConnectionId != null) {
-                    dropAllCommand.addArgumentValue(DropAllCommandStep.HUB_CONNECTION_ID_ARG, UUID.fromString(hubConnectionId));
-                }
-                if (hubProjectId != null) {
-                    dropAllCommand.addArgumentValue(DropAllCommandStep.HUB_PROJECT_ID_ARG, UUID.fromString(hubProjectId));
-                }
                 dropAllCommand
                         .addArgumentValue(DbUrlConnectionCommandStep.DATABASE_ARG, liquibase.getDatabase())
                         .addArgumentValue(DropAllCommandStep.CATALOG_AND_SCHEMAS_ARG, InternalSnapshotCommandStep.parseSchemas(database, getSchemaParams(database)))
