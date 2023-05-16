@@ -29,9 +29,7 @@ Liquibase system requirements can be found on the [Download Liquibase](https://w
 4. Open your CLI and navigate to your `examples/sql` or `examples/xml` directory.
 5. Start the included H2 database with the `liquibase init start-h2` command.
 6. Run the `liquibase update` command.
-7. Optionally, follow the prompt for your email to register for [Liquibase Hub](https://hub.liquibase.com/).
-8. Run the `liquibase history` command.
-9. If you entered your email, check the report link and the output of the `history` command to see they match. 
+7. Run the `liquibase history` command to see what has executed!
 
 See also how to [get started with Liquibase in minutes](https://www.liquibase.org/get-started/quickstart) or refer to our [Installing Liquibase](https://docs.liquibase.com/install/home.html) documentation page for more details.
 
