@@ -16,7 +16,6 @@ import liquibase.exception.LockException;
 import liquibase.executor.ExecutorService;
 import liquibase.lockservice.LockService;
 import liquibase.lockservice.LockServiceFactory;
-import liquibase.logging.core.BufferedLogService;
 import liquibase.logging.mdc.MdcKey;
 import liquibase.logging.mdc.MdcObject;
 import liquibase.logging.mdc.MdcValue;
@@ -56,14 +55,7 @@ public abstract class AbstractUpdateCommandStep extends AbstractCommandStep impl
         DatabaseChangelogCommandStep.addCommandFiltersMdc(labelExpression, contexts);
         customMdcLogging(commandScope);
 
-        //
-        // Create and add the listener to the resultsBuilder so that it is available
-        // for exception handling when there is an error
-        //
-        DefaultChangeExecListener defaultChangeExecListener = (DefaultChangeExecListener) commandScope.getDependency(ChangeExecListener.class);
-        // Need to reset the cached changesets in the listener, because in the case of something like update-testing-rollback, the same listener is used for both updates
-        defaultChangeExecListener.reset();
-        resultsBuilder.addResult(DEFAULT_CHANGE_EXEC_LISTENER_RESULT_KEY, defaultChangeExecListener);
+        ChangeExecListener changeExecListener = getChangeExecListener(resultsBuilder, commandScope);
         try {
             DatabaseChangeLog databaseChangeLog = (DatabaseChangeLog) commandScope.getDependency(DatabaseChangeLog.class);
             if (isUpToDate(commandScope, database, databaseChangeLog, contexts, labelExpression, resultsBuilder.getOutputStream())) {
@@ -82,14 +74,14 @@ public abstract class AbstractUpdateCommandStep extends AbstractCommandStep impl
             HashMap<String, Object> scopeValues = new HashMap<>();
             scopeValues.put("showSummary", getShowSummary(commandScope));
             Scope.child(scopeValues, () -> {
-                runChangeLogIterator.run(new UpdateVisitor(database, defaultChangeExecListener), new RuntimeEnvironment(database, contexts, labelExpression));
+                runChangeLogIterator.run(new UpdateVisitor(database, changeExecListener), new RuntimeEnvironment(database, contexts, labelExpression));
                 ShowSummaryUtil.showUpdateSummary(databaseChangeLog, getShowSummary(commandScope), statusVisitor, resultsBuilder.getOutputStream());
             });
             resultsBuilder.addResult("statusCode", 0);
-            logDeploymentOutcomeMdc(defaultChangeExecListener, true);
+            logDeploymentOutcomeMdc(changeExecListener, true);
             postUpdateLog();
         } catch (Exception e) {
-            logDeploymentOutcomeMdc(defaultChangeExecListener, false);
+            logDeploymentOutcomeMdc(changeExecListener, false);
             resultsBuilder.addResult("statusCode", 1);
             throw e;
         } finally {
@@ -103,6 +95,21 @@ public abstract class AbstractUpdateCommandStep extends AbstractCommandStep impl
         }
     }
 
+    private ChangeExecListener getChangeExecListener(CommandResultsBuilder resultsBuilder, CommandScope commandScope) {
+        //
+        // Create and add the listener to the resultsBuilder so that it is available
+        // for exception handling when there is an error
+        //
+        ChangeExecListener changeExecListener = (ChangeExecListener) commandScope.getDependency(ChangeExecListener.class);
+        // Because of MDC we need to reset the cached changesets in the listener, because in the case of something like
+        // update-testing-rollback, the same listener is used for both updates
+        if (changeExecListener instanceof DefaultChangeExecListener) {
+            ((DefaultChangeExecListener)changeExecListener).reset();
+        }
+        resultsBuilder.addResult(DEFAULT_CHANGE_EXEC_LISTENER_RESULT_KEY, changeExecListener);
+        return changeExecListener;
+    }
+
     protected void customMdcLogging(CommandScope commandScope) {
         // do nothing by default
     }
@@ -114,16 +121,19 @@ public abstract class AbstractUpdateCommandStep extends AbstractCommandStep impl
         Scope.getCurrentScope().getSingleton(ExecutorService.class).reset();
     }
 
-    private void logDeploymentOutcomeMdc(DefaultChangeExecListener defaultListener, boolean success) throws IOException {
-        List<ChangeSet> deployedChangeSets = defaultListener.getDeployedChangeSets();
-        int deployedChangeSetCount = deployedChangeSets.size();
-        ChangesetsUpdated changesetsUpdated = new ChangesetsUpdated(deployedChangeSets);
+    private void logDeploymentOutcomeMdc(ChangeExecListener defaultListener, boolean success) {
         String successLog = "Update command completed successfully.";
         String failureLog = "Update command encountered an exception.";
-        try (MdcObject deploymentOutcomeMdc = Scope.getCurrentScope().addMdcValue(MdcKey.DEPLOYMENT_OUTCOME, success ? MdcValue.COMMAND_SUCCESSFUL : MdcValue.COMMAND_FAILED);
-             MdcObject deploymentOutcomeCountMdc = Scope.getCurrentScope().addMdcValue(MdcKey.DEPLOYMENT_OUTCOME_COUNT, String.valueOf(deployedChangeSetCount));
-             MdcObject changesetsUpdatesMdc = Scope.getCurrentScope().addMdcValue(MdcKey.CHANGESETS_UPDATED, changesetsUpdated)) {
+        try (MdcObject deploymentOutcomeMdc = Scope.getCurrentScope().addMdcValue(MdcKey.DEPLOYMENT_OUTCOME, success ? MdcValue.COMMAND_SUCCESSFUL : MdcValue.COMMAND_FAILED)) {
             Scope.getCurrentScope().getLog(getClass()).info(success ? successLog : failureLog);
+        }
+
+        if (defaultListener instanceof  DefaultChangeExecListener) {
+            List<ChangeSet> deployedChangeSets = ((DefaultChangeExecListener)defaultListener).getDeployedChangeSets();
+            int deployedChangeSetCount = deployedChangeSets.size();
+            ChangesetsUpdated changesetsUpdated = new ChangesetsUpdated(deployedChangeSets);
+            Scope.getCurrentScope().addMdcValue(MdcKey.DEPLOYMENT_OUTCOME_COUNT, String.valueOf(deployedChangeSetCount));
+            Scope.getCurrentScope().addMdcValue(MdcKey.CHANGESETS_UPDATED, changesetsUpdated);
         }
     }
 
