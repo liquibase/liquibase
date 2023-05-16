@@ -25,13 +25,11 @@ import liquibase.exception.LockException;
 import liquibase.executor.Executor;
 import liquibase.executor.ExecutorService;
 import liquibase.executor.LoggingExecutor;
-import liquibase.hub.*;
-import liquibase.hub.model.Connection;
-import liquibase.hub.model.HubChangeLog;
 import liquibase.io.WriterOutputStream;
 import liquibase.lockservice.DatabaseChangeLogLock;
 import liquibase.lockservice.LockService;
 import liquibase.lockservice.LockServiceFactory;
+import liquibase.logging.LogService;
 import liquibase.logging.Logger;
 import liquibase.logging.mdc.MdcKey;
 import liquibase.logging.mdc.customobjects.ChangesetsRolledback;
@@ -72,7 +70,6 @@ public class Liquibase implements AutoCloseable {
     private final ChangeLogParameters changeLogParameters;
     private ChangeExecListener changeExecListener;
     private final DefaultChangeExecListener defaultChangeExecListener = new DefaultChangeExecListener();
-    private UUID hubConnectionId;
     private final Map<String, Boolean> upToDateFastCheck = new HashMap<>();
 
     /**
@@ -121,14 +118,6 @@ public class Liquibase implements AutoCloseable {
         this.resourceAccessor = resourceAccessor;
         this.database = database;
         this.changeLogParameters = new ChangeLogParameters(database);
-    }
-
-    public UUID getHubConnectionId() {
-        return hubConnectionId;
-    }
-
-    public void setHubConnectionId(UUID hubConnectionId) {
-        this.hubConnectionId = hubConnectionId;
     }
 
     /**
@@ -253,69 +242,6 @@ public class Liquibase implements AutoCloseable {
     protected boolean isUpToDateFastCheck(Contexts contexts, LabelExpression labelExpression) throws LiquibaseException {
         return new UpdateCommandStep().isUpToDateFastCheck(null, database, databaseChangeLog, contexts, labelExpression);
     }
-
-    /**
-     *
-     * Create or retrieve the Connection object
-     *
-     * @param   changeLog              Database changelog
-     * @return  Connection
-     * @throws  LiquibaseHubException  Thrown by HubService
-     *
-     */
-    public Connection getConnection(DatabaseChangeLog changeLog) throws LiquibaseHubException {
-        //
-        // If our current Executor is a LoggingExecutor then just return since we will not update Hub
-        //
-        Executor executor = Scope.getCurrentScope().getSingleton(ExecutorService.class).getExecutor("jdbc", database);
-        if (executor instanceof LoggingExecutor) {
-            return null;
-        }
-        String changeLogId = changeLog.getChangeLogId();
-        HubUpdater hubUpdater = new HubUpdater(new Date(), changeLog, database);
-        if (hubUpdater.hubIsNotAvailable(changeLogId)) {
-            return null;
-        }
-
-        //
-        // Warn about the situation where there is a changeLog ID, but no API key
-        //
-        if (StringUtil.isEmpty(HubConfiguration.LIQUIBASE_HUB_API_KEY.getCurrentValue()) && changeLogId != null) {
-            return null;
-        }
-        Connection connection;
-        final HubService hubService = Scope.getCurrentScope().getSingleton(HubServiceFactory.class).getService();
-        if (getHubConnectionId() == null) {
-            HubChangeLog hubChangeLog = hubService.getHubChangeLog(UUID.fromString(changeLogId), "*");
-            if (hubChangeLog == null) {
-                Scope.getCurrentScope().getLog(getClass()).warning(
-                    "Retrieving Hub Change Log failed for Changelog ID: " + changeLogId);
-                return null;
-            }
-            if (hubChangeLog.isDeleted()) {
-                //
-                // Complain and stop the operation
-                //
-                String message =
-                    "\n" +
-                        "The operation did not complete and will not be reported to Hub because the\n" +  "" +
-                        "registered changelog has been deleted by someone in your organization.\n" +
-                        "Learn more at http://hub.liquibase.com.";
-                throw new LiquibaseHubException(message);
-            }
-
-            Connection exampleConnection = new Connection();
-            exampleConnection.setProject(hubChangeLog.getProject());
-            exampleConnection.setJdbcUrl(Liquibase.this.database.getConnection().getURL());
-            connection = hubService.getConnection(exampleConnection, true);
-
-            setHubConnectionId(connection.getId());
-        } else {
-            connection = hubService.getConnection(new Connection().setId(getHubConnectionId()), true);
-        }
-        return connection;
-    }
-
 
     public DatabaseChangeLog getDatabaseChangeLog() throws LiquibaseException {
         return getDatabaseChangeLog(false);
@@ -847,7 +773,6 @@ public class Liquibase implements AutoCloseable {
             new CommandScope(commandToRun)
                     .addArgumentValue(DbUrlConnectionCommandStep.DATABASE_ARG, Liquibase.this.getDatabase())
                     .addArgumentValue(DatabaseChangelogCommandStep.CHANGELOG_FILE_ARG, changeLogFile)
-                    .addArgumentValue(ChangelogSyncCommandStep.HUB_CHANGE_EXEC_LISTENER_ARG, changeExecListener)
                     .addArgumentValue(DatabaseChangelogCommandStep.CONTEXTS_ARG, (contexts != null? contexts.toString() : null))
                     .addArgumentValue(DatabaseChangelogCommandStep.LABEL_FILTER_ARG, (labelExpression != null ? labelExpression.getOriginalString() : null))
                     .addArgumentValue(ChangelogSyncToTagCommandStep.TAG_ARG, tag)
@@ -872,7 +797,6 @@ public class Liquibase implements AutoCloseable {
         runInScope(() -> new CommandScope(commandToRun)
                 .addArgumentValue(DbUrlConnectionCommandStep.DATABASE_ARG, Liquibase.this.getDatabase())
                 .addArgumentValue(DatabaseChangelogCommandStep.CHANGELOG_FILE_ARG, changeLogFile)
-                .addArgumentValue(ChangelogSyncSqlCommandStep.HUB_CHANGE_EXEC_LISTENER_ARG, changeExecListener)
                 .addArgumentValue(DatabaseChangelogCommandStep.CONTEXTS_ARG, (contexts != null? contexts.toString() : null))
                 .addArgumentValue(DatabaseChangelogCommandStep.LABEL_FILTER_ARG, (labelExpression != null ? labelExpression.getOriginalString() : null))
                 .addArgumentValue(ChangelogSyncToTagSqlCommandStep.TAG_ARG, tag)

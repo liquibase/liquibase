@@ -23,8 +23,6 @@ public class DropAllCommandStep extends AbstractCommandStep {
 
     public static final CommandArgumentDefinition<String> SCHEMAS_ARG;
     public static final CommandArgumentDefinition<CatalogAndSchema[]> CATALOG_AND_SCHEMAS_ARG;
-    public static final CommandArgumentDefinition<UUID> HUB_CONNECTION_ID_ARG;
-    public static final CommandArgumentDefinition<UUID> HUB_PROJECT_ID_ARG;
 
     static {
         CommandBuilder builder = new CommandBuilder(COMMAND_NAME);
@@ -32,10 +30,6 @@ public class DropAllCommandStep extends AbstractCommandStep {
         CATALOG_AND_SCHEMAS_ARG = builder.argument("catalogAndSchemas", CatalogAndSchema[].class)
                 .description("Catalog and schemas to include in drop. It has precedence over SCHEMAS_ARG").supersededBy(SCHEMAS_ARG).hidden().build();
         SCHEMAS_ARG.setSupersededBy(CATALOG_AND_SCHEMAS_ARG);
-        HUB_CONNECTION_ID_ARG = builder.argument("hubConnectionId", UUID.class)
-                .description("Used to identify the specific Connection in which to record or extract data at Liquibase Hub. Available in your Liquibase Hub Project at https://hub.liquibase.com.").build();
-        HUB_PROJECT_ID_ARG = builder.argument("hubProjectId", UUID.class)
-                .description("Used to identify the specific Project in which to record at Liquibase Hub. Available in your Liquibase Hub account at https://hub.liquibase.com.").build();
     }
 
     @Override
