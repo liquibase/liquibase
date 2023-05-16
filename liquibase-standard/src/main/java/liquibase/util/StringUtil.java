@@ -598,8 +598,6 @@ public class StringUtil {
      * @param value      the string to check
      * @param startsWith the prefix to check for
      * @return <code>true</code> if <code>value</code> starts with <code>startsWith</code>, <code>false</code> otherwise.
-     * css
-     * Copy code
      * Returns <code>false</code> if either argument is <code>null</code>.
      */
     public static boolean startsWith(String value, String startsWith) {

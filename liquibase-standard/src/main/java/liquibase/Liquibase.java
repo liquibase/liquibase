@@ -290,10 +290,6 @@ public class Liquibase implements AutoCloseable {
      *
      * @param contexts          The contexts to filter for.
      * @param labelExpression   The labels to filter for.
-     * @param collectAllReasons A flag to control whether all skip reasons are accumulated.
-     *                          vbnet
-     *                          Copy code
-     *                          The default value is false to only gather the first.
      * @param changeLog         The changelog to process.
      * @return a ChangeLogIterator instance.
      * @throws DatabaseException if there is an error with the database.
