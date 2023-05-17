@@ -74,8 +74,10 @@ public class DatabaseChangelogCommandStep extends AbstractHelperCommandStep impl
         }
         Contexts contexts = new Contexts(commandScope.getArgumentValue(CONTEXTS_ARG));
         changeLogParameters.setContexts(contexts);
+        commandScope.provideDependency(Contexts.class, contexts);
         LabelExpression labels = new LabelExpression(commandScope.getArgumentValue(LABEL_FILTER_ARG));
         changeLogParameters.setLabels(labels);
+        commandScope.provideDependency(LabelExpression.class, labels);
         addCommandFiltersMdc(labels, contexts);
 
         DatabaseChangeLog databaseChangeLog = getDatabaseChangeLog(changeLogFile, changeLogParameters);
