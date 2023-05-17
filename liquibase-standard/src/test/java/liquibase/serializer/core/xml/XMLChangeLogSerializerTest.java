@@ -962,12 +962,31 @@ public class XMLChangeLogSerializerTest {
         change.setCatalogName("a");
         change.setSchemaName("b");
         change.setTableName("c");
+        change.setIfNotExists(true);
         change.addColumn(new ColumnConfig().setName("x").setDefaultValue("x1"));
         change.addColumn(new ColumnConfig().setName("y").setDefaultValue("y1"));
 
         String out = new XMLChangeLogSerializer().serialize(change, true);
         assertEquals("<createTable catalogName=\"a\"\n" +
-                "        ifNotExists=\"false\"\n" +
+                "        ifNotExists=\"true\"\n" +
+                "        schemaName=\"b\"\n" +
+                "        tableName=\"c\">\n" +
+                "    <column defaultValue=\"x1\" name=\"x\"/>\n" +
+                "    <column defaultValue=\"y1\" name=\"y\"/>\n" +
+                "</createTable>", out);
+    }
+
+    @Test
+    public void serialize_pretty_nestedNodeWithAttributesAndNotExistsIgnored() {
+        CreateTableChange change = new CreateTableChange();
+        change.setCatalogName("a");
+        change.setSchemaName("b");
+        change.setTableName("c");
+        change.addColumn(new ColumnConfig().setName("x").setDefaultValue("x1"));
+        change.addColumn(new ColumnConfig().setName("y").setDefaultValue("y1"));
+
+        String out = new XMLChangeLogSerializer().serialize(change, true);
+        assertEquals("<createTable catalogName=\"a\"\n" +
                 "        schemaName=\"b\"\n" +
                 "        tableName=\"c\">\n" +
                 "    <column defaultValue=\"x1\" name=\"x\"/>\n" +
