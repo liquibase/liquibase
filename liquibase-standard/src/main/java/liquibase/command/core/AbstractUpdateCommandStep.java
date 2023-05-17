@@ -87,12 +87,12 @@ public abstract class AbstractUpdateCommandStep extends AbstractCommandStep impl
                 ShowSummaryUtil.showUpdateSummary(databaseChangeLog, getShowSummary(commandScope), statusVisitor, resultsBuilder.getOutputStream());
             });
             resultsBuilder.addResult("statusCode", 0);
-            addChangelogFileToMdc(changeLogFile, databaseChangeLog);
+            addChangelogFileToMdc(getChangelogFileArg(commandScope), databaseChangeLog);
             logDeploymentOutcomeMdc(defaultChangeExecListener, true);
             postUpdateLog();
         } catch (Exception e) {
             DatabaseChangeLog databaseChangeLog = (DatabaseChangeLog) commandScope.getDependency(DatabaseChangeLog.class);
-            addChangelogFileToMdc(changeLogFile, databaseChangeLog);
+            addChangelogFileToMdc(getChangelogFileArg(commandScope), databaseChangeLog);
             logDeploymentOutcomeMdc(defaultChangeExecListener, false);
             resultsBuilder.addResult("statusCode", 1);
             throw e;
