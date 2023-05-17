@@ -37,7 +37,7 @@ public class SnapshotCommandStep extends AbstractCommandStep {
 
     @Override
     public List<Class<?>> requiredDependencies() {
-        return Arrays.asList(Database.class);
+        return Collections.singletonList(Database.class);
     }
 
     @Override
