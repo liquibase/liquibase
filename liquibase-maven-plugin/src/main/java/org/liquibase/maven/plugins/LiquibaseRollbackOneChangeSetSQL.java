@@ -106,7 +106,7 @@ public class LiquibaseRollbackOneChangeSetSQL extends AbstractLiquibaseChangeLog
         // Check the Pro license
         //
         Database database = liquibase.getDatabase();
-        CommandScope liquibaseCommand = new CommandScope("internalRollbackOneChangeSetSQL");
+        CommandScope liquibaseCommand = new CommandScope("rollbackOneChangeSetSQL");
 
         Map<String, Object> argsMap = getCommandArgsObjectMap(liquibase);
         ChangeLogParameters clp = new ChangeLogParameters(database);
