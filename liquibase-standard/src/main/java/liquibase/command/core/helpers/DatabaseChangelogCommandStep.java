@@ -20,6 +20,7 @@ import liquibase.parser.ChangeLogParser;
 import liquibase.parser.ChangeLogParserFactory;
 import liquibase.parser.core.xml.XMLChangeLogSAXParser;
 import liquibase.resource.ResourceAccessor;
+import liquibase.util.StringUtil;
 
 import java.util.Arrays;
 import java.util.HashMap;
@@ -98,12 +99,17 @@ public class DatabaseChangelogCommandStep extends AbstractHelperCommandStep impl
 
     private DatabaseChangeLog getDatabaseChangeLog(String changeLogFile, ChangeLogParameters changeLogParameters) throws LiquibaseException {
         ResourceAccessor resourceAccessor = Scope.getCurrentScope().getResourceAccessor();
-        Scope.getCurrentScope().addMdcValue(MdcKey.CHANGELOG_FILE, changeLogFile);
         ChangeLogParser parser = ChangeLogParserFactory.getInstance().getParser(changeLogFile, resourceAccessor);
         if (parser instanceof XMLChangeLogSAXParser) {
             ((XMLChangeLogSAXParser) parser).setShouldWarnOnMismatchedXsdVersion(false);
         }
-        return parser.parse(changeLogFile, changeLogParameters, resourceAccessor);
+        DatabaseChangeLog changelog = parser.parse(changeLogFile, changeLogParameters, resourceAccessor);
+        if (StringUtil.isNotEmpty(changelog.getLogicalFilePath())) {
+            Scope.getCurrentScope().addMdcValue(MdcKey.CHANGELOG_FILE, changelog.getLogicalFilePath());
+        } else {
+            Scope.getCurrentScope().addMdcValue(MdcKey.CHANGELOG_FILE, changeLogFile);
+        }
+        return changelog;
     }
 
     private void checkLiquibaseTables(boolean updateExistingNullChecksums, DatabaseChangeLog databaseChangeLog,
