@@ -116,7 +116,6 @@ public class MergeColumnChange extends AbstractChange {
 
     @Override
     public SqlStatement[] generateStatements(final Database database) {
-        List<SqlStatement> statements = new ArrayList<>();
 
         AddColumnChange addNewColumnChange = new AddColumnChange();
         addNewColumnChange.setSchemaName(schemaName);
@@ -125,7 +124,7 @@ public class MergeColumnChange extends AbstractChange {
         columnConfig.setName(getFinalColumnName());
         columnConfig.setType(getFinalColumnType());
         addNewColumnChange.addColumn(columnConfig);
-        statements.addAll(Arrays.asList(addNewColumnChange.generateStatements(database)));
+        List<SqlStatement> statements = new ArrayList<>(Arrays.asList(addNewColumnChange.generateStatements(database)));
 
         String updateStatement = "";
         if (database instanceof MySQLDatabase || database instanceof MariaDBDatabase) {

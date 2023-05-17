@@ -102,11 +102,6 @@ public class UpdateCountCommandStep extends AbstractUpdateCommandStep {
     }
 
     @Override
-    public String getHubOperation() {
-        return "update-count";
-    }
-
-    @Override
     public List<Class<?>> requiredDependencies() {
         List<Class<?>> deps = new ArrayList<>(super.requiredDependencies());
         deps.add(UpdateSummaryEnum.class);

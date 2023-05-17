@@ -257,7 +257,6 @@ public class CustomChangeWrapper extends AbstractChange {
     public SerializationType getSerializableFieldType(String field) {
         switch (field) {
             case "class":
-                return SerializationType.NAMED_FIELD;
             case "param":
                 return SerializationType.NAMED_FIELD;
             default:
