@@ -9,7 +9,7 @@ on:
       - 'main'
       - 'master'
 env:
-  MAVEN_VERSION: '3.9.1'
+  MAVEN_VERSION: '3.9.2'
 jobs:
   build-master:
     name: Build & Package Master
