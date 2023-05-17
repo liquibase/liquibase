@@ -1849,7 +1849,7 @@ public class Main {
         rollbackOneUpdate.addArgumentValue(ChangeExecListenerCommandStep.CHANGE_EXEC_LISTENER_CLASS_ARG, changeExecListenerClass)
                 .addArgumentValue(ChangeExecListenerCommandStep.CHANGE_EXEC_LISTENER_PROPERTIES_FILE_ARG, changeExecListenerPropertiesFile)
                 .addArgumentValue(DatabaseChangelogCommandStep.CHANGELOG_FILE_ARG, changeLogFile)
-                .addArgumentValue("deploymentId", getCommandParam(OPTIONS.CHANGE_SET_ID, null))
+                .addArgumentValue("deploymentId", getCommandParam(OPTIONS.DEPLOYMENT_ID, null))
                 .addArgumentValue("force", getCommandParam(OPTIONS.FORCE, null));
         String internalCommand = "rollbackOneUpdate";
         Scope.getCurrentScope().addMdcValue(MdcKey.LIQUIBASE_INTERNAL_COMMAND, internalCommand);
@@ -1862,7 +1862,7 @@ public class Main {
         rollbackOneUpdate.addArgumentValue(ChangeExecListenerCommandStep.CHANGE_EXEC_LISTENER_CLASS_ARG, changeExecListenerClass)
                 .addArgumentValue(ChangeExecListenerCommandStep.CHANGE_EXEC_LISTENER_PROPERTIES_FILE_ARG, changeExecListenerPropertiesFile)
                 .addArgumentValue(DatabaseChangelogCommandStep.CHANGELOG_FILE_ARG, changeLogFile)
-                .addArgumentValue("deploymentId", getCommandParam(OPTIONS.CHANGE_SET_ID, null))
+                .addArgumentValue("deploymentId", getCommandParam(OPTIONS.DEPLOYMENT_ID, null))
                 .addArgumentValue("force", getCommandParam(OPTIONS.FORCE, null));
         String internalCommand = "rollbackOneUpdate";
         Scope.getCurrentScope().addMdcValue(MdcKey.LIQUIBASE_INTERNAL_COMMAND, internalCommand);
