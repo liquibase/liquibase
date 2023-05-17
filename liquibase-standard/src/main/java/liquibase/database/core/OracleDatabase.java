@@ -480,26 +480,6 @@ public class OracleDatabase extends AbstractJdbcDatabase {
     }
 
 
-//    public Set<UniqueConstraint> findUniqueConstraints(String schema) throws DatabaseException {
-//        Set<UniqueConstraint> returnSet = new HashSet<UniqueConstraint>();
-//
-//        List<Map> maps = new Executor(this).queryForList(new RawSqlStatement("SELECT UC.CONSTRAINT_NAME, UCC.TABLE_NAME, UCC.COLUMN_NAME FROM USER_CONSTRAINTS UC, USER_CONS_COLUMNS UCC WHERE UC.CONSTRAINT_NAME=UCC.CONSTRAINT_NAME AND CONSTRAINT_TYPE='U' ORDER BY UC.CONSTRAINT_NAME"));
-//
-//        UniqueConstraint constraint = null;
-//        for (Map map : maps) {
-//            if (constraint == null || !constraint.getName().equals(constraint.getName())) {
-//                returnSet.add(constraint);
-//                Table table = new Table((String) map.get("TABLE_NAME"));
-//                constraint = new UniqueConstraint(map.get("CONSTRAINT_NAME").toString(), table);
-//            }
-//        }
-//        if (constraint != null) {
-//            returnSet.add(constraint);
-//        }
-//
-//        return returnSet;
-//    }
-
     @Override
     public boolean supportsRestrictForeignKeys() {
         return false;

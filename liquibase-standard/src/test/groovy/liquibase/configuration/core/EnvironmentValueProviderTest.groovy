@@ -1,7 +1,6 @@
 package liquibase.configuration.core
 
 import liquibase.GlobalConfiguration
-import liquibase.hub.HubConfiguration
 import spock.lang.Specification
 import spock.lang.Unroll
 
@@ -14,7 +13,6 @@ class EnvironmentValueProviderTest extends Specification {
             @Override
             protected Map<?, ?> getMap() {
                 return [
-                        "LIQUIBASE_HUB_URL"                 : "http://example.com",
                         "LIQUIBASE_CHANGELOG_LOCK_POLL_RATE": "5",
                         "LIQUIBASE_PRO_MARK_UNUSED_NOT_DROP": "true",
                 ]
@@ -26,7 +24,6 @@ class EnvironmentValueProviderTest extends Specification {
 
         where:
         input                                                   | expected
-        HubConfiguration.LIQUIBASE_HUB_URL.getKey()             | "http://example.com"
         GlobalConfiguration.CHANGELOGLOCK_POLL_RATE.getKey()    | "5"
         "LIQUIBASE_PRO_MARK_UNUSED_NOT_DROP"                    | "true"
 

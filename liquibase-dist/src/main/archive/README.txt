@@ -18,7 +18,7 @@ The default install location on Mac is "/usr/local/opt/liquibase"
 The following software was installed:
 	* Liquibase ( https://liquibase.com )
 	* H2 Database ( https://www.h2database.com )
-	* AdoptOpenJDK 13 ( https://adoptopenjdk.net )
+	* Latest LTS AdoptOpenJDK Java version ( https://adoptopenjdk.net )
 
 This installer creates the following directories:
 	* liquibase/lib
