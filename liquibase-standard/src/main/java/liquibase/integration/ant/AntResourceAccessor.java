@@ -9,6 +9,7 @@ import org.apache.tools.ant.AntClassLoader;
 
 import java.io.File;
 import java.io.FileNotFoundException;
+import java.nio.file.Path;
 import java.nio.file.Paths;
 
 public class AntResourceAccessor extends CompositeResourceAccessor {
@@ -46,10 +47,11 @@ public class AntResourceAccessor extends CompositeResourceAccessor {
             for (String path : classpath.split(System.getProperty("path.separator"))) {
                 try {
                     String lowercasePath = path.toLowerCase();
+                    final Path path1 = Paths.get(path);
                     if (lowercasePath.endsWith(".jar") || lowercasePath.endsWith(".zip")) {
-                        this.addResourceAccessor(new ZipResourceAccessor(Paths.get(path).toAbsolutePath()));
+                        this.addResourceAccessor(new ZipResourceAccessor(path1.toAbsolutePath()));
                     } else {
-                        this.addResourceAccessor(new DirectoryResourceAccessor(Paths.get(path).toAbsolutePath()));
+                        this.addResourceAccessor(new DirectoryResourceAccessor(path1.toAbsolutePath()));
                     }
                 } catch (FileNotFoundException e) {
                     Scope.getCurrentScope().getLog(getClass()).fine(e.getMessage(), e);
