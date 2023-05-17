@@ -24,12 +24,15 @@ public class DiffChangelogCommandStep extends AbstractCommandStep {
 
     public static final String[] COMMAND_NAME = {"diffChangelog"};
 
+    public static final CommandArgumentDefinition<String> AUTHOR_ARG;
     public static final CommandArgumentDefinition<String> CHANGELOG_FILE_ARG;
 
     static {
         final CommandBuilder builder = new CommandBuilder(COMMAND_NAME);
         CHANGELOG_FILE_ARG = builder.argument(CommonArgumentNames.CHANGELOG_FILE, String.class)
                 .description("Changelog file to write results").required().build();
+        AUTHOR_ARG = builder.argument("author", String.class)
+                .description("Specifies the author for changesets in the generated changelog").build();
     }
 
     @Override
@@ -70,10 +73,13 @@ public class DiffChangelogCommandStep extends AbstractCommandStep {
                 String changeLogFile = commandScope.getArgumentValue(CHANGELOG_FILE_ARG);
                 Scope.getCurrentScope().addMdcValue(MdcKey.DIFF_CHANGELOG_FILE, changeLogFile);
                 referenceDatabase.setObjectQuotingStrategy(ObjectQuotingStrategy.QUOTE_ALL_OBJECTS);
+
+                DiffToChangeLog changeLogWriter = createDiffToChangeLogObject(diffResult, diffOutputControl);
+                changeLogWriter.setChangeSetAuthor(commandScope.getArgumentValue(AUTHOR_ARG));
                 if (StringUtil.trimToNull(changeLogFile) == null) {
-                    createDiffToChangeLogObject(diffResult, diffOutputControl).print(outputStream);
+                    changeLogWriter.print(outputStream);
                 } else {
-                    createDiffToChangeLogObject(diffResult, diffOutputControl).print(changeLogFile);
+                    changeLogWriter.print(changeLogFile);
                 }
             }
             finally {
