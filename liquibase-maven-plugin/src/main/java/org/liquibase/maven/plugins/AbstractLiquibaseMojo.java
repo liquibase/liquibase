@@ -207,7 +207,7 @@ public abstract class AbstractLiquibaseMojo extends AbstractMojo {
      * Deprecated and ignored configuration property. Logging is managed via the standard maven logging system
      * either using the -e, -X or -q flags or the ${maven.home}/conf/logging/simplelogger.properties file.
      *
-     * See https://maven.apache.org/maven-logging.html for more information.
+     * @see <a href="https://maven.apache.org/maven-logging.html">maven-logging for more information.</a>
      *
      * @parameter property="liquibase.logging"
      * @deprecated Logging managed by maven

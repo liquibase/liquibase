@@ -26,7 +26,7 @@ import static liquibase.statement.SqlStatement.EMPTY_SQL_STATEMENT;
 
 /**
  * A common parent for all raw SQL related changes regardless of where the sql was sourced from.
- * 
+ * <p>
  * Implements the necessary logic to choose how the SQL string should be parsed to generate the statements.
  *
  */

@@ -240,7 +240,7 @@ public class ObjectUtil {
      * Determines the class of a given object and returns an array of that class's methods. The information might come
      * from a cache.
      * @param object the object to examine
-     * @return a list of methods belonging to the class of the object
+     * @return array of {@link Method} belonging to the class of the object
      */
     private static Method[] getMethods(Object object) {
         return methodCache.computeIfAbsent(object.getClass(), k -> object.getClass().getMethods());
