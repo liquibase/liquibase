@@ -136,9 +136,9 @@ public class ChangeParameterMetaData {
             }
 
             if (validDatabases == 0) {
-                return new HashSet<>(Arrays.asList(ALL));
+                return new HashSet<>(Collections.singletonList(ALL));
             } else if (computedDatabases.size() == validDatabases) {
-                computedDatabases = new HashSet<>(Arrays.asList(ALL));
+                computedDatabases = new HashSet<>(Collections.singletonList(ALL));
             }
 
             computedDatabases.remove(NONE);
@@ -182,7 +182,7 @@ public class ChangeParameterMetaData {
             if (validDatabases == 0) {
                 return new HashSet<>();
             } else if (computedDatabases.size() == validDatabases) {
-                computedDatabases = new HashSet<>(Arrays.asList(ALL));
+                computedDatabases = new HashSet<>(Collections.singletonList(ALL));
             }
 
             computedDatabases.remove(NONE);

@@ -3,6 +3,7 @@ package org.liquibase.maven.plugins;
 import liquibase.GlobalConfiguration;
 import liquibase.Liquibase;
 import liquibase.Scope;
+import liquibase.ThreadLocalScopeManager;
 import liquibase.changelog.visitor.ChangeExecListener;
 import liquibase.changelog.visitor.DefaultChangeExecListener;
 import liquibase.configuration.LiquibaseConfiguration;
@@ -207,7 +208,7 @@ public abstract class AbstractLiquibaseMojo extends AbstractMojo {
      * Deprecated and ignored configuration property. Logging is managed via the standard maven logging system
      * either using the -e, -X or -q flags or the ${maven.home}/conf/logging/simplelogger.properties file.
      *
-     * See https://maven.apache.org/maven-logging.html for more information.
+     * @see <a href="https://maven.apache.org/maven-logging.html">maven-logging for more information.</a>
      *
      * @parameter property="liquibase.logging"
      * @deprecated Logging managed by maven
@@ -490,7 +491,7 @@ public abstract class AbstractLiquibaseMojo extends AbstractMojo {
      */
     @PropertyElement
     protected String sqlPlusLogFile;
-    
+
     /**
      * Specifies your sqlcmd path.
      *
@@ -631,6 +632,7 @@ public abstract class AbstractLiquibaseMojo extends AbstractMojo {
             // If the specified log format does not require the use of the standard Liquibase logger, just return the
             // Maven log service as is traditionally done.
             scopeAttrs.put(Scope.Attr.logService.name(), new MavenLogService(getLog()));
+            scopeAttrs.put(Scope.Attr.ui.name(), new MavenUi(getLog()));
             return scopeAttrs;
         } else {
             // The log format requires the use of the standard Liquibase logger, so set it up.
@@ -654,6 +656,8 @@ public abstract class AbstractLiquibaseMojo extends AbstractMojo {
             getLog().error("The liquibase-maven-plugin now manages logging via the standard maven logging config, not the 'logging' configuration. Use the -e, -X or -q flags or see https://maven.apache.org/maven-logging.html");
         }
 
+        // If maven is called with -T and a value larger than 1, it can get confused under heavy thread load
+        Scope.setScopeManager(new ThreadLocalScopeManager());
         try {
             Scope.child(setUpLogging(), () -> {
 

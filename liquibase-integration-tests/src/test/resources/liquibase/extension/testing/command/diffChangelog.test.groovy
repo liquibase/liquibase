@@ -1,15 +1,12 @@
 package liquibase.extension.testing.command
 
-import liquibase.change.AddColumnConfig
+
 import liquibase.change.ColumnConfig
 import liquibase.change.ConstraintsConfig
-import liquibase.change.core.AddColumnChange
 import liquibase.change.core.AddPrimaryKeyChange
 import liquibase.change.core.CreateTableChange
-import liquibase.exception.CommandExecutionException
 import liquibase.exception.CommandValidationException
 import liquibase.extension.testing.setup.SetupCleanResources
-import liquibase.structure.core.Column
 
 import java.util.regex.Pattern
 
@@ -24,6 +21,8 @@ Required Args:
   url (String) The JDBC database connection URL
     OBFUSCATED
 Optional Args:
+  author (String) Specifies the author for changesets in the generated changelog
+    Default: null
   defaultCatalogName (String) The default catalog name to use for the database connection
     Default: null
   defaultSchemaName (String) The default schema name to use for the database connection
@@ -114,8 +113,9 @@ Optional Args:
         ]
     }
 
-    run "Running diffChangelog should add changesets", {
+    run "Running diffChangelog should add changesets with specified author", {
         arguments = [
+                author           : "Test Author",
                 url              : { it.url },
                 username         : { it.username },
                 password         : { it.password },
@@ -168,7 +168,8 @@ Optional Args:
         }
         expectedFileContent = [
                 "target/test-classes/diffChangeLog-test.xml" : [CommandTests.assertContains("<changeSet ", 5),
-                                                                CommandTests.assertContains("<dropTable ", 1)]
+                                                                CommandTests.assertContains("<dropTable ", 1),
+                                                                CommandTests.assertContains("author=\"Test Author\"", 5)]
         ]
     }
 
