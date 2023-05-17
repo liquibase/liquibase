@@ -183,14 +183,13 @@ public class ParsedNode {
     }
 
     /**
+     * Matches the namespace and name of this node. Matching is performed case-insensitively.
      *
-     * Match the namespace and name of this node. This is now done case-insensitively
-     *
-     * @param   node
-     * @param   namespace
-     * @param   nodename
-     * @return  boolean
-     *
+     * @param node      The node to match against.
+     * @param namespace The namespace to match against.
+     * @param nodename  The name to match against.
+     * @return {@code true} if the namespace and name of the node match the specified namespace and name,
+     * ignoring case; {@code false} otherwise.
      */
     protected boolean nodeMatches(ParsedNode node, String namespace, String nodename) {
         return namespaceMatches(node, namespace) && node.getName().equalsIgnoreCase(nodename);
