@@ -3,6 +3,7 @@ package org.liquibase.maven.plugins;
 import liquibase.GlobalConfiguration;
 import liquibase.Liquibase;
 import liquibase.Scope;
+import liquibase.ThreadLocalScopeManager;
 import liquibase.changelog.visitor.ChangeExecListener;
 import liquibase.changelog.visitor.DefaultChangeExecListener;
 import liquibase.configuration.LiquibaseConfiguration;
@@ -655,6 +656,8 @@ public abstract class AbstractLiquibaseMojo extends AbstractMojo {
             getLog().error("The liquibase-maven-plugin now manages logging via the standard maven logging config, not the 'logging' configuration. Use the -e, -X or -q flags or see https://maven.apache.org/maven-logging.html");
         }
 
+        // If maven is called with -T and a value larger than 1, it can get confused under heavy thread load
+        Scope.setScopeManager(new ThreadLocalScopeManager());
         try {
             Scope.child(setUpLogging(), () -> {
 
