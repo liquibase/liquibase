@@ -29,7 +29,7 @@ public class CommandArgumentDefinition<DataType> implements Comparable<CommandAr
     private static final Pattern ALLOWED_ARGUMENT_PATTERN = Pattern.compile(ALLOWED_ARGUMENT_REGEX);
 
     private final String name;
-    private SortedSet<String> aliases = new TreeSet<>();
+    private final SortedSet<String> aliases = new TreeSet<>();
     private final Class<DataType> dataType;
     private String description;
     private boolean required;

@@ -57,10 +57,10 @@ public class DiffToChangeLog {
     private String changeSetAuthor;
     private String changeSetPath;
     private DiffResult diffResult;
-    private DiffOutputControl diffOutputControl;
+    private final DiffOutputControl diffOutputControl;
     private boolean tryDbaDependencies = true;
 
-    private static Set<Class> loggedOrderFor = new HashSet<>();
+    private static final Set<Class> loggedOrderFor = new HashSet<>();
 
     public DiffToChangeLog(DiffResult diffResult, DiffOutputControl diffOutputControl) {
         this.diffResult = diffResult;
@@ -826,7 +826,7 @@ public class DiffToChangeLog {
 
     private static class DependencyGraph {
 
-        private Map<Class<? extends DatabaseObject>, Node> allNodes = new HashMap<>();
+        private final Map<Class<? extends DatabaseObject>, Node> allNodes = new HashMap<>();
 
         private void addType(Class<? extends DatabaseObject> type) {
             allNodes.put(type, new Node(type));
