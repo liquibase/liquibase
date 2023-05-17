@@ -30,7 +30,7 @@ Optional Args:
   username (String) Username to use to connect to the database
     Default: null
   verbose (Boolean) Verbose flag
-    Default: null
+    Default: false
 """
 
     run "Happy path", {
