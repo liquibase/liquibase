@@ -207,32 +207,6 @@ public class ResultSetCache {
         }
     }
 
-//    public abstract static class MultiSchemaRowData extends RowData {
-//        public MultiSchemaRowData(String catalog, String schema, Database database, String... parameters) {
-//            super(catalog, schema, database, parameters);
-//        }
-//
-//        @Override
-//        public String createSchemaKey(Database database) {
-//            String multiSchemaKey = getMultiSchemaKey();
-//
-//            if (multiSchemaKey == null) {
-//                return super.createSchemaKey(database);
-//            }
-//
-//            for (Class<? extends Database> supportedDb : getMultiSchemaSupportedDatabases()) {
-//                if (supportedDb.isAssignableFrom(database.getClass())) {
-//                    return multiSchemaKey;
-//                }
-//            }
-//            return super.createSchemaKey(database);
-//        }
-//
-//        public abstract Class<? extends Database>[] getMultiSchemaSupportedDatabases();
-//
-//        public abstract String getMultiSchemaKey();
-//    }
-
     public abstract static class ResultSetExtractor {
 
         private final Database database;

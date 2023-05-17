@@ -593,11 +593,12 @@ public class StringUtil {
     }
 
     /**
-     * Checks if <code>value</code> starts with <code>startsWith</code>.
+     * Checks whether the given <code>value</code> starts with the specified <code>startsWith</code> string.
      *
-     * @param value
-     * @param startsWith
-     * @return true if <code>value</code> starts with <code>startsWith</code>, otherwise false. If any of arguments is null returns false
+     * @param value      the string to check
+     * @param startsWith the prefix to check for
+     * @return <code>true</code> if <code>value</code> starts with <code>startsWith</code>, <code>false</code> otherwise.
+     * Returns <code>false</code> if either argument is <code>null</code>.
      */
     public static boolean startsWith(String value, String startsWith) {
         if ((value == null) || (startsWith == null)) {
@@ -817,8 +818,10 @@ public class StringUtil {
     }
 
     /**
-     * @param sqlString
-     * @return the last block comment from a Sql string if any
+     * Retrieves the last block comment in a SQL string, if any.
+     *
+     * @param sqlString the SQL string to search for the last block comment
+     * @return the last block comment in the SQL string, or {@code null} if none was found
      */
     public static String getLastBlockComment(String sqlString) {
         if (isEmpty(sqlString) || sqlString.length() < 4) {
@@ -864,8 +867,10 @@ public class StringUtil {
     }
 
     /**
-     * @param sqlString
-     * @return the last line comment from a Sql string if any
+     * Returns the last line comment from a given SQL string, if there is one.
+     *
+     * @param sqlString the SQL string to search
+     * @return the last line comment from the SQL string, or {@code null} if there is no line comment
      */
     public static String getLastLineComment(String sqlString) {
         if (isEmpty(sqlString) || sqlString.length() < 2) {
@@ -904,10 +909,10 @@ public class StringUtil {
     }
 
     /**
-     * Strips the comments and whitespaces from the end of given sql string.
+     * Strips the comments and white spaces from the end of given SQL string.
      *
-     * @param sqlString
-     * @return
+     * @param sqlString the SQL string to strip
+     * @return the stripped SQL string
      */
     public static String stripSqlCommentsAndWhitespacesFromTheEnd(String sqlString) {
         if (isEmpty(sqlString)) {
@@ -977,7 +982,7 @@ public class StringUtil {
     /**
      * <p>Splits a camel-case string into words based on the came casing.
      * <p>
-     * This code originated from the StringUtils class of https://github.com/apache/commons-lang
+     * This code originated from the StringUtils class of <a href="https://github.com/apache/commons-lang">commons-lang</a>
      *
      * @param str the String to split, may be {@code null}
      * @return an array of parsed Strings, {@code null} if null String input
@@ -1047,7 +1052,7 @@ public class StringUtil {
      * <p>Checks whether the char sequence is numeric by checking that all chars in the sequence are
      * numbers, so (-1, 1.0 and 1F) will return false
      * <p>
-     * This code originated from the StringUtils class of https://github.com/apache/commons-lang
+     * This code originated from the StringUtils class of <a href="https://github.com/apache/commons-lang">commons-lang</a>
      *
      * @param cs the arg to check if it is numeric
      * @return true if convertible to numeric and false otherwise

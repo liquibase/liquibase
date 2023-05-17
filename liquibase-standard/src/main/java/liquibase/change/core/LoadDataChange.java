@@ -213,11 +213,12 @@ public class LoadDataChange extends AbstractTableChange implements ChangeWithCol
     }
 
     /**
-     * Unique string for the column for better identification
+     * Returns a unique {@code string} for the column for better identification.
+     * The returned {@code string} includes the index of the column and, if available, its name.
      *
-     * @param index        index of the column
-     * @param columnConfig the column
-     * @return
+     * @param index        the index of the column
+     * @param columnConfig the column configuration
+     * @return a string in the format " / column[index] (name:'columnName')" or " / column[index]" if the column name is not available.
      */
     protected String columnIdString(int index, LoadDataColumnConfig columnConfig) {
         return " / column[" + index + "]" +
@@ -244,7 +245,7 @@ public class LoadDataChange extends AbstractTableChange implements ChangeWithCol
 
     @Override
     public SqlStatement[] generateStatements(Database database) {
-        boolean databaseSupportsBatchUpdates = supportsBatchUpdates(database);
+        supportsBatchUpdates(database);
 
         try (CSVReader reader = getCSVReader()) {
 
