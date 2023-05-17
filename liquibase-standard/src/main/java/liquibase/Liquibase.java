@@ -188,14 +188,13 @@ public class Liquibase implements AutoCloseable {
     }
 
     /**
-     * Liquibase update
+     * Executes Liquibase update with given contexts and label expression.
      *
-     * @param contexts
-     * @param labelExpression
-     * @throws LiquibaseException
-     *
-     * @see <a href="https://docs.liquibase.com/concepts/advanced/contexts.html" target="_top">contexts</a> in documentation
-     * @see <a href="https://docs.liquibase.com/concepts/advanced/labels.html" target="_top">labels</a> in documentation
+     * @param contexts        the set of contexts to execute the update against. If empty or {@code null}, all contexts are used.
+     * @param labelExpression the label expression to use during the update. If empty or {@code null}, no labels are used.
+     * @throws LiquibaseException If an error occurs while executing the update.
+     * @see <a href="https://docs.liquibase.com/concepts/changelogs/attributes/contexts.html" target="_top">Liquibase Contexts</a> in the Liquibase documentation
+     * @see <a href="https://docs.liquibase.com/concepts/changelogs/attributes/labels.html" target="_top">Liquibase Labels</a> in the Liquibase documentation
      */
     @Deprecated
     public void update(Contexts contexts, LabelExpression labelExpression) throws LiquibaseException {
@@ -203,15 +202,17 @@ public class Liquibase implements AutoCloseable {
     }
 
     /**
-     * Liquibase update
-     * @deprecated Use CommandStep
-     * @param   contexts
-     * @param   labelExpression
-     * @param   checkLiquibaseTables
-     * @throws  LiquibaseException
+     * Updates the database schema to the latest version. This method performs a Liquibase update operation,
+     * which can include applying changesets that modify the database schema.
      *
-     * @see <a href="https://docs.liquibase.com/concepts/advanced/contexts.html" target="_top">contexts</a> in documentation
-     * @see <a href="https://docs.liquibase.com/concepts/advanced/labels.html" target="_top">labels</a> in documentation
+     * @param contexts the set of contexts to execute the update against. If empty or null, all contexts are used.
+     * @param labelExpression the label expression to use during the update. If empty or null, no labels are used.
+     * @param checkLiquibaseTables whether to check for Liquibase metadata tables before updating. If false, Liquibase will
+     *                             assume that the metadata tables already exist and will not attempt to create them.
+     * @throws LiquibaseException if an error occurs while updating the database schema.
+     *
+     * @see <a href="https://docs.liquibase.com/concepts/changelogs/attributes/contexts.html" target="_top">Liquibase Contexts</a>
+     * @see <a href="https://docs.liquibase.com/concepts/changelogs/attributes/labels.html" target="_top">Liquibase Labels</a>
      */
     @Deprecated
     public void update(Contexts contexts, LabelExpression labelExpression, boolean checkLiquibaseTables) throws LiquibaseException {
@@ -285,16 +286,13 @@ public class Liquibase implements AutoCloseable {
     }
 
     /**
+     * Return a ChangeLogIterator constructed with standard filters for processing the specified changelog.
      *
-     * Return a ChangeLogIterator constructed with standard filters
-     *
-     * @param   contexts                           Contexts to filter for
-     * @param   labelExpression                    Labels to filter for
-     * @param   changeLog                          The changelog to process
-     *
-     * @return  ChangeLogIterator
-     * @throws DatabaseException
-     *
+     * @param contexts          The contexts to filter for.
+     * @param labelExpression   The labels to filter for.
+     * @param changeLog         The changelog to process.
+     * @return a ChangeLogIterator instance.
+     * @throws DatabaseException if there is an error with the database.
      */
     protected ChangeLogIterator getStandardChangelogIterator(Contexts contexts, LabelExpression labelExpression,
                                                              DatabaseChangeLog changeLog) throws DatabaseException {
@@ -339,14 +337,13 @@ public class Liquibase implements AutoCloseable {
     }
 
     /**
+     * Updates the database schema with the specified number of changesets, within the given contexts and matching the
+     * given label expression.
      *
-     * Update to count
-     *
-     * @param  changesToApply
-     * @param  contexts
-     * @param  labelExpression
-     * @throws LiquibaseException
-     *
+     * @param changesToApply  the number of changesets to apply.
+     * @param contexts        the contexts in which the changesets should be applied.
+     * @param labelExpression the label expression used to filter the changesets.
+     * @throws LiquibaseException if there is an error while updating the schema.
      */
     @Deprecated
     public void update(int changesToApply, Contexts contexts, LabelExpression labelExpression)
@@ -374,15 +371,14 @@ public class Liquibase implements AutoCloseable {
         update(tag, contexts, new LabelExpression());
     }
 
+
     /**
+     * Updates the database to a specified tag.
      *
-     * Update to tag
-     *
-     * @param   tag                             Tag to update for
-     * @param   contexts
-     * @param   labelExpression
-     * @throws  LiquibaseException
-     *
+     * @param tag             The tag to update the database to.
+     * @param contexts        The contexts to execute in.
+     * @param labelExpression The label expression to execute with.
+     * @throws LiquibaseException if there is an error updating the database.
      */
     @Deprecated
     public void update(String tag, Contexts contexts, LabelExpression labelExpression) throws LiquibaseException {
@@ -536,7 +532,16 @@ public class Liquibase implements AutoCloseable {
     }
 
     /**
-     * Rollback count
+     * Rolls back a specified number of changesets. The `changesToRollback` parameter specifies how many changesets to roll
+     * back, and the `rollbackScript` parameter specifies the path to a custom SQL script to use for the rollback. The
+     * `contexts` parameter specifies which contexts to include in the rollback, and the `labelExpression` parameter specifies
+     * which labels to include in the rollback.
+     *
+     * @param changesToRollback the number of changesets to roll back
+     * @param rollbackScript    the path to a custom SQL script to use for the rollback, or `null` to use Liquibase's built-in rollback functionality
+     * @param contexts          the contexts to include in the rollback, or `null` to include all contexts
+     * @param labelExpression   the labels to include in the rollback, or `null` to include all labels
+     * @throws LiquibaseException if an error occurs while rolling back the changesets
      */
     public void rollback(int changesToRollback, String rollbackScript, Contexts contexts,
                          LabelExpression labelExpression) throws LiquibaseException {
@@ -625,8 +630,13 @@ public class Liquibase implements AutoCloseable {
     }
 
     /**
-     * Rollback to tag
-     * @deprecated Use CommandStep directly
+     * Rolls back the database to a specific tag, using either a generated or user-defined rollback script.
+     *
+     * @param tagToRollBackTo the tag to which the database should be rolled back.
+     * @param rollbackScript  an optional path to a user-defined rollback script. If null, Liquibase will generate the rollback SQL automatically.
+     * @param contexts        a list of contexts to include when rolling back the database. May be null.
+     * @param labelExpression a label expression to filter the change sets to rollback. May be null.
+     * @throws LiquibaseException if there is a problem rolling back the database.
      */
     public void rollback(String tagToRollBackTo, String rollbackScript, Contexts contexts,
                          LabelExpression labelExpression) throws LiquibaseException {
@@ -686,8 +696,17 @@ public class Liquibase implements AutoCloseable {
         rollback(dateToRollBackTo, new Contexts(contexts), new LabelExpression());
     }
 
+
     /**
-     * Rollback to date
+     * Rolls back all changesets that were applied after the specified date. If a rollback script is provided,
+     * the changesets are rolled back in reverse order until the script is reached. Otherwise, the changesets
+     * are rolled back in reverse order until the rollback point is reached.
+     *
+     * @param dateToRollBackTo the date to roll back to
+     * @param rollbackScript   the path to a SQL script to execute for the rollback (optional)
+     * @param contexts         the contexts to execute the rollback in (optional)
+     * @param labelExpression  the label expression to use for filtering change sets (optional)
+     * @throws LiquibaseException if there was an error rolling back the changes
      */
     public void rollback(Date dateToRollBackTo, String rollbackScript, Contexts contexts,
                          LabelExpression labelExpression) throws LiquibaseException {
@@ -762,10 +781,12 @@ public class Liquibase implements AutoCloseable {
     }
 
     /**
+     * Synchronizes the changelog with the database up to a specified tag.
      *
-     * Changelogsync or changelogsync to tag
-     *
-     * @deprecated Use CommandStep
+     * @param tag             the tag up to which the changelog should be synchronized
+     * @param contexts        the contexts to use for the synchronization
+     * @param labelExpression the label expression to use for the synchronization
+     * @throws LiquibaseException if an error occurs during the synchronization
      */
     public void changeLogSync(String tag, Contexts contexts, LabelExpression labelExpression) throws LiquibaseException {
         String commandToRun = StringUtil.isEmpty(tag) ? ChangelogSyncCommandStep.COMMAND_NAME[0] : ChangelogSyncToTagCommandStep.COMMAND_NAME[0];
