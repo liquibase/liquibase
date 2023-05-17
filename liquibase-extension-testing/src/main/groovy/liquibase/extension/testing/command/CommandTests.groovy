@@ -24,8 +24,6 @@ import liquibase.extension.testing.setup.*
 import liquibase.extension.testing.setup.SetupCleanResources.CleanupMode
 import liquibase.extension.testing.testsystem.DatabaseTestSystem
 import liquibase.extension.testing.testsystem.TestSystemFactory
-import liquibase.hub.HubService
-import liquibase.hub.core.MockHubService
 import liquibase.integration.commandline.LiquibaseCommandLineConfiguration
 import liquibase.integration.commandline.Main
 import liquibase.logging.core.BufferedLogService
@@ -310,7 +308,6 @@ Long Description: ${commandDefinition.getLongDescription() ?: "NOT SET"}
 
         def scopeSettings = [
                 (LiquibaseCommandLineConfiguration.LOG_LEVEL.getKey()): Level.INFO,
-                ("liquibase.plugin." + HubService.name)               : MockHubService,
                 (Scope.Attr.resourceAccessor.name())                  : testDef.resourceAccessor ?
                                                                             testDef.resourceAccessor : resourceAccessor,
                 (Scope.Attr.ui.name())                                : testDef.testUI ? testDef.testUI.initialize(uiOutputWriter, uiErrorWriter) :
@@ -1125,10 +1122,6 @@ Long Description: ${commandDefinition.getLongDescription() ?: "NOT SET"}
             }
             FileUtil.write(contents, outputFile)
             println "Copied file " + originalFile + " to file " + newFile
-        }
-
-        void modifyChangeLogId(String originalFile, String newChangeLogId) {
-            this.setups.add(new SetupModifyChangelog(originalFile, newChangeLogId))
         }
 
         /**

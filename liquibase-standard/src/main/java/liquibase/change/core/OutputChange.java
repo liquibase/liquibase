@@ -2,6 +2,7 @@ package liquibase.change.core;
 
 import liquibase.Scope;
 import liquibase.change.AbstractChange;
+import liquibase.change.Change;
 import liquibase.change.ChangeMetaData;
 import liquibase.change.DatabaseChange;
 import liquibase.change.DatabaseChangeProperty;
@@ -94,5 +95,10 @@ public class OutputChange extends AbstractChange {
             return null;
         }
         return value;
+    }
+
+    @Override
+    protected Change[] createInverses() {
+        return EMPTY_CHANGE;
     }
 }

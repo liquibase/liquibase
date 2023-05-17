@@ -5,7 +5,7 @@ import liquibase.plugin.Plugin;
 
 /**
  * This service is used to create named {@link Logger} instances through a {@link LogService}.
- *
+ * <p>
  * The default LoggerFactory used in {@link JavaLogService} uses {@link java.util.logging.Logger}
  */
 public interface LogService extends Plugin {

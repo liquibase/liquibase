@@ -125,9 +125,6 @@ public class FormattedSqlChangeLogParser implements ChangeLogParser {
     private static final String LOGICAL_FILE_PATH_REGEX = ".*logicalFilePath:(\\S*).*";
     private static final Pattern LOGICAL_FILE_PATH_PATTERN = Pattern.compile(LOGICAL_FILE_PATH_REGEX, Pattern.CASE_INSENSITIVE);
 
-    private static final String CHANGE_LOG_ID_REGEX = ".*changeLogId:(\\S*).*";
-    private static final Pattern CHANGE_LOG_ID_PATTERN = Pattern.compile(CHANGE_LOG_ID_REGEX, Pattern.CASE_INSENSITIVE);
-
     private static final String LABELS_REGEX = ".*labels:(\\S*).*";
     private static final Pattern LABELS_PATTERN = Pattern.compile(LABELS_REGEX, Pattern.CASE_INSENSITIVE);
 
@@ -254,9 +251,6 @@ public class FormattedSqlChangeLogParser implements ChangeLogParser {
                 if (changeLogPatterMatcher.matches ()) {
                     Matcher logicalFilePathMatcher = LOGICAL_FILE_PATH_PATTERN.matcher (line);
                     changeLog.setLogicalFilePath (parseString(logicalFilePathMatcher));
-
-                    Matcher changeLogIdMatcher = CHANGE_LOG_ID_PATTERN.matcher (line);
-                    changeLog.setChangeLogId (parseString(changeLogIdMatcher));
                 }
 
                 Matcher ignoreLinesMatcher = IGNORE_LINES_PATTERN.matcher(line);

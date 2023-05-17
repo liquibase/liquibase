@@ -56,7 +56,6 @@ public class ChangeLogIterator {
                 return "";
             }
         });
-        this.databaseChangeLog.setChangeLogId(changeLog.getChangeLogId());
         this.changeSetFilters = Arrays.asList(changeSetFilters);
     }
 
@@ -99,14 +98,7 @@ public class ChangeLogIterator {
                                     validateChangeSetExecutor(changeSet, env);
                                 }
 
-                                //
-                                // Execute the visit call in its own scope with a new
-                                // CompositeLogService and BufferLogService in order
-                                // to capture the logging for just this changeset.  The
-                                // log is sent to Hub if available
-                                //
-                                Map<String, Object> values = new HashMap<>();
-                                Scope.child(values, () -> visitor.visit(changeSet, databaseChangeLog, env.getTargetDatabase(), reasonsAccepted));
+                                visitor.visit(changeSet, databaseChangeLog, env.getTargetDatabase(), reasonsAccepted);
                                 markSeen(changeSet);
                             } else {
                                 if (visitor instanceof SkippedChangeSetVisitor) {
