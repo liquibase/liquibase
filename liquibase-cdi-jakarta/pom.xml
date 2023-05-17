@@ -13,6 +13,7 @@
     <artifactId>liquibase-cdi-jakarta</artifactId>
 
     <properties>
+        <maven.compiler.release>11</maven.compiler.release>
         <maven.install.skip>false</maven.install.skip>
         <maven.deploy.skip>false</maven.deploy.skip>
         <maven.javadoc.skip>false</maven.javadoc.skip>
