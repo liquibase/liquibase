@@ -489,7 +489,19 @@ public abstract class AbstractChange extends AbstractPlugin implements Change {
      */
     @Override
     public CheckSum generateCheckSum() {
-        return CheckSum.compute(new StringChangeLogSerializer().serialize(this, false));
+        return CheckSum.compute(new StringChangeLogSerializer(new StringChangeLogSerializer.FieldFilter() {
+            @Override
+            public boolean include(Object obj, String field, Object value) {
+                if(Arrays.stream(getExcludedFieldFilters()).anyMatch(filter -> filter.equals(field))) {
+                    return false;
+                }
+                return super.include(obj, field, value);
+            }
+        }).serialize(this, false));
+    }
+
+    public String[] getExcludedFieldFilters() {
+        return new String[0];
     }
 
     /*
@@ -818,4 +830,5 @@ public abstract class AbstractChange extends AbstractPlugin implements Change {
 
         return description;
     }
+
 }

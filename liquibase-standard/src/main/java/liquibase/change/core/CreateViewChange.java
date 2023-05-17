@@ -4,6 +4,7 @@ import liquibase.GlobalConfiguration;
 import liquibase.Scope;
 import liquibase.change.*;
 import liquibase.changelog.ChangeLogParameters;
+import liquibase.changelog.PropertyExpandingStream;
 import liquibase.database.Database;
 import liquibase.database.core.*;
 import liquibase.exception.UnexpectedLiquibaseException;
@@ -14,7 +15,9 @@ import liquibase.resource.ResourceAccessor;
 import liquibase.snapshot.SnapshotGeneratorFactory;
 import liquibase.sqlgenerator.SqlGeneratorFactory;
 import liquibase.statement.SqlStatement;
-import liquibase.statement.core.*;
+import liquibase.statement.core.CreateViewStatement;
+import liquibase.statement.core.DropViewStatement;
+import liquibase.statement.core.SetViewRemarksStatement;
 import liquibase.structure.core.View;
 import liquibase.util.FileUtil;
 import liquibase.util.ObjectUtil;
@@ -24,7 +27,7 @@ import liquibase.util.StringUtil;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.UnsupportedEncodingException;
+import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -182,6 +185,16 @@ public class CreateViewChange extends AbstractChange {
         }
     }
 
+    @Override
+    public String[] getExcludedFieldFilters() {
+        return new String[] {
+                "path",
+                "relativeToChangelogFile",
+                "selectQuery",
+                "encoding"
+        };
+    }
+
     /**
      * Calculates the checksum based on the contained SQL.
      *
@@ -189,35 +202,25 @@ public class CreateViewChange extends AbstractChange {
      */
     @Override
     public CheckSum generateCheckSum() {
-        if (this.path == null) {
-            return super.generateCheckSum();
-        }
-
         InputStream stream = null;
+        CheckSum checkSum;
         try {
-            stream = openSqlStream();
-        } catch (IOException e) {
-            throw new UnexpectedLiquibaseException(e);
-        }
-
-        try {
-            String selectQuery = this.selectQuery;
-            if ((stream == null) && (selectQuery == null)) {
-                selectQuery = "";
-            }
-
-            String encoding = GlobalConfiguration.OUTPUT_FILE_ENCODING.getCurrentValue();
-            if (selectQuery != null) {
-                try {
+            if (getPath() == null) {
+                String selectQuery = this.selectQuery;
+                Charset encoding = GlobalConfiguration.FILE_ENCODING.getCurrentValue();
+                if(selectQuery != null) {
                     stream = new ByteArrayInputStream(selectQuery.getBytes(encoding));
-                } catch (UnsupportedEncodingException e) {
-                    throw new AssertionError(encoding+" is not supported by the JVM, this should not happen according to the JavaDoc of the Charset class");
                 }
             }
-
-			CheckSum checkSum = CheckSum.compute(new AbstractSQLChange.NormalizingStream(";", false, false, stream), false);
-
+            else {
+                stream = openSqlStream();
+                stream = new PropertyExpandingStream(this.getChangeSet(), stream);
+            }
+            checkSum = CheckSum.compute(new AbstractSQLChange.NormalizingStream(stream), false);
             return CheckSum.compute(super.generateCheckSum().toString() + ":" + checkSum);
+
+        } catch (IOException e) {
+            throw new UnexpectedLiquibaseException(e);
         } finally {
             if (stream != null) {
                 try {

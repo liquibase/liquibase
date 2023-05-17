@@ -43,7 +43,7 @@ public class LoggingChangeExecListener extends AbstractChangeExecListener {
      * @param changeSet         changeSet that was rolled back
      * @param databaseChangeLog parent change log
      * @param database          the database the rollback was executed on.
-     * @param exception         the original exception which was thrown
+     * @param e                 the original exception which was thrown
      *
      */
     @Override

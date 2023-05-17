@@ -12,6 +12,7 @@ import liquibase.configuration.LiquibaseConfiguration;
 import liquibase.database.Database;
 import liquibase.database.DatabaseList;
 import liquibase.database.ObjectQuotingStrategy;
+import liquibase.database.core.MSSQLDatabase;
 import liquibase.exception.*;
 import liquibase.executor.Executor;
 import liquibase.executor.ExecutorService;
@@ -27,11 +28,9 @@ import liquibase.precondition.ErrorPrecondition;
 import liquibase.precondition.FailedPrecondition;
 import liquibase.precondition.core.PreconditionContainer;
 import liquibase.resource.ResourceAccessor;
-import liquibase.sql.visitor.SqlVisitor;
-import liquibase.sql.visitor.SqlVisitorFactory;
+import liquibase.sql.visitor.*;
 import liquibase.sqlgenerator.SqlGeneratorFactory;
 import liquibase.statement.SqlStatement;
-import liquibase.util.ISODateFormat;
 import liquibase.util.SqlUtil;
 import liquibase.util.StreamUtil;
 import liquibase.util.StringUtil;
@@ -296,9 +295,9 @@ public class ChangeSet implements Conditional, ChangeLogChild {
     }
 
     /**
-     * The logical file path defined directly on this node. Return null if not set.
+     * Returns the logical file path defined directly on this node. Returns {@code null} if not set.
      *
-     * @return
+     * @return the logical file path defined on this node, or {@code null} if not set
      */
     public String getLogicalFilePath() {
         return logicalFilePath;
@@ -593,6 +592,10 @@ public class ChangeSet implements Conditional, ChangeLogChild {
             throws MigrationFailedException {
         Logger log = Scope.getCurrentScope().getLog(getClass());
         addChangeSetMdcProperties();
+        Boolean failOnError = getFailOnError();
+        if (failOnError != null) {
+            Scope.getCurrentScope().addMdcValue(MdcKey.FAIL_ON_ERROR, String.valueOf(failOnError));
+        }
         if (validationFailed) {
             return ExecType.MARK_RAN;
         }
@@ -705,21 +708,19 @@ public class ChangeSet implements Conditional, ChangeLogChild {
 
                 log.fine("Reading ChangeSet: " + this);
                 for (Change change : getChanges()) {
-                    if ((!(change instanceof DbmsTargetedChange)) || DatabaseList.definitionMatches(((DbmsTargetedChange) change).getDbms(), database, true)) {
-                        if (listener != null) {
-                            listener.willRun(change, this, changeLog, database);
-                        }
-                        if (change.generateStatementsVolatile(database)) {
-                            executor.comment("WARNING The following SQL may change each run and therefore is possibly incorrect and/or invalid:");
-                        }
+                    if (listener != null) {
+                        listener.willRun(change, this, changeLog, database);
+                    }
+                    if (change.generateStatementsVolatile(database)) {
+                        executor.comment("WARNING The following SQL may change each run and therefore is possibly incorrect and/or invalid:");
+                    }
 
-                        addSqlMdc(change, database, false);
+                    addSqlMdc(change, database, false);
 
-                        database.executeStatements(change, databaseChangeLog, sqlVisitors);
-                        log.info(change.getConfirmationMessage());
-                        if (listener != null) {
-                            listener.ran(change, this, changeLog, database);
-                        }
+                    database.executeStatements(change, databaseChangeLog, sqlVisitors);
+                    log.info(change.getConfirmationMessage());
+                    if (listener != null) {
+                        listener.ran(change, this, changeLog, database);
                     } else {
                         log.fine("Change " + change.getSerializedObjectName() + " not included for database " + database.getShortName());
                     }
@@ -741,16 +742,14 @@ public class ChangeSet implements Conditional, ChangeLogChild {
 
         } catch (Exception e) {
             Scope.getCurrentScope().addMdcValue(MdcKey.CHANGESET_OPERATION_STOP_TIME, Instant.ofEpochMilli(new Date().getTime()).toString());
-            if (getFailOnError() == null || getFailOnError()) {
-                Scope.getCurrentScope().addMdcValue(MdcKey.CHANGESET_OUTCOME, ExecType.FAILED.value.toLowerCase());
-            }
+            Scope.getCurrentScope().addMdcValue(MdcKey.CHANGESET_OUTCOME, ExecType.FAILED.value.toLowerCase());
             log.severe(String.format("ChangeSet %s encountered an exception.", toString(false)));
             try {
                 database.rollback();
             } catch (Exception e1) {
                 throw new MigrationFailedException(this, e);
             }
-            if ((getFailOnError() != null) && !getFailOnError()) {
+            if ((failOnError != null) && !failOnError) {
                 log.info("Changeset " + toString(false) + " failed, but failOnError was false.  Error: " + e.getMessage());
                 log.fine("Failure Stacktrace", e);
                 execType = ExecType.FAILED;
@@ -950,6 +949,14 @@ public class ChangeSet implements Conditional, ChangeLogChild {
      */
     public List<Change> getChanges() {
         return Collections.unmodifiableList(changes);
+    }
+
+    /**
+     * Method created to remove changes from a changeset
+     * @param collection
+     */
+    public void removeAllChanges(Collection<?> collection) {
+        this.changes.removeAll(collection);
     }
 
     public void addChange(Change change) {
@@ -1498,9 +1505,9 @@ public class ChangeSet implements Conditional, ChangeLogChild {
     }
 
     /**
-     * Sets storedCheckSum in ValidatingVisitor in case when changeset was executed
+     * Sets the stored checksum in the ValidatingVisitor in case the changeset was executed.
      *
-     * @param storedCheckSum
+     * @param storedCheckSum the checksum to set
      */
     public void setStoredCheckSum(CheckSum storedCheckSum) {
         this.storedCheckSum = storedCheckSum;
@@ -1524,6 +1531,9 @@ public class ChangeSet implements Conditional, ChangeLogChild {
         String commentMdc = comments != null ? comments : "";
         String labelMdc = labels != null ? labels.toString() : "";
         String contextsMdc = contextFilter != null && contextFilter.getOriginalString() != null ? contextFilter.getOriginalString() : "";
+
+        String changelogPath = (getChangeLog() != null ? getChangeLog().getLogicalFilePath() : null);
+        Scope.getCurrentScope().addMdcValue(MdcKey.CHANGELOG_FILE, changelogPath);
         Scope.getCurrentScope().addMdcValue(MdcKey.CHANGESET_COMMENT, commentMdc);
         Scope.getCurrentScope().addMdcValue(MdcKey.CHANGESET_LABEL, labelMdc);
         Scope.getCurrentScope().addMdcValue(MdcKey.CHANGESET_CONTEXT, contextsMdc);

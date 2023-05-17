@@ -8,6 +8,9 @@ import liquibase.changelog.ChangeLogHistoryServiceFactory;
 import liquibase.changelog.ChangeLogParameters;
 import liquibase.changelog.DatabaseChangeLog;
 import liquibase.command.*;
+import liquibase.configuration.ConfigurationValueProvider;
+import liquibase.configuration.LiquibaseConfiguration;
+import liquibase.configuration.core.DefaultsFileValueProvider;
 import liquibase.database.Database;
 import liquibase.exception.LiquibaseException;
 import liquibase.lockservice.LockService;
@@ -17,6 +20,7 @@ import liquibase.parser.ChangeLogParser;
 import liquibase.parser.ChangeLogParserFactory;
 import liquibase.parser.core.xml.XMLChangeLogSAXParser;
 import liquibase.resource.ResourceAccessor;
+import liquibase.util.StringUtil;
 
 import java.util.Arrays;
 import java.util.HashMap;
@@ -67,11 +71,14 @@ public class DatabaseChangelogCommandStep extends AbstractHelperCommandStep impl
         if (changeLogParameters == null) {
             changeLogParameters = new ChangeLogParameters(database);
             addJavaProperties(changeLogParameters);
+            addDefaultFileProperties(changeLogParameters);
         }
         Contexts contexts = new Contexts(commandScope.getArgumentValue(CONTEXTS_ARG));
         changeLogParameters.setContexts(contexts);
+        commandScope.provideDependency(Contexts.class, contexts);
         LabelExpression labels = new LabelExpression(commandScope.getArgumentValue(LABEL_FILTER_ARG));
         changeLogParameters.setLabels(labels);
+        commandScope.provideDependency(LabelExpression.class, labels);
         addCommandFiltersMdc(labels, contexts);
 
         DatabaseChangeLog databaseChangeLog = getDatabaseChangeLog(changeLogFile, changeLogParameters);
@@ -92,12 +99,17 @@ public class DatabaseChangelogCommandStep extends AbstractHelperCommandStep impl
 
     private DatabaseChangeLog getDatabaseChangeLog(String changeLogFile, ChangeLogParameters changeLogParameters) throws LiquibaseException {
         ResourceAccessor resourceAccessor = Scope.getCurrentScope().getResourceAccessor();
-        Scope.getCurrentScope().addMdcValue(MdcKey.CHANGELOG_FILE, changeLogFile);
         ChangeLogParser parser = ChangeLogParserFactory.getInstance().getParser(changeLogFile, resourceAccessor);
         if (parser instanceof XMLChangeLogSAXParser) {
             ((XMLChangeLogSAXParser) parser).setShouldWarnOnMismatchedXsdVersion(false);
         }
-        return parser.parse(changeLogFile, changeLogParameters, resourceAccessor);
+        DatabaseChangeLog changelog = parser.parse(changeLogFile, changeLogParameters, resourceAccessor);
+        if (StringUtil.isNotEmpty(changelog.getLogicalFilePath())) {
+            Scope.getCurrentScope().addMdcValue(MdcKey.CHANGELOG_FILE, changelog.getLogicalFilePath());
+        } else {
+            Scope.getCurrentScope().addMdcValue(MdcKey.CHANGELOG_FILE, changeLogFile);
+        }
+        return changelog;
     }
 
     private void checkLiquibaseTables(boolean updateExistingNullChecksums, DatabaseChangeLog databaseChangeLog,
@@ -130,4 +142,21 @@ public class DatabaseChangelogCommandStep extends AbstractHelperCommandStep impl
             javaProperties.forEach((key, value) -> changeLogParameters.set((String) key, value));
         }
     }
+
+    /**
+     * Add default-file properties to changelog parameters
+     * @param changeLogParameters the changelog parameters to update
+     */
+    private void addDefaultFileProperties(ChangeLogParameters changeLogParameters) {
+        final LiquibaseConfiguration liquibaseConfiguration = Scope.getCurrentScope().getSingleton(LiquibaseConfiguration.class);
+        for (ConfigurationValueProvider cvp : liquibaseConfiguration.getProviders()) {
+            if (cvp instanceof DefaultsFileValueProvider) {
+                DefaultsFileValueProvider dfvp = (DefaultsFileValueProvider)  cvp;
+                dfvp.getMap().entrySet().stream()
+                        .filter(entry -> ((String) entry.getKey()).startsWith("parameter."))
+                        .forEach(entry -> changeLogParameters.set(((String) entry.getKey()).replaceFirst("^parameter.", ""), entry.getValue()));
+            }
+        }
+    }
+
 }

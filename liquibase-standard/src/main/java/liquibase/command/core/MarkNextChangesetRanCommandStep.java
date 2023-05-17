@@ -1,42 +1,28 @@
 package liquibase.command.core;
 
+import liquibase.Contexts;
+import liquibase.LabelExpression;
+import liquibase.RuntimeEnvironment;
+import liquibase.Scope;
+import liquibase.changelog.ChangeLogIterator;
+import liquibase.changelog.DatabaseChangeLog;
+import liquibase.changelog.filter.*;
+import liquibase.changelog.visitor.ChangeLogSyncVisitor;
 import liquibase.command.*;
-import liquibase.configuration.ConfigurationValueObfuscator;
-import liquibase.exception.CommandExecutionException;
+import liquibase.command.core.helpers.DatabaseChangelogCommandStep;
+import liquibase.database.Database;
+import liquibase.executor.ExecutorService;
 
-public class MarkNextChangesetRanCommandStep extends AbstractCliWrapperCommandStep {
+import java.util.Arrays;
+import java.util.List;
+
+public class MarkNextChangesetRanCommandStep extends AbstractCommandStep {
 
     public static final String[] COMMAND_NAME = {"markNextChangesetRan"};
 
-    public static final CommandArgumentDefinition<String> URL_ARG;
-    public static final CommandArgumentDefinition<String> DEFAULT_SCHEMA_NAME_ARG;
-    public static final CommandArgumentDefinition<String> DEFAULT_CATALOG_NAME_ARG;
-    public static final CommandArgumentDefinition<String> USERNAME_ARG;
-    public static final CommandArgumentDefinition<String> PASSWORD_ARG;
-    public static final CommandArgumentDefinition<String> CHANGELOG_FILE_ARG;
-    public static final CommandArgumentDefinition<String> DRIVER_ARG;
-    public static final CommandArgumentDefinition<String> DRIVER_PROPERTIES_FILE_ARG;
-
-    static {
-        CommandBuilder builder = new CommandBuilder(COMMAND_NAME);
-        URL_ARG = builder.argument(CommonArgumentNames.URL, String.class).required()
-                .description("The JDBC database connection URL").build();
-        DEFAULT_SCHEMA_NAME_ARG = builder.argument("defaultSchemaName", String.class)
-                .description("The default schema name to use for the database connection").build();
-        DEFAULT_CATALOG_NAME_ARG = builder.argument("defaultCatalogName", String.class)
-                .description("The default catalog name to use for the database connection").build();
-        DRIVER_ARG = builder.argument("driver", String.class)
-                .description("The JDBC driver class").build();
-        DRIVER_PROPERTIES_FILE_ARG = builder.argument("driverPropertiesFile", String.class)
-                .description("The JDBC driver properties file").build();
-        USERNAME_ARG = builder.argument(CommonArgumentNames.USERNAME, String.class)
-                .description("Username to use to connect to the database").build();
-        PASSWORD_ARG = builder.argument(CommonArgumentNames.PASSWORD, String.class)
-                .description("Password to use to connect to the database")
-                .setValueObfuscator(ConfigurationValueObfuscator.STANDARD)
-                .build();
-        CHANGELOG_FILE_ARG = builder.argument(CommonArgumentNames.CHANGELOG_FILE, String.class).required()
-                .description("The root changelog").build();
+    @Override
+    public List<Class<?>> requiredDependencies() {
+        return Arrays.asList(Database.class, DatabaseChangeLog.class);
     }
 
     @Override
@@ -50,7 +36,27 @@ public class MarkNextChangesetRanCommandStep extends AbstractCliWrapperCommandSt
     }
 
     @Override
-    protected String[] collectArguments(CommandScope commandScope) throws CommandExecutionException {
-        return collectArguments(commandScope, null, null);
+    public void run(CommandResultsBuilder resultsBuilder) throws Exception {
+        try {
+            CommandScope commandScope = resultsBuilder.getCommandScope();
+            DatabaseChangeLog changeLog = (DatabaseChangeLog) commandScope.getDependency(DatabaseChangeLog.class);
+            Database database = ((Database) commandScope.getDependency(Database.class));
+            Contexts contexts = ((Contexts) commandScope.getDependency(Contexts.class));
+            LabelExpression labelExpression = ((LabelExpression) commandScope.getDependency(LabelExpression.class));
+
+            ChangeLogIterator logIterator = new ChangeLogIterator(changeLog,
+                    new NotRanChangeSetFilter(database.getRanChangeSetList()),
+                    new ContextChangeSetFilter(contexts),
+                    new LabelChangeSetFilter(labelExpression),
+                    new DbmsChangeSetFilter(database),
+                    new IgnoreChangeSetFilter(),
+                    new CountChangeSetFilter(1));
+
+            logIterator.run(new ChangeLogSyncVisitor(database),
+                    new RuntimeEnvironment(database, contexts, labelExpression)
+            );
+        } finally {
+            Scope.getCurrentScope().getSingleton(ExecutorService.class).reset();
+        }
     }
 }

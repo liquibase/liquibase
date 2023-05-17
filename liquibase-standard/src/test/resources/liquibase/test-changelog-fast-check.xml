@@ -8,7 +8,7 @@ http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbch
   http://www.liquibase.org/xml/ns/pro http://www.liquibase.org/xml/ns/pro/liquibase-pro-4.1.xsd" changeLogId="dacc59c9-e3b3-4afc-8f88-2e949374623e">
 
     <!-- SETUP: Create tables for other objects to use. -->
-    <changeSet author="Liquibase Test User" id="1::testFastCheck" context="testContext" labels="testLabel">
+    <changeSet author="Liquibase Test User" id="1::testFastCheck2" context="testContext2" labels="testLabel2">
         <tagDatabase tag="Test Tag Database"></tagDatabase>
     </changeSet>
 </databaseChangeLog>
