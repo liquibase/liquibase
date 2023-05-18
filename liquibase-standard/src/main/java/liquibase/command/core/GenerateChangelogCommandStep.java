@@ -51,7 +51,8 @@ public class GenerateChangelogCommandStep extends AbstractCommandStep {
                 .description("Changelog file to write results").build();
 
         // hiding parameter names that are not available externally but are used by this step.
-        AUTHOR_ARG = builder.argument("author", String.class).hidden().build();
+        AUTHOR_ARG = builder.argument("author", String.class)
+                .description("Specifies the author for changesets in the generated changelog").build();
         CONTEXT_ARG = builder.argument("context", String.class).hidden().build();
         DATA_OUTPUT_DIR_ARG = builder.argument("dataOutputDirectory", String.class)
                 .description("Directory to write table data to").build();

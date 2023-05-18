@@ -149,9 +149,9 @@ public interface Database extends PrioritizedService, AutoCloseable {
     String getDatabaseChangeLogTableName();
 
     /**
-     * Set the table name of the change log to the given table name
+     * Sets the table name of the change log to the given table name.
      *
-     * @param tableName
+     * @param tableName the name of the change log table to set
      */
     void setDatabaseChangeLogTableName(String tableName);
 

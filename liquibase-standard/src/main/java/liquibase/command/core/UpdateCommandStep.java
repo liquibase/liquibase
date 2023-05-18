@@ -5,7 +5,6 @@ import liquibase.UpdateSummaryEnum;
 import liquibase.command.*;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 
 public class UpdateCommandStep extends AbstractUpdateCommandStep implements CleanUpCommandStep {
@@ -72,11 +71,6 @@ public class UpdateCommandStep extends AbstractUpdateCommandStep implements Clea
     @Override
     public void postUpdateLog() {
         Scope.getCurrentScope().getUI().sendMessage(coreBundle.getString("update.successful"));
-    }
-
-    @Override
-    public String getHubOperation() {
-        return "update";
     }
 
     @Override
