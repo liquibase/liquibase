@@ -15,6 +15,7 @@ import liquibase.database.Database;
 import liquibase.exception.DatabaseException;
 import liquibase.logging.mdc.MdcKey;
 import liquibase.logging.mdc.MdcObject;
+import liquibase.logging.mdc.customobjects.SimpleStatus;
 import liquibase.logging.mdc.customobjects.Status;
 import liquibase.util.StreamUtil;
 
@@ -91,7 +92,13 @@ public class StatusCommandStep extends AbstractCommandStep {
         }
 
 
-        Status statusMdc = new Status(message, database.getConnection().getURL(), unrunChangeSets);
+        SimpleStatus statusMdc;
+        if (verbose) {
+            statusMdc = new Status(message, database.getConnection().getURL(), unrunChangeSets);
+        } else {
+            statusMdc = new SimpleStatus(message, database.getConnection().getURL(), unrunChangeSets);
+        }
+
         try (MdcObject statusMdcObject = Scope.getCurrentScope().addMdcValue(MdcKey.STATUS, statusMdc)) {
             Scope.getCurrentScope().getLog(getClass()).fine("Status");
         }

@@ -6,45 +6,16 @@ import liquibase.logging.mdc.CustomMdcObject;
 import java.util.List;
 import java.util.stream.Collectors;
 
-public class Status implements CustomMdcObject {
+public class Status extends SimpleStatus implements CustomMdcObject {
 
-    private String message;
-    private String liquibaseTargetUrl;
-    private int changesetCount;
     private List<Changeset> undeployedChangesets;
 
     public Status() {
     }
 
     public Status(String message, String url, List<ChangeSet> unrunChangeSets) {
-        this.message = message;
-        this.liquibaseTargetUrl = url;
-        this.changesetCount = unrunChangeSets.size();
+        super(message, url, unrunChangeSets);
         this.undeployedChangesets = unrunChangeSets.stream().map(urcs -> new Changeset(urcs.getFilePath(), urcs.getAuthor(), urcs.getId())).collect(Collectors.toList());
-    }
-
-    public String getMessage() {
-        return message;
-    }
-
-    public void setMessage(String message) {
-        this.message = message;
-    }
-
-    public String getLiquibaseTargetUrl() {
-        return liquibaseTargetUrl;
-    }
-
-    public void setLiquibaseTargetUrl(String liquibaseTargetUrl) {
-        this.liquibaseTargetUrl = liquibaseTargetUrl;
-    }
-
-    public int getChangesetCount() {
-        return changesetCount;
-    }
-
-    public void setChangesetCount(int changesetCount) {
-        this.changesetCount = changesetCount;
     }
 
     public List<Changeset> getUndeployedChangesets() {
