@@ -13,7 +13,7 @@ import java.util.Map;
  * Launcher which builds up the classpath needed to run Liquibase, then calls {@link LiquibaseCommandLine#main(String[])}.
  * <p>
  * Supports the following configuration options that can be passed as JVM properties and/or environment variables, taking
- * the former, more Java specific, precedence over the latter:
+ * the former precedence over the latter:
  * <table>
  *   <thead>
  *     <tr>
@@ -53,37 +53,50 @@ import java.util.Map;
  */
 public class LiquibaseLauncher {
 
-    public static final String LIQUIBASE_HOME_JVM_PROPERTY_NAME = "liquibase.home";
-    public static final String LIQUIBASE_LAUNCHER_DEBUG_JVM_PROPERTY_NAME = "liquibase.launcher.debug";
-    public static final String LIQUIBASE_LAUNCHER_PARENT_CLASSLOADER_JVM_PROPERTY_NAME = "liquibase.launcher.parent_classloader";
-    public static final String LIQUIBASE_HOME_ENVIRONMENT_VARIABLE_NAME = "LIQUIBASE_HOME";
-    public static final String LIQUIBASE_LAUNCHER_DEBUG_ENVIRONMENT_VARIABLE_NAME = "LIQUIBASE_LAUNCHER_DEBUG";
-    public static final String LIQUIBASE_LAUNCHER_PARENT_CLASSLOADER_ENVIRONMENT_VARIABLE_NAME =
-        "LIQUIBASE_LAUNCHER_PARENT_CLASSLOADER";
+    private static final String LIQUIBASE_HOME_JVM_PROPERTY_NAME = "liquibase.home";
+    private static final String LIQUIBASE_LAUNCHER_DEBUG_JVM_PROPERTY_NAME = "liquibase.launcher.debug";
+    private static final String LIQUIBASE_LAUNCHER_PARENT_CLASSLOADER_JVM_PROPERTY_NAME = "liquibase.launcher.parent_classloader";
 
-    private static final Map<String, String> jvmPropertiesToEnvironmentVariablesMap =
-        initializeJvmPropertiesToEnvironmentVariablesMap();
+    /**
+     * Agglutinates the different settings, i.e., environment variables or associated JVM system properties, that can be
+     * used for customizing the behavior of the class.
+     */
+    private enum LiquibaseLauncherSetting {
+        LIQUIBASE_HOME(LIQUIBASE_HOME_JVM_PROPERTY_NAME),
+        LIQUIBASE_LAUNCHER_DEBUG(LIQUIBASE_LAUNCHER_DEBUG_JVM_PROPERTY_NAME),
+        LIQUIBASE_LAUNCHER_PARENT_CLASSLOADER(LIQUIBASE_LAUNCHER_PARENT_CLASSLOADER_JVM_PROPERTY_NAME);
+
+        private final String jvmPropertyName;
+
+        LiquibaseLauncherSetting(String jvmPropertyName) {
+            this.jvmPropertyName = jvmPropertyName;
+        }
+
+        String getJvmPropertyName() {
+            return this.jvmPropertyName;
+        }
+    }
 
     private static boolean debug = false;
 
     public static void main(final String[] args) throws Exception {
 
         final String debugSetting =
-            getValueFromJvmPropertyOrEnvironmentVariable(LIQUIBASE_LAUNCHER_DEBUG_JVM_PROPERTY_NAME);
-        if (debugSetting != null && debugSetting.equals("true")) {
+            getValueFromJvmPropertyOrEnvironmentVariable(LiquibaseLauncherSetting.LIQUIBASE_LAUNCHER_DEBUG);
+        if ("true".equals(debugSetting)) {
             LiquibaseLauncher.debug = true;
             debug("Debug mode enabled because either the JVM property 'liquibase.launcher.debug' or the environment " +
                 "variable 'LIQUIBASE_LAUNCHER_DEBUG' is set to " + debugSetting);
         }
 
         String parentLoaderSetting =
-            getValueFromJvmPropertyOrEnvironmentVariable(LIQUIBASE_LAUNCHER_PARENT_CLASSLOADER_JVM_PROPERTY_NAME);
+            getValueFromJvmPropertyOrEnvironmentVariable(LiquibaseLauncherSetting.LIQUIBASE_LAUNCHER_PARENT_CLASSLOADER);
         if (parentLoaderSetting == null) {
              parentLoaderSetting = "system";
         }
         debug("Liquibase launcher parent classloader is set to " + parentLoaderSetting);
 
-        final String liquibaseHomeEnv = getValueFromJvmPropertyOrEnvironmentVariable(LIQUIBASE_HOME_JVM_PROPERTY_NAME);
+        final String liquibaseHomeEnv = getValueFromJvmPropertyOrEnvironmentVariable(LiquibaseLauncherSetting.LIQUIBASE_HOME);
         debug("Liquibase home: " + liquibaseHomeEnv);
         if (liquibaseHomeEnv == null || liquibaseHomeEnv.equals("")) {
             throw new IllegalArgumentException("Unable to find either 'liquibase.home' JVM property nor " +
@@ -142,9 +155,9 @@ public class LiquibaseLauncher {
 
         ClassLoader parentLoader;
         if (parentLoaderSetting.equalsIgnoreCase("system")) {
-        //loading with the regular system classloader includes liquibase.jar in the parent.
+            //loading with the regular system classloader includes liquibase.jar in the parent.
             //That causes the parent classloader to load LiquibaseCommandLine which makes it not able to access files in the child classloader
-        //The system classloader's parent is the boot classloader, which keeps the only classloader with liquibase-core.jar the same as the rest of the classes it needs to access.
+            //The system classloader's parent is the boot classloader, which keeps the only classloader with liquibase-core.jar the same as the rest of the classes it needs to access.
             parentLoader = ClassLoader.getSystemClassLoader().getParent();
 
         } else if (parentLoaderSetting.equalsIgnoreCase("thread")) {
@@ -177,29 +190,12 @@ public class LiquibaseLauncher {
         }
     }
 
-    private static Map<String, String> initializeJvmPropertiesToEnvironmentVariablesMap() {
-        Map<String,String> jvmPropertiesToEnvironmentVariablesMap = new HashMap<>(3);
-        jvmPropertiesToEnvironmentVariablesMap.put(
-            LIQUIBASE_HOME_JVM_PROPERTY_NAME, LIQUIBASE_HOME_ENVIRONMENT_VARIABLE_NAME
-        );
-        jvmPropertiesToEnvironmentVariablesMap.put(
-            LIQUIBASE_LAUNCHER_DEBUG_JVM_PROPERTY_NAME, LIQUIBASE_LAUNCHER_DEBUG_ENVIRONMENT_VARIABLE_NAME
-        );
-        jvmPropertiesToEnvironmentVariablesMap.put(
-            LIQUIBASE_LAUNCHER_PARENT_CLASSLOADER_JVM_PROPERTY_NAME,
-            LIQUIBASE_LAUNCHER_PARENT_CLASSLOADER_ENVIRONMENT_VARIABLE_NAME
-        );
-        return jvmPropertiesToEnvironmentVariablesMap;
-    }
-
-    private static String getValueFromJvmPropertyOrEnvironmentVariable(String jvmPropertyName) {
-        String value = System.getProperty(jvmPropertyName);
+    private static String getValueFromJvmPropertyOrEnvironmentVariable(LiquibaseLauncherSetting setting) {
+        String value = System.getProperty(setting.getJvmPropertyName());
         if (value != null) {
             return value;
         }
 
-        String environmentVariableName = jvmPropertiesToEnvironmentVariablesMap.get(jvmPropertyName);
-        // Due to the nature of the Map we assume that environmentVariableName must not be null
-        return System.getenv(environmentVariableName);
+        return System.getenv(setting.name());
     }
 }
