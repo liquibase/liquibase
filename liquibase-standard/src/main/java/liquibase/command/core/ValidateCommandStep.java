@@ -1,6 +1,5 @@
 package liquibase.command.core;
 
-import liquibase.changelog.ChangeLogParameters;
 import liquibase.changelog.DatabaseChangeLog;
 import liquibase.command.*;
 import liquibase.command.core.helpers.DatabaseChangelogCommandStep;
@@ -30,7 +29,7 @@ public class ValidateCommandStep extends AbstractCommandStep {
 
     @Override
     public List<Class<?>> requiredDependencies() {
-        return Arrays.asList(Database.class, DatabaseChangeLog.class, ChangeLogParameters.class);
+        return Arrays.asList(Database.class, DatabaseChangeLog.class);
     }
 
     @Override
@@ -41,12 +40,7 @@ public class ValidateCommandStep extends AbstractCommandStep {
 
     @Override
     public void run(CommandResultsBuilder resultsBuilder) throws Exception {
-        final CommandScope commandScope = resultsBuilder.getCommandScope();
-        final DatabaseChangeLog changeLog = (DatabaseChangeLog) commandScope.getDependency(DatabaseChangeLog.class);
-        final Database database = (Database) commandScope.getDependency(Database.class);
-        if (changeLog != null) {
-            changeLog.validate(database);
-        }
+        // Do nothing. This is all handled in DatabaseChangelogCommandStep.
         resultsBuilder.addResult("statusCode", 0);
     }
 }
