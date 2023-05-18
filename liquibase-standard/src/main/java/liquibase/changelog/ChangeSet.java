@@ -295,9 +295,9 @@ public class ChangeSet implements Conditional, ChangeLogChild {
     }
 
     /**
-     * The logical file path defined directly on this node. Return null if not set.
+     * Returns the logical file path defined directly on this node. Returns {@code null} if not set.
      *
-     * @return
+     * @return the logical file path defined on this node, or {@code null} if not set
      */
     public String getLogicalFilePath() {
         return logicalFilePath;
@@ -1505,9 +1505,9 @@ public class ChangeSet implements Conditional, ChangeLogChild {
     }
 
     /**
-     * Sets storedCheckSum in ValidatingVisitor in case when changeset was executed
+     * Sets the stored checksum in the ValidatingVisitor in case the changeset was executed.
      *
-     * @param storedCheckSum
+     * @param storedCheckSum the checksum to set
      */
     public void setStoredCheckSum(CheckSum storedCheckSum) {
         this.storedCheckSum = storedCheckSum;
@@ -1531,6 +1531,9 @@ public class ChangeSet implements Conditional, ChangeLogChild {
         String commentMdc = comments != null ? comments : "";
         String labelMdc = labels != null ? labels.toString() : "";
         String contextsMdc = contextFilter != null && contextFilter.getOriginalString() != null ? contextFilter.getOriginalString() : "";
+
+        String changelogPath = (getChangeLog() != null ? getChangeLog().getLogicalFilePath() : null);
+        Scope.getCurrentScope().addMdcValue(MdcKey.CHANGELOG_FILE, changelogPath);
         Scope.getCurrentScope().addMdcValue(MdcKey.CHANGESET_COMMENT, commentMdc);
         Scope.getCurrentScope().addMdcValue(MdcKey.CHANGESET_LABEL, labelMdc);
         Scope.getCurrentScope().addMdcValue(MdcKey.CHANGESET_CONTEXT, contextsMdc);
