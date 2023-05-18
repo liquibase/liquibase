@@ -433,6 +433,7 @@ public class DatabaseChangeLog implements Comparable<DatabaseChangeLog>, Conditi
                     throw new UnexpectedLiquibaseException("No 'file' attribute on 'include'");
                 }
                 path = path.replace('\\', '/');
+                Scope.getCurrentScope().addMdcValue(MdcKey.CHANGELOG_FILE, path);
                 ContextExpression includeContextFilter = new ContextExpression(node.getChildValue(null, "contextFilter", String.class));
                 if (includeContextFilter.isEmpty()) {
                     includeContextFilter = new ContextExpression(node.getChildValue(null, "context", String.class));
