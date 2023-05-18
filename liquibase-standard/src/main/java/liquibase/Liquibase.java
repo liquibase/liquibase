@@ -1010,28 +1010,31 @@ public class Liquibase implements AutoCloseable {
         return commandResults.getResult(TagExistsCommandStep.TAG_EXISTS_RESULT);
     }
 
+    @Deprecated
     public void updateTestingRollback(String contexts) throws LiquibaseException {
         updateTestingRollback(new Contexts(contexts), new LabelExpression());
     }
 
+    @Deprecated
     public void updateTestingRollback(Contexts contexts, LabelExpression labelExpression) throws LiquibaseException {
         updateTestingRollback(null, contexts, labelExpression);
 
     }
 
+    @Deprecated
     public void updateTestingRollback(String tag, Contexts contexts, LabelExpression labelExpression)
             throws LiquibaseException {
-        changeLogParameters.setContexts(contexts);
-        changeLogParameters.setLabels(labelExpression);
-
-        ChangeLogHistoryService changeLogService = ChangeLogHistoryServiceFactory.getInstance().getChangeLogService(database);
-        int originalSize = changeLogService.getRanChangeSets().size();
-        update(tag, contexts, labelExpression);
-        changeLogService.reset();
-        int changesetsToRollback = changeLogService.getRanChangeSets().size() - originalSize;
-        Scope.getCurrentScope().getLog(getClass()).info(String.format("Rolling back %d changeset(s).", changesetsToRollback));
-        rollback(changesetsToRollback, null, contexts, labelExpression);
-        update(tag, contexts, labelExpression);
+        runInScope(() -> {
+            CommandScope updateTestingRollback = new CommandScope(UpdateTestingRollbackCommandStep.COMMAND_NAME);
+            updateTestingRollback.addArgumentValue(DbUrlConnectionCommandStep.DATABASE_ARG, getDatabase());
+            updateTestingRollback.addArgumentValue(DatabaseChangelogCommandStep.CHANGELOG_PARAMETERS, changeLogParameters);
+            updateTestingRollback.addArgumentValue(DatabaseChangelogCommandStep.CHANGELOG_FILE_ARG, changeLogFile);
+            updateTestingRollback.addArgumentValue(DatabaseChangelogCommandStep.CONTEXTS_ARG, (contexts != null? contexts.toString() : null));
+            updateTestingRollback.addArgumentValue(DatabaseChangelogCommandStep.LABEL_FILTER_ARG, (labelExpression != null ? labelExpression.getOriginalString() : null));
+            updateTestingRollback.addArgumentValue(UpdateTestingRollbackCommandStep.TAG_ARG, tag);
+            updateTestingRollback.addArgumentValue(ChangeExecListenerCommandStep.CHANGE_EXEC_LISTENER_ARG, changeExecListener);
+            updateTestingRollback.execute();
+        });
     }
 
     public void checkLiquibaseTables(boolean updateExistingNullChecksums, DatabaseChangeLog databaseChangeLog,
