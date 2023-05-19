@@ -58,7 +58,7 @@ liquibase:
 
 
       mysql:
-        version: 5.7
+        version: latest
         imageName: mysql
         setup:
           username: root
