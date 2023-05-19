@@ -349,5 +349,9 @@
         </createTable>
     </changeSet>
 
+    <changeSet id="tranKeywordTest" author="mallod">
+        <sqlFile path="changelogs/mssql/issues/transaction.test.sql" endDelimiter="GO"/>
+    </changeSet>
+
 
 </databaseChangeLog>

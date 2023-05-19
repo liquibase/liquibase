@@ -10,7 +10,7 @@ import java.util.Locale;
 
 /**
  * Firebird database implementation.
- * SQL Syntax ref: http://www.ibphoenix.com/main.nfs?a=ibphoenix&page=ibp_60_sqlref
+ * SQL Syntax ref: <a href="http://www.ibphoenix.com/main.nfs?a=ibphoenix&page=ibp_60_sqlref">ibphoenix</a>
  */
 public class FirebirdDatabase extends AbstractJdbcDatabase {
 

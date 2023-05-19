@@ -17,7 +17,7 @@ import java.util.stream.Collectors;
  * while also delegating listener actions to any other ChangeExecListener included
  * when the object is constructed.
  */
-public class DefaultChangeExecListener implements ChangeExecListener {
+public class DefaultChangeExecListener implements ChangeExecListener, ChangeLogSyncListener {
     private final List<ChangeExecListener> listeners;
     private final List<ChangeSet> deployedChangeSets = new LinkedList<>();
     private final List<ChangeSet> failedChangeSets = new LinkedList<>();
@@ -117,6 +117,16 @@ public class DefaultChangeExecListener implements ChangeExecListener {
         if (listener != null) {
             this.listeners.add(listener);
         }
+    }
+
+    /**
+     * @param changeSet
+     * @param databaseChangeLog
+     * @param database
+     */
+    @Override
+    public void markedRan(ChangeSet changeSet, DatabaseChangeLog databaseChangeLog, Database database) {
+        // no-op
     }
 
     public void reset() {

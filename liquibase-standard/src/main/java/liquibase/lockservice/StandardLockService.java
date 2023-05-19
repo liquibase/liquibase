@@ -20,6 +20,9 @@ import liquibase.executor.Executor;
 import liquibase.executor.ExecutorService;
 import liquibase.executor.LoggingExecutor;
 import liquibase.executor.jvm.ChangelogJdbcMdcListener;
+import liquibase.logging.mdc.MdcKey;
+import liquibase.logging.mdc.MdcObject;
+import liquibase.logging.mdc.MdcValue;
 import liquibase.snapshot.InvalidExampleException;
 import liquibase.snapshot.SnapshotGeneratorFactory;
 import liquibase.sql.Sql;
@@ -34,6 +37,7 @@ import java.text.DateFormat;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.util.*;
+import java.util.logging.Level;
 
 import static java.util.ResourceBundle.getBundle;
 
@@ -354,6 +358,7 @@ public class StandardLockService implements LockService {
             database.setObjectQuotingStrategy(this.quotingStrategy);
         }
 
+        boolean success = false;
         Executor executor = Scope.getCurrentScope().getSingleton(ExecutorService.class).getExecutor("jdbc", database);
         try {
             if (this.hasDatabaseChangeLogLockTable()) {
@@ -392,6 +397,7 @@ public class StandardLockService implements LockService {
                     );
                 }
                 database.commit();
+                success = true;
             }
         } catch (Exception e) {
             throw new LockException(e);
@@ -400,7 +406,10 @@ public class StandardLockService implements LockService {
                 hasChangeLogLock = false;
 
                 database.setCanCacheLiquibaseTableInfo(false);
-                Scope.getCurrentScope().getLog(getClass()).info("Successfully released change log lock");
+                try (MdcObject releaseLocksOutcome = Scope.getCurrentScope().addMdcValue(MdcKey.RELEASE_LOCKS_OUTCOME, success ? MdcValue.COMMAND_SUCCESSFUL : MdcValue.COMMAND_FAILED)) {
+                    Scope.getCurrentScope().getLog(getClass()).log(success ? Level.INFO : Level.WARNING, success ? "Successfully released" : "Failed to release" + " change log lock", null);
+                }
+
                 database.rollback();
             } catch (DatabaseException e) {
             }

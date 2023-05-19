@@ -26,7 +26,7 @@ import static liquibase.statement.SqlStatement.EMPTY_SQL_STATEMENT;
 
 /**
  * A common parent for all raw SQL related changes regardless of where the sql was sourced from.
- * 
+ * <p>
  * Implements the necessary logic to choose how the SQL string should be parsed to generate the statements.
  *
  */
@@ -180,8 +180,9 @@ public abstract class AbstractSQLChange extends AbstractChange implements DbmsTa
     }
 
     /**
-     * Set the end delimiter for splitting SQL statements. Set to null to use the default delimiter.
-     * @param endDelimiter
+     * Sets the end delimiter for splitting SQL statements. Set to {@code null} to use the default delimiter.
+     *
+     * @param endDelimiter the end delimiter to set
      */
     public void setEndDelimiter(String endDelimiter) {
         this.endDelimiter = endDelimiter;

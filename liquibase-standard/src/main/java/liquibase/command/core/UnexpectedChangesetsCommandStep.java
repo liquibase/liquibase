@@ -52,7 +52,7 @@ public class UnexpectedChangesetsCommandStep extends AbstractCliWrapperCommandSt
 
     @Override
     protected String[] collectArguments(CommandScope commandScope) throws CommandExecutionException {
-        return removeArgumentValues(collectArguments(commandScope, Arrays.asList("verbose"), null), "verbose");
+        return removeArgumentValues(collectArguments(commandScope, Collections.singletonList("verbose"), null), "verbose");
     }
 
     @Override

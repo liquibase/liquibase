@@ -14,7 +14,6 @@ import liquibase.configuration.core.DefaultsFileValueProvider;
 import liquibase.exception.CommandLineParsingException;
 import liquibase.exception.CommandValidationException;
 import liquibase.exception.LiquibaseException;
-import liquibase.hub.HubConfiguration;
 import liquibase.license.LicenseInfo;
 import liquibase.license.LicenseService;
 import liquibase.license.LicenseServiceFactory;
@@ -131,8 +130,6 @@ public class LiquibaseCommandLine {
                 "outputDefaultSchema",
                 "outputDefaultCatalog",
                 "changelogFile",
-                "hubConnectionId",
-                "hubProjectId",
                 "contexts",
                 "labels",
                 "diffTypes",
@@ -180,7 +177,6 @@ public class LiquibaseCommandLine {
                 "logFile",
                 "outputFile",
                 "liquibaseProLicenseKey",
-                "liquibaseHubApiKey",
                 "outputFileEncoding",
                 "outputLineSeparator"
         ).collect(Collectors.toSet());
@@ -691,13 +687,6 @@ public class LiquibaseCommandLine {
         }
 
         configureLogging(logLevel, logFile, currentConfiguredValue.wasDefaultValueUsed());
-
-        //
-        // Set the Liquibase Hub log level if logging is not OFF
-        //
-        if (logLevel != Level.OFF) {
-            returnMap.put(HubConfiguration.LIQUIBASE_HUB_LOGLEVEL.getKey(), logLevel);
-        }
 
         return returnMap;
     }
