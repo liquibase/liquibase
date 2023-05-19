@@ -1342,13 +1342,16 @@ public class Liquibase implements AutoCloseable {
 
     /**
      * Checks changelogs for bad MD5Sums and preconditions before attempting a migration
+     *
+     * @deprecated use {@link CommandScope}
      */
+    @Deprecated
     public void validate() throws LiquibaseException {
-        DatabaseChangeLog changeLog = getDatabaseChangeLog(true);
-        checkLiquibaseTables(false, changeLog, null, null);
-        if (changeLog != null) {
-            changeLog.validate(database);
-        }
+        new CommandScope("validate")
+                .addArgumentValue(DbUrlConnectionCommandStep.DATABASE_ARG, database)
+                .addArgumentValue(DatabaseChangelogCommandStep.CHANGELOG_FILE_ARG, changeLogFile)
+                .addArgumentValue(DatabaseChangelogCommandStep.CHANGELOG_PARAMETERS, changeLogParameters)
+                .execute();
     }
 
     public void setChangeLogParameter(String key, Object value) {
