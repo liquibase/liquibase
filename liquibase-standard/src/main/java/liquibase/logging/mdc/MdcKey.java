@@ -105,4 +105,5 @@ public class MdcKey {
 
     public static final String VERSION = "version";
     public static final String FAIL_ON_ERROR = "failOnError";
+    public static final String STATUS = "status";
 }
