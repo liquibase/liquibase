@@ -20,9 +20,6 @@ interface PreparedStatementCallback {
      * 
      * @param ps active JDBC PreparedStatement
      * @return a result object, or <code>null</code> if none
-     * @throws java.sql.SQLException if thrown by a JDBC method, to be auto-converted
-     *                               to a DataAccessException by a SQLExceptionTranslator
-     * @throws liquibase.exception.DatabaseException         in case of custom exceptions
      */
     Object doInPreparedStatement(PreparedStatement ps);
 

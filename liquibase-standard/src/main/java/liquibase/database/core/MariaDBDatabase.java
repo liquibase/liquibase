@@ -6,6 +6,7 @@ import liquibase.exception.DatabaseException;
 import liquibase.util.StringUtil;
 
 import java.util.Arrays;
+import java.util.Collections;
 
 
 /**
@@ -15,7 +16,7 @@ public class MariaDBDatabase extends MySQLDatabase {
     private static final String PRODUCT_NAME = "MariaDB";
 
     public MariaDBDatabase() {
-        addReservedWords(Arrays.asList("PERIOD"));
+        addReservedWords(Collections.singletonList("PERIOD"));
         super.sequenceNextValueFunction = "NEXT VALUE FOR %s";
         // According to https://mariadb.com/kb/en/library/data-types/, retrieved on 2019-02-12
         super.unmodifiableDataTypes.addAll(Arrays.asList(
