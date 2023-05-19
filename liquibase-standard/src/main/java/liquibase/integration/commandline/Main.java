@@ -1446,19 +1446,6 @@ public class Main {
                 outputWriter.write(result);
                 outputWriter.flush();
                 return;
-            } else if (COMMANDS.SNAPSHOT_REFERENCE.equalsIgnoreCase(command)) {
-                CommandScope snapshotCommand = new CommandScope("internalSnapshot");
-                Database referenceDatabase = createReferenceDatabaseFromCommandParams(commandParams, fileOpener);
-                snapshotCommand
-                        .addArgumentValue(InternalSnapshotCommandStep.DATABASE_ARG, referenceDatabase)
-                        .addArgumentValue(InternalSnapshotCommandStep.SCHEMAS_ARG, InternalSnapshotCommandStep.parseSchemas(referenceDatabase, getSchemaParams(referenceDatabase)))
-                        .addArgumentValue(InternalSnapshotCommandStep.SERIALIZER_FORMAT_ARG, getCommandParam(OPTIONS.SNAPSHOT_FORMAT, null));
-
-                Writer outputWriter = getOutputWriter();
-                outputWriter.write(InternalSnapshotCommandStep.printSnapshot(snapshotCommand, snapshotCommand.execute()));
-                outputWriter.flush();
-
-                return;
             }
 
             Liquibase liquibase = new Liquibase(changeLogFile, fileOpener, database);
@@ -1773,7 +1760,7 @@ public class Main {
                 .addArgumentValue(ChangeExecListenerCommandStep.CHANGE_EXEC_LISTENER_CLASS_ARG, changeExecListenerClass)
                 .addArgumentValue(ChangeExecListenerCommandStep.CHANGE_EXEC_LISTENER_PROPERTIES_FILE_ARG, changeExecListenerPropertiesFile)
                 .addArgumentValue(RollbackCommandStep.TAG_ARG, getCommandArgument())
-                .addArgumentValue(RollbackCommandStep.ROLLBACK_SCRIPT_ARG, getCommandParam(COMMANDS.ROLLBACK_SCRIPT, null));
+                .addArgumentValue(AbstractRollbackCommandStep.ROLLBACK_SCRIPT_ARG, getCommandParam(COMMANDS.ROLLBACK_SCRIPT, null));
         this.setDatabaseArgumentsToCommand(commandScope);
         if (outputWriter != null) {
             commandScope.setOutput(new WriterOutputStream(outputWriter, GlobalConfiguration.OUTPUT_FILE_ENCODING.getCurrentValue()));
