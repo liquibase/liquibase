@@ -1805,9 +1805,9 @@ public class Main {
         rollbackOneChangeSet.addArgumentValue(ChangeExecListenerCommandStep.CHANGE_EXEC_LISTENER_CLASS_ARG, changeExecListenerClass)
                 .addArgumentValue(ChangeExecListenerCommandStep.CHANGE_EXEC_LISTENER_PROPERTIES_FILE_ARG, changeExecListenerPropertiesFile)
                 .addArgumentValue(DatabaseChangelogCommandStep.CHANGELOG_FILE_ARG, changeLogFile)
-                .addArgumentValue("changeSetId", getCommandParam(OPTIONS.CHANGE_SET_ID, null))
-                .addArgumentValue("changeSetAuthor", getCommandParam(OPTIONS.CHANGE_SET_AUTHOR, null))
-                .addArgumentValue("changeSetPath", getCommandParam(OPTIONS.CHANGE_SET_PATH, null))
+                .addArgumentValue("changesetId", getCommandParam(OPTIONS.CHANGE_SET_ID, null))
+                .addArgumentValue("changesetAuthor", getCommandParam(OPTIONS.CHANGE_SET_AUTHOR, null))
+                .addArgumentValue("changesetPath", getCommandParam(OPTIONS.CHANGE_SET_PATH, null))
                 .addArgumentValue("force", getCommandParam(OPTIONS.FORCE, null));
         String internalCommand = "rollbackOneChangeset";
         Scope.getCurrentScope().addMdcValue(MdcKey.LIQUIBASE_INTERNAL_COMMAND, internalCommand);
@@ -1820,9 +1820,9 @@ public class Main {
         rollbackOneChangeSet.addArgumentValue(ChangeExecListenerCommandStep.CHANGE_EXEC_LISTENER_CLASS_ARG, changeExecListenerClass)
                 .addArgumentValue(ChangeExecListenerCommandStep.CHANGE_EXEC_LISTENER_PROPERTIES_FILE_ARG, changeExecListenerPropertiesFile)
                 .addArgumentValue(DatabaseChangelogCommandStep.CHANGELOG_FILE_ARG, changeLogFile)
-                .addArgumentValue("changeSetId", getCommandParam(OPTIONS.CHANGE_SET_ID, null))
-                .addArgumentValue("changeSetAuthor", getCommandParam(OPTIONS.CHANGE_SET_AUTHOR, null))
-                .addArgumentValue("changeSetPath", getCommandParam(OPTIONS.CHANGE_SET_PATH, null))
+                .addArgumentValue("changesetId", getCommandParam(OPTIONS.CHANGE_SET_ID, null))
+                .addArgumentValue("changesetAuthor", getCommandParam(OPTIONS.CHANGE_SET_AUTHOR, null))
+                .addArgumentValue("changesetPath", getCommandParam(OPTIONS.CHANGE_SET_PATH, null))
                 .addArgumentValue("force", getCommandParam(OPTIONS.FORCE, null));
         String internalCommand = "rollbackOneChangeset";
         Scope.getCurrentScope().addMdcValue(MdcKey.LIQUIBASE_INTERNAL_COMMAND, internalCommand);
