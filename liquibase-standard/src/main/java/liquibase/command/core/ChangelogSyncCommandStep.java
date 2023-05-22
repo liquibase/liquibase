@@ -19,6 +19,7 @@ import liquibase.logging.core.CompositeLogService;
 import liquibase.logging.mdc.MdcKey;
 import liquibase.logging.mdc.MdcObject;
 import liquibase.logging.mdc.MdcValue;
+import liquibase.util.StringUtil;
 
 import java.util.Arrays;
 import java.util.HashMap;
