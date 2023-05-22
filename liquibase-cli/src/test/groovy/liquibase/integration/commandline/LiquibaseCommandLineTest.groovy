@@ -387,6 +387,13 @@ Global Options
                              (defaults file: 'liquibase.sql.logLevel',
                                environment variable: 'LIQUIBASE_SQL_LOG_LEVEL')
 
+      --sql-show-sql-warnings=PARAM
+                             Show SQLWarning messages
+                             DEFAULT: true
+                             (defaults file: 'liquibase.sql.showSqlWarnings',
+                               environment variable:
+                               'LIQUIBASE_SQL_SHOW_SQL_WARNINGS')
+
       --strict=PARAM         Be stricter on allowed Liquibase configuration and
                                setup?
                              DEFAULT: false
