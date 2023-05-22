@@ -1,7 +1,7 @@
 package liquibase.integration.cdi.exceptions;
 
 /**
- * @author antoermo (https://github.com/dikeert)
+  * @author <a href="https://github.com/dikeert">antoermo</a>
  * @since 31/07/2015
  */
 public class DependencyNotFoundException extends RuntimeException {

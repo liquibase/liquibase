@@ -39,6 +39,7 @@ import java.io.OutputStream;
 import java.io.PrintStream;
 import java.text.SimpleDateFormat;
 import java.util.*;
+import java.util.stream.Collectors;
 
 public class DiffToChangeLog {
 
@@ -134,7 +135,6 @@ public class DiffToChangeLog {
             //
             // Get a Database instance and save it in the scope for later use
             //
-            DatabaseSnapshot snapshot = diffResult.getReferenceSnapshot();
             Database database = determineDatabase(diffResult.getReferenceSnapshot());
             if (database == null) {
                 database = determineDatabase(diffResult.getComparisonSnapshot());
@@ -329,7 +329,34 @@ public class DiffToChangeLog {
         changeSets.addAll(createChangeSets);
         changeSets.addAll(deleteChangeSets);
         changeSets.addAll(updateChangeSets);
+        changeSets = bringDropFKToTop(changeSets);
         return changeSets;
+    }
+
+    //
+    // Because the generated changeset list can contain both add and drop
+    // FK changes with the same constraint name, we make sure that the
+    // drop FK goes first
+    //
+    private List<ChangeSet> bringDropFKToTop(List<ChangeSet> changeSets) {
+        List<ChangeSet> dropFk = changeSets.stream().filter(cs -> {
+            return cs.getChanges().stream().anyMatch(ch -> ch instanceof DropForeignKeyConstraintChange);
+        }).collect(Collectors.toList());
+        if (dropFk == null || dropFk.isEmpty()) {
+            return changeSets;
+        }
+        List<ChangeSet> returnList = new ArrayList<>();
+        changeSets.stream().forEach(cs -> {
+            if (dropFk.contains(cs)) {
+                returnList.add(cs);
+            }
+        });
+        changeSets.stream().forEach(cs -> {
+            if (! dropFk.contains(cs)) {
+                returnList.add(cs);
+            }
+        });
+        return returnList;
     }
 
     private DatabaseObjectCollectionComparator getDatabaseObjectCollectionComparator() {
