@@ -407,7 +407,7 @@ public class StandardLockService implements LockService {
 
                 database.setCanCacheLiquibaseTableInfo(false);
                 try (MdcObject releaseLocksOutcome = Scope.getCurrentScope().addMdcValue(MdcKey.RELEASE_LOCKS_OUTCOME, success ? MdcValue.COMMAND_SUCCESSFUL : MdcValue.COMMAND_FAILED)) {
-                    Scope.getCurrentScope().getLog(getClass()).log(success ? Level.INFO : Level.WARNING, success ? "Successfully released" : "Failed to release" + " change log lock", null);
+                    Scope.getCurrentScope().getLog(getClass()).log(success ? Level.INFO : Level.WARNING, (success ? "Successfully released" : "Failed to release") + " change log lock", null);
                 }
 
                 database.rollback();
