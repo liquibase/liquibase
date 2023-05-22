@@ -517,7 +517,7 @@
                 <constraints primaryKey="true"/>
             </column>
             <column name="referee" type="int">
-                <constraints foreignKeyName="fk_reftest" references="createtablenamedpk(id)"/>
+                <constraints foreignKeyName="FK_REFTEST" references="CREATETABLENAMEDPK(id)"/>
             </column>
         </createTable>
     </changeSet>
@@ -622,7 +622,7 @@
 
     <changeSet id="fkExistsPrecondition" author="nvoxland">
         <preConditions>
-            <foreignKeyConstraintExists foreignKeyTableName="createtablenamedpkref" foreignKeyName="fk_reftest"/>
+            <foreignKeyConstraintExists foreignKeyTableName="CREATETABLENAMEDPKREF" foreignKeyName="FK_REFTEST"/>
         </preConditions>
     </changeSet>
 
@@ -703,7 +703,7 @@
 
     <changeSet id="addColWithFK-checkConstraint" author="nvoxland">
         <preConditions onFailMessage="I couldn't find the FK set in addColWithFK">
-            <foreignKeyConstraintExists foreignKeyName="fk_test_fk_addCol" foreignKeyTableName="commatest"/>
+            <foreignKeyConstraintExists foreignKeyName="FK_TEST_FK_ADDCOL" foreignKeyTableName="COMMATEST"/>
         </preConditions>
     </changeSet>
 
@@ -1127,7 +1127,7 @@
     <changeSet id="fkexists-without-table-setup" author="example">
         <sql>
             CREATE TABLE fkexists_table1 (
-                id INT PRIMARY KEY
+                id INT PRIMARY KEY NOT NULL
             )
         </sql>
         <sql>
@@ -1150,9 +1150,9 @@
     </changeSet>
     <changeSet author="example" id="fkexists-without-table-check">
         <preConditions>
-            <foreignKeyConstraintExists foreignKeyName="fkexists_1"/>
+            <foreignKeyConstraintExists foreignKeyName="FKEXISTS_1"/>
             <not>
-                <foreignKeyConstraintExists foreignKeyName="fkexists_2"/>
+                <foreignKeyConstraintExists foreignKeyName="FKEXISTS_2"/>
             </not>
         </preConditions>
         <addForeignKeyConstraint baseColumnNames="id2" baseTableName="fkexists_table2"
@@ -1161,12 +1161,12 @@
     </changeSet>
     <changeSet author="example" id="fkexists-without-table-check2">
         <preConditions>
-            <foreignKeyConstraintExists foreignKeyName="fkexists_1"/>
-            <foreignKeyConstraintExists foreignKeyName="fkexists_2"/>
+            <foreignKeyConstraintExists foreignKeyName="FKEXISTS_1"/>
+            <foreignKeyConstraintExists foreignKeyName="FKEXISTS_2"/>
         </preConditions>
     </changeSet>
 
-    <changeSet id="example" author="view-if-exists" dbms="!oracle,!firebird">
+    <changeSet id="example" author="view-if-exists" dbms="!oracle,!firebird,!db2">
         <dropView viewName="does_not_exist" ifExists="true"/>
     </changeSet>
 
