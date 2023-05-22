@@ -511,13 +511,24 @@
         <loadData tableName="csvdata" file="changelogs/sample.data1.csv.gz"/>
     </changeSet>
 
-    <changeSet id="createTableNamedPKRef" author="nvoxland">
+    <changeSet id="createTableNamedPKRef" author="nvoxland" dbms="db2">
         <createTable tableName="createtablenamedpkref">
             <column name="id" type="int">
                 <constraints primaryKey="true"/>
             </column>
             <column name="referee" type="int">
                 <constraints foreignKeyName="FK_REFTEST" references="CREATETABLENAMEDPK(id)"/>
+            </column>
+        </createTable>
+    </changeSet>
+
+    <changeSet id="createTableNamedPKRef" author="nvoxland" dbms="!db2">
+        <createTable tableName="createtablenamedpkref">
+            <column name="id" type="int">
+                <constraints primaryKey="true"/>
+            </column>
+            <column name="referee" type="int">
+                <constraints foreignKeyName="fk_reftest" references="createtablenamedpk(id)"/>
             </column>
         </createTable>
     </changeSet>
@@ -620,9 +631,15 @@
         </preConditions>
     </changeSet>
 
-    <changeSet id="fkExistsPrecondition" author="nvoxland">
+    <changeSet id="fkExistsPrecondition" author="nvoxland" dbms="db2">
         <preConditions>
             <foreignKeyConstraintExists foreignKeyTableName="CREATETABLENAMEDPKREF" foreignKeyName="FK_REFTEST"/>
+        </preConditions>
+    </changeSet>
+
+    <changeSet id="fkExistsPrecondition" author="nvoxland" dbms="!db2">
+        <preConditions>
+            <foreignKeyConstraintExists foreignKeyTableName="createtablenamedpkref" foreignKeyName="fk_reftest"/>
         </preConditions>
     </changeSet>
 
@@ -701,9 +718,15 @@
         </addColumn>
     </changeSet>
 
-    <changeSet id="addColWithFK-checkConstraint" author="nvoxland">
+    <changeSet id="addColWithFK-checkConstraint" author="nvoxland" dbms="db2">
         <preConditions onFailMessage="I couldn't find the FK set in addColWithFK">
             <foreignKeyConstraintExists foreignKeyName="FK_TEST_FK_ADDCOL" foreignKeyTableName="COMMATEST"/>
+        </preConditions>
+    </changeSet>
+
+    <changeSet id="addColWithFK-checkConstraint" author="nvoxland" dbms="!db2">
+        <preConditions onFailMessage="I couldn't find the FK set in addColWithFK">
+            <foreignKeyConstraintExists foreignKeyName="fk_test_fk_addCol" foreignKeyTableName="commatest"/>
         </preConditions>
     </changeSet>
 
@@ -1124,7 +1147,7 @@
         <output target="stderr">Message using stderr target</output>
     </changeSet>
 
-    <changeSet id="fkexists-without-table-setup" author="example">
+    <changeSet id="fkexists-without-table-setup" author="example" dbms="db2">
         <sql>
             CREATE TABLE fkexists_table1 (
                 id INT PRIMARY KEY NOT NULL
@@ -1148,7 +1171,32 @@
             </sql>
         </rollback>
     </changeSet>
-    <changeSet author="example" id="fkexists-without-table-check">
+    <changeSet id="fkexists-without-table-setup" author="example" dbms="!db2">
+        <sql>
+            CREATE TABLE fkexists_table1 (
+                id INT PRIMARY KEY
+            )
+        </sql>
+        <sql>
+            CREATE TABLE fkexists_table2 (
+                                             id INT,
+                                             id2 INT,
+                                             CONSTRAINT fkexists_1
+                                                 FOREIGN KEY (id)
+                                                     REFERENCES fkexists_table1 (id)
+            )
+        </sql>
+        <rollback>
+            <sql>
+                DROP TABLE fkexists_table1
+            </sql>
+            <sql>
+                DROP TABLE fkexists_table2
+            </sql>
+        </rollback>
+    </changeSet>
+
+    <changeSet author="example" id="fkexists-without-table-check" dbms="db2">
         <preConditions>
             <foreignKeyConstraintExists foreignKeyName="FKEXISTS_1"/>
             <not>
@@ -1159,10 +1207,30 @@
                                  constraintName="fkexists_2"
                                  referencedColumnNames="id" referencedTableName="fkexists_table1"/>
     </changeSet>
-    <changeSet author="example" id="fkexists-without-table-check2">
+
+    <changeSet author="example" id="fkexists-without-table-check" dbms="!db2">
+        <preConditions>
+            <foreignKeyConstraintExists foreignKeyName="fkexists_1"/>
+            <not>
+                <foreignKeyConstraintExists foreignKeyName="fkexists_2"/>
+            </not>
+        </preConditions>
+        <addForeignKeyConstraint baseColumnNames="id2" baseTableName="fkexists_table2"
+                                 constraintName="fkexists_2"
+                                 referencedColumnNames="id" referencedTableName="fkexists_table1"/>
+    </changeSet>
+
+    <changeSet author="example" id="fkexists-without-table-check2" dbms="db2">
         <preConditions>
             <foreignKeyConstraintExists foreignKeyName="FKEXISTS_1"/>
             <foreignKeyConstraintExists foreignKeyName="FKEXISTS_2"/>
+        </preConditions>
+    </changeSet>
+
+    <changeSet author="example" id="fkexists-without-table-check2" dbms="!db2">
+        <preConditions>
+            <foreignKeyConstraintExists foreignKeyName="fkexists_1"/>
+            <foreignKeyConstraintExists foreignKeyName="fkexists_2"/>
         </preConditions>
     </changeSet>
 
