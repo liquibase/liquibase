@@ -29,13 +29,13 @@ import java.util.stream.Collectors;
 public class DBDocVisitor implements ChangeSetVisitor {
 
     private static final int MAX_RECENT_CHANGE = 50;
-    private Database database;
-    private SortedSet<ChangeLogInfo> changeLogs;
-    private Map<DatabaseObject, List<Change>> changesByObject;
-    private Map<String, List<Change>> changesByAuthor;
-    private Map<DatabaseObject, List<Change>> changesToRunByObject;
-    private Map<String, List<Change>> changesToRunByAuthor;
-    private List<Change> changesToRun;
+    private final Database database;
+    private final SortedSet<ChangeLogInfo> changeLogs;
+    private final Map<DatabaseObject, List<Change>> changesByObject;
+    private final Map<String, List<Change>> changesByAuthor;
+    private final Map<DatabaseObject, List<Change>> changesToRunByObject;
+    private final Map<String, List<Change>> changesToRunByAuthor;
+    private final List<Change> changesToRun;
     private List<Change> recentChanges;
     private String rootChangeLogName;
     private DatabaseChangeLog rootChangeLog;

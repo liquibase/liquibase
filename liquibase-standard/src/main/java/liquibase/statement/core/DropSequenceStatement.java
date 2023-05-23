@@ -4,9 +4,9 @@ import liquibase.statement.AbstractSqlStatement;
 
 public class DropSequenceStatement extends AbstractSqlStatement {
 
-    private String catalogName;
-    private String schemaName;
-    private String sequenceName;
+    private final String catalogName;
+    private final String schemaName;
+    private final String sequenceName;
 
     public DropSequenceStatement(String catalogName, String schemaName, String sequenceName) {
         this.catalogName  =catalogName;

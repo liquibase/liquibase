@@ -20,7 +20,7 @@ import java.util.Set;
 
 public class DiffOutputControl {
 
-    private Set<CatalogAndSchema> includeSchemas = new HashSet<>();
+    private final Set<CatalogAndSchema> includeSchemas = new HashSet<>();
 
     private boolean includeSchema;
     private boolean includeCatalog;
@@ -28,9 +28,9 @@ public class DiffOutputControl {
 
     private CompareControl.SchemaComparison[] schemaComparisons;
 
-    private DatabaseObjectCollection alreadyHandledMissing= new DatabaseObjectCollection(new DatabaseForHash());
-    private DatabaseObjectCollection alreadyHandledUnexpected = new DatabaseObjectCollection(new DatabaseForHash());
-    private DatabaseObjectCollection alreadyHandledChanged = new DatabaseObjectCollection(new DatabaseForHash());
+    private final DatabaseObjectCollection alreadyHandledMissing= new DatabaseObjectCollection(new DatabaseForHash());
+    private final DatabaseObjectCollection alreadyHandledUnexpected = new DatabaseObjectCollection(new DatabaseForHash());
+    private final DatabaseObjectCollection alreadyHandledChanged = new DatabaseObjectCollection(new DatabaseForHash());
     private ObjectQuotingStrategy objectQuotingStrategy;
 
     private ContextExpression context;

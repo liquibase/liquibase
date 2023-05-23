@@ -3,7 +3,7 @@ package liquibase.exception;
 /**
  * If there is an error with setting up a Change this Exception
  * will be thrown.
- * 
+ * <p>
  * A message must always be provided, if none is then the message
  * from the cause exception will be used.
  *

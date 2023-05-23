@@ -16,7 +16,7 @@ import java.util.*;
  */
 public class Contexts {
 
-    private HashSet<String> contextStore = new HashSet<>();
+    private final HashSet<String> contextStore = new HashSet<>();
 
     public Contexts() {
     }
@@ -74,7 +74,7 @@ public class Contexts {
 
 
     public boolean isEmpty() {
-        return (this.contextStore == null) || this.contextStore.isEmpty();
+        return this.contextStore.isEmpty();
     }
 
     public Set<String> getContexts() {

@@ -19,8 +19,8 @@ import java.util.regex.Pattern;
  * It is not up to this class to determine what should be storedCheckSum-ed, it simply hashes what is passed to it.
  */
 public final class CheckSum {
-    private int version;
-    private String storedCheckSum;
+    private final int version;
+    private final String storedCheckSum;
 
     private static final int CURRENT_CHECKSUM_ALGORITHM_VERSION = 9;
     private static final char DELIMITER = ':';

@@ -1,8 +1,6 @@
 package org.liquibase.maven.plugins;
 
-import liquibase.GlobalConfiguration;
 import liquibase.Liquibase;
-import liquibase.Scope;
 import liquibase.changelog.ChangeLogParameters;
 import liquibase.command.CommandScope;
 import liquibase.database.Database;
@@ -11,7 +9,6 @@ import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.plugin.MojoFailureException;
 import org.liquibase.maven.property.PropertyElement;
 
-import java.io.*;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.ResourceBundle;
@@ -51,7 +48,7 @@ public class LiquibaseRollbackOneUpdateSQL extends AbstractLiquibaseChangeLogMoj
     @PropertyElement
     protected String outputFile;
 
-    private static ResourceBundle coreBundle = getBundle("liquibase/i18n/liquibase-core");
+    private static final ResourceBundle coreBundle = getBundle("liquibase/i18n/liquibase-core");
 
     @Override
     public void execute() throws MojoExecutionException, MojoFailureException {
@@ -65,15 +62,8 @@ public class LiquibaseRollbackOneUpdateSQL extends AbstractLiquibaseChangeLogMoj
         // Check the Pro license
         //
         Database database = liquibase.getDatabase();
-        CommandScope liquibaseCommand = new CommandScope("internalRollbackOneUpdateSQL");
+        CommandScope liquibaseCommand = new CommandScope("rollbackOneUpdateSQL");
         Map<String, Object> argsMap = getCommandArgsObjectMap(liquibase);
-        Writer outputWriter = null;
-        try {
-            outputWriter = createOutputWriter();
-            argsMap.put("outputWriter", outputWriter);
-        } catch (IOException ioe) {
-            throw new LiquibaseException("Error executing rollbackOneChangeSetSQL.  Unable to create output writer.", ioe);
-        }
         ChangeLogParameters clp = new ChangeLogParameters(database);
         argsMap.put("changeLogParameters", clp);
         if (force != null && !Boolean.parseBoolean(force)) {
@@ -85,37 +75,8 @@ public class LiquibaseRollbackOneUpdateSQL extends AbstractLiquibaseChangeLogMoj
         for (Map.Entry<String, Object> entry : argsMap.entrySet()) {
             liquibaseCommand.addArgumentValue(entry.getKey(), entry.getValue());
         }
-
+        liquibaseCommand.setOutput(getOutputStream(outputFile));
         liquibaseCommand.execute();
-    }
-
-    private void closeOutputWriter(Writer outputWriter) throws IOException {
-        if (outputFile == null) {
-            return;
-        }
-        outputWriter.close();
-    }
-
-    private Writer createOutputWriter() throws IOException {
-        String charsetName = GlobalConfiguration.OUTPUT_FILE_ENCODING.getCurrentValue();
-
-        return new OutputStreamWriter(getOutputStream(), charsetName);
-    }
-
-    private OutputStream getOutputStream() throws IOException {
-        if (outputFile == null) {
-            return System.out;
-        }
-        FileOutputStream fileOut;
-        try {
-            fileOut = new FileOutputStream(outputFile, false);
-        } catch (IOException e) {
-            Scope.getCurrentScope().getLog(getClass()).severe(String.format(
-                    coreBundle.getString("could.not.create.output.file"),
-                    outputFile));
-            throw e;
-        }
-        return fileOut;
     }
 
     private Map<String, Object> getCommandArgsObjectMap(Liquibase liquibase) throws LiquibaseException {
@@ -127,7 +88,7 @@ public class LiquibaseRollbackOneUpdateSQL extends AbstractLiquibaseChangeLogMoj
         argsMap.put("changeLog", liquibase.getDatabaseChangeLog());
         argsMap.put("resourceAccessor", liquibase.getResourceAccessor());
         argsMap.put("changeLogFile", changeLogFile);
+        argsMap.put("outputFile", outputFile);
         return argsMap;
     }
-
 }

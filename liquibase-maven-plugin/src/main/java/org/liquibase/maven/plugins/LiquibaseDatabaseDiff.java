@@ -126,6 +126,13 @@ public class LiquibaseDatabaseDiff extends AbstractLiquibaseChangeLogMojo {
     @PropertyElement
     protected String diffTypes;
     /**
+     * The author to be specified for Changesets in the generated Change Log.
+     *
+     * @parameter property="liquibase.changeSetAuthor"
+     */
+    @PropertyElement
+    protected String changeSetAuthor;
+    /**
      * Objects to be excluded from the changelog. Example filters: "table_name", "table:main_.*", "column:*._lock, table:primary.*".
      *
      * @parameter property="liquibase.diffExcludeObjects"
@@ -179,7 +186,7 @@ public class LiquibaseDatabaseDiff extends AbstractLiquibaseChangeLogMojo {
 
     /**
      * Write the output of the diff to a file
-     *
+     * <p>
      *
      * @parameter property="liquibase.outputFile"
      *
@@ -254,7 +261,7 @@ public class LiquibaseDatabaseDiff extends AbstractLiquibaseChangeLogMojo {
                 try {
                     DiffOutputControl diffOutputControl = new DiffOutputControl(diffIncludeCatalog, diffIncludeSchema, diffIncludeTablespace, null).addIncludedSchema(new CatalogAndSchema(referenceDefaultCatalogName, referenceDefaultSchemaName));
                     diffOutputControl.setObjectChangeFilter(objectChangeFilter);
-                    CommandLineUtils.doDiffToChangeLog(diffChangeLogFile, referenceDatabase, db, diffOutputControl,
+                    CommandLineUtils.doDiffToChangeLog(diffChangeLogFile, referenceDatabase, db, changeSetAuthor, diffOutputControl,
                             objectChangeFilter, StringUtil.trimToNull(diffTypes), schemaComparisons);
                     if (new File(diffChangeLogFile).exists()) {
                         getLog().info("Differences written to Change Log File, " + diffChangeLogFile);
