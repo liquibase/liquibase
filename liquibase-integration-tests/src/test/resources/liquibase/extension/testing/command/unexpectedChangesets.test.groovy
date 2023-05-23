@@ -8,11 +8,11 @@ CommandTests.define {
 Short Description: Generate a list of changesets that have been executed but are not in the current changelog
 Long Description: NOT SET
 Required Args:
-  changelogFile (String) The root changelog
+  changelogFile (String) The root changelog file
   url (String) The JDBC database connection URL
     OBFUSCATED
 Optional Args:
-  contexts (String) Changeset contexts to match
+  contexts (String) Context string to use for filtering
     Default: null
   defaultCatalogName (String) The default catalog name to use for the database connection
     Default: null
@@ -22,13 +22,15 @@ Optional Args:
     Default: null
   driverPropertiesFile (String) The JDBC driver properties file
     Default: null
+  labelFilter (String) Label expression to use for filtering
+    Default: null
   password (String) Password to use to connect to the database
     Default: null
     OBFUSCATED
   username (String) Username to use to connect to the database
     Default: null
   verbose (Boolean) Verbose flag
-    Default: null
+    Default: false
 """
 
     run "Happy path", {
@@ -43,10 +45,6 @@ Optional Args:
         setup {
             syncChangelog "changelogs/h2/complete/rollback.tag.changelog.xml"
         }
-
-        expectedResults = [
-                statusCode   : 0
-        ]
     }
 
     run "Run without a URL should throw an exception",  {
