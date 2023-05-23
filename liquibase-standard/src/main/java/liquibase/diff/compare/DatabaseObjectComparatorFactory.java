@@ -15,10 +15,10 @@ public class DatabaseObjectComparatorFactory {
 
     private static DatabaseObjectComparatorFactory instance;
 
-    private List<DatabaseObjectComparator> comparators = new ArrayList<>();
+    private final List<DatabaseObjectComparator> comparators = new ArrayList<>();
 
-    private Map<String, List<DatabaseObjectComparator>> validComparatorsByClassAndDatabase = new HashMap<>();
-    private Map<String, DatabaseObjectComparatorChain> comparatorChainsByClassAndDatabase = new HashMap<>();
+    private final Map<String, List<DatabaseObjectComparator>> validComparatorsByClassAndDatabase = new HashMap<>();
+    private final Map<String, DatabaseObjectComparatorChain> comparatorChainsByClassAndDatabase = new HashMap<>();
 
     private DatabaseObjectComparatorFactory() {
         try {
