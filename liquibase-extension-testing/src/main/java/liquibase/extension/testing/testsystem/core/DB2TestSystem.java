@@ -7,6 +7,8 @@ import org.jetbrains.annotations.NotNull;
 import org.testcontainers.containers.Db2Container;
 import org.testcontainers.utility.DockerImageName;
 
+import java.util.Collections;
+
 public class DB2TestSystem extends DatabaseTestSystem {
 
     public DB2TestSystem() {
@@ -21,10 +23,11 @@ public class DB2TestSystem extends DatabaseTestSystem {
     @Override
     protected @NotNull DatabaseWrapper createContainerWrapper() {
         return new DockerDatabaseWrapper(
-                new Db2Container(DockerImageName.parse(getImageName()).withTag(getVersion()))
+                new Db2Container(DockerImageName.parse(getImageName()).withTag("latest"))
                         .withUsername(getUsername())
                         .withPassword(getPassword())
                         .withDatabaseName(getCatalog())
+                        .withTmpFs(Collections.singletonMap("/tmp", "rw"))
                         .withUrlParam("retrieveMessagesFromServerOnGetMessage", "true"),
                 this
         ) {
