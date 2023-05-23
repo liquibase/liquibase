@@ -79,7 +79,7 @@ public interface Change extends LiquibaseSerializable, Plugin, ExtensibleObject 
 
     /**
      * Returns example {@link DatabaseObject} instances describing the objects affected by this change.
-     * This method is not called during the normal execution of a changelog, but but can be used as metadata for documentation or other integrations.
+     * This method is not called during the normal execution of a changelog, but can be used as metadata for documentation or other integrations.
      */
     Set<DatabaseObject> getAffectedDatabaseObjects(Database database);
 
