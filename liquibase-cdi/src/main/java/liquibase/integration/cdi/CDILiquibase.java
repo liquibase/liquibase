@@ -68,7 +68,7 @@ import java.util.Map;
  *
  * }
  * </p>
- * @author Aaron Walker (http://github.com/aaronwalker)
+ * @author <a href="http://github.com/aaronwalker">Aaron Walker</a>
  */
 @ApplicationScoped
 public class CDILiquibase implements Extension {
@@ -179,12 +179,13 @@ public class CDILiquibase implements Extension {
     }
 
     /**
-     * Subclasses may override this method add change some database settings such as
-     * default schema before returning the database object.
+     * Creates and returns a {@link  Database} object retrieved from the {@link liquibase.database.DatabaseFactory}.
+     * Subclasses may override this method to change some database settings, such as default schema, before returning
+     * the database object.
      *
-     * @param c
-     * @return a Database implementation retrieved from the {@link liquibase.database.DatabaseFactory}.
-     * @throws DatabaseException
+     * @param c the {@code JDBC} connection to use for creating the database
+     * @return a {@link  Database} implementation retrieved from the {@link liquibase.database.DatabaseFactory}
+     * @throws DatabaseException if there is an error accessing the database
      */
     protected Database createDatabase(Connection c) throws DatabaseException {
         Database database = DatabaseFactory.getInstance().findCorrectDatabaseImplementation(new JdbcConnection(c));

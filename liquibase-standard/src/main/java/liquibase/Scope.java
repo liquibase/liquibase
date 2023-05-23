@@ -68,7 +68,7 @@ public class Scope {
     private static ScopeManager scopeManager;
 
     private Scope parent;
-    private SmartMap values = new SmartMap();
+    private final SmartMap values = new SmartMap();
     private String scopeId;
     private static final Map<String, List<MdcObject>> addedMdcEntries = new ConcurrentHashMap<>();
 

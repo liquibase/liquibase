@@ -4,10 +4,10 @@ import liquibase.serializer.AbstractLiquibaseSerializable;
 import liquibase.serializer.LiquibaseSerializable;
 
 public class Difference extends AbstractLiquibaseSerializable implements Comparable, LiquibaseSerializable {
-    private String message;
-    private String field;
-    private Object referenceValue;
-    private Object comparedValue;
+    private final String message;
+    private final String field;
+    private final Object referenceValue;
+    private final Object comparedValue;
 
     public Difference(String field, Object referenceValue, Object comparedValue) {
         this(null, field, referenceValue, comparedValue);

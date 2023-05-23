@@ -188,14 +188,13 @@ public class Liquibase implements AutoCloseable {
     }
 
     /**
-     * Liquibase update
+     * Executes Liquibase update with given contexts and label expression.
      *
-     * @param contexts
-     * @param labelExpression
-     * @throws LiquibaseException
-     *
-     * @see <a href="https://docs.liquibase.com/concepts/advanced/contexts.html" target="_top">contexts</a> in documentation
-     * @see <a href="https://docs.liquibase.com/concepts/advanced/labels.html" target="_top">labels</a> in documentation
+     * @param contexts        the set of contexts to execute the update against. If empty or {@code null}, all contexts are used.
+     * @param labelExpression the label expression to use during the update. If empty or {@code null}, no labels are used.
+     * @throws LiquibaseException If an error occurs while executing the update.
+     * @see <a href="https://docs.liquibase.com/concepts/changelogs/attributes/contexts.html" target="_top">Liquibase Contexts</a> in the Liquibase documentation
+     * @see <a href="https://docs.liquibase.com/concepts/changelogs/attributes/labels.html" target="_top">Liquibase Labels</a> in the Liquibase documentation
      */
     @Deprecated
     public void update(Contexts contexts, LabelExpression labelExpression) throws LiquibaseException {
@@ -203,15 +202,17 @@ public class Liquibase implements AutoCloseable {
     }
 
     /**
-     * Liquibase update
-     * @deprecated Use CommandStep
-     * @param   contexts
-     * @param   labelExpression
-     * @param   checkLiquibaseTables
-     * @throws  LiquibaseException
+     * Updates the database schema to the latest version. This method performs a Liquibase update operation,
+     * which can include applying changesets that modify the database schema.
      *
-     * @see <a href="https://docs.liquibase.com/concepts/advanced/contexts.html" target="_top">contexts</a> in documentation
-     * @see <a href="https://docs.liquibase.com/concepts/advanced/labels.html" target="_top">labels</a> in documentation
+     * @param contexts the set of contexts to execute the update against. If empty or null, all contexts are used.
+     * @param labelExpression the label expression to use during the update. If empty or null, no labels are used.
+     * @param checkLiquibaseTables whether to check for Liquibase metadata tables before updating. If false, Liquibase will
+     *                             assume that the metadata tables already exist and will not attempt to create them.
+     * @throws LiquibaseException if an error occurs while updating the database schema.
+     *
+     * @see <a href="https://docs.liquibase.com/concepts/changelogs/attributes/contexts.html" target="_top">Liquibase Contexts</a>
+     * @see <a href="https://docs.liquibase.com/concepts/changelogs/attributes/labels.html" target="_top">Liquibase Labels</a>
      */
     @Deprecated
     public void update(Contexts contexts, LabelExpression labelExpression, boolean checkLiquibaseTables) throws LiquibaseException {
@@ -255,13 +256,17 @@ public class Liquibase implements AutoCloseable {
      */
     private DatabaseChangeLog getDatabaseChangeLog(boolean shouldWarnOnMismatchedXsdVersion) throws LiquibaseException {
         if (databaseChangeLog == null && changeLogFile != null) {
-            Scope.getCurrentScope().addMdcValue(MdcKey.CHANGELOG_FILE, changeLogFile);
             ChangeLogParser parser = ChangeLogParserFactory.getInstance().getParser(changeLogFile, resourceAccessor);
             if (parser instanceof XMLChangeLogSAXParser) {
                 ((XMLChangeLogSAXParser) parser).setShouldWarnOnMismatchedXsdVersion(shouldWarnOnMismatchedXsdVersion);
             }
             databaseChangeLog = parser.parse(changeLogFile, changeLogParameters, resourceAccessor);
             Scope.getCurrentScope().getLog(Liquibase.class).info("Parsed changelog file '" + changeLogFile + "'");
+            if (StringUtil.isNotEmpty(databaseChangeLog.getLogicalFilePath())) {
+                Scope.getCurrentScope().addMdcValue(MdcKey.CHANGELOG_FILE, databaseChangeLog.getLogicalFilePath());
+            } else {
+                Scope.getCurrentScope().addMdcValue(MdcKey.CHANGELOG_FILE, changeLogFile);
+            }
         }
 
         return databaseChangeLog;
@@ -285,16 +290,13 @@ public class Liquibase implements AutoCloseable {
     }
 
     /**
+     * Return a ChangeLogIterator constructed with standard filters for processing the specified changelog.
      *
-     * Return a ChangeLogIterator constructed with standard filters
-     *
-     * @param   contexts                           Contexts to filter for
-     * @param   labelExpression                    Labels to filter for
-     * @param   changeLog                          The changelog to process
-     *
-     * @return  ChangeLogIterator
-     * @throws DatabaseException
-     *
+     * @param contexts          The contexts to filter for.
+     * @param labelExpression   The labels to filter for.
+     * @param changeLog         The changelog to process.
+     * @return a ChangeLogIterator instance.
+     * @throws DatabaseException if there is an error with the database.
      */
     protected ChangeLogIterator getStandardChangelogIterator(Contexts contexts, LabelExpression labelExpression,
                                                              DatabaseChangeLog changeLog) throws DatabaseException {
@@ -339,14 +341,13 @@ public class Liquibase implements AutoCloseable {
     }
 
     /**
+     * Updates the database schema with the specified number of changesets, within the given contexts and matching the
+     * given label expression.
      *
-     * Update to count
-     *
-     * @param  changesToApply
-     * @param  contexts
-     * @param  labelExpression
-     * @throws LiquibaseException
-     *
+     * @param changesToApply  the number of changesets to apply.
+     * @param contexts        the contexts in which the changesets should be applied.
+     * @param labelExpression the label expression used to filter the changesets.
+     * @throws LiquibaseException if there is an error while updating the schema.
      */
     @Deprecated
     public void update(int changesToApply, Contexts contexts, LabelExpression labelExpression)
@@ -374,15 +375,14 @@ public class Liquibase implements AutoCloseable {
         update(tag, contexts, new LabelExpression());
     }
 
+
     /**
+     * Updates the database to a specified tag.
      *
-     * Update to tag
-     *
-     * @param   tag                             Tag to update for
-     * @param   contexts
-     * @param   labelExpression
-     * @throws  LiquibaseException
-     *
+     * @param tag             The tag to update the database to.
+     * @param contexts        The contexts to execute in.
+     * @param labelExpression The label expression to execute with.
+     * @throws LiquibaseException if there is an error updating the database.
      */
     @Deprecated
     public void update(String tag, Contexts contexts, LabelExpression labelExpression) throws LiquibaseException {
@@ -536,7 +536,16 @@ public class Liquibase implements AutoCloseable {
     }
 
     /**
-     * Rollback count
+     * Rolls back a specified number of changesets. The `changesToRollback` parameter specifies how many changesets to roll
+     * back, and the `rollbackScript` parameter specifies the path to a custom SQL script to use for the rollback. The
+     * `contexts` parameter specifies which contexts to include in the rollback, and the `labelExpression` parameter specifies
+     * which labels to include in the rollback.
+     *
+     * @param changesToRollback the number of changesets to roll back
+     * @param rollbackScript    the path to a custom SQL script to use for the rollback, or `null` to use Liquibase's built-in rollback functionality
+     * @param contexts          the contexts to include in the rollback, or `null` to include all contexts
+     * @param labelExpression   the labels to include in the rollback, or `null` to include all labels
+     * @throws LiquibaseException if an error occurs while rolling back the changesets
      */
     public void rollback(int changesToRollback, String rollbackScript, Contexts contexts,
                          LabelExpression labelExpression) throws LiquibaseException {
@@ -625,8 +634,13 @@ public class Liquibase implements AutoCloseable {
     }
 
     /**
-     * Rollback to tag
-     * @deprecated Use CommandStep directly
+     * Rolls back the database to a specific tag, using either a generated or user-defined rollback script.
+     *
+     * @param tagToRollBackTo the tag to which the database should be rolled back.
+     * @param rollbackScript  an optional path to a user-defined rollback script. If null, Liquibase will generate the rollback SQL automatically.
+     * @param contexts        a list of contexts to include when rolling back the database. May be null.
+     * @param labelExpression a label expression to filter the change sets to rollback. May be null.
+     * @throws LiquibaseException if there is a problem rolling back the database.
      */
     public void rollback(String tagToRollBackTo, String rollbackScript, Contexts contexts,
                          LabelExpression labelExpression) throws LiquibaseException {
@@ -686,8 +700,17 @@ public class Liquibase implements AutoCloseable {
         rollback(dateToRollBackTo, new Contexts(contexts), new LabelExpression());
     }
 
+
     /**
-     * Rollback to date
+     * Rolls back all changesets that were applied after the specified date. If a rollback script is provided,
+     * the changesets are rolled back in reverse order until the script is reached. Otherwise, the changesets
+     * are rolled back in reverse order until the rollback point is reached.
+     *
+     * @param dateToRollBackTo the date to roll back to
+     * @param rollbackScript   the path to a SQL script to execute for the rollback (optional)
+     * @param contexts         the contexts to execute the rollback in (optional)
+     * @param labelExpression  the label expression to use for filtering change sets (optional)
+     * @throws LiquibaseException if there was an error rolling back the changes
      */
     public void rollback(Date dateToRollBackTo, String rollbackScript, Contexts contexts,
                          LabelExpression labelExpression) throws LiquibaseException {
@@ -762,10 +785,12 @@ public class Liquibase implements AutoCloseable {
     }
 
     /**
+     * Synchronizes the changelog with the database up to a specified tag.
      *
-     * Changelogsync or changelogsync to tag
-     *
-     * @deprecated Use CommandStep
+     * @param tag             the tag up to which the changelog should be synchronized
+     * @param contexts        the contexts to use for the synchronization
+     * @param labelExpression the label expression to use for the synchronization
+     * @throws LiquibaseException if an error occurs during the synchronization
      */
     public void changeLogSync(String tag, Contexts contexts, LabelExpression labelExpression) throws LiquibaseException {
         String commandToRun = StringUtil.isEmpty(tag) ? ChangelogSyncCommandStep.COMMAND_NAME[0] : ChangelogSyncToTagCommandStep.COMMAND_NAME[0];
@@ -804,223 +829,120 @@ public class Liquibase implements AutoCloseable {
                 .execute());
     }
 
+    @Deprecated
     public void markNextChangeSetRan(String contexts, Writer output) throws LiquibaseException {
         markNextChangeSetRan(new Contexts(contexts), new LabelExpression(), output);
     }
 
+    @Deprecated
     public void markNextChangeSetRan(Contexts contexts, LabelExpression labelExpression, Writer output)
             throws LiquibaseException {
-        changeLogParameters.setContexts(contexts);
-        changeLogParameters.setLabels(labelExpression);
-
-        runInScope(() -> {
-
-            @SuppressWarnings("squid:S1941")
-            Executor oldTemplate = getAndReplaceJdbcExecutor(output);
-            outputHeader("SQL to add all changesets to database history table");
-
-            markNextChangeSetRan(contexts, labelExpression);
-
-            flushOutputWriter(output);
-
-            Scope.getCurrentScope().getSingleton(ExecutorService.class).setExecutor("jdbc", database, oldTemplate);
-            resetServices();
-        });
+        runInScope(() -> new CommandScope(MarkNextChangesetRanSqlCommandStep.COMMAND_NAME)
+                .addArgumentValue(DbUrlConnectionCommandStep.DATABASE_ARG, getDatabase())
+                .addArgumentValue(DatabaseChangelogCommandStep.CHANGELOG_FILE_ARG, changeLogFile)
+                .addArgumentValue(DatabaseChangelogCommandStep.CHANGELOG_PARAMETERS, changeLogParameters)
+                .addArgumentValue(DatabaseChangelogCommandStep.CONTEXTS_ARG, (contexts != null ? contexts.toString() : null))
+                .addArgumentValue(DatabaseChangelogCommandStep.LABEL_FILTER_ARG, (labelExpression != null ? labelExpression.getOriginalString() : null))
+                .setOutput(new WriterOutputStream(output, GlobalConfiguration.OUTPUT_FILE_ENCODING.getCurrentValue()))
+                .execute());
     }
 
+    @Deprecated
     public void markNextChangeSetRan(String contexts) throws LiquibaseException {
         markNextChangeSetRan(new Contexts(contexts), new LabelExpression());
     }
 
+    @Deprecated
     public void markNextChangeSetRan(Contexts contexts, LabelExpression labelExpression) throws LiquibaseException {
-        changeLogParameters.setContexts(contexts);
-        changeLogParameters.setLabels(labelExpression);
-
-        runInScope(() -> {
-
-            LockService lockService = LockServiceFactory.getInstance().getLockService(database);
-            lockService.waitForLock();
-
-            try {
-                DatabaseChangeLog changeLog = getDatabaseChangeLog();
-                ChangeLogHistoryServiceFactory.getInstance().getChangeLogService(database).generateDeploymentId();
-
-                checkLiquibaseTables(false, changeLog, contexts, labelExpression);
-                changeLog.validate(database, contexts, labelExpression);
-
-                ChangeLogIterator logIterator = new ChangeLogIterator(changeLog,
-                        new NotRanChangeSetFilter(database.getRanChangeSetList()),
-                        new ContextChangeSetFilter(contexts),
-                        new LabelChangeSetFilter(labelExpression),
-                        new DbmsChangeSetFilter(database),
-                        new IgnoreChangeSetFilter(),
-                        new CountChangeSetFilter(1));
-
-                logIterator.run(new ChangeLogSyncVisitor(database),
-                        new RuntimeEnvironment(database, contexts, labelExpression)
-                );
-            } finally {
-                try {
-                    lockService.releaseLock();
-                } catch (LockException e) {
-                    LOG.severe(MSG_COULD_NOT_RELEASE_LOCK, e);
-                }
-                resetServices();
-            }
-        });
+        runInScope(() -> new CommandScope(MarkNextChangesetRanCommandStep.COMMAND_NAME)
+                .addArgumentValue(DbUrlConnectionCommandStep.DATABASE_ARG, getDatabase())
+                .addArgumentValue(DatabaseChangelogCommandStep.CHANGELOG_FILE_ARG, changeLogFile)
+                .addArgumentValue(DatabaseChangelogCommandStep.CHANGELOG_PARAMETERS, changeLogParameters)
+                .addArgumentValue(DatabaseChangelogCommandStep.CONTEXTS_ARG, (contexts != null ? contexts.toString() : null))
+                .addArgumentValue(DatabaseChangelogCommandStep.LABEL_FILTER_ARG, (labelExpression != null ? labelExpression.getOriginalString() : null))
+                .execute());
     }
 
+    @Deprecated
     public void futureRollbackSQL(String contexts, Writer output) throws LiquibaseException {
         futureRollbackSQL(null, contexts, output, true);
     }
 
+    @Deprecated
     public void futureRollbackSQL(Writer output) throws LiquibaseException {
         futureRollbackSQL(null, null, new Contexts(), new LabelExpression(), output);
     }
 
+    @Deprecated
     public void futureRollbackSQL(String contexts, Writer output, boolean checkLiquibaseTables)
             throws LiquibaseException {
         futureRollbackSQL(null, contexts, output, checkLiquibaseTables);
     }
 
+    @Deprecated
     public void futureRollbackSQL(Integer count, String contexts, Writer output) throws LiquibaseException {
         futureRollbackSQL(count, new Contexts(contexts), new LabelExpression(), output, true);
     }
 
+    @Deprecated
     public void futureRollbackSQL(Contexts contexts, LabelExpression labelExpression, Writer output)
             throws LiquibaseException {
         futureRollbackSQL(null, null, contexts, labelExpression, output);
     }
 
+    @Deprecated
     public void futureRollbackSQL(Integer count, String contexts, Writer output, boolean checkLiquibaseTables)
             throws LiquibaseException {
         futureRollbackSQL(count, new Contexts(contexts), new LabelExpression(), output, checkLiquibaseTables);
     }
 
+    @Deprecated
     public void futureRollbackSQL(Integer count, Contexts contexts, LabelExpression labelExpression, Writer output)
             throws LiquibaseException {
         futureRollbackSQL(count, contexts, labelExpression, output, true);
     }
 
+    @Deprecated
     public void futureRollbackSQL(Integer count, Contexts contexts, LabelExpression labelExpression, Writer output,
                                   boolean checkLiquibaseTables) throws LiquibaseException {
         futureRollbackSQL(count, null, contexts, labelExpression, output);
     }
 
+    @Deprecated
     public void futureRollbackSQL(String tag, Contexts contexts, LabelExpression labelExpression, Writer output)
             throws LiquibaseException {
         futureRollbackSQL(null, tag, contexts, labelExpression, output);
     }
 
+    @Deprecated
     protected void futureRollbackSQL(Integer count, String tag, Contexts contexts, LabelExpression labelExpression,
                                      Writer output) throws LiquibaseException {
         futureRollbackSQL(count, tag, contexts, labelExpression, output, true);
     }
 
+    @Deprecated
     protected void futureRollbackSQL(Integer count, String tag, Contexts contexts, LabelExpression labelExpression,
                                      Writer output, boolean checkLiquibaseTables) throws LiquibaseException {
-        changeLogParameters.setContexts(contexts);
-        changeLogParameters.setLabels(labelExpression);
+        CommandScope commandScope;
+        if ((count == null) && (tag == null)) {
+            commandScope = new CommandScope(FutureRollbackSqlCommandStep.COMMAND_NAME);
+        } else if (count != null) {
+            commandScope = new CommandScope(FutureRollbackCountSqlCommandStep.COMMAND_NAME);
+            commandScope.addArgumentValue(FutureRollbackCountSqlCommandStep.COUNT_ARG, count);
+        } else {
+            commandScope = new CommandScope(FutureRollbackFromTagSqlCommandStep.COMMAND_NAME);
+            commandScope.addArgumentValue(FutureRollbackFromTagSqlCommandStep.TAG_ARG, tag);
+        }
 
-        runInScope(() -> {
+        commandScope.addArgumentValue(DbUrlConnectionCommandStep.DATABASE_ARG, getDatabase())
+                .addArgumentValue(DatabaseChangelogCommandStep.CHANGELOG_FILE_ARG, changeLogFile)
+                .addArgumentValue(DatabaseChangelogCommandStep.CHANGELOG_PARAMETERS, changeLogParameters)
+                .addArgumentValue(DatabaseChangelogCommandStep.CONTEXTS_ARG, (contexts != null ? contexts.toString() : null))
+                .addArgumentValue(DatabaseChangelogCommandStep.LABEL_FILTER_ARG, (labelExpression != null ? labelExpression.getOriginalString() : null))
+                .addArgumentValue(ChangeExecListenerCommandStep.CHANGE_EXEC_LISTENER_ARG, changeExecListener)
+                .setOutput(new WriterOutputStream(output, GlobalConfiguration.OUTPUT_FILE_ENCODING.getCurrentValue()));
 
-
-            LoggingExecutor outputTemplate = new LoggingExecutor(Scope.getCurrentScope().getSingleton(ExecutorService.class).getExecutor(database),
-                    output, database);
-            Executor oldTemplate = getAndReplaceJdbcExecutor(output);
-            Scope.getCurrentScope().getSingleton(ExecutorService.class).setExecutor(database, outputTemplate);
-
-            outputHeader("SQL to roll back currently unexecuted changes");
-
-            LockService lockService = LockServiceFactory.getInstance().getLockService(database);
-            lockService.waitForLock();
-
-            try {
-                DatabaseChangeLog changeLog = getDatabaseChangeLog();
-                if (checkLiquibaseTables) {
-                    checkLiquibaseTables(false, changeLog, contexts, labelExpression);
-                }
-                ChangeLogHistoryServiceFactory.getInstance().getChangeLogService(database).generateDeploymentId();
-
-                changeLog.validate(database, contexts, labelExpression);
-
-                ChangeLogIterator logIterator;
-                if ((count == null) && (tag == null)) {
-                    logIterator = new ChangeLogIterator(changeLog,
-                            new NotRanChangeSetFilter(database.getRanChangeSetList()),
-                            new ContextChangeSetFilter(contexts),
-                            new LabelChangeSetFilter(labelExpression),
-                            new IgnoreChangeSetFilter(),
-                            new DbmsChangeSetFilter(database));
-                } else if (count != null) {
-                    ChangeLogIterator forwardIterator = new ChangeLogIterator(changeLog,
-                            new NotRanChangeSetFilter(database.getRanChangeSetList()),
-                            new ContextChangeSetFilter(contexts),
-                            new LabelChangeSetFilter(labelExpression),
-                            new DbmsChangeSetFilter(database),
-                            new IgnoreChangeSetFilter(),
-                            new CountChangeSetFilter(count));
-                    final ListVisitor listVisitor = new ListVisitor();
-                    forwardIterator.run(listVisitor, new RuntimeEnvironment(database, contexts, labelExpression));
-
-                    logIterator = new ChangeLogIterator(changeLog,
-                            new NotRanChangeSetFilter(database.getRanChangeSetList()),
-                            new ContextChangeSetFilter(contexts),
-                            new LabelChangeSetFilter(labelExpression),
-                            new DbmsChangeSetFilter(database),
-                            new IgnoreChangeSetFilter(),
-                            changeSet -> new ChangeSetFilterResult(
-                                    listVisitor.getSeenChangeSets().contains(changeSet), null, null
-                            ));
-                } else {
-                    List<RanChangeSet> ranChangeSetList = database.getRanChangeSetList();
-                    UpToTagChangeSetFilter upToTagChangeSetFilter = new UpToTagChangeSetFilter(tag, ranChangeSetList);
-                    ChangeLogIterator forwardIterator = new ChangeLogIterator(changeLog,
-                            new NotRanChangeSetFilter(ranChangeSetList),
-                            new ContextChangeSetFilter(contexts),
-                            new LabelChangeSetFilter(labelExpression),
-                            new DbmsChangeSetFilter(database),
-                            new IgnoreChangeSetFilter(),
-                            upToTagChangeSetFilter);
-                    final ListVisitor listVisitor = new ListVisitor();
-                    forwardIterator.run(listVisitor, new RuntimeEnvironment(database, contexts, labelExpression));
-
-                    //
-                    // Check to see if the tag was found and stop if not
-                    //
-                    if (! upToTagChangeSetFilter.isSeenTag()) {
-                        String message = "No tag matching '" + tag + "' found";
-                        Scope.getCurrentScope().getUI().sendMessage("ERROR: " + message);
-                        Scope.getCurrentScope().getLog(Liquibase.class).severe(message);
-                        throw new LiquibaseException(new IllegalArgumentException(message));
-                    }
-
-                    logIterator = new ChangeLogIterator(changeLog,
-                            new NotRanChangeSetFilter(ranChangeSetList),
-                            new ContextChangeSetFilter(contexts),
-                            new LabelChangeSetFilter(labelExpression),
-                            new DbmsChangeSetFilter(database),
-                            new IgnoreChangeSetFilter(),
-                            changeSet -> new ChangeSetFilterResult(
-                                    listVisitor.getSeenChangeSets().contains(changeSet), null, null
-                            ));
-                }
-
-                logIterator.run(createRollbackVisitor(),
-                        new RuntimeEnvironment(database, contexts, labelExpression)
-                );
-            } finally {
-                try {
-                    lockService.releaseLock();
-                } catch (LockException e) {
-                    LOG.severe(MSG_COULD_NOT_RELEASE_LOCK, e);
-                }
-                Scope.getCurrentScope().getSingleton(ExecutorService.class).setExecutor("jdbc", database, oldTemplate);
-                resetServices();
-            }
-
-            flushOutputWriter(output);
-        });
+        runInScope(commandScope::execute);
     }
 
     protected void resetServices() {
@@ -1088,28 +1010,31 @@ public class Liquibase implements AutoCloseable {
         return commandResults.getResult(TagExistsCommandStep.TAG_EXISTS_RESULT);
     }
 
+    @Deprecated
     public void updateTestingRollback(String contexts) throws LiquibaseException {
         updateTestingRollback(new Contexts(contexts), new LabelExpression());
     }
 
+    @Deprecated
     public void updateTestingRollback(Contexts contexts, LabelExpression labelExpression) throws LiquibaseException {
         updateTestingRollback(null, contexts, labelExpression);
 
     }
 
+    @Deprecated
     public void updateTestingRollback(String tag, Contexts contexts, LabelExpression labelExpression)
             throws LiquibaseException {
-        changeLogParameters.setContexts(contexts);
-        changeLogParameters.setLabels(labelExpression);
-
-        ChangeLogHistoryService changeLogService = ChangeLogHistoryServiceFactory.getInstance().getChangeLogService(database);
-        int originalSize = changeLogService.getRanChangeSets().size();
-        update(tag, contexts, labelExpression);
-        changeLogService.reset();
-        int changesetsToRollback = changeLogService.getRanChangeSets().size() - originalSize;
-        Scope.getCurrentScope().getLog(getClass()).info(String.format("Rolling back %d changeset(s).", changesetsToRollback));
-        rollback(changesetsToRollback, null, contexts, labelExpression);
-        update(tag, contexts, labelExpression);
+        runInScope(() -> {
+            CommandScope updateTestingRollback = new CommandScope(UpdateTestingRollbackCommandStep.COMMAND_NAME);
+            updateTestingRollback.addArgumentValue(DbUrlConnectionCommandStep.DATABASE_ARG, getDatabase());
+            updateTestingRollback.addArgumentValue(DatabaseChangelogCommandStep.CHANGELOG_PARAMETERS, changeLogParameters);
+            updateTestingRollback.addArgumentValue(DatabaseChangelogCommandStep.CHANGELOG_FILE_ARG, changeLogFile);
+            updateTestingRollback.addArgumentValue(DatabaseChangelogCommandStep.CONTEXTS_ARG, (contexts != null? contexts.toString() : null));
+            updateTestingRollback.addArgumentValue(DatabaseChangelogCommandStep.LABEL_FILTER_ARG, (labelExpression != null ? labelExpression.getOriginalString() : null));
+            updateTestingRollback.addArgumentValue(UpdateTestingRollbackCommandStep.TAG_ARG, tag);
+            updateTestingRollback.addArgumentValue(ChangeExecListenerCommandStep.CHANGE_EXEC_LISTENER_ARG, changeExecListener);
+            updateTestingRollback.execute();
+        });
     }
 
     public void checkLiquibaseTables(boolean updateExistingNullChecksums, DatabaseChangeLog databaseChangeLog,
@@ -1260,71 +1185,38 @@ public class Liquibase implements AutoCloseable {
         });
     }
 
+    @Deprecated
     public Collection<RanChangeSet> listUnexpectedChangeSets(String contexts) throws LiquibaseException {
         return listUnexpectedChangeSets(new Contexts(contexts), new LabelExpression());
     }
 
+    @Deprecated
     public Collection<RanChangeSet> listUnexpectedChangeSets(Contexts contexts, LabelExpression labelExpression)
             throws LiquibaseException {
-        changeLogParameters.setContexts(contexts);
-        changeLogParameters.setLabels(labelExpression);
-
-        ExpectedChangesVisitor visitor = new ExpectedChangesVisitor(database.getRanChangeSetList());
-
-        runInScope(() -> {
-
-            DatabaseChangeLog changeLog = getDatabaseChangeLog();
-            changeLog.validate(database, contexts, labelExpression);
-
-            ChangeLogIterator logIterator = new ChangeLogIterator(changeLog,
-                    new ContextChangeSetFilter(contexts),
-                    new LabelChangeSetFilter(labelExpression),
-                    new DbmsChangeSetFilter(database),
-                    new IgnoreChangeSetFilter());
-            logIterator.run(visitor, new RuntimeEnvironment(database, contexts, labelExpression));
-
-        });
-        return visitor.getUnexpectedChangeSets();
+        return UnexpectedChangesetsCommandStep.listUnexpectedChangeSets(getDatabase(), getDatabaseChangeLog(), contexts, labelExpression);
     }
 
-
+    @Deprecated
     public void reportUnexpectedChangeSets(boolean verbose, String contexts, Writer out) throws LiquibaseException {
         reportUnexpectedChangeSets(verbose, new Contexts(contexts), new LabelExpression(), out);
     }
 
+    @Deprecated
     public void reportUnexpectedChangeSets(boolean verbose, Contexts contexts, LabelExpression labelExpression,
                                            Writer out) throws LiquibaseException {
         changeLogParameters.setContexts(contexts);
         changeLogParameters.setLabels(labelExpression);
-        checkLiquibaseTables(false, getDatabaseChangeLog(true), null, null);
-
-        try {
-            Collection<RanChangeSet> unexpectedChangeSets = listUnexpectedChangeSets(contexts, labelExpression);
-            if (unexpectedChangeSets.isEmpty()) {
-                out.append(getDatabase().getConnection().getConnectionUserName());
-                out.append("@");
-                out.append(getDatabase().getConnection().getURL());
-                out.append(" contains no unexpected changes!");
-                out.append(StreamUtil.getLineSeparator());
-            } else {
-                out.append(String.valueOf(unexpectedChangeSets.size()));
-                out.append(" unexpected changes were found in ");
-                out.append(getDatabase().getConnection().getConnectionUserName());
-                out.append("@");
-                out.append(getDatabase().getConnection().getURL());
-                out.append(StreamUtil.getLineSeparator());
-                if (verbose) {
-                    for (RanChangeSet ranChangeSet : unexpectedChangeSets) {
-                        out.append("     ").append(ranChangeSet.toString()).append(StreamUtil.getLineSeparator());
-                    }
-                }
-            }
-
-            out.flush();
-        } catch (IOException e) {
-            throw new LiquibaseException(e);
-        }
-
+        runInScope(() -> {
+            CommandScope unexpectedChangesetsCommand = new CommandScope(UnexpectedChangesetsCommandStep.COMMAND_NAME);
+            unexpectedChangesetsCommand.addArgumentValue(DbUrlConnectionCommandStep.DATABASE_ARG, getDatabase());
+            unexpectedChangesetsCommand.addArgumentValue(DatabaseChangelogCommandStep.CHANGELOG_PARAMETERS, changeLogParameters);
+            unexpectedChangesetsCommand.addArgumentValue(UnexpectedChangesetsCommandStep.VERBOSE_ARG, verbose);
+            unexpectedChangesetsCommand.addArgumentValue(DatabaseChangelogCommandStep.CHANGELOG_FILE_ARG, changeLogFile);
+            unexpectedChangesetsCommand.addArgumentValue(DatabaseChangelogCommandStep.CONTEXTS_ARG, (contexts != null? contexts.toString() : null));
+            unexpectedChangesetsCommand.addArgumentValue(DatabaseChangelogCommandStep.LABEL_FILTER_ARG, (labelExpression != null ? labelExpression.getOriginalString() : null));
+            unexpectedChangesetsCommand.setOutput(new WriterOutputStream(out, GlobalConfiguration.OUTPUT_FILE_ENCODING.getCurrentValue()));
+            unexpectedChangesetsCommand.execute();
+        });
     }
 
     /**
@@ -1420,13 +1312,16 @@ public class Liquibase implements AutoCloseable {
 
     /**
      * Checks changelogs for bad MD5Sums and preconditions before attempting a migration
+     *
+     * @deprecated use {@link CommandScope}
      */
+    @Deprecated
     public void validate() throws LiquibaseException {
-        DatabaseChangeLog changeLog = getDatabaseChangeLog(true);
-        checkLiquibaseTables(false, changeLog, null, null);
-        if (changeLog != null) {
-            changeLog.validate(database);
-        }
+        new CommandScope("validate")
+                .addArgumentValue(DbUrlConnectionCommandStep.DATABASE_ARG, database)
+                .addArgumentValue(DatabaseChangelogCommandStep.CHANGELOG_FILE_ARG, changeLogFile)
+                .addArgumentValue(DatabaseChangelogCommandStep.CHANGELOG_PARAMETERS, changeLogParameters)
+                .execute();
     }
 
     public void setChangeLogParameter(String key, Object value) {

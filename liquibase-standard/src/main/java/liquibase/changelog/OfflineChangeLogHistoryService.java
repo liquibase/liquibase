@@ -324,7 +324,6 @@ public class OfflineChangeLogHistoryService extends AbstractChangeLogHistoryServ
                 CSVReader csvReader = new CSVReader(reader);
                 String[] line = csvReader.readNext(); //skip header line
 
-                List<RanChangeSet> returnList = new ArrayList<>();
                 while ((line = csvReader.readNext()) != null) {
                     try {
                         lastChangeSetSequenceValue = Integer.valueOf(line[Columns.ORDEREXECUTED.ordinal()]);

@@ -12,7 +12,7 @@ import java.util.*;
  */
 public class CompositeResourceAccessor extends AbstractResourceAccessor {
 
-    private List<ResourceAccessor> resourceAccessors;
+    private final List<ResourceAccessor> resourceAccessors;
 
     public CompositeResourceAccessor(ResourceAccessor... resourceAccessors) {
         this.resourceAccessors = new ArrayList<>(); //Arrays.asList(CollectionUtil.createIfNull(resourceAccessors));
