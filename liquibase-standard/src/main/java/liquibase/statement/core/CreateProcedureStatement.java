@@ -4,11 +4,11 @@ import liquibase.statement.AbstractSqlStatement;
 
 public class CreateProcedureStatement extends AbstractSqlStatement {
 
-    private String catalogName;
-    private String schemaName;
-    private String procedureName;
-    private String procedureText;
-    private String endDelimiter;
+    private final String catalogName;
+    private final String schemaName;
+    private final String procedureName;
+    private final String procedureText;
+    private final String endDelimiter;
     private Boolean replaceIfExists;
 
     public CreateProcedureStatement(String catalogName, String schemaName, String procedureName, String procedureText, String endDelimiter) {

@@ -13,7 +13,7 @@ import java.util.*;
 public class DiffGeneratorFactory {
 
     private static DiffGeneratorFactory instance;
-    private List<DiffGenerator> implementedGenerators = new ArrayList<>();
+    private final List<DiffGenerator> implementedGenerators = new ArrayList<>();
 
     protected DiffGeneratorFactory() {
         try {
