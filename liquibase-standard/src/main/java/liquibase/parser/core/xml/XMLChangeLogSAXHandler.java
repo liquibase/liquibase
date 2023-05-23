@@ -31,7 +31,7 @@ class XMLChangeLogSAXHandler extends DefaultHandler {
 	private final ResourceAccessor resourceAccessor;
 	private final ChangeLogParameters changeLogParameters;
     private final Stack<ParsedNode> nodeStack = new Stack<>();
-    private Stack<StringBuilder> textStack = new Stack<>();
+    private final Stack<StringBuilder> textStack = new Stack<>();
     private ParsedNode databaseChangeLogTree;
 
 

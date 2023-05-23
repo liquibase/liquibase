@@ -46,12 +46,12 @@ public class DatabaseChangeLog implements Comparable<DatabaseChangeLog>, Conditi
     private static final Pattern NO_LETTER_PATTERN = Pattern.compile("^[a-zA-Z]:");
     private static final String SEEN_CHANGELOGS_PATHS_SCOPE_KEY = "SEEN_CHANGELOG_PATHS";
 
-    private PreconditionContainer preconditionContainer = new GlobalPreconditionContainer();
+    private final PreconditionContainer preconditionContainer = new GlobalPreconditionContainer();
     private String physicalFilePath;
     private String logicalFilePath;
     private ObjectQuotingStrategy objectQuotingStrategy;
 
-    private List<ChangeSet> changeSets = new ArrayList<>();
+    private final List<ChangeSet> changeSets = new ArrayList<>();
     private List<ChangeSet> skippedChangeSets = new ArrayList<>();
     private ChangeLogParameters changeLogParameters;
 
