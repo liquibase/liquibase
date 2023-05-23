@@ -19,16 +19,16 @@ import java.util.*;
 
 public class ValidatingVisitor implements ChangeSetVisitor {
 
-    private List<String> invalidMD5Sums = new ArrayList<>();
-    private List<FailedPrecondition> failedPreconditions = new ArrayList<>();
-    private List<ErrorPrecondition> errorPreconditions = new ArrayList<>();
-    private Set<ChangeSet> duplicateChangeSets = new HashSet<>();
-    private List<SetupException> setupExceptions = new ArrayList<>();
-    private List<Throwable> changeValidationExceptions = new ArrayList<>();
-    private ValidationErrors validationErrors = new ValidationErrors();
-    private Warnings warnings = new Warnings();
+    private final List<String> invalidMD5Sums = new ArrayList<>();
+    private final List<FailedPrecondition> failedPreconditions = new ArrayList<>();
+    private final List<ErrorPrecondition> errorPreconditions = new ArrayList<>();
+    private final Set<ChangeSet> duplicateChangeSets = new HashSet<>();
+    private final List<SetupException> setupExceptions = new ArrayList<>();
+    private final List<Throwable> changeValidationExceptions = new ArrayList<>();
+    private final ValidationErrors validationErrors = new ValidationErrors();
+    private final Warnings warnings = new Warnings();
 
-    private Set<String> seenChangeSets = new HashSet<>();
+    private final Set<String> seenChangeSets = new HashSet<>();
 
     private Map<String, RanChangeSet> ranIndex;
     private Database database;

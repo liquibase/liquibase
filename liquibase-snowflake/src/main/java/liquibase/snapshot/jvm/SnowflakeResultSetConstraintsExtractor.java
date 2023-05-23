@@ -14,10 +14,10 @@ import java.util.List;
 
 public class SnowflakeResultSetConstraintsExtractor extends ResultSetCacheSnowflake.SingleResultSetExtractor {
 
-    private Database database;
-    private String catalogName;
-    private String schemaName;
-    private String tableName;
+    private final Database database;
+    private final String catalogName;
+    private final String schemaName;
+    private final String tableName;
 
     public SnowflakeResultSetConstraintsExtractor(DatabaseSnapshot databaseSnapshot, String catalogName, String schemaName,
                                                   String tableName) {

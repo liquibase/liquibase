@@ -23,8 +23,8 @@ public class CustomPreconditionWrapper extends AbstractPrecondition {
 
     private String className;
 
-    private SortedSet<String> params = new TreeSet<>();
-    private Map<String, String> paramValues = new LinkedHashMap<>();
+    private final SortedSet<String> params = new TreeSet<>();
+    private final Map<String, String> paramValues = new LinkedHashMap<>();
 
     public String getClassName() {
         return className;

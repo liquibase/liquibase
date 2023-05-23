@@ -4,7 +4,7 @@ import liquibase.changelog.ChangeSet;
 
 public class CountChangeSetFilter implements ChangeSetFilter {
 
-    private int changeSetsToAllow;
+    private final int changeSetsToAllow;
     private int changeSetsSeen;
 
     public CountChangeSetFilter(int changeSetsToAllow) {
