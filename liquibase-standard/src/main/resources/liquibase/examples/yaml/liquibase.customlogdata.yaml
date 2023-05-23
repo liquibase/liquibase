@@ -7,7 +7,7 @@ liquibase.userMetadata:
   - outputTologlevel: FINE
     data:
       <somekey1>: <somevalue>
-      <somekey2: <somevalue>
+      <somekey2>: <somevalue>
       <somenestedkey>:
         <nestedkey1>: <somevalue>
         <nestedkey2>: <somevalue>
@@ -24,7 +24,7 @@ liquibase.command.<commandName>:
   - outputTologlevel: FINE
     data:
       <somekey1>: <somevalue>
-      <somekey2: <somevalue>
+      <somekey2>: <somevalue>
       <somenestedkey>:
         <nestedkey1>: <somevalue>
         <nestedkey2>: <somevalue>
