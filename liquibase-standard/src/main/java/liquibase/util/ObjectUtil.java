@@ -29,7 +29,7 @@ public class ObjectUtil {
     /**
      * Cache for the methods of classes that we have been queried about so far.
      */
-    private static Map<Class<?>, Method[]> methodCache = new ConcurrentHashMap<>();
+    private static final Map<Class<?>, Method[]> methodCache = new ConcurrentHashMap<>();
 
     /**
      * For a given object, try to find the appropriate reader method and return the value, if set

@@ -27,7 +27,7 @@ import java.util.LinkedHashSet;
 import java.util.Set;
 
 public class GenerateChangeLogTask extends BaseLiquibaseTask {
-    private Set<ChangeLogOutputFile> changeLogOutputFiles = new LinkedHashSet<>();
+    private final Set<ChangeLogOutputFile> changeLogOutputFiles = new LinkedHashSet<>();
     private boolean includeSchema = true;
     private boolean includeCatalog = true;
     private boolean includeTablespace = true;
@@ -69,7 +69,7 @@ public class GenerateChangeLogTask extends BaseLiquibaseTask {
     protected void validateParameters() {
         super.validateParameters();
 
-        if((changeLogOutputFiles == null) || changeLogOutputFiles.isEmpty()) {
+        if(changeLogOutputFiles.isEmpty()) {
             throw new BuildException("Unable to generate a change log. No output file defined. Add at least one <xml>, <json>, <yaml>, or <txt> nested element.");
         }
     }

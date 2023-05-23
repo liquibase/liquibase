@@ -4,7 +4,7 @@ import liquibase.changelog.ChangeSet;
 import liquibase.statement.AbstractSqlStatement;
 
 public class RemoveChangeSetRanStatusStatement extends AbstractSqlStatement {
-    private ChangeSet changeSet;
+    private final ChangeSet changeSet;
 
     public RemoveChangeSetRanStatusStatement(ChangeSet changeSet) {
         this.changeSet = changeSet;

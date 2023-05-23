@@ -22,9 +22,9 @@ import java.util.List;
 import java.util.Set;
 
 public abstract class JdbcSnapshotGenerator implements SnapshotGenerator {
-    private Set<DiffStatusListener> statusListeners = new HashSet<>();
+    private final Set<DiffStatusListener> statusListeners = new HashSet<>();
 
-    private Class<? extends DatabaseObject> defaultFor;
+    private final Class<? extends DatabaseObject> defaultFor;
     private Class<? extends DatabaseObject>[] addsTo;
 
     protected JdbcSnapshotGenerator(Class<? extends DatabaseObject> defaultFor) {
@@ -103,9 +103,6 @@ public abstract class JdbcSnapshotGenerator implements SnapshotGenerator {
     }
 
     protected void updateListeners(String message) {
-        if (this.statusListeners == null) {
-            return;
-        }
         Scope.getCurrentScope().getLog(getClass()).fine(message);
         for (DiffStatusListener listener : this.statusListeners) {
             listener.statusUpdate(message);
