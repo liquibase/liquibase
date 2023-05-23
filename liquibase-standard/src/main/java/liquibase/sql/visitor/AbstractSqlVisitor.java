@@ -82,7 +82,7 @@ public abstract class AbstractSqlVisitor implements SqlVisitor {
         return CheckSum.compute(new StringChangeLogSerializer(new StringChangeLogSerializer.FieldFilter(){
             @Override
             public boolean include(Object obj, String field, Object value) {
-                if(Arrays.stream(getExcludedFieldFilters()).anyMatch(filter -> filter.equals(field))) {
+                if(Arrays.asList(getExcludedFieldFilters()).contains(field)) {
                     return false;
                 }
                 return super.include(obj, field, value);

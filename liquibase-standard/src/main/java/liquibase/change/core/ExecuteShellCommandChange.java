@@ -236,7 +236,7 @@ public class ExecuteShellCommandChange extends AbstractChange {
      * <p>
      * Creates a scheduled task to destroy the process in given timeout milliseconds.
      * This killer task will be cancelled if the process returns before the timeout value.
-     *  @param process
+     * @param process
      * @param timeoutInMillis waits for specified timeoutInMillis before destroying the process.
      */
     @java.lang.SuppressWarnings("squid:S2142")

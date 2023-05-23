@@ -38,7 +38,7 @@ public class ViewSnapshotGenerator extends JdbcSnapshotGenerator {
         Database database = snapshot.getDatabase();
         Schema schema = example.getSchema();
 
-        List<CachedRow> viewsMetadataRs = null;
+        List<CachedRow> viewsMetadataRs;
         try {
             viewsMetadataRs = ((JdbcDatabaseSnapshot) snapshot).getMetaDataFromCache().getViews(((AbstractJdbcDatabase) database).getJdbcCatalogName(schema), ((AbstractJdbcDatabase) database).getJdbcSchemaName(schema), example.getName());
             if (!viewsMetadataRs.isEmpty()) {
@@ -130,7 +130,7 @@ public class ViewSnapshotGenerator extends JdbcSnapshotGenerator {
         if (foundObject instanceof Schema) {
             Schema schema = (Schema) foundObject;
             Database database = snapshot.getDatabase();
-            List<CachedRow> viewsMetadataRs = null;
+            List<CachedRow> viewsMetadataRs;
             try {
                 viewsMetadataRs = ((JdbcDatabaseSnapshot) snapshot).getMetaDataFromCache().getViews(((AbstractJdbcDatabase) database).getJdbcCatalogName(schema), ((AbstractJdbcDatabase) database).getJdbcSchemaName(schema), null);
                 for (CachedRow row : viewsMetadataRs) {

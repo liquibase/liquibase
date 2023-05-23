@@ -203,7 +203,7 @@ public class UniqueConstraintSnapshotGenerator extends JdbcSnapshotGenerator {
 
                 if (!conditions.isEmpty()) {
                     sql += " WHERE ";
-                    sql += conditions.stream().collect(Collectors.joining(" AND "));
+                    sql += String.join(" AND ", conditions);
                 }
 
                 sql += " order by ordinal_position";

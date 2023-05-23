@@ -9,7 +9,6 @@ import liquibase.database.Database;
 import liquibase.database.DatabaseFactory;
 import liquibase.diff.output.changelog.DiffToChangeLog;
 import liquibase.exception.UnexpectedLiquibaseException;
-import liquibase.logging.Logger;
 import liquibase.serializer.ChangeLogSerializer;
 import liquibase.serializer.LiquibaseSerializable;
 import liquibase.sql.Sql;
@@ -26,7 +25,6 @@ public class FormattedSqlChangeLogSerializer  implements ChangeLogSerializer {
 
     private static final String SQL_FILE_NAME_REGEX = ".*\\.(\\w+)\\.sql";
     private static final Pattern SQL_FILE_NAME_PATTERN = Pattern.compile(SQL_FILE_NAME_REGEX);
-    private static Logger logger = Scope.getCurrentScope().getLog(FormattedSqlChangeLogSerializer.class);
 
 
     @Override
@@ -97,7 +95,7 @@ public class FormattedSqlChangeLogSerializer  implements ChangeLogSerializer {
             StringBuilder availableDbs = new StringBuilder();
             availableDbs.append("Available database short names for serialization:\n");
             for (Database db : databases) {
-                availableDbs.append("  " + db.getShortName() + "\n");
+                availableDbs.append("  ").append(db.getShortName()).append("\n");
             }
             throw new UnexpectedLiquibaseException("Serializing changelog as sql requires a file name in the format *.databaseType.sql. Example: changelog.h2.sql. Unknown database type: "+shortName +"\n" + availableDbs);
         }
