@@ -71,7 +71,7 @@ public class Main {
 
     private static final String ERRORMSG_UNEXPECTED_PARAMETERS = "unexpected.command.parameters";
     private static final Logger LOG = Scope.getCurrentScope().getLog(Main.class);
-    private static ResourceBundle coreBundle = getBundle("liquibase/i18n/liquibase-core");
+    private static final ResourceBundle coreBundle = getBundle("liquibase/i18n/liquibase-core");
 
     protected ClassLoader classLoader;
     protected String driver;
@@ -129,7 +129,8 @@ public class Main {
     protected String schemas;
     protected String snapshotFormat;
     protected String liquibaseProLicenseKey;
-    private boolean outputsLogMessages = false;
+    private static final Boolean managingLogConfig = null;
+    private static final boolean outputsLogMessages = false;
     protected String sqlFile;
     protected String delimiter;
     protected String rollbackScript;
@@ -1446,19 +1447,6 @@ public class Main {
                 outputWriter.write(result);
                 outputWriter.flush();
                 return;
-            } else if (COMMANDS.SNAPSHOT_REFERENCE.equalsIgnoreCase(command)) {
-                CommandScope snapshotCommand = new CommandScope("internalSnapshot");
-                Database referenceDatabase = createReferenceDatabaseFromCommandParams(commandParams, fileOpener);
-                snapshotCommand
-                        .addArgumentValue(InternalSnapshotCommandStep.DATABASE_ARG, referenceDatabase)
-                        .addArgumentValue(InternalSnapshotCommandStep.SCHEMAS_ARG, InternalSnapshotCommandStep.parseSchemas(referenceDatabase, getSchemaParams(referenceDatabase)))
-                        .addArgumentValue(InternalSnapshotCommandStep.SERIALIZER_FORMAT_ARG, getCommandParam(OPTIONS.SNAPSHOT_FORMAT, null));
-
-                Writer outputWriter = getOutputWriter();
-                outputWriter.write(InternalSnapshotCommandStep.printSnapshot(snapshotCommand, snapshotCommand.execute()));
-                outputWriter.flush();
-
-                return;
             }
 
             Liquibase liquibase = new Liquibase(changeLogFile, fileOpener, database);
@@ -1773,7 +1761,7 @@ public class Main {
                 .addArgumentValue(ChangeExecListenerCommandStep.CHANGE_EXEC_LISTENER_CLASS_ARG, changeExecListenerClass)
                 .addArgumentValue(ChangeExecListenerCommandStep.CHANGE_EXEC_LISTENER_PROPERTIES_FILE_ARG, changeExecListenerPropertiesFile)
                 .addArgumentValue(RollbackCommandStep.TAG_ARG, getCommandArgument())
-                .addArgumentValue(RollbackCommandStep.ROLLBACK_SCRIPT_ARG, getCommandParam(COMMANDS.ROLLBACK_SCRIPT, null));
+                .addArgumentValue(AbstractRollbackCommandStep.ROLLBACK_SCRIPT_ARG, getCommandParam(COMMANDS.ROLLBACK_SCRIPT, null));
         this.setDatabaseArgumentsToCommand(commandScope);
         if (outputWriter != null) {
             commandScope.setOutput(new WriterOutputStream(outputWriter, GlobalConfiguration.OUTPUT_FILE_ENCODING.getCurrentValue()));
@@ -2040,49 +2028,6 @@ public class Main {
         }
 
         return defaultValue;
-    }
-
-    private Database createReferenceDatabaseFromCommandParams(
-            Set<String> commandParams, ResourceAccessor resourceAccessor)
-            throws CommandLineParsingException, DatabaseException {
-        String refDriver = referenceDriver;
-        String refUrl = referenceUrl;
-        String refUsername = referenceUsername;
-        String refPassword = referencePassword;
-        String defSchemaName = this.referenceDefaultSchemaName;
-        String defCatalogName = this.referenceDefaultCatalogName;
-
-        for (String param : commandParams) {
-            String[] splitArg = splitArg(param);
-
-            String attributeName = splitArg[0];
-            String value = splitArg[1];
-            if (OPTIONS.REFERENCE_DRIVER.equalsIgnoreCase(attributeName)) {
-                refDriver = value;
-            } else if (OPTIONS.REFERENCE_URL.equalsIgnoreCase(attributeName)) {
-                refUrl = value;
-            } else if (OPTIONS.REFERENCE_USERNAME.equalsIgnoreCase(attributeName)) {
-                refUsername = value;
-            } else if (OPTIONS.REFERENCE_PASSWORD.equalsIgnoreCase(attributeName)) {
-                refPassword = value;
-            } else if (OPTIONS.REFERENCE_DEFAULT_CATALOG_NAME.equalsIgnoreCase(attributeName)) {
-                defCatalogName = value;
-            } else if (OPTIONS.REFERENCE_DEFAULT_SCHEMA_NAME.equalsIgnoreCase(attributeName)) {
-                defSchemaName = value;
-            } else if (OPTIONS.DATA_OUTPUT_DIRECTORY.equalsIgnoreCase(attributeName)) {
-                dataOutputDirectory = value;
-            }
-        }
-
-        if (refUrl == null) {
-            throw new CommandLineParsingException(
-                    String.format(coreBundle.getString("option.required"), "--referenceUrl"));
-        }
-
-        return CommandLineUtils.createDatabaseObject(resourceAccessor, refUrl, refUsername, refPassword, refDriver,
-                defCatalogName, defSchemaName, Boolean.parseBoolean(outputDefaultCatalog), Boolean.parseBoolean
-                        (outputDefaultSchema), null, null, this.propertyProviderClass, this.liquibaseCatalogName,
-                this.liquibaseSchemaName, this.databaseChangeLogTableName, this.databaseChangeLogLockTableName);
     }
 
     private OutputStream getOutputStream() throws IOException {
