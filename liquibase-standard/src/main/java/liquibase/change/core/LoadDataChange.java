@@ -57,7 +57,7 @@ public class LoadDataChange extends AbstractTableChange implements ChangeWithCol
     public static final String DEFAULT_COMMENT_PATTERN = "#";
     public static final Pattern BASE64_PATTERN = Pattern.compile("^(?:[A-Za-z0-9+/]{4})*(?:[A-Za-z0-9+/]{2}==|[A-Za-z0-9+/]{3}=)?$");
     private static final Logger LOG = Scope.getCurrentScope().getLog(LoadDataChange.class);
-    private static ResourceBundle coreBundle = getBundle("liquibase/i18n/liquibase-core");
+    private static final ResourceBundle coreBundle = getBundle("liquibase/i18n/liquibase-core");
     private String file;
     private String commentLineStartsWith = DEFAULT_COMMENT_PATTERN;
     private Boolean relativeToChangelogFile;
@@ -213,11 +213,12 @@ public class LoadDataChange extends AbstractTableChange implements ChangeWithCol
     }
 
     /**
-     * Unique string for the column for better identification
+     * Returns a unique {@code string} for the column for better identification.
+     * The returned {@code string} includes the index of the column and, if available, its name.
      *
-     * @param index        index of the column
-     * @param columnConfig the column
-     * @return
+     * @param index        the index of the column
+     * @param columnConfig the column configuration
+     * @return a string in the format " / column[index] (name:'columnName')" or " / column[index]" if the column name is not available.
      */
     protected String columnIdString(int index, LoadDataColumnConfig columnConfig) {
         return " / column[" + index + "]" +
@@ -244,7 +245,7 @@ public class LoadDataChange extends AbstractTableChange implements ChangeWithCol
 
     @Override
     public SqlStatement[] generateStatements(Database database) {
-        boolean databaseSupportsBatchUpdates = supportsBatchUpdates(database);
+        supportsBatchUpdates(database);
 
         try (CSVReader reader = getCSVReader()) {
 

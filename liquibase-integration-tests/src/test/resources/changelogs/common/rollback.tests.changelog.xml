@@ -73,4 +73,20 @@
             <sqlFile stripComments="true" path="changelogs/common/rollbackinclude/rollbackTables.sql"/>
         </rollback>
     </changeSet>
+
+    <changeSet  author="mallod"  id="outputChangeTest">
+        <output  target="STDERR">Make sure you feed the cat</output>
+    </changeSet>
+
+    <changeSet  author="mallod"  id="emptyChangeTest">
+        <empty/>
+    </changeSet>
+
+    <changeSet  author="mallod"  id="rollbackOutputChangeTest">
+        <rollback changeSetId="outputChangeTest" changeSetAuthor="mallod"/>
+    </changeSet>
+
+    <changeSet  author="mallod"  id="rollbackEmptyChangeTest">
+        <rollback changeSetId="emptyChangeTest" changeSetAuthor="mallod"/>
+    </changeSet>
 </databaseChangeLog>

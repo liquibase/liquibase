@@ -46,7 +46,6 @@ public class SqlPrecondition extends AbstractPrecondition {
     @Override
     public void check(Database database, DatabaseChangeLog changeLog, ChangeSet changeSet, ChangeExecListener changeExecListener)
             throws PreconditionFailedException, PreconditionErrorException {
-        DatabaseConnection connection = database.getConnection();
         try {
             Object oResult = Scope.getCurrentScope().getSingleton(ExecutorService.class).getExecutor("jdbc", database).queryForObject(new RawSqlStatement(getSql().replaceFirst(";$","")), String.class);
             if (oResult == null) {

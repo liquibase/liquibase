@@ -28,7 +28,7 @@ public class DataTypeWrapper extends LiquibaseDataType {
 		return candidate; 
 	}
 	
-	private LiquibaseDataType underlyingDataType;
+	private final LiquibaseDataType underlyingDataType;
 	
 	public LiquibaseDataType getUnderlyingDataType() {
 		return underlyingDataType;

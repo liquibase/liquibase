@@ -8,7 +8,7 @@ import java.util.Set;
 
 public class NotInChangeLogChangeSetFilter implements ChangeSetFilter {
 
-    private Set<ChangeSet> changeSets;
+    private final Set<ChangeSet> changeSets;
 
     public NotInChangeLogChangeSetFilter(DatabaseChangeLog databaseChangeLog) {
         this.changeSets = new HashSet<>(databaseChangeLog.getChangeSets());

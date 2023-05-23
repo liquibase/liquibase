@@ -20,7 +20,7 @@ public class StringChangeLogSerializer implements ChangeLogSerializer {
 
     private static final int INDENT_LENGTH = 4;
 
-    private FieldFilter fieldFilter;
+    private final FieldFilter fieldFilter;
 
     public StringChangeLogSerializer() {
         this(new FieldFilter());

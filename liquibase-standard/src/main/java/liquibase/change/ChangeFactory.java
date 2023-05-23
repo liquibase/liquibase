@@ -18,7 +18,7 @@ import java.util.concurrent.ConcurrentHashMap;
  */
 public class ChangeFactory extends AbstractPluginFactory<Change>{
 
-    private Map<Class<? extends Change>, ChangeMetaData> metaDataByClass = new ConcurrentHashMap<>();
+    private final Map<Class<? extends Change>, ChangeMetaData> metaDataByClass = new ConcurrentHashMap<>();
 
     private ChangeFactory() {
 

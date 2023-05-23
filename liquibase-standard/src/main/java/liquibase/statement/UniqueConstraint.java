@@ -10,7 +10,7 @@ public class UniqueConstraint implements ColumnConstraint {
      * Default value is true
      */
     private boolean validateUnique = true;
-    private List<String> columns = new ArrayList<>();
+    private final List<String> columns = new ArrayList<>();
 
     public UniqueConstraint() {
 

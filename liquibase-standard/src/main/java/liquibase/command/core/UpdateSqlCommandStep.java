@@ -101,9 +101,4 @@ public class UpdateSqlCommandStep extends AbstractUpdateCommandStep {
     public UpdateSummaryEnum getShowSummary(CommandScope commandScope) {
         return UpdateSummaryEnum.OFF;
     }
-
-    @Override
-    public String getHubOperation() {
-        return "update";
-    }
 }
