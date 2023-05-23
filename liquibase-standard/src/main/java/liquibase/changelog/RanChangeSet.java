@@ -17,12 +17,12 @@ public class RanChangeSet {
     private final CheckSum lastCheckSum;
     private final Date dateExecuted;
     private String tag;
-    private ChangeSet.ExecType execType;
+    private final ChangeSet.ExecType execType;
     private String description;
     private String comments;
     private Integer orderExecuted;
-    private ContextExpression contextExpression;
-    private Labels labels;
+    private final ContextExpression contextExpression;
+    private final Labels labels;
     private String deploymentId;
     private String liquibaseVersion;
 

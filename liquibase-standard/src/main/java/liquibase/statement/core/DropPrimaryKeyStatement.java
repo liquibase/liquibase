@@ -4,10 +4,10 @@ import liquibase.statement.AbstractSqlStatement;
 
 public class DropPrimaryKeyStatement extends AbstractSqlStatement {
 
-    private String catalogName;
-    private String schemaName;
-    private String tableName;
-    private String constraintName;
+    private final String catalogName;
+    private final String schemaName;
+    private final String tableName;
+    private final String constraintName;
     private Boolean dropIndex;
 
     public DropPrimaryKeyStatement(String catalogName, String schemaName, String tableName, String constraintName) {

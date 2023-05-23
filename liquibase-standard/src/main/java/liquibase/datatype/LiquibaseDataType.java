@@ -19,13 +19,13 @@ import java.util.Locale;
  */
 public abstract class LiquibaseDataType implements PrioritizedService {
 
-    private String name;
-    private String[] aliases;
-    private int priority;
-    private int minParameters;
-    private int maxParameters;
+    private final String name;
+    private final String[] aliases;
+    private final int priority;
+    private final int minParameters;
+    private final int maxParameters;
 
-    private List<Object> parameters = new ArrayList<>();
+    private final List<Object> parameters = new ArrayList<>();
     private String additionalInformation;
     private String rawDefinition;
 

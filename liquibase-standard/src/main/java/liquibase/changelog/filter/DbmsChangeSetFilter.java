@@ -13,7 +13,7 @@ import java.util.List;
 
 public class DbmsChangeSetFilter implements ChangeSetFilter {
 
-    private Database database;
+    private final Database database;
     public static final String MDC_NAME = "dbmsMismatch";
     public static final String DISPLAY_NAME = "DBMS mismatch";
 

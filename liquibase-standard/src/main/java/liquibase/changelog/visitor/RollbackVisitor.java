@@ -21,7 +21,7 @@ import java.util.Set;
 
 public class RollbackVisitor implements ChangeSetVisitor {
 
-    private Database database;
+    private final Database database;
 
     private ChangeExecListener execListener;
     private List<ChangesetsRolledback.ChangeSet> processedChangesets = new ArrayList<>();

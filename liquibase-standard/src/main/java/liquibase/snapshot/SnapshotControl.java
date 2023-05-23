@@ -84,7 +84,7 @@ public class SnapshotControl implements LiquibaseSerializable {
 
     @Override
     public Set<String> getSerializableFields() {
-        return new HashSet<>(Arrays.asList("includedType"));
+        return new HashSet<>(Collections.singletonList("includedType"));
     }
 
     @Override

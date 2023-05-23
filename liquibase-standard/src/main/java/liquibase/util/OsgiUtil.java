@@ -11,14 +11,14 @@ public final class OsgiUtil {
     }
 
     /**
-     * try to load a class under OSGI environment. It will try to load the class
-     * from all liquibase bundles registered via
-     * {@link Activator Activator}
+     * Tries to load a class under OSGI environment. It will attempt to load the class
+     * from all Liquibase bundles registered via
+     * {@link Activator Activator}.
      *
-     * @param <T>
-     * @param className name of class
-     * @return
-     * @throws ClassNotFoundException
+     * @param <T>       the type of the class to load
+     * @param className the name of the class to load
+     * @return the loaded class
+     * @throws ClassNotFoundException if the class could not be found
      */
     public static <T> Class<T> loadClass(String className) throws ClassNotFoundException {
         List<LiquibaseBundle> liquibaseBundles = Activator.getLiquibaseBundles();
@@ -41,10 +41,12 @@ public final class OsgiUtil {
     }
 
     /**
+     * Checks whether a given class is allowed according to the configuration of the provided {@link LiquibaseBundle}.
      *
-     * @param clazz
-     * @return true is a class is allowed
-     * @throws java.lang.ClassNotFoundException
+     * @param liquibaseBundle the {@link LiquibaseBundle} instance containing the configuration for the allowed packages
+     * @param clazz           the class to check
+     * @return {@code true} if the class is allowed, {@code false} otherwise
+     * @throws ClassNotFoundException if the class is not found
      */
     private static boolean isClassAllowed(LiquibaseBundle liquibaseBundle, Class clazz) {
         if (liquibaseBundle.allowedAllPackages()) {
