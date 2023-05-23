@@ -5,7 +5,7 @@ import java.util.Map;
 
 /**
  * Stores information about the integration running Liquibase.
- *
+ * <p>
  * NOTE: This class is under development and will likely change over time.
  */
 public class IntegrationDetails {

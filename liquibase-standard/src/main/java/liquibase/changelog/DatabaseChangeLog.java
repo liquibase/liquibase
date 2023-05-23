@@ -49,7 +49,6 @@ public class DatabaseChangeLog implements Comparable<DatabaseChangeLog>, Conditi
     private PreconditionContainer preconditionContainer = new GlobalPreconditionContainer();
     private String physicalFilePath;
     private String logicalFilePath;
-    private String changeLogId;
     private ObjectQuotingStrategy objectQuotingStrategy;
 
     private List<ChangeSet> changeSets = new ArrayList<>();
@@ -125,14 +124,6 @@ public class DatabaseChangeLog implements Comparable<DatabaseChangeLog>, Conditi
 
     public void setPhysicalFilePath(String physicalFilePath) {
         this.physicalFilePath = physicalFilePath;
-    }
-
-    public String getChangeLogId() {
-        return changeLogId;
-    }
-
-    public void setChangeLogId(String changeLogId) {
-        this.changeLogId = changeLogId;
     }
 
     public String getLogicalFilePath() {
@@ -364,11 +355,12 @@ public class DatabaseChangeLog implements Comparable<DatabaseChangeLog>, Conditi
     }
 
     public List<ChangeSet> getChangeSets(RanChangeSet ranChangeSet) {
-        return getChangeSets(ranChangeSet.getChangeLog(), ranChangeSet.getAuthor(), ranChangeSet.getId());
+        List<ChangeSet> changesets = getChangeSets(ranChangeSet.getChangeLog(), ranChangeSet.getAuthor(), ranChangeSet.getId());
+        changesets.forEach(c -> c.setStoredFilePath(ranChangeSet.getStoredChangeLog()));
+        return changesets;
     }
 
     public void load(ParsedNode parsedNode, ResourceAccessor resourceAccessor) throws ParsedNodeException, SetupException {
-        setChangeLogId(parsedNode.getChildValue(null, "changeLogId", String.class));
         setLogicalFilePath(parsedNode.getChildValue(null, "logicalFilePath", String.class));
 
         String context = parsedNode.getChildValue(null, "contextFilter", String.class);
@@ -441,6 +433,7 @@ public class DatabaseChangeLog implements Comparable<DatabaseChangeLog>, Conditi
                     throw new UnexpectedLiquibaseException("No 'file' attribute on 'include'");
                 }
                 path = path.replace('\\', '/');
+                Scope.getCurrentScope().addMdcValue(MdcKey.CHANGELOG_FILE, path);
                 ContextExpression includeContextFilter = new ContextExpression(node.getChildValue(null, "contextFilter", String.class));
                 if (includeContextFilter.isEmpty()) {
                     includeContextFilter = new ContextExpression(node.getChildValue(null, "context", String.class));

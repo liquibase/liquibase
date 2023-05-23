@@ -21,7 +21,7 @@ import java.util.HashSet;
 import java.util.Set;
 
 /**
- * Support for SAP (formerly: Siebel) AS (Adapter Server) Anywhere embedded/mobile database.
+ * Support for SAP (formerly: Sybase) AS (Adapter Server) Anywhere embedded/mobile database.
  *
  * @author otaranenko
  *

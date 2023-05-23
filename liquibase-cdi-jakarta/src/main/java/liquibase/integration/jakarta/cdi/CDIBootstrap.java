@@ -1,26 +1,19 @@
 package liquibase.integration.jakarta.cdi;
 
 
-import java.lang.annotation.Annotation;
-import java.lang.reflect.Type;
-import java.util.Collections;
-import java.util.HashSet;
-import java.util.Set;
-
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.enterprise.context.spi.CreationalContext;
 import jakarta.enterprise.event.Observes;
 import jakarta.enterprise.inject.Any;
 import jakarta.enterprise.inject.Default;
-import jakarta.enterprise.inject.spi.AfterBeanDiscovery;
-import jakarta.enterprise.inject.spi.AfterDeploymentValidation;
-import jakarta.enterprise.inject.spi.AnnotatedType;
-import jakarta.enterprise.inject.spi.Bean;
-import jakarta.enterprise.inject.spi.BeanManager;
-import jakarta.enterprise.inject.spi.Extension;
-import jakarta.enterprise.inject.spi.InjectionPoint;
-import jakarta.enterprise.inject.spi.InjectionTarget;
+import jakarta.enterprise.inject.spi.*;
 import jakarta.enterprise.util.AnnotationLiteral;
+
+import java.lang.annotation.Annotation;
+import java.lang.reflect.Type;
+import java.util.Collections;
+import java.util.HashSet;
+import java.util.Set;
 
 /**
  * CDI Bootstrap
@@ -82,11 +75,6 @@ public class CDIBootstrap implements Extension {
 
             @Override
             public boolean isAlternative() {
-                return false;
-            }
-
-            @Override
-            public boolean isNullable() {
                 return false;
             }
 

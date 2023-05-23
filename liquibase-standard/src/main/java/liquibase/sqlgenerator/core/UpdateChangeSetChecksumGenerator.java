@@ -11,6 +11,7 @@ import liquibase.sqlgenerator.SqlGeneratorFactory;
 import liquibase.statement.SqlStatement;
 import liquibase.statement.core.UpdateChangeSetChecksumStatement;
 import liquibase.statement.core.UpdateStatement;
+import liquibase.util.StringUtil;
 
 public class UpdateChangeSetChecksumGenerator extends AbstractSqlGenerator<UpdateChangeSetChecksumStatement> {
     @Override
@@ -33,11 +34,18 @@ public class UpdateChangeSetChecksumGenerator extends AbstractSqlGenerator<Updat
                     .setWhereClause(database.escapeObjectName("ID", LiquibaseColumn.class) + " = ? " +
                             "AND " + database.escapeObjectName("AUTHOR", LiquibaseColumn.class) + " = ? " +
                             "AND " + database.escapeObjectName("FILENAME", LiquibaseColumn.class) + " = ?")
-                    .addWhereParameters(changeSet.getId(), changeSet.getAuthor(), changeSet.getFilePath());
+                    .addWhereParameters(changeSet.getId(), changeSet.getAuthor(), this.getFilePath(changeSet));
 
             return SqlGeneratorFactory.getInstance().generateSql(runStatement, database);
         } finally {
             database.setObjectQuotingStrategy(currentStrategy);
         }
+    }
+
+    private String getFilePath(ChangeSet changeSet) {
+        if (StringUtil.isNotEmpty(changeSet.getStoredFilePath())) {
+            return changeSet.getStoredFilePath();
+        }
+        return changeSet.getFilePath();
     }
 }

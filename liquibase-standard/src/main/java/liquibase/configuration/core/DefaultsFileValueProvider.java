@@ -128,7 +128,7 @@ public class DefaultsFileValueProvider extends AbstractMapConfigurationValueProv
     }
 
     @Override
-    protected Map<?, ?> getMap() {
+    public Map<?, ?> getMap() {
         return properties;
     }
 

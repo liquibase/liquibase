@@ -8,6 +8,7 @@ import liquibase.extension.testing.testsystem.DatabaseTestSystem
 import liquibase.extension.testing.testsystem.TestSystemFactory
 import liquibase.extension.testing.testsystem.spock.LiquibaseIntegrationTest
 import liquibase.util.FileUtil
+import liquibase.util.StringUtil
 import spock.lang.Shared
 import spock.lang.Specification
 
@@ -18,23 +19,23 @@ class GenerateChangeLogMySQLIntegrationTest extends Specification {
     private DatabaseTestSystem mysql = (DatabaseTestSystem) Scope.getCurrentScope().getSingleton(TestSystemFactory.class).getTestSystem("mysql")
 
     def setupSpec() {
-        mysql.executeSql("""
+        CommandUtil.runDropAll(mysql)
+        def sql = """
 create table str4 (
     col1 int ,
     col2 int auto_increment,
     col3 int,
     primary key(col2, col1)
 )
-""")
+"""
+        def updateChangelogFile = "target/test-classes/create-table-" + StringUtil.randomIdentifer(10) + ".sql"
+        File updateFile = new File(updateChangelogFile)
+        updateFile.write(sql.toString())
+        CommandUtil.runUpdate(mysql, updateChangelogFile)
     }
 
     def cleanupSpec() {
-        try {
-            mysql.executeSql("""
-drop table str4;
-""")
-        } catch(Exception ignored) {
-        }
+        CommandUtil.runDropAll(mysql)
     }
 
     def "Ensure that MySQL generated changelog puts primary keys in as part of the create table change, even if the primary key is in a different order than the columns in the table" () {
@@ -62,6 +63,7 @@ drop table str4;
         !mysql.executeSql("drop table str4")
 
         when:
+        CommandUtil.runDropAll(mysql)
         CommandUtil.runUpdate(mysql,"output.xml")
 
         then:
