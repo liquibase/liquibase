@@ -1,5 +1,6 @@
 package liquibase.change;
 
+import liquibase.ChecksumVersions;
 import liquibase.change.core.RawSQLChange;
 import liquibase.Scope;
 import liquibase.GlobalConfiguration;
@@ -188,10 +189,10 @@ public abstract class AbstractSQLChange extends AbstractChange implements DbmsTa
     /**
      * Calculates the checksum based on the contained SQL.
      *
-     * @see Change#generateCheckSum(int)
+     * @see Change#generateCheckSum(ChecksumVersions)
      */
     @Override
-    public CheckSum generateCheckSum(int version) {
+    public CheckSum generateCheckSum(ChecksumVersions version) {
         InputStream stream = null;
         try {
             stream = openSqlStream();

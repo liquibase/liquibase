@@ -1,5 +1,6 @@
 package liquibase.change;
 
+import liquibase.ChecksumVersions;
 import liquibase.util.MD5Util;
 import liquibase.util.StringUtil;
 
@@ -22,7 +23,6 @@ public final class CheckSum {
     private final int version;
     private final String storedCheckSum;
 
-    private static final int CURRENT_CHECKSUM_ALGORITHM_VERSION = 9;
     private static final char DELIMITER = ':';
     private static final String CHECKSUM_REGEX = "(^\\d)" + DELIMITER + "([a-zA-Z0-9]++)";
     private static final Pattern CHECKSUM_PATTERN = Pattern.compile(CHECKSUM_REGEX);
@@ -59,26 +59,29 @@ public final class CheckSum {
 
     /**
      * Return the current CheckSum algorithm version.
+     *
+     * @deprecated Use {@link ChecksumVersions#latest()} instead
      */
+    @Deprecated
     public static int getCurrentVersion() {
-        return CURRENT_CHECKSUM_ALGORITHM_VERSION;
+        return ChecksumVersions.latest().getVersion();
     }
 
     /**
      * Compute a storedCheckSum of the given string.
      */
-    public static CheckSum compute(String valueToChecksum, int version) {
+    public static CheckSum compute(String valueToChecksum, ChecksumVersions version) {
         return new CheckSum(MD5Util.computeMD5(
                 //remove "Unknown" unicode char 65533
                 Normalizer.normalize(StringUtil.standardizeLineEndings(valueToChecksum)
                         .replace("\uFFFD", ""), Normalizer.Form.NFC)
-        ), version);
+        ), version.getVersion());
     }
 
     /**
      * Compute a CheckSum of the given data stream (no normalization of line endings!)
      */
-    public static CheckSum compute(final InputStream stream, boolean standardizeLineEndings, int version) {
+    public static CheckSum compute(final InputStream stream, boolean standardizeLineEndings, ChecksumVersions version) {
         InputStream newStream = stream;
         if (standardizeLineEndings) {
             newStream = new InputStream() {

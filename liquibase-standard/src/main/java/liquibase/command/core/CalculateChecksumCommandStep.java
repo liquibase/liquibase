@@ -1,5 +1,6 @@
 package liquibase.command.core;
 
+import liquibase.ChecksumVersions;
 import liquibase.Scope;
 import liquibase.change.CheckSum;
 import liquibase.changelog.ChangeLogParameters;
@@ -70,7 +71,7 @@ public class CalculateChecksumCommandStep extends AbstractCommandStep {
         if (changeSet == null) {
             throw new LiquibaseException(new IllegalArgumentException("No such changeSet: " + changeSetIdentifier));
         }
-        sendMessages(resultsBuilder, changeSet.generateCheckSum(changeSet.getStoredCheckSum().getVersion()));
+        sendMessages(resultsBuilder, changeSet.generateCheckSum(ChecksumVersions.enumFromChecksumVersion(changeSet.getStoredCheckSum().getVersion())));
     }
 
     private static void sendMessages(CommandResultsBuilder resultsBuilder, CheckSum checkSum) {

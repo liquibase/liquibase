@@ -1,5 +1,6 @@
 package liquibase.change.core;
 
+import liquibase.ChecksumVersions;
 import liquibase.GlobalConfiguration;
 import liquibase.Scope;
 import liquibase.change.*;
@@ -235,14 +236,14 @@ public class CreateProcedureChange extends AbstractChange implements DbmsTargete
     /**
      * Calculates the checksum based on the contained SQL.
      *
-     * @see liquibase.change.AbstractChange#generateCheckSum(int version)
+     * @see Change#generateCheckSum(ChecksumVersions)
      */
     @Override
-    public CheckSum generateCheckSum(int version) {
+    public CheckSum generateCheckSum(ChecksumVersions version) {
         return generateCheckSum(this.procedureText, version);
     }
 
-    protected CheckSum generateCheckSum(String sqlText, int version) {
+    protected CheckSum generateCheckSum(String sqlText, ChecksumVersions version) {
         InputStream stream = null;
         CheckSum checkSum;
         try {

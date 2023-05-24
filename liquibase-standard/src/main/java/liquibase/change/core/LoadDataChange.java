@@ -2,6 +2,7 @@ package liquibase.change.core;
 
 import com.opencsv.exceptions.CsvMalformedLineException;
 import liquibase.CatalogAndSchema;
+import liquibase.ChecksumVersions;
 import liquibase.Scope;
 import liquibase.change.*;
 import liquibase.changelog.ChangeSet;
@@ -772,7 +773,7 @@ public class LoadDataChange extends AbstractTableChange implements ChangeWithCol
     }
 
     @Override
-    public CheckSum generateCheckSum(int version) {
+    public CheckSum generateCheckSum(ChecksumVersions version) {
         InputStream stream = null;
         try {
             ResourceAccessor resourceAccessor = Scope.getCurrentScope().getResourceAccessor();

@@ -1,5 +1,6 @@
 package liquibase.sql.visitor;
 
+import liquibase.ChecksumVersions;
 import liquibase.ContextExpression;
 import liquibase.Labels;
 import liquibase.change.CheckSum;
@@ -29,6 +30,6 @@ public interface SqlVisitor extends LiquibaseSerializable {
     Labels getLabels();
     void setLabels(Labels labels);
 
-    CheckSum generateCheckSum(int version);
+    CheckSum generateCheckSum(ChecksumVersions version);
 
 }

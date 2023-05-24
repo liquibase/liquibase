@@ -1,5 +1,6 @@
 package liquibase.changelog;
 
+import liquibase.ChecksumVersions;
 import liquibase.Contexts;
 import liquibase.LabelExpression;
 import liquibase.Scope;
@@ -49,7 +50,8 @@ public abstract class AbstractChangeLogHistoryService implements ChangeLogHistor
 
                 return ChangeSet.RunStatus.ALREADY_RAN;
             } else {
-                if (foundRan.getLastCheckSum().equals(changeSet.generateCheckSum(foundRan.getLastCheckSum().getVersion()))) {
+                if (foundRan.getLastCheckSum().equals(changeSet.generateCheckSum(
+                        ChecksumVersions.enumFromChecksumVersion(foundRan.getLastCheckSum().getVersion())))) {
                     return ChangeSet.RunStatus.ALREADY_RAN;
                 } else {
                     if (changeSet.shouldRunOnChange()) {

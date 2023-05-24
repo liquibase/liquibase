@@ -1,5 +1,6 @@
 package liquibase.changelog.visitor;
 
+import liquibase.ChecksumVersions;
 import liquibase.GlobalConfiguration;
 import liquibase.Scope;
 import liquibase.change.Change;
@@ -147,7 +148,8 @@ public class ValidatingVisitor implements ChangeSetVisitor {
         if(ranChangeSet != null){
             if (!changeSet.isCheckSumValid(ranChangeSet.getLastCheckSum())) {
                 if (!changeSet.shouldRunOnChange()) {
-                    invalidMD5Sums.add(changeSet.toString(false)+" was: "+ranChangeSet.getLastCheckSum().toString()+" but is now: "+changeSet.generateCheckSum(ranChangeSet.getLastCheckSum().getVersion()).toString());
+                    invalidMD5Sums.add(changeSet.toString(false)+" was: "+ranChangeSet.getLastCheckSum().toString()
+                            +" but is now: "+changeSet.generateCheckSum(ChecksumVersions.enumFromChecksumVersion(ranChangeSet.getLastCheckSum().getVersion())).toString());
                 }
             }
         }

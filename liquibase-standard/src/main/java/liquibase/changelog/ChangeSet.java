@@ -1,5 +1,6 @@
 package liquibase.changelog;
 
+import liquibase.ChecksumVersions;
 import liquibase.ContextExpression;
 import liquibase.Labels;
 import liquibase.Scope;
@@ -338,7 +339,7 @@ public class ChangeSet implements Conditional, ChangeLogChild {
         this.checkSum = null;
     }
 
-    public CheckSum generateCheckSum(int version) {
+    public CheckSum generateCheckSum(ChecksumVersions version) {
         if (checkSum == null) {
             StringBuilder stringToMD5 = new StringBuilder();
             for (Change change : getChanges()) {
@@ -1121,7 +1122,7 @@ public class ChangeSet implements Conditional, ChangeLogChild {
     }
 
     public String toString(boolean includeMD5Sum) {
-        int checksumVersion = (this.checkSum != null ? this.checkSum.getVersion() : CheckSum.getCurrentVersion());
+        ChecksumVersions checksumVersion = ChecksumVersions.enumFromChecksumVersion(this.checkSum != null ? this.checkSum.getVersion() : CheckSum.getCurrentVersion());
         return filePath + "::" + getId() + "::" + getAuthor() +
                 (includeMD5Sum ? ("::(Checksum: " + generateCheckSum(checksumVersion) + ")") : "");
     }
@@ -1241,7 +1242,7 @@ public class ChangeSet implements Conditional, ChangeLogChild {
                 return true;
             }
         }
-        CheckSum currentMd5Sum = storedCheckSum != null ? generateCheckSum(storedCheckSum.getVersion()) : null;
+        CheckSum currentMd5Sum = storedCheckSum != null ? generateCheckSum(ChecksumVersions.enumFromChecksumVersion(storedCheckSum.getVersion())) : null;
         if (currentMd5Sum == null) {
             return true;
         }

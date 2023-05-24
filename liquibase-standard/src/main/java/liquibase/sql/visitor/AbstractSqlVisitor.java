@@ -1,5 +1,6 @@
 package liquibase.sql.visitor;
 
+import liquibase.ChecksumVersions;
 import liquibase.ContextExpression;
 import liquibase.Labels;
 import liquibase.change.CheckSum;
@@ -78,7 +79,7 @@ public abstract class AbstractSqlVisitor implements SqlVisitor {
     }
 
     @Override
-    public CheckSum generateCheckSum(int version) {
+    public CheckSum generateCheckSum(ChecksumVersions version) {
         return CheckSum.compute(new StringChangeLogSerializer(new StringChangeLogSerializer.FieldFilter(){
             @Override
             public boolean include(Object obj, String field, Object value) {
