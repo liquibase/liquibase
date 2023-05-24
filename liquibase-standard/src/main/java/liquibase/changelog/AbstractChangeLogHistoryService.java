@@ -33,7 +33,7 @@ public abstract class AbstractChangeLogHistoryService implements ChangeLogHistor
 
     @Override
     public ChangeSet.RunStatus getRunStatus(final ChangeSet changeSet)
-        throws DatabaseException, DatabaseHistoryException {
+            throws DatabaseException, DatabaseHistoryException {
         RanChangeSet foundRan = getRanChangeSet(changeSet);
 
         if (foundRan == null) {
@@ -70,7 +70,7 @@ public abstract class AbstractChangeLogHistoryService implements ChangeLogHistor
                 List<ChangeSet> changeSets = databaseChangeLog.getChangeSets(ranChangeSet);
                 for (ChangeSet changeSet : changeSets) {
                     if ((changeSet != null) && new ContextChangeSetFilter(contexts).accepts(changeSet).isAccepted() &&
-                        new DbmsChangeSetFilter(getDatabase()).accepts(changeSet).isAccepted()) {
+                            new DbmsChangeSetFilter(getDatabase()).accepts(changeSet).isAccepted()) {
                         Scope.getCurrentScope().getLog(getClass()).fine(
                                 "Updating null or out of date checksum on changeSet " + changeSet + " to correct value"
                         );
@@ -107,13 +107,13 @@ public abstract class AbstractChangeLogHistoryService implements ChangeLogHistor
      * @return the deployment ID of the last changeset that has been run, or null if no changesets have been run yet.
      * @throws DatabaseException if there is an error accessing the database
      */
-     public String getLastDeploymentId() throws DatabaseException {
-         List<RanChangeSet> ranChangeSetsList = getRanChangeSets();
-         if (ranChangeSetsList == null || ranChangeSetsList.size() == 0) {
-             return null;
-         }
-         RanChangeSet lastRanChangeSet = ranChangeSetsList.get(ranChangeSetsList.size() - 1);
-         return lastRanChangeSet.getDeploymentId();
+    public String getLastDeploymentId() throws DatabaseException {
+        List<RanChangeSet> ranChangeSetsList = getRanChangeSets();
+        if (ranChangeSetsList == null || ranChangeSetsList.size() == 0) {
+            return null;
+        }
+        RanChangeSet lastRanChangeSet = ranChangeSetsList.get(ranChangeSetsList.size() - 1);
+        return lastRanChangeSet.getDeploymentId();
     }
 
     protected abstract void replaceChecksum(ChangeSet changeSet) throws DatabaseException;
@@ -132,7 +132,8 @@ public abstract class AbstractChangeLogHistoryService implements ChangeLogHistor
     public void generateDeploymentId() {
         if (this.deploymentId == null) {
             String dateString = String.valueOf(new Date().getTime());
-            this.deploymentId = dateString.substring(dateString.length() - 10);
+            this.deploymentId = dateString.length() > 9 ? dateString.substring(dateString.length() - 10) :
+                    String.format("%010d", dateString);
         }
     }
 
