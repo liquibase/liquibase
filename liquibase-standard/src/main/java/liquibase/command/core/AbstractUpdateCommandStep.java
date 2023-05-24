@@ -108,16 +108,19 @@ public abstract class AbstractUpdateCommandStep extends AbstractCommandStep impl
         }
     }
 
-    private void performChecksumUpgradeIfRequired(Database database, final DatabaseChangeLog databaseChangeLog, final Contexts contexts, LabelExpression labels) throws DatabaseException {
+    private void performChecksumUpgradeIfRequired(Database database, final DatabaseChangeLog databaseChangeLog, final Contexts contexts,
+                                                  LabelExpression labelExpression) throws LiquibaseException {
         ChangeLogHistoryService changeLogService = ChangeLogHistoryServiceFactory.getInstance().getChangeLogService(database);
         if (changeLogService.isDatabaseChecksumsCompatible()) {
             return;
         }
-        // FIXME this is not working - I believe we need to reload DatabaseChangelog too.
-        changeLogService.reset();
-        changeLogService.init();
-        changeLogService.getRanChangeSets(true);
-        changeLogService.upgradeChecksums(databaseChangeLog, contexts, labels);
+        ChangeLogIterator runChangeLogIterator = new ChangeLogIterator(databaseChangeLog,
+                new ContextChangeSetFilter(contexts),
+                new LabelChangeSetFilter(labelExpression),
+                new DbmsChangeSetFilter(database),
+                new IgnoreChangeSetFilter());
+
+        runChangeLogIterator.run(new UpgradeCheckSumVisitor(database), new RuntimeEnvironment(database, contexts, labelExpression));
     }
 
     private void addChangelogFileToMdc(String changeLogFile, DatabaseChangeLog databaseChangeLog) {
@@ -139,7 +142,7 @@ public abstract class AbstractUpdateCommandStep extends AbstractCommandStep impl
         Scope.getCurrentScope().getSingleton(ExecutorService.class).reset();
     }
 
-    private void logDeploymentOutcomeMdc(DefaultChangeExecListener defaultListener, boolean success) throws IOException {
+    private void logDeploymentOutcomeMdc(DefaultChangeExecListener defaultListener, boolean success) {
         List<ChangeSet> deployedChangeSets = defaultListener.getDeployedChangeSets();
         int deployedChangeSetCount = deployedChangeSets.size();
         ChangesetsUpdated changesetsUpdated = new ChangesetsUpdated(deployedChangeSets);

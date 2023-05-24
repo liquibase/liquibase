@@ -244,33 +244,15 @@ public class StandardChangeLogHistoryService extends AbstractChangeLogHistorySer
                 }
             }
 
-            SqlStatement databaseChangeLogStatement = new SelectFromDatabaseChangeLogStatement(new SelectFromDatabaseChangeLogStatement.ByNotNullCheckSum(),
-                    new ColumnConfig().setName("MD5SUM")).setLimit(1);
+            SqlStatement databaseChangeLogStatement = new SelectFromDatabaseChangeLogStatement(
+                    new SelectFromDatabaseChangeLogStatement.ByNotNullCheckSum(),
+                    new ColumnConfig().setName("MD5SUM"));
             List<Map<String, ?>> md5sumRS = ChangelogJdbcMdcListener.query(getDatabase(), ex -> ex.queryForList(databaseChangeLogStatement));
 
             if (!md5sumRS.isEmpty()) {
                 //check if any checksum is not using the current version
-                databaseChecksumsCompatible = !md5sumRS.stream()
-                        .filter(m -> !m.get("MD5SUM").toString().startsWith(CheckSum.getCurrentVersion() + ":"))
-                        .findAny().isPresent();
+                databaseChecksumsCompatible = md5sumRS.stream().allMatch(m -> m.get("MD5SUM").toString().startsWith(ChecksumVersions.latest().getVersion() + ":"));
             }
-                //String md5sum = md5sumRS.get(0).get("MD5SUM").toString();
-             //   if (!md5sum.startsWith(CheckSum.getCurrentVersion() + ":")) {
-//                    executor.comment("DatabaseChangeLog checksums are an incompatible version.  Setting them to null " +
-//                        "so they will be updated on next database update");
-//                    // FIXME
-//                    // if (force is not set, throws exception.
-//                    // outside we validate if there are runOnchange
-//                    // if not, set the flag and call this method again
-//                    // otherwise fail .
-//                    databaseChecksumsCompatible = false;
-//                    UpdateStatement updateStatement = new UpdateStatement(database.getLiquibaseCatalogName(),
-//                            database.getLiquibaseSchemaName(), database.getDatabaseChangeLogTableName())
-//                            .addNewColumnValue("MD5SUM", null);
-//
-//                    statementsToExecute.add(updateStatement);
-             //   }
-//            }
 
 
         } else if (!changeLogCreateAttempted) {
@@ -300,7 +282,7 @@ public class StandardChangeLogHistoryService extends AbstractChangeLogHistorySer
             }
         }
 
-        if (statementsToExecute.size() > 0) {
+        if (!statementsToExecute.isEmpty()) {
             //reset the cache if there was a change to the table. Especially catches things like md5 changes which might have been updated but would still be wrong in the cache
             this.ranChangeSetList = null;
         }
