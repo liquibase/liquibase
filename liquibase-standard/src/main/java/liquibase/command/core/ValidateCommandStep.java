@@ -1,5 +1,6 @@
 package liquibase.command.core;
 
+import liquibase.Scope;
 import liquibase.changelog.DatabaseChangeLog;
 import liquibase.command.*;
 import liquibase.command.core.helpers.DatabaseChangelogCommandStep;
@@ -41,6 +42,7 @@ public class ValidateCommandStep extends AbstractCommandStep {
     @Override
     public void run(CommandResultsBuilder resultsBuilder) throws Exception {
         // Do nothing. This is all handled in DatabaseChangelogCommandStep.
+        Scope.getCurrentScope().getUI().sendMessage(coreBundle.getString("no.validation.errors.found"));
         resultsBuilder.addResult("statusCode", 0);
     }
 }
