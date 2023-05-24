@@ -78,7 +78,7 @@ public abstract class AbstractSqlVisitor implements SqlVisitor {
     }
 
     @Override
-    public CheckSum generateCheckSum() {
+    public CheckSum generateCheckSum(int version) {
         return CheckSum.compute(new StringChangeLogSerializer(new StringChangeLogSerializer.FieldFilter(){
             @Override
             public boolean include(Object obj, String field, Object value) {
@@ -87,7 +87,7 @@ public abstract class AbstractSqlVisitor implements SqlVisitor {
                 }
                 return super.include(obj, field, value);
             }
-        }).serialize(this, false));
+        }).serialize(this, false), version);
     }
 
     public String[] getExcludedFieldFilters() {

@@ -67,18 +67,18 @@ public final class CheckSum {
     /**
      * Compute a storedCheckSum of the given string.
      */
-    public static CheckSum compute(String valueToChecksum) {
+    public static CheckSum compute(String valueToChecksum, int version) {
         return new CheckSum(MD5Util.computeMD5(
                 //remove "Unknown" unicode char 65533
                 Normalizer.normalize(StringUtil.standardizeLineEndings(valueToChecksum)
                         .replace("\uFFFD", ""), Normalizer.Form.NFC)
-        ), getCurrentVersion());
+        ), version);
     }
 
     /**
      * Compute a CheckSum of the given data stream (no normalization of line endings!)
      */
-    public static CheckSum compute(final InputStream stream, boolean standardizeLineEndings) {
+    public static CheckSum compute(final InputStream stream, boolean standardizeLineEndings, int version) {
         InputStream newStream = stream;
         if (standardizeLineEndings) {
             newStream = new InputStream() {

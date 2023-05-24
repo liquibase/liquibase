@@ -37,15 +37,15 @@ public class CheckSumTest {
     @Test
     public void compute_String() {
         String valueToHash = "asdf";
-        CheckSum checkSum = CheckSum.compute(valueToHash);
+        CheckSum checkSum = CheckSum.compute(valueToHash, CheckSum.getCurrentVersion());
         assertEquals(CheckSum.getCurrentVersion(), checkSum.getVersion());
         assertNotEquals(checkSum.toString(), valueToHash);
     }
 
     @Test
     public void compute_String_shouldIgnoreUnknownUnicodeChar() {
-        CheckSum checkSum1 = CheckSum.compute("asdfa");
-        CheckSum checkSum2 = CheckSum.compute("as\uFFFDdf\uFFFDa");
+        CheckSum checkSum1 = CheckSum.compute("asdfa", CheckSum.getCurrentVersion());
+        CheckSum checkSum2 = CheckSum.compute("as\uFFFDdf\uFFFDa", CheckSum.getCurrentVersion());
 
         assertEquals(checkSum2, checkSum1);
     }
@@ -53,10 +53,10 @@ public class CheckSumTest {
     @Test
     public void compute_Stream() {
         String valueToHash = "asdf";
-        CheckSum checkSum = CheckSum.compute(new ByteArrayInputStream(valueToHash.getBytes()), false);
+        CheckSum checkSum = CheckSum.compute(new ByteArrayInputStream(valueToHash.getBytes()), false, CheckSum.getCurrentVersion());
         assertEquals(CheckSum.getCurrentVersion(), checkSum.getVersion());
         assertNotEquals(checkSum.toString(), valueToHash);
-        assertEquals(CheckSum.compute(valueToHash).toString(), checkSum.toString());
+        assertEquals(CheckSum.compute(valueToHash, CheckSum.getCurrentVersion()).toString(), checkSum.toString());
     }
 
     @Test
@@ -76,27 +76,27 @@ public class CheckSumTest {
 
     @Test
     public void compute_lineEndingsDontMatter() {
-        String checkSum = CheckSum.compute("a string\nwith\nlines").toString();
-        assertEquals(checkSum, CheckSum.compute("a string\rwith\rlines").toString());
-        assertEquals(checkSum, CheckSum.compute("a string\r\nwith\r\nlines").toString());
-        assertEquals(checkSum, CheckSum.compute("a string\rwith\nlines").toString());
+        String checkSum = CheckSum.compute("a string\nwith\nlines", CheckSum.getCurrentVersion()).toString();
+        assertEquals(checkSum, CheckSum.compute("a string\rwith\rlines", CheckSum.getCurrentVersion()).toString());
+        assertEquals(checkSum, CheckSum.compute("a string\r\nwith\r\nlines", CheckSum.getCurrentVersion()).toString());
+        assertEquals(checkSum, CheckSum.compute("a string\rwith\nlines", CheckSum.getCurrentVersion()).toString());
 
-        assertNotEquals(checkSum, CheckSum.compute("a string\n\nwith\n\nlines").toString());
+        assertNotEquals(checkSum, CheckSum.compute("a string\n\nwith\n\nlines", CheckSum.getCurrentVersion()).toString());
 
-        assertEquals(checkSum, CheckSum.compute(new ByteArrayInputStream("a string\nwith\nlines".getBytes()), true).toString());
-        assertEquals(checkSum, CheckSum.compute(new ByteArrayInputStream("a string\rwith\rlines".getBytes()), true).toString());
-        assertEquals(checkSum, CheckSum.compute(new ByteArrayInputStream("a string\r\nwith\r\nlines".getBytes()), true).toString());
-        assertEquals(checkSum, CheckSum.compute(new ByteArrayInputStream("a string\rwith\r\nlines".getBytes()), true).toString());
+        assertEquals(checkSum, CheckSum.compute(new ByteArrayInputStream("a string\nwith\nlines".getBytes()), true, CheckSum.getCurrentVersion()).toString());
+        assertEquals(checkSum, CheckSum.compute(new ByteArrayInputStream("a string\rwith\rlines".getBytes()), true, CheckSum.getCurrentVersion()).toString());
+        assertEquals(checkSum, CheckSum.compute(new ByteArrayInputStream("a string\r\nwith\r\nlines".getBytes()), true, CheckSum.getCurrentVersion()).toString());
+        assertEquals(checkSum, CheckSum.compute(new ByteArrayInputStream("a string\rwith\r\nlines".getBytes()), true, CheckSum.getCurrentVersion()).toString());
     }
 
     @Test
     public void compute_lineEndingsDontMatter_multiline() {
-        String checkSum = CheckSum.compute("a string\n\nwith\n\nlines").toString();
-        assertEquals(checkSum, CheckSum.compute("a string\r\rwith\r\rlines").toString());
-        assertEquals(checkSum, CheckSum.compute("a string\r\n\r\nwith\r\n\r\nlines").toString());
+        String checkSum = CheckSum.compute("a string\n\nwith\n\nlines", CheckSum.getCurrentVersion()).toString();
+        assertEquals(checkSum, CheckSum.compute("a string\r\rwith\r\rlines", CheckSum.getCurrentVersion()).toString());
+        assertEquals(checkSum, CheckSum.compute("a string\r\n\r\nwith\r\n\r\nlines", CheckSum.getCurrentVersion()).toString());
 
-        assertEquals(checkSum, CheckSum.compute(new ByteArrayInputStream("a string\n\nwith\n\nlines".getBytes()), true).toString());
-        assertEquals(checkSum, CheckSum.compute(new ByteArrayInputStream("a string\r\rwith\r\rlines".getBytes()), true).toString());
-        assertEquals(checkSum, CheckSum.compute(new ByteArrayInputStream("a string\r\n\r\nwith\r\n\r\nlines".getBytes()), true).toString());
+        assertEquals(checkSum, CheckSum.compute(new ByteArrayInputStream("a string\n\nwith\n\nlines".getBytes()), true, CheckSum.getCurrentVersion()).toString());
+        assertEquals(checkSum, CheckSum.compute(new ByteArrayInputStream("a string\r\rwith\r\rlines".getBytes()), true, CheckSum.getCurrentVersion()).toString());
+        assertEquals(checkSum, CheckSum.compute(new ByteArrayInputStream("a string\r\n\r\nwith\r\n\r\nlines".getBytes()), true, CheckSum.getCurrentVersion()).toString());
     }
 }

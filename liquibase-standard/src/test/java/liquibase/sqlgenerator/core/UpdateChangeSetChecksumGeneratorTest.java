@@ -51,7 +51,7 @@ public class UpdateChangeSetChecksumGeneratorTest {
         doReturn("SomeSchemaName").when(mockedDatabase).getLiquibaseSchemaName();
         doReturn("SomeChangeLogTableName").when(mockedDatabase).getDatabaseChangeLogTableName();
         doReturn(SOME_UPDATED_CHECK_SUM).when(mockedUpdatedCheckSum).toString();
-        doReturn(mockedUpdatedCheckSum).when(mockedChangeSet).generateCheckSum();
+        doReturn(mockedUpdatedCheckSum).when(mockedChangeSet).generateCheckSum(CheckSum.getCurrentVersion());
         doReturn(CHANGESET_SOME_ID).when(mockedChangeSet).getId();
         doReturn(CHANGESET_SOME_AUTHOR).when(mockedChangeSet).getAuthor();
         doReturn(CHANGESET_NORMALIZED_FILE_PATH).when(mockedChangeSet).getFilePath();

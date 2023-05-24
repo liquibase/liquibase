@@ -29,8 +29,8 @@ public class ChangeSetStatus {
 
     public ChangeSetStatus(ChangeSet changeSet) {
         this.changeSet = changeSet;
-
-        this.currentCheckSum = changeSet.generateCheckSum();
+        int version = changeSet.getStoredCheckSum() != null? changeSet.getStoredCheckSum().getVersion() : CheckSum.getCurrentVersion();
+        this.currentCheckSum = changeSet.generateCheckSum(version);
         this.description = changeSet.getDescription();
         this.comments = changeSet.getComments();
     }

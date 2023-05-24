@@ -35,7 +35,8 @@ public class RanChangeSet {
         this(changeSet.getFilePath(),
                 changeSet.getId(),
                 changeSet.getAuthor(),
-                changeSet.generateCheckSum(),
+                changeSet.generateCheckSum((changeSet.getStoredCheckSum() != null) ?
+                        changeSet.getStoredCheckSum().getVersion() : CheckSum.getCurrentVersion()),
                 new Date(),
                 null,
                 execType,

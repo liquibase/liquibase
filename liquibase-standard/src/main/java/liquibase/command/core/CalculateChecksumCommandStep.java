@@ -70,7 +70,7 @@ public class CalculateChecksumCommandStep extends AbstractCommandStep {
         if (changeSet == null) {
             throw new LiquibaseException(new IllegalArgumentException("No such changeSet: " + changeSetIdentifier));
         }
-        sendMessages(resultsBuilder, changeSet.generateCheckSum());
+        sendMessages(resultsBuilder, changeSet.generateCheckSum(changeSet.getStoredCheckSum().getVersion()));
     }
 
     private static void sendMessages(CommandResultsBuilder resultsBuilder, CheckSum checkSum) {

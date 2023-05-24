@@ -73,7 +73,7 @@ public class ShouldRunChangeSetFilter implements ChangeSetFilter {
         if (ranChangeSet.getLastCheckSum() == null) {
             return false;
         }
-        return !changeSet.generateCheckSum().equals(ranChangeSet.getLastCheckSum());
+        return !changeSet.generateCheckSum(changeSet.getStoredCheckSum().getVersion()).equals(ranChangeSet.getLastCheckSum());
     }
 
     @Override

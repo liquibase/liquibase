@@ -141,13 +141,18 @@ public class OfflineChangeLogHistoryService extends AbstractChangeLogHistoryServ
             Scope.getCurrentScope().getSingleton(ExecutorService.class).getExecutor("jdbc", getDatabase()).execute(new UpdateChangeSetChecksumStatement(changeSet));
         }
         replaceChangeSet(changeSet, line -> {
-            line[Columns.MD5SUM.ordinal()] = changeSet.generateCheckSum().toString();
+            line[Columns.MD5SUM.ordinal()] = changeSet.generateCheckSum(CheckSum.getCurrentVersion()).toString();
             return line;
         });
     }
 
     @Override
     public List<RanChangeSet> getRanChangeSets() throws DatabaseException {
+        return this.getRanChangeSets(false);
+    }
+
+    @Override
+    public List<RanChangeSet> getRanChangeSets(boolean allowUpgrade) throws DatabaseException {
         try (
                 Reader reader = new InputStreamReader(Files.newInputStream(this.changeLogFile.toPath()), GlobalConfiguration.OUTPUT_FILE_ENCODING.getCurrentValue())
         )
@@ -259,7 +264,7 @@ public class OfflineChangeLogHistoryService extends AbstractChangeLogHistoryServ
             newLine[Columns.DATEEXECUTED.ordinal()] = new ISODateFormat().format(new java.sql.Timestamp(new Date().getTime()));
             newLine[Columns.ORDEREXECUTED.ordinal()] = String.valueOf(getNextSequenceValue());
             newLine[Columns.EXECTYPE.ordinal()] = execType.value;
-            newLine[Columns.MD5SUM.ordinal()] = changeSet.generateCheckSum().toString();
+            newLine[Columns.MD5SUM.ordinal()] = changeSet.generateCheckSum(CheckSum.getCurrentVersion()).toString();
             newLine[Columns.DESCRIPTION.ordinal()] = changeSet.getDescription();
             newLine[Columns.COMMENTS.ordinal()] = changeSet.getComments();
             newLine[Columns.TAG.ordinal()] = tag;
@@ -292,7 +297,7 @@ public class OfflineChangeLogHistoryService extends AbstractChangeLogHistoryServ
         } else  if (execType.ranBefore) {
             replaceChangeSet(changeSet, line -> {
                 line[Columns.DATEEXECUTED.ordinal()] = new ISODateFormat().format(new java.sql.Timestamp(new Date().getTime()));
-                line[Columns.MD5SUM.ordinal()] = changeSet.generateCheckSum().toString();
+                line[Columns.MD5SUM.ordinal()] = changeSet.generateCheckSum(changeSet.getStoredCheckSum().getVersion()).toString();
                 line[Columns.EXECTYPE.ordinal()] = execType.value;
                 return line;
             });
@@ -387,5 +392,10 @@ public class OfflineChangeLogHistoryService extends AbstractChangeLogHistoryServ
         if (changeLogFile.exists() && !changeLogFile.delete()) {
             throw new DatabaseException("Could not delete changelog history file "+changeLogFile.getAbsolutePath());
         }
+    }
+
+    @Override
+    public boolean isDatabaseChecksumsCompatible() {
+        return true;
     }
 }

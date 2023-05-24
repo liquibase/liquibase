@@ -29,6 +29,6 @@ public interface SqlVisitor extends LiquibaseSerializable {
     Labels getLabels();
     void setLabels(Labels labels);
 
-    CheckSum generateCheckSum();
+    CheckSum generateCheckSum(int version);
 
 }

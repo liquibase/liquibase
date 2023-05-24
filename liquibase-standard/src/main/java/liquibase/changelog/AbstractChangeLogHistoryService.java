@@ -49,7 +49,7 @@ public abstract class AbstractChangeLogHistoryService implements ChangeLogHistor
 
                 return ChangeSet.RunStatus.ALREADY_RAN;
             } else {
-                if (foundRan.getLastCheckSum().equals(changeSet.generateCheckSum())) {
+                if (foundRan.getLastCheckSum().equals(changeSet.generateCheckSum(foundRan.getLastCheckSum().getVersion()))) {
                     return ChangeSet.RunStatus.ALREADY_RAN;
                 } else {
                     if (changeSet.shouldRunOnChange()) {

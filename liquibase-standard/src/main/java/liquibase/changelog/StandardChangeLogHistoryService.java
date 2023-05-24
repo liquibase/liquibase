@@ -249,18 +249,28 @@ public class StandardChangeLogHistoryService extends AbstractChangeLogHistorySer
             List<Map<String, ?>> md5sumRS = ChangelogJdbcMdcListener.query(getDatabase(), ex -> ex.queryForList(databaseChangeLogStatement));
 
             if (!md5sumRS.isEmpty()) {
-                String md5sum = md5sumRS.get(0).get("MD5SUM").toString();
-                if (!md5sum.startsWith(CheckSum.getCurrentVersion() + ":")) {
-                    executor.comment("DatabaseChangeLog checksums are an incompatible version.  Setting them to null " +
-                        "so they will be updated on next database update");
-                    databaseChecksumsCompatible = false;
-                    UpdateStatement updateStatement = new UpdateStatement(database.getLiquibaseCatalogName(),
-                            database.getLiquibaseSchemaName(), database.getDatabaseChangeLogTableName())
-                            .addNewColumnValue("MD5SUM", null);
-
-                    statementsToExecute.add(updateStatement);
-                }
+                //check if any checksum is not using the current version
+                databaseChecksumsCompatible = !md5sumRS.stream()
+                        .filter(m -> !m.get("MD5SUM").toString().startsWith(CheckSum.getCurrentVersion() + ":"))
+                        .findAny().isPresent();
             }
+                //String md5sum = md5sumRS.get(0).get("MD5SUM").toString();
+             //   if (!md5sum.startsWith(CheckSum.getCurrentVersion() + ":")) {
+//                    executor.comment("DatabaseChangeLog checksums are an incompatible version.  Setting them to null " +
+//                        "so they will be updated on next database update");
+//                    // FIXME
+//                    // if (force is not set, throws exception.
+//                    // outside we validate if there are runOnchange
+//                    // if not, set the flag and call this method again
+//                    // otherwise fail .
+//                    databaseChecksumsCompatible = false;
+//                    UpdateStatement updateStatement = new UpdateStatement(database.getLiquibaseCatalogName(),
+//                            database.getLiquibaseSchemaName(), database.getDatabaseChangeLogTableName())
+//                            .addNewColumnValue("MD5SUM", null);
+//
+//                    statementsToExecute.add(updateStatement);
+             //   }
+//            }
 
 
         } else if (!changeLogCreateAttempted) {
@@ -309,6 +319,11 @@ public class StandardChangeLogHistoryService extends AbstractChangeLogHistorySer
      */
     @Override
     public List<RanChangeSet> getRanChangeSets() throws DatabaseException {
+        return this.getRanChangeSets(false);
+    }
+
+    @Override
+    public List<RanChangeSet> getRanChangeSets(boolean allowChecksumsUpgrade) throws DatabaseException {
         if (this.ranChangeSetList == null) {
             Database database = getDatabase();
             String databaseChangeLogTableName = getDatabase().escapeTableName(getLiquibaseCatalogName(),
@@ -322,8 +337,8 @@ public class StandardChangeLogHistoryService extends AbstractChangeLogHistorySer
                     String fileName = DatabaseChangeLog.normalizePath(storedFileName);
                     String author = rs.get("AUTHOR").toString();
                     String id = rs.get("ID").toString();
-                    String md5sum = ((rs.get("MD5SUM") == null) || !databaseChecksumsCompatible) ? null : rs.get
-                        ("MD5SUM").toString();
+                    boolean isUpgrade = allowChecksumsUpgrade && !databaseChecksumsCompatible;
+                    String md5sum = ((rs.get("MD5SUM") == null) || isUpgrade) ? null : rs.get("MD5SUM").toString();
                     String description = (rs.get("DESCRIPTION") == null) ? null : rs.get("DESCRIPTION").toString();
                     String comments = (rs.get("COMMENTS") == null) ? null : rs.get("COMMENTS").toString();
                     Object tmpDateExecuted = rs.get("DATEEXECUTED");
@@ -506,5 +521,10 @@ public class StandardChangeLogHistoryService extends AbstractChangeLogHistorySer
 
     protected String getContextsSize() {
         return CONTEXTS_SIZE;
+    }
+
+    @Override
+    public boolean isDatabaseChecksumsCompatible() {
+        return this.databaseChecksumsCompatible;
     }
 }

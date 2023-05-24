@@ -198,10 +198,10 @@ public class CreateViewChange extends AbstractChange {
     /**
      * Calculates the checksum based on the contained SQL.
      *
-     * @see liquibase.change.AbstractChange#generateCheckSum()
+     * @see liquibase.change.AbstractChange#generateCheckSum(int version)
      */
     @Override
-    public CheckSum generateCheckSum() {
+    public CheckSum generateCheckSum(int version) {
         InputStream stream = null;
         CheckSum checkSum;
         try {
@@ -216,8 +216,8 @@ public class CreateViewChange extends AbstractChange {
                 stream = openSqlStream();
                 stream = new PropertyExpandingStream(this.getChangeSet(), stream);
             }
-            checkSum = CheckSum.compute(new AbstractSQLChange.NormalizingStream(stream), false);
-            return CheckSum.compute(super.generateCheckSum().toString() + ":" + checkSum);
+            checkSum = CheckSum.compute(new AbstractSQLChange.NormalizingStream(stream), false, version);
+            return CheckSum.compute(super.generateCheckSum(version).toString() + ":" + checkSum, version);
 
         } catch (IOException e) {
             throw new UnexpectedLiquibaseException(e);
