@@ -1,5 +1,6 @@
 package liquibase.change;
 
+import liquibase.ChecksumVersions;
 import liquibase.Scope;
 import liquibase.changelog.ChangeSet;
 import liquibase.database.Database;
@@ -488,7 +489,10 @@ public abstract class AbstractChange extends AbstractPlugin implements Change {
      * Implementation generates checksum by serializing the change with {@link StringChangeLogSerializer}
      */
     @Override
-    public CheckSum generateCheckSum() {
+    public CheckSum generateCheckSum(ChecksumVersions version) {
+        if (version.equals(ChecksumVersions.V8)) {
+            return CheckSum.compute(new StringChangeLogSerializer().serialize(this, false), version);
+        }
         return CheckSum.compute(new StringChangeLogSerializer(new StringChangeLogSerializer.FieldFilter() {
             @Override
             public boolean include(Object obj, String field, Object value) {
@@ -497,7 +501,7 @@ public abstract class AbstractChange extends AbstractPlugin implements Change {
                 }
                 return super.include(obj, field, value);
             }
-        }).serialize(this, false));
+        }).serialize(this, false), version);
     }
 
     public String[] getExcludedFieldFilters() {

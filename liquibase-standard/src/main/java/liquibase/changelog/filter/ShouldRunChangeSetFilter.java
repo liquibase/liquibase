@@ -1,5 +1,6 @@
 package liquibase.changelog.filter;
 
+import liquibase.ChecksumVersions;
 import liquibase.changelog.ChangeSet;
 import liquibase.changelog.RanChangeSet;
 import liquibase.database.Database;
@@ -73,7 +74,8 @@ public class ShouldRunChangeSetFilter implements ChangeSetFilter {
         if (ranChangeSet.getLastCheckSum() == null) {
             return false;
         }
-        return !changeSet.generateCheckSum().equals(ranChangeSet.getLastCheckSum());
+        return !changeSet.generateCheckSum(ChecksumVersions.enumFromChecksumVersion(changeSet.getStoredCheckSum().getVersion()))
+                .equals(ranChangeSet.getLastCheckSum());
     }
 
     @Override

@@ -31,6 +31,8 @@ public interface ChangeLogHistoryService extends PrioritizedService {
 
     List<RanChangeSet> getRanChangeSets() throws DatabaseException;
 
+    List<RanChangeSet> getRanChangeSets(boolean allowChecksumsUpgrade) throws DatabaseException;
+
     RanChangeSet getRanChangeSet(ChangeSet changeSet) throws DatabaseException, DatabaseHistoryException;
 
     ChangeSet.RunStatus getRunStatus(ChangeSet changeSet) throws DatabaseException, DatabaseHistoryException;
@@ -60,4 +62,5 @@ public interface ChangeLogHistoryService extends PrioritizedService {
 
     void generateDeploymentId();
 
-    }
+    boolean isDatabaseChecksumsCompatible();
+}

@@ -1,5 +1,6 @@
 package liquibase.changelog;
 
+import liquibase.ChecksumVersions;
 import liquibase.change.CheckSum;
 import liquibase.changelog.filter.ChangeSetFilter;
 import liquibase.changelog.filter.ChangeSetFilterResult;
@@ -29,8 +30,10 @@ public class ChangeSetStatus {
 
     public ChangeSetStatus(ChangeSet changeSet) {
         this.changeSet = changeSet;
-
-        this.currentCheckSum = changeSet.generateCheckSum();
+        ChecksumVersions version = changeSet.getStoredCheckSum() != null ?
+                ChecksumVersions.enumFromChecksumVersion(changeSet.getStoredCheckSum().getVersion()) :
+                ChecksumVersions.latest();
+        this.currentCheckSum = changeSet.generateCheckSum(version);
         this.description = changeSet.getDescription();
         this.comments = changeSet.getComments();
     }

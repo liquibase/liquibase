@@ -16,7 +16,6 @@ import liquibase.exception.LockException;
 import liquibase.executor.ExecutorService;
 import liquibase.lockservice.LockService;
 import liquibase.lockservice.LockServiceFactory;
-import liquibase.logging.core.BufferedLogService;
 import liquibase.logging.mdc.MdcKey;
 import liquibase.logging.mdc.MdcObject;
 import liquibase.logging.mdc.MdcValue;
@@ -86,10 +85,12 @@ public abstract class AbstractUpdateCommandStep extends AbstractCommandStep impl
                 runChangeLogIterator.run(new UpdateVisitor(database, defaultChangeExecListener), new RuntimeEnvironment(database, contexts, labelExpression));
                 ShowSummaryUtil.showUpdateSummary(databaseChangeLog, getShowSummary(commandScope), statusVisitor, resultsBuilder.getOutputStream());
             });
+
             resultsBuilder.addResult("statusCode", 0);
             addChangelogFileToMdc(getChangelogFileArg(commandScope), databaseChangeLog);
             logDeploymentOutcomeMdc(defaultChangeExecListener, true);
             postUpdateLog();
+            this.performChecksumUpgradeIfRequired(database, databaseChangeLog, contexts, labelExpression);
         } catch (Exception e) {
             DatabaseChangeLog databaseChangeLog = (DatabaseChangeLog) commandScope.getDependency(DatabaseChangeLog.class);
             addChangelogFileToMdc(getChangelogFileArg(commandScope), databaseChangeLog);
@@ -105,6 +106,18 @@ public abstract class AbstractUpdateCommandStep extends AbstractCommandStep impl
                 Scope.getCurrentScope().getLog(getClass()).severe(MSG_COULD_NOT_RELEASE_LOCK, e);
             }
         }
+    }
+
+    private void performChecksumUpgradeIfRequired(Database database, final DatabaseChangeLog databaseChangeLog, final Contexts contexts, LabelExpression labels) throws DatabaseException {
+        ChangeLogHistoryService changeLogService = ChangeLogHistoryServiceFactory.getInstance().getChangeLogService(database);
+        if (changeLogService.isDatabaseChecksumsCompatible()) {
+            return;
+        }
+        // FIXME this is not working - I believe we need to reload DatabaseChangelog too.
+        changeLogService.reset();
+        changeLogService.init();
+        changeLogService.getRanChangeSets(true);
+        changeLogService.upgradeChecksums(databaseChangeLog, contexts, labels);
     }
 
     private void addChangelogFileToMdc(String changeLogFile, DatabaseChangeLog databaseChangeLog) {
@@ -174,8 +187,9 @@ public abstract class AbstractUpdateCommandStep extends AbstractCommandStep impl
     public boolean isUpToDateFastCheck(CommandScope commandScope, Database database, DatabaseChangeLog databaseChangeLog, Contexts contexts, LabelExpression labelExpression) throws LiquibaseException {
         String cacheKey = contexts + "/" + labelExpression;
         if (!upToDateFastCheck.containsKey(cacheKey)) {
+            ChangeLogHistoryService changeLogService = ChangeLogHistoryServiceFactory.getInstance().getChangeLogService(database);
             try {
-                if (listUnrunChangeSets(commandScope, database, databaseChangeLog, contexts, labelExpression).isEmpty()) {
+                if (changeLogService.isDatabaseChecksumsCompatible() && listUnrunChangeSets(commandScope, database, databaseChangeLog, contexts, labelExpression).isEmpty()) {
                     Scope.getCurrentScope().getLog(getClass()).fine("Fast check found no un-run changesets");
                     upToDateFastCheck.put(cacheKey, true);
                 } else {
@@ -188,7 +202,6 @@ public abstract class AbstractUpdateCommandStep extends AbstractCommandStep impl
                 // Discard the cached fetched un-run changeset list, as if
                 // another peer is running the changesets in parallel, we may
                 // get a different answer after taking out the write lock
-                ChangeLogHistoryService changeLogService = ChangeLogHistoryServiceFactory.getInstance().getChangeLogService(database);
                 changeLogService.reset();
             }
         }

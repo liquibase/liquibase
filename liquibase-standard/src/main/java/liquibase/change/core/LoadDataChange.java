@@ -2,6 +2,7 @@ package liquibase.change.core;
 
 import com.opencsv.exceptions.CsvMalformedLineException;
 import liquibase.CatalogAndSchema;
+import liquibase.ChecksumVersions;
 import liquibase.Scope;
 import liquibase.change.*;
 import liquibase.changelog.ChangeSet;
@@ -32,7 +33,10 @@ import liquibase.statement.core.InsertStatement;
 import liquibase.structure.core.Column;
 import liquibase.structure.core.DataType;
 import liquibase.structure.core.Table;
-import liquibase.util.*;
+import liquibase.util.BooleanUtil;
+import liquibase.util.ObjectUtil;
+import liquibase.util.StreamUtil;
+import liquibase.util.StringUtil;
 import liquibase.util.csv.CSVReader;
 
 import java.io.IOException;
@@ -769,7 +773,7 @@ public class LoadDataChange extends AbstractTableChange implements ChangeWithCol
     }
 
     @Override
-    public CheckSum generateCheckSum() {
+    public CheckSum generateCheckSum(ChecksumVersions version) {
         InputStream stream = null;
         try {
             ResourceAccessor resourceAccessor = Scope.getCurrentScope().getResourceAccessor();
@@ -781,7 +785,7 @@ public class LoadDataChange extends AbstractTableChange implements ChangeWithCol
             }
 
             stream = new EmptyLineAndCommentSkippingInputStream(resource.openInputStream(), commentLineStartsWith);
-            return CheckSum.compute(getTableName() + ":" + CheckSum.compute(stream, /*standardizeLineEndings*/ true));
+            return CheckSum.compute(getTableName() + ":" + CheckSum.compute(stream, /*standardizeLineEndings*/ true, version), version);
         } catch (IOException e) {
             throw new UnexpectedLiquibaseException(e);
         } finally {

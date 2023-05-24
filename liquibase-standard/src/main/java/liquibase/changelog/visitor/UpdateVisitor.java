@@ -16,6 +16,7 @@ import liquibase.executor.Executor;
 import liquibase.executor.ExecutorService;
 import liquibase.executor.LoggingExecutor;
 import liquibase.logging.mdc.MdcKey;
+import liquibase.statement.core.UpdateChangeSetChecksumStatement;
 
 import java.util.Objects;
 import java.util.Set;
@@ -59,6 +60,7 @@ public class UpdateVisitor implements ChangeSetVisitor {
         ObjectQuotingStrategy previousStr = this.database.getObjectQuotingStrategy();
         try {
             execType = changeSet.execute(databaseChangeLog, execListener, this.database);
+
         } catch (MigrationFailedException e) {
             fireRunFailed(changeSet, databaseChangeLog, database, e);
             throw e;
@@ -71,7 +73,6 @@ public class UpdateVisitor implements ChangeSetVisitor {
         // reset object quoting strategy after running changeset
         this.database.setObjectQuotingStrategy(previousStr);
         this.database.markChangeSetExecStatus(changeSet, execType);
-
         this.database.commit();
     }
 

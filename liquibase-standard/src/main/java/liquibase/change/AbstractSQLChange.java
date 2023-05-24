@@ -1,9 +1,9 @@
 package liquibase.change;
 
+import liquibase.ChecksumVersions;
 import liquibase.change.core.RawSQLChange;
 import liquibase.Scope;
 import liquibase.GlobalConfiguration;
-import liquibase.change.core.SQLFileChange;
 import liquibase.database.Database;
 import liquibase.database.core.Db2zDatabase;
 import liquibase.database.core.MSSQLDatabase;
@@ -11,7 +11,6 @@ import liquibase.exception.DatabaseException;
 import liquibase.exception.UnexpectedLiquibaseException;
 import liquibase.exception.ValidationErrors;
 import liquibase.exception.Warnings;
-import liquibase.serializer.core.string.StringChangeLogSerializer;
 import liquibase.statement.SqlStatement;
 import liquibase.statement.core.RawCompoundStatement;
 import liquibase.statement.core.RawSqlStatement;
@@ -19,7 +18,6 @@ import liquibase.util.StringUtil;
 
 import java.io.*;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 
 import static liquibase.statement.SqlStatement.EMPTY_SQL_STATEMENT;
@@ -191,10 +189,10 @@ public abstract class AbstractSQLChange extends AbstractChange implements DbmsTa
     /**
      * Calculates the checksum based on the contained SQL.
      *
-     * @see liquibase.change.AbstractChange#generateCheckSum()
+     * @see Change#generateCheckSum(ChecksumVersions)
      */
     @Override
-    public CheckSum generateCheckSum() {
+    public CheckSum generateCheckSum(ChecksumVersions version) {
         InputStream stream = null;
         try {
             stream = openSqlStream();
@@ -209,7 +207,7 @@ public abstract class AbstractSQLChange extends AbstractChange implements DbmsTa
                 );
             }
 
-            return CheckSum.compute(new AbstractSQLChange.NormalizingStream(stream), false);
+            return CheckSum.compute(new AbstractSQLChange.NormalizingStream(stream), false, version);
 
         } catch (IOException e) {
             throw new UnexpectedLiquibaseException(e);
