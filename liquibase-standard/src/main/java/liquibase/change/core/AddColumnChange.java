@@ -284,9 +284,8 @@ public class AddColumnChange extends AbstractChange implements ChangeWithColumns
     }
 
     private List<SqlStatement> generateAddNotNullConstraintStatements(AddColumnConfig column, ConstraintsConfig constraints, Database database) {
-        List<SqlStatement> returnList = new ArrayList<>();
         AddNotNullConstraintChange addNotNullConstraintChange = createAddNotNullConstraintChange(column, constraints);
-        returnList.addAll(Arrays.asList(addNotNullConstraintChange.generateStatements(database)));
+        List<SqlStatement> returnList = new ArrayList<>(Arrays.asList(addNotNullConstraintChange.generateStatements(database)));
 
         if (database instanceof MySQLDatabase && column.getDefaultValueObject() != null) {
             //mysql's addNotNullConstraint call above loses the default value

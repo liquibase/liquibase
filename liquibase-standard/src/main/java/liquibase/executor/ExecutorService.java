@@ -46,13 +46,12 @@ public class ExecutorService extends AbstractPluginFactory<Executor>  {
     }
 
     /**
+     * Retrieves a named executor for the specified database.
      *
-     * Retrieve a named executor for the specified database
-     *
-     * @param   name
-     * @param   database
-     * @return  Executor
-     *
+     * @param name     the name of the executor
+     * @param database the database for which to retrieve the executor
+     * @return the {@code Executor} associated with the given name and database
+     * @throws UnexpectedLiquibaseException if there was an error retrieving the executor
      */
     public Executor getExecutor(final String name, final Database database) {
         return executors.computeIfAbsent(createKey(name, database), db -> {
@@ -67,30 +66,34 @@ public class ExecutorService extends AbstractPluginFactory<Executor>  {
     }
 
     /**
+     * Checks if an executor exists for the given name and database.
      *
-     * Return true if there is an existing Executor for this name/database
-     *
+     * @param name     the name of the executor
+     * @param database the database to which the executor is connected
+     * @return {@code true} if an executor exists for the given name and database, {@code false} otherwise
      */
     public boolean executorExists(final String name, final Database database) {
         return executors.containsKey(createKey(name, database));
     }
 
     /**
+     * Returns an {@code Executor} for the specified database and name.
+     * This method is deprecated; please use {@link #getExecutor(String, Database)} instead.
      *
-     * @deprecated  Please use getExecutor(name, database) instead
-     * @param       database
-     * @return      Executor
-     *
+     * @param database the {@code Database} to execute the statements on
+     * @return {@code Executor} for the specified database and name
+     * @deprecated Please use {@link #getExecutor(String, Database) } instead.
      */
     public Executor getExecutor(Database database) {
         return getExecutor("jdbc", database);
     }
 
     /**
+     * Sets the executor for the given database with the default name "jdbc". If an executor with the same name and database already exists,
+     * it will be replaced by the new one.
      *
-     * @deprecated      Please use setExecutor(name, database, executor)
-     * @param           database
-     * @param           executor
+     * @param database the {@code Database} for which the executor is set
+     * @param executor the {@code Executor} to set
      */
     public void setExecutor(Database database, Executor executor) {
         setExecutor("jdbc", database, executor);

@@ -9,7 +9,7 @@ import java.util.Map;
 /**
  * Adapter implementation of the ResultSetExtractor interface that delegates
  * to a RowMapper which is supposed to create a not null constraint object for each row.
- *
+ * <p>
  * Special mapper needed because sys table ALL_CONSTRAINTS provides info about not null constraints
  * that have type 'C' and SEARCH_CONDITION(Text of search condition for a check constraint) field with 'is not null' string
  * of data type: 'LONG' But type 'LONG' limits us to do any text operations (match, contains, etc.) on DB level

@@ -74,11 +74,6 @@ public class UpdateCommandStep extends AbstractUpdateCommandStep implements Clea
     }
 
     @Override
-    public String getHubOperation() {
-        return "update";
-    }
-
-    @Override
     public List<Class<?>> requiredDependencies() {
         List<Class<?>> deps = new ArrayList<>(super.requiredDependencies());
         deps.add(UpdateSummaryEnum.class);

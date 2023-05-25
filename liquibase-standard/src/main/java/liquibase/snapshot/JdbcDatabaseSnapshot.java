@@ -52,8 +52,8 @@ public class JdbcDatabaseSnapshot extends DatabaseSnapshot {
 
     public class CachingDatabaseMetaData {
         private static final String SQL_FILTER_MATCH_ALL = "%";
-        private DatabaseMetaData databaseMetaData;
-        private Database database;
+        private final DatabaseMetaData databaseMetaData;
+        private final Database database;
 
         public CachingDatabaseMetaData(Database database, DatabaseMetaData metaData) {
             this.databaseMetaData = metaData;

@@ -17,7 +17,7 @@ import java.util.regex.Pattern;
  */
 public class ClassLoaderResourceAccessor extends AbstractResourceAccessor {
 
-    private ClassLoader classLoader;
+    private final ClassLoader classLoader;
     private CompositeResourceAccessor additionalResourceAccessors;
     protected SortedSet<String> description;
 
