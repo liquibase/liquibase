@@ -27,9 +27,9 @@ import java.util.regex.Pattern;
  */
 public abstract class AbstractDatabaseObject implements DatabaseObject {
 
+    private final Map<String, Object> attributes = new HashMap<>();
     private static final String CURLY_BRACKET_REGEX = "(.*)!\\{(.*)\\}";
     public static final Pattern CURLY_BRACKET_PATTERN = Pattern.compile(CURLY_BRACKET_REGEX);
-    private Map<String, Object> attributes = new HashMap<>();
 
     private String snapshotId;
 
@@ -233,10 +233,11 @@ public abstract class AbstractDatabaseObject implements DatabaseObject {
     }
 
     /**
-     * Convenience method to check if the object types should consider catalog name
-     * also during comparison (equals(), hashcode() and compareTo())
+     * Returns a boolean value indicating whether the object types should include the catalog name in their specification.
+     * This method checks the current value of the {@code INCLUDE_CATALOG_IN_SPECIFICATION} setting in the
+     * {@link  GlobalConfiguration}.
      *
-     * @return
+     * @return {@code true} if the object types should include the catalog name in their specification, otherwise {@code false}.
      */
     public boolean shouldIncludeCatalogInSpecification() {
         return GlobalConfiguration.INCLUDE_CATALOG_IN_SPECIFICATION.getCurrentValue();

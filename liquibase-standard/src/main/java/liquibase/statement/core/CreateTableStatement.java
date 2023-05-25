@@ -9,31 +9,31 @@ public class CreateTableStatement extends AbstractSqlStatement implements Compou
     /** Table type used by some RDBMS (Snowflake, SAP HANA) supporting different ... types ... of tables (e.g. column- vs. row-based) */
     private String tableType;
 
-    private String catalogName;
+    private final String catalogName;
     private String schemaName;
-    private String tableName;
+    private final String tableName;
     private String tablespace;
     private String remarks;
-    private List<String> columns = new ArrayList<>();
-    private Set<AutoIncrementConstraint> autoIncrementConstraints = new HashSet<>();
-    private Map<String, LiquibaseDataType> columnTypes = new HashMap<>();
-    private Map<String, Object> defaultValues = new HashMap<>();
-    private Map<String, String> defaultValueConstraintNames = new HashMap<>();
-    private Map<String, String> columnRemarks = new HashMap<>();
+    private final List<String> columns = new ArrayList<>();
+    private final Set<AutoIncrementConstraint> autoIncrementConstraints = new HashSet<>();
+    private final Map<String, LiquibaseDataType> columnTypes = new HashMap<>();
+    private final Map<String, Object> defaultValues = new HashMap<>();
+    private final Map<String, String> defaultValueConstraintNames = new HashMap<>();
+    private final Map<String, String> columnRemarks = new HashMap<>();
 
     private PrimaryKeyConstraint primaryKeyConstraint;
-    private Map<String, NotNullConstraint> notNullConstraints = new HashMap<>();
-    private Set<ForeignKeyConstraint> foreignKeyConstraints = new HashSet<>();
+    private final Map<String, NotNullConstraint> notNullConstraints = new HashMap<>();
+    private final Set<ForeignKeyConstraint> foreignKeyConstraints = new HashSet<>();
 
     /* NOT NULL constraints in RDBMSs are curious beasts. In some RDBMS, they do not exist as constraints at all, i.e.
        they are merely a property of the column. In others, like Oracle DB, they can exist in both forms, and to be
        able to give the NN constraint a name in CREATE TABLE, we need to save both the NN property as well as the NN constraint. To make things even more complicated, you cannot just add a NN constraint after the list
        of columns, like you could do with UNIQUE, CHECK or FOREIGN KEY constraints. They must be defined
        in line with the column (this implies that a NN constraint can always affects exactly one column). */
-    private HashMap<String, NotNullConstraint> notNullColumns = new HashMap<>();
+    private final HashMap<String, NotNullConstraint> notNullColumns = new HashMap<>();
 
-    private Set<UniqueConstraint> uniqueConstraints = new LinkedHashSet<>();
-    private Set<String> computedColumns = new HashSet<>();
+    private final Set<UniqueConstraint> uniqueConstraints = new LinkedHashSet<>();
+    private final Set<String> computedColumns = new HashSet<>();
 
     public CreateTableStatement(String catalogName, String schemaName, String tableName) {
         this.catalogName = catalogName;
@@ -103,8 +103,7 @@ public class CreateTableStatement extends AbstractSqlStatement implements Compou
         pkConstraint.addColumns(columnName);
         pkConstraint.setTablespace(tablespace);
 
-        List<ColumnConstraint> allConstraints = new ArrayList<>();
-        allConstraints.addAll(Arrays.asList(constraints));
+        List<ColumnConstraint> allConstraints = new ArrayList<>(Arrays.asList(constraints));
         allConstraints.add(new NotNullConstraint(columnName));
         allConstraints.add(pkConstraint);
 

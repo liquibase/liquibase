@@ -15,8 +15,8 @@ import java.util.concurrent.ConcurrentHashMap;
 
 public class DatabaseObjectCollection implements LiquibaseSerializable {
 
-    private Map<Class<? extends DatabaseObject>, Map<String, Set<DatabaseObject>>> cache = Collections.synchronizedMap(new LinkedHashMap<>());
-    private Database database;
+    private final Map<Class<? extends DatabaseObject>, Map<String, Set<DatabaseObject>>> cache = Collections.synchronizedMap(new LinkedHashMap<>());
+    private final Database database;
 
     public DatabaseObjectCollection(Database database) {
         this.database = database;
