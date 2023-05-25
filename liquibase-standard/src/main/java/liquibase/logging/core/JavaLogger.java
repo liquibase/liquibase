@@ -10,7 +10,7 @@ import java.util.logging.Level;
 public class JavaLogger extends AbstractLogger {
 
     private final String className;
-    private java.util.logging.Logger logger;
+    private final java.util.logging.Logger logger;
 
     /**
      * @deprecated use {@link #JavaLogger(java.util.logging.Logger)}

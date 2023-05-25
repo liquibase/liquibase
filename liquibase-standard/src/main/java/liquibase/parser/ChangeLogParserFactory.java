@@ -12,7 +12,7 @@ public class ChangeLogParserFactory {
 
     private static ChangeLogParserFactory instance;
 
-    private List<ChangeLogParser> parsers = new ArrayList<>();
+    private final List<ChangeLogParser> parsers = new ArrayList<>();
 
     public static synchronized void reset() {
         instance = new ChangeLogParserFactory();

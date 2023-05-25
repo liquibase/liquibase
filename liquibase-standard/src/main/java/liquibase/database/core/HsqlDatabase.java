@@ -19,10 +19,10 @@ import static liquibase.statement.DatabaseFunction.CURRENT_DATE_TIME_PLACE_HOLDE
 public class HsqlDatabase extends AbstractJdbcDatabase {
 
     private static final Map<String, HashSet<String>> SUPPORTED_DEFAULT_VALUE_COMPUTED_MAP;
-    private static String START_CONCAT = "CONCAT(";
-    private static String END_CONCAT = ")";
-    private static String SEP_CONCAT = ", ";
-    private static List keywords = Arrays.asList(
+    private static final String START_CONCAT = "CONCAT(";
+    private static final String END_CONCAT = ")";
+    private static final String SEP_CONCAT = ", ";
+    private static final List keywords = Arrays.asList(
             "ADD",
             "ALL",
             "ALLOCATE",

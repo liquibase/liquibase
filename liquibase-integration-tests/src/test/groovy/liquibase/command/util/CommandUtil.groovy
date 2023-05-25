@@ -3,11 +3,19 @@ package liquibase.command.util
 import liquibase.Scope
 import liquibase.UpdateSummaryEnum
 import liquibase.command.CommandScope
+import liquibase.command.core.DiffCommandStep
 import liquibase.command.core.DropAllCommandStep
 import liquibase.command.core.GenerateChangelogCommandStep
+import liquibase.command.core.SnapshotCommandStep
+import liquibase.command.core.TagCommandStep
 import liquibase.command.core.UpdateCommandStep
 import liquibase.command.core.helpers.DbUrlConnectionCommandStep
+import liquibase.command.core.helpers.DiffOutputControlCommandStep
+import liquibase.command.core.helpers.PreCompareCommandStep
+import liquibase.command.core.helpers.ReferenceDbUrlConnectionCommandStep
 import liquibase.command.core.helpers.ShowSummaryArgument
+import liquibase.database.Database
+import liquibase.diff.compare.CompareControl
 import liquibase.exception.CommandExecutionException
 import liquibase.extension.testing.testsystem.DatabaseTestSystem
 import liquibase.resource.SearchPathResourceAccessor
@@ -61,6 +69,38 @@ class CommandUtil {
         commandScope.addArgumentValue(GenerateChangelogCommandStep.CHANGELOG_FILE_ARG, outputFile)
         OutputStream outputStream = new ByteArrayOutputStream()
         commandScope.setOutput(outputStream)
+        commandScope.execute()
+    }
+
+    static void runSnapshot(DatabaseTestSystem db, String outputFile) throws CommandExecutionException {
+        CommandScope commandScope = new CommandScope(SnapshotCommandStep.COMMAND_NAME)
+        commandScope.addArgumentValue(DbUrlConnectionCommandStep.URL_ARG, db.getConnectionUrl())
+        commandScope.addArgumentValue(DbUrlConnectionCommandStep.USERNAME_ARG, db.getUsername())
+        commandScope.addArgumentValue(DbUrlConnectionCommandStep.PASSWORD_ARG, db.getPassword())
+        commandScope.addArgumentValue(SnapshotCommandStep.SNAPSHOT_FORMAT_ARG, "json")
+        OutputStream outputStream = new FileOutputStream(new File(outputFile))
+        commandScope.setOutput(outputStream)
+        commandScope.execute()
+    }
+
+    static void runDiff(DatabaseTestSystem db, Database targetDatabase, Database referenceDatabase,
+                        String outputFile) throws CommandExecutionException {
+        CommandScope commandScope = new CommandScope(DiffCommandStep.COMMAND_NAME)
+        commandScope.addArgumentValue(ReferenceDbUrlConnectionCommandStep.REFERENCE_DATABASE_ARG, referenceDatabase)
+        commandScope.addArgumentValue(PreCompareCommandStep.COMPARE_CONTROL_ARG, CompareControl.STANDARD)
+        commandScope.addArgumentValue(DbUrlConnectionCommandStep.DATABASE_ARG, targetDatabase)
+        commandScope.addArgumentValue(DiffOutputControlCommandStep.INCLUDE_SCHEMA_ARG, true)
+        OutputStream outputStream = new FileOutputStream(new File(outputFile))
+        commandScope.setOutput(outputStream)
+        commandScope.execute()
+    }
+
+    static void runTag(DatabaseTestSystem db, String tag) throws CommandExecutionException {
+        CommandScope commandScope = new CommandScope(TagCommandStep.COMMAND_NAME)
+        commandScope.addArgumentValue(DbUrlConnectionCommandStep.URL_ARG, db.getConnectionUrl())
+        commandScope.addArgumentValue(DbUrlConnectionCommandStep.USERNAME_ARG, db.getUsername())
+        commandScope.addArgumentValue(DbUrlConnectionCommandStep.PASSWORD_ARG, db.getPassword())
+        commandScope.addArgumentValue(TagCommandStep.TAG_ARG, tag)
         commandScope.execute()
     }
 

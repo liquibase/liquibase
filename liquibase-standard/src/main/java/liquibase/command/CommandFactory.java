@@ -97,7 +97,7 @@ public class CommandFactory implements SingletonObject {
      */
     private void findDependenciesForCommand(DependencyUtil.DependencyGraph<CommandStep> pipelineGraph, Collection<CommandStep> allCommandStepInstances,
                                             CommandStep step) {
-        if (step.requiredDependencies().isEmpty()) {
+        if (step.requiredDependencies() == null || step.requiredDependencies().isEmpty()) {
             pipelineGraph.add(null, step);
         } else {
             for (Class<?> d : step.requiredDependencies()) {
@@ -112,7 +112,7 @@ public class CommandFactory implements SingletonObject {
      * Go through all command steps and find the step that provides the desired class.
      */
     private CommandStep whoProvidesClass(Class<?> dependency, Collection<CommandStep> allCommandStepInstances) {
-        return allCommandStepInstances.stream().filter(cs -> cs.providedDependencies().contains(dependency))
+        return allCommandStepInstances.stream().filter(cs -> cs.providedDependencies() != null && cs.providedDependencies().contains(dependency))
                 .reduce((a, b) -> {
                     throw new IllegalStateException(String.format("More than one CommandStep provides class %s. Steps: %s, %s",
                             dependency.getName(), a.getClass().getName(), b.getClass().getName()));
