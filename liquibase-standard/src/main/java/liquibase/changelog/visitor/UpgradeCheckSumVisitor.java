@@ -17,6 +17,10 @@ import liquibase.statement.core.UpdateChangeSetChecksumStatement;
 
 import java.util.Set;
 
+/**
+ * ChangeSetVisitor that will upgrade the checksum version and calculation from previous versions to this Liquibase checksum version .
+ * It should not downgrade checksums neither recalculate existing ones.
+ */
 public class UpgradeCheckSumVisitor implements ChangeSetVisitor {
 
     private final Database database;
@@ -36,8 +40,8 @@ public class UpgradeCheckSumVisitor implements ChangeSetVisitor {
         Executor executor = Scope.getCurrentScope().getSingleton(ExecutorService.class).getExecutor("jdbc", database);
 
         ChangeLogHistoryService changeLogService = ChangeLogHistoryServiceFactory.getInstance().getChangeLogService(database);
-        if (changeLogService.isDatabaseChecksumsCompatible() || changeSet.getStoredCheckSum() == null ||
-                changeSet.getStoredCheckSum().getVersion() == ChecksumVersions.latest().getVersion()) {
+        if (changeLogService.isDatabaseChecksumsCompatible() ||
+                (changeSet.getStoredCheckSum() != null &&  changeSet.getStoredCheckSum().getVersion() >= ChecksumVersions.latest().getVersion())) {
             return;
         }
 
@@ -46,7 +50,7 @@ public class UpgradeCheckSumVisitor implements ChangeSetVisitor {
         changeSet.setStoredCheckSum(changeSet.generateCheckSum(ChecksumVersions.latest()));
         if (! (executor instanceof LoggingExecutor)) {
             Scope.getCurrentScope().getUI().sendMessage(String.format("Upgrading checksum for Changeset %s from %s to %s.",
-                    changeSet, oldChecksum.toString(), changeSet.getStoredCheckSum().toString()));
+                    changeSet, (oldChecksum != null? oldChecksum.toString() : "<null>"), changeSet.getStoredCheckSum().toString()));
         }
 
         Scope.getCurrentScope().getSingleton(ExecutorService.class).getExecutor("jdbc", database)
