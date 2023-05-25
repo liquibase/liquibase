@@ -126,8 +126,8 @@ public class StandardObjectChangeFilter implements ObjectChangeFilter {
      */
     protected static class Filter {
 
-        private Class<DatabaseObject> objectType;
-        private Pattern nameMatcher;
+        private final Class<DatabaseObject> objectType;
+        private final Pattern nameMatcher;
 
         public Filter(Class<DatabaseObject> objectType, Pattern nameMatcher) {
             this.objectType = objectType;

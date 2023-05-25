@@ -8,8 +8,8 @@ import java.util.List;
 import java.util.Properties;
 
 public class ConnectionProperties {
-    private List<PropertySet> propertySets;
-    private List<Property> properties;
+    private final List<PropertySet> propertySets;
+    private final List<Property> properties;
 
     public ConnectionProperties() {
         propertySets = new LinkedList<>();

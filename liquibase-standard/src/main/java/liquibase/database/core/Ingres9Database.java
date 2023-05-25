@@ -22,7 +22,7 @@ public class Ingres9Database extends AbstractJdbcDatabase {
     public static final String PRODUCT_NAME = "INGRES";
 
     private static final String CREATE_VIEW_REGEX = "^CREATE\\s+.*?VIEW\\s+.*?AS\\s+";
-    private static Pattern CREATE_VIEW_AS_PATTERN = Pattern.compile(CREATE_VIEW_REGEX, Pattern.CASE_INSENSITIVE | Pattern.DOTALL);
+    private static final Pattern CREATE_VIEW_AS_PATTERN = Pattern.compile(CREATE_VIEW_REGEX, Pattern.CASE_INSENSITIVE | Pattern.DOTALL);
 
     public Ingres9Database() {
         setCurrentDateTimeFunction("date('now')");

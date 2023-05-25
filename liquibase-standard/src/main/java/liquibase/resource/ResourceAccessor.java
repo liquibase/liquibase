@@ -263,7 +263,7 @@ public interface ResourceAccessor extends AutoCloseable {
     List<String> describeLocations();
 
     class NotFoundResource extends AbstractResource {
-        private ResourceAccessor resourceAccessor;
+        private final ResourceAccessor resourceAccessor;
 
         public NotFoundResource(String path, ResourceAccessor resourceAccessor) {
             super(path, URI.create("resourceaccessor:"+path.replace(" ", "%20").replace('\\', '/')));
