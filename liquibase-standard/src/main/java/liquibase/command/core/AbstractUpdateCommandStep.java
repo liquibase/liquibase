@@ -25,10 +25,7 @@ import liquibase.util.StringUtil;
 
 import java.io.IOException;
 import java.io.OutputStream;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 
 import static liquibase.Liquibase.MSG_COULD_NOT_RELEASE_LOCK;
@@ -108,16 +105,17 @@ public abstract class AbstractUpdateCommandStep extends AbstractCommandStep impl
         }
     }
 
-    private void performChecksumUpgradeIfRequired(Database database, final DatabaseChangeLog databaseChangeLog, final Contexts contexts, LabelExpression labels) throws DatabaseException {
+    private void performChecksumUpgradeIfRequired(Database database, final DatabaseChangeLog databaseChangeLog, final Contexts contexts,
+                                                  LabelExpression labelExpression) throws LiquibaseException {
         ChangeLogHistoryService changeLogService = ChangeLogHistoryServiceFactory.getInstance().getChangeLogService(database);
         if (changeLogService.isDatabaseChecksumsCompatible()) {
             return;
         }
-        // FIXME this is not working - I believe we need to reload DatabaseChangelog too.
-        changeLogService.reset();
-        changeLogService.init();
-        changeLogService.getRanChangeSets(true);
-        changeLogService.upgradeChecksums(databaseChangeLog, contexts, labels);
+
+        ChangeLogIterator runChangeLogIterator = new ChangeLogIterator(databaseChangeLog,
+                this.getStandardChangelogIteratorFilters(database, contexts, labelExpression).toArray(new ChangeSetFilter[0]));
+
+        runChangeLogIterator.run(new UpgradeCheckSumVisitor(database), new RuntimeEnvironment(database, contexts, labelExpression));
     }
 
     private void addChangelogFileToMdc(String changeLogFile, DatabaseChangeLog databaseChangeLog) {
@@ -139,7 +137,7 @@ public abstract class AbstractUpdateCommandStep extends AbstractCommandStep impl
         Scope.getCurrentScope().getSingleton(ExecutorService.class).reset();
     }
 
-    private void logDeploymentOutcomeMdc(DefaultChangeExecListener defaultListener, boolean success) throws IOException {
+    private void logDeploymentOutcomeMdc(DefaultChangeExecListener defaultListener, boolean success) {
         List<ChangeSet> deployedChangeSets = defaultListener.getDeployedChangeSets();
         int deployedChangeSetCount = deployedChangeSets.size();
         ChangesetsUpdated changesetsUpdated = new ChangesetsUpdated(deployedChangeSets);
@@ -154,22 +152,23 @@ public abstract class AbstractUpdateCommandStep extends AbstractCommandStep impl
 
     @Beta
     public ChangeLogIterator getStandardChangelogIterator(CommandScope commandScope, Database database, Contexts contexts, LabelExpression labelExpression, DatabaseChangeLog changeLog) throws DatabaseException {
-        return new ChangeLogIterator(changeLog,
-                new ShouldRunChangeSetFilter(database),
-                new ContextChangeSetFilter(contexts),
-                new LabelChangeSetFilter(labelExpression),
-                new DbmsChangeSetFilter(database),
-                new IgnoreChangeSetFilter());
+        List<ChangeSetFilter> changesetFilters = this.getStandardChangelogIteratorFilters(database, contexts, labelExpression);
+        changesetFilters.add(new ShouldRunChangeSetFilter(database));
+        return new ChangeLogIterator(changeLog, changesetFilters.toArray(new ChangeSetFilter[0]));
     }
 
     @Beta
     public ChangeLogIterator getStatusChangelogIterator(CommandScope commandScope, Database database, Contexts contexts, LabelExpression labelExpression, DatabaseChangeLog changeLog) throws DatabaseException {
-        return new StatusChangeLogIterator(changeLog,
-                new ShouldRunChangeSetFilter(database),
-                new ContextChangeSetFilter(contexts),
+        List<ChangeSetFilter> changesetFilters = this.getStandardChangelogIteratorFilters(database, contexts, labelExpression);
+        changesetFilters.add(new ShouldRunChangeSetFilter(database));
+        return new StatusChangeLogIterator(changeLog, changesetFilters.toArray(new ChangeSetFilter[0]));
+    }
+
+    private List<ChangeSetFilter> getStandardChangelogIteratorFilters(Database database, Contexts contexts, LabelExpression labelExpression) {
+        return new ArrayList<>(Arrays.asList(new ContextChangeSetFilter(contexts),
                 new LabelChangeSetFilter(labelExpression),
                 new DbmsChangeSetFilter(database),
-                new IgnoreChangeSetFilter());
+                new IgnoreChangeSetFilter()));
     }
 
     /**
