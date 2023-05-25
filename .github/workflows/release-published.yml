@@ -8,7 +8,7 @@ on:
         description: 'Release Tag'
         required: true
 env:
-  MAVEN_VERSION: '3.8.7'
+  MAVEN_VERSION: '3.9.2'
 jobs:
   setup:
     name: Setup
@@ -38,7 +38,7 @@ jobs:
           echo "Publishing version ${{ steps.collect-data.outputs.version }} from ${{ steps.collect-data.outputs.tag }}"
 
   manual_trigger_deployment:
-    name: Manually trigger deployment 
+    name: Manually trigger deployment
     needs: [ setup ]
     runs-on: ubuntu-22.04
     steps:
@@ -321,4 +321,3 @@ jobs:
             aws s3 sync index-file s3://liquibaseorg-origin/xml/ns/dbchangelog/ --only-show-errors
           fi
           
-      
