@@ -108,7 +108,8 @@ public class CreateProcedureChange extends AbstractChange implements DbmsTargete
         this.relativeToChangelogFile = relativeToChangelogFile;
     }
 
-    @DatabaseChangeProperty(serializationType = SerializationType.DIRECT_VALUE)
+    @DatabaseChangeProperty(serializationType = SerializationType.DIRECT_VALUE, version = {ChecksumVersions.V8})
+    @DatabaseChangeProperty(isChangeProperty = false)
     /**
      * @deprecated Use getProcedureText() instead
      */
@@ -124,9 +125,13 @@ public class CreateProcedureChange extends AbstractChange implements DbmsTargete
         this.procedureText = procedureText;
     }
 
+    private final String procedureTextDescription = "The SQL creating the procedure. You need to define either this attribute or 'path'. " +
+            "procedureText is not supported in the XML format; however, you can specify the procedure SQL inline within the createProcedure definition.";
     @DatabaseChangeProperty(
-        description = "The SQL creating the procedure. You need to define either this attribute or 'path'. " +
-            "procedureText is not supported in the XML format; however, you can specify the procedure SQL inline within the createProcedure definition.",
+        description = procedureTextDescription,
+            isChangeProperty = false, version = {ChecksumVersions.V8})
+    @DatabaseChangeProperty(
+        description = procedureTextDescription,
             serializationType = SerializationType.DIRECT_VALUE)
     public String getProcedureText() {
         return procedureText;

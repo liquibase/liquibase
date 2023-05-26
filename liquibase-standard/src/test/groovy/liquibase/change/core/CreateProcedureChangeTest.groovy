@@ -118,7 +118,7 @@ class CreateProcedureChangeTest extends StandardChangeTest {
         where:
         version | originalChecksum | updatedChecksum
         ChecksumVersions.V8 | "8:977441683eb54d6ee1b2de400adb5eed" | "8:63f00c8a5e353ec6d400b0c5a5f7b013"
-        ChecksumVersions.latest() | "9:a516aae651b589e82ce1fd4358dc4b99" | "9:a516aae651b589e82ce1fd4358dc4b99"
+        ChecksumVersions.latest() | "9:4ec1db90234ea750169f7d94f7e5c425" | "9:4ec1db90234ea750169f7d94f7e5c425"
 
     }
 
@@ -148,7 +148,7 @@ class CreateProcedureChangeTest extends StandardChangeTest {
         where:
         version | originalChecksum | updatedChecksum
         ChecksumVersions.V8 | "8:977441683eb54d6ee1b2de400adb5eed" | "8:39bcca9579db76270fcbedf41ef2e61a"
-        ChecksumVersions.latest() | "9:a516aae651b589e82ce1fd4358dc4b99" | "9:4ec1db90234ea750169f7d94f7e5c425"
+        ChecksumVersions.latest() | "9:4ec1db90234ea750169f7d94f7e5c425" | "9:4ec1db90234ea750169f7d94f7e5c425"
     }
 
     @Unroll
@@ -169,7 +169,7 @@ class CreateProcedureChangeTest extends StandardChangeTest {
         where:
         version | originalChecksum | updatedChecksum
         ChecksumVersions.V8 | "8:977441683eb54d6ee1b2de400adb5eed" | "8:f834f1891f07c1a2242c346499e16b22"
-        ChecksumVersions.latest() | "9:a516aae651b589e82ce1fd4358dc4b99" | "9:a516aae651b589e82ce1fd4358dc4b99"
+        ChecksumVersions.latest() | "9:4ec1db90234ea750169f7d94f7e5c425" | "9:4ec1db90234ea750169f7d94f7e5c425"
     }
 
     @Unroll
@@ -190,7 +190,7 @@ class CreateProcedureChangeTest extends StandardChangeTest {
         where:
         version | originalChecksum | updatedChecksum
         ChecksumVersions.V8 | "8:977441683eb54d6ee1b2de400adb5eed" | "8:a5244728b4370b3e7e642523539b10a1"
-        ChecksumVersions.latest() | "9:a516aae651b589e82ce1fd4358dc4b99" | "9:a516aae651b589e82ce1fd4358dc4b99"
+        ChecksumVersions.latest() | "9:4ec1db90234ea750169f7d94f7e5c425" | "9:4ec1db90234ea750169f7d94f7e5c425"
     }
 
     @Unroll
@@ -210,7 +210,7 @@ class CreateProcedureChangeTest extends StandardChangeTest {
         where:
         version | originalChecksum | updatedChecksum
         ChecksumVersions.V8 | "8:977441683eb54d6ee1b2de400adb5eed" | "8:08289655a87e3a5ef12e2a62e3168105"
-        ChecksumVersions.latest() | "9:a516aae651b589e82ce1fd4358dc4b99" | "9:a516aae651b589e82ce1fd4358dc4b99"
+        ChecksumVersions.latest() | "9:4ec1db90234ea750169f7d94f7e5c425" | "9:4ec1db90234ea750169f7d94f7e5c425"
     }
 
     @Unroll
@@ -232,7 +232,7 @@ class CreateProcedureChangeTest extends StandardChangeTest {
         where:
         version | originalChecksum | updatedChecksum
         ChecksumVersions.V8 | "8:977441683eb54d6ee1b2de400adb5eed" | "8:55058b1ccfdae7d3e486a53b6f3357e5"
-        ChecksumVersions.latest() | "9:a516aae651b589e82ce1fd4358dc4b99" | "9:454ddc9de8cb4778f7ad3628d8c8c3b0"
+        ChecksumVersions.latest() | "9:4ec1db90234ea750169f7d94f7e5c425" | "9:36f93561a3ca75d53c84639669d74b51"
     }
 
     @Unroll
@@ -264,7 +264,7 @@ class CreateProcedureChangeTest extends StandardChangeTest {
         where:
         version | originalChecksum | updatedChecksum
         ChecksumVersions.V8 | "8:633d7b88ffefdea580a8c5671b284cc9" | "8:b7d57ddf12ba7f8a12d342b0f833c11d"
-        ChecksumVersions.latest() | "9:8f48578f03fd9cfda645749f53e26f40" | "9:32b84d8d7f38451e0449d5d0052bc533"
+        ChecksumVersions.latest() | "9:eec1dde2b2197528f030a2917d2602c3" | "9:06085ea7538bfe94b70b7196d520cc2f"
     }
 
     @Unroll
@@ -286,6 +286,6 @@ class CreateProcedureChangeTest extends StandardChangeTest {
         where:
         version | originalChecksum | updatedChecksum
         ChecksumVersions.V8 | "8:977441683eb54d6ee1b2de400adb5eed" | "8:20536e4edf2d1dfa3d892063830f38ae"
-        ChecksumVersions.latest() | "9:a516aae651b589e82ce1fd4358dc4b99" | "9:a516aae651b589e82ce1fd4358dc4b99"
+        ChecksumVersions.latest() | "9:4ec1db90234ea750169f7d94f7e5c425" | "9:4ec1db90234ea750169f7d94f7e5c425"
     }
 }

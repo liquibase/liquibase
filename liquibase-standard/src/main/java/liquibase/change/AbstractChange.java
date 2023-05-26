@@ -27,6 +27,7 @@ import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.lang.reflect.Type;
 import java.util.*;
+import java.util.stream.Stream;
 
 import static liquibase.statement.SqlStatement.EMPTY_SQL_STATEMENT;
 
@@ -87,7 +88,8 @@ public abstract class AbstractChange extends AbstractPlugin implements Change {
                     }
                 }
                 if ((readMethod != null) && (writeMethod != null)) {
-                    DatabaseChangeProperty annotation = readMethod.getAnnotation(DatabaseChangeProperty.class);
+                    DatabaseChangeProperty annotation = findDatabaseChangePropertyAnnotationMatchingCurrentChecksumVersion(readMethod);
+
                     if ((annotation == null) || annotation.isChangeProperty()) {
                         params.add(createChangeParameterMetadata(property, readMethod));
                     }
@@ -104,6 +106,31 @@ public abstract class AbstractChange extends AbstractPlugin implements Change {
                 databaseChange.appliesTo(), notes, params);
         } catch (UnexpectedLiquibaseException|IntrospectionException e) {
             throw new UnexpectedLiquibaseException(e);
+        }
+    }
+
+    private DatabaseChangeProperty findDatabaseChangePropertyAnnotationMatchingCurrentChecksumVersion(Method readMethod) {
+        DatabaseChangeProperty[] annotations = readMethod.getAnnotationsByType(DatabaseChangeProperty.class);
+        if (annotations.length == 1) {
+            return annotations[0];
+        } else if (annotations.length > 1) {
+            // todo - need some kind of check - maybe a test- that no one duplicates versions of the annotation anywhere
+            // todo put the checksum version in the scope
+            ChecksumVersions currentChecksumVersion = Scope.getCurrentScope().get(Scope.Attr.currentChecksumVersion, ChecksumVersions.latest());
+            // first try to find the annotation that matches the current checksum version
+            Optional<DatabaseChangeProperty> versionMatchingAnnotation = Arrays.stream(annotations)
+                    .filter(ann ->
+                            Arrays.stream(ann.version()).anyMatch(annotationVersion -> annotationVersion == currentChecksumVersion))
+                    .findFirst();
+            // If found, use that annotation, if not found, use the first annotation with no version specified
+            // (it is assumed that this is the default and should apply to all versions not explicitly specified)
+            // If no annotation with no version is found, return null.
+            return versionMatchingAnnotation.orElseGet(
+                    () -> Arrays.stream(annotations)
+                            .filter(ann -> ann.version().length == 0).findFirst().orElse(null)
+            );
+        } else {
+            return null;
         }
     }
 
@@ -150,7 +177,7 @@ public abstract class AbstractChange extends AbstractPlugin implements Change {
 
             Type type = readMethod.getGenericReturnType();
 
-            DatabaseChangeProperty changePropertyAnnotation = readMethod.getAnnotation(DatabaseChangeProperty.class);
+            DatabaseChangeProperty changePropertyAnnotation = findDatabaseChangePropertyAnnotationMatchingCurrentChecksumVersion(readMethod);
 
             String mustEqualExisting = createMustEqualExistingMetaData(parameterName, changePropertyAnnotation);
             String description = createDescriptionMetaData(parameterName, changePropertyAnnotation);
@@ -490,6 +517,16 @@ public abstract class AbstractChange extends AbstractPlugin implements Change {
      */
     @Override
     public CheckSum generateCheckSum(ChecksumVersions version) {
+        try {
+            return Scope.child(Collections.singletonMap(Scope.Attr.currentChecksumVersion.toString(), version), () -> internalGenerateChecksum(version));
+        } catch (Exception e) {
+            // todo logging?
+            // todo is this how we should handle it?
+            return internalGenerateChecksum(version);
+        }
+    }
+
+    private CheckSum internalGenerateChecksum(ChecksumVersions version) {
         return CheckSum.compute(new StringChangeLogSerializer(new StringChangeLogSerializer.FieldFilter() {
             @Override
             public boolean include(Object obj, String field, Object value) {

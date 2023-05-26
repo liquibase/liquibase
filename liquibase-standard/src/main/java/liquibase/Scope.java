@@ -62,7 +62,8 @@ public class Scope {
         fileEncoding,
         databaseChangeLog,
         changeSet,
-        osgiPlatform
+        osgiPlatform,
+        currentChecksumVersion
     }
 
     private static ScopeManager scopeManager;

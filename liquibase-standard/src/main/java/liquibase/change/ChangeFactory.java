@@ -49,9 +49,10 @@ public class ChangeFactory extends AbstractPluginFactory<Change>{
     }
 
     public ChangeMetaData getChangeMetaData(Change change) {
-        if (!metaDataByClass.containsKey(change.getClass())) {
+        // todo - enable this caching?
+//        if (!metaDataByClass.containsKey(change.getClass())) {
             metaDataByClass.put(change.getClass(), change.createChangeMetaData());
-        }
+//        }
         return metaDataByClass.get(change.getClass());
     }
 
