@@ -342,9 +342,7 @@ public class CreateProcedureChange extends AbstractChange implements DbmsTargete
     @Override
     public String[] getExcludedFieldFilters(ChecksumVersions version) {
         if (version == ChecksumVersions.V8) {
-            return new String[]{
-                    "procedureText"
-            };
+            return new String[0];
         }
         return new String[]{
                 "path",
