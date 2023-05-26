@@ -41,27 +41,6 @@ public class AfterTagChangeSetFilter implements ChangeSetFilter {
         }
     }
 
-    public AfterTagChangeSetFilter(String tag, List<RanChangeSet> ranChangeSets, int count) throws RollbackFailedException {
-        this.tag = tag;
-        boolean seenTag = false;
-        for (RanChangeSet ranChangeSet : ranChangeSets) {
-            if (seenTag && !tag.equalsIgnoreCase(ranChangeSet.getTag())) {
-                changeLogsAfterTag.add(ranChangeSet.toString());
-            }
-
-            if (!seenTag && tag.equalsIgnoreCase(ranChangeSet.getTag())) {
-                seenTag = true;
-                if ("tagDatabase".equals(StringUtil.trimToEmpty(ranChangeSet.getDescription()))) { //changeSet is just tagging the database. Also remove it.
-                    changeLogsAfterTag.add(ranChangeSet.toString());
-                }
-            }
-        }
-
-        if (!seenTag) {
-            throw new RollbackFailedException("Could not find tag '"+tag+"' in the database");
-        }
-    }
-
     @Override
     public ChangeSetFilterResult accepts(ChangeSet changeSet) {
         if (changeLogsAfterTag.contains(changeSet.toString())) {
