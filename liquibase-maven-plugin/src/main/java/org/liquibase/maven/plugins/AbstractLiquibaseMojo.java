@@ -47,6 +47,7 @@ import java.text.MessageFormat;
 import java.util.*;
 import java.util.logging.Handler;
 
+import static java.util.ResourceBundle.getBundle;
 import static liquibase.configuration.LiquibaseConfiguration.REGISTERED_VALUE_PROVIDERS_KEY;
 
 /**
@@ -592,6 +593,8 @@ public abstract class AbstractLiquibaseMojo extends AbstractMojo {
 
     protected String commandName;
     protected DefaultChangeExecListener defaultChangeExecListener;
+    private static final ResourceBundle coreBundle = getBundle("liquibase/i18n/liquibase-core");
+
 
     /**
      * Get the specified license key. This first checks liquibaseLicenseKey and if no key is found, then returns
@@ -1177,5 +1180,28 @@ public abstract class AbstractLiquibaseMojo extends AbstractMojo {
         nativeProperties.computeIfAbsent("liquibase.sqlcmd.logFile", val -> sqlcmdLogFile);
         nativeProperties.computeIfAbsent("liquibase.sqlcmd.catalogName", val -> sqlcmdCatalogName);
         return nativeProperties;
+    }
+
+    /**
+     * Returns the OutputStream based on whether there is an outputFile provided.
+     * If no outputFile parameter is provided, defaults to System.out.
+     * @param outputFile the string outputFile
+     * @return the OutputStream to use
+     * @throws LiquibaseException if we cannot create the provided outputFile
+     */
+    protected OutputStream getOutputStream(String outputFile) throws LiquibaseException {
+        if (outputFile == null) {
+            return System.out;
+        }
+        FileOutputStream fileOut;
+        try {
+            fileOut = new FileOutputStream(outputFile, false);
+        } catch (IOException e) {
+            Scope.getCurrentScope().getLog(getClass()).severe(String.format(
+                    coreBundle.getString("could.not.create.output.file"),
+                    outputFile));
+            throw new LiquibaseException(e);
+        }
+        return fileOut;
     }
 }
