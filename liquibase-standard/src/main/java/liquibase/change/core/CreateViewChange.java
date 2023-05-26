@@ -28,6 +28,7 @@ import liquibase.util.StringUtil;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.UnsupportedEncodingException;
 import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -187,7 +188,10 @@ public class CreateViewChange extends AbstractChange {
     }
 
     @Override
-    public String[] getExcludedFieldFilters() {
+    public String[] getExcludedFieldFilters(ChecksumVersions version) {
+        if (version == ChecksumVersions.V8) {
+            return new String[0];
+        }
         return new String[] {
                 "path",
                 "relativeToChangelogFile",
@@ -203,6 +207,13 @@ public class CreateViewChange extends AbstractChange {
      */
     @Override
     public CheckSum generateCheckSum(ChecksumVersions version) {
+        if (version == ChecksumVersions.V8) {
+            return generateCheckSumV8(version);
+        }
+        return generateCheckSumV9(version);
+    }
+
+    private CheckSum generateCheckSumV9(ChecksumVersions version) {
         InputStream stream = null;
         CheckSum checkSum;
         try {
@@ -230,7 +241,47 @@ public class CreateViewChange extends AbstractChange {
                 }
             }
         }
+    }
 
+    @Deprecated
+    private CheckSum generateCheckSumV8(ChecksumVersions version) {
+        if (this.path == null) {
+            return super.generateCheckSum(version);
+        }
+
+        InputStream stream = null;
+        try {
+            stream = openSqlStream();
+        } catch (IOException e) {
+            throw new UnexpectedLiquibaseException(e);
+        }
+
+        try {
+            String selectQuery = this.selectQuery;
+            if ((stream == null) && (selectQuery == null)) {
+                selectQuery = "";
+            }
+
+            String encoding = GlobalConfiguration.OUTPUT_FILE_ENCODING.getCurrentValue();
+            if (selectQuery != null) {
+                try {
+                    stream = new ByteArrayInputStream(selectQuery.getBytes(encoding));
+                } catch (UnsupportedEncodingException e) {
+                    throw new AssertionError(encoding+" is not supported by the JVM, this should not happen according to the JavaDoc of the Charset class");
+                }
+            }
+
+            CheckSum checkSum = CheckSum.compute(new AbstractSQLChange.NormalizingStreamV8(";", false, false, stream), false, version);
+
+            return CheckSum.compute(super.generateCheckSum(version).toString() + ":" + checkSum, version);
+        } finally {
+            if (stream != null) {
+                try {
+                    stream.close();
+                } catch (IOException ignore) {
+                }
+            }
+        }
     }
 
     @Override

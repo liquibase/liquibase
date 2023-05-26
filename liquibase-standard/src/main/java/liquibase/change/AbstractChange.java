@@ -490,13 +490,10 @@ public abstract class AbstractChange extends AbstractPlugin implements Change {
      */
     @Override
     public CheckSum generateCheckSum(ChecksumVersions version) {
-        if (version.equals(ChecksumVersions.V8)) {
-            return CheckSum.compute(new StringChangeLogSerializer().serialize(this, false), version);
-        }
         return CheckSum.compute(new StringChangeLogSerializer(new StringChangeLogSerializer.FieldFilter() {
             @Override
             public boolean include(Object obj, String field, Object value) {
-                if(Arrays.stream(getExcludedFieldFilters()).anyMatch(filter -> filter.equals(field))) {
+                if(Arrays.stream(getExcludedFieldFilters(version)).anyMatch(filter -> filter.equals(field))) {
                     return false;
                 }
                 return super.include(obj, field, value);
@@ -504,7 +501,7 @@ public abstract class AbstractChange extends AbstractPlugin implements Change {
         }).serialize(this, false), version);
     }
 
-    public String[] getExcludedFieldFilters() {
+    public String[] getExcludedFieldFilters(ChecksumVersions version) {
         return new String[0];
     }
 

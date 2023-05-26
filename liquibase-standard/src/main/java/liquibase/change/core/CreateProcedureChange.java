@@ -21,6 +21,7 @@ import liquibase.util.StringUtil;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.UnsupportedEncodingException;
 import java.nio.charset.Charset;
 import java.util.Map;
 
@@ -107,7 +108,7 @@ public class CreateProcedureChange extends AbstractChange implements DbmsTargete
         this.relativeToChangelogFile = relativeToChangelogFile;
     }
 
-    @DatabaseChangeProperty(isChangeProperty = false)
+    @DatabaseChangeProperty(serializationType = SerializationType.DIRECT_VALUE)
     /**
      * @deprecated Use getProcedureText() instead
      */
@@ -240,10 +241,58 @@ public class CreateProcedureChange extends AbstractChange implements DbmsTargete
      */
     @Override
     public CheckSum generateCheckSum(ChecksumVersions version) {
-        return generateCheckSum(this.procedureText, version);
+        if (version == ChecksumVersions.V8) {
+            return generateCheckSumV8(version);
+        }
+        return generateCheckSumV9(this.procedureText, version);
     }
 
-    protected CheckSum generateCheckSum(String sqlText, ChecksumVersions version) {
+    @Deprecated
+    protected CheckSum generateCheckSumV8(ChecksumVersions version) {
+        if (this.path == null) {
+            return super.generateCheckSum(version);
+        }
+
+        InputStream stream = null;
+        try {
+            stream = openSqlStream();
+        } catch (IOException e) {
+            throw new UnexpectedLiquibaseException(e);
+        }
+
+        try {
+            String procedureText = this.procedureText;
+            if ((stream == null) && (procedureText == null)) {
+                procedureText = "";
+            }
+
+            String encoding = GlobalConfiguration.OUTPUT_FILE_ENCODING.getCurrentValue();
+            if (procedureText != null) {
+                try {
+                    stream = new ByteArrayInputStream(procedureText.getBytes(encoding));
+                } catch (UnsupportedEncodingException e) {
+                    throw new AssertionError(encoding +
+                            " is not supported by the JVM, this should not happen according to the JavaDoc of " +
+                            "the Charset class"
+                    );
+                }
+            }
+
+            CheckSum checkSum = CheckSum.compute(new AbstractSQLChange.NormalizingStreamV8(";", false, false, stream), false, version);
+
+            return CheckSum.compute(super.generateCheckSum(version).toString() + ":" + checkSum, version);
+        } finally {
+            if (stream != null) {
+                try {
+                    stream.close();
+                } catch (IOException ignore) {
+                    // Do nothing
+                }
+            }
+        }
+    }
+
+    protected CheckSum generateCheckSumV9(String sqlText, ChecksumVersions version) {
         InputStream stream = null;
         CheckSum checkSum;
         try {
@@ -286,7 +335,12 @@ public class CreateProcedureChange extends AbstractChange implements DbmsTargete
      * change types.
      */
     @Override
-    public String[] getExcludedFieldFilters() {
+    public String[] getExcludedFieldFilters(ChecksumVersions version) {
+        if (version == ChecksumVersions.V8) {
+            return new String[]{
+                    "procedureText"
+            };
+        }
         return new String[]{
                 "path",
                 "dbms",
@@ -297,7 +351,8 @@ public class CreateProcedureChange extends AbstractChange implements DbmsTargete
                 "triggerBody",
                 "functionBody",
                 "packageText",
-                "packageBodyText"
+                "packageBodyText"//,
+                //"procedureBody"
         };
     }
 
