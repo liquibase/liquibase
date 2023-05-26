@@ -41,10 +41,9 @@ public class UpdateVisitor implements ChangeSetVisitor {
         this.database = database;
     }
 
-    @Deprecated
     public UpdateVisitor(Database database, ChangeExecListener execListener) {
         this(database);
-              this.execListener = execListener;
+        this.execListener = execListener;
     }
 
     public UpdateVisitor(Database database, ChangeExecListener execListener, ShouldRunChangeSetFilter shouldRunChangeSetFilter) {
@@ -71,13 +70,18 @@ public class UpdateVisitor implements ChangeSetVisitor {
         } else if ((oldChecksum == null || oldChecksum.getVersion() < ChecksumVersions.latest().getVersion())) {
             upgradeCheckSumVersionForAlreadyExecutedOrNullChange(changeSet, database, oldChecksum);
         }
-
         this.database.commit();
     }
 
+    /**
+     * Updates the checksum to the current version in Changeset object in case that it is null
+     * or if it is from a previous checksum version.
+     *
+     * @return oldChecksum the former checksum
+     */
     private static CheckSum updateCheckSumIfRequired(ChangeSet changeSet) {
         CheckSum oldChecksum = null;
-        if (changeSet.getStoredCheckSum() != null && changeSet.getStoredCheckSum().getVersion() < ChecksumVersions.latest().getVersion()) {
+        if (changeSet.getStoredCheckSum() == null || changeSet.getStoredCheckSum().getVersion() < ChecksumVersions.latest().getVersion()) {
             oldChecksum = changeSet.getStoredCheckSum();
             changeSet.clearCheckSum();
             changeSet.setStoredCheckSum(changeSet.generateCheckSum(ChecksumVersions.latest()));
@@ -85,6 +89,9 @@ public class UpdateVisitor implements ChangeSetVisitor {
         return oldChecksum;
     }
 
+    /**
+     * Upgrade checksum for a given Changeset at database.
+     */
     private static void upgradeCheckSumVersionForAlreadyExecutedOrNullChange(ChangeSet changeSet, Database database, CheckSum oldChecksum) throws DatabaseException {
         Executor executor = Scope.getCurrentScope().getSingleton(ExecutorService.class).getExecutor("jdbc", database);
         if (! (executor instanceof LoggingExecutor)) {
@@ -95,6 +102,9 @@ public class UpdateVisitor implements ChangeSetVisitor {
                 .execute(new UpdateChangeSetChecksumStatement(changeSet));
     }
 
+    /**
+     * Executes the given changeset marking it as executed/reran/etc at the database
+     */
     private void executeAcceptedChange(ChangeSet changeSet, DatabaseChangeLog databaseChangeLog, Database database)
             throws DatabaseException, DatabaseHistoryException, MigrationFailedException {
         Executor executor = Scope.getCurrentScope().getSingleton(ExecutorService.class).getExecutor("jdbc", database);
