@@ -6,9 +6,11 @@ import liquibase.command.CommandScope
 import liquibase.command.core.DiffCommandStep
 import liquibase.command.core.DropAllCommandStep
 import liquibase.command.core.GenerateChangelogCommandStep
+import liquibase.command.core.RollbackCommandStep
 import liquibase.command.core.SnapshotCommandStep
 import liquibase.command.core.TagCommandStep
 import liquibase.command.core.UpdateCommandStep
+import liquibase.command.core.helpers.DatabaseChangelogCommandStep
 import liquibase.command.core.helpers.DbUrlConnectionCommandStep
 import liquibase.command.core.helpers.DiffOutputControlCommandStep
 import liquibase.command.core.helpers.PreCompareCommandStep
@@ -18,6 +20,7 @@ import liquibase.database.Database
 import liquibase.diff.compare.CompareControl
 import liquibase.exception.CommandExecutionException
 import liquibase.extension.testing.testsystem.DatabaseTestSystem
+import liquibase.resource.ResourceAccessor
 import liquibase.resource.SearchPathResourceAccessor
 import liquibase.sdk.resource.MockResourceAccessor
 
@@ -114,6 +117,24 @@ class CommandUtil {
         commandScope.addArgumentValue(DbUrlConnectionCommandStep.PASSWORD_ARG, db.getPassword())
         commandScope.setOutput(new ByteArrayOutputStream())
         commandScope.execute()
+    }
+
+    static void runRollback(ResourceAccessor resourceAccessor, DatabaseTestSystem db, String changelogFile, String tag) throws Exception {
+        if (! db.shouldTest()) {
+            return;
+        }
+        def scopeSettings = [
+                (Scope.Attr.resourceAccessor.name()): resourceAccessor
+        ]
+        Scope.child(scopeSettings, {
+            CommandScope commandScope = new CommandScope(RollbackCommandStep.COMMAND_NAME)
+            commandScope.addArgumentValue(DbUrlConnectionCommandStep.URL_ARG, db.getConnectionUrl())
+            commandScope.addArgumentValue(DbUrlConnectionCommandStep.USERNAME_ARG, db.getUsername())
+            commandScope.addArgumentValue(DbUrlConnectionCommandStep.PASSWORD_ARG, db.getPassword())
+            commandScope.addArgumentValue(DatabaseChangelogCommandStep.CHANGELOG_FILE_ARG, changelogFile)
+            commandScope.addArgumentValue(RollbackCommandStep.TAG_ARG, tag)
+            commandScope.execute()
+        } as Scope.ScopedRunnerWithReturn<Void>)
     }
 
     private static void execUpdateCommandInScope(SearchPathResourceAccessor resourceAccessor, DatabaseTestSystem db, String changelogFile,
