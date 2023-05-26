@@ -2,6 +2,7 @@ package liquibase.integration.commandline;
 
 import liquibase.*;
 import liquibase.changelog.ChangeLogParameters;
+import liquibase.changelog.DatabaseChangeLog;
 import liquibase.changelog.visitor.ChangeExecListener;
 import liquibase.changelog.visitor.DefaultChangeExecListener;
 import liquibase.command.CommandResults;
@@ -71,7 +72,7 @@ public class Main {
 
     private static final String ERRORMSG_UNEXPECTED_PARAMETERS = "unexpected.command.parameters";
     private static final Logger LOG = Scope.getCurrentScope().getLog(Main.class);
-    private static ResourceBundle coreBundle = getBundle("liquibase/i18n/liquibase-core");
+    private static final ResourceBundle coreBundle = getBundle("liquibase/i18n/liquibase-core");
 
     protected ClassLoader classLoader;
     protected String driver;
@@ -129,7 +130,8 @@ public class Main {
     protected String schemas;
     protected String snapshotFormat;
     protected String liquibaseProLicenseKey;
-    private boolean outputsLogMessages = false;
+    private static final Boolean managingLogConfig = null;
+    private static final boolean outputsLogMessages = false;
     protected String sqlFile;
     protected String delimiter;
     protected String rollbackScript;
@@ -1477,47 +1479,6 @@ public class Main {
                 String tag = commandParams.iterator().next();
                 liquibase.tagExists(tag);
                 return;
-            } else if (COMMANDS.ROLLBACK_ONE_CHANGE_SET.equalsIgnoreCase(command)) {
-                Map<String, Object> argsMap = new HashMap<>();
-                loadChangeSetInfoToMap(argsMap);
-                argsMap.put("changeLogFile", changeLogFile);
-                String internalCommand = "internalRollbackOneChangeSet";
-                Scope.getCurrentScope().addMdcValue(MdcKey.LIQUIBASE_INTERNAL_COMMAND, internalCommand);
-                CommandScope liquibaseCommand = createLiquibaseCommand(database, liquibase, internalCommand, argsMap);
-                liquibaseCommand.execute();
-                return;
-            } else if (COMMANDS.ROLLBACK_ONE_CHANGE_SET_SQL.equalsIgnoreCase(command)) {
-                Writer outputWriter = getOutputWriter();
-                Map<String, Object> argsMap = new HashMap<>();
-                loadChangeSetInfoToMap(argsMap);
-                argsMap.put("changeLogFile", changeLogFile);
-                argsMap.put("outputWriter", outputWriter);
-                argsMap.put("force", Boolean.TRUE);
-                String internalCommand = "internalRollbackOneChangeSetSQL";
-                Scope.getCurrentScope().addMdcValue(MdcKey.LIQUIBASE_INTERNAL_COMMAND, internalCommand);
-                CommandScope liquibaseCommand = createLiquibaseCommand(database, liquibase, internalCommand, argsMap);
-                liquibaseCommand.execute();
-                return;
-            } else if (COMMANDS.ROLLBACK_ONE_UPDATE.equalsIgnoreCase(command)) {
-                Map<String, Object> argsMap = new HashMap<>();
-                argsMap.put("changeLogFile", changeLogFile);
-                argsMap.put("deploymentId", getCommandParam(OPTIONS.DEPLOYMENT_ID, null));
-                String internalCommand = "internalRollbackOneUpdate";
-                Scope.getCurrentScope().addMdcValue(MdcKey.LIQUIBASE_INTERNAL_COMMAND, internalCommand);
-                CommandScope liquibaseCommand = createLiquibaseCommand(database, liquibase, internalCommand, argsMap);
-                liquibaseCommand.execute();
-                return;
-            } else if (COMMANDS.ROLLBACK_ONE_UPDATE_SQL.equalsIgnoreCase(command)) {
-                Writer outputWriter = getOutputWriter();
-                Map<String, Object> argsMap = new HashMap<>();
-                argsMap.put("deploymentId", getCommandParam(OPTIONS.DEPLOYMENT_ID, null));
-                argsMap.put("force", Boolean.TRUE);
-                argsMap.put("outputWriter", outputWriter);
-                String internalCommand = "internalRollbackOneUpdateSQL";
-                Scope.getCurrentScope().addMdcValue(MdcKey.LIQUIBASE_INTERNAL_COMMAND, internalCommand);
-                CommandScope liquibaseCommand = createLiquibaseCommand(database, liquibase, internalCommand, argsMap);
-                liquibaseCommand.execute();
-                return;
             } else if (COMMANDS.DROP_ALL.equalsIgnoreCase(command)) {
                 CommandScope dropAllCommand = new CommandScope("dropAll");
                 dropAllCommand
@@ -1737,6 +1698,14 @@ public class Main {
             runRollbackSqlCommand();
         } else if (COMMANDS.EXECUTE_SQL.equalsIgnoreCase(command)) {
             runExecuteSqlCommand();
+        } else if (COMMANDS.ROLLBACK_ONE_CHANGE_SET.equalsIgnoreCase(command)) {
+            runRollbackOneChangeSetCommandStep();
+        } else if (COMMANDS.ROLLBACK_ONE_CHANGE_SET_SQL.equalsIgnoreCase(command)) {
+            runRollbackOneChangeSetSqlCommandStep();
+        } else if (COMMANDS.ROLLBACK_ONE_UPDATE.equalsIgnoreCase(command)) {
+            runRollbackOneUpdateCommandStep();
+        } else if (COMMANDS.ROLLBACK_ONE_UPDATE_SQL.equalsIgnoreCase(command)) {
+            runRollbackOneUpdateSqlCommandStep();
         }
     }
 
@@ -1829,6 +1798,64 @@ public class Main {
         updateCommand.addArgumentValue(ChangeExecListenerCommandStep.CHANGE_EXEC_LISTENER_PROPERTIES_FILE_ARG, changeExecListenerPropertiesFile);
         setDatabaseArgumentsToCommand(updateCommand);
         updateCommand.execute();
+    }
+
+    private void runRollbackOneChangeSetCommandStep() throws CommandExecutionException, CommandLineParsingException {
+        CommandScope rollbackOneChangeSet = new CommandScope("rollbackOneChangeset");
+        setDatabaseArgumentsToCommand(rollbackOneChangeSet);
+        rollbackOneChangeSet.addArgumentValue(ChangeExecListenerCommandStep.CHANGE_EXEC_LISTENER_CLASS_ARG, changeExecListenerClass)
+                .addArgumentValue(ChangeExecListenerCommandStep.CHANGE_EXEC_LISTENER_PROPERTIES_FILE_ARG, changeExecListenerPropertiesFile)
+                .addArgumentValue(DatabaseChangelogCommandStep.CHANGELOG_FILE_ARG, changeLogFile)
+                .addArgumentValue("changesetId", getCommandParam(OPTIONS.CHANGE_SET_ID, null))
+                .addArgumentValue("changesetAuthor", getCommandParam(OPTIONS.CHANGE_SET_AUTHOR, null))
+                .addArgumentValue("changesetPath", getCommandParam(OPTIONS.CHANGE_SET_PATH, null))
+                .addArgumentValue("force", getCommandParam(OPTIONS.FORCE, null));
+        String internalCommand = "rollbackOneChangeset";
+        Scope.getCurrentScope().addMdcValue(MdcKey.LIQUIBASE_INTERNAL_COMMAND, internalCommand);
+        rollbackOneChangeSet.execute();
+    }
+
+    private void runRollbackOneChangeSetSqlCommandStep() throws CommandExecutionException, CommandLineParsingException, IOException {
+        CommandScope rollbackOneChangeSet = new CommandScope("rollbackOneChangesetSql");
+        setDatabaseArgumentsToCommand(rollbackOneChangeSet);
+        rollbackOneChangeSet.addArgumentValue(ChangeExecListenerCommandStep.CHANGE_EXEC_LISTENER_CLASS_ARG, changeExecListenerClass)
+                .addArgumentValue(ChangeExecListenerCommandStep.CHANGE_EXEC_LISTENER_PROPERTIES_FILE_ARG, changeExecListenerPropertiesFile)
+                .addArgumentValue(DatabaseChangelogCommandStep.CHANGELOG_FILE_ARG, changeLogFile)
+                .addArgumentValue("changesetId", getCommandParam(OPTIONS.CHANGE_SET_ID, null))
+                .addArgumentValue("changesetAuthor", getCommandParam(OPTIONS.CHANGE_SET_AUTHOR, null))
+                .addArgumentValue("changesetPath", getCommandParam(OPTIONS.CHANGE_SET_PATH, null))
+                .addArgumentValue("force", getCommandParam(OPTIONS.FORCE, null));
+        String internalCommand = "rollbackOneChangeset";
+        Scope.getCurrentScope().addMdcValue(MdcKey.LIQUIBASE_INTERNAL_COMMAND, internalCommand);
+        rollbackOneChangeSet.setOutput(new WriterOutputStream(getOutputWriter(), GlobalConfiguration.OUTPUT_FILE_ENCODING.getCurrentValue()));
+        rollbackOneChangeSet.execute();
+    }
+
+    private void runRollbackOneUpdateCommandStep() throws CommandExecutionException, CommandLineParsingException {
+        CommandScope rollbackOneUpdate = new CommandScope("rollbackOneUpdate");
+        setDatabaseArgumentsToCommand(rollbackOneUpdate);
+        rollbackOneUpdate.addArgumentValue(ChangeExecListenerCommandStep.CHANGE_EXEC_LISTENER_CLASS_ARG, changeExecListenerClass)
+                .addArgumentValue(ChangeExecListenerCommandStep.CHANGE_EXEC_LISTENER_PROPERTIES_FILE_ARG, changeExecListenerPropertiesFile)
+                .addArgumentValue(DatabaseChangelogCommandStep.CHANGELOG_FILE_ARG, changeLogFile)
+                .addArgumentValue("deploymentId", getCommandParam(OPTIONS.DEPLOYMENT_ID, null))
+                .addArgumentValue("force", getCommandParam(OPTIONS.FORCE, null));
+        String internalCommand = "rollbackOneUpdate";
+        Scope.getCurrentScope().addMdcValue(MdcKey.LIQUIBASE_INTERNAL_COMMAND, internalCommand);
+        rollbackOneUpdate.execute();
+    }
+
+    private void runRollbackOneUpdateSqlCommandStep() throws CommandExecutionException, CommandLineParsingException, IOException {
+        CommandScope rollbackOneUpdate = new CommandScope("rollbackOneUpdateSql");
+        setDatabaseArgumentsToCommand(rollbackOneUpdate);
+        rollbackOneUpdate.addArgumentValue(ChangeExecListenerCommandStep.CHANGE_EXEC_LISTENER_CLASS_ARG, changeExecListenerClass)
+                .addArgumentValue(ChangeExecListenerCommandStep.CHANGE_EXEC_LISTENER_PROPERTIES_FILE_ARG, changeExecListenerPropertiesFile)
+                .addArgumentValue(DatabaseChangelogCommandStep.CHANGELOG_FILE_ARG, changeLogFile)
+                .addArgumentValue("deploymentId", getCommandParam(OPTIONS.DEPLOYMENT_ID, null))
+                .addArgumentValue("force", getCommandParam(OPTIONS.FORCE, null));
+        String internalCommand = "rollbackOneUpdate";
+        Scope.getCurrentScope().addMdcValue(MdcKey.LIQUIBASE_INTERNAL_COMMAND, internalCommand);
+        rollbackOneUpdate.setOutput(new WriterOutputStream(getOutputWriter(), GlobalConfiguration.OUTPUT_FILE_ENCODING.getCurrentValue()));
+        rollbackOneUpdate.execute();
     }
 
     /**

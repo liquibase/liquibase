@@ -22,11 +22,11 @@ import static java.util.ResourceBundle.getBundle;
 
 public class ChangeLogIterator {
 
-    protected DatabaseChangeLog databaseChangeLog;
-    protected List<ChangeSetFilter> changeSetFilters;
-    private static ResourceBundle coreBundle = getBundle("liquibase/i18n/liquibase-core");
+    protected final DatabaseChangeLog databaseChangeLog;
+    protected final List<ChangeSetFilter> changeSetFilters;
+    private static final ResourceBundle coreBundle = getBundle("liquibase/i18n/liquibase-core");
     private static final String MSG_COULD_NOT_FIND_EXECUTOR = coreBundle.getString("no.executor.found");
-    private Set<String> seenChangeSets = new HashSet<>();
+    private final Set<String> seenChangeSets = new HashSet<>();
 
     public ChangeLogIterator(DatabaseChangeLog databaseChangeLog, ChangeSetFilter... changeSetFilters) {
         this(databaseChangeLog, Arrays.asList(changeSetFilters));

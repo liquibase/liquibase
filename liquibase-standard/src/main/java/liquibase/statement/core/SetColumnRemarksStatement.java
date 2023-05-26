@@ -5,12 +5,12 @@ import liquibase.util.ColumnParentType;
 
 public class SetColumnRemarksStatement extends AbstractSqlStatement {
 
-    private String catalogName;
-    private String schemaName;
-    private String tableName;
-    private String columnName;
-    private String remarks;
-    private String columnDataType;
+    private final String catalogName;
+    private final String schemaName;
+    private final String tableName;
+    private final String columnName;
+    private final String remarks;
+    private final String columnDataType;
     private String columnParentType;
 
     public SetColumnRemarksStatement(String catalogName, String schemaName, String tableName, String columnName, String remarks) {
