@@ -21,7 +21,7 @@ public class SnapshotGeneratorFactory {
 
     private static SnapshotGeneratorFactory instance;
 
-    private List<SnapshotGenerator> generators = new ArrayList<>();
+    private final List<SnapshotGenerator> generators = new ArrayList<>();
 
     protected SnapshotGeneratorFactory() {
         try {

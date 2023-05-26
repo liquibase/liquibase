@@ -16,7 +16,7 @@ public class JavaLogService extends AbstractLogService {
         return PRIORITY_DEFAULT;
     }
 
-    private Map<Class, JavaLogger> loggers = new HashMap<>();
+    private final Map<Class, JavaLogger> loggers = new HashMap<>();
 
     private java.util.logging.Logger parent;
 

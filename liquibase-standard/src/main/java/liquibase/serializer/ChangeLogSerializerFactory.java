@@ -10,7 +10,7 @@ import java.util.concurrent.ConcurrentHashMap;
 public class ChangeLogSerializerFactory {
     private static ChangeLogSerializerFactory instance;
 
-    private Map<String, List<ChangeLogSerializer>> serializers = new ConcurrentHashMap<>();
+    private final Map<String, List<ChangeLogSerializer>> serializers = new ConcurrentHashMap<>();
 
     public static synchronized void reset() {
         instance = new ChangeLogSerializerFactory();

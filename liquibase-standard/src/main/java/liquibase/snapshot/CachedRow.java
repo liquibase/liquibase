@@ -3,7 +3,7 @@ package liquibase.snapshot;
 import java.util.Map;
 
 public class CachedRow {
-    private Map row;
+    private final Map row;
 
     public CachedRow(Map row) {
         this.row = row;

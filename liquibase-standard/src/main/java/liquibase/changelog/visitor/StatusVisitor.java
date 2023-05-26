@@ -14,7 +14,7 @@ import java.util.*;
  */
 public class StatusVisitor implements ChangeSetVisitor, SkippedChangeSetVisitor {
 
-    private LinkedHashMap<ChangeSet, ChangeSetStatus> changeSetStatuses = new LinkedHashMap<>();
+    private final LinkedHashMap<ChangeSet, ChangeSetStatus> changeSetStatuses = new LinkedHashMap<>();
     private final List<RanChangeSet> ranChangeSets;
 
     public StatusVisitor(Database database) throws LiquibaseException {
