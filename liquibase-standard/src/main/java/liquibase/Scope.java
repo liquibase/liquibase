@@ -15,7 +15,7 @@ import liquibase.logging.mdc.CustomMdcObject;
 import liquibase.logging.mdc.MdcManager;
 import liquibase.logging.mdc.MdcManagerFactory;
 import liquibase.logging.mdc.MdcObject;
-import liquibase.osgi.Activator;
+import liquibase.osgi.ContainerChecker;
 import liquibase.resource.ClassLoaderResourceAccessor;
 import liquibase.resource.ResourceAccessor;
 import liquibase.servicelocator.ServiceLocator;
@@ -104,7 +104,7 @@ public class Scope {
             }
 
             rootScope.values.put(Attr.serviceLocator.name(), serviceLocator);
-            rootScope.values.put(Attr.osgiPlatform.name(), Activator.OSGIContainerChecker.isOsgiPlatform());
+            rootScope.values.put(Attr.osgiPlatform.name(), ContainerChecker.isOsgiPlatform());
         }
         return scopeManager.getCurrentScope();
     }
