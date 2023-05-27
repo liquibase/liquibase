@@ -135,6 +135,21 @@ Optional Args:
         expectedException = CommandValidationException.class
     }
 
+    run "Run with a bogus tag shows a warning", {
+        arguments = [
+                url:        { it.url },
+                username:   { it.username },
+                password:   { it.password },
+                tag          : "blablabla",
+                changelogFile: "changelogs/h2/complete/simple.tag.changelog.xml",
+        ]
+        expectedUI =
+"""
+WARNING:  The tag 'blablabla' was not found in the changelog 'changelogs/h2/complete/simple.tag.changelog.xml'. All changesets in the changelog were deployed.
+Learn about options for undoing these changes at https://docs.liquibase.com/rollbacks
+"""
+    }
+
     run "Run without a changeLogFile throws an exception", {
         arguments = [
                 url          : "",
