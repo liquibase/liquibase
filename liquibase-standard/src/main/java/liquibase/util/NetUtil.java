@@ -18,7 +18,8 @@ public class NetUtil {
     private NetUtil() {}
 
     /**
-     * Smarter way to get localhost than InetAddress.getLocalHost.  See https://bugs.java.com/bugdatabase/view_bug.do?bug_id=4665037
+     * Smarter way to get localhost than InetAddress.getLocalHost.
+     * @see <a href="https://bugs.java.com/bugdatabase/view_bug.do?bug_id=4665037">view bug</a>
      */
     private static InetAddress getLocalHost() throws UnknownHostException, SocketException {
         if (localHost == null) {

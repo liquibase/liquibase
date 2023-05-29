@@ -12,9 +12,9 @@ public class DependencyUtil {
 
     public static class DependencyGraph<T> {
 
-        private LinkedHashMap<T, GraphNode<T>> nodes = new LinkedHashMap<>();
-        private NodeValueListener<T> listener;
-        private List<GraphNode<T>> evaluatedNodes = new ArrayList<>();
+        private final LinkedHashMap<T, GraphNode<T>> nodes = new LinkedHashMap<>();
+        private final NodeValueListener<T> listener;
+        private final List<GraphNode<T>> evaluatedNodes = new ArrayList<>();
 
         private Integer recursiveSizeCheck;
 

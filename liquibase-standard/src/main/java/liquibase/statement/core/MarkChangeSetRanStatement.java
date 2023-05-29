@@ -5,9 +5,9 @@ import liquibase.statement.AbstractSqlStatement;
 
 public class MarkChangeSetRanStatement extends AbstractSqlStatement {
 
-    private ChangeSet changeSet;
+    private final ChangeSet changeSet;
 
-    private ChangeSet.ExecType execType;
+    private final ChangeSet.ExecType execType;
 
     public MarkChangeSetRanStatement(ChangeSet changeSet, ChangeSet.ExecType execType) {
         this.changeSet = changeSet;

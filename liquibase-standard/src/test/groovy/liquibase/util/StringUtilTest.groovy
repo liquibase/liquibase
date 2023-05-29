@@ -5,7 +5,6 @@ import org.hamcrest.Matchers
 import spock.lang.Specification
 import spock.lang.Unroll
 
-import static spock.util.matcher.HamcrestSupport.expect
 import static spock.util.matcher.HamcrestSupport.that
 
 class StringUtilTest extends Specification {

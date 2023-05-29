@@ -8,8 +8,8 @@ import java.util.*;
 public class SnapshotGeneratorChain {
     private Iterator<SnapshotGenerator> snapshotGenerators;
 
-    private Set<Class<? extends SnapshotGenerator>> replacedGenerators = new HashSet<>();
-    private SnapshotIdService snapshotIdService;
+    private final Set<Class<? extends SnapshotGenerator>> replacedGenerators = new HashSet<>();
+    private final SnapshotIdService snapshotIdService;
 
     public SnapshotGeneratorChain(SortedSet<SnapshotGenerator> snapshotGenerators) {
         snapshotIdService = SnapshotIdService.getInstance();

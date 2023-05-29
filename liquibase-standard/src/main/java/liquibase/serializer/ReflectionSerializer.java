@@ -10,13 +10,13 @@ import java.util.concurrent.ConcurrentHashMap;
 
 public class ReflectionSerializer {
 
-    private static ReflectionSerializer instance = new ReflectionSerializer();
+    private static final ReflectionSerializer instance = new ReflectionSerializer();
 
     public static ReflectionSerializer getInstance() {
         return instance;
     }
 
-    private Map<Class, Map<String, Field>> reflectionCache = new ConcurrentHashMap<>();
+    private final Map<Class, Map<String, Field>> reflectionCache = new ConcurrentHashMap<>();
 
     private ReflectionSerializer() {
 

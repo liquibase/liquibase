@@ -4,7 +4,7 @@ import liquibase.statement.AbstractSqlStatement;
 
 public class RawSqlStatement extends AbstractSqlStatement {
 
-    private String sql;
+    private final String sql;
     private String endDelimiter  = ";";
 
 

@@ -86,11 +86,9 @@ public abstract class AbstractExecutor implements Executor {
     }
 
     /**
+     * Sets a {@code ResourceAccessor} object on this Executor to be used for file access.
      *
-     * Set a ResourceAccessor on this Executor to be used in file access
-     *
-     * @param resourceAccessor
-     *
+     * @param resourceAccessor the {@link ResourceAccessor} object to set
      */
     @Override
     public void setResourceAccessor(ResourceAccessor resourceAccessor) {
