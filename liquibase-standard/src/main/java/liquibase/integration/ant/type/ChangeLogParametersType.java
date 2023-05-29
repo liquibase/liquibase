@@ -13,8 +13,8 @@ import java.util.Map;
 import java.util.Properties;
 
 public class ChangeLogParametersType extends DataType {
-    private List<PropertySet> propertySets;
-    private List<Property> parameters;
+    private final List<PropertySet> propertySets;
+    private final List<Property> parameters;
 
     public ChangeLogParametersType(Project project) {
         setProject(project);

@@ -44,12 +44,12 @@ public class OracleDatabase extends AbstractJdbcDatabase {
     private static final Pattern VERSION_PATTERN = Pattern.compile(VERSION_REGEX);
 
     public static final String PRODUCT_NAME = "oracle";
-    private static ResourceBundle coreBundle = getBundle("liquibase/i18n/liquibase-core");
+    private static final ResourceBundle coreBundle = getBundle("liquibase/i18n/liquibase-core");
     protected final int SHORT_IDENTIFIERS_LENGTH = 30;
     protected final int LONG_IDENTIFIERS_LEGNTH = 128;
     public static final int ORACLE_12C_MAJOR_VERSION = 12;
 
-    private Set<String> reservedWords = new HashSet<>();
+    private final Set<String> reservedWords = new HashSet<>();
     private Set<String> userDefinedTypes;
     private Map<String, String> savedSessionNlsSettings;
 
@@ -479,26 +479,6 @@ public class OracleDatabase extends AbstractJdbcDatabase {
         return isAutoIncrementSupported;
     }
 
-
-//    public Set<UniqueConstraint> findUniqueConstraints(String schema) throws DatabaseException {
-//        Set<UniqueConstraint> returnSet = new HashSet<UniqueConstraint>();
-//
-//        List<Map> maps = new Executor(this).queryForList(new RawSqlStatement("SELECT UC.CONSTRAINT_NAME, UCC.TABLE_NAME, UCC.COLUMN_NAME FROM USER_CONSTRAINTS UC, USER_CONS_COLUMNS UCC WHERE UC.CONSTRAINT_NAME=UCC.CONSTRAINT_NAME AND CONSTRAINT_TYPE='U' ORDER BY UC.CONSTRAINT_NAME"));
-//
-//        UniqueConstraint constraint = null;
-//        for (Map map : maps) {
-//            if (constraint == null || !constraint.getName().equals(constraint.getName())) {
-//                returnSet.add(constraint);
-//                Table table = new Table((String) map.get("TABLE_NAME"));
-//                constraint = new UniqueConstraint(map.get("CONSTRAINT_NAME").toString(), table);
-//            }
-//        }
-//        if (constraint != null) {
-//            returnSet.add(constraint);
-//        }
-//
-//        return returnSet;
-//    }
 
     @Override
     public boolean supportsRestrictForeignKeys() {

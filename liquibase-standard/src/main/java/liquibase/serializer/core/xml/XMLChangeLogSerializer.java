@@ -36,6 +36,7 @@ import java.io.OutputStream;
 import java.nio.file.Files;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -165,7 +166,7 @@ public class XMLChangeLogSerializer implements ChangeLogSerializer {
 
         try (OutputStream out = Files.newOutputStream(changeLogFile.toPath())) {
             if (!existingChangeLog.contains("</databaseChangeLog>")) {
-                write(Arrays.asList(changeSet), out);
+                write(Collections.singletonList(changeSet), out);
             } else {
                 existingChangeLog = existingChangeLog.replaceFirst("</databaseChangeLog>", serialize(changeSet, true) + "\n</databaseChangeLog>");
 

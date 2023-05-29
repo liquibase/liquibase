@@ -1,11 +1,13 @@
 package liquibase.logging.core;
 
+import liquibase.logging.LogService;
 import liquibase.logging.Logger;
 import liquibase.serializer.LiquibaseSerializable;
 
 import java.util.HashMap;
 import java.util.Map;
 import java.util.logging.Formatter;
+import java.util.logging.Handler;
 
 public class JavaLogService extends AbstractLogService {
 
@@ -14,7 +16,7 @@ public class JavaLogService extends AbstractLogService {
         return PRIORITY_DEFAULT;
     }
 
-    private Map<Class, JavaLogger> loggers = new HashMap<>();
+    private final Map<Class, JavaLogger> loggers = new HashMap<>();
 
     private java.util.logging.Logger parent;
 
@@ -94,5 +96,19 @@ public class JavaLogService extends AbstractLogService {
 
     public Formatter getCustomFormatter() {
         return null;
+    }
+
+
+    /**
+     * Set the formatter for the supplied handler if the supplied log service
+     * is a JavaLogService and that service specifies a custom formatter.
+     */
+    public static void setFormatterOnHandler(LogService logService, Handler handler) {
+        if (logService instanceof JavaLogService && handler != null) {
+            Formatter customFormatter = ((JavaLogService) logService).getCustomFormatter();
+            if (customFormatter != null) {
+                handler.setFormatter(customFormatter);
+            }
+        }
     }
 }

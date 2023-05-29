@@ -14,8 +14,6 @@ import liquibase.exception.UnexpectedLiquibaseException;
 import liquibase.exception.ValidationErrors;
 import liquibase.executor.Executor;
 import liquibase.executor.ExecutorService;
-import liquibase.logging.core.BufferedLogService;
-import liquibase.logging.core.CompositeLogService;
 import liquibase.util.StringUtil;
 
 import java.util.*;
@@ -24,11 +22,11 @@ import static java.util.ResourceBundle.getBundle;
 
 public class ChangeLogIterator {
 
-    protected DatabaseChangeLog databaseChangeLog;
-    protected List<ChangeSetFilter> changeSetFilters;
-    private static ResourceBundle coreBundle = getBundle("liquibase/i18n/liquibase-core");
+    protected final DatabaseChangeLog databaseChangeLog;
+    protected final List<ChangeSetFilter> changeSetFilters;
+    private static final ResourceBundle coreBundle = getBundle("liquibase/i18n/liquibase-core");
     private static final String MSG_COULD_NOT_FIND_EXECUTOR = coreBundle.getString("no.executor.found");
-    private Set<String> seenChangeSets = new HashSet<>();
+    private final Set<String> seenChangeSets = new HashSet<>();
 
     public ChangeLogIterator(DatabaseChangeLog databaseChangeLog, ChangeSetFilter... changeSetFilters) {
         this.databaseChangeLog = databaseChangeLog;
@@ -58,7 +56,6 @@ public class ChangeLogIterator {
                 return "";
             }
         });
-        this.databaseChangeLog.setChangeLogId(changeLog.getChangeLogId());
         this.changeSetFilters = Arrays.asList(changeSetFilters);
     }
 
@@ -101,14 +98,7 @@ public class ChangeLogIterator {
                                     validateChangeSetExecutor(changeSet, env);
                                 }
 
-                                //
-                                // Execute the visit call in its own scope with a new
-                                // CompositeLogService and BufferLogService in order
-                                // to capture the logging for just this changeset.  The
-                                // log is sent to Hub if available
-                                //
-                                Map<String, Object> values = new HashMap<>();
-                                Scope.child(values, () -> visitor.visit(changeSet, databaseChangeLog, env.getTargetDatabase(), reasonsAccepted));
+                                visitor.visit(changeSet, databaseChangeLog, env.getTargetDatabase(), reasonsAccepted);
                                 markSeen(changeSet);
                             } else {
                                 if (visitor instanceof SkippedChangeSetVisitor) {

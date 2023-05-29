@@ -507,7 +507,7 @@ public class StringClauses {
     }
 
     public static class Delimiter implements LiteralClause{
-        private String value;
+        private final String value;
 
         public Delimiter(String value) {
             this.value = value;
@@ -520,7 +520,7 @@ public class StringClauses {
     }
 
     public static class Whitespace implements LiteralClause{
-        private String value;
+        private final String value;
 
         public Whitespace(String value) {
             this.value = value;
@@ -533,7 +533,7 @@ public class StringClauses {
     }
 
     public static class Comment implements LiteralClause {
-        private String value;
+        private final String value;
 
         public Comment(String value) {
             this.value = value;
@@ -548,7 +548,7 @@ public class StringClauses {
     public static class ClauseIterator implements Iterator {
 
         private final LinkedHashMap<String, Object> clauses;
-        private ListIterator<String> keyIterator;
+        private final ListIterator<String> keyIterator;
 
         public ClauseIterator(LinkedHashMap<String, Object> clauses) {
             this.keyIterator = new ArrayList<>(clauses.keySet()).listIterator();

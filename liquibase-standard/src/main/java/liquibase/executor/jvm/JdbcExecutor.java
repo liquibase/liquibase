@@ -11,7 +11,6 @@ import liquibase.exception.DatabaseException;
 import liquibase.executor.AbstractExecutor;
 import liquibase.listener.SqlListener;
 import liquibase.logging.Logger;
-import liquibase.logging.mdc.MdcKey;
 import liquibase.servicelocator.PrioritizedService;
 import liquibase.sql.CallableSql;
 import liquibase.sql.Sql;
@@ -74,10 +73,19 @@ public class JdbcExecutor extends AbstractExecutor {
             stmt = ((JdbcConnection) con).getUnderlyingConnection().createStatement();
             Statement stmtToUse = stmt;
 
-            return action.doInStatement(stmtToUse);
+            Object object = action.doInStatement(stmtToUse);
+            if (stmtToUse.getWarnings() != null) {
+                showSqlWarnings(stmtToUse);
+            }
+            return object;
         } catch (SQLException ex) {
             // Release Connection early, to avoid potential connection pool deadlock
             // in the case when the exception translator hasn't been initialized yet.
+            try {
+                showSqlWarnings(stmt);
+            } catch (SQLException sqle) {
+                Scope.getCurrentScope().getLog(JdbcExecutor.class).warning(String.format("Unable to access SQL warning: %s", sqle.getMessage()));
+            }
             JdbcUtil.closeStatement(stmt);
             stmt = null;
             String url;
@@ -90,6 +98,17 @@ public class JdbcExecutor extends AbstractExecutor {
         } finally {
             JdbcUtil.closeStatement(stmt);
         }
+    }
+
+    private void showSqlWarnings(Statement stmtToUse) throws SQLException {
+        if (! SqlConfiguration.SHOW_SQL_WARNING_MESSAGES.getCurrentValue() || stmtToUse.getWarnings() == null) {
+            return;
+        }
+        SQLWarning sqlWarning = stmtToUse.getWarnings();
+        do {
+            Scope.getCurrentScope().getLog(JdbcExecutor.class).warning(sqlWarning.getMessage());
+            sqlWarning = sqlWarning.getNextWarning();
+        } while (sqlWarning != null);
     }
 
     // Incorrect warning, at least at this point. The situation here is not that we inject some unsanitised parameter

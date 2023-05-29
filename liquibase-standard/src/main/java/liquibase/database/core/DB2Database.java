@@ -22,8 +22,9 @@ public class DB2Database extends AbstractDb2Database {
 	}
 
 	/**
-	 * boolean data type column are allowed for versions >= 11.1.1.1
-	 * @return
+	 * Checks if the database supports boolean data type columns. This is true for versions >= 11.1.1.1.
+	 *
+	 * @return true if boolean data type columns are supported, false otherwise
 	 */
 	public boolean supportsBooleanDataType() {
 		if (getConnection() == null)
