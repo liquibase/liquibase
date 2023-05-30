@@ -354,8 +354,7 @@ public class CreateProcedureChange extends AbstractChange implements DbmsTargete
                 "triggerBody",
                 "functionBody",
                 "packageText",
-                "packageBodyText"//,
-                //"procedureBody"
+                "packageBodyText"
         };
     }
 
