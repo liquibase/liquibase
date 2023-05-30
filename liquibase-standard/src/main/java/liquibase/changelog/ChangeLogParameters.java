@@ -247,6 +247,10 @@ public class ChangeLogParameters {
         List<ChangeLogParameter> localList = null;
         if (changeLog != null) {
             localList = localParameters.get(getLocalKey(changeLog));
+            if (localList != null) {
+                localList = new ArrayList<>(localList); // make a copy as we don't want to reverse the original list
+                Collections.reverse(localList);
+            }
         }
 
         for (List<ChangeLogParameter> paramList : Arrays.asList(globalParameters, localList)) {
@@ -254,11 +258,7 @@ public class ChangeLogParameters {
                 continue;
             }
 
-            /*
-             * Getting from the last to first, allowing override parameters, usefully to enable inherits
-             */
-            for (int i = paramList.size() - 1; i >= 0; i--) {
-                ChangeLogParameter parameter = paramList.get(i);
+            for (ChangeLogParameter parameter : paramList) {
                 if (parameter.getKey().equalsIgnoreCase(key) && (filter == null || filter.matches(parameter))) {
                     return parameter;
                 }
