@@ -18,8 +18,6 @@ public class BinaryTypeSnowflake extends LiquibaseDataType {
         if (database instanceof SnowflakeDatabase) {
             if (originalDefinition.toLowerCase(Locale.US).startsWith("varbinary") || originalDefinition.startsWith("java.sql.Types.VARBINARY")) {
                 return new DatabaseDataType("VARBINARY", getParameters());
-            } else if (originalDefinition.toLowerCase(Locale.US).startsWith("longvarbinary") || originalDefinition.startsWith("java.sql.Types.LONGVARBINARY")) {
-                return new DatabaseDataType("LONGVARBINARY", getParameters());
             } else {
                 return new DatabaseDataType("BINARY", getParameters());
             }
