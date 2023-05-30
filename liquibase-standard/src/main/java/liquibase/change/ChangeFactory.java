@@ -1,5 +1,6 @@
 package liquibase.change;
 
+import liquibase.ChecksumVersions;
 import liquibase.Scope;
 import liquibase.exception.UnexpectedLiquibaseException;
 import liquibase.plugin.AbstractPluginFactory;
@@ -18,7 +19,7 @@ import java.util.concurrent.ConcurrentHashMap;
  */
 public class ChangeFactory extends AbstractPluginFactory<Change>{
 
-    private final Map<Class<? extends Change>, ChangeMetaData> metaDataByClass = new ConcurrentHashMap<>();
+    private final Map<String, ChangeMetaData> cachedMetadata = new ConcurrentHashMap<>();
 
     private ChangeFactory() {
 
@@ -49,11 +50,25 @@ public class ChangeFactory extends AbstractPluginFactory<Change>{
     }
 
     public ChangeMetaData getChangeMetaData(Change change) {
-        // todo - enable this caching?
-//        if (!metaDataByClass.containsKey(change.getClass())) {
-            metaDataByClass.put(change.getClass(), change.createChangeMetaData());
-//        }
-        return metaDataByClass.get(change.getClass());
+        String cacheKey = generateCacheKey(change);
+        if (!cachedMetadata.containsKey(cacheKey)) {
+            cachedMetadata.put(cacheKey, change.createChangeMetaData());
+        }
+        return cachedMetadata.get(cacheKey);
+    }
+
+    private String generateCacheKey(Change change) {
+        String key;
+        try {
+            ChecksumVersions version = Scope.getCurrentScope().get(Scope.Attr.currentChecksumVersion, ChecksumVersions.class);
+            if (version == null) {
+                 throw new NullPointerException();
+            }
+            key = change.getClass().getName() + version;
+        } catch (Exception ignored) {
+            key = change.getClass().getName();
+        }
+        return key;
     }
 
 
