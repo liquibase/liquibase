@@ -253,7 +253,7 @@ public class CreateProcedureChange extends AbstractChange implements DbmsTargete
     }
 
     @Deprecated
-    protected CheckSum generateCheckSumV8(ChecksumVersions version) {
+    private CheckSum generateCheckSumV8(ChecksumVersions version) {
         if (this.path == null) {
             return super.generateCheckSum(version);
         }
