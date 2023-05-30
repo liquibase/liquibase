@@ -109,6 +109,19 @@ public abstract class AbstractChange extends AbstractPlugin implements Change {
         }
     }
 
+    /**
+     * Given a particular method, find the {@link DatabaseChangeProperty} annotation on it that most precisely matches
+     * the requested checksum version.
+     *
+     * The logic can be summarized as follows:
+     * 1. If only one {@link DatabaseChangeProperty} annotation is on the particular method, then return it.
+     * 2. If no {@link DatabaseChangeProperty} annotations are present on the particular method, return null;
+     * 3. In the event that multiple {@link DatabaseChangeProperty} annotations are present on the particular method,
+     * read all of them to determine which one most closely matches the requested checksum version. If an annotation
+     * exists that specifies its version as the same version that is being requested, it is returned. If no annotation
+     * exists with a matching version, the first annotation on the method without a version is returned. If no
+     * annotations with no version exist, then null is returned.
+     */
     private DatabaseChangeProperty findDatabaseChangePropertyAnnotationMatchingCurrentChecksumVersion(Method readMethod) {
         DatabaseChangeProperty[] annotations = readMethod.getAnnotationsByType(DatabaseChangeProperty.class);
         if (annotations.length == 1) {

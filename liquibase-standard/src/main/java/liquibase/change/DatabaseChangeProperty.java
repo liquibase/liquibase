@@ -60,8 +60,18 @@ public @interface DatabaseChangeProperty {
         .NAMED_FIELD;
 
     /**
-     * The checksum version that this annotation applies to. This can be omitted and it is assumed that the
-     * annotation applies to all checksum versions.
+     * The checksum version that this annotation applies to. This can be omitted, and it is assumed that the
+     * annotation applies to all checksum versions. If a version is applied to some, but not all of the
+     * {@link DatabaseChangeProperty} annotations on a particular property, the most specific matching annotation
+     * is selected. For example, if a particular property has:
+     *
+     * <code>
+     *     @DatabaseChangeProperty(isChangeProperty = false, version = {ChecksumVersions.V8})
+     *     @DatabaseChangeProperty(serializationType = SerializationType.DIRECT_VALUE)
+     * </code>
+     *
+     * and checksum calculation for version 8 is requested, the first annotation is used. If any other checksum version
+     * is requested, the second annotation is used.
      */
     ChecksumVersions[] version() default {};
 }
