@@ -42,7 +42,7 @@ jobs:
           
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          
+
       # Run JReleaser
       - name: Run JReleaser
-        run: mvn jreleaser:jreleaser
+        run: mvn jreleaser:release
