@@ -20,10 +20,10 @@ on:
       - main
       - github-action-*
     paths-ignore:
-      - '**.md'
+      - "**.md"
 
 env:
-  MAVEN_VERSION: '3.9.2'
+  MAVEN_VERSION: "3.9.2"
 
 jobs:
   check_build_safety:
@@ -71,7 +71,6 @@ jobs:
             if (${{ github.run_attempt }} % 5 == 0) {
               core.setFailed("Fail every 5 run attempts to catch accidental infinite loops");
             }
-
 
       - uses: actions/checkout@v3
         with:
@@ -150,8 +149,8 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        os: [ ubuntu-22.04, macos-latest, windows-2019 ]
-        java: [ 8, 11, 17, 20 ]
+        os: [ubuntu-22.04, macos-latest, windows-2019]
+        java: [8, 11, 17, 20]
         exclude:
           # exclude non-java 8 on macos and windows builds
           - os: macos-latest
@@ -183,8 +182,8 @@ jobs:
         uses: actions/setup-java@v3
         with:
           java-version: ${{ matrix.java }}
-          distribution: 'temurin'
-          cache: 'maven'
+          distribution: "temurin"
+          cache: "maven"
       - name: Set up Maven
         uses: stCarolas/setup-maven@v4.5
         with:
@@ -202,7 +201,6 @@ jobs:
         if: env.OS_TYPE != 'windows-2019'
         run: |
           find . -name original-*.jar -exec rm {} \;
-
 
       - name: Archive Test Results
         if: ${{ always() }}
@@ -228,14 +226,14 @@ jobs:
     steps:
       - uses: actions/checkout@v3
         with:
-          fetch-depth: 0  # Shallow clones should be disabled for a better relevancy of analysis
+          fetch-depth: 0 # Shallow clones should be disabled for a better relevancy of analysis
           ref: ${{ github.event.pull_request.head.sha || github.event.after}}
       - name: Set up JDK
         uses: actions/setup-java@v3
         with:
           java-version: 11
-          distribution: 'adopt'
-          cache: 'maven'
+          distribution: "adopt"
+          cache: "maven"
       - name: Set up Maven
         uses: stCarolas/setup-maven@v4.5
         with:
@@ -248,7 +246,7 @@ jobs:
           restore-keys: ${{ runner.os }}-sonar
       - name: Build and analyze
         env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}  # Needed to get PR information, if any
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }} # Needed to get PR information, if any
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
         run: mvn clean verify sonar:sonar -P sonar -Dsonar.login=$SONAR_TOKEN -Dsonar.pullrequest.key=${{ github.event.pull_request.number }} -Dsonar.pullrequest.branch=${{ github.event.pull_request.head.ref }} -Dsonar.pullrequest.base=${{ github.event.pull_request.base.ref }}
 
@@ -286,9 +284,9 @@ jobs:
       - name: Set up JDK 8
         uses: actions/setup-java@v3
         with:
-          java-version: '8'
-          distribution: 'temurin'
-          cache: 'maven'
+          java-version: "8"
+          distribution: "temurin"
+          cache: "maven"
       - name: Set up Maven
         uses: stCarolas/setup-maven@v4.5
         with:
@@ -320,7 +318,7 @@ jobs:
   package:
     name: Package Artifacts
     runs-on: macos-latest
-    needs: [ setup, build ]
+    needs: [setup, build]
     steps:
       - uses: actions/checkout@v3
         with:
@@ -342,11 +340,11 @@ jobs:
       - name: Set up JDK 11
         uses: actions/setup-java@v3
         with:
-          java-version: '11'
-          distribution: 'temurin'
+          java-version: "11"
+          distribution: "temurin"
           gpg-private-key: ${{ secrets.GPG_SECRET }}
           gpg-passphrase: GPG_PASSPHRASE
-          cache: 'maven'
+          cache: "maven"
         env:
           GPG_PASSWORD: ${{ secrets.GPG_PASSPHRASE }}
 
@@ -355,21 +353,10 @@ jobs:
         with:
           maven-version: ${{ env.MAVEN_VERSION }}
 
-      # - name: Download liquibase-commercial from GPM
-      #   uses: liquibase/action-download-artifact@v2-liquibase
-      #   with:
-      #     github_token: ${{ secrets.BOT_TOKEN }}
-      #     workflow: build.yml
-      #     workflow_conclusion: success
-      #     branch: "${{ needs.setup.outputs.proBranchName }}"
-      #     name: liquibase-commercial-modules
-      #     path: download/liquibase-commercial
-      #     repo: liquibase/liquibase-pro
+      # Download liquibase-commercial from GPM
 
       - name: Install Built Modules
         run: |
-          (find . -name *-SNAPSHOT.jar -exec mvn -B org.apache.maven.plugins:maven-install-plugin:3.0.0-M1:install-file -Dfile={} \;)
-          (find . -name *-SNAPSHOT-sources.jar -exec mvn -B org.apache.maven.plugins:maven-install-plugin:3.0.0-M1:install-file -Dclassifier=sources -Dfile={} \;)
           mvn org.apache.maven.plugins:maven-dependency-plugin:3.5.0:get -Dartifact=org.liquibase:liquibase-commercial:0-SNAPSHOT -DrepoUrl=https://maven.pkg.github.com/liquibase/liquibase-pro
           mkdir -p download/liquibase-commercial
           mvn org.apache.maven.plugins:maven-dependency-plugin:3.5.0:copy -Dartifact=org.liquibase:liquibase-commercial:0-SNAPSHOT -DoutputDirectory=download/liquibase-commercial
@@ -409,11 +396,11 @@ jobs:
           mkdir -p artifacts
           cp liquibase-dist/target/liquibase-0-SNAPSHOT.tar.gz artifacts
           cp liquibase-dist/target/liquibase-0-SNAPSHOT.zip artifacts
-          
+
           cp liquibase-core/target/liquibase-core-0-SNAPSHOT.jar artifacts/liquibase-core-0-SNAPSHOT.jar
           cp liquibase-core/target/liquibase-core-0-SNAPSHOT-sources.jar artifacts/liquibase-core-0-SNAPSHOT-sources.jar
           cp target/liquibase-0-SNAPSHOT-javadoc.jar artifacts/liquibase-core-0-SNAPSHOT-javadoc.jar
-          
+
           ##create installer - disabled here but run as nightly job and as part of release workflow
           #cp liquibase-dist/target/liquibase-*-installer-* artifacts
 
@@ -428,7 +415,7 @@ jobs:
           cp liquibase-cdi-jakarta/target/liquibase-cdi-jakarta-0-SNAPSHOT.jar artifacts
           cp liquibase-cdi-jakarta/target/liquibase-cdi-jakarta-0-SNAPSHOT-sources.jar artifacts
           cp liquibase-cdi-jakarta/target/liquibase-cdi-jakarta-0-SNAPSHOT-javadoc.jar artifacts
-          
+
           echo "Source code not available for liquibase-commercial" > /tmp/readme.source.txt
           (cd /tmp && jar cf liquibase-commercial-0-SNAPSHOT-sources.jar readme.source.txt)
 
@@ -470,11 +457,10 @@ jobs:
           name: liquibase-artifacts-${{ needs.setup.outputs.thisBranchFileName }}
           path: artifacts-named/*
 
-
   finish:
     name: Finish Build
     runs-on: ubuntu-22.04
-    needs: [ setup, build, integration-test, package, sonar ]
+    needs: [setup, build, integration-test, package, sonar]
     if: ${{ needs.setup.outputs.setupSuccessful }}
     steps:
       - uses: actions/checkout@v3
@@ -581,7 +567,7 @@ jobs:
                   })
                 }
               });
-            
+
               let testHarnessBranch = await helper.findMatchingBranch("liquibase", "liquibase-test-harness");
               if (testHarnessBranch.name == "main" || testHarnessBranch.name == "master") {
                 testHarnessBranch.name = "develop";
