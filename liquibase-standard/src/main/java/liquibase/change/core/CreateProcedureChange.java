@@ -283,7 +283,7 @@ public class CreateProcedureChange extends AbstractChange implements DbmsTargete
                 }
             }
 
-            CheckSum checkSum = CheckSum.compute(new AbstractSQLChange.NormalizingStreamV8(";", false, false, stream), false, version);
+            CheckSum checkSum = CheckSum.compute(new NormalizingStreamV8(";", false, false, stream), false, version);
 
             return CheckSum.compute(super.generateCheckSum(version).toString() + ":" + checkSum, version);
         } finally {
