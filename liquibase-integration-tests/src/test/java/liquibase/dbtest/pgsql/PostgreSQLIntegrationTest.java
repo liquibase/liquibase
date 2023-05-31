@@ -57,7 +57,7 @@ public class PostgreSQLIntegrationTest extends AbstractIntegrationTest {
     }
 
     @AfterClass
-    public void cleanup() throws Exception {
+    public static void cleanup() throws Exception {
         if (! testSystem.shouldTest()) {
             return;
         }
