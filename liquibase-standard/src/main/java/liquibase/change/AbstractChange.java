@@ -8,6 +8,7 @@ import liquibase.exception.*;
 import liquibase.executor.Executor;
 import liquibase.executor.ExecutorService;
 import liquibase.executor.LoggingExecutor;
+import liquibase.integration.commandline.LiquibaseCommandLineConfiguration;
 import liquibase.parser.core.ParsedNode;
 import liquibase.parser.core.ParsedNodeException;
 import liquibase.plugin.AbstractPlugin;
@@ -127,7 +128,7 @@ public abstract class AbstractChange extends AbstractPlugin implements Change {
         if (annotations.length == 1) {
             return annotations[0];
         } else if (annotations.length > 1) {
-            ChecksumVersions currentChecksumVersion = Scope.getCurrentScope().get(Scope.Attr.currentChecksumVersion, ChecksumVersions.latest());
+            ChecksumVersions currentChecksumVersion = LiquibaseCommandLineConfiguration.CHECKSUM_VERSION.getCurrentValue();
             // first try to find the annotation that matches the current checksum version
             Optional<DatabaseChangeProperty> versionMatchingAnnotation = Arrays.stream(annotations)
                     .filter(ann ->
@@ -528,24 +529,16 @@ public abstract class AbstractChange extends AbstractPlugin implements Change {
      */
     @Override
     public CheckSum generateCheckSum(ChecksumVersions version) {
-        try {
-            return Scope.child(Collections.singletonMap(Scope.Attr.currentChecksumVersion.toString(), version), () -> internalGenerateChecksum(version));
-        } catch (Exception e) {
-            Scope.getCurrentScope().getLog(getClass()).warning("Failed to generate checksum using the specified version.", e);
-            return internalGenerateChecksum(version);
-        }
-    }
-
-    private CheckSum internalGenerateChecksum(ChecksumVersions version) {
+        ChecksumVersions finalVersion = LiquibaseCommandLineConfiguration.CHECKSUM_VERSION.getCurrentValue();
         return CheckSum.compute(new StringChangeLogSerializer(new StringChangeLogSerializer.FieldFilter() {
             @Override
             public boolean include(Object obj, String field, Object value) {
-                if(Arrays.stream(getExcludedFieldFilters(version)).anyMatch(filter -> filter.equals(field))) {
+                if(Arrays.stream(getExcludedFieldFilters(finalVersion)).anyMatch(filter -> filter.equals(field))) {
                     return false;
                 }
                 return super.include(obj, field, value);
             }
-        }).serialize(this, false), version);
+        }).serialize(this, false), finalVersion);
     }
 
     public String[] getExcludedFieldFilters(ChecksumVersions version) {

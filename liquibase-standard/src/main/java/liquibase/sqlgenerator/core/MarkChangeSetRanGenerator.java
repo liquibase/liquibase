@@ -12,6 +12,7 @@ import liquibase.database.ObjectQuotingStrategy;
 import liquibase.exception.LiquibaseException;
 import liquibase.exception.UnexpectedLiquibaseException;
 import liquibase.exception.ValidationErrors;
+import liquibase.integration.commandline.LiquibaseCommandLineConfiguration;
 import liquibase.sql.Sql;
 import liquibase.sqlgenerator.SqlGeneratorChain;
 import liquibase.sqlgenerator.SqlGeneratorFactory;
@@ -65,7 +66,7 @@ public class MarkChangeSetRanGenerator extends AbstractSqlGenerator<MarkChangeSe
                 runStatement = new UpdateStatement(database.getLiquibaseCatalogName(), database.getLiquibaseSchemaName(), database.getDatabaseChangeLogTableName())
                         .addNewColumnValue("DATEEXECUTED", new DatabaseFunction(dateValue))
                         .addNewColumnValue("ORDEREXECUTED", ChangeLogHistoryServiceFactory.getInstance().getChangeLogService(database).getNextSequenceValue())
-                        .addNewColumnValue("MD5SUM", changeSet.generateCheckSum(ChecksumVersions.latest()).toString())
+                        .addNewColumnValue("MD5SUM", changeSet.generateCheckSum(LiquibaseCommandLineConfiguration.CHECKSUM_VERSION.getCurrentValue()).toString())
                         .addNewColumnValue("EXECTYPE", statement.getExecType().value)
                         .addNewColumnValue("DEPLOYMENT_ID", ChangeLogHistoryServiceFactory.getInstance().getChangeLogService(database).getDeploymentId())
                         .addNewColumnValue(COMMENTS, getCommentsColumn(changeSet))
@@ -86,7 +87,7 @@ public class MarkChangeSetRanGenerator extends AbstractSqlGenerator<MarkChangeSe
                             .addColumnValue("FILENAME", changeSet.getFilePath())
                             .addColumnValue("DATEEXECUTED", new DatabaseFunction(dateValue))
                             .addColumnValue("ORDEREXECUTED", ChangeLogHistoryServiceFactory.getInstance().getChangeLogService(database).getNextSequenceValue())
-                            .addColumnValue("MD5SUM", changeSet.generateCheckSum(ChecksumVersions.latest()).toString())
+                            .addColumnValue("MD5SUM", changeSet.generateCheckSum(LiquibaseCommandLineConfiguration.CHECKSUM_VERSION.getCurrentValue()).toString())
                             .addColumnValue("DESCRIPTION", limitSize(changeSet.getDescription()))
                             .addColumnValue(COMMENTS, getCommentsColumn(changeSet))
                             .addColumnValue("EXECTYPE", statement.getExecType().value)

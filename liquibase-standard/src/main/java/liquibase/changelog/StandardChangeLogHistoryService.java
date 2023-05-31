@@ -17,6 +17,7 @@ import liquibase.exception.UnexpectedLiquibaseException;
 import liquibase.executor.Executor;
 import liquibase.executor.ExecutorService;
 import liquibase.executor.jvm.ChangelogJdbcMdcListener;
+import liquibase.integration.commandline.LiquibaseCommandLineConfiguration;
 import liquibase.snapshot.InvalidExampleException;
 import liquibase.snapshot.SnapshotControl;
 import liquibase.snapshot.SnapshotGeneratorFactory;
@@ -251,7 +252,7 @@ public class StandardChangeLogHistoryService extends AbstractChangeLogHistorySer
 
             if (!md5sumRS.isEmpty()) {
                 //check if any checksum is not using the current version
-                databaseChecksumsCompatible = md5sumRS.stream().allMatch(m -> m.get("MD5SUM").toString().startsWith(ChecksumVersions.latest().getVersion() + ":"));
+                databaseChecksumsCompatible = md5sumRS.stream().allMatch(m -> m.get("MD5SUM").toString().startsWith(LiquibaseCommandLineConfiguration.CHECKSUM_VERSION.getCurrentValue().getVersion() + ":"));
             }
 
 

@@ -1,6 +1,7 @@
 package liquibase.change;
 
 import liquibase.ChecksumVersions;
+import liquibase.integration.commandline.LiquibaseCommandLineConfiguration;
 import liquibase.util.MD5Util;
 import liquibase.util.StringUtil;
 
@@ -60,11 +61,11 @@ public final class CheckSum {
     /**
      * Return the current CheckSum algorithm version.
      *
-     * @deprecated Use {@link ChecksumVersions#latest()} instead
+     * @deprecated Use {@link LiquibaseCommandLineConfiguration#CHECKSUM_VERSION} instead
      */
     @Deprecated
     public static int getCurrentVersion() {
-        return ChecksumVersions.latest().getVersion();
+        return LiquibaseCommandLineConfiguration.CHECKSUM_VERSION.getCurrentValue().getVersion();
     }
 
     /**

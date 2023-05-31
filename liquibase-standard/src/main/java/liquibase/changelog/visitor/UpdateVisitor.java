@@ -20,6 +20,7 @@ import liquibase.exception.MigrationFailedException;
 import liquibase.executor.Executor;
 import liquibase.executor.ExecutorService;
 import liquibase.executor.LoggingExecutor;
+import liquibase.integration.commandline.LiquibaseCommandLineConfiguration;
 import liquibase.statement.core.UpdateChangeSetChecksumStatement;
 
 import java.util.Objects;
@@ -67,7 +68,7 @@ public class UpdateVisitor implements ChangeSetVisitor {
         CheckSum oldChecksum = updateCheckSumIfRequired(changeSet);
         if (isAccepted) {
             executeAcceptedChange(changeSet, databaseChangeLog, database);
-        } else if ((oldChecksum == null || oldChecksum.getVersion() < ChecksumVersions.latest().getVersion())) {
+        } else if ((oldChecksum == null || oldChecksum.getVersion() < LiquibaseCommandLineConfiguration.CHECKSUM_VERSION.getCurrentValue().getVersion())) {
             upgradeCheckSumVersionForAlreadyExecutedOrNullChange(changeSet, database, oldChecksum);
         }
         this.database.commit();
@@ -81,10 +82,10 @@ public class UpdateVisitor implements ChangeSetVisitor {
      */
     private static CheckSum updateCheckSumIfRequired(ChangeSet changeSet) {
         CheckSum oldChecksum = null;
-        if (changeSet.getStoredCheckSum() == null || changeSet.getStoredCheckSum().getVersion() < ChecksumVersions.latest().getVersion()) {
+        if (changeSet.getStoredCheckSum() == null || changeSet.getStoredCheckSum().getVersion() < LiquibaseCommandLineConfiguration.CHECKSUM_VERSION.getCurrentValue().getVersion()) {
             oldChecksum = changeSet.getStoredCheckSum();
             changeSet.clearCheckSum();
-            changeSet.setStoredCheckSum(changeSet.generateCheckSum(ChecksumVersions.latest()));
+            changeSet.setStoredCheckSum(changeSet.generateCheckSum(LiquibaseCommandLineConfiguration.CHECKSUM_VERSION.getCurrentValue()));
         }
         return oldChecksum;
     }

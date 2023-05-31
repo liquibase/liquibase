@@ -4,6 +4,7 @@ import liquibase.ChecksumVersions
 import liquibase.change.ChangeStatus
 import liquibase.database.core.PostgresDatabase
 import liquibase.database.DatabaseConnection
+import liquibase.integration.commandline.LiquibaseCommandLineConfiguration
 import liquibase.snapshot.MockSnapshotGeneratorFactory
 import liquibase.snapshot.SnapshotGeneratorFactory
 import liquibase.change.StandardChangeTest;
@@ -141,7 +142,7 @@ public class LoadUpdateDataChangeTest extends StandardChangeTest {
         where:
         version | originalChecksum | updatedChecksum
         ChecksumVersions.V8 | "8:a91f2379b2b3b4c4a5a571b8e7409081" | "8:cce1423feea9e29192ef7c306eda0c94"
-        ChecksumVersions.latest() | "9:55d574d66869989f7208b9f05b7409bb" | "9:b0cc70905a4b9db9211c05392fd08f08"
+        LiquibaseCommandLineConfiguration.CHECKSUM_VERSION.getCurrentValue() | "9:55d574d66869989f7208b9f05b7409bb" | "9:b0cc70905a4b9db9211c05392fd08f08"
     }
 
     @Override
@@ -184,7 +185,7 @@ public class LoadUpdateDataChangeTest extends StandardChangeTest {
         where:
         version | originalChecksum | updatedChecksum
         ChecksumVersions.V8 | "8:a91f2379b2b3b4c4a5a571b8e7409081" | "8:a91f2379b2b3b4c4a5a571b8e7409081"
-        ChecksumVersions.latest() | "9:55d574d66869989f7208b9f05b7409bb" | "9:55d574d66869989f7208b9f05b7409bb"
+        LiquibaseCommandLineConfiguration.CHECKSUM_VERSION.getCurrentValue() | "9:55d574d66869989f7208b9f05b7409bb" | "9:55d574d66869989f7208b9f05b7409bb"
     }
 
     @Unroll
@@ -208,7 +209,7 @@ public class LoadUpdateDataChangeTest extends StandardChangeTest {
         where:
         version | originalChecksum | updatedChecksum
         ChecksumVersions.V8 | "8:becddfbcfda2ec516371ed36aaf1137a" | "8:e51a6408e921cfa151c50c7d90cf5baa"
-        ChecksumVersions.latest() | "9:c02972964ae29d51fa8e7801951fbb70" | "9:91298c1042fcb57394a242e8c838ce51"
+        LiquibaseCommandLineConfiguration.CHECKSUM_VERSION.getCurrentValue() | "9:c02972964ae29d51fa8e7801951fbb70" | "9:91298c1042fcb57394a242e8c838ce51"
     }
 
     @Unroll
@@ -233,6 +234,6 @@ public class LoadUpdateDataChangeTest extends StandardChangeTest {
         where:
         version | originalChecksum | updatedChecksum
         ChecksumVersions.V8 | "8:e51a6408e921cfa151c50c7d90cf5baa" | "8:e51a6408e921cfa151c50c7d90cf5baa"
-        ChecksumVersions.latest() | "9:91298c1042fcb57394a242e8c838ce51" | "9:91298c1042fcb57394a242e8c838ce51"
+        LiquibaseCommandLineConfiguration.CHECKSUM_VERSION.getCurrentValue() | "9:91298c1042fcb57394a242e8c838ce51" | "9:91298c1042fcb57394a242e8c838ce51"
     }
 }

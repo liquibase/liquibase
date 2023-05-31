@@ -4,6 +4,7 @@ import liquibase.ChecksumVersions;
 import liquibase.Scope;
 import liquibase.change.core.CreateTableChange;
 import liquibase.database.core.MSSQLDatabase;
+import liquibase.integration.commandline.LiquibaseCommandLineConfiguration;
 import liquibase.servicelocator.LiquibaseService;
 import liquibase.sqlgenerator.SqlGeneratorFactory;
 import liquibase.statement.core.CreateSequenceStatement;
@@ -48,8 +49,8 @@ public class ChangeFactoryTest {
         Change change8 = new CreateTableChange();
         Change change9 = new CreateTableChange();
 
-        ChangeMetaData changeMetaData8 = Scope.child(Collections.singletonMap(Scope.Attr.currentChecksumVersion.toString(), ChecksumVersions.V8), () -> changeFactory.getChangeMetaData(change8));
-        ChangeMetaData changeMetaData9 = Scope.child(Collections.singletonMap(Scope.Attr.currentChecksumVersion.toString(), ChecksumVersions.V9), () -> changeFactory.getChangeMetaData(change9));
+        ChangeMetaData changeMetaData8 = Scope.child(Collections.singletonMap(LiquibaseCommandLineConfiguration.CHECKSUM_VERSION.getKey(), ChecksumVersions.V8), () -> changeFactory.getChangeMetaData(change8));
+        ChangeMetaData changeMetaData9 = Scope.child(Collections.singletonMap(LiquibaseCommandLineConfiguration.CHECKSUM_VERSION.getKey(), ChecksumVersions.V9), () -> changeFactory.getChangeMetaData(change9));
 
         assertNotEquals(changeMetaData8, changeMetaData9);
     }
