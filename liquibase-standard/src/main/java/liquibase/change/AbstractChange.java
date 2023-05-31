@@ -532,8 +532,7 @@ public abstract class AbstractChange extends AbstractPlugin implements Change {
         try {
             return Scope.child(Collections.singletonMap(Scope.Attr.currentChecksumVersion.toString(), version), () -> internalGenerateChecksum(version));
         } catch (Exception e) {
-            // todo logging?
-            // todo is this how we should handle it?
+            Scope.getCurrentScope().getLog(getClass()).warning("Failed to generate checksum using the specified version.", e);
             return internalGenerateChecksum(version);
         }
     }
