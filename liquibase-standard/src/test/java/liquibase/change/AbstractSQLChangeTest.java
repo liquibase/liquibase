@@ -2,6 +2,7 @@ package liquibase.change;
 
 import liquibase.ChecksumVersions;
 import liquibase.database.core.MSSQLDatabase;
+import liquibase.integration.commandline.LiquibaseCommandLineConfiguration;
 import liquibase.statement.SqlStatement;
 import liquibase.statement.core.RawSqlStatement;
 import liquibase.util.StreamUtil;
@@ -79,10 +80,10 @@ public class AbstractSQLChangeTest {
 
     @Test
     public void generateCheckSum_lineEndingIndependent() {
-        CheckSum sql = new ExampleAbstractSQLChange("LINE 1;\nLINE 2;\nLINE3;").generateCheckSum(ChecksumVersions.latest());
-        CheckSum sqlCRLF = new ExampleAbstractSQLChange("LINE 1;\r\nLINE 2;\r\nLINE3;").generateCheckSum(ChecksumVersions.latest());
-        CheckSum sqlLF = new ExampleAbstractSQLChange("LINE 1;\rLINE 2;\rLINE3;").generateCheckSum(ChecksumVersions.latest());
-        CheckSum sqlDifferent = new ExampleAbstractSQLChange("Something Completely Different").generateCheckSum(ChecksumVersions.latest());
+        CheckSum sql = new ExampleAbstractSQLChange("LINE 1;\nLINE 2;\nLINE3;").generateCheckSum(LiquibaseCommandLineConfiguration.CHECKSUM_VERSION.getCurrentValue());
+        CheckSum sqlCRLF = new ExampleAbstractSQLChange("LINE 1;\r\nLINE 2;\r\nLINE3;").generateCheckSum(LiquibaseCommandLineConfiguration.CHECKSUM_VERSION.getCurrentValue());
+        CheckSum sqlLF = new ExampleAbstractSQLChange("LINE 1;\rLINE 2;\rLINE3;").generateCheckSum(LiquibaseCommandLineConfiguration.CHECKSUM_VERSION.getCurrentValue());
+        CheckSum sqlDifferent = new ExampleAbstractSQLChange("Something Completely Different").generateCheckSum(LiquibaseCommandLineConfiguration.CHECKSUM_VERSION.getCurrentValue());
 
         assertEquals(sql.toString(), sqlCRLF.toString());
         assertEquals(sql.toString(), sqlLF.toString());
@@ -91,29 +92,29 @@ public class AbstractSQLChangeTest {
 
     @Test
     public void generateCheckSum_nullSql() {
-        assertNotNull(new ExampleAbstractSQLChange().generateCheckSum(ChecksumVersions.latest()));
+        assertNotNull(new ExampleAbstractSQLChange().generateCheckSum(LiquibaseCommandLineConfiguration.CHECKSUM_VERSION.getCurrentValue()));
     }
 
     @Test
     public void generateCheckSum_changesBasedOnParams_latest() {
-        CheckSum baseCheckSum = new ExampleAbstractSQLChange("SOME SQL").generateCheckSum(ChecksumVersions.latest());
+        CheckSum baseCheckSum = new ExampleAbstractSQLChange("SOME SQL").generateCheckSum(LiquibaseCommandLineConfiguration.CHECKSUM_VERSION.getCurrentValue());
 
         ExampleAbstractSQLChange change = new ExampleAbstractSQLChange("SOME SQL");
         change.setSplitStatements(false);
-        assertEquals(baseCheckSum.toString(), change.generateCheckSum(ChecksumVersions.latest()).toString());
+        assertEquals(baseCheckSum.toString(), change.generateCheckSum(LiquibaseCommandLineConfiguration.CHECKSUM_VERSION.getCurrentValue()).toString());
 
         change = new ExampleAbstractSQLChange("SOME SQL");
         change.setEndDelimiter("X");
-        assertEquals(baseCheckSum.toString(), change.generateCheckSum(ChecksumVersions.latest()).toString());
+        assertEquals(baseCheckSum.toString(), change.generateCheckSum(LiquibaseCommandLineConfiguration.CHECKSUM_VERSION.getCurrentValue()).toString());
 
         change = new ExampleAbstractSQLChange("SOME SQL");
         change.setStripComments(true);
-        assertEquals(baseCheckSum.toString(), change.generateCheckSum(ChecksumVersions.latest()).toString());
+        assertEquals(baseCheckSum.toString(), change.generateCheckSum(LiquibaseCommandLineConfiguration.CHECKSUM_VERSION.getCurrentValue()).toString());
     }
 
     @Test
     public void generateCheckSum_changesBasedOnParams_v8() {
-        CheckSum baseCheckSum = new ExampleAbstractSQLChange("SOME SQL").generateCheckSum(ChecksumVersions.latest());
+        CheckSum baseCheckSum = new ExampleAbstractSQLChange("SOME SQL").generateCheckSum(LiquibaseCommandLineConfiguration.CHECKSUM_VERSION.getCurrentValue());
 
         ExampleAbstractSQLChange change = new ExampleAbstractSQLChange("SOME SQL");
         change.setSplitStatements(false);

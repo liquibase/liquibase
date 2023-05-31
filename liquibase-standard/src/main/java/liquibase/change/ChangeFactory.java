@@ -3,6 +3,7 @@ package liquibase.change;
 import liquibase.ChecksumVersions;
 import liquibase.Scope;
 import liquibase.exception.UnexpectedLiquibaseException;
+import liquibase.integration.commandline.LiquibaseCommandLineConfiguration;
 import liquibase.plugin.AbstractPluginFactory;
 import liquibase.plugin.Plugin;
 import liquibase.servicelocator.ServiceLocator;
@@ -60,7 +61,7 @@ public class ChangeFactory extends AbstractPluginFactory<Change>{
     private String generateCacheKey(Change change) {
         String key;
         try {
-            ChecksumVersions version = Scope.getCurrentScope().get(Scope.Attr.currentChecksumVersion, ChecksumVersions.class);
+            ChecksumVersions version = LiquibaseCommandLineConfiguration.CHECKSUM_VERSION.getCurrentValue();
             if (version == null) {
                  throw new NullPointerException();
             }

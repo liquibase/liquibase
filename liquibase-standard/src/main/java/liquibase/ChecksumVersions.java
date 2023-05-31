@@ -35,10 +35,6 @@ public enum ChecksumVersions {
         return since;
     }
 
-    public static ChecksumVersions latest() {
-        return V9;
-    }
-
     public static ChecksumVersions enumFromChecksumVersion(int i) {
         if (i < 8 || i > 9) {
             throw new UnsupportedChecksumVersionException(i);

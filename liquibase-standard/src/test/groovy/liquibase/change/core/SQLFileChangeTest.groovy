@@ -10,6 +10,7 @@ import liquibase.changelog.ChangeSet
 import liquibase.changelog.DatabaseChangeLog
 import liquibase.database.core.MockDatabase
 import liquibase.exception.UnexpectedLiquibaseException
+import liquibase.integration.commandline.LiquibaseCommandLineConfiguration
 import liquibase.statement.SqlStatement
 import liquibase.test.JUnitResourceAccessor
 import liquibase.util.StreamUtil
@@ -158,12 +159,12 @@ class SQLFileChangeTest extends StandardChangeTest {
         procedureText = procedureText.replace("valueToReplace", "value1")
         change.setSql(procedureText)
 
-        def checkSumFirstReplacement = change.generateCheckSum(version).toString()
+        def checkSumFirstReplacement = Scope.child(Collections.singletonMap(LiquibaseCommandLineConfiguration.CHECKSUM_VERSION.getKey(), version), { -> return change.generateCheckSum(version) } as Scope.ScopedRunnerWithReturn).toString()
 
         procedureText = procedureText.replace("value1", "value2")
         change.setSql(procedureText)
 
-        def checkSumSecondReplacement = change.generateCheckSum(version).toString()
+        def checkSumSecondReplacement = Scope.child(Collections.singletonMap(LiquibaseCommandLineConfiguration.CHECKSUM_VERSION.getKey(), version), { -> return change.generateCheckSum(version) } as Scope.ScopedRunnerWithReturn).toString()
 
         then:
         checkSumFirstReplacement == originalChecksum
@@ -172,6 +173,6 @@ class SQLFileChangeTest extends StandardChangeTest {
         where:
         version | originalChecksum | updatedChecksum
         ChecksumVersions.V8 | "8:25560f4c442fa581b820d0a6206fd14e" | "8:b934d68e53222bc7b5cbf147ce6746b4"
-        ChecksumVersions.latest() | "9:8cfbd3e5970885470db17cd149feb637" | "9:f6302129ace10ca356faa21343dd1aa8"
+        LiquibaseCommandLineConfiguration.CHECKSUM_VERSION.getCurrentValue() | "9:8cfbd3e5970885470db17cd149feb637" | "9:f6302129ace10ca356faa21343dd1aa8"
     }
 }

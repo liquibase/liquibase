@@ -11,6 +11,7 @@ import liquibase.exception.DatabaseException;
 import liquibase.exception.LiquibaseException;
 import liquibase.exception.UnexpectedLiquibaseException;
 import liquibase.executor.ExecutorService;
+import liquibase.integration.commandline.LiquibaseCommandLineConfiguration;
 import liquibase.servicelocator.LiquibaseService;
 import liquibase.statement.core.CreateDatabaseChangeLogTableStatement;
 import liquibase.statement.core.MarkChangeSetRanStatement;
@@ -138,7 +139,7 @@ public class OfflineChangeLogHistoryService extends AbstractChangeLogHistoryServ
             Scope.getCurrentScope().getSingleton(ExecutorService.class).getExecutor("jdbc", getDatabase()).execute(new UpdateChangeSetChecksumStatement(changeSet));
         }
         replaceChangeSet(changeSet, line -> {
-            line[Columns.MD5SUM.ordinal()] = changeSet.generateCheckSum(ChecksumVersions.latest()).toString();
+            line[Columns.MD5SUM.ordinal()] = changeSet.generateCheckSum(LiquibaseCommandLineConfiguration.CHECKSUM_VERSION.getCurrentValue()).toString();
             return line;
         });
     }
@@ -261,7 +262,7 @@ public class OfflineChangeLogHistoryService extends AbstractChangeLogHistoryServ
             newLine[Columns.DATEEXECUTED.ordinal()] = new ISODateFormat().format(new java.sql.Timestamp(new Date().getTime()));
             newLine[Columns.ORDEREXECUTED.ordinal()] = String.valueOf(getNextSequenceValue());
             newLine[Columns.EXECTYPE.ordinal()] = execType.value;
-            newLine[Columns.MD5SUM.ordinal()] = changeSet.generateCheckSum(ChecksumVersions.latest()).toString();
+            newLine[Columns.MD5SUM.ordinal()] = changeSet.generateCheckSum(LiquibaseCommandLineConfiguration.CHECKSUM_VERSION.getCurrentValue()).toString();
             newLine[Columns.DESCRIPTION.ordinal()] = changeSet.getDescription();
             newLine[Columns.COMMENTS.ordinal()] = changeSet.getComments();
             newLine[Columns.TAG.ordinal()] = tag;

@@ -1,5 +1,6 @@
 package liquibase.integration.commandline;
 
+import liquibase.ChecksumVersions;
 import liquibase.configuration.AutoloadedConfigurations;
 import liquibase.configuration.ConfigurationDefinition;
 import liquibase.configuration.ConfigurationValueConverter;
@@ -31,6 +32,7 @@ public class LiquibaseCommandLineConfiguration implements AutoloadedConfiguratio
     public static final ConfigurationDefinition<Boolean> SHOULD_RUN;
     public static final ConfigurationDefinition<ArgumentConverter> ARGUMENT_CONVERTER;
     public static final ConfigurationDefinition<String> MONITOR_PERFORMANCE;
+    public static final ConfigurationDefinition<ChecksumVersions> CHECKSUM_VERSION;
 
     static {
         ConfigurationDefinition.Builder builder = new ConfigurationDefinition.Builder("liquibase");
@@ -112,6 +114,13 @@ public class LiquibaseCommandLineConfiguration implements AutoloadedConfiguratio
                         return null;
                     }
                 })
+                .build();
+
+        CHECKSUM_VERSION = builder.define("checksumVersion", ChecksumVersions.class)
+                .setDescription("Optionally, force Liquibase to use a different version of the checksum calculation " +
+                        "algorithm. It is not recommended that this setting be used.")
+                .setDefaultValue(ChecksumVersions.V9)
+                .setHidden(true)
                 .build();
 
    }
