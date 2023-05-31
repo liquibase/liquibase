@@ -127,7 +127,6 @@ public abstract class AbstractChange extends AbstractPlugin implements Change {
         if (annotations.length == 1) {
             return annotations[0];
         } else if (annotations.length > 1) {
-            // todo put the checksum version in the scope
             ChecksumVersions currentChecksumVersion = Scope.getCurrentScope().get(Scope.Attr.currentChecksumVersion, ChecksumVersions.latest());
             // first try to find the annotation that matches the current checksum version
             Optional<DatabaseChangeProperty> versionMatchingAnnotation = Arrays.stream(annotations)
