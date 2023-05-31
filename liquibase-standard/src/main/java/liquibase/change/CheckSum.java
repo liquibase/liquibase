@@ -24,7 +24,7 @@ public final class CheckSum {
     private final String storedCheckSum;
 
     private static final char DELIMITER = ':';
-    private static final String CHECKSUM_REGEX = "(^\\d)" + DELIMITER + "([a-zA-Z0-9]++)";
+    private static final String CHECKSUM_REGEX = "(^\\d++)" + DELIMITER + "([a-zA-Z0-9]++)";
     private static final Pattern CHECKSUM_PATTERN = Pattern.compile(CHECKSUM_REGEX);
 
     /**
@@ -46,7 +46,7 @@ public final class CheckSum {
             return null;
         }
         // The general layout of a checksum is:
-        // <1 digit: algorithm version number>:<1..n characters alphanumeric checksum>
+        // <1+ digits: algorithm version number>:<1..n characters alphanumeric checksum>
         // Example: 7:2cdf9876e74347162401315d34b83746
         Matcher matcher = CHECKSUM_PATTERN.matcher(checksumValue);
         if (matcher.find()) {
