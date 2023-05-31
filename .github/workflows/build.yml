@@ -357,7 +357,7 @@ jobs:
 
       - name: Build if we do not have a cache anymore
         if: steps.cache.outputs.cache-hit != 'true'
-        run: mvn -B -Dbuild.repository.owner=${{ needs.setup.outputs.thisRepositoryOwner }} -Dbuild.repository.name=${{ needs.setup.outputs.thisRepositoryName }} -Dbuild.branch=${{ needs.setup.outputs.thisBranchName }} -Dbuild.number=${{ github.run_number }} -Dbuild.commit=${{ needs.setup.outputs.thisSha }} -DtrimStackTrace=false clean package -DskipTests
+        run: mvn -B -Dbuild.repository.owner=${{ needs.setup.outputs.thisRepositoryOwner }} -Dbuild.repository.name=${{ needs.setup.outputs.thisRepositoryName }} -Dbuild.branch=${{ needs.setup.outputs.thisBranchName }} -Dbuild.number=${{ github.run_number }} -Dbuild.commit=${{ needs.setup.outputs.thisSha }} -DtrimStackTrace=false clean install -DskipTests
 
       - name: Download liquibase-commercial
         uses: liquibase/action-download-artifact@v2-liquibase
