@@ -30,7 +30,7 @@ import liquibase.snapshot.SnapshotGeneratorFactory;
 import liquibase.statement.core.RawSqlStatement;
 import liquibase.structure.core.Sequence;
 import liquibase.structure.core.Table;
-import org.junit.After;
+import org.junit.AfterClass;
 import org.junit.Assert;
 import org.junit.Test;
 
@@ -56,7 +56,7 @@ public class PostgreSQLIntegrationTest extends AbstractIntegrationTest {
         blobChangeLog = "changelogs/pgsql/complete/testBlob.changelog.xml";
     }
 
-    @After
+    @AfterClass
     public void cleanup() throws Exception {
         if (! testSystem.shouldTest()) {
             return;
