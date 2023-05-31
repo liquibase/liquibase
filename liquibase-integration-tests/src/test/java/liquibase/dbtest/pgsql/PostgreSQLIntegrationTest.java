@@ -22,6 +22,7 @@ import liquibase.diff.output.DiffOutputControl;
 import liquibase.diff.output.changelog.DiffToChangeLog;
 import liquibase.exception.ValidationFailedException;
 import liquibase.executor.ExecutorService;
+import liquibase.extension.testing.testsystem.DatabaseTestSystem;
 import liquibase.lockservice.LockService;
 import liquibase.lockservice.LockServiceFactory;
 import liquibase.snapshot.DatabaseSnapshot;
@@ -49,24 +50,26 @@ public class PostgreSQLIntegrationTest extends AbstractIntegrationTest {
 
     private String dependenciesChangeLog;
     private String blobChangeLog;
+    private static DatabaseTestSystem localTestSystem;
 
     public PostgreSQLIntegrationTest() throws Exception {
         super("pgsql", DatabaseFactory.getInstance().getDatabase("postgresql"));
         dependenciesChangeLog = "changelogs/pgsql/complete/testFkPkDependencies.xml";
         blobChangeLog = "changelogs/pgsql/complete/testBlob.changelog.xml";
+        localTestSystem = testSystem;
     }
 
     @AfterClass
     public static void cleanup() throws Exception {
-        if (! testSystem.shouldTest()) {
+        if (! localTestSystem.shouldTest()) {
             return;
         }
-        LockService lockService = LockServiceFactory.getInstance().getLockService(testSystem.getDatabaseFromFactory());
+        LockService lockService = LockServiceFactory.getInstance().getLockService(localTestSystem.getDatabaseFromFactory());
         lockService.releaseLock();
         CommandScope commandScope = new CommandScope(DropAllCommandStep.COMMAND_NAME);
-        commandScope.addArgumentValue(DbUrlConnectionCommandStep.URL_ARG, testSystem.getConnectionUrl());
-        commandScope.addArgumentValue(DbUrlConnectionCommandStep.USERNAME_ARG, testSystem.getUsername());
-        commandScope.addArgumentValue(DbUrlConnectionCommandStep.PASSWORD_ARG, testSystem.getPassword());
+        commandScope.addArgumentValue(DbUrlConnectionCommandStep.URL_ARG, localTestSystem.getConnectionUrl());
+        commandScope.addArgumentValue(DbUrlConnectionCommandStep.USERNAME_ARG, localTestSystem.getUsername());
+        commandScope.addArgumentValue(DbUrlConnectionCommandStep.PASSWORD_ARG, localTestSystem.getPassword());
         commandScope.setOutput(new ByteArrayOutputStream());
         commandScope.execute();
     }
