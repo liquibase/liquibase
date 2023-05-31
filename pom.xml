@@ -475,7 +475,7 @@
                             </distributions>
                             <assemble>
                                 <jlink>
-                                    <liquibase-link>
+                                    <liquibase>
                                         <active>ALWAYS</active>
                                         <exported>true</exported>
                                         <imageName>liquibase-{{projectVersion}}</imageName>
@@ -496,7 +496,7 @@
                                             </targetJdk>
                                         </targetJdks>
                                         <mainJar>liquibase-cli/target/liquibase-cli-{{projectVersion}}.jar</mainJar>
-                                    </liquibase-link>
+                                    </liquibase>
                                 </jlink>
                             </assemble>
                         </jreleaser>
@@ -609,5 +609,5 @@
                 </plugins>
             </build>
         </profile>
-        </profiles>
+    </profiles>
 </project>
