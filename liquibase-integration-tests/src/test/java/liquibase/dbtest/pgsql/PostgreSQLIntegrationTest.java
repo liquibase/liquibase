@@ -9,6 +9,7 @@ import liquibase.change.core.CreateIndexChange;
 import liquibase.change.core.CreateTableChange;
 import liquibase.changelog.ChangeSet;
 import liquibase.command.CommandScope;
+import liquibase.command.core.DropAllCommandStep;
 import liquibase.command.core.GenerateChangelogCommandStep;
 import liquibase.command.core.helpers.DbUrlConnectionCommandStep;
 import liquibase.database.Database;
@@ -21,12 +22,15 @@ import liquibase.diff.output.DiffOutputControl;
 import liquibase.diff.output.changelog.DiffToChangeLog;
 import liquibase.exception.ValidationFailedException;
 import liquibase.executor.ExecutorService;
+import liquibase.lockservice.LockService;
+import liquibase.lockservice.LockServiceFactory;
 import liquibase.snapshot.DatabaseSnapshot;
 import liquibase.snapshot.SnapshotControl;
 import liquibase.snapshot.SnapshotGeneratorFactory;
 import liquibase.statement.core.RawSqlStatement;
 import liquibase.structure.core.Sequence;
 import liquibase.structure.core.Table;
+import org.junit.After;
 import org.junit.Assert;
 import org.junit.Test;
 
@@ -50,6 +54,21 @@ public class PostgreSQLIntegrationTest extends AbstractIntegrationTest {
         super("pgsql", DatabaseFactory.getInstance().getDatabase("postgresql"));
         dependenciesChangeLog = "changelogs/pgsql/complete/testFkPkDependencies.xml";
         blobChangeLog = "changelogs/pgsql/complete/testBlob.changelog.xml";
+    }
+
+    @After
+    public void cleanup() throws Exception {
+        if (! testSystem.shouldTest()) {
+            return;
+        }
+        LockService lockService = LockServiceFactory.getInstance().getLockService(testSystem.getDatabaseFromFactory());
+        lockService.releaseLock();
+        CommandScope commandScope = new CommandScope(DropAllCommandStep.COMMAND_NAME);
+        commandScope.addArgumentValue(DbUrlConnectionCommandStep.URL_ARG, testSystem.getConnectionUrl());
+        commandScope.addArgumentValue(DbUrlConnectionCommandStep.USERNAME_ARG, testSystem.getUsername());
+        commandScope.addArgumentValue(DbUrlConnectionCommandStep.PASSWORD_ARG, testSystem.getPassword());
+        commandScope.setOutput(new ByteArrayOutputStream());
+        commandScope.execute();
     }
 
     @Test
