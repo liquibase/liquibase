@@ -249,7 +249,7 @@ public class CreateProcedureChange extends AbstractChange implements DbmsTargete
         if (version == ChecksumVersions.V8) {
             return generateCheckSumV8(version);
         }
-        return generateCheckSumV9(this.procedureText, version);
+        return generateCheckSumLatest(this.procedureText, version);
     }
 
     @Deprecated
@@ -297,7 +297,7 @@ public class CreateProcedureChange extends AbstractChange implements DbmsTargete
         }
     }
 
-    protected CheckSum generateCheckSumV9(String sqlText, ChecksumVersions version) {
+    protected CheckSum generateCheckSumLatest(String sqlText, ChecksumVersions version) {
         InputStream stream = null;
         CheckSum checkSum;
         try {

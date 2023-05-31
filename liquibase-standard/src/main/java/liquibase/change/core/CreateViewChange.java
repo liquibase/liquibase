@@ -210,10 +210,10 @@ public class CreateViewChange extends AbstractChange {
         if (version == ChecksumVersions.V8) {
             return generateCheckSumV8(version);
         }
-        return generateCheckSumV9(version);
+        return generateCheckSumLatest(version);
     }
 
-    private CheckSum generateCheckSumV9(ChecksumVersions version) {
+    private CheckSum generateCheckSumLatest(ChecksumVersions version) {
         InputStream stream = null;
         CheckSum checkSum;
         try {
