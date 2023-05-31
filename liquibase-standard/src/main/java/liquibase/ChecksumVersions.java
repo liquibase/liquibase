@@ -4,6 +4,9 @@ import liquibase.exception.UnsupportedChecksumVersionException;
 
 import java.util.Arrays;
 
+/**
+ * Enum used to keep track of Liquibase Checksum versions introduced to enable the support of multiple versions at the same time.
+ */
 public enum ChecksumVersions {
 
     V8(8, "Version used from Liquibase 3.5.0 until 4.21.1", "3.5.0"),
@@ -26,6 +29,10 @@ public enum ChecksumVersions {
 
     public String getDescription() {
         return description;
+    }
+
+    public String getSince() {
+        return since;
     }
 
     public static ChecksumVersions latest() {
