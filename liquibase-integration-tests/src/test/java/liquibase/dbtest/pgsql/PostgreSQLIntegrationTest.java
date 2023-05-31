@@ -59,21 +59,6 @@ public class PostgreSQLIntegrationTest extends AbstractIntegrationTest {
         localTestSystem = testSystem;
     }
 
-    @AfterClass
-    public static void cleanup() throws Exception {
-        if (! localTestSystem.shouldTest()) {
-            return;
-        }
-        LockService lockService = LockServiceFactory.getInstance().getLockService(localTestSystem.getDatabaseFromFactory());
-        lockService.releaseLock();
-        CommandScope commandScope = new CommandScope(DropAllCommandStep.COMMAND_NAME);
-        commandScope.addArgumentValue(DbUrlConnectionCommandStep.URL_ARG, localTestSystem.getConnectionUrl());
-        commandScope.addArgumentValue(DbUrlConnectionCommandStep.USERNAME_ARG, localTestSystem.getUsername());
-        commandScope.addArgumentValue(DbUrlConnectionCommandStep.PASSWORD_ARG, localTestSystem.getPassword());
-        commandScope.setOutput(new ByteArrayOutputStream());
-        commandScope.execute();
-    }
-
     @Test
     public void testDependenciesInGenerateChangeLog() throws Exception {
         assumeNotNull(this.getDatabase());
