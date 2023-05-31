@@ -73,6 +73,9 @@
         <junit.version>4.13.2</junit.version>
         <trimStackTrace>false</trimStackTrace>
         <argLine></argLine>
+        <java.version>11</java.version>
+        <jdk.pathPrefix>target/jdks</jdk.pathPrefix>
+        <jdk.filePrefix>zulu11.48.21-ca-jdk11.0.11</jdk.filePrefix>
     </properties>
 
     <distributionManagement>
@@ -267,6 +270,7 @@
                     <encoding>UTF-8</encoding>
                 </configuration>
             </plugin>
+
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-enforcer-plugin</artifactId>
@@ -410,6 +414,95 @@
                 </executions>
             </plugin>
 
+            <plugin>
+                <groupId>org.jreleaser</groupId>
+                <artifactId>jdks-maven-plugin</artifactId>
+                <version>1.6.0</version>
+                <inherited>false</inherited>
+                <executions>
+                    <execution>
+                        <phase>verify</phase>
+                        <goals>
+                            <goal>setup-disco</goal>
+                        </goals>
+                    </execution>
+                </executions>
+                <configuration>
+                    <pkgs>
+                        <pkg>
+                            <name>zulu11Linux</name>
+                            <platform>linux-x86_64</platform>
+                            <version>11.0.11</version>
+                        </pkg>
+                        <pkg>
+                            <name>zulu11Osx</name>
+                            <platform>osx-x86_64</platform>
+                            <version>11.0.11</version>
+                        </pkg>
+                        <pkg>
+                            <name>zulu11Windows</name>
+                            <platform>windows-x86_64</platform>
+                            <version>11.0.11</version>
+                        </pkg>
+                    </pkgs>
+                </configuration>
+            </plugin>
+
+            <plugin>
+                <groupId>org.jreleaser</groupId>
+                <artifactId>jreleaser-maven-plugin</artifactId>
+                <version>1.6.0</version>
+                    <executions>
+                        <execution>
+                            <phase>package</phase>
+                            <goals>
+                                <goal>prepare</goal>
+                            </goals>
+                        </execution>
+                    </executions>
+                    <configuration>
+                        <jreleaser>
+                            <distributions>
+                                <liquibase>
+                                    <type>SINGLE_JAR</type>
+                                    <stereotype>CLI</stereotype>
+                                    <artifacts>
+                                        <artifact>
+                                            <path>liquibase-cli/target/liquibase-cli-{{projectVersion}}.jar</path>
+                                        </artifact>
+                                    </artifacts>
+                                </liquibase>
+                            </distributions>
+                            <assemble>
+                                <jlink>
+                                    <liquibase-link>
+                                        <active>ALWAYS</active>
+                                        <exported>true</exported>
+                                        <imageName>liquibase-{{projectVersion}}</imageName>
+                                        <executable>liquibase</executable>
+                                        <stereotype>CLI</stereotype>
+                                        <targetJdks>
+                                            <targetJdk>
+                                                <path>${jdk.pathPrefix}/zulu11Osx/${jdk.filePrefix}-macosx_x64/zulu-11.jdk/Contents/Home</path>
+                                                <platform>osx-x86_64</platform>
+                                            </targetJdk>
+                                            <targetJdk>
+                                                <path>${jdk.pathPrefix}/zulu11Linux/${jdk.filePrefix}-linux_x64</path>
+                                                <platform>linux-x86_64</platform>
+                                            </targetJdk>
+                                            <targetJdk>
+                                                <path>${jdk.pathPrefix}/zulu11Windows/${jdk.filePrefix}-win_x64</path>
+                                                <platform>windows-x86_64</platform>
+                                            </targetJdk>
+                                        </targetJdks>
+                                        <mainJar>liquibase-cli/target/liquibase-cli-{{projectVersion}}.jar</mainJar>
+                                    </liquibase-link>
+                                </jlink>
+                            </assemble>
+                        </jreleaser>
+                    </configuration>
+            </plugin>
+
             <!--        <plugin>-->
             <!--            <artifactId>maven-install-plugin</artifactId>-->
             <!--            <version>2.5.2</version>-->
@@ -516,18 +609,5 @@
                 </plugins>
             </build>
         </profile>
-
-        <profile>
-            <id>release</id>
-            <build>
-                <plugins>
-                <plugin>
-                    <groupId>org.jreleaser</groupId>
-                    <artifactId>jreleaser-maven-plugin</artifactId>
-                    <version>1.6.0</version>
-                </plugin>
-                </plugins>
-            </build>
-        </profile>
-    </profiles>
+        </profiles>
 </project>
