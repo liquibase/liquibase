@@ -15,6 +15,7 @@ import liquibase.exception.ValidationErrors
 import liquibase.database.core.MockDatabase
 import liquibase.serializer.LiquibaseSerializable
 import liquibase.statement.SqlStatement
+import liquibase.util.TestUtil
 import org.junit.Test
 import spock.lang.Specification
 import spock.lang.Unroll
@@ -24,6 +25,30 @@ import static org.junit.Assert.assertSame
 import static org.junit.Assert.assertTrue
 
 class AbstractChangeTest extends Specification {
+
+    @Unroll("#featureName: #object")
+    def "implementations of abstract change must not have any DatabaseChangeProperty annotations which duplicate versions"() {
+        def methods = object.getMethods()
+        expect:
+        for (def method : methods) {
+            Set<ChecksumVersions> seenVersions = new HashSet<>()
+            def annotations = method.getAnnotationsByType(DatabaseChangeProperty.class)
+            for (def annotation : annotations) {
+                def versions = annotation.version()
+                if (versions.size() == 0) {
+                    assert !seenVersions.contains(null)
+                    seenVersions.add(null)
+                }
+                for (def version : versions) {
+                    assert !seenVersions.contains(version)
+                    seenVersions.add(version)
+                }
+            }
+        }
+
+        where:
+        object << TestUtil.getClasses(AbstractChange)
+    }
 
     def "createChangeMetaData with no annotations"() {
         when:
