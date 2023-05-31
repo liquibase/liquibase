@@ -1,5 +1,6 @@
 package liquibase.change
 
+import liquibase.ChecksumVersions
 import liquibase.ContextExpression
 import liquibase.Labels
 import liquibase.change.core.CreateProcedureChange
@@ -14,6 +15,7 @@ import liquibase.exception.ValidationErrors
 import liquibase.database.core.MockDatabase
 import liquibase.serializer.LiquibaseSerializable
 import liquibase.statement.SqlStatement
+import liquibase.util.TestUtil
 import org.junit.Test
 import spock.lang.Specification
 import spock.lang.Unroll
@@ -23,6 +25,30 @@ import static org.junit.Assert.assertSame
 import static org.junit.Assert.assertTrue
 
 class AbstractChangeTest extends Specification {
+
+    @Unroll("#featureName: #object")
+    def "implementations of abstract change must not have any DatabaseChangeProperty annotations which duplicate versions"() {
+        def methods = object.getMethods()
+        expect:
+        for (def method : methods) {
+            Set<ChecksumVersions> seenVersions = new HashSet<>()
+            def annotations = method.getAnnotationsByType(DatabaseChangeProperty.class)
+            for (def annotation : annotations) {
+                def versions = annotation.version()
+                if (versions.size() == 0) {
+                    assert !seenVersions.contains(null)
+                    seenVersions.add(null)
+                }
+                for (def version : versions) {
+                    assert !seenVersions.contains(version)
+                    seenVersions.add(version)
+                }
+            }
+        }
+
+        where:
+        object << TestUtil.getClasses(AbstractChange)
+    }
 
     def "createChangeMetaData with no annotations"() {
         when:
@@ -343,56 +369,84 @@ class AbstractChangeTest extends Specification {
         "This/is/a/very/very/very/very/very/very/very/very/very/very/very/very/very/very/very/very/very/very/very/very/very/very/very/very/very/very/ver/long/test/change/path" | new CreateProcedureChange()
     }
 
-    def "context filter is not considered on checksum generation"() {
+    @Unroll
+    def "context filter checksum generation - #version"(ChecksumVersions version, String originalChecksum, String updatedChecksum) {
         when:
         ChangeSet originalChange = new ChangeSet("testId", "testAuthor", false, false, "path/changelog", null, null, null)
         ChangeSet changeWithContext = originalChange
 
-        CheckSum changeWithoutContextCheckSum = originalChange.generateCheckSum()
+        CheckSum changeWithoutContextCheckSum = originalChange.generateCheckSum(version)
         changeWithContext.setContextFilter(new ContextExpression("test"))
-        CheckSum changeWithContextCheckSum = changeWithContext.generateCheckSum()
+        CheckSum changeWithContextCheckSum = changeWithContext.generateCheckSum(version)
 
         then:
-        changeWithoutContextCheckSum == changeWithContextCheckSum
+        changeWithoutContextCheckSum.toString() == originalChecksum
+        changeWithContextCheckSum.toString() == updatedChecksum
+
+        where:
+        version | originalChecksum | updatedChecksum
+        ChecksumVersions.V8 | "8:d41d8cd98f00b204e9800998ecf8427e" | "8:d41d8cd98f00b204e9800998ecf8427e"
+        ChecksumVersions.latest() | "9:d41d8cd98f00b204e9800998ecf8427e" | "9:d41d8cd98f00b204e9800998ecf8427e"
     }
 
-    def "label is not considered on checksum generation"() {
+    @Unroll
+    def "label checksum generation - #version"(ChecksumVersions version, String originalChecksum, String updatedChecksum) {
         when:
         ChangeSet originalChange = new ChangeSet("testId", "testAuthor", false, false, "path/changelog", null, null, null)
         ChangeSet changeWithLabel = originalChange
 
-        CheckSum changeWithoutLabelCheckSum = originalChange.generateCheckSum()
+        CheckSum changeWithoutLabelCheckSum = originalChange.generateCheckSum(version)
         changeWithLabel.setLabels(new Labels("test"))
-        CheckSum changeWithLabelCheckSum = changeWithLabel.generateCheckSum()
+        CheckSum changeWithLabelCheckSum = changeWithLabel.generateCheckSum(version)
 
         then:
-        changeWithoutLabelCheckSum == changeWithLabelCheckSum
+        changeWithoutLabelCheckSum.toString() == originalChecksum
+        changeWithLabelCheckSum.toString() == updatedChecksum
+
+        where:
+        version | originalChecksum | updatedChecksum
+        ChecksumVersions.V8 | "8:d41d8cd98f00b204e9800998ecf8427e" | "8:d41d8cd98f00b204e9800998ecf8427e"
+        ChecksumVersions.latest() | "9:d41d8cd98f00b204e9800998ecf8427e" | "9:d41d8cd98f00b204e9800998ecf8427e"
     }
 
-    def "dbms is not considered on checksum generation"() {
+    @Unroll
+    def "dbms checksum generation - #version"(ChecksumVersions version, String originalChecksum, String updatedChecksum) {
         when:
         ChangeSet originalChange = new ChangeSet("testId", "testAuthor", false, false, "path/changelog", null, null, null)
         ChangeSet changeWithDbms = originalChange
 
-        CheckSum changeWithoutDbmsCheckSum = originalChange.generateCheckSum()
+        CheckSum changeWithoutDbmsCheckSum = originalChange.generateCheckSum(version)
         changeWithDbms.setDbms("postgresql")
-        CheckSum changeWithDbmsCheckSum = changeWithDbms.generateCheckSum()
+        CheckSum changeWithDbmsCheckSum = changeWithDbms.generateCheckSum(version)
 
         then:
-        changeWithoutDbmsCheckSum == changeWithDbmsCheckSum
+        changeWithoutDbmsCheckSum.toString() == originalChecksum
+        changeWithDbmsCheckSum.toString() == updatedChecksum
+
+        where:
+        version | originalChecksum | updatedChecksum
+        ChecksumVersions.V8 | "8:d41d8cd98f00b204e9800998ecf8427e" | "8:d41d8cd98f00b204e9800998ecf8427e"
+        ChecksumVersions.latest() | "9:d41d8cd98f00b204e9800998ecf8427e" | "9:d41d8cd98f00b204e9800998ecf8427e"
     }
 
-    def "comment is not considered on checksum generation"() {
+    @Unroll
+    def "comment checksum generation - #version"(ChecksumVersions version, String originalChecksum, String updatedChecksum) {
         when:
         ChangeSet originalChange = new ChangeSet("testId", "testAuthor", false, false, "path/changelog", null, null, null)
         ChangeSet changeWithComment = originalChange
 
-        CheckSum changeWithoutCommentCheckSum = originalChange.generateCheckSum()
+        CheckSum changeWithoutCommentCheckSum = originalChange.generateCheckSum(version)
         changeWithComment.setComments("This is a test comment")
-        CheckSum changeWithCommentCheckSum = changeWithComment.generateCheckSum()
+        CheckSum changeWithCommentCheckSum = changeWithComment.generateCheckSum(version)
 
         then:
-        changeWithoutCommentCheckSum == changeWithCommentCheckSum
+        changeWithoutCommentCheckSum.toString() == originalChecksum
+        changeWithCommentCheckSum.toString() == updatedChecksum
+
+        where:
+        version | originalChecksum | updatedChecksum
+        ChecksumVersions.V8 | "8:d41d8cd98f00b204e9800998ecf8427e" | "8:d41d8cd98f00b204e9800998ecf8427e"
+        ChecksumVersions.latest() | "9:d41d8cd98f00b204e9800998ecf8427e" | "9:d41d8cd98f00b204e9800998ecf8427e"
     }
 
     @DatabaseChange(name = "exampleParamelessAbstractChange", description = "Used for the AbstractChangeTest unit test", priority = 1)

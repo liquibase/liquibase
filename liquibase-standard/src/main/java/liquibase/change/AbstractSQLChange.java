@@ -203,10 +203,16 @@ public abstract class AbstractSQLChange extends AbstractChange implements DbmsTa
             }
 
             if (sql != null) {
-                stream = new ByteArrayInputStream(sql.getBytes(GlobalConfiguration.FILE_ENCODING.getCurrentValue())
-                );
+                if (version == ChecksumVersions.V8) {
+                    stream = new ByteArrayInputStream(sql.getBytes(GlobalConfiguration.OUTPUT_FILE_ENCODING.getCurrentValue()));
+                } else {
+                    stream = new ByteArrayInputStream(sql.getBytes(GlobalConfiguration.FILE_ENCODING.getCurrentValue()));
+                }
             }
 
+            if (version == ChecksumVersions.V8) {
+                return CheckSum.compute(new NormalizingStreamV8(this.getEndDelimiter(), this.isSplitStatements(), this.isStripComments(), stream), false, version);
+            }
             return CheckSum.compute(new AbstractSQLChange.NormalizingStream(stream), false, version);
 
         } catch (IOException e) {

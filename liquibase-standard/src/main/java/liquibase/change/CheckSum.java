@@ -105,7 +105,7 @@ public final class CheckSum {
             };
         }
 
-        return new CheckSum(MD5Util.computeMD5(newStream), getCurrentVersion());
+        return new CheckSum(MD5Util.computeMD5(newStream), version.getVersion());
     }
 
     @Override

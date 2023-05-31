@@ -83,7 +83,7 @@ public abstract class AbstractSqlVisitor implements SqlVisitor {
         return CheckSum.compute(new StringChangeLogSerializer(new StringChangeLogSerializer.FieldFilter(){
             @Override
             public boolean include(Object obj, String field, Object value) {
-                if(Arrays.stream(getExcludedFieldFilters()).anyMatch(filter -> filter.equals(field))) {
+                if(Arrays.stream(getExcludedFieldFilters(version)).anyMatch(filter -> filter.equals(field))) {
                     return false;
                 }
                 return super.include(obj, field, value);
@@ -91,7 +91,10 @@ public abstract class AbstractSqlVisitor implements SqlVisitor {
         }).serialize(this, false), version);
     }
 
-    public String[] getExcludedFieldFilters() {
+    public String[] getExcludedFieldFilters(ChecksumVersions version) {
+        if (version == ChecksumVersions.V8){
+            return new String[0];
+        }
         return new String[]{
                 "applicableDbms",
                 "contextFilter",

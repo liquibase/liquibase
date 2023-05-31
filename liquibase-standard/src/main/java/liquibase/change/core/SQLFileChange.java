@@ -165,6 +165,9 @@ public class SQLFileChange extends AbstractSQLChange {
 
     @Override
     public CheckSum generateCheckSum(ChecksumVersions version) {
+        if (version == ChecksumVersions.V8) {
+            return super.generateCheckSum(version);
+        }
         InputStream stream = null;
         try {
             String sqlContent = getSql();

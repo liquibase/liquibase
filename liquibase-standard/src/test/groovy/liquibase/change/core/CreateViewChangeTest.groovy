@@ -1,5 +1,6 @@
 package liquibase.change.core
 
+import liquibase.ChecksumVersions
 import liquibase.Scope
 import liquibase.change.ChangeStatus
 import liquibase.change.CheckSum
@@ -93,7 +94,8 @@ class CreateViewChangeTest extends StandardChangeTest {
         "my-logic.sql"             | "a/logical/path.xml" | true
     }
 
-    def "path is not considered on checksum generation"() {
+    @Unroll
+    def "path checksum generation - #version"(ChecksumVersions version, String originalChecksum, String updatedChecksum) {
         when:
         String testScopeId = Scope.enter([
                 "resourceAccessor": new MockResourceAccessor([
@@ -103,60 +105,88 @@ class CreateViewChangeTest extends StandardChangeTest {
 
         CreateViewChange change = new CreateViewChange()
         change.setSelectQuery(SELECT_QUERY)
-        CheckSum viewCheckSumWithoutPath = change.generateCheckSum()
+        CheckSum viewCheckSumWithoutPath = change.generateCheckSum(version)
         CreateViewChange change2 = new CreateViewChange()
         change2.setPath("viewTest.sql")
-        CheckSum viewCheckSumWithPath = change2.generateCheckSum()
+        CheckSum viewCheckSumWithPath = change2.generateCheckSum(version)
         //TODO: Move this Scope.exit() call into a cleanUpSpec method
         Scope.exit(testScopeId)
 
         then:
-        viewCheckSumWithoutPath == viewCheckSumWithPath
+        viewCheckSumWithoutPath.toString() == originalChecksum
+        viewCheckSumWithPath.toString() == updatedChecksum
+
+        where:
+        version | originalChecksum | updatedChecksum
+        ChecksumVersions.V8 | "8:dcb086e83731ee5f3e04af0a7010dd69" | "8:93ebeea10f821f8f9582450fcfcfbe0f"
+        ChecksumVersions.latest() | "9:44c9d30cc310fbecd58e03d557fe85df" | "9:44c9d30cc310fbecd58e03d557fe85df"
     }
 
-    def "encoding is not considered on checksum generation"() {
+    @Unroll
+    def "encoding checksum generation - #version"(ChecksumVersions version, String originalChecksum, String updatedChecksum) {
         when:
         CreateViewChange change = new CreateViewChange()
         change.setSelectQuery(SELECT_QUERY)
-        CheckSum viewCheckSumWithoutEncoding = change.generateCheckSum()
+        CheckSum viewCheckSumWithoutEncoding = change.generateCheckSum(version)
         CreateViewChange change2 = new CreateViewChange()
         change2.setSelectQuery(SELECT_QUERY)
         change2.setEncoding("UTF-8")
-        CheckSum viewCheckSumWithEncoding = change2.generateCheckSum()
+        CheckSum viewCheckSumWithEncoding = change2.generateCheckSum(version)
 
         then:
-        viewCheckSumWithoutEncoding == viewCheckSumWithEncoding
+        viewCheckSumWithoutEncoding.toString() == originalChecksum
+        viewCheckSumWithEncoding.toString() == updatedChecksum
+
+        where:
+        version | originalChecksum | updatedChecksum
+        ChecksumVersions.V8 | "8:dcb086e83731ee5f3e04af0a7010dd69" | "8:fe5f671b0280cca6fd47ba1cb0f6f521"
+        ChecksumVersions.latest() | "9:44c9d30cc310fbecd58e03d557fe85df" | "9:44c9d30cc310fbecd58e03d557fe85df"
     }
 
-    def "select query updated with whitespaces should not be computed as a new checksum"() {
+    @Unroll
+    def "select query updated with whitespaces checksum - #version"(ChecksumVersions version, String originalChecksum, String updatedChecksum) {
         when:
         CreateViewChange change = new CreateViewChange()
         change.setSelectQuery(SELECT_QUERY)
-        CheckSum viewTextCheckSum = change.generateCheckSum()
+        CheckSum viewTextCheckSum = change.generateCheckSum(version)
         CreateViewChange change2 = new CreateViewChange()
         change2.setSelectQuery(SELECT_QUERY.concat("      \n"))
-        CheckSum viewTextModifiedCheckSum = change2.generateCheckSum()
+        CheckSum viewTextModifiedCheckSum = change2.generateCheckSum(version)
 
         then:
-        viewTextCheckSum == viewTextModifiedCheckSum
+        viewTextCheckSum.toString() == originalChecksum
+        viewTextModifiedCheckSum.toString() == updatedChecksum
+
+        where:
+        version | originalChecksum | updatedChecksum
+        ChecksumVersions.V8 | "8:dcb086e83731ee5f3e04af0a7010dd69" | "8:39739d2b228cbfc3f8a4f4b44d0d168e"
+        ChecksumVersions.latest() | "9:44c9d30cc310fbecd58e03d557fe85df" | "9:44c9d30cc310fbecd58e03d557fe85df"
     }
 
-    def "checksum gets updated having a change on select query"() {
+    @Unroll
+    def "checksum change on select query - #version"(ChecksumVersions version, String originalChecksum, String updatedChecksum) {
         when:
         CreateViewChange change = new CreateViewChange()
         change.setSelectQuery(SELECT_QUERY)
-        CheckSum viewTextOriginalCheckSum = change.generateCheckSum()
+        CheckSum viewTextOriginalCheckSum = change.generateCheckSum(version)
 
         StringBuilder selectQueryUpdated = new StringBuilder(SELECT_QUERY)
         selectQueryUpdated.append(" WHERE 1=1")
         change.setSelectQuery(selectQueryUpdated.toString())
-        CheckSum viewTextUpdatedCheckSum = change.generateCheckSum();
+        CheckSum viewTextUpdatedCheckSum = change.generateCheckSum(version);
 
         then:
-        viewTextOriginalCheckSum != viewTextUpdatedCheckSum
+        viewTextOriginalCheckSum.toString() == originalChecksum
+        viewTextUpdatedCheckSum.toString() == updatedChecksum
+
+        where:
+        version | originalChecksum | updatedChecksum
+        ChecksumVersions.V8 | "8:dcb086e83731ee5f3e04af0a7010dd69" | "8:6ade9a5def82e9f15d2f353e97c41784"
+        ChecksumVersions.latest() | "9:44c9d30cc310fbecd58e03d557fe85df" | "9:43b9ff024ff5b5212a12e4ffc13f4790"
     }
 
-    def "validate checksum gets re-computed if select query text gets updated"() {
+    @Unroll
+    def "validate checksum if select query text gets updated - #version"(ChecksumVersions version, String originalChecksum, String updatedChecksum) {
         when:
         String selectQueryText = "SELECT id, name FROM person WHERE id > valueToReplace;"
 
@@ -164,29 +194,42 @@ class CreateViewChangeTest extends StandardChangeTest {
         def change = new CreateViewChange();
         change.setSelectQuery(selectQueryText)
 
-        def checkSumFirstReplacement = change.generateCheckSum().toString()
+        def checkSumFirstReplacement = change.generateCheckSum(version).toString()
 
         selectQueryText = selectQueryText.replace("value1", "value2")
         change.setSelectQuery(selectQueryText)
 
-        def checkSumSecondReplacement = change.generateCheckSum().toString()
+        def checkSumSecondReplacement = change.generateCheckSum(version).toString()
 
         then:
-        checkSumFirstReplacement != checkSumSecondReplacement
+        checkSumFirstReplacement.toString() == originalChecksum
+        checkSumSecondReplacement.toString() == updatedChecksum
+
+        where:
+        version | originalChecksum | updatedChecksum
+        ChecksumVersions.V8 | "8:09bbf3defde77019c8f8dc32f8f84908" | "8:c4a6c3c5a7d2b519d83d27351b7919e7"
+        ChecksumVersions.latest() | "9:e70628fe4f941c2d8822214dbd7cd28f" | "9:ed9a064736c8974be6ac35bb231032ff"
     }
 
-    def "relativeToChangelogFile attribute is not considered on checksum generation"() {
+    @Unroll
+    def "relativeToChangelogFile attribute checksum generation - #version"(ChecksumVersions version, String originalChecksum, String updatedChecksum) {
         when:
         CreateViewChange changeWithoutRelativeToChangelogFileAttribSet = new CreateViewChange()
         changeWithoutRelativeToChangelogFileAttribSet.setSelectQuery(SELECT_QUERY)
-        CheckSum changeWithoutRelativeToChangelogFileAttribSetCheckSum = changeWithoutRelativeToChangelogFileAttribSet.generateCheckSum()
+        CheckSum changeWithoutRelativeToChangelogFileAttribSetCheckSum = changeWithoutRelativeToChangelogFileAttribSet.generateCheckSum(version)
 
         CreateViewChange changeWithRelativeToChangelogFileAttribSet = new CreateViewChange()
         changeWithRelativeToChangelogFileAttribSet.setSelectQuery(SELECT_QUERY)
         changeWithRelativeToChangelogFileAttribSet.setRelativeToChangelogFile(true)
-        CheckSum changeWithRelativeToChangelogFileAttribSetCheckSum = changeWithRelativeToChangelogFileAttribSet.generateCheckSum()
+        CheckSum changeWithRelativeToChangelogFileAttribSetCheckSum = changeWithRelativeToChangelogFileAttribSet.generateCheckSum(version)
 
         then:
-        changeWithoutRelativeToChangelogFileAttribSetCheckSum == changeWithRelativeToChangelogFileAttribSetCheckSum
+        changeWithoutRelativeToChangelogFileAttribSetCheckSum.toString() == originalChecksum
+        changeWithRelativeToChangelogFileAttribSetCheckSum.toString() == updatedChecksum
+
+        where:
+        version | originalChecksum | updatedChecksum
+        ChecksumVersions.V8 | "8:dcb086e83731ee5f3e04af0a7010dd69" | "8:5effbea4284f4277c1bdd81505787591"
+        ChecksumVersions.latest() | "9:44c9d30cc310fbecd58e03d557fe85df" | "9:44c9d30cc310fbecd58e03d557fe85df"
     }
 }
