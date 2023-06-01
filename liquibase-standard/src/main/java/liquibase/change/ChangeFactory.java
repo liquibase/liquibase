@@ -59,7 +59,7 @@ public class ChangeFactory extends AbstractPluginFactory<Change>{
     private String generateCacheKey(Change change) {
         String key;
         try {
-            ChecksumVersion version = LiquibaseCommandLineConfiguration.CHECKSUM_VERSION.getCurrentValue();
+            ChecksumVersion version = Scope.getCurrentScope().getChecksumVersion();
             if (version == null) {
                  throw new NullPointerException();
             }
