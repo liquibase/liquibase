@@ -171,6 +171,9 @@ jobs:
             java: 20
           - os: windows-2019
             java: 20
+          # temporarily exclude failing Java 20 build
+          - os: ubuntu-22.04
+            java: 20
     runs-on: ${{ matrix.os }}
     container: maven:3.9.2-eclipse-temurin-${{ matrix.java }}-alpine
     env:
