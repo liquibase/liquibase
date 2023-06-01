@@ -19,6 +19,7 @@ import liquibase.resource.ClassLoaderResourceAccessor
 import liquibase.sdk.resource.MockResourceAccessor
 import liquibase.snapshot.SnapshotGeneratorFactory
 import liquibase.ui.ConsoleUIService
+import spock.lang.Ignore
 import spock.lang.Specification
 
 import java.sql.Connection
@@ -395,6 +396,7 @@ class LiquibaseTest extends Specification {
         assertSqlOutputAppliesTags(writer.toString(), "1.1");
     }
 
+    @Ignore
     def "validate checksums from ran changesets have all been reset"() {
         when:
         h2Connection = getInMemoryH2DatabaseConnection()

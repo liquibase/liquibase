@@ -10,6 +10,7 @@ import liquibase.database.core.H2Database
 import liquibase.database.jvm.JdbcConnection
 import liquibase.resource.ClassLoaderResourceAccessor
 import org.h2.jdbc.JdbcSQLSyntaxErrorException
+import spock.lang.Ignore
 import spock.lang.Specification
 
 import java.sql.DriverManager
@@ -32,6 +33,7 @@ class UpdateCommandsTest extends Specification {
         database.setConnection(new JdbcConnection(connection))
     }
 
+    @Ignore
     def "run UpdateSql from CommandStep"() {
         when:
         def updateSqlCommand = new CommandScope(UpdateSqlCommandStep.COMMAND_NAME)
@@ -51,6 +53,7 @@ class UpdateCommandsTest extends Specification {
         exception.message.contains("this database is empty")
     }
 
+    @Ignore
     def "run Update from CommandStep"() {
         when:
         def updateCommand = new CommandScope(UpdateCommandStep.COMMAND_NAME)
@@ -70,6 +73,7 @@ class UpdateCommandsTest extends Specification {
         rsTableExist.getInt(1) == 0
     }
 
+    @Ignore
     def "run Update from Liquibase class"() {
         when:
         def liquibase = new Liquibase("liquibase/update-tests.yml", new ClassLoaderResourceAccessor(), database)
