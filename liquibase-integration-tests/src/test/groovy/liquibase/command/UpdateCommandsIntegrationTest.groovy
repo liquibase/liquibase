@@ -83,4 +83,15 @@ class UpdateCommandsIntegrationTest extends Specification {
         cleanup:
         CommandUtil.runDropAll(h2)
     }
+
+    def "run Update from Liquibase class using print writer"() {
+        when:
+        def liquibase = new Liquibase("liquibase/update-tests.yml", new ClassLoaderResourceAccessor(), h2.getDatabaseFromFactory())
+        liquibase.update(new Contexts(), new PrintWriter(System.out))
+        h2.getConnection().createStatement().executeQuery("select count(1) from databasechangelog")
+
+        then:
+        final JdbcSQLSyntaxErrorException exception = thrown()
+        exception.message.contains("this database is empty")
+    }
 }
