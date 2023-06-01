@@ -153,6 +153,11 @@ jobs:
         os: [ ubuntu-22.04, macos-latest, windows-2019 ]
         java: [ 8, 11, 17, 20 ]
         exclude:
+          # temporarily exclude incompatible docker builds
+          - os: macos-latest
+            java: 8
+          - os: windows-2019
+            java: 8
           # exclude non-java 8 on macos and windows builds
           - os: macos-latest
             java: 11
