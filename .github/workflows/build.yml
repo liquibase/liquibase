@@ -230,40 +230,27 @@ jobs:
         with:
           fetch-depth: 0  # Shallow clones should be disabled for a better relevancy of analysis
           ref: ${{ github.event.pull_request.head.sha || github.event.after}}
-#      - name: Set up JDK
-#        uses: actions/setup-java@v3
-#        with:
-#          java-version: 11
-#          distribution: 'adopt'
-#          cache: 'maven'
-#      - name: Set up Maven
-#        uses: stCarolas/setup-maven@v4.5
-#        with:
-#          maven-version: ${{ env.MAVEN_VERSION }}
-#      - name: Cache SonarCloud packages
-#        uses: actions/cache@v3.3.1
-#        with:
-#          path: ~/.sonar/cache
-#          key: ${{ runner.os }}-sonar
-#          restore-keys: ${{ runner.os }}-sonar
-      - name: Build and analyze
-        uses: docker/build-push-action@v4
+      - name: Set up JDK
+        uses: actions/setup-java@v3
         with:
-          platforms: linux/amd64
-          # relative path to the place where source code with Dockerfile is located
-          context: .
-          target: sonar
-          build-args: |
-            SONAR_LOGIN=$SONAR_TOKEN
-            SONAR_PULLREQUEST_KEY=${{ github.event.pull_request.number }}
-            SONAR_PULLREQUEST_BRANCH=${{ github.event.pull_request.head.ref }}
-            SONAR_PULLREQUEST_BASE=${{ github.event.pull_request.base.ref }}
-            GITHUB_TOKEN=${{ secrets.GITHUB_TOKEN }}
-#      - name: Build and analyze
-#        env:
-#          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}  # Needed to get PR information, if any
-#          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
-#        run: mvn clean verify sonar:sonar -P sonar -Dsonar.login=$SONAR_TOKEN -Dsonar.pullrequest.key=${{ github.event.pull_request.number }} -Dsonar.pullrequest.branch=${{ github.event.pull_request.head.ref }} -Dsonar.pullrequest.base=${{ github.event.pull_request.base.ref }}
+          java-version: 11
+          distribution: 'adopt'
+          cache: 'maven'
+      - name: Set up Maven
+        uses: stCarolas/setup-maven@v4.5
+        with:
+          maven-version: ${{ env.MAVEN_VERSION }}
+      - name: Cache SonarCloud packages
+        uses: actions/cache@v3.3.1
+        with:
+          path: ~/.sonar/cache
+          key: ${{ runner.os }}-sonar
+          restore-keys: ${{ runner.os }}-sonar
+      - name: Build and analyze
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}  # Needed to get PR information, if any
+          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+        run: mvn clean verify sonar:sonar -P sonar -Dsonar.login=$SONAR_TOKEN -Dsonar.pullrequest.key=${{ github.event.pull_request.number }} -Dsonar.pullrequest.branch=${{ github.event.pull_request.head.ref }} -Dsonar.pullrequest.base=${{ github.event.pull_request.base.ref }}
 
   integration-test:
     name: Integration Test
