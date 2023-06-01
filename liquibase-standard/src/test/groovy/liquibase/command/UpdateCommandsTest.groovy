@@ -54,7 +54,6 @@ class UpdateCommandsTest extends Specification {
     }
 
     @Ignore
-
     def "run Update from CommandStep"() {
         when:
         def updateCommand = new CommandScope(UpdateCommandStep.COMMAND_NAME)
