@@ -330,9 +330,6 @@ jobs:
         uses: actions/cache@v3.3.1
         with:
           key: built-code-${{ github.run_number }}-${{ github.run_attempt }}
-          # fallback to most recent built-code- cache available
-          restore-keys: | 
-            built-code-${{ github.run_number }}-
           path: ./**/target
 
       ##Cache based on install4j file, since changes to JVM is seen in there. If install4j version changes without changing the file, change the prefix letter before hashFiles to force a new cache
@@ -358,6 +355,10 @@ jobs:
         with:
           maven-version: ${{ env.MAVEN_VERSION }}
 
+      - name: Build if we do not have a cache anymore
+        if: steps.cache.outputs.cache-hit != 'true'
+        run: mvn -B -Dbuild.repository.owner=${{ needs.setup.outputs.thisRepositoryOwner }} -Dbuild.repository.name=${{ needs.setup.outputs.thisRepositoryName }} -Dbuild.branch=${{ needs.setup.outputs.thisBranchName }} -Dbuild.number=${{ github.run_number }} -Dbuild.commit=${{ needs.setup.outputs.thisSha }} -DtrimStackTrace=false clean install -DskipTests
+
       - name: Download liquibase-commercial
         uses: liquibase/action-download-artifact@v2-liquibase
         with:
@@ -370,6 +371,14 @@ jobs:
           repo: liquibase/liquibase-pro
 
       - name: Install Built Modules
+        if: steps.cache.outputs.cache-hit == 'false' # if we don't have a cache, we only need to install commercial because we installed core above
+        run: |
+          (find . -name *commercial*-SNAPSHOT.jar -exec mvn -B org.apache.maven.plugins:maven-install-plugin:3.0.0-M1:install-file -Dfile={} \;)
+          (find . -name *commercial*-SNAPSHOT-sources.jar -exec mvn -B org.apache.maven.plugins:maven-install-plugin:3.0.0-M1:install-file -Dclassifier=sources -Dfile={} \;)
+          mvn -B org.apache.maven.plugins:maven-install-plugin:3.0.0-M1:install-file -Dfile=download/liquibase-commercial/liquibase-commercial-0-SNAPSHOT.jar
+
+      - name: Install Built Modules
+        if: steps.cache.outputs.cache-hit == 'true' # otherwise we're using the cache so install everything
         run: |
           (find . -name *-SNAPSHOT.jar -exec mvn -B org.apache.maven.plugins:maven-install-plugin:3.0.0-M1:install-file -Dfile={} \;)
           (find . -name *-SNAPSHOT-sources.jar -exec mvn -B org.apache.maven.plugins:maven-install-plugin:3.0.0-M1:install-file -Dclassifier=sources -Dfile={} \;)
