@@ -1,6 +1,6 @@
 package liquibase.change;
 
-import liquibase.ChecksumVersions;
+import liquibase.ChecksumVersion;
 import liquibase.Scope;
 import liquibase.changelog.ChangeSet;
 import liquibase.database.Database;
@@ -537,7 +537,7 @@ public abstract class AbstractChange extends AbstractPlugin implements Change {
         }).serialize(this, false));
     }
 
-    public String[] getExcludedFieldFilters(ChecksumVersions version) {
+    public String[] getExcludedFieldFilters(ChecksumVersion version) {
         return new String[0];
     }
 

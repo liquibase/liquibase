@@ -1,6 +1,6 @@
 package liquibase.change;
 
-import liquibase.ChecksumVersions;
+import liquibase.ChecksumVersion;
 import liquibase.GlobalConfiguration;
 import liquibase.Scope;
 import liquibase.change.core.RawSQLChange;
@@ -206,16 +206,16 @@ public abstract class AbstractSQLChange extends AbstractChange implements DbmsTa
             }
 
             if (sql != null) {
-                ChecksumVersions version = Scope.getCurrentScope().getChecksumVersion();
-                if (version == ChecksumVersions.V8) {
+                ChecksumVersion version = Scope.getCurrentScope().getChecksumVersion();
+                if (version == ChecksumVersion.V8) {
                     stream = new ByteArrayInputStream(sql.getBytes(GlobalConfiguration.OUTPUT_FILE_ENCODING.getCurrentValue()));
                 } else {
                     stream = new ByteArrayInputStream(sql.getBytes(GlobalConfiguration.FILE_ENCODING.getCurrentValue()));
                 }
             }
 
-            ChecksumVersions version = Scope.getCurrentScope().getChecksumVersion();
-            if (version == ChecksumVersions.V8) {
+            ChecksumVersion version = Scope.getCurrentScope().getChecksumVersion();
+            if (version == ChecksumVersion.V8) {
                 return CheckSum.compute(new NormalizingStreamV8(this.getEndDelimiter(), this.isSplitStatements(), this.isStripComments(), stream), false);
             }
             return CheckSum.compute(new AbstractSQLChange.NormalizingStream(stream), false);
@@ -301,13 +301,6 @@ public abstract class AbstractSQLChange extends AbstractChange implements DbmsTa
 
     public static class NormalizingStream extends InputStream {
         private InputStream stream;
-
-        private final byte[] quickBuffer = new byte[100];
-        private final List<Byte> resizingBuffer = new ArrayList<>();
-
-
-        private int lastChar = 'X';
-        private boolean seenNonSpace;
 
         @Deprecated
         public NormalizingStream(String endDelimiter, Boolean splitStatements, Boolean stripComments, InputStream stream) {

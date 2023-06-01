@@ -1,9 +1,8 @@
 package liquibase.change;
 
-import liquibase.ChecksumVersions;
+import liquibase.ChecksumVersion;
 import liquibase.Scope;
 import liquibase.database.core.MSSQLDatabase;
-import liquibase.integration.commandline.LiquibaseCommandLineConfiguration;
 import liquibase.statement.SqlStatement;
 import liquibase.statement.core.RawSqlStatement;
 import liquibase.util.StreamUtil;
@@ -85,7 +84,7 @@ public class AbstractSQLChangeTest {
         CheckSum sql = new ExampleAbstractSQLChange("LINE 1;\nLINE 2;\nLINE3;").generateCheckSum();
         CheckSum sqlCRLF = new ExampleAbstractSQLChange("LINE 1;\r\nLINE 2;\r\nLINE3;").generateCheckSum();
         CheckSum sqlLF = new ExampleAbstractSQLChange("LINE 1;\rLINE 2;\rLINE3;").generateCheckSum();
-        CheckSum sqlDifferent = Scope.child(Collections.singletonMap(Scope.Attr.checksumVersion.name(), ChecksumVersions.V8), () ->
+        CheckSum sqlDifferent = Scope.child(Collections.singletonMap(Scope.Attr.checksumVersion.name(), ChecksumVersion.V8), () ->
                 new ExampleAbstractSQLChange("Something Completely Different").generateCheckSum());
 
         assertEquals(sql.toString(), sqlCRLF.toString());
@@ -121,17 +120,17 @@ public class AbstractSQLChangeTest {
 
         final ExampleAbstractSQLChange change = new ExampleAbstractSQLChange("SOME SQL");
         change.setSplitStatements(false);
-        assertNotEquals(baseCheckSum.toString(), Scope.child(Collections.singletonMap(Scope.Attr.checksumVersion.name(), ChecksumVersions.V8), () ->
+        assertNotEquals(baseCheckSum.toString(), Scope.child(Collections.singletonMap(Scope.Attr.checksumVersion.name(), ChecksumVersion.V8), () ->
                 change.generateCheckSum().toString()));
 
         final ExampleAbstractSQLChange change2 = new ExampleAbstractSQLChange("SOME SQL");
         change2.setEndDelimiter("X");
-        assertNotEquals(baseCheckSum.toString(),  Scope.child(Collections.singletonMap(Scope.Attr.checksumVersion.name(), ChecksumVersions.V8), () ->
+        assertNotEquals(baseCheckSum.toString(),  Scope.child(Collections.singletonMap(Scope.Attr.checksumVersion.name(), ChecksumVersion.V8), () ->
                 change2.generateCheckSum().toString()));
 
         final ExampleAbstractSQLChange change3 = new ExampleAbstractSQLChange("SOME SQL");
         change3.setStripComments(true);
-        assertNotEquals(baseCheckSum.toString(),  Scope.child(Collections.singletonMap(Scope.Attr.checksumVersion.name(), ChecksumVersions.V8), () ->
+        assertNotEquals(baseCheckSum.toString(),  Scope.child(Collections.singletonMap(Scope.Attr.checksumVersion.name(), ChecksumVersion.V8), () ->
                 change3.generateCheckSum().toString()));
     }
 

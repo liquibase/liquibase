@@ -1,6 +1,5 @@
 package liquibase.changelog.visitor;
 
-import liquibase.ChecksumVersions;
 import liquibase.Scope;
 import liquibase.change.CheckSum;
 import liquibase.changelog.ChangeLogHistoryService;

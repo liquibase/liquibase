@@ -1,6 +1,6 @@
 package liquibase.change;
 
-import liquibase.ChecksumVersions;
+import liquibase.ChecksumVersion;
 import liquibase.integration.commandline.LiquibaseCommandLineConfiguration;
 import org.junit.Test;
 
@@ -33,7 +33,7 @@ public class CheckSumTest {
 
     @Test
     public void getCurrentVersion() {
-        assertEquals(ChecksumVersions.V9, LiquibaseCommandLineConfiguration.CHECKSUM_VERSION.getCurrentValue());
+        assertEquals(ChecksumVersion.V9, LiquibaseCommandLineConfiguration.CHECKSUM_VERSION.getCurrentValue());
     }
 
     @Test

@@ -1,6 +1,6 @@
 package liquibase.changelog;
 
-import liquibase.ChecksumVersions;
+import liquibase.ChecksumVersion;
 import liquibase.ContextExpression;
 import liquibase.Labels;
 import liquibase.Scope;
@@ -339,7 +339,7 @@ public class ChangeSet implements Conditional, ChangeLogChild {
         this.checkSum = null;
     }
 
-    public CheckSum generateCheckSum(ChecksumVersions version) {
+    public CheckSum generateCheckSum(ChecksumVersion version) {
         try {
             return Scope.child(Collections.singletonMap(Scope.Attr.checksumVersion.name(), version), () -> {
                 if (checkSum == null) {
@@ -1126,7 +1126,7 @@ public class ChangeSet implements Conditional, ChangeLogChild {
     }
 
     public String toString(boolean includeMD5Sum) {
-        ChecksumVersions checksumVersion = ChecksumVersions.enumFromChecksumVersion(this.checkSum != null ? this.checkSum.getVersion() : CheckSum.getCurrentVersion());
+        ChecksumVersion checksumVersion = ChecksumVersion.enumFromChecksumVersion(this.checkSum != null ? this.checkSum.getVersion() : CheckSum.getCurrentVersion());
         return filePath + "::" + getId() + "::" + getAuthor() +
                 (includeMD5Sum ? ("::(Checksum: " + generateCheckSum(checksumVersion) + ")") : "");
     }
@@ -1246,7 +1246,7 @@ public class ChangeSet implements Conditional, ChangeLogChild {
                 return true;
             }
         }
-        CheckSum currentMd5Sum = storedCheckSum != null ? generateCheckSum(ChecksumVersions.enumFromChecksumVersion(storedCheckSum.getVersion())) : null;
+        CheckSum currentMd5Sum = storedCheckSum != null ? generateCheckSum(ChecksumVersion.enumFromChecksumVersion(storedCheckSum.getVersion())) : null;
         if (currentMd5Sum == null) {
             return true;
         }

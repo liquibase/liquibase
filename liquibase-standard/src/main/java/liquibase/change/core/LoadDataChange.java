@@ -2,7 +2,6 @@ package liquibase.change.core;
 
 import com.opencsv.exceptions.CsvMalformedLineException;
 import liquibase.CatalogAndSchema;
-import liquibase.ChecksumVersions;
 import liquibase.Scope;
 import liquibase.change.*;
 import liquibase.changelog.ChangeSet;

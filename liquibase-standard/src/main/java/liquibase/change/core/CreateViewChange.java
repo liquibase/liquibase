@@ -1,6 +1,6 @@
 package liquibase.change.core;
 
-import liquibase.ChecksumVersions;
+import liquibase.ChecksumVersion;
 import liquibase.GlobalConfiguration;
 import liquibase.Scope;
 import liquibase.change.*;
@@ -188,8 +188,8 @@ public class CreateViewChange extends AbstractChange {
     }
 
     @Override
-    public String[] getExcludedFieldFilters(ChecksumVersions version) {
-        if (version == ChecksumVersions.V8) {
+    public String[] getExcludedFieldFilters(ChecksumVersion version) {
+        if (version == ChecksumVersion.V8) {
             return new String[0];
         }
         return new String[] {
@@ -203,18 +203,18 @@ public class CreateViewChange extends AbstractChange {
     /**
      * Calculates the checksum based on the contained SQL.
      *
-     * @see Change#generateCheckSum(ChecksumVersions)
+     * @see Change#generateCheckSum(ChecksumVersion)
      */
     @Override
     public CheckSum generateCheckSum() {
-        ChecksumVersions version = Scope.getCurrentScope().getChecksumVersion();
-        if (version == ChecksumVersions.V8) {
+        ChecksumVersion version = Scope.getCurrentScope().getChecksumVersion();
+        if (version == ChecksumVersion.V8) {
             return generateCheckSumV8();
         }
         return generateCheckSumLatest(version);
     }
 
-    private CheckSum generateCheckSumLatest(ChecksumVersions version) {
+    private CheckSum generateCheckSumLatest(ChecksumVersion version) {
         InputStream stream = null;
         CheckSum checkSum;
         try {

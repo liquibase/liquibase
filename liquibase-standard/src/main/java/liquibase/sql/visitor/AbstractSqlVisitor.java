@@ -1,6 +1,6 @@
 package liquibase.sql.visitor;
 
-import liquibase.ChecksumVersions;
+import liquibase.ChecksumVersion;
 import liquibase.ContextExpression;
 import liquibase.Labels;
 import liquibase.Scope;
@@ -81,7 +81,7 @@ public abstract class AbstractSqlVisitor implements SqlVisitor {
 
     @Override
     public CheckSum generateCheckSum() {
-        ChecksumVersions version = Scope.getCurrentScope().getChecksumVersion();
+        ChecksumVersion version = Scope.getCurrentScope().getChecksumVersion();
         return CheckSum.compute(new StringChangeLogSerializer(new StringChangeLogSerializer.FieldFilter(){
             @Override
             public boolean include(Object obj, String field, Object value) {
@@ -93,8 +93,8 @@ public abstract class AbstractSqlVisitor implements SqlVisitor {
         }).serialize(this, false));
     }
 
-    public String[] getExcludedFieldFilters(ChecksumVersions version) {
-        if (version == ChecksumVersions.V8){
+    public String[] getExcludedFieldFilters(ChecksumVersion version) {
+        if (version == ChecksumVersion.V8){
             return new String[0];
         }
         return new String[]{

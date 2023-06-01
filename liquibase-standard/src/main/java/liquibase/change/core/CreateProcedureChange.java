@@ -1,6 +1,6 @@
 package liquibase.change.core;
 
-import liquibase.ChecksumVersions;
+import liquibase.ChecksumVersion;
 import liquibase.GlobalConfiguration;
 import liquibase.Scope;
 import liquibase.change.*;
@@ -108,7 +108,7 @@ public class CreateProcedureChange extends AbstractChange implements DbmsTargete
         this.relativeToChangelogFile = relativeToChangelogFile;
     }
 
-    @DatabaseChangeProperty(serializationType = SerializationType.DIRECT_VALUE, version = {ChecksumVersions.V8})
+    @DatabaseChangeProperty(serializationType = SerializationType.DIRECT_VALUE, version = {ChecksumVersion.V8})
     @DatabaseChangeProperty(isChangeProperty = false)
     /**
      * @deprecated Use getProcedureText() instead
@@ -129,7 +129,7 @@ public class CreateProcedureChange extends AbstractChange implements DbmsTargete
             "procedureText is not supported in the XML format; however, you can specify the procedure SQL inline within the createProcedure definition.";
     @DatabaseChangeProperty(
         description = procedureTextDescription,
-            isChangeProperty = false, version = {ChecksumVersions.V8})
+            isChangeProperty = false, version = {ChecksumVersion.V8})
     @DatabaseChangeProperty(
         description = procedureTextDescription,
             serializationType = SerializationType.DIRECT_VALUE)
@@ -246,8 +246,8 @@ public class CreateProcedureChange extends AbstractChange implements DbmsTargete
      */
     @Override
     public CheckSum generateCheckSum() {
-        ChecksumVersions version = Scope.getCurrentScope().getChecksumVersion();
-        if (version == ChecksumVersions.V8) {
+        ChecksumVersion version = Scope.getCurrentScope().getChecksumVersion();
+        if (version == ChecksumVersion.V8) {
             return generateCheckSumV8();
         }
         return generateCheckSumLatest(this.procedureText);
@@ -341,8 +341,8 @@ public class CreateProcedureChange extends AbstractChange implements DbmsTargete
      * change types.
      */
     @Override
-    public String[] getExcludedFieldFilters(ChecksumVersions version) {
-        if (version == ChecksumVersions.V8) {
+    public String[] getExcludedFieldFilters(ChecksumVersion version) {
+        if (version == ChecksumVersion.V8) {
             return new String[0];
         }
         return new String[]{

@@ -1,6 +1,6 @@
 package liquibase.change.core;
 
-import liquibase.ChecksumVersions;
+import liquibase.ChecksumVersion;
 import liquibase.GlobalConfiguration;
 import liquibase.Scope;
 import liquibase.change.*;
@@ -165,8 +165,8 @@ public class SQLFileChange extends AbstractSQLChange {
 
     @Override
     public CheckSum generateCheckSum() {
-        ChecksumVersions version = Scope.getCurrentScope().getChecksumVersion();
-        if (version == ChecksumVersions.V8) {
+        ChecksumVersion version = Scope.getCurrentScope().getChecksumVersion();
+        if (version == ChecksumVersion.V8) {
             return super.generateCheckSum();
         }
         InputStream stream = null;

@@ -296,7 +296,7 @@ public class OfflineChangeLogHistoryService extends AbstractChangeLogHistoryServ
             replaceChangeSet(changeSet, line -> {
                 line[Columns.DATEEXECUTED.ordinal()] = new ISODateFormat().format(new java.sql.Timestamp(new Date().getTime()));
                 line[Columns.MD5SUM.ordinal()] = changeSet.generateCheckSum(
-                        ChecksumVersions.enumFromChecksumVersion(changeSet.getStoredCheckSum().getVersion())).toString();
+                        ChecksumVersion.enumFromChecksumVersion(changeSet.getStoredCheckSum().getVersion())).toString();
                 line[Columns.EXECTYPE.ordinal()] = execType.value;
                 return line;
             });

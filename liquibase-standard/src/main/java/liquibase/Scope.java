@@ -386,8 +386,8 @@ public class Scope {
         return get(Attr.resourceAccessor, ResourceAccessor.class);
     }
 
-    public ChecksumVersions getChecksumVersion() {
-        return get(Attr.checksumVersion, ChecksumVersions.class);
+    public ChecksumVersion getChecksumVersion() {
+        return get(Attr.checksumVersion, ChecksumVersion.class);
     }
 
     public String getLineSeparator() {

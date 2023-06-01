@@ -1,6 +1,6 @@
 package liquibase.change.core
 
-import liquibase.ChecksumVersions
+import liquibase.ChecksumVersion
 import liquibase.Scope
 import liquibase.change.Change
 import liquibase.change.ChangeStatus
@@ -145,7 +145,7 @@ class SQLFileChangeTest extends StandardChangeTest {
     }
 
     @Unroll
-    def "validate checksum if sql(file) content change - #version"(ChecksumVersions version, String originalChecksum, String updatedChecksum) {
+    def "validate checksum if sql(file) content change - #version"(ChecksumVersion version, String originalChecksum, String updatedChecksum) {
         when:
         String procedureText =
         """CREATE OR REPLACE PROCEDURE testHello()
@@ -176,7 +176,7 @@ class SQLFileChangeTest extends StandardChangeTest {
 
         where:
         version | originalChecksum | updatedChecksum
-        ChecksumVersions.V8 | "8:25560f4c442fa581b820d0a6206fd14e" | "8:b934d68e53222bc7b5cbf147ce6746b4"
+        ChecksumVersion.V8 | "8:25560f4c442fa581b820d0a6206fd14e" | "8:b934d68e53222bc7b5cbf147ce6746b4"
         LiquibaseCommandLineConfiguration.CHECKSUM_VERSION.getCurrentValue() | "9:8cfbd3e5970885470db17cd149feb637" | "9:f6302129ace10ca356faa21343dd1aa8"
     }
 }

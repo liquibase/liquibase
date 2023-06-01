@@ -1,6 +1,6 @@
 package liquibase.change.core
 
-import liquibase.ChecksumVersions
+import liquibase.ChecksumVersion
 import liquibase.Scope
 import liquibase.change.CheckSum
 import liquibase.change.StandardChangeTest
@@ -102,7 +102,7 @@ class CreateProcedureChangeTest extends StandardChangeTest {
     }
 
     @Unroll
-    def "dbms checksum generation - #version"(ChecksumVersions version, String originalChecksum, String updatedChecksum) {
+    def "dbms checksum generation - #version"(ChecksumVersion version, String originalChecksum, String updatedChecksum) {
         when:
         CreateProcedureChange change = new CreateProcedureChange()
         change.setProcedureText(PROCEDURE_TEXT)
@@ -123,13 +123,13 @@ class CreateProcedureChangeTest extends StandardChangeTest {
 
         where:
         version | originalChecksum | updatedChecksum
-        ChecksumVersions.V8 | "8:977441683eb54d6ee1b2de400adb5eed" | "8:63f00c8a5e353ec6d400b0c5a5f7b013"
+        ChecksumVersion.V8 | "8:977441683eb54d6ee1b2de400adb5eed" | "8:63f00c8a5e353ec6d400b0c5a5f7b013"
         LiquibaseCommandLineConfiguration.CHECKSUM_VERSION.getCurrentValue() | "9:4ec1db90234ea750169f7d94f7e5c425" | "9:4ec1db90234ea750169f7d94f7e5c425"
 
     }
 
     @Unroll
-    def "path checksum generation - #version"(ChecksumVersions version, String originalChecksum, String updatedChecksum) {
+    def "path checksum generation - #version"(ChecksumVersion version, String originalChecksum, String updatedChecksum) {
         when:
         String testScopeId = Scope.enter([
                 "resourceAccessor": new MockResourceAccessor([
@@ -159,12 +159,12 @@ class CreateProcedureChangeTest extends StandardChangeTest {
 
         where:
         version | originalChecksum | updatedChecksum
-        ChecksumVersions.V8 | "8:977441683eb54d6ee1b2de400adb5eed" | "8:39bcca9579db76270fcbedf41ef2e61a"
+        ChecksumVersion.V8 | "8:977441683eb54d6ee1b2de400adb5eed" | "8:39bcca9579db76270fcbedf41ef2e61a"
         LiquibaseCommandLineConfiguration.CHECKSUM_VERSION.getCurrentValue() | "9:4ec1db90234ea750169f7d94f7e5c425" | "9:4ec1db90234ea750169f7d94f7e5c425"
     }
 
     @Unroll
-    def "comment checksum generation - #version"(ChecksumVersions version, String originalChecksum, String updatedChecksum) {
+    def "comment checksum generation - #version"(ChecksumVersion version, String originalChecksum, String updatedChecksum) {
         when:
         CreateProcedureChange change = new CreateProcedureChange()
         change.setProcedureText(PROCEDURE_TEXT)
@@ -185,12 +185,12 @@ class CreateProcedureChangeTest extends StandardChangeTest {
 
         where:
         version | originalChecksum | updatedChecksum
-        ChecksumVersions.V8 | "8:977441683eb54d6ee1b2de400adb5eed" | "8:f834f1891f07c1a2242c346499e16b22"
+        ChecksumVersion.V8 | "8:977441683eb54d6ee1b2de400adb5eed" | "8:f834f1891f07c1a2242c346499e16b22"
         LiquibaseCommandLineConfiguration.CHECKSUM_VERSION.getCurrentValue() | "9:4ec1db90234ea750169f7d94f7e5c425" | "9:4ec1db90234ea750169f7d94f7e5c425"
     }
 
     @Unroll
-    def "encoding checksum generation - #version"(ChecksumVersions version, String originalChecksum, String updatedChecksum) {
+    def "encoding checksum generation - #version"(ChecksumVersion version, String originalChecksum, String updatedChecksum) {
         when:
         CreateProcedureChange change = new CreateProcedureChange()
         change.setProcedureText(PROCEDURE_TEXT)
@@ -211,12 +211,12 @@ class CreateProcedureChangeTest extends StandardChangeTest {
 
         where:
         version | originalChecksum | updatedChecksum
-        ChecksumVersions.V8 | "8:977441683eb54d6ee1b2de400adb5eed" | "8:a5244728b4370b3e7e642523539b10a1"
+        ChecksumVersion.V8 | "8:977441683eb54d6ee1b2de400adb5eed" | "8:a5244728b4370b3e7e642523539b10a1"
         LiquibaseCommandLineConfiguration.CHECKSUM_VERSION.getCurrentValue() | "9:4ec1db90234ea750169f7d94f7e5c425" | "9:4ec1db90234ea750169f7d94f7e5c425"
     }
 
     @Unroll
-    def "procedure text updated with whitespaces checksum - #version"(ChecksumVersions version, String originalChecksum, String updatedChecksum) {
+    def "procedure text updated with whitespaces checksum - #version"(ChecksumVersion version, String originalChecksum, String updatedChecksum) {
         when:
         CreateProcedureChange change = new CreateProcedureChange()
         change.setProcedureText(PROCEDURE_TEXT)
@@ -236,12 +236,12 @@ class CreateProcedureChangeTest extends StandardChangeTest {
 
         where:
         version | originalChecksum | updatedChecksum
-        ChecksumVersions.V8 | "8:977441683eb54d6ee1b2de400adb5eed" | "8:08289655a87e3a5ef12e2a62e3168105"
+        ChecksumVersion.V8 | "8:977441683eb54d6ee1b2de400adb5eed" | "8:08289655a87e3a5ef12e2a62e3168105"
         LiquibaseCommandLineConfiguration.CHECKSUM_VERSION.getCurrentValue() | "9:4ec1db90234ea750169f7d94f7e5c425" | "9:4ec1db90234ea750169f7d94f7e5c425"
     }
 
     @Unroll
-    def "checksum change on procedure text - #version"(ChecksumVersions version, String originalChecksum, String updatedChecksum) {
+    def "checksum change on procedure text - #version"(ChecksumVersion version, String originalChecksum, String updatedChecksum) {
         when:
         CreateProcedureChange change = new CreateProcedureChange()
         change.setProcedureText(PROCEDURE_TEXT)
@@ -262,12 +262,12 @@ class CreateProcedureChangeTest extends StandardChangeTest {
 
         where:
         version | originalChecksum | updatedChecksum
-        ChecksumVersions.V8 | "8:977441683eb54d6ee1b2de400adb5eed" | "8:55058b1ccfdae7d3e486a53b6f3357e5"
+        ChecksumVersion.V8 | "8:977441683eb54d6ee1b2de400adb5eed" | "8:55058b1ccfdae7d3e486a53b6f3357e5"
         LiquibaseCommandLineConfiguration.CHECKSUM_VERSION.getCurrentValue() | "9:4ec1db90234ea750169f7d94f7e5c425" | "9:36f93561a3ca75d53c84639669d74b51"
     }
 
     @Unroll
-    def "validate checksum gets re-computed if procedure text gets updated - #version"(ChecksumVersions version, String originalChecksum, String updatedChecksum) {
+    def "validate checksum gets re-computed if procedure text gets updated - #version"(ChecksumVersion version, String originalChecksum, String updatedChecksum) {
         when:
         String procedureText =
                 """CREATE OR REPLACE PROCEDURE testHello()
@@ -298,12 +298,12 @@ class CreateProcedureChangeTest extends StandardChangeTest {
 
         where:
         version | originalChecksum | updatedChecksum
-        ChecksumVersions.V8 | "8:633d7b88ffefdea580a8c5671b284cc9" | "8:b7d57ddf12ba7f8a12d342b0f833c11d"
+        ChecksumVersion.V8 | "8:633d7b88ffefdea580a8c5671b284cc9" | "8:b7d57ddf12ba7f8a12d342b0f833c11d"
         LiquibaseCommandLineConfiguration.CHECKSUM_VERSION.getCurrentValue() | "9:eec1dde2b2197528f030a2917d2602c3" | "9:06085ea7538bfe94b70b7196d520cc2f"
     }
 
     @Unroll
-    def "relativeToChangelogFile attribute checksum generation - #version"(ChecksumVersions version, String originalChecksum, String updatedChecksum) {
+    def "relativeToChangelogFile attribute checksum generation - #version"(ChecksumVersion version, String originalChecksum, String updatedChecksum) {
         when:
         CreateProcedureChange changeWithoutRelativeToChangelogFileAttribSet = new CreateProcedureChange()
         changeWithoutRelativeToChangelogFileAttribSet.setProcedureText(PROCEDURE_TEXT)
@@ -324,7 +324,7 @@ class CreateProcedureChangeTest extends StandardChangeTest {
 
         where:
         version | originalChecksum | updatedChecksum
-        ChecksumVersions.V8 | "8:977441683eb54d6ee1b2de400adb5eed" | "8:20536e4edf2d1dfa3d892063830f38ae"
+        ChecksumVersion.V8 | "8:977441683eb54d6ee1b2de400adb5eed" | "8:20536e4edf2d1dfa3d892063830f38ae"
         LiquibaseCommandLineConfiguration.CHECKSUM_VERSION.getCurrentValue() | "9:4ec1db90234ea750169f7d94f7e5c425" | "9:4ec1db90234ea750169f7d94f7e5c425"
     }
 }
