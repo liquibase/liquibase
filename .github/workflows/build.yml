@@ -23,7 +23,7 @@ on:
       - '**.md'
 
 env:
-  MAVEN_VERSION: '3.9.2'
+  MAVEN_VERSION: '3.8.8'
 
 jobs:
   check_build_safety:
