@@ -33,62 +33,6 @@ class UpdateCommandsTest extends Specification {
         database.setConnection(new JdbcConnection(connection))
     }
 
-    @Ignore
-    def "run UpdateSql from CommandStep"() {
-        when:
-        def updateSqlCommand = new CommandScope(UpdateSqlCommandStep.COMMAND_NAME)
-        updateSqlCommand.addArgumentValue(DbUrlConnectionCommandStep.DATABASE_ARG, database)
-        updateSqlCommand.addArgumentValue(UpdateSqlCommandStep.CHANGELOG_FILE_ARG, "liquibase/update-tests.yml")
-
-        then:
-        def result = updateSqlCommand.execute().getResults()
-        def a = ((DefaultChangeExecListener)result.get("defaultChangeExecListener"))
-        a.getDeployedChangeSets().get(0).getId() == "1"
-
-        when:
-        connection.createStatement().executeQuery("select count(1) from databasechangelog")
-
-        then:
-        final JdbcSQLSyntaxErrorException exception = thrown()
-        exception.message.contains("this database is empty")
-    }
-
-    @Ignore
-    def "run Update from CommandStep"() {
-        when:
-        def updateCommand = new CommandScope(UpdateCommandStep.COMMAND_NAME)
-        updateCommand.addArgumentValue(DbUrlConnectionCommandStep.DATABASE_ARG, database)
-        updateCommand.addArgumentValue(UpdateSqlCommandStep.CHANGELOG_FILE_ARG, "liquibase/update-tests.yml")
-
-        and:
-        updateCommand.execute()
-
-        then:
-        def resultSet = connection.createStatement().executeQuery("select count(1) from databasechangelog")
-        resultSet.next()
-        resultSet.getInt(1) == 1
-
-        def rsTableExist = connection.createStatement().executeQuery("select count(1) from example_table")
-        rsTableExist.next()
-        rsTableExist.getInt(1) == 0
-    }
-
-    @Ignore
-    def "run Update from Liquibase class"() {
-        when:
-        def liquibase = new Liquibase("liquibase/update-tests.yml", new ClassLoaderResourceAccessor(), database)
-        liquibase.update(new Contexts())
-
-        then:
-        def resultSet = connection.createStatement().executeQuery("select count(1) from databasechangelog")
-        resultSet.next()
-        resultSet.getInt(1) == 1
-
-        def rsTableExist = connection.createStatement().executeQuery("select count(1) from example_table")
-        rsTableExist.next()
-        rsTableExist.getInt(1) == 0
-    }
-
     def "run Update from Liquibase class using print writer"() {
         when:
         def liquibase = new Liquibase("liquibase/update-tests.yml", new ClassLoaderResourceAccessor(), database)
