@@ -279,12 +279,12 @@ jobs:
           key: built-code-${{ github.run_number }}-${{ github.run_attempt }}
           path: ./**/target
 
-      - name: Login to Artifactory
-        uses: docker/login-action@v2
-        with:
-          registry: docker-dev.artifactory.datical.net
-          username: ${{ secrets.ARTIFACTORY_USER }}
-          password: ${{ secrets.ARTIFACTORY_TOKEN }}
+#      - name: Login to Artifactory
+#        uses: docker/login-action@v2
+#        with:
+#          registry: docker-dev.artifactory.datical.net
+#          username: ${{ secrets.ARTIFACTORY_USER }}
+#          password: ${{ secrets.ARTIFACTORY_TOKEN }}
 
       - name: Run Tests
         run: mvn -B jar:jar jar:test-jar surefire:test -DtrimStackTrace=false -Dliquibase.sdk.testSystem.test=${{ matrix.testSystem }} -Dliquibase.sdk.testSystem.acceptLicenses=${{ matrix.testSystem }} -Dtest=*IntegrationTest,*ExecutorTest -DfailIfNoTests=false -Dsurefire.failIfNoSpecifiedTests=false
