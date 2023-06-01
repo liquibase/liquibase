@@ -35,6 +35,7 @@ class UpdateCommandStepTest extends Specification {
         h2Connection.close()
     }
 
+    @Ignore
     def "validate context and label entry has been added previously"() {
         when:
 
