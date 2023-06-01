@@ -16,4 +16,4 @@ RUN apt-get update && \
     apt-get update && \
     apt-get install -y --no-install-recommends temurin-11-jdk
 
-RUN echo mvn clean verify sonar:sonar -P sonar -Dsonar.login=$SONAR_LOGIN -Dsonar.pullrequest.key=$SONAR_PULLREQUEST_KEY -Dsonar.pullrequest.branch=$SONAR_PULLREQUEST_BRANCH -Dsonar.pullrequest.base=$SONAR_PULLREQUEST_BASE
+RUN mvn clean verify sonar:sonar -P sonar -Dsonar.login=$SONAR_LOGIN -Dsonar.pullrequest.key=$SONAR_PULLREQUEST_KEY -Dsonar.pullrequest.branch=$SONAR_PULLREQUEST_BRANCH -Dsonar.pullrequest.base=$SONAR_PULLREQUEST_BASE
