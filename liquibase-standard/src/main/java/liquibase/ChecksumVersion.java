@@ -44,11 +44,8 @@ public enum ChecksumVersion {
     }
 
     public static ChecksumVersion enumFromChecksumVersion(int i) {
-        if (i != 1 && i < 8 || i > 9) {
-            throw new UnsupportedChecksumVersionException(i);
-        }
-        return Arrays.stream(ChecksumVersion.values()).filter(cv -> cv.getVersion() == i)
-                .findFirst().orElse(null);
+        return Arrays.stream(ChecksumVersion.values()).filter(cv -> cv.getVersion() == i).findFirst()
+                .orElseThrow(() -> new UnsupportedChecksumVersionException(i));
     }
 
     public boolean lowerOrEqualThan(ChecksumVersion compareTo) {
