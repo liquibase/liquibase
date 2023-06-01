@@ -223,22 +223,13 @@ jobs:
   sonar:
     name: Sonar Scan
     runs-on: ubuntu-22.04
+    container: maven:3.9.2-eclipse-temurin-11-alpine
     needs: build
     steps:
       - uses: actions/checkout@v3
         with:
           fetch-depth: 0  # Shallow clones should be disabled for a better relevancy of analysis
           ref: ${{ github.event.pull_request.head.sha || github.event.after}}
-      - name: Set up JDK
-        uses: actions/setup-java@v3
-        with:
-          java-version: 11
-          distribution: 'adopt'
-          cache: 'maven'
-      - name: Set up Maven
-        uses: stCarolas/setup-maven@v4.5
-        with:
-          maven-version: ${{ env.MAVEN_VERSION }}
       - name: Cache SonarCloud packages
         uses: actions/cache@v3.3.1
         with:
@@ -254,6 +245,7 @@ jobs:
   integration-test:
     name: Integration Test
     runs-on: ubuntu-22.04
+    container: maven:3.9.2-eclipse-temurin-8-alpine
     strategy:
       fail-fast: false
       matrix:
@@ -281,17 +273,6 @@ jobs:
         with:
           script: |
             core.setOutput("testResultsArtifact", "liquibase-test-results-integration-${{ matrix.testSystem }}".replace(/[^a-zA-Z0-9\-_]/g, "_"));
-
-      - name: Set up JDK 8
-        uses: actions/setup-java@v3
-        with:
-          java-version: '8'
-          distribution: 'temurin'
-          cache: 'maven'
-      - name: Set up Maven
-        uses: stCarolas/setup-maven@v4.5
-        with:
-          maven-version: ${{ env.MAVEN_VERSION }}
       - name: Restore Built Code Cache
         uses: actions/cache@v3.3.1
         with:
