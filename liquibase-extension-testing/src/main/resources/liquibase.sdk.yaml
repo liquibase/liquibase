@@ -17,6 +17,8 @@ liquibase:
         altTablespace: liquibase2
         keepRunning: true
 
+      test: h2,hsqldb,sqlite
+
       cockroachdb:
         version: latest-v21.2
         imageName: cockroachdb/cockroach
