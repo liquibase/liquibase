@@ -166,7 +166,7 @@ public class SQLFileChange extends AbstractSQLChange {
     @Override
     public CheckSum generateCheckSum() {
         ChecksumVersion version = Scope.getCurrentScope().getChecksumVersion();
-        if (version == ChecksumVersion.V8) {
+        if (version.lowerOrEqualThan(ChecksumVersion.V8)) {
             return super.generateCheckSum();
         }
         InputStream stream = null;

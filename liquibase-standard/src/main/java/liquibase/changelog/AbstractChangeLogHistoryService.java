@@ -111,7 +111,7 @@ public abstract class AbstractChangeLogHistoryService implements ChangeLogHistor
      */
      public String getLastDeploymentId() throws DatabaseException {
          List<RanChangeSet> ranChangeSetsList = getRanChangeSets();
-         if (ranChangeSetsList == null || ranChangeSetsList.isEmpty()0) {
+         if (ranChangeSetsList == null || ranChangeSetsList.isEmpty()) {
              return null;
          }
          RanChangeSet lastRanChangeSet = ranChangeSetsList.get(ranChangeSetsList.size() - 1);

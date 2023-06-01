@@ -189,7 +189,7 @@ public class CreateViewChange extends AbstractChange {
 
     @Override
     public String[] getExcludedFieldFilters(ChecksumVersion version) {
-        if (version == ChecksumVersion.V8) {
+        if (version.lowerOrEqualThan(ChecksumVersion.V8)) {
             return new String[0];
         }
         return new String[] {
@@ -208,7 +208,7 @@ public class CreateViewChange extends AbstractChange {
     @Override
     public CheckSum generateCheckSum() {
         ChecksumVersion version = Scope.getCurrentScope().getChecksumVersion();
-        if (version == ChecksumVersion.V8) {
+        if (version.lowerOrEqualThan(ChecksumVersion.V8)) {
             return generateCheckSumV8();
         }
         return generateCheckSumLatest(version);

@@ -9,9 +9,16 @@ import java.util.Arrays;
  */
 public enum ChecksumVersion {
 
-    V1(1, "Pass through version for testing purpose", "0"),
+    V9(9, "Version used from Liquibase 4.22.0 till now", "4.22.0"),
     V8(8, "Version used from Liquibase 3.5.0 until 4.21.1", "3.5.0"),
-    V9(9, "Version used from Liquibase 4.22.0 till now", "4.22.0");
+    V7(7, "Old version", "?"),
+    V6(6, "Old version", "?"),
+    V5(5, "Old version", "?"),
+    V4(4, "Old version", "?"),
+    V3(3, "Old version", "?"),
+    V2(2, "Old version", "?"),
+    V1(1, "Pass through version for testing purpose", "0");
+
 
     private final int version;
 
@@ -42,5 +49,9 @@ public enum ChecksumVersion {
         }
         return Arrays.stream(ChecksumVersion.values()).filter(cv -> cv.getVersion() == i)
                 .findFirst().orElse(null);
+    }
+
+    public boolean lowerOrEqualThan(ChecksumVersion compareTo) {
+        return compareTo != null && this.version <= compareTo.getVersion();
     }
 }

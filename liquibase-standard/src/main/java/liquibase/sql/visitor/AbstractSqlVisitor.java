@@ -94,7 +94,7 @@ public abstract class AbstractSqlVisitor implements SqlVisitor {
     }
 
     public String[] getExcludedFieldFilters(ChecksumVersion version) {
-        if (version == ChecksumVersion.V8){
+        if (version.lowerOrEqualThan(ChecksumVersion.V8)) {
             return new String[0];
         }
         return new String[]{
