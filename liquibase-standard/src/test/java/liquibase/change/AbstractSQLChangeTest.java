@@ -248,21 +248,21 @@ public class AbstractSQLChangeTest {
 
     @Test
     public void normalizeSql_V8() throws IOException {
-        assertNormalizingStreamCorrectV8("singlelineString", "single line String");
-        assertNormalizingStreamCorrectV8("singlelinestringwithwhitespace", "single line string with      whitespace");
-        assertNormalizingStreamCorrectV8("multiplelinestring", "\r\nmultiple\r\nline\r\nstring\r\n");
-        assertNormalizingStreamCorrectV8("multiplelinestring", "\rmultiple\rline\rstring\r");
-        assertNormalizingStreamCorrectV8("multiplelinestring", "\nmultiple\nline\nstring\n");
-        assertNormalizingStreamCorrectV8("alinewithdoublenewlines", "\n\na\nline \n with \r\n \r\n double \n \n \n \n newlines");
+        assertNormalizingStreamCorrectV8("single line String", "single line String");
+        assertNormalizingStreamCorrectV8("single line string with whitespace", "single line string with      whitespace");
+        assertNormalizingStreamCorrectV8("multiple line string", "\r\nmultiple\r\nline\r\nstring\r\n");
+        assertNormalizingStreamCorrectV8("multiple line string", "\rmultiple\rline\rstring\r");
+        assertNormalizingStreamCorrectV8("multiple line string", "\nmultiple\nline\nstring\n");
+        assertNormalizingStreamCorrectV8("a line with double newlines", "\n\na\nline \n with \r\n \r\n double \n \n \n \n newlines");
 //        assertNormalizingStreamCorrectV8("", null);
         assertNormalizingStreamCorrectV8("", "    ");
         assertNormalizingStreamCorrectV8("", " \n \n \n   \n  ");
 
         //test quickBuffer -> resizingBuffer handoff
         String longSpaceString = "a line with a lot of: wait for it....                                                                                                                                                                                                                                                                                         spaces";
-        assertNormalizingStreamCorrectV8("alinewithalotof:waitforit....spaces", longSpaceString);
+        assertNormalizingStreamCorrectV8("a line with a lot of: wait for it.... spaces", longSpaceString);
 
-        String versionNormalized = "INSERTINTOrecommendation_list(instanceId,name,publicId)SELECTDISTINCTinstanceId,\"default\"asname,\"default\"aspublicIdFROMrecommendation;";
+        String versionNormalized = "INSERT INTO recommendation_list(instanceId, name, publicId) SELECT DISTINCT instanceId, \"default\" as name, \"default\" as publicId FROM recommendation;";
 
         String version1 = "INSERT INTO recommendation_list(instanceId, name, publicId)\n" +
                 "SELECT DISTINCT instanceId, \"default\" as name, \"default\" as publicId\n" +
