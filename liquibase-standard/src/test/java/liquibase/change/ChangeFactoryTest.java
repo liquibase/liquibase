@@ -49,8 +49,8 @@ public class ChangeFactoryTest {
         Change change8 = new CreateTableChange();
         Change change9 = new CreateTableChange();
 
-        ChangeMetaData changeMetaData8 = Scope.child(Collections.singletonMap(LiquibaseCommandLineConfiguration.CHECKSUM_VERSION.getKey(), ChecksumVersion.V8), () -> changeFactory.getChangeMetaData(change8));
-        ChangeMetaData changeMetaData9 = Scope.child(Collections.singletonMap(LiquibaseCommandLineConfiguration.CHECKSUM_VERSION.getKey(), ChecksumVersion.V9), () -> changeFactory.getChangeMetaData(change9));
+        ChangeMetaData changeMetaData8 = Scope.child(Collections.singletonMap(Scope.Attr.checksumVersion.name(), ChecksumVersion.V8), () -> changeFactory.getChangeMetaData(change8));
+        ChangeMetaData changeMetaData9 = Scope.child(Collections.singletonMap(Scope.Attr.checksumVersion.name(), ChecksumVersion.V9), () -> changeFactory.getChangeMetaData(change9));
 
         assertNotEquals(changeMetaData8, changeMetaData9);
     }
