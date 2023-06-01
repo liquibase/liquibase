@@ -206,9 +206,10 @@ public class CreateViewChange extends AbstractChange {
      * @see Change#generateCheckSum(ChecksumVersions)
      */
     @Override
-    public CheckSum generateCheckSum(ChecksumVersions version) {
+    public CheckSum generateCheckSum() {
+        ChecksumVersions version = Scope.getCurrentScope().getChecksumVersion();
         if (version == ChecksumVersions.V8) {
-            return generateCheckSumV8(version);
+            return generateCheckSumV8();
         }
         return generateCheckSumLatest(version);
     }
@@ -228,8 +229,8 @@ public class CreateViewChange extends AbstractChange {
                 stream = openSqlStream();
                 stream = new PropertyExpandingStream(this.getChangeSet(), stream);
             }
-            checkSum = CheckSum.compute(new AbstractSQLChange.NormalizingStream(stream), false, version);
-            return CheckSum.compute(super.generateCheckSum(version).toString() + ":" + checkSum, version);
+            checkSum = CheckSum.compute(new AbstractSQLChange.NormalizingStream(stream), false);
+            return CheckSum.compute(super.generateCheckSum().toString() + ":" + checkSum);
 
         } catch (IOException e) {
             throw new UnexpectedLiquibaseException(e);
@@ -244,9 +245,9 @@ public class CreateViewChange extends AbstractChange {
     }
 
     @Deprecated
-    private CheckSum generateCheckSumV8(ChecksumVersions version) {
+    private CheckSum generateCheckSumV8() {
         if (this.path == null) {
-            return super.generateCheckSum(version);
+            return super.generateCheckSum();
         }
 
         InputStream stream = null;
@@ -271,9 +272,9 @@ public class CreateViewChange extends AbstractChange {
                 }
             }
 
-            CheckSum checkSum = CheckSum.compute(new NormalizingStreamV8(";", false, false, stream), false, version);
+            CheckSum checkSum = CheckSum.compute(new NormalizingStreamV8(";", false, false, stream), false);
 
-            return CheckSum.compute(super.generateCheckSum(version).toString() + ":" + checkSum, version);
+            return CheckSum.compute(super.generateCheckSum().toString() + ":" + checkSum);
         } finally {
             if (stream != null) {
                 try {

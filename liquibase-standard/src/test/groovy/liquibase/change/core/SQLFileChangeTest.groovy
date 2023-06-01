@@ -159,12 +159,16 @@ class SQLFileChangeTest extends StandardChangeTest {
         procedureText = procedureText.replace("valueToReplace", "value1")
         change.setSql(procedureText)
 
-        def checkSumFirstReplacement = Scope.child(Collections.singletonMap(LiquibaseCommandLineConfiguration.CHECKSUM_VERSION.getKey(), version), { -> return change.generateCheckSum(version) } as Scope.ScopedRunnerWithReturn).toString()
+        def checkSumFirstReplacement = Scope.child([(Scope.Attr.checksumVersion.name()): version], {
+            return change.generateCheckSum()
+        } as Scope.ScopedRunnerWithReturn).toString()
 
         procedureText = procedureText.replace("value1", "value2")
         change.setSql(procedureText)
 
-        def checkSumSecondReplacement = Scope.child(Collections.singletonMap(LiquibaseCommandLineConfiguration.CHECKSUM_VERSION.getKey(), version), { -> return change.generateCheckSum(version) } as Scope.ScopedRunnerWithReturn).toString()
+        def checkSumSecondReplacement = Scope.child([(Scope.Attr.checksumVersion.name()): version], {
+            return change.generateCheckSum()
+        } as Scope.ScopedRunnerWithReturn).toString()
 
         then:
         checkSumFirstReplacement == originalChecksum

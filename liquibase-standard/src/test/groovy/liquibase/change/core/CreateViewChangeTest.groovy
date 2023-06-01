@@ -106,10 +106,16 @@ class CreateViewChangeTest extends StandardChangeTest {
 
         CreateViewChange change = new CreateViewChange()
         change.setSelectQuery(SELECT_QUERY)
-        CheckSum viewCheckSumWithoutPath = Scope.child(Collections.singletonMap(LiquibaseCommandLineConfiguration.CHECKSUM_VERSION.getKey(), version), { -> return change.generateCheckSum(version) } as Scope.ScopedRunnerWithReturn)
+        CheckSum viewCheckSumWithoutPath = Scope.child([(Scope.Attr.checksumVersion.name()): version], {
+            return change.generateCheckSum()
+        } as Scope.ScopedRunnerWithReturn<CheckSum>) as CheckSum
+
         CreateViewChange change2 = new CreateViewChange()
         change2.setPath("viewTest.sql")
-        CheckSum viewCheckSumWithPath = Scope.child(Collections.singletonMap(LiquibaseCommandLineConfiguration.CHECKSUM_VERSION.getKey(), version), { -> return change2.generateCheckSum(version) } as Scope.ScopedRunnerWithReturn)
+        CheckSum viewCheckSumWithPath = Scope.child([(Scope.Attr.checksumVersion.name()): version], {
+            return change2.generateCheckSum()
+        } as Scope.ScopedRunnerWithReturn<CheckSum>) as CheckSum
+
         //TODO: Move this Scope.exit() call into a cleanUpSpec method
         Scope.exit(testScopeId)
 
@@ -128,11 +134,16 @@ class CreateViewChangeTest extends StandardChangeTest {
         when:
         CreateViewChange change = new CreateViewChange()
         change.setSelectQuery(SELECT_QUERY)
-        CheckSum viewCheckSumWithoutEncoding = Scope.child(Collections.singletonMap(LiquibaseCommandLineConfiguration.CHECKSUM_VERSION.getKey(), version), { -> return change.generateCheckSum(version) } as Scope.ScopedRunnerWithReturn)
+        CheckSum viewCheckSumWithoutEncoding = Scope.child([(Scope.Attr.checksumVersion.name()): version], {
+            return change.generateCheckSum()
+        } as Scope.ScopedRunnerWithReturn<CheckSum>) as CheckSum
+
         CreateViewChange change2 = new CreateViewChange()
         change2.setSelectQuery(SELECT_QUERY)
         change2.setEncoding("UTF-8")
-        CheckSum viewCheckSumWithEncoding = Scope.child(Collections.singletonMap(LiquibaseCommandLineConfiguration.CHECKSUM_VERSION.getKey(), version), { -> return change2.generateCheckSum(version) } as Scope.ScopedRunnerWithReturn)
+        CheckSum viewCheckSumWithEncoding = Scope.child([(Scope.Attr.checksumVersion.name()): version], {
+            return change2.generateCheckSum()
+        } as Scope.ScopedRunnerWithReturn<CheckSum>) as CheckSum
 
         then:
         viewCheckSumWithoutEncoding.toString() == originalChecksum
@@ -149,10 +160,14 @@ class CreateViewChangeTest extends StandardChangeTest {
         when:
         CreateViewChange change = new CreateViewChange()
         change.setSelectQuery(SELECT_QUERY)
-        CheckSum viewTextCheckSum = Scope.child(Collections.singletonMap(LiquibaseCommandLineConfiguration.CHECKSUM_VERSION.getKey(), version), { -> return change.generateCheckSum(version) } as Scope.ScopedRunnerWithReturn)
+        CheckSum viewTextCheckSum = Scope.child([(Scope.Attr.checksumVersion.name()): version], {
+            return change.generateCheckSum()
+        } as Scope.ScopedRunnerWithReturn<CheckSum>) as CheckSum
         CreateViewChange change2 = new CreateViewChange()
         change2.setSelectQuery(SELECT_QUERY.concat("      \n"))
-        CheckSum viewTextModifiedCheckSum = Scope.child(Collections.singletonMap(LiquibaseCommandLineConfiguration.CHECKSUM_VERSION.getKey(), version), { -> return change2.generateCheckSum(version) } as Scope.ScopedRunnerWithReturn)
+        CheckSum viewTextModifiedCheckSum = Scope.child([(Scope.Attr.checksumVersion.name()): version], {
+            return change2.generateCheckSum()
+        } as Scope.ScopedRunnerWithReturn<CheckSum>) as CheckSum
 
         then:
         viewTextCheckSum.toString() == originalChecksum
@@ -169,12 +184,16 @@ class CreateViewChangeTest extends StandardChangeTest {
         when:
         CreateViewChange change = new CreateViewChange()
         change.setSelectQuery(SELECT_QUERY)
-        CheckSum viewTextOriginalCheckSum = Scope.child(Collections.singletonMap(LiquibaseCommandLineConfiguration.CHECKSUM_VERSION.getKey(), version), { -> return change.generateCheckSum(version) } as Scope.ScopedRunnerWithReturn)
+        CheckSum viewTextOriginalCheckSum = Scope.child([(Scope.Attr.checksumVersion.name()): version], {
+            return change.generateCheckSum()
+        } as Scope.ScopedRunnerWithReturn<CheckSum>) as CheckSum
 
         StringBuilder selectQueryUpdated = new StringBuilder(SELECT_QUERY)
         selectQueryUpdated.append(" WHERE 1=1")
         change.setSelectQuery(selectQueryUpdated.toString())
-        CheckSum viewTextUpdatedCheckSum = Scope.child(Collections.singletonMap(LiquibaseCommandLineConfiguration.CHECKSUM_VERSION.getKey(), version), { -> return change.generateCheckSum(version) } as Scope.ScopedRunnerWithReturn);
+        CheckSum viewTextUpdatedCheckSum = Scope.child([(Scope.Attr.checksumVersion.name()): version], {
+            return change.generateCheckSum()
+        } as Scope.ScopedRunnerWithReturn<CheckSum>) as CheckSum
 
         then:
         viewTextOriginalCheckSum.toString() == originalChecksum
@@ -195,12 +214,16 @@ class CreateViewChangeTest extends StandardChangeTest {
         def change = new CreateViewChange();
         change.setSelectQuery(selectQueryText)
 
-        def checkSumFirstReplacement = Scope.child(Collections.singletonMap(LiquibaseCommandLineConfiguration.CHECKSUM_VERSION.getKey(), version), { -> return change.generateCheckSum(version) } as Scope.ScopedRunnerWithReturn).toString()
+        def checkSumFirstReplacement = Scope.child([(Scope.Attr.checksumVersion.name()): version], {
+            return change.generateCheckSum()
+        } as Scope.ScopedRunnerWithReturn<CheckSum>).toString()
 
         selectQueryText = selectQueryText.replace("value1", "value2")
         change.setSelectQuery(selectQueryText)
 
-        def checkSumSecondReplacement = Scope.child(Collections.singletonMap(LiquibaseCommandLineConfiguration.CHECKSUM_VERSION.getKey(), version), { -> return change.generateCheckSum(version) } as Scope.ScopedRunnerWithReturn).toString()
+        def checkSumSecondReplacement = Scope.child([(Scope.Attr.checksumVersion.name()): version], {
+            return change.generateCheckSum()
+        } as Scope.ScopedRunnerWithReturn<CheckSum>).toString()
 
         then:
         checkSumFirstReplacement.toString() == originalChecksum
@@ -217,12 +240,16 @@ class CreateViewChangeTest extends StandardChangeTest {
         when:
         CreateViewChange changeWithoutRelativeToChangelogFileAttribSet = new CreateViewChange()
         changeWithoutRelativeToChangelogFileAttribSet.setSelectQuery(SELECT_QUERY)
-        CheckSum changeWithoutRelativeToChangelogFileAttribSetCheckSum = Scope.child(Collections.singletonMap(LiquibaseCommandLineConfiguration.CHECKSUM_VERSION.getKey(), version), { -> return changeWithoutRelativeToChangelogFileAttribSet.generateCheckSum(version) } as Scope.ScopedRunnerWithReturn)
+        CheckSum changeWithoutRelativeToChangelogFileAttribSetCheckSum = Scope.child([(Scope.Attr.checksumVersion.name()): version], {
+            return changeWithoutRelativeToChangelogFileAttribSet.generateCheckSum()
+        } as Scope.ScopedRunnerWithReturn<CheckSum>) as CheckSum
 
         CreateViewChange changeWithRelativeToChangelogFileAttribSet = new CreateViewChange()
         changeWithRelativeToChangelogFileAttribSet.setSelectQuery(SELECT_QUERY)
         changeWithRelativeToChangelogFileAttribSet.setRelativeToChangelogFile(true)
-        CheckSum changeWithRelativeToChangelogFileAttribSetCheckSum = Scope.child(Collections.singletonMap(LiquibaseCommandLineConfiguration.CHECKSUM_VERSION.getKey(), version), { -> return changeWithRelativeToChangelogFileAttribSet.generateCheckSum(version) } as Scope.ScopedRunnerWithReturn)
+        CheckSum changeWithRelativeToChangelogFileAttribSetCheckSum = Scope.child([(Scope.Attr.checksumVersion.name()): version], {
+            return changeWithRelativeToChangelogFileAttribSet.generateCheckSum()
+        } as Scope.ScopedRunnerWithReturn<CheckSum>) as CheckSum
 
         then:
         changeWithoutRelativeToChangelogFileAttribSetCheckSum.toString() == originalChecksum

@@ -2,7 +2,9 @@ package liquibase.change.core
 
 import liquibase.ChecksumVersions
 import liquibase.Scope
+import liquibase.change.AbstractSQLChangeTest
 import liquibase.change.ChangeStatus
+import liquibase.change.CheckSum
 import liquibase.change.StandardChangeTest
 import liquibase.changelog.ChangeSet
 import liquibase.changelog.DatabaseChangeLog
@@ -310,10 +312,14 @@ public class LoadDataChangeTest extends StandardChangeTest {
         refactoring.setTableName("TABLE_NAME");
         refactoring.setFile("liquibase/change/core/sample.data1.csv");
 
-        String md5sum1 = refactoring.generateCheckSum(version).toString();
+        String md5sum1 = Scope.child([(Scope.Attr.checksumVersion.name()): version], {
+            return refactoring.generateCheckSum().toString()
+        } as Scope.ScopedRunnerWithReturn<String>)
 
         refactoring.setFile("liquibase/change/core/sample.data2.csv");
-        String md5sum2 = refactoring.generateCheckSum(version).toString();
+        String md5sum2 = Scope.child([(Scope.Attr.checksumVersion.name()): version], {
+            return refactoring.generateCheckSum().toString()
+        } as Scope.ScopedRunnerWithReturn<String>)
 
         then:
         md5sum1 == originalChecksum
@@ -430,10 +436,14 @@ public class LoadDataChangeTest extends StandardChangeTest {
         refactoring.setFile("liquibase/change/core/sample.data1.csv");
 
         refactoring.setCommentLineStartsWith("") //comments disabled
-        String md5sum1 = refactoring.generateCheckSum(version).toString();
+        String md5sum1 = Scope.child([(Scope.Attr.checksumVersion.name()): version], {
+            return refactoring.generateCheckSum().toString()
+        } as Scope.ScopedRunnerWithReturn<String>)
 
         refactoring.setCommentLineStartsWith("#");
-        String md5sum2 = refactoring.generateCheckSum(version).toString();
+        String md5sum2 = Scope.child([(Scope.Attr.checksumVersion.name()): version], {
+            return refactoring.generateCheckSum().toString()
+        } as Scope.ScopedRunnerWithReturn<String>)
 
         then:
         md5sum1 == originalChecksum
@@ -454,10 +464,14 @@ public class LoadDataChangeTest extends StandardChangeTest {
         refactoring.setFile("liquibase/change/core/sample.data1-withComments.csv");
 
         refactoring.setCommentLineStartsWith("") //comments disabled
-        String md5sum1 = refactoring.generateCheckSum(version).toString();
+        String md5sum1 = Scope.child([(Scope.Attr.checksumVersion.name()): version], {
+            return refactoring.generateCheckSum().toString()
+        } as Scope.ScopedRunnerWithReturn<String>)
 
         refactoring.setCommentLineStartsWith("#");
-        String md5sum2 = refactoring.generateCheckSum(version).toString();
+        String md5sum2 = Scope.child([(Scope.Attr.checksumVersion.name()): version], {
+            return refactoring.generateCheckSum().toString()
+        } as Scope.ScopedRunnerWithReturn<String>)
 
         then:
         md5sum1 == originalChecksum
@@ -478,11 +492,15 @@ public class LoadDataChangeTest extends StandardChangeTest {
         refactoring.setFile("liquibase/change/core/sample.data1-withComments.csv");
 
         refactoring.setCommentLineStartsWith("#");
-        String md5sum1 = refactoring.generateCheckSum(version).toString();
+        String md5sum1 = Scope.child([(Scope.Attr.checksumVersion.name()): version], {
+            return refactoring.generateCheckSum().toString()
+        } as Scope.ScopedRunnerWithReturn<String>)
 
         refactoring.setFile("liquibase/change/core/sample.data1-removedComments.csv");
         refactoring.setCommentLineStartsWith(""); //disable comments just in case
-        String md5sum2 = refactoring.generateCheckSum(version).toString();
+        String md5sum2 = Scope.child([(Scope.Attr.checksumVersion.name()): version], {
+            return refactoring.generateCheckSum().toString()
+        } as Scope.ScopedRunnerWithReturn<String>)
 
         then:
         md5sum1 == originalChecksum

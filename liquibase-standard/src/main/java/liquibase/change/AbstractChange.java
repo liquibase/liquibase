@@ -8,7 +8,6 @@ import liquibase.exception.*;
 import liquibase.executor.Executor;
 import liquibase.executor.ExecutorService;
 import liquibase.executor.LoggingExecutor;
-import liquibase.integration.commandline.LiquibaseCommandLineConfiguration;
 import liquibase.parser.core.ParsedNode;
 import liquibase.parser.core.ParsedNodeException;
 import liquibase.plugin.AbstractPlugin;
@@ -28,7 +27,6 @@ import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.lang.reflect.Type;
 import java.util.*;
-import java.util.stream.Stream;
 
 import static liquibase.statement.SqlStatement.EMPTY_SQL_STATEMENT;
 
@@ -128,11 +126,10 @@ public abstract class AbstractChange extends AbstractPlugin implements Change {
         if (annotations.length == 1) {
             return annotations[0];
         } else if (annotations.length > 1) {
-            ChecksumVersions currentChecksumVersion = LiquibaseCommandLineConfiguration.CHECKSUM_VERSION.getCurrentValue();
             // first try to find the annotation that matches the current checksum version
             Optional<DatabaseChangeProperty> versionMatchingAnnotation = Arrays.stream(annotations)
                     .filter(ann ->
-                            Arrays.stream(ann.version()).anyMatch(annotationVersion -> annotationVersion == currentChecksumVersion))
+                            Arrays.stream(ann.version()).anyMatch(annotationVersion -> annotationVersion == Scope.getCurrentScope().getChecksumVersion()))
                     .findFirst();
             // If found, use that annotation, if not found, use the first annotation with no version specified
             // (it is assumed that this is the default and should apply to all versions not explicitly specified)
@@ -528,17 +525,16 @@ public abstract class AbstractChange extends AbstractPlugin implements Change {
      * Implementation generates checksum by serializing the change with {@link StringChangeLogSerializer}
      */
     @Override
-    public CheckSum generateCheckSum(ChecksumVersions version) {
-        ChecksumVersions finalVersion = LiquibaseCommandLineConfiguration.CHECKSUM_VERSION.getCurrentValue();
+    public CheckSum generateCheckSum() {
         return CheckSum.compute(new StringChangeLogSerializer(new StringChangeLogSerializer.FieldFilter() {
             @Override
             public boolean include(Object obj, String field, Object value) {
-                if(Arrays.stream(getExcludedFieldFilters(finalVersion)).anyMatch(filter -> filter.equals(field))) {
+                if(Arrays.stream(getExcludedFieldFilters(Scope.getCurrentScope().getChecksumVersion())).anyMatch(filter -> filter.equals(field))) {
                     return false;
                 }
                 return super.include(obj, field, value);
             }
-        }).serialize(this, false), finalVersion);
+        }).serialize(this, false));
     }
 
     public String[] getExcludedFieldFilters(ChecksumVersions version) {

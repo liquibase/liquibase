@@ -340,21 +340,25 @@ public class ChangeSet implements Conditional, ChangeLogChild {
     }
 
     public CheckSum generateCheckSum(ChecksumVersions version) {
-        if (checkSum == null) {
-            StringBuilder stringToMD5 = new StringBuilder();
-            for (Change change : getChanges()) {
-                stringToMD5.append(change.generateCheckSum(version)).append(":");
-            }
+        try {
+            return Scope.child(Collections.singletonMap(Scope.Attr.checksumVersion.name(), version), () -> {
+                if (checkSum == null) {
+                    StringBuilder stringToMD5 = new StringBuilder();
+                    for (Change change : this.getChanges()) {
+                        stringToMD5.append(change.generateCheckSum()).append(":");
+                    }
 
-            for (SqlVisitor visitor : this.getSqlVisitors()) {
-                stringToMD5.append(visitor.generateCheckSum(version)).append(";");
-            }
+                    for (SqlVisitor visitor : this.getSqlVisitors()) {
+                        stringToMD5.append(visitor.generateCheckSum()).append(";");
+                    }
+                    checkSum = CheckSum.compute(stringToMD5.toString());
+                }
 
-
-            checkSum = CheckSum.compute(stringToMD5.toString(), version);
+                return checkSum;
+            });
+        } catch (Exception e) {
+            throw new RuntimeException(e);
         }
-
-        return checkSum;
     }
 
     @Override

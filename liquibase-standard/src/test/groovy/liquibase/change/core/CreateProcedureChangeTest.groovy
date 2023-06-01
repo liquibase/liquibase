@@ -106,11 +106,16 @@ class CreateProcedureChangeTest extends StandardChangeTest {
         when:
         CreateProcedureChange change = new CreateProcedureChange()
         change.setProcedureText(PROCEDURE_TEXT)
-        CheckSum procedureCheckSumWithoutDbms = Scope.child(Collections.singletonMap(LiquibaseCommandLineConfiguration.CHECKSUM_VERSION.getKey(), version), { -> return change.generateCheckSum(version) } as Scope.ScopedRunnerWithReturn)
+        CheckSum procedureCheckSumWithoutDbms = Scope.child([(Scope.Attr.checksumVersion.name()): version], {
+            return change.generateCheckSum()
+        } as Scope.ScopedRunnerWithReturn<CheckSum>) as CheckSum
+
         CreateProcedureChange change2 = new CreateProcedureChange()
         change2.setProcedureText(PROCEDURE_TEXT)
         change2.setDbms("postgresql")
-        CheckSum procedureCheckSumWithDbms = Scope.child(Collections.singletonMap(LiquibaseCommandLineConfiguration.CHECKSUM_VERSION.getKey(), version), { -> return change2.generateCheckSum(version) } as Scope.ScopedRunnerWithReturn)
+        CheckSum procedureCheckSumWithDbms = Scope.child([(Scope.Attr.checksumVersion.name()): version], {
+            return change2.generateCheckSum()
+        } as Scope.ScopedRunnerWithReturn<CheckSum>) as CheckSum
 
         then:
         procedureCheckSumWithoutDbms.toString() == originalChecksum
@@ -134,11 +139,17 @@ class CreateProcedureChangeTest extends StandardChangeTest {
 
         CreateProcedureChange change = new CreateProcedureChange()
         change.setProcedureText(PROCEDURE_TEXT)
-        CheckSum procedureCheckSumWithoutPath = Scope.child(Collections.singletonMap(LiquibaseCommandLineConfiguration.CHECKSUM_VERSION.getKey(), version), { -> return change.generateCheckSum(version) } as Scope.ScopedRunnerWithReturn)
+        CheckSum procedureCheckSumWithoutPath = Scope.child([(Scope.Attr.checksumVersion.name()): version], {
+            return change.generateCheckSum()
+        } as Scope.ScopedRunnerWithReturn<CheckSum>) as CheckSum
+
         CreateProcedureChange change2 = new CreateProcedureChange()
         change2.setPath("test.sql")
-        //Below check sum generation should not take path property into account
-        CheckSum procedureCheckSumWithPath = Scope.child(Collections.singletonMap(LiquibaseCommandLineConfiguration.CHECKSUM_VERSION.getKey(), version), { -> return change2.generateCheckSum(version) } as Scope.ScopedRunnerWithReturn)
+        //Below check sum generation should not take path property into account to v9
+        CheckSum procedureCheckSumWithPath = Scope.child([(Scope.Attr.checksumVersion.name()): version], {
+            return change2.generateCheckSum()
+        } as Scope.ScopedRunnerWithReturn<CheckSum>) as CheckSum
+
         //TODO: Move this Scope.exit() call into a cleanUpSpec method
         Scope.exit(testScopeId)
 
@@ -157,11 +168,16 @@ class CreateProcedureChangeTest extends StandardChangeTest {
         when:
         CreateProcedureChange change = new CreateProcedureChange()
         change.setProcedureText(PROCEDURE_TEXT)
-        CheckSum procedureCheckSumWithoutComments = Scope.child(Collections.singletonMap(LiquibaseCommandLineConfiguration.CHECKSUM_VERSION.getKey(), version), { -> return change.generateCheckSum(version) } as Scope.ScopedRunnerWithReturn)
+        CheckSum procedureCheckSumWithoutComments = Scope.child([(Scope.Attr.checksumVersion.name()): version], {
+            return change.generateCheckSum()
+        } as Scope.ScopedRunnerWithReturn<CheckSum>) as CheckSum
+
         CreateProcedureChange change2 = new CreateProcedureChange()
         change2.setProcedureText(PROCEDURE_TEXT)
         change2.setComments("This is a test")
-        CheckSum procedureCheckSumWithComments = Scope.child(Collections.singletonMap(LiquibaseCommandLineConfiguration.CHECKSUM_VERSION.getKey(), version), { -> return change2.generateCheckSum(version) } as Scope.ScopedRunnerWithReturn)
+        CheckSum procedureCheckSumWithComments = Scope.child([(Scope.Attr.checksumVersion.name()): version], {
+            return change2.generateCheckSum()
+        } as Scope.ScopedRunnerWithReturn<CheckSum>) as CheckSum
 
         then:
         procedureCheckSumWithoutComments.toString() == originalChecksum
@@ -178,11 +194,16 @@ class CreateProcedureChangeTest extends StandardChangeTest {
         when:
         CreateProcedureChange change = new CreateProcedureChange()
         change.setProcedureText(PROCEDURE_TEXT)
-        CheckSum procedureCheckSumWithoutEncoding = Scope.child(Collections.singletonMap(LiquibaseCommandLineConfiguration.CHECKSUM_VERSION.getKey(), version), { -> return change.generateCheckSum(version) } as Scope.ScopedRunnerWithReturn)
+        CheckSum procedureCheckSumWithoutEncoding = Scope.child([(Scope.Attr.checksumVersion.name()): version], {
+            return change.generateCheckSum()
+        } as Scope.ScopedRunnerWithReturn<CheckSum>) as CheckSum
+
         CreateProcedureChange change2 = new CreateProcedureChange()
         change2.setProcedureText(PROCEDURE_TEXT)
         change2.setEncoding("UTF-8")
-        CheckSum procedureCheckSumWithEncoding = Scope.child(Collections.singletonMap(LiquibaseCommandLineConfiguration.CHECKSUM_VERSION.getKey(), version), { -> return change2.generateCheckSum(version) } as Scope.ScopedRunnerWithReturn)
+        CheckSum procedureCheckSumWithEncoding = Scope.child([(Scope.Attr.checksumVersion.name()): version], {
+            return change2.generateCheckSum()
+        } as Scope.ScopedRunnerWithReturn<CheckSum>) as CheckSum
 
         then:
         procedureCheckSumWithoutEncoding.toString() == originalChecksum
@@ -199,10 +220,15 @@ class CreateProcedureChangeTest extends StandardChangeTest {
         when:
         CreateProcedureChange change = new CreateProcedureChange()
         change.setProcedureText(PROCEDURE_TEXT)
-        CheckSum procedureTextCheckSum = Scope.child(Collections.singletonMap(LiquibaseCommandLineConfiguration.CHECKSUM_VERSION.getKey(), version), { -> return change.generateCheckSum(version) } as Scope.ScopedRunnerWithReturn)
+        CheckSum procedureTextCheckSum = Scope.child([(Scope.Attr.checksumVersion.name()): version], {
+            return change.generateCheckSum()
+        } as Scope.ScopedRunnerWithReturn<CheckSum>) as CheckSum
+
         CreateProcedureChange change2 = new CreateProcedureChange()
         change2.setProcedureText(PROCEDURE_TEXT.concat("      \n"))
-        CheckSum procedureTextModifiedCheckSum = Scope.child(Collections.singletonMap(LiquibaseCommandLineConfiguration.CHECKSUM_VERSION.getKey(), version), { -> return change2.generateCheckSum(version) } as Scope.ScopedRunnerWithReturn)
+        CheckSum procedureTextModifiedCheckSum = Scope.child([(Scope.Attr.checksumVersion.name()): version], {
+            return change2.generateCheckSum()
+        } as Scope.ScopedRunnerWithReturn<CheckSum>) as CheckSum
 
         then:
         procedureTextCheckSum.toString() == originalChecksum
@@ -219,12 +245,16 @@ class CreateProcedureChangeTest extends StandardChangeTest {
         when:
         CreateProcedureChange change = new CreateProcedureChange()
         change.setProcedureText(PROCEDURE_TEXT)
-        CheckSum procedureTextOriginalCheckSum = Scope.child(Collections.singletonMap(LiquibaseCommandLineConfiguration.CHECKSUM_VERSION.getKey(), version), { -> return change.generateCheckSum(version) } as Scope.ScopedRunnerWithReturn)
+        CheckSum procedureTextOriginalCheckSum = Scope.child([(Scope.Attr.checksumVersion.name()): version], {
+            return change.generateCheckSum()
+        } as Scope.ScopedRunnerWithReturn<CheckSum>) as CheckSum
 
         StringBuilder procedureTextUpdated = new StringBuilder(PROCEDURE_TEXT)
         procedureTextUpdated.append(" WHERE 1=1")
         change.setProcedureText(procedureTextUpdated.toString())
-        CheckSum procedureTextUpdatedCheckSum = Scope.child(Collections.singletonMap(LiquibaseCommandLineConfiguration.CHECKSUM_VERSION.getKey(), version), { -> return change.generateCheckSum(version) } as Scope.ScopedRunnerWithReturn)
+        CheckSum procedureTextUpdatedCheckSum = Scope.child([(Scope.Attr.checksumVersion.name()): version], {
+            return change.generateCheckSum()
+        } as Scope.ScopedRunnerWithReturn<CheckSum>) as CheckSum
 
         then:
         procedureTextOriginalCheckSum.toString() == originalChecksum
@@ -251,12 +281,16 @@ class CreateProcedureChangeTest extends StandardChangeTest {
         procedureText = procedureText.replace("valueToReplace", "value1")
         change.setProcedureText(procedureText)
 
-        def checkSumFirstReplacement = Scope.child(Collections.singletonMap(LiquibaseCommandLineConfiguration.CHECKSUM_VERSION.getKey(), version), { -> return change.generateCheckSum(version) } as Scope.ScopedRunnerWithReturn).toString()
+        def checkSumFirstReplacement = Scope.child([(Scope.Attr.checksumVersion.name()): version], {
+            return change.generateCheckSum()
+        } as Scope.ScopedRunnerWithReturn<CheckSum>).toString()
 
         procedureText = procedureText.replace("value1", "value2")
         change.setProcedureText(procedureText)
 
-        def checkSumSecondReplacement = Scope.child(Collections.singletonMap(LiquibaseCommandLineConfiguration.CHECKSUM_VERSION.getKey(), version), { -> return change.generateCheckSum(version) } as Scope.ScopedRunnerWithReturn).toString()
+        def checkSumSecondReplacement = Scope.child([(Scope.Attr.checksumVersion.name()): version], {
+            return change.generateCheckSum()
+        } as Scope.ScopedRunnerWithReturn<CheckSum>).toString()
 
         then:
         checkSumFirstReplacement == originalChecksum
@@ -273,12 +307,16 @@ class CreateProcedureChangeTest extends StandardChangeTest {
         when:
         CreateProcedureChange changeWithoutRelativeToChangelogFileAttribSet = new CreateProcedureChange()
         changeWithoutRelativeToChangelogFileAttribSet.setProcedureText(PROCEDURE_TEXT)
-        CheckSum changeWithoutRelativeToChangelogFileAttribSetCheckSum = Scope.child(Collections.singletonMap(LiquibaseCommandLineConfiguration.CHECKSUM_VERSION.getKey(), version), { -> return changeWithoutRelativeToChangelogFileAttribSet.generateCheckSum(version) } as Scope.ScopedRunnerWithReturn)
+        CheckSum changeWithoutRelativeToChangelogFileAttribSetCheckSum = Scope.child([(Scope.Attr.checksumVersion.name()): version], {
+            return changeWithoutRelativeToChangelogFileAttribSet.generateCheckSum()
+        } as Scope.ScopedRunnerWithReturn<CheckSum>) as CheckSum
 
         CreateProcedureChange changeWithRelativeToChangelogFileAttribSet = new CreateProcedureChange()
         changeWithRelativeToChangelogFileAttribSet.setProcedureText(PROCEDURE_TEXT)
         changeWithRelativeToChangelogFileAttribSet.setRelativeToChangelogFile(true)
-        CheckSum changeWithRelativeToChangelogFileAttribSetCheckSum = Scope.child(Collections.singletonMap(LiquibaseCommandLineConfiguration.CHECKSUM_VERSION.getKey(), version), { -> return changeWithRelativeToChangelogFileAttribSet.generateCheckSum(version) } as Scope.ScopedRunnerWithReturn)
+        CheckSum changeWithRelativeToChangelogFileAttribSetCheckSum = Scope.child([(Scope.Attr.checksumVersion.name()): version], {
+            return changeWithRelativeToChangelogFileAttribSet.generateCheckSum()
+        } as Scope.ScopedRunnerWithReturn<CheckSum>) as CheckSum
 
         then:
         changeWithoutRelativeToChangelogFileAttribSetCheckSum.toString() == originalChecksum

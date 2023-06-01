@@ -1,6 +1,7 @@
 package liquibase.change;
 
 import liquibase.ChecksumVersions;
+import liquibase.Scope;
 import liquibase.database.core.MSSQLDatabase;
 import liquibase.integration.commandline.LiquibaseCommandLineConfiguration;
 import liquibase.statement.SqlStatement;
@@ -10,6 +11,7 @@ import org.junit.Test;
 
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
+import java.util.Collections;
 
 import static org.junit.Assert.*;
 
@@ -79,11 +81,12 @@ public class AbstractSQLChangeTest {
     }
 
     @Test
-    public void generateCheckSum_lineEndingIndependent() {
-        CheckSum sql = new ExampleAbstractSQLChange("LINE 1;\nLINE 2;\nLINE3;").generateCheckSum(LiquibaseCommandLineConfiguration.CHECKSUM_VERSION.getCurrentValue());
-        CheckSum sqlCRLF = new ExampleAbstractSQLChange("LINE 1;\r\nLINE 2;\r\nLINE3;").generateCheckSum(LiquibaseCommandLineConfiguration.CHECKSUM_VERSION.getCurrentValue());
-        CheckSum sqlLF = new ExampleAbstractSQLChange("LINE 1;\rLINE 2;\rLINE3;").generateCheckSum(LiquibaseCommandLineConfiguration.CHECKSUM_VERSION.getCurrentValue());
-        CheckSum sqlDifferent = new ExampleAbstractSQLChange("Something Completely Different").generateCheckSum(LiquibaseCommandLineConfiguration.CHECKSUM_VERSION.getCurrentValue());
+    public void generateCheckSum_lineEndingIndependent() throws Exception {
+        CheckSum sql = new ExampleAbstractSQLChange("LINE 1;\nLINE 2;\nLINE3;").generateCheckSum();
+        CheckSum sqlCRLF = new ExampleAbstractSQLChange("LINE 1;\r\nLINE 2;\r\nLINE3;").generateCheckSum();
+        CheckSum sqlLF = new ExampleAbstractSQLChange("LINE 1;\rLINE 2;\rLINE3;").generateCheckSum();
+        CheckSum sqlDifferent = Scope.child(Collections.singletonMap(Scope.Attr.checksumVersion.name(), ChecksumVersions.V8), () ->
+                new ExampleAbstractSQLChange("Something Completely Different").generateCheckSum());
 
         assertEquals(sql.toString(), sqlCRLF.toString());
         assertEquals(sql.toString(), sqlLF.toString());
@@ -92,41 +95,44 @@ public class AbstractSQLChangeTest {
 
     @Test
     public void generateCheckSum_nullSql() {
-        assertNotNull(new ExampleAbstractSQLChange().generateCheckSum(LiquibaseCommandLineConfiguration.CHECKSUM_VERSION.getCurrentValue()));
+        assertNotNull(new ExampleAbstractSQLChange().generateCheckSum());
     }
 
     @Test
     public void generateCheckSum_changesBasedOnParams_latest() {
-        CheckSum baseCheckSum = new ExampleAbstractSQLChange("SOME SQL").generateCheckSum(LiquibaseCommandLineConfiguration.CHECKSUM_VERSION.getCurrentValue());
+        CheckSum baseCheckSum = new ExampleAbstractSQLChange("SOME SQL").generateCheckSum();
 
         ExampleAbstractSQLChange change = new ExampleAbstractSQLChange("SOME SQL");
         change.setSplitStatements(false);
-        assertEquals(baseCheckSum.toString(), change.generateCheckSum(LiquibaseCommandLineConfiguration.CHECKSUM_VERSION.getCurrentValue()).toString());
+        assertEquals(baseCheckSum.toString(), change.generateCheckSum().toString());
 
         change = new ExampleAbstractSQLChange("SOME SQL");
         change.setEndDelimiter("X");
-        assertEquals(baseCheckSum.toString(), change.generateCheckSum(LiquibaseCommandLineConfiguration.CHECKSUM_VERSION.getCurrentValue()).toString());
+        assertEquals(baseCheckSum.toString(), change.generateCheckSum().toString());
 
         change = new ExampleAbstractSQLChange("SOME SQL");
         change.setStripComments(true);
-        assertEquals(baseCheckSum.toString(), change.generateCheckSum(LiquibaseCommandLineConfiguration.CHECKSUM_VERSION.getCurrentValue()).toString());
+        assertEquals(baseCheckSum.toString(), change.generateCheckSum().toString());
     }
 
     @Test
-    public void generateCheckSum_changesBasedOnParams_v8() {
-        CheckSum baseCheckSum = new ExampleAbstractSQLChange("SOME SQL").generateCheckSum(LiquibaseCommandLineConfiguration.CHECKSUM_VERSION.getCurrentValue());
+    public void generateCheckSum_changesBasedOnParams_v8() throws Exception {
+        CheckSum baseCheckSum = new ExampleAbstractSQLChange("SOME SQL").generateCheckSum();
 
-        ExampleAbstractSQLChange change = new ExampleAbstractSQLChange("SOME SQL");
+        final ExampleAbstractSQLChange change = new ExampleAbstractSQLChange("SOME SQL");
         change.setSplitStatements(false);
-        assertNotEquals(baseCheckSum.toString(), change.generateCheckSum(ChecksumVersions.V8).toString());
+        assertNotEquals(baseCheckSum.toString(), Scope.child(Collections.singletonMap(Scope.Attr.checksumVersion.name(), ChecksumVersions.V8), () ->
+                change.generateCheckSum().toString()));
 
-        change = new ExampleAbstractSQLChange("SOME SQL");
-        change.setEndDelimiter("X");
-        assertNotEquals(baseCheckSum.toString(), change.generateCheckSum(ChecksumVersions.V8).toString());
+        final ExampleAbstractSQLChange change2 = new ExampleAbstractSQLChange("SOME SQL");
+        change2.setEndDelimiter("X");
+        assertNotEquals(baseCheckSum.toString(),  Scope.child(Collections.singletonMap(Scope.Attr.checksumVersion.name(), ChecksumVersions.V8), () ->
+                change2.generateCheckSum().toString()));
 
-        change = new ExampleAbstractSQLChange("SOME SQL");
-        change.setStripComments(true);
-        assertNotEquals(baseCheckSum.toString(), change.generateCheckSum(ChecksumVersions.V8).toString());
+        final ExampleAbstractSQLChange change3 = new ExampleAbstractSQLChange("SOME SQL");
+        change3.setStripComments(true);
+        assertNotEquals(baseCheckSum.toString(),  Scope.child(Collections.singletonMap(Scope.Attr.checksumVersion.name(), ChecksumVersions.V8), () ->
+                change3.generateCheckSum().toString()));
     }
 
 //    @Test

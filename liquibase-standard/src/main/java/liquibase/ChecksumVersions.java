@@ -9,6 +9,7 @@ import java.util.Arrays;
  */
 public enum ChecksumVersions {
 
+    V1(1, "Pass through version for testing purpose", "0"),
     V8(8, "Version used from Liquibase 3.5.0 until 4.21.1", "3.5.0"),
     V9(9, "Version used from Liquibase 4.22.0 till now", "4.22.0");
 
@@ -36,7 +37,7 @@ public enum ChecksumVersions {
     }
 
     public static ChecksumVersions enumFromChecksumVersion(int i) {
-        if (i < 8 || i > 9) {
+        if (i != 1 && i < 8 || i > 9) {
             throw new UnsupportedChecksumVersionException(i);
         }
         return Arrays.stream(ChecksumVersions.values()).filter(cv -> cv.getVersion() == i)

@@ -71,10 +71,10 @@ public class ShouldRunChangeSetFilter implements ChangeSetFilter {
 
 
     protected boolean checksumChanged(ChangeSet changeSet, RanChangeSet ranChangeSet) {
-        if (ranChangeSet.getLastCheckSum() == null || changeSet.getStoredCheckSum() == null) {
+        if (ranChangeSet.getLastCheckSum() == null) {
             return false;
         }
-        return !changeSet.generateCheckSum(ChecksumVersions.enumFromChecksumVersion(changeSet.getStoredCheckSum().getVersion()))
+        return !changeSet.generateCheckSum(ChecksumVersions.enumFromChecksumVersion(ranChangeSet.getLastCheckSum().getVersion()))
                 .equals(ranChangeSet.getLastCheckSum());
     }
 
