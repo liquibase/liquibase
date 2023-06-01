@@ -12,7 +12,7 @@ class TestSystemTest extends Specification {
     def shouldTest() {
         expect:
         !new ThisTestSystem().shouldTest()
-        !new H2TestSystem().shouldTest()
+        new H2TestSystem().shouldTest()
     }
 
     def getPriority() {
