@@ -15,6 +15,9 @@ import java.sql.SQLException
 import static java.lang.String.format
 
 class UpdateCommandStepTest extends Specification {
+    /*
+    change nothing
+     */
 
     def "validate context and label entry has not been added previously"() {
         when:
