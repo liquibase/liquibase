@@ -38,7 +38,7 @@ class UpdateCommandsIntegrationTest extends Specification {
 
         then:
         final JdbcSQLSyntaxErrorException exception = thrown()
-        exception.message.contains("Table \"DATABASECHANGELOG\" not found;")
+        exception.message.contains("this database is empty")
 
         cleanup:
         CommandUtil.runDropAll(h2)
@@ -92,6 +92,6 @@ class UpdateCommandsIntegrationTest extends Specification {
 
         then:
         final JdbcSQLSyntaxErrorException exception = thrown()
-        exception.message.contains("Table \"DATABASECHANGELOG\" not found;")
+        exception.message.contains("this database is empty")
     }
 }
