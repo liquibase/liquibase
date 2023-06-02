@@ -3,6 +3,7 @@ package liquibase
 import liquibase.changelog.ChangeSet
 import liquibase.database.jvm.JdbcConnection
 import liquibase.exception.LiquibaseException
+import liquibase.extension.testing.testsystem.spock.LiquibaseIntegrationTest
 import liquibase.resource.ClassLoaderResourceAccessor
 import spock.lang.Ignore
 import spock.lang.Specification
@@ -13,7 +14,8 @@ import java.util.stream.Collectors
 
 import static org.junit.Assert.*
 
-class ThreadLocalScopeManagerTest extends Specification {
+@LiquibaseIntegrationTest
+class ThreadLocalScopeManagerIntegrationTest extends Specification {
 
     private static final String DATABASE_NAME_PREFIX = "DB_MT_"
     private final ExecutorService executor = Executors.newCachedThreadPool()
@@ -35,7 +37,6 @@ class ThreadLocalScopeManagerTest extends Specification {
 
     }
 
-    @Ignore
     void "maintain databases in parallel"() {
         when:
         /*
