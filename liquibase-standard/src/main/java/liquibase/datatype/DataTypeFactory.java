@@ -21,7 +21,7 @@ public class DataTypeFactory {
 
     private static DataTypeFactory instance;
 
-    private Map<String, List<Class<? extends LiquibaseDataType>>> registry = new ConcurrentHashMap<>();
+    private final Map<String, List<Class<? extends LiquibaseDataType>>> registry = new ConcurrentHashMap<>();
 
     /**
      * Build the factory registry from all classes in the classpath that implement

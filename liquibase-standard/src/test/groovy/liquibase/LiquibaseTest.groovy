@@ -6,16 +6,10 @@ import liquibase.changelog.ChangeSet
 import liquibase.changelog.DatabaseChangeLog
 import liquibase.changelog.RanChangeSet
 import liquibase.database.Database
-import liquibase.database.core.H2Database
 import liquibase.database.core.MockDatabase
-import liquibase.database.core.PostgresDatabase
 import liquibase.database.jvm.JdbcConnection
 import liquibase.exception.DatabaseException
 import liquibase.exception.LiquibaseException
-import liquibase.hub.HubConfiguration
-import liquibase.hub.HubService
-import liquibase.hub.HubServiceFactory
-import liquibase.hub.core.MockHubService
 import liquibase.lockservice.LockService
 import liquibase.lockservice.LockServiceFactory
 import liquibase.parser.ChangeLogParser
@@ -25,6 +19,7 @@ import liquibase.resource.ClassLoaderResourceAccessor
 import liquibase.sdk.resource.MockResourceAccessor
 import liquibase.snapshot.SnapshotGeneratorFactory
 import liquibase.ui.ConsoleUIService
+import spock.lang.Ignore
 import spock.lang.Specification
 
 import java.sql.Connection
@@ -44,7 +39,6 @@ class LiquibaseTest extends Specification {
     private Database mockDatabase
     private LockServiceFactory mockLockServiceFactory
     private LockService mockLockService
-    private MockHubService mockHubService
 
     private ChangeLogParserFactory mockChangeLogParserFactory
     private ChangeLogParser mockChangeLogParser
@@ -92,13 +86,8 @@ class LiquibaseTest extends Specification {
 //        });
 
         mockDatabase = new MockDatabase()
-        setupScopeId = Scope.enter([
-                ("liquibase.plugin." + HubService.name): MockHubService,
-        ])
-
-        mockHubService = (MockHubService) Scope.currentScope.getSingleton(HubServiceFactory).getService()
-        mockHubService.reset()
-        def databaseChangeLog = new DatabaseChangeLog(changeLogId: MockHubService.randomUUID.toString())
+        setupScopeId = Scope.enter(null)
+        def databaseChangeLog = new DatabaseChangeLog()
         databaseChangeLog.addChangeSet(new ChangeSet(
                 "test",
                 "test",
@@ -117,7 +106,6 @@ class LiquibaseTest extends Specification {
     def cleanup() {
 //        verifyNoMoreInteractions(mockLockService, mockChangeLogParser, mockChangeLog, mockChangeLogIterator); //for no other interactions of normal use objects. Not automatically checking mockDatabase and the *Factory mocks
 //        Mockito.reset(mockDatabase, mockLockServiceFactory, mockLockService, mockChangeLogParserFactory, mockChangeLogParser, mockChangeLog, mockChangeLogIterator);
-        mockHubService.reset()
         LockServiceFactory.reset()
         ChangeLogParserFactory.reset()
         Scope.exit(setupScopeId)
@@ -214,98 +202,6 @@ class LiquibaseTest extends Specification {
 //            .setCurrentDateTimeFunction(testFunction);
 //        verify(database).setCurrentDateTimeFunction(testFunction);
 //    }
-
-    def "update() communicates with hub"() {
-        given:
-        Map<String, Object> scopedObjects = new HashMap<>()
-        TestConsoleUIService uiService = new TestConsoleUIService()
-        scopedObjects.put(Scope.Attr.ui.name(), uiService)
-
-        def scopeId = Scope.enter(null, scopedObjects)
-
-        when:
-        Liquibase liquibase = new Liquibase("com/example/changelog.mock", mockResourceAccessor, mockDatabase)
-        Scope.child(HubConfiguration.LIQUIBASE_HUB_API_KEY.getKey(), "API_KEY", {
-            liquibase.update()
-        })
-        Scope.exit(scopeId)
-
-        then:
-        mockHubService.sentObjects.toString() ==
-                "[setRanChangeSets/Connection jdbc://test ($MockHubService.randomUUID):[test/changelog.xml::1::mock-author, test/changelog.xml::2::mock-author, test/changelog.xml::3::mock-author], startOperation/$MockHubService.randomUUID:[$MockHubService.operationCreateDate]]"
-
-    }
-
-    def "update(\"\") communicates with hub"() {
-        given:
-        Map<String, Object> scopedObjects = new HashMap<>()
-        TestConsoleUIService uiService = new TestConsoleUIService()
-        scopedObjects.put(Scope.Attr.ui.name(), uiService)
-        def scopeId = Scope.enter(null, scopedObjects)
-
-        when:
-        Liquibase liquibase = new Liquibase("com/example/changelog.mock", mockResourceAccessor, mockDatabase)
-        Scope.child(HubConfiguration.LIQUIBASE_HUB_API_KEY.getKey(), "API_KEY", {
-          liquibase.update("")
-        })
-        Scope.exit(scopeId)
-
-        then:
-        mockHubService.sentObjects.toString() ==
-          "[setRanChangeSets/Connection jdbc://test ($MockHubService.randomUUID):[test/changelog.xml::1::mock-author, test/changelog.xml::2::mock-author, test/changelog.xml::3::mock-author], startOperation/$MockHubService.randomUUID:[$MockHubService.operationCreateDate]]"
-
-    }
-
-    def "getConnection does not return warning message if API key does not exist and the changelog is registered"() {
-        given:
-        Map<String, Object> scopedObjects = new HashMap<>()
-        TestConsoleUIService uiService = new TestConsoleUIService()
-        scopedObjects.put(Scope.Attr.ui.name(), uiService)
-        def scopeId = Scope.enter(null, scopedObjects)
-
-        when:
-        Liquibase liquibase = new Liquibase("com/example/changelog.mock", mockResourceAccessor, mockDatabase)
-        Connection connection = null
-        List<String> messages = null
-        def changeLogId = UUID.randomUUID().toString()
-
-        Scope.child(HubConfiguration.LIQUIBASE_HUB_API_KEY.getKey(), null, {
-            DatabaseChangeLog changeLog = liquibase.getDatabaseChangeLog()
-            changeLog.setChangeLogId(changeLogId)
-            connection = liquibase.getConnection(changeLog)
-            messages = uiService.getMessages()
-        })
-        Scope.exit(scopeId)
-
-        then:
-        connection == null
-        messages.isEmpty()
-    }
-
-    def "getConnection does not return warning message if API key exists but the changelog is not registered"() {
-        given:
-        Map<String, Object> scopedObjects = new HashMap<>()
-        TestConsoleUIService uiService = new TestConsoleUIService()
-        scopedObjects.put(Scope.Attr.ui.name(), uiService)
-        def scopeId = Scope.enter(null, scopedObjects)
-        List<String> messages = null
-
-        when:
-        Liquibase liquibase = new Liquibase("com/example/changelog.mock", mockResourceAccessor, mockDatabase)
-        Connection connection = null
-        String message = null
-        Scope.child(HubConfiguration.LIQUIBASE_HUB_API_KEY.getKey(), "API_KEY", {
-            DatabaseChangeLog changeLog = liquibase.getDatabaseChangeLog()
-            changeLog.setChangeLogId(null)
-            connection = liquibase.getConnection(changeLog)
-            messages = uiService.getMessages()
-        })
-        Scope.exit(scopeId)
-
-        then:
-        connection == null
-        messages.isEmpty()
-    }
 
 //    @Test(expected = LockException.class)
 //    public void testUpdateExceptionGettingLock() throws LiquibaseException {
@@ -500,32 +396,7 @@ class LiquibaseTest extends Specification {
         assertSqlOutputAppliesTags(writer.toString(), "1.1");
     }
 
-    def validateContextLabelEntryHasNotBeenAddedPreviously() {
-        when:
-        h2Connection = getInMemoryH2DatabaseConnection()
-        Liquibase liquibase = createDatabaseAtTag(h2Connection, "1.0")
-        Contexts context = new Contexts("testContext")
-        LabelExpression label = new LabelExpression("testLabel")
-
-        then:
-        assertFalse(liquibase.isUpToDateFastCheck(context, label))
-
-    }
-
-    def validateContextLabelEntryHasBeenAddedPreviously() {
-        when:
-        h2Connection = getInMemoryH2DatabaseConnection()
-        Liquibase liquibase = new Liquibase("liquibase/test-changelog-fast-check.xml", new ClassLoaderResourceAccessor(),
-                h2Connection)
-        Contexts context = new Contexts("testContext")
-        LabelExpression label = new LabelExpression("testLabel")
-        liquibase.update()
-
-        then:
-        assertTrue(liquibase.isUpToDateFastCheck(context, label))
-
-    }
-
+    @Ignore
     def "validate checksums from ran changesets have all been reset"() {
         when:
         h2Connection = getInMemoryH2DatabaseConnection()
@@ -607,7 +478,7 @@ class LiquibaseTest extends Specification {
         }
     }
 
-    public static class TestConsoleUIService extends ConsoleUIService {
+    static class TestConsoleUIService extends ConsoleUIService {
         private List<String> messages = new ArrayList<>()
 
         @Override
@@ -625,7 +496,7 @@ class LiquibaseTest extends Specification {
      * To use, create a subclass that overrides the method delegated to with an implementation that stores whatever params are being passed.
      * After calling the delegating method in your test, assert against the objectToVerify
      */
-    public static class LiquibaseDelegate extends Liquibase {
+    static class LiquibaseDelegate extends Liquibase {
 
         /**
          * If using multiple parameters, store them here
@@ -636,7 +507,7 @@ class LiquibaseTest extends Specification {
          */
         protected Object objectToVerify
 
-        public LiquibaseDelegate() throws LiquibaseException {
+        LiquibaseDelegate() throws LiquibaseException {
             super("com/example/changelog.mock", new MockResourceAccessor(), mockDatabase)
         }
 

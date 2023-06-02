@@ -94,7 +94,6 @@ public class MdcKey {
     public static final String OPERATION_STOP = "operationStop";
     public static final String DIFF_CHANGELOG_FILE = "diffChangelogFile";
     public static final String DIFF_CHANGELOG_OUTCOME = "diffChangelogOutcome";
-
     public static final String CHANGESET_SYNC_OUTCOME = "changesetSyncOutcome";
 
     //
@@ -106,4 +105,10 @@ public class MdcKey {
     public static final String FLOW_FILE_OUTCOME = "flowFileOutcome";
     public static final String FLOW_FILE_FAILED_MESSAGE = "flowFileFailedMessage";
     public static final String FLOW_FILE_FAILED_STAGE = "flowFileFailedStage";
+
+    public static final String VERSION = "version";
+    public static final String FAIL_ON_ERROR = "failOnError";
+    public static final String HISTORY = "history";
+    public static final String RELEASE_LOCKS_OUTCOME = "releaseLocksOutcome";
+    public static final String STATUS = "status";
 }

@@ -17,12 +17,12 @@ public class AbstractExtensibleObject implements ExtensibleObject {
     /**
      * Additional non-standard attributes.
      */
-    private SmartMap attributes = new SmartMap();
+    private final SmartMap attributes = new SmartMap();
 
     /**
      * Cache of fields on this object. Lazy loaded in {@link #getAttributeFields()}
      */
-    private static Map<Class, Map<String, Field>> attributeFieldCache = new HashMap<>();
+    private static final Map<Class, Map<String, Field>> attributeFieldCache = new HashMap<>();
 
     public AbstractExtensibleObject() {
     }

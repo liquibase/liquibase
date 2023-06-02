@@ -3,9 +3,9 @@ package liquibase.precondition;
 import liquibase.changelog.DatabaseChangeLog;
 
 public class FailedPrecondition {
-    private String message;
-    private Precondition precondition;
-    private DatabaseChangeLog changeLog;
+    private final String message;
+    private final Precondition precondition;
+    private final DatabaseChangeLog changeLog;
 
 
     public FailedPrecondition(String message, DatabaseChangeLog changeLog, Precondition precondition) {

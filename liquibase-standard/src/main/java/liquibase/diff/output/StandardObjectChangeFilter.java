@@ -18,7 +18,7 @@ import java.util.regex.Pattern;
  * This class is used by other classes to filter the set of database objects used
  * in diff-type operations including the diff command and the generateChangeLog
  * command.
- *
+ * <p>
  * There are two basic types of filter - FilterType.INCLUDE and FilterType.EXCLUDE.
  * In Each filter type, a filter string can be supplied. That string is a
  * comma-separated list of subfilters. Each subfilter can either be a regular expression,
@@ -110,24 +110,24 @@ public class StandardObjectChangeFilter implements ObjectChangeFilter {
     /**
      * The Filter class is used internally to do the actual work. A Filter consists of
      * an objectType and a regex Pattern.
-     *
+     * <p>
      * The main method is matches(), which returns true if the given DatabaseObject
      * matches the filter, and false if it does not match the Filter.
-     *
+     * <p>
      * If the objectType is null, then just the Pattern is used to compare the "name" of
      * the object whether it matches or not.
-     *
+     * <p>
      * If the objectType is not null, then the objectType of the Filter must be
      * assignableFrom the given DatabaseObject, AND the "name" of the DatabaseObject
      * must match the Pattern.
-     *
+     * <p>
      * The "name" of the object might be what is returned from getName(), or it might
      * be a different 'identifier' for different objet types.
      */
     protected static class Filter {
 
-        private Class<DatabaseObject> objectType;
-        private Pattern nameMatcher;
+        private final Class<DatabaseObject> objectType;
+        private final Pattern nameMatcher;
 
         public Filter(Class<DatabaseObject> objectType, Pattern nameMatcher) {
             this.objectType = objectType;

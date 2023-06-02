@@ -31,10 +31,10 @@ public class H2Database extends AbstractJdbcDatabase {
 
     private static final String PATCH_VERSION_REGEX = "^(?:\\d+\\.)(?:\\d+\\.)(\\d+).*$";
     private static final Pattern PATCH_VERSION_PATTERN = Pattern.compile(PATCH_VERSION_REGEX);
-    private static String START_CONCAT = "CONCAT(";
-    private static String END_CONCAT = ")";
-    private static String SEP_CONCAT = ", ";
-    private static List<String> keywords = Arrays.asList(
+    private static final String START_CONCAT = "CONCAT(";
+    private static final String END_CONCAT = ")";
+    private static final String SEP_CONCAT = ", ";
+    private static final List<String> keywords = Arrays.asList(
             "ALL",
             "AND",
             "ANY",
@@ -301,6 +301,32 @@ public class H2Database extends AbstractJdbcDatabase {
             }
         } catch (DatabaseException e) {
             return "AUTO_INCREMENT";
+        }
+    }
+
+    @Override
+    protected String getAutoIncrementStartWithClause() {
+        try {
+            if (getDatabaseMajorVersion() == 1) {
+                return "%d";
+            } else {
+                return super.getAutoIncrementStartWithClause();
+            }
+        } catch (DatabaseException e) {
+            return "%d";
+        }
+    }
+
+    @Override
+    protected String getAutoIncrementByClause() {
+        try {
+            if (getDatabaseMajorVersion() == 1) {
+                return "%d";
+            } else {
+                return super.getAutoIncrementByClause();
+            }
+        } catch (DatabaseException e) {
+            return "%d";
         }
     }
 

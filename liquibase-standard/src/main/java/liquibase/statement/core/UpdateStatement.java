@@ -5,14 +5,14 @@ import liquibase.statement.AbstractSqlStatement;
 import java.util.*;
 
 public class UpdateStatement extends AbstractSqlStatement {
-    private String catalogName;
-    private String schemaName;
-    private String tableName;
-    private SortedMap<String, Object> newColumnValues = new TreeMap<>();
+    private final String catalogName;
+    private final String schemaName;
+    private final String tableName;
+    private final SortedMap<String, Object> newColumnValues = new TreeMap<>();
     private String whereClause;
 
-    private List<String> whereColumnNames = new ArrayList<>();
-    private List<Object> whereParameters = new ArrayList<>();
+    private final List<String> whereColumnNames = new ArrayList<>();
+    private final List<Object> whereParameters = new ArrayList<>();
 
 
     public UpdateStatement(String catalogName, String schemaName, String tableName) {

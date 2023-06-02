@@ -9,6 +9,9 @@ import liquibase.exception.DatabaseException;
 import liquibase.executor.ExecutorService;
 import liquibase.statement.core.RawSqlStatement;
 import liquibase.structure.DatabaseObject;
+import liquibase.structure.core.StoredProcedure;
+import liquibase.structure.core.Table;
+import liquibase.structure.core.View;
 import liquibase.util.SystemUtil;
 
 import java.math.BigInteger;
@@ -22,8 +25,8 @@ public class SnowflakeDatabase extends AbstractJdbcDatabase {
 
     public static final String PRODUCT_NAME = "Snowflake";
     private static final Pattern CREATE_VIEW_AS_PATTERN = Pattern.compile("^CREATE\\s+.*?VIEW\\s+.*?AS\\s+", Pattern.CASE_INSENSITIVE | Pattern.DOTALL);
-    private Set<String> systemTables = new HashSet<>();
-    private Set<String> systemViews = new HashSet<>();
+    private final Set<String> systemTables = new HashSet<>();
+    private final Set<String> systemViews = new HashSet<>();
 
     public SnowflakeDatabase() {
         super.setCurrentDateTimeFunction("current_timestamp::timestamp_ntz");
@@ -102,7 +105,7 @@ public class SnowflakeDatabase extends AbstractJdbcDatabase {
 
     @Override
     public boolean supportsCatalogInObjectName(Class<? extends DatabaseObject> type) {
-        return false;
+        return type == Table.class || type == View.class || type == StoredProcedure.class;
     }
 
     @Override
@@ -291,7 +294,7 @@ public class SnowflakeDatabase extends AbstractJdbcDatabase {
 
         return reservedWords;
     }
-    
+
     public String getViewDefinition(CatalogAndSchema schema, String viewName) throws DatabaseException {
         String definition = super.getViewDefinition(schema, viewName);
         if (definition == null || definition.isEmpty()) {

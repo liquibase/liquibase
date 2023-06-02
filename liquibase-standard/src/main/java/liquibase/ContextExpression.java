@@ -10,7 +10,7 @@ import java.util.*;
  */
 public class ContextExpression {
 
-    private HashSet<String> contexts = new HashSet<>();
+    private final HashSet<String> contexts = new HashSet<>();
     private String originalString;
 
     public ContextExpression() {
@@ -91,7 +91,7 @@ public class ContextExpression {
     }
 
     public boolean isEmpty() {
-        return (this.contexts == null) || this.contexts.isEmpty();
+        return this.contexts.isEmpty();
     }
 
     public static boolean matchesAll(Collection<ContextExpression> expressions, Contexts contexts) {

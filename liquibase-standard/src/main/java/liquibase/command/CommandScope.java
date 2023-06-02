@@ -73,8 +73,9 @@ public class CommandScope {
     }
 
     /**
-     * Returns the complete config prefix (without a trailing period) for the command in this scope.
-     * @return
+     * Returns the complete configuration prefix (without a trailing period) for the command in this scope.
+     *
+     * @return the complete configuration prefix for the command in this scope
      */
     public String getCompleteConfigPrefix() {
         return completeConfigPrefix;
@@ -135,7 +136,7 @@ public class CommandScope {
      * Assign a value to a given provided dependency. So if a CommandStep provides class X, at
      * {@link CommandStep#run(CommandResultsBuilder)} method it needs to provide the value for X using this method.
      * commandScope.provideDependency(LockService.class, lockService);
-     *
+     * <p>
      * Means that this class will LockService.class using object lock
      */
     public  CommandScope provideDependency(Class<?> clazz, Object value) {
