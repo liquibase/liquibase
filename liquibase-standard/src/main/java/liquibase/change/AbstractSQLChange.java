@@ -1,9 +1,9 @@
 package liquibase.change;
 
-import liquibase.ChecksumVersions;
-import liquibase.change.core.RawSQLChange;
-import liquibase.Scope;
+import liquibase.ChecksumVersion;
 import liquibase.GlobalConfiguration;
+import liquibase.Scope;
+import liquibase.change.core.RawSQLChange;
 import liquibase.database.Database;
 import liquibase.database.core.Db2zDatabase;
 import liquibase.database.core.MSSQLDatabase;
@@ -16,7 +16,10 @@ import liquibase.statement.core.RawCompoundStatement;
 import liquibase.statement.core.RawSqlStatement;
 import liquibase.util.StringUtil;
 
-import java.io.*;
+import java.io.ByteArrayInputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.PushbackInputStream;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -189,10 +192,10 @@ public abstract class AbstractSQLChange extends AbstractChange implements DbmsTa
     /**
      * Calculates the checksum based on the contained SQL.
      *
-     * @see Change#generateCheckSum(ChecksumVersions)
+     * @see Change#generateCheckSum()
      */
     @Override
-    public CheckSum generateCheckSum(ChecksumVersions version) {
+    public CheckSum generateCheckSum() {
         InputStream stream = null;
         try {
             stream = openSqlStream();
@@ -203,17 +206,19 @@ public abstract class AbstractSQLChange extends AbstractChange implements DbmsTa
             }
 
             if (sql != null) {
-                if (version == ChecksumVersions.V8) {
+                ChecksumVersion version = Scope.getCurrentScope().getChecksumVersion();
+                if (version.lowerOrEqualThan(ChecksumVersion.V8)) {
                     stream = new ByteArrayInputStream(sql.getBytes(GlobalConfiguration.OUTPUT_FILE_ENCODING.getCurrentValue()));
                 } else {
                     stream = new ByteArrayInputStream(sql.getBytes(GlobalConfiguration.FILE_ENCODING.getCurrentValue()));
                 }
             }
 
-            if (version == ChecksumVersions.V8) {
-                return CheckSum.compute(new NormalizingStreamV8(this.getEndDelimiter(), this.isSplitStatements(), this.isStripComments(), stream), false, version);
+            ChecksumVersion version = Scope.getCurrentScope().getChecksumVersion();
+            if (version.lowerOrEqualThan(ChecksumVersion.V8)) {
+                return CheckSum.compute(new NormalizingStreamV8(this.getEndDelimiter(), this.isSplitStatements(), this.isStripComments(), stream), false);
             }
-            return CheckSum.compute(new AbstractSQLChange.NormalizingStream(stream), false, version);
+            return CheckSum.compute(new AbstractSQLChange.NormalizingStream(stream), false);
 
         } catch (IOException e) {
             throw new UnexpectedLiquibaseException(e);
@@ -296,13 +301,6 @@ public abstract class AbstractSQLChange extends AbstractChange implements DbmsTa
 
     public static class NormalizingStream extends InputStream {
         private InputStream stream;
-
-        private final byte[] quickBuffer = new byte[100];
-        private final List<Byte> resizingBuffer = new ArrayList<>();
-
-
-        private int lastChar = 'X';
-        private boolean seenNonSpace;
 
         @Deprecated
         public NormalizingStream(String endDelimiter, Boolean splitStatements, Boolean stripComments, InputStream stream) {

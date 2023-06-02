@@ -1,6 +1,6 @@
 package liquibase.change
 
-import liquibase.ChecksumVersions
+import liquibase.ChecksumVersion
 import liquibase.ContextExpression
 import liquibase.Labels
 import liquibase.Scope
@@ -33,7 +33,7 @@ class AbstractChangeTest extends Specification {
         def methods = object.getMethods()
         expect:
         for (def method : methods) {
-            Set<ChecksumVersions> seenVersions = new HashSet<>()
+            Set<ChecksumVersion> seenVersions = new HashSet<>()
             def annotations = method.getAnnotationsByType(DatabaseChangeProperty.class)
             for (def annotation : annotations) {
                 def versions = annotation.version()
@@ -372,7 +372,7 @@ class AbstractChangeTest extends Specification {
     }
 
     @Unroll
-    def "context filter checksum generation - #version"(ChecksumVersions version, String originalChecksum, String updatedChecksum) {
+    def "context filter checksum generation - #version"(ChecksumVersion version, String originalChecksum, String updatedChecksum) {
         when:
         ChangeSet originalChange = new ChangeSet("testId", "testAuthor", false, false, "path/changelog", null, null, null)
         ChangeSet changeWithContext = originalChange
@@ -387,12 +387,12 @@ class AbstractChangeTest extends Specification {
 
         where:
         version | originalChecksum | updatedChecksum
-        ChecksumVersions.V8 | "8:d41d8cd98f00b204e9800998ecf8427e" | "8:d41d8cd98f00b204e9800998ecf8427e"
+        ChecksumVersion.V8 | "8:d41d8cd98f00b204e9800998ecf8427e" | "8:d41d8cd98f00b204e9800998ecf8427e"
         LiquibaseCommandLineConfiguration.CHECKSUM_VERSION.getCurrentValue() | "9:d41d8cd98f00b204e9800998ecf8427e" | "9:d41d8cd98f00b204e9800998ecf8427e"
     }
 
     @Unroll
-    def "label checksum generation - #version"(ChecksumVersions version, String originalChecksum, String updatedChecksum) {
+    def "label checksum generation - #version"(ChecksumVersion version, String originalChecksum, String updatedChecksum) {
         when:
         ChangeSet originalChange = new ChangeSet("testId", "testAuthor", false, false, "path/changelog", null, null, null)
         ChangeSet changeWithLabel = originalChange
@@ -407,12 +407,12 @@ class AbstractChangeTest extends Specification {
 
         where:
         version | originalChecksum | updatedChecksum
-        ChecksumVersions.V8 | "8:d41d8cd98f00b204e9800998ecf8427e" | "8:d41d8cd98f00b204e9800998ecf8427e"
+        ChecksumVersion.V8 | "8:d41d8cd98f00b204e9800998ecf8427e" | "8:d41d8cd98f00b204e9800998ecf8427e"
         LiquibaseCommandLineConfiguration.CHECKSUM_VERSION.getCurrentValue() | "9:d41d8cd98f00b204e9800998ecf8427e" | "9:d41d8cd98f00b204e9800998ecf8427e"
     }
 
     @Unroll
-    def "dbms checksum generation - #version"(ChecksumVersions version, String originalChecksum, String updatedChecksum) {
+    def "dbms checksum generation - #version"(ChecksumVersion version, String originalChecksum, String updatedChecksum) {
         when:
         ChangeSet originalChange = new ChangeSet("testId", "testAuthor", false, false, "path/changelog", null, null, null)
         ChangeSet changeWithDbms = originalChange
@@ -427,12 +427,12 @@ class AbstractChangeTest extends Specification {
 
         where:
         version | originalChecksum | updatedChecksum
-        ChecksumVersions.V8 | "8:d41d8cd98f00b204e9800998ecf8427e" | "8:d41d8cd98f00b204e9800998ecf8427e"
+        ChecksumVersion.V8 | "8:d41d8cd98f00b204e9800998ecf8427e" | "8:d41d8cd98f00b204e9800998ecf8427e"
         LiquibaseCommandLineConfiguration.CHECKSUM_VERSION.getCurrentValue() | "9:d41d8cd98f00b204e9800998ecf8427e" | "9:d41d8cd98f00b204e9800998ecf8427e"
     }
 
     @Unroll
-    def "comment checksum generation - #version"(ChecksumVersions version, String originalChecksum, String updatedChecksum) {
+    def "comment checksum generation - #version"(ChecksumVersion version, String originalChecksum, String updatedChecksum) {
         when:
         ChangeSet originalChange = new ChangeSet("testId", "testAuthor", false, false, "path/changelog", null, null, null)
         ChangeSet changeWithComment = originalChange
@@ -447,7 +447,7 @@ class AbstractChangeTest extends Specification {
 
         where:
         version | originalChecksum | updatedChecksum
-        ChecksumVersions.V8 | "8:d41d8cd98f00b204e9800998ecf8427e" | "8:d41d8cd98f00b204e9800998ecf8427e"
+        ChecksumVersion.V8 | "8:d41d8cd98f00b204e9800998ecf8427e" | "8:d41d8cd98f00b204e9800998ecf8427e"
         LiquibaseCommandLineConfiguration.CHECKSUM_VERSION.getCurrentValue() | "9:d41d8cd98f00b204e9800998ecf8427e" | "9:d41d8cd98f00b204e9800998ecf8427e"
     }
 

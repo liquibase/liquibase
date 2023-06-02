@@ -1,6 +1,6 @@
 package liquibase.changelog;
 
-import liquibase.ChecksumVersions;
+import liquibase.ChecksumVersion;
 import liquibase.Contexts;
 import liquibase.LabelExpression;
 import liquibase.Scope;
@@ -51,7 +51,7 @@ public abstract class AbstractChangeLogHistoryService implements ChangeLogHistor
                 return ChangeSet.RunStatus.ALREADY_RAN;
             } else {
                 if (foundRan.getLastCheckSum().equals(changeSet.generateCheckSum(
-                        ChecksumVersions.enumFromChecksumVersion(foundRan.getLastCheckSum().getVersion())))) {
+                        ChecksumVersion.enumFromChecksumVersion(foundRan.getLastCheckSum().getVersion())))) {
                     return ChangeSet.RunStatus.ALREADY_RAN;
                 } else {
                     if (changeSet.shouldRunOnChange()) {
@@ -111,7 +111,7 @@ public abstract class AbstractChangeLogHistoryService implements ChangeLogHistor
      */
      public String getLastDeploymentId() throws DatabaseException {
          List<RanChangeSet> ranChangeSetsList = getRanChangeSets();
-         if (ranChangeSetsList == null || ranChangeSetsList.size() == 0) {
+         if (ranChangeSetsList == null || ranChangeSetsList.isEmpty()) {
              return null;
          }
          RanChangeSet lastRanChangeSet = ranChangeSetsList.get(ranChangeSetsList.size() - 1);

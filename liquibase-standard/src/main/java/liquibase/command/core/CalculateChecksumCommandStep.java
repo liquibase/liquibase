@@ -1,6 +1,6 @@
 package liquibase.command.core;
 
-import liquibase.ChecksumVersions;
+import liquibase.ChecksumVersion;
 import liquibase.Scope;
 import liquibase.change.CheckSum;
 import liquibase.changelog.*;
@@ -75,7 +75,7 @@ public class CalculateChecksumCommandStep extends AbstractCommandStep {
 
         sendMessages(resultsBuilder, changeSet.generateCheckSum(
                 ranChangeSet != null && ranChangeSet.getLastCheckSum() != null ?
-                        ChecksumVersions.enumFromChecksumVersion(ranChangeSet.getLastCheckSum().getVersion()) : LiquibaseCommandLineConfiguration.CHECKSUM_VERSION.getCurrentValue()
+                        ChecksumVersion.enumFromChecksumVersion(ranChangeSet.getLastCheckSum().getVersion()) : LiquibaseCommandLineConfiguration.CHECKSUM_VERSION.getCurrentValue()
                 )
         );
     }

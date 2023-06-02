@@ -1,8 +1,8 @@
 package liquibase.change;
 
-import liquibase.ChecksumVersions;
+import liquibase.ChecksumVersion;
+import liquibase.Scope;
 import liquibase.database.core.MSSQLDatabase;
-import liquibase.integration.commandline.LiquibaseCommandLineConfiguration;
 import liquibase.statement.SqlStatement;
 import liquibase.statement.core.RawSqlStatement;
 import liquibase.util.StreamUtil;
@@ -10,6 +10,7 @@ import org.junit.Test;
 
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
+import java.util.Collections;
 
 import static org.junit.Assert.*;
 
@@ -79,11 +80,12 @@ public class AbstractSQLChangeTest {
     }
 
     @Test
-    public void generateCheckSum_lineEndingIndependent() {
-        CheckSum sql = new ExampleAbstractSQLChange("LINE 1;\nLINE 2;\nLINE3;").generateCheckSum(LiquibaseCommandLineConfiguration.CHECKSUM_VERSION.getCurrentValue());
-        CheckSum sqlCRLF = new ExampleAbstractSQLChange("LINE 1;\r\nLINE 2;\r\nLINE3;").generateCheckSum(LiquibaseCommandLineConfiguration.CHECKSUM_VERSION.getCurrentValue());
-        CheckSum sqlLF = new ExampleAbstractSQLChange("LINE 1;\rLINE 2;\rLINE3;").generateCheckSum(LiquibaseCommandLineConfiguration.CHECKSUM_VERSION.getCurrentValue());
-        CheckSum sqlDifferent = new ExampleAbstractSQLChange("Something Completely Different").generateCheckSum(LiquibaseCommandLineConfiguration.CHECKSUM_VERSION.getCurrentValue());
+    public void generateCheckSum_lineEndingIndependent() throws Exception {
+        CheckSum sql = new ExampleAbstractSQLChange("LINE 1;\nLINE 2;\nLINE3;").generateCheckSum();
+        CheckSum sqlCRLF = new ExampleAbstractSQLChange("LINE 1;\r\nLINE 2;\r\nLINE3;").generateCheckSum();
+        CheckSum sqlLF = new ExampleAbstractSQLChange("LINE 1;\rLINE 2;\rLINE3;").generateCheckSum();
+        CheckSum sqlDifferent = Scope.child(Collections.singletonMap(Scope.Attr.checksumVersion.name(), ChecksumVersion.V8), () ->
+                new ExampleAbstractSQLChange("Something Completely Different").generateCheckSum());
 
         assertEquals(sql.toString(), sqlCRLF.toString());
         assertEquals(sql.toString(), sqlLF.toString());
@@ -92,41 +94,44 @@ public class AbstractSQLChangeTest {
 
     @Test
     public void generateCheckSum_nullSql() {
-        assertNotNull(new ExampleAbstractSQLChange().generateCheckSum(LiquibaseCommandLineConfiguration.CHECKSUM_VERSION.getCurrentValue()));
+        assertNotNull(new ExampleAbstractSQLChange().generateCheckSum());
     }
 
     @Test
     public void generateCheckSum_changesBasedOnParams_latest() {
-        CheckSum baseCheckSum = new ExampleAbstractSQLChange("SOME SQL").generateCheckSum(LiquibaseCommandLineConfiguration.CHECKSUM_VERSION.getCurrentValue());
+        CheckSum baseCheckSum = new ExampleAbstractSQLChange("SOME SQL").generateCheckSum();
 
         ExampleAbstractSQLChange change = new ExampleAbstractSQLChange("SOME SQL");
         change.setSplitStatements(false);
-        assertEquals(baseCheckSum.toString(), change.generateCheckSum(LiquibaseCommandLineConfiguration.CHECKSUM_VERSION.getCurrentValue()).toString());
+        assertEquals(baseCheckSum.toString(), change.generateCheckSum().toString());
 
         change = new ExampleAbstractSQLChange("SOME SQL");
         change.setEndDelimiter("X");
-        assertEquals(baseCheckSum.toString(), change.generateCheckSum(LiquibaseCommandLineConfiguration.CHECKSUM_VERSION.getCurrentValue()).toString());
+        assertEquals(baseCheckSum.toString(), change.generateCheckSum().toString());
 
         change = new ExampleAbstractSQLChange("SOME SQL");
         change.setStripComments(true);
-        assertEquals(baseCheckSum.toString(), change.generateCheckSum(LiquibaseCommandLineConfiguration.CHECKSUM_VERSION.getCurrentValue()).toString());
+        assertEquals(baseCheckSum.toString(), change.generateCheckSum().toString());
     }
 
     @Test
-    public void generateCheckSum_changesBasedOnParams_v8() {
-        CheckSum baseCheckSum = new ExampleAbstractSQLChange("SOME SQL").generateCheckSum(LiquibaseCommandLineConfiguration.CHECKSUM_VERSION.getCurrentValue());
+    public void generateCheckSum_changesBasedOnParams_v8() throws Exception {
+        CheckSum baseCheckSum = new ExampleAbstractSQLChange("SOME SQL").generateCheckSum();
 
-        ExampleAbstractSQLChange change = new ExampleAbstractSQLChange("SOME SQL");
+        final ExampleAbstractSQLChange change = new ExampleAbstractSQLChange("SOME SQL");
         change.setSplitStatements(false);
-        assertNotEquals(baseCheckSum.toString(), change.generateCheckSum(ChecksumVersions.V8).toString());
+        assertNotEquals(baseCheckSum.toString(), Scope.child(Collections.singletonMap(Scope.Attr.checksumVersion.name(), ChecksumVersion.V8), () ->
+                change.generateCheckSum().toString()));
 
-        change = new ExampleAbstractSQLChange("SOME SQL");
-        change.setEndDelimiter("X");
-        assertNotEquals(baseCheckSum.toString(), change.generateCheckSum(ChecksumVersions.V8).toString());
+        final ExampleAbstractSQLChange change2 = new ExampleAbstractSQLChange("SOME SQL");
+        change2.setEndDelimiter("X");
+        assertNotEquals(baseCheckSum.toString(),  Scope.child(Collections.singletonMap(Scope.Attr.checksumVersion.name(), ChecksumVersion.V8), () ->
+                change2.generateCheckSum().toString()));
 
-        change = new ExampleAbstractSQLChange("SOME SQL");
-        change.setStripComments(true);
-        assertNotEquals(baseCheckSum.toString(), change.generateCheckSum(ChecksumVersions.V8).toString());
+        final ExampleAbstractSQLChange change3 = new ExampleAbstractSQLChange("SOME SQL");
+        change3.setStripComments(true);
+        assertNotEquals(baseCheckSum.toString(),  Scope.child(Collections.singletonMap(Scope.Attr.checksumVersion.name(), ChecksumVersion.V8), () ->
+                change3.generateCheckSum().toString()));
     }
 
 //    @Test
@@ -243,21 +248,21 @@ public class AbstractSQLChangeTest {
 
     @Test
     public void normalizeSql_V8() throws IOException {
-        assertNormalizingStreamCorrectV8("singlelineString", "single line String");
-        assertNormalizingStreamCorrectV8("singlelinestringwithwhitespace", "single line string with      whitespace");
-        assertNormalizingStreamCorrectV8("multiplelinestring", "\r\nmultiple\r\nline\r\nstring\r\n");
-        assertNormalizingStreamCorrectV8("multiplelinestring", "\rmultiple\rline\rstring\r");
-        assertNormalizingStreamCorrectV8("multiplelinestring", "\nmultiple\nline\nstring\n");
-        assertNormalizingStreamCorrectV8("alinewithdoublenewlines", "\n\na\nline \n with \r\n \r\n double \n \n \n \n newlines");
+        assertNormalizingStreamCorrectV8("single line String", "single line String");
+        assertNormalizingStreamCorrectV8("single line string with whitespace", "single line string with      whitespace");
+        assertNormalizingStreamCorrectV8("multiple line string", "\r\nmultiple\r\nline\r\nstring\r\n");
+        assertNormalizingStreamCorrectV8("multiple line string", "\rmultiple\rline\rstring\r");
+        assertNormalizingStreamCorrectV8("multiple line string", "\nmultiple\nline\nstring\n");
+        assertNormalizingStreamCorrectV8("a line with double newlines", "\n\na\nline \n with \r\n \r\n double \n \n \n \n newlines");
 //        assertNormalizingStreamCorrectV8("", null);
         assertNormalizingStreamCorrectV8("", "    ");
         assertNormalizingStreamCorrectV8("", " \n \n \n   \n  ");
 
         //test quickBuffer -> resizingBuffer handoff
         String longSpaceString = "a line with a lot of: wait for it....                                                                                                                                                                                                                                                                                         spaces";
-        assertNormalizingStreamCorrectV8("alinewithalotof:waitforit....spaces", longSpaceString);
+        assertNormalizingStreamCorrectV8("a line with a lot of: wait for it.... spaces", longSpaceString);
 
-        String versionNormalized = "INSERTINTOrecommendation_list(instanceId,name,publicId)SELECTDISTINCTinstanceId,\"default\"asname,\"default\"aspublicIdFROMrecommendation;";
+        String versionNormalized = "INSERT INTO recommendation_list(instanceId, name, publicId) SELECT DISTINCT instanceId, \"default\" as name, \"default\" as publicId FROM recommendation;";
 
         String version1 = "INSERT INTO recommendation_list(instanceId, name, publicId)\n" +
                 "SELECT DISTINCT instanceId, \"default\" as name, \"default\" as publicId\n" +

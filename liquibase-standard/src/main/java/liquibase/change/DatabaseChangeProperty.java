@@ -1,6 +1,6 @@
 package liquibase.change;
 
-import liquibase.ChecksumVersions;
+import liquibase.ChecksumVersion;
 import liquibase.database.Database;
 import liquibase.serializer.LiquibaseSerializable;
 
@@ -73,5 +73,5 @@ public @interface DatabaseChangeProperty {
      * and checksum calculation for version 8 is requested, the first annotation is used. If any other checksum version
      * is requested, the second annotation is used.
      */
-    ChecksumVersions[] version() default {};
+    ChecksumVersion[] version() default {};
 }

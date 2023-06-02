@@ -1,8 +1,6 @@
 package liquibase.sqlgenerator.core;
 
-import liquibase.ChecksumVersions;
 import liquibase.change.Change;
-import liquibase.change.CheckSum;
 import liquibase.change.core.TagDatabaseChange;
 import liquibase.changelog.ChangeLogHistoryServiceFactory;
 import liquibase.changelog.ChangeSet;
