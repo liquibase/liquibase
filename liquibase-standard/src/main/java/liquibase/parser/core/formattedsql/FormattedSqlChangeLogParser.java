@@ -5,4 +5,8 @@ import liquibase.parser.FormattedChangeLogParser;
 
 public class FormattedSqlChangeLogParser extends FormattedChangeLogParser {
 
+    @Override
+    protected String getCommentSequence() {
+        return "\\-\\-";
+    }
 }
