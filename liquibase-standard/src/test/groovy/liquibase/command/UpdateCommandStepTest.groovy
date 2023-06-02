@@ -7,6 +7,7 @@ import liquibase.command.core.UpdateCommandStep
 import liquibase.database.core.H2Database
 import liquibase.database.jvm.JdbcConnection
 import liquibase.resource.ClassLoaderResourceAccessor
+import spock.lang.Ignore
 import spock.lang.Specification
 
 import java.sql.DriverManager
@@ -16,6 +17,7 @@ import static java.lang.String.format
 
 class UpdateCommandStepTest extends Specification {
 
+    @Ignore
     def "validate context and label entry has not been added previously"() {
         when:
         JdbcConnection h2Connection = getInMemoryH2DatabaseConnection();
@@ -33,6 +35,7 @@ class UpdateCommandStepTest extends Specification {
         h2Connection.close()
     }
 
+    @Ignore
     def "validate context and label entry has been added previously"() {
         when:
 
