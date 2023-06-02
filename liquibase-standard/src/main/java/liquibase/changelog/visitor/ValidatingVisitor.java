@@ -97,6 +97,10 @@ public class ValidatingVisitor implements ChangeSetVisitor {
         
     @Override
     public void visit(ChangeSet changeSet, DatabaseChangeLog databaseChangeLog, Database database, Set<ChangeSetFilterResult> filterResults) throws LiquibaseException {
+        if (changeSet.isIgnore()) {
+            Scope.getCurrentScope().getLog(ValidatingVisitor.class).info("Not validating ignored change set '" + changeSet.toString() + "'");
+            return;
+        }
         RanChangeSet ranChangeSet = findChangeSet(changeSet);
         boolean ran = ranChangeSet != null;
         Set<String> dbmsSet = changeSet.getDbmsSet();
