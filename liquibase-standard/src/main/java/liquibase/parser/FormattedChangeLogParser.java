@@ -71,10 +71,8 @@ public abstract class FormattedChangeLogParser implements ChangeLogParser {
     protected final String ROLLBACK_SPLIT_STATEMENTS_REGEX = ".*rollbackSplitStatements:(\\w+).*";
     protected final Pattern ROLLBACK_SPLIT_STATEMENTS_PATTERN = Pattern.compile(ROLLBACK_SPLIT_STATEMENTS_REGEX, Pattern.CASE_INSENSITIVE);
 
-
     protected final String END_DELIMITER_REGEX = ".*endDelimiter:(\\S*).*";
     protected final Pattern END_DELIMITER_PATTERN = Pattern.compile(END_DELIMITER_REGEX, Pattern.CASE_INSENSITIVE);
-
 
     protected final String ROLLBACK_END_DELIMITER_REGEX = ".*rollbackEndDelimiter:(\\S*).*";
     protected final Pattern ROLLBACK_END_DELIMITER_PATTERN = Pattern.compile(ROLLBACK_END_DELIMITER_REGEX, Pattern.CASE_INSENSITIVE);
@@ -176,6 +174,8 @@ public abstract class FormattedChangeLogParser implements ChangeLogParser {
 
     protected abstract String getCommentSequence();
 
+    protected abstract boolean supportsExtension(String changelogFile);
+
     @Override
     public boolean supports(String changeLogFile, ResourceAccessor resourceAccessor) {
         BufferedReader reader = null;
@@ -192,7 +192,7 @@ public abstract class FormattedChangeLogParser implements ChangeLogParser {
                 while (firstLine.trim().isEmpty() && reader.ready()) {
                     firstLine = reader.readLine();
                 }
-                return (firstLine != null) && FIRST_LINE_PATTERN.matcher(firstLine).matches();
+                return FIRST_LINE_PATTERN.matcher(firstLine).matches();
             } else {
                 return false;
             }
@@ -712,9 +712,6 @@ public abstract class FormattedChangeLogParser implements ChangeLogParser {
             throw new ChangeLogParseException("Liquibase rollback comment is not closed.");
         }
         return multiLineRollbackSQL;
-    }
-    protected boolean supportsExtension(String changelogFile){
-        return changelogFile.toLowerCase().endsWith(".sql");
     }
 
     private SqlPrecondition parseSqlCheckCondition(String body) throws ChangeLogParseException{

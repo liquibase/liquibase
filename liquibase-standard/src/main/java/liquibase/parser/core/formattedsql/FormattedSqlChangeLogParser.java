@@ -9,4 +9,9 @@ public class FormattedSqlChangeLogParser extends FormattedChangeLogParser {
     protected String getCommentSequence() {
         return "\\-\\-";
     }
+
+    @Override
+    protected boolean supportsExtension(String changelogFile) {
+        return changelogFile.toLowerCase().endsWith(".sql");
+    }
 }
