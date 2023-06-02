@@ -23,11 +23,6 @@ jobs:
     - uses: actions/delete-package-versions@v4
       if: ${{ steps.version.outputs.ids != '' }}
       with:
-        # Name of the package.
-        # Defaults to an empty string.
-        # Required if `package-version-ids` input is not given.
-        package-name: ${{ matrix.packages_to_delete }}
-
         # The number of latest versions to keep.
         # This cannot be specified with `num-old-versions-to-delete`. By default, `num-old-versions-to-delete` takes precedence over `min-versions-to-keep`.
         # When set to 0, all deletable versions will be deleted.
