@@ -1,6 +1,6 @@
 package liquibase.change;
 
-import liquibase.ChecksumVersions;
+import liquibase.ChecksumVersion;
 import liquibase.Scope;
 import liquibase.exception.UnexpectedLiquibaseException;
 import liquibase.integration.commandline.LiquibaseCommandLineConfiguration;
@@ -52,16 +52,14 @@ public class ChangeFactory extends AbstractPluginFactory<Change>{
 
     public ChangeMetaData getChangeMetaData(Change change) {
         String cacheKey = generateCacheKey(change);
-        if (!cachedMetadata.containsKey(cacheKey)) {
-            cachedMetadata.put(cacheKey, change.createChangeMetaData());
-        }
+        cachedMetadata.putIfAbsent(cacheKey, change.createChangeMetaData());
         return cachedMetadata.get(cacheKey);
     }
 
     private String generateCacheKey(Change change) {
         String key;
         try {
-            ChecksumVersions version = LiquibaseCommandLineConfiguration.CHECKSUM_VERSION.getCurrentValue();
+            ChecksumVersion version = Scope.getCurrentScope().getChecksumVersion();
             if (version == null) {
                  throw new NullPointerException();
             }

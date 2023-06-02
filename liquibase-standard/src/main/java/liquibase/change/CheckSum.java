@@ -1,6 +1,6 @@
 package liquibase.change;
 
-import liquibase.ChecksumVersions;
+import liquibase.Scope;
 import liquibase.integration.commandline.LiquibaseCommandLineConfiguration;
 import liquibase.util.MD5Util;
 import liquibase.util.StringUtil;
@@ -71,18 +71,18 @@ public final class CheckSum {
     /**
      * Compute a storedCheckSum of the given string.
      */
-    public static CheckSum compute(String valueToChecksum, ChecksumVersions version) {
+    public static CheckSum compute(String valueToChecksum) {
         return new CheckSum(MD5Util.computeMD5(
                 //remove "Unknown" unicode char 65533
                 Normalizer.normalize(StringUtil.standardizeLineEndings(valueToChecksum)
                         .replace("\uFFFD", ""), Normalizer.Form.NFC)
-        ), version.getVersion());
+        ), Scope.getCurrentScope().getChecksumVersion().getVersion());
     }
 
     /**
      * Compute a CheckSum of the given data stream (no normalization of line endings!)
      */
-    public static CheckSum compute(final InputStream stream, boolean standardizeLineEndings, ChecksumVersions version) {
+    public static CheckSum compute(final InputStream stream, boolean standardizeLineEndings) {
         InputStream newStream = stream;
         if (standardizeLineEndings) {
             newStream = new InputStream() {
@@ -106,7 +106,7 @@ public final class CheckSum {
             };
         }
 
-        return new CheckSum(MD5Util.computeMD5(newStream), version.getVersion());
+        return new CheckSum(MD5Util.computeMD5(newStream), Scope.getCurrentScope().getChecksumVersion().getVersion());
     }
 
     @Override

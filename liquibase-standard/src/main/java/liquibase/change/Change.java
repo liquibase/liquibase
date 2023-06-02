@@ -1,6 +1,5 @@
 package liquibase.change;
 
-import liquibase.ChecksumVersions;
 import liquibase.ExtensibleObject;
 import liquibase.Scope;
 import liquibase.changelog.ChangeSet;
@@ -87,7 +86,7 @@ public interface Change extends LiquibaseSerializable, Plugin, ExtensibleObject 
      * The checksum should take into account all settings that would impact what actually happens to the database
      * and <b>NOT</b> include any settings that do not impact the actual execution of the change.
      */
-    CheckSum generateCheckSum(ChecksumVersions version);
+    CheckSum generateCheckSum();
 
     /**
      * Confirmation message to be displayed after the change is executed. Should include relevant configuration settings to make it as helpful as possible.

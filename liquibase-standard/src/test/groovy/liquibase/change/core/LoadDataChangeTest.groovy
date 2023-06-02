@@ -1,6 +1,6 @@
 package liquibase.change.core
 
-import liquibase.ChecksumVersions
+import liquibase.ChecksumVersion
 import liquibase.Scope
 import liquibase.change.ChangeStatus
 import liquibase.change.StandardChangeTest
@@ -303,17 +303,21 @@ public class LoadDataChangeTest extends StandardChangeTest {
     }
 
     @Unroll
-    def "generateChecksum produces different values with each field - #version"(ChecksumVersions version, String originalChecksum, String updatedChecksum) {
+    def "generateChecksum produces different values with each field - #version"(ChecksumVersion version, String originalChecksum, String updatedChecksum) {
         when:
         LoadDataChange refactoring = new LoadDataChange();
         refactoring.setSchemaName("SCHEMA_NAME");
         refactoring.setTableName("TABLE_NAME");
         refactoring.setFile("liquibase/change/core/sample.data1.csv");
 
-        String md5sum1 = refactoring.generateCheckSum(version).toString();
+        String md5sum1 = Scope.child([(Scope.Attr.checksumVersion.name()): version], {
+            return refactoring.generateCheckSum().toString()
+        } as Scope.ScopedRunnerWithReturn<String>)
 
         refactoring.setFile("liquibase/change/core/sample.data2.csv");
-        String md5sum2 = refactoring.generateCheckSum(version).toString();
+        String md5sum2 = Scope.child([(Scope.Attr.checksumVersion.name()): version], {
+            return refactoring.generateCheckSum().toString()
+        } as Scope.ScopedRunnerWithReturn<String>)
 
         then:
         md5sum1 == originalChecksum
@@ -321,7 +325,7 @@ public class LoadDataChangeTest extends StandardChangeTest {
 
         where:
         version | originalChecksum | updatedChecksum
-        ChecksumVersions.V8 | "8:a91f2379b2b3b4c4a5a571b8e7409081" | "8:cce1423feea9e29192ef7c306eda0c94"
+        ChecksumVersion.V8 | "8:a91f2379b2b3b4c4a5a571b8e7409081" | "8:cce1423feea9e29192ef7c306eda0c94"
         LiquibaseCommandLineConfiguration.CHECKSUM_VERSION.getCurrentValue() | "9:55d574d66869989f7208b9f05b7409bb" | "9:b0cc70905a4b9db9211c05392fd08f08"
     }
 
@@ -422,7 +426,7 @@ public class LoadDataChangeTest extends StandardChangeTest {
     }
 
     @Unroll
-    def "checksum does not change when no comments in CSV and comment property changes - #version"(ChecksumVersions version, String originalChecksum, String updatedChecksum) {
+    def "checksum does not change when no comments in CSV and comment property changes - #version"(ChecksumVersion version, String originalChecksum, String updatedChecksum) {
         when:
         LoadDataChange refactoring = new LoadDataChange();
         refactoring.setSchemaName("SCHEMA_NAME");
@@ -430,10 +434,14 @@ public class LoadDataChangeTest extends StandardChangeTest {
         refactoring.setFile("liquibase/change/core/sample.data1.csv");
 
         refactoring.setCommentLineStartsWith("") //comments disabled
-        String md5sum1 = refactoring.generateCheckSum(version).toString();
+        String md5sum1 = Scope.child([(Scope.Attr.checksumVersion.name()): version], {
+            return refactoring.generateCheckSum().toString()
+        } as Scope.ScopedRunnerWithReturn<String>)
 
         refactoring.setCommentLineStartsWith("#");
-        String md5sum2 = refactoring.generateCheckSum(version).toString();
+        String md5sum2 = Scope.child([(Scope.Attr.checksumVersion.name()): version], {
+            return refactoring.generateCheckSum().toString()
+        } as Scope.ScopedRunnerWithReturn<String>)
 
         then:
         md5sum1 == originalChecksum
@@ -441,12 +449,12 @@ public class LoadDataChangeTest extends StandardChangeTest {
 
         where:
         version | originalChecksum | updatedChecksum
-        ChecksumVersions.V8 | "8:a91f2379b2b3b4c4a5a571b8e7409081" | "8:a91f2379b2b3b4c4a5a571b8e7409081"
+        ChecksumVersion.V8 | "8:a91f2379b2b3b4c4a5a571b8e7409081" | "8:a91f2379b2b3b4c4a5a571b8e7409081"
         LiquibaseCommandLineConfiguration.CHECKSUM_VERSION.getCurrentValue() | "9:55d574d66869989f7208b9f05b7409bb" | "9:55d574d66869989f7208b9f05b7409bb"
     }
 
     @Unroll
-    def "checksum changes when there are comments in CSV - #version"(ChecksumVersions version, String originalChecksum, String updatedChecksum) {
+    def "checksum changes when there are comments in CSV - #version"(ChecksumVersion version, String originalChecksum, String updatedChecksum) {
         when:
         LoadDataChange refactoring = new LoadDataChange();
         refactoring.setSchemaName("SCHEMA_NAME");
@@ -454,10 +462,14 @@ public class LoadDataChangeTest extends StandardChangeTest {
         refactoring.setFile("liquibase/change/core/sample.data1-withComments.csv");
 
         refactoring.setCommentLineStartsWith("") //comments disabled
-        String md5sum1 = refactoring.generateCheckSum(version).toString();
+        String md5sum1 = Scope.child([(Scope.Attr.checksumVersion.name()): version], {
+            return refactoring.generateCheckSum().toString()
+        } as Scope.ScopedRunnerWithReturn<String>)
 
         refactoring.setCommentLineStartsWith("#");
-        String md5sum2 = refactoring.generateCheckSum(version).toString();
+        String md5sum2 = Scope.child([(Scope.Attr.checksumVersion.name()): version], {
+            return refactoring.generateCheckSum().toString()
+        } as Scope.ScopedRunnerWithReturn<String>)
 
         then:
         md5sum1 == originalChecksum
@@ -465,12 +477,12 @@ public class LoadDataChangeTest extends StandardChangeTest {
 
         where:
         version | originalChecksum | updatedChecksum
-        ChecksumVersions.V8 | "8:becddfbcfda2ec516371ed36aaf1137a" | "8:e51a6408e921cfa151c50c7d90cf5baa"
+        ChecksumVersion.V8 | "8:becddfbcfda2ec516371ed36aaf1137a" | "8:e51a6408e921cfa151c50c7d90cf5baa"
         LiquibaseCommandLineConfiguration.CHECKSUM_VERSION.getCurrentValue() | "9:c02972964ae29d51fa8e7801951fbb70" | "9:91298c1042fcb57394a242e8c838ce51"
     }
 
     @Unroll
-    def "checksum same for CSV files with comments and file with removed comments manually - #version"(ChecksumVersions version, String originalChecksum, String updatedChecksum) {
+    def "checksum same for CSV files with comments and file with removed comments manually - #version"(ChecksumVersion version, String originalChecksum, String updatedChecksum) {
         when:
         LoadDataChange refactoring = new LoadDataChange();
         refactoring.setSchemaName("SCHEMA_NAME");
@@ -478,11 +490,15 @@ public class LoadDataChangeTest extends StandardChangeTest {
         refactoring.setFile("liquibase/change/core/sample.data1-withComments.csv");
 
         refactoring.setCommentLineStartsWith("#");
-        String md5sum1 = refactoring.generateCheckSum(version).toString();
+        String md5sum1 = Scope.child([(Scope.Attr.checksumVersion.name()): version], {
+            return refactoring.generateCheckSum().toString()
+        } as Scope.ScopedRunnerWithReturn<String>)
 
         refactoring.setFile("liquibase/change/core/sample.data1-removedComments.csv");
         refactoring.setCommentLineStartsWith(""); //disable comments just in case
-        String md5sum2 = refactoring.generateCheckSum(version).toString();
+        String md5sum2 = Scope.child([(Scope.Attr.checksumVersion.name()): version], {
+            return refactoring.generateCheckSum().toString()
+        } as Scope.ScopedRunnerWithReturn<String>)
 
         then:
         md5sum1 == originalChecksum
@@ -490,7 +506,7 @@ public class LoadDataChangeTest extends StandardChangeTest {
 
         where:
         version | originalChecksum | updatedChecksum
-        ChecksumVersions.V8 | "8:e51a6408e921cfa151c50c7d90cf5baa" | "8:e51a6408e921cfa151c50c7d90cf5baa"
+        ChecksumVersion.V8 | "8:e51a6408e921cfa151c50c7d90cf5baa" | "8:e51a6408e921cfa151c50c7d90cf5baa"
         LiquibaseCommandLineConfiguration.CHECKSUM_VERSION.getCurrentValue() | "9:91298c1042fcb57394a242e8c838ce51" | "9:91298c1042fcb57394a242e8c838ce51"
     }
 

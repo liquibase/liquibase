@@ -1,6 +1,6 @@
 package liquibase.changelog;
 
-import liquibase.ChecksumVersions;
+import liquibase.ChecksumVersion;
 import liquibase.ContextExpression;
 import liquibase.Labels;
 import liquibase.change.CheckSum;
@@ -38,7 +38,7 @@ public class RanChangeSet {
                 changeSet.getId(),
                 changeSet.getAuthor(),
                 changeSet.generateCheckSum((changeSet.getStoredCheckSum() != null) ?
-                        ChecksumVersions.enumFromChecksumVersion(changeSet.getStoredCheckSum().getVersion()) : LiquibaseCommandLineConfiguration.CHECKSUM_VERSION.getCurrentValue()),
+                        ChecksumVersion.enumFromChecksumVersion(changeSet.getStoredCheckSum().getVersion()) : LiquibaseCommandLineConfiguration.CHECKSUM_VERSION.getCurrentValue()),
                 new Date(),
                 null,
                 execType,

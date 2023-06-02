@@ -1,6 +1,6 @@
 package liquibase.integration.commandline;
 
-import liquibase.ChecksumVersions;
+import liquibase.ChecksumVersion;
 import liquibase.configuration.AutoloadedConfigurations;
 import liquibase.configuration.ConfigurationDefinition;
 import liquibase.configuration.ConfigurationValueConverter;
@@ -32,7 +32,7 @@ public class LiquibaseCommandLineConfiguration implements AutoloadedConfiguratio
     public static final ConfigurationDefinition<Boolean> SHOULD_RUN;
     public static final ConfigurationDefinition<ArgumentConverter> ARGUMENT_CONVERTER;
     public static final ConfigurationDefinition<String> MONITOR_PERFORMANCE;
-    public static final ConfigurationDefinition<ChecksumVersions> CHECKSUM_VERSION;
+    public static final ConfigurationDefinition<ChecksumVersion> CHECKSUM_VERSION;
 
     static {
         ConfigurationDefinition.Builder builder = new ConfigurationDefinition.Builder("liquibase");
@@ -95,7 +95,7 @@ public class LiquibaseCommandLineConfiguration implements AutoloadedConfiguratio
                         "Open Source users default to unstructured \"" + LogFormat.TEXT + "\" logs to the console or output log files. " +
                         "Pro users have the option to set value as \"" + LogFormat.JSON + "\" or \"" + LogFormat.JSON_PRETTY + "\" to enable json-structured log files to the console or output log files.")
                 .setDefaultValue(LogFormat.TEXT)
-                .setValueHandler((logFormat) -> {
+                .setValueHandler(logFormat -> {
                     if (logFormat == null) {
                         return null;
                     }
@@ -116,10 +116,10 @@ public class LiquibaseCommandLineConfiguration implements AutoloadedConfiguratio
                 })
                 .build();
 
-        CHECKSUM_VERSION = builder.define("checksumVersion", ChecksumVersions.class)
+        CHECKSUM_VERSION = builder.define("checksumVersion", ChecksumVersion.class)
                 .setDescription("Optionally, force Liquibase to use a different version of the checksum calculation " +
                         "algorithm. It is not recommended that this setting be used.")
-                .setDefaultValue(ChecksumVersions.V9)
+                .setDefaultValue(ChecksumVersion.V9)
                 .setHidden(true)
                 .build();
 
