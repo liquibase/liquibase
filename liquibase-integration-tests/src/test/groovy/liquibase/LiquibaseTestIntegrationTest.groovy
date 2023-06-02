@@ -29,6 +29,7 @@ class LiquibaseTestIntegrationTest extends Specification {
 
     def syncChangeLogForUnmanagedDatabase() throws Exception {
         when:
+        CommandUtil.runDropAll(h2)
         Liquibase liquibase = createUnmanagedDatabase(h2);
         assertFalse(hasDatabaseChangeLogTable(liquibase));
 
