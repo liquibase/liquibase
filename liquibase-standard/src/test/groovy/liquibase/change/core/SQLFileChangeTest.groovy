@@ -177,6 +177,6 @@ class SQLFileChangeTest extends StandardChangeTest {
         where:
         version | originalChecksum | updatedChecksum
         ChecksumVersion.V8 | "8:25560f4c442fa581b820d0a6206fd14e" | "8:b934d68e53222bc7b5cbf147ce6746b4"
-        LiquibaseCommandLineConfiguration.CHECKSUM_VERSION.getCurrentValue() | "9:8cfbd3e5970885470db17cd149feb637" | "9:f6302129ace10ca356faa21343dd1aa8"
+        ChecksumVersion.latest() | "9:8cfbd3e5970885470db17cd149feb637" | "9:f6302129ace10ca356faa21343dd1aa8"
     }
 }

@@ -33,7 +33,7 @@ public class ChangeSetStatus {
         this.changeSet = changeSet;
         ChecksumVersion version = changeSet.getStoredCheckSum() != null ?
                 ChecksumVersion.enumFromChecksumVersion(changeSet.getStoredCheckSum().getVersion()) :
-                LiquibaseCommandLineConfiguration.CHECKSUM_VERSION.getCurrentValue();
+                ChecksumVersion.latest();
         this.currentCheckSum = changeSet.generateCheckSum(version);
         this.description = changeSet.getDescription();
         this.comments = changeSet.getComments();
