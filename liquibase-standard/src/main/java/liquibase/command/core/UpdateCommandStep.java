@@ -3,6 +3,8 @@ package liquibase.command.core;
 import liquibase.Scope;
 import liquibase.UpdateSummaryEnum;
 import liquibase.command.*;
+import liquibase.command.core.helpers.DatabaseChangelogCommandStep;
+import liquibase.exception.CommandValidationException;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -66,6 +68,12 @@ public class UpdateCommandStep extends AbstractUpdateCommandStep implements Clea
         if (commandDefinition.is(LEGACY_COMMAND_NAME)) {
             commandDefinition.setHidden(true);
         }
+    }
+
+    @Override
+    public void validate(CommandScope commandScope) throws CommandValidationException {
+        // update null checksums when running validate.
+        commandScope.addArgumentValue(DatabaseChangelogCommandStep.UPDATE_NULL_CHECKSUMS, Boolean.TRUE);
     }
 
     @Override
