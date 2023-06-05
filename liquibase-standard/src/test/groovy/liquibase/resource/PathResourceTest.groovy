@@ -5,16 +5,15 @@ import spock.lang.Specification
 import java.nio.file.Files
 import java.nio.file.Path
 import java.nio.file.Paths
-import java.time.Instant
 
 class PathResourceTest extends Specification {
 
     def "validate parent directory can be created successfully"() {
         when:
-        String filePath = String.format("com/example/not/exists/%s/test.sql", Instant.now().toString())
+        String filePath = File.createTempFile("Test-", ".sql").getPath()
         Path rootChangeLogPath = Paths.get(filePath)
 
-        def pathResource =  new PathResource("test.sql", rootChangeLogPath)
+        def pathResource =  new PathResource("Test.sql", rootChangeLogPath)
         OutputStream outputStream = pathResource.openOutputStream(new OpenOptions())
         outputStream.write("test content".bytes)
         outputStream.close()
