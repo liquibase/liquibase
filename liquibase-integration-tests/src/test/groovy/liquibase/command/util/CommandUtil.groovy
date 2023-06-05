@@ -3,23 +3,13 @@ package liquibase.command.util
 import liquibase.Scope
 import liquibase.UpdateSummaryEnum
 import liquibase.command.CommandScope
-import liquibase.command.core.DiffCommandStep
-import liquibase.command.core.DropAllCommandStep
-import liquibase.command.core.GenerateChangelogCommandStep
-import liquibase.command.core.RollbackCommandStep
-import liquibase.command.core.SnapshotCommandStep
-import liquibase.command.core.TagCommandStep
-import liquibase.command.core.UpdateCommandStep
-import liquibase.command.core.helpers.DatabaseChangelogCommandStep
-import liquibase.command.core.helpers.DbUrlConnectionCommandStep
-import liquibase.command.core.helpers.DiffOutputControlCommandStep
-import liquibase.command.core.helpers.PreCompareCommandStep
-import liquibase.command.core.helpers.ReferenceDbUrlConnectionCommandStep
-import liquibase.command.core.helpers.ShowSummaryArgument
+import liquibase.command.core.*
+import liquibase.command.core.helpers.*
 import liquibase.database.Database
 import liquibase.diff.compare.CompareControl
 import liquibase.exception.CommandExecutionException
 import liquibase.extension.testing.testsystem.DatabaseTestSystem
+import liquibase.lockservice.LockServiceFactory
 import liquibase.resource.ResourceAccessor
 import liquibase.resource.SearchPathResourceAccessor
 import liquibase.sdk.resource.MockResourceAccessor
@@ -111,6 +101,8 @@ class CommandUtil {
         if (! db.shouldTest()) {
             return;
         }
+        def lockService = LockServiceFactory.getInstance().getLockService(db.getDatabaseFromFactory());
+        lockService.releaseLock()
         CommandScope commandScope = new CommandScope(DropAllCommandStep.COMMAND_NAME)
         commandScope.addArgumentValue(DbUrlConnectionCommandStep.URL_ARG, db.getConnectionUrl())
         commandScope.addArgumentValue(DbUrlConnectionCommandStep.USERNAME_ARG, db.getUsername())
