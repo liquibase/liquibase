@@ -18,13 +18,13 @@ import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 
 public class ResultSetCache {
-    private Map<String, Integer> timesSingleQueried = new HashMap<>();
-    private Map<String, Boolean> didBulkQuery = new HashMap<>();
+    private final Map<String, Integer> timesSingleQueried = new HashMap<>();
+    private final Map<String, Boolean> didBulkQuery = new HashMap<>();
     private boolean bulkTracking = true;
 
-    private Map<String, Map<String, List<CachedRow>>> cacheBySchema = new ConcurrentHashMap<>();
+    private final Map<String, Map<String, List<CachedRow>>> cacheBySchema = new ConcurrentHashMap<>();
 
-    private Map<String, Object> info = new ConcurrentHashMap<>();
+    private final Map<String, Object> info = new ConcurrentHashMap<>();
 
     public List<CachedRow> get(ResultSetExtractor resultSetExtractor) throws DatabaseException {
         try {
@@ -116,10 +116,10 @@ public class ResultSetCache {
     }
 
     public static class RowData {
-        private Database database;
-        private String[] parameters;
-        private String catalog;
-        private String schema;
+        private final Database database;
+        private final String[] parameters;
+        private final String catalog;
+        private final String schema;
 
         private String[] keyPermutations;
 
@@ -206,32 +206,6 @@ public class ResultSetCache {
             return createKey(database, parameters);
         }
     }
-
-//    public abstract static class MultiSchemaRowData extends RowData {
-//        public MultiSchemaRowData(String catalog, String schema, Database database, String... parameters) {
-//            super(catalog, schema, database, parameters);
-//        }
-//
-//        @Override
-//        public String createSchemaKey(Database database) {
-//            String multiSchemaKey = getMultiSchemaKey();
-//
-//            if (multiSchemaKey == null) {
-//                return super.createSchemaKey(database);
-//            }
-//
-//            for (Class<? extends Database> supportedDb : getMultiSchemaSupportedDatabases()) {
-//                if (supportedDb.isAssignableFrom(database.getClass())) {
-//                    return multiSchemaKey;
-//                }
-//            }
-//            return super.createSchemaKey(database);
-//        }
-//
-//        public abstract Class<? extends Database>[] getMultiSchemaSupportedDatabases();
-//
-//        public abstract String getMultiSchemaKey();
-//    }
 
     public abstract static class ResultSetExtractor {
 

@@ -19,6 +19,8 @@ Required Args:
   url (String) The JDBC database connection URL
     OBFUSCATED
 Optional Args:
+  author (String) Specifies the author for changesets in the generated changelog
+    Default: null
   changelogFile (String) Changelog file to write results
     Default: null
   dataOutputDirectory (String) Directory to write table data to

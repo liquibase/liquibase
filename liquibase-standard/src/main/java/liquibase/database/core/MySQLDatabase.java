@@ -286,13 +286,10 @@ public class MySQLDatabase extends AbstractJdbcDatabase {
     }
 
     /**
+     * Checks whether this instance of a MySQL database is equal to or greater than the specified version.
      *
-     * Check to see if this instance of a MySQL database is equal to or greater
-     * than the specified version
-     *
-     * @param   minimumVersion
-     * @return  boolean
-     *
+     * @param minimumVersion the minimum version to check
+     * @return {@code true} if this instance of a MySQL database is equal to or greater than the specified version,  {@code false} otherwise
      */
     public boolean isMinimumMySQLVersion(String minimumVersion) {
         int major = 0;
@@ -329,7 +326,7 @@ public class MySQLDatabase extends AbstractJdbcDatabase {
 
     /**
      * <p>Returns the default timestamp fractional digits if nothing is specified.</p>
-     * https://dev.mysql.com/doc/refman/5.7/en/fractional-seconds.html :
+     * <a href="https://dev.mysql.com/doc/refman/5.7/en/fractional-seconds.html">fractional seconds</a>:
      * "The fsp value, if given, must be in the range 0 to 6. A value of 0 signifies that there is no fractional part.
      * If omitted, the default precision is 0. (This differs from the STANDARD SQL default of 6, for compatibility
      * with previous MySQL versions.)"

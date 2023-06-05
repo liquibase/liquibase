@@ -66,9 +66,4 @@ public class UpdateCountSqlCommandStep extends UpdateCountCommandStep {
         dependencies.remove(UpdateSummaryEnum.class); // no update summary for this command, despite the class it is extending having an update summary option
         return dependencies;
     }
-
-    @Override
-    public String getHubOperation() {
-        return "update-count";
-    }
 }

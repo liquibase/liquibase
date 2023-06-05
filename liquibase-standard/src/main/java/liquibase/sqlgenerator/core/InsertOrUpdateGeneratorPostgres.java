@@ -38,15 +38,7 @@ public class InsertOrUpdateGeneratorPostgres extends InsertOrUpdateGenerator {
 					database, getWhereClause(insertOrUpdateStatement, database),
 					sqlGeneratorChain));
 		} catch (LiquibaseException e) {
-			// do a select statement instead
-			/*
-			generatedSql.append("select * from " + database.escapeTableName(insertOrUpdateStatement.getCatalogName(), insertOrUpdateStatement.getSchemaName(), insertOrUpdateStatement.getTableName()) + " WHERE " +
-					getWhereClause(insertOrUpdateStatement, database) + "\n");
-			*/
-
-			// The above code results in an invalid pl/pgsql statement as the select is not being stored.
 			// The perform keyword can be used here as an alternative as it does not return a value.
-			// Additionally the statement is not being terminated correctly, it is missing a semi-colon.
 			generatedSql.append("perform * from "
 					+ database.escapeTableName(insertOrUpdateStatement.getCatalogName(), insertOrUpdateStatement.getSchemaName(),
 							insertOrUpdateStatement.getTableName()) + " WHERE " + getWhereClause(insertOrUpdateStatement, database) + ";\n");

@@ -5,7 +5,7 @@ import java.util.SortedSet;
 
 /**
  * This interface defines how objects can be extended with additional attributes at runtime without subclassing and exposes the ability to query attributes without resorting to reflection.
- *
+ * <p>
  * If creating an ExtensibleObject, it is usually best to extend {@link liquibase.AbstractExtensibleObject} rather than this interface directly.
  * You should also create a test that extends from AbstractExtensibleObjectTest.
  */
@@ -47,7 +47,7 @@ public interface ExtensibleObject extends Cloneable {
     /**
      * Works like {@link #get(String, Class)} but if the attribute is null or not defined, returns the passed defaultValue.
      * Uses the type of defaultValue to determine the type to convert the current value to.
-     *
+     * <p>
      * If null is passed to the default value, no conversion of attribute is made if it is set.
      * If traversing a dot-separated attribute path, return the default value if any along the path are null.
      */

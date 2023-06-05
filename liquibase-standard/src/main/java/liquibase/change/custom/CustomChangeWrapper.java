@@ -40,9 +40,9 @@ public class CustomChangeWrapper extends AbstractChange {
     
     private String className;
 
-    private SortedSet<String> params = new TreeSet<>();
+    private final SortedSet<String> params = new TreeSet<>();
 
-    private Map<String, String> paramValues = new LinkedHashMap<>();
+    private final Map<String, String> paramValues = new LinkedHashMap<>();
 
     private boolean configured;
 
@@ -257,7 +257,6 @@ public class CustomChangeWrapper extends AbstractChange {
     public SerializationType getSerializableFieldType(String field) {
         switch (field) {
             case "class":
-                return SerializationType.NAMED_FIELD;
             case "param":
                 return SerializationType.NAMED_FIELD;
             default:

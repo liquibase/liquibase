@@ -102,12 +102,10 @@ public abstract class AbstractChangeLogHistoryService implements ChangeLogHistor
     }
 
     /**
+     * Returns the deployment ID of the last changeset that has been run, or {@code null} if no changesets have been run yet.
      *
-     * Return the last deployment ID from the changesets that have been run or null
-     *
-     * @return   String
-     * @throws   DatabaseException
-     *
+     * @return the deployment ID of the last changeset that has been run, or null if no changesets have been run yet.
+     * @throws DatabaseException if there is an error accessing the database
      */
      public String getLastDeploymentId() throws DatabaseException {
          List<RanChangeSet> ranChangeSetsList = getRanChangeSets();

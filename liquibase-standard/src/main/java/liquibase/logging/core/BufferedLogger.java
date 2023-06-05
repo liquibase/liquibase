@@ -4,10 +4,11 @@ import liquibase.logging.LogMessageFilter;
 
 import java.util.logging.Level;
 
+@Deprecated
 public class BufferedLogger extends AbstractLogger {
 
-    private BufferedLogService bufferedLogService;
-    private Class clazz;
+    private final BufferedLogService bufferedLogService;
+    private final Class clazz;
 
     /**
      * @deprecated use {@link #BufferedLogger(Class, BufferedLogService)}
