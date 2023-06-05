@@ -27,6 +27,10 @@ class LiquibaseTestIntegrationTest extends Specification {
     @Shared
     private DatabaseTestSystem h2 = Scope.currentScope.getSingleton(TestSystemFactory).getTestSystem("h2") as DatabaseTestSystem
 
+    def setupSpec() {
+        CommandUtil.runDropAll(h2)
+    }
+
     def syncChangeLogForUnmanagedDatabase() throws Exception {
         when:
         CommandUtil.runDropAll(h2)
