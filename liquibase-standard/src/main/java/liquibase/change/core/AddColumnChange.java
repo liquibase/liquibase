@@ -1,9 +1,12 @@
 package liquibase.change.core;
 
 import liquibase.change.*;
+import liquibase.change.visitor.AddColumnChangeVisitor;
+import liquibase.change.visitor.ChangeVisitor;
 import liquibase.database.Database;
 import liquibase.database.core.DB2Database;
 import liquibase.database.core.MySQLDatabase;
+import liquibase.parser.core.ParsedNodeException;
 import liquibase.snapshot.SnapshotGeneratorFactory;
 import liquibase.sqlgenerator.SqlGeneratorFactory;
 import liquibase.statement.*;
@@ -272,6 +275,27 @@ public class AddColumnChange extends AbstractChange implements ChangeWithColumns
     @Override
     public String getSerializedObjectNamespace() {
         return STANDARD_CHANGELOG_NAMESPACE;
+    }
+
+    @Override
+    public void modify(ChangeVisitor changeVisitor) throws ParsedNodeException {
+        if(!changeVisitor.getName().equals("addColumn")) {
+            return;
+        }
+        String remove = ((AddColumnChangeVisitor)changeVisitor).getRemove();
+        switch (remove){
+            case "afterColumn":
+                getColumns().forEach(c -> c.setAfterColumn(null));
+                break;
+            case "beforeColumn":
+                getColumns().forEach(c -> c.setBeforeColumn(null));
+                break;
+            case "position":
+                getColumns().forEach(c -> c.setPosition(null));
+                break;
+            default:
+                throw new ParsedNodeException("Unexpected value found under modifyChange for remove tag: " + remove);
+        }
     }
 
     private NotNullConstraint createNotNullConstraint(ConstraintsConfig constraintsConfig) {

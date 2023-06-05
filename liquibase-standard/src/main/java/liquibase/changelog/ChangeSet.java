@@ -7,6 +7,7 @@ import liquibase.change.*;
 import liquibase.change.core.EmptyChange;
 import liquibase.change.core.RawSQLChange;
 import liquibase.change.core.SQLFileChange;
+import liquibase.change.visitor.ChangeVisitor;
 import liquibase.changelog.visitor.ChangeExecListener;
 import liquibase.configuration.LiquibaseConfiguration;
 import liquibase.database.Database;
@@ -567,7 +568,9 @@ public class ChangeSet implements Conditional, ChangeLogChild {
             return null;
         } else {
             change.load(value, resourceAccessor);
-
+            for(ChangeVisitor changeVisitor : getChangeVisitors()){
+                change.modify(changeVisitor);
+            }
             return change;
         }
     }
@@ -1565,5 +1568,9 @@ public class ChangeSet implements Conditional, ChangeLogChild {
                     .map(statement -> SqlUtil.getSqlString(statement, SqlGeneratorFactory.getInstance(), database))
                     .collect(Collectors.joining("\n"));
         Scope.getCurrentScope().addMdcValue(MdcKey.CHANGESET_SQL, sqlStatementsMdc);
+    }
+
+    private List<ChangeVisitor> getChangeVisitors(){
+       return getChangeLog().getChangeVisitors();
     }
 }
