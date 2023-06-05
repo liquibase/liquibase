@@ -105,7 +105,7 @@ public class UpdateToTagCommandStep extends AbstractUpdateCommandStep {
             });
         if (! found) {
             String message = String.format(
-                    "The tag '%s' was not found in the changelog '%s'. All changesets in the changelog were deployed.%nLearn about options for undoing these changes at https://docs.liquibase.com/rollbacks",
+                    "The tag '%s' was not found in the changelog '%s'. All changesets in the changelog were deployed.%nLearn about options for undoing these changes at https://docs.liquibase.com.",
                     tag, changeLog.getPhysicalFilePath());
             Scope.getCurrentScope().getLog(UpdateToTagCommandStep.class).warning(message);
             Scope.getCurrentScope().getUI().sendMessage("WARNING:  " + message);

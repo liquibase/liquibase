@@ -146,7 +146,7 @@ Optional Args:
         expectedUI =
 """
 WARNING:  The tag 'blablabla' was not found in the changelog 'changelogs/h2/complete/simple.tag.changelog.xml'. All changesets in the changelog were deployed.
-Learn about options for undoing these changes at https://docs.liquibase.com/rollbacks
+Learn about options for undoing these changes at https://docs.liquibase.com.
 """
     }
 
