@@ -8,6 +8,9 @@ import liquibase.change.core.AddPrimaryKeyChange;
 import liquibase.change.core.CreateIndexChange;
 import liquibase.change.core.CreateTableChange;
 import liquibase.changelog.ChangeSet;
+import liquibase.command.CommandScope;
+import liquibase.command.core.GenerateChangelogCommandStep;
+import liquibase.command.core.helpers.DbUrlConnectionCommandStep;
 import liquibase.database.Database;
 import liquibase.database.DatabaseFactory;
 import liquibase.dbtest.AbstractIntegrationTest;
@@ -27,35 +30,26 @@ import liquibase.structure.core.Table;
 import org.junit.Assert;
 import org.junit.Test;
 
+import java.io.ByteArrayOutputStream;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 import static org.junit.Assume.assumeNotNull;
+import static org.junit.Assume.assumeTrue;
 
 public class PostgreSQLIntegrationTest extends AbstractIntegrationTest {
 
-    private String dependenciesChangeLog = null;
-    private String blobChangeLog = null;
+    private String dependenciesChangeLog;
+    private String blobChangeLog;
 
     public PostgreSQLIntegrationTest() throws Exception {
         super("pgsql", DatabaseFactory.getInstance().getDatabase("postgresql"));
         dependenciesChangeLog = "changelogs/pgsql/complete/testFkPkDependencies.xml";
         blobChangeLog = "changelogs/pgsql/complete/testBlob.changelog.xml";
-    }
-
-    /**
-     * Postgresql caches info including enum oid mappings in the connection. When we do a lot of dropping/re-creating in the tests it gets confused.
-     * Closing the connection
-     */
-    @Override
-    public void tearDown() throws Exception {
-        super.tearDown();
-        if (getDatabase() != null && getDatabase().getConnection() != null) {
-            getDatabase().getConnection().close();
-        }
     }
 
     @Test
@@ -247,6 +241,27 @@ public class PostgreSQLIntegrationTest extends AbstractIntegrationTest {
         assert snapshot.get(new Table(null, null, "serial_table")).getColumn("id").isAutoIncrement();
         assert !supportsIdentity || snapshot.get(new Table(null, null, "autoinc_table")).getColumn("id").isAutoIncrement();
         assert !snapshot.get(new Table(null, null, "owned_by_table")).getColumn("id").isAutoIncrement();
+
+    }
+
+    @Test
+    public void testGeneratedColumn() throws Exception {
+        assumeNotNull(getDatabase());
+        assumeTrue(getDatabase().getDatabaseMajorVersion() >= 12);
+        clearDatabase();
+        String textToTest = "GENERATED ALWAYS AS (height_cm / 2.54) STORED";
+
+        Scope.getCurrentScope().getSingleton(ExecutorService.class).getExecutor("jdbc", getDatabase())
+                .execute(
+                        new RawSqlStatement(String.format("CREATE TABLE generated_test (height_cm numeric, height_stored numeric %s)", textToTest)));
+
+            ByteArrayOutputStream baos = new ByteArrayOutputStream();
+            new CommandScope(GenerateChangelogCommandStep.COMMAND_NAME)
+                    .addArgumentValue(DbUrlConnectionCommandStep.DATABASE_ARG, getDatabase())
+                    .setOutput(baos)
+                    .execute();
+
+            assertTrue(baos.toString().contains(textToTest));
 
     }
 }

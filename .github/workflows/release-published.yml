@@ -8,11 +8,11 @@ on:
         description: 'Release Tag'
         required: true
 env:
-  MAVEN_VERSION: '3.8.7'
+  MAVEN_VERSION: '3.9.2'
 jobs:
   setup:
     name: Setup
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-22.04
     outputs:
       tag: ${{ steps.collect-data.outputs.tag }}
       version: ${{ steps.collect-data.outputs.version }}
@@ -37,13 +37,32 @@ jobs:
       - run: |
           echo "Publishing version ${{ steps.collect-data.outputs.version }} from ${{ steps.collect-data.outputs.tag }}"
 
+  manual_trigger_deployment:
+    name: Manually trigger deployment
+    needs: [ setup ]
+    runs-on: ubuntu-22.04
+    steps:
+      - name: Get Version to deploy
+        run: |
+          version=${{ needs.setup.outputs.version }}
+      - uses: trstringer/manual-approval@v1
+        with:
+          secret: ${{ secrets.GITHUB_TOKEN }}
+          # approvers: suryaaki2,XDelphiGrl,jnewton03,kristyldatical
+          approvers: sayaliM0412
+          minimum-approvals: 1
+          issue-title: "Deploying ${version} to sonatype"
+          issue-body: "Please approve or deny the deployment of version ${version}"
+          additional-approved-words: 'lgtm,✅,👍,proceed,shipit,:shipit:'
+          additional-denied-words: 'stop,error,failed,fail,broken,:x:,👎'
+
   deploy_maven:
     name: Deploy to Maven
-    needs: [ setup ]
-    runs-on: ubuntu-20.04
+    needs: [ setup, manual_trigger_deployment ]
+    runs-on: ubuntu-22.04
     steps:
       - name: Download release assets
-        uses: robinraju/release-downloader@v1.7
+        uses: robinraju/release-downloader@v1.8
         with:
           repository: "liquibase/liquibase"
           tag: "${{ needs.setup.outputs.tag }}"
@@ -86,6 +105,11 @@ jobs:
           mv pom.xml liquibase-cdi-${version}.pom
           sed -i -e "s/<description>/<name>Liquibase CDI Plugin<\/name><description>/" liquibase-cdi-${version}.pom   ## name didn't end up in pom. Hack it in for now
           gpg --batch --pinentry-mode=loopback --passphrase "$GPG_PASSWORD" -ab liquibase-cdi-${version}.pom
+
+          unzip -j liquibase-cdi-jakarta-${version}.jar META-INF/maven/org.liquibase/liquibase-cdi-jakarta/pom.xml
+          mv pom.xml liquibase-cdi-jakarta-${version}.pom
+          sed -i -e "s/<description>/<name>Liquibase cdi-jakarta Plugin<\/name><description>/" liquibase-cdi-jakarta-${version}.pom   ## name didn't end up in pom. Hack it in for now
+          gpg --batch --pinentry-mode=loopback --passphrase "$GPG_PASSWORD" -ab liquibase-cdi-jakarta-${version}.pom
 
           unzip -j liquibase-commercial-${version}.jar META-INF/maven/org.liquibase/liquibase-commercial/pom.xml
           mv pom.xml liquibase-commercial-${version}.pom
@@ -140,6 +164,18 @@ jobs:
             -Dtypes=jar.asc,jar.asc,jar.asc,pom.asc \
             -Dclassifiers=,sources,javadoc,
 
+          mvn -B org.apache.maven.plugins:maven-deploy-plugin:3.0.0-M1:deploy-file \
+            -Durl=https://oss.sonatype.org/service/local/staging/deploy/maven2/ \
+            -DrepositoryId=sonatype-nexus-staging \
+            -DpomFile=liquibase-cdi-jakarta-${version}.pom \
+            -DgeneratePom=false \
+            -Dfile=liquibase-cdi-jakarta-${version}.jar \
+            -Dsources=liquibase-cdi-jakarta-${version}-sources.jar \
+            -Djavadoc=liquibase-cdi-jakarta-${version}-javadoc.jar \
+            -Dfiles=liquibase-cdi-jakarta-${version}.jar.asc,liquibase-cdi-jakarta-${version}-sources.jar.asc,liquibase-cdi-jakarta-${version}-javadoc.jar.asc,liquibase-cdi-jakarta-${version}.pom.asc \
+            -Dtypes=jar.asc,jar.asc,jar.asc,pom.asc \
+            -Dclassifiers=,sources,javadoc,
+
           ## Release repository
           ## Have to find the stagingRepositoryId that was auto-generated
           rcList=$(mvn -B org.sonatype.plugins:nexus-staging-maven-plugin:1.6.8:rc-list -DnexusUrl=https://oss.sonatype.org/ -DserverId=sonatype-nexus-staging)
@@ -169,14 +205,14 @@ jobs:
   deploy_javadocs:
     name: Upload Javadocs
     needs: [ setup ]
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-22.04
     # These permissions are needed to interact with GitHub's OIDC Token endpoint.
     permissions:
       id-token: write
       contents: read
     steps:
     - name: Download release javadocs
-      uses: robinraju/release-downloader@v1.7
+      uses: robinraju/release-downloader@v1.8
       with:
         repository: "liquibase/liquibase"
         tag: "${{ needs.setup.outputs.tag }}"
@@ -188,18 +224,23 @@ jobs:
         AWS_ACCESS_KEY_ID: ${{ secrets.JAVADOCS_ACCESS_KEY_ID }}
         AWS_SECRET_ACCESS_KEY: ${{ secrets.JAVADOCS_SECRET_ACCESS_KEY }}
         AWS_DEFAULT_REGION: us-east-1
+      # unzip archives, create directory for each jar, and extract jar contents to directory.  Then delete the jar and zip files.  Then upload to s3.
       run: |
-        unzip -j '*.zip' '*javadoc*.jar'
-        unzip '*liquibase-cdi*.jar' -d liquibase-cdi/
-        unzip '*liquibase-commercial*.jar' -d liquibase-commercial/
-        unzip '*liquibase-core*.jar' -d liquibase-core/
-        unzip '*liquibase-maven-plugin*.jar' -d liquibase-maven-plugin/
+        unzip -j '*.zip' '*javadoc*.jar' 
+        
+        for jar in *liquibase*.jar; do
+          dir_name=$(basename "$jar" .jar)
+          dir_name=$(echo "$dir_name" | sed -E 's/(-[0-9]+(\.[0-9]+)*(-javadoc)?)//')
+          mkdir -p "$dir_name"
+          unzip -o "$jar" -d "$dir_name"
+        done
+        
         rm -rf *.jar *.zip
         aws s3 sync . s3://javadocsliquibasecom-origin --only-show-errors
 
   publish_to_github_packages:
     name: Publish artifacts to Github Packages
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-22.04
     needs: [ setup ]
     permissions:
       contents: read
@@ -232,7 +273,7 @@ jobs:
   deploy_xsd:
       name: Upload xsds
       needs: [ setup ]
-      runs-on: ubuntu-20.04
+      runs-on: ubuntu-22.04
       outputs:
           tag: ${{ steps.collect-data.outputs.tag }}
           version: ${{ needs.setup.outputs.version }}
@@ -260,7 +301,7 @@ jobs:
         # aws s3 sync syncs directories and S3 prefixes.
         run: |
           aws s3 sync liquibase-pro-repo/pro/src/main/resources/www.liquibase.org/xml/ns/pro/ s3://liquibaseorg-origin/xml/ns/pro/ --content-type application/octet-stream --only-show-errors
-          aws s3 sync liquibase-core-repo/liquibase-core/src/main/resources/www.liquibase.org/xml/ns/dbchangelog/ s3://liquibaseorg-origin/xml/ns/dbchangelog/ --content-type application/octet-stream --only-show-errors
+          aws s3 sync liquibase-core-repo/liquibase-standard/src/main/resources/www.liquibase.org/xml/ns/dbchangelog/ s3://liquibaseorg-origin/xml/ns/dbchangelog/ --content-type application/octet-stream --only-show-errors
 
 
       - name: Index.htm file upload
@@ -280,4 +321,3 @@ jobs:
             aws s3 sync index-file s3://liquibaseorg-origin/xml/ns/dbchangelog/ --only-show-errors
           fi
           
-      
