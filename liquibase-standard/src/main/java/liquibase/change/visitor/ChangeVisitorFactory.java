@@ -1,8 +1,5 @@
 package liquibase.change.visitor;
 
-import liquibase.servicelocator.ServiceLocator;
-import liquibase.sql.visitor.*;
-
 import java.util.HashMap;
 import java.util.Map;
 /**
