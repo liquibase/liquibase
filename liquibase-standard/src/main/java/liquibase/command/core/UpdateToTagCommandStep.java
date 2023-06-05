@@ -83,7 +83,7 @@ public class UpdateToTagCommandStep extends AbstractUpdateCommandStep {
         List<RanChangeSet> ranChangeSetList = database.getRanChangeSetList();
         String tag = commandScope.getArgumentValue(TAG_ARG);
         UpToTagChangeSetFilter upToTagChangeSetFilter = getUpToTagChangeSetFilter(tag, ranChangeSetList);
-        if (! (warningMessageShown && upToTagChangeSetFilter.isSeenTag())) {
+        if (! warningMessageShown && ! upToTagChangeSetFilter.isSeenTag()) {
             checkForTagExists(changeLog, tag);
         }
         return new ChangeLogIterator(changeLog,
