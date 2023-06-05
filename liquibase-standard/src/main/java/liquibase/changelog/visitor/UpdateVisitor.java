@@ -95,9 +95,9 @@ public class UpdateVisitor implements ChangeSetVisitor {
      */
     private static void upgradeCheckSumVersionForAlreadyExecutedOrNullChange(ChangeSet changeSet, Database database, CheckSum oldChecksum) throws DatabaseException {
         Executor executor = Scope.getCurrentScope().getSingleton(ExecutorService.class).getExecutor("jdbc", database);
-        if (! (executor instanceof LoggingExecutor)) {
+        if (!(executor instanceof LoggingExecutor) && oldChecksum != null) {
             Scope.getCurrentScope().getUI().sendMessage(String.format("Upgrading checksum for Changeset %s from %s to %s.",
-                    changeSet, (oldChecksum != null? oldChecksum.toString() : "<null>"), changeSet.getStoredCheckSum().toString()));
+                    changeSet, oldChecksum, changeSet.getStoredCheckSum()));
         }
         Scope.getCurrentScope().getSingleton(ExecutorService.class).getExecutor("jdbc", database)
                 .execute(new UpdateChangeSetChecksumStatement(changeSet));

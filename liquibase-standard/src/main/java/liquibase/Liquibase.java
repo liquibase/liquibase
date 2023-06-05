@@ -1086,7 +1086,7 @@ public class Liquibase implements AutoCloseable {
             DatabaseChangeLog changeLog = getDatabaseChangeLog();
 
             if (checkLiquibaseTables) {
-                checkLiquibaseTables(true, changeLog, contexts, labels);
+                checkLiquibaseTables(false, changeLog, contexts, labels);
             }
 
             changeLog.validate(database, contexts, labels);
@@ -1126,7 +1126,7 @@ public class Liquibase implements AutoCloseable {
             DatabaseChangeLog changeLog = getDatabaseChangeLog();
 
             if (checkLiquibaseTables) {
-                checkLiquibaseTables(true, changeLog, contexts, labelExpression);
+                checkLiquibaseTables(false, changeLog, contexts, labelExpression);
             }
 
             changeLog.validate(database, contexts, labelExpression);
