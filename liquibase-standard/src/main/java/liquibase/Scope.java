@@ -87,7 +87,7 @@ public class Scope {
             rootScope.values.put(Attr.logService.name(), new JavaLogService());
             rootScope.values.put(Attr.serviceLocator.name(), new StandardServiceLocator());
             rootScope.values.put(Attr.resourceAccessor.name(), new ClassLoaderResourceAccessor());
-            rootScope.values.put(Attr.checksumVersion.name(), LiquibaseCommandLineConfiguration.CHECKSUM_VERSION.getCurrentValue());
+            rootScope.values.put(Attr.checksumVersion.name(), ChecksumVersion.latest());
 
             rootScope.values.put(Attr.ui.name(), new ConsoleUIService());
             rootScope.getSingleton(LiquibaseConfiguration.class).init(rootScope);

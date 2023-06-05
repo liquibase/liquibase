@@ -377,7 +377,7 @@ class AbstractChangeTest extends Specification {
         ChangeSet originalChange = new ChangeSet("testId", "testAuthor", false, false, "path/changelog", null, null, null)
         ChangeSet changeWithContext = originalChange
 
-        CheckSum changeWithoutContextCheckSum = Scope.child(Collections.singletonMap(LiquibaseCommandLineConfiguration.CHECKSUM_VERSION.getKey(), version), { -> return originalChange.generateCheckSum(version) } as Scope.ScopedRunnerWithReturn)
+        CheckSum changeWithoutContextCheckSum = Scope.child(Collections.singletonMap(Scope.Attr.checksumVersion.toString(), version), { -> return originalChange.generateCheckSum(version) } as Scope.ScopedRunnerWithReturn)
         changeWithContext.setContextFilter(new ContextExpression("test"))
         CheckSum changeWithContextCheckSum = changeWithContext.generateCheckSum(version)
 
@@ -388,7 +388,7 @@ class AbstractChangeTest extends Specification {
         where:
         version | originalChecksum | updatedChecksum
         ChecksumVersion.V8 | "8:d41d8cd98f00b204e9800998ecf8427e" | "8:d41d8cd98f00b204e9800998ecf8427e"
-        LiquibaseCommandLineConfiguration.CHECKSUM_VERSION.getCurrentValue() | "9:d41d8cd98f00b204e9800998ecf8427e" | "9:d41d8cd98f00b204e9800998ecf8427e"
+        ChecksumVersion.latest() | "9:d41d8cd98f00b204e9800998ecf8427e" | "9:d41d8cd98f00b204e9800998ecf8427e"
     }
 
     @Unroll
@@ -397,7 +397,7 @@ class AbstractChangeTest extends Specification {
         ChangeSet originalChange = new ChangeSet("testId", "testAuthor", false, false, "path/changelog", null, null, null)
         ChangeSet changeWithLabel = originalChange
 
-        CheckSum changeWithoutLabelCheckSum = Scope.child(Collections.singletonMap(LiquibaseCommandLineConfiguration.CHECKSUM_VERSION.getKey(), version), { -> return originalChange.generateCheckSum(version) } as Scope.ScopedRunnerWithReturn)
+        CheckSum changeWithoutLabelCheckSum = Scope.child(Collections.singletonMap(Scope.Attr.checksumVersion.toString(), version), { -> return originalChange.generateCheckSum(version) } as Scope.ScopedRunnerWithReturn)
         changeWithLabel.setLabels(new Labels("test"))
         CheckSum changeWithLabelCheckSum = changeWithLabel.generateCheckSum(version)
 
@@ -408,7 +408,7 @@ class AbstractChangeTest extends Specification {
         where:
         version | originalChecksum | updatedChecksum
         ChecksumVersion.V8 | "8:d41d8cd98f00b204e9800998ecf8427e" | "8:d41d8cd98f00b204e9800998ecf8427e"
-        LiquibaseCommandLineConfiguration.CHECKSUM_VERSION.getCurrentValue() | "9:d41d8cd98f00b204e9800998ecf8427e" | "9:d41d8cd98f00b204e9800998ecf8427e"
+        ChecksumVersion.latest() | "9:d41d8cd98f00b204e9800998ecf8427e" | "9:d41d8cd98f00b204e9800998ecf8427e"
     }
 
     @Unroll
@@ -417,7 +417,7 @@ class AbstractChangeTest extends Specification {
         ChangeSet originalChange = new ChangeSet("testId", "testAuthor", false, false, "path/changelog", null, null, null)
         ChangeSet changeWithDbms = originalChange
 
-        CheckSum changeWithoutDbmsCheckSum = Scope.child(Collections.singletonMap(LiquibaseCommandLineConfiguration.CHECKSUM_VERSION.getKey(), version), { -> return originalChange.generateCheckSum(version) } as Scope.ScopedRunnerWithReturn)
+        CheckSum changeWithoutDbmsCheckSum = Scope.child(Collections.singletonMap(Scope.Attr.checksumVersion.toString(), version), { -> return originalChange.generateCheckSum(version) } as Scope.ScopedRunnerWithReturn)
         changeWithDbms.setDbms("postgresql")
         CheckSum changeWithDbmsCheckSum = changeWithDbms.generateCheckSum(version)
 
@@ -428,7 +428,7 @@ class AbstractChangeTest extends Specification {
         where:
         version | originalChecksum | updatedChecksum
         ChecksumVersion.V8 | "8:d41d8cd98f00b204e9800998ecf8427e" | "8:d41d8cd98f00b204e9800998ecf8427e"
-        LiquibaseCommandLineConfiguration.CHECKSUM_VERSION.getCurrentValue() | "9:d41d8cd98f00b204e9800998ecf8427e" | "9:d41d8cd98f00b204e9800998ecf8427e"
+        ChecksumVersion.latest() | "9:d41d8cd98f00b204e9800998ecf8427e" | "9:d41d8cd98f00b204e9800998ecf8427e"
     }
 
     @Unroll
@@ -437,7 +437,7 @@ class AbstractChangeTest extends Specification {
         ChangeSet originalChange = new ChangeSet("testId", "testAuthor", false, false, "path/changelog", null, null, null)
         ChangeSet changeWithComment = originalChange
 
-        CheckSum changeWithoutCommentCheckSum = Scope.child(Collections.singletonMap(LiquibaseCommandLineConfiguration.CHECKSUM_VERSION.getKey(), version), { -> return originalChange.generateCheckSum(version) } as Scope.ScopedRunnerWithReturn)
+        CheckSum changeWithoutCommentCheckSum = Scope.child(Collections.singletonMap(Scope.Attr.checksumVersion.toString(), version), { -> return originalChange.generateCheckSum(version) } as Scope.ScopedRunnerWithReturn)
         changeWithComment.setComments("This is a test comment")
         CheckSum changeWithCommentCheckSum = changeWithComment.generateCheckSum(version)
 
@@ -448,7 +448,7 @@ class AbstractChangeTest extends Specification {
         where:
         version | originalChecksum | updatedChecksum
         ChecksumVersion.V8 | "8:d41d8cd98f00b204e9800998ecf8427e" | "8:d41d8cd98f00b204e9800998ecf8427e"
-        LiquibaseCommandLineConfiguration.CHECKSUM_VERSION.getCurrentValue() | "9:d41d8cd98f00b204e9800998ecf8427e" | "9:d41d8cd98f00b204e9800998ecf8427e"
+        ChecksumVersion.latest() | "9:d41d8cd98f00b204e9800998ecf8427e" | "9:d41d8cd98f00b204e9800998ecf8427e"
     }
 
     @DatabaseChange(name = "exampleParamelessAbstractChange", description = "Used for the AbstractChangeTest unit test", priority = 1)

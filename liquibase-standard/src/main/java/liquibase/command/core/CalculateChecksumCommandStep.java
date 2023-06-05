@@ -75,7 +75,7 @@ public class CalculateChecksumCommandStep extends AbstractCommandStep {
 
         sendMessages(resultsBuilder, changeSet.generateCheckSum(
                 ranChangeSet != null && ranChangeSet.getLastCheckSum() != null ?
-                        ChecksumVersion.enumFromChecksumVersion(ranChangeSet.getLastCheckSum().getVersion()) : LiquibaseCommandLineConfiguration.CHECKSUM_VERSION.getCurrentValue()
+                        ChecksumVersion.enumFromChecksumVersion(ranChangeSet.getLastCheckSum().getVersion()) : ChecksumVersion.latest()
                 )
         );
     }

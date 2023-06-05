@@ -38,7 +38,7 @@ public class RanChangeSet {
                 changeSet.getId(),
                 changeSet.getAuthor(),
                 changeSet.generateCheckSum((changeSet.getStoredCheckSum() != null) ?
-                        ChecksumVersion.enumFromChecksumVersion(changeSet.getStoredCheckSum().getVersion()) : LiquibaseCommandLineConfiguration.CHECKSUM_VERSION.getCurrentValue()),
+                        ChecksumVersion.enumFromChecksumVersion(changeSet.getStoredCheckSum().getVersion()) : ChecksumVersion.latest()),
                 new Date(),
                 null,
                 execType,

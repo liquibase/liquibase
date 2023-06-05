@@ -33,14 +33,14 @@ public class CheckSumTest {
 
     @Test
     public void getCurrentVersion() {
-        assertEquals(ChecksumVersion.V9, LiquibaseCommandLineConfiguration.CHECKSUM_VERSION.getCurrentValue());
+        assertEquals(ChecksumVersion.V9, ChecksumVersion.latest());
     }
 
     @Test
     public void compute_String() {
         String valueToHash = "asdf";
         CheckSum checkSum = CheckSum.compute(valueToHash);
-        assertEquals(LiquibaseCommandLineConfiguration.CHECKSUM_VERSION.getCurrentValue().getVersion(), checkSum.getVersion());
+        assertEquals(ChecksumVersion.latest().getVersion(), checkSum.getVersion());
         assertNotEquals(checkSum.toString(), valueToHash);
     }
 
@@ -56,7 +56,7 @@ public class CheckSumTest {
     public void compute_Stream() {
         String valueToHash = "asdf";
         CheckSum checkSum = CheckSum.compute(new ByteArrayInputStream(valueToHash.getBytes()), false);
-        assertEquals(LiquibaseCommandLineConfiguration.CHECKSUM_VERSION.getCurrentValue().getVersion(), checkSum.getVersion());
+        assertEquals(ChecksumVersion.latest().getVersion(), checkSum.getVersion());
         assertNotEquals(checkSum.toString(), valueToHash);
         assertEquals(CheckSum.compute(valueToHash).toString(), checkSum.toString());
     }

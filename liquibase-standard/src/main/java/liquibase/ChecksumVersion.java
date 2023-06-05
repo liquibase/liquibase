@@ -43,6 +43,10 @@ public enum ChecksumVersion {
         return since;
     }
 
+    public static ChecksumVersion latest() {
+        return V9;
+    }
+
     public static ChecksumVersion enumFromChecksumVersion(int i) {
         return Arrays.stream(ChecksumVersion.values()).filter(cv -> cv.getVersion() == i).findFirst()
                 .orElseThrow(() -> new UnsupportedChecksumVersionException(i));

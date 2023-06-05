@@ -252,7 +252,7 @@ public class StandardChangeLogHistoryService extends AbstractChangeLogHistorySer
 
             if (!md5sumRS.isEmpty()) {
                 //check if any checksum is not using the current version
-                databaseChecksumsCompatible = md5sumRS.stream().allMatch(m -> m.get("MD5SUM").toString().startsWith(LiquibaseCommandLineConfiguration.CHECKSUM_VERSION.getCurrentValue().getVersion() + ":"));
+                databaseChecksumsCompatible = md5sumRS.stream().allMatch(m -> m.get("MD5SUM").toString().startsWith(ChecksumVersion.latest().getVersion() + ":"));
             }
 
 
