@@ -15,14 +15,15 @@
     <dependencies>
         <dependency>
             <groupId>org.liquibase</groupId>
-            <artifactId>liquibase-core</artifactId>
+            <artifactId>liquibase-standard</artifactId>
             <version>${project.version}</version>
         </dependency>
 
         <dependency>
             <groupId>info.picocli</groupId>
             <artifactId>picocli</artifactId>
-            <version>4.7.0</version>
+            <version>4.7.3</version>
+            <scope>compile</scope>
         </dependency>
     </dependencies>
 

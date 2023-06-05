@@ -7,6 +7,7 @@
  
 ## Description
 
+<!--
 A clear and concise description of the change being made.  
 
 - Introduce what was/will be done in the title
@@ -22,17 +23,24 @@ A clear and concise description of the change being made.
 - Describe what users need and how the fix will affect them
 - Describe how the code change addresses the problem
 - Ensure private information is redacted.
+-->
 
 ## Things to be aware of
 
+<!--
 - Describe the technical choices you made
 - Describe impacts on the codebase
+-->
 
 ## Things to worry about
 
+<!--
 - List any questions or concerns you have with the change
 - List unknowns you have 
+-->
 
 ## Additional Context
 
+<!--
 Add any other context about the problem here.
+-->

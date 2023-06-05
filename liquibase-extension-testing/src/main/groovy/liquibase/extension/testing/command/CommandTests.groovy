@@ -24,8 +24,6 @@ import liquibase.extension.testing.setup.*
 import liquibase.extension.testing.setup.SetupCleanResources.CleanupMode
 import liquibase.extension.testing.testsystem.DatabaseTestSystem
 import liquibase.extension.testing.testsystem.TestSystemFactory
-import liquibase.hub.HubService
-import liquibase.hub.core.MockHubService
 import liquibase.integration.commandline.LiquibaseCommandLineConfiguration
 import liquibase.integration.commandline.Main
 import liquibase.logging.core.BufferedLogService
@@ -257,7 +255,6 @@ Long Description: ${commandDefinition.getLongDescription() ?: "NOT SET"}
             outputStream = new FileOutputStream(testDef.outputFile)
         }
 
-        commandScope.addArgumentValue("database", database)
         commandScope.setOutput(outputStream)
 
         if (testDef.setup != null) {
@@ -311,7 +308,6 @@ Long Description: ${commandDefinition.getLongDescription() ?: "NOT SET"}
 
         def scopeSettings = [
                 (LiquibaseCommandLineConfiguration.LOG_LEVEL.getKey()): Level.INFO,
-                ("liquibase.plugin." + HubService.name)               : MockHubService,
                 (Scope.Attr.resourceAccessor.name())                  : testDef.resourceAccessor ?
                                                                             testDef.resourceAccessor : resourceAccessor,
                 (Scope.Attr.ui.name())                                : testDef.testUI ? testDef.testUI.initialize(uiOutputWriter, uiErrorWriter) :
@@ -402,7 +398,14 @@ Long Description: ${commandDefinition.getLongDescription() ?: "NOT SET"}
                     assert !testDef.expectFileToNotExist.exists(): "File '${testDef.expectFileToNotExist.getAbsolutePath()}' should not exist"
                 }
                 if (testDef.expectations != null) {
-                    testDef.expectations.call()
+                    Scope.child([
+                            "database": database,
+                    ], new Scope.ScopedRunner() {
+                        @Override
+                        void run() throws Exception {
+                            testDef.expectations.call()
+                        }
+                    })
                 }
             } finally {
                 if (testDef.setup != null) {
@@ -618,7 +621,9 @@ Long Description: ${commandDefinition.getLongDescription() ?: "NOT SET"}
                 } else if (expectedOutputCheck instanceof Pattern) {
                     def matcher = expectedOutputCheck.matcher(fullOutput)
                     assert matcher.groupCount() == 0: "Unescaped parentheses in regexp /$expectedOutputCheck/"
-                    assert matcher.find(): "$outputDescription\n$fullOutput\n\nDoes not match regexp\n\n/$expectedOutputCheck/"
+                    if (!matcher.find()) {
+                        throw new ComparisonFailure("$outputDescription\n$fullOutput\n\nDoes not match regexp\n\n/$expectedOutputCheck/", expectedOutputCheck.toString(), fullOutput)
+                    }
                 } else if (expectedOutputCheck instanceof OutputCheck) {
                     try {
                         ((OutputCheck) expectedOutputCheck).check(fullOutput)
@@ -663,7 +668,11 @@ Long Description: ${commandDefinition.getLongDescription() ?: "NOT SET"}
             }
             catch (Exception e) {
                 String message = "Error loading tests in ${path}: ${e.message}"
-                throw new RuntimeException("${message}.\nIf running CommandTests directly, make sure you are choosing the classpath of the module you want to test")
+                throw new RuntimeException("${message}.\n\n!!------------- TEST EXECUTION FAILURE -------------!!\n" +
+                        "\nIf you are running CommandTests directly through your IDE, make sure you are including the module with your 'test.groovy' files in your classpath.\n" +
+                        "\nNOTE: For example, if you are running these tests in liquibase-core, use the liquibase-integration-tests module as the classpath in your run configuration.\n" +
+                        "\n!!--------------------------------------------------!!")
+
             }
         }
 
@@ -1117,10 +1126,6 @@ Long Description: ${commandDefinition.getLongDescription() ?: "NOT SET"}
             println "Copied file " + originalFile + " to file " + newFile
         }
 
-        void modifyChangeLogId(String originalFile, String newChangeLogId) {
-            this.setups.add(new SetupModifyChangelog(originalFile, newChangeLogId))
-        }
-
         /**
          *
          * Delete the specified resources
@@ -1197,6 +1202,11 @@ Long Description: ${commandDefinition.getLongDescription() ?: "NOT SET"}
         String altUsername
         String altPassword
         Database altDatabase
+    }
+
+    public static String createRandomFilePath(String suffix) {
+        String rand = "target/test-classes/" + StringUtil.randomIdentifer(10) + "." + suffix
+        rand
     }
 
     interface OutputCheck {
@@ -1351,7 +1361,9 @@ Long Description: ${commandDefinition.getLongDescription() ?: "NOT SET"}
         @Override
         void sendErrorMessage(String message, Throwable exception) {
             errorOutput.println(message)
-            exception.printStackTrace(errorOutput)
+            if (exception != null) {
+                exception.printStackTrace(errorOutput)
+            }
         }
 
         @Override

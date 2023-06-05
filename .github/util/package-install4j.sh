@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 
 ###################################################################
-## This script creates the installer files given an unziped directory
+## This script creates the installer files given an unzipped directory
 ###################################################################
 
 set -e
@@ -13,14 +13,14 @@ if [ -z ${1+x} ]; then
 fi
 version=$1
 
-if [ -z ${INSTALL4J_LICENSE+x} ]; then
-  echo "INSTALL4J_LICENSE must be set";
+if [ -z ${INSTALL4J_10_LICENSE+x} ]; then
+  echo "INSTALL4J_10_LICENSE must be set";
   exit 1
 fi
 
 
-mkdir -p ~/.install4j8
-export INSTALL4J_CACHE=$HOME/.install4j8
+mkdir -p ~/.install4j10
+export INSTALL4J_CACHE=$HOME/.install4j10
 
 # install4jc="/usr/local/bin/install4jc"
 install4jc="/Applications/install4j.app/Contents/Resources/app/bin/install4jc"
@@ -31,13 +31,13 @@ else
   echo "$install4jc does not exist. Installing..."
 
   # installer automation for ubuntu-latest; replaced
-  # wget -nv --directory-prefix=$INSTALL4J_CACHE -nc https://download-gcdn.ej-technologies.com/install4j/install4j_linux_8_0_11.deb
-  # sudo apt install -y $INSTALL4J_CACHE/install4j_linux_8_0_11.deb
+  # wget -nv --directory-prefix=$INSTALL4J_CACHE -nc https://download.ej-technologies.com/install4j/install4j_linux-x64_10_0_4.deb
+  # sudo apt install -y $INSTALL4J_CACHE/install4j_linux-x64_10_0_4.deb
 
   # installer automation for macos-latest; macos needed for apple notarizing
-  wget -nv --directory-prefix=$INSTALL4J_CACHE -nc https://download-gcdn.ej-technologies.com/install4j/install4j_macos_8_0_11.dmg
+  wget -nv --directory-prefix=$INSTALL4J_CACHE -nc https://download.ej-technologies.com/install4j/install4j_macos_10_0_4.dmg
   sleep 5
-  hdiutil attach /Users/runner/.install4j8/install4j_macos_8_0_11.dmg
+  hdiutil attach /Users/runner/.install4j10/install4j_macos_10_0_4.dmg
   sleep 5
   cp -rf /Volumes/install4j/install4j.app /Applications
   sleep 5
@@ -54,6 +54,6 @@ else
   INSTALL4J_ARGS="$INSTALL4J_ARGS --win-keystore-password=$INSTALL4J_WINDOWS_KEY_PASSWORD --mac-keystore-password=$INSTALL4J_APPLE_KEY_PASSWORD --apple-id=$INSTALL4J_APPLE_ID --apple-id-password=$INSTALL4J_APPLE_ID_PASSWORD"
 fi
 
-"$install4jc" --license=$INSTALL4J_LICENSE
+"$install4jc" --license=$INSTALL4J_10_LICENSE
 "$install4jc" $INSTALL4J_ARGS src/main/install4j/liquibase.install4j
 

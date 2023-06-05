@@ -51,17 +51,13 @@ public class LiquibaseRollbackOneUpdateMojo extends AbstractLiquibaseChangeLogMo
 
     @Override
     protected void performLiquibaseTask(Liquibase liquibase) throws LiquibaseException {
-        //
-        // Call the base class method so that
-        // Hub settings will be made
-        //
         super.performLiquibaseTask(liquibase);
 
         //
         // Check the Pro license
         //
         Database database = liquibase.getDatabase();
-        CommandScope liquibaseCommand = new CommandScope("internalRollbackOneUpdate");
+        CommandScope liquibaseCommand = new CommandScope("rollbackOneUpdate");
         Map<String, Object> argsMap = getCommandArgsObjectMap(liquibase);
         ChangeLogParameters clp = new ChangeLogParameters(database);
         argsMap.put("changeLogParameters", clp);
@@ -79,7 +75,7 @@ public class LiquibaseRollbackOneUpdateMojo extends AbstractLiquibaseChangeLogMo
 
     private Map<String, Object> getCommandArgsObjectMap(Liquibase liquibase) throws LiquibaseException {
         Database database = liquibase.getDatabase();
-        Map<String, Object> argsMap = new HashMap<String, Object>();
+        Map<String, Object> argsMap = new HashMap<>();
         argsMap.put("deploymentId", this.deploymentId);
         argsMap.put("force", this.force);
         argsMap.put("database", database);

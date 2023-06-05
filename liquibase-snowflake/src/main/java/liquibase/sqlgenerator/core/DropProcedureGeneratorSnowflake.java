@@ -6,7 +6,6 @@ import liquibase.sql.Sql;
 import liquibase.sql.UnparsedSql;
 import liquibase.sqlgenerator.SqlGeneratorChain;
 import liquibase.statement.core.DropProcedureStatement;
-import liquibase.structure.core.Catalog;
 import liquibase.structure.core.Schema;
 
 public class DropProcedureGeneratorSnowflake extends DropProcedureGenerator {
@@ -29,12 +28,16 @@ public class DropProcedureGeneratorSnowflake extends DropProcedureGenerator {
         // DROP PROCEDURE "PUBLIC"."proc3()" -- default core implementation, doesn't work
         // DROP PROCEDURE "proc3()" -- doesn't work
 
-        if (statement.getCatalogName() != null) {
-            return new Sql[]{new UnparsedSql("DROP PROCEDURE " + database.escapeObjectName(statement.getCatalogName(), Catalog.class) + statement.getProcedureName())};
-        } else if (statement.getSchemaName() != null) {
-            return new Sql[]{new UnparsedSql("DROP PROCEDURE " + database.escapeObjectName(statement.getSchemaName(), Schema.class) + statement.getProcedureName())};
-        } else {
-            return new Sql[]{new UnparsedSql("DROP PROCEDURE " + statement.getProcedureName())};
+        //
+        // Drop with a catalog prefix does not work.  We only add the schema name here
+        //
+        StringBuilder unparsedSql = new StringBuilder("DROP PROCEDURE ");
+        if (statement.getSchemaName() != null) {
+            unparsedSql.append(database.escapeObjectName(statement.getSchemaName(), Schema.class));
+            unparsedSql.append(".");
         }
+        unparsedSql.append(statement.getProcedureName());
+        unparsedSql.append("()");
+        return new Sql[]{new UnparsedSql(unparsedSql.toString())};
     }
 }

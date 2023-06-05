@@ -1,5 +1,6 @@
 package liquibase.extension.testing.command
 
+import liquibase.command.core.TagExistsCommandStep
 import liquibase.exception.CommandValidationException
 
 CommandTests.define {
@@ -36,8 +37,9 @@ Optional Args:
         ]
 
         expectedResults = [
-                statusCode   : 0
+                tagExistsResult   : false
         ]
+
     }
 
     run "Run without a tag should throw an exception",  {

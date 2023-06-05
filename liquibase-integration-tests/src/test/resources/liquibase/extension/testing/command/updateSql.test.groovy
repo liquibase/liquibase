@@ -50,7 +50,8 @@ Optional Args:
         ]
 
         expectedResults = [
-                statusCode   : 0
+                statusCode   : 0,
+                defaultChangeExecListener: 'not_null'
         ]
     }
     
@@ -72,11 +73,13 @@ Optional Args:
                 //
                 // Find the " -- Release Database Lock" line
                 //
-                "target/test-classes/update.sql" : [CommandTests.assertContains("-- Release Database Lock")]
+                "target/test-classes/update.sql" : [CommandTests.assertContains("-- Release Database Lock"),
+                                                    CommandTests.assertContains("SET LOCKED = FALSE")]
         ]
 
         expectedResults = [
-                statusCode   : 0
+                statusCode   : 0,
+                defaultChangeExecListener: 'not_null'
         ]
     }
 

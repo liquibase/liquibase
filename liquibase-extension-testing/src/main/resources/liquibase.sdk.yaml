@@ -58,7 +58,7 @@ liquibase:
 
 
       mysql:
-        version: 5.7
+        version: latest
         imageName: mysql
         setup:
           username: root
@@ -75,8 +75,11 @@ liquibase:
 
       postgresql:
         imageName: postgres
-        version: 9.6
+        version: 15
 
       sqlite:
         url: "jdbc:sqlite::memory:"
 
+      firebird:
+        imageName: jacobalberty/firebird
+        version: v4

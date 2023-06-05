@@ -15,7 +15,7 @@ import java.util.stream.Collectors;
  */
 public class TestSystemFactory extends AbstractPluginFactory<TestSystem> {
 
-    private Map<TestSystem.Definition, TestSystem> systems = new HashMap<>();
+    private final Map<TestSystem.Definition, TestSystem> systems = new HashMap<>();
 
     @Override
     protected Class<TestSystem> getPluginClass() {
@@ -68,7 +68,7 @@ public class TestSystemFactory extends AbstractPluginFactory<TestSystem> {
     }
 
     /**
-     * Conveniene method for {@link #getTestSystem(TestSystem.Definition)} without having to parse the definition yourself.
+     * Convenience method for {@link #getTestSystem(TestSystem.Definition)} without having to parse the definition yourself.
      */
     public TestSystem getTestSystem(String definition) {
         return getTestSystem(TestSystem.Definition.parse(definition));

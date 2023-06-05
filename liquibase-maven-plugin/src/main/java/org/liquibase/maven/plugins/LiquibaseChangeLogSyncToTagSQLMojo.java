@@ -84,8 +84,8 @@ public class LiquibaseChangeLogSyncToTagSQLMojo extends
 									+ migrationSqlOutputFile.getAbsolutePath());
 				}
 			}
-			outputWriter = getOutputWriter(migrationSqlOutputFile);;
-		} catch (IOException e) {
+			outputWriter = getOutputWriter(migrationSqlOutputFile);
+        } catch (IOException e) {
 			getLog().error(e);
 			throw new MojoExecutionException(
 					"Failed to create SQL output writer", e);

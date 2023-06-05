@@ -6,11 +6,12 @@ import liquibase.logging.Logger;
 import liquibase.util.StreamUtil;
 
 import java.io.File;
-import java.io.FileOutputStream;
 import java.io.InputStream;
+import java.io.OutputStream;
 import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 
@@ -57,7 +58,7 @@ public class DownloadUtil {
                 }
 
                 try (final InputStream response = connection.getInputStream();
-                     FileOutputStream file = new FileOutputStream(pathAsFile)) {
+                     final OutputStream file = Files.newOutputStream(pathAsFile.toPath())) {
                     StreamUtil.copy(response, file);
                 }
                 log.fine("Saved " + url + " to " + pathAsFile.getAbsolutePath());

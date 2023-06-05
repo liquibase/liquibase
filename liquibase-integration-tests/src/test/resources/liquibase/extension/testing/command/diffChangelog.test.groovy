@@ -1,15 +1,12 @@
 package liquibase.extension.testing.command
 
-import liquibase.change.AddColumnConfig
+
 import liquibase.change.ColumnConfig
 import liquibase.change.ConstraintsConfig
-import liquibase.change.core.AddColumnChange
 import liquibase.change.core.AddPrimaryKeyChange
 import liquibase.change.core.CreateTableChange
-import liquibase.exception.CommandExecutionException
 import liquibase.exception.CommandValidationException
 import liquibase.extension.testing.setup.SetupCleanResources
-import liquibase.structure.core.Column
 
 import java.util.regex.Pattern
 
@@ -21,9 +18,11 @@ Long Description: NOT SET
 Required Args:
   changelogFile (String) Changelog file to write results
   referenceUrl (String) The JDBC reference database connection URL
-  url (String) The JDBC target database connection URL
+  url (String) The JDBC database connection URL
     OBFUSCATED
 Optional Args:
+  author (String) Specifies the author for changesets in the generated changelog
+    Default: null
   defaultCatalogName (String) The default catalog name to use for the database connection
     Default: null
   defaultSchemaName (String) The default schema name to use for the database connection
@@ -36,29 +35,37 @@ Optional Args:
     Default: null
   excludeObjects (String) Objects to exclude from diff
     Default: null
-  includeCatalog (Boolean) If true, the catalog will be included in generated changeSets
+  includeCatalog (Boolean) If true, the catalog will be included in generated changeSets. Defaults to false.
     Default: false
   includeObjects (String) Objects to include in diff
     Default: null
-  includeSchema (Boolean) If true, the schema will be included in generated changeSets
+  includeSchema (Boolean) If true, the schema will be included in generated changeSets. Defaults to false.
     Default: false
-  includeTablespace (String) Include the tablespace attribute in the changelog
+  includeTablespace (Boolean) Include the tablespace attribute in the changelog. Defaults to false.
+    Default: false
+  outputSchemas (String) Output schemas names. This is a CSV list.
     Default: null
-  password (String) The target database password
+  password (String) Password to use to connect to the database
     Default: null
     OBFUSCATED
-  referenceDefaultCatalogName (String) The reference default catalog name to use for the database connection
+  referenceDefaultCatalogName (String) The default catalog name to use for the reference database connection
     Default: null
-  referenceDefaultSchemaName (String) The reference default schema name to use for the database connection
+  referenceDefaultSchemaName (String) The default schema name to use for the reference database connection
+    Default: null
+  referenceDriver (String) The JDBC driver class for the reference database
+    Default: null
+  referenceDriverPropertiesFile (String) The JDBC driver properties file for the reference database
     Default: null
   referencePassword (String) The reference database password
     Default: null
     OBFUSCATED
+  referenceSchemas (String) Schemas names on reference database to use in diff. This is a CSV list.
+    Default: null
   referenceUsername (String) The reference database username
     Default: null
   schemas (String) Schemas to include in diff
     Default: null
-  username (String) The target database username
+  username (String) Username to use to connect to the database
     Default: null
 """
 
@@ -106,8 +113,9 @@ Optional Args:
         ]
     }
 
-    run "Running diffChangelog should add changesets", {
+    run "Running diffChangelog should add changesets with specified author", {
         arguments = [
+                author           : "Test Author",
                 url              : { it.url },
                 username         : { it.username },
                 password         : { it.password },
@@ -160,7 +168,8 @@ Optional Args:
         }
         expectedFileContent = [
                 "target/test-classes/diffChangeLog-test.xml" : [CommandTests.assertContains("<changeSet ", 5),
-                                                                CommandTests.assertContains("<dropTable ", 1)]
+                                                                CommandTests.assertContains("<dropTable ", 1),
+                                                                CommandTests.assertContains("author=\"Test Author\"", 5)]
         ]
     }
 

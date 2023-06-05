@@ -47,7 +47,7 @@ public class MavenUtils {
         }
         Set<URI> uris = new HashSet<>();
         // Find project dependencies, including the transitive ones.
-        Set dependencies = project.getArtifacts();
+        Set<Artifact> dependencies = project.getArtifacts();
         if ((dependencies != null) && !dependencies.isEmpty()) {
             for (Iterator it = dependencies.iterator(); it.hasNext(); ) {
                 addArtifact(uris, (Artifact) it.next(), log, verbose);
@@ -104,16 +104,6 @@ public class MavenUtils {
         } else {
             addFile(urls, f, log, verbose);
         }
-//    if (f != null) {
-//      URL fileURL = f.toURI().toURL();
-//      if (verbose) {
-//        log.info("  artifact: " + fileURL);
-//      }
-//      urls.add(fileURL);
-//    } else {
-//      log.warning("Artifact with no actual file, '" + artifact.getGroupId()
-//               + ":" + artifact.getArtifactId() + "'");
-//    }
     }
 
     private static void addFile(Set<URI> urls, File f, Log log, boolean verbose)

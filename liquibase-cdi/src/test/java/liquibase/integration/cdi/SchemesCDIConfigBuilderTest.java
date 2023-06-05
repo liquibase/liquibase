@@ -29,7 +29,7 @@ import java.util.concurrent.atomic.AtomicLong;
 
 
 /**
- * @author Nikita Lipatov (https://github.com/islonik),
+ * @author  <a href="https://github.com/islonik)">Nikita Lipatov</a>
  * @since 27/5/17.
  */
 public class SchemesCDIConfigBuilderTest {
@@ -83,28 +83,9 @@ public class SchemesCDIConfigBuilderTest {
     @Before
     public void setUp() {
         COUNTER = new AtomicLong(0L);
-
-//        bm = mock(BeanManager.class);
         treeBuilder = new SchemesTreeBuilder();
         schemesCDIConfigBuilder = new SchemesCDIConfigBuilder(bm, treeBuilder);
     }
-
-    /**
-     * General execution.
-     */
-//    @Test
-//    public void testCreateCDILiquibaseConfig() throws Exception {
-//        Set<Bean<?>> beans = new LinkedHashSet<Bean<?>>();
-//        beans.add(mockBean(new A1()));
-//        beans.add(mockBean(new B2()));
-//
-//        when(bm.getBeans(eq(Object.class), eq(new SchemesCDIConfigBuilder.AnnotationLiteralDefault()))).thenReturn(beans);
-//
-//        CDILiquibaseConfig config = schemesCDIConfigBuilder.createCDILiquibaseConfig();
-//
-//        Assert.assertNotNull(config);
-//        Assert.assertEquals("liquibase.cdi.schema.xml", config.getChangeLog());
-//    }
 
     private Bean mockBean(final Object object) {
         return new Bean() {
@@ -251,33 +232,15 @@ public class SchemesCDIConfigBuilderTest {
     }
 
     private Callable<CDILiquibaseConfig> getAction(final long timeout) {
-        return new Callable<CDILiquibaseConfig>() {
-            @Override
-            public CDILiquibaseConfig call() throws Exception {
-                Map<String, String> map = new LinkedHashMap<String, String>();
-                CDILiquibaseConfig config = new CDILiquibaseConfig();
-                map.put(BEFORE_KEY, Long.toString(COUNTER.incrementAndGet()));
-                Thread.sleep(timeout);
-                map.put(AFTER_KEY, Long.toString(COUNTER.decrementAndGet()));
-                config.setParameters(map);
-                return config;
-            }
+        return () -> {
+            Map<String, String> map = new LinkedHashMap<String, String>();
+            CDILiquibaseConfig config = new CDILiquibaseConfig();
+            map.put(BEFORE_KEY, Long.toString(COUNTER.incrementAndGet()));
+            Thread.sleep(timeout);
+            map.put(AFTER_KEY, Long.toString(COUNTER.decrementAndGet()));
+            config.setParameters(map);
+            return config;
         };
     }
 
-}
-
-
-@ApplicationScoped
-@Default
-@Liquibase
-@LiquibaseSchema(name = "1", depends = "",  resource = "liquibase/parser/core/xml/changeLog1.xml")
-class A1 {
-}
-
-@ApplicationScoped
-@Default
-@Liquibase
-@LiquibaseSchema(name = "2", depends = "1", resource = "liquibase/parser/core/xml/changeLog2.xml")
-class B2 {
 }

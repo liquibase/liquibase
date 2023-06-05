@@ -43,7 +43,7 @@ mkdir -p $outdir
 (cd $scriptDir && javac ManifestReversion.java)
 
 #### Update  jars
-declare -a jars=("liquibase-core-0-SNAPSHOT.jar" "liquibase-core-0-SNAPSHOT-sources.jar" "liquibase-commercial-0-SNAPSHOT.jar" "liquibase-cdi-0-SNAPSHOT.jar" "liquibase-cdi-0-SNAPSHOT-sources.jar" "liquibase-maven-plugin-0-SNAPSHOT.jar" "liquibase-maven-plugin-0-SNAPSHOT-sources.jar")
+declare -a jars=("liquibase-core-0-SNAPSHOT.jar" "liquibase-core-0-SNAPSHOT-sources.jar" "liquibase-commercial-0-SNAPSHOT.jar" "liquibase-commercial-0-SNAPSHOT-sources.jar" "liquibase-cdi-0-SNAPSHOT.jar" "liquibase-cdi-0-SNAPSHOT-sources.jar" "liquibase-cdi-jakarta-0-SNAPSHOT.jar" "liquibase-cdi-jakarta-0-SNAPSHOT-sources.jar" "liquibase-maven-plugin-0-SNAPSHOT.jar" "liquibase-maven-plugin-0-SNAPSHOT-sources.jar")
 
 for jar in "${jars[@]}"
 do
@@ -75,11 +75,13 @@ do
   (cd $workdir/finalize-jar && jar cfm $workdir/$jar $workdir/tmp-manifest.mf .)
 
   cp $workdir/$jar $outdir
-  rename.ul 0-SNAPSHOT $version $outdir/$jar
+  RENAME_SNAPSHOTS=$(ls $outdir/$jar | sed -e "s/0-SNAPSHOT/$version/g")
+  mv -v $outdir/$jar $RENAME_SNAPSHOTS
+  
 done
 
 #### Update  javadoc jars
-declare -a javadocJars=("liquibase-core-0-SNAPSHOT-javadoc.jar" "liquibase-cdi-0-SNAPSHOT-javadoc.jar" "liquibase-maven-plugin-0-SNAPSHOT-javadoc.jar")
+declare -a javadocJars=("liquibase-core-0-SNAPSHOT-javadoc.jar" "liquibase-cdi-0-SNAPSHOT-javadoc.jar" "liquibase-cdi-jakarta-0-SNAPSHOT-javadoc.jar" "liquibase-maven-plugin-0-SNAPSHOT-javadoc.jar" "liquibase-commercial-0-SNAPSHOT-javadoc.jar")
 
 for jar in "${javadocJars[@]}"
 do
@@ -93,7 +95,8 @@ do
   rm -rf $workdir/rebuild
 
   cp $workdir/$jar $outdir
-  rename.ul 0-SNAPSHOT $version $outdir/$jar
+  RENAME_JAVADOC_SNAPSHOTS=$(ls $outdir/$jar | sed -e "s/0-SNAPSHOT/$version/g")
+  mv -v $outdir/$jar $RENAME_JAVADOC_SNAPSHOTS
 done
 
 ## Test jar structure
