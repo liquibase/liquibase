@@ -45,7 +45,7 @@ VALUES('1', 'your.name', '$changelogfile', '2023-05-31 14:33:39.108', 1, 'EXECUT
 
         then:
         ranChangeSets.size() == 1
-        ranChangeSets.forEach({ rcs -> rcs.getLastCheckSum().getVersion() == 8 })
+        ranChangeSets.forEach({ rcs -> assert rcs.getLastCheckSum().getVersion() == 8 })
 
         when:
         CommandScope updateCommandScope = new CommandScope(UpdateCommandStep.COMMAND_NAME)
@@ -58,7 +58,7 @@ VALUES('1', 'your.name', '$changelogfile', '2023-05-31 14:33:39.108', 1, 'EXECUT
 
         then:
         ranChangeSets.size() == 2
-        ranChangeSets.forEach({ rcs -> rcs.getLastCheckSum().getVersion() == 9 })
+        ranChangeSets.forEach({ rcs -> assert rcs.getLastCheckSum().getVersion() == 9 })
 
         cleanup:
         CommandUtil.runDropAll(mysql)
@@ -75,7 +75,7 @@ VALUES('1', 'your.name', '$changelogfile', '2023-05-31 14:33:39.108', 1, 'EXECUT
 
         then:
         ranChangeSets.size() == 1
-        ranChangeSets.forEach({ rcs -> rcs.getLastCheckSum().getVersion() == 8 })
+        ranChangeSets.forEach({ rcs -> assert rcs.getLastCheckSum().getVersion() == 8 })
 
         when:
         CommandScope updateCommandScope = new CommandScope(UpdateCommandStep.COMMAND_NAME)
@@ -107,7 +107,7 @@ VALUES('1', 'your.name', '$changelogfile', '2023-05-31 14:33:39.108', 1, 'EXECUT
 
         then:
         ranChangeSets.size() == 1
-        ranChangeSets.forEach({ rcs -> rcs.getLastCheckSum().getVersion() == 8 })
+        ranChangeSets.forEach({ rcs -> assert rcs.getLastCheckSum().getVersion() == 8 })
 
         when:
         CommandScope updateCommandScope = new CommandScope(UpdateToTagCommandStep.COMMAND_NAME)
@@ -121,7 +121,9 @@ VALUES('1', 'your.name', '$changelogfile', '2023-05-31 14:33:39.108', 1, 'EXECUT
 
         then:
         ranChangeSets.size() == 3
-        ranChangeSets.forEach({ rcs -> rcs.getLastCheckSum().getVersion() == 9 })
+        ranChangeSets.get(0).getLastCheckSum().getVersion() == 8
+        ranChangeSets.get(1).getLastCheckSum().getVersion() == 9
+        ranChangeSets.get(2).getLastCheckSum().getVersion() == 9
 
         cleanup:
         CommandUtil.runDropAll(mysql)
@@ -138,7 +140,7 @@ VALUES('1', 'your.name', '$changelogfile', '2023-05-31 14:33:39.108', 1, 'EXECUT
 
         then:
         ranChangeSets.size() == 1
-        ranChangeSets.forEach({ rcs -> rcs.getLastCheckSum().getVersion() == 8 })
+        ranChangeSets.forEach({ rcs -> assert rcs.getLastCheckSum().getVersion() == 8 })
 
         when:
         CommandScope updateCommandScope = new CommandScope(UpdateCountCommandStep.COMMAND_NAME)
@@ -152,7 +154,8 @@ VALUES('1', 'your.name', '$changelogfile', '2023-05-31 14:33:39.108', 1, 'EXECUT
 
         then:
         ranChangeSets.size() == 2
-        ranChangeSets.forEach({ rcs -> rcs.getLastCheckSum().getVersion() == 9 })
+        ranChangeSets.get(0).getLastCheckSum().getVersion() == 8
+        ranChangeSets.get(1).getLastCheckSum().getVersion() == 9
 
         cleanup:
         CommandUtil.runDropAll(mysql)
@@ -171,7 +174,7 @@ VALUES('1', 'your.name', '$changelogfile', '2023-05-31 14:33:39.108', 1, 'EXECUT
 
         then:
         ranChangeSets.size() == 1
-        ranChangeSets.forEach({ rcs -> rcs.getLastCheckSum().getVersion() == 8 })
+        ranChangeSets.forEach({ rcs -> assert rcs.getLastCheckSum().getVersion() == 8 })
 
         when:
         CommandScope updateTestingRollbackCommand = new CommandScope(UpdateTestingRollbackCommandStep.COMMAND_NAME)
@@ -184,7 +187,7 @@ VALUES('1', 'your.name', '$changelogfile', '2023-05-31 14:33:39.108', 1, 'EXECUT
 
         then:
         ranChangeSets.size() == 2
-        ranChangeSets.forEach({ rcs -> rcs.getLastCheckSum().getVersion() == 9 })
+        ranChangeSets.forEach({ rcs -> assert rcs.getLastCheckSum().getVersion() == 9 })
 
         cleanup:
         CommandUtil.runDropAll(mysql)
@@ -202,7 +205,7 @@ VALUES('1', 'your.name', '$changelogfile', '2023-05-31 14:33:39.108', 1, 'EXECUT
 
         then:
         ranChangeSets.size() == 1
-        ranChangeSets.forEach({ rcs -> rcs.getLastCheckSum().getVersion() == 8 })
+        ranChangeSets.forEach({ rcs -> assert rcs.getLastCheckSum().getVersion() == 8 })
 
         when:
         CommandScope updateCommandScope = new CommandScope(UpdateSqlCommandStep.COMMAND_NAME)
@@ -215,7 +218,7 @@ VALUES('1', 'your.name', '$changelogfile', '2023-05-31 14:33:39.108', 1, 'EXECUT
 
         then:
         ranChangeSets.size() == 1
-        ranChangeSets.forEach({ rcs -> rcs.getLastCheckSum().getVersion() == 8 })
+        ranChangeSets.forEach({ rcs -> assert rcs.getLastCheckSum().getVersion() == 8 })
 
         cleanup:
         CommandUtil.runDropAll(mysql)
@@ -232,7 +235,7 @@ VALUES('1', 'your.name', '$changelogfile', '2023-05-31 14:33:39.108', 1, 'EXECUT
 
         then:
         ranChangeSets.size() == 1
-        ranChangeSets.forEach({ rcs -> rcs.getLastCheckSum().getVersion() == 8 })
+        ranChangeSets.forEach({ rcs -> assert rcs.getLastCheckSum().getVersion() == 8 })
 
         when:
         CommandScope updateCommandScope = new CommandScope(UpdateCountSqlCommandStep.COMMAND_NAME)
@@ -246,7 +249,7 @@ VALUES('1', 'your.name', '$changelogfile', '2023-05-31 14:33:39.108', 1, 'EXECUT
 
         then:
         ranChangeSets.size() == 1
-        ranChangeSets.forEach({ rcs -> rcs.getLastCheckSum().getVersion() == 8 })
+        ranChangeSets.forEach({ rcs -> assert rcs.getLastCheckSum().getVersion() == 8 })
 
         cleanup:
         CommandUtil.runDropAll(mysql)
@@ -263,7 +266,7 @@ VALUES('1', 'your.name', '$changelogfile', '2023-05-31 14:33:39.108', 1, 'EXECUT
 
         then:
         ranChangeSets.size() == 1
-        ranChangeSets.forEach({ rcs -> rcs.getLastCheckSum().getVersion() == 8 })
+        ranChangeSets.forEach({ rcs -> assert rcs.getLastCheckSum().getVersion() == 8 })
 
         when:
         CommandScope updateCommandScope = new CommandScope(UpdateToTagSqlCommandStep.COMMAND_NAME)
@@ -277,7 +280,7 @@ VALUES('1', 'your.name', '$changelogfile', '2023-05-31 14:33:39.108', 1, 'EXECUT
 
         then:
         ranChangeSets.size() == 1
-        ranChangeSets.forEach({ rcs -> rcs.getLastCheckSum().getVersion() == 8 })
+        ranChangeSets.forEach({ rcs -> assert rcs.getLastCheckSum().getVersion() == 8 })
 
         cleanup:
         CommandUtil.runDropAll(mysql)
