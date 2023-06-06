@@ -88,7 +88,6 @@
             <xsd:attribute name="author" type="xsd:string"/>
             <xsd:attribute name="file" type="xsd:string" use="required"/>
             <xsd:attribute name="relativeToChangelogFile" type="booleanExp"/>
-            <xsd:attribute name="errorIfMissing" type="booleanExp" default="true"/>
             <xsd:attribute name="context" type="xsd:string"/>
             <xsd:attribute name="contextFilter" type="xsd:string"/>
             <xsd:attribute name="labels" type="xsd:string"/>
@@ -102,7 +101,6 @@
     <xsd:element name="includeAll">
         <xsd:complexType>
             <xsd:attribute name="path" type="xsd:string" use="required"/>
-            <xsd:attribute name="errorIfMissing" type="booleanExp" default="true"/>
             <xsd:attribute name="relativeToChangelogFile" type="booleanExp"/>
             <xsd:attribute name="resourceComparator" type="xsd:string"/>
             <xsd:attribute name="filter" type="xsd:string"/>
@@ -123,7 +121,6 @@
                     <xsd:complexType>
                         <xsd:attribute name="file" type="xsd:string"/>
                         <xsd:attribute name="relativeToChangelogFile" type="booleanExp" default="false"/>
-                        <xsd:attribute name="errorIfMissing" type="booleanExp" default="true"/>
                         <xsd:attribute name="name" type="xsd:string"/>
                         <xsd:attribute name="value" type="xsd:string"/>
                         <xsd:attribute name="dbms" type="xsd:string"/>
