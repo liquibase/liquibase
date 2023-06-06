@@ -26,7 +26,7 @@
 		<firebird.version>5.0.1.java8</firebird.version>
 
 		<assemblyConfigFile>src/main/assembly/assembly-bin.xml</assemblyConfigFile>
-		<maven.deploy.skip>true</maven.deploy.skip>
+		<maven.deploy.skip>false</maven.deploy.skip>
 		<maven.install.skip>true</maven.install.skip>
 	</properties>
 	<dependencies>
