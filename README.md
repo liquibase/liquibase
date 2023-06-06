@@ -82,3 +82,4 @@ LIQUIBASE is a registered trademark of [Liquibase Inc.](https://www.liquibase.co
 3. A minimum of 2 approvers are needed in order for the other jobs such as `deploy_maven`, `deploy_javadocs`, `publish_to_github_packages`, etc to be executed.
 4. When you view the GitHub PR, make sure to verify the version which is being published. It should say something like `Deploying v4.20.0 to sonatype`
 
+
