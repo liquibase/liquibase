@@ -278,7 +278,7 @@
 				<dependency>
                     <groupId>org.liquibase</groupId>
                     <artifactId>liquibase-commercial</artifactId>
-                    <version>${project.version}</version>
+                    <version>${liquibase-pro.version}</version>
 				</dependency>
 			</dependencies>
 		</profile>

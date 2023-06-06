@@ -8,9 +8,66 @@ on:
 env:
   MAVEN_VERSION: '3.9.2'
 jobs:
+  setup:
+    name: Get Branch Name
+    runs-on: ubuntu-22.04
+    outputs:
+      proBranchName: ${{ steps.find-branches.outputs.proBranchName }}
+    steps:
+      - name: Failsafe
+        uses: actions/github-script@v6
+        with:
+          script: |
+            if (${{ github.run_attempt }} % 5 == 0) {
+              core.setFailed("Fail every 5 run attempts to catch accidental infinite loops");
+            }
+            
+      - uses: actions/checkout@v3
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.event.after}}
+
+      - name: Find corresponding branches
+        id: find-branches
+        uses: actions/github-script@v6
+        with:
+          github-token: ${{ secrets.BOT_TOKEN }}
+          script: |
+            const helper = require('./.github/util/workflow-helper.js')({github, context});
+
+            let proStatusMessage = "success";
+            let proFailed = false;
+
+            let branch = await helper.findMatchingBranch("liquibase", "liquibase-pro");
+            
+            if (!branch.lastSuccessfulRunNumber) {
+              proFailed = true;
+              proStatusMessage = "Matching pro branch has never passed. Falling back to master"
+              branch = await helper.findMatchingBranch("liquibase", "liquibase-pro", ["main", "master"])
+            }
+            core.setOutput("proBranchName", branch.name);
+
+            if (!proFailed) {
+              if (!branch.workflowId) {
+                proStatusMessage = "does not have a ran workflow";
+                proFailed = true
+              } else if ( branch.runStatus != "completed") {
+                proStatusMessage = "build is "+ branch.runStatus;
+                proFailed = true
+              } else if ( branch.runConclusion != "success") {
+                proStatusMessage = "build conclusion was "+branch.runConclusion;
+                proFailed = true
+              }
+            }
+
+            statusMessage = "liquibase/liquibase-pro:"+branch.name+"@" + branch.sha.substring(0, 7) + " " + proStatusMessage;
+            console.log("Pro failed?" + proFailed + ": "+statusMessage);
+
+            
+
   build:
     name: Build & Package
     runs-on: ubuntu-22.04
+    needs: [setup]
     permissions:
       contents: read
       packages: write
@@ -31,14 +88,14 @@ jobs:
 
       # Version artifact based off of branch and commit SHA.
       - name: Version Artifact
-        run: mvn versions:set -DnewVersion="${{ github.ref_name }}-SNAPSHOT"
+        run: mvn versions:set -DnewVersion="${{ github.ref_name }}-SNAPSHOT" 
 
 
       # This would still deploy a package if there are test failures. Might help to have build.yml complete and then run this workflow
-      # Publish to GitHub Packages
+      # Publish to GitHub Packages. We are building a tar file which includes liquibase-commercial hence we need -Dliquibase-pro.version
       - name: Publish package
         run: |
-          mvn -B clean deploy -DskipTests=true
+          mvn -B -P liquibase-commercial clean deploy -DskipTests=true -Dliquibase-pro.version=${{ needs.setup.outputs.proBranchName }} 
           
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
