@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
 
     <!-- Cannot use "liquibase" as the name since "Liquibase" is used by liquibase-core -->
@@ -75,16 +76,6 @@
         <argLine></argLine>
     </properties>
 
-    <repositories>
-        <repository>
-        <id>github</id>
-        <url>https://maven.pkg.github.com/liquibase/liquibase-pro</url>
-        <snapshots>
-          <enabled>true</enabled>
-        </snapshots>
-      </repository>
-    </repositories>
-
     <distributionManagement>
         <repository>
             <id>github</id>
@@ -97,8 +88,8 @@
         <module>liquibase-core</module>
         <module>liquibase-standard</module>
         <module>liquibase-cli</module>
-	    <module>liquibase-maven-plugin</module>
-	    <module>liquibase-cdi-jakarta</module>
+        <module>liquibase-maven-plugin</module>
+        <module>liquibase-cdi-jakarta</module>
         <module>liquibase-cdi</module>
         <module>liquibase-integration-tests</module>
         <module>liquibase-dist</module>
@@ -164,7 +155,8 @@
             <version>3.3.0</version>
             <scope>test</scope>
         </dependency>
-        <dependency> <!-- enables mocking of classes without default constructor (together with CGLIB) -->
+        <dependency> <!-- enables mocking of classes without default constructor (together with
+            CGLIB) -->
             <groupId>org.objenesis</groupId>
             <artifactId>objenesis</artifactId>
             <version>3.3</version>
@@ -291,7 +283,8 @@
                             <rules>
                                 <requireMavenVersion>
                                     <version>${maven.enforcer.requireMavenVersion}</version>
-                                    <message>This POM requires Maven ${maven.enforcer.requireMavenVersion}.</message>
+                                    <message>This POM requires Maven
+                                        ${maven.enforcer.requireMavenVersion}.</message>
                                 </requireMavenVersion>
                             </rules>
                         </configuration>
@@ -397,8 +390,8 @@
                     <flattenedPomFilename>release.pom.xml</flattenedPomFilename>
                     <pomElements>
                         <profiles>remove</profiles>
-                        <organization/>
-                        <issueManagement/>
+                        <organization />
+                        <issueManagement />
                     </pomElements>
                     <flattenMode>ossrh</flattenMode>
                 </configuration>
