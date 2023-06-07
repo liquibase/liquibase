@@ -314,7 +314,7 @@
                     <dependency>
                         <groupId>org.apache.maven.surefire</groupId>
                         <artifactId>surefire-junit4</artifactId>
-                        <version>3.1.0</version>
+                        <version>3.1.2</version>
                     </dependency>
                 </dependencies>
                 <configuration>
