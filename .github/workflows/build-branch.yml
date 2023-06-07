@@ -10,7 +10,7 @@ on:
   workflow_dispatch:
   push:
     branches:
-      - '*'
+      - '**'
 env:
   MAVEN_VERSION: '3.9.2'
 jobs:
