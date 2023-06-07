@@ -8,24 +8,9 @@ on:
     branches:
       - '**DAT-**'
 
-  # workflow_run:
-  #     workflows: [Build and Test]
-  #     types:
-  #     - completed  
-
 env:
   MAVEN_VERSION: '3.9.2'
 jobs:
-  # on-success:
-  #   runs-on: ubuntu-latest
-  #   if: ${{ github.event.workflow_run.conclusion == 'success' }}
-  #   steps:
-  #     - run: echo 'The triggering workflow passed'
-  # on-failure:
-  #   runs-on: ubuntu-latest
-  #   if: ${{ github.event.workflow_run.conclusion == 'failure' }}
-  #   steps:
-  #     - run: echo 'The triggering workflow failed'    
   setup:
     name: Get Branch Name
     runs-on: ubuntu-22.04
