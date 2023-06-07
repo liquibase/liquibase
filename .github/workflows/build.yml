@@ -373,13 +373,24 @@ jobs:
         with:
           maven-version: ${{ env.MAVEN_VERSION }}
 
-      # Download liquibase-commercial from GPM
+      # Download liquibase-commercial from build artifact page until make changes to other extensions to look into GPM and not build artifact page
+      - name: Download liquibase-commercial
+        uses: liquibase/action-download-artifact@v2-liquibase
+        with:
+          github_token: ${{ secrets.BOT_TOKEN }}
+          workflow: build.yml
+          workflow_conclusion: success
+          branch: "${{ needs.setup.outputs.proBranchName }}"
+          name: liquibase-commercial-modules
+          path: download/liquibase-commercial
+          repo: liquibase/liquibase-pro
 
       - name: Install Built Modules
         run: |
           (find . -name *-SNAPSHOT.jar -exec mvn -B org.apache.maven.plugins:maven-install-plugin:3.0.0-M1:install-file -Dfile={} \;)
           (find . -name *-SNAPSHOT-sources.jar -exec mvn -B org.apache.maven.plugins:maven-install-plugin:3.0.0-M1:install-file -Dclassifier=sources -Dfile={} \;)
- 
+          mvn -B org.apache.maven.plugins:maven-install-plugin:3.0.0-M1:install-file -Dfile=download/liquibase-commercial/liquibase-commercial-0-SNAPSHOT.jar
+
       - name: Build & Sign Artifacts
         env:
           INSTALL4J_LICENSE: ${{ secrets.INSTALL4J_LICENSE }}
