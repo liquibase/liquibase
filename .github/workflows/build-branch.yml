@@ -3,14 +3,16 @@ name: Build Branch SNAPSHOT
 # run this workflow when build.yml succedes https://docs.github.com/en/actions/using-workflows/events-that-trigger-workflows#workflow_run
 # commeting out the workflow_run code as : Note: This event will only trigger a workflow run if the workflow file is on the default branch ie master
 on:
+  workflow_dispatch:
+  push:
+    branches:
+      - '**DAT-**'
+
   # workflow_run:
   #     workflows: [Build and Test]
   #     types:
   #     - completed  
-  workflow_dispatch:
-  push:
-    branches:
-      - '**'
+
 env:
   MAVEN_VERSION: '3.9.2'
 jobs:
