@@ -22,10 +22,14 @@ class SetupModifyDbCredentials extends TestSetup {
 
     @Override
     void setup(TestSetupEnvironment testSetupEnvironment) throws Exception {
+        setup(testSetupEnvironment.url, testSetupEnvironment.username, testSetupEnvironment.password)
+    }
+
+    void setup(String url, String username, String password) {
         String contents = FileUtil.getContents(textFile)
-        contents = contents.replaceAll(URL, testSetupEnvironment.url)
-        contents = contents.replaceAll(USERNAME, testSetupEnvironment.username)
-        contents = contents.replaceAll(PASSWORD, testSetupEnvironment.password)
+        contents = contents.replaceAll(URL, url)
+        contents = contents.replaceAll(USERNAME, username)
+        contents = contents.replaceAll(PASSWORD, password)
         FileUtil.write(contents, textFile)
     }
 }
