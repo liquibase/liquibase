@@ -178,6 +178,7 @@ jobs:
         with:
           key: built-code-${{ github.run_number }}-${{ github.run_attempt }}
           path: ./**/target
+
       - name: Set up JDK ${{ matrix.java }}
         uses: actions/setup-java@v3
         with:
@@ -373,7 +374,7 @@ jobs:
         with:
           maven-version: ${{ env.MAVEN_VERSION }}
 
-      # Download liquibase-commercial from build artifact page until make changes to other extensions to look into GPM and not build artifact page
+      # Download liquibase-commercial from build artifact page until we make changes to other extensions to look into GPM and not build artifact page
       - name: Download liquibase-commercial
         uses: liquibase/action-download-artifact@v2-liquibase
         with:
@@ -498,6 +499,12 @@ jobs:
     steps:
       - uses: actions/checkout@v3
 
+      - name: maven-settings-xml-action
+        uses: whelk-io/maven-settings-xml-action@v20
+        with:
+          repositories: '[{ "id": "github", "url": "https://maven.pkg.github.com/liquibase/liquibase" }, {"id": "liquibase-pro", "url": "https://maven.pkg.github.com/liquibase/liquibase-pro"}]'
+          servers: '[{ "id": "liquibase-pro", "username": "liquibot", "password": "${{ secrets.LIQUIBOT_PAT }}"" }]'
+
       - name: Set up Java for publishing to GitHub Repository
         uses: actions/setup-java@v3
         with:
@@ -505,6 +512,8 @@ jobs:
           distribution: 'temurin'
           cache: 'maven'
           server-id: github
+          overwrite-settings: false
+          
       - name: Set up Maven
         uses: stCarolas/setup-maven@v4.5
         with:
