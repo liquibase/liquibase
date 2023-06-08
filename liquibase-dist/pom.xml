@@ -27,7 +27,7 @@
 
 		<assemblyConfigFile>src/main/assembly/assembly-bin.xml</assemblyConfigFile>
 		<maven.deploy.skip>false</maven.deploy.skip>
-		<maven.install.skip>true</maven.install.skip>
+		<maven.install.skip>false</maven.install.skip>
 	</properties>
 	<dependencies>
 		<dependency>

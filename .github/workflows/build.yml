@@ -390,7 +390,7 @@ jobs:
         run: |
           (find . -name *-SNAPSHOT.jar -exec mvn -B org.apache.maven.plugins:maven-install-plugin:3.0.0-M1:install-file -Dfile={} \;)
           (find . -name *-SNAPSHOT-sources.jar -exec mvn -B org.apache.maven.plugins:maven-install-plugin:3.0.0-M1:install-file -Dclassifier=sources -Dfile={} \;)
-          mvn -B org.apache.maven.plugins:mavenf-install-plugin:3.0.0-M1:install-file -Dfile=download/liquibase-commercial/liquibase-commercial-0-SNAPSHOT.jar
+          mvn -B org.apache.maven.plugins:maven-install-plugin:3.0.0-M1:install-file -Dfile=download/liquibase-commercial/liquibase-commercial-0-SNAPSHOT.jar
 
       - name: Build & Sign Artifacts
         env:
@@ -490,7 +490,7 @@ jobs:
           path: artifacts-named/*
 
   deploy-package:
-    name: Build & Package
+    name: Deploy to GPM
     runs-on: ubuntu-22.04
     needs: [setup, build, sonar, integration-test]
     permissions:
@@ -503,9 +503,9 @@ jobs:
         uses: whelk-io/maven-settings-xml-action@v20
         with:
           repositories: '[{ "id": "github", "url": "https://maven.pkg.github.com/liquibase/liquibase" }, {"id": "liquibase-pro", "url": "https://maven.pkg.github.com/liquibase/liquibase-pro"}]'
-          servers: '[{ "id": "liquibase-pro", "username": "liquibot", "password": "${{ secrets.LIQUIBOT_PAT }}"" }]'
+          servers: '[{ "id": "liquibase-pro", "username": "liquibot", "password": "${{ secrets.LIQUIBOT_PAT }}" }]'
 
-      - name: Set up Java for publishing to GitHub Repository
+      - name: Set up Java for publishing to GPM
         uses: actions/setup-java@v3
         with:
           java-version: '17'
@@ -513,7 +513,7 @@ jobs:
           cache: 'maven'
           server-id: github
           overwrite-settings: false
-          
+
       - name: Set up Maven
         uses: stCarolas/setup-maven@v4.5
         with:
@@ -526,7 +526,7 @@ jobs:
 
       # This would still deploy a package if there are test failures. Might help to have build.yml complete and then run this workflow
       # Publish to GitHub Packages. We are building a tar file which includes liquibase-commercial hence we need -Dliquibase-pro.version
-      - name: Publish package
+      - name: Publish package to GPM
         run: |
           mvn -B -P liquibase-commercial clean deploy -DskipTests=true -Dliquibase-pro.version=${{ needs.setup.outputs.proBranchName }} 
           
