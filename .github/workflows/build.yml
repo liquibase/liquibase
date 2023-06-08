@@ -6,7 +6,7 @@ concurrency:
 
 on:
   workflow_dispatch:
-
+  # DAT branches can get triggered from this logic
   pull_request_target:
     types:
       - opened
@@ -488,10 +488,47 @@ jobs:
           name: liquibase-artifacts-${{ needs.setup.outputs.thisBranchFileName }}
           path: artifacts-named/*
 
+  deploy-package:
+    name: Build & Package
+    runs-on: ubuntu-22.04
+    needs: [setup, build, sonar, integration-test]
+    permissions:
+      contents: read
+      packages: write
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Set up Java for publishing to GitHub Repository
+        uses: actions/setup-java@v3
+        with:
+          java-version: '17'
+          distribution: 'temurin'
+          cache: 'maven'
+          server-id: github
+      - name: Set up Maven
+        uses: stCarolas/setup-maven@v4.5
+        with:
+          maven-version: ${{ env.MAVEN_VERSION }}
+
+      # Version artifact based off of branch and commit SHA.
+      - name: Version Artifact
+        run: mvn versions:set -DnewVersion="${{ github.ref_name }}-SNAPSHOT" 
+
+
+      # This would still deploy a package if there are test failures. Might help to have build.yml complete and then run this workflow
+      # Publish to GitHub Packages. We are building a tar file which includes liquibase-commercial hence we need -Dliquibase-pro.version
+      - name: Publish package
+        run: |
+          mvn -B -P liquibase-commercial clean deploy -DskipTests=true -Dliquibase-pro.version=${{ needs.setup.outputs.proBranchName }} 
+          
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+# this triggers the pro-tests and test-harness to run
   finish:
     name: Finish Build
     runs-on: ubuntu-22.04
-    needs: [setup, build, integration-test, package, sonar]
+    needs: [setup, build, integration-test, package, sonar, deploy-package]
     if: ${{ needs.setup.outputs.setupSuccessful }}
     steps:
       - uses: actions/checkout@v3

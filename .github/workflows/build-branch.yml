@@ -1,102 +1,110 @@
-name: Build Branch SNAPSHOT
+# name: Build Branch SNAPSHOT
 
-# run this workflow when build.yml succedes https://docs.github.com/en/actions/using-workflows/events-that-trigger-workflows#workflow_run
-# commeting out the workflow_run code as : Note: This event will only trigger a workflow run if the workflow file is on the default branch ie master
-on:
-  workflow_dispatch:
-  push:
-    branches:
-      - '**DAT-**'
+# # run this workflow when build.yml succedes https://docs.github.com/en/actions/using-workflows/events-that-trigger-workflows#workflow_run
+# # commeting out the workflow_run code as : Note: This event will only trigger a workflow run if the workflow file is on the default branch ie master
+# on:
+#   workflow_dispatch:
+#   # DAT branches can get triggered from this logic
+#   pull_request_target:
+#     types:
+#       - opened
+#       - reopened
+#       - synchronize
+#       - labeled
 
-env:
-  MAVEN_VERSION: '3.9.2'
-jobs:
-  setup:
-    name: Get Branch Name
-    runs-on: ubuntu-22.04
-    outputs:
-      proBranchName: ${{ steps.find-branches.outputs.proBranchName }}
-    steps:
-      - name: Failsafe
-        uses: actions/github-script@v6
-        with:
-          script: |
-            if (${{ github.run_attempt }} % 5 == 0) {
-              core.setFailed("Fail every 5 run attempts to catch accidental infinite loops");
-            }
+#   push:
+#     branches:
+#       - github-action-*
+
+# env:
+#   MAVEN_VERSION: '3.9.2'
+# jobs:
+#   setup:
+#     name: Get Branch Name
+#     runs-on: ubuntu-22.04
+#     outputs:
+#       proBranchName: ${{ steps.find-branches.outputs.proBranchName }}
+#     steps:
+#       # - name: Failsafe
+#       #   uses: actions/github-script@v6
+#       #   with:
+#       #     script: |
+#       #       if (${{ github.run_attempt }} % 5 == 0) {
+#       #         core.setFailed("Fail every 5 run attempts to catch accidental infinite loops");
+#       #       }
             
-      - uses: actions/checkout@v3
-        with:
-          ref: ${{ github.event.pull_request.head.sha || github.event.after}}
+#       - uses: actions/checkout@v3
+#         with:
+#           ref: ${{ github.event.pull_request.head.sha || github.event.after}}
 
-      - name: Find corresponding branches
-        id: find-branches
-        uses: actions/github-script@v6
-        with:
-          github-token: ${{ secrets.BOT_TOKEN }}
-          script: |
-            const helper = require('./.github/util/workflow-helper.js')({github, context});
-            let proStatusMessage = "success";
-            let proFailed = false;
-            let branch = await helper.findMatchingBranch("liquibase", "liquibase-pro");
+#       - name: Find corresponding branches
+#         id: find-branches
+#         uses: actions/github-script@v6
+#         with:
+#           github-token: ${{ secrets.BOT_TOKEN }}
+#           script: |
+#             const helper = require('./.github/util/workflow-helper.js')({github, context});
+#             let proStatusMessage = "success";
+#             let proFailed = false;
+#             let branch = await helper.findMatchingBranch("liquibase", "liquibase-pro");
             
-            if (!branch.lastSuccessfulRunNumber) {
-              proFailed = true;
-              proStatusMessage = "Matching pro branch has never passed. Falling back to master"
-              branch = await helper.findMatchingBranch("liquibase", "liquibase-pro", ["main", "master"])
-            }
-            core.setOutput("proBranchName", branch.name);
-            if (!proFailed) {
-              if (!branch.workflowId) {
-                proStatusMessage = "does not have a ran workflow";
-                proFailed = true
-              } else if ( branch.runStatus != "completed") {
-                proStatusMessage = "build is "+ branch.runStatus;
-                proFailed = true
-              } else if ( branch.runConclusion != "success") {
-                proStatusMessage = "build conclusion was "+branch.runConclusion;
-                proFailed = true
-              }
-            }
-            statusMessage = "liquibase/liquibase-pro:"+branch.name+"@" + branch.sha.substring(0, 7) + " " + proStatusMessage;
-            console.log("Pro failed?" + proFailed + ": "+statusMessage);
+#             if (!branch.lastSuccessfulRunNumber) {
+#               proFailed = true;
+#               proStatusMessage = "Matching pro branch has never passed. Falling back to master"
+#               branch = await helper.findMatchingBranch("liquibase", "liquibase-pro", ["main", "master"])
+#             }
+#             core.setOutput("proBranchName", branch.name);
+#             if (!proFailed) {
+#               if (!branch.workflowId) {
+#                 proStatusMessage = "does not have a ran workflow";
+#                 proFailed = true
+#               } else if ( branch.runStatus != "completed") {
+#                 proStatusMessage = "build is "+ branch.runStatus;
+#                 proFailed = true
+#               } else if ( branch.runConclusion != "success") {
+#                 proStatusMessage = "build conclusion was "+branch.runConclusion;
+#                 proFailed = true
+#               }
+#             }
+#             statusMessage = "liquibase/liquibase-pro:"+branch.name+"@" + branch.sha.substring(0, 7) + " " + proStatusMessage;
+#             console.log("Pro failed?" + proFailed + ": "+statusMessage);
 
-  build:
-    name: Build & Package
-    runs-on: ubuntu-22.04
-    needs: [setup]
-    permissions:
-      contents: read
-      packages: write
-    steps:
-      - uses: actions/checkout@v3
+#   build:
+#     name: Build & Package
+#     runs-on: ubuntu-22.04
+#     needs: [setup]
+#     permissions:
+#       contents: read
+#       packages: write
+#     steps:
+#       - uses: actions/checkout@v3
 
-      - name: Set up Java for publishing to GitHub Repository
-        uses: actions/setup-java@v3
-        with:
-          java-version: '17'
-          distribution: 'temurin'
-          cache: 'maven'
-          server-id: github
-      - name: Set up Maven
-        uses: stCarolas/setup-maven@v4.5
-        with:
-          maven-version: ${{ env.MAVEN_VERSION }}
+#       - name: Set up Java for publishing to GitHub Repository
+#         uses: actions/setup-java@v3
+#         with:
+#           java-version: '17'
+#           distribution: 'temurin'
+#           cache: 'maven'
+#           server-id: github
+#       - name: Set up Maven
+#         uses: stCarolas/setup-maven@v4.5
+#         with:
+#           maven-version: ${{ env.MAVEN_VERSION }}
 
-      # Version artifact based off of branch and commit SHA.
-      - name: Version Artifact
-        run: mvn versions:set -DnewVersion="${{ github.ref_name }}-SNAPSHOT" 
+#       # Version artifact based off of branch and commit SHA.
+#       - name: Version Artifact
+#         run: mvn versions:set -DnewVersion="${{ github.ref_name }}-SNAPSHOT" 
 
 
-      # This would still deploy a package if there are test failures. Might help to have build.yml complete and then run this workflow
-      # Publish to GitHub Packages. We are building a tar file which includes liquibase-commercial hence we need -Dliquibase-pro.version
-      - name: Publish package
-        run: |
-          # Read the value of liquibase-pro.version from build.yml
-          # proBranchName=${{ needs.setup.outputs.proBranchName }}
-          # mvn -B -P liquibase-commercial clean deploy -DskipTests=true -Dliquibase-pro.version=$proBranchName
+#       # This would still deploy a package if there are test failures. Might help to have build.yml complete and then run this workflow
+#       # Publish to GitHub Packages. We are building a tar file which includes liquibase-commercial hence we need -Dliquibase-pro.version
+#       - name: Publish package
+#         run: |
+#           # Read the value of liquibase-pro.version from build.yml
+#           # proBranchName=${{ needs.setup.outputs.proBranchName }}
+#           # mvn -B -P liquibase-commercial clean deploy -DskipTests=true -Dliquibase-pro.version=$proBranchName
 
-          mvn -B -P liquibase-commercial clean deploy -DskipTests=true -Dliquibase-pro.version=${{ needs.setup.outputs.proBranchName }} 
+#           mvn -B -P liquibase-commercial clean deploy -DskipTests=true -Dliquibase-pro.version=${{ needs.setup.outputs.proBranchName }} 
           
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+#         env:
+#           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

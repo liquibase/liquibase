@@ -35,7 +35,7 @@ jobs:
 
       # Version artifact based off of branch and commit SHA.
       - name: Version Artifact
-        run: mvn versions:set -DnewVersion="master-SNAPSHOT"
+        run: mvn versions:set -DnewVersion="master-SNAPSHOT" 
 
       # Publish to GitHub Packages
       - name: Publish package
