@@ -26,7 +26,7 @@
 		<firebird.version>5.0.1.java8</firebird.version>
 
 		<assemblyConfigFile>src/main/assembly/assembly-bin.xml</assemblyConfigFile>
-		<maven.deploy.skip>false</maven.deploy.skip>
+		<maven.deploy.skip>true</maven.deploy.skip>
 		<maven.install.skip>true</maven.install.skip>
 	</properties>
 	<dependencies>
@@ -197,7 +197,7 @@
                     <skipSource>true</skipSource>
 				</configuration>
 			</plugin>
-					<!-- this builds and attaches the tar file of liquibase-core -->
+					<!-- this builds and attaches the tar file of liquibase (which has liquibase cli) -->
 			<plugin>
                 <artifactId>maven-assembly-plugin</artifactId>
                 <version>3.6.0</version>
@@ -236,6 +236,28 @@
                         <phase>install</phase>
 						<goals>
                             <goal>install-file</goal>
+						</goals>
+					</execution>
+				</executions>
+			</plugin>
+			<plugin>
+                <artifactId>maven-deploy-plugin</artifactId>
+                <version>3.1.1</version>
+				<configuration>
+					<groupId>${project.groupId}</groupId>
+					<version>${project.version}</version>
+					<packaging>tar.gz</packaging>
+                    <file>${project.build.directory}/liquibase-${project.version}.tar.gz</file>
+					<artifactId>liquibase</artifactId>
+					<repositoryId>${deploy.repositoryId}</repositoryId>
+					<url>${deploy.url}</url>
+				</configuration>
+				<executions>
+					<execution>
+                        <id>deploy-file</id>
+                        <phase>deploy</phase>
+						<goals>
+                            <goal>deploy-file</goal>
 						</goals>
 					</execution>
 				</executions>
