@@ -14,7 +14,7 @@ import java.util.*;
  * name, and it is case-insensitive.
  * </p>
  *
- * @see <a href="https://docs.liquibase.com/concepts/advanced/labels.html" target="_top">labels</a> in documentation
+ * @see <a href="https://docs.liquibase.com/concepts/changelogs/attributes/labels.html" target="_top">labels</a> in documentation
  */
 public class LabelExpression {
 
