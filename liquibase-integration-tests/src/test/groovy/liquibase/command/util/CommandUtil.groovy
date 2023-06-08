@@ -62,10 +62,14 @@ class CommandUtil {
         execUpdateCommandInScope(resourceAccessor, db, changelogFile, labels, contexts, outputFile)
     }
     static void runGenerateChangelog(DatabaseTestSystem db, String outputFile) throws CommandExecutionException {
+        runGenerateChangelog(db.getConnectionUrl(), db.getUsername(), db.getPassword(), outputFile)
+    }
+
+    static void runGenerateChangelog(String url, String username, String password, String outputFile) throws CommandExecutionException {
         CommandScope commandScope = new CommandScope(GenerateChangelogCommandStep.COMMAND_NAME)
-        commandScope.addArgumentValue(DbUrlConnectionCommandStep.URL_ARG, db.getConnectionUrl())
-        commandScope.addArgumentValue(DbUrlConnectionCommandStep.USERNAME_ARG, db.getUsername())
-        commandScope.addArgumentValue(DbUrlConnectionCommandStep.PASSWORD_ARG, db.getPassword())
+        commandScope.addArgumentValue(DbUrlConnectionCommandStep.URL_ARG, url)
+        commandScope.addArgumentValue(DbUrlConnectionCommandStep.USERNAME_ARG, username)
+        commandScope.addArgumentValue(DbUrlConnectionCommandStep.PASSWORD_ARG, password)
         commandScope.addArgumentValue(GenerateChangelogCommandStep.OVERWRITE_OUTPUT_FILE_ARG, true)
         commandScope.addArgumentValue(GenerateChangelogCommandStep.CHANGELOG_FILE_ARG, outputFile)
         OutputStream outputStream = new ByteArrayOutputStream()
