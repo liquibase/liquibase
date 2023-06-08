@@ -503,7 +503,7 @@ jobs:
         uses: whelk-io/maven-settings-xml-action@v20
         with:
           repositories: '[{ "id": "github", "url": "https://maven.pkg.github.com/liquibase/liquibase" }, {"id": "liquibase-pro", "url": "https://maven.pkg.github.com/liquibase/liquibase-pro"}]'
-          servers: '[{ "id": "liquibase-pro", "username": "liquibot", "password": "${{ secrets.LIQUIBOT_PAT }}" }]'
+          servers: '[{ "id": "liquibase-pro", "username": "liquibot", "password": "${{ secrets.LIQUIBOT_PAT }}" }, { "id": "github", "username": "liquibot", "password": "${{ secrets.LIQUIBOT_PAT }}" }]'
 
       - name: Set up Java for publishing to GPM
         uses: actions/setup-java@v3
