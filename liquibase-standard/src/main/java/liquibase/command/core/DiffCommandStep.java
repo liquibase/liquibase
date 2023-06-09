@@ -146,7 +146,9 @@ public class DiffCommandStep extends AbstractCommandStep {
 
         SnapshotControl snapshotControl = commandScope.getArgumentValue(TARGET_SNAPSHOT_CONTROL_ARG);
         if (snapshotControl == null) {
-            snapshotControl = new SnapshotControl(targetDatabase, (Class[])
+            ObjectChangeFilter objectChangeFilter = (ObjectChangeFilter) resultsBuilder
+                    .getResult(PreCompareCommandStep.OBJECT_CHANGE_FILTER_RESULT.getName());
+            snapshotControl = new SnapshotControl(targetDatabase, objectChangeFilter, (Class[])
                     resultsBuilder.getResult(PreCompareCommandStep.SNAPSHOT_TYPES_RESULT.getName()));
         }
 
