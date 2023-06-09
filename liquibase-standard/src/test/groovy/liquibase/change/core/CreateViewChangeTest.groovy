@@ -54,7 +54,7 @@ class CreateViewChangeTest extends StandardChangeTest {
         when:
         def change = new CreateViewChange()
         try {
-            change.load(new liquibase.parser.core.ParsedNode(null, "createView").addChild(null, "viewName", "my_view").setValue("select * from test"), resourceSupplier.simpleResourceAccessor)
+            change.load(new liquibase.parser.core.ParsedNode(null, "createView").addChild(null, "viewName", "my_view").setValue("select * from test"), null, resourceSupplier.simpleResourceAccessor)
         } catch (ParsedNodeException e) {
             e.printStackTrace()
         } catch (SetupException e) {

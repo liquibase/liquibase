@@ -1,5 +1,6 @@
 package liquibase.change;
 
+import liquibase.database.Database;
 import liquibase.exception.UnexpectedLiquibaseException;
 import liquibase.parser.core.ParsedNode;
 import liquibase.parser.core.ParsedNodeException;
@@ -433,7 +434,7 @@ public class ConstraintsConfig extends AbstractLiquibaseSerializable {
     }
 
     @Override
-    public void load(ParsedNode parsedNode, ResourceAccessor resourceAccessor) throws ParsedNodeException {
+    public void load(ParsedNode parsedNode, Database database, ResourceAccessor resourceAccessor) throws ParsedNodeException {
         throw new RuntimeException("TODO");
     }
 }

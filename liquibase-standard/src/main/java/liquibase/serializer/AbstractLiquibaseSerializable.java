@@ -1,5 +1,6 @@
 package liquibase.serializer;
 
+import liquibase.database.Database;
 import liquibase.exception.UnexpectedLiquibaseException;
 import liquibase.parser.core.ParsedNode;
 import liquibase.parser.core.ParsedNodeException;
@@ -19,7 +20,7 @@ public abstract class AbstractLiquibaseSerializable implements LiquibaseSerializ
     private Set<String> serializableFields;
 
     @Override
-    public void load(ParsedNode parsedNode, ResourceAccessor resourceAccessor) throws ParsedNodeException {
+    public void load(ParsedNode parsedNode, Database database, ResourceAccessor resourceAccessor) throws ParsedNodeException {
         for (ParsedNode childNode : parsedNode.getChildren()) {
             if (!shouldAutoLoad(childNode)) {
                 continue;
@@ -51,7 +52,7 @@ public abstract class AbstractLiquibaseSerializable implements LiquibaseSerializ
                                     Collection collection = ((Collection) getSerializableFieldValue(childNode.getName()));
                                     for (ParsedNode node : elementNodes) {
                                         LiquibaseSerializable childObject = (LiquibaseSerializable) collectionType.getConstructor().newInstance();
-                                        childObject.load(node, resourceAccessor);
+                                        childObject.load(node, null, resourceAccessor);
                                         collection.add(childObject);
                                     }
                                 }
@@ -62,7 +63,7 @@ public abstract class AbstractLiquibaseSerializable implements LiquibaseSerializ
                                 && !Modifier.isAbstract(dataTypeClass.getModifiers())) {
 
                             LiquibaseSerializable childObject = (LiquibaseSerializable) dataTypeClass.getConstructor().newInstance();
-                            childObject.load(childNode, resourceAccessor);
+                            childObject.load(childNode, null, resourceAccessor);
                             setSerializableFieldValue(childNode.getName(), childObject);
                         }
                     } else if (childNode.getValue() != null) {
@@ -95,7 +96,7 @@ public abstract class AbstractLiquibaseSerializable implements LiquibaseSerializ
                                         Collection collection = ((Collection) getSerializableFieldValue(field));
                                         for (ParsedNode node : elementNodes) {
                                             LiquibaseSerializable childObject = (LiquibaseSerializable) collectionType.getConstructor().newInstance();
-                                            childObject.load(node, resourceAccessor);
+                                            childObject.load(node, null, resourceAccessor);
                                             collection.add(childObject);
                                         }
                                     }

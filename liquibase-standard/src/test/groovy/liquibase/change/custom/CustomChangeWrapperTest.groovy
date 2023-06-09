@@ -243,7 +243,7 @@ class CustomChangeWrapperTest extends Specification {
                 .addChild(new ParsedNode(null, "param").addChildren([name: "param 3"]).setValue("param 3 value"))
         def change = new CustomChangeWrapper()
         try {
-            change.load(node, resourceSupplier.simpleResourceAccessor)
+            change.load(node, null, resourceSupplier.simpleResourceAccessor)
         } catch (ParsedNodeException e) {
             e.printStackTrace()
         }
@@ -266,7 +266,7 @@ class CustomChangeWrapperTest extends Specification {
                 .addChild(new ParsedNode(null, "otherNode").setValue("should be ignored"))
                 .addChild(new ParsedNode(null, "param").addChildren([name: "param 3"]).setValue("param 3 value"))
         def change = new CustomChangeWrapper()
-        change.load(node, resourceSupplier.simpleResourceAccessor)
+        change.load(node, null, resourceSupplier.simpleResourceAccessor)
 
         then:
         thrown(ParsedNodeException.class)
@@ -277,7 +277,7 @@ class CustomChangeWrapperTest extends Specification {
         when:
         def node = new ParsedNode(null, "customChange")
         def change = new CustomChangeWrapper()
-        change.load(node, resourceSupplier.simpleResourceAccessor)
+        change.load(node, null, resourceSupplier.simpleResourceAccessor)
 
         then:
         thrown(ParsedNodeException.class)
@@ -293,7 +293,7 @@ class CustomChangeWrapperTest extends Specification {
                                            new ParsedNode(null, "param").addChildren([name: "param 3"]).setValue("param 3 value")])
         def change = new CustomChangeWrapper()
         try {
-            change.load(node, resourceSupplier.simpleResourceAccessor)
+            change.load(node, null, resourceSupplier.simpleResourceAccessor)
         } catch (ParsedNodeException e) {
             e.printStackTrace()
         }
@@ -311,7 +311,7 @@ class CustomChangeWrapperTest extends Specification {
         def change = new CustomChangeWrapper()
         try {
             change.load(new liquibase.parser.core.ParsedNode(null, "customChange")
-                    .addChildren([class: "liquibase.change.custom.ExampleCustomSqlChange", tableName: "my_table", columnName: "my_col", unusedParam: "unused value"]), resourceSupplier.simpleResourceAccessor)
+                    .addChildren([class: "liquibase.change.custom.ExampleCustomSqlChange", tableName: "my_table", columnName: "my_col", unusedParam: "unused value"]), null, resourceSupplier.simpleResourceAccessor)
         } catch (ParsedNodeException e) {
             e.printStackTrace()
         }

@@ -12,7 +12,6 @@ import liquibase.configuration.LiquibaseConfiguration;
 import liquibase.database.Database;
 import liquibase.database.DatabaseList;
 import liquibase.database.ObjectQuotingStrategy;
-import liquibase.database.core.MSSQLDatabase;
 import liquibase.exception.*;
 import liquibase.executor.Executor;
 import liquibase.executor.ExecutorService;
@@ -357,7 +356,7 @@ public class ChangeSet implements Conditional, ChangeLogChild {
     }
 
     @Override
-    public void load(ParsedNode node, ResourceAccessor resourceAccessor) throws ParsedNodeException {
+    public void load(ParsedNode node, Database database, ResourceAccessor resourceAccessor) throws ParsedNodeException {
         this.id = node.getChildValue(null, "id", String.class);
         this.author = node.getChildValue(null, "author", String.class);
         this.alwaysRun = node.getChildValue(null, "runAlways", node.getChildValue(null, "alwaysRun", false));
@@ -413,14 +412,14 @@ public class ChangeSet implements Conditional, ChangeLogChild {
         this.setOnValidationFail(ValidationFailOption.valueOf(onValidationFailString));
 
         for (ParsedNode child : node.getChildren()) {
-            handleChildNode(child, resourceAccessor);
+            handleChildNode(child, database, resourceAccessor);
         }
     }
 
-    protected void handleChildNode(ParsedNode child, ResourceAccessor resourceAccessor) throws ParsedNodeException {
+    protected void handleChildNode(ParsedNode child, Database database, ResourceAccessor resourceAccessor) throws ParsedNodeException {
         switch (child.getName()) {
             case "rollback":
-                handleRollbackNode(child, resourceAccessor);
+                handleRollbackNode(child, database, resourceAccessor);
                 break;
             case "validCheckSum":
             case "validCheckSums":
@@ -471,7 +470,7 @@ public class ChangeSet implements Conditional, ChangeLogChild {
                         }
                         sqlVisitor.setContextFilter(contextFilter);
                         sqlVisitor.setLabels(labels);
-                        sqlVisitor.load(node, resourceAccessor);
+                        sqlVisitor.load(node, null, resourceAccessor);
 
                         addSqlVisitor(sqlVisitor);
                     }
@@ -481,15 +480,15 @@ public class ChangeSet implements Conditional, ChangeLogChild {
                 break;
             case "preConditions":
                 this.preconditions = new PreconditionContainer();
-                this.preconditions.load(child, resourceAccessor);
+                this.preconditions.load(child, null, resourceAccessor);
                 break;
             case "changes":
                 for (ParsedNode changeNode : child.getChildren()) {
-                    handleChildNode(changeNode, resourceAccessor);
+                    handleChildNode(changeNode, database, resourceAccessor);
                 }
                 break;
             default:
-                Change change = toChange(child, resourceAccessor);
+                Change change = toChange(child, database, resourceAccessor);
                 if ((change == null) && (child.getValue() instanceof String)) {
                     this.setAttribute(child.getName(), child.getValue());
                 } else {
@@ -499,7 +498,7 @@ public class ChangeSet implements Conditional, ChangeLogChild {
         }
     }
 
-    protected void handleRollbackNode(ParsedNode rollbackNode, ResourceAccessor resourceAccessor) throws ParsedNodeException {
+    protected void handleRollbackNode(ParsedNode rollbackNode, Database database, ResourceAccessor resourceAccessor) throws ParsedNodeException {
         String changeSetId = rollbackNode.getChildValue(null, "changeSetId", String.class);
         if (changeSetId != null) {
             String changeSetAuthor = rollbackNode.getChildValue(null, "changeSetAuthor", String.class);
@@ -526,7 +525,7 @@ public class ChangeSet implements Conditional, ChangeLogChild {
 
         boolean foundValue = false;
         for (ParsedNode childNode : rollbackNode.getChildren()) {
-            Change rollbackChange = toChange(childNode, resourceAccessor);
+            Change rollbackChange = toChange(childNode, database, resourceAccessor);
             if (rollbackChange != null) {
                 addRollbackChange(rollbackChange);
                 foundValue = true;
@@ -553,8 +552,8 @@ public class ChangeSet implements Conditional, ChangeLogChild {
         }
     }
 
-    protected Change toChange(ParsedNode value, ResourceAccessor resourceAccessor) throws ParsedNodeException {
-        Change change = Scope.getCurrentScope().getSingleton(ChangeFactory.class).create(value.getName());
+    protected Change toChange(ParsedNode value, Database database, ResourceAccessor resourceAccessor) throws ParsedNodeException {
+        Change change = Scope.getCurrentScope().getSingleton(ChangeFactory.class).create(value.getName(), database);
         if (change == null) {
             if (value.getChildren().size() > 0 && ChangeLogParserConfiguration.CHANGELOG_PARSE_MODE.getCurrentValue().equals(ChangeLogParserConfiguration.ChangelogParseMode.STRICT)) {
                 String message = "";
@@ -566,7 +565,7 @@ public class ChangeSet implements Conditional, ChangeLogChild {
             }
             return null;
         } else {
-            change.load(value, resourceAccessor);
+            change.load(value, null, resourceAccessor);
 
             return change;
         }

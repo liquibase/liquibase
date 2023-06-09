@@ -591,7 +591,7 @@ public abstract class DatabaseSnapshot implements LiquibaseSerializable {
     }
 
     @Override
-    public void load(ParsedNode parsedNode, ResourceAccessor resourceAccessor) throws ParsedNodeException {
+    public void load(ParsedNode parsedNode, Database database, ResourceAccessor resourceAccessor) throws ParsedNodeException {
         try {
             Map<String, DatabaseObject> referencedObjects = new HashMap<>();
             Map<String, DatabaseObject> objects = new HashMap<>();
@@ -669,7 +669,7 @@ public abstract class DatabaseSnapshot implements LiquibaseSerializable {
             Class<? extends DatabaseObject> objectType = (Class<? extends DatabaseObject>) Class.forName(typeNode.getName());
             for (ParsedNode objectNode : typeNode.getChildren()) {
                 DatabaseObject databaseObject = objectType.getConstructor().newInstance();
-                databaseObject.load(objectNode, resourceAccessor);
+                databaseObject.load(objectNode, null, resourceAccessor);
                 String key = objectType.getName() + "#" + databaseObject.getSnapshotId();
                 objectMap.put(key, databaseObject);
                 allObjects.put(key, databaseObject);

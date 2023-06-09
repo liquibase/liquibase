@@ -1,5 +1,6 @@
 package liquibase.structure.core;
 
+import liquibase.database.Database;
 import liquibase.parser.core.ParsedNode;
 import liquibase.parser.core.ParsedNodeException;
 import liquibase.resource.ResourceAccessor;
@@ -177,14 +178,14 @@ public class Index extends AbstractDatabaseObject {
     }
 
     @Override
-    public void load(ParsedNode parsedNode, ResourceAccessor resourceAccessor) throws ParsedNodeException {
-        super.load(parsedNode, resourceAccessor);
+    public void load(ParsedNode parsedNode, Database database, ResourceAccessor resourceAccessor) throws ParsedNodeException {
+        super.load(parsedNode, database, resourceAccessor);
         ParsedNode columns = parsedNode.getChild(null, "columns");
         List<ParsedNode> nodes = columns.getChildren(null, "column");
         for (int i=0; i < nodes.size(); i++) {
             ParsedNode node = nodes.get(i);
             Column column = new Column();
-            column.load(node, resourceAccessor);
+            column.load(node, null, resourceAccessor);
             column.setName((String) node.getChildren(null, "name").get(0).getValue());
             column.setDescending(node.getChildValue(null, "descending", Boolean.class));
             column.setComputed(node.getChildValue(null, "computed", Boolean.class));

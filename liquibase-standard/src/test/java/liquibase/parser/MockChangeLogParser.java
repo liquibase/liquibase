@@ -2,6 +2,7 @@ package liquibase.parser;
 
 import liquibase.changelog.ChangeLogParameters;
 import liquibase.changelog.DatabaseChangeLog;
+import liquibase.database.Database;
 import liquibase.exception.ChangeLogParseException;
 import liquibase.resource.ResourceAccessor;
 import liquibase.servicelocator.LiquibaseService;
@@ -41,7 +42,7 @@ public class MockChangeLogParser implements ChangeLogParser {
     }
 
     @Override
-    public DatabaseChangeLog parse(String physicalChangeLogLocation, ChangeLogParameters changeLogParameters,
+    public DatabaseChangeLog parse(String physicalChangeLogLocation, Database database, ChangeLogParameters changeLogParameters,
                                    ResourceAccessor resourceAccessor) throws ChangeLogParseException {
         return changeLogs.get(physicalChangeLogLocation);
     }

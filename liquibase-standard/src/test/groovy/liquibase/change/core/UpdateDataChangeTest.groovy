@@ -43,7 +43,7 @@ public class UpdateDataChangeTest extends StandardChangeTest {
                 .addChild(new ParsedNode(null, "param").addChild(null, "valueNumeric", "134"))
                 .addChild(new ParsedNode(null, "param").addChildren([name: "other_val", value: "asdf"]))
         try {
-            change.load(new liquibase.parser.core.ParsedNode(null, "updateData").addChild(null, "tableName", "updateTest").addChild(whereParams), resourceSupplier.simpleResourceAccessor)
+            change.load(new liquibase.parser.core.ParsedNode(null, "updateData").addChild(null, "tableName", "updateTest").addChild(whereParams), null, resourceSupplier.simpleResourceAccessor)
         } catch (ParsedNodeException e) {
             e.printStackTrace()
         }

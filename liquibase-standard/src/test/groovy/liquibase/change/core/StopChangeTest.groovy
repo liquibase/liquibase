@@ -14,7 +14,7 @@ class StopChangeTest extends Specification {
         when:
         def change = new StopChange()
         try {
-            change.load(new liquibase.parser.core.ParsedNode(null, "stop").setValue("stopping..."), resourceSupplier.simpleResourceAccessor)
+            change.load(new liquibase.parser.core.ParsedNode(null, "stop").setValue("stopping..."), null, resourceSupplier.simpleResourceAccessor)
         } catch (ParsedNodeException e) {
             e.printStackTrace()
         } catch (SetupException e) {

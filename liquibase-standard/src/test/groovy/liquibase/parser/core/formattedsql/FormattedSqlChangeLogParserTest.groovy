@@ -255,14 +255,14 @@ CREATE TABLE ALL_CAPS_TABLE_2 (
 
     def invalidPrecondition() throws Exception {
         when:
-        new MockFormattedSqlChangeLogParser(INVALID_CHANGELOG_INVALID_PRECONDITION).parse("asdf.sql", new ChangeLogParameters(), new JUnitResourceAccessor())
+        new MockFormattedSqlChangeLogParser(INVALID_CHANGELOG_INVALID_PRECONDITION).parse("asdf.sql", null, new ChangeLogParameters(), new JUnitResourceAccessor())
         then:
         thrown(ChangeLogParseException)
     }
 
     def invalidPreconditionPattern() throws Exception {
         when:
-        new MockFormattedSqlChangeLogParser(INVALID_CHANGELOG_INVALID_PRECONDITION_PATTERN).parse("asdf.sql", new ChangeLogParameters(), new JUnitResourceAccessor())
+        new MockFormattedSqlChangeLogParser(INVALID_CHANGELOG_INVALID_PRECONDITION_PATTERN).parse("asdf.sql", null, new ChangeLogParameters(), new JUnitResourceAccessor())
         then:
         def e = thrown(ChangeLogParseException)
         assert e != null
@@ -274,7 +274,7 @@ CREATE TABLE ALL_CAPS_TABLE_2 (
         expect:
         ChangeLogParameters params = new ChangeLogParameters()
         params.set("tablename", "table4")
-        DatabaseChangeLog changeLog = new MockFormattedSqlChangeLogParser(VALID_CHANGELOG).parse("asdf.sql", params, new JUnitResourceAccessor())
+        DatabaseChangeLog changeLog = new MockFormattedSqlChangeLogParser(VALID_CHANGELOG).parse("asdf.sql", null, params, new JUnitResourceAccessor())
 
         changeLog.getLogicalFilePath() == "asdf.sql"
 
@@ -419,7 +419,7 @@ CREATE TABLE ALL_CAPS_TABLE_2 (
     def parseIgnoreProperty() throws Exception {
         expect:
         ChangeLogParameters params = new ChangeLogParameters()
-        DatabaseChangeLog changeLog = new MockFormattedSqlChangeLogParser(VALID_CHANGELOG_WITH_IGNORE_PROP).parse("asdf.sql", params, new JUnitResourceAccessor())
+        DatabaseChangeLog changeLog = new MockFormattedSqlChangeLogParser(VALID_CHANGELOG_WITH_IGNORE_PROP).parse("asdf.sql", null, params, new JUnitResourceAccessor())
 
         changeLog.getChangeSets().get(0).getAuthor() == "sk"
         changeLog.getChangeSets().get(0).getId() == "1"
@@ -437,7 +437,7 @@ CREATE TABLE ALL_CAPS_TABLE_2 (
                 "lastname VARCHAR(255))" +
                 ");\n"
 
-        DatabaseChangeLog changeLog = new MockFormattedSqlChangeLogParser(changeLogWithOneGoodOneBad).parse("asdf.sql", new ChangeLogParameters(), new JUnitResourceAccessor())
+        DatabaseChangeLog changeLog = new MockFormattedSqlChangeLogParser(changeLogWithOneGoodOneBad).parse("asdf.sql", null, new ChangeLogParameters(), new JUnitResourceAccessor())
 
         then:
         ChangeSet changeSet = changeLog.getChangeSets().get(0)
@@ -456,7 +456,7 @@ CREATE TABLE ALL_CAPS_TABLE_2 (
                 "lastname VARCHAR(255))" +
                 ");\n"
 
-        DatabaseChangeLog changeLog = new MockFormattedSqlChangeLogParser(changeLogWithInvalidChangeSetAttributes).parse("asdf.sql", new ChangeLogParameters(), new JUnitResourceAccessor())
+        DatabaseChangeLog changeLog = new MockFormattedSqlChangeLogParser(changeLogWithInvalidChangeSetAttributes).parse("asdf.sql", null, new ChangeLogParameters(), new JUnitResourceAccessor())
 
         then:
         def e = thrown(ChangeLogParseException)
@@ -470,7 +470,7 @@ CREATE TABLE ALL_CAPS_TABLE_2 (
                 "--preconditions onFail:HALT onSqlOutput:TEST\n" +
                 "--precondition-sql-check expectedResult:1 select count(*) from dual where 1=2;\n" +
                 "create table pctest2 (id number);"
-        DatabaseChangeLog changeLog = new MockFormattedSqlChangeLogParser(changeLogWithOnSqlOutputPrecondition).parse("asdf.sql", new ChangeLogParameters(), new JUnitResourceAccessor())
+        DatabaseChangeLog changeLog = new MockFormattedSqlChangeLogParser(changeLogWithOnSqlOutputPrecondition).parse("asdf.sql", null, new ChangeLogParameters(), new JUnitResourceAccessor())
 
         then:
         assert changeLog.getPreconditions().getOnSqlOutput() == PreconditionContainer.OnSqlOutputOption.TEST
@@ -483,7 +483,7 @@ CREATE TABLE ALL_CAPS_TABLE_2 (
                 "--preconditions onFail:HALT onUpdateSQL:TEST onSqlOutput:TEST\n" +
                 "--precondition-sql-check expectedResult:1 select count(*) from dual where 1=2;\n" +
                 "create table pctest2 (id number);"
-        DatabaseChangeLog changeLog = new MockFormattedSqlChangeLogParser(changeLogWithOnSqlOutputPrecondition).parse("asdf.sql", new ChangeLogParameters(), new JUnitResourceAccessor())
+        DatabaseChangeLog changeLog = new MockFormattedSqlChangeLogParser(changeLogWithOnSqlOutputPrecondition).parse("asdf.sql", null, new ChangeLogParameters(), new JUnitResourceAccessor())
 
         then:
         thrown(IllegalArgumentException.class)
@@ -502,7 +502,7 @@ CREATE TABLE ALL_CAPS_TABLE_2 (
                 "--changeset Steve\n" +
                 "create table test (id int);\n"
 
-        DatabaseChangeLog changeLog = new MockFormattedSqlChangeLogParser(changeLogWithOneGoodOneBad).parse("asdf.sql", new ChangeLogParameters(), new JUnitResourceAccessor())
+        DatabaseChangeLog changeLog = new MockFormattedSqlChangeLogParser(changeLogWithOneGoodOneBad).parse("asdf.sql", null, new ChangeLogParameters(), new JUnitResourceAccessor())
 
         then:
         thrown(ChangeLogParseException)
@@ -515,7 +515,7 @@ CREATE TABLE ALL_CAPS_TABLE_2 (
                 "--changeset Steve\n" +
                 "create table test (id int);\n"
 
-        DatabaseChangeLog changeLog = new MockFormattedSqlChangeLogParser(changeLogWithOnlyAuthor).parse("asdf.sql", new ChangeLogParameters(), new JUnitResourceAccessor())
+        DatabaseChangeLog changeLog = new MockFormattedSqlChangeLogParser(changeLogWithOnlyAuthor).parse("asdf.sql", null, new ChangeLogParameters(), new JUnitResourceAccessor())
 
         then:
         def e = thrown(ChangeLogParseException)
@@ -529,7 +529,7 @@ CREATE TABLE ALL_CAPS_TABLE_2 (
                 "--changeset John Doe:12345\n" +
                 "create table test (id int);\n"
 
-        DatabaseChangeLog changeLog = new MockFormattedSqlChangeLogParser(changeLogWithSpace).parse("asdf.sql", new ChangeLogParameters(), new JUnitResourceAccessor())
+        DatabaseChangeLog changeLog = new MockFormattedSqlChangeLogParser(changeLogWithSpace).parse("asdf.sql", null, new ChangeLogParameters(), new JUnitResourceAccessor())
 
         then:
         changeLog.getChangeSets().size() == 1
@@ -543,7 +543,7 @@ CREATE TABLE ALL_CAPS_TABLE_2 (
                 "--changeset John Doe:12345\n" +
                 "create table test (id int);\n"
 
-        DatabaseChangeLog changeLog = new MockFormattedSqlChangeLogParser(changeLogWithSpace).parse("asdf.sql", new ChangeLogParameters(), new JUnitResourceAccessor())
+        DatabaseChangeLog changeLog = new MockFormattedSqlChangeLogParser(changeLogWithSpace).parse("asdf.sql", null, new ChangeLogParameters(), new JUnitResourceAccessor())
 
         then:
         changeLog.getChangeSets().size() == 1
@@ -558,7 +558,7 @@ CREATE TABLE ALL_CAPS_TABLE_2 (
                 "-changeset John Doe:12345\n" +
                 "create table test (id int);\n"
 
-        DatabaseChangeLog changeLog = new MockFormattedSqlChangeLogParser(changeLogWithOneDash).parse("asdf.sql", new ChangeLogParameters(), new JUnitResourceAccessor())
+        DatabaseChangeLog changeLog = new MockFormattedSqlChangeLogParser(changeLogWithOneDash).parse("asdf.sql", null, new ChangeLogParameters(), new JUnitResourceAccessor())
 
         then:
         thrown(ChangeLogParseException)
@@ -572,7 +572,7 @@ CREATE TABLE ALL_CAPS_TABLE_2 (
                 "create table test (id int);\n" +
                 "-rollback drop table test;\n"
 
-        DatabaseChangeLog changeLog = new MockFormattedSqlChangeLogParser(changeLogWithOneDash).parse("asdf.sql", new ChangeLogParameters(), new JUnitResourceAccessor())
+        DatabaseChangeLog changeLog = new MockFormattedSqlChangeLogParser(changeLogWithOneDash).parse("asdf.sql", null, new ChangeLogParameters(), new JUnitResourceAccessor())
 
         then:
         def e = thrown(ChangeLogParseException)
@@ -589,7 +589,7 @@ CREATE TABLE ALL_CAPS_TABLE_2 (
                 "create table test (id int);\n" +
                 "-rollback drop table test;\n"
 
-        DatabaseChangeLog changeLog = new MockFormattedSqlChangeLogParser(changeLogWithOneDash).parse("asdf.sql", new ChangeLogParameters(), new JUnitResourceAccessor())
+        DatabaseChangeLog changeLog = new MockFormattedSqlChangeLogParser(changeLogWithOneDash).parse("asdf.sql", null, new ChangeLogParameters(), new JUnitResourceAccessor())
 
         then:
         def e = thrown(ChangeLogParseException)
@@ -624,7 +624,7 @@ not validCheckSum here
 not ignoreLines here
 - not ignoreLines here
 -- not ignoreLines here
-""".trim()).parse("asdf.sql", new ChangeLogParameters(), new JUnitResourceAccessor())
+""".trim()).parse("asdf.sql", null, new ChangeLogParameters(), new JUnitResourceAccessor())
 
         then:
         StringUtil.standardizeLineEndings(((RawSQLChange) changeLog.getChangeSets()[0].getChanges()[0]).getSql().trim()) == StringUtil.standardizeLineEndings("""
@@ -659,7 +659,7 @@ not ignoreLines here
                 "--comment: This is a test comment\n" +
                 "create table test (id int);\n"
 
-        DatabaseChangeLog changeLog = new MockFormattedSqlChangeLogParser(changeLogWithComment).parse("asdf.sql", new ChangeLogParameters(), new JUnitResourceAccessor())
+        DatabaseChangeLog changeLog = new MockFormattedSqlChangeLogParser(changeLogWithComment).parse("asdf.sql", null, new ChangeLogParameters(), new JUnitResourceAccessor())
 
         then:
         changeLog.getChangeSets().size() == 1
@@ -674,7 +674,7 @@ not ignoreLines here
                 "--changeset JohnDoe:12345\n" +
                 "-comment: This is a test comment\n" +
                 "create table test (id int);\n"
-        DatabaseChangeLog changeLog = new MockFormattedSqlChangeLogParser(changeLogWithComment).parse("asdf.sql", new ChangeLogParameters(), new JUnitResourceAccessor())
+        DatabaseChangeLog changeLog = new MockFormattedSqlChangeLogParser(changeLogWithComment).parse("asdf.sql", null, new ChangeLogParameters(), new JUnitResourceAccessor())
 
         then:
         thrown(ChangeLogParseException)
@@ -686,7 +686,7 @@ not ignoreLines here
                 "--changeset JohnDoe:12345\n" +
                 "--comments: This is a test comment\n" +
                 "create table test (id int);\n"
-        DatabaseChangeLog changeLog = new MockFormattedSqlChangeLogParser(changeLogWithComment).parse("asdf.sql", new ChangeLogParameters(), new JUnitResourceAccessor())
+        DatabaseChangeLog changeLog = new MockFormattedSqlChangeLogParser(changeLogWithComment).parse("asdf.sql", null, new ChangeLogParameters(), new JUnitResourceAccessor())
 
         then:
         thrown(ChangeLogParseException)
@@ -703,7 +703,7 @@ not ignoreLines here
                 "--ignore:1\n" +
                 "foo\n" +
                 "create table tbl_dat7721e ( ID int not null, FNAME varchar(100) not null);\n"
-        DatabaseChangeLog changeLog = new MockFormattedSqlChangeLogParser(changeLogWithComment).parse("asdf.sql", new ChangeLogParameters(), new JUnitResourceAccessor())
+        DatabaseChangeLog changeLog = new MockFormattedSqlChangeLogParser(changeLogWithComment).parse("asdf.sql", null, new ChangeLogParameters(), new JUnitResourceAccessor())
 
         then:
         def e = thrown(ChangeLogParseException)
@@ -721,7 +721,7 @@ not ignoreLines here
                 "--ignore:1\n" +
                 "foo\n" +
                 "create table tbl_dat7721e ( ID int not null, FNAME varchar(100) not null);\n"
-        DatabaseChangeLog changeLog = new MockFormattedSqlChangeLogParser(changeLogString).parse("asdf.sql", new ChangeLogParameters(), new JUnitResourceAccessor())
+        DatabaseChangeLog changeLog = new MockFormattedSqlChangeLogParser(changeLogString).parse("asdf.sql", null, new ChangeLogParameters(), new JUnitResourceAccessor())
 
         then:
         def e = thrown(ChangeLogParseException)
@@ -740,7 +740,7 @@ not ignoreLines here
                 "foo\n" +
                 "-ignoreLines:end\n" +
                 "create table tbl_dat7721e ( ID int not null, FNAME varchar(100) not null);\n"
-        DatabaseChangeLog changeLog = new MockFormattedSqlChangeLogParser(changeLogString).parse("asdf.sql", new ChangeLogParameters(), new JUnitResourceAccessor())
+        DatabaseChangeLog changeLog = new MockFormattedSqlChangeLogParser(changeLogString).parse("asdf.sql", null, new ChangeLogParameters(), new JUnitResourceAccessor())
 
         then:
         def e = thrown(ChangeLogParseException)
@@ -751,7 +751,7 @@ not ignoreLines here
     @Unroll
     def parse_multipleDbms() throws Exception {
         when:
-        def changeLog = new MockFormattedSqlChangeLogParser(changelog).parse("asdf.sql", new ChangeLogParameters(), new JUnitResourceAccessor())
+        def changeLog = new MockFormattedSqlChangeLogParser(changelog).parse("asdf.sql", null, new ChangeLogParameters(), new JUnitResourceAccessor())
         def dbmsSet = changeLog.getChangeSets().get(0).getDbmsSet()
 
         then:
@@ -773,7 +773,7 @@ not ignoreLines here
     def parse_withEndDelimiter() throws Exception {
         expect:
         ChangeLogParameters params = new ChangeLogParameters()
-        DatabaseChangeLog changeLog = new MockFormattedSqlChangeLogParser(END_DELIMITER_CHANGELOG).parse("asdf.sql", params, new JUnitResourceAccessor())
+        DatabaseChangeLog changeLog = new MockFormattedSqlChangeLogParser(END_DELIMITER_CHANGELOG).parse("asdf.sql", null, params, new JUnitResourceAccessor())
 
         changeLog.getLogicalFilePath() == "asdf.sql"
         changeLog.getChangeSets().size() == 1
@@ -792,7 +792,7 @@ not ignoreLines here
     @Unroll("#featureName: #example")
     def "example file"() {
         when:
-        def changeLog = new MockFormattedSqlChangeLogParser(example).parse("asdf.sql", new ChangeLogParameters(), new JUnitResourceAccessor())
+        def changeLog = new MockFormattedSqlChangeLogParser(example).parse("asdf.sql", null, new ChangeLogParameters(), new JUnitResourceAccessor())
 
         then:
         ((RawSQLChange) changeLog.changeSets[0].changes[0]).sql.replace("\r\n", "\n") == expected
@@ -806,7 +806,7 @@ not ignoreLines here
 
     def parse_withAllCaps() {
         when:
-        def changeLog = new MockFormattedSqlChangeLogParser(VALID_ALL_CAPS_CHANGELOG).parse("ALL_CAPS.SQL", new ChangeLogParameters(), new JUnitResourceAccessor())
+        def changeLog = new MockFormattedSqlChangeLogParser(VALID_ALL_CAPS_CHANGELOG).parse("ALL_CAPS.SQL", null, new ChangeLogParameters(), new JUnitResourceAccessor())
 
         then:
         changeLog.getChangeSets().size() == 2
@@ -829,7 +829,7 @@ create table table1 (
 */
                """.trim()
 
-        DatabaseChangeLog changeLog = new MockFormattedSqlChangeLogParser(changeLogWithMultiLineRollback).parse("asdf.sql", new ChangeLogParameters(), new JUnitResourceAccessor())
+        DatabaseChangeLog changeLog = new MockFormattedSqlChangeLogParser(changeLogWithMultiLineRollback).parse("asdf.sql", null, new ChangeLogParameters(), new JUnitResourceAccessor())
 
         then:
         changeLog.getChangeSets().size() == 1
@@ -868,7 +868,7 @@ select (*) from table3;
 --rollback empty
                """.trim()
 
-        DatabaseChangeLog changeLog = new MockFormattedSqlChangeLogParser(changeLogWithMultiLineRollback).parse("asdf.sql", new ChangeLogParameters(), new JUnitResourceAccessor())
+        DatabaseChangeLog changeLog = new MockFormattedSqlChangeLogParser(changeLogWithMultiLineRollback).parse("asdf.sql", null, new ChangeLogParameters(), new JUnitResourceAccessor())
 
         then:
         changeLog.getChangeSets().size() == 3
@@ -905,7 +905,7 @@ create table table1 (
  drop table table1; */
                """.trim()
 
-        DatabaseChangeLog changeLog = new MockFormattedSqlChangeLogParser(changeLogWithMultiLineRollback).parse("asdf.sql", new ChangeLogParameters(), new JUnitResourceAccessor())
+        DatabaseChangeLog changeLog = new MockFormattedSqlChangeLogParser(changeLogWithMultiLineRollback).parse("asdf.sql", null, new ChangeLogParameters(), new JUnitResourceAccessor())
 
         then:
         changeLog.getChangeSets().size() == 1

@@ -18,7 +18,7 @@ class LoadDataColumnConfigTest extends Specification {
                               defaultValueNumeric: "1", type: "NUMERIC"])
         def column = new LoadDataColumnConfig()
         try {
-            column.load(node, resourceSupplier.simpleResourceAccessor)
+            column.load(node, null, resourceSupplier.simpleResourceAccessor)
         } catch (ParsedNodeException e) {
             e.printStackTrace()
         } catch (SetupException e) {

@@ -36,17 +36,17 @@ public class ChangeFactoryTest {
 
     @Test
     public void create_exists() {
-        Change change = Scope.getCurrentScope().getSingleton(ChangeFactory.class).create("createTable");
+        Change change = Scope.getCurrentScope().getSingleton(ChangeFactory.class).create("createTable", null);
 
         assertNotNull(change);
         assertTrue(change instanceof CreateTableChange);
 
-        assertNotSame(change, Scope.getCurrentScope().getSingleton(ChangeFactory.class).create("createTable"));
+        assertNotSame(change, Scope.getCurrentScope().getSingleton(ChangeFactory.class).create("createTable", null));
     }
 
     @Test
     public void create_notExists() {
-        Change change = Scope.getCurrentScope().getSingleton(ChangeFactory.class).create("badChangeName");
+        Change change = Scope.getCurrentScope().getSingleton(ChangeFactory.class).create("badChangeName", null);
 
         assertNull(change);
 

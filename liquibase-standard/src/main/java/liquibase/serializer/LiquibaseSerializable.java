@@ -1,5 +1,6 @@
 package liquibase.serializer;
 
+import liquibase.database.Database;
 import liquibase.parser.core.ParsedNode;
 import liquibase.parser.core.ParsedNodeException;
 import liquibase.resource.ResourceAccessor;
@@ -32,7 +33,7 @@ public interface LiquibaseSerializable {
 
     String getSerializedObjectNamespace();
 
-    void load(ParsedNode parsedNode, ResourceAccessor resourceAccessor) throws ParsedNodeException;
+    void load(ParsedNode parsedNode, Database database, ResourceAccessor resourceAccessor) throws ParsedNodeException;
 
     ParsedNode serialize() throws ParsedNodeException;
 

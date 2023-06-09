@@ -360,7 +360,7 @@ public class DatabaseChangeLog implements Comparable<DatabaseChangeLog>, Conditi
         return changesets;
     }
 
-    public void load(ParsedNode parsedNode, ResourceAccessor resourceAccessor) throws ParsedNodeException, SetupException {
+    public void load(ParsedNode parsedNode, Database database, ResourceAccessor resourceAccessor) throws ParsedNodeException, SetupException {
         setLogicalFilePath(parsedNode.getChildValue(null, "logicalFilePath", String.class));
 
         String context = parsedNode.getChildValue(null, "contextFilter", String.class);
@@ -374,7 +374,7 @@ public class DatabaseChangeLog implements Comparable<DatabaseChangeLog>, Conditi
             setObjectQuotingStrategy(ObjectQuotingStrategy.valueOf(nodeObjectQuotingStrategy));
         }
         for (ParsedNode childNode : parsedNode.getChildren()) {
-            handleChildNode(childNode, resourceAccessor, new HashMap<>());
+            handleChildNode(childNode, database, resourceAccessor, new HashMap<>());
         }
     }
 
@@ -399,19 +399,14 @@ public class DatabaseChangeLog implements Comparable<DatabaseChangeLog>, Conditi
         }
     }
 
-    protected void handleChildNode(ParsedNode node, ResourceAccessor resourceAccessor)
-            throws ParsedNodeException, SetupException {
-        handleChildNode(node, resourceAccessor, new HashMap<>());
-    }
-
-    protected void handleChildNode(ParsedNode node, ResourceAccessor resourceAccessor, Map<String, Object> nodeScratch)
+    protected void handleChildNode(ParsedNode node, Database database, ResourceAccessor resourceAccessor, Map<String, Object> nodeScratch)
             throws ParsedNodeException, SetupException {
         expandExpressions(node);
         String nodeName = node.getName();
         switch (nodeName) {
             case "changeSet":
                 if (isDbmsMatch(node.getChildValue(null, "dbms", String.class))) {
-                    this.addChangeSet(createChangeSet(node, resourceAccessor));
+                    this.addChangeSet(createChangeSet(node, database, resourceAccessor));
                 } else {
                     handleSkippedChangeSet(node);
                 }
@@ -423,7 +418,7 @@ public class DatabaseChangeLog implements Comparable<DatabaseChangeLog>, Conditi
                 nodeScratch = new HashMap<>();
                 nodeScratch.put("modifyChangeSets", modifyChangeSets);
                 for (ParsedNode modifyChildNode : node.getChildren()) {
-                    handleChildNode(modifyChildNode, resourceAccessor, nodeScratch);
+                    handleChildNode(modifyChildNode, database, resourceAccessor, nodeScratch);
                 }
                 nodeScratch.remove("modifyChangeSets");
                 break;
@@ -507,7 +502,7 @@ public class DatabaseChangeLog implements Comparable<DatabaseChangeLog>, Conditi
             }
             case "preConditions": {
                 PreconditionContainer parsedContainer = new PreconditionContainer();
-                parsedContainer.load(node, resourceAccessor);
+                parsedContainer.load(node, null, resourceAccessor);
                 this.preconditionContainer.addNestedPrecondition(parsedContainer);
 
                 break;
@@ -835,7 +830,7 @@ public class DatabaseChangeLog implements Comparable<DatabaseChangeLog>, Conditi
                     }
                 }
                 ChangeLogParser parser = ChangeLogParserFactory.getInstance().getParser(fileName, resourceAccessor);
-                changeLog = parser.parse(fileName, changeLogParameters, resourceAccessor);
+                changeLog = parser.parse(fileName, null, changeLogParameters, resourceAccessor);
                 changeLog.setIncludeContextFilter(includeContextFilter);
                 changeLog.setIncludeLabels(labels);
                 changeLog.setIncludeIgnore(ignore != null ? ignore.booleanValue() : false);
@@ -885,10 +880,10 @@ public class DatabaseChangeLog implements Comparable<DatabaseChangeLog>, Conditi
         return true;
     }
 
-    protected ChangeSet createChangeSet(ParsedNode node, ResourceAccessor resourceAccessor) throws ParsedNodeException {
+    protected ChangeSet createChangeSet(ParsedNode node, Database database, ResourceAccessor resourceAccessor) throws ParsedNodeException {
         ChangeSet changeSet = new ChangeSet(this);
         changeSet.setChangeLogParameters(this.getChangeLogParameters());
-        changeSet.load(node, resourceAccessor);
+        changeSet.load(node, database, resourceAccessor);
         return changeSet;
     }
 

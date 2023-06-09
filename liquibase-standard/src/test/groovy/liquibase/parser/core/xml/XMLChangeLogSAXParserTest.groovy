@@ -53,7 +53,7 @@ class XMLChangeLogSAXParserTest extends Specification {
     def testAllProvidedChangesetsAreLoaded() throws ChangeLogParseException, Exception {
         when:
         def xmlParser = new XMLChangeLogSAXParser()
-        def changeLog = xmlParser.parse("liquibase/parser/core/xml/ignoreDuplicatedChangeLogs/master.changelog.xml",
+        def changeLog = xmlParser.parse("liquibase/parser/core/xml/ignoreDuplicatedChangeLogs/master.changelog.xml", null,
                 new ChangeLogParameters(), new JUnitResourceAccessor())
 
         final List<ChangeSet> changeSets = new ArrayList<ChangeSet>()
@@ -92,7 +92,7 @@ class XMLChangeLogSAXParserTest extends Specification {
         when:
         def resourceAccessor = new MockResourceAccessor(["com/example/insecure.xml": INSECURE_XML])
 
-        new XMLChangeLogSAXParser().parse("com/example/insecure.xml", new ChangeLogParameters(), resourceAccessor)
+        new XMLChangeLogSAXParser().parse("com/example/insecure.xml", null, new ChangeLogParameters(), resourceAccessor)
 
         then:
         def e = thrown(ChangeLogParseException)
@@ -104,7 +104,7 @@ class XMLChangeLogSAXParserTest extends Specification {
         def resourceAccessor = new MockResourceAccessor(["com/example/insecure.xml": INSECURE_XML])
 
         Scope.child(GlobalConfiguration.SECURE_PARSING.key, "false", { ->
-            new XMLChangeLogSAXParser().parse("com/example/insecure.xml", new ChangeLogParameters(), resourceAccessor)
+            new XMLChangeLogSAXParser().parse("com/example/insecure.xml", null, new ChangeLogParameters(), resourceAccessor)
         })
 
 
@@ -119,7 +119,7 @@ class XMLChangeLogSAXParserTest extends Specification {
 
         when:
         def resourceAccessor = new MockResourceAccessor(["com/example/invalid.xml": INVALID_XML])
-        new XMLChangeLogSAXParser().parse(file, new ChangeLogParameters(), resourceAccessor)
+        new XMLChangeLogSAXParser().parse(file, null, new ChangeLogParameters(), resourceAccessor)
 
         then:
         def e = thrown(ChangeLogParseException)
@@ -138,7 +138,7 @@ class XMLChangeLogSAXParserTest extends Specification {
 
         then:
         Scope.child(GlobalConfiguration.VALIDATE_XML_CHANGELOG_FILES.key, "false", { ->
-            def d = new XMLChangeLogSAXParser().parse(file, new ChangeLogParameters(), resourceAccessor)
+            def d = new XMLChangeLogSAXParser().parse(file, null, new ChangeLogParameters(), resourceAccessor)
             assert d.physicalFilePath == file
             assert d.getChangeSets().isEmpty()
         })

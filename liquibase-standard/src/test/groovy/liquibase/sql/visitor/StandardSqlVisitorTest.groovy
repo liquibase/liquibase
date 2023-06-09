@@ -20,7 +20,7 @@ abstract class StandardSqlVisitorTest extends Specification {
         def fieldValue = "value for ${field}"
         node.addChild(null, field, fieldValue)
         try {
-            visitor.load(node, resourceSupplier.simpleResourceAccessor)
+            visitor.load(node, null, resourceSupplier.simpleResourceAccessor)
         } catch (ParsedNodeException e) {
             e.printStackTrace()
         } catch (SetupException e) {

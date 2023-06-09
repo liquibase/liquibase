@@ -16,7 +16,7 @@ class AddColumnConfigTest extends Specification {
         def node = new ParsedNode(null, "column").addChildren([beforeColumn: "before_col", afterColumn: "after_col", position: 4, name: "col_name"])
         def column = new AddColumnConfig()
         try {
-            column.load(node, resourceSupplier.simpleResourceAccessor)
+            column.load(node, null, resourceSupplier.simpleResourceAccessor)
         } catch (ParsedNodeException e) {
             e.printStackTrace()
         } catch (SetupException e) {

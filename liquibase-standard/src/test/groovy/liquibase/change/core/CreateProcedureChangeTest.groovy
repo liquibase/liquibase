@@ -44,7 +44,7 @@ class CreateProcedureChangeTest extends StandardChangeTest {
     def "load with inline sql"() {
         when:
         def change = new CreateProcedureChange()
-        change.load(new ParsedNode(null, "createProcedure").setValue("create procedure sql"), new MockResourceAccessor())
+        change.load(new ParsedNode(null, "createProcedure").setValue("create procedure sql"), null, new MockResourceAccessor())
         change.validate(new OracleDatabase())
 
         then:

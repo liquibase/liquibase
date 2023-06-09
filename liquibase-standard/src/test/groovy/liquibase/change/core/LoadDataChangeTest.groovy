@@ -341,7 +341,7 @@ public class LoadDataChangeTest extends StandardChangeTest {
             change.load(new liquibase.parser.core.ParsedNode(null, "loadData").setValue([
                     [column: [name: "id"]],
                     [column: [name: "new_col", header: "new_col_header"]],
-            ]), resourceSupplier.simpleResourceAccessor)
+            ]), null, resourceSupplier.simpleResourceAccessor)
         } catch (ParsedNodeException e) {
             e.printStackTrace()
         }
@@ -638,7 +638,7 @@ public class LoadDataChangeTest extends StandardChangeTest {
                 [column: [name: "name", defaultValue: "defName"]],
                 [column: [name: "date", defaultValueDate: "2020-01-02 03:04:05"]],
                 [column: [name: "bool", defaultValueBoolean: "true"]]
-        ]), new ClassLoaderResourceAccessor())
+        ]), null, new ClassLoaderResourceAccessor())
 
         SnapshotGeneratorFactory.instance = new MockSnapshotGeneratorFactory(table)
 
@@ -676,7 +676,7 @@ public class LoadDataChangeTest extends StandardChangeTest {
                 [column: [name: "name", defaultValue: "defName"]],
                 [column: [name: "date", defaultValue: "2020-01-02 03:04:05"]],
                 [column: [name: "bool", defaultValue: "t"]]
-        ]), new ClassLoaderResourceAccessor())
+        ]), null, new ClassLoaderResourceAccessor())
 
         SnapshotGeneratorFactory.instance = new MockSnapshotGeneratorFactory(table)
 
@@ -711,7 +711,7 @@ public class LoadDataChangeTest extends StandardChangeTest {
         ]).setValue([
                 [column: [name: "name", type: "STRING"]],
                 [column: [name: "date"]],
-        ]), new ClassLoaderResourceAccessor())
+        ]), null, new ClassLoaderResourceAccessor())
 
         SnapshotGeneratorFactory.instance = new MockSnapshotGeneratorFactory()
 
@@ -738,7 +738,7 @@ public class LoadDataChangeTest extends StandardChangeTest {
                 [column: [name: "date", type: "DATE"]],
                 [column: [name: "datetime", type: "DATETIME"]],
                 [column: [name: "time", type: "TIME"]],
-        ]), new ClassLoaderResourceAccessor())
+        ]), null, new ClassLoaderResourceAccessor())
 
         SnapshotGeneratorFactory.instance = new MockSnapshotGeneratorFactory()
 
@@ -788,9 +788,9 @@ public class LoadDataChangeTest extends StandardChangeTest {
                 file     : "liquibase/change/core/sample.data1.csv",
                 tableName: "table.name"
         ]).setValue([
-                [column: [name: "a", header:"name", index:1, type: "STRING"]],
+                [column: [name: "a", header: "name", index: 1, type: "STRING"]],
                 [column: [name: "username", type: "STRING"]]
-        ]), new ClassLoaderResourceAccessor())
+        ]), null, new ClassLoaderResourceAccessor())
         ValidationErrors foundErrors = change.validate(mockDB);
         SqlStatement[] sqlStatements = change.generateStatements(mockDB)
 
@@ -810,10 +810,10 @@ public class LoadDataChangeTest extends StandardChangeTest {
                 file     : "liquibase/change/core/sample.data1.csv",
                 tableName: ""
         ]).setValue([
-                [column: [name: "a", header:"", index:1, type: "STRING", defaultValue: ""]],
+                [column: [name: "a", header: "", index: 1, type: "STRING", defaultValue: ""]],
                 [column: [name: "", type: ""]],
                 [column: []]
-        ]), new ClassLoaderResourceAccessor())
+        ]), null, new ClassLoaderResourceAccessor())
 
         ValidationErrors errors = change.validate(mockDB)
         then:

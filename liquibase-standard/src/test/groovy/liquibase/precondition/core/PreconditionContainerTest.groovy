@@ -1,6 +1,6 @@
 package liquibase.precondition.core
 
-import liquibase.GlobalConfiguration
+
 import liquibase.Scope
 import liquibase.exception.SetupException
 import liquibase.parser.ChangeLogParserConfiguration
@@ -20,7 +20,7 @@ class PreconditionContainerTest extends Specification {
         def node = new ParsedNode(null, "preConditions").addChildren([onFail: "MARK_RAN", onError: "CONTINUE", onSqlOutput: "IGNORE", onFailMessage: "I Failed", onErrorMessage: "I Errored"])
         def container = new PreconditionContainer()
         try {
-            container.load(node, resourceSupplier.simpleResourceAccessor)
+            container.load(node, null, resourceSupplier.simpleResourceAccessor)
         } catch (ParsedNodeException e) {
             e.printStackTrace()
         } catch (SetupException e) {
@@ -40,7 +40,7 @@ class PreconditionContainerTest extends Specification {
         def node = new ParsedNode(null, "preConditions").addChildren([onFail: "MARK_RAN"]).setValue(new ParsedNode(null, "tableExists").addChildren([tableName: "my_table"]))
         def container = new PreconditionContainer()
         try {
-            container.load(node, resourceSupplier.simpleResourceAccessor)
+            container.load(node, null, resourceSupplier.simpleResourceAccessor)
         } catch (ParsedNodeException e) {
             e.printStackTrace()
         } catch (SetupException e) {
@@ -62,7 +62,7 @@ class PreconditionContainerTest extends Specification {
         ])
         def container = new PreconditionContainer()
         try {
-            container.load(node, resourceSupplier.simpleResourceAccessor)
+            container.load(node, null, resourceSupplier.simpleResourceAccessor)
         } catch (ParsedNodeException e) {
             e.printStackTrace()
         } catch (SetupException e) {
@@ -85,7 +85,7 @@ class PreconditionContainerTest extends Specification {
 
         def container = new PreconditionContainer()
         try {
-            container.load(node, resourceSupplier.simpleResourceAccessor)
+            container.load(node, null, resourceSupplier.simpleResourceAccessor)
         } catch (ParsedNodeException e) {
             e.printStackTrace()
         } catch (SetupException e) {
@@ -112,7 +112,7 @@ class PreconditionContainerTest extends Specification {
 
         def container = new PreconditionContainer()
         try {
-            container.load(node, resourceSupplier.simpleResourceAccessor)
+            container.load(node, null, resourceSupplier.simpleResourceAccessor)
         } catch (ParsedNodeException e) {
             e.printStackTrace()
         } catch (SetupException e) {
@@ -139,7 +139,7 @@ class PreconditionContainerTest extends Specification {
                 .addChild(new ParsedNode(null, "tableExists").addChildren([tableName: "my_table"]))
 
         def container = new PreconditionContainer()
-        container.load(node, resourceSupplier.simpleResourceAccessor)
+        container.load(node, null, resourceSupplier.simpleResourceAccessor)
 
         then:
         def e = thrown(ParsedNodeException)
@@ -155,7 +155,7 @@ class PreconditionContainerTest extends Specification {
         def container = new PreconditionContainer()
         Scope.currentScope.child([(ChangeLogParserConfiguration.CHANGELOG_PARSE_MODE.key): ChangeLogParserConfiguration.ChangelogParseMode.LAX], {
             ->
-            container.load(node, resourceSupplier.simpleResourceAccessor)
+            container.load(node, null, resourceSupplier.simpleResourceAccessor)
         } as Scope.ScopedRunner)
 
 

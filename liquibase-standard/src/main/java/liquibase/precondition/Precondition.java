@@ -26,5 +26,5 @@ public interface Precondition extends LiquibaseSerializable {
     void check(Database database, DatabaseChangeLog changeLog, ChangeSet changeSet, ChangeExecListener changeExecListener)
             throws PreconditionFailedException, PreconditionErrorException;
 
-    void load(ParsedNode parsedNode, ResourceAccessor resourceAccessor) throws ParsedNodeException;
+    void load(ParsedNode parsedNode, Database database, ResourceAccessor resourceAccessor) throws ParsedNodeException;
 }

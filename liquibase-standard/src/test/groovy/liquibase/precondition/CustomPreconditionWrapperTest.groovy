@@ -21,7 +21,7 @@ class CustomPreconditionWrapperTest extends Specification {
                 .addChild(new ParsedNode(null, "param").addChildren([name: "param 3"]).setValue("param 3 value"))
         def precondition = new CustomPreconditionWrapper()
         try {
-            precondition.load(node, resourceSupplier.simpleResourceAccessor)
+            precondition.load(node, null, resourceSupplier.simpleResourceAccessor)
         } catch (ParsedNodeException e) {
             e.printStackTrace()
         }
@@ -47,7 +47,7 @@ class CustomPreconditionWrapperTest extends Specification {
         )
         def precondition = new CustomPreconditionWrapper()
         try {
-            precondition.load(node, resourceSupplier.simpleResourceAccessor)
+            precondition.load(node, null, resourceSupplier.simpleResourceAccessor)
         } catch (ParsedNodeException e) {
             e.printStackTrace()
         }

@@ -2,6 +2,7 @@ package liquibase.parser;
 
 import liquibase.changelog.ChangeLogParameters;
 import liquibase.changelog.DatabaseChangeLog;
+import liquibase.database.Database;
 import liquibase.exception.ChangeLogParseException;
 import liquibase.resource.ResourceAccessor;
 
@@ -13,15 +14,17 @@ public interface ChangeLogParser extends LiquibaseParser {
     
     /**
      * Parses a Liquibase database changelog and returns the parsed form as an object.
+     *
      * @param physicalChangeLogLocation the physical location of the changelog. The exact file formats and locations
-     * where can load changelog files from depend on the implementations and capabilities of the implementing parsers.
-     * @param changeLogParameters parameters given by the end user that should be applied while parsing the changelog
-     *  (i.e. replacement of ${placeholders} inside the changelogs with user-defined content)
-     * @param resourceAccessor a Java resource accessor
+     *                                  where can load changelog files from depend on the implementations and capabilities of the implementing parsers.
+     * @param database
+     * @param changeLogParameters       parameters given by the end user that should be applied while parsing the changelog
+     *                                  (i.e. replacement of ${placeholders} inside the changelogs with user-defined content)
+     * @param resourceAccessor          a Java resource accessor
      * @return the parsed ChangeLog in object form
      * @throws ChangeLogParseException if an error occurs during parsing of the ChangeLog
      */
-    DatabaseChangeLog parse(String physicalChangeLogLocation, ChangeLogParameters changeLogParameters,
+    DatabaseChangeLog parse(String physicalChangeLogLocation, Database database, ChangeLogParameters changeLogParameters,
                             ResourceAccessor resourceAccessor) throws ChangeLogParseException;
     
     /**

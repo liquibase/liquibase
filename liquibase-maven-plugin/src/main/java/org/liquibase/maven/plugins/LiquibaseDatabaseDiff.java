@@ -258,17 +258,13 @@ public class LiquibaseDatabaseDiff extends AbstractLiquibaseChangeLogMojo {
 
             CompareControl.SchemaComparison[] schemaComparisons = createSchemaComparisons(db);
             if (diffChangeLogFile != null) {
-                try {
-                    DiffOutputControl diffOutputControl = new DiffOutputControl(diffIncludeCatalog, diffIncludeSchema, diffIncludeTablespace, null).addIncludedSchema(new CatalogAndSchema(referenceDefaultCatalogName, referenceDefaultSchemaName));
-                    diffOutputControl.setObjectChangeFilter(objectChangeFilter);
-                    CommandLineUtils.doDiffToChangeLog(diffChangeLogFile, referenceDatabase, db, changeSetAuthor, diffOutputControl,
-                            objectChangeFilter, StringUtil.trimToNull(diffTypes), schemaComparisons);
-                    if (new File(diffChangeLogFile).exists()) {
-                        getLog().info("Differences written to Change Log File, " + diffChangeLogFile);
-                    }
-                } catch (IOException | ParserConfigurationException e) {
-                    throw new LiquibaseException(e);
-                }
+                DiffOutputControl diffOutputControl = new DiffOutputControl(diffIncludeCatalog, diffIncludeSchema, diffIncludeTablespace, null).addIncludedSchema(new CatalogAndSchema(referenceDefaultCatalogName, referenceDefaultSchemaName));
+                diffOutputControl.setObjectChangeFilter(objectChangeFilter);
+//                    CommandLineUtils.doDiffToChangeLog(diffChangeLogFile, referenceDatabase, db, changeSetAuthor, diffOutputControl,
+//                            objectChangeFilter, StringUtil.trimToNull(diffTypes), schemaComparisons);
+//                if (new File(diffChangeLogFile).exists()) {
+//                    getLog().info("Differences written to Change Log File, " + diffChangeLogFile);
+//                }
             } else {
                 PrintStream output = createPrintStream();
                 CommandScope liquibaseCommand = new CommandScope("diff");

@@ -12,7 +12,7 @@ class SqlPreconditionTest extends Specification {
         when:
         def precondition = new SqlPrecondition()
         try {
-            precondition.load(new liquibase.parser.core.ParsedNode(null, "sqlCheck").addChild(null, "expectedResult", "5").setValue("select count(*) from test"), resourceSupplier.simpleResourceAccessor)
+            precondition.load(new liquibase.parser.core.ParsedNode(null, "sqlCheck").addChild(null, "expectedResult", "5").setValue("select count(*) from test"), null, resourceSupplier.simpleResourceAccessor)
         } catch (ParsedNodeException e) {
             e.printStackTrace()
         }

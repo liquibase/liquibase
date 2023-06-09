@@ -238,7 +238,7 @@ public class CreateTableChangeTest extends StandardChangeTest {
                 .addChildren([column: [name: "column2", type: "type2"]])
         def change = new CreateTableChange()
         try {
-            change.load(node, resourceSupplier.simpleResourceAccessor)
+            change.load(node, null, resourceSupplier.simpleResourceAccessor)
         } catch (ParsedNodeException e) {
             e.printStackTrace()
         }
@@ -259,7 +259,7 @@ public class CreateTableChangeTest extends StandardChangeTest {
                 .addChild(null, "columns", [[column: [name: "column1", type: "type1"]], [column: [name: "column2", type: "type2"]]])
         def change = new CreateTableChange()
         try {
-            change.load(node, resourceSupplier.simpleResourceAccessor)
+            change.load(node, null, resourceSupplier.simpleResourceAccessor)
         } catch (ParsedNodeException e) {
             e.printStackTrace()
         }

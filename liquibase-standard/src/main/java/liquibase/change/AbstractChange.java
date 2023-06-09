@@ -631,7 +631,7 @@ public abstract class AbstractChange extends AbstractPlugin implements Change {
     }
 
     @Override
-    public void load(ParsedNode parsedNode, ResourceAccessor resourceAccessor) throws ParsedNodeException {
+    public void load(ParsedNode parsedNode, Database database, ResourceAccessor resourceAccessor) throws ParsedNodeException {
         ChangeMetaData metaData = Scope.getCurrentScope().getSingleton(ChangeFactory.class).getChangeMetaData(this);
 
         try {
@@ -664,12 +664,12 @@ public abstract class AbstractChange extends AbstractPlugin implements Change {
                                     if ((columnChildren != null) && !columnChildren.isEmpty()) {
                                         for (ParsedNode columnChild : columnChildren) {
                                             ColumnConfig columnConfig = createEmptyColumnConfig(collectionType);
-                                            columnConfig.load(columnChild, resourceAccessor);
+                                            columnConfig.load(columnChild, null, resourceAccessor);
                                             ((ChangeWithColumns) this).addColumn(columnConfig);
                                         }
                                     } else {
                                         ColumnConfig columnConfig = createEmptyColumnConfig(collectionType);
-                                        columnConfig.load(child, resourceAccessor);
+                                        columnConfig.load(child, null, resourceAccessor);
                                         ((ChangeWithColumns) this).addColumn(columnConfig);
                                     }
                                 }
@@ -707,13 +707,13 @@ public abstract class AbstractChange extends AbstractPlugin implements Change {
                                         for (ParsedNode childNode : childNodes) {
                                             LiquibaseSerializable childObject =
                                                 (LiquibaseSerializable)collectionType.getConstructor().newInstance();
-                                            childObject.load(childNode, resourceAccessor);
+                                            childObject.load(childNode, null, resourceAccessor);
                                             ((Collection) param.getCurrentValue(this)).add(childObject);
                                         }
                                     } else {
                                         LiquibaseSerializable childObject =
                                             (LiquibaseSerializable) collectionType.getConstructor().newInstance();
-                                        childObject.load(node, resourceAccessor);
+                                        childObject.load(node, null, resourceAccessor);
                                         ((Collection) param.getCurrentValue(this)).add(childObject);
                                     }
                                }
@@ -729,7 +729,7 @@ public abstract class AbstractChange extends AbstractPlugin implements Change {
                             if (child != null) {
                                 LiquibaseSerializable serializableChild =
                                     (LiquibaseSerializable) param.getDataTypeClass().getConstructor().newInstance();
-                                serializableChild.load(child, resourceAccessor);
+                                serializableChild.load(child, null, resourceAccessor);
                                 param.setValue(this, serializableChild);
                             }
                         } catch (ReflectiveOperationException e) {

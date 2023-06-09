@@ -12,7 +12,6 @@ import liquibase.parser.ChangeLogParserFactory;
 import liquibase.resource.ResourceAccessor;
 import liquibase.util.StringUtil;
 
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
@@ -63,7 +62,7 @@ public class CalculateChecksumCommandStep extends AbstractCommandStep {
 
         ResourceAccessor resourceAccessor = Scope.getCurrentScope().getResourceAccessor();
         DatabaseChangeLog changeLog = ChangeLogParserFactory.getInstance().getParser(
-                        changeLogFile, resourceAccessor).parse(changeLogFile, new ChangeLogParameters(database), resourceAccessor);
+                        changeLogFile, resourceAccessor).parse(changeLogFile, null, new ChangeLogParameters(database), resourceAccessor);
 
         ChangeSet changeSet = changeLog.getChangeSet(parts.get(CHANGESET_ID_CHANGELOG_PART), parts.get(CHANGESET_ID_AUTHOR_PART),
                 parts.get(CHANGESET_ID_CHANGESET_PART));

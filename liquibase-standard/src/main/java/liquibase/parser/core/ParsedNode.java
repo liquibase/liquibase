@@ -1,6 +1,7 @@
 package liquibase.parser.core;
 
 import liquibase.exception.UnexpectedLiquibaseException;
+import liquibase.serializer.LiquibaseSerializable;
 import liquibase.statement.DatabaseFunction;
 import liquibase.statement.SequenceCurrentValueFunction;
 import liquibase.statement.SequenceNextValueFunction;
@@ -15,7 +16,7 @@ import java.util.*;
  * Acts as a standard abstract syntax layer for changelogs defined in different formats.
  * {@link liquibase.parser.ChangeLogParser} implementations and other classes that work with multiple formats can create objects
  * directs or create instances of this class which can then be passed to the load() method of the object they want to configure.
- * For example, {@link liquibase.change.Change#load(ParsedNode, liquibase.resource.ResourceAccessor)}.
+ * For example, {@link LiquibaseSerializable#load(ParsedNode, liquibase.database.Database, liquibase.resource.ResourceAccessor)}.
  * <p/>
  * ParsedNodes are a simple key/value structure with the following characteristics:
  * <ul>

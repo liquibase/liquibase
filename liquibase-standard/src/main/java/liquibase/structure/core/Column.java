@@ -2,6 +2,7 @@ package liquibase.structure.core;
 
 import liquibase.change.ColumnConfig;
 import liquibase.change.ConstraintsConfig;
+import liquibase.database.Database;
 import liquibase.parser.core.ParsedNode;
 import liquibase.parser.core.ParsedNodeException;
 import liquibase.resource.ResourceAccessor;
@@ -388,18 +389,18 @@ public class Column extends AbstractDatabaseObject {
     }
 
     @Override
-    public void load(ParsedNode parsedNode, ResourceAccessor resourceAccessor) throws ParsedNodeException {
-        super.load(parsedNode, resourceAccessor);
+    public void load(ParsedNode parsedNode, Database database, ResourceAccessor resourceAccessor) throws ParsedNodeException {
+        super.load(parsedNode, database, resourceAccessor);
         ParsedNode typeNode = parsedNode.getChild(null, "type");
         if (typeNode != null) {
             DataType type = new DataType();
-            type.load(typeNode, resourceAccessor);
+            type.load(typeNode, null, resourceAccessor);
             setType(type);
         }
         ParsedNode autoIncrementInformation = parsedNode.getChild(null, "autoIncrementInformation");
         if (autoIncrementInformation != null) {
             AutoIncrementInformation info = new AutoIncrementInformation();
-            info.load(autoIncrementInformation, resourceAccessor);
+            info.load(autoIncrementInformation, null, resourceAccessor);
             setAutoIncrementInformation(info);
         }
     }
@@ -460,7 +461,7 @@ public class Column extends AbstractDatabaseObject {
         }
 
         @Override
-        public void load(ParsedNode parsedNode, ResourceAccessor resourceAccessor) throws ParsedNodeException {
+        public void load(ParsedNode parsedNode, Database database, ResourceAccessor resourceAccessor) throws ParsedNodeException {
             this.startWith = (BigInteger) convertEscaped(parsedNode.getChildValue(null, "startWith"));
             this.incrementBy = (BigInteger) convertEscaped(parsedNode.getChildValue(null, "incrementBy"));
             this.defaultOnNull = parsedNode.getChildValue(null, "defaultOnNull", Boolean.class);

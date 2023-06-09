@@ -4,9 +4,9 @@ import liquibase.ContextExpression;
 import liquibase.Labels;
 import liquibase.changelog.ChangeLogParameters;
 import liquibase.changelog.DatabaseChangeLog;
+import liquibase.database.Database;
 import liquibase.exception.ChangeLogParseException;
 import liquibase.exception.LiquibaseException;
-import liquibase.exception.UnexpectedLiquibaseException;
 import liquibase.parser.ChangeLogParser;
 import liquibase.parser.core.ParsedNode;
 import liquibase.resource.Resource;
@@ -16,13 +16,12 @@ import org.yaml.snakeyaml.constructor.SafeConstructor;
 
 import java.io.IOException;
 import java.io.InputStream;
-import java.nio.file.Paths;
 import java.util.*;
 
 public class YamlChangeLogParser extends YamlParser implements ChangeLogParser {
 
     @Override
-    public DatabaseChangeLog parse(String physicalChangeLogLocation, ChangeLogParameters changeLogParameters, ResourceAccessor resourceAccessor) throws ChangeLogParseException {
+    public DatabaseChangeLog parse(String physicalChangeLogLocation, Database database, ChangeLogParameters changeLogParameters, ResourceAccessor resourceAccessor) throws ChangeLogParseException {
         Yaml yaml = new Yaml(new SafeConstructor(createLoaderOptions()));
 
         try {
@@ -78,7 +77,7 @@ public class YamlChangeLogParser extends YamlParser implements ChangeLogParser {
             ParsedNode databaseChangeLogNode = new ParsedNode(null, "databaseChangeLog");
             databaseChangeLogNode.setValue(rootList);
 
-            changeLog.load(databaseChangeLogNode, resourceAccessor);
+            changeLog.load(databaseChangeLogNode, database, resourceAccessor);
 
             return changeLog;
         } catch (ChangeLogParseException e) {

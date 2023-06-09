@@ -171,7 +171,7 @@ class IndexWithDescendingColumnSnapshotIntegrationTest extends Specification {
         generateChangelogScope.execute()
 
         ResourceAccessor resourceAccessor = new SearchPathResourceAccessor(".")
-        DatabaseChangeLog changelog = new JsonChangeLogParser().parse(changelogFile, new ChangeLogParameters(), resourceAccessor)
+        DatabaseChangeLog changelog = new JsonChangeLogParser().parse(changelogFile, null, new ChangeLogParameters(), resourceAccessor)
         def changeSets = changelog.getChangeSets()
         ChangeSet indexChangeSet = changeSets.get(1)
         CreateIndexChange createIndexChange = indexChangeSet.getChanges().get(0)

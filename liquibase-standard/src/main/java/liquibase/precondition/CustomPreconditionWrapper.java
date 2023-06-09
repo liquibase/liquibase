@@ -119,7 +119,7 @@ public class CustomPreconditionWrapper extends AbstractPrecondition {
     }
 
     @Override
-    public void load(ParsedNode parsedNode, ResourceAccessor resourceAccessor) throws ParsedNodeException {
+    public void load(ParsedNode parsedNode, Database database, ResourceAccessor resourceAccessor) throws ParsedNodeException {
         setClassName(parsedNode.getChildValue(null, "className", String.class));
 
         ParsedNode paramsNode = parsedNode.getChild(null, "params");
@@ -137,7 +137,7 @@ public class CustomPreconditionWrapper extends AbstractPrecondition {
             }
             this.setParam(child.getChildValue(null, "name", String.class), (String) value);
         }
-        super.load(parsedNode, resourceAccessor);
+        super.load(parsedNode, database, resourceAccessor);
 
     }
 }

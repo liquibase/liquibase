@@ -269,14 +269,14 @@ public class PreconditionContainer extends AndPrecondition implements ChangeLogC
     }
 
     @Override
-    public void load(ParsedNode parsedNode, ResourceAccessor resourceAccessor) throws ParsedNodeException {
+    public void load(ParsedNode parsedNode, Database database, ResourceAccessor resourceAccessor) throws ParsedNodeException {
         this.setOnError(parsedNode.getChildValue(null, "onError", String.class));
         this.setOnErrorMessage(parsedNode.getChildValue(null, "onErrorMessage", String.class));
         this.setOnFail(parsedNode.getChildValue(null, "onFail", String.class));
         this.setOnFailMessage(parsedNode.getChildValue(null, "onFailMessage", String.class));
         this.setOnSqlOutput(parsedNode.getChildValue(null, "onSqlOutput", String.class));
 
-        super.load(parsedNode, resourceAccessor);
+        super.load(parsedNode, database, resourceAccessor);
     }
 
     @Override

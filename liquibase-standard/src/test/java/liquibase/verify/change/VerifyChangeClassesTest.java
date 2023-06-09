@@ -61,7 +61,7 @@ public class VerifyChangeClassesTest extends AbstractVerifyTest {
                 TestState state = new TestState(name.getMethodName(), changeName, database.getShortName(), TestState.Type.SQL);
                 state.addComment("Database: " + database.getShortName());
 
-                Change change = changeFactory.create(changeName);
+                Change change = changeFactory.create(changeName, database);
                 if (!change.supports(database)) {
                     continue;
                 }
@@ -162,7 +162,7 @@ public class VerifyChangeClassesTest extends AbstractVerifyTest {
                     continue; //need to better handle strange "one of path or body is required" logic
                 }
 
-                Change change = changeFactory.create(changeName);
+                Change change = changeFactory.create(changeName, database);
                 if (!change.supports(database)) {
                     continue;
                 }
@@ -212,7 +212,7 @@ public class VerifyChangeClassesTest extends AbstractVerifyTest {
                 TestState state = new TestState(name.getMethodName(), changeName, database.getShortName(), TestState.Type.SQL);
                 state.addComment("Database: " + database.getShortName());
 
-                Change baseChange = changeFactory.create(changeName);
+                Change baseChange = changeFactory.create(changeName, database);
                 if (!baseChange.supports(database)) {
                     continue;
                 }
@@ -235,7 +235,7 @@ public class VerifyChangeClassesTest extends AbstractVerifyTest {
                     }
                 });
                 for (List<String> permutation : paramLists) {
-                    Change change = changeFactory.create(changeName);
+                    Change change = changeFactory.create(changeName, database);
 //
                     for (String paramName : new TreeSet<String>(changeMetaData.getRequiredParameters(database).keySet())) {
                         ChangeParameterMetaData param = changeMetaData.getParameters().get(paramName);

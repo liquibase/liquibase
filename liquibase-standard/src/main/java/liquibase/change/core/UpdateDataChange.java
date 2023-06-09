@@ -138,7 +138,7 @@ public class UpdateDataChange extends AbstractModifyDataChange implements Change
             for (ParsedNode param : whereParams.getChildren(null, "param")) {
                 ColumnConfig columnConfig = new ColumnConfig();
                 try {
-                    columnConfig.load(param, resourceAccessor);
+                    columnConfig.load(param, null, resourceAccessor);
                 } catch (ParsedNodeException e) {
                     e.printStackTrace();
                 }

@@ -1,5 +1,6 @@
 package liquibase.change;
 
+import liquibase.database.Database;
 import liquibase.exception.DateParseException;
 import liquibase.parser.core.ParsedNode;
 import liquibase.parser.core.ParsedNodeException;
@@ -778,7 +779,7 @@ public class ColumnConfig extends AbstractLiquibaseSerializable {
     }
 
     @Override
-    public void load(ParsedNode parsedNode, ResourceAccessor resourceAccessor) throws ParsedNodeException {
+    public void load(ParsedNode parsedNode, Database database, ResourceAccessor resourceAccessor) throws ParsedNodeException {
         for (ParsedNode child : parsedNode.getChildren()) {
             if (!ObjectUtil.hasProperty(this, child.getName())) {
                 throw new ParsedNodeException("Unexpected node: "+child.getName());

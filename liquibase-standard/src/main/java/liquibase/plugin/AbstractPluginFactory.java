@@ -5,7 +5,9 @@ import liquibase.servicelocator.ServiceLocator;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.HashSet;
 import java.util.ServiceLoader;
+import java.util.Set;
 import java.util.TreeSet;
 
 /**
@@ -37,12 +39,22 @@ public abstract class AbstractPluginFactory<T extends Plugin> implements PluginF
      * @return null if no plugins are found or have a priority greater than zero.
      */
     protected T getPlugin(final Object... args) {
+        Set<T> applicable = getPlugins(args);
+        if (applicable.size() == 0) {
+            return null;
+        }
+        return applicable.iterator().next();
+    }
+
+    protected Set<T> getPlugins(final Object... args) {
         final String pluginClassName = getPluginClass().getName();
         final Class forcedPlugin = Scope.getCurrentScope().get("liquibase.plugin." + pluginClassName, Class.class);
         if (forcedPlugin != null) {
             for (T plugin : findAllInstances()) {
                 if (plugin.getClass().equals(forcedPlugin)) {
-                    return plugin;
+                    Set<T> set = new HashSet<>();
+                    set.add(plugin);
+                    return set;
                 }
             }
             throw new RuntimeException("No registered " + pluginClassName + " plugin " + forcedPlugin.getName());
@@ -64,13 +76,7 @@ public abstract class AbstractPluginFactory<T extends Plugin> implements PluginF
                 applicable.add(plugin);
             }
         }
-
-        if (applicable.size() == 0) {
-            return null;
-        }
-
-        return applicable.iterator().next();
-
+        return applicable;
     }
 
 

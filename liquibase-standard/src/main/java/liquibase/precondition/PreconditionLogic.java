@@ -37,8 +37,8 @@ public abstract class PreconditionLogic extends AbstractPrecondition {
     }
 
     @Override
-    public void load(ParsedNode parsedNode, ResourceAccessor resourceAccessor) throws ParsedNodeException {
-        super.load(parsedNode, resourceAccessor);
+    public void load(ParsedNode parsedNode, Database database, ResourceAccessor resourceAccessor) throws ParsedNodeException {
+        super.load(parsedNode, database, resourceAccessor);
 
         for (ParsedNode child : parsedNode.getChildren()) {
             addNestedPrecondition(toPrecondition(child, resourceAccessor));
@@ -55,7 +55,7 @@ public abstract class PreconditionLogic extends AbstractPrecondition {
             return null;
         }
 
-        precondition.load(node, resourceAccessor);
+        precondition.load(node, null, resourceAccessor);
         return precondition;
     }
 }

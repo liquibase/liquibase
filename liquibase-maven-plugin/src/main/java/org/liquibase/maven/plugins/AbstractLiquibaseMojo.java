@@ -624,7 +624,7 @@ public abstract class AbstractLiquibaseMojo extends AbstractMojo {
         boolean useScopeLogger = false;
         if (this.logFormat != null) {
             try {
-                useScopeLogger = LogFormat.valueOf(this.logFormat.toUpperCase()).isUseScopeLoggerInMaven();
+//                useScopeLogger = LogFormat.valueOf(this.logFormat.toUpperCase()).isUseScopeLoggerInMaven();
             } catch (Exception ignored) {
 
             }
@@ -645,9 +645,9 @@ public abstract class AbstractLiquibaseMojo extends AbstractMojo {
             LogService newLogService = Scope.child(scopeAttrs, () -> Scope.getCurrentScope().getSingleton(LogServiceFactory.class).getDefaultLogService());
             // Set the formatter on all the handlers.
             java.util.logging.Logger rootLogger = java.util.logging.Logger.getLogger("");
-            for (Handler handler : rootLogger.getHandlers()) {
-                JavaLogService.setFormatterOnHandler(newLogService, handler);
-            }
+//            for (Handler handler : rootLogger.getHandlers()) {
+//                JavaLogService.setFormatterOnHandler(newLogService, handler);
+//            }
             scopeAttrs.put(Scope.Attr.logService.name(), newLogService);
             return scopeAttrs;
         }

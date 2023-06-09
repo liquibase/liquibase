@@ -45,7 +45,7 @@ public class RawSQLChangeTest extends StandardChangeTest {
         when:
         def changeFromValue = new RawSQLChange()
         try {
-            changeFromValue.load(new liquibase.parser.core.ParsedNode(null, "sql").setValue("select * from x"), resourceSupplier.simpleResourceAccessor)
+            changeFromValue.load(new liquibase.parser.core.ParsedNode(null, "sql").setValue("select * from x"), null, resourceSupplier.simpleResourceAccessor)
         } catch (ParsedNodeException e1) {
             e1.printStackTrace()
         } catch (SetupException e1) {
@@ -54,7 +54,7 @@ public class RawSQLChangeTest extends StandardChangeTest {
 
         def changeFromChild = new RawSQLChange()
         try {
-            changeFromChild.load(new liquibase.parser.core.ParsedNode(null, "sql").addChild(null, "sql", "select * from y"), resourceSupplier.simpleResourceAccessor)
+            changeFromChild.load(new liquibase.parser.core.ParsedNode(null, "sql").addChild(null, "sql", "select * from y"), null, resourceSupplier.simpleResourceAccessor)
         } catch (ParsedNodeException e) {
             e.printStackTrace()
         } catch (SetupException e) {

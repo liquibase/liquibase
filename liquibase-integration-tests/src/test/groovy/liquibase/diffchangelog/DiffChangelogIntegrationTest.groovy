@@ -1,7 +1,6 @@
 package liquibase.diffchangelog
 
 import liquibase.Scope
-import liquibase.UpdateSummaryEnum
 import liquibase.change.core.AddForeignKeyConstraintChange
 import liquibase.change.core.DropForeignKeyConstraintChange
 import liquibase.changelog.ChangeLogParameters
@@ -9,7 +8,6 @@ import liquibase.changelog.ChangeSet
 import liquibase.changelog.DatabaseChangeLog
 import liquibase.command.CommandScope
 import liquibase.command.core.DiffChangelogCommandStep
-import liquibase.command.core.UpdateCommandStep
 import liquibase.command.core.helpers.*
 import liquibase.command.util.CommandUtil
 import liquibase.database.Database
@@ -100,7 +98,7 @@ CREATE TABLE $tableName ( product_no varchar(20) DEFAULT nextval('$sequenceName'
         commandScope.execute()
         def generatedChangelog = new File(diffChangelogFile)
         DatabaseChangeLog changelog =
-                new JsonChangeLogParser().parse(diffChangelogFile, new ChangeLogParameters(), new SearchPathResourceAccessor("."))
+                new JsonChangeLogParser().parse(diffChangelogFile, null, new ChangeLogParameters(), new SearchPathResourceAccessor("."))
         List<ChangeSet> changeSets = changelog.getChangeSets()
 
         then:

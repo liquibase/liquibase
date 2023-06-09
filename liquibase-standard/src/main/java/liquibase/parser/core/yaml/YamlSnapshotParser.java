@@ -62,7 +62,7 @@ public class YamlSnapshotParser extends YamlParser implements SnapshotParser {
                 snapshot.getMetadata().putAll(metadata);
             }
 
-            snapshot.load(snapshotNode, resourceAccessor);
+            snapshot.load(snapshotNode, null, resourceAccessor);
 
             return snapshot;
         } catch (LiquibaseParseException e) {

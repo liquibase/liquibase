@@ -433,7 +433,7 @@ public class ColumnConfigTest extends Specification {
         }
         node.addChild(null, field, testValue)
         try {
-            column.load(node, resourceSupplier.simpleResourceAccessor)
+            column.load(node, null, resourceSupplier.simpleResourceAccessor)
         } catch (ParsedNodeException e) {
             e.printStackTrace()
         }
@@ -461,7 +461,7 @@ public class ColumnConfigTest extends Specification {
         }
         constraintNode.addChild(null, field, testValue)
         try {
-            column.load(node, resourceSupplier.simpleResourceAccessor)
+            column.load(node, null, resourceSupplier.simpleResourceAccessor)
         } catch (ParsedNodeException e) {
             e.printStackTrace()
         }
@@ -478,7 +478,7 @@ public class ColumnConfigTest extends Specification {
         when:
         def column = new ColumnConfig()
         try {
-            column.load(new liquibase.parser.core.ParsedNode(null, "column").addChild(null, param, value), resourceSupplier.simpleResourceAccessor)
+            column.load(new liquibase.parser.core.ParsedNode(null, "column").addChild(null, param, value), null, resourceSupplier.simpleResourceAccessor)
         } catch (ParsedNodeException e) {
             e.printStackTrace()
         }

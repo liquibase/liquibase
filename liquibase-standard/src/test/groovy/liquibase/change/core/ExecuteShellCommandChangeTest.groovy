@@ -20,7 +20,7 @@ class ExecuteShellCommandChangeTest extends Specification {
             change.load(new liquibase.parser.core.ParsedNode(null, "executeCommand")
                     .addChildren([executable: "/usr/bin/test", os: "linux,mac"])
                     .addChild(new liquibase.parser.core.ParsedNode(null, "arg").addChild(null, "value", "-out"))
-                    .addChild(new liquibase.parser.core.ParsedNode(null, "arg").addChild(null, "value", "-test"))
+                    .addChild(new liquibase.parser.core.ParsedNode(null, "arg").addChild(null, "value", "-test")), null
                     , resourceSupplier.simpleResourceAccessor)
         } catch (ParsedNodeException e) {
             e.printStackTrace()
@@ -41,9 +41,9 @@ class ExecuteShellCommandChangeTest extends Specification {
             change.load(new liquibase.parser.core.ParsedNode(null, "executeCommand")
                     .addChildren([executable: "/usr/bin/test", os: "linux,mac"])
                     .addChild(new liquibase.parser.core.ParsedNode(null, "args")
-                    .addChild(new liquibase.parser.core.ParsedNode(null, "arg").addChild(null, "value", "-out"))
-                    .addChild(new liquibase.parser.core.ParsedNode(null, "arg").addChild(null, "value", "-test"))
-            ), resourceSupplier.simpleResourceAccessor)
+                            .addChild(new liquibase.parser.core.ParsedNode(null, "arg").addChild(null, "value", "-out"))
+                            .addChild(new liquibase.parser.core.ParsedNode(null, "arg").addChild(null, "value", "-test"))
+                    ), null, resourceSupplier.simpleResourceAccessor)
         } catch (ParsedNodeException e) {
             e.printStackTrace()
         }
@@ -59,11 +59,11 @@ class ExecuteShellCommandChangeTest extends Specification {
         def change = new ExecuteShellCommandChange()
         try {
             change.load(new liquibase.parser.core.ParsedNode(null, "executeCommand")
-                    .addChildren([executable: "/usr/bin/test", os: "linux,mac", timeout:"10s"])
+                    .addChildren([executable: "/usr/bin/test", os: "linux,mac", timeout: "10s"])
                     .addChild(new liquibase.parser.core.ParsedNode(null, "args")
-                    .addChild(new liquibase.parser.core.ParsedNode(null, "arg").addChild(null, "value", "-out"))
-                    .addChild(new liquibase.parser.core.ParsedNode(null, "arg").addChild(null, "value", "-test"))
-            ), resourceSupplier.simpleResourceAccessor)
+                            .addChild(new liquibase.parser.core.ParsedNode(null, "arg").addChild(null, "value", "-out"))
+                            .addChild(new liquibase.parser.core.ParsedNode(null, "arg").addChild(null, "value", "-test"))
+                    ), null, resourceSupplier.simpleResourceAccessor)
         } catch (ParsedNodeException e) {
             e.printStackTrace()
         }

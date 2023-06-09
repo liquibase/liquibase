@@ -13,7 +13,6 @@ import liquibase.parser.core.ParsedNodeException
 import liquibase.snapshot.MockSnapshotGeneratorFactory
 import liquibase.snapshot.SnapshotGeneratorFactory
 import liquibase.sqlgenerator.SqlGeneratorFactory
-import liquibase.statement.SqlStatement
 import liquibase.structure.core.Column
 import liquibase.structure.core.PrimaryKey
 import liquibase.structure.core.Table
@@ -158,7 +157,7 @@ class AddColumnChangeTest extends StandardChangeTest {
                 .addChild(new ParsedNode(null, "column").addChildren([name: "col_2", type: "int", position: "3"]))
         def change = new AddColumnChange()
         try {
-            change.load(node, resourceSupplier.simpleResourceAccessor)
+            change.load(node, null, resourceSupplier.simpleResourceAccessor)
         } catch (ParsedNodeException e) {
             e.printStackTrace()
         } catch (SetupException e) {

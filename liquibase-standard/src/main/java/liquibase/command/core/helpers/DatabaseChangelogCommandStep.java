@@ -111,7 +111,7 @@ public class DatabaseChangelogCommandStep extends AbstractHelperCommandStep impl
         if (parser instanceof XMLChangeLogSAXParser) {
             ((XMLChangeLogSAXParser) parser).setShouldWarnOnMismatchedXsdVersion(false);
         }
-        DatabaseChangeLog changelog = parser.parse(changeLogFile, changeLogParameters, resourceAccessor);
+        DatabaseChangeLog changelog = parser.parse(changeLogFile, null, changeLogParameters, resourceAccessor);
         if (StringUtil.isNotEmpty(changelog.getLogicalFilePath())) {
             Scope.getCurrentScope().addMdcValue(MdcKey.CHANGELOG_FILE, changelog.getLogicalFilePath());
         } else {

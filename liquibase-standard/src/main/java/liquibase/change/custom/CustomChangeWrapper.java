@@ -287,7 +287,7 @@ public class CustomChangeWrapper extends AbstractChange {
     }
 
     @Override
-    public void load(ParsedNode parsedNode, ResourceAccessor resourceAccessor) throws ParsedNodeException {
+    public void load(ParsedNode parsedNode, Database database, ResourceAccessor resourceAccessor) throws ParsedNodeException {
         try {
             String classNameValue = parsedNode.getChildValue(null, "class", String.class);
             if (classNameValue == null) {
@@ -297,7 +297,7 @@ public class CustomChangeWrapper extends AbstractChange {
         } catch (CustomChangeException e) {
             throw new ParsedNodeException(e);
         }
-        super.load(parsedNode, resourceAccessor);
+        super.load(parsedNode, database, resourceAccessor);
     }
 
     @Override

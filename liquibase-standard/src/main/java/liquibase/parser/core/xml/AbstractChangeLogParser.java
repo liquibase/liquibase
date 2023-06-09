@@ -2,6 +2,7 @@ package liquibase.parser.core.xml;
 
 import liquibase.changelog.ChangeLogParameters;
 import liquibase.changelog.DatabaseChangeLog;
+import liquibase.database.Database;
 import liquibase.exception.ChangeLogParseException;
 import liquibase.parser.ChangeLogParser;
 import liquibase.parser.core.ParsedNode;
@@ -10,7 +11,7 @@ import liquibase.resource.ResourceAccessor;
 public abstract class AbstractChangeLogParser implements ChangeLogParser {
 
     @Override
-    public DatabaseChangeLog parse(String physicalChangeLogLocation, ChangeLogParameters changeLogParameters,
+    public DatabaseChangeLog parse(String physicalChangeLogLocation, Database database, ChangeLogParameters changeLogParameters,
                                    ResourceAccessor resourceAccessor) throws ChangeLogParseException {
         ParsedNode parsedNode = parseToNode(physicalChangeLogLocation, changeLogParameters, resourceAccessor);
         if (parsedNode == null) {
@@ -20,7 +21,7 @@ public abstract class AbstractChangeLogParser implements ChangeLogParser {
         DatabaseChangeLog changeLog = new DatabaseChangeLog(DatabaseChangeLog.normalizePath(physicalChangeLogLocation));
         changeLog.setChangeLogParameters(changeLogParameters);
         try {
-            changeLog.load(parsedNode, resourceAccessor);
+            changeLog.load(parsedNode, database, resourceAccessor);
         } catch (Exception e) {
             throw new ChangeLogParseException(e);
         }

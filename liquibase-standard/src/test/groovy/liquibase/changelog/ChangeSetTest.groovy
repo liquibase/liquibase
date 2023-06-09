@@ -115,7 +115,7 @@ public class ChangeSetTest extends Specification {
         def changeSet = new ChangeSet(new DatabaseChangeLog("com/example/test.xml"))
         def node = new ParsedNode(null, "changeSet").addChildren([id: "1", author: "nvoxland"])
         try {
-            changeSet.load(node, resourceSupplier.simpleResourceAccessor)
+            changeSet.load(node, null, resourceSupplier.simpleResourceAccessor)
         } catch (ParsedNodeException e) {
             e.printStackTrace()
         }
@@ -153,7 +153,7 @@ public class ChangeSetTest extends Specification {
         }
         node.addChild(null, "onValidationFail", "MARK_RAN")
         try {
-            changeSet.load(node, resourceSupplier.simpleResourceAccessor)
+            changeSet.load(node, null, resourceSupplier.simpleResourceAccessor)
         } catch (ParsedNodeException e) {
             e.printStackTrace()
         }
@@ -178,7 +178,7 @@ public class ChangeSetTest extends Specification {
                 .addChild(new ParsedNode(null, "createTable").addChild(null, "tableName", "table_1"))
                 .addChild(new ParsedNode(null, "createTable").addChild(null, "tableName", "table_2"))
         try {
-            changeSet.load(node, resourceSupplier.simpleResourceAccessor)
+            changeSet.load(node, null, resourceSupplier.simpleResourceAccessor)
         } catch (ParsedNodeException e) {
             e.printStackTrace()
         }
@@ -198,7 +198,7 @@ public class ChangeSetTest extends Specification {
                 .addChildren([id: "1", author: "nvoxland"])
                 .addChild(new ParsedNode(null, "createTable").addChild(null, "tableName", "table_1"))
                 .addChild(new ParsedNode(null, "invalid").addChild(null, "tableName", "table_2"))
-        changeSet.load(node, resourceSupplier.simpleResourceAccessor)
+        changeSet.load(node, null, resourceSupplier.simpleResourceAccessor)
 
         then:
         def e = thrown(ParsedNodeException)
@@ -215,7 +215,7 @@ public class ChangeSetTest extends Specification {
 
         Scope.child([(ChangeLogParserConfiguration.CHANGELOG_PARSE_MODE.getKey()): ChangeLogParserConfiguration.ChangelogParseMode.LAX], {
             ->
-            changeSet.load(node, resourceSupplier.simpleResourceAccessor)
+            changeSet.load(node, null, resourceSupplier.simpleResourceAccessor)
         } as Scope.ScopedRunner)
 
 
@@ -231,7 +231,7 @@ public class ChangeSetTest extends Specification {
                 .addChild(new ParsedNode(null, "createTable").addChild(null, "tableName", "table_1"))
                 .setValue(new ParsedNode(null, "rollback").setValue("rollback logic here"))
         try {
-            changeSet.load(node, resourceSupplier.simpleResourceAccessor)
+            changeSet.load(node, null, resourceSupplier.simpleResourceAccessor)
         } catch (ParsedNodeException e) {
             e.printStackTrace()
         }
@@ -249,7 +249,7 @@ public class ChangeSetTest extends Specification {
                 .addChild(new ParsedNode(null, "createTable").addChild(null, "tableName", "table_1"))
                 .setValue(new ParsedNode(null, "rollback").setValue(new ParsedNode(null, "renameTable").addChild(null, "newTableName", "rename_to_x")))
         try {
-            changeSet.load(node, resourceSupplier.simpleResourceAccessor)
+            changeSet.load(node, null, resourceSupplier.simpleResourceAccessor)
         } catch (ParsedNodeException e) {
             e.printStackTrace()
         }
@@ -270,7 +270,7 @@ public class ChangeSetTest extends Specification {
                 new ParsedNode(null, "rollback").setValue(new ParsedNode(null, "renameTable").addChild(null, "newTableName", "rename_to_y"))
         ])
         try {
-            changeSet.load(node, resourceSupplier.simpleResourceAccessor)
+            changeSet.load(node, null, resourceSupplier.simpleResourceAccessor)
         } catch (ParsedNodeException e) {
             e.printStackTrace()
         }
@@ -292,7 +292,7 @@ public class ChangeSetTest extends Specification {
                 .addChild(new ParsedNode(null, "rollback").setValue("rollback sql"))
 
         try {
-            changeSet.load(node, resourceSupplier.simpleResourceAccessor)
+            changeSet.load(node, null, resourceSupplier.simpleResourceAccessor)
         } catch (ParsedNodeException e) {
             e.printStackTrace()
         }
@@ -313,7 +313,7 @@ public class ChangeSetTest extends Specification {
                 .addChild(new ParsedNode(null, "rollback").setValue("\n--a comment here\nrollback sql 1;\nrollback sql 2\n--final comment"))
 
         try {
-            changeSet.load(node, resourceSupplier.simpleResourceAccessor)
+            changeSet.load(node, null, resourceSupplier.simpleResourceAccessor)
         } catch (ParsedNodeException e) {
             e.printStackTrace()
         }
@@ -332,7 +332,7 @@ public class ChangeSetTest extends Specification {
                 .addChild(null, "validCheckSum", "c2b7b29ce3a75940893cd022501852e2")
                 .addChild(null, "validCheckSum", "8:d54da29ce3a75940858cd093501158b8")
         try {
-            changeSet.load(node, resourceSupplier.simpleResourceAccessor)
+            changeSet.load(node, null, resourceSupplier.simpleResourceAccessor)
         } catch (ParsedNodeException e) {
             e.printStackTrace()
         }
@@ -351,7 +351,7 @@ public class ChangeSetTest extends Specification {
                 new ParsedNode(null, "validCheckSum").setValue("8:d54da29ce3a75940858cd093501158b8")
         ])
         try {
-            changeSet.load(node, resourceSupplier.simpleResourceAccessor)
+            changeSet.load(node, null, resourceSupplier.simpleResourceAccessor)
         } catch (ParsedNodeException e) {
             e.printStackTrace()
         }
@@ -369,7 +369,7 @@ public class ChangeSetTest extends Specification {
             changeSet.load(new ParsedNode(null, "changeSet").addChildren([preConditions: [
                     [runningAs: [username: "my_user"]],
                     [runningAs: [username: "my_other_user"]],
-            ]]), resourceSupplier.simpleResourceAccessor)
+            ]]), null, resourceSupplier.simpleResourceAccessor)
         } catch (ParsedNodeException e) {
             e.printStackTrace()
         }
@@ -387,7 +387,7 @@ public class ChangeSetTest extends Specification {
             changeSet.load(new ParsedNode(null, "changeSet").setValue(new ParsedNode(null, "preConditions").setValue([
                     [runningAs: [username: "my_user"]],
                     [runningAs: [username: "my_other_user"]],
-            ])), resourceSupplier.simpleResourceAccessor)
+            ])), null, resourceSupplier.simpleResourceAccessor)
         } catch (ParsedNodeException e) {
             e.printStackTrace()
         }
@@ -408,7 +408,7 @@ public class ChangeSetTest extends Specification {
                             [replace: [replace: "x1", with: "y1"]],
                             [replace: [replace: "x2", with: "y2"]],
                     ])
-            ]), resourceSupplier.simpleResourceAccessor)
+            ]), null, resourceSupplier.simpleResourceAccessor)
         } catch (ParsedNodeException e) {
             e.printStackTrace()
         }
@@ -436,7 +436,7 @@ public class ChangeSetTest extends Specification {
         when:
         def changeSet = new ChangeSet(new DatabaseChangeLog("com/example/test.xml"))
         try {
-            changeSet.load(new ParsedNode(null, "changeSet").addChild(new ParsedNode(null, "rollback")), resourceSupplier.simpleResourceAccessor)
+            changeSet.load(new ParsedNode(null, "changeSet").addChild(new ParsedNode(null, "rollback")), null, resourceSupplier.simpleResourceAccessor)
         } catch (ParsedNodeException e) {
             e.printStackTrace()
         }
@@ -454,7 +454,7 @@ public class ChangeSetTest extends Specification {
             def commentNode = new ParsedNode(null, "comment").setValue("comment here")
             def rollbackNode = new ParsedNode(null, "rollback").addChild(commentNode)
             def changeSetNode = new ParsedNode(null, "changeSet").addChild(rollbackNode)
-            changeSet.load(changeSetNode, resourceSupplier.simpleResourceAccessor)
+            changeSet.load(changeSetNode, null, resourceSupplier.simpleResourceAccessor)
         } catch (ParsedNodeException e) {
             e.printStackTrace()
         }
@@ -473,7 +473,7 @@ public class ChangeSetTest extends Specification {
         def rollbackNode = new ParsedNode(null, "rollback").addChild(commentNode).addChild(renameTableNode)
         def changeSetNode = new ParsedNode(null, "changeSet").addChild(createTableNode).addChild(rollbackNode)
         try {
-            changeSet.load(changeSetNode, resourceSupplier.simpleResourceAccessor)
+            changeSet.load(changeSetNode, null, resourceSupplier.simpleResourceAccessor)
         } catch (ParsedNodeException e) {
             e.printStackTrace()
         }
@@ -514,7 +514,7 @@ public class ChangeSetTest extends Specification {
                 new ParsedNode(null, "createTable").addChild(null, "tableName", "table_2")
         ]])
         try {
-            changeSet.load(node, resourceSupplier.simpleResourceAccessor)
+            changeSet.load(node, null, resourceSupplier.simpleResourceAccessor)
         } catch (ParsedNodeException e) {
             e.printStackTrace()
         }
@@ -531,7 +531,7 @@ public class ChangeSetTest extends Specification {
         when:
         def changeSet = new ChangeSet(new DatabaseChangeLog("com/example/test.xml"))
         try {
-            changeSet.load(new ParsedNode(null, "changeSet").addChild(null, param, value), resourceSupplier.simpleResourceAccessor)
+            changeSet.load(new ParsedNode(null, "changeSet").addChild(null, param, value), null, resourceSupplier.simpleResourceAccessor)
         } catch (ParsedNodeException e) {
             e.printStackTrace()
         }
@@ -552,7 +552,7 @@ public class ChangeSetTest extends Specification {
         when:
         def changeSet = new ChangeSet(new DatabaseChangeLog("com/example/test.xml"))
         try {
-            changeSet.load(new ParsedNode(null, "changeSet").addChild(null, param, value), resourceSupplier.simpleResourceAccessor)
+            changeSet.load(new ParsedNode(null, "changeSet").addChild(null, param, value), null, resourceSupplier.simpleResourceAccessor)
         } catch (ParsedNodeException e) {
             e.printStackTrace()
         }

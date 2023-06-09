@@ -1,6 +1,7 @@
 package liquibase.change;
 
 import liquibase.Scope;
+import liquibase.database.Database;
 import liquibase.exception.UnexpectedLiquibaseException;
 import liquibase.plugin.AbstractPluginFactory;
 import liquibase.plugin.Plugin;
@@ -40,8 +41,8 @@ public class ChangeFactory extends AbstractPluginFactory<Change>{
         }
     }
 
-    public ChangeMetaData getChangeMetaData(String change) {
-        Change changeObj = create(change);
+    public ChangeMetaData getChangeMetaData(String change, Database database) {
+        Change changeObj = create(change, database);
         if (changeObj == null) {
             return null;
         }
@@ -82,16 +83,23 @@ public class ChangeFactory extends AbstractPluginFactory<Change>{
      * Create a new Change implementation for the given change name. The class of the constructed object will be the Change implementation with the highest priority.
      * Each call to create will return a new instance of the Change.
      */
-    public Change create(String name) {
-        Change plugin = getPlugin(name);
-        if (plugin == null) {
+    public Change create(String name, Database database) {
+        Set<Change> plugins = getPlugins(name);
+        if (plugins.isEmpty()) {
             return null;
         }
-        try {
-            return plugin.getClass().getConstructor().newInstance();
-        } catch (Exception e) {
-            throw new UnexpectedLiquibaseException(e);
+
+        for (Change plugin : plugins) {
+            try {
+                Change change = plugin.getClass().getConstructor().newInstance();
+                if (change.supports(database)) {
+                    return change;
+                }
+            } catch (Exception e) {
+                throw new UnexpectedLiquibaseException(e);
+            }
         }
+        return null;
     }
 
     public Map<String, Object> getParameters(Change change) {
