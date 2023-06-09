@@ -162,15 +162,34 @@
 	</dependencies>
 
 	<build>
-		<resources>
-			<resource>
-				<directory>${project.basedir}/src/main/archive</directory>
-				<targetPath>${project.build.directory}/archive</targetPath>
-				<filtering>true</filtering>
-			</resource>
-		</resources>
-
 		<plugins>
+
+			<plugin>
+			<artifactId>maven-resources-plugin</artifactId>
+			<version>3.3.1</version>
+				<executions>
+					<execution>
+						<id>copy-resources</id>
+						<goals>
+							<goal>copy-resources</goal>
+						</goals>
+						<phase>process-resources</phase>
+
+						<configuration>
+							<resources>
+								<resource>
+									<directory>${project.basedir}/src/main/archive</directory>
+									<filtering>true</filtering>
+								</resource>
+							</resources>
+							<outputDirectory>${project.build.directory}/archive</outputDirectory>
+						</configuration>
+
+					</execution>
+				</executions>
+			</plugin>
+
+
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-jar-plugin</artifactId>
