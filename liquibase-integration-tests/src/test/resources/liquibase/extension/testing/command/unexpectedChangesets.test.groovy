@@ -45,6 +45,34 @@ Optional Args:
         setup {
             syncChangelog "changelogs/h2/complete/rollback.tag.changelog.xml"
         }
+
+        expectedOutput = """
+5 unexpected changes were found in LBUSER@jdbc:h2:mem:lbcat
+     changelogs/h2/complete/rollback.tag.changelog.xml::1::nvoxland
+     changelogs/h2/complete/rollback.tag.changelog.xml::1.1::nvoxland
+     changelogs/h2/complete/rollback.tag.changelog.xml::2::nvoxland
+     changelogs/h2/complete/rollback.tag.changelog.xml::13.1::testuser
+     changelogs/h2/complete/rollback.tag.changelog.xml::14::nvoxland
+"""
+    }
+
+    run "Verbose false", {
+        arguments = [
+                url:        { it.url },
+                username:   { it.username },
+                password:   { it.password },
+                verbose      : "false",
+                changelogFile: "changelogs/h2/complete/unexpected.tag.changelog.xml",
+        ]
+
+        setup {
+            syncChangelog "changelogs/h2/complete/rollback.tag.changelog.xml"
+        }
+
+        expectedOutput = [
+                CommandTests.assertContains("5 unexpected changes were found in LBUSER@jdbc:h2:mem:lbcat"),
+                CommandTests.assertNotContains("changelogs/h2/complete/rollback.tag.changelog.xml::1::nvoxland"),
+        ]
     }
 
     run "Run without a URL should throw an exception",  {
