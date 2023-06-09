@@ -88,7 +88,7 @@ public class StringUtils {
 
         String trimmedString = StringUtils.trimToNull(currentString.toString());
         if (trimmedString != null) {
-            if (!returnArray.isEmpty() && isLastStatementComment(parsed, trimmedString)) {
+            if (!stripComments && !returnArray.isEmpty() && isLastStatementComment(parsed, trimmedString)) {
                 String lastStatement = returnArray.get(returnArray.size() - 1);
                 String commentSeparator = getWhiteSpaceSymbolBeforeLastComment(parsed, " ");
                 String lastStatementWithAppendedComment = lastStatement + commentSeparator + trimmedString;
