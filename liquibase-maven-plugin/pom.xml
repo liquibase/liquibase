@@ -13,11 +13,14 @@
     <packaging>maven-plugin</packaging>
     <description>A Maven plugin wraps up some of the functionality of Liquibase</description>
 
+
     <properties>
         <targetMavenVersion>3.9.2</targetMavenVersion>
         <maven.install.skip>false</maven.install.skip>
         <maven.deploy.skip>false</maven.deploy.skip>
         <maven.javadoc.skip>false</maven.javadoc.skip>
+        <deploy.url>https://maven.pkg.github.com/liquibase/liquibase</deploy.url>
+        <deploy.repositoryId>github</deploy.repositoryId>
     </properties>
     <dependencies>
         <dependency>
@@ -59,8 +62,7 @@
             <scope>provided</scope>
         </dependency>
 
-
-        <dependency>
+       <dependency>
             <groupId>org.apache.maven.plugin-testing</groupId>
             <artifactId>maven-plugin-testing-harness</artifactId>
             <version>3.3.0</version>
@@ -165,6 +167,31 @@
                                 <phase>install</phase>
                                 <goals>
                                     <goal>install-file</goal>
+                                </goals>
+                            </execution>
+                        </executions>
+                    </plugin>
+                    <plugin>
+                        <artifactId>maven-deploy-plugin</artifactId>
+                        <version>3.1.1</version>
+                        <configuration>
+                            <groupId>${project.groupId}</groupId>
+                            <version>${project.version}</version>
+                            <packaging>jar</packaging>
+                            <repositoryId>${deploy.repositoryId}</repositoryId>
+                            <url>${deploy.url}</url>
+                            <file>${project.build.directory}/liquibase-maven-plugin-${project.version}.jar</file>
+                            <artifactId>${project.artifactId}</artifactId>
+                            <sources>${project.build.directory}/liquibase-maven-plugin-${project.version}-sources.jar
+                            </sources>
+                            <pomFile>${basedir}/src/main/maven/release.pom.xml</pomFile>
+                        </configuration>
+                        <executions>
+                            <execution>
+                                <id>custom-deploy</id>
+                                <phase>deploy</phase>
+                                <goals>
+                                    <goal>deploy-file</goal>
                                 </goals>
                             </execution>
                         </executions>
