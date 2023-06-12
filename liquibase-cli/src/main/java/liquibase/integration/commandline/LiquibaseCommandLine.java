@@ -424,7 +424,9 @@ public class LiquibaseCommandLine {
         MdcManager mdcManager = Scope.getCurrentScope().getMdcManager();
         try (MdcObject version = mdcManager.put(MdcKey.LIQUIBASE_VERSION, LiquibaseUtil.getBuildVersion());
              MdcObject systemUser = mdcManager.put(MdcKey.LIQUIBASE_SYSTEM_USER, System.getProperty("user.name"));
-             MdcObject systemName = mdcManager.put(MdcKey.LIQUIBASE_SYSTEM_NAME, NetUtil.getLocalHostName())) {
+             MdcObject systemName = mdcManager.put(MdcKey.LIQUIBASE_SYSTEM_NAME, NetUtil.getLocalHostName());
+             // The host name here is purposefully the same as the system name. The system name is retained for backwards compatibility.
+             MdcObject hostName = mdcManager.put(MdcKey.LIQUIBASE_HOST_NAME, NetUtil.getLocalHostName())) {
             Scope.getCurrentScope().getLog(getClass()).info("Starting command execution.");
         }
     }
