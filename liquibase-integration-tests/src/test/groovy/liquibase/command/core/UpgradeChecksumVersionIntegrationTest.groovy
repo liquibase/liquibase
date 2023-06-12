@@ -121,7 +121,7 @@ VALUES('1', 'your.name', '$changelogfile', '2023-05-31 14:33:39.108', 1, 'EXECUT
 
         then:
         ranChangeSets.size() == 3
-        ranChangeSets.get(0).getLastCheckSum().getVersion() == 8
+        ranChangeSets.get(0).getLastCheckSum().getVersion() == 9
         ranChangeSets.get(1).getLastCheckSum().getVersion() == 9
         ranChangeSets.get(2).getLastCheckSum().getVersion() == 9
 
