@@ -519,19 +519,28 @@ jobs:
         with:
           maven-version: ${{ env.MAVEN_VERSION }}
 
+      # Deploy branch
       # Version artifact based off of branch and commit SHA.
       - name: Version Artifact
         run: mvn versions:set -DnewVersion="${{ github.ref_name }}-SNAPSHOT" 
 
-
-      # This would still deploy a package if there are test failures. Might help to have build.yml complete and then run this workflow
       # Publish to GitHub Packages. We are building a tar file which includes liquibase-commercial hence we need -Dliquibase-pro.version
       - name: Publish package to GPM
         run: |
-          mvn -B -P liquibase-commercial clean deploy -DskipTests=true -Dliquibase-pro.version="${{ needs.setup.outputs.proBranchName }}-SNAPSHOT"
-          
+          mvn -B -P liquibase-commercial clean deploy -DskipTests=true -Dliquibase-pro.version="${{ needs.setup.outputs.proBranchName }}-SNAPSHOT"   
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      # Deploy branch with Stand Alone PR's in OSS 
+      - name: Version Artifact
+        run: |
+          mvn versions:set -DnewVersion="${{ github.ref_name }}-SNAPSHOT" 
+
+      - name: Publish tar package to GPM
+        run: |
+          mvn versions:set -DnewVersion="${{ needs.setup.outputs.thisBranchName }}-SNAPSHOT" 
+          mvn -B -P liquibase-commercial clean deploy -DskipTests=true -Dliquibase-pro.version=${{ needs.setup.outputs.proBranchName }}-SNAPSHOT
+
 
 # this triggers the pro-tests and test-harness to run
   finish:
