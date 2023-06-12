@@ -1,0 +1,46 @@
+name-template: 'Liquibase v$RESOLVED_VERSION'
+tag-template: 'v$RESOLVED_VERSION'
+categories:
+  - title: ':green_book: Notable Changes'
+    labels: 
+      - 'notablechanges'
+  - title: '🚀 New Features'
+    labels:
+      - 'feature'
+      - 'enhancement'
+  - title: '🐛 Bug Fixes 🛠'
+    labels:
+      - 'bugfix'
+  - title: ':boom: Breaking Changes'
+    label: 
+      - 'breakingChanges'    
+  - title: 'Security, Driver and other updates'   
+    labels:
+      - 'sdou'
+  - title: '👏 New Contributors'
+    labels:
+      - 'newcontributors'    
+  - title: 'API'
+    label: 
+      - 'API'
+change-template: '- (#$NUMBER) $TITLE @$AUTHOR '
+change-title-escapes: '\<*_&' # You can add # and @ to disable mentions, and add ` to disable code blocks.
+version-resolver:
+  major:
+    labels:
+      - 'major'
+  minor:
+    labels:
+      - 'minor'
+  patch:
+    labels:
+      - 'feature'
+      - 'enhancement'
+      - 'patch'
+      - 'bugfix'
+      - 'sdou'
+  default: patch
+template: |
+  ## Changes
+
+  $CHANGES
