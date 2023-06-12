@@ -327,4 +327,16 @@ class CreateProcedureChangeTest extends StandardChangeTest {
         ChecksumVersion.V8 | "8:977441683eb54d6ee1b2de400adb5eed" | "8:20536e4edf2d1dfa3d892063830f38ae"
         ChecksumVersion.latest() | "9:4ec1db90234ea750169f7d94f7e5c425" | "9:4ec1db90234ea750169f7d94f7e5c425"
     }
+
+    def "v8 checksum generation"() {
+        when:
+        CreateProcedureChange change = new CreateProcedureChange()
+        change.setProcedureText('CREATE PROCEDURE insert_data( a integer, b integer)\nLANGUAGE SQL\nAS $$\nINSERT INTO tbl VALUES (a);\nINSERT INTO tbl VALUES (b);\n$$;"')
+        CheckSum checkSum = Scope.child([(Scope.Attr.checksumVersion.name()): ChecksumVersion.V8], {
+            return change.generateCheckSum()
+        } as Scope.ScopedRunnerWithReturn<CheckSum>) as CheckSum
+
+        then:
+        checkSum.toString() == "8:bf4003d3123aea9ae2c1899073ce4431"
+    }
 }
