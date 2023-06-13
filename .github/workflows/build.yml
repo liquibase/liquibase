@@ -499,12 +499,6 @@ jobs:
     steps:
       - uses: actions/checkout@v3
 
-      - name: maven-settings-xml-action
-        uses: whelk-io/maven-settings-xml-action@v20
-        with:
-          repositories: '[{ "id": "github", "url": "https://maven.pkg.github.com/liquibase/liquibase" }, {"id": "liquibase-pro", "url": "https://maven.pkg.github.com/liquibase/liquibase-pro"}]'
-          servers: '[{ "id": "liquibase-pro", "username": "liquibot", "password": "${{ secrets.LIQUIBOT_PAT }}" }, { "id": "github", "username": "liquibot", "password": "${{ secrets.LIQUIBOT_PAT }}" }]'
-
       - name: Set up Java for publishing to GPM
         uses: actions/setup-java@v3
         with:
@@ -514,6 +508,38 @@ jobs:
           server-id: github
           overwrite-settings: false
 
+      # look for dependencies in maven
+      - name: maven-settings-xml-action
+        uses: whelk-io/maven-settings-xml-action@v20
+        with:
+          repositories: |
+            [
+              {
+                "id": "liquibase",
+                "url": "https://maven.pkg.github.com/liquibase/liquibase",
+                "releases": {
+                  "enabled": "false"
+                },
+                "snapshots": {
+                  "enabled": "true",
+                  "updatePolicy": "always"
+                }
+              }
+            ]
+          servers: |
+            [
+              {
+                "id": "liquibase-pro",
+                "username": "liquibot",
+                "password": "${{ secrets.LIQUIBOT_PAT }}"
+              },
+              {
+                "id": "liquibase",
+                "username": "liquibot",
+                "password": "${{ secrets.LIQUIBOT_PAT }}"
+              }
+            ]
+            
       - name: Set up Maven
         uses: stCarolas/setup-maven@v4.5
         with:
