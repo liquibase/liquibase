@@ -186,9 +186,7 @@ jobs:
           distribution: "temurin"
           cache: "maven"
 
-      # - name: Get updated snapshots
-      #   run : |
-      #     mvn dependency:go-offline --update-snapshots -Dliquibase-pro.version=${{ needs.setup.outputs.proBranchName }}
+      # getting from build results page. If we remove 0-snapshot then we will need settings.xml
 
       - name: Set up Maven
         uses: stCarolas/setup-maven@v4.5
@@ -241,9 +239,7 @@ jobs:
           distribution: "adopt"
           cache: "maven"
 
-      # - name: Get updated snapshots
-      #   run : |
-      #     mvn dependency:go-offline --update-snapshots -Dliquibase-pro.version=${{ needs.setup.outputs.proBranchName }}
+          # getting from build results page. If we remove 0-snapshot then we will need settings.xml
 
       - name: Set up Maven
         uses: stCarolas/setup-maven@v4.5
@@ -299,9 +295,7 @@ jobs:
           distribution: "temurin"
           cache: "maven"
 
-      # - name: Get updated snapshots
-      #   run : |
-      #     mvn dependency:go-offline --update-snapshots -Dliquibase-pro.version=${{ needs.setup.outputs.proBranchName }}
+      # getting from build results page. If we remove 0-snapshot then we will need settings.xml
 
       - name: Set up Maven
         uses: stCarolas/setup-maven@v4.5
@@ -334,7 +328,7 @@ jobs:
   package:
     name: Package Artifacts
     runs-on: macos-latest
-    needs: [setup, build, integration-test, sonar]
+    needs: [setup, build]
     steps:
       - uses: actions/checkout@v3
         with:
@@ -365,9 +359,7 @@ jobs:
         env:
           GPG_PASSWORD: ${{ secrets.GPG_PASSPHRASE }}
 
-      # - name: Get updated snapshots
-      #   run : |
-      #     mvn dependency:go-offline --update-snapshots -Dliquibase-pro.version=${{ needs.setup.outputs.proBranchName }}
+          # getting from build results page. If we remove 0-snapshot then we will need settings.xml
 
       - name: Set up Maven
         uses: stCarolas/setup-maven@v4.5
@@ -505,8 +497,6 @@ jobs:
           java-version: '17'
           distribution: 'temurin'
           cache: 'maven'
-          server-id: github
-          overwrite-settings: false
 
       # look for dependencies in maven
       - name: maven-settings-xml-action
@@ -546,7 +536,7 @@ jobs:
           maven-version: ${{ env.MAVEN_VERSION }}
 
       # Deploy branch
-      # Version artifact based off of branch and commit SHA.
+      # Version artifact based off of branch
       - name: Version Artifact
         run: mvn versions:set -DnewVersion="${{ github.ref_name }}-SNAPSHOT" 
 
