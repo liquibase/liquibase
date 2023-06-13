@@ -6,6 +6,8 @@ package liquibase.command;
  * command may want to do additional logging or handling of the exception because it knows the command was surprised by the result.
  */
 public class CommandFailedException extends Exception {
+
+    private static final long serialVersionUID = -394350095952659571L;
     private final CommandResults results;
     private final int exitCode;
     private final boolean expected;

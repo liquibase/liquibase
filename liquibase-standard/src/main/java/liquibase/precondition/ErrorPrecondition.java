@@ -3,9 +3,9 @@ package liquibase.precondition;
 import liquibase.changelog.DatabaseChangeLog;
 
 public class ErrorPrecondition {
-    private Throwable cause;
-    private Precondition precondition;
-    private DatabaseChangeLog changeLog;
+    private final Throwable cause;
+    private final Precondition precondition;
+    private final DatabaseChangeLog changeLog;
 
 
     public ErrorPrecondition(Throwable exception, DatabaseChangeLog changeLog, Precondition precondition) {

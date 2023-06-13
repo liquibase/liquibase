@@ -8,7 +8,7 @@ import java.util.*;
 
 public class MockResourceAccessor extends AbstractResourceAccessor {
 
-    private SortedMap<String, String> contentByFileName;
+    private final SortedMap<String, String> contentByFileName;
 
     public MockResourceAccessor() {
         this(new HashMap<>());

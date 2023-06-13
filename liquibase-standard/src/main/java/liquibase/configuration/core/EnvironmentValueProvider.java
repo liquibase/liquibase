@@ -28,8 +28,8 @@ import java.util.concurrent.atomic.AtomicBoolean;
  */
 public class EnvironmentValueProvider extends AbstractMapConfigurationValueProvider {
 
-    private Map<String, String> environment = System.getenv();
-    private static AtomicBoolean printedInvalidEnvironmentVariablesMessage = new AtomicBoolean(false);
+    private final Map<String, String> environment = System.getenv();
+    private static final AtomicBoolean printedInvalidEnvironmentVariablesMessage = new AtomicBoolean(false);
 
     @Override
     public int getPrecedence() {

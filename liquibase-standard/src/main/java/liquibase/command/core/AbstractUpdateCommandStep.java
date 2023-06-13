@@ -21,6 +21,7 @@ import liquibase.logging.mdc.MdcObject;
 import liquibase.logging.mdc.MdcValue;
 import liquibase.logging.mdc.customobjects.ChangesetsUpdated;
 import liquibase.util.ShowSummaryUtil;
+import liquibase.util.StringUtil;
 
 import java.io.IOException;
 import java.io.OutputStream;
@@ -78,9 +79,12 @@ public abstract class AbstractUpdateCommandStep extends AbstractCommandStep impl
                 ShowSummaryUtil.showUpdateSummary(databaseChangeLog, getShowSummary(commandScope), statusVisitor, resultsBuilder.getOutputStream());
             });
             resultsBuilder.addResult("statusCode", 0);
+            addChangelogFileToMdc(getChangelogFileArg(commandScope), databaseChangeLog);
             logDeploymentOutcomeMdc(changeExecListener, true);
             postUpdateLog();
         } catch (Exception e) {
+            DatabaseChangeLog databaseChangeLog = (DatabaseChangeLog) commandScope.getDependency(DatabaseChangeLog.class);
+            addChangelogFileToMdc(getChangelogFileArg(commandScope), databaseChangeLog);
             logDeploymentOutcomeMdc(changeExecListener, false);
             resultsBuilder.addResult("statusCode", 1);
             throw e;
@@ -110,6 +114,14 @@ public abstract class AbstractUpdateCommandStep extends AbstractCommandStep impl
         return changeExecListener;
     }
 
+    private void addChangelogFileToMdc(String changeLogFile, DatabaseChangeLog databaseChangeLog) {
+        if (StringUtil.isNotEmpty(databaseChangeLog.getLogicalFilePath())) {
+            Scope.getCurrentScope().addMdcValue(MdcKey.CHANGELOG_FILE, databaseChangeLog.getLogicalFilePath());
+        } else {
+            Scope.getCurrentScope().addMdcValue(MdcKey.CHANGELOG_FILE, changeLogFile);
+        }
+    }
+
     protected void customMdcLogging(CommandScope commandScope) {
         // do nothing by default
     }
@@ -128,7 +140,7 @@ public abstract class AbstractUpdateCommandStep extends AbstractCommandStep impl
             Scope.getCurrentScope().getLog(getClass()).info(success ? successLog : failureLog);
         }
 
-        if (defaultListener instanceof  DefaultChangeExecListener) {
+        if (defaultListener instanceof DefaultChangeExecListener) {
             List<ChangeSet> deployedChangeSets = ((DefaultChangeExecListener)defaultListener).getDeployedChangeSets();
             int deployedChangeSetCount = deployedChangeSets.size();
             ChangesetsUpdated changesetsUpdated = new ChangesetsUpdated(deployedChangeSets);
