@@ -557,16 +557,6 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
-      # Deploy branch with Stand Alone PR's in OSS 
-      - name: Version Artifact
-        run: |
-          mvn versions:set -DnewVersion="${{ github.ref_name }}-SNAPSHOT" 
-
-      - name: Publish tar package to GPM
-        run: |
-          mvn versions:set -DnewVersion="${{ needs.setup.outputs.thisBranchName }}-SNAPSHOT" 
-          mvn -B -P liquibase-commercial clean deploy -DskipTests=true -Dliquibase-pro.version=${{ needs.setup.outputs.proBranchName }}-SNAPSHOT
-
 
 # this triggers the pro-tests and test-harness to run
   finish:
