@@ -28,6 +28,7 @@
 		<assemblyConfigFile>src/main/assembly/assembly-bin.xml</assemblyConfigFile>
 		<maven.deploy.skip>true</maven.deploy.skip>
 		<maven.install.skip>true</maven.install.skip>
+		<artifact.version>${project.version}</artifact.version>
 	</properties>
 	<dependencies>
 		<dependency>
@@ -248,7 +249,7 @@
                 <version>3.1.1</version>
 				<configuration>
 					<groupId>${project.groupId}</groupId>
-					<version>${project.version}</version>
+					<version>${artifact.version}</version>
 					<packaging>tar.gz</packaging>
                     <file>${project.build.directory}/liquibase-${project.version}.tar.gz</file>
 					<artifactId>liquibase</artifactId>
@@ -268,7 +269,7 @@
                 <version>3.1.1</version>
 				<configuration>
 					<groupId>${project.groupId}</groupId>
-					<version>${project.version}</version>
+					<version>${artifact.version}</version>
 					<packaging>tar.gz</packaging>
                     <file>${project.build.directory}/liquibase-${project.version}.tar.gz</file>
 					<artifactId>liquibase</artifactId>
