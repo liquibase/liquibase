@@ -90,12 +90,12 @@ public class UpdateToTagCommandStep extends AbstractUpdateCommandStep {
         List<RanChangeSet> ranChangeSetList = database.getRanChangeSetList();
         String tag = commandScope.getArgumentValue(TAG_ARG);
         return new StatusChangeLogIterator(changeLog, tag,
+                new UpToTagChangeSetFilter(tag, ranChangeSetList),
                 new ShouldRunChangeSetFilter(database),
                 new ContextChangeSetFilter(contexts),
                 new LabelChangeSetFilter(labelExpression),
                 new DbmsChangeSetFilter(database),
-                new IgnoreChangeSetFilter(),
-                new UpToTagChangeSetFilter(tag, ranChangeSetList));
+                new IgnoreChangeSetFilter());
     }
 
     @Override

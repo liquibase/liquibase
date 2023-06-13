@@ -1,6 +1,5 @@
 package liquibase.changelog.filter;
 
-import liquibase.ChecksumVersion;
 import liquibase.change.Change;
 import liquibase.change.core.TagDatabaseChange;
 import liquibase.changelog.ChangeSet;
@@ -14,13 +13,6 @@ public class UpToTagChangeSetFilter implements ChangeSetFilter {
 
     public UpToTagChangeSetFilter(String tag, List<RanChangeSet> ranChangeSets) {
         this.tag = tag;
-        for (RanChangeSet ranChangeSet : ranChangeSets) {
-            if (ranChangeSet.getLastCheckSum().getVersion() == ChecksumVersion.latest().getVersion()
-            && tag.equalsIgnoreCase(ranChangeSet.getTag())) {
-                seenTag = true;
-                break;
-            }
-        }
     }
 
     public boolean isSeenTag() {
