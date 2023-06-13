@@ -515,7 +515,7 @@ jobs:
           repositories: |
             [
               {
-                "id": "liquibase",
+                "id": "github",
                 "url": "https://maven.pkg.github.com/liquibase/liquibase",
                 "releases": {
                   "enabled": "false"
