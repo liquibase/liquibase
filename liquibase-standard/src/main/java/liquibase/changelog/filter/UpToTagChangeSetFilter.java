@@ -11,14 +11,14 @@ import java.util.List;
 public class UpToTagChangeSetFilter implements ChangeSetFilter {
     private final String tag;
     private boolean seenTag;
-    private CheckSum checksumForTagChangeset = null;
+    private CheckSum checksumForRanChangesetTag = null;
 
 
     public UpToTagChangeSetFilter(String tag, List<RanChangeSet> ranChangeSets) {
         this.tag = tag;
         for (RanChangeSet ranChangeSet : ranChangeSets) {
             if (tag.equalsIgnoreCase(ranChangeSet.getTag())) {
-                checksumForTagChangeset = ranChangeSet.getLastCheckSum();
+                checksumForRanChangesetTag = ranChangeSet.getLastCheckSum();
                 break;
             }
         }
@@ -35,8 +35,10 @@ public class UpToTagChangeSetFilter implements ChangeSetFilter {
             return new ChangeSetFilterResult(false, "Changeset is after tag '" + this.tag + "'", this.getClass(), getMdcName(), getDisplayName());
         }
 
-        if (this.checksumForTagChangeset != null && changeSet.isCheckSumValid(this.checksumForTagChangeset)) {
+        // if the tag is already in the database, accept the changesets until we find it
+        if (this.checksumForRanChangesetTag != null && changeSet.isCheckSumValid(this.checksumForRanChangesetTag)) {
             seenTag = true;
+        // otherwise validate each new changeset until we find the tag
         } else {
             String changesetTag = null;
             for (Change change : changeSet.getChanges()) {
