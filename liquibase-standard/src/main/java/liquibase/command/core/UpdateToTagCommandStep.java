@@ -102,12 +102,11 @@ public class UpdateToTagCommandStep extends AbstractUpdateCommandStep {
 
     private void checkForTagExists(DatabaseChangeLog changeLog, String tag) {
         boolean found =
-                changeLog.getChangeSets().stream().anyMatch(cs -> {
-                    return
-                            cs.getChanges().stream().anyMatch(ch -> {
-                                return ch instanceof TagDatabaseChange && ((TagDatabaseChange) ch).getTag().equals(tag);
-                            });
-                });
+            changeLog.getChangeSets().stream().anyMatch(cs ->
+                cs.getChanges().stream().anyMatch(ch ->
+                                ch instanceof TagDatabaseChange && ((TagDatabaseChange) ch).getTag().equals(tag)
+                )
+            );
         if (! found) {
             String message = String.format(
                     "The tag '%s' was not found in the changelog '%s'. All changesets in the changelog were deployed.%nLearn about options for undoing these changes at https://docs.liquibase.com.",
