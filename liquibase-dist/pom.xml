@@ -271,7 +271,7 @@
 						<phase>package</phase>  
 						<configuration>  
 							<target>  
-								<untar src="${project.build.directory}/liquibase-0-SNAPSHOT.tar.gz" compression="gzip" dest="${project.build.directory}/liquibase-dist-unpacked" />
+								<untar src="${project.build.directory}/${project.parent.artifactId}-${project.parent.version}.tar.gz" compression="gzip" dest="${project.build.directory}/liquibase-dist-unpacked" />
 							</target>  
 						</configuration>  
 						<goals>  
