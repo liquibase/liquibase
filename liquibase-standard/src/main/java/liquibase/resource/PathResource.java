@@ -64,7 +64,7 @@ public class PathResource extends AbstractResource {
         if (!exists()) {
             if (openOptions.isCreateIfNeeded()) {
                 Path parent = path.getParent();
-                if (parent != null) {
+                if (parent != null && !parent.toFile().exists()) {
                     boolean mkdirs = parent.toFile().mkdirs();
                     if (!mkdirs) {
                         Scope.getCurrentScope().getLog(getClass()).warning("Failed to create parent directories for file " + path);
