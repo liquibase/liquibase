@@ -1,4 +1,4 @@
-package liquibase.changelog.filter;
+    package liquibase.changelog.filter;
 
 import liquibase.LabelExpression;
 import liquibase.Labels;
@@ -10,7 +10,7 @@ import java.util.Collection;
 import java.util.List;
 
 public class LabelChangeSetFilter implements ChangeSetFilter {
-    private final LabelExpression labelExpression;
+    private LabelExpression labelExpression;
 
     public LabelChangeSetFilter() {
         this(new LabelExpression());

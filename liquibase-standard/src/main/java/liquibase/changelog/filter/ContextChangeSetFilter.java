@@ -10,7 +10,7 @@ import java.util.Collection;
 import java.util.List;
 
 public class ContextChangeSetFilter implements ChangeSetFilter {
-    private final Contexts contexts;
+    private Contexts contexts;
 
     public ContextChangeSetFilter() {
         this(new Contexts());
