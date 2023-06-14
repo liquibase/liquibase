@@ -312,6 +312,7 @@
 							<mapper>
 								<type>perm</type>
 								<prefix>/etc/profile.d/</prefix>
+								<filemode>755</filemode>
 							</mapper>
 						</data>
 					</dataSet>
