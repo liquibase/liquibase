@@ -151,7 +151,7 @@ public class ValidatingVisitor implements ChangeSetVisitor {
 
         if(ranChangeSet != null){
             if (!changeSet.isCheckSumValid(ranChangeSet.getLastCheckSum())) {
-                if (!changeSet.shouldRunOnChange()) {
+                if (!changeSet.shouldRunOnChange() && !changeSet.shouldAlwaysRun()) {
                     invalidMD5Sums.add(changeSet.toString(false)+" was: "+ranChangeSet.getLastCheckSum().toString()
                             +" but is now: "+changeSet.generateCheckSum(ChecksumVersion.enumFromChecksumVersion(ranChangeSet.getLastCheckSum().getVersion())).toString());
                 }

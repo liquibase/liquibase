@@ -2,7 +2,6 @@ package liquibase.change;
 
 import liquibase.ChecksumVersion;
 import liquibase.Scope;
-import liquibase.integration.commandline.LiquibaseCommandLineConfiguration;
 import liquibase.util.MD5Util;
 import liquibase.util.StringUtil;
 
@@ -44,7 +43,7 @@ public final class CheckSum {
      * Parse the given storedCheckSum string value and return a new CheckSum object.
      */
     public static CheckSum parse(String checksumValue) {
-        if (checksumValue == null) {
+        if (StringUtil.isEmpty(checksumValue)) {
             return null;
         }
         // The general layout of a checksum is:
