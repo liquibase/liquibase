@@ -104,7 +104,7 @@ public class UpdateToTagCommandStep extends AbstractUpdateCommandStep {
         boolean found =
             changeLog.getChangeSets().stream().anyMatch(cs ->
                 cs.getChanges().stream().anyMatch(ch ->
-                                ch instanceof TagDatabaseChange && ((TagDatabaseChange) ch).getTag().equals(tag)
+                    ch instanceof TagDatabaseChange && ((TagDatabaseChange) ch).getTag().equals(tag)
                 )
             );
         if (! found) {
