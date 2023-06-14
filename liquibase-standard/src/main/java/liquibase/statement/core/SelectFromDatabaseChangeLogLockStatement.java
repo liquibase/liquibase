@@ -5,7 +5,7 @@ import liquibase.statement.AbstractSqlStatement;
 
 public class SelectFromDatabaseChangeLogLockStatement extends AbstractSqlStatement {
 
-    private ColumnConfig[] columnsToSelect;
+    private final ColumnConfig[] columnsToSelect;
 
     public SelectFromDatabaseChangeLogLockStatement() {
         this.columnsToSelect = new ColumnConfig[0];

@@ -18,7 +18,7 @@ import java.util.*;
  */
 public class LabelExpression {
 
-    private HashSet<String> labels = new LinkedHashSet<>();
+    private final HashSet<String> labels = new LinkedHashSet<>();
     private String originalString;
 
     public LabelExpression() {
@@ -127,7 +127,7 @@ public class LabelExpression {
     }
 
     public boolean isEmpty() {
-        return (this.labels == null) || this.labels.isEmpty();
+        return this.labels.isEmpty();
     }
 
     public String getOriginalString() {
