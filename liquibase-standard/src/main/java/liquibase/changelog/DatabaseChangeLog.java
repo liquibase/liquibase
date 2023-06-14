@@ -24,6 +24,7 @@ import liquibase.resource.Resource;
 import liquibase.resource.ResourceAccessor;
 import liquibase.servicelocator.LiquibaseService;
 import liquibase.util.FileUtil;
+import liquibase.util.LoggingExecutorTextUtil;
 import liquibase.util.StringUtil;
 
 import java.io.IOException;
@@ -623,7 +624,7 @@ public class DatabaseChangeLog implements Comparable<DatabaseChangeLog>, Conditi
     }
 
     /**
-     * @deprecated Incorrect LabelExpression parameter. Kept for backwards compatibility
+     * @deprecated use {@link DatabaseChangeLog#includeAll(String, boolean, IncludeAllFilter, boolean, Comparator, ResourceAccessor, ContextExpression, Labels, boolean, int, int)}
      */
     @Deprecated
     public void includeAll(String pathName,
@@ -752,7 +753,7 @@ public class DatabaseChangeLog implements Comparable<DatabaseChangeLog>, Conditi
     }
 
     /**
-     * @deprecated Incorrect LabelExpression parameter. Kept for backwards compatibility
+     * @deprecated use {@link DatabaseChangeLog#include(String, boolean, boolean, ResourceAccessor, ContextExpression, Labels, Boolean, OnUnknownFileFormat)}
      */
     @Deprecated
     public boolean include(String fileName,
@@ -780,7 +781,7 @@ public class DatabaseChangeLog implements Comparable<DatabaseChangeLog>, Conditi
     }
 
     /**
-     * @deprecated
+     * @deprecated use {@link DatabaseChangeLog#include(String, boolean, boolean, ResourceAccessor, ContextExpression, Labels, Boolean, OnUnknownFileFormat)}
      */
     public boolean include(String fileName,
                            boolean isRelativePath,

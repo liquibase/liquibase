@@ -592,7 +592,7 @@ http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbch
     }
 
     @Unroll
-    def "no error is thrown when properties file is not found and is set to not error and property is not set"() {
+    def "no error is thrown when properties file is not found and errorIfMissing flag is either set as false or null"() {
         when:
         def propertiesResourceAccessor = new MockResourceAccessor(["com/example/file.properties": testProperties])
 
