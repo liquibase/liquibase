@@ -73,9 +73,6 @@
         <junit.version>4.13.2</junit.version>
         <trimStackTrace>false</trimStackTrace>
         <argLine></argLine>
-        <java.version>11</java.version>
-        <jdk.pathPrefix>target/jdks</jdk.pathPrefix>
-        <jdk.filePrefix>zulu20.30.11-ca-jdk20.0.1</jdk.filePrefix>
     </properties>
 
     <distributionManagement>
@@ -173,7 +170,7 @@
         <dependency>
             <groupId>org.hsqldb</groupId>
             <artifactId>hsqldb</artifactId>
-            <version>2.7.1</version>
+            <version>2.7.2</version>
             <scope>test</scope>
         </dependency>
 
@@ -222,7 +219,7 @@
         <dependency>
             <groupId>org.xerial</groupId>
             <artifactId>sqlite-jdbc</artifactId>
-            <version>3.41.2.2</version>
+            <version>3.42.0.0</version>
             <scope>test</scope>
         </dependency>
 
@@ -270,7 +267,6 @@
                     <encoding>UTF-8</encoding>
                 </configuration>
             </plugin>
-
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-enforcer-plugin</artifactId>
@@ -413,6 +409,7 @@
                     </execution>
                 </executions>
             </plugin>
+
             <!--        <plugin>-->
             <!--            <artifactId>maven-install-plugin</artifactId>-->
             <!--            <version>2.5.2</version>-->
@@ -437,90 +434,6 @@
                 <plugin>
                     <artifactId>maven-install-plugin</artifactId>
                     <version>3.1.1</version>
-                </plugin>
-                <plugin>
-                    <groupId>org.jreleaser</groupId>
-                    <artifactId>jreleaser-maven-plugin</artifactId>
-                    <version>1.6.0</version>
-                    <dependencies>
-                        <dependency>
-                            <groupId>commons-io</groupId>
-                            <artifactId>commons-io</artifactId>
-                            <version>2.11.0</version>
-                        </dependency>
-                    </dependencies>
-                        <configuration>
-                            <jreleaser>
-                            <project>
-                                <description>Liquibase</description>
-                                <copyright>2023</copyright>
-                                <version>1.0.0</version>
-                                <vendor>Liquibase</vendor>
-                            </project>
-                                <assemble>
-                                    <jlink>
-                                        <liquibase-jlink>
-                                            <active>ALWAYS</active>
-                                            <java>
-                                                <mainClass>liquibase.integration.commandline.LiquibaseLauncher</mainClass>
-                                            </java>
-                                            <imageName>liquibase-${project.version}</imageName>
-                                            <exported>false</exported>
-                                            <executable>liquibase</executable>
-                                            <imageName>liquibase-${project.version}</imageName>
-                                            <targetJdks>
-                                                <targetJdk>
-                                                    <path>${jdk.pathPrefix}/zulu20Osx/${jdk.filePrefix}-macosx_x64/zulu-20.jdk/Contents/Home</path>
-                                                    <platform>osx-x86_64</platform>
-                                                </targetJdk>
-                                                <targetJdk>
-                                                    <path>${jdk.pathPrefix}/zulu20Linux/${jdk.filePrefix}-linux_x64</path>
-                                                    <platform>linux-x86_64</platform>
-                                                </targetJdk>
-                                                <targetJdk>
-                                                    <path>${jdk.pathPrefix}/zulu20Windows/${jdk.filePrefix}-win_x64</path>
-                                                    <platform>windows-x86_64</platform>
-                                                </targetJdk>
-                                            </targetJdks>
-                                            <copyJars>false</copyJars>
-                                            <mainJar>
-                                                <path>liquibase-cli/target/liquibase-cli-${project.version}.jar</path>
-                                            </mainJar>
-                                            <copyJars>true</copyJars>
-                                            <jdeps>
-                                            <multiRelease>base</multiRelease>
-                                                <ignoreMissingDeps>true</ignoreMissingDeps>
-                                            </jdeps>
-                                        </liquibase-jlink>
-                                    </jlink>
-                                    <jpackage>
-                                        <liquibase>
-                                            <active>ALWAYS</active>
-                                            <attachPlatform>true</attachPlatform>
-                                            <applicationPackage>
-                                                <appName>liquibase</appName>
-                                            </applicationPackage>
-                                            <jlink>liquibase-jlink</jlink>
-                                            <verbose>true</verbose>
-                                            <exported>true</exported>
-                                            <linux>
-                                                <types>deb</types>
-                                                <maintainer>Liquibase</maintainer>
-                                            </linux>
-                                            <osx>
-                                                <appName>liquibase</appName>
-                                                <installDir>/Applications/liquibase</installDir>
-                                                <packageName>liquibase</packageName>
-                                                <types>dmg</types>
-                                            </osx>
-                                            <mainJar>
-                                                <path>liquibase-cli/target/liquibase-cli-${project.version}.jar</path>
-                                            </mainJar>
-                                        </liquibase>
-                                    </jpackage>
-                                </assemble>
-                            </jreleaser>
-                        </configuration>
                 </plugin>
             </plugins>
         </pluginManagement>
@@ -596,71 +509,6 @@
                                 <phase>test</phase>
                                 <goals>
                                     <goal>report</goal>
-                                </goals>
-                            </execution>
-                        </executions>
-                    </plugin>
-                </plugins>
-            </build>
-        </profile>
-        <profile>
-            <id>assemble</id>
-            <properties>
-                <jreleaser.config.assembly>true</jreleaser.config.assembly>
-            </properties>
-            <build>
-                <plugins>
-                    <plugin>
-                    <groupId>org.jreleaser</groupId>
-                    <artifactId>jdks-maven-plugin</artifactId>
-                    <version>1.6.0</version>
-                    <inherited>false</inherited>
-                    <configuration>
-                        <pkgs>
-                            <pkg>
-                                <name>zulu20Linux</name>
-                                <platform>linux-x86_64</platform>
-                                <version>20.0.1</version>
-                            </pkg>
-                            <pkg>
-                                <name>zulu20osx</name>
-                                <platform>osx-x86_64</platform>
-                                <version>20.0.1</version>
-                            </pkg>
-                            <pkg>
-                                <name>zulu20Windows</name>
-                                <platform>windows-x86_64</platform>
-                                <version>20.0.1</version>
-                            </pkg>
-                        </pkgs>
-                    </configuration>
-                        <executions>
-                            <execution>
-                                <id>download-jdks</id>
-                                <phase>package</phase>
-                                <goals>
-                                    <goal>setup-disco</goal>
-                                </goals>
-                            </execution>
-                    </executions>
-                    </plugin>
-                    <plugin>
-                        <groupId>org.jreleaser</groupId>
-                        <artifactId>jreleaser-maven-plugin</artifactId>
-                        <inherited>false</inherited>
-                        <executions>
-                            <execution>
-                                <id>assemble</id>
-                                <phase>package</phase>
-                                <goals>
-                                    <goal>assemble</goal>
-                                </goals>
-                            </execution>
-                            <execution>
-                                <id>package</id>
-                                <phase>package</phase>
-                                <goals>
-                                    <goal>package</goal>
                                 </goals>
                             </execution>
                         </executions>
