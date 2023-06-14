@@ -44,6 +44,13 @@ public class UpdateToTagCommandStep extends AbstractUpdateCommandStep {
     private boolean warningMessageShown = false;
 
     @Override
+    public void run(CommandResultsBuilder resultsBuilder) throws Exception {
+        this.setFastCheckEnabled(false);
+        super.run(resultsBuilder);
+    }
+
+
+    @Override
     public String[][] defineCommandNames() {
         return new String[][] { COMMAND_NAME };
     }
