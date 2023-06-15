@@ -2,6 +2,7 @@ package liquibase.database.core;
 
 import liquibase.CatalogAndSchema;
 import liquibase.Liquibase;
+import liquibase.Scope;
 import liquibase.change.Change;
 import liquibase.changelog.*;
 import liquibase.database.*;
@@ -472,18 +473,18 @@ public class MockDatabase implements Database, InternalDatabase {
 
     @Override
     public RanChangeSet getRanChangeSet(final ChangeSet changeSet) throws DatabaseException, DatabaseHistoryException {
-        return ChangeLogHistoryServiceFactory.getInstance().getChangeLogService(this).getRanChangeSet(changeSet);
+        return Scope.getCurrentScope().getSingleton(ChangeLogHistoryServiceFactory.class).getChangeLogService(this).getRanChangeSet(changeSet);
 
     }
 
     @Override
     public void markChangeSetExecStatus(final ChangeSet changeSet, final ChangeSet.ExecType execType) throws DatabaseException {
-        ChangeLogHistoryServiceFactory.getInstance().getChangeLogService(this).setExecType(changeSet, execType);
+        Scope.getCurrentScope().getSingleton(ChangeLogHistoryServiceFactory.class).getChangeLogService(this).setExecType(changeSet, execType);
     }
 
     @Override
     public List<RanChangeSet> getRanChangeSetList() throws DatabaseException {
-        return ChangeLogHistoryServiceFactory.getInstance().getChangeLogService(this).getRanChangeSets();
+        return Scope.getCurrentScope().getSingleton(ChangeLogHistoryServiceFactory.class).getChangeLogService(this).getRanChangeSets();
     }
 
     @Override
@@ -493,7 +494,7 @@ public class MockDatabase implements Database, InternalDatabase {
 
     @Override
     public void removeRanStatus(final ChangeSet changeSet) throws DatabaseException {
-        ChangeLogHistoryServiceFactory.getInstance().getChangeLogService(this).removeFromHistory(changeSet);
+        Scope.getCurrentScope().getSingleton(ChangeLogHistoryServiceFactory.class).getChangeLogService(this).removeFromHistory(changeSet);
     }
 
     @Override
