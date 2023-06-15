@@ -7,23 +7,24 @@ categories:
       - 'notablechanges'
   - title: '🚀 New Features'
     labels:
-      - 'feature'
-      - 'enhancement'
+      - 'TypeEnhancement'
+      - 'TypeTest'
   - title: '🐛 Bug Fixes 🛠'
     labels:
-      - 'bugfix'
+      - 'TypeBug'
   - title: ':boom: Breaking Changes'
     labels: 
       - 'breakingChanges'
+  - title: ':boom: API Breaking Changes'
+    labels: 
+      - 'APIBreakingChanges'
   - title: 'Security, Driver and other updates'   
     labels:
-      - 'sdou'
+      - 'dependencies'
   - title: '👏 New Contributors'
     labels:
       - 'newcontributors'    
-  - title: 'API'
-    labels: 
-      - 'API'
+  
 change-template: '- (#$NUMBER) $TITLE @$AUTHOR '
 change-title-escapes: '\<*_&' # You can add # and @ to disable mentions, and add ` to disable code blocks.
 version-resolver:
