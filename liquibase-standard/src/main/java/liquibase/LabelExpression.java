@@ -99,7 +99,7 @@ public class LabelExpression {
 
     /**
      *
-     * Return true if any of the LabelExpression objects match the runtime
+     * Return true if all the LabelExpression objects match the runtime
      *
      * @param   changesetLabels    Expressions to match against
      * @param   labelExpression         Runtime labels
