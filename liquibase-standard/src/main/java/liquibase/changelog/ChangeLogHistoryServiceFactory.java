@@ -15,7 +15,10 @@ public class ChangeLogHistoryServiceFactory extends AbstractPluginFactory<Change
     private final List<ChangeLogHistoryService> explicitRegistered = new ArrayList<>();
     private final Map<Database, ChangeLogHistoryService> services = new ConcurrentHashMap<>();
 
-    @Deprecated // use Scope instead
+    /**
+     * @deprecated Instead use Scope.getCurrentScope().getSingleton(ChangeLogHistoryServiceFactory.class)
+     */
+    @Deprecated
     public static synchronized ChangeLogHistoryServiceFactory getInstance() {
         return Scope.getCurrentScope().getSingleton(ChangeLogHistoryServiceFactory.class);
     }
