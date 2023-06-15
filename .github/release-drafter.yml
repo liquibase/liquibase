@@ -18,7 +18,7 @@ categories:
   - title: '💥 API Breaking Changes'
     labels: 
       - 'APIBreakingChanges'
-  - title: '🤖 Security, Driver and other updates'
+  - title: '🤖 Other Updates'
     collapse-after: 5
     labels:
       - 'sdou'
