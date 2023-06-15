@@ -13,8 +13,8 @@ categories:
     labels:
       - 'bugfix'
   - title: ':boom: Breaking Changes'
-    label: 
-      - 'breakingChanges'    
+    labels: 
+      - 'breakingChanges'
   - title: 'Security, Driver and other updates'   
     labels:
       - 'sdou'
@@ -22,7 +22,7 @@ categories:
     labels:
       - 'newcontributors'    
   - title: 'API'
-    label: 
+    labels: 
       - 'API'
 change-template: '- (#$NUMBER) $TITLE @$AUTHOR '
 change-title-escapes: '\<*_&' # You can add # and @ to disable mentions, and add ` to disable code blocks.
