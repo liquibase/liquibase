@@ -12,13 +12,13 @@ categories:
   - title: '🐛 Bug Fixes 🛠'
     labels:
       - 'TypeBug'
-  - title: ':boom: Breaking Changes'
+  - title: '💥 Breaking Changes'
     labels: 
       - 'breakingChanges'
-  - title: ':boom: API Breaking Changes'
+  - title: '💥 API Breaking Changes'
     labels: 
       - 'APIBreakingChanges'
-  - title: '⬆️ Security, Driver and other updates'
+  - title: '🤖 Security, Driver and other updates'
     collapse-after: 5
     labels:
       - 'sdou'
