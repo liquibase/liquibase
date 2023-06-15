@@ -672,6 +672,15 @@ public abstract class AbstractLiquibaseMojo extends AbstractMojo {
             return;
         }
 
+        if (skipOnFileExists != null) {
+            File f = new File(skipOnFileExists);
+            if (f.exists()) {
+                getLog().warn("Liquibase skipped because file " + skipOnFileExists + " exists");
+                return;
+            }
+            getLog().warn("Liquibase NOT skipped because file " + skipOnFileExists + " does NOT exists");
+        }
+
         // If maven is called with -T and a value larger than 1, it can get confused under heavy thread load
         Scope.setScopeManager(new ThreadLocalScopeManager());
         try {
@@ -692,18 +701,6 @@ public abstract class AbstractLiquibaseMojo extends AbstractMojo {
                 if (!LiquibaseCommandLineConfiguration.SHOULD_RUN.getCurrentValue()) {
                     getLog().info("Liquibase did not run because " + LiquibaseCommandLineConfiguration.SHOULD_RUN.getKey() + " was set to false");
                     return;
-                }
-                if (skip) {
-                    getLog().warn("Liquibase skipped due to Maven configuration");
-                    return;
-                }
-                if (skipOnFileExists != null) {
-                    File f = new File(skipOnFileExists);
-                    if (f.exists()) {
-                        getLog().warn("Liquibase skipped because file " + skipOnFileExists + " exists");
-                        return;
-                    }
-                    getLog().warn("Liquibase NOT skipped because file " + skipOnFileExists + " does NOT exists");
                 }
 
                 ClassLoader mavenClassLoader = getClassLoaderIncludingProjectClasspath();
