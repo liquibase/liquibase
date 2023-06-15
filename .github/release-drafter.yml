@@ -18,7 +18,8 @@ categories:
   - title: ':boom: API Breaking Changes'
     labels: 
       - 'APIBreakingChanges'
-  - title: 'Security, Driver and other updates'   
+  - title: '⬆️ Dependencies'
+    collapse-after: 5
     labels:
       - 'dependencies'
   - title: '👏 New Contributors'
