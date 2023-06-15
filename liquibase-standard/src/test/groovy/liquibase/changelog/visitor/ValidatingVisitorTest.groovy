@@ -4,6 +4,7 @@ import liquibase.GlobalConfiguration
 import liquibase.Scope
 import liquibase.change.ColumnConfig
 import liquibase.change.core.CreateTableChange
+import liquibase.change.core.OutputChange
 import liquibase.changelog.ChangeSet
 import liquibase.changelog.DatabaseChangeLog
 import liquibase.changelog.RanChangeSet
@@ -267,6 +268,28 @@ class ValidatingVisitorTest extends Specification {
         handler.visit(changeSet, new DatabaseChangeLog(), new MockDatabase(), null)
 
         then:
+        handler.validationPassed()
+    }
+
+    void "validate successful visit when always run is true and the changeset is ran again after being modified"() throws Exception {
+        when:
+        def changeSet = new ChangeSet("1", "testAuthor", true, false, "path/changelog", null, null, null);
+        def outputChange = new OutputChange()
+        outputChange.message = "Hello World"
+        changeSet.addChange(outputChange)
+        List<RanChangeSet> ran = new ArrayList<RanChangeSet>()
+        ran.add(new RanChangeSet(changeSet))
+
+        ValidatingVisitor handler = new ValidatingVisitor(ran)
+
+        def theSameChangeSetWithDifferentChanges = new ChangeSet("1", "testAuthor", true, false, "path/changelog", null, null, null);
+        def outputChangeWithModifiedMessage = new OutputChange()
+        outputChangeWithModifiedMessage.message = "Hello To You"
+        theSameChangeSetWithDifferentChanges.addChange(outputChangeWithModifiedMessage)
+        handler.visit(theSameChangeSetWithDifferentChanges, new DatabaseChangeLog(), new MockDatabase(), null)
+
+        then:
+        handler.getSetupExceptions().size() == 0
         handler.validationPassed()
     }
 }
