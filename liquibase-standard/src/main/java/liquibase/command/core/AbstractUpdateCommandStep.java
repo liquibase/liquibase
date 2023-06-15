@@ -32,6 +32,7 @@ import static liquibase.Liquibase.MSG_COULD_NOT_RELEASE_LOCK;
 
 public abstract class AbstractUpdateCommandStep extends AbstractCommandStep implements CleanUpCommandStep {
     public static final String DEFAULT_CHANGE_EXEC_LISTENER_RESULT_KEY = "defaultChangeExecListener";
+    private boolean isFastCheckEnabled = true;
 
     public abstract String getChangelogFileArg(CommandScope commandScope);
     public abstract String getContextsArg(CommandScope commandScope);
@@ -63,7 +64,7 @@ public abstract class AbstractUpdateCommandStep extends AbstractCommandStep impl
         resultsBuilder.addResult(DEFAULT_CHANGE_EXEC_LISTENER_RESULT_KEY, defaultChangeExecListener);
         try {
             DatabaseChangeLog databaseChangeLog = (DatabaseChangeLog) commandScope.getDependency(DatabaseChangeLog.class);
-            if (isUpToDate(commandScope, database, databaseChangeLog, contexts, labelExpression, resultsBuilder.getOutputStream())) {
+            if (isFastCheckEnabled && isUpToDate(commandScope, database, databaseChangeLog, contexts, labelExpression, resultsBuilder.getOutputStream())) {
                 return;
             }
             ChangeLogHistoryService changelogService = ChangeLogHistoryServiceFactory.getInstance().getChangeLogService(database);
@@ -242,6 +243,10 @@ public abstract class AbstractUpdateCommandStep extends AbstractCommandStep impl
             return true;
         }
         return false;
+    }
+
+    public void setFastCheckEnabled(boolean fastCheckEnabled) {
+        isFastCheckEnabled = fastCheckEnabled;
     }
 
     /**
