@@ -14,7 +14,7 @@ import java.util.*;
  */
 public class StatusVisitor implements ChangeSetVisitor, SkippedChangeSetVisitor {
 
-    private LinkedHashMap<ChangeSet, ChangeSetStatus> changeSetStatuses = new LinkedHashMap<>();
+    private final LinkedHashMap<ChangeSet, ChangeSetStatus> changeSetStatuses = new LinkedHashMap<>();
     private final List<RanChangeSet> ranChangeSets;
 
     public StatusVisitor(Database database) throws LiquibaseException {
@@ -88,7 +88,7 @@ public class StatusVisitor implements ChangeSetVisitor, SkippedChangeSetVisitor 
             status.setComments(changeSet.getComments());
             status.setDescription(changeSet.getDescription());
             status.setWillRun(false);
-            status.setFilterResults(new HashSet<>(Arrays.asList(new ChangeSetFilterResult(false, "Changeset is not in change log", NotInChangeLogChangeSetFilter.class))));
+            status.setFilterResults(new HashSet<>(Collections.singletonList(new ChangeSetFilterResult(false, "Changeset is not in change log", NotInChangeLogChangeSetFilter.class))));
             status.setRanChangeSet(changeSet);
 
             returnList.add(status);

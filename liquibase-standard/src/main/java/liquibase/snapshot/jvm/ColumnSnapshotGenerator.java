@@ -321,14 +321,7 @@ public class ColumnSnapshotGenerator extends JdbcSnapshotGenerator {
             type.setDataTypeId(columnMetadataResultSet.getInt("DATA_TYPE"));
             if (dataType.equalsIgnoreCase("NUMBER")) {
                 type.setColumnSize(columnMetadataResultSet.getInt("DATA_PRECISION"));
-//                if (type.getColumnSize() == null) {
-//                    type.setColumnSize(38);
-//                }
                 type.setDecimalDigits(columnMetadataResultSet.getInt("DATA_SCALE"));
-//                if (type.getDecimalDigits() == null) {
-//                    type.setDecimalDigits(0);
-//                }
-//            type.setRadix(10);
             } else {
                 if ("FLOAT".equalsIgnoreCase(dataType)) { //FLOAT [(precision)]
                     type.setColumnSize(columnMetadataResultSet.getInt("DATA_PRECISION"));
@@ -550,23 +543,7 @@ public class ColumnSnapshotGenerator extends JdbcSnapshotGenerator {
         }
 
         if (database instanceof PostgresDatabase) {
-            if (columnInfo.isAutoIncrement()) {
-                columnMetadataResultSet.set(COLUMN_DEF_COL, null);
-            }
-            Object defaultValue = columnMetadataResultSet.get(COLUMN_DEF_COL);
-            if ((defaultValue instanceof String)) {
-                Matcher matcher = POSTGRES_STRING_VALUE_PATTERN.matcher((String) defaultValue);
-                if (matcher.matches()) {
-                    defaultValue = matcher.group(1);
-                } else {
-                    matcher = POSTGRES_NUMBER_VALUE_PATTERN.matcher((String) defaultValue);
-                    if (matcher.matches()) {
-                        defaultValue = matcher.group(1);
-                    }
-
-                }
-                columnMetadataResultSet.set(COLUMN_DEF_COL, defaultValue);
-            }
+            readDefaultValueForPostgresDatabase(columnMetadataResultSet, columnInfo);
         }
 
         if (
@@ -577,6 +554,35 @@ public class ColumnSnapshotGenerator extends JdbcSnapshotGenerator {
         }
 
         return SqlUtil.parseValue(database, columnMetadataResultSet.get(COLUMN_DEF_COL), columnInfo.getType());
+    }
+
+    private void readDefaultValueForPostgresDatabase(CachedRow columnMetadataResultSet, Column columnInfo) {
+        if (columnInfo.isAutoIncrement()) {
+            columnMetadataResultSet.set(COLUMN_DEF_COL, null);
+        }
+        Object defaultValue = columnMetadataResultSet.get(COLUMN_DEF_COL);
+        if ((defaultValue instanceof String)) {
+            Matcher matcher = POSTGRES_STRING_VALUE_PATTERN.matcher((String) defaultValue);
+            if (matcher.matches()) {
+                defaultValue = matcher.group(1);
+            } else {
+                matcher = POSTGRES_NUMBER_VALUE_PATTERN.matcher((String) defaultValue);
+                if (matcher.matches()) {
+                    defaultValue = matcher.group(1);
+                }
+
+            }
+            columnMetadataResultSet.set(COLUMN_DEF_COL, defaultValue);
+        }
+
+        if ("YES".equals(columnMetadataResultSet.get("IS_GENERATEDCOLUMN"))) {
+            Object virtColumnDef = columnMetadataResultSet.get(COLUMN_DEF_COL);
+            if ((virtColumnDef != null) && !"null".equals(virtColumnDef)) {
+                // Column type added on PG 12 and until PG 15 only STORED mode is supported and jdbc metadata just say "YES" or "NO"
+                // VIRTUAL support is yet to be implemented, so we need to come back here if that happens and see what needs to be changed
+                columnMetadataResultSet.set(COLUMN_DEF_COL, "GENERATED ALWAYS AS " + virtColumnDef + " STORED");
+            }
+        }
     }
 
     /**

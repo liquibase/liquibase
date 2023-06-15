@@ -12,6 +12,7 @@ import java.util.Date;
 import java.util.List;
 import java.util.logging.Level;
 
+@Deprecated
 public class BufferedLogService extends AbstractLogService {
     //
     // Truncate the return value at 10MB = 10,000,000 bytes
@@ -70,11 +71,11 @@ public class BufferedLogService extends AbstractLogService {
     }
 
     public static class BufferedLogMessage {
-        private Date timestamp;
-        private Level level;
-        private Class location;
-        private String message;
-        private Throwable throwable;
+        private final Date timestamp;
+        private final Level level;
+        private final Class location;
+        private final String message;
+        private final Throwable throwable;
 
         public BufferedLogMessage(Level level, Class location, String message, Throwable throwable) {
             this.timestamp = new Date();

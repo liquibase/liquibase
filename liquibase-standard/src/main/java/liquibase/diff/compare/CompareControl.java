@@ -12,9 +12,9 @@ import java.util.*;
 public class CompareControl {
 
     public static CompareControl STANDARD = new CompareControl();
-    private CompareControl.SchemaComparison[] schemaComparisons;
+    private final CompareControl.SchemaComparison[] schemaComparisons;
     private Set<Class<? extends DatabaseObject>> compareTypes = new HashSet<>();
-    private Map<Class<? extends DatabaseObject>, Set<String>> suppressedFields = new HashMap<>();
+    private final Map<Class<? extends DatabaseObject>, Set<String>> suppressedFields = new HashMap<>();
 
 
     public CompareControl() {
@@ -193,8 +193,8 @@ public class CompareControl {
     }
 
     public static class SchemaComparison {
-        private CatalogAndSchema comparisonSchema;
-        private CatalogAndSchema referenceSchema;
+        private final CatalogAndSchema comparisonSchema;
+        private final CatalogAndSchema referenceSchema;
         private String outputSchemaAs;
 
         public SchemaComparison(CatalogAndSchema reference, CatalogAndSchema comparison) {

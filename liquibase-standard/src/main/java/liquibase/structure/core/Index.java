@@ -227,23 +227,6 @@ public class Index extends AbstractDatabaseObject {
         return (Index) setAttribute("clustered", clustered);
     }
 
-//    @Override
-//    public boolean equals(Object o) {
-//        if (this == o) return true;
-//        if (o == null || getClass() != o.getClass()) return false;
-//
-//        Index index = (Index) o;
-//
-//        if (name != null ? !name.equals(index.name) : index.name != null) return false;
-//
-//        return true;
-//    }
-//
-//    @Override
-//    public int hashCode() {
-//        return name != null ? name.hashCode() : 0;
-//    }
-
     @Override
     public int compareTo(Object other) {
         Index o = (Index) other;
@@ -261,12 +244,6 @@ public class Index extends AbstractDatabaseObject {
             String oName = StringUtil.trimToEmpty(o.getName());
             returnValue = thisName.compareTo(oName);
         }
-
-        //We should not have two indexes that have the same name and tablename
-        /*if (returnValue == 0) {
-        	returnValue = this.getColumnName().compareTo(o.getColumnName());
-        }*/
-
 
         return returnValue;
     }

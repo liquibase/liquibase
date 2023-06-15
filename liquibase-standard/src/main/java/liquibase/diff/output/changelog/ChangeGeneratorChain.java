@@ -28,10 +28,6 @@ public class ChangeGeneratorChain {
             return null;
         }
 
-//        if (!snapshot.getSnapshotControl().shouldInclude(example.getClass())) {
-//            return null;
-//        }
-
         if (changeGenerators == null) {
             return null;
         }
@@ -68,10 +64,6 @@ public class ChangeGeneratorChain {
             !control.getObjectChangeFilter().includeUnexpected(unexpectedObject, referenceDatabase, comparisionDatabase)) {
             return null;
         }
-
-//        if (!snapshot.getSnapshotControl().shouldInclude(example.getClass())) {
-//            return null;
-//        }
 
         if (changeGenerators == null) {
             return null;
@@ -116,10 +108,6 @@ public class ChangeGeneratorChain {
             !control.getObjectChangeFilter().includeChanged(changedObject, differences, referenceDatabase, comparisionDatabase)) {
             return null;
         }
-
-//        if (!snapshot.getSnapshotControl().shouldInclude(example.getClass())) {
-//            return null;
-//        }
 
         if (changeGenerators == null) {
             return null;

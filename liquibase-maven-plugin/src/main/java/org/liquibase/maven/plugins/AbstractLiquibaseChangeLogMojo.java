@@ -8,7 +8,6 @@ import liquibase.Scope;
 import liquibase.configuration.core.DeprecatedConfigurationValueProvider;
 import liquibase.database.Database;
 import liquibase.exception.LiquibaseException;
-import liquibase.hub.HubConfiguration;
 import liquibase.resource.*;
 import liquibase.util.StringUtil;
 import org.apache.maven.plugin.MojoExecutionException;
@@ -75,35 +74,6 @@ public abstract class AbstractLiquibaseChangeLogMojo extends AbstractLiquibaseMo
     @PropertyElement
     protected String labelFilter;
 
-    /**
-     *
-     * Specifies the <i>Liquibase Hub API key</i> for Liquibase to use.
-     *
-     * @parameter property="liquibase.hub.apiKey"
-     *
-     */
-    @PropertyElement(key = "liquibase.hub.apiKey")
-    protected String hubApiKey;
-
-    /**
-     *
-     * Specifies the <i>Liquibase Hub URL</i> for Liquibase to use.
-     *
-     * @parameter property="liquibase.hub.url"
-     *
-     */
-    @PropertyElement(key = "liquibase.hub.url")
-    protected String hubUrl;
-
-    /**
-     * Specifies the <i>Liquibase Hub URL</i> for Liquibase to use.
-     *
-     * @parameter property="liquibase.hub.mode"
-     *
-     */
-    @PropertyElement(key = "liquibase.hub.mode")
-    protected String hubMode;
-
 
     /**
      * How to handle multiple files being found in the search path that have duplicate paths.
@@ -132,18 +102,6 @@ public abstract class AbstractLiquibaseChangeLogMojo extends AbstractLiquibaseMo
      */
     @Override
     protected void performLiquibaseTask(Liquibase liquibase) throws LiquibaseException {
-        //
-        // Store the Hub API key and URL for later use
-        //
-        if (StringUtil.isNotEmpty(hubApiKey)) {
-            DeprecatedConfigurationValueProvider.setData(HubConfiguration.LIQUIBASE_HUB_API_KEY, hubApiKey);
-        }
-        if (StringUtil.isNotEmpty(hubUrl)) {
-            DeprecatedConfigurationValueProvider.setData(HubConfiguration.LIQUIBASE_HUB_URL.getKey(), hubUrl);
-        }
-        if (StringUtil.isNotEmpty(hubMode)) {
-            DeprecatedConfigurationValueProvider.setData(HubConfiguration.LIQUIBASE_HUB_MODE.getKey(), hubMode);
-        }
         if (StringUtil.isNotEmpty(duplicateFileMode)) {
             DeprecatedConfigurationValueProvider.setData(GlobalConfiguration.DUPLICATE_FILE_MODE.getKey(), GlobalConfiguration.DuplicateFileMode.valueOf(duplicateFileMode.toUpperCase(Locale.ROOT)));
         }

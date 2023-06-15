@@ -4,10 +4,10 @@ import liquibase.statement.AbstractSqlStatement;
 
 public class DropTableStatement extends AbstractSqlStatement {
 
-    private String catalogName;
-    private String schemaName;
-    private String tableName;
-    private boolean cascadeConstraints;
+    private final String catalogName;
+    private final String schemaName;
+    private final String tableName;
+    private final boolean cascadeConstraints;
 
     public DropTableStatement(String catalogName, String schemaName, String tableName, boolean cascadeConstraints) {
         this.catalogName = catalogName;
