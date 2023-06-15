@@ -22,6 +22,7 @@ class DbDocPostgresIntegrationTest extends Specification {
 
     def "Should generate db docs"() {
         given:
+        CommandUtil.runDropAll(postgres)
         String outputDirectory = "dbdoc-postgres"
         String changelogFile = "src/test/resources/changelogs/pgsql/complete/basic.formatted.sql"
         CommandUtil.runDropAll(postgres)

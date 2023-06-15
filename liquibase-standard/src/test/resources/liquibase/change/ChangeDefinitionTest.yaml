@@ -1,0 +1,1090 @@
+addAutoIncrement: |
+  catalogName string (since 3.0)
+    Description: Name of the database catalog
+    Supported: all
+  columnDataType string 
+    Description: Current data type of the column to make auto-increment
+    Supported: all
+    Required For: asany,h2,hsqldb,informix,ingres,mariadb,mysql,sybase,unsupported
+  columnName string 
+    Description: Name of the column
+    Supported: all
+    Required For: all
+  defaultOnNull boolean (since 3.6)
+    Description: When using generationType of BY DEFAULT then defaultOnNull=true allows the identity to be used if the identity column is referenced, but a value of NULL is specified.
+    Supported: all
+  generationType string (since 3.6)
+    Description: Type of the generation in "GENERATED %s AS IDENTITY". Default: "|".
+    Supported: all
+  incrementBy bigInteger 
+    Description: Amount to increment by at each call
+    Supported: asany,cockroachdb,db2,db2z,edb,h2,hsqldb,informix,ingres,postgresql,sybase
+  schemaName string 
+    Description: Name of the database schema
+    Supported: all
+  startWith bigInteger 
+    Description: Initial value of the increment
+    Supported: all
+  tableName string 
+    Description: Name of the table
+    Supported: all
+    Required For: all
+
+addColumn: |
+  catalogName string (since 3.0)
+    Description: Name of the database catalog
+    Supported: all
+  columns list of addColumnConfig 
+    Description: Column constraint and foreign key information. Setting the "defaultValue" attribute specifies a default value for the column. Setting the "value" attribute sets all rows existing to the specified value without modifying the column default.
+    Supported: all
+    Required For: all
+  schemaName string 
+    Description: Name of the database schema
+    Supported: all
+  tableName string 
+    Description: Name of the table to add the column to
+    Supported: all
+    Required For: all
+
+addDefaultValue: |
+  catalogName string (since 3.0)
+    Description: Name of the database catalog
+    Supported: all
+  columnDataType string 
+    Description: Current data type of the column to add a default value to
+    Supported: all
+    Required For: informix
+  columnName string 
+    Description: Name of the column to add a default value to
+    Supported: all
+    Required For: all
+  defaultValue string 
+    Description: Default value for fields in the column. Either this property or another defaultValue* property is required.
+    Supported: all
+  defaultValueBoolean boolean 
+    Description: Default value for a column of a boolean type.
+    Supported: all
+  defaultValueComputed databaseFunction 
+    Description: Default value that is returned from a function or procedure call of the same type as the column. Contains the function or column name to call. Differs from defaultValue by returning the value of the function or column you specify instead of the name of the function/column as a string. Can also perform operations on the returned value.
+    Supported: all
+  defaultValueConstraintName string 
+    Description: Sets a unique name for the default constraint used for a specific column. Works only along with any of the defaultValue* properties listed.
+    Supported: all
+  defaultValueDate string 
+    Description: Default date and time value for column. The value is specified in one of the following forms: YYYY-MM-DD, hh:mm:ss, or YYYY-MM-DDThh:mm:ss.
+    Supported: all
+  defaultValueNumeric string 
+    Description: Default value for a column of a numeric type. For example: integer, bigint, bigdecimal, and others.
+    Supported: all
+  defaultValueSequenceNext sequenceNextValueFunction 
+    Description: Sets value for a specified column by using the value of the existing sequence. With every new input, the next value of the sequence will be taken.
+    Supported: all
+  schemaName string 
+    Description: Name of the database schema
+    Supported: all
+  tableName string 
+    Description: Name of the table containing the column to modify
+    Supported: all
+    Required For: all
+
+addForeignKeyConstraint: |
+  baseColumnNames string 
+    Description: Name of the column(s) to place the foreign key constraint on. Comma-separate if multiple
+    Supported: all
+    Required For: all
+  baseTableCatalogName string (since 3.0)
+    Description: Name of the database catalog of the base table
+    Supported: all
+  baseTableName string 
+    Description: Name of the table containing the column to constrain
+    Supported: all
+    Required For: all
+  baseTableSchemaName string 
+    Description: Name of the database schema of the base table
+    Supported: all
+  constraintName string 
+    Description: Name of the new foreign key constraint
+    Supported: all
+    Required For: all
+  deferrable boolean 
+    Description: Defines whether the foreign key is deferrable
+    Supported: edb,oracle,postgresql,sqlite
+  deleteCascade boolean 
+    Description: Deprecated. This is true to set onDelete to Cascade, priority given to onDelete tag if one exists
+    Supported: asany,cockroachdb,db2,db2z,derby,edb,firebird,h2,hsqldb,informix,ingres,mariadb,mssql,mysql,oracle,postgresql
+  initiallyDeferred boolean 
+    Description: Defines whether the foreign key is initially deferred
+    Supported: edb,oracle,postgresql,sqlite
+  onDelete string 
+    Description: ON DELETE functionality. Possible values: 'CASCADE', 'SET NULL', 'SET DEFAULT', 'RESTRICT', 'NO ACTION'
+    Supported: asany,cockroachdb,db2,db2z,derby,edb,firebird,h2,hsqldb,informix,ingres,mariadb,mssql,mysql,oracle,postgresql
+  onUpdate string 
+    Description: ON UPDATE functionality. Possible values: 'CASCADE', 'SET NULL', 'SET DEFAULT', 'RESTRICT', 'NO ACTION'
+    Supported: all
+  referencedColumnNames string 
+    Description: Name of the column(s) the foreign key points to. Comma-separate if multiple
+    Supported: all
+    Required For: all
+  referencedTableCatalogName string (since 3.0)
+    Description: Name of the database catalog of the referenced table
+    Supported: all
+  referencedTableName string 
+    Description: Name of the table the foreign key points to
+    Supported: all
+    Required For: all
+  referencedTableSchemaName string 
+    Description: Name of the database schema of the referenced table
+    Supported: all
+  referencesUniqueColumn boolean 
+    Description: Deprecated
+    Supported: all
+  validate boolean 
+    Description: Defines whether to check if the foreign key constraint refers to a valid row. This is true if the foreign key has 'ENABLE VALIDATE' set, or false if the foreign key has 'ENABLE NOVALIDATE' set.
+    Supported: all
+
+addLookupTable: |
+  constraintName string 
+    Description: Name of the foreign key constraint to create between the existing table and the lookup table
+    Supported: all
+  existingColumnName string 
+    Description: Name of the column containing the data to extract
+    Supported: all
+    Required For: all
+  existingTableCatalogName string 
+    Description: Name of the database catalog of the existing table
+    Supported: all
+  existingTableName string 
+    Description: Name of the table containing the data to extract
+    Supported: all
+    Required For: all
+  existingTableSchemaName string 
+    Description: Name of the database schema where the table containing data to extract resides
+    Supported: all
+  newColumnDataType string 
+    Description: Data type of the new table column
+    Supported: all
+    Required For: informix,mariadb,mssql,mysql
+  newColumnName string 
+    Description: Name of the column in the new table to create
+    Supported: all
+    Required For: all
+  newTableCatalogName string (since 3.0)
+    Description: Name of the database catalog for the lookup table
+    Supported: all
+  newTableName string 
+    Description: Name of lookup table to create
+    Supported: all
+    Required For: all
+  newTableSchemaName string 
+    Description: Name of the database schema for the lookup table
+    Supported: all
+
+
+addNotNullConstraint: |
+  catalogName string (since 3.0)
+    Description: Name of the database catalog
+    Supported: all
+  columnDataType string 
+    Description: Current data type of the column
+    Supported: all
+    Required For: informix,mariadb,mssql,mysql
+  columnName string 
+    Description: Name of the column to add the constraint to
+    Supported: all
+    Required For: all
+  constraintName string 
+    Description: Name of the constraint to add (if database supports names for NOT NULL constraints)
+    Supported: all
+  defaultNullValue string 
+    Description: Value to set all currently null values to. If defaultNullValue is not set and null values exist, the change fails
+    Supported: all
+  schemaName string 
+    Description: Name of the database schema
+    Supported: all
+  tableName string 
+    Description: Name of the table to add a NOT NULL constraint to.
+    Supported: all
+    Required For: all
+  validate boolean 
+    Description: Defines whether to check if the NOT NULL constraint refers to a valid row. This is true if the constraint has 'ENABLE VALIDATE' set, or false if the constraint has 'ENABLE NOVALIDATE' set.
+    Supported: all
+
+
+addPrimaryKey: |
+  catalogName string (since 3.0)
+    Description: Name of the database catalog
+    Supported: all
+  clustered boolean 
+    Description: Whether to create a clustered index
+    Supported: all
+  columnNames string 
+    Description: Name of the column(s) to create the primary key on. Comma separated if multiple
+    Supported: all
+    Required For: all
+  constraintName string 
+    Description: Name of primary key constraint
+    Supported: all
+  forIndexCatalogName string 
+    Description: Name of the database catalog of the index to associate with the primary key
+    Supported: all
+  forIndexName string 
+    Description: Name of the index to associate with the primary key
+    Supported: db2,db2z,oracle
+  forIndexSchemaName string 
+    Description: Name of the database schema of the index to associate with the primary key
+    Supported: all
+  schemaName string 
+    Description: Name of the database schema
+    Supported: all
+  tableName string 
+    Description: Name of the table to create the primary key on
+    Supported: all
+    Required For: all
+  tablespace string 
+    Description: Tablespace to create the primary key in. Corresponds to file group in mssql
+    Supported: all
+  validate boolean 
+    Description: Defines whether to check if the primary key constraint refers to a valid row. This is true if the primary key has 'ENABLE VALIDATE' set, or false if the primary key has 'ENABLE NOVALIDATE' set.
+    Supported: all
+
+
+addUniqueConstraint: |
+  catalogName string (since 3.0)
+    Description: Name of the database catalog
+    Supported: all
+  clustered boolean 
+    Description: Whether to create a clustered index
+    Supported: mssql
+  columnNames string 
+    Description: Name of the column(s) to create the unique constraint on. Comma separated if multiple
+    Supported: all
+    Required For: all
+  constraintName string 
+    Description: Name of the unique constraint
+    Supported: all
+  deferrable boolean 
+    Description: Defines whether the constraint is deferrable
+    Supported: all
+  disabled boolean 
+    Description: Specifies whether the constraint is disabled
+    Supported: all
+  forIndexCatalogName string 
+    Description: Name of the catalog of the index to associate with the constraint
+    Supported: all
+  forIndexName string 
+    Description: Name of the index to associate with the constraint
+    Supported: oracle
+  forIndexSchemaName string 
+    Description: Name of the schema of the index to associate with the constraint
+    Supported: all
+  initiallyDeferred boolean 
+    Description: Defines whether the constraint is initially deferred
+    Supported: all
+  schemaName string 
+    Description: Name of the database schema
+    Supported: all
+  tableName string 
+    Description: Name of the table to create the unique constraint on
+    Supported: all
+    Required For: all
+  tablespace string 
+    Description: Tablespace to create the index in. Corresponds to file group in mssql
+    Supported: all
+  validate boolean 
+    Description: Defines whether to check if the unique constraint refers to a valid row. This is true if the constraint has 'ENABLE VALIDATE' set, or false if the constraint has 'ENABLE NOVALIDATE' set.
+    Supported: all
+
+
+alterSequence: |
+  cacheSize bigInteger 
+    Description: Number of values to fetch per query
+    Supported: all
+  catalogName string (since 3.0)
+    Description: Name of the database catalog
+    Supported: all
+  cycle boolean 
+    Description: Whether the sequence cycles when it hits its max value
+    Supported: all
+  dataType string 
+    Description: Data type of the sequence
+    Supported: asany,cockroachdb,db2z,derby,edb,firebird,h2,informix,postgresql
+  incrementBy bigInteger 
+    Description: New amount the sequence should increment by at each call
+    Supported: asany,cockroachdb,db2,db2z,derby,edb,firebird,informix,mariadb,mssql,oracle,postgresql
+  maxValue bigInteger 
+    Description: New maximum value for the sequence
+    Supported: asany,cockroachdb,db2,db2z,derby,edb,firebird,h2,informix,mariadb,mssql,oracle,postgresql
+  minValue bigInteger 
+    Description: New minimum value for the sequence
+    Supported: all
+  ordered boolean 
+    Description: Whether the sequence is generated in the requested order
+    Supported: asany,cockroachdb,db2z,derby,edb,firebird,h2,informix,mariadb,oracle,postgresql
+  schemaName string 
+    Description: Name of the database schema
+    Supported: all
+  sequenceName string 
+    Description: Name of the sequence
+    Supported: all
+    Required For: all
+
+createIndex: |
+  catalogName string (since 3.0)
+    Description: Name of the database catalog
+    Supported: all
+  clustered boolean 
+    Description: Whether to create a clustered index
+    Supported: all
+  columns list of addColumnConfig 
+    Description: Column(s) in the table to add the index on
+    Supported: all
+    Required For: all
+  indexName string 
+    Description: Name of the index to create
+    Supported: all
+    Required For: firebird,hsqldb
+  schemaName string 
+    Description: Name of the database schema
+    Supported: all
+  tableName string 
+    Description: Name of the table to add the index on
+    Supported: all
+    Required For: all
+  tablespace string 
+    Description: Tablepace to create the index in. Corresponds to file group in mssql
+    Supported: all
+  unique boolean (since 1.8)
+    Description: Whether the index is unique (contains no duplicate values)
+    Supported: all
+
+
+createProcedure: |
+  catalogName string 
+    Description: Name of the database catalog
+    Supported: all
+  comments string 
+    Description: Inline comments generated by update-sql. Not applied to the database
+    Supported: all
+  dbms string (since 3.1)
+    Description: Specifies which database type(s) a changeset is to be used for. See valid database type names on Supported Databases docs page. Separate multiple databases with commas. Specify that a changeset is not applicable to a particular database type by prefixing with !. The keywords 'all' and 'none' are also available.
+    Supported: all
+  encoding string 
+    Description: Encoding used in the file you specify in 'path'
+    Supported: all
+  path string 
+    Description: File containing the procedure text. You must either use this attribute or write inline SQL within the createProcedure definition.
+    Supported: all
+    Required For: all
+  procedureName string 
+    Description: Name of the stored procedure to create. Required if replaceIfExists=true
+    Supported: all
+  procedureText string 
+    Description: The SQL creating the procedure. You need to define either this attribute or 'path'. procedureText is not supported in the XML format; however, you can specify the procedure SQL inline within the createProcedure definition.
+    Supported: all
+    Required For: all
+  relativeToChangelogFile boolean 
+    Description: Specifies whether the file path is relative to the changelog file rather than looked up in the search path. Default: false.
+    Supported: all
+  replaceIfExists boolean 
+    Description: If the stored procedure defined by createProcedure already exists, alter it instead of creating it. Default: false
+    Supported: mariadb,mssql,mysql
+  schemaName string 
+    Description: Name of the database schema
+    Supported: all
+
+
+createSequence: |
+  cacheSize bigInteger 
+    Description: Number of values to fetch per query
+    Supported: all
+  catalogName string (since 3.0)
+    Description: Name of the database catalog
+    Supported: all
+  cycle boolean 
+    Description: Whether the sequence cycles when it hits its max value
+    Supported: all
+  dataType string 
+    Description: Data type of the sequence
+    Supported: asany,cockroachdb,db2,db2z,derby,edb,h2,informix,postgresql
+  incrementBy bigInteger 
+    Description: Interval between sequence numbers
+    Supported: asany,cockroachdb,db2,db2z,derby,edb,h2,hsqldb,informix,mariadb,mssql,oracle,postgresql
+  maxValue bigInteger 
+    Description: Maximum value of the sequence
+    Supported: asany,cockroachdb,db2,db2z,derby,edb,h2,informix,mariadb,mssql,oracle,postgresql
+  minValue bigInteger 
+    Description: Minimum value of the sequence
+    Supported: asany,cockroachdb,db2,db2z,derby,edb,h2,informix,mariadb,mssql,oracle,postgresql
+  ordered boolean 
+    Description: Whether the sequence is generated in the requested order
+    Supported: asany,db2,db2z,derby,firebird,h2,informix,mariadb,oracle
+  schemaName string 
+    Description: Name of the database schema
+    Supported: all
+  sequenceName string 
+    Description: Name of the sequence to create
+    Supported: all
+    Required For: all
+  startValue bigInteger 
+    Description: First sequence number to be generated.
+    Supported: asany,cockroachdb,db2,db2z,derby,edb,h2,hsqldb,informix,mariadb,mssql,oracle,postgresql
+
+createTable: |
+  catalogName string (since 3.0)
+    Description: Name of the database catalog
+    Supported: all
+  columns list of columnConfig 
+    Description: Column definitions
+    Supported: all
+    Required For: all
+  remarks string 
+    Description: A brief descriptive comment to store in the table metadata
+    Supported: all
+  schemaName string 
+    Description: Name of the database schema
+    Supported: all
+  tableName string 
+    Description: Name of the table to create
+    Supported: all
+    Required For: all
+  tableType string 
+    Description: In some databases, specifies the type of the table (column-based, row-based...)
+    Supported: all
+  tablespace string 
+    Description: Tablespace to create the table in. Corresponds to file group in mssql
+    Supported: all
+
+
+createView: |
+  catalogName string (since 3.0)
+    Description: Name of the database catalog
+    Supported: all
+  encoding string 
+    Description: Encoding used in the file you specify in 'path'
+    Supported: all
+  fullDefinition boolean (since 3.3)
+    Description: Set to true if selectQuery is the entire view definition. Set to false if the CREATE VIEW header should be added
+    Supported: all
+  path string (since 3.6)
+    Description: Path to the file containing the view definition. Specifying 'path' is an alternative to selectQuery.
+    Supported: all
+  relativeToChangelogFile boolean 
+    Description: Specifies whether the file path is relative to the changelog file rather than looked up in the search path. Default: false.
+    Supported: all
+  remarks string 
+    Description: A brief descriptive comment stored in the view metadata
+    Supported: all
+  replaceIfExists boolean (since 1.5)
+    Description: Use 'CREATE OR REPLACE' syntax
+    Supported: cockroachdb,db2,edb,firebird,h2,hsqldb,ingres,mariadb,mssql,mysql,oracle,postgresql,sqlite,sybase
+  schemaName string 
+    Description: Name of the database schema
+    Supported: all
+  selectQuery string 
+    Description: SQL for generating the view
+    Supported: all
+    Required For: informix
+  viewName string 
+    Description: Name of the view to create
+    Supported: all
+    Required For: all
+
+
+customChange: |
+
+delete: |
+  catalogName string 
+    Description: Name of the database catalog
+    Supported: all
+  schemaName string 
+    Description: Name of the database schema
+    Supported: all
+  tableName string 
+    Description: Name of the table
+    Supported: all
+    Required For: all
+  where string 
+    Description: SQL WHERE condition string
+    Supported: all
+
+
+dropAllForeignKeyConstraints: |
+  baseTableCatalogName string (since 3.0)
+    Description: Name of the database catalog of the base table
+    Supported: all
+  baseTableName string 
+    Description: Name of the table containing columns constrained by foreign keys
+    Supported: all
+    Required For: all
+  baseTableSchemaName string 
+    Description: Name of the database schema of the base table
+    Supported: all
+
+
+dropColumn: |
+  catalogName string (since 3.0)
+    Description: Name of the database catalog
+    Supported: all
+  columnName string 
+    Description: Name of the column to drop, if dropping a single column. Ignore if nested columns are defined
+    Supported: all
+  columns list of columnConfig 
+    Description: Columns to be dropped if dropping multiple columns. If this is populated, the columnName attribute is ignored.
+    Supported: all
+  schemaName string 
+    Description: Name of the database schema
+    Supported: all
+  tableName string 
+    Description: Name of the table containing the column to drop
+    Supported: all
+    Required For: all
+
+
+dropDefaultValue: |
+  catalogName string (since 3.0)
+    Description: Name of the database catalog
+    Supported: all
+  columnDataType string 
+    Description: Data type of the column
+    Supported: all
+    Required For: informix
+  columnName string 
+    Description: Name of the column to drop the default value from
+    Supported: all
+    Required For: all
+  schemaName string 
+    Description: Name of the database schema
+    Supported: all
+  tableName string 
+    Description: Name of the table containing the column
+    Supported: all
+    Required For: all
+
+
+dropForeignKeyConstraint: |
+  baseTableCatalogName string (since 3.0)
+    Description: Name of the database catalog of the base table
+    Supported: all
+  baseTableName string 
+    Description: Name of the table containing the column constrained by the foreign key
+    Supported: all
+    Required For: all
+  baseTableSchemaName string 
+    Description: Name of the database schema of the base table
+    Supported: all
+  constraintName string 
+    Description: Name of the foreign key constraint to drop
+    Supported: all
+    Required For: all
+
+dropIndex: |
+  catalogName string (since 3.0)
+    Description: Name of the database catalog
+    Supported: all
+  indexName string 
+    Description: Name of the index to drop
+    Supported: all
+    Required For: all
+  schemaName string 
+    Description: Name of the database schema
+    Supported: all
+  tableName string 
+    Description: Name of the indexed table
+    Supported: all
+    Required For: asany,mariadb,mssql,mysql,sybase
+
+
+dropNotNullConstraint: |
+  catalogName string (since 3.0)
+    Description: Name of the database catalog
+    Supported: all
+  columnDataType string 
+    Description: Current data type of the column
+    Supported: all
+    Required For: informix,mariadb,mssql,mysql
+  columnName string 
+    Description: Name of the column to drop the constraint from
+    Supported: all
+    Required For: asany,cockroachdb,db2,derby,edb,firebird,h2,hsqldb,informix,ingres,mariadb,mssql,mysql,postgresql,sybase,unsupported
+  constraintName string 
+    Description: Name of the constraint to drop (if database supports names for NOT NULL constraints)
+    Supported: all
+  schemaName string 
+    Description: Name of the database schema
+    Supported: all
+  tableName string 
+    Description: Name of the table containing the column to drop the constraint from
+    Supported: all
+    Required For: all
+
+
+dropPrimaryKey: |
+  catalogName string 
+    Description: Name of the database catalog
+    Supported: all
+  constraintName string 
+    Description: Name of the primary key to drop
+    Supported: all
+    Required For: firebird,informix,sybase
+  dropIndex boolean 
+    Description: Whether to drop the index associated with the primary key
+    Supported: all
+  schemaName string 
+    Description: Name of the database schema
+    Supported: all
+  tableName string 
+    Description: Name of the table to drop the primary key from
+    Supported: all
+    Required For: all
+
+
+dropProcedure: |
+  catalogName string 
+    Description: Name of the database catalog
+    Supported: asany,cockroachdb,db2,db2z,derby,edb,firebird,h2,hsqldb,informix,ingres,mariadb,mysql,oracle,postgresql,sybase
+  procedureName string 
+    Description: Name of the stored procedure to drop
+    Supported: all
+    Required For: all
+  schemaName string 
+    Description: Name of the database schema
+    Supported: all
+
+dropSequence: |
+  catalogName string (since 3.0)
+    Description: Name of the database catalog
+    Supported: all
+  schemaName string 
+    Description: Name of the database schema
+    Supported: all
+  sequenceName string 
+    Description: Name of the sequence to drop
+    Supported: all
+    Required For: all
+
+
+dropTable: |
+  cascadeConstraints boolean 
+    Description: Whether to add CASCADE CONSTRAINTS to the SQL statement
+    Supported: all
+  catalogName string (since 3.0)
+    Description: Name of the database catalog
+    Supported: all
+  schemaName string 
+    Description: Name of the database schema
+    Supported: all
+  tableName string 
+    Description: Name of the table to drop
+    Supported: all
+    Required For: all
+
+dropUniqueConstraint: |
+  catalogName string (since 3.0)
+    Description: Name of the database catalog
+    Supported: all
+  constraintName string 
+    Description: Name of the unique constraint to drop
+    Supported: all
+    Required For: all
+  schemaName string 
+    Description: Name of the database schema
+    Supported: all
+  tableName string 
+    Description: Name of the table to drop the unique constraint from
+    Supported: all
+    Required For: all
+  uniqueColumns string 
+    Description: For SAP SQL Anywhere, a list of columns in the UNIQUE clause
+    Supported: sybase
+
+dropView: |
+  catalogName string (since 3.0)
+    Description: Name of the database catalog
+    Supported: all
+  ifExists boolean (since 4.19.0)
+    Description: Appends IF EXISTS to the DROP VIEW statement. If ifExists=true, the view is only dropped if it already exists, but the migration continues even if the view does not exist. If ifExists=false and the view does not exist, the database returns an error. Default: false.
+    Supported: all
+  schemaName string 
+    Description: Name of the database schema
+    Supported: all
+  viewName string 
+    Description: Name of the view to drop
+    Supported: all
+    Required For: all
+
+empty: |
+
+executeCommand: |
+  executable string 
+    Description: Name of the executable to run
+    Supported: all
+    Required For: all
+  timeout string 
+    Description: Timeout value for the executable to run
+    Supported: all
+
+insert: |
+  catalogName string (since 3.0)
+    Description: Name of the database catalog
+    Supported: all
+  columns list of columnConfig 
+    Description: Data to insert into columns
+    Supported: all
+    Required For: all
+  dbms string (since 3.0)
+    Description: Specifies which database type(s) a changeset is to be used for. See valid database type names on Supported Databases docs page. Separate multiple databases with commas. Specify that a changeset is not applicable to a particular database type by prefixing with !. The keywords 'all' and 'none' are also available.
+    Supported: all
+  schemaName string 
+    Description: Name of the database schema
+    Supported: all
+  tableName string 
+    Description: Name of the table to insert data into
+    Supported: all
+    Required For: all
+
+
+loadData: |
+  catalogName string (since 3.0)
+    Description: Name of the catalog
+    Supported: all
+  columns list of loadDataColumnConfig 
+    Description: Column mapping and defaults can be defined.
+  
+  'header' or 'index' attributes need to be defined. If the header name in the CSV is different than the column, 'name' needs to be inserted.
+  If column 'type' is not defined, the type is taken from the database. Otherwise, for non-string columns, the type definition might be required.
+  The 'defaultValue*' attributes can define values for empty fields.
+    Supported: all
+  commentLineStartsWith string 
+    Description: Lines starting with this are treated as comments and ignored. To disable comments, set 'commentLineStartsWith' to an empty value. Default: #
+    Supported: all
+  encoding string 
+    Description: Encoding of the CSV file (defaults to UTF-8)
+    Supported: all
+  file string 
+    Description: CSV file to load
+    Supported: all
+    Required For: all
+  quotchar string 
+    Description: The quote character for string fields containing the separator character. Default: "
+    Supported: all
+  relativeToChangelogFile boolean 
+    Description: Specifies whether the file path is relative to the changelog file rather than looked up in the search path. Default: false.
+    Supported: all
+  schemaName string 
+    Description: Name of the schema
+    Supported: all
+  separator string 
+    Description: Character separating the fields. Default: ,
+    Supported: all
+  tableName string 
+    Description: Name of the table to insert data into
+    Supported: all
+    Required For: all
+  usePreparedStatements boolean 
+    Description: Whether to use prepared statements instead of INSERT statement strings (if the database supports it)
+    Supported: all
+
+
+loadUpdateData: |
+  catalogName string (since 3.0)
+    Description: Name of the catalog
+    Supported: all
+  columns list of loadDataColumnConfig 
+    Description: Column mapping and defaults can be defined.
+  
+  'header' or 'index' attributes need to be defined. If the header name in the CSV is different than the column, 'name' needs to be inserted.
+  If column 'type' is not defined, the type is taken from the database. Otherwise, for non-string columns, the type definition might be required.
+  The 'defaultValue*' attributes can define values for empty fields.
+    Supported: all
+  commentLineStartsWith string 
+    Description: Lines starting with this are treated as comments and ignored. To disable comments, set 'commentLineStartsWith' to an empty value. Default: #
+    Supported: all
+  encoding string 
+    Description: Encoding of the CSV file (defaults to UTF-8)
+    Supported: all
+  file string 
+    Description: CSV file to load
+    Supported: all
+    Required For: all
+  onlyUpdate boolean (since 3.3)
+    Description: If true, records with no matching database record should be ignored
+    Supported: all
+  primaryKey string 
+    Description: Comma-delimited list of columns for the primary key
+    Supported: all
+    Required For: all
+  quotchar string 
+    Description: The quote character for string fields containing the separator character. Default: "
+    Supported: all
+  relativeToChangelogFile boolean 
+    Description: Specifies whether the file path is relative to the changelog file rather than looked up in the search path. Default: false.
+    Supported: all
+  schemaName string 
+    Description: Name of the schema
+    Supported: all
+  separator string 
+    Description: Character separating the fields. Default: ,
+    Supported: all
+  tableName string 
+    Description: Name of the table to insert or update data in
+    Supported: all
+    Required For: all
+  usePreparedStatements boolean 
+    Description: Whether to use prepared statements instead of INSERT statement strings (if the database supports it)
+    Supported: all
+
+mergeColumns: |
+  catalogName string 
+    Description: Name of the database catalog
+    Supported: all
+  column1Name string 
+    Description: Name of the column containing the first half of the data
+    Supported: all
+    Required For: all
+  column2Name string 
+    Description: Name of the column containing the second half of the data
+    Supported: all
+    Required For: all
+  finalColumnName string 
+    Description: Name of the column to create
+    Supported: all
+    Required For: all
+  finalColumnType string 
+    Description: Data type of the column to create
+    Supported: all
+    Required For: all
+  joinString string 
+    Description: String to place between the values from column1 and column2 (may be empty)
+    Supported: all
+  schemaName string 
+    Description: Name of the database schema
+    Supported: all
+  tableName string 
+    Description: Name of the table containing the columns to join
+    Supported: all
+    Required For: all
+
+
+modifyDataType: |
+  catalogName string (since 3.0)
+    Description: Name of the database catalog
+    Supported: all
+  columnName string 
+    Description: Name of the column
+    Supported: all
+    Required For: all
+  newDataType string 
+    Description: Data type to convert the column to. Only modifies the data type itself and cannot define constraints
+    Supported: all
+    Required For: all
+  schemaName string 
+    Description: Name of the database schema
+    Supported: all
+  tableName string 
+    Description: Name of the table containing the column whose data type you want to change
+    Supported: all
+    Required For: all
+
+
+output: |
+  message string 
+    Description: Message to send to output
+    Supported: all
+  target string 
+    Description: Target for message. Possible values: STDOUT, STDERR, FATAL, WARN, INFO, DEBUG. Default: STDERR
+    Supported: all
+
+renameColumn: |
+  catalogName string (since 3.0)
+    Description: Name of the database catalog
+    Supported: all
+  columnDataType string 
+    Description: Data type of the column
+    Supported: all
+    Required For: mariadb,mysql
+  newColumnName string 
+    Description: New name for the column
+    Supported: all
+    Required For: all
+  oldColumnName string 
+    Description: Name of the existing column to rename
+    Supported: all
+    Required For: all
+  remarks string 
+    Description: A brief descriptive comment written to the column metadata
+    Supported: all
+  schemaName string 
+    Description: Name of the database schema
+    Supported: all
+  tableName string 
+    Description: Name of the table containing the column to rename
+    Supported: all
+    Required For: all
+
+
+renameSequence: |
+  catalogName string (since 3.0)
+    Description: Name of the database catalog
+    Supported: all
+  newSequenceName string 
+    Description: New name for the sequence
+    Supported: all
+    Required For: all
+  oldSequenceName string 
+    Description: Name of the existing sequence to rename
+    Supported: all
+    Required For: all
+  schemaName string 
+    Description: Name of the database schema
+    Supported: all
+
+renameTable: |
+  catalogName string 
+    Description: Name of the database catalog
+    Supported: all
+  newTableName string 
+    Description: New name for the table
+    Supported: all
+    Required For: all
+  oldTableName string 
+    Description: Name of the existing table to rename
+    Supported: all
+    Required For: all
+  schemaName string 
+    Description: Name of the database schema
+    Supported: all
+
+
+renameView: |
+  catalogName string (since 3.0)
+    Description: Name of the database catalog
+    Supported: all
+  newViewName string 
+    Description: New name for the view
+    Supported: all
+    Required For: all
+  oldViewName string 
+    Description: Name of the existing view to rename
+    Supported: all
+    Required For: all
+  schemaName string 
+    Description: Name of the database schema
+    Supported: cockroachdb,edb,ingres,mariadb,mssql,mysql,postgresql,sqlite,sybase
+
+setColumnRemarks: |
+  catalogName string 
+    Description: Name of the database catalog
+    Supported: asany,cockroachdb,db2,db2z,edb,h2,mariadb,mysql,oracle,postgresql
+  columnDataType string 
+    Description: Data type of the column
+    Supported: all
+    Required For: mariadb,mysql
+  columnName string 
+    Description: Name of the column to set remarks on
+    Supported: all
+    Required For: all
+  columnParentType string 
+    Description: Indicates the parent object type of the column we are setting remarks against. Valid values are VIEW and TABLE. Default: TABLE.
+    Supported: all
+  remarks string 
+    Description: A brief descriptive comment written to the column metadata.
+    Supported: all
+  schemaName string 
+    Description: Name of the database schema
+    Supported: all
+  tableName string 
+    Description: Name of the table containing the column to set remarks on
+    Supported: all
+    Required For: all
+
+
+setTableRemarks: |
+  catalogName string 
+    Description: Name of the database catalog
+    Supported: all
+  remarks string 
+    Description: A brief descriptive comment stored in the table metadata
+    Supported: all
+  schemaName string 
+    Description: Name of the database schema
+    Supported: all
+  tableName string 
+    Description: Name of the table to set remarks on
+    Supported: all
+    Required For: all
+
+
+sql: |
+  comment string 
+    Description: A brief descriptive inline comment. Not stored in the database
+    Supported: all
+  dbms string (since 3.0)
+    Description: Specifies which database type(s) a changeset is to be used for. See valid database type names on Supported Databases docs page. Separate multiple databases with commas. Specify that a changeset is not applicable to a particular database type by prefixing with !. The keywords 'all' and 'none' are also available.
+    Supported: all
+  endDelimiter string 
+    Description: Delimiter to apply to the end of the statement. Defaults to ';', may be set to ''.
+    Supported: all
+  splitStatements boolean 
+    Description: Set to false to not have liquibase split statements on ;'s and GO's. Defaults to true if not set
+    Supported: all
+  sql string 
+    Supported: all
+    Required For: all
+  stripComments boolean 
+    Description: Set to true to remove any comments in the SQL before executing, otherwise false. Defaults to false if not set
+    Supported: all
+
+
+sqlFile: |
+  dbms string (since 3.0)
+    Description: Specifies which database type(s) a changeset is to be used for. See valid database type names on Supported Databases docs page. Separate multiple databases with commas. Specify that a changeset is not applicable to a particular database type by prefixing with !. The keywords 'all' and 'none' are also available.
+    Supported: all
+  encoding string 
+    Description: Encoding used in the file you specify in 'path'
+    Supported: all
+  endDelimiter string 
+    Description: Delimiter to apply to the end of the statement. Defaults to ';', may be set to ''.
+    Supported: all
+  path string 
+    Description: The file path of the SQL file to load
+    Supported: all
+    Required For: all
+  relativeToChangelogFile boolean 
+    Description: Specifies whether the file path is relative to the changelog file rather than looked up in the search path. Default: false.
+    Supported: all
+  splitStatements boolean 
+    Description: Set to false to not have liquibase split statements on ;'s and GO's. Defaults to true if not set
+    Supported: all
+  stripComments boolean 
+    Description: Set to true to remove any comments in the SQL before executing, otherwise false. Defaults to false if not set
+    Supported: all
+
+stop: |
+  message string 
+    Description: Message to send to output when execution stops
+    Supported: all
+
+tagDatabase: |
+  tag string 
+    Description: Tag to apply
+    Supported: all
+
+update: |
+  catalogName string 
+    Description: Name of the database catalog
+    Supported: all
+  columns list of columnConfig 
+    Description: Data to update
+    Supported: all
+    Required For: all
+  schemaName string 
+    Description: Name of the database schema
+    Supported: all
+  tableName string 
+    Description: Name of the table
+    Supported: all
+    Required For: all
+  where string 
+    Description: SQL WHERE condition string
+    Supported: all
+
