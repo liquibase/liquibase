@@ -266,6 +266,15 @@ public abstract class AbstractLiquibaseMojo extends AbstractMojo {
     protected boolean skip;
 
     /**
+     * Skip plugin execution if the specified file exists.
+     * The use of this parameter is NOT RECOMMENDED but can be used when needed.
+     *
+     * @parameter property="liquibase.skipOnFileExists"
+     */
+    @PropertyElement
+    protected String skipOnFileExists;
+
+    /**
      * A flag which indicates you want to set the character encoding of the output file during the updateSQL phase.
      *
      * @parameter property="liquibase.outputFileEncoding"
@@ -661,6 +670,15 @@ public abstract class AbstractLiquibaseMojo extends AbstractMojo {
         if (skip) {
             getLog().warn("Liquibase skipped due to Maven configuration");
             return;
+        }
+
+        if (skipOnFileExists != null) {
+            File f = new File(skipOnFileExists);
+            if (f.exists()) {
+                getLog().warn("Liquibase skipped because file " + skipOnFileExists + " exists");
+                return;
+            }
+            getLog().warn("Liquibase NOT skipped because file " + skipOnFileExists + " does NOT exists");
         }
 
         // If maven is called with -T and a value larger than 1, it can get confused under heavy thread load
