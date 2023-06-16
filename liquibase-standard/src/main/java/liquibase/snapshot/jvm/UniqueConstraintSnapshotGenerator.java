@@ -279,7 +279,7 @@ public class UniqueConstraintSnapshotGenerator extends JdbcSnapshotGenerator {
                 }
             } else if (database instanceof Db2zDatabase) {
                 List<String> parameter = new ArrayList<>(2);
-                String sql = "select  KC.colname as column_name from "
+                String sql = "select  KC.colname as column_name "
                         + " from SYSIBM.SYSKEYCOLUSE KC"
                         + " inner join SYSIBM.SYSTABCONST TC"
                         + " on KC.CONSTNAME = TC.CONSTNAME"
