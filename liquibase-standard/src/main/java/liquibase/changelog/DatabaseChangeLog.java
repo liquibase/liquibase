@@ -957,6 +957,7 @@ public class DatabaseChangeLog implements Comparable<DatabaseChangeLog>, Conditi
             }
             addChangeSet(changeSet);
         }
+        skippedChangeSets.addAll(changeLog.getSkippedChangeSets());
 
         return true;
     }
