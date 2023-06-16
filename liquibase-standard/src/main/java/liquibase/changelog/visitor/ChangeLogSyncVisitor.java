@@ -61,7 +61,7 @@ public class ChangeLogSyncVisitor implements ChangeSetVisitor {
 
     private void postRunMdc() {
         try {
-            ChangeLogHistoryServiceFactory instance = ChangeLogHistoryServiceFactory.getInstance();
+            ChangeLogHistoryServiceFactory instance = Scope.getCurrentScope().getSingleton(ChangeLogHistoryServiceFactory.class);
             String deploymentId = instance.getChangeLogService(database).getDeploymentId();
             Scope.getCurrentScope().addMdcValue(MdcKey.DEPLOYMENT_ID, deploymentId);
         } catch (Exception e) {
