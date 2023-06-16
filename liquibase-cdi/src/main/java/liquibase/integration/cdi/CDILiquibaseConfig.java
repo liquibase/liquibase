@@ -5,7 +5,7 @@ import java.util.Map;
 /**
  * Holds the configuration for Liquibase
  *
- *  @author Aaron Walker (http://github.com/aaronwalker)
+ *  @author <a href="http://github.com/aaronwalker">Aaron Walker </a>
  */
 public class CDILiquibaseConfig {
 

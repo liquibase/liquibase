@@ -468,9 +468,9 @@ public class UniqueConstraintSnapshotGenerator extends JdbcSnapshotGenerator {
      * Should the given database include the table name in the key?
      * Databases that need to include the table names are ones where unique constraint names do not have to be unique
      * within the schema.
-     *
+     * <p>
      * Currently only mysql is known to have non-unique constraint names.
-     *
+     * <p>
      * If this returns true, the database-specific query in {@link #listColumns(UniqueConstraint, Database, DatabaseSnapshot)} must include
      * a TABLE_NAME column in the results for {@link #getCacheKey(Map, Database)} to use.
      */

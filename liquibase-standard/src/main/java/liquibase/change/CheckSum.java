@@ -19,10 +19,10 @@ import java.util.regex.Pattern;
  * It is not up to this class to determine what should be storedCheckSum-ed, it simply hashes what is passed to it.
  */
 public final class CheckSum {
-    private int version;
-    private String storedCheckSum;
+    private final int version;
+    private final String storedCheckSum;
 
-    private static final int CURRENT_CHECKSUM_ALGORITHM_VERSION = 8;
+    private static final int CURRENT_CHECKSUM_ALGORITHM_VERSION = 9;
     private static final char DELIMITER = ':';
     private static final String CHECKSUM_REGEX = "(^\\d)" + DELIMITER + "([a-zA-Z0-9]++)";
     private static final Pattern CHECKSUM_PATTERN = Pattern.compile(CHECKSUM_REGEX);
@@ -70,10 +70,8 @@ public final class CheckSum {
     public static CheckSum compute(String valueToChecksum) {
         return new CheckSum(MD5Util.computeMD5(
                 //remove "Unknown" unicode char 65533
-                Normalizer.normalize(
-                    StringUtil.standardizeLineEndings(valueToChecksum)
-                            .replace("\uFFFD", "")
-                        , Normalizer.Form.NFC)
+                Normalizer.normalize(StringUtil.standardizeLineEndings(valueToChecksum)
+                        .replace("\uFFFD", ""), Normalizer.Form.NFC)
         ), getCurrentVersion());
     }
 

@@ -16,7 +16,7 @@ import spock.lang.Unroll
 
 import static org.junit.Assert.assertEquals
 
-public class SQLFileChangeTest extends StandardChangeTest {
+class SQLFileChangeTest extends StandardChangeTest {
 
     def "generateStatements throws Exception if file does not exist"() throws Exception {
         when:
@@ -142,4 +142,28 @@ public class SQLFileChangeTest extends StandardChangeTest {
 
     }
 
+    def "validate checksum gets re-computed if sql(file) content change"() {
+        when:
+        String procedureText =
+        """CREATE OR REPLACE PROCEDURE testHello()
+                  LANGUAGE plpgsql
+                  AS \$\$
+        BEGIN
+                  raise notice 'valueToReplace';
+        END \$\$"""
+        def change = new SQLFileChange()
+
+        procedureText = procedureText.replace("valueToReplace", "value1")
+        change.setSql(procedureText)
+
+        def checkSumFirstReplacement = change.generateCheckSum().toString()
+
+        procedureText = procedureText.replace("value1", "value2")
+        change.setSql(procedureText)
+
+        def checkSumSecondReplacement = change.generateCheckSum().toString()
+
+        then:
+        checkSumFirstReplacement != checkSumSecondReplacement
+    }
 }

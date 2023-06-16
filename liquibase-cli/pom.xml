@@ -22,7 +22,8 @@
         <dependency>
             <groupId>info.picocli</groupId>
             <artifactId>picocli</artifactId>
-            <version>4.7.1</version>
+            <version>4.7.4</version>
+            <scope>compile</scope>
         </dependency>
     </dependencies>
 

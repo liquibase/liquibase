@@ -31,7 +31,7 @@ public abstract class AbstractPluginFactory<T extends Plugin> implements PluginF
      * Finds the plugin for which {@link #getPriority(Plugin, Object...)}  returns the highest value for the given scope and args.
      * This method is called by a public implementation-specific methods.
      * Normally this does not need to be overridden, instead override {@link #getPriority(Plugin, Object...)} to compute the priority of each object for the scope and arguments passed to this method.
-     *
+     * <p>
      * However, if there is a {@link Scope} key of "liquibase.plugin.${plugin.interface.class.Name}", an instance of that class will always be ran first.
      *
      * @return null if no plugins are found or have a priority greater than zero.
@@ -74,7 +74,7 @@ public abstract class AbstractPluginFactory<T extends Plugin> implements PluginF
     }
 
 
-    public void register(T plugin) {
+    public synchronized void register(T plugin) {
         this.findAllInstances();
         this.allInstances.add(plugin);
     }
@@ -95,7 +95,7 @@ public abstract class AbstractPluginFactory<T extends Plugin> implements PluginF
         return this.allInstances;
     }
 
-    protected void removeInstance(T instance) {
+    protected synchronized void removeInstance(T instance) {
         if (this.allInstances == null) {
             return;
         }

@@ -14,7 +14,7 @@ import spock.lang.Specification
 import static org.junit.Assert.assertFalse
 import static org.junit.Assert.assertTrue
 
-public class ShouldRunChangeSetFilterTest extends Specification {
+class ShouldRunChangeSetFilterTest extends Specification {
 
     Database database;
 
@@ -22,7 +22,7 @@ public class ShouldRunChangeSetFilterTest extends Specification {
         database = Mock(Database.class);
     }
 
-    public void accepts_noneRun() throws DatabaseException {
+    void accepts_noneRun() throws DatabaseException {
         when:
         database.getRanChangeSetList() >> new ArrayList<RanChangeSet>()
 
@@ -32,7 +32,7 @@ public class ShouldRunChangeSetFilterTest extends Specification {
         assertTrue(filter.accepts(new ChangeSet("1", "testAuthor", false, false, "path/changelog", null, null, null)).isAccepted());
     }
 
-    public void accepts() throws DatabaseException {
+    void accepts() throws DatabaseException {
         when:
         given_a_database_with_two_executed_changesets();
         ShouldRunChangeSetFilter filter = new ShouldRunChangeSetFilter(database);
@@ -46,7 +46,7 @@ public class ShouldRunChangeSetFilterTest extends Specification {
         assertTrue("ChangSet with different path should be accepted", filter.accepts(new ChangeSet("1", "testAuthor", false, false, "other/changelog", null, null, null)).isAccepted());
     }
 
-    public void does_NOT_accept_current_changeset_with_classpath_prefix() throws DatabaseException {
+    void does_NOT_accept_current_changeset_with_classpath_prefix() throws DatabaseException {
         when:
         given_a_database_with_two_executed_changesets();
         ChangeSet changeSetWithClasspathPrefix = new ChangeSet("1", "testAuthor", false, false, "classpath:path/changelog", null, null, null);
@@ -57,7 +57,7 @@ public class ShouldRunChangeSetFilterTest extends Specification {
         assertFalse(filter.accepts(changeSetWithClasspathPrefix).isAccepted());
     }
 
-    public void does_NOT_accept_current_changeset_when_inserted_changeset_has_classpath_prefix() throws DatabaseException {
+    void does_NOT_accept_current_changeset_when_inserted_changeset_has_classpath_prefix() throws DatabaseException {
         when:
         given_a_database_with_two_executed_changesets();
         ChangeSet changeSet = new ChangeSet("2", "testAuthor", false, false, "path/changelog", null, null, null);
@@ -68,7 +68,7 @@ public class ShouldRunChangeSetFilterTest extends Specification {
         assertFalse(filter.accepts(changeSet).isAccepted());
     }
 
-    public void does_NOT_accept_current_changeset_when_both_have_classpath_prefix() throws DatabaseException {
+    void does_NOT_accept_current_changeset_when_both_have_classpath_prefix() throws DatabaseException {
         when:
         given_a_database_with_two_executed_changesets();
         ChangeSet changeSet = new ChangeSet("2", "testAuthor", false, false, "classpath:path/changelog", null, null, null);
@@ -119,7 +119,7 @@ public class ShouldRunChangeSetFilterTest extends Specification {
         RanChangeSet ranChangeSet1 = new RanChangeSet("path/changelog", "1", "testAuthor", CheckSum.parse("not_matched_checksum"), new Date(100000), null, null, null, null, null, null, null)
         ranChangeSet1.setOrderExecuted(1)
         ranChanges.add(ranChangeSet1)
-        RanChangeSet ranChangeSet2 = new RanChangeSet("path/changelog", "1", "testAuthor", CheckSum.parse("8:d41d8cd98f00b204e9800998ecf8427e"), new Date(100000 + 5), null, null, null, null, null, null, null)
+        RanChangeSet ranChangeSet2 = new RanChangeSet("path/changelog", "1", "testAuthor", CheckSum.parse("9:d41d8cd98f00b204e9800998ecf8427e"), new Date(100000 + 5), null, null, null, null, null, null, null)
         ranChangeSet2.setOrderExecuted(2)
         ranChanges.add(ranChangeSet2)
 
@@ -127,7 +127,7 @@ public class ShouldRunChangeSetFilterTest extends Specification {
     }
 
 
-    public void should_decline_not_changed_changeset_when_has_run_on_change() throws DatabaseException {
+    void should_decline_not_changed_changeset_when_has_run_on_change() throws DatabaseException {
         when:
         given_a_database_with_one_twice_executed_changeset()
         ShouldRunChangeSetFilter filter = new ShouldRunChangeSetFilter(database)
