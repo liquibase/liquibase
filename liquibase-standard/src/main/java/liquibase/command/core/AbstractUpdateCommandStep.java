@@ -61,7 +61,7 @@ public abstract class AbstractUpdateCommandStep extends AbstractCommandStep impl
             if (isFastCheckEnabled && isUpToDate(commandScope, database, databaseChangeLog, contexts, labelExpression, resultsBuilder.getOutputStream())) {
                 return;
             }
-            ChangeLogHistoryService changelogService = ChangeLogHistoryServiceFactory.getInstance().getChangeLogService(database);
+            ChangeLogHistoryService changelogService = Scope.getCurrentScope().getSingleton(ChangeLogHistoryServiceFactory.class).getChangeLogService(database);
             Scope.getCurrentScope().addMdcValue(MdcKey.DEPLOYMENT_ID, changelogService.getDeploymentId());
             Scope.getCurrentScope().getLog(getClass()).info(String.format("Using deploymentId: %s", changelogService.getDeploymentId()));
 
@@ -135,7 +135,7 @@ public abstract class AbstractUpdateCommandStep extends AbstractCommandStep impl
     @Override
     public void cleanUp(CommandResultsBuilder resultsBuilder) {
         LockServiceFactory.getInstance().resetAll();
-        ChangeLogHistoryServiceFactory.getInstance().resetAll();
+        Scope.getCurrentScope().getSingleton(ChangeLogHistoryServiceFactory.class).resetAll();
         Scope.getCurrentScope().getSingleton(ExecutorService.class).reset();
     }
 
@@ -190,7 +190,7 @@ public abstract class AbstractUpdateCommandStep extends AbstractCommandStep impl
     public boolean isUpToDateFastCheck(CommandScope commandScope, Database database, DatabaseChangeLog databaseChangeLog, Contexts contexts, LabelExpression labelExpression) throws LiquibaseException {
         String cacheKey = contexts + "/" + labelExpression;
         if (!upToDateFastCheck.containsKey(cacheKey)) {
-            ChangeLogHistoryService changeLogService = ChangeLogHistoryServiceFactory.getInstance().getChangeLogService(database);
+            ChangeLogHistoryService changeLogService = Scope.getCurrentScope().getSingleton(ChangeLogHistoryServiceFactory.class).getChangeLogService(database);
             try {
                 if (changeLogService.isDatabaseChecksumsCompatible() && listUnrunChangeSets(database, databaseChangeLog, contexts, labelExpression).isEmpty()) {
                     Scope.getCurrentScope().getLog(getClass()).fine("Fast check found no un-run changesets");

@@ -1,5 +1,8 @@
 package liquibase.command.core;
 
+import liquibase.Contexts;
+import liquibase.LabelExpression;
+import liquibase.Scope;
 import liquibase.changelog.ChangeLogHistoryService;
 import liquibase.changelog.ChangeLogHistoryServiceFactory;
 import liquibase.command.AbstractCommandStep;
@@ -69,7 +72,7 @@ public class ListLocksCommandStep extends AbstractCommandStep {
 
     public static void initializeChangelogService(Database database) throws LiquibaseException {
         ChangeLogHistoryService changeLogHistoryService =
-                ChangeLogHistoryServiceFactory.getInstance().getChangeLogService(database);
+            Scope.getCurrentScope().getSingleton(ChangeLogHistoryServiceFactory.class).getChangeLogService(database);
         changeLogHistoryService.init();
         LockServiceFactory.getInstance().getLockService(database).init();
     }

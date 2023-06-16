@@ -154,7 +154,7 @@ public abstract class AbstractIntegrationTest {
         LockServiceFactory.getInstance().resetAll();
         LockServiceFactory.getInstance().getLockService(database).init();
 
-        ChangeLogHistoryServiceFactory.getInstance().resetAll();
+        Scope.getCurrentScope().getSingleton(ChangeLogHistoryServiceFactory.class).resetAll();
     }
 
     /**
