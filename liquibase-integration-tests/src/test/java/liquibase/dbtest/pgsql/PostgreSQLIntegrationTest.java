@@ -46,18 +46,6 @@ public class PostgreSQLIntegrationTest extends AbstractIntegrationTest {
         blobChangeLog = "changelogs/pgsql/complete/testBlob.changelog.xml";
     }
 
-    /**
-     * Postgresql caches info including enum oid mappings in the connection. When we do a lot of dropping/re-creating in the tests it gets confused.
-     * Closing the connection
-     */
-    @Override
-    public void tearDown() throws Exception {
-        super.tearDown();
-        if (getDatabase() != null && getDatabase().getConnection() != null) {
-            getDatabase().getConnection().close();
-        }
-    }
-
     @Test
     public void testDependenciesInGenerateChangeLog() throws Exception {
         assumeNotNull(this.getDatabase());
