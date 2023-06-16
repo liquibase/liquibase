@@ -5,6 +5,9 @@ updates:
     directory: "/"
     schedule:
       interval: "daily"
+    labels:
+      - "sdou"
+      - "dependencies"
 
   - package-ecosystem: "maven"
     directory: "/"
