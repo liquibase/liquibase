@@ -3,8 +3,9 @@ name-template: 'Liquibase v$RESOLVED_VERSION'
 tag-template: 'v$RESOLVED_VERSION'
 categories:
   - title: ':green_book: Notable Changes'
+    collapse-after: 10
     labels: 
-      - 'notablechanges'
+      - 'notableChanges'
   - title: '🚀 New Features'
     labels:
       - 'TypeEnhancement'
