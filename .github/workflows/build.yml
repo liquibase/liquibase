@@ -491,13 +491,6 @@ jobs:
     steps:
       - uses: actions/checkout@v3
 
-      - name: Set up Java for publishing to GPM
-        uses: actions/setup-java@v3
-        with:
-          java-version: '17'
-          distribution: 'temurin'
-          cache: 'maven'
-
       # look for dependencies in maven
       - name: maven-settings-xml-action
         uses: whelk-io/maven-settings-xml-action@v20
@@ -530,6 +523,14 @@ jobs:
               }
             ]
             
+      
+      - name: Set up Java for publishing to GPM
+        uses: actions/setup-java@v3
+        with:
+          java-version: '17'
+          distribution: 'temurin'
+          cache: 'maven'
+                
       - name: Set up Maven
         uses: stCarolas/setup-maven@v4.5
         with:
