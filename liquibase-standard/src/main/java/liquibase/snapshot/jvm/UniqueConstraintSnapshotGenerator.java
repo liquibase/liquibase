@@ -368,25 +368,7 @@ public class UniqueConstraintSnapshotGenerator extends JdbcSnapshotGenerator {
             } else if (database instanceof InformixDatabase) {
                 //does not support bulkQuery,  supportsBulkQuery should return false()
 
-                String sql = getUniqueConstraintsSqlInformix((InformixDatabase) database, schema, name);
-                stmt = new RawSqlStatement(sql);
-            } else if (database instanceof Db2zDatabase) {
-                List<String> parameter = new ArrayList<>(2);
-                String sql = "select KC.TBCREATOR as CONSTRAINT_CONTAINER, KC.CONSTNAME as CONSTRAINT_NAME, KC.COLNAME as COLUMN_NAME"
-                        + " from SYSIBM.SYSKEYCOLUSE KC"
-                        + " inner join SYSIBM.SYSTABCONST TC"
-                        + " on KC.CONSTNAME = TC.CONSTNAME"
-                        + " and KC.TBCREATOR = TC.TBCREATOR"
-                        + " and KC.TBNAME = TC.TBNAME"
-                        + " where TC.TYPE = 'U'"
-                        + (bulkQuery ? "" : " and TC.CONSTNAME = ?")
-                        + " and TC.TBCREATOR = ?"
-                        + " order by KC.COLSEQ";
-                if (!bulkQuery) {
-                    parameter.add(database.correctObjectName(name, UniqueConstraint.class));
-                }
-                parameter.add(database.correctObjectName(schema.getName(), Schema.class));
-                stmt = new RawParameterizedSqlStatement(sql, parameter.toArray());
+                stmt = new RawSqlStatement(getUniqueConstraintsSqlInformix((InformixDatabase) database, schema, name));
             } else if (database instanceof H2Database && database.getDatabaseMajorVersion() >= 2) {
                 String catalogName = database.correctObjectName(schema.getCatalogName(), Catalog.class);
                 String schemaName = database.correctObjectName(schema.getName(), Schema.class);
