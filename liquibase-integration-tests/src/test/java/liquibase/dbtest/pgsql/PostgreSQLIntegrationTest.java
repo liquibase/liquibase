@@ -283,8 +283,7 @@ public class PostgreSQLIntegrationTest extends AbstractIntegrationTest {
                         "DROP USER IF EXISTS TEST_USER;" +
                         "CREATE SCHEMA TEST_SCHEMA;" +
                         "CREATE USER TEST_USER WITH PASSWORD '1234';" +
-                        "CREATE TABLE TEST_SCHEMA.permissionDeniedTable(id serial, name varchar(50));" +
-                        "GRANT ALL ON ALL TABLES IN SCHEMA public TO TEST_USER"
+                        "CREATE TABLE TEST_SCHEMA.permissionDeniedTable(id serial, name varchar(50));"
         );
         getDatabase().commit();
 
