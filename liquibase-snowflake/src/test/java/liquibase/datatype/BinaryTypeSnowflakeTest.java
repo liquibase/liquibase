@@ -7,6 +7,7 @@ import org.junit.Before;
 import org.junit.Test;
 
 import java.util.Arrays;
+import java.util.List;
 
 import static liquibase.servicelocator.PrioritizedService.PRIORITY_DATABASE;
 import static org.junit.Assert.*;
@@ -35,11 +36,19 @@ public class BinaryTypeSnowflakeTest {
         LiquibaseDataType liquibaseDataType = DataTypeFactory.getInstance().fromDescription("binary", snowflakeDatabase);
         String[] aliases = liquibaseDataType.getAliases();
         assertEquals(12, aliases.length);
-        assertTrue(Arrays.asList(aliases).contains("binary"));
-        assertTrue(Arrays.asList(aliases).contains("longblob"));
-        assertTrue(Arrays.asList(aliases).contains("longvarbinary"));
-        assertTrue(Arrays.asList(aliases).contains("java.sql.Types.BLOB"));
-        assertTrue(Arrays.asList(aliases).contains("java.sql.Types.LONGVARBINARY"));
+        List<String> snowflakeBinaryAliasList = Arrays.asList("longblob",
+                "longvarbinary",
+                "java.sql.Types.BLOB",
+                "java.sql.Types.LONGBLOB",
+                "java.sql.Types.LONGVARBINARY",
+                "java.sql.Types.VARBINARY",
+                "java.sql.Types.BINARY",
+                "varbinary",
+                "binary",
+                "image",
+                "tinyblob",
+                "mediumblob");
+        assertTrue(Arrays.asList(aliases).containsAll(snowflakeBinaryAliasList));
     }
 
     @Test
@@ -66,7 +75,7 @@ public class BinaryTypeSnowflakeTest {
 
     @Test
     public void getMaxParameters() {
-        assertEquals(0, binaryTypeSnowflake.getMinParameters(snowflakeDatabase));
+        assertEquals(12, binaryTypeSnowflake.getMaxParameters(snowflakeDatabase));
     }
 
 

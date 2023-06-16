@@ -10,7 +10,7 @@ import liquibase.util.StringUtil;
 
 import java.util.Locale;
 
-@DataTypeInfo(name = "binary", aliases = {"longblob", "longvarbinary", "java.sql.Types.BLOB", "java.sql.Types.LONGBLOB", "java.sql.Types.LONGVARBINARY", "java.sql.Types.VARBINARY", "java.sql.Types.BINARY", "varbinary", "binary", "image", "tinyblob", "mediumblob"}, minParameters = 0, maxParameters = 0, priority = LiquibaseDataType.PRIORITY_DATABASE)
+@DataTypeInfo(name = "binary", aliases = {"longblob", "longvarbinary", "java.sql.Types.BLOB", "java.sql.Types.LONGBLOB", "java.sql.Types.LONGVARBINARY", "java.sql.Types.VARBINARY", "java.sql.Types.BINARY", "varbinary", "binary", "image", "tinyblob", "mediumblob"}, minParameters = 0, maxParameters = 12, priority = LiquibaseDataType.PRIORITY_DATABASE)
 public class BinaryTypeSnowflake extends LiquibaseDataType {
     @Override
     public DatabaseDataType toDatabaseDataType(Database database) {
