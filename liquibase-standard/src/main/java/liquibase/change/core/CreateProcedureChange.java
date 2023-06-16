@@ -196,7 +196,7 @@ public class CreateProcedureChange extends AbstractChange implements DbmsTargete
         }
 
         if ((this.getReplaceIfExists() != null) && (DatabaseList.definitionMatches(getDbms(), database, true))) {
-            if (database instanceof MSSQLDatabase || database instanceof MySQLDatabase) {
+            if (databaseSupportsReplaceIfExists(database)) {
                 if (this.getReplaceIfExists() && (this.getProcedureName() == null)) {
                     validate.addError("procedureName is required if replaceIfExists = true");
                 }
@@ -386,5 +386,32 @@ public class CreateProcedureChange extends AbstractChange implements DbmsTargete
         } else {
             return super.createExampleValueMetaData(parameterName, changePropertyAnnotation);
         }
+    }
+
+    private static boolean databaseSupportsReplaceIfExists(Database database) {
+        if (database instanceof MSSQLDatabase) {
+            return true;
+        }
+        if (database instanceof MySQLDatabase) {
+            return true;
+        }
+        if (database instanceof DB2Database) {
+            return true;
+        }
+        if (database instanceof Db2zDatabase) {
+           try {
+                int major = database.getDatabaseMajorVersion();
+                if (major > 12) {
+                    return true;
+                }
+                if (major < 12) {
+                    return false;
+                }
+                return database.getDatabaseMinorVersion() >= 1;
+            } catch (DatabaseException e) {
+                return false;
+            }
+        }
+        return false;
     }
 }
