@@ -31,7 +31,7 @@ public class MockChangeLogHistoryService implements ChangeLogHistoryService {
 
     @Override
     public int getPriority() {
-        return PRIORITY_DATABASE;
+        return 5;
     }
 
     @Override

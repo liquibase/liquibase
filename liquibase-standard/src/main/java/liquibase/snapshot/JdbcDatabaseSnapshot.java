@@ -51,7 +51,6 @@ public class JdbcDatabaseSnapshot extends DatabaseSnapshot {
     }
 
     public class CachingDatabaseMetaData {
-        private static final String ASANY_NO_FOREIGN_KEYS_FOUND_SQLSTATE = "WW012";
         private static final String SQL_FILTER_MATCH_ALL = "%";
         private final DatabaseMetaData databaseMetaData;
         private final Database database;
@@ -190,6 +189,7 @@ public class JdbcDatabaseSnapshot extends DatabaseSnapshot {
                         returnList.addAll(executeAndExtract(sql, database));
 
                     } else if (database instanceof Db2zDatabase) {
+                        List<String> parameters = new ArrayList<>(3);
                         String sql = "SELECT i.CREATOR AS TABLE_SCHEM, " +
                                 "i.TBNAME AS TABLE_NAME, " +
                                 "i.NAME AS INDEX_NAME, " +
@@ -200,20 +200,24 @@ public class JdbcDatabaseSnapshot extends DatabaseSnapshot {
                                 "k.ORDERING AS ORDER, " +
                                 "i.CREATOR AS INDEX_QUALIFIER " +
                                 "FROM SYSIBM.SYSKEYS k " +
-                                "JOIN SYSIBM.SYSINDEXES i ON k.IXNAME = i.NAME " +
-                                "WHERE  i.CREATOR = '" + database.correctObjectName(catalogAndSchema.getSchemaName(), Schema.class) + "'" +
-                                "AND  k.IXCREATOR = '" + database.correctObjectName(catalogAndSchema.getSchemaName(), Schema.class) + "'";
+                                "JOIN SYSIBM.SYSINDEXES i " +
+                                "ON k.IXNAME = i.NAME " +
+                                "AND k.IXCREATOR = i.CREATOR " +
+                                "WHERE  i.CREATOR = ?";
+                        parameters.add(database.correctObjectName(catalogAndSchema.getSchemaName(), Schema.class));
                         if (!isBulkFetchMode && tableName != null) {
-                            sql += " AND i.TBNAME='" + database.escapeStringForDatabase(tableName) + "'";
+                            sql += " AND i.TBNAME = ?";
+                            parameters.add(database.escapeStringForDatabase(tableName));
                         }
 
                         if (!isBulkFetchMode && indexName != null) {
-                            sql += " AND i.NAME='" + database.escapeStringForDatabase(indexName) + "'";
+                            sql += " AND i.NAME = ?";
+                            parameters.add(database.escapeStringForDatabase(indexName));
                         }
 
                         sql += "ORDER BY i.NAME, k.COLSEQ";
 
-                        returnList.addAll(executeAndExtract(sql, database));
+                        returnList.addAll(executeAndExtract(database, sql, parameters.toArray()));
                     } else if (!(database instanceof MariaDBDatabase) && database instanceof MySQLDatabase) {
 
                         //mysql 8.0.13 introduced support for indexes on `lower(first_name)` which comes back in an "expression" column
@@ -720,17 +724,15 @@ public class JdbcDatabaseSnapshot extends DatabaseSnapshot {
             public List<CachedRow> fastFetch() throws SQLException, DatabaseException {
                 CatalogAndSchema catalogAndSchema = new CatalogAndSchema(catalogName, schemaName).customize(database);
 
-                List<CachedRow> returnList = new ArrayList<>();
-
-                List<String> tables = new ArrayList<>();
                 String jdbcCatalogName = ((AbstractJdbcDatabase) database).getJdbcCatalogName(catalogAndSchema);
                 String jdbcSchemaName = ((AbstractJdbcDatabase) database).getJdbcSchemaName(catalogAndSchema);
 
                 if (database instanceof DB2Database) {
                     return executeAndExtract(getDB2Sql(jdbcSchemaName, tableName), database);
                 } else if (database instanceof Db2zDatabase) {
-                    return executeAndExtract(getDB2ZOSSql(jdbcSchemaName, tableName), database);
+                    return queryDb2Zos(catalogAndSchema, tableName);
                 } else {
+                    List<String> tables = new ArrayList<>();
                     if (tableName == null) {
                         for (CachedRow row : getTables(jdbcCatalogName, jdbcSchemaName, null)) {
                             tables.add(row.getString("TABLE_NAME"));
@@ -739,6 +741,7 @@ public class JdbcDatabaseSnapshot extends DatabaseSnapshot {
                         tables.add(tableName);
                     }
 
+                    List<CachedRow> returnList = new ArrayList<>();
                     for (String foundTable : tables) {
                         if (database instanceof OracleDatabase) {
                             throw new RuntimeException("Should have bulk selected");
@@ -764,8 +767,7 @@ public class JdbcDatabaseSnapshot extends DatabaseSnapshot {
                     return executeAndExtract(getDB2Sql(jdbcSchemaName, null), database);
                 } else if (database instanceof Db2zDatabase) {
                     CatalogAndSchema catalogAndSchema = new CatalogAndSchema(catalogName, schemaName).customize(database);
-                    String jdbcSchemaName = ((AbstractJdbcDatabase) database).getJdbcSchemaName(catalogAndSchema);
-                    return executeAndExtract(getDB2ZOSSql(jdbcSchemaName, null), database);
+                    return queryDb2Zos(catalogAndSchema, null);
                 } else if (database instanceof MSSQLDatabase) {
                     CatalogAndSchema catalogAndSchema = new CatalogAndSchema(catalogName, schemaName).customize(database);
                     String jdbcSchemaName = ((AbstractJdbcDatabase) database).getJdbcSchemaName(catalogAndSchema);
@@ -909,8 +911,10 @@ public class JdbcDatabaseSnapshot extends DatabaseSnapshot {
                         "AND FKTABLE_NAME = '" + tableName + "'";
             }
 
-            protected String getDB2ZOSSql(String jdbcSchemaName, String tableName) {
-                return "SELECT  " +
+            protected List<CachedRow> queryDb2Zos(CatalogAndSchema catalogAndSchema, String tableName) throws DatabaseException, SQLException {
+
+                List<String> parameters = new ArrayList<>(2);
+                StringBuilder sql = new StringBuilder("SELECT  " +
                         "  ref.REFTBCREATOR AS pktable_cat,  " +
                         "  ref.REFTBNAME as pktable_name,  " +
                         "  pk_col.colname as pkcolumn_name, " +
@@ -924,12 +928,23 @@ public class JdbcDatabaseSnapshot extends DatabaseSnapshot {
                         "  7 as deferrability  " +
                         "FROM " +
                         "SYSIBM.SYSRELS ref " +
-                        "join SYSIBM.SYSFOREIGNKEYS fk_col on ref.relname = fk_col.RELNAME and ref.CREATOR = fk_col.CREATOR and ref.TBNAME = fk_col.TBNAME " +
-                        "join SYSIBM.SYSKEYCOLUSE pk_col on ref.REFTBCREATOR = pk_col.TBCREATOR and ref.REFTBNAME = pk_col.TBNAME " +
-                        "WHERE ref.CREATOR = '" + jdbcSchemaName + "' " +
+                        "join SYSIBM.SYSFOREIGNKEYS fk_col " +
+                        "on ref.relname = fk_col.RELNAME " +
+                        "and ref.CREATOR = fk_col.CREATOR " +
+                        "and ref.TBNAME = fk_col.TBNAME " +
+                        "join SYSIBM.SYSKEYCOLUSE pk_col " +
+                        "on ref.REFTBCREATOR = pk_col.TBCREATOR " +
+                        "and ref.REFTBNAME = pk_col.TBNAME " +
                         "and pk_col.colseq=fk_col.colseq " +
-                        (tableName != null ? " AND ref.TBNAME='" + tableName + "' " : "") +
-                        "ORDER BY fk_col.colseq";
+                        "WHERE ref.CREATOR = ? ");
+                parameters.add(((AbstractJdbcDatabase) CachingDatabaseMetaData.this.database).getJdbcSchemaName(catalogAndSchema));
+                if (tableName != null) {
+                    sql.append("AND ref.TBNAME = ? ");
+                    parameters.add(tableName);
+                }
+                sql.append("ORDER BY fk_col.colseq");
+
+                return executeAndExtract(CachingDatabaseMetaData.this.database, sql.toString(), parameters.toArray());
             }
 
             @Override
@@ -1188,16 +1203,19 @@ public class JdbcDatabaseSnapshot extends DatabaseSnapshot {
                             "NAME AS TABLE_NAME, " +
                             "'TABLE' AS TABLE_TYPE, " +
                             "REMARKS " +
-                            "FROM  SYSIBM.SYSTABLES " +
-                            "WHERE TYPE = 'T' ";
+                            "FROM SYSIBM.SYSTABLES " +
+                            "WHERE TYPE = 'T'";
+                    List<String> parameters = new ArrayList<>(2);
                     if (ownerName != null) {
-                        sql += "AND CREATOR='" + ownerName + "'";
+                        sql += " AND CREATOR = ?";
+                        parameters.add(ownerName);
                     }
                     if (tableName != null) {
-                        sql += " AND NAME='" + tableName + "'";
+                        sql += " AND NAME = ?";
+                        parameters.add(tableName);
                     }
 
-                    return executeAndExtract(sql, database);
+                    return executeAndExtract(database, sql, parameters.toArray());
                 }
 
                 private List<CachedRow> queryPostgres(CatalogAndSchema catalogAndSchema, String tableName) throws SQLException {
@@ -1404,13 +1422,13 @@ public class JdbcDatabaseSnapshot extends DatabaseSnapshot {
                                     "JOIN SYSIBM.SYSKEYCOLUSE COLUSE " +
                                     "ON SYSTAB.TBCREATOR = COLUSE.TBCREATOR " +
                                     "WHERE SYSTAB.TYPE = 'P' " +
-                                    "AND SYSTAB.TBNAME='" + table + "' " +
-                                    "AND SYSTAB.TBCREATOR='" + ((AbstractJdbcDatabase) database).getJdbcSchemaName(catalogAndSchema) + "' " +
+                                    "AND SYSTAB.TBNAME = ? " +
+                                    "AND SYSTAB.TBCREATOR = ? " +
                                     "AND SYSTAB.TBNAME=COLUSE.TBNAME " +
                                     "AND SYSTAB.CONSTNAME=COLUSE.CONSTNAME " +
                                     "ORDER BY COLUSE.COLNAME";
                             try {
-                                return executeAndExtract(sql, database);
+                                return executeAndExtract(database, sql, table, ((AbstractJdbcDatabase) database).getJdbcSchemaName(catalogAndSchema));
                             } catch (DatabaseException e) {
                                 throw new SQLException(e);
                             }
@@ -1611,24 +1629,24 @@ public class JdbcDatabaseSnapshot extends DatabaseSnapshot {
                 public List<CachedRow> fastFetchQuery() throws SQLException, DatabaseException {
                     CatalogAndSchema catalogAndSchema = new CatalogAndSchema(catalogName, schemaName).customize(database);
 
-                    return executeAndExtract(createSql(((AbstractJdbcDatabase) database).getJdbcCatalogName(catalogAndSchema), ((AbstractJdbcDatabase) database).getJdbcSchemaName(catalogAndSchema), tableName), JdbcDatabaseSnapshot.this.getDatabase(), (database instanceof InformixDatabase));
+                    return queryDb(catalogAndSchema, tableName);
                 }
 
                 @Override
                 public List<CachedRow> bulkFetchQuery() throws SQLException, DatabaseException {
                     CatalogAndSchema catalogAndSchema = new CatalogAndSchema(catalogName, schemaName).customize(database);
 
-                    return executeAndExtract(createSql(((AbstractJdbcDatabase) database).getJdbcCatalogName(catalogAndSchema), ((AbstractJdbcDatabase) database).getJdbcSchemaName(catalogAndSchema), null), JdbcDatabaseSnapshot.this.getDatabase());
+                    return queryDb(catalogAndSchema, null);
                 }
 
-                private String createSql(String catalogName, String schemaName, String tableName) throws SQLException {
-                    CatalogAndSchema catalogAndSchema = new CatalogAndSchema(catalogName, schemaName).customize(database);
+                private List<CachedRow> queryDb(CatalogAndSchema catalogAndSchema, String tableName) throws SQLException, DatabaseException {
 
-                    String jdbcCatalogName = database.correctObjectName(((AbstractJdbcDatabase) database).getJdbcCatalogName(catalogAndSchema), Catalog.class);
-                    String jdbcSchemaName = database.correctObjectName(((AbstractJdbcDatabase) database).getJdbcSchemaName(catalogAndSchema), Schema.class);
+                    String jdbcCatalogName = catalogAndSchema.getCatalogName();
+                    String jdbcSchemaName = catalogAndSchema.getSchemaName();
 
-                    Database database = JdbcDatabaseSnapshot.this.getDatabase();
-                    String sql;
+                    Database database = getDatabase();
+                    List<String> parameters = new ArrayList<>(3);
+                    String sql = null;
                     if (database instanceof Ingres9Database) {
                         sql = "select CONSTRAINT_NAME, TABLE_NAME from iiconstraints where schema_name ='"
                                 + schemaName + "' and constraint_type='U'";
@@ -1785,33 +1803,32 @@ public class JdbcDatabaseSnapshot extends DatabaseSnapshot {
                                     if (tableName != null) {
                                         sql += " and table_name='" + tableName + "'";
                                     }
-
-                                    return sql;
                                 }
                             } catch (DatabaseException e) {
                                 Scope.getCurrentScope().getLog(getClass()).fine("Cannot determine h2 version, using default unique constraint query");
                             }
                         }
+                        if (sql == null) {
 
-                        sql = "select CONSTRAINT_NAME, CONSTRAINT_TYPE, TABLE_NAME "
-                                + "from " + database.getSystemSchema() + ".constraints "
-                                + "where constraint_schema='" + jdbcSchemaName + "' "
-                                + "and constraint_catalog='" + jdbcCatalogName + "' "
-                                + "and constraint_type='UNIQUE'";
-                        if (tableName != null) {
-                            sql += " and table_name='" + tableName + "'";
+                            sql = "select CONSTRAINT_NAME, CONSTRAINT_TYPE, TABLE_NAME "
+                                    + "from " + database.getSystemSchema() + ".constraints "
+                                    + "where constraint_schema='" + jdbcSchemaName + "' "
+                                    + "and constraint_catalog='" + jdbcCatalogName + "' "
+                                    + "and constraint_type='UNIQUE'";
+                            if (tableName != null) {
+                                sql += " and table_name='" + tableName + "'";
+                            }
                         }
-
                     }
 
-                    return sql;
+                    return executeAndExtract(database, database instanceof InformixDatabase, sql, parameters.toArray());
                 }
             });
         }
     }
 
     private String getAllCatalogsStringScratchData() {
-        return (String) JdbcDatabaseSnapshot.this.getScratchData(ALL_CATALOGS_STRING_SCRATCH_KEY);
+        return (String) getScratchData(ALL_CATALOGS_STRING_SCRATCH_KEY);
     }
 
     private String escapeForLike(String string, Database database) {
@@ -1828,5 +1845,4 @@ public class JdbcDatabaseSnapshot extends DatabaseSnapshot {
                 .replace("%", "\\%")
                 .replace("_", "\\_");
     }
-
 }

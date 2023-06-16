@@ -161,7 +161,7 @@ public class OfflineConnection implements DatabaseConnection {
             }
         }
 
-        ChangeLogHistoryServiceFactory.getInstance().register(createChangeLogHistoryService(database));
+        Scope.getCurrentScope().getSingleton(ChangeLogHistoryServiceFactory.class).register(createChangeLogHistoryService(database));
     }
 
     protected ChangeLogHistoryService createChangeLogHistoryService(Database database) {
