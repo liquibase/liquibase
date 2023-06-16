@@ -279,7 +279,6 @@ public class PostgreSQLIntegrationTest extends AbstractIntegrationTest {
         //Create a new table with a serial type field on a new schema for a new user to test it can only get access to the created table
         ((JdbcConnection) getDatabase().getConnection()).getUnderlyingConnection().createStatement().executeUpdate(
                 "DROP SCHEMA IF EXISTS TEST_SCHEMA CASCADE;" +
-                        "DROP OWNED BY TEST_USER;" +
                         "DROP USER IF EXISTS TEST_USER;" +
                         "CREATE SCHEMA TEST_SCHEMA;" +
                         "CREATE USER TEST_USER WITH PASSWORD '1234';" +
