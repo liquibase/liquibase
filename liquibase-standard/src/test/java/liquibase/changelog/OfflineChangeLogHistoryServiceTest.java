@@ -6,6 +6,7 @@ import liquibase.database.core.HsqlDatabase;
 import liquibase.executor.ExecutorService;
 import liquibase.executor.LoggingExecutor;
 import liquibase.resource.ClassLoaderResourceAccessor;
+import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.TemporaryFolder;
@@ -28,16 +29,9 @@ public class OfflineChangeLogHistoryServiceTest {
     @Rule
     public TemporaryFolder temporaryFolder = new TemporaryFolder();
 
-    private File getResourceAsFile(String resourceName) {
-        URL resourceUrl = getClass().getResource(resourceName);
-        if (resourceUrl == null) {
-            throw new IllegalArgumentException("Resource "+resourceName+" not found for class "+getClass().getName());
-        }
-        try {
-            return new File(resourceUrl.toURI());
-        } catch (URISyntaxException e) {
-            return new File(resourceUrl.getPath());
-        }
+    @Before
+    public void setUp() throws Exception {
+        Scope.getCurrentScope().getSingleton(ChangeLogHistoryServiceFactory.class).resetAll();
     }
 
     /**
@@ -53,6 +47,8 @@ public class OfflineChangeLogHistoryServiceTest {
         service.init();
         service.setExecType(changeSet, ChangeSet.ExecType.EXECUTED);
         writer.close();
+        unregisterService(service);
+
         // Assert
         assertTrue(writer.toString().contains("CREATE TABLE PUBLIC.DATABASECHANGELOG"));
         assertTrue(writer.toString().contains("INSERT INTO PUBLIC.DATABASECHANGELOG"));
@@ -72,6 +68,7 @@ public class OfflineChangeLogHistoryServiceTest {
         service.init();
         service.setExecType(changeSet, ChangeSet.ExecType.EXECUTED);
         writer.close();
+        unregisterService(service);
 
         // Assert
         assertTrue(new File(temporaryFolder.getRoot(), CHANGE_LOG_CSV).exists());
@@ -91,6 +88,7 @@ public class OfflineChangeLogHistoryServiceTest {
         service.init();
         service.setExecType(changeSet, ChangeSet.ExecType.EXECUTED);
         writer.close();
+        unregisterService(service);
         // Assert
         assertFalse(writer.toString().contains("CREATE TABLE PUBLIC.DATABASECHANGELOG"));
         assertTrue(writer.toString().contains("INSERT INTO PUBLIC.DATABASECHANGELOG"));
@@ -105,8 +103,7 @@ public class OfflineChangeLogHistoryServiceTest {
         File changeLogCsvFile = new File(temporaryFolder.getRoot(), CHANGE_LOG_CSV);
         OfflineConnection connection = new OfflineConnection("offline:hsqldb?changeLogFile="+changeLogCsvFile.getAbsolutePath() + "&outputLiquibaseSql=" + outputLiquibaseSql, new ClassLoaderResourceAccessor());
         database.setConnection(connection);
-        connection.attached(database);
-        OfflineChangeLogHistoryService changeLogHistoryService = (OfflineChangeLogHistoryService) ChangeLogHistoryServiceFactory.getInstance().getChangeLogService(database);
+        OfflineChangeLogHistoryService changeLogHistoryService = (OfflineChangeLogHistoryService) Scope.getCurrentScope().getSingleton(ChangeLogHistoryServiceFactory.class).getChangeLogService(database);
 
         //
         // Create the new LoggingExecutor and give it the original Executor as a delegator
@@ -116,6 +113,10 @@ public class OfflineChangeLogHistoryServiceTest {
         Scope.getCurrentScope().getSingleton(ExecutorService.class).setExecutor("logging", database, loggingExecutor);
         Scope.getCurrentScope().getSingleton(ExecutorService.class).setExecutor("jdbc", database, loggingExecutor);
         return changeLogHistoryService;
+    }
+
+    private void unregisterService(OfflineChangeLogHistoryService service) {
+        Scope.getCurrentScope().getSingleton(ChangeLogHistoryServiceFactory.class).unregister(service);
     }
 
     /**

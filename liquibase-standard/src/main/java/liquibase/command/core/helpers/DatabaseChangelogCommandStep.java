@@ -91,7 +91,7 @@ public class DatabaseChangelogCommandStep extends AbstractHelperCommandStep impl
 
         DatabaseChangeLog databaseChangeLog = getDatabaseChangeLog(changeLogFile, changeLogParameters);
         checkLiquibaseTables(shouldUpdateChecksums, databaseChangeLog, changeLogParameters.getContexts(), changeLogParameters.getLabels(), database);
-        ChangeLogHistoryServiceFactory.getInstance().getChangeLogService(database).generateDeploymentId();
+        Scope.getCurrentScope().getSingleton(ChangeLogHistoryServiceFactory.class).getChangeLogService(database).generateDeploymentId();
         databaseChangeLog.validate(database, changeLogParameters.getContexts(), changeLogParameters.getLabels());
 
         commandScope.provideDependency(DatabaseChangeLog.class, databaseChangeLog);
@@ -122,7 +122,7 @@ public class DatabaseChangelogCommandStep extends AbstractHelperCommandStep impl
 
     private void checkLiquibaseTables(boolean updateExistingNullChecksums, DatabaseChangeLog databaseChangeLog,
                                       Contexts contexts, LabelExpression labelExpression, Database database) throws LiquibaseException {
-        ChangeLogHistoryService changeLogHistoryService = ChangeLogHistoryServiceFactory.getInstance().getChangeLogService(database);
+        ChangeLogHistoryService changeLogHistoryService = Scope.getCurrentScope().getSingleton(ChangeLogHistoryServiceFactory.class).getChangeLogService(database);
         changeLogHistoryService.init();
         if (updateExistingNullChecksums) {
             changeLogHistoryService.upgradeChecksums(databaseChangeLog, contexts, labelExpression);
@@ -137,7 +137,7 @@ public class DatabaseChangelogCommandStep extends AbstractHelperCommandStep impl
 
     @Override
     public void cleanUp(CommandResultsBuilder resultsBuilder) {
-        ChangeLogHistoryServiceFactory.getInstance().resetAll();
+        Scope.getCurrentScope().getSingleton(ChangeLogHistoryServiceFactory.class).resetAll();
     }
 
     /**

@@ -62,7 +62,7 @@ public abstract class AbstractUpdateCommandStep extends AbstractCommandStep impl
             if (isUpToDate(commandScope, database, databaseChangeLog, contexts, labelExpression, resultsBuilder.getOutputStream())) {
                 return;
             }
-            ChangeLogHistoryService changelogService = ChangeLogHistoryServiceFactory.getInstance().getChangeLogService(database);
+            ChangeLogHistoryService changelogService = Scope.getCurrentScope().getSingleton(ChangeLogHistoryServiceFactory.class).getChangeLogService(database);
             Scope.getCurrentScope().addMdcValue(MdcKey.DEPLOYMENT_ID, changelogService.getDeploymentId());
             Scope.getCurrentScope().getLog(getClass()).info(String.format("Using deploymentId: %s", changelogService.getDeploymentId()));
 
@@ -129,7 +129,7 @@ public abstract class AbstractUpdateCommandStep extends AbstractCommandStep impl
     @Override
     public void cleanUp(CommandResultsBuilder resultsBuilder) {
         LockServiceFactory.getInstance().resetAll();
-        ChangeLogHistoryServiceFactory.getInstance().resetAll();
+        Scope.getCurrentScope().getSingleton(ChangeLogHistoryServiceFactory.class).resetAll();
         Scope.getCurrentScope().getSingleton(ExecutorService.class).reset();
     }
 
@@ -198,7 +198,7 @@ public abstract class AbstractUpdateCommandStep extends AbstractCommandStep impl
                 // Discard the cached fetched un-run changeset list, as if
                 // another peer is running the changesets in parallel, we may
                 // get a different answer after taking out the write lock
-                ChangeLogHistoryService changeLogService = ChangeLogHistoryServiceFactory.getInstance().getChangeLogService(database);
+                ChangeLogHistoryService changeLogService = Scope.getCurrentScope().getSingleton(ChangeLogHistoryServiceFactory.class).getChangeLogService(database);
                 changeLogService.reset();
             }
         }

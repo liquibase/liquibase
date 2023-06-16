@@ -556,7 +556,7 @@ Long Description: ${commandDefinition.getLongDescription() ?: "NOT SET"}
     }
 
     private static File takeDatabaseSnapshot(Database database, String format) {
-        final ChangeLogHistoryService changeLogService = ChangeLogHistoryServiceFactory.getInstance().getChangeLogService(database)
+        final ChangeLogHistoryService changeLogService = Scope.getCurrentScope().getSingleton(ChangeLogHistoryServiceFactory.class).getChangeLogService(database)
         changeLogService.init()
         changeLogService.reset()
 
