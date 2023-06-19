@@ -133,3 +133,31 @@ jobs:
             **/target/surefire-reports
             **/target/jacoco.exec
 
+  dependabot:
+    name: Merge dependabot
+    runs-on: ubuntu-latest
+    needs: integration-test
+    permissions:
+      contents: write
+      pull-requests: write
+    if: ${{ github.actor == 'dependabot[bot]' }}
+
+    steps:
+      - name: Dependabot metadata
+        id: dependabot-metadata
+        uses: dependabot/fetch-metadata@v1.3.1
+
+      - name: Enable auto-merge for Dependabot PRs
+        run: gh pr merge --auto --merge "$PR_URL"
+        env:
+          PR_URL: ${{github.event.pull_request.html_url}}
+          GITHUB_TOKEN: ${{secrets.GITHUB_TOKEN}}
+
+      - name: Approve patch and minor updates
+        if: ${{steps.dependabot-metadata.outputs.update-type == 'version-update:semver-patch' || steps.dependabot-metadata.outputs.update-type == 'version-update:semver-minor'}}
+        run: |
+          gh pr merge --auto --merge "$PR_URL"
+          gh pr review $PR_URL --approve -b "I'm **approving** this pull request because **it includes a patch or minor update**"
+        env:
+          PR_URL: ${{github.event.pull_request.html_url}}
+          GITHUB_TOKEN: ${{secrets.GITHUB_TOKEN}}
