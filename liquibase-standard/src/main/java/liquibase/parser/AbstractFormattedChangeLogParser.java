@@ -306,16 +306,7 @@ public abstract class AbstractFormattedChangeLogParser implements ChangeLogParse
 
                         setChangeSequence(change, finalCurrentSequence);
 
-                        String currentRollbackSequenceAsString = currentRollbackSequence.toString();
-                        if (StringUtil.trimToNull(currentRollbackSequenceAsString) != null) {
-                            if (currentRollbackSequenceAsString.trim().toLowerCase().matches("^not required.*")) {
-                                changeSet.addRollbackChange(new EmptyChange());
-                            } else if (currentRollbackSequenceAsString.trim().toLowerCase().contains("changesetid")) {
-                                handleChangesetIdCase(physicalChangeLogLocation, changeLog, changeSet, currentRollbackSequenceAsString);
-                            } else {
-                                handleElseCase(changeLogParameters, currentRollbackSequence, changeSet, rollbackSplitStatementsPatternMatcher, rollbackSplitStatements, rollbackEndDelimiter);
-                            }
-                        }
+                        handleRollbackSequence(physicalChangeLogLocation, changeLogParameters, changeLog, currentRollbackSequence, changeSet, rollbackSplitStatementsPatternMatcher, rollbackSplitStatements, rollbackEndDelimiter);
                     }
 
                     Matcher stripCommentsPatternMatcher = STRIP_COMMENTS_PATTERN.matcher(line);
@@ -451,15 +442,7 @@ public abstract class AbstractFormattedChangeLogParser implements ChangeLogParse
                     change.setEndDelimiter("\n/$");
                 }
 
-                if (StringUtil.trimToNull(currentRollbackSequence.toString()) != null) {
-                    if (currentRollbackSequence.toString().trim().toLowerCase().matches("^not required.*") || currentRollbackSequence.toString().trim().toLowerCase().matches("^empty.*")) {
-                        changeSet.addRollbackChange(new EmptyChange());
-                    } else if (currentRollbackSequence.toString().trim().toLowerCase().contains("changesetid")) {
-                        handleChangesetIdCase(physicalChangeLogLocation, changeLog, changeSet, currentRollbackSequence.toString());
-                    } else {
-                        handleElseCase(changeLogParameters, currentRollbackSequence, changeSet, rollbackSplitStatementsPatternMatcher, rollbackSplitStatements, rollbackEndDelimiter);
-                    }
-                }
+                handleRollbackSequence(physicalChangeLogLocation, changeLogParameters, changeLog, currentRollbackSequence, changeSet, rollbackSplitStatementsPatternMatcher, rollbackSplitStatements, rollbackEndDelimiter);
             }
 
         } catch (IOException e) {
@@ -562,6 +545,19 @@ public abstract class AbstractFormattedChangeLogParser implements ChangeLogParse
 
     protected InputStream openChangeLogFile(String physicalChangeLogLocation, ResourceAccessor resourceAccessor) throws IOException {
         return resourceAccessor.getExisting(physicalChangeLogLocation).openInputStream();
+    }
+
+    private void handleRollbackSequence(String physicalChangeLogLocation, ChangeLogParameters changeLogParameters, DatabaseChangeLog changeLog, StringBuilder currentRollbackSequence, ChangeSet changeSet, Matcher rollbackSplitStatementsPatternMatcher, boolean rollbackSplitStatements, String rollbackEndDelimiter) throws ChangeLogParseException {
+        String currentRollbackSequenceAsString = currentRollbackSequence.toString();
+        if (StringUtil.trimToNull(currentRollbackSequenceAsString) != null) {
+            if (currentRollbackSequenceAsString.trim().toLowerCase().matches("^not required.*") || currentRollbackSequence.toString().trim().toLowerCase().matches("^empty.*")) {
+                changeSet.addRollbackChange(new EmptyChange());
+            } else if (currentRollbackSequenceAsString.trim().toLowerCase().contains("changesetid")) {
+                handleChangesetIdCase(physicalChangeLogLocation, changeLog, changeSet, currentRollbackSequenceAsString);
+            } else {
+                handleElseCase(changeLogParameters, currentRollbackSequence, changeSet, rollbackSplitStatementsPatternMatcher, rollbackSplitStatements, rollbackEndDelimiter);
+            }
+        }
     }
 
     private void handleElseCase(ChangeLogParameters changeLogParameters, StringBuilder currentRollbackSequence, ChangeSet changeSet, Matcher rollbackSplitStatementsPatternMatcher, boolean rollbackSplitStatements, String rollbackEndDelimiter) {
