@@ -452,7 +452,7 @@ public abstract class AbstractFormattedChangeLogParser implements ChangeLogParse
                 }
 
                 if (StringUtil.trimToNull(currentRollbackSequence.toString()) != null) {
-                    if (currentRollbackSequence.toString().trim().toLowerCase().matches("^not required.*")) {
+                    if (currentRollbackSequence.toString().trim().toLowerCase().matches("^not required.*") || currentRollbackSequence.toString().trim().toLowerCase().matches("^empty.*")) {
                         changeSet.addRollbackChange(new EmptyChange());
                     } else if (currentRollbackSequence.toString().trim().toLowerCase().contains("changesetid")) {
                         handleChangesetIdCase(physicalChangeLogLocation, changeLog, changeSet, currentRollbackSequence.toString());
