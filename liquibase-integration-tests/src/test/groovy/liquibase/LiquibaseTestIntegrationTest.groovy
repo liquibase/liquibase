@@ -27,6 +27,10 @@ class LiquibaseTestIntegrationTest extends Specification {
     @Shared
     private DatabaseTestSystem h2 = Scope.currentScope.getSingleton(TestSystemFactory).getTestSystem("h2") as DatabaseTestSystem
 
+    def setupSpec() {
+        CommandUtil.runDropAll(h2)
+    }
+
     def syncChangeLogForUnmanagedDatabase() throws Exception {
         when:
         Liquibase liquibase = createUnmanagedDatabase(h2);
@@ -179,7 +183,7 @@ class LiquibaseTestIntegrationTest extends Specification {
         liquibase.clearCheckSums()
 
         then:
-        List<RanChangeSet> ranChangeSets = ChangeLogHistoryServiceFactory.getInstance().getChangeLogService(liquibase.getDatabase()).getRanChangeSets()
+        List<RanChangeSet> ranChangeSets = Scope.getCurrentScope().getSingleton(ChangeLogHistoryServiceFactory.class).getChangeLogService(liquibase.getDatabase()).getRanChangeSets()
         assert ranChangeSets.get(0).getLastCheckSum() == null
 
         cleanup:

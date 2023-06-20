@@ -218,7 +218,7 @@ public class ColumnSnapshotGenerator extends JdbcSnapshotGenerator {
                 (column.getRelation() != null) && (column.getSchema() != null)) {
 
             Column.AutoIncrementInformation autoIncrementInformation =
-                    this.columnAutoIncrementService.obtainSequencesInformation(database, snapshot)
+                    this.columnAutoIncrementService.obtainSequencesInformation(database, column.getSchema(), snapshot)
                             .get(String.format("%s.%s.%s", column.getSchema().getName(), column.getRelation().getName(), column.getName()));
             if (autoIncrementInformation != null) {
                 column.setAutoIncrementInformation(autoIncrementInformation);
