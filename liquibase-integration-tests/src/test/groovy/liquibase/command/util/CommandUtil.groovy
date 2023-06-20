@@ -4,6 +4,7 @@ import liquibase.Scope
 import liquibase.UpdateSummaryEnum
 import liquibase.command.CommandScope
 import liquibase.command.core.*
+import liquibase.command.core.RollbackCommandStep.TAG_VERSION
 import liquibase.command.core.helpers.*
 import liquibase.database.Database
 import liquibase.diff.compare.CompareControl
@@ -112,6 +113,11 @@ class CommandUtil {
     }
 
     static void runRollback(ResourceAccessor resourceAccessor, DatabaseTestSystem db, String changelogFile, String tag) throws Exception {
+        runRollback(resourceAccessor, db, changelogFile, tag, TAG_VERSION.OLDEST)
+    }
+
+    static void runRollback(ResourceAccessor resourceAccessor, DatabaseTestSystem db, String changelogFile, String tag, TAG_VERSION tagVersion)
+            throws Exception {
         if (! db.shouldTest()) {
             return;
         }
@@ -125,6 +131,7 @@ class CommandUtil {
             commandScope.addArgumentValue(DbUrlConnectionCommandStep.PASSWORD_ARG, db.getPassword())
             commandScope.addArgumentValue(DatabaseChangelogCommandStep.CHANGELOG_FILE_ARG, changelogFile)
             commandScope.addArgumentValue(RollbackCommandStep.TAG_ARG, tag)
+            commandScope.addArgumentValue(RollbackCommandStep.TAG_VERSION_ARG, tagVersion.toString())
             commandScope.execute()
         } as Scope.ScopedRunnerWithReturn<Void>)
     }

@@ -31,13 +31,25 @@ class RollbackIntegrationTest extends Specification {
         console.setOutputStream(new PrintStream(outputStream))
 
         when:
-        CommandUtil.runRollback(new SearchPathResourceAccessor("."), postgres, changelogFile, "version_2.0")
+        CommandUtil.runRollback(new SearchPathResourceAccessor("."), postgres, changelogFile, "version_2.0", RollbackCommandStep.TAG_VERSION.NEWEST)
         String outputString = outputStream.toString()
 
         then:
         noExceptionThrown()
         assert outputString.contains("Rolling Back Changeset: target/test-classes/changelogs/pgsql/rollback/rollback-to-tag-changelog.xml::4b::createTable::Liquibase Pro User")
         assert outputString.contains("Rolling Back Changeset: target/test-classes/changelogs/pgsql/rollback/rollback-to-tag-changelog.xml::13.2::testuser")
+
+        when:
+        CommandUtil.runUpdate(postgres, changelogFile)
+        outputStream = new ByteArrayOutputStream()
+        console.setOutputStream(new PrintStream(outputStream))
+        CommandUtil.runRollback(new SearchPathResourceAccessor("."), postgres, changelogFile, "version_2.0", RollbackCommandStep.TAG_VERSION.OLDEST)
+        outputString = outputStream.toString()
+
+        then:
+        noExceptionThrown()
+        assert outputString.contains("Rolling Back Changeset: target/test-classes/changelogs/pgsql/rollback/rollback-to-tag-changelog.xml::4a::createTable::Liquibase Pro User")
+        assert outputString.contains("Rolling Back Changeset: target/test-classes/changelogs/pgsql/rollback/rollback-to-tag-changelog.xml::13.1::testuser")
 
         when:
         outputStream = new ByteArrayOutputStream()
@@ -47,8 +59,7 @@ class RollbackIntegrationTest extends Specification {
 
         then:
         noExceptionThrown()
-        assert outputString.contains("Rolling Back Changeset: target/test-classes/changelogs/pgsql/rollback/rollback-to-tag-changelog.xml::4a::createTable::Liquibase Pro User")
-        assert outputString.contains("Rolling Back Changeset: target/test-classes/changelogs/pgsql/rollback/rollback-to-tag-changelog.xml::13.1::testuser")
+        assert outputString.contains("Rolling Back Changeset: target/test-classes/changelogs/pgsql/rollback/rollback-to-tag-changelog.xml::13.2::testuser")
 
         when:
         outputStream = new ByteArrayOutputStream()

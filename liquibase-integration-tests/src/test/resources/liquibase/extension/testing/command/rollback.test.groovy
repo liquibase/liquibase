@@ -34,6 +34,8 @@ Optional Args:
     OBFUSCATED
   rollbackScript (String) Rollback script to execute
     Default: null
+  tagVersion (String) Tag version to use for multiple occurrences of a tag
+    Default: OLDEST
   username (String) Username to use to connect to the database
     Default: null
 """

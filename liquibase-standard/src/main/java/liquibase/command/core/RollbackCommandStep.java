@@ -17,13 +17,38 @@ public class RollbackCommandStep extends AbstractRollbackCommandStep {
     public static final String[] COMMAND_NAME = {"rollback"};
 
     public static final CommandArgumentDefinition<String> TAG_ARG;
+    public static final CommandArgumentDefinition<String> TAG_VERSION_ARG;
 
     static {
         CommandBuilder builder = new CommandBuilder(COMMAND_NAME);
         TAG_ARG = builder.argument("tag", String.class).required()
             .description("Tag to rollback to").build();
 
+        TAG_VERSION_ARG = builder.argument("tagVersion",String.class)
+                .description("Tag version to use for multiple occurrences of a tag")
+                .setValueHandler((Object input) -> {
+                    if (input == null) {
+                        return null;
+                    }
+
+                    String tagVersion = String.valueOf(input);
+
+                    boolean found = tagVersion.equalsIgnoreCase("oldest") || tagVersion.equalsIgnoreCase("newest");
+                    if (!found) {
+                        String messageString =
+                                "\nWARNING:  The tag version value '" + tagVersion + "' is not valid.  Valid values include: 'OLDEST' or 'NEWEST'";
+                        throw new IllegalArgumentException(messageString);
+                    }
+                    return tagVersion;
+                })
+                .defaultValue(TAG_VERSION.OLDEST.name())
+                .build();
+
         builder.addArgument(AbstractRollbackCommandStep.ROLLBACK_SCRIPT_ARG).build();
+    }
+
+    public enum TAG_VERSION {
+        NEWEST, OLDEST
     }
 
     @Override
@@ -36,7 +61,8 @@ public class RollbackCommandStep extends AbstractRollbackCommandStep {
         Database database = (Database) commandScope.getDependency(Database.class);
 
         List<RanChangeSet> ranChangeSetList = database.getRanChangeSetList();
-        this.doRollback(resultsBuilder, ranChangeSetList, new AfterTagChangeSetFilter(tagToRollBackTo, ranChangeSetList));
+        TAG_VERSION tagVersion = TAG_VERSION.valueOf(commandScope.getArgumentValue(TAG_VERSION_ARG));
+        this.doRollback(resultsBuilder, ranChangeSetList, new AfterTagChangeSetFilter(tagToRollBackTo, ranChangeSetList, tagVersion));
     }
 
     @Override
