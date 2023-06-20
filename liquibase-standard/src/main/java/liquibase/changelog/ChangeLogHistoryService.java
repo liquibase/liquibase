@@ -6,12 +6,14 @@ import liquibase.database.Database;
 import liquibase.exception.DatabaseException;
 import liquibase.exception.DatabaseHistoryException;
 import liquibase.exception.LiquibaseException;
+import liquibase.plugin.Plugin;
 import liquibase.servicelocator.PrioritizedService;
 
 import java.util.Date;
 import java.util.List;
 
-public interface ChangeLogHistoryService extends PrioritizedService {
+public interface ChangeLogHistoryService extends Plugin {
+    int getPriority();
 
     boolean supports(Database database);
 

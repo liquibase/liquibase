@@ -15,6 +15,7 @@ import liquibase.snapshot.CachedRow;
 import liquibase.snapshot.DatabaseSnapshot;
 import liquibase.statement.core.RawSqlStatement;
 import liquibase.structure.core.Column;
+import liquibase.structure.core.Schema;
 import liquibase.util.StringUtil;
 
 import java.sql.Connection;
@@ -43,14 +44,14 @@ public class ColumnAutoIncrementService {
      * @param snapshot snapshot data used to store cache information.
      * @return Map with the sequence name and auto increment details
      */
-    public Map<String, Column.AutoIncrementInformation> obtainSequencesInformation(Database database, DatabaseSnapshot snapshot) {
+    public Map<String, Column.AutoIncrementInformation> obtainSequencesInformation(Database database, Schema schema, DatabaseSnapshot snapshot) {
         if (autoIncrementColumns != null) {
             return autoIncrementColumns;
         } else {
             autoIncrementColumns = new ConcurrentHashMap<>();
             Executor executor = Scope.getCurrentScope().getSingleton(ExecutorService.class).getExecutor("jdbc", database);
             try {
-                String query = this.getQueryForDatabase(database);
+                String query = this.getQueryForDatabaseAndSchema(database, schema);
                 List<Map<String, ?>> rows = executor.queryForList(new RawSqlStatement(query));
                 for (Map<String, ?> row : rows) {
                     String schemaName = (String) row.get("SCHEMA_NAME");
@@ -73,13 +74,14 @@ public class ColumnAutoIncrementService {
         return autoIncrementColumns;
     }
 
-    private String getQueryForDatabase(Database database) throws LiquibaseException {
+    private String getQueryForDatabaseAndSchema(Database database, Schema schema) throws LiquibaseException {
         if (database instanceof MSSQLDatabase) {
             return "SELECT object_schema_name(object_id) AS schema_name, " +
                     "object_name(object_id) AS table_name, name AS column_name, " +
                     "CAST(seed_value AS bigint) AS start_value, " +
                     "CAST(increment_value AS bigint) AS increment_by " +
-                    "FROM sys.identity_columns";
+                    "FROM sys.identity_columns " +
+                    "WHERE sys.schemas = '" + schema.getName() + "'";
         } else if (database instanceof PostgresDatabase) {
             int version = 9;
             try {
@@ -100,7 +102,7 @@ public class ColumnAutoIncrementService {
                         "    JOIN pg_depend d ON c.oid = d.objid " +
                         "    JOIN pg_class td ON td.oid = d.refobjid " +
                         "    JOIN pg_attribute pa ON  pa.attrelid=td.oid AND pa.attnum=d.refobjsubid " +
-                        "WHERE c.relkind = 'S' AND d.deptype = 'a'";
+                        "WHERE c.relkind = 'S' AND d.deptype = 'a' AND ns.nspname = '" + schema.getName() + "'";
             } else {
                 return "SELECT " +
                         "    ns.nspname as SCHEMA_NAME, " +
@@ -115,7 +117,7 @@ public class ColumnAutoIncrementService {
                         "    JOIN pg_depend d ON c.oid = d.objid " +
                         "    JOIN pg_class td ON td.oid = d.refobjid " +
                         "    JOIN pg_attribute pa ON  pa.attrelid=td.oid AND pa.attnum=d.refobjsubid " +
-                        "WHERE c.relkind = 'S' AND d.deptype = 'a'";
+                        "WHERE c.relkind = 'S' AND d.deptype = 'a' AND ns.nspname = '" + schema.getName() + "'";
             }
         }
 
