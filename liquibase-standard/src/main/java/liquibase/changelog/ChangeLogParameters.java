@@ -247,6 +247,10 @@ public class ChangeLogParameters {
         List<ChangeLogParameter> localList = null;
         if (changeLog != null) {
             localList = localParameters.get(getLocalKey(changeLog));
+            if (localList != null) {
+                localList = new ArrayList<>(localList); // make a copy as we don't want to reverse the original list
+                Collections.reverse(localList);
+            }
         }
 
         for (List<ChangeLogParameter> paramList : Arrays.asList(globalParameters, localList)) {

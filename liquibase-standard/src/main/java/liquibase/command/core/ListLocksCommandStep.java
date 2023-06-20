@@ -2,9 +2,9 @@ package liquibase.command.core;
 
 import liquibase.Contexts;
 import liquibase.LabelExpression;
+import liquibase.Scope;
 import liquibase.changelog.ChangeLogHistoryService;
 import liquibase.changelog.ChangeLogHistoryServiceFactory;
-import liquibase.changelog.DatabaseChangeLog;
 import liquibase.command.AbstractCommandStep;
 import liquibase.command.CommandDefinition;
 import liquibase.command.CommandResultsBuilder;
@@ -65,19 +65,15 @@ public class ListLocksCommandStep extends AbstractCommandStep {
      * Display change log lock information.
      */
     public static DatabaseChangeLogLock[] listLocks(Database database) throws LiquibaseException {
-        checkLiquibaseTables(false, null, new Contexts(), new LabelExpression(), database);
+        initializeChangelogService(database);
 
         return LockServiceFactory.getInstance().getLockService(database).listLocks();
     }
 
-    public static void checkLiquibaseTables(boolean updateExistingNullChecksums, DatabaseChangeLog databaseChangeLog,
-                                     Contexts contexts, LabelExpression labelExpression, Database database) throws LiquibaseException {
+    public static void initializeChangelogService(Database database) throws LiquibaseException {
         ChangeLogHistoryService changeLogHistoryService =
-                ChangeLogHistoryServiceFactory.getInstance().getChangeLogService(database);
+            Scope.getCurrentScope().getSingleton(ChangeLogHistoryServiceFactory.class).getChangeLogService(database);
         changeLogHistoryService.init();
-        if (updateExistingNullChecksums) {
-            changeLogHistoryService.upgradeChecksums(databaseChangeLog, contexts, labelExpression);
-        }
         LockServiceFactory.getInstance().getLockService(database).init();
     }
 

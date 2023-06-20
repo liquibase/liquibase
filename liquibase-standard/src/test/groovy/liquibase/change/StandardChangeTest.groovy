@@ -49,7 +49,7 @@ public abstract class StandardChangeTest extends Specification {
 //            if (change.validate(database).hasErrors()) {
 //                continue
 //            }
-//            def checkSum = change.generateCheckSum()
+//            def checkSum = change.generateCheckSumLatest()
 //            assert CheckSum.getCurrentVersion() == checkSum.getVersion();
 //            assert checkSum.toString().startsWith(CheckSum.getCurrentVersion()+":")
 //

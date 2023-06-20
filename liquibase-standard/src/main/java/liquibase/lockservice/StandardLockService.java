@@ -333,7 +333,7 @@ public class StandardLockService implements LockService {
 
                 hasChangeLogLock = true;
 
-                ChangeLogHistoryServiceFactory.getInstance().resetAll();
+                Scope.getCurrentScope().getSingleton(ChangeLogHistoryServiceFactory.class).resetAll();
                 database.setCanCacheLiquibaseTableInfo(true);
                 return true;
             }
@@ -475,7 +475,7 @@ public class StandardLockService implements LockService {
         isDatabaseChangeLogLockTableInitialized = false;
 
         if (this.database != null) {
-            ChangeLogHistoryService changelogService = ChangeLogHistoryServiceFactory.getInstance().getChangeLogService(database);
+            ChangeLogHistoryService changelogService = Scope.getCurrentScope().getSingleton(ChangeLogHistoryServiceFactory.class).getChangeLogService(database);
             // On reseting the lock the changelog service has to be invalidated due to the fact that
             // some liquibase component released the lock temporarily. In this time span another JVM instance
             // might have acquired the database lock and could have applied further changesets to prevent that
