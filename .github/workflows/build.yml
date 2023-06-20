@@ -563,153 +563,153 @@ jobs:
 
 
 # this triggers the pro-tests and test-harness to run
-  finish:
-    name: Finish Build
-    runs-on: ubuntu-22.04
-    needs: [setup, build, integration-test, package, sonar, deploy-package]
-    if: ${{ needs.setup.outputs.setupSuccessful }}
-    steps:
-      - uses: actions/checkout@v3
-        with:
-          ref: ${{ github.event.pull_request.head.sha || github.event.after}}
+  # finish:
+  #   name: Finish Build
+  #   runs-on: ubuntu-22.04
+  #   needs: [setup, build, integration-test, package, sonar, deploy-package]
+  #   if: ${{ needs.setup.outputs.setupSuccessful }}
+  #   steps:
+  #     - uses: actions/checkout@v3
+  #       with:
+  #         ref: ${{ github.event.pull_request.head.sha || github.event.after}}
 
-      - name: Coordinate Liquibase-Pro
-        uses: actions/github-script@v6
-        with:
-          github-token: ${{ secrets.BOT_TOKEN }}
-          script: |
-            const helper = require('./.github/util/workflow-helper.js')({github, context});
-            let currentBranchInfo = await helper.findMatchingBranch("liquibase", "liquibase-pro");
+  #     - name: Coordinate Liquibase-Pro
+  #       uses: actions/github-script@v6
+  #       with:
+  #         github-token: ${{ secrets.BOT_TOKEN }}
+  #         script: |
+  #           const helper = require('./.github/util/workflow-helper.js')({github, context});
+  #           let currentBranchInfo = await helper.findMatchingBranch("liquibase", "liquibase-pro");
 
-            let thisStatus = "${{ needs.package.result }}" == "success" ? "success" : "failure";
-            let stablePro = ("${{ needs.setup.outputs.stablePro }}" == "true");
-            let standalonePR = "${{ needs.setup.outputs.standAlonePR }}" == "true";
+  #           let thisStatus = "${{ needs.package.result }}" == "success" ? "success" : "failure";
+  #           let stablePro = ("${{ needs.setup.outputs.stablePro }}" == "true");
+  #           let standalonePR = "${{ needs.setup.outputs.standAlonePR }}" == "true";
 
-            console.log("Stand alone PR: "+standalonePR);
+  #           console.log("Stand alone PR: "+standalonePR);
 
-            let runFunctionalTests = false;
-            let markFunctionalTestsStatus = "failure";
-            let markFunctionalTestsDescription = "Unexpected setup";
+  #           let runFunctionalTests = false;
+  #           let markFunctionalTestsStatus = "failure";
+  #           let markFunctionalTestsDescription = "Unexpected setup";
 
-            if (stablePro) {
-              console.log("Pro is stable");
+  #           if (stablePro) {
+  #             console.log("Pro is stable");
 
-              runFunctionalTests = true;
-              markFunctionalTestsStatus = "pending";
-              markFunctionalTestsDescription = "Trigger internal functional tests";
-            } else {
-              console.log("Last pro was unstable");
+  #             runFunctionalTests = true;
+  #             markFunctionalTestsStatus = "pending";
+  #             markFunctionalTestsDescription = "Trigger internal functional tests";
+  #           } else {
+  #             console.log("Last pro was unstable");
 
-              runFunctionalTests = false;
-              markFunctionalTestsStatus = "failure";
-              markFunctionalTestsDescription = "Liquibase Pro is unstable";
+  #             runFunctionalTests = false;
+  #             markFunctionalTestsStatus = "failure";
+  #             markFunctionalTestsDescription = "Liquibase Pro is unstable";
 
-              let checks = await github.rest.repos.listCommitStatusesForRef({
-                "owner": "liquibase",
-                "repo": "liquibase-pro",
-                "ref": currentBranchInfo.sha
-              });
+  #             let checks = await github.rest.repos.listCommitStatusesForRef({
+  #               "owner": "liquibase",
+  #               "repo": "liquibase-pro",
+  #               "ref": currentBranchInfo.sha
+  #             });
 
-              let failedCheckingUs = false;
-              if (standalonePR) {
-                for (let status of checks.data) {
-                  if (status.context == "Stable Liquibase Core") {
-                    console.log("Stable Liquibase Core is "+ status.state);
-                    failedCheckingUs = (status.state == "failure");
-                  }
-                }
-              }
+  #             let failedCheckingUs = false;
+  #             if (standalonePR) {
+  #               for (let status of checks.data) {
+  #                 if (status.context == "Stable Liquibase Core") {
+  #                   console.log("Stable Liquibase Core is "+ status.state);
+  #                   failedCheckingUs = (status.state == "failure");
+  #                 }
+  #               }
+  #             }
 
-              if (failedCheckingUs) {
-                console.log("Rerun liquibase-commercial that was waiting on us");
+  #             if (failedCheckingUs) {
+  #               console.log("Rerun liquibase-commercial that was waiting on us");
 
-                //octokit removed the retryWorkflow function
-                github.request("POST "+currentBranchInfo.runRerunUrl);
+  #               //octokit removed the retryWorkflow function
+  #               github.request("POST "+currentBranchInfo.runRerunUrl);
 
-                //await github.rest.actions.retryWorkflow({
-                //    "owner": "liquibase",
-                //    "repo": "liquibase-pro",
-                //    "run_id": currentBranchInfo.workflowId
-                //});
-              }
-            }
+  #               //await github.rest.actions.retryWorkflow({
+  #               //    "owner": "liquibase",
+  #               //    "repo": "liquibase-pro",
+  #               //    "run_id": currentBranchInfo.workflowId
+  #               //});
+  #             }
+  #           }
 
-            if (standalonePR) {
-              console.log("Do not mark base pro branch as included in this");
-            } else {
-              console.log("Mark 'Included in Liquibase Core' status as "+thisStatus);
-              github.rest.repos.createCommitStatus({
-                "owner": "liquibase",
-                "repo": "liquibase-pro",
-                "sha": currentBranchInfo.sha,
-                "state": thisStatus,
-                "context": "Stable Liquibase Core",
-                "target_url": currentBranchInfo.runHtmlUrl,
-                "description": "Latest Liquibase Core build"
-              });
-            }
+  #           if (standalonePR) {
+  #             console.log("Do not mark base pro branch as included in this");
+  #           } else {
+  #             console.log("Mark 'Included in Liquibase Core' status as "+thisStatus);
+  #             github.rest.repos.createCommitStatus({
+  #               "owner": "liquibase",
+  #               "repo": "liquibase-pro",
+  #               "sha": currentBranchInfo.sha,
+  #               "state": thisStatus,
+  #               "context": "Stable Liquibase Core",
+  #               "target_url": currentBranchInfo.runHtmlUrl,
+  #               "description": "Latest Liquibase Core build"
+  #             });
+  #           }
 
-            if (runFunctionalTests) {
-              let testsBranch = await helper.findMatchingBranch("liquibase", "liquibase-pro-tests");
+  #           if (runFunctionalTests) {
+  #             let testsBranch = await helper.findMatchingBranch("liquibase", "liquibase-pro-tests");
 
-              let notices = [];
-              if (context.payload.pull_request) {
-                console.log("Sending pull request information");
-                notices = ["Triggered by PR " + context.payload.pull_request.html_url];
-              }
-              console.log("Trigger functional tests");
-              let workflowDispatch = await github.rest.actions.createWorkflowDispatch({
-                "owner": "liquibase",
-                "repo": "liquibase-pro-tests",
-                "workflow_id": "test.yml",
-                "ref": testsBranch.name,
-                "inputs": {
-                  "liquibaseCommit": helper.getCurrentSha(),
-                  "runDescription": "Triggered by https://github.com/liquibase/liquibase/actions/runs/"+context.runId,
-                  "liquibaseBranch": helper.getCurrentBranch(),
-                  "runDetails": JSON.stringify({
-                    "liquibaseBranch": helper.getCurrentBranch(),
-                    "notices": notices
-                  })
-                }
-              });
+  #             let notices = [];
+  #             if (context.payload.pull_request) {
+  #               console.log("Sending pull request information");
+  #               notices = ["Triggered by PR " + context.payload.pull_request.html_url];
+  #             }
+  #             console.log("Trigger functional tests");
+  #             let workflowDispatch = await github.rest.actions.createWorkflowDispatch({
+  #               "owner": "liquibase",
+  #               "repo": "liquibase-pro-tests",
+  #               "workflow_id": "test.yml",
+  #               "ref": testsBranch.name,
+  #               "inputs": {
+  #                 "liquibaseCommit": helper.getCurrentSha(),
+  #                 "runDescription": "Triggered by https://github.com/liquibase/liquibase/actions/runs/"+context.runId,
+  #                 "liquibaseBranch": helper.getCurrentBranch(),
+  #                 "runDetails": JSON.stringify({
+  #                   "liquibaseBranch": helper.getCurrentBranch(),
+  #                   "notices": notices
+  #                 })
+  #               }
+  #             });
 
-              let testHarnessBranch = await helper.findMatchingBranch("liquibase", "liquibase-test-harness");
-              if (testHarnessBranch.name == "main" || testHarnessBranch.name == "master") {
-                testHarnessBranch.name = "develop";
-              }
+  #             let testHarnessBranch = await helper.findMatchingBranch("liquibase", "liquibase-test-harness");
+  #             if (testHarnessBranch.name == "main" || testHarnessBranch.name == "master") {
+  #               testHarnessBranch.name = "develop";
+  #             }
               
-              console.log("Trigger Test Harness tests");
-              let testHarnessWorkflowDispatch = await github.rest.actions.createWorkflowDispatch({
-                "owner": "liquibase",
-                "repo": "liquibase-test-harness",
-                "workflow_id": "main.yml",
-                "ref": testHarnessBranch.name,
-                "inputs": {
-                  "runDescription": "Triggered by https://github.com/liquibase/liquibase/actions/runs/"+context.runId,
-                  "liquibaseBranch": helper.getCurrentBranchLabel(),
-                  "liquibaseRepo": "liquibase/liquibase",
-                  "runDetails": JSON.stringify({
-                    "notices": notices
-                  })
-                }
-              });
-            }
+  #             console.log("Trigger Test Harness tests");
+  #             let testHarnessWorkflowDispatch = await github.rest.actions.createWorkflowDispatch({
+  #               "owner": "liquibase",
+  #               "repo": "liquibase-test-harness",
+  #               "workflow_id": "main.yml",
+  #               "ref": testHarnessBranch.name,
+  #               "inputs": {
+  #                 "runDescription": "Triggered by https://github.com/liquibase/liquibase/actions/runs/"+context.runId,
+  #                 "liquibaseBranch": helper.getCurrentBranchLabel(),
+  #                 "liquibaseRepo": "liquibase/liquibase",
+  #                 "runDetails": JSON.stringify({
+  #                   "notices": notices
+  #                 })
+  #               }
+  #             });
+  #           }
 
-            await github.rest.repos.createCommitStatus({
-              "owner": "liquibase",
-              "repo": "liquibase",
-              "sha": helper.getCurrentSha(),
-              "state": markFunctionalTestsStatus,
-              "context": "Run Functional Tests",
-              "description": markFunctionalTestsDescription
-            });
+  #           await github.rest.repos.createCommitStatus({
+  #             "owner": "liquibase",
+  #             "repo": "liquibase",
+  #             "sha": helper.getCurrentSha(),
+  #             "state": markFunctionalTestsStatus,
+  #             "context": "Run Functional Tests",
+  #             "description": markFunctionalTestsDescription
+  #           });
 
-            await github.rest.repos.createCommitStatus({
-              "owner": "liquibase",
-              "repo": "liquibase",
-              "sha": helper.getCurrentSha(),
-              "state": markFunctionalTestsStatus,
-              "context": "Run Test Harness",
-              "description": markFunctionalTestsDescription
-            });
+  #           await github.rest.repos.createCommitStatus({
+  #             "owner": "liquibase",
+  #             "repo": "liquibase",
+  #             "sha": helper.getCurrentSha(),
+  #             "state": markFunctionalTestsStatus,
+  #             "context": "Run Test Harness",
+  #             "description": markFunctionalTestsDescription
+  #           });
