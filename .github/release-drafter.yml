@@ -4,7 +4,7 @@ tag-template: 'v$RESOLVED_VERSION'
 categories:
   - title: ':green_book: Notable Changes'
     labels: 
-      - 'notablechanges'
+      - 'notableChanges'
   - title: '🚀 New Features'
     labels:
       - 'TypeEnhancement'
