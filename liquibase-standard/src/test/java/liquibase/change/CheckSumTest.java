@@ -1,5 +1,7 @@
 package liquibase.change;
 
+import liquibase.ChecksumVersion;
+import liquibase.integration.commandline.LiquibaseCommandLineConfiguration;
 import org.junit.Test;
 
 import java.io.ByteArrayInputStream;
@@ -31,14 +33,14 @@ public class CheckSumTest {
 
     @Test
     public void getCurrentVersion() {
-        assertEquals(9, CheckSum.getCurrentVersion());
+        assertEquals(ChecksumVersion.V9, ChecksumVersion.latest());
     }
 
     @Test
     public void compute_String() {
         String valueToHash = "asdf";
         CheckSum checkSum = CheckSum.compute(valueToHash);
-        assertEquals(CheckSum.getCurrentVersion(), checkSum.getVersion());
+        assertEquals(ChecksumVersion.latest().getVersion(), checkSum.getVersion());
         assertNotEquals(checkSum.toString(), valueToHash);
     }
 
@@ -54,7 +56,7 @@ public class CheckSumTest {
     public void compute_Stream() {
         String valueToHash = "asdf";
         CheckSum checkSum = CheckSum.compute(new ByteArrayInputStream(valueToHash.getBytes()), false);
-        assertEquals(CheckSum.getCurrentVersion(), checkSum.getVersion());
+        assertEquals(ChecksumVersion.latest().getVersion(), checkSum.getVersion());
         assertNotEquals(checkSum.toString(), valueToHash);
         assertEquals(CheckSum.compute(valueToHash).toString(), checkSum.toString());
     }
