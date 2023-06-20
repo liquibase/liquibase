@@ -91,7 +91,7 @@ public class OutputChange extends AbstractChange {
     @Override
     public Object getSerializableFieldValue(String field) {
         Object value = super.getSerializableFieldValue(field);
-        if ("target".equals(field) && "".equals(value)) {
+        if ("target".equals(field) && StringUtil.isEmpty(String.valueOf(value))) {
             return null;
         }
         return value;

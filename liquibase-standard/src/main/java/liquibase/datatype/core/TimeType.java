@@ -136,7 +136,8 @@ public class TimeType extends LiquibaseDataType {
     }
 
     private boolean zeroTime(String stringVal) {
-        return "".equals(stringVal.replace("-", "").replace(":", "").replace(" ", "").replace("0", ""));
+        return StringUtil
+                .isEmpty(stringVal.replace("-", "").replace(":", "").replace(" ", "").replace("0", ""));
     }
 
     protected DateFormat getTimeFormat(Database database) {

@@ -18,7 +18,7 @@ public class SqlParser {
         SimpleSqlGrammar t = new SimpleSqlGrammar(tokenManager);
         try {
             Token token = t.getNextToken();
-            while (!"".equals(token.toString())) {
+            while (StringUtil.isNotBlank(token.toString())) {
                 if (token.kind == SimpleSqlGrammarConstants.WHITESPACE) {
                     if (preserveWhitespace) {
                         clauses.append(new StringClauses.Whitespace(token.image));

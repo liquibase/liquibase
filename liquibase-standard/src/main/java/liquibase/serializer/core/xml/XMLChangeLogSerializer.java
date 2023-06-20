@@ -18,6 +18,7 @@ import liquibase.util.StreamUtil;
 import liquibase.util.StringUtil;
 import liquibase.util.XMLUtil;
 import liquibase.util.xml.DefaultXmlWriter;
+
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.NamedNodeMap;
@@ -127,7 +128,7 @@ public class XMLChangeLogSerializer implements ChangeLogSerializer {
         }
 
         for (Map.Entry<String, String> entry : shortNameByNamespace.entrySet()) {
-            if (!"".equals(entry.getValue())) {
+            if (StringUtil.isNotBlank(entry.getValue())) {
                 changeLogElement.setAttribute("xmlns:" + entry.getValue(), entry.getKey());
             }
         }
@@ -135,7 +136,7 @@ public class XMLChangeLogSerializer implements ChangeLogSerializer {
 
         StringBuilder schemaLocationAttribute = new StringBuilder();
         for (Map.Entry<String, String> entry : urlByNamespace.entrySet()) {
-            if (!"".equals(entry.getValue())) {
+            if (StringUtil.isNotBlank(entry.getValue())) {
                 schemaLocationAttribute
                     .append(entry.getKey())
                     .append(" ")
@@ -181,7 +182,7 @@ public class XMLChangeLogSerializer implements ChangeLogSerializer {
         String nodeName = object.getSerializedObjectName();
 
         NamespaceDetails details = NamespaceDetailsFactory.getInstance().getNamespaceDetails(this, namespace);
-        if ((details != null) && !"".equals(details.getShortName(namespace))) {
+        if ((details != null) && StringUtil.isNotBlank(details.getShortName(namespace))) {
             nodeName = details.getShortName(namespace) + ":" + nodeName;
         }
         Element node = currentChangeLogFileDOM.createElementNS(namespace, nodeName);
@@ -504,7 +505,7 @@ public class XMLChangeLogSerializer implements ChangeLogSerializer {
             }
         }
 
-        if (!sawChildren && "".equals(textContent)) {
+        if (!sawChildren && StringUtil.isBlank(textContent)) {
             buffer.replace(buffer.length() - 1, buffer.length(), "/>");
         } else {
             buffer.append("</").append(node.getNodeName()).append(">");
