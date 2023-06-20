@@ -32,7 +32,10 @@ import liquibase.statement.core.InsertStatement;
 import liquibase.structure.core.Column;
 import liquibase.structure.core.DataType;
 import liquibase.structure.core.Table;
-import liquibase.util.*;
+import liquibase.util.BooleanUtil;
+import liquibase.util.ObjectUtil;
+import liquibase.util.StreamUtil;
+import liquibase.util.StringUtil;
 import liquibase.util.csv.CSVReader;
 
 import java.io.IOException;
