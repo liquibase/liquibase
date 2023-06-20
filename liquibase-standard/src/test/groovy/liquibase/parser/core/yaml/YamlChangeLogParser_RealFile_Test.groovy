@@ -653,7 +653,7 @@ public class YamlChangeLogParser_RealFile_Test extends Specification {
     }
 
 
-    def "change set have to empty when change log has only databaseChangeLog tag"() throws ChangeLogParseException {
+    def "Verify Liquibase returns zero changesets when a YAML changelog only has the databaseChangeLog tag"() throws ChangeLogParseException {
         def path = "liquibase/parser/core/yaml/emptyChangeLog.yaml"
         when:
         def changeLog = new YamlChangeLogParser().parse(path, new ChangeLogParameters(), new JUnitResourceAccessor());
