@@ -60,7 +60,7 @@ public class FormattedSqlChangeLogParser extends AbstractFormattedChangeLogParse
     @Override
     protected void handlePreconditionsCase(ChangeSet changeSet, int count, Matcher preconditionsMatcher) throws ChangeLogParseException {
         if (preconditionsMatcher.groupCount() == 0) {
-            String message = String.format("Unexpected formatting at line %d. Formatted %s changelogs require known formats, such as '--preconditions <onFail>|<onError>|<onUpdate>' and others to be recognized and run. Learn all the options at %s", count, getSequenceType(), getDocumentationLink());
+            String message = String.format("Unexpected formatting at line %d. Formatted %s changelogs require known formats, such as '--preconditions <onFail>|<onError>|<onUpdate>' and others to be recognized and run. Learn all the options at %s", count, getSequenceName(), getDocumentationLink());
             throw new ChangeLogParseException("\n" + message);
         }
         if (preconditionsMatcher.groupCount() == 1) {
@@ -117,7 +117,7 @@ public class FormattedSqlChangeLogParser extends AbstractFormattedChangeLogParse
     }
 
     @Override
-    protected String getSequenceType() {
+    protected String getSequenceName() {
         return "SQL";
     }
 
@@ -139,7 +139,7 @@ public class FormattedSqlChangeLogParser extends AbstractFormattedChangeLogParse
         change.setSql(changeLogParameters.expandExpressions(StringUtil.trimToNull(currentSequence.toString()), changeSet.getChangeLog()));
     }
 
-    private SqlPrecondition parseSqlCheckCondition(String body) throws ChangeLogParseException{
+    private SqlPrecondition parseSqlCheckCondition(String body) throws ChangeLogParseException {
         for (Pattern pattern : WORD_AND_QUOTING_PATTERNS) {
             Matcher matcher = pattern.matcher(body);
             if (matcher.matches() && (matcher.groupCount() == 2)) {
