@@ -642,6 +642,10 @@ http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbch
         "c:\\path\\to\\changelog.xml"         | "path/to/changelog.xml"
         "c:/path/to/changelog.xml"            | "path/to/changelog.xml"
         "D:\\a\\liquibase\\DBDocTaskTest.xml" | "a/liquibase/DBDocTaskTest.xml"
+        "..\\path\\to\\changelog.xml"         | "../path/to/changelog.xml"
+        "../path/changelog.xml"               | "../path/changelog.xml"
+        "..\\..\\path\\changelog.xml"         | "../../path/changelog.xml"
+        "../../path/changelog.xml"            | "../../path/changelog.xml"
     }
 
     def "warning message is logged when changelog include fails because file does not exist"() {

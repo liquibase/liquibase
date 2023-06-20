@@ -1,5 +1,6 @@
 package liquibase.sqlgenerator.core;
 
+import liquibase.ChecksumVersion;
 import liquibase.Scope;
 import liquibase.change.Change;
 import liquibase.change.core.TagDatabaseChange;
@@ -11,6 +12,7 @@ import liquibase.database.ObjectQuotingStrategy;
 import liquibase.exception.LiquibaseException;
 import liquibase.exception.UnexpectedLiquibaseException;
 import liquibase.exception.ValidationErrors;
+import liquibase.integration.commandline.LiquibaseCommandLineConfiguration;
 import liquibase.sql.Sql;
 import liquibase.sqlgenerator.SqlGeneratorChain;
 import liquibase.sqlgenerator.SqlGeneratorFactory;
@@ -64,7 +66,7 @@ public class MarkChangeSetRanGenerator extends AbstractSqlGenerator<MarkChangeSe
                 runStatement = new UpdateStatement(database.getLiquibaseCatalogName(), database.getLiquibaseSchemaName(), database.getDatabaseChangeLogTableName())
                         .addNewColumnValue("DATEEXECUTED", new DatabaseFunction(dateValue))
                         .addNewColumnValue("ORDEREXECUTED", Scope.getCurrentScope().getSingleton(ChangeLogHistoryServiceFactory.class).getChangeLogService(database).getNextSequenceValue())
-                        .addNewColumnValue("MD5SUM", changeSet.generateCheckSum().toString())
+                        .addNewColumnValue("MD5SUM", changeSet.generateCheckSum(ChecksumVersion.latest()).toString())
                         .addNewColumnValue("EXECTYPE", statement.getExecType().value)
                         .addNewColumnValue("DEPLOYMENT_ID", Scope.getCurrentScope().getSingleton(ChangeLogHistoryServiceFactory.class).getChangeLogService(database).getDeploymentId())
                         .addNewColumnValue(COMMENTS, getCommentsColumn(changeSet))
@@ -85,7 +87,7 @@ public class MarkChangeSetRanGenerator extends AbstractSqlGenerator<MarkChangeSe
                             .addColumnValue("FILENAME", changeSet.getFilePath())
                             .addColumnValue("DATEEXECUTED", new DatabaseFunction(dateValue))
                             .addColumnValue("ORDEREXECUTED", Scope.getCurrentScope().getSingleton(ChangeLogHistoryServiceFactory.class).getChangeLogService(database).getNextSequenceValue())
-                            .addColumnValue("MD5SUM", changeSet.generateCheckSum().toString())
+                            .addColumnValue("MD5SUM", changeSet.generateCheckSum(ChecksumVersion.latest()).toString())
                             .addColumnValue("DESCRIPTION", limitSize(changeSet.getDescription()))
                             .addColumnValue(COMMENTS, getCommentsColumn(changeSet))
                             .addColumnValue("EXECTYPE", statement.getExecType().value)

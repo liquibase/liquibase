@@ -1,5 +1,7 @@
 package liquibase.change;
 
+import liquibase.ChecksumVersion;
+import liquibase.Scope;
 import liquibase.util.MD5Util;
 import liquibase.util.StringUtil;
 
@@ -22,9 +24,8 @@ public final class CheckSum {
     private final int version;
     private final String storedCheckSum;
 
-    private static final int CURRENT_CHECKSUM_ALGORITHM_VERSION = 9;
     private static final char DELIMITER = ':';
-    private static final String CHECKSUM_REGEX = "(^\\d)" + DELIMITER + "([a-zA-Z0-9]++)";
+    private static final String CHECKSUM_REGEX = "(^\\d++)" + DELIMITER + "([a-zA-Z0-9]++)";
     private static final Pattern CHECKSUM_PATTERN = Pattern.compile(CHECKSUM_REGEX);
 
     /**
@@ -42,11 +43,11 @@ public final class CheckSum {
      * Parse the given storedCheckSum string value and return a new CheckSum object.
      */
     public static CheckSum parse(String checksumValue) {
-        if (checksumValue == null) {
+        if (StringUtil.isEmpty(checksumValue)) {
             return null;
         }
         // The general layout of a checksum is:
-        // <1 digit: algorithm version number>:<1..n characters alphanumeric checksum>
+        // <1+ digits: algorithm version number>:<1..n characters alphanumeric checksum>
         // Example: 7:2cdf9876e74347162401315d34b83746
         Matcher matcher = CHECKSUM_PATTERN.matcher(checksumValue);
         if (matcher.find()) {
@@ -59,9 +60,12 @@ public final class CheckSum {
 
     /**
      * Return the current CheckSum algorithm version.
+     *
+     * @deprecated Use {@link ChecksumVersion#latest()} instead
      */
+    @Deprecated
     public static int getCurrentVersion() {
-        return CURRENT_CHECKSUM_ALGORITHM_VERSION;
+        return ChecksumVersion.latest().getVersion();
     }
 
     /**
@@ -72,7 +76,7 @@ public final class CheckSum {
                 //remove "Unknown" unicode char 65533
                 Normalizer.normalize(StringUtil.standardizeLineEndings(valueToChecksum)
                         .replace("\uFFFD", ""), Normalizer.Form.NFC)
-        ), getCurrentVersion());
+        ), Scope.getCurrentScope().getChecksumVersion().getVersion());
     }
 
     /**
@@ -102,7 +106,7 @@ public final class CheckSum {
             };
         }
 
-        return new CheckSum(MD5Util.computeMD5(newStream), getCurrentVersion());
+        return new CheckSum(MD5Util.computeMD5(newStream), Scope.getCurrentScope().getChecksumVersion().getVersion());
     }
 
     @Override
