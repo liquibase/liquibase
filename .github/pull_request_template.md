@@ -25,6 +25,19 @@ A clear and concise description of the change being made.
 - Ensure private information is redacted.
 -->
 
+## Mandatory Labels to add to a PR
+
+<!-- At least one of the labels must be added to the PR before it's merged. If no label is provided the workflow will fail and you will not be able to merge the PR -->
+`skipReleaseNotes`   - Don't show up on the Draft Release Notes page
+`notableChanges`     - Any notable changes
+`TypeEnhancement`    - New features
+`TypeTest`           - New Test features
+`TypeBug`            - bug fixes
+`breakingChanges`    - any breaking changes
+`APIBreakingChanges` - any API breaking changes
+`sdou`               - Security, Driver and Other Updates -dependabot PR's
+`newContributors`    - New Contributors
+
 ## Things to be aware of
 
 <!--
