@@ -520,11 +520,6 @@ jobs:
           servers: |
             [
               {
-                "id": "liquibase-pro",
-                "username": "liquibot",
-                "password": "${{ secrets.LIQUIBOT_PAT }}"
-              },
-              {
                 "id": "liquibase",
                 "username": "liquibot",
                 "password": "${{ secrets.LIQUIBOT_PAT }}"
