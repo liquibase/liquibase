@@ -9,7 +9,7 @@ jobs:
       issues: write
       pull-requests: write
     steps:
-      - name: Label PR
+      - name: Validate PR Labels
         uses: mheap/github-action-required-labels@v5
         with:
           mode: minimum
