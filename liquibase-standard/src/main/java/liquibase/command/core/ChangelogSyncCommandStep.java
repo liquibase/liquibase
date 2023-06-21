@@ -11,6 +11,7 @@ import liquibase.changelog.visitor.DefaultChangeExecListener;
 import liquibase.command.*;
 import liquibase.command.core.helpers.DatabaseChangelogCommandStep;
 import liquibase.database.Database;
+import liquibase.exception.CommandValidationException;
 import liquibase.exception.DatabaseException;
 import liquibase.lockservice.LockService;
 import liquibase.logging.mdc.MdcKey;
@@ -108,6 +109,12 @@ public class ChangelogSyncCommandStep extends AbstractCommandStep {
                     new DbmsChangeSetFilter(database),
                     new UpToTagChangeSetFilter(tag, ranChangeSetList));
         }
+    }
+
+    @Override
+    public void validate(CommandScope commandScope) throws CommandValidationException {
+        // update null checksums when running validate.
+        commandScope.addArgumentValue(DatabaseChangelogCommandStep.UPDATE_NULL_CHECKSUMS, Boolean.TRUE);
     }
 
     /**

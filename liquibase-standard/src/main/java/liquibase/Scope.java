@@ -6,6 +6,7 @@ import liquibase.database.DatabaseConnection;
 import liquibase.database.OfflineConnection;
 import liquibase.database.jvm.JdbcConnection;
 import liquibase.exception.UnexpectedLiquibaseException;
+import liquibase.integration.commandline.LiquibaseCommandLineConfiguration;
 import liquibase.listener.LiquibaseListener;
 import liquibase.logging.LogService;
 import liquibase.logging.Logger;
@@ -62,7 +63,8 @@ public class Scope {
         fileEncoding,
         databaseChangeLog,
         changeSet,
-        osgiPlatform
+        osgiPlatform,
+        checksumVersion
     }
 
     private static ScopeManager scopeManager;
@@ -85,6 +87,7 @@ public class Scope {
             rootScope.values.put(Attr.logService.name(), new JavaLogService());
             rootScope.values.put(Attr.serviceLocator.name(), new StandardServiceLocator());
             rootScope.values.put(Attr.resourceAccessor.name(), new ClassLoaderResourceAccessor());
+            rootScope.values.put(Attr.checksumVersion.name(), ChecksumVersion.latest());
 
             rootScope.values.put(Attr.ui.name(), new ConsoleUIService());
             rootScope.getSingleton(LiquibaseConfiguration.class).init(rootScope);
@@ -381,6 +384,10 @@ public class Scope {
 
     public ResourceAccessor getResourceAccessor() {
         return get(Attr.resourceAccessor, ResourceAccessor.class);
+    }
+
+    public ChecksumVersion getChecksumVersion() {
+        return get(Attr.checksumVersion, ChecksumVersion.class);
     }
 
     public String getLineSeparator() {

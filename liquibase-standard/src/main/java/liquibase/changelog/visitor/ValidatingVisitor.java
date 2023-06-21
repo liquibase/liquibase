@@ -1,5 +1,6 @@
 package liquibase.changelog.visitor;
 
+import liquibase.ChecksumVersion;
 import liquibase.GlobalConfiguration;
 import liquibase.Scope;
 import liquibase.change.Change;
@@ -96,6 +97,10 @@ public class ValidatingVisitor implements ChangeSetVisitor {
         
     @Override
     public void visit(ChangeSet changeSet, DatabaseChangeLog databaseChangeLog, Database database, Set<ChangeSetFilterResult> filterResults) throws LiquibaseException {
+        if (changeSet.isIgnore()) {
+            Scope.getCurrentScope().getLog(ValidatingVisitor.class).info("Not validating ignored change set '" + changeSet.toString() + "'");
+            return;
+        }
         RanChangeSet ranChangeSet = findChangeSet(changeSet);
         boolean ran = ranChangeSet != null;
         Set<String> dbmsSet = changeSet.getDbmsSet();
@@ -146,8 +151,9 @@ public class ValidatingVisitor implements ChangeSetVisitor {
 
         if(ranChangeSet != null){
             if (!changeSet.isCheckSumValid(ranChangeSet.getLastCheckSum())) {
-                if (!changeSet.shouldRunOnChange()) {
-                    invalidMD5Sums.add(changeSet.toString(false)+" was: "+ranChangeSet.getLastCheckSum().toString()+" but is now: "+changeSet.generateCheckSum().toString());
+                if (!changeSet.shouldRunOnChange() && !changeSet.shouldAlwaysRun()) {
+                    invalidMD5Sums.add(changeSet.toString(false)+" was: "+ranChangeSet.getLastCheckSum().toString()
+                            +" but is now: "+changeSet.generateCheckSum(ChecksumVersion.enumFromChecksumVersion(ranChangeSet.getLastCheckSum().getVersion())).toString());
                 }
             }
         }

@@ -6,12 +6,14 @@ import liquibase.database.Database;
 import liquibase.exception.DatabaseException;
 import liquibase.exception.DatabaseHistoryException;
 import liquibase.exception.LiquibaseException;
+import liquibase.plugin.Plugin;
 import liquibase.servicelocator.PrioritizedService;
 
 import java.util.Date;
 import java.util.List;
 
-public interface ChangeLogHistoryService extends PrioritizedService {
+public interface ChangeLogHistoryService extends Plugin {
+    int getPriority();
 
     boolean supports(Database database);
 
@@ -25,11 +27,13 @@ public interface ChangeLogHistoryService extends PrioritizedService {
     void init() throws DatabaseException;
 
     /**
-     * Upgrades any existing checksums with an out of date version
+     * Updates null checksum values
      */
     void upgradeChecksums(final DatabaseChangeLog databaseChangeLog, final Contexts contexts, LabelExpression labels) throws DatabaseException;
 
     List<RanChangeSet> getRanChangeSets() throws DatabaseException;
+
+    List<RanChangeSet> getRanChangeSets(boolean allowChecksumsUpgrade) throws DatabaseException;
 
     RanChangeSet getRanChangeSet(ChangeSet changeSet) throws DatabaseException, DatabaseHistoryException;
 
@@ -60,4 +64,5 @@ public interface ChangeLogHistoryService extends PrioritizedService {
 
     void generateDeploymentId();
 
-    }
+    boolean isDatabaseChecksumsCompatible();
+}

@@ -1,6 +1,6 @@
 package liquibase.command
 
-
+import liquibase.Scope
 import liquibase.changelog.ChangeLogHistoryService
 import liquibase.changelog.ChangeLogHistoryServiceFactory
 import liquibase.changelog.ChangeSet
@@ -24,8 +24,12 @@ class InternalHistoryCommandStepTest extends Specification {
 
     Database database
 
+    ChangeLogHistoryServiceFactory changeLogHistoryServiceFactory = Scope.getCurrentScope().getSingleton(ChangeLogHistoryServiceFactory.class)
+
+    ChangeLogHistoryService changeLogHistoryService
+
     def setup() {
-        def changeLogHistoryService = Mock(ChangeLogHistoryService)
+        changeLogHistoryService = Mock(ChangeLogHistoryService)
         changeLogHistoryService.getRanChangeSets() >> [
                 new RanChangeSet("some/change/log", "some/id", "me", null, new Date(1670000000000), "", ChangeSet.ExecType.EXECUTED, "", "", null, null, "deployment-id-1"),
                 new RanChangeSet("some/change/log", "some/other/id", "me", null, new Date(1670000000000), "", ChangeSet.ExecType.EXECUTED, "", "", null, null, "deployment-id-1"),
@@ -34,10 +38,14 @@ class InternalHistoryCommandStepTest extends Specification {
         database = databaseAt("jdbc:some://url")
         changeLogHistoryService.supports(database) >> true
         changeLogHistoryService.getPriority() >> PRIORITY_DATABASE
-        ChangeLogHistoryServiceFactory.getInstance().register(changeLogHistoryService)
+        changeLogHistoryServiceFactory.register(changeLogHistoryService)
 
         historyCommand = new InternalHistoryCommandStep()
         outputStream = new ByteArrayOutputStream()
+    }
+
+    void cleanup() {
+        changeLogHistoryServiceFactory.unregister(changeLogHistoryService)
     }
 
     def "displays the history in tabular format"() {
