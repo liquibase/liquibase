@@ -65,6 +65,11 @@ public class MockChangeLogHistoryService implements ChangeLogHistoryService {
     }
 
     @Override
+    public List<RanChangeSet> getRanChangeSets(boolean a) throws DatabaseException {
+        return ranChangeSets;
+    }
+
+    @Override
     public RanChangeSet getRanChangeSet(ChangeSet changeSet) throws DatabaseException, DatabaseHistoryException {
         return null;
     }
@@ -127,5 +132,10 @@ public class MockChangeLogHistoryService implements ChangeLogHistoryService {
     @Override
     public void generateDeploymentId() {
 
+    }
+
+    @Override
+    public boolean isDatabaseChecksumsCompatible() {
+        return true;
     }
 }

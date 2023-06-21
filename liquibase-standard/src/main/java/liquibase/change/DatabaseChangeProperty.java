@@ -1,12 +1,10 @@
 package liquibase.change;
 
+import liquibase.ChecksumVersion;
 import liquibase.database.Database;
 import liquibase.serializer.LiquibaseSerializable;
 
-import java.lang.annotation.ElementType;
-import java.lang.annotation.Retention;
-import java.lang.annotation.RetentionPolicy;
-import java.lang.annotation.Target;
+import java.lang.annotation.*;
 
 /**
  * Annotation used by {@link AbstractChange } to declare {@link ChangeParameterMetaData} information.
@@ -17,6 +15,7 @@ import java.lang.annotation.Target;
  */
 @Retention(RetentionPolicy.RUNTIME)
 @Target({ElementType.METHOD})
+@Repeatable(DatabaseChangeProperties.class)
 public @interface DatabaseChangeProperty {
 
     /**
@@ -59,4 +58,20 @@ public @interface DatabaseChangeProperty {
      */
     LiquibaseSerializable.SerializationType serializationType() default LiquibaseSerializable.SerializationType
         .NAMED_FIELD;
+
+    /**
+     * The checksum version that this annotation applies to. This can be omitted, and it is assumed that the
+     * annotation applies to all checksum versions. If a version is applied to some, but not all of the
+     * {@link DatabaseChangeProperty} annotations on a particular property, the most specific matching annotation
+     * is selected. For example, if a particular property has:
+     *
+     * <code>
+     *     @DatabaseChangeProperty(isChangeProperty = false, version = {ChecksumVersions.V8})
+     *     @DatabaseChangeProperty(serializationType = SerializationType.DIRECT_VALUE)
+     * </code>
+     *
+     * and checksum calculation for version 8 is requested, the first annotation is used. If any other checksum version
+     * is requested, the second annotation is used.
+     */
+    ChecksumVersion[] version() default {};
 }
