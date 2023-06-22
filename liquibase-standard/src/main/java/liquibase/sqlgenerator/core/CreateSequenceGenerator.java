@@ -76,7 +76,7 @@ public class CreateSequenceGenerator extends AbstractSqlGenerator<CreateSequence
         if (database instanceof HsqlDatabase || database instanceof Db2zDatabase) {
             queryStringBuilder.append(" AS BIGINT ");
         } else if (statement.getDataType() != null) {
-            if (!(isH2WithoutAsDatatypeSupport(database) || database instanceof CockroachDatabase) || database instanceof SybaseASADatabase) {
+            if (!(isH2WithoutAsDatatypeSupport(database) || database instanceof CockroachDatabase || database instanceof SybaseASADatabase)) {
                 queryStringBuilder.append(" AS ").append(statement.getDataType());
             }
         }
