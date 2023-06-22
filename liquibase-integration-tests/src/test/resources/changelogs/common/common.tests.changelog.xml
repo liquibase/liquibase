@@ -1062,7 +1062,7 @@
     </changeSet>
 
     <changeSet id="timestamp_column_precision9" author="abuschka"
-               dbms="db2,derby,firebird,h2,hsqldb,informix,mssql,oracle,postgresql,sqlite,asany,sybase">
+               dbms="db2,derby,firebird,h2,hsqldb,informix,mssql,oracle,sqlite,asany,sybase">
         <comment>Test if we (and the JDBC driver) correctly support TIMESTAMP columns with a extra-large precision
             of 9 for supported DBMS.
         </comment>
