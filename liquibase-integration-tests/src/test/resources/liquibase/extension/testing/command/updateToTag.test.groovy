@@ -33,7 +33,7 @@ Optional Args:
     Default: null
     OBFUSCATED
   showSummary (UpdateSummaryEnum) Type of update results summary to show.  Values can be 'off', 'summary', or 'verbose'.
-    Default: OFF
+    Default: SUMMARY
   username (String) Username to use to connect to the database
     Default: null
 """
@@ -83,7 +83,7 @@ Optional Args:
                                  "FILTERED CHANGE SETS SUMMARY",
                                  "Context mismatch:             1",
                                  "Label mismatch:               2",
-                                 "After tag:                    1",
+                                 "After tag:                    2",
                                  "DBMS mismatch:                1"
                                 ]
         ]
@@ -133,6 +133,21 @@ Optional Args:
                 changelogFile: "changelogs/h2/complete/simple.tag.changelog.xml",
         ]
         expectedException = CommandValidationException.class
+    }
+
+    run "Run with a bogus tag shows a warning", {
+        arguments = [
+                url:        { it.url },
+                username:   { it.username },
+                password:   { it.password },
+                tag          : "blablabla",
+                changelogFile: "changelogs/h2/complete/simple.tag.changelog.xml",
+        ]
+        expectedUI =
+"""
+WARNING:  The tag 'blablabla' was not found in the changelog 'changelogs/h2/complete/simple.tag.changelog.xml'. All changesets in the changelog were deployed.
+Learn about options for undoing these changes at https://docs.liquibase.com.
+"""
     }
 
     run "Run without a changeLogFile throws an exception", {

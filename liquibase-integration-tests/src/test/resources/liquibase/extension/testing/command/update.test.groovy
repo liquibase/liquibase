@@ -1,9 +1,15 @@
 package liquibase.extension.testing.command
 
+import liquibase.Scope
+import liquibase.changelog.ChangeLogHistoryServiceFactory
+import liquibase.changelog.RanChangeSet
+import liquibase.database.Database
 import liquibase.exception.CommandExecutionException
 import liquibase.exception.CommandValidationException
 
 import java.util.regex.Pattern
+
+import static org.junit.Assert.assertEquals
 
 CommandTests.define {
     command = ["update"]
@@ -35,7 +41,7 @@ Optional Args:
     Default: null
     OBFUSCATED
   showSummary (UpdateSummaryEnum) Type of update results summary to show.  Values can be 'off', 'summary', or 'verbose'.
-    Default: OFF
+    Default: SUMMARY
   username (String) Username to use to connect to the database
     Default: null
 """
@@ -57,6 +63,18 @@ Optional Args:
                 "txt": [Pattern.compile(".*liquibase.structure.core.Table:.*ADDRESS.*", Pattern.MULTILINE | Pattern.DOTALL | Pattern.CASE_INSENSITIVE),
                         Pattern.compile(".*liquibase.structure.core.Table:.*ADDRESS.*columns:.*city.*", Pattern.MULTILINE | Pattern.DOTALL | Pattern.CASE_INSENSITIVE)]
         ]
+
+         expectations = {
+             // Check that the order executed number increments by 1 for each changeset
+             def database = (Database) Scope.getCurrentScope().get("database", null)
+             def changelogHistoryService = Scope.getCurrentScope().getSingleton(ChangeLogHistoryServiceFactory.class).getChangeLogService(database)
+             List<RanChangeSet> ranChangeSets = changelogHistoryService.getRanChangeSets()
+             int expectedOrder = 1
+             for (RanChangeSet ranChangeSet : ranChangeSets) {
+                 assertEquals(expectedOrder, ranChangeSet.getOrderExecuted())
+                 expectedOrder++
+             }
+        }
 
     }
 

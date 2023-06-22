@@ -12,6 +12,12 @@
 
     <artifactId>liquibase-cdi-jakarta</artifactId>
 
+    <properties>
+        <maven.install.skip>false</maven.install.skip>
+        <maven.deploy.skip>false</maven.deploy.skip>
+        <maven.javadoc.skip>false</maven.javadoc.skip>
+    </properties>
+
     <dependencies>
         <dependency>
             <groupId>org.liquibase</groupId>
@@ -19,10 +25,10 @@
             <version>${project.version}</version>
         </dependency>
 
-
+<!-- we have a liquibase-standard dependency here for tests-jar -->
         <dependency>
             <groupId>org.liquibase</groupId>
-            <artifactId>liquibase-core</artifactId>
+            <artifactId>liquibase-standard</artifactId>
             <version>${project.version}</version>
             <type>test-jar</type>
             <scope>test</scope>
@@ -31,7 +37,7 @@
         <dependency>
             <groupId>org.jboss.weld.se</groupId>
             <artifactId>weld-se-core</artifactId>
-            <version>4.0.3.Final</version>
+            <version>5.1.1.Final</version>
             <scope>test</scope>
         </dependency>
 
@@ -39,7 +45,7 @@
         <dependency>
             <groupId>jakarta.enterprise</groupId>
             <artifactId>jakarta.enterprise.cdi-api</artifactId>
-            <version>3.0.0</version>
+            <version>4.0.1</version>
             <scope>provided</scope>
         </dependency>
     </dependencies>
@@ -90,13 +96,6 @@
                         </manifestEntries>
                     </archive>
                 </configuration>
-                <executions>
-                    <execution>
-                        <goals>
-                            <goal>test-jar</goal>
-                        </goals>
-                    </execution>
-                </executions>
             </plugin>
 
             <plugin>

@@ -403,5 +403,11 @@
         <preConditions onFail="MARK_RAN"><tableExists tableName="NOT_EXISTENT_TABLE"/></preConditions>
         <dropTable tableName="NOT_EXISTENT_TABLE_DOESNT_MATTER"/>
     </changeSet>
+    <changeSet id="addAutoIncrementColumnWithCustomValue" author="mallod">
+        <createTable tableName="autoIncrementColumnStartingWithCustomValueTest">
+            <column name="id" type="BIGINT" autoIncrement="true" startWith="100"/>
+            <column name="name" type="int"/>
+        </createTable>
+    </changeSet>
 
 </databaseChangeLog>

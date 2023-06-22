@@ -87,6 +87,7 @@ public abstract class AbstractIntegrationTest {
     private final String encodingChangeLog;
     private final String externalfkInitChangeLog;
     private final String invalidReferenceChangeLog;
+    private final String invalidSqlChangeLog;
     private final String objectQuotingStrategyChangeLog;
     private final String commonChangeLog;
     private Database database;
@@ -106,6 +107,7 @@ public abstract class AbstractIntegrationTest {
         this.commonChangeLog = "changelogs/common/common.tests.changelog.xml";
         this.externalfkInitChangeLog= "changelogs/common/externalfk.init.changelog.xml";
         this.invalidReferenceChangeLog= "changelogs/common/invalid.reference.changelog.xml";
+        this.invalidSqlChangeLog= "changelogs/common/invalid.sql.changelog.xml";
         this.objectQuotingStrategyChangeLog = "changelogs/common/object.quoting.strategy.changelog.xml";
         this.emptyRollbackSqlChangeLog = "changelogs/common/rollbackable.changelog.sql";
         this.pathChangeLog = "changelogs/common/pathChangeLog.xml";
@@ -152,7 +154,7 @@ public abstract class AbstractIntegrationTest {
         LockServiceFactory.getInstance().resetAll();
         LockServiceFactory.getInstance().getLockService(database).init();
 
-        ChangeLogHistoryServiceFactory.getInstance().resetAll();
+        Scope.getCurrentScope().getSingleton(ChangeLogHistoryServiceFactory.class).resetAll();
     }
 
     /**
@@ -970,6 +972,21 @@ public abstract class AbstractIntegrationTest {
     }
 
     @Test
+    public void testInvalidSqlThrowsException() throws Exception {
+        assumeNotNull(this.getDatabase());
+        Liquibase liquibase = createLiquibase(invalidSqlChangeLog);
+        try {
+            liquibase.update(new Contexts());
+            fail("Did not fail with invalid SQL");
+        } catch (CommandExecutionException executionException) {
+            Assert.assertTrue(executionException.getMessage().contains("this sql is not valid and should throw an exception"));
+        }
+
+        LockService lockService = LockServiceFactory.getInstance().getLockService(database);
+        assertFalse(lockService.hasChangeLogLock());
+    }
+
+    @Test
     public void testContextsWithHyphensWorkInFormattedSql() throws Exception {
         assumeNotNull(this.getDatabase());
         Liquibase liquibase = createLiquibase("changelogs/common/sqlstyle/formatted.changelog.sql");
@@ -1112,9 +1129,9 @@ public abstract class AbstractIntegrationTest {
         liquibase.update(contexts);
 
         Connection conn = ((JdbcConnection) database.getConnection()).getUnderlyingConnection();
-        conn.createStatement().execute("update DATABASECHANGELOG set md5sum = '1:xxx'");
+        conn.createStatement().execute("update DATABASECHANGELOG set md5sum = null");
         if (!conn.getAutoCommit()) {
-            conn.commit();;
+            conn.commit();
         }
 
         liquibase.getDatabase().getRanChangeSetList();
