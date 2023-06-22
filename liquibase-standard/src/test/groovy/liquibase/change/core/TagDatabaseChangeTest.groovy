@@ -1,17 +1,18 @@
 package liquibase.change.core
 
+import liquibase.Scope
 import liquibase.change.ChangeStatus;
 import liquibase.change.StandardChangeTest
 import liquibase.changelog.ChangeLogHistoryService
 import liquibase.changelog.ChangeLogHistoryServiceFactory;
 import liquibase.database.core.MockDatabase
+import liquibase.plugin.Plugin
 import spock.lang.Unroll
 
 public class TagDatabaseChangeTest extends StandardChangeTest {
 
-    def cleanup() {
-        ChangeLogHistoryServiceFactory.reset()
-    }
+    ChangeLogHistoryServiceFactory changeLogHistoryServiceFactory = Scope.getCurrentScope().getSingleton(ChangeLogHistoryServiceFactory.class)
+
 
     def getConfirmationMessage() throws Exception {
         when:
@@ -30,15 +31,14 @@ public class TagDatabaseChangeTest extends StandardChangeTest {
 
         def database = new MockDatabase()
         ChangeLogHistoryService historyService = Mock()
-        ChangeLogHistoryServiceFactory historyServiceFactory = Mock()
-
-        ChangeLogHistoryServiceFactory.instance = historyServiceFactory
-        historyServiceFactory.getChangeLogService(database) >> historyService
-
         historyService.tagExists(change.tag) >> tagExists
+        historyService.getPriority() >> Plugin.PRIORITY_SPECIALIZED
+        historyService.supports(database) >> true
+        changeLogHistoryServiceFactory.register(historyService)
 
         then:
         assert change.checkStatus(database).status == expectedStatus
+        changeLogHistoryServiceFactory.unregister(historyService)
 
         where:
         tagExists | expectedStatus
