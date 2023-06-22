@@ -34,6 +34,8 @@ public abstract class AbstractUpdateCommandStep extends AbstractCommandStep impl
     public static final String DEFAULT_CHANGE_EXEC_LISTENER_RESULT_KEY = "defaultChangeExecListener";
     private boolean isFastCheckEnabled = true;
 
+    private boolean isDBLocked = true;
+
     public abstract String getChangelogFileArg(CommandScope commandScope);
     public abstract String getContextsArg(CommandScope commandScope);
     public abstract String getLabelFilterArg(CommandScope commandScope);
@@ -60,6 +62,11 @@ public abstract class AbstractUpdateCommandStep extends AbstractCommandStep impl
             if (isFastCheckEnabled && isUpToDate(commandScope, database, databaseChangeLog, contexts, labelExpression, resultsBuilder.getOutputStream())) {
                 return;
             }
+
+            if(!isDBLocked) {
+                LockServiceFactory.getInstance().getLockService(database).waitForLock();
+            }
+
             ChangeLogHistoryService changelogService = Scope.getCurrentScope().getSingleton(ChangeLogHistoryServiceFactory.class).getChangeLogService(database);
             Scope.getCurrentScope().addMdcValue(MdcKey.DEPLOYMENT_ID, changelogService.getDeploymentId());
             Scope.getCurrentScope().getLog(getClass()).info(String.format("Using deploymentId: %s", changelogService.getDeploymentId()));
@@ -266,5 +273,9 @@ public abstract class AbstractUpdateCommandStep extends AbstractCommandStep impl
     @Beta
     public void postUpdateLog() {
 
+    }
+
+    protected void setDBLock(boolean locked) {
+        isDBLocked = locked;
     }
 }
