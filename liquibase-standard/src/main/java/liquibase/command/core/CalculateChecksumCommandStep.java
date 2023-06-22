@@ -1,18 +1,17 @@
 package liquibase.command.core;
 
+import liquibase.ChecksumVersion;
 import liquibase.Scope;
 import liquibase.change.CheckSum;
-import liquibase.changelog.ChangeLogParameters;
-import liquibase.changelog.ChangeSet;
-import liquibase.changelog.DatabaseChangeLog;
+import liquibase.changelog.*;
 import liquibase.command.*;
 import liquibase.database.Database;
 import liquibase.exception.LiquibaseException;
+import liquibase.integration.commandline.LiquibaseCommandLineConfiguration;
 import liquibase.parser.ChangeLogParserFactory;
 import liquibase.resource.ResourceAccessor;
 import liquibase.util.StringUtil;
 
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
@@ -70,7 +69,15 @@ public class CalculateChecksumCommandStep extends AbstractCommandStep {
         if (changeSet == null) {
             throw new LiquibaseException(new IllegalArgumentException("No such changeSet: " + changeSetIdentifier));
         }
-        sendMessages(resultsBuilder, changeSet.generateCheckSum());
+
+        ChangeLogHistoryService changeLogService = ChangeLogHistoryServiceFactory.getInstance().getChangeLogService(database);
+        RanChangeSet ranChangeSet = changeLogService.getRanChangeSet(changeSet);
+
+        sendMessages(resultsBuilder, changeSet.generateCheckSum(
+                ranChangeSet != null && ranChangeSet.getLastCheckSum() != null ?
+                        ChecksumVersion.enumFromChecksumVersion(ranChangeSet.getLastCheckSum().getVersion()) : ChecksumVersion.latest()
+                )
+        );
     }
 
     private static void sendMessages(CommandResultsBuilder resultsBuilder, CheckSum checkSum) {

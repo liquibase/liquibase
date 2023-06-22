@@ -98,7 +98,7 @@ public abstract class AbstractExecuteTest {
                     testedDatabases.add(database.getClass());
 
                     if (database.getConnection() != null) {
-                        ChangeLogHistoryServiceFactory.getInstance().getChangeLogService(database).init();
+                        Scope.getCurrentScope().getSingleton(ChangeLogHistoryServiceFactory.class).getChangeLogService(database).init();
                         LockServiceFactory.getInstance().getLockService(database).init();
                     }
 
