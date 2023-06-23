@@ -29,20 +29,16 @@ import liquibase.io.WriterOutputStream;
 import liquibase.lockservice.DatabaseChangeLogLock;
 import liquibase.lockservice.LockService;
 import liquibase.lockservice.LockServiceFactory;
-import liquibase.logging.LogService;
 import liquibase.logging.Logger;
 import liquibase.logging.mdc.MdcKey;
 import liquibase.logging.mdc.customobjects.ChangesetsRolledback;
 import liquibase.parser.ChangeLogParser;
 import liquibase.parser.ChangeLogParserFactory;
 import liquibase.parser.core.xml.XMLChangeLogSAXParser;
-import liquibase.resource.PathHandlerFactory;
-import liquibase.resource.Resource;
 import liquibase.resource.ResourceAccessor;
 import liquibase.serializer.ChangeLogSerializer;
 import liquibase.structure.DatabaseObject;
 import liquibase.util.LoggingExecutorTextUtil;
-import liquibase.util.StreamUtil;
 import liquibase.util.StringUtil;
 
 import java.io.IOException;
@@ -270,23 +266,6 @@ public class Liquibase implements AutoCloseable {
         }
 
         return databaseChangeLog;
-    }
-
-
-    protected UpdateVisitor createUpdateVisitor() {
-        return new UpdateVisitor(database, changeExecListener);
-    }
-
-    protected UpdateVisitor createUpdateVisitor(ChangeExecListener listener) {
-        return new UpdateVisitor(database, listener);
-    }
-
-    protected RollbackVisitor createRollbackVisitor() {
-        return new RollbackVisitor(database, changeExecListener);
-    }
-
-    protected RollbackVisitor createRollbackVisitor(List<ChangesetsRolledback.ChangeSet> processedChangesets) {
-        return new RollbackVisitor(database, changeExecListener, processedChangesets);
     }
 
     /**
@@ -947,7 +926,7 @@ public class Liquibase implements AutoCloseable {
 
     protected void resetServices() {
         LockServiceFactory.getInstance().resetAll();
-        ChangeLogHistoryServiceFactory.getInstance().resetAll();
+        Scope.getCurrentScope().getSingleton(ChangeLogHistoryServiceFactory.class).resetAll();
         Scope.getCurrentScope().getSingleton(ExecutorService.class).reset();
     }
 
@@ -1040,7 +1019,7 @@ public class Liquibase implements AutoCloseable {
     public void checkLiquibaseTables(boolean updateExistingNullChecksums, DatabaseChangeLog databaseChangeLog,
                                      Contexts contexts, LabelExpression labelExpression) throws LiquibaseException {
         ChangeLogHistoryService changeLogHistoryService =
-                ChangeLogHistoryServiceFactory.getInstance().getChangeLogService(getDatabase());
+            Scope.getCurrentScope().getSingleton(ChangeLogHistoryServiceFactory.class).getChangeLogService(getDatabase());
         changeLogHistoryService.init();
         if (updateExistingNullChecksums) {
             changeLogHistoryService.upgradeChecksums(databaseChangeLog, contexts, labelExpression);
@@ -1107,7 +1086,7 @@ public class Liquibase implements AutoCloseable {
             DatabaseChangeLog changeLog = getDatabaseChangeLog();
 
             if (checkLiquibaseTables) {
-                checkLiquibaseTables(true, changeLog, contexts, labels);
+                checkLiquibaseTables(false, changeLog, contexts, labels);
             }
 
             changeLog.validate(database, contexts, labels);
@@ -1147,7 +1126,7 @@ public class Liquibase implements AutoCloseable {
             DatabaseChangeLog changeLog = getDatabaseChangeLog();
 
             if (checkLiquibaseTables) {
-                checkLiquibaseTables(true, changeLog, contexts, labelExpression);
+                checkLiquibaseTables(false, changeLog, contexts, labelExpression);
             }
 
             changeLog.validate(database, contexts, labelExpression);
@@ -1230,7 +1209,7 @@ public class Liquibase implements AutoCloseable {
 
             try {
                 checkLiquibaseTables(false, null, new Contexts(), new LabelExpression());
-                ChangeLogHistoryServiceFactory.getInstance().getChangeLogService(database).clearAllCheckSums();
+                Scope.getCurrentScope().getSingleton(ChangeLogHistoryServiceFactory.class).getChangeLogService(database).clearAllCheckSums();
             } finally {
                 try {
                     lockService.releaseLock();

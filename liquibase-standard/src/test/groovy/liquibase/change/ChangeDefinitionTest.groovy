@@ -12,7 +12,7 @@ class ChangeDefinitionTest extends Specification {
 
     def setupSpec() {
         //reset change metadata in case other tests modified it and didn't clean up correctly
-        Scope.currentScope.getSingleton(ChangeFactory).metaDataByClass.clear()
+        Scope.currentScope.getSingleton(ChangeFactory).cachedMetadata.clear()
     }
 
     /**

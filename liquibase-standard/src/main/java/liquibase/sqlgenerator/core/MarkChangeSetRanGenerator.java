@@ -1,5 +1,7 @@
 package liquibase.sqlgenerator.core;
 
+import liquibase.ChecksumVersion;
+import liquibase.Scope;
 import liquibase.change.Change;
 import liquibase.change.core.TagDatabaseChange;
 import liquibase.changelog.ChangeLogHistoryServiceFactory;
@@ -10,6 +12,7 @@ import liquibase.database.ObjectQuotingStrategy;
 import liquibase.exception.LiquibaseException;
 import liquibase.exception.UnexpectedLiquibaseException;
 import liquibase.exception.ValidationErrors;
+import liquibase.integration.commandline.LiquibaseCommandLineConfiguration;
 import liquibase.sql.Sql;
 import liquibase.sqlgenerator.SqlGeneratorChain;
 import liquibase.sqlgenerator.SqlGeneratorFactory;
@@ -62,10 +65,10 @@ public class MarkChangeSetRanGenerator extends AbstractSqlGenerator<MarkChangeSe
             if (statement.getExecType().ranBefore) {
                 runStatement = new UpdateStatement(database.getLiquibaseCatalogName(), database.getLiquibaseSchemaName(), database.getDatabaseChangeLogTableName())
                         .addNewColumnValue("DATEEXECUTED", new DatabaseFunction(dateValue))
-                        .addNewColumnValue("ORDEREXECUTED", ChangeLogHistoryServiceFactory.getInstance().getChangeLogService(database).getNextSequenceValue())
-                        .addNewColumnValue("MD5SUM", changeSet.generateCheckSum().toString())
+                        .addNewColumnValue("ORDEREXECUTED", Scope.getCurrentScope().getSingleton(ChangeLogHistoryServiceFactory.class).getChangeLogService(database).getNextSequenceValue())
+                        .addNewColumnValue("MD5SUM", changeSet.generateCheckSum(ChecksumVersion.latest()).toString())
                         .addNewColumnValue("EXECTYPE", statement.getExecType().value)
-                        .addNewColumnValue("DEPLOYMENT_ID", ChangeLogHistoryServiceFactory.getInstance().getChangeLogService(database).getDeploymentId())
+                        .addNewColumnValue("DEPLOYMENT_ID", Scope.getCurrentScope().getSingleton(ChangeLogHistoryServiceFactory.class).getChangeLogService(database).getDeploymentId())
                         .addNewColumnValue(COMMENTS, getCommentsColumn(changeSet))
                         .addNewColumnValue(CONTEXTS, getContextsColumn(changeSet))
                         .addNewColumnValue(LABELS, getLabelsColumn(changeSet))
@@ -83,8 +86,8 @@ public class MarkChangeSetRanGenerator extends AbstractSqlGenerator<MarkChangeSe
                             .addColumnValue("AUTHOR", changeSet.getAuthor())
                             .addColumnValue("FILENAME", changeSet.getFilePath())
                             .addColumnValue("DATEEXECUTED", new DatabaseFunction(dateValue))
-                            .addColumnValue("ORDEREXECUTED", ChangeLogHistoryServiceFactory.getInstance().getChangeLogService(database).getNextSequenceValue())
-                            .addColumnValue("MD5SUM", changeSet.generateCheckSum().toString())
+                            .addColumnValue("ORDEREXECUTED", Scope.getCurrentScope().getSingleton(ChangeLogHistoryServiceFactory.class).getChangeLogService(database).getNextSequenceValue())
+                            .addColumnValue("MD5SUM", changeSet.generateCheckSum(ChecksumVersion.latest()).toString())
                             .addColumnValue("DESCRIPTION", limitSize(changeSet.getDescription()))
                             .addColumnValue(COMMENTS, getCommentsColumn(changeSet))
                             .addColumnValue("EXECTYPE", statement.getExecType().value)
@@ -95,7 +98,7 @@ public class MarkChangeSetRanGenerator extends AbstractSqlGenerator<MarkChangeSe
                                                                                             .replaceAll("beta", "b")
                                                                                             .replaceAll("alpha", "b"), 20)
                             )
-                            .addColumnValue("DEPLOYMENT_ID", ChangeLogHistoryServiceFactory.getInstance().getChangeLogService(database).getDeploymentId());
+                            .addColumnValue("DEPLOYMENT_ID", Scope.getCurrentScope().getSingleton(ChangeLogHistoryServiceFactory.class).getChangeLogService(database).getDeploymentId());
 
                     if (tag != null) {
                         ((InsertStatement) runStatement).addColumnValue("TAG", tag);
