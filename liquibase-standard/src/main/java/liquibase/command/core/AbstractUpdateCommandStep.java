@@ -62,7 +62,6 @@ public abstract class AbstractUpdateCommandStep extends AbstractCommandStep impl
             if (isFastCheckEnabled && isUpToDate(commandScope, database, databaseChangeLog, contexts, labelExpression, resultsBuilder.getOutputStream())) {
                 return;
             }
-
             if(!isDBLocked) {
                 LockServiceFactory.getInstance().getLockService(database).waitForLock();
             }
