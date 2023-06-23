@@ -1,5 +1,6 @@
 package liquibase.changelog;
 
+import liquibase.ChecksumVersion;
 import liquibase.Contexts;
 import liquibase.LabelExpression;
 import liquibase.Scope;
@@ -49,7 +50,8 @@ public abstract class AbstractChangeLogHistoryService implements ChangeLogHistor
 
                 return ChangeSet.RunStatus.ALREADY_RAN;
             } else {
-                if (foundRan.getLastCheckSum().equals(changeSet.generateCheckSum())) {
+                if (foundRan.getLastCheckSum().equals(changeSet.generateCheckSum(
+                        ChecksumVersion.enumFromChecksumVersion(foundRan.getLastCheckSum().getVersion())))) {
                     return ChangeSet.RunStatus.ALREADY_RAN;
                 } else {
                     if (changeSet.shouldRunOnChange()) {
@@ -107,13 +109,13 @@ public abstract class AbstractChangeLogHistoryService implements ChangeLogHistor
      * @return the deployment ID of the last changeset that has been run, or null if no changesets have been run yet.
      * @throws DatabaseException if there is an error accessing the database
      */
-    public String getLastDeploymentId() throws DatabaseException {
-        List<RanChangeSet> ranChangeSetsList = getRanChangeSets();
-        if (ranChangeSetsList == null || ranChangeSetsList.size() == 0) {
-            return null;
-        }
-        RanChangeSet lastRanChangeSet = ranChangeSetsList.get(ranChangeSetsList.size() - 1);
-        return lastRanChangeSet.getDeploymentId();
+     public String getLastDeploymentId() throws DatabaseException {
+         List<RanChangeSet> ranChangeSetsList = getRanChangeSets();
+         if (ranChangeSetsList == null || ranChangeSetsList.isEmpty()) {
+             return null;
+         }
+         RanChangeSet lastRanChangeSet = ranChangeSetsList.get(ranChangeSetsList.size() - 1);
+         return lastRanChangeSet.getDeploymentId();
     }
 
     protected abstract void replaceChecksum(ChangeSet changeSet) throws DatabaseException;

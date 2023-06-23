@@ -1,5 +1,6 @@
 package liquibase.change.core;
 
+import liquibase.Scope;
 import liquibase.change.*;
 import liquibase.changelog.ChangeLogHistoryServiceFactory;
 import liquibase.database.Database;
@@ -36,7 +37,8 @@ public class TagDatabaseChange extends AbstractChange {
     @Override
     public ChangeStatus checkStatus(Database database) {
         try {
-            return new ChangeStatus().assertComplete(ChangeLogHistoryServiceFactory.getInstance().getChangeLogService(database).tagExists(getTag()), "Database not tagged");
+            return new ChangeStatus().assertComplete(
+                Scope.getCurrentScope().getSingleton(ChangeLogHistoryServiceFactory.class).getChangeLogService(database).tagExists(getTag()), "Database not tagged");
         } catch (DatabaseException e) {
             return new ChangeStatus().unknown(e);
         }

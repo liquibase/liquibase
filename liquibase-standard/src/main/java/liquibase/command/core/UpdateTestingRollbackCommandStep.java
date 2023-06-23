@@ -54,7 +54,7 @@ public class UpdateTestingRollbackCommandStep extends AbstractCommandStep {
         Liquibase liquibase = new Liquibase(databaseChangeLog, Scope.getCurrentScope().getResourceAccessor(), database);
         liquibase.setChangeExecListener(changeExecListener);
 
-        ChangeLogHistoryService changeLogService = ChangeLogHistoryServiceFactory.getInstance().getChangeLogService(database);
+        ChangeLogHistoryService changeLogService = Scope.getCurrentScope().getSingleton(ChangeLogHistoryServiceFactory.class).getChangeLogService(database);
         int originalSize = changeLogService.getRanChangeSets().size();
         liquibase.update(tag, contexts, labelExpression);
         changeLogService.reset();

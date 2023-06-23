@@ -1,8 +1,10 @@
 package liquibase.sqlgenerator.core;
 
+import liquibase.ChecksumVersion;
 import liquibase.change.CheckSum;
 import liquibase.changelog.ChangeSet;
 import liquibase.database.Database;
+import liquibase.integration.commandline.LiquibaseCommandLineConfiguration;
 import liquibase.sqlgenerator.SqlGeneratorFactory;
 import liquibase.statement.SqlStatement;
 import liquibase.statement.core.UpdateChangeSetChecksumStatement;
@@ -51,7 +53,7 @@ public class UpdateChangeSetChecksumGeneratorTest {
         doReturn("SomeSchemaName").when(mockedDatabase).getLiquibaseSchemaName();
         doReturn("SomeChangeLogTableName").when(mockedDatabase).getDatabaseChangeLogTableName();
         doReturn(SOME_UPDATED_CHECK_SUM).when(mockedUpdatedCheckSum).toString();
-        doReturn(mockedUpdatedCheckSum).when(mockedChangeSet).generateCheckSum();
+        doReturn(mockedUpdatedCheckSum).when(mockedChangeSet).generateCheckSum(ChecksumVersion.latest());
         doReturn(CHANGESET_SOME_ID).when(mockedChangeSet).getId();
         doReturn(CHANGESET_SOME_AUTHOR).when(mockedChangeSet).getAuthor();
         doReturn(CHANGESET_NORMALIZED_FILE_PATH).when(mockedChangeSet).getFilePath();
