@@ -88,10 +88,78 @@ public class StringUtils {
 
         String trimmedString = StringUtils.trimToNull(currentString.toString());
         if (trimmedString != null) {
-            returnArray.add(trimmedString);
+            if (!stripComments && !returnArray.isEmpty() && isLastStatementComment(parsed, trimmedString)) {
+                String lastStatement = returnArray.get(returnArray.size() - 1);
+                String commentSeparator = getWhiteSpaceSymbolBeforeLastComment(parsed, " ");
+                String lastStatementWithAppendedComment = lastStatement + commentSeparator + trimmedString;
+                returnArray.set(returnArray.size() - 1, lastStatementWithAppendedComment);
+            } else {
+                returnArray.add(trimmedString);
+            }
         }
 
         return returnArray.toArray(new String[0]);
+    }
+
+
+    /**
+     * Checks if the last statement in the given string clauses is a comment and matches the provided last string statement.
+     *
+     * @param stringClauses is the {@link StringClauses} object containing the parsed string clauses.
+     * @param lastStringStatement is the last string statement parsed out of the SQL string.
+     * @return {@code true} if lastStringStatement is SQL comment (without any additional statements) and it is last clause,
+     *         {@code false} otherwise.
+     */
+    private static boolean isLastStatementComment(StringClauses stringClauses, String lastStringStatement) {
+        List<Object> parsedStringClauses = Arrays.asList(stringClauses.toArray(false));
+        Optional<StringClauses.Comment> lastStringClause = getLastStringClause(parsedStringClauses);
+
+        if (lastStringClause.isEmpty()) {
+            return false;
+        }
+
+        if (!lastStringClause.get().toString().equals(lastStringStatement)) {
+            return false;
+        }
+
+        return true;
+    }
+
+    /**
+     * Retrieves the last {@link StringClauses} of type {@link StringClauses.Comment} from a list of parsed string clauses.
+     *
+     * @param parsedStringClauses is a list of parsed string clauses.
+     * @return an Optional containing the last {@link StringClauses.Comment} from {@link StringClauses} if found, or an empty Optional if not found.
+     */
+    private static Optional<StringClauses.Comment> getLastStringClause(List<Object> parsedStringClauses) {
+        for (int i = parsedStringClauses.size() - 1; i >= 0; i--) {
+            if (parsedStringClauses.get(i) instanceof StringClauses.Comment) {
+                return Optional.of((StringClauses.Comment) parsedStringClauses.get(i));
+            }
+        }
+        return Optional.empty();
+    }
+
+    /**
+     * Retrieves the whitespace symbol occurring immediately before the last comment in the given string clauses.
+     * If no whitespace symbol is found before the last comment, the default separator is returned.
+     *
+     * @param stringClauses is an object containing the clauses to search for the last comment and preceding whitespace.
+     * @param defaultSeparator is a default separator to return if no whitespace symbol is found before the last comment.
+     * @return The whitespace symbol occurring before the last comment, or the default separator if not found.
+     */
+    protected static String getWhiteSpaceSymbolBeforeLastComment(StringClauses stringClauses, String defaultSeparator) {
+        List<Object> parsedStringClauses = Arrays.asList(stringClauses.toArray(false));
+        for (int i = parsedStringClauses.size() - 1; i >= 0; i--) {
+            if (parsedStringClauses.get(i) instanceof StringClauses.Comment) {
+                if (i > 0 && parsedStringClauses.get(i - 1) instanceof StringClauses.Whitespace) {
+                    return parsedStringClauses.get(i - 1).toString();
+                } else {
+                    break;
+                }
+            }
+        }
+        return defaultSeparator;
     }
 
     /**
