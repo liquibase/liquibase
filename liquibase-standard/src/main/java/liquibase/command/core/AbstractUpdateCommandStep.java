@@ -190,10 +190,10 @@ public abstract class AbstractUpdateCommandStep extends AbstractCommandStep impl
      * <p>
      * NOTE: to reduce the number of queries to the databasehistory table, this method will cache the "fast check" results within this instance under the assumption that the total changesets will not change within this instance.
      */
-    private static final Map<String, Boolean> upToDateFastCheck = new ConcurrentHashMap<>();
+    private final Map<String, Boolean> upToDateFastCheck = new ConcurrentHashMap<>();
 
     public boolean isUpToDateFastCheck(CommandScope commandScope, Database database, DatabaseChangeLog databaseChangeLog, Contexts contexts, LabelExpression labelExpression) throws LiquibaseException {
-        String cacheKey = contexts + "/" + labelExpression;
+        String cacheKey = String.format("%s/%s/%s/%s/%s", contexts, labelExpression, database.getDefaultSchemaName(), database.getDefaultCatalogName(), database.getConnection().getURL());
         if (!upToDateFastCheck.containsKey(cacheKey)) {
             ChangeLogHistoryService changeLogService = Scope.getCurrentScope().getSingleton(ChangeLogHistoryServiceFactory.class).getChangeLogService(database);
             try {
