@@ -325,6 +325,13 @@ jobs:
       steps:
         - uses: actions/checkout@v3
 
+        - name: Configure AWS credentials
+          uses: aws-actions/configure-aws-credentials@v2
+          with:
+            aws-access-key-id: ${{ secrets.AWS_PROD_ACCESS_KEY_ID }}
+            aws-secret-access-key: ${{ secrets.AWS_PROD_SECRET_ACCESS_KEY }}
+            aws-region: us-east-1
+
         - name: Set up Ruby
           uses: ruby/setup-ruby@v1
           with:
@@ -333,8 +340,12 @@ jobs:
         - name: Install deb-s3 gem
           run: gem install deb-s3
 
-        - name: Upload deb package
-        # --sign=60EF2CD3C14E006F is the key id of the GPG key used to sign the package
+        - name: Import GPG key
           run: |
-            deb-s3 upload --bucket repo.liquibase.com liquibase-dist/target/liquibase-${{ needs.setup.outputs.version }}.deb 
+            echo "${{ secrets.GPG_SECRET }}" | gpg --batch --import --pinentry-mode loopback --passphrase "${{ secrets.GPG_PASSPHRASE }}"
+            GPG_SECRET_KEY_ID=$(gpg --list-secret-keys --with-colons | awk -F: '$1 == "sec" {print $5}') >> $GITHUB_ENV
+  
+        - name: Upload deb package
+          run: |
+            deb-s3 upload --bucket repo.liquibase.com liquibase-dist/target/liquibase-${{ needs.setup.outputs.version }}.deb --sign=${{ env.GPG_SECRET_KEY_ID }} --gpg-options="--passphrase=${{ secrets.GPG_PASSPHRASE }}"
           
