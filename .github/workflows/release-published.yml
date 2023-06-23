@@ -317,4 +317,24 @@ jobs:
             sed -ie "s/<\/ul>/  <li><a href=\"\/xml\/ns\/dbchangelog\/dbchangelog-${xsd_version}.xsd\">dbchangelog-${xsd_version}.xsd<\/a><\/li>\n<\/ul>/" index-file/index.htm
             aws s3 sync index-file s3://liquibaseorg-origin/xml/ns/dbchangelog/ --only-show-errors
           fi
+
+  upload_deb:
+      name: Upload deb
+      needs: [ setup ]
+      runs-on: ubuntu-22.04
+      steps:
+        - uses: actions/checkout@v3
+
+        - name: Set up Ruby
+          uses: ruby/setup-ruby@v1
+          with:
+            ruby-version: 3.1.4
+
+        - name: Install deb-s3 gem
+          run: gem install deb-s3
+
+        - name: Upload deb package
+        # --sign=60EF2CD3C14E006F is the key id of the GPG key used to sign the package
+          run: |
+            deb-s3 upload --bucket repo.liquibase.com liquibase-dist/target/liquibase-${{ needs.setup.outputs.version }}.deb 
           
