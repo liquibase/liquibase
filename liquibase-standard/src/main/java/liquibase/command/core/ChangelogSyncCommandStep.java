@@ -6,19 +6,18 @@ import liquibase.RuntimeEnvironment;
 import liquibase.Scope;
 import liquibase.changelog.*;
 import liquibase.changelog.filter.*;
-import liquibase.changelog.visitor.ChangeExecListener;
 import liquibase.changelog.visitor.ChangeLogSyncVisitor;
 import liquibase.changelog.visitor.DefaultChangeExecListener;
 import liquibase.command.*;
 import liquibase.command.core.helpers.DatabaseChangelogCommandStep;
 import liquibase.database.Database;
+import liquibase.exception.CommandValidationException;
 import liquibase.exception.DatabaseException;
 import liquibase.lockservice.LockService;
-import liquibase.logging.core.BufferedLogService;
-import liquibase.logging.core.CompositeLogService;
 import liquibase.logging.mdc.MdcKey;
 import liquibase.logging.mdc.MdcObject;
 import liquibase.logging.mdc.MdcValue;
+import liquibase.util.StringUtil;
 
 import java.util.Arrays;
 import java.util.HashMap;
@@ -54,6 +53,7 @@ public class ChangelogSyncCommandStep extends AbstractCommandStep {
     @Override
     public void run(CommandResultsBuilder resultsBuilder) throws Exception {
         final CommandScope commandScope = resultsBuilder.getCommandScope();
+        final String changelogFile = commandScope.getArgumentValue(DatabaseChangelogCommandStep.CHANGELOG_FILE_ARG);
         final Database database = (Database) commandScope.getDependency(Database.class);
         final DatabaseChangeLog changeLog = (DatabaseChangeLog) commandScope.getDependency(DatabaseChangeLog.class);
         final ChangeLogParameters changeLogParameters = (ChangeLogParameters) commandScope.getDependency(ChangeLogParameters.class);
@@ -67,14 +67,25 @@ public class ChangelogSyncCommandStep extends AbstractCommandStep {
                     runChangeLogIterator.run(new ChangeLogSyncVisitor(database, new DefaultChangeExecListener()),
                     new RuntimeEnvironment(database, changeLogParameters.getContexts(), changeLogParameters.getLabels())));
             Scope.getCurrentScope().addMdcValue(MdcKey.CHANGESET_SYNC_COUNT, changesetCount.toString());
+
+            addChangelogToMdc(changelogFile, changeLog);
             try (MdcObject changelogSyncOutcome = Scope.getCurrentScope().addMdcValue(MdcKey.CHANGELOG_SYNC_OUTCOME, MdcValue.COMMAND_SUCCESSFUL)) {
                 Scope.getCurrentScope().getLog(getClass()).info("Finished executing " + defineCommandNames()[0][0] + " command");
             }
         } catch (Exception e) {
+            addChangelogToMdc(changelogFile, changeLog);
             try (MdcObject changelogSyncOutcome = Scope.getCurrentScope().addMdcValue(MdcKey.CHANGELOG_SYNC_OUTCOME, MdcValue.COMMAND_FAILED)) {
                 Scope.getCurrentScope().getLog(getClass()).warning("Failed executing " + defineCommandNames()[0][0] + " command");
             }
             throw e;
+        }
+    }
+
+    private void addChangelogToMdc(String changelogFile, DatabaseChangeLog changeLog) {
+        if (StringUtil.isNotEmpty(changeLog.getLogicalFilePath())) {
+            Scope.getCurrentScope().addMdcValue(MdcKey.CHANGELOG_FILE, changeLog.getLogicalFilePath());
+        } else {
+            Scope.getCurrentScope().addMdcValue(MdcKey.CHANGELOG_FILE, changelogFile);
         }
     }
 
@@ -98,6 +109,12 @@ public class ChangelogSyncCommandStep extends AbstractCommandStep {
                     new DbmsChangeSetFilter(database),
                     new UpToTagChangeSetFilter(tag, ranChangeSetList));
         }
+    }
+
+    @Override
+    public void validate(CommandScope commandScope) throws CommandValidationException {
+        // update null checksums when running validate.
+        commandScope.addArgumentValue(DatabaseChangelogCommandStep.UPDATE_NULL_CHECKSUMS, Boolean.TRUE);
     }
 
     /**

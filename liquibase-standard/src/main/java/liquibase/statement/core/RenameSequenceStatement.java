@@ -4,10 +4,10 @@ import liquibase.statement.AbstractSqlStatement;
 
 public class RenameSequenceStatement  extends AbstractSqlStatement {
   
-  private String catalogName;
-  private String schemaName;
-  private String oldSequenceName;
-  private String newSequenceName;
+  private final String catalogName;
+  private final String schemaName;
+  private final String oldSequenceName;
+  private final String newSequenceName;
 
   public RenameSequenceStatement(String catalogName, String schemaName, String oldSequenceName, String newSequenceName) {
       this.catalogName = catalogName;

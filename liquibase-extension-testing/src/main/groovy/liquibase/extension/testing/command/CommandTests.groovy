@@ -556,7 +556,7 @@ Long Description: ${commandDefinition.getLongDescription() ?: "NOT SET"}
     }
 
     private static File takeDatabaseSnapshot(Database database, String format) {
-        final ChangeLogHistoryService changeLogService = ChangeLogHistoryServiceFactory.getInstance().getChangeLogService(database)
+        final ChangeLogHistoryService changeLogService = Scope.getCurrentScope().getSingleton(ChangeLogHistoryServiceFactory.class).getChangeLogService(database)
         changeLogService.init()
         changeLogService.reset()
 
@@ -621,7 +621,9 @@ Long Description: ${commandDefinition.getLongDescription() ?: "NOT SET"}
                 } else if (expectedOutputCheck instanceof Pattern) {
                     def matcher = expectedOutputCheck.matcher(fullOutput)
                     assert matcher.groupCount() == 0: "Unescaped parentheses in regexp /$expectedOutputCheck/"
-                    assert matcher.find(): "$outputDescription\n$fullOutput\n\nDoes not match regexp\n\n/$expectedOutputCheck/"
+                    if (!matcher.find()) {
+                        throw new ComparisonFailure("$outputDescription\n$fullOutput\n\nDoes not match regexp\n\n/$expectedOutputCheck/", expectedOutputCheck.toString(), fullOutput)
+                    }
                 } else if (expectedOutputCheck instanceof OutputCheck) {
                     try {
                         ((OutputCheck) expectedOutputCheck).check(fullOutput)

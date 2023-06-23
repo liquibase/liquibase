@@ -1,5 +1,6 @@
 package liquibase.statementexecute;
 
+import liquibase.Scope;
 import liquibase.changelog.ChangeLogHistoryServiceFactory;
 import liquibase.changelog.ChangeSet;
 import liquibase.database.Database;
@@ -23,7 +24,7 @@ public class MarkChangeSetRanExecuteTest extends AbstractExecuteTest {
 
     @Test
     public void generateSql_insert() throws Exception {
-        ChangeLogHistoryServiceFactory.getInstance().resetAll();
+        Scope.getCurrentScope().getSingleton(ChangeLogHistoryServiceFactory.class).resetAll();
 
         this.statementUnderTest = new MarkChangeSetRanStatement(new ChangeSet("a", "b", false, false, "c", "e", "f",
                 null), ChangeSet.ExecType.EXECUTED);
@@ -119,7 +120,7 @@ public class MarkChangeSetRanExecuteTest extends AbstractExecuteTest {
 
     @Test
     public void generateSql_update() throws Exception {
-        ChangeLogHistoryServiceFactory.getInstance().resetAll();
+        Scope.getCurrentScope().getSingleton(ChangeLogHistoryServiceFactory.class).resetAll();
 
         this.statementUnderTest = new MarkChangeSetRanStatement(new ChangeSet("a", "b", false, false, "c", "e", "f",
                 null), ChangeSet.ExecType.RERAN);

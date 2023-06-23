@@ -11,20 +11,20 @@ import liquibase.executor.jvm.RowMapperResultSetExtractor;
 import liquibase.util.JdbcUtil;
 import liquibase.util.StringUtil;
 
+import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.sql.Statement;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 
 public class ResultSetCache {
-    private Map<String, Integer> timesSingleQueried = new HashMap<>();
-    private Map<String, Boolean> didBulkQuery = new HashMap<>();
+    private final Map<String, Integer> timesSingleQueried = new HashMap<>();
+    private final Map<String, Boolean> didBulkQuery = new HashMap<>();
     private boolean bulkTracking = true;
 
-    private Map<String, Map<String, List<CachedRow>>> cacheBySchema = new ConcurrentHashMap<>();
+    private final Map<String, Map<String, List<CachedRow>>> cacheBySchema = new ConcurrentHashMap<>();
 
-    private Map<String, Object> info = new ConcurrentHashMap<>();
+    private final Map<String, Object> info = new ConcurrentHashMap<>();
 
     public List<CachedRow> get(ResultSetExtractor resultSetExtractor) throws DatabaseException {
         try {
@@ -116,10 +116,10 @@ public class ResultSetCache {
     }
 
     public static class RowData {
-        private Database database;
-        private String[] parameters;
-        private String catalog;
-        private String schema;
+        private final Database database;
+        private final String[] parameters;
+        private final String catalog;
+        private final String schema;
 
         private String[] keyPermutations;
 
@@ -229,17 +229,29 @@ public class ResultSetCache {
             return executeAndExtract(sql, database, false);
         }
 
+        protected List<CachedRow> executeAndExtract(Database database, String sql, Object...parameters) throws DatabaseException, SQLException {
+            return executeAndExtract(database, false, sql, parameters);
+        }
+
         protected List<CachedRow> executeAndExtract(String sql, Database database, boolean informixTrimHint)
+                throws DatabaseException, SQLException {
+            return executeAndExtract(database, informixTrimHint, sql);
+        }
+
+        protected List<CachedRow> executeAndExtract(Database database, boolean informixTrimHint, String sql, Object...parameters)
                 throws DatabaseException, SQLException {
             if (sql == null) {
                 return new ArrayList<>();
             }
-            Statement statement = null;
+            PreparedStatement statement = null;
             ResultSet resultSet = null;
             try {
                 JdbcConnection connection = (JdbcConnection) database.getConnection();
-                statement = connection.createStatement();
-                resultSet = statement.executeQuery(sql);
+                statement = connection.prepareStatement(sql);
+                for (int i = 0; i < parameters.length; ++i) {
+                    statement.setObject(i + 1, parameters[i]);
+                }
+                resultSet = statement.executeQuery();
                 resultSet.setFetchSize(database.getFetchSize());
                 return extract(resultSet, informixTrimHint);
             } finally {
@@ -278,10 +290,9 @@ public class ResultSetCache {
         protected List<CachedRow> extract(ResultSet resultSet, final boolean informixIndexTrimHint)
                 throws SQLException {
             resultSet.setFetchSize(database.getFetchSize());
-            List<Map> result;
             List<CachedRow> returnList = new ArrayList<>();
             try {
-                result = (List<Map>) new RowMapperResultSetExtractor(new ColumnMapRowMapper(database.isCaseSensitive()) {
+                List<Map> result = (List<Map>) new RowMapperResultSetExtractor(new ColumnMapRowMapper(database.isCaseSensitive()) {
                     @Override
                     protected Object getColumnValue(ResultSet rs, int index) throws SQLException {
                         Object value = super.getColumnValue(rs, index);
@@ -301,7 +312,6 @@ public class ResultSetCache {
                                     value = " " + value; // Put the space back at the beginning if the flag was set
                                 }
                             }
-
                         }
                         return value;
                     }
@@ -331,7 +341,6 @@ public class ResultSetCache {
         public List<CachedRow> fastFetch() throws SQLException, DatabaseException {
             return fastFetchQuery();
         }
-
 
         @Override
         public List<CachedRow> bulkFetch() throws SQLException, DatabaseException {

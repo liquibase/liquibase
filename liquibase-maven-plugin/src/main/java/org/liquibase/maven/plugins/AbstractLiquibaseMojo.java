@@ -47,6 +47,7 @@ import java.text.MessageFormat;
 import java.util.*;
 import java.util.logging.Handler;
 
+import static java.util.ResourceBundle.getBundle;
 import static liquibase.configuration.LiquibaseConfiguration.REGISTERED_VALUE_PROVIDERS_KEY;
 
 /**
@@ -263,6 +264,15 @@ public abstract class AbstractLiquibaseMojo extends AbstractMojo {
      */
     @PropertyElement
     protected boolean skip;
+
+    /**
+     * Skip plugin execution if the specified file exists.
+     * The use of this parameter is NOT RECOMMENDED but can be used when needed.
+     *
+     * @parameter property="liquibase.skipOnFileExists"
+     */
+    @PropertyElement
+    protected String skipOnFileExists;
 
     /**
      * A flag which indicates you want to set the character encoding of the output file during the updateSQL phase.
@@ -592,6 +602,8 @@ public abstract class AbstractLiquibaseMojo extends AbstractMojo {
 
     protected String commandName;
     protected DefaultChangeExecListener defaultChangeExecListener;
+    private static final ResourceBundle coreBundle = getBundle("liquibase/i18n/liquibase-core");
+
 
     /**
      * Get the specified license key. This first checks liquibaseLicenseKey and if no key is found, then returns
@@ -655,6 +667,19 @@ public abstract class AbstractLiquibaseMojo extends AbstractMojo {
         if (StringUtil.trimToNull(logging) != null) {
             getLog().error("The liquibase-maven-plugin now manages logging via the standard maven logging config, not the 'logging' configuration. Use the -e, -X or -q flags or see https://maven.apache.org/maven-logging.html");
         }
+        if (skip) {
+            getLog().warn("Liquibase skipped due to Maven configuration");
+            return;
+        }
+
+        if (skipOnFileExists != null) {
+            File f = new File(skipOnFileExists);
+            if (f.exists()) {
+                getLog().warn("Liquibase skipped because file " + skipOnFileExists + " exists");
+                return;
+            }
+            getLog().warn("Liquibase NOT skipped because file " + skipOnFileExists + " does NOT exists");
+        }
 
         // If maven is called with -T and a value larger than 1, it can get confused under heavy thread load
         Scope.setScopeManager(new ThreadLocalScopeManager());
@@ -675,10 +700,6 @@ public abstract class AbstractLiquibaseMojo extends AbstractMojo {
 
                 if (!LiquibaseCommandLineConfiguration.SHOULD_RUN.getCurrentValue()) {
                     getLog().info("Liquibase did not run because " + LiquibaseCommandLineConfiguration.SHOULD_RUN.getKey() + " was set to false");
-                    return;
-                }
-                if (skip) {
-                    getLog().warn("Liquibase skipped due to Maven configuration");
                     return;
                 }
 
@@ -1177,5 +1198,28 @@ public abstract class AbstractLiquibaseMojo extends AbstractMojo {
         nativeProperties.computeIfAbsent("liquibase.sqlcmd.logFile", val -> sqlcmdLogFile);
         nativeProperties.computeIfAbsent("liquibase.sqlcmd.catalogName", val -> sqlcmdCatalogName);
         return nativeProperties;
+    }
+
+    /**
+     * Returns the OutputStream based on whether there is an outputFile provided.
+     * If no outputFile parameter is provided, defaults to System.out.
+     * @param outputFile the string outputFile
+     * @return the OutputStream to use
+     * @throws LiquibaseException if we cannot create the provided outputFile
+     */
+    protected OutputStream getOutputStream(String outputFile) throws LiquibaseException {
+        if (outputFile == null) {
+            return System.out;
+        }
+        FileOutputStream fileOut;
+        try {
+            fileOut = new FileOutputStream(outputFile, false);
+        } catch (IOException e) {
+            Scope.getCurrentScope().getLog(getClass()).severe(String.format(
+                    coreBundle.getString("could.not.create.output.file"),
+                    outputFile));
+            throw new LiquibaseException(e);
+        }
+        return fileOut;
     }
 }

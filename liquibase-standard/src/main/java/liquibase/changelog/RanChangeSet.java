@@ -1,8 +1,10 @@
 package liquibase.changelog;
 
+import liquibase.ChecksumVersion;
 import liquibase.ContextExpression;
 import liquibase.Labels;
 import liquibase.change.CheckSum;
+import liquibase.integration.commandline.LiquibaseCommandLineConfiguration;
 
 import java.util.Date;
 
@@ -17,12 +19,12 @@ public class RanChangeSet {
     private final CheckSum lastCheckSum;
     private final Date dateExecuted;
     private String tag;
-    private ChangeSet.ExecType execType;
+    private final ChangeSet.ExecType execType;
     private String description;
     private String comments;
     private Integer orderExecuted;
-    private ContextExpression contextExpression;
-    private Labels labels;
+    private final ContextExpression contextExpression;
+    private final Labels labels;
     private String deploymentId;
     private String liquibaseVersion;
 
@@ -35,7 +37,8 @@ public class RanChangeSet {
         this(changeSet.getFilePath(),
                 changeSet.getId(),
                 changeSet.getAuthor(),
-                changeSet.generateCheckSum(),
+                changeSet.generateCheckSum((changeSet.getStoredCheckSum() != null) ?
+                        ChecksumVersion.enumFromChecksumVersion(changeSet.getStoredCheckSum().getVersion()) : ChecksumVersion.latest()),
                 new Date(),
                 null,
                 execType,

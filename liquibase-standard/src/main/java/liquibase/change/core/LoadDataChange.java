@@ -32,7 +32,10 @@ import liquibase.statement.core.InsertStatement;
 import liquibase.structure.core.Column;
 import liquibase.structure.core.DataType;
 import liquibase.structure.core.Table;
-import liquibase.util.*;
+import liquibase.util.BooleanUtil;
+import liquibase.util.ObjectUtil;
+import liquibase.util.StreamUtil;
+import liquibase.util.StringUtil;
 import liquibase.util.csv.CSVReader;
 
 import java.io.IOException;
@@ -57,7 +60,7 @@ public class LoadDataChange extends AbstractTableChange implements ChangeWithCol
     public static final String DEFAULT_COMMENT_PATTERN = "#";
     public static final Pattern BASE64_PATTERN = Pattern.compile("^(?:[A-Za-z0-9+/]{4})*(?:[A-Za-z0-9+/]{2}==|[A-Za-z0-9+/]{3}=)?$");
     private static final Logger LOG = Scope.getCurrentScope().getLog(LoadDataChange.class);
-    private static ResourceBundle coreBundle = getBundle("liquibase/i18n/liquibase-core");
+    private static final ResourceBundle coreBundle = getBundle("liquibase/i18n/liquibase-core");
     private String file;
     private String commentLineStartsWith = DEFAULT_COMMENT_PATTERN;
     private Boolean relativeToChangelogFile;
