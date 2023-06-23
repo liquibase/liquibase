@@ -295,6 +295,7 @@
 					</execution>
 				</executions>
 				<configuration>
+					<deb>${project.build.directory}/${project.parent.artifactId}-${project.version}.deb</deb>
 					<controlDir>${project.basedir}/src/deb/control</controlDir>
 					<dataSet>
 						<data>
