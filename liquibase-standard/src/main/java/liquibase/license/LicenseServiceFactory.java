@@ -12,13 +12,8 @@ public class LicenseServiceFactory extends AbstractPluginFactory<LicenseService>
         return LicenseService.class;
     }
 
-    @Override
-    protected int getPriority(LicenseService obj, Object... args) {
-        return obj.getPriority();
-    }
-
     public LicenseService getLicenseService() {
-        return getPlugin();
+        return getPlugin(PLAIN_PRIORITIZED_SERVICE);
     }
 
     public void unregister(LicenseService service) {

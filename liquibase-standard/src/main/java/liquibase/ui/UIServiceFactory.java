@@ -12,8 +12,4 @@ public class UIServiceFactory extends AbstractPluginFactory<UIService> {
         return UIService.class;
     }
 
-    @Override
-    protected int getPriority(UIService uiService, Object... args) {
-        return uiService.getPriority();
-    }
 }

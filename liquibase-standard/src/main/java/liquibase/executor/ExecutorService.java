@@ -20,24 +20,18 @@ public class ExecutorService extends AbstractPluginFactory<Executor>  {
         return Executor.class;
     }
 
-    @Override
-    protected int getPriority(Executor executor, Object... args) {
-        String name = (String) args[0];
-        Database database = (Database) args[1];
-        if (name.equals(executor.getName()) && executor.supports(database)) {
-            return executor.getPriority();
-        } else {
-            return Plugin.PRIORITY_NOT_APPLICABLE;
-        }
-
-    }
-
     private Key createKey(String executorName, Database database) {
         return new Key(executorName, database);
     }
 
-    private Executor getExecutorValue(String executorName, Database database) throws UnexpectedLiquibaseException {
-        final Executor plugin = getPlugin(executorName.toLowerCase(), database);
+    private Executor getExecutorValue(final String executorName, final Database database) throws UnexpectedLiquibaseException {
+        final Executor plugin = getPlugin(candidate -> {
+            if (executorName.equals(candidate.getName()) && candidate.supports(database)) {
+                return candidate.getPriority();
+            } else {
+                return Plugin.PRIORITY_NOT_APPLICABLE;
+            }
+        });
         try {
             return plugin.getClass().newInstance();
         } catch (ReflectiveOperationException e) {

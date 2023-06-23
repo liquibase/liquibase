@@ -1,14 +1,12 @@
 package liquibase.ui;
 
 import liquibase.ExtensibleObject;
-import liquibase.plugin.Plugin;
+import liquibase.servicelocator.PrioritizedService;
 
 /**
  * Service for interacting with the user.
  */
-public interface UIService extends ExtensibleObject, Plugin {
-
-    int getPriority();
+public interface UIService extends ExtensibleObject, PrioritizedService {
 
     /**
      * Send a "normal" message to the user.

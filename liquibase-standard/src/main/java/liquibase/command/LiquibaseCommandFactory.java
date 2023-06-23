@@ -16,13 +16,8 @@ class LiquibaseCommandFactory extends AbstractPluginFactory<LiquibaseCommand> {
         return LiquibaseCommand.class;
     }
 
-    @Override
-    protected int getPriority(LiquibaseCommand obj, Object... args) {
-        return obj.getPriority((String) args[0]);
-    }
-
-    public LiquibaseCommand getCommand(String commandName) {
-        return getPlugin(commandName);
+    public LiquibaseCommand getCommand(final String commandName) {
+        return getPlugin(candidate -> candidate.getPriority(commandName));
     }
 
     public <T extends CommandResult> T execute(LiquibaseCommand<T> command) throws CommandExecutionException {

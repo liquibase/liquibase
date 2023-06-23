@@ -5,14 +5,15 @@ import liquibase.database.Database;
 import liquibase.exception.UnexpectedLiquibaseException;
 import liquibase.plugin.AbstractPluginFactory;
 import liquibase.plugin.Plugin;
-import java.util.ArrayList;
+
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.CopyOnWriteArrayList;
 
 public class ChangeLogHistoryServiceFactory extends AbstractPluginFactory<ChangeLogHistoryService> {
 
-    private final List<ChangeLogHistoryService> explicitRegistered = new ArrayList<>();
+    private final List<ChangeLogHistoryService> explicitRegistered = new CopyOnWriteArrayList<>();
     private final Map<Database, ChangeLogHistoryService> services = new ConcurrentHashMap<>();
 
     /**
@@ -32,54 +33,40 @@ public class ChangeLogHistoryServiceFactory extends AbstractPluginFactory<Change
     }
 
     @Override
-    protected int getPriority(final ChangeLogHistoryService changeLogHistoryService, final Object... args) {
-        Database database = (Database) args[0];
-        if (changeLogHistoryService.supports(database)) {
-            return changeLogHistoryService.getPriority();
-        } else {
-            return Plugin.PRIORITY_NOT_APPLICABLE;
-        }
-    }
-
-    @Override
-    public synchronized void register(final ChangeLogHistoryService plugin) {
+    public void register(final ChangeLogHistoryService plugin) {
         super.register(plugin);
         explicitRegistered.add(plugin);
     }
 
 
-    public ChangeLogHistoryService getChangeLogService(Database database) {
-            if (services.containsKey(database)) {
-                return services.get(database);
-            }
+    private ChangeLogHistoryService selectFor(Database database) {
+        ChangeLogHistoryService exampleService = getPlugin(
+                candidate -> candidate.supports(database) ? candidate.getPriority() : Plugin.PRIORITY_NOT_APPLICABLE
+        );
 
-            ChangeLogHistoryService plugin = getPlugin(database);
-
-            if (plugin == null) {
-                throw new UnexpectedLiquibaseException("Cannot find ChangeLogHistoryService for " +
-                    database.getShortName());
-            }
-
+        try {
+            Class<? extends ChangeLogHistoryService> aClass = exampleService.getClass();
+            ChangeLogHistoryService service;
             try {
-                Class<? extends ChangeLogHistoryService> aClass = plugin.getClass();
-                ChangeLogHistoryService service;
-                try {
-                    aClass.getConstructor();
-                    service = aClass.getConstructor().newInstance();
-                    service.setDatabase(database);
-                } catch (NoSuchMethodException e) {
-                    // must have been manually added to the registry and so already configured.
-                    service = plugin;
-                }
-
-                services.put(database, service);
-                return service;
-            } catch (Exception e) {
-                throw new UnexpectedLiquibaseException(e);
+                aClass.getConstructor();
+                service = aClass.getConstructor().newInstance();
+                service.setDatabase(database);
+            } catch (NoSuchMethodException e) {
+                // must have been manually added to the registry and so already configured.
+                service = exampleService;
             }
+
+            return service;
+        } catch (Exception e) {
+            throw new UnexpectedLiquibaseException(e);
+        }
     }
 
-    public synchronized void unregister(final ChangeLogHistoryService service) {
+    public ChangeLogHistoryService getChangeLogService(Database database) {
+        return services.computeIfAbsent(database, this::selectFor);
+    }
+
+    public void unregister(final ChangeLogHistoryService service) {
         removeInstance(service);
     }
 

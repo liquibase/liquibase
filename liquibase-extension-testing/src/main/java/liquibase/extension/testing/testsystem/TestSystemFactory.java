@@ -22,30 +22,25 @@ public class TestSystemFactory extends AbstractPluginFactory<TestSystem> {
         return TestSystem.class;
     }
 
-    @Override
-    protected int getPriority(TestSystem testSystem, Object... args) {
-        return testSystem.getPriority((TestSystem.Definition) args[0]);
-    }
-
     /**
      * Return the {@link TestSystem} for the given {@link liquibase.extension.testing.testsystem.TestSystem.Definition}.
      * Returns singleton instances for equal definitions.
      */
-    public TestSystem getTestSystem(TestSystem.Definition definition) {
-        return systems.computeIfAbsent(definition, passedDefinition -> {
-            final TestSystem singleton = TestSystemFactory.this.getPlugin(passedDefinition);
+    public TestSystem getTestSystem(final TestSystem.Definition definition) {
+        return systems.computeIfAbsent(definition, ignored -> {
+            final TestSystem singleton = getPlugin(candidate -> candidate.getPriority(definition));
 
             if (singleton == null) {
-                throw new UnexpectedLiquibaseException("No test system: " + passedDefinition);
+                throw new UnexpectedLiquibaseException("No test system: " + definition);
             }
 
             try {
-                TestSystem.Definition finalDefinition = passedDefinition;
-                if (passedDefinition.getProfiles().length == 0 && passedDefinition.getProperties().size() == 0) {
+                TestSystem.Definition finalDefinition = definition;
+                if (definition.getProfiles().length == 0 && definition.getProperties().size() == 0) {
                     //see if we're configured to use a specific setting instead
                     for (String testSystem : getConfiguredTestSystems()) {
                         final TestSystem.Definition testSystemDef = TestSystem.Definition.parse(testSystem);
-                        if (testSystemDef.getName().equals(passedDefinition.getName())) {
+                        if (testSystemDef.getName().equals(definition.getName())) {
                             finalDefinition = testSystemDef;
                             break;
                         }
