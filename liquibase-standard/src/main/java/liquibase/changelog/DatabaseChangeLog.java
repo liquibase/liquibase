@@ -504,6 +504,7 @@ public class DatabaseChangeLog implements Comparable<DatabaseChangeLog>, Conditi
                         ignore,
                         node.getChildValue(null, "minDepth", 1),
                         node.getChildValue(null, "maxDepth", Integer.MAX_VALUE),
+                        node.getChildValue(null, "endsWithFilter", ""),
                         (ModifyChangeSets)nodeScratch.get("modifyChangeSets"));
                 break;
             }
@@ -666,7 +667,7 @@ public class DatabaseChangeLog implements Comparable<DatabaseChangeLog>, Conditi
                            int maxDepth)
             throws SetupException {
         includeAll(pathName, isRelativeToChangelogFile, resourceFilter, errorIfMissingOrEmpty, resourceComparator,
-                   resourceAccessor, includeContextFilter, labels, ignore, minDepth, maxDepth, new ModifyChangeSets(null, null));
+                   resourceAccessor, includeContextFilter, labels, ignore, minDepth, maxDepth, "", new ModifyChangeSets(null, null));
     }
 
     public void includeAll(String pathName,
@@ -680,6 +681,7 @@ public class DatabaseChangeLog implements Comparable<DatabaseChangeLog>, Conditi
                            boolean ignore,
                            int minDepth,
                            int maxDepth,
+                           String endsWithFilter,
                            ModifyChangeSets modifyChangeSets)
             throws SetupException {
         try {
@@ -693,6 +695,7 @@ public class DatabaseChangeLog implements Comparable<DatabaseChangeLog>, Conditi
             }
 
             ResourceAccessor.SearchOptions searchOptions = initializeAndSetMinAndMaxDepth(minDepth, maxDepth);
+            searchOptions.setEndsWithFilter(endsWithFilter);
 
             List<Resource> unsortedResources = null;
             Set<String> seenChangelogPaths = Scope.getCurrentScope().get(SEEN_CHANGELOGS_PATHS_SCOPE_KEY, new HashSet<>());
