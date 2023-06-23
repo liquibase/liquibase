@@ -1,10 +1,10 @@
 package liquibase.command.util
 
 import liquibase.Scope
+import liquibase.TagVersionEnum
 import liquibase.UpdateSummaryEnum
 import liquibase.command.CommandScope
 import liquibase.command.core.*
-import liquibase.command.core.RollbackCommandStep.TAG_VERSION
 import liquibase.command.core.helpers.*
 import liquibase.database.Database
 import liquibase.diff.compare.CompareControl
@@ -113,10 +113,10 @@ class CommandUtil {
     }
 
     static void runRollback(ResourceAccessor resourceAccessor, DatabaseTestSystem db, String changelogFile, String tag) throws Exception {
-        runRollback(resourceAccessor, db, changelogFile, tag, TAG_VERSION.OLDEST)
+        runRollback(resourceAccessor, db, changelogFile, tag, TagVersionEnum.OLDEST)
     }
 
-    static void runRollback(ResourceAccessor resourceAccessor, DatabaseTestSystem db, String changelogFile, String tag, TAG_VERSION tagVersion)
+    static void runRollback(ResourceAccessor resourceAccessor, DatabaseTestSystem db, String changelogFile, String tag, TagVersionEnum tagVersion)
             throws Exception {
         if (! db.shouldTest()) {
             return;

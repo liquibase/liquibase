@@ -2,6 +2,7 @@ package liquibase.command.core
 
 
 import liquibase.Scope
+import liquibase.TagVersionEnum
 import liquibase.command.util.CommandUtil
 import liquibase.exception.CommandExecutionException
 import liquibase.exception.RollbackFailedException
@@ -31,7 +32,7 @@ class RollbackIntegrationTest extends Specification {
         console.setOutputStream(new PrintStream(outputStream))
 
         when:
-        CommandUtil.runRollback(new SearchPathResourceAccessor("."), postgres, changelogFile, "version_2.0", RollbackCommandStep.TAG_VERSION.NEWEST)
+        CommandUtil.runRollback(new SearchPathResourceAccessor("."), postgres, changelogFile, "version_2.0", TagVersionEnum.NEWEST)
         String outputString = outputStream.toString()
 
         then:
@@ -43,7 +44,7 @@ class RollbackIntegrationTest extends Specification {
         CommandUtil.runUpdate(postgres, changelogFile)
         outputStream = new ByteArrayOutputStream()
         console.setOutputStream(new PrintStream(outputStream))
-        CommandUtil.runRollback(new SearchPathResourceAccessor("."), postgres, changelogFile, "version_2.0", RollbackCommandStep.TAG_VERSION.OLDEST)
+        CommandUtil.runRollback(new SearchPathResourceAccessor("."), postgres, changelogFile, "version_2.0", TagVersionEnum.OLDEST)
         outputString = outputStream.toString()
 
         then:
@@ -56,15 +57,6 @@ class RollbackIntegrationTest extends Specification {
         console.setOutputStream(new PrintStream(outputStream))
         CommandUtil.runRollback(new SearchPathResourceAccessor("."), postgres, changelogFile, "version_2.0")
         outputString = outputStream.toString()
-
-        then:
-        noExceptionThrown()
-        assert outputString.contains("Rolling Back Changeset: target/test-classes/changelogs/pgsql/rollback/rollback-to-tag-changelog.xml::13.2::testuser")
-
-        when:
-        outputStream = new ByteArrayOutputStream()
-        console.setOutputStream(new PrintStream(outputStream))
-        CommandUtil.runRollback(new SearchPathResourceAccessor("."), postgres, changelogFile, "version_2.0")
 
         then:
         def e = thrown(CommandExecutionException)

@@ -1,5 +1,6 @@
 package liquibase.changelog.filter;
 
+import liquibase.TagVersionEnum;
 import liquibase.changelog.ChangeSet;
 import liquibase.changelog.RanChangeSet;
 import liquibase.command.core.RollbackCommandStep;
@@ -17,10 +18,10 @@ public class AfterTagChangeSetFilter implements ChangeSetFilter {
     private final String tag;
     private final Set<String> changeLogsAfterTag = new HashSet<>();
 
-    public AfterTagChangeSetFilter(String tag, List<RanChangeSet> ranChangeSets, RollbackCommandStep.TAG_VERSION tagVersion)
+    public AfterTagChangeSetFilter(String tag, List<RanChangeSet> ranChangeSets, TagVersionEnum tagVersion)
             throws RollbackFailedException {
         this.tag = tag;
-        if (tagVersion == RollbackCommandStep.TAG_VERSION.OLDEST) {
+        if (tagVersion == TagVersionEnum.OLDEST) {
             oldestVersion(ranChangeSets);
             return;
         }
@@ -67,9 +68,11 @@ public class AfterTagChangeSetFilter implements ChangeSetFilter {
 
             if (!seenTag && tag.equalsIgnoreCase(ranChangeSet.getTag())) {
                 seenTag = true;
-                if ("tagDatabase".equals(StringUtil.trimToEmpty(ranChangeSet.getDescription()))) { //changeSet is just tagging the database. Also remove it.
-                    changeLogsAfterTag.add(ranChangeSet.toString());
-                }
+            }
+            //changeSet is just tagging the database. Also remove it.
+            if (tag.equalsIgnoreCase(ranChangeSet.getTag()) &&
+                ("tagDatabase".equals(StringUtil.trimToEmpty(ranChangeSet.getDescription())))) {
+                changeLogsAfterTag.add(ranChangeSet.toString());
             }
         }
 
