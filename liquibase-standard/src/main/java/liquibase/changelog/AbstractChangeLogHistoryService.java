@@ -10,6 +10,7 @@ import liquibase.database.Database;
 import liquibase.exception.DatabaseException;
 import liquibase.exception.DatabaseHistoryException;
 
+import java.text.DecimalFormat;
 import java.util.Date;
 import java.util.List;
 
@@ -133,9 +134,11 @@ public abstract class AbstractChangeLogHistoryService implements ChangeLogHistor
     @Override
     public void generateDeploymentId() {
         if (this.deploymentId == null) {
-            String dateString = String.valueOf(new Date().getTime());
+            long time = (new Date()).getTime();
+            String dateString = String.valueOf(time);
+            DecimalFormat decimalFormat = new DecimalFormat("0000000000");
             this.deploymentId = dateString.length() > 9 ? dateString.substring(dateString.length() - 10) :
-                    String.format("%010d", dateString);
+                    decimalFormat.format(time);
         }
     }
 
