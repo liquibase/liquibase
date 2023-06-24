@@ -719,7 +719,7 @@ http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbch
 
         def rootChangeLog = new DatabaseChangeLog(rootChangeLogPath)
         rootChangeLog.load(new ParsedNode(null, "databaseChangeLog")
-                .addChildren([includeAll: [path: includedAllChangeLogPath, minDepth:minDepth, maxDepth:maxDepth, errorIfMissing:false]]), resourceAccessor)
+                .addChildren([includeAll: [path: includedAllChangeLogPath, minDepth:minDepth, maxDepth:maxDepth, errorIfMissingOrEmpty:false]]), resourceAccessor)
 
         then:
         rootChangeLog.getChangeSets().size() == expectedIncludeAllChangesetsToDeploy
