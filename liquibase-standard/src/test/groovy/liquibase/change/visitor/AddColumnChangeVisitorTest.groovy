@@ -4,7 +4,6 @@ import liquibase.exception.SetupException
 import liquibase.parser.core.ParsedNode
 import liquibase.parser.core.ParsedNodeException
 import liquibase.sdk.supplier.resource.ResourceSupplier
-import liquibase.sql.visitor.SqlVisitor
 import spock.lang.Shared
 import spock.lang.Specification
 import spock.lang.Unroll
@@ -31,7 +30,7 @@ class AddColumnChangeVisitorTest extends Specification {
         visitor[field] == fieldValue
 
         where:
-        field << createClass().getSerializableFields().findAll()
+        field << createClass().getSerializableFields().findAll({ !(it in ["dbms"])})
     }
 
     def ChangeVisitor createClass() {

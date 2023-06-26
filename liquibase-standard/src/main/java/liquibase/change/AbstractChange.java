@@ -872,11 +872,4 @@ public abstract class AbstractChange extends AbstractPlugin implements Change {
     @Override
     public void modify(ChangeVisitor changeVisitor) throws ParsedNodeException{
     }
-
-    @Override
-    public Object clone(){
-        Change clone = (Change)super.clone();
-        clone.setChangeSet(this.getChangeSet());
-        return clone;
-    }
 }

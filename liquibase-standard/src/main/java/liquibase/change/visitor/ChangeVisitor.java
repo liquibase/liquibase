@@ -2,12 +2,14 @@ package liquibase.change.visitor;
 
 import liquibase.changelog.ChangeLogChild;
 
+import java.util.Set;
+
 public interface ChangeVisitor extends ChangeLogChild {
 
     String getName();
 
     String getChange();
 
-    String getDbms();
+    Set<String> getDbms();
 
 }

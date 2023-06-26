@@ -179,16 +179,18 @@ class AddColumnChangeTest extends StandardChangeTest {
         change.columns[1].type == "int"
         change.columns[1].position == 3
     }
+
+    @Unroll
     def "modify method works for removing afterColumn"() {
         when:
         def modifyChange = new ParsedNode(null, "modifyChange")
-                .addChildren([change: "addColumn", dbms: "postgresql", remove: "afterColumn"])
+                .addChildren([change: "addColumn", dbms: dbms, remove: "afterColumn"])
         def changeVisitor = ChangeVisitorFactory.getInstance().create("addColumn");
         changeVisitor.load(modifyChange, resourceSupplier.simpleResourceAccessor)
         def node = new ParsedNode(null, "addColumn")
                 .addChildren([tableName: "table_name"])
                 .addChild(new ParsedNode(null, "column").addChildren([name: "col_1", type: "int", beforeColumn: "before_col"]))
-                .addChild(new ParsedNode(null, "column").addChildren([name: "col_2", type: "int", afterColumn: "after_col"]))
+                .addChild(new ParsedNode(null, "column").addChildren([name: "col_2", type: "int", afterColumn: after_column]))
                 .addChild(new ParsedNode(null, "column").addChildren([name: "col_3", type: "int", position: "3"]))
         def change = new AddColumnChange()
 
@@ -211,21 +213,28 @@ class AddColumnChangeTest extends StandardChangeTest {
 
         change.columns[1].name == "col_2"
         change.columns[1].type == "int"
-        change.columns[1].afterColumn == null
+        change.columns[1].afterColumn == expected
 
         change.columns[2].name == "col_3"
         change.columns[2].type == "int"
         change.columns[2].position == 3
+
+        where:
+        dbms                              | after_column  || expected
+        "postgres"                        | "after_col"   || null
+        "postgres,any_unsupported_db"     | "after_col"   || null
     }
+
+    @Unroll
     def "modify method works for removing beforeColumn"() {
         when:
         def modifyChange = new ParsedNode(null, "modifyChange")
-                .addChildren([change: "addColumn", dbms: "postgresql", remove: "beforeColumn"])
+                .addChildren([change: "addColumn", dbms: dbms, remove: "beforeColumn"])
         def changeVisitor = ChangeVisitorFactory.getInstance().create("addColumn");
         changeVisitor.load(modifyChange, resourceSupplier.simpleResourceAccessor)
         def node = new ParsedNode(null, "addColumn")
                 .addChildren([tableName: "table_name"])
-                .addChild(new ParsedNode(null, "column").addChildren([name: "col_1", type: "int", beforeColumn: "before_col"]))
+                .addChild(new ParsedNode(null, "column").addChildren([name: "col_1", type: "int", beforeColumn: before_column]))
                 .addChild(new ParsedNode(null, "column").addChildren([name: "col_2", type: "int", afterColumn: "after_col"]))
                 .addChild(new ParsedNode(null, "column").addChildren([name: "col_3", type: "int", position: "3"]))
         def change = new AddColumnChange()
@@ -245,7 +254,7 @@ class AddColumnChangeTest extends StandardChangeTest {
 
         change.columns[0].name == "col_1"
         change.columns[0].type == "int"
-        change.columns[0].beforeColumn == null
+        change.columns[0].beforeColumn == expected
 
         change.columns[1].name == "col_2"
         change.columns[1].type == "int"
@@ -254,11 +263,18 @@ class AddColumnChangeTest extends StandardChangeTest {
         change.columns[2].name == "col_3"
         change.columns[2].type == "int"
         change.columns[2].position == 3
+
+        where:
+        dbms                              | before_column  || expected
+        "postgres"                        | "before_col"   || null
+        "postgres,any_unsupported_db"     | "before_col"   || null
     }
+
+    @Unroll
     def "modify method works for removing position"() {
         when:
         def modifyChange = new ParsedNode(null, "modifyChange")
-                .addChildren([change: "addColumn", dbms: "postgresql", remove: "position"])
+                .addChildren([change: "addColumn", dbms: dbms, remove: "position"])
         def changeVisitor = ChangeVisitorFactory.getInstance().create("addColumn");
         changeVisitor.load(modifyChange, resourceSupplier.simpleResourceAccessor)
         def node = new ParsedNode(null, "addColumn")
@@ -291,7 +307,12 @@ class AddColumnChangeTest extends StandardChangeTest {
 
         change.columns[2].name == "col_3"
         change.columns[2].type == "int"
-        change.columns[2].position == null
+        change.columns[2].position == expected
+
+        where:
+        dbms                              | position    || expected
+        "postgres"                        | "3"         || null
+        "postgres,any_unsupported_db"     | "3"         || null
     }
 
     protected void addColumnsToSnapshot(Table table, Change change, MockSnapshotGeneratorFactory snapshotFactory) {

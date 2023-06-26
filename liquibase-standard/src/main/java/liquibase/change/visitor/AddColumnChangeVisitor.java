@@ -3,11 +3,15 @@ package liquibase.change.visitor;
 import liquibase.parser.core.ParsedNode;
 import liquibase.parser.core.ParsedNodeException;
 import liquibase.resource.ResourceAccessor;
+import liquibase.util.StringUtil;
+
+import java.util.HashSet;
+import java.util.Set;
 
 public class AddColumnChangeVisitor extends AbstractChangeVisitor {
 
     private String change;
-    private String dbms;
+    private Set<String> dbms;
     private String remove;
     @Override
     public String getName() {
@@ -18,7 +22,7 @@ public class AddColumnChangeVisitor extends AbstractChangeVisitor {
         return change;
     }
     @Override
-    public String getDbms() {
+    public Set<String> getDbms() {
         return dbms;
     }
     public String getRemove() {
@@ -35,8 +39,12 @@ public class AddColumnChangeVisitor extends AbstractChangeVisitor {
     @Override
     public void load(ParsedNode node, ResourceAccessor resourceAccessor) throws ParsedNodeException {
         this.change = node.getChildValue(null, "change", String.class);
-        this.dbms = node.getChildValue(null, "dbms", String.class);
         this.remove = node.getChildValue(null, "remove", String.class);
+        String dbmsString = StringUtil.trimToNull(node.getChildValue(null, "dbms", String.class));
+        this.dbms = new HashSet<>();
+        if (dbmsString != null) {
+            this.dbms.addAll(StringUtil.splitAndTrim(dbmsString, ","));
+        }
 
     }
 }

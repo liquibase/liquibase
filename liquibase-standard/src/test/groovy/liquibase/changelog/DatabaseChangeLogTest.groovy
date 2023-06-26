@@ -184,7 +184,7 @@ create view sql_view as select * from sql_table;'''
 
 
         ((ChangeVisitor) changeLogFromChildren.changeVisitors[0]).change == "addColumn"
-        ((ChangeVisitor) changeLogFromChildren.changeVisitors[0]).dbms == "mock"
+        ((ChangeVisitor) changeLogFromChildren.changeVisitors[0]).dbms == ["mock"] as HashSet
         ((ChangeVisitor) changeLogFromChildren.changeVisitors[0]).remove == "afterColumn"
 
     }

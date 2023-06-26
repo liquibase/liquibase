@@ -529,8 +529,8 @@ public class DatabaseChangeLog implements Comparable<DatabaseChangeLog>, Conditi
                     ChangeVisitor changeVisitor = ChangeVisitorFactory.getInstance().create((String) changeNode.get().getValue());
                     if(changeVisitor != null){
                         changeVisitor.load(node, resourceAccessor);
-                        if(changeVisitor.getDbms().equalsIgnoreCase(changeLogParameters.getDatabase())) {
-                            //add changeVisitor to this changeLog only if the running database matches with the modifyChange's dbms
+                        if(DatabaseList.definitionMatches(changeVisitor.getDbms(), changeLogParameters.getDatabase(), false)) {
+                            //add changeVisitor to this changeLog only if the running database matches with one of the modifyChange's dbms
                             getChangeVisitors().add(changeVisitor);
                         }
                     }
