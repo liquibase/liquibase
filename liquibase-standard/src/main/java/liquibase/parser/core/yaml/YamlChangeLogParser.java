@@ -21,6 +21,7 @@ import java.io.InputStream;
 import java.util.*;
 
 public class YamlChangeLogParser extends YamlParser implements ChangeLogParser {
+    private static final String DATABASE_CHANGE_LOG = "databaseChangeLog";
 
     @Override
     public DatabaseChangeLog parse(String physicalChangeLogLocation, ChangeLogParameters changeLogParameters, ResourceAccessor resourceAccessor) throws ChangeLogParseException {
@@ -42,9 +43,14 @@ public class YamlChangeLogParser extends YamlParser implements ChangeLogParser {
             }
             DatabaseChangeLog changeLog = new DatabaseChangeLog(DatabaseChangeLog.normalizePath(physicalChangeLogLocation));
 
-            Object rootList = parsedYaml.get("databaseChangeLog");
-            if (rootList == null) {
+            if (!parsedYaml.containsKey(DATABASE_CHANGE_LOG)) {
                 throw new ChangeLogParseException("Could not find databaseChangeLog node");
+            }
+
+            Object rootList = parsedYaml.get(DATABASE_CHANGE_LOG);
+            if (rootList == null) {
+                changeLog.setChangeLogParameters(changeLogParameters);
+                return changeLog;
             }
 
             if (!(rootList instanceof List)) {
@@ -76,7 +82,7 @@ public class YamlChangeLogParser extends YamlParser implements ChangeLogParser {
             replaceParameters(parsedYaml, changeLogParameters, changeLog);
 
             changeLog.setChangeLogParameters(changeLogParameters);
-            ParsedNode databaseChangeLogNode = new ParsedNode(null, "databaseChangeLog");
+            ParsedNode databaseChangeLogNode = new ParsedNode(null, DATABASE_CHANGE_LOG);
             databaseChangeLogNode.setValue(rootList);
 
             changeLog.load(databaseChangeLogNode, resourceAccessor);

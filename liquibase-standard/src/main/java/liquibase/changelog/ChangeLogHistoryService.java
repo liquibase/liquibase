@@ -27,11 +27,13 @@ public interface ChangeLogHistoryService extends Plugin {
     void init() throws DatabaseException;
 
     /**
-     * Upgrades any existing checksums with an out of date version
+     * Updates null checksum values
      */
     void upgradeChecksums(final DatabaseChangeLog databaseChangeLog, final Contexts contexts, LabelExpression labels) throws DatabaseException;
 
     List<RanChangeSet> getRanChangeSets() throws DatabaseException;
+
+    List<RanChangeSet> getRanChangeSets(boolean allowChecksumsUpgrade) throws DatabaseException;
 
     RanChangeSet getRanChangeSet(ChangeSet changeSet) throws DatabaseException, DatabaseHistoryException;
 
@@ -62,4 +64,5 @@ public interface ChangeLogHistoryService extends Plugin {
 
     void generateDeploymentId();
 
-    }
+    boolean isDatabaseChecksumsCompatible();
+}
