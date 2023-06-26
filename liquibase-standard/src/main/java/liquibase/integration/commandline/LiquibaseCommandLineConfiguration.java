@@ -1,5 +1,6 @@
 package liquibase.integration.commandline;
 
+import liquibase.ChecksumVersion;
 import liquibase.configuration.AutoloadedConfigurations;
 import liquibase.configuration.ConfigurationDefinition;
 import liquibase.configuration.ConfigurationValueConverter;
@@ -93,7 +94,7 @@ public class LiquibaseCommandLineConfiguration implements AutoloadedConfiguratio
                         "Open Source users default to unstructured \"" + LogFormat.TEXT + "\" logs to the console or output log files. " +
                         "Pro users have the option to set value as \"" + LogFormat.JSON + "\" or \"" + LogFormat.JSON_PRETTY + "\" to enable json-structured log files to the console or output log files.")
                 .setDefaultValue(LogFormat.TEXT)
-                .setValueHandler((logFormat) -> {
+                .setValueHandler(logFormat -> {
                     if (logFormat == null) {
                         return null;
                     }
@@ -113,7 +114,6 @@ public class LiquibaseCommandLineConfiguration implements AutoloadedConfiguratio
                     }
                 })
                 .build();
-
    }
 
     public interface ArgumentConverter {

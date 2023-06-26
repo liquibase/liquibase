@@ -92,7 +92,7 @@ public class ChangeSetTest extends Specification {
 
     def isCheckSumValid_invalidCheckSum() {
         when:
-        def checkSum = CheckSum.parse("2:asdf");
+        def checkSum = CheckSum.parse("8:asdf");
         def changeSet = new ChangeSet("1", "2", false, false, "/test.xml", null, null, null);
 
         then:
@@ -101,7 +101,7 @@ public class ChangeSetTest extends Specification {
 
     def isCheckSumValid_differentButValidCheckSum() {
         when:
-        CheckSum checkSum = CheckSum.parse("2:asdf");
+        CheckSum checkSum = CheckSum.parse("8:asdf");
 
         ChangeSet changeSet = new ChangeSet("1", "2", false, false, "/test.xml", null, null, null);
         changeSet.addValidCheckSum(changeSet.generateCheckSum().toString());
