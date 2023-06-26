@@ -308,7 +308,7 @@
 							</mapper>
 						</data>
 						<data>
-							<src>${project.basedir}/src/main/archive/liquibase.sh</src>
+							<src>${project.basedir}/src/main/archive/liquibase-env.sh</src>
 							<type>file</type>
 							<mapper>
 								<type>perm</type>
