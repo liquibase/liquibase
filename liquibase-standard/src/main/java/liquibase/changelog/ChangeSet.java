@@ -1,5 +1,6 @@
 package liquibase.changelog;
 
+import liquibase.ChecksumVersion;
 import liquibase.ContextExpression;
 import liquibase.Labels;
 import liquibase.Scope;
@@ -12,7 +13,6 @@ import liquibase.configuration.LiquibaseConfiguration;
 import liquibase.database.Database;
 import liquibase.database.DatabaseList;
 import liquibase.database.ObjectQuotingStrategy;
-import liquibase.database.core.MSSQLDatabase;
 import liquibase.exception.*;
 import liquibase.executor.Executor;
 import liquibase.executor.ExecutorService;
@@ -28,7 +28,8 @@ import liquibase.precondition.ErrorPrecondition;
 import liquibase.precondition.FailedPrecondition;
 import liquibase.precondition.core.PreconditionContainer;
 import liquibase.resource.ResourceAccessor;
-import liquibase.sql.visitor.*;
+import liquibase.sql.visitor.SqlVisitor;
+import liquibase.sql.visitor.SqlVisitorFactory;
 import liquibase.sqlgenerator.SqlGeneratorFactory;
 import liquibase.statement.SqlStatement;
 import liquibase.util.SqlUtil;
@@ -338,22 +339,26 @@ public class ChangeSet implements Conditional, ChangeLogChild {
         this.checkSum = null;
     }
 
-    public CheckSum generateCheckSum() {
-        if (checkSum == null) {
-            StringBuilder stringToMD5 = new StringBuilder();
-            for (Change change : getChanges()) {
-                stringToMD5.append(change.generateCheckSum()).append(":");
-            }
+    public CheckSum generateCheckSum(ChecksumVersion version) {
+        try {
+            return Scope.child(Collections.singletonMap(Scope.Attr.checksumVersion.name(), version), () -> {
+                if (checkSum == null) {
+                    StringBuilder stringToMD5 = new StringBuilder();
+                    for (Change change : this.getChanges()) {
+                        stringToMD5.append(change.generateCheckSum()).append(":");
+                    }
 
-            for (SqlVisitor visitor : this.getSqlVisitors()) {
-                stringToMD5.append(visitor.generateCheckSum()).append(";");
-            }
+                    for (SqlVisitor visitor : this.getSqlVisitors()) {
+                        stringToMD5.append(visitor.generateCheckSum()).append(";");
+                    }
+                    checkSum = CheckSum.compute(stringToMD5.toString());
+                }
 
-
-            checkSum = CheckSum.compute(stringToMD5.toString());
+                return checkSum;
+            });
+        } catch (Exception e) {
+            throw new RuntimeException(e);
         }
-
-        return checkSum;
     }
 
     @Override
@@ -1121,7 +1126,9 @@ public class ChangeSet implements Conditional, ChangeLogChild {
     }
 
     public String toString(boolean includeMD5Sum) {
-        return filePath + "::" + getId() + "::" + getAuthor() + (includeMD5Sum ? ("::(Checksum: " + generateCheckSum() + ")") : "");
+        ChecksumVersion checksumVersion = ChecksumVersion.enumFromChecksumVersion(this.checkSum != null ? this.checkSum.getVersion() : CheckSum.getCurrentVersion());
+        return filePath + "::" + getId() + "::" + getAuthor() +
+                (includeMD5Sum ? ("::(Checksum: " + generateCheckSum(checksumVersion) + ")") : "");
     }
 
     @Override
@@ -1239,7 +1246,7 @@ public class ChangeSet implements Conditional, ChangeLogChild {
                 return true;
             }
         }
-        CheckSum currentMd5Sum = generateCheckSum();
+        CheckSum currentMd5Sum = storedCheckSum != null ? generateCheckSum(ChecksumVersion.enumFromChecksumVersion(storedCheckSum.getVersion())) : null;
         if (currentMd5Sum == null) {
             return true;
         }

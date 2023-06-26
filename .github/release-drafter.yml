@@ -1,6 +1,8 @@
 
 name-template: 'Liquibase v$RESOLVED_VERSION'
 tag-template: 'v$RESOLVED_VERSION'
+exclude-labels:
+  - 'skipReleaseNotes'
 categories:
   - title: ':green_book: Notable Changes'
     labels: 
@@ -25,7 +27,8 @@ categories:
       - 'dependencies'
   - title: '👏 New Contributors'
     labels:
-      - 'newcontributors'    
+      - 'newContributors'  
+       
   
 change-template: '- (#$NUMBER) $TITLE @$AUTHOR '
 change-title-escapes: '\<*_&' # You can add # and @ to disable mentions, and add ` to disable code blocks.
