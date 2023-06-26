@@ -368,7 +368,7 @@ public interface ResourceAccessor extends AutoCloseable {
 
         public String getEndsWithFilter() { return endsWithFilter; }
 
-        public void setEndsWithFilter(String endsWithFilter) { this.endsWithFilter = endsWithFilter.trim(); }
+        public void setTrimmedEndsWithFilter(String endsWithFilter) { this.endsWithFilter = endsWithFilter.trim(); }
 
         public boolean endsWithFilterIsSet() {
             return endsWithFilter != null && !endsWithFilter.trim().equals("");

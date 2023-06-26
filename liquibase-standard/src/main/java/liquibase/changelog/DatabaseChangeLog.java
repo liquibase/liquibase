@@ -24,7 +24,6 @@ import liquibase.resource.Resource;
 import liquibase.resource.ResourceAccessor;
 import liquibase.servicelocator.LiquibaseService;
 import liquibase.util.FileUtil;
-import liquibase.util.LoggingExecutorTextUtil;
 import liquibase.util.StringUtil;
 
 import java.io.IOException;
@@ -695,7 +694,7 @@ public class DatabaseChangeLog implements Comparable<DatabaseChangeLog>, Conditi
             }
 
             ResourceAccessor.SearchOptions searchOptions = initializeAndSetMinAndMaxDepth(minDepth, maxDepth);
-            searchOptions.setEndsWithFilter(endsWithFilter);
+            searchOptions.setTrimmedEndsWithFilter(endsWithFilter);
 
             List<Resource> unsortedResources = null;
             Set<String> seenChangelogPaths = Scope.getCurrentScope().get(SEEN_CHANGELOGS_PATHS_SCOPE_KEY, new HashSet<>());
