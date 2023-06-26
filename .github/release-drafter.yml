@@ -20,14 +20,14 @@ categories:
   - title: '💥 API Breaking Changes'
     labels: 
       - 'APIBreakingChanges'
-  - title: '🤖 Security Driver and Other Updates'
+  - title: '🤖 Security, Driver and Other Updates'
     collapse-after: 5
     labels:
       - 'sdou'
       - 'dependencies'
   - title: '👏 New Contributors'
     labels:
-      - 'newcontributors'  
+      - 'newContributors'  
        
   
 change-template: '- (#$NUMBER) $TITLE @$AUTHOR '
