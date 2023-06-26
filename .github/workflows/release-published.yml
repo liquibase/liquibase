@@ -349,5 +349,5 @@ jobs:
   
         - name: Upload deb package
           run: |
-            deb-s3 upload --bucket repo.liquibase.com liquibase-dist/target/liquibase-${{ needs.setup.outputs.version }}.deb --sign=${{ env.GPG_SECRET_KEY_ID }} --gpg-options="--passphrase=${{ secrets.GPG_PASSPHRASE }}"
+            deb-s3 upload --bucket repo.liquibase.com liquibase-dist/target/liquibase-${{ needs.setup.outputs.version }}.deb --preserve-versions --sign=${{ env.GPG_SECRET_KEY_ID }} --gpg-options="--passphrase=${{ secrets.GPG_PASSPHRASE }}"
           
