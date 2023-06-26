@@ -27,7 +27,7 @@ A clear and concise description of the change being made.
 
 ## Mandatory Labels to add to a PR
 
-<!-- At least one of the labels must be added to the PR before it's merged. If no label is provided the workflow will fail and you will not be able to merge the PR. After the label is added it re-runs the `Pull Request Labels / label (pull_request)` and gives a green check. -->
+<!-- At least one of the labels must be added to the PR before it's merged. If no label is provided the workflow will fail and you will not be able to merge the PR. After the label is added it re-runs the `Pull Request Labels / label (pull_request)` and gives a green check. 
 
 `skipReleaseNotes`   - Don't show up on the Draft Release Notes page
 `notableChanges`     - Any notable changes
@@ -38,6 +38,7 @@ A clear and concise description of the change being made.
 `APIBreakingChanges` - any API breaking changes
 `sdou`               - Security, Driver and Other Updates -dependabot PR's
 `newContributors`    - New Contributors
+-->
 
 ## Things to be aware of
 
