@@ -22,15 +22,6 @@ public class FormattedSqlChangeLogParser extends AbstractFormattedChangeLogParse
     private static final String ON_SQL_OUTPUT_REGEX = ".*onSqlOutput:(\\w+).*";
     private static final Pattern ON_SQL_OUTPUT_PATTERN = Pattern.compile(ON_SQL_OUTPUT_REGEX, Pattern.CASE_INSENSITIVE);
 
-    private static final String WORD_RESULT_REGEX = "^(?:expectedResult:)?(\\w+) (.*)";
-    private static final String SINGLE_QUOTE_RESULT_REGEX = "^(?:expectedResult:)?'([^']+)' (.*)";
-    private static final String DOUBLE_QUOTE_RESULT_REGEX = "^(?:expectedResult:)?\"([^\"]+)\" (.*)";
-
-    private static final Pattern[] WORD_AND_QUOTING_PATTERNS = new Pattern[]{
-            Pattern.compile(WORD_RESULT_REGEX, Pattern.CASE_INSENSITIVE),
-            Pattern.compile(SINGLE_QUOTE_RESULT_REGEX, Pattern.CASE_INSENSITIVE),
-            Pattern.compile(DOUBLE_QUOTE_RESULT_REGEX, Pattern.CASE_INSENSITIVE)
-    };
 
     @Override
     protected String getSingleLineCommentOneCharacter() {

@@ -155,6 +155,16 @@ public abstract class AbstractFormattedChangeLogParser implements ChangeLogParse
     protected final String ROLLBACK_MULTI_LINE_END_REGEX = String.format(".*\\s*%s\\s*$", getEndMultiLineCommentSequence());
     protected final Pattern ROLLBACK_MULTI_LINE_END_PATTERN = Pattern.compile(ROLLBACK_MULTI_LINE_END_REGEX, Pattern.CASE_INSENSITIVE);
 
+    protected final String WORD_RESULT_REGEX = "^(?:expectedResult:)?(\\w+) (.*)";
+    protected final String SINGLE_QUOTE_RESULT_REGEX = "^(?:expectedResult:)?'([^']+)' (.*)";
+    protected final String DOUBLE_QUOTE_RESULT_REGEX = "^(?:expectedResult:)?\"([^\"]+)\" (.*)";
+
+    protected final Pattern[] WORD_AND_QUOTING_PATTERNS = new Pattern[]{
+            Pattern.compile(WORD_RESULT_REGEX, Pattern.CASE_INSENSITIVE),
+            Pattern.compile(SINGLE_QUOTE_RESULT_REGEX, Pattern.CASE_INSENSITIVE),
+            Pattern.compile(DOUBLE_QUOTE_RESULT_REGEX, Pattern.CASE_INSENSITIVE)
+    };
+
     protected abstract String getSingleLineCommentOneCharacter();
 
     protected abstract String getSingleLineCommentSequence();
