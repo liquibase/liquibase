@@ -294,7 +294,7 @@ public class AddColumnChange extends AbstractChange implements ChangeWithColumns
                 getColumns().forEach(c -> c.setPosition(null));
                 break;
             default:
-                throw new ParsedNodeException("Unexpected value found under modifyChange for remove tag: " + remove);
+                throw new ParsedNodeException("Unexpected value found under removeChangeSetProperty for remove tag: " + remove);
         }
     }
 

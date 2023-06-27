@@ -522,7 +522,7 @@ public class DatabaseChangeLog implements Comparable<DatabaseChangeLog>, Conditi
 
                 break;
             }
-            case "modifyChange": {
+            case "removeChangeSetProperty": {
                 List<ParsedNode> childNodes = node.getChildren();
                 Optional<ParsedNode> changeNode = childNodes.stream().filter(n -> n.getName().equalsIgnoreCase("change")).findFirst();
                 if(changeNode.isPresent()){
@@ -530,7 +530,7 @@ public class DatabaseChangeLog implements Comparable<DatabaseChangeLog>, Conditi
                     if(changeVisitor != null){
                         changeVisitor.load(node, resourceAccessor);
                         if(DatabaseList.definitionMatches(changeVisitor.getDbms(), changeLogParameters.getDatabase(), false)) {
-                            //add changeVisitor to this changeLog only if the running database matches with one of the modifyChange's dbms
+                            //add changeVisitor to this changeLog only if the running database matches with one of the removeChangeSetProperty's dbms
                             getChangeVisitors().add(changeVisitor);
                         }
                     }

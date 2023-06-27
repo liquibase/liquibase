@@ -10,6 +10,7 @@ import liquibase.change.visitor.ChangeVisitorFactory
 import liquibase.database.core.H2Database
 import liquibase.database.core.MSSQLDatabase
 import liquibase.database.core.MockDatabase
+import liquibase.database.core.PostgresDatabase
 import liquibase.exception.SetupException
 import liquibase.parser.core.ParsedNode
 import liquibase.parser.core.ParsedNodeException
@@ -180,13 +181,45 @@ class AddColumnChangeTest extends StandardChangeTest {
         change.columns[1].position == 3
     }
 
+    def "with AfterColumn and removeChangeSetProperty the column is added at the last position"() {
+
+        given:
+        def db = new PostgresDatabase()
+
+        def change = new AddColumnChange()
+        change.setTableName("test_table")
+        def newColumn = new AddColumnConfig()
+        newColumn.setName("new_col")
+        newColumn.setAfterColumn("id")
+        change.addColumn(newColumn)
+
+        when:
+        def statements = change.generateStatements(db)
+
+        then:
+        SqlGeneratorFactory.getInstance().generateSql(statements, db)*.toString() == ["ALTER TABLE test_table ADD new_col AFTER id;"]
+
+        when:
+        def removeChangeSetPropertyNode = new ParsedNode(null, "removeChangeSetProperty")
+                .addChildren([change: "addColumn", dbms: "postgres", remove: "afterColumn"])
+        def changeVisitor = ChangeVisitorFactory.getInstance().create("addColumn");
+        changeVisitor.load(removeChangeSetPropertyNode, resourceSupplier.simpleResourceAccessor)
+        change.modify(changeVisitor)
+
+        statements = change.generateStatements(db)
+
+        then:
+        SqlGeneratorFactory.getInstance().generateSql(statements, db)*.toString() == ["ALTER TABLE test_table ADD new_col;"]
+
+    }
+
     @Unroll
     def "modify method works for removing afterColumn"() {
         when:
-        def modifyChange = new ParsedNode(null, "modifyChange")
+        def removeChangeSetPropertyNode = new ParsedNode(null, "removeChangeSetProperty")
                 .addChildren([change: "addColumn", dbms: dbms, remove: "afterColumn"])
         def changeVisitor = ChangeVisitorFactory.getInstance().create("addColumn");
-        changeVisitor.load(modifyChange, resourceSupplier.simpleResourceAccessor)
+        changeVisitor.load(removeChangeSetPropertyNode, resourceSupplier.simpleResourceAccessor)
         def node = new ParsedNode(null, "addColumn")
                 .addChildren([tableName: "table_name"])
                 .addChild(new ParsedNode(null, "column").addChildren([name: "col_1", type: "int", beforeColumn: "before_col"]))
@@ -228,10 +261,10 @@ class AddColumnChangeTest extends StandardChangeTest {
     @Unroll
     def "modify method works for removing beforeColumn"() {
         when:
-        def modifyChange = new ParsedNode(null, "modifyChange")
+        def removeChangeSetPropertyNode = new ParsedNode(null, "removeChangeSetProperty")
                 .addChildren([change: "addColumn", dbms: dbms, remove: "beforeColumn"])
         def changeVisitor = ChangeVisitorFactory.getInstance().create("addColumn");
-        changeVisitor.load(modifyChange, resourceSupplier.simpleResourceAccessor)
+        changeVisitor.load(removeChangeSetPropertyNode, resourceSupplier.simpleResourceAccessor)
         def node = new ParsedNode(null, "addColumn")
                 .addChildren([tableName: "table_name"])
                 .addChild(new ParsedNode(null, "column").addChildren([name: "col_1", type: "int", beforeColumn: before_column]))
@@ -273,10 +306,10 @@ class AddColumnChangeTest extends StandardChangeTest {
     @Unroll
     def "modify method works for removing position"() {
         when:
-        def modifyChange = new ParsedNode(null, "modifyChange")
+        def removeChangeSetPropertyNode = new ParsedNode(null, "removeChangeSetProperty")
                 .addChildren([change: "addColumn", dbms: dbms, remove: "position"])
         def changeVisitor = ChangeVisitorFactory.getInstance().create("addColumn");
-        changeVisitor.load(modifyChange, resourceSupplier.simpleResourceAccessor)
+        changeVisitor.load(removeChangeSetPropertyNode, resourceSupplier.simpleResourceAccessor)
         def node = new ParsedNode(null, "addColumn")
                 .addChildren([tableName: "table_name"])
                 .addChild(new ParsedNode(null, "column").addChildren([name: "col_1", type: "int", beforeColumn: "before_col"]))

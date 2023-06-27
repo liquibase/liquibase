@@ -119,7 +119,7 @@
     <xsd:element name="databaseChangeLog">
         <xsd:complexType>
             <xsd:sequence>
-                <xsd:element name="modifyChange" minOccurs="0" maxOccurs="unbounded">
+                <xsd:element name="removeChangeSetProperty" minOccurs="0" maxOccurs="unbounded">
                     <xsd:complexType>
                         <xsd:attribute name="change" type="xsd:string"/>
                         <xsd:attribute name="dbms" type="xsd:string"/>

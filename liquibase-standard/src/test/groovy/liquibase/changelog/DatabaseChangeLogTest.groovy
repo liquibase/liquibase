@@ -160,10 +160,10 @@ create view sql_view as select * from sql_table;'''
         ((CreateTableChange) changeLogFromChildren.changeSets[1].changes[0]).tableName == "my_other_table"
         ((CreateTableChange) changeLogFromValue.changeSets[1].changes[0]).tableName == "my_other_table"
     }
-    def "load handles modifyChange"() {
+    def "load handles removeChangeSetProperty"() {
         when:
         def children = [
-                new ParsedNode(null, "modifyChange").setValue([change: "addColumn", dbms: "mock", "remove": "afterColumn"]),
+                new ParsedNode(null, "removeChangeSetProperty").setValue([change: "addColumn", dbms: "mock", "remove": "afterColumn"]),
                 new ParsedNode(null, "changeSet").addChildren([id: "1", author: "kirangodishala", createTable: [tableName: "my_table"]]),
         ]
         def nodeWithChildren = new ParsedNode(null, "databaseChangeLog").addChildren([logicalFilePath: "com/example/logical.xml"])
