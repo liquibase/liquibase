@@ -364,6 +364,23 @@ public class XMLChangeLogSAXParser_RealFile_Test extends Specification {
 
 	}
 
+    def "changeLog parameters that are not global are correctly expanded"() throws Exception {
+        when:
+        def changeLog = new XMLChangeLogSAXParser().parse("liquibase/parser/core/xml/localParameters/changelog.xml", new ChangeLogParameters(new MockDatabase()), new JUnitResourceAccessor());
+
+        then: "changeSet 1"
+        changeLog.getChangeSets().size() == 2
+
+        changeLog.getChangeSets()[0].getAuthor() == "AironTeixeira"
+        changeLog.getChangeSets()[0].getId() == "createTable_account_bank_enum"
+        changeLog.getChangeSets()[0].getLogicalFilePath() == "create_table_account_bank_enum.xml"
+
+        and: "changeSet 2"
+        changeLog.getChangeSets()[1].getAuthor() == "Author2"
+        changeLog.getChangeSets()[1].getId() == "createTable_financial_institution_enum"
+        changeLog.getChangeSets()[1].getLogicalFilePath() == "create_table_financial_institution_enum.xml"
+    }
+
 	def "tests for particular features and edge conditions part 1 testCasesChangeLog.xml"() throws Exception {
         when:
         def path = "liquibase/parser/core/xml/testCasesChangeLog.xml"

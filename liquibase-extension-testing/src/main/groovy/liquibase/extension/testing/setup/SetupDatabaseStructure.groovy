@@ -23,7 +23,7 @@ class SetupDatabaseStructure extends TestSetup {
     void setup(TestSetupEnvironment testSetupEnvironment) throws Exception {
         Database database = getDatabase(testSetupEnvironment)
 
-        final ChangeLogHistoryService changeLogService = ChangeLogHistoryServiceFactory.getInstance().getChangeLogService(database)
+        final ChangeLogHistoryService changeLogService = Scope.getCurrentScope().getSingleton(ChangeLogHistoryServiceFactory.class).getChangeLogService(database)
         changeLogService.init()
         changeLogService.generateDeploymentId()
 
