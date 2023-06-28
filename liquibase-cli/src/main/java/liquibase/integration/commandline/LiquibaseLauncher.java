@@ -1,13 +1,16 @@
 package liquibase.integration.commandline;
 
+import static liquibase.integration.commandline.LiquibaseLauncherSettings.LiquibaseLauncherSetting.LIQUIBASE_HOME;
+import static liquibase.integration.commandline.LiquibaseLauncherSettings.LiquibaseLauncherSetting.LIQUIBASE_LAUNCHER_DEBUG;
+import static liquibase.integration.commandline.LiquibaseLauncherSettings.LiquibaseLauncherSetting.LIQUIBASE_LAUNCHER_PARENT_CLASSLOADER;
+import static liquibase.integration.commandline.LiquibaseLauncherSettings.getSetting;
+
 import java.io.File;
 import java.net.URL;
 import java.net.URLClassLoader;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
-import java.util.Map;
 
 /**
  * Launcher which builds up the classpath needed to run Liquibase, then calls {@link LiquibaseCommandLine#main(String[])}.
@@ -53,50 +56,24 @@ import java.util.Map;
  */
 public class LiquibaseLauncher {
 
-    private static final String LIQUIBASE_HOME_JVM_PROPERTY_NAME = "liquibase.home";
-    private static final String LIQUIBASE_LAUNCHER_DEBUG_JVM_PROPERTY_NAME = "liquibase.launcher.debug";
-    private static final String LIQUIBASE_LAUNCHER_PARENT_CLASSLOADER_JVM_PROPERTY_NAME = "liquibase.launcher.parent_classloader";
-
-    /**
-     * Agglutinates the different settings, i.e., environment variables or associated JVM system properties, that can be
-     * used for customizing the behavior of the class.
-     */
-    private enum LiquibaseLauncherSetting {
-        LIQUIBASE_HOME(LIQUIBASE_HOME_JVM_PROPERTY_NAME),
-        LIQUIBASE_LAUNCHER_DEBUG(LIQUIBASE_LAUNCHER_DEBUG_JVM_PROPERTY_NAME),
-        LIQUIBASE_LAUNCHER_PARENT_CLASSLOADER(LIQUIBASE_LAUNCHER_PARENT_CLASSLOADER_JVM_PROPERTY_NAME);
-
-        private final String jvmPropertyName;
-
-        LiquibaseLauncherSetting(String jvmPropertyName) {
-            this.jvmPropertyName = jvmPropertyName;
-        }
-
-        String getJvmPropertyName() {
-            return this.jvmPropertyName;
-        }
-    }
-
     private static boolean debug = false;
 
     public static void main(final String[] args) throws Exception {
 
-        final String debugSetting =
-            getValueFromJvmPropertyOrEnvironmentVariable(LiquibaseLauncherSetting.LIQUIBASE_LAUNCHER_DEBUG);
+        final String debugSetting = getSetting(LIQUIBASE_LAUNCHER_DEBUG);
         if ("true".equals(debugSetting)) {
             LiquibaseLauncher.debug = true;
             debug("Debug mode enabled because either the JVM property 'liquibase.launcher.debug' or the environment " +
                 "variable 'LIQUIBASE_LAUNCHER_DEBUG' is set to " + debugSetting);
         }
 
-        String parentLoaderSetting =
-            getValueFromJvmPropertyOrEnvironmentVariable(LiquibaseLauncherSetting.LIQUIBASE_LAUNCHER_PARENT_CLASSLOADER);
+        String parentLoaderSetting = getSetting(LIQUIBASE_LAUNCHER_PARENT_CLASSLOADER);
         if (parentLoaderSetting == null) {
              parentLoaderSetting = "system";
         }
         debug("Liquibase launcher parent classloader is set to " + parentLoaderSetting);
 
-        final String liquibaseHomeEnv = getValueFromJvmPropertyOrEnvironmentVariable(LiquibaseLauncherSetting.LIQUIBASE_HOME);
+        final String liquibaseHomeEnv = getSetting(LIQUIBASE_HOME);
         debug("Liquibase home: " + liquibaseHomeEnv);
         if (liquibaseHomeEnv == null || liquibaseHomeEnv.equals("")) {
             throw new IllegalArgumentException("Unable to find either 'liquibase.home' JVM property nor " +
@@ -196,14 +173,5 @@ public class LiquibaseLauncher {
                 e.printStackTrace(System.err);
             }
         }
-    }
-
-    private static String getValueFromJvmPropertyOrEnvironmentVariable(LiquibaseLauncherSetting setting) {
-        String value = System.getProperty(setting.getJvmPropertyName());
-        if (value != null) {
-            return value;
-        }
-
-        return System.getenv(setting.name());
     }
 }
