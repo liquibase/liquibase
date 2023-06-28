@@ -118,7 +118,7 @@ public abstract class AbstractChangeLogHistoryService implements ChangeLogHistor
          return lastRanChangeSet.getDeploymentId();
     }
 
-    protected abstract void replaceChecksum(ChangeSet changeSet) throws DatabaseException;
+    public abstract void replaceChecksum(ChangeSet changeSet) throws DatabaseException;
 
     @Override
     public String getDeploymentId() {
