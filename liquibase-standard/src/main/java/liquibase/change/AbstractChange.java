@@ -868,4 +868,22 @@ public abstract class AbstractChange extends AbstractPlugin implements Change {
         return description;
     }
 
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        if (!super.equals(o)) return false;
+        if (o instanceof DbmsTargetedChange && this instanceof DbmsTargetedChange) {
+            if (!((DbmsTargetedChange)o).getDbms().equals(((DbmsTargetedChange)this).getDbms())) {
+                return false;
+            }
+        }
+        AbstractChange that = (AbstractChange) o;
+        return Objects.equals(changeSet, that.changeSet);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(super.hashCode(), changeSet);
+    }
 }
