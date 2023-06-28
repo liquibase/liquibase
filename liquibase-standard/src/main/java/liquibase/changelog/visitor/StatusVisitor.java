@@ -1,5 +1,6 @@
 package liquibase.changelog.visitor;
 
+import liquibase.Scope;
 import liquibase.changelog.*;
 import liquibase.changelog.filter.ChangeSetFilterResult;
 import liquibase.changelog.filter.NotInChangeLogChangeSetFilter;
@@ -18,7 +19,8 @@ public class StatusVisitor implements ChangeSetVisitor, SkippedChangeSetVisitor 
     private final List<RanChangeSet> ranChangeSets;
 
     public StatusVisitor(Database database) throws LiquibaseException {
-        ranChangeSets = new ArrayList<>(ChangeLogHistoryServiceFactory.getInstance().getChangeLogService(database).getRanChangeSets());
+        ranChangeSets = new ArrayList<>(
+            Scope.getCurrentScope().getSingleton(ChangeLogHistoryServiceFactory.class).getChangeLogService(database).getRanChangeSets());
     }
 
     @Override
