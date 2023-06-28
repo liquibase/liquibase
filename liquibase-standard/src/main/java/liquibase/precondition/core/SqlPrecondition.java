@@ -5,10 +5,11 @@ import liquibase.changelog.ChangeSet;
 import liquibase.changelog.DatabaseChangeLog;
 import liquibase.changelog.visitor.ChangeExecListener;
 import liquibase.database.Database;
-import liquibase.database.DatabaseConnection;
 import liquibase.exception.*;
+import liquibase.executor.Executor;
 import liquibase.executor.ExecutorService;
 import liquibase.precondition.AbstractPrecondition;
+import liquibase.statement.SqlStatement;
 import liquibase.statement.core.RawSqlStatement;
 
 public class SqlPrecondition extends AbstractPrecondition {
@@ -47,16 +48,20 @@ public class SqlPrecondition extends AbstractPrecondition {
     public void check(Database database, DatabaseChangeLog changeLog, ChangeSet changeSet, ChangeExecListener changeExecListener)
             throws PreconditionFailedException, PreconditionErrorException {
         try {
-            Object oResult = Scope.getCurrentScope().getSingleton(ExecutorService.class).getExecutor("jdbc", database).queryForObject(new RawSqlStatement(getSql().replaceFirst(";$","")), String.class);
-            if (oResult == null) {
-                throw new PreconditionFailedException("No rows returned from SQL Precondition", changeLog, this);
-            }
-            String result = oResult.toString();
+            Executor executor = Scope.getCurrentScope().getSingleton(ExecutorService.class).getExecutor("jdbc", database);
+            SqlStatement statement = new RawSqlStatement(getSql().replaceFirst(";$",""));
             String expectedResult = getExpectedResult();
-            if (!expectedResult.equals(result)) {
-                throw new PreconditionFailedException("SQL Precondition failed.  Expected '"+ expectedResult +"' got '"+result+"'", changeLog, this);
+            if (expectedResult == null) {
+                executor.execute(statement);
+            } else {
+                String result = executor.queryForObject(statement, String.class);
+                if (result == null) {
+                    throw new PreconditionFailedException("No rows returned from SQL Precondition", changeLog, this);
+                }
+                if (!expectedResult.equals(result)) {
+                    throw new PreconditionFailedException("SQL Precondition failed.  Expected '"+ expectedResult +"' got '"+result+"'", changeLog, this);
+                }
             }
-
         } catch (DatabaseException e) {
             throw new PreconditionErrorException(e, changeLog, this);
         }

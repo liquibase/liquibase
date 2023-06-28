@@ -838,8 +838,7 @@
 
     <xsd:element name="sqlCheck">
         <xsd:complexType mixed="true">
-            <xsd:attribute name="expectedResult" type="xsd:string"
-                           use="required"/>
+            <xsd:attribute name="expectedResult" type="xsd:string"/>
         </xsd:complexType>
     </xsd:element>
 
