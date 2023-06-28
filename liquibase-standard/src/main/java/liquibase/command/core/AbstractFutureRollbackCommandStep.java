@@ -69,7 +69,7 @@ public abstract class AbstractFutureRollbackCommandStep extends AbstractCommandS
         lockService.waitForLock();
 
         try {
-            ChangeLogHistoryServiceFactory.getInstance().getChangeLogService(database).generateDeploymentId();
+            Scope.getCurrentScope().getSingleton(ChangeLogHistoryServiceFactory.class).getChangeLogService(database).generateDeploymentId();
 
             changeLog.validate(database, contexts, labelExpression);
 

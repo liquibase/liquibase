@@ -4,6 +4,7 @@ import liquibase.ContextExpression;
 import liquibase.Labels;
 import liquibase.RuntimeEnvironment;
 import liquibase.Scope;
+import liquibase.change.CheckSum;
 import liquibase.changelog.filter.ChangeSetFilter;
 import liquibase.changelog.filter.ChangeSetFilterResult;
 import liquibase.changelog.visitor.ChangeSetVisitor;
@@ -29,21 +30,29 @@ public class ChangeLogIterator {
     private final Set<String> seenChangeSets = new HashSet<>();
 
     public ChangeLogIterator(DatabaseChangeLog databaseChangeLog, ChangeSetFilter... changeSetFilters) {
+        this(databaseChangeLog, Arrays.asList(changeSetFilters));
+    }
+
+    public ChangeLogIterator(DatabaseChangeLog databaseChangeLog, List<ChangeSetFilter> changeSetFilters) {
         this.databaseChangeLog = databaseChangeLog;
-        this.changeSetFilters = Arrays.asList(changeSetFilters);
+        this.changeSetFilters = changeSetFilters;
     }
 
     public ChangeLogIterator(List<RanChangeSet> changeSetList, DatabaseChangeLog changeLog, ChangeSetFilter... changeSetFilters) {
+        this(changeSetList, changeLog, Arrays.asList(changeSetFilters));
+    }
+
+    public ChangeLogIterator(List<RanChangeSet> changeSetList, DatabaseChangeLog changeLog, List<ChangeSetFilter> changeSetFilters) {
         final List<ChangeSet> changeSets = new ArrayList<>();
         for (RanChangeSet ranChangeSet : changeSetList) {
-	        final List<ChangeSet> changeSetsForRanChangeSet = changeLog.getChangeSets(ranChangeSet);
-	        for (ChangeSet changeSet : changeSetsForRanChangeSet) {
+            final List<ChangeSet> changeSetsForRanChangeSet = changeLog.getChangeSets(ranChangeSet);
+            for (ChangeSet changeSet : changeSetsForRanChangeSet) {
                 if (changeSet != null) {
                     changeSet.setFilePath(DatabaseChangeLog.normalizePath(ranChangeSet.getChangeLog()));
                     changeSet.setDeploymentId(ranChangeSet.getDeploymentId());
                     changeSets.add(changeSet);
                 }
-	        }
+            }
         }
         this.databaseChangeLog = (new DatabaseChangeLog() {
             @Override
@@ -56,7 +65,7 @@ public class ChangeLogIterator {
                 return "";
             }
         });
-        this.changeSetFilters = Arrays.asList(changeSetFilters);
+        this.changeSetFilters = changeSetFilters;
     }
 
     public void run(ChangeSetVisitor visitor, RuntimeEnvironment env) throws LiquibaseException {

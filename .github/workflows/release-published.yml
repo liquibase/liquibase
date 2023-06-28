@@ -43,16 +43,13 @@ jobs:
     runs-on: ubuntu-22.04
     steps:
       - name: Get Version to deploy
-        run: |
-          version=${{ needs.setup.outputs.version }}
-      - uses: trstringer/manual-approval@v1
+        uses: trstringer/manual-approval@v1
         with:
           secret: ${{ secrets.GITHUB_TOKEN }}
-          # approvers: suryaaki2,XDelphiGrl,jnewton03,kristyldatical
-          approvers: sayaliM0412
+          approvers: suryaaki2,rberezen,jnewton03,kristyldatical,sayaliM0412
           minimum-approvals: 1
-          issue-title: "Deploying ${version} to sonatype"
-          issue-body: "Please approve or deny the deployment of version ${version}"
+          issue-title: "Deploying ${{ needs.setup.outputs.version }} to sonatype"
+          issue-body: "Please approve or deny the deployment of version ${{ needs.setup.outputs.version }}"
           additional-approved-words: 'lgtm,✅,👍,proceed,shipit,:shipit:'
           additional-denied-words: 'stop,error,failed,fail,broken,:x:,👎'
 

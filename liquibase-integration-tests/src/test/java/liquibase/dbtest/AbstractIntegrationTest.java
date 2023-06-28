@@ -154,7 +154,7 @@ public abstract class AbstractIntegrationTest {
         LockServiceFactory.getInstance().resetAll();
         LockServiceFactory.getInstance().getLockService(database).init();
 
-        ChangeLogHistoryServiceFactory.getInstance().resetAll();
+        Scope.getCurrentScope().getSingleton(ChangeLogHistoryServiceFactory.class).resetAll();
     }
 
     /**
@@ -1129,9 +1129,9 @@ public abstract class AbstractIntegrationTest {
         liquibase.update(contexts);
 
         Connection conn = ((JdbcConnection) database.getConnection()).getUnderlyingConnection();
-        conn.createStatement().execute("update DATABASECHANGELOG set md5sum = '1:xxx'");
+        conn.createStatement().execute("update DATABASECHANGELOG set md5sum = null");
         if (!conn.getAutoCommit()) {
-            conn.commit();;
+            conn.commit();
         }
 
         liquibase.getDatabase().getRanChangeSetList();

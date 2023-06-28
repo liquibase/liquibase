@@ -18,6 +18,7 @@ import liquibase.database.Database
 import liquibase.diff.compare.CompareControl
 import liquibase.exception.CommandExecutionException
 import liquibase.extension.testing.testsystem.DatabaseTestSystem
+import liquibase.lockservice.LockServiceFactory
 import liquibase.resource.SearchPathResourceAccessor
 import liquibase.sdk.resource.MockResourceAccessor
 
@@ -108,6 +109,8 @@ class CommandUtil {
         if (! db.shouldTest()) {
             return;
         }
+        def lockService = LockServiceFactory.getInstance().getLockService(db.getDatabaseFromFactory());
+        lockService.releaseLock()
         CommandScope commandScope = new CommandScope(DropAllCommandStep.COMMAND_NAME)
         commandScope.addArgumentValue(DbUrlConnectionCommandStep.URL_ARG, db.getConnectionUrl())
         commandScope.addArgumentValue(DbUrlConnectionCommandStep.USERNAME_ARG, db.getUsername())
