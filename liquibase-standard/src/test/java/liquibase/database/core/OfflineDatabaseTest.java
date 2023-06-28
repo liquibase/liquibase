@@ -20,7 +20,7 @@ public class OfflineDatabaseTest {
 
     private Database createOfflineDatabase(String url) throws Exception {
         DatabaseConnection databaseConnection = new OfflineConnection(url, new JUnitResourceAccessor());
-        return DatabaseFactory.getInstance().openDatabase(url, null, null, null, null);
+        return DatabaseFactory.getInstance().findCorrectDatabaseImplementation(databaseConnection);
     }
 
     /**
