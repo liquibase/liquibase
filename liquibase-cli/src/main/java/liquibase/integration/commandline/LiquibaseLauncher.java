@@ -169,7 +169,15 @@ public class LiquibaseLauncher {
         final URLClassLoader classloader = new URLClassLoader(urls.toArray(new URL[0]), parentLoader);
         Thread.currentThread().setContextClassLoader(classloader);
 
-        final Class<?> cli = classloader.loadClass(LiquibaseCommandLine.class.getName());
+        Class<?> cli = null;
+
+        try {
+            cli = classloader.loadClass(LiquibaseCommandLine.class.getName());
+        } catch (ClassNotFoundException classNotFoundException) {
+            throw new RuntimeException(
+                String.format("Unable to find Liquibase classes in the configured home: '%s'.", liquibaseHome)
+            );
+        }
 
         cli.getMethod("main", String[].class).invoke(null, new Object[]{args});
     }
