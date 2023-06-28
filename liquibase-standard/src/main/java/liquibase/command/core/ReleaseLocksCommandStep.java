@@ -1,7 +1,5 @@
 package liquibase.command.core;
 
-import liquibase.Contexts;
-import liquibase.LabelExpression;
 import liquibase.Scope;
 import liquibase.command.AbstractCommandStep;
 import liquibase.command.CommandDefinition;
@@ -19,7 +17,7 @@ public class ReleaseLocksCommandStep extends AbstractCommandStep {
     @Override
     public void run(CommandResultsBuilder resultsBuilder) throws Exception {
         Database database = (Database) resultsBuilder.getCommandScope().getDependency(Database.class);
-        ListLocksCommandStep.checkLiquibaseTables(false, null, new Contexts(), new LabelExpression(), database);
+        ListLocksCommandStep.initializeChangelogService(database);
         LockServiceFactory.getInstance().getLockService(database).forceReleaseLock();
         Scope.getCurrentScope().getUI().sendMessage(String.format(
                         coreBundle.getString("successfully.released.database.change.log.locks"),

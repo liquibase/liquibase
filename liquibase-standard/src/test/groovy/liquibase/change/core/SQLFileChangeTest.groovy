@@ -1,5 +1,6 @@
 package liquibase.change.core
 
+import liquibase.ChecksumVersion
 import liquibase.Scope
 import liquibase.change.Change
 import liquibase.change.ChangeStatus
@@ -9,6 +10,7 @@ import liquibase.changelog.ChangeSet
 import liquibase.changelog.DatabaseChangeLog
 import liquibase.database.core.MockDatabase
 import liquibase.exception.UnexpectedLiquibaseException
+import liquibase.integration.commandline.LiquibaseCommandLineConfiguration
 import liquibase.statement.SqlStatement
 import liquibase.test.JUnitResourceAccessor
 import liquibase.util.StreamUtil
@@ -142,7 +144,8 @@ class SQLFileChangeTest extends StandardChangeTest {
 
     }
 
-    def "validate checksum gets re-computed if sql(file) content change"() {
+    @Unroll
+    def "validate checksum if sql(file) content change - #version"(ChecksumVersion version, String originalChecksum, String updatedChecksum) {
         when:
         String procedureText =
         """CREATE OR REPLACE PROCEDURE testHello()
@@ -156,14 +159,24 @@ class SQLFileChangeTest extends StandardChangeTest {
         procedureText = procedureText.replace("valueToReplace", "value1")
         change.setSql(procedureText)
 
-        def checkSumFirstReplacement = change.generateCheckSum().toString()
+        def checkSumFirstReplacement = Scope.child([(Scope.Attr.checksumVersion.name()): version], {
+            return change.generateCheckSum()
+        } as Scope.ScopedRunnerWithReturn).toString()
 
         procedureText = procedureText.replace("value1", "value2")
         change.setSql(procedureText)
 
-        def checkSumSecondReplacement = change.generateCheckSum().toString()
+        def checkSumSecondReplacement = Scope.child([(Scope.Attr.checksumVersion.name()): version], {
+            return change.generateCheckSum()
+        } as Scope.ScopedRunnerWithReturn).toString()
 
         then:
-        checkSumFirstReplacement != checkSumSecondReplacement
+        checkSumFirstReplacement == originalChecksum
+        checkSumSecondReplacement == updatedChecksum
+
+        where:
+        version | originalChecksum | updatedChecksum
+        ChecksumVersion.V8 | "8:25560f4c442fa581b820d0a6206fd14e" | "8:b934d68e53222bc7b5cbf147ce6746b4"
+        ChecksumVersion.latest() | "9:8cfbd3e5970885470db17cd149feb637" | "9:f6302129ace10ca356faa21343dd1aa8"
     }
 }

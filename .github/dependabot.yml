@@ -5,9 +5,15 @@ updates:
     directory: "/"
     schedule:
       interval: "daily"
+    labels:
+      - "sdou"
+      - "dependencies"
 
   - package-ecosystem: "maven"
     directory: "/"
     open-pull-requests-limit: 50
     schedule:
       interval: "daily"
+    ignore:
+      - dependency-name: "actions/delete-package-versions"
+        update-types: ["version-update:semver-major"]  

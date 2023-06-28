@@ -2,6 +2,7 @@ package liquibase.parser.core.yaml;
 
 import liquibase.ContextExpression;
 import liquibase.Labels;
+import liquibase.Scope;
 import liquibase.changelog.ChangeLogParameters;
 import liquibase.changelog.DatabaseChangeLog;
 import liquibase.exception.ChangeLogParseException;
@@ -11,15 +12,16 @@ import liquibase.parser.ChangeLogParser;
 import liquibase.parser.core.ParsedNode;
 import liquibase.resource.Resource;
 import liquibase.resource.ResourceAccessor;
+import liquibase.util.FileUtil;
 import org.yaml.snakeyaml.Yaml;
 import org.yaml.snakeyaml.constructor.SafeConstructor;
 
 import java.io.IOException;
 import java.io.InputStream;
-import java.nio.file.Paths;
 import java.util.*;
 
 public class YamlChangeLogParser extends YamlParser implements ChangeLogParser {
+    private static final String DATABASE_CHANGE_LOG = "databaseChangeLog";
 
     @Override
     public DatabaseChangeLog parse(String physicalChangeLogLocation, ChangeLogParameters changeLogParameters, ResourceAccessor resourceAccessor) throws ChangeLogParseException {
@@ -41,9 +43,14 @@ public class YamlChangeLogParser extends YamlParser implements ChangeLogParser {
             }
             DatabaseChangeLog changeLog = new DatabaseChangeLog(DatabaseChangeLog.normalizePath(physicalChangeLogLocation));
 
-            Object rootList = parsedYaml.get("databaseChangeLog");
-            if (rootList == null) {
+            if (!parsedYaml.containsKey(DATABASE_CHANGE_LOG)) {
                 throw new ChangeLogParseException("Could not find databaseChangeLog node");
+            }
+
+            Object rootList = parsedYaml.get(DATABASE_CHANGE_LOG);
+            if (rootList == null) {
+                changeLog.setChangeLogParameters(changeLogParameters);
+                return changeLog;
             }
 
             if (!(rootList instanceof List)) {
@@ -75,7 +82,7 @@ public class YamlChangeLogParser extends YamlParser implements ChangeLogParser {
             replaceParameters(parsedYaml, changeLogParameters, changeLog);
 
             changeLog.setChangeLogParameters(changeLogParameters);
-            ParsedNode databaseChangeLogNode = new ParsedNode(null, "databaseChangeLog");
+            ParsedNode databaseChangeLogNode = new ParsedNode(null, DATABASE_CHANGE_LOG);
             databaseChangeLogNode.setValue(rootList);
 
             changeLog.load(databaseChangeLogNode, resourceAccessor);
@@ -101,10 +108,15 @@ public class YamlChangeLogParser extends YamlParser implements ChangeLogParser {
     private void loadChangeLogParametersFromFile(ChangeLogParameters changeLogParameters, ResourceAccessor resourceAccessor, DatabaseChangeLog changeLog, Map property, ContextExpression context, Labels labels, Boolean global) throws IOException, LiquibaseException {
         Properties props = new Properties();
         Boolean relativeToChangelogFile = (Boolean) property.get("relativeToChangelogFile");
+        Boolean errorIfMissing = (Boolean) property.get("errorIfMissing");
         String file = (String) property.get("file");
 
         if (relativeToChangelogFile == null) {
             relativeToChangelogFile = false;
+        }
+
+        if (errorIfMissing == null) {
+            errorIfMissing = true;
         }
 
         Resource resource;
@@ -116,7 +128,12 @@ public class YamlChangeLogParser extends YamlParser implements ChangeLogParser {
         }
 
         if (!resource.exists()) {
-            log.info("Could not open properties file " + property.get("file"));
+            if (errorIfMissing) {
+                throw new UnexpectedLiquibaseException(FileUtil.getFileNotFoundMessage(file));
+            }
+            else {
+                Scope.getCurrentScope().getLog(getClass()).warning(FileUtil.getFileNotFoundMessage(file));
+            }
         } else {
             try (InputStream stream = resource.openInputStream()) {
                 props.load(stream);

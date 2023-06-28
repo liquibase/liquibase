@@ -39,7 +39,7 @@
 		<dependency>
 			<groupId>info.picocli</groupId>
 			<artifactId>picocli</artifactId>
-			<version>4.7.3</version>
+			<version>4.7.4</version>
 			<optional>true</optional>
 		</dependency>
 		<dependency>
@@ -191,7 +191,7 @@
 			<plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-source-plugin</artifactId>
-                <version>3.2.1</version>
+                <version>3.3.0</version>
 				<configuration>
 					<!-- sources.jar from this module is the shaded sources of others -->
                     <skipSource>true</skipSource>

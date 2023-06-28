@@ -266,6 +266,15 @@ public abstract class AbstractLiquibaseMojo extends AbstractMojo {
     protected boolean skip;
 
     /**
+     * Skip plugin execution if the specified file exists.
+     * The use of this parameter is NOT RECOMMENDED but can be used when needed.
+     *
+     * @parameter property="liquibase.skipOnFileExists"
+     */
+    @PropertyElement
+    protected String skipOnFileExists;
+
+    /**
      * A flag which indicates you want to set the character encoding of the output file during the updateSQL phase.
      *
      * @parameter property="liquibase.outputFileEncoding"
@@ -658,6 +667,19 @@ public abstract class AbstractLiquibaseMojo extends AbstractMojo {
         if (StringUtil.trimToNull(logging) != null) {
             getLog().error("The liquibase-maven-plugin now manages logging via the standard maven logging config, not the 'logging' configuration. Use the -e, -X or -q flags or see https://maven.apache.org/maven-logging.html");
         }
+        if (skip) {
+            getLog().warn("Liquibase skipped due to Maven configuration");
+            return;
+        }
+
+        if (skipOnFileExists != null) {
+            File f = new File(skipOnFileExists);
+            if (f.exists()) {
+                getLog().warn("Liquibase skipped because file " + skipOnFileExists + " exists");
+                return;
+            }
+            getLog().warn("Liquibase NOT skipped because file " + skipOnFileExists + " does NOT exists");
+        }
 
         // If maven is called with -T and a value larger than 1, it can get confused under heavy thread load
         Scope.setScopeManager(new ThreadLocalScopeManager());
@@ -678,10 +700,6 @@ public abstract class AbstractLiquibaseMojo extends AbstractMojo {
 
                 if (!LiquibaseCommandLineConfiguration.SHOULD_RUN.getCurrentValue()) {
                     getLog().info("Liquibase did not run because " + LiquibaseCommandLineConfiguration.SHOULD_RUN.getKey() + " was set to false");
-                    return;
-                }
-                if (skip) {
-                    getLog().warn("Liquibase skipped due to Maven configuration");
                     return;
                 }
 
