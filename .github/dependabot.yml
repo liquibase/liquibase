@@ -14,3 +14,6 @@ updates:
     open-pull-requests-limit: 50
     schedule:
       interval: "daily"
+    ignore:
+      - dependency-name: "actions/delete-package-versions"
+        update-types: ["version-update:semver-major"]  
