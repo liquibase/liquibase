@@ -66,7 +66,7 @@ public class DatabaseChangelogCommandStep extends AbstractHelperCommandStep impl
 
     @Override
     public List<Class<?>> requiredDependencies() {
-        return Arrays.asList(Database.class, LockService.class);
+        return Arrays.asList(Database.class);
     }
 
     @Override
