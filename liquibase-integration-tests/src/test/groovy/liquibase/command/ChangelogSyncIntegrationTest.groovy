@@ -16,7 +16,7 @@ class ChangelogSyncIntegrationTest extends Specification {
     @Shared
     private DatabaseTestSystem h2 = Scope.currentScope.getSingleton(TestSystemFactory).getTestSystem("h2") as DatabaseTestSystem
 
-    def "run changelogSync from CommandStep"() {
+    def "Verify deploymentId is populated when running changelogSync"() {
         when:
         def changelogSync = new CommandScope(ChangelogSyncCommandStep.COMMAND_NAME)
         changelogSync.addArgumentValue(DatabaseChangelogCommandStep.CHANGELOG_FILE_ARG, "liquibase/update-tests.yml")
