@@ -198,7 +198,7 @@ public class H2IntegrationTest extends AbstractIntegrationTest {
         liquibase.update();
 
         try {
-            List<Map<String, ?>> queryResult = Scope.getCurrentScope().getSingleton(ExecutorService.class).getExecutor("jdbc", getDatabase())
+            Scope.getCurrentScope().getSingleton(ExecutorService.class).getExecutor("jdbc", getDatabase())
                     .queryForList(new RawSqlStatement("select * from oraculo"));
         }
         catch (DatabaseException e) {
