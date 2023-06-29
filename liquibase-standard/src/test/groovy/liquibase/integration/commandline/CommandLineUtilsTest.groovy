@@ -4,7 +4,11 @@ import liquibase.GlobalConfiguration
 import liquibase.Scope
 import spock.lang.Specification
 
+import static java.util.ResourceBundle.getBundle
+
 class CommandLineUtilsTest extends Specification {
+
+    private static ResourceBundle coreBundle = getBundle("liquibase/i18n/liquibase-core")
 
     def getBanner() {
         when:
@@ -14,8 +18,8 @@ class CommandLineUtilsTest extends Specification {
 
         then:
         banner.contains("Get documentation at docs.liquibase.com")
-        banner.contains("Starting Liquibase at");
-        banner.contains("version ")
+        banner.contains(coreBundle.getString("starting.liquibase.at.timestamp").replace("%s", ""))
+        banner.contains(coreBundle.getString("liquibase.version.builddate").replaceFirst("%s.*", ""))
     }
 
     def "getBanner with banner disabled"() {
@@ -26,7 +30,7 @@ class CommandLineUtilsTest extends Specification {
 
         then:
         !banner.contains("Get documentation at docs.liquibase.com")
-        banner.contains("Starting Liquibase at");
-        banner.contains("version ")
+        banner.contains(coreBundle.getString("starting.liquibase.at.timestamp").replace("%s", ""))
+        banner.contains(coreBundle.getString("liquibase.version.builddate").replaceFirst("%s.*", ""))
     }
 }
