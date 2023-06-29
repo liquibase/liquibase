@@ -43,11 +43,7 @@ jobs:
           echo "PR from Fork is NOT safe to build"
           echo "A member of Liquibase team needs to apply label 'SafeToBuild'! "
           exit 1
-      - name: Run needed builds
-        if: github.event.action == 'labeled' && github.event.pull_request.head.repo.full_name == 'liquibase/liquibase'
-        run: |
-          echo "Don't run liquibase/liquibase builds on labels"
-          exit 1
+
   setup:
     name: Setup
     needs: check_build_safety
