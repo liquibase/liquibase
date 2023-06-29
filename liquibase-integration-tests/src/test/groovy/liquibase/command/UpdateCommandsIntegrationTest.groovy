@@ -58,6 +58,10 @@ class UpdateCommandsIntegrationTest extends Specification {
         resultSet.next()
         resultSet.getInt(1) == 1
 
+        def detailsResultSet = h2.getConnection().createStatement().executeQuery("select DEPLOYMENT_ID from databasechangelog")
+        detailsResultSet.next()
+        assert detailsResultSet.getString(1) != null : "No deployment ID found for the update"
+
         def rsTableExist = h2.getConnection().createStatement().executeQuery("select count(1) from example_table")
         rsTableExist.next()
         rsTableExist.getInt(1) == 0
