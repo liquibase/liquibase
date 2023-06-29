@@ -8,6 +8,7 @@ import java.io.UnsupportedEncodingException;
 import java.nio.charset.StandardCharsets;
 import java.security.SecureRandom;
 import java.util.*;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -31,6 +32,27 @@ public class StringUtil {
             return "";
         }
         return string.trim();
+    }
+
+    /**
+     *
+     * Split a string, trim each part, and return a new array
+     *
+     * @param   string           String to operate on
+     * @return  String[]
+     *
+     */
+    public static String[] splitAndTrim(String string) {
+        String[] newParts = string.split(",");
+        if (newParts.length == 1) {
+            return newParts;
+        }
+        String[] editedParts = new String[newParts.length];
+        AtomicInteger i = new AtomicInteger();
+        Arrays.stream(newParts).forEach(label-> {
+            editedParts[i.getAndIncrement()] = label.trim();
+        });
+        return editedParts;
     }
 
     /**
