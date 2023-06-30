@@ -476,7 +476,8 @@ http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbch
 
         then:
         SetupException e = thrown()
-        assert e.getMessage().startsWith("liquibase.exception.SetupException: Circular reference detected in 'include-all-dir/'. Set liquibase.errorOnCircularIncludeAll if you'd like to ignore this error.")
+        assert e.getMessage().startsWith("liquibase.exception.SetupException:") &&
+               e.getMessage().contains("Circular reference detected in 'include-all-dir/'. Set liquibase.errorOnCircularIncludeAll if you'd like to ignore this error.")
     }
 
     def "includeAll throws no exception when directory not found and errorIfMissing is false"() {
