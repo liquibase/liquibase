@@ -17,13 +17,9 @@ class MssqlMergeIntegrationTest extends Specification {
         given:
         CommandUtil.runDropAll(mssql)
         when:
-        System.out.println("Starting merge test")
         CommandUtil.runUpdate(mssql,'src/test/resources/changelogs/mssql/issues/merge.statement.changelog.sql')
-        System.out.println("Finishing merge test")
         then:
-        System.out.println("Checking no exception")
         noExceptionThrown()
-        System.out.println("Found no exception")
         cleanup:
         CommandUtil.runDropAll(mssql)
     }
