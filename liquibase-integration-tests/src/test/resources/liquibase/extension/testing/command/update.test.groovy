@@ -67,7 +67,7 @@ Optional Args:
          expectations = {
              // Check that the order executed number increments by 1 for each changeset
              def database = (Database) Scope.getCurrentScope().get("database", null)
-             def changelogHistoryService = ChangeLogHistoryServiceFactory.getInstance().getChangeLogService(database)
+             def changelogHistoryService = Scope.getCurrentScope().getSingleton(ChangeLogHistoryServiceFactory.class).getChangeLogService(database)
              List<RanChangeSet> ranChangeSets = changelogHistoryService.getRanChangeSets()
              int expectedOrder = 1
              for (RanChangeSet ranChangeSet : ranChangeSets) {

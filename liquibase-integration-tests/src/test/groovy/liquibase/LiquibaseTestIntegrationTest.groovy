@@ -183,7 +183,7 @@ class LiquibaseTestIntegrationTest extends Specification {
         liquibase.clearCheckSums()
 
         then:
-        List<RanChangeSet> ranChangeSets = ChangeLogHistoryServiceFactory.getInstance().getChangeLogService(liquibase.getDatabase()).getRanChangeSets()
+        List<RanChangeSet> ranChangeSets = Scope.getCurrentScope().getSingleton(ChangeLogHistoryServiceFactory.class).getChangeLogService(liquibase.getDatabase()).getRanChangeSets()
         assert ranChangeSets.get(0).getLastCheckSum() == null
 
         cleanup:

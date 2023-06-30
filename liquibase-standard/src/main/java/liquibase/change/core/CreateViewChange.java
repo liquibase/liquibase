@@ -1,5 +1,6 @@
 package liquibase.change.core;
 
+import liquibase.ChecksumVersion;
 import liquibase.GlobalConfiguration;
 import liquibase.Scope;
 import liquibase.change.*;
@@ -27,6 +28,7 @@ import liquibase.util.StringUtil;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.UnsupportedEncodingException;
 import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -186,7 +188,10 @@ public class CreateViewChange extends AbstractChange {
     }
 
     @Override
-    public String[] getExcludedFieldFilters() {
+    public String[] getExcludedFieldFilters(ChecksumVersion version) {
+        if (version.lowerOrEqualThan(ChecksumVersion.V8)) {
+            return new String[0];
+        }
         return new String[] {
                 "path",
                 "relativeToChangelogFile",
@@ -198,10 +203,18 @@ public class CreateViewChange extends AbstractChange {
     /**
      * Calculates the checksum based on the contained SQL.
      *
-     * @see liquibase.change.AbstractChange#generateCheckSum()
+     * @see Change#generateCheckSum(ChecksumVersion)
      */
     @Override
     public CheckSum generateCheckSum() {
+        ChecksumVersion version = Scope.getCurrentScope().getChecksumVersion();
+        if (version.lowerOrEqualThan(ChecksumVersion.V8)) {
+            return generateCheckSumV8();
+        }
+        return generateCheckSumLatest(version);
+    }
+
+    private CheckSum generateCheckSumLatest(ChecksumVersion version) {
         InputStream stream = null;
         CheckSum checkSum;
         try {
@@ -229,7 +242,47 @@ public class CreateViewChange extends AbstractChange {
                 }
             }
         }
+    }
 
+    @Deprecated
+    private CheckSum generateCheckSumV8() {
+        if (this.path == null) {
+            return super.generateCheckSum();
+        }
+
+        InputStream stream = null;
+        try {
+            stream = openSqlStream();
+        } catch (IOException e) {
+            throw new UnexpectedLiquibaseException(e);
+        }
+
+        try {
+            String selectQuery = this.selectQuery;
+            if ((stream == null) && (selectQuery == null)) {
+                selectQuery = "";
+            }
+
+            String encoding = GlobalConfiguration.OUTPUT_FILE_ENCODING.getCurrentValue();
+            if (selectQuery != null) {
+                try {
+                    stream = new ByteArrayInputStream(selectQuery.getBytes(encoding));
+                } catch (UnsupportedEncodingException e) {
+                    throw new AssertionError(encoding+" is not supported by the JVM, this should not happen according to the JavaDoc of the Charset class");
+                }
+            }
+
+            CheckSum checkSum = CheckSum.compute(new NormalizingStreamV8(";", false, false, stream), false);
+
+            return CheckSum.compute(super.generateCheckSum().toString() + ":" + checkSum);
+        } finally {
+            if (stream != null) {
+                try {
+                    stream.close();
+                } catch (IOException ignore) {
+                }
+            }
+        }
     }
 
     @Override

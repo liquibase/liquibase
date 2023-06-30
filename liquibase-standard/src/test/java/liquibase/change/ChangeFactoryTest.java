@@ -1,12 +1,16 @@
 package liquibase.change;
 
+import liquibase.ChecksumVersion;
 import liquibase.Scope;
 import liquibase.change.core.CreateTableChange;
 import liquibase.database.core.MSSQLDatabase;
+import liquibase.integration.commandline.LiquibaseCommandLineConfiguration;
 import liquibase.servicelocator.LiquibaseService;
 import liquibase.sqlgenerator.SqlGeneratorFactory;
 import liquibase.statement.core.CreateSequenceStatement;
 import org.junit.Test;
+
+import java.util.Collections;
 
 import static org.junit.Assert.*;
 
@@ -32,6 +36,23 @@ public class ChangeFactoryTest {
         Scope.getCurrentScope().getSingleton(ChangeFactory.class); //make sure there is no problem with SqlGeneratorFactory.generatorsByKey cache
         assertFalse("unsupported create sequence", SqlGeneratorFactory.getInstance().supports(statement, database10));
         assertTrue("supported create sequence", SqlGeneratorFactory.getInstance().supports(statement, database11));
+    }
+
+    /**
+     * This test exists to ensure that the cache key contains enough information so that we aren't considering
+     * objects with different checksum versions as the same.
+     */
+    @Test
+    public void differentChecksumVersionsResultInDifferentObjects() throws Exception {
+        ChangeFactory changeFactory = Scope.getCurrentScope().getSingleton(ChangeFactory.class);
+
+        Change change8 = new CreateTableChange();
+        Change change9 = new CreateTableChange();
+
+        ChangeMetaData changeMetaData8 = Scope.child(Collections.singletonMap(Scope.Attr.checksumVersion.name(), ChecksumVersion.V8), () -> changeFactory.getChangeMetaData(change8));
+        ChangeMetaData changeMetaData9 = Scope.child(Collections.singletonMap(Scope.Attr.checksumVersion.name(), ChecksumVersion.V9), () -> changeFactory.getChangeMetaData(change9));
+
+        assertNotEquals(changeMetaData8, changeMetaData9);
     }
 
     @Test

@@ -83,7 +83,7 @@ Optional Args:
                                  "FILTERED CHANGE SETS SUMMARY",
                                  "Context mismatch:             1",
                                  "Label mismatch:               2",
-                                 "After tag:                    1",
+                                 "After tag:                    2",
                                  "DBMS mismatch:                1"
                                 ]
         ]
