@@ -18,5 +18,7 @@ class MssqlMergeIntegrationTest extends Specification {
         CommandUtil.runUpdate(mssql,'src/test/resources/changelogs/mssql/issues/merge.statement.changelog.sql')
         then:
         noExceptionThrown()
+        cleanup:
+        CommandUtil.runDropAll(mssql)
     }
 }
