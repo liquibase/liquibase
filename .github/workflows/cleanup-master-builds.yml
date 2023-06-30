@@ -14,7 +14,7 @@ jobs:
       matrix:
         packages_to_delete: [org.liquibase.liquibase-core, org.liquibase.liquibase-extension-testing, org.liquibase.liquibase-integration-tests, org.liquibase.liquibase-maven-plugin, org.liquibase.liquibase-cdi-jakarta, org.liquibase.liquibase-cdi]
     steps:
-    - uses: actions/delete-package-versions@v4
+    - uses: actions/delete-package-versions@v3
       with:
         # Name of the package.
         # Defaults to an empty string.

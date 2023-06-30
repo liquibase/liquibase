@@ -1,5 +1,6 @@
 package liquibase.change.core;
 
+import liquibase.ChecksumVersion;
 import liquibase.GlobalConfiguration;
 import liquibase.Scope;
 import liquibase.change.*;
@@ -164,13 +165,16 @@ public class SQLFileChange extends AbstractSQLChange {
 
     @Override
     public CheckSum generateCheckSum() {
+        ChecksumVersion version = Scope.getCurrentScope().getChecksumVersion();
+        if (version.lowerOrEqualThan(ChecksumVersion.V8)) {
+            return super.generateCheckSum();
+        }
         InputStream stream = null;
         try {
             String sqlContent = getSql();
             Charset encoding = GlobalConfiguration.FILE_ENCODING.getCurrentValue();
             stream = new ByteArrayInputStream(sqlContent.getBytes(encoding));
-            CheckSum checkSum = CheckSum.compute(new AbstractSQLChange.NormalizingStream(stream), false);
-            return checkSum;
+            return CheckSum.compute(new AbstractSQLChange.NormalizingStream(stream), false);
         }
         finally {
             if (stream != null) {

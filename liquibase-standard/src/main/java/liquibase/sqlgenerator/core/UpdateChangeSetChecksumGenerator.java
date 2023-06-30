@@ -1,10 +1,12 @@
 package liquibase.sqlgenerator.core;
 
+import liquibase.ChecksumVersion;
 import liquibase.changelog.ChangeSet;
 import liquibase.changelog.column.LiquibaseColumn;
 import liquibase.database.Database;
 import liquibase.database.ObjectQuotingStrategy;
 import liquibase.exception.ValidationErrors;
+import liquibase.integration.commandline.LiquibaseCommandLineConfiguration;
 import liquibase.sql.Sql;
 import liquibase.sqlgenerator.SqlGeneratorChain;
 import liquibase.sqlgenerator.SqlGeneratorFactory;
@@ -30,7 +32,7 @@ public class UpdateChangeSetChecksumGenerator extends AbstractSqlGenerator<Updat
         try {
             SqlStatement runStatement = null;
             runStatement = new UpdateStatement(database.getLiquibaseCatalogName(), database.getLiquibaseSchemaName(), database.getDatabaseChangeLogTableName())
-                    .addNewColumnValue("MD5SUM", changeSet.generateCheckSum().toString())
+                    .addNewColumnValue("MD5SUM", changeSet.generateCheckSum(ChecksumVersion.latest()).toString())
                     .setWhereClause(database.escapeObjectName("ID", LiquibaseColumn.class) + " = ? " +
                             "AND " + database.escapeObjectName("AUTHOR", LiquibaseColumn.class) + " = ? " +
                             "AND " + database.escapeObjectName("FILENAME", LiquibaseColumn.class) + " = ?")
