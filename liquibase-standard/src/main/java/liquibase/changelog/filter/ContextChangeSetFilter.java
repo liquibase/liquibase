@@ -10,7 +10,7 @@ import java.util.Collection;
 import java.util.List;
 
 public class ContextChangeSetFilter implements ChangeSetFilter {
-    private final Contexts contexts;
+    private Contexts contexts;
 
     public ContextChangeSetFilter() {
         this(new Contexts());
@@ -30,8 +30,8 @@ public class ContextChangeSetFilter implements ChangeSetFilter {
         }
         changeSet.getSqlVisitors().removeAll(visitorsToRemove);
 
-        if ((contexts == null) || contexts.isEmpty()) {
-            return new ChangeSetFilterResult(true, "No runtime context specified, all contexts will run", this.getClass(), getMdcName(), getDisplayName());
+        if (contexts == null) {
+            contexts = new Contexts();
         }
 
         Collection<ContextExpression> inheritableContexts = changeSet.getInheritableContextFilter();
