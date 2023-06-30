@@ -4,7 +4,7 @@
 	<parent>
 		<groupId>org.liquibase</groupId>
 		<artifactId>liquibase</artifactId>
-		<version>4.23.0</version>
+    	<version>0-SNAPSHOT</version>
 	</parent>
 	<artifactId>liquibase-dist</artifactId>
 	<packaging>jar</packaging>
@@ -304,15 +304,6 @@
 							<mapper>
 								<type>perm</type>
 								<prefix>/opt/liquibase</prefix>
-								<filemode>755</filemode>
-							</mapper>
-						</data>
-						<data>
-							<src>${project.basedir}/src/main/archive/liquibase-env.sh</src>
-							<type>file</type>
-							<mapper>
-								<type>perm</type>
-								<prefix>/etc/profile.d/</prefix>
 								<filemode>755</filemode>
 							</mapper>
 						</data>
