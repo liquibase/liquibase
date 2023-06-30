@@ -14,7 +14,7 @@ if NOT "%JAVA_HOME%" == "" set JAVA_HOME=%JAVA_HOME:"=%
 
 rem set JAVA_HOME to local jre dir if not set
 if exist "%LIQUIBASE_HOME%\jre" if "%JAVA_HOME%"=="" (
-    set JAVA_HOME=%LIQUIBASE_HOME%\jre
+    set JAVA_HOME="%LIQUIBASE_HOME%\jre"
 )
 
 if NOT "%JAVA_HOME%" == "" if not exist "%JAVA_HOME%" (

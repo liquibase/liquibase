@@ -36,13 +36,17 @@ public class CreateTableStatement extends AbstractSqlStatement implements Compou
     private final Set<String> computedColumns = new HashSet<>();
 
     public CreateTableStatement(String catalogName, String schemaName, String tableName) {
-        this.catalogName = catalogName;
-        this.schemaName = schemaName;
-        this.tableName = tableName;
+        this(catalogName, schemaName, tableName, null, null);
+    }
+
+    public CreateTableStatement(String catalogName, String schemaName, String tableName, String remarks) {
+        this(catalogName, schemaName, tableName, remarks, null);
     }
 
     public CreateTableStatement(String catalogName, String schemaName, String tableName, String remarks, String tableType) {
-        this(catalogName, schemaName, tableName);
+        this.catalogName = catalogName;
+        this.schemaName = schemaName;
+        this.tableName = tableName;
         this.remarks = remarks;
         this.tableType = tableType;
     }

@@ -496,7 +496,7 @@ public class DatabaseChangeLog implements Comparable<DatabaseChangeLog>, Conditi
                     ignore = false;
                 }
                 includeAll(path, node.getChildValue(null, "relativeToChangelogFile", false), resourceFilter,
-                        node.getChildValue(null, "errorIfMissing", true),
+                        node.getChildValue(null, "errorIfMissingOrEmpty", true),
                         resourceComparator,
                         resourceAccessor,
                         includeContextFilter,
@@ -630,7 +630,7 @@ public class DatabaseChangeLog implements Comparable<DatabaseChangeLog>, Conditi
     public void includeAll(String pathName,
                            boolean isRelativeToChangelogFile,
                            IncludeAllFilter resourceFilter,
-                           boolean errorIfMissing,
+                           boolean errorIfMissingOrEmpty,
                            Comparator<String> resourceComparator,
                            ResourceAccessor resourceAccessor,
                            ContextExpression includeContextFilter,
@@ -644,7 +644,7 @@ public class DatabaseChangeLog implements Comparable<DatabaseChangeLog>, Conditi
         includeAll(pathName,
                 isRelativeToChangelogFile,
                 resourceFilter,
-                errorIfMissing,
+                errorIfMissingOrEmpty,
                 resourceComparator,
                 resourceAccessor,
                 includeContextFilter,
@@ -656,7 +656,7 @@ public class DatabaseChangeLog implements Comparable<DatabaseChangeLog>, Conditi
     public void includeAll(String pathName,
                            boolean isRelativeToChangelogFile,
                            IncludeAllFilter resourceFilter,
-                           boolean errorIfMissing,
+                           boolean errorIfMissingOrEmpty,
                            Comparator<String> resourceComparator,
                            ResourceAccessor resourceAccessor,
                            ContextExpression includeContextFilter,
@@ -665,14 +665,14 @@ public class DatabaseChangeLog implements Comparable<DatabaseChangeLog>, Conditi
                            int minDepth,
                            int maxDepth)
             throws SetupException {
-        includeAll(pathName, isRelativeToChangelogFile, resourceFilter, errorIfMissing, resourceComparator,
+        includeAll(pathName, isRelativeToChangelogFile, resourceFilter, errorIfMissingOrEmpty, resourceComparator,
                    resourceAccessor, includeContextFilter, labels, ignore, minDepth, maxDepth, new ModifyChangeSets(null, null));
     }
 
     public void includeAll(String pathName,
                            boolean isRelativeToChangelogFile,
                            IncludeAllFilter resourceFilter,
-                           boolean errorIfMissing,
+                           boolean errorIfMissingOrEmpty,
                            Comparator<String> resourceComparator,
                            ResourceAccessor resourceAccessor,
                            ContextExpression includeContextFilter,
@@ -722,7 +722,7 @@ public class DatabaseChangeLog implements Comparable<DatabaseChangeLog>, Conditi
 
                 unsortedResources = resourceAccessor.search(path, searchOptions);
             } catch (IOException e) {
-                if (errorIfMissing) {
+                if (errorIfMissingOrEmpty) {
                     throw new IOException(String.format("Could not find/read changelogs from %s directory", pathName));
                 }
             }
@@ -735,7 +735,7 @@ public class DatabaseChangeLog implements Comparable<DatabaseChangeLog>, Conditi
                 }
             }
 
-            if (resources.isEmpty() && errorIfMissing) {
+            if (resources.isEmpty() && errorIfMissingOrEmpty) {
                 throw new SetupException(
                         "Could not find directory or directory was empty for includeAll '" + pathName + "'");
             }
@@ -743,7 +743,7 @@ public class DatabaseChangeLog implements Comparable<DatabaseChangeLog>, Conditi
             Scope.child(Collections.singletonMap(SEEN_CHANGELOGS_PATHS_SCOPE_KEY, seenChangelogPaths), () -> {
                 for (Resource resource : resources) {
                     Scope.getCurrentScope().getLog(getClass()).info("Reading resource: " + resource);
-                    include(resource.getPath(), false, errorIfMissing, resourceAccessor, includeContextFilter,
+                    include(resource.getPath(), false, errorIfMissingOrEmpty, resourceAccessor, includeContextFilter,
                             labels, ignore, OnUnknownFileFormat.WARN, modifyChangeSets);
                 }
             });
