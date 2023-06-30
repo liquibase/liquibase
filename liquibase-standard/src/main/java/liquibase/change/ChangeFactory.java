@@ -1,7 +1,9 @@
 package liquibase.change;
 
+import liquibase.ChecksumVersion;
 import liquibase.Scope;
 import liquibase.exception.UnexpectedLiquibaseException;
+import liquibase.integration.commandline.LiquibaseCommandLineConfiguration;
 import liquibase.plugin.AbstractPluginFactory;
 import liquibase.plugin.Plugin;
 import liquibase.servicelocator.ServiceLocator;
@@ -18,7 +20,7 @@ import java.util.concurrent.ConcurrentHashMap;
  */
 public class ChangeFactory extends AbstractPluginFactory<Change>{
 
-    private final Map<Class<? extends Change>, ChangeMetaData> metaDataByClass = new ConcurrentHashMap<>();
+    private final Map<String, ChangeMetaData> cachedMetadata = new ConcurrentHashMap<>();
 
     private ChangeFactory() {
 
@@ -49,10 +51,23 @@ public class ChangeFactory extends AbstractPluginFactory<Change>{
     }
 
     public ChangeMetaData getChangeMetaData(Change change) {
-        if (!metaDataByClass.containsKey(change.getClass())) {
-            metaDataByClass.put(change.getClass(), change.createChangeMetaData());
+        String cacheKey = generateCacheKey(change);
+        cachedMetadata.putIfAbsent(cacheKey, change.createChangeMetaData());
+        return cachedMetadata.get(cacheKey);
+    }
+
+    private String generateCacheKey(Change change) {
+        String key;
+        try {
+            ChecksumVersion version = Scope.getCurrentScope().getChecksumVersion();
+            if (version == null) {
+                 throw new NullPointerException();
+            }
+            key = change.getClass().getName() + version;
+        } catch (Exception ignored) {
+            key = change.getClass().getName();
         }
-        return metaDataByClass.get(change.getClass());
+        return key;
     }
 
 
