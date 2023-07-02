@@ -157,7 +157,7 @@ public class PreCompareCommandStep extends AbstractHelperCommandStep {
         return new CompareControl(finalSchemaComparisons, diffTypes);
     }
 
-    private void logMdcProperties(String schemas, String outputSchemas, String referenceSchemas) {
+    public static void logMdcProperties(String schemas, String outputSchemas, String referenceSchemas) {
         Scope.getCurrentScope().addMdcValue(MdcKey.SCHEMAS, schemas);
         Scope.getCurrentScope().addMdcValue(MdcKey.OUTPUT_SCHEMAS, outputSchemas);
         Scope.getCurrentScope().addMdcValue(MdcKey.REFERENCE_SCHEMAS, referenceSchemas);

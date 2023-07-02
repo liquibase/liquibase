@@ -150,7 +150,7 @@
 		<dependency>
             <groupId>org.glassfish.jaxb</groupId>
             <artifactId>jaxb-core</artifactId>
-            <version>4.0.2</version>
+            <version>4.0.3</version>
             <optional>true</optional>
 		</dependency>
 		<dependency>
