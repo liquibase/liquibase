@@ -8,7 +8,7 @@ public enum TagVersionEnum {
             return null;
         }
 
-        String tagVersion = String.valueOf(input);
+        String tagVersion = String.valueOf(((String)input).toUpperCase());
 
         boolean found = tagVersion.equalsIgnoreCase("oldest") || tagVersion.equalsIgnoreCase("newest");
         if (!found) {
