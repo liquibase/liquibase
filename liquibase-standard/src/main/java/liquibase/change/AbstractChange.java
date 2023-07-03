@@ -870,14 +870,7 @@ public abstract class AbstractChange extends AbstractPlugin implements Change {
 
     @Override
     public boolean equals(Object reference) {
-        if (this == reference) return true;
-        if (reference instanceof DbmsTargetedChange && this instanceof DbmsTargetedChange &&
-            !((DbmsTargetedChange)reference).getDbms().equals(((DbmsTargetedChange)this).getDbms())) {
-            return false;
-        }
-        if (reference == null || getClass() != reference.getClass()) return false;
-        if (!super.equals(reference)) return false;
-        return false;
+        return (this == reference);
     }
 
     @Override
