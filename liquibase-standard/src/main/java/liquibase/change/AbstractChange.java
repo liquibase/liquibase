@@ -877,8 +877,7 @@ public abstract class AbstractChange extends AbstractPlugin implements Change {
         }
         if (reference == null || getClass() != reference.getClass()) return false;
         if (!super.equals(reference)) return false;
-        AbstractChange that = (AbstractChange) reference;
-        return Objects.equals(this, that);
+        return false;
     }
 
     @Override

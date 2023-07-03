@@ -193,9 +193,7 @@ public class H2IntegrationTest extends AbstractIntegrationTest {
     @Test
     public void makeSureDbmsFilteredChangeIsNotDeployed() throws Exception {
         clearDatabase();
-
-        Liquibase liquibase = createLiquibase("changelogs/h2/complete/sql.change.dbms.filtered.should.not.be.deployed.changelog.xml");
-        liquibase.update();
+        runUpdate("changelogs/h2/complete/sql.change.dbms.filtered.should.not.be.deployed.changelog.xml");
 
         try {
             Scope.getCurrentScope().getSingleton(ExecutorService.class).getExecutor("jdbc", getDatabase())
@@ -203,6 +201,13 @@ public class H2IntegrationTest extends AbstractIntegrationTest {
         }
         catch (DatabaseException e) {
             Assert.assertTrue(e.getMessage().contains("Table \"ORACULO\" not found"));
+        }
+        try {
+            Scope.getCurrentScope().getSingleton(ExecutorService.class).getExecutor("jdbc", getDatabase())
+                    .queryForList(new RawSqlStatement("select * from anydb"));
+        }
+        catch (DatabaseException e) {
+            Assert.assertTrue(e.getMessage().contains("Table \"ANYDB\" not found"));
         }
     }
 
