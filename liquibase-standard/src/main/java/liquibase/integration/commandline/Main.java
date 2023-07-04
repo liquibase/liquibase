@@ -974,19 +974,7 @@ public class Main {
             return;
         }
 
-        final int CHANGESET_MINIMUM_IDENTIFIER_PARTS = 3;
-
-        if (COMMANDS.CALCULATE_CHECKSUM.equalsIgnoreCase(command)) {
-            for (final String param : commandParams) {
-                if ((param != null) && !param.startsWith("-")) {
-                    final String[] parts = param.split("::");
-                    if (parts.length < CHANGESET_MINIMUM_IDENTIFIER_PARTS) {
-                        messages.add(coreBundle.getString("changeset.identifier.must.have.form.filepath.id.author"));
-                        break;
-                    }
-                }
-            }
-        } else if (COMMANDS.DIFF_CHANGELOG.equalsIgnoreCase(command) && (diffTypes != null) && diffTypes.toLowerCase
+       if (COMMANDS.DIFF_CHANGELOG.equalsIgnoreCase(command) && (diffTypes != null) && diffTypes.toLowerCase
                 ().contains("data")) {
             messages.add(String.format(coreBundle.getString("including.data.diffchangelog.has.no.effect"),
                     OPTIONS.DIFF_TYPES, COMMANDS.GENERATE_CHANGELOG
@@ -1514,7 +1502,11 @@ public class Main {
                 liquibase.clearCheckSums();
                 return;
             } else if (COMMANDS.CALCULATE_CHECKSUM.equalsIgnoreCase(command)) {
-                liquibase.calculateCheckSum(commandParams.iterator().next());
+                liquibase.calculateCheckSum(
+                        getCommandParam(OPTIONS.CHANGE_SET_PATH, null),
+                        getCommandParam(OPTIONS.CHANGE_SET_ID, null),
+                        getCommandParam(OPTIONS.CHANGE_SET_AUTHOR, null)
+                );
                 return;
             } else if (COMMANDS.DB_DOC.equalsIgnoreCase(command)) {
                 if (commandParams.isEmpty()) {

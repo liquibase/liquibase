@@ -1229,24 +1229,15 @@ public class Liquibase implements AutoCloseable {
      * @deprecated Use {link {@link CommandScope(String)}.
      */
     @Deprecated
-    public final CheckSum calculateCheckSum(final String changeSetIdentifier) throws LiquibaseException {
+    public final CheckSum calculateCheckSum(final String changeSetPath, final String changeSetId, final String changeSetAuthor) throws LiquibaseException {
         CommandResults commandResults = new CommandScope("calculateChecksum")
                 .addArgumentValue(DbUrlConnectionCommandStep.DATABASE_ARG, database)
-                .addArgumentValue(CalculateChecksumCommandStep.CHANGESET_IDENTIFIER_ARG, changeSetIdentifier)
+                .addArgumentValue(CalculateChecksumCommandStep.CHANGESET_PATH_ARG, changeSetPath)
+                .addArgumentValue(CalculateChecksumCommandStep.CHANGESET_ID_ARG, changeSetId)
+                .addArgumentValue(CalculateChecksumCommandStep.CHANGESET_AUTHOR_ARG, changeSetAuthor)
                 .addArgumentValue(CalculateChecksumCommandStep.CHANGELOG_FILE_ARG, this.changeLogFile)
                 .execute();
         return commandResults.getResult(CalculateChecksumCommandStep.CHECKSUM_RESULT);
-    }
-
-    /**
-     * Calculates the checksum for the values that form a given identifier
-     *
-     * @deprecated Use {link {@link CommandScope(String)}.
-     */
-    @Deprecated
-    public CheckSum calculateCheckSum(final String filename, final String id, final String author)
-            throws LiquibaseException {
-        return this.calculateCheckSum(String.format("%s::%s::%s", filename, id, author));
     }
 
     @Deprecated
