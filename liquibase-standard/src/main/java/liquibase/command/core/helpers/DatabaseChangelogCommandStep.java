@@ -14,7 +14,6 @@ import liquibase.configuration.LiquibaseConfiguration;
 import liquibase.configuration.core.DefaultsFileValueProvider;
 import liquibase.database.Database;
 import liquibase.exception.LiquibaseException;
-import liquibase.lockservice.LockService;
 import liquibase.lockservice.LockServiceFactory;
 import liquibase.logging.mdc.MdcKey;
 import liquibase.parser.ChangeLogParser;
@@ -91,7 +90,6 @@ public class DatabaseChangelogCommandStep extends AbstractHelperCommandStep impl
 
         DatabaseChangeLog databaseChangeLog = getDatabaseChangeLog(changeLogFile, changeLogParameters);
         checkLiquibaseTables(shouldUpdateNullChecksums, databaseChangeLog, changeLogParameters.getContexts(), changeLogParameters.getLabels(), database);
-        Scope.getCurrentScope().getSingleton(ChangeLogHistoryServiceFactory.class).getChangeLogService(database).generateDeploymentId();
         databaseChangeLog.validate(database, changeLogParameters.getContexts(), changeLogParameters.getLabels());
 
         commandScope.provideDependency(DatabaseChangeLog.class, databaseChangeLog);
