@@ -7,7 +7,6 @@ import liquibase.exception.DatabaseException;
 import liquibase.exception.DatabaseHistoryException;
 import liquibase.exception.LiquibaseException;
 import liquibase.plugin.Plugin;
-import liquibase.servicelocator.PrioritizedService;
 
 import java.util.Date;
 import java.util.List;
@@ -65,4 +64,11 @@ public interface ChangeLogHistoryService extends Plugin {
     void generateDeploymentId();
 
     boolean isDatabaseChecksumsCompatible();
+
+    /**
+     * By default does nothing to keep compatibility with older versions, but subclasses may like to implement
+     * this method to support checksum upgrades.
+     */
+    default void replaceChecksum(ChangeSet changeSet) throws DatabaseException {
+    }
 }
