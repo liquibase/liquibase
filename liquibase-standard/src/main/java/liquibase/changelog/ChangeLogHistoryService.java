@@ -32,7 +32,14 @@ public interface ChangeLogHistoryService extends Plugin {
 
     List<RanChangeSet> getRanChangeSets() throws DatabaseException;
 
-    List<RanChangeSet> getRanChangeSets(boolean allowChecksumsUpgrade) throws DatabaseException;
+    /**
+     * Use  {@link #getRanChangeSets()} instead
+     * @deprecated
+     */
+    @Deprecated
+    default List<RanChangeSet> getRanChangeSets(boolean allowChecksumsUpgrade) throws DatabaseException {
+        return this.getRanChangeSets();
+    }
 
     RanChangeSet getRanChangeSet(ChangeSet changeSet) throws DatabaseException, DatabaseHistoryException;
 

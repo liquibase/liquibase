@@ -301,11 +301,6 @@ public class StandardChangeLogHistoryService extends AbstractChangeLogHistorySer
      */
     @Override
     public List<RanChangeSet> getRanChangeSets() throws DatabaseException {
-        return this.getRanChangeSets(false);
-    }
-
-    @Override
-    public List<RanChangeSet> getRanChangeSets(boolean allowChecksumsUpgrade) throws DatabaseException {
         if (this.ranChangeSetList == null) {
             Database database = getDatabase();
             String databaseChangeLogTableName = getDatabase().escapeTableName(getLiquibaseCatalogName(),
@@ -319,7 +314,7 @@ public class StandardChangeLogHistoryService extends AbstractChangeLogHistorySer
                     String fileName = DatabaseChangeLog.normalizePath(storedFileName);
                     String author = rs.get("AUTHOR").toString();
                     String id = rs.get("ID").toString();
-                    boolean isUpgrade = allowChecksumsUpgrade && !databaseChecksumsCompatible;
+                    boolean isUpgrade = !databaseChecksumsCompatible;
                     String md5sum = ((rs.get("MD5SUM") == null) || isUpgrade) ? null : rs.get("MD5SUM").toString();
                     String description = (rs.get("DESCRIPTION") == null) ? null : rs.get("DESCRIPTION").toString();
                     String comments = (rs.get("COMMENTS") == null) ? null : rs.get("COMMENTS").toString();
