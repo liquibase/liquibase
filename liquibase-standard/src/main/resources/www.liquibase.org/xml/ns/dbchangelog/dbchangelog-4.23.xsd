@@ -104,7 +104,6 @@
             <xsd:attribute name="path" type="xsd:string" use="required"/>
             <xsd:attribute name="errorIfMissingOrEmpty" type="booleanExp" default="true"/>
             <xsd:attribute name="relativeToChangelogFile" type="booleanExp"/>
-            <xsd:attribute name="errorIfMissing" type="booleanExp" default="true"/>
             <xsd:attribute name="resourceComparator" type="xsd:string"/>
             <xsd:attribute name="filter" type="xsd:string"/>
             <xsd:attribute name="context" type="xsd:string"/>

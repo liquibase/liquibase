@@ -5,6 +5,21 @@
 - [ ] Enhancement/New feature (adds functionality without impacting existing logic)
 - [ ] Breaking change (fix or feature that would cause existing functionality to change)
  
+<!--  Mandatory Labels to add to a PR
+
+At least one of the labels must be added to the PR before it's merged. If no label is provided the workflow will fail and you will not be able to merge the PR. After the label is added it re-runs the `Pull Request Labels / label (pull_request)` and gives a green check. 
+
+`skipReleaseNotes`   - Don't show up on the Draft Release Notes page
+`notableChanges`     - Any notable changes
+`TypeEnhancement`    - New features
+`TypeTest`           - New Test features
+`TypeBug`            - bug fixes
+`breakingChanges`    - any breaking changes
+`APIBreakingChanges` - any API breaking changes
+`sdou`               - Security, Driver and Other Updates -dependabot PR's
+`newContributors`    - New Contributors -->
+
+
 ## Description
 
 <!--
