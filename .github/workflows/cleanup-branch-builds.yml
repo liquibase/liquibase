@@ -33,3 +33,6 @@ jobs:
         # When set to 0, all deletable versions will be deleted.
         # When set greater than 0, all deletable package versions except the specified number will be deleted.
         min-versions-to-keep: 0
+        
+        # on branch id's deletion we only want to delete that particular branch version
+        package-version-ids: "${{ steps.version.outputs.ids }}"
