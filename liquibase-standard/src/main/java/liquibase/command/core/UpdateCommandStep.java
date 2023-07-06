@@ -31,7 +31,8 @@ public class UpdateCommandStep extends AbstractUpdateCommandStep implements Clea
                 .addAlias("labels")
                 .description("Changeset labels to match")
                 .build();
-        CONTEXTS_ARG = builder.argument("contexts", String.class)
+        CONTEXTS_ARG = builder.argument("contextFilter", String.class)
+                .addAlias("contexts")
                 .description("Changeset contexts to match")
                 .build();
     }
