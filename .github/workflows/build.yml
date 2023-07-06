@@ -402,6 +402,8 @@ jobs:
           # we are packaging and deploying liquibase tar which includes liquibase-commercial 
           mvn versions:set -DnewVersion="${{ needs.setup.outputs.thisBranchName }}-SNAPSHOT"
           mvn -B -pl liquibase-dist -P liquibase-commercial source:jar package
+          apt-get update
+          apt-get install tree
           tree
 
           ## extract tar content for other artifacts
