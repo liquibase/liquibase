@@ -21,13 +21,13 @@
 				<enabled>true</enabled>
 			</snapshots>
 		</repository>
-		<!-- <repository>
-			<id>github</id>
+		<repository>
+			<id>liquibase-pro</id>
 			<url>https://liquibot:${env.GITHUB_TOKEN}@maven.pkg.github.com/liquibase/liquibase-pro</url>
 			<snapshots>
 				<enabled>true</enabled>
 			</snapshots>
-		</repository> -->
+		</repository>
 	</repositories>
 
 	<properties>
