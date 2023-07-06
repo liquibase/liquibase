@@ -11,6 +11,23 @@
 
     <description>Liquibase is a tool for managing and executing database changes.</description>
 
+	<repositories>
+		<repository>
+			<id>github</id>
+			<url>https://liquibot:${env.GITHUB_TOKEN}@maven.pkg.github.com/liquibase/liquibase</url>
+			<snapshots>
+				<enabled>true</enabled>
+			</snapshots>
+		</repository>
+		<repository>
+			<id>github</id>
+			<url>https://liquibot:${env.GITHUB_TOKEN}@maven.pkg.github.com/liquibase/liquibase-pro</url>
+			<snapshots>
+				<enabled>true</enabled>
+			</snapshots>
+		</repository>
+	</repositories>
+
 	<properties>
 		<deploy.repositoryId>github</deploy.repositoryId>
 		<deploy.url>https://maven.pkg.github.com/liquibase/liquibase</deploy.url>

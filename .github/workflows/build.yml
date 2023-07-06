@@ -351,23 +351,6 @@ jobs:
         with:
           maven-version: ${{ env.MAVEN_VERSION }}
 
-      - name: Download liquibase-commercial
-        uses: liquibase/action-download-artifact@v2-liquibase
-        with:
-          github_token: ${{ secrets.BOT_TOKEN }}
-          workflow: build.yml
-          workflow_conclusion: success
-          branch: "${{ needs.setup.outputs.proBranchName }}"
-          name: liquibase-commercial-modules
-          path: download/liquibase-commercial
-          repo: liquibase/liquibase-pro
-
-      - name: Install Built Modules
-        run: |
-          (find . -name *-SNAPSHOT.jar -exec mvn -B org.apache.maven.plugins:maven-install-plugin:3.0.0-M1:install-file -Dfile={} \;)
-          (find . -name *-SNAPSHOT-sources.jar -exec mvn -B org.apache.maven.plugins:maven-install-plugin:3.0.0-M1:install-file -Dclassifier=sources -Dfile={} \;)
-          mvn -B org.apache.maven.plugins:maven-install-plugin:3.0.0-M1:install-file -Dfile=download/liquibase-commercial/liquibase-commercial-0-SNAPSHOT.jar
-
       - name: Build & Sign Artifacts
         env:
           INSTALL4J_LICENSE: ${{ secrets.INSTALL4J_LICENSE }}
@@ -378,6 +361,7 @@ jobs:
           INSTALL4J_WINDOWS_KEY: ${{ secrets.INSTALL4J_WINDOWS_KEY }}
           INSTALL4J_WINDOWS_KEY_PASSWORD: ${{ secrets.INSTALL4J_WINDOWS_KEY_PASSWORD }}
           GPG_PASSWORD: ${{ secrets.GPG_PASSPHRASE }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           ## save install4j code signing keys
           mkdir -p liquibase-dist/target/keys
@@ -386,6 +370,7 @@ jobs:
 
           echo "Saving windows key"
           echo "$INSTALL4J_WINDOWS_KEY" | base64 -d > liquibase-dist/target/keys/datical_windows.pfx
+          mvn versions:set -DnewVersion="${{ needs.setup.outputs.thisBranchName }}-SNAPSHOT"
           mvn -B -pl liquibase-dist -P liquibase-commercial source:jar package
 
           ## extract tar content for other artifacts
