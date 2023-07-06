@@ -465,6 +465,8 @@ jobs:
   deploy-package:
     name: Deploy to GPM
     runs-on: ubuntu-22.04
+    env: 
+      GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
     # needs: [setup, build, sonar, integration-test]
     needs: [setup]
     permissions:
