@@ -115,6 +115,7 @@
                 <groupId>org.codehaus.mojo</groupId>
                 <artifactId>flatten-maven-plugin</artifactId>
                 <version>1.5.0</version>
+
                 <configuration>
                     <flattenMode>ossrh</flattenMode>
                     <outputDirectory>${project.build.directory}</outputDirectory>
@@ -213,4 +214,3 @@
         </plugins>
     </reporting>
 </project>
-

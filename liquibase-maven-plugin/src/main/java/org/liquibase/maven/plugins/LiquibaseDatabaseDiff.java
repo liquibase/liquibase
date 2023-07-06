@@ -243,6 +243,7 @@ public class LiquibaseDatabaseDiff extends AbstractLiquibaseChangeLogMojo {
         Database db = liquibase.getDatabase();
 
         try (Database referenceDatabase = CommandLineUtils.createDatabaseObject(resourceAccessor, referenceUrl, referenceUsername, referencePassword, referenceDriver, referenceDefaultCatalogName, referenceDefaultSchemaName, outputDefaultCatalog, outputDefaultSchema, null, null, propertyProviderClass, null, null, databaseChangeLogTableName, databaseChangeLogLockTableName)) {
+            ReferenceDbUrlConnectionCommandStep.logMdc(referenceUrl, referenceUsername, referenceDefaultSchemaName, referenceDefaultCatalogName);
 
             getLog().info("Performing Diff on database " + db.toString());
             if ((diffExcludeObjects != null) && (diffIncludeObjects != null)) {
@@ -296,6 +297,7 @@ public class LiquibaseDatabaseDiff extends AbstractLiquibaseChangeLogMojo {
                 defaultCatalogName, defaultSchemaName,
                 referenceDefaultCatalogName, referenceDefaultSchemaName,
                 database);
+        PreCompareCommandStep.logMdcProperties(schemas, outputSchemas, referenceSchemas);
 
         return computedSchemas.finalSchemaComparisons;
     }

@@ -1,5 +1,7 @@
 package liquibase.extension.testing.command
 
+import static java.util.ResourceBundle.getBundle
+
 import liquibase.change.ColumnConfig
 import liquibase.change.ConstraintsConfig
 import liquibase.change.core.AddForeignKeyConstraintChange
@@ -154,7 +156,7 @@ Optional Args:
             cleanResources("changelog-test.xml")
         }
         expectedException = CommandValidationException.class
-        expectedExceptionMessage = "Output ChangeLogFile 'target/test-classes/changelog-test.xml' already exists!"
+        expectedExceptionMessage = getBundle("liquibase/i18n/liquibase-core").getString("changelogfile.already.exists").replace("%s", "target/test-classes/changelog-test.xml")
     }
 
     run "Filtering with includeObjects", {
