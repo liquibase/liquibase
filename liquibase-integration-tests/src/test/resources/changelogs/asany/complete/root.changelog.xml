@@ -142,7 +142,7 @@
 
     <changeSet id="16" author="nvoxland">
         <createView viewName="personView">
-            select * from liquibase.person
+            select * from ${loginUser}.person
         </createView>
     </changeSet>
 

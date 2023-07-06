@@ -258,6 +258,10 @@ class DataTypeFactoryTest extends Specification {
         "java.sql.Types.TIMESTAMP_WITH_TIMEZONE(6)"    | new H2Database()       | "TIMESTAMP(6) WITH TIME ZONE"                  | TimestampType | false
         "\${invalidParam}"                             | new H2Database()       | "\${INVALIDPARAM}"                             | UnknownType   | false
         "currency"                                     | new H2Database()       | "DECIMAL(18, 4)"                               | CurrencyType  | false
+        "BOOLEAN"                                      | new H2Database()       | "BOOLEAN"                                      | BooleanType   | false
+        "BOOLEAN(1)"                                   | new H2Database()       | "BOOLEAN"                                      | BooleanType   | false
+        "BOOLEAN(0)"                                   | new H2Database()       | "BOOLEAN"                                      | BooleanType   | false
+        "BOOLEAN(10)"                                  | new H2Database()       | "BOOLEAN"                                      | BooleanType   | false
         "INT(20)"                                      | new SybaseDatabase()   | "INT"                                          | IntType       | false
         "SMALLINT(20)"                                 | new SybaseDatabase()   | "SMALLINT"                                     | SmallIntType  | false
         "TINYINT(20)"                                  | new SybaseDatabase()   | "TINYINT"                                      | TinyIntType   | false
