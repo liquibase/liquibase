@@ -402,10 +402,12 @@ jobs:
           # we are packaging and deploying liquibase tar which includes liquibase-commercial 
           mvn versions:set -DnewVersion="${{ needs.setup.outputs.thisBranchName }}-SNAPSHOT"
           mvn -B -pl liquibase-dist -P liquibase-commercial source:jar package
+          tree
 
           ## extract tar content for other artifacts
           mkdir -p liquibase-dist/target/liquibase-0-SNAPSHOT
           (cd liquibase-dist/target/liquibase-0-SNAPSHOT && tar xfz ../liquibase-0-SNAPSHOT.tar.gz)
+          
 
           ##create zip file from tar content
           (cd liquibase-dist/target/liquibase-0-SNAPSHOT && zip -r ../liquibase-0-SNAPSHOT.zip *)
