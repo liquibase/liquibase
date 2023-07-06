@@ -2,18 +2,21 @@ package liquibase.command.core;
 
 import liquibase.CatalogAndSchema;
 import liquibase.Scope;
+import liquibase.changelog.ChangeLogHistoryServiceFactory;
 import liquibase.command.*;
 import liquibase.database.Database;
 import liquibase.exception.DatabaseException;
 import liquibase.exception.LiquibaseException;
+import liquibase.executor.ExecutorService;
 import liquibase.lockservice.LockService;
+import liquibase.lockservice.LockServiceFactory;
 import liquibase.logging.Logger;
 import liquibase.util.StringUtil;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
-import java.util.UUID;
 
 public class DropAllCommandStep extends AbstractCommandStep {
 
@@ -44,13 +47,15 @@ public class DropAllCommandStep extends AbstractCommandStep {
 
     @Override
     public List<Class<?>> requiredDependencies() {
-        return Arrays.asList(Database.class, LockService.class);
+        return Collections.singletonList(Database.class);
     }
 
     @Override
     public void run(CommandResultsBuilder resultsBuilder) throws Exception {
         CommandScope commandScope = resultsBuilder.getCommandScope();
         Database database = (Database) commandScope.getDependency(Database.class);
+        LockService lockService = LockServiceFactory.getInstance().getLockService(database);
+        lockService.waitForLock();
 
         List<CatalogAndSchema> catalogAndSchemas = getCatalogAndSchemas(database, commandScope);
 
@@ -68,6 +73,10 @@ public class DropAllCommandStep extends AbstractCommandStep {
             log.severe(message, liquibaseException);
         } catch (Exception e) {
             throw new DatabaseException(e);
+        } finally {
+            lockService.releaseLock();
+            lockService.destroy();
+            resetServices();
         }
 
         Scope.getCurrentScope().getUI().sendMessage("All objects dropped from " + database.getConnection().getConnectionUserName() + "@" + database.getConnection().getURL());
@@ -90,6 +99,12 @@ public class DropAllCommandStep extends AbstractCommandStep {
                     computedCatalogAndSchemas.add(new CatalogAndSchema(null, s).customize(database))
             );
         } return computedCatalogAndSchemas;
+    }
+
+    protected void resetServices() {
+        LockServiceFactory.getInstance().resetAll();
+        Scope.getCurrentScope().getSingleton(ChangeLogHistoryServiceFactory.class).resetAll();
+        Scope.getCurrentScope().getSingleton(ExecutorService.class).reset();
     }
 
 }
