@@ -139,85 +139,85 @@ jobs:
           name: Event File
           path: ${{ github.event_path }}
 
-  # build:
-  #   name: Build & Test (Java ${{ matrix.java }} ${{ matrix.os }})
-  #   needs: setup
-  #   strategy:
-  #     fail-fast: false
-  #     matrix:
-  #       os: [ubuntu-22.04, macos-latest, windows-2019]
-  #       java: [8, 11, 17, 20]
-  #       exclude:
-  #         # exclude non-java 8 on macos and windows builds
-  #         - os: macos-latest
-  #           java: 11
-  #         - os: windows-2019
-  #           java: 11
-  #         - os: macos-latest
-  #           java: 17
-  #         - os: windows-2019
-  #           java: 17
-  #         - os: macos-latest
-  #           java: 20
-  #         - os: windows-2019
-  #           java: 20
-  #   runs-on: ${{ matrix.os }}
-  #   env:
-  #     OS_TYPE: ${{ matrix.os }}
-  #   steps:
-  #     - uses: actions/checkout@v3
-  #       with:
-  #         ref: ${{ github.event.pull_request.head.sha || github.event.after}}
-  #     - name: Built Code Cache
-  #       if: ${{ matrix.java == 11}}
-  #       uses: actions/cache@v3.3.1
-  #       with:
-  #         key: built-code-${{ github.run_number }}-${{ github.run_attempt }}
-  #         path: ./**/target
+  build:
+    name: Build & Test (Java ${{ matrix.java }} ${{ matrix.os }})
+    needs: setup
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-22.04, macos-latest, windows-2019]
+        java: [8, 11, 17, 20]
+        exclude:
+          # exclude non-java 8 on macos and windows builds
+          - os: macos-latest
+            java: 11
+          - os: windows-2019
+            java: 11
+          - os: macos-latest
+            java: 17
+          - os: windows-2019
+            java: 17
+          - os: macos-latest
+            java: 20
+          - os: windows-2019
+            java: 20
+    runs-on: ${{ matrix.os }}
+    env:
+      OS_TYPE: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@v3
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.event.after}}
+      - name: Built Code Cache
+        if: ${{ matrix.java == 11}}
+        uses: actions/cache@v3.3.1
+        with:
+          key: built-code-${{ github.run_number }}-${{ github.run_attempt }}
+          path: ./**/target
 
-  #     - name: Set up JDK ${{ matrix.java }}
-  #       uses: actions/setup-java@v3
-  #       with:
-  #         java-version: ${{ matrix.java }}
-  #         distribution: "temurin"
-  #         cache: "maven"
+      - name: Set up JDK ${{ matrix.java }}
+        uses: actions/setup-java@v3
+        with:
+          java-version: ${{ matrix.java }}
+          distribution: "temurin"
+          cache: "maven"
 
-  #     # getting from build results page. If we remove 0-snapshot then we will need settings.xml
+      # getting from build results page. If we remove 0-snapshot then we will need settings.xml
 
-  #     - name: Set up Maven
-  #       uses: stCarolas/setup-maven@v4.5
-  #       with:
-  #         maven-version: ${{ env.MAVEN_VERSION }}
-  #     - name: Build & Test Java 8
-  #       if: ${{ matrix.java == 8}}
-  #       run: |
-  #         mvn -B "-Dbuild.repository.owner=${{ needs.setup.outputs.thisRepositoryOwner }}" "-Dbuild.repository.name=${{ needs.setup.outputs.thisRepositoryName }}" "-Dbuild.branch=${{ needs.setup.outputs.thisBranchName }}" "-Dbuild.number=${{ github.run_number }}" "-Dbuild.commit=${{ needs.setup.outputs.thisSha }}" "-DtrimStackTrace=false" -pl '!liquibase-dist,!liquibase-cdi-jakarta' clean test package surefire-report:report
-  #     - name: Build & Test Java non-jdk-8
-  #       if: ${{ matrix.java != 8}}
-  #       run: |
-  #         mvn -B "-Dbuild.repository.owner=${{ needs.setup.outputs.thisRepositoryOwner }}" "-Dbuild.repository.name=${{ needs.setup.outputs.thisRepositoryName }}" "-Dbuild.branch=${{ needs.setup.outputs.thisBranchName }}" "-Dbuild.number=${{ github.run_number }}" "-Dbuild.commit=${{ needs.setup.outputs.thisSha }}" "-DtrimStackTrace=false" -pl '!liquibase-dist' clean test package surefire-report:report 
+      - name: Set up Maven
+        uses: stCarolas/setup-maven@v4.5
+        with:
+          maven-version: ${{ env.MAVEN_VERSION }}
+      - name: Build & Test Java 8
+        if: ${{ matrix.java == 8}}
+        run: |
+          mvn -B "-Dbuild.repository.owner=${{ needs.setup.outputs.thisRepositoryOwner }}" "-Dbuild.repository.name=${{ needs.setup.outputs.thisRepositoryName }}" "-Dbuild.branch=${{ needs.setup.outputs.thisBranchName }}" "-Dbuild.number=${{ github.run_number }}" "-Dbuild.commit=${{ needs.setup.outputs.thisSha }}" "-DtrimStackTrace=false" -pl '!liquibase-dist,!liquibase-cdi-jakarta' clean test package surefire-report:report
+      - name: Build & Test Java non-jdk-8
+        if: ${{ matrix.java != 8}}
+        run: |
+          mvn -B "-Dbuild.repository.owner=${{ needs.setup.outputs.thisRepositoryOwner }}" "-Dbuild.repository.name=${{ needs.setup.outputs.thisRepositoryName }}" "-Dbuild.branch=${{ needs.setup.outputs.thisBranchName }}" "-Dbuild.number=${{ github.run_number }}" "-Dbuild.commit=${{ needs.setup.outputs.thisSha }}" "-DtrimStackTrace=false" -pl '!liquibase-dist' clean test package surefire-report:report 
 
-  #     - name: Remove Original Jars for *nix
-  #       if: env.OS_TYPE != 'windows-2019'
-  #       run: |
-  #         find . -name original-*.jar -exec rm {} \;
+      - name: Remove Original Jars for *nix
+        if: env.OS_TYPE != 'windows-2019'
+        run: |
+          find . -name original-*.jar -exec rm {} \;
 
-  #     - name: Archive Test Results
-  #       if: ${{ always() }}
-  #       uses: actions/upload-artifact@v3
-  #       with:
-  #         name: liquibase-test-results-jdk${{ matrix.java }}
-  #         path: |
-  #           ./**/target/surefire-reports
-  #           ./**/target/site
+      - name: Archive Test Results
+        if: ${{ always() }}
+        uses: actions/upload-artifact@v3
+        with:
+          name: liquibase-test-results-jdk${{ matrix.java }}
+          path: |
+            ./**/target/surefire-reports
+            ./**/target/site
 
-  #     - name: Archive Modules
-  #       if: ${{ matrix.java == 11 && matrix.os == 'ubuntu-22.04'}}
-  #       uses: actions/upload-artifact@v3
-  #       with:
-  #         name: liquibase-modules
-  #         path: |
-  #           */target/*-0-SNAPSHOT.jar
+      - name: Archive Modules
+        if: ${{ matrix.java == 11 && matrix.os == 'ubuntu-22.04'}}
+        uses: actions/upload-artifact@v3
+        with:
+          name: liquibase-modules
+          path: |
+            */target/*-0-SNAPSHOT.jar
 
   # sonar:
   #   name: Sonar Scan
