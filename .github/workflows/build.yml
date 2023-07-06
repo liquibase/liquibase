@@ -324,7 +324,7 @@ jobs:
   package:
     name: Package Artifacts
     runs-on: macos-latest
-    needs: [setup]
+    needs: [setup, build]
     steps:
       - uses: actions/checkout@v3
         with:
