@@ -318,4 +318,13 @@ public class SybaseASADatabase extends AbstractJdbcDatabase {
          */
         return true;
     }
+
+    @Override
+    public int getMaxFractionalDigitsForTimestamp() {
+        /*
+         * SQL Anywhere statically uses exactly 6 decimal places for the fraction.
+         * See: https://help.sap.com/docs/SAP_SQL_Anywhere/93079d4ba8e44920ae63ffb4def91f5b/81fe344c6ce21014a4f29d9e0af358b9.html
+         */
+        return 6;
+    }
 }
