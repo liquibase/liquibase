@@ -7,6 +7,9 @@ import liquibase.change.core.LoadDataChange;
 import liquibase.changelog.ChangeLogHistoryServiceFactory;
 import liquibase.changelog.ChangeSet;
 import liquibase.changelog.DatabaseChangeLog;
+import liquibase.command.CommandScope;
+import liquibase.command.core.UpdateCommandStep;
+import liquibase.command.core.helpers.DbUrlConnectionCommandStep;
 import liquibase.database.Database;
 import liquibase.database.DatabaseConnection;
 import liquibase.database.DatabaseFactory;
@@ -1212,6 +1215,15 @@ public abstract class AbstractIntegrationTest {
         command.add(contexts);
 
         return new ProcessBuilder(command);
+    }
+
+    protected void runUpdate(String changelog) throws CommandExecutionException {
+        CommandScope commandScope = new CommandScope(UpdateCommandStep.COMMAND_NAME);
+        commandScope.addArgumentValue(DbUrlConnectionCommandStep.URL_ARG, testSystem.getConnectionUrl());
+        commandScope.addArgumentValue(DbUrlConnectionCommandStep.USERNAME_ARG, testSystem.getUsername());
+        commandScope.addArgumentValue(DbUrlConnectionCommandStep.PASSWORD_ARG, testSystem.getPassword());
+        commandScope.addArgumentValue(UpdateCommandStep.CHANGELOG_FILE_ARG, changelog);
+        commandScope.execute();
     }
 
     public static final class ApplyTestChangelog {
