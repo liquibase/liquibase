@@ -75,7 +75,6 @@
         <argLine></argLine>
     </properties>
 
-    <!-- comment -->
     <distributionManagement>
         <repository>
             <id>github</id>
