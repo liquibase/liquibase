@@ -38,6 +38,8 @@ Optional Args:
     OBFUSCATED
   rollbackScript (String) Rollback script to execute
     Default: null
+  tagVersion (String) Tag version to use for multiple occurrences of a tag
+    Default: OLDEST
   username (String) Username to use to connect to the database
     Default: null
 """
@@ -48,6 +50,7 @@ Optional Args:
                 username     : { it.username },
                 password     : { it.password },
                 tag          : "version_2.0",
+                tagVersion   : "OLDEST",
                 changelogFile: "changelogs/h2/complete/rollback.tag.changelog.xml",
         ]
 
