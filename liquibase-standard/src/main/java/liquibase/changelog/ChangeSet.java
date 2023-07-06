@@ -960,7 +960,7 @@ public class ChangeSet implements Conditional, ChangeLogChild {
      * Method created to remove changes from a changeset
      * @param collection
      */
-    public void removeAllChanges(Collection<Change> collection) {
+    public void removeAllChanges(Collection<?> collection) {
         this.changes.removeAll(collection);
     }
 
