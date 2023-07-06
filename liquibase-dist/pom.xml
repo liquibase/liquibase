@@ -20,7 +20,7 @@
 			</snapshots>
 		</repository>
 		<repository>
-			<id>github</id>
+			<id>github-pro</id>
 			<url>https://liquibot:${env.GITHUB_TOKEN}@maven.pkg.github.com/liquibase/liquibase-pro</url>
 			<snapshots>
 				<enabled>true</enabled>
