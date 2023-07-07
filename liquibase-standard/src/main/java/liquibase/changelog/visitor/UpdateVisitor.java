@@ -20,8 +20,6 @@ import liquibase.exception.MigrationFailedException;
 import liquibase.executor.Executor;
 import liquibase.executor.ExecutorService;
 import liquibase.executor.LoggingExecutor;
-import liquibase.integration.commandline.LiquibaseCommandLineConfiguration;
-import liquibase.statement.core.UpdateChangeSetChecksumStatement;
 
 import java.util.Objects;
 import java.util.Set;
@@ -81,9 +79,8 @@ public class UpdateVisitor implements ChangeSetVisitor {
      * @return oldChecksum the former checksum
      */
     private static CheckSum updateCheckSumIfRequired(ChangeSet changeSet) {
-        CheckSum oldChecksum = null;
-        if (changeSet.getStoredCheckSum() == null || changeSet.getStoredCheckSum().getVersion() < ChecksumVersion.latest().getVersion()) {
-            oldChecksum = changeSet.getStoredCheckSum();
+        CheckSum oldChecksum = changeSet.getStoredCheckSum();
+        if (oldChecksum == null || oldChecksum.getVersion() < ChecksumVersion.latest().getVersion()) {
             changeSet.clearCheckSum();
             changeSet.setStoredCheckSum(changeSet.generateCheckSum(ChecksumVersion.latest()));
         }
@@ -99,8 +96,8 @@ public class UpdateVisitor implements ChangeSetVisitor {
             Scope.getCurrentScope().getUI().sendMessage(String.format("Upgrading checksum for Changeset %s from %s to %s.",
                     changeSet, oldChecksum, changeSet.getStoredCheckSum()));
         }
-        Scope.getCurrentScope().getSingleton(ExecutorService.class).getExecutor("jdbc", database)
-                .execute(new UpdateChangeSetChecksumStatement(changeSet));
+        ChangeLogHistoryService changeLogService = Scope.getCurrentScope().getSingleton(ChangeLogHistoryServiceFactory.class).getChangeLogService(database);
+        changeLogService.replaceChecksum(changeSet);
     }
 
     /**
@@ -159,3 +156,4 @@ public class UpdateVisitor implements ChangeSetVisitor {
         changeSet.setAttribute("deploymentId", deploymentId);
     }
 }
+
