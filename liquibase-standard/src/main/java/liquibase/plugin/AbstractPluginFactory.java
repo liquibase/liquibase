@@ -1,6 +1,8 @@
 package liquibase.plugin;
 
 import liquibase.Scope;
+import liquibase.change.Change;
+import liquibase.database.Database;
 import liquibase.servicelocator.ServiceLocator;
 
 import java.util.ArrayList;
@@ -65,8 +67,15 @@ public abstract class AbstractPluginFactory<T extends Plugin> implements PluginF
             }
         }
 
-        if (applicable.size() == 0) {
+        if (applicable.isEmpty()) {
             return null;
+        } else if (applicable.size() == 1) {
+            return applicable.iterator().next();
+        } else if (getPluginClass().equals(Change.class)) {
+            Database database = Scope.getCurrentScope().getDatabase();
+            if (database != null) {
+                applicable.removeIf(a -> !((Change) a).supports(database));
+            }
         }
 
         return applicable.iterator().next();
