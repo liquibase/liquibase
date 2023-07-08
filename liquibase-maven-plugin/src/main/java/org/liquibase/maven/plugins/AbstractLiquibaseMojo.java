@@ -6,6 +6,7 @@ import liquibase.Scope;
 import liquibase.ThreadLocalScopeManager;
 import liquibase.changelog.visitor.ChangeExecListener;
 import liquibase.changelog.visitor.DefaultChangeExecListener;
+import liquibase.command.core.helpers.DbUrlConnectionCommandStep;
 import liquibase.configuration.LiquibaseConfiguration;
 import liquibase.configuration.core.DefaultsFileValueProvider;
 import liquibase.database.Database;
@@ -783,6 +784,7 @@ public abstract class AbstractLiquibaseMojo extends AbstractMojo {
                                     changelogSchemaName,
                                     databaseChangeLogTableName,
                                     databaseChangeLogLockTableName);
+                            DbUrlConnectionCommandStep.logMdc(url, database);
                             liquibase = createLiquibase(database);
 
                             configureChangeLogProperties();

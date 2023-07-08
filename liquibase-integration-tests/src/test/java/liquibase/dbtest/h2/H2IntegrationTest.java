@@ -11,6 +11,7 @@ import liquibase.diff.compare.CompareControl;
 import liquibase.diff.output.DiffOutputControl;
 import liquibase.diff.output.changelog.DiffToChangeLog;
 import liquibase.diff.output.report.DiffToReport;
+import liquibase.exception.DatabaseException;
 import liquibase.exception.ValidationFailedException;
 import liquibase.executor.ExecutorService;
 import liquibase.statement.core.RawSqlStatement;
@@ -187,6 +188,27 @@ public class H2IntegrationTest extends AbstractIntegrationTest {
                 .queryForList(new RawSqlStatement(String.format("select * from %s", tableName)));
         Assert.assertEquals("Rollbacking for " + insertedValue, 2, queryResult.size());
         Assert.assertEquals(insertedValue.toString(), queryResult.get(1).get(colName));
+    }
+
+    @Test
+    public void makeSureDbmsFilteredChangeIsNotDeployed() throws Exception {
+        clearDatabase();
+        runUpdate("changelogs/h2/complete/sql.change.dbms.filtered.should.not.be.deployed.changelog.xml");
+
+        try {
+            Scope.getCurrentScope().getSingleton(ExecutorService.class).getExecutor("jdbc", getDatabase())
+                    .queryForList(new RawSqlStatement("select * from oraculo"));
+        }
+        catch (DatabaseException e) {
+            Assert.assertTrue(e.getMessage().contains("Table \"ORACULO\" not found"));
+        }
+        try {
+            Scope.getCurrentScope().getSingleton(ExecutorService.class).getExecutor("jdbc", getDatabase())
+                    .queryForList(new RawSqlStatement("select * from anydb"));
+        }
+        catch (DatabaseException e) {
+            Assert.assertTrue(e.getMessage().contains("Table \"ANYDB\" not found"));
+        }
     }
 
     @Override
