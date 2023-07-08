@@ -739,7 +739,7 @@ public class DatabaseChangeLog implements Comparable<DatabaseChangeLog>, Conditi
 
             if (resources.isEmpty() && errorIfMissingOrEmpty) {
                 throw new SetupException(
-                        "Could not find directory or directory was empty for includeAll '" + pathName + "'");
+                        "Could not find directory, directory was empty, or no changelogs matched the provided search criteria for includeAll '" + pathName + "'");
             }
 
             Scope.child(Collections.singletonMap(SEEN_CHANGELOGS_PATHS_SCOPE_KEY, seenChangelogPaths), () -> {
