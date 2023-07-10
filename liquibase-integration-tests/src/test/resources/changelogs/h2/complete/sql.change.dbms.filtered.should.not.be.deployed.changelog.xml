@@ -1,0 +1,15 @@
+<?xml version="1.1" encoding="UTF-8" standalone="no"?>
+<databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog" xmlns:ext="http://www.liquibase.org/xml/ns/dbchangelog-ext" xmlns:pro="http://www.liquibase.org/xml/ns/pro" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog-ext http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-ext.xsd http://www.liquibase.org/xml/ns/pro http://www.liquibase.org/xml/ns/pro/liquibase-pro-latest.xsd http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-latest.xsd">
+
+    <changeSet id="1" author="mallod">
+        <sql>create table anydb(id boolean default true, status varchar(2))</sql>
+        <sql dbms="oracle">create table oraculo(id boolean default true, status varchar(2))</sql>
+        <dropTable tableName="anydb" />
+    </changeSet>
+
+    <changeSet id="2" author="fl" >
+        <sql dbms="oracle">create table anydb(id boolean default true, status varchar(2))</sql>
+        <sql dbms="oracle">create table oraculo(id boolean default true, status varchar(2))</sql>
+    </changeSet>
+
+</databaseChangeLog>
