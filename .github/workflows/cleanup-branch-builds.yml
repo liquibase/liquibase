@@ -20,7 +20,7 @@ jobs:
       with:
         version: "${{ github.event.ref }}-SNAPSHOT"
 
-    - uses: actions/delete-package-versions@v4
+    - uses: actions/delete-package-versions@v3
       if: ${{ steps.version.outputs.ids != '' }}
       with:
         # The number of latest versions to keep.
@@ -31,4 +31,4 @@ jobs:
 
         # Can be a single package version id, or a comma separated list of package version ids.
         # Defaults to an empty string.
-        package-version-ids: "${{ steps.versions.outputs.ids }}"
+        package-version-ids: "${{ steps.version.outputs.ids }}"
