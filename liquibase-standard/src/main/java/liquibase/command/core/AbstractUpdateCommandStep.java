@@ -62,12 +62,13 @@ public abstract class AbstractUpdateCommandStep extends AbstractCommandStep impl
             if (isFastCheckEnabled && isUpToDate(commandScope, database, databaseChangeLog, contexts, labelExpression, resultsBuilder.getOutputStream())) {
                 return;
             }
-            //
-            // Comment out this code until Github issue 4448 is resolved
-            //
-            //if(!isDBLocked) {
-            //    LockServiceFactory.getInstance().getLockService(database).waitForLock();
-            //}
+            if(!isDBLocked) {
+                LockServiceFactory.getInstance().getLockService(database).waitForLock();
+                // waitForLock resets the changelog history service, so we need to rebuild that and generate a final deploymentId.
+                ChangeLogHistoryService changeLogHistoryService = Scope.getCurrentScope().getSingleton(ChangeLogHistoryServiceFactory.class).getChangeLogService(database);
+                changeLogHistoryService.init();
+                changeLogHistoryService.generateDeploymentId();
+            }
 
             ChangeLogHistoryService changelogService = Scope.getCurrentScope().getSingleton(ChangeLogHistoryServiceFactory.class).getChangeLogService(database);
             Scope.getCurrentScope().addMdcValue(MdcKey.DEPLOYMENT_ID, changelogService.getDeploymentId());
