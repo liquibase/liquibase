@@ -11,6 +11,7 @@ import liquibase.exception.DatabaseException;
 import liquibase.exception.LiquibaseException;
 import liquibase.exception.UnexpectedLiquibaseException;
 import liquibase.executor.ExecutorService;
+import liquibase.integration.commandline.LiquibaseCommandLineConfiguration;
 import liquibase.servicelocator.LiquibaseService;
 import liquibase.statement.core.CreateDatabaseChangeLogTableStatement;
 import liquibase.statement.core.MarkChangeSetRanStatement;
@@ -133,7 +134,7 @@ public class OfflineChangeLogHistoryService extends AbstractChangeLogHistoryServ
     }
 
     @Override
-    public void replaceChecksum(final ChangeSet changeSet) throws DatabaseException {
+    protected void replaceChecksum(final ChangeSet changeSet) throws DatabaseException {
         if (isExecuteDmlAgainstDatabase()) {
             Scope.getCurrentScope().getSingleton(ExecutorService.class).getExecutor("jdbc", getDatabase()).execute(new UpdateChangeSetChecksumStatement(changeSet));
         }
@@ -145,6 +146,11 @@ public class OfflineChangeLogHistoryService extends AbstractChangeLogHistoryServ
 
     @Override
     public List<RanChangeSet> getRanChangeSets() throws DatabaseException {
+        return this.getRanChangeSets(false);
+    }
+
+    @Override
+    public List<RanChangeSet> getRanChangeSets(boolean allowUpgrade) throws DatabaseException {
         try (
                 Reader reader = new InputStreamReader(Files.newInputStream(this.changeLogFile.toPath()), GlobalConfiguration.OUTPUT_FILE_ENCODING.getCurrentValue())
         )
