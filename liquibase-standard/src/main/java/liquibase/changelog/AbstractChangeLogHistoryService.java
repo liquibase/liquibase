@@ -9,8 +9,6 @@ import liquibase.changelog.filter.DbmsChangeSetFilter;
 import liquibase.database.Database;
 import liquibase.exception.DatabaseException;
 import liquibase.exception.DatabaseHistoryException;
-import liquibase.executor.ExecutorService;
-import liquibase.statement.core.UpdateChangeSetChecksumStatement;
 
 import java.util.Date;
 import java.util.List;
@@ -120,13 +118,7 @@ public abstract class AbstractChangeLogHistoryService implements ChangeLogHistor
          return lastRanChangeSet.getDeploymentId();
     }
 
-    @Override
-    public void replaceChecksum(ChangeSet changeSet) throws DatabaseException {
-        Scope.getCurrentScope().getSingleton(ExecutorService.class).getExecutor("jdbc", getDatabase()).execute(new UpdateChangeSetChecksumStatement
-                (changeSet));
-        getDatabase().commit();
-        reset();
-    }
+    protected abstract void replaceChecksum(ChangeSet changeSet) throws DatabaseException;
 
     @Override
     public String getDeploymentId() {
