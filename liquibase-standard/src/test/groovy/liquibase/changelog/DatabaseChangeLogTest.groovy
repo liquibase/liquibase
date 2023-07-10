@@ -456,8 +456,7 @@ create view sql_view as select * from sql_table;'''
 
         then:
         def e = thrown(SetupException)
-        assert e.getMessage().startsWith("Could not find directory or directory was empty for includeAll '")
-
+        assert e.getMessage().startsWith("Could not find directory, directory was empty, or no changelogs matched the provided search criteria for includeAll '")
     }
 
     def "includeAll throws exception when circular reference is detected"() {
