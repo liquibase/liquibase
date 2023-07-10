@@ -342,5 +342,10 @@ jobs:
   
         - name: Upload deb package
           run: |
-            deb-s3 upload --bucket repo.liquibase.com liquibase-dist/target/liquibase-${{ needs.setup.outputs.version }}.deb --preserve-versions
+            sudo apt install pinentry-tty
+            echo "2" | sudo update-alternatives --config pinentry
+            echo "${{ secrets.GPG_SECRET }}" | gpg --batch --import --pinentry-mode loopback --passphrase "${{ secrets.GPG_PASSPHRASE }}"
+            export GPG_TTY=$(tty)
+            echo '${{ secrets.GPG_PASSPHRASE }}' > pass.txt
+            deb-s3 upload --preserve-versions --sign "${{ secrets.GPG_SECRET_KEY_ID }}" --gpg-options "\-\-pinentry-mode loopback \-\-batch \-\-passphrase\-file pass.txt \-\-yes \-\-quiet" --bucket repo.liquibase.com liquibase-dist/target/liquibase-${{ needs.setup.outputs.version }}.deb
           
