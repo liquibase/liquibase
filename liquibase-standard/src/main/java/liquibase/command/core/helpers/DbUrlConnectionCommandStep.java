@@ -97,7 +97,7 @@ public class DbUrlConnectionCommandStep extends AbstractDatabaseConnectionComman
         }
     }
 
-    private void logMdc(String url, Database database) {
+    public static void logMdc(String url, Database database) {
         Scope.getCurrentScope().addMdcValue(MdcKey.LIQUIBASE_TARGET_URL, url);
         Scope.getCurrentScope().addMdcValue(MdcKey.LIQUIBASE_CATALOG_NAME, database.getLiquibaseCatalogName());
         Scope.getCurrentScope().addMdcValue(MdcKey.LIQUIBASE_SCHEMA_NAME, database.getLiquibaseSchemaName());

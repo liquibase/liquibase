@@ -23,7 +23,7 @@
 		<oracle.version>23.2.0.0</oracle.version>
 		<sqlite.version>3.42.0.0</sqlite.version>
 		<db2.version>11.5.8.0</db2.version>
-		<firebird.version>5.0.1.java8</firebird.version>
+		<firebird.version>5.0.2.java8</firebird.version>
 
 		<assemblyConfigFile>src/main/assembly/assembly-bin.xml</assemblyConfigFile>
 		<maven.deploy.skip>true</maven.deploy.skip>
@@ -90,7 +90,7 @@
         <dependency>
             <groupId>net.snowflake</groupId>
             <artifactId>snowflake-jdbc</artifactId>
-            <version>3.13.32</version>
+            <version>3.13.33</version>
         </dependency>
 
         <!--        CANNOT INCLUDE MYSQL FOR LICENSING REASONS -->
@@ -158,7 +158,7 @@
 		<dependency>
             <groupId>org.glassfish.jaxb</groupId>
             <artifactId>jaxb-runtime</artifactId>
-            <version>4.0.2</version>
+            <version>4.0.3</version>
             <optional>true</optional>
 		</dependency>
 	</dependencies>
