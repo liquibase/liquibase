@@ -462,43 +462,6 @@ jobs:
           name: liquibase-artifacts-${{ needs.setup.outputs.thisBranchFileName }}
           path: artifacts-named/*
 
-  deploy-package:
-    name: Deploy to GPM
-    runs-on: ubuntu-22.04
-    env: 
-      GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-    # needs: [setup, build, sonar, integration-test]
-    needs: [setup]
-    permissions:
-      contents: read
-      packages: write
-    steps:
-      - uses: actions/checkout@v3
-
-      - name: Set up Java for publishing to GPM
-        uses: actions/setup-java@v3
-        with:
-          java-version: '17'
-          distribution: 'temurin'
-          cache: 'maven'
-
-      - name: Set up Maven
-        uses: stCarolas/setup-maven@v4.5
-        with:
-          maven-version: ${{ env.MAVEN_VERSION }}
-
-      # Deploy branch
-      # Version artifact based off of branch
-      - name: Version Artifact
-        run: mvn versions:set -DnewVersion="${{ github.ref_name }}-SNAPSHOT" 
-
-      # Publish to GitHub Packages. We are building a tar file which includes liquibase-commercial hence we need -Dliquibase-pro.version
-      - name: Publish package to GPM
-        run: |
-          mvn -B -P liquibase-commercial clean deploy -DskipTests=true -Dliquibase-pro.version="${{ needs.setup.outputs.proBranchName }}-SNAPSHOT"   
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-
 
 # this triggers the pro-tests and test-harness to run
   # finish:
