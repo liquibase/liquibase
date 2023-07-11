@@ -23,6 +23,7 @@ import liquibase.diff.output.DiffOutputControl;
 import liquibase.diff.output.changelog.DiffToChangeLog;
 import liquibase.exception.ValidationFailedException;
 import liquibase.executor.ExecutorService;
+import liquibase.extension.testing.testsystem.DatabaseTestSystem;
 import liquibase.snapshot.DatabaseSnapshot;
 import liquibase.snapshot.SnapshotControl;
 import liquibase.snapshot.SnapshotGeneratorFactory;
@@ -46,11 +47,13 @@ public class PostgreSQLIntegrationTest extends AbstractIntegrationTest {
 
     private String dependenciesChangeLog;
     private String blobChangeLog;
+    private static DatabaseTestSystem localTestSystem;
 
     public PostgreSQLIntegrationTest() throws Exception {
         super("pgsql", DatabaseFactory.getInstance().getDatabase("postgresql"));
         dependenciesChangeLog = "changelogs/pgsql/complete/testFkPkDependencies.xml";
         blobChangeLog = "changelogs/pgsql/complete/testBlob.changelog.xml";
+        localTestSystem = testSystem;
     }
 
     @Test

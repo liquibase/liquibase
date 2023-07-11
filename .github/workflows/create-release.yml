@@ -160,6 +160,14 @@ jobs:
           rm re-version/final/*.md5
           rm re-version/final/*.sha1
 
+      - name: Re-version deb package
+        run: |
+          version="${{ needs.setup.outputs.version }}"
+          mvn versions:set -DnewVersion=$version
+          mvn package -DskipTests -f ./liquibase-dist/pom.xml 
+          mv liquibase-dist/target/liquibase-*deb re-version/final
+
+
       - name: Attach Files to Draft Release
         uses: softprops/action-gh-release@v1
         with:
