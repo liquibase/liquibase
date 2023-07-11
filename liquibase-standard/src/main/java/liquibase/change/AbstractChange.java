@@ -868,4 +868,13 @@ public abstract class AbstractChange extends AbstractPlugin implements Change {
         return description;
     }
 
+    @Override
+    public boolean equals(Object reference) {
+        return (this == reference);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(super.hashCode(), changeSet);
+    }
 }
