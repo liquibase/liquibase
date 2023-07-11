@@ -317,4 +317,35 @@ jobs:
             sed -ie "s/<\/ul>/  <li><a href=\"\/xml\/ns\/dbchangelog\/dbchangelog-${xsd_version}.xsd\">dbchangelog-${xsd_version}.xsd<\/a><\/li>\n<\/ul>/" index-file/index.htm
             aws s3 sync index-file s3://liquibaseorg-origin/xml/ns/dbchangelog/ --only-show-errors
           fi
+
+  upload_deb:
+      name: Upload deb
+      needs: [ setup ]
+      runs-on: ubuntu-22.04
+      steps:
+        - uses: actions/checkout@v3
+
+        - name: Configure AWS credentials
+          uses: aws-actions/configure-aws-credentials@v2
+          with:
+            aws-access-key-id: ${{ secrets.AWS_PROD_ACCESS_KEY_ID }}
+            aws-secret-access-key: ${{ secrets.AWS_PROD_SECRET_ACCESS_KEY }}
+            aws-region: us-east-1
+
+        - name: Set up Ruby
+          uses: ruby/setup-ruby@v1
+          with:
+            ruby-version: 3.1.4
+
+        - name: Install deb-s3 gem
+          run: gem install deb-s3
+  
+        - name: Upload deb package
+          run: |
+            sudo apt install pinentry-tty
+            echo "2" | sudo update-alternatives --config pinentry
+            echo "${{ secrets.GPG_SECRET }}" | gpg --batch --import --pinentry-mode loopback --passphrase "${{ secrets.GPG_PASSPHRASE }}"
+            export GPG_TTY=$(tty)
+            echo '${{ secrets.GPG_PASSPHRASE }}' > pass.txt
+            deb-s3 upload --preserve-versions --sign "${{ secrets.GPG_SECRET_KEY_ID }}" --gpg-options "\-\-pinentry-mode loopback \-\-batch \-\-passphrase\-file pass.txt \-\-yes \-\-quiet" --bucket repo.liquibase.com liquibase-dist/target/liquibase-${{ needs.setup.outputs.version }}.deb
           
