@@ -43,9 +43,3 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
-      # Publish to GitHub Packages. We are building a tar file which includes liquibase-commercial hence we need -Dliquibase-pro.version
-      - name: Publish tar.gz package to GPM
-        run: |
-          mvn -B -pl liquibase-dist -P liquibase-commercial clean deploy -DskipTests=true -Dliquibase-pro.version="${{ github.ref_name }}-SNAPSHOT"
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

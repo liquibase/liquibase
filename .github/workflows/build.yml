@@ -463,6 +463,13 @@ jobs:
           path: artifacts-named/*
 
 
+      # Publish to GitHub Packages. We are building a tar file which includes liquibase-commercial hence we need -Dliquibase-pro.version
+      - name: Publish tar.gz package to GPM
+        run: |
+          mvn -B -pl liquibase-dist -P liquibase-commercial clean deploy -DskipTests=true -Dliquibase-pro.version="${{ needs.setup.outputs.proBranchName }}-SNAPSHOT"
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
 # this triggers the pro-tests and test-harness to run
   # finish:
   #   name: Finish Build
