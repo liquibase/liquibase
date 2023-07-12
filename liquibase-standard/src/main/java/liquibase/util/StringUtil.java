@@ -35,27 +35,6 @@ public class StringUtil {
     }
 
     /**
-     *
-     * Split a string, trim each part, and return a new array
-     *
-     * @param   string           String to operate on
-     * @return  String[]
-     *
-     */
-    public static String[] splitAndTrim(String string) {
-        String[] newParts = string.split(",");
-        if (newParts.length == 1) {
-            return newParts;
-        }
-        String[] editedParts = new String[newParts.length];
-        AtomicInteger i = new AtomicInteger();
-        Arrays.stream(newParts).forEach(label-> {
-            editedParts[i.getAndIncrement()] = label.trim();
-        });
-        return editedParts;
-    }
-
-    /**
      * Returns the trimmed (left and right) form of the input string. If the string is empty after trimming (or null
      * was passed in the first place), null is returned, i.e. the input string is reduced to nothing.
      *
