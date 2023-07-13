@@ -39,7 +39,5 @@ jobs:
       - name: Publish package
         run: |
           mvn -B clean deploy -DskipTests=true
-
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-

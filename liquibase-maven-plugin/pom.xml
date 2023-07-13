@@ -152,54 +152,6 @@
                     <version>${liquibase-pro.version}</version>
                 </dependency>
             </dependencies>
-
-<!--            <build>-->
-<!--                <plugins>-->
-<!--                    <plugin>-->
-<!--                        <artifactId>maven-install-plugin</artifactId>-->
-<!--                        <configuration>-->
-<!--                            <artifactId>liquibase-maven-plugin</artifactId>-->
-<!--                            <file>${project.build.directory}/liquibase-maven-plugin-${project.version}.jar</file>-->
-<!--                            <sources>${project.build.directory}/liquibase-maven-plugin-${project.version}-sources.jar</sources>-->
-<!--                            <pomFile>${basedir}/src/main/maven/release.pom.xml</pomFile>-->
-<!--                        </configuration>-->
-<!--                        <executions>-->
-<!--                            <execution>-->
-<!--                                <id>default-install</id>-->
-<!--                                <phase>install</phase>-->
-<!--                                <goals>-->
-<!--                                    <goal>install-file</goal>-->
-<!--                                </goals>-->
-<!--                            </execution>-->
-<!--                        </executions>-->
-<!--                    </plugin>-->
-<!--                    <plugin>-->
-<!--                        <artifactId>maven-deploy-plugin</artifactId>-->
-<!--                        <version>3.1.1</version>-->
-<!--                        <configuration>-->
-<!--                            <groupId>${project.groupId}</groupId>-->
-<!--                            <version>${project.version}</version>-->
-<!--                            <packaging>jar</packaging>-->
-<!--                            <repositoryId>${deploy.repositoryId}</repositoryId>-->
-<!--                            <url>${deploy.url}</url>-->
-<!--                            <file>${project.build.directory}/liquibase-maven-plugin-${project.version}.jar</file>-->
-<!--                            <artifactId>${project.artifactId}</artifactId>-->
-<!--                            <sources>${project.build.directory}/liquibase-maven-plugin-${project.version}-sources.jar-->
-<!--                            </sources>-->
-<!--                            <pomFile>${basedir}/src/main/maven/release.pom.xml</pomFile>-->
-<!--                        </configuration>-->
-<!--                        <executions>-->
-<!--                            <execution>-->
-<!--                                <id>default-deploy</id>-->
-<!--                                <phase>deploy</phase>-->
-<!--                                <goals>-->
-<!--                                    <goal>deploy-file</goal>-->
-<!--                                </goals>-->
-<!--                            </execution>-->
-<!--                        </executions>-->
-<!--                    </plugin>-->
-<!--                </plugins>-->
-<!--            </build>-->
         </profile>
 
     </profiles>

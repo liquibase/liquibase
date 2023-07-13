@@ -408,8 +408,8 @@
                     <flattenedPomFilename>release.pom.xml</flattenedPomFilename>
                     <pomElements>
                         <profiles>remove</profiles>
-                        <organization />
-                        <issueManagement />
+                        <organization/>
+                        <issueManagement/>
                     </pomElements>
                     <flattenMode>ossrh</flattenMode>
                 </configuration>
