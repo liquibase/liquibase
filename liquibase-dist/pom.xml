@@ -234,15 +234,15 @@
 				<version>0.10.18</version>
 			</plugin>
 
-			<plugin>
-				<groupId>org.apache.maven.plugins</groupId>
-				<artifactId>maven-source-plugin</artifactId>
-				<version>3.3.0</version>
-				<configuration>
-					<!-- sources.jar from this module is the shaded sources of others -->
-					<skipSource>true</skipSource>
-				</configuration>
-			</plugin>
+<!--			<plugin>-->
+<!--				<groupId>org.apache.maven.plugins</groupId>-->
+<!--				<artifactId>maven-source-plugin</artifactId>-->
+<!--				<version>3.3.0</version>-->
+<!--				<configuration>-->
+<!--					&lt;!&ndash; sources.jar from this module is the shaded sources of others &ndash;&gt;-->
+<!--					<skipSource>true</skipSource>-->
+<!--				</configuration>-->
+<!--			</plugin>-->
 			<!-- this builds and attaches the tar file of liquibase (which has liquibase cli) -->
 			<plugin>
 				<artifactId>maven-assembly-plugin</artifactId>
