@@ -469,7 +469,8 @@ jobs:
           echo "Javadocs not available for liquibase-commercial" > /tmp/readme.javadocs.txt
           (cd /tmp && jar cf liquibase-commercial-${{ needs.setup.outputs.thisBranchName }}-SNAPSHOT-javadoc.jar readme.javadocs.txt)
 
-          cp liquibase-dist/target/liquibase-${{ needs.setup.outputs.thisBranchName }}-SNAPSHOT/liquibase-commercial/liquibase-commercial-${{ needs.setup.outputs.thisBranchName }}-SNAPSHOT.jar artifacts
+          commercialJarM2Location=/Users/runner/.m2/repository/org/liquibase/liquibase-commercial/${{ needs.setup.outputs.thisBranchName }}-SNAPSHOT/liquibase-commercial-${{ needs.setup.outputs.thisBranchName }}-SNAPSHOT.jar
+          cp $commercialJarM2Location artifacts
           cp /tmp/liquibase-commercial-${{ needs.setup.outputs.thisBranchName }}-SNAPSHOT-sources.jar artifacts
           cp /tmp/liquibase-commercial-${{ needs.setup.outputs.thisBranchName }}-SNAPSHOT-javadoc.jar artifacts
 
@@ -484,7 +485,7 @@ jobs:
           cp liquibase-cdi-jakarta/target/liquibase-cdi-jakarta-0-SNAPSHOT.jar artifacts-named/liquibase-cdi-jakarta-${{ needs.setup.outputs.thisBranchFileName }}.jar
           cp liquibase-extension-testing/target/liquibase-extension-testing-0-SNAPSHOT.jar artifacts-named/liquibase-extension-testing-${{ needs.setup.outputs.thisBranchFileName }}.jar
           cp liquibase-extension-testing/target/liquibase-extension-testing-0-SNAPSHOT-deps.jar artifacts-named/liquibase-extension-testing-${{ needs.setup.outputs.thisBranchFileName }}-deps.jar
-          cp liquibase-dist/target/liquibase-${{ needs.setup.outputs.thisBranchName }}-SNAPSHOT/liquibase-commercial/liquibase-commercial-0-SNAPSHOT.jar artifacts-named/liquibase-commercial-${{ needs.setup.outputs.thisBranchFileName }}.jar
+          cp $commercialJarM2Location artifacts-named/liquibase-commercial-${{ needs.setup.outputs.thisBranchFileName }}.jar
 
       - name: Archive Packages
         uses: actions/upload-artifact@v3
