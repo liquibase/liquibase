@@ -83,7 +83,7 @@ public class ReferenceDbUrlConnectionCommandStep extends AbstractDatabaseConnect
         }
     }
 
-    private void logMdc(String url, String username, String defaultSchemaName, String defaultCatalogName) {
+    public static void logMdc(String url, String username, String defaultSchemaName, String defaultCatalogName) {
         Scope.getCurrentScope().addMdcValue(MdcKey.LIQUIBASE_REF_URL, url);
         Scope.getCurrentScope().addMdcValue(MdcKey.REFERENCE_USERNAME, username);
         Scope.getCurrentScope().addMdcValue(MdcKey.REFERENCE_DEFAULT_SCHEMA_NAME, defaultSchemaName);

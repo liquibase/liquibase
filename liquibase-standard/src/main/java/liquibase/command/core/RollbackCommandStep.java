@@ -1,6 +1,7 @@
 package liquibase.command.core;
 
 import liquibase.Scope;
+import liquibase.TagVersionEnum;
 import liquibase.changelog.RanChangeSet;
 import liquibase.changelog.filter.AfterTagChangeSetFilter;
 import liquibase.command.*;
@@ -17,14 +18,22 @@ public class RollbackCommandStep extends AbstractRollbackCommandStep {
     public static final String[] COMMAND_NAME = {"rollback"};
 
     public static final CommandArgumentDefinition<String> TAG_ARG;
+    public static final CommandArgumentDefinition<String> TAG_VERSION_ARG;
 
     static {
         CommandBuilder builder = new CommandBuilder(COMMAND_NAME);
         TAG_ARG = builder.argument("tag", String.class).required()
             .description("Tag to rollback to").build();
 
+        TAG_VERSION_ARG = builder.argument("tagVersion",String.class)
+                .description("Tag version to use for multiple occurrences of a tag")
+                .setValueHandler(TagVersionEnum::handleTagVersionInput)
+                .defaultValue(TagVersionEnum.OLDEST.name())
+                .build();
+
         builder.addArgument(AbstractRollbackCommandStep.ROLLBACK_SCRIPT_ARG).build();
     }
+
 
     @Override
     public void run(CommandResultsBuilder resultsBuilder) throws Exception {
@@ -36,7 +45,8 @@ public class RollbackCommandStep extends AbstractRollbackCommandStep {
         Database database = (Database) commandScope.getDependency(Database.class);
 
         List<RanChangeSet> ranChangeSetList = database.getRanChangeSetList();
-        this.doRollback(resultsBuilder, ranChangeSetList, new AfterTagChangeSetFilter(tagToRollBackTo, ranChangeSetList));
+        TagVersionEnum tagVersion = TagVersionEnum.valueOf(commandScope.getArgumentValue(TAG_VERSION_ARG));
+        this.doRollback(resultsBuilder, ranChangeSetList, new AfterTagChangeSetFilter(tagToRollBackTo, ranChangeSetList, tagVersion));
     }
 
     @Override

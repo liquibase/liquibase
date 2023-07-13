@@ -23,11 +23,13 @@
 		<oracle.version>23.2.0.0</oracle.version>
 		<sqlite.version>3.42.0.0</sqlite.version>
 		<db2.version>11.5.8.0</db2.version>
-		<firebird.version>5.0.1.java8</firebird.version>
+		<firebird.version>5.0.2.java8</firebird.version>
 
 		<assemblyConfigFile>src/main/assembly/assembly-bin.xml</assemblyConfigFile>
 		<maven.deploy.skip>true</maven.deploy.skip>
 		<maven.install.skip>true</maven.install.skip>
+		<maven.antrun.version>3.1.0</maven.antrun.version>
+		<org.vafer.jdeb.version>1.10</org.vafer.jdeb.version>
 	</properties>
 	<dependencies>
 		<dependency>
@@ -88,7 +90,7 @@
         <dependency>
             <groupId>net.snowflake</groupId>
             <artifactId>snowflake-jdbc</artifactId>
-            <version>3.13.32</version>
+            <version>3.13.33</version>
         </dependency>
 
         <!--        CANNOT INCLUDE MYSQL FOR LICENSING REASONS -->
@@ -150,13 +152,13 @@
 		<dependency>
             <groupId>org.glassfish.jaxb</groupId>
             <artifactId>jaxb-core</artifactId>
-            <version>4.0.2</version>
+            <version>4.0.3</version>
             <optional>true</optional>
 		</dependency>
 		<dependency>
             <groupId>org.glassfish.jaxb</groupId>
             <artifactId>jaxb-runtime</artifactId>
-            <version>4.0.2</version>
+            <version>4.0.3</version>
             <optional>true</optional>
 		</dependency>
 	</dependencies>
@@ -240,24 +242,85 @@
 <!--                    </execution>-->
 <!--                </executions>-->
 <!--            </plugin>-->
-		<plugin>
-                <groupId>org.codehaus.mojo</groupId>
-                <artifactId>build-helper-maven-plugin</artifactId>
-                <version>3.4.0</version>
-                <executions>
-                    <execution>
-                        <id>timestamp-property</id>
-                        <goals>
-                            <goal>timestamp-property</goal>
-                        </goals>
-                        <phase>validate</phase>
-                        <configuration>
-                            <name>current.year</name>
-                            <pattern>yyyy</pattern>
-                        </configuration>
-                    </execution>
-                </executions>
-            </plugin></plugins>
+			<plugin>
+				<groupId>org.codehaus.mojo</groupId>
+				<artifactId>build-helper-maven-plugin</artifactId>
+				<version>3.4.0</version>
+				<executions>
+					<execution>
+						<id>timestamp-property</id>
+						<goals>
+							<goal>timestamp-property</goal>
+						</goals>
+						<phase>validate</phase>
+						<configuration>
+							<name>current.year</name>
+							<pattern>yyyy</pattern>
+						</configuration>
+					</execution>
+				</executions>
+			</plugin>
+
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>  
+				<artifactId>maven-antrun-plugin</artifactId>  
+				<version>${maven.antrun.version}</version>  
+				<executions>  
+					<execution>  
+						<id>unpack</id>  
+						<phase>package</phase>  
+						<configuration>  
+							<target>  
+								<untar src="${project.build.directory}/${project.parent.artifactId}-${project.parent.version}.tar.gz" compression="gzip" dest="${project.build.directory}/liquibase-dist-unpacked" />
+							</target>  
+						</configuration>  
+						<goals>  
+							<goal>run</goal>  
+						</goals>  
+					</execution>  
+				</executions>  
+			</plugin> 
+	
+			<plugin>
+				<groupId>org.vafer</groupId>
+				<artifactId>jdeb</artifactId>
+				<version>${org.vafer.jdeb.version}</version>
+				<executions>
+					<execution>
+						<id>create-deb</id>
+						<phase>package</phase>
+						<goals>
+							<goal>jdeb</goal>
+						</goals>
+					</execution>
+				</executions>
+				<configuration>
+					<deb>${project.build.directory}/${project.parent.artifactId}-${project.version}.deb</deb>
+					<controlDir>${project.basedir}/src/deb/control</controlDir>
+					<dataSet>
+						<data>
+							<src>${project.build.directory}/liquibase-dist-unpacked</src>
+							<type>directory</type>
+							<mapper>
+								<type>perm</type>
+								<prefix>/opt/liquibase</prefix>
+								<filemode>755</filemode>
+							</mapper>
+						</data>
+						<data>
+							<src>${project.basedir}/src/main/archive/liquibase-env.sh</src>
+							<type>file</type>
+							<mapper>
+								<type>perm</type>
+								<prefix>/etc/profile.d/</prefix>
+								<filemode>755</filemode>
+							</mapper>
+						</data>
+					</dataSet>
+				</configuration>
+			</plugin>
+
+		</plugins>
 	</build>
 
 	<profiles>
