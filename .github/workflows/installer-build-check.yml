@@ -62,7 +62,8 @@ jobs:
           (cd liquibase-dist/target/liquibase-0-SNAPSHOT && tar xfz $tarFile)
           (cd liquibase-dist && $scriptDir/package-install4j.sh 0-SNAPSHOT)
           mv liquibase-dist/target/liquibase-*-installer-* re-version/final
-          
+          mv liquibase-dist/target/liquibase-*deb re-version/final
+
           ##Sign Files
           .github/util/sign-artifacts.sh re-version/final
           

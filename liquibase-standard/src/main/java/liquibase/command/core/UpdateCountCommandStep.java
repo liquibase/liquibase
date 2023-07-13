@@ -35,7 +35,8 @@ public class UpdateCountCommandStep extends AbstractUpdateCommandStep {
         LABEL_FILTER_ARG = builder.argument("labelFilter", String.class)
                 .addAlias("labels")
                 .description("Changeset labels to match").build();
-        CONTEXTS_ARG = builder.argument("contexts", String.class)
+        CONTEXTS_ARG = builder.argument("contextFilter", String.class)
+                .addAlias("contexts")
                 .description("Changeset contexts to match").build();
         COUNT_ARG = builder.argument("count", Integer.class).required()
                 .description("The number of changes in the changelog to deploy").build();
