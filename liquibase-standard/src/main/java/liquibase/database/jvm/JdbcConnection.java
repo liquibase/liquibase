@@ -475,10 +475,20 @@ public class JdbcConnection implements DatabaseConnection {
     }
 
     public PreparedStatement prepareStatement(String sql) throws DatabaseException {
+        try {
+            return con.prepareStatement(sql);
+        } catch (SQLException e) {
+            throw new DatabaseException(e);
+        }
+    }
+
+    public PreparedStatement prepareCacheableStatement(String sql) throws DatabaseException {
         if (sql.equals(lastPreparedStatementSql)) {
             try {
-                lastPreparedStatement.clearParameters();
-                return lastPreparedStatement;
+                if (!lastPreparedStatement.isClosed()) {
+                    lastPreparedStatement.clearParameters();
+                    return lastPreparedStatement;
+                }
             } catch (SQLException e) {
                 Scope.getCurrentScope().getLog(getClass())
                         .fine("Error clearing parameters on prepared statement: " + e.getMessage(), e);

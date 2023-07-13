@@ -147,11 +147,9 @@ public class JdbcExecutor extends AbstractExecutor {
     @Override
     public void execute(final SqlStatement sql, final List<SqlVisitor> sqlVisitors) throws DatabaseException {
         if (sql instanceof RawParameterizedSqlStatement) {
-            PreparedStatementFactory factory = new PreparedStatementFactory((JdbcConnection) database.getConnection());
-
             String finalSql = applyVisitors((RawParameterizedSqlStatement) sql, sqlVisitors);
 
-            try (PreparedStatement pstmt = factory.create(finalSql)) {
+            try (PreparedStatement pstmt = ((JdbcConnection) database.getConnection()).prepareStatement(finalSql)) {
                 final List<?> parameters = ((RawParameterizedSqlStatement) sql).getParameters();
                 for (int i = 0; i < parameters.size(); i++) {
                     pstmt.setObject(i, parameters.get(i));
@@ -198,11 +196,9 @@ public class JdbcExecutor extends AbstractExecutor {
 
     public Object query(final SqlStatement sql, final ResultSetExtractor rse, final List<SqlVisitor> sqlVisitors) throws DatabaseException {
         if (sql instanceof RawParameterizedSqlStatement) {
-            PreparedStatementFactory factory = new PreparedStatementFactory((JdbcConnection) database.getConnection());
-
             String finalSql = applyVisitors((RawParameterizedSqlStatement) sql, sqlVisitors);
 
-            try (PreparedStatement pstmt = factory.create(finalSql)) {
+            try (PreparedStatement pstmt = ((JdbcConnection) database.getConnection()).prepareStatement(finalSql)) {
                 final List<?> parameters = ((RawParameterizedSqlStatement) sql).getParameters();
                 for (int i = 0; i < parameters.size(); i++) {
                     pstmt.setObject(i, parameters.get(0));
