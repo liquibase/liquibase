@@ -98,7 +98,7 @@
         <repository>
             <id>github</id>
             <name>GitHub Packages</name>
-            <url>https://maven.pkg.github.com/liquibase/liquibase</url>
+            <url>https://liquibot:${env.GITHUB_TOKEN}@maven.pkg.github.com/liquibase/liquibase</url>
         </repository>
     </distributionManagement>
 
