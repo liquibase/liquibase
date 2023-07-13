@@ -4,6 +4,7 @@ import liquibase.Scope;
 import liquibase.database.DatabaseConnection;
 import liquibase.database.jvm.JdbcConnection;
 import liquibase.exception.DatabaseException;
+import liquibase.structure.DatabaseObject;
 import liquibase.util.JdbcUtil;
 
 import java.sql.ResultSet;
@@ -57,5 +58,10 @@ public class EnterpriseDBDatabase extends PostgresDatabase {
     @Override
     public Integer getDefaultPort() {
         return 5444;
+    }
+
+    @Override
+    public boolean supportsCreateIfNotExists(Class<? extends DatabaseObject> type) {
+        return false;
     }
 }
