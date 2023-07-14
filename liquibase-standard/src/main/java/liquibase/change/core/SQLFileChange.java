@@ -116,17 +116,18 @@ public class SQLFileChange extends AbstractSQLChange {
         ValidationErrors validationErrors = new ValidationErrors();
         if (StringUtil.trimToNull(getPath()) == null) {
             validationErrors.addError("'path' is required");
-        }
-
-        try {
-            Resource resource = getResource();
-            if (!resource.exists()) {
+        } else {
+            try {
+                Resource resource = getResource();
+                if (!resource.exists()) {
+                    alertOnNonExistantSqlFile(validationErrors);
+                }
+            } catch (IOException e) {
+                Scope.getCurrentScope().getLog(getClass()).warning("Failed to obtain sqlFile resource at path '" + path + "'while attempting to validate the existence of the sqlFile.", e);
                 alertOnNonExistantSqlFile(validationErrors);
             }
-        } catch (IOException e) {
-            Scope.getCurrentScope().getLog(getClass()).warning("Failed to obtain sqlFile resource at path '" + path + "'while attempting to validate the existence of the sqlFile.", e);
-            alertOnNonExistantSqlFile(validationErrors);
         }
+
         return validationErrors;
     }
 
