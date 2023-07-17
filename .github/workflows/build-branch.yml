@@ -38,6 +38,6 @@ jobs:
       # Publish to GitHub Packages
       - name: Publish package
         run: |
-          mvn -B clean deploy -DskipTests=true
+          mvn -B clean deploy -pl '!liquibase-dist' -DskipTests=true
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
