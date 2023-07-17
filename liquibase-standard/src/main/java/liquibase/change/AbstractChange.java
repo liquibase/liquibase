@@ -1,5 +1,6 @@
 package liquibase.change;
 
+import liquibase.ChecksumVersion;
 import liquibase.Scope;
 import liquibase.changelog.ChangeSet;
 import liquibase.database.Database;
@@ -86,7 +87,8 @@ public abstract class AbstractChange extends AbstractPlugin implements Change {
                     }
                 }
                 if ((readMethod != null) && (writeMethod != null)) {
-                    DatabaseChangeProperty annotation = readMethod.getAnnotation(DatabaseChangeProperty.class);
+                    DatabaseChangeProperty annotation = findDatabaseChangePropertyAnnotationMatchingCurrentChecksumVersion(readMethod);
+
                     if ((annotation == null) || annotation.isChangeProperty()) {
                         params.add(createChangeParameterMetadata(property, readMethod));
                     }
@@ -103,6 +105,41 @@ public abstract class AbstractChange extends AbstractPlugin implements Change {
                 databaseChange.appliesTo(), notes, params);
         } catch (UnexpectedLiquibaseException|IntrospectionException e) {
             throw new UnexpectedLiquibaseException(e);
+        }
+    }
+
+    /**
+     * Given a particular method, find the {@link DatabaseChangeProperty} annotation on it that most precisely matches
+     * the requested checksum version.
+     *
+     * The logic can be summarized as follows:
+     * 1. If only one {@link DatabaseChangeProperty} annotation is on the particular method, then return it.
+     * 2. If no {@link DatabaseChangeProperty} annotations are present on the particular method, return null;
+     * 3. In the event that multiple {@link DatabaseChangeProperty} annotations are present on the particular method,
+     * read all of them to determine which one most closely matches the requested checksum version. If an annotation
+     * exists that specifies its version as the same version that is being requested, it is returned. If no annotation
+     * exists with a matching version, the first annotation on the method without a version is returned. If no
+     * annotations with no version exist, then null is returned.
+     */
+    private DatabaseChangeProperty findDatabaseChangePropertyAnnotationMatchingCurrentChecksumVersion(Method readMethod) {
+        DatabaseChangeProperty[] annotations = readMethod.getAnnotationsByType(DatabaseChangeProperty.class);
+        if (annotations.length == 1) {
+            return annotations[0];
+        } else if (annotations.length > 1) {
+            // first try to find the annotation that matches the current checksum version
+            Optional<DatabaseChangeProperty> versionMatchingAnnotation = Arrays.stream(annotations)
+                    .filter(ann ->
+                            Arrays.stream(ann.version()).anyMatch(annotationVersion -> annotationVersion == Scope.getCurrentScope().getChecksumVersion()))
+                    .findFirst();
+            // If found, use that annotation, if not found, use the first annotation with no version specified
+            // (it is assumed that this is the default and should apply to all versions not explicitly specified)
+            // If no annotation with no version is found, return null.
+            return versionMatchingAnnotation.orElseGet(
+                    () -> Arrays.stream(annotations)
+                            .filter(ann -> ann.version().length == 0).findFirst().orElse(null)
+            );
+        } else {
+            return null;
         }
     }
 
@@ -149,7 +186,7 @@ public abstract class AbstractChange extends AbstractPlugin implements Change {
 
             Type type = readMethod.getGenericReturnType();
 
-            DatabaseChangeProperty changePropertyAnnotation = readMethod.getAnnotation(DatabaseChangeProperty.class);
+            DatabaseChangeProperty changePropertyAnnotation = findDatabaseChangePropertyAnnotationMatchingCurrentChecksumVersion(readMethod);
 
             String mustEqualExisting = createMustEqualExistingMetaData(parameterName, changePropertyAnnotation);
             String description = createDescriptionMetaData(parameterName, changePropertyAnnotation);
@@ -492,7 +529,7 @@ public abstract class AbstractChange extends AbstractPlugin implements Change {
         return CheckSum.compute(new StringChangeLogSerializer(new StringChangeLogSerializer.FieldFilter() {
             @Override
             public boolean include(Object obj, String field, Object value) {
-                if(Arrays.stream(getExcludedFieldFilters()).anyMatch(filter -> filter.equals(field))) {
+                if(Arrays.stream(getExcludedFieldFilters(Scope.getCurrentScope().getChecksumVersion())).anyMatch(filter -> filter.equals(field))) {
                     return false;
                 }
                 return super.include(obj, field, value);
@@ -500,7 +537,7 @@ public abstract class AbstractChange extends AbstractPlugin implements Change {
         }).serialize(this, false));
     }
 
-    public String[] getExcludedFieldFilters() {
+    public String[] getExcludedFieldFilters(ChecksumVersion version) {
         return new String[0];
     }
 
@@ -831,4 +868,13 @@ public abstract class AbstractChange extends AbstractPlugin implements Change {
         return description;
     }
 
+    @Override
+    public boolean equals(Object reference) {
+        return (this == reference);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(super.hashCode(), changeSet);
+    }
 }

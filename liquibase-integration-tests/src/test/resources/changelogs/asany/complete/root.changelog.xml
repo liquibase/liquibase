@@ -9,6 +9,12 @@
             <runningAs username="${loginUser}"/>
     </preConditions>
 
+    <changeSet id="test-timestamp-with-timezone" author="mkarg">
+        <createTable tableName="SomeTableWithSomeTimezonedColumn">
+            <column defaultValueComputed="CURRENT UTC TIMESTAMP" name="someTimezonedColumn" type="TIMESTAMP WITH TIME ZONE" />
+        </createTable>
+    </changeSet>
+
     <changeSet id="1" author="nvoxland">
         <comment>
             You can add comments to changeSets.
@@ -136,7 +142,7 @@
 
     <changeSet id="16" author="nvoxland">
         <createView viewName="personView">
-            select * from liquibase.person
+            select * from ${loginUser}.person
         </createView>
     </changeSet>
 

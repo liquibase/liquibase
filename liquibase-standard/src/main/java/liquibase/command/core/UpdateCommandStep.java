@@ -2,9 +2,15 @@ package liquibase.command.core;
 
 import liquibase.Scope;
 import liquibase.UpdateSummaryEnum;
+import liquibase.changelog.ChangeLogParameters;
+import liquibase.changelog.DatabaseChangeLog;
+import liquibase.changelog.visitor.ChangeExecListener;
 import liquibase.command.*;
+import liquibase.command.core.helpers.DatabaseChangelogCommandStep;
+import liquibase.database.Database;
+import liquibase.exception.CommandValidationException;
 
-import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 public class UpdateCommandStep extends AbstractUpdateCommandStep implements CleanUpCommandStep {
@@ -25,7 +31,8 @@ public class UpdateCommandStep extends AbstractUpdateCommandStep implements Clea
                 .addAlias("labels")
                 .description("Changeset labels to match")
                 .build();
-        CONTEXTS_ARG = builder.argument("contexts", String.class)
+        CONTEXTS_ARG = builder.argument("contextFilter", String.class)
+                .addAlias("contexts")
                 .description("Changeset contexts to match")
                 .build();
     }
@@ -69,14 +76,25 @@ public class UpdateCommandStep extends AbstractUpdateCommandStep implements Clea
     }
 
     @Override
+    public void validate(CommandScope commandScope) throws CommandValidationException {
+        // update null checksums when running validate.
+        commandScope.addArgumentValue(DatabaseChangelogCommandStep.UPDATE_NULL_CHECKSUMS, Boolean.TRUE);
+    }
+
+    @Override
     public void postUpdateLog() {
         Scope.getCurrentScope().getUI().sendMessage(coreBundle.getString("update.successful"));
     }
 
     @Override
     public List<Class<?>> requiredDependencies() {
-        List<Class<?>> deps = new ArrayList<>(super.requiredDependencies());
-        deps.add(UpdateSummaryEnum.class);
+        List<Class<?>> deps = Arrays.asList(Database.class, DatabaseChangeLog.class, ChangeExecListener.class, ChangeLogParameters.class, UpdateSummaryEnum.class);
         return deps;
+    }
+
+    @Override
+    public void run(CommandResultsBuilder resultsBuilder) throws Exception {
+        setDBLock(false);
+        super.run(resultsBuilder);
     }
 }

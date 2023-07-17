@@ -17,7 +17,7 @@ Optional Args:
     Default: null
   changeExecListenerPropertiesFile (String) Path to a properties file for the ChangeExecListenerClass
     Default: null
-  contexts (String) Changeset contexts to match
+  contextFilter (String) Changeset contexts to match
     Default: null
   defaultCatalogName (String) The default catalog name to use for the database connection
     Default: null
@@ -62,7 +62,7 @@ Optional Args:
                 changelogFile: "changelogs/h2/complete/summary-changelog.xml",
                 tag: "updateTag",
                 labelFilter: "testtable1,tagit",
-                contexts: "none,tagit",
+                contextFilter: "none,tagit",
                 showSummary: "summary"
         ]
 
@@ -83,7 +83,7 @@ Optional Args:
                                  "FILTERED CHANGE SETS SUMMARY",
                                  "Context mismatch:             1",
                                  "Label mismatch:               2",
-                                 "After tag:                    1",
+                                 "After tag:                    2",
                                  "DBMS mismatch:                1"
                                 ]
         ]
