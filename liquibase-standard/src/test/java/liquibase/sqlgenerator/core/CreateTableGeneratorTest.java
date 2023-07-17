@@ -78,7 +78,7 @@ public class CreateTableGeneratorTest extends AbstractSqlGeneratorTest<CreateTab
             statement.addColumn(COLUMN_NAME1, DataTypeFactory.getInstance().fromDescription("int", database),
                     new PrimaryKeyConstraint().addColumns(COLUMN_NAME1).setDeferrable(true).setInitiallyDeferred(true));
 
-            if (database.supportsInitiallyDeferrableColumns()) {
+            if (database.supportsInitiallyDeferrableColumns() && !(database instanceof SybaseASADatabase)) {
                 assertTrue(this.generatorUnderTest.generateSql(statement, database, null)[0].toSql().contains("DEFERRABLE"));
             } else {
                 assertFalse(this.generatorUnderTest.generateSql(statement, database, null)[0].toSql().contains("DEFERRABLE"));
