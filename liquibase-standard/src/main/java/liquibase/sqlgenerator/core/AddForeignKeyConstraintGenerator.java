@@ -90,12 +90,16 @@ public class AddForeignKeyConstraintGenerator extends AbstractSqlGenerator<AddFo
         }
 
         if (statement.isDeferrable() || statement.isInitiallyDeferred()) {
-            if (statement.isDeferrable()) {
+            if (statement.isDeferrable() && !(database instanceof SybaseASADatabase)) {
                 sb.append(" DEFERRABLE");
             }
 
             if (statement.isInitiallyDeferred()) {
-                sb.append(" INITIALLY DEFERRED");
+                if (database instanceof SybaseASADatabase) {
+                    sb.append(" CHECK ON COMMIT");
+                } else {
+                    sb.append(" INITIALLY DEFERRED");
+                }
             }
         }
 
