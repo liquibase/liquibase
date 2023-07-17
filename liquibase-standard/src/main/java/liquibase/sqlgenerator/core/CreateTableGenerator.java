@@ -262,7 +262,7 @@ public class CreateTableGenerator extends AbstractSqlGenerator<CreateTableStatem
                 }
                 buffer.append(!statement.getPrimaryKeyConstraint().shouldValidatePrimaryKey() ? " ENABLE NOVALIDATE " : "");
 
-                if (database.supportsInitiallyDeferrableColumns()) {
+                if (database.supportsInitiallyDeferrableColumns() && !(database instanceof SybaseASADatabase)) {
                     if (statement.getPrimaryKeyConstraint().isInitiallyDeferred()) {
                         buffer.append(" INITIALLY DEFERRED");
                     }
@@ -310,9 +310,13 @@ public class CreateTableGenerator extends AbstractSqlGenerator<CreateTableStatem
             }
 
             if (fkConstraint.isInitiallyDeferred()) {
-                buffer.append(" INITIALLY DEFERRED");
+                if (database instanceof SybaseASADatabase) {
+                    buffer.append(" CHECK ON COMMIT");
+                } else {
+                    buffer.append(" INITIALLY DEFERRED");
+                }
             }
-            if (fkConstraint.isDeferrable()) {
+            if (fkConstraint.isDeferrable() && !(database instanceof SybaseASADatabase)) {
                 buffer.append(" DEFERRABLE");
             }
 
