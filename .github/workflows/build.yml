@@ -513,7 +513,7 @@ jobs:
   finish:
     name: Finish Build
     runs-on: ubuntu-22.04
-    needs: [ setup, build, integration-test, package, sonar, deploy-package]
+    needs: [ setup, build, integration-test, package, sonar]
     if: ${{ needs.setup.outputs.setupSuccessful }}
     steps:
       - uses: actions/checkout@v3
