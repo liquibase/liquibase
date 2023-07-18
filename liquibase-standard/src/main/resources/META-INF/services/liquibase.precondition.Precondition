@@ -4,6 +4,7 @@ liquibase.precondition.core.ChangeLogPropertyDefinedPrecondition
 liquibase.precondition.core.ChangeSetExecutedPrecondition
 liquibase.precondition.core.ColumnExistsPrecondition
 liquibase.precondition.core.DBMSPrecondition
+liquibase.precondition.core.FaultlessSqlExecutionPrecondition
 liquibase.precondition.core.ForeignKeyExistsPrecondition
 liquibase.precondition.core.IndexExistsPrecondition
 liquibase.precondition.core.NotPrecondition

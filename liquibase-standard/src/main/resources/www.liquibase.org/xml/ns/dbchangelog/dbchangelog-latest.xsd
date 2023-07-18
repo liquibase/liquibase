@@ -842,6 +842,8 @@
         </xsd:complexType>
     </xsd:element>
 
+    <xsd:element name="faultlessSqlExecution"/>
+
     <xsd:element name="customPrecondition">
         <xsd:complexType>
             <xsd:sequence>
@@ -1417,6 +1419,7 @@
                 <xsd:element ref="tableIsEmpty" maxOccurs="unbounded"/>
                 <xsd:element ref="rowCount" maxOccurs="unbounded"/>
                 <xsd:element ref="sqlCheck" maxOccurs="unbounded"/>
+                <xsd:element ref="faultlessSqlExecution" maxOccurs="unbounded"/>
                 <xsd:element ref="changeLogPropertyDefined" maxOccurs="unbounded"/>
                 <xsd:element ref="expectedQuotingStrategy" maxOccurs="unbounded"/>
                 <xsd:element ref="customPrecondition" maxOccurs="unbounded"/>

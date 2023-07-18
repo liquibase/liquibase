@@ -5,29 +5,21 @@ import liquibase.changelog.ChangeSet;
 import liquibase.changelog.DatabaseChangeLog;
 import liquibase.changelog.visitor.ChangeExecListener;
 import liquibase.database.Database;
-import liquibase.exception.*;
-import liquibase.executor.Executor;
+import liquibase.exception.DatabaseException;
+import liquibase.exception.PreconditionErrorException;
+import liquibase.exception.PreconditionFailedException;
+import liquibase.exception.ValidationErrors;
+import liquibase.exception.Warnings;
 import liquibase.executor.ExecutorService;
 import liquibase.precondition.AbstractPrecondition;
-import liquibase.statement.SqlStatement;
 import liquibase.statement.core.RawSqlStatement;
 
-public class SqlPrecondition extends AbstractPrecondition {
+public class FaultlessSqlExecutionPrecondition extends AbstractPrecondition {
 
-    private String expectedResult;
     private String sql;
 
-
-    public String getExpectedResult() {
-        return expectedResult;
-    }
-
-    public void setExpectedResult(String expectedResult) {
-        this.expectedResult = expectedResult;
-    }
-
     public String getSql() {
-        return sql;
+        return this.sql;
     }
 
     public void setSql(String sql) {
@@ -48,14 +40,7 @@ public class SqlPrecondition extends AbstractPrecondition {
     public void check(Database database, DatabaseChangeLog changeLog, ChangeSet changeSet, ChangeExecListener changeExecListener)
             throws PreconditionFailedException, PreconditionErrorException {
         try {
-            String result = Scope.getCurrentScope().getSingleton(ExecutorService.class).getExecutor("jdbc", database).queryForObject(new RawSqlStatement(getSql().replaceFirst(";$","")), String.class);
-            if (result == null) {
-                throw new PreconditionFailedException("No rows returned from SQL Precondition", changeLog, this);
-            }
-            String expectedResult = getExpectedResult();
-            if (!expectedResult.equals(result)) {
-                throw new PreconditionFailedException("SQL Precondition failed.  Expected '"+ expectedResult +"' got '"+result+"'", changeLog, this);
-            }
+            Scope.getCurrentScope().getSingleton(ExecutorService.class).getExecutor("jdbc", database).execute(new RawSqlStatement(getSql().replaceFirst(";$","")));
         } catch (DatabaseException e) {
             throw new PreconditionErrorException(e, changeLog, this);
         }
@@ -68,7 +53,7 @@ public class SqlPrecondition extends AbstractPrecondition {
 
     @Override
     public String getName() {
-        return "sqlCheck";
+        return "faultlessSqlExecution";
     }
 
     @Override
