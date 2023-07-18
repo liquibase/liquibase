@@ -56,6 +56,8 @@ import static liquibase.util.SystemUtil.isWindows;
 
 public class LiquibaseCommandLine {
 
+    public static final String COMMAND_ARGUMENTS = "commandArguments";
+
     private final Map<String, String> legacyPositionalArguments;
 
     /**
@@ -353,7 +355,7 @@ public class LiquibaseCommandLine {
 
             return Scope.child(Collections.singletonMap(Scope.Attr.logService.name(), newLogService), () -> {
                 try {
-                    return Scope.child(configureScope(), () -> {
+                    return Scope.child(configureScope(args), () -> {
 
                         if (!LiquibaseCommandLineConfiguration.SHOULD_RUN.getCurrentValue()) {
                             Scope.getCurrentScope().getUI().sendErrorMessage((
@@ -636,8 +638,9 @@ public class LiquibaseCommandLine {
      *
      * @return values to set in the scope
      */
-    private Map<String, Object> configureScope() throws Exception {
+    private Map<String, Object> configureScope(String[] args) throws Exception {
         Map<String, Object> returnMap = new HashMap<>();
+        returnMap.put(COMMAND_ARGUMENTS, args);
 
         final ClassLoader classLoader = configureClassLoader();
 
