@@ -658,7 +658,7 @@ http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbch
 
         when:
         boolean result = changelog.include("../../path/changelog.xml", true, false,
-                resourceAccessor, null, new Labels(), false, false)
+                resourceAccessor, null, new Labels(), false, DatabaseChangeLog.OnUnknownFileFormat.WARN)
 
         then:
         result
