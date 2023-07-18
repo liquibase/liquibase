@@ -91,6 +91,8 @@ public class BooleanType extends LiquibaseDataType {
                                 .replace("\"", "")
                                 .replace("::it", "")
                         + "'::\"bit\"";
+            } else if (database instanceof SybaseASADatabase && ((String) value).startsWith("COMPUTE")) {
+                returnValue = (String) value;
             } else {
                 throw new UnexpectedLiquibaseException("Unknown boolean value: " + value);
             }
