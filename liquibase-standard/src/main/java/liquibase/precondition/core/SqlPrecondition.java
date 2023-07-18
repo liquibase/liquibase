@@ -6,10 +6,8 @@ import liquibase.changelog.DatabaseChangeLog;
 import liquibase.changelog.visitor.ChangeExecListener;
 import liquibase.database.Database;
 import liquibase.exception.*;
-import liquibase.executor.Executor;
 import liquibase.executor.ExecutorService;
 import liquibase.precondition.AbstractPrecondition;
-import liquibase.statement.SqlStatement;
 import liquibase.statement.core.RawSqlStatement;
 
 public class SqlPrecondition extends AbstractPrecondition {
