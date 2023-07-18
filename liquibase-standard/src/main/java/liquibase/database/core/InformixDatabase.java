@@ -158,7 +158,7 @@ public class InformixDatabase extends AbstractJdbcDatabase {
     @Override
     public boolean isCorrectDatabaseImplementation(final DatabaseConnection conn)
             throws DatabaseException {
-        Boolean correct = false;
+        boolean correct = false;
         String name = conn.getDatabaseProductName();
         if (name != null && (name.equals(PRODUCT_NAME) || name.startsWith(PRODUCT_NAME_DB2JCC_PREFIX))) {
             correct = true;
@@ -201,11 +201,11 @@ public class InformixDatabase extends AbstractJdbcDatabase {
     @Override
     public String getDateLiteral(final String isoDate) {
         if (isTimeOnly(isoDate)) {
-            return "DATETIME (" + super.getDateLiteral(isoDate).replaceAll("'", "") + ") " + TIME_FIELD_QUALIFIER;
+            return "DATETIME (" + super.getDateLiteral(isoDate).replace("'", "") + ") " + TIME_FIELD_QUALIFIER;
         } else if (isDateOnly(isoDate)) {
             return super.getDateLiteral(isoDate);
         } else {
-            return "DATETIME (" + super.getDateLiteral(isoDate).replaceAll("'", "") + ") " + DATETIME_FIELD_QUALIFIER;
+            return "DATETIME (" + super.getDateLiteral(isoDate).replace("'", "") + ") " + DATETIME_FIELD_QUALIFIER;
         }
     }
 
