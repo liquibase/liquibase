@@ -102,19 +102,13 @@ public class ChangeFactory extends AbstractPluginFactory<Change>{
 
         if (plugins.isEmpty()) {
             return null;
-        } else if (plugins.size() == 1) {
-            try {
-                return plugins.iterator().next().getClass().getConstructor().newInstance();
-            } catch (Exception e) {
-                throw new UnexpectedLiquibaseException(e);
-            }
-        } else {
+        } else if (plugins.size() > 1) {
             Database database = Scope.getCurrentScope().getDatabase();
             if (database != null) {
                 plugins.removeIf(a -> !a.supports(database));
-            }
-            if (plugins.isEmpty()) {
-                throw new UnexpectedLiquibaseException(String.format("No registered %s plugin found for %s database", name,  (database != null ? database.getDisplayName() : "undefined")));
+                if (plugins.isEmpty()) {
+                    throw new UnexpectedLiquibaseException(String.format("No registered %s plugin found for %s database", name, database.getDisplayName()));
+                }
             }
         }
 
