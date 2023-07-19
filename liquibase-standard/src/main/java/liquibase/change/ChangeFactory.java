@@ -108,7 +108,7 @@ public class ChangeFactory extends AbstractPluginFactory<Change>{
             } catch (Exception e) {
                 throw new UnexpectedLiquibaseException(e);
             }
-        } else if (getPluginClass().equals(Change.class)) {
+        } else {
             Database database = Scope.getCurrentScope().getDatabase();
             if (database != null) {
                 plugins.removeIf(a -> !a.supports(database));
