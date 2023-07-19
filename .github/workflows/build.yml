@@ -539,7 +539,6 @@ jobs:
             let markFunctionalTestsDescription = "Unexpected setup";
 
             if (stablePro) {
-            if (stablePro) {
               console.log("Pro is stable");
 
               runFunctionalTests = true;
