@@ -1,5 +1,6 @@
 package liquibase.command.core;
 
+import liquibase.TagVersionEnum;
 import liquibase.command.*;
 import liquibase.command.core.helpers.DatabaseChangelogCommandStep;
 import liquibase.database.Database;
@@ -30,7 +31,8 @@ public class RollbackSqlCommandStep extends RollbackCommandStep {
                 .defaultValue(true)
                 .build();
 
-        builder.addArgument(RollbackCommandStep.TAG_ARG).build();
+        builder.addArgument(TAG_ARG).build();
+        builder.addArgument(TAG_VERSION_ARG).setValueHandler(TagVersionEnum::handleTagVersionInput).build();
         builder.addArgument(AbstractRollbackCommandStep.ROLLBACK_SCRIPT_ARG).build();
     }
 
