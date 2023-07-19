@@ -576,6 +576,23 @@ jobs:
                 }
               });
             
+            console.log("Trigger functional tests");
+              let workflowDispatch = await github.rest.actions.createWorkflowDispatch({
+                "owner": "liquibase",
+                "repo": "liquibase-pro-tests",
+                "workflow_id": "nightly-test.yml",
+                "ref": testsBranch.name,
+                "inputs": {
+                  "liquibaseCommit": helper.getCurrentSha(),
+                  "runDescription": "Triggered by https://github.com/liquibase/liquibase/actions/runs/"+context.runId,
+                  "liquibaseBranch": helper.getCurrentBranch(),
+                  "runDetails": JSON.stringify({
+                    "liquibaseBranch": helper.getCurrentBranch(),
+                    "notices": notices
+                  })
+                }
+              });
+              
               let testHarnessBranch = await helper.findMatchingBranch("liquibase", "liquibase-test-harness");
               if (testHarnessBranch.name == "main" || testHarnessBranch.name == "master") {
                 testHarnessBranch.name = "develop";
