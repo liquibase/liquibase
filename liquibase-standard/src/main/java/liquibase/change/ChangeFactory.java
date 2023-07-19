@@ -2,8 +2,8 @@ package liquibase.change;
 
 import liquibase.ChecksumVersion;
 import liquibase.Scope;
+import liquibase.database.Database;
 import liquibase.exception.UnexpectedLiquibaseException;
-import liquibase.integration.commandline.LiquibaseCommandLineConfiguration;
 import liquibase.plugin.AbstractPluginFactory;
 import liquibase.plugin.Plugin;
 import liquibase.servicelocator.ServiceLocator;
@@ -98,12 +98,28 @@ public class ChangeFactory extends AbstractPluginFactory<Change>{
      * Each call to create will return a new instance of the Change.
      */
     public Change create(String name) {
-        Change plugin = getPlugin(name);
-        if (plugin == null) {
+        Set<Change> plugins = getPlugins(name);
+
+        if (plugins.isEmpty()) {
             return null;
+        } else if (plugins.size() == 1) {
+            try {
+                return plugins.iterator().next().getClass().getConstructor().newInstance();
+            } catch (Exception e) {
+                throw new UnexpectedLiquibaseException(e);
+            }
+        } else if (getPluginClass().equals(Change.class)) {
+            Database database = Scope.getCurrentScope().getDatabase();
+            if (database != null) {
+                plugins.removeIf(a -> !a.supports(database));
+            }
+            if (plugins.isEmpty()) {
+                throw new UnexpectedLiquibaseException(String.format("No registered %s plugin found for %s database", name,  (database != null ? database.getDisplayName() : "undefined")));
+            }
         }
+
         try {
-            return plugin.getClass().getConstructor().newInstance();
+            return plugins.iterator().next().getClass().getConstructor().newInstance();
         } catch (Exception e) {
             throw new UnexpectedLiquibaseException(e);
         }
