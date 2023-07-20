@@ -427,7 +427,7 @@ jobs:
 
           ## extract tar content for other artifacts
           mkdir -p liquibase-dist/target/liquibase-${{ needs.setup.outputs.thisBranchName }}-SNAPSHOT
-          (cd liquibase-dist/target/liquibase-${{ needs.setup.outputs.thisBranchName }}-SNAPSHOT && tar xfz ../liquibase-${{ needs.setup.outputs.thisBranchName }}-SNAPSHOT.tar.gz)
+          (cd liquibase-dist/target/liquibase-${{ needs.setup.outputs.thisBranchName }}-SNAPSHOT && tar -xzf ../liquibase-${{ needs.setup.outputs.thisBranchName }}-SNAPSHOT.tar.gz)
 
           ##create zip file from tar content
           (cd liquibase-dist/target/liquibase-${{ needs.setup.outputs.thisBranchName }}-SNAPSHOT && zip -r ../liquibase-${{ needs.setup.outputs.thisBranchName }}-SNAPSHOT.zip *)
