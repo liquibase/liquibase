@@ -428,17 +428,19 @@ jobs:
           ## extract tar content for other artifacts
           mkdir -p liquibase-dist/target/liquibase-${{ needs.setup.outputs.thisBranchName }}-SNAPSHOT
           (cd liquibase-dist/target/liquibase-${{ needs.setup.outputs.thisBranchName }}-SNAPSHOT && tar -xzf ../liquibase-${{ needs.setup.outputs.proBranchName }}-SNAPSHOT.tar.gz)
-
+          
           ##create zip file from tar content
           (cd liquibase-dist/target/liquibase-${{ needs.setup.outputs.thisBranchName }}-SNAPSHOT && zip -r ../liquibase-${{ needs.setup.outputs.thisBranchName }}-SNAPSHOT.zip *)
-
+          ls liquibase-dist/target/liquibase-${{ needs.setup.outputs.thisBranchName }}-SNAPSHOT
+          
           ##create installer - disabled here but run as nightly job and as part of release workflow
           # (cd liquibase-dist && ${{ github.workspace }}/.github/util/package-install4j.sh 0-SNAPSHOT)
 
           find . -name original-*.jar -exec rm {} \;
 
           mkdir -p artifacts
-          cp liquibase-dist/target/liquibase-${{ needs.setup.outputs.proBranchName }}-SNAPSHOT.tar.gz artifacts
+          cd liquibase-dist/target/liquibase-${{ needs.setup.outputs.thisBranchName }}-SNAPSHOT
+          cp liquibase-dist/target/liquibase-${{ needs.setup.outputs.thisBranchName }}-SNAPSHOT.tar.gz artifacts
           cp liquibase-dist/target/liquibase-${{ needs.setup.outputs.thisBranchName }}-SNAPSHOT.zip artifacts
           cp liquibase-core/target/liquibase-core-0-SNAPSHOT.jar artifacts/liquibase-core-0-SNAPSHOT.jar
           cp liquibase-core/target/liquibase-core-0-SNAPSHOT-sources.jar artifacts/liquibase-core-0-SNAPSHOT-sources.jar
