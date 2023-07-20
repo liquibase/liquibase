@@ -330,7 +330,6 @@ jobs:
             ./**/target
             !./**target/**/keys
           restore-keys: |
-#             An ordered list of prefix-matched keys
             ${{ runner.os }}-m2-
 
 
