@@ -458,6 +458,7 @@ public class CreateProcedureChange extends AbstractChange implements DbmsTargete
         if (database instanceof DB2Database) {
             return true;
         }
+
         if (database instanceof Db2zDatabase) {
            try {
                 int major = database.getDatabaseMajorVersion();
