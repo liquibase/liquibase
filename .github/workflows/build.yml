@@ -177,6 +177,7 @@ jobs:
           path: ./**/target
           
       - name: ls
+        if: ${{ matrix.java == 11}}
         run: |
           ls -lR ./**/target    
           
