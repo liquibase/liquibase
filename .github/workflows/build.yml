@@ -352,7 +352,7 @@ jobs:
           maven-version: ${{ env.MAVEN_VERSION }}
 
       - name: Download liquibase-commercial
-        uses: liquibase/action-download-artifact@v2-liquibase
+        uses: dawidd6/action-download-artifact@v2
         with:
           github_token: ${{ secrets.BOT_TOKEN }}
           workflow: build.yml

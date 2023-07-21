@@ -18,7 +18,7 @@ jobs:
       - uses: actions/checkout@v3
 
       - name: Download liquibase-artifacts
-        uses: liquibase/action-download-artifact@v2-liquibase
+        uses: dawidd6/action-download-artifact@v2
         with:
           workflow: build.yml
           workflow_conclusion: success
