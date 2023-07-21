@@ -175,6 +175,11 @@ jobs:
         with:
           key: built-code-${{ github.run_number }}-${{ github.run_attempt }}
           path: ./**/target
+          
+      - name: ls
+        run: |
+          ls -lR ./**/target    
+          
       - name: Set up JDK ${{ matrix.java }}
         uses: actions/setup-java@v3
         with:
@@ -294,6 +299,10 @@ jobs:
         with:
           key: built-code-${{ github.run_number }}-${{ github.run_attempt }}
           path: ./**/target
+          
+      - name: ls
+        run: |
+          ls -lR ./**/target        
 
       - name: Login to Artifactory
         uses: docker/login-action@v2
@@ -327,6 +336,10 @@ jobs:
         with:
           key: built-code-${{ github.run_number }}-${{ github.run_attempt }}
           path: ./**/target
+      
+      - name: ls
+        run: |
+          ls -lR ./**/target
 
       ##Cache based on install4j file, since changes to JVM is seen in there. If install4j version changes without changing the file, change the prefix letter before hashFiles to force a new cache
       - name: Install4j Cache
