@@ -176,7 +176,11 @@ jobs:
           key: built-code-${{ hashFiles('**/pom.xml') }}
           path: |
             ./**/target
-            !./**target/**/keys
+            ## !./**target/**/keys
+
+      - name: ls
+        run: |
+          ls -lR ./**/target
 
       - name: Set up JDK ${{ matrix.java }}
         uses: actions/setup-java@v3
