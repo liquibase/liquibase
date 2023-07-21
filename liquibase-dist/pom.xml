@@ -43,7 +43,7 @@
 		<sqlite.version>3.42.0.0</sqlite.version>
 		<db2.version>11.5.8.0</db2.version>
 		<firebird.version>5.0.2.java8</firebird.version>
-
+		<liquibase-pro.version>master-SNAPSHOT</liquibase-pro.version>
 		<assemblyConfigFile>src/main/assembly/assembly-bin.xml</assemblyConfigFile>
 		<maven.deploy.skip>true</maven.deploy.skip>
 		<maven.install.skip>true</maven.install.skip>
@@ -426,7 +426,7 @@
 				<dependency>
 					<groupId>org.liquibase</groupId>
 					<artifactId>liquibase-commercial</artifactId>
-					<version>${project.version}</version>
+					<version>${liquibase-pro.version}</version>
 				</dependency>
 			</dependencies>
 		</profile>
