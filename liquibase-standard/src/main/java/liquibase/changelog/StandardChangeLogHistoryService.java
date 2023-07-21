@@ -374,7 +374,7 @@ public class StandardChangeLogHistoryService extends AbstractChangeLogHistorySer
     }
 
     @Override
-    protected void replaceChecksum(ChangeSet changeSet) throws DatabaseException {
+    public void replaceChecksum(ChangeSet changeSet) throws DatabaseException {
         Scope.getCurrentScope().getSingleton(ExecutorService.class).getExecutor("jdbc", getDatabase()).execute(new UpdateChangeSetChecksumStatement
             (changeSet));
 
