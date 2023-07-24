@@ -224,6 +224,10 @@ public class ForeignKeySnapshotGenerator extends JdbcSnapshotGenerator {
             if (jdbcType == DatabaseMetaData.importedKeyCascade) {
                 return ForeignKeyConstraintType.importedKeyCascade;
             } else if (jdbcType == DatabaseMetaData.importedKeyNoAction) {
+                if (database instanceof SybaseASADatabase) {
+                    //SQL Anywhere doesn't support NO ACTION, but reports it instead of SET DEFAULT
+                    return ForeignKeyConstraintType.importedKeySetDefault;
+                }
                 return ForeignKeyConstraintType.importedKeyNoAction;
             } else if (jdbcType == DatabaseMetaData.importedKeyRestrict) {
                 if (database instanceof MSSQLDatabase) {
