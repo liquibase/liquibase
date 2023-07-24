@@ -150,12 +150,11 @@ public class ValidatingVisitor implements ChangeSetVisitor {
         }
 
         if(ranChangeSet != null){
-            if (!changeSet.isCheckSumValid(ranChangeSet.getLastCheckSum())) {
-                isItAnIncorrectChecksumVersionGeneratedByABuggyExtension(changeSet, ranChangeSet);
-                if (!changeSet.shouldRunOnChange() && !changeSet.shouldAlwaysRun()) {
+            if (!changeSet.isCheckSumValid(ranChangeSet.getLastCheckSum())
+                && !changeSet.shouldRunOnChange() && !changeSet.shouldAlwaysRun()) {
+                    isItAnIncorrectChecksumVersionGeneratedByABuggyExtension(changeSet, ranChangeSet);
                     invalidMD5Sums.add(changeSet.toString(false) + " was: " + ranChangeSet.getLastCheckSum().toString()
                             + " but is now: " + changeSet.generateCheckSum(ChecksumVersion.enumFromChecksumVersion(ranChangeSet.getLastCheckSum().getVersion())).toString());
-                }
             }
         }
 
