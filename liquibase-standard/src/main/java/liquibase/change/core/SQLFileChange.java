@@ -6,10 +6,14 @@ import liquibase.Scope;
 import liquibase.change.*;
 import liquibase.changelog.ChangeLogParameters;
 import liquibase.database.Database;
+import liquibase.exception.ChangeLogParseException;
 import liquibase.exception.SetupException;
 import liquibase.exception.UnexpectedLiquibaseException;
 import liquibase.exception.ValidationErrors;
+import liquibase.parser.ChangeLogParserConfiguration;
+import liquibase.resource.Resource;
 import liquibase.resource.ResourceAccessor;
+import liquibase.util.FileUtil;
 import liquibase.util.ObjectUtil;
 import liquibase.util.StreamUtil;
 import liquibase.util.StringUtil;
@@ -95,11 +99,15 @@ public class SQLFileChange extends AbstractSQLChange {
             return null;
         }
 
+        return getResource().openInputStream();
+    }
+
+    private Resource getResource() throws IOException {
         ResourceAccessor resourceAccessor = Scope.getCurrentScope().getResourceAccessor();
         if (ObjectUtil.defaultIfNull(isRelativeToChangelogFile(), false)) {
-            return resourceAccessor.get(getChangeSet().getChangeLog().getPhysicalFilePath()).resolveSibling(path).openInputStream();
+            return resourceAccessor.get(getChangeSet().getChangeLog().getPhysicalFilePath()).resolveSibling(path);
         } else {
-            return resourceAccessor.getExisting(path).openInputStream();
+            return resourceAccessor.getExisting(path);
         }
     }
 
@@ -108,8 +116,27 @@ public class SQLFileChange extends AbstractSQLChange {
         ValidationErrors validationErrors = new ValidationErrors();
         if (StringUtil.trimToNull(getPath()) == null) {
             validationErrors.addError("'path' is required");
+        } else {
+            try {
+                Resource resource = getResource();
+                if (!resource.exists()) {
+                    alertOnNonExistantSqlFile(validationErrors);
+                }
+            } catch (IOException e) {
+                Scope.getCurrentScope().getLog(getClass()).warning("Failed to obtain sqlFile resource at path '" + path + "'while attempting to validate the existence of the sqlFile.", e);
+                alertOnNonExistantSqlFile(validationErrors);
+            }
         }
+
         return validationErrors;
+    }
+
+    private void alertOnNonExistantSqlFile(ValidationErrors validationErrors) {
+        if (ChangeLogParserConfiguration.ON_MISSING_SQL_FILE.getCurrentValue().equals(ChangeLogParserConfiguration.MissingIncludeConfiguration.WARN)) {
+            validationErrors.addWarning(FileUtil.getFileNotFoundMessage(path));
+        } else {
+            validationErrors.addError(FileUtil.getFileNotFoundMessage(path));
+        }
     }
 
     @Override
