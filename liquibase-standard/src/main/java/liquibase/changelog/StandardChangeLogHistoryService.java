@@ -17,7 +17,6 @@ import liquibase.exception.UnexpectedLiquibaseException;
 import liquibase.executor.Executor;
 import liquibase.executor.ExecutorService;
 import liquibase.executor.jvm.ChangelogJdbcMdcListener;
-import liquibase.integration.commandline.LiquibaseCommandLineConfiguration;
 import liquibase.snapshot.InvalidExampleException;
 import liquibase.snapshot.SnapshotControl;
 import liquibase.snapshot.SnapshotGeneratorFactory;
@@ -302,11 +301,6 @@ public class StandardChangeLogHistoryService extends AbstractChangeLogHistorySer
      */
     @Override
     public List<RanChangeSet> getRanChangeSets() throws DatabaseException {
-        return this.getRanChangeSets(false);
-    }
-
-    @Override
-    public List<RanChangeSet> getRanChangeSets(boolean allowChecksumsUpgrade) throws DatabaseException {
         if (this.ranChangeSetList == null) {
             Database database = getDatabase();
             String databaseChangeLogTableName = getDatabase().escapeTableName(getLiquibaseCatalogName(),
@@ -320,8 +314,7 @@ public class StandardChangeLogHistoryService extends AbstractChangeLogHistorySer
                     String fileName = DatabaseChangeLog.normalizePath(storedFileName);
                     String author = rs.get("AUTHOR").toString();
                     String id = rs.get("ID").toString();
-                    boolean isUpgrade = allowChecksumsUpgrade && !databaseChecksumsCompatible;
-                    String md5sum = ((rs.get("MD5SUM") == null) || isUpgrade) ? null : rs.get("MD5SUM").toString();
+                    String md5sum = ((rs.get("MD5SUM") == null)) ? null : rs.get("MD5SUM").toString();
                     String description = (rs.get("DESCRIPTION") == null) ? null : rs.get("DESCRIPTION").toString();
                     String comments = (rs.get("COMMENTS") == null) ? null : rs.get("COMMENTS").toString();
                     Object tmpDateExecuted = rs.get("DATEEXECUTED");
@@ -371,15 +364,6 @@ public class StandardChangeLogHistoryService extends AbstractChangeLogHistorySer
         SelectFromDatabaseChangeLogStatement select = new SelectFromDatabaseChangeLogStatement(new ColumnConfig()
             .setName("*").setComputed(true)).setOrderBy("DATEEXECUTED ASC", "ORDEREXECUTED ASC");
         return ChangelogJdbcMdcListener.query(getDatabase(), executor -> executor.queryForList(select));
-    }
-
-    @Override
-    protected void replaceChecksum(ChangeSet changeSet) throws DatabaseException {
-        Scope.getCurrentScope().getSingleton(ExecutorService.class).getExecutor("jdbc", getDatabase()).execute(new UpdateChangeSetChecksumStatement
-            (changeSet));
-
-        getDatabase().commit();
-        reset();
     }
 
     @Override

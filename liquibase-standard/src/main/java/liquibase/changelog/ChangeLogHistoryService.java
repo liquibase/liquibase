@@ -37,10 +37,12 @@ public interface ChangeLogHistoryService extends Plugin {
      * as everywhere it is called only with boolean false, so for core it is the same as getRanChangeSets().
      *
      * @param allowChecksumsUpgrade
-     * @deprecated use getRanChangeSets() instead
+     * @deprecated use {@link #getRanChangeSets()} instead
      */
     @Deprecated
-    List<RanChangeSet> getRanChangeSets(boolean allowChecksumsUpgrade) throws DatabaseException;
+    default List<RanChangeSet> getRanChangeSets(boolean allowChecksumsUpgrade) throws DatabaseException {
+        return this.getRanChangeSets();
+    }
 
     RanChangeSet getRanChangeSet(ChangeSet changeSet) throws DatabaseException, DatabaseHistoryException;
 
@@ -79,4 +81,11 @@ public interface ChangeLogHistoryService extends Plugin {
      * @return false if we have checksums different from  {@link liquibase.ChecksumVersion#latest().getVersion()} in the dbcl table.
      */
     boolean isDatabaseChecksumsCompatible();
+
+    /**
+     * By default does nothing to keep compatibility with older versions, but subclasses may like to implement
+     * this method to support checksum upgrades.
+     */
+    default void replaceChecksum(ChangeSet changeSet) throws DatabaseException {
+    }
 }
