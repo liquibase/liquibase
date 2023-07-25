@@ -31,7 +31,8 @@ public class UpdateCommandStep extends AbstractUpdateCommandStep implements Clea
                 .addAlias("labels")
                 .description("Changeset labels to match")
                 .build();
-        CONTEXTS_ARG = builder.argument("contexts", String.class)
+        CONTEXTS_ARG = builder.argument("contextFilter", String.class)
+                .addAlias("contexts")
                 .description("Changeset contexts to match")
                 .build();
     }
@@ -81,8 +82,12 @@ public class UpdateCommandStep extends AbstractUpdateCommandStep implements Clea
     }
 
     @Override
-    public void postUpdateLog() {
-        Scope.getCurrentScope().getUI().sendMessage(coreBundle.getString("update.successful"));
+    public void postUpdateLog(int rowsAffected) {
+        if (rowsAffected > -1) {
+            Scope.getCurrentScope().getUI().sendMessage(String.format(coreBundle.getString("update.successful.with.row.count"), rowsAffected));
+        } else {
+            Scope.getCurrentScope().getUI().sendMessage(coreBundle.getString("update.successful"));
+        }
     }
 
     @Override

@@ -17,7 +17,7 @@ Optional Args:
     Default: null
   changeExecListenerPropertiesFile (String) Path to a properties file for the ChangeExecListenerClass
     Default: null
-  contexts (String) Context string to use for filtering
+  contextFilter (String) Context string to use for filtering
     Default: null
   defaultCatalogName (String) The default catalog name to use for the database connection
     Default: null
@@ -38,6 +38,8 @@ Optional Args:
     OBFUSCATED
   rollbackScript (String) Rollback script to execute
     Default: null
+  tagVersion (String) Tag version to use for multiple occurrences of a tag
+    Default: OLDEST
   username (String) Username to use to connect to the database
     Default: null
 """
@@ -48,6 +50,7 @@ Optional Args:
                 username     : { it.username },
                 password     : { it.password },
                 tag          : "version_2.0",
+                tagVersion   : "OLDEST",
                 changelogFile: "changelogs/h2/complete/rollback.tag.changelog.xml",
         ]
 

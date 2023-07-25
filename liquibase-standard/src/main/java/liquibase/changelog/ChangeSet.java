@@ -150,7 +150,7 @@ public class ChangeSet implements Conditional, ChangeLogChild {
     private ContextExpression contextFilter;
 
     /**
-     * "Labels" associated with this changeSet.  If null or empty, will execute regardless of contexts set
+     * "Labels" associated with this changeSet.  If null or empty, will execute regardless of labels set
      */
     private Labels labels;
 
@@ -320,8 +320,11 @@ public class ChangeSet implements Conditional, ChangeLogChild {
         this.storedFilePath = storedFilePath;
     }
 
+    /**
+     * @return the runWith value. If the runWith value is empty or not set this method will return null.
+     */
     public String getRunWith() {
-        return runWith;
+        return runWith == null || runWith.isEmpty() ? null : runWith;
     }
 
     public void setRunWith(String runWith) {

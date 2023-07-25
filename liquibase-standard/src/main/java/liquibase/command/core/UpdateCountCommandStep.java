@@ -35,7 +35,8 @@ public class UpdateCountCommandStep extends AbstractUpdateCommandStep {
         LABEL_FILTER_ARG = builder.argument("labelFilter", String.class)
                 .addAlias("labels")
                 .description("Changeset labels to match").build();
-        CONTEXTS_ARG = builder.argument("contexts", String.class)
+        CONTEXTS_ARG = builder.argument("contextFilter", String.class)
+                .addAlias("contexts")
                 .description("Changeset contexts to match").build();
         COUNT_ARG = builder.argument("count", Integer.class).required()
                 .description("The number of changes in the changelog to deploy").build();
@@ -111,5 +112,14 @@ public class UpdateCountCommandStep extends AbstractUpdateCommandStep {
     @Override
     protected void customMdcLogging(CommandScope commandScope) {
         Scope.getCurrentScope().addMdcValue(MdcKey.UPDATE_COUNT, String.valueOf(commandScope.getArgumentValue(COUNT_ARG)));
+    }
+
+    @Override
+    public void postUpdateLog(int rowsAffected) {
+        if (rowsAffected > -1) {
+            Scope.getCurrentScope().getUI().sendMessage(String.format(coreBundle.getString("update.count.successful.with.row.count"), rowsAffected));
+        } else {
+            Scope.getCurrentScope().getUI().sendMessage(coreBundle.getString("update.count.successful"));
+        }
     }
 }

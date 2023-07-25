@@ -872,4 +872,14 @@ public abstract class AbstractChange extends AbstractPlugin implements Change {
     @Override
     public void modify(ChangeVisitor changeVisitor) throws ParsedNodeException{
     }
+
+    @Override
+    public boolean equals(Object reference) {
+        return (this == reference);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(super.hashCode(), changeSet);
+    }
 }

@@ -32,7 +32,8 @@ public class UpdateToTagCommandStep extends AbstractUpdateCommandStep {
         LABEL_FILTER_ARG = builder.argument("labelFilter", String.class)
                 .addAlias("labels")
                 .description("Changeset labels to match").build();
-        CONTEXTS_ARG = builder.argument("contexts", String.class)
+        CONTEXTS_ARG = builder.argument("contextFilter", String.class)
+                .addAlias("contexts")
                 .description("Changeset contexts to match").build();
         TAG_ARG = builder.argument("tag", String.class).required()
             .description("The tag to update to").build();
@@ -144,5 +145,14 @@ public class UpdateToTagCommandStep extends AbstractUpdateCommandStep {
     @Override
     protected void customMdcLogging(CommandScope commandScope) {
         Scope.getCurrentScope().addMdcValue(MdcKey.UPDATE_TO_TAG, commandScope.getArgumentValue(TAG_ARG));
+    }
+
+    @Override
+    public void postUpdateLog(int rowsAffected) {
+        if (rowsAffected > -1) {
+            Scope.getCurrentScope().getUI().sendMessage(String.format(coreBundle.getString("update.to.tag.successful.with.row.count"), rowsAffected));
+        } else {
+            Scope.getCurrentScope().getUI().sendMessage(coreBundle.getString("update.to.tag.successful"));
+        }
     }
 }
