@@ -44,6 +44,7 @@ import org.junit.Assume
 import org.junit.ComparisonFailure
 import spock.lang.Specification
 import spock.lang.Unroll
+import spock.util.environment.OperatingSystem
 
 import java.util.logging.Level
 import java.util.regex.Pattern
@@ -223,6 +224,10 @@ Long Description: ${commandDefinition.getLongDescription() ?: "NOT SET"}
         }
 
         when:
+        if (testDef.supportedOs != null) {
+            def currentOs = OperatingSystem.getCurrent()
+            Assume.assumeTrue("The current operating system (" + currentOs.name + ") does not support this test.", testDef.supportedOs.contains(currentOs))
+        }
         final commandScope
         try {
             commandScope = new CommandScope(testDef.commandTestDefinition.command as String[])
@@ -808,6 +813,7 @@ Long Description: ${commandDefinition.getLongDescription() ?: "NOT SET"}
         private Map<String, ?> globalArguments = new HashMap<>()
 
         private String searchPath
+        private ArrayList<OperatingSystem> supportedOs
 
         /**
          * Arguments to command as key/value pairs
@@ -880,6 +886,10 @@ Long Description: ${commandDefinition.getLongDescription() ?: "NOT SET"}
 
         def setSearchPath(String searchPath) {
             this.searchPath = searchPath
+        }
+
+        def setSupportedOs(ArrayList<OperatingSystem> supportedOs) {
+            this.supportedOs = supportedOs;
         }
 
         def setExpectedFileContent(Map<String, Object> content) {

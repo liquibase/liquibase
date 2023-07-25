@@ -580,7 +580,7 @@ jobs:
               if (testHarnessBranch.name == "main" || testHarnessBranch.name == "master") {
                 testHarnessBranch.name = "develop";
               }
-              
+            
               console.log("Trigger Test Harness tests");
               let testHarnessWorkflowDispatch = await github.rest.actions.createWorkflowDispatch({
                 "owner": "liquibase",
