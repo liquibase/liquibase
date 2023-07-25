@@ -24,6 +24,7 @@
             <email>nathan.voxland@liquibase.org</email>
             <roles>
                 <role>architect</role>
+                <role>developer</role>
             </roles>
             <timezone>-6</timezone>
         </developer>
@@ -225,7 +226,7 @@
         <dependency>
             <groupId>net.snowflake</groupId>
             <artifactId>snowflake-jdbc</artifactId>
-            <version>3.13.33</version>
+            <version>3.13.32</version>
             <scope>test</scope>
         </dependency>
 
