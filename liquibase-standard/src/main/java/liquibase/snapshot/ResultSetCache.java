@@ -3,6 +3,7 @@ package liquibase.snapshot;
 import liquibase.CatalogAndSchema;
 import liquibase.database.Database;
 import liquibase.database.core.InformixDatabase;
+import liquibase.database.core.SybaseASADatabase;
 import liquibase.database.jvm.JdbcConnection;
 import liquibase.exception.DatabaseException;
 import liquibase.exception.UnexpectedLiquibaseException;
@@ -56,6 +57,7 @@ public class ResultSetCache {
                 }
 
                 results = resultSetExtractor.bulkFetch();
+
                 didBulkQuery.put(schemaKey, bulkTracking);
                 bulkQueried = true;
             } else {
@@ -92,7 +94,6 @@ public class ResultSetCache {
                 returnList = new ArrayList<>();
             }
             return returnList;
-
 
         } catch (SQLException e) {
             throw new DatabaseException(e);
@@ -297,6 +298,11 @@ public class ResultSetCache {
                     protected Object getColumnValue(ResultSet rs, int index) throws SQLException {
                         Object value = super.getColumnValue(rs, index);
                         if ((value instanceof String)) {
+                            if (database instanceof SybaseASADatabase) {
+                                // SQL Anywhere does not need any trimming as it never provides any extra whitespace padding,
+                                // but it does support duplicate object names differing by whitespace only.
+                                return value;
+                            }
 
                             // Don't trim for informix database,
                             // We need to discern the space in front of an index name,
