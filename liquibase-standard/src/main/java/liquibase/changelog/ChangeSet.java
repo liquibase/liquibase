@@ -149,7 +149,7 @@ public class ChangeSet implements Conditional, ChangeLogChild {
     private ContextExpression contextFilter;
 
     /**
-     * "Labels" associated with this changeSet.  If null or empty, will execute regardless of contexts set
+     * "Labels" associated with this changeSet.  If null or empty, will execute regardless of labels set
      */
     private Labels labels;
 
