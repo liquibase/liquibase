@@ -14,7 +14,7 @@ import java.util.*;
  * name, and it is case-insensitive.
  * </p>
  *
- * @see <a href="https://docs.liquibase.com/concepts/advanced/labels.html" target="_top">labels</a> in documentation
+ * @see <a href="https://docs.liquibase.com/concepts/changelogs/attributes/labels.html" target="_top">labels</a> in documentation
  */
 public class LabelExpression {
 
@@ -99,7 +99,7 @@ public class LabelExpression {
 
     /**
      *
-     * Return true if any of the LabelExpression objects match the runtime
+     * Return true if all the LabelExpression objects match the runtime
      *
      * @param   changesetLabels    Expressions to match against
      * @param   labelExpression         Runtime labels

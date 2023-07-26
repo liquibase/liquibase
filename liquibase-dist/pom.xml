@@ -107,12 +107,11 @@
 			<optional>true</optional>
 		</dependency>
 
-
-		<dependency>
-			<groupId>net.snowflake</groupId>
-			<artifactId>snowflake-jdbc</artifactId>
-			<version>3.13.33</version>
-		</dependency>
+        <dependency>
+            <groupId>net.snowflake</groupId>
+            <artifactId>snowflake-jdbc</artifactId>
+            <version>3.13.32</version>
+        </dependency>
 
 		<!--        CANNOT INCLUDE MYSQL FOR LICENSING REASONS -->
 		<!--        <dependency>-->
