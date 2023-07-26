@@ -333,7 +333,7 @@ jobs:
       # this includes all the tar files included in the previous runs. So in the next step we deploy what was previously build
       # do not cache the keys for the next run
       - name: Built Code Cache
-        uses: actions/cache@v2
+        uses: actions/cache@v3.3.1
         with:
           key: built-code-${{ github.run_number }}-${{ github.run_attempt }}
           path: |
