@@ -108,7 +108,7 @@ public class LiquibaseEntityResolver implements EntityResolver2 {
                     String xsdVersion = versionMatcher.group("version");
                     if (!buildVersion.startsWith(xsdVersion)) {
                         hasWarnedAboutMismatchedXsdVersion = true;
-                        String msg = "INFO: An older version of the XSD is specified in one or more changelog's <databaseChangeLog> header. This can lead to unexpected outcomes. If a specific XSD is not required, please replace all XSD version references with \"-latest\". Learn more at https://docs.liquibase.com";
+                        String msg = "INFO: An older version of the XSD is specified in one or more changelog's <databaseChangeLog> header. This can lead to unexpected outcomes. If a specific XSD is not required, please replace all XSD version references with \"-latest\". Learn more at https://docs.liquibase.com/concepts/changelogs/xml-format.html";
                         Scope.getCurrentScope().getLog(getClass()).info(msg);
                         Scope.getCurrentScope().getUI().sendMessage(msg);
                     }

@@ -27,12 +27,15 @@ import java.io.IOException;
 import java.io.OutputStream;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.atomic.AtomicInteger;
 
 import static liquibase.Liquibase.MSG_COULD_NOT_RELEASE_LOCK;
 
 public abstract class AbstractUpdateCommandStep extends AbstractCommandStep implements CleanUpCommandStep {
     public static final String DEFAULT_CHANGE_EXEC_LISTENER_RESULT_KEY = "defaultChangeExecListener";
     private boolean isFastCheckEnabled = true;
+
+    private boolean isDBLocked = true;
 
     public abstract String getChangelogFileArg(CommandScope commandScope);
     public abstract String getContextsArg(CommandScope commandScope);
@@ -60,6 +63,14 @@ public abstract class AbstractUpdateCommandStep extends AbstractCommandStep impl
             if (isFastCheckEnabled && isUpToDate(commandScope, database, databaseChangeLog, contexts, labelExpression, resultsBuilder.getOutputStream())) {
                 return;
             }
+            if(!isDBLocked) {
+                LockServiceFactory.getInstance().getLockService(database).waitForLock();
+                // waitForLock resets the changelog history service, so we need to rebuild that and generate a final deploymentId.
+                ChangeLogHistoryService changeLogHistoryService = Scope.getCurrentScope().getSingleton(ChangeLogHistoryServiceFactory.class).getChangeLogService(database);
+                changeLogHistoryService.init();
+                changeLogHistoryService.generateDeploymentId();
+            }
+
             ChangeLogHistoryService changelogService = Scope.getCurrentScope().getSingleton(ChangeLogHistoryServiceFactory.class).getChangeLogService(database);
             Scope.getCurrentScope().addMdcValue(MdcKey.DEPLOYMENT_ID, changelogService.getDeploymentId());
             Scope.getCurrentScope().getLog(getClass()).info(String.format("Using deploymentId: %s", changelogService.getDeploymentId()));
@@ -67,9 +78,11 @@ public abstract class AbstractUpdateCommandStep extends AbstractCommandStep impl
             StatusVisitor statusVisitor = getStatusVisitor(commandScope, database, contexts, labelExpression, databaseChangeLog);
 
             ChangeLogIterator runChangeLogIterator = getStandardChangelogIterator(commandScope, database, contexts, labelExpression, databaseChangeLog);
+            AtomicInteger rowsAffected = new AtomicInteger(0);
 
             HashMap<String, Object> scopeValues = new HashMap<>();
             scopeValues.put("showSummary", getShowSummary(commandScope));
+            scopeValues.put("rowsAffected", rowsAffected);
             Scope.child(scopeValues, () -> {
                 runChangeLogIterator.run(new UpdateVisitor(database, changeExecListener, new ShouldRunChangeSetFilter(database)),
                         new RuntimeEnvironment(database, contexts, labelExpression));
@@ -78,8 +91,9 @@ public abstract class AbstractUpdateCommandStep extends AbstractCommandStep impl
 
             resultsBuilder.addResult("statusCode", 0);
             addChangelogFileToMdc(getChangelogFileArg(commandScope), databaseChangeLog);
+            Scope.getCurrentScope().addMdcValue(MdcKey.ROWS_AFFECTED, String.valueOf(rowsAffected.get()));
             logDeploymentOutcomeMdc(changeExecListener, true);
-            postUpdateLog();
+            postUpdateLog(rowsAffected.get());
         } catch (Exception e) {
             DatabaseChangeLog databaseChangeLog = (DatabaseChangeLog) commandScope.getDependency(DatabaseChangeLog.class);
             addChangelogFileToMdc(getChangelogFileArg(commandScope), databaseChangeLog);
@@ -184,10 +198,10 @@ public abstract class AbstractUpdateCommandStep extends AbstractCommandStep impl
      * <p>
      * NOTE: to reduce the number of queries to the databasehistory table, this method will cache the "fast check" results within this instance under the assumption that the total changesets will not change within this instance.
      */
-    private static final Map<String, Boolean> upToDateFastCheck = new ConcurrentHashMap<>();
+    private final Map<String, Boolean> upToDateFastCheck = new ConcurrentHashMap<>();
 
     public boolean isUpToDateFastCheck(CommandScope commandScope, Database database, DatabaseChangeLog databaseChangeLog, Contexts contexts, LabelExpression labelExpression) throws LiquibaseException {
-        String cacheKey = contexts + "/" + labelExpression;
+        String cacheKey = String.format("%s/%s/%s/%s/%s", contexts, labelExpression, database.getDefaultSchemaName(), database.getDefaultCatalogName(), database.getConnection().getURL());
         if (!upToDateFastCheck.containsKey(cacheKey)) {
             ChangeLogHistoryService changeLogService = Scope.getCurrentScope().getSingleton(ChangeLogHistoryServiceFactory.class).getChangeLogService(database);
             try {
@@ -264,7 +278,11 @@ public abstract class AbstractUpdateCommandStep extends AbstractCommandStep impl
      * Log
      */
     @Beta
-    public void postUpdateLog() {
+    public void postUpdateLog(int rowsAffected) {
 
+    }
+
+    protected void setDBLock(boolean locked) {
+        isDBLocked = locked;
     }
 }

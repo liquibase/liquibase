@@ -10,10 +10,7 @@ import liquibase.sqlgenerator.AbstractSqlGeneratorTest;
 import liquibase.sqlgenerator.MockSqlGeneratorChain;
 import liquibase.sqlgenerator.SqlGenerator;
 import liquibase.sqlgenerator.SqlGeneratorFactory;
-import liquibase.statement.AutoIncrementConstraint;
-import liquibase.statement.NotNullConstraint;
-import liquibase.statement.PrimaryKeyConstraint;
-import liquibase.statement.SqlStatement;
+import liquibase.statement.*;
 import liquibase.statement.core.AddColumnStatement;
 import org.junit.Test;
 
@@ -131,6 +128,21 @@ public class AddColumnGeneratorTest extends AbstractSqlGeneratorTest<AddColumnSt
 
         assertEquals(1, sql.length);
         assertEquals("ALTER TABLE table_name ADD ID BIGINT NOT NULL PRIMARY KEY", sql[0].toSql());
+    }
+
+    @Test
+    public void testAddForeignKeyWithEmptySpaces() {
+        AddColumnStatement columns = new AddColumnStatement(null, null, TABLE_NAME, "ID", "BIGINT", null,
+                new ForeignKeyConstraint("fk_name", "table1 ( id )"));
+
+        H2Database h2Database = new H2Database();
+        assertFalse(generatorUnderTest.validate(columns, h2Database, new MockSqlGeneratorChain()).hasErrors());
+
+        Sql[] sql = generatorUnderTest.generateSql(columns, h2Database, new MockSqlGeneratorChain());
+
+
+        assertEquals(2, sql.length);
+        assertEquals("ALTER TABLE table_name ADD CONSTRAINT fk_name FOREIGN KEY (ID) REFERENCES table1 (id)", sql[1].toSql());
     }
 
     @Test

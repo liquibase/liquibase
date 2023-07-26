@@ -14,7 +14,6 @@ import liquibase.configuration.LiquibaseConfiguration;
 import liquibase.configuration.core.DefaultsFileValueProvider;
 import liquibase.database.Database;
 import liquibase.exception.LiquibaseException;
-import liquibase.lockservice.LockService;
 import liquibase.lockservice.LockServiceFactory;
 import liquibase.logging.mdc.MdcKey;
 import liquibase.parser.ChangeLogParser;
@@ -48,7 +47,8 @@ public class DatabaseChangelogCommandStep extends AbstractHelperCommandStep impl
         LABEL_FILTER_ARG = builder.argument("labelFilter", String.class)
                 .addAlias("labels")
                 .description("Label expression to use for filtering").build();
-        CONTEXTS_ARG = builder.argument("contexts", String.class)
+        CONTEXTS_ARG = builder.argument("contextFilter", String.class)
+                .addAlias("contexts")
                 .description("Context string to use for filtering").build();
         CHANGELOG_PARAMETERS = builder.argument("changelogParameters", ChangeLogParameters.class)
                 .hidden()
@@ -66,7 +66,7 @@ public class DatabaseChangelogCommandStep extends AbstractHelperCommandStep impl
 
     @Override
     public List<Class<?>> requiredDependencies() {
-        return Arrays.asList(Database.class, LockService.class);
+        return Arrays.asList(Database.class);
     }
 
     @Override
@@ -91,7 +91,6 @@ public class DatabaseChangelogCommandStep extends AbstractHelperCommandStep impl
 
         DatabaseChangeLog databaseChangeLog = getDatabaseChangeLog(changeLogFile, changeLogParameters);
         checkLiquibaseTables(shouldUpdateNullChecksums, databaseChangeLog, changeLogParameters.getContexts(), changeLogParameters.getLabels(), database);
-        Scope.getCurrentScope().getSingleton(ChangeLogHistoryServiceFactory.class).getChangeLogService(database).generateDeploymentId();
         databaseChangeLog.validate(database, changeLogParameters.getContexts(), changeLogParameters.getLabels());
 
         commandScope.provideDependency(DatabaseChangeLog.class, databaseChangeLog);

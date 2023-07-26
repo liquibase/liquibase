@@ -76,7 +76,7 @@ public class CreateSequenceGenerator extends AbstractSqlGenerator<CreateSequence
         if (database instanceof HsqlDatabase || database instanceof Db2zDatabase) {
             queryStringBuilder.append(" AS BIGINT ");
         } else if (statement.getDataType() != null) {
-            if (!(isH2WithoutAsDatatypeSupport(database) || database instanceof CockroachDatabase)) {
+            if (!(isH2WithoutAsDatatypeSupport(database) || database instanceof CockroachDatabase || database instanceof SybaseASADatabase)) {
                 queryStringBuilder.append(" AS ").append(statement.getDataType());
             }
         }
@@ -97,10 +97,12 @@ public class CreateSequenceGenerator extends AbstractSqlGenerator<CreateSequence
         }
 
         if (statement.getCacheSize() != null) {
-            if (database instanceof OracleDatabase || database instanceof Db2zDatabase || database instanceof PostgresDatabase || database instanceof MariaDBDatabase) {
+            if (database instanceof OracleDatabase || database instanceof Db2zDatabase || database instanceof PostgresDatabase || database instanceof MariaDBDatabase || database instanceof SybaseASADatabase) {
                 if (BigInteger.ZERO.equals(statement.getCacheSize())) {
                     if (database instanceof OracleDatabase) {
                         queryStringBuilder.append(" NOCACHE ");
+                    } else if (database instanceof SybaseASADatabase) {
+                        queryStringBuilder.append(" NO CACHE ");
                     } else if (database instanceof MariaDBDatabase) {
                         queryStringBuilder.append(" CACHE 0");
                     }

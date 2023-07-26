@@ -2,11 +2,15 @@ package liquibase.command.core;
 
 import liquibase.Scope;
 import liquibase.UpdateSummaryEnum;
+import liquibase.changelog.ChangeLogParameters;
+import liquibase.changelog.DatabaseChangeLog;
+import liquibase.changelog.visitor.ChangeExecListener;
 import liquibase.command.*;
 import liquibase.command.core.helpers.DatabaseChangelogCommandStep;
+import liquibase.database.Database;
 import liquibase.exception.CommandValidationException;
 
-import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 public class UpdateCommandStep extends AbstractUpdateCommandStep implements CleanUpCommandStep {
@@ -27,7 +31,8 @@ public class UpdateCommandStep extends AbstractUpdateCommandStep implements Clea
                 .addAlias("labels")
                 .description("Changeset labels to match")
                 .build();
-        CONTEXTS_ARG = builder.argument("contexts", String.class)
+        CONTEXTS_ARG = builder.argument("contextFilter", String.class)
+                .addAlias("contexts")
                 .description("Changeset contexts to match")
                 .build();
     }
@@ -77,14 +82,23 @@ public class UpdateCommandStep extends AbstractUpdateCommandStep implements Clea
     }
 
     @Override
-    public void postUpdateLog() {
-        Scope.getCurrentScope().getUI().sendMessage(coreBundle.getString("update.successful"));
+    public void postUpdateLog(int rowsAffected) {
+        if (rowsAffected > -1) {
+            Scope.getCurrentScope().getUI().sendMessage(String.format(coreBundle.getString("update.successful.with.row.count"), rowsAffected));
+        } else {
+            Scope.getCurrentScope().getUI().sendMessage(coreBundle.getString("update.successful"));
+        }
     }
 
     @Override
     public List<Class<?>> requiredDependencies() {
-        List<Class<?>> deps = new ArrayList<>(super.requiredDependencies());
-        deps.add(UpdateSummaryEnum.class);
+        List<Class<?>> deps = Arrays.asList(Database.class, DatabaseChangeLog.class, ChangeExecListener.class, ChangeLogParameters.class, UpdateSummaryEnum.class);
         return deps;
+    }
+
+    @Override
+    public void run(CommandResultsBuilder resultsBuilder) throws Exception {
+        setDBLock(false);
+        super.run(resultsBuilder);
     }
 }
