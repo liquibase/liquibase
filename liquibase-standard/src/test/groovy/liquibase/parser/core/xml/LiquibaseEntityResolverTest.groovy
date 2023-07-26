@@ -50,7 +50,7 @@ class LiquibaseEntityResolverTest extends Specification {
 
         // This is an ugly assertion line, it is essentially saying, either we expect the message, so make sure it's there
         // or we expect no message, so make sure there are no messages.
-        ((expectedWarningMessage && uiService.getMessages().contains("INFO: An older version of the XSD is specified in one or more changelog's <databaseChangeLog> header. This can lead to unexpected outcomes. If a specific XSD is not required, please replace all XSD version references with \"-latest\". Learn more at https://docs.liquibase.com"))
+        ((expectedWarningMessage && uiService.getMessages().contains("INFO: An older version of the XSD is specified in one or more changelog's <databaseChangeLog> header. This can lead to unexpected outcomes. If a specific XSD is not required, please replace all XSD version references with \"-latest\". Learn more at https://docs.liquibase.com/concepts/changelogs/xml-format.html"))
         || (!expectedWarningMessage && uiService.getMessages().isEmpty()))
 
         cleanup:
