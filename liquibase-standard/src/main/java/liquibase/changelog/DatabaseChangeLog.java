@@ -24,7 +24,6 @@ import liquibase.resource.Resource;
 import liquibase.resource.ResourceAccessor;
 import liquibase.servicelocator.LiquibaseService;
 import liquibase.util.FileUtil;
-import liquibase.util.LoggingExecutorTextUtil;
 import liquibase.util.StringUtil;
 
 import java.io.IOException;
@@ -42,10 +41,9 @@ public class DatabaseChangeLog implements Comparable<DatabaseChangeLog>, Conditi
     private static final ThreadLocal<DatabaseChangeLog> PARENT_CHANGE_LOG = new ThreadLocal<>();
     private static final Logger LOG = Scope.getCurrentScope().getLog(DatabaseChangeLog.class);
     private static final Pattern SLASH_PATTERN = Pattern.compile("^/");
-    private static final Pattern NON_CLASSPATH_PATTERN = Pattern.compile("^classpath:");
     private static final Pattern DOUBLE_BACK_SLASH_PATTERN = Pattern.compile("\\\\");
     private static final Pattern NO_LETTER_PATTERN = Pattern.compile("^[a-zA-Z]:");
-    private static final String SEEN_CHANGELOGS_PATHS_SCOPE_KEY = "SEEN_CHANGELOG_PATHS";
+    public static final String SEEN_CHANGELOGS_PATHS_SCOPE_KEY = "SEEN_CHANGELOG_PATHS";
 
     private final PreconditionContainer preconditionContainer = new GlobalPreconditionContainer();
     private String physicalFilePath;
@@ -53,7 +51,7 @@ public class DatabaseChangeLog implements Comparable<DatabaseChangeLog>, Conditi
     private ObjectQuotingStrategy objectQuotingStrategy;
 
     private final List<ChangeSet> changeSets = new ArrayList<>();
-    private List<ChangeSet> skippedChangeSets = new ArrayList<>();
+    private final List<ChangeSet> skippedChangeSets = new ArrayList<>();
     private ChangeLogParameters changeLogParameters;
 
     private RuntimeEnvironment runtimeEnvironment;
@@ -682,9 +680,42 @@ public class DatabaseChangeLog implements Comparable<DatabaseChangeLog>, Conditi
                            int maxDepth,
                            ModifyChangeSets modifyChangeSets)
             throws SetupException {
+        if (pathName == null) {
+            throw new SetupException("No path attribute for includeAll");
+        }
+        SortedSet<Resource> resources =
+                findResources(pathName, isRelativeToChangelogFile, resourceFilter, errorIfMissingOrEmpty, resourceComparator, resourceAccessor, minDepth, maxDepth);
+        if (resources.isEmpty() && errorIfMissingOrEmpty) {
+            throw new SetupException(
+                    "Could not find directory or directory was empty for includeAll '" + pathName + "'");
+        }
+        try {
+            Set<String> seenChangelogPaths = Scope.getCurrentScope().get(SEEN_CHANGELOGS_PATHS_SCOPE_KEY, new HashSet<>());
+            Scope.child(Collections.singletonMap(SEEN_CHANGELOGS_PATHS_SCOPE_KEY, seenChangelogPaths), () -> {
+                for (Resource resource : resources) {
+                    Scope.getCurrentScope().getLog(getClass()).info("Reading resource: " + resource);
+                    include(resource.getPath(), false, errorIfMissingOrEmpty, resourceAccessor, includeContextFilter,
+                            labels, ignore, OnUnknownFileFormat.WARN, modifyChangeSets);
+                }
+            });
+        } catch (Exception e) {
+            throw new SetupException(e);
+        }
+    }
+
+    public SortedSet<Resource> findResources(
+                               String pathName,
+                               boolean isRelativeToChangelogFile,
+                               IncludeAllFilter resourceFilter,
+                               boolean errorIfMissingOrEmpty,
+                               Comparator<String> resourceComparator,
+                               ResourceAccessor resourceAccessor,
+                               int minDepth,
+                               int maxDepth)
+            throws SetupException {
         try {
             if (pathName == null) {
-                throw new SetupException("No path attribute for includeAll");
+                throw new SetupException("No path attribute for findResources");
             }
 
             String relativeTo = null;
@@ -697,21 +728,9 @@ public class DatabaseChangeLog implements Comparable<DatabaseChangeLog>, Conditi
             List<Resource> unsortedResources = null;
             Set<String> seenChangelogPaths = Scope.getCurrentScope().get(SEEN_CHANGELOGS_PATHS_SCOPE_KEY, new HashSet<>());
             try {
-                String path;
-                if (relativeTo == null) {
-                    path = pathName;
-                } else {
-                    path = resourceAccessor.get(relativeTo).resolveSibling(pathName).getPath();
-                    path = Paths.get(path).normalize().toString()
-                            .replace("\\", "/");
-                }
+                String path = fixPath(pathName, resourceAccessor, relativeTo);
 
-                path = path.replace("\\", "/");
-                if (StringUtil.isNotEmpty(path) && !(path.endsWith("/"))) {
-                    path = path + '/';
-                }
-
-                if (ChangeLogParserConfiguration.ERROR_ON_CIRCULAR_INCLUDE_ALL.getCurrentValue()) {
+                if (Boolean.TRUE.equals(ChangeLogParserConfiguration.ERROR_ON_CIRCULAR_INCLUDE_ALL.getCurrentValue())) {
                     if (seenChangelogPaths.contains(path)) {
                         throw new SetupException("Circular reference detected in '" + path + "'. Set " + ChangeLogParserConfiguration.ERROR_ON_CIRCULAR_INCLUDE_ALL.getKey() + " if you'd like to ignore this error.");
                     }
@@ -739,17 +758,27 @@ public class DatabaseChangeLog implements Comparable<DatabaseChangeLog>, Conditi
                 throw new SetupException(
                         "Could not find directory or directory was empty for includeAll '" + pathName + "'");
             }
-
-            Scope.child(Collections.singletonMap(SEEN_CHANGELOGS_PATHS_SCOPE_KEY, seenChangelogPaths), () -> {
-                for (Resource resource : resources) {
-                    Scope.getCurrentScope().getLog(getClass()).info("Reading resource: " + resource);
-                    include(resource.getPath(), false, errorIfMissingOrEmpty, resourceAccessor, includeContextFilter,
-                            labels, ignore, OnUnknownFileFormat.WARN, modifyChangeSets);
-                }
-            });
-        } catch (Exception e) {
+            return resources;
+        } catch (IOException e) {
             throw new SetupException(e);
         }
+    }
+
+    private String fixPath(String pathName, ResourceAccessor resourceAccessor, String relativeTo) throws IOException {
+        String path;
+        if (relativeTo == null) {
+            path = pathName;
+        } else {
+            path = resourceAccessor.get(relativeTo).resolveSibling(pathName).getPath();
+            path = Paths.get(path).normalize().toString()
+                    .replace("\\", "/");
+        }
+
+        path = path.replace("\\", "/");
+        if (StringUtil.isNotEmpty(path) && !(path.endsWith("/"))) {
+            path = path + '/';
+        }
+        return path;
     }
 
     /**
