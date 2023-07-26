@@ -173,8 +173,7 @@ jobs:
         uses: actions/cache@v3.3.1
         with:
           key: built-code-${{ github.run_number }}-${{ github.run_attempt }}
-          path: |
-            ./**/target
+          path: ./**/target
 
       - name: Set up JDK ${{ matrix.java }}
         uses: actions/setup-java@v3
@@ -332,15 +331,15 @@ jobs:
           ref: ${{ github.event.pull_request.head.sha || github.event.after}}
       # this includes all the tar files included in the previous runs. So in the next step we deploy what was previously build
       # do not cache the keys for the next run
-#      - name: Built Code Cache
-#        uses: actions/cache@v3.3.1
-#        with:
-#          key: built-code-${{ github.run_number }}-${{ github.run_attempt }}
-#          path: |
-#            ./**/target
-#            !./**/target/keys/*
+      #- name: Built Code Cache
+       # uses: actions/cache@v3.3.1
+        #with:
+        #  key: built-code-${{ github.run_number }}-${{ github.run_attempt }}
+         # path: |
+         #   ./**/target
+         #   !./**/target/keys/*
 
-#     restore doesn't have a post step to save the cache
+     # restore doesn't have a post step to save the cache
       - name: Restore Built Code Cache
         uses: actions/cache/restore@v3
         with:
@@ -495,9 +494,6 @@ jobs:
           cp liquibase-extension-testing/target/liquibase-extension-testing-0-SNAPSHOT.jar artifacts-named/liquibase-extension-testing-${{ needs.setup.outputs.thisBranchFileName }}.jar
           cp liquibase-extension-testing/target/liquibase-extension-testing-0-SNAPSHOT-deps.jar artifacts-named/liquibase-extension-testing-${{ needs.setup.outputs.thisBranchFileName }}-deps.jar
           cp $commercialJarM2Location artifacts-named/liquibase-commercial-${{ needs.setup.outputs.thisBranchFileName }}.jar
-
-
-      - name : Delete cache for keys
 
       - name: Archive Packages
         uses: actions/upload-artifact@v3
