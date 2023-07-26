@@ -1,5 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
 	<modelVersion>4.0.0</modelVersion>
 	<parent>
 		<groupId>org.liquibase</groupId>
@@ -7,13 +9,30 @@
 		<version>0-SNAPSHOT</version>
 	</parent>
 	<artifactId>liquibase-dist</artifactId>
-	<packaging>jar</packaging>
+	<packaging>pom</packaging>
 
-    <description>Liquibase is a tool for managing and executing database changes.</description>
+	<description>Liquibase is a tool for managing and executing database changes.</description>
+
+	<repositories>
+		<repository>
+			<id>github</id>
+			<url>https://liquibot:${env.GITHUB_TOKEN}@maven.pkg.github.com/liquibase/liquibase</url>
+			<snapshots>
+				<enabled>true</enabled>
+			</snapshots>
+		</repository>
+		<repository>
+			<id>liquibase-pro</id>
+			<url>https://liquibot:${env.GITHUB_TOKEN}@maven.pkg.github.com/liquibase/liquibase-pro</url>
+			<snapshots>
+				<enabled>true</enabled>
+			</snapshots>
+		</repository>
+	</repositories>
 
 	<properties>
 		<deploy.repositoryId>github</deploy.repositoryId>
-		<deploy.url>https://maven.pkg.github.com/liquibase/liquibase</deploy.url>
+		<deploy.url>https://liquibot:${env.GITHUB_TOKEN}@maven.pkg.github.com/liquibase/liquibase</deploy.url>
 		<h2.version>2.1.214</h2.version>
 		<hsqldb.version>2.7.2</hsqldb.version>
 		<postgresql.version>42.6.0</postgresql.version>
@@ -24,18 +43,19 @@
 		<sqlite.version>3.42.0.0</sqlite.version>
 		<db2.version>11.5.8.0</db2.version>
 		<firebird.version>5.0.2.java8</firebird.version>
-
+		<liquibase-pro.version>master-SNAPSHOT</liquibase-pro.version>
 		<assemblyConfigFile>src/main/assembly/assembly-bin.xml</assemblyConfigFile>
 		<maven.deploy.skip>true</maven.deploy.skip>
 		<maven.install.skip>true</maven.install.skip>
+		<artifact.version>${project.version}</artifact.version>
 		<maven.antrun.version>3.1.0</maven.antrun.version>
 		<org.vafer.jdeb.version>1.10</org.vafer.jdeb.version>
 	</properties>
 	<dependencies>
 		<dependency>
-            <groupId>${project.groupId}</groupId>
+			<groupId>${project.groupId}</groupId>
 			<artifactId>liquibase-core</artifactId>
-            <version>${project.version}</version>
+			<version>${project.version}</version>
 		</dependency>
 
 		<dependency>
@@ -62,29 +82,29 @@
 			<groupId>com.h2database</groupId>
 			<artifactId>h2</artifactId>
 			<version>${h2.version}</version>
-            <optional>true</optional>
+			<optional>true</optional>
 		</dependency>
 
 		<dependency>
-            <groupId>org.hsqldb</groupId>
-            <artifactId>hsqldb</artifactId>
-            <version>${hsqldb.version}</version>
-            <optional>true</optional>
+			<groupId>org.hsqldb</groupId>
+			<artifactId>hsqldb</artifactId>
+			<version>${hsqldb.version}</version>
+			<optional>true</optional>
 		</dependency>
 
 
 		<dependency>
-            <groupId>org.postgresql</groupId>
-            <artifactId>postgresql</artifactId>
-            <version>${postgresql.version}</version>
-            <optional>true</optional>
+			<groupId>org.postgresql</groupId>
+			<artifactId>postgresql</artifactId>
+			<version>${postgresql.version}</version>
+			<optional>true</optional>
 		</dependency>
 
 		<dependency>
-            <groupId>com.microsoft.sqlserver</groupId>
-            <artifactId>mssql-jdbc</artifactId>
-            <version>${mssql.version}</version>
-            <optional>true</optional>
+			<groupId>com.microsoft.sqlserver</groupId>
+			<artifactId>mssql-jdbc</artifactId>
+			<version>${mssql.version}</version>
+			<optional>true</optional>
 		</dependency>
 
         <dependency>
@@ -93,18 +113,18 @@
             <version>3.13.32</version>
         </dependency>
 
-        <!--        CANNOT INCLUDE MYSQL FOR LICENSING REASONS -->
-<!--        <dependency>-->
-<!--            <groupId>mysql</groupId>-->
-<!--            <artifactId>mysql-connector-java</artifactId>-->
-<!--            <version>${mysql.version}</version>-->
-<!--        </dependency>-->
+		<!--        CANNOT INCLUDE MYSQL FOR LICENSING REASONS -->
+		<!--        <dependency>-->
+		<!--            <groupId>mysql</groupId>-->
+		<!--            <artifactId>mysql-connector-java</artifactId>-->
+		<!--            <version>${mysql.version}</version>-->
+		<!--        </dependency>-->
 
 		<dependency>
-            <groupId>org.mariadb.jdbc</groupId>
-            <artifactId>mariadb-java-client</artifactId>
-            <version>${mariadb.version}</version>
-            <optional>true</optional>
+			<groupId>org.mariadb.jdbc</groupId>
+			<artifactId>mariadb-java-client</artifactId>
+			<version>${mariadb.version}</version>
+			<optional>true</optional>
 			<exclusions>
 				<exclusion>
 					<groupId>com.github.waffle</groupId>
@@ -114,114 +134,180 @@
 		</dependency>
 
 		<dependency>
-            <groupId>com.oracle.database.jdbc</groupId>
-            <artifactId>ojdbc8</artifactId>
-            <version>${oracle.version}</version>
-            <optional>true</optional>
+			<groupId>com.oracle.database.jdbc</groupId>
+			<artifactId>ojdbc8</artifactId>
+			<version>${oracle.version}</version>
+			<optional>true</optional>
 		</dependency>
 
 		<dependency>
-            <groupId>org.xerial</groupId>
-            <artifactId>sqlite-jdbc</artifactId>
-            <version>${sqlite.version}</version>
-            <optional>true</optional>
+			<groupId>org.xerial</groupId>
+			<artifactId>sqlite-jdbc</artifactId>
+			<version>${sqlite.version}</version>
+			<optional>true</optional>
 		</dependency>
 
 		<dependency>
-            <groupId>com.ibm.db2</groupId>
-            <artifactId>jcc</artifactId>
-            <version>${db2.version}</version>
-            <optional>true</optional>
+			<groupId>com.ibm.db2</groupId>
+			<artifactId>jcc</artifactId>
+			<version>${db2.version}</version>
+			<optional>true</optional>
 		</dependency>
 
 		<dependency>
-            <groupId>org.firebirdsql.jdbc</groupId>
-            <artifactId>jaybird</artifactId>
-            <version>${firebird.version}</version>
-            <optional>true</optional>
+			<groupId>org.firebirdsql.jdbc</groupId>
+			<artifactId>jaybird</artifactId>
+			<version>${firebird.version}</version>
+			<optional>true</optional>
 		</dependency>
 
-
-
-    <!-- needed for inclusion in CLI when running in newer java versions -->
 		<dependency>
-            <groupId>javax.xml.bind</groupId>
-            <artifactId>jaxb-api</artifactId>
-            <version>2.3.1</version>
+			<groupId>org.yaml</groupId>
+			<artifactId>snakeyaml</artifactId>
+			<version>2.0</version>
+		</dependency>
+
+		<!-- needed for inclusion in CLI when running in newer java versions -->
+		<dependency>
+			<groupId>javax.xml.bind</groupId>
+			<artifactId>jaxb-api</artifactId>
+			<version>2.3.1</version>
 		</dependency>
 		<dependency>
-            <groupId>org.glassfish.jaxb</groupId>
-            <artifactId>jaxb-core</artifactId>
-            <version>4.0.3</version>
-            <optional>true</optional>
+			<groupId>org.glassfish.jaxb</groupId>
+			<artifactId>jaxb-core</artifactId>
+			<version>4.0.3</version>
+			<optional>true</optional>
 		</dependency>
 		<dependency>
-            <groupId>org.glassfish.jaxb</groupId>
-            <artifactId>jaxb-runtime</artifactId>
-            <version>4.0.3</version>
-            <optional>true</optional>
+			<groupId>org.glassfish.jaxb</groupId>
+			<artifactId>jaxb-runtime</artifactId>
+			<version>4.0.3</version>
+			<optional>true</optional>
 		</dependency>
 	</dependencies>
 
 	<build>
-		<resources>
-			<resource>
-				<directory>${project.basedir}/src/main/archive</directory>
-				<targetPath>${project.build.directory}/archive</targetPath>
-				<filtering>true</filtering>
-			</resource>
-		</resources>
-
 		<plugins>
+
+			<plugin>
+				<artifactId>maven-resources-plugin</artifactId>
+				<version>3.3.1</version>
+				<executions>
+					<execution>
+						<id>copy-resources</id>
+						<goals>
+							<goal>copy-resources</goal>
+						</goals>
+						<phase>process-resources</phase>
+
+						<configuration>
+							<resources>
+								<resource>
+									<directory>${project.basedir}/src/main/archive</directory>
+									<filtering>true</filtering>
+								</resource>
+							</resources>
+							<outputDirectory>${project.build.directory}/archive</outputDirectory>
+						</configuration>
+
+					</execution>
+				</executions>
+			</plugin>
+
+
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-jar-plugin</artifactId>
 				<version>3.3.0</version>
 				<executions>
-				  <execution>
-					<id>default-jar</id>
-					<phase/>
-				  </execution>
+					<execution>
+						<id>default-jar</id>
+						<phase />
+					</execution>
 				</executions>
 			</plugin>
-		    <plugin>
-                <groupId>org.liquibase.ext</groupId>
-                <artifactId>liquibase-sdk-maven-plugin</artifactId>
-                <version>0.10.18</version>
-            </plugin>
-
 			<plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-source-plugin</artifactId>
-                <version>3.3.0</version>
-				<configuration>
-					<!-- sources.jar from this module is the shaded sources of others -->
-                    <skipSource>true</skipSource>
-				</configuration>
+				<groupId>org.liquibase.ext</groupId>
+				<artifactId>liquibase-sdk-maven-plugin</artifactId>
+				<version>0.10.18</version>
 			</plugin>
 
 			<plugin>
-                <artifactId>maven-assembly-plugin</artifactId>
-                <version>3.6.0</version>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-source-plugin</artifactId>
+				<version>3.3.0</version>
 				<configuration>
-                    <tarLongFileMode>posix</tarLongFileMode>
-                    <finalName>liquibase-${project.version}</finalName>
-                    <appendAssemblyId>false</appendAssemblyId>
-                    <attach>false</attach>
+					<!-- sources.jar from this module is the shaded sources of others -->
+					<skipSource>true</skipSource>
+				</configuration>
+			</plugin>
+			<!-- this builds and attaches the tar file of liquibase (which has liquibase cli) -->
+			<plugin>
+				<artifactId>maven-assembly-plugin</artifactId>
+				<version>3.6.0</version>
+				<configuration>
+					<tarLongFileMode>posix</tarLongFileMode>
+					<finalName>liquibase-${project.version}</finalName>
+					<appendAssemblyId>false</appendAssemblyId>
+					<attach>true</attach>
 					<descriptors>
-                        <descriptor>${assemblyConfigFile}</descriptor>
+						<descriptor>${assemblyConfigFile}</descriptor>
 					</descriptors>
 				</configuration>
 				<executions>
 					<execution>
-                        <id>make-assembly</id>
-                        <phase>package</phase>
+						<id>make-assembly</id>
+						<phase>package</phase>
 						<goals>
-                            <goal>single</goal>
+							<goal>single</goal>
 						</goals>
 					</execution>
 				</executions>
 			</plugin>
+			<plugin>
+				<artifactId>maven-install-plugin</artifactId>
+				<version>3.1.1</version>
+				<configuration>
+					<groupId>${project.groupId}</groupId>
+					<version>${artifact.version}</version>
+					<packaging>tar.gz</packaging>
+					<file>${project.build.directory}/liquibase-${project.version}.tar.gz</file>
+					<artifactId>liquibase</artifactId>
+				</configuration>
+				<executions>
+					<execution>
+						<id>install-file</id>
+						<phase>install</phase>
+						<goals>
+							<goal>install-file</goal>
+						</goals>
+					</execution>
+				</executions>
+			</plugin>
+			<plugin>
+				<artifactId>maven-deploy-plugin</artifactId>
+				<version>3.1.1</version>
+				<configuration>
+					<groupId>${project.groupId}</groupId>
+					<version>${artifact.version}</version>
+					<packaging>tar.gz</packaging>
+					<file>${project.build.directory}/liquibase-${project.version}.tar.gz</file>
+					<artifactId>liquibase</artifactId>
+					<repositoryId>${deploy.repositoryId}</repositoryId>
+					<url>${deploy.url}</url>
+				</configuration>
+				<executions>
+					<execution>
+						<id>deploy-file</id>
+						<phase>deploy</phase>
+						<goals>
+							<goal>deploy-file</goal>
+						</goals>
+					</execution>
+				</executions>
+			</plugin>
+
 
 <!--            <plugin>-->
 <!--                <groupId>org.jacoco</groupId>-->
@@ -241,8 +327,7 @@
 <!--                        <phase>none</phase>-->
 <!--                    </execution>-->
 <!--                </executions>-->
-<!--            </plugin>-->
-			<plugin>
+<!--            </plugin>-->			<plugin>
 				<groupId>org.codehaus.mojo</groupId>
 				<artifactId>build-helper-maven-plugin</artifactId>
 				<version>3.4.0</version>
@@ -319,17 +404,16 @@
 					</dataSet>
 				</configuration>
 			</plugin>
-
 		</plugins>
 	</build>
 
 	<profiles>
 		<profile>
-            <id>liquibase-commercial</id>
+			<id>liquibase-commercial</id>
 
 			<activation>
 				<file>
-                    <exists>../../liquibase-pro/pom.xml</exists>
+					<exists>../../liquibase-pro/pom.xml</exists>
 				</file>
 			</activation>
 
@@ -339,9 +423,9 @@
 
 			<dependencies>
 				<dependency>
-                    <groupId>org.liquibase</groupId>
-                    <artifactId>liquibase-commercial</artifactId>
-                    <version>${project.version}</version>
+					<groupId>org.liquibase</groupId>
+					<artifactId>liquibase-commercial</artifactId>
+					<version>${liquibase-pro.version}</version>
 				</dependency>
 			</dependencies>
 		</profile>
