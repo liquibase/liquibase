@@ -1,8 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
-
+ 
     <!-- Cannot use "liquibase" as the name since "Liquibase" is used by liquibase-core -->
     <name>Liquibase Parent</name>
     <groupId>org.liquibase</groupId>
@@ -52,6 +53,23 @@
         <developerConnection>scm:git:git@github.com:liquibase/liquibase.git</developerConnection>
     </scm>
 
+    <repositories>
+        <repository>
+            <id>github</id>
+            <url>https://liquibot:${env.GITHUB_TOKEN}@maven.pkg.github.com/liquibase/liquibase</url>
+            <snapshots>
+                <enabled>true</enabled>
+            </snapshots>
+        </repository>
+        <repository>
+            <id>liquibase-pro</id>
+            <url>https://liquibot:${env.GITHUB_TOKEN}@maven.pkg.github.com/liquibase/liquibase-pro</url>
+            <snapshots>
+                <enabled>true</enabled>
+            </snapshots>
+        </repository>
+    </repositories>
+
     <properties>
         <maven.compiler.source>1.8</maven.compiler.source>
         <maven.compiler.target>1.8</maven.compiler.target>
@@ -72,6 +90,7 @@
         <dependency.spock.version>1.3-groovy-2.4</dependency.spock.version>
         <junit.version>4.13.2</junit.version>
         <trimStackTrace>false</trimStackTrace>
+        <liquibase-pro.version>0-SNAPSHOT</liquibase-pro.version>
         <argLine></argLine>
     </properties>
 
@@ -79,7 +98,7 @@
         <repository>
             <id>github</id>
             <name>GitHub Packages</name>
-            <url>https://maven.pkg.github.com/liquibase/liquibase</url>
+            <url>https://liquibot:${env.GITHUB_TOKEN}@maven.pkg.github.com/liquibase/liquibase</url>
         </repository>
     </distributionManagement>
 
@@ -87,8 +106,8 @@
         <module>liquibase-core</module>
         <module>liquibase-standard</module>
         <module>liquibase-cli</module>
-	<module>liquibase-maven-plugin</module>
-	<module>liquibase-cdi-jakarta</module>
+        <module>liquibase-maven-plugin</module>
+        <module>liquibase-cdi-jakarta</module>
         <module>liquibase-cdi</module>
         <module>liquibase-integration-tests</module>
         <module>liquibase-dist</module>
@@ -154,7 +173,8 @@
             <version>3.3.0</version>
             <scope>test</scope>
         </dependency>
-        <dependency> <!-- enables mocking of classes without default constructor (together with CGLIB) -->
+        <dependency> <!-- enables mocking of classes without default constructor (together with
+            CGLIB) -->
             <groupId>org.objenesis</groupId>
             <artifactId>objenesis</artifactId>
             <version>3.3</version>
@@ -281,7 +301,8 @@
                             <rules>
                                 <requireMavenVersion>
                                     <version>${maven.enforcer.requireMavenVersion}</version>
-                                    <message>This POM requires Maven ${maven.enforcer.requireMavenVersion}.</message>
+                                    <message>This POM requires Maven
+                                        ${maven.enforcer.requireMavenVersion}.</message>
                                 </requireMavenVersion>
                             </rules>
                         </configuration>
