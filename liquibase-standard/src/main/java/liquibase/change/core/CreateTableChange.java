@@ -319,6 +319,7 @@ public class CreateTableChange extends AbstractChange implements ChangeWithColum
         this.tableType = tableType;
     }
 
+    @DatabaseChangeProperty(description = "If true, creates the table only if it does not already exist. Appends IF NOT EXISTS syntax to SQL query")
     public Boolean getIfNotExists() {
         return ifNotExists;
     }
