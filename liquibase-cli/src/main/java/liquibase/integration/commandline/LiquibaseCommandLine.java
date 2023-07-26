@@ -44,7 +44,6 @@ import java.time.Duration;
 import java.util.*;
 import java.util.jar.JarFile;
 import java.util.jar.Manifest;
-import java.util.logging.Formatter;
 import java.util.logging.*;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
