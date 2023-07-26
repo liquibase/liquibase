@@ -154,7 +154,7 @@ public class Liquibase implements AutoCloseable {
     /**
      * Convenience method for {@link #update(Contexts)} that runs in "no context mode".
      *
-     * @see <a href="https://docs.liquibase.com/concepts/advanced/contexts.html" target="_top">contexts</a> in documentation
+     * @see <a href="https://docs.liquibase.com/concepts/changelogs/attributes/contexts.html" target="_top">contexts</a> in documentation
      */
     @Deprecated
     public void update() throws LiquibaseException {
@@ -165,7 +165,7 @@ public class Liquibase implements AutoCloseable {
      * Convenience method for {@link #update(Contexts)} that constructs the Context object from the passed string.
      * To run in "no context mode", pass a null or empty "".
      *
-     * @see <a href="https://docs.liquibase.com/concepts/advanced/contexts.html" target="_top">contexts</a> in documentation
+     * @see <a href="https://docs.liquibase.com/concepts/changelogs/attributes/contexts.html" target="_top">contexts</a> in documentation
      */
     @Deprecated
     public void update(String contexts) throws LiquibaseException {
@@ -176,7 +176,7 @@ public class Liquibase implements AutoCloseable {
      * Executes Liquibase "update" logic which ensures that the configured {@link Database} is up to date according to
      * the configured changelog file. To run in "no context mode", pass a null or empty context object.
      *
-     * @see <a href="https://docs.liquibase.com/concepts/advanced/contexts.html" target="_top">contexts</a> in documentation
+     * @see <a href="https://docs.liquibase.com/concepts/changelogs/attributes/contexts.html" target="_top">contexts</a> in documentation
      */
     @Deprecated
     public void update(Contexts contexts) throws LiquibaseException {

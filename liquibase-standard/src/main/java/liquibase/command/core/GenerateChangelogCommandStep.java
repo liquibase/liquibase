@@ -28,7 +28,7 @@ public class GenerateChangelogCommandStep extends AbstractCommandStep {
 
     private static final String INFO_MESSAGE =
             "BEST PRACTICE: When generating formatted SQL changelogs, always check if the 'splitStatements' attribute" + System.lineSeparator() +
-            "works for your environment. See https://docs.liquibase.com/commands/generatechangelog.html for more information. ";
+            "works for your environment. See https://docs.liquibase.com/commands/inspection/generate-changelog.html for more information. ";
 
     public static final CommandArgumentDefinition<String> AUTHOR_ARG;
     public static final CommandArgumentDefinition<String> CONTEXT_ARG;

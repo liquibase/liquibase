@@ -113,4 +113,13 @@ public class UpdateCountCommandStep extends AbstractUpdateCommandStep {
     protected void customMdcLogging(CommandScope commandScope) {
         Scope.getCurrentScope().addMdcValue(MdcKey.UPDATE_COUNT, String.valueOf(commandScope.getArgumentValue(COUNT_ARG)));
     }
+
+    @Override
+    public void postUpdateLog(int rowsAffected) {
+        if (rowsAffected > -1) {
+            Scope.getCurrentScope().getUI().sendMessage(String.format(coreBundle.getString("update.count.successful.with.row.count"), rowsAffected));
+        } else {
+            Scope.getCurrentScope().getUI().sendMessage(coreBundle.getString("update.count.successful"));
+        }
+    }
 }

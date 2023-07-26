@@ -12,7 +12,7 @@ import java.util.*;
  * migration run. Any string can be used for the context name and they are checked case-insensitively.
  * </p>
  *
- * @see <a href="https://docs.liquibase.com/concepts/advanced/contexts.html" target="_top">contexts</a> in documentation
+ * @see <a href="https://docs.liquibase.com/concepts/changelogs/attributes/contexts.html" target="_top">contexts</a> in documentation
  */
 public class Contexts {
 

@@ -386,4 +386,18 @@ Optional Args:
                 'EVENT: ran fired',
         ]
     }
+
+    run "Should fall back to jdbc executor when runWith is an empty string", {
+        arguments = [
+                url                    : { it.url },
+                username               : { it.username },
+                password               : { it.password },
+                changelogFile          : 'changelogs/h2/complete/empty.runWith.changelog.xml',
+        ]
+
+        expectedResults = [
+                statusCode: 0,
+                defaultChangeExecListener: 'not_null'
+        ]
+    }
 }

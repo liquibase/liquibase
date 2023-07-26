@@ -146,4 +146,13 @@ public class UpdateToTagCommandStep extends AbstractUpdateCommandStep {
     protected void customMdcLogging(CommandScope commandScope) {
         Scope.getCurrentScope().addMdcValue(MdcKey.UPDATE_TO_TAG, commandScope.getArgumentValue(TAG_ARG));
     }
+
+    @Override
+    public void postUpdateLog(int rowsAffected) {
+        if (rowsAffected > -1) {
+            Scope.getCurrentScope().getUI().sendMessage(String.format(coreBundle.getString("update.to.tag.successful.with.row.count"), rowsAffected));
+        } else {
+            Scope.getCurrentScope().getUI().sendMessage(coreBundle.getString("update.to.tag.successful"));
+        }
+    }
 }

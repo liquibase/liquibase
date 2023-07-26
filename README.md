@@ -31,7 +31,7 @@ Liquibase system requirements can be found on the [Download Liquibase](https://w
 6. Run the `liquibase update` command.
 7. Run the `liquibase history` command to see what has executed!
 
-See also how to [get started with Liquibase in minutes](https://www.liquibase.org/get-started/quickstart) or refer to our [Installing Liquibase](https://docs.liquibase.com/install/home.html) documentation page for more details.
+See also how to [get started with Liquibase in minutes](https://www.liquibase.org/get-started/quickstart) or refer to our [Installing Liquibase](https://docs.liquibase.com/start/install/home.html) documentation page for more details.
 
 ## Documentation
 

@@ -27,6 +27,7 @@ import java.io.IOException;
 import java.io.OutputStream;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.atomic.AtomicInteger;
 
 import static liquibase.Liquibase.MSG_COULD_NOT_RELEASE_LOCK;
 
@@ -77,9 +78,11 @@ public abstract class AbstractUpdateCommandStep extends AbstractCommandStep impl
             StatusVisitor statusVisitor = getStatusVisitor(commandScope, database, contexts, labelExpression, databaseChangeLog);
 
             ChangeLogIterator runChangeLogIterator = getStandardChangelogIterator(commandScope, database, contexts, labelExpression, databaseChangeLog);
+            AtomicInteger rowsAffected = new AtomicInteger(0);
 
             HashMap<String, Object> scopeValues = new HashMap<>();
             scopeValues.put("showSummary", getShowSummary(commandScope));
+            scopeValues.put("rowsAffected", rowsAffected);
             Scope.child(scopeValues, () -> {
                 runChangeLogIterator.run(new UpdateVisitor(database, changeExecListener, new ShouldRunChangeSetFilter(database)),
                         new RuntimeEnvironment(database, contexts, labelExpression));
@@ -88,8 +91,9 @@ public abstract class AbstractUpdateCommandStep extends AbstractCommandStep impl
 
             resultsBuilder.addResult("statusCode", 0);
             addChangelogFileToMdc(getChangelogFileArg(commandScope), databaseChangeLog);
+            Scope.getCurrentScope().addMdcValue(MdcKey.ROWS_AFFECTED, String.valueOf(rowsAffected.get()));
             logDeploymentOutcomeMdc(changeExecListener, true);
-            postUpdateLog();
+            postUpdateLog(rowsAffected.get());
         } catch (Exception e) {
             DatabaseChangeLog databaseChangeLog = (DatabaseChangeLog) commandScope.getDependency(DatabaseChangeLog.class);
             addChangelogFileToMdc(getChangelogFileArg(commandScope), databaseChangeLog);
@@ -274,7 +278,7 @@ public abstract class AbstractUpdateCommandStep extends AbstractCommandStep impl
      * Log
      */
     @Beta
-    public void postUpdateLog() {
+    public void postUpdateLog(int rowsAffected) {
 
     }
 
