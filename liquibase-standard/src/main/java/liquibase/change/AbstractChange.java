@@ -40,6 +40,9 @@ import static liquibase.statement.SqlStatement.EMPTY_SQL_STATEMENT;
  */
 public abstract class AbstractChange extends AbstractPlugin implements Change {
 
+    /*
+    test
+     */
     protected static final String NODENAME_COLUMN = "column";
 
     private ChangeSet changeSet;
