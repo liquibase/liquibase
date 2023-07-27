@@ -1,6 +1,7 @@
 package liquibase.parser.core.formattedsql
 
-
+import liquibase.Contexts
+import liquibase.LabelExpression
 import liquibase.change.core.EmptyChange
 import liquibase.change.core.RawSQLChange
 import liquibase.changelog.ChangeLogParameters
@@ -913,6 +914,124 @@ create table table1 (
         changeLog.getChangeSets().get(0).getId() == "12345"
         changeLog.getChangeSets().get(0).getRollback().getChanges().size() == 1
         ((RawSQLChange) changeLog.getChangeSets().get(0).getRollback().getChanges().get(0)).getSql() == "delete from table1; drop table table1;"
+    }
+
+    def parse_propertyWithContext() throws Exception {
+        given: "a changelog with property and context"
+        String changeLogWithGlobalContext =
+                "-- liquibase formatted sql \n\n" +
+                        "-- property name:DEFAULT_VALUE value:0 context:some.context.value \n" +
+                        "-- changeset droy:12345 \n" +
+                        "create table test (id int default \${DEFAULT_VALUE}); \n"
+
+        ChangeLogParameters changeLogParameters = new ChangeLogParameters();
+        changeLogParameters.setContexts(new Contexts("some.context.value"))
+
+        when: "change log is parsed"
+        DatabaseChangeLog changeLog = new MockFormattedSqlChangeLogParser(changeLogWithGlobalContext).parse("asdf.sql", changeLogParameters, new JUnitResourceAccessor())
+
+        then: "change log parameters are created"
+        changeLog.getChangeLogParameters().hasValue("DEFAULT_VALUE", changeLog) == true
+        changeLog.getChangeLogParameters().getValue("DEFAULT_VALUE", changeLog) == "0"
+    }
+
+    def parse_multiplePropertyWithContext() throws Exception {
+        given: "a changelog with property and context"
+        String changeLogWithGlobalContext =
+            "-- liquibase formatted sql \n\n" +
+            "-- property name:DEFAULT_VALUE value:0 context:some.context.value \n" +
+            "-- property name:DEFAULT_VALUE value:1 context:\"!some.context.value AND !some.other.context.value\" \n" +
+            "-- changeset droy:12345 \n" +
+            "create table test (id int default \${DEFAULT_VALUE}); \n"
+
+        ChangeLogParameters changeLogParameters = new ChangeLogParameters();
+        changeLogParameters.setContexts(new Contexts("another.context.value"))
+
+        when: "change log is parsed"
+        DatabaseChangeLog changeLog = new MockFormattedSqlChangeLogParser(changeLogWithGlobalContext).parse("asdf.sql", changeLogParameters, new JUnitResourceAccessor())
+
+        then: "change log parameters are created"
+        changeLog.getChangeLogParameters().hasValue("DEFAULT_VALUE", changeLog) == true
+        changeLog.getChangeLogParameters().getValue("DEFAULT_VALUE", changeLog) == "1"
+    }
+
+    def parse_propertyWithLabels() throws Exception {
+        given: "a changelog with property and labels"
+        String changeLogWithGlobalContext =
+                "-- liquibase formatted sql \n\n" +
+                        "-- property name:DEFAULT_VALUE value:0 labels:\"some.label.value, some.other.label.value\" \n" +
+                        "-- changeset droy:12345 \n" +
+                        "create table test (id int default \${DEFAULT_VALUE}); \n";
+
+        ChangeLogParameters changeLogParameters = new ChangeLogParameters();
+        changeLogParameters.setLabels(new LabelExpression("some.label.value"));
+
+        when: "change log is parsed"
+        DatabaseChangeLog changeLog = new MockFormattedSqlChangeLogParser(changeLogWithGlobalContext).parse("asdf.sql", changeLogParameters, new JUnitResourceAccessor())
+
+        then: "change log parameters are created"
+        changeLog.getChangeLogParameters().hasValue("DEFAULT_VALUE", changeLog) == true
+        changeLog.getChangeLogParameters().getValue("DEFAULT_VALUE", changeLog) == "0"
+    }
+
+    def parse_multiplePropertyWithleLabels() throws Exception {
+        given: "a changelog with property and labels"
+        String changeLogWithGlobalContext =
+            "-- liquibase formatted sql \n\n" +
+            "-- property name:DEFAULT_VALUE value:0 labels:\"some.label.value, some.other.label.value\" \n" +
+            "-- property name:DEFAULT_VALUE value:1 labels:another.label.value \n" +
+            "-- changeset droy:12345 \n" +
+            "create table test (id int default \${DEFAULT_VALUE}); \n";
+
+        ChangeLogParameters changeLogParameters = new ChangeLogParameters();
+        changeLogParameters.setLabels(new LabelExpression("another.label.value"));
+
+        when: "change log is parsed"
+        DatabaseChangeLog changeLog = new MockFormattedSqlChangeLogParser(changeLogWithGlobalContext).parse("asdf.sql", changeLogParameters, new JUnitResourceAccessor())
+
+        then: "change log parameters are created"
+        changeLog.getChangeLogParameters().hasValue("DEFAULT_VALUE", changeLog) == true
+        changeLog.getChangeLogParameters().getValue("DEFAULT_VALUE", changeLog) == "1"
+    }
+
+    def parse_multiplePropertyWithContextAndLabels() throws Exception {
+        given: "a changelog with property, context and labels"
+        String changeLogWithGlobalContext =
+            "-- liquibase formatted sql \n\n" +
+            "-- property name:DEFAULT_VALUE value:0 context:some.context.value labels:some.label.value \n" +
+            "-- property name:DEFAULT_VALUE value:1 context:\"!some.context.value\" labels:\"some.other.label.value\" \n" +
+            "-- changeset droy:12345 \n" +
+            "create table test (id int default \${DEFAULT_VALUE}); \n"
+
+        ChangeLogParameters changeLogParameters = new ChangeLogParameters();
+        changeLogParameters.setContexts(new Contexts("another.context.value"))
+        changeLogParameters.setLabels(new LabelExpression("some.other.label.value"));
+
+        when: "change log is parsed"
+        DatabaseChangeLog changeLog = new MockFormattedSqlChangeLogParser(changeLogWithGlobalContext).parse("asdf.sql", changeLogParameters, new JUnitResourceAccessor())
+
+        then: "change log parameters are created"
+        changeLog.getChangeLogParameters().hasValue("DEFAULT_VALUE", changeLog) == true
+        changeLog.getChangeLogParameters().getValue("DEFAULT_VALUE", changeLog) == "1"
+    }
+
+    def parse_propertyWithDbms() throws Exception {
+        given: "a changelog with property and dbms"
+        String changeLogWithDbms =
+                "-- liquibase formatted sql \n\n" +
+                        "-- property name:DEFAULT_VALUE value:0 dbms:oracle,mssql \n" +
+                        "-- changeset droy:12345 \n" +
+                        "create table test (id int default \${DEFAULT_VALUE}); \n"
+
+        ChangeLogParameters changeLogParameters = new ChangeLogParameters();
+        changeLogParameters.setDatabase("mssql");
+
+        when: "change log is parsed"
+        DatabaseChangeLog changeLog = new MockFormattedSqlChangeLogParser(changeLogWithDbms).parse("asdf.sql", changeLogParameters, new JUnitResourceAccessor())
+
+        then: "change log parameters are created"
+        changeLog.getChangeLogParameters().hasValue("DEFAULT_VALUE", changeLog) == true
+        changeLog.getChangeLogParameters().getValue("DEFAULT_VALUE", changeLog) == "0"
     }
 
     @LiquibaseService(skip = true)
