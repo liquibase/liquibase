@@ -41,4 +41,3 @@ jobs:
           mvn -B clean deploy -pl '!liquibase-dist' -DskipTests=true "-Dbuild.branch=${{ github.ref_name }}" "-Dbuild.number=${{ github.run_number }}" "-Dbuild.commit=${{ github.sha }}" "-Dbuild.repository.owner=${{ github.repository_owner }}" "-Dbuild.repository.name=${{ github.repository }}"
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          LIQUIBOT_TOKEN: ${{ secrets.LIQUIBOT_PAT }}
