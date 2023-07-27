@@ -119,9 +119,6 @@ public abstract class AbstractFormattedChangeLogParser implements ChangeLogParse
     protected static final String LOGICAL_FILE_PATH_REGEX = ".*logicalFilePath:(\\S*).*";
     protected final Pattern LOGICAL_FILE_PATH_PATTERN = Pattern.compile(LOGICAL_FILE_PATH_REGEX, Pattern.CASE_INSENSITIVE);
 
-    protected static final String CHANGE_LOG_ID_REGEX = ".*changeLogId:(\\S*).*";
-    protected final Pattern CHANGE_LOG_ID_PATTERN = Pattern.compile(CHANGE_LOG_ID_REGEX, Pattern.CASE_INSENSITIVE);
-
     protected static final String LABELS_REGEX = ".*labels:(\".*?\"|\\S*).*";
     protected final Pattern LABELS_PATTERN = Pattern.compile(LABELS_REGEX, Pattern.CASE_INSENSITIVE);
 
