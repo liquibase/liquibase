@@ -7,6 +7,7 @@ concurrency:
 on:
   workflow_dispatch:
 
+  # DAT branches can get triggered from this logic
   pull_request_target:
     types:
       - opened
@@ -67,8 +68,6 @@ jobs:
             if (${{ github.run_attempt }} % 5 == 0) {
               core.setFailed("Fail every 5 run attempts to catch accidental infinite loops");
             }
-
-
       - uses: actions/checkout@v3
         with:
           ref: ${{ github.event.pull_request.head.sha || github.event.after}}
@@ -181,6 +180,9 @@ jobs:
           java-version: ${{ matrix.java }}
           distribution: 'temurin'
           cache: 'maven'
+
+      # getting from build results page. If we remove 0-snapshot then we will need settings.xml
+
       - name: Set up Maven
         uses: stCarolas/setup-maven@v4.5
         with:
@@ -198,7 +200,6 @@ jobs:
         if: env.OS_TYPE != 'windows-2019'
         run: |
           find . -name original-*.jar -exec rm {} \;
-
 
       - name: Archive Test Results
         if: ${{ always() }}
@@ -232,6 +233,9 @@ jobs:
           java-version: 11
           distribution: 'adopt'
           cache: 'maven'
+
+          # getting from build results page. If we remove 0-snapshot then we will need settings.xml
+
       - name: Set up Maven
         uses: stCarolas/setup-maven@v4.5
         with:
@@ -285,6 +289,9 @@ jobs:
           java-version: '8'
           distribution: 'temurin'
           cache: 'maven'
+
+      # getting from build results page. If we remove 0-snapshot then we will need settings.xml
+
       - name: Set up Maven
         uses: stCarolas/setup-maven@v4.5
         with:
@@ -321,7 +328,7 @@ jobs:
       - uses: actions/checkout@v3
         with:
           ref: ${{ github.event.pull_request.head.sha || github.event.after}}
-
+      # this includes all the tar files included in the previous runs. So in the next step we deploy what was previously build
       - name: Built Code Cache
         uses: actions/cache@v3.3.1
         with:
@@ -343,30 +350,57 @@ jobs:
           gpg-private-key: ${{ secrets.GPG_SECRET }}
           gpg-passphrase: GPG_PASSPHRASE
           cache: 'maven'
+          overwrite-settings: false
         env:
           GPG_PASSWORD: ${{ secrets.GPG_PASSPHRASE }}
+
+      # look for dependencies in maven
+      - name: maven-settings-xml-action
+        uses: whelk-io/maven-settings-xml-action@v20
+        with:
+          repositories: |
+            [
+              {
+                "id": "liquibase",
+                "url": "https://maven.pkg.github.com/liquibase/liquibase",
+                "releases": {
+                  "enabled": "false"
+                },
+                "snapshots": {
+                  "enabled": "true",
+                  "updatePolicy": "always"
+                }
+              },
+              {
+                "id": "liquibase-pro",
+                "url": "https://maven.pkg.github.com/liquibase/liquibase-pro",
+                "releases": {
+                  "enabled": "false"
+                },
+                "snapshots": {
+                  "enabled": "true",
+                  "updatePolicy": "always"
+                }
+              }
+            ]
+          servers: |
+            [
+              {
+                "id": "liquibase-pro",
+                "username": "liquibot",
+                "password": "${{ secrets.LIQUIBOT_PAT }}"
+              },
+              {
+                "id": "liquibase",
+                "username": "liquibot",
+                "password": "${{ secrets.LIQUIBOT_PAT }}"
+              }
+            ]
 
       - name: Set up Maven
         uses: stCarolas/setup-maven@v4.5
         with:
           maven-version: ${{ env.MAVEN_VERSION }}
-
-      - name: Download liquibase-commercial
-        uses: liquibase/action-download-artifact@v2-liquibase
-        with:
-          github_token: ${{ secrets.BOT_TOKEN }}
-          workflow: build.yml
-          workflow_conclusion: success
-          branch: "${{ needs.setup.outputs.proBranchName }}"
-          name: liquibase-commercial-modules
-          path: download/liquibase-commercial
-          repo: liquibase/liquibase-pro
-
-      - name: Install Built Modules
-        run: |
-          (find . -name *-SNAPSHOT.jar -exec mvn -B org.apache.maven.plugins:maven-install-plugin:3.0.0-M1:install-file -Dfile={} \;)
-          (find . -name *-SNAPSHOT-sources.jar -exec mvn -B org.apache.maven.plugins:maven-install-plugin:3.0.0-M1:install-file -Dclassifier=sources -Dfile={} \;)
-          mvn -B org.apache.maven.plugins:maven-install-plugin:3.0.0-M1:install-file -Dfile=download/liquibase-commercial/liquibase-commercial-0-SNAPSHOT.jar
 
       - name: Build & Sign Artifacts
         env:
@@ -378,6 +412,7 @@ jobs:
           INSTALL4J_WINDOWS_KEY: ${{ secrets.INSTALL4J_WINDOWS_KEY }}
           INSTALL4J_WINDOWS_KEY_PASSWORD: ${{ secrets.INSTALL4J_WINDOWS_KEY_PASSWORD }}
           GPG_PASSWORD: ${{ secrets.GPG_PASSPHRASE }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           ## save install4j code signing keys
           mkdir -p liquibase-dist/target/keys
@@ -386,28 +421,30 @@ jobs:
 
           echo "Saving windows key"
           echo "$INSTALL4J_WINDOWS_KEY" | base64 -d > liquibase-dist/target/keys/datical_windows.pfx
-          mvn -B -pl liquibase-dist -P liquibase-commercial source:jar package
+          # we are packaging and deploying liquibase tar which includes liquibase-commercial 
+          mvn versions:set -DnewVersion="${{ needs.setup.outputs.thisBranchName }}-SNAPSHOT"
+          mvn -B -pl liquibase-dist -P liquibase-commercial source:jar package -Dliquibase-pro.version="${{ needs.setup.outputs.proBranchName }}-SNAPSHOT"
 
           ## extract tar content for other artifacts
-          mkdir -p liquibase-dist/target/liquibase-0-SNAPSHOT
-          (cd liquibase-dist/target/liquibase-0-SNAPSHOT && tar xfz ../liquibase-0-SNAPSHOT.tar.gz)
-
+          mkdir -p liquibase-dist/target/liquibase-${{ needs.setup.outputs.thisBranchName }}-SNAPSHOT
+          (cd liquibase-dist/target/liquibase-${{ needs.setup.outputs.thisBranchName }}-SNAPSHOT && tar -xzf ../liquibase-${{ needs.setup.outputs.thisBranchName }}-SNAPSHOT.tar.gz)
+          
           ##create zip file from tar content
-          (cd liquibase-dist/target/liquibase-0-SNAPSHOT && zip -r ../liquibase-0-SNAPSHOT.zip *)
-
+          (cd liquibase-dist/target/liquibase-${{ needs.setup.outputs.thisBranchName }}-SNAPSHOT && zip -r ../liquibase-${{ needs.setup.outputs.thisBranchName }}-SNAPSHOT.zip *)
+          ls liquibase-dist/target/liquibase-${{ needs.setup.outputs.thisBranchName }}-SNAPSHOT
+          
           ##create installer - disabled here but run as nightly job and as part of release workflow
           # (cd liquibase-dist && ${{ github.workspace }}/.github/util/package-install4j.sh 0-SNAPSHOT)
 
           find . -name original-*.jar -exec rm {} \;
 
           mkdir -p artifacts
-          cp liquibase-dist/target/liquibase-0-SNAPSHOT.tar.gz artifacts
-          cp liquibase-dist/target/liquibase-0-SNAPSHOT.zip artifacts
-          
+          cp liquibase-dist/target/liquibase-${{ needs.setup.outputs.thisBranchName }}-SNAPSHOT.tar.gz artifacts
+          cp liquibase-dist/target/liquibase-${{ needs.setup.outputs.thisBranchName }}-SNAPSHOT.zip artifacts
           cp liquibase-core/target/liquibase-core-0-SNAPSHOT.jar artifacts/liquibase-core-0-SNAPSHOT.jar
           cp liquibase-core/target/liquibase-core-0-SNAPSHOT-sources.jar artifacts/liquibase-core-0-SNAPSHOT-sources.jar
           cp target/liquibase-0-SNAPSHOT-javadoc.jar artifacts/liquibase-core-0-SNAPSHOT-javadoc.jar
-          
+
           ##create installer - disabled here but run as nightly job and as part of release workflow
           #cp liquibase-dist/target/liquibase-*-installer-* artifacts
 
@@ -422,29 +459,30 @@ jobs:
           cp liquibase-cdi-jakarta/target/liquibase-cdi-jakarta-0-SNAPSHOT.jar artifacts
           cp liquibase-cdi-jakarta/target/liquibase-cdi-jakarta-0-SNAPSHOT-sources.jar artifacts
           cp liquibase-cdi-jakarta/target/liquibase-cdi-jakarta-0-SNAPSHOT-javadoc.jar artifacts
-          
+
           echo "Source code not available for liquibase-commercial" > /tmp/readme.source.txt
-          (cd /tmp && jar cf liquibase-commercial-0-SNAPSHOT-sources.jar readme.source.txt)
+          (cd /tmp && jar cf liquibase-commercial-${{ needs.setup.outputs.proBranchName }}-SNAPSHOT-sources.jar readme.source.txt)
 
           echo "Javadocs not available for liquibase-commercial" > /tmp/readme.javadocs.txt
-          (cd /tmp && jar cf liquibase-commercial-0-SNAPSHOT-javadoc.jar readme.javadocs.txt)
+          (cd /tmp && jar cf liquibase-commercial-${{ needs.setup.outputs.proBranchName }}-SNAPSHOT-javadoc.jar readme.javadocs.txt)
 
-          cp download/liquibase-commercial/liquibase-commercial-0-SNAPSHOT.jar artifacts
-          cp /tmp/liquibase-commercial-0-SNAPSHOT-sources.jar artifacts
-          cp /tmp/liquibase-commercial-0-SNAPSHOT-javadoc.jar artifacts
+          commercialJarM2Location=/Users/runner/.m2/repository/org/liquibase/liquibase-commercial/${{ needs.setup.outputs.proBranchName }}-SNAPSHOT/liquibase-commercial-${{ needs.setup.outputs.proBranchName }}-SNAPSHOT.jar
+          cp $commercialJarM2Location artifacts
+          cp /tmp/liquibase-commercial-${{ needs.setup.outputs.proBranchName }}-SNAPSHOT-sources.jar artifacts
+          cp /tmp/liquibase-commercial-${{ needs.setup.outputs.proBranchName }}-SNAPSHOT-javadoc.jar artifacts
 
           .github/util/sign-artifacts.sh artifacts
 
           ##prepare branch-named convenience artifacts directories
           mkdir artifacts-named
-          cp liquibase-dist/target/liquibase-0-SNAPSHOT.tar.gz artifacts-named/liquibase-${{ needs.setup.outputs.thisBranchFileName }}.tar.gz
+          cp liquibase-dist/target/liquibase-${{ needs.setup.outputs.thisBranchName }}-SNAPSHOT.tar.gz artifacts-named/liquibase-${{ needs.setup.outputs.thisBranchFileName }}.tar.gz
           cp liquibase-core/target/liquibase-core-0-SNAPSHOT.jar artifacts-named/liquibase-core-${{ needs.setup.outputs.thisBranchFileName }}.jar
           cp liquibase-maven-plugin/target/liquibase-maven-plugin-0-SNAPSHOT.jar artifacts-named/liquibase-maven-plugin-${{ needs.setup.outputs.thisBranchFileName }}.jar
           cp liquibase-cdi/target/liquibase-cdi-0-SNAPSHOT.jar artifacts-named/liquibase-cdi-${{ needs.setup.outputs.thisBranchFileName }}.jar
           cp liquibase-cdi-jakarta/target/liquibase-cdi-jakarta-0-SNAPSHOT.jar artifacts-named/liquibase-cdi-jakarta-${{ needs.setup.outputs.thisBranchFileName }}.jar
           cp liquibase-extension-testing/target/liquibase-extension-testing-0-SNAPSHOT.jar artifacts-named/liquibase-extension-testing-${{ needs.setup.outputs.thisBranchFileName }}.jar
           cp liquibase-extension-testing/target/liquibase-extension-testing-0-SNAPSHOT-deps.jar artifacts-named/liquibase-extension-testing-${{ needs.setup.outputs.thisBranchFileName }}-deps.jar
-          cp download/liquibase-commercial/liquibase-commercial-0-SNAPSHOT.jar artifacts-named/liquibase-commercial-${{ needs.setup.outputs.thisBranchFileName }}.jar
+          cp $commercialJarM2Location artifacts-named/liquibase-commercial-${{ needs.setup.outputs.thisBranchFileName }}.jar
 
       - name: Archive Packages
         uses: actions/upload-artifact@v3
@@ -456,7 +494,7 @@ jobs:
         uses: actions/upload-artifact@v3
         with:
           name: liquibase-zip-${{ needs.setup.outputs.thisBranchFileName }}
-          path: liquibase-dist/target/liquibase-0-SNAPSHOT/*
+          path: liquibase-dist/target/liquibase-${{ needs.setup.outputs.thisBranchName }}-SNAPSHOT/*
 
       - name: Archive Convenience Artifacts
         uses: actions/upload-artifact@v3
@@ -465,10 +503,18 @@ jobs:
           path: artifacts-named/*
 
 
+      # Publish to GitHub Packages. We are building a tar file which includes liquibase-commercial hence we need "-Dliquibase-pro.version"
+      - name: Publish tar.gz package to GPM
+        run: |
+          mvn -B -pl liquibase-dist -P liquibase-commercial clean deploy -DskipTests=true -Dliquibase-pro.version="${{ needs.setup.outputs.proBranchName }}-SNAPSHOT" -Dbuild.timestamp=${{ steps.date.outputs.date }}
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+# this triggers the pro-tests and test-harness to run
   finish:
     name: Finish Build
     runs-on: ubuntu-22.04
-    needs: [ setup, build, integration-test, package, sonar ]
+    needs: [ setup, build, integration-test, package, sonar]
     if: ${{ needs.setup.outputs.setupSuccessful }}
     steps:
       - uses: actions/checkout@v3
@@ -575,7 +621,7 @@ jobs:
                   })
                 }
               });
-            
+
               let testHarnessBranch = await helper.findMatchingBranch("liquibase", "liquibase-test-harness");
               if (testHarnessBranch.name == "main" || testHarnessBranch.name == "master") {
                 testHarnessBranch.name = "develop";

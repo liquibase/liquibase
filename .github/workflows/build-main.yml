@@ -72,6 +72,6 @@ jobs:
       # This would still deploy a package if there are test failures. Might help to have build.yml complete and then run this workflow
       # Publish to GitHub Packages
       - name: Publish package
-        run: mvn -B clean deploy -DskipTests=true
+        run: mvn -B clean deploy -DskipTests=true "-Dbuild.branch=${{ github.ref_name }}" "-Dbuild.number=${{ github.run_number }}" "-Dbuild.commit=${{ github.sha }}" "-Dbuild.repository.owner=${{ github.repository_owner }}" "-Dbuild.repository.name=${{ github.repository }}"
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
