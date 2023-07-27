@@ -94,7 +94,7 @@ public abstract class AbstractJdbcDatabase implements Database {
     private static final String NON_WORD_REGEX = ".*\\W.*";
     private static final Pattern NON_WORD_PATTERN = Pattern.compile(NON_WORD_REGEX);
 
-    private static final String CREATE_VIEW_AS_REGEX = "^CREATE\\s+.*?VIEW\\s+.*?AS\\s+";
+    private static final String CREATE_VIEW_AS_REGEX = "^CREATE\\s+.*?VIEW\\s+.*?\\s+AS(?:\\s+|(?:>\\()?)";
     private static final Pattern CREATE_VIEW_AS_PATTERN = Pattern.compile(CREATE_VIEW_AS_REGEX, Pattern.CASE_INSENSITIVE | Pattern.DOTALL);
 
     private static final String DATE_ONLY_REGEX = "^\\d{4}\\-\\d{2}\\-\\d{2}$";
