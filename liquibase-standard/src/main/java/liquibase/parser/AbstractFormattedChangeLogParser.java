@@ -16,11 +16,17 @@ import liquibase.util.StringUtil;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.ResourceBundle;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import static java.util.ResourceBundle.getBundle;
+
 @SuppressWarnings("java:S2583")
 public abstract class AbstractFormattedChangeLogParser implements ChangeLogParser {
+
+    private static final ResourceBundle coreBundle = getBundle("liquibase/i18n/liquibase-core");
+    private static final String EXCEPTION_MESSAGE = coreBundle.getString("formatted.changelog.exception.message");
 
     protected final String FIRST_LINE_REGEX = String.format("%s\\s*liquibase formatted.*", getSingleLineCommentSequence());
     protected final Pattern FIRST_LINE_PATTERN = Pattern.compile(FIRST_LINE_REGEX, Pattern.CASE_INSENSITIVE);
@@ -270,7 +276,7 @@ public abstract class AbstractFormattedChangeLogParser implements ChangeLogParse
                     handleProperty(changeLogParameters, changeLog, line);
                     continue;
                 } else if (altPropertyPatternMatcher.matches()) {
-                    String message = String.format("Unexpected formatting at line %d. Formatted %s changelogs require known formats, such as '--property name=<property name> value=<property value>' and others to be recognized and run. Learn all the options at %s", count, getSequenceName(), getDocumentationLink());
+                    String message = String.format(EXCEPTION_MESSAGE, count, getSequenceName(), "--property name=<property name> value=<property value>", getDocumentationLink());
                     throw new ChangeLogParseException("\n" + message);
                 }
                 Matcher changeLogPatterMatcher = FIRST_LINE_PATTERN.matcher(line);
@@ -292,7 +298,7 @@ public abstract class AbstractFormattedChangeLogParser implements ChangeLogParse
                                 }
                             } else if (altIgnoreLinesOneDashMatcher.matches()) {
                                 String message =
-                                        String.format("Unexpected formatting at line %d. Formatted %s changelogs require known formats, such as '--ignoreLines:end' and others to be recognized and run. Learn all the options at %s", count, getSequenceName(), getDocumentationLink());
+                                        String.format(EXCEPTION_MESSAGE, count, getSequenceName(), "--ignoreLines:end", getDocumentationLink());
                                 throw new ChangeLogParseException("\n" + message);
                             }
                         }
@@ -311,7 +317,7 @@ public abstract class AbstractFormattedChangeLogParser implements ChangeLogParse
                     }
                 } else if (altIgnoreLinesOneDashMatcher.matches() || altIgnoreMatcher.matches()) {
                     String message =
-                            String.format("Unexpected formatting at line %d. Formatted %s changelogs require known formats, such as '--ignoreLines:<count|start>' and others to be recognized and run. Learn all the options at %s", count, getSequenceName(), getDocumentationLink());
+                            String.format(EXCEPTION_MESSAGE, count, getSequenceName(), "--ignoreLines:<count|start>", getDocumentationLink());
                     throw new ChangeLogParseException("\n" + message);
                 }
 
@@ -409,7 +415,7 @@ public abstract class AbstractFormattedChangeLogParser implements ChangeLogParse
                     Matcher changeSetAuthorIdPatternMatcher = changeSetAuthorIdPattern.matcher(line);
                     if (!changeSetAuthorIdPatternMatcher.matches()) {
                         String message =
-                                String.format("Unexpected formatting at line %d. Formatted %s changelogs require known formats, such as '--changeset <authorname>:<changesetId>' and others to be recognized and run. Learn all the options at %s", count, getSequenceName(), getDocumentationLink());
+                                String.format(EXCEPTION_MESSAGE, count, getSequenceName(), "--changeset <authorname>:<changesetId>", getDocumentationLink());
                         throw new ChangeLogParseException("\n" + message);
                     }
 
@@ -435,7 +441,7 @@ public abstract class AbstractFormattedChangeLogParser implements ChangeLogParse
                     Matcher altChangeSetOneDashPatternMatcher = ALT_CHANGE_SET_ONE_CHARACTER_PATTERN.matcher(line);
                     Matcher altChangeSetNoOtherInfoPatternMatcher = ALT_CHANGE_SET_NO_OTHER_INFO_PATTERN.matcher(line);
                     if (altChangeSetOneDashPatternMatcher.matches() || altChangeSetNoOtherInfoPatternMatcher.matches()) {
-                        String message = String.format("Unexpected formatting at line %d. Formatted %s changelogs require known formats, such as '--changeset <authorname>:<changesetId>' and others to be recognized and run. Learn all the options at %s", count, getSequenceName(), getDocumentationLink());
+                        String message = String.format(EXCEPTION_MESSAGE, count, getSequenceName(), "--changeset <authorname>:<changesetId>", getDocumentationLink());
                         throw new ChangeLogParseException("\n" + message);
                     }
                     if (changeSet != null) {
@@ -482,33 +488,33 @@ public abstract class AbstractFormattedChangeLogParser implements ChangeLogParse
 
         if (commentMatcher.matches()) {
             if (commentMatcher.groupCount() == 0) {
-                String message = String.format("Unexpected formatting at line %d. Formatted %s changelogs require known formats, such as '--comment <comment>' and others to be recognized and run. Learn all the options at %s", count, getSequenceName(), getDocumentationLink());
+                String message = String.format(EXCEPTION_MESSAGE, count, getSequenceName(), "--comment <comment>", getDocumentationLink());
                 throw new ChangeLogParseException("\n" + message);
             }
             if (commentMatcher.groupCount() == 1) {
                 changeSet.setComments(commentMatcher.group(1));
             }
         } else if (altCommentOneDashMatcher.matches() || altCommentPluralMatcher.matches()) {
-            String message = String.format("Unexpected formatting at line %d. Formatted %s changelogs require known formats, such as '--comment <comment>' and others to be recognized and run. Learn all the options at %s", count, getSequenceName(), getDocumentationLink());
+            String message = String.format(EXCEPTION_MESSAGE, count, getSequenceName(), "--comment <comment>", getDocumentationLink());
             throw new ChangeLogParseException("\n" + message);
         } else if (validCheckSumMatcher.matches()) {
             if (validCheckSumMatcher.groupCount() == 0) {
-                String message = String.format("Unexpected formatting at line %d. Formatted %s changelogs require known formats, such as '--rollback <rollback %s>' and others to be recognized and run. Learn all the options at %s", count, getSequenceName(), getSequenceName(), getDocumentationLink());
+                String message = String.format(EXCEPTION_MESSAGE, count, getSequenceName(), String.format("--rollback <rollback %s>", getSequenceName()), getDocumentationLink());
                 throw new ChangeLogParseException("\n" + message);
             } else if (validCheckSumMatcher.groupCount() == 1) {
                 changeSet.addValidCheckSum(validCheckSumMatcher.group(1));
             }
         } else if (altValidCheckSumOneDashMatcher.matches()) {
-            String message = String.format("Unexpected formatting at line %d. Formatted %s changelogs require known formats, such as '--validChecksum <checksum>' and others to be recognized and run. Learn all the options at %s", count, getSequenceName(), getDocumentationLink());
+            String message = String.format(EXCEPTION_MESSAGE, count, getSequenceName(), "--validChecksum <checksum>", getDocumentationLink());
             throw new ChangeLogParseException("\n" + message);
         } else if (rollbackMatcher.matches()) {
             if (rollbackMatcher.groupCount() == 0) {
-                String message = String.format("Unexpected formatting at line %d. Formatted %s changelogs require known formats, such as '--rollback <rollback %s>' and others to be recognized and run. Learn all the options at %s", count, getSequenceName(), getSequenceName(), getDocumentationLink());
+                String message = String.format(EXCEPTION_MESSAGE, count, getSequenceName(), String.format("--rollback <rollback %s>", getSequenceName()), getDocumentationLink());
                 throw new ChangeLogParseException("\n" + message);
             }
             currentRollbackSequence.append(rollbackMatcher.group(1)).append(System.lineSeparator());
         } else if (altRollbackMatcher.matches()) {
-            String message = String.format("Unexpected formatting at line %d. Formatted %s changelogs require known formats, such as '--rollback <rollback %s>' and others to be recognized and run. Learn all the options at %s", count, getSequenceName(), getSequenceName(), getDocumentationLink());
+            String message = String.format(EXCEPTION_MESSAGE, count, getSequenceName(), String.format("--rollback <rollback %s>", getSequenceName()), getDocumentationLink());
             throw new ChangeLogParseException("\n" + message);
         } else if (rollbackMultiLineStartMatcher.matches()) {
             if (rollbackMultiLineStartMatcher.groupCount() == 0) {
@@ -517,13 +523,13 @@ public abstract class AbstractFormattedChangeLogParser implements ChangeLogParse
         } else if (preconditionsMatcher.matches()) {
             handlePreconditionsCase(changeSet, count, preconditionsMatcher);
         } else if (altPreconditionsOneDashMatcher.matches()) {
-            String message = String.format("Unexpected formatting at line %d. Formatted %s changelogs require known formats, such as '--preconditions <onFail>|<onError>|<onUpdate>' and others to be recognized and run. Learn all the options at %s", count, getSequenceName(), getDocumentationLink());
+            String message = String.format(EXCEPTION_MESSAGE, count, getSequenceName(), "--preconditions <onFail>|<onError>|<onUpdate>", getDocumentationLink());
             throw new ChangeLogParseException("\n" + message);
         } else if (preconditionMatcher.matches()) {
             handlePreconditionCase(changeLogParameters, changeSet, preconditionMatcher);
         } else if (altPreconditionOneDashMatcher.matches()) {
             String message =
-                    String.format("Unexpected formatting at line %d. Formatted %s changelogs require known formats, such as '--precondition-sql-check' and others to be recognized and run. Learn all the options at `%s`", count, getSequenceName(), getDocumentationLink());
+                    String.format(EXCEPTION_MESSAGE, count, getSequenceName(), "--precondition-sql-check", getDocumentationLink());
             throw new ChangeLogParseException("\n" + message);
         } else {
             currentSequence.append(line).append(System.lineSeparator());
