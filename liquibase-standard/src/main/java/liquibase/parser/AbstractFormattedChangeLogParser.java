@@ -381,7 +381,7 @@ public abstract class AbstractFormattedChangeLogParser implements ChangeLogParse
                         labels = changeLogParameters.expandExpressions(StringUtil.stripEnclosingQuotes(labels), changeLog);
                     }
                     String logicalFilePath = parseString(logicalFilePathMatcher);
-                    if ((logicalFilePath == null) || "".equals(logicalFilePath)) {
+                    if ((logicalFilePath == null) || logicalFilePath.isEmpty()) {
                         logicalFilePath = changeLog.getLogicalFilePath();
                     }
                     if (logicalFilePath != null) {
