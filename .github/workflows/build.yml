@@ -332,10 +332,6 @@ jobs:
         with:
           key: built-code-${{ github.run_number }}-${{ github.run_attempt }}
           path: ./**/target
-      
-      - name: ls
-        run: |
-          ls -lR ./**/target
 
       ##Cache based on install4j file, since changes to JVM is seen in there. If install4j version changes without changing the file, change the prefix letter before hashFiles to force a new cache
       - name: Install4j Cache
@@ -624,3 +620,23 @@ jobs:
               "context": "Run Test Harness",
               "description": markFunctionalTestsDescription
             });
+
+
+  log_end:
+    name: Log end
+    runs-on: macos-latest
+    needs: [ finish ]
+    steps:
+      - uses: actions/checkout@v3
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.event.after}}
+
+      - name: Built Code Cache
+        uses: actions/cache/restore@v3.3.1
+        with:
+          key: built-code-${{ github.run_number }}-${{ github.run_attempt }}
+          path: ./**/target
+
+      - name: ls
+        run: |
+          ls -lR ./**/target
