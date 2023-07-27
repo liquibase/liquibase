@@ -15,15 +15,15 @@
 
 	<repositories>
 		<repository>
-			<id>liquibase</id>
-			<url>https://maven.pkg.github.com/liquibase/liquibase</url>
+			<id>github</id>
+			<url>https://liquibot:${env.GITHUB_TOKEN}@maven.pkg.github.com/liquibase/liquibase</url>
 			<snapshots>
 				<enabled>true</enabled>
 			</snapshots>
 		</repository>
 		<repository>
 			<id>liquibase-pro</id>
-			<url>https://maven.pkg.github.com/liquibase/liquibase-pro</url>
+			<url>https://liquibot:${env.GITHUB_TOKEN}@maven.pkg.github.com/liquibase/liquibase-pro</url>
 			<snapshots>
 				<enabled>true</enabled>
 			</snapshots>
@@ -32,7 +32,7 @@
 
 	<properties>
 		<deploy.repositoryId>github</deploy.repositoryId>
-		<deploy.url>https://maven.pkg.github.com/liquibase/liquibase</deploy.url>
+		<deploy.url>https://liquibot:${env.GITHUB_TOKEN}@maven.pkg.github.com/liquibase/liquibase</deploy.url>
 		<h2.version>2.1.214</h2.version>
 		<hsqldb.version>2.7.2</hsqldb.version>
 		<postgresql.version>42.6.0</postgresql.version>
