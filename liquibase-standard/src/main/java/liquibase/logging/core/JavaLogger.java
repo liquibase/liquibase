@@ -8,7 +8,9 @@ import java.util.logging.Level;
  * The default logger for Liquibase. Routes messages through {@link java.util.logging.Logger}.
  */
 public class JavaLogger extends AbstractLogger {
-
+/*
+test
+ */
     private final String className;
     private final java.util.logging.Logger logger;
 
