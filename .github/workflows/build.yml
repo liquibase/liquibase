@@ -33,6 +33,11 @@ jobs:
     name: Check if Build should be done
     runs-on: ubuntu-22.04
     steps:
+      - name: Supress builds for PRs from branch github-action-*
+        if: github.event.pull_request && contains(github.head_ref, 'github-action') && github.event.pull_request.head.repo.full_name != 'liquibase/liquibase'
+        run: |
+          echo "not building PRs with source branch github-action-*"
+          exit 1
       - name: Emit failure code for unsafe fork PRs
         if: github.event.pull_request && github.event.pull_request.head.repo.full_name != 'liquibase/liquibase' && github.event.label.name != 'SafeToBuild'
         run: |
