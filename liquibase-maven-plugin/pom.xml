@@ -45,7 +45,7 @@
         <maven.deploy.skip>false</maven.deploy.skip>
         <maven.javadoc.skip>false</maven.javadoc.skip>
         <deploy.url>https://maven.pkg.github.com/liquibase/liquibase</deploy.url>
-        <deploy.repositoryId>liquibase</deploy.repositoryId>
+        <deploy.repositoryId>github</deploy.repositoryId>
     </properties>
     <dependencies>
         <dependency>

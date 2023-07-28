@@ -251,7 +251,7 @@ jobs:
           java-version: '17'
           distribution: 'temurin'
           cache: 'maven'
-          server-id: liquibase
+          server-id: github
       - name: Set up Maven
         uses: stCarolas/setup-maven@v4.5
         with:
@@ -265,7 +265,7 @@ jobs:
         run: mvn -B clean deploy -DskipTests=true
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          TARGET_ARTIFACT_REPOSITORY: liquibase
+          TARGET_ARTIFACT_REPOSITORY: github
 
   deploy_xsd:
       name: Upload xsds
