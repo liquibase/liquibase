@@ -34,6 +34,8 @@ Optional Args:
     OBFUSCATED
   showSummary (UpdateSummaryEnum) Type of update results summary to show.  Values can be 'off', 'summary', or 'verbose'.
     Default: SUMMARY
+  showSummaryOutput (UpdateSummaryOutputEnum) Where to report the results summary. Values can be 'log', 'console', or 'all'.
+    Default: ALL
   username (String) Username to use to connect to the database
     Default: null
 """
@@ -102,6 +104,49 @@ Optional Args:
                       "After count:                  1",
                       "DBMS mismatch:                1"
                     ]
+        ]
+
+        expectedResults = [
+                statusCode   : 0,
+                defaultChangeExecListener: 'not_null'
+        ]
+
+        expectedUI = [
+            "Running Changeset: changelogs/h2/complete/summary-changelog.xml::4-table::lbuser"
+        ]
+
+    }
+
+    run "Happy path with a change set that has complicated labels and contexts with log output", {
+        arguments = [
+                url:        { it.url },
+                username:   { it.username },
+                password:   { it.password },
+                changelogFile: "changelogs/h2/complete/summary-changelog.xml",
+                count: "1",
+                labelFilter: "testtable4,tagit and !testtable2",
+                contextFilter: "none",
+                showSummary: "summary",
+                showSummaryOutput: "log"
+        ]
+
+        expectedResults = [
+                statusCode   : 0,
+                defaultChangeExecListener: 'not_null'
+        ]
+
+        expectedLogs = [
+                "UPDATE SUMMARY",
+                "Run:                          1",
+                "Previously run:               0",
+                "Filtered out:                 5",
+                "-------------------------------",
+                "Total change sets:            6",
+                "FILTERED CHANGE SETS SUMMARY",
+                "Label mismatch:               2",
+                "Context mismatch:             2",
+                "After count:                  1",
+                "DBMS mismatch:                1"
         ]
 
         expectedResults = [
