@@ -3,12 +3,17 @@ package liquibase.util;
 import liquibase.GlobalConfiguration;
 import liquibase.Scope;
 import liquibase.UpdateSummaryEnum;
+import liquibase.UpdateSummaryOutputEnum;
 import liquibase.changelog.ChangeSet;
 import liquibase.changelog.ChangeSetStatus;
 import liquibase.changelog.DatabaseChangeLog;
 import liquibase.changelog.filter.*;
 import liquibase.changelog.visitor.StatusVisitor;
 import liquibase.exception.LiquibaseException;
+import liquibase.exception.UnexpectedLiquibaseException;
+import liquibase.logging.Logger;
+import liquibase.logging.core.AbstractLogger;
+import liquibase.logging.core.CompositeLogger;
 import liquibase.logging.mdc.MdcKey;
 import liquibase.logging.mdc.MdcObject;
 import liquibase.logging.mdc.customobjects.UpdateSummary;
@@ -16,7 +21,10 @@ import liquibase.logging.mdc.customobjects.UpdateSummary;
 import java.io.*;
 import java.util.*;
 import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.function.Predicate;
+import java.util.logging.Level;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 /**
  *
@@ -31,13 +39,14 @@ public class ShowSummaryUtil {
      *
      * @param   changeLog                          The changelog used in this update
      * @param   showSummary                        Flag to control whether or not we show the summary
+     * @param   showSummaryOutput                  Flag to control where we show the summary
      * @param   statusVisitor                      The StatusVisitor used to determine statuses
      * @param   outputStream                       The OutputStream to use for the summary
      * @throws  LiquibaseException                 Thrown by this method
      * @throws  IOException                        Thrown by this method
      *
      */
-    public static void showUpdateSummary(DatabaseChangeLog changeLog, UpdateSummaryEnum showSummary, StatusVisitor statusVisitor, OutputStream outputStream)
+    public static void showUpdateSummary(DatabaseChangeLog changeLog, UpdateSummaryEnum showSummary, UpdateSummaryOutputEnum showSummaryOutput, StatusVisitor statusVisitor, OutputStream outputStream)
             throws LiquibaseException, IOException {
         //
         // Check the global flag to turn the summary off
@@ -69,7 +78,7 @@ public class ShowSummaryUtil {
         //
         // Only show the summary
         //
-        UpdateSummary updateSummaryMdc = showSummary(changeLog, statusVisitor, skippedChangeSets, filterDenied, outputStream);
+        UpdateSummary updateSummaryMdc = showSummary(changeLog, statusVisitor, skippedChangeSets, filterDenied, outputStream, showSummaryOutput);
         updateSummaryMdc.setValue(showSummary.toString());
         boolean shouldPrintDetailTable = showSummary != UpdateSummaryEnum.SUMMARY && (!skippedChangeSets.isEmpty() || !denied.isEmpty());
 
@@ -193,7 +202,8 @@ public class ShowSummaryUtil {
                                     StatusVisitor statusVisitor,
                                     List<ChangeSet> skippedChangeSets,
                                     List<ChangeSetStatus> filterDenied,
-                                    OutputStream outputStream) throws LiquibaseException {
+                                    OutputStream outputStream,
+                                    UpdateSummaryOutputEnum showSummaryOutput) throws LiquibaseException {
         StringBuilder builder = new StringBuilder();
         builder.append(System.lineSeparator());
         int totalInChangelog = changeLog.getChangeSets().size() + skippedChangeSets.size();
@@ -204,33 +214,28 @@ public class ShowSummaryUtil {
         UpdateSummary updateSummaryMdc = new UpdateSummary(null, totalAccepted, totalPreviouslyRun, null, totalInChangelog);
 
         String message = "UPDATE SUMMARY";
-        Scope.getCurrentScope().getLog(ShowSummaryUtil.class).info(message);
         builder.append(message);
         builder.append(System.lineSeparator());
 
         message = String.format("Run:                     %6d", totalAccepted);
-        Scope.getCurrentScope().getLog(ShowSummaryUtil.class).info(message);
         builder.append(message);
         builder.append(System.lineSeparator());
 
         message = String.format("Previously run:          %6d", totalPreviouslyRun);
-        Scope.getCurrentScope().getLog(ShowSummaryUtil.class).info(message);
         builder.append(message);
         builder.append(System.lineSeparator());
 
         message = String.format("Filtered out:            %6d", filtered + skipped);
-        Scope.getCurrentScope().getLog(ShowSummaryUtil.class).info(message);
         builder.append(message);
         builder.append(System.lineSeparator());
 
         message = "-------------------------------";
-        Scope.getCurrentScope().getLog(ShowSummaryUtil.class).info(message);
         builder.append(message);
         builder.append(System.lineSeparator());
 
-        message = String.format("Total change sets:       %6d%n", totalInChangelog);
-        Scope.getCurrentScope().getLog(ShowSummaryUtil.class).info(message);
+        message = String.format("Total change sets:       %6d", totalInChangelog);
         builder.append(message);
+        builder.append(System.lineSeparator());
         builder.append(System.lineSeparator());
 
         final Map<String, Integer> filterSummaryMap = new LinkedHashMap<>();
@@ -245,27 +250,20 @@ public class ShowSummaryUtil {
         });
 
         if (! filterSummaryMap.isEmpty()) {
-            message = String.format("%nFILTERED CHANGE SETS SUMMARY%n");
+            message = "FILTERED CHANGE SETS SUMMARY";
+            builder.append(System.lineSeparator());
             builder.append(message);
             builder.append(System.lineSeparator());
-            Scope.getCurrentScope().getLog(ShowSummaryUtil.class).info(message);
             filterSummaryMap.forEach((filterDisplayName, count) -> {
                 String filterSummaryDetailMessage = String.format("%-18s       %6d",
                         filterDisplayName + ":", count);
-                Scope.getCurrentScope().getLog(ShowSummaryUtil.class).info(filterSummaryDetailMessage);
                 builder.append(filterSummaryDetailMessage);
                 builder.append(System.lineSeparator());
             });
             builder.append(System.lineSeparator());
         }
 
-        try {
-            Writer writer = createOutputWriter(outputStream);
-            writer.append(builder.toString());
-            writer.flush();
-        } catch (IOException ioe) {
-            throw new LiquibaseException(ioe);
-        }
+        writeMessage(builder.toString(), showSummaryOutput, outputStream);
 
         return updateSummaryMdc;
     }
@@ -276,5 +274,30 @@ public class ShowSummaryUtil {
     private static Writer createOutputWriter(OutputStream outputStream) throws IOException {
         String charsetName = GlobalConfiguration.OUTPUT_FILE_ENCODING.getCurrentValue();
         return new OutputStreamWriter(outputStream, charsetName);
+    }
+
+    private static void writeMessage(String message, UpdateSummaryOutputEnum showSummaryOutput, OutputStream outputStream) throws LiquibaseException {
+        if (showSummaryOutput != UpdateSummaryOutputEnum.CONSOLE) {
+            writeToLog(message);
+        }
+        if (showSummaryOutput != UpdateSummaryOutputEnum.LOG) {
+            writeToOutput(outputStream, message);
+        }
+    }
+
+    private static void writeToOutput(OutputStream outputStream, String message) throws LiquibaseException {
+        try {
+            Writer writer = createOutputWriter(outputStream);
+            writer.append(message);
+            writer.flush();
+        } catch (IOException ioe) {
+            throw new LiquibaseException(ioe);
+        }
+    }
+
+    private static void writeToLog(String message) {
+        Stream.of(message.split(System.lineSeparator()))
+                .filter(s -> !StringUtil.isWhitespace(s))
+                .forEach(Scope.getCurrentScope().getLog(ShowSummaryUtil.class)::info);
     }
 }

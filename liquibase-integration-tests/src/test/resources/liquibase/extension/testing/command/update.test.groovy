@@ -42,6 +42,8 @@ Optional Args:
     OBFUSCATED
   showSummary (UpdateSummaryEnum) Type of update results summary to show.  Values can be 'off', 'summary', or 'verbose'.
     Default: SUMMARY
+  showSummaryOutput (UpdateSummaryOutputEnum) Where to report the results summary. Values can be 'log', 'console', or 'all'.
+    Default: ALL
   username (String) Username to use to connect to the database
     Default: null
 """
@@ -269,6 +271,37 @@ Optional Args:
                "Label mismatch:               3",
                "DBMS mismatch:                1"
              ]
+        ]
+    }
+
+    run "Happy path with a change set that has complicated labels and contexts with log output", {
+        arguments = [
+                url                 : { it.url },
+                username            : { it.username },
+                password            : { it.password },
+                changelogFile       : "changelogs/h2/complete/summary-changelog.xml",
+                labelFilter         : "testtable1",
+                contextFilter       : "none",
+                showSummary         : "summary",
+                showSummaryOutput   : "log"
+        ]
+
+        expectedResults = [
+                statusCode: 0,
+                defaultChangeExecListener: 'not_null'
+        ]
+
+        expectedLogs = [
+                "UPDATE SUMMARY",
+                "Run:                          2",
+                "Previously run:               0",
+                "Filtered out:                 4",
+                "-------------------------------",
+                "Total change sets:            6",
+                "FILTERED CHANGE SETS SUMMARY",
+                "Context mismatch:             2",
+                "Label mismatch:               3",
+                "DBMS mismatch:                1"
         ]
     }
 
