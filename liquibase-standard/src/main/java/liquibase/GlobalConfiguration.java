@@ -2,6 +2,7 @@ package liquibase;
 
 import liquibase.configuration.AutoloadedConfigurations;
 import liquibase.configuration.ConfigurationDefinition;
+import liquibase.ui.UIServiceEnum;
 
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
@@ -46,6 +47,8 @@ public class GlobalConfiguration implements AutoloadedConfigurations {
     public static final ConfigurationDefinition<Integer> DDL_LOCK_TIMEOUT;
     public static final ConfigurationDefinition<Boolean> SECURE_PARSING;
     public static final ConfigurationDefinition<String> SEARCH_PATH;
+
+    public static final ConfigurationDefinition<UIServiceEnum> UI_SERVICE;
 
     static {
         ConfigurationDefinition.Builder builder = new ConfigurationDefinition.Builder("liquibase");
@@ -220,6 +223,11 @@ public class GlobalConfiguration implements AutoloadedConfigurations {
         VALIDATE_XML_CHANGELOG_FILES = builder.define("validateXmlChangelogFiles", Boolean.class)
                 .setDescription("Will perform xsd validation of XML changelog files. When many XML changelog files are included this validation may impact Liquibase performance. Defaults to true.")
                 .setDefaultValue(true)
+                .build();
+
+        UI_SERVICE = builder.define("uiService", UIServiceEnum.class)
+                .setDescription("Changes the default UI Service Logger used by Liquibase. Option are CONSOLE or LOGGER - defaults to CONSOLE.")
+                .setDefaultValue(UIServiceEnum.CONSOLE)
                 .build();
     }
 

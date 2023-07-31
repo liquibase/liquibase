@@ -6,7 +6,6 @@ import liquibase.database.DatabaseConnection;
 import liquibase.database.OfflineConnection;
 import liquibase.database.jvm.JdbcConnection;
 import liquibase.exception.UnexpectedLiquibaseException;
-import liquibase.integration.commandline.LiquibaseCommandLineConfiguration;
 import liquibase.listener.LiquibaseListener;
 import liquibase.logging.LogService;
 import liquibase.logging.Logger;
@@ -28,6 +27,7 @@ import liquibase.util.SmartMap;
 import liquibase.util.StringUtil;
 
 import java.lang.reflect.Constructor;
+import java.lang.reflect.InvocationTargetException;
 import java.nio.charset.Charset;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
@@ -89,7 +89,13 @@ public class Scope {
             rootScope.values.put(Attr.resourceAccessor.name(), new ClassLoaderResourceAccessor());
             rootScope.values.put(Attr.checksumVersion.name(), ChecksumVersion.latest());
 
-            rootScope.values.put(Attr.ui.name(), new ConsoleUIService());
+            try {
+                rootScope.values.put(Attr.ui.name(), GlobalConfiguration.UI_SERVICE.getCurrentValue().getUiServiceClass().getDeclaredConstructor().newInstance());
+            } catch (InvocationTargetException | InstantiationException | IllegalAccessException | NoSuchMethodException e) {
+                // no logger, so using System.err to log this error
+                System.err.println("Unable to instantiate UI logger class - proceding with default ConsoleUIService. Reason: " + e.getMessage());
+                rootScope.values.put(Attr.ui.name(), new ConsoleUIService());
+            }
             rootScope.getSingleton(LiquibaseConfiguration.class).init(rootScope);
 
             LogService overrideLogService = rootScope.getSingleton(LogServiceFactory.class).getDefaultLogService();
