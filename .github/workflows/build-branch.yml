@@ -5,7 +5,7 @@ on:
   push:
     branches:
       - '**DAT-**'
-      - 'github-action-*'
+      -
 env:
   MAVEN_VERSION: '3.9.2'
 jobs:
