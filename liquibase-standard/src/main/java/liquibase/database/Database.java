@@ -472,5 +472,14 @@ public interface Database extends PrioritizedService, AutoCloseable {
     String unescapeDataTypeString(String dataTypeString);
 
     ValidationErrors validate();
+
+    /**
+     * Allows the database to perform actions after an update is finished,
+     * i. e. after the last change of a changelog was applied.
+     */
+    default void afterUpdate() {
+        // Do nothing by default
+    }
+
 }
 
