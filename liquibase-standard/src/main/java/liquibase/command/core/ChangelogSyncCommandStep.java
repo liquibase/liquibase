@@ -32,7 +32,7 @@ public class ChangelogSyncCommandStep extends AbstractCommandStep {
     private String tag = null;
 
     static {
-        CommandBuilder builder = new CommandBuilder(COMMAND_NAME);
+        new CommandBuilder(COMMAND_NAME);
     }
 
     @Override
@@ -104,12 +104,12 @@ public class ChangelogSyncCommandStep extends AbstractCommandStep {
         } else {
             List<RanChangeSet> ranChangeSetList = database.getRanChangeSetList();
             return new ChangeLogIterator(changeLog,
+                    new UpToTagChangeSetFilter(tag, ranChangeSetList),
                     new NotRanChangeSetFilter(database.getRanChangeSetList()),
                     new ContextChangeSetFilter(contexts),
                     new LabelChangeSetFilter(labelExpression),
                     new IgnoreChangeSetFilter(),
-                    new DbmsChangeSetFilter(database),
-                    new UpToTagChangeSetFilter(tag, ranChangeSetList));
+                    new DbmsChangeSetFilter(database));
         }
     }
 
