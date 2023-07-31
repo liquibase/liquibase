@@ -53,22 +53,7 @@
         <developerConnection>scm:git:git@github.com:liquibase/liquibase.git</developerConnection>
     </scm>
 
-    <repositories>
-        <repository>
-            <id>github</id>
-            <url>https://liquibot:${env.GITHUB_TOKEN}@maven.pkg.github.com/liquibase/liquibase</url>
-            <snapshots>
-                <enabled>true</enabled>
-            </snapshots>
-        </repository>
-        <repository>
-            <id>liquibase-pro</id>
-            <url>https://liquibot:${env.GITHUB_TOKEN}@maven.pkg.github.com/liquibase/liquibase-pro</url>
-            <snapshots>
-                <enabled>true</enabled>
-            </snapshots>
-        </repository>
-    </repositories>
+
 
     <properties>
         <maven.compiler.source>1.8</maven.compiler.source>
@@ -96,9 +81,9 @@
 
     <distributionManagement>
         <repository>
-            <id>github</id>
+            <id>liquibase</id>
             <name>GitHub Packages</name>
-            <url>https://liquibot:${env.GITHUB_TOKEN}@maven.pkg.github.com/liquibase/liquibase</url>
+            <url>https://maven.pkg.github.com/liquibase/liquibase</url>
         </repository>
     </distributionManagement>
 
@@ -536,6 +521,32 @@
                     </plugin>
                 </plugins>
             </build>
+        </profile>
+
+        <profile>
+            <id>remote-repositories</id>
+            <activation>
+                <property>
+                    <name>env.CI</name>
+                    <value>true</value>
+                </property>
+            </activation>
+            <repositories>
+                <repository>
+                    <id>liquibase</id>
+                    <url>https://maven.pkg.github.com/liquibase/liquibase</url>
+                    <snapshots>
+                        <enabled>true</enabled>
+                    </snapshots>
+                </repository>
+                <repository>
+                    <id>liquibase-pro</id>
+                    <url>https://maven.pkg.github.com/liquibase/liquibase-pro</url>
+                    <snapshots>
+                        <enabled>true</enabled>
+                    </snapshots>
+                </repository>
+            </repositories>
         </profile>
     </profiles>
 </project>
