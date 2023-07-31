@@ -42,6 +42,13 @@ public class BooleanType extends LiquibaseDataType {
             }
             return new DatabaseDataType("TINYINT", 1);
         } else if (database instanceof OracleDatabase) {
+            try {
+                if (database.getDatabaseMajorVersion() >= OracleDatabase.ORACLE_23C_MAJOR_VERSION) {
+                    return new DatabaseDataType("BOOLEAN");
+                }
+            } catch (DatabaseException e) {
+                Scope.getCurrentScope().getLog(getClass()).fine("Error checking database major version, assuming version <23: "+e.getMessage(), e);
+            }
             return new DatabaseDataType("NUMBER", 1);
         } else if ((database instanceof SybaseASADatabase) || (database instanceof SybaseDatabase)) {
             return new DatabaseDataType("BIT");
