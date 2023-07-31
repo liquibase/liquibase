@@ -150,11 +150,12 @@ public class ValidatingVisitor implements ChangeSetVisitor {
         }
 
         if(ranChangeSet != null){
-            if (!changeSet.isCheckSumValid(ranChangeSet.getLastCheckSum())
-                && !changeSet.shouldRunOnChange() && !changeSet.shouldAlwaysRun()) {
-                    isItAnIncorrectChecksumVersionGeneratedByABuggyExtension(changeSet, ranChangeSet);
-                    invalidMD5Sums.add(changeSet.toString(false) + " was: " + ranChangeSet.getLastCheckSum().toString()
-                            + " but is now: " + changeSet.generateCheckSum(ChecksumVersion.enumFromChecksumVersion(ranChangeSet.getLastCheckSum().getVersion())).toString());
+            if (!changeSet.isCheckSumValid(ranChangeSet.getLastCheckSum()) &&
+                !isItAnOldButCorrectChecksumVersionGeneratedByABuggyExtension(changeSet, ranChangeSet, databaseChangeLog) &&
+                !changeSet.shouldRunOnChange() &&
+                !changeSet.shouldAlwaysRun()) {
+                    invalidMD5Sums.add(changeSet.toString(false)+" was: "+ranChangeSet.getLastCheckSum().toString()
+                            +" but is now: "+changeSet.generateCheckSum(ChecksumVersion.enumFromChecksumVersion(ranChangeSet.getLastCheckSum().getVersion())).toString());
             }
         }
 
@@ -170,30 +171,47 @@ public class ValidatingVisitor implements ChangeSetVisitor {
 
     /**
      * MongoDB's extension was incorrectly messing with CreateIndex checksum when the extension was added to the lib folder
-     * but the database being used was other than mongodb. This method checks:
+     * but a database other than mongodb was used. This method checks:
      * * is it a CreateIndex change?
      * * are we not using mongo?
      * * do we have mongo extension loaded?
-     * If everything matches than add a warning message.
+     * * If I use CreateIndex from mongo extension, does the checksum matches?
+     * If everything matches than we fix the checksum on the database and say it's fine to continue.
      */
-    private void isItAnIncorrectChecksumVersionGeneratedByABuggyExtension(ChangeSet changeSet, RanChangeSet ranChangeSet) {
+    private boolean isItAnOldButCorrectChecksumVersionGeneratedByABuggyExtension(ChangeSet changeSet, RanChangeSet ranChangeSet, DatabaseChangeLog databaseChangeLog) {
         if (changeSet.getChanges().stream().anyMatch(CreateIndexChange.class::isInstance)
             && !database.getShortName().equals("mongodb")) {
             try {
                 ChangeFactory changeFactory = Scope.getCurrentScope().getSingleton(ChangeFactory.class);
                 changeFactory.setPerformSupportsDatabaseValidation(false);
                 Change newChange = changeFactory.create("createIndex");
+                // is it an old mongo change, and we are not using mongodb!?
                 if (newChange.getClass().getTypeName().equals("liquibase.ext.mongodb.change.CreateIndexChange")) {
-                    // is it an old mongo change, and we are not using mongodb!? So it means that we
-                    // can have a broken checksum in the database.
-                    validationErrors.addError(String.format("Checksum value %s for CreateIndexChange probably was created by " +
-                            "an old version of mongodb extension and needs to be fixed manually",
-                            ranChangeSet.getLastCheckSum().toString()), changeSet);
+                    ChangeSet newChangeset = new ChangeSet(databaseChangeLog);
+                    for (Change c : changeSet.getChanges()) {
+                        if (!(c instanceof CreateIndexChange)) {
+                            newChangeset.addChange(c);
+                        } else {
+                            newChangeset.addChange(newChange);
+                        }
+                    }
+                    if (newChangeset.isCheckSumValid(ranChangeSet.getLastCheckSum())) {
+                        // now it matches, so it means that we are have a broken checksum in the database.
+                        // Let's fix it and move ahead
+                        ChangeLogHistoryService changeLogService = Scope.getCurrentScope().getSingleton(ChangeLogHistoryServiceFactory.class).getChangeLogService(database);
+                        changeLogService.replaceChecksum(changeSet);
+                        return true;
+                    } else {
+                        changeSet.clearCheckSum();
+                    }
                 }
+            } catch (DatabaseException e) {
+                throw new UnexpectedLiquibaseException(e);
             } finally {
                 Scope.getCurrentScope().getSingleton(ChangeFactory.class).setPerformSupportsDatabaseValidation(true);
             }
         }
+        return false;
     }
 
     private boolean areChangeSetAttributesValid(ChangeSet changeSet) {
