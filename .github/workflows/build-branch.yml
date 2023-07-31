@@ -23,7 +23,7 @@ jobs:
           java-version: '17'
           distribution: 'temurin'
           cache: 'maven'
-          server-id: github
+          server-id: liquibase
       - name: Set up Maven
         uses: stCarolas/setup-maven@v4.5
         with:
@@ -38,7 +38,6 @@ jobs:
       # Publish to GitHub Packages
       - name: Publish package
         run: |
-          mvn -B clean deploy -DskipTests=true
-          
+          mvn -B clean deploy -pl '!liquibase-dist' -DskipTests=true "-Dbuild.branch=${{ github.ref_name }}" "-Dbuild.number=${{ github.run_number }}" "-Dbuild.commit=${{ github.sha }}" "-Dbuild.repository.owner=${{ github.repository_owner }}" "-Dbuild.repository.name=${{ github.repository }}"
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
