@@ -1,5 +1,6 @@
 package liquibase.integration.commandline;
 
+import liquibase.GlobalConfiguration;
 import liquibase.Scope;
 import liquibase.command.CommandArgumentDefinition;
 import liquibase.command.CommandDefinition;
@@ -646,27 +647,22 @@ public class LiquibaseCommandLine {
         returnMap.putAll(configureLogging());
         returnMap.putAll(configureResourceAccessor(classLoader));
 
-        ConsoleUIService console = null;
-        List<UIService> uiServices = Scope.getCurrentScope().getServiceLocator().findInstances(UIService.class);
-        for (UIService uiService : uiServices) {
-            if (uiService instanceof ConsoleUIService) {
-                console = (ConsoleUIService) uiService;
-                break;
-            }
-        }
-        if (console == null) {
-            console = new ConsoleUIService();
-        }
+        UIService defaultUiService = GlobalConfiguration.UI_SERVICE.getCurrentValue().getUiServiceClass()
+                .getDeclaredConstructor().newInstance();
 
-        console.setAllowPrompt(true);
-        console.setOutputStream(System.err);
-        List<UIService> outputServices = new ArrayList<>();
-        outputServices.add(console);
-        if (LiquibaseCommandLineConfiguration.MIRROR_CONSOLE_MESSAGES_TO_LOG.getCurrentValue()) {
-            outputServices.add(new LoggerUIService());
+        if (defaultUiService instanceof ConsoleUIService) {
+            defaultUiService.setAllowPrompt(true);
+            ((ConsoleUIService) defaultUiService).setOutputStream(System.err);
+            List<UIService> outputServices = new ArrayList<>();
+            outputServices.add(defaultUiService);
+            if (LiquibaseCommandLineConfiguration.MIRROR_CONSOLE_MESSAGES_TO_LOG.getCurrentValue()) {
+                outputServices.add(new LoggerUIService());
+            }
+            CompositeUIService compositeUIService = new CompositeUIService(defaultUiService, outputServices);
+            returnMap.put(Scope.Attr.ui.name(), compositeUIService);
+        } else {
+            returnMap.put(Scope.Attr.ui.name(), defaultUiService);
         }
-        CompositeUIService compositeUIService = new CompositeUIService(console, outputServices);
-        returnMap.put(Scope.Attr.ui.name(), compositeUIService);
 
         returnMap.put(LiquibaseCommandLineConfiguration.ARGUMENT_CONVERTER.getKey(),
                 (LiquibaseCommandLineConfiguration.ArgumentConverter) argument -> "--" + StringUtil.toKabobCase(argument));
