@@ -38,7 +38,7 @@ public class ShowSummaryArgument extends AbstractCommandStep {
                     }
                     return null;
                 }).build();
-        SHOW_SUMMARY_OUTPUT = commandBuilder.argument("showSummaryOutput", UpdateSummaryOutputEnum.class).description("Where to report the results summary. Values can be 'log', 'console', or 'all'.")
+        SHOW_SUMMARY_OUTPUT = commandBuilder.argument("showSummaryOutput", UpdateSummaryOutputEnum.class).description("Summary output to report update summary results. Values can be 'log', 'console', or 'all'.")
                 .defaultValue(UpdateSummaryOutputEnum.ALL)
                 .setValueHandler(value -> {
                     if (value == null) {
