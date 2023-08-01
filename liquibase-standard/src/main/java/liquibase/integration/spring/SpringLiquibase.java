@@ -79,7 +79,7 @@ public class SpringLiquibase implements InitializingBean, BeanNameAware, Resourc
 
 	protected boolean testRollbackOnUpdate = false;
 
-    protected UIServiceEnum uiServiceEnum = UIServiceEnum.CONSOLE;
+    protected UIServiceEnum uiService = UIServiceEnum.LOGGER;
 
 	public SpringLiquibase() {
 		super();
@@ -282,7 +282,8 @@ public class SpringLiquibase implements InitializingBean, BeanNameAware, Resourc
 		}
 
         try {
-            Scope.child(Scope.Attr.ui.name(), this.uiServiceEnum.getUiServiceClass().getDeclaredConstructor().newInstance(),
+
+            Scope.child(Scope.Attr.ui.name(), this.uiService.getUiServiceClass().getDeclaredConstructor().newInstance(),
                     () -> {
                 Liquibase liquibase = null;
                 try {
@@ -457,12 +458,15 @@ public class SpringLiquibase implements InitializingBean, BeanNameAware, Resourc
 
 	}
 
-    public void setUiServiceEnum(UIServiceEnum uiServiceEnum) {
-        this.uiServiceEnum = uiServiceEnum;
+    public void setUiService(UIServiceEnum uiService) {
+        if (uiService == null) {
+            return;
+        }
+        this.uiService = uiService;
     }
 
-    public UIServiceEnum getUiServiceEnum() {
-        return uiServiceEnum;
+    public UIServiceEnum getUiService() {
+        return uiService;
     }
 
     @Override
