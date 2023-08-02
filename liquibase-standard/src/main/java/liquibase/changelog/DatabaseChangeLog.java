@@ -686,7 +686,7 @@ public class DatabaseChangeLog implements Comparable<DatabaseChangeLog>, Conditi
             throw new SetupException("No path attribute for includeAll");
         }
         SortedSet<Resource> resources =
-                findResources(pathName, isRelativeToChangelogFile, resourceFilter, errorIfMissingOrEmpty, resourceComparator, resourceAccessor, minDepth, maxDepth);
+                findResources(pathName, isRelativeToChangelogFile, resourceFilter, errorIfMissingOrEmpty, resourceComparator, resourceAccessor, minDepth, maxDepth, endsWithFilter);
         if (resources.isEmpty() && errorIfMissingOrEmpty) {
             throw new SetupException(
                     "Could not find directory or directory was empty for includeAll '" + pathName + "'");
@@ -713,7 +713,9 @@ public class DatabaseChangeLog implements Comparable<DatabaseChangeLog>, Conditi
                                Comparator<String> resourceComparator,
                                ResourceAccessor resourceAccessor,
                                int minDepth,
-                               int maxDepth)
+                               int maxDepth,
+                               String endsWithFilter
+                               )
             throws SetupException {
         try {
             if (pathName == null) {
