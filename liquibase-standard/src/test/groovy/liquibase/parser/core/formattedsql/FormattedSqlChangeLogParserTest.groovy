@@ -887,7 +887,7 @@ select (*) from table3;
         changeLog.getChangeSets().get(2).getAuthor() == "nvoxland"
         changeLog.getChangeSets().get(2).getId() == "3"
         changeLog.getChangeSets().get(2).getRollback().getChanges().size() == 1
-        assert changeLog.getChangeSets().get(2).getRollback().getChanges().get(0) instanceof RawSQLChange
+        assert changeLog.getChangeSets().get(2).getRollback().getChanges().get(0) instanceof EmptyChange
     }
 
     @Unroll
