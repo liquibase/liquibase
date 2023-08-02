@@ -40,7 +40,7 @@ public class ValidatingVisitorUtil {
                 DatabaseChange databaseChange = change.get().getClass().getAnnotation(DatabaseChange.class);
                 Change newChange = changeFactory.create(databaseChange.name());
                 // do we have a mongodb change with the same name present?
-                if (newChange.getClass().getTypeName().equals("liquibase.ext.mongodb.change" + databaseChange.name())) {
+                if (newChange.getClass().getTypeName().equalsIgnoreCase("liquibase.ext.mongodb.change." + databaseChange.name() + "Change")) {
                     ChangeSet newChangeset = generateNewChangeSet(databaseChangeLog, change.get(), newChange, changeSet);
                     if (newChangeset.isCheckSumValid(ranChangeSet.getLastCheckSum())) {
                         // now it matches, so it means that we are have a broken checksum in the database.
@@ -62,7 +62,9 @@ public class ValidatingVisitorUtil {
     }
 
     private static ChangeSet generateNewChangeSet(DatabaseChangeLog databaseChangeLog, Change originalChange, Change newChange, ChangeSet changeSet) {
-        ChangeSet newChangeset = new ChangeSet(databaseChangeLog);
+        ChangeSet newChangeset = new ChangeSet(changeSet.getId(), changeSet.getAuthor(), changeSet.shouldAlwaysRun(),
+                changeSet.isRunOnChange(), changeSet.getFilePath(), null, null,
+                databaseChangeLog);
         for (Change c : changeSet.getChanges()) {
             if (!(originalChange.getClass().isInstance(c))) {
                 newChangeset.addChange(c);
