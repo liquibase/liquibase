@@ -158,16 +158,15 @@ public abstract class AbstractUpdateCommandStep extends AbstractCommandStep impl
     private void logDeploymentOutcomeMdc(ChangeExecListener defaultListener, boolean success) {
         String successLog = "Update command completed successfully.";
         String failureLog = "Update command encountered an exception.";
-        try (MdcObject deploymentOutcomeMdc = Scope.getCurrentScope().addMdcValue(MdcKey.DEPLOYMENT_OUTCOME, success ? MdcValue.COMMAND_SUCCESSFUL : MdcValue.COMMAND_FAILED)) {
-            Scope.getCurrentScope().getLog(getClass()).info(success ? successLog : failureLog);
-        }
-
         if (defaultListener instanceof DefaultChangeExecListener) {
             List<ChangeSet> deployedChangeSets = ((DefaultChangeExecListener)defaultListener).getDeployedChangeSets();
             int deployedChangeSetCount = deployedChangeSets.size();
             ChangesetsUpdated changesetsUpdated = new ChangesetsUpdated(deployedChangeSets);
             Scope.getCurrentScope().addMdcValue(MdcKey.DEPLOYMENT_OUTCOME_COUNT, String.valueOf(deployedChangeSetCount));
             Scope.getCurrentScope().addMdcValue(MdcKey.CHANGESETS_UPDATED, changesetsUpdated);
+        }
+        try (MdcObject deploymentOutcomeMdc = Scope.getCurrentScope().addMdcValue(MdcKey.DEPLOYMENT_OUTCOME, success ? MdcValue.COMMAND_SUCCESSFUL : MdcValue.COMMAND_FAILED)) {
+            Scope.getCurrentScope().getLog(getClass()).info(success ? successLog : failureLog);
         }
     }
 
