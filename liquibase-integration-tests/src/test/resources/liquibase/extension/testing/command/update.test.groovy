@@ -42,7 +42,7 @@ Optional Args:
     OBFUSCATED
   showSummary (UpdateSummaryEnum) Type of update results summary to show.  Values can be 'off', 'summary', or 'verbose'.
     Default: SUMMARY
-  showSummaryOutput (UpdateSummaryOutputEnum) Where to report the results summary. Values can be 'log', 'console', or 'all'.
+  showSummaryOutput (UpdateSummaryOutputEnum) Summary output to report update summary results. Values can be 'log', 'console', or 'all'.
     Default: ALL
   username (String) Username to use to connect to the database
     Default: null

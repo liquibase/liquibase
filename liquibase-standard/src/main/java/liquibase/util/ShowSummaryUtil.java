@@ -280,11 +280,16 @@ public class ShowSummaryUtil {
     }
 
     private static void writeMessage(String message, UpdateSummaryOutputEnum showSummaryOutput, OutputStream outputStream) throws LiquibaseException {
-        if (showSummaryOutput != UpdateSummaryOutputEnum.CONSOLE) {
-            writeToLog(message);
-        }
-        if (showSummaryOutput != UpdateSummaryOutputEnum.LOG) {
-            writeToOutput(outputStream, message);
+        switch (showSummaryOutput) {
+            case CONSOLE:
+                writeToOutput(outputStream, message);
+                break;
+            case LOG:
+                writeToLog(message);
+                break;
+            default:
+                writeToOutput(outputStream, message);
+                writeToLog(message);
         }
     }
 
