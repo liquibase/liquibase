@@ -416,8 +416,10 @@ jobs:
 
           echo "Saving windows key"
           echo "$INSTALL4J_WINDOWS_KEY" | base64 -d > liquibase-dist/target/keys/datical_windows.pfx
-          # we are packaging and deploying liquibase tar which includes liquibase-commercial 
-          mvn versions:set -DnewVersion="${{ needs.setup.outputs.thisBranchFileName }}-SNAPSHOT"
+          # we are packaging and deploying liquibase tar which includes liquibase-commercial
+          version="${{ needs.setup.outputs.thisBranchFileName }}-SNAPSHOT"
+          version=$(echo "$version" | sed 's/\//-/g')
+          mvn versions:set -DnewVersion="$version"
           mvn -B -pl liquibase-dist -P liquibase-commercial source:jar package "-Dliquibase-pro.version=${{ needs.setup.outputs.proBranchName }}-SNAPSHOT" "-Dbuild.repository.owner=${{ needs.setup.outputs.thisRepositoryOwner }}" "-Dbuild.repository.name=${{ needs.setup.outputs.thisRepositoryName }}" "-Dbuild.branch=${{ needs.setup.outputs.thisBranchFileName }}" "-Dbuild.number=${{ github.run_number }}" "-Dbuild.commit=${{ needs.setup.outputs.thisSha }}"
 
           ## extract tar content for other artifacts
