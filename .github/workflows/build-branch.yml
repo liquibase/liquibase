@@ -74,9 +74,6 @@ jobs:
 
     steps:
       - uses: actions/checkout@v3
-        with:
-          ref: ${{ github.event.pull_request.head.sha || github.event.after }}
-
       - name: Find mvn Build Attributes
         id: find-attributes
         uses: actions/github-script@v6
