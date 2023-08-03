@@ -112,6 +112,9 @@ public class ShowSummaryUtil {
                 ChangeSet c2 = o2.getChangeSet();
                 int order1 = determineOrderInChangelog(c1);
                 int order2 = determineOrderInChangelog(c2);
+                if (order1 == -1 || order2 == -1) {
+                    return -1;
+                }
                 return Integer.compare(order1, order2);
             }
         });
