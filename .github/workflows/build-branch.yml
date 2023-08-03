@@ -31,7 +31,10 @@ jobs:
 
       # Version artifact based off of branch and commit SHA.
       - name: Version Artifact
-        run: mvn versions:set -DnewVersion="${{ github.ref_name }}-SNAPSHOT"
+        run: |
+          version=${{ github.ref_name }}-SNAPSHOT
+          version=$(echo "$version" | sed 's/\//-/g')
+          mvn versions:set -DnewVersion="$version"
 
 
       # This would still deploy a package if there are test failures. Might help to have build.yml complete and then run this workflow
