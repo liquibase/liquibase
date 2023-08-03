@@ -3,8 +3,8 @@ name: Build Branch SNAPSHOT
 on:
   workflow_dispatch:
   push:
-    branches-ignore:
-      - master
+    branches:
+      - '**DAT-**'
 env:
   MAVEN_VERSION: '3.9.2'
 jobs:
