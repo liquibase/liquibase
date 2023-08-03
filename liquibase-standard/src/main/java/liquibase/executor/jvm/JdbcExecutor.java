@@ -29,6 +29,7 @@ import java.sql.*;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.logging.Level;
 
 /**
@@ -458,7 +459,9 @@ public class JdbcExecutor extends AbstractExecutor {
                     //if execute returns false, we can retrieve the affected rows count
                     // (true used when resultset is returned)
                     if (!stmt.execute(statement)) {
-                        log.log(sqlLogLevel, stmt.getUpdateCount() + " row(s) affected", null);
+                        int updateCount = stmt.getUpdateCount();
+                        addUpdateCountToScope(updateCount);
+                        log.log(sqlLogLevel, updateCount + " row(s) affected", null);
                     }
                 } catch (Throwable e) {
                     throw new DatabaseException(e.getMessage() + " [Failed SQL: " + getErrorCode(e) + statement + "]", e);
@@ -469,6 +472,7 @@ public class JdbcExecutor extends AbstractExecutor {
                     do {
                         if (!stmt.getMoreResults()) {
                             updateCount = stmt.getUpdateCount();
+                            addUpdateCountToScope(updateCount);
                             if (updateCount != -1)
                                 log.log(sqlLogLevel, updateCount + " row(s) affected", null);
                         }
@@ -484,6 +488,15 @@ public class JdbcExecutor extends AbstractExecutor {
         @Override
         public SqlStatement getStatement() {
             return sql;
+        }
+    }
+
+    private void addUpdateCountToScope(int updateCount) {
+        if (updateCount > -1) {
+            AtomicInteger scopeRowsAffected = Scope.getCurrentScope().get("rowsAffected", AtomicInteger.class);
+            if (scopeRowsAffected != null) {
+                scopeRowsAffected.addAndGet(updateCount);
+            }
         }
     }
 

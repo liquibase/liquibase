@@ -4,6 +4,7 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.CopyOnWriteArrayList;
+
 import liquibase.osgi.Activator.LiquibaseBundle;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleActivator;
@@ -20,7 +21,7 @@ public class Activator implements BundleActivator, BundleTrackerCustomizer<Liqui
 
     @Override
     public void start(final BundleContext bc) throws Exception {
-        OSGIContainerChecker.osgiPlatform();
+        ContainerChecker.osgiPlatform();
         bundleTracker = new BundleTracker<>(bc, Bundle.ACTIVE, this);
         bundleTracker.open();
     }
@@ -92,17 +93,12 @@ public class Activator implements BundleActivator, BundleTrackerCustomizer<Liqui
 
     }
 
-    public static class OSGIContainerChecker {
+    /**
+     * @deprecated use {@link ContainerChecker}
+     */
+    @Deprecated
+    public static class OSGIContainerChecker extends ContainerChecker {
 
-        private static volatile boolean osgiPlatform = false;
-
-        public static boolean isOsgiPlatform() {
-            return osgiPlatform;
-        }
-
-        static void osgiPlatform() {
-            osgiPlatform = true;
-        }
     }
 
 }
