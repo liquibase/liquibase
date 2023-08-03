@@ -403,4 +403,12 @@ public class PostgresDatabase extends AbstractJdbcDatabase {
         //Rollback in postgresql resets the search path. Need to put it back to the defaults
         DatabaseUtils.initializeDatabase(getDefaultCatalogName(), getDefaultSchemaName(), this);
     }
+
+    @Override
+    public void setDefaultCatalogName(String defaultCatalogName) {
+        if (StringUtil.isNotEmpty(defaultCatalogName)) {
+            Scope.getCurrentScope().getUI().sendMessage("WARNING: Postgres does not support catalogs, so the values set in 'defaultCatalogName' and 'referenceDefaultCatalogName' will be ignored.");
+        }
+        super.setDefaultCatalogName(defaultCatalogName);
+    }
 }
