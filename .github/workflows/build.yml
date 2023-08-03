@@ -159,6 +159,7 @@ jobs:
     runs-on: ${{ matrix.os }}
     env:
       OS_TYPE: ${{ matrix.os }}
+      GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
     steps:
       - uses: actions/checkout@v3
         with:
