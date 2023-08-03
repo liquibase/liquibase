@@ -8,30 +8,21 @@ on:
     branches:
       - 'main'
       - 'master'
+
 env:
   MAVEN_VERSION: '3.9.2'
-jobs:
-  setup:
-    name: Setup
-    runs-on: ubuntu-22.04
-    outputs:
-      thisSha: ${{ steps.find-attributes.outputs.thisSha }}
-      thisBranchName: ${{ steps.find-attributes.outputs.thisBranchName }}
-      thisRepositoryName: ${{ steps.find-attributes.outputs.thisRepositoryName }}
-      thisRepositoryOwner: ${{ steps.find-attributes.outputs.thisRepositoryName }}
-      setupSuccessful: "true"
 
-  build-master:
-    name: Build & Package Master
+jobs:
+  build:
+    name: Build & Package
     runs-on: ubuntu-22.04
+    needs: setup
     permissions:
       contents: read
       packages: write
 
     steps:
       - uses: actions/checkout@v3
-        with:
-          ref: ${{ github.event.pull_request.head.sha || github.event.after}}
 
       - name: Find mvn Build Attributes
         id: find-attributes
@@ -55,6 +46,7 @@ jobs:
           distribution: 'temurin'
           cache: 'maven'
           server-id: liquibase
+
       - name: Set up Maven
         uses: stCarolas/setup-maven@v4.5
         with:
@@ -66,13 +58,45 @@ jobs:
 
       # Publish to GitHub Packages
       - name: Publish package
-        run: mvn -B clean deploy -DskipTests=true "-Dbuild.repository.owner=${{ needs.setup.outputs.thisRepositoryOwner }}" "-Dbuild.repository.name=${{ needs.setup.outputs.thisRepositoryName }}" "-Dbuild.branch=${{ needs.setup.outputs.thisBranchName }}" "-Dbuild.number=${{ github.run_number }}" "-Dbuild.commit=${{ needs.setup.outputs.thisSha }}" "-Dbuild.timestamp=${{ steps.date.outputs.date }}"
+        run: mvn -B clean deploy -DskipTests=true "-Dbuild.repository.owner=${{ needs.setup.outputs.thisRepositoryOwner }}" "-Dbuild.repository.name=${{ needs.setup.outputs.thisRepositoryName }}" "-Dbuild.branch=${{ needs.setup.outputs.thisBranchName }}" "-Dbuild.number=${{ github.run_number }}" "-Dbuild.commit=${{ needs.setup.outputs.thisSha }}" "-Dbuild.timestamp=${{ github.run_created }}"
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+  setup:
+    name: Setup
+    runs-on: ubuntu-22.04
+    outputs:
+      thisSha: ${{ steps.find-attributes.outputs.thisSha }}
+      thisBranchName: ${{ steps.find-attributes.outputs.thisBranchName }}
+      thisBranchFileName: ${{ steps.find-attributes.outputs.thisBranchFileName }}
+      thisRepositoryName: ${{ steps.find-attributes.outputs.thisRepositoryName }}
+      thisRepositoryOwner: ${{ steps.find-attributes.outputs.thisRepositoryOwner }}
+      setupSuccessful: "true"
+
+    steps:
+      - uses: actions/checkout@v3
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.event.after }}
+
+      - name: Find mvn Build Attributes
+        id: find-attributes
+        uses: actions/github-script@v6
+        with:
+          github-token: ${{ secrets.BOT_TOKEN }}
+          script: |
+            const helper = require('./.github/util/workflow-helper.js')({github, context});
+
+            core.setOutput("thisSha", helper.getCurrentSha());
+            core.setOutput("thisBranchName", helper.getCurrentBranch());
+            core.setOutput("thisBranchFileName", helper.getCurrentBranch().replace(/[^a-zA-Z0-9\-_]/g, "_"));
+            core.setOutput("thisRepositoryName", helper.getRepositoryName());
+            core.setOutput("thisRepositoryOwner", helper.getRepositoryOwner());
+  
 
   build-sha:
     name: Build & Package SHA
     runs-on: ubuntu-22.04
+    needs: setup
     permissions:
       contents: read
       packages: write
@@ -87,6 +111,7 @@ jobs:
           distribution: 'temurin'
           cache: 'maven'
           server-id: liquibase
+
       - name: Set up Maven
         uses: stCarolas/setup-maven@v4.5
         with:
@@ -96,9 +121,8 @@ jobs:
       - name: Version Artifact
         run: mvn versions:set -DnewVersion="$(git rev-parse --short HEAD)-SNAPSHOT"
 
-      # This would still deploy a package if there are test failures. Might help to have build.yml complete and then run this workflow
       # Publish to GitHub Packages
       - name: Publish package
-        run: mvn -B clean deploy -DskipTests=true "-Dbuild.repository.owner=${{ needs.setup.outputs.thisRepositoryOwner }}" "-Dbuild.repository.name=${{ needs.setup.outputs.thisRepositoryName }}" "-Dbuild.branch=${{ needs.setup.outputs.thisBranchName }}" "-Dbuild.number=${{ github.run_number }}" "-Dbuild.commit=${{ needs.setup.outputs.thisSha }}" "-Dbuild.timestamp=${{ steps.date.outputs.date }}"
+        run: mvn -B clean deploy -DskipTests=true "-Dbuild.repository.owner=${{ needs.setup.outputs.thisRepositoryOwner }}" "-Dbuild.repository.name=${{ needs.setup.outputs.thisRepositoryName }}" "-Dbuild.branch=${{ needs.setup.outputs.thisBranchName }}" "-Dbuild.number=${{ github.run_number }}" "-Dbuild.commit=${{ needs.setup.outputs.thisSha }}" "-Dbuild.timestamp=${{ github.run_created }}"
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
