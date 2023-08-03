@@ -417,7 +417,7 @@ jobs:
           echo "Saving windows key"
           echo "$INSTALL4J_WINDOWS_KEY" | base64 -d > liquibase-dist/target/keys/datical_windows.pfx
           # we are packaging and deploying liquibase tar which includes liquibase-commercial
-          version="${{ needs.setup.outputs.thisBranchFileName }}-SNAPSHOT"
+          version=${{ needs.setup.outputs.thisBranchFileName }}-SNAPSHOT
           # Replace / with - in version
           version=$(echo "$version" | sed 's/\//-/g')
           mvn versions:set -DnewVersion="$version"
