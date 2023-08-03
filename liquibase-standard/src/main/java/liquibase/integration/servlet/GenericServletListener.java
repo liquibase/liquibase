@@ -29,7 +29,7 @@ import java.util.Enumeration;
  * Servlet listener than can be added to web.xml to allow Liquibase to run on every application server startup.
  * Using this listener allows users to know that they always have the most up to date database, although it will
  * slow down application server startup slightly.
- * See the <a href="https://docs.liquibase.com/tools-integrations/community-supported/servlet-listener.html">Liquibase documentation</a> for
+ * See the <a href="https://contribute.liquibase.com/extensions-integrations/directory/integration-docs/servlet-listener/">Liquibase documentation</a> for
  * more information.
  *
  * @see LiquibaseJakartaServletListener
