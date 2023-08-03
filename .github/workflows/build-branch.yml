@@ -33,6 +33,7 @@ jobs:
       - name: Version Artifact
         run: |
           version=${{ github.ref_name }}-SNAPSHOT
+          # Replace / with - in branch name
           version=$(echo "$version" | sed 's/\//-/g')
           mvn versions:set -DnewVersion="$version"
 
