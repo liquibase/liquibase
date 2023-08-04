@@ -54,6 +54,7 @@ jobs:
       thisRepositoryOwner: ${{ steps.find-branches.outputs.thisRepositoryName }}
       standAlonePR: ${{ steps.find-branches.outputs.standAlonePR }}
       stablePro: ${{ steps.find-branches.outputs.stablePro }}
+      timestamp: ${{ steps.get-date.outputs.date }}
       setupSuccessful: "true"
     steps:
       - name: Failsafe
@@ -66,6 +67,10 @@ jobs:
       - uses: actions/checkout@v3
         with:
           ref: ${{ github.event.pull_request.head.sha || github.event.after}}
+
+      - name: Get current date
+        id: get-date
+        run: echo "::set-output name=date::$(date +'%Y-%m-%d %H:%M:%S')"
 
       - name: Find corresponding branches
         id: find-branches
@@ -159,6 +164,7 @@ jobs:
     runs-on: ${{ matrix.os }}
     env:
       OS_TYPE: ${{ matrix.os }}
+      GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
     steps:
       - uses: actions/checkout@v3
         with:
@@ -169,7 +175,6 @@ jobs:
         with:
           key: built-code-${{ github.run_number }}-${{ github.run_attempt }}
           path: ./**/target
-
       - name: Set up JDK ${{ matrix.java }}
         uses: actions/setup-java@v3
         with:
@@ -325,14 +330,11 @@ jobs:
         with:
           ref: ${{ github.event.pull_request.head.sha || github.event.after}}
       # this includes all the tar files included in the previous runs. So in the next step we deploy what was previously build
-      # do not cache the keys for the next run
       - name: Built Code Cache
         uses: actions/cache@v3.3.1
         with:
           key: built-code-${{ github.run_number }}-${{ github.run_attempt }}
-          path: |
-            ./**/target/*
-            !./**/target/keys/
+          path: ./**/target
 
       ##Cache based on install4j file, since changes to JVM is seen in there. If install4j version changes without changing the file, change the prefix letter before hashFiles to force a new cache
       - name: Install4j Cache
@@ -422,7 +424,7 @@ jobs:
           echo "$INSTALL4J_WINDOWS_KEY" | base64 -d > liquibase-dist/target/keys/datical_windows.pfx
           # we are packaging and deploying liquibase tar which includes liquibase-commercial 
           mvn versions:set -DnewVersion="${{ needs.setup.outputs.thisBranchName }}-SNAPSHOT"
-          mvn -B -pl liquibase-dist -P liquibase-commercial source:jar package -Dliquibase-pro.version="${{ needs.setup.outputs.proBranchName }}-SNAPSHOT"
+          mvn -B -pl liquibase-dist -P liquibase-commercial source:jar package "-Dliquibase-pro.version=${{ needs.setup.outputs.proBranchName }}-SNAPSHOT" "-Dbuild.repository.owner=${{ needs.setup.outputs.thisRepositoryOwner }}" "-Dbuild.repository.name=${{ needs.setup.outputs.thisRepositoryName }}" "-Dbuild.branch=${{ needs.setup.outputs.thisBranchName }}" "-Dbuild.number=${{ github.run_number }}" "-Dbuild.commit=${{ needs.setup.outputs.thisSha }}" "-Dbuild.timestamp=${{ needs.setup.outputs.timestamp }}"
 
           ## extract tar content for other artifacts
           mkdir -p liquibase-dist/target/liquibase-${{ needs.setup.outputs.thisBranchName }}-SNAPSHOT
@@ -505,7 +507,7 @@ jobs:
       # Publish to GitHub Packages. We are building a tar file which includes liquibase-commercial hence we need "-Dliquibase-pro.version"
       - name: Publish tar.gz package to GPM
         run: |
-          mvn -B -pl liquibase-dist -P liquibase-commercial clean deploy -DskipTests=true -Dliquibase-pro.version="${{ needs.setup.outputs.proBranchName }}-SNAPSHOT" -Dbuild.timestamp=${{ steps.date.outputs.date }}
+          mvn -B -pl liquibase-dist -P liquibase-commercial clean deploy -DskipTests=true "-Dliquibase-pro.version=${{ needs.setup.outputs.proBranchName }}-SNAPSHOT" "-Dbuild.timestamp=${{ needs.setup.outputs.timestamp }}" "-Dbuild.repository.owner=${{ needs.setup.outputs.thisRepositoryOwner }}" "-Dbuild.repository.name=${{ needs.setup.outputs.thisRepositoryName }}" "-Dbuild.branch=${{ needs.setup.outputs.thisBranchName }}" "-Dbuild.number=${{ github.run_number }}" "-Dbuild.commit=${{ needs.setup.outputs.thisSha }}"
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
