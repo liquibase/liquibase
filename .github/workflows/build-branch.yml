@@ -20,22 +20,6 @@ jobs:
 
     steps:
       - uses: actions/checkout@v3
-
-      - name: Find mvn Build Attributes
-        id: find-attributes
-        uses: actions/github-script@v6
-        with:
-          github-token: ${{ secrets.BOT_TOKEN }}
-          script: |
-            const helper = require('./.github/util/workflow-helper.js')({github, context});
-
-            core.setOutput("thisSha", helper.getCurrentSha());
-            core.setOutput("thisBranchName", helper.getCurrentBranch());
-            core.setOutput("thisRepoName", helper.getRepositoryName());
-            core.setOutput("thisRepoOwner", helper.getRepositoryOwner());
-
-      - uses: actions/checkout@v3
-
       - name: Set up Java for publishing to GitHub Repository
         uses: actions/setup-java@v3
         with:
