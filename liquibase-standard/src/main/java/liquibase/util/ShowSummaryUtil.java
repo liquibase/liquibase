@@ -85,7 +85,7 @@ public class ShowSummaryUtil {
         //
         // Show the details too
         //
-        SortedMap<String, Integer> skippedMdc = showDetailTable(skippedChangeSets, filterDenied, outputStream, shouldPrintDetailTable);
+        SortedMap<String, Integer> skippedMdc = showDetailTable(skippedChangeSets, filterDenied, outputStream, shouldPrintDetailTable, showSummaryOutput);
         updateSummaryMdc.setSkipped(skippedMdc);
         try(MdcObject updateSummaryMdcObject = Scope.getCurrentScope().addMdcValue(MdcKey.UPDATE_SUMMARY, updateSummaryMdc)) {
             Scope.getCurrentScope().getLog(ShowSummaryUtil.class).info("Update summary generated");
@@ -95,7 +95,7 @@ public class ShowSummaryUtil {
     //
     // Show the details
     //
-    private static SortedMap<String, Integer> showDetailTable(List<ChangeSet> skippedChangeSets, List<ChangeSetStatus> filterDenied, OutputStream outputStream, boolean shouldPrintDetailTable)
+    private static SortedMap<String, Integer> showDetailTable(List<ChangeSet> skippedChangeSets, List<ChangeSetStatus> filterDenied, OutputStream outputStream, boolean shouldPrintDetailTable, UpdateSummaryOutputEnum showSummaryOutput)
             throws IOException, LiquibaseException {
         String totalSkippedMdcKey = "totalSkipped";
         //
@@ -131,6 +131,7 @@ public class ShowSummaryUtil {
         //
         // Filtered because of labels or context
         //
+        List<String> skippedMessages = new ArrayList<>();
         for (ChangeSetStatus st : finalList) {
             AtomicBoolean flag = new AtomicBoolean(true);
             StringBuilder builder = new StringBuilder();
@@ -140,7 +141,7 @@ public class ShowSummaryUtil {
                     mdcSkipCounts.merge(displayName, 1, Integer::sum);
                 }
                 String skippedMessage = String.format("   '%s' : %s", st.getChangeSet().toString(), consumer.getMessage());
-                Scope.getCurrentScope().getLog(ShowSummaryUtil.class).info(skippedMessage);
+                skippedMessages.add(skippedMessage);
                 if (! flag.get()) {
                     builder.append(System.lineSeparator());
                 }
@@ -154,14 +155,27 @@ public class ShowSummaryUtil {
         }
 
         if (shouldPrintDetailTable) {
-            List<Integer> widths = new ArrayList<>();
-            widths.add(60);
-            widths.add(40);
-
-            Writer writer = createOutputWriter(outputStream);
-            TableOutput.formatOutput(table, widths, true, writer);
+            switch (showSummaryOutput) {
+                case CONSOLE:
+                    printDetailTable(table, outputStream);
+                    break;
+                case LOG:
+                    skippedMessages.forEach(ShowSummaryUtil::writeToLog);
+                    break;
+                default:
+                    printDetailTable(table, outputStream);
+                    skippedMessages.forEach(ShowSummaryUtil::writeToLog);
+            }
         }
         return mdcSkipCounts;
+    }
+
+    private static void printDetailTable(List<List<String>> table, OutputStream outputStream) throws IOException, LiquibaseException {
+        List<Integer> widths = new ArrayList<>();
+        widths.add(60);
+        widths.add(40);
+        Writer writer = createOutputWriter(outputStream);
+        TableOutput.formatOutput(table, widths, true, writer);
     }
 
     //
