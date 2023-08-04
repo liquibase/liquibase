@@ -77,7 +77,7 @@ jobs:
       - uses: actions/checkout@v3
       - name: Get current date
         id: get-date
-        run: echo "::set-output name=date::$(date +'%Y-%m-%d:H:M:S')"
+        run: echo "::set-output name=date::$(date +'%Y-%m-%d %H:%M:%S')"
 
       - name: Find mvn Build Attributes
         id: find-attributes
