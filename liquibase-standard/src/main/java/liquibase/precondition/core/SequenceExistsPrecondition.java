@@ -76,17 +76,16 @@ public class SequenceExistsPrecondition extends AbstractPrecondition {
     }
 
     private void checkPostgresSequence(Database database, DatabaseChangeLog changeLog) throws DatabaseException, SQLException, PreconditionFailedException, PreconditionErrorException {
-        PreparedStatement statement = ((JdbcConnection) database.getConnection()).prepareStatement(POSTGRESQL_SQL_CHECK);
-        statement.setString(1, getSchemaName() != null ? getSchemaName() : database.getDefaultSchemaName());
-        statement.setString(2, getSequenceName());
-        try (ResultSet rs = statement.executeQuery()) {
-            if (!rs.next()) {
-                throw new PreconditionFailedException("Sequence " + database.escapeSequenceName(getCatalogName(), getSchemaName(), getSequenceName()) + " does not exist", changeLog, this);
+        try (PreparedStatement statement = ((JdbcConnection) database.getConnection()).prepareStatement(POSTGRESQL_SQL_CHECK)) {
+            statement.setString(1, getSchemaName() != null ? getSchemaName() : database.getDefaultSchemaName());
+            statement.setString(2, getSequenceName());
+            try (ResultSet rs = statement.executeQuery()) {
+                if (!rs.next()) {
+                    throw new PreconditionFailedException("Sequence " + database.escapeSequenceName(getCatalogName(), getSchemaName(), getSequenceName()) + " does not exist", changeLog, this);
+                }
+            } catch (SQLException e) {
+                throw new PreconditionErrorException(e, changeLog, this);
             }
-        } catch (SQLException e) {
-            throw new PreconditionErrorException(e, changeLog, this);
-        } finally {
-            statement.close();
         }
     }
 
