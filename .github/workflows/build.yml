@@ -403,6 +403,14 @@ jobs:
         with:
           maven-version: ${{ env.MAVEN_VERSION }}
 
+      # Version artifact based off of branch
+      - name: Version Artifact
+        run: |
+          version=${{ needs.setup.outputs.thisBranchFileName }}-SNAPSHOT
+          # Replace / with - in branch name
+          version=$(echo "$version" | sed 's/\//-/g')
+          mvn versions:set -DnewVersion="$version"
+
       - name: Build & Sign Artifacts
         env:
           INSTALL4J_LICENSE: ${{ secrets.INSTALL4J_LICENSE }}
