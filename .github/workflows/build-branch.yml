@@ -35,13 +35,17 @@ jobs:
 
       # Version artifact based off of branch and commit SHA.
       - name: Version Artifact
-        run: mvn versions:set -DnewVersion="${{ github.ref_name }}-SNAPSHOT"
+        run: |
+          version=${{ github.ref_name }}-SNAPSHOT
+          # Replace / with - in branch name
+          version=$(echo "$version" | sed 's/\//-/g')
+          mvn versions:set -DnewVersion="$version"
 
       # This would still deploy a package if there are test failures. Might help to have build.yml complete and then run this workflow
       # Publish to GitHub Packages
       - name: Publish package
         run: |
-          mvn -B clean deploy -pl '!liquibase-dist' -DskipTests=true "-Dbuild.repository.owner=${{ needs.setup.outputs.thisRepositoryOwner }}" "-Dbuild.repository.name=${{ needs.setup.outputs.thisRepositoryName }}" "-Dbuild.branch=${{ needs.setup.outputs.thisBranchName }}" "-Dbuild.number=${{ github.run_number }}" "-Dbuild.commit=${{ needs.setup.outputs.thisSha }}" "-Dbuild.timestamp=${{ needs.setup.outputs.timestamp }}"
+          mvn -B clean deploy -pl '!liquibase-dist' -DskipTests=true "-Dbuild.repository.owner=${{ needs.setup.outputs.thisRepositoryOwner }}" "-Dbuild.repository.name=${{ needs.setup.outputs.thisRepositoryName }}" "-Dbuild.branch='${{ needs.setup.outputs.thisBranchFileName }}'" "-Dbuild.number=${{ github.run_number }}" "-Dbuild.commit=${{ needs.setup.outputs.thisSha }}" "-Dbuild.timestamp=${{ needs.setup.outputs.timestamp }}"
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
