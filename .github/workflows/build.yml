@@ -404,6 +404,7 @@ jobs:
           maven-version: ${{ env.MAVEN_VERSION }}
 
       # Version artifact based off of branch
+      # https://datical.atlassian.net/browse/DAT-15548
       - name: Version Artifact
         run: |
           version=${{ needs.setup.outputs.thisBranchFileName }}-SNAPSHOT
