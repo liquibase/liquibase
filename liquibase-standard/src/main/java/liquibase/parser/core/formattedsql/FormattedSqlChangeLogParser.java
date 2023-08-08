@@ -40,7 +40,7 @@ public class FormattedSqlChangeLogParser extends AbstractFormattedChangeLogParse
 
     @Override
     protected String getSingleLineCommentSequence() {
-        return "\\-\\-";
+        return "^\\s*\\-\\-";
     }
 
     @Override
