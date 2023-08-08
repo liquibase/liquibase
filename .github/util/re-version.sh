@@ -76,7 +76,7 @@ do
 
   cp $workdir/$jar $outdir
   RENAME_SNAPSHOTS=$(ls "$outdir/$jar" | sed -e "s/0-SNAPSHOT/$version/g")
-  if [[ "$RENAME_SNAPSHOTS" -ne "$outdir/$jar" ]]; then
+  if [[ "$RENAME_SNAPSHOTS" != "$outdir/$jar" ]]; then
       mv -v "$outdir/$jar" "$RENAME_SNAPSHOTS"
   fi
 
@@ -98,7 +98,7 @@ do
 
   cp $workdir/$jar $outdir
   RENAME_JAVADOC_SNAPSHOTS=$(ls "$outdir/$jar" | sed -e "s/0-SNAPSHOT/$version/g")
-  if [[ "$RENAME_JAVADOC_SNAPSHOTS" -ne "$outdir/$jar" ]]; then
+  if [[ "$RENAME_JAVADOC_SNAPSHOTS" != "$outdir/$jar" ]]; then
     mv -v "$outdir/$jar" "$RENAME_JAVADOC_SNAPSHOTS"
   fi
 
