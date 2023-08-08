@@ -1204,6 +1204,7 @@ public class Liquibase implements AutoCloseable {
     public void clearCheckSums() throws LiquibaseException {
         CommandResults commandResults = new CommandScope("clearChecksums")
                 .addArgumentValue(DbUrlConnectionCommandStep.DATABASE_ARG, database)
+                .addArgumentValue(ClearChecksumsCommandStep.URL_ARG, database.getConnection().getURL())
                 .execute();
     }
 

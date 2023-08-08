@@ -822,9 +822,6 @@ public abstract class AbstractIntegrationTest {
         clearDatabase();
 
         liquibase = createLiquibase(completeChangeLog);
-        clearDatabase();
-
-        liquibase = createLiquibase(completeChangeLog);
         liquibase.setChangeLogParameter( "loginuser", testSystem.getUsername());
         liquibase.update(this.contexts);
 
