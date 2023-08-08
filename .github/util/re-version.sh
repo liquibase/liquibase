@@ -75,7 +75,7 @@ do
   (cd $workdir/finalize-jar && jar cfm $workdir/$jar $workdir/tmp-manifest.mf .)
 
   cp $workdir/$jar $outdir
-  RENAME_SNAPSHOTS=$(ls "$outdir/$jar" | sed -e "s/0-SNAPSHOT/$version/g")
+  RENAME_SNAPSHOTS=$(ls "$outdir/$jar" | sed -e "s/0-SNAPSHOT/$version/g" -e "s/master-SNAPSHOT/$version/g")
   if [[ "$RENAME_SNAPSHOTS" != "$outdir/$jar" ]]; then
       mv -v "$outdir/$jar" "$RENAME_SNAPSHOTS"
   fi
@@ -97,7 +97,7 @@ do
   rm -rf $workdir/rebuild
 
   cp $workdir/$jar $outdir
-  RENAME_JAVADOC_SNAPSHOTS=$(ls "$outdir/$jar" | sed -e "s/0-SNAPSHOT/$version/g")
+  RENAME_JAVADOC_SNAPSHOTS=$(ls "$outdir/$jar" | sed -e "s/0-SNAPSHOT/$version/g" -e "s/master-SNAPSHOT/$version/g")
   if [[ "$RENAME_JAVADOC_SNAPSHOTS" != "$outdir/$jar" ]]; then
     mv -v "$outdir/$jar" "$RENAME_JAVADOC_SNAPSHOTS"
   fi
