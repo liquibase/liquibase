@@ -76,7 +76,7 @@ do
 
   cp $workdir/$jar $outdir
   RENAME_SNAPSHOTS=$(ls $outdir/$jar | sed -e "s/0-SNAPSHOT/$version/g")
-  mv -v $outdir/$jar $RENAME_SNAPSHOTS
+  mv -v -f $outdir/$jar $RENAME_SNAPSHOTS
   
 done
 
