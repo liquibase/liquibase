@@ -1,10 +1,17 @@
 package liquibase.command.core;
 
+import liquibase.Scope;
+import liquibase.changelog.ChangeLogHistoryService;
+import liquibase.changelog.ChangeLogHistoryServiceFactory;
 import liquibase.command.*;
 import liquibase.configuration.ConfigurationValueObfuscator;
-import liquibase.exception.CommandExecutionException;
+import liquibase.database.Database;
+import liquibase.lockservice.LockService;
 
-public class ClearChecksumsCommandStep extends AbstractCliWrapperCommandStep {
+import java.util.Arrays;
+import java.util.List;
+
+public class ClearChecksumsCommandStep extends AbstractCommandStep {
 
     public static final String[] COMMAND_NAME = {"clearChecksums"};
 
@@ -48,7 +55,18 @@ public class ClearChecksumsCommandStep extends AbstractCliWrapperCommandStep {
     }
 
     @Override
-    protected String[] collectArguments(CommandScope commandScope) throws CommandExecutionException {
-        return collectArguments(commandScope, null, null);
+    public void run(CommandResultsBuilder resultsBuilder) throws Exception {
+        CommandScope commandScope = resultsBuilder.getCommandScope();
+        final Database database = (Database) commandScope.getDependency(Database.class);
+
+        ChangeLogHistoryService changeLogService = ChangeLogHistoryServiceFactory.getInstance().getChangeLogService(database);
+        Scope.getCurrentScope().getLog(getClass()).info(String.format("Clearing database change log checksums for database %s", database.getShortName()));
+        changeLogService.clearAllCheckSums();
     }
+
+    @Override
+    public List<Class<?>> requiredDependencies() {
+        return Arrays.asList(Database.class, LockService.class);
+    }
+
 }
