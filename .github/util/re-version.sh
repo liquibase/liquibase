@@ -76,8 +76,10 @@ do
 
   cp $workdir/$jar $outdir
   RENAME_SNAPSHOTS=$(ls $outdir/$jar | sed -e "s/0-SNAPSHOT/$version/g")
-  mv -v -f $outdir/$jar $RENAME_SNAPSHOTS
-  
+  if [[$RENAME_SNAPSHOTS -ne $outdir/$jar ]]; then
+    mv -v $outdir/$jar $RENAME_SNAPSHOTS
+  fi
+
 done
 
 #### Update  javadoc jars
