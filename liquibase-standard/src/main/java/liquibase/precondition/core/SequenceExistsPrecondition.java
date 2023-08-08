@@ -21,7 +21,7 @@ public class SequenceExistsPrecondition extends AbstractPrecondition {
     private String schemaName;
     private String sequenceName;
 
-    private static final String POSTGRESQL_SQL_CHECK = "SELECT c.relname FROM pg_class c JOIN pg_namespace ns on c.relnamespace = ns.oid WHERE c.relkind = 'S' AND ns.nspname = ? and c.relname = ?";
+    private static final String SQL_CHECK_POSTGRES_SEQUENCE_EXISTS = "SELECT c.relname FROM pg_class c JOIN pg_namespace ns on c.relnamespace = ns.oid WHERE c.relkind = 'S' AND ns.nspname = ? and c.relname = ?";
 
     public String getCatalogName() {
         return catalogName;
@@ -76,7 +76,7 @@ public class SequenceExistsPrecondition extends AbstractPrecondition {
     }
 
     private void checkPostgresSequence(Database database, DatabaseChangeLog changeLog) throws DatabaseException, SQLException, PreconditionFailedException, PreconditionErrorException {
-        try (PreparedStatement statement = ((JdbcConnection) database.getConnection()).prepareStatement(POSTGRESQL_SQL_CHECK)) {
+        try (PreparedStatement statement = ((JdbcConnection) database.getConnection()).prepareStatement(SQL_CHECK_POSTGRES_SEQUENCE_EXISTS)) {
             statement.setString(1, getSchemaName() != null ? getSchemaName() : database.getDefaultSchemaName());
             statement.setString(2, getSequenceName());
             try (ResultSet rs = statement.executeQuery()) {
