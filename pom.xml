@@ -79,6 +79,7 @@
         <argLine></argLine>
     </properties>
 
+    <!-- comment -->
     <distributionManagement>
         <repository>
             <id>liquibase</id>
