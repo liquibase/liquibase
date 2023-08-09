@@ -463,9 +463,9 @@ public class ColumnSnapshotGenerator extends JdbcSnapshotGenerator {
 
         // For SAP (Sybase) SQL ANywhere, JDBC returns "LONG(2147483647) binary" (the number is 2^31-1)
         // but when creating a column, LONG BINARY must not have parameters.
-        // The same applies to LONG(...) VARCHAR.
+        // The same applies to LONG(...) VARCHAR and LONG(...) NVARCHAR.
         if (database instanceof SybaseASADatabase
-                && ("LONG BINARY".equalsIgnoreCase(columnTypeName) || "LONG VARCHAR".equalsIgnoreCase(columnTypeName))) {
+                && ("LONG BINARY".equalsIgnoreCase(columnTypeName) || "LONG VARCHAR".equalsIgnoreCase(columnTypeName) || "LONG NVARCHAR".equalsIgnoreCase(columnTypeName))) {
             columnSize = null;
         }
 
