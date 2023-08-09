@@ -154,8 +154,8 @@ find $workdir/tgz-repackage -name "*.txt" -exec sed -i -e "s/0-SNAPSHOT/$version
 (cd $workdir/tgz-repackage && zip -qr $outdir/liquibase-$version.zip *)
 
 ## Reversion deb package
-apt-get update
-apt-get -y install dpkg-dev
+sudo apt-get update
+sudo apt-get -y install dpkg-dev
 mv $workdir/liquibase-0-SNAPSHOT.deb $workdir/liquibase-$version.deb
 tmp_dir=temp_deb/DEBIAN
 mkdir -p $tmp_dir
