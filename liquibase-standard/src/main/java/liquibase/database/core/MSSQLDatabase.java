@@ -285,7 +285,7 @@ public class MSSQLDatabase extends AbstractJdbcDatabase {
         // it anyway.
         //
         tableName = escapeObjectName(catalogName, schemaName, tableName, Table.class);
-        if (tableName.contains(" ") && ! tableName.startsWith("\"")) {
+        if (tableName != null && tableName.contains(" ") && ! tableName.startsWith("\"")) {
             tableName = "\"" + tableName + "\"";
         }
         return tableName;
