@@ -63,16 +63,7 @@ public class MissingDataExternalFileChangeGenerator extends MissingDataChangeGen
                 return null;
             }
 
-            //
-            // If the table name has a parenthesis in it, the escape logic might mistake it for stored logic
-            // and not add quotes. We can check for a space and the lack of a quote at the beginning and quote
-            // it anyway
-            //
-            String tableName = referenceDatabase.escapeTableName(table.getSchema().getCatalogName(), table.getSchema().getName(), table.getName());
-            if (tableName.contains(" ") && ! tableName.startsWith("\"")) {
-                tableName = "\"" + tableName + "\"";
-            }
-            String sql = "SELECT * FROM " + tableName;
+            String sql = "SELECT * FROM " + referenceDatabase.escapeTableName(table.getSchema().getCatalogName(), table.getSchema().getName(), table.getName());
 
             
             stmt.setFetchSize(100);
