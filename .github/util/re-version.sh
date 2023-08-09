@@ -159,10 +159,10 @@ sudo apt-get -y install dpkg-dev
 mv $workdir/liquibase-0-SNAPSHOT.deb $workdir/liquibase-$version.deb
 tmp_dir=temp_deb/DEBIAN
 mkdir -p $tmp_dir
-dpkg-deb -x $workdir/liquibase-$version.deb $tmp_dir
+dpkg-deb -x $workdir/liquibase-$version.deb temp_deb
 dpkg-deb -e $workdir/liquibase-$version.deb $tmp_dir
 sed -i "s/Version: .*/Version: $version/" "$tmp_dir/control"
 rm -rf $workdir/liquibase-$version.deb
-dpkg-deb -b temp_deb $workdir/liquibase-$version.deb
+dpkg-deb -b -z9 temp_deb $workdir/liquibase-$version.deb
 rm -rf temp_deb
 cp $workdir/liquibase-$version.deb $outdir/liquibase-$version.deb
