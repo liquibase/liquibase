@@ -2,7 +2,9 @@ package liquibase.command.core.helpers;
 
 import liquibase.Liquibase;
 import liquibase.Scope;
-import liquibase.command.*;
+import liquibase.command.CleanUpCommandStep;
+import liquibase.command.CommandResultsBuilder;
+import liquibase.command.CommandScope;
 import liquibase.database.Database;
 import liquibase.exception.LockException;
 import liquibase.lockservice.LockService;
@@ -18,8 +20,6 @@ public class LockServiceCommandStep extends AbstractHelperCommandStep implements
 
     protected static final String[] COMMAND_NAME = {"lockServiceCommandStep"};
 
-    private Database database;
-
     @Override
     public List<Class<?>> requiredDependencies() {
         return Collections.singletonList(Database.class);
@@ -33,7 +33,7 @@ public class LockServiceCommandStep extends AbstractHelperCommandStep implements
     @Override
     public void run(CommandResultsBuilder resultsBuilder) throws Exception {
         CommandScope commandScope = resultsBuilder.getCommandScope();
-        database = (Database) commandScope.getDependency(Database.class);
+        Database database = (Database) commandScope.getDependency(Database.class);
         LockServiceFactory.getInstance().getLockService(database).waitForLock();
     }
 
