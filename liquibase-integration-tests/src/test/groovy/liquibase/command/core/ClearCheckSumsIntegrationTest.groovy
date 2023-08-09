@@ -13,7 +13,7 @@ import spock.lang.Shared
 import spock.lang.Specification
 
 @LiquibaseIntegrationTest
-class ClearCheckSumsIntegrationTests extends Specification {
+class ClearCheckSumsIntegrationTest extends Specification {
 
     @Shared
     private DatabaseTestSystem h2 = (DatabaseTestSystem) Scope.currentScope.getSingleton(TestSystemFactory.class).getTestSystem("h2")
