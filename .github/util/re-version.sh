@@ -146,7 +146,7 @@ cp $outdir/liquibase-commercial-$version.jar $workdir/internal/lib/liquibase-com
 
 ## Extract tar.gz and rebuild it back into the tar.gz and zip
 mkdir $workdir/tgz-repackage
-(cd $workdir/tgz-repackage && tar -xzf $workdir/liquibase-$version.tar.gz)
+(cd $workdir/tgz-repackage && tar -xzf $workdir/liquibase-master-SNAPSHOT.tar.gz)
 cp $workdir/internal/lib/liquibase-core.jar $workdir/tgz-repackage/internal/lib/liquibase-core.jar
 cp $workdir/internal/lib/liquibase-commercial.jar $workdir/tgz-repackage/internal/lib/liquibase-commercial.jar
 find $workdir/tgz-repackage -name "*.txt" -exec sed -i -e "s/0-SNAPSHOT/$version/" {} \;
