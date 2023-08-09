@@ -43,7 +43,7 @@ mkdir -p $outdir
 (cd $scriptDir && javac ManifestReversion.java)
 
 #### Update  jars
-declare -a jars=("liquibase-core-0-SNAPSHOT.jar" "liquibase-core-0-SNAPSHOT-sources.jar" "liquibase-commercial-0-SNAPSHOT.jar" "liquibase-commercial-0-SNAPSHOT-sources.jar" "liquibase-cdi-0-SNAPSHOT.jar" "liquibase-cdi-0-SNAPSHOT-sources.jar" "liquibase-cdi-jakarta-0-SNAPSHOT.jar" "liquibase-cdi-jakarta-0-SNAPSHOT-sources.jar" "liquibase-maven-plugin-0-SNAPSHOT.jar" "liquibase-maven-plugin-0-SNAPSHOT-sources.jar")
+declare -a jars=("liquibase-core-0-SNAPSHOT.jar" "liquibase-core-0-SNAPSHOT-sources.jar" "liquibase-commercial-master-SNAPSHOT.jar" "liquibase-commercial-master-SNAPSHOT-sources.jar" "liquibase-cdi-0-SNAPSHOT.jar" "liquibase-cdi-0-SNAPSHOT-sources.jar" "liquibase-cdi-jakarta-0-SNAPSHOT.jar" "liquibase-cdi-jakarta-0-SNAPSHOT-sources.jar" "liquibase-maven-plugin-0-SNAPSHOT.jar" "liquibase-maven-plugin-0-SNAPSHOT-sources.jar")
 
 for jar in "${jars[@]}"
 do
@@ -58,7 +58,7 @@ do
   rm -rf $workdir/META-INF
 
   ## Fix up liquibase.build.properties
-  if [[ $jar == "liquibase-core-0-SNAPSHOT.jar" || $jar == "liquibase-commercial-0-SNAPSHOT.jar" ]]; then
+  if [[ $jar == "liquibase-core-0-SNAPSHOT.jar" || $jar == "liquibase-commercial-master-SNAPSHOT.jar" ]]; then
     unzip -q $workdir/$jar liquibase.build.properties -d $workdir
     sed -i -e "s/build.version=.*/build.version=$version/" $workdir/liquibase.build.properties
     (cd $workdir && jar -uf $jar liquibase.build.properties)
@@ -75,13 +75,15 @@ do
   (cd $workdir/finalize-jar && jar cfm $workdir/$jar $workdir/tmp-manifest.mf .)
 
   cp $workdir/$jar $outdir
-  RENAME_SNAPSHOTS=$(ls $outdir/$jar | sed -e "s/0-SNAPSHOT/$version/g")
-  mv -v $outdir/$jar $RENAME_SNAPSHOTS
-  
+  RENAME_SNAPSHOTS=$(ls "$outdir/$jar" | sed -e "s/0-SNAPSHOT/$version/g" -e "s/master-SNAPSHOT/$version/g")
+  if [[ "$RENAME_SNAPSHOTS" != "$outdir/$jar" ]]; then
+      mv -v "$outdir/$jar" "$RENAME_SNAPSHOTS"
+  fi
+
 done
 
 #### Update  javadoc jars
-declare -a javadocJars=("liquibase-core-0-SNAPSHOT-javadoc.jar" "liquibase-cdi-0-SNAPSHOT-javadoc.jar" "liquibase-cdi-jakarta-0-SNAPSHOT-javadoc.jar" "liquibase-maven-plugin-0-SNAPSHOT-javadoc.jar" "liquibase-commercial-0-SNAPSHOT-javadoc.jar")
+declare -a javadocJars=("liquibase-core-0-SNAPSHOT-javadoc.jar" "liquibase-cdi-0-SNAPSHOT-javadoc.jar" "liquibase-cdi-jakarta-0-SNAPSHOT-javadoc.jar" "liquibase-maven-plugin-0-SNAPSHOT-javadoc.jar" "liquibase-commercial-master-SNAPSHOT-javadoc.jar")
 
 for jar in "${javadocJars[@]}"
 do
@@ -95,8 +97,11 @@ do
   rm -rf $workdir/rebuild
 
   cp $workdir/$jar $outdir
-  RENAME_JAVADOC_SNAPSHOTS=$(ls $outdir/$jar | sed -e "s/0-SNAPSHOT/$version/g")
-  mv -v $outdir/$jar $RENAME_JAVADOC_SNAPSHOTS
+  RENAME_JAVADOC_SNAPSHOTS=$(ls "$outdir/$jar" | sed -e "s/0-SNAPSHOT/$version/g" -e "s/master-SNAPSHOT/$version/g")
+  if [[ "$RENAME_JAVADOC_SNAPSHOTS" != "$outdir/$jar" ]]; then
+    mv -v "$outdir/$jar" "$RENAME_JAVADOC_SNAPSHOTS"
+  fi
+
 done
 
 ## Test jar structure
@@ -141,9 +146,23 @@ cp $outdir/liquibase-commercial-$version.jar $workdir/internal/lib/liquibase-com
 
 ## Extract tar.gz and rebuild it back into the tar.gz and zip
 mkdir $workdir/tgz-repackage
-(cd $workdir/tgz-repackage && tar -xzf $workdir/liquibase-0-SNAPSHOT.tar.gz)
+(cd $workdir/tgz-repackage && tar -xzf $workdir/liquibase-master-SNAPSHOT.tar.gz)
 cp $workdir/internal/lib/liquibase-core.jar $workdir/tgz-repackage/internal/lib/liquibase-core.jar
 cp $workdir/internal/lib/liquibase-commercial.jar $workdir/tgz-repackage/internal/lib/liquibase-commercial.jar
 find $workdir/tgz-repackage -name "*.txt" -exec sed -i -e "s/0-SNAPSHOT/$version/" {} \;
 (cd $workdir/tgz-repackage && tar -czf $outdir/liquibase-$version.tar.gz *)
 (cd $workdir/tgz-repackage && zip -qr $outdir/liquibase-$version.zip *)
+
+## Reversion deb package
+sudo apt-get update
+sudo apt-get -y install dpkg-dev
+mv $workdir/liquibase-0-SNAPSHOT.deb $workdir/liquibase-$version.deb
+tmp_dir=temp_deb/DEBIAN
+mkdir -p $tmp_dir
+dpkg-deb -x $workdir/liquibase-$version.deb temp_deb
+dpkg-deb -e $workdir/liquibase-$version.deb $tmp_dir
+sed -i "s/Version: .*/Version: $version/" "$tmp_dir/control"
+rm -rf $workdir/liquibase-$version.deb
+dpkg-deb -b -z9 temp_deb $workdir/liquibase-$version.deb
+rm -rf temp_deb
+cp $workdir/liquibase-$version.deb $outdir/liquibase-$version.deb
