@@ -1,13 +1,6 @@
 package liquibase.extension.testing.command
 
-import liquibase.Scope
-import liquibase.changelog.ChangeLogHistoryServiceFactory
-import liquibase.changelog.RanChangeSet
-import liquibase.database.Database
 import liquibase.exception.CommandValidationException
-import liquibase.extension.testing.setup.HistoryEntry
-
-import static org.junit.Assert.assertEquals
 
 CommandTests.define {
     command = ["clearChecksums"]
