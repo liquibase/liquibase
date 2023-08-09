@@ -57,6 +57,8 @@ public class DiffToChangeLog {
     private String changeSetContext;
     private String changeSetAuthor;
     private String changeSetPath;
+    private boolean changeSetRunOnChangeForCreateViewChange;
+    private boolean changeReplaceIfExistsForCreateViewChange;
     private DiffResult diffResult;
     private final DiffOutputControl diffOutputControl;
     private boolean tryDbaDependencies = true;
@@ -748,23 +750,33 @@ public class DiffToChangeLog {
 
             if (useSeparateChangeSets(changes)) {
                 for (Change change : changes) {
-                    ChangeSet changeSet = new ChangeSet(generateId(changes), getChangeSetAuthor(), false, false, this.changeSetPath, changeSetContext,
+                    final boolean onlyCreateViewChanges = change instanceof CreateViewChange;
+                    final boolean runOnChange = onlyCreateViewChanges && getChangeSetRunOnChangeForCreateViewChange();
+                    ChangeSet changeSet = new ChangeSet(generateId(changes), getChangeSetAuthor(), false, runOnChange, this.changeSetPath, changeSetContext,
                             null, true, quotingStrategy, null);
                     changeSet.setCreated(created);
                     if (diffOutputControl.getLabels() != null) {
                         changeSet.setLabels(diffOutputControl.getLabels());
                     }
+                    if (change instanceof CreateViewChange && getChangeReplaceIfExistsForCreateViewChange()) {
+                        ((CreateViewChange) change).setReplaceIfExists(true);
+                    }
                     changeSet.addChange(change);
                     changeSets.add(changeSet);
                 }
             } else {
-                ChangeSet changeSet = new ChangeSet(generateId(changes), getChangeSetAuthor(), false, false, this.changeSetPath, csContext,
+                final boolean onlyCreateViewChanges = Arrays.asList(changes).stream().allMatch(CreateViewChange.class::isInstance);
+                final boolean runOnChange = onlyCreateViewChanges && getChangeSetRunOnChangeForCreateViewChange();
+                ChangeSet changeSet = new ChangeSet(generateId(changes), getChangeSetAuthor(), false, runOnChange, this.changeSetPath, csContext,
                         null, true, quotingStrategy, null);
                 changeSet.setCreated(created);
                 if (diffOutputControl.getLabels() != null) {
                     changeSet.setLabels(diffOutputControl.getLabels());
                 }
                 for (Change change : changes) {
+                    if (change instanceof CreateViewChange && getChangeReplaceIfExistsForCreateViewChange()) {
+                        ((CreateViewChange) change).setReplaceIfExists(true);
+                    }
                     changeSet.addChange(change);
                 }
                 changeSets.add(changeSet);
@@ -823,6 +835,22 @@ public class DiffToChangeLog {
 
     public void setChangeSetPath(String changeSetPath) {
         this.changeSetPath = changeSetPath;
+    }
+
+    public void setChangeSetRunOnChangeForCreateViewChange(final boolean runOnChange) {
+        changeSetRunOnChangeForCreateViewChange = runOnChange;
+    }
+
+    protected boolean getChangeSetRunOnChangeForCreateViewChange() {
+        return changeSetRunOnChangeForCreateViewChange;
+    }
+
+    public void setChangeReplaceIfExistsForCreateViewChange(final boolean replaceIfExists) {
+        changeReplaceIfExistsForCreateViewChange = replaceIfExists;
+    }
+
+    protected boolean getChangeReplaceIfExistsForCreateViewChange() {
+        return changeReplaceIfExistsForCreateViewChange;
     }
 
     public void setIdRoot(String idRoot) {
