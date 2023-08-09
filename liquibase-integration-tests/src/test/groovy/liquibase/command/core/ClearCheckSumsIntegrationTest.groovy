@@ -29,7 +29,7 @@ class ClearCheckSumsIntegrationTest extends Specification {
         when:
         def h2Database = h2.getDatabaseFromFactory()
         def commandResults = new CommandScope("clearChecksums")
-                .addArgumentValue(ClearChecksumsCommandStep.URL_ARG, h2.getConnectionUrl())
+                .addArgumentValue(DbUrlConnectionCommandStep.URL_ARG, h2.getConnectionUrl())
                 .addArgumentValue(DbUrlConnectionCommandStep.DATABASE_ARG, h2Database)
                 .execute()
 

@@ -27,10 +27,10 @@ Optional Args:
     Default: null
   driverPropertiesFile (String) The JDBC driver properties file
     Default: null
-  password (String) The database password
+  password (String) Password to use to connect to the database
     Default: null
     OBFUSCATED
-  username (String) The database username
+  username (String) Username to use to connect to the database
     Default: null
 """
 
