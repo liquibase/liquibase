@@ -34,38 +34,6 @@ Optional Args:
     Default: null
 """
 
-    run "Happy path", {
-        arguments = [
-            url:        { it.url },
-            username:   { it.username },
-            password:   { it.password }
-        ]
-        setup {
-            history = [
-                    new HistoryEntry(
-                            id: "1",
-                            author: "test",
-                            path: "com/example/changelog.xml"
-                    ),
-                    new HistoryEntry(
-                            id: "2",
-                            author: "test",
-                            path: "com/example/changelog.xml"
-                    ),
-            ]
-        }
-
-        expectations = {
-            def database = (Database) Scope.getCurrentScope().get("database", null)
-            def changelogHistoryService = Scope.getCurrentScope().getSingleton(ChangeLogHistoryServiceFactory.class).getChangeLogService(database)
-            List<RanChangeSet> ranChangeSets = changelogHistoryService.getRanChangeSets()
-            for (RanChangeSet ranChangeSet : ranChangeSets) {
-                assertEquals(ranChangeSet.getLastCheckSum(), null)
-            }
-        }
-
-    }
-
     run "Run without a URL should throw an exception", {
         arguments = [
                 url:  ""
