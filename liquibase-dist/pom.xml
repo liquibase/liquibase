@@ -9,7 +9,6 @@
 		<version>0-SNAPSHOT</version>
 	</parent>
 	<artifactId>liquibase-dist</artifactId>
-	<packaging>pom</packaging>
 
 	<description>Liquibase is a tool for managing and executing database changes.</description>
 
