@@ -215,6 +215,7 @@ public class Liquibase implements AutoCloseable {
         runInScope(() -> {
             CommandScope updateCommand = new CommandScope(UpdateCommandStep.COMMAND_NAME);
             updateCommand.addArgumentValue(DbUrlConnectionCommandStep.DATABASE_ARG, getDatabase());
+            updateCommand.addArgumentValue(UpdateCommandStep.CHANGELOG_ARG, databaseChangeLog);
             updateCommand.addArgumentValue(UpdateCommandStep.CHANGELOG_FILE_ARG, changeLogFile);
             updateCommand.addArgumentValue(UpdateCommandStep.CONTEXTS_ARG, contexts != null ? contexts.toString() : null);
             updateCommand.addArgumentValue(UpdateCommandStep.LABEL_FILTER_ARG, labelExpression != null ? labelExpression.getOriginalString() : null);
@@ -305,6 +306,7 @@ public class Liquibase implements AutoCloseable {
             CommandScope updateCommand = new CommandScope(UpdateSqlCommandStep.COMMAND_NAME);
             updateCommand.addArgumentValue(DbUrlConnectionCommandStep.DATABASE_ARG, getDatabase());
             updateCommand.addArgumentValue(UpdateSqlCommandStep.CHANGELOG_FILE_ARG, changeLogFile);
+            updateCommand.addArgumentValue(DatabaseChangelogCommandStep.CHANGELOG_ARG, databaseChangeLog);
             updateCommand.addArgumentValue(UpdateSqlCommandStep.CONTEXTS_ARG, contexts != null ? contexts.toString() : null);
             updateCommand.addArgumentValue(UpdateSqlCommandStep.LABEL_FILTER_ARG, labelExpression != null ? labelExpression.getOriginalString() : null);
             updateCommand.addArgumentValue(ChangeExecListenerCommandStep.CHANGE_EXEC_LISTENER_ARG, changeExecListener);
@@ -335,6 +337,7 @@ public class Liquibase implements AutoCloseable {
             CommandScope updateCommand = new CommandScope(UpdateCountCommandStep.COMMAND_NAME);
             updateCommand.addArgumentValue(DbUrlConnectionCommandStep.DATABASE_ARG, getDatabase());
             updateCommand.addArgumentValue(UpdateCountCommandStep.CHANGELOG_FILE_ARG, changeLogFile);
+            updateCommand.addArgumentValue(DatabaseChangelogCommandStep.CHANGELOG_ARG, databaseChangeLog);
             updateCommand.addArgumentValue(UpdateCountCommandStep.CONTEXTS_ARG, contexts != null ? contexts.toString() : null);
             updateCommand.addArgumentValue(UpdateCountCommandStep.LABEL_FILTER_ARG, labelExpression != null ? labelExpression.getOriginalString() : null);
             updateCommand.addArgumentValue(ChangeExecListenerCommandStep.CHANGE_EXEC_LISTENER_ARG, changeExecListener);
@@ -374,6 +377,7 @@ public class Liquibase implements AutoCloseable {
             CommandScope updateCommand = new CommandScope(UpdateToTagCommandStep.COMMAND_NAME);
             updateCommand.addArgumentValue(DbUrlConnectionCommandStep.DATABASE_ARG, getDatabase());
             updateCommand.addArgumentValue(UpdateToTagCommandStep.CHANGELOG_FILE_ARG, changeLogFile);
+            updateCommand.addArgumentValue(DatabaseChangelogCommandStep.CHANGELOG_ARG, databaseChangeLog);
             updateCommand.addArgumentValue(UpdateToTagCommandStep.CONTEXTS_ARG, contexts != null ? contexts.toString() : null);
             updateCommand.addArgumentValue(UpdateToTagCommandStep.LABEL_FILTER_ARG, labelExpression != null ? labelExpression.getOriginalString() : null);
             updateCommand.addArgumentValue(ChangeExecListenerCommandStep.CHANGE_EXEC_LISTENER_ARG, changeExecListener);
