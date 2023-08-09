@@ -161,7 +161,7 @@ tmp_dir=temp_deb/DEBIAN
 mkdir -p $tmp_dir
 dpkg-deb -x $workdir/liquibase-$version.deb $tmp_dir
 dpkg-deb -e $workdir/liquibase-$version.deb $tmp_dir
-sed -i "s/Version: .*/Version: $version/" "$temp_dir/control"
+sed -i "s/Version: .*/Version: $version/" "$tmp_dir/control"
 rm -rf $workdir/liquibase-$version.deb
 dpkg-deb -b temp_deb $workdir/liquibase-$version.deb
 rm -rf temp_deb
