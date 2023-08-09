@@ -37,6 +37,8 @@ public class GenerateChangelogCommandStep extends AbstractCommandStep {
     public static final CommandArgumentDefinition<String> DATA_OUTPUT_DIR_ARG;
     public static final CommandArgumentDefinition<Boolean> OVERWRITE_OUTPUT_FILE_ARG;
     public static final CommandArgumentDefinition<String> CHANGELOG_FILE_ARG;
+    public static final CommandArgumentDefinition<Boolean> CREATEVIEW_RUNONCHANGE_ARG;
+    public static final CommandArgumentDefinition<Boolean> CREATEVIEW_REPLACEIFEXISTS_ARG;
 
     public static final CommandArgumentDefinition<String> REFERENCE_URL_ARG;
     public static final CommandArgumentDefinition<String> REFERENCE_USERNAME_ARG;
@@ -70,6 +72,10 @@ public class GenerateChangelogCommandStep extends AbstractCommandStep {
                 .description("Directory to write table data to").build();
         OVERWRITE_OUTPUT_FILE_ARG = builder.argument("overwriteOutputFile", Boolean.class)
                 .defaultValue(false).description("Flag to allow overwriting of output changelog file. Default: false").build();
+        CREATEVIEW_RUNONCHANGE_ARG = builder.argument("createViewRunOnChange", Boolean.class)
+                .defaultValue(false).description("Sets runOnChange=\"true\" for changesets containing solely createView changes").build();
+        CREATEVIEW_REPLACEIFEXISTS_ARG = builder.argument("createViewReplaceIfExists", Boolean.class)
+                .defaultValue(false).description("Sets replaceIfExists=\"true\" for createView changes").build();
 
         // this happens because the command line asks for "url", but in fact uses it as "referenceUrl"
         REFERENCE_URL_ARG = builder.argument("referenceUrl", String.class).hidden().build();
@@ -131,6 +137,8 @@ public class GenerateChangelogCommandStep extends AbstractCommandStep {
             changeLogWriter.setChangeSetLabels(commandScope.getArgumentValue(LABEL_FILTER_ARG));
         }
         changeLogWriter.setChangeSetPath(changeLogFile);
+        changeLogWriter.setChangeSetRunOnChangeForCreateViewChange(commandScope.getArgumentValue(CREATEVIEW_RUNONCHANGE_ARG));
+        changeLogWriter.setChangeReplaceIfExistsForCreateViewChange(commandScope.getArgumentValue(CREATEVIEW_REPLACEIFEXISTS_ARG));
 
         ObjectQuotingStrategy originalStrategy = referenceDatabase.getObjectQuotingStrategy();
         try {
