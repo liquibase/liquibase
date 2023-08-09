@@ -75,9 +75,11 @@ do
   (cd $workdir/finalize-jar && jar cfm $workdir/$jar $workdir/tmp-manifest.mf .)
 
   cp $workdir/$jar $outdir
-  RENAME_SNAPSHOTS=$(ls $outdir/$jar | sed -e "s/0-SNAPSHOT/$version/g")
-  mv -v -f $outdir/$jar $RENAME_SNAPSHOTS
-  
+  RENAME_SNAPSHOTS=$(ls "$outdir/$jar" | sed -e "s/0-SNAPSHOT/$version/g" -e "s/master-SNAPSHOT/$version/g")
+  if [[ "$RENAME_SNAPSHOTS" != "$outdir/$jar" ]]; then
+      mv -v "$outdir/$jar" "$RENAME_SNAPSHOTS"
+  fi
+
 done
 
 #### Update  javadoc jars
@@ -95,8 +97,11 @@ do
   rm -rf $workdir/rebuild
 
   cp $workdir/$jar $outdir
-  RENAME_JAVADOC_SNAPSHOTS=$(ls $outdir/$jar | sed -e "s/0-SNAPSHOT/$version/g")
-  mv -v $outdir/$jar $RENAME_JAVADOC_SNAPSHOTS
+  RENAME_JAVADOC_SNAPSHOTS=$(ls "$outdir/$jar" | sed -e "s/0-SNAPSHOT/$version/g" -e "s/master-SNAPSHOT/$version/g")
+  if [[ "$RENAME_JAVADOC_SNAPSHOTS" != "$outdir/$jar" ]]; then
+    mv -v "$outdir/$jar" "$RENAME_JAVADOC_SNAPSHOTS"
+  fi
+
 done
 
 ## Test jar structure
@@ -141,7 +146,7 @@ cp $outdir/liquibase-commercial-$version.jar $workdir/internal/lib/liquibase-com
 
 ## Extract tar.gz and rebuild it back into the tar.gz and zip
 mkdir $workdir/tgz-repackage
-(cd $workdir/tgz-repackage && tar -xzf $workdir/liquibase-0-SNAPSHOT.tar.gz)
+(cd $workdir/tgz-repackage && tar -xzf $workdir/liquibase-master-SNAPSHOT.tar.gz)
 cp $workdir/internal/lib/liquibase-core.jar $workdir/tgz-repackage/internal/lib/liquibase-core.jar
 cp $workdir/internal/lib/liquibase-commercial.jar $workdir/tgz-repackage/internal/lib/liquibase-commercial.jar
 find $workdir/tgz-repackage -name "*.txt" -exec sed -i -e "s/0-SNAPSHOT/$version/" {} \;
