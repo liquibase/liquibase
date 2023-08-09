@@ -157,11 +157,10 @@ find $workdir/tgz-repackage -name "*.txt" -exec sed -i -e "s/0-SNAPSHOT/$version
 apt-get update
 apt-get -y install dpkg-dev
 mv $workdir/liquibase-0-SNAPSHOT.deb $workdir/liquibase-$version.deb
-tmp_dir=$(mktemp -d)
+mkdir -p temp_deb/DEBIAN
 dpkg-deb -x $workdir/liquibase-$version.deb $tmp_dir
-tar -xzf $temp_dir/control.tar.gz -C $temp_dir
+dpkg-deb -e $workdir/liquibase-$version.deb $tmp_dir
 sed -i "s/Version: .*/Version: $version/" "$temp_dir/control"
-tar -czf $temp_dir/control.tar.gz -C $temp_dir control
 rm -rf $workdir/liquibase-$version.deb
 dpkg-deb -b $tmp_dir $workdir/liquibase-$version.deb
 rm -rf $tmp_dir
