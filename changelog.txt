@@ -5,9 +5,11 @@ Changes in version 4.23.1 (2023.08.09)
 
 ### Liquibase 4.23.1 is a patch release
 
-## Changes
+## Notable Changes
 
-* (#4370) add liquibaseHostName MDC key (DAT-14956) @StevenMassaro 
+### [PRO]
+* Introduce two new commands: `set-labels` and `set-contexts` to batch update the labels or contexts on existing changesets. Use these to scale database DevOps by bulk updating your changesets with one command. Or consolidate changes from different teams with different coding standards to ensure adherence to current standards. Learn more at https://docs.liquibase.com
+
 
 ## New Features
 
@@ -28,7 +30,7 @@ Changes in version 4.23.1 (2023.08.09)
 * (#4420) add additional MDC properties to update and diff mojos (DAT-14672) @StevenMassaro 
 * (#4219) Fixed CommandLineUtilsTest for german locale @nvoxland 
 * (#4450) Fix deploymentId not populating after locking @wwillard7800 
-* (#4409) DAT-15030 @sayaliM0412 
+* (#4409) DAT-15030 @sayaliM0412
 
 ## Bug Fixes
 
@@ -67,10 +69,7 @@ Changes in version 4.23.1 (2023.08.09)
 * (#4228) #4227 fix for BOOLEAN with precision like BOOLEAN(1) @sfrevel 
 * (#4354) Make CreateTableStatement backward compatible @jccampanero 
 * (#4427) Fix update fast check behavior @MalloD12 
-
-## API Breaking Changes
-
-*  (#4452) Fix checksum upgrade changes preventing useless updates and using AbstractChangeLogHistoryService for extensions compatibility @filipelautert 
+* (#4370) add liquibaseHostName MDC key (DAT-14956) @StevenMassaro
 
 ## Security, Driver and Other Updates
 
