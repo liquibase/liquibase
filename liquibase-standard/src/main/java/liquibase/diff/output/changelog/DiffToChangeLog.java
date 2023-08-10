@@ -845,15 +845,7 @@ public class DiffToChangeLog {
     }
 
     private boolean isContainedInRunOnChangeTypes(final Change change) {
-        return Arrays.asList(getChangeSetRunOnChangeTypes()).contains(changeName(change));
-    }
-
-    private String changeName(final Change change) {
-        if (change instanceof CreateViewChange)
-            return "createView";
-        if (change instanceof CreateProcedureChange)
-            return "createProcedure";
-        return null;
+        return Arrays.asList(getChangeSetRunOnChangeTypes()).contains(change.getSerializedObjectName());
     }
 
     public void setChangeReplaceIfExistsTypes(final String[] replaceIfExistsTypes) {
@@ -865,7 +857,7 @@ public class DiffToChangeLog {
     }
 
     private boolean isContainedInReplaceIfExistsTypes(final Change change) {
-        return Arrays.asList(getChangeReplaceIfExistsTypes()).contains(changeName(change));
+        return Arrays.asList(getChangeReplaceIfExistsTypes()).contains(change.getSerializedObjectName());
     }
 
     public void setIdRoot(String idRoot) {

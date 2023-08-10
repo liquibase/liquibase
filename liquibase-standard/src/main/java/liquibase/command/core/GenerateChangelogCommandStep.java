@@ -61,9 +61,9 @@ public class GenerateChangelogCommandStep extends AbstractCommandStep {
         OVERWRITE_OUTPUT_FILE_ARG = builder.argument("overwriteOutputFile", Boolean.class)
                 .defaultValue(false).description("Flag to allow overwriting of output changelog file. Default: false").build();
         RUNONCHANGE_TYPES_ARG = builder.argument("runOnChangeTypes", String.class)
-                .description("Sets runOnChange=\"true\" for changesets containing solely changes of these types (supported types: createView, createProcedure).").build();
+                .defaultValue("none").description("Sets runOnChange=\"true\" for changesets containing solely changes of these types (e. g. createView, createProcedure, ...).").build();
         REPLACEIFEXISTS_TYPES_ARG = builder.argument("replaceIfExistsTypes", String.class)
-                .description("Sets replaceIfExists=\"true\" for changes of these types (supported types: createView, createProcedure)").build();
+                .defaultValue("none").description("Sets replaceIfExists=\"true\" for changes of these types (supported types: createView, createProcedure)").build();
 
         // this happens because the command line asks for "url", but in fact uses it as "referenceUrl"
         REFERENCE_URL_ARG = builder.argument("referenceUrl", String.class).hidden().build();
