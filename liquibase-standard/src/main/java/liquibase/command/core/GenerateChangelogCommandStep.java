@@ -22,8 +22,11 @@ import liquibase.util.StringUtil;
 import java.io.IOException;
 import java.io.PrintStream;
 import java.util.Arrays;
+import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 public class GenerateChangelogCommandStep extends AbstractCommandStep {
 
@@ -65,9 +68,7 @@ public class GenerateChangelogCommandStep extends AbstractCommandStep {
                 .defaultValue(false).description("Flag to allow overwriting of output changelog file. Default: false").build();
         RUNONCHANGE_TYPES_ARG = builder.argument("runOnChangeTypes", String.class)
                 .defaultValue("none").description("Sets runOnChange=\"true\" for changesets containing solely changes of these types (e. g. createView, createProcedure, ...).").build();
-        final ChangeFactory changeFactory = Scope.getCurrentScope().getSingleton(ChangeFactory.class);
-        final String replaceIfExistsTypeNames = changeFactory.getDefinedChanges().stream()
-                .filter(changeType -> changeFactory.create(changeType) instanceof ReplaceIfExists).collect(Collectors.joining(", "));
+        final String replaceIfExistsTypeNames = supportedReplaceIfExistsTypes().collect(Collectors.joining(", "));
         REPLACEIFEXISTS_TYPES_ARG = builder.argument("replaceIfExistsTypes", String.class)
                 .defaultValue("none")
                 .description(String.format("Sets replaceIfExists=\"true\" for changes of these types (supported types: createView, createProcedure)", replaceIfExistsTypeNames)).build();
@@ -157,6 +158,8 @@ public class GenerateChangelogCommandStep extends AbstractCommandStep {
         commandScope.addArgumentValue(DbUrlConnectionCommandStep.SKIP_DATABASE_STEP_ARG, true);
         commandScope.addArgumentValue(DiffCommandStep.FORMAT_ARG, "none");
         validateConditionsToOverwriteChangelogFile(commandScope);
+        validateReplaceIfExistsTypes(commandScope);
+        validateRunOnChangeTypes(commandScope);
     }
 
     /**
@@ -177,6 +180,34 @@ public class GenerateChangelogCommandStep extends AbstractCommandStep {
                 throw new CommandValidationException(String.format(coreBundle.getString("changelogfile.already.exists"), changeLogFile));
             }
         }
+    }
+
+    private static void validateRunOnChangeTypes(final CommandScope commandScope) throws CommandValidationException {
+        final Collection<String> runOnChangeTypes = new ArrayList(Arrays.asList(commandScope.getArgumentValue(RUNONCHANGE_TYPES_ARG).split("\\s*,\\s*")));
+        final Collection<String> supportedRunOnChangeTypes = supportedRunOnChangeTypes().collect(Collectors.toList());
+        supportedRunOnChangeTypes.add("none");
+        runOnChangeTypes.removeAll(supportedRunOnChangeTypes);
+        if (!runOnChangeTypes.isEmpty())
+            throw new CommandValidationException("Invalid types for --run-on-change-types: " + runOnChangeTypes.stream().collect(Collectors.joining(", ")));
+    }
+
+    private static void validateReplaceIfExistsTypes(final CommandScope commandScope) throws CommandValidationException {
+        final Collection<String> replaceIfExistsTypes = new ArrayList(Arrays.asList(commandScope.getArgumentValue(REPLACEIFEXISTS_TYPES_ARG).split("\\s*,\\s*")));
+        final Collection<String> supportedReplaceIfExistsTypes = supportedReplaceIfExistsTypes().collect(Collectors.toList());
+        supportedReplaceIfExistsTypes.add("none");
+        replaceIfExistsTypes.removeAll(supportedReplaceIfExistsTypes);
+        if (!replaceIfExistsTypes.isEmpty())
+            throw new CommandValidationException("Invalid types for --replace-if-exists-types: " + replaceIfExistsTypes.stream().collect(Collectors.joining(", ")));
+    }
+
+    private static Stream<String> supportedRunOnChangeTypes() {
+        final ChangeFactory changeFactory = Scope.getCurrentScope().getSingleton(ChangeFactory.class);
+        return changeFactory.getDefinedChanges().stream();
+    }
+
+    private static Stream<String> supportedReplaceIfExistsTypes() {
+        final ChangeFactory changeFactory = Scope.getCurrentScope().getSingleton(ChangeFactory.class);
+        return changeFactory.getDefinedChanges().stream().filter(changeType -> changeFactory.create(changeType) instanceof ReplaceIfExists);
     }
 
     @Override
