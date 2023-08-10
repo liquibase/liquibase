@@ -1,6 +1,8 @@
 package liquibase.command.core;
 
 import liquibase.Scope;
+import liquibase.change.ChangeFactory;
+import liquibase.change.ReplaceIfExists;
 import liquibase.command.*;
 import liquibase.command.core.helpers.DbUrlConnectionCommandStep;
 import liquibase.command.core.helpers.DiffOutputControlCommandStep;
@@ -21,6 +23,7 @@ import java.io.IOException;
 import java.io.PrintStream;
 import java.util.Arrays;
 import java.util.List;
+import java.util.stream.Collectors;
 
 public class GenerateChangelogCommandStep extends AbstractCommandStep {
 
@@ -62,8 +65,12 @@ public class GenerateChangelogCommandStep extends AbstractCommandStep {
                 .defaultValue(false).description("Flag to allow overwriting of output changelog file. Default: false").build();
         RUNONCHANGE_TYPES_ARG = builder.argument("runOnChangeTypes", String.class)
                 .defaultValue("none").description("Sets runOnChange=\"true\" for changesets containing solely changes of these types (e. g. createView, createProcedure, ...).").build();
+        final ChangeFactory changeFactory = Scope.getCurrentScope().getSingleton(ChangeFactory.class);
+        final String replaceIfExistsTypeNames = changeFactory.getDefinedChanges().stream()
+                .filter(changeType -> changeFactory.create(changeType) instanceof ReplaceIfExists).collect(Collectors.joining(", "));
         REPLACEIFEXISTS_TYPES_ARG = builder.argument("replaceIfExistsTypes", String.class)
-                .defaultValue("none").description("Sets replaceIfExists=\"true\" for changes of these types (supported types: createView, createProcedure)").build();
+                .defaultValue("none")
+                .description(String.format("Sets replaceIfExists=\"true\" for changes of these types (supported types: createView, createProcedure)", replaceIfExistsTypeNames)).build();
 
         // this happens because the command line asks for "url", but in fact uses it as "referenceUrl"
         REFERENCE_URL_ARG = builder.argument("referenceUrl", String.class).hidden().build();
