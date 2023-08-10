@@ -1,10 +1,9 @@
 package liquibase.serializer.core.formattedsql;
 
-import liquibase.Scope;
+import liquibase.*;
 import liquibase.change.Change;
 import liquibase.changelog.ChangeLogChild;
 import liquibase.changelog.ChangeSet;
-import liquibase.GlobalConfiguration;
 import liquibase.database.Database;
 import liquibase.database.DatabaseFactory;
 import liquibase.diff.output.changelog.DiffToChangeLog;
@@ -76,7 +75,22 @@ public class FormattedSqlChangeLogSerializer  implements ChangeLogSerializer {
     public void createChangeSetInfo(ChangeSet changeSet, StringBuilder builder) {
         String author = (changeSet.getAuthor()).replaceAll("\\s+", "_");
         author = author.replace("_(generated)", "");
-        builder.append("-- changeset ").append(author).append(":").append(changeSet.getId()).append("\n");
+        builder.append("-- changeset ").append(author).append(":").append(changeSet.getId());
+        Labels labels = changeSet.getLabels();
+        if (labels != null && ! labels.isEmpty()) {
+            String outputLabels = labels.toString();
+            builder.append(" labels: \"");
+            builder.append(outputLabels);
+            builder.append("\"");
+        }
+        ContextExpression contexts = changeSet.getContextFilter();
+        if (contexts != null && ! contexts.isEmpty()) {
+            String outputContexts = contexts.toString();
+            builder.append(" contextFilter: \"");
+            builder.append(outputContexts);
+            builder.append("\"");
+        }
+        builder.append("\n");
     }
 
     protected Database getTargetDatabase(ChangeSet changeSet) {
