@@ -19,6 +19,7 @@ jobs:
       version: ${{ steps.collect-data.outputs.version }}
       branch: ${{ steps.collect-data.outputs.branch }}
       runId: ${{ steps.collect-data.outputs.runId }}
+      
     steps:
       - name: Collect Data
         id: collect-data
@@ -103,6 +104,8 @@ jobs:
     needs: [ setup, reversion ]
     name: Build Installers
     runs-on: macos-latest #needs macos for apple notarization
+    env:
+      GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
     steps:
       - uses: actions/checkout@v3
 
@@ -159,14 +162,6 @@ jobs:
           rm re-version/final/*.asc
           rm re-version/final/*.md5
           rm re-version/final/*.sha1
-
-      - name: Re-version deb package
-        run: |
-          version="${{ needs.setup.outputs.version }}"
-          mvn versions:set -DnewVersion=$version
-          mvn package -DskipTests -f ./liquibase-dist/pom.xml 
-          mv liquibase-dist/target/liquibase-*deb re-version/final
-
 
       - name: Attach Files to Draft Release
         uses: softprops/action-gh-release@v1

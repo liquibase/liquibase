@@ -23,6 +23,7 @@ import liquibase.resource.ResourceAccessor;
 import liquibase.util.StringUtil;
 
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 
@@ -89,7 +90,7 @@ public class DatabaseChangelogCommandStep extends AbstractHelperCommandStep impl
         commandScope.provideDependency(LabelExpression.class, labels);
         addCommandFiltersMdc(labels, contexts);
 
-        DatabaseChangeLog databaseChangeLog = getDatabaseChangeLog(changeLogFile, changeLogParameters);
+        DatabaseChangeLog databaseChangeLog = getDatabaseChangeLog(changeLogFile, changeLogParameters, database);
         checkLiquibaseTables(shouldUpdateNullChecksums, databaseChangeLog, changeLogParameters.getContexts(), changeLogParameters.getLabels(), database);
         databaseChangeLog.validate(database, changeLogParameters.getContexts(), changeLogParameters.getLabels());
 
@@ -104,13 +105,14 @@ public class DatabaseChangelogCommandStep extends AbstractHelperCommandStep impl
         Scope.getCurrentScope().addMdcValue(MdcKey.COMMAND_CONTEXT_FILTER, contextFilterMdc);
     }
 
-    private DatabaseChangeLog getDatabaseChangeLog(String changeLogFile, ChangeLogParameters changeLogParameters) throws LiquibaseException {
+    private DatabaseChangeLog getDatabaseChangeLog(String changeLogFile, ChangeLogParameters changeLogParameters, Database database) throws Exception {
         ResourceAccessor resourceAccessor = Scope.getCurrentScope().getResourceAccessor();
         ChangeLogParser parser = ChangeLogParserFactory.getInstance().getParser(changeLogFile, resourceAccessor);
         if (parser instanceof XMLChangeLogSAXParser) {
             ((XMLChangeLogSAXParser) parser).setShouldWarnOnMismatchedXsdVersion(false);
         }
-        DatabaseChangeLog changelog = parser.parse(changeLogFile, changeLogParameters, resourceAccessor);
+        DatabaseChangeLog changelog = Scope.child(Collections.singletonMap(Scope.Attr.database.name(), database),
+                () -> parser.parse(changeLogFile, changeLogParameters, resourceAccessor));
         if (StringUtil.isNotEmpty(changelog.getLogicalFilePath())) {
             Scope.getCurrentScope().addMdcValue(MdcKey.CHANGELOG_FILE, changelog.getLogicalFilePath());
         } else {
