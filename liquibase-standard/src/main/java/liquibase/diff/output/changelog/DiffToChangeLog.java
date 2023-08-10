@@ -3,6 +3,7 @@ package liquibase.diff.output.changelog;
 import liquibase.GlobalConfiguration;
 import liquibase.Scope;
 import liquibase.change.Change;
+import liquibase.change.ReplaceIfExists;
 import liquibase.change.core.*;
 import liquibase.changelog.ChangeSet;
 import liquibase.configuration.core.DeprecatedConfigurationValueProvider;
@@ -757,11 +758,8 @@ public class DiffToChangeLog {
                     if (diffOutputControl.getLabels() != null) {
                         changeSet.setLabels(diffOutputControl.getLabels());
                     }
-                    if (isContainedInReplaceIfExistsTypes(change)) {
-                        if (change instanceof CreateViewChange)
-                            ((CreateViewChange) change).setReplaceIfExists(true);
-                        if (change instanceof CreateProcedureChange)
-                            ((CreateProcedureChange) change).setReplaceIfExists(true);
+                    if (change instanceof ReplaceIfExists && isContainedInReplaceIfExistsTypes(change)) {
+                        ((ReplaceIfExists) change).setReplaceIfExists(true);
                     }
                     changeSet.addChange(change);
                     changeSets.add(changeSet);
@@ -775,11 +773,8 @@ public class DiffToChangeLog {
                     changeSet.setLabels(diffOutputControl.getLabels());
                 }
                 for (Change change : changes) {
-                    if (isContainedInReplaceIfExistsTypes(change)) {
-                        if (change instanceof CreateViewChange)
-                            ((CreateViewChange) change).setReplaceIfExists(true);
-                        if (change instanceof CreateProcedureChange)
-                            ((CreateProcedureChange) change).setReplaceIfExists(true);
+                    if (change instanceof ReplaceIfExists && isContainedInReplaceIfExistsTypes(change)) {
+                        ((ReplaceIfExists) change).setReplaceIfExists(true);
                     }
                     changeSet.addChange(change);
                 }
