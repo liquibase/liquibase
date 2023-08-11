@@ -2,8 +2,8 @@ package liquibase.change;
 
 import liquibase.ChecksumVersion;
 import liquibase.Scope;
+import liquibase.database.Database;
 import liquibase.exception.UnexpectedLiquibaseException;
-import liquibase.integration.commandline.LiquibaseCommandLineConfiguration;
 import liquibase.plugin.AbstractPluginFactory;
 import liquibase.plugin.Plugin;
 import liquibase.servicelocator.ServiceLocator;
@@ -21,6 +21,7 @@ import java.util.concurrent.ConcurrentHashMap;
 public class ChangeFactory extends AbstractPluginFactory<Change>{
 
     private final Map<String, ChangeMetaData> cachedMetadata = new ConcurrentHashMap<>();
+    private boolean performSupportsDatabaseValidation = true;
 
     private ChangeFactory() {
 
@@ -98,12 +99,22 @@ public class ChangeFactory extends AbstractPluginFactory<Change>{
      * Each call to create will return a new instance of the Change.
      */
     public Change create(String name) {
-        Change plugin = getPlugin(name);
-        if (plugin == null) {
+        Set<Change> plugins = getPlugins(name);
+
+        if (plugins.isEmpty()) {
             return null;
+        } else if (plugins.size() > 1) {
+            Database database = Scope.getCurrentScope().getDatabase();
+            if (database != null && performSupportsDatabaseValidation) {
+                plugins.removeIf(a -> !a.supports(database));
+                if (plugins.isEmpty()) {
+                    throw new UnexpectedLiquibaseException(String.format("No registered %s plugin found for %s database", name, database.getDisplayName()));
+                }
+            }
         }
+
         try {
-            return plugin.getClass().getConstructor().newInstance();
+            return plugins.iterator().next().getClass().getConstructor().newInstance();
         } catch (Exception e) {
             throw new UnexpectedLiquibaseException(e);
         }
@@ -127,5 +138,16 @@ public class ChangeFactory extends AbstractPluginFactory<Change>{
      */
     public static ChangeFactory getInstance() {
         return Scope.getCurrentScope().getSingleton(ChangeFactory.class);
+    }
+
+    /**
+     * Should the change be checked to see if it supports
+     * the current database?
+     * Default is true
+     *
+     * @param performSupportsDatabaseValidation
+     */
+    public void setPerformSupportsDatabaseValidation(boolean performSupportsDatabaseValidation) {
+        this.performSupportsDatabaseValidation = performSupportsDatabaseValidation;
     }
 }
