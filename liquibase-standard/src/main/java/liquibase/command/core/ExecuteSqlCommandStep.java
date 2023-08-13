@@ -2,6 +2,7 @@ package liquibase.command.core;
 
 import liquibase.GlobalConfiguration;
 import liquibase.Scope;
+import liquibase.changelog.ChangeLogParameters;
 import liquibase.command.*;
 import liquibase.database.Database;
 import liquibase.exception.DatabaseException;
@@ -64,7 +65,9 @@ public class ExecuteSqlCommandStep extends AbstractCommandStep {
         final StringBuilder out = new StringBuilder();
         final String[] sqlStrings = StringUtil.processMultiLineSQL(sqlText, true, true, commandScope.getArgumentValue(DELIMITER_ARG));
 
+        ChangeLogParameters changeLogParameters = new ChangeLogParameters(database);
         for (String sqlString : sqlStrings) {
+            sqlString = changeLogParameters.expandExpressions(sqlString, null);
             if (sqlString.toLowerCase().matches("\\s*select .*")) {
                 out.append(handleSelect(sqlString, executor));
             } else {
