@@ -1162,7 +1162,7 @@ public class LiquibaseCommandLine {
 
     protected static String[] toArgNames(CommandArgumentDefinition<?> def) {
         LinkedHashSet<String> returnList = new LinkedHashSet<>();
-        Set<String> baseNames = new HashSet<>();
+        Set<String> baseNames = new LinkedHashSet<>();
         baseNames.add(def.getName());
         baseNames.addAll(def.getAliases());
 
