@@ -19,7 +19,7 @@ on:
     branches:
       - master
       - main
-      - github-action-*
+      - github-action-**
     paths-ignore:
       - '**.md'
 
@@ -410,6 +410,13 @@ jobs:
           # Replace / with - in branch name
           version=$(echo "$version" | sed 's/\//-/g')
           mvn versions:set -DnewVersion="$version"
+
+      # Publish to GitHub Packages
+      - name: Publish package
+        run: |
+          mvn -B clean deploy -pl '!liquibase-dist' -DskipTests=true "-Dbuild.repository.owner=${{ needs.setup.outputs.thisRepositoryOwner }}" "-Dbuild.repository.name=${{ needs.setup.outputs.thisRepositoryName }}" "-Dbuild.branch='${{ needs.setup.outputs.thisBranchFileName }}'" "-Dbuild.number=${{ github.run_number }}" "-Dbuild.commit=${{ needs.setup.outputs.thisSha }}" "-Dbuild.timestamp=${{ needs.setup.outputs.timestamp }}"
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Build & Sign Artifacts
         env:
