@@ -119,7 +119,7 @@ public class DatabaseChangelogCommandStep extends AbstractHelperCommandStep impl
         Scope.getCurrentScope().addMdcValue(MdcKey.COMMAND_CONTEXT_FILTER, contextFilterMdc);
     }
 
-    private DatabaseChangeLog getDatabaseChangeLog(String changeLogFile, ChangeLogParameters changeLogParameters, Database database) throws Exception {
+    public static DatabaseChangeLog getDatabaseChangeLog(String changeLogFile, ChangeLogParameters changeLogParameters, Database database) throws Exception {
         ResourceAccessor resourceAccessor = Scope.getCurrentScope().getResourceAccessor();
         ChangeLogParser parser = ChangeLogParserFactory.getInstance().getParser(changeLogFile, resourceAccessor);
         if (parser instanceof XMLChangeLogSAXParser) {
