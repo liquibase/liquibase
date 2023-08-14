@@ -19,7 +19,7 @@ on:
     branches:
       - master
       - main
-      - github-action-*
+      - github-action-**
     paths-ignore:
       - '**.md'
 
