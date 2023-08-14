@@ -279,7 +279,16 @@ public class MSSQLDatabase extends AbstractJdbcDatabase {
 
     @Override
     public String escapeTableName(String catalogName, String schemaName, String tableName) {
-        return escapeObjectName(catalogName, schemaName, tableName, Table.class);
+        //
+        // If the table name has a parenthesis in it, the escape logic might mistake it for stored logic
+        // and not add quotes. We can check for a space and the lack of a quote at the beginning and quote
+        // it anyway.
+        //
+        tableName = escapeObjectName(catalogName, schemaName, tableName, Table.class);
+        if (tableName != null && tableName.contains(" ") && ! tableName.startsWith("\"")) {
+            tableName = "\"" + tableName + "\"";
+        }
+        return tableName;
     }
 
     @Override
