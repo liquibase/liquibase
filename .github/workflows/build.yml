@@ -50,8 +50,8 @@ jobs:
       thisSha: ${{ steps.find-branches.outputs.thisSha }}
       thisBranchName: ${{ steps.find-branches.outputs.thisBranchName }}
       thisBranchFileName: ${{ steps.find-branches.outputs.thisBranchFileName }}
-      thisRepositoryName: ${{ steps.find-branches.outputs.thisRepositoryName }}
-      thisRepositoryOwner: ${{ steps.find-branches.outputs.thisRepositoryName }}
+      thisRepositoryName: ${{ steps.find-branches.outputs.thisRepoName }}
+      thisRepositoryOwner: ${{ steps.find-branches.outputs.thisRepoName }}
       standAlonePR: ${{ steps.find-branches.outputs.standAlonePR }}
       stablePro: ${{ steps.find-branches.outputs.stablePro }}
       timestamp: ${{ steps.get-date.outputs.date }}
