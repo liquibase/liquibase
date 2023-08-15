@@ -13,6 +13,25 @@ env:
   MAVEN_VERSION: '3.9.2'
 
 jobs:
+  setup:
+    name: Setup
+    runs-on: ubuntu-22.04
+    outputs:
+      timestamp: ${{ steps.get-date.outputs.date }}
+      setupSuccessful: "true"
+
+    steps:
+      - uses: actions/checkout@v3
+      - name: Get current date
+        id: get-date
+        run: echo "::set-output name=date::$(date +'%Y-%m-%d %H:%M:%S')"
+
+      - name: Get Latest Merge Commit SHA
+        id: get-sha
+        run: |
+          latest_merge_sha=$(git rev-parse origin/master)
+          echo "::set-output name=latestMergeSha::$latest_merge_sha"
+
   build:
     name: Build & Package
     runs-on: ubuntu-22.04
@@ -23,22 +42,6 @@ jobs:
 
     steps:
       - uses: actions/checkout@v3
-
-      - name: Find mvn Build Attributes
-        id: find-attributes
-        uses: actions/github-script@v6
-        with:
-          github-token: ${{ secrets.BOT_TOKEN }}
-          script: |
-            const helper = require('./.github/util/workflow-helper.js')({github, context});
-
-            core.setOutput("thisSha", helper.getCurrentSha());
-            core.setOutput("thisBranchName", helper.getCurrentBranch());
-            core.setOutput("thisRepoName", helper.getRepositoryName());
-            core.setOutput("thisRepoOwner", helper.getRepositoryOwner());
-
-      - uses: actions/checkout@v3
-
       - name: Set up Java for publishing to GitHub Repository
         uses: actions/setup-java@v3
         with:
@@ -58,42 +61,10 @@ jobs:
 
       # Publish to GitHub Packages
       - name: Publish package
-        run: mvn -B clean deploy -pl '!liquibase-dist' -DskipTests=true "-Dbuild.repository.owner=${{ needs.setup.outputs.thisRepositoryOwner }}" "-Dbuild.repository.name=${{ needs.setup.outputs.thisRepositoryName }}" "-Dbuild.branch=${{ needs.setup.outputs.thisBranchName }}" "-Dbuild.number=${{ github.run_number }}" "-Dbuild.commit=${{ needs.setup.outputs.thisSha }}" "-Dbuild.timestamp=${{ needs.setup.outputs.timestamp }}"
+        run: mvn -B clean deploy -pl '!liquibase-dist' -DskipTests=true "-Dbuild.repository.owner=liquibase" "-Dbuild.repository.name=liquibase" "-Dbuild.branch=master" "-Dbuild.number=${{ github.run_number }}" "-Dbuild.commit=${{ steps.get-sha.outputs.latestMergeSha }}" "-Dbuild.timestamp=${{ steps.get-date.outputs.timestamp }}"
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
-  setup:
-    name: Setup
-    runs-on: ubuntu-22.04
-    outputs:
-      thisSha: ${{ steps.find-attributes.outputs.thisSha }}
-      thisBranchName: ${{ steps.find-attributes.outputs.thisBranchName }}
-      thisBranchFileName: ${{ steps.find-attributes.outputs.thisBranchFileName }}
-      thisRepositoryName: ${{ steps.find-attributes.outputs.thisRepositoryName }}
-      thisRepositoryOwner: ${{ steps.find-attributes.outputs.thisRepositoryOwner }}
-      timestamp: ${{ steps.get-date.outputs.date }}
-      setupSuccessful: "true"
-
-    steps:
-      - uses: actions/checkout@v3
-      - name: Get current date
-        id: get-date
-        run: echo "::set-output name=date::$(date +'%Y-%m-%d %H:%M:%S')"
-
-      - name: Find mvn Build Attributes
-        id: find-attributes
-        uses: actions/github-script@v6
-        with:
-          github-token: ${{ secrets.BOT_TOKEN }}
-          script: |
-            const helper = require('./.github/util/workflow-helper.js')({github, context});
-
-            core.setOutput("thisSha", helper.getCurrentSha());
-            core.setOutput("thisBranchName", helper.getCurrentBranch());
-            core.setOutput("thisBranchFileName", helper.getCurrentBranch().replace(/[^a-zA-Z0-9\-_]/g, "_"));
-            core.setOutput("thisRepositoryName", helper.getRepositoryName());
-            core.setOutput("thisRepositoryOwner", helper.getRepositoryOwner());
-  
 
   build-sha:
     name: Build & Package SHA
@@ -125,6 +96,6 @@ jobs:
 
       # Publish to GitHub Packages
       - name: Publish package
-        run: mvn -B clean deploy -pl '!liquibase-dist' -DskipTests=true "-Dbuild.repository.owner=${{ needs.setup.outputs.thisRepositoryOwner }}" "-Dbuild.repository.name=${{ needs.setup.outputs.thisRepositoryName }}" "-Dbuild.branch=${{ needs.setup.outputs.thisBranchFileName }}" "-Dbuild.number=${{ github.run_number }}" "-Dbuild.commit=${{ needs.setup.outputs.thisSha }}" "-Dbuild.timestamp=${{ needs.setup.outputs.timestamp }}"
+        run: mvn -B clean deploy -pl '!liquibase-dist' -DskipTests=true "-Dbuild.repository.owner=liquibase" "-Dbuild.repository.name=liquibase" "-Dbuild.branch=master" "-Dbuild.number=${{ github.run_number }}" "-Dbuild.commit=${{ steps.get-sha.outputs.latestMergeSha }}" "-Dbuild.timestamp=${{ steps.get-date.outputs.timestamp }}"
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
