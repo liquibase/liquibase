@@ -9,7 +9,6 @@
 		<version>0-SNAPSHOT</version>
 	</parent>
 	<artifactId>liquibase-dist</artifactId>
-	<packaging>pom</packaging>
 
 	<description>Liquibase is a tool for managing and executing database changes.</description>
 
@@ -376,7 +375,7 @@
 							</mapper>
 						</data>
 						<data>
-							<src>${project.basedir}/src/main/archive/liquibase-env.sh</src>
+							<src>${project.basedir}/src/main/deb/liquibase-env.sh</src>
 							<type>file</type>
 							<mapper>
 								<type>perm</type>
