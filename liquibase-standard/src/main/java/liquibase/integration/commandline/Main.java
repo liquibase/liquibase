@@ -1501,11 +1501,16 @@ public class Main {
                 liquibase.clearCheckSums();
                 return;
             } else if (COMMANDS.CALCULATE_CHECKSUM.equalsIgnoreCase(command)) {
-                liquibase.calculateCheckSum(
-                        getCommandParam(OPTIONS.CHANGE_SET_PATH, null),
-                        getCommandParam(OPTIONS.CHANGE_SET_ID, null),
-                        getCommandParam(OPTIONS.CHANGE_SET_AUTHOR, null)
-                );
+                CommandScope calculateChecksumCommand = new CommandScope("calculateChecksum");
+
+                calculateChecksumCommand
+                        .addArgumentValue(DbUrlConnectionCommandStep.DATABASE_ARG, database)
+                        .addArgumentValue(CalculateChecksumCommandStep.CHANGESET_PATH_ARG, OPTIONS.CHANGE_SET_PATH)
+                        .addArgumentValue(CalculateChecksumCommandStep.CHANGESET_ID_ARG, OPTIONS.CHANGE_SET_ID)
+                        .addArgumentValue(CalculateChecksumCommandStep.CHANGESET_AUTHOR_ARG, OPTIONS.CHANGE_SET_AUTHOR)
+                        .addArgumentValue(CalculateChecksumCommandStep.CHANGELOG_FILE_ARG, this.changeLogFile);
+
+                calculateChecksumCommand.execute();
                 return;
             } else if (COMMANDS.DB_DOC.equalsIgnoreCase(command)) {
                 if (commandParams.isEmpty()) {

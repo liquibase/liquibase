@@ -1224,12 +1224,23 @@ public class Liquibase implements AutoCloseable {
      * @deprecated Use {link {@link CommandScope(String)}.
      */
     @Deprecated
-    public final CheckSum calculateCheckSum(final String changeSetPath, final String changeSetId, final String changeSetAuthor) throws LiquibaseException {
+    public final CheckSum calculateCheckSum(final String changeSetIdentifier) throws LiquibaseException {
+        String changeSetAttributes[] = changeSetIdentifier.split("::");
+        //validate changeSet parameters and return an error or removed/ignore any other '::' occurrence when processing either a path, id or author.
+        return this.calculateCheckSum(changeSetAttributes[0], changeSetAttributes[1], changeSetAttributes[2]);
+    }
+
+    /**
+     * Calculate the checksum for a given changeset specified by path, changeset id and author
+     */
+    public CheckSum calculateCheckSum(final String changeSetPath, final String changeSetId, final String changeSetAuthor)
+            throws LiquibaseException {
         CommandResults commandResults = new CommandScope("calculateChecksum")
                 .addArgumentValue(DbUrlConnectionCommandStep.DATABASE_ARG, database)
                 .addArgumentValue(CalculateChecksumCommandStep.CHANGESET_PATH_ARG, changeSetPath)
                 .addArgumentValue(CalculateChecksumCommandStep.CHANGESET_ID_ARG, changeSetId)
                 .addArgumentValue(CalculateChecksumCommandStep.CHANGESET_AUTHOR_ARG, changeSetAuthor)
+                .addArgumentValue(CalculateChecksumCommandStep.CHANGESET_IDENTIFIER_ARG, String.format("%s::%s::%s", changeSetPath, changeSetId, changeSetAuthor))
                 .addArgumentValue(CalculateChecksumCommandStep.CHANGELOG_FILE_ARG, this.changeLogFile)
                 .execute();
         return commandResults.getResult(CalculateChecksumCommandStep.CHECKSUM_RESULT);
