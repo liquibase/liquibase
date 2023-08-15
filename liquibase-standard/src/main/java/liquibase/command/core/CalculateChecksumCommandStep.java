@@ -39,11 +39,18 @@ public class CalculateChecksumCommandStep extends AbstractCommandStep {
 
     public static final CommandResultDefinition<CheckSum> CHECKSUM_RESULT;
 
+    public static final CommandArgumentDefinition<String> CHANGESET_IDENTIFIER_ARG;
+
 
     static {
         CommandBuilder builder = new CommandBuilder(COMMAND_NAME);
         CHANGELOG_FILE_ARG = builder.argument(CommonArgumentNames.CHANGELOG_FILE, String.class).required()
                                     .description("The root changelog file").build();
+
+        CHANGESET_IDENTIFIER_ARG = builder.argument("changeSetIdentifier", String.class)
+                                    .required()
+                                    .description("Changeset ID identifier of form filepath::id::author")
+                                    .build();
 
         CHANGESET_PATH_ARG = builder.argument("changeSetPath", String.class)
                                     .required()
@@ -82,7 +89,11 @@ public class CalculateChecksumCommandStep extends AbstractCommandStep {
         final String changeLogFile = commandScope.getArgumentValue(CHANGELOG_FILE_ARG).replace('\\', '/');
         final Database database = (Database) commandScope.getDependency(Database.class);
 
-        Scope.getCurrentScope().getLog(getClass()).info(String.format("Calculating checksum for changeset %s", changeSetId));
+        Scope.getCurrentScope().getLog(getClass()).info(String.format("Calculating checksum for changeset identified by changeset id: %s, author: %s, path: %s",
+                                                                      changeSetId,
+                                                                      changeSetAuthor,
+                                                                      changeSetPath
+        ));
 
         ResourceAccessor resourceAccessor = Scope.getCurrentScope().getResourceAccessor();
         DatabaseChangeLog changeLog = ChangeLogParserFactory.getInstance().getParser(
@@ -90,7 +101,11 @@ public class CalculateChecksumCommandStep extends AbstractCommandStep {
 
         ChangeSet changeSet = changeLog.getChangeSet(changeSetPath, changeSetAuthor, changeSetId);
         if (changeSet == null) {
-            throw new LiquibaseException(new IllegalArgumentException("No such changeSet: " + changeSetId));
+            throw new LiquibaseException(new IllegalArgumentException(String.format("No such changeset identified by changeset id: %s, author: %s, path: %s",
+                                                                                    changeSetId,
+                                                                                    changeSetAuthor,
+                                                                                    changeSetPath
+            )));
         }
 
         ChangeLogHistoryService changeLogService = ChangeLogHistoryServiceFactory.getInstance().getChangeLogService(database);
