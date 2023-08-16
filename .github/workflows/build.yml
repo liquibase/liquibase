@@ -334,7 +334,9 @@ jobs:
         uses: actions/cache@v3.3.1
         with:
           key: built-code-${{ github.run_number }}-${{ github.run_attempt }}
-          path: ./**/target
+          path: |
+            ./**/target/*
+            !./**/target/keys/
 
       ##Cache based on install4j file, since changes to JVM is seen in there. If install4j version changes without changing the file, change the prefix letter before hashFiles to force a new cache
       - name: Install4j Cache
