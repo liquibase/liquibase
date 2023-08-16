@@ -40,6 +40,7 @@ jobs:
           thisBranchName=$(basename ${GITHUB_REF#refs/heads/})
           modified_branch=$(echo "$thisBranchName" | tr / -)
           echo "this_Branch_Name=$modified_branch" >> $GITHUB_OUTPUT
+
   build:
     name: Build & Package
     runs-on: ubuntu-22.04
@@ -51,6 +52,7 @@ jobs:
       LATEST_MERGE_SHA: ${{ needs.setup.outputs.latestMergeSha }}
       TIMESTAMP: ${{ needs.setup.outputs.timeStamp }}
       CURRENT_BRANCH_NAME: ${{ needs.setup.outputs.thisBranchName }}
+
 
     steps:
       - uses: actions/checkout@v3
