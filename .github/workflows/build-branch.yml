@@ -17,7 +17,7 @@ jobs:
     outputs:
       timeStamp: ${{ steps.get-timestamp.outputs.timeStamp }}
       latestMergeSha: ${{ steps.get-sha.outputs.latestMergeSha }}
-      thisBranchFileName: ${{ steps.get-branch-name.outputs.thisBranchFileName }}
+      thisBranchName: ${{ steps.get-branch-name.outputs.thisBranchFileName }}
       setupSuccessful: "true"
 
     steps:
@@ -35,13 +35,10 @@ jobs:
           echo "timeStamp=${timestamp}" >> $GITHUB_OUTPUT
 
       - name: Get Current BranchName
-        uses: actions/github-script@v6
         id: get-branch-name
-        with:
-          github-token: ${{ secrets.BOT_TOKEN }}
-        script: |
-          const helper = require('./.github/util/workflow-helper.js')({github, context});          
-          core.setOutput("thisBranchFileName", helper.getCurrentBranch().replace(/[^a-zA-Z0-9\-_]/g, "_"));
+        run: |
+          thisBranchName="${GITHUB_REF#refs/heads/} | tr / -"
+          echo "thisBranchName=${this_Branch_Name}" >> $GITHUB_OUTPUT
 
   build:
     name: Build & Package
