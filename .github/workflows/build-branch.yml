@@ -47,12 +47,13 @@ jobs:
     permissions:
       contents: read
       packages: write
-    env:
-      LATEST_MERGE_SHA: ${{ needs.get-sha.outputs.latestMergeSha }}
-      TIMESTAMP: ${{ needs.get-timestamp.outputs.timeStamp }}
-      CURRENT_BRANCH_NAME: ${{ needs.get-branch-name.outputs.thisBranchName }}
 
     steps:
+      - env:
+          LATEST_MERGE_SHA: ${{ needs.setup.outputs.latestMergeSha }}
+          TIMESTAMP: ${{ needs.setup.outputs.timeStamp }}
+          CURRENT_BRANCH_NAME: ${{ needs.setup.outputs.thisBranchName }}
+
       - uses: actions/checkout@v3
       - name: Set up Java for publishing to GitHub Repository
         uses: actions/setup-java@v3
