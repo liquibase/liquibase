@@ -47,13 +47,12 @@ jobs:
     permissions:
       contents: read
       packages: write
+    env:
+      LATEST_MERGE_SHA: ${{ needs.setup.outputs.latestMergeSha }}
+      TIMESTAMP: ${{ needs.setup.outputs.timeStamp }}
+      CURRENT_BRANCH_NAME: ${{ needs.setup.outputs.thisBranchName }}
 
     steps:
-      - env:
-          LATEST_MERGE_SHA: ${{ needs.setup.outputs.latestMergeSha }}
-          TIMESTAMP: ${{ needs.setup.outputs.timeStamp }}
-          CURRENT_BRANCH_NAME: ${{ needs.setup.outputs.thisBranchName }}
-
       - uses: actions/checkout@v3
       - name: Set up Java for publishing to GitHub Repository
         uses: actions/setup-java@v3
@@ -80,6 +79,6 @@ jobs:
       # Publish to GitHub Packages
       - name: Publish package
         run: |
-          mvn -B clean deploy -pl '!liquibase-dist' -DskipTests=true "-Dbuild.repository.owner=liquibase" "-Dbuild.repository.name=liquibase" "-Dbuild.branch=$CURRENT_BRANCH_NAME" "-Dbuild.number=${{ github.run_number }}" "-Dbuild.commit=$LATEST_MERGE_SHA" "-Dbuild.timestamp=$TIMESTAMP"
+          mvn -B clean deploy -pl '!liquibase-dist' -DskipTests=true "-Dbuild.repository.owner=liquibase" "-Dbuild.repository.name=liquibase" "-Dbuild.branch=${{ env.CURRENT_BRANCH_NAME }}" "-Dbuild.number=${{ github.run_number }}" "-Dbuild.commit=${{ env.LATEST_MERGE_SHA }}" "-Dbuild.timestamp=${{ env.TIMESTAMP }}"
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
