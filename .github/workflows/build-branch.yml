@@ -15,9 +15,9 @@ jobs:
     name: Setup
     runs-on: ubuntu-22.04
     outputs:
-      timeStamp: ${{ steps.get-timestamp.outputs.timeStamp }}
-      latestMergeSha: ${{ steps.get-sha.outputs.latestMergeSha }}
-      thisBranchName: ${{ steps.get-branch-name.outputs.thisBranchName }}
+      timeStamp: ${{ steps.get-timestamp.outputs.timestamp }}
+      latestMergeSha: ${{ steps.get-sha.outputs.latest_Merge_Sha }}
+      thisBranchName: ${{ steps.get-branch-name.outputs.this_Branch_Name }}
       setupSuccessful: "true"
 
     steps:
@@ -50,7 +50,7 @@ jobs:
     env:
       LATEST_MERGE_SHA: ${{ needs.get-sha.outputs.latestMergeSha }}
       TIMESTAMP: ${{ needs.get-timestamp.outputs.timeStamp }}
-      CURRENT_BRANCH_NAME: ${{ needs.get-branch-name.outputs.thisBranchFileName }}
+      CURRENT_BRANCH_NAME: ${{ needs.get-branch-name.outputs.thisBranchName }}
 
     steps:
       - uses: actions/checkout@v3
