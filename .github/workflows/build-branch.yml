@@ -17,7 +17,7 @@ jobs:
     outputs:
       timeStamp: ${{ steps.get-timestamp.outputs.timeStamp }}
       latestMergeSha: ${{ steps.get-sha.outputs.latestMergeSha }}
-      thisBranchName: ${{ steps.get-branch-name.outputs.thisBranchFileName }}
+      thisBranchName: ${{ steps.get-branch-name.outputs.thisBranchName }}
       setupSuccessful: "true"
 
     steps:
@@ -25,20 +25,20 @@ jobs:
       - name: Get Latest Merge Commit SHA
         id: get-sha
         run: |
-          latest_merge_sha=$(git rev-parse HEAD)
-          echo "latestMergeSha=${latest_merge_sha}" >> $GITHUB_OUTPUT
+          latestMergeSha=$(git rev-parse HEAD)
+          echo "latest_Merge_Sha=${latestMergeSha}" >> $GITHUB_OUTPUT
 
       - name: Get Timestamp
         id: get-timestamp
         run: |
-          timestamp=$(date +'%Y-%m-%d %H:%M:%S %Z')
-          echo "timeStamp=${timestamp}" >> $GITHUB_OUTPUT
+          timeStamp=$(date +'%Y-%m-%d %H:%M:%S %Z')
+          echo "timestamp=${timeStamp}" >> $GITHUB_OUTPUT
 
       - name: Get Current BranchName
         id: get-branch-name
         run: |
           thisBranchName="${GITHUB_REF#refs/heads/} | tr / -"
-          echo "thisBranchName=${this_Branch_Name}" >> $GITHUB_OUTPUT
+          echo "this_Branch_Name=${thisBranchName}" >> $GITHUB_OUTPUT
 
   build:
     name: Build & Package
