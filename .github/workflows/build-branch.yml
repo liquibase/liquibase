@@ -35,6 +35,7 @@ jobs:
           echo "timeStamp=${timestamp}" >> $GITHUB_OUTPUT
 
       - name: Get Current BranchName
+        uses: actions/github-script@v6
         id: get-branch-name
         with:
           github-token: ${{ secrets.BOT_TOKEN }}
