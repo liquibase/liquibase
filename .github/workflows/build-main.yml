@@ -17,7 +17,8 @@ jobs:
     name: Setup
     runs-on: ubuntu-22.04
     outputs:
-      timestamp: ${{ steps.get-date.outputs.date }}
+      timeStamp: '${{ steps.get-timestamp.outputs.timeStamp }}'
+      latestMergeSha: '${{ steps.get-sha.outputs.latestMergeSha }}'
       setupSuccessful: "true"
 
     steps:
@@ -25,18 +26,14 @@ jobs:
       - name: Get Latest Merge Commit SHA
         id: get-sha
         run: |
-          latest_merge_sha=$(git rev-parse origin/master)
+          $latest_merge_sha=$(git rev-parse origin/master)
           echo "latestMergeSha=$latest_merge_sha" >> $GITHUB_OUTPUT
-        outputs:
-          latestMergeSha: '${{ steps.get-sha.outputs.latestMergeSha }}'
 
       - name: Get Timestamp
         id: get-timestamp
         run: |
           $timestamp=$(date +'%Y-%m-%d %H:%M:%S')
           echo "timeStamp=$timestamp" >> $GITHUB_OUTPUT
-        outputs:
-          timeStamp: '${{ steps.get-timestamp.outputs.timeStamp }}'
 
   build:
     name: Build & Package
