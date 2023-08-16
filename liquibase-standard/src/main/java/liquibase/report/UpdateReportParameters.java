@@ -36,7 +36,6 @@ public class UpdateReportParameters {
         private final String os = System.getProperty("os.name");
         private String interfaceType;
         private String startTime;
-        private String endTime;
     }
 
     @Data
