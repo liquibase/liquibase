@@ -1,0 +1,86 @@
+name: Build Branch SNAPSHOT
+
+on:
+  workflow_dispatch:
+  push:
+    branches-ignore:
+      - master
+  workflow_call:
+
+env:
+  MAVEN_VERSION: '3.9.2'
+
+jobs:
+  setup:
+    name: Setup
+    runs-on: ubuntu-22.04
+    outputs:
+      timeStamp: ${{ steps.get-timestamp.outputs.timeStamp }}
+      latestMergeSha: ${{ steps.get-sha.outputs.latestMergeSha }}
+      thisBranchFileName: ${{ steps.get-branch-name.outputs.thisBranchFileName }}
+      setupSuccessful: "true"
+
+    steps:
+      - uses: actions/checkout@v3
+      - name: Get Latest Merge Commit SHA
+        id: get-sha
+        run: |
+          latest_merge_sha=$(git rev-parse origin/master)
+          echo "latestMergeSha=${latest_merge_sha}" >> $GITHUB_OUTPUT
+
+      - name: Get Timestamp
+        id: get-timestamp
+        run: |
+          timestamp=$(date +'%Y-%m-%d %H:%M:%S %Z')
+          echo "timeStamp=${timestamp}" >> $GITHUB_OUTPUT
+
+      - name: Get Current BranchName
+        id: get-branch-name
+        with:
+          github-token: ${{ secrets.BOT_TOKEN }}
+        script: |
+          const helper = require('./.github/util/workflow-helper.js')({github, context});          
+          core.setOutput("thisBranchFileName", helper.getCurrentBranch().replace(/[^a-zA-Z0-9\-_]/g, "_"));
+
+  build:
+    name: Build & Package
+    runs-on: ubuntu-22.04
+    needs: setup
+    permissions:
+      contents: read
+      packages: write
+    env:
+      LATEST_MERGE_SHA: ${{ needs.get-sha.outputs.latestMergeSha }}
+      TIMESTAMP: ${{ needs.get-timestamp.outputs.timeStamp }}
+      CURRENT_BRANCH_NAME: ${{ needs.get-branch-name.outputs.thisBranchFileName }}
+
+    steps:
+      - uses: actions/checkout@v3
+      - name: Set up Java for publishing to GitHub Repository
+        uses: actions/setup-java@v3
+        with:
+          java-version: '17'
+          distribution: 'temurin'
+          cache: 'maven'
+          server-id: liquibase
+
+      - name: Set up Maven
+        uses: stCarolas/setup-maven@v4.5
+        with:
+          maven-version: ${{ env.MAVEN_VERSION }}
+
+      # Version artifact based off of branch and commit SHA.
+      - name: Version Artifact
+        run: |
+          version=${{ github.ref_name }}-SNAPSHOT
+          # Replace / with - in branch name
+          version=$(echo "$version" | sed 's/\//-/g')
+          mvn versions:set -DnewVersion="$version"
+
+      # This would still deploy a package if there are test failures. Might help to have build.yml complete and then run this workflow
+      # Publish to GitHub Packages
+      - name: Publish package
+        run: |
+          mvn -B clean deploy -pl '!liquibase-dist' -DskipTests=true "-Dbuild.repository.owner=liquibase" "-Dbuild.repository.name=liquibase" "-Dbuild.branch=$CURRENT_BRANCH_NAME" "-Dbuild.number=${{ github.run_number }}" "-Dbuild.commit=$LATEST_MERGE_SHA" "-Dbuild.timestamp=$TIMESTAMP"
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
