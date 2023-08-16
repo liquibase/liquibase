@@ -37,9 +37,9 @@ jobs:
       - name: Get Current BranchName
         id: get-branch-name
         run: |
-          thisBranchName="${GITHUB_REF#refs/heads/} | tr / -"
-          echo "this_Branch_Name=${thisBranchName}" >> $GITHUB_OUTPUT
-
+          thisBranchName=$(basename ${GITHUB_REF#refs/heads/})
+          modified_branch=$(echo "thisBranchName" | tr / -)
+          echo "this_Branch_Name=$modified_branch" >> $GITHUB_OUTPUT
   build:
     name: Build & Package
     runs-on: ubuntu-22.04
