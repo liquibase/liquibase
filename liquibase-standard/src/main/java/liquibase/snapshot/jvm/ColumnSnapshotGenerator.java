@@ -552,6 +552,10 @@ public class ColumnSnapshotGenerator extends JdbcSnapshotGenerator {
             readDefaultValueForPostgresDatabase(columnMetadataResultSet, columnInfo);
         }
 
+        if (database instanceof MySQLDatabase) {
+            readDefaultValueForMysqlDatabase(columnMetadataResultSet, columnInfo, database);
+        }
+
         if (
                 (database instanceof AbstractDb2Database) &&
                         ((columnMetadataResultSet.get(COLUMN_DEF_COL) != null) &&
@@ -560,6 +564,23 @@ public class ColumnSnapshotGenerator extends JdbcSnapshotGenerator {
         }
 
         return SqlUtil.parseValue(database, columnMetadataResultSet.get(COLUMN_DEF_COL), columnInfo.getType());
+    }
+
+    private void readDefaultValueForMysqlDatabase(CachedRow columnMetadataResultSet, Column column, Database database) {
+        try {
+            String extraValue = Scope.getCurrentScope().getSingleton(ExecutorService.class)
+                    .getExecutor("jdbc", database)
+                    .queryForObject(new RawSqlStatement("SELECT EXTRA FROM INFORMATION_SCHEMA.COLUMNS\n" +
+                            "WHERE TABLE_SCHEMA = '" + column.getSchema().getName() + "'\n" +
+                            "AND TABLE_NAME = '" + column.getRelation().getName() + "'\n" +
+                            "AND COLUMN_NAME = '" + column.getName() + "'"), String.class);
+            if (extraValue.startsWith("DEFAULT_GENERATED")) {
+                columnMetadataResultSet.set(COLUMN_DEF_COL,
+                        String.format("%s %s", columnMetadataResultSet.get(COLUMN_DEF_COL), extraValue.replace("DEFAULT_GENERATED", "").trim()));
+            }
+        } catch (DatabaseException e) {
+            Scope.getCurrentScope().getLog(getClass()).warning("Error fetching extra values", e);
+        }
     }
 
     private void readDefaultValueForPostgresDatabase(CachedRow columnMetadataResultSet, Column columnInfo) {
