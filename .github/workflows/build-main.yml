@@ -22,15 +22,21 @@ jobs:
 
     steps:
       - uses: actions/checkout@v3
-      - name: Get current date
-        id: get-date
-        run: echo "::set-output name=date::$(date +'%Y-%m-%d %H:%M:%S')"
-
       - name: Get Latest Merge Commit SHA
         id: get-sha
         run: |
           latest_merge_sha=$(git rev-parse origin/master)
-          echo "::set-output name=latestMergeSha::$latest_merge_sha"
+          echo "latestMergeSha=$latest_merge_sha" >> $GITHUB_OUTPUT
+        outputs:
+          latestMergeSha: '${{ steps.get-sha.outputs.latestMergeSha }}'
+
+      - name: Get Timestamp
+        id: get-timestamp
+        run: |
+          $timestamp=$(date +'%Y-%m-%d %H:%M:%S')
+          echo "timeStamp=$timestamp" >> $GITHUB_OUTPUT
+        outputs:
+          timeStamp: '${{ steps.get-timestamp.outputs.timeStamp }}'
 
   build:
     name: Build & Package
@@ -39,6 +45,9 @@ jobs:
     permissions:
       contents: read
       packages: write
+    env:
+      LATEST_MERGE_SHA: ${{ needs.get-sha.outputs.latestMergeSha }}
+      TIMESTAMP: ${{ needs.get-timestamp.outputs.timeStamp }}
 
     steps:
       - uses: actions/checkout@v3
@@ -61,7 +70,7 @@ jobs:
 
       # Publish to GitHub Packages
       - name: Publish package
-        run: mvn -B clean deploy -pl '!liquibase-dist' -DskipTests=true "-Dbuild.repository.owner=liquibase" "-Dbuild.repository.name=liquibase" "-Dbuild.branch=master" "-Dbuild.number=${{ github.run_number }}" "-Dbuild.commit=${{ steps.get-sha.outputs.latestMergeSha }}" "-Dbuild.timestamp=${{ steps.get-date.outputs.timestamp }}"
+        run: mvn -B clean deploy -pl '!liquibase-dist' -DskipTests=true "-Dbuild.repository.owner=liquibase" "-Dbuild.repository.name=liquibase" "-Dbuild.branch=master" "-Dbuild.number=${{ github.run_number }}" "-Dbuild.commit=$LATEST_MERGE_SHA" "-Dbuild.timestamp=$TIMESTAMP"
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
