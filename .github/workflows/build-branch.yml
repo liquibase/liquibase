@@ -25,7 +25,7 @@ jobs:
       - name: Get Latest Merge Commit SHA
         id: get-sha
         run: |
-          latest_merge_sha=$(git rev-parse origin/master)
+          latest_merge_sha=$(git rev-parse HEAD)
           echo "latestMergeSha=${latest_merge_sha}" >> $GITHUB_OUTPUT
 
       - name: Get Timestamp
