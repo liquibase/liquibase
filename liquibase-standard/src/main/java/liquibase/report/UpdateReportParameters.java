@@ -107,7 +107,7 @@ public class UpdateReportParameters {
     private static List<String> buildAttributesString(ChangeSet changeSet) {
         List<String> attributes = new ArrayList<>();
 
-        if (!changeSet.getFailOnError()) {
+        if (changeSet.getFailOnError() != null && !changeSet.getFailOnError()) {
             attributes.add("failOnError = false");
         }
         if (changeSet.isAlwaysRun()){
