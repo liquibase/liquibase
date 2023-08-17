@@ -41,7 +41,8 @@ jobs:
           modified_branch=$(echo "$thisBranchName" | tr / -)
           echo "this_Branch_Name=$modified_branch" >> $GITHUB_OUTPUT
           echo "${{ github.head_ref }}"
-          echo "$(git rev-parse HEAD)"
+          echo "$(git rev-parse HEAD)"  
+          echo "${{ github.base_ref }}"
 
   build:
     name: Build & Package
