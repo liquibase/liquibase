@@ -1,11 +1,11 @@
 name: Build Branch SNAPSHOT
 
 on:
-  workflow_dispatch:
-  push:
-    branches-ignore:
-      - master
   workflow_call:
+    inputs:
+      thisBranchName:
+        required: true
+        type: string
 
 env:
   MAVEN_VERSION: '3.9.2'
@@ -17,7 +17,7 @@ jobs:
     outputs:
       timeStamp: ${{ steps.get-timestamp.outputs.timestamp }}
       latestMergeSha: ${{ steps.get-sha.outputs.latest_Merge_Sha }}
-      thisBranchName: ${{ steps.get-branch-name.outputs.this_Branch_Name }}
+#      thisBranchName: ${{ steps.get-branch-name.outputs.this_Branch_Name }}
       setupSuccessful: "true"
 
     steps:
@@ -34,14 +34,7 @@ jobs:
           timeStamp=$(date +'%Y-%m-%d %H:%M:%S %Z')
           echo "timestamp=${timeStamp}" >> $GITHUB_OUTPUT
 
-      - name: Get Current BranchName
-        uses: actions/github-script@v6
-        with:
-          github-token:
-            ${{ secrets.GITHUB_TOKEN }}
-          script: |
-            console.log(JSON.stringify(github))
-            console.log(JSON.stringify(context))
+#      - name: Get Current BranchName
 #        id: get-branch-name
 #        run: |
 #          thisBranchName=${{ github.head_ref }}
@@ -89,6 +82,6 @@ jobs:
       # Publish to GitHub Packages
       - name: Publish package
         run: |
-          mvn -B clean deploy -pl '!liquibase-dist' -DskipTests=true "-Dbuild.repository.owner=liquibase" "-Dbuild.repository.name=liquibase" "-Dbuild.branch=${{ env.CURRENT_BRANCH_NAME }}" "-Dbuild.number=${{ github.run_number }}" "-Dbuild.commit=${{ env.LATEST_MERGE_SHA }}" "-Dbuild.timestamp=${{ env.TIMESTAMP }}"
+          mvn -B clean deploy -pl '!liquibase-dist' -DskipTests=true "-Dbuild.repository.owner=liquibase" "-Dbuild.repository.name=liquibase" "-Dbuild.branch=${{ inputs.thisBranchName }}" "-Dbuild.number=${{ github.run_number }}" "-Dbuild.commit=${{ env.LATEST_MERGE_SHA }}" "-Dbuild.timestamp=${{ env.TIMESTAMP }}"
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
