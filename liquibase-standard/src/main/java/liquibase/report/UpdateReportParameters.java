@@ -93,8 +93,8 @@ public class UpdateReportParameters {
                         deployedChangeSet.getComments(),
                         changesetOutcome,
                         errorMsg,
-                        deployedChangeSet.getLabels().toString(),
-                        deployedChangeSet.getContextFilter().getOriginalString(),
+                        deployedChangeSet.getLabels() == null ? null : deployedChangeSet.getLabels().toString(),
+                        deployedChangeSet.getContextFilter() == null ? null : deployedChangeSet.getContextFilter().getOriginalString(),
                         buildAttributesString(deployedChangeSet),
                         deployedChangeSet.getGeneratedSql()
                 ));
