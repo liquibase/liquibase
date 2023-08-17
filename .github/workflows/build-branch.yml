@@ -38,7 +38,7 @@ jobs:
         uses: actions/github-script@v6
         with:
           github-token:
-            ${{ secrets.BOT_TOKEN }}
+            ${{ secrets.GITHUB_TOKEN }}
           script: |
             console.log(JSON.stringify(github))
             console.log(JSON.stringify(context))
