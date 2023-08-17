@@ -322,7 +322,7 @@ jobs:
             ./**/target/surefire-reports
 
   call-build-branch:
-    uses: liquibase/liquibase/.github/workflows/build-branch.yml@master
+    uses: liquibase/liquibase/.github/workflows/build-branch.yml@fix-branch-build
 
   package:
     name: Package Artifacts
