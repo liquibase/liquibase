@@ -9,7 +9,6 @@ import liquibase.database.Database;
 import liquibase.exception.PreconditionErrorException;
 import liquibase.exception.PreconditionFailedException;
 import liquibase.precondition.core.PreconditionContainer;
-import liquibase.structure.core.Data;
 
 /**
  * An implementation of ChangeExecListener can be called by UpdateVisitor or
