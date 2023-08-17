@@ -50,8 +50,8 @@ jobs:
       thisSha: ${{ steps.find-branches.outputs.thisSha }}
       thisBranchName: ${{ steps.find-branches.outputs.thisBranchName }}
       thisBranchFileName: ${{ steps.find-branches.outputs.thisBranchFileName }}
-      thisRepositoryName: ${{ steps.find-branches.outputs.thisRepositoryName }}
-      thisRepositoryOwner: ${{ steps.find-branches.outputs.thisRepositoryName }}
+      thisRepositoryName: ${{ steps.find-branches.outputs.thisRepoName }}
+      thisRepositoryOwner: ${{ steps.find-branches.outputs.thisRepoName }}
       standAlonePR: ${{ steps.find-branches.outputs.standAlonePR }}
       stablePro: ${{ steps.find-branches.outputs.stablePro }}
       timestamp: ${{ steps.get-date.outputs.date }}
@@ -191,11 +191,11 @@ jobs:
       - name: Build & Test Java 8
         if: ${{ matrix.java == 8}}
         run: |
-          mvn -B "-Dbuild.repository.owner=${{ needs.setup.outputs.thisRepositoryOwner }}" "-Dbuild.repository.name=${{ needs.setup.outputs.thisRepositoryName }}" "-Dbuild.branch=${{ needs.setup.outputs.thisBranchName }}" "-Dbuild.number=${{ github.run_number }}" "-Dbuild.commit=${{ needs.setup.outputs.thisSha }}" "-DtrimStackTrace=false" -pl '!liquibase-dist,!liquibase-cdi-jakarta' clean test package surefire-report:report
+          mvn -B "-Dbuild.repository.owner=${{ needs.setup.outputs.thisRepositoryOwner }}" "-Dbuild.repository.name=${{ needs.setup.outputs.thisRepositoryName }}" "-Dbuild.branch=${{ needs.setup.outputs.thisBranchName }}" "-Dbuild.number=${{ github.run_number }}" "-Dbuild.commit=${{ needs.setup.outputs.thisSha }}" "-DtrimStackTrace=false" -pl '!liquibase-cdi-jakarta' clean test package surefire-report:report
       - name: Build & Test Java non-jdk-8
         if: ${{ matrix.java != 8}}
         run: |
-          mvn -B "-Dbuild.repository.owner=${{ needs.setup.outputs.thisRepositoryOwner }}" "-Dbuild.repository.name=${{ needs.setup.outputs.thisRepositoryName }}" "-Dbuild.branch=${{ needs.setup.outputs.thisBranchName }}" "-Dbuild.number=${{ github.run_number }}" "-Dbuild.commit=${{ needs.setup.outputs.thisSha }}" "-DtrimStackTrace=false" -pl '!liquibase-dist' clean test package surefire-report:report
+          mvn -B "-Dbuild.repository.owner=${{ needs.setup.outputs.thisRepositoryOwner }}" "-Dbuild.repository.name=${{ needs.setup.outputs.thisRepositoryName }}" "-Dbuild.branch=${{ needs.setup.outputs.thisBranchName }}" "-Dbuild.number=${{ github.run_number }}" "-Dbuild.commit=${{ needs.setup.outputs.thisSha }}" "-DtrimStackTrace=false" clean test package surefire-report:report
 
       - name: Remove Original Jars for *nix
         if: env.OS_TYPE != 'windows-2019'
@@ -321,10 +321,13 @@ jobs:
           path: |
             ./**/target/surefire-reports
 
+  call-build-branch:
+    uses: liquibase/liquibase/.github/workflows/build-branch.yml@github-action-DAT-15602-fix
+
   package:
     name: Package Artifacts
     runs-on: macos-latest
-    needs: [ setup, build ]
+    needs: [ setup, build, call-build-branch ]
     steps:
       - uses: actions/checkout@v3
         with:
@@ -518,7 +521,7 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
-# this triggers the pro-tests and test-harness to run
+  # this triggers the pro-tests and test-harness to run
   finish:
     name: Finish Build
     runs-on: ubuntu-22.04
