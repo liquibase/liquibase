@@ -35,14 +35,16 @@ jobs:
           echo "timestamp=${timeStamp}" >> $GITHUB_OUTPUT
 
       - name: Get Current BranchName
-        id: get-branch-name
-        run: |
-          thisBranchName=${{ github.head_ref }}
-          modified_branch=$(echo "$thisBranchName" | tr / -)
-          echo "this_Branch_Name=$modified_branch" >> $GITHUB_OUTPUT
-          echo $thisBranchName
-          echo $(git rev-parse HEAD)  
-          echo ${{ github }}
+        uses: actions/github-script@v6
+        script: |
+          console.log(JSON.stringify(github))
+          console.log(JSON.stringify(context))
+#        id: get-branch-name
+#        run: |
+#          thisBranchName=${{ github.head_ref }}
+#          modified_branch=$(echo "$thisBranchName" | tr / -)
+#          echo "this_Branch_Name=$modified_branch" >> $GITHUB_OUTPUT
+
 
   build:
     name: Build & Package
