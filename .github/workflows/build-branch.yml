@@ -36,9 +36,12 @@ jobs:
 
       - name: Get Current BranchName
         uses: actions/github-script@v6
-        script: |
-          console.log(JSON.stringify(github))
-          console.log(JSON.stringify(context))
+        with:
+          github-token:
+            ${{ secrets.BOT_TOKEN }}
+          script: |
+            console.log(JSON.stringify(github))
+            console.log(JSON.stringify(context))
 #        id: get-branch-name
 #        run: |
 #          thisBranchName=${{ github.head_ref }}
