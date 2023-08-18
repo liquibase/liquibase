@@ -23,6 +23,8 @@ Required Args:
 Optional Args:
   author (String) Specifies the author for changesets in the generated changelog
     Default: null
+  contextFilter (String) Changeset contexts to generate
+    Default: null
   defaultCatalogName (String) The default catalog name to use for the database connection
     Default: null
   defaultSchemaName (String) The default schema name to use for the database connection
@@ -43,6 +45,8 @@ Optional Args:
     Default: false
   includeTablespace (Boolean) Include the tablespace attribute in the changelog. Defaults to false.
     Default: false
+  labelFilter (String) Changeset labels to generate
+    Default: null
   outputSchemas (String) Output schemas names. This is a CSV list.
     Default: null
   password (String) Password to use to connect to the database
