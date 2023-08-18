@@ -472,11 +472,20 @@ public class Column extends AbstractDatabaseObject {
     public Set<String> getSerializableFields() {
         final Set<String> fields = super.getSerializableFields();
         //if this is a computed or indexed column, don't have the serializer try to traverse down to the relation since it may not be a "real" object with an objectId
-        if (BooleanUtil.isTrue(getDescending()) || BooleanUtil.isTrue(getComputed())) {
+        if (! isRealObject() && (BooleanUtil.isTrue(getDescending()) || BooleanUtil.isTrue(getComputed()))) {
             fields.remove("relation");
         }
         fields.remove("forIndex");
         return fields;
+    }
+
+    private boolean isRealObject() {
+        Object obj = getAttribute("relation", Object.class);
+        if (obj instanceof DatabaseObject) {
+            DatabaseObject databaseObject = (DatabaseObject) obj;
+            return databaseObject.getSnapshotId() != null;
+        }
+        return false;
     }
 }
 
