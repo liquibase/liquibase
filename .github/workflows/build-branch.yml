@@ -45,7 +45,7 @@ jobs:
           thisBranchName=${{ github.ref_name }}
           modified_branch=$(echo "$thisBranchName" | tr / -)
           echo "this_Branch_Name=$modified_branch" >> $GITHUB_OUTPUT
-
+          echo ${{ github.ref_name }}
 
   build:
     name: Build & Package
@@ -78,10 +78,7 @@ jobs:
       # Version artifact based off of branch and commit SHA.
       - name: Version Artifact
         run: |
-          version=${{ github.ref_name }}-SNAPSHOT
-          # Replace / with - in branch name
-          version=$(echo "$version" | sed 's/\//-/g')
-          mvn versions:set -DnewVersion="$version"
+          mvn versions:set -DnewVersion="${{ inputs.thisBranchName }}-SNAPSHOT"
 
       # This would still deploy a package if there are test failures. Might help to have build.yml complete and then run this workflow
       # Publish to GitHub Packages
