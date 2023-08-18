@@ -90,7 +90,7 @@ public class CalculateChecksumCommandStep extends AbstractCommandStep {
         String changeSetId;
         String changeSetAuthor;
 
-        Boolean isChangeSetIdentifierPassed = changeSetIdentifier != null;
+        final boolean isChangeSetIdentifierPassed = changeSetIdentifier != null;
 
         if (isChangeSetIdentifierPassed) {
             List<String> parts = validateAndExtractParts(changeSetIdentifier, changeLogFile);
