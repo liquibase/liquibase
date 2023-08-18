@@ -26,6 +26,7 @@ jobs:
       - name: Get Latest Merge Commit SHA
         id: get-sha
         run: |
+          git fetch origin master
           latest_merge_sha=$(git rev-parse origin/master)
           echo "latestMergeSha=${latest_merge_sha}" >> $GITHUB_OUTPUT
 
