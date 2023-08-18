@@ -2,7 +2,6 @@ package liquibase.integration.commandline;
 
 import liquibase.*;
 import liquibase.changelog.ChangeLogParameters;
-import liquibase.changelog.DatabaseChangeLog;
 import liquibase.changelog.visitor.ChangeExecListener;
 import liquibase.changelog.visitor.DefaultChangeExecListener;
 import liquibase.command.CommandResults;
@@ -1506,9 +1505,10 @@ public class Main {
 
                 calculateChecksumCommand
                         .addArgumentValue(DbUrlConnectionCommandStep.DATABASE_ARG, database)
-                        .addArgumentValue(CalculateChecksumCommandStep.CHANGESET_PATH_ARG, OPTIONS.CHANGE_SET_PATH)
-                        .addArgumentValue(CalculateChecksumCommandStep.CHANGESET_ID_ARG, OPTIONS.CHANGE_SET_ID)
-                        .addArgumentValue(CalculateChecksumCommandStep.CHANGESET_AUTHOR_ARG, OPTIONS.CHANGE_SET_AUTHOR)
+                        .addArgumentValue(CalculateChecksumCommandStep.CHANGESET_PATH_ARG, getCommandParam(OPTIONS.CHANGE_SET_PATH, null))
+                        .addArgumentValue(CalculateChecksumCommandStep.CHANGESET_ID_ARG, getCommandParam(OPTIONS.CHANGE_SET_ID, null))
+                        .addArgumentValue(CalculateChecksumCommandStep.CHANGESET_AUTHOR_ARG, getCommandParam(OPTIONS.CHANGE_SET_AUTHOR, null))
+                        .addArgumentValue(CalculateChecksumCommandStep.CHANGESET_IDENTIFIER_ARG, getCommandParam(OPTIONS.CHANGE_SET_IDENTIFIER, null))
                         .addArgumentValue(CalculateChecksumCommandStep.CHANGELOG_FILE_ARG, this.changeLogFile);
 
                 calculateChecksumCommand.execute();
@@ -2183,6 +2183,8 @@ public class Main {
         private static final String CHANGELOG_FILE = "changeLogFile";
         private static final String DATA_OUTPUT_DIRECTORY = "dataOutputDirectory";
         private static final String DIFF_TYPES = "diffTypes";
+
+        public static final String CHANGE_SET_IDENTIFIER = "changeSetIdentifier";
         private static final String CHANGE_SET_ID = "changeSetId";
         private static final String CHANGE_SET_AUTHOR = "changeSetAuthor";
         private static final String CHANGE_SET_PATH = "changeSetPath";
