@@ -1,11 +1,16 @@
 name: Build Branch SNAPSHOT
 
 on:
+  workflow_dispatch:
+    push:
+      branches-ignore:
+        - master
   workflow_call:
-    inputs:
-      thisBranchName:
-        required: true
-        type: string
+#    inputs:
+#      thisBranchName:
+#        required: true
+#        type: string
+
 
 env:
   MAVEN_VERSION: '3.9.2'
@@ -17,7 +22,7 @@ jobs:
     outputs:
       timeStamp: ${{ steps.get-timestamp.outputs.timestamp }}
       latestMergeSha: ${{ steps.get-sha.outputs.latest_Merge_Sha }}
-#      thisBranchName: ${{ steps.get-branch-name.outputs.this_Branch_Name }}
+      thisBranchName: ${{ steps.get-branch-name.outputs.this_Branch_Name }}
       setupSuccessful: "true"
 
     steps:
@@ -34,12 +39,12 @@ jobs:
           timeStamp=$(date +'%Y-%m-%d %H:%M:%S %Z')
           echo "timestamp=${timeStamp}" >> $GITHUB_OUTPUT
 
-#      - name: Get Current BranchName
-#        id: get-branch-name
-#        run: |
-#          thisBranchName=${{ github.head_ref }}
-#          modified_branch=$(echo "$thisBranchName" | tr / -)
-#          echo "this_Branch_Name=$modified_branch" >> $GITHUB_OUTPUT
+      - name: Get Current BranchName
+        id: get-branch-name
+        run: |
+          thisBranchName=${{ github.ref_name }}
+          modified_branch=$(echo "$thisBranchName" | tr / -)
+          echo "this_Branch_Name=$modified_branch" >> $GITHUB_OUTPUT
 
 
   build:
