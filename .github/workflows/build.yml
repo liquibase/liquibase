@@ -325,8 +325,8 @@ jobs:
   call-build-branch:
     needs: [setup, build, sonar, integration-test]
     uses: liquibase/liquibase/.github/workflows/build-branch.yml@fix-branch-build
-    with:
-      thisBranchName: ${{ needs.setup.outputs.thisBranchName }}
+#    with:
+#      thisBranchName: ${{ needs.setup.outputs.thisBranchName }}
 
   package:
     name: Package Artifacts
