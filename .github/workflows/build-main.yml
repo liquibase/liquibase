@@ -43,9 +43,6 @@ jobs:
     permissions:
       contents: read
       packages: write
-    env:
-      LATEST_MERGE_SHA: ${{ needs.get-sha.outputs.latestMergeSha }}
-      TIMESTAMP: ${{ needs.get-timestamp.outputs.timeStamp }}
 
     steps:
       - uses: actions/checkout@v3
@@ -68,7 +65,7 @@ jobs:
 
       # Publish to GitHub Packages
       - name: Publish package
-        run: mvn -B clean deploy -pl '!liquibase-dist' -DskipTests=true "-Dbuild.repository.owner=liquibase" "-Dbuild.repository.name=liquibase" "-Dbuild.branch=master" "-Dbuild.number=${{ github.run_number }}" "-Dbuild.commit=$LATEST_MERGE_SHA" "-Dbuild.timestamp=$TIMESTAMP"
+        run: mvn -B clean deploy -pl '!liquibase-dist' -DskipTests=true "-Dbuild.repository.owner=liquibase" "-Dbuild.repository.name=liquibase" "-Dbuild.branch=master" "-Dbuild.number=${{ github.run_number }}" "-Dbuild.commit=${{ needs.get-sha.outputs.latestMergeSha }}" "-Dbuild.timestamp=${{ needs.get-timestamp.outputs.timeStamp }}"
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
