@@ -54,6 +54,32 @@ public class UpdateReportParameters {
     public static class ChangesetInfo {
         private int changesetCount;
         private final List<IndividualChangesetInfo> changesetInfoList = new ArrayList<>();
+
+        public void addAllToChangesetInfoList(List<ChangeSet> changeSets) {
+            if (changeSets != null) {
+                for (ChangeSet deployedChangeSet : changeSets) {
+                    String changesetOutcome = deployedChangeSet.getExecType() == null ? "" : deployedChangeSet.getExecType().toString();
+                    // If the changeset fails, the exec type it has is null, but if there's an error message, then it failed, and we want to indicate that it failed.
+                    String errorMsg = deployedChangeSet.getErrorMsg();
+                    if (StringUtil.isNotEmpty(errorMsg)) {
+                        changesetOutcome = ChangeSet.ExecType.FAILED.value;
+                    }
+                    changesetInfoList.add(new IndividualChangesetInfo(
+                            changesetInfoList.size() + 1,
+                            deployedChangeSet.getAuthor(),
+                            deployedChangeSet.getId(),
+                            deployedChangeSet.getFilePath(),
+                            deployedChangeSet.getComments(),
+                            changesetOutcome,
+                            errorMsg,
+                            deployedChangeSet.getLabels() == null ? null : deployedChangeSet.getLabels().toString(),
+                            deployedChangeSet.getContextFilter() == null ? null : deployedChangeSet.getContextFilter().getOriginalString(),
+                            buildAttributesString(deployedChangeSet),
+                            deployedChangeSet.getGeneratedSql()
+                    ));
+                }
+            }
+        }
     }
 
     @Data
@@ -71,36 +97,12 @@ public class UpdateReportParameters {
         private List<String> attributes;
         private List<String> generatedSql;
 
+        /**
+         * Used in the report template. Do not remove.
+         * @return true if there are any attributes
+         */
         public boolean hasAttributes() {
             return !CollectionUtil.createIfNull(attributes).isEmpty();
-        }
-
-        public static List<IndividualChangesetInfo> fromChangesetList(List<ChangeSet> deployedChangeSets) {
-            List<IndividualChangesetInfo> individualChangesetInfos = new ArrayList<>(deployedChangeSets.size());
-            int index = 1;
-            for (ChangeSet deployedChangeSet : deployedChangeSets) {
-                String changesetOutcome = deployedChangeSet.getExecType() == null ? "" : deployedChangeSet.getExecType().toString();
-                // If the changeset fails, the exec type it has is null, but if there's an error message, then it failed, and we want to indicate that it failed.
-                String errorMsg = deployedChangeSet.getErrorMsg();
-                if (StringUtil.isNotEmpty(errorMsg)) {
-                    changesetOutcome = ChangeSet.ExecType.FAILED.value;
-                }
-                individualChangesetInfos.add(new IndividualChangesetInfo(
-                        index,
-                        deployedChangeSet.getAuthor(),
-                        deployedChangeSet.getId(),
-                        deployedChangeSet.getFilePath(),
-                        deployedChangeSet.getComments(),
-                        changesetOutcome,
-                        errorMsg,
-                        deployedChangeSet.getLabels() == null ? null : deployedChangeSet.getLabels().toString(),
-                        deployedChangeSet.getContextFilter() == null ? null : deployedChangeSet.getContextFilter().getOriginalString(),
-                        buildAttributesString(deployedChangeSet),
-                        deployedChangeSet.getGeneratedSql()
-                ));
-                index++;
-            }
-            return individualChangesetInfos;
         }
     }
 
