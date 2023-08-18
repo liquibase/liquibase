@@ -27,13 +27,13 @@ jobs:
         id: get-sha
         run: |
           git fetch origin master
-          latest_merge_sha=$(git rev-parse origin/master)
+          latest_merge_sha=`(git rev-parse origin/master)`
           echo "latestMergeSha=${latest_merge_sha}" >> $GITHUB_OUTPUT
 
       - name: Get Timestamp
         id: get-timestamp
         run: |
-          timestamp=$(date +'%Y-%m-%d %H:%M:%S %Z')
+          timestamp=`(date +'%Y-%m-%d %H:%M:%S %Z')`
           echo "timeStamp=${timestamp}" >> $GITHUB_OUTPUT
 
   build:
@@ -65,7 +65,7 @@ jobs:
 
       # Publish to GitHub Packages
       - name: Publish package
-        run: mvn -B clean deploy -pl '!liquibase-dist' -DskipTests=true "-Dbuild.repository.owner=liquibase" "-Dbuild.repository.name=liquibase" "-Dbuild.branch=master" "-Dbuild.number=${{ github.run_number }}" "-Dbuild.commit=${{ needs.get-sha.outputs.latestMergeSha }}" "-Dbuild.timestamp=${{ needs.get-timestamp.outputs.timeStamp }}"
+        run: mvn -B clean deploy -pl '!liquibase-dist' -DskipTests=true "-Dbuild.repository.owner=liquibase" "-Dbuild.repository.name=liquibase" "-Dbuild.branch=master" "-Dbuild.number=${{ github.run_number }}" "-Dbuild.commit=${{ needs.setup.outputs.latestMergeSha }}" "-Dbuild.timestamp=${{ needs.setup.outputs.timeStamp }}"
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
