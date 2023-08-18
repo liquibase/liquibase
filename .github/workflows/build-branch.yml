@@ -12,7 +12,7 @@ on:
       - synchronize
       - labeled
 
-#  workflow_call:
+  workflow_call:
 #    inputs:
 #      branchName:
 #        required: true
