@@ -21,8 +21,8 @@ jobs:
     runs-on: ubuntu-22.04
     outputs:
       timeStamp: ${{ steps.get-timestamp.outputs.timestamp }}
-      latestMergeSha: ${{ steps.get-sha.outputs.latest_Merge_Sha }}
-      thisBranchName: ${{ steps.get-branch-name.outputs.this_Branch_Name }}
+      latestMergeSha: ${{ steps.get-sha.outputs.latestMergeSha }}
+      thisBranchName: ${{ steps.get-branch-name.outputs.thisBranchName }}
       setupSuccessful: "true"
 
     steps:
@@ -31,7 +31,7 @@ jobs:
         id: get-sha
         run: |
           latestMergeSha=$(git rev-parse HEAD)
-          echo "latest_Merge_Sha=${latestMergeSha}" >> $GITHUB_OUTPUT
+          echo "latestMergeSha=${latestMergeSha}" >> $GITHUB_OUTPUT
 
       - name: Get Timestamp
         id: get-timestamp
@@ -42,11 +42,9 @@ jobs:
       - name: Get Current BranchName
         id: get-branch-name
         run: |
-          thisBranchName=${{ github.ref_name }}
-          modified_branch=echo $thisBranchName | tr / -
-          echo "this_Branch_Name=$modified_branch" >> $GITHUB_OUTPUT
-          echo ${{ github.ref_name }}
-          echo $thisBranchName
+          branch_name=${{ github.ref_name }}
+          modified_branch_name=`(echo $branch_name | tr / -)`
+          echo "thisBranchName=$modified_branch_name" >> $GITHUB_OUTPUT
 
   build:
     name: Build & Package
@@ -78,7 +76,7 @@ jobs:
       # Version artifact based off of branch and commit SHA.
       - name: Version Artifact
         run: |
-          mvn versions:set -DnewVersion="${{ needs.setup.outputs.thisBranchName }}-SNAPSHOT"
+          mvn versions:set "-DnewVersion=${{ needs.setup.outputs.thisBranchName }}-SNAPSHOT"
 
       # This would still deploy a package if there are test failures. Might help to have build.yml complete and then run this workflow
       # Publish to GitHub Packages
