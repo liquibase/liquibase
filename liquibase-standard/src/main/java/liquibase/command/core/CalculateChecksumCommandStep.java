@@ -164,11 +164,11 @@ public class CalculateChecksumCommandStep extends AbstractCommandStep {
                 "Calculates and prints a checksum for the changeset with the given id in the format filepath::id::author");
         commandDefinition.setHelpFooter("Calculate checksum provides two ways to identify a changeset.\n\n" +
                                         "1. Composite changeset identifier\n\n" +
-                                        "The composite changeset identifier must be passed in the following pattern myPath::myId::myAuthor\n" +
+                                        "The composite changeset identifier must be passed in the following pattern myPath::myId::myAuthor.\n" +
                                         "liquibase calculateCheckSum --changeSetIdentifier myFile::myId::myAuthor\n\n" +
                                         "2. Individual changeset parameters\n\n" +
-                                        "The second option requires all three parameters to be defined\n" +
-                                        "This variant offers some more flexibility in naming conventions for path, id and author\n"+
+                                        "The second option requires all three parameters to be defined.\n" +
+                                        "This variant offers some more flexibility in naming conventions for path, id and author.\n"+
                                         "liquibase calculateCheckSum --changesetId myId --changesetAuthor myAuthor --changesetPath myPath\n"
         );
     }
