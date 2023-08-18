@@ -21,17 +21,14 @@ import liquibase.diff.output.changelog.DiffToChangeLog;
 import liquibase.exception.CommandExecutionException;
 import liquibase.exception.DatabaseException;
 import liquibase.exception.LiquibaseException;
-import liquibase.exception.LockException;
 import liquibase.executor.Executor;
 import liquibase.executor.ExecutorService;
 import liquibase.executor.LoggingExecutor;
 import liquibase.io.WriterOutputStream;
 import liquibase.lockservice.DatabaseChangeLogLock;
-import liquibase.lockservice.LockService;
 import liquibase.lockservice.LockServiceFactory;
 import liquibase.logging.Logger;
 import liquibase.logging.mdc.MdcKey;
-import liquibase.logging.mdc.customobjects.ChangesetsRolledback;
 import liquibase.parser.ChangeLogParser;
 import liquibase.parser.ChangeLogParserFactory;
 import liquibase.parser.core.xml.XMLChangeLogSAXParser;
@@ -1199,26 +1196,16 @@ public class Liquibase implements AutoCloseable {
     }
 
     /**
-     * Sets checksums to null so they will be repopulated next run
+     * Sets checksums to null, so they will be repopulated next run
+     *
+     * @deprecated Use {@link CommandScope(String)}
      */
+    @Deprecated
     public void clearCheckSums() throws LiquibaseException {
-        LOG.info("Clearing database change log checksums");
-        runInScope(() -> {
-            LockService lockService = LockServiceFactory.getInstance().getLockService(database);
-            lockService.waitForLock();
-
-            try {
-                checkLiquibaseTables(false, null, new Contexts(), new LabelExpression());
-                Scope.getCurrentScope().getSingleton(ChangeLogHistoryServiceFactory.class).getChangeLogService(database).clearAllCheckSums();
-            } finally {
-                try {
-                    lockService.releaseLock();
-                } catch (LockException e) {
-                    LOG.severe(MSG_COULD_NOT_RELEASE_LOCK, e);
-                }
-            }
-            resetServices();
-        });
+        CommandResults commandResults = new CommandScope(ClearChecksumsCommandStep.COMMAND_NAME)
+                .addArgumentValue(DbUrlConnectionCommandStep.DATABASE_ARG, database)
+                .addArgumentValue(DbUrlConnectionCommandStep.URL_ARG, database.getConnection().getURL())
+                .execute();
     }
 
     /**
