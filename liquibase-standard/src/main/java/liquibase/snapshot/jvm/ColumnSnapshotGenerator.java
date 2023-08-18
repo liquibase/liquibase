@@ -553,6 +553,24 @@ public class ColumnSnapshotGenerator extends JdbcSnapshotGenerator {
             columnMetadataResultSet.set(COLUMN_DEF_COL, null);
         }
 
+        if (database instanceof SybaseASADatabase) {
+            String defaultValue = (String) columnMetadataResultSet.get(COLUMN_DEF_COL);
+
+           // SQL Anywhere returns `CURRENT DATE` (without underscore), which no other RDBMS would understand
+           defaultValue = defaultValue.replaceAll("(?i)\\bCURRENT\\s+DATE\\b", "{fn CURDATE()}");
+
+           // SQL Anywhere returns `CURRENT TIME` (without underscore), which no other RDBMS would understand
+           defaultValue = defaultValue.replaceAll("(?i)\\bCURRENT\\s+TIME\\b", "{fn CURTIME()}");
+
+           // SQL Anywhere returns `CURRENT TIMESTAMP` (without underscore), which no other RDBMS would understand
+           defaultValue = defaultValue.replaceAll("(?i)\\bCURRENT\\s+TIMESTAMP\\b", "{fn NOW()}");
+
+           // SQL Anywhere returns `CURRENT USER` (without underscore), which no other RDBMS would understand
+           defaultValue = defaultValue.replaceAll("(?i)\\bCURRENT\\s+USER\\b", "{fn USER()}");
+
+           columnMetadataResultSet.set(COLUMN_DEF_COL, defaultValue);
+        }
+
         return SqlUtil.parseValue(database, columnMetadataResultSet.get(COLUMN_DEF_COL), columnInfo.getType());
     }
 
