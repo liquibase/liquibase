@@ -47,7 +47,7 @@ jobs:
         run: |
           branch_name=${{ github.event.pull_request.base.ref }}
           
-          base_branch_name=${branch_name#refs/heads/}
+          base_branch_name=`branch_name#refs/heads/`
           
           
           modified_branch_name=`(echo $base_branch_name | tr / -)`
