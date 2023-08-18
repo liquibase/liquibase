@@ -43,10 +43,10 @@ jobs:
         id: get-branch-name
         run: |
           thisBranchName=${{ github.ref_name }}
-          modified_branch=$(echo "thisBranchName" | tr / -)
+          modified_branch=echo $thisBranchName | tr / -
           echo "this_Branch_Name=$modified_branch" >> $GITHUB_OUTPUT
           echo ${{ github.ref_name }}
-          echo this_Branch_Name
+          echo $thisBranchName
 
   build:
     name: Build & Package
