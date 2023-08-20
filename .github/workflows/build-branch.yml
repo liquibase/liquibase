@@ -54,6 +54,7 @@ jobs:
           echo "thisBranchName=$modified_branch_name" >> $GITHUB_OUTPUT
           pr_branch_name="${{ github.event.pull_request.head.ref }}"
           echo "Forked PR Branch Name: $pr_branch_name"
+          echo "branch_name": $branch_name
 
   build:
     name: Build & Package
