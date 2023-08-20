@@ -48,9 +48,12 @@ jobs:
       - name: Get Current BranchName
         id: get-branch-name
         run: |
-          branch_name=${{ github.ref_name }}
+          #branch_name=${{ github.ref_name }}
+          branch_name=${{ github.head_ref }}
           modified_branch_name=`(echo $branch_name | tr / -)`
           echo "thisBranchName=$modified_branch_name" >> $GITHUB_OUTPUT
+          pr_branch_name="${{ github.event.pull_request.head.ref }}"
+          echo "Forked PR Branch Name: $pr_branch_name"
 
   build:
     name: Build & Package
