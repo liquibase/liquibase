@@ -49,7 +49,7 @@ jobs:
         id: get-branch-name
         run: |
           #branch_name=${{ github.ref_name }}
-          branch_name=${{ github.head_ref }}
+          branch_name="${GITHUB_HEAD_REF}"
           modified_branch_name=`(echo $branch_name | tr / -)`
           echo "thisBranchName=$modified_branch_name" >> $GITHUB_OUTPUT
           pr_branch_name="${{ github.event.pull_request.head.ref }}"
