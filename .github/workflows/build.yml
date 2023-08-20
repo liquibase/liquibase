@@ -23,6 +23,11 @@ on:
     paths-ignore:
       - '**.md'
 
+  workflow_run:
+    workflows:
+      - "Build Branch SNAPSHOT"
+    types:
+      - completed
 env:
   MAVEN_VERSION: '3.9.2'
 
@@ -70,7 +75,7 @@ jobs:
 
       - name: Get current date
         id: get-date
-        run: echo "::set-output name=date::$(date +'%Y-%m-%d %H:%M:%S')"
+        run: echo "::set-output name=date::$(date +'%Y-%m-%d %H:%M:%S %Z')"
 
       - name: Find corresponding branches
         id: find-branches
@@ -322,16 +327,17 @@ jobs:
             ./**/target/surefire-reports
 
 
-  call-build-branch:
-    needs: [setup, build, sonar, integration-test]
-    uses: liquibase/liquibase/.github/workflows/build-branch.yml@github-action-fix-branch-build
+#  call-build-branch:
+#    needs: [setup, build, sonar, integration-test]
+#    uses: liquibase/liquibase/.github/workflows/build-branch.yml@github-action-fix-branch-build
 #    with:
-#      thisBranchName: ${{ needs.setup.outputs.thisBranchName }}
+#      branchName: ${{ github.head_ref }}
 
   package:
     name: Package Artifacts
     runs-on: macos-latest
-    needs: [ setup, build, call-build-branch ]
+    #needs: [ setup, build, call-build-branch ]
+    needs: [ setup, build ]
     steps:
       - uses: actions/checkout@v3
         with:
