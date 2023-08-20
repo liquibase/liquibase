@@ -5,14 +5,14 @@ on:
   push:
     branches-ignore:
       - master
-  pull_request:
+  pull_request_target:
     types:
       - opened
       - reopened
       - synchronize
       - labeled
 
-  workflow_call:
+#  workflow_call:
 #    inputs:
 #      branchName:
 #        required: true
@@ -48,7 +48,7 @@ jobs:
       - name: Get Current BranchName
         id: get-branch-name
         run: |
-          branch_name=${{ github.head_ref }}
+          branch_name=${{ github.ref_name }}
           modified_branch_name=`(echo $branch_name | tr / -)`
           echo "thisBranchName=$modified_branch_name" >> $GITHUB_OUTPUT
 
@@ -82,13 +82,12 @@ jobs:
       # Version artifact based off of branch and commit SHA.
       - name: Version Artifact
         run: |
-           #mvn versions:set "-DnewVersion=${{ needs.setup.outputs.thisBranchName }}-SNAPSHOT"
-           mvn versions:set "-DnewVersion=${{ inputs.branchName }}-SNAPSHOT"
+           mvn versions:set "-DnewVersion=${{ needs.setup.outputs.thisBranchName }}-SNAPSHOT"
+           #mvn versions:set "-DnewVersion=${{ inputs.branchName }}-SNAPSHOT"
 
-      # This would still deploy a package if there are test failures. Might help to have build.yml complete and then run this workflow
       # Publish to GitHub Packages
       - name: Publish package
         run: |
-          mvn -B clean deploy -pl '!liquibase-dist' -DskipTests=true "-Dbuild.repository.owner=liquibase" "-Dbuild.repository.name=liquibase" "-Dbuild.branch=${{ inputs.branchName }}" "-Dbuild.number=${{ github.run_number }}" "-Dbuild.commit=${{ needs.setup.outputs.latestMergeSha }}" "-Dbuild.timestamp=${{ needs.setup.outputs.timeStamp }}"
+          mvn -B clean deploy -pl '!liquibase-dist' -DskipTests=true "-Dbuild.repository.owner=liquibase" "-Dbuild.repository.name=liquibase" "-Dbuild.branch=${{ needs.setup.outputs.thisBranchName }}" "-Dbuild.number=${{ github.run_number }}" "-Dbuild.commit=${{ needs.setup.outputs.latestMergeSha }}" "-Dbuild.timestamp=${{ needs.setup.outputs.timeStamp }}"
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
