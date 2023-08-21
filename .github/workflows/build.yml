@@ -326,17 +326,9 @@ jobs:
           path: |
             ./**/target/surefire-reports
 
-
-#  call-build-branch:
-#    needs: [setup, build, sonar, integration-test]
-#    uses: liquibase/liquibase/.github/workflows/build-branch.yml@github-action-fix-branch-build
-#    with:
-#      branchName: ${{ github.head_ref }}
-
   package:
     name: Package Artifacts
     runs-on: macos-latest
-    #needs: [ setup, build, call-build-branch ]
     needs: [ setup, build ]
     steps:
       - uses: actions/checkout@v3
