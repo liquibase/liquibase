@@ -2,15 +2,11 @@ name: Build Branch SNAPSHOT
 
 on:
   workflow_dispatch:
-  push:
-    branches-ignore:
-      - master
   pull_request_target:
     types:
       - opened
       - reopened
       - synchronize
-      - labeled
 
 env:
   MAVEN_VERSION: '3.9.2'
