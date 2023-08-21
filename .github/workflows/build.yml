@@ -258,6 +258,7 @@ jobs:
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
         run: mvn clean verify sonar:sonar -P sonar -Dsonar.login=$SONAR_TOKEN -Dsonar.pullrequest.key=${{ github.event.pull_request.number }} -Dsonar.pullrequest.branch=${{ github.event.pull_request.head.ref }} -Dsonar.pullrequest.base=${{ github.event.pull_request.base.ref }}
 
+
   integration-test:
     name: Integration Test
     runs-on: ubuntu-22.04
