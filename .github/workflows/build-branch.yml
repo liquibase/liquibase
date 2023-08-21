@@ -2,9 +2,6 @@ name: Build Branch SNAPSHOT
 
 on:
   workflow_dispatch:
-  push:
-    branches:
-      - master
   pull_request_target:
     types:
       - opened
