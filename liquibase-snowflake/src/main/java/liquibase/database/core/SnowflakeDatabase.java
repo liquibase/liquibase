@@ -36,6 +36,7 @@ public class SnowflakeDatabase extends AbstractJdbcDatabase {
         super.addReservedWords(getDefaultReservedWords());
         super.defaultAutoIncrementStartWith = BigInteger.ONE;
         super.defaultAutoIncrementBy = BigInteger.ONE;
+        super.sequenceNextValueFunction = "%s.nextval";
     }
 
     @Override

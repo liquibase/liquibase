@@ -19,10 +19,15 @@ on:
     branches:
       - master
       - main
-      - github-action-*
+      - github-action-**
     paths-ignore:
       - '**.md'
 
+  workflow_run:
+    workflows:
+      - "Build Branch SNAPSHOT"
+    types:
+      - completed
 env:
   MAVEN_VERSION: '3.9.2'
 
@@ -50,10 +55,11 @@ jobs:
       thisSha: ${{ steps.find-branches.outputs.thisSha }}
       thisBranchName: ${{ steps.find-branches.outputs.thisBranchName }}
       thisBranchFileName: ${{ steps.find-branches.outputs.thisBranchFileName }}
-      thisRepositoryName: ${{ steps.find-branches.outputs.thisRepositoryName }}
-      thisRepositoryOwner: ${{ steps.find-branches.outputs.thisRepositoryName }}
+      thisRepositoryName: ${{ steps.find-branches.outputs.thisRepoName }}
+      thisRepositoryOwner: ${{ steps.find-branches.outputs.thisRepoName }}
       standAlonePR: ${{ steps.find-branches.outputs.standAlonePR }}
       stablePro: ${{ steps.find-branches.outputs.stablePro }}
+      timestamp: ${{ steps.get-date.outputs.date }}
       setupSuccessful: "true"
     steps:
       - name: Failsafe
@@ -66,6 +72,10 @@ jobs:
       - uses: actions/checkout@v3
         with:
           ref: ${{ github.event.pull_request.head.sha || github.event.after}}
+
+      - name: Get current date
+        id: get-date
+        run: echo "::set-output name=date::$(date +'%Y-%m-%d %H:%M:%S %Z')"
 
       - name: Find corresponding branches
         id: find-branches
@@ -159,6 +169,7 @@ jobs:
     runs-on: ${{ matrix.os }}
     env:
       OS_TYPE: ${{ matrix.os }}
+      GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
     steps:
       - uses: actions/checkout@v3
         with:
@@ -169,7 +180,6 @@ jobs:
         with:
           key: built-code-${{ github.run_number }}-${{ github.run_attempt }}
           path: ./**/target
-
       - name: Set up JDK ${{ matrix.java }}
         uses: actions/setup-java@v3
         with:
@@ -186,11 +196,11 @@ jobs:
       - name: Build & Test Java 8
         if: ${{ matrix.java == 8}}
         run: |
-          mvn -B "-Dbuild.repository.owner=${{ needs.setup.outputs.thisRepositoryOwner }}" "-Dbuild.repository.name=${{ needs.setup.outputs.thisRepositoryName }}" "-Dbuild.branch=${{ needs.setup.outputs.thisBranchName }}" "-Dbuild.number=${{ github.run_number }}" "-Dbuild.commit=${{ needs.setup.outputs.thisSha }}" "-DtrimStackTrace=false" -pl '!liquibase-dist,!liquibase-cdi-jakarta' clean test package surefire-report:report
+          mvn -B "-Dbuild.repository.owner=${{ needs.setup.outputs.thisRepositoryOwner }}" "-Dbuild.repository.name=${{ needs.setup.outputs.thisRepositoryName }}" "-Dbuild.branch=${{ needs.setup.outputs.thisBranchName }}" "-Dbuild.number=${{ github.run_number }}" "-Dbuild.commit=${{ needs.setup.outputs.thisSha }}" "-DtrimStackTrace=false" -pl '!liquibase-cdi-jakarta' clean test package surefire-report:report
       - name: Build & Test Java non-jdk-8
         if: ${{ matrix.java != 8}}
         run: |
-          mvn -B "-Dbuild.repository.owner=${{ needs.setup.outputs.thisRepositoryOwner }}" "-Dbuild.repository.name=${{ needs.setup.outputs.thisRepositoryName }}" "-Dbuild.branch=${{ needs.setup.outputs.thisBranchName }}" "-Dbuild.number=${{ github.run_number }}" "-Dbuild.commit=${{ needs.setup.outputs.thisSha }}" "-DtrimStackTrace=false" -pl '!liquibase-dist' clean test package surefire-report:report
+          mvn -B "-Dbuild.repository.owner=${{ needs.setup.outputs.thisRepositoryOwner }}" "-Dbuild.repository.name=${{ needs.setup.outputs.thisRepositoryName }}" "-Dbuild.branch=${{ needs.setup.outputs.thisBranchName }}" "-Dbuild.number=${{ github.run_number }}" "-Dbuild.commit=${{ needs.setup.outputs.thisSha }}" "-DtrimStackTrace=false" clean test package surefire-report:report
 
       - name: Remove Original Jars for *nix
         if: env.OS_TYPE != 'windows-2019'
@@ -325,14 +335,11 @@ jobs:
         with:
           ref: ${{ github.event.pull_request.head.sha || github.event.after}}
       # this includes all the tar files included in the previous runs. So in the next step we deploy what was previously build
-      # do not cache the keys for the next run
       - name: Built Code Cache
         uses: actions/cache@v3.3.1
         with:
           key: built-code-${{ github.run_number }}-${{ github.run_attempt }}
-          path: |
-            ./**/target/*
-            !./**/target/keys/
+          path: ./**/target
 
       ##Cache based on install4j file, since changes to JVM is seen in there. If install4j version changes without changing the file, change the prefix letter before hashFiles to force a new cache
       - name: Install4j Cache
@@ -401,6 +408,14 @@ jobs:
         with:
           maven-version: ${{ env.MAVEN_VERSION }}
 
+      # Version artifact based off of branch
+      - name: Version Artifact
+        run: |
+          version=${{ needs.setup.outputs.thisBranchFileName }}-SNAPSHOT
+          # Replace / with - in branch name
+          version=$(echo "$version" | sed 's/\//-/g')
+          mvn versions:set -DnewVersion="$version"
+
       - name: Build & Sign Artifacts
         env:
           INSTALL4J_LICENSE: ${{ secrets.INSTALL4J_LICENSE }}
@@ -420,17 +435,16 @@ jobs:
 
           echo "Saving windows key"
           echo "$INSTALL4J_WINDOWS_KEY" | base64 -d > liquibase-dist/target/keys/datical_windows.pfx
-          # we are packaging and deploying liquibase tar which includes liquibase-commercial 
-          mvn versions:set -DnewVersion="${{ needs.setup.outputs.thisBranchName }}-SNAPSHOT"
-          mvn -B -pl liquibase-dist -P liquibase-commercial source:jar package -Dliquibase-pro.version="${{ needs.setup.outputs.proBranchName }}-SNAPSHOT"
+          # we are packaging and deploying liquibase tar which includes liquibase-commercial
+          mvn -B -pl liquibase-dist -P liquibase-commercial source:jar package "-Dliquibase-pro.version=${{ needs.setup.outputs.proBranchName }}-SNAPSHOT" "-Dbuild.repository.owner=${{ needs.setup.outputs.thisRepositoryOwner }}" "-Dbuild.repository.name=${{ needs.setup.outputs.thisRepositoryName }}" "-Dbuild.branch=${{ needs.setup.outputs.thisBranchFileName }}" "-Dbuild.number=${{ github.run_number }}" "-Dbuild.commit=${{ needs.setup.outputs.thisSha }}" "-Dbuild.timestamp=${{ needs.setup.outputs.timestamp }}"
 
           ## extract tar content for other artifacts
-          mkdir -p liquibase-dist/target/liquibase-${{ needs.setup.outputs.thisBranchName }}-SNAPSHOT
-          (cd liquibase-dist/target/liquibase-${{ needs.setup.outputs.thisBranchName }}-SNAPSHOT && tar -xzf ../liquibase-${{ needs.setup.outputs.thisBranchName }}-SNAPSHOT.tar.gz)
+          mkdir -p liquibase-dist/target/liquibase-${{ needs.setup.outputs.thisBranchFileName }}-SNAPSHOT
+          (cd liquibase-dist/target/liquibase-${{ needs.setup.outputs.thisBranchFileName }}-SNAPSHOT && tar -xzf ../liquibase-${{ needs.setup.outputs.thisBranchFileName }}-SNAPSHOT.tar.gz)
           
           ##create zip file from tar content
-          (cd liquibase-dist/target/liquibase-${{ needs.setup.outputs.thisBranchName }}-SNAPSHOT && zip -r ../liquibase-${{ needs.setup.outputs.thisBranchName }}-SNAPSHOT.zip *)
-          ls liquibase-dist/target/liquibase-${{ needs.setup.outputs.thisBranchName }}-SNAPSHOT
+          (cd liquibase-dist/target/liquibase-${{ needs.setup.outputs.thisBranchFileName }}-SNAPSHOT && zip -r ../liquibase-${{ needs.setup.outputs.thisBranchFileName }}-SNAPSHOT.zip *)
+          ls liquibase-dist/target/liquibase-${{ needs.setup.outputs.thisBranchFileName }}-SNAPSHOT
           
           ##create installer - disabled here but run as nightly job and as part of release workflow
           # (cd liquibase-dist && ${{ github.workspace }}/.github/util/package-install4j.sh 0-SNAPSHOT)
@@ -438,8 +452,8 @@ jobs:
           find . -name original-*.jar -exec rm {} \;
 
           mkdir -p artifacts
-          cp liquibase-dist/target/liquibase-${{ needs.setup.outputs.thisBranchName }}-SNAPSHOT.tar.gz artifacts
-          cp liquibase-dist/target/liquibase-${{ needs.setup.outputs.thisBranchName }}-SNAPSHOT.zip artifacts
+          cp liquibase-dist/target/liquibase-${{ needs.setup.outputs.thisBranchFileName }}-SNAPSHOT.tar.gz artifacts
+          cp liquibase-dist/target/liquibase-${{ needs.setup.outputs.thisBranchFileName }}-SNAPSHOT.zip artifacts
           cp liquibase-core/target/liquibase-core-0-SNAPSHOT.jar artifacts/liquibase-core-0-SNAPSHOT.jar
           cp liquibase-core/target/liquibase-core-0-SNAPSHOT-sources.jar artifacts/liquibase-core-0-SNAPSHOT-sources.jar
           cp target/liquibase-0-SNAPSHOT-javadoc.jar artifacts/liquibase-core-0-SNAPSHOT-javadoc.jar
@@ -474,7 +488,7 @@ jobs:
 
           ##prepare branch-named convenience artifacts directories
           mkdir artifacts-named
-          cp liquibase-dist/target/liquibase-${{ needs.setup.outputs.thisBranchName }}-SNAPSHOT.tar.gz artifacts-named/liquibase-${{ needs.setup.outputs.thisBranchFileName }}.tar.gz
+          cp liquibase-dist/target/liquibase-${{ needs.setup.outputs.thisBranchFileName }}-SNAPSHOT.tar.gz artifacts-named/liquibase-${{ needs.setup.outputs.thisBranchFileName }}.tar.gz
           cp liquibase-core/target/liquibase-core-0-SNAPSHOT.jar artifacts-named/liquibase-core-${{ needs.setup.outputs.thisBranchFileName }}.jar
           cp liquibase-maven-plugin/target/liquibase-maven-plugin-0-SNAPSHOT.jar artifacts-named/liquibase-maven-plugin-${{ needs.setup.outputs.thisBranchFileName }}.jar
           cp liquibase-cdi/target/liquibase-cdi-0-SNAPSHOT.jar artifacts-named/liquibase-cdi-${{ needs.setup.outputs.thisBranchFileName }}.jar
@@ -493,7 +507,7 @@ jobs:
         uses: actions/upload-artifact@v3
         with:
           name: liquibase-zip-${{ needs.setup.outputs.thisBranchFileName }}
-          path: liquibase-dist/target/liquibase-${{ needs.setup.outputs.thisBranchName }}-SNAPSHOT/*
+          path: liquibase-dist/target/liquibase-${{ needs.setup.outputs.thisBranchFileName }}-SNAPSHOT/*
 
       - name: Archive Convenience Artifacts
         uses: actions/upload-artifact@v3
@@ -505,11 +519,11 @@ jobs:
       # Publish to GitHub Packages. We are building a tar file which includes liquibase-commercial hence we need "-Dliquibase-pro.version"
       - name: Publish tar.gz package to GPM
         run: |
-          mvn -B -pl liquibase-dist -P liquibase-commercial clean deploy -DskipTests=true -Dliquibase-pro.version="${{ needs.setup.outputs.proBranchName }}-SNAPSHOT" -Dbuild.timestamp=${{ steps.date.outputs.date }}
+          mvn -B -pl liquibase-dist -P liquibase-commercial clean deploy -DskipTests=true "-Dliquibase-pro.version=${{ needs.setup.outputs.proBranchName }}-SNAPSHOT" "-Dbuild.timestamp=${{ needs.setup.outputs.timestamp }}" "-Dbuild.repository.owner=${{ needs.setup.outputs.thisRepositoryOwner }}" "-Dbuild.repository.name=${{ needs.setup.outputs.thisRepositoryName }}" "-Dbuild.branch=${{ needs.setup.outputs.thisBranchFileName }}" "-Dbuild.number=${{ github.run_number }}" "-Dbuild.commit=${{ needs.setup.outputs.thisSha }}"
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
-# this triggers the pro-tests and test-harness to run
+  # this triggers the pro-tests and test-harness to run
   finish:
     name: Finish Build
     runs-on: ubuntu-22.04
