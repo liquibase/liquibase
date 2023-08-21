@@ -23,6 +23,11 @@ on:
     paths-ignore:
       - '**.md'
 
+  workflow_run:
+    workflows:
+      - "Build Branch SNAPSHOT"
+    types:
+      - completed
 env:
   MAVEN_VERSION: '3.9.2'
 
@@ -321,13 +326,10 @@ jobs:
           path: |
             ./**/target/surefire-reports
 
-  call-build-branch:
-    uses: liquibase/liquibase/.github/workflows/build-branch.yml@master
-
   package:
     name: Package Artifacts
     runs-on: macos-latest
-    needs: [ setup, build, call-build-branch ]
+    needs: [ setup, build ]
     steps:
       - uses: actions/checkout@v3
         with:
