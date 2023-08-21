@@ -37,6 +37,8 @@ class JdbcConnectionTest extends Specification {
         "jdbc:jtds:sqlserver://localhost:1433/proCatalog;user=my_user;"                      | "jdbc:jtds:sqlserver://localhost:1433/proCatalog;"
         "jdbc:oracle:thin:user/password@host:1521/db"                                        | "jdbc:oracle:thin:user@host:1521/db"
         "jdbc:oracle:thin:@host:1521/db"                                                     | "jdbc:oracle:thin:@host:1521/db"
+        "mongodb://userdb:Password123@localhost:27017/testdb"                                | "mongodb:@localhost:27017/testdb"
+        "mongodb+srv://AWS_ACCESS_KEY_ID:AWS_SECRET_ACCESS_KEY@cluster0.example.com/testdb"  | "mongodb+srv:@cluster0.example.com/testdb"
         null                                                                                 | null
     }
 
@@ -72,6 +74,8 @@ class JdbcConnectionTest extends Specification {
         "jdbc:jtds:sqlserver://localhost:1433/proCatalog;user=my_user;"                      | "jdbc:jtds:sqlserver://localhost:1433/proCatalog;user=*****;"
         "jdbc:oracle:thin:user/password@host:1521/db"                                        | "jdbc:oracle:thin:*****/*****@host:1521/db"
         "jdbc:oracle:thin:@host:1521/db"                                                     | "jdbc:oracle:thin:@host:1521/db"
+        "mongodb://userdb:Password123@localhost:27017/testdb"                                | "mongodb://*****:*****@localhost:27017/testdb"
+        "mongodb+srv://AWS_ACCESS_KEY_ID:AWS_SECRET_ACCESS_KEY@cluster0.example.com/testdb"  | "mongodb+srv://*****:*****@cluster0.example.com/testdb"
         null                                                                                 | null
     }
 }
