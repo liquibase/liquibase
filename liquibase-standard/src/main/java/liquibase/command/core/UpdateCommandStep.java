@@ -22,9 +22,6 @@ public class UpdateCommandStep extends AbstractUpdateCommandStep implements Clea
     public static final CommandArgumentDefinition<String> CHANGELOG_FILE_ARG;
     public static final CommandArgumentDefinition<String> LABEL_FILTER_ARG;
     public static final CommandArgumentDefinition<String> CONTEXTS_ARG;
-    public static final CommandArgumentDefinition<String> REPORT_NAME;
-    public static final CommandArgumentDefinition<String> REPORT_PATH;
-    public static final CommandArgumentDefinition<Boolean> REPORT_ENABLED;
 
     static {
         CommandBuilder builder = new CommandBuilder(COMMAND_NAME, LEGACY_COMMAND_NAME);
@@ -38,22 +35,6 @@ public class UpdateCommandStep extends AbstractUpdateCommandStep implements Clea
         CONTEXTS_ARG = builder.argument("contextFilter", String.class)
                 .addAlias("contexts")
                 .description("Changeset contexts to match")
-                .build();
-        REPORT_ENABLED = builder.argument("reportEnabled", Boolean.class)
-                .description("Enable or disable update reporting.")
-                .defaultValue(Boolean.FALSE)
-                .setValueHandler(ValueHandlerUtil::booleanValueHandler)
-                .hidden()
-                .build();
-        REPORT_NAME = builder.argument("reportName", String.class)
-                .description("The name of the Update Report.")
-                .defaultValue("update-report")
-                .hidden()
-                .build();
-        REPORT_PATH = builder.argument("reportPath", String.class)
-                .description("The path to the directory to generate Update Reports.")
-                .defaultValue(".")
-                .hidden()
                 .build();
     }
 
