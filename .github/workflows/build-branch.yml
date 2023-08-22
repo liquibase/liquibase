@@ -23,7 +23,11 @@ jobs:
       thisBranchName: ${{ steps.get-branch-name.outputs.thisBranchName }}
       thisSha: ${{ steps.get-commit-sha.outputs.thisSha }}
       setupSuccessful: "true"
-
+    env:
+      GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+    permissions:
+      contents: read
+      packages: write
     steps:
       - uses: actions/checkout@v3
         with:
