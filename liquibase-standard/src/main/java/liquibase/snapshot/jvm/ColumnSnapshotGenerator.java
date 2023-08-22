@@ -576,7 +576,7 @@ public class ColumnSnapshotGenerator extends JdbcSnapshotGenerator {
                             "WHERE TABLE_SCHEMA = '" + column.getSchema().getName() + "'\n" +
                             "AND TABLE_NAME = '" + column.getRelation().getName() + "'\n" +
                             "AND COLUMN_NAME = '" + column.getName() + "'"), String.class);
-            if (extraValue != null && extraValue.startsWith(MYSQL_DEFAULT_GENERATED) && !extraValue.equals(MYSQL_DEFAULT_GENERATED)) {
+            if (extraValue != null && extraValue.startsWith(MYSQL_DEFAULT_GENERATED + " ")) {
                 columnMetadataResultSet.set(COLUMN_DEF_COL,
                         String.format("%s %s", columnMetadataResultSet.get(COLUMN_DEF_COL), extraValue.replace(MYSQL_DEFAULT_GENERATED, "").trim()));
             }
