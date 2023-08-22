@@ -38,6 +38,8 @@ public class ColumnSnapshotGenerator extends JdbcSnapshotGenerator {
     private static final String POSTGRES_NUMBER_VALUE_REGEX = "\\(?(\\d*)\\)?::[\\w .]+";
     private static final Pattern POSTGRES_NUMBER_VALUE_PATTERN = Pattern.compile(POSTGRES_NUMBER_VALUE_REGEX);
 
+    private static final String MYSQL_DEFAULT_GENERATED = "DEFAULT_GENERATED";
+
     private final ColumnAutoIncrementService columnAutoIncrementService = new ColumnAutoIncrementService();
 
 
@@ -574,9 +576,9 @@ public class ColumnSnapshotGenerator extends JdbcSnapshotGenerator {
                             "WHERE TABLE_SCHEMA = '" + column.getSchema().getName() + "'\n" +
                             "AND TABLE_NAME = '" + column.getRelation().getName() + "'\n" +
                             "AND COLUMN_NAME = '" + column.getName() + "'"), String.class);
-            if (extraValue != null && extraValue.startsWith("DEFAULT_GENERATED")) {
+            if (extraValue != null && extraValue.startsWith(MYSQL_DEFAULT_GENERATED) && !extraValue.equals(MYSQL_DEFAULT_GENERATED)) {
                 columnMetadataResultSet.set(COLUMN_DEF_COL,
-                        String.format("%s %s", columnMetadataResultSet.get(COLUMN_DEF_COL), extraValue.replace("DEFAULT_GENERATED", "").trim()));
+                        String.format("%s %s", columnMetadataResultSet.get(COLUMN_DEF_COL), extraValue.replace(MYSQL_DEFAULT_GENERATED, "").trim()));
             }
         } catch (DatabaseException e) {
             Scope.getCurrentScope().getLog(getClass()).warning("Error fetching extra values", e);
