@@ -34,7 +34,7 @@ VALUES('1', 'your.name', '$changelogfile', '2023-05-31 14:33:39.108', 1, 'EXECUT
 """))
     }
 
-    private cleanUp(ChangeLogHistoryService changeLogService) {
+    private cleanup(ChangeLogHistoryService changeLogService) {
         CommandUtil.runDropAll(mysql)
         changeLogService.reset()
     }
@@ -67,7 +67,7 @@ VALUES('1', 'your.name', '$changelogfile', '2023-05-31 14:33:39.108', 1, 'EXECUT
         ranChangeSets.forEach({ rcs -> assert rcs.getLastCheckSum().getVersion() == 9 })
 
         cleanup:
-        cleanUp(changeLogService)
+        cleanup(changeLogService)
     }
 
     def "update command should upgrade only matching changesets when filter is applied" () {
@@ -100,7 +100,7 @@ VALUES('1', 'your.name', '$changelogfile', '2023-05-31 14:33:39.108', 1, 'EXECUT
         ranChangeSets.get(1).getLastCheckSum().getVersion() == 9
 
         cleanup:
-        cleanUp(changeLogService)
+        cleanup(changeLogService)
     }
 
     def "update-to-tag" () {
@@ -134,7 +134,7 @@ VALUES('1', 'your.name', '$changelogfile', '2023-05-31 14:33:39.108', 1, 'EXECUT
         ranChangeSets.get(2).getLastCheckSum().getVersion() == 9
 
         cleanup:
-        cleanUp(changeLogService)
+        cleanup(changeLogService)
     }
 
     def "update-count"() {
@@ -167,7 +167,7 @@ VALUES('1', 'your.name', '$changelogfile', '2023-05-31 14:33:39.108', 1, 'EXECUT
         ranChangeSets.get(1).getLastCheckSum().getVersion() == 9
 
         cleanup:
-        cleanUp(changeLogService)
+        cleanup(changeLogService)
     }
 
 
@@ -200,7 +200,7 @@ VALUES('1', 'your.name', '$changelogfile', '2023-05-31 14:33:39.108', 1, 'EXECUT
         ranChangeSets.forEach({ rcs -> assert rcs.getLastCheckSum().getVersion() == 9 })
 
         cleanup:
-        cleanUp(changeLogService)
+        cleanup(changeLogService)
     }
 
 
@@ -232,7 +232,7 @@ VALUES('1', 'your.name', '$changelogfile', '2023-05-31 14:33:39.108', 1, 'EXECUT
         ranChangeSets.forEach({ rcs -> assert rcs.getLastCheckSum().getVersion() == 8 })
 
         cleanup:
-        cleanUp(changeLogService)
+        cleanup(changeLogService)
     }
 
     def "update-count-sql calculates checksum but does not update DBCL"() {
@@ -264,7 +264,7 @@ VALUES('1', 'your.name', '$changelogfile', '2023-05-31 14:33:39.108', 1, 'EXECUT
         ranChangeSets.forEach({ rcs -> assert rcs.getLastCheckSum().getVersion() == 8 })
 
         cleanup:
-        cleanUp(changeLogService)
+        cleanup(changeLogService)
     }
 
     def "update-to-tag-sql calculates checksum but does not update DBCL"() {
@@ -296,6 +296,6 @@ VALUES('1', 'your.name', '$changelogfile', '2023-05-31 14:33:39.108', 1, 'EXECUT
         ranChangeSets.forEach({ rcs -> assert rcs.getLastCheckSum().getVersion() == 8 })
 
         cleanup:
-        cleanUp(changeLogService)
+        cleanup(changeLogService)
     }
 }
