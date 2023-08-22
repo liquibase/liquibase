@@ -34,9 +34,9 @@ jobs:
         uses: actions/github-script@v6
         with:
           github-token: ${{ secrets.BOT_TOKEN }}
-        script: |
-            const helper = require('./.github/util/workflow-helper.js')({github, context});
-            core.setOutput("thisSha", helper.getCurrentSha());
+          script: |
+              const helper = require('./.github/util/workflow-helper.js')({github, context});
+              core.setOutput("thisSha", helper.getCurrentSha());
 
       - name: Get Timestamp
         id: get-timestamp
