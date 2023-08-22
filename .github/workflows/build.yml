@@ -8,7 +8,7 @@ on:
   workflow_dispatch:
 
   # DAT branches can get triggered from this logic
-  pull_request_target:
+  pull_request:
     types:
       - opened
       - reopened
