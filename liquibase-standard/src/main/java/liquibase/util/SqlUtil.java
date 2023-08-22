@@ -237,11 +237,11 @@ public abstract class SqlUtil {
             } else if (typeId == Types.JAVA_OBJECT) {
                 return new DatabaseFunction(stringVal);
             } else if (typeId == Types.LONGNVARCHAR) {
-                return stringVal;
+                return strippedSingleQuotes ? stringVal : new DatabaseFunction(stringVal);
             } else if (typeId == Types.LONGVARBINARY) {
                 return new DatabaseFunction(stringVal);
             } else if (typeId == Types.LONGVARCHAR) {
-                return stringVal;
+                return strippedSingleQuotes ? stringVal : new DatabaseFunction(stringVal);
             } else if (liquibaseDataType instanceof NCharType || typeId == Types.NCHAR || liquibaseDataType.getName().equalsIgnoreCase("NCLOB")) {
                 return stringVal;
             } else if (typeId == Types.NCLOB) {
