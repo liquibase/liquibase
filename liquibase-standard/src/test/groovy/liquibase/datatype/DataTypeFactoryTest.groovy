@@ -265,6 +265,11 @@ class DataTypeFactoryTest extends Specification {
         "INT(20)"                                      | new SybaseDatabase()   | "INT"                                          | IntType       | false
         "SMALLINT(20)"                                 | new SybaseDatabase()   | "SMALLINT"                                     | SmallIntType  | false
         "TINYINT(20)"                                  | new SybaseDatabase()   | "TINYINT"                                      | TinyIntType   | false
+        "long binary"                                  | new SybaseDatabase()   | "IMAGE"                                        | BlobType      | false
+        "long varbinary"                               | new SybaseDatabase()   | "IMAGE"                                        | BlobType      | false
+        "long varchar"                                 | new SybaseDatabase()   | "TEXT"                                         | ClobType      | false
+        "long nvarchar"                                | new SybaseDatabase()   | "TEXT"                                         | ClobType      | false
+        "character varying"                            | new SybaseDatabase()   | "VARCHAR"                                      | VarcharType   | false
     }
 
     @Unroll("#featureName: #object for #database")
