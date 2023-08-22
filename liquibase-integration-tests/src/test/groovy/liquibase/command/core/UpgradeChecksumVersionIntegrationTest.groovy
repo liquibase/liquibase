@@ -34,7 +34,13 @@ VALUES('1', 'your.name', '$changelogfile', '2023-05-31 14:33:39.108', 1, 'EXECUT
 """))
     }
 
+    private cleanUp(ChangeLogHistoryService changeLogService) {
+        CommandUtil.runDropAll(mysql)
+        changeLogService.reset()
+    }
+
     def "update command should upgrade all checksums when no filters supplied" () {
+        mysql.getConnection().rollback()
         def changesetFilepath = "changelogs/common/checksum-changelog.xml"
         final ChangeLogHistoryService changeLogService = ChangeLogHistoryServiceFactory.getInstance().getChangeLogService(mysql.getDatabaseFromFactory())
         changeLogService.init()
@@ -61,10 +67,11 @@ VALUES('1', 'your.name', '$changelogfile', '2023-05-31 14:33:39.108', 1, 'EXECUT
         ranChangeSets.forEach({ rcs -> assert rcs.getLastCheckSum().getVersion() == 9 })
 
         cleanup:
-        CommandUtil.runDropAll(mysql)
+        cleanUp(changeLogService)
     }
 
     def "update command should upgrade only matching changesets when filter is applied" () {
+        mysql.getConnection().rollback()
         def changesetFilepath = "changelogs/common/checksum-changelog.xml"
         final ChangeLogHistoryService changeLogService = ChangeLogHistoryServiceFactory.getInstance().getChangeLogService(mysql.getDatabaseFromFactory())
         changeLogService.init()
@@ -93,10 +100,11 @@ VALUES('1', 'your.name', '$changelogfile', '2023-05-31 14:33:39.108', 1, 'EXECUT
         ranChangeSets.get(1).getLastCheckSum().getVersion() == 9
 
         cleanup:
-        CommandUtil.runDropAll(mysql)
+        cleanUp(changeLogService)
     }
 
     def "update-to-tag" () {
+        mysql.getConnection().rollback()
         def changesetFilepath = "changelogs/common/checksum-changelog-tag.xml"
         final ChangeLogHistoryService changeLogService = ChangeLogHistoryServiceFactory.getInstance().getChangeLogService(mysql.getDatabaseFromFactory())
         changeLogService.init()
@@ -126,10 +134,11 @@ VALUES('1', 'your.name', '$changelogfile', '2023-05-31 14:33:39.108', 1, 'EXECUT
         ranChangeSets.get(2).getLastCheckSum().getVersion() == 9
 
         cleanup:
-        CommandUtil.runDropAll(mysql)
+        cleanUp(changeLogService)
     }
 
     def "update-count"() {
+        mysql.getConnection().rollback()
         def changesetFilepath = "changelogs/common/checksum-changelog.xml"
         final ChangeLogHistoryService changeLogService = ChangeLogHistoryServiceFactory.getInstance().getChangeLogService(mysql.getDatabaseFromFactory())
         changeLogService.init()
@@ -158,11 +167,12 @@ VALUES('1', 'your.name', '$changelogfile', '2023-05-31 14:33:39.108', 1, 'EXECUT
         ranChangeSets.get(1).getLastCheckSum().getVersion() == 9
 
         cleanup:
-        CommandUtil.runDropAll(mysql)
+        cleanUp(changeLogService)
     }
 
 
     def "update-testing-rollback"() {
+        mysql.getConnection().rollback()
         def changesetFilepath = "changelogs/common/checksum-changelog.xml"
         final ChangeLogHistoryService changeLogService = ChangeLogHistoryServiceFactory.getInstance().getChangeLogService(mysql.getDatabaseFromFactory())
         changeLogService.init()
@@ -190,11 +200,12 @@ VALUES('1', 'your.name', '$changelogfile', '2023-05-31 14:33:39.108', 1, 'EXECUT
         ranChangeSets.forEach({ rcs -> assert rcs.getLastCheckSum().getVersion() == 9 })
 
         cleanup:
-        CommandUtil.runDropAll(mysql)
+        cleanUp(changeLogService)
     }
 
 
     def "update-sql calculates checksum but does not update DBCL"() {
+        mysql.getConnection().rollback()
         def changesetFilepath = "changelogs/common/checksum-changelog.xml"
         final ChangeLogHistoryService changeLogService = ChangeLogHistoryServiceFactory.getInstance().getChangeLogService(mysql.getDatabaseFromFactory())
         changeLogService.init()
@@ -221,10 +232,11 @@ VALUES('1', 'your.name', '$changelogfile', '2023-05-31 14:33:39.108', 1, 'EXECUT
         ranChangeSets.forEach({ rcs -> assert rcs.getLastCheckSum().getVersion() == 8 })
 
         cleanup:
-        CommandUtil.runDropAll(mysql)
+        cleanUp(changeLogService)
     }
 
     def "update-count-sql calculates checksum but does not update DBCL"() {
+        mysql.getConnection().rollback()
         def changesetFilepath = "changelogs/common/checksum-changelog.xml"
         final ChangeLogHistoryService changeLogService = ChangeLogHistoryServiceFactory.getInstance().getChangeLogService(mysql.getDatabaseFromFactory())
         changeLogService.init()
@@ -252,10 +264,11 @@ VALUES('1', 'your.name', '$changelogfile', '2023-05-31 14:33:39.108', 1, 'EXECUT
         ranChangeSets.forEach({ rcs -> assert rcs.getLastCheckSum().getVersion() == 8 })
 
         cleanup:
-        CommandUtil.runDropAll(mysql)
+        cleanUp(changeLogService)
     }
 
     def "update-to-tag-sql calculates checksum but does not update DBCL"() {
+        mysql.getConnection().rollback()
         def changesetFilepath = "changelogs/common/checksum-changelog-tag.xml"
         final ChangeLogHistoryService changeLogService = ChangeLogHistoryServiceFactory.getInstance().getChangeLogService(mysql.getDatabaseFromFactory())
         changeLogService.init()
@@ -283,6 +296,6 @@ VALUES('1', 'your.name', '$changelogfile', '2023-05-31 14:33:39.108', 1, 'EXECUT
         ranChangeSets.forEach({ rcs -> assert rcs.getLastCheckSum().getVersion() == 8 })
 
         cleanup:
-        CommandUtil.runDropAll(mysql)
+        cleanUp(changeLogService)
     }
 }
