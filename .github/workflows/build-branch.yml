@@ -69,6 +69,8 @@ jobs:
     permissions:
       contents: read
       packages: write
+    env:
+      GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
     steps:
       - uses: actions/checkout@v3
         with:
@@ -90,7 +92,6 @@ jobs:
       - name: Version Artifact
         run: |
            mvn versions:set "-DnewVersion=${{ needs.setup.outputs.thisBranchName }}-SNAPSHOT"
-           #mvn versions:set "-DnewVersion=${{ inputs.branchName }}-SNAPSHOT"
 
       # Publish to GitHub Packages
       - name: Publish package
