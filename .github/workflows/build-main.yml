@@ -27,7 +27,7 @@ jobs:
         id: get-sha
         run: |
           git fetch origin master
-          latest_merge_sha=`(git rev-parse origin/master)`
+          latest_merge_sha=`(git rev-parse --short HEAD)`
           echo "latestMergeSha=${latest_merge_sha}" >> $GITHUB_OUTPUT
 
       - name: Get Timestamp
@@ -96,7 +96,7 @@ jobs:
 
       # Version artifact based off of branch and commit SHA.
       - name: Version Artifact
-        run: mvn versions:set -DnewVersion="$(git rev-parse --short HEAD)-SNAPSHOT"
+        run: mvn versions:set -DnewVersion="${{ needs.setup.outputs.latestMergeSha }}-SNAPSHOT"
 
       # Publish to GitHub Packages
       - name: Publish package
