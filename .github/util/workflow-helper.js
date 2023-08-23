@@ -2,6 +2,8 @@
 // THIS FILE SHOULD BE MANUALLY COPY/PASTED ACROSS ALL THE USED REPOSITORIES ON CHANGES SO THEY STAY IN SYNC
 // -----------------------------------------------------------------
 
+const { exec } = require('child_process');
+
 module.exports = ({github, context}) => {
 
     return {
