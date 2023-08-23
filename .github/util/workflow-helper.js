@@ -43,13 +43,16 @@ module.exports = ({github, context}) => {
         },
 
         getCurrentSha: function () {
-            let sha = this.getBranchSha()
             if (context.payload.pull_request) {
-                sha = this.cleanBranchRef(context.payload.pull_request.head.sha);
+                console.log("debug context.payload.pull_request")
+                return this.cleanBranchRef(context.payload.pull_request.head.sha);
             } else if (context.payload.after) {
-                sha = this.cleanBranchRef(context.payload.after);
-            } 
-            return sha;
+                console.log("context.payload.after")
+                return this.cleanBranchRef(context.payload.after);
+            } else {
+                console.log("this.getBranchSha()")
+                return this.getBranchSha();
+            }
         },
 
         cleanBranchRef: function (branch) {
