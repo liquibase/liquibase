@@ -808,7 +808,7 @@
             <xsd:attribute name="catalogName" type="xsd:string"/>
             <xsd:attribute name="schemaName" type="xsd:string"/>
             <xsd:attribute name="tableName" type="xsd:string"/>
-            <xsd:attribute name="expectedRows" type="xsd:int"/>
+            <xsd:attribute name="expectedRows" type="xsd:long"/>
         </xsd:complexType>
     </xsd:element>
 
