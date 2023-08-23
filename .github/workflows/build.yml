@@ -99,6 +99,7 @@ jobs:
             let proFailed = false;
 
             let branch = await helper.findMatchingBranch("liquibase", "liquibase-pro");
+            console.log("debug branch:" +  branch)
             //count as not a stand-alone PR for branch builds on master/main, even though there are no PRs
             if (helper.getCurrentBranch() == 'master' || helper.getCurrentBranch() == 'main' && branch.pullRequestId) {
               core.setOutput("standAlonePR", helper.getCurrentBranch() !== branch.name);
