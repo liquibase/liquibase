@@ -133,7 +133,7 @@ jobs:
             const { Octokit } = require("@octokit/rest");
 
             const octokit = new Octokit({
-              auth: github-token
+              auth: process.env.BOT_TOKEN
             })
 
             //https://docs.github.com/en/rest/commits/statuses?apiVersion=2022-11-28#create-a-commit-status
