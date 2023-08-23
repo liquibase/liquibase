@@ -42,18 +42,20 @@ module.exports = ({github, context}) => {
             }
         },
 
-        getCurrentSha: function () {
+        getCurrentSha: async function () {
             if (context.payload.pull_request) {
                 return this.cleanBranchRef(context.payload.pull_request.head.sha);
             } else if (context.payload.after) {
                 return this.cleanBranchRef(context.payload.after);
             } else {
-                this.getBranchSha().then(sha => {
+                try {
+                    let sha = await this.getBranchSha();
                     console.log("getCurrentSha - getBranchSha:" + sha);
                     return sha;
-                }).catch(error => {
+                } catch (error) {
                     console.error(error);
-                });
+                    throw error;
+                }
             }
         },
 
