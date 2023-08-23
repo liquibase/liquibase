@@ -53,7 +53,6 @@ module.exports = ({github, context}) => {
         },
 
         cleanBranchRef: function (branch) {
-            console.log("debug cleanBranchRef:" + branch)
             if (!branch) {
                 return branch;
             }
@@ -68,7 +67,6 @@ module.exports = ({github, context}) => {
                 console.error(error);
                 return;
               }
-              console.log("debug sha:" + stdout)
               return stdout.trim();
             });
         },
