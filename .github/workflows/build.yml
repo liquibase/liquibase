@@ -87,6 +87,7 @@ jobs:
         with:
           github-token: ${{ secrets.BOT_TOKEN }}
           script: |
+            import fetch from "node-fetch";
             const helper = require('./.github/util/workflow-helper.js')({github, context});
 
             core.setOutput("thisSha", helper.getCurrentSha());
@@ -133,6 +134,9 @@ jobs:
             const { Octokit } = require("@octokit/rest");
 
             const octokit = new Octokit({
+              request: {
+                fetch: fetch,
+              },
               auth: process.env.BOT_TOKEN
             })
 
