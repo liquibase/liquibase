@@ -44,11 +44,13 @@ module.exports = ({github, context}) => {
             if (context.payload.pull_request) {
                 return this.cleanBranchRef(context.payload.pull_request.head.sha);
             } else {
+                console.log("debug context.payload.after:" + context.payload.after)
                 return this.cleanBranchRef(context.payload.after);
             }
         },
 
         cleanBranchRef: function (branch) {
+            console.log("debug cleanBranchRef:" + branch)
             if (!branch) {
                 return branch;
             }

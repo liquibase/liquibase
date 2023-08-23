@@ -96,7 +96,6 @@ jobs:
 
             let branch = await helper.findMatchingBranch("liquibase", "liquibase-pro");
             //count as not a stand-alone PR for branch builds on master/main, even though there are no PRs
-            console.log("debug jandro getCurrentBranch: " + helper.getCurrentBranch())
             if (helper.getCurrentBranch() == 'master' || helper.getCurrentBranch() == 'main' && branch.pullRequestId) {
               core.setOutput("standAlonePR", helper.getCurrentBranch() !== branch.name);
             } else {
