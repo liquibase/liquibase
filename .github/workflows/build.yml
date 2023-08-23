@@ -126,7 +126,22 @@ jobs:
             statusMessage = "liquibase/liquibase-pro:"+branch.name+"@" + branch.sha.substring(0, 7) + " " + proStatusMessage;
             console.log("Pro failed?" + proFailed + ": "+statusMessage);
 
+            const octokit = new Octokit({
+              auth: github-token
+            })
 
+            await octokit.request('POST /repos/{owner}/{repo}/statuses/{sha}', {
+              owner: 'liquibase',
+              repo: 'liquibase',
+              sha: helper.getCurrentSha(),
+              state: (proFailed ? "failure" : "success"),
+              target_url: branch.runHtmlUrl,
+              description: 'The build succeeded!',
+              context: 'Stable Liquibase Pro',
+              headers: {
+                'X-GitHub-Api-Version': '2022-11-28'
+              }
+            })
 
             core.setOutput("stablePro", !proFailed);
 
