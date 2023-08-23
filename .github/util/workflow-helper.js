@@ -44,14 +44,17 @@ module.exports = ({github, context}) => {
 
         getCurrentSha: function () {
             if (context.payload.pull_request) {
-                console.log("debug context.payload.pull_request")
                 return this.cleanBranchRef(context.payload.pull_request.head.sha);
             } else if (context.payload.after) {
-                console.log("context.payload.after")
                 return this.cleanBranchRef(context.payload.after);
             } else {
                 console.log("this.getBranchSha()")
-                return this.getBranchSha();
+                this.getBranchSha().then(sha => {
+                    console.log("getBranchSha:" + sha);
+                    return sha;
+                }).catch(error => {
+                    console.error(error);
+                });
             }
         },
 
@@ -65,16 +68,17 @@ module.exports = ({github, context}) => {
         },
 
         getBranchSha: function () {
-            let sha = exec('git rev-parse $GITHUB_REF', (error, stdout) => {
-              if (error) {
-                console.error(error);
-                return;
-              }
-              console.log("getBranchSha:" + stdout)
-              return stdout;
+            return new Promise((resolve, reject) => {
+                exec('git rev-parse $GITHUB_REF', (error, stdout) => {
+                    if (error) {
+                        console.error(error);
+                        reject(error);
+                    } else {
+                        console.log("getBranchSha:" + stdout);
+                        resolve(stdout.trim());
+                    }
+                });
             });
-            console.log("getBranchSha:" + sha)
-            return sha;
         },
 
         findMatchingBranch: async function (owner, repo, branchesToCheck) {
