@@ -48,9 +48,8 @@ module.exports = ({github, context}) => {
             } else if (context.payload.after) {
                 return this.cleanBranchRef(context.payload.after);
             } else {
-                console.log("this.getBranchSha()")
                 this.getBranchSha().then(sha => {
-                    console.log("getBranchSha:" + sha);
+                    console.log("getCurrentSha - getBranchSha:" + sha);
                     return sha;
                 }).catch(error => {
                     console.error(error);
@@ -74,7 +73,6 @@ module.exports = ({github, context}) => {
                         console.error(error);
                         reject(error);
                     } else {
-                        console.log("getBranchSha:" + stdout);
                         resolve(stdout.trim());
                     }
                 });
