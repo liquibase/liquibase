@@ -26,7 +26,7 @@ import java.nio.charset.Charset;
 import java.util.Map;
 
 @DatabaseChange(name = "createProcedure", description = "Defines a stored procedure.", priority = ChangeMetaData.PRIORITY_DEFAULT)
-public class CreateProcedureChange extends AbstractChange implements DbmsTargetedChange {
+public class CreateProcedureChange extends AbstractChange implements DbmsTargetedChange, ReplaceIfExists {
     private String comments;
     private String catalogName;
     private String schemaName;
