@@ -48,6 +48,7 @@ module.exports = ({github, context}) => {
             } else if (context.payload.after) {
                 return this.cleanBranchRef(context.payload.after);
             } else {
+                console.log("debug jandro: " + this.getBranchSha())
                 return this.getBranchSha();
             }
         },
