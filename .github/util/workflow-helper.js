@@ -44,12 +44,9 @@ module.exports = ({github, context}) => {
             if (context.payload.pull_request) {
                 return this.cleanBranchRef(context.payload.pull_request.head.sha);
             } else if (context.payload.after) {
-                console.log("debug context.payload.after:" + context.payload.after)
                 return this.cleanBranchRef(context.payload.after);
             } else {
-                // Assuming context.payload.ref is the current branch SHA when context.payload.after is undefined
-                console.log("debug context.payload.sha:" + context.payload.sha)
-                return context.payload.sha;
+                return this.getBranchSha();
             }
         },
 
@@ -61,7 +58,17 @@ module.exports = ({github, context}) => {
 
             return branch.replace("refs/heads/", "")
                 .replace("refs/heads/tags", "");
+        },
 
+        getBranchSha: function () {
+            exec('git rev-parse $GITHUB_REF', (error, stdout) => {
+              if (error) {
+                console.error(error);
+                return;
+              }
+              const sha = stdout.trim();
+              console.log('SHA of current branch is ${sha}');
+            });
         },
 
         findMatchingBranch: async function (owner, repo, branchesToCheck) {
