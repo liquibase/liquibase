@@ -52,6 +52,7 @@ module.exports = ({github, context}) => {
 
         cleanBranchRef: function (branch) {
             if (!branch) {
+                console.log("getCurrentSha branch:" + branch)
                 return branch;
             }
 
