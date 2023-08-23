@@ -77,8 +77,8 @@ jobs:
         id: get-date
         run: echo "::set-output name=date::$(date +'%Y-%m-%d %H:%M:%S %Z')"
 
-      - name: Install octokit
-        id: install-octokit
+      - name: Install dependencies
+        id: install-dependencies
         run: npm install @octokit/rest node-fetch
 
       - name: Find corresponding branches
@@ -140,7 +140,7 @@ jobs:
             })
 
             //https://docs.github.com/en/rest/commits/statuses?apiVersion=2022-11-28#create-a-commit-status
-            await octokit.request('POST /repos/liquibase/liquibase/statuses/${helper.getCurrentSha()}', {
+            await octokit.request('POST /repos/liquibase/liquibase/statuses/' + helper.getCurrentSha(), {
               owner: 'liquibase',
               repo: 'liquibase',
               sha: helper.getCurrentSha(),
