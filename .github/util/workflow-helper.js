@@ -65,7 +65,7 @@ module.exports = ({github, context}) => {
         },
 
         getBranchSha: function () {
-            exec('git rev-parse $GITHUB_REF', (error, stdout) => {
+            let sha = exec('git rev-parse $GITHUB_REF', (error, stdout) => {
               if (error) {
                 console.error(error);
                 return;
@@ -73,6 +73,8 @@ module.exports = ({github, context}) => {
               console.log("getBranchSha:" + stdout)
               return stdout;
             });
+            console.log("getBranchSha:" + sha)
+            return sha;
         },
 
         findMatchingBranch: async function (owner, repo, branchesToCheck) {

@@ -131,8 +131,7 @@ jobs:
             console.log("target_url " + branch.runHtmlUrl)
             console.log("statusMessage " + statusMessage)
 
-            try {
-              await github.rest.repos.createCommitStatus({
+            await github.rest.repos.createCommitStatus({
                 "owner": "liquibase",
                 "repo": "liquibase",
                 "sha": helper.getCurrentSha(),
@@ -141,13 +140,6 @@ jobs:
                 "context": "Stable Liquibase Pro",
                 "description": statusMessage
               });
-            } catch (error) {
-              if (error.status === 404) {
-                console.log('Received 404 error, but continuing the action.');
-              } else {
-                throw error;
-              }
-            }
 
             core.setOutput("stablePro", !proFailed);
             
