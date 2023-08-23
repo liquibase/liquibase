@@ -77,6 +77,10 @@ jobs:
         id: get-date
         run: echo "::set-output name=date::$(date +'%Y-%m-%d %H:%M:%S %Z')"
 
+      - name: Install octokit
+        id: install-octokit
+        run: npm install @octokit/rest
+
       - name: Find corresponding branches
         id: find-branches
         uses: actions/github-script@v6
@@ -127,7 +131,7 @@ jobs:
             console.log("Pro failed?" + proFailed + ": "+statusMessage);
 
             const { Octokit } = require("@octokit/rest");
-            
+
             const octokit = new Octokit({
               auth: github-token
             })
