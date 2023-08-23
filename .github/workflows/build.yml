@@ -138,6 +138,8 @@ jobs:
             
 
             core.setOutput("stablePro", !proFailed);
+            
+            console.log("debug jandro: " + helper.getCurrentBranch())
 
       - name: Upload Event File
         uses: actions/upload-artifact@v3
