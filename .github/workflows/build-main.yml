@@ -35,14 +35,16 @@ jobs:
           timestamp=`(date +'%Y-%m-%d %H:%M:%S %Z')`
           echo "timeStamp=${timestamp}" >> $GITHUB_OUTPUT
 
-  build:
-    name: Build & Package
+
+  build-and-publish:
+    name: Build & Publish
     runs-on: ubuntu-22.04
     needs: setup
     permissions:
       contents: read
       packages: write
-
+    env:
+      GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
     steps:
       - uses: actions/checkout@v3
       - name: Set up Java for publishing to GitHub Repository
@@ -58,48 +60,16 @@ jobs:
         with:
           maven-version: ${{ env.MAVEN_VERSION }}
 
-      # Version artifact based off of branch and commit SHA.
-      - name: Version Artifact
+        # Publish master-SNAPSHOT version to GPM
+      - name: Version Artifact as master-SNAPSHOT
         run: mvn versions:set "-DnewVersion=master-SNAPSHOT"
 
-      # Publish to GitHub Packages
-      - name: Publish package
+      - name: Publish master-SNAPSHOT
         run: mvn -B clean deploy -pl '!liquibase-dist' -DskipTests=true "-Dbuild.repository.owner=liquibase" "-Dbuild.repository.name=liquibase" "-Dbuild.branch=master" "-Dbuild.number=${{ github.run_number }}" "-Dbuild.commit=${{ needs.setup.outputs.latestMergeSha }}" "-Dbuild.timestamp=${{ needs.setup.outputs.timeStamp }}"
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
-
-  build-sha:
-    name: Build & Package SHA
-    runs-on: ubuntu-22.04
-    needs: setup
-    permissions:
-      contents: read
-      packages: write
-
-    steps:
-      - uses: actions/checkout@v3
-
-      - name: Set up Java for publishing to GitHub Repository
-        uses: actions/setup-java@v3
-        with:
-          java-version: '17'
-          distribution: 'temurin'
-          cache: 'maven'
-          server-id: liquibase
-
-      - name: Set up Maven
-        uses: stCarolas/setup-maven@v4.5
-        with:
-          maven-version: ${{ env.MAVEN_VERSION }}
-
-      # Version artifact based off of branch and commit SHA.
-      - name: Version Artifact
+      # Publish <commitsha>-SNAPSHOT version to GPM
+      - name: Version Artifact as commit-SNAPSHOT
         run: mvn versions:set -DnewVersion="${{ needs.setup.outputs.latestMergeSha }}-SNAPSHOT"
 
-      # Publish to GitHub Packages
-      - name: Publish package
+      - name: Publish commit-SNAPSHOT
         run: mvn -B clean deploy -pl '!liquibase-dist' -DskipTests=true "-Dbuild.repository.owner=liquibase" "-Dbuild.repository.name=liquibase" "-Dbuild.branch=master" "-Dbuild.number=${{ github.run_number }}" "-Dbuild.commit=${{ needs.setup.outputs.latestMergeSha }}" "-Dbuild.timestamp=${{ needs.setup.outputs.timeStamp }}"
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-
