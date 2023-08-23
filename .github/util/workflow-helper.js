@@ -67,6 +67,7 @@ module.exports = ({github, context}) => {
                 console.error(error);
                 return;
               }
+              console.log("getBranchSha:" + stdout)
               return stdout;
             });
         },
