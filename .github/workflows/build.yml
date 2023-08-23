@@ -77,10 +77,6 @@ jobs:
         id: get-date
         run: echo "::set-output name=date::$(date +'%Y-%m-%d %H:%M:%S %Z')"
 
-      - name: Install dependencies
-        id: install-dependencies
-        run: npm install @octokit/rest node-fetch
-
       - name: Find corresponding branches
         id: find-branches
         uses: actions/github-script@v6
@@ -99,9 +95,8 @@ jobs:
             let proFailed = false;
 
             let branch = await helper.findMatchingBranch("liquibase", "liquibase-pro");
-            console.log("debug branch:" +  branch.name)
-            console.log("debug branch sha:" +  branch.sha)
             //count as not a stand-alone PR for branch builds on master/main, even though there are no PRs
+            console.log("debug jandro getCurrentBranch: " + helper.getCurrentBranch())
             if (helper.getCurrentBranch() == 'master' || helper.getCurrentBranch() == 'main' && branch.pullRequestId) {
               core.setOutput("standAlonePR", helper.getCurrentBranch() !== branch.name);
             } else {
@@ -132,28 +127,17 @@ jobs:
             statusMessage = "liquibase/liquibase-pro:"+branch.name+"@" + branch.sha.substring(0, 7) + " " + proStatusMessage;
             console.log("Pro failed?" + proFailed + ": "+statusMessage);
 
-            const { Octokit } = require("@octokit/rest");
-
-            const octokit = new Octokit({
-              request: {
-                fetch: fetch,
-              },
-              auth: process.env.BOT_TOKEN
-            })
-
-            //https://docs.github.com/en/rest/commits/statuses?apiVersion=2022-11-28#create-a-commit-status
-            await octokit.request('POST /repos/liquibase/liquibase/statuses/' + helper.getCurrentSha(), {
-              owner: 'liquibase',
-              repo: 'liquibase',
-              sha: helper.getCurrentSha(),
-              state: (proFailed ? "failure" : "success"),
-              target_url: branch.runHtmlUrl,
-              description: 'The build succeeded!',
-              context: 'Stable Liquibase Pro',
-              headers: {
-                'X-GitHub-Api-Version': '2022-11-28'
-              }
-            })
+            if (helper.getCurrentSha() !== undefined) {
+              github.rest.repos.createCommitStatus({
+                "owner": "liquibase",
+                "repo": "liquibase",
+                "sha": helper.getCurrentSha(),
+                "state": (proFailed ? "failure" : "success"),
+                "target_url": branch.runHtmlUrl,
+                "context": "Stable Liquibase Pro",
+                "description": statusMessage
+              });
+            }
 
             core.setOutput("stablePro", !proFailed);
 
