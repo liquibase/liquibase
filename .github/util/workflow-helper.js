@@ -48,8 +48,8 @@ module.exports = ({github, context}) => {
                 return this.cleanBranchRef(context.payload.after);
             } else {
                 // Assuming context.payload.ref is the current branch SHA when context.payload.after is undefined
-                console.log("debug context.payload.ref:" + context.payload)
-                return this.cleanBranchRef(context.payload.ref);
+                console.log("debug context.payload.sha:" + context.payload.sha)
+                return context.payload.sha;
             }
         },
 
