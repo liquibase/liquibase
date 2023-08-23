@@ -67,7 +67,6 @@ module.exports = ({github, context}) => {
                 console.error(error);
                 return;
               }
-              console.log("debug jandro: " + stdout)
               return stdout;
             });
         },
