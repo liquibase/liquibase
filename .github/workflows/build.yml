@@ -79,7 +79,7 @@ jobs:
 
       - name: Install octokit
         id: install-octokit
-        run: npm install @octokit/rest
+        run: npm install @octokit/rest node-fetch
 
       - name: Find corresponding branches
         id: find-branches
@@ -87,7 +87,6 @@ jobs:
         with:
           github-token: ${{ secrets.BOT_TOKEN }}
           script: |
-            import fetch from "node-fetch";
             const helper = require('./.github/util/workflow-helper.js')({github, context});
 
             core.setOutput("thisSha", helper.getCurrentSha());
