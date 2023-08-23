@@ -68,8 +68,7 @@ module.exports = ({github, context}) => {
                 console.error(error);
                 return;
               }
-              const sha = stdout.trim();
-              console.log('SHA of current branch is ${sha}');
+              return stdout.trim();
             });
         },
 
