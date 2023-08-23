@@ -126,17 +126,16 @@ jobs:
             statusMessage = "liquibase/liquibase-pro:"+branch.name+"@" + branch.sha.substring(0, 7) + " " + proStatusMessage;
             console.log("Pro failed?" + proFailed + ": "+statusMessage);
 
-            if (helper.getCurrentSha() !== undefined) {
-              github.rest.repos.createCommitStatus({
-                "owner": "liquibase",
-                "repo": "liquibase",
-                "sha": helper.getCurrentSha(),
-                "state": (proFailed ? "failure" : "success"),
-                "target_url": branch.runHtmlUrl,
-                "context": "Stable Liquibase Pro",
-                "description": statusMessage
-              });
-            }
+            github.rest.repos.createCommitStatus({
+              "owner": "liquibase",
+              "repo": "liquibase",
+              "sha": helper.getCurrentSha(),
+              "state": (proFailed ? "failure" : "success"),
+              "target_url": branch.runHtmlUrl,
+              "context": "Stable Liquibase Pro",
+              "description": statusMessage
+            });
+            
 
             core.setOutput("stablePro", !proFailed);
 
