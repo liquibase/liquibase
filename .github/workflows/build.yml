@@ -83,6 +83,8 @@ jobs:
         with:
           github-token: ${{ secrets.BOT_TOKEN }}
           script: |
+            import { Octokit } from "https://cdn.skypack.dev/octokit";
+            
             const helper = require('./.github/util/workflow-helper.js')({github, context});
 
             core.setOutput("thisSha", helper.getCurrentSha());
@@ -129,7 +131,7 @@ jobs:
             const octokit = new Octokit({
               auth: github-token
             })
-
+            //https://docs.github.com/en/rest/commits/statuses?apiVersion=2022-11-28#create-a-commit-status
             await octokit.request('POST /repos/{owner}/{repo}/statuses/{sha}', {
               owner: 'liquibase',
               repo: 'liquibase',
