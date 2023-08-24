@@ -1,7 +1,7 @@
 name: Build and Test
 
 concurrency:
-  group: ${{ github.workflow }}-${{ (github.ref == 'refs/heads/master' && github.sha) || github.event.pull_request.number || github.ref }}
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
   cancel-in-progress: true
 
 on:
