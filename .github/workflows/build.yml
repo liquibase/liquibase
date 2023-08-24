@@ -28,11 +28,6 @@ on:
     paths-ignore:
       - '**.md'
 
-  workflow_run:
-    workflows:
-      - "Build Branch SNAPSHOT"
-    types:
-      - completed
 env:
   MAVEN_VERSION: '3.9.2'
 
