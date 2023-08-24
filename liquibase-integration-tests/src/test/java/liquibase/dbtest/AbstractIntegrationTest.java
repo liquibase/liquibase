@@ -276,6 +276,7 @@ public abstract class AbstractIntegrationTest {
             database.setOutputDefaultSchema(true);
         }
         SnapshotGeneratorFactory.resetAll();
+//        ChangeLogHistoryServiceFactory.getInstance().resetAll();
     }
 
     protected boolean shouldRollBack() {
