@@ -8,6 +8,7 @@ import liquibase.changelog.ChangeLogHistoryServiceFactory;
 import liquibase.changelog.ChangeSet;
 import liquibase.changelog.DatabaseChangeLog;
 import liquibase.command.CommandScope;
+import liquibase.command.core.DropAllCommandStep;
 import liquibase.command.core.UpdateCommandStep;
 import liquibase.command.core.helpers.DbUrlConnectionCommandStep;
 import liquibase.database.Database;
@@ -274,6 +275,11 @@ public abstract class AbstractIntegrationTest {
             database.setDefaultSchemaName(null);
             database.setOutputDefaultCatalog(true);
             database.setOutputDefaultSchema(true);
+            LockService lockService = LockServiceFactory.getInstance().getLockService(database);
+            lockService.releaseLock();
+            CommandScope commandScope = new CommandScope(DropAllCommandStep.COMMAND_NAME);
+            commandScope.addArgumentValue(DbUrlConnectionCommandStep.DATABASE_ARG, database);
+            commandScope.execute();
         }
         SnapshotGeneratorFactory.resetAll();
     }
