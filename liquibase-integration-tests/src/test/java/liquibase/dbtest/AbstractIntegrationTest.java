@@ -1206,6 +1206,23 @@ public abstract class AbstractIntegrationTest {
         assertTrue(liquibase.getDatabaseChangeLog().getChangeSets().stream().allMatch(changeSet -> changeSet.getDescription().contains(pathToSet)));
     }
 
+    @Test
+    public void allowsDbChangelogTableNameAsLowerCase() throws DatabaseException {
+        clearDatabase();
+        String oldDbChangelogTableName = this.getDatabase().getDatabaseChangeLogTableName();
+        try {
+            getDatabase().setDatabaseChangeLogTableName("lowercase");
+            CommandScope commandScope = new CommandScope(UpdateCommandStep.COMMAND_NAME);
+            commandScope.addArgumentValue(DbUrlConnectionCommandStep.DATABASE_ARG, getDatabase());
+            commandScope.addArgumentValue(UpdateCommandStep.CHANGELOG_FILE_ARG, objectQuotingStrategyChangeLog);
+            commandScope.execute();
+        } catch (Exception e) {
+            Assert.fail("Should not fail. Reason: " + e.getMessage());
+        } finally {
+            getDatabase().setDatabaseChangeLogTableName(oldDbChangelogTableName);
+        }
+    }
+
     private ProcessBuilder prepareExternalLiquibaseProcess() {
         String javaHome = System.getProperty("java.home");
         String javaBin = javaHome + File.separator + "bin" + File.separator + "java";
