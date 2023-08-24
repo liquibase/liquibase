@@ -32,6 +32,11 @@ public class TestSystemFactory extends AbstractPluginFactory<TestSystem> {
      * Returns singleton instances for equal definitions.
      */
     public TestSystem getTestSystem(TestSystem.Definition definition) {
+        if (systems.get(definition) != null) {
+            System.err.println("Database '" + definition + "' is ALREADY started.");
+        } else {
+            System.err.println("Will start database '" + definition + "'.");
+        }
         return systems.computeIfAbsent(definition, passedDefinition -> {
             final TestSystem singleton = TestSystemFactory.this.getPlugin(passedDefinition);
 
