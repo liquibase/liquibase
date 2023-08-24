@@ -6,6 +6,7 @@ public class MavenLog implements Log {
 
     public enum Level {
         DEBUG(0),
+        FINE(0),
         INFO(1),
         WARNING(2),
         ERROR(3),
