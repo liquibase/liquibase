@@ -3,12 +3,12 @@ name: Build Azure Uber jar
 on:
   workflow_call:
     inputs:
-        liquibase-version:
-          description: 'liquibase version'
-          required: true
-          type: string
         branch:
           description: 'branch to check out'
+          required: true
+          type: string
+        liquibase-version:
+          description: 'liquibase version'
           required: true
           type: string
 
