@@ -163,7 +163,7 @@ public class StandardLockService implements LockService {
 
     private void handleOldChangelogTableFormat(Executor executor) throws DatabaseException {
         if (executor.updatesDatabase() && (database instanceof DerbyDatabase) && ((DerbyDatabase) database)
-                .supportsBooleanDataType() || database.getClass().isAssignableFrom(DB2Database.class) && ((DB2Database) database)
+                .supportsBooleanDataType() || DB2Database.class.isAssignableFrom( database.getClass() ) && ((DB2Database) database)
                 .supportsBooleanDataType()) {
             //check if the changelog table is of an old smallint vs. boolean format
             String lockTable = database.escapeTableName(
