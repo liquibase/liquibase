@@ -275,11 +275,17 @@ public abstract class AbstractIntegrationTest {
             database.setDefaultSchemaName(null);
             database.setOutputDefaultCatalog(true);
             database.setOutputDefaultSchema(true);
-            LockService lockService = LockServiceFactory.getInstance().getLockService(database);
-            lockService.releaseLock();
-            CommandScope commandScope = new CommandScope(DropAllCommandStep.COMMAND_NAME);
-            commandScope.addArgumentValue(DbUrlConnectionCommandStep.DATABASE_ARG, database);
-            commandScope.execute();
+            try {
+                LockService lockService = LockServiceFactory.getInstance().getLockService(database);
+                lockService.releaseLock();
+            } catch (Exception ignored) {
+            }
+            try {
+                CommandScope commandScope = new CommandScope(DropAllCommandStep.COMMAND_NAME);
+                commandScope.addArgumentValue(DbUrlConnectionCommandStep.DATABASE_ARG, database);
+                commandScope.execute();
+            } catch (Exception ignored) {
+            }
         }
         SnapshotGeneratorFactory.resetAll();
     }
