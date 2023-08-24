@@ -4,9 +4,7 @@ import liquibase.ChecksumVersion;
 import liquibase.GlobalConfiguration;
 import liquibase.Scope;
 import liquibase.change.Change;
-import liquibase.changelog.ChangeSet;
-import liquibase.changelog.DatabaseChangeLog;
-import liquibase.changelog.RanChangeSet;
+import liquibase.changelog.*;
 import liquibase.changelog.filter.ChangeSetFilterResult;
 import liquibase.database.Database;
 import liquibase.database.DatabaseList;
@@ -15,6 +13,7 @@ import liquibase.precondition.ErrorPrecondition;
 import liquibase.precondition.FailedPrecondition;
 import liquibase.precondition.core.PreconditionContainer;
 import liquibase.util.StringUtil;
+import liquibase.util.ValidatingVisitorUtil;
 
 import java.util.*;
 
@@ -150,11 +149,12 @@ public class ValidatingVisitor implements ChangeSetVisitor {
         }
 
         if(ranChangeSet != null){
-            if (!changeSet.isCheckSumValid(ranChangeSet.getLastCheckSum())) {
-                if (!changeSet.shouldRunOnChange() && !changeSet.shouldAlwaysRun()) {
+            if (!changeSet.isCheckSumValid(ranChangeSet.getLastCheckSum()) &&
+                !ValidatingVisitorUtil.validateMongoDbExtensionIssue(changeSet, ranChangeSet, databaseChangeLog, database) &&
+                !changeSet.shouldRunOnChange() &&
+                !changeSet.shouldAlwaysRun()) {
                     invalidMD5Sums.add(changeSet.toString(false)+" was: "+ranChangeSet.getLastCheckSum().toString()
                             +" but is now: "+changeSet.generateCheckSum(ChecksumVersion.enumFromChecksumVersion(ranChangeSet.getLastCheckSum().getVersion())).toString());
-                }
             }
         }
 
