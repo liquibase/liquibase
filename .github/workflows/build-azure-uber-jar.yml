@@ -47,7 +47,7 @@ jobs:
         run: mvn versions:set -DnewVersion="${{ github.event.inputs.liquibase-version }}"
 
       - name: Build & Test
-        run: mvm -B clean package
+        run: mvn -B clean package
 
       - name: Archive Modules
         uses: actions/upload-artifact@v3
