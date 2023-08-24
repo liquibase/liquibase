@@ -22,8 +22,6 @@ on:
 
   push:
     branches:
-      - master
-      - main
       - github-action-**
     paths-ignore:
       - '**.md'
