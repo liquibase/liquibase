@@ -411,6 +411,12 @@ public class ColumnSnapshotGenerator extends JdbcSnapshotGenerator {
 
         DataType.ColumnSizeUnit columnSizeUnit = DataType.ColumnSizeUnit.BYTE;
 
+        if (database instanceof SybaseASADatabase &&
+            (columnMetadataResultSet.getInt("DATA_TYPE") == Types.VARCHAR || columnMetadataResultSet.getInt("DATA_TYPE") == Types.CHAR) &&
+            columnMetadataResultSet.getInt("scale") == 1) {
+            columnSizeUnit = DataType.ColumnSizeUnit.CHAR;
+        }
+
         int dataType = columnMetadataResultSet.getInt("DATA_TYPE");
         Integer columnSize = null;
         Integer decimalDigits = null;

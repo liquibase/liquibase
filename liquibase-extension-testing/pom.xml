@@ -133,6 +133,7 @@
                             </artifactSet>
                             <shadedArtifactAttached>true</shadedArtifactAttached>
                             <shadedClassifierName>deps</shadedClassifierName>
+                            <createDependencyReducedPom>false</createDependencyReducedPom>
                         </configuration>
                     </execution>
                 </executions>

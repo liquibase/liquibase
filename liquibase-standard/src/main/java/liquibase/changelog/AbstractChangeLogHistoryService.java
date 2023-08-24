@@ -12,6 +12,7 @@ import liquibase.exception.DatabaseHistoryException;
 import liquibase.executor.ExecutorService;
 import liquibase.statement.core.UpdateChangeSetChecksumStatement;
 
+import java.text.DecimalFormat;
 import java.util.Date;
 import java.util.List;
 
@@ -36,7 +37,7 @@ public abstract class AbstractChangeLogHistoryService implements ChangeLogHistor
 
     @Override
     public ChangeSet.RunStatus getRunStatus(final ChangeSet changeSet)
-        throws DatabaseException, DatabaseHistoryException {
+            throws DatabaseException, DatabaseHistoryException {
         RanChangeSet foundRan = getRanChangeSet(changeSet);
 
         if (foundRan == null) {
@@ -74,7 +75,7 @@ public abstract class AbstractChangeLogHistoryService implements ChangeLogHistor
                 List<ChangeSet> changeSets = databaseChangeLog.getChangeSets(ranChangeSet);
                 for (ChangeSet changeSet : changeSets) {
                     if ((changeSet != null) && new ContextChangeSetFilter(contexts).accepts(changeSet).isAccepted() &&
-                        new DbmsChangeSetFilter(getDatabase()).accepts(changeSet).isAccepted()) {
+                            new DbmsChangeSetFilter(getDatabase()).accepts(changeSet).isAccepted()) {
                         Scope.getCurrentScope().getLog(getClass()).fine(
                                 "Updating null or out of date checksum on changeSet " + changeSet + " to correct value"
                         );
@@ -141,8 +142,11 @@ public abstract class AbstractChangeLogHistoryService implements ChangeLogHistor
     @Override
     public void generateDeploymentId() {
         if (this.deploymentId == null) {
-            String dateString = String.valueOf(new Date().getTime());
-            this.deploymentId = dateString.substring(dateString.length() - 10);
+            long time = (new Date()).getTime();
+            String dateString = String.valueOf(time);
+            DecimalFormat decimalFormat = new DecimalFormat("0000000000");
+            this.deploymentId = dateString.length() > 9 ? dateString.substring(dateString.length() - 10) :
+                    decimalFormat.format(time);
         }
     }
 
