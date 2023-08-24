@@ -52,6 +52,6 @@ jobs:
       - name: Archive Modules
         uses: actions/upload-artifact@v3
         with:
-          name: liquibase-azure-modules
+          name: liquibase-pro-azure-artifacts
           path: |
             */target/*.jar
