@@ -1,7 +1,7 @@
 name: Build and Test
 
 concurrency:
-  group: ${{ github.workflow }}-${{ (github.ref == 'refs/heads/master' && github.sha) || github.event.pull_request.number || github.ref }}
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
   cancel-in-progress: true
 
 on:
@@ -28,11 +28,6 @@ on:
     paths-ignore:
       - '**.md'
 
-  workflow_run:
-    workflows:
-      - "Build Branch SNAPSHOT"
-    types:
-      - completed
 env:
   MAVEN_VERSION: '3.9.2'
 
