@@ -9,6 +9,9 @@ import spock.lang.Unroll
 import java.sql.Timestamp
 import java.sql.Types
 
+import static liquibase.database.ObjectQuotingStrategy.QUOTE_ALL_OBJECTS
+import static liquibase.database.ObjectQuotingStrategy.QUOTE_ONLY_RESERVED_WORDS
+
 /**
  * Tests to ensure correction functionality of SqlUtil
  */
@@ -152,14 +155,25 @@ class SqlUtilTest extends Specification {
 
     }
 
-    @Unroll
+    @Unroll("#featureName [#quotingStrategy], [#predicate, #columnNames, #parameters], [#expected]")
     def replacePredicatePlaceholders() {
+        given:
+        def database = new H2Database().tap {
+            if (quotingStrategy != null) {
+                it.objectQuotingStrategy = quotingStrategy
+            }
+        }
+
         expect:
-        SqlUtil.replacePredicatePlaceholders(new H2Database(), predicate, columns, values) == expected
+        SqlUtil.replacePredicatePlaceholders(database, predicate, columnNames, parameters) == expected
 
         where:
-        predicate     | columns  | values      | expected
-        "query :name" | ["col1"] | ["value 1"] | "query col1"
-        "query :name=:value, :name=:value" | ["col1", "col with space"] | ["value 1", 6] | "query col1='value 1', \"col with space\"=6"
+        quotingStrategy           || predicate                          | columnNames                | parameters     || expected
+        null                      || 'query :name'                      | ['col1']                   | ['value 1']    || 'query col1'
+        null                      || 'query :name=:value, :name=:value' | ['col1', 'col with space'] | ['value 1', 6] || 'query col1=\'value 1\', "COL WITH SPACE"=6'
+        QUOTE_ONLY_RESERVED_WORDS || 'query :name'                      | ['col1']                   | ['value 1']    || 'query col1'
+        QUOTE_ONLY_RESERVED_WORDS || 'query :name=:value, :name=:value' | ['col1', 'col with space'] | ['value 1', 6] || 'query col1=\'value 1\', "COL WITH SPACE"=6'
+        QUOTE_ALL_OBJECTS         || 'query :name'                      | ['col1']                   | ['value 1']    || 'query "col1"'
+        QUOTE_ALL_OBJECTS         || 'query :name=:value, :name=:value' | ['col1', 'col with space'] | ['value 1', 6] || 'query "col1"=\'value 1\', "col with space"=6'
     }
 }
