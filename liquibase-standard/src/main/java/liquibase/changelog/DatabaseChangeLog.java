@@ -693,6 +693,9 @@ public class DatabaseChangeLog implements Comparable<DatabaseChangeLog>, Conditi
             Set<String> seenChangelogPaths = Scope.getCurrentScope().get(SEEN_CHANGELOGS_PATHS_SCOPE_KEY, new HashSet<>());
             Scope.child(Collections.singletonMap(SEEN_CHANGELOGS_PATHS_SCOPE_KEY, seenChangelogPaths), () -> {
                 for (Resource resource : resources) {
+                    if (resource.isFolder(resource.getUri().toString())) {
+                        continue;
+                    }
                     Scope.getCurrentScope().getLog(getClass()).info("Reading resource: " + resource);
                     include(resource.getPath(), false, errorIfMissingOrEmpty, resourceAccessor, includeContextFilter,
                             labels, ignore, OnUnknownFileFormat.WARN, modifyChangeSets);

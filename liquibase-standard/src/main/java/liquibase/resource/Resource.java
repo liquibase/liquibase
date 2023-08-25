@@ -30,6 +30,18 @@ public interface Resource {
     boolean isWritable();
 
     /**
+     *
+     * Default implementation
+     *
+     * @param   possibleFolder    Path to check for a folder
+     * @return  boolean
+     *
+     */
+    default boolean isFolder(String possibleFolder) {
+       return false;
+    }
+
+    /**
      * @return true if the resource defined by this object currently exists.
      */
     boolean exists();
