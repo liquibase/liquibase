@@ -74,7 +74,7 @@
         <liquibase-pro.version>0-SNAPSHOT</liquibase-pro.version>
         <argLine></argLine>
 
-        <ant.version>1.10.13</ant.version>
+        <ant.version>1.10.14</ant.version>
         <junit.version>4.13.2</junit.version>
         <junit-jupiter.version>5.9.3</junit-jupiter.version>
         <groovy.version>2.5.22</groovy.version>
