@@ -668,6 +668,24 @@ public class DatabaseChangeLog implements Comparable<DatabaseChangeLog>, Conditi
                    resourceAccessor, includeContextFilter, labels, ignore, minDepth, maxDepth, "", new ModifyChangeSets(null, null));
     }
 
+    @Deprecated
+    public void includeAll(String pathName,
+                           boolean isRelativeToChangelogFile,
+                           IncludeAllFilter resourceFilter,
+                           boolean errorIfMissingOrEmpty,
+                           Comparator<String> resourceComparator,
+                           ResourceAccessor resourceAccessor,
+                           ContextExpression includeContextFilter,
+                           Labels labels,
+                           boolean ignore,
+                           int minDepth,
+                           int maxDepth,
+                           ModifyChangeSets modifyChangeSets)
+            throws SetupException {
+        includeAll(pathName, isRelativeToChangelogFile, resourceFilter, errorIfMissingOrEmpty, resourceComparator,
+                resourceAccessor, includeContextFilter, labels, ignore, minDepth, maxDepth, "", modifyChangeSets);
+    }
+
     public void includeAll(String pathName,
                            boolean isRelativeToChangelogFile,
                            IncludeAllFilter resourceFilter,
@@ -705,6 +723,20 @@ public class DatabaseChangeLog implements Comparable<DatabaseChangeLog>, Conditi
         }
     }
 
+    @Deprecated
+    public SortedSet<Resource> findResources(
+            String pathName,
+            boolean isRelativeToChangelogFile,
+            IncludeAllFilter resourceFilter,
+            boolean errorIfMissingOrEmpty,
+            Comparator<String> resourceComparator,
+            ResourceAccessor resourceAccessor,
+            int minDepth,
+            int maxDepth) throws SetupException {
+        return this.findResources(pathName, isRelativeToChangelogFile, resourceFilter, errorIfMissingOrEmpty, resourceComparator,
+                resourceAccessor, minDepth, maxDepth, "");
+    }
+
     public SortedSet<Resource> findResources(
                                String pathName,
                                boolean isRelativeToChangelogFile,
@@ -715,8 +747,7 @@ public class DatabaseChangeLog implements Comparable<DatabaseChangeLog>, Conditi
                                int minDepth,
                                int maxDepth,
                                String endsWithFilter
-                               )
-            throws SetupException {
+                               ) throws SetupException {
         try {
             if (pathName == null) {
                 throw new SetupException("No path attribute for findResources");
