@@ -40,7 +40,7 @@ public class BooleanType extends LiquibaseDataType {
             if (originalDefinition.toLowerCase(Locale.US).startsWith("bit")) {
                 return new DatabaseDataType("BIT", getParameters());
             }
-            return new DatabaseDataType("BIT", 1);
+            return new DatabaseDataType("TINYINT", 1);
         } else if (database instanceof OracleDatabase) {
             return new DatabaseDataType("NUMBER", 1);
         } else if ((database instanceof SybaseASADatabase) || (database instanceof SybaseDatabase)) {
