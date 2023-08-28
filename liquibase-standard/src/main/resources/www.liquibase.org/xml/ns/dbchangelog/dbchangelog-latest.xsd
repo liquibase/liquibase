@@ -226,9 +226,9 @@
 
                     <xsd:element name="modifyChangeSets" minOccurs="0" maxOccurs="unbounded">
                         <xsd:complexType>
-                            <xsd:choice>
-                                <xsd:element ref="include" minOccurs="0" maxOccurs="unbounded" />
-                                <xsd:element ref="includeAll" minOccurs="0" maxOccurs="unbounded"/>
+                            <xsd:choice minOccurs="0" maxOccurs="unbounded">
+                                <xsd:element ref="include"/>
+                                <xsd:element ref="includeAll"/>
                             </xsd:choice>
                             <xsd:attribute name="runWith" type="xsd:string" />
                             <xsd:attribute name="runWithSpoolFile" type="xsd:string" />
