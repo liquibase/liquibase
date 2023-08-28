@@ -228,7 +228,7 @@ Long Description: ${commandDefinition.getLongDescription() ?: "NOT SET"}
             def currentOs = OperatingSystem.getCurrent()
             Assume.assumeTrue("The current operating system (" + currentOs.name + ") does not support this test.", testDef.supportedOs.contains(currentOs))
         }
-        final commandScope
+        def commandScope
         try {
             commandScope = new CommandScope(testDef.commandTestDefinition.command as String[])
         }
