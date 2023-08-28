@@ -8,6 +8,7 @@ import liquibase.database.core.Db2zDatabase;
 import liquibase.database.core.MSSQLDatabase;
 import liquibase.database.core.OracleDatabase;
 import liquibase.database.core.SybaseDatabase;
+import liquibase.database.core.SybaseASADatabase;
 import liquibase.database.jvm.JdbcConnection;
 import liquibase.diff.compare.DatabaseObjectComparatorFactory;
 import liquibase.exception.DatabaseException;
@@ -149,6 +150,12 @@ public class ForeignKeySnapshotGenerator extends JdbcSnapshotGenerator {
                 foreignKey.setDeleteRule(deleteRule);
 
                 short deferrability = row.getShort(METADATA_DEFERRABILITY);
+
+                // SQL Anywhere supports initially deferrable but does not support initially immediate,
+                // but reports not deferrable as initially immediate.
+                if (database instanceof SybaseASADatabase && deferrability == DatabaseMetaData.importedKeyInitiallyImmediate) {
+                    deferrability = DatabaseMetaData.importedKeyNotDeferrable;
+                }
 
                 // Hsqldb doesn't handle setting this property correctly, it sets it to 0.
                 // it should be set to DatabaseMetaData.importedKeyNotDeferrable(7)
