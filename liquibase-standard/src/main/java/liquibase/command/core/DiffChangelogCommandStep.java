@@ -26,6 +26,8 @@ public class DiffChangelogCommandStep extends AbstractCommandStep {
 
     public static final CommandArgumentDefinition<String> AUTHOR_ARG;
     public static final CommandArgumentDefinition<String> CHANGELOG_FILE_ARG;
+    public static final CommandArgumentDefinition<String> CONTEXTS_ARG;
+    public static final CommandArgumentDefinition<String> LABEL_FILTER_ARG;
 
     static {
         final CommandBuilder builder = new CommandBuilder(COMMAND_NAME);
@@ -33,6 +35,14 @@ public class DiffChangelogCommandStep extends AbstractCommandStep {
                 .description("Changelog file to write results").required().build();
         AUTHOR_ARG = builder.argument("author", String.class)
                 .description("Specifies the author for changesets in the generated changelog").build();
+        LABEL_FILTER_ARG = builder.argument("labelFilter", String.class)
+                .addAlias("labels")
+                .description("Changeset labels to generate")
+                .build();
+        CONTEXTS_ARG = builder.argument("contextFilter", String.class)
+                .addAlias("contexts")
+                .description("Changeset contexts to generate")
+                .build();
     }
 
     @Override
@@ -75,6 +85,8 @@ public class DiffChangelogCommandStep extends AbstractCommandStep {
                 referenceDatabase.setObjectQuotingStrategy(ObjectQuotingStrategy.QUOTE_ALL_OBJECTS);
 
                 DiffToChangeLog changeLogWriter = createDiffToChangeLogObject(diffResult, diffOutputControl);
+                changeLogWriter.setChangeSetContext(commandScope.getArgumentValue(CONTEXTS_ARG));
+                changeLogWriter.setChangeSetLabels(commandScope.getArgumentValue(LABEL_FILTER_ARG));
                 changeLogWriter.setChangeSetAuthor(commandScope.getArgumentValue(AUTHOR_ARG));
                 if (StringUtil.trimToNull(changeLogFile) == null) {
                     changeLogWriter.print(outputStream);

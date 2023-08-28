@@ -67,7 +67,6 @@ public abstract class AbstractUpdateCommandStep extends AbstractCommandStep impl
                 LockServiceFactory.getInstance().getLockService(database).waitForLock();
                 // waitForLock resets the changelog history service, so we need to rebuild that and generate a final deploymentId.
                 ChangeLogHistoryService changeLogHistoryService = Scope.getCurrentScope().getSingleton(ChangeLogHistoryServiceFactory.class).getChangeLogService(database);
-                changeLogHistoryService.init();
                 changeLogHistoryService.generateDeploymentId();
             }
 
