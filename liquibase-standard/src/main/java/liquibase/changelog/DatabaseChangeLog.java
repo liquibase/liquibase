@@ -502,6 +502,7 @@ public class DatabaseChangeLog implements Comparable<DatabaseChangeLog>, Conditi
                         ignore,
                         node.getChildValue(null, "minDepth", 1),
                         node.getChildValue(null, "maxDepth", Integer.MAX_VALUE),
+                        node.getChildValue(null, "endsWithFilter", ""),
                         (ModifyChangeSets) nodeScratch.get("modifyChangeSets"));
                 break;
             }
@@ -664,9 +665,10 @@ public class DatabaseChangeLog implements Comparable<DatabaseChangeLog>, Conditi
                            int maxDepth)
             throws SetupException {
         includeAll(pathName, isRelativeToChangelogFile, resourceFilter, errorIfMissingOrEmpty, resourceComparator,
-                resourceAccessor, includeContextFilter, labels, ignore, minDepth, maxDepth, new ModifyChangeSets(null, null));
+                   resourceAccessor, includeContextFilter, labels, ignore, minDepth, maxDepth, "", new ModifyChangeSets(null, null));
     }
 
+    @Deprecated
     public void includeAll(String pathName,
                            boolean isRelativeToChangelogFile,
                            IncludeAllFilter resourceFilter,
@@ -680,11 +682,29 @@ public class DatabaseChangeLog implements Comparable<DatabaseChangeLog>, Conditi
                            int maxDepth,
                            ModifyChangeSets modifyChangeSets)
             throws SetupException {
+        includeAll(pathName, isRelativeToChangelogFile, resourceFilter, errorIfMissingOrEmpty, resourceComparator,
+                resourceAccessor, includeContextFilter, labels, ignore, minDepth, maxDepth, "", modifyChangeSets);
+    }
+
+    public void includeAll(String pathName,
+                           boolean isRelativeToChangelogFile,
+                           IncludeAllFilter resourceFilter,
+                           boolean errorIfMissingOrEmpty,
+                           Comparator<String> resourceComparator,
+                           ResourceAccessor resourceAccessor,
+                           ContextExpression includeContextFilter,
+                           Labels labels,
+                           boolean ignore,
+                           int minDepth,
+                           int maxDepth,
+                           String endsWithFilter,
+                           ModifyChangeSets modifyChangeSets)
+            throws SetupException {
         if (pathName == null) {
             throw new SetupException("No path attribute for includeAll");
         }
         SortedSet<Resource> resources =
-                findResources(pathName, isRelativeToChangelogFile, resourceFilter, errorIfMissingOrEmpty, resourceComparator, resourceAccessor, minDepth, maxDepth);
+                findResources(pathName, isRelativeToChangelogFile, resourceFilter, errorIfMissingOrEmpty, resourceComparator, resourceAccessor, minDepth, maxDepth, endsWithFilter);
         if (resources.isEmpty() && errorIfMissingOrEmpty) {
             throw new SetupException(
                     "Could not find directory or directory was empty for includeAll '" + pathName + "'");
@@ -703,6 +723,7 @@ public class DatabaseChangeLog implements Comparable<DatabaseChangeLog>, Conditi
         }
     }
 
+    @Deprecated
     public SortedSet<Resource> findResources(
             String pathName,
             boolean isRelativeToChangelogFile,
@@ -711,8 +732,22 @@ public class DatabaseChangeLog implements Comparable<DatabaseChangeLog>, Conditi
             Comparator<String> resourceComparator,
             ResourceAccessor resourceAccessor,
             int minDepth,
-            int maxDepth)
-            throws SetupException {
+            int maxDepth) throws SetupException {
+        return this.findResources(pathName, isRelativeToChangelogFile, resourceFilter, errorIfMissingOrEmpty, resourceComparator,
+                resourceAccessor, minDepth, maxDepth, "");
+    }
+
+    public SortedSet<Resource> findResources(
+                               String pathName,
+                               boolean isRelativeToChangelogFile,
+                               IncludeAllFilter resourceFilter,
+                               boolean errorIfMissingOrEmpty,
+                               Comparator<String> resourceComparator,
+                               ResourceAccessor resourceAccessor,
+                               int minDepth,
+                               int maxDepth,
+                               String endsWithFilter
+                               ) throws SetupException {
         try {
             if (pathName == null) {
                 throw new SetupException("No path attribute for findResources");
@@ -724,6 +759,7 @@ public class DatabaseChangeLog implements Comparable<DatabaseChangeLog>, Conditi
             }
 
             ResourceAccessor.SearchOptions searchOptions = initializeAndSetMinAndMaxDepth(minDepth, maxDepth);
+            searchOptions.setTrimmedEndsWithFilter(endsWithFilter);
 
             List<Resource> unsortedResources = null;
             Set<String> seenChangelogPaths = Scope.getCurrentScope().get(SEEN_CHANGELOGS_PATHS_SCOPE_KEY, new HashSet<>());
@@ -756,7 +792,7 @@ public class DatabaseChangeLog implements Comparable<DatabaseChangeLog>, Conditi
 
             if (resources.isEmpty() && errorIfMissingOrEmpty) {
                 throw new SetupException(
-                        "Could not find directory or directory was empty for includeAll '" + pathName + "'");
+                        "Could not find directory, directory was empty, or no changelogs matched the provided search criteria for includeAll '" + pathName + "'");
             }
             return resources;
         } catch (IOException e) {

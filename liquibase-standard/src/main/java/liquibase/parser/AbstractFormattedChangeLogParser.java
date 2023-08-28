@@ -28,7 +28,7 @@ public abstract class AbstractFormattedChangeLogParser implements ChangeLogParse
     private static final ResourceBundle coreBundle = getBundle("liquibase/i18n/liquibase-core");
     private static final String EXCEPTION_MESSAGE = coreBundle.getString("formatted.changelog.exception.message");
 
-    protected final String FIRST_LINE_REGEX = String.format("%s\\s*liquibase formatted.*", getSingleLineCommentSequence());
+    protected final String FIRST_LINE_REGEX = String.format("^\\s*%s\\s*liquibase\\s*formatted.*", getSingleLineCommentSequence());
     protected final Pattern FIRST_LINE_PATTERN = Pattern.compile(FIRST_LINE_REGEX, Pattern.CASE_INSENSITIVE);
 
     protected final String PROPERTY_REGEX = String.format("\\s*%s[\\s]*property\\s+(.*:.*)\\s+(.*:.*).*", getSingleLineCommentSequence());
