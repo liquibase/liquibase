@@ -60,6 +60,7 @@ jobs:
       standAlonePR: ${{ steps.find-branches.outputs.standAlonePR }}
       stablePro: ${{ steps.find-branches.outputs.stablePro }}
       timestamp: ${{ steps.get-date.outputs.date }}
+      latestMergeSha: ${{ steps.get-sha.outputs.latestMergeSha }}
       setupSuccessful: "true"
     steps:
       - name: Failsafe
@@ -76,6 +77,13 @@ jobs:
       - name: Get current date
         id: get-date
         run: echo "::set-output name=date::$(date +'%Y-%m-%d %H:%M:%S %Z')"
+
+      - uses: actions/checkout@v3
+      - name: Get Latest Merge Commit SHA
+        id: get-sha
+        run: |
+          latest_merge_sha=`(git rev-parse --short HEAD)`
+          echo "latestMergeSha=${latest_merge_sha}" >> $GITHUB_OUTPUT
 
       - name: Find corresponding branches
         id: find-branches
@@ -436,7 +444,7 @@ jobs:
           echo "Saving windows key"
           echo "$INSTALL4J_WINDOWS_KEY" | base64 -d > liquibase-dist/target/keys/datical_windows.pfx
           # we are packaging and deploying liquibase tar which includes liquibase-commercial
-          mvn -B -pl liquibase-dist -P liquibase-commercial source:jar package "-Dliquibase-pro.version=${{ needs.setup.outputs.proBranchName }}-SNAPSHOT" "-Dbuild.repository.owner=${{ needs.setup.outputs.thisRepositoryOwner }}" "-Dbuild.repository.name=${{ needs.setup.outputs.thisRepositoryName }}" "-Dbuild.branch=${{ needs.setup.outputs.thisBranchFileName }}" "-Dbuild.number=${{ github.run_number }}" "-Dbuild.commit=${{ needs.setup.outputs.thisSha }}" "-Dbuild.timestamp=${{ needs.setup.outputs.timestamp }}"
+          mvn -B -pl liquibase-dist -P liquibase-commercial source:jar package "-Dliquibase-pro.version=${{ needs.setup.outputs.proBranchName }}-SNAPSHOT" "-Dbuild.repository.owner=${{ needs.setup.outputs.thisRepositoryOwner }}" "-Dbuild.repository.name=${{ needs.setup.outputs.thisRepositoryName }}" "-Dbuild.branch=${{ needs.setup.outputs.thisBranchFileName }}" "-Dbuild.number=${{ github.run_number }}" "-Dbuild.commit=${{ needs.setup.outputs.latestMergeSha }}" "-Dbuild.timestamp=${{ needs.setup.outputs.timestamp }}"
 
           ## extract tar content for other artifacts
           mkdir -p liquibase-dist/target/liquibase-${{ needs.setup.outputs.thisBranchFileName }}-SNAPSHOT
