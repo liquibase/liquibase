@@ -1228,4 +1228,17 @@ public class CreateTableGeneratorTest extends AbstractSqlGeneratorTest<CreateTab
             }
         }
     }
+
+    @Test
+    public void testWithEmptyPrimaryKeyTablespaceOracleDatabase() {
+        for (Database database : TestContext.getInstance().getAllDatabases()) {
+            if (database instanceof OracleDatabase) {
+                CreateTableStatement statement = new CreateTableStatement(CATALOG_NAME, SCHEMA_NAME, TABLE_NAME);
+                statement.addPrimaryKeyColumn(COLUMN_NAME1, DataTypeFactory.getInstance().fromDescription("varchar2(40)", database), new ColumnConfig().setDefaultValue(null).getDefaultValueObject(), "PK", "");
+                if (shouldBeImplementation(database)) {
+                    assertEquals("CREATE TABLE CATALOG_NAME.TABLE_NAME (COLUMN1_NAME VARCHAR2(40) NOT NULL, CONSTRAINT PK PRIMARY KEY (COLUMN1_NAME))", this.generatorUnderTest.generateSql(statement, database, null)[0].toSql());
+                }
+            }
+        }
+    }
 }
