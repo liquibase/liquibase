@@ -3,9 +3,6 @@ name: Sonar Scan
 on:
   workflow_call:
     secrets:
-      GITHUB_TOKEN:
-        description: 'GITHUB_TOKEN from the caller workflow'
-        required: true
       SONAR_TOKEN:
         description: 'SONAR_TOKEN from the caller workflow'
         required: true
