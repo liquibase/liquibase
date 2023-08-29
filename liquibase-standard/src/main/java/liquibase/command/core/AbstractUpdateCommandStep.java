@@ -135,7 +135,7 @@ public abstract class AbstractUpdateCommandStep extends AbstractCommandStep impl
     private void addChangelogFileToMdc(String changeLogFile, DatabaseChangeLog databaseChangeLog) {
         if (StringUtil.isNotEmpty(databaseChangeLog.getLogicalFilePath())) {
             Scope.getCurrentScope().addMdcValue(MdcKey.CHANGELOG_FILE, databaseChangeLog.getLogicalFilePath());
-        } else {
+        } else if (StringUtil.isNotEmpty(changeLogFile)) {
             Scope.getCurrentScope().addMdcValue(MdcKey.CHANGELOG_FILE, changeLogFile);
         }
     }
