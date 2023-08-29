@@ -1,0 +1,70 @@
+name: Sonar Scan
+
+on:
+  workflow_call:
+    secrets:
+      GITHUB_TOKEN:
+        description: 'GITHUB_TOKEN from the caller workflow'
+        required: true
+      SONAR_TOKEN:
+        description: 'SONAR_TOKEN from the caller workflow'
+        required: true
+
+jobs:
+  sonar-push:
+    name: Sonar Scan
+    runs-on: ubuntu-latest
+
+    env:
+      AWS_REGION: us-east-1
+
+    steps:
+      - uses: actions/checkout@v3
+        with:
+          fetch-depth: 0  # Shallow clones should be disabled for a better relevancy of analysis
+          ref: ${{ github.event.pull_request.head.sha || github.event.after}}
+
+      - name: Set up JDK
+        uses: actions/setup-java@v3
+        with:
+          java-version: 11
+          distribution: 'adopt'
+          cache: 'maven'
+
+      - name: Set up Maven
+        uses: stCarolas/setup-maven@v4.5
+        with:
+            maven-version: ${{ env.MAVEN_VERSION }}
+
+      - name: Cache SonarCloud packages
+        uses: actions/cache@v3.3.1
+        with:
+            path: ~/.sonar/cache
+            key: ${{ runner.os }}-sonar
+            restore-keys: ${{ runner.os }}-sonar
+
+      - name: Get Artifact ID
+        id: get-artifact-id
+        run: echo "artifact_id=$(mvn help:evaluate -Dexpression=project.artifactId -q -DforceStdout)" >> $GITHUB_ENV
+
+      - name: Download Test Results Artifact
+        id: download-artifact
+        uses: dawidd6/action-download-artifact@v2
+        with:
+          github_token: ${{secrets.BOT_TOKEN}}
+          workflow: build.yml
+          name: ${{ env.artifact_id }}-artifacts
+          repo: ${{ github.repository }}
+          path: ./target
+          if_no_artifact_found: warn
+          workflow_conclusion: ""
+
+      - name: Sonar Scan
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+          AWS_REGION: "us-east-1"
+        run: |
+          mvn -B -Daws.region="us-east-1" -Dsonar.login=$SONAR_TOKEN \
+              -Dsonar.scm.revision=${{ github.event.pull_request.head.sha }} \
+              sonar:sonar
