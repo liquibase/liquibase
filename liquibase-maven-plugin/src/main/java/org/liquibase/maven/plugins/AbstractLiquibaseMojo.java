@@ -65,6 +65,11 @@ import static liquibase.configuration.LiquibaseConfiguration.REGISTERED_VALUE_PR
 @SuppressWarnings("java:S2583")
 public abstract class AbstractLiquibaseMojo extends AbstractMojo {
 
+    static {
+        // If maven is called with -T and a value larger than 1, it can get confused under heavy thread load
+        Scope.setScopeManager( new ThreadLocalScopeManager(null));
+    }
+
     /**
      * Suffix for fields that are representing a default value for a another field.
      */
@@ -709,8 +714,6 @@ public abstract class AbstractLiquibaseMojo extends AbstractMojo {
             getLog().warn("Liquibase NOT skipped because file " + skipOnFileExists + " does NOT exists");
         }
 
-        // If maven is called with -T and a value larger than 1, it can get confused under heavy thread load
-        Scope.setScopeManager(new ThreadLocalScopeManager());
         try {
             Scope.child(setUpLogging(), () -> {
 
