@@ -294,7 +294,7 @@ jobs:
 
   sonar:
     needs: [build, integration-test]
-    uses: liquibase/liquibase/.github/workflows/sonar-scan.yml@master
+    uses: liquibase/liquibase/.github/workflows/sonar-scan.yml@DAT-15791 
     secrets: inherit
 
   package:
