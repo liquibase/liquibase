@@ -13,7 +13,7 @@ jobs:
       - name: Generate GHAS Metrics Report
         uses: theztefan/ghas-metrics-report@v1
         env:
-          GITHUB_TOKEN: ${{ secrets.LIQUIBOT_PAT_REPO_ACCESS }}
+          GITHUB_TOKEN: ${{ secrets.PUBLIC_REPO_ACCESS_TOKEN  }}
         with:
           repo: ${{ github.event.repository.name }}
           org: ${{ github.repository_owner }}
