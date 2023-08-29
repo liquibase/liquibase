@@ -23,11 +23,7 @@ jobs:
       thisBranchName: ${{ steps.get-branch-name.outputs.thisBranchName }}
       thisSha: ${{ steps.get-commit-sha.outputs.thisSha }}
       setupSuccessful: "true"
-    env:
-      GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-    permissions:
-      contents: read
-      packages: write
+
     steps:
       - uses: actions/checkout@v3
         with:
@@ -37,7 +33,7 @@ jobs:
         id: get-commit-sha
         uses: actions/github-script@v6
         with:
-          github-token: ${{ secrets.GITHUB_TOKEN }}
+          github-token: ${{ secrets.BOT_TOKEN }}
           script: |
               const helper = require('./.github/util/workflow-helper.js')({github, context});
               core.setOutput("thisSha", helper.getCurrentSha());
@@ -69,8 +65,6 @@ jobs:
     permissions:
       contents: read
       packages: write
-    env:
-      GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
     steps:
       - uses: actions/checkout@v3
         with:
@@ -92,6 +86,7 @@ jobs:
       - name: Version Artifact
         run: |
            mvn versions:set "-DnewVersion=${{ needs.setup.outputs.thisBranchName }}-SNAPSHOT"
+           #mvn versions:set "-DnewVersion=${{ inputs.branchName }}-SNAPSHOT"
 
       # Publish to GitHub Packages
       - name: Publish package
