@@ -164,10 +164,10 @@
 
     <changeSet id="19" author="nvoxland">
         <createView viewName="personView">
-            select * from public.person
+            select * from person
         </createView>
         <createView viewName="personView" replaceIfExists="true">
-            select * from public.person
+            select * from person
         </createView>
     </changeSet>
 
@@ -453,6 +453,20 @@
                 <constraints nullable="false"/>
             </column>
         </createTable>
+    </changeSet>
+
+    <changeSet id="serial-sequence-test-part1" author="fl">
+        <createTable tableName="serial_sequence_test">
+            <column name="id" type="serial">
+            </column>
+        </createTable>
+    </changeSet>
+
+    <changeSet id="serial-sequence-test-part2" author="fl">
+        <preConditions onFail="MARK_RAN">
+            <sequenceExists sequenceName="serial_sequence_test_id_seq"/>
+        </preConditions>
+        <renameSequence oldSequenceName="serial_sequence_test_id_seq" newSequenceName="new_test_id_seq"/>
     </changeSet>
 
 </databaseChangeLog>
