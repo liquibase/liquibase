@@ -46,7 +46,7 @@ jobs:
           latest_merge_sha=`(git rev-parse --short HEAD)`
           echo "latestMergeSha=${latest_merge_sha}" >> $GITHUB_OUTPUT
 
-  build:
+  build_tests:
     name: Build & Test (Java ${{ matrix.java }} ${{ matrix.os }})
     needs: setup
     strategy:
@@ -144,7 +144,7 @@ jobs:
           - postgresql
           - sqlite
           - firebird
-    needs: build
+    needs: build_tests
     timeout-minutes: 30
     steps:
       - uses: actions/checkout@v3
@@ -195,10 +195,8 @@ jobs:
           path: |
             ./**/target/surefire-reports
             
-            
-            
 
   publish-branch-SNAPSHOTS:
-    needs: [build, integration-test]
+    needs: [build_tests, integration-test]
     uses: liquibase/liquibase/.github/workflows/build-branch.yml@github-action-DAT-15775
     secrets: inherit

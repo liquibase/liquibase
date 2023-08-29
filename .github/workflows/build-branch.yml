@@ -53,7 +53,7 @@ jobs:
           modified_branch_name=`(echo $branch_name | tr / -)`
           echo "thisBranchName=$modified_branch_name" >> $GITHUB_OUTPUT          
 
-  build:
+  build_branch:
     name: Build & Package
     runs-on: ubuntu-22.04
     needs: setup

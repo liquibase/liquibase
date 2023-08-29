@@ -32,5 +32,10 @@ In summary, this configuration sets up a concurrency group for the workflow run 
 
    a. The head ref or source branch of the pull request in a workflow run. This property is only set when the event that triggers a workflow run is either `pull_request` or `pull_request_target`. In our case it is `pull_request`. 
 
+4. ```publish-branch-SNAPSHOTS```
+
+   a. This job inherits the workflow definition from `build-branch.yml` in `liqibase/liquibase/workflows/build-branch.yml` file
+
+   b. `secrets: inherit` : using `secrets: inherit` allows the workflow in the forked repository to access the secrets from the original repository **without** revealing the secret values to the forked repository or the contributor
 
 ### `new-build.yml`
