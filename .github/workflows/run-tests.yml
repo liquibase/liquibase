@@ -25,7 +25,6 @@ env:
 jobs:
   setup:
     name: Setup
-    needs: check_build_safety
     runs-on: ubuntu-22.04
     outputs:
       timestamp: ${{ steps.get-date.outputs.date }}
