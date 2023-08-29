@@ -42,19 +42,34 @@ jobs:
 
       - name: Download unit test reports
         id: download-unit-test-reports
-        uses: actions/download-artifact@v3
+        uses: dawidd6/action-download-artifact@v2
         with:
           name: liquibase-test-results*
+          name_is_regexp: true
+          path: sonar_tests
+          pr: ${{ github.event.pull_request.number }}
+          if_no_artifact_found: warn
 
       - name: Download integration test reports
         id: download-integration-test-reports
-        uses: actions/download-artifact@v3
+        uses: dawidd6/action-download-artifact@v2
         with:
           name: liquibase-integration-test-results*
+          name_is_regexp: true
+          path: sonar_tests
+          pr: ${{ github.event.pull_request.number }}
+          if_no_artifact_found: warn
 
       - name: Sonar Scan
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
           AWS_REGION: "us-east-1"
-        run: mvn -B sonar:sonar -Dsonar.login=$SONAR_TOKEN -Dsonar.pullrequest.key=${{ github.event.pull_request.number }} -Dsonar.pullrequest.branch=${{ github.event.pull_request.head.ref }} -Dsonar.pullrequest.base=${{ github.event.pull_request.base.ref }}
+        run: |
+          mvn -B sonar:sonar \
+          -Dsonar.login=$SONAR_TOKEN \
+          -Dsonar.pullrequest.key=${{ github.event.pull_request.number }} \
+          -Dsonar.pullrequest.branch=${{ github.event.pull_request.head.ref }} \
+          -Dsonar.pullrequest.base=${{ github.event.pull_request.base.ref }} \
+          -Dsonar.test.inclusions=**/sonar_tests/** \
+          -Dsonar.exclusions=**/sonar_tests/**
