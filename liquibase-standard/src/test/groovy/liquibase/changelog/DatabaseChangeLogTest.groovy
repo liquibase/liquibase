@@ -74,6 +74,16 @@ class DatabaseChangeLogTest extends Specification {
     </changeSet>
 </databaseChangeLog>'''
 
+    def test3Xml = '''<databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+                   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                   xmlns:pro="http://www.liquibase.org/xml/ns/pro" xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-latest.xsd
+    http://www.liquibase.org/xml/ns/pro http://www.liquibase.org/xml/ns/pro/liquibase-latest.xsd ">       
+
+    <changeSet id="1" author="jlyle" runAlways="true">
+        <empty/>
+    </changeSet>
+</databaseChangeLog>'''
+
     def testSql = '''-- an included raw sql file
 create table sql_table (id int);
 create view sql_view as select * from sql_table;'''
@@ -447,8 +457,7 @@ create view sql_view as select * from sql_table;'''
 
         then:
         def e = thrown(SetupException)
-        assert e.getMessage().startsWith("Could not find directory or directory was empty for includeAll '")
-
+        assert e.getMessage().startsWith("Could not find directory, directory was empty, or no changelogs matched the provided search criteria for includeAll '")
     }
 
     def "includeAll throws exception when circular reference is detected"() {
@@ -717,6 +726,41 @@ http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbch
         1        | 3                 | 4
         0        | 2                 | 2
         0        | Integer.MAX_VALUE | 4
+    }
+
+    @Unroll
+    def "includeAll finds all expected changelogs with EndsWithFilter: #endsWithFilter"() {
+        when:
+        def rootChangeLogPath = "com/example/root.xml"
+        def includedAllChangeLogPath = "changelogs"
+        def resourceAccessor = new MockResourceAccessor(["com/example/root.xml": "",
+                                                         "changelogs/changelog-1.xml": test3Xml,
+                                                         "changelogs/morechangelogs/changelog-2.xml": test3Xml,
+                                                         "changelogs/morechangelogs/withMore/changelog-3.xml": test3Xml,
+                                                         "changelogs/morechangelogs/withMore/changelog-4.xml": test3Xml,
+                                                         "changelogs/morechangelogs/AndMore/changelog-4.xml": test3Xml])
+
+        def rootChangeLog = new DatabaseChangeLog(rootChangeLogPath)
+        rootChangeLog.load(new ParsedNode(null, "databaseChangeLog")
+                .addChildren([includeAll: [path: includedAllChangeLogPath, endsWithFilter:endsWithFilter, errorIfMissingOrEmpty:false]]), resourceAccessor)
+
+        then:
+        rootChangeLog.getChangeSets().size() == expectedIncludeAllChangesetsToDeploy
+
+        where:
+        endsWithFilter  | expectedIncludeAllChangesetsToDeploy
+        null            | 5
+        ""              | 5
+        "1.XML"         | 1
+        "2.XML"         | 1
+        "3.XML"         | 1
+        "4.XML"         | 2
+        "5.XML"         | 0
+        "1.xml"         | 1
+        "2.xml"         | 1
+        "3.xml"         | 1
+        "4.xml"         | 2
+        "5.xml"         | 0
     }
 
 }

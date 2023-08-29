@@ -78,7 +78,7 @@ public class CreateTableGeneratorTest extends AbstractSqlGeneratorTest<CreateTab
             statement.addColumn(COLUMN_NAME1, DataTypeFactory.getInstance().fromDescription("int", database),
                     new PrimaryKeyConstraint().addColumns(COLUMN_NAME1).setDeferrable(true).setInitiallyDeferred(true));
 
-            if (database.supportsInitiallyDeferrableColumns()) {
+            if (database.supportsInitiallyDeferrableColumns() && !(database instanceof SybaseASADatabase)) {
                 assertTrue(this.generatorUnderTest.generateSql(statement, database, null)[0].toSql().contains("DEFERRABLE"));
             } else {
                 assertFalse(this.generatorUnderTest.generateSql(statement, database, null)[0].toSql().contains("DEFERRABLE"));
@@ -1225,6 +1225,19 @@ public class CreateTableGeneratorTest extends AbstractSqlGeneratorTest<CreateTab
 
                 assertEquals("CREATE TABLE SCHEMA_NAME.TABLE_NAME (COLUMN1_NAME INTEGER GENERATED ALWAYS AS (rank_1 / 2) STORED)", generatedSql[0].toSql());
                 conn.setDatabaseMajorVersion(saveMajorVersion);
+            }
+        }
+    }
+
+    @Test
+    public void testWithEmptyPrimaryKeyTablespaceOracleDatabase() {
+        for (Database database : TestContext.getInstance().getAllDatabases()) {
+            if (database instanceof OracleDatabase) {
+                CreateTableStatement statement = new CreateTableStatement(CATALOG_NAME, SCHEMA_NAME, TABLE_NAME);
+                statement.addPrimaryKeyColumn(COLUMN_NAME1, DataTypeFactory.getInstance().fromDescription("varchar2(40)", database), new ColumnConfig().setDefaultValue(null).getDefaultValueObject(), "PK", "");
+                if (shouldBeImplementation(database)) {
+                    assertEquals("CREATE TABLE CATALOG_NAME.TABLE_NAME (COLUMN1_NAME VARCHAR2(40) NOT NULL, CONSTRAINT PK PRIMARY KEY (COLUMN1_NAME))", this.generatorUnderTest.generateSql(statement, database, null)[0].toSql());
+                }
             }
         }
     }
