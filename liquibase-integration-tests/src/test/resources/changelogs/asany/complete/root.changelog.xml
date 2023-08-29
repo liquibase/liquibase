@@ -10,7 +10,7 @@
     </preConditions>
 
     <changeSet id="test-check-on-commit" author="mkarg">
-        <createTable tableName="SomeReferencedTable>">
+        <createTable tableName="SomeReferencedTable">
             <column name="pc" type="INTEGER">
                 <constraints nullable="false" primaryKey="true" primaryKeyName="pk"/>
             </column>
