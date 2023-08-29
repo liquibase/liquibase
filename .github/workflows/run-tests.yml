@@ -37,7 +37,8 @@ jobs:
 
       - name: Get current date
         id: get-date
-        run: echo "::set-output name=date::$(date +'%Y-%m-%d %H:%M:%S %Z')"
+        run: |
+          echo "date=$(date +'%Y-%m-%d %H:%M:%S %Z')" >> $GITHUB_OUTPUT
 
       - name: Get Latest Merge Commit SHA
         id: get-sha
@@ -193,3 +194,11 @@ jobs:
           name: ${{ steps.prepare.outputs.testResultsArtifact }}
           path: |
             ./**/target/surefire-reports
+            
+            
+            
+
+  publish-branch-SNAPSHOTS:
+    needs: [build, integration-test]
+    uses: liquibase/liquibase/.github/workflows/build-branch.yml@github-action-DAT-15775
+    secrets: inherit
