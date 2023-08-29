@@ -57,7 +57,7 @@
                 <!-- Converts the generated flattened-pom into a cleaner version for maven distribution -->
                 <groupId>org.codehaus.mojo</groupId>
                 <artifactId>xml-maven-plugin</artifactId>
-                <version>1.0.2</version>
+                <version>1.1.0</version>
                 <executions>
                     <execution>
                         <id>transform-deploy-pom</id>

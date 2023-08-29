@@ -80,7 +80,7 @@ public class DbUrlConnectionCommandStep extends AbstractDatabaseConnectionComman
      * @param commandScope current command scope
      * @throws DatabaseException Thrown when there is a connection error
      */
-    private Database obtainDatabase(CommandScope commandScope) throws DatabaseException {
+    public Database obtainDatabase(CommandScope commandScope) throws DatabaseException {
         if (commandScope.getArgumentValue(DATABASE_ARG) == null) {
             String url = commandScope.getArgumentValue(URL_ARG);
             String username = commandScope.getArgumentValue(USERNAME_ARG);
@@ -97,7 +97,7 @@ public class DbUrlConnectionCommandStep extends AbstractDatabaseConnectionComman
         }
     }
 
-    private void logMdc(String url, Database database) {
+    public static void logMdc(String url, Database database) {
         Scope.getCurrentScope().addMdcValue(MdcKey.LIQUIBASE_TARGET_URL, url);
         Scope.getCurrentScope().addMdcValue(MdcKey.LIQUIBASE_CATALOG_NAME, database.getLiquibaseCatalogName());
         Scope.getCurrentScope().addMdcValue(MdcKey.LIQUIBASE_SCHEMA_NAME, database.getLiquibaseSchemaName());

@@ -251,7 +251,7 @@ jobs:
           java-version: '17'
           distribution: 'temurin'
           cache: 'maven'
-          server-id: github
+          server-id: liquibase
       - name: Set up Maven
         uses: stCarolas/setup-maven@v4.5
         with:
@@ -265,7 +265,7 @@ jobs:
         run: mvn -B clean deploy -DskipTests=true
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          TARGET_ARTIFACT_REPOSITORY: github
+          TARGET_ARTIFACT_REPOSITORY: liquibase
 
   deploy_xsd:
       name: Upload xsds
@@ -317,4 +317,12 @@ jobs:
             sed -ie "s/<\/ul>/  <li><a href=\"\/xml\/ns\/dbchangelog\/dbchangelog-${xsd_version}.xsd\">dbchangelog-${xsd_version}.xsd<\/a><\/li>\n<\/ul>/" index-file/index.htm
             aws s3 sync index-file s3://liquibaseorg-origin/xml/ns/dbchangelog/ --only-show-errors
           fi
-          
+
+  package-deb:
+    uses: liquibase/build-logic/.github/workflows/package-deb.yml@v0.3.8
+    needs: [ setup ]
+    secrets: inherit
+    with:
+      groupId: 'org.liquibase'
+      artifactId: 'liquibase'
+      version: ${{ needs.setup.outputs.version }}

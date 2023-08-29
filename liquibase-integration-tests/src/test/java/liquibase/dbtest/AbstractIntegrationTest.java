@@ -7,6 +7,10 @@ import liquibase.change.core.LoadDataChange;
 import liquibase.changelog.ChangeLogHistoryServiceFactory;
 import liquibase.changelog.ChangeSet;
 import liquibase.changelog.DatabaseChangeLog;
+import liquibase.command.CommandScope;
+import liquibase.command.core.DropAllCommandStep;
+import liquibase.command.core.UpdateCommandStep;
+import liquibase.command.core.helpers.DbUrlConnectionCommandStep;
 import liquibase.database.Database;
 import liquibase.database.DatabaseConnection;
 import liquibase.database.DatabaseFactory;
@@ -113,7 +117,7 @@ public abstract class AbstractIntegrationTest {
         this.pathChangeLog = "changelogs/common/pathChangeLog.xml";
         logger = Scope.getCurrentScope().getLog(getClass());
 
-        Scope.setScopeManager(new TestScopeManager());
+        Scope.setScopeManager(new TestScopeManager(Scope.getCurrentScope()));
     }
 
     private void openConnection() throws Exception {
@@ -271,6 +275,17 @@ public abstract class AbstractIntegrationTest {
             database.setDefaultSchemaName(null);
             database.setOutputDefaultCatalog(true);
             database.setOutputDefaultSchema(true);
+            try {
+                LockService lockService = LockServiceFactory.getInstance().getLockService(database);
+                lockService.releaseLock();
+            } catch (Exception ignored) {
+            }
+            try {
+                CommandScope commandScope = new CommandScope(DropAllCommandStep.COMMAND_NAME);
+                commandScope.addArgumentValue(DbUrlConnectionCommandStep.DATABASE_ARG, database);
+                commandScope.execute();
+            } catch (Exception ignored) {
+            }
         }
         SnapshotGeneratorFactory.resetAll();
     }
@@ -819,9 +834,6 @@ public abstract class AbstractIntegrationTest {
         clearDatabase();
 
         liquibase = createLiquibase(completeChangeLog);
-        clearDatabase();
-
-        liquibase = createLiquibase(completeChangeLog);
         liquibase.setChangeLogParameter( "loginuser", testSystem.getUsername());
         liquibase.update(this.contexts);
 
@@ -1194,6 +1206,23 @@ public abstract class AbstractIntegrationTest {
         assertTrue(liquibase.getDatabaseChangeLog().getChangeSets().stream().allMatch(changeSet -> changeSet.getDescription().contains(pathToSet)));
     }
 
+    @Test
+    public void allowsDbChangelogTableNameAsLowerCase() throws DatabaseException {
+        clearDatabase();
+        String oldDbChangelogTableName = this.getDatabase().getDatabaseChangeLogTableName();
+        try {
+            getDatabase().setDatabaseChangeLogTableName("lowercase");
+            CommandScope commandScope = new CommandScope(UpdateCommandStep.COMMAND_NAME);
+            commandScope.addArgumentValue(DbUrlConnectionCommandStep.DATABASE_ARG, getDatabase());
+            commandScope.addArgumentValue(UpdateCommandStep.CHANGELOG_FILE_ARG, objectQuotingStrategyChangeLog);
+            commandScope.execute();
+        } catch (Exception e) {
+            Assert.fail("Should not fail. Reason: " + e.getMessage());
+        } finally {
+            getDatabase().setDatabaseChangeLogTableName(oldDbChangelogTableName);
+        }
+    }
+
     private ProcessBuilder prepareExternalLiquibaseProcess() {
         String javaHome = System.getProperty("java.home");
         String javaBin = javaHome + File.separator + "bin" + File.separator + "java";
@@ -1212,6 +1241,15 @@ public abstract class AbstractIntegrationTest {
         command.add(contexts);
 
         return new ProcessBuilder(command);
+    }
+
+    protected void runUpdate(String changelog) throws CommandExecutionException {
+        CommandScope commandScope = new CommandScope(UpdateCommandStep.COMMAND_NAME);
+        commandScope.addArgumentValue(DbUrlConnectionCommandStep.URL_ARG, testSystem.getConnectionUrl());
+        commandScope.addArgumentValue(DbUrlConnectionCommandStep.USERNAME_ARG, testSystem.getUsername());
+        commandScope.addArgumentValue(DbUrlConnectionCommandStep.PASSWORD_ARG, testSystem.getPassword());
+        commandScope.addArgumentValue(UpdateCommandStep.CHANGELOG_FILE_ARG, changelog);
+        commandScope.execute();
     }
 
     public static final class ApplyTestChangelog {

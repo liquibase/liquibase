@@ -19,7 +19,12 @@ public class MdcKey {
     public static final String DEPLOYMENT_OUTCOME = "deploymentOutcome";
     public static final String LIQUIBASE_COMMAND_NAME = "liquibaseCommandName";
     public static final String LIQUIBASE_VERSION = "liquibaseVersion";
+    /**
+     * Use the {@link MdcKey}#LIQUIBASE_HOST_NAME instead.
+     */
+    @Deprecated
     public static final String LIQUIBASE_SYSTEM_NAME = "liquibaseSystemName";
+    public static final String LIQUIBASE_HOST_NAME = "liquibaseHostName";
     public static final String LIQUIBASE_SYSTEM_USER = "liquibaseSystemUser";
     public static final String OUTPUT_FILE = "outputFile";
     public static final String OUTPUT_FILE_ENCODING = "outputFileEncoding";
@@ -108,4 +113,5 @@ public class MdcKey {
     public static final String HISTORY = "history";
     public static final String RELEASE_LOCKS_OUTCOME = "releaseLocksOutcome";
     public static final String STATUS = "status";
+    public static final String ROWS_AFFECTED = "rowsAffected";
 }

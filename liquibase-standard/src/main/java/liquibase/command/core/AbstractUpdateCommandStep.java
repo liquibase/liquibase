@@ -27,6 +27,7 @@ import java.io.IOException;
 import java.io.OutputStream;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.atomic.AtomicInteger;
 
 import static liquibase.Liquibase.MSG_COULD_NOT_RELEASE_LOCK;
 
@@ -64,6 +65,9 @@ public abstract class AbstractUpdateCommandStep extends AbstractCommandStep impl
             }
             if(!isDBLocked) {
                 LockServiceFactory.getInstance().getLockService(database).waitForLock();
+                // waitForLock resets the changelog history service, so we need to rebuild that and generate a final deploymentId.
+                ChangeLogHistoryService changeLogHistoryService = Scope.getCurrentScope().getSingleton(ChangeLogHistoryServiceFactory.class).getChangeLogService(database);
+                changeLogHistoryService.generateDeploymentId();
             }
 
             ChangeLogHistoryService changelogService = Scope.getCurrentScope().getSingleton(ChangeLogHistoryServiceFactory.class).getChangeLogService(database);
@@ -73,9 +77,11 @@ public abstract class AbstractUpdateCommandStep extends AbstractCommandStep impl
             StatusVisitor statusVisitor = getStatusVisitor(commandScope, database, contexts, labelExpression, databaseChangeLog);
 
             ChangeLogIterator runChangeLogIterator = getStandardChangelogIterator(commandScope, database, contexts, labelExpression, databaseChangeLog);
+            AtomicInteger rowsAffected = new AtomicInteger(0);
 
             HashMap<String, Object> scopeValues = new HashMap<>();
             scopeValues.put("showSummary", getShowSummary(commandScope));
+            scopeValues.put("rowsAffected", rowsAffected);
             Scope.child(scopeValues, () -> {
                 runChangeLogIterator.run(new UpdateVisitor(database, changeExecListener, new ShouldRunChangeSetFilter(database)),
                         new RuntimeEnvironment(database, contexts, labelExpression));
@@ -84,8 +90,9 @@ public abstract class AbstractUpdateCommandStep extends AbstractCommandStep impl
 
             resultsBuilder.addResult("statusCode", 0);
             addChangelogFileToMdc(getChangelogFileArg(commandScope), databaseChangeLog);
+            Scope.getCurrentScope().addMdcValue(MdcKey.ROWS_AFFECTED, String.valueOf(rowsAffected.get()));
             logDeploymentOutcomeMdc(changeExecListener, true);
-            postUpdateLog();
+            postUpdateLog(rowsAffected.get());
         } catch (Exception e) {
             DatabaseChangeLog databaseChangeLog = (DatabaseChangeLog) commandScope.getDependency(DatabaseChangeLog.class);
             addChangelogFileToMdc(getChangelogFileArg(commandScope), databaseChangeLog);
@@ -128,7 +135,7 @@ public abstract class AbstractUpdateCommandStep extends AbstractCommandStep impl
     private void addChangelogFileToMdc(String changeLogFile, DatabaseChangeLog databaseChangeLog) {
         if (StringUtil.isNotEmpty(databaseChangeLog.getLogicalFilePath())) {
             Scope.getCurrentScope().addMdcValue(MdcKey.CHANGELOG_FILE, databaseChangeLog.getLogicalFilePath());
-        } else {
+        } else if (StringUtil.isNotEmpty(changeLogFile)) {
             Scope.getCurrentScope().addMdcValue(MdcKey.CHANGELOG_FILE, changeLogFile);
         }
     }
@@ -147,16 +154,15 @@ public abstract class AbstractUpdateCommandStep extends AbstractCommandStep impl
     private void logDeploymentOutcomeMdc(ChangeExecListener defaultListener, boolean success) {
         String successLog = "Update command completed successfully.";
         String failureLog = "Update command encountered an exception.";
-        try (MdcObject deploymentOutcomeMdc = Scope.getCurrentScope().addMdcValue(MdcKey.DEPLOYMENT_OUTCOME, success ? MdcValue.COMMAND_SUCCESSFUL : MdcValue.COMMAND_FAILED)) {
-            Scope.getCurrentScope().getLog(getClass()).info(success ? successLog : failureLog);
-        }
-
         if (defaultListener instanceof DefaultChangeExecListener) {
             List<ChangeSet> deployedChangeSets = ((DefaultChangeExecListener)defaultListener).getDeployedChangeSets();
             int deployedChangeSetCount = deployedChangeSets.size();
             ChangesetsUpdated changesetsUpdated = new ChangesetsUpdated(deployedChangeSets);
             Scope.getCurrentScope().addMdcValue(MdcKey.DEPLOYMENT_OUTCOME_COUNT, String.valueOf(deployedChangeSetCount));
             Scope.getCurrentScope().addMdcValue(MdcKey.CHANGESETS_UPDATED, changesetsUpdated);
+        }
+        try (MdcObject deploymentOutcomeMdc = Scope.getCurrentScope().addMdcValue(MdcKey.DEPLOYMENT_OUTCOME, success ? MdcValue.COMMAND_SUCCESSFUL : MdcValue.COMMAND_FAILED)) {
+            Scope.getCurrentScope().getLog(getClass()).info(success ? successLog : failureLog);
         }
     }
 
@@ -270,7 +276,7 @@ public abstract class AbstractUpdateCommandStep extends AbstractCommandStep impl
      * Log
      */
     @Beta
-    public void postUpdateLog() {
+    public void postUpdateLog(int rowsAffected) {
 
     }
 

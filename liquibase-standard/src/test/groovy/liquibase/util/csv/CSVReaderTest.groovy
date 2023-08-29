@@ -38,7 +38,7 @@ class CSVReaderTest extends Specification {
 
         then:
         def e = thrown(CsvMalformedLineException)
-        e.message.startsWith("Unterminated quoted field at end of CSV line")
+        e.lineNumber == 2
 
         where:
         separator                   | quote                             | input                  | notes

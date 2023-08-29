@@ -47,7 +47,6 @@ import java.time.Duration;
 import java.util.*;
 import java.util.jar.JarFile;
 import java.util.jar.Manifest;
-import java.util.logging.Formatter;
 import java.util.logging.*;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -58,6 +57,8 @@ import static liquibase.util.SystemUtil.isWindows;
 
 
 public class LiquibaseCommandLine {
+
+    public static final String COMMAND_ARGUMENTS = "commandArguments";
 
     private final Map<String, String> legacyPositionalArguments;
 
@@ -356,7 +357,7 @@ public class LiquibaseCommandLine {
 
             return Scope.child(Collections.singletonMap(Scope.Attr.logService.name(), newLogService), () -> {
                 try {
-                    return Scope.child(configureScope(), () -> {
+                    return Scope.child(configureScope(args), () -> {
 
                         if (!LiquibaseCommandLineConfiguration.SHOULD_RUN.getCurrentValue()) {
                             Scope.getCurrentScope().getUI().sendErrorMessage((
@@ -425,9 +426,12 @@ public class LiquibaseCommandLine {
      */
     private void logMdcData() throws IOException {
         MdcManager mdcManager = Scope.getCurrentScope().getMdcManager();
+        String localHostName = NetUtil.getLocalHostName();
         try (MdcObject version = mdcManager.put(MdcKey.LIQUIBASE_VERSION, LiquibaseUtil.getBuildVersion());
              MdcObject systemUser = mdcManager.put(MdcKey.LIQUIBASE_SYSTEM_USER, System.getProperty("user.name"));
-             MdcObject systemName = mdcManager.put(MdcKey.LIQUIBASE_SYSTEM_NAME, NetUtil.getLocalHostName())) {
+             MdcObject systemName = mdcManager.put(MdcKey.LIQUIBASE_SYSTEM_NAME, localHostName);
+             // The host name here is purposefully the same as the system name. The system name is retained for backwards compatibility.
+             MdcObject hostName = mdcManager.put(MdcKey.LIQUIBASE_HOST_NAME, localHostName)) {
             Scope.getCurrentScope().getLog(getClass()).info("Starting command execution.");
         }
     }
@@ -636,8 +640,9 @@ public class LiquibaseCommandLine {
      *
      * @return values to set in the scope
      */
-    private Map<String, Object> configureScope() throws Exception {
+    private Map<String, Object> configureScope(String[] args) throws Exception {
         Map<String, Object> returnMap = new HashMap<>();
+        returnMap.put(COMMAND_ARGUMENTS, args);
 
         final ClassLoader classLoader = configureClassLoader();
 

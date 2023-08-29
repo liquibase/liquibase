@@ -28,10 +28,12 @@ public class GenerateChangelogCommandStep extends AbstractCommandStep {
 
     private static final String INFO_MESSAGE =
             "BEST PRACTICE: When generating formatted SQL changelogs, always check if the 'splitStatements' attribute" + System.lineSeparator() +
-            "works for your environment. See https://docs.liquibase.com/commands/generatechangelog.html for more information. ";
+            "works for your environment. See https://docs.liquibase.com/commands/inspection/generate-changelog.html for more information. ";
 
     public static final CommandArgumentDefinition<String> AUTHOR_ARG;
     public static final CommandArgumentDefinition<String> CONTEXT_ARG;
+    public static final CommandArgumentDefinition<String> CONTEXTS_ARG;
+    public static final CommandArgumentDefinition<String> LABEL_FILTER_ARG;
     public static final CommandArgumentDefinition<String> DATA_OUTPUT_DIR_ARG;
     public static final CommandArgumentDefinition<Boolean> OVERWRITE_OUTPUT_FILE_ARG;
     public static final CommandArgumentDefinition<String> CHANGELOG_FILE_ARG;
@@ -54,6 +56,14 @@ public class GenerateChangelogCommandStep extends AbstractCommandStep {
         AUTHOR_ARG = builder.argument("author", String.class)
                 .description("Specifies the author for changesets in the generated changelog").build();
         CONTEXT_ARG = builder.argument("context", String.class).hidden().build();
+        LABEL_FILTER_ARG = builder.argument("labelFilter", String.class)
+                .addAlias("labels")
+                .description("Changeset labels to generate")
+                .build();
+        CONTEXTS_ARG = builder.argument("contextFilter", String.class)
+                .addAlias("contexts")
+                .description("Changeset contexts to generate")
+                .build();
         DATA_OUTPUT_DIR_ARG = builder.argument("dataOutputDirectory", String.class)
                 .description("Directory to write table data to").build();
         OVERWRITE_OUTPUT_FILE_ARG = builder.argument("overwriteOutputFile", Boolean.class)
@@ -106,7 +116,14 @@ public class GenerateChangelogCommandStep extends AbstractCommandStep {
         DiffToChangeLog changeLogWriter = new DiffToChangeLog(diffResult, diffOutputControl);
 
         changeLogWriter.setChangeSetAuthor(commandScope.getArgumentValue(AUTHOR_ARG));
-        changeLogWriter.setChangeSetContext(commandScope.getArgumentValue(CONTEXT_ARG));
+        if (commandScope.getArgumentValue(CONTEXT_ARG) != null) {
+            changeLogWriter.setChangeSetContext(commandScope.getArgumentValue(CONTEXT_ARG));
+        } else {
+            changeLogWriter.setChangeSetContext(commandScope.getArgumentValue(CONTEXTS_ARG));
+        }
+        if (commandScope.getArgumentValue(LABEL_FILTER_ARG) != null) {
+            changeLogWriter.setChangeSetLabels(commandScope.getArgumentValue(LABEL_FILTER_ARG));
+        }
         changeLogWriter.setChangeSetPath(changeLogFile);
 
         ObjectQuotingStrategy originalStrategy = referenceDatabase.getObjectQuotingStrategy();
