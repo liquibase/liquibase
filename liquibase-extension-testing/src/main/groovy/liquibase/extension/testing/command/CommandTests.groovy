@@ -228,7 +228,7 @@ Long Description: ${commandDefinition.getLongDescription() ?: "NOT SET"}
             def currentOs = OperatingSystem.getCurrent()
             Assume.assumeTrue("The current operating system (" + currentOs.name + ") does not support this test.", testDef.supportedOs.contains(currentOs))
         }
-        final commandScope
+        def commandScope
         try {
             commandScope = new CommandScope(testDef.commandTestDefinition.command as String[])
         }
@@ -380,6 +380,11 @@ Long Description: ${commandDefinition.getLongDescription() ?: "NOT SET"}
                 checkFileContent(testDef.expectedFileContent, "Command File Content")
                 checkDatabaseContent(testDef.expectedDatabaseContent, database, "Database snapshot content")
 
+                if (!testDef.expectedResult.isEmpty()) {
+                    def entrySet = testDef.expectedResult.entrySet()
+                    def oneEntry = entrySet.iterator().next()
+                    assert results.getResult(oneEntry.getKey()) == oneEntry.getValue()
+                }
                 if (!testDef.expectedResults.isEmpty()) {
                     for (def returnedResult : results.getResults().entrySet()) {
                         def expectedResult = testDef.expectedResults.get(returnedResult.getKey())
@@ -842,10 +847,15 @@ Long Description: ${commandDefinition.getLongDescription() ?: "NOT SET"}
         private File outputFile
 
         private Map<String, ?> expectedResults = new HashMap<>()
+        private Map<String, ?> expectedResult = new HashMap<>()
         private Class<Throwable> expectedException
         private Object expectedExceptionMessage
         private File expectFileToExist
         private File expectFileToNotExist
+
+        def setExpectedResult(Map<String, ?> expectedResult) {
+            this.expectedResult = expectedResult
+        }
 
         def setup(@DelegatesTo(TestSetupDefinition) Closure closure) {
             def setupDef = new TestSetupDefinition()

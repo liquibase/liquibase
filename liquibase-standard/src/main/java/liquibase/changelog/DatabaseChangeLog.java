@@ -228,16 +228,16 @@ public class DatabaseChangeLog implements Comparable<DatabaseChangeLog>, Conditi
     }
 
     public ChangeSet getChangeSet(String path, String author, String id) {
-	    final List<ChangeSet> possibleChangeSets = getChangeSets(path, author, id);
-	    if (possibleChangeSets.isEmpty()){
-	    	return null;
-	    }
-	    return possibleChangeSets.get(0);
+        final List<ChangeSet> possibleChangeSets = getChangeSets(path, author, id);
+        if (possibleChangeSets.isEmpty()) {
+            return null;
+        }
+        return possibleChangeSets.get(0);
     }
 
     public List<ChangeSet> getChangeSets(String path, String author, String id) {
-	    final ArrayList<ChangeSet> changeSetsToReturn = new ArrayList<>();
-	    for (ChangeSet changeSet : this.changeSets) {
+        final ArrayList<ChangeSet> changeSetsToReturn = new ArrayList<>();
+        for (ChangeSet changeSet : this.changeSets) {
             final String normalizedPath = normalizePath(changeSet.getFilePath());
             if (normalizedPath != null &&
                     normalizedPath.equalsIgnoreCase(normalizePath(path)) &&
@@ -417,8 +417,8 @@ public class DatabaseChangeLog implements Comparable<DatabaseChangeLog>, Conditi
                 break;
             case "modifyChangeSets":
                 ModifyChangeSets modifyChangeSets = new ModifyChangeSets(
-                        (String)node.getChildValue(null, "runWith"),
-                        (String)node.getChildValue(null, "runWithSpoolFile"));
+                        (String) node.getChildValue(null, "runWith"),
+                        (String) node.getChildValue(null, "runWithSpoolFile"));
                 nodeScratch = new HashMap<>();
                 nodeScratch.put("modifyChangeSets", modifyChangeSets);
                 for (ParsedNode modifyChildNode : node.getChildren()) {
@@ -448,7 +448,7 @@ public class DatabaseChangeLog implements Comparable<DatabaseChangeLog>, Conditi
                             labels,
                             ignore,
                             OnUnknownFileFormat.FAIL,
-                            (ModifyChangeSets)nodeScratch.get("modifyChangeSets"));
+                            (ModifyChangeSets) nodeScratch.get("modifyChangeSets"));
                 } catch (LiquibaseException e) {
                     throw new SetupException(e);
                 }
@@ -502,7 +502,8 @@ public class DatabaseChangeLog implements Comparable<DatabaseChangeLog>, Conditi
                         ignore,
                         node.getChildValue(null, "minDepth", 1),
                         node.getChildValue(null, "maxDepth", Integer.MAX_VALUE),
-                        (ModifyChangeSets)nodeScratch.get("modifyChangeSets"));
+                        node.getChildValue(null, "endsWithFilter", ""),
+                        (ModifyChangeSets) nodeScratch.get("modifyChangeSets"));
                 break;
             }
             case "preConditions": {
@@ -550,8 +551,7 @@ public class DatabaseChangeLog implements Comparable<DatabaseChangeLog>, Conditi
                         if (!resource.exists()) {
                             if (errorIfMissing) {
                                 throw new UnexpectedLiquibaseException(FileUtil.getFileNotFoundMessage(file));
-                            }
-                            else {
+                            } else {
                                 Scope.getCurrentScope().getLog(getClass()).warning(FileUtil.getFileNotFoundMessage(file));
                             }
                         } else {
@@ -606,7 +606,7 @@ public class DatabaseChangeLog implements Comparable<DatabaseChangeLog>, Conditi
         }
         String dbmsList = node.getChildValue(null, "dbms", String.class);
         ChangeSet skippedChangeSet =
-            new ChangeSet(id, author, false, false, filePath, null, dbmsList, this);
+                new ChangeSet(id, author, false, false, filePath, null, dbmsList, this);
         skippedChangeSets.add(skippedChangeSet);
     }
 
@@ -651,6 +651,7 @@ public class DatabaseChangeLog implements Comparable<DatabaseChangeLog>, Conditi
                 0,
                 Integer.MAX_VALUE);
     }
+
     public void includeAll(String pathName,
                            boolean isRelativeToChangelogFile,
                            IncludeAllFilter resourceFilter,
@@ -664,9 +665,10 @@ public class DatabaseChangeLog implements Comparable<DatabaseChangeLog>, Conditi
                            int maxDepth)
             throws SetupException {
         includeAll(pathName, isRelativeToChangelogFile, resourceFilter, errorIfMissingOrEmpty, resourceComparator,
-                   resourceAccessor, includeContextFilter, labels, ignore, minDepth, maxDepth, new ModifyChangeSets(null, null));
+                   resourceAccessor, includeContextFilter, labels, ignore, minDepth, maxDepth, "", new ModifyChangeSets(null, null));
     }
 
+    @Deprecated
     public void includeAll(String pathName,
                            boolean isRelativeToChangelogFile,
                            IncludeAllFilter resourceFilter,
@@ -680,11 +682,29 @@ public class DatabaseChangeLog implements Comparable<DatabaseChangeLog>, Conditi
                            int maxDepth,
                            ModifyChangeSets modifyChangeSets)
             throws SetupException {
+        includeAll(pathName, isRelativeToChangelogFile, resourceFilter, errorIfMissingOrEmpty, resourceComparator,
+                resourceAccessor, includeContextFilter, labels, ignore, minDepth, maxDepth, "", modifyChangeSets);
+    }
+
+    public void includeAll(String pathName,
+                           boolean isRelativeToChangelogFile,
+                           IncludeAllFilter resourceFilter,
+                           boolean errorIfMissingOrEmpty,
+                           Comparator<String> resourceComparator,
+                           ResourceAccessor resourceAccessor,
+                           ContextExpression includeContextFilter,
+                           Labels labels,
+                           boolean ignore,
+                           int minDepth,
+                           int maxDepth,
+                           String endsWithFilter,
+                           ModifyChangeSets modifyChangeSets)
+            throws SetupException {
         if (pathName == null) {
             throw new SetupException("No path attribute for includeAll");
         }
         SortedSet<Resource> resources =
-                findResources(pathName, isRelativeToChangelogFile, resourceFilter, errorIfMissingOrEmpty, resourceComparator, resourceAccessor, minDepth, maxDepth);
+                findResources(pathName, isRelativeToChangelogFile, resourceFilter, errorIfMissingOrEmpty, resourceComparator, resourceAccessor, minDepth, maxDepth, endsWithFilter);
         if (resources.isEmpty() && errorIfMissingOrEmpty) {
             throw new SetupException(
                     "Could not find directory or directory was empty for includeAll '" + pathName + "'");
@@ -703,6 +723,20 @@ public class DatabaseChangeLog implements Comparable<DatabaseChangeLog>, Conditi
         }
     }
 
+    @Deprecated
+    public SortedSet<Resource> findResources(
+            String pathName,
+            boolean isRelativeToChangelogFile,
+            IncludeAllFilter resourceFilter,
+            boolean errorIfMissingOrEmpty,
+            Comparator<String> resourceComparator,
+            ResourceAccessor resourceAccessor,
+            int minDepth,
+            int maxDepth) throws SetupException {
+        return this.findResources(pathName, isRelativeToChangelogFile, resourceFilter, errorIfMissingOrEmpty, resourceComparator,
+                resourceAccessor, minDepth, maxDepth, "");
+    }
+
     public SortedSet<Resource> findResources(
                                String pathName,
                                boolean isRelativeToChangelogFile,
@@ -711,8 +745,9 @@ public class DatabaseChangeLog implements Comparable<DatabaseChangeLog>, Conditi
                                Comparator<String> resourceComparator,
                                ResourceAccessor resourceAccessor,
                                int minDepth,
-                               int maxDepth)
-            throws SetupException {
+                               int maxDepth,
+                               String endsWithFilter
+                               ) throws SetupException {
         try {
             if (pathName == null) {
                 throw new SetupException("No path attribute for findResources");
@@ -724,6 +759,7 @@ public class DatabaseChangeLog implements Comparable<DatabaseChangeLog>, Conditi
             }
 
             ResourceAccessor.SearchOptions searchOptions = initializeAndSetMinAndMaxDepth(minDepth, maxDepth);
+            searchOptions.setTrimmedEndsWithFilter(endsWithFilter);
 
             List<Resource> unsortedResources = null;
             Set<String> seenChangelogPaths = Scope.getCurrentScope().get(SEEN_CHANGELOGS_PATHS_SCOPE_KEY, new HashSet<>());
@@ -756,7 +792,7 @@ public class DatabaseChangeLog implements Comparable<DatabaseChangeLog>, Conditi
 
             if (resources.isEmpty() && errorIfMissingOrEmpty) {
                 throw new SetupException(
-                        "Could not find directory or directory was empty for includeAll '" + pathName + "'");
+                        "Could not find directory, directory was empty, or no changelogs matched the provided search criteria for includeAll '" + pathName + "'");
             }
             return resources;
         } catch (IOException e) {
@@ -770,8 +806,7 @@ public class DatabaseChangeLog implements Comparable<DatabaseChangeLog>, Conditi
             path = pathName;
         } else {
             path = resourceAccessor.get(relativeTo).resolveSibling(pathName).getPath();
-            path = Paths.get(path).normalize().toString()
-                    .replace("\\", "/");
+            path = normalizePath(path);
         }
 
         path = path.replace("\\", "/");
@@ -853,8 +888,7 @@ public class DatabaseChangeLog implements Comparable<DatabaseChangeLog>, Conditi
         if (isRelativePath) {
             try {
                 fileName = resourceAccessor.get(this.getPhysicalFilePath()).resolveSibling(fileName).getPath();
-                fileName = Paths.get(fileName).normalize().toString()
-                        .replace("\\", "/");
+                fileName = normalizePath(Paths.get(fileName).toString());
             } catch (IOException e) {
                 throw new UnexpectedLiquibaseException(e);
             }
@@ -868,7 +902,7 @@ public class DatabaseChangeLog implements Comparable<DatabaseChangeLog>, Conditi
             DatabaseChangeLog parentChangeLog = PARENT_CHANGE_LOG.get();
             PARENT_CHANGE_LOG.set(this);
             try {
-                if(!resourceAccessor.get(fileName).exists()) {
+                if (!resourceAccessor.get(fileName).exists()) {
                     if (ChangeLogParserConfiguration.ON_MISSING_INCLUDE_CHANGELOG.getCurrentValue().equals(ChangeLogParserConfiguration.MissingIncludeConfiguration.WARN)
                             || !errorIfMissing) {
                         Scope.getCurrentScope().getLog(getClass()).warning(FileUtil.getFileNotFoundMessage(fileName));
@@ -904,8 +938,7 @@ public class DatabaseChangeLog implements Comparable<DatabaseChangeLog>, Conditi
                 );
             }
             return false;
-        }
-        catch (IOException e) {
+        } catch (IOException e) {
             throw new LiquibaseException(e.getMessage(), e);
         }
         PreconditionContainer preconditions = changeLog.getPreconditions();
@@ -982,20 +1015,16 @@ public class DatabaseChangeLog implements Comparable<DatabaseChangeLog>, Conditi
     }
 
     /**
-     *
      * Container class to handle the modifyChangeSets tag.
      * Other attributes may be added later
-     *
      */
     private static class ModifyChangeSets {
         private final String runWith;
         private final String runWithSpool;
 
         /**
-         *
-         * @param  runWith                The native executor to execute all included change sets with. Can be null
-         * @param  runWithSpool           The name of the spool file to be created
-         *
+         * @param runWith      The native executor to execute all included change sets with. Can be null
+         * @param runWithSpool The name of the spool file to be created
          */
         public ModifyChangeSets(String runWith, String runWithSpool) {
             this.runWith = runWith;
@@ -1005,7 +1034,10 @@ public class DatabaseChangeLog implements Comparable<DatabaseChangeLog>, Conditi
         public String getRunWith() {
             return runWith;
         }
-        public String getRunWithSpool() { return runWithSpool; }
+
+        public String getRunWithSpool() {
+            return runWithSpool;
+        }
     }
 
     /**
@@ -1051,6 +1083,7 @@ public class DatabaseChangeLog implements Comparable<DatabaseChangeLog>, Conditi
 
     /**
      * Initialize and set min/max depth values validating maxDepth cannot be a lower value than minDepth
+     *
      * @param minDepth
      * @param maxDepth
      * @return ResourceAccessor.SearchOptions
@@ -1065,9 +1098,8 @@ public class DatabaseChangeLog implements Comparable<DatabaseChangeLog>, Conditi
 
             searchOptions.setMinDepth(minDepth);
             searchOptions.setMaxDepth(maxDepth);
-        }
-        catch (IllegalArgumentException e){
-            throw new SetupException("Error in includeAll setup: "+ e.getMessage(), e);
+        } catch (IllegalArgumentException e) {
+            throw new SetupException("Error in includeAll setup: " + e.getMessage(), e);
         }
         return searchOptions;
     }
