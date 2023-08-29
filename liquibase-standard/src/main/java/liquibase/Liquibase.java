@@ -496,6 +496,7 @@ public class Liquibase implements AutoCloseable {
                 .addArgumentValue(ChangeExecListenerCommandStep.CHANGE_EXEC_LISTENER_ARG, changeExecListener)
                 .addArgumentValue(RollbackCountCommandStep.COUNT_ARG, changesToRollback)
                 .addArgumentValue(AbstractRollbackCommandStep.ROLLBACK_SCRIPT_ARG, rollbackScript)
+                .addArgumentValue(DatabaseChangelogCommandStep.CHANGELOG_PARAMETERS, changeLogParameters)
                 .setOutput(new WriterOutputStream(output, GlobalConfiguration.OUTPUT_FILE_ENCODING.getCurrentValue()))
                 .execute();
     }
@@ -537,6 +538,7 @@ public class Liquibase implements AutoCloseable {
                 .addArgumentValue(ChangeExecListenerCommandStep.CHANGE_EXEC_LISTENER_ARG, changeExecListener)
                 .addArgumentValue(RollbackCountCommandStep.COUNT_ARG, changesToRollback)
                 .addArgumentValue(AbstractRollbackCommandStep.ROLLBACK_SCRIPT_ARG, rollbackScript)
+                .addArgumentValue(DatabaseChangelogCommandStep.CHANGELOG_PARAMETERS, changeLogParameters)
                 .execute();
     }
     // ---------- End RollbackCount Family of methods
@@ -581,6 +583,7 @@ public class Liquibase implements AutoCloseable {
                 .addArgumentValue(ChangeExecListenerCommandStep.CHANGE_EXEC_LISTENER_ARG, changeExecListener)
                 .addArgumentValue(RollbackCommandStep.TAG_ARG, tagToRollBackTo)
                 .addArgumentValue(AbstractRollbackCommandStep.ROLLBACK_SCRIPT_ARG, rollbackScript)
+                .addArgumentValue(DatabaseChangelogCommandStep.CHANGELOG_PARAMETERS, changeLogParameters)
                 .setOutput(new WriterOutputStream(output, GlobalConfiguration.OUTPUT_FILE_ENCODING.getCurrentValue()))
                 .execute();
     }
@@ -632,6 +635,7 @@ public class Liquibase implements AutoCloseable {
                 .addArgumentValue(ChangeExecListenerCommandStep.CHANGE_EXEC_LISTENER_ARG, changeExecListener)
                 .addArgumentValue(RollbackCommandStep.TAG_ARG, tagToRollBackTo)
                 .addArgumentValue(RollbackCommandStep.ROLLBACK_SCRIPT_ARG, rollbackScript)
+                .addArgumentValue(DatabaseChangelogCommandStep.CHANGELOG_PARAMETERS, changeLogParameters)
                 .execute();
     }
     // ---------- End Rollback (To Tag) Family of methods
@@ -661,6 +665,7 @@ public class Liquibase implements AutoCloseable {
                 .addArgumentValue(ChangeExecListenerCommandStep.CHANGE_EXEC_LISTENER_ARG, changeExecListener)
                 .addArgumentValue(RollbackToDateCommandStep.DATE_ARG, dateToRollBackTo)
                 .addArgumentValue(AbstractRollbackCommandStep.ROLLBACK_SCRIPT_ARG, rollbackScript)
+                .addArgumentValue(DatabaseChangelogCommandStep.CHANGELOG_PARAMETERS, changeLogParameters)
                 .setOutput(new WriterOutputStream(output, GlobalConfiguration.OUTPUT_FILE_ENCODING.getCurrentValue()))
                 .execute();
     }
@@ -706,6 +711,7 @@ public class Liquibase implements AutoCloseable {
                 .addArgumentValue(ChangeExecListenerCommandStep.CHANGE_EXEC_LISTENER_ARG, changeExecListener)
                 .addArgumentValue(RollbackToDateCommandStep.DATE_ARG, dateToRollBackTo)
                 .addArgumentValue(AbstractRollbackCommandStep.ROLLBACK_SCRIPT_ARG, rollbackScript)
+                .addArgumentValue(DatabaseChangelogCommandStep.CHANGELOG_PARAMETERS, changeLogParameters)
                 .execute();
 
     }
