@@ -40,28 +40,21 @@ jobs:
             key: ${{ runner.os }}-sonar
             restore-keys: ${{ runner.os }}-sonar
 
-      - name: Get Artifact ID
-        id: get-artifact-id
-        run: echo "artifact_id=$(mvn help:evaluate -Dexpression=project.artifactId -q -DforceStdout)" >> $GITHUB_ENV
-
-      - name: Download Test Results Artifact
-        id: download-artifact
-        uses: dawidd6/action-download-artifact@v2
+      - name: Download unit test reports
+        id: download-unit-test-reports
+        uses: actions/download-artifact@v3
         with:
-          github_token: ${{secrets.BOT_TOKEN}}
-          workflow: build.yml
-          name: ${{ env.artifact_id }}-artifacts
-          repo: ${{ github.repository }}
-          path: ./target
-          if_no_artifact_found: warn
-          workflow_conclusion: ""
+          name: liquibase-test-results*
+
+      - name: Download integration test reports
+        id: download-integration-test-reports
+        uses: actions/download-artifact@v3
+        with:
+          name: liquibase-integration-test-results*
 
       - name: Sonar Scan
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
           AWS_REGION: "us-east-1"
-        run: |
-          mvn -B -Daws.region="us-east-1" -Dsonar.login=$SONAR_TOKEN \
-              -Dsonar.scm.revision=${{ github.event.pull_request.head.sha }} \
-              sonar:sonar
+        run: mvn -B sonar:sonar -Dsonar.login=$SONAR_TOKEN -Dsonar.pullrequest.key=${{ github.event.pull_request.number }} -Dsonar.pullrequest.branch=${{ github.event.pull_request.head.ref }} -Dsonar.pullrequest.base=${{ github.event.pull_request.base.ref }}
