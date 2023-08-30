@@ -24,14 +24,15 @@ git checkout -b $PR-copy
 
 # cherry-pick all commits from PR
 for i in $(git rev-list --reverse --no-merges origin/master..FETCH_HEAD); do
-	git cherry-pick $i
+	git cherry-pick  $i
 done
 
 # up up up
 git push --set-upstream origin $PR-copy
 
+TITLE=$(gh pr view --json title $PR | cut -d \" -f 4)
 
-gh pr create -d -m "TestPRs" --title "Test PR for $PR" --body "Test PR - do not merge" 
+gh pr create -d -m "TestPRs" --title "Test - $TITLE" --body "Test PR for $PR - do not merge" 
 
 gh pr checks
 
