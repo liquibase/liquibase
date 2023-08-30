@@ -37,7 +37,7 @@ import static liquibase.statement.SqlStatement.EMPTY_SQL_STATEMENT;
  * <p></p>
  * By default, this base class relies on annotations such as {@link DatabaseChange} and {@link DatabaseChangeProperty}
  * and delegating logic to the {@link liquibase.sqlgenerator.SqlGenerator} objects created to do the actual change work.
- * Place the @DatabaseChangeProperty annotations on the read "get" methods to control property metadata.
+ * Place the @DatabaseChangeProperty annotations on the read "get" methods to control property metadata. Cause a build
  */
 public abstract class AbstractChange extends AbstractPlugin implements Change {
 
