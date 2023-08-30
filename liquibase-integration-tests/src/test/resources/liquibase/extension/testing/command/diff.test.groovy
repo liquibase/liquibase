@@ -46,6 +46,10 @@ Optional Args:
     Default: null
   referenceDriverPropertiesFile (String) The JDBC driver properties file for the reference database
     Default: null
+  referenceLiquibaseCatalogName (String) Reference catalog to use for Liquibase objects
+    Default: null
+  referenceLiquibaseSchemaName (String) Reference schema to use for Liquibase objects
+    Default: null
   referencePassword (String) The reference database password
     Default: null
     OBFUSCATED

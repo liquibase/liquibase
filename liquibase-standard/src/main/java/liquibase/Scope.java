@@ -113,21 +113,7 @@ public class Scope {
     }
 
     public static void setScopeManager(ScopeManager scopeManager) {
-        Scope currentScope = getCurrentScope();
-        if (currentScope == null) {
-            currentScope = new Scope();
-        }
-
-        try {
-            currentScope = scopeManager.init(currentScope);
-        } catch (Exception e) {
-            Scope.getCurrentScope().getLog(Scope.class).warning(e.getMessage(), e);
-        }
-        scopeManager.setCurrentScope(currentScope);
-
         Scope.scopeManager = scopeManager;
-
-
     }
 
     /**
