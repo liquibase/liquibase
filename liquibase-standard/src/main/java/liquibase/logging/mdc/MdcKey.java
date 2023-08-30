@@ -114,4 +114,5 @@ public class MdcKey {
     public static final String RELEASE_LOCKS_OUTCOME = "releaseLocksOutcome";
     public static final String STATUS = "status";
     public static final String ROWS_AFFECTED = "rowsAffected";
+    public static final String USER_METADATA = "userMetadata";
 }
