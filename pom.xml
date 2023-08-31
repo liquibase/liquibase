@@ -543,7 +543,7 @@
                 <sonar.host.url>https://sonarcloud.io</sonar.host.url>
                 <sonar.scm.provider>git</sonar.scm.provider>
                 <sonar.qualitygate.wait>true</sonar.qualitygate.wait>
-                <sonar.skip>true</sonar.skip>
+                <sonar.skip>false</sonar.skip>
             </properties>
             <build>
                 <plugins>
