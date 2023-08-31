@@ -250,8 +250,7 @@ public class DatabaseChangeLog implements Comparable<DatabaseChangeLog>, Conditi
             for (ChangeSet changeSet : this.changeSets) {
                 if (changeSet.getAuthor().equalsIgnoreCase(author) && changeSet.getId().equalsIgnoreCase(id) && isDbmsMatch(changeSet.getDbmsSet())) {
                     final String changesetNormalizedPath = normalizePath(changeSet.getFilePath());
-                    if (changesetNormalizedPath != null &&
-                            changesetNormalizedPath.equalsIgnoreCase(normalizedPath)) {
+                    if (changesetNormalizedPath != null && changesetNormalizedPath.equalsIgnoreCase(normalizedPath)) {
                         changeSetsToReturn.add(changeSet);
                     }
                 }
