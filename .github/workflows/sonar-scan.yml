@@ -132,7 +132,7 @@ jobs:
         run: |
           ls -ltr sonar_tests
           mvn -B "-Dbuild.branch=${{ inputs.thisBranchName }}" "-Dbuild.commit=${{ inputs.thisSha  }}" "-DtrimStackTrace=false" -DskipTests=true clean package
-          mv ./sonar_tests/target/site ./target/
+          mv ./sonar_tests/liquibase-core/target/site ./liquibase-core/target/
           mkdir -p target/surefire-reports
           mv ./sonar_tests/integration/* ./target/site/
           ls -ltr target/surefire-reports/
@@ -146,7 +146,8 @@ jobs:
           -Dsonar.pullrequest.base=${{ inputs.pullRequestBaseBranchName }} \
           -Dsonar.pullrequest.provider=GitHub \
           -Dsonar.pullrequest.github.repository=liquibase/liquibase \
-          -Dsonar.pullrequest.github.endpoint=https://api.github.com/
+          -Dsonar.pullrequest.github.endpoint=https://api.github.com/ \
+          -Dsonar.coverage.jacoco.xmlReportPaths=./liquibase-core/target/site/jacoco-aggregate/jacoco.xml
           #-Dsonar.qualitygate.wait=true
 
 
