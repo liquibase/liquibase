@@ -13,6 +13,7 @@ import liquibase.structure.DatabaseObject;
 import liquibase.structure.core.StoredProcedure;
 import liquibase.structure.core.Table;
 import liquibase.structure.core.View;
+import liquibase.util.StringUtil;
 import liquibase.util.SystemUtil;
 
 import java.math.BigInteger;
@@ -94,8 +95,7 @@ public class SnowflakeDatabase extends AbstractJdbcDatabase {
 
     @Override
     protected boolean mustQuoteObjectName(String objectName, Class<? extends DatabaseObject> objectType) {
-        boolean hasLowerCaseLetters = !objectName.equals(objectName.toLowerCase());
-        return super.mustQuoteObjectName(objectName, objectType) || hasLowerCaseLetters;
+        return super.mustQuoteObjectName(objectName, objectType) || StringUtil.hasLowerCase(objectName);
     }
 
     @Override
