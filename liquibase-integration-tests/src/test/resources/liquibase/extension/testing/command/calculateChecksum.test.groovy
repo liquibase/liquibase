@@ -14,13 +14,13 @@ Required Args:
   url (String) The JDBC database connection URL
     OBFUSCATED
 Optional Args:
-  changeSetAuthor (String) ChangeSet Author attribute
+  changesetAuthor (String) ChangeSet Author attribute
     Default: null
-  changeSetId (String) ChangeSet ID attribute
+  changesetId (String) ChangeSet ID attribute
     Default: null
-  changeSetIdentifier (String) ChangeSet identifier of form filepath::id::author
+  changesetIdentifier (String) ChangeSet identifier of form filepath::id::author
     Default: null
-  changeSetPath (String) Changelog path in which the changeSet is included
+  changesetPath (String) Changelog path in which the changeSet is included
     Default: null
   defaultCatalogName (String) The default catalog name to use for the database connection
     Default: null
@@ -42,7 +42,7 @@ Optional Args:
                 url              : { it.altUrl },
                 username         : { it.altUsername },
                 password         : { it.altPassword },
-                changeSetIdentifier: "changelogs/h2/complete/rollback.tag.changelog.xml::1::nvoxland",
+                changesetIdentifier: "changelogs/h2/complete/rollback.tag.changelog.xml::1::nvoxland",
                 changelogFile    : "changelogs/h2/complete/rollback.tag.changelog.xml"
         ]
 
@@ -56,9 +56,9 @@ Optional Args:
                 url              : { it.altUrl },
                 username         : { it.altUsername },
                 password         : { it.altPassword },
-                changeSetPath    : "changelogs/h2/complete/rollback.tag.changelog.xml",
-                changeSetId      : "1",
-                changeSetAuthor  : "nvoxland",
+                changesetPath    : "changelogs/h2/complete/rollback.tag.changelog.xml",
+                changesetId      : "1",
+                changesetAuthor  : "nvoxland",
                 changelogFile    : "changelogs/h2/complete/rollback.tag.changelog.xml"
         ]
 
@@ -69,7 +69,7 @@ Optional Args:
 
     run "Run without changelogFile should throw an exception",  {
         arguments = [
-                changeSetIdentifier: "changelogs/h2/complete/rollback.tag.changelog.xml::1::nvoxland",
+                changesetIdentifier: "changelogs/h2/complete/rollback.tag.changelog.xml::1::nvoxland",
         ]
 
         expectedException = CommandValidationException.class
@@ -80,7 +80,7 @@ Optional Args:
         arguments = [
                 url: "",
                 changelogFile    : "changelogs/h2/complete/rollback.tag.changelog.xml",
-                changeSetIdentifier: "changelogs/h2/complete/rollback.tag.changelog.xml::1::nvoxland",
+                changesetIdentifier: "changelogs/h2/complete/rollback.tag.changelog.xml::1::nvoxland",
         ]
 
         expectedException = CommandValidationException.class
