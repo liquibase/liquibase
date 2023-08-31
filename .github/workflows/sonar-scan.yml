@@ -106,10 +106,9 @@ jobs:
 
       - name: Download integration test results
         id: download-integration-test-results
-        uses: dawidd6/action-download-artifact@v2
+        uses: actions/download-artifact@v3
         with:
-          name: liquibase-test-results-integration-*
-          name_is_regexp: true
+          name: liquibase-test-results-integration-mysql
           path: ./sonar_tests/integration
 
       - name: Sonar Scan
