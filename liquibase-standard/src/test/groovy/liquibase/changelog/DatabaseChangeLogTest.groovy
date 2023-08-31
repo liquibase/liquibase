@@ -6,6 +6,9 @@ import liquibase.Labels
 import liquibase.Scope
 import liquibase.change.core.CreateTableChange
 import liquibase.change.core.RawSQLChange
+import liquibase.change.visitor.ChangeVisitor
+import liquibase.database.Database
+import liquibase.database.core.MockDatabase
 import liquibase.exception.SetupException
 import liquibase.exception.UnexpectedLiquibaseException
 import liquibase.logging.core.BufferedLogService
@@ -19,6 +22,7 @@ import liquibase.resource.ResourceAccessor
 import liquibase.sdk.resource.MockResourceAccessor
 import liquibase.sdk.supplier.resource.ResourceSupplier
 import liquibase.util.FileUtil
+import org.mockito.Mock
 import spock.lang.Shared
 import spock.lang.Specification
 import spock.lang.Unroll
@@ -166,6 +170,34 @@ create view sql_view as select * from sql_table;'''
 
         ((CreateTableChange) changeLogFromChildren.changeSets[1].changes[0]).tableName == "my_other_table"
         ((CreateTableChange) changeLogFromValue.changeSets[1].changes[0]).tableName == "my_other_table"
+    }
+    def "load handles removeChangeSetProperty"() {
+        when:
+        def children = [
+                new ParsedNode(null, "removeChangeSetProperty").setValue([change: "addColumn", dbms: "mock", "remove": "afterColumn"]),
+                new ParsedNode(null, "changeSet").addChildren([id: "1", author: "kirangodishala", createTable: [tableName: "my_table"]]),
+        ]
+        def nodeWithChildren = new ParsedNode(null, "databaseChangeLog").addChildren([logicalFilePath: "com/example/logical.xml"])
+        for (child in children) {
+            nodeWithChildren.addChild(child)
+        }
+
+        def changeLogFromChildren = new DatabaseChangeLog()
+        Database database = new MockDatabase();
+        changeLogFromChildren.setChangeLogParameters(new ChangeLogParameters(database))
+
+        changeLogFromChildren.load(nodeWithChildren, resourceSupplier.simpleResourceAccessor)
+
+        then:
+
+        changeLogFromChildren.changeVisitors.size() == 1
+        changeLogFromChildren.changeSets.size() == 1
+
+
+        ((ChangeVisitor) changeLogFromChildren.changeVisitors[0]).change == "addColumn"
+        ((ChangeVisitor) changeLogFromChildren.changeVisitors[0]).dbms == ["mock"] as HashSet
+        ((ChangeVisitor) changeLogFromChildren.changeVisitors[0]).remove == "afterColumn"
+
     }
 
     def "included changelog files have their preconditions and changes included in root changelog"() {
