@@ -157,6 +157,10 @@ public class MarkChangeSetRanExecuteTest extends AbstractExecuteTest {
                         "'reran', [labels] = null, md5sum = '9:d41d8cd98f00b204e9800998ecf8427e', orderexecuted = 1 where id = 'a' and" +
                         " author = 'b' and filename = 'c'",
                 MySQLDatabase.class, MariaDBDatabase.class, HsqlDatabase.class, PostgresDatabase.class, H2Database.class, CockroachDatabase.class);
+        assertCorrect("update databasechangelog set comments = '', contexts = 'e', dateexecuted = NOW(), deployment_id = null, exectype = " +
+                        "'reran', labels = null, md5sum = '9:d41d8cd98f00b204e9800998ecf8427e', orderexecuted = 1 where id = 'a' and" +
+                        " author = 'b' and filename = 'c'",
+                SnowflakeDatabase.class);
         assertCorrectOnRest("update [databasechangelog] set [comments] = '', [contexts] = 'e', [dateexecuted] = NOW(), [deployment_id] = null, [exectype] = 'reran', [labels] = null, [md5sum] = " +
                 "'9:d41d8cd98f00b204e9800998ecf8427e', [orderexecuted] = 1 where id = 'a' and author = 'b' and filename = 'c'");
     }

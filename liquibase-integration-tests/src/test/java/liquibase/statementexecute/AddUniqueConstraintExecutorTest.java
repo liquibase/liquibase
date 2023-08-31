@@ -104,6 +104,7 @@ public class AddUniqueConstraintExecutorTest extends AbstractExecuteTest {
         assertCorrect("alter table adduqtest add constraint uq_test unique (coltomakeuq)", OracleDatabase.class);
         assertCorrect("alter table \"adduqtest\" add constraint uq_test unique (\"coltomakeuq\")", PostgresDatabase.class, CockroachDatabase.class, EnterpriseDBDatabase.class);
         assertCorrect("alter table adduqtest add constraint uq_test unique (coltomakeuq)", DerbyDatabase.class);
+        assertCorrect("alter table [adduqtest] add constraint uq_test unique ([coltomakeuq])", SnowflakeDatabase.class);
         assertCorrect("alter table [adduqtest] add constraint [uq_test] unique ([coltomakeuq])");
         assertCorrect(" alter table adduqtest add constraint \"primary\" primary key (id ASC, coltomakeuq DESC)", CockroachDatabase.class);
     }
@@ -160,7 +161,7 @@ public class AddUniqueConstraintExecutorTest extends AbstractExecuteTest {
         assertCorrect("alter table \"lbcat2\".[adduqtest] add constraint [uq_test] unique ([coltomakeuq])", DB2Database.class, Db2zDatabase.class);
         assertCorrect("alter table [lbschem2].[adduqtest] add constraint [uq_test] unique ([coltomakeuq])", H2Database.class);
         assertCorrect("alter table [lbschem2].[adduqtest] add constraint [uq_test] unique ([coltomakeuq])", Ingres9Database.class);
-        assertCorrect("alter table [lbcat2].[lbschem2].[adduqtest] add constraint [uq_test] unique ([coltomakeuq])", SnowflakeDatabase.class);
+        assertCorrect("alter table lbcat2.lbschem2.[adduqtest] add constraint uq_test unique ([coltomakeuq])", SnowflakeDatabase.class);
         assertCorrectOnRest("alter table [lbcat2].[adduqtest] add constraint [uq_test] unique ([coltomakeuq])");
 
     }
@@ -179,6 +180,7 @@ public class AddUniqueConstraintExecutorTest extends AbstractExecuteTest {
         assertCorrect("alter table adduqtest add constraint uq_test unique (coltomakeuq)", DerbyDatabase.class, HsqlDatabase.class, DB2Database.class, H2Database.class, FirebirdDatabase.class);
         assertCorrect("alter table [adduqtest] add constraint [uq_test] unique ([coltomakeuq])", Db2zDatabase.class);
         assertCorrect("alter table [adduqtest] add constraint [uq_test] unique ([coltomakeuq]) USING INDEX TABLESPACE " + TABLESPACE_NAME, OracleDatabase.class);
+        assertCorrect("alter table [adduqtest] add constraint uq_test unique ([coltomakeuq])", SnowflakeDatabase.class);
         assertCorrectOnRest("alter table [adduqtest] add constraint [uq_test] unique ([coltomakeuq])");
     }
 
@@ -196,6 +198,7 @@ public class AddUniqueConstraintExecutorTest extends AbstractExecuteTest {
         assertCorrect("ALTER TABLE \"adduqtest\" ADD CONSTRAINT uq_test unique (\"coltomakeuq\") DEFERRABLE INITIALLY" +
                 " DEFERRED", PostgresDatabase.class, CockroachDatabase.class, EnterpriseDBDatabase.class);
         assertCorrect("alter table adduqtest add constraint uq_test unique (coltomakeuq)", DerbyDatabase.class);
+        assertCorrect("alter table [adduqtest] add constraint uq_test unique ([coltomakeuq])", SnowflakeDatabase.class);
         assertCorrect("alter table [adduqtest] add constraint [uq_test] unique ([coltomakeuq])");
     }
 }
