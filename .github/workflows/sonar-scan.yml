@@ -134,12 +134,11 @@ jobs:
           mvn -B "-Dbuild.branch=${{ inputs.thisBranchName }}" "-Dbuild.commit=${{ inputs.thisSha  }}" "-DtrimStackTrace=false" -DskipTests=true clean package
           mv ./sonar_tests/target/site ./target/
           mkdir -p target/surefire-reports
-          mv ./sonar_tests/integration/* ./target/surefire-reports/
+          mv ./sonar_tests/integration/* ./target/site/
           ls -ltr target/surefire-reports/
           mvn -B sonar:sonar -P 'sonar' \
           -Dsonar.login=$SONAR_TOKEN \
-          -Dsonar.java.coveragePlugin=jacoco \
-          -Dsonar.surefire.reportsPath=./target/surefire-reports \
+          -Dsonar.surefire.reportsPath=./target/site \
           -Dsonar.coverage.exclusions=**src/test/**/*.* \
           -Dsonar.branch.name=${{ inputs.thisBranchName}} \
           -Dsonar.pullrequest.key=${{ inputs.pullRequestNumber}} \
@@ -148,5 +147,7 @@ jobs:
           -Dsonar.pullrequest.provider=GitHub \
           -Dsonar.pullrequest.github.repository=liquibase/liquibase \
           -Dsonar.pullrequest.github.endpoint=https://api.github.com/
+          #-Dsonar.qualitygate.wait=true
+
 
 
