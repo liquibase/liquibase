@@ -11,11 +11,6 @@ env:
   MAVEN_VERSION: '3.9.2'
 
 jobs:
-  setup:
-    name: Setup
-    runs-on: ubuntu-22.04
-
-
   build:
     if: ${{ github.event.label.name == 'runFunctionalTests' }}
     runs-on: ubuntu-latest
