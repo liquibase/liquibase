@@ -5,6 +5,8 @@ concurrency:
   cancel-in-progress: true
 
 on:
+  workflow_call:
+
   workflow_dispatch:
     inputs:
       archive_test_results:
