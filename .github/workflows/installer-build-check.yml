@@ -58,7 +58,6 @@ jobs:
           echo "$INSTALL4J_APPLE_KEY" | base64 -d > liquibase-dist/target/keys/datical_apple.p12
           echo "Saving windows key"
           echo "$INSTALL4J_WINDOWS_KEY" | base64 -d > liquibase-dist/target/keys/datical_windows.pfx
-          version="${{ needs.setup.outputs.version }}"
           
           ##### Rebuild installers
           tarFile=$(pwd)/re-version/final/liquibase-$version.tar.gz
