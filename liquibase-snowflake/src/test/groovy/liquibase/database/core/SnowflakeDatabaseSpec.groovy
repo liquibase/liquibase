@@ -26,13 +26,13 @@ class SnowflakeDatabaseSpec extends Specification {
 
         where:
         quotingStrategy           || objectName       | objectType || expectedCorrect  | expectedEscape
-        null                      || 'col1'           | Column     || 'COL1'           | 'col1'
+        null                      || 'col1'           | Column     || 'COL1'           | '"col1"'
         null                      || 'COL1'           | Column     || 'COL1'           | 'COL1'
-        null                      || 'Col1'           | Column     || 'COL1'           | 'Col1'
+        null                      || 'Col1'           | Column     || 'COL1'           | '"Col1"'
         null                      || 'col with space' | Column     || 'COL WITH SPACE' | '"col with space"'
-        QUOTE_ONLY_RESERVED_WORDS || 'col1'           | Column     || 'COL1'           | 'col1'
+        QUOTE_ONLY_RESERVED_WORDS || 'col1'           | Column     || 'COL1'           | '"col1"'
         QUOTE_ONLY_RESERVED_WORDS || 'COL1'           | Column     || 'COL1'           | 'COL1'
-        QUOTE_ONLY_RESERVED_WORDS || 'Col1'           | Column     || 'COL1'           | 'Col1'
+        QUOTE_ONLY_RESERVED_WORDS || 'Col1'           | Column     || 'COL1'           | '"Col1"'
         QUOTE_ONLY_RESERVED_WORDS || 'col with space' | Column     || 'COL WITH SPACE' | '"col with space"'
         QUOTE_ALL_OBJECTS         || 'col1'           | Column     || 'col1'           | '"col1"'
         QUOTE_ALL_OBJECTS         || 'COL1'           | Column     || 'COL1'           | '"COL1"'
