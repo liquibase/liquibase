@@ -15,6 +15,18 @@ on:
         description: 'The sha of the branch to be scanned'
         type: string
         required: true
+      pullRequestNumber:
+        description: 'The pull request number to be scanned'
+        type: string
+        required: false
+      pullRequestBranchName:
+        description: 'The name of the pull request branch to be scanned'
+        type: string
+        required: false
+      pullRequestBaseBranchName:
+        description: 'The name of the pull request base branch to be scanned'
+        type: string
+        required: false
     secrets:
       SONAR_TOKEN:
         description: 'SONAR_TOKEN from the caller workflow'
@@ -108,7 +120,7 @@ jobs:
         id: download-integration-test-results
         uses: actions/download-artifact@v3
         with:
-          name: liquibase-test-results-integration-mysql
+          name: liquibase-test-results-integration-hsqldb
           path: ./sonar_tests/integration
 
       - name: Sonar Scan
@@ -124,4 +136,17 @@ jobs:
           mkdir -p target/surefire-reports
           mv ./sonar_tests/integration/* ./target/surefire-reports/
           ls -ltr target/surefire-reports/
-          mvn -B sonar:sonar -P 'sonar' -Dsonar.login=$SONAR_TOKEN -Dsonar.java.coveragePlugin=jacoco -Dsonar.surefire.reportsPath=./target/surefire-reports -Dsonar.coverage.exclusions=**src/test/**/*.* -Dsonar.branch.name=${{ inputs.thisBranchName}}
+          mvn -B sonar:sonar -P 'sonar' \
+          -Dsonar.login=$SONAR_TOKEN \
+          -Dsonar.java.coveragePlugin=jacoco \
+          -Dsonar.surefire.reportsPath=./target/surefire-reports \
+          -Dsonar.coverage.exclusions=**src/test/**/*.* \
+          -Dsonar.branch.name=${{ inputs.thisBranchName}} \
+          -Dsonar.pullrequest.key=${{ inputs.pullRequestNumber}} \
+          -Dsonar.pullrequest.branch=${{ inputs.pullRequestBranchName}} \
+          -Dsonar.pullrequest.base=${{ inputs.pullRequestBaseBranchName }} \
+          -Dsonar.pullrequest.provider=GitHub \
+          -Dsonar.pullrequest.github.repository=liquibase/liquibase \
+          -Dsonar.pullrequest.github.endpoint=https://api.github.com/
+
+
