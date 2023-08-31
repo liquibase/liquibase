@@ -5,10 +5,10 @@ import org.apache.maven.plugin.logging.Log;
 public class MavenLog implements Log {
 
     public enum Level {
-        DEBUG(0),
-        INFO(1),
-        WARNING(2),
-        ERROR(3),
+        DEBUG(0), debug(0), FINE(0),  fine(0),
+        INFO(1), info(1),
+        WARNING(2), warning(2),
+        ERROR(3), error(3)
         ;
 
         private final int level;
