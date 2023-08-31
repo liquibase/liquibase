@@ -4,6 +4,7 @@ import liquibase.CatalogAndSchema;
 import liquibase.Scope;
 import liquibase.database.AbstractJdbcDatabase;
 import liquibase.database.DatabaseConnection;
+import liquibase.database.ObjectQuotingStrategy;
 import liquibase.database.jvm.JdbcConnection;
 import liquibase.exception.DatabaseException;
 import liquibase.executor.ExecutorService;
@@ -89,6 +90,12 @@ public class SnowflakeDatabase extends AbstractJdbcDatabase {
     @Override
     public boolean isCorrectDatabaseImplementation(DatabaseConnection conn) throws DatabaseException {
         return PRODUCT_NAME.equalsIgnoreCase(conn.getDatabaseProductName());
+    }
+
+    @Override
+    protected boolean mustQuoteObjectName(String objectName, Class<? extends DatabaseObject> objectType) {
+        boolean hasLowerCaseLetters = !objectName.equals(objectName.toLowerCase());
+        return super.mustQuoteObjectName(objectName, objectType) || hasLowerCaseLetters;
     }
 
     @Override
