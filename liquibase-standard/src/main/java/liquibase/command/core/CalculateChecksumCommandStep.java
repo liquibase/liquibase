@@ -51,19 +51,19 @@ public class CalculateChecksumCommandStep extends AbstractCommandStep {
         CHANGELOG_FILE_ARG = builder.argument(CommonArgumentNames.CHANGELOG_FILE, String.class).required()
                                     .description("The root changelog file").build();
 
-        CHANGESET_IDENTIFIER_ARG = builder.argument("changeSetIdentifier", String.class)
+        CHANGESET_IDENTIFIER_ARG = builder.argument("changesetIdentifier", String.class)
                                     .description("ChangeSet identifier of form filepath::id::author")
                                     .build();
 
-        CHANGESET_PATH_ARG = builder.argument("changeSetPath", String.class)
+        CHANGESET_PATH_ARG = builder.argument("changesetPath", String.class)
                                     .description("Changelog path in which the changeSet is included")
                                     .build();
 
-        CHANGESET_ID_ARG = builder.argument("changeSetId", String.class)
+        CHANGESET_ID_ARG = builder.argument("changesetId", String.class)
                                   .description("ChangeSet ID attribute")
                                   .build();
 
-        CHANGESET_AUTHOR_ARG = builder.argument("changeSetAuthor", String.class)
+        CHANGESET_AUTHOR_ARG = builder.argument("changesetAuthor", String.class)
                                       .description("ChangeSet Author attribute")
                                       .build();
 
@@ -165,11 +165,11 @@ public class CalculateChecksumCommandStep extends AbstractCommandStep {
         commandDefinition.setHelpFooter("\nCalculate checksum provides two ways to identify a changeSet.\n\n" +
                                         "1. Composite changeSet identifier\n\n" +
                                         "The composite changeSet identifier must be passed in the following pattern myPath::myId::myAuthor.\n\n" +
-                                        "liquibase calculateCheckSum --changeSetIdentifier myFile::myId::myAuthor\n\n" +
+                                        "liquibase calculateCheckSum --changesetIdentifier myFile::myId::myAuthor\n\n" +
                                         "2. Individual changeSet parameters\n\n" +
                                         "The second option requires all three parameters to be defined.\n" +
                                         "This variant offers some more flexibility in naming conventions for path, id and author.\n\n"+
-                                        "liquibase calculateCheckSum --changeSetId myId --changeSetAuthor myAuthor --changeSetPath myPath\n"
+                                        "liquibase calculateCheckSum --changesetId myId --changesetAuthor myAuthor --changesetPath myPath\n"
         );
     }
 }
