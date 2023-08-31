@@ -2,6 +2,7 @@ package liquibase.change;
 
 import liquibase.ChecksumVersion;
 import liquibase.Scope;
+import liquibase.change.visitor.ChangeVisitor;
 import liquibase.changelog.ChangeSet;
 import liquibase.database.Database;
 import liquibase.exception.*;
@@ -866,6 +867,10 @@ public abstract class AbstractChange extends AbstractPlugin implements Change {
         }
 
         return description;
+    }
+
+    @Override
+    public void modify(ChangeVisitor changeVisitor) throws ParsedNodeException{
     }
 
     @Override

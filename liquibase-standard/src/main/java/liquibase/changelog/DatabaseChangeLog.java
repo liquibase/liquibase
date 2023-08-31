@@ -1,6 +1,8 @@
 package liquibase.changelog;
 
 import liquibase.*;
+import liquibase.change.visitor.ChangeVisitor;
+import liquibase.change.visitor.ChangeVisitorFactory;
 import liquibase.changelog.filter.ContextChangeSetFilter;
 import liquibase.changelog.filter.DbmsChangeSetFilter;
 import liquibase.changelog.filter.LabelChangeSetFilter;
@@ -23,6 +25,8 @@ import liquibase.precondition.core.PreconditionContainer;
 import liquibase.resource.Resource;
 import liquibase.resource.ResourceAccessor;
 import liquibase.servicelocator.LiquibaseService;
+import liquibase.sql.visitor.SqlVisitor;
+import liquibase.sql.visitor.SqlVisitorFactory;
 import liquibase.util.FileUtil;
 import liquibase.util.StringUtil;
 
@@ -50,6 +54,7 @@ public class DatabaseChangeLog implements Comparable<DatabaseChangeLog>, Conditi
     private String logicalFilePath;
     private ObjectQuotingStrategy objectQuotingStrategy;
 
+    private List<ChangeVisitor> changeVisitors = new ArrayList<>();
     private final List<ChangeSet> changeSets = new ArrayList<>();
     private final List<ChangeSet> skippedChangeSets = new ArrayList<>();
     private ChangeLogParameters changeLogParameters;
@@ -227,6 +232,9 @@ public class DatabaseChangeLog implements Comparable<DatabaseChangeLog>, Conditi
         return getFilePath().compareTo(o.getFilePath());
     }
 
+    public List<ChangeVisitor> getChangeVisitors(){
+        return changeVisitors;
+    }
     public ChangeSet getChangeSet(String path, String author, String id) {
         final List<ChangeSet> possibleChangeSets = getChangeSets(path, author, id);
         if (possibleChangeSets.isEmpty()) {
@@ -510,6 +518,22 @@ public class DatabaseChangeLog implements Comparable<DatabaseChangeLog>, Conditi
                 PreconditionContainer parsedContainer = new PreconditionContainer();
                 parsedContainer.load(node, resourceAccessor);
                 this.preconditionContainer.addNestedPrecondition(parsedContainer);
+
+                break;
+            }
+            case "removeChangeSetProperty": {
+                List<ParsedNode> childNodes = node.getChildren();
+                Optional<ParsedNode> changeNode = childNodes.stream().filter(n -> n.getName().equalsIgnoreCase("change")).findFirst();
+                if(changeNode.isPresent()){
+                    ChangeVisitor changeVisitor = ChangeVisitorFactory.getInstance().create((String) changeNode.get().getValue());
+                    if(changeVisitor != null){
+                        changeVisitor.load(node, resourceAccessor);
+                        if(DatabaseList.definitionMatches(changeVisitor.getDbms(), changeLogParameters.getDatabase(), false)) {
+                            //add changeVisitor to this changeLog only if the running database matches with one of the removeChangeSetProperty's dbms
+                            getChangeVisitors().add(changeVisitor);
+                        }
+                    }
+                }
 
                 break;
             }
