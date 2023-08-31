@@ -14,6 +14,7 @@ import liquibase.configuration.core.DefaultsFileValueProvider;
 import liquibase.exception.CommandLineParsingException;
 import liquibase.exception.CommandValidationException;
 import liquibase.exception.LiquibaseException;
+import liquibase.integration.IntegrationDetails;
 import liquibase.license.LicenseInfo;
 import liquibase.license.LicenseService;
 import liquibase.license.LicenseServiceFactory;
@@ -640,6 +641,10 @@ public class LiquibaseCommandLine {
     private Map<String, Object> configureScope(String[] args) throws Exception {
         Map<String, Object> returnMap = new HashMap<>();
         returnMap.put(COMMAND_ARGUMENTS, args);
+
+        final IntegrationDetails integrationDetails = new IntegrationDetails();
+        integrationDetails.setName("cli");
+        returnMap.put("integrationDetails", integrationDetails);
 
         final ClassLoader classLoader = configureClassLoader();
 
