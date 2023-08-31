@@ -1,0 +1,82 @@
+name: Build and Publish
+
+#the concurrency check will cancel in-progress runs on non-master branches and pull requests on forked repositories, but not on the specified branches (master, main, and github-action-**).
+concurrency:
+  group: ${{ github.workflow }}-${{ github.head_ref && github.ref || github.run_id }}
+  cancel-in-progress: true
+
+on:
+  pull_request_target:
+    types:
+      - opened
+      - reopened
+      - synchronize
+      - labeled
+
+  push:
+    branches:
+      - master
+      - main
+      - github-action-**
+    paths-ignore:
+          - '**.md'
+
+env:
+  MAVEN_VERSION: '3.9.2'
+
+jobs:
+  setup:
+    name: Setup
+    runs-on: ubuntu-22.04
+    outputs:
+      branch_name: ${{ steps.find-matching-branch.outputs.branch_name }}
+      latestMergeSha: ${{ steps.get-sha.outputs.latestMergeSha }}
+      timeStamp: ${{ steps.get-timestamp.outputs.timestamp }}
+    steps:
+      - name: Checkout OSS Repo
+        uses: actions/checkout@v3
+        with:
+          repository: liquibase/liquibase # Change this to the actual repository
+
+      #checking if the branch specified by $branch_name exists in the OSS repository, If the output is empty (meaning the branch doesn't exist in the remote repository), then the condition will be true. Also, remove refs/heads/
+      - name: Check if branch exists in PRO Repo
+        id: find-matching-branch
+        run: |
+          git fetch --all
+          branch_name="${{ github.ref }}"
+          if [ -z "$(git ls-remote --heads https://github.com/liquibase/liquibase.git $branch_name | sed 's#^refs/heads/##')" ]; then
+            echo "Branch doesn't exist in PRO. Using master branch from CORE."
+            git checkout master # default branch of OSS Repo
+          else
+            echo "Using matching branch from PRO."
+            git checkout $branch_name
+          fi
+          
+      - uses: actions/checkout@v3
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.event.after}}
+
+      - name: Get Latest Merge Commit SHA
+        id: get-sha
+        run: |
+          latest_merge_sha=`(git rev-parse --short HEAD)`
+          echo "latestMergeSha=${latest_merge_sha}" >> $GITHUB_OUTPUT
+
+      - name: Get Timestamp
+        id: get-timestamp
+        run: |
+          timeStamp=$(date +'%Y-%m-%d %H:%M:%S %Z')
+          echo "timestamp=${timeStamp}" >> $GITHUB_OUTPUT    
+
+  run-tests:
+    needs: [setup]
+    uses: liquibase/liquibase/.github/workflows/run-tests.yml@github-action-DAT-15775
+    secrets: inherit
+
+
+
+  #- trigger functional tests
+  trigger-FunctionalTests:
+    needs: [ ]
+    uses: liquibase/liquibase/.github/workflows/run-functional-tests.yml@github-action-DAT-15775
+    secrets: inherit
