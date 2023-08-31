@@ -2,74 +2,127 @@ name: Sonar Scan
 
 on:
   workflow_call:
+    inputs:
+      thisBranchName:
+        description: 'The name of the branch to be scanned'
+        type: string
+        required: true
+      liquibaseBranchName:
+        description: 'The name of the liquibase branch to be scanned'
+        type: string
+        required: true
+      thisSha:
+        description: 'The sha of the branch to be scanned'
+        type: string
+        required: true
     secrets:
       SONAR_TOKEN:
         description: 'SONAR_TOKEN from the caller workflow'
         required: true
+      LIQUIBOT_PAT:
+        description: 'LIQUIBOT_PAT from the caller workflow'
+        required: true
+env:
+  MAVEN_VERSION: '3.8.7'
 
 jobs:
   sonar-push:
     name: Sonar Scan
     runs-on: ubuntu-latest
 
-    env:
-      AWS_REGION: us-east-1
-
     steps:
       - uses: actions/checkout@v3
         with:
           fetch-depth: 0  # Shallow clones should be disabled for a better relevancy of analysis
-          ref: ${{ github.event.pull_request.head.sha || github.event.after}}
 
       - name: Set up JDK
         uses: actions/setup-java@v3
         with:
-          java-version: 11
-          distribution: 'adopt'
+          java-version: 17
+          distribution: 'temurin'
           cache: 'maven'
+
+      # look for dependencies in maven
+      - name: maven-settings-xml-action
+        uses: whelk-io/maven-settings-xml-action@v20
+        with:
+          repositories: |
+            [
+              {
+                "id": "liquibase",
+                "url": "https://maven.pkg.github.com/liquibase/liquibase",
+                "releases": {
+                  "enabled": "false"
+                },
+                "snapshots": {
+                  "enabled": "true",
+                  "updatePolicy": "always"
+                }
+              },
+              {
+                "id": "liquibase-pro",
+                "url": "https://maven.pkg.github.com/liquibase/liquibase-pro",
+                "releases": {
+                  "enabled": "false"
+                },
+                "snapshots": {
+                  "enabled": "true",
+                  "updatePolicy": "always"
+                }
+              }
+            ]
+          servers: |
+            [
+              {
+                "id": "liquibase-pro",
+                "username": "liquibot",
+                "password": "${{ secrets.LIQUIBOT_PAT }}"
+              },
+              {
+                "id": "liquibase",
+                "username": "liquibot",
+                "password": "${{ secrets.LIQUIBOT_PAT }}"
+              }
+            ]
 
       - name: Set up Maven
         uses: stCarolas/setup-maven@v4.5
         with:
-            maven-version: ${{ env.MAVEN_VERSION }}
+          maven-version: ${{ env.MAVEN_VERSION }}
 
       - name: Cache SonarCloud packages
-        uses: actions/cache@v3.3.1
+        uses: actions/cache@v3
         with:
-            path: ~/.sonar/cache
-            key: ${{ runner.os }}-sonar
-            restore-keys: ${{ runner.os }}-sonar
+          path: ~/.sonar/cache
+          key: ${{ runner.os }}-sonar
+          restore-keys: ${{ runner.os }}-sonar
 
-      - name: Download unit test reports
-        id: download-unit-test-reports
+      - name: Download unit test results
+        id: download-unit-test-results
+        uses: actions/download-artifact@v3
+        with:
+          name: liquibase-test-results-jdk11
+          path: ./sonar_tests
+
+      - name: Download integration test results
+        id: download-integration-test-results
         uses: dawidd6/action-download-artifact@v2
         with:
-          name: liquibase-test-results*
+          name: liquibase-test-results-integration-*
           name_is_regexp: true
-          path: sonar_tests
-          pr: ${{ github.event.pull_request.number }}
-          if_no_artifact_found: warn
-
-      - name: Download integration test reports
-        id: download-integration-test-reports
-        uses: dawidd6/action-download-artifact@v2
-        with:
-          name: liquibase-integration-test-results*
-          name_is_regexp: true
-          path: sonar_tests
-          pr: ${{ github.event.pull_request.number }}
-          if_no_artifact_found: warn
+          path: ./sonar_tests/integration
 
       - name: Sonar Scan
+        if: always()
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
           AWS_REGION: "us-east-1"
         run: |
-          mvn -B sonar:sonar \
-          -Dsonar.login=$SONAR_TOKEN \
-          -Dsonar.pullrequest.key=${{ github.event.pull_request.number }} \
-          -Dsonar.pullrequest.branch=${{ github.event.pull_request.head.ref }} \
-          -Dsonar.pullrequest.base=${{ github.event.pull_request.base.ref }} \
-          -Dsonar.test.inclusions=**/sonar_tests/** \
-          -Dsonar.exclusions=**/sonar_tests/**
+          ls -ltr sonar_tests
+          mvn -B "-Dbuild.branch=${{ inputs.thisBranchName }}" "-Dbuild.commit=${{ inputs.thisSha  }}" "-DtrimStackTrace=false" -DskipTests=true clean package
+          mv ./sonar_tests/target/site ./target/
+          mkdir -p target/surefire-reports
+          mv ./sonar_tests/integration/* ./target/surefire-reports/
+          ls -ltr target/surefire-reports/
+          mvn -B sonar:sonar -P 'sonar' -Dsonar.login=$SONAR_TOKEN -Dsonar.java.coveragePlugin=jacoco -Dsonar.surefire.reportsPath=./target/surefire-reports -Dsonar.coverage.exclusions=**src/test/**/*.* -Dsonar.branch.name=${{ inputs.thisBranchName}}
