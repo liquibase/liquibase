@@ -23,6 +23,6 @@ class InsertOrUpdateGeneratorSnowflakeTest extends Specification {
         then:
         sql != null
         sql.size() == 1
-        sql[0].toSql() == 'UPDATE mycatalog.myschema.mytable SET mycolumn = myschema.mysequence.nextval'
+        sql[0].toSql() == 'UPDATE "mycatalog"."myschema"."mytable" SET "mycolumn" = "myschema"."mysequence".nextval'
     }
 }
