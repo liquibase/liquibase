@@ -36,12 +36,6 @@ jobs:
         env:
           GPG_PASSWORD: ${{ secrets.GPG_PASSPHRASE }}
 
-      - name: Version Artifact
-        run: |
-          version=${{ github.ref_name }}-SNAPSHOT
-          # Replace / with - in branch name
-          version=$(echo "$version" | sed 's/\//-/g')
-
       - name: Re-version Installers
         env:
           INSTALL4J_10_LICENSE: ${{ secrets.INSTALL4J_10_LICENSE }}
@@ -53,6 +47,10 @@ jobs:
           INSTALL4J_WINDOWS_KEY_PASSWORD: ${{ secrets.INSTALL4J_WINDOWS_KEY_PASSWORD }}
           GPG_PASSWORD: ${{ secrets.GPG_PASSPHRASE }}
         run: |
+          version=${{ github.ref_name }}-SNAPSHOT
+          # Replace / with - in branch name
+          version=$(echo "$version" | sed 's/\//-/g')
+          
           mkdir -p liquibase-dist/target/keys
           echo "Saving apple key"
           echo "$INSTALL4J_APPLE_KEY" | base64 -d > liquibase-dist/target/keys/datical_apple.p12
