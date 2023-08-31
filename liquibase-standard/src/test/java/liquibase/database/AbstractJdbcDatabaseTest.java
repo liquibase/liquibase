@@ -1,11 +1,5 @@
 package liquibase.database;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
-import java.util.ArrayList;
-import java.util.List;
-import org.junit.Test;
 import liquibase.Scope;
 import liquibase.change.core.CreateTableChange;
 import liquibase.exception.DatabaseException;
@@ -16,6 +10,15 @@ import liquibase.sql.visitor.SqlVisitor;
 import liquibase.statement.SqlStatement;
 import liquibase.statement.core.DropTableStatement;
 import liquibase.structure.core.Table;
+import org.junit.jupiter.api.Test;
+
+import java.util.ArrayList;
+import java.util.List;
+
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 /**
  * Base test class for database-specific tests
@@ -60,7 +63,6 @@ public abstract class AbstractJdbcDatabaseTest {
 //        verify(connection);
 //    }
 
-
     @Test
     public void defaultsWorkWithoutAConnection() {
         database.getDatabaseProductName();
@@ -68,6 +70,7 @@ public abstract class AbstractJdbcDatabaseTest {
         database.getDefaultSchemaName();
         database.getDefaultPort();
     }
+
 //    @Test
 //    public void isCorrectDatabaseImplementation() throws Exception {
 //        assertTrue(getDatabase().isCorrectDatabaseImplementation(getMockConnection()));
@@ -279,13 +282,15 @@ public abstract class AbstractJdbcDatabaseTest {
     @Test
     public void test_escapeObjectName() {
         String tableName = database.escapeObjectName("My Table  ", Table.class);
-        assertTrue(tableName.matches("[\\[\\\"`]?My Table  [\\]\\\"`]?"));
+        assertThat(tableName).isEqualToIgnoringCase(
+            database.getQuotingStartCharacter() + "My Table  " + database.getQuotingEndCharacter());
 
         tableName = database.escapeObjectName("MyTable", Table.class);
-        assertEquals("MyTable", tableName);
+        assertThat(tableName).isEqualTo("MyTable");
 
         tableName = database.escapeObjectName("My Table", Table.class);
-        assertTrue(tableName.matches("[\\[\\\"`]?My Table[\\]\\\"`]?"));
+        assertThat(tableName).isEqualToIgnoringCase(
+            database.getQuotingStartCharacter() + "My Table" + database.getQuotingEndCharacter());
     }
 
 //    @Test

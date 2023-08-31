@@ -14,6 +14,7 @@ import liquibase.configuration.core.DefaultsFileValueProvider;
 import liquibase.exception.CommandLineParsingException;
 import liquibase.exception.CommandValidationException;
 import liquibase.exception.LiquibaseException;
+import liquibase.integration.IntegrationDetails;
 import liquibase.license.LicenseInfo;
 import liquibase.license.LicenseService;
 import liquibase.license.LicenseServiceFactory;
@@ -641,6 +642,10 @@ public class LiquibaseCommandLine {
         Map<String, Object> returnMap = new HashMap<>();
         returnMap.put(COMMAND_ARGUMENTS, args);
 
+        final IntegrationDetails integrationDetails = new IntegrationDetails();
+        integrationDetails.setName("cli");
+        returnMap.put("integrationDetails", integrationDetails);
+
         final ClassLoader classLoader = configureClassLoader();
 
         returnMap.putAll(configureLogging());
@@ -1161,14 +1166,18 @@ public class LiquibaseCommandLine {
     }
 
     protected static String[] toArgNames(CommandArgumentDefinition<?> def) {
+        //
+        // Use an ordered Set so that the command name shows up first
+        // and is listed as the argument in the help
+        //
         LinkedHashSet<String> returnList = new LinkedHashSet<>();
-        Set<String> baseNames = new HashSet<>();
+        Set<String> baseNames = new LinkedHashSet<>();
         baseNames.add(def.getName());
         baseNames.addAll(def.getAliases());
 
         for (String baseName : baseNames) {
             returnList.add("--" + StringUtil.toKabobCase(baseName).replace(".", "-"));
-            returnList.add("--" + baseName.replaceAll("\\.", ""));
+            returnList.add("--" + baseName.replace("\\.", ""));
         }
 
         return returnList.toArray(new String[0]);

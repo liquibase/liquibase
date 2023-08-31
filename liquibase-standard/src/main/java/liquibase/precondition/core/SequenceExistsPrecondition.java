@@ -1,20 +1,27 @@
 package liquibase.precondition.core;
 
 import liquibase.changelog.ChangeSet;
-import liquibase.changelog.visitor.ChangeExecListener;
 import liquibase.changelog.DatabaseChangeLog;
+import liquibase.changelog.visitor.ChangeExecListener;
 import liquibase.database.Database;
+import liquibase.database.core.PostgresDatabase;
+import liquibase.database.jvm.JdbcConnection;
 import liquibase.exception.*;
 import liquibase.precondition.AbstractPrecondition;
-import liquibase.snapshot.DatabaseSnapshot;
 import liquibase.snapshot.SnapshotGeneratorFactory;
 import liquibase.structure.core.Schema;
 import liquibase.structure.core.Sequence;
+
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
 
 public class SequenceExistsPrecondition extends AbstractPrecondition {
     private String catalogName;
     private String schemaName;
     private String sequenceName;
+
+    private static final String SQL_CHECK_POSTGRES_SEQUENCE_EXISTS = "SELECT c.relname FROM pg_class c JOIN pg_namespace ns on c.relnamespace = ns.oid WHERE c.relkind = 'S' AND ns.nspname = ? and c.relname = ?";
 
     public String getCatalogName() {
         return catalogName;
@@ -54,13 +61,31 @@ public class SequenceExistsPrecondition extends AbstractPrecondition {
     public void check(Database database, DatabaseChangeLog changeLog, ChangeSet changeSet, ChangeExecListener changeExecListener)
             throws PreconditionFailedException, PreconditionErrorException {
 
-        Schema schema = new Schema(getCatalogName(), getSchemaName());
         try {
-            if (!SnapshotGeneratorFactory.getInstance().has(new Sequence().setName(getSequenceName()).setSchema(schema), database)) {
-                throw new PreconditionFailedException("Sequence "+database.escapeSequenceName(getCatalogName(), getSchemaName(), getSequenceName())+" does not exist", changeLog, this);
+            if (database instanceof PostgresDatabase) {
+                checkPostgresSequence(database, changeLog);
+            } else {
+                Schema schema = new Schema(getCatalogName(), getSchemaName());
+                if (!SnapshotGeneratorFactory.getInstance().has(new Sequence().setName(getSequenceName()).setSchema(schema), database)) {
+                    throw new PreconditionFailedException("Sequence " + database.escapeSequenceName(getCatalogName(), getSchemaName(), getSequenceName()) + " does not exist", changeLog, this);
+                }
             }
-        } catch (LiquibaseException e) {
+        } catch (LiquibaseException | SQLException e) {
             throw new PreconditionErrorException(e, changeLog, this);
+        }
+    }
+
+    private void checkPostgresSequence(Database database, DatabaseChangeLog changeLog) throws DatabaseException, SQLException, PreconditionFailedException, PreconditionErrorException {
+        try (PreparedStatement statement = ((JdbcConnection) database.getConnection()).prepareStatement(SQL_CHECK_POSTGRES_SEQUENCE_EXISTS)) {
+            statement.setString(1, getSchemaName() != null ? getSchemaName() : database.getDefaultSchemaName());
+            statement.setString(2, getSequenceName());
+            try (ResultSet rs = statement.executeQuery()) {
+                if (!rs.next()) {
+                    throw new PreconditionFailedException("Sequence " + database.escapeSequenceName(getCatalogName(), getSchemaName(), getSequenceName()) + " does not exist", changeLog, this);
+                }
+            } catch (SQLException e) {
+                throw new PreconditionErrorException(e, changeLog, this);
+            }
         }
     }
 
