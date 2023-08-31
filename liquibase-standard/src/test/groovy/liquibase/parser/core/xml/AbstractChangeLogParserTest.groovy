@@ -6,6 +6,7 @@ import liquibase.exception.ChangeLogParseException
 import liquibase.parser.core.ParsedNode
 import liquibase.resource.ResourceAccessor
 import liquibase.sdk.supplier.resource.ResourceSupplier
+import org.xml.sax.SAXParseException
 import spock.lang.Shared
 import spock.lang.Specification
 
@@ -16,6 +17,15 @@ class AbstractChangeLogParserTest extends Specification {
     def "null node creates null changelog object"() {
         when:
         def changeLog = createParser(null).parse("com/example/changelog.xml", new ChangeLogParameters(), resourceSupplier.simpleResourceAccessor)
+        then:
+        changeLog == null
+    }
+
+    def "empty XML changelog"() {
+        when:
+        File f = new File("target/test-classes/com/example/empty.xml")
+        f.createNewFile()
+        def changeLog = createParser(null).parse("com/example/empty.xml", new ChangeLogParameters(), resourceSupplier.simpleResourceAccessor)
         then:
         changeLog == null
     }
