@@ -70,8 +70,10 @@ public abstract class AbstractPathResourceAccessor extends AbstractResourceAcces
 
     @Override
     public List<Resource> search(String startPath, SearchOptions searchOptions) throws IOException {
-        int minDepth = searchOptions.getMinDepth();
-        int maxDepth = searchOptions.getMaxDepth();
+        final int minDepth = searchOptions.getMinDepth();
+        final int maxDepth = searchOptions.getMaxDepth();
+        final boolean endsWithFilterIsSet = searchOptions.endsWithFilterIsSet();
+        final String endsWithFilter = searchOptions.getEndsWithFilter();
 
         if (startPath == null) {
             throw new IllegalArgumentException("Path must not be null");
@@ -95,12 +97,10 @@ public abstract class AbstractPathResourceAccessor extends AbstractResourceAcces
             throw new IOException("'" + startPath + "' is a file, not a directory");
         }
 
-        final int finalMinDepth = minDepth;
-
         SimpleFileVisitor<Path> fileVisitor = new SimpleFileVisitor<Path>() {
             @Override
             public FileVisitResult visitFile(Path file, BasicFileAttributes attrs) throws IOException {
-                if (attrs.isRegularFile() && residesInDepthBoundaries(file)) {
+                if (attrs.isRegularFile() && meetsSearchCriteria(file)) {
                     addToReturnList(file);
                 }
 
@@ -112,10 +112,20 @@ public abstract class AbstractPathResourceAccessor extends AbstractResourceAcces
                 return FileVisitResult.CONTINUE;
             }
 
-            private boolean residesInDepthBoundaries(Path file) {
+            private boolean meetsSearchCriteria(Path file) {
                 final int depth = file.getParent().getNameCount() - rootPath.getNameCount();
 
-                return depth >= finalMinDepth;
+                if (depth < minDepth) {
+                    return false;
+                }
+
+                if (endsWithFilterIsSet) {
+                    if (!file.toString().toLowerCase().endsWith(endsWithFilter.toLowerCase())) {
+                        return false;
+                    }
+                }
+
+                return true;
             }
 
             private void addToReturnList(Path file) {
