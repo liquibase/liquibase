@@ -73,8 +73,6 @@ jobs:
     uses: liquibase/liquibase/.github/workflows/run-tests.yml@github-action-DAT-15775
     secrets: inherit
 
-
-
   #- trigger functional tests
   # trigger-FunctionalTests:
   #   needs: []
