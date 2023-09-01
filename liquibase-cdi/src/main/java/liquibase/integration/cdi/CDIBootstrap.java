@@ -19,7 +19,7 @@ import java.util.Set;
  * Observes CDI container startup events and triggers the Liquibase update
  * process via @PostConstruct on CDILiquibase
  *
- * @author Aaron Walker (http://github.com/aaronwalker)
+ * @author <a href="http://github.com/aaronwalker">Aaron Walker</a>
  */
 public class CDIBootstrap implements Extension {
     

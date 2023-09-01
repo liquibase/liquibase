@@ -2,9 +2,15 @@ package liquibase.command.core;
 
 import liquibase.Scope;
 import liquibase.UpdateSummaryEnum;
+import liquibase.changelog.ChangeLogParameters;
+import liquibase.changelog.DatabaseChangeLog;
+import liquibase.changelog.visitor.ChangeExecListener;
 import liquibase.command.*;
+import liquibase.command.core.helpers.DatabaseChangelogCommandStep;
+import liquibase.database.Database;
+import liquibase.exception.CommandValidationException;
+import liquibase.util.ValueHandlerUtil;
 
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
@@ -14,20 +20,43 @@ public class UpdateCommandStep extends AbstractUpdateCommandStep implements Clea
     public static String[] COMMAND_NAME = {"update"};
 
     public static final CommandArgumentDefinition<String> CHANGELOG_FILE_ARG;
+
+    public static final CommandArgumentDefinition<DatabaseChangeLog> CHANGELOG_ARG;
     public static final CommandArgumentDefinition<String> LABEL_FILTER_ARG;
     public static final CommandArgumentDefinition<String> CONTEXTS_ARG;
+    public static final CommandArgumentDefinition<String> REPORT_NAME;
+    public static final CommandArgumentDefinition<String> REPORT_PATH;
+    public static final CommandArgumentDefinition<Boolean> REPORT_ENABLED;
 
     static {
         CommandBuilder builder = new CommandBuilder(COMMAND_NAME, LEGACY_COMMAND_NAME);
+        CHANGELOG_ARG = builder.argument("databaseChangelog", DatabaseChangeLog.class).hidden().build();
         CHANGELOG_FILE_ARG = builder.argument(CommonArgumentNames.CHANGELOG_FILE, String.class)
-                .required().description("The root changelog")
-                .build();
+                .required().description("The root changelog").supersededBy(CHANGELOG_ARG).build();
+        CHANGELOG_ARG.setSupersededBy(CHANGELOG_FILE_ARG);
         LABEL_FILTER_ARG = builder.argument("labelFilter", String.class)
                 .addAlias("labels")
                 .description("Changeset labels to match")
                 .build();
-        CONTEXTS_ARG = builder.argument("contexts", String.class)
+        CONTEXTS_ARG = builder.argument("contextFilter", String.class)
+                .addAlias("contexts")
                 .description("Changeset contexts to match")
+                .build();
+        REPORT_ENABLED = builder.argument("reportEnabled", Boolean.class)
+                .description("Enable or disable update reporting.")
+                .defaultValue(Boolean.FALSE)
+                .setValueHandler(ValueHandlerUtil::booleanValueHandler)
+                .hidden()
+                .build();
+        REPORT_NAME = builder.argument("reportName", String.class)
+                .description("The name of the Update Report.")
+                .defaultValue("update-report")
+                .hidden()
+                .build();
+        REPORT_PATH = builder.argument("reportPath", String.class)
+                .description("The path to the directory to generate Update Reports.")
+                .defaultValue(".")
+                .hidden()
                 .build();
     }
 
@@ -70,19 +99,29 @@ public class UpdateCommandStep extends AbstractUpdateCommandStep implements Clea
     }
 
     @Override
-    public void postUpdateLog() {
-        Scope.getCurrentScope().getUI().sendMessage(coreBundle.getString("update.successful"));
+    public void validate(CommandScope commandScope) throws CommandValidationException {
+        // update null checksums when running validate.
+        commandScope.addArgumentValue(DatabaseChangelogCommandStep.UPDATE_NULL_CHECKSUMS, Boolean.TRUE);
     }
 
     @Override
-    public String getHubOperation() {
-        return "update";
+    public void postUpdateLog(int rowsAffected) {
+        if (rowsAffected > -1) {
+            Scope.getCurrentScope().getUI().sendMessage(String.format(coreBundle.getString("update.successful.with.row.count"), rowsAffected));
+        } else {
+            Scope.getCurrentScope().getUI().sendMessage(coreBundle.getString("update.successful"));
+        }
     }
 
     @Override
     public List<Class<?>> requiredDependencies() {
-        List<Class<?>> deps = new ArrayList<>(super.requiredDependencies());
-        deps.add(UpdateSummaryEnum.class);
+        List<Class<?>> deps = Arrays.asList(Database.class, DatabaseChangeLog.class, ChangeExecListener.class, ChangeLogParameters.class, UpdateSummaryEnum.class);
         return deps;
+    }
+
+    @Override
+    public void run(CommandResultsBuilder resultsBuilder) throws Exception {
+        setDBLock(false);
+        super.run(resultsBuilder);
     }
 }

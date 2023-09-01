@@ -1,0 +1,49 @@
+#### USE THIS FILE TO INJECT OR EXCLUDE METADATA FROM STRUCTURED LOGS
+#### on the CLI: --custom-log-data-file=liquibase.customlogdata.yaml
+#### via Env var: LIQUIBASE_CUSTOM_LOG_DATA_FILE=liquibase.customlogdata.yaml
+#### or other standard property setting method. For more info, see
+#### https://docs.liquibase.com/structured-logging
+####
+## Using liquibase.userMetadata, the subset key-values
+## are added to that command's MDC structured log output
+## These are just examples! Please adjust before using.
+
+
+## template of standalone object for all commands
+liquibase.userMetadata:
+  - data:
+      FINDME: "example custom log data"
+      teamsize: 3
+      members:
+        - name: danthedev
+        - name: debthedba
+        - name: annthearchitect
+
+
+## By specifying the command, these objects will be added only
+## to the logs of the update command, in this example.
+liquibase.command.update:
+  - data:
+      awsRegion: "us-east"
+      deploymentlead: "name@example.com"
+  - excludeData:
+      - liquibaseTargetUrl
+      - commandLabelFilter
+      - commandContextFilter
+    data:
+      callingbirds: four
+      frenchhens: 3
+      goldenrings: "five"
+      partridges:
+        count: 1
+        location: "a pear tree"
+      turtledoves: two
+
+
+## EXCLUDE data from structured logs.
+## In this example, these keys will be excluded from all commands
+liquibase.excludeData:
+  - thread
+  - class
+  ##  --<add one key per line>
+

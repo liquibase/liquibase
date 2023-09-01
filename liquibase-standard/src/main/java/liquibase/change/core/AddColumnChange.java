@@ -1,9 +1,12 @@
 package liquibase.change.core;
 
 import liquibase.change.*;
+import liquibase.change.visitor.AddColumnChangeVisitor;
+import liquibase.change.visitor.ChangeVisitor;
 import liquibase.database.Database;
 import liquibase.database.core.DB2Database;
 import liquibase.database.core.MySQLDatabase;
+import liquibase.parser.core.ParsedNodeException;
 import liquibase.snapshot.SnapshotGeneratorFactory;
 import liquibase.sqlgenerator.SqlGeneratorFactory;
 import liquibase.statement.*;
@@ -274,6 +277,27 @@ public class AddColumnChange extends AbstractChange implements ChangeWithColumns
         return STANDARD_CHANGELOG_NAMESPACE;
     }
 
+    @Override
+    public void modify(ChangeVisitor changeVisitor) throws ParsedNodeException {
+        if(!changeVisitor.getName().equals("addColumn")) {
+            return;
+        }
+        String remove = ((AddColumnChangeVisitor)changeVisitor).getRemove();
+        switch (remove){
+            case "afterColumn":
+                getColumns().forEach(c -> c.setAfterColumn(null));
+                break;
+            case "beforeColumn":
+                getColumns().forEach(c -> c.setBeforeColumn(null));
+                break;
+            case "position":
+                getColumns().forEach(c -> c.setPosition(null));
+                break;
+            default:
+                throw new ParsedNodeException("Unexpected value found under removeChangeSetProperty for remove tag: " + remove);
+        }
+    }
+
     private NotNullConstraint createNotNullConstraint(ConstraintsConfig constraintsConfig) {
         NotNullConstraint notNullConstraint = new NotNullConstraint();
         if (constraintsConfig.getValidateNullable() != null && !constraintsConfig.getValidateNullable()) {
@@ -284,9 +308,8 @@ public class AddColumnChange extends AbstractChange implements ChangeWithColumns
     }
 
     private List<SqlStatement> generateAddNotNullConstraintStatements(AddColumnConfig column, ConstraintsConfig constraints, Database database) {
-        List<SqlStatement> returnList = new ArrayList<>();
         AddNotNullConstraintChange addNotNullConstraintChange = createAddNotNullConstraintChange(column, constraints);
-        returnList.addAll(Arrays.asList(addNotNullConstraintChange.generateStatements(database)));
+        List<SqlStatement> returnList = new ArrayList<>(Arrays.asList(addNotNullConstraintChange.generateStatements(database)));
 
         if (database instanceof MySQLDatabase && column.getDefaultValueObject() != null) {
             //mysql's addNotNullConstraint call above loses the default value

@@ -11,7 +11,6 @@ import liquibase.exception.DatabaseException;
 import liquibase.executor.AbstractExecutor;
 import liquibase.listener.SqlListener;
 import liquibase.logging.Logger;
-import liquibase.logging.mdc.MdcKey;
 import liquibase.servicelocator.PrioritizedService;
 import liquibase.sql.CallableSql;
 import liquibase.sql.Sql;
@@ -30,6 +29,7 @@ import java.sql.*;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.logging.Level;
 
 /**
@@ -74,10 +74,19 @@ public class JdbcExecutor extends AbstractExecutor {
             stmt = ((JdbcConnection) con).getUnderlyingConnection().createStatement();
             Statement stmtToUse = stmt;
 
-            return action.doInStatement(stmtToUse);
+            Object object = action.doInStatement(stmtToUse);
+            if (stmtToUse.getWarnings() != null) {
+                showSqlWarnings(stmtToUse);
+            }
+            return object;
         } catch (SQLException ex) {
             // Release Connection early, to avoid potential connection pool deadlock
             // in the case when the exception translator hasn't been initialized yet.
+            try {
+                showSqlWarnings(stmt);
+            } catch (SQLException sqle) {
+                Scope.getCurrentScope().getLog(JdbcExecutor.class).warning(String.format("Unable to access SQL warning: %s", sqle.getMessage()));
+            }
             JdbcUtil.closeStatement(stmt);
             stmt = null;
             String url;
@@ -90,6 +99,17 @@ public class JdbcExecutor extends AbstractExecutor {
         } finally {
             JdbcUtil.closeStatement(stmt);
         }
+    }
+
+    private void showSqlWarnings(Statement stmtToUse) throws SQLException {
+        if (! SqlConfiguration.SHOW_SQL_WARNING_MESSAGES.getCurrentValue() || stmtToUse.getWarnings() == null) {
+            return;
+        }
+        SQLWarning sqlWarning = stmtToUse.getWarnings();
+        do {
+            Scope.getCurrentScope().getLog(JdbcExecutor.class).warning(sqlWarning.getMessage());
+            sqlWarning = sqlWarning.getNextWarning();
+        } while (sqlWarning != null);
     }
 
     // Incorrect warning, at least at this point. The situation here is not that we inject some unsanitised parameter
@@ -184,9 +204,9 @@ public class JdbcExecutor extends AbstractExecutor {
             String finalSql = applyVisitors((RawParameterizedSqlStatement) sql, sqlVisitors);
 
             try (PreparedStatement pstmt = factory.create(finalSql)) {
-                final List<?> parameters = ((RawParameterizedSqlStatement) sql).getParameters();
+                final List<Object> parameters = ((RawParameterizedSqlStatement) sql).getParameters();
                 for (int i = 0; i < parameters.size(); i++) {
-                    pstmt.setObject(i, parameters.get(0));
+                    pstmt.setObject(i+1, parameters.get(i));
                 }
                 return rse.extractData(pstmt.executeQuery());
             } catch (SQLException e) {
@@ -439,7 +459,9 @@ public class JdbcExecutor extends AbstractExecutor {
                     //if execute returns false, we can retrieve the affected rows count
                     // (true used when resultset is returned)
                     if (!stmt.execute(statement)) {
-                        log.log(sqlLogLevel, stmt.getUpdateCount() + " row(s) affected", null);
+                        int updateCount = stmt.getUpdateCount();
+                        addUpdateCountToScope(updateCount);
+                        log.log(sqlLogLevel, updateCount + " row(s) affected", null);
                     }
                 } catch (Throwable e) {
                     throw new DatabaseException(e.getMessage() + " [Failed SQL: " + getErrorCode(e) + statement + "]", e);
@@ -450,6 +472,7 @@ public class JdbcExecutor extends AbstractExecutor {
                     do {
                         if (!stmt.getMoreResults()) {
                             updateCount = stmt.getUpdateCount();
+                            addUpdateCountToScope(updateCount);
                             if (updateCount != -1)
                                 log.log(sqlLogLevel, updateCount + " row(s) affected", null);
                         }
@@ -465,6 +488,15 @@ public class JdbcExecutor extends AbstractExecutor {
         @Override
         public SqlStatement getStatement() {
             return sql;
+        }
+    }
+
+    private void addUpdateCountToScope(int updateCount) {
+        if (updateCount > -1) {
+            AtomicInteger scopeRowsAffected = Scope.getCurrentScope().get("rowsAffected", AtomicInteger.class);
+            if (scopeRowsAffected != null) {
+                scopeRowsAffected.addAndGet(updateCount);
+            }
         }
     }
 

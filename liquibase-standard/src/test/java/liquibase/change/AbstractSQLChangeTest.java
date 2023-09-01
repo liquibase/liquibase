@@ -1,5 +1,7 @@
 package liquibase.change;
 
+import liquibase.ChecksumVersion;
+import liquibase.Scope;
 import liquibase.database.core.MSSQLDatabase;
 import liquibase.statement.SqlStatement;
 import liquibase.statement.core.RawSqlStatement;
@@ -8,13 +10,9 @@ import org.junit.Test;
 
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
+import java.util.Collections;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNotEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.*;
 
 public class AbstractSQLChangeTest {
 
@@ -82,11 +80,12 @@ public class AbstractSQLChangeTest {
     }
 
     @Test
-    public void generateCheckSum_lineEndingIndependent() {
+    public void generateCheckSum_lineEndingIndependent() throws Exception {
         CheckSum sql = new ExampleAbstractSQLChange("LINE 1;\nLINE 2;\nLINE3;").generateCheckSum();
         CheckSum sqlCRLF = new ExampleAbstractSQLChange("LINE 1;\r\nLINE 2;\r\nLINE3;").generateCheckSum();
         CheckSum sqlLF = new ExampleAbstractSQLChange("LINE 1;\rLINE 2;\rLINE3;").generateCheckSum();
-        CheckSum sqlDifferent = new ExampleAbstractSQLChange("Something Completely Different").generateCheckSum();
+        CheckSum sqlDifferent = Scope.child(Collections.singletonMap(Scope.Attr.checksumVersion.name(), ChecksumVersion.V8), () ->
+                new ExampleAbstractSQLChange("Something Completely Different").generateCheckSum());
 
         assertEquals(sql.toString(), sqlCRLF.toString());
         assertEquals(sql.toString(), sqlLF.toString());
@@ -99,7 +98,7 @@ public class AbstractSQLChangeTest {
     }
 
     @Test
-    public void generateCheckSum_changesBasedOnParams() {
+    public void generateCheckSum_changesBasedOnParams_latest() {
         CheckSum baseCheckSum = new ExampleAbstractSQLChange("SOME SQL").generateCheckSum();
 
         ExampleAbstractSQLChange change = new ExampleAbstractSQLChange("SOME SQL");
@@ -113,6 +112,26 @@ public class AbstractSQLChangeTest {
         change = new ExampleAbstractSQLChange("SOME SQL");
         change.setStripComments(true);
         assertEquals(baseCheckSum.toString(), change.generateCheckSum().toString());
+    }
+
+    @Test
+    public void generateCheckSum_changesBasedOnParams_v8() throws Exception {
+        CheckSum baseCheckSum = new ExampleAbstractSQLChange("SOME SQL").generateCheckSum();
+
+        final ExampleAbstractSQLChange change = new ExampleAbstractSQLChange("SOME SQL");
+        change.setSplitStatements(false);
+        assertNotEquals(baseCheckSum.toString(), Scope.child(Collections.singletonMap(Scope.Attr.checksumVersion.name(), ChecksumVersion.V8), () ->
+                change.generateCheckSum().toString()));
+
+        final ExampleAbstractSQLChange change2 = new ExampleAbstractSQLChange("SOME SQL");
+        change2.setEndDelimiter("X");
+        assertNotEquals(baseCheckSum.toString(),  Scope.child(Collections.singletonMap(Scope.Attr.checksumVersion.name(), ChecksumVersion.V8), () ->
+                change2.generateCheckSum().toString()));
+
+        final ExampleAbstractSQLChange change3 = new ExampleAbstractSQLChange("SOME SQL");
+        change3.setStripComments(true);
+        assertNotEquals(baseCheckSum.toString(),  Scope.child(Collections.singletonMap(Scope.Attr.checksumVersion.name(), ChecksumVersion.V8), () ->
+                change3.generateCheckSum().toString()));
     }
 
 //    @Test
@@ -193,27 +212,27 @@ public class AbstractSQLChangeTest {
 //    }
 
     @Test
-    public void normalizeSql() throws IOException {
-        assertNormalizingStreamCorrect("singlelineString", "single line String");
-        assertNormalizingStreamCorrect("singlelinestringwithwhitespace", "single line string with      whitespace");
-        assertNormalizingStreamCorrect("multiplelinestring", "\r\nmultiple\r\nline\r\nstring\r\n");
-        assertNormalizingStreamCorrect("multiplelinestring", "\rmultiple\rline\rstring\r");
-        assertNormalizingStreamCorrect("multiplelinestring", "\nmultiple\nline\nstring\n");
-        assertNormalizingStreamCorrect("alinewithdoublenewlines", "\n\na\nline \n with \r\n \r\n double \n \n \n \n newlines");
-//        assertNormalizingStreamCorrect("", null);
-        assertNormalizingStreamCorrect("", "    ");
-        assertNormalizingStreamCorrect("", " \n \n \n   \n  ");
+    public void normalizeSql_latest() throws IOException {
+        assertNormalizingStreamCorrectLatest("singlelineString", "single line String");
+        assertNormalizingStreamCorrectLatest("singlelinestringwithwhitespace", "single line string with      whitespace");
+        assertNormalizingStreamCorrectLatest("multiplelinestring", "\r\nmultiple\r\nline\r\nstring\r\n");
+        assertNormalizingStreamCorrectLatest("multiplelinestring", "\rmultiple\rline\rstring\r");
+        assertNormalizingStreamCorrectLatest("multiplelinestring", "\nmultiple\nline\nstring\n");
+        assertNormalizingStreamCorrectLatest("alinewithdoublenewlines", "\n\na\nline \n with \r\n \r\n double \n \n \n \n newlines");
+//        assertNormalizingStreamCorrectLatest("", null);
+        assertNormalizingStreamCorrectLatest("", "    ");
+        assertNormalizingStreamCorrectLatest("", " \n \n \n   \n  ");
 
         //test quickBuffer -> resizingBuffer handoff
         String longSpaceString = "a line with a lot of: wait for it....                                                                                                                                                                                                                                                                                         spaces";
-        assertNormalizingStreamCorrect("alinewithalotof:waitforit....spaces", longSpaceString);
+        assertNormalizingStreamCorrectLatest("alinewithalotof:waitforit....spaces", longSpaceString);
 
         String versionNormalized = "INSERTINTOrecommendation_list(instanceId,name,publicId)SELECTDISTINCTinstanceId,\"default\"asname,\"default\"aspublicIdFROMrecommendation;";
 
         String version1 = "INSERT INTO recommendation_list(instanceId, name, publicId)\n" +
                 "SELECT DISTINCT instanceId, \"default\" as name, \"default\" as publicId\n" +
                 "FROM recommendation;";
-        assertNormalizingStreamCorrect(versionNormalized, version1);
+        assertNormalizingStreamCorrectLatest(versionNormalized, version1);
 
         String version2 = "INSERT INTO \n" +
                 "    recommendation_list(instanceId, name, publicId)\n" +
@@ -224,12 +243,52 @@ public class AbstractSQLChangeTest {
                 "          \"default\" as publicId\n" +
                 "   FROM \n" +
                 "       recommendation;";
-        assertNormalizingStreamCorrect(versionNormalized, version2);
+        assertNormalizingStreamCorrectLatest(versionNormalized, version2);
     }
 
-    private void assertNormalizingStreamCorrect(String expected, String toCorrect) throws IOException {
+    @Test
+    public void normalizeSql_V8() throws IOException {
+        assertNormalizingStreamCorrectV8("single line String", "single line String");
+        assertNormalizingStreamCorrectV8("single line string with whitespace", "single line string with      whitespace");
+        assertNormalizingStreamCorrectV8("multiple line string", "\r\nmultiple\r\nline\r\nstring\r\n");
+        assertNormalizingStreamCorrectV8("multiple line string", "\rmultiple\rline\rstring\r");
+        assertNormalizingStreamCorrectV8("multiple line string", "\nmultiple\nline\nstring\n");
+        assertNormalizingStreamCorrectV8("a line with double newlines", "\n\na\nline \n with \r\n \r\n double \n \n \n \n newlines");
+//        assertNormalizingStreamCorrectV8("", null);
+        assertNormalizingStreamCorrectV8("", "    ");
+        assertNormalizingStreamCorrectV8("", " \n \n \n   \n  ");
+
+        //test quickBuffer -> resizingBuffer handoff
+        String longSpaceString = "a line with a lot of: wait for it....                                                                                                                                                                                                                                                                                         spaces";
+        assertNormalizingStreamCorrectV8("a line with a lot of: wait for it.... spaces", longSpaceString);
+
+        String versionNormalized = "INSERT INTO recommendation_list(instanceId, name, publicId) SELECT DISTINCT instanceId, \"default\" as name, \"default\" as publicId FROM recommendation;";
+
+        String version1 = "INSERT INTO recommendation_list(instanceId, name, publicId)\n" +
+                "SELECT DISTINCT instanceId, \"default\" as name, \"default\" as publicId\n" +
+                "FROM recommendation;";
+        assertNormalizingStreamCorrectV8(versionNormalized, version1);
+
+        String version2 = "INSERT INTO \n" +
+                "    recommendation_list(instanceId, name, publicId)\n" +
+                "SELECT \n" +
+                "    DISTINCT \n" +
+                "        instanceId, \n" +
+                "          \"default\" as name, \n" +
+                "          \"default\" as publicId\n" +
+                "   FROM \n" +
+                "       recommendation;";
+        assertNormalizingStreamCorrectV8(versionNormalized, version2);
+    }
+
+    private void assertNormalizingStreamCorrectLatest(String expected, String toCorrect) throws IOException {
         AbstractSQLChange.NormalizingStream normalizingStream = new AbstractSQLChange.NormalizingStream(new ByteArrayInputStream(toCorrect.getBytes()));
         assertEquals(expected, StreamUtil.readStreamAsString(normalizingStream));
+    }
+
+    private void assertNormalizingStreamCorrectV8(String expected, String toCorrect) throws IOException {
+        NormalizingStreamV8 normalizingStream = new NormalizingStreamV8("x", true, false, new ByteArrayInputStream(toCorrect.getBytes()));
+        assertEquals("x:true:false:"+expected, StreamUtil.readStreamAsString(normalizingStream));
     }
 
 //    @Test

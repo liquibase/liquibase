@@ -4,10 +4,10 @@ import liquibase.statement.AbstractSqlStatement;
 
 public class DropViewStatement extends AbstractSqlStatement {
 
-    private String catalogName;
-    private String schemaName;
-    private String viewName;
-    private Boolean ifExists;
+    private final String catalogName;
+    private final String schemaName;
+    private final String viewName;
+    private final Boolean ifExists;
 
     public DropViewStatement(String catalogName, String schemaName, String viewName) {
         this(catalogName, schemaName, viewName, null);

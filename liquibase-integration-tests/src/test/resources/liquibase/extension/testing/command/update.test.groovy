@@ -25,7 +25,7 @@ Optional Args:
     Default: null
   changeExecListenerPropertiesFile (String) Path to a properties file for the ChangeExecListenerClass
     Default: null
-  contexts (String) Changeset contexts to match
+  contextFilter (String) Changeset contexts to match
     Default: null
   defaultCatalogName (String) The default catalog name to use for the database connection
     Default: null
@@ -56,7 +56,8 @@ Optional Args:
 
         expectedResults = [
                 statusCode: 0,
-                defaultChangeExecListener: 'not_null'
+                defaultChangeExecListener: 'not_null',
+                updateReport: 'not_null'
         ]
 
         expectedDatabaseContent = [
@@ -67,7 +68,7 @@ Optional Args:
          expectations = {
              // Check that the order executed number increments by 1 for each changeset
              def database = (Database) Scope.getCurrentScope().get("database", null)
-             def changelogHistoryService = ChangeLogHistoryServiceFactory.getInstance().getChangeLogService(database)
+             def changelogHistoryService = Scope.getCurrentScope().getSingleton(ChangeLogHistoryServiceFactory.class).getChangeLogService(database)
              List<RanChangeSet> ranChangeSets = changelogHistoryService.getRanChangeSets()
              int expectedOrder = 1
              for (RanChangeSet ranChangeSet : ranChangeSets) {
@@ -89,7 +90,8 @@ Optional Args:
 
         expectedResults = [
                 statusCode: 0,
-                defaultChangeExecListener: 'not_null'
+                defaultChangeExecListener: 'not_null',
+                updateReport: 'not_null'
         ]
 
         expectedDatabaseContent = [
@@ -122,7 +124,8 @@ Optional Args:
 
         expectedResults = [
                 statusCode: 0,
-                defaultChangeExecListener: 'not_null'
+                defaultChangeExecListener: 'not_null',
+                updateReport: 'not_null'
         ]
 
         outputFile = new File("target/test-classes/ignoredChangeset.txt")
@@ -153,7 +156,8 @@ Optional Args:
 
         expectedResults = [
                 statusCode: 0,
-                defaultChangeExecListener: 'not_null'
+                defaultChangeExecListener: 'not_null',
+                updateReport: 'not_null'
         ]
 
         outputFile = new File("target/test-classes/changeSetWithLabels.txt")
@@ -199,13 +203,14 @@ Optional Args:
                 password     : { it.password },
                 changelogFile: "changelogs/h2/complete/simple.changelog.labels.context.xml",
                 labelFilter  : "first",
-                contexts     : "firstContext",
+                contextFilter: "firstContext",
                 showSummary  : "verbose"
         ]
 
         expectedResults = [
                 statusCode: 0,
-                defaultChangeExecListener: 'not_null'
+                defaultChangeExecListener: 'not_null',
+                updateReport: 'not_null'
         ]
 
         outputFile = new File("target/test-classes/changeSetWithLabels.txt")
@@ -239,13 +244,14 @@ Optional Args:
                 password     : { it.password },
                 changelogFile: "changelogs/h2/complete/summary-changelog.xml",
                 labelFilter  : "testtable1",
-                contexts     : "none",
+                contextFilter: "none",
                 showSummary  : "summary"
         ]
 
         expectedResults = [
                 statusCode: 0,
-                defaultChangeExecListener: 'not_null'
+                defaultChangeExecListener: 'not_null',
+                updateReport: 'not_null'
         ]
 
         outputFile = new File("target/test-classes/changeSetWithComplicatedLabelsAndContext.txt")
@@ -277,7 +283,8 @@ Optional Args:
 
         expectedResults = [
                 statusCode: 0,
-                defaultChangeExecListener: 'not_null'
+                defaultChangeExecListener: 'not_null',
+                updateReport: 'not_null'
         ]
 
         outputFile = new File("target/test-classes/mismatchedDBMS.txt")
@@ -313,7 +320,8 @@ Optional Args:
 
         expectedResults = [
                 statusCode: 0,
-                defaultChangeExecListener: 'not_null'
+                defaultChangeExecListener: 'not_null',
+                updateReport: 'not_null'
         ]
 
         expectedDatabaseContent = [
@@ -378,12 +386,28 @@ Optional Args:
 
         expectedResults = [
                 statusCode: 0,
-                defaultChangeExecListener: 'not_null'
+                defaultChangeExecListener: 'not_null',
+                updateReport: 'not_null'
         ]
 
         expectedLogs = [
                 'EVENT: willRun fired',
                 'EVENT: ran fired',
+        ]
+    }
+
+    run "Should fall back to jdbc executor when runWith is an empty string", {
+        arguments = [
+                url                    : { it.url },
+                username               : { it.username },
+                password               : { it.password },
+                changelogFile          : 'changelogs/h2/complete/empty.runWith.changelog.xml',
+        ]
+
+        expectedResults = [
+                statusCode: 0,
+                defaultChangeExecListener: 'not_null',
+                updateReport: 'not_null'
         ]
     }
 }

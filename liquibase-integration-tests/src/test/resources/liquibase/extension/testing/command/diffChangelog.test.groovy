@@ -1,15 +1,12 @@
 package liquibase.extension.testing.command
 
-import liquibase.change.AddColumnConfig
+
 import liquibase.change.ColumnConfig
 import liquibase.change.ConstraintsConfig
-import liquibase.change.core.AddColumnChange
 import liquibase.change.core.AddPrimaryKeyChange
 import liquibase.change.core.CreateTableChange
-import liquibase.exception.CommandExecutionException
 import liquibase.exception.CommandValidationException
 import liquibase.extension.testing.setup.SetupCleanResources
-import liquibase.structure.core.Column
 
 import java.util.regex.Pattern
 
@@ -24,6 +21,10 @@ Required Args:
   url (String) The JDBC database connection URL
     OBFUSCATED
 Optional Args:
+  author (String) Specifies the author for changesets in the generated changelog
+    Default: null
+  contextFilter (String) Changeset contexts to generate
+    Default: null
   defaultCatalogName (String) The default catalog name to use for the database connection
     Default: null
   defaultSchemaName (String) The default schema name to use for the database connection
@@ -44,6 +45,8 @@ Optional Args:
     Default: false
   includeTablespace (Boolean) Include the tablespace attribute in the changelog. Defaults to false.
     Default: false
+  labelFilter (String) Changeset labels to generate
+    Default: null
   outputSchemas (String) Output schemas names. This is a CSV list.
     Default: null
   password (String) Password to use to connect to the database
@@ -56,6 +59,10 @@ Optional Args:
   referenceDriver (String) The JDBC driver class for the reference database
     Default: null
   referenceDriverPropertiesFile (String) The JDBC driver properties file for the reference database
+    Default: null
+  referenceLiquibaseCatalogName (String) Reference catalog to use for Liquibase objects
+    Default: null
+  referenceLiquibaseSchemaName (String) Reference schema to use for Liquibase objects
     Default: null
   referencePassword (String) The reference database password
     Default: null
@@ -114,8 +121,9 @@ Optional Args:
         ]
     }
 
-    run "Running diffChangelog should add changesets", {
+    run "Running diffChangelog should add changesets with specified author", {
         arguments = [
+                author           : "Test Author",
                 url              : { it.url },
                 username         : { it.username },
                 password         : { it.password },
@@ -168,7 +176,8 @@ Optional Args:
         }
         expectedFileContent = [
                 "target/test-classes/diffChangeLog-test.xml" : [CommandTests.assertContains("<changeSet ", 5),
-                                                                CommandTests.assertContains("<dropTable ", 1)]
+                                                                CommandTests.assertContains("<dropTable ", 1),
+                                                                CommandTests.assertContains("author=\"Test Author\"", 5)]
         ]
     }
 

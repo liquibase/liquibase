@@ -73,8 +73,9 @@ public class CommandScope {
     }
 
     /**
-     * Returns the complete config prefix (without a trailing period) for the command in this scope.
-     * @return
+     * Returns the complete configuration prefix (without a trailing period) for the command in this scope.
+     *
+     * @return the complete configuration prefix for the command in this scope
      */
     public String getCompleteConfigPrefix() {
         return completeConfigPrefix;
@@ -135,7 +136,7 @@ public class CommandScope {
      * Assign a value to a given provided dependency. So if a CommandStep provides class X, at
      * {@link CommandStep#run(CommandResultsBuilder)} method it needs to provide the value for X using this method.
      * commandScope.provideDependency(LockService.class, lockService);
-     *
+     * <p>
      * Means that this class will LockService.class using object lock
      */
     public  CommandScope provideDependency(Class<?> clazz, Object value) {
@@ -193,8 +194,9 @@ public class CommandScope {
      * Executes the command in this scope, and returns the results.
      */
     public CommandResults execute() throws CommandExecutionException {
-        Scope.getCurrentScope().addMdcValue(MdcKey.OPERATION_START_TIME, new ISODateFormat().format(new Date()));
-        // We don't want to reset the command name even when defining another CommandScope during execution because we intend on keeping this value as the command entered to the console
+        Scope.getCurrentScope().addMdcValue(MdcKey.OPERATION_START_TIME, Instant.ofEpochMilli(new Date().getTime()).toString());
+        // We don't want to reset the command name even when defining another CommandScope during execution
+        // because we intend on keeping this value as the command entered to the console
         if (!Scope.getCurrentScope().isMdcKeyPresent(MdcKey.LIQUIBASE_COMMAND_NAME)) {
             Scope.getCurrentScope().addMdcValue(MdcKey.LIQUIBASE_COMMAND_NAME, String.join(" ", commandDefinition.getName()));
         }

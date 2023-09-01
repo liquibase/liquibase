@@ -9,6 +9,25 @@
             <runningAs username="${loginUser}"/>
     </preConditions>
 
+    <changeSet id="test-check-on-commit" author="mkarg">
+        <createTable tableName="SomeReferencedTable">
+            <column name="pc" type="INTEGER">
+                <constraints nullable="false" primaryKey="true" primaryKeyName="pk"/>
+            </column>
+        </createTable>
+        <createTable tableName="SomeTableWithCheckOnCommit">
+            <column name="sc" type="INTEGER">
+                <constraints foreignKeyName="fk" referencedColumnNames="pc" referencedTableName="SomeReferencedTable" deferrable="true" initiallyDeferred="true"/>
+            </column>
+        </createTable>
+    </changeSet>
+
+    <changeSet id="test-timestamp-with-timezone" author="mkarg">
+        <createTable tableName="SomeTableWithSomeTimezonedColumn">
+            <column defaultValueComputed="CURRENT UTC TIMESTAMP" name="someTimezonedColumn" type="TIMESTAMP WITH TIME ZONE" />
+        </createTable>
+    </changeSet>
+
     <changeSet id="1" author="nvoxland">
         <comment>
             You can add comments to changeSets.
@@ -136,7 +155,7 @@
 
     <changeSet id="16" author="nvoxland">
         <createView viewName="personView">
-            select * from liquibase.person
+            select * from ${loginUser}.person
         </createView>
     </changeSet>
 

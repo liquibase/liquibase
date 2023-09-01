@@ -20,6 +20,9 @@ import liquibase.executor.Executor;
 import liquibase.executor.ExecutorService;
 import liquibase.executor.LoggingExecutor;
 import liquibase.executor.jvm.ChangelogJdbcMdcListener;
+import liquibase.logging.mdc.MdcKey;
+import liquibase.logging.mdc.MdcObject;
+import liquibase.logging.mdc.MdcValue;
 import liquibase.snapshot.InvalidExampleException;
 import liquibase.snapshot.SnapshotGeneratorFactory;
 import liquibase.sql.Sql;
@@ -34,6 +37,7 @@ import java.text.DateFormat;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.util.*;
+import java.util.logging.Level;
 
 import static java.util.ResourceBundle.getBundle;
 
@@ -250,8 +254,9 @@ public class StandardLockService implements LockService {
 
         boolean locked = false;
         long timeToGiveUp = new Date().getTime() + (getChangeLogLockWaitTime() * 1000 * 60);
-        while (!locked && (new Date().getTime() < timeToGiveUp)) {
-            locked = acquireLock();
+
+        locked = acquireLock();
+        do {
             if (!locked) {
                 Scope.getCurrentScope().getLog(getClass()).info("Waiting for changelog lock....");
                 try {
@@ -261,7 +266,8 @@ public class StandardLockService implements LockService {
                     Thread.currentThread().interrupt();
                 }
             }
-        }
+            locked = acquireLock();
+        } while (!locked && (new Date().getTime() < timeToGiveUp));
 
         if (!locked) {
             DatabaseChangeLogLock[] locks = listLocks();
@@ -329,7 +335,7 @@ public class StandardLockService implements LockService {
 
                 hasChangeLogLock = true;
 
-                ChangeLogHistoryServiceFactory.getInstance().resetAll();
+                Scope.getCurrentScope().getSingleton(ChangeLogHistoryServiceFactory.class).resetAll();
                 database.setCanCacheLiquibaseTableInfo(true);
                 return true;
             }
@@ -354,6 +360,7 @@ public class StandardLockService implements LockService {
             database.setObjectQuotingStrategy(this.quotingStrategy);
         }
 
+        boolean success = false;
         Executor executor = Scope.getCurrentScope().getSingleton(ExecutorService.class).getExecutor("jdbc", database);
         try {
             if (this.hasDatabaseChangeLogLockTable()) {
@@ -392,6 +399,7 @@ public class StandardLockService implements LockService {
                     );
                 }
                 database.commit();
+                success = true;
             }
         } catch (Exception e) {
             throw new LockException(e);
@@ -400,7 +408,10 @@ public class StandardLockService implements LockService {
                 hasChangeLogLock = false;
 
                 database.setCanCacheLiquibaseTableInfo(false);
-                Scope.getCurrentScope().getLog(getClass()).info("Successfully released change log lock");
+                try (MdcObject releaseLocksOutcome = Scope.getCurrentScope().addMdcValue(MdcKey.RELEASE_LOCKS_OUTCOME, success ? MdcValue.COMMAND_SUCCESSFUL : MdcValue.COMMAND_FAILED)) {
+                    Scope.getCurrentScope().getLog(getClass()).log(success ? Level.INFO : Level.WARNING, (success ? "Successfully released" : "Failed to release") + " change log lock", null);
+                }
+
                 database.rollback();
             } catch (DatabaseException e) {
             }
@@ -466,7 +477,7 @@ public class StandardLockService implements LockService {
         isDatabaseChangeLogLockTableInitialized = false;
 
         if (this.database != null) {
-            ChangeLogHistoryService changelogService = ChangeLogHistoryServiceFactory.getInstance().getChangeLogService(database);
+            ChangeLogHistoryService changelogService = Scope.getCurrentScope().getSingleton(ChangeLogHistoryServiceFactory.class).getChangeLogService(database);
             // On reseting the lock the changelog service has to be invalidated due to the fact that
             // some liquibase component released the lock temporarily. In this time span another JVM instance
             // might have acquired the database lock and could have applied further changesets to prevent that

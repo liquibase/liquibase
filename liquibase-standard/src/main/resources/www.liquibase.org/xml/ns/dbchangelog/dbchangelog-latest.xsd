@@ -88,6 +88,7 @@
             <xsd:attribute name="author" type="xsd:string"/>
             <xsd:attribute name="file" type="xsd:string" use="required"/>
             <xsd:attribute name="relativeToChangelogFile" type="booleanExp"/>
+            <xsd:attribute name="errorIfMissing" type="booleanExp" default="true"/>
             <xsd:attribute name="context" type="xsd:string"/>
             <xsd:attribute name="contextFilter" type="xsd:string"/>
             <xsd:attribute name="labels" type="xsd:string"/>
@@ -110,6 +111,7 @@
             <xsd:attribute name="contextFilter" type="xsd:string"/>
             <xsd:attribute name="minDepth" type="integerExp"/>
             <xsd:attribute name="maxDepth" type="integerExp"/>
+            <xsd:attribute name="endsWithFilter" type="xsd:string"/>
             <xsd:anyAttribute namespace="##other" processContents="lax"/>
         </xsd:complexType>
     </xsd:element>
@@ -118,10 +120,18 @@
     <xsd:element name="databaseChangeLog">
         <xsd:complexType>
             <xsd:sequence>
+                <xsd:element name="removeChangeSetProperty" minOccurs="0" maxOccurs="unbounded">
+                    <xsd:complexType>
+                        <xsd:attribute name="change" type="xsd:string"/>
+                        <xsd:attribute name="dbms" type="xsd:string"/>
+                        <xsd:attribute name="remove" type="xsd:string"/>
+                    </xsd:complexType>
+                </xsd:element>
                 <xsd:element name="property" minOccurs="0" maxOccurs="unbounded">
                     <xsd:complexType>
                         <xsd:attribute name="file" type="xsd:string"/>
                         <xsd:attribute name="relativeToChangelogFile" type="booleanExp" default="false"/>
+                        <xsd:attribute name="errorIfMissing" type="booleanExp" default="true"/>
                         <xsd:attribute name="name" type="xsd:string"/>
                         <xsd:attribute name="value" type="xsd:string"/>
                         <xsd:attribute name="dbms" type="xsd:string"/>
@@ -223,9 +233,9 @@
 
                     <xsd:element name="modifyChangeSets" minOccurs="0" maxOccurs="unbounded">
                         <xsd:complexType>
-                            <xsd:choice>
-                                <xsd:element ref="include" minOccurs="0" maxOccurs="unbounded" />
-                                <xsd:element ref="includeAll" minOccurs="0" maxOccurs="unbounded"/>
+                            <xsd:choice minOccurs="0" maxOccurs="unbounded">
+                                <xsd:element ref="include"/>
+                                <xsd:element ref="includeAll"/>
                             </xsd:choice>
                             <xsd:attribute name="runWith" type="xsd:string" />
                             <xsd:attribute name="runWithSpoolFile" type="xsd:string" />

@@ -46,7 +46,7 @@ public class ChangeLogParameters {
     /**
      * Creates a new ChangeLogParameters instance, populated with a set of "database.*" global parameters based on the passed database configuration.
      * If the database is null, no global parameters are added.
-     *
+     * <p>
      * The passed database is used as a default value for {@link #getDatabase()}
      */
     public ChangeLogParameters(Database database) {
@@ -247,6 +247,10 @@ public class ChangeLogParameters {
         List<ChangeLogParameter> localList = null;
         if (changeLog != null) {
             localList = localParameters.get(getLocalKey(changeLog));
+            if (localList != null) {
+                localList = new ArrayList<>(localList); // make a copy as we don't want to reverse the original list
+                Collections.reverse(localList);
+            }
         }
 
         for (List<ChangeLogParameter> paramList : Arrays.asList(globalParameters, localList)) {

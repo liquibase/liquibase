@@ -16,7 +16,7 @@ Required Args:
   url (String) The JDBC database connection URL
     OBFUSCATED
 Optional Args:
-  contexts (String) Context string to use for filtering
+  contextFilter (String) Context string to use for filtering
     Default: null
   defaultCatalogName (String) The default catalog name to use for the database connection
     Default: null

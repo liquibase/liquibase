@@ -199,28 +199,6 @@ Global Options
                              (defaults file: 'liquibase.headless', environment
                                variable: 'LIQUIBASE_HEADLESS')
 
-      --hub-api-key=PARAM    Liquibase Hub API key for operations
-                             (defaults file: 'liquibase.hub.apiKey',
-                               environment variable: 'LIQUIBASE_HUB_API_KEY')
-
-      --hub-log-level=PARAM  Log level for filtering log messages to send to
-                               Liquibase Hub during operations. Values can be
-                               any acceptable log level.
-                             DEFAULT: INFO
-                             (defaults file: 'liquibase.hub.logLevel',
-                               environment variable: 'LIQUIBASE_HUB_LOG_LEVEL')
-
-      --hub-mode=PARAM       Content to send to Liquibase Hub during
-                               operations. Values can be 'all', 'meta', or 'off'
-                             DEFAULT: ALL
-                             (defaults file: 'liquibase.hub.mode', environment
-                               variable: 'LIQUIBASE_HUB_MODE')
-
-      --hub-url=PARAM        Liquibase Hub URL for operations
-                             DEFAULT: https://hub.liquibase.com
-                             (defaults file: 'liquibase.hub.url', environment
-                               variable: 'LIQUIBASE_HUB_URL')
-
       --include-catalog-in-specification=PARAM
                              Should Liquibase include the catalog name when
                                determining equality?
@@ -409,6 +387,13 @@ Global Options
                              (defaults file: 'liquibase.sql.logLevel',
                                environment variable: 'LIQUIBASE_SQL_LOG_LEVEL')
 
+      --sql-show-sql-warnings=PARAM
+                             Show SQLWarning messages
+                             DEFAULT: true
+                             (defaults file: 'liquibase.sql.showSqlWarnings',
+                               environment variable:
+                               'LIQUIBASE_SQL_SHOW_SQL_WARNINGS')
+
       --strict=PARAM         Be stricter on allowed Liquibase configuration and
                                setup?
                              DEFAULT: false
@@ -466,9 +451,6 @@ Commands
   db-doc                        Generates JavaDoc documentation for the
                                   existing database and changelogs
 
-  deactivate-changelog          Removes the changelogID from your changelog so
-                                  it stops sending reports to Liquibase Hub
-
   diff                          Outputs a description of differences.  If you
                                   have a Liquibase Pro key, you can output the
                                   differences as JSON using the --format=JSON
@@ -506,9 +488,6 @@ Commands
   mark-next-changeset-ran-sql   Writes the SQL used to mark the next change you
                                   apply as executed in your database
 
-  register-changelog            Register the changelog with a Liquibase Hub
-                                  project
-
   release-locks                 Remove the Liquibase lock record from the
                                   DATABASECHANGELOG table
 
@@ -536,9 +515,6 @@ Commands
                                   database
 
   status                        Generate a list of pending changesets
-
-  sync-hub                      Synchronize the local DatabaseChangeLog table
-                                  with Liquibase Hub
 
   tag                           Mark the current database state with the
                                   specified tag
@@ -629,7 +605,7 @@ https://docs.liquibase.com
 
         where:
         prefix          | argName          | alias                 | expected
-        "liquibase"     | "test"           | "testAlias"           | "--test-alias, --testAlias, --test"
+        "liquibase"     | "test"           | "testAlias"           | "--test, --test-alias, --testAlias"
     }
 
     @Unroll

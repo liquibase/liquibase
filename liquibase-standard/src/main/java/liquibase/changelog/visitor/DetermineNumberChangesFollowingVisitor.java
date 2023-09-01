@@ -9,9 +9,9 @@ import liquibase.exception.LiquibaseException;
 import java.util.Set;
 
 public class DetermineNumberChangesFollowingVisitor implements ChangeSetVisitor {
-  private String id;
-  private String author;
-  private String filePath;
+  private final String id;
+  private final String author;
+  private final String filePath;
   private int changeSetPosition;
   private int totalChangeSets;
 

@@ -34,7 +34,7 @@ import java.util.List;
 @LiquibaseService(skip = true)
 public class MissingDataExternalFileChangeGenerator extends MissingDataChangeGenerator {
 
-    private String dataDir;
+    private final String dataDir;
 
     public MissingDataExternalFileChangeGenerator(String dataDir) {
         this.dataDir = dataDir;

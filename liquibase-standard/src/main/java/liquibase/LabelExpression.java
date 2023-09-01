@@ -14,11 +14,11 @@ import java.util.*;
  * name, and it is case-insensitive.
  * </p>
  *
- * @see <a href="https://docs.liquibase.com/concepts/advanced/labels.html" target="_top">labels</a> in documentation
+ * @see <a href="https://docs.liquibase.com/concepts/changelogs/attributes/labels.html" target="_top">labels</a> in documentation
  */
 public class LabelExpression {
 
-    private HashSet<String> labels = new LinkedHashSet<>();
+    private final HashSet<String> labels = new LinkedHashSet<>();
     private String originalString;
 
     public LabelExpression() {
@@ -82,8 +82,8 @@ public class LabelExpression {
      * Returns true if the passed runtime labels match this label expression
      */
     public boolean matches(Labels runtimeLabels) {
-        if ((runtimeLabels == null) || runtimeLabels.isEmpty()) {
-            return true;
+        if (runtimeLabels == null) {
+            runtimeLabels = new Labels();
         }
         if (this.labels.isEmpty()) {
             return true;
@@ -99,7 +99,7 @@ public class LabelExpression {
 
     /**
      *
-     * Return true if any of the LabelExpression objects match the runtime
+     * Return true if all the LabelExpression objects match the runtime
      *
      * @param   changesetLabels    Expressions to match against
      * @param   labelExpression         Runtime labels
@@ -110,9 +110,7 @@ public class LabelExpression {
         if (changesetLabels == null || changesetLabels.isEmpty()) {
             return true;
         }
-        if (labelExpression == null || labelExpression.isEmpty()) {
-            return true;
-        }
+
         for (Labels changesetLabel : changesetLabels) {
             if (!labelExpression.matches(changesetLabel)) {
                 return false;
@@ -122,11 +120,14 @@ public class LabelExpression {
     }
 
     private boolean matches(String expression, Labels runtimeLabels) {
+        if (runtimeLabels == null) {
+            runtimeLabels = new Labels();
+        }
         return ExpressionMatcher.matches(expression, runtimeLabels.getLabels());
     }
 
     public boolean isEmpty() {
-        return (this.labels == null) || this.labels.isEmpty();
+        return this.labels.isEmpty();
     }
 
     public String getOriginalString() {

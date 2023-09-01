@@ -8,6 +8,7 @@ import liquibase.database.core.Db2zDatabase;
 import liquibase.database.core.MSSQLDatabase;
 import liquibase.database.core.OracleDatabase;
 import liquibase.database.core.SybaseDatabase;
+import liquibase.database.core.SybaseASADatabase;
 import liquibase.database.jvm.JdbcConnection;
 import liquibase.diff.compare.DatabaseObjectComparatorFactory;
 import liquibase.exception.DatabaseException;
@@ -42,40 +43,6 @@ public class ForeignKeySnapshotGenerator extends JdbcSnapshotGenerator {
     public ForeignKeySnapshotGenerator() {
         super(ForeignKey.class, new Class[]{Table.class});
     }
-
-//    public Boolean has(DatabaseObject example, DatabaseSnapshot snapshot, SnapshotGeneratorChain chain) throws DatabaseException {
-//        if (example instanceof ForeignKey) {
-//            Database database = snapshot.getDatabase();
-//            String searchCatalog = database.getJdbcCatalogName(example.getSchema());
-//            String searchSchema = database.getJdbcSchemaName(example.getSchema());
-//            String searchTableName = null;
-//            if (((ForeignKey) example).getForeignKeyTable() != null) {
-//                searchTableName = ((ForeignKey) example).getForeignKeyTable().getName();
-//            }
-//            String fkName = example.getName();
-//
-//            ResultSet rs = null;
-//            try {
-//                rs = getMetaDataFromCache(database).getForeignKeys(searchCatalog, searchSchema, searchTableName);
-//                while (rs.next()) {
-//                    if (fkName.equals(rs.getString("FK_NAME"))) {
-//                        return true;
-//                    }
-//                }
-//                return false;
-//            } catch (SQLException e) {
-//                throw new DatabaseException(e);
-//            } finally {
-//                if (rs != null) {
-//                    try {
-//                        rs.close();
-//                    } catch (SQLException ignored) { }
-//                }
-//            }
-//        } else {
-//            return chain.has(example, snapshot);
-//        }
-//    }
 
 
     @Override
@@ -184,6 +151,12 @@ public class ForeignKeySnapshotGenerator extends JdbcSnapshotGenerator {
 
                 short deferrability = row.getShort(METADATA_DEFERRABILITY);
 
+                // SQL Anywhere supports initially deferrable but does not support initially immediate,
+                // but reports not deferrable as initially immediate.
+                if (database instanceof SybaseASADatabase && deferrability == DatabaseMetaData.importedKeyInitiallyImmediate) {
+                    deferrability = DatabaseMetaData.importedKeyNotDeferrable;
+                }
+
                 // Hsqldb doesn't handle setting this property correctly, it sets it to 0.
                 // it should be set to DatabaseMetaData.importedKeyNotDeferrable(7)
                 if ((deferrability == 0) || (deferrability == DatabaseMetaData.importedKeyNotDeferrable)) {
@@ -258,6 +231,10 @@ public class ForeignKeySnapshotGenerator extends JdbcSnapshotGenerator {
             if (jdbcType == DatabaseMetaData.importedKeyCascade) {
                 return ForeignKeyConstraintType.importedKeyCascade;
             } else if (jdbcType == DatabaseMetaData.importedKeyNoAction) {
+                if (database instanceof SybaseASADatabase) {
+                    //SQL Anywhere doesn't support NO ACTION, but reports it instead of SET DEFAULT
+                    return ForeignKeyConstraintType.importedKeySetDefault;
+                }
                 return ForeignKeyConstraintType.importedKeyNoAction;
             } else if (jdbcType == DatabaseMetaData.importedKeyRestrict) {
                 if (database instanceof MSSQLDatabase) {
@@ -311,59 +288,4 @@ public class ForeignKeySnapshotGenerator extends JdbcSnapshotGenerator {
         }
     }
 
-    //from SQLiteDatabaseSnapshotGenerator
-    //    protected void readForeignKeys(DatabaseSnapshot snapshot, String schema, DatabaseMetaData databaseMetaData) throws DatabaseException, SQLException {
-//        updateListeners("Reading foreign keys for " + snapshot.getDatabase().toString() + " ...");
-//        // Foreign keys are not supported in SQLite until now.
-//        // ...do nothing here
-//    }
-
-
-    //Code from OracleDatabaseSnapshotGenerator
-//    public List<ForeignKey> getAdditionalForeignKeys(String schemaName, Database database) throws DatabaseException {
-//        List<ForeignKey> foreignKeys = super.getAdditionalForeignKeys(schemaName, database);
-//
-//        // Setting default schema name. Needed for correct statement generation
-//        if (schemaName == null) {
-//            schemaName = database.convertRequestedSchemaToSchema(schemaName);
-//        }
-//
-//        // Create SQL statement to select all FKs in database which referenced to unique columns
-//        String query = "select uc_fk.constraint_name FK_NAME,uc_fk.owner FKTABLE_SCHEM,ucc_fk.table_name FKTABLE_NAME,ucc_fk.column_name FKCOLUMN_NAME,decode(uc_fk.deferrable, 'DEFERRABLE', 5 ,'NOT DEFERRABLE', 7 , 'DEFERRED', 6 ) DEFERRABILITY, decode(uc_fk.delete_rule, 'CASCADE', 0,'NO ACTION', 3) DELETE_RULE,ucc_rf.table_name PKTABLE_NAME,ucc_rf.column_name PKCOLUMN_NAME from all_cons_columns ucc_fk,all_constraints uc_fk,all_cons_columns ucc_rf,all_constraints uc_rf where uc_fk.CONSTRAINT_NAME = ucc_fk.CONSTRAINT_NAME and uc_fk.constraint_type='R' and uc_fk.r_constraint_name=ucc_rf.CONSTRAINT_NAME and uc_rf.constraint_name = ucc_rf.constraint_name and uc_rf.constraint_type = 'U' and uc_fk.owner = '" + schemaName + "' and ucc_fk.owner = '" + schemaName + "' and uc_rf.owner = '" + schemaName + "' and ucc_rf.owner = '" + schemaName + "'";
-//        Statement statement = null;
-//        ResultSet rs = null;
-//        try {
-//            statement = ((JdbcConnection) database.getConnection()).getUnderlyingConnection().createStatement();
-//            rs = statement.executeQuery(query);
-//            while (rs.next()) {
-//                ForeignKeyInfo fkInfo = new ForeignKeyInfo();
-//                fkInfo.setReferencesUniqueColumn(true);
-//                fkInfo.setFkName(cleanObjectNameFromDatabase(rs.getString("FK_NAME")));
-//                fkInfo.setFkSchema(cleanObjectNameFromDatabase(rs.getString("FKTABLE_SCHEM")));
-//                fkInfo.setFkTableName(cleanObjectNameFromDatabase(rs.getString("FKTABLE_NAME")));
-//                fkInfo.setFkColumn(cleanObjectNameFromDatabase(rs.getString("FKCOLUMN_NAME")));
-//
-//                fkInfo.setPkTableName(cleanObjectNameFromDatabase(rs.getString("PKTABLE_NAME")));
-//                fkInfo.setPkColumn(cleanObjectNameFromDatabase(rs.getString("PKCOLUMN_NAME")));
-//
-//                fkInfo.setDeferrablility(rs.getShort("DEFERRABILITY"));
-//                ForeignKeyConstraintType deleteRule = convertToForeignKeyConstraintType(rs.getInt("DELETE_RULE"));
-//                if (rs.wasNull()) {
-//                    deleteRule = null;
-//                }
-//                fkInfo.setDeleteRule(deleteRule);
-//                foreignKeys.add(generateForeignKey(fkInfo, database, foreignKeys));
-//            }
-//        } catch (SQLException e) {
-//            throw new DatabaseException("Can't execute selection query to generate list of foreign keys", e);
-//        } finally {
-//            JdbcUtils.closeResultSet(rs);
-//            JdbcUtils.closeStatement(statement);
-//        }
-//        return foreignKeys;
-//    }
-//
-
-//
-//
 }

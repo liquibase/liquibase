@@ -10,7 +10,7 @@ import java.util.concurrent.ConcurrentHashMap;
 public class SnapshotSerializerFactory {
     private static SnapshotSerializerFactory instance;
 
-    private Map<String, List<SnapshotSerializer>> serializers = new ConcurrentHashMap<>();
+    private final Map<String, List<SnapshotSerializer>> serializers = new ConcurrentHashMap<>();
 
     public static synchronized void reset() {
         instance = new SnapshotSerializerFactory();

@@ -4,6 +4,7 @@ import liquibase.ContextExpression;
 import liquibase.Labels;
 import liquibase.RuntimeEnvironment;
 import liquibase.Scope;
+import liquibase.change.CheckSum;
 import liquibase.changelog.filter.ChangeSetFilter;
 import liquibase.changelog.filter.ChangeSetFilterResult;
 import liquibase.changelog.visitor.ChangeSetVisitor;
@@ -22,28 +23,36 @@ import static java.util.ResourceBundle.getBundle;
 
 public class ChangeLogIterator {
 
-    protected DatabaseChangeLog databaseChangeLog;
-    protected List<ChangeSetFilter> changeSetFilters;
-    private static ResourceBundle coreBundle = getBundle("liquibase/i18n/liquibase-core");
+    protected final DatabaseChangeLog databaseChangeLog;
+    protected final List<ChangeSetFilter> changeSetFilters;
+    private static final ResourceBundle coreBundle = getBundle("liquibase/i18n/liquibase-core");
     private static final String MSG_COULD_NOT_FIND_EXECUTOR = coreBundle.getString("no.executor.found");
-    private Set<String> seenChangeSets = new HashSet<>();
+    private final Set<String> seenChangeSets = new HashSet<>();
 
     public ChangeLogIterator(DatabaseChangeLog databaseChangeLog, ChangeSetFilter... changeSetFilters) {
+        this(databaseChangeLog, Arrays.asList(changeSetFilters));
+    }
+
+    public ChangeLogIterator(DatabaseChangeLog databaseChangeLog, List<ChangeSetFilter> changeSetFilters) {
         this.databaseChangeLog = databaseChangeLog;
-        this.changeSetFilters = Arrays.asList(changeSetFilters);
+        this.changeSetFilters = changeSetFilters;
     }
 
     public ChangeLogIterator(List<RanChangeSet> changeSetList, DatabaseChangeLog changeLog, ChangeSetFilter... changeSetFilters) {
+        this(changeSetList, changeLog, Arrays.asList(changeSetFilters));
+    }
+
+    public ChangeLogIterator(List<RanChangeSet> changeSetList, DatabaseChangeLog changeLog, List<ChangeSetFilter> changeSetFilters) {
         final List<ChangeSet> changeSets = new ArrayList<>();
         for (RanChangeSet ranChangeSet : changeSetList) {
-	        final List<ChangeSet> changeSetsForRanChangeSet = changeLog.getChangeSets(ranChangeSet);
-	        for (ChangeSet changeSet : changeSetsForRanChangeSet) {
+            final List<ChangeSet> changeSetsForRanChangeSet = changeLog.getChangeSets(ranChangeSet);
+            for (ChangeSet changeSet : changeSetsForRanChangeSet) {
                 if (changeSet != null) {
                     changeSet.setFilePath(DatabaseChangeLog.normalizePath(ranChangeSet.getChangeLog()));
                     changeSet.setDeploymentId(ranChangeSet.getDeploymentId());
                     changeSets.add(changeSet);
                 }
-	        }
+            }
         }
         this.databaseChangeLog = (new DatabaseChangeLog() {
             @Override
@@ -56,8 +65,7 @@ public class ChangeLogIterator {
                 return "";
             }
         });
-        this.databaseChangeLog.setChangeLogId(changeLog.getChangeLogId());
-        this.changeSetFilters = Arrays.asList(changeSetFilters);
+        this.changeSetFilters = changeSetFilters;
     }
 
     public void run(ChangeSetVisitor visitor, RuntimeEnvironment env) throws LiquibaseException {
@@ -99,14 +107,7 @@ public class ChangeLogIterator {
                                     validateChangeSetExecutor(changeSet, env);
                                 }
 
-                                //
-                                // Execute the visit call in its own scope with a new
-                                // CompositeLogService and BufferLogService in order
-                                // to capture the logging for just this changeset.  The
-                                // log is sent to Hub if available
-                                //
-                                Map<String, Object> values = new HashMap<>();
-                                Scope.child(values, () -> visitor.visit(changeSet, databaseChangeLog, env.getTargetDatabase(), reasonsAccepted));
+                                visitor.visit(changeSet, databaseChangeLog, env.getTargetDatabase(), reasonsAccepted);
                                 markSeen(changeSet);
                             } else {
                                 if (visitor instanceof SkippedChangeSetVisitor) {

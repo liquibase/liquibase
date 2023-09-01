@@ -40,7 +40,7 @@ public class BooleanType extends LiquibaseDataType {
             if (originalDefinition.toLowerCase(Locale.US).startsWith("bit")) {
                 return new DatabaseDataType("BIT", getParameters());
             }
-            return new DatabaseDataType("BIT", 1);
+            return new DatabaseDataType("TINYINT", 1);
         } else if (database instanceof OracleDatabase) {
             return new DatabaseDataType("NUMBER", 1);
         } else if ((database instanceof SybaseASADatabase) || (database instanceof SybaseDatabase)) {
@@ -62,7 +62,10 @@ public class BooleanType extends LiquibaseDataType {
             if (originalDefinition.toLowerCase(Locale.US).startsWith("bit")) {
                 return new DatabaseDataType("BIT", getParameters());
             }
-    }
+        } else if (database instanceof H2Database && getParameters().length > 0) {
+          return new DatabaseDataType("BOOLEAN");
+      }
+
 
         return super.toDatabaseDataType(database);
     }
@@ -88,6 +91,8 @@ public class BooleanType extends LiquibaseDataType {
                                 .replace("\"", "")
                                 .replace("::it", "")
                         + "'::\"bit\"";
+            } else if (database instanceof SybaseASADatabase && ((String) value).startsWith("COMPUTE")) {
+                returnValue = (String) value;
             } else {
                 throw new UnexpectedLiquibaseException("Unknown boolean value: " + value);
             }

@@ -218,7 +218,7 @@ public class ColumnSnapshotGenerator extends JdbcSnapshotGenerator {
                 (column.getRelation() != null) && (column.getSchema() != null)) {
 
             Column.AutoIncrementInformation autoIncrementInformation =
-                    this.columnAutoIncrementService.obtainSequencesInformation(database, snapshot)
+                    this.columnAutoIncrementService.obtainSequencesInformation(database, column.getSchema(), snapshot)
                             .get(String.format("%s.%s.%s", column.getSchema().getName(), column.getRelation().getName(), column.getName()));
             if (autoIncrementInformation != null) {
                 column.setAutoIncrementInformation(autoIncrementInformation);
@@ -321,14 +321,7 @@ public class ColumnSnapshotGenerator extends JdbcSnapshotGenerator {
             type.setDataTypeId(columnMetadataResultSet.getInt("DATA_TYPE"));
             if (dataType.equalsIgnoreCase("NUMBER")) {
                 type.setColumnSize(columnMetadataResultSet.getInt("DATA_PRECISION"));
-//                if (type.getColumnSize() == null) {
-//                    type.setColumnSize(38);
-//                }
                 type.setDecimalDigits(columnMetadataResultSet.getInt("DATA_SCALE"));
-//                if (type.getDecimalDigits() == null) {
-//                    type.setDecimalDigits(0);
-//                }
-//            type.setRadix(10);
             } else {
                 if ("FLOAT".equalsIgnoreCase(dataType)) { //FLOAT [(precision)]
                     type.setColumnSize(columnMetadataResultSet.getInt("DATA_PRECISION"));
@@ -418,6 +411,12 @@ public class ColumnSnapshotGenerator extends JdbcSnapshotGenerator {
 
         DataType.ColumnSizeUnit columnSizeUnit = DataType.ColumnSizeUnit.BYTE;
 
+        if (database instanceof SybaseASADatabase &&
+            (columnMetadataResultSet.getInt("DATA_TYPE") == Types.VARCHAR || columnMetadataResultSet.getInt("DATA_TYPE") == Types.CHAR) &&
+            columnMetadataResultSet.getInt("scale") == 1) {
+            columnSizeUnit = DataType.ColumnSizeUnit.CHAR;
+        }
+
         int dataType = columnMetadataResultSet.getInt("DATA_TYPE");
         Integer columnSize = null;
         Integer decimalDigits = null;
@@ -484,9 +483,9 @@ public class ColumnSnapshotGenerator extends JdbcSnapshotGenerator {
          */
         int jdbcType = columnMetadataResultSet.getInt("DATA_TYPE");
 
-        // Java 8 compatibility notes: When upgrading this project to JDK8 and beyond, also execute this if-branch
-        // if jdbcType is TIMESTAMP_WITH_TIMEZONE (does not exist yet in JDK7)
-        if (jdbcType == Types.TIMESTAMP) {
+        if (jdbcType == Types.TIMESTAMP || jdbcType == Types.TIMESTAMP_WITH_TIMEZONE
+            // SQL Anywhere incorrectly reports type VARCHAR for TIMESTAMP_WITZH_TIMEZONE columns
+            || (database instanceof SybaseASADatabase && "timestamp with time zone".equalsIgnoreCase(columnTypeName))) {
 
             if (decimalDigits == null) {
                 type.setColumnSize(null);
@@ -558,6 +557,13 @@ public class ColumnSnapshotGenerator extends JdbcSnapshotGenerator {
                         ((columnMetadataResultSet.get(COLUMN_DEF_COL) != null) &&
                                 "NULL".equalsIgnoreCase((String) columnMetadataResultSet.get(COLUMN_DEF_COL)))) {
             columnMetadataResultSet.set(COLUMN_DEF_COL, null);
+        }
+
+        if (database instanceof SybaseASADatabase && "YES".equals(columnMetadataResultSet.get("IS_GENERATEDCOLUMN"))) {
+            Object virtColumnDef = columnMetadataResultSet.get(COLUMN_DEF_COL);
+            if ((virtColumnDef != null) && !"null".equals(virtColumnDef)) {
+                columnMetadataResultSet.set(COLUMN_DEF_COL, "COMPUTE (" + virtColumnDef + ")");
+            }
         }
 
         return SqlUtil.parseValue(database, columnMetadataResultSet.get(COLUMN_DEF_COL), columnInfo.getType());

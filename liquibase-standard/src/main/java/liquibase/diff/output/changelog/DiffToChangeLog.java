@@ -1,6 +1,7 @@
 package liquibase.diff.output.changelog;
 
 import liquibase.GlobalConfiguration;
+import liquibase.Labels;
 import liquibase.Scope;
 import liquibase.change.Change;
 import liquibase.change.core.*;
@@ -39,6 +40,7 @@ import java.io.OutputStream;
 import java.io.PrintStream;
 import java.text.SimpleDateFormat;
 import java.util.*;
+import java.util.stream.Collectors;
 
 public class DiffToChangeLog {
 
@@ -54,13 +56,14 @@ public class DiffToChangeLog {
     private int changeNumber = 1;
 
     private String changeSetContext;
+    private String changeSetLabels;
     private String changeSetAuthor;
     private String changeSetPath;
     private DiffResult diffResult;
-    private DiffOutputControl diffOutputControl;
+    private final DiffOutputControl diffOutputControl;
     private boolean tryDbaDependencies = true;
 
-    private static Set<Class> loggedOrderFor = new HashSet<>();
+    private static final Set<Class> loggedOrderFor = new HashSet<>();
 
     public DiffToChangeLog(DiffResult diffResult, DiffOutputControl diffOutputControl) {
         this.diffResult = diffResult;
@@ -84,6 +87,10 @@ public class DiffToChangeLog {
 
     public void setChangeSetContext(String changeSetContext) {
         this.changeSetContext = changeSetContext;
+    }
+
+    public void setChangeSetLabels(String changeSetLabels) {
+        this.changeSetLabels = changeSetLabels;
     }
 
     public void print(String changeLogFile) throws ParserConfigurationException, IOException, DatabaseException {
@@ -134,7 +141,6 @@ public class DiffToChangeLog {
             //
             // Get a Database instance and save it in the scope for later use
             //
-            DatabaseSnapshot snapshot = diffResult.getReferenceSnapshot();
             Database database = determineDatabase(diffResult.getReferenceSnapshot());
             if (database == null) {
                 database = determineDatabase(diffResult.getComparisonSnapshot());
@@ -329,7 +335,34 @@ public class DiffToChangeLog {
         changeSets.addAll(createChangeSets);
         changeSets.addAll(deleteChangeSets);
         changeSets.addAll(updateChangeSets);
+        changeSets = bringDropFKToTop(changeSets);
         return changeSets;
+    }
+
+    //
+    // Because the generated changeset list can contain both add and drop
+    // FK changes with the same constraint name, we make sure that the
+    // drop FK goes first
+    //
+    private List<ChangeSet> bringDropFKToTop(List<ChangeSet> changeSets) {
+        List<ChangeSet> dropFk = changeSets.stream().filter(cs -> {
+            return cs.getChanges().stream().anyMatch(ch -> ch instanceof DropForeignKeyConstraintChange);
+        }).collect(Collectors.toList());
+        if (dropFk == null || dropFk.isEmpty()) {
+            return changeSets;
+        }
+        List<ChangeSet> returnList = new ArrayList<>();
+        changeSets.stream().forEach(cs -> {
+            if (dropFk.contains(cs)) {
+                returnList.add(cs);
+            }
+        });
+        changeSets.stream().forEach(cs -> {
+            if (! dropFk.contains(cs)) {
+                returnList.add(cs);
+            }
+        });
+        return returnList;
     }
 
     private DatabaseObjectCollectionComparator getDatabaseObjectCollectionComparator() {
@@ -721,11 +754,14 @@ public class DiffToChangeLog {
 
             if (useSeparateChangeSets(changes)) {
                 for (Change change : changes) {
-                    ChangeSet changeSet = new ChangeSet(generateId(changes), getChangeSetAuthor(), false, false, this.changeSetPath, changeSetContext,
+                    ChangeSet changeSet =
+                       new ChangeSet(generateId(changes), getChangeSetAuthor(), false, false, this.changeSetPath, changeSetContext,
                             null, true, quotingStrategy, null);
                     changeSet.setCreated(created);
                     if (diffOutputControl.getLabels() != null) {
                         changeSet.setLabels(diffOutputControl.getLabels());
+                    } else {
+                        changeSet.setLabels(new Labels(this.changeSetLabels));
                     }
                     changeSet.addChange(change);
                     changeSets.add(changeSet);
@@ -736,6 +772,8 @@ public class DiffToChangeLog {
                 changeSet.setCreated(created);
                 if (diffOutputControl.getLabels() != null) {
                     changeSet.setLabels(diffOutputControl.getLabels());
+                } else {
+                    changeSet.setLabels(new Labels(this.changeSetLabels));
                 }
                 for (Change change : changes) {
                     changeSet.addChange(change);
@@ -827,7 +865,7 @@ public class DiffToChangeLog {
 
     private static class DependencyGraph {
 
-        private Map<Class<? extends DatabaseObject>, Node> allNodes = new HashMap<>();
+        private final Map<Class<? extends DatabaseObject>, Node> allNodes = new HashMap<>();
 
         private void addType(Class<? extends DatabaseObject> type) {
             allNodes.put(type, new Node(type));

@@ -1,14 +1,16 @@
 package liquibase.diffchangelog
 
 import liquibase.Scope
+import liquibase.UpdateSummaryEnum
+import liquibase.change.core.AddForeignKeyConstraintChange
+import liquibase.change.core.DropForeignKeyConstraintChange
+import liquibase.changelog.ChangeLogParameters
+import liquibase.changelog.ChangeSet
+import liquibase.changelog.DatabaseChangeLog
 import liquibase.command.CommandScope
 import liquibase.command.core.DiffChangelogCommandStep
-import liquibase.command.core.DropAllCommandStep
 import liquibase.command.core.UpdateCommandStep
-import liquibase.command.core.helpers.DbUrlConnectionCommandStep
-import liquibase.command.core.helpers.DiffOutputControlCommandStep
-import liquibase.command.core.helpers.PreCompareCommandStep
-import liquibase.command.core.helpers.ReferenceDbUrlConnectionCommandStep
+import liquibase.command.core.helpers.*
 import liquibase.command.util.CommandUtil
 import liquibase.database.Database
 import liquibase.database.DatabaseFactory
@@ -16,13 +18,12 @@ import liquibase.diff.compare.CompareControl
 import liquibase.extension.testing.testsystem.DatabaseTestSystem
 import liquibase.extension.testing.testsystem.TestSystemFactory
 import liquibase.extension.testing.testsystem.spock.LiquibaseIntegrationTest
-import liquibase.lockservice.LockServiceFactory
+import liquibase.parser.core.json.JsonChangeLogParser
 import liquibase.resource.SearchPathResourceAccessor
 import liquibase.snapshot.SnapshotGeneratorFactory
 import liquibase.structure.core.Sequence
 import liquibase.util.FileUtil
 import liquibase.util.StringUtil
-import spock.lang.Ignore
 import spock.lang.Shared
 import spock.lang.Specification
 
@@ -59,6 +60,8 @@ CREATE TABLE $tableName ( product_no varchar(20) DEFAULT nextval('$sequenceName'
         commandScope.addArgumentValue(PreCompareCommandStep.COMPARE_CONTROL_ARG, CompareControl.STANDARD)
         commandScope.addArgumentValue(DbUrlConnectionCommandStep.DATABASE_ARG, targetDatabase)
         commandScope.addArgumentValue(DiffOutputControlCommandStep.INCLUDE_SCHEMA_ARG, true)
+        commandScope.addArgumentValue(DiffChangelogCommandStep.LABEL_FILTER_ARG, "newLabels")
+        commandScope.addArgumentValue(DiffChangelogCommandStep.CONTEXTS_ARG, "newContexts")
 
         then:
         commandScope.execute()
@@ -66,6 +69,8 @@ CREATE TABLE $tableName ( product_no varchar(20) DEFAULT nextval('$sequenceName'
         def generatedChangelogContents = FileUtil.getContents(generatedChangelog)
         generatedChangelogContents.contains("""CREATE SEQUENCE  IF NOT EXISTS "public"."${sequenceName.toLowerCase()}" AS bigint START WITH 100 INCREMENT BY 5 MINVALUE 1 MAXVALUE 9223372036854775807 CACHE 1;""")
         generatedChangelogContents.contains("""CREATE TABLE "public"."${tableName.toLowerCase()}" ("product_no" VARCHAR(20) DEFAULT 'nextval(''''${sequenceName.toLowerCase()}''''::regclass)');""")
+        generatedChangelogContents.contains(" labels: \"newlabels\"")
+        generatedChangelogContents.contains(" contextFilter: \"newContexts\"")
 
         cleanup:
         try {
@@ -79,7 +84,45 @@ CREATE TABLE $tableName ( product_no varchar(20) DEFAULT nextval('$sequenceName'
         CommandUtil.runDropAll(postgres)
     }
 
-    //@Ignore("This test causes the pipeline to time out.")
+    def "FKs which are different but have same name" () {
+        when:
+        def diffChangelogFile = "target/test-classes/diffChangelog.json"
+        def url = "offline:postgresql?snapshot=target/test-classes/target.json"
+        Database targetDatabase =
+                DatabaseFactory.getInstance().openDatabase(url, null, null, null, new SearchPathResourceAccessor("."))
+
+        def refUrl = "offline:postgresql?snapshot=target/test-classes/reference.json"
+        Database refDatabase =
+                DatabaseFactory.getInstance().openDatabase(refUrl, null, null, null, new SearchPathResourceAccessor("."))
+
+        CommandScope commandScope = new CommandScope(DiffChangelogCommandStep.COMMAND_NAME)
+        commandScope.addArgumentValue(ReferenceDbUrlConnectionCommandStep.REFERENCE_DATABASE_ARG, refDatabase)
+        commandScope.addArgumentValue(DiffChangelogCommandStep.CHANGELOG_FILE_ARG, diffChangelogFile)
+        commandScope.addArgumentValue(PreCompareCommandStep.COMPARE_CONTROL_ARG, CompareControl.STANDARD)
+        commandScope.addArgumentValue(DbUrlConnectionCommandStep.DATABASE_ARG, targetDatabase)
+        commandScope.addArgumentValue(DiffOutputControlCommandStep.INCLUDE_SCHEMA_ARG, true)
+        commandScope.execute()
+        def generatedChangelog = new File(diffChangelogFile)
+        DatabaseChangeLog changelog =
+                new JsonChangeLogParser().parse(diffChangelogFile, new ChangeLogParameters(), new SearchPathResourceAccessor("."))
+        List<ChangeSet> changeSets = changelog.getChangeSets()
+
+        then:
+        DropForeignKeyConstraintChange dropFK = changeSets.get(0).getChanges().get(0) as DropForeignKeyConstraintChange
+        AddForeignKeyConstraintChange addFK = changeSets.get(3).getChanges().get(0) as AddForeignKeyConstraintChange
+        dropFK.getConstraintName() == addFK.getConstraintName()
+
+        cleanup:
+        try {
+            generatedChangelog.delete()
+        } catch (Exception ignored) {
+
+        }
+        postgres.getConnection().close()
+        refDatabase.close()
+        targetDatabase.close()
+    }
+
     def "should include view comments"() {
         when:
         def changelogfile = StringUtil.randomIdentifer(10) + ".sql"

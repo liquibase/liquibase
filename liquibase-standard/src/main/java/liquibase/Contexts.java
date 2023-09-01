@@ -12,11 +12,11 @@ import java.util.*;
  * migration run. Any string can be used for the context name and they are checked case-insensitively.
  * </p>
  *
- * @see <a href="https://docs.liquibase.com/concepts/advanced/contexts.html" target="_top">contexts</a> in documentation
+ * @see <a href="https://docs.liquibase.com/concepts/changelogs/attributes/contexts.html" target="_top">contexts</a> in documentation
  */
 public class Contexts {
 
-    private HashSet<String> contextStore = new HashSet<>();
+    private final HashSet<String> contextStore = new HashSet<>();
 
     public Contexts() {
     }
@@ -74,7 +74,7 @@ public class Contexts {
 
 
     public boolean isEmpty() {
-        return (this.contextStore == null) || this.contextStore.isEmpty();
+        return this.contextStore.isEmpty();
     }
 
     public Set<String> getContexts() {

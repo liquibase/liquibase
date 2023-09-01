@@ -15,7 +15,7 @@ public abstract class AbstractConfigurationContainer implements ConfigurationCon
 
     private final String namespace;
     private final ConfigurationContainer container;
-    private Map<String, ConfigurationProperty> properties = new HashMap<>();
+    private final Map<String, ConfigurationProperty> properties = new HashMap<>();
 
     public AbstractConfigurationContainer(String namespace) {
         this.namespace = namespace;

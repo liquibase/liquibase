@@ -3,8 +3,10 @@ package org.liquibase.maven.plugins;
 import liquibase.GlobalConfiguration;
 import liquibase.Liquibase;
 import liquibase.Scope;
+import liquibase.ThreadLocalScopeManager;
 import liquibase.changelog.visitor.ChangeExecListener;
 import liquibase.changelog.visitor.DefaultChangeExecListener;
+import liquibase.command.core.helpers.DbUrlConnectionCommandStep;
 import liquibase.configuration.LiquibaseConfiguration;
 import liquibase.configuration.core.DefaultsFileValueProvider;
 import liquibase.database.Database;
@@ -15,6 +17,10 @@ import liquibase.integration.IntegrationDetails;
 import liquibase.integration.commandline.ChangeExecListenerUtils;
 import liquibase.integration.commandline.CommandLineUtils;
 import liquibase.integration.commandline.LiquibaseCommandLineConfiguration;
+import liquibase.logging.LogFormat;
+import liquibase.logging.LogService;
+import liquibase.logging.core.JavaLogService;
+import liquibase.logging.core.LogServiceFactory;
 import liquibase.resource.DirectoryResourceAccessor;
 import liquibase.resource.ResourceAccessor;
 import liquibase.resource.SearchPathResourceAccessor;
@@ -27,6 +33,7 @@ import org.apache.maven.plugin.MojoFailureException;
 import org.apache.maven.plugin.descriptor.MojoDescriptor;
 import org.apache.maven.plugin.descriptor.Parameter;
 import org.apache.maven.plugin.descriptor.PluginDescriptor;
+import org.apache.maven.plugin.logging.Log;
 import org.apache.maven.project.MavenProject;
 import org.apache.maven.wagon.authentication.AuthenticationInfo;
 import org.liquibase.maven.property.PropertyElement;
@@ -40,6 +47,10 @@ import java.net.URLClassLoader;
 import java.nio.file.Files;
 import java.text.MessageFormat;
 import java.util.*;
+import java.util.logging.Handler;
+
+import static java.util.ResourceBundle.getBundle;
+import static liquibase.configuration.LiquibaseConfiguration.REGISTERED_VALUE_PROVIDERS_KEY;
 
 /**
  * A base class for providing Liquibase {@link liquibase.Liquibase} functionality.
@@ -54,10 +65,17 @@ import java.util.*;
 @SuppressWarnings("java:S2583")
 public abstract class AbstractLiquibaseMojo extends AbstractMojo {
 
+    static {
+        // If maven is called with -T and a value larger than 1, it can get confused under heavy thread load
+        Scope.setScopeManager( new ThreadLocalScopeManager(null));
+    }
+
     /**
      * Suffix for fields that are representing a default value for a another field.
      */
     private static final String DEFAULT_FIELD_SUFFIX = "Default";
+
+    private MavenLog logCache;
 
     /**
      *
@@ -200,13 +218,37 @@ public abstract class AbstractLiquibaseMojo extends AbstractMojo {
      * Deprecated and ignored configuration property. Logging is managed via the standard maven logging system
      * either using the -e, -X or -q flags or the ${maven.home}/conf/logging/simplelogger.properties file.
      *
-     * See https://maven.apache.org/maven-logging.html for more information.
+     * @see <a href="https://maven.apache.org/maven-logging.html">maven-logging for more information.</a>
      *
      * @parameter property="liquibase.logging"
      * @deprecated Logging managed by maven
      */
     @PropertyElement
     protected String logging;
+
+    /**
+     * Determines the minimum log level liquibase uses when logging.
+     * <p>
+     * Supported values are:
+     *
+     * <ul>
+     *     <li>DEBUG</li>
+     *     <li>INFO</li>
+     *     <li>WARNING</li>
+     *     <li>ERROR</li>
+     * </ul>
+     *
+     * The primary use case for this option is to reduce the amount of logs from liquibase, while
+     * not changing the log level of maven itself, without changing ${maven.home}/conf/logging/simplelogger.properties.
+     * <p>
+     * <b>NOTE:</b> The final log level is the <i>maximum</i> of this value and the maven log level.
+     * Thus, it is not possible to <i>decrease</i> the effective log level with this option.
+     *
+     * @parameter property="liquibase.logLevel" default-value="DEBUG"
+     */
+    @PropertyElement
+    protected String logLevel;
+
     /**
      * Specifies the <i>liquibase.properties</i> you want to use to configure Liquibase.
      *
@@ -255,6 +297,15 @@ public abstract class AbstractLiquibaseMojo extends AbstractMojo {
      */
     @PropertyElement
     protected boolean skip;
+
+    /**
+     * Skip plugin execution if the specified file exists.
+     * The use of this parameter is NOT RECOMMENDED but can be used when needed.
+     *
+     * @parameter property="liquibase.skipOnFileExists"
+     */
+    @PropertyElement
+    protected String skipOnFileExists;
 
     /**
      * A flag which indicates you want to set the character encoding of the output file during the updateSQL phase.
@@ -483,7 +534,7 @@ public abstract class AbstractLiquibaseMojo extends AbstractMojo {
      */
     @PropertyElement
     protected String sqlPlusLogFile;
-    
+
     /**
      * Specifies your sqlcmd path.
      *
@@ -572,8 +623,20 @@ public abstract class AbstractLiquibaseMojo extends AbstractMojo {
     @PropertyElement
     protected String changeExecListenerPropertiesFile;
 
+    /**
+     * Sets the format of log output to console or log files.
+     * Open Source users default to unstructured TXT logs to the console or output log files.
+     * Pro users have the option to set value as JSON or JSON_PRETTY to enable json-structured log files to the console or output log files.
+     *
+     * @parameter property="liquibase.logFormat"
+     */
+    @PropertyElement
+    protected String logFormat;
+
     protected String commandName;
     protected DefaultChangeExecListener defaultChangeExecListener;
+    private static final ResourceBundle coreBundle = getBundle("liquibase/i18n/liquibase-core");
+
 
     /**
      * Get the specified license key. This first checks liquibaseLicenseKey and if no key is found, then returns
@@ -598,14 +661,61 @@ public abstract class AbstractLiquibaseMojo extends AbstractMojo {
         return new BufferedWriter(new OutputStreamWriter(Files.newOutputStream(outputFile.toPath()), encoding));
     }
 
+    private Map<String, Object> setUpLogging() throws Exception {
+        // First determine whether the specified log format requires the use of the standard Scope logger.
+        boolean useScopeLogger = false;
+        if (this.logFormat != null) {
+            try {
+                useScopeLogger = LogFormat.valueOf(this.logFormat.toUpperCase()).isUseScopeLoggerInMaven();
+            } catch (Exception ignored) {
+
+            }
+        }
+
+        Map<String, Object> scopeAttrs = new HashMap<>();
+        if (!useScopeLogger) {
+            // If the specified log format does not require the use of the standard Liquibase logger, just return the
+            // Maven log service as is traditionally done.
+            scopeAttrs.put(Scope.Attr.logService.name(), new MavenLogService(getLog()));
+            scopeAttrs.put(Scope.Attr.ui.name(), new MavenUi(getLog()));
+            return scopeAttrs;
+        } else {
+            // The log format requires the use of the standard Liquibase logger, so set it up.
+            scopeAttrs.put(LiquibaseCommandLineConfiguration.LOG_FORMAT.getKey(), this.logFormat);
+            scopeAttrs.put(REGISTERED_VALUE_PROVIDERS_KEY, true);
+            // Get a new log service after registering the value providers, since the log service might need to load parameters using newly registered value providers.
+            LogService newLogService = Scope.child(scopeAttrs, () -> Scope.getCurrentScope().getSingleton(LogServiceFactory.class).getDefaultLogService());
+            // Set the formatter on all the handlers.
+            java.util.logging.Logger rootLogger = java.util.logging.Logger.getLogger("");
+            for (Handler handler : rootLogger.getHandlers()) {
+                JavaLogService.setFormatterOnHandler(newLogService, handler);
+            }
+            scopeAttrs.put(Scope.Attr.logService.name(), newLogService);
+            return scopeAttrs;
+        }
+    }
+
     @Override
     public void execute() throws MojoExecutionException, MojoFailureException {
         if (StringUtil.trimToNull(logging) != null) {
             getLog().error("The liquibase-maven-plugin now manages logging via the standard maven logging config, not the 'logging' configuration. Use the -e, -X or -q flags or see https://maven.apache.org/maven-logging.html");
         }
+        if (skip) {
+            getLog().warn("Liquibase skipped due to Maven configuration");
+            return;
+        }
+
+        if (skipOnFileExists != null) {
+            File f = new File(skipOnFileExists);
+            if (f.exists()) {
+                getLog().warn("Liquibase skipped because file " + skipOnFileExists + " exists");
+                return;
+            }
+            getLog().warn("Liquibase NOT skipped because file " + skipOnFileExists + " does NOT exists");
+        }
 
         try {
-            Scope.child(Scope.Attr.logService, new MavenLogService(getLog()), () -> {
+            Scope.child(setUpLogging(), () -> {
 
                 getLog().info(MavenUtils.LOG_SEPARATOR);
 
@@ -621,10 +731,6 @@ public abstract class AbstractLiquibaseMojo extends AbstractMojo {
 
                 if (!LiquibaseCommandLineConfiguration.SHOULD_RUN.getCurrentValue()) {
                     getLog().info("Liquibase did not run because " + LiquibaseCommandLineConfiguration.SHOULD_RUN.getKey() + " was set to false");
-                    return;
-                }
-                if (skip) {
-                    getLog().warn("Liquibase skipped due to Maven configuration");
                     return;
                 }
 
@@ -650,7 +756,7 @@ public abstract class AbstractLiquibaseMojo extends AbstractMojo {
 
                         final Field field = getField(this.getClass(), name);
                         if (field == null) {
-                            getLog().debug("Cannot read current maven value for. Will not send the value to hub " + name);
+                            getLog().debug("Cannot read current maven value for: " + name);
                         } else {
                             field.setAccessible(true);
                             final Object value = field.get(this);
@@ -708,6 +814,7 @@ public abstract class AbstractLiquibaseMojo extends AbstractMojo {
                                     changelogSchemaName,
                                     databaseChangeLogTableName,
                                     databaseChangeLogLockTableName);
+                            DbUrlConnectionCommandStep.logMdc(url, database);
                             liquibase = createLiquibase(database);
 
                             configureChangeLogProperties();
@@ -1123,5 +1230,36 @@ public abstract class AbstractLiquibaseMojo extends AbstractMojo {
         nativeProperties.computeIfAbsent("liquibase.sqlcmd.logFile", val -> sqlcmdLogFile);
         nativeProperties.computeIfAbsent("liquibase.sqlcmd.catalogName", val -> sqlcmdCatalogName);
         return nativeProperties;
+    }
+
+    @Override
+    public synchronized Log getLog() {
+        if (logCache == null) {
+            logCache = new MavenLog(super.getLog(), logLevel);
+        }
+        return logCache;
+    }
+
+    /**
+     * Returns the OutputStream based on whether there is an outputFile provided.
+     * If no outputFile parameter is provided, defaults to System.out.
+     * @param outputFile the string outputFile
+     * @return the OutputStream to use
+     * @throws LiquibaseException if we cannot create the provided outputFile
+     */
+    protected OutputStream getOutputStream(String outputFile) throws LiquibaseException {
+        if (outputFile == null) {
+            return System.out;
+        }
+        FileOutputStream fileOut;
+        try {
+            fileOut = new FileOutputStream(outputFile, false);
+        } catch (IOException e) {
+            Scope.getCurrentScope().getLog(getClass()).severe(String.format(
+                    coreBundle.getString("could.not.create.output.file"),
+                    outputFile));
+            throw new LiquibaseException(e);
+        }
+        return fileOut;
     }
 }

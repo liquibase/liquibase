@@ -1,12 +1,10 @@
 package liquibase.plugin;
 
 import liquibase.Scope;
+import liquibase.exception.UnexpectedLiquibaseException;
 import liquibase.servicelocator.ServiceLocator;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.ServiceLoader;
-import java.util.TreeSet;
+import java.util.*;
 
 /**
  * Convenience base class for all factories that find correct {@link Plugin} implementations.
@@ -31,23 +29,25 @@ public abstract class AbstractPluginFactory<T extends Plugin> implements PluginF
      * Finds the plugin for which {@link #getPriority(Plugin, Object...)}  returns the highest value for the given scope and args.
      * This method is called by a public implementation-specific methods.
      * Normally this does not need to be overridden, instead override {@link #getPriority(Plugin, Object...)} to compute the priority of each object for the scope and arguments passed to this method.
-     *
+     * <p>
      * However, if there is a {@link Scope} key of "liquibase.plugin.${plugin.interface.class.Name}", an instance of that class will always be ran first.
      *
      * @return null if no plugins are found or have a priority greater than zero.
      */
     protected T getPlugin(final Object... args) {
-        final String pluginClassName = getPluginClass().getName();
-        final Class forcedPlugin = Scope.getCurrentScope().get("liquibase.plugin." + pluginClassName, Class.class);
-        if (forcedPlugin != null) {
-            for (T plugin : findAllInstances()) {
-                if (plugin.getClass().equals(forcedPlugin)) {
-                    return plugin;
-                }
-            }
-            throw new RuntimeException("No registered " + pluginClassName + " plugin " + forcedPlugin.getName());
-        }
+        Set<T> applicable = this.getPlugins(args);
 
+        if (applicable.isEmpty()) {
+            return null;
+        }
+        return applicable.iterator().next();
+    }
+
+    protected Set<T> getPlugins(final Object... args) {
+        Optional<T> forcedPlugin = this.getForcedPluginIfAvailable();
+        if (forcedPlugin.isPresent()) {
+            return new HashSet<>(Collections.singletonList(forcedPlugin.get()));
+        }
         TreeSet<T> applicable = new TreeSet<>((o1, o2) -> {
             Integer o1Priority = getPriority(o1, args);
             Integer o2Priority = getPriority(o2, args);
@@ -64,17 +64,25 @@ public abstract class AbstractPluginFactory<T extends Plugin> implements PluginF
                 applicable.add(plugin);
             }
         }
+        return applicable;
+    }
 
-        if (applicable.size() == 0) {
-            return null;
+    private Optional<T> getForcedPluginIfAvailable() {
+        final String pluginClassName = getPluginClass().getName();
+        final Class<?> forcedPlugin = Scope.getCurrentScope().get("liquibase.plugin." + pluginClassName, Class.class);
+        if (forcedPlugin != null) {
+            for (T plugin : findAllInstances()) {
+                if (plugin.getClass().equals(forcedPlugin)) {
+                    return Optional.of(plugin);
+                }
+            }
+            throw new UnexpectedLiquibaseException("No registered " + pluginClassName + " plugin " + forcedPlugin.getName());
         }
-
-        return applicable.iterator().next();
-
+        return Optional.empty();
     }
 
 
-    public void register(T plugin) {
+    public synchronized void register(T plugin) {
         this.findAllInstances();
         this.allInstances.add(plugin);
     }
@@ -95,7 +103,7 @@ public abstract class AbstractPluginFactory<T extends Plugin> implements PluginF
         return this.allInstances;
     }
 
-    protected void removeInstance(T instance) {
+    protected synchronized void removeInstance(T instance) {
         if (this.allInstances == null) {
             return;
         }

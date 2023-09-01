@@ -4,6 +4,7 @@ import liquibase.database.Database;
 import liquibase.database.DatabaseConnection;
 import liquibase.database.core.H2Database;
 import liquibase.database.core.PostgresDatabase;
+import liquibase.database.core.SybaseASADatabase;
 import liquibase.exception.DatabaseException;
 import liquibase.exception.ValidationErrors;
 import liquibase.sql.Sql;
@@ -16,6 +17,8 @@ import java.math.BigInteger;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.*;
+import static java.math.BigInteger.ONE;
+import static java.math.BigInteger.ZERO;
 
 public class CreateSequenceGeneratorTest extends AbstractSqlGeneratorTest<CreateSequenceStatement> {
 
@@ -32,6 +35,25 @@ public class CreateSequenceGeneratorTest extends AbstractSqlGeneratorTest<Create
     @Override
     protected CreateSequenceStatement createSampleSqlStatement() {
         return new CreateSequenceStatement(CATALOG_NAME, SCHEMA_NAME, SEQUENCE_NAME);
+    }
+
+    @Test
+    public void sqlanywhereDatabaseSupportNoCache() {
+        // given
+        DatabaseConnection dbConnection = mock(DatabaseConnection.class);
+        SybaseASADatabase database = spy(new SybaseASADatabase());
+        database.setConnection(dbConnection);
+        doReturn(SEQUENCE_NAME).when(database).escapeSequenceName(CATALOG_NAME, SCHEMA_NAME, SEQUENCE_NAME);
+        CreateSequenceStatement createSequenceStatement = createSampleSqlStatement();
+        createSequenceStatement.setStartValue(ONE);
+
+        // when
+        createSequenceStatement.setCacheSize(ZERO);
+
+        // then
+        Sql[] sql = new CreateSequenceGenerator().generateSql(createSequenceStatement, database, new MockSqlGeneratorChain());
+        assertThat(sql).isNotEmpty().hasSize(1);
+        assertThat(sql[0].toSql()).contains("NO CACHE");
     }
 
     @Test

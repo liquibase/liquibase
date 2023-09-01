@@ -1,15 +1,23 @@
 package liquibase.database.core;
 
+import static liquibase.util.BooleanUtil.isTrue;
+
 import liquibase.CatalogAndSchema;
+import liquibase.CatalogAndSchema.CatalogAndSchemaCase;
+import liquibase.GlobalConfiguration;
 import liquibase.Scope;
 import liquibase.database.AbstractJdbcDatabase;
 import liquibase.database.DatabaseConnection;
+import liquibase.database.ObjectQuotingStrategy;
 import liquibase.database.OfflineConnection;
 import liquibase.database.jvm.JdbcConnection;
 import liquibase.exception.DatabaseException;
 import liquibase.exception.DateParseException;
 import liquibase.exception.UnexpectedLiquibaseException;
 import liquibase.statement.DatabaseFunction;
+import liquibase.structure.DatabaseObject;
+import liquibase.structure.core.Catalog;
+import liquibase.structure.core.Schema;
 import liquibase.util.ISODateFormat;
 import liquibase.util.JdbcUtil;
 
@@ -21,9 +29,12 @@ import java.sql.SQLException;
 import java.sql.Statement;
 import java.text.ParseException;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.Date;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Locale;
+import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -31,10 +42,12 @@ public class H2Database extends AbstractJdbcDatabase {
 
     private static final String PATCH_VERSION_REGEX = "^(?:\\d+\\.)(?:\\d+\\.)(\\d+).*$";
     private static final Pattern PATCH_VERSION_PATTERN = Pattern.compile(PATCH_VERSION_REGEX);
-    private static String START_CONCAT = "CONCAT(";
-    private static String END_CONCAT = ")";
-    private static String SEP_CONCAT = ", ";
-    private static List<String> keywords = Arrays.asList(
+    private static final String START_CONCAT = "CONCAT(";
+    private static final String END_CONCAT = ")";
+    private static final String SEP_CONCAT = ", ";
+    private static final String LEGAL_IDENTIFIER_REGEX = "^[a-zA-Z_][a-zA-Z_0-9]*$";
+    private static final Pattern LEGAL_IDENTIFIER_PATTERN = Pattern.compile(LEGAL_IDENTIFIER_REGEX);
+    protected static final Set<String> V2_RESERVED_WORDS = Collections.unmodifiableSet(new LinkedHashSet<>(Arrays.asList(
             "ALL",
             "AND",
             "ANY",
@@ -78,8 +91,6 @@ public class H2Database extends AbstractJdbcDatabase {
             "IF",
             "ILIKE",
             "IN",
-            "ILIKE",
-            "IN",
             "INNER",
             "INTERSECT",
             "INTERSECTS",
@@ -118,8 +129,8 @@ public class H2Database extends AbstractJdbcDatabase {
             "SET",
             "SOME",
             "SYMMETRIC",
-            "SYSTEM_USER",
             "SYSDATE",
+            "SYSTEM_USER",
             "SYSTIME",
             "SYSTIMESTAMP",
             "TABLE",
@@ -142,7 +153,89 @@ public class H2Database extends AbstractJdbcDatabase {
             "WITH",
             "YEAR",
             "_ROWID_"
-    );
+    )));
+    protected static final Set<String> V1_RESERVED_WORDS = Collections.unmodifiableSet(new LinkedHashSet<>(Arrays.asList(
+            "ALL",
+            "AND",
+            "ARRAY",
+            "AS",
+            "BETWEEN",
+            "BOTH",
+            "CASE",
+            "CHECK",
+            "CONSTRAINT",
+            "CROSS",
+            "CURRENT_CATALOG",
+            "CURRENT_DATE",
+            "CURRENT_SCHEMA",
+            "CURRENT_TIME",
+            "CURRENT_TIMESTAMP",
+            "CURRENT_USER",
+            "DISTINCT",
+            "EXCEPT",
+            "EXISTS",
+            "FALSE",
+            "FETCH",
+            "FILTER",
+            "FOR",
+            "FOREIGN",
+            "FROM",
+            "FULL",
+            "GROUP",
+            "GROUPS",
+            "HAVING",
+            "IF",
+            "ILIKE",
+            "IN",
+            "INNER",
+            "INTERSECT",
+            "INTERSECTS",
+            "INTERVAL",
+            "IS",
+            "JOIN",
+            "LEADING",
+            "LEFT",
+            "LIKE",
+            "LIMIT",
+            "LOCALTIME",
+            "LOCALTIMESTAMP",
+            "MINUS",
+            "NATURAL",
+            "NOT",
+            "NULL",
+            "OFFSET",
+            "ON",
+            "OR",
+            "ORDER",
+            "OVER",
+            "PARTITION",
+            "PRIMARY",
+            "QUALIFY",
+            "RANGE",
+            "REGEXP",
+            "RIGHT",
+            "ROW",
+            "ROWNUM",
+            "ROWS",
+            "SELECT",
+            "SYSDATE",
+            "SYSTIME",
+            "SYSTIMESTAMP",
+            "TABLE",
+            "TODAY",
+            "TOP",
+            "TRAILING",
+            "TRUE",
+            "UNION",
+            "UNIQUE",
+            "UNKNOWN",
+            "USING",
+            "VALUES",
+            "WHERE",
+            "WINDOW",
+            "WITH",
+            "_ROWID_"
+    )));
     private String connectionSchemaName = "PUBLIC";
 
     private static final int MAJOR_VERSION_FOR_MINMAX_IN_SEQUENCES = 1;
@@ -283,7 +376,71 @@ public class H2Database extends AbstractJdbcDatabase {
 
     @Override
     public boolean isReservedWord(String objectName) {
-        return keywords.contains(objectName.toUpperCase(Locale.US));
+        return super.isReservedWord(objectName) || getReservedWords().contains(objectName.toUpperCase(Locale.US));
+    }
+
+    protected Set<String> getReservedWords() {
+        try {
+            if (getDatabaseMajorVersion() >= 2) {
+                return V2_RESERVED_WORDS;
+            }
+        } catch (DatabaseException e) {
+            Scope.getCurrentScope().getLog(getClass())
+                    .warning("Failed to determine database version, reported error: " + e.getMessage());
+        }
+        return V1_RESERVED_WORDS;
+    }
+
+    @Override
+    public String correctObjectName(String objectName, Class<? extends DatabaseObject> objectType) {
+        if (objectName == null) {
+            return null;
+        }
+        if (isCatalogOrSchemaType(objectType)) {
+            if (isTrue(GlobalConfiguration.PRESERVE_SCHEMA_CASE.getCurrentValue())
+                    || getSchemaAndCatalogCase() == CatalogAndSchemaCase.ORIGINAL_CASE) {
+                return objectName;
+            }
+            if (getSchemaAndCatalogCase() == CatalogAndSchemaCase.UPPER_CASE) {
+                return objectName.toUpperCase(Locale.US);
+            }
+            if (getSchemaAndCatalogCase() == CatalogAndSchemaCase.LOWER_CASE) {
+                return objectName.toLowerCase(Locale.US);
+            }
+        }
+        if (unquotedObjectsAreUppercased == null || quotingStrategy == ObjectQuotingStrategy.QUOTE_ALL_OBJECTS) {
+            return objectName;
+        }
+        if (isTrue(unquotedObjectsAreUppercased)) {
+            return objectName.toUpperCase(Locale.US);
+        }
+        return objectName.toLowerCase(Locale.US);
+    }
+
+    @Override
+    public String escapeObjectName(String objectName, final Class<? extends DatabaseObject> objectType) {
+        if (objectName == null) {
+            return null;
+        }
+        return mustQuoteObjectName(objectName, objectType)
+                ? quoteObject(correctObjectName(objectName, objectType), objectType) : objectName;
+    }
+
+    @Override
+    protected boolean mustQuoteObjectName(String objectName, Class<? extends DatabaseObject> objectType) {
+        return quotingStrategy == ObjectQuotingStrategy.QUOTE_ALL_OBJECTS
+                || isCatalogOrSchemaType(objectType)
+                        && (isTrue(GlobalConfiguration.PRESERVE_SCHEMA_CASE.getCurrentValue())
+                                || getSchemaAndCatalogCase() == CatalogAndSchemaCase.ORIGINAL_CASE)
+                || isIllegalIdentifier(objectName) || isReservedWord(objectName);
+    }
+
+    private boolean isCatalogOrSchemaType(Class<? extends DatabaseObject> objectType) {
+        return objectType == Catalog.class || objectType == Schema.class;
+    }
+
+    private boolean isIllegalIdentifier(String objectName) {
+        return !LEGAL_IDENTIFIER_PATTERN.matcher(objectName).matches();
     }
 
     @Override

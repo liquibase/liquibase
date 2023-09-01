@@ -8,7 +8,7 @@ on:
         description: 'Release Tag'
         required: true
 env:
-  MAVEN_VERSION: '3.8.7'
+  MAVEN_VERSION: '3.9.2'
 jobs:
   setup:
     name: Setup
@@ -38,17 +38,18 @@ jobs:
           echo "Publishing version ${{ steps.collect-data.outputs.version }} from ${{ steps.collect-data.outputs.tag }}"
 
   manual_trigger_deployment:
-    name: Manually trigger deployment 
+    name: Manually trigger deployment
     needs: [ setup ]
     runs-on: ubuntu-22.04
     steps:
-      - uses: trstringer/manual-approval@v1
+      - name: Get Version to deploy
+        uses: trstringer/manual-approval@v1
         with:
           secret: ${{ secrets.GITHUB_TOKEN }}
-          approvers: suryaaki2,XDelphiGrl,jnewton03,kristyldatical
-          minimum-approvals: 2
-          issue-title: "Deploying ${version} to sonatype"
-          issue-body: "Please approve or deny the deployment of version ${version}"
+          approvers: suryaaki2,rberezen,jnewton03,kristyldatical,sayaliM0412
+          minimum-approvals: 1
+          issue-title: "Deploying ${{ needs.setup.outputs.version }} to sonatype"
+          issue-body: "Please approve or deny the deployment of version ${{ needs.setup.outputs.version }}"
           additional-approved-words: 'lgtm,✅,👍,proceed,shipit,:shipit:'
           additional-denied-words: 'stop,error,failed,fail,broken,:x:,👎'
 
@@ -58,7 +59,7 @@ jobs:
     runs-on: ubuntu-22.04
     steps:
       - name: Download release assets
-        uses: robinraju/release-downloader@v1.7
+        uses: robinraju/release-downloader@v1.8
         with:
           repository: "liquibase/liquibase"
           tag: "${{ needs.setup.outputs.tag }}"
@@ -208,7 +209,7 @@ jobs:
       contents: read
     steps:
     - name: Download release javadocs
-      uses: robinraju/release-downloader@v1.7
+      uses: robinraju/release-downloader@v1.8
       with:
         repository: "liquibase/liquibase"
         tag: "${{ needs.setup.outputs.tag }}"
@@ -250,7 +251,7 @@ jobs:
           java-version: '17'
           distribution: 'temurin'
           cache: 'maven'
-          server-id: github
+          server-id: liquibase
       - name: Set up Maven
         uses: stCarolas/setup-maven@v4.5
         with:
@@ -264,7 +265,7 @@ jobs:
         run: mvn -B clean deploy -DskipTests=true
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          TARGET_ARTIFACT_REPOSITORY: github
+          TARGET_ARTIFACT_REPOSITORY: liquibase
 
   deploy_xsd:
       name: Upload xsds
@@ -316,5 +317,12 @@ jobs:
             sed -ie "s/<\/ul>/  <li><a href=\"\/xml\/ns\/dbchangelog\/dbchangelog-${xsd_version}.xsd\">dbchangelog-${xsd_version}.xsd<\/a><\/li>\n<\/ul>/" index-file/index.htm
             aws s3 sync index-file s3://liquibaseorg-origin/xml/ns/dbchangelog/ --only-show-errors
           fi
-          
-      
+
+  package-deb:
+    uses: liquibase/build-logic/.github/workflows/package-deb.yml@v0.3.8
+    needs: [ setup ]
+    secrets: inherit
+    with:
+      groupId: 'org.liquibase'
+      artifactId: 'liquibase'
+      version: ${{ needs.setup.outputs.version }}

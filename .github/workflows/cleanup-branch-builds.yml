@@ -11,25 +11,19 @@ jobs:
     runs-on: ubuntu-22.04
     steps:
       # Get version id(s) based on version name
-    - uses: castlabs/get-package-version-id-action@v2.1
+    - uses: castlabs/get-package-version-id-action@v2.2
       id: version
       with:
         version: "${{ github.event.ref }}-SNAPSHOT"
-
+    
     - uses: actions/delete-package-versions@v3
       if: ${{ steps.version.outputs.ids != '' }}
-      with:
-        # Name of the package.
-        # Defaults to an empty string.
-        # Required if `package-version-ids` input is not given.
-        package-name: org.liquibase.liquibase-core
-
+      with: 
         # The number of latest versions to keep.
         # This cannot be specified with `num-old-versions-to-delete`. By default, `num-old-versions-to-delete` takes precedence over `min-versions-to-keep`.
         # When set to 0, all deletable versions will be deleted.
         # When set greater than 0, all deletable package versions except the specified number will be deleted.
         min-versions-to-keep: 0
-
-        # Can be a single package version id, or a comma separated list of package version ids.
-        # Defaults to an empty string.
+        
+        # on branch id's deletion we only want to delete that particular branch version
         package-version-ids: "${{ steps.version.outputs.ids }}"

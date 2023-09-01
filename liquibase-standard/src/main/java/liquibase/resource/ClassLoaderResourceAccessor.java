@@ -17,7 +17,7 @@ import java.util.regex.Pattern;
  */
 public class ClassLoaderResourceAccessor extends AbstractResourceAccessor {
 
-    private ClassLoader classLoader;
+    private final ClassLoader classLoader;
     private CompositeResourceAccessor additionalResourceAccessors;
     protected SortedSet<String> description;
 
@@ -86,14 +86,6 @@ public class ClassLoaderResourceAccessor extends AbstractResourceAccessor {
             configureAdditionalResourceAccessors(parent);
         }
     }
-//
-//    private void addDescription(URL url) {
-//        try {
-//            this.description.add(Paths.get(url.toURI()).toString());
-//        } catch (Throwable e) {
-//            this.description.add(url.toExternalForm());
-//        }
-//    }
 
     @Override
     public List<Resource> search(String path, SearchOptions searchOptions) throws IOException {

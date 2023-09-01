@@ -8,10 +8,12 @@ CommandTests.define {
 Short Description: Writes the SQL used to mark the next change you apply as executed in your database
 Long Description: NOT SET
 Required Args:
-  changelogFile (String) The root changelog
+  changelogFile (String) The root changelog file
   url (String) The JDBC database connection URL
     OBFUSCATED
 Optional Args:
+  contextFilter (String) Context string to use for filtering
+    Default: null
   defaultCatalogName (String) The default catalog name to use for the database connection
     Default: null
   defaultSchemaName (String) The default schema name to use for the database connection
@@ -19,6 +21,8 @@ Optional Args:
   driver (String) The JDBC driver class
     Default: null
   driverPropertiesFile (String) The JDBC driver properties file
+    Default: null
+  labelFilter (String) Label expression to use for filtering
     Default: null
   password (String) Password to use to connect to the database
     Default: null
@@ -33,10 +37,6 @@ Optional Args:
                 username : { it.username },
                 password : { it.password },
                 "changelogFile": "changelogs/h2/complete/simple.changelog.xml"
-        ]
-
-        expectedResults = [
-                statusCode   : 0
         ]
     }
 

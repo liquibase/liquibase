@@ -1,5 +1,6 @@
 package liquibase.changelog;
 
+import liquibase.ChecksumVersion;
 import liquibase.Contexts;
 import liquibase.LabelExpression;
 import liquibase.Scope;
@@ -8,7 +9,10 @@ import liquibase.changelog.filter.DbmsChangeSetFilter;
 import liquibase.database.Database;
 import liquibase.exception.DatabaseException;
 import liquibase.exception.DatabaseHistoryException;
+import liquibase.executor.ExecutorService;
+import liquibase.statement.core.UpdateChangeSetChecksumStatement;
 
+import java.text.DecimalFormat;
 import java.util.Date;
 import java.util.List;
 
@@ -33,7 +37,7 @@ public abstract class AbstractChangeLogHistoryService implements ChangeLogHistor
 
     @Override
     public ChangeSet.RunStatus getRunStatus(final ChangeSet changeSet)
-        throws DatabaseException, DatabaseHistoryException {
+            throws DatabaseException, DatabaseHistoryException {
         RanChangeSet foundRan = getRanChangeSet(changeSet);
 
         if (foundRan == null) {
@@ -49,7 +53,8 @@ public abstract class AbstractChangeLogHistoryService implements ChangeLogHistor
 
                 return ChangeSet.RunStatus.ALREADY_RAN;
             } else {
-                if (foundRan.getLastCheckSum().equals(changeSet.generateCheckSum())) {
+                if (foundRan.getLastCheckSum().equals(changeSet.generateCheckSum(
+                        ChecksumVersion.enumFromChecksumVersion(foundRan.getLastCheckSum().getVersion())))) {
                     return ChangeSet.RunStatus.ALREADY_RAN;
                 } else {
                     if (changeSet.shouldRunOnChange()) {
@@ -70,7 +75,7 @@ public abstract class AbstractChangeLogHistoryService implements ChangeLogHistor
                 List<ChangeSet> changeSets = databaseChangeLog.getChangeSets(ranChangeSet);
                 for (ChangeSet changeSet : changeSets) {
                     if ((changeSet != null) && new ContextChangeSetFilter(contexts).accepts(changeSet).isAccepted() &&
-                        new DbmsChangeSetFilter(getDatabase()).accepts(changeSet).isAccepted()) {
+                            new DbmsChangeSetFilter(getDatabase()).accepts(changeSet).isAccepted()) {
                         Scope.getCurrentScope().getLog(getClass()).fine(
                                 "Updating null or out of date checksum on changeSet " + changeSet + " to correct value"
                         );
@@ -102,23 +107,27 @@ public abstract class AbstractChangeLogHistoryService implements ChangeLogHistor
     }
 
     /**
+     * Returns the deployment ID of the last changeset that has been run, or {@code null} if no changesets have been run yet.
      *
-     * Return the last deployment ID from the changesets that have been run or null
-     *
-     * @return   String
-     * @throws   DatabaseException
-     *
+     * @return the deployment ID of the last changeset that has been run, or null if no changesets have been run yet.
+     * @throws DatabaseException if there is an error accessing the database
      */
      public String getLastDeploymentId() throws DatabaseException {
          List<RanChangeSet> ranChangeSetsList = getRanChangeSets();
-         if (ranChangeSetsList == null || ranChangeSetsList.size() == 0) {
+         if (ranChangeSetsList == null || ranChangeSetsList.isEmpty()) {
              return null;
          }
          RanChangeSet lastRanChangeSet = ranChangeSetsList.get(ranChangeSetsList.size() - 1);
          return lastRanChangeSet.getDeploymentId();
     }
 
-    protected abstract void replaceChecksum(ChangeSet changeSet) throws DatabaseException;
+    @Override
+    public void replaceChecksum(ChangeSet changeSet) throws DatabaseException {
+        Scope.getCurrentScope().getSingleton(ExecutorService.class).getExecutor("jdbc", getDatabase()).execute(new UpdateChangeSetChecksumStatement
+                (changeSet));
+        getDatabase().commit();
+        reset();
+    }
 
     @Override
     public String getDeploymentId() {
@@ -133,8 +142,11 @@ public abstract class AbstractChangeLogHistoryService implements ChangeLogHistor
     @Override
     public void generateDeploymentId() {
         if (this.deploymentId == null) {
-            String dateString = String.valueOf(new Date().getTime());
-            this.deploymentId = dateString.substring(dateString.length() - 10);
+            long time = (new Date()).getTime();
+            String dateString = String.valueOf(time);
+            DecimalFormat decimalFormat = new DecimalFormat("0000000000");
+            this.deploymentId = dateString.length() > 9 ? dateString.substring(dateString.length() - 10) :
+                    decimalFormat.format(time);
         }
     }
 

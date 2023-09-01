@@ -19,7 +19,12 @@ public class MdcKey {
     public static final String DEPLOYMENT_OUTCOME = "deploymentOutcome";
     public static final String LIQUIBASE_COMMAND_NAME = "liquibaseCommandName";
     public static final String LIQUIBASE_VERSION = "liquibaseVersion";
+    /**
+     * Use the {@link MdcKey}#LIQUIBASE_HOST_NAME instead.
+     */
+    @Deprecated
     public static final String LIQUIBASE_SYSTEM_NAME = "liquibaseSystemName";
+    public static final String LIQUIBASE_HOST_NAME = "liquibaseHostName";
     public static final String LIQUIBASE_SYSTEM_USER = "liquibaseSystemUser";
     public static final String OUTPUT_FILE = "outputFile";
     public static final String OUTPUT_FILE_ENCODING = "outputFileEncoding";
@@ -90,10 +95,22 @@ public class MdcKey {
     public static final String ROLLBACK_ON_ERROR = "rollbackOnError";
     public static final String CHANGESET_SYNC_COUNT = "changesetSyncCount";
     public static final String CHANGELOG_SYNC_OUTCOME = "changelogSyncOutcome";
-    public static final String OPERATION_START = "operationStart";
-    public static final String OPERATION_STOP = "operationStop";
     public static final String DIFF_CHANGELOG_FILE = "diffChangelogFile";
     public static final String DIFF_CHANGELOG_OUTCOME = "diffChangelogOutcome";
-
     public static final String CHANGESET_SYNC_OUTCOME = "changesetSyncOutcome";
+
+    public static final String FLOW_FILE_ROOT = "flowFileRoot";
+    public static final String FLOW_START_TIME = "flowStart";
+    public static final String FLOW_STOP_TIME = "flowStop";
+    public static final String FLOW_FILE_OUTCOME = "flowFileOutcome";
+    public static final String FLOW_FILE_FAILED_MESSAGE = "flowFileFailedMessage";
+    public static final String FLOW_FILE_FAILED_STAGE = "flowFileFailedStage";
+
+    public static final String VERSION = "version";
+    public static final String FAIL_ON_ERROR = "failOnError";
+    public static final String HISTORY = "history";
+    public static final String RELEASE_LOCKS_OUTCOME = "releaseLocksOutcome";
+    public static final String STATUS = "status";
+    public static final String ROWS_AFFECTED = "rowsAffected";
+    public static final String USER_METADATA = "userMetadata";
 }

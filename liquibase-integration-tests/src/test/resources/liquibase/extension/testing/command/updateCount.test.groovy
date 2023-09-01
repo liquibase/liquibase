@@ -17,7 +17,7 @@ Optional Args:
     Default: null
   changeExecListenerPropertiesFile (String) Path to a properties file for the ChangeExecListenerClass
     Default: null
-  contexts (String) Changeset contexts to match
+  contextFilter (String) Changeset contexts to match
     Default: null
   defaultCatalogName (String) The default catalog name to use for the database connection
     Default: null
@@ -49,7 +49,8 @@ Optional Args:
 
         expectedResults = [
                 statusCode   : 0,
-                defaultChangeExecListener: 'not_null'
+                defaultChangeExecListener: 'not_null',
+                updateReport: 'not_null'
         ]
     }
 
@@ -65,7 +66,8 @@ Optional Args:
 
         expectedResults = [
                 statusCode   : 0,
-                defaultChangeExecListener: 'not_null'
+                defaultChangeExecListener: 'not_null',
+                updateReport: 'not_null'
         ]
     }
 
@@ -77,13 +79,14 @@ Optional Args:
                 changelogFile: "changelogs/h2/complete/summary-changelog.xml",
                 count: "1",
                 labelFilter: "testtable4,tagit and !testtable2",
-                contexts: "none",
+                contextFilter: "none",
                 showSummary: "summary"
         ]
 
         expectedResults = [
                 statusCode   : 0,
-                defaultChangeExecListener: 'not_null'
+                defaultChangeExecListener: 'not_null',
+                updateReport: 'not_null'
         ]
 
         outputFile = new File("target/test-classes/labelsAndContent.txt")
@@ -106,7 +109,8 @@ Optional Args:
 
         expectedResults = [
                 statusCode   : 0,
-                defaultChangeExecListener: 'not_null'
+                defaultChangeExecListener: 'not_null',
+                updateReport: 'not_null'
         ]
 
         expectedUI = [
@@ -127,7 +131,8 @@ Optional Args:
 
         expectedResults = [
                 statusCode   : 0,
-                defaultChangeExecListener: 'not_null'
+                defaultChangeExecListener: 'not_null',
+                updateReport: 'not_null'
         ]
 
         outputFile = new File("target/test-classes/mismatchedDBMS.txt")
