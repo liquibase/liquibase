@@ -6,6 +6,11 @@ concurrency:
 
 on:
   workflow_dispatch:
+    inputs:
+      archive_test_results:
+        description: 'If set to true, the unit and integration test results will be archived to the build artifacts page.'
+        required: false
+        default: 'false'
 
   # DAT branches can get triggered from this logic
   pull_request_target:
@@ -70,7 +75,7 @@ jobs:
 
       - name: Get current date
         id: get-date
-        run: echo "::set-output name=date::$(date +'%Y-%m-%d %H:%M:%S')"
+        run: echo "::set-output name=date::$(date +'%Y-%m-%d %H:%M:%S %Z')"
 
       - name: Find corresponding branches
         id: find-branches
@@ -203,7 +208,7 @@ jobs:
           find . -name original-*.jar -exec rm {} \;
 
       - name: Archive Test Results
-        if: ${{ always() }}
+        if: ${{ inputs.archive_test_results == 'true' }}
         uses: actions/upload-artifact@v3
         with:
           name: liquibase-test-results-jdk${{ matrix.java }}
@@ -314,20 +319,17 @@ jobs:
         run: mvn -B jar:jar jar:test-jar surefire:test -DtrimStackTrace=false -Dliquibase.sdk.testSystem.test=${{ matrix.testSystem }} -Dliquibase.sdk.testSystem.acceptLicenses=${{ matrix.testSystem }} -Dtest=*IntegrationTest,*ExecutorTest -DfailIfNoTests=false -Dsurefire.failIfNoSpecifiedTests=false
 
       - name: Archive Test Results
-        if: ${{ always() }}
+        if: ${{ inputs.archive_test_results == 'true' }}
         uses: actions/upload-artifact@v3
         with:
           name: ${{ steps.prepare.outputs.testResultsArtifact }}
           path: |
             ./**/target/surefire-reports
 
-  call-build-branch:
-    uses: liquibase/liquibase/.github/workflows/build-branch.yml@master
-
   package:
     name: Package Artifacts
     runs-on: macos-latest
-    needs: [ setup, build, call-build-branch ]
+    needs: [ setup, build ]
     steps:
       - uses: actions/checkout@v3
         with:
@@ -360,7 +362,7 @@ jobs:
 
       # look for dependencies in maven
       - name: maven-settings-xml-action
-        uses: whelk-io/maven-settings-xml-action@v20
+        uses: whelk-io/maven-settings-xml-action@v21
         with:
           repositories: |
             [

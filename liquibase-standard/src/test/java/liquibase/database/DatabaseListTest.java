@@ -4,21 +4,20 @@ import liquibase.database.core.H2Database;
 import liquibase.database.core.MSSQLDatabase;
 import liquibase.database.core.MySQLDatabase;
 import liquibase.database.core.OracleDatabase;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 public class DatabaseListTest {
 
-
     @Test
     public void databaseMatchesDbmsDefinition() {
-        assertTrue("'all' should match any database", DatabaseList.definitionMatches("all", new MySQLDatabase(), false));
-        assertTrue("'all' should match any database, even when others are added", DatabaseList.definitionMatches("all, oracle", new MySQLDatabase(), false));
+        assertTrue(DatabaseList.definitionMatches("all", new MySQLDatabase(), false), "'all' should match any database");
+        assertTrue(DatabaseList.definitionMatches("all, oracle", new MySQLDatabase(), false), "'all' should match any database, even when others are added");
 
-        assertFalse("'none' should not match any database", DatabaseList.definitionMatches("none", new MySQLDatabase(), false));
-        assertFalse("'none' should not match any database, even when others are added", DatabaseList.definitionMatches("none, oracle", new OracleDatabase(), false));
+        assertFalse(DatabaseList.definitionMatches("none", new MySQLDatabase(), false), "'none' should not match any database");
+        assertFalse(DatabaseList.definitionMatches("none, oracle", new OracleDatabase(), false), "'none' should not match any database, even when others are added");
 
         assertTrue(DatabaseList.definitionMatches("", new OracleDatabase(), true));
         assertFalse(DatabaseList.definitionMatches("", new OracleDatabase(), false));
@@ -44,5 +43,4 @@ public class DatabaseListTest {
         assertFalse(DatabaseList.definitionMatches("!h2,mysql", new H2Database(), false));
         assertTrue(DatabaseList.definitionMatches("!h2,mysql", new MySQLDatabase(), false));
     }
-
 }

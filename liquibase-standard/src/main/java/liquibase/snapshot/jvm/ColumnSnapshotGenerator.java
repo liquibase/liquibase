@@ -577,6 +577,13 @@ public class ColumnSnapshotGenerator extends JdbcSnapshotGenerator {
            columnMetadataResultSet.set(COLUMN_DEF_COL, defaultValue);
         }
 
+        if (database instanceof SybaseASADatabase && "YES".equals(columnMetadataResultSet.get("IS_GENERATEDCOLUMN"))) {
+            Object virtColumnDef = columnMetadataResultSet.get(COLUMN_DEF_COL);
+            if ((virtColumnDef != null) && !"null".equals(virtColumnDef)) {
+                columnMetadataResultSet.set(COLUMN_DEF_COL, "COMPUTE (" + virtColumnDef + ")");
+            }
+        }
+
         return SqlUtil.parseValue(database, columnMetadataResultSet.get(COLUMN_DEF_COL), columnInfo.getType());
     }
 
