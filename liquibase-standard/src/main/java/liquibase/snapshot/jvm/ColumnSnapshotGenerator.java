@@ -552,10 +552,9 @@ public class ColumnSnapshotGenerator extends JdbcSnapshotGenerator {
             readDefaultValueForPostgresDatabase(columnMetadataResultSet, columnInfo);
         }
 
-        if (
-                (database instanceof AbstractDb2Database) &&
-                        ((columnMetadataResultSet.get(COLUMN_DEF_COL) != null) &&
-                                "NULL".equalsIgnoreCase((String) columnMetadataResultSet.get(COLUMN_DEF_COL)))) {
+        if ((database instanceof AbstractDb2Database)
+                && ((columnMetadataResultSet.get(COLUMN_DEF_COL) != null)
+                && "NULL".equalsIgnoreCase((String) columnMetadataResultSet.get(COLUMN_DEF_COL)))) {
             columnMetadataResultSet.set(COLUMN_DEF_COL, null);
         }
 
@@ -575,13 +574,13 @@ public class ColumnSnapshotGenerator extends JdbcSnapshotGenerator {
            defaultValue = defaultValue.replaceAll("(?i)\\bCURRENT\\s+USER\\b", "{fn USER()}");
 
            columnMetadataResultSet.set(COLUMN_DEF_COL, defaultValue);
-        }
 
-        if (database instanceof SybaseASADatabase && "YES".equals(columnMetadataResultSet.get("IS_GENERATEDCOLUMN"))) {
-            Object virtColumnDef = columnMetadataResultSet.get(COLUMN_DEF_COL);
-            if ((virtColumnDef != null) && !"null".equals(virtColumnDef)) {
-                columnMetadataResultSet.set(COLUMN_DEF_COL, "COMPUTE (" + virtColumnDef + ")");
-            }
+           if ("YES".equals(columnMetadataResultSet.get("IS_GENERATEDCOLUMN"))) {
+               Object virtColumnDef = columnMetadataResultSet.get(COLUMN_DEF_COL);
+               if ((virtColumnDef != null) && !"null".equals(virtColumnDef)) {
+                   columnMetadataResultSet.set(COLUMN_DEF_COL, "COMPUTE (" + virtColumnDef + ")");
+               }
+           }
         }
 
         return SqlUtil.parseValue(database, columnMetadataResultSet.get(COLUMN_DEF_COL), columnInfo.getType());
