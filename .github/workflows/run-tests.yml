@@ -20,7 +20,11 @@ on:
       - reopened
       - synchronize
       - labeled
-
+  push:
+    branches:
+      - '*'
+    paths-ignore:
+        - '**.md'
 
 env:
   MAVEN_VERSION: '3.9.2'
