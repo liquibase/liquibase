@@ -46,6 +46,8 @@ public class GenerateChangelogCommandStep extends AbstractCommandStep {
     public static final CommandArgumentDefinition<String> REFERENCE_DRIVER_ARG;
     public static final CommandArgumentDefinition<String> REFERENCE_DRIVER_PROPERTIES_FILE_ARG;
     public static final CommandArgumentDefinition<String> REFERENCE_SCHEMAS_ARG;
+    public static final CommandArgumentDefinition<String> REFERENCE_LIQUIBASE_SCHEMA_NAME_ARG;
+    public static final CommandArgumentDefinition<String> REFERENCE_LIQUIBASE_CATALOG_NAME_ARG;
 
     static {
         final CommandBuilder builder = new CommandBuilder(COMMAND_NAME);
@@ -82,6 +84,10 @@ public class GenerateChangelogCommandStep extends AbstractCommandStep {
         REFERENCE_PASSWORD_ARG = builder.argument("referencePassword", String.class).hidden()
                 .setValueObfuscator(ConfigurationValueObfuscator.STANDARD).build();
         REFERENCE_SCHEMAS_ARG = builder.argument("referenceSchemas", String.class).hidden().build();
+        REFERENCE_LIQUIBASE_SCHEMA_NAME_ARG = builder.argument("referenceLiquibaseSchemaName", String.class)
+                .hidden().build();
+        REFERENCE_LIQUIBASE_CATALOG_NAME_ARG = builder.argument("referenceLiquibaseCatalogName", String.class)
+                .hidden().build();
     }
 
     @Override
