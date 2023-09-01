@@ -21,6 +21,7 @@ on:
       - synchronize
       - labeled
 
+
 env:
   MAVEN_VERSION: '3.9.2'
 
