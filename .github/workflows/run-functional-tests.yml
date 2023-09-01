@@ -26,5 +26,5 @@ jobs:
         with:
           token: ${{ secrets.RUN_FUNCTIONAL_TESTS_TOKEN }}
           repository: liquibase/liquibase-pro-tests
-          event-type: run-workflow
+          event-type: run-functional-tests
           client-payload: '{"ref": "${{ github.event.pull_request.head.ref }}" }'
