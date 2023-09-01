@@ -7,6 +7,10 @@ import java.io.StringReader;
 
 public class SqlParser {
 
+    private SqlParser() {
+        // util class
+    }
+
     public static StringClauses parse(String sqlBlock) {
         return parse(sqlBlock, false, false);
     }
@@ -18,19 +22,16 @@ public class SqlParser {
         SimpleSqlGrammar t = new SimpleSqlGrammar(tokenManager);
         try {
             Token token = t.getNextToken();
-            while (!"".equals(token.toString())) {
+            while (token != null && StringUtil.isNotEmpty(token.toString())) {
                 if (token.kind == SimpleSqlGrammarConstants.WHITESPACE) {
                     if (preserveWhitespace) {
                         clauses.append(new StringClauses.Whitespace(token.image));
                     }
-                } else if ((token.kind == SimpleSqlGrammarConstants.LINE_COMMENT) || (token.kind ==
-                    SimpleSqlGrammarConstants.MULTI_LINE_COMMENT)) {
+                } else if ((token.kind == SimpleSqlGrammarConstants.LINE_COMMENT)|| (token.kind == SimpleSqlGrammarConstants.MULTI_LINE_COMMENT)) {
                     if (preserveComments) {
                         String comment = token.image;
-                        if (!preserveWhitespace && (token.kind == SimpleSqlGrammarConstants.LINE_COMMENT)) {
-                            if (!comment.endsWith("\n")) {
+                        if (!preserveWhitespace && (token.kind == SimpleSqlGrammarConstants.LINE_COMMENT) && !comment.endsWith("\n")) {
                                 comment = comment + "\n";
-                            }
                         }
                         clauses.append(new StringClauses.Comment(comment));
                     }
