@@ -80,7 +80,6 @@ public abstract class AbstractUpdateCommandStep extends AbstractCommandStep impl
                 LockServiceFactory.getInstance().getLockService(database).waitForLock();
                 // waitForLock resets the changelog history service, so we need to rebuild that and generate a final deploymentId.
                 ChangeLogHistoryService changeLogHistoryService = Scope.getCurrentScope().getSingleton(ChangeLogHistoryServiceFactory.class).getChangeLogService(database);
-                changeLogHistoryService.init();
                 changeLogHistoryService.generateDeploymentId();
             }
 
@@ -149,7 +148,7 @@ public abstract class AbstractUpdateCommandStep extends AbstractCommandStep impl
     private void addChangelogFileToMdc(String changeLogFile, DatabaseChangeLog databaseChangeLog) {
         if (StringUtil.isNotEmpty(databaseChangeLog.getLogicalFilePath())) {
             Scope.getCurrentScope().addMdcValue(MdcKey.CHANGELOG_FILE, databaseChangeLog.getLogicalFilePath());
-        } else {
+        } else if (StringUtil.isNotEmpty(changeLogFile)) {
             Scope.getCurrentScope().addMdcValue(MdcKey.CHANGELOG_FILE, changeLogFile);
         }
     }

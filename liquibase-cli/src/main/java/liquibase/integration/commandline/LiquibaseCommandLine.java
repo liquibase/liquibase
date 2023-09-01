@@ -1166,14 +1166,18 @@ public class LiquibaseCommandLine {
     }
 
     protected static String[] toArgNames(CommandArgumentDefinition<?> def) {
+        //
+        // Use an ordered Set so that the command name shows up first
+        // and is listed as the argument in the help
+        //
         LinkedHashSet<String> returnList = new LinkedHashSet<>();
-        Set<String> baseNames = new HashSet<>();
+        Set<String> baseNames = new LinkedHashSet<>();
         baseNames.add(def.getName());
         baseNames.addAll(def.getAliases());
 
         for (String baseName : baseNames) {
             returnList.add("--" + StringUtil.toKabobCase(baseName).replace(".", "-"));
-            returnList.add("--" + baseName.replaceAll("\\.", ""));
+            returnList.add("--" + baseName.replace("\\.", ""));
         }
 
         return returnList.toArray(new String[0]);
