@@ -1,7 +1,6 @@
 package liquibase.extension.testing.command
 
 import liquibase.exception.CommandValidationException
-import liquibase.extension.testing.setup.HistoryEntry
 
 CommandTests.define {
     command = ["clearChecksums"]
@@ -21,39 +20,12 @@ Optional Args:
     Default: null
   driverPropertiesFile (String) The JDBC driver properties file
     Default: null
-  password (String) The database password
+  password (String) Password to use to connect to the database
     Default: null
     OBFUSCATED
-  username (String) The database username
+  username (String) Username to use to connect to the database
     Default: null
 """
-
-    run "Happy path", {
-        arguments = [
-            url:        { it.url },
-            username:   { it.username },
-            password:   { it.password }
-        ]
-        setup {
-            history = [
-                    new HistoryEntry(
-                            id: "1",
-                            author: "test",
-                            path: "com/example/changelog.xml"
-                    ),
-                    new HistoryEntry(
-                            id: "2",
-                            author: "test",
-                            path: "com/example/changelog.xml"
-                    ),
-            ]
-        }
-
-        expectedResults = [
-                statusCode   : 0
-        ]
-
-    }
 
     run "Run without a URL should throw an exception", {
         arguments = [

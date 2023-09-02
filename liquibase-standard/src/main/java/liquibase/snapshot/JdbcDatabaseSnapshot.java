@@ -400,7 +400,7 @@ public class JdbcDatabaseSnapshot extends DatabaseSnapshot {
                                     SQL_FILTER_MATCH_ALL)
                     );
                     //
-                    // IF MARIADB
+                    // IF MARIADB OR SQL ANYWHERE
                     // Query to get actual data types and then map each column to its CachedRow
                     //
                     determineActualDataTypes(returnList, tableName);
@@ -431,7 +431,7 @@ public class JdbcDatabaseSnapshot extends DatabaseSnapshot {
                             escapeForLike(((AbstractJdbcDatabase) database).getJdbcSchemaName(catalogAndSchema), database),
                             SQL_FILTER_MATCH_ALL, SQL_FILTER_MATCH_ALL));
                     //
-                    // IF MARIADB
+                    // IF MARIADB OR SQL ANYWHERE
                     // Query to get actual data types and then map each column to its CachedRow
                     //
                     determineActualDataTypes(returnList, null);
@@ -449,11 +449,63 @@ public class JdbcDatabaseSnapshot extends DatabaseSnapshot {
             // For MariaDB, query for the data type column so that we can correctly
             // set the DATETIME(6) type if specified
             //
+            // For SQL Anywhere, query for the scale column so we can correctly
+            // set the size unit
+            //
             private void determineActualDataTypes(List<CachedRow> returnList, String tableName) {
                 //
-                // If not MariaDB then just return
+                // If not MariaDB / SQL Anywhere then just return
                 //
-                if (!(database instanceof MariaDBDatabase)) {
+                if (!(database instanceof MariaDBDatabase || database instanceof SybaseASADatabase)) {
+                    return;
+                }
+
+                if (database instanceof SybaseASADatabase) {
+                    //
+                    // Query for actual data type for column. The actual SYSTABCOL.scale column value is
+                    // not reported by the DatabaseMetadata.getColumns() query for CHAR-limited (in contrast
+                    // to BYTE-limited) columns, and it is needed to capture the kind if limitation.
+                    // The actual SYSTABCOL.column_type is not reported by the DatabaseMetadata.getColumns()
+                    // query as the IS_GENERATEDCOLUMN columns is missing in the result set, and it is needed to
+                    // capture the kind of column (regular or computed).
+                    //
+                    // See https://help.sap.com/docs/SAP_SQL_Anywhere/93079d4ba8e44920ae63ffb4def91f5b/3beaa3956c5f1014883cb0c3e3559cc9.html.
+                    //
+                    String selectStatement =
+                        "SELECT table_name, column_name, scale, column_type FROM SYSTABCOL KEY JOIN SYSTAB KEY JOIN SYSUSER " +
+                        "WHERE user_name = ? AND ? IS NULL OR table_name = ?";
+                    Connection underlyingConnection = ((JdbcConnection) database.getConnection()).getUnderlyingConnection();
+                    try (PreparedStatement stmt = underlyingConnection.prepareStatement(selectStatement)) {
+                        stmt.setString(1, schemaName);
+                        stmt.setString(2, tableName);
+                        stmt.setString(3, tableName);
+                        try (ResultSet columnSelectRS = stmt.executeQuery()) {
+                            while (columnSelectRS.next()) {
+                                String selectedTableName = columnSelectRS.getString("table_name");
+                                String selectedColumnName = columnSelectRS.getString("column_name");
+                                int selectedScale = columnSelectRS.getInt("scale");
+                                String selectedColumnType = columnSelectRS.getString("column_type");
+                                for (CachedRow row : returnList) {
+                                    String rowTableName = row.getString("TABLE_NAME");
+                                    String rowColumnName = row.getString("COLUMN_NAME");
+                                    if (rowTableName.equalsIgnoreCase(selectedTableName) &&
+                                        rowColumnName.equalsIgnoreCase(selectedColumnName)) {
+                                        int rowDataType = row.getInt("DATA_TYPE");
+                                        if (rowDataType == Types.VARCHAR || rowDataType == Types.CHAR) {
+                                            row.set("scale", selectedScale);
+                                        }
+                                        row.set("IS_GENERATEDCOLUMN", "C".equals(selectedColumnType) ? "YES" : "NO");
+                                        break;
+                                    }
+                                }
+                            }
+                        }
+                    } catch (SQLException sqle) {
+                        throw new RuntimeException(sqle);
+                        //
+                        // Do not stop
+                        //
+                    }
                     return;
                 }
 

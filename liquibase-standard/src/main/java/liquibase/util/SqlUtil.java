@@ -2,10 +2,7 @@ package liquibase.util;
 
 import liquibase.Scope;
 import liquibase.database.Database;
-import liquibase.database.core.AbstractDb2Database;
-import liquibase.database.core.MSSQLDatabase;
-import liquibase.database.core.MySQLDatabase;
-import liquibase.database.core.OracleDatabase;
+import liquibase.database.core.*;
 import liquibase.datatype.DataTypeFactory;
 import liquibase.datatype.LiquibaseDataType;
 import liquibase.datatype.core.*;
@@ -151,9 +148,6 @@ public abstract class SqlUtil {
                 }
 
                 stringVal = stringVal.trim();
-                if (database instanceof MySQLDatabase) {
-                    return "1".equals(stringVal) || "true".equalsIgnoreCase(stringVal);
-                }
 
                 Object value = stringVal;
                 if (scanner.hasNextBoolean()) {
@@ -237,11 +231,11 @@ public abstract class SqlUtil {
             } else if (typeId == Types.JAVA_OBJECT) {
                 return new DatabaseFunction(stringVal);
             } else if (typeId == Types.LONGNVARCHAR) {
-                return stringVal;
+                return strippedSingleQuotes ? stringVal : new DatabaseFunction(stringVal);
             } else if (typeId == Types.LONGVARBINARY) {
                 return new DatabaseFunction(stringVal);
             } else if (typeId == Types.LONGVARCHAR) {
-                return stringVal;
+                return strippedSingleQuotes ? stringVal : new DatabaseFunction(stringVal);
             } else if (liquibaseDataType instanceof NCharType || typeId == Types.NCHAR || liquibaseDataType.getName().equalsIgnoreCase("NCLOB")) {
                 return stringVal;
             } else if (typeId == Types.NCLOB) {

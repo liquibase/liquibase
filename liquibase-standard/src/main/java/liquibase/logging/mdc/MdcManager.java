@@ -20,7 +20,7 @@ public interface MdcManager extends PrioritizedService {
      * the MDC. The caller is responsible for cleaning up this entry at an appropriate time.
      */
     @Beta
-    MdcObject put(String key, Map<String, String> values);
+    MdcObject put(String key, Map<String, Object> values);
 
     /**
      * Puts a context value (the <code>customMdcObject</code> parameter) as identified with the <code>key</code> parameter into

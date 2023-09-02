@@ -14,6 +14,7 @@ import liquibase.configuration.core.DefaultsFileValueProvider;
 import liquibase.exception.CommandLineParsingException;
 import liquibase.exception.CommandValidationException;
 import liquibase.exception.LiquibaseException;
+import liquibase.integration.IntegrationDetails;
 import liquibase.license.LicenseInfo;
 import liquibase.license.LicenseService;
 import liquibase.license.LicenseServiceFactory;
@@ -44,7 +45,6 @@ import java.time.Duration;
 import java.util.*;
 import java.util.jar.JarFile;
 import java.util.jar.Manifest;
-import java.util.logging.Formatter;
 import java.util.logging.*;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -55,6 +55,8 @@ import static liquibase.util.SystemUtil.isWindows;
 
 
 public class LiquibaseCommandLine {
+
+    public static final String COMMAND_ARGUMENTS = "commandArguments";
 
     private final Map<String, String> legacyPositionalArguments;
 
@@ -353,7 +355,7 @@ public class LiquibaseCommandLine {
 
             return Scope.child(Collections.singletonMap(Scope.Attr.logService.name(), newLogService), () -> {
                 try {
-                    return Scope.child(configureScope(), () -> {
+                    return Scope.child(configureScope(args), () -> {
 
                         if (!LiquibaseCommandLineConfiguration.SHOULD_RUN.getCurrentValue()) {
                             Scope.getCurrentScope().getUI().sendErrorMessage((
@@ -636,8 +638,13 @@ public class LiquibaseCommandLine {
      *
      * @return values to set in the scope
      */
-    private Map<String, Object> configureScope() throws Exception {
+    private Map<String, Object> configureScope(String[] args) throws Exception {
         Map<String, Object> returnMap = new HashMap<>();
+        returnMap.put(COMMAND_ARGUMENTS, args);
+
+        final IntegrationDetails integrationDetails = new IntegrationDetails();
+        integrationDetails.setName("cli");
+        returnMap.put("integrationDetails", integrationDetails);
 
         final ClassLoader classLoader = configureClassLoader();
 
@@ -1159,14 +1166,18 @@ public class LiquibaseCommandLine {
     }
 
     protected static String[] toArgNames(CommandArgumentDefinition<?> def) {
+        //
+        // Use an ordered Set so that the command name shows up first
+        // and is listed as the argument in the help
+        //
         LinkedHashSet<String> returnList = new LinkedHashSet<>();
-        Set<String> baseNames = new HashSet<>();
+        Set<String> baseNames = new LinkedHashSet<>();
         baseNames.add(def.getName());
         baseNames.addAll(def.getAliases());
 
         for (String baseName : baseNames) {
             returnList.add("--" + StringUtil.toKabobCase(baseName).replace(".", "-"));
-            returnList.add("--" + baseName.replaceAll("\\.", ""));
+            returnList.add("--" + baseName.replace("\\.", ""));
         }
 
         return returnList.toArray(new String[0]);

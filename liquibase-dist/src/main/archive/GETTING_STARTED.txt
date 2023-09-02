@@ -139,7 +139,7 @@ as defined by the changelog script.
 The DATABASECHANGELOG and DATABASECHANGELOGLOCK tables are liquibase-metadata tables. 
 Also, the changelog created the COMPANY and PERSON tables.
 
-Now, open the sample.changelog.xml or samplechangelog.h2.sql file in your favorite 
+Now, open the `example-changelog.xml` or `example-changelog.sql` file in your favorite 
 text editor.
 
 In each file, you can see how changes were defined as a series of changeSets. Each 

@@ -411,6 +411,12 @@ public class ColumnSnapshotGenerator extends JdbcSnapshotGenerator {
 
         DataType.ColumnSizeUnit columnSizeUnit = DataType.ColumnSizeUnit.BYTE;
 
+        if (database instanceof SybaseASADatabase &&
+            (columnMetadataResultSet.getInt("DATA_TYPE") == Types.VARCHAR || columnMetadataResultSet.getInt("DATA_TYPE") == Types.CHAR) &&
+            columnMetadataResultSet.getInt("scale") == 1) {
+            columnSizeUnit = DataType.ColumnSizeUnit.CHAR;
+        }
+
         int dataType = columnMetadataResultSet.getInt("DATA_TYPE");
         Integer columnSize = null;
         Integer decimalDigits = null;
@@ -551,6 +557,13 @@ public class ColumnSnapshotGenerator extends JdbcSnapshotGenerator {
                         ((columnMetadataResultSet.get(COLUMN_DEF_COL) != null) &&
                                 "NULL".equalsIgnoreCase((String) columnMetadataResultSet.get(COLUMN_DEF_COL)))) {
             columnMetadataResultSet.set(COLUMN_DEF_COL, null);
+        }
+
+        if (database instanceof SybaseASADatabase && "YES".equals(columnMetadataResultSet.get("IS_GENERATEDCOLUMN"))) {
+            Object virtColumnDef = columnMetadataResultSet.get(COLUMN_DEF_COL);
+            if ((virtColumnDef != null) && !"null".equals(virtColumnDef)) {
+                columnMetadataResultSet.set(COLUMN_DEF_COL, "COMPUTE (" + virtColumnDef + ")");
+            }
         }
 
         return SqlUtil.parseValue(database, columnMetadataResultSet.get(COLUMN_DEF_COL), columnInfo.getType());

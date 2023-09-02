@@ -1,6 +1,7 @@
 package liquibase.parser.core.formattedsql
 
-
+import liquibase.Contexts
+import liquibase.LabelExpression
 import liquibase.change.core.EmptyChange
 import liquibase.change.core.RawSQLChange
 import liquibase.changelog.ChangeLogParameters
@@ -206,6 +207,28 @@ grant execute on any_procedure_name to ANY_USER2
 grant execute on any_procedure_name to ANY_USER3
 /
 -- rollback drop PROCEDURE refresh_all_fos_permission_views/
+"""
+    private static final String VALID_CHANGELOG_WITH_LEAD_SPACES =
+"""
+  --liquibase formatted sql
+
+--property name:idProp value:1
+--property name:authorProp value:nvoxland
+--property nAmE:tableNameProp value:table1
+--property name:runwith value: sqlplus
+
+
+--changeset \${authorProp}:\${idProp}
+select * from \${tableNameProp};
+
+
+--changeset "n voxland":"change 2" (stripComments:false splitStatements:false endDelimiter:X runOnChange:true runAlways:true contextFilter:y dbms:mysql runInTransaction:false failOnError:false)
+create table table1 (
+    id int primary key
+);
+
+--rollback delete from table1;
+--rollback drop table table1;
 """
 
     private static final String INVALID_CHANGELOG = "select * from table1"
@@ -414,6 +437,50 @@ CREATE TABLE ALL_CAPS_TABLE_2 (
 
         changeLog.getChangeSets().get(24).getRollback().getChanges().size() == 1
         ((RawSQLChange) changeLog.getChangeSets().get(24).getRollback().getChanges().get(0)).getSql().startsWith("create table test_table (")
+    }
+
+    def parseWithSpaces() throws Exception {
+        expect:
+        ChangeLogParameters params = new ChangeLogParameters()
+        params.set("tablename", "table4")
+        DatabaseChangeLog changeLog = new MockFormattedSqlChangeLogParser(VALID_CHANGELOG_WITH_LEAD_SPACES).parse("asdf.sql", params, new JUnitResourceAccessor())
+
+        changeLog.getLogicalFilePath() == "asdf.sql"
+
+        changeLog.getChangeSets().size() == 2
+
+        changeLog.getChangeSets().get(0).getAuthor() == "nvoxland"
+        changeLog.getChangeSets().get(0).getId() == "1"
+        changeLog.getChangeSets().get(0).getChanges().size() == 1
+        ((RawSQLChange) changeLog.getChangeSets().get(0).getChanges().get(0)).getSql() == "select * from table1;"
+        ((RawSQLChange) changeLog.getChangeSets().get(0).getChanges().get(0)).getEndDelimiter() == null
+        assert ((RawSQLChange) changeLog.getChangeSets().get(0).getChanges().get(0)).isSplitStatements()
+        assert ((RawSQLChange) changeLog.getChangeSets().get(0).getChanges().get(0)).isStripComments()
+        assert !changeLog.getChangeSets().get(0).isAlwaysRun()
+        assert !changeLog.getChangeSets().get(0).isRunOnChange()
+        assert changeLog.getChangeSets().get(0).isRunInTransaction()
+        assert changeLog.getChangeSets().get(0).getContextFilter().isEmpty()
+        changeLog.getChangeSets().get(0).getDbmsSet() == null
+
+
+        changeLog.getChangeSets().get(1).getAuthor() == "n voxland"
+        changeLog.getChangeSets().get(1).getId() == "change 2"
+        changeLog.getChangeSets().get(1).getChanges().size() == 1
+        ((RawSQLChange) changeLog.getChangeSets().get(1).getChanges().get(0)).getSql().replace("\r\n", "\n") == "create table table1 (\n    id int primary key\n);"
+        ((RawSQLChange) changeLog.getChangeSets().get(1).getChanges().get(0)).getEndDelimiter() == "X"
+        assert !((RawSQLChange) changeLog.getChangeSets().get(1).getChanges().get(0)).isSplitStatements()
+        assert !((RawSQLChange) changeLog.getChangeSets().get(1).getChanges().get(0)).isStripComments()
+        ((RawSQLChange) changeLog.getChangeSets().get(1).getChanges().get(0)).getEndDelimiter() == "X"
+        assert !((RawSQLChange) changeLog.getChangeSets().get(1).getChanges().get(0)).isSplitStatements()
+        assert !((RawSQLChange) changeLog.getChangeSets().get(1).getChanges().get(0)).isStripComments()
+        assert changeLog.getChangeSets().get(1).isAlwaysRun()
+        assert changeLog.getChangeSets().get(1).isRunOnChange()
+        assert !changeLog.getChangeSets().get(1).isRunInTransaction()
+        changeLog.getChangeSets().get(1).getContextFilter().toString() == "y"
+        StringUtil.join(changeLog.getChangeSets().get(1).getDbmsSet(), ",") == "mysql"
+        changeLog.getChangeSets().get(1).rollback.changes.size() == 1
+        ((RawSQLChange) changeLog.getChangeSets().get(1).rollback.changes[0]).getSql().replace("\r\n", "\n") == "delete from table1;\ndrop table table1;"
+
     }
 
     def parseIgnoreProperty() throws Exception {
@@ -886,7 +953,7 @@ select (*) from table3;
         changeLog.getChangeSets().get(2).getAuthor() == "nvoxland"
         changeLog.getChangeSets().get(2).getId() == "3"
         changeLog.getChangeSets().get(2).getRollback().getChanges().size() == 1
-        assert changeLog.getChangeSets().get(2).getRollback().getChanges().get(0) instanceof RawSQLChange
+        assert changeLog.getChangeSets().get(2).getRollback().getChanges().get(0) instanceof EmptyChange
     }
 
     @Unroll
@@ -913,6 +980,124 @@ create table table1 (
         changeLog.getChangeSets().get(0).getId() == "12345"
         changeLog.getChangeSets().get(0).getRollback().getChanges().size() == 1
         ((RawSQLChange) changeLog.getChangeSets().get(0).getRollback().getChanges().get(0)).getSql() == "delete from table1; drop table table1;"
+    }
+
+    def parse_propertyWithContext() throws Exception {
+        given: "a changelog with property and context"
+        String changeLogWithGlobalContext =
+                "-- liquibase formatted sql \n\n" +
+                        "-- property name:DEFAULT_VALUE value:0 context:some.context.value \n" +
+                        "-- changeset droy:12345 \n" +
+                        "create table test (id int default \${DEFAULT_VALUE}); \n"
+
+        ChangeLogParameters changeLogParameters = new ChangeLogParameters();
+        changeLogParameters.setContexts(new Contexts("some.context.value"))
+
+        when: "change log is parsed"
+        DatabaseChangeLog changeLog = new MockFormattedSqlChangeLogParser(changeLogWithGlobalContext).parse("asdf.sql", changeLogParameters, new JUnitResourceAccessor())
+
+        then: "change log parameters are created"
+        changeLog.getChangeLogParameters().hasValue("DEFAULT_VALUE", changeLog) == true
+        changeLog.getChangeLogParameters().getValue("DEFAULT_VALUE", changeLog) == "0"
+    }
+
+    def parse_multiplePropertyWithContext() throws Exception {
+        given: "a changelog with property and context"
+        String changeLogWithGlobalContext =
+            "-- liquibase formatted sql \n\n" +
+            "-- property name:DEFAULT_VALUE value:0 context:some.context.value \n" +
+            "-- property name:DEFAULT_VALUE value:1 context:\"!some.context.value AND !some.other.context.value\" \n" +
+            "-- changeset droy:12345 \n" +
+            "create table test (id int default \${DEFAULT_VALUE}); \n"
+
+        ChangeLogParameters changeLogParameters = new ChangeLogParameters();
+        changeLogParameters.setContexts(new Contexts("another.context.value"))
+
+        when: "change log is parsed"
+        DatabaseChangeLog changeLog = new MockFormattedSqlChangeLogParser(changeLogWithGlobalContext).parse("asdf.sql", changeLogParameters, new JUnitResourceAccessor())
+
+        then: "change log parameters are created"
+        changeLog.getChangeLogParameters().hasValue("DEFAULT_VALUE", changeLog) == true
+        changeLog.getChangeLogParameters().getValue("DEFAULT_VALUE", changeLog) == "1"
+    }
+
+    def parse_propertyWithLabels() throws Exception {
+        given: "a changelog with property and labels"
+        String changeLogWithGlobalContext =
+                "-- liquibase formatted sql \n\n" +
+                        "-- property name:DEFAULT_VALUE value:0 labels:\"some.label.value, some.other.label.value\" \n" +
+                        "-- changeset droy:12345 \n" +
+                        "create table test (id int default \${DEFAULT_VALUE}); \n";
+
+        ChangeLogParameters changeLogParameters = new ChangeLogParameters();
+        changeLogParameters.setLabels(new LabelExpression("some.label.value"));
+
+        when: "change log is parsed"
+        DatabaseChangeLog changeLog = new MockFormattedSqlChangeLogParser(changeLogWithGlobalContext).parse("asdf.sql", changeLogParameters, new JUnitResourceAccessor())
+
+        then: "change log parameters are created"
+        changeLog.getChangeLogParameters().hasValue("DEFAULT_VALUE", changeLog) == true
+        changeLog.getChangeLogParameters().getValue("DEFAULT_VALUE", changeLog) == "0"
+    }
+
+    def parse_multiplePropertyWithleLabels() throws Exception {
+        given: "a changelog with property and labels"
+        String changeLogWithGlobalContext =
+            "-- liquibase formatted sql \n\n" +
+            "-- property name:DEFAULT_VALUE value:0 labels:\"some.label.value, some.other.label.value\" \n" +
+            "-- property name:DEFAULT_VALUE value:1 labels:another.label.value \n" +
+            "-- changeset droy:12345 \n" +
+            "create table test (id int default \${DEFAULT_VALUE}); \n";
+
+        ChangeLogParameters changeLogParameters = new ChangeLogParameters();
+        changeLogParameters.setLabels(new LabelExpression("another.label.value"));
+
+        when: "change log is parsed"
+        DatabaseChangeLog changeLog = new MockFormattedSqlChangeLogParser(changeLogWithGlobalContext).parse("asdf.sql", changeLogParameters, new JUnitResourceAccessor())
+
+        then: "change log parameters are created"
+        changeLog.getChangeLogParameters().hasValue("DEFAULT_VALUE", changeLog) == true
+        changeLog.getChangeLogParameters().getValue("DEFAULT_VALUE", changeLog) == "1"
+    }
+
+    def parse_multiplePropertyWithContextAndLabels() throws Exception {
+        given: "a changelog with property, context and labels"
+        String changeLogWithGlobalContext =
+            "-- liquibase formatted sql \n\n" +
+            "-- property name:DEFAULT_VALUE value:0 context:some.context.value labels:some.label.value \n" +
+            "-- property name:DEFAULT_VALUE value:1 context:\"!some.context.value\" labels:\"some.other.label.value\" \n" +
+            "-- changeset droy:12345 \n" +
+            "create table test (id int default \${DEFAULT_VALUE}); \n"
+
+        ChangeLogParameters changeLogParameters = new ChangeLogParameters();
+        changeLogParameters.setContexts(new Contexts("another.context.value"))
+        changeLogParameters.setLabels(new LabelExpression("some.other.label.value"));
+
+        when: "change log is parsed"
+        DatabaseChangeLog changeLog = new MockFormattedSqlChangeLogParser(changeLogWithGlobalContext).parse("asdf.sql", changeLogParameters, new JUnitResourceAccessor())
+
+        then: "change log parameters are created"
+        changeLog.getChangeLogParameters().hasValue("DEFAULT_VALUE", changeLog) == true
+        changeLog.getChangeLogParameters().getValue("DEFAULT_VALUE", changeLog) == "1"
+    }
+
+    def parse_propertyWithDbms() throws Exception {
+        given: "a changelog with property and dbms"
+        String changeLogWithDbms =
+                "-- liquibase formatted sql \n\n" +
+                        "-- property name:DEFAULT_VALUE value:0 dbms:oracle,mssql \n" +
+                        "-- changeset droy:12345 \n" +
+                        "create table test (id int default \${DEFAULT_VALUE}); \n"
+
+        ChangeLogParameters changeLogParameters = new ChangeLogParameters();
+        changeLogParameters.setDatabase("mssql");
+
+        when: "change log is parsed"
+        DatabaseChangeLog changeLog = new MockFormattedSqlChangeLogParser(changeLogWithDbms).parse("asdf.sql", changeLogParameters, new JUnitResourceAccessor())
+
+        then: "change log parameters are created"
+        changeLog.getChangeLogParameters().hasValue("DEFAULT_VALUE", changeLog) == true
+        changeLog.getChangeLogParameters().getValue("DEFAULT_VALUE", changeLog) == "0"
     }
 
     @LiquibaseService(skip = true)

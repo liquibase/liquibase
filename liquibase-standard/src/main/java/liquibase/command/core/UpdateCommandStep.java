@@ -9,6 +9,7 @@ import liquibase.command.*;
 import liquibase.command.core.helpers.DatabaseChangelogCommandStep;
 import liquibase.database.Database;
 import liquibase.exception.CommandValidationException;
+import liquibase.util.ValueHandlerUtil;
 
 import java.util.Arrays;
 import java.util.List;
@@ -19,14 +20,20 @@ public class UpdateCommandStep extends AbstractUpdateCommandStep implements Clea
     public static String[] COMMAND_NAME = {"update"};
 
     public static final CommandArgumentDefinition<String> CHANGELOG_FILE_ARG;
+
+    public static final CommandArgumentDefinition<DatabaseChangeLog> CHANGELOG_ARG;
     public static final CommandArgumentDefinition<String> LABEL_FILTER_ARG;
     public static final CommandArgumentDefinition<String> CONTEXTS_ARG;
+    public static final CommandArgumentDefinition<String> REPORT_NAME;
+    public static final CommandArgumentDefinition<String> REPORT_PATH;
+    public static final CommandArgumentDefinition<Boolean> REPORT_ENABLED;
 
     static {
         CommandBuilder builder = new CommandBuilder(COMMAND_NAME, LEGACY_COMMAND_NAME);
+        CHANGELOG_ARG = builder.argument("databaseChangelog", DatabaseChangeLog.class).hidden().build();
         CHANGELOG_FILE_ARG = builder.argument(CommonArgumentNames.CHANGELOG_FILE, String.class)
-                .required().description("The root changelog")
-                .build();
+                .required().description("The root changelog").supersededBy(CHANGELOG_ARG).build();
+        CHANGELOG_ARG.setSupersededBy(CHANGELOG_FILE_ARG);
         LABEL_FILTER_ARG = builder.argument("labelFilter", String.class)
                 .addAlias("labels")
                 .description("Changeset labels to match")
@@ -34,6 +41,22 @@ public class UpdateCommandStep extends AbstractUpdateCommandStep implements Clea
         CONTEXTS_ARG = builder.argument("contextFilter", String.class)
                 .addAlias("contexts")
                 .description("Changeset contexts to match")
+                .build();
+        REPORT_ENABLED = builder.argument("reportEnabled", Boolean.class)
+                .description("Enable or disable update reporting.")
+                .defaultValue(Boolean.FALSE)
+                .setValueHandler(ValueHandlerUtil::booleanValueHandler)
+                .hidden()
+                .build();
+        REPORT_NAME = builder.argument("reportName", String.class)
+                .description("The name of the Update Report.")
+                .defaultValue("update-report")
+                .hidden()
+                .build();
+        REPORT_PATH = builder.argument("reportPath", String.class)
+                .description("The path to the directory to generate Update Reports.")
+                .defaultValue(".")
+                .hidden()
                 .build();
     }
 
@@ -82,8 +105,12 @@ public class UpdateCommandStep extends AbstractUpdateCommandStep implements Clea
     }
 
     @Override
-    public void postUpdateLog() {
-        Scope.getCurrentScope().getUI().sendMessage(coreBundle.getString("update.successful"));
+    public void postUpdateLog(int rowsAffected) {
+        if (rowsAffected > -1) {
+            Scope.getCurrentScope().getUI().sendMessage(String.format(coreBundle.getString("update.successful.with.row.count"), rowsAffected));
+        } else {
+            Scope.getCurrentScope().getUI().sendMessage(coreBundle.getString("update.successful"));
+        }
     }
 
     @Override

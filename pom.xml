@@ -1,8 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
-
+ 
     <!-- Cannot use "liquibase" as the name since "Liquibase" is used by liquibase-core -->
     <name>Liquibase Parent</name>
     <groupId>org.liquibase</groupId>
@@ -52,6 +53,8 @@
         <developerConnection>scm:git:git@github.com:liquibase/liquibase.git</developerConnection>
     </scm>
 
+
+
     <properties>
         <maven.compiler.source>1.8</maven.compiler.source>
         <maven.compiler.target>1.8</maven.compiler.target>
@@ -66,18 +69,23 @@
         <build.repository.owner>unknown</build.repository.owner>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
-        <spring.version>5.3.28</spring.version>
         <sonar.moduleKey>${project.artifactId}</sonar.moduleKey>
-        <groovy.version>2.4.17</groovy.version>
-        <dependency.spock.version>1.3-groovy-2.4</dependency.spock.version>
-        <junit.version>4.13.2</junit.version>
         <trimStackTrace>false</trimStackTrace>
+        <liquibase-pro.version>0-SNAPSHOT</liquibase-pro.version>
         <argLine></argLine>
+
+        <ant.version>1.10.13</ant.version>
+        <junit.version>4.13.2</junit.version>
+        <junit-jupiter.version>5.10.0</junit-jupiter.version>
+        <groovy.version>2.5.22</groovy.version>
+        <spock.version>1.3-groovy-2.5</spock.version>
+        <spring.version>5.3.28</spring.version>
     </properties>
 
+    <!-- comment -->
     <distributionManagement>
         <repository>
-            <id>github</id>
+            <id>liquibase</id>
             <name>GitHub Packages</name>
             <url>https://maven.pkg.github.com/liquibase/liquibase</url>
         </repository>
@@ -87,8 +95,8 @@
         <module>liquibase-core</module>
         <module>liquibase-standard</module>
         <module>liquibase-cli</module>
-	<module>liquibase-maven-plugin</module>
-	<module>liquibase-cdi-jakarta</module>
+        <module>liquibase-maven-plugin</module>
+        <module>liquibase-cdi-jakarta</module>
         <module>liquibase-cdi</module>
         <module>liquibase-integration-tests</module>
         <module>liquibase-dist</module>
@@ -97,12 +105,71 @@
         <module>liquibase-snowflake</module>
     </modules>
 
+    <dependencyManagement>
+        <dependencies>
+            <dependency>
+                <groupId>org.codehaus.groovy</groupId>
+                <artifactId>groovy-bom</artifactId>
+                <version>${groovy.version}</version>
+                <type>pom</type>
+                <scope>import</scope>
+            </dependency>
+            <dependency>
+                <groupId>org.junit</groupId>
+                <artifactId>junit-bom</artifactId>
+                <version>${junit-jupiter.version}</version>
+                <type>pom</type>
+                <scope>import</scope>
+            </dependency>
+            <dependency>
+                <groupId>junit</groupId>
+                <artifactId>junit</artifactId>
+                <version>${junit.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.apache.ant</groupId>
+                <artifactId>ant</artifactId>
+                <version>${ant.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.apache.ant</groupId>
+                <artifactId>ant-antlr</artifactId>
+                <version>${ant.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.apache.ant</groupId>
+                <artifactId>ant-junit</artifactId>
+                <version>${ant.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.apache.ant</groupId>
+                <artifactId>ant-launcher</artifactId>
+                <version>${ant.version}</version>
+            </dependency>
+            <dependency> <!-- use a specific Groovy version rather than the one specified by spock-core -->
+                <groupId>org.codehaus.groovy</groupId>
+                <artifactId>groovy-all</artifactId>
+                <version>${groovy.version}</version>
+                <type>pom</type>
+                <exclusions>
+                    <exclusion>
+                        <groupId>org.codehaus.groovy</groupId>
+                        <artifactId>groovy-testng</artifactId>
+                    </exclusion>
+                </exclusions>
+            </dependency>
+            <dependency>
+                <groupId>org.spockframework</groupId>
+                <artifactId>spock-core</artifactId>
+                <version>${spock.version}</version>
+            </dependency>
+        </dependencies>
+    </dependencyManagement>
     <dependencies>
 
         <dependency>
             <groupId>junit</groupId>
             <artifactId>junit</artifactId>
-            <version>${junit.version}</version>
             <scope>test</scope>
         </dependency>
 
@@ -127,24 +194,16 @@
             <scope>test</scope>
         </dependency>
 
-        <dependency> <!-- use a specific Groovy version rather than the one specified by spock-core -->
+        <dependency>
             <groupId>org.codehaus.groovy</groupId>
             <artifactId>groovy-all</artifactId>
-            <version>${groovy.version}</version>
-            <scope>test</scope>
             <type>pom</type>
-            <exclusions>
-                <exclusion>
-                    <groupId>org.codehaus.groovy</groupId>
-                    <artifactId>groovy-testng</artifactId>
-                </exclusion>
-            </exclusions>
+            <scope>test</scope>
         </dependency>
 
         <dependency>
             <groupId>org.spockframework</groupId>
             <artifactId>spock-core</artifactId>
-            <version>${dependency.spock.version}</version>
             <scope>test</scope>
         </dependency>
 
@@ -154,7 +213,8 @@
             <version>3.3.0</version>
             <scope>test</scope>
         </dependency>
-        <dependency> <!-- enables mocking of classes without default constructor (together with CGLIB) -->
+        <dependency> <!-- enables mocking of classes without default constructor (together with
+            CGLIB) -->
             <groupId>org.objenesis</groupId>
             <artifactId>objenesis</artifactId>
             <version>3.3</version>
@@ -164,7 +224,7 @@
         <dependency>
             <groupId>com.h2database</groupId>
             <artifactId>h2</artifactId>
-            <version>2.1.214</version>
+            <version>2.2.220</version>
             <scope>test</scope>
         </dependency>
         <dependency>
@@ -184,7 +244,7 @@
         <dependency>
             <groupId>com.microsoft.sqlserver</groupId>
             <artifactId>mssql-jdbc</artifactId>
-            <version>12.2.0.jre8</version>
+            <version>12.4.1.jre8</version>
             <scope>test</scope>
         </dependency>
 
@@ -226,7 +286,7 @@
         <dependency>
             <groupId>net.snowflake</groupId>
             <artifactId>snowflake-jdbc</artifactId>
-            <version>3.13.33</version>
+            <version>3.14.0</version>
             <scope>test</scope>
         </dependency>
 
@@ -281,7 +341,8 @@
                             <rules>
                                 <requireMavenVersion>
                                     <version>${maven.enforcer.requireMavenVersion}</version>
-                                    <message>This POM requires Maven ${maven.enforcer.requireMavenVersion}.</message>
+                                    <message>This POM requires Maven
+                                        ${maven.enforcer.requireMavenVersion}.</message>
                                 </requireMavenVersion>
                             </rules>
                         </configuration>
@@ -320,6 +381,13 @@
                 <configuration>
                     <redirectTestOutputToFile>true</redirectTestOutputToFile>
                     <argLine>-Dfile.encoding=${project.build.sourceEncoding}</argLine>
+                    <includes>
+                        <include>**/Test*.java</include>
+                        <include>**/*Test.java</include>
+                        <include>**/*Tests.java</include>
+                        <include>**/*TestCase.java</include>
+                        <include>**/*Spec.java</include>
+                    </includes>
                 </configuration>
             </plugin>
 
@@ -515,6 +583,32 @@
                     </plugin>
                 </plugins>
             </build>
+        </profile>
+
+        <profile>
+            <id>remote-repositories</id>
+            <activation>
+                <property>
+                    <name>env.CI</name>
+                    <value>true</value>
+                </property>
+            </activation>
+            <repositories>
+                <repository>
+                    <id>liquibase</id>
+                    <url>https://maven.pkg.github.com/liquibase/liquibase</url>
+                    <snapshots>
+                        <enabled>true</enabled>
+                    </snapshots>
+                </repository>
+                <repository>
+                    <id>liquibase-pro</id>
+                    <url>https://maven.pkg.github.com/liquibase/liquibase-pro</url>
+                    <snapshots>
+                        <enabled>true</enabled>
+                    </snapshots>
+                </repository>
+            </repositories>
         </profile>
     </profiles>
 </project>
