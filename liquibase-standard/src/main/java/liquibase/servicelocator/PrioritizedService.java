@@ -10,8 +10,6 @@ public interface PrioritizedService extends Plugin {
      */
     Comparator<PrioritizedService> COMPARATOR = (o1, o2) -> Integer.compare(o2.getPriority(), o1.getPriority());
 
-    int PRIORITY_DATABASE = 5;
-
     /**
      *
      * This method returns a priority value for an implementation. Liquibase uses this to

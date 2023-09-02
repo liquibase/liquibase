@@ -48,7 +48,7 @@ public class UpdateExecutablePreparedStatementTest {
 
     @Before
     public void setUp() throws Exception {
-        given(connection.prepareStatement(anyString())).willReturn(ps);
+        given(connection.prepareCacheableStatement(anyString())).willReturn(ps);
         database = new MSSQLDatabase();
         preparedStatementFactory = new PreparedStatementFactory(connection);
     }
@@ -91,7 +91,7 @@ public class UpdateExecutablePreparedStatementTest {
         statement.execute(preparedStatementFactory);
 
         // then
-        verify(connection).prepareStatement(
+        verify(connection).prepareCacheableStatement(
                 "UPDATE DATABASECHANGELOG " +
                         "SET MD5SUM = ? " +
                         "WHERE ID = N'SYPA: AUTO_START tüüp INT -> TEXT, vaartus 0 00 17 * * ?' " +
@@ -127,7 +127,7 @@ public class UpdateExecutablePreparedStatementTest {
         statement.execute(preparedStatementFactory);
 
         // then
-        verify(connection).prepareStatement(
+        verify(connection).prepareCacheableStatement(
                 "UPDATE DATABASECHANGELOG " +
                         "SET MD5SUM = ? " +
                         "WHERE ID = N'SYPA: AUTO_START tüüp INT -> TEXT, vaartus 0 00 17 * * ?' " +
@@ -168,7 +168,7 @@ public class UpdateExecutablePreparedStatementTest {
 
         updateExecutablePreparedStatement.execute(preparedStatementFactory);
 
-        verify(connection).prepareStatement(
+        verify(connection).prepareCacheableStatement(
                 "UPDATE catalogName.tableName " +
                         "SET column1 = ?, " +
                         "column2 = ?, " +
@@ -204,7 +204,7 @@ public class UpdateExecutablePreparedStatementTest {
         statement.execute(preparedStatementFactory);
 
         // then
-        verify(connection).prepareStatement("UPDATE DATABASECHANGELOG SET MD5SUM = ?, DATEEXECUTED = GETDATE()");
+        verify(connection).prepareCacheableStatement("UPDATE DATABASECHANGELOG SET MD5SUM = ?, DATEEXECUTED = GETDATE()");
 		verify(ps).setString(1, "7:e27bf9c0c2313160ef960a15d44ced47");
 		verify(ps, never()).setNull(eq(2), anyInt());
 	}
@@ -241,7 +241,7 @@ public class UpdateExecutablePreparedStatementTest {
 
         updateExecutablePreparedStatement.execute(preparedStatementFactory);
 
-        verify(connection).prepareStatement(
+        verify(connection).prepareCacheableStatement(
                 "UPDATE catalogName.tableName " +
                         "SET column1 = ?, " +
                         "column2 = ?, " +
