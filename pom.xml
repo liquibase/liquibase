@@ -46,14 +46,11 @@
         <url>https://github.com/liquibase/liquibase/actions</url>
     </ciManagement>
 
-
     <scm>
         <connection>scm:git:git@github.com:liquibase/liquibase.git</connection>
         <url>scm:git:git@github.com:liquibase/liquibase.git</url>
         <developerConnection>scm:git:git@github.com:liquibase/liquibase.git</developerConnection>
     </scm>
-
-
 
     <properties>
         <maven.compiler.source>1.8</maven.compiler.source>
@@ -105,6 +102,7 @@
         <module>liquibase-standard</module>
         <module>liquibase-cli</module>
         <module>liquibase-maven-plugin</module>
+        <module>liquibase-cdi-jakarta</module>
         <module>liquibase-cdi</module>
         <module>liquibase-integration-tests</module>
         <module>liquibase-dist</module>
