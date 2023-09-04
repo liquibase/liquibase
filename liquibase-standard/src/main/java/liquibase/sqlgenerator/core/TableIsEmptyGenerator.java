@@ -1,6 +1,8 @@
 package liquibase.sqlgenerator.core;
 
 import liquibase.database.Database;
+import liquibase.database.core.HsqlDatabase;
+import liquibase.database.core.OracleDatabase;
 import liquibase.exception.ValidationErrors;
 import liquibase.sql.Sql;
 import liquibase.sql.UnparsedSql;
@@ -27,7 +29,13 @@ public class TableIsEmptyGenerator extends AbstractSqlGenerator<TableIsEmptyStat
     }
 
     protected String generateCountSql(TableIsEmptyStatement statement, Database database) {
-        return String.format("SELECT COUNT(1) WHERE EXISTS (SELECT * FROM %s)", database.escapeTableName(statement.getCatalogName(), statement.getSchemaName(), statement.getTableName()));
+        String tableName = database.escapeTableName(statement.getCatalogName(), statement.getSchemaName(), statement.getTableName());
+        if (database instanceof HsqlDatabase) {
+            return String.format("SELECT COUNT(1) FROM (VALUES(0)) WHERE EXISTS (SELECT * FROM %s)", tableName);
+        } else if (database instanceof OracleDatabase) {
+            return String.format("SELECT COUNT(1) FROM DUAL WHERE EXISTS (SELECT * FROM %s)", tableName);
+        }
+        return String.format("SELECT COUNT(1) WHERE EXISTS (SELECT * FROM %s)", tableName);
     }
 
 
