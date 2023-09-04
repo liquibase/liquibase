@@ -479,7 +479,7 @@
                     <execution>
                         <id>javadoc-default</id>
                         <goals>
-                            <goal>jar-no-fork</goal>
+                            <goal>jar</goal>
                         </goals>
                         <phase>package</phase>
                     </execution>
