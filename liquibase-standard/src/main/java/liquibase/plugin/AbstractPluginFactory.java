@@ -2,16 +2,20 @@ package liquibase.plugin;
 
 import liquibase.Scope;
 import liquibase.exception.UnexpectedLiquibaseException;
+import liquibase.servicelocator.PrioritizedService;
 import liquibase.servicelocator.ServiceLocator;
 
 import java.util.*;
+import java.util.concurrent.CopyOnWriteArrayList;
+import java.util.function.Predicate;
+import java.util.stream.Collectors;
 
 /**
  * Convenience base class for all factories that find correct {@link Plugin} implementations.
  */
 public abstract class AbstractPluginFactory<T extends Plugin> implements PluginFactory {
 
-    private Collection<T> allInstances;
+    private volatile Collection<T> allInstances;
 
     protected AbstractPluginFactory() {
 
@@ -20,22 +24,19 @@ public abstract class AbstractPluginFactory<T extends Plugin> implements PluginF
     protected abstract Class<T> getPluginClass();
 
     /**
-     * Returns the priority of the given object based on the passed args array.
-     * The args are created as as part of the custom public getPlugin method in implementations are are passed through {@link #getPlugin(Object...)}
-     */
-    protected abstract int getPriority(T obj, Object... args);
-
-    /**
-     * Finds the plugin for which {@link #getPriority(Plugin, Object...)}  returns the highest value for the given scope and args.
+     * Finds the plugin filtering and ordering with the passed {@link PriorityArgsClosure}.
      * This method is called by a public implementation-specific methods.
-     * Normally this does not need to be overridden, instead override {@link #getPriority(Plugin, Object...)} to compute the priority of each object for the scope and arguments passed to this method.
+     * Normally this does not need to be overridden, instead define an implementor of {@link PriorityArgsClosure}
+     * to compute the priority of each object for the scope and arguments passed to this method.
      * <p>
-     * However, if there is a {@link Scope} key of "liquibase.plugin.${plugin.interface.class.Name}", an instance of that class will always be ran first.
+     * However, if there is a {@link Scope} key of "liquibase.plugin.${plugin.interface.class.Name}",
+     * an instance of that class is returned or {@link RuntimeException} is thrown.
      *
+     * @throws RuntimeException when cannot find registred plugin for specified name.
      * @return null if no plugins are found or have a priority greater than zero.
      */
-    protected T getPlugin(final Object... args) {
-        Set<T> applicable = this.getPlugins(args);
+    protected T getPlugin(final PriorityArgsClosure<? super T> chooser) {
+        Set<T> applicable = this.getPlugins(chooser);
 
         if (applicable.isEmpty()) {
             return null;
@@ -43,28 +44,17 @@ public abstract class AbstractPluginFactory<T extends Plugin> implements PluginF
         return applicable.iterator().next();
     }
 
-    protected Set<T> getPlugins(final Object... args) {
+    protected Set<T> getPlugins(final PriorityArgsClosure<? super T> chooser) {
         Optional<T> forcedPlugin = this.getForcedPluginIfAvailable();
         if (forcedPlugin.isPresent()) {
             return new HashSet<>(Collections.singletonList(forcedPlugin.get()));
         }
-        TreeSet<T> applicable = new TreeSet<>((o1, o2) -> {
-            Integer o1Priority = getPriority(o1, args);
-            Integer o2Priority = getPriority(o2, args);
 
-            int i = o2Priority.compareTo(o1Priority);
-            if (i == 0) {
-                return o1.getClass().getName().compareTo(o2.getClass().getName());
-            }
-            return i;
-        });
-
-        for (T plugin : findAllInstances()) {
-            if (getPriority(plugin, args) >= 0) {
-                applicable.add(plugin);
-            }
-        }
-        return applicable;
+        return findAllInstances()
+                .stream()
+                .filter(chooser)
+                .sorted(chooser)
+                .collect(Collectors.toCollection(LinkedHashSet::new));
     }
 
     private Optional<T> getForcedPluginIfAvailable() {
@@ -82,7 +72,7 @@ public abstract class AbstractPluginFactory<T extends Plugin> implements PluginF
     }
 
 
-    public synchronized void register(T plugin) {
+    public void register(T plugin) {
         this.findAllInstances();
         this.allInstances.add(plugin);
     }
@@ -90,24 +80,59 @@ public abstract class AbstractPluginFactory<T extends Plugin> implements PluginF
     /**
      * Finds implementations of the given interface or class and returns instances of them.
      * Standard implementation uses {@link ServiceLoader} to find implementations and caches results in {@link #allInstances} which means the same objects are always returned.
-     * If the instances should not be treated as singletons, clone the objects before returning them from {@link #getPlugin(Object...)}.
+     * If the instances should not be treated as singletons, clone the objects before returning them from {@link #getPlugin(PriorityArgsClosure)}.
      */
-    protected synchronized Collection<T> findAllInstances() {
+    protected Collection<T> findAllInstances() {
         if (this.allInstances == null) {
-            this.allInstances = new ArrayList<>();
-
-            ServiceLocator serviceLocator = Scope.getCurrentScope().getServiceLocator();
-            this.allInstances.addAll(serviceLocator.findInstances(getPluginClass()));
+            synchronized (this) {
+                if (this.allInstances == null) {
+                    ServiceLocator serviceLocator = Scope.getCurrentScope().getServiceLocator();
+                    this.allInstances = new CopyOnWriteArrayList<>(serviceLocator.findInstances(getPluginClass()));
+                }
+            }
         }
 
         return this.allInstances;
     }
 
-    protected synchronized void removeInstance(T instance) {
+    protected void removeInstance(T instance) {
         if (this.allInstances == null) {
             return;
         }
         this.allInstances.remove(instance);
     }
 
+    /**
+     * Allows to influence selection of a plugin per request.
+     *
+     * @param <T> same as PluginFactory's.
+     */
+    @FunctionalInterface
+    public interface PriorityArgsClosure<T extends Plugin> extends Comparator<T>, Predicate<T> {
+        /**
+         * Highest wins, negatives are not considered.
+         *
+         * @param obj to assess
+         * @return value, influencing filtering and comparison
+         */
+        int getPriority(T obj);
+
+        @Override
+        default int compare(T o1, T o2) {
+            //Reversed!
+            int i = Integer.compare(getPriority(o2), getPriority(o1));
+            if (i == 0) {
+                //Not reversed!
+                return o1.getClass().getName().compareTo(o2.getClass().getName());
+            }
+            return i;
+        }
+
+        @Override
+        default boolean test(T t) {
+            return getPriority(t) >= 0;
+        }
+    }
+
+    public static final PriorityArgsClosure<PrioritizedService> PLAIN_PRIORITIZED_SERVICE = PrioritizedService::getPriority;
 }

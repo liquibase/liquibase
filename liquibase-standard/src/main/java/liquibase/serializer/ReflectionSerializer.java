@@ -16,53 +16,45 @@ public class ReflectionSerializer {
         return instance;
     }
 
-    private final Map<Class, Map<String, Field>> reflectionCache = new ConcurrentHashMap<>();
+    private final Map<Class<?>, Map<String, Field>> reflectionCache = new ConcurrentHashMap<>();
 
     private ReflectionSerializer() {
 
     }
 
-    public Set<String> getFields(Object object) {
+    private Map<String, Field> getFieldMap(Object object) {
+        return reflectionCache.computeIfAbsent(object.getClass(), ReflectionSerializer::gatherFields);
+    }
 
-        if (!reflectionCache.containsKey(object.getClass())) {
+    private static Map<String, Field> gatherFields(Class<?> classToExtractFieldsFrom) {
+        Map<String, Field> fields = new HashMap<>();
+        Set<Field> allFields = new HashSet<>();
 
-            Map<String, Field> fields = new HashMap<>();
-            Set<Field> allFields = new HashSet<>();
-
-            Class<? extends Object> classToExtractFieldsFrom = object.getClass();
-            while (!classToExtractFieldsFrom.equals(Object.class)) {
-                allFields.addAll(Arrays.asList(classToExtractFieldsFrom.getDeclaredFields()));
-                classToExtractFieldsFrom = classToExtractFieldsFrom.getSuperclass();
-            }
-
-            for (Field field : allFields) {
-                if ("serialVersionUID".equals(field.getName()) || "serializableFields".equals(field.getName())) {
-                    continue;
-                }
-                if (field.isSynthetic() || "$VRc".equals(field.getName())) { //from emma
-                    continue;
-                }
-
-                fields.put(field.getName(), field);
-                field.setAccessible(true);
-            }
-
-            reflectionCache.put(object.getClass(), fields);
+        while (!classToExtractFieldsFrom.equals(Object.class)) {
+            allFields.addAll(Arrays.asList(classToExtractFieldsFrom.getDeclaredFields()));
+            classToExtractFieldsFrom = classToExtractFieldsFrom.getSuperclass();
         }
 
-        return reflectionCache.get(object.getClass()).keySet();
+        for (Field field : allFields) {
+            if ("serialVersionUID".equals(field.getName()) || "serializableFields".equals(field.getName())) {
+                continue;
+            }
+            if (field.isSynthetic() || "$VRc".equals(field.getName())) { //from emma
+                continue;
+            }
+
+            fields.put(field.getName(), field);
+            field.setAccessible(true);
+        }
+        return Collections.unmodifiableMap(fields);
+    }
+
+    public Set<String> getFields(Object object) {
+        return getFieldMap(object).keySet();
     }
 
     private Field findField(Object object, String field) {
-        Field foundField = null;
-        Class<? extends Object> classToCheck = object.getClass();
-        while ((foundField == null) && !classToCheck.equals(Object.class)) {
-            try {
-                foundField = classToCheck.getDeclaredField(field);
-            } catch (NoSuchFieldException e) {
-                classToCheck = classToCheck.getSuperclass();
-            }
-        }
+        Field foundField = getFieldMap(object).get(field);
         if (foundField == null) {
             throw new UnexpectedLiquibaseException("No field " + field + " on " + object.getClass());
         }
@@ -70,20 +62,9 @@ public class ReflectionSerializer {
     }
 
     public Object getValue(Object object, String field) {
-        if (!reflectionCache.containsKey(object.getClass())) {
-            getFields(object); //fills cache
-        }
-
-        Map<String, Field> fieldsByName = reflectionCache.get(object.getClass());
-        Field foundField = fieldsByName.get(field);
-
         try {
-            if (foundField == null) {
-                foundField = findField(object, field);
-                foundField.setAccessible(true);
-
-                fieldsByName.put(field, foundField);
-            }
+            Field foundField = findField(object, field);
+            foundField.setAccessible(true);
 
             return foundField.get(object);
         } catch (Exception e) {
@@ -102,15 +83,15 @@ public class ReflectionSerializer {
         }
     }
 
-    public Class getDataTypeClass(Object object, String field) {
+    public Class<?> getDataTypeClass(Object object, String field) {
         try {
             Field foundField = findField(object, field);
             Type dataType = foundField.getGenericType();
             if (dataType instanceof Class) {
-                return (Class) dataType;
+                return (Class<?>) dataType;
             }
             if (dataType instanceof ParameterizedType) {
-                return (Class) ((ParameterizedType) dataType).getRawType();
+                return (Class<?>) ((ParameterizedType) dataType).getRawType();
             }
             return Object.class;
         } catch (Exception e) {

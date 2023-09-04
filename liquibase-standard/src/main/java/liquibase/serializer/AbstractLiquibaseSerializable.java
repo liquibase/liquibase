@@ -16,8 +16,6 @@ import java.util.regex.Pattern;
 
 public abstract class AbstractLiquibaseSerializable implements LiquibaseSerializable {
 
-    private Set<String> serializableFields;
-
     @Override
     public void load(ParsedNode parsedNode, ResourceAccessor resourceAccessor) throws ParsedNodeException {
         for (ParsedNode childNode : parsedNode.getChildren()) {
@@ -185,7 +183,8 @@ public abstract class AbstractLiquibaseSerializable implements LiquibaseSerializ
 
     @Override
     public Set<String> getSerializableFields() {
-        return ReflectionSerializer.getInstance().getFields(this);
+        //There is some code in proprietary extension, which assumes this to be modifiable.
+        return new HashSet<>(ReflectionSerializer.getInstance().getFields(this));
     }
 
     @Override

@@ -62,6 +62,14 @@ public class JdbcConnection implements DatabaseConnection {
         PATTERN_JDBC_OBFUSCATE.add(PatternPair.of(Pattern.compile("(?i)(.*)"), Pattern.compile(FILTER_CREDS_PRIVATE_KEY_FILE_PWD)));
     }
 
+    //Some databases do extra work on creating prepared statements, so constantly creating new prepared statements is expensive
+    //When running through a CSV file, the SQL will be the same within the same file so just storing the last seen prepared statement is all we need
+    //Ideally the creation of the prepared statements would happen at the spot where we know we should be re-using it and that code can close it.
+    // But that will have to wait for a refactoring of this code.
+    // So for now we're trading leaving at most one prepared statement unclosed at the end of the liquibase run for better re-using statements to avoid overhead
+    private PreparedStatement lastPreparedStatement;
+    private String lastPreparedStatementSql;
+
     public JdbcConnection() {
 
     }
@@ -259,6 +267,9 @@ public class JdbcConnection implements DatabaseConnection {
     public void close() throws DatabaseException {
         rollback();
         try {
+            if (lastPreparedStatement != null) {
+                lastPreparedStatement.close();
+            }
             con.close();
         } catch (SQLException e) {
             throw new DatabaseException(e);
@@ -466,6 +477,28 @@ public class JdbcConnection implements DatabaseConnection {
     public PreparedStatement prepareStatement(String sql) throws DatabaseException {
         try {
             return con.prepareStatement(sql);
+        } catch (SQLException e) {
+            throw new DatabaseException(e);
+        }
+    }
+
+    public PreparedStatement prepareCacheableStatement(String sql) throws DatabaseException {
+        if (sql.equals(lastPreparedStatementSql)) {
+            try {
+                if (!lastPreparedStatement.isClosed()) {
+                    lastPreparedStatement.clearParameters();
+                    return lastPreparedStatement;
+                }
+            } catch (SQLException e) {
+                Scope.getCurrentScope().getLog(getClass())
+                        .fine("Error clearing parameters on prepared statement: " + e.getMessage(), e);
+            }
+        }
+        try {
+            PreparedStatement statement = con.prepareStatement(sql);
+            lastPreparedStatementSql = sql;
+            lastPreparedStatement = statement;
+            return statement;
         } catch (SQLException e) {
             throw new DatabaseException(e);
         }

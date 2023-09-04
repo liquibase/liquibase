@@ -13,11 +13,6 @@ public class LogFactory extends AbstractPluginFactory<LogService> {
         return LogService.class;
     }
 
-    @Override
-    protected int getPriority(LogService logService, Object... args) {
-        return logService.getPriority();
-    }
-
     /**
      * @deprecated Use {@link Scope#getLog(Class)}
      */

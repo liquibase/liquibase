@@ -1,12 +1,12 @@
 package liquibase.logging.mdc;
 
 import liquibase.Beta;
-import liquibase.plugin.Plugin;
+import liquibase.servicelocator.PrioritizedService;
 
 import java.util.Map;
 
 @Beta
-public interface MdcManager extends Plugin {
+public interface MdcManager extends PrioritizedService {
 
     /**
      * Puts a context value (the <code>value</code> parameter) as identified with the <code>key</code> parameter into
@@ -42,6 +42,8 @@ public interface MdcManager extends Plugin {
     void clear();
 
     @Beta
+    //Just for Beta annotation
+    @Override
     int getPriority();
 
     @Beta

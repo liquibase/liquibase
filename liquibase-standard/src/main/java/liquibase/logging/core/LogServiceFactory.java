@@ -13,12 +13,7 @@ public class LogServiceFactory extends AbstractPluginFactory<LogService> {
         return LogService.class;
     }
 
-    @Override
-    protected int getPriority(LogService obj, Object... args) {
-        return obj.getPriority();
-    }
-
     public LogService getDefaultLogService() {
-        return getPlugin();
+        return getPlugin(PLAIN_PRIORITIZED_SERVICE);
     }
 }

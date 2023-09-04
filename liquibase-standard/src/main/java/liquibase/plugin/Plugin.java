@@ -1,7 +1,5 @@
 package liquibase.plugin;
 
-import liquibase.servicelocator.PrioritizedService;
-
 /**
  * Interface for objects designed to be pluggable in Liquibase.
  * Implementations of this class should be looked up via factories rather than instantiated directly to support the extension system.
@@ -18,7 +16,7 @@ public interface Plugin {
     /**
      * Value to return from priority functions when the plugin is the standard implementation.
      */
-    int PRIORITY_DEFAULT = PrioritizedService.PRIORITY_DEFAULT;
+    int PRIORITY_DEFAULT = 1;
 
     /**
      * Value to return from priority functions when the plugin is a specialized, non-default implementation.
@@ -26,7 +24,7 @@ public interface Plugin {
     int PRIORITY_SPECIALIZED = 10;
 
 
-    int PRIORITY_DATABASE = PrioritizedService.PRIORITY_DATABASE;
+    int PRIORITY_DATABASE = 5;
 
 
 }

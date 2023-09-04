@@ -24,7 +24,7 @@ import liquibase.servicelocator.StandardServiceLocator;
 import liquibase.ui.ConsoleUIService;
 import liquibase.ui.UIService;
 import liquibase.util.CollectionUtil;
-import liquibase.util.SmartMap;
+import liquibase.util.ObjectUtil;
 import liquibase.util.StringUtil;
 
 import java.lang.reflect.Constructor;
@@ -37,7 +37,7 @@ import java.util.concurrent.ConcurrentHashMap;
  * It also allows new parameters to be added by extensions without affecting standard method signatures.
  * Scope objects can be created in a hierarchical manner with the {@link #child(Map, ScopedRunner)} or {@link #child(String, Object, ScopedRunner)} methods.
  * Values set in parent scopes are visible in child scopes, but values in child scopes are not visible to parent scopes.
- * Values with the same key in different scopes "mask" each other with the value furthest down the scope chain being returned.
+ * Values with the same key in different scopes "mask" each other with the furthest value down the scope chain being returned.
  */
 public class Scope {
 
@@ -70,7 +70,7 @@ public class Scope {
     private static ScopeManager scopeManager;
 
     private Scope parent;
-    private final SmartMap values = new SmartMap();
+    private final Map<String, Object> values = new ConcurrentHashMap<>();
     private String scopeId;
     private static final Map<String, List<MdcObject>> addedMdcEntries = new ConcurrentHashMap<>();
 
@@ -138,6 +138,7 @@ public class Scope {
         scopeId = generateScopeId();
         if (scopeValues != null) {
             for (Map.Entry<String, Object> entry : scopeValues.entrySet()) {
+                if (entry.getValue() == null) continue;
                 values.put(entry.getKey(), entry.getValue());
             }
         }
@@ -268,7 +269,7 @@ public class Scope {
     }
 
 
-    public synchronized <T> T get(Enum key, Class<T> type) {
+    public <T> T get(Enum key, Class<T> type) {
         return get(key.name(), type);
     }
 
@@ -282,7 +283,7 @@ public class Scope {
      * Returns null if key is not defined in this or any parent scopes.
      */
     public <T> T get(String key, Class<T> type) {
-        T value = values.get(key, type);
+        T value = ObjectUtil.convert(values.get(key), type);
         if (value == null && parent != null) {
             value = parent.get(key, type);
         }
@@ -294,50 +295,42 @@ public class Scope {
      * If the value is not defined, the passed defaultValue is returned.
      * The value is converted to the given type if necessary using {@link liquibase.util.ObjectUtil#convert(Object, Class)}.
      */
-    public synchronized <T> T get(String key, T defaultValue) {
-        Class type;
-        if (defaultValue == null) {
-            type = Object.class;
-        } else {
-            type = defaultValue.getClass();
-        }
+    public <T> T get(String key, T defaultValue) {
+        Class<?> type = defaultValue == null ? Object.class : defaultValue.getClass();
         Object value = get(key, type);
-
-        if (value == null) {
-            return defaultValue;
-        }
-        return (T) value;
+        return value == null ? defaultValue : (T) value;
     }
 
     /**
      * Looks up the singleton object of the given type. If the singleton has not been created yet, it will be instantiated.
      * The singleton is a singleton based on the root scope and the same object will be returned for all child scopes of the root.
      */
-    public synchronized <T extends SingletonObject> T getSingleton(Class<T> type) {
+    public <T extends SingletonObject> T getSingleton(Class<T> type) {
         if (getParent() != null) {
             return getParent().getSingleton(type);
         }
 
         String key = type.getName();
-        T singleton = get(key, type);
-        if (singleton == null) {
-            try {
-                try {
-                    Constructor<T> constructor = type.getDeclaredConstructor(Scope.class);
-                    constructor.setAccessible(true);
-                    singleton = constructor.newInstance(this);
-                } catch (NoSuchMethodException e) { //try without scope
-                    Constructor<T> constructor = type.getDeclaredConstructor();
-                    constructor.setAccessible(true);
-                    singleton = constructor.newInstance();
-                }
-            } catch (Exception e) {
-                throw new UnexpectedLiquibaseException(e);
-            }
+        return ObjectUtil.convert(
+                values.computeIfAbsent(key, k -> instantiate(type)),
+                type
+        );
+    }
 
-            values.put(key, singleton);
+    private <T> T instantiate(Class<T> type) {
+        try {
+            try {
+                Constructor<T> constructor = type.getDeclaredConstructor(Scope.class);
+                constructor.setAccessible(true);
+                return constructor.newInstance(this);
+            } catch (NoSuchMethodException e) { //try without scope
+                Constructor<T> constructor = type.getDeclaredConstructor();
+                constructor.setAccessible(true);
+                return constructor.newInstance();
+            }
+        } catch (Exception e) {
+            throw new UnexpectedLiquibaseException(e);
         }
-        return singleton;
     }
 
     public Logger getLog(Class clazz) {

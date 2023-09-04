@@ -1,5 +1,7 @@
 package liquibase;
 
+import java.util.Optional;
+
 /**
  * An alternative to {@link SingletonScopeManager} which manages a separate Scope per thread.<br><br>
  * Integrations that would prefer to use this scope manager can call <pre>Scope.setScopeManager(new ThreadLocalScopeManager())</pre>.
@@ -22,20 +24,17 @@ public class ThreadLocalScopeManager extends ScopeManager {
     }
 
     @Override
-    public synchronized Scope getCurrentScope() {
-        Scope current = threadLocalScopes.get();
-
-        if (current == null) {
-            threadLocalScopes.set(rootScope);
-            current = rootScope;
-        }
-
-        return current;
+    public Scope getCurrentScope() {
+        return Optional.ofNullable(threadLocalScopes.get()).orElse(rootScope);
     }
 
     @Override
-    protected synchronized void setCurrentScope(Scope scope) {
-        this.threadLocalScopes.set(scope);
+    protected void setCurrentScope(Scope scope) {
+        if (scope == rootScope) {
+            threadLocalScopes.remove();
+        } else {
+            threadLocalScopes.set(scope);
+        }
     }
     @Override
     protected Scope init(Scope scope) throws Exception {

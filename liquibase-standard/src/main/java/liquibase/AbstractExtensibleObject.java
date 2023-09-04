@@ -2,12 +2,12 @@ package liquibase;
 
 import liquibase.exception.UnexpectedLiquibaseException;
 import liquibase.util.ObjectUtil;
-import liquibase.util.SmartMap;
 import liquibase.util.StringUtil;
 
 import java.lang.reflect.Field;
 import java.lang.reflect.Modifier;
 import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * Convenience class implementing ExtensibleObject. It is usually easiest to extend this class rather than implement all of ExtensibleObject yourself.
@@ -17,12 +17,12 @@ public class AbstractExtensibleObject implements ExtensibleObject {
     /**
      * Additional non-standard attributes.
      */
-    private final SmartMap attributes = new SmartMap();
+    private final Map<String, Object> attributes = new HashMap<>();
 
     /**
      * Cache of fields on this object. Lazy loaded in {@link #getAttributeFields()}
      */
-    private static final Map<Class, Map<String, Field>> attributeFieldCache = new HashMap<>();
+    private static final Map<Class<? extends AbstractExtensibleObject>, Map<String, Field>> attributeFieldCache = new ConcurrentHashMap<>();
 
     public AbstractExtensibleObject() {
     }
@@ -90,18 +90,18 @@ public class AbstractExtensibleObject implements ExtensibleObject {
     }
 
     private Map<String, Field> getAttributeFields() {
-        Map<String, Field> fields = attributeFieldCache.get(this.getClass());
-        if (fields == null) {
-            fields = new HashMap<>();
-            for (Field field : this.getClass().getFields()) {
-                int modifiers = field.getModifiers();
-                if (Modifier.isPublic(modifiers) && !field.isSynthetic() && !Modifier.isFinal(modifiers) && !Modifier.isStatic(modifiers)) {
-                    fields.put(field.getName(), field);
-                }
+        return attributeFieldCache.computeIfAbsent(this.getClass(), AbstractExtensibleObject::buildCacheEntry);
+    }
+
+    private static Map<String, Field> buildCacheEntry(Class<? extends AbstractExtensibleObject> type) {
+        Map<String, Field> fields = new HashMap<>();
+        for (Field field : type.getFields()) {
+            int modifiers = field.getModifiers();
+            if (Modifier.isPublic(modifiers) && !field.isSynthetic() && !Modifier.isFinal(modifiers) && !Modifier.isStatic(modifiers)) {
+                fields.put(field.getName(), field);
             }
-            attributeFieldCache.put(this.getClass(), fields);
         }
-        return fields;
+        return Collections.unmodifiableMap(fields);
     }
 
     protected <T> T get(String attribute, T defaultValue, Class<T> type) {
@@ -205,7 +205,7 @@ public class AbstractExtensibleObject implements ExtensibleObject {
 
         Field field = getAttributeFields().get(attribute);
         if (field == null) {
-            value = attributes.get(attribute, type);
+            value = ObjectUtil.convert(attributes.get(attribute), type);
         } else {
             try {
                 value = ObjectUtil.convert(field.get(this), type);
@@ -220,7 +220,7 @@ public class AbstractExtensibleObject implements ExtensibleObject {
     public ExtensibleObject set(String attribute, Object value) {
         Field field = getAttributeFields().get(attribute);
         if (field == null) {
-            attributes.set(attribute, value);
+            attributes.put(attribute, value);
         } else {
             try {
                 field.set(this, ObjectUtil.convert(value, field.getType()));

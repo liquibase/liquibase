@@ -44,12 +44,14 @@ public class YamlChangeLogSerializer extends YamlSerializer implements ChangeLog
 
 
     private static class ChangeSetComparator implements Comparator<String> {
-        private static final Map<String, Integer> order = new HashMap<>();
+        private static final Map<String, Integer> order;
 
         static {
-            order.put("id", 1);
-            order.put("author", 2);
-            order.put("changes", Integer.MAX_VALUE);
+            Map<String, Integer> temporary = new HashMap<>();
+            temporary.put("id", 1);
+            temporary.put("author", 2);
+            temporary.put("changes", Integer.MAX_VALUE);
+            order = Collections.unmodifiableMap(temporary);
         }
 
         @Override

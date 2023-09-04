@@ -21,20 +21,11 @@ public class PathHandlerFactory extends AbstractPluginFactory<PathHandler> {
         return PathHandler.class;
     }
 
-    @Override
-    protected int getPriority(PathHandler obj, Object... args) {
-        return obj.getPriority((String) args[0]);
-    }
-
     /**
      * Creates a {@link ResourceAccessor} for the given path.
      */
     public ResourceAccessor getResourceAccessor(String root) throws IOException {
-        final PathHandler plugin = getPlugin(root);
-        if (plugin == null) {
-            throw new IOException("Cannot parse resource location: '" + root + "'");
-        }
-        return plugin.getResourceAccessor(root);
+        return getPathHandler(root).getResourceAccessor(root);
     }
 
     /**
@@ -44,12 +35,7 @@ public class PathHandlerFactory extends AbstractPluginFactory<PathHandler> {
      * @throws IOException                              if the path cannot be written to
      */
     public OutputStream createResource(String resourcePath) throws IOException {
-        final PathHandler plugin = getPlugin(resourcePath);
-        if (plugin == null) {
-            throw new IOException("Cannot parse resource location: '" + resourcePath + "'");
-        }
-
-        return plugin.createResource(resourcePath);
+        return getPathHandler(resourcePath).createResource(resourcePath);
     }
 
     /**
@@ -61,12 +47,15 @@ public class PathHandlerFactory extends AbstractPluginFactory<PathHandler> {
      */
     @SuppressWarnings("java:S2095")
     public Resource getResource(String resourcePath) throws IOException {
-        final PathHandler plugin = getPlugin(resourcePath);
+        return getPathHandler(resourcePath).getResource(resourcePath);
+    }
+
+    private PathHandler getPathHandler(final String resourcePath) throws IOException {
+        final PathHandler plugin = getPlugin(candidate -> candidate.getPriority(resourcePath));
         if (plugin == null) {
             throw new IOException("Cannot parse resource location: '" + resourcePath + "'");
         }
-
-        return plugin.getResource(resourcePath);
+        return plugin;
     }
 
     /**

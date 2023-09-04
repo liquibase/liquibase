@@ -9,6 +9,7 @@ import liquibase.logging.Logger;
 import liquibase.resource.PathHandlerFactory;
 import liquibase.resource.Resource;
 import liquibase.resource.ResourceAccessor;
+import liquibase.servicelocator.PrioritizedService;
 import liquibase.util.StringUtil;
 import liquibase.util.SystemUtil;
 import liquibase.SingletonObject;
@@ -18,12 +19,14 @@ import java.io.InputStream;
 import java.lang.reflect.InvocationTargetException;
 import java.sql.Driver;
 import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.stream.Stream;
 
 public class DatabaseFactory implements SingletonObject {
     private static final Logger LOG = Scope.getCurrentScope().getLog(DatabaseFactory.class);
     private static DatabaseFactory instance;
-    private final Map<String, SortedSet<Database>> implementedDatabases = new HashMap<>();
-    private final Map<String, SortedSet<Database>> internalDatabases = new HashMap<>();
+    private final Map<String, Database> implementedDatabases = new ConcurrentHashMap<>();
+    private final Map<String, Database> internalDatabases = new ConcurrentHashMap<>();
 
     private DatabaseFactory() {
         try {
@@ -58,26 +61,18 @@ public class DatabaseFactory implements SingletonObject {
      * Returns instances of all implemented database types.
      */
     public List<Database> getImplementedDatabases() {
-        List<Database> returnList = new ArrayList<>();
-        for (SortedSet<Database> set : implementedDatabases.values()) {
-            returnList.add(set.iterator().next());
-        }
-        return returnList;
+        return new ArrayList<>(implementedDatabases.values());
     }
 
     /**
      * Returns instances of all "internal" database types.
      */
     public List<Database> getInternalDatabases() {
-        List<Database> returnList = new ArrayList<>();
-        for (SortedSet<Database> set : internalDatabases.values()) {
-            returnList.add(set.iterator().next());
-        }
-        return returnList;
+        return new ArrayList<>(internalDatabases.values());
     }
 
     public void register(Database database) {
-        Map<String, SortedSet<Database>> map = null;
+        Map<String, Database> map;
         if (database instanceof InternalDatabase) {
             map = internalDatabases;
         } else {
@@ -85,15 +80,19 @@ public class DatabaseFactory implements SingletonObject {
 
         }
 
-        if (!map.containsKey(database.getShortName())) {
-            map.put(database.getShortName(), new TreeSet<>(new TreeSet<>(new DatabaseComparator())));
-        }
-        map.get(database.getShortName()).add(database);
+        map.compute(
+                database.getShortName(),
+                (name, existing) -> Stream
+                        .of(existing, database)
+                        .filter(Objects::nonNull)
+                        .min(PrioritizedService.COMPARATOR)
+                        .orElseThrow(IllegalStateException::new)
+        );
     }
 
     public Database findCorrectDatabaseImplementation(DatabaseConnection connection) throws DatabaseException {
 
-        SortedSet<Database> foundDatabases = new TreeSet<>(new DatabaseComparator());
+        SortedSet<Database> foundDatabases = new TreeSet<>(PrioritizedService.COMPARATOR);
 
         for (Database implementedDatabase : getImplementedDatabases()) {
             if (connection instanceof OfflineConnection) {
@@ -249,10 +248,7 @@ public class DatabaseFactory implements SingletonObject {
     }
 
     public Database getDatabase(String shortName) {
-        if (!implementedDatabases.containsKey(shortName)) {
-            return null;
-        }
-        return implementedDatabases.get(shortName).iterator().next();
+        return implementedDatabases.get(shortName);
 
     }
 
@@ -326,12 +322,5 @@ public class DatabaseFactory implements SingletonObject {
             }
         }
         return driverProperties;
-    }
-
-    private static class DatabaseComparator implements Comparator<Database> {
-        @Override
-        public int compare(Database o1, Database o2) {
-            return -1 * Integer.compare(o1.getPriority(), o2.getPriority());
-        }
     }
 }

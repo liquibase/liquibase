@@ -32,17 +32,6 @@ public class ChangeFactory extends AbstractPluginFactory<Change>{
         return Change.class;
     }
 
-    @Override
-    protected int getPriority(Change obj, Object... args) {
-        String commandName = (String) args[0];
-        ChangeMetaData changeMetaData = getChangeMetaData(obj);
-        if (commandName.equals(changeMetaData.getName())) {
-            return changeMetaData.getPriority();
-        } else {
-            return Plugin.PRIORITY_NOT_APPLICABLE;
-        }
-    }
-
     public ChangeMetaData getChangeMetaData(String change) {
         Change changeObj = create(change);
         if (changeObj == null) {
@@ -53,8 +42,7 @@ public class ChangeFactory extends AbstractPluginFactory<Change>{
 
     public ChangeMetaData getChangeMetaData(Change change) {
         String cacheKey = generateCacheKey(change);
-        cachedMetadata.putIfAbsent(cacheKey, change.createChangeMetaData());
-        return cachedMetadata.get(cacheKey);
+        return cachedMetadata.computeIfAbsent(cacheKey, ignored -> change.createChangeMetaData());
     }
 
     private String generateCacheKey(Change change) {
@@ -98,8 +86,15 @@ public class ChangeFactory extends AbstractPluginFactory<Change>{
      * Create a new Change implementation for the given change name. The class of the constructed object will be the Change implementation with the highest priority.
      * Each call to create will return a new instance of the Change.
      */
-    public Change create(String name) {
-        Set<Change> plugins = getPlugins(name);
+    public Change create(final String name) {
+        Set<Change> plugins = getPlugins(candidate -> {
+            ChangeMetaData changeMetaData = getChangeMetaData(candidate);
+            if (name.equals(changeMetaData.getName())) {
+                return changeMetaData.getPriority();
+            } else {
+                return Plugin.PRIORITY_NOT_APPLICABLE;
+            }
+        });
 
         if (plugins.isEmpty()) {
             return null;

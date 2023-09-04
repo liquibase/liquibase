@@ -3,18 +3,16 @@ package liquibase.precondition;
 import liquibase.Scope;
 import liquibase.exception.UnexpectedLiquibaseException;
 
-import java.util.HashMap;
+import java.util.Collections;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
 public class PreconditionFactory {
-    @SuppressWarnings("unchecked")
-    private final Map<String, Class<? extends Precondition>> preconditions;
+    private final Map<String, Class<? extends Precondition>> preconditions = new ConcurrentHashMap<>();
 
     private static PreconditionFactory instance;
 
-    @SuppressWarnings("unchecked")
     private PreconditionFactory() {
-        preconditions = new HashMap<>();
         try {
             for (Precondition precondition : Scope.getCurrentScope().getServiceLocator().findInstances(Precondition.class)) {
                 register(precondition);
@@ -36,7 +34,7 @@ public class PreconditionFactory {
     }
 
     public Map<String, Class<? extends Precondition>> getPreconditions() {
-        return preconditions;
+        return Collections.unmodifiableMap(preconditions);
     }
 
     public void register(Precondition precondition) {

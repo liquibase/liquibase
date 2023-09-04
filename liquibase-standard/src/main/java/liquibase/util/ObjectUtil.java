@@ -25,7 +25,7 @@ import java.util.concurrent.ConcurrentHashMap;
 public class ObjectUtil {
 
     private static final List<BeanIntrospector> introspectors = new ArrayList<>(Arrays.asList(new DefaultBeanIntrospector(), new FluentPropertyBeanIntrospector()));
-    
+
     /**
      * Cache for the methods of classes that we have been queried about so far.
      */
@@ -243,7 +243,7 @@ public class ObjectUtil {
      * @return array of {@link Method} belonging to the class of the object
      */
     private static Method[] getMethods(Object object) {
-        return methodCache.computeIfAbsent(object.getClass(), k -> object.getClass().getMethods());
+        return methodCache.computeIfAbsent(object.getClass(), Class::getMethods);
     }
 
       /**

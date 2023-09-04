@@ -9,11 +9,12 @@ import liquibase.exception.UnexpectedLiquibaseException;
 import liquibase.structure.DatabaseObject;
 
 import java.util.*;
+import java.util.concurrent.ConcurrentLinkedDeque;
 
 public class ChangeGeneratorFactory {
     private static ChangeGeneratorFactory instance;
 
-    private final List<ChangeGenerator> generators = new ArrayList<>();
+    private final Deque<ChangeGenerator> generators = new ConcurrentLinkedDeque<>();
 
     private ChangeGeneratorFactory() {
         try {
@@ -51,14 +52,13 @@ public class ChangeGeneratorFactory {
     }
 
     public void unregister(Class generatorClass) {
-        ChangeGenerator toRemove = null;
-        for (ChangeGenerator existingGenerator : generators) {
-            if (existingGenerator.getClass().equals(generatorClass)) {
-                toRemove = existingGenerator;
+        Iterator<ChangeGenerator> iterator = generators.descendingIterator();
+        while (iterator.hasNext()) {
+            if (iterator.next().getClass().equals(generatorClass)) {
+                iterator.remove();
+                return;
             }
         }
-
-        unregister(toRemove);
     }
 
     protected SortedSet<ChangeGenerator> getGenerators(Class<? extends ChangeGenerator> generatorType, Class<? extends DatabaseObject> objectType, Database database) {

@@ -7,11 +7,12 @@ import liquibase.servicelocator.PrioritizedService;
 
 import java.sql.Driver;
 import java.util.*;
+import java.util.concurrent.ConcurrentLinkedQueue;
 
 public class ConnectionServiceFactory {
     private static ConnectionServiceFactory instance;
 
-    private final List<DatabaseConnection> databaseConnections = new ArrayList<>();
+    private final Collection<DatabaseConnection> databaseConnections = new ConcurrentLinkedQueue<>();
 
     public static synchronized void reset() {
         instance = new ConnectionServiceFactory();
@@ -45,14 +46,13 @@ public class ConnectionServiceFactory {
     }
 
     public DatabaseConnection getDatabaseConnection(String url) {
-        final SortedSet<DatabaseConnection> sortedConnections = new TreeSet<>(
-                (o1, o2) -> -1 * Integer.compare(o1.getPriority(), o2.getPriority()));
-
-        databaseConnections.stream().filter(c -> c.supports(url))
-                .forEach(sortedConnections::add);
+        DatabaseConnection exampleService = databaseConnections
+                .stream()
+                .filter(c -> c.supports(url))
+                .min(PrioritizedService.COMPARATOR)
+                .orElseThrow(() -> new UnexpectedLiquibaseException("no-connection-found"));
 
         try {
-            DatabaseConnection exampleService = sortedConnections.iterator().next();
             Class<? extends DatabaseConnection> aClass = exampleService.getClass();
             DatabaseConnection connection;
             try {
@@ -84,6 +84,5 @@ public class ConnectionServiceFactory {
 
     public void register(DatabaseConnection databaseConnection) {
         databaseConnections.add(databaseConnection);
-        databaseConnections.sort(PrioritizedService.COMPARATOR);
     }
 }

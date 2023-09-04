@@ -7,13 +7,16 @@ import liquibase.structure.DatabaseObject;
 import liquibase.util.StringUtil;
 
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;
 
 public class DatabaseObjectFactory {
 
     private static DatabaseObjectFactory instance;
-    private Set<Class<? extends DatabaseObject>> standardTypes;
+    //We use it within double-check synchronized pattern, volatile is what we only need.
+    @SuppressWarnings("java:S3077")
+    private volatile Set<Class<? extends DatabaseObject>> standardTypes;
 
     public static synchronized DatabaseObjectFactory getInstance() {
         if (instance == null) {
@@ -55,17 +58,21 @@ public class DatabaseObjectFactory {
 
     public Set<Class<? extends DatabaseObject>> getStandardTypes() {
         if (standardTypes == null) {
-            Set<Class<? extends DatabaseObject>> set = new HashSet<>();
+            synchronized (DatabaseObjectFactory.class) {
+                if (standardTypes == null) {
+                    Set<Class<? extends DatabaseObject>> set = new HashSet<>();
 
-            for (DatabaseObject databaseObject : Scope.getCurrentScope().getServiceLocator().findInstances(DatabaseObject.class)) {
-                if (!databaseObject.getClass().equals(LiquibaseColumn.class) && databaseObject.snapshotByDefault()) {
-                    set.add(databaseObject.getClass());
+                    for (DatabaseObject databaseObject : Scope.getCurrentScope().getServiceLocator().findInstances(DatabaseObject.class)) {
+                        if (!databaseObject.getClass().equals(LiquibaseColumn.class) && databaseObject.snapshotByDefault()) {
+                            set.add(databaseObject.getClass());
+                        }
+                    }
+
+                    standardTypes = Collections.unmodifiableSet(set);
                 }
             }
-
-            standardTypes = set;
         }
-        return standardTypes;
+        return new HashSet<>(standardTypes);
     }
 
     public void reset() {

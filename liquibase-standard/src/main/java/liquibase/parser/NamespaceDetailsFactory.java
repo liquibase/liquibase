@@ -3,14 +3,16 @@ package liquibase.parser;
 import liquibase.Scope;
 import liquibase.exception.UnexpectedLiquibaseException;
 import liquibase.serializer.LiquibaseSerializer;
+import liquibase.servicelocator.PrioritizedService;
 
 import java.util.*;
+import java.util.concurrent.CopyOnWriteArrayList;
 
 public class NamespaceDetailsFactory {
 
     private static NamespaceDetailsFactory instance;
 
-    private final List<NamespaceDetails> namespaceDetails = new ArrayList<>();
+    private final List<NamespaceDetails> namespaceDetails = new CopyOnWriteArrayList<>();
 
     public static synchronized void reset() {
         instance = null;
@@ -40,35 +42,29 @@ public class NamespaceDetailsFactory {
     }
 
     public NamespaceDetails getNamespaceDetails(LiquibaseParser parser, String namespace) {
-        SortedSet<NamespaceDetails> validNamespaceDetails = new TreeSet<>(new SerializerNamespaceDetailsComparator());
+        Optional<NamespaceDetails> details = namespaceDetails
+                .stream()
+                .filter(nd -> nd.supports(parser, namespace))
+                .min(PrioritizedService.COMPARATOR);
 
-        for (NamespaceDetails details : namespaceDetails) {
-            if (details.supports(parser, namespace)) {
-                validNamespaceDetails.add(details);
-            }
-        }
+        if (details.isPresent()) return details.get();
 
-        if (validNamespaceDetails.isEmpty()) {
-            Scope.getCurrentScope().getLog(getClass()).fine("No parser namespace details associated with namespace '" + namespace + "' and parser " + parser.getClass().getName());
-        }
-
-        return validNamespaceDetails.iterator().next();
+        String message = "No parser namespace details associated with namespace '" + namespace + "' and parser " + parser.getClass().getName();
+        Scope.getCurrentScope().getLog(getClass()).fine(message);
+        throw new NoSuchElementException(message);
     }
 
     public NamespaceDetails getNamespaceDetails(LiquibaseSerializer serializer, String namespace) {
-        SortedSet<NamespaceDetails> validNamespaceDetails = new TreeSet<>(new SerializerNamespaceDetailsComparator());
+        Optional<NamespaceDetails> details = namespaceDetails
+                .stream()
+                .filter(nd -> nd.supports(serializer, namespace))
+                .min(PrioritizedService.COMPARATOR);
 
-        for (NamespaceDetails details : namespaceDetails) {
-            if (details.supports(serializer, namespace)) {
-                validNamespaceDetails.add(details);
-            }
-        }
+        if (details.isPresent()) return details.get();
 
-        if (validNamespaceDetails.isEmpty()) {
-            Scope.getCurrentScope().getLog(getClass()).fine("No serializer namespace details associated with namespace '" + namespace + "' and serializer " + serializer.getClass().getName());
-        }
-
-        return validNamespaceDetails.iterator().next();
+        String message = "No serializer namespace details associated with namespace '" + namespace + "' and serializer " + serializer.getClass().getName();
+        Scope.getCurrentScope().getLog(getClass()).fine(message);
+        throw new NoSuchElementException(message);
     }
 
     public void register(NamespaceDetails namespaceDetails) {
@@ -77,12 +73,5 @@ public class NamespaceDetailsFactory {
 
     public void unregister(NamespaceDetails namespaceDetails) {
         this.namespaceDetails.remove(namespaceDetails);
-    }
-
-    private class SerializerNamespaceDetailsComparator implements Comparator<NamespaceDetails> {
-        @Override
-        public int compare(NamespaceDetails o1, NamespaceDetails o2) {
-            return Integer.compare(o2.getPriority(), o1.getPriority());
-        }
     }
 }

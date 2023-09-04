@@ -6,6 +6,7 @@ import liquibase.database.Database;
 import liquibase.exception.UnexpectedLiquibaseException;
 import liquibase.exception.ValidationErrors;
 import liquibase.exception.Warnings;
+import liquibase.servicelocator.PrioritizedService;
 import liquibase.sql.Sql;
 import liquibase.statement.SqlStatement;
 import liquibase.structure.DatabaseObject;
@@ -15,6 +16,9 @@ import java.lang.reflect.Type;
 import java.lang.reflect.TypeVariable;
 import java.util.*;
 import java.util.concurrent.atomic.AtomicReference;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.CopyOnWriteArrayList;
+import java.util.stream.Collectors;
 
 import static liquibase.sqlgenerator.SqlGenerator.EMPTY_SQL;
 
@@ -27,17 +31,19 @@ public class SqlGeneratorFactory {
 
     private static SqlGeneratorFactory instance;
     //caches for expensive reflection based calls that slow down Liquibase initialization: CORE-1207
-    private final Map<Class<?>, Type[]> genericInterfacesCache = new HashMap<>();
-    private final Map<Class<?>, Type> genericSuperClassCache = new HashMap<>();
-    private final List<SqlGenerator> generators = new ArrayList<>();
-    private final Map<String, SortedSet<SqlGenerator>> generatorsByKey = new HashMap<>();
+    private final Map<Class<?>, Type[]> genericInterfacesCache = new ConcurrentHashMap<>();
+    private final Map<Class<?>, Type> genericSuperClassCache = new ConcurrentHashMap<>();
+    private List<SqlGenerator> generators;
+    private final Map<String, List<SqlGenerator>> generatorsByKey = new ConcurrentHashMap<>();
     public static final String GENERATED_SQL_ARRAY_SCOPE_KEY = "generatedSqlArray";
 
     private SqlGeneratorFactory() {
         try {
+            generators = new ArrayList<>();
             for (SqlGenerator generator : Scope.getCurrentScope().getServiceLocator().findInstances(SqlGenerator.class)) {
                 register(generator);
             }
+            generators = new CopyOnWriteArrayList<>(generators);
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
@@ -68,6 +74,13 @@ public class SqlGeneratorFactory {
 
     public void unregister(SqlGenerator generator) {
         generators.remove(generator);
+        for (Iterator<Map.Entry<String, List<SqlGenerator>>> iterator = generatorsByKey.entrySet().iterator(); iterator.hasNext(); ) {
+            List<SqlGenerator> specificGenerators = iterator.next().getValue();
+            specificGenerators.remove(generator);
+            if (specificGenerators.isEmpty()) {
+                iterator.remove();
+            }
+        }
     }
 
     public void unregister(Class generatorClass) {
@@ -85,7 +98,7 @@ public class SqlGeneratorFactory {
         return generators;
     }
 
-    public synchronized SortedSet<SqlGenerator> getGenerators(SqlStatement statement, Database database) {
+    public List<SqlGenerator> getGenerators(SqlStatement statement, Database database) {
         String databaseName = null;
         if (database == null) {
             databaseName = "NULL";
@@ -106,14 +119,16 @@ public class SqlGeneratorFactory {
 
         String key = statement.getClass().getName()+":"+ databaseName+":"+ version;
 
-        if (generatorsByKey.containsKey(key) && !generatorsByKey.get(key).isEmpty()) {
-            SortedSet<SqlGenerator> result = new TreeSet<>(new SqlGeneratorComparator());
-            result.addAll(generatorsByKey.get(key));
-            result.retainAll(getGenerators());
-            return result;
-        }
+        List<SqlGenerator> potential = generatorsByKey.get(key);
+        if (potential != null && !potential.isEmpty()) return potential;
 
-        SortedSet<SqlGenerator> validGenerators = new TreeSet<>(new SqlGeneratorComparator());
+        return generatorsByKey.compute(key, (k, existing) -> maybeSelectBetter(statement, database, existing));
+    }
+
+    private List<SqlGenerator> maybeSelectBetter(SqlStatement statement, Database database, List<SqlGenerator> existing) {
+        if (existing != null && !existing.isEmpty()) return existing;
+
+        Set<SqlGenerator> validGenerators = new HashSet<>();
 
         for (SqlGenerator generator : getGenerators()) {
             Class clazz = generator.getClass();
@@ -137,26 +152,15 @@ public class SqlGeneratorFactory {
                 clazz = clazz.getSuperclass();
             }
         }
-        generatorsByKey.put(key, validGenerators);
-        return validGenerators;
+        return validGenerators.stream().sorted(PrioritizedService.COMPARATOR).collect(Collectors.toCollection(CopyOnWriteArrayList::new));
     }
 
     private Type[] getGenericInterfaces(Class<?> clazz) {
-        if(genericInterfacesCache.containsKey(clazz)) {
-            return genericInterfacesCache.get(clazz);
-        }
-        Type[] genericInterfaces = clazz.getGenericInterfaces();
-        genericInterfacesCache.put(clazz, genericInterfaces);
-        return genericInterfaces;
+        return genericInterfacesCache.computeIfAbsent(clazz, Class::getGenericInterfaces);
     }
 
     private Type getGenericSuperclass(Class<?> clazz) {
-        if(genericSuperClassCache.containsKey(clazz)) {
-            return genericSuperClassCache.get(clazz);
-        }
-        Type genericSuperclass = clazz.getGenericSuperclass();
-        genericSuperClassCache.put(clazz, genericSuperclass);
-        return genericSuperclass;
+        return genericSuperClassCache.computeIfAbsent(clazz, Class::getGenericSuperclass);
     }
 
     private boolean isTypeEqual(Type aType, Class aClass) {
@@ -166,7 +170,7 @@ public class SqlGeneratorFactory {
         return aType.equals(aClass);
     }
 
-    private void checkType(Type type, SqlStatement statement, SqlGenerator generator, Database database, SortedSet<SqlGenerator> validGenerators) {
+    private void checkType(Type type, SqlStatement statement, SqlGenerator generator, Database database, Collection<SqlGenerator> validGenerators) {
         for (Type typeClass : ((ParameterizedType) type).getActualTypeArguments()) {
             if (typeClass instanceof TypeVariable) {
                 typeClass = ((TypeVariable) typeClass).getBounds()[0];
@@ -185,7 +189,7 @@ public class SqlGeneratorFactory {
     }
 
     private SqlGeneratorChain createGeneratorChain(SqlStatement statement, Database database) {
-        SortedSet<SqlGenerator> sqlGenerators = getGenerators(statement, database);
+        Collection<SqlGenerator> sqlGenerators = getGenerators(statement, database);
         if ((sqlGenerators == null) || sqlGenerators.isEmpty()) {
             return null;
         }

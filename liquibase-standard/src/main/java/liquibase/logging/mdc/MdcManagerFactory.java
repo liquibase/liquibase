@@ -11,13 +11,8 @@ public class MdcManagerFactory extends AbstractPluginFactory<MdcManager> {
         return MdcManager.class;
     }
 
-    @Override
-    protected int getPriority(MdcManager obj, Object... args) {
-        return obj.getPriority();
-    }
-
     public MdcManager getMdcManager() {
-        return getPlugin();
+        return getPlugin(PLAIN_PRIORITIZED_SERVICE);
     }
 
     public void unregister(MdcManager manager) {

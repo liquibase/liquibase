@@ -9,12 +9,13 @@ import liquibase.resource.ResourceAccessor;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.concurrent.CopyOnWriteArrayList;
 
 public class ChangeLogParserFactory {
 
     private static ChangeLogParserFactory instance;
 
-    private final List<ChangeLogParser> parsers = new ArrayList<>();
+    private final List<ChangeLogParser> parsers = new CopyOnWriteArrayList<>();
 
     public static synchronized void reset() {
         instance = new ChangeLogParserFactory();

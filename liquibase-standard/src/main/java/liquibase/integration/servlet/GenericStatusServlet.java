@@ -5,9 +5,9 @@ import liquibase.Scope;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.text.DateFormat;
-import java.util.ArrayList;
 import java.util.Date;
-import java.util.List;
+import java.util.Deque;
+import java.util.concurrent.ConcurrentLinkedDeque;
 import java.util.logging.Level;
 import java.util.logging.LogRecord;
 
@@ -20,9 +20,9 @@ import java.util.logging.LogRecord;
 class GenericStatusServlet {
 
     private static final long serialVersionUID = 1092565349351848089L;
-    private static final List<LogRecord> liquibaseRunLog = new ArrayList<>();
+    private static final Deque<LogRecord> liquibaseRunLog = new ConcurrentLinkedDeque<>();
 
-    public static synchronized void logMessage(LogRecord message) {
+    public static void logMessage(LogRecord message) {
         liquibaseRunLog.add(message);
     }
 
@@ -60,7 +60,7 @@ class GenericStatusServlet {
 
                 writer.println("<hr>");
                 writer.println("<b>Liquibase started at " + DateFormat.getDateTimeInstance().format(new Date
-                        (liquibaseRunLog.get(0).getMillis())));
+                        (liquibaseRunLog.peekFirst().getMillis())));
                 writer.println("<hr>");
                 writer.println("<pre>");
                 for (LogRecord record : liquibaseRunLog) {
@@ -77,7 +77,7 @@ class GenericStatusServlet {
                 writer.println("</pre>");
                 writer.println("<hr>");
                 writer.println("<b>Liquibase finished at " + DateFormat.getDateTimeInstance().format(new Date
-                        (liquibaseRunLog.get(liquibaseRunLog.size() - 1).getMillis())));
+                        (liquibaseRunLog.peekLast().getMillis())));
             }
             writer.println("</body>");
             writer.println("</html>");

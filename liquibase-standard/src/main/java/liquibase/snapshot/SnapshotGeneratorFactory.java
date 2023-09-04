@@ -16,19 +16,21 @@ import liquibase.structure.core.Schema;
 import liquibase.structure.core.Table;
 
 import java.util.*;
+import java.util.concurrent.CopyOnWriteArrayList;
 
 public class SnapshotGeneratorFactory {
 
     private static SnapshotGeneratorFactory instance;
 
-    private final List<SnapshotGenerator> generators = new ArrayList<>();
+    private List<SnapshotGenerator> generators;
 
     protected SnapshotGeneratorFactory() {
         try {
+            generators = new ArrayList<>();
             for (SnapshotGenerator generator : Scope.getCurrentScope().getServiceLocator().findInstances(SnapshotGenerator.class)) {
                 register(generator);
             }
-
+            generators = new CopyOnWriteArrayList<>(generators);
         } catch (Exception e) {
             throw new UnexpectedLiquibaseException(e);
         }

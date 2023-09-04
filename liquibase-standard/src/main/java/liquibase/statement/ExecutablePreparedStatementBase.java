@@ -20,7 +20,6 @@ import liquibase.snapshot.SnapshotGeneratorFactory;
 import liquibase.structure.core.Column;
 import liquibase.structure.core.Table;
 import liquibase.util.FilenameUtil;
-import liquibase.util.JdbcUtil;
 import liquibase.util.StreamUtil;
 
 import java.io.*;
@@ -35,7 +34,7 @@ import static java.util.ResourceBundle.getBundle;
 
 public abstract class ExecutablePreparedStatementBase implements ExecutablePreparedStatement {
 
-    protected static ResourceBundle coreBundle = getBundle("liquibase/i18n/liquibase-core");
+    protected static final ResourceBundle coreBundle = getBundle("liquibase/i18n/liquibase-core");
 
     protected Database database;
     private final String catalogName;
@@ -48,16 +47,11 @@ public abstract class ExecutablePreparedStatementBase implements ExecutablePrepa
 
     private final ResourceAccessor resourceAccessor;
 
-    //Some databases do extra work on creating prepared statements, so constantly creating new prepared statements is expensive
-    //When running through a CSV file, the SQL will be the same within the same file so just storing the last seen prepared statement is all we need
-    //Ideally the creation of the prepared statements would happen at the spot where we know we should be re-using it and that code can close it.
-    // But that will have to wait for a refactoring of this code.
-    // So for now we're trading leaving at most one prepared statement unclosed at the end of the liquibase run for better re-using statements to avoid overhead
-    private static PreparedStatement lastPreparedStatement;
-    private static String lastPreparedStatementSql;
-
-    //Cache the executeWithFlags method to avoid reflection overhead
-    private static Method executeWithFlagsMethod;
+    //Cache the executeWithFlags method of Postgres'es PreparedStatement to avoid reflection overhead
+    //We use it within double-check synchronized pattern, volatile is what we only need.
+    //Additionally, there is no forseeable need to modify the value (method handler) after initialization.
+    @SuppressWarnings("java:S3077")
+    private static volatile Method postgresExecuteWithFlagsMethod;
 
     private final Map<String, Object> snapshotScratchPad = new HashMap<>();
 
@@ -91,20 +85,7 @@ public abstract class ExecutablePreparedStatementBase implements ExecutablePrepa
         }
         log.fine("Number of columns = " + cols.size());
 
-        PreparedStatement stmt = getCachedStatement(sql);
-        if (stmt == null) {
-            // create prepared statement
-            stmt = factory.create(sql);
-
-            lastPreparedStatement = stmt;
-            lastPreparedStatementSql = sql;
-        } else {
-            try {
-                stmt.clearParameters();
-            } catch (SQLException e) {
-                log.fine("Error clearing parameters on prepared statement: " + e.getMessage(), e);
-            }
-        }
+        PreparedStatement stmt = factory.create(sql);
 
         try {
             attachParams(cols, stmt);
@@ -122,50 +103,21 @@ public abstract class ExecutablePreparedStatementBase implements ExecutablePrepa
         }
     }
 
-    protected PreparedStatement getCachedStatement(String sql) {
-        if (lastPreparedStatement == null || lastPreparedStatementSql == null) {
-            return null;
-        }
-
-        boolean statementIsValid = true;
-        if (lastPreparedStatementSql.equals(sql)) {
-            try {
-                if (lastPreparedStatement.isClosed()) {
-                    statementIsValid = false;
-                }
-                if (statementIsValid) {
-                    final Connection connection = lastPreparedStatement.getConnection();
-                    if (connection == null || connection.isClosed()) {
-                        statementIsValid = false;
-                    }
-                }
-            } catch (SQLException e) {
-                statementIsValid = false;
-            }
-
-        } else {
-            statementIsValid = false;
-        }
-
-        if (!statementIsValid) {
-            JdbcUtil.closeStatement(lastPreparedStatement);
-            lastPreparedStatement = null;
-            lastPreparedStatementSql = null;
-        }
-
-        return lastPreparedStatement;
-    }
-
     protected void executePreparedStatement(PreparedStatement stmt) throws SQLException {
         if (database instanceof PostgresDatabase) {
             //postgresql's default prepared statement setup is slow for normal liquibase usage. Calling with QUERY_ONESHOT seems faster, even when we keep re-calling the same prepared statement for many rows in loadData
             try {
-                if (executeWithFlagsMethod == null) {
-                    executeWithFlagsMethod = stmt.getClass().getMethod("executeWithFlags", int.class);
-                    executeWithFlagsMethod.setAccessible(true);
+                if (postgresExecuteWithFlagsMethod == null) {
+                    synchronized (ExecutablePreparedStatementBase.class) {
+                        if (postgresExecuteWithFlagsMethod == null) {
+                            Method method = stmt.getClass().getMethod("executeWithFlags", int.class);
+                            method.setAccessible(true);
+                            postgresExecuteWithFlagsMethod = method;
+                        }
+                    }
                 }
 
-                executeWithFlagsMethod.invoke(stmt, 1); //QueryExecutor.QUERY_ONESHOT
+                postgresExecuteWithFlagsMethod.invoke(stmt, 1); //QueryExecutor.QUERY_ONESHOT
             } catch (IllegalAccessException | InvocationTargetException | NoSuchMethodException e) {
                 stmt.execute();
             }

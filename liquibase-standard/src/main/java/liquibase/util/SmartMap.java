@@ -6,7 +6,12 @@ import java.util.*;
  * Implementation of Map with the added methods {@link #get(String, Class)}  and {@link #get(String, Object)} to make the return values type safe and/or auto-converted.
  * Also adds {@link #set(String, Object)} for easier builder-style code.
  * Returns keys in alphabetical order.
+ *
+ * @deprecated This construct is no longer used by the Liquibase itself,
+ * because a combination of a regular Map and a wrapping ObjectUtils call seems to work pretty well,
+ * in the same time allowing to select a specific Map implementation for the given context.
  */
+@Deprecated
 public class SmartMap implements Map<String, Object> {
 
     private final SortedMap<String, Object> values = new TreeMap<>();

@@ -9,6 +9,7 @@ import liquibase.structure.DatabaseObject;
 import liquibase.structure.core.Column;
 import liquibase.structure.core.DataType;
 
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -17,20 +18,22 @@ import java.util.Map;
  */
 public class ColumnSnapshotGeneratorInformix extends ColumnSnapshotGenerator {
 
-    private static final Map<Integer, String> qualifiers = new HashMap<>();
+    private static final Map<Integer, String> qualifiers;
 
     static {
-        qualifiers.put(0, "YEAR");
-        qualifiers.put(2, "MONTH");
-        qualifiers.put(4, "DAY");
-        qualifiers.put(6, "HOUR");
-        qualifiers.put(8, "MINUTE");
-        qualifiers.put(10, "SECOND");
-        qualifiers.put(11, "FRACTION(1)");
-        qualifiers.put(12, "FRACTION(2)");
-        qualifiers.put(13, "FRACTION(3)");
-        qualifiers.put(14, "FRACTION(4)");
-        qualifiers.put(15, "FRACTION(5)");
+        Map<Integer, String> temporary = new HashMap<>();
+        temporary.put(0, "YEAR");
+        temporary.put(2, "MONTH");
+        temporary.put(4, "DAY");
+        temporary.put(6, "HOUR");
+        temporary.put(8, "MINUTE");
+        temporary.put(10, "SECOND");
+        temporary.put(11, "FRACTION(1)");
+        temporary.put(12, "FRACTION(2)");
+        temporary.put(13, "FRACTION(3)");
+        temporary.put(14, "FRACTION(4)");
+        temporary.put(15, "FRACTION(5)");
+        qualifiers = Collections.unmodifiableMap(temporary);
     }
 
 

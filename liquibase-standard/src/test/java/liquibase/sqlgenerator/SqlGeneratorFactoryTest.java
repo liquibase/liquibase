@@ -12,7 +12,6 @@ import org.junit.Before;
 import org.junit.Test;
 
 import java.util.Collection;
-import java.util.SortedSet;
 
 import static org.junit.Assert.*;
 
@@ -179,10 +178,10 @@ public class SqlGeneratorFactoryTest {
 
     @Test
     public void getGenerators() {
-        SortedSet<SqlGenerator> allGenerators = SqlGeneratorFactory.getInstance().getGenerators(new AddAutoIncrementStatement(null, null, "person", "name", "varchar(255)", null, null, null, null), new H2Database());
+        Collection<SqlGenerator> allGenerators = SqlGeneratorFactory.getInstance().getGenerators(new AddAutoIncrementStatement(null, null, "person", "name", "varchar(255)", null, null, null, null), new H2Database());
 
         assertNotNull(allGenerators);
-        assertEquals(1, allGenerators.size());        
+        assertEquals(1, allGenerators.size());
     }
 
     @LiquibaseService(skip = true)

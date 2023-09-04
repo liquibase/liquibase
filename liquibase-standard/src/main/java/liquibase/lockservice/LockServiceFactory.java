@@ -3,9 +3,11 @@ package liquibase.lockservice;
 import liquibase.Scope;
 import liquibase.database.Database;
 import liquibase.exception.UnexpectedLiquibaseException;
+import liquibase.servicelocator.PrioritizedService;
 
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentLinkedDeque;
 
 /**
  * @author John Sanda
@@ -14,7 +16,7 @@ public class LockServiceFactory {
 
     private static LockServiceFactory instance;
 
-	  private final List<LockService> registry = new ArrayList<>();
+	  private final Deque<LockService> registry = new ConcurrentLinkedDeque<>();
 
 	  private final Map<Database, LockService> openLockServices = new ConcurrentHashMap<>();
 
@@ -47,38 +49,37 @@ public class LockServiceFactory {
 	  }
 
     public void register(LockService lockService) {
-        registry.add(0, lockService);
+        registry.addFirst(lockService);
+    }
+
+    private LockService instantiate(Database database) {
+        LockService example = registry
+                .stream()
+                .filter(ls -> ls.supports(database))
+                .min(PrioritizedService.COMPARATOR)
+                .orElseThrow(() -> new UnexpectedLiquibaseException(
+                        "Cannot find LockService for " + database.getShortName()
+                ));
+
+        try {
+            LockService lockService = example.getClass().getConstructor().newInstance();
+            lockService.setDatabase(database);
+            return lockService;
+        } catch (Exception e) {
+            throw new UnexpectedLiquibaseException(e);
+        }
     }
 
     public LockService getLockService(Database database) {
-        if (!openLockServices.containsKey(database)) {
-			      SortedSet<LockService> foundServices = new TreeSet<>((o1, o2) -> -1 * Integer.compare(o1.getPriority(), o2.getPriority()));
-
-            for (LockService lockService : registry) {
-                if (lockService.supports(database)) {
-					          foundServices.add(lockService);
-				        }
-            }
-
-            if (foundServices.isEmpty()) {
-                throw new UnexpectedLiquibaseException("Cannot find LockService for " + database.getShortName());
-			      }
-
-            try {
-                LockService lockService = foundServices.iterator().next().getClass().getConstructor().newInstance();
-                lockService.setDatabase(database);
-                openLockServices.put(database, lockService);
-            } catch (Exception e) {
-                throw new UnexpectedLiquibaseException(e);
-            }
-        }
-        return openLockServices.get(database);
+        return openLockServices.computeIfAbsent(database, this::instantiate);
     }
 
     public void resetAll() {
-        for (LockService lockService : registry) {
-            lockService.reset();
+        synchronized (LockServiceFactory.class) {
+            for (LockService lockService : registry) {
+                lockService.reset();
+            }
+            reset();
         }
-        reset();
     }
 }

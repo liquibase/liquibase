@@ -13,7 +13,7 @@ import liquibase.structure.core.Relation;
 import liquibase.structure.core.Table;
 
 import java.util.ArrayList;
-import java.util.SortedSet;
+import java.util.Collection;
 
 public class InsertSetGenerator extends AbstractSqlGenerator<InsertSetStatement> {
 
@@ -55,20 +55,20 @@ public class InsertSetGenerator extends AbstractSqlGenerator<InsertSetStatement>
 
 		return result.toArray(new UnparsedSql[0]);
 	}
-    
+
 	private Sql completeStatement(InsertSetStatement statement, StringBuilder sql) {
 		sql.deleteCharAt(sql.lastIndexOf(","));
 		sql.append(";\n");
 		return new UnparsedSql(sql.toString(), getAffectedTable(statement));
 	}
-    
+
     public void generateHeader(StringBuilder sql,InsertSetStatement statement, Database database) {
         InsertStatement insert=statement.peek();
 		getInsertGenerator(database).generateHeader(sql, insert, database);
 	}
 
 	protected InsertGenerator getInsertGenerator(Database database) {
-		SortedSet<SqlGenerator> generators = SqlGeneratorFactory.getInstance().getGenerators(new InsertStatement(null, null, null), database);
+		Collection<SqlGenerator> generators = SqlGeneratorFactory.getInstance().getGenerators(new InsertStatement(null, null, null), database);
 		if ((generators == null) || generators.isEmpty()) {
 			return null;
 		}

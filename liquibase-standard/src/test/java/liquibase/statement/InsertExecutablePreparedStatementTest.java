@@ -45,7 +45,7 @@ public class InsertExecutablePreparedStatementTest {
     public void setUp() throws Exception {
         database = new MSSQLDatabase();
         preparedStatementFactory = new PreparedStatementFactory(connection);
-        when(connection.prepareStatement(any(String.class))).thenReturn(ps);
+        when(connection.prepareCacheableStatement(any(String.class))).thenReturn(ps);
     }
 
     @Test
@@ -88,7 +88,7 @@ public class InsertExecutablePreparedStatementTest {
 
         insertExecutablePreparedStatement.execute(preparedStatementFactory);
 
-        verify(connection).prepareStatement(
+        verify(connection).prepareCacheableStatement(
                 "INSERT INTO catalogName.schemaName.tableName(column1, column2, column3, column4) VALUES(?, ?, ?, ?)");
         verify(ps).setString(1, "value1");
         verify(ps).setString(2, "value2");
@@ -128,7 +128,7 @@ public class InsertExecutablePreparedStatementTest {
 
         insertExecutablePreparedStatement.execute(preparedStatementFactory);
 
-        verify(connection).prepareStatement(
+        verify(connection).prepareCacheableStatement(
                 "INSERT INTO catalogName.schemaName.tableName(column2, column3, column4) VALUES(?, ?, ?)");
         verify(ps).setString(1, "value2");
         verify(ps).setString(2, "value3");
@@ -167,7 +167,7 @@ public class InsertExecutablePreparedStatementTest {
 
         insertExecutablePreparedStatement.execute(preparedStatementFactory);
 
-        verify(connection).prepareStatement(
+        verify(connection).prepareCacheableStatement(
                 "INSERT INTO catalogName.schemaName.tableName(column2, column3, column4) VALUES(?, select * from abc where x=y, ?)");
         verify(ps).setString(1, "value2");
         verify(ps).setString(2, "value4");
@@ -197,7 +197,7 @@ public class InsertExecutablePreparedStatementTest {
         statement.execute(preparedStatementFactory);
 
         // then
-        verify(connection).prepareStatement("INSERT INTO DATABASECHANGELOG(MD5SUM, DATEEXECUTED) VALUES(?, GETDATE())");
+        verify(connection).prepareCacheableStatement("INSERT INTO DATABASECHANGELOG(MD5SUM, DATEEXECUTED) VALUES(?, GETDATE())");
         verify(ps).setString(1, "7:e27bf9c0c2313160ef960a15d44ced47");
         verify(ps, never()).setNull(eq(2), anyInt());
     }
