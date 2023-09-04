@@ -19,7 +19,7 @@ public class JdbcConnection implements DatabaseConnection {
     private java.sql.Connection con;
     private static final Pattern PROXY_USER = Pattern.compile(".*(?:thin|oci)\\:(.+)/@.*");
 
-    private static final List<JdbcConnectionPatterns> JDBC_CONNECTION_PATTERNS = Scope.getCurrentScope().getServiceLocator().findInstances(JdbcConnectionPatterns.class);
+    private static final List<ConnectionPatterns> JDBC_CONNECTION_PATTERNS = Scope.getCurrentScope().getServiceLocator().findInstances(ConnectionPatterns.class);
 
     public JdbcConnection() {
 
@@ -136,7 +136,7 @@ public class JdbcConnection implements DatabaseConnection {
         }
 
         if (!JDBC_CONNECTION_PATTERNS.isEmpty()) {
-            for (JdbcConnectionPatterns jdbcConnectionPattern : JDBC_CONNECTION_PATTERNS) {
+            for (ConnectionPatterns jdbcConnectionPattern : JDBC_CONNECTION_PATTERNS) {
                 for (Map.Entry<Pattern, Pattern> entry : jdbcConnectionPattern.getJdbcBlankToObfuscatePatterns()) {
                     Pattern jdbcUrlPattern = entry.getKey();
                     Matcher matcher = jdbcUrlPattern.matcher(jdbcUrl);
@@ -152,7 +152,7 @@ public class JdbcConnection implements DatabaseConnection {
         }
 
         if (!JDBC_CONNECTION_PATTERNS.isEmpty()) {
-            for (JdbcConnectionPatterns jdbcConnectionPattern : JDBC_CONNECTION_PATTERNS) {
+            for (ConnectionPatterns jdbcConnectionPattern : JDBC_CONNECTION_PATTERNS) {
                 for (Map.Entry<Pattern, Pattern> entry : jdbcConnectionPattern.getJdbcObfuscatePatterns()) {
                     Pattern jdbcUrlPattern = entry.getKey();
                     Matcher matcher = jdbcUrlPattern.matcher(jdbcUrl);
@@ -182,7 +182,7 @@ public class JdbcConnection implements DatabaseConnection {
             return jdbcUrl;
         }
         if (!JDBC_CONNECTION_PATTERNS.isEmpty()) {
-            for (JdbcConnectionPatterns jdbcConnectionPattern : JDBC_CONNECTION_PATTERNS) {
+            for (ConnectionPatterns jdbcConnectionPattern : JDBC_CONNECTION_PATTERNS) {
                 for (Map.Entry<Pattern, Pattern> entry : jdbcConnectionPattern.getJdbcBlankPatterns()) {
                     Pattern jdbcUrlPattern = entry.getKey();
                     Matcher matcher = jdbcUrlPattern.matcher(jdbcUrl);
