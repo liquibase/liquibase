@@ -20,7 +20,7 @@
 
     <name>liquibase-coverage</name>
 
-     <dependencies>
+     <!-- <dependencies>
         <dependency>
             <groupId>${project.groupId}</groupId>
             <artifactId>liquibase-cdi</artifactId>
@@ -31,7 +31,7 @@
             <artifactId>liquibase-cli</artifactId>
             <version>${project.version}</version>
         </dependency>
-    </dependencies>
+    </dependencies> -->
 
     <build>
       <plugins>
