@@ -31,6 +31,7 @@
 		<maven.deploy.skip>true</maven.deploy.skip>
 		<maven.install.skip>true</maven.install.skip>
 		<artifact.version>${project.version}</artifact.version>
+		<sonar.coverage.jacoco.xmlReportPaths>${project.basedir}/../liquibase-coverage/target/site/jacoco-aggregate/jacoco.xml</sonar.coverage.jacoco.xmlReportPaths>
 	</properties>
 	<dependencies>
 		<dependency>

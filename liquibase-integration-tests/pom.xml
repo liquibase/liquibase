@@ -14,6 +14,7 @@
 
     <properties>
         <maven.deploy.skip>false</maven.deploy.skip>
+        <sonar.coverage.jacoco.xmlReportPaths>${project.basedir}/../liquibase-coverage/target/site/jacoco-aggregate/jacoco.xml</sonar.coverage.jacoco.xmlReportPaths>
     </properties>
 
     <dependencies>
@@ -48,6 +49,16 @@
     </dependencies>
 
     <build>
+        <plugins>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-surefire-plugin</artifactId>
+                <configuration>
+                    <skipTests>${skip.integration.tests}</skipTests>
+                    <forkCount>1</forkCount>
+                </configuration>
+                </plugin>
+        </plugins>
         <testResources>
             <testResource>
                 <directory>src/test/resources</directory>

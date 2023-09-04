@@ -15,7 +15,8 @@
 
     <properties>
         <maven.deploy.skip>false</maven.deploy.skip>
-        <maven.javadoc.skip>true</maven.javadoc.skip> <!-- javadocs created in the root pom currently -->
+        <maven.javadoc.skip>true</maven.javadoc.skip>
+        <sonar.coverage.jacoco.xmlReportPaths>${project.basedir}/../liquibase-coverage/target/site/jacoco-aggregate/jacoco.xml</sonar.coverage.jacoco.xmlReportPaths> <!-- javadocs created in the root pom currently -->
     </properties>
 
     <description>Liquibase is a tool for managing and executing database changes.</description>
@@ -58,19 +59,6 @@
 
     <build>
         <plugins>
-            <plugin>
-                <groupId>org.jacoco</groupId>
-                <artifactId>jacoco-maven-plugin</artifactId>
-                <executions>
-                <execution>
-                    <id>report</id>
-                    <goals>
-                        <goal>report-aggregate</goal>
-                    </goals>
-                    <phase>test</phase>
-                </execution>
-                </executions>
-            </plugin>
             <plugin>
                 <groupId>org.liquibase.ext</groupId>
                 <artifactId>liquibase-sdk-maven-plugin</artifactId>
