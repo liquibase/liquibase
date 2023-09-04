@@ -454,7 +454,7 @@
                         <id>attach-sources</id>
                         <phase>package</phase>
                         <goals>
-                            <goal>jar</goal>
+                            <goal>jar-no-fork</goal>
                         </goals>
                     </execution>
                 </executions>
@@ -479,7 +479,7 @@
                     <execution>
                         <id>javadoc-default</id>
                         <goals>
-                            <goal>jar</goal>
+                            <goal>jar-no-fork</goal>
                         </goals>
                         <phase>package</phase>
                     </execution>
