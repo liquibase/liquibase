@@ -324,11 +324,12 @@
                             </archive>
                         </configuration>
                         <goals>
-                            <goal>jar-no-fork</goal>
+                            <goal>jar</goal>
                         </goals>
                     </execution>
                     <execution>
                         <id>test-jar</id>
+                        <phase>verify</phase>
                         <goals>
                             <goal>test-jar</goal>
                         </goals>
