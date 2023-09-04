@@ -2,6 +2,7 @@ package liquibase.sqlgenerator.core;
 
 import liquibase.database.Database;
 import liquibase.database.core.HsqlDatabase;
+import liquibase.database.core.MySQLDatabase;
 import liquibase.database.core.OracleDatabase;
 import liquibase.exception.ValidationErrors;
 import liquibase.sql.Sql;
@@ -32,7 +33,7 @@ public class TableIsEmptyGenerator extends AbstractSqlGenerator<TableIsEmptyStat
         String tableName = database.escapeTableName(statement.getCatalogName(), statement.getSchemaName(), statement.getTableName());
         if (database instanceof HsqlDatabase) {
             return String.format("SELECT COUNT(1) FROM (VALUES(0)) WHERE EXISTS (SELECT * FROM %s)", tableName);
-        } else if (database instanceof OracleDatabase) {
+        } else if (database instanceof OracleDatabase || database instanceof MySQLDatabase) {
             return String.format("SELECT COUNT(1) FROM DUAL WHERE EXISTS (SELECT * FROM %s)", tableName);
         }
         return String.format("SELECT COUNT(1) WHERE EXISTS (SELECT * FROM %s)", tableName);
