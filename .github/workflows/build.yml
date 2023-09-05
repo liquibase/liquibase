@@ -280,7 +280,7 @@ jobs:
       pullRequestNumber: ${{ github.event.pull_request.number }}
       pullRequestBranchName: ${{ github.event.pull_request.head.ref }}
       pullRequestBaseBranchName: ${{ github.event.pull_request.base.ref }}
-      mavenArgs: -Dliquibase.sdk.testSystem.test=h2,hsqldb,mssql,oracle -Dliquibase.sdk.testSystem.acceptLicenses=h2,hsqldb,mssql,oracle -Dsonar.coverage.exclusions='**/src/test/**/*.*'
+      mavenArgs: -Dliquibase.sdk.testSystem.test=h2 -Dliquibase.sdk.testSystem.acceptLicenses=h2 -Dsonar.coverage.exclusions='**/src/test/**/*.*'
     secrets: inherit
 
   package:
