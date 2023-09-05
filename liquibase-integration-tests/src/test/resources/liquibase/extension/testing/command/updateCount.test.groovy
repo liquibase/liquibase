@@ -134,11 +134,6 @@ Optional Args:
                 showSummaryOutput: "log"
         ]
 
-        expectedResults = [
-                statusCode   : 0,
-                defaultChangeExecListener: 'not_null'
-        ]
-
         expectedLogs = [
                 "UPDATE SUMMARY",
                 "Run:                          1",
@@ -155,7 +150,8 @@ Optional Args:
 
         expectedResults = [
                 statusCode   : 0,
-                defaultChangeExecListener: 'not_null'
+                defaultChangeExecListener: 'not_null',
+                updateReport: 'not_null'
         ]
 
         expectedUI = [
