@@ -6,7 +6,6 @@ import liquibase.exception.ChangeLogParseException
 import liquibase.parser.core.ParsedNode
 import liquibase.resource.ResourceAccessor
 import liquibase.sdk.supplier.resource.ResourceSupplier
-import org.xml.sax.SAXParseException
 import spock.lang.Shared
 import spock.lang.Specification
 
@@ -28,6 +27,8 @@ class AbstractChangeLogParserTest extends Specification {
         def changeLog = createParser(null).parse("com/example/empty.xml", new ChangeLogParameters(), resourceSupplier.simpleResourceAccessor)
         then:
         changeLog == null
+        cleanup:
+        f.delete()
     }
 
     def "empty node creates empty changelog object"() {
