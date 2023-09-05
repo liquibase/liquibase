@@ -246,7 +246,7 @@ public class SnapshotGeneratorFactory {
 
     public Table getDatabaseChangeLogTable(SnapshotControl snapshotControl, Database database) throws DatabaseException {
         try {
-            Table liquibaseTable = (Table) new Table().setName(database.getDatabaseChangeLogTableName()).setSchema(
+            Table liquibaseTable = (Table) new Table().setName(database.correctObjectName(database.getDatabaseChangeLogTableName(), Table.class)).setSchema(
                     new Schema(database.getLiquibaseCatalogName(), database.getLiquibaseSchemaName()));
             return createSnapshot(liquibaseTable, database, snapshotControl);
         } catch (InvalidExampleException e) {
@@ -256,7 +256,7 @@ public class SnapshotGeneratorFactory {
 
     public Table getDatabaseChangeLogLockTable(Database database) throws DatabaseException {
         try {
-            Table example = (Table) new Table().setName(database.getDatabaseChangeLogLockTableName()).setSchema(
+            Table example = (Table) new Table().setName(database.correctObjectName(database.getDatabaseChangeLogLockTableName(), Table.class)).setSchema(
                     new Schema(database.getLiquibaseCatalogName(), database.getLiquibaseSchemaName()));
             return createSnapshot(example, database);
         } catch (InvalidExampleException e) {
