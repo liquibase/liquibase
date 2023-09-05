@@ -16,7 +16,7 @@
 	<properties>
 		<deploy.repositoryId>liquibase</deploy.repositoryId>
 		<deploy.url>https://maven.pkg.github.com/liquibase/liquibase</deploy.url>
-		<h2.version>2.2.220</h2.version>
+		<h2.version>2.2.222</h2.version>
 		<hsqldb.version>2.7.2</hsqldb.version>
 		<postgresql.version>42.6.0</postgresql.version>
 		<mssql.version>12.4.1.jre8</mssql.version>
@@ -42,7 +42,7 @@
 		<dependency>
 			<groupId>info.picocli</groupId>
 			<artifactId>picocli</artifactId>
-			<version>4.7.4</version>
+			<version>4.7.5</version>
 			<optional>true</optional>
 		</dependency>
 		<dependency>
@@ -91,7 +91,7 @@
         <dependency>
             <groupId>net.snowflake</groupId>
             <artifactId>snowflake-jdbc</artifactId>
-            <version>3.14.0</version>
+            <version>3.14.1</version>
         </dependency>
 
 		<!--        CANNOT INCLUDE MYSQL FOR LICENSING REASONS -->

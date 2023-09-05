@@ -119,7 +119,6 @@ public class StandardDiffGenerator implements DiffGenerator {
                     if (referenceSnapshot.get(comparisonObject) == null) {
                         diffResult.addUnexpectedObject(comparisonObject);
                     }
-                    //            }
                 }
             }
 
