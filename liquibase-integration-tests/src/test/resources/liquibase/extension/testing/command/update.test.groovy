@@ -56,7 +56,8 @@ Optional Args:
 
         expectedResults = [
                 statusCode: 0,
-                defaultChangeExecListener: 'not_null'
+                defaultChangeExecListener: 'not_null',
+                updateReport: 'not_null'
         ]
 
         expectedDatabaseContent = [
@@ -89,7 +90,8 @@ Optional Args:
 
         expectedResults = [
                 statusCode: 0,
-                defaultChangeExecListener: 'not_null'
+                defaultChangeExecListener: 'not_null',
+                updateReport: 'not_null'
         ]
 
         expectedDatabaseContent = [
@@ -122,7 +124,8 @@ Optional Args:
 
         expectedResults = [
                 statusCode: 0,
-                defaultChangeExecListener: 'not_null'
+                defaultChangeExecListener: 'not_null',
+                updateReport: 'not_null'
         ]
 
         outputFile = new File("target/test-classes/ignoredChangeset.txt")
@@ -153,7 +156,8 @@ Optional Args:
 
         expectedResults = [
                 statusCode: 0,
-                defaultChangeExecListener: 'not_null'
+                defaultChangeExecListener: 'not_null',
+                updateReport: 'not_null'
         ]
 
         outputFile = new File("target/test-classes/changeSetWithLabels.txt")
@@ -205,7 +209,8 @@ Optional Args:
 
         expectedResults = [
                 statusCode: 0,
-                defaultChangeExecListener: 'not_null'
+                defaultChangeExecListener: 'not_null',
+                updateReport: 'not_null'
         ]
 
         outputFile = new File("target/test-classes/changeSetWithLabels.txt")
@@ -245,7 +250,8 @@ Optional Args:
 
         expectedResults = [
                 statusCode: 0,
-                defaultChangeExecListener: 'not_null'
+                defaultChangeExecListener: 'not_null',
+                updateReport: 'not_null'
         ]
 
         outputFile = new File("target/test-classes/changeSetWithComplicatedLabelsAndContext.txt")
@@ -277,7 +283,8 @@ Optional Args:
 
         expectedResults = [
                 statusCode: 0,
-                defaultChangeExecListener: 'not_null'
+                defaultChangeExecListener: 'not_null',
+                updateReport: 'not_null'
         ]
 
         outputFile = new File("target/test-classes/mismatchedDBMS.txt")
@@ -313,7 +320,8 @@ Optional Args:
 
         expectedResults = [
                 statusCode: 0,
-                defaultChangeExecListener: 'not_null'
+                defaultChangeExecListener: 'not_null',
+                updateReport: 'not_null'
         ]
 
         expectedDatabaseContent = [
@@ -378,7 +386,8 @@ Optional Args:
 
         expectedResults = [
                 statusCode: 0,
-                defaultChangeExecListener: 'not_null'
+                defaultChangeExecListener: 'not_null',
+                updateReport: 'not_null'
         ]
 
         expectedLogs = [
@@ -397,7 +406,8 @@ Optional Args:
 
         expectedResults = [
                 statusCode: 0,
-                defaultChangeExecListener: 'not_null'
+                defaultChangeExecListener: 'not_null',
+                updateReport: 'not_null'
         ]
     }
 }
