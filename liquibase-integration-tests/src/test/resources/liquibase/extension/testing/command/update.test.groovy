@@ -285,7 +285,8 @@ Optional Args:
 
         expectedResults = [
                 statusCode: 0,
-                defaultChangeExecListener: 'not_null'
+                defaultChangeExecListener: 'not_null',
+                updateReport: 'not_null'
         ]
 
         outputFile = new File("target/test-classes/changeSetSkippedPropagatedToRoot.txt")

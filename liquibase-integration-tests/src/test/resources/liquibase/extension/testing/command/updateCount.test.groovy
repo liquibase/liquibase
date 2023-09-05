@@ -131,11 +131,6 @@ Optional Args:
                 showSummary: "summary"
         ]
 
-        expectedResults = [
-                statusCode   : 0,
-                defaultChangeExecListener: 'not_null'
-        ]
-
         outputFile = new File("target/test-classes/skippedPropagatedToRoot.txt")
 
         expectedFileContent = [ "target/test-classes/skippedPropagatedToRoot.txt":
@@ -156,7 +151,8 @@ Optional Args:
 
         expectedResults = [
                 statusCode   : 0,
-                defaultChangeExecListener: 'not_null'
+                defaultChangeExecListener: 'not_null',
+                updateReport: 'not_null'
         ]
 
         expectedUI = [
