@@ -8,6 +8,7 @@ import liquibase.change.*;
 import liquibase.change.core.EmptyChange;
 import liquibase.change.core.RawSQLChange;
 import liquibase.change.core.SQLFileChange;
+import liquibase.change.visitor.ChangeVisitor;
 import liquibase.changelog.visitor.ChangeExecListener;
 import liquibase.configuration.LiquibaseConfiguration;
 import liquibase.database.Database;
@@ -35,6 +36,8 @@ import liquibase.statement.SqlStatement;
 import liquibase.util.SqlUtil;
 import liquibase.util.StreamUtil;
 import liquibase.util.StringUtil;
+import lombok.Getter;
+import lombok.Setter;
 
 import java.time.Instant;
 import java.util.*;
@@ -237,6 +240,18 @@ public class ChangeSet implements Conditional, ChangeLogChild {
      * Deployment ID stored in the databasechangelog table.
      */
     private String deploymentId;
+
+    @Getter
+    @Setter
+    private List<String> generatedSql = new ArrayList<>();
+
+    @Getter
+    @Setter
+    private ExecType execType;
+
+    @Getter
+    @Setter
+    private String errorMsg;
 
     public boolean shouldAlwaysRun() {
         return alwaysRun;
@@ -575,7 +590,9 @@ public class ChangeSet implements Conditional, ChangeLogChild {
             return null;
         } else {
             change.load(value, resourceAccessor);
-
+            for(ChangeVisitor changeVisitor : getChangeVisitors()){
+                change.modify(changeVisitor);
+            }
             return change;
         }
     }
@@ -610,8 +627,6 @@ public class ChangeSet implements Conditional, ChangeLogChild {
 
         long startTime = new Date().getTime();
         Scope.getCurrentScope().addMdcValue(MdcKey.CHANGESET_OPERATION_START_TIME, Instant.ofEpochMilli(startTime).toString());
-
-        ExecType execType = null;
 
         boolean skipChange = false;
 
@@ -723,7 +738,8 @@ public class ChangeSet implements Conditional, ChangeLogChild {
                         executor.comment("WARNING The following SQL may change each run and therefore is possibly incorrect and/or invalid:");
                     }
 
-                    addSqlMdc(change, database, false);
+                    String sql = addSqlMdc(change, database, false);
+                    this.getGeneratedSql().add(sql);
 
                     database.executeStatements(change, databaseChangeLog, sqlVisitors);
                     log.info(change.getConfirmationMessage());
@@ -752,6 +768,7 @@ public class ChangeSet implements Conditional, ChangeLogChild {
             Scope.getCurrentScope().addMdcValue(MdcKey.CHANGESET_OPERATION_STOP_TIME, Instant.ofEpochMilli(new Date().getTime()).toString());
             Scope.getCurrentScope().addMdcValue(MdcKey.CHANGESET_OUTCOME, ExecType.FAILED.value.toLowerCase());
             log.severe(String.format("ChangeSet %s encountered an exception.", toString(false)));
+            setErrorMsg(e.getMessage());
             try {
                 database.rollback();
             } catch (Exception e1) {
@@ -876,7 +893,8 @@ public class ChangeSet implements Conditional, ChangeLogChild {
                     }
                     //
                     SqlStatement[] changeStatements = change.generateStatements(database);
-                    addSqlMdc(change, database, false);
+                    String sql = addSqlMdc(change, database, false);
+                    this.getGeneratedSql().add(sql);
                     if (change instanceof SQLFileChange) {
                         addSqlFileMdc((SQLFileChange) change);
                     }
@@ -899,7 +917,8 @@ public class ChangeSet implements Conditional, ChangeLogChild {
                         throw new RollbackFailedException("Liquibase does not support automatic rollback generation for raw " +
                             "sql changes (did you mean to specify keyword \"empty\" to ignore rolling back this change?)");
                     }
-                    addSqlMdc(change, database, true);
+                    String sql = addSqlMdc(change, database, true);
+                    this.getGeneratedSql().add(sql);
                     database.executeRollbackStatements(change, sqlVisitors);
                 }
             }
@@ -1558,13 +1577,13 @@ public class ChangeSet implements Conditional, ChangeLogChild {
      * @throws RollbackImpossibleException if you cannot generate rollback statements
      *
      */
-    private void addSqlMdc(Change change, Database database, boolean generateRollbackStatements) throws Exception {
+    private String addSqlMdc(Change change, Database database, boolean generateRollbackStatements) throws Exception {
         //
         // If the change is for this Database
         // add a Boolean flag to Scope to indicate that the Change should not be executed when adding MDC context
         //
         if (! change.supports(database)) {
-            return;
+            return null;
         }
         AtomicReference<SqlStatement[]> statementsReference = new AtomicReference<>();
         Map<String, Object> scopeValues = new HashMap<>();
@@ -1575,5 +1594,10 @@ public class ChangeSet implements Conditional, ChangeLogChild {
                     .map(statement -> SqlUtil.getSqlString(statement, SqlGeneratorFactory.getInstance(), database))
                     .collect(Collectors.joining("\n"));
         Scope.getCurrentScope().addMdcValue(MdcKey.CHANGESET_SQL, sqlStatementsMdc);
+        return sqlStatementsMdc;
+    }
+
+    private List<ChangeVisitor> getChangeVisitors(){
+       return getChangeLog().getChangeVisitors();
     }
 }

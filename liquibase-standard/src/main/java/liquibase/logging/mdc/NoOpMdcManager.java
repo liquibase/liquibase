@@ -15,7 +15,7 @@ public class NoOpMdcManager implements MdcManager {
     }
 
     @Override
-    public MdcObject put(String key, Map<String, String> values) {
+    public MdcObject put(String key, Map<String, Object> values) {
         return new MdcObject(key, values);
     }
 

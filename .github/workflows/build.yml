@@ -319,7 +319,7 @@ jobs:
 
       # look for dependencies in maven
       - name: maven-settings-xml-action
-        uses: whelk-io/maven-settings-xml-action@v20
+        uses: whelk-io/maven-settings-xml-action@v21
         with:
           repositories: |
             [
