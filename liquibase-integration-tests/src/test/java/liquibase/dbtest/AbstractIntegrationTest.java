@@ -117,7 +117,7 @@ public abstract class AbstractIntegrationTest {
         this.pathChangeLog = "changelogs/common/pathChangeLog.xml";
         logger = Scope.getCurrentScope().getLog(getClass());
 
-        Scope.setScopeManager(new TestScopeManager());
+        Scope.setScopeManager(new TestScopeManager(Scope.getCurrentScope()));
     }
 
     private void openConnection() throws Exception {
