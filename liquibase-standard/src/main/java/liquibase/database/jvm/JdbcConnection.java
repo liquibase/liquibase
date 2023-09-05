@@ -579,15 +579,4 @@ public class JdbcConnection implements DatabaseConnection {
             throw new DatabaseException("Asking the JDBC driver if it supports batched updates has failed.", e);
         }
     }
-
-    /**
-     *  @deprecated this class has been moved to {@link ConnectionPatterns}, use that one instead.
-     */
-    @Deprecated
-    public static class PatternPair {
-        // Return a map entry (key-value pair) from the specified values
-        public static <T, U> Map.Entry<T, U> of(T first, U second) {
-            return new AbstractMap.SimpleEntry<>(first, second);
-        }
-    }
 }
