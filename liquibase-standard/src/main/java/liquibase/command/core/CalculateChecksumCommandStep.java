@@ -92,6 +92,41 @@ public class CalculateChecksumCommandStep extends AbstractCommandStep {
 
         final boolean isChangeSetIdentifierPassed = changeSetIdentifier != null;
 
+        final boolean isRequiredCompositeIdentifierMissing = (commandScope.getArgumentValue(CHANGESET_ID_ARG) == null ||
+                commandScope.getArgumentValue(CHANGESET_AUTHOR_ARG) == null || commandScope.getArgumentValue(CHANGESET_PATH_ARG) == null)
+                && changeSetIdentifier == null;
+
+        final boolean isAmbiguousNumberOfIdentifierProvided = (commandScope.getArgumentValue(CHANGESET_ID_ARG) != null ||
+                commandScope.getArgumentValue(CHANGESET_AUTHOR_ARG) != null || commandScope.getArgumentValue(CHANGESET_PATH_ARG) != null)
+                && changeSetIdentifier != null;
+
+        if (isAmbiguousNumberOfIdentifierProvided)  {
+            String errorMessage = "Error encountered while parsing the command line. " +
+                    "'--changeset-identifier' cannot be provided alongside other changeset arguments: " +
+                    "'--changeset-id', '--changeset-path', '--changeset-author'.";
+            throw new LiquibaseException(new IllegalArgumentException(errorMessage));
+        }
+
+        if (isRequiredCompositeIdentifierMissing) {
+            String errorMessage = "Required arguments missing: ";
+
+            if (commandScope.getArgumentValue(CHANGESET_ID_ARG) == null) {
+                errorMessage = errorMessage + " '--changeset-id',";
+            }
+
+            if (commandScope.getArgumentValue(CHANGESET_AUTHOR_ARG) == null) {
+                errorMessage = errorMessage + " '--changeset-author',";
+            }
+
+            if (commandScope.getArgumentValue(CHANGESET_PATH_ARG) == null) {
+                errorMessage = errorMessage + " '--changeset-path',";
+            }
+
+            errorMessage = errorMessage.substring(0,errorMessage.length() - 1) + ".";
+
+            throw new LiquibaseException(new IllegalArgumentException(errorMessage));
+        }
+
         if (isChangeSetIdentifierPassed) {
             List<String> parts = validateAndExtractParts(changeSetIdentifier, changeLogFile);
             changeSetPath = parts.get(CHANGESET_IDENTIFIER_PATH_PART);
