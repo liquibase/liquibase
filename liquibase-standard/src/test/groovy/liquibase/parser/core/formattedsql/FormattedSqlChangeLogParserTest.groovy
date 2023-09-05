@@ -246,8 +246,8 @@ create table table1 (
                     "-precondition 123\n" +
                     "select 1;"
 
-    private static final String VALID_ALL_CAPS_CHANGELOG = """
---LIQUIBASE FORMATTED SQL
+    private static final String VALID_ALL_CAPS_CHANGELOG =
+"""--LIQUIBASE FORMATTED SQL
 
 --CHANGESET SOME_USER:ALL_CAPS_SCRIPT_1
 CREATE TABLE ALL_CAPS_TABLE_1 (
