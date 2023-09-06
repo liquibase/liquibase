@@ -27,6 +27,7 @@ jobs:
     runs-on: ubuntu-22.04
     env:
       GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      LIQUIBOT_PAT_GPM_ACCESS: ${{ secrets.LIQUIBOT_PAT_GPM_ACCESS }}
     outputs:
       branchExistsInBoth: ${{ steps.check-branch.outputs.branchExistsInBoth }}
       branch_name: ${{ steps.find-matching-branch.outputs.branch_name }}
