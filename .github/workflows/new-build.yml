@@ -79,7 +79,7 @@ jobs:
           github-token: ${{ secrets.GITHUB_TOKEN }}
           script: |
             const branchNamePrefix = "pair-branch-";
-
+            const github = context.github; // Initialize the 'github' object
             const repositories = ['liquibase', 'liquibase-pro'];
 
             const branchExistenceResults = await Promise.all(repositories.map(async (repo) => {
