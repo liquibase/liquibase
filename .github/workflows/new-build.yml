@@ -80,14 +80,16 @@ jobs:
           script: |
             const branchNamePrefix = "pair-branch-";
             const repositories = ['liquibase', 'liquibase-pro'];
-
+          #Initialize the 'github' object using the 'context' variable
+            const github = context.github;
+      
             const branchExistenceResults = await Promise.all(repositories.map(async (repo) => {
               const resp = await github.repos.listBranches({
                 owner: "liquibase",
                 repo,
               });
-              const branches = resp.data.branches
-              return branches.some((branchName) => branchName.startsWith(branchNamePrefix));
+              const branches = resp.branches
+              return branches.some((branchName) => branch.name.startsWith(branchNamePrefix));
             }));
 
             const branchExistsInBoth = branchExistenceResults.every((exists) => exists);
