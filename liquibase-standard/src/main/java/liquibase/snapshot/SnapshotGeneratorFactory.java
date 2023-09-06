@@ -4,6 +4,7 @@ import liquibase.CatalogAndSchema;
 import liquibase.Scope;
 import liquibase.database.Database;
 import liquibase.database.DatabaseConnection;
+import liquibase.database.ObjectQuotingStrategy;
 import liquibase.database.OfflineConnection;
 import liquibase.database.core.PostgresDatabase;
 import liquibase.diff.compare.DatabaseObjectComparatorFactory;
@@ -245,40 +246,60 @@ public class SnapshotGeneratorFactory {
     }
 
     public Table getDatabaseChangeLogTable(SnapshotControl snapshotControl, Database database) throws DatabaseException {
+        // use LEGACY quoting since we're dealing with system objects
+        ObjectQuotingStrategy currentStrategy = database.getObjectQuotingStrategy();
+        database.setObjectQuotingStrategy(ObjectQuotingStrategy.LEGACY);
         try {
-            Table liquibaseTable = (Table) new Table().setName(database.correctObjectName(database.getDatabaseChangeLogTableName(), Table.class)).setSchema(
+            Table liquibaseTable = (Table) new Table().setName(database.getDatabaseChangeLogTableName()).setSchema(
                     new Schema(database.getLiquibaseCatalogName(), database.getLiquibaseSchemaName()));
             return createSnapshot(liquibaseTable, database, snapshotControl);
         } catch (InvalidExampleException e) {
             throw new UnexpectedLiquibaseException(e);
+        } finally {
+            database.setObjectQuotingStrategy(currentStrategy);
         }
     }
 
     public Table getDatabaseChangeLogLockTable(Database database) throws DatabaseException {
+        // use LEGACY quoting since we're dealing with system objects
+        ObjectQuotingStrategy currentStrategy = database.getObjectQuotingStrategy();
+        database.setObjectQuotingStrategy(ObjectQuotingStrategy.LEGACY);
         try {
-            Table example = (Table) new Table().setName(database.correctObjectName(database.getDatabaseChangeLogLockTableName(), Table.class)).setSchema(
+            Table example = (Table) new Table().setName(database.getDatabaseChangeLogLockTableName()).setSchema(
                     new Schema(database.getLiquibaseCatalogName(), database.getLiquibaseSchemaName()));
             return createSnapshot(example, database);
         } catch (InvalidExampleException e) {
             throw new UnexpectedLiquibaseException(e);
+        } finally {
+            database.setObjectQuotingStrategy(currentStrategy);
         }
     }
 
     public boolean hasDatabaseChangeLogTable(Database database) throws DatabaseException {
+        // use LEGACY quoting since we're dealing with system objects
+        ObjectQuotingStrategy currentStrategy = database.getObjectQuotingStrategy();
+        database.setObjectQuotingStrategy(ObjectQuotingStrategy.LEGACY);
         try {
             return has(new Table().setName(database.getDatabaseChangeLogTableName()).setSchema(new Schema(
                     database.getLiquibaseCatalogName(), database.getLiquibaseSchemaName())), database);
         } catch (InvalidExampleException e) {
             throw new UnexpectedLiquibaseException(e);
+        } finally {
+            database.setObjectQuotingStrategy(currentStrategy);
         }
     }
 
     public boolean hasDatabaseChangeLogLockTable(Database database) throws DatabaseException {
+        // use LEGACY quoting since we're dealing with system objects
+        ObjectQuotingStrategy currentStrategy = database.getObjectQuotingStrategy();
+        database.setObjectQuotingStrategy(ObjectQuotingStrategy.LEGACY);
         try {
             return has(new Table().setName(database.getDatabaseChangeLogLockTableName()).setSchema(
                     new Schema(database.getLiquibaseCatalogName(), database.getLiquibaseSchemaName())), database);
         } catch (InvalidExampleException e) {
             throw new UnexpectedLiquibaseException(e);
+        } finally {
+            database.setObjectQuotingStrategy(currentStrategy);
         }
     }
 
