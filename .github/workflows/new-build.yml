@@ -76,8 +76,9 @@ jobs:
         id: check-branch
         uses: actions/github-script@v6
         with:
-          github-token: ${{ secrets.GITHUB_TOKEN }}
+          github-token: ${{ secrets.LIQUIBOT_PAT_GPM_ACCESS }}
           script: |
+            console.log(context)
             const branchNamePrefix = "pair-branch-";
             const repositories = ['liquibase', 'liquibase-pro'];
       
