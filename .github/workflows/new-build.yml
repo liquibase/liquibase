@@ -10,12 +10,13 @@ on:
     branches:
       - github-action-**
       - pair-branch-**
+      - dependabot-**
     paths-ignore:
           - '**.md'
-    workflow_run:
-      workflows: [ "Run matching branch PRs" ]
-      types:
-        - requested
+#    workflow_run:
+#      workflows: [ "Run matching branch PRs" ]
+#      types:
+#        - requested
 
 env:
   MAVEN_VERSION: '3.9.2'
@@ -161,6 +162,16 @@ jobs:
           mvn -B clean deploy -pl '!liquibase-dist' -DskipTests=true "-Dbuild.repository.owner=liquibase" "-Dbuild.repository.name=liquibase" "-Dbuild.branch=${{ needs.setup.outputs.thisBranchName }}" "-Dbuild.number=${{ github.run_number }}" "-Dbuild.commit=${{ needs.setup.outputs.latestMergeSha }}" "-Dbuild.timestamp=${{ needs.setup.outputs.timeStamp }}"
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+
+      # Publish branch-SNAPSHOT version to GPM
+      - name: Version Artifact
+        run: |
+          mvn versions:set "-DnewVersion=${{ needs.setup.outputs.thisBranchName }}-SNAPSHOT"
+
+      - name: Publish branch-SNAPSHOT package
+        run: |
+          mvn -B clean deploy -pl '!liquibase-dist' -DskipTests=true "-Dbuild.repository.owner=liquibase" "-Dbuild.repository.name=liquibase" "-Dbuild.branch=${{ needs.setup.outputs.thisBranchName }}" "-Dbuild.number=${{ github.run_number }}" "-Dbuild.commit=${{ needs.setup.outputs.latestMergeSha }}" "-Dbuild.timestamp=${{ needs.setup.outputs.timeStamp }}"
 
       #Publish to GitHub Packages. We are building a tar file which includes liquibase-commercial hence we need "-Dliquibase-pro.version". As this workflow is for matching branch, we can use the same branch as OSS branch for -Dliquibase-pro.version
       - name: Publish tar.gz package to GPM

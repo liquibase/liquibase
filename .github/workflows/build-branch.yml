@@ -1,8 +1,6 @@
 name: Build Branch SNAPSHOT
 
 on:
-  workflow_call:
-
   pull_request:
     types:
       - opened

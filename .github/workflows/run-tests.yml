@@ -1,8 +1,9 @@
 name: Run Tests
 
 concurrency:
-  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
-  cancel-in-progress: true
+  group: ${{ github.workflow }}-${{ github.head_ref || github.ref }}
+  cancel-in-progress: ${{ !contains(github.ref, 'refs/heads/master') }}
+
 
 on:
   workflow_call:
