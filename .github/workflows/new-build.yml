@@ -88,7 +88,12 @@ jobs:
                 repo,
               });
               const branches = resp.data.branches;
-              return branches.some((branchName) => branchName.startsWith(branchNamePrefix));
+              if (branches && branches.length > 0) {
+                return branches.some((branchName) => branchName.name.startsWith(branchNamePrefix));
+            } else {
+          #Handle the case where no branches are found
+              return false;
+              }
             }));
 
             const branchExistsInBoth = branchExistenceResults.every((exists) => exists);
