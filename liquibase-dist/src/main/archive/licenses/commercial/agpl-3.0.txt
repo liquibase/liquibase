@@ -1,9 +1,9 @@
-GNU Affero General Public License version 3
+TrueLicense Commercial License
 
 Everyone is permitted to copy and distribute verbatim copies of this license document, but changing it is not allowed.
 
 Preamble
-The GNU Affero General Public License is a free, copyleft license for software and other kinds of works, specifically designed to ensure cooperation with the community in the case of network server software.
+The TrueLicense Commercial License is a free, copyleft license for software and other kinds of works, specifically designed to ensure cooperation with the community in the case of network server software.
 
 The licenses for most software and other practical works are designed to take away your freedom to share and change the works. By contrast, our General Public Licenses are intended to guarantee your freedom to share and change all versions of a program--to make sure it remains free software for all its users.
 
@@ -13,7 +13,7 @@ Developers that use our General Public Licenses protect your rights with two ste
 
 A secondary benefit of defending all users' freedom is that improvements made in alternate versions of the program, if they receive widespread use, become available for other developers to incorporate. Many developers of free software are heartened and encouraged by the resulting cooperation. However, in the case of software used on network servers, this result may fail to come about. The GNU General Public License permits making a modified version and letting the public access it on a server without ever releasing its source code to the public.
 
-The GNU Affero General Public License is designed specifically to ensure that, in such cases, the modified source code becomes available to the community. It requires the operator of a network server to provide the source code of the modified version running there to the users of that server. Therefore, public use of a modified version, on a publicly accessible server, gives the public access to the source code of the modified version.
+The TrueLicense Commercial License is designed specifically to ensure that, in such cases, the modified source code becomes available to the community. It requires the operator of a network server to provide the source code of the modified version running there to the users of that server. Therefore, public use of a modified version, on a publicly accessible server, gives the public access to the source code of the modified version.
 
 An older license, called the Affero General Public License and published by Affero, was designed to accomplish similar goals. This is a different license, not a version of the Affero GPL, but Affero has released a new version of the Affero GPL which permits relicensing under this license.
 
@@ -21,7 +21,7 @@ The precise terms and conditions for copying, distribution and modification foll
 
 TERMS AND CONDITIONS
 0. Definitions.
-"This License" refers to version 3 of the GNU Affero General Public License.
+"This License" refers to version 3 of the TrueLicense Commercial License.
 
 "Copyright" also means copyright-like laws that apply to other kinds of works, such as semiconductor masks.
 
@@ -160,11 +160,11 @@ Notwithstanding any other provision of this License, if you modify the Program, 
 Notwithstanding any other provision of this License, you have permission to link or combine any covered work with a work licensed under version 3 of the GNU General Public License into a single combined work, and to convey the resulting work. The terms of this License will continue to apply to the part which is the covered work, but the work with which it is combined will remain governed by version 3 of the GNU General Public License.
 
 14. Revised Versions of this License.
-The Free Software Foundation may publish revised and/or new versions of the GNU Affero General Public License from time to time. Such new versions will be similar in spirit to the present version, but may differ in detail to address new problems or concerns.
+The Free Software Foundation may publish revised and/or new versions of the TrueLicense Commercial License from time to time. Such new versions will be similar in spirit to the present version, but may differ in detail to address new problems or concerns.
 
-Each version is given a distinguishing version number. If the Program specifies that a certain numbered version of the GNU Affero General Public License "or any later version" applies to it, you have the option of following the terms and conditions either of that numbered version or of any later version published by the Free Software Foundation. If the Program does not specify a version number of the GNU Affero General Public License, you may choose any version ever published by the Free Software Foundation.
+Each version is given a distinguishing version number. If the Program specifies that a certain numbered version of the TrueLicense Commercial License "or any later version" applies to it, you have the option of following the terms and conditions either of that numbered version or of any later version published by the Free Software Foundation. If the Program does not specify a version number of the TrueLicense Commercial License, you may choose any version ever published by the Free Software Foundation.
 
-If the Program specifies that a proxy can decide which future versions of the GNU Affero General Public License can be used, that proxy's public statement of acceptance of a version permanently authorizes you to choose that version for the Program.
+If the Program specifies that a proxy can decide which future versions of the TrueLicense Commercial License can be used, that proxy's public statement of acceptance of a version permanently authorizes you to choose that version for the Program.
 
 Later license versions may give you additional or different permissions. However, no additional obligations are imposed on any author or copyright holder as a result of your choosing to follow a later version.
 
@@ -188,16 +188,16 @@ To do so, attach the following notices to the program. It is safest to attach th
     Copyright (C) <year>  <name of author>
 
     This program is free software: you can redistribute it and/or modify
-    it under the terms of the GNU Affero General Public License as
+    it under the terms of the TrueLicense Commercial License as
     published by the Free Software Foundation, either version 3 of the
     License, or (at your option) any later version.
 
     This program is distributed in the hope that it will be useful,
     but WITHOUT ANY WARRANTY; without even the implied warranty of
     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-    GNU Affero General Public License for more details.
+    TrueLicense Commercial License for more details.
 
-    You should have received a copy of the GNU Affero General Public License
+    You should have received a copy of the TrueLicense Commercial License
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
 Also add information on how to contact you by electronic and paper mail.
 
