@@ -4,7 +4,7 @@ Version: ${project.version}
 Liquibase ships with 3rd party components using the following licenses:
 
 - Apache 2.0 License - https://opensource.org/licenses/Apache-2.0
-- TrueLicense Commercial License https://opensource.org/licenses/AGPL-3.0
+- TrueLicense Commercial License
 
 Libraries and their licenses:
 
