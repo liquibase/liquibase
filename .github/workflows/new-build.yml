@@ -87,46 +87,17 @@ jobs:
                 owner: "liquibase",
                 repo,
               });
-              const branches = resp.data.branches;
-              if (branches && branches.length > 0) {
+              const branches = resp.data.branches || [];
                 return branches.some((branchName) => branchName.name.startsWith(branchNamePrefix));
-              } else {
-                return false;
               }
             }));
 
             const branchExistsInBoth = branchExistenceResults.every((exists) => exists);
             core.setOutput("branchExistsInBoth", branchExistsInBoth)
-            
-
-#          script: |
-#            const octokit = require('@octokit/core');
-#            const { GITHUB_TOKEN, GITHUB_REPOSITORY } = process.env;
-#
-#            const MyOctokit = octokit.defaults({ auth: GITHUB_TOKEN });
-#            const repositories = ['liquibase', 'liquibase-pro'];
-#            const branchNamePrefix = "pair-branch-";
-#
-#            async function branchExists(repo) {
-#              try {
-#                await MyOctokit.request('GET /repos/:owner/:repo/branches/:branch', {
-#                  owner: GITHUB_REPOSITORY.split('/')[0],
-#                  repo,
-#                  branch: branchNamePrefix,
-#                });
-#                return true;
-#              } catch (error) {
-#                return false;
-#              }
-#            }
-#
-#            const results = await Promise.all(repositories.map(repo => branchExists(repo));
-#            const branchExistsInBoth= results.every((exists) => exists);
-#            core.setOutput("branchExistsInBoth", branchExistsInBoth)
-
           
   run-tests:
     needs: [setup]
+    if: needs.setup.outputs.branchExistsInBoth == 'true'
     uses: liquibase/liquibase/.github/workflows/run-tests.yml@github-action-DAT-15775
     secrets: inherit
 
@@ -135,7 +106,7 @@ jobs:
     name: Build & Package
     runs-on: ubuntu-22.04
     needs: [setup, run-tests]
-    if: ${{ needs.setup.outputs.branchExistsInBoth }}
+    if: needs.setup.outputs.branchExistsInBoth == 'true'
     permissions:
       contents: read
       packages: write
@@ -186,8 +157,4 @@ jobs:
 
 
 
-  #- trigger functional tests
-#  trigger-FunctionalTests:
-#    needs: []
-#    uses: liquibase/liquibase/.github/workflows/run-functional-tests.yml@github-action-DAT-15775
-#    secrets: inherit
+  #- trigger functional tests on label runFunctionalTests
