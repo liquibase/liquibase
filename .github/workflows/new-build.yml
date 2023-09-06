@@ -27,7 +27,6 @@ jobs:
     runs-on: ubuntu-22.04
     env:
       GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      LIQUIBOT_PAT_GPM_ACCESS: ${{ secrets.LIQUIBOT_PAT_GPM_ACCESS }}
     outputs:
       branchExistsInBoth: ${{ steps.check-branch.outputs.branchExistsInBoth }}
       branch_name: ${{ steps.find-matching-branch.outputs.branch_name }}
@@ -79,12 +78,12 @@ jobs:
         with:
           github-token: ${{ secrets.LIQUIBOT_PAT_GPM_ACCESS }}
           script: |
-            console.log(context)
+            console.log(github)
             const branchNamePrefix = "pair-branch-";
             const repositories = ['liquibase', 'liquibase-pro'];
       
             const branchExistenceResults = await Promise.all(repositories.map(async (repo) => {
-              const resp = await github.repos.listBranches({
+              const resp = await github.rest.repos.listBranches({
                 owner: "liquibase",
                 repo,
               });
