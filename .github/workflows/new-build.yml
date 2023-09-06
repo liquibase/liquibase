@@ -90,9 +90,8 @@ jobs:
               const branches = resp.data.branches;
               if (branches && branches.length > 0) {
                 return branches.some((branchName) => branchName.name.startsWith(branchNamePrefix));
-            } else {
-          #Handle the case where no branches are found
-              return false;
+              } else {
+                return false;
               }
             }));
 
