@@ -87,8 +87,8 @@ jobs:
                 owner: "liquibase",
                 repo,
               });
-              const branches = resp.branches
-              return branches.some((branchName) => branch.name.startsWith(branchNamePrefix));
+              const branches = resp.data.branches;
+              return branches.some((branchName) => branchName.startsWith(branchNamePrefix));
             }));
 
             const branchExistsInBoth = branchExistenceResults.every((exists) => exists);
