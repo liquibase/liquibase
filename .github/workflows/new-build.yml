@@ -80,7 +80,6 @@ jobs:
           script: |
             const branchNamePrefix = "pair-branch-";
             const repositories = ['liquibase', 'liquibase-pro'];
-            const github = context.github;
       
             const branchExistenceResults = await Promise.all(repositories.map(async (repo) => {
               const resp = await github.repos.listBranches({
