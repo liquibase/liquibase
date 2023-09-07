@@ -137,7 +137,6 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
-
       # Publish branch-SNAPSHOT version to GPM
       - name: Version Artifact
         run: |
@@ -148,12 +147,10 @@ jobs:
           mvn -B clean deploy -pl '!liquibase-dist' -DskipTests=true "-Dbuild.repository.owner=liquibase" "-Dbuild.repository.name=liquibase" "-Dbuild.branch=${{ needs.setup.outputs.branch_name }}" "-Dbuild.number=${{ github.run_number }}" "-Dbuild.commit=${{ needs.setup.outputs.latestMergeSha }}" "-Dbuild.timestamp=${{ needs.setup.outputs.timeStamp }}"
 
       #Publish to GitHub Packages. We are building a tar file which includes liquibase-commercial hence we need "-Dliquibase-pro.version". As this workflow is for matching branch, we can use the same branch as OSS branch for -Dliquibase-pro.version
-      - name: Publish tar.gz package to GPM
+      - name: Publish branch-SNAPSHOT tar.gz package to GPM
         run: |
           mvn -B -pl liquibase-dist -P liquibase-commercial clean deploy -DskipTests=true "-Dliquibase-pro.version=${{ needs.setup.outputs.branch_name }}-SNAPSHOT" "-Dbuild.timestamp=${{ needs.setup.outputs.timeStamp }}" "-Dbuild.repository.owner=liquibase" "-Dbuild.repository.name=liquibase" "-Dbuild.branch=${{ needs.setup.outputs.branch_name }}" "-Dbuild.number=${{ github.run_number }}" "-Dbuild.commit=${{ needs.setup.outputs.latestMergeSha }}"
         env:
           GITHUB_TOKEN: ${{ secrets.LIQUIBOT_PAT }}
-
-
 
   #- trigger functional tests on label runFunctionalTests

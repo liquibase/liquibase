@@ -20,7 +20,7 @@ jobs:
         with:
           ref: ${{ github.event.pull_request.head.sha || github.event.after}} #sets the Git reference (commit or branch) to be checked out in the workflow
 
-      #run the functional tests only against the head-branch of the PR
+      #run the test harness tests only against the head-branch of the PR
       - name: Trigger TestHarness Tests Workflow
         uses: peter-evans/repository-dispatch@v2
         with:
