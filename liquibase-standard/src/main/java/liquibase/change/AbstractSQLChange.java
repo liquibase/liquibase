@@ -37,6 +37,9 @@ public abstract class AbstractSQLChange extends AbstractChange implements DbmsTa
 
     private boolean stripComments;
     private boolean splitStatements;
+
+
+    private Boolean originalSplitStatements;
     /**
      *
      * @deprecated  To be removed when splitStatements is changed to be type Boolean
@@ -54,6 +57,10 @@ public abstract class AbstractSQLChange extends AbstractChange implements DbmsTa
     protected AbstractSQLChange() {
         setStripComments(null);
         setSplitStatements(null);
+    }
+
+    public void setOriginalSplitStatements(Boolean originalSplitStatements) {
+        this.originalSplitStatements = originalSplitStatements;
     }
 
     public InputStream openSqlStream() throws IOException {
@@ -218,8 +225,8 @@ public abstract class AbstractSQLChange extends AbstractChange implements DbmsTa
             ChecksumVersion version = Scope.getCurrentScope().getChecksumVersion();
             if (version.lowerOrEqualThan(ChecksumVersion.V8)) {
                 boolean isSplitStatements = this.isSplitStatements();
-                if (getChangeSet() != null && getChangeSet().getRunWith() != null) {
-                    isSplitStatements = BooleanUtil.isTrue(originalSplitStatements);
+                if (getChangeSet().getRunWith() != null) {
+                    isSplitStatements = originalSplitStatements;
                 }
                 return CheckSum.compute(new NormalizingStreamV8(this.getEndDelimiter(), isSplitStatements, this.isStripComments(), stream), false);
             }
