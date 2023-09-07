@@ -220,16 +220,16 @@ public abstract class AbstractFormattedChangeLogParser implements ChangeLogParse
 
                 String firstLine = reader.readLine();
 
+                while (firstLine != null && firstLine.trim().isEmpty() && reader.ready()) {
+                    firstLine = reader.readLine();
+                }
+
                 //
                 // Handle empty files with a WARNING message
                 //
                 if (StringUtil.isEmpty(firstLine)) {
                     Scope.getCurrentScope().getLog(getClass()).warning(String.format("Skipping empty file '%s'", changeLogFile));
                     return false;
-                }
-
-                while (firstLine.trim().isEmpty() && reader.ready()) {
-                    firstLine = reader.readLine();
                 }
                 return FIRST_LINE_PATTERN.matcher(firstLine).matches();
             } else {
