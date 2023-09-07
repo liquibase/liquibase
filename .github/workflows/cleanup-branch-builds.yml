@@ -5,6 +5,8 @@ on:
   delete:
     branches:
       - '**DAT-**'
+      - 'github-action-**'
+      - 'dependabot-**'
 jobs:
   delete-package:
     name: Delete Github Package for Branch
