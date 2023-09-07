@@ -9,7 +9,7 @@ on:
   push:
     branches:
       - github-action-**
-      - pair-branch-**
+      - DAT-**
       - dependabot-**
     paths-ignore:
           - '**.md'
