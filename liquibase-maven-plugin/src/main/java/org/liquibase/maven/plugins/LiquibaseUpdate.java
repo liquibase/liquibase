@@ -1,10 +1,9 @@
 package org.liquibase.maven.plugins;
 
-import liquibase.Contexts;
-import liquibase.LabelExpression;
-import liquibase.Liquibase;
-import liquibase.Scope;
+import liquibase.*;
+import liquibase.database.Database;
 import liquibase.exception.LiquibaseException;
+import org.apache.maven.plugin.MojoExecutionException;
 import org.liquibase.maven.property.PropertyElement;
 
 /**
@@ -24,6 +23,15 @@ public class LiquibaseUpdate extends AbstractLiquibaseUpdateMojo {
      */
     @PropertyElement
     protected boolean dropFirst;
+
+    /**
+     * Whether or not to print a summary of the update operation.
+     * Allowed values: 'OFF', 'SUMMARY' (default), 'VERBOSE'
+     *
+     * @parameter property="liquibase.showSummary"
+     */
+    @PropertyElement
+    protected UpdateSummaryEnum showSummary;
 
     @Override
     protected void doUpdate(Liquibase liquibase) throws LiquibaseException {
@@ -48,6 +56,12 @@ public class LiquibaseUpdate extends AbstractLiquibaseUpdateMojo {
         }
     }
 
+    @Override
+    protected Liquibase createLiquibase(Database db) throws MojoExecutionException {
+        Liquibase liquibase = super.createLiquibase(db);
+        liquibase.setShowSummary(showSummary);
+        return liquibase;
+    }
 
     @Override
     protected void printSettings(String indent) {
