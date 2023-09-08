@@ -1,4 +1,4 @@
-name: Run Functional Tests
+name: Run Test Harness Tests
 
 on:
   workflow_call:
@@ -12,7 +12,7 @@ env:
 
 jobs:
   build:
-    if: ${{ github.event.label.name == 'runFunctionalTests' }}
+    if: ${{ github.event.label.name == 'runTestHarnessTests' }}
     runs-on: ubuntu-latest
 
     steps:
@@ -20,11 +20,11 @@ jobs:
         with:
           ref: ${{ github.event.pull_request.head.sha || github.event.after}} #sets the Git reference (commit or branch) to be checked out in the workflow
 
-       #run the functional tests only against the head-branch of the PR
-      - name: Trigger Functional Tests Workflow
+      #run the test harness tests only against the head-branch of the PR
+      - name: Trigger TestHarness Tests Workflow
         uses: peter-evans/repository-dispatch@v2
         with:
           token: ${{ secrets.RUN_FUNCTIONAL_TEST_HARNESS_TESTS_TOKEN }}
-          repository: liquibase/liquibase-pro-tests
-          event-type: run-functional-tests
+          repository: liquibase/liquibase-test-harness
+          event-type: run-test-harness
           client-payload: '{"ref": "${{ github.event.pull_request.head.ref }}" }'
