@@ -14,6 +14,7 @@ import liquibase.exception.Warnings;
 import liquibase.statement.SqlStatement;
 import liquibase.statement.core.RawCompoundStatement;
 import liquibase.statement.core.RawSqlStatement;
+import liquibase.util.BooleanUtil;
 import liquibase.util.StringUtil;
 
 import java.io.ByteArrayInputStream;
@@ -224,8 +225,8 @@ public abstract class AbstractSQLChange extends AbstractChange implements DbmsTa
             ChecksumVersion version = Scope.getCurrentScope().getChecksumVersion();
             if (version.lowerOrEqualThan(ChecksumVersion.V8)) {
                 boolean isSplitStatements = this.isSplitStatements();
-                if (getChangeSet().getRunWith() != null) {
-                    isSplitStatements = originalSplitStatements;
+                if (getChangeSet() != null && getChangeSet().getRunWith() != null) {
+                    isSplitStatements = BooleanUtil.isTrue(originalSplitStatements);
                 }
                 return CheckSum.compute(new NormalizingStreamV8(this.getEndDelimiter(), isSplitStatements, this.isStripComments(), stream), false);
             }
