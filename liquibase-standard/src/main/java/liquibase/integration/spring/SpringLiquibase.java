@@ -74,6 +74,7 @@ public class SpringLiquibase implements InitializingBean, BeanNameAware, Resourc
 	protected boolean clearCheckSums;
 	protected boolean shouldRun = true;
 	protected File rollbackFile;
+    protected UpdateSummaryEnum showSummary;
     protected UpdateSummaryOutputEnum showSummaryOutput = UpdateSummaryOutputEnum.LOG;
 
 	protected boolean testRollbackOnUpdate = false;
@@ -347,6 +348,7 @@ public class SpringLiquibase implements InitializingBean, BeanNameAware, Resourc
 		}
 
         liquibase.setShowSummaryOutput(showSummaryOutput);
+        liquibase.setShowSummary(showSummary);
 
 		return liquibase;
 	}
@@ -435,6 +437,10 @@ public class SpringLiquibase implements InitializingBean, BeanNameAware, Resourc
 
 	public void setRollbackFile(File rollbackFile) {
 		this.rollbackFile = rollbackFile;
+    }
+
+    public void setShowSummary(UpdateSummaryEnum showSummary) {
+        this.showSummary = showSummary;
     }
 
     public boolean isIgnoreClasspathPrefix() {

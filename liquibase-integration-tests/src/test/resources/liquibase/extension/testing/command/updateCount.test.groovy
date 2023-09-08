@@ -85,12 +85,6 @@ Optional Args:
                 showSummary: "summary"
         ]
 
-        expectedResults = [
-                statusCode   : 0,
-                defaultChangeExecListener: 'not_null',
-                updateReport: 'not_null'
-        ]
-
         outputFile = new File("target/test-classes/labelsAndContent.txt")
 
         expectedFileContent = [ "target/test-classes/labelsAndContent.txt":
@@ -146,6 +140,48 @@ Optional Args:
                 "Context mismatch:             2",
                 "After count:                  1",
                 "DBMS mismatch:                1"
+        ]
+
+        expectedResults = [
+                statusCode   : 0,
+                defaultChangeExecListener: 'not_null',
+                updateReport: 'not_null'
+        ]
+
+        expectedUI = [
+            "Running Changeset: changelogs/h2/complete/summary-changelog.xml::4-table::lbuser"
+        ]
+
+    }
+
+    run "Happy path with skipped change sets propagated from an included changelog", {
+        arguments = [
+                url:        { it.url },
+                username:   { it.username },
+                password:   { it.password },
+                changelogFile: "changelogs/h2/complete/summary-changelog.xml",
+                count: "1",
+                labelFilter: "testtable4,tagit and !testtable2",
+                contextFilter: "none",
+                showSummary: "summary"
+        ]
+
+        outputFile = new File("target/test-classes/skippedPropagatedToRoot.txt")
+
+        expectedFileContent = [ "target/test-classes/skippedPropagatedToRoot.txt":
+                    [
+                      "UPDATE SUMMARY",
+                      "Run:                          1",
+                      "Previously run:               0",
+                      "Filtered out:                 5",
+                      "-------------------------------",
+                      "Total change sets:            6",
+                      "FILTERED CHANGE SETS SUMMARY",
+                      "Label mismatch:               2",
+                      "Context mismatch:             2",
+                      "After count:                  1",
+                      "DBMS mismatch:                1"
+                    ]
         ]
 
         expectedResults = [

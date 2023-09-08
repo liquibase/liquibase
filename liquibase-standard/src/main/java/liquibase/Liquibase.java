@@ -57,6 +57,7 @@ public class Liquibase implements AutoCloseable {
     private DatabaseChangeLog databaseChangeLog;
     private String changeLogFile;
     private UpdateSummaryOutputEnum showSummaryOutput;
+    private UpdateSummaryEnum showSummary;
     private final ResourceAccessor resourceAccessor;
     private final ChangeLogParameters changeLogParameters;
     private ChangeExecListener changeExecListener;
@@ -217,6 +218,7 @@ public class Liquibase implements AutoCloseable {
             updateCommand.addArgumentValue(ChangeExecListenerCommandStep.CHANGE_EXEC_LISTENER_ARG, changeExecListener);
             updateCommand.addArgumentValue(ShowSummaryArgument.SHOW_SUMMARY_OUTPUT, showSummaryOutput);
             updateCommand.addArgumentValue(DatabaseChangelogCommandStep.CHANGELOG_PARAMETERS, changeLogParameters);
+            updateCommand.addArgumentValue(ShowSummaryArgument.SHOW_SUMMARY, showSummary);
             updateCommand.execute();
         });
     }
@@ -340,6 +342,7 @@ public class Liquibase implements AutoCloseable {
             updateCommand.addArgumentValue(UpdateCountCommandStep.COUNT_ARG, changesToApply);
             updateCommand.addArgumentValue(ShowSummaryArgument.SHOW_SUMMARY_OUTPUT, showSummaryOutput);
             updateCommand.addArgumentValue(DatabaseChangelogCommandStep.CHANGELOG_PARAMETERS, changeLogParameters);
+            updateCommand.addArgumentValue(ShowSummaryArgument.SHOW_SUMMARY, showSummary);
             updateCommand.execute();
         });
     }
@@ -381,6 +384,7 @@ public class Liquibase implements AutoCloseable {
             updateCommand.addArgumentValue(UpdateToTagCommandStep.TAG_ARG, tag);
             updateCommand.addArgumentValue(ShowSummaryArgument.SHOW_SUMMARY_OUTPUT, showSummaryOutput);
             updateCommand.addArgumentValue(DatabaseChangelogCommandStep.CHANGELOG_PARAMETERS, changeLogParameters);
+            updateCommand.addArgumentValue(ShowSummaryArgument.SHOW_SUMMARY, showSummary);
             updateCommand.execute();
         });
     }
@@ -1311,6 +1315,10 @@ public class Liquibase implements AutoCloseable {
 
     public DefaultChangeExecListener getDefaultChangeExecListener() {
         return defaultChangeExecListener;
+    }
+
+    public void setShowSummary(UpdateSummaryEnum showSummary) {
+        this.showSummary = showSummary;
     }
 
     public void setShowSummaryOutput(UpdateSummaryOutputEnum showSummaryOutput) {
