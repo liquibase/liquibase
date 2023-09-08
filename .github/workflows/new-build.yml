@@ -13,10 +13,6 @@ on:
       - dependabot-**
     paths-ignore:
           - '**.md'
-#    workflow_run:
-#      workflows: [ "Run matching branch PRs" ]
-#      types:
-#        - requested
 
 env:
   MAVEN_VERSION: '3.9.2'
@@ -78,8 +74,9 @@ jobs:
         with:
           github-token: ${{ secrets.LIQUIBOT_PAT_GPM_ACCESS }}
           script: |
-            console.log(github)
-            const branchNamePrefix = "pair-branch-";
+            const liquibaseBranch = context.ref
+            console.log(liquibaseBranch)
+            const branchNamePrefixes = ["github-action-","DAT-","dependabot-"];
             const repositories = ['liquibase', 'liquibase-pro'];
       
             const branchExistenceResults = await Promise.all(repositories.map(async (repo) => {
@@ -88,7 +85,7 @@ jobs:
                 repo,
               });
               const branches = resp.data.branches || [];
-              return branches.some((branchName) => branchName.name.startsWith(branchNamePrefix));
+              return branches.some((branchName) => branchName.name.includes(branchNamePrefixes));
             }));
 
             const branchExistsInBoth = branchExistenceResults.every((exists) => exists);
