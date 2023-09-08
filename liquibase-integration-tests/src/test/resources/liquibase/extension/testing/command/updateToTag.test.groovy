@@ -91,6 +91,42 @@ Optional Args:
         ]
     }
 
+    run "Happy path with skipped change sets propagated from an included changelog", {
+        arguments = [
+                url          : { it.url },
+                username     : { it.username },
+                password     : { it.password },
+                changelogFile: "changelogs/h2/complete/summary.root.changelog.xml",
+                tag: "updateTag",
+                labelFilter  : "testtable1,tagit",
+                contextFilter: "none,tagit",
+                showSummary  : "summary"
+        ]
+
+        expectedResults = [
+                statusCode: 0,
+                defaultChangeExecListener: 'not_null',
+                updateReport: 'not_null'
+        ]
+
+        outputFile = new File("target/test-classes/skippedPropagatedToRoot.txt")
+
+        expectedFileContent = [ "target/test-classes/labelsAndContent.txt":
+                                        ["UPDATE SUMMARY",
+                                         "Run:                          2",
+                                         "Previously run:               0",
+                                         "Filtered out:                 4",
+                                         "-------------------------------",
+                                         "Total change sets:            6",
+                                         "FILTERED CHANGE SETS SUMMARY",
+                                         "Context mismatch:             1",
+                                         "Label mismatch:               2",
+                                         "After tag:                    2",
+                                         "DBMS mismatch:                1"
+                                        ]
+        ]
+    }
+
     run "Mismatched DBMS causes not deployed summary message", {
         arguments = [
                 url:        { it.url },
