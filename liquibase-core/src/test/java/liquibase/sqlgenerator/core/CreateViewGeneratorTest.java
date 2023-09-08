@@ -1,6 +1,5 @@
 package liquibase.sqlgenerator.core;
 
-import liquibase.database.Database;
 import liquibase.database.core.MSSQLDatabase;
 import liquibase.database.core.OracleDatabase;
 import liquibase.sql.Sql;
@@ -19,13 +18,11 @@ public class CreateViewGeneratorTest {
     private static final String LSP = System.lineSeparator();
 
     private CreateViewGenerator generator;
-    Database database;
 
 
     @Before
     public void setUp() {
         generator = new CreateViewGenerator();
-        database = new OracleDatabase();
     }
 
     @Test
@@ -63,75 +60,82 @@ public class CreateViewGeneratorTest {
     @Test
     public void cleanUpSqlString_noTrailingComment_slashCleanUpDone() {
         String initialSql = "   CREATE VIEW SOME_VIEW AS SELECT * FROM SOME_TABLE" + LSP + "     /";
-        String expectedCleanSql = "   CREATE VIEW SOME_VIEW AS SELECT * FROM SOME_TABLE" + LSP + "     ";
-
         StringClauses viewDefinition = SqlParser.parse(initialSql, true, true);
 
-        assertEquals(expectedCleanSql, generator.getViewDefinition(viewDefinition, database));
+        String actualViewDefinition = generator.getViewDefinition(viewDefinition, new OracleDatabase());
+
+        String expectedCleanSql = "   CREATE VIEW SOME_VIEW AS SELECT * FROM SOME_TABLE" + LSP + "     ";
+        assertEquals(expectedCleanSql, actualViewDefinition);
     }
 
     @Test
     public void cleanUpSqlString_noTrailingComment_semicolonCleanUpDone() {
         String initialSql = "   CREATE VIEW SOME_VIEW AS SELECT * FROM SOME_TABLE;";
-
         StringClauses viewDefinition = SqlParser.parse(initialSql, true, true);
 
+        String actualViewDefinition = generator.getViewDefinition(viewDefinition, new OracleDatabase());
+
         String expectedCleanSql = "   CREATE VIEW SOME_VIEW AS SELECT * FROM SOME_TABLE";
-        assertEquals(expectedCleanSql, generator.getViewDefinition(viewDefinition, database));
+        assertEquals(expectedCleanSql, actualViewDefinition);
     }
 
     @Test
     public void cleanUpSqlString_withTrailingComment_slashCleanUpDone() {
         String initialSql = "   CREATE VIEW SOME_VIEW AS SELECT * FROM SOME_TABLE" + LSP + "     /" + LSP +
                 "   -- trailing comment";
-
         StringClauses viewDefinition = SqlParser.parse(initialSql, true, true);
+
+        String actualViewDefinition = generator.getViewDefinition(viewDefinition, new OracleDatabase());
+
         String expectedCleanSql = "   CREATE VIEW SOME_VIEW AS SELECT * FROM SOME_TABLE" + LSP + "     " + LSP +
                 "   -- trailing comment";
-
-        assertEquals(expectedCleanSql, generator.getViewDefinition(viewDefinition, database));
+        assertEquals(expectedCleanSql, actualViewDefinition);
     }
 
     @Test
     public void cleanUpSqlString_withTrailingComment_slashAndSemicolonCleanUpDone() {
         String initialSql = "   CREATE VIEW SOME_VIEW AS SELECT * FROM SOME_TABLE;" + LSP + "     /" + LSP +
                 "   -- trailing comment";
-
         StringClauses viewDefinition = SqlParser.parse(initialSql, true, true);
+
+        String actualViewDefinition = generator.getViewDefinition(viewDefinition, new OracleDatabase());
+
         String expectedCleanSql = "   CREATE VIEW SOME_VIEW AS SELECT * FROM SOME_TABLE" + LSP + "     " + LSP +
                 "   -- trailing comment";
-
-        assertEquals(expectedCleanSql, generator.getViewDefinition(viewDefinition, database));
+        assertEquals(expectedCleanSql, actualViewDefinition);
     }
 
     @Test
     public void cleanUpSqlString_noTrailingCommentNoLineSeparatorBeforeSlas_slashCleanUpDone() {
         String initialSql = "   CREATE VIEW SOME_VIEW AS SELECT * FROM SOME_TABLE/    ";
-
         StringClauses viewDefinition = SqlParser.parse(initialSql, true, true);
 
+        String actualViewDefinition = generator.getViewDefinition(viewDefinition, new OracleDatabase());
+
         String expectedCleanSql = "   CREATE VIEW SOME_VIEW AS SELECT * FROM SOME_TABLE    ";
-        assertEquals(expectedCleanSql, generator.getViewDefinition(viewDefinition, database));
+        assertEquals(expectedCleanSql, actualViewDefinition);
     }
 
     @Test
     public void cleanUpSqlString_noTrailingCommentNoLineSeparatorBeforeSlas_slashAndSemicolonCleanUpDone() {
         String initialSql = "   CREATE VIEW SOME_VIEW AS SELECT * FROM SOME_TABLE;/    ";
-
         StringClauses viewDefinition = SqlParser.parse(initialSql, true, true);
 
+        String actualViewDefinition = generator.getViewDefinition(viewDefinition, new OracleDatabase());
+
         String expectedCleanSql = "   CREATE VIEW SOME_VIEW AS SELECT * FROM SOME_TABLE    ";
-        assertEquals(expectedCleanSql, generator.getViewDefinition(viewDefinition, database));
+        assertEquals(expectedCleanSql, actualViewDefinition);
     }
 
     @Test
     public void cleanUpSqlString_noTrailingCommentNoLineSeparatorBeforeSlasAndComment_slashAndSemicolonCleanUpDone() {
         String initialSql = "   CREATE VIEW SOME_VIEW AS SELECT * FROM SOME_TABLE;/ -- trailing comment   ";
-
         StringClauses viewDefinition = SqlParser.parse(initialSql, true, true);
-        String expectedCleanSql = "   CREATE VIEW SOME_VIEW AS SELECT * FROM SOME_TABLE -- trailing comment   ";
 
-        assertEquals(expectedCleanSql, generator.getViewDefinition(viewDefinition, database));
+        String actualViewDefinition = generator.getViewDefinition(viewDefinition, new OracleDatabase());
+
+        String expectedCleanSql = "   CREATE VIEW SOME_VIEW AS SELECT * FROM SOME_TABLE -- trailing comment   ";
+        assertEquals(expectedCleanSql, actualViewDefinition);
     }
 
     @Test
@@ -139,13 +143,14 @@ public class CreateViewGeneratorTest {
         String initialSql = "   CREATE VIEW SOME_VIEW AS SELECT * FROM SOME_TABLE;;;/;///; -- trailing comment inline" + LSP + "     /" + LSP +
                 "///" + LSP + ";;" + LSP + ";/;/;/;" + LSP +
                 "   -- trailing comment next line";
-
         StringClauses viewDefinition = SqlParser.parse(initialSql, true, true);
+
+        String actualViewDefinition = generator.getViewDefinition(viewDefinition, new OracleDatabase());
+
         String expectedCleanSql = "   CREATE VIEW SOME_VIEW AS SELECT * FROM SOME_TABLE -- trailing comment inline" + LSP + "     " + LSP +
                 LSP + LSP + LSP +
                 "   -- trailing comment next line";
-
-        assertEquals(expectedCleanSql, generator.getViewDefinition(viewDefinition, database));
+        assertEquals(expectedCleanSql, actualViewDefinition);
     }
 
     @Test
@@ -153,13 +158,14 @@ public class CreateViewGeneratorTest {
         String initialSql = "   CREATE VIEW SOME_VIEW AS SELECT * FROM SOME_TABLE WHERE foo = '/bar;';;;/;///; -- trailing comment inline" + LSP + "     /" + LSP +
                 "///" + LSP + ";;" + LSP + ";/;/;/;" + LSP +
                 "   -- trailing comment next line";
-
         StringClauses viewDefinition = SqlParser.parse(initialSql, true, true);
+
+        String actualViewDefinition = generator.getViewDefinition(viewDefinition, new OracleDatabase());
+
         String expectedCleanSql = "   CREATE VIEW SOME_VIEW AS SELECT * FROM SOME_TABLE WHERE foo = '/bar;' -- trailing comment inline" + LSP + "     " + LSP +
                 LSP + LSP + LSP +
                 "   -- trailing comment next line";
-
-        assertEquals(expectedCleanSql, generator.getViewDefinition(viewDefinition, database));
+        assertEquals(expectedCleanSql, actualViewDefinition);
     }
 
     @Test
@@ -186,8 +192,10 @@ public class CreateViewGeneratorTest {
                 "    -- return the total sales ;;;" + LSP +
                 "    RETURN l_total_sales;" + LSP +
                 "END;" +  LSP + "/" + LSP;
-
         StringClauses viewDefinition = SqlParser.parse(initialSql, true, true);
+
+        String actualViewDefinition = generator.getViewDefinition(viewDefinition, new OracleDatabase());
+
         String expectedCleanSql = "CREATE OR REPLACE FUNCTION get_total_sales(" + LSP +
                 "    in_year PLS_INTEGER" + LSP +
                 ") " + LSP +
@@ -208,8 +216,7 @@ public class CreateViewGeneratorTest {
                 "    -- return the total sales ;;;" + LSP +
                 "    RETURN l_total_sales;" + LSP +
                 "END" +  LSP + LSP;
-
-        assertEquals(expectedCleanSql, generator.getViewDefinition(viewDefinition, database));
+        assertEquals(expectedCleanSql, actualViewDefinition);
     }
 
 //    @Test
