@@ -83,7 +83,7 @@ jobs:
                 branch: "abcd"
               });
               branchExistsInBoth = true
-            } catch (){
+            } catch (error){
               branchExistsInBoth = false
             }
             core.setOutput("branchExistsInBoth", branchExistsInBoth)
