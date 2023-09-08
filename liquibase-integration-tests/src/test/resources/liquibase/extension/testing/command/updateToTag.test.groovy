@@ -34,6 +34,8 @@ Optional Args:
     OBFUSCATED
   showSummary (UpdateSummaryEnum) Type of update results summary to show.  Values can be 'off', 'summary', or 'verbose'.
     Default: SUMMARY
+  showSummaryOutput (UpdateSummaryOutputEnum) Summary output to report update summary results. Values can be 'log', 'console', or 'all'.
+    Default: ALL
   username (String) Username to use to connect to the database
     Default: null
 """
@@ -88,6 +90,76 @@ Optional Args:
                                  "After tag:                    2",
                                  "DBMS mismatch:                1"
                                 ]
+        ]
+    }
+
+    run "Happy path with a change set that has complicated labels and contexts with log output", {
+        arguments = [
+                url:        { it.url },
+                username:   { it.username },
+                password:   { it.password },
+                changelogFile: "changelogs/h2/complete/summary-changelog.xml",
+                tag: "updateTag",
+                labelFilter: "testtable1,tagit",
+                contextFilter: "none,tagit",
+                showSummary: "summary",
+                showSummaryOutput: "log"
+        ]
+
+        expectedResults = [
+                statusCode   : 0,
+                defaultChangeExecListener: 'not_null',
+                updateReport: 'not_null'
+        ]
+
+        expectedLogs = [
+                "UPDATE SUMMARY",
+                "Run:                          2",
+                "Previously run:               0",
+                "Filtered out:                 4",
+                "-------------------------------",
+                "Total change sets:            6",
+                "FILTERED CHANGE SETS SUMMARY",
+                "Context mismatch:             1",
+                "Label mismatch:               2",
+                "After tag:                    2",
+                "DBMS mismatch:                1"
+        ]
+    }
+
+    run "Happy path with skipped change sets propagated from an included changelog", {
+        arguments = [
+                url          : { it.url },
+                username     : { it.username },
+                password     : { it.password },
+                changelogFile: "changelogs/h2/complete/summary.root.changelog.xml",
+                tag: "updateTag",
+                labelFilter  : "testtable1,tagit",
+                contextFilter: "none,tagit",
+                showSummary  : "summary"
+        ]
+
+        expectedResults = [
+                statusCode: 0,
+                defaultChangeExecListener: 'not_null',
+                updateReport: 'not_null'
+        ]
+
+        outputFile = new File("target/test-classes/skippedPropagatedToRoot.txt")
+
+        expectedFileContent = [ "target/test-classes/labelsAndContent.txt":
+                                        ["UPDATE SUMMARY",
+                                         "Run:                          2",
+                                         "Previously run:               0",
+                                         "Filtered out:                 4",
+                                         "-------------------------------",
+                                         "Total change sets:            6",
+                                         "FILTERED CHANGE SETS SUMMARY",
+                                         "Context mismatch:             1",
+                                         "Label mismatch:               2",
+                                         "After tag:                    2",
+                                         "DBMS mismatch:                1"
+                                        ]
         ]
     }
 
