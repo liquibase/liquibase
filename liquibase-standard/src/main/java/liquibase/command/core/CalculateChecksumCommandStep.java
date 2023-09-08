@@ -108,7 +108,9 @@ public class CalculateChecksumCommandStep extends AbstractCommandStep {
         }
 
         if (isRequiredCompositeIdentifierMissing) {
-            String errorMessage = "Required arguments missing: ";
+            String errorMessage = "Error encountered while parsing the command line. " +
+                    "If --changeset-identifier is not provided than --changeset-id, --changeset-author and --changeset-path must be specified. " +
+                    "Missing argument: ";
 
             if (commandScope.getArgumentValue(CHANGESET_ID_ARG) == null) {
                 errorMessage = errorMessage + " '--changeset-id',";
