@@ -80,7 +80,7 @@ jobs:
               await github.rest.repos.getBranch({
                 owner: "liquibase",
                 repo: "liquibase-pro",
-                branch: "abcd"
+                branch: currentBranch
               });
               branchExistsInBoth = true
             } catch (error){
