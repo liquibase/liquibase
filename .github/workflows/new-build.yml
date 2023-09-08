@@ -74,21 +74,15 @@ jobs:
         with:
           github-token: ${{ secrets.LIQUIBOT_PAT_GPM_ACCESS }}
           script: |
-            const liquibaseBranch = context.ref
-            console.log(liquibaseBranch)
-            const branchNamePrefixes = ["github-action-","DAT-","dependabot-"];
-            const repositories = ['liquibase', 'liquibase-pro'];
-      
-            const branchExistenceResults = await Promise.all(repositories.map(async (repo) => {
-              const resp = await github.rest.repos.listBranches({
+            const currentBranch = context.ref.replace("refs/heads/","")  
+            const resp = await github.rest.repos.getBranch({
                 owner: "liquibase",
-                repo,
+                repo: "liquibase-pro",
+                branch: "abcd"
               });
-              const branches = resp.data.branches || [];
-              return branches.some((branchName) => branchName.name.includes(branchNamePrefixes));
-            }));
-
-            const branchExistsInBoth = branchExistenceResults.every((exists) => exists);
+            console.log(resp)
+            const liquibaseProBranches = resp.data.branches || [];
+            const branchExistsInBoth = liquibaseProBranches.find((branchName) => branchName.name === currentBranch);
             core.setOutput("branchExistsInBoth", branchExistsInBoth)
           
   run-tests:
