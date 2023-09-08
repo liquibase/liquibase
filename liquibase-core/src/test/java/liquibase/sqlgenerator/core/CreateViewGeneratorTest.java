@@ -1,23 +1,34 @@
 package liquibase.sqlgenerator.core;
 
+import liquibase.database.Database;
 import liquibase.database.core.MSSQLDatabase;
+import liquibase.database.core.OracleDatabase;
 import liquibase.sql.Sql;
 import liquibase.sqlgenerator.SqlGeneratorChain;
 import liquibase.statement.core.CreateViewStatement;
+import liquibase.util.SqlParser;
+import liquibase.util.StringClauses;
 import org.junit.Before;
 import org.junit.Test;
+import org.mockito.Mock;
+import org.mockito.Mockito;
 
 import java.util.TreeSet;
 
 import static org.junit.Assert.assertEquals;
 
 public class CreateViewGeneratorTest {
+    private static final String LSP = System.lineSeparator();
 
     private CreateViewGenerator generator;
+    @Mock
+    Database database;
+
 
     @Before
     public void setUp() {
         generator = new CreateViewGenerator();
+        database = Mockito.mock(OracleDatabase.class);
     }
 
     @Test
@@ -49,6 +60,139 @@ public class CreateViewGeneratorTest {
                 sqls[3].toSql());
         assertEquals("SET ANSI_NULLS ON", sqls[4].toSql());
         assertEquals("SET QUOTED_IDENTIFIER ON", sqls[5].toSql());
+    }
+
+
+    @Test
+    public void cleanUpSqlString_noTrailingComment_slashCleanUpDone() {
+        String initialSql = "   CREATE VIEW SOME_VIEW AS SELECT * FROM SOME_TABLE" + LSP + "     /";
+        String expectedCleanSql = "   CREATE VIEW SOME_VIEW AS SELECT * FROM SOME_TABLE" + LSP + "     ";
+        StringClauses viewDefinition = SqlParser.parse(initialSql, true, true);
+        assertEquals(expectedCleanSql, generator.getViewDefinition(viewDefinition, database));
+    }
+
+    @Test
+    public void cleanUpSqlString_noTrailingComment_semicolonCleanUpDone() {
+        String initialSql = "   CREATE VIEW SOME_VIEW AS SELECT * FROM SOME_TABLE;";
+        String expectedCleanSql = "   CREATE VIEW SOME_VIEW AS SELECT * FROM SOME_TABLE";
+        StringClauses viewDefinition = SqlParser.parse(initialSql, true, true);
+        assertEquals(expectedCleanSql, generator.getViewDefinition(viewDefinition, database));
+    }
+
+    @Test
+    public void cleanUpSqlString_withTrailingComment_slashCleanUpDone() {
+        String initialSql = "   CREATE VIEW SOME_VIEW AS SELECT * FROM SOME_TABLE" + LSP + "     /" + LSP +
+                "   -- trailing comment";
+        String expectedCleanSql = "   CREATE VIEW SOME_VIEW AS SELECT * FROM SOME_TABLE" + LSP + "     " + LSP +
+                "   -- trailing comment";
+        StringClauses viewDefinition = SqlParser.parse(initialSql, true, true);
+        assertEquals(expectedCleanSql, generator.getViewDefinition(viewDefinition, database));
+    }
+
+    @Test
+    public void cleanUpSqlString_withTrailingComment_slashAndSemicolonCleanUpDone() {
+        String initialSql = "   CREATE VIEW SOME_VIEW AS SELECT * FROM SOME_TABLE;" + LSP + "     /" + LSP +
+                "   -- trailing comment";
+        String expectedCleanSql = "   CREATE VIEW SOME_VIEW AS SELECT * FROM SOME_TABLE" + LSP + "     " + LSP +
+                "   -- trailing comment";
+        StringClauses viewDefinition = SqlParser.parse(initialSql, true, true);
+        assertEquals(expectedCleanSql, generator.getViewDefinition(viewDefinition, database));
+    }
+
+    @Test
+    public void cleanUpSqlString_noTrailingCommentNoLineSeparatorBeforeSlas_slashCleanUpDone() {
+        String initialSql = "   CREATE VIEW SOME_VIEW AS SELECT * FROM SOME_TABLE/    ";
+        String expectedCleanSql = "   CREATE VIEW SOME_VIEW AS SELECT * FROM SOME_TABLE    ";
+        StringClauses viewDefinition = SqlParser.parse(initialSql, true, true);
+        assertEquals(expectedCleanSql, generator.getViewDefinition(viewDefinition, database));
+    }
+
+    @Test
+    public void cleanUpSqlString_noTrailingCommentNoLineSeparatorBeforeSlas_slashAndSemicolonCleanUpDone() {
+        String initialSql = "   CREATE VIEW SOME_VIEW AS SELECT * FROM SOME_TABLE;/    ";
+        String expectedCleanSql = "   CREATE VIEW SOME_VIEW AS SELECT * FROM SOME_TABLE    ";
+        StringClauses viewDefinition = SqlParser.parse(initialSql, true, true);
+        assertEquals(expectedCleanSql, generator.getViewDefinition(viewDefinition, database));
+    }
+
+    @Test
+    public void cleanUpSqlString_noTrailingCommentNoLineSeparatorBeforeSlasAndComment_slashAndSemicolonCleanUpDone() {
+        String initialSql = "   CREATE VIEW SOME_VIEW AS SELECT * FROM SOME_TABLE;/ -- trailing comment   ";
+        String expectedCleanSql = "   CREATE VIEW SOME_VIEW AS SELECT * FROM SOME_TABLE -- trailing comment   ";
+        StringClauses viewDefinition = SqlParser.parse(initialSql, true, true);
+        assertEquals(expectedCleanSql, generator.getViewDefinition(viewDefinition, database));
+    }
+
+    @Test
+    public void cleanUpSqlString_veryUglyValidCase_slashAndSemicolonCleanUpDone() {
+        String initialSql = "   CREATE VIEW SOME_VIEW AS SELECT * FROM SOME_TABLE;;;/;///; -- trailing comment inline" + LSP + "     /" + LSP +
+                "///" + LSP + ";;" + LSP + ";/;/;/;" + LSP +
+                "   -- trailing comment next line";
+        String expectedCleanSql = "   CREATE VIEW SOME_VIEW AS SELECT * FROM SOME_TABLE -- trailing comment inline" + LSP + "     " + LSP +
+                LSP + LSP + LSP +
+                "   -- trailing comment next line";
+        StringClauses viewDefinition = SqlParser.parse(initialSql, true, true);
+        assertEquals(expectedCleanSql, generator.getViewDefinition(viewDefinition, database));
+    }
+
+    @Test
+    public void cleanUpSqlString_veryUglyValidCase_slashAndSemicolonCleanUpDoneAndDontTouchSlashAndSemicolonInOracleLiteral() {
+        String initialSql = "   CREATE VIEW SOME_VIEW AS SELECT * FROM SOME_TABLE WHERE foo = '/bar;';;;/;///; -- trailing comment inline" + LSP + "     /" + LSP +
+                "///" + LSP + ";;" + LSP + ";/;/;/;" + LSP +
+                "   -- trailing comment next line";
+        String expectedCleanSql = "   CREATE VIEW SOME_VIEW AS SELECT * FROM SOME_TABLE WHERE foo = '/bar;' -- trailing comment inline" + LSP + "     " + LSP +
+                LSP + LSP + LSP +
+                "   -- trailing comment next line";
+        StringClauses viewDefinition = SqlParser.parse(initialSql, true, true);
+        assertEquals(expectedCleanSql, generator.getViewDefinition(viewDefinition, database));
+    }
+
+    @Test
+    public void cleanUpSqlString_veryValidCaseWithInnerStatements_slashAndSemicolonCleanUpDoneAndDontTouchSlashAndSemicolonInOracleCommentsAndInternalStatements() {
+        //here create statement for function is used due to that reason that it wasn't found example for create view statement with 'inner' statement delimiter usage,
+        //so it is for extremely rare, almost impossible case
+        String initialSql = "CREATE OR REPLACE FUNCTION get_total_sales(" + LSP +
+                "    in_year PLS_INTEGER" + LSP +
+                ") " + LSP +
+                "RETURN NUMBER" + LSP +
+                "IS" + LSP +
+                "    l_total_sales NUMBER := 0" + LSP +
+                ";" + LSP + //here we have 'inner' hanging delimiter that should not be touched
+                "BEGIN" + LSP +
+                "    -- get total sales ///" + LSP +
+                "    SELECT SUM(unit_price * quantity)" + LSP +
+                "    INTO l_total_sales" + LSP +
+                "    FROM order_items" + LSP +
+                "    INNER JOIN orders USING (order_id)" + LSP +
+                "    WHERE status = 'Shipped'" + LSP +
+                "    GROUP BY EXTRACT(YEAR FROM order_date)" + LSP +
+                "    HAVING EXTRACT(YEAR FROM order_date) = in_year;" + LSP +
+                "    " + LSP +
+                "    -- return the total sales ;;;" + LSP +
+                "    RETURN l_total_sales;" + LSP +
+                "END;" +  LSP + "/" + LSP;
+        String expectedCleanSql = "CREATE OR REPLACE FUNCTION get_total_sales(" + LSP +
+                "    in_year PLS_INTEGER" + LSP +
+                ") " + LSP +
+                "RETURN NUMBER" + LSP +
+                "IS" + LSP +
+                "    l_total_sales NUMBER := 0" + LSP +
+                ";" + LSP + //here we have 'inner' hanging delimiter that should not be touched
+                "BEGIN" + LSP +
+                "    -- get total sales ///" + LSP +
+                "    SELECT SUM(unit_price * quantity)" + LSP +
+                "    INTO l_total_sales" + LSP +
+                "    FROM order_items" + LSP +
+                "    INNER JOIN orders USING (order_id)" + LSP +
+                "    WHERE status = 'Shipped'" + LSP +
+                "    GROUP BY EXTRACT(YEAR FROM order_date)" + LSP +
+                "    HAVING EXTRACT(YEAR FROM order_date) = in_year;" + LSP +
+                "    " + LSP +
+                "    -- return the total sales ;;;" + LSP +
+                "    RETURN l_total_sales;" + LSP +
+                "END" +  LSP + LSP;
+        StringClauses viewDefinition = SqlParser.parse(initialSql, true, true);
+        assertEquals(expectedCleanSql, generator.getViewDefinition(viewDefinition, database));
     }
 
 //    @Test

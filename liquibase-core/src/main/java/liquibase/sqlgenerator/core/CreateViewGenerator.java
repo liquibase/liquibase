@@ -4,23 +4,23 @@ import liquibase.CatalogAndSchema;
 import liquibase.database.Database;
 import liquibase.database.core.*;
 import liquibase.exception.DatabaseException;
-import liquibase.structure.core.Relation;
 import liquibase.exception.ValidationErrors;
 import liquibase.sql.Sql;
 import liquibase.sql.UnparsedSql;
 import liquibase.sqlgenerator.SqlGeneratorChain;
 import liquibase.statement.core.CreateViewStatement;
+import liquibase.structure.core.Relation;
 import liquibase.structure.core.View;
 import liquibase.util.SqlParser;
 import liquibase.util.StringClauses;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
+import java.util.*;
 
 import static liquibase.sqlgenerator.core.CreateProcedureGenerator.splitSetStatementsOutForMssql;
 
 public class CreateViewGenerator extends AbstractSqlGenerator<CreateViewStatement> {
+
+    private static final Set<String> ORACLE_STATEMENT_DELIMITERS = Set.of(";", "/");
 
     @Override
     public ValidationErrors validate(CreateViewStatement createViewStatement, Database database, SqlGeneratorChain sqlGeneratorChain) {
@@ -117,7 +117,7 @@ public class CreateViewGenerator extends AbstractSqlGenerator<CreateViewStatemen
                             sql.add(new UnparsedSql(mssqlSetStatement, defaultDelimiter)));
         }
 
-        sql.add(new UnparsedSql(viewDefinition.toString(), getAffectedView(statement)));
+        sql.add(new UnparsedSql(getViewDefinition(viewDefinition, database), getAffectedView(statement)));
 
         if (!mssqlSetStatementsAfter.isEmpty()) {
             mssqlSetStatementsAfter
@@ -126,6 +126,40 @@ public class CreateViewGenerator extends AbstractSqlGenerator<CreateViewStatemen
         }
 
         return sql.toArray(new Sql[sql.size()]);
+    }
+
+    protected String getViewDefinition(StringClauses viewDefinition, Database database) {
+        if (!(database instanceof OracleDatabase)) {
+            return viewDefinition.toString();
+        }
+
+        Object[] viewClauses = viewDefinition.toArray(false);
+        boolean executableSqlPresent = false;
+        LinkedList<String> result = new LinkedList<>();
+
+        for (int i = viewClauses.length - 1; i >= 0; i--) {
+            if (viewClauses[i] == null) {
+                continue;
+            }
+
+            Object clause = viewClauses[i];
+
+            if (isExecutableSql(clause)) {
+                executableSqlPresent = true;
+            }
+
+            if (executableSqlPresent || !ORACLE_STATEMENT_DELIMITERS.contains(clause.toString())) {
+                result.add(0, clause.toString());
+            }
+        }
+
+        return String.join("", result);
+    }
+
+    private static boolean isExecutableSql(Object clause) {
+        return !(clause instanceof StringClauses.Whitespace
+                || clause instanceof StringClauses.Comment
+                || ORACLE_STATEMENT_DELIMITERS.contains(clause.toString()));
     }
 
     //
