@@ -463,9 +463,9 @@ public class ColumnSnapshotGenerator extends JdbcSnapshotGenerator {
 
         // For SAP (Sybase) SQL ANywhere, JDBC returns "LONG(2147483647) binary" (the number is 2^31-1)
         // but when creating a column, LONG BINARY must not have parameters.
-        // The same applies to LONG(...) VARCHAR and LONG(...) NVARCHAR.
+        // The same applies to LONG(...) VARCHAR.
         if (database instanceof SybaseASADatabase
-                && ("LONG BINARY".equalsIgnoreCase(columnTypeName) || "LONG VARCHAR".equalsIgnoreCase(columnTypeName) || "LONG NVARCHAR".equalsIgnoreCase(columnTypeName))) {
+                && ("LONG BINARY".equalsIgnoreCase(columnTypeName) || "LONG VARCHAR".equalsIgnoreCase(columnTypeName))) {
             columnSize = null;
         }
 
@@ -552,9 +552,10 @@ public class ColumnSnapshotGenerator extends JdbcSnapshotGenerator {
             readDefaultValueForPostgresDatabase(columnMetadataResultSet, columnInfo);
         }
 
-        if ((database instanceof AbstractDb2Database)
-                && ((columnMetadataResultSet.get(COLUMN_DEF_COL) != null)
-                && "NULL".equalsIgnoreCase((String) columnMetadataResultSet.get(COLUMN_DEF_COL)))) {
+        if (
+                (database instanceof AbstractDb2Database) &&
+                        ((columnMetadataResultSet.get(COLUMN_DEF_COL) != null) &&
+                                "NULL".equalsIgnoreCase((String) columnMetadataResultSet.get(COLUMN_DEF_COL)))) {
             columnMetadataResultSet.set(COLUMN_DEF_COL, null);
         }
         return SqlUtil.parseValue(database, columnMetadataResultSet.get(COLUMN_DEF_COL), columnInfo.getType());

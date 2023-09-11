@@ -189,15 +189,8 @@ Long Description: ${commandDefinition.getLongDescription() ?: "NOT SET"}
         if (!foundOptional) {
             signature.println "  NONE"
         }
-        def actualSignature = signature.toString()
-        def expectedSignature = commandTestDefinition.signature
-
-        if (expectedSignature == NOT_NULL) {
-            assert actualSignature != null: "The result is null"
-        } else {
-            assert StringUtil.standardizeLineEndings(StringUtil.trimToEmpty(actualSignature)) ==
-                    StringUtil.standardizeLineEndings(StringUtil.trimToEmpty(expectedSignature))
-        }
+        assert StringUtil.standardizeLineEndings(StringUtil.trimToEmpty(signature.toString())) ==
+               StringUtil.standardizeLineEndings(StringUtil.trimToEmpty(commandTestDefinition.signature))
 
         where:
         commandTestDefinition << getCommandTestDefinitions()
