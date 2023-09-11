@@ -60,8 +60,6 @@ CREATE TABLE $tableName ( product_no varchar(20) DEFAULT nextval('$sequenceName'
         commandScope.addArgumentValue(PreCompareCommandStep.COMPARE_CONTROL_ARG, CompareControl.STANDARD)
         commandScope.addArgumentValue(DbUrlConnectionCommandStep.DATABASE_ARG, targetDatabase)
         commandScope.addArgumentValue(DiffOutputControlCommandStep.INCLUDE_SCHEMA_ARG, true)
-        commandScope.addArgumentValue(DiffChangelogCommandStep.LABEL_FILTER_ARG, "newLabels")
-        commandScope.addArgumentValue(DiffChangelogCommandStep.CONTEXTS_ARG, "newContexts")
 
         then:
         commandScope.execute()
@@ -69,8 +67,6 @@ CREATE TABLE $tableName ( product_no varchar(20) DEFAULT nextval('$sequenceName'
         def generatedChangelogContents = FileUtil.getContents(generatedChangelog)
         generatedChangelogContents.contains("""CREATE SEQUENCE  IF NOT EXISTS "public"."${sequenceName.toLowerCase()}" AS bigint START WITH 100 INCREMENT BY 5 MINVALUE 1 MAXVALUE 9223372036854775807 CACHE 1;""")
         generatedChangelogContents.contains("""CREATE TABLE "public"."${tableName.toLowerCase()}" ("product_no" VARCHAR(20) DEFAULT 'nextval(''''${sequenceName.toLowerCase()}''''::regclass)');""")
-        generatedChangelogContents.contains(" labels: \"newlabels\"")
-        generatedChangelogContents.contains(" contextFilter: \"newContexts\"")
 
         cleanup:
         try {

@@ -78,7 +78,7 @@ class AbstractChangeTest extends Specification {
 
     def createChangeMetaData() {
         when:
-        def change = new ExampleAbstractChange()
+        ExampleAbstractChange change = new ExampleAbstractChange()
         ChangeMetaData changeMetaData = change.createChangeMetaData()
         Map<String, ChangeParameterMetaData> parameters = changeMetaData.getParameters()
 
@@ -120,7 +120,7 @@ class AbstractChangeTest extends Specification {
 
     def createChangeMetaData_noParams() {
         when:
-        def change = new ExampleParamlessAbstractChange()
+        ExampleParamlessAbstractChange change = new ExampleParamlessAbstractChange()
         ChangeMetaData changeMetaData = change.createChangeMetaData()
         Map<String, ChangeParameterMetaData> parameters = changeMetaData.getParameters()
 
@@ -144,7 +144,7 @@ class AbstractChangeTest extends Specification {
 
     def getChangeSet() {
         when:
-        def change = new ExampleAbstractChange()
+        ExampleAbstractChange change = new ExampleAbstractChange()
         ChangeSet changeSet = new ChangeSet(new DatabaseChangeLog())
         change.setChangeSet(changeSet)
 
@@ -249,7 +249,7 @@ class AbstractChangeTest extends Specification {
 
     def validate_missingRequiredValue() throws Exception {
         when:
-        def change = new ExampleAbstractChange()
+        ExampleAbstractChange change = new ExampleAbstractChange()
         ValidationErrors errors = change.validate(new MSSQLDatabase())
         then:
 
@@ -259,7 +259,7 @@ class AbstractChangeTest extends Specification {
 
     def validate_noErrors() throws Exception {
         when:
-        def change = new ExampleAbstractChange()
+        ExampleAbstractChange change = new ExampleAbstractChange()
         change.setParamTwo(3)
 
         then:

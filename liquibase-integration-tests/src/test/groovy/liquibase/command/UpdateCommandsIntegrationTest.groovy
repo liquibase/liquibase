@@ -3,23 +3,18 @@ package liquibase.command
 import liquibase.Contexts
 import liquibase.Liquibase
 import liquibase.Scope
-import liquibase.changelog.ChangeLogParameters
-import liquibase.changelog.DatabaseChangeLog
 import liquibase.changelog.visitor.DefaultChangeExecListener
 import liquibase.command.core.UpdateCommandStep
 import liquibase.command.core.UpdateSqlCommandStep
-import liquibase.command.core.helpers.DatabaseChangelogCommandStep
 import liquibase.command.core.helpers.DbUrlConnectionCommandStep
 import liquibase.command.util.CommandUtil
 import liquibase.extension.testing.testsystem.DatabaseTestSystem
 import liquibase.extension.testing.testsystem.TestSystemFactory
 import liquibase.extension.testing.testsystem.spock.LiquibaseIntegrationTest
 import liquibase.resource.ClassLoaderResourceAccessor
-import liquibase.resource.SearchPathResourceAccessor
 import org.h2.jdbc.JdbcSQLSyntaxErrorException
 import spock.lang.Shared
 import spock.lang.Specification
-import spock.lang.Unroll
 
 @LiquibaseIntegrationTest
 class UpdateCommandsIntegrationTest extends Specification {
@@ -49,26 +44,14 @@ class UpdateCommandsIntegrationTest extends Specification {
         CommandUtil.runDropAll(h2)
     }
 
-    @Unroll
     def "run Update from CommandStep"() {
         when:
+        def updateCommand = new CommandScope(UpdateCommandStep.COMMAND_NAME)
+        updateCommand.addArgumentValue(DbUrlConnectionCommandStep.DATABASE_ARG, h2.getDatabaseFromFactory())
+        updateCommand.addArgumentValue(UpdateSqlCommandStep.CHANGELOG_FILE_ARG, "liquibase/update-tests.yml")
 
-        def resourceAccessor = new SearchPathResourceAccessor("target/test-classes")
-        def scopeSettings = [
-                (Scope.Attr.resourceAccessor.name()) : resourceAccessor
-        ]
-
-        Scope.child(scopeSettings, {
-            def updateCommand = new CommandScope(UpdateCommandStep.COMMAND_NAME)
-            updateCommand.addArgumentValue(DbUrlConnectionCommandStep.DATABASE_ARG, h2.getDatabaseFromFactory())
-            if (changelog instanceof DatabaseChangeLog) {
-                updateCommand.addArgumentValue(UpdateCommandStep.CHANGELOG_ARG, changelog)
-            } else {
-                updateCommand.addArgumentValue(UpdateCommandStep.CHANGELOG_FILE_ARG, changelog)
-            }
-
-            updateCommand.execute()
-        } as Scope.ScopedRunner)
+        and:
+        updateCommand.execute()
 
         then:
         def resultSet = h2.getConnection().createStatement().executeQuery("select count(1) from databasechangelog")
@@ -77,7 +60,7 @@ class UpdateCommandsIntegrationTest extends Specification {
 
         def detailsResultSet = h2.getConnection().createStatement().executeQuery("select DEPLOYMENT_ID from databasechangelog")
         detailsResultSet.next()
-        assert detailsResultSet.getString(1) != null: "No deployment ID found for the update"
+        assert detailsResultSet.getString(1) != null : "No deployment ID found for the update"
 
         def rsTableExist = h2.getConnection().createStatement().executeQuery("select count(1) from example_table")
         rsTableExist.next()
@@ -85,11 +68,6 @@ class UpdateCommandsIntegrationTest extends Specification {
 
         cleanup:
         CommandUtil.runDropAll(h2)
-
-        where:
-        changelog                                                                                                                               | _
-        "liquibase/update-tests.yml"                                                                                                            | _
-        DatabaseChangelogCommandStep.getDatabaseChangeLog("liquibase/update-tests.yml", new ChangeLogParameters(), h2.getDatabaseFromFactory()) | _
     }
 
     def "run Update from Liquibase class"() {

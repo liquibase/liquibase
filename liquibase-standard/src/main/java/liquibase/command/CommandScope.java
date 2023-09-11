@@ -194,9 +194,8 @@ public class CommandScope {
      * Executes the command in this scope, and returns the results.
      */
     public CommandResults execute() throws CommandExecutionException {
-        Scope.getCurrentScope().addMdcValue(MdcKey.OPERATION_START_TIME, Instant.ofEpochMilli(new Date().getTime()).toString());
-        // We don't want to reset the command name even when defining another CommandScope during execution
-        // because we intend on keeping this value as the command entered to the console
+        Scope.getCurrentScope().addMdcValue(MdcKey.OPERATION_START_TIME, new ISODateFormat().format(new Date()));
+        // We don't want to reset the command name even when defining another CommandScope during execution because we intend on keeping this value as the command entered to the console
         if (!Scope.getCurrentScope().isMdcKeyPresent(MdcKey.LIQUIBASE_COMMAND_NAME)) {
             Scope.getCurrentScope().addMdcValue(MdcKey.LIQUIBASE_COMMAND_NAME, String.join(" ", commandDefinition.getName()));
         }

@@ -192,8 +192,7 @@ public class InternalHistoryCommandStep extends AbstractCommandStep {
                 "Update Date",
                 "Changelog Path",
                 "Changeset Author",
-                "Changeset ID",
-                "Tag");
+                "Changeset ID");
 
         private final List<RanChangeSet> changeSets;
         private final CommandScope commandScope;
@@ -218,8 +217,7 @@ public class InternalHistoryCommandStep extends AbstractCommandStep {
                                     dateFormat.format(changeSet.getDateExecuted()),
                                     changeSet.getChangeLog(),
                                     changeSet.getAuthor(),
-                                    changeSet.getId(),
-                                    changeSet.getTag() == null ? "" : changeSet.getTag()
+                                    changeSet.getId()
                             )
                     )
                     .collect(Collectors.toList());

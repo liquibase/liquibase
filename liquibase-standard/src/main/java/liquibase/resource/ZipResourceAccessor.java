@@ -42,11 +42,7 @@ public class ZipResourceAccessor extends AbstractPathResourceAccessor {
             try {
                 this.fileSystem = FileSystems.getFileSystem(finalUri);
             } catch (FileSystemNotFoundException e) {
-                try {
-                    this.fileSystem = FileSystems.newFileSystem(finalUri, Collections.emptyMap(), Scope.getCurrentScope().getClassLoader());
-                } catch (FileSystemAlreadyExistsException ex) {
-                    this.fileSystem = FileSystems.getFileSystem(finalUri);
-                }
+                this.fileSystem = FileSystems.newFileSystem(finalUri, Collections.emptyMap(), Scope.getCurrentScope().getClassLoader());
             }
         } catch (Throwable e) {
             throw new IllegalArgumentException(e.getMessage(), e);
