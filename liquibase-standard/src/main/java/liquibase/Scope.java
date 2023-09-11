@@ -113,7 +113,21 @@ public class Scope {
     }
 
     public static void setScopeManager(ScopeManager scopeManager) {
+        Scope currentScope = getCurrentScope();
+        if (currentScope == null) {
+            currentScope = new Scope();
+        }
+
+        try {
+            currentScope = scopeManager.init(currentScope);
+        } catch (Exception e) {
+            Scope.getCurrentScope().getLog(Scope.class).warning(e.getMessage(), e);
+        }
+        scopeManager.setCurrentScope(currentScope);
+
         Scope.scopeManager = scopeManager;
+
+
     }
 
     /**
@@ -430,7 +444,7 @@ public class Scope {
      * Add a key value pair to the MDC using the MDC manager. This key value pair will be automatically removed from the
      * MDC when this scope exits.
      */
-    public MdcObject addMdcValue(String key, Map<String, Object> value) {
+    public MdcObject addMdcValue(String key, Map<String, String> value) {
         return addMdcValue(key, value, true);
     }
 
@@ -440,7 +454,7 @@ public class Scope {
      *                             scope exits. If there is not a demonstrable reason for setting this parameter to false
      *                             then it should be set to true.
      */
-    public MdcObject addMdcValue(String key, Map<String, Object> value, boolean removeWhenScopeExits) {
+    public MdcObject addMdcValue(String key, Map<String, String> value, boolean removeWhenScopeExits) {
         MdcObject mdcObject = getMdcManager().put(key, value);
         removeMdcObjectWhenScopeExits(removeWhenScopeExits, mdcObject);
 

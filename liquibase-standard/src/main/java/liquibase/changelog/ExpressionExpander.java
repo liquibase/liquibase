@@ -14,7 +14,7 @@ import java.util.Map;
 class ExpressionExpander {
     private final boolean enableEscaping;
     private final ChangeLogParameters parameters;
-    private final static Map<String, Object> expandedParameters = new LinkedHashMap<>();
+    private final static Map<String, String> expandedParameters = new LinkedHashMap<>();
 
     public ExpressionExpander(ChangeLogParameters parameters) {
         this.enableEscaping = ChangeLogParserConfiguration.SUPPORT_PROPERTY_ESCAPING.getCurrentValue();

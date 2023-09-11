@@ -254,9 +254,8 @@ public class StandardLockService implements LockService {
 
         boolean locked = false;
         long timeToGiveUp = new Date().getTime() + (getChangeLogLockWaitTime() * 1000 * 60);
-
-        locked = acquireLock();
-        do {
+        while (!locked && (new Date().getTime() < timeToGiveUp)) {
+            locked = acquireLock();
             if (!locked) {
                 Scope.getCurrentScope().getLog(getClass()).info("Waiting for changelog lock....");
                 try {
@@ -266,8 +265,7 @@ public class StandardLockService implements LockService {
                     Thread.currentThread().interrupt();
                 }
             }
-            locked = acquireLock();
-        } while (!locked && (new Date().getTime() < timeToGiveUp));
+        }
 
         if (!locked) {
             DatabaseChangeLogLock[] locks = listLocks();

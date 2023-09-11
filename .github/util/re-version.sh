@@ -152,3 +152,17 @@ cp $workdir/internal/lib/liquibase-commercial.jar $workdir/tgz-repackage/interna
 find $workdir/tgz-repackage -name "*.txt" -exec sed -i -e "s/0-SNAPSHOT/$version/" {} \;
 (cd $workdir/tgz-repackage && tar -czf $outdir/liquibase-$version.tar.gz *)
 (cd $workdir/tgz-repackage && zip -qr $outdir/liquibase-$version.zip *)
+
+## Reversion deb package
+sudo apt-get update
+sudo apt-get -y install dpkg-dev
+mv $workdir/liquibase-0-SNAPSHOT.deb $workdir/liquibase-$version.deb
+tmp_dir=temp_deb/DEBIAN
+mkdir -p $tmp_dir
+dpkg-deb -x $workdir/liquibase-$version.deb $tmp_dir
+dpkg-deb -e $workdir/liquibase-$version.deb $tmp_dir
+sed -i "s/Version: .*/Version: $version/" "$tmp_dir/control"
+rm -rf $workdir/liquibase-$version.deb
+dpkg-deb -b temp_deb $workdir/liquibase-$version.deb
+rm -rf temp_deb
+cp $workdir/liquibase-$version.deb $outdir/liquibase-$version.deb

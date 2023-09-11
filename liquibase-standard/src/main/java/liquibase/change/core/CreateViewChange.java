@@ -327,8 +327,7 @@ public class CreateViewChange extends AbstractChange {
                     .setFullDefinition(fullDefinition));
         }
 
-        List<Class<?>> databaseSupportsViewComments = Arrays.asList(OracleDatabase.class, PostgresDatabase.class, MSSQLDatabase.class, DB2Database.class,
-                SybaseASADatabase.class);
+        List<Class<?>> databaseSupportsViewComments = Arrays.asList(OracleDatabase.class, PostgresDatabase.class, MSSQLDatabase.class, DB2Database.class);
         boolean supportsViewComments = databaseSupportsViewComments.stream().anyMatch(clazz -> clazz.isInstance(database));
 
         if (supportsViewComments && (StringUtil.trimToNull(remarks) != null)) {

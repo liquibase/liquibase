@@ -1,7 +1,6 @@
 package liquibase.diff.output.changelog;
 
 import liquibase.GlobalConfiguration;
-import liquibase.Labels;
 import liquibase.Scope;
 import liquibase.change.Change;
 import liquibase.change.core.*;
@@ -56,7 +55,6 @@ public class DiffToChangeLog {
     private int changeNumber = 1;
 
     private String changeSetContext;
-    private String changeSetLabels;
     private String changeSetAuthor;
     private String changeSetPath;
     private DiffResult diffResult;
@@ -87,10 +85,6 @@ public class DiffToChangeLog {
 
     public void setChangeSetContext(String changeSetContext) {
         this.changeSetContext = changeSetContext;
-    }
-
-    public void setChangeSetLabels(String changeSetLabels) {
-        this.changeSetLabels = changeSetLabels;
     }
 
     public void print(String changeLogFile) throws ParserConfigurationException, IOException, DatabaseException {
@@ -754,14 +748,11 @@ public class DiffToChangeLog {
 
             if (useSeparateChangeSets(changes)) {
                 for (Change change : changes) {
-                    ChangeSet changeSet =
-                       new ChangeSet(generateId(changes), getChangeSetAuthor(), false, false, this.changeSetPath, changeSetContext,
+                    ChangeSet changeSet = new ChangeSet(generateId(changes), getChangeSetAuthor(), false, false, this.changeSetPath, changeSetContext,
                             null, true, quotingStrategy, null);
                     changeSet.setCreated(created);
                     if (diffOutputControl.getLabels() != null) {
                         changeSet.setLabels(diffOutputControl.getLabels());
-                    } else {
-                        changeSet.setLabels(new Labels(this.changeSetLabels));
                     }
                     changeSet.addChange(change);
                     changeSets.add(changeSet);
@@ -772,8 +763,6 @@ public class DiffToChangeLog {
                 changeSet.setCreated(created);
                 if (diffOutputControl.getLabels() != null) {
                     changeSet.setLabels(diffOutputControl.getLabels());
-                } else {
-                    changeSet.setLabels(new Labels(this.changeSetLabels));
                 }
                 for (Change change : changes) {
                     changeSet.addChange(change);

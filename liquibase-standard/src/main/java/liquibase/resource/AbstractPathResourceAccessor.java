@@ -70,10 +70,8 @@ public abstract class AbstractPathResourceAccessor extends AbstractResourceAcces
 
     @Override
     public List<Resource> search(String startPath, SearchOptions searchOptions) throws IOException {
-        final int minDepth = searchOptions.getMinDepth();
-        final int maxDepth = searchOptions.getMaxDepth();
-        final boolean endsWithFilterIsSet = searchOptions.endsWithFilterIsSet();
-        final String endsWithFilter = searchOptions.getEndsWithFilter();
+        int minDepth = searchOptions.getMinDepth();
+        int maxDepth = searchOptions.getMaxDepth();
 
         if (startPath == null) {
             throw new IllegalArgumentException("Path must not be null");
@@ -97,10 +95,12 @@ public abstract class AbstractPathResourceAccessor extends AbstractResourceAcces
             throw new IOException("'" + startPath + "' is a file, not a directory");
         }
 
+        final int finalMinDepth = minDepth;
+
         SimpleFileVisitor<Path> fileVisitor = new SimpleFileVisitor<Path>() {
             @Override
             public FileVisitResult visitFile(Path file, BasicFileAttributes attrs) throws IOException {
-                if (attrs.isRegularFile() && meetsSearchCriteria(file)) {
+                if (attrs.isRegularFile() && residesInDepthBoundaries(file)) {
                     addToReturnList(file);
                 }
 
@@ -112,20 +112,10 @@ public abstract class AbstractPathResourceAccessor extends AbstractResourceAcces
                 return FileVisitResult.CONTINUE;
             }
 
-            private boolean meetsSearchCriteria(Path file) {
+            private boolean residesInDepthBoundaries(Path file) {
                 final int depth = file.getParent().getNameCount() - rootPath.getNameCount();
 
-                if (depth < minDepth) {
-                    return false;
-                }
-
-                if (endsWithFilterIsSet) {
-                    if (!file.toString().toLowerCase().endsWith(endsWithFilter.toLowerCase())) {
-                        return false;
-                    }
-                }
-
-                return true;
+                return depth >= finalMinDepth;
             }
 
             private void addToReturnList(Path file) {

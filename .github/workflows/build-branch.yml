@@ -52,7 +52,7 @@ jobs:
 
           modified_branch_name=`(echo $branch_name | tr / -)`
           echo "thisBranchName=$modified_branch_name" >> $GITHUB_OUTPUT          
-          echo $thisBranchName
+          echo $modified_branch_name
 
   build_branch:
     name: Build & Package
@@ -61,10 +61,9 @@ jobs:
     permissions:
       contents: read
       packages: write
+
     steps:
       - uses: actions/checkout@v3
-        with:
-          ref: ${{ github.event.pull_request.head.sha || github.event.after}}
       - name: Set up Java for publishing to GitHub Repository
         uses: actions/setup-java@v3
         with:
@@ -106,7 +105,3 @@ jobs:
           mvn -B -pl liquibase-dist -P liquibase-commercial clean deploy -DskipTests=true "-Dliquibase-pro.version=${{ needs.setup.outputs.thisBranchName }}-SNAPSHOT" "-Dbuild.timestamp=${{ needs.setup.outputs.timeStamp }}" "-Dbuild.repository.owner=liquibase" "-Dbuild.repository.name=liquibase" "-Dbuild.branch=${{ needs.setup.outputs.thisBranchName }}" "-Dbuild.number=${{ github.run_number }}" "-Dbuild.commit=${{ needs.setup.outputs.latestMergeSha }}"
         env:
           GITHUB_TOKEN: ${{ secrets.LIQUIBOT_PAT }}
-
-
-
-
