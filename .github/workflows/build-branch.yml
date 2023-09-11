@@ -3,11 +3,11 @@ name: Build Branch SNAPSHOT
 on:
   workflow_call:
 
-  pull_request:
-    types:
-      - opened
-      - reopened
-      - synchronize
+#  pull_request:
+#    types:
+#      - opened
+#      - reopened
+#      - synchronize
 
 env:
   MAVEN_VERSION: '3.9.2'
@@ -108,9 +108,11 @@ jobs:
 
 
   publish_tar_package_to_build_artifact:
-    name: Build & Package
+    name: Download tar.gz & Publish to Build Artifact Page
     runs-on: ubuntu-22.04
     needs: [setup, build_branch]
+    env:
+      GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
     steps:
       - name: Checkout Repository
         uses: actions/checkout@v3
@@ -126,7 +128,7 @@ jobs:
 
       - name: Authenticate with GitHub CLI
         run: |
-          gh auth login --with-token <<< ${{ secrets.GITHUB_TOKEN }}
+          gh auth login
           gh config set prompt disabled
 
       - name: Download Artifact from GPM
