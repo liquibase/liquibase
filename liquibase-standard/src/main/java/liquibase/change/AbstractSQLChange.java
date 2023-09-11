@@ -37,6 +37,8 @@ public abstract class AbstractSQLChange extends AbstractChange implements DbmsTa
 
     private boolean stripComments;
     private boolean splitStatements;
+
+    private Boolean originalSplitStatements;
     /**
      *
      * @deprecated  To be removed when splitStatements is changed to be type Boolean
@@ -54,6 +56,10 @@ public abstract class AbstractSQLChange extends AbstractChange implements DbmsTa
     protected AbstractSQLChange() {
         setStripComments(null);
         setSplitStatements(null);
+    }
+
+    public void setOriginalSplitStatements(Boolean originalSplitStatements) {
+        this.originalSplitStatements = originalSplitStatements;
     }
 
     public InputStream openSqlStream() throws IOException {
