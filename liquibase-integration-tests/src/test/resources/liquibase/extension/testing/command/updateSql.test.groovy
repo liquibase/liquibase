@@ -51,8 +51,7 @@ Optional Args:
 
         expectedResults = [
                 statusCode   : 0,
-                defaultChangeExecListener: 'not_null',
-                updateReport: 'not_null'
+                defaultChangeExecListener: 'not_null'
         ]
     }
     
@@ -80,8 +79,7 @@ Optional Args:
 
         expectedResults = [
                 statusCode   : 0,
-                defaultChangeExecListener: 'not_null',
-                updateReport: 'not_null'
+                defaultChangeExecListener: 'not_null'
         ]
     }
 

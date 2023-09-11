@@ -34,7 +34,7 @@ public class CreateProcedureGenerator extends AbstractSqlGenerator<CreateProcedu
         ValidationErrors validationErrors = new ValidationErrors();
         validationErrors.checkRequiredField("procedureText", statement.getProcedureText());
         if (statement.getReplaceIfExists() != null) {
-            if (database instanceof MSSQLDatabase || database instanceof MySQLDatabase || database instanceof DB2Database || database instanceof Db2zDatabase) {
+            if (database instanceof MSSQLDatabase || database instanceof MySQLDatabase) {
                 if (statement.getReplaceIfExists() && (statement.getProcedureName() == null)) {
                     validationErrors.addError("procedureName is required if replaceIfExists = true");
                 }
@@ -74,7 +74,8 @@ public class CreateProcedureGenerator extends AbstractSqlGenerator<CreateProcedu
                 }
                 clauseIterator.replace("ALTER");
                 procedureText = parsedSql.toString();
-            } else if (!(database instanceof DB2Database) && !(database instanceof Db2zDatabase)) {
+            }
+            else {
                 String fullyQualifiedName = database.escapeObjectName(statement.getProcedureName(), StoredProcedure.class);
                 sql.add(new UnparsedSql("DROP PROCEDURE IF EXISTS " + fullyQualifiedName));
             }
@@ -100,6 +101,10 @@ public class CreateProcedureGenerator extends AbstractSqlGenerator<CreateProcedu
             if (reallyMerge) {
                 procedureText = procedureText + ";";
             }
+        }
+        if (database instanceof Db2zDatabase  && procedureText.toLowerCase().contains("replace")) {
+            procedureText = procedureText.replace("OR REPLACE", "");
+            procedureText = procedureText.replaceAll("[\\s]{2,}", " ");
         }
         sql.add(new UnparsedSql(procedureText, statement.getEndDelimiter()));
         surroundWithSchemaSets(sql, statement.getSchemaName(), database);

@@ -65,19 +65,19 @@ class InternalHistoryCommandStepTest extends Specification {
         StringUtil.standardizeLineEndings(output.trim()) == StringUtil.standardizeLineEndings("""
 Liquibase History for jdbc:some://url
 
-+-----------------+-------------+-----------------+------------------+---------------+-----+
-| Deployment ID   | Update Date | Changelog Path  | Changeset Author | Changeset ID  | Tag |
-+-----------------+-------------+-----------------+------------------+---------------+-----+
-| deployment-id-1 | 2022        | some/change/log | me               | some/id       |     |
-+-----------------+-------------+-----------------+------------------+---------------+-----+
-| deployment-id-1 | 2022        | some/change/log | me               | some/other/id |     |
-+-----------------+-------------+-----------------+------------------+---------------+-----+
++-----------------+-------------+-----------------+------------------+---------------+
+| Deployment ID   | Update Date | Changelog Path  | Changeset Author | Changeset ID  |
++-----------------+-------------+-----------------+------------------+---------------+
+| deployment-id-1 | 2022        | some/change/log | me               | some/id       |
++-----------------+-------------+-----------------+------------------+---------------+
+| deployment-id-1 | 2022        | some/change/log | me               | some/other/id |
++-----------------+-------------+-----------------+------------------+---------------+
 
-+-----------------+-------------+-----------------+------------------+----------------+-----+
-| Deployment ID   | Update Date | Changelog Path  | Changeset Author | Changeset ID   | Tag |
-+-----------------+-------------+-----------------+------------------+----------------+-----+
-| deployment-id-2 | 2023        | some/change/log | me               | yet/another/id |     |
-+-----------------+-------------+-----------------+------------------+----------------+-----+
++-----------------+-------------+-----------------+------------------+----------------+
+| Deployment ID   | Update Date | Changelog Path  | Changeset Author | Changeset ID   |
++-----------------+-------------+-----------------+------------------+----------------+
+| deployment-id-2 | 2023        | some/change/log | me               | yet/another/id |
++-----------------+-------------+-----------------+------------------+----------------+
 
 """.trim())
 

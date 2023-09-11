@@ -1,5 +1,18 @@
 package liquibase.database.core;
 
+import static java.util.ResourceBundle.getBundle;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertThat;
+import static org.junit.Assert.assertTrue;
+
+import java.util.ArrayList;
+import java.util.ResourceBundle;
+
+import org.hamcrest.CoreMatchers;
+import org.junit.Assert;
+import org.junit.Test;
+import liquibase.Scope;
 import liquibase.database.AbstractJdbcDatabaseTest;
 import liquibase.database.Database;
 import liquibase.database.ObjectQuotingStrategy;
@@ -16,25 +29,13 @@ import liquibase.statement.SequenceNextValueFunction;
 import liquibase.statement.SqlStatement;
 import liquibase.statement.core.UpdateStatement;
 import liquibase.test.JUnitResourceAccessor;
-import org.junit.jupiter.api.Test;
-
-import java.util.ArrayList;
-import java.util.ResourceBundle;
-import liquibase.Scope;
-
-import static java.util.ResourceBundle.getBundle;
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.is;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNull;
-import static org.junit.jupiter.api.Assertions.assertTrue;
 
 /**
  * Tests for {@link liquibase.database.core.OracleDatabase}.
  */
 public class OracleDatabaseTest extends AbstractJdbcDatabaseTest {
-
     private static ResourceBundle coreBundle = getBundle("liquibase/i18n/liquibase-core");
+
 
     public OracleDatabaseTest() throws Exception {
         super(new OracleDatabase());
@@ -49,7 +50,7 @@ public class OracleDatabaseTest extends AbstractJdbcDatabaseTest {
     @Test
     public void escapeTableName_noSchema() {
         final Database database = getDatabase();
-        assertEquals("tableName", database.escapeTableName(null, null, "tableName"), "table name without schema is correctly escaped as simply tableName");
+        assertEquals("table name without schema is correctly escaped as simply tableName", "tableName", database.escapeTableName(null, null, "tableName"));
     }
 
     @Test
@@ -64,19 +65,19 @@ public class OracleDatabaseTest extends AbstractJdbcDatabaseTest {
     @Test
     public void escapeTableName_withSchema() {
         final Database database = getDatabase();
-        assertEquals("catalogName.tableName",database.escapeTableName("catalogName", "schemaName", "tableName"), "table name without schema but with catalog is correctly escaped as catalogName.tableName");
+        assertEquals("table name without schema but with catalog is correctly escaped as catalogName.tableName", "catalogName.tableName", database.escapeTableName("catalogName", "schemaName", "tableName"));
     }
 
     @Override
     @Test
     public void supportsInitiallyDeferrableColumns() {
-        assertTrue(getDatabase().supportsInitiallyDeferrableColumns(), "Oracle Database is correctly reported as being able to do INITIALLY DEFERRED column constraints.");
+        assertTrue("Oracle Database is correctly reported as being able to do INITIALLY DEFERRED column constraints.", getDatabase().supportsInitiallyDeferrableColumns());
     }
 
     @Override
     @Test
     public void getCurrentDateTimeFunction() {
-        assertEquals("SYSTIMESTAMP", getDatabase().getCurrentDateTimeFunction(), "Oracle Database's 'give me the current timestamp' function is correctly reported.");
+        Assert.assertEquals("Oracle Database's 'give me the current timestamp' function is correctly reported.", "SYSTIMESTAMP", getDatabase().getCurrentDateTimeFunction());
     }
 
     @Test
@@ -84,7 +85,7 @@ public class OracleDatabaseTest extends AbstractJdbcDatabaseTest {
         final TimestampType ts = new TimestampType();
         ts.setAdditionalInformation("WITHOUT TIME ZONE");
         final DatabaseDataType oracleDataType = ts.toDatabaseDataType(getDatabase());
-        assertThat(oracleDataType.getType(), is("TIMESTAMP"));
+        assertThat(oracleDataType.getType(), CoreMatchers.is("TIMESTAMP"));
     }
 
     public void testGetDefaultDriver() throws DatabaseException {

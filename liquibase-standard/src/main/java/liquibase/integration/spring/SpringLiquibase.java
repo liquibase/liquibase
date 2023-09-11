@@ -74,8 +74,6 @@ public class SpringLiquibase implements InitializingBean, BeanNameAware, Resourc
 	protected boolean clearCheckSums;
 	protected boolean shouldRun = true;
 	protected File rollbackFile;
-    protected UpdateSummaryEnum showSummary;
-    protected UpdateSummaryOutputEnum showSummaryOutput = UpdateSummaryOutputEnum.LOG;
 
 	protected boolean testRollbackOnUpdate = false;
 
@@ -347,9 +345,6 @@ public class SpringLiquibase implements InitializingBean, BeanNameAware, Resourc
 			liquibase.dropAll();
 		}
 
-        liquibase.setShowSummaryOutput(showSummaryOutput);
-        liquibase.setShowSummary(showSummary);
-
 		return liquibase;
 	}
 
@@ -439,10 +434,6 @@ public class SpringLiquibase implements InitializingBean, BeanNameAware, Resourc
 		this.rollbackFile = rollbackFile;
     }
 
-    public void setShowSummary(UpdateSummaryEnum showSummary) {
-        this.showSummary = showSummary;
-    }
-
     public boolean isIgnoreClasspathPrefix() {
         return true;
     }
@@ -454,14 +445,7 @@ public class SpringLiquibase implements InitializingBean, BeanNameAware, Resourc
 
 	}
 
-    public void setShowSummaryOutput(UpdateSummaryOutputEnum showSummaryOutput) {
-        if (showSummaryOutput == null) {
-            return;
-        }
-        this.showSummaryOutput = showSummaryOutput;
-    }
-
-    @Override
+	@Override
     public String toString() {
         return getClass().getName() + "(" + this.getResourceLoader().toString() + ")";
     }

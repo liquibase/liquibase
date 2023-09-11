@@ -1,14 +1,15 @@
 package liquibase.database.core;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNull;
+
+import org.junit.Assert;
+import org.junit.Test;
 import liquibase.database.AbstractJdbcDatabaseTest;
 import liquibase.database.Database;
 import liquibase.exception.DatabaseException;
 import liquibase.statement.DatabaseFunction;
-import org.junit.jupiter.api.Test;
-
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertNull;
 
 /**
  * Tests for {@link MySQLDatabase}
@@ -33,15 +34,15 @@ public class MySQLDatabaseTest extends AbstractJdbcDatabaseTest {
     @Override
     @Test
     public void getCurrentDateTimeFunction() {
-        assertEquals("NOW()", getDatabase().getCurrentDateTimeFunction());
+        Assert.assertEquals("NOW()", getDatabase().getCurrentDateTimeFunction());
     }
 
     @Test
     public void getCurrentDateTimeFunctionWithPrecision() {
         final MySQLDatabase mySQLDatabase = (MySQLDatabase) getDatabase();
-        assertEquals("NOW(1)", mySQLDatabase.getCurrentDateTimeFunction(1));
-        assertEquals("NOW(2)", mySQLDatabase.getCurrentDateTimeFunction(2));
-        assertEquals("NOW(5)", mySQLDatabase.getCurrentDateTimeFunction(5));
+        Assert.assertEquals("NOW(1)", mySQLDatabase.getCurrentDateTimeFunction(1));
+        Assert.assertEquals("NOW(2)", mySQLDatabase.getCurrentDateTimeFunction(2));
+        Assert.assertEquals("NOW(5)", mySQLDatabase.getCurrentDateTimeFunction(5));
     }
 
     @Test
@@ -90,6 +91,7 @@ public class MySQLDatabaseTest extends AbstractJdbcDatabaseTest {
 
     @Test
     public void escapeStringForDatabase_withBackslashes() {
-        assertEquals("\\\\0", database.escapeStringForDatabase("\\0"));
+        Assert.assertEquals("\\\\0", database.escapeStringForDatabase("\\0"));
     }
+
 }
