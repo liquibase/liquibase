@@ -1,17 +1,16 @@
 package liquibase.database;
 
-import liquibase.database.jvm.JdbcConnection;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
-
 import static org.assertj.core.api.Assertions.assertThat;
+import org.junit.Before;
+import org.junit.Test;
+import liquibase.database.jvm.JdbcConnection;
 
 public class ConnectionServiceFactoryTest {
 
     private String mockUrl = "mock://url";
     private ConnectionServiceFactory connectionServiceFactory;
 
-    @BeforeEach
+    @Before
     public void setUp() {
         ConnectionServiceFactory.reset();
         connectionServiceFactory = ConnectionServiceFactory.getInstance();

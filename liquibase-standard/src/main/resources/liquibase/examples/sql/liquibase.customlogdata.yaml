@@ -11,7 +11,8 @@
 
 ## template of standalone object for all commands
 liquibase.userMetadata:
-  - data:
+  - outputTologlevel: INFO
+    data:
       FINDME: "example custom log data"
       teamsize: 3
       members:
@@ -23,10 +24,12 @@ liquibase.userMetadata:
 ## By specifying the command, these objects will be added only
 ## to the logs of the update command, in this example.
 liquibase.command.update:
-  - data:
+  - outputToLoglevel: INFO
+    data:
       awsRegion: "us-east"
       deploymentlead: "name@example.com"
-  - excludeData:
+  - outputToLogLevel: FINE
+    excludeData:
       - liquibaseTargetUrl
       - commandLabelFilter
       - commandContextFilter

@@ -11,8 +11,8 @@ import java.net.URLDecoder;
 public abstract class AbstractAntTaskTest {
 
     @BeforeClass
-    public static void setup() throws Exception {
-        Scope.setScopeManager(new TestScopeManager(Scope.getCurrentScope()));
+    public static void setup() {
+        Scope.setScopeManager(new TestScopeManager());
     }
 
     protected static void setProperties() {

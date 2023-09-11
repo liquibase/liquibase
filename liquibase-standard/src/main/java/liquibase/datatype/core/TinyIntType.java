@@ -48,9 +48,6 @@ public class TinyIntType extends LiquibaseDataType {
         if (database instanceof H2Database) {
             return new DatabaseDataType("TINYINT");
         }
-        if (database instanceof SybaseASADatabase) {
-            return new DatabaseDataType("TINYINT");
-        }
         return super.toDatabaseDataType(database);
     }
 

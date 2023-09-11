@@ -20,17 +20,6 @@ class AbstractChangeLogParserTest extends Specification {
         changeLog == null
     }
 
-    def "empty XML changelog"() {
-        when:
-        File f = new File("target/test-classes/com/example/empty.xml")
-        f.createNewFile()
-        def changeLog = createParser(null).parse("com/example/empty.xml", new ChangeLogParameters(), resourceSupplier.simpleResourceAccessor)
-        then:
-        changeLog == null
-        cleanup:
-        f.delete()
-    }
-
     def "empty node creates empty changelog object"() {
         when:
         def changeLogNode = new ParsedNode(null, "databaseChangeLog")

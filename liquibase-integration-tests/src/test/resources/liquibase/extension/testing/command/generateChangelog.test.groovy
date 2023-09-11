@@ -25,8 +25,6 @@ Optional Args:
     Default: null
   changelogFile (String) Changelog file to write results
     Default: null
-  contextFilter (String) Changeset contexts to generate
-    Default: null
   dataOutputDirectory (String) Directory to write table data to
     Default: null
   defaultCatalogName (String) The default catalog name to use for the database connection
@@ -49,8 +47,6 @@ Optional Args:
     Default: false
   includeTablespace (Boolean) Include the tablespace attribute in the changelog. Defaults to false.
     Default: false
-  labelFilter (String) Changeset labels to generate
-    Default: null
   outputSchemas (String) Output schemas names. This is a CSV list.
     Default: null
   overwriteOutputFile (Boolean) Flag to allow overwriting of output changelog file. Default: false
