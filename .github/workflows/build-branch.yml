@@ -3,7 +3,7 @@ name: Build Branch SNAPSHOT
 on:
   workflow_call:
 
-  pull_request_target:
+  pull_request:
     types:
       - opened
       - reopened
