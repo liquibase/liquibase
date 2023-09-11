@@ -105,3 +105,9 @@ jobs:
           mvn -B -pl liquibase-dist -P liquibase-commercial clean deploy -DskipTests=true "-Dliquibase-pro.version=${{ needs.setup.outputs.thisBranchName }}-SNAPSHOT" "-Dbuild.timestamp=${{ needs.setup.outputs.timeStamp }}" "-Dbuild.repository.owner=liquibase" "-Dbuild.repository.name=liquibase" "-Dbuild.branch=${{ needs.setup.outputs.thisBranchName }}" "-Dbuild.number=${{ github.run_number }}" "-Dbuild.commit=${{ needs.setup.outputs.latestMergeSha }}"
         env:
           GITHUB_TOKEN: ${{ secrets.LIQUIBOT_PAT }}
+
+      #- name: Archive Packages
+        #uses: actions/upload-artifact@v3
+        #with:
+          #name: liquibase-artifacts
+         # path: artifacts/*
