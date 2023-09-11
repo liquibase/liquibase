@@ -24,6 +24,10 @@ on:
   push:
     branches:
       - '*'
+    #branches-ignore:
+      #- github-action-**
+      #- DAT-**
+      #- dependabot-**
     paths-ignore:
         - '**.md'
 
