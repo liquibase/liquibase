@@ -52,7 +52,7 @@ jobs:
 
           modified_branch_name=`(echo $branch_name | tr / -)`
           echo "thisBranchName=$modified_branch_name" >> $GITHUB_OUTPUT          
-          echo $thisBranchName
+          echo $modified_branch_name
 
   build_branch:
     name: Build & Package
