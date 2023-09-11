@@ -9,6 +9,7 @@ import liquibase.database.DatabaseFactory;
 import liquibase.database.core.DatabaseUtils;
 import liquibase.exception.DatabaseException;
 import liquibase.integration.commandline.LiquibaseCommandLineConfiguration;
+import liquibase.logging.mdc.MdcKey;
 import liquibase.resource.ResourceAccessor;
 import liquibase.util.StringUtil;
 
@@ -48,9 +49,8 @@ public abstract class AbstractDatabaseConnectionCommandStep extends AbstractHelp
                                         String defaultSchemaName,
                                         String defaultCatalogName,
                                         String driver,
-                                        String driverPropertiesFile,
-                                        String liquibaseCatalogName,
-                                        String liquibaseSchemaName) throws DatabaseException {
+                                        String driverPropertiesFile)
+            throws DatabaseException {
         ResourceAccessor resourceAccessor = Scope.getCurrentScope().getResourceAccessor();
         String databaseClassName = null;
         Class<?> databaseClass = LiquibaseCommandLineConfiguration.DATABASE_CLASS.getCurrentValue();
@@ -62,6 +62,8 @@ public abstract class AbstractDatabaseConnectionCommandStep extends AbstractHelp
         if (clazz != null) {
             propertyProviderClass = clazz.getName();
         }
+        String liquibaseCatalogName = StringUtil.trimToNull(GlobalConfiguration.LIQUIBASE_CATALOG_NAME.getCurrentValue());
+        String liquibaseSchemaName = StringUtil.trimToNull(GlobalConfiguration.LIQUIBASE_SCHEMA_NAME.getCurrentValue());
         String databaseChangeLogTablespaceName = StringUtil.trimToNull(GlobalConfiguration.LIQUIBASE_TABLESPACE_NAME.getCurrentValue());
         String databaseChangeLogLockTableName = StringUtil.trimToNull(GlobalConfiguration.DATABASECHANGELOGLOCK_TABLE_NAME.getCurrentValue());
         String databaseChangeLogTableName = StringUtil.trimToNull(GlobalConfiguration.DATABASECHANGELOG_TABLE_NAME.getCurrentValue());

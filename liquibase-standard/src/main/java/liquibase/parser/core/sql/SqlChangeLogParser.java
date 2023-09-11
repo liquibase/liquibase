@@ -1,6 +1,5 @@
 package liquibase.parser.core.sql;
 
-import liquibase.Scope;
 import liquibase.change.core.RawSQLChange;
 import liquibase.changelog.ChangeLogParameters;
 import liquibase.changelog.ChangeSet;
@@ -11,7 +10,6 @@ import liquibase.parser.ChangeLogParser;
 import liquibase.resource.Resource;
 import liquibase.resource.ResourceAccessor;
 import liquibase.util.StreamUtil;
-import liquibase.util.StringUtil;
 
 import java.io.IOException;
 
@@ -39,14 +37,6 @@ public class SqlChangeLogParser implements ChangeLogParser {
         try {
             Resource sqlResource = resourceAccessor.getExisting(physicalChangeLogLocation);
             String sql = StreamUtil.readStreamAsString(sqlResource.openInputStream());
-            //
-            // Handle empty files with a WARNING message
-            //
-            if (StringUtil.isEmpty(sql)) {
-                String message = String.format("Unable to parse empty file '%s'", physicalChangeLogLocation);
-                Scope.getCurrentScope().getLog(getClass()).warning(message);
-                throw new ChangeLogParseException(message);
-            }
             change.setSql(sql);
         } catch (IOException e) {
             throw new ChangeLogParseException(e);

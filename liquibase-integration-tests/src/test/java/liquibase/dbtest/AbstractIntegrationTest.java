@@ -8,7 +8,6 @@ import liquibase.changelog.ChangeLogHistoryServiceFactory;
 import liquibase.changelog.ChangeSet;
 import liquibase.changelog.DatabaseChangeLog;
 import liquibase.command.CommandScope;
-import liquibase.command.core.DropAllCommandStep;
 import liquibase.command.core.UpdateCommandStep;
 import liquibase.command.core.helpers.DbUrlConnectionCommandStep;
 import liquibase.database.Database;
@@ -117,7 +116,7 @@ public abstract class AbstractIntegrationTest {
         this.pathChangeLog = "changelogs/common/pathChangeLog.xml";
         logger = Scope.getCurrentScope().getLog(getClass());
 
-        Scope.setScopeManager(new TestScopeManager(Scope.getCurrentScope()));
+        Scope.setScopeManager(new TestScopeManager());
     }
 
     private void openConnection() throws Exception {
@@ -275,17 +274,6 @@ public abstract class AbstractIntegrationTest {
             database.setDefaultSchemaName(null);
             database.setOutputDefaultCatalog(true);
             database.setOutputDefaultSchema(true);
-            try {
-                LockService lockService = LockServiceFactory.getInstance().getLockService(database);
-                lockService.releaseLock();
-            } catch (Exception ignored) {
-            }
-            try {
-                CommandScope commandScope = new CommandScope(DropAllCommandStep.COMMAND_NAME);
-                commandScope.addArgumentValue(DbUrlConnectionCommandStep.DATABASE_ARG, database);
-                commandScope.execute();
-            } catch (Exception ignored) {
-            }
         }
         SnapshotGeneratorFactory.resetAll();
     }
@@ -834,6 +822,9 @@ public abstract class AbstractIntegrationTest {
         clearDatabase();
 
         liquibase = createLiquibase(completeChangeLog);
+        clearDatabase();
+
+        liquibase = createLiquibase(completeChangeLog);
         liquibase.setChangeLogParameter( "loginuser", testSystem.getUsername());
         liquibase.update(this.contexts);
 
@@ -1204,23 +1195,6 @@ public abstract class AbstractIntegrationTest {
         liquibase.update(this.contexts);
 
         assertTrue(liquibase.getDatabaseChangeLog().getChangeSets().stream().allMatch(changeSet -> changeSet.getDescription().contains(pathToSet)));
-    }
-
-    @Test
-    public void allowsDbChangelogTableNameAsLowerCase() throws DatabaseException {
-        clearDatabase();
-        String oldDbChangelogTableName = this.getDatabase().getDatabaseChangeLogTableName();
-        try {
-            getDatabase().setDatabaseChangeLogTableName("lowercase");
-            CommandScope commandScope = new CommandScope(UpdateCommandStep.COMMAND_NAME);
-            commandScope.addArgumentValue(DbUrlConnectionCommandStep.DATABASE_ARG, getDatabase());
-            commandScope.addArgumentValue(UpdateCommandStep.CHANGELOG_FILE_ARG, objectQuotingStrategyChangeLog);
-            commandScope.execute();
-        } catch (Exception e) {
-            Assert.fail("Should not fail. Reason: " + e.getMessage());
-        } finally {
-            getDatabase().setDatabaseChangeLogTableName(oldDbChangelogTableName);
-        }
     }
 
     private ProcessBuilder prepareExternalLiquibaseProcess() {

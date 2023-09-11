@@ -104,8 +104,6 @@ public abstract class JdbcUtil {
             if ("java.sql.Timestamp".equals(rs.getMetaData().getColumnClassName(index))) {
                 obj = rs.getTimestamp(index);
             }
-        } else if (obj instanceof SQLXML) {
-            obj = rs.getSQLXML(index).getString();
         }
         return obj;
     }

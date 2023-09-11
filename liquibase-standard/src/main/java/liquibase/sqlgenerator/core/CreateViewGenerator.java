@@ -57,11 +57,6 @@ public class CreateViewGenerator extends AbstractSqlGenerator<CreateViewStatemen
 
         List<Sql> sql = new ArrayList<>();
 
-        if (database instanceof SybaseASADatabase) {
-            // Switching off view definition checks to allow creation of dependent views even if dependency does not yet exist.
-            sql.add(new UnparsedSql("SET TEMPORARY OPTION force_view_creation='ON'"));
-        }
-
         StringClauses viewDefinition = SqlParser.parse(statement.getSelectQuery(), true, true);
 
         if (!statement.isFullDefinition()) {
