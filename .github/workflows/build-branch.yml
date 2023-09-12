@@ -6,7 +6,10 @@ on:
     types:
       - completed
 
-  workflow_dispatch:
+  #testing-remove this block
+  pull_request:
+    types:
+      - synchronize
 
 env:
   MAVEN_VERSION: '3.9.2'
