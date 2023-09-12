@@ -22,8 +22,6 @@ on:
       - synchronize
       - labeled
   push:
-    branches:
-      - '*'
     branches-ignore:
       - github-action-**
       - DAT-**
