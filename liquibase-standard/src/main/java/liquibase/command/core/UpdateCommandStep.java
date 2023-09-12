@@ -9,6 +9,7 @@ import liquibase.command.*;
 import liquibase.command.core.helpers.DatabaseChangelogCommandStep;
 import liquibase.database.Database;
 import liquibase.exception.CommandValidationException;
+import liquibase.util.ValueHandlerUtil;
 
 import java.util.Arrays;
 import java.util.List;
@@ -19,14 +20,17 @@ public class UpdateCommandStep extends AbstractUpdateCommandStep implements Clea
     public static String[] COMMAND_NAME = {"update"};
 
     public static final CommandArgumentDefinition<String> CHANGELOG_FILE_ARG;
+
+    public static final CommandArgumentDefinition<DatabaseChangeLog> CHANGELOG_ARG;
     public static final CommandArgumentDefinition<String> LABEL_FILTER_ARG;
     public static final CommandArgumentDefinition<String> CONTEXTS_ARG;
 
     static {
         CommandBuilder builder = new CommandBuilder(COMMAND_NAME, LEGACY_COMMAND_NAME);
+        CHANGELOG_ARG = builder.argument("databaseChangelog", DatabaseChangeLog.class).hidden().build();
         CHANGELOG_FILE_ARG = builder.argument(CommonArgumentNames.CHANGELOG_FILE, String.class)
-                .required().description("The root changelog")
-                .build();
+                .required().description("The root changelog").supersededBy(CHANGELOG_ARG).build();
+        CHANGELOG_ARG.setSupersededBy(CHANGELOG_FILE_ARG);
         LABEL_FILTER_ARG = builder.argument("labelFilter", String.class)
                 .addAlias("labels")
                 .description("Changeset labels to match")
