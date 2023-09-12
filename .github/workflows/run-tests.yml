@@ -24,10 +24,10 @@ on:
   push:
     branches:
       - '*'
-    #branches-ignore:
-      #- github-action-**
-      #- DAT-**
-      #- dependabot-**
+    branches-ignore:
+      - github-action-**
+      - DAT-**
+      - dependabot-**
     paths-ignore:
         - '**.md'
 
@@ -35,10 +35,19 @@ env:
   MAVEN_VERSION: '3.9.2'
 
 jobs:
+  authorize:
+    environment:
+      ${{ github.event_name == 'pull_request_target' &&
+      github.event.pull_request.head.repo.full_name != github.repository &&
+      'external' || 'internal' }}
+    runs-on: ubuntu-22.04
+    steps:
+      - run: true
+
   setup:
     name: Setup
     runs-on: ubuntu-22.04
-    #needs: authorize
+    needs: authorize
     outputs:
       timestamp: ${{ steps.get-date.outputs.date }}
       latestMergeSha: ${{ steps.get-sha.outputs.latestMergeSha }}
