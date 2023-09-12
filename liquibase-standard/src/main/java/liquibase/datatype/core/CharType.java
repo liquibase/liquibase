@@ -22,7 +22,9 @@ public class CharType extends LiquibaseDataType {
         if (database instanceof MSSQLDatabase) {
             Object[] parameters = getParameters();
             if (parameters.length > 0) {
-                String param1 = parameters[0].toString();
+                // MSSQL only supports (n) syntax but not (n CHAR) syntax, so we need to remove CHAR.
+                final String param1 = parameters[0].toString().replaceFirst("(?<=\\d+)\\s*(?i)CHAR$", "");
+                parameters[0] =  param1;
                 if (!param1.matches("\\d+") || (new BigInteger(param1).compareTo(BigInteger.valueOf(8000)) > 0)) {
 
                     DatabaseDataType type = new DatabaseDataType(database.escapeDataTypeName("char"), 8000);
