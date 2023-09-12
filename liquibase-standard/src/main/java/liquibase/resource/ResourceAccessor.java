@@ -133,13 +133,10 @@ public interface ResourceAccessor extends AutoCloseable {
      */
     default List<Resource> search(String path, SearchOptions searchOptions) throws IOException {
         List<Resource> recursiveResourceList;
-        List<Resource> searchOptionsFilteredResourceList = new ArrayList<>();
-        
-        
+        List<Resource> depthBoundedResourceList = new ArrayList<>();
         if(searchOptions == null) {
             searchOptions = new SearchOptions();
         }
-        
         if (searchOptions.getMaxDepth() <= 0) {
             return Collections.emptyList();
         }
@@ -147,29 +144,23 @@ public interface ResourceAccessor extends AutoCloseable {
         boolean searchRecursive = searchOptions.getMaxDepth() > 1;
         recursiveResourceList = search(path, searchRecursive);
 
+        if (!searchRecursive || searchOptions.getRecursive()) {
+            return recursiveResourceList;
+        }
+
         int minDepth = searchOptions.getMinDepth();
         int maxDepth = searchOptions.getMaxDepth();
-        boolean endsWithFilterIsSet = searchOptions.endsWithFilterIsSet();
-        String endsWithFilter = searchOptions.getEndsWithFilter();
 
         for (Resource res: CollectionUtil.createIfNull(recursiveResourceList)) {
             String relativePath = res.getPath();
             int depth = (int) relativePath.chars().filter(ch -> ch == '/').count();
 
-            if (depth < minDepth || depth > maxDepth) {
-                continue;
+            if (depth >= minDepth && depth <= maxDepth) {
+                depthBoundedResourceList.add(res);
             }
-
-            if (endsWithFilterIsSet) {
-                if (!relativePath.toLowerCase().endsWith(endsWithFilter.toLowerCase())) {
-                    continue;
-                }
-            }
-
-            searchOptionsFilteredResourceList.add(res);
         }
 
-        return searchOptionsFilteredResourceList;
+        return depthBoundedResourceList;
     }
 
     /**
@@ -321,12 +312,10 @@ public interface ResourceAccessor extends AutoCloseable {
     class SearchOptions {
         private int minDepth;
         private int maxDepth;
-        private String endsWithFilter;
 
         public SearchOptions() {
             minDepth = 0;
             maxDepth = 1;
-            endsWithFilter = "";
         }
 
         public boolean getRecursive() {
@@ -364,14 +353,6 @@ public interface ResourceAccessor extends AutoCloseable {
                 throw new IllegalArgumentException("maxDepth must be non-negative");
             }
             this.maxDepth = maxDepth;
-        }
-
-        public String getEndsWithFilter() { return endsWithFilter; }
-
-        public void setTrimmedEndsWithFilter(String endsWithFilter) { this.endsWithFilter = endsWithFilter.trim(); }
-
-        public boolean endsWithFilterIsSet() {
-            return endsWithFilter != null && endsWithFilter.trim().length() > 0;
         }
     }
 }

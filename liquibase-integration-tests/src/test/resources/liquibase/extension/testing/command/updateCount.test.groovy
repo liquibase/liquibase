@@ -49,8 +49,7 @@ Optional Args:
 
         expectedResults = [
                 statusCode   : 0,
-                defaultChangeExecListener: 'not_null',
-                updateReport: 'not_null'
+                defaultChangeExecListener: 'not_null'
         ]
     }
 
@@ -66,8 +65,7 @@ Optional Args:
 
         expectedResults = [
                 statusCode   : 0,
-                defaultChangeExecListener: 'not_null',
-                updateReport: 'not_null'
+                defaultChangeExecListener: 'not_null'
         ]
     }
 
@@ -85,8 +83,7 @@ Optional Args:
 
         expectedResults = [
                 statusCode   : 0,
-                defaultChangeExecListener: 'not_null',
-                updateReport: 'not_null'
+                defaultChangeExecListener: 'not_null'
         ]
 
         outputFile = new File("target/test-classes/labelsAndContent.txt")
@@ -109,8 +106,7 @@ Optional Args:
 
         expectedResults = [
                 statusCode   : 0,
-                defaultChangeExecListener: 'not_null',
-                updateReport: 'not_null'
+                defaultChangeExecListener: 'not_null'
         ]
 
         expectedUI = [
@@ -131,8 +127,7 @@ Optional Args:
 
         expectedResults = [
                 statusCode   : 0,
-                defaultChangeExecListener: 'not_null',
-                updateReport: 'not_null'
+                defaultChangeExecListener: 'not_null'
         ]
 
         outputFile = new File("target/test-classes/mismatchedDBMS.txt")

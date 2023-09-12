@@ -170,10 +170,10 @@ public class AddColumnGeneratorTest extends AbstractSqlGeneratorTest<AddColumnSt
         Sql[] sql = instance.generateSql(statements, new MySQLDatabase());
 
         assertEquals(5, sql.length);
-        assertEquals("ALTER TABLE schema_name.table_name ADD column1 BIGINT NULL, ADD column2 TINYINT(1) NULL", sql[0].toSql());
+        assertEquals("ALTER TABLE schema_name.table_name ADD column1 BIGINT NULL, ADD column2 BIT(1) NULL", sql[0].toSql());
         assertEquals("UPDATE schema_name.table_name SET column1 = 0", sql[1].toSql());
         assertEquals("UPDATE schema_name.table_name SET column2 = 1", sql[2].toSql());
         assertEquals("ALTER TABLE schema_name.table_name MODIFY column1 BIGINT NOT NULL", sql[3].toSql());
-        assertEquals("ALTER TABLE schema_name.table_name MODIFY column2 TINYINT(1) NOT NULL", sql[4].toSql());
+        assertEquals("ALTER TABLE schema_name.table_name MODIFY column2 BIT(1) NOT NULL", sql[4].toSql());
     }
 }

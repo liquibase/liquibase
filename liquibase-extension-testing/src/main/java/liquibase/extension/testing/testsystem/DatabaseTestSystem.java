@@ -164,7 +164,7 @@ public abstract class DatabaseTestSystem extends TestSystem {
                 //
                 final URLClassLoader isolatedClassloader = new URLClassLoader(new URL[]{
                         driverPath.toUri().toURL(),
-                }, this.getClass().getClassLoader());
+                }, null);
 
                 final Class<?> isolatedDriverManager = Class.forName(DriverManager.class.getName(), true, isolatedClassloader);
                 final Method getDriverMethod = isolatedDriverManager.getMethod("getDriver", String.class);

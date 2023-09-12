@@ -36,7 +36,7 @@ class LiquibaseTest extends Specification {
 
     private String setupScopeId
     private MockResourceAccessor mockResourceAccessor
-    private static Database mockDatabase
+    private Database mockDatabase
     private LockServiceFactory mockLockServiceFactory
     private LockService mockLockService
 

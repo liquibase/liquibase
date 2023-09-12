@@ -1,13 +1,10 @@
 package liquibase.database.core;
 
+import junit.framework.TestCase;
 import liquibase.exception.DatabaseException;
-import org.junit.jupiter.api.Test;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
+public class AbstractDb2DatabaseTest extends TestCase {
 
-public class AbstractDb2DatabaseTest {
-
-    @Test
     public void testGetDateLiteral() throws DatabaseException {
         try (AbstractDb2Database database = new DB2Database()) {
             assertEquals("DATE('2018-12-31')", database.getDateLiteral("2018-12-31"));
@@ -18,4 +15,5 @@ public class AbstractDb2DatabaseTest {
             throw e;
         }
     }
+
 }

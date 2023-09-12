@@ -9,9 +9,6 @@ import spock.lang.Unroll
 import java.sql.Timestamp
 import java.sql.Types
 
-import static liquibase.database.ObjectQuotingStrategy.QUOTE_ALL_OBJECTS
-import static liquibase.database.ObjectQuotingStrategy.QUOTE_ONLY_RESERVED_WORDS
-
 /**
  * Tests to ensure correction functionality of SqlUtil
  */
@@ -93,8 +90,8 @@ class SqlUtilTest extends Specification {
         "[binary literal]"                                        | new H2Database()       | "binary"        | new DatabaseFunction("[binary literal]")  | Types.BINARY
         "[binary literal]"                                        | new H2Database()       | "varbinary"     | new DatabaseFunction("[binary literal]")  | Types.VARBINARY
         "[binary literal]"                                        | new H2Database()       | "longvarbinary" | new DatabaseFunction("[binary literal]")  | Types.LONGVARBINARY
-        "b'0'"                                                    | new MySQLDatabase()    | "bit"           | "0"                                       | Types.BIT
-        "b'1'"                                                    | new MySQLDatabase()    | "bit"           | "1"                                       | Types.BIT
+        "b'0'"                                                    | new MySQLDatabase()    | "bit"           | false                                     | Types.BIT
+        "b'1'"                                                    | new MySQLDatabase()    | "bit"           | true                                      | Types.BIT
         "B'0'::\"bit\""                                           | new PostgresDatabase() | "bit"           | "0"                                       | Types.BIT
         "B'1'::\"bit\""                                           | new PostgresDatabase() | "bit"           | "1"                                       | Types.BIT
         "0"                                                       | new H2Database()       | "bit"           | 0                                         | Types.BIT
@@ -155,25 +152,14 @@ class SqlUtilTest extends Specification {
 
     }
 
-    @Unroll("#featureName [#quotingStrategy], [#predicate, #columnNames, #parameters], [#expected]")
+    @Unroll
     def replacePredicatePlaceholders() {
-        given:
-        def database = new H2Database().tap {
-            if (quotingStrategy != null) {
-                it.objectQuotingStrategy = quotingStrategy
-            }
-        }
-
         expect:
-        SqlUtil.replacePredicatePlaceholders(database, predicate, columnNames, parameters) == expected
+        SqlUtil.replacePredicatePlaceholders(new H2Database(), predicate, columns, values) == expected
 
         where:
-        quotingStrategy           || predicate                          | columnNames                | parameters     || expected
-        null                      || 'query :name'                      | ['col1']                   | ['value 1']    || 'query col1'
-        null                      || 'query :name=:value, :name=:value' | ['col1', 'col with space'] | ['value 1', 6] || 'query col1=\'value 1\', "COL WITH SPACE"=6'
-        QUOTE_ONLY_RESERVED_WORDS || 'query :name'                      | ['col1']                   | ['value 1']    || 'query col1'
-        QUOTE_ONLY_RESERVED_WORDS || 'query :name=:value, :name=:value' | ['col1', 'col with space'] | ['value 1', 6] || 'query col1=\'value 1\', "COL WITH SPACE"=6'
-        QUOTE_ALL_OBJECTS         || 'query :name'                      | ['col1']                   | ['value 1']    || 'query "col1"'
-        QUOTE_ALL_OBJECTS         || 'query :name=:value, :name=:value' | ['col1', 'col with space'] | ['value 1', 6] || 'query "col1"=\'value 1\', "col with space"=6'
+        predicate     | columns  | values      | expected
+        "query :name" | ["col1"] | ["value 1"] | "query col1"
+        "query :name=:value, :name=:value" | ["col1", "col with space"] | ["value 1", 6] | "query col1='value 1', \"col with space\"=6"
     }
 }
