@@ -7,9 +7,9 @@ on:
       - completed
 
   #testing-remove this block
-  pull_request:
-    types:
-      - synchronize
+  push:
+    branches:
+      - 'github-action-DAT-15775'
 
 env:
   MAVEN_VERSION: '3.9.2'
