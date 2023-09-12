@@ -23,6 +23,7 @@ jobs:
     name: Setup
     runs-on: ubuntu-22.04
 #    needs: authorize
+    if: ${{ github.event.workflow_run.conclusion == 'success' }}
     outputs:
       timeStamp: ${{ steps.get-timestamp.outputs.timestamp }}
       thisBranchName: ${{ steps.get-branch-name.outputs.thisBranchName }}
