@@ -10,10 +10,6 @@ on:
       - opened
       - reopened
       - synchronize
-  workflow_run:
-    workflows: [Run Tests]
-    types:
-      - completed    
 
 env:
   MAVEN_VERSION: '3.9.2'
