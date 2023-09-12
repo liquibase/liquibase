@@ -2,7 +2,7 @@ name: Build Branch SNAPSHOT
 
 on:
   workflow_run:
-    workflows: ["Run Tests"]
+    workflows: [Run Tests]
     types:
       - completed
 
