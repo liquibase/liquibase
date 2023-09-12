@@ -34,4 +34,9 @@ public class ConfiguredValueModifierFactory  implements SingletonObject {
             modifier.override(configuredValue);
         }
     }
+
+    public String override(String configuredValue) {
+        // get the last instance because it will have the highest order, and would supercede all others
+        return allInstances.last().override(configuredValue);
+    }
 }
