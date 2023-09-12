@@ -465,11 +465,14 @@ public class JdbcDatabaseSnapshot extends DatabaseSnapshot {
                     // Query for actual data type for column. The actual SYSTABCOL.scale column value is
                     // not reported by the DatabaseMetadata.getColumns() query for CHAR-limited (in contrast
                     // to BYTE-limited) columns, and it is needed to capture the kind if limitation.
+                    // The actual SYSTABCOL.column_type is not reported by the DatabaseMetadata.getColumns()
+                    // query as the IS_GENERATEDCOLUMN columns is missing in the result set, and it is needed to
+                    // capture the kind of column (regular or computed).
                     //
                     // See https://help.sap.com/docs/SAP_SQL_Anywhere/93079d4ba8e44920ae63ffb4def91f5b/3beaa3956c5f1014883cb0c3e3559cc9.html.
                     //
                     String selectStatement =
-                        "SELECT table_name, column_name, scale FROM SYSTABCOL KEY JOIN SYSTAB KEY JOIN SYSUSER " +
+                        "SELECT table_name, column_name, scale, column_type FROM SYSTABCOL KEY JOIN SYSTAB KEY JOIN SYSUSER " +
                         "WHERE user_name = ? AND ? IS NULL OR table_name = ?";
                     Connection underlyingConnection = ((JdbcConnection) database.getConnection()).getUnderlyingConnection();
                     try (PreparedStatement stmt = underlyingConnection.prepareStatement(selectStatement)) {
@@ -481,6 +484,7 @@ public class JdbcDatabaseSnapshot extends DatabaseSnapshot {
                                 String selectedTableName = columnSelectRS.getString("table_name");
                                 String selectedColumnName = columnSelectRS.getString("column_name");
                                 int selectedScale = columnSelectRS.getInt("scale");
+                                String selectedColumnType = columnSelectRS.getString("column_type");
                                 for (CachedRow row : returnList) {
                                     String rowTableName = row.getString("TABLE_NAME");
                                     String rowColumnName = row.getString("COLUMN_NAME");
@@ -490,6 +494,7 @@ public class JdbcDatabaseSnapshot extends DatabaseSnapshot {
                                         if (rowDataType == Types.VARCHAR || rowDataType == Types.CHAR) {
                                             row.set("scale", selectedScale);
                                         }
+                                        row.set("IS_GENERATEDCOLUMN", "C".equals(selectedColumnType) ? "YES" : "NO");
                                         break;
                                     }
                                 }

@@ -463,9 +463,9 @@ public class ColumnSnapshotGenerator extends JdbcSnapshotGenerator {
 
         // For SAP (Sybase) SQL ANywhere, JDBC returns "LONG(2147483647) binary" (the number is 2^31-1)
         // but when creating a column, LONG BINARY must not have parameters.
-        // The same applies to LONG(...) VARCHAR.
+        // The same applies to LONG(...) VARCHAR and LONG(...) NVARCHAR.
         if (database instanceof SybaseASADatabase
-                && ("LONG BINARY".equalsIgnoreCase(columnTypeName) || "LONG VARCHAR".equalsIgnoreCase(columnTypeName))) {
+                && ("LONG BINARY".equalsIgnoreCase(columnTypeName) || "LONG VARCHAR".equalsIgnoreCase(columnTypeName) || "LONG NVARCHAR".equalsIgnoreCase(columnTypeName))) {
             columnSize = null;
         }
 
@@ -552,12 +552,37 @@ public class ColumnSnapshotGenerator extends JdbcSnapshotGenerator {
             readDefaultValueForPostgresDatabase(columnMetadataResultSet, columnInfo);
         }
 
-        if (
-                (database instanceof AbstractDb2Database) &&
-                        ((columnMetadataResultSet.get(COLUMN_DEF_COL) != null) &&
-                                "NULL".equalsIgnoreCase((String) columnMetadataResultSet.get(COLUMN_DEF_COL)))) {
+        if ((database instanceof AbstractDb2Database)
+                && ((columnMetadataResultSet.get(COLUMN_DEF_COL) != null)
+                && "NULL".equalsIgnoreCase((String) columnMetadataResultSet.get(COLUMN_DEF_COL)))) {
             columnMetadataResultSet.set(COLUMN_DEF_COL, null);
         }
+        if (database instanceof SybaseASADatabase) {
+            String defaultValue = (String) columnMetadataResultSet.get(COLUMN_DEF_COL);
+
+           // SQL Anywhere returns `CURRENT DATE` (without underscore), which no other RDBMS would understand
+           defaultValue = defaultValue.replaceAll("(?i)\\bCURRENT\\s+DATE\\b", "{fn CURDATE()}");
+
+           // SQL Anywhere returns `CURRENT TIME` (without underscore), which no other RDBMS would understand
+           defaultValue = defaultValue.replaceAll("(?i)\\bCURRENT\\s+TIME\\b", "{fn CURTIME()}");
+
+           // SQL Anywhere returns `CURRENT TIMESTAMP` (without underscore), which no other RDBMS would understand
+           defaultValue = defaultValue.replaceAll("(?i)\\bCURRENT\\s+TIMESTAMP\\b", "{fn NOW()}");
+
+           // SQL Anywhere returns `CURRENT USER` (without underscore), which no other RDBMS would understand
+           defaultValue = defaultValue.replaceAll("(?i)\\bCURRENT\\s+USER\\b", "{fn USER()}");
+
+           columnMetadataResultSet.set(COLUMN_DEF_COL, defaultValue);
+
+           if ("YES".equals(columnMetadataResultSet.get("IS_GENERATEDCOLUMN"))) {
+               Object virtColumnDef = columnMetadataResultSet.get(COLUMN_DEF_COL);
+               if ((virtColumnDef != null) && !"null".equals(virtColumnDef)) {
+                   columnMetadataResultSet.set(COLUMN_DEF_COL, "COMPUTE (" + virtColumnDef + ")");
+               }
+           }
+        }
+
+
         return SqlUtil.parseValue(database, columnMetadataResultSet.get(COLUMN_DEF_COL), columnInfo.getType());
     }
 

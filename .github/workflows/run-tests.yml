@@ -24,6 +24,10 @@ on:
   push:
     branches:
       - '*'
+    #branches-ignore:
+      #- github-action-**
+      #- DAT-**
+      #- dependabot-**
     paths-ignore:
         - '**.md'
 
@@ -134,7 +138,7 @@ jobs:
           name: liquibase-modules
           path: |
             */target/*-0-SNAPSHOT.jar
-      
+
 
   integration-test:
     name: Integration Test
@@ -196,7 +200,7 @@ jobs:
           name: ${{ steps.prepare.outputs.testResultsArtifact }}
           path: |
             ./**/target/surefire-reports
-            
+
 
   publish-branch-SNAPSHOTS:
     needs: [build_tests, integration-test]

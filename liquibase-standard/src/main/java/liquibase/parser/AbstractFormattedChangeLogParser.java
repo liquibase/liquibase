@@ -28,7 +28,7 @@ public abstract class AbstractFormattedChangeLogParser implements ChangeLogParse
     private static final ResourceBundle coreBundle = getBundle("liquibase/i18n/liquibase-core");
     private static final String EXCEPTION_MESSAGE = coreBundle.getString("formatted.changelog.exception.message");
 
-    protected final String FIRST_LINE_REGEX = String.format("%s\\s*liquibase formatted.*", getSingleLineCommentSequence());
+    protected final String FIRST_LINE_REGEX = String.format("^\\s*%s\\s*liquibase\\s*formatted.*", getSingleLineCommentSequence());
     protected final Pattern FIRST_LINE_PATTERN = Pattern.compile(FIRST_LINE_REGEX, Pattern.CASE_INSENSITIVE);
 
     protected final String PROPERTY_REGEX = String.format("\\s*%s[\\s]*property\\s+(.*:.*)\\s+(.*:.*).*", getSingleLineCommentSequence());
@@ -220,8 +220,16 @@ public abstract class AbstractFormattedChangeLogParser implements ChangeLogParse
 
                 String firstLine = reader.readLine();
 
-                while (firstLine.trim().isEmpty() && reader.ready()) {
+                while (firstLine != null && firstLine.trim().isEmpty() && reader.ready()) {
                     firstLine = reader.readLine();
+                }
+
+                //
+                // Handle empty files with a WARNING message
+                //
+                if (StringUtil.isEmpty(firstLine)) {
+                    Scope.getCurrentScope().getLog(getClass()).warning(String.format("Skipping empty file '%s'", changeLogFile));
+                    return false;
                 }
                 return FIRST_LINE_PATTERN.matcher(firstLine).matches();
             } else {
