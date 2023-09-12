@@ -1,8 +1,6 @@
 name: Build Branch SNAPSHOT
 
 on:
-  #workflow_call:
-
   workflow_run:
     workflows: [ "Run Tests" ]
     types:
