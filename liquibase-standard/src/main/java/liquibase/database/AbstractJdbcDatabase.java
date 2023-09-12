@@ -648,10 +648,10 @@ public abstract class AbstractJdbcDatabase implements Database {
     @Override
     public String getDatabaseChangeLogTableName() {
         if (databaseChangeLogTableName != null) {
-            return databaseChangeLogTableName;
+            return correctObjectName(databaseChangeLogTableName, Table.class);
         }
 
-        return GlobalConfiguration.DATABASECHANGELOG_TABLE_NAME.getCurrentValue();
+        return correctObjectName(GlobalConfiguration.DATABASECHANGELOG_TABLE_NAME.getCurrentValue(), Table.class);
     }
 
     @Override
@@ -662,10 +662,10 @@ public abstract class AbstractJdbcDatabase implements Database {
     @Override
     public String getDatabaseChangeLogLockTableName() {
         if (databaseChangeLogLockTableName != null) {
-            return databaseChangeLogLockTableName;
+            return correctObjectName(databaseChangeLogLockTableName, Table.class);
         }
 
-        return GlobalConfiguration.DATABASECHANGELOGLOCK_TABLE_NAME.getCurrentValue();
+        return correctObjectName(GlobalConfiguration.DATABASECHANGELOGLOCK_TABLE_NAME.getCurrentValue(), Table.class);
     }
 
     @Override

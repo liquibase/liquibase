@@ -2,11 +2,15 @@ package liquibase.change.core
 
 import liquibase.change.AddColumnConfig
 import liquibase.change.Change
+import liquibase.change.ChangeFactory
 import liquibase.change.ChangeStatus
 import liquibase.change.StandardChangeTest
+import liquibase.change.visitor.ChangeVisitor
+import liquibase.change.visitor.ChangeVisitorFactory
 import liquibase.database.core.H2Database
 import liquibase.database.core.MSSQLDatabase
 import liquibase.database.core.MockDatabase
+import liquibase.database.core.PostgresDatabase
 import liquibase.exception.SetupException
 import liquibase.parser.core.ParsedNode
 import liquibase.parser.core.ParsedNodeException
@@ -175,6 +179,173 @@ class AddColumnChangeTest extends StandardChangeTest {
         change.columns[1].name == "col_2"
         change.columns[1].type == "int"
         change.columns[1].position == 3
+    }
+
+    def "with AfterColumn and removeChangeSetProperty the column is added at the last position"() {
+
+        given:
+        def db = new PostgresDatabase()
+
+        def change = new AddColumnChange()
+        change.setTableName("test_table")
+        def newColumn = new AddColumnConfig()
+        newColumn.setName("new_col")
+        newColumn.setAfterColumn("id")
+        change.addColumn(newColumn)
+
+        when:
+        def statements = change.generateStatements(db)
+
+        then:
+        SqlGeneratorFactory.getInstance().generateSql(statements, db)*.toString() == ["ALTER TABLE test_table ADD new_col AFTER id;"]
+
+        when:
+        def removeChangeSetPropertyNode = new ParsedNode(null, "removeChangeSetProperty")
+                .addChildren([change: "addColumn", dbms: "postgres", remove: "afterColumn"])
+        def changeVisitor = ChangeVisitorFactory.getInstance().create("addColumn");
+        changeVisitor.load(removeChangeSetPropertyNode, resourceSupplier.simpleResourceAccessor)
+        change.modify(changeVisitor)
+
+        statements = change.generateStatements(db)
+
+        then:
+        SqlGeneratorFactory.getInstance().generateSql(statements, db)*.toString() == ["ALTER TABLE test_table ADD new_col;"]
+
+    }
+
+    @Unroll
+    def "modify method works for removing afterColumn"() {
+        when:
+        def removeChangeSetPropertyNode = new ParsedNode(null, "removeChangeSetProperty")
+                .addChildren([change: "addColumn", dbms: dbms, remove: "afterColumn"])
+        def changeVisitor = ChangeVisitorFactory.getInstance().create("addColumn");
+        changeVisitor.load(removeChangeSetPropertyNode, resourceSupplier.simpleResourceAccessor)
+        def node = new ParsedNode(null, "addColumn")
+                .addChildren([tableName: "table_name"])
+                .addChild(new ParsedNode(null, "column").addChildren([name: "col_1", type: "int", beforeColumn: "before_col"]))
+                .addChild(new ParsedNode(null, "column").addChildren([name: "col_2", type: "int", afterColumn: after_column]))
+                .addChild(new ParsedNode(null, "column").addChildren([name: "col_3", type: "int", position: "3"]))
+        def change = new AddColumnChange()
+
+        try {
+            change.load(node, resourceSupplier.simpleResourceAccessor)
+            change.modify(changeVisitor)
+        } catch (ParsedNodeException e) {
+            e.printStackTrace()
+        } catch (SetupException e) {
+            e.printStackTrace()
+        }
+
+        then:
+        change.tableName == "table_name"
+        change.columns.size() == 3
+
+        change.columns[0].name == "col_1"
+        change.columns[0].type == "int"
+        change.columns[0].beforeColumn == "before_col"
+
+        change.columns[1].name == "col_2"
+        change.columns[1].type == "int"
+        change.columns[1].afterColumn == expected
+
+        change.columns[2].name == "col_3"
+        change.columns[2].type == "int"
+        change.columns[2].position == 3
+
+        where:
+        dbms                              | after_column  || expected
+        "postgres"                        | "after_col"   || null
+        "postgres,any_unsupported_db"     | "after_col"   || null
+    }
+
+    @Unroll
+    def "modify method works for removing beforeColumn"() {
+        when:
+        def removeChangeSetPropertyNode = new ParsedNode(null, "removeChangeSetProperty")
+                .addChildren([change: "addColumn", dbms: dbms, remove: "beforeColumn"])
+        def changeVisitor = ChangeVisitorFactory.getInstance().create("addColumn");
+        changeVisitor.load(removeChangeSetPropertyNode, resourceSupplier.simpleResourceAccessor)
+        def node = new ParsedNode(null, "addColumn")
+                .addChildren([tableName: "table_name"])
+                .addChild(new ParsedNode(null, "column").addChildren([name: "col_1", type: "int", beforeColumn: before_column]))
+                .addChild(new ParsedNode(null, "column").addChildren([name: "col_2", type: "int", afterColumn: "after_col"]))
+                .addChild(new ParsedNode(null, "column").addChildren([name: "col_3", type: "int", position: "3"]))
+        def change = new AddColumnChange()
+
+        try {
+            change.load(node, resourceSupplier.simpleResourceAccessor)
+            change.modify(changeVisitor)
+        } catch (ParsedNodeException e) {
+            e.printStackTrace()
+        } catch (SetupException e) {
+            e.printStackTrace()
+        }
+
+        then:
+        change.tableName == "table_name"
+        change.columns.size() == 3
+
+        change.columns[0].name == "col_1"
+        change.columns[0].type == "int"
+        change.columns[0].beforeColumn == expected
+
+        change.columns[1].name == "col_2"
+        change.columns[1].type == "int"
+        change.columns[1].afterColumn == "after_col"
+
+        change.columns[2].name == "col_3"
+        change.columns[2].type == "int"
+        change.columns[2].position == 3
+
+        where:
+        dbms                              | before_column  || expected
+        "postgres"                        | "before_col"   || null
+        "postgres,any_unsupported_db"     | "before_col"   || null
+    }
+
+    @Unroll
+    def "modify method works for removing position"() {
+        when:
+        def removeChangeSetPropertyNode = new ParsedNode(null, "removeChangeSetProperty")
+                .addChildren([change: "addColumn", dbms: dbms, remove: "position"])
+        def changeVisitor = ChangeVisitorFactory.getInstance().create("addColumn");
+        changeVisitor.load(removeChangeSetPropertyNode, resourceSupplier.simpleResourceAccessor)
+        def node = new ParsedNode(null, "addColumn")
+                .addChildren([tableName: "table_name"])
+                .addChild(new ParsedNode(null, "column").addChildren([name: "col_1", type: "int", beforeColumn: "before_col"]))
+                .addChild(new ParsedNode(null, "column").addChildren([name: "col_2", type: "int", afterColumn: "after_col"]))
+                .addChild(new ParsedNode(null, "column").addChildren([name: "col_3", type: "int", position: "3"]))
+        def change = new AddColumnChange()
+
+        try {
+            change.load(node, resourceSupplier.simpleResourceAccessor)
+            change.modify(changeVisitor)
+        } catch (ParsedNodeException e) {
+            e.printStackTrace()
+        } catch (SetupException e) {
+            e.printStackTrace()
+        }
+
+        then:
+        change.tableName == "table_name"
+        change.columns.size() == 3
+
+        change.columns[0].name == "col_1"
+        change.columns[0].type == "int"
+        change.columns[0].beforeColumn == "before_col"
+
+        change.columns[1].name == "col_2"
+        change.columns[1].type == "int"
+        change.columns[1].afterColumn == "after_col"
+
+        change.columns[2].name == "col_3"
+        change.columns[2].type == "int"
+        change.columns[2].position == expected
+
+        where:
+        dbms                              | position    || expected
+        "postgres"                        | "3"         || null
+        "postgres,any_unsupported_db"     | "3"         || null
     }
 
     protected void addColumnsToSnapshot(Table table, Change change, MockSnapshotGeneratorFactory snapshotFactory) {
