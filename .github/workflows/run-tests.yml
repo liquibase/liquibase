@@ -199,7 +199,7 @@ jobs:
 #            ./**/target/surefire-reports
 #
 
-  publish-branch-SNAPSHOTS:
+  #publish-branch-SNAPSHOTS:
     #needs: [build_tests, integration-test]
-    uses: liquibase/liquibase/.github/workflows/build-branch.yml@github-action-DAT-15775
-    secrets: inherit
+    #uses: liquibase/liquibase/.github/workflows/build-branch.yml@github-action-DAT-15775
+    #secrets: inherit
