@@ -75,15 +75,3 @@ jobs:
       uses: github/codeql-action/analyze@v2
       with:
         category: "/language:${{matrix.language}}"
-
-    - name: Generate Security Report
-      uses: rsdmike/github-security-report-action@v3.0.4
-      with:
-        token: ${{ secrets.BOT_TOKEN }}
-        outputDir: ./reports/
-
-    - name: Upload Security Report
-      uses: actions/upload-artifact@v3
-      with:
-        name: security-report
-        path: ./reports/summary.pdf

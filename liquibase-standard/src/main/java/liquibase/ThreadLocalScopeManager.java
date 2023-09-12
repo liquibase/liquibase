@@ -14,11 +14,7 @@ public class ThreadLocalScopeManager extends ScopeManager {
     private final ThreadLocal<Scope> threadLocalScopes = new ThreadLocal<>();
 
     public ThreadLocalScopeManager() {
-        this(Scope.getCurrentScope());
-    }
-
-    public ThreadLocalScopeManager(Scope rootScope) {
-        this.rootScope = rootScope;
+        this.rootScope = Scope.getCurrentScope();
     }
 
     @Override

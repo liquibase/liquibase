@@ -16,7 +16,7 @@ public abstract class StandardChangeTest extends Specification {
     @Shared resourceSupplier = new ResourceSupplier()
 
     def setup() {
-        Scope.setScopeManager(new TestScopeManager(Scope.getCurrentScope()));
+        Scope.setScopeManager(new TestScopeManager());
     }
 
     def cleanup() {

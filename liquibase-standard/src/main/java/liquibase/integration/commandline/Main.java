@@ -1399,7 +1399,7 @@ public class Main {
         final ResourceAccessor fileOpener = this.getFileOpenerResourceAccessor();
 
         if (COMMANDS.DIFF.equalsIgnoreCase(command) || COMMANDS.DIFF_CHANGELOG.equalsIgnoreCase(command)
-            || COMMANDS.GENERATE_CHANGELOG.equalsIgnoreCase(command)
+            || COMMANDS.GENERATE_CHANGELOG.equalsIgnoreCase(command) || COMMANDS.UPDATE.equalsIgnoreCase(command)
             || COMMANDS.RELEASE_LOCKS.equalsIgnoreCase(command)
             || COMMANDS.ROLLBACK.equalsIgnoreCase(command) || COMMANDS.ROLLBACK_SQL.equalsIgnoreCase(command)) {
             this.runUsingCommandFramework();
@@ -1563,8 +1563,6 @@ public class Main {
                     } catch (LiquibaseException updateException) {
                         handleUpdateException(database, updateException, defaultChangeExecListener, rollbackOnError);
                     }
-                } else if (COMMANDS.UPDATE.equalsIgnoreCase(command)) {
-                    liquibase.update(new Contexts(contexts), new LabelExpression(getLabelFilter()));
                 } else if (COMMANDS.UPDATE_COUNT_SQL.equalsIgnoreCase(command)) {
                     liquibase.update(Integer.parseInt(commandParams.iterator().next()), new Contexts(contexts), new
                             LabelExpression(getLabelFilter()), getOutputWriter());

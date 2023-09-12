@@ -7,8 +7,8 @@ import java.util.Map;
 
 public class TestScopeManager extends SingletonScopeManager {
 
-    public TestScopeManager(Scope scope) throws Exception {
-        setCurrentScope(init(scope));
+    public TestScopeManager() {
+
     }
 
     @Override

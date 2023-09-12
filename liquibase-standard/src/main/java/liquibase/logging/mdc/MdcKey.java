@@ -95,6 +95,8 @@ public class MdcKey {
     public static final String ROLLBACK_ON_ERROR = "rollbackOnError";
     public static final String CHANGESET_SYNC_COUNT = "changesetSyncCount";
     public static final String CHANGELOG_SYNC_OUTCOME = "changelogSyncOutcome";
+    public static final String OPERATION_START = "operationStart";
+    public static final String OPERATION_STOP = "operationStop";
     public static final String DIFF_CHANGELOG_FILE = "diffChangelogFile";
     public static final String DIFF_CHANGELOG_OUTCOME = "diffChangelogOutcome";
     public static final String CHANGESET_SYNC_OUTCOME = "changesetSyncOutcome";
@@ -112,5 +114,4 @@ public class MdcKey {
     public static final String RELEASE_LOCKS_OUTCOME = "releaseLocksOutcome";
     public static final String STATUS = "status";
     public static final String ROWS_AFFECTED = "rowsAffected";
-    public static final String USER_METADATA = "userMetadata";
 }

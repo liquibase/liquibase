@@ -42,8 +42,6 @@ Optional Args:
     OBFUSCATED
   showSummary (UpdateSummaryEnum) Type of update results summary to show.  Values can be 'off', 'summary', or 'verbose'.
     Default: SUMMARY
-  showSummaryOutput (UpdateSummaryOutputEnum) Summary output to report update summary results. Values can be 'log', 'console', or 'all'.
-    Default: ALL
   username (String) Username to use to connect to the database
     Default: null
 """
@@ -58,8 +56,7 @@ Optional Args:
 
         expectedResults = [
                 statusCode: 0,
-                defaultChangeExecListener: 'not_null',
-                updateReport: 'not_null'
+                defaultChangeExecListener: 'not_null'
         ]
 
         expectedDatabaseContent = [
@@ -92,8 +89,7 @@ Optional Args:
 
         expectedResults = [
                 statusCode: 0,
-                defaultChangeExecListener: 'not_null',
-                updateReport: 'not_null'
+                defaultChangeExecListener: 'not_null'
         ]
 
         expectedDatabaseContent = [
@@ -126,8 +122,7 @@ Optional Args:
 
         expectedResults = [
                 statusCode: 0,
-                defaultChangeExecListener: 'not_null',
-                updateReport: 'not_null'
+                defaultChangeExecListener: 'not_null'
         ]
 
         outputFile = new File("target/test-classes/ignoredChangeset.txt")
@@ -158,8 +153,7 @@ Optional Args:
 
         expectedResults = [
                 statusCode: 0,
-                defaultChangeExecListener: 'not_null',
-                updateReport: 'not_null'
+                defaultChangeExecListener: 'not_null'
         ]
 
         outputFile = new File("target/test-classes/changeSetWithLabels.txt")
@@ -211,8 +205,7 @@ Optional Args:
 
         expectedResults = [
                 statusCode: 0,
-                defaultChangeExecListener: 'not_null',
-                updateReport: 'not_null'
+                defaultChangeExecListener: 'not_null'
         ]
 
         outputFile = new File("target/test-classes/changeSetWithLabels.txt")
@@ -252,80 +245,12 @@ Optional Args:
 
         expectedResults = [
                 statusCode: 0,
-                defaultChangeExecListener: 'not_null',
-                updateReport: 'not_null'
+                defaultChangeExecListener: 'not_null'
         ]
 
         outputFile = new File("target/test-classes/changeSetWithComplicatedLabelsAndContext.txt")
 
         expectedFileContent = [ "target/test-classes/changeSetWithComplicatedLabelsAndContext.txt":
-             [
-               "UPDATE SUMMARY",
-               "Run:                          2",
-               "Previously run:               0",
-               "Filtered out:                 4",
-               "-------------------------------",
-               "Total change sets:            6",
-               "FILTERED CHANGE SETS SUMMARY",
-               "Context mismatch:             2",
-               "Label mismatch:               3",
-               "DBMS mismatch:                1"
-             ]
-        ]
-    }
-
-    run "Happy path with a change set that has complicated labels and contexts with log output", {
-        arguments = [
-                url                 : { it.url },
-                username            : { it.username },
-                password            : { it.password },
-                changelogFile       : "changelogs/h2/complete/summary-changelog.xml",
-                labelFilter         : "testtable1",
-                contextFilter       : "none",
-                showSummary         : "summary",
-                showSummaryOutput   : "log"
-        ]
-
-        expectedResults = [
-                statusCode: 0,
-                defaultChangeExecListener: 'not_null',
-                updateReport: 'not_null'
-        ]
-
-        expectedLogs = [
-                "UPDATE SUMMARY",
-                "Run:                          2",
-                "Previously run:               0",
-                "Filtered out:                 4",
-                "-------------------------------",
-                "Total change sets:            6",
-                "FILTERED CHANGE SETS SUMMARY",
-                "Context mismatch:             2",
-                "Label mismatch:               3",
-                "DBMS mismatch:                1"
-        ]
-    }
-
-    run "Happy path with skipped change sets propagated from an included changelog", {
-        arguments = [
-                url          : { it.url },
-                username     : { it.username },
-                password     : { it.password },
-                changelogFile: "changelogs/h2/complete/summary.root.changelog.xml",
-                labelFilter  : "testtable1",
-                contextFilter: "none",
-                showSummary  : "summary"
-        ]
-
-        expectedResults = [
-                statusCode: 0,
-                defaultChangeExecListener: 'not_null',
-                updateReport: 'not_null'
-        ]
-
-        outputFile = new File("target/test-classes/changeSetSkippedPropagatedToRoot.txt")
-
-        expectedFileContent = [ "target/test-classes/changeSetSkippedPropagatedToRoot.txt":
              [
                "UPDATE SUMMARY",
                "Run:                          2",
@@ -352,8 +277,7 @@ Optional Args:
 
         expectedResults = [
                 statusCode: 0,
-                defaultChangeExecListener: 'not_null',
-                updateReport: 'not_null'
+                defaultChangeExecListener: 'not_null'
         ]
 
         outputFile = new File("target/test-classes/mismatchedDBMS.txt")
@@ -389,8 +313,7 @@ Optional Args:
 
         expectedResults = [
                 statusCode: 0,
-                defaultChangeExecListener: 'not_null',
-                updateReport: 'not_null'
+                defaultChangeExecListener: 'not_null'
         ]
 
         expectedDatabaseContent = [
@@ -455,8 +378,7 @@ Optional Args:
 
         expectedResults = [
                 statusCode: 0,
-                defaultChangeExecListener: 'not_null',
-                updateReport: 'not_null'
+                defaultChangeExecListener: 'not_null'
         ]
 
         expectedLogs = [
@@ -475,8 +397,7 @@ Optional Args:
 
         expectedResults = [
                 statusCode: 0,
-                defaultChangeExecListener: 'not_null',
-                updateReport: 'not_null'
+                defaultChangeExecListener: 'not_null'
         ]
     }
 }
