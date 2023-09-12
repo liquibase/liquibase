@@ -9,7 +9,7 @@ on:
   #testing-remove this block
   push:
     branches:
-      - 'github-action-DAT-15775'
+      - '*'
 
 env:
   MAVEN_VERSION: '3.9.2'
