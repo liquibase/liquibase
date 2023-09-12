@@ -1,7 +1,7 @@
 name: Build Branch SNAPSHOT
 
 on:
-  workflow_call:
+  #workflow_call:
 
   workflow_run:
     workflows: [ "Run Tests" ]
@@ -12,14 +12,14 @@ env:
   MAVEN_VERSION: '3.9.2'
 
 jobs:
-#  authorize:
-#    environment:
-#      ${{ github.event_name == 'pull_request_target' &&
-#      github.event.pull_request.head.repo.full_name != github.repository &&
-#      'external' || 'internal' }}
-#    runs-on: ubuntu-22.04
-#    steps:
-#      - run: true
+  #authorize:
+    #environment:
+      #${{ github.event_name == 'pull_request_target' &&
+      #github.event.pull_request.head.repo.full_name != github.repository &&
+      #'external' || 'internal' }}
+    #runs-on: ubuntu-22.04
+    #steps:
+      #- run: true
 
   setup:
     name: Setup
