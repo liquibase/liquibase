@@ -8,6 +8,7 @@ import liquibase.exception.DatabaseException;
 import liquibase.executor.Executor;
 import liquibase.executor.ExecutorService;
 import liquibase.statement.core.RawSqlStatement;
+import liquibase.structure.core.Catalog;
 import liquibase.structure.core.Schema;
 import liquibase.util.StringUtil;
 
@@ -45,7 +46,7 @@ public class DatabaseUtils {
                     if (GlobalConfiguration.PRESERVE_SCHEMA_CASE.getCurrentValue()) {
                         finalSearchPath = ((PostgresDatabase) database).quoteObject(defaultSchemaName, Schema.class);
                     } else {
-                        finalSearchPath = defaultSchemaName;
+                        finalSearchPath = database.escapeObjectName(defaultSchemaName, Schema.class);
                     }
 
                     if (StringUtil.isNotEmpty(searchPath)) {
@@ -66,6 +67,7 @@ public class DatabaseUtils {
                 if (schema == null) {
                     schema = defaultSchemaName;
                 }
+                database.escapeObjectName(schema, Schema.class);
                 executor.execute(new RawSqlStatement("SET CURRENT SCHEMA "
                         + schema));
             } else if (database instanceof MySQLDatabase) {
@@ -73,12 +75,14 @@ public class DatabaseUtils {
                 if (schema == null) {
                     schema = defaultSchemaName;
                 }
+                database.escapeObjectName(schema, Schema.class);
                 executor.execute(new RawSqlStatement("USE " + schema));
             } else if (database instanceof MSSQLDatabase) {
-                    defaultCatalogName = StringUtil.trimToNull(defaultCatalogName);
-                    if (defaultCatalogName != null) {
-                        executor.execute(new RawSqlStatement(String.format("USE %s", defaultCatalogName)));
-                    }
+                defaultCatalogName = StringUtil.trimToNull(defaultCatalogName);
+                if (defaultCatalogName != null) {
+                    database.escapeObjectName(defaultCatalogName, Catalog.class);
+                    executor.execute(new RawSqlStatement(String.format("USE %s", defaultCatalogName)));
+                }
             }
         }
     }
