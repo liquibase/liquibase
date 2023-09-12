@@ -677,7 +677,7 @@ public class LiquibaseCommandLine {
                 (LiquibaseCommandLineConfiguration.ArgumentConverter) argument -> "--" + StringUtil.toKabobCase(argument));
 
         Map<String, String> javaProperties = addJavaPropertiesToChangelogParameters();
-        returnMap.put("javaProperties", javaProperties);
+        returnMap.put(Scope.JAVA_PROPERTIES, javaProperties);
 
         return returnMap;
     }
