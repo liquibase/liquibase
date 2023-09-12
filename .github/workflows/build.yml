@@ -6,6 +6,11 @@ concurrency:
 
 on:
   workflow_dispatch:
+    inputs:
+      archive_test_results:
+        description: 'If set to true, the unit and integration test results will be archived to the build artifacts page.'
+        required: false
+        default: 'false'
 
   # DAT branches can get triggered from this logic
   pull_request_target:
@@ -19,7 +24,7 @@ on:
     branches:
       - master
       - main
-      - github-action-*
+      - github-action-**
     paths-ignore:
       - '**.md'
 
@@ -50,8 +55,8 @@ jobs:
       thisSha: ${{ steps.find-branches.outputs.thisSha }}
       thisBranchName: ${{ steps.find-branches.outputs.thisBranchName }}
       thisBranchFileName: ${{ steps.find-branches.outputs.thisBranchFileName }}
-      thisRepositoryName: ${{ steps.find-branches.outputs.thisRepositoryName }}
-      thisRepositoryOwner: ${{ steps.find-branches.outputs.thisRepositoryName }}
+      thisRepositoryName: ${{ steps.find-branches.outputs.thisRepoName }}
+      thisRepositoryOwner: ${{ steps.find-branches.outputs.thisRepoName }}
       standAlonePR: ${{ steps.find-branches.outputs.standAlonePR }}
       stablePro: ${{ steps.find-branches.outputs.stablePro }}
       timestamp: ${{ steps.get-date.outputs.date }}
@@ -70,7 +75,7 @@ jobs:
 
       - name: Get current date
         id: get-date
-        run: echo "::set-output name=date::$(date +'%Y-%m-%d %H:%M:%S')"
+        run: echo "::set-output name=date::$(date +'%Y-%m-%d %H:%M:%S %Z')"
 
       - name: Find corresponding branches
         id: find-branches
@@ -203,7 +208,7 @@ jobs:
           find . -name original-*.jar -exec rm {} \;
 
       - name: Archive Test Results
-        if: ${{ always() }}
+        if: ${{ inputs.archive_test_results == 'true' }}
         uses: actions/upload-artifact@v3
         with:
           name: liquibase-test-results-jdk${{ matrix.java }}
@@ -314,7 +319,7 @@ jobs:
         run: mvn -B jar:jar jar:test-jar surefire:test -DtrimStackTrace=false -Dliquibase.sdk.testSystem.test=${{ matrix.testSystem }} -Dliquibase.sdk.testSystem.acceptLicenses=${{ matrix.testSystem }} -Dtest=*IntegrationTest,*ExecutorTest -DfailIfNoTests=false -Dsurefire.failIfNoSpecifiedTests=false
 
       - name: Archive Test Results
-        if: ${{ always() }}
+        if: ${{ inputs.archive_test_results == 'true' }}
         uses: actions/upload-artifact@v3
         with:
           name: ${{ steps.prepare.outputs.testResultsArtifact }}
@@ -357,7 +362,7 @@ jobs:
 
       # look for dependencies in maven
       - name: maven-settings-xml-action
-        uses: whelk-io/maven-settings-xml-action@v20
+        uses: whelk-io/maven-settings-xml-action@v21
         with:
           repositories: |
             [
@@ -468,8 +473,6 @@ jobs:
           cp liquibase-cdi-jakarta/target/liquibase-cdi-jakarta-0-SNAPSHOT-sources.jar artifacts
           cp liquibase-cdi-jakarta/target/liquibase-cdi-jakarta-0-SNAPSHOT-javadoc.jar artifacts
 
-          cp liquibase-dist/target/liquibase-*.deb artifacts
-
           echo "Source code not available for liquibase-commercial" > /tmp/readme.source.txt
           (cd /tmp && jar cf liquibase-commercial-${{ needs.setup.outputs.proBranchName }}-SNAPSHOT-sources.jar readme.source.txt)
 
@@ -520,7 +523,7 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
-# this triggers the pro-tests and test-harness to run
+  # this triggers the pro-tests and test-harness to run
   finish:
     name: Finish Build
     runs-on: ubuntu-22.04
