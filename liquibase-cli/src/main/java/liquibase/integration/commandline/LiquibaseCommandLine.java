@@ -354,6 +354,7 @@ public class LiquibaseCommandLine {
             });
 
             return Scope.child(Collections.singletonMap(Scope.Attr.logService.name(), newLogService), () -> {
+                addEmptyMdcValues();
                 try {
                     return Scope.child(configureScope(args), () -> {
 
@@ -416,6 +417,28 @@ public class LiquibaseCommandLine {
             return 1;
         } finally {
             cleanup();
+        }
+    }
+
+    private void addEmptyMdcValues() {
+        if (LiquibaseCommandLineConfiguration.ADD_EMPTY_MDC_VALUES.getCurrentValue()) {
+            Scope.getCurrentScope().addMdcValue(MdcKey.DEPLOYMENT_ID, "");
+            Scope.getCurrentScope().addMdcValue(MdcKey.DEPLOYMENT_OUTCOME, "");
+            Scope.getCurrentScope().addMdcValue(MdcKey.DEPLOYMENT_OUTCOME_COUNT, "");
+            Scope.getCurrentScope().addMdcValue(MdcKey.ROWS_AFFECTED, "");
+            Scope.getCurrentScope().addMdcValue(MdcKey.CHANGELOG_FILE, "");
+            Scope.getCurrentScope().addMdcValue(MdcKey.CHANGESET_ID, "");
+            Scope.getCurrentScope().addMdcValue(MdcKey.CHANGESET_AUTHOR, "");
+            Scope.getCurrentScope().addMdcValue(MdcKey.CHANGESET_OUTCOME, "");
+            Scope.getCurrentScope().addMdcValue(MdcKey.CHANGESET_SYNC_COUNT, "");
+            Scope.getCurrentScope().addMdcValue(MdcKey.OPERATION_START_TIME, "");
+            Scope.getCurrentScope().addMdcValue(MdcKey.OPERATION_STOP_TIME, "");
+            Scope.getCurrentScope().addMdcValue(MdcKey.LIQUIBASE_SYSTEM_NAME, "");
+            Scope.getCurrentScope().addMdcValue(MdcKey.LIQUIBASE_SYSTEM_USER, "");
+            Scope.getCurrentScope().addMdcValue(MdcKey.LIQUIBASE_TARGET_URL, "");
+            Scope.getCurrentScope().addMdcValue(MdcKey.LIQUIBASE_VERSION, "");
+            Scope.getCurrentScope().addMdcValue(MdcKey.LIQUIBASE_SCHEMA_NAME, "");
+            Scope.getCurrentScope().addMdcValue(MdcKey.LIQUIBASE_CATALOG_NAME, "");
         }
     }
 
