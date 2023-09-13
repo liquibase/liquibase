@@ -1,6 +1,7 @@
 package liquibase.integration.commandline;
 
 import liquibase.Scope;
+import liquibase.util.StringUtil;
 
 import java.io.File;
 import java.net.URL;
@@ -133,9 +134,10 @@ public class LiquibaseLauncher {
     }
 
     private static void buildDupsMessage(List<String> duplicates, String title) {
-        StringBuilder builder = new StringBuilder();
-        duplicates.forEach(jar -> builder.append(String.format("%s%n", jar)));
-        Scope.getCurrentScope().getLog(LiquibaseLauncher.class).warning(String.format("*** Duplicate %s JAR files ***%n%s", title, builder));
+        String jarString = StringUtil.join(duplicates, System.lineSeparator());
+        String message = String.format("*** Duplicate %s JAR files ***%n%s", title, jarString);
+        Scope.getCurrentScope().getUI().sendMessage(String.format("WARNING: %s", message));
+        Scope.getCurrentScope().getLog(LiquibaseLauncher.class).warning(message);
     }
 
     private static void debug(String message) {
