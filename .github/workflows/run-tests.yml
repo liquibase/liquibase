@@ -1,0 +1,58 @@
+name: Run Tests
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.head_ref || github.ref }}
+  cancel-in-progress: ${{ !contains(github.ref, 'refs/heads/master') }}
+
+
+on:
+  workflow_call:
+
+  workflow_dispatch:
+    inputs:
+      archive_test_results:
+        description: 'If set to true, the unit and integration test results will be archived to the build artifacts page.'
+        required: false
+        default: 'false'
+
+  pull_request:
+    types:
+      - opened
+      - reopened
+      - synchronize
+      - labeled
+  push:
+    branches-ignore:
+      - github-action-**
+      - DAT-**
+      - dependabot-**
+    paths-ignore:
+        - '**.md'
+
+env:
+  MAVEN_VERSION: '3.9.2'
+
+jobs:
+  setup:
+    name: Setup
+    runs-on: ubuntu-22.04
+    outputs:
+      timestamp: ${{ steps.get-date.outputs.date }}
+      latestMergeSha: ${{ steps.get-sha.outputs.latestMergeSha }}
+      setupSuccessful: "true"
+    steps:
+      - uses: actions/checkout@v3
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.ref }}
+
+      - name: Get current date
+        id: get-date
+        run: |
+          echo "date=$(date +'%Y-%m-%d %H:%M:%S %Z')" >> $GITHUB_OUTPUT
+
+      - name: Get Latest Merge Commit SHA
+        id: get-sha
+        run: |
+          latest_merge_sha=`(git rev-parse --short HEAD)`
+          echo "latestMergeSha=${latest_merge_sha}" >> $GITHUB_OUTPUT
+

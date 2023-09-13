@@ -1,0 +1,30 @@
+name: Run Test Harness Tests
+
+on:
+  workflow_call:
+
+  pull_request:
+    types:
+      - labeled
+
+env:
+  MAVEN_VERSION: '3.9.2'
+
+jobs:
+  build:
+    if: ${{ github.event.label.name == 'runTestHarnessTests' }}
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v3
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.event.after}} #sets the Git reference (commit or branch) to be checked out in the workflow
+
+      #run the test harness tests only against the head-branch of the PR
+      - name: Trigger TestHarness Tests Workflow
+        uses: peter-evans/repository-dispatch@v2
+        with:
+          token: ${{ secrets.RUN_FUNCTIONAL_TEST_HARNESS_TESTS_TOKEN }}
+          repository: liquibase/liquibase-test-harness
+          event-type: run-test-harness
+          client-payload: '{"ref": "${{ github.event.pull_request.head.ref }}" }'

@@ -7,10 +7,7 @@ import liquibase.changelog.visitor.*;
 import liquibase.command.CommandResults;
 import liquibase.command.CommandScope;
 import liquibase.command.core.*;
-import liquibase.command.core.helpers.ChangeExecListenerCommandStep;
-import liquibase.command.core.helpers.DatabaseChangelogCommandStep;
-import liquibase.command.core.helpers.DbUrlConnectionCommandStep;
-import liquibase.command.core.helpers.PreCompareCommandStep;
+import liquibase.command.core.helpers.*;
 import liquibase.database.Database;
 import liquibase.database.DatabaseConnection;
 import liquibase.database.DatabaseFactory;
@@ -59,6 +56,8 @@ public class Liquibase implements AutoCloseable {
     protected Database database;
     private DatabaseChangeLog databaseChangeLog;
     private String changeLogFile;
+    private UpdateSummaryOutputEnum showSummaryOutput;
+    private UpdateSummaryEnum showSummary;
     private final ResourceAccessor resourceAccessor;
     private final ChangeLogParameters changeLogParameters;
     private ChangeExecListener changeExecListener;
@@ -217,7 +216,9 @@ public class Liquibase implements AutoCloseable {
             updateCommand.addArgumentValue(UpdateCommandStep.CONTEXTS_ARG, contexts != null ? contexts.toString() : null);
             updateCommand.addArgumentValue(UpdateCommandStep.LABEL_FILTER_ARG, labelExpression != null ? labelExpression.getOriginalString() : null);
             updateCommand.addArgumentValue(ChangeExecListenerCommandStep.CHANGE_EXEC_LISTENER_ARG, changeExecListener);
+            updateCommand.addArgumentValue(ShowSummaryArgument.SHOW_SUMMARY_OUTPUT, showSummaryOutput);
             updateCommand.addArgumentValue(DatabaseChangelogCommandStep.CHANGELOG_PARAMETERS, changeLogParameters);
+            updateCommand.addArgumentValue(ShowSummaryArgument.SHOW_SUMMARY, showSummary);
             updateCommand.execute();
         });
     }
@@ -339,7 +340,9 @@ public class Liquibase implements AutoCloseable {
             updateCommand.addArgumentValue(UpdateCountCommandStep.LABEL_FILTER_ARG, labelExpression != null ? labelExpression.getOriginalString() : null);
             updateCommand.addArgumentValue(ChangeExecListenerCommandStep.CHANGE_EXEC_LISTENER_ARG, changeExecListener);
             updateCommand.addArgumentValue(UpdateCountCommandStep.COUNT_ARG, changesToApply);
+            updateCommand.addArgumentValue(ShowSummaryArgument.SHOW_SUMMARY_OUTPUT, showSummaryOutput);
             updateCommand.addArgumentValue(DatabaseChangelogCommandStep.CHANGELOG_PARAMETERS, changeLogParameters);
+            updateCommand.addArgumentValue(ShowSummaryArgument.SHOW_SUMMARY, showSummary);
             updateCommand.execute();
         });
     }
@@ -379,7 +382,9 @@ public class Liquibase implements AutoCloseable {
             updateCommand.addArgumentValue(UpdateToTagCommandStep.LABEL_FILTER_ARG, labelExpression != null ? labelExpression.getOriginalString() : null);
             updateCommand.addArgumentValue(ChangeExecListenerCommandStep.CHANGE_EXEC_LISTENER_ARG, changeExecListener);
             updateCommand.addArgumentValue(UpdateToTagCommandStep.TAG_ARG, tag);
+            updateCommand.addArgumentValue(ShowSummaryArgument.SHOW_SUMMARY_OUTPUT, showSummaryOutput);
             updateCommand.addArgumentValue(DatabaseChangelogCommandStep.CHANGELOG_PARAMETERS, changeLogParameters);
+            updateCommand.addArgumentValue(ShowSummaryArgument.SHOW_SUMMARY, showSummary);
             updateCommand.execute();
         });
     }
@@ -1310,6 +1315,14 @@ public class Liquibase implements AutoCloseable {
 
     public DefaultChangeExecListener getDefaultChangeExecListener() {
         return defaultChangeExecListener;
+    }
+
+    public void setShowSummary(UpdateSummaryEnum showSummary) {
+        this.showSummary = showSummary;
+    }
+
+    public void setShowSummaryOutput(UpdateSummaryOutputEnum showSummaryOutput) {
+        this.showSummaryOutput = showSummaryOutput;
     }
 
     /**
