@@ -11,7 +11,7 @@ import java.util.*;
  */
 public class ConfiguredValueModifierFactory  implements SingletonObject {
 
-    private final SortedSet<ConfiguredValueModifier> allInstances;
+    private final TreeSet<ConfiguredValueModifier> allInstances;
 
     private ConfiguredValueModifierFactory() {
         this.allInstances = new TreeSet<>(Comparator.comparingInt(ConfiguredValueModifier::getOrder));
@@ -36,7 +36,14 @@ public class ConfiguredValueModifierFactory  implements SingletonObject {
     }
 
     public String override(String configuredValue) {
-        // get the last instance because it will have the highest order, and would supercede all others
-        return allInstances.last().override(configuredValue);
+        // look backwards through the treeset, thus starting with the modifier with the highest order
+        for (Iterator<ConfiguredValueModifier> iterator = allInstances.descendingIterator(); iterator.hasNext(); ) {
+            ConfiguredValueModifier allInstance = iterator.next();
+            String overriddenValue = allInstance.override(configuredValue);
+            if (!configuredValue.equals(overriddenValue)) {
+                return overriddenValue;
+            }
+        }
+        return configuredValue;
     }
 }
