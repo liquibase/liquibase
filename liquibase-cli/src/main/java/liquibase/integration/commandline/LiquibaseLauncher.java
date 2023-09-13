@@ -1,11 +1,14 @@
 package liquibase.integration.commandline;
 
+import liquibase.Scope;
+
 import java.io.File;
 import java.net.URL;
 import java.net.URLClassLoader;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
+import java.util.stream.Collectors;
 
 /**
  * Launcher which builds up the classpath needed to run Liquibase, then calls {@link LiquibaseCommandLine#main(String[])}.
@@ -79,6 +82,28 @@ public class LiquibaseLauncher {
             }
         }
 
+        //
+        // Check for duplicate core and commercial JAR files
+        //
+        List<String> duplicateCore =
+                urls
+                  .stream()
+                  .map(URL::getFile)
+                  .filter(file -> file.matches(".*?/liquibase-core.*?.jar"))
+                  .collect(Collectors.toList());
+        List<String> duplicateCommercial =
+                urls
+                  .stream()
+                  .map(URL::getFile)
+                  .filter(file -> file.matches(".*?/liquibase-commercial.*?.jar"))
+                  .collect(Collectors.toList());
+        if (duplicateCore.size() > 1) {
+            buildDupsMessage(duplicateCore, "Liquibase Core");
+        }
+        if (duplicateCommercial.size() > 1) {
+            buildDupsMessage(duplicateCommercial, "Liquibase Commercial");
+        }
+
         if (debug) {
             debug("Final Classpath:");
             for (URL url : urls) {
@@ -105,6 +130,12 @@ public class LiquibaseLauncher {
         final Class<?> cli = classloader.loadClass(LiquibaseCommandLine.class.getName());
 
         cli.getMethod("main", String[].class).invoke(null, new Object[]{args});
+    }
+
+    private static void buildDupsMessage(List<String> duplicates, String title) {
+        StringBuilder builder = new StringBuilder();
+        duplicates.forEach(jar -> builder.append(String.format("%s%n", jar)));
+        Scope.getCurrentScope().getLog(LiquibaseLauncher.class).warning(String.format("*** Duplicate %s JAR files ***%n%s", title, builder));
     }
 
     private static void debug(String message) {
