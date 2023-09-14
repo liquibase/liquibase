@@ -24,6 +24,7 @@ import liquibase.logging.core.LogServiceFactory;
 import liquibase.logging.mdc.MdcKey;
 import liquibase.logging.mdc.MdcManager;
 import liquibase.logging.mdc.MdcObject;
+import liquibase.logging.mdc.customobjects.ChangesetsUpdated;
 import liquibase.logging.mdc.customobjects.Version;
 import liquibase.resource.*;
 import liquibase.ui.CompositeUIService;
@@ -430,7 +431,7 @@ public class LiquibaseCommandLine {
             Scope.getCurrentScope().addMdcValue(MdcKey.CHANGESET_ID, "");
             Scope.getCurrentScope().addMdcValue(MdcKey.CHANGESET_AUTHOR, "");
             Scope.getCurrentScope().addMdcValue(MdcKey.CHANGESET_OUTCOME, "");
-            Scope.getCurrentScope().addMdcValue(MdcKey.CHANGESET_SYNC_COUNT, "");
+            Scope.getCurrentScope().addMdcValue(MdcKey.CHANGESETS_UPDATED, new ChangesetsUpdated());
             Scope.getCurrentScope().addMdcValue(MdcKey.OPERATION_START_TIME, "");
             Scope.getCurrentScope().addMdcValue(MdcKey.OPERATION_STOP_TIME, "");
             Scope.getCurrentScope().addMdcValue(MdcKey.LIQUIBASE_SYSTEM_NAME, "");
