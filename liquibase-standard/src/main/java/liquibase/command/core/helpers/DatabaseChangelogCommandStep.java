@@ -35,6 +35,7 @@ public class DatabaseChangelogCommandStep extends AbstractHelperCommandStep impl
     protected static final String[] COMMAND_NAME = {"changelogCommandStep"};
 
     public static final CommandArgumentDefinition<String> CHANGELOG_FILE_ARG;
+    public static final CommandArgumentDefinition<DatabaseChangeLog> CHANGELOG_ARG;
     public static final CommandArgumentDefinition<String> LABEL_FILTER_ARG;
     public static final CommandArgumentDefinition<String> CONTEXTS_ARG;
     public static final CommandArgumentDefinition<ChangeLogParameters> CHANGELOG_PARAMETERS;
@@ -43,8 +44,10 @@ public class DatabaseChangelogCommandStep extends AbstractHelperCommandStep impl
 
     static {
         CommandBuilder builder = new CommandBuilder(COMMAND_NAME);
+        CHANGELOG_ARG = builder.argument("databaseChangelog", DatabaseChangeLog.class).hidden().build();
         CHANGELOG_FILE_ARG = builder.argument(CommonArgumentNames.CHANGELOG_FILE, String.class).required()
-                .description("The root changelog file").build();
+                .supersededBy(CHANGELOG_ARG).description("The root changelog file").build();
+        CHANGELOG_ARG.setSupersededBy(CHANGELOG_FILE_ARG);
         LABEL_FILTER_ARG = builder.argument("labelFilter", String.class)
                 .addAlias("labels")
                 .description("Label expression to use for filtering").build();
@@ -74,8 +77,25 @@ public class DatabaseChangelogCommandStep extends AbstractHelperCommandStep impl
     public void run(CommandResultsBuilder resultsBuilder) throws Exception {
         CommandScope commandScope = resultsBuilder.getCommandScope();
         final Database database = (Database) commandScope.getDependency(Database.class);
-        final String changeLogFile = commandScope.getArgumentValue(CHANGELOG_FILE_ARG);
+        ChangeLogParameters changeLogParameters = getChangeLogParameters(commandScope, database);
+
+        DatabaseChangeLog databaseChangeLog;
+        if (commandScope.getArgumentValue(CHANGELOG_ARG) != null)  {
+            databaseChangeLog = commandScope.getArgumentValue(CHANGELOG_ARG);
+        } else {
+            final String changeLogFile = commandScope.getArgumentValue(CHANGELOG_FILE_ARG);
+            databaseChangeLog = getDatabaseChangeLog(changeLogFile, changeLogParameters, database);
+        }
+
         final Boolean shouldUpdateNullChecksums = commandScope.getArgumentValue(UPDATE_NULL_CHECKSUMS);
+        checkLiquibaseTables(shouldUpdateNullChecksums, databaseChangeLog, changeLogParameters.getContexts(), changeLogParameters.getLabels(), database);
+        databaseChangeLog.validate(database, changeLogParameters.getContexts(), changeLogParameters.getLabels());
+
+        commandScope.provideDependency(DatabaseChangeLog.class, databaseChangeLog);
+        commandScope.provideDependency(ChangeLogParameters.class, changeLogParameters);
+    }
+
+    private ChangeLogParameters getChangeLogParameters(CommandScope commandScope, Database database) {
         ChangeLogParameters changeLogParameters = commandScope.getArgumentValue(CHANGELOG_PARAMETERS);
         if (changeLogParameters == null) {
             changeLogParameters = new ChangeLogParameters(database);
@@ -89,13 +109,7 @@ public class DatabaseChangelogCommandStep extends AbstractHelperCommandStep impl
         changeLogParameters.setLabels(labels);
         commandScope.provideDependency(LabelExpression.class, labels);
         addCommandFiltersMdc(labels, contexts);
-
-        DatabaseChangeLog databaseChangeLog = getDatabaseChangeLog(changeLogFile, changeLogParameters, database);
-        checkLiquibaseTables(shouldUpdateNullChecksums, databaseChangeLog, changeLogParameters.getContexts(), changeLogParameters.getLabels(), database);
-        databaseChangeLog.validate(database, changeLogParameters.getContexts(), changeLogParameters.getLabels());
-
-        commandScope.provideDependency(DatabaseChangeLog.class, databaseChangeLog);
-        commandScope.provideDependency(ChangeLogParameters.class, changeLogParameters);
+        return changeLogParameters;
     }
 
     public static void addCommandFiltersMdc(LabelExpression labelExpression, Contexts contexts) {
@@ -105,7 +119,7 @@ public class DatabaseChangelogCommandStep extends AbstractHelperCommandStep impl
         Scope.getCurrentScope().addMdcValue(MdcKey.COMMAND_CONTEXT_FILTER, contextFilterMdc);
     }
 
-    private DatabaseChangeLog getDatabaseChangeLog(String changeLogFile, ChangeLogParameters changeLogParameters, Database database) throws Exception {
+    public static DatabaseChangeLog getDatabaseChangeLog(String changeLogFile, ChangeLogParameters changeLogParameters, Database database) throws Exception {
         ResourceAccessor resourceAccessor = Scope.getCurrentScope().getResourceAccessor();
         ChangeLogParser parser = ChangeLogParserFactory.getInstance().getParser(changeLogFile, resourceAccessor);
         if (parser instanceof XMLChangeLogSAXParser) {

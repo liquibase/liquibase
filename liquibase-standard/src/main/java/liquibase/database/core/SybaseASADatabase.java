@@ -223,7 +223,7 @@ public class SybaseASADatabase extends AbstractJdbcDatabase {
      */
     @Override
     public boolean supportsInitiallyDeferrableColumns() {
-        return false;
+        return true;
     }
 
     @Override

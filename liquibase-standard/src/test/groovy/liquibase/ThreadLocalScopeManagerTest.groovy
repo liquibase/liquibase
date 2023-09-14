@@ -35,7 +35,6 @@ class ThreadLocalScopeManagerTest extends Specification {
 
     }
 
-    @Ignore
     void "maintain databases in parallel"() {
         when:
         /*
