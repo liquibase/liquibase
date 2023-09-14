@@ -105,8 +105,8 @@ public class LoggingExecutor extends AbstractExecutor {
                 }
 
                 if (database instanceof OracleDatabase) { //remove trailing /
-                    while (statement.matches("(?s).*[\\s\\r\\n]*/[\\s\\r\\n]*$")) { //all trailing /'s
-                        statement = statement.replaceFirst("[\\s\\r\\n]*/[\\s\\r\\n]*$", "");
+                    while (statement.matches("(?s).*[\\s\\r\\n]*[^*]/[\\s\\r\\n]*$")) { //all trailing /'s
+                        statement = statement.replaceFirst("[\\s\\r\\n]*[^*]/[\\s\\r\\n]*$", "");
                     }
                 }
 
