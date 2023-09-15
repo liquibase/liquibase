@@ -140,7 +140,9 @@ public class StandardLockService implements LockService {
                     database.commit();
                 }
 
-                handleOldChangelogTableFormat(executor);
+                if(!(executor instanceof LoggingExecutor)) {
+                    handleOldChangelogTableFormat(executor);
+                }
                 break;
             } catch (Exception e) {
                 if (i == maxIterations - 1) {
