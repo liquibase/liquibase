@@ -291,12 +291,12 @@ jobs:
         run: mvn -B -pl '!liquibase-cdi-jakarta' -P 'integration-test' clean verify -DtrimStackTrace=false -Dliquibase.sdk.testSystem.test=${{ matrix.testSystem }} -Dliquibase.sdk.testSystem.acceptLicenses=${{ matrix.testSystem }} -Dtest=*IntegrationTest,*ExecutorTest -DfailIfNoTests=false -Dsurefire.failIfNoSpecifiedTests=false
 
       - name: Archive Test Results
-        if: ${{ inputs.archive_test_results == 'true' }}
         uses: actions/upload-artifact@v3
         with:
           name: ${{ steps.prepare.outputs.testResultsArtifact }}
           path: |
             ./**/target/surefire-reports
+            **/*.exec
 
       - name: Save Jacoco Report for Sonar
         uses: actions/upload-artifact@v3
