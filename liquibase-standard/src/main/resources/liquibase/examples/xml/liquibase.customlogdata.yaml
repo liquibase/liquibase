@@ -24,26 +24,43 @@ liquibase.userMetadata:
 ## to the logs of the update command, in this example.
 liquibase.command.update:
   - data:
-      awsRegion: "us-east"
+      awsRegion: "us-example"
       deploymentlead: "name@example.com"
-  - excludeData:
-      - liquibaseTargetUrl
-      - commandLabelFilter
-      - commandContextFilter
-    data:
-      callingbirds: four
-      frenchhens: 3
-      goldenrings: "five"
       partridges:
         count: 1
         location: "a pear tree"
       turtledoves: two
+      frenchhens: 3
+      callingbirds: four
+      goldenrings: "five"
+    excludeData:
+      - liquibaseTargetUrl
+      - commandLabelFilter
+      - commandContextFilter
 
 
 ## EXCLUDE data from structured logs.
 ## In this example, these keys will be excluded from all commands
 liquibase.excludeData:
-  - thread
-  - class
-  ##  --<add one key per line>
+## These are the default minimum keys. Uncomment (remove the ##) to exclude these keys
+## or add other keys which are not useful for your logs
+
+## - deploymentId
+## - deploymentOutcome
+## - deploymentOutcomeCount
+## - rowsAffected
+## - changelog
+## - changesetId
+## - changesetAuthor
+## - changesetOutcome
+## - changesetCount
+## - operationStart
+## - operationStop
+## - liquibaseCommandName
+## - liquibaseSystemName
+## - liquibaseSystemUser
+## - liquibaseTargetUrl-
+## - liquibaseVersion
+## - liquibaseSchemaName
+## - liquibaseCatalogName
 
