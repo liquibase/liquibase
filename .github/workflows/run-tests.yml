@@ -23,7 +23,7 @@ on:
       - labeled
   push:
     branches-ignore:
-      - github-action-**
+      #- github-action-**
       - DAT-**
       - dependabot-**
     paths-ignore:
