@@ -220,7 +220,7 @@ jobs:
         with:
           name: liquibase-jacoco-test-results
           path: |
-            ./pro/target/jacoco.exec
+            ./liquibase-standard/target/jacoco.exec
 
       - name: Archive Modules
         if: ${{ matrix.java == 11 && matrix.os == 'ubuntu-22.04'}}
@@ -303,7 +303,7 @@ jobs:
         with:
           name: liquibase-integration-jacoco-test-results-${{ matrix.testSystem }}
           path: |
-            ./liquibase-pro-integration-tests/target/jacoco.exec
+            ./liquibase-integration-tests/target/jacoco.exec
 
   sonar:
     needs: [setup, build, integration-test]
