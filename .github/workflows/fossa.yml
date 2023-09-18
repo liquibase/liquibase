@@ -3,6 +3,7 @@ name: FOSSA License Compliance and Security Check
 
 # Event triggers for the workflow
 on:
+  workflow_dispatch:  # Run this action manually from the GitHub Actions tab
   push:
     branches:
       - main  # Run this action on every push to the 'main' branch
