@@ -187,9 +187,8 @@ public abstract class AbstractUpdateCommandStep extends AbstractCommandStep impl
         }
         String deploymentOutcome = success ? MdcValue.COMMAND_SUCCESSFUL : MdcValue.COMMAND_FAILED;
         updateReportParameters.getOperationInfo().setOperationOutcome(deploymentOutcome);
-        try (MdcObject deploymentOutcomeMdc = Scope.getCurrentScope().addMdcValue(MdcKey.DEPLOYMENT_OUTCOME, deploymentOutcome)) {
-            Scope.getCurrentScope().getLog(getClass()).info(success ? successLog : failureLog);
-        }
+        Scope.getCurrentScope().addMdcValue(MdcKey.DEPLOYMENT_OUTCOME, deploymentOutcome, false);
+        Scope.getCurrentScope().getLog(getClass()).info(success ? successLog : failureLog);
     }
 
     @Beta
