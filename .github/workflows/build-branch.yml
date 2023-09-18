@@ -2,16 +2,16 @@ name: Build Branch SNAPSHOT
 
 on:
   workflow_run:
-    workflows: [Run Tests]
+    workflows: "Run Tests"
     types:
       - completed
 
  #only for testing. Remove this block
-  #pull_request:
-    #types:
-      #- opened
-      #- reopened
-      #- synchronize
+  pull_request:
+    types:
+      - opened
+      - reopened
+      - synchronize
 
 env:
   MAVEN_VERSION: '3.9.2'
