@@ -286,18 +286,22 @@ public class Liquibase implements AutoCloseable {
                 new IgnoreChangeSetFilter());
     }
 
+    @Deprecated
     public void update(String contexts, Writer output) throws LiquibaseException {
         this.update(new Contexts(contexts), output);
     }
 
+    @Deprecated
     public void update(Contexts contexts, Writer output) throws LiquibaseException {
         update(contexts, new LabelExpression(), output);
     }
 
+    @Deprecated
     public void update(Contexts contexts, LabelExpression labelExpression, Writer output) throws LiquibaseException {
         update(contexts, labelExpression, output, true);
     }
 
+    @Deprecated
     public void update(Contexts contexts, LabelExpression labelExpression, Writer output, boolean checkLiquibaseTables)
             throws LiquibaseException {
         runInScope(() -> {
