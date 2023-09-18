@@ -37,6 +37,11 @@
             <artifactId>liquibase-snowflake</artifactId>
             <version>${project.version}</version>
         </dependency>
+        <dependency>
+            <groupId>${project.groupId}</groupId>
+            <artifactId>liquibase-integration-tests</artifactId>
+            <version>${project.version}</version>
+        </dependency>
     </dependencies>
 
     <build>
