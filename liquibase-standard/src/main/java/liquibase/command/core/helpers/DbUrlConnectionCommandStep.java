@@ -6,6 +6,7 @@ import liquibase.Scope;
 import liquibase.command.*;
 import liquibase.configuration.ConfigurationValueObfuscator;
 import liquibase.database.Database;
+import liquibase.database.jvm.JdbcConnection;
 import liquibase.exception.DatabaseException;
 import liquibase.logging.mdc.MdcKey;
 import liquibase.util.StringUtil;
@@ -102,7 +103,7 @@ public class DbUrlConnectionCommandStep extends AbstractDatabaseConnectionComman
     }
 
     public static void logMdc(String url, Database database) {
-        Scope.getCurrentScope().addMdcValue(MdcKey.LIQUIBASE_TARGET_URL, url);
+        Scope.getCurrentScope().addMdcValue(MdcKey.LIQUIBASE_TARGET_URL, JdbcConnection.sanitizeUrl(url));
         Scope.getCurrentScope().addMdcValue(MdcKey.LIQUIBASE_CATALOG_NAME, database.getLiquibaseCatalogName());
         Scope.getCurrentScope().addMdcValue(MdcKey.LIQUIBASE_SCHEMA_NAME, database.getLiquibaseSchemaName());
     }
