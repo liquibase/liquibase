@@ -688,7 +688,7 @@ Long Description: ${commandDefinition.getLongDescription() ?: "NOT SET"}
                 throw new RuntimeException("${message}.\n\n!!------------- TEST EXECUTION FAILURE -------------!!\n" +
                         "\nIf you are running CommandTests directly through your IDE, make sure you are including the module with your 'test.groovy' files in your classpath.\n" +
                         "\nNOTE: For example, if you are running these tests in liquibase-core, use the liquibase-integration-tests module as the classpath in your run configuration.\n" +
-                        "\n!!--------------------------------------------------!!")
+                        "\n!!--------------------------------------------------!!", e)
 
             }
         }
@@ -1140,17 +1140,21 @@ Long Description: ${commandDefinition.getLongDescription() ?: "NOT SET"}
         }
 
         void copyResource(String originalFile, String newFile, boolean writeInTargetTestClasses) {
-            URL url = Thread.currentThread().getContextClassLoader().getResource(originalFile)
-            File f = new File(url.toURI())
-            String contents = FileUtil.getContents(f)
-            File outputFile
-            if (writeInTargetTestClasses) {
-                outputFile = new File("target/test-classes", newFile)
-            } else {
-                outputFile = new File(newFile)
+            try {
+                URL url = Thread.currentThread().getContextClassLoader().getResource(originalFile)
+                File f = new File(url.toURI())
+                String contents = FileUtil.getContents(f)
+                File outputFile
+                if (writeInTargetTestClasses) {
+                    outputFile = new File("target/test-classes", newFile)
+                } else {
+                    outputFile = new File(newFile)
+                }
+                FileUtil.write(contents, outputFile)
+                println "Copied file " + originalFile + " to file " + newFile
+            } catch (Exception e) {
+                throw new Exception("Failed to copy resource " + originalFile + " during test setup.", e)
             }
-            FileUtil.write(contents, outputFile)
-            println "Copied file " + originalFile + " to file " + newFile
         }
 
         /**
