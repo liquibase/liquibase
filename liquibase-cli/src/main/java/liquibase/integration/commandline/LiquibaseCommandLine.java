@@ -426,7 +426,7 @@ public class LiquibaseCommandLine {
             Scope.getCurrentScope().addMdcValue(MdcKey.DEPLOYMENT_ID, "");
             Scope.getCurrentScope().addMdcValue(MdcKey.DEPLOYMENT_OUTCOME, "");
             Scope.getCurrentScope().addMdcValue(MdcKey.DEPLOYMENT_OUTCOME_COUNT, "");
-            Scope.getCurrentScope().addMdcValue(MdcKey.ROWS_AFFECTED, "");
+            Scope.getCurrentScope().addMdcValue(MdcKey.ROWS_AFFECTED, "0");
             Scope.getCurrentScope().addMdcValue(MdcKey.CHANGELOG_FILE, "");
             Scope.getCurrentScope().addMdcValue(MdcKey.CHANGESET_ID, "");
             Scope.getCurrentScope().addMdcValue(MdcKey.CHANGESET_AUTHOR, "");
