@@ -598,6 +598,33 @@
         </profile>
 
         <profile>
+            <id>remote-repositories</id>
+            <activation>
+                <property>
+                    <name>env.CI</name>
+                    <value>true</value>
+                </property>
+            </activation>
+            <repositories>
+                <repository>
+                    <id>liquibase</id>
+                    <url>https://maven.pkg.github.com/liquibase/liquibase</url>
+                    <snapshots>
+                        <enabled>true</enabled>
+                        <updatePolicy>always</updatePolicy>
+                    </snapshots>
+                </repository>
+                <repository>
+                    <id>liquibase-pro</id>
+                    <url>https://maven.pkg.github.com/liquibase/liquibase-pro</url>
+                    <snapshots>
+                        <enabled>true</enabled>
+                        <updatePolicy>always</updatePolicy>
+                    </snapshots>
+                </repository>
+            </repositories>
+        </profile>
+        <profile>
             <id>unit</id>
             <properties>
                 <skip.integration.tests>true</skip.integration.tests>
@@ -617,32 +644,6 @@
                 <skip.integration.tests>false</skip.integration.tests>
                 <skip.unit.tests>false</skip.unit.tests>
             </properties>
-        </profile>
-
-        <profile>
-            <id>remote-repositories</id>
-            <activation>
-                <property>
-                    <name>env.CI</name>
-                    <value>true</value>
-                </property>
-            </activation>
-            <repositories>
-                <repository>
-                    <id>liquibase</id>
-                    <url>https://maven.pkg.github.com/liquibase/liquibase</url>
-                    <snapshots>
-                        <enabled>true</enabled>
-                    </snapshots>
-                </repository>
-                <repository>
-                    <id>liquibase-pro</id>
-                    <url>https://maven.pkg.github.com/liquibase/liquibase-pro</url>
-                    <snapshots>
-                        <enabled>true</enabled>
-                    </snapshots>
-                </repository>
-            </repositories>
         </profile>
     </profiles>
 </project>

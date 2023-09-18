@@ -4,17 +4,19 @@
     xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
 
+    <artifactId>liquibase-integration-tests</artifactId>
+
     <parent>
         <groupId>org.liquibase</groupId>
         <artifactId>liquibase</artifactId>
         <version>0-SNAPSHOT</version>
+        <relativePath>../pom.xml</relativePath>
     </parent>
-
-    <artifactId>liquibase-integration-tests</artifactId>
 
     <properties>
         <maven.deploy.skip>false</maven.deploy.skip>
         <sonar.coverage.jacoco.xmlReportPaths>${project.basedir}/../liquibase-coverage/target/site/jacoco-aggregate/jacoco.xml</sonar.coverage.jacoco.xmlReportPaths>
+        <sonar.skip>true</sonar.skip>
     </properties>
 
     <dependencies>

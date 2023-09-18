@@ -288,7 +288,7 @@ jobs:
           password: ${{ secrets.ARTIFACTORY_TOKEN }}
 
       - name: Run Tests
-        run: mvn -B -pl '!liquibase-cdi-jakarta' -P 'integration-test' clean verify -DtrimStackTrace=false -Dliquibase.sdk.testSystem.test=${{ matrix.testSystem }} -Dliquibase.sdk.testSystem.acceptLicenses=${{ matrix.testSystem }} -Dtest=*IntegrationTest,*ExecutorTest -DfailIfNoTests=false -Dsurefire.failIfNoSpecifiedTests=false
+        run: mvn -B -pl '!liquibase-cdi-jakarta' -P 'integration-test' clean verify -DtrimStackTrace=false -Dliquibase.sdk.testSystem.test=${{ matrix.testSystem }} -Dliquibase.sdk.testSystem.acceptLicenses=${{ matrix.testSystem }} -DfailIfNoTests=false -Dsurefire.failIfNoSpecifiedTests=false
 
       - name: Archive Test Results
         uses: actions/upload-artifact@v3
@@ -296,14 +296,13 @@ jobs:
           name: ${{ steps.prepare.outputs.testResultsArtifact }}
           path: |
             ./**/target/surefire-reports
-            **/*.exec
 
       - name: Save Jacoco Report for Sonar
         uses: actions/upload-artifact@v3
         with:
           name: liquibase-integration-jacoco-test-results-${{ matrix.testSystem }}
           path: |
-            ./liquibase-integration-tests/target/jacoco.exec
+            **/target/**
 
   sonar:
     needs: [setup, build, integration-test]
