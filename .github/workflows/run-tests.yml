@@ -132,62 +132,63 @@ jobs:
           name: liquibase-modules
           path: |
             */target/*-0-SNAPSHOT.jar
+
   integration-test:
-  name: Integration Test
-  runs-on: ubuntu-22.04
-  strategy:
-    fail-fast: false
-    matrix:
-      testSystem:
-        - h2
-        #- h2:1.4
-        - hsqldb
-        - mariadb
-        - mssql
-        - mysql
-        - oracle
-        - postgresql
-        - sqlite
-        - firebird
-  needs: build_tests
-  timeout-minutes: 30
-  steps:
-    - uses: actions/checkout@v3
-      with:
-        ref: ${{ github.event.pull_request.head.sha || github.event.after}}
+    name: Integration Test
+    runs-on: ubuntu-22.04
+    strategy:
+      fail-fast: false
+      matrix:
+        testSystem:
+          - h2
+          #- h2:1.4
+          - hsqldb
+          - mariadb
+          - mssql
+          - mysql
+          - oracle
+          - postgresql
+          - sqlite
+          - firebird
+    needs: build_tests
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v3
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.event.after}}
 
-    - name: Prepare
-      id: prepare
-      uses: actions/github-script@v6
-      with:
-        script: |
-          core.setOutput("testResultsArtifact", "liquibase-test-results-integration-${{ matrix.testSystem }}".replace(/[^a-zA-Z0-9\-_]/g, "_"));
-    - name: Set up JDK 8
-      uses: actions/setup-java@v3
-      with:
-        java-version: '8'
-        distribution: 'temurin'
-        cache: 'maven'
+      - name: Prepare
+        id: prepare
+        uses: actions/github-script@v6
+        with:
+          script: |
+            core.setOutput("testResultsArtifact", "liquibase-test-results-integration-${{ matrix.testSystem }}".replace(/[^a-zA-Z0-9\-_]/g, "_"));
+      - name: Set up JDK 8
+        uses: actions/setup-java@v3
+        with:
+          java-version: '8'
+          distribution: 'temurin'
+          cache: 'maven'
 
-    # getting from build results page. If we remove 0-snapshot then we will need settings.xml
+      # getting from build results page. If we remove 0-snapshot then we will need settings.xml
 
-    - name: Set up Maven
-      uses: stCarolas/setup-maven@v4.5
-      with:
-        maven-version: ${{ env.MAVEN_VERSION }}
-    - name: Restore Built Code Cache
-      uses: actions/cache@v3.3.1
-      with:
-        key: built-code-${{ github.run_number }}-${{ github.run_attempt }}
-        path: ./**/target
+      - name: Set up Maven
+        uses: stCarolas/setup-maven@v4.5
+        with:
+          maven-version: ${{ env.MAVEN_VERSION }}
+      - name: Restore Built Code Cache
+        uses: actions/cache@v3.3.1
+        with:
+          key: built-code-${{ github.run_number }}-${{ github.run_attempt }}
+          path: ./**/target
 
-    - name: Run Tests
-      run: mvn -B jar:jar jar:test-jar surefire:test -DtrimStackTrace=false -Dliquibase.sdk.testSystem.test=${{ matrix.testSystem }} -Dliquibase.sdk.testSystem.acceptLicenses=${{ matrix.testSystem }} -Dtest=*IntegrationTest,*ExecutorTest -DfailIfNoTests=false -Dsurefire.failIfNoSpecifiedTests=false
+      - name: Run Tests
+        run: mvn -B jar:jar jar:test-jar surefire:test -DtrimStackTrace=false -Dliquibase.sdk.testSystem.test=${{ matrix.testSystem }} -Dliquibase.sdk.testSystem.acceptLicenses=${{ matrix.testSystem }} -Dtest=*IntegrationTest,*ExecutorTest -DfailIfNoTests=false -Dsurefire.failIfNoSpecifiedTests=false
 
-    - name: Archive Test Results
-      if: ${{ inputs.archive_test_results == 'true' }}
-      uses: actions/upload-artifact@v3
-      with:
-        name: ${{ steps.prepare.outputs.testResultsArtifact }}
-        path: |
-          ./**/target/surefire-reports
+      - name: Archive Test Results
+        if: ${{ inputs.archive_test_results == 'true' }}
+        uses: actions/upload-artifact@v3
+        with:
+          name: ${{ steps.prepare.outputs.testResultsArtifact }}
+          path: |
+            ./**/target/surefire-reports
