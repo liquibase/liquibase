@@ -5,13 +5,6 @@ on:
     workflows: [Run Tests]
     types:
       - completed
-
-  #testing-remove this block
-  pull_request:
-    types:
-      - synchronize
-
-
 env:
   MAVEN_VERSION: '3.9.2'
 
