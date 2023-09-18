@@ -6,10 +6,12 @@ on:
     types:
       - completed
 
-  #testing-remove this block
-  push:
-    branches:
-      - '*'
+ #only for testing. Remove this block
+  #pull_request:
+    #types:
+      #- opened
+      #- reopened
+      #- synchronize
 
 env:
   MAVEN_VERSION: '3.9.2'
