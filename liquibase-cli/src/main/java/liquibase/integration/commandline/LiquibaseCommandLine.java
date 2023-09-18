@@ -424,8 +424,8 @@ public class LiquibaseCommandLine {
     private void addEmptyMdcValues() {
         if (LiquibaseCommandLineConfiguration.ADD_EMPTY_MDC_VALUES.getCurrentValue()) {
             Scope.getCurrentScope().addMdcValue(MdcKey.DEPLOYMENT_ID, "");
-            Scope.getCurrentScope().addMdcValue(MdcKey.DEPLOYMENT_OUTCOME, "");
-            Scope.getCurrentScope().addMdcValue(MdcKey.DEPLOYMENT_OUTCOME_COUNT, "");
+            Scope.getCurrentScope().addMdcValue(MdcKey.DEPLOYMENT_OUTCOME, "NOOP");
+            Scope.getCurrentScope().addMdcValue(MdcKey.DEPLOYMENT_OUTCOME_COUNT, "0");
             Scope.getCurrentScope().addMdcValue(MdcKey.ROWS_AFFECTED, "0");
             Scope.getCurrentScope().addMdcValue(MdcKey.CHANGELOG_FILE, "");
             Scope.getCurrentScope().addMdcValue(MdcKey.CHANGESET_ID, "");
