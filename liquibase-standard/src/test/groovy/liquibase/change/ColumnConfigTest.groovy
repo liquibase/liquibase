@@ -29,7 +29,7 @@ public class ColumnConfigTest extends Specification {
         table.getOutgoingForeignKeys().add(new ForeignKey().setName("fk1").setForeignKeyColumns([new Column("otherCol")]));
         table.getOutgoingForeignKeys().add(new ForeignKey().setName("fk2").setForeignKeyColumns([new Column("colName")]).setPrimaryKeyTable(new Table().setName("otherTable")).setPrimaryKeyColumns([new Column("id")]));
 
-        Column column = new Column();
+        def column = new Column();
         column.setName("colName");
         column.setRelation(table);
         column.setAutoIncrementInformation(new Column.AutoIncrementInformation(3, 5));
@@ -66,7 +66,7 @@ public class ColumnConfigTest extends Specification {
         when:
         def table = new Table();
 
-        Column column = new Column();
+        def column = new Column();
         column.setName("colName");
         column.setRelation(table);
         column.setType(new DataType("BIGINT"));
@@ -89,7 +89,7 @@ public class ColumnConfigTest extends Specification {
         when:
         def view = new View();
 
-        Column column = new Column();
+        def column = new Column();
         column.setName("colName");
         column.setRelation(view);
         column.setType(new DataType("BIGINT"));
