@@ -557,6 +557,7 @@ public class ColumnSnapshotGenerator extends JdbcSnapshotGenerator {
                 && "NULL".equalsIgnoreCase((String) columnMetadataResultSet.get(COLUMN_DEF_COL)))) {
             columnMetadataResultSet.set(COLUMN_DEF_COL, null);
         }
+
         if (database instanceof SybaseASADatabase) {
             String defaultValue = (String) columnMetadataResultSet.get(COLUMN_DEF_COL);
 
@@ -581,7 +582,6 @@ public class ColumnSnapshotGenerator extends JdbcSnapshotGenerator {
                }
            }
         }
-
 
         return SqlUtil.parseValue(database, columnMetadataResultSet.get(COLUMN_DEF_COL), columnInfo.getType());
     }
