@@ -555,7 +555,58 @@ http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbch
         e.message == "Cannot find parser that supports com/example/test1.invalid"
     }
 
-    def "include fails if file does not exist"() {
+    def "include fails if XML file is empty"() {
+        when:
+        def resourceAccessor = new MockResourceAccessor(["com/example/test1.xml": ""])
+
+        def rootChangeLog = new DatabaseChangeLog("com/example/root.xml")
+
+        rootChangeLog.load(new ParsedNode(null, "databaseChangeLog")
+                .addChildren([changeSet: [id: "1", author: "nvoxland", createTable: [tableName: "test_table", schemaName: "test_schema"]]])
+                .addChildren([include: [file: "com/example/test1.xml"]])
+                , resourceAccessor)
+
+
+        then:
+        def e = thrown(SetupException)
+        e.getMessage().contains("Premature end of file.")
+    }
+
+    def "include fails if SQL file is empty"() {
+        when:
+        def resourceAccessor = new MockResourceAccessor(["com/example/test1.sql": ""])
+
+        def rootChangeLog = new DatabaseChangeLog("com/example/root.xml")
+
+        rootChangeLog.load(new ParsedNode(null, "databaseChangeLog")
+                .addChildren([changeSet: [id: "1", author: "nvoxland", createTable: [tableName: "test_table", schemaName: "test_schema"]]])
+                .addChildren([include: [file: "com/example/test1.sql"]])
+                , resourceAccessor)
+
+
+        then:
+        def e = thrown(SetupException)
+        e.getMessage().contains("Unable to parse empty file")
+    }
+
+    def "include fails if JSON file is empty"() {
+        when:
+        def resourceAccessor = new MockResourceAccessor(["com/example/test1.json": ""])
+
+        def rootChangeLog = new DatabaseChangeLog("com/example/root.xml")
+
+        rootChangeLog.load(new ParsedNode(null, "databaseChangeLog")
+                .addChildren([changeSet: [id: "1", author: "nvoxland", createTable: [tableName: "test_table", schemaName: "test_schema"]]])
+                .addChildren([include: [file: "com/example/test1.json"]])
+                , resourceAccessor)
+
+
+        then:
+        def e = thrown(SetupException)
+        e.getMessage().contains("Empty file com/example/test1.json")
+    }
+
+    def "include fails if file is empty"() {
         when:
         def resourceAccessor = new MockResourceAccessor(["com/example/test1.xml": test1Xml])
 

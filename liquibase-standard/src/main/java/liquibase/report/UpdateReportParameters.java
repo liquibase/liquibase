@@ -42,6 +42,7 @@ public class UpdateReportParameters {
     public static class OperationInfo {
         private String command;
         private String operationOutcome;
+        private String operationOutcomeErrorMsg;
     }
 
     @Data
