@@ -7,9 +7,9 @@ on:
       - completed
 
   #testing-remove this block
-  push:
-    branches:
-      - '*'
+  pull_request:
+    types:
+      - synchronize
 
 
 env:
