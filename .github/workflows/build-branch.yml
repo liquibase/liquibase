@@ -102,10 +102,9 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
-      # publish_tar_package_to_build_artifact:
+      #publish_tar_package_to_build_artifact:
       - name: Build & Publish tar.gz to Build Artifact Page
         runs-on: ubuntu-22.04
-        needs: [ setup, build_branch ]
         env:
           env:
             INSTALL4J_LICENSE: ${{ secrets.INSTALL4J_LICENSE }}
