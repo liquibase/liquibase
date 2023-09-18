@@ -23,8 +23,14 @@ jobs:
     - name: Checkout Code
       uses: actions/checkout@v3
 
-    # Run FOSSA scan and tests
-    - name: Run FOSSA Scan and Tests
+    # Run FOSSA Scan
+    - name: Run FOSSA Scan
+      uses: fossas/fossa-action@main
+      with:
+        api-key: ${{secrets.FOSSA_API_KEY}}  # Set this secret in your GitHub repo settings
+
+    # Run FOSSA Tests
+    - name: Run FOSSA Tests
       uses: fossas/fossa-action@main
       with:
         api-key: ${{secrets.FOSSA_API_KEY}}  # Set this secret in your GitHub repo settings
