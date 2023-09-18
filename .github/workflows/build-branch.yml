@@ -110,3 +110,50 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.LIQUIBOT_PAT }}
 
     #publish_tar_package_to_build_artifact:
+      - name: Build & Publish tar.gz to Build Artifact Page
+        env:
+          INSTALL4J_LICENSE: ${{ secrets.INSTALL4J_LICENSE }}
+          INSTALL4J_APPLE_KEY: ${{ secrets.INSTALL4J_APPLE_KEY }}
+          INSTALL4J_APPLE_KEY_PASSWORD: ${{ secrets.INSTALL4J_APPLE_KEY_PASSWORD }}
+          INSTALL4J_APPLE_ID: ${{ secrets.INSTALL4J_APPLE_ID }}
+          INSTALL4J_APPLE_ID_PASSWORD: ${{ secrets.INSTALL4J_APPLE_ID_PASSWORD }}
+          INSTALL4J_WINDOWS_KEY: ${{ secrets.INSTALL4J_WINDOWS_KEY }}
+          INSTALL4J_WINDOWS_KEY_PASSWORD: ${{ secrets.INSTALL4J_WINDOWS_KEY_PASSWORD }}
+          GPG_PASSWORD: ${{ secrets.GPG_PASSPHRASE }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          ## save install4j code signing keys
+          mkdir -p liquibase-dist/target/keys
+          echo "Saving apple key"
+          echo "$INSTALL4J_APPLE_KEY" | base64 -d > liquibase-dist/target/keys/datical_apple.p12
+
+          echo "Saving windows key"
+          echo "$INSTALL4J_WINDOWS_KEY" | base64 -d > liquibase-dist/target/keys/datical_windows.pfx
+          
+          ## extract tar content for other artifacts
+          mkdir -p liquibase-dist/target/liquibase-${{ needs.setup.outputs.thisBranchName }}-SNAPSHOT
+          (cd liquibase-dist/target/liquibase-${{ needs.setup.outputs.thisBranchName }}-SNAPSHOT && tar -xzf ../liquibase-${{ needs.setup.outputs.thisBranchName }}-SNAPSHOT.tar.gz)
+          
+          mkdir -p artifacts
+          cp liquibase-dist/target/liquibase-${{ needs.setup.outputs.thisBranchName }}-SNAPSHOT.tar.gz artifacts
+          
+          mkdir artifacts-named
+          cp liquibase-dist/target/liquibase-${{ needs.setup.outputs.thisBranchName }}-SNAPSHOT.tar.gz artifacts-named/liquibase-${{ needs.setup.outputs.thisBranchName }}.tar.gz
+
+      - name: Archive Packages
+        uses: actions/upload-artifact@v3
+        with:
+          name: liquibase-artifacts
+          path: artifacts/*
+
+      - name: Archive Convenience Zip
+        uses: actions/upload-artifact@v3
+        with:
+          name: liquibase-zip-${{ needs.setup.outputs.thisBranchName }}
+          path: liquibase-dist/target/liquibase-${{ needs.setup.outputs.thisBranchName }}-SNAPSHOT/*
+
+      - name: Archive Convenience Artifacts
+        uses: actions/upload-artifact@v3
+        with:
+          name: liquibase-artifacts-${{ needs.setup.outputs.thisBranchName }}
+          path: artifacts-named/*
