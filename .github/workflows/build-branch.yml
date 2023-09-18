@@ -104,18 +104,16 @@ jobs:
 
       #publish_tar_package_to_build_artifact:
       - name: Build & Publish tar.gz to Build Artifact Page
-        runs-on: ubuntu-22.04
         env:
-          env:
-            INSTALL4J_LICENSE: ${{ secrets.INSTALL4J_LICENSE }}
-            INSTALL4J_APPLE_KEY: ${{ secrets.INSTALL4J_APPLE_KEY }}
-            INSTALL4J_APPLE_KEY_PASSWORD: ${{ secrets.INSTALL4J_APPLE_KEY_PASSWORD }}
-            INSTALL4J_APPLE_ID: ${{ secrets.INSTALL4J_APPLE_ID }}
-            INSTALL4J_APPLE_ID_PASSWORD: ${{ secrets.INSTALL4J_APPLE_ID_PASSWORD }}
-            INSTALL4J_WINDOWS_KEY: ${{ secrets.INSTALL4J_WINDOWS_KEY }}
-            INSTALL4J_WINDOWS_KEY_PASSWORD: ${{ secrets.INSTALL4J_WINDOWS_KEY_PASSWORD }}
-            GPG_PASSWORD: ${{ secrets.GPG_PASSPHRASE }}
-            GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          INSTALL4J_LICENSE: ${{ secrets.INSTALL4J_LICENSE }}
+          INSTALL4J_APPLE_KEY: ${{ secrets.INSTALL4J_APPLE_KEY }}
+          INSTALL4J_APPLE_KEY_PASSWORD: ${{ secrets.INSTALL4J_APPLE_KEY_PASSWORD }}
+          INSTALL4J_APPLE_ID: ${{ secrets.INSTALL4J_APPLE_ID }}
+          INSTALL4J_APPLE_ID_PASSWORD: ${{ secrets.INSTALL4J_APPLE_ID_PASSWORD }}
+          INSTALL4J_WINDOWS_KEY: ${{ secrets.INSTALL4J_WINDOWS_KEY }}
+          INSTALL4J_WINDOWS_KEY_PASSWORD: ${{ secrets.INSTALL4J_WINDOWS_KEY_PASSWORD }}
+          GPG_PASSWORD: ${{ secrets.GPG_PASSPHRASE }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           ## save install4j code signing keys
           mkdir -p liquibase-dist/target/keys
