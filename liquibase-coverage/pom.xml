@@ -14,6 +14,7 @@
         <sonar.coverage.jacoco.xmlReportPaths>target/site/jacoco-aggregate/jacoco.xml</sonar.coverage.jacoco.xmlReportPaths>
         <code.coverage.project.folder>${basedir}/../</code.coverage.project.folder>
         <code.coverage.overall.data.folder>${basedir}/target/</code.coverage.overall.data.folder>
+        <jacoco-maven-plugin.version>0.8.10</jacoco-maven-plugin.version>
         <sonar.skip>true</sonar.skip>
         <maven.deploy.skip>true</maven.deploy.skip>
     </properties>
@@ -57,6 +58,7 @@
         <plugin>
           <groupId>org.jacoco</groupId>
           <artifactId>jacoco-maven-plugin</artifactId>
+          <version>${jacoco-maven-plugin.version}</version>
           <executions>
             <execution>
               <id>report-aggregate</id>
@@ -65,7 +67,6 @@
                 <goal>report-aggregate</goal>
               </goals>
             </execution>
-
             <execution>
               <id>merge-results</id>
               <phase>verify</phase>
@@ -77,7 +78,25 @@
                   <fileSet>
                     <directory>${code.coverage.project.folder}</directory>
                     <includes>
-                      <include>**/target/jacoco.exec</include>
+                      <include>*.exec</include>
+                    </includes>
+                  </fileSet>
+                </fileSets>
+                <destFile>${code.coverage.overall.data.folder}/aggregate.exec</destFile>
+              </configuration>
+            </execution>
+            <execution>
+              <id>cli-merge-results</id>
+              <phase>test</phase>
+              <goals>
+                <goal>merge</goal>
+              </goals>
+              <configuration>
+                <fileSets>
+                  <fileSet>
+                    <directory>${code.coverage.overall.data.folder}</directory>
+                    <includes>
+                      <include>*.exec</include>
                     </includes>
                   </fileSet>
                 </fileSets>

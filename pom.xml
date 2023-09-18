@@ -82,8 +82,8 @@
         <sonar.moduleKey>{project.groupId}:${project.artifactId}</sonar.moduleKey>
         <code.coverage.project.folder>${basedir}/../</code.coverage.project.folder>
         <code.coverage.overall.data.folder>${basedir}/target/</code.coverage.overall.data.folder>      
-        <skip.integration.tests>true</skip.integration.tests>
-        <skip.unit.tests>true</skip.unit.tests>
+        <skip.integration.tests>false</skip.integration.tests>
+        <skip.unit.tests>false</skip.unit.tests>
         <itCoverageAgent></itCoverageAgent>
         <sonar.coverage.jacoco.xmlReportPaths>liquibase-coverage/target/site/jacoco-aggregate/jacoco.xml</sonar.coverage.jacoco.xmlReportPaths>
     </properties>
@@ -399,6 +399,7 @@
                 </configuration>
             </plugin>
 
+            <!-- INTEGRATION test via 'mvn clean install -P integration-test -->
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-failsafe-plugin</artifactId>
@@ -413,7 +414,7 @@
                         <configuration>
                             <skipTests>${skip.integration.tests}</skipTests>
                             <includes>
-                                <include>**/*IntegrationTest.java</include>
+                                <include>liquibase-pro-integration-tests/**/*Test.java</include>
                             </includes>
                             <reuseForks>true</reuseForks>
                             <!-- When running as a Maven plugin, the JaCoCo agent configuration is prepared by invoking the prepare-agent
