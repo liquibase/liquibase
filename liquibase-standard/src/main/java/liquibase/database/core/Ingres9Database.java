@@ -41,7 +41,7 @@ public class Ingres9Database extends AbstractJdbcDatabase {
 
     @Override
     public String getViewDefinition(CatalogAndSchema schema, String viewName) throws DatabaseException {
-        final String sql = "select text_segment from iiviews where table_name = '?'";
+        final String sql = "select text_segment from iiviews where table_name = ?";
         PreparedStatement stmt = null;
         final StringBuilder definition = new StringBuilder();
         try {

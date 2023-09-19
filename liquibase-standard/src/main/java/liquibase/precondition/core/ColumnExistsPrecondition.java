@@ -132,7 +132,7 @@ public class ColumnExistsPrecondition extends AbstractPrecondition {
             String columnName = getColumnName();
 
             if (database instanceof PostgresDatabase) {
-                String sql = "SELECT 1 FROM pg_attribute a WHERE EXISTS (SELECT 1 FROM pg_class JOIN pg_catalog.pg_namespace ns ON ns.oid = pg_class.relnamespace WHERE lower(ns.nspname)='?' AND lower(relname) = lower('?') AND pg_class.oid = a.attrelid) AND lower(a.attname) = lower('?');";
+                String sql = "SELECT 1 FROM pg_attribute a WHERE EXISTS (SELECT 1 FROM pg_class JOIN pg_catalog.pg_namespace ns ON ns.oid = pg_class.relnamespace WHERE lower(ns.nspname) = ? AND lower(relname) = lower(?) AND pg_class.oid = a.attrelid) AND lower(a.attname) = lower(?);";
                 statement = ((JdbcConnection) database.getConnection())
                         .prepareStatement(sql);
                 statement.setString(1, schemaName.toLowerCase());
@@ -166,7 +166,7 @@ public class ColumnExistsPrecondition extends AbstractPrecondition {
                 statement = ((JdbcConnection) database.getConnection())
                         .prepareStatement(sql);
                 try {
-                    statement.executeQuery();
+                    statement.executeQuery().close();
                     // column exists
                 } catch (SQLException e) {
                     // column or table does not exist
