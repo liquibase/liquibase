@@ -100,7 +100,7 @@ jobs:
         run: |
           mvn -B clean deploy -pl '!liquibase-dist' -DskipTests=true "-Dbuild.repository.owner=liquibase" "-Dbuild.repository.name=liquibase" "-Dbuild.branch=${{ needs.setup.outputs.latestMergeSha }}" "-Dbuild.number=${{ github.run_number }}" "-Dbuild.commit=${{ needs.setup.outputs.latestMergeSha }}" "-Dbuild.timestamp=${{ needs.setup.outputs.timeStamp }}"
         env:
-          GITHUB_TOKEN: ${{ secrets.LIQUIBOT_PAT }}
+          GITHUB_TOKEN: ${{ secrets.LIQUIBASE_PAT }}
 
       # # Publish branch-SNAPSHOT version to GPM
       - name: Version Artifact
@@ -111,7 +111,7 @@ jobs:
         run: |
           mvn -B clean deploy -pl '!liquibase-dist' -DskipTests=true "-Dbuild.repository.owner=liquibase" "-Dbuild.repository.name=liquibase" "-Dbuild.branch=${{ needs.setup.outputs.thisBranchName }}" "-Dbuild.number=${{ github.run_number }}" "-Dbuild.commit=${{ needs.setup.outputs.latestMergeSha }}" "-Dbuild.timestamp=${{ needs.setup.outputs.timeStamp }}"
         env:
-          GITHUB_TOKEN: ${{ secrets.LIQUIBOT_PAT }}
+          GITHUB_TOKEN: ${{ secrets.LIQUIBASE_PAT }}
 
 
     #publish_tar_package_to_build_artifact:
@@ -125,7 +125,7 @@ jobs:
           INSTALL4J_WINDOWS_KEY: ${{ secrets.INSTALL4J_WINDOWS_KEY }}
           INSTALL4J_WINDOWS_KEY_PASSWORD: ${{ secrets.INSTALL4J_WINDOWS_KEY_PASSWORD }}
           GPG_PASSWORD: ${{ secrets.GPG_PASSPHRASE }}
-          LIQUIBOT_PAT: ${{ secrets.LIQUIBOT_PAT }}
+          LIQUIBASE_PAT: ${{ secrets.LIQUIBASE_PAT }}
           PUBLIC_REPO_ACCESS_TOKEN: ${{ secrets.PUBLIC_REPO_ACCESS_TOKEN }}
         run: |
           ## save install4j code signing keys
