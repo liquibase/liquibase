@@ -25,6 +25,7 @@ import liquibase.ui.UIService;
 import liquibase.util.CollectionUtil;
 import liquibase.util.SmartMap;
 import liquibase.util.StringUtil;
+import lombok.Getter;
 
 import java.lang.reflect.Constructor;
 import java.nio.charset.Charset;
@@ -72,6 +73,7 @@ public class Scope {
 
     private Scope parent;
     private final SmartMap values = new SmartMap();
+    @Getter
     private String scopeId;
     private static final Map<String, List<MdcObject>> addedMdcEntries = new ConcurrentHashMap<>();
 
