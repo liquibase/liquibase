@@ -1220,5 +1220,51 @@
             </column>
         </addColumn>
     </changeSet>
+    <changeSet id="prepare-rowCount" author="kzander91">
+        <createTable tableName="empty_table">
+            <column name="col" type="varchar(50)"/>
+        </createTable>
+
+        <createTable tableName="single_row_table">
+            <column name="col" type="varchar(50)"/>
+        </createTable>
+        <insert tableName="single_row_table">
+            <column name="col" value="row1"/>
+        </insert>
+
+        <createTable tableName="multi_row_table">
+            <column name="col" type="varchar(50)"/>
+        </createTable>
+        <insert tableName="multi_row_table">
+            <column name="col" value="row1"/>
+        </insert>
+        <insert tableName="multi_row_table">
+            <column name="col" value="row2"/>
+        </insert>
+    </changeSet>
+
+    <changeSet id="check-rowCount" author="kzander91">
+        <preConditions>
+            <rowCount tableName="empty_table" expectedRows="0"/>
+            <rowCount tableName="single_row_table" expectedRows="1"/>
+            <rowCount tableName="multi_row_table" expectedRows="2"/>
+            <not>
+                <!--                                                Long.MAX_VALUE -->
+                <rowCount tableName="multi_row_table" expectedRows="9223372036854775807"/>
+            </not>
+        </preConditions>
+    </changeSet>
+
+    <changeSet id="check-tableIsEmpty" author="kzander91">
+        <preConditions>
+            <tableIsEmpty tableName="empty_table"/>
+            <not>
+                <tableIsEmpty tableName="single_row_table"/>
+            </not>
+            <not>
+                <tableIsEmpty tableName="multi_row_table"/>
+            </not>
+        </preConditions>
+    </changeSet>
 
 </databaseChangeLog>
