@@ -118,7 +118,7 @@ jobs:
           INSTALL4J_WINDOWS_KEY: ${{ secrets.INSTALL4J_WINDOWS_KEY }}
           INSTALL4J_WINDOWS_KEY_PASSWORD: ${{ secrets.INSTALL4J_WINDOWS_KEY_PASSWORD }}
           GPG_PASSWORD: ${{ secrets.GPG_PASSPHRASE }}
-          GITHUB_TOKEN: ${{ secrets.LIQUIBASE_PAT }}
+          GITHUB_TOKEN: ${{ secrets.LIQUIBOT_PAT }}
         run: |
           ## save install4j code signing keys
           mkdir -p liquibase-dist/target/keys
@@ -144,20 +144,20 @@ jobs:
           mkdir artifacts-named
           cp liquibase-dist/target/liquibase-${{ needs.setup.outputs.thisBranchName }}-SNAPSHOT.tar.gz artifacts-named/liquibase-${{ needs.setup.outputs.thisBranchName }}.tar.gz
 
-            - name: Archive Packages
-              uses: actions/upload-artifact@v3
-              with:
-                name: liquibase-artifacts
-                path: artifacts/*
+      - name: Archive Packages
+        uses: actions/upload-artifact@v3
+        with:
+          name: liquibase-artifacts
+          path: artifacts/*
 
-            - name: Archive Convenience Zip
-              uses: actions/upload-artifact@v3
-              with:
-                name: liquibase-zip-${{ needs.setup.outputs.thisBranchName }}
-                path: liquibase-dist/target/liquibase-${{ needs.setup.outputs.thisBranchName }}-SNAPSHOT/*
+      - name: Archive Convenience Zip
+        uses: actions/upload-artifact@v3
+        with:
+          name: liquibase-zip-${{ needs.setup.outputs.thisBranchName }}
+          path: liquibase-dist/target/liquibase-${{ needs.setup.outputs.thisBranchName }}-SNAPSHOT/*
 
-            - name: Archive Convenience Artifacts
-              uses: actions/upload-artifact@v3
-              with:
-                name: liquibase-artifacts-${{ needs.setup.outputs.thisBranchName }}
-                path: artifacts-named/*
+      - name: Archive Convenience Artifacts
+        uses: actions/upload-artifact@v3
+        with:
+          name: liquibase-artifacts-${{ needs.setup.outputs.thisBranchName }}
+          path: artifacts-named/*
