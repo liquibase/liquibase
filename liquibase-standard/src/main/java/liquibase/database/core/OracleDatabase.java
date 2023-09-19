@@ -48,6 +48,7 @@ public class OracleDatabase extends AbstractJdbcDatabase {
     protected final int SHORT_IDENTIFIERS_LENGTH = 30;
     protected final int LONG_IDENTIFIERS_LEGNTH = 128;
     public static final int ORACLE_12C_MAJOR_VERSION = 12;
+    public static final int ORACLE_23C_MAJOR_VERSION = 23;
 
     private final Set<String> reservedWords = new HashSet<>();
     private Set<String> userDefinedTypes;
