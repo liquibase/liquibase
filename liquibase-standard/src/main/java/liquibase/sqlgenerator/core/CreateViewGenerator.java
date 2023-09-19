@@ -41,7 +41,7 @@ public class CreateViewGenerator extends AbstractSqlGenerator<CreateViewStatemen
                 validationErrors.addError("'replaceIfExists' is not allowed on DB2 version < 10.5");
             }
             else {
-                validationErrors.checkDisallowedField("replaceIfExists", createViewStatement.isReplaceIfExists(), database, Db2zDatabase.class, DerbyDatabase.class, SybaseASADatabase.class, InformixDatabase.class);
+                validationErrors.checkDisallowedField("replaceIfExists", createViewStatement.isReplaceIfExists(), database, Db2zDatabase.class, DerbyDatabase.class, InformixDatabase.class);
             }
         }
 
@@ -80,9 +80,6 @@ public class CreateViewGenerator extends AbstractSqlGenerator<CreateViewStatemen
         if (statement.isReplaceIfExists()) {
             if (database instanceof FirebirdDatabase) {
                 viewDefinition.replace("CREATE", "RECREATE");
-            } else if ((database instanceof SybaseASADatabase) && statement.getSelectQuery().toLowerCase().startsWith
-                ("create view")) {
-                // Sybase ASA saves view definitions with header.
             } else if (database instanceof MSSQLDatabase) {
                 //from http://stackoverflow.com/questions/163246/sql-server-equivalent-to-oracles-create-or-replace-view
                 CatalogAndSchema schema = new CatalogAndSchema(
