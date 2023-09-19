@@ -148,24 +148,22 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        #os: [ ubuntu-22.04, macos-latest, windows-2019 ]
-        os: [ ubuntu-22.04 ]
-        #java: [ 8, 11, 17, 20 ]
-        java: [ 11 ]
-        #exclude:
+        os: [ ubuntu-22.04, macos-latest, windows-2019 ]
+        java: [ 8, 11, 17, 20 ]
+        exclude:
           # exclude non-java 8 on macos and windows builds
-          # - os: macos-latest
-          #   java: 11
-          # - os: windows-2019
-          #   java: 11
-          # - os: macos-latest
-          #   java: 17
-          # - os: windows-2019
-          #   java: 17
-          # - os: macos-latest
-          #   java: 20
-          # - os: windows-2019
-          #   java: 20
+          - os: macos-latest
+            java: 11
+          - os: windows-2019
+            java: 11
+          - os: macos-latest
+            java: 17
+          - os: windows-2019
+            java: 17
+          - os: macos-latest
+            java: 20
+          - os: windows-2019
+            java: 20
     runs-on: ${{ matrix.os }}
     env:
       OS_TYPE: ${{ matrix.os }}
@@ -255,7 +253,6 @@ jobs:
       - uses: actions/checkout@v3
         with:
           ref: ${{ github.event.pull_request.head.sha || github.event.after}}
-          fetch-depth: 0
 
       - name: Prepare
         id: prepare
@@ -264,13 +261,12 @@ jobs:
           script: |
             core.setOutput("testResultsArtifact", "liquibase-test-results-integration-${{ matrix.testSystem }}".replace(/[^a-zA-Z0-9\-_]/g, "_"));
 
-      - name: Set up JDK
+      - name: Set up JDK 8
         uses: actions/setup-java@v3
         with:
-          java-version: 11
+          java-version: '8'
           distribution: 'temurin'
           cache: 'maven'
-          overwrite-settings: false
 
       # getting from build results page. If we remove 0-snapshot then we will need settings.xml
 
@@ -309,7 +305,7 @@ jobs:
             ./liquibase-integration-tests/target/jacoco.exec
 
   sonar:
-    needs: [integration-test]
+    needs: [setup, build, integration-test]
     uses: liquibase/build-logic/.github/workflows/sonar-test-scan.yml@DAT-10564
     with:
       thisBranchName: ${{ needs.setup.outputs.thisBranchName }}
