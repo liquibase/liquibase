@@ -6,11 +6,6 @@ on:
     types:
       - completed
 
-  #testing-remove this block
-  push:
-    branches:
-      - '*'
-
 env:
   MAVEN_VERSION: '3.9.2'
 
