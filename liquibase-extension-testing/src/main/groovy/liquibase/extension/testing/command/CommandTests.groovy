@@ -189,8 +189,15 @@ Long Description: ${commandDefinition.getLongDescription() ?: "NOT SET"}
         if (!foundOptional) {
             signature.println "  NONE"
         }
-        assert StringUtil.standardizeLineEndings(StringUtil.trimToEmpty(signature.toString())) ==
-               StringUtil.standardizeLineEndings(StringUtil.trimToEmpty(commandTestDefinition.signature))
+        def actualSignature = signature.toString()
+        def expectedSignature = commandTestDefinition.signature
+
+        if (expectedSignature == NOT_NULL) {
+            assert actualSignature != null: "The result is null"
+        } else {
+            assert StringUtil.standardizeLineEndings(StringUtil.trimToEmpty(actualSignature)) ==
+                    StringUtil.standardizeLineEndings(StringUtil.trimToEmpty(expectedSignature))
+        }
 
         where:
         commandTestDefinition << getCommandTestDefinitions()
@@ -1133,17 +1140,7 @@ Long Description: ${commandDefinition.getLongDescription() ?: "NOT SET"}
         }
 
         void copyResource(String originalFile, String newFile, boolean writeInTargetTestClasses) {
-            URL url = Thread.currentThread().getContextClassLoader().getResource(originalFile)
-            File f = new File(url.toURI())
-            String contents = FileUtil.getContents(f)
-            File outputFile
-            if (writeInTargetTestClasses) {
-                outputFile = new File("target/test-classes", newFile)
-            } else {
-                outputFile = new File(newFile)
-            }
-            FileUtil.write(contents, outputFile)
-            println "Copied file " + originalFile + " to file " + newFile
+            this.setups.add(new SetupCreateTempResources(originalFile, newFile, writeInTargetTestClasses ? "target/test-classes" : "."))
         }
 
         /**

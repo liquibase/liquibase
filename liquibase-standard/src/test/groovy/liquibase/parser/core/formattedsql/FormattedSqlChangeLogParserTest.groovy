@@ -246,8 +246,8 @@ create table table1 (
                     "-precondition 123\n" +
                     "select 1;"
 
-    private static final String VALID_ALL_CAPS_CHANGELOG = """
---LIQUIBASE FORMATTED SQL
+    private static final String VALID_ALL_CAPS_CHANGELOG =
+"""--LIQUIBASE FORMATTED SQL
 
 --CHANGESET SOME_USER:ALL_CAPS_SCRIPT_1
 CREATE TABLE ALL_CAPS_TABLE_1 (
@@ -291,6 +291,7 @@ CREATE TABLE ALL_CAPS_TABLE_2 (
         assert e != null
         assert e instanceof ChangeLogParseException
         assert e.getMessage().toLowerCase().contains("--precondition-sql-check")
+        assert e.getMessage().contains("Unexpected formatting in formatted changelog 'asdf.sql' at line 4.")
     }
 
     def parse() throws Exception {
@@ -528,6 +529,7 @@ CREATE TABLE ALL_CAPS_TABLE_2 (
         then:
         def e = thrown(ChangeLogParseException)
         assert e
+        assert e.getMessage().contains("Unexpected formatting in formatted changelog 'asdf.sql' at line 3.")
     }
 
     def "parse changeset with 'onSqlOutput' precondition set"() throws Exception {
