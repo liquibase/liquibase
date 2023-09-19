@@ -214,7 +214,7 @@ jobs:
             ./**/target/surefire-reports
             ./**/target/site
 
-      - name: Save Jacoco Teport for Sonar
+      - name: Save Jacoco Report for Sonar
         if: ${{ matrix.java == 11 && matrix.os == 'ubuntu-22.04'}}
         uses: actions/upload-artifact@v3
         with:
