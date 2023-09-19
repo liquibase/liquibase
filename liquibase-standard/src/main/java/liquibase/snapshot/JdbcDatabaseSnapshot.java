@@ -938,7 +938,7 @@ public class JdbcDatabaseSnapshot extends DatabaseSnapshot {
                         "WHERE ref.tabschema = ? ");
                 parameters.add(jdbcSchemaName);
                 if (tableName != null) {
-                    sql.append("fk_col.tabname = ? ");
+                    sql.append("and fk_col.tabname = ? ");
                     parameters.add(tableName);
                 }
                 sql.append("ORDER BY fk_col.colseq");
