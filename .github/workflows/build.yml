@@ -247,7 +247,7 @@ jobs:
            - postgresql
            - sqlite
            - firebird
-    needs: build
+    needs: setup
     timeout-minutes: 30
     steps:
       - uses: actions/checkout@v3
@@ -305,7 +305,7 @@ jobs:
             ./liquibase-integration-tests/target/jacoco.exec
 
   sonar:
-    needs: [setup, build, integration-test]
+    needs: integration-test
     uses: liquibase/build-logic/.github/workflows/sonar-test-scan.yml@v0.4.3
     with:
       thisBranchName: ${{ needs.setup.outputs.thisBranchName }}
