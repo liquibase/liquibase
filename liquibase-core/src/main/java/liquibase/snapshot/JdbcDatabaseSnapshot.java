@@ -4,19 +4,7 @@ import liquibase.CatalogAndSchema;
 import liquibase.database.AbstractJdbcDatabase;
 import liquibase.database.Database;
 import liquibase.database.DatabaseConnection;
-import liquibase.database.core.AbstractDb2Database;
-import liquibase.database.core.DB2Database;
-import liquibase.database.core.Db2zDatabase;
-import liquibase.database.core.DerbyDatabase;
-import liquibase.database.core.FirebirdDatabase;
-import liquibase.database.core.HsqlDatabase;
-import liquibase.database.core.InformixDatabase;
-import liquibase.database.core.MSSQLDatabase;
-import liquibase.database.core.MySQLDatabase;
-import liquibase.database.core.OracleDatabase;
-import liquibase.database.core.PostgresDatabase;
-import liquibase.database.core.SybaseASADatabase;
-import liquibase.database.core.SybaseDatabase;
+import liquibase.database.core.*;
 import liquibase.database.jvm.JdbcConnection;
 import liquibase.exception.DatabaseException;
 import liquibase.executor.jvm.ColumnMapRowMapper;
@@ -30,17 +18,8 @@ import liquibase.structure.core.View;
 import liquibase.util.JdbcUtils;
 import liquibase.util.StringUtils;
 
-import java.sql.DatabaseMetaData;
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.sql.Statement;
-import java.sql.Types;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.sql.*;
+import java.util.*;
 
 public class JdbcDatabaseSnapshot extends DatabaseSnapshot {
 
@@ -197,7 +176,7 @@ public class JdbcDatabaseSnapshot extends DatabaseSnapshot {
                             sql += " AND i.name='" + database.escapeStringForDatabase(indexName) + "'";
                         }
 
-                        sql += "ORDER BY i.object_id, i.index_id, c.key_ordinal";
+                        sql += "ORDER BY i.object_id, i.index_id, c.key_ordinal, c.index_column_id";
 
                         returnList.addAll(executeAndExtract(sql, database));
 
