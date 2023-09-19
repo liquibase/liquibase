@@ -302,7 +302,7 @@ jobs:
         with:
           name: liquibase-integration-jacoco-test-results-${{ matrix.testSystem }}
           path: |
-            **/target/**
+            ./liquibase-integration-tests/target/jacoco.exec
 
   sonar:
     needs: [setup, build, integration-test]
