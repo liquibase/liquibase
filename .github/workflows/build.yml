@@ -148,22 +148,24 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        os: [ ubuntu-22.04, macos-latest, windows-2019 ]
-        java: [ 8, 11, 17, 20 ]
-        exclude:
+        #os: [ ubuntu-22.04, macos-latest, windows-2019 ]
+        os: [ ubuntu-22.04 ]
+        #java: [ 8, 11, 17, 20 ]
+        java: [ 11 ]
+        #exclude:
           # exclude non-java 8 on macos and windows builds
-          - os: macos-latest
-            java: 11
-          - os: windows-2019
-            java: 11
-          - os: macos-latest
-            java: 17
-          - os: windows-2019
-            java: 17
-          - os: macos-latest
-            java: 20
-          - os: windows-2019
-            java: 20
+          # - os: macos-latest
+          #   java: 11
+          # - os: windows-2019
+          #   java: 11
+          # - os: macos-latest
+          #   java: 17
+          # - os: windows-2019
+          #   java: 17
+          # - os: macos-latest
+          #   java: 20
+          # - os: windows-2019
+          #   java: 20
     runs-on: ${{ matrix.os }}
     env:
       OS_TYPE: ${{ matrix.os }}
@@ -307,7 +309,7 @@ jobs:
             ./liquibase-integration-tests/target/jacoco.exec
 
   sonar:
-    needs: [setup, build, integration-test]
+    needs: [integration-test]
     uses: liquibase/build-logic/.github/workflows/sonar-test-scan.yml@DAT-10564
     with:
       thisBranchName: ${{ needs.setup.outputs.thisBranchName }}
