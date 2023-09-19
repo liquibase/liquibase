@@ -319,6 +319,7 @@ jobs:
       unitTestReportArtifactName: liquibase-jacoco-test-results
       integrationTestReportArtifactName: liquibase-integration-jacoco-test-results
       testedClassesModuleName: liquibase-standard
+      mavenArgs: -pl '!liquibase-cdi-jakarta'
     secrets: inherit
 
   package:
