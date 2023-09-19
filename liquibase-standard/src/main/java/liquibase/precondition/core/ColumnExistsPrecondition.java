@@ -122,68 +122,58 @@ public class ColumnExistsPrecondition extends AbstractPrecondition {
     private void checkFast(Database database, DatabaseChangeLog changeLog)
             throws PreconditionFailedException, PreconditionErrorException {
 
-        PreparedStatement statement = null;
-        try {
-            String schemaName = getSchemaName();
-            if (schemaName == null) {
-                schemaName = database.getDefaultSchemaName();
-            }
-            String tableName = getTableName();
-            String columnName = getColumnName();
+        String schemaName = getSchemaName();
+        if (schemaName == null) {
+            schemaName = database.getDefaultSchemaName();
+        }
+        String tableName = getTableName();
+        String columnName = getColumnName();
 
-            if (database instanceof PostgresDatabase) {
-                String sql = "SELECT 1 FROM pg_attribute a WHERE EXISTS (SELECT 1 FROM pg_class JOIN pg_catalog.pg_namespace ns ON ns.oid = pg_class.relnamespace WHERE lower(ns.nspname) = ? AND lower(relname) = lower(?) AND pg_class.oid = a.attrelid) AND lower(a.attname) = lower(?);";
-                statement = ((JdbcConnection) database.getConnection())
-                        .prepareStatement(sql);
-                statement.setString(1, schemaName.toLowerCase());
-                statement.setString(2, tableName);
-                statement.setString(3, columnName);
-                try {
-                    try (ResultSet rs = statement.executeQuery()) {
-                        if (rs.next()) {
-                            return;
-                        } else {
-                            // column or table does not exist
-                            throw new PreconditionFailedException(format("Column %s.%s.%s does not exist", schemaName, tableName, columnName), changeLog, this);
-                        }
+        if (database instanceof PostgresDatabase) {
+            String sql = "SELECT 1 FROM pg_attribute a WHERE EXISTS (SELECT 1 FROM pg_class JOIN pg_catalog.pg_namespace ns ON ns.oid = pg_class.relnamespace WHERE lower(ns.nspname) = ? AND lower(relname) = lower(?) AND pg_class.oid = a.attrelid) AND lower(a.attname) = lower(?);";
+
+
+            try {
+                try (PreparedStatement statement = ((JdbcConnection) database.getConnection())
+                    .prepareStatement(sql)) {
+                    ResultSet rs = statement.executeQuery();
+                    statement.setString(1, schemaName.toLowerCase());
+                    statement.setString(2, tableName);
+                    statement.setString(3, columnName);
+                    if (rs.next()) {
+                        return;
+                    } else {
+                        // column or table does not exist
+                        throw new PreconditionFailedException(format("Column %s.%s.%s does not exist", schemaName, tableName, columnName), changeLog, this);
                     }
-                } catch (SQLException e) {
-                    throw new PreconditionErrorException(e, changeLog, this);
                 }
+            } catch (SQLException | DatabaseException e) {
+                throw new PreconditionErrorException(e, changeLog, this);
+            }
+        } else {
+            String sql;
+            if (database instanceof FirebirdDatabase) {
+                sql = format("select t.%s from %s t where 0=1",
+                        database.escapeColumnNameList(columnName),
+                        database.escapeObjectName(tableName, Table.class));
             } else {
-                String sql;
-                if (database instanceof FirebirdDatabase) {
-                    sql = format("select t.%s from %s t where 0=1",
-                            database.escapeColumnNameList(columnName),
-                            database.escapeObjectName(tableName, Table.class));
-                } else {
-                    sql = format("select t.%s from %s.%s t where 0=1",
-                            database.escapeColumnNameList(columnName),
-                            database.escapeObjectName(schemaName, Schema.class),
-                            database.escapeObjectName(tableName, Table.class));
-                }
-
-                statement = ((JdbcConnection) database.getConnection())
-                        .prepareStatement(sql);
-                try {
-                    statement.executeQuery().close();
-                    // column exists
-                } catch (SQLException e) {
-                    // column or table does not exist
-                    throw new PreconditionFailedException(format(
-                            "Column %s.%s.%s does not exist", schemaName,
-                            tableName, columnName), changeLog, this);
-                }
-                finally {
-                    JdbcUtil.closeStatement(statement);
-                }
+                sql = format("select t.%s from %s.%s t where 0=1",
+                        database.escapeColumnNameList(columnName),
+                        database.escapeObjectName(schemaName, Schema.class),
+                        database.escapeObjectName(tableName, Table.class));
             }
 
-        } catch (DatabaseException | SQLException e) {
-            throw new PreconditionErrorException(e, changeLog, this);
 
-        } finally {
-            JdbcUtil.closeStatement(statement);
+            try (PreparedStatement statement = ((JdbcConnection) database.getConnection())
+                    .prepareStatement(sql)) {
+                statement.executeQuery();
+                // column exists
+            } catch (SQLException | DatabaseException e) {
+                // column or table does not exist
+                throw new PreconditionFailedException(format(
+                        "Column %s.%s.%s does not exist", schemaName,
+                        tableName, columnName), changeLog, this);
+            }
         }
     }
 
