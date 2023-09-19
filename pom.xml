@@ -413,7 +413,7 @@
                         <goal>verify</goal>
                         </goals>
                         <configuration>
-                            <skipTests>${skip.integration.tests}</skipTests>
+                            <skipITs>${skip.integration.tests}</skipITs>
                             <includes>
                                 <include>liquibase-integration-tests/**/*Test.java</include>
                             </includes>
@@ -644,13 +644,6 @@
             <properties>
                 <skip.integration.tests>false</skip.integration.tests>
                 <skip.unit.tests>false</skip.unit.tests>
-            </properties>
-        </profile>
-        <profile>
-            <id>no-test</id>
-            <properties>
-                <skip.integration.tests>true</skip.integration.tests>
-                <skip.unit.tests>true</skip.unit.tests>
             </properties>
         </profile>
     </profiles>
