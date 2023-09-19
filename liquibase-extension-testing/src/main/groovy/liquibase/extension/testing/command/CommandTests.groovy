@@ -1140,6 +1140,7 @@ Long Description: ${commandDefinition.getLongDescription() ?: "NOT SET"}
         }
 
         void copyResource(String originalFile, String newFile, boolean writeInTargetTestClasses) {
+            this.setups.add(new SetupCreateTempResources(originalFile, newFile, writeInTargetTestClasses ? "target/test-classes" : "."))
         }
 
         /**
