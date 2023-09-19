@@ -348,7 +348,7 @@ public class DatabaseChangeLog implements Comparable<DatabaseChangeLog>, Conditi
         }
 
         if (!validatingVisitor.validationPassed()) {
-            Scope.getCurrentScope().addMdcValue(MdcKey.DEPLOYMENT_OUTCOME, MdcValue.COMMAND_FAILED, false);
+            Scope.getCurrentScope().addMdcValue(MdcKey.DEPLOYMENT_OUTCOME, MdcValue.COMMAND_FAILED);
             Scope.getCurrentScope().getLog(getClass()).info("Change failed validation!");
             throw new ValidationFailedException(validatingVisitor);
         }

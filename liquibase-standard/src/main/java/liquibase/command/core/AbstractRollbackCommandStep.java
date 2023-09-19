@@ -101,8 +101,9 @@ public abstract class AbstractRollbackCommandStep extends AbstractCommandStep {
             addChangelogFileToMdc(changelogFile, databaseChangeLog);
             Scope.getCurrentScope().addMdcValue(MdcKey.CHANGESETS_ROLLED_BACK, ChangesetsRolledback.fromChangesetList(changeSets));
         }
-        Scope.getCurrentScope().getMdcManager().put(MdcKey.DEPLOYMENT_OUTCOME, MdcValue.COMMAND_SUCCESSFUL);
-        Scope.getCurrentScope().getLog(AbstractRollbackCommandStep.class).info("Rollback command completed successfully.");
+        try (MdcObject deploymentOutcomeMdc = Scope.getCurrentScope().getMdcManager().put(MdcKey.DEPLOYMENT_OUTCOME, MdcValue.COMMAND_SUCCESSFUL)) {
+            Scope.getCurrentScope().getLog(AbstractRollbackCommandStep.class).info("Rollback command completed successfully.");
+        }
     }
 
     private static void addChangelogFileToMdc(String changelogFile, DatabaseChangeLog databaseChangeLog) {
@@ -205,8 +206,9 @@ public abstract class AbstractRollbackCommandStep extends AbstractCommandStep {
     }
 
     private static void handleRollbackException(String operationName) {
-        Scope.getCurrentScope().addMdcValue(MdcKey.DEPLOYMENT_OUTCOME, MdcValue.COMMAND_FAILED, false);
-        Scope.getCurrentScope().getLog(AbstractRollbackCommandStep.class).info(operationName + " command encountered an exception.");
+        try (MdcObject deploymentOutcomeMdc = Scope.getCurrentScope().addMdcValue(MdcKey.DEPLOYMENT_OUTCOME, MdcValue.COMMAND_FAILED)) {
+            Scope.getCurrentScope().getLog(AbstractRollbackCommandStep.class).info(operationName + " command encountered an exception.");
+        }
     }
 
     @Override
