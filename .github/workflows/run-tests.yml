@@ -21,7 +21,8 @@ on:
       - reopened
       - synchronize
       - labeled
-#  push:
+  #remove commented code later
+#   push:
 #    branches-ignore:
 #      - github-action-**
 #      - DAT-**
