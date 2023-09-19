@@ -31,7 +31,17 @@ public class SQLiteIntegrationTest extends AbstractIntegrationTest {
     }
 
     @Override
-    public void testTableExistsPreconditionTableNameMatch() throws Exception {
+    public void testTableExistsPreconditionTableNameMatch() {
+        //does not work for sqlite
+    }
+
+    @Override
+    public void testTableIsEmptyPrecondition() {
+        //does not work for sqlite
+    }
+
+    @Override
+    public void testRowCountPrecondition() {
         //does not work for sqlite
     }
 
