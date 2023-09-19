@@ -484,8 +484,20 @@
         </createTable>
     </changeSet>
     <changeSet id="sampleCSVData1" author="nvoxland">
+        <preConditions>
+            <tableIsEmpty tableName="csvdata"/>
+        </preConditions>
         <loadData tableName="csvdata" file="changelogs/sample.data1.csv"/>
     </changeSet>
+
+    <changeSet id="tableIsEmptyShouldFail" author="flautert">
+        <preConditions onFail="MARK_RAN">
+            <tableIsEmpty tableName="csvdata"/>
+        </preConditions>
+        <!-- if table is dropped then next changesets will fail, thus it is an indirect check -->
+        <dropTable tableName="csvdata" />
+    </changeSet>
+
     <changeSet id="sampleTSVData" author="nvoxland">
         <loadData tableName="csvdata" file="changelogs/sample.data1.tsv" separator="&#9;"/>
     </changeSet>
