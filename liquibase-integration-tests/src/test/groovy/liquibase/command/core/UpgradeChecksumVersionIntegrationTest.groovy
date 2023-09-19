@@ -14,6 +14,7 @@ import liquibase.extension.testing.testsystem.spock.LiquibaseIntegrationTest
 import liquibase.statement.core.RawSqlStatement
 import spock.lang.Shared
 import spock.lang.Specification
+import spock.lang.Unroll
 
 @LiquibaseIntegrationTest
 class UpgradeChecksumVersionIntegrationTest extends Specification{
@@ -34,11 +35,12 @@ VALUES('1', 'your.name', '$changelogfile', '2023-05-31 14:33:39.108', 1, 'EXECUT
 """))
     }
 
+    @Unroll
     def "update command should upgrade all checksums when no filters supplied" () {
         def changesetFilepath = "changelogs/common/checksum-changelog.xml"
         final ChangeLogHistoryService changeLogService = ChangeLogHistoryServiceFactory.getInstance().getChangeLogService(mysql.getDatabaseFromFactory())
         changeLogService.init()
-        insertDbclRecord(changesetFilepath)
+        insertDbclRecord(storedFilepathPrefix + changesetFilepath)
 
         when:
         def ranChangeSets = getRanChangesets(changeLogService)
@@ -62,6 +64,11 @@ VALUES('1', 'your.name', '$changelogfile', '2023-05-31 14:33:39.108', 1, 'EXECUT
 
         cleanup:
         CommandUtil.runDropAll(mysql)
+
+        where:
+        storedFilepathPrefix | _
+        "" | _
+        "classpath:" | _
     }
 
     def "update command should upgrade only matching changesets when filter is applied" () {
