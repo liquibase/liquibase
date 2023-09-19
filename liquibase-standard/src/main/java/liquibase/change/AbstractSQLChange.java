@@ -62,6 +62,10 @@ public abstract class AbstractSQLChange extends AbstractChange implements DbmsTa
         this.originalSplitStatements = originalSplitStatements;
     }
 
+    public Boolean isOriginalSplitStatements() {
+        return originalSplitStatements;
+    }
+
     public InputStream openSqlStream() throws IOException {
         return null;
     }
