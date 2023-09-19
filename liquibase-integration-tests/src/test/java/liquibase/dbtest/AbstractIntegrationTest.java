@@ -1131,7 +1131,7 @@ public abstract class AbstractIntegrationTest {
             PreconditionFailedException ex = assertThrows(PreconditionFailedException.class, () -> precondition.check(this.getDatabase(), null, null, null));
             assertEquals(1, ex.getFailedPreconditions().size());
 
-            String expectedMessage = String.format("Table %s is not empty. Contains %s rows", tableName, actualRows);
+            String expectedMessage = String.format("Table %s is not empty.", tableName);
             assertEquals(expectedMessage, ex.getFailedPreconditions().get(0).getMessage());
         }
     }
