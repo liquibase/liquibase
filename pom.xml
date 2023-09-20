@@ -83,8 +83,6 @@
         <sonar.moduleKey>{project.groupId}:${project.artifactId}</sonar.moduleKey>
         <code.coverage.project.folder>${basedir}/../</code.coverage.project.folder>
         <code.coverage.overall.data.folder>${basedir}/target/</code.coverage.overall.data.folder>      
-        <skip.integration.tests>false</skip.integration.tests>
-        <skip.unit.tests>false</skip.unit.tests>
         <itCoverageAgent></itCoverageAgent>
         <sonar.coverage.jacoco.xmlReportPaths>liquibase-coverage/target/site/jacoco-aggregate/jacoco.xml</sonar.coverage.jacoco.xmlReportPaths>
     </properties>
@@ -387,7 +385,6 @@
                     </dependency>
                 </dependencies>
                 <configuration>
-                    <skipTests>${skip.unit.tests}</skipTests>
                     <argLine>-Dfile.encoding=${project.build.sourceEncoding}</argLine>
                     <includes>
                         <include>**/Test*.java</include>
@@ -413,7 +410,6 @@
                         <goal>verify</goal>
                         </goals>
                         <configuration>
-                            <skipITs>${skip.integration.tests}</skipITs>
                             <includes>
                                 <include>liquibase-integration-tests/**/*Test.java</include>
                             </includes>
@@ -624,27 +620,6 @@
                     </snapshots>
                 </repository>
             </repositories>
-        </profile>
-        <profile>
-            <id>unit</id>
-            <properties>
-                <skip.integration.tests>true</skip.integration.tests>
-                <skip.unit.tests>false</skip.unit.tests>
-            </properties>
-        </profile>
-        <profile>
-            <id>integration-test</id>
-            <properties>
-                <skip.integration.tests>false</skip.integration.tests>
-                <skip.unit.tests>true</skip.unit.tests>
-            </properties>
-        </profile>
-        <profile>
-            <id>testAll</id>
-            <properties>
-                <skip.integration.tests>false</skip.integration.tests>
-                <skip.unit.tests>false</skip.unit.tests>
-            </properties>
         </profile>
     </profiles>
 </project>
