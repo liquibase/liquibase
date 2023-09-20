@@ -109,7 +109,7 @@
                         </filter>
                     </filters>
                     <dependencyReducedPomLocation>${project.build.directory}/dependency-reduced-pom.xml</dependencyReducedPomLocation>
-                    <createDependencyReducedPom>false</createDependencyReducedPom>
+                    <createDependencyReducedPom>true</createDependencyReducedPom>
                     <promoteTransitiveDependencies>true</promoteTransitiveDependencies>
                     <createSourcesJar>true</createSourcesJar>
                     <createTestSourcesJar>false</createTestSourcesJar>
