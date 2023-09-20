@@ -27,7 +27,7 @@ public class ValidatingVisitorUtil {
 
     public static boolean isChecksumIssue(ChangeSet changeSet, RanChangeSet ranChangeSet, DatabaseChangeLog databaseChangeLog, Database database) {
         return ValidatingVisitorUtil.validateMongoDbExtensionIssue(changeSet, ranChangeSet, databaseChangeLog, database) ||
-               ValidatingVisitorUtil.validateAbstractSqlChangeV8ChecksumVariant(changeSet, ranChangeSet, databaseChangeLog, database);
+               ValidatingVisitorUtil.validateAbstractSqlChangeV8ChecksumVariant(changeSet, ranChangeSet);
     }
 
 
@@ -41,7 +41,7 @@ public class ValidatingVisitorUtil {
      * * does this change extends from AbstractSQLChange?
      * * Changing splitStaments makes it work?
      */
-    private static boolean validateAbstractSqlChangeV8ChecksumVariant(ChangeSet changeSet, RanChangeSet ranChangeSet, DatabaseChangeLog databaseChangeLog, Database database) {
+    private static boolean validateAbstractSqlChangeV8ChecksumVariant(ChangeSet changeSet, RanChangeSet ranChangeSet) {
         if (StringUtil.isNotEmpty(changeSet.getRunWith()) &&
             ChecksumVersion.V8.lowerOrEqualThan(Scope.getCurrentScope().getChecksumVersion())) {
 
