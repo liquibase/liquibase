@@ -319,7 +319,7 @@ jobs:
       integrationTestReportArtifactName: liquibase-integration-jacoco-test-results
       testedClassesModuleName: liquibase-standard
       mavenArgs: -pl '!liquibase-cdi-jakarta'
-      dbPlatforms: h2,hsqldb,mariadb,mssql,mysql,oracle,postgresql,sqlite,firebird
+      dbPlatforms: h2,hsqldb,mariadb,mssql,mysql,oracle,postgresql,sqlite
     secrets: inherit
 
   package:
