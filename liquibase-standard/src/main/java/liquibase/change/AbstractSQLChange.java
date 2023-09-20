@@ -58,10 +58,15 @@ public abstract class AbstractSQLChange extends AbstractChange implements DbmsTa
         setSplitStatements(null);
     }
 
+    @Deprecated
     public void setOriginalSplitStatements(Boolean originalSplitStatements) {
         this.originalSplitStatements = originalSplitStatements;
     }
 
+    /**
+     * isOriginalSplitStatements is used by checksums v8 calculator only to define splitStatements behavior
+     */
+    @Deprecated
     public Boolean isOriginalSplitStatements() {
         return originalSplitStatements;
     }
