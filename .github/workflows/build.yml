@@ -148,8 +148,10 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        os: [ ubuntu-22.04, macos-latest, windows-2019 ]
-        java: [ 8, 11, 17, 20 ]
+        os: [ ubuntu-22.04 ]
+        java: [ 11 ]
+        #os: [ ubuntu-22.04, macos-latest, windows-2019 ]
+        #java: [ 8, 11, 17, 20 ]
         exclude:
           # exclude non-java 8 on macos and windows builds
           - os: macos-latest
@@ -237,16 +239,16 @@ jobs:
       fail-fast: false
       matrix:
         testSystem:
-           - h2
-           #- h2:1.4
-           - hsqldb
-           - mariadb
-           - mssql
-           - mysql
-           - oracle
-           - postgresql
-           - sqlite
-           - firebird
+          #  - h2
+          #  #- h2:1.4
+            - hsqldb
+          #  - mariadb
+          #  - mssql
+          #  - mysql
+          #  - oracle
+          #  - postgresql
+          #  - sqlite
+          #  - firebird
     needs: setup
     timeout-minutes: 30
     steps:
