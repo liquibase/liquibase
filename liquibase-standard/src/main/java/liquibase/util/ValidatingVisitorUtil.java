@@ -32,10 +32,10 @@ public class ValidatingVisitorUtil {
 
 
     /**
-     * AbstractSqlChange checksum had the default calculated value changed from Liquibase versions 4.19.1 to 4.23.1
-     * when using runWith="anything". This method validatesthe v8 checksum using the alternative algorithm as a way
-     * to allow users to upgrade to checksums v9 without facing any errors or unexpected behaviours. To accomplish
-     * that it will check for:
+     * AbstractSqlChange checksum had the checksum calculated value changed for Liquibase versions 4.19.1 to 4.23.1
+     * due to some changes on the way that we call it when using runWith="anything".
+     * This method validates the v8 checksum using the alternative algorithm as a way to allow users to upgrade to
+     * checksums v9 without facing any errors or unexpected behaviours. To accomplish that it will check for:
      * * do we have runWith set?
      * * are we working with a v8 checksum?
      * * does this change extends from AbstractSQLChange?
