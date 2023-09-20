@@ -13,6 +13,7 @@ import liquibase.configuration.ConfiguredValue;
 import liquibase.configuration.LiquibaseConfiguration;
 import liquibase.configuration.core.DeprecatedConfigurationValueProvider;
 import liquibase.database.Database;
+import liquibase.database.jvm.JdbcConnection;
 import liquibase.exception.*;
 import liquibase.integration.IntegrationDetails;
 import liquibase.io.WriterOutputStream;
@@ -1414,7 +1415,7 @@ public class Main {
                     this.databaseClass, this.driverPropertiesFile, this.propertyProviderClass,
                     this.liquibaseCatalogName, this.liquibaseSchemaName, this.databaseChangeLogTableName,
                     this.databaseChangeLogLockTableName);
-            Scope.getCurrentScope().addMdcValue(MdcKey.LIQUIBASE_TARGET_URL, this.url);
+            Scope.getCurrentScope().addMdcValue(MdcKey.LIQUIBASE_TARGET_URL, JdbcConnection.sanitizeUrl(this.url));
             Scope.getCurrentScope().addMdcValue(MdcKey.LIQUIBASE_CATALOG_NAME, database.getLiquibaseCatalogName());
             Scope.getCurrentScope().addMdcValue(MdcKey.LIQUIBASE_SCHEMA_NAME, database.getLiquibaseSchemaName());
             if (this.databaseChangeLogTablespaceName != null) {

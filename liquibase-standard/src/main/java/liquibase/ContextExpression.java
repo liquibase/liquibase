@@ -19,10 +19,12 @@ public class ContextExpression {
     public ContextExpression(String... contexts) {
         if (contexts.length == 1) {
             parseContextString(contexts[0]);
+            originalString = contexts[0];
         } else {
             for (String context : contexts) {
                 parseContextString(context.toLowerCase());
             }
+            originalString = StringUtil.join(contexts, ",");
         }
     }
 
@@ -36,6 +38,7 @@ public class ContextExpression {
             for (String context : contexts) {
                 this.contexts.add(context.toLowerCase());
             }
+            originalString = StringUtil.join(contexts, ",");
         }
     }
 
