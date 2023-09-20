@@ -246,7 +246,7 @@ jobs:
            - oracle
            - postgresql
            - sqlite
-           #- firebird
+           - firebird
     needs: setup
     timeout-minutes: 30
     steps:
@@ -318,7 +318,7 @@ jobs:
       unitTestReportArtifactName: liquibase-jacoco-test-results
       integrationTestReportArtifactName: liquibase-integration-jacoco-test-results
       testedClassesModuleName: liquibase-standard
-      dbPlatforms: h2,hsqldb,mariadb,mssql,mysql,oracle,postgresql,sqlite
+      dbPlatforms: h2,hsqldb,mariadb,mssql,mysql,oracle,postgresql,sqlite,firebird
     secrets: inherit
 
   package:
