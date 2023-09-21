@@ -120,7 +120,8 @@ jobs:
           INSTALL4J_WINDOWS_KEY: ${{ secrets.INSTALL4J_WINDOWS_KEY }}
           INSTALL4J_WINDOWS_KEY_PASSWORD: ${{ secrets.INSTALL4J_WINDOWS_KEY_PASSWORD }}
           GPG_PASSWORD: ${{ secrets.GPG_PASSPHRASE }}
-          GITHUB_TOKEN: ${{ secrets.LIQUIBOT_PAT }}
+          GITHUB_TOKEN: ${{ secrets.TESTING_PAT }}
+          PUBLIC_REPO_ACCESS_TOKEN: ${{ secrets.PUBLIC_REPO_ACCESS_TOKEN }}
         run: |
           ## save install4j code signing keys
           mkdir -p liquibase-dist/target/keys
