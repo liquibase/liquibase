@@ -66,7 +66,7 @@ public class ValidatingVisitorUtil {
      */
     private static void clearChecksumAndRevertOriginalSplitStatements(ChangeSet changeSet, List<AbstractSQLChange> changes) {
         changes.forEach(change -> {
-            change.setOriginalSplitStatements(!change.isOriginalSplitStatements());
+            change.setOriginalSplitStatements(!BooleanUtil.isTrue(change.isOriginalSplitStatements()));
         });
         changeSet.clearCheckSum();
     }

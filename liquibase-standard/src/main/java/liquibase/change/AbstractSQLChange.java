@@ -38,7 +38,7 @@ public abstract class AbstractSQLChange extends AbstractChange implements DbmsTa
     private boolean stripComments;
     private boolean splitStatements;
 
-    private boolean originalSplitStatements;
+    private Boolean originalSplitStatements;
     /**
      *
      * @deprecated  To be removed when splitStatements is changed to be type Boolean
@@ -59,7 +59,7 @@ public abstract class AbstractSQLChange extends AbstractChange implements DbmsTa
     }
 
     @Deprecated
-    public void setOriginalSplitStatements(boolean originalSplitStatements) {
+    public void setOriginalSplitStatements(Boolean originalSplitStatements) {
         this.originalSplitStatements = originalSplitStatements;
     }
 
@@ -67,7 +67,7 @@ public abstract class AbstractSQLChange extends AbstractChange implements DbmsTa
      * isOriginalSplitStatements is used by checksums v8 calculator only to define splitStatements behavior
      */
     @Deprecated
-    public boolean isOriginalSplitStatements() {
+    public Boolean isOriginalSplitStatements() {
         return originalSplitStatements;
     }
 
