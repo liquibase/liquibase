@@ -399,7 +399,6 @@
                 </configuration>
             </plugin>
 
-            <!-- INTEGRATION test via 'mvn clean install -P integration-test -->
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-failsafe-plugin</artifactId>
@@ -408,7 +407,6 @@
                     <execution>
                         <id>integration-tests</id>
                         <goals>
-                            <goal>integration-test</goal>
                         <goal>verify</goal>
                         </goals>
                         <configuration>
@@ -476,7 +474,7 @@
                 <executions>
                     <execution>
                         <id>attach-sources</id>
-                        <phase>verify</phase>
+                        <phase>package</phase>
                         <goals>
                             <goal>jar</goal>
                         </goals>
@@ -610,7 +608,6 @@
                     <url>https://maven.pkg.github.com/liquibase/liquibase</url>
                     <snapshots>
                         <enabled>true</enabled>
-                        <updatePolicy>always</updatePolicy>
                     </snapshots>
                 </repository>
                 <repository>
@@ -618,7 +615,6 @@
                     <url>https://maven.pkg.github.com/liquibase/liquibase-pro</url>
                     <snapshots>
                         <enabled>true</enabled>
-                        <updatePolicy>always</updatePolicy>
                     </snapshots>
                 </repository>
             </repositories>
