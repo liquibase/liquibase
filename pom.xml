@@ -474,7 +474,7 @@
                 <executions>
                     <execution>
                         <id>attach-sources</id>
-                        <phase>package</phase>
+                        <phase>verify</phase>
                         <goals>
                             <goal>jar</goal>
                         </goals>

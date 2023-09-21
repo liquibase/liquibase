@@ -347,6 +347,7 @@
 					<url>https://maven.pkg.github.com/liquibase/liquibase</url>
 					<snapshots>
 						<enabled>true</enabled>
+						<updatePolicy>always</updatePolicy>
 					</snapshots>
 				</repository>
 				<repository>
@@ -354,6 +355,7 @@
 					<url>https://maven.pkg.github.com/liquibase/liquibase-pro</url>
 					<snapshots>
 						<enabled>true</enabled>
+						<updatePolicy>always</updatePolicy>
 					</snapshots>
 				</repository>
 			</repositories>
