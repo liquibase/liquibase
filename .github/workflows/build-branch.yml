@@ -5,6 +5,8 @@ on:
     workflows: "Run Tests"
     types:
       - completed
+      -
+  workflow_dispatch:
 
 env:
   MAVEN_VERSION: '3.9.2'
