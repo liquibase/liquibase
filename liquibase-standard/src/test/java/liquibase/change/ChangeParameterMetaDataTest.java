@@ -168,7 +168,7 @@ public class ChangeParameterMetaDataTest {
 
         ChangeParameterMetaData replaceIfExists  = Scope.getCurrentScope().getSingleton(ChangeFactory.class).getChangeMetaData(new CreateViewChange()).getParameters().get("replaceIfExists");
         assertSetsEqual(new String[]{}, replaceIfExists.analyzeRequiredDatabases(new String[]{ChangeParameterMetaData.COMPUTE}));
-        assertSetsEqual(new String[]{"sybase","mssql","postgresql","cockroachdb","firebird","oracle","sqlite","mysql","mariadb","h2","hsqldb","db2", "ingres", "edb"}, replaceIfExists.analyzeSupportedDatabases(new String[]{ChangeParameterMetaData.COMPUTE}));
+        assertSetsEqual(new String[]{"sybase","mssql","postgresql","cockroachdb","firebird","oracle","sqlite","mysql","mariadb","h2","hsqldb","db2","ingres","edb","asany"}, replaceIfExists.analyzeSupportedDatabases(new String[]{ChangeParameterMetaData.COMPUTE}));
     }
 
 

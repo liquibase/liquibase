@@ -207,6 +207,10 @@ public class ForeignKey extends AbstractDatabaseObject{
 
         ForeignKey that = (ForeignKey) o;
 
+        if (!this.getName().equalsIgnoreCase(that.getName())) {
+            return false;
+        }
+
         if (this.getSchema() != null && that.getSchema() != null) {
             boolean schemasEqual = this.getSchema().equals(that.getSchema());
             if (!schemasEqual) {
@@ -214,9 +218,8 @@ public class ForeignKey extends AbstractDatabaseObject{
             }
         }
 
-
         if (getForeignKeyColumns() == null) {
-            return this.getName().equalsIgnoreCase(that.getName());
+            return true;
         }
 
         StringUtil.StringUtilFormatter<Column> formatter = obj -> obj.toString(false);
