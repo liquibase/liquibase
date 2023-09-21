@@ -8,6 +8,7 @@ import liquibase.datatype.LiquibaseDataType;
 
 import java.math.BigInteger;
 import java.util.Arrays;
+import java.util.Locale;
 
 @DataTypeInfo(name="varchar", aliases = {"java.sql.Types.VARCHAR", "java.lang.String", "varchar2", "character varying"}, minParameters = 0, maxParameters = 1, priority = LiquibaseDataType.PRIORITY_DEFAULT)
 public class VarcharType extends CharType {
@@ -56,7 +57,9 @@ public class VarcharType extends CharType {
                     return type;
                 }
                 parameters[0] = parameter;
-                return new DatabaseDataType("CHARACTER VARYING", parameters);
+                DatabaseDataType type = new DatabaseDataType(this.getName().toUpperCase(Locale.US), parameters);
+                type.addAdditionalInformation(this.getAdditionalInformation());
+                return type;
             }
         }
 
