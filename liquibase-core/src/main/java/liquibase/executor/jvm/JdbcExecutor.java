@@ -391,8 +391,8 @@ public class JdbcExecutor extends AbstractExecutor {
             Integer updateCount = null;
             for (String statement : applyVisitors(sql, sqlVisitors)) {
                 if (database instanceof OracleDatabase) {
-                    while (statement.matches("(?s).*[\\s\\r\\n]*/[\\s\\r\\n]*$")) { //all trailing /'s
-                        statement = statement.replaceFirst("[\\s\\r\\n]*/[\\s\\r\\n]*$", "");
+                    while (statement.matches("(?s).*[\\s\\r\\n]*[^*]/[\\s\\r\\n]*$")) { //all trailing /'s
+                        statement = statement.replaceFirst("[\\s\\r\\n]*[^*]/[\\s\\r\\n]*$", "");
                     }
                 }
 
