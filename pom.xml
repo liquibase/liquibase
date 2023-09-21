@@ -79,8 +79,10 @@
         <jacoco-maven-plugin.version>0.8.10</jacoco-maven-plugin.version>
         <jacoco.classDumpDir>${project.build.directory}/classdumps</jacoco.classDumpDir>
         <maven-surefire-plugin.version>3.1.2</maven-surefire-plugin.version>
+        <sonar.projectName>Liquibase</sonar.projectName>
+        <sonar.projectDescription>Liquibase</sonar.projectDescription>
         <sonar.projectKey>liquibase</sonar.projectKey>
-        <sonar.moduleKey>{project.groupId}:${project.artifactId}</sonar.moduleKey>
+        <sonar.moduleKey>${project.groupId}:${project.artifactId}</sonar.moduleKey>
         <code.coverage.project.folder>${basedir}/../</code.coverage.project.folder>
         <code.coverage.overall.data.folder>${basedir}/target/</code.coverage.overall.data.folder>      
         <itCoverageAgent></itCoverageAgent>
