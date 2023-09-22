@@ -2,13 +2,19 @@ package liquibase.command.core;
 
 import liquibase.CatalogAndSchema;
 import liquibase.GlobalConfiguration;
+import liquibase.Scope;
 import liquibase.command.*;
 import liquibase.database.Database;
 import liquibase.database.ObjectQuotingStrategy;
+import liquibase.diff.ObjectDifferences;
+import liquibase.diff.output.ObjectChangeFilter;
+import liquibase.diff.output.StandardObjectChangeFilter;
 import liquibase.serializer.SnapshotSerializerFactory;
 import liquibase.snapshot.DatabaseSnapshot;
 import liquibase.snapshot.SnapshotControl;
 import liquibase.snapshot.SnapshotGeneratorFactory;
+import liquibase.structure.DatabaseObject;
+import liquibase.structure.core.DatabaseObjectFactory;
 import liquibase.util.StringUtil;
 
 import java.io.IOException;
@@ -24,6 +30,7 @@ public class SnapshotCommandStep extends AbstractCommandStep {
     public static final CommandArgumentDefinition<String> SCHEMAS_ARG;
     public static final CommandArgumentDefinition<String> SNAPSHOT_FORMAT_ARG;
     public static final CommandArgumentDefinition<SnapshotControl> SNAPSHOT_CONTROL_ARG;
+    public static final CommandArgumentDefinition<String> SNAPSHOT_TYPES_ARG;
 
     static {
         CommandBuilder builder = new CommandBuilder(COMMAND_NAME);
@@ -31,6 +38,8 @@ public class SnapshotCommandStep extends AbstractCommandStep {
         SNAPSHOT_FORMAT_ARG = builder.argument("snapshotFormat", String.class)
                 .description("Output format to use (JSON, YAML, or TXT)").build();
         SNAPSHOT_CONTROL_ARG = builder.argument("snapshotControl", SnapshotControl.class).hidden().build();
+        SNAPSHOT_TYPES_ARG = builder.argument("snapshotTypes", String.class)
+                .description("Types of objects to snapshot").build();
     }
 
     private Map<String, Object> snapshotMetadata;
@@ -83,7 +92,13 @@ public class SnapshotCommandStep extends AbstractCommandStep {
         InternalSnapshotCommandStep.logUnsupportedDatabase(database, this.getClass());
         SnapshotControl snapshotControl;
         if (commandScope.getArgumentValue(SNAPSHOT_CONTROL_ARG) == null) {
-            snapshotControl = new SnapshotControl(database);
+            String types = commandScope.getArgumentValue(SNAPSHOT_TYPES_ARG);
+            if (types != null) {
+                Scope.getCurrentScope().getLog(SnapshotCommandStep.class).info(DatabaseObjectFactory.getInstance().getStandardTypes().toString());
+                snapshotControl = new SnapshotControl(database, types);
+            } else {
+                snapshotControl = new SnapshotControl(database);
+            }
         } else {
             snapshotControl = commandScope.getArgumentValue(SnapshotCommandStep.SNAPSHOT_CONTROL_ARG);
         }
