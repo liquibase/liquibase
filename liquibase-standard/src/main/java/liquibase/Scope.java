@@ -6,7 +6,6 @@ import liquibase.database.DatabaseConnection;
 import liquibase.database.OfflineConnection;
 import liquibase.database.jvm.JdbcConnection;
 import liquibase.exception.UnexpectedLiquibaseException;
-import liquibase.integration.commandline.LiquibaseCommandLineConfiguration;
 import liquibase.listener.LiquibaseListener;
 import liquibase.logging.LogService;
 import liquibase.logging.Logger;
@@ -66,6 +65,8 @@ public class Scope {
         osgiPlatform,
         checksumVersion
     }
+
+    public static final String JAVA_PROPERTIES = "javaProperties";
 
     private static ScopeManager scopeManager;
 
@@ -283,9 +284,14 @@ public class Scope {
      */
     public <T> T get(String key, Class<T> type) {
         T value = values.get(key, type);
+        if (value == null && values.containsKey(JAVA_PROPERTIES)) {
+            Map javaProperties = values.get(JAVA_PROPERTIES, Map.class);
+            value = (T)javaProperties.get(key);
+        }
         if (value == null && parent != null) {
             value = parent.get(key, type);
         }
+
         return value;
     }
 

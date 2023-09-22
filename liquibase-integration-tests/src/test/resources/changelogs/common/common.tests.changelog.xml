@@ -484,8 +484,20 @@
         </createTable>
     </changeSet>
     <changeSet id="sampleCSVData1" author="nvoxland">
+        <preConditions>
+            <tableIsEmpty tableName="csvdata"/>
+        </preConditions>
         <loadData tableName="csvdata" file="changelogs/sample.data1.csv"/>
     </changeSet>
+
+    <changeSet id="tableIsEmptyShouldFail" author="flautert">
+        <preConditions onFail="MARK_RAN">
+            <tableIsEmpty tableName="csvdata"/>
+        </preConditions>
+        <!-- if table is dropped then next changesets will fail, thus it is an indirect check -->
+        <dropTable tableName="csvdata" />
+    </changeSet>
+
     <changeSet id="sampleTSVData" author="nvoxland">
         <loadData tableName="csvdata" file="changelogs/sample.data1.tsv" separator="&#9;"/>
     </changeSet>
@@ -1202,11 +1214,57 @@
             <column name="other_col" type="varchar(100)"/>
         </loadUpdateData>
     </changeSet>
-    <changeSet id="addColumn" author="kiran" dbms="!oracle, !mssql">
+    <changeSet id="addColumn" author="kiran" dbms="!oracle, !mssql, !firebird">
         <addColumn tableName="my_table">
             <column name="new_column" type="varchar(50)" afterColumn="test_col">
             </column>
         </addColumn>
+    </changeSet>
+    <changeSet id="prepare-rowCount" author="kzander91">
+        <createTable tableName="empty_table">
+            <column name="col" type="varchar(50)"/>
+        </createTable>
+
+        <createTable tableName="single_row_table">
+            <column name="col" type="varchar(50)"/>
+        </createTable>
+        <insert tableName="single_row_table">
+            <column name="col" value="row1"/>
+        </insert>
+
+        <createTable tableName="multi_row_table">
+            <column name="col" type="varchar(50)"/>
+        </createTable>
+        <insert tableName="multi_row_table">
+            <column name="col" value="row1"/>
+        </insert>
+        <insert tableName="multi_row_table">
+            <column name="col" value="row2"/>
+        </insert>
+    </changeSet>
+
+    <changeSet id="check-rowCount" author="kzander91">
+        <preConditions>
+            <rowCount tableName="empty_table" expectedRows="0"/>
+            <rowCount tableName="single_row_table" expectedRows="1"/>
+            <rowCount tableName="multi_row_table" expectedRows="2"/>
+            <not>
+                <!--                                                Long.MAX_VALUE -->
+                <rowCount tableName="multi_row_table" expectedRows="9223372036854775807"/>
+            </not>
+        </preConditions>
+    </changeSet>
+
+    <changeSet id="check-tableIsEmpty" author="kzander91">
+        <preConditions>
+            <tableIsEmpty tableName="empty_table"/>
+            <not>
+                <tableIsEmpty tableName="single_row_table"/>
+            </not>
+            <not>
+                <tableIsEmpty tableName="multi_row_table"/>
+            </not>
+        </preConditions>
     </changeSet>
 
 </databaseChangeLog>

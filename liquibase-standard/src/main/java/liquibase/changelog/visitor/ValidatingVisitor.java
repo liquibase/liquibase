@@ -107,6 +107,7 @@ public class ValidatingVisitor implements ChangeSetVisitor {
             DatabaseList.validateDefinitions(changeSet.getDbmsSet(), validationErrors);
         }
         changeSet.setStoredCheckSum(ran?ranChangeSet.getLastCheckSum():null);
+        changeSet.setStoredFilePath(ran?ranChangeSet.getStoredChangeLog():null);
         boolean shouldValidate = !ran || changeSet.shouldRunOnChange() || changeSet.shouldAlwaysRun();
 
         if (!areChangeSetAttributesValid(changeSet)) {
