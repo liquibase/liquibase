@@ -688,7 +688,7 @@ Long Description: ${commandDefinition.getLongDescription() ?: "NOT SET"}
                 throw new RuntimeException("${message}.\n\n!!------------- TEST EXECUTION FAILURE -------------!!\n" +
                         "\nIf you are running CommandTests directly through your IDE, make sure you are including the module with your 'test.groovy' files in your classpath.\n" +
                         "\nNOTE: For example, if you are running these tests in liquibase-core, use the liquibase-integration-tests module as the classpath in your run configuration.\n" +
-                        "\n!!--------------------------------------------------!!")
+                        "\n!!--------------------------------------------------!!", e)
 
             }
         }
