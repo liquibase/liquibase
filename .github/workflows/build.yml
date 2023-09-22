@@ -355,6 +355,11 @@ jobs:
         env:
           GPG_PASSWORD: ${{ secrets.GPG_PASSPHRASE }}
 
+      - name: Set up Maven
+        uses: stCarolas/setup-maven@v4.5
+        with:
+          maven-version: ${{ env.MAVEN_VERSION }}
+
       # look for dependencies in maven
       - name: maven-settings-xml-action
         uses: whelk-io/maven-settings-xml-action@v21
@@ -397,11 +402,6 @@ jobs:
                 "password": "${{ secrets.LIQUIBOT_PAT }}"
               }
             ]
-
-      - name: Set up Maven
-        uses: stCarolas/setup-maven@v4.5
-        with:
-          maven-version: ${{ env.MAVEN_VERSION }}
 
       # Version artifact based off of branch
       - name: Version Artifact
