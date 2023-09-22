@@ -42,7 +42,7 @@ public abstract class AbstractSQLChange extends AbstractChange implements DbmsTa
     private Boolean originalSplitStatements;
 
     @Deprecated
-    private boolean ignoreOriginalSplitStatements = false;
+    private Boolean ignoreOriginalSplitStatements;
     /**
      *
      * @deprecated  To be removed when splitStatements is changed to be type Boolean
@@ -71,12 +71,12 @@ public abstract class AbstractSQLChange extends AbstractChange implements DbmsTa
      * isOriginalSplitStatements is used by checksums v8 calculator only to define splitStatements behavior
      */
     @Deprecated
-    public void setIgnoreOriginalSplitStatements(boolean ignoreOriginalSplitStatements) {
+    public void setIgnoreOriginalSplitStatements(Boolean ignoreOriginalSplitStatements) {
         this.ignoreOriginalSplitStatements = ignoreOriginalSplitStatements;
     }
 
     @Deprecated
-    public boolean isIgnoreOriginalSplitStatements() {
+    public Boolean isIgnoreOriginalSplitStatements() {
         return ignoreOriginalSplitStatements;
     }
 
@@ -243,7 +243,7 @@ public abstract class AbstractSQLChange extends AbstractChange implements DbmsTa
             if (version.lowerOrEqualThan(ChecksumVersion.V8)) {
                 boolean isSplitStatements = this.isSplitStatements();
                 if (getChangeSet() != null && getChangeSet().getRunWith() != null
-                        && !isIgnoreOriginalSplitStatements() && !isSplitStatements) {
+                        && !BooleanUtil.isTrue(isIgnoreOriginalSplitStatements()) && !isSplitStatements) {
                     isSplitStatements = BooleanUtil.isTrue(originalSplitStatements);
                 }
                 return CheckSum.compute(new NormalizingStreamV8(this.getEndDelimiter(), isSplitStatements, this.isStripComments(), stream), false);

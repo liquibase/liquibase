@@ -66,7 +66,7 @@ public class ValidatingVisitorUtil {
      */
 
     private static void revertIgnoreOriginalSplitStatementsFlag(ChangeSet changeSet, List<AbstractSQLChange> changes) {
-        changes.forEach(change -> change.setIgnoreOriginalSplitStatements(!change.isIgnoreOriginalSplitStatements()));
+        changes.forEach(change -> change.setIgnoreOriginalSplitStatements(!BooleanUtil.isTrue(change.isIgnoreOriginalSplitStatements())));
         changeSet.clearCheckSum();
     }
 
