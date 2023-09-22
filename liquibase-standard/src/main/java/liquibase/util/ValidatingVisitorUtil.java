@@ -49,10 +49,10 @@ public class ValidatingVisitorUtil {
                     .filter(AbstractSQLChange.class::isInstance).map(c -> (AbstractSQLChange) c)
                     .collect(Collectors.toList());
             if (!changes.isEmpty()) {
-                clearChecksumAndRevertOriginalSplitStatements(changeSet, changes);
+                revertIgnoreOriginalSplitStatementsFlag(changeSet, changes);
                 boolean valid = changeSet.isCheckSumValid(ranChangeSet.getLastCheckSum());
                 if (!valid) { // whops, something really changed. Revert what we just did.
-                    clearChecksumAndRevertOriginalSplitStatements(changeSet, changes);
+                    revertIgnoreOriginalSplitStatementsFlag(changeSet, changes);
                 }
                 return valid;
             }
@@ -61,14 +61,12 @@ public class ValidatingVisitorUtil {
     }
 
     /**
-     * This method reverses flag originalSplitStatements on the AbstractSQLChange list and clears the changeset calculated checksum
+     * This method reverses flag ignoreOriginalSplitStatements on the AbstractSQLChange list and clears the changeset calculated checksum
      *  so it is recalculated when it's used again
      */
-    private static void clearChecksumAndRevertOriginalSplitStatements(ChangeSet changeSet, List<AbstractSQLChange> changes) {
-        changes.forEach(change -> {
-            change.setOriginalSplitStatements( !change.isSplitStatements() ? false :
-                    !BooleanUtil.isTrue(change.isOriginalSplitStatements()));
-        });
+
+    private static void revertIgnoreOriginalSplitStatementsFlag(ChangeSet changeSet, List<AbstractSQLChange> changes) {
+        changes.forEach(change -> change.setIgnoreOriginalSplitStatements(!change.isIgnoreOriginalSplitStatements()));
         changeSet.clearCheckSum();
     }
 

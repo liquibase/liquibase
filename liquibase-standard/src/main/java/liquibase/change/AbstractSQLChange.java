@@ -38,7 +38,11 @@ public abstract class AbstractSQLChange extends AbstractChange implements DbmsTa
     private boolean stripComments;
     private boolean splitStatements;
 
+    @Deprecated
     private Boolean originalSplitStatements;
+
+    @Deprecated
+    private boolean ignoreOriginalSplitStatements = false;
     /**
      *
      * @deprecated  To be removed when splitStatements is changed to be type Boolean
@@ -67,8 +71,13 @@ public abstract class AbstractSQLChange extends AbstractChange implements DbmsTa
      * isOriginalSplitStatements is used by checksums v8 calculator only to define splitStatements behavior
      */
     @Deprecated
-    public Boolean isOriginalSplitStatements() {
-        return originalSplitStatements;
+    public void setIgnoreOriginalSplitStatements(boolean ignoreOriginalSplitStatements) {
+        this.ignoreOriginalSplitStatements = ignoreOriginalSplitStatements;
+    }
+
+    @Deprecated
+    public boolean isIgnoreOriginalSplitStatements() {
+        return ignoreOriginalSplitStatements;
     }
 
     public InputStream openSqlStream() throws IOException {
@@ -233,7 +242,8 @@ public abstract class AbstractSQLChange extends AbstractChange implements DbmsTa
             ChecksumVersion version = Scope.getCurrentScope().getChecksumVersion();
             if (version.lowerOrEqualThan(ChecksumVersion.V8)) {
                 boolean isSplitStatements = this.isSplitStatements();
-                if (getChangeSet() != null && getChangeSet().getRunWith() != null) {
+                if (getChangeSet() != null && getChangeSet().getRunWith() != null
+                        && !isIgnoreOriginalSplitStatements() && !isSplitStatements) {
                     isSplitStatements = BooleanUtil.isTrue(originalSplitStatements);
                 }
                 return CheckSum.compute(new NormalizingStreamV8(this.getEndDelimiter(), isSplitStatements, this.isStripComments(), stream), false);
