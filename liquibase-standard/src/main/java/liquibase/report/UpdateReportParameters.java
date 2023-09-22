@@ -16,6 +16,7 @@ import java.util.Map;
 public class UpdateReportParameters {
     private String changelogArgValue;
     private String jdbcUrl;
+    private String commandTitle = "Update";
     private final DatabaseInfo databaseInfo = new DatabaseInfo();
     private final RuntimeInfo runtimeInfo = new RuntimeInfo();
     private final OperationInfo operationInfo = new OperationInfo();
