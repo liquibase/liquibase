@@ -472,13 +472,6 @@
                 <version>3.3.0</version>
                 <executions>
                     <execution>
-                        <id>attach-sources-verify</id>
-                        <phase>verify</phase>
-                        <goals>
-                            <goal>jar</goal>
-                        </goals>
-                    </execution>
-                    <execution>
                         <id>attach-sources</id>
                         <phase>package</phase>
                         <goals>
