@@ -137,7 +137,6 @@ public class LiquibaseLauncher {
         String jarString = StringUtil.join(duplicates, System.lineSeparator());
         String message = String.format("*** Duplicate %s JAR files ***%n%s", title, jarString);
         Scope.getCurrentScope().getUI().sendMessage(String.format("WARNING: %s", message));
-        Scope.getCurrentScope().getLog(LiquibaseLauncher.class).warning(message);
     }
 
     private static void debug(String message) {
