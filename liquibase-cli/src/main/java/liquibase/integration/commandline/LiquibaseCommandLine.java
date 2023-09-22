@@ -649,7 +649,13 @@ public class LiquibaseCommandLine {
         final ClassLoader classLoader = configureClassLoader();
 
         returnMap.putAll(configureLogging());
-        returnMap.putAll(configureResourceAccessor(classLoader));
+
+        //
+        // Pass any -D properties in the scope so that they will be available to
+        // any logging that might happen
+        //
+        Map<String, String> javaProperties = addJavaPropertiesToChangelogParameters();
+        Scope.child(new HashMap<>(javaProperties), () -> returnMap.putAll(configureResourceAccessor(classLoader)));
 
         ConsoleUIService console = null;
         List<UIService> uiServices = Scope.getCurrentScope().getServiceLocator().findInstances(UIService.class);
@@ -676,8 +682,7 @@ public class LiquibaseCommandLine {
         returnMap.put(LiquibaseCommandLineConfiguration.ARGUMENT_CONVERTER.getKey(),
                 (LiquibaseCommandLineConfiguration.ArgumentConverter) argument -> "--" + StringUtil.toKabobCase(argument));
 
-        Map<String, String> javaProperties = addJavaPropertiesToChangelogParameters();
-        returnMap.put("javaProperties", javaProperties);
+        returnMap.put(Scope.JAVA_PROPERTIES, javaProperties);
 
         return returnMap;
     }
