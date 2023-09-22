@@ -330,7 +330,6 @@
                     </execution>
                     <execution>
                         <id>test-jar</id>
-                        <phase>verify</phase>
                         <goals>
                             <goal>test-jar</goal>
                         </goals>

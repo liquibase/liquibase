@@ -60,8 +60,6 @@
             <!-- which jacoco will not instrument. Hence it is important to add -->
             <!-- those command-line params here (${argLine} holds those params) -->
             <argLine>${argLine}</argLine>
-            <forkCount>1</forkCount>
-            <runOrder>random</runOrder>
           </configuration>
         </plugin>
 

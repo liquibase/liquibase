@@ -395,7 +395,6 @@
                         <include>**/*TestCase.java</include>
                         <include>**/*Spec.java</include>
                     </includes>
-                    <forkCount>1</forkCount>
                 </configuration>
             </plugin>
 
@@ -475,6 +474,13 @@
                     <execution>
                         <id>attach-sources</id>
                         <phase>verify</phase>
+                        <goals>
+                            <goal>jar</goal>
+                        </goals>
+                    </execution>
+                    <execution>
+                        <id>attach-sources</id>
+                        <phase>package</phase>
                         <goals>
                             <goal>jar</goal>
                         </goals>
