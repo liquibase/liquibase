@@ -472,7 +472,7 @@
                 <version>3.3.0</version>
                 <executions>
                     <execution>
-                        <id>attach-sources</id>
+                        <id>attach-sources-verify</id>
                         <phase>verify</phase>
                         <goals>
                             <goal>jar</goal>
