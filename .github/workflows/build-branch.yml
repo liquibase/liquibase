@@ -87,48 +87,6 @@ jobs:
         with:
           maven-version: ${{ env.MAVEN_VERSION }}
 
-      - name: maven-settings-xml-action
-        uses: whelk-io/maven-settings-xml-action@v20
-        with:
-          repositories: |
-            [
-              {
-                "id": "liquibase",
-                "url": "https://maven.pkg.github.com/liquibase/liquibase",
-                "releases": {
-                  "enabled": "false"
-                },
-                "snapshots": {
-                  "enabled": "true",
-                  "updatePolicy": "always"
-                }
-              },
-              {
-                "id": "liquibase-pro",
-                "url": "https://maven.pkg.github.com/liquibase/liquibase-pro",
-                "releases": {
-                  "enabled": "false"
-                },
-                "snapshots": {
-                  "enabled": "true",
-                  "updatePolicy": "always"
-                }
-              }
-            ]
-          servers: |
-            [
-              {
-                "id": "liquibase-pro",
-                "username": "liquibot",
-                "password": "${{ secrets.LIQUIBOT_PAT }}"
-              },
-              {
-                "id": "liquibase",
-                "username": "liquibot",
-                "password": "${{ secrets.LIQUIBOT_PAT }}"
-              }
-            ]
-
 
       # Publish <commitsha>-SNAPSHOT version to GPM
       - name: Version Artifact
