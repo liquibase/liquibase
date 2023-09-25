@@ -226,7 +226,7 @@ public class GlobalConfiguration implements AutoloadedConfigurations {
                 .build();
 
         UI_SERVICE = builder.define("uiService", UIServiceEnum.class)
-                .setDescription("Changes the default UI Service Logger used by Liquibase. Option are CONSOLE or LOGGER - defaults to CONSOLE.")
+                .setDescription("Changes the default UI Service Logger used by Liquibase. Options are CONSOLE or LOGGER.")
                 .setDefaultValue(UIServiceEnum.CONSOLE)
                 .build();
     }
