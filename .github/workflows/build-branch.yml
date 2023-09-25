@@ -164,3 +164,4 @@ jobs:
         with:
           name: liquibase-artifacts-${{ needs.setup.outputs.thisBranchName }}
           path: artifacts-named/*
+
