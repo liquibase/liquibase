@@ -3,7 +3,7 @@ name: Build and Publish (Matching Branch)
 #the concurrency check will cancel in-progress runs on non-master branches and pull requests on forked repositories, but not on the specified branches (master, main, and pair-branch-**).
 concurrency:
   group: ${{ github.workflow }}-${{ github.head_ref && github.ref || github.run_id }}
-  cancel-in-progress: true
+  cancel-in-progress: false
 
 on:
   push:
@@ -11,6 +11,7 @@ on:
       - github-action-**
       - DAT-**
       - dependabot-**
+      - master
     paths-ignore:
           - '**.md'
 
