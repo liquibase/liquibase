@@ -472,7 +472,6 @@ public class SpringLiquibase implements InitializingBean, BeanNameAware, Resourc
         this.showSummaryOutput = showSummaryOutput;
     }
 
-    @Override
     public void setUiService(UIServiceEnum uiService) {
         if (uiService == null) {
             return;
