@@ -3,6 +3,7 @@ package liquibase;
 import liquibase.configuration.AutoloadedConfigurations;
 import liquibase.configuration.ConfigurationDefinition;
 import liquibase.ui.UIServiceEnum;
+import liquibase.util.ValueHandlerUtil;
 
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
@@ -228,6 +229,7 @@ public class GlobalConfiguration implements AutoloadedConfigurations {
         UI_SERVICE = builder.define("uiService", UIServiceEnum.class)
                 .setDescription("Changes the default UI Service Logger used by Liquibase. Options are CONSOLE or LOGGER.")
                 .setDefaultValue(UIServiceEnum.CONSOLE)
+                .setValueHandler(o -> ValueHandlerUtil.getEnum(UIServiceEnum.class, o, "UiService"))
                 .build();
     }
 
