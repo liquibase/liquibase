@@ -73,7 +73,7 @@ jobs:
         id: check-branch
         uses: actions/github-script@v6
         with:
-          github-token: ${{ secrets.LIQUIBOT_PAT_GPM_ACCESS }}
+          github-token: ${{ secrets.LIQUIBASE_PAT }}
           script: |
             const currentBranch = context.ref.replace("refs/heads/",""); 
             let branchExistsInBoth;
