@@ -4,7 +4,7 @@ on:
   push:
     branches:
       - master
-      - github-action-**
+      - github-action-DAT-15775
       - DAT-**
       - dependabot-**
     paths-ignore:
