@@ -9,7 +9,7 @@ on:
   push:
     branches:
       - master
-      - github-action-DAT-15775
+      - github-action-**
       - DAT-**
       - dependabot-**
     paths-ignore:
