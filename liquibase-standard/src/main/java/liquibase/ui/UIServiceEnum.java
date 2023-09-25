@@ -1,17 +1,20 @@
 package liquibase.ui;
 
+import lombok.Getter;
+
+/**
+ * Enum used to define the available UIServices provided by Liquibase that can be set using global parameters
+ */
+@Getter
 public enum UIServiceEnum {
 
-        CONSOLE(ConsoleUIService.class),
-        LOGGER(LoggerUIService.class);
+    CONSOLE(ConsoleUIService.class),
+    LOGGER(LoggerUIService.class);
 
-        private final Class<? extends UIService> uiServiceClass;
+    private final Class<? extends UIService> uiServiceClass;
 
-        UIServiceEnum(Class<? extends UIService> uiServiceClass) {
-            this.uiServiceClass = uiServiceClass;
-        }
-
-        public Class<? extends UIService> getUiServiceClass() {
-            return uiServiceClass;
-        }
+    UIServiceEnum(Class<? extends UIService> uiServiceClass) {
+        this.uiServiceClass = uiServiceClass;
     }
+
+}
