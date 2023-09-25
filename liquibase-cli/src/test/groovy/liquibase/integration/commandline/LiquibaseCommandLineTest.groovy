@@ -612,7 +612,7 @@ https://docs.liquibase.com
 
         where:
         prefix          | argName          | alias                 | expected
-        "liquibase"     | "test"           | "testAlias"           | "--test-alias, --testAlias, --test"
+        "liquibase"     | "test"           | "testAlias"           | "--test, --test-alias, --testAlias"
     }
 
     @Unroll

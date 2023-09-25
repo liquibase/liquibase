@@ -111,6 +111,7 @@
             <xsd:attribute name="contextFilter" type="xsd:string"/>
             <xsd:attribute name="minDepth" type="integerExp"/>
             <xsd:attribute name="maxDepth" type="integerExp"/>
+            <xsd:attribute name="endsWithFilter" type="xsd:string"/>
             <xsd:anyAttribute namespace="##other" processContents="lax"/>
         </xsd:complexType>
     </xsd:element>
@@ -119,6 +120,13 @@
     <xsd:element name="databaseChangeLog">
         <xsd:complexType>
             <xsd:sequence>
+                <xsd:element name="removeChangeSetProperty" minOccurs="0" maxOccurs="unbounded">
+                    <xsd:complexType>
+                        <xsd:attribute name="change" type="xsd:string"/>
+                        <xsd:attribute name="dbms" type="xsd:string"/>
+                        <xsd:attribute name="remove" type="xsd:string"/>
+                    </xsd:complexType>
+                </xsd:element>
                 <xsd:element name="property" minOccurs="0" maxOccurs="unbounded">
                     <xsd:complexType>
                         <xsd:attribute name="file" type="xsd:string"/>
@@ -225,9 +233,9 @@
 
                     <xsd:element name="modifyChangeSets" minOccurs="0" maxOccurs="unbounded">
                         <xsd:complexType>
-                            <xsd:choice>
-                                <xsd:element ref="include" minOccurs="0" maxOccurs="unbounded" />
-                                <xsd:element ref="includeAll" minOccurs="0" maxOccurs="unbounded"/>
+                            <xsd:choice minOccurs="0" maxOccurs="unbounded">
+                                <xsd:element ref="include"/>
+                                <xsd:element ref="includeAll"/>
                             </xsd:choice>
                             <xsd:attribute name="runWith" type="xsd:string" />
                             <xsd:attribute name="runWithSpoolFile" type="xsd:string" />
@@ -800,7 +808,7 @@
             <xsd:attribute name="catalogName" type="xsd:string"/>
             <xsd:attribute name="schemaName" type="xsd:string"/>
             <xsd:attribute name="tableName" type="xsd:string"/>
-            <xsd:attribute name="expectedRows" type="xsd:int"/>
+            <xsd:attribute name="expectedRows" type="xsd:long"/>
         </xsd:complexType>
     </xsd:element>
 
