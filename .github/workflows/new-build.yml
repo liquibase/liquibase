@@ -1,5 +1,10 @@
 name: Build and Publish (Matching Branch)
 
+  #the concurrency check will cancel in-progress runs on non-master branches and pull requests on forked repositories, but not on the specified branches (master, github-action-**, DAT-**, dependabot-**).
+concurrency:
+  group: ${{ github.workflow }}-${{ github.head_ref && github.ref || github.run_id }}
+  cancel-in-progress: false
+
 on:
   push:
     branches:
@@ -9,6 +14,7 @@ on:
       - dependabot-**
     paths-ignore:
           - '**.md'
+  workflow_dispatch:
 
 env:
   MAVEN_VERSION: '3.9.2'
@@ -17,12 +23,6 @@ jobs:
   setup:
     name: Setup
     runs-on: ubuntu-22.04
-
-    #the concurrency check will cancel in-progress runs on non-master branches and pull requests on forked repositories, but not on the specified branches (master, github-action-**, DAT-**, dependabot-**).
-    concurrency:
-      group: ${{ github.workflow }}-${{ github.head_ref && github.ref || github.run_id }}
-      cancel-in-progress: false
-
     env:
       GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
     outputs:
