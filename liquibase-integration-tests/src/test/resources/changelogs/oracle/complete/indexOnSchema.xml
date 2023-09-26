@@ -29,7 +29,7 @@
             <column name="firstname" type="varchar(10)"/>
             <column name="lastname" type="varchar(10)"/>
         </createTable>
-        <createIndex indexName="idx_test" tableName="indexTestTable" associatedWith="primaryKey">
+        <createIndex indexName="idx_test" tableName="indexTestTable" schemaName="lbcat2" associatedWith="primaryKey">
             <column name="firstname"/>
             <column name="lastname"/>
         </createIndex>
