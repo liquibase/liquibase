@@ -5,6 +5,7 @@ Liquibase ships with 3rd party components using the following licenses:
 
 - Apache 2.0 License - https://opensource.org/licenses/Apache-2.0
 - TrueLicense Commercial License
+- Oracle FDHUT License
 
 Libraries and their licenses:
 
@@ -20,3 +21,5 @@ Apache 2.0 License
 TrueLicense Commercial License
 - net.java.truelicense:truelicense
 
+Oracle FDHUT License
+- ojdbc8.jar

@@ -55,6 +55,9 @@ public abstract class AbstractUpdateCommandStep extends AbstractCommandStep impl
     @Override
     public void run(CommandResultsBuilder resultsBuilder) throws Exception {
         UpdateReportParameters updateReportParameters = new UpdateReportParameters();
+        updateReportParameters.setCommandTitle(
+            StringUtil.upperCaseFirst(Arrays.toString(
+               getCommandName()).replace("[","").replace("]","").replace("update", "update ").trim()));
         resultsBuilder.addResult("updateReport", updateReportParameters);
         Scope.child(Collections.singletonMap("updateReport", updateReportParameters), () -> {
             doRun(resultsBuilder, updateReportParameters);
