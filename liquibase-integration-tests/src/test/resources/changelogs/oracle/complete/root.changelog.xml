@@ -456,18 +456,5 @@ END testSP;
     <changeSet id="8" author="constraint-check">
         <dropNotNullConstraint tableName="unnamed_constraint" columnName="id"/>
     </changeSet>
-    <changeSet id="indexTest" author="mallod">
-        <createTable tableName="indexTestTable" schemaName="lbcat2">
-            <column name="id" type="int">
-                <constraints primaryKey="true" nullable="false"/>
-            </column>
-            <column name="firstname" type="varchar(10)"/>
-            <column name="lastname" type="varchar(10)"/>
-        </createTable>
-        <createIndex indexName="idx_test" tableName="indexTestTable" schemaName="lbcat2" associatedWith="primaryKey">
-            <column name="firstname"/>
-            <column name="lastname"/>
-        </createIndex>
-    </changeSet>
 
 </databaseChangeLog>
