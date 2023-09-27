@@ -34,7 +34,7 @@ jobs:
           
   build-azure-uber-jar:
     needs: [ setup ]
-    uses: liquibase/liquibase/.github/workflows/build-azure-uber-jar.yml@main
+    uses: liquibase/liquibase/.github/workflows/build-azure-uber-jar.yml@master
     with:
       branch: ${{ needs.setup.outputs.branch }}
       liquibase-version: ${{ needs.setup.outputs.version }}
