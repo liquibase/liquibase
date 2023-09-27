@@ -1335,4 +1335,18 @@
         </preConditions>
     </changeSet>
 
+    <changeSet id="indexTest" author="mallod">
+        <createTable tableName="indexTestTable">
+            <column name="id" type="int">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="firstname" type="varchar(10)"/>
+            <column name="lastname" type="varchar(10)"/>
+        </createTable>
+        <createIndex indexName="idx_test" tableName="indexTestTable" associatedWith="primaryKey">
+            <column name="firstname"/>
+            <column name="lastname"/>
+        </createIndex>
+    </changeSet>
+
 </databaseChangeLog>
