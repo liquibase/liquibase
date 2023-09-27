@@ -1,6 +1,47 @@
 Liquibase Core Changelog
 ===========================================
 
+Changes in version 4.24.0 (2023.09.28)
+
+### Liquibase 4.24.0 is a major  release
+
+## New Features
+
+* (#4905) Check for duplicate core and commercial JARs DAT-15837 @wwillard7800
+* (#4799) parameter binding for DB2luw to improve performance and other trifles @MichaelKern-IVV
+* (#4926) Adding properties to the update report template to allow all the update family commands to use reports DAT-15638 @wwillard7800
+* (#4688) MySQL/MariaDB add extra info for date/timestamp columns for the diffChangeLog @filipelautert
+* (#4579) Use native oracle BOOLEAN for >=23c | fixes #4576 @mensinda
+* (#4834) Optimise the logic for tableIsEmpty check constraint @filipelautert
+* (#4729) DAT-15603 Attach Azure jar to liquibase release artifacts @jandroav
+
+## Bug Fixes
+
+* (#4936) Added FDHUT license information DAT-15915 @wwillard7800
+* (#4956) Fix typo in SqlGeneratorFactory @asashour
+* (#4937) [DAT-15924] Handle AbstractSQLChange runWith checksum v8 variants @filipelautert
+* (#4900) Enable scoped value to be looked up from Java properties loaded from the command line -D properties DAT-15668 @wwillard7800
+* (#4725) Change type of RowCountPrecondition#expectedRows from Integer to Long (#1549) @kzander91
+* (#4762) Fetch ran change sets before updating check sums @hpoettker
+* (#4598) SQL Anywhere allows two foreign keys to differ only by name @mkarg
+* (#4621) Fixed: Issue #4620 - "SQL Anywhere DOES support CREATE OR REPLACE VIEW, despite what the source code says!" @mkarg
+* (#4705) DAT-15338 Refactor connection string patterns to allow extensions to extend they @vitaliimak
+* (#4902) obfuscate user/pass in urls entered in MDC (DAT-15860) @StevenMassaro
+* (#4862) DAT-15821 :: OperationOutcomeErrorMsg field added to Operation Info @MalloD12
+* (#4909) Rollbacks Oracle Driver to LTS series 19.x @filipelautert
+* (#4853) update truelicense text @suryaaki2
+* (#4854) Fix LabelExpression constructors when using array or collection @MalloD12
+* (#4859) Fix regression in recognizing formatted SQL file DAT-15865 @wwillard7800
+* (#4846) do not attempt to recreate DBCL when it is specified with mixed case (DAT-15570) @StevenMassaro
+
+## Security, Driver and Other Updates
+
+* (#4829) Bump org.slf4j:slf4j-jdk14 from 2.0.7 to 2.0.9 @dependabot
+* (#4940) Bump org.projectlombok:lombok from 1.18.28 to 1.18.30 @dependabot
+* (#4766) Bump org.mariadb.jdbc:mariadb-java-client from 3.1.4 to 3.2.0 @dependabot
+* (#4923) DAT-15922 add fossa license checking action @jnewton03
+
+
 Changes in version 4.23.2 (2023.09.11)
 
 ### Liquibase 4.23.2 is a patch release
