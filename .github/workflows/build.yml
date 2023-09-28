@@ -307,7 +307,7 @@ jobs:
 
   sonar:
     needs: integration-test
-    uses: liquibase/build-logic/.github/workflows/sonar-test-scan.yml@v0.4.3
+    uses: liquibase/build-logic/.github/workflows/sonar-test-scan.yml@v0.4.4
     with:
       thisBranchName: ${{ needs.setup.outputs.thisBranchName }}
       thisSha: ${{ needs.setup.outputs.thisSha }}
@@ -317,7 +317,7 @@ jobs:
       pullRequestBaseBranchName: ${{ github.event.pull_request.base.ref }}
       unitTestReportArtifactName: liquibase-jacoco-test-results
       integrationTestReportArtifactName: liquibase-integration-jacoco-test-results
-      testedClassesModuleName: liquibase-standard
+      testedClassesModuleName: .
       dbPlatforms: h2,hsqldb,mariadb,mssql,mysql,oracle,postgresql,sqlite,firebird
     secrets: inherit
 
