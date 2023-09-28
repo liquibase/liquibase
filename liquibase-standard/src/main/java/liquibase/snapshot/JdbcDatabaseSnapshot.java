@@ -780,7 +780,10 @@ public class JdbcDatabaseSnapshot extends DatabaseSnapshot {
                 String jdbcSchemaName = ((AbstractJdbcDatabase) database).getJdbcSchemaName(catalogAndSchema);
 
                 if (database instanceof DB2Database) {
-                    return executeAndExtract(getDB2Sql(jdbcSchemaName, tableName), database);
+                    if (database.getDatabaseProductName().startsWith("DB2 UDB for AS/400")) {
+                        executeAndExtract(getDB2ForAs400Sql(jdbcSchemaName, tableName), database);
+                    }
+                    return querytDB2Luw(jdbcSchemaName, tableName);
                 } else if (database instanceof Db2zDatabase) {
                     return queryDb2Zos(catalogAndSchema, tableName);
                 } else {
@@ -816,7 +819,10 @@ public class JdbcDatabaseSnapshot extends DatabaseSnapshot {
                 } else if (database instanceof DB2Database) {
                     CatalogAndSchema catalogAndSchema = new CatalogAndSchema(catalogName, schemaName).customize(database);
                     String jdbcSchemaName = ((AbstractJdbcDatabase) database).getJdbcSchemaName(catalogAndSchema);
-                    return executeAndExtract(getDB2Sql(jdbcSchemaName, null), database);
+                    if (database.getDatabaseProductName().startsWith("DB2 UDB for AS/400")) {
+                        executeAndExtract(getDB2ForAs400Sql(jdbcSchemaName, null), database);
+                    }
+                    return querytDB2Luw(jdbcSchemaName, null);
                 } else if (database instanceof Db2zDatabase) {
                     CatalogAndSchema catalogAndSchema = new CatalogAndSchema(catalogName, schemaName).customize(database);
                     return queryDb2Zos(catalogAndSchema, null);
@@ -910,16 +916,9 @@ public class JdbcDatabaseSnapshot extends DatabaseSnapshot {
                         "' )) order by 5, 6, 7, 9, 8";
             }
 
-            protected String getDB2Sql(String jdbcSchemaName, String tableName) {
-                if (database.getDatabaseProductName().startsWith("DB2 UDB for AS/400")) {
-                    return getDB2ForAs400Sql(jdbcSchemaName, tableName);
-                } else {
-                    return getDefaultDB2Sql(jdbcSchemaName, tableName);
-                }
-            }
-
-            private String getDefaultDB2Sql(String jdbcSchemaName, String tableName) {
-                return "SELECT  " +
+            private List<CachedRow> querytDB2Luw(String jdbcSchemaName, String tableName) throws DatabaseException, SQLException {
+                List<String> parameters = new ArrayList<>(2);
+                StringBuilder sql = new StringBuilder ("SELECT " +
                         "  pk_col.tabschema AS pktable_cat,  " +
                         "  pk_col.tabname as pktable_name,  " +
                         "  pk_col.colname as pkcolumn_name, " +
@@ -935,11 +934,15 @@ public class JdbcDatabaseSnapshot extends DatabaseSnapshot {
                         "FROM " +
                         "syscat.references ref " +
                         "join syscat.keycoluse fk_col on ref.constname=fk_col.constname and ref.tabschema=fk_col.tabschema and ref.tabname=fk_col.tabname " +
-                        "join syscat.keycoluse pk_col on ref.refkeyname=pk_col.constname and ref.reftabschema=pk_col.tabschema and ref.reftabname=pk_col.tabname " +
-                        "WHERE ref.tabschema = '" + jdbcSchemaName + "' " +
-                        "and pk_col.colseq=fk_col.colseq " +
-                        (tableName != null ? " AND fk_col.tabname='" + tableName + "' " : "") +
-                        "ORDER BY fk_col.colseq";
+                        "join syscat.keycoluse pk_col on ref.refkeyname=pk_col.constname and ref.reftabschema=pk_col.tabschema and ref.reftabname=pk_col.tabname and pk_col.colseq=fk_col.colseq " +
+                        "WHERE ref.tabschema = ? ");
+                parameters.add(jdbcSchemaName);
+                if (tableName != null) {
+                    sql.append("and fk_col.tabname = ? ");
+                    parameters.add(tableName);
+                }
+                sql.append("ORDER BY fk_col.colseq");
+                return executeAndExtract(database, sql.toString(), parameters.toArray());
             }
 
             private String getDB2ForAs400Sql(String jdbcSchemaName, String tableName) {
@@ -1775,21 +1778,31 @@ public class JdbcDatabaseSnapshot extends DatabaseSnapshot {
                         }
                         // here we are on DB2 UDB
                         else {
-                            sql = "select distinct k.constname as constraint_name, t.tabname as TABLE_NAME from syscat.keycoluse k, syscat.tabconst t "
-                                    + "where k.constname = t.constname "
-                                    + "and t.tabschema = '" + jdbcSchemaName + "' "
-                                    + "and t.type='U'";
+                            sql = "select distinct k.constname as constraint_name, t.tabname as TABLE_NAME "
+                                    + "from syscat.keycoluse k "
+                                    + "inner join syscat.tabconst t "
+                                    + "on k.constname = t.constname "
+                                    + "where t.tabschema = ? "
+                                    + "and t.type = 'U'";
+                            parameters.add(jdbcSchemaName);
                             if (tableName != null) {
-                                sql += " and t.tabname = '" + tableName + "'";
+                                sql += " and t.tabname = ?";
+                                parameters.add(tableName);
                             }
                         }
                     } else if (database instanceof Db2zDatabase) {
-                        sql = "select distinct k.constname as constraint_name, t.tbname as TABLE_NAME from SYSIBM.SYSKEYCOLUSE k, SYSIBM.SYSTABCONST t "
-                                + "where k.constname = t.constname "
-                                + "and k.TBCREATOR = t.TBCREATOR "
-                                + "and t.TBCREATOR = '" + jdbcSchemaName + "' ";
+                        sql = "select k.constname as constraint_name, t.tbname as TABLE_NAME"
+                                + " from SYSIBM.SYSKEYCOLUSE k"
+                                + " inner join SYSIBM.SYSTABCONST t"
+                                + " on k.constname = t.constname"
+                                + " and k.TBCREATOR = t.TBCREATOR"
+                                + " and k.TBNAME = t.TBNAME"
+                                + " where t.TBCREATOR = ?"
+                                + " and t.TYPE = 'U'";
+                        parameters.add(jdbcSchemaName);
                         if (tableName != null) {
-                            sql += " and t.tbname = '" + tableName + "'";
+                            sql += " and t.TBNAME = ?";
+                            parameters.add(tableName);
                         }
                     } else if (database instanceof FirebirdDatabase) {
                         sql = "SELECT TRIM(RDB$INDICES.RDB$INDEX_NAME) AS CONSTRAINT_NAME, " +
