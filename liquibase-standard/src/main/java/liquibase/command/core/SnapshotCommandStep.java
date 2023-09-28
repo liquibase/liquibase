@@ -39,10 +39,26 @@ public class SnapshotCommandStep extends AbstractCommandStep {
                 .description("Output format to use (JSON, YAML, or TXT)").build();
         SNAPSHOT_CONTROL_ARG = builder.argument("snapshotControl", SnapshotControl.class).hidden().build();
         SNAPSHOT_TYPES_ARG = builder.argument("snapshotTypes", String.class)
-                .description("Types of objects to snapshot").build();
+                .description("Types of objects to snapshot: " + getStandardTypes()).build();
     }
 
     private Map<String, Object> snapshotMetadata;
+
+    private static String getStandardTypes() {
+        Set<Class<? extends DatabaseObject>> standardTypes = DatabaseObjectFactory.getInstance().getStandardTypes();
+        StringBuilder builder = new StringBuilder();
+        standardTypes.forEach(type -> {
+            String[] parts= type.getName().split("\\.");
+            String name = parts[parts.length-1];
+            if (builder.length() == 0) {
+                builder.append(name);
+            } else {
+                builder.append(", ");
+                builder.append(name);
+            }
+        });
+        return builder.toString();
+    }
 
     @Override
     public List<Class<?>> requiredDependencies() {
