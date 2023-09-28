@@ -13,7 +13,7 @@
     <artifactId>liquibase-cli</artifactId>
 
     <properties>
-        <sonar.coverage.jacoco.xmlReportPaths>${project.basedir}/../liquibase-coverage/target/site/jacoco-aggregate/jacoco.xml</sonar.coverage.jacoco.xmlReportPaths>
+        <sonar.coverage.jacoco.xmlReportPaths>${project.basedir}/../target/site/jacoco-aggregate/jacoco.xml</sonar.coverage.jacoco.xmlReportPaths>
     </properties>
     
     <dependencies>
