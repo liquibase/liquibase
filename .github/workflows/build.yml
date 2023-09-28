@@ -440,6 +440,10 @@ jobs:
           ## extract tar content for other artifacts
           mkdir -p liquibase-dist/target/liquibase-${{ needs.setup.outputs.thisBranchFileName }}-SNAPSHOT
           (cd liquibase-dist/target/liquibase-${{ needs.setup.outputs.thisBranchFileName }}-SNAPSHOT && tar -xzf ../liquibase-${{ needs.setup.outputs.thisBranchFileName }}-SNAPSHOT.tar.gz)
+
+          ## verify that the contents of the tar matches the expectation
+          sudo apt-get install tree
+          tree liquibase-dist/target/liquibase-${{ needs.setup.outputs.thisBranchFileName }}-SNAPSHOT
           
           ##create zip file from tar content
           (cd liquibase-dist/target/liquibase-${{ needs.setup.outputs.thisBranchFileName }}-SNAPSHOT && zip -r ../liquibase-${{ needs.setup.outputs.thisBranchFileName }}-SNAPSHOT.zip *)
