@@ -317,7 +317,7 @@ jobs:
       pullRequestBaseBranchName: ${{ github.event.pull_request.base.ref }}
       unitTestReportArtifactName: liquibase-jacoco-test-results
       integrationTestReportArtifactName: liquibase-integration-jacoco-test-results
-      testedClassesModuleName: .
+      testedClassesModuleName: . #this is the root module
       dbPlatforms: h2,hsqldb,mariadb,mssql,mysql,oracle,postgresql,sqlite,firebird
     secrets: inherit
 

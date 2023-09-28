@@ -444,6 +444,42 @@
                             <propertyName>itCoverageAgent</propertyName>
                         </configuration>
                     </execution>
+                    <execution>
+                        <id>merge-results</id>
+                        <phase>verify</phase>
+                        <goals>
+                            <goal>merge</goal>
+                        </goals>
+                        <configuration>
+                            <fileSets>
+                            <fileSet>
+                                <directory>${code.coverage.project.folder}</directory>
+                                <includes>
+                                <include>*.exec</include>
+                                </includes>
+                            </fileSet>
+                            </fileSets>
+                            <destFile>${code.coverage.overall.data.folder}/aggregate.exec</destFile>
+                        </configuration>
+                    </execution>
+                    <execution>
+                        <id>cli-merge-results</id>
+                        <phase>test</phase>
+                        <goals>
+                            <goal>merge</goal>
+                        </goals>
+                        <configuration>
+                            <fileSets>
+                            <fileSet>
+                                <directory>${code.coverage.overall.data.folder}</directory>
+                                <includes>
+                                <include>*.exec</include>
+                                </includes>
+                            </fileSet>
+                            </fileSets>
+                            <destFile>${code.coverage.overall.data.folder}/aggregate.exec</destFile>
+                        </configuration>
+                    </execution>
                 </executions>
             </plugin>
             
