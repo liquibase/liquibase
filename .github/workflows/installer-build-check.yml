@@ -5,10 +5,12 @@ name: Build Test Installers
 on:
   schedule:
     - cron: "5 7 * * *"
+  workflow_run:
+    workflows: [ "Build Branch SNAPSHOT", "Build and Publish (Matching Branch)" ]
+    types:
+      - completed
   workflow_dispatch:
-  push:
-    branches:
-      - gha-scheduled-*
+
 
 jobs:
   build-installers:
@@ -17,15 +19,6 @@ jobs:
     steps:
       - uses: actions/checkout@v3
 
-      - name: Download liquibase-artifacts
-        uses: liquibase/action-download-artifact@v2-liquibase
-        with:
-          workflow: build.yml
-          workflow_conclusion: success
-          branch: master
-          name: liquibase-artifacts
-          path: re-version/final
-
       - name: Set up JDK for GPG
         uses: actions/setup-java@v3
         with:
@@ -33,8 +26,18 @@ jobs:
           distribution: 'temurin'
           gpg-private-key: ${{ secrets.GPG_SECRET }}
           gpg-passphrase: GPG_PASSPHRASE
+          overwrite-settings: false
         env:
           GPG_PASSWORD: ${{ secrets.GPG_PASSPHRASE }}
+
+      - name: Download liquibase-artifacts
+        uses: liquibase/action-download-artifact@v2-liquibase
+        with:
+          workflow: new-build.yml
+          workflow_conclusion: success
+          branch: master
+          name: liquibase-artifacts
+          path: re-version/final
 
       - name: Re-version Installers
         env:
