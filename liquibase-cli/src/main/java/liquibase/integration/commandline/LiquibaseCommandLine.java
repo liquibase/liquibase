@@ -14,6 +14,7 @@ import liquibase.configuration.core.DefaultsFileValueProvider;
 import liquibase.exception.CommandLineParsingException;
 import liquibase.exception.CommandValidationException;
 import liquibase.exception.LiquibaseException;
+import liquibase.integration.IntegrationDetails;
 import liquibase.license.LicenseInfo;
 import liquibase.license.LicenseService;
 import liquibase.license.LicenseServiceFactory;
@@ -641,10 +642,20 @@ public class LiquibaseCommandLine {
         Map<String, Object> returnMap = new HashMap<>();
         returnMap.put(COMMAND_ARGUMENTS, args);
 
+        final IntegrationDetails integrationDetails = new IntegrationDetails();
+        integrationDetails.setName("cli");
+        returnMap.put("integrationDetails", integrationDetails);
+
         final ClassLoader classLoader = configureClassLoader();
 
         returnMap.putAll(configureLogging());
-        returnMap.putAll(configureResourceAccessor(classLoader));
+
+        //
+        // Pass any -D properties in the scope so that they will be available to
+        // any logging that might happen
+        //
+        Map<String, String> javaProperties = addJavaPropertiesToChangelogParameters();
+        Scope.child(new HashMap<>(javaProperties), () -> returnMap.putAll(configureResourceAccessor(classLoader)));
 
         ConsoleUIService console = null;
         List<UIService> uiServices = Scope.getCurrentScope().getServiceLocator().findInstances(UIService.class);
@@ -671,8 +682,7 @@ public class LiquibaseCommandLine {
         returnMap.put(LiquibaseCommandLineConfiguration.ARGUMENT_CONVERTER.getKey(),
                 (LiquibaseCommandLineConfiguration.ArgumentConverter) argument -> "--" + StringUtil.toKabobCase(argument));
 
-        Map<String, String> javaProperties = addJavaPropertiesToChangelogParameters();
-        returnMap.put("javaProperties", javaProperties);
+        returnMap.put(Scope.JAVA_PROPERTIES, javaProperties);
 
         return returnMap;
     }
@@ -1161,14 +1171,18 @@ public class LiquibaseCommandLine {
     }
 
     protected static String[] toArgNames(CommandArgumentDefinition<?> def) {
+        //
+        // Use an ordered Set so that the command name shows up first
+        // and is listed as the argument in the help
+        //
         LinkedHashSet<String> returnList = new LinkedHashSet<>();
-        Set<String> baseNames = new HashSet<>();
+        Set<String> baseNames = new LinkedHashSet<>();
         baseNames.add(def.getName());
         baseNames.addAll(def.getAliases());
 
         for (String baseName : baseNames) {
             returnList.add("--" + StringUtil.toKabobCase(baseName).replace(".", "-"));
-            returnList.add("--" + baseName.replaceAll("\\.", ""));
+            returnList.add("--" + baseName.replace("\\.", ""));
         }
 
         return returnList.toArray(new String[0]);

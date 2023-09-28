@@ -14,6 +14,7 @@ import liquibase.exception.Warnings;
 import liquibase.statement.SqlStatement;
 import liquibase.statement.core.RawCompoundStatement;
 import liquibase.statement.core.RawSqlStatement;
+import liquibase.util.BooleanUtil;
 import liquibase.util.StringUtil;
 
 import java.io.ByteArrayInputStream;
@@ -36,6 +37,12 @@ public abstract class AbstractSQLChange extends AbstractChange implements DbmsTa
 
     private boolean stripComments;
     private boolean splitStatements;
+
+    @Deprecated
+    private Boolean originalSplitStatements;
+
+    @Deprecated
+    private Boolean ignoreOriginalSplitStatements;
     /**
      *
      * @deprecated  To be removed when splitStatements is changed to be type Boolean
@@ -53,6 +60,24 @@ public abstract class AbstractSQLChange extends AbstractChange implements DbmsTa
     protected AbstractSQLChange() {
         setStripComments(null);
         setSplitStatements(null);
+    }
+
+    @Deprecated
+    public void setOriginalSplitStatements(Boolean originalSplitStatements) {
+        this.originalSplitStatements = originalSplitStatements;
+    }
+
+    /**
+     * isOriginalSplitStatements is used by checksums v8 calculator only to define splitStatements behavior
+     */
+    @Deprecated
+    public void setIgnoreOriginalSplitStatements(Boolean ignoreOriginalSplitStatements) {
+        this.ignoreOriginalSplitStatements = ignoreOriginalSplitStatements;
+    }
+
+    @Deprecated
+    public Boolean isIgnoreOriginalSplitStatements() {
+        return ignoreOriginalSplitStatements;
     }
 
     public InputStream openSqlStream() throws IOException {
@@ -216,7 +241,12 @@ public abstract class AbstractSQLChange extends AbstractChange implements DbmsTa
 
             ChecksumVersion version = Scope.getCurrentScope().getChecksumVersion();
             if (version.lowerOrEqualThan(ChecksumVersion.V8)) {
-                return CheckSum.compute(new NormalizingStreamV8(this.getEndDelimiter(), this.isSplitStatements(), this.isStripComments(), stream), false);
+                boolean isSplitStatements = this.isSplitStatements();
+                if (getChangeSet() != null && getChangeSet().getRunWith() != null
+                        && !BooleanUtil.isTrue(isIgnoreOriginalSplitStatements()) && !isSplitStatements) {
+                    isSplitStatements = BooleanUtil.isTrue(originalSplitStatements);
+                }
+                return CheckSum.compute(new NormalizingStreamV8(this.getEndDelimiter(), isSplitStatements, this.isStripComments(), stream), false);
             }
             return CheckSum.compute(new AbstractSQLChange.NormalizingStream(stream), false);
 

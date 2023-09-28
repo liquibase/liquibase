@@ -97,6 +97,7 @@ liquibase.sqlgenerator.core.SetNullableGenerator
 liquibase.sqlgenerator.core.SetTableRemarksGenerator
 liquibase.sqlgenerator.core.SetViewRemarksGenerator
 liquibase.sqlgenerator.core.StoredProcedureGenerator
+liquibase.sqlgenerator.core.TableIsEmptyGenerator
 liquibase.sqlgenerator.core.TableRowCountGenerator
 liquibase.sqlgenerator.core.TagDatabaseGenerator
 liquibase.sqlgenerator.core.UnlockDatabaseChangeLogGenerator

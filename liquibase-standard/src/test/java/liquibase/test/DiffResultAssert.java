@@ -15,16 +15,15 @@ import static org.junit.Assert.fail;
 public class DiffResultAssert {
     private DiffResult diff;
 
-    private DiffResultAssert() {
+    private DiffResultAssert(DiffResult diff) {
+        this.diff = diff;
     }
 
     /**
      * Constructs a DiffResultAssert to make assertions on a diffresult
      */
     public static DiffResultAssert assertThat(DiffResult diffResult) {
-        DiffResultAssert da=new DiffResultAssert();
-        da.diff=diffResult;
-        return da;
+        return new DiffResultAssert(diffResult);
     }
 
     /**
