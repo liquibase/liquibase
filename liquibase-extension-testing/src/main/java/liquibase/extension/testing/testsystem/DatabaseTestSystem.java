@@ -329,7 +329,9 @@ public abstract class DatabaseTestSystem extends TestSystem {
 
     public boolean executeSql(String sql) throws SQLException {
         try (Statement statement = getConnection().createStatement()) {
-            return statement.execute(sql);
+            boolean execute = statement.execute(sql);
+            getConnection().commit();
+            return execute;
         }
     }
 
