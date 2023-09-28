@@ -442,7 +442,7 @@ jobs:
           (cd liquibase-dist/target/liquibase-${{ needs.setup.outputs.thisBranchFileName }}-SNAPSHOT && tar -xzf ../liquibase-${{ needs.setup.outputs.thisBranchFileName }}-SNAPSHOT.tar.gz)
 
           ## verify that the contents of the tar matches the expectation
-          sudo brew install tree
+          brew install tree
           tree liquibase-dist/target/liquibase-${{ needs.setup.outputs.thisBranchFileName }}-SNAPSHOT
           
           ##create zip file from tar content
