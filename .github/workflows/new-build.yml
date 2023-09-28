@@ -69,7 +69,7 @@ jobs:
 
       #RUN THIS LOGIC WHEN THERE IS A SAME BRANCH IN OSS AND PRO
 
-      #checking if the branch specified by $branch_name exists in the OSS repository, If the output is empty (meaning the branch doesn't exist in the remote repository), then the condition will be true. Also, remove refs/heads/
+      #checking if the branch specified by $currentBranch exists in the PRO repository, If the getBranch call throws an error, it means the branch doesn't exist in the PRO repo. Also, remove refs/heads/
       - name: Check branch existence
         id: check-branch
         uses: actions/github-script@v6
@@ -116,6 +116,7 @@ jobs:
           distribution: 'temurin'
           cache: 'maven'
           server-id: liquibase
+          overwrite-settings: false
 
       - name: Set up Maven
         uses: stCarolas/setup-maven@v4.5
@@ -143,6 +144,51 @@ jobs:
           mvn -B clean deploy -pl '!liquibase-dist' -DskipTests=true "-Dbuild.repository.owner=liquibase" "-Dbuild.repository.name=liquibase" "-Dbuild.branch=${{ needs.setup.outputs.thisBranchName }}" "-Dbuild.number=${{ github.run_number }}" "-Dbuild.commit=${{ needs.setup.outputs.latestMergeSha }}" "-Dbuild.timestamp=${{ needs.setup.outputs.timeStamp }}"
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+            
+            
+      # look for dependencies in maven
+      - name: maven-settings-xml-action
+        uses: whelk-io/maven-settings-xml-action@v21
+        with:
+          repositories: |
+            [
+              {
+                "id": "liquibase",
+                "url": "https://maven.pkg.github.com/liquibase/liquibase",
+                "releases": {
+                  "enabled": "false"
+                },
+                "snapshots": {
+                  "enabled": "true",
+                  "updatePolicy": "always"
+                }
+              },
+              {
+                "id": "liquibase-pro",
+                "url": "https://maven.pkg.github.com/liquibase/liquibase-pro",
+                "releases": {
+                  "enabled": "false"
+                },
+                "snapshots": {
+                  "enabled": "true",
+                  "updatePolicy": "always"
+                }
+              }
+            ]
+          servers: |
+            [
+              {
+                "id": "liquibase-pro",
+                "username": "liquibot",
+                "password": "${{ secrets.LIQUIBOT_PAT }}"
+              },
+              {
+                "id": "liquibase",
+                "username": "liquibot",
+                "password": "${{ secrets.LIQUIBOT_PAT }}"
+              }
+            ]
+
 
       #publish_tar_package_to_build_artifact:
       - name: Build & Publish tar.gz to Build Artifact Page
