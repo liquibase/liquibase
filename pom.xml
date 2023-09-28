@@ -87,6 +87,7 @@
         <code.coverage.overall.data.folder>${basedir}/target/</code.coverage.overall.data.folder>      
         <itCoverageAgent></itCoverageAgent>
         <sonar.coverage.jacoco.xmlReportPaths>liquibase-coverage/target/site/jacoco-aggregate/jacoco.xml</sonar.coverage.jacoco.xmlReportPaths>
+        <jacoco.classDumpDir>${project.build.directory}/classdumps</jacoco.classDumpDir>
     </properties>
 
     <!-- comment -->
