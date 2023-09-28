@@ -464,7 +464,7 @@
                     </execution>
                     <execution>
                         <id>cli-merge-results</id>
-                        <phase>test</phase>
+                        <phase>none</phase>
                         <goals>
                             <goal>merge</goal>
                         </goals>
@@ -478,6 +478,17 @@
                             </fileSet>
                             </fileSets>
                             <destFile>${code.coverage.overall.data.folder}/aggregate.exec</destFile>
+                        </configuration>
+                    </execution>
+                    <execution>
+                        <id>cli-post-merge-report</id>
+                        <phase>none</phase>
+                        <goals>
+                            <goal>report</goal>
+                        </goals>
+                        <configuration>
+                            <dataFile>${code.coverage.overall.data.folder}/aggregate.exec</dataFile>
+                            <outputDirectory>${code.coverage.overall.data.folder}/jacoco-aggregate</outputDirectory>
                         </configuration>
                     </execution>
                 </executions>
