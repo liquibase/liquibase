@@ -464,7 +464,7 @@
                     </execution>
                     <execution>
                         <id>cli-merge-results</id>
-                        <phase>test</phase>
+                        <phase>verify</phase>
                         <goals>
                             <goal>merge</goal>
                         </goals>
