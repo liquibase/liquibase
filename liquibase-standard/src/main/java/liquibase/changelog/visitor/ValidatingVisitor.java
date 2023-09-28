@@ -149,9 +149,9 @@ public class ValidatingVisitor implements ChangeSetVisitor {
             }
         }
 
-        if(ranChangeSet != null){
+        if(ranChangeSet != null) {
             if (!changeSet.isCheckSumValid(ranChangeSet.getLastCheckSum()) &&
-                !ValidatingVisitorUtil.validateMongoDbExtensionIssue(changeSet, ranChangeSet, databaseChangeLog, database) &&
+                !ValidatingVisitorUtil.isChecksumIssue(changeSet, ranChangeSet, databaseChangeLog, database) &&
                 !changeSet.shouldRunOnChange() &&
                 !changeSet.shouldAlwaysRun()) {
                     invalidMD5Sums.add(changeSet.toString(false)+" was: "+ranChangeSet.getLastCheckSum().toString()
