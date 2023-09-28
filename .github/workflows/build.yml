@@ -195,11 +195,11 @@ jobs:
       - name: Build & Test Java 8
         if: ${{ matrix.java == 8}}
         run: |
-          mvn -B "-Dbuild.repository.owner=${{ needs.setup.outputs.thisRepositoryOwner }}" "-Dbuild.repository.name=${{ needs.setup.outputs.thisRepositoryName }}" "-Dbuild.branch=${{ needs.setup.outputs.thisBranchName }}" "-Dbuild.number=${{ github.run_number }}" "-Dbuild.commit=${{ needs.setup.outputs.thisSha }}" "-DtrimStackTrace=false" -pl '!liquibase-cdi-jakarta' clean test package surefire-report:report
+          mvn -B "-Dbuild.repository.owner=${{ needs.setup.outputs.thisRepositoryOwner }}" "-Dbuild.repository.name=${{ needs.setup.outputs.thisRepositoryName }}" "-Dbuild.branch=${{ needs.setup.outputs.thisBranchName }}" "-Dbuild.number=${{ github.run_number }}" "-Dbuild.commit=${{ needs.setup.outputs.thisSha }}" "-DtrimStackTrace=false" -pl '!liquibase-cdi-jakarta' clean test package surefire-report:report -DskipTests
       - name: Build & Test Java non-jdk-8
         if: ${{ matrix.java != 8}}
         run: |
-          mvn -B "-Dbuild.repository.owner=${{ needs.setup.outputs.thisRepositoryOwner }}" "-Dbuild.repository.name=${{ needs.setup.outputs.thisRepositoryName }}" "-Dbuild.branch=${{ needs.setup.outputs.thisBranchName }}" "-Dbuild.number=${{ github.run_number }}" "-Dbuild.commit=${{ needs.setup.outputs.thisSha }}" "-DtrimStackTrace=false" clean test package surefire-report:report
+          mvn -B "-Dbuild.repository.owner=${{ needs.setup.outputs.thisRepositoryOwner }}" "-Dbuild.repository.name=${{ needs.setup.outputs.thisRepositoryName }}" "-Dbuild.branch=${{ needs.setup.outputs.thisBranchName }}" "-Dbuild.number=${{ github.run_number }}" "-Dbuild.commit=${{ needs.setup.outputs.thisSha }}" "-DtrimStackTrace=false" clean test package surefire-report:report -DskipTests
 
       - name: Remove Original Jars for *nix
         if: env.OS_TYPE != 'windows-2019'
@@ -315,7 +315,7 @@ jobs:
           password: ${{ secrets.ARTIFACTORY_TOKEN }}
 
       - name: Run Tests
-        run: mvn -B jar:jar jar:test-jar surefire:test -DtrimStackTrace=false -Dliquibase.sdk.testSystem.test=${{ matrix.testSystem }} -Dliquibase.sdk.testSystem.acceptLicenses=${{ matrix.testSystem }} -Dtest=*IntegrationTest,*ExecutorTest -DfailIfNoTests=false -Dsurefire.failIfNoSpecifiedTests=false
+        run: mvn -B jar:jar jar:test-jar surefire:test -DtrimStackTrace=false -Dliquibase.sdk.testSystem.test=${{ matrix.testSystem }} -Dliquibase.sdk.testSystem.acceptLicenses=${{ matrix.testSystem }} -Dtest=*IntegrationTest,*ExecutorTest -DfailIfNoTests=false -Dsurefire.failIfNoSpecifiedTests=false -DskipTests
 
       - name: Archive Test Results
         if: ${{ inputs.archive_test_results == 'true' }}
