@@ -430,7 +430,7 @@ public class LiquibaseCommandLine {
             Scope.getCurrentScope().addMdcValue(MdcKey.CHANGELOG_FILE, "");
             Scope.getCurrentScope().addMdcValue(MdcKey.CHANGESET_ID, "");
             Scope.getCurrentScope().addMdcValue(MdcKey.CHANGESET_AUTHOR, "");
-            Scope.getCurrentScope().addMdcValue(MdcKey.CHANGESET_OUTCOME, "");
+            Scope.getCurrentScope().addMdcValue(MdcKey.CHANGESET_OUTCOME, "NOOP");
             Scope.getCurrentScope().addMdcValue(MdcKey.CHANGESETS_UPDATED, new ChangesetsUpdated());
             Scope.getCurrentScope().addMdcValue(MdcKey.OPERATION_START_TIME, "");
             Scope.getCurrentScope().addMdcValue(MdcKey.OPERATION_STOP_TIME, "");
