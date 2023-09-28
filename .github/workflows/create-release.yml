@@ -72,7 +72,7 @@ jobs:
         env:
           GPG_PASSWORD: ${{ secrets.GPG_PASSPHRASE }}
         run: |
-          .github/util/re-version.sh download/liquibase-artifacts "${{ needs.setup.outputs.version }}" "${{ steps.collect-data.outputs.branch }}"
+          .github/util/re-version.sh download/liquibase-artifacts "${{ needs.setup.outputs.version }}" "${{ needs.setup.outputs.branch }}"
 
           ##Sign Files
           .github/util/sign-artifacts.sh re-version/out
