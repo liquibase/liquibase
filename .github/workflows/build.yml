@@ -308,7 +308,7 @@ jobs:
             ./liquibase-integration-tests/target/jacoco.exec
 
   sonar:
-    needs: [ integration-test ]
+    needs: [ build, integration-test ]
     uses: liquibase/build-logic/.github/workflows/sonar-test-scan.yml@github-action-DAT-15968
     with:
       thisBranchName: ${{ needs.setup.outputs.thisBranchName }}
@@ -317,8 +317,6 @@ jobs:
       pullRequestNumber: ${{ github.event.pull_request.number }}
       pullRequestBranchName: ${{ github.event.pull_request.head.ref }}
       pullRequestBaseBranchName: ${{ github.event.pull_request.base.ref }}
-      unitTestReportArtifactName: liquibase-jacoco-test-results
-      integrationTestReportArtifactName: liquibase-integration-jacoco-test-results
       testedClassesModuleName: . #this is the root module
       dbPlatforms: h2
     secrets: inherit
