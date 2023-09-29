@@ -444,6 +444,8 @@ jobs:
           ## verify that the contents of the tar matches the expectation
           brew install tree
           tree liquibase-dist/target/liquibase-${{ needs.setup.outputs.thisBranchFileName }}-SNAPSHOT -o actual-distribution-contents.txt
+          # remove first line of actual, because it contains the folder name, which the expected will not have
+          echo "$(tail -n +2 actual-distribution-contents.txt)" > actual-distribution-contents.txt
           diff --strip-trailing-cr actual-distribution-contents.txt liquibase-dist/expected-distribution-contents.txt
           
           ##create zip file from tar content
