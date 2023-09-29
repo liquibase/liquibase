@@ -224,6 +224,14 @@ jobs:
           path: |
             ./liquibase-standard/target/jacoco.exec
 
+      - name: Save Classes for Jacoco Merged Report
+        if: ${{ matrix.java == 11 && matrix.os == 'ubuntu-22.04'}}
+        uses: actions/upload-artifact@v3
+        with:
+          name: liquibase-jacoco-classes
+          path: |
+            ./liquibase-standard/target/classes
+
       - name: Archive Modules
         if: ${{ matrix.java == 11 && matrix.os == 'ubuntu-22.04'}}
         uses: actions/upload-artifact@v3
@@ -308,8 +316,8 @@ jobs:
             ./liquibase-integration-tests/target/jacoco.exec
 
   sonar:
-    needs: integration-test
-    uses: liquibase/build-logic/.github/workflows/sonar-test-scan.yml@jacoco-final-report
+    needs: [ build, integration-test ]
+    uses: liquibase/build-logic/.github/workflows/sonar-test-scan.yml@github-action-DAT-15968
     with:
       thisBranchName: ${{ needs.setup.outputs.thisBranchName }}
       thisSha: ${{ needs.setup.outputs.thisSha }}
@@ -320,6 +328,7 @@ jobs:
       unitTestReportArtifactName: liquibase-jacoco-test-results
       integrationTestReportArtifactName: liquibase-integration-jacoco-test-results
       testedClassesModuleName: . #this is the root module
+      classesArtifactName: liquibase-jacoco-classes
       dbPlatforms: h2,hsqldb,mariadb,mssql,mysql,oracle,postgresql,sqlite,firebird
     secrets: inherit
 
