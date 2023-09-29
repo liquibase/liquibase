@@ -148,24 +148,22 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        #os: [ ubuntu-22.04, macos-latest, windows-2019 ]
-        #java: [ 8, 11, 17, 20 ]
-        os: [ ubuntu-22.04 ]
-        java: [ 11 ]
-        # exclude:
-        #   # exclude non-java 8 on macos and windows builds
-        #   - os: macos-latest
-        #     java: 11
-        #   - os: windows-2019
-        #     java: 11
-        #   - os: macos-latest
-        #     java: 17
-        #   - os: windows-2019
-        #     java: 17
-        #   - os: macos-latest
-        #     java: 20
-        #   - os: windows-2019
-        #     java: 20
+        os: [ ubuntu-22.04, macos-latest, windows-2019 ]
+        java: [ 8, 11, 17, 20 ]
+        exclude:
+          # exclude non-java 8 on macos and windows builds
+          - os: macos-latest
+            java: 11
+          - os: windows-2019
+            java: 11
+          - os: macos-latest
+            java: 17
+          - os: windows-2019
+            java: 17
+          - os: macos-latest
+            java: 20
+          - os: windows-2019
+            java: 20
     runs-on: ${{ matrix.os }}
     env:
       OS_TYPE: ${{ matrix.os }}
