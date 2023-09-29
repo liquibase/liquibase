@@ -77,7 +77,6 @@
         <spring.version>5.3.28</spring.version>
         <maven-failsafe-plugin.version>3.1.2</maven-failsafe-plugin.version>
         <jacoco-maven-plugin.version>0.8.10</jacoco-maven-plugin.version>
-        <jacoco.classDumpDir>${project.build.directory}/classdumps</jacoco.classDumpDir>
         <maven-surefire-plugin.version>3.1.2</maven-surefire-plugin.version>
         <sonar.projectName>Liquibase</sonar.projectName>
         <sonar.projectDescription>Liquibase</sonar.projectDescription>
@@ -86,8 +85,7 @@
         <code.coverage.project.folder>${basedir}/../</code.coverage.project.folder>
         <code.coverage.overall.data.folder>${basedir}/target/</code.coverage.overall.data.folder>      
         <itCoverageAgent></itCoverageAgent>
-        <sonar.coverage.jacoco.xmlReportPaths>target/site/jacoco-aggregate/jacoco.xml</sonar.coverage.jacoco.xmlReportPaths>
-        <jacoco.classDumpDir>${project.build.directory}/classdumps</jacoco.classDumpDir>
+        <sonar.coverage.jacoco.xmlReportPaths>target/jacoco.xml</sonar.coverage.jacoco.xmlReportPaths>
     </properties>
 
     <!-- comment -->
@@ -442,53 +440,6 @@
                         <phase>pre-integration-test</phase>
                         <configuration>
                             <propertyName>itCoverageAgent</propertyName>
-                        </configuration>
-                    </execution>
-                    <execution>
-                        <id>merge-results</id>
-                        <phase>verify</phase>
-                        <goals>
-                            <goal>merge</goal>
-                        </goals>
-                        <configuration>
-                            <fileSets>
-                            <fileSet>
-                                <directory>${code.coverage.project.folder}</directory>
-                                <includes>
-                                <include>*.exec</include>
-                                </includes>
-                            </fileSet>
-                            </fileSets>
-                            <destFile>${code.coverage.overall.data.folder}/aggregate.exec</destFile>
-                        </configuration>
-                    </execution>
-                    <execution>
-                        <id>cli-merge-results</id>
-                        <phase>none</phase>
-                        <goals>
-                            <goal>merge</goal>
-                        </goals>
-                        <configuration>
-                            <fileSets>
-                            <fileSet>
-                                <directory>${code.coverage.overall.data.folder}</directory>
-                                <includes>
-                                <include>*.exec</include>
-                                </includes>
-                            </fileSet>
-                            </fileSets>
-                            <destFile>${code.coverage.overall.data.folder}/aggregate.exec</destFile>
-                        </configuration>
-                    </execution>
-                    <execution>
-                        <id>cli-post-merge-report</id>
-                        <phase>none</phase>
-                        <goals>
-                            <goal>report</goal>
-                        </goals>
-                        <configuration>
-                            <dataFile>${code.coverage.overall.data.folder}/aggregate.exec</dataFile>
-                            <outputDirectory>${code.coverage.overall.data.folder}/jacoco-aggregate</outputDirectory>
                         </configuration>
                     </execution>
                 </executions>
