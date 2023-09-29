@@ -111,7 +111,6 @@
         <module>liquibase-extension-examples</module>
         <module>liquibase-extension-testing</module>
         <module>liquibase-snowflake</module>
-        <module>liquibase-coverage</module>
     </modules>
 
     <dependencyManagement>
