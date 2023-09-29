@@ -328,9 +328,12 @@ public abstract class DatabaseTestSystem extends TestSystem {
     protected abstract String[] getSetupSql();
 
     public boolean executeSql(String sql) throws SQLException {
-        try (Statement statement = getConnection().createStatement()) {
+        Connection connection = getConnection();
+        try (Statement statement = connection.createStatement()) {
             boolean execute = statement.execute(sql);
-            getConnection().commit();
+            if (!connection.getAutoCommit()) {
+                connection.commit();
+            }
             return execute;
         }
     }
