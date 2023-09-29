@@ -442,7 +442,7 @@ jobs:
           (cd liquibase-dist/target/liquibase-${{ needs.setup.outputs.thisBranchFileName }}-SNAPSHOT && tar -xzf ../liquibase-${{ needs.setup.outputs.thisBranchFileName }}-SNAPSHOT.tar.gz)
 
           ## verify that the contents of the tar matches the expectation
-          echo "Compare the contents of the tar.gz with the expected contents (using baseline file in liquibase-dist directory) to ensure that no new files were accidentally added. A failure here indicates that a new file was added to the tar.gz, and it should either be rectififed or added to the baseline."
+          echo "Comparing the contents of the tar.gz with the expected contents (using baseline file in liquibase-dist directory) to ensure that no new files were accidentally added. A failure here indicates that a new file was added to the tar.gz, and it should either be rectififed or added to the baseline."
           brew install tree --quiet
           tree liquibase-dist/target/liquibase-${{ needs.setup.outputs.thisBranchFileName }}-SNAPSHOT -o actual-distribution-contents.txt
           cat actual-distribution-contents.txt
