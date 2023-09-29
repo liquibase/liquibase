@@ -84,16 +84,16 @@
 │   └── liquibase_autocomplete_mac.bash
 ├── licenses
 │   ├── commercial
+│   │   ├── FDHUT.txt
 │   │   ├── Liquibase Pro EULA Software License Subscription and Support Agreement.txt
 │   │   ├── README.txt
-│   │   ├── agpl-3.0.txt
 │   │   └── apache-2.0.txt
 │   └── oss
 │       ├── README.txt
 │       ├── apache-2.0.txt
 │       ├── bsd-2-clause.txt
 │       ├── bsd-3-clause.txt
-│       ├── cddl1.txt
+│       ├── cddl1.1.txt
 │       ├── edl-1.0.txt
 │       ├── epl-1.0.txt
 │       ├── epl-2.0.txt
@@ -103,7 +103,6 @@
 │       ├── lgpl-3.0.txt
 │       └── mit.txt
 ├── liquibase
-├── liquibase-env.sh
 └── liquibase.bat
 
-11 directories, 96 files
+11 directories, 95 files
