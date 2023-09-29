@@ -448,6 +448,7 @@ jobs:
           # remove first line of actual, because it contains the folder name, which the expected will not have
           echo "$(tail -n +2 actual-distribution-contents.txt)" > actual-distribution-contents.txt
           diff actual-distribution-contents.txt liquibase-dist/expected-distribution-contents.txt
+          rm -rf actual-distribution-contents.txt
           
           ##create zip file from tar content
           (cd liquibase-dist/target/liquibase-${{ needs.setup.outputs.thisBranchFileName }}-SNAPSHOT && zip -r ../liquibase-${{ needs.setup.outputs.thisBranchFileName }}-SNAPSHOT.zip *)
