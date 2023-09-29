@@ -363,9 +363,11 @@ public class ChangeSet implements Conditional, ChangeLogChild {
                 if (checkSum == null) {
                     StringBuilder stringToMD5 = new StringBuilder();
                     for (Change change : this.getChanges()) {
-                        if (Scope.getCurrentScope().getChecksumVersion().lowerOrEqualThan(ChecksumVersion.V8) ||
-                            !(change instanceof DbmsTargetedChange) ||
-                            DatabaseList.definitionMatches(((DbmsTargetedChange) change).getDbms(), Scope.getCurrentScope().getDatabase(), true)) {
+                        // checksum v8 requires changes that are applied even to other databases to be calculated
+                        // checksum v9 excludes them from calculation
+                        if (!(change instanceof DbmsTargetedChange) ||
+                                Scope.getCurrentScope().getChecksumVersion().lowerOrEqualThan(ChecksumVersion.V8) ||
+                                DatabaseList.definitionMatches(((DbmsTargetedChange) change).getDbms(), Scope.getCurrentScope().getDatabase(), true)) {
                             stringToMD5.append(change.generateCheckSum()).append(":");
                         }
                     }
