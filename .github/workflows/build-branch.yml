@@ -32,8 +32,9 @@ jobs:
       - name: Get commit-sha
         id: get-commit-sha
         uses: actions/github-script@v6
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
-          github-token: ${{ secrets.BOT_TOKEN }}
           script: |
               const helper = require('./.github/util/workflow-helper.js')({github, context});
               core.setOutput("thisSha", helper.getCurrentSha());
