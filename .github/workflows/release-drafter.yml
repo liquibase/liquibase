@@ -2,9 +2,13 @@ name: Release Drafter
 
 on:
   workflow_dispatch:
+  #This job will be triggered when changes are pushed to the master branch, and it will also be triggered when a branch is created with a name that starts with 'refs/heads/releases-'
   push:
     branches:
-      - master
+      push:
+        branches:
+          - master
+          - 'release-**'
     
 permissions:
   contents: read
@@ -19,7 +23,13 @@ jobs:
         pull-requests: write
     runs-on: ubuntu-latest
     steps:
-      # Drafts your next Release notes as Pull Requests are merged into the default branch
-      - uses: release-drafter/release-drafter@v5
+      - name: Check branch name
+        id: branch_check
+        #-qE : quiet mode Search for a regular expression pattern in the input text using extended(E) regular expressions
+        run: echo "is_release_branch=$(echo $GITHUB_REF | grep -qE 'refs/heads/(release-|master)' && echo true || echo false)" >> "$GITHUB_ENV"
+
+      - name: Draft Release
+        if: steps.branch_check.outputs.is_release_branch == 'true'
+        uses: release-drafter/release-drafter@v5
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
