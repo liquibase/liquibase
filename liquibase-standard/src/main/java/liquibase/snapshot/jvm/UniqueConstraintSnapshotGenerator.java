@@ -268,14 +268,19 @@ public class UniqueConstraintSnapshotGenerator extends JdbcSnapshotGenerator {
                             + "order by T2.COLUMN_NAME\n";
                     stmt = new RawSqlStatement(sql);
                 } else {
+                    List<String> parameter = new ArrayList<>(2);
                     String sql = "select k.constname as constraint_name, k.colname as column_name from syscat.keycoluse k, syscat.tabconst t "
                             + "where k.constname = t.constname "
                             + "and k.tabschema = t.tabschema "
-                            + "and t.type='U' "
-                            + (bulkQuery? "" : "and k.constname='" + database.correctObjectName(name, UniqueConstraint.class) + "' ")
-                            + "and t.tabschema = '" + database.correctObjectName(schema.getName(), Schema.class) + "' "
+                            + "and t.type = 'U' "
+                            + (bulkQuery? "" : "and k.constname = ? ")
+                            + "and t.tabschema = ? "
                             + "order by colseq";
-                    stmt = new RawSqlStatement(sql);
+                    if (!bulkQuery) {
+                        parameter.add(database.correctObjectName(name, UniqueConstraint.class));
+                    }
+                    parameter.add(database.correctObjectName(schema.getName(), Schema.class));
+                    stmt = new RawParameterizedSqlStatement(sql, parameter.toArray());
                 }
             } else if (database instanceof Db2zDatabase) {
                 List<String> parameter = new ArrayList<>(2);
@@ -552,5 +557,4 @@ public class UniqueConstraintSnapshotGenerator extends JdbcSnapshotGenerator {
         // Return the query
         return sqlBuf.toString();
     }
-
 }
