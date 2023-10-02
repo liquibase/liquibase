@@ -1,5 +1,6 @@
 package liquibase.change.core;
 
+import liquibase.ChecksumVersion;
 import liquibase.change.*;
 import liquibase.database.Database;
 import liquibase.exception.ValidationErrors;
@@ -242,5 +243,12 @@ public class CreateIndexChange extends AbstractChange implements ChangeWithColum
             }
         }
         return validationErrors;
+    }
+
+    @Override
+    public String[] getExcludedFieldFilters(ChecksumVersion version) {
+        return new String[]{
+                "associatedWith"
+        };
     }
 }
