@@ -52,7 +52,7 @@ public abstract class AbstractRollbackCommandStep extends AbstractCommandStep {
 
     protected void doRollback(CommandResultsBuilder resultsBuilder, List<RanChangeSet> ranChangeSetList,
                               ChangeSetFilter changeSetFilter) throws Exception {
-        doRollback(resultsBuilder, ranChangeSetList, changeSetFilter);
+        doRollback(resultsBuilder, ranChangeSetList, changeSetFilter, null);
     }
 
     protected void doRollback(CommandResultsBuilder resultsBuilder, List<RanChangeSet> ranChangeSetList,
