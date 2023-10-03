@@ -7,6 +7,7 @@ import liquibase.database.Database;
 import liquibase.exception.PreconditionErrorException;
 import liquibase.exception.PreconditionFailedException;
 import liquibase.precondition.core.PreconditionContainer;
+import lombok.Getter;
 
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
@@ -20,6 +21,8 @@ import java.util.stream.Collectors;
 public class DefaultChangeExecListener implements ChangeExecListener, ChangeLogSyncListener {
     private final List<ChangeExecListener> listeners;
     private final List<ChangeSet> deployedChangeSets = new LinkedList<>();
+    @Getter
+    private final List<ChangeSet> rolledBackChangeSets = new LinkedList<>();
     private final List<ChangeSet> failedChangeSets = new LinkedList<>();
     private final Map<ChangeSet, List<Change>> deployedChangesPerChangeSet = new ConcurrentHashMap<>();
 
@@ -47,6 +50,7 @@ public class DefaultChangeExecListener implements ChangeExecListener, ChangeLogS
 
     @Override
     public void rolledBack(ChangeSet changeSet, DatabaseChangeLog databaseChangeLog, Database database) {
+        rolledBackChangeSets.add(changeSet);
         listeners.forEach(listener -> listener.rolledBack(changeSet, databaseChangeLog, database));
     }
 
@@ -79,6 +83,7 @@ public class DefaultChangeExecListener implements ChangeExecListener, ChangeLogS
 
     @Override
     public void rollbackFailed(ChangeSet changeSet, DatabaseChangeLog databaseChangeLog, Database database, Exception exception) {
+        failedChangeSets.add(changeSet);
         listeners.forEach(listener -> listener.rollbackFailed(changeSet, databaseChangeLog, database, exception));
     }
 

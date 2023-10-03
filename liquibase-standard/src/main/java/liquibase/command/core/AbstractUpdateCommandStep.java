@@ -180,8 +180,8 @@ public abstract class AbstractUpdateCommandStep extends AbstractCommandStep impl
             int failedChangeSetCount = failedChangeSets.size();
             ChangesetsUpdated changesetsUpdated = new ChangesetsUpdated(deployedChangeSets);
             updateReportParameters.getChangesetInfo().setChangesetCount(deployedChangeSetCount + failedChangeSetCount);
-            updateReportParameters.getChangesetInfo().addAllToChangesetInfoList(deployedChangeSets);
-            updateReportParameters.getChangesetInfo().addAllToChangesetInfoList(failedChangeSets);
+            updateReportParameters.getChangesetInfo().addAllToChangesetInfoList(deployedChangeSets, false);
+            updateReportParameters.getChangesetInfo().addAllToChangesetInfoList(failedChangeSets, false);
             Scope.getCurrentScope().addMdcValue(MdcKey.DEPLOYMENT_OUTCOME_COUNT, String.valueOf(deployedChangeSetCount));
             Scope.getCurrentScope().addMdcValue(MdcKey.CHANGESETS_UPDATED, changesetsUpdated);
         }

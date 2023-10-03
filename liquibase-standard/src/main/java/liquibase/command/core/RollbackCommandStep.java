@@ -7,7 +7,11 @@ import liquibase.changelog.filter.AfterTagChangeSetFilter;
 import liquibase.command.*;
 import liquibase.database.Database;
 import liquibase.logging.mdc.MdcKey;
+import liquibase.report.RollbackReportParameters;
+import liquibase.util.StringUtil;
 
+import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 
 /**
@@ -34,19 +38,30 @@ public class RollbackCommandStep extends AbstractRollbackCommandStep {
         builder.addArgument(AbstractRollbackCommandStep.ROLLBACK_SCRIPT_ARG).build();
     }
 
-
     @Override
     public void run(CommandResultsBuilder resultsBuilder) throws Exception {
+        RollbackReportParameters rollbackReportParameters = new RollbackReportParameters();
+        rollbackReportParameters.setCommandTitle(
+                StringUtil.upperCaseFirst(Arrays.toString(
+                        defineCommandNames()[0]).replace("[","").replace("]","").replace("rollback", "rollback ").trim()));
+        resultsBuilder.addResult("rollbackReport", rollbackReportParameters);
+        Scope.child(Collections.singletonMap("rollbackReport", rollbackReportParameters), () -> doRun(resultsBuilder, rollbackReportParameters));
+    }
+
+    private void doRun(CommandResultsBuilder resultsBuilder, RollbackReportParameters rollbackReportParameters) throws Exception {
         CommandScope commandScope = resultsBuilder.getCommandScope();
 
         String tagToRollBackTo = commandScope.getArgumentValue(TAG_ARG);
         Scope.getCurrentScope().addMdcValue(MdcKey.ROLLBACK_TO_TAG, tagToRollBackTo);
 
         Database database = (Database) commandScope.getDependency(Database.class);
+        rollbackReportParameters.getDatabaseInfo().setDatabaseType(database.getDatabaseProductName());
+        rollbackReportParameters.getDatabaseInfo().setVersion(database.getDatabaseProductVersion());
+        rollbackReportParameters.setJdbcUrl(database.getConnection().getURL());
 
         List<RanChangeSet> ranChangeSetList = database.getRanChangeSetList();
         TagVersionEnum tagVersion = TagVersionEnum.valueOf(commandScope.getArgumentValue(TAG_VERSION_ARG));
-        this.doRollback(resultsBuilder, ranChangeSetList, new AfterTagChangeSetFilter(tagToRollBackTo, ranChangeSetList, tagVersion));
+        this.doRollback(resultsBuilder, ranChangeSetList, new AfterTagChangeSetFilter(tagToRollBackTo, ranChangeSetList, tagVersion), rollbackReportParameters);
     }
 
     @Override
