@@ -160,7 +160,11 @@ public class JdbcConnection implements DatabaseConnection {
                         Pattern pattern = entry.getValue();
                         Matcher actualMatcher = pattern.matcher(jdbcUrl);
                         if (actualMatcher.find()) {
+                            //
+                            // Handle style '=<some string>' and ':<some string>'
+                            //
                             jdbcUrl = jdbcUrl.replace("=" + actualMatcher.group(2), "=*****");
+                            jdbcUrl = jdbcUrl.replace(":" + actualMatcher.group(2), ":*****");
                         }
                     }
                 }

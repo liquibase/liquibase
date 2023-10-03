@@ -12,6 +12,7 @@ Short Description: Capture the current state of the reference database
 Long Description: NOT SET
 Required Args:
   referenceUrl (String) The JDBC reference database connection URL
+    OBFUSCATED
 Optional Args:
   referenceDefaultCatalogName (String) The default catalog name to use for the reference database connection
     Default: null

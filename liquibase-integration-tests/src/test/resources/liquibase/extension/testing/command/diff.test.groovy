@@ -16,6 +16,7 @@ Short Description: Outputs a description of differences.  If you have a Liquibas
 Long Description: NOT SET
 Required Args:
   referenceUrl (String) The JDBC reference database connection URL
+    OBFUSCATED
   url (String) The JDBC database connection URL
     OBFUSCATED
 Optional Args:
