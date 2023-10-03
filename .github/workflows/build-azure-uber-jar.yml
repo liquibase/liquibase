@@ -44,7 +44,7 @@ jobs:
           maven-version: ${{ env.MAVEN_VERSION }}
 
       - name: Set version
-        run: mvn versions:set -DnewVersion="${{ github.event.inputs.liquibase-version }}"
+        run: mvn versions:set "-DnewVersion=v4.24.0"
 
       - name: Build & Test
         run: mvn -B clean package
