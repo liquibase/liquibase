@@ -147,12 +147,6 @@ jobs:
           mkdir artifacts-named
           cp liquibase-dist/target/liquibase-${{ needs.setup.outputs.thisBranchName }}-SNAPSHOT.tar.gz artifacts-named/liquibase-${{ needs.setup.outputs.thisBranchName }}.tar.gz
 
-      - name: Archive Packages
-        uses: actions/upload-artifact@v3
-        with:
-          name: liquibase-artifacts
-          path: artifacts/*
-
       - name: Archive Convenience Zip
         uses: actions/upload-artifact@v3
         with:
