@@ -36,7 +36,7 @@ public class ClobTypeTest {
             ClobType ct = new ClobType();
             ct.finishInitialization("Text");
             DatabaseDataType dbType = ct.toDatabaseDataType(new MSSQLDatabase());
-            assertEquals("Text", dbType.getType());
+            assertEquals("varchar (max)", dbType.getType());
         });
     }
 
@@ -46,7 +46,7 @@ public class ClobTypeTest {
             ClobType ct = new ClobType();
             ct.finishInitialization("NText");
             DatabaseDataType dbType = ct.toDatabaseDataType(new MSSQLDatabase());
-            assertEquals("NText", dbType.getType());
+            assertEquals("nvarchar (max)", dbType.getType());
         });
     }
 
@@ -56,7 +56,7 @@ public class ClobTypeTest {
             ClobType ct = new ClobType();
             ct.finishInitialization("[Text]");
             DatabaseDataType dbType = ct.toDatabaseDataType(new MSSQLDatabase());
-            assertEquals("[Text]", dbType.getType());
+            assertEquals("varchar (max)", dbType.getType());
         });
     }
 
@@ -66,7 +66,7 @@ public class ClobTypeTest {
             ClobType ct = new ClobType();
             ct.finishInitialization("[NText]");
             DatabaseDataType dbType = ct.toDatabaseDataType(new MSSQLDatabase());
-            assertEquals("[NText]", dbType.getType());
+            assertEquals("nvarchar (max)", dbType.getType());
         });
     }
 }
