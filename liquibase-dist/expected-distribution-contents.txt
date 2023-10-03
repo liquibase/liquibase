@@ -1,0 +1,106 @@
+├── ABOUT.txt
+├── GETTING_STARTED.txt
+├── LICENSE.txt
+├── README.txt
+├── UNINSTALL.txt
+├── changelog.txt
+├── examples
+│   ├── json
+│   │   ├── blank-changelog.json
+│   │   ├── example-changelog.json
+│   │   ├── example-changeset-json.txt
+│   │   ├── liquibase.advanced.flowfile.yaml
+│   │   ├── liquibase.customlogdata.yaml
+│   │   ├── liquibase.endstage.flow
+│   │   ├── liquibase.flowfile.yaml
+│   │   ├── liquibase.flowvariables.yaml
+│   │   └── liquibase.properties
+│   ├── sql
+│   │   ├── blank-changelog.sql
+│   │   ├── example-changelog.sql
+│   │   ├── example-changeset-sql.txt
+│   │   ├── liquibase.advanced.flowfile.yaml
+│   │   ├── liquibase.customlogdata.yaml
+│   │   ├── liquibase.endstage.flow
+│   │   ├── liquibase.flowfile.yaml
+│   │   ├── liquibase.flowvariables.yaml
+│   │   ├── liquibase.properties
+│   │   ├── liquibase.psql.conf
+│   │   ├── liquibase.sqlcmd.conf
+│   │   └── liquibase.sqlplus.conf
+│   ├── start-h2
+│   ├── start-h2.bat
+│   ├── xml
+│   │   ├── blank-changelog.xml
+│   │   ├── example-changelog.xml
+│   │   ├── example-changeset-xml.txt
+│   │   ├── liquibase.advanced.flowfile.yaml
+│   │   ├── liquibase.customlogdata.yaml
+│   │   ├── liquibase.endstage.flow
+│   │   ├── liquibase.flowfile.yaml
+│   │   ├── liquibase.flowvariables.yaml
+│   │   ├── liquibase.properties
+│   │   ├── liquibase.psql.conf
+│   │   ├── liquibase.sqlcmd.conf
+│   │   └── liquibase.sqlplus.conf
+│   └── yaml
+│       ├── blank-changelog.yaml
+│       ├── example-changelog.yaml
+│       ├── example-changeset-yaml.txt
+│       ├── liquibase.advanced.flowfile.yaml
+│       ├── liquibase.customlogdata.yaml
+│       ├── liquibase.endstage.flow
+│       ├── liquibase.flowfile.yaml
+│       ├── liquibase.flowvariables.yaml
+│       └── liquibase.properties
+├── internal
+│   └── lib
+│       ├── commons-collections4.jar
+│       ├── commons-lang3.jar
+│       ├── commons-text.jar
+│       ├── compiler.jar
+│       ├── h2.jar
+│       ├── hsqldb.jar
+│       ├── jaxb-api.jar
+│       ├── jaxb-core.jar
+│       ├── jaxb-runtime.jar
+│       ├── jaybird.jar
+│       ├── jcc.jar
+│       ├── liquibase-commercial.jar
+│       ├── liquibase-core.jar
+│       ├── mariadb-java-client.jar
+│       ├── mssql-jdbc.jar
+│       ├── ojdbc8.jar
+│       ├── opencsv.jar
+│       ├── picocli.jar
+│       ├── postgresql.jar
+│       ├── snakeyaml.jar
+│       ├── snowflake-jdbc.jar
+│       └── sqlite-jdbc.jar
+├── lib
+│   ├── README.txt
+│   ├── liquibase_autocomplete.sh
+│   ├── liquibase_autocomplete.zsh
+│   └── liquibase_autocomplete_mac.bash
+├── licenses
+│   ├── commercial
+│   │   ├── FDHUT.txt
+│   │   ├── Liquibase Pro EULA Software License Subscription and Support Agreement.txt
+│   │   ├── README.txt
+│   │   └── apache-2.0.txt
+│   └── oss
+│       ├── README.txt
+│       ├── apache-2.0.txt
+│       ├── bsd-2-clause.txt
+│       ├── bsd-3-clause.txt
+│       ├── cddl1.1.txt
+│       ├── edl-1.0.txt
+│       ├── epl-1.0.txt
+│       ├── epl-2.0.txt
+│       ├── futc.txt
+│       ├── ipla.txt
+│       ├── lgpl-2.1.txt
+│       ├── lgpl-3.0.txt
+│       └── mit.txt
+├── liquibase
+└── liquibase.bat
