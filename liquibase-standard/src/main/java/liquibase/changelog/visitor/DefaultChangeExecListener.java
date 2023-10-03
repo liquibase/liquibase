@@ -24,6 +24,8 @@ public class DefaultChangeExecListener implements ChangeExecListener, ChangeLogS
     @Getter
     private final List<ChangeSet> rolledBackChangeSets = new LinkedList<>();
     private final List<ChangeSet> failedChangeSets = new LinkedList<>();
+    @Getter
+    private final List<ChangeSet> failedRollbackChangeSets = new LinkedList<>();
     private final Map<ChangeSet, List<Change>> deployedChangesPerChangeSet = new ConcurrentHashMap<>();
 
     public DefaultChangeExecListener(ChangeExecListener... listeners) {
@@ -83,7 +85,7 @@ public class DefaultChangeExecListener implements ChangeExecListener, ChangeLogS
 
     @Override
     public void rollbackFailed(ChangeSet changeSet, DatabaseChangeLog databaseChangeLog, Database database, Exception exception) {
-        failedChangeSets.add(changeSet);
+        failedRollbackChangeSets.add(changeSet);
         listeners.forEach(listener -> listener.rollbackFailed(changeSet, databaseChangeLog, database, exception));
     }
 

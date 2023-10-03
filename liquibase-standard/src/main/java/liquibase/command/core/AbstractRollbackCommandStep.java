@@ -130,7 +130,7 @@ public abstract class AbstractRollbackCommandStep extends AbstractCommandStep {
             }
         } finally {
             if (rollbackReportParameters != null && changeExecListener instanceof DefaultChangeExecListener) {
-                List<ChangeSet> failedChangeSets = ((DefaultChangeExecListener) changeExecListener).getFailedChangeSets();
+                List<ChangeSet> failedChangeSets = ((DefaultChangeExecListener) changeExecListener).getFailedRollbackChangeSets();
                 List<ChangeSet> rolledBackChangeSets = ((DefaultChangeExecListener) changeExecListener).getRolledBackChangeSets();
                 rollbackReportParameters.getChangesetInfo().setChangesetCount(failedChangeSets.size() + rolledBackChangeSets.size());
                 rollbackReportParameters.getChangesetInfo().addAllToChangesetInfoList(rolledBackChangeSets, true);
