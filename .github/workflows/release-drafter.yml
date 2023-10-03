@@ -5,10 +5,8 @@ on:
   #This job will be triggered when changes are pushed to the master branch, and it will also be triggered when a branch is created with a name that starts with 'refs/heads/releases-'
   push:
     branches:
-      push:
-        branches:
           - master
-          - 'release-**'
+          - 'refs/heads/release-**'
     
 permissions:
   contents: read
