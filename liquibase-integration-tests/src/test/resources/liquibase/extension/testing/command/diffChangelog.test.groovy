@@ -18,6 +18,7 @@ Long Description: NOT SET
 Required Args:
   changelogFile (String) Changelog file to write results
   referenceUrl (String) The JDBC reference database connection URL
+    OBFUSCATED
   url (String) The JDBC database connection URL
     OBFUSCATED
 Optional Args:
