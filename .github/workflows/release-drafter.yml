@@ -26,8 +26,9 @@ jobs:
         #-qE : quiet mode Search for a regular expression pattern in the input text using extended(E) regular expressions. 
         # The below command determines whether the current branch is a release branch (starts with release-) or is master. It sets the is_release_branch variable to true if the condition is met and false otherwise. 
         run: |
-          echo "is_release_branch=$(echo $GITHUB_REF | grep -qE 'refs/heads/(release-|master)' && echo true || echo false)" >> "$GITHUB_ENV"
-          echo "$GITHUB_ENV"
+          is_release_branch=$(echo $GITHUB_REF | grep -qE 'refs/heads/(release-|master)' && echo true || echo false)
+          echo "is_release_branch=$is_release_branch" >> "$GITHUB_OUTPUT"
+          echo "$is_release_branch"
           
       - name: Draft Release
         if: steps.branch_check.outputs.is_release_branch == 'true'
