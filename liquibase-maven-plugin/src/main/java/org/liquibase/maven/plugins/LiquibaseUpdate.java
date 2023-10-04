@@ -48,7 +48,11 @@ public class LiquibaseUpdate extends AbstractLiquibaseUpdateMojo {
             });
         } catch (Exception exception) {
             if (exception instanceof LiquibaseException) {
-                handleUpdateException((LiquibaseException) exception); //need this until update-to-tag and update-count are refactored
+                try {
+                    handleUpdateException((LiquibaseException) exception); //need this until update-to-tag and update-count are refactored
+                } catch (MojoExecutionException e) {
+                    //nothing
+                }
                 throw (LiquibaseException) exception;
             } else {
                 throw new LiquibaseException(exception);

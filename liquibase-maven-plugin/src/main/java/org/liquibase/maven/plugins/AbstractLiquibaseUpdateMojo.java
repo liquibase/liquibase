@@ -2,7 +2,9 @@ package org.liquibase.maven.plugins;
 
 import liquibase.Liquibase;
 import liquibase.command.CommandScope;
+import liquibase.database.Database;
 import liquibase.exception.LiquibaseException;
+import org.apache.maven.plugin.MojoExecutionException;
 import org.liquibase.maven.property.PropertyElement;
 
 /**
@@ -53,10 +55,11 @@ public abstract class AbstractLiquibaseUpdateMojo extends AbstractLiquibaseChang
     getLog().info(indent + "number of changes to apply: " + changesToApply);
   }
 
-  protected void handleUpdateException(LiquibaseException exception) throws LiquibaseException {
-    try {
+  protected void handleUpdateException(LiquibaseException exception) throws LiquibaseException, MojoExecutionException {
+    ClassLoader mavenClassLoader = getMavenArtifactClassLoader();
+    try(Database database = getDatabase(mavenClassLoader)) {
       CommandScope liquibaseCommand = new CommandScope("internalRollbackOnError");
-      liquibaseCommand.addArgumentValue("database", getLiquibase().getDatabase());
+      liquibaseCommand.addArgumentValue("database", database);
       liquibaseCommand.addArgumentValue("exception", exception);
       liquibaseCommand.addArgumentValue("listener", defaultChangeExecListener);
       liquibaseCommand.addArgumentValue("rollbackOnError", rollbackOnError);

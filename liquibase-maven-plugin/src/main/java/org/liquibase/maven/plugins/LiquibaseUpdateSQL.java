@@ -49,31 +49,7 @@ public class LiquibaseUpdateSQL extends AbstractLiquibaseUpdateMojo {
 	@java.lang.SuppressWarnings("squid:S2095")
 	protected Liquibase createLiquibase(Database db)
 			throws MojoExecutionException {
-		Liquibase liquibase = super.createLiquibase(db);
-
-		// Setup the output file writer
-		try {
-			if (!migrationSqlOutputFile.exists()) {
-				// Ensure the parent directories exist
-				migrationSqlOutputFile.getParentFile().mkdirs();
-				// Create the actual file
-				if (!migrationSqlOutputFile.createNewFile()) {
-					throw new MojoExecutionException(
-							"Cannot create the migration SQL file; "
-									+ migrationSqlOutputFile.getAbsolutePath());
-				}
-			}
-
-            outputWriter = getOutputWriter(migrationSqlOutputFile);
-		} catch (IOException e) {
-			getLog().error(e);
-			throw new MojoExecutionException(
-					"Failed to create SQL output writer", e);
-		}
-		getLog().info(
-				"Output SQL Migration File: "
-						+ migrationSqlOutputFile.getAbsolutePath());
-		return liquibase;
+		return super.createLiquibase(db, migrationSqlOutputFile);
 	}
 
 	@Override
@@ -81,17 +57,5 @@ public class LiquibaseUpdateSQL extends AbstractLiquibaseUpdateMojo {
 		super.printSettings(indent);
 		getLog().info(
 				indent + "migrationSQLOutputFile: " + migrationSqlOutputFile);
-	}
-
-	@Override
-	protected void cleanup(Database db) {
-		super.cleanup(db);
-		if (outputWriter != null) {
-			try {
-				outputWriter.close();
-			} catch (IOException e) {
-				getLog().error(e);
-			}
-		}
 	}
 }

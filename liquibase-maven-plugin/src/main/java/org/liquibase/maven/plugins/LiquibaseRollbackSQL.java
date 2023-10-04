@@ -9,8 +9,6 @@ import org.apache.maven.plugin.MojoExecutionException;
 import org.liquibase.maven.property.PropertyElement;
 
 import java.io.File;
-import java.io.IOException;
-import java.io.Writer;
 import java.text.ParseException;
 
 /**
@@ -33,36 +31,9 @@ public class LiquibaseRollbackSQL extends LiquibaseRollback {
     @PropertyElement
     protected File migrationSqlOutputFile;
 
-    /** The writer for writing the migration SQL. */
-    private Writer outputWriter;
-
     @Override
-    protected Liquibase createLiquibase(Database db)
-            throws MojoExecutionException {
-        Liquibase liquibase = super.createLiquibase(db);
-
-        // Setup the output file writer
-        try {
-            if (!migrationSqlOutputFile.exists()) {
-                // Ensure the parent directories exist
-                migrationSqlOutputFile.getParentFile().mkdirs();
-                // Create the actual file
-                if (!migrationSqlOutputFile.createNewFile()) {
-                    throw new MojoExecutionException(
-                            "Cannot create the migration SQL file; "
-                                    + migrationSqlOutputFile.getAbsolutePath());
-                }
-            }
-            outputWriter = getOutputWriter(migrationSqlOutputFile);
-        } catch (IOException e) {
-            getLog().error(e);
-            throw new MojoExecutionException(
-                    "Failed to create SQL output writer", e);
-        }
-        getLog().info(
-                "Output SQL Migration File: "
-                        + migrationSqlOutputFile.getAbsolutePath());
-        return liquibase;
+    protected Liquibase createLiquibase(Database db) throws MojoExecutionException {
+       return super.createLiquibase(db, migrationSqlOutputFile);
     }
 
     @Override
@@ -70,18 +41,6 @@ public class LiquibaseRollbackSQL extends LiquibaseRollback {
         super.printSettings(indent);
         getLog().info(
                 indent + "migrationSQLOutputFile: " + migrationSqlOutputFile);
-    }
-
-    @Override
-    protected void cleanup(Database db) {
-        super.cleanup(db);
-        if (outputWriter != null) {
-            try {
-                outputWriter.close();
-            } catch (IOException e) {
-                getLog().error(e);
-            }
-        }
     }
 
     @Override
