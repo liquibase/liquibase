@@ -58,7 +58,6 @@
 │       ├── commons-collections4.jar
 │       ├── commons-lang3.jar
 │       ├── commons-text.jar
-│       ├── compiler.jar
 │       ├── h2.jar
 │       ├── hsqldb.jar
 │       ├── jaxb-api.jar
