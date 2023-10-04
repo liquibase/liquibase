@@ -1393,7 +1393,7 @@ public class LiquibaseCommandLine {
                 }
             } catch (Exception e) {
                 Scope.getCurrentScope().getLog(getClass()).fine("Failed to load the version of compiler.jar from " +
-                        "its pom.xml, this is relatively harmless, but could mean that the version of compiler.jar will " +
+                        "its pom.properties, this is relatively harmless, but could mean that the version of compiler.jar will " +
                         "not appear in the liquibase --version console output.", e);
             }
         }
