@@ -122,7 +122,7 @@ logLevel: WARN
 - updating the database schema
 
 ```shell
-liquibase --changeLogFile=changelog.sql update
+liquibase --changeLogFile=changelog.bigquery.sql update
 ```
 
 - generating the schema from current database state
