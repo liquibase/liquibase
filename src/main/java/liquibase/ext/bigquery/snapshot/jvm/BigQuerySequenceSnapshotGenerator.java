@@ -9,6 +9,8 @@ import liquibase.ext.bigquery.database.BigqueryDatabase;
 import liquibase.snapshot.DatabaseSnapshot;
 import liquibase.snapshot.SnapshotGenerator;
 import liquibase.snapshot.jvm.SequenceSnapshotGenerator;
+import liquibase.statement.SqlStatement;
+import liquibase.statement.core.RawSqlStatement;
 import liquibase.structure.DatabaseObject;
 import liquibase.structure.core.Schema;
 
@@ -34,20 +36,22 @@ public class BigQuerySequenceSnapshotGenerator extends SequenceSnapshotGenerator
             return null;
         }
 
-        @Override
-        protected String getSelectSequenceSql(Schema schema, Database database) {
-            if (database instanceof BigqueryDatabase) {
-                // BigQuery does not support sequences
-                //String catalog = database.getDefaultCatalogName();
-                CatalogAndSchema catalogAndSchema = (new CatalogAndSchema(schema.getCatalogName(), schema.getName())).customize(database);
+    @Override
+    protected SqlStatement getSelectSequenceStatement(Schema schema, Database database) {
+        if (database instanceof BigqueryDatabase) {
+            // BigQuery does not support sequences
+            //String catalog = database.getDefaultCatalogName();
+            CatalogAndSchema catalogAndSchema = (new CatalogAndSchema(schema.getCatalogName(), schema.getName())).customize(database);
 
-                String jdbcSchemaName = database.correctObjectName(((AbstractJdbcDatabase)database).getJdbcSchemaName(catalogAndSchema), Schema.class);
+            String jdbcSchemaName = database.correctObjectName(((AbstractJdbcDatabase) database).getJdbcSchemaName(catalogAndSchema), Schema.class);
 
-                return "SELECT NULL AS SEQUENCE_NAME, NULL AS START_VALUE, NULL AS AS MIN_VALUE, NULL AS MAX_VALUE, " +
-                        "NULL AS INCREMENT_BY, " +
-                        "NULL AS WILL_CYCLE "+
-                        jdbcSchemaName+"."+database.getSystemSchema().toUpperCase() + ".COLUMNS WHERE 1=0";
-            }
-            return super.getSelectSequenceSql(schema, database);
+            return new RawSqlStatement(
+            "SELECT NULL AS SEQUENCE_NAME, NULL AS START_VALUE, NULL AS AS MIN_VALUE, NULL AS MAX_VALUE, " +
+                    "NULL AS INCREMENT_BY, " +
+                    "NULL AS WILL_CYCLE " +
+                    jdbcSchemaName + "." + database.getSystemSchema().toUpperCase() + ".COLUMNS WHERE 1=0");
         }
+        return super.getSelectSequenceStatement(schema, database);
     }
+
+}
