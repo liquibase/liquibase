@@ -1609,7 +1609,9 @@ public abstract class AbstractJdbcDatabase implements Database {
             Scope.getCurrentScope().getLog(getClass()).warning(
                     "No database connection available - specified"
                             + " DATETIME/TIMESTAMP precision will be tried");
+            return DEFAULT_MAX_TIMESTAMP_FRACTIONAL_DIGITS;
         }
+
         return DEFAULT_MAX_TIMESTAMP_FRACTIONAL_DIGITS;
     }
 

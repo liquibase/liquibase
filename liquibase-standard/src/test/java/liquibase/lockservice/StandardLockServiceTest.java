@@ -44,7 +44,7 @@ public class StandardLockServiceTest {
 
         lockService = new StandardLockService() {
             @Override
-            public boolean isDatabaseChangeLogLockTableCreated() throws DatabaseException {
+            public boolean hasDatabaseChangeLogLockTable() throws DatabaseException {
                 return true;
             }
         };

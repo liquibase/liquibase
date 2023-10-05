@@ -152,12 +152,20 @@ public class ExecuteShellCommandChange extends AbstractChange {
         }
 
         if (! shouldExecuteChange) {
-            return new SqlStatement[]{
-                    new CommentStatement(getCommandString())
-            };
+            try {
+                return new SqlStatement[]{
+                        new CommentStatement(getCommandString())
+                };
+            } finally {
+                nonExecutedCleanup();
+            }
         }
 
         return SqlStatement.EMPTY_SQL_STATEMENT;
+    }
+
+    protected void nonExecutedCleanup() {
+
     }
 
     protected List<String> createFinalCommandArray(Database database) {
@@ -295,7 +303,6 @@ public class ExecuteShellCommandChange extends AbstractChange {
                             break;
                         case 'm':
                             valLong = valLong * MIN_IN_MILLIS;
-                            break;
                         default:
                             valLong = valLong * SECS_IN_MILLIS;
                     }

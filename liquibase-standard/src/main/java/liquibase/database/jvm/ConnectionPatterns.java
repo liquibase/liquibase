@@ -13,27 +13,25 @@ import java.util.regex.Pattern;
 public abstract class ConnectionPatterns {
 
     public static class PatternPair {
-        private PatternPair() { }
-
         // Return a map entry (key-value pair) from the specified values
         public static <T, U> Map.Entry<T, U> of(T first, U second) {
             return new AbstractMap.SimpleEntry<>(first, second);
         }
     }
-    private final Set<Map.Entry<Pattern, Pattern>> patternJdbcBlank = new HashSet<>();
-    private final Set<Map.Entry<Pattern, Pattern>> patternJdbcBlankToObfuscate = new HashSet<>();
-    private final Set<Map.Entry<Pattern, Pattern>> patternJdbcObfuscate = new HashSet<>();
+    private final Set<Map.Entry<Pattern, Pattern>> PATTERN_JDBC_BLANK = new HashSet<>();
+    private final Set<Map.Entry<Pattern, Pattern>> PATTERN_JDBC_BLANK_TO_OBFUSCATE = new HashSet<>();
+    private final Set<Map.Entry<Pattern, Pattern>> PATTERN_JDBC_OBFUSCATE = new HashSet<>();
 
     public Set<Map.Entry<Pattern, Pattern>> getJdbcBlankPatterns() {
-        return patternJdbcBlank;
+        return PATTERN_JDBC_BLANK;
     }
 
     public Set<Map.Entry<Pattern, Pattern>> getJdbcBlankToObfuscatePatterns() {
-        return patternJdbcBlankToObfuscate;
+        return PATTERN_JDBC_BLANK_TO_OBFUSCATE;
     }
 
     public Set<Map.Entry<Pattern, Pattern>> getJdbcObfuscatePatterns() {
-        return patternJdbcObfuscate;
+        return PATTERN_JDBC_OBFUSCATE;
     }
 
     /**
@@ -45,9 +43,8 @@ public abstract class ConnectionPatterns {
      * jdbc:mariadb://<b>username:password</b>@localhost:3306/lbcat
      * </p>
      */
-    @SuppressWarnings("secrets:S6703")
     public void addJdbcBlankPatterns(Map.Entry<Pattern, Pattern> jdbcBlankPatterns) {
-        patternJdbcBlank.add(jdbcBlankPatterns);
+        PATTERN_JDBC_BLANK.add(jdbcBlankPatterns);
     }
 
     /**
@@ -58,7 +55,7 @@ public abstract class ConnectionPatterns {
      * </p>
      */
     public void addJdbcBlankToObfuscatePatterns(Map.Entry<Pattern, Pattern> patternJdbcBlankToObfuscate) {
-        this.patternJdbcBlankToObfuscate.add(patternJdbcBlankToObfuscate);
+        PATTERN_JDBC_BLANK_TO_OBFUSCATE.add(patternJdbcBlankToObfuscate);
     }
 
     /**
@@ -68,8 +65,7 @@ public abstract class ConnectionPatterns {
      * jdbc:postgresql://localhost:6432/lbcat?<b>user=username&password=password</b>
      * </p>
      */
-    @SuppressWarnings("secrets:S6703")
     public void addJdbcObfuscatePatterns(Map.Entry<Pattern, Pattern> jdbcObfuscatePatterns) {
-        patternJdbcObfuscate.add(jdbcObfuscatePatterns);
+        PATTERN_JDBC_OBFUSCATE.add(jdbcObfuscatePatterns);
     }
 }
