@@ -16,7 +16,6 @@ import org.liquibase.maven.property.PropertyElement;
 
 import java.io.File;
 import java.io.IOException;
-import java.io.Writer;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
@@ -137,6 +136,14 @@ public abstract class AbstractLiquibaseChangeLogMojo extends AbstractLiquibaseMo
         return new SearchPathResourceAccessor(finalSearchPath, resourceAccessors.toArray(new ResourceAccessor[0]));
     }
 
+    @Override
+    protected Liquibase createLiquibase(Database db) throws MojoExecutionException {
+
+        String changeLog = (changeLogFile == null) ? "" : changeLogFile.trim();
+        return new Liquibase(changeLog, Scope.getCurrentScope().getResourceAccessor(), db);
+
+    }
+
     private void calculateChangeLogDirectoryAbsolutePath() {
         if (changeLogDirectory != null) {
             // convert to standard / if using absolute path on windows
@@ -156,6 +163,4 @@ public abstract class AbstractLiquibaseChangeLogMojo extends AbstractLiquibaseMo
         }
         return labelFilter;
     }
-
-
 }
