@@ -58,7 +58,7 @@ public class PrimaryKeySnapshotGenerator extends JdbcSnapshotGenerator {
 
                 String ascOrDesc = row.getString("ASC_OR_DESC");
                 Boolean descending = "D".equals(ascOrDesc) ? Boolean.TRUE : "A".equals(ascOrDesc) ? Boolean.FALSE : null;
-                boolean computed = descending != null && descending;
+                boolean computed = descending != null;
                 returnKey.addColumn(position - 1, new Column(columnName)
                         .setDescending(descending)
                         .setComputed(computed)

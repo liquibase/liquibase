@@ -314,7 +314,8 @@ public abstract class AbstractFormattedChangeLogParser implements ChangeLogParse
                     } else {
                         try {
                             long ignoreCount = Long.parseLong(ignoreLinesMatcher.group(1));
-                            while (ignoreCount > 0 && reader.readLine() != null) {
+                            String newLine;
+                            while (ignoreCount > 0 && (newLine = reader.readLine()) != null) {
                                 ignoreCount--;
                                 count++;
                             }
