@@ -24,6 +24,7 @@ import liquibase.logging.core.LogServiceFactory;
 import liquibase.logging.mdc.MdcKey;
 import liquibase.logging.mdc.MdcManager;
 import liquibase.logging.mdc.MdcObject;
+import liquibase.logging.mdc.customobjects.ChangesetsUpdated;
 import liquibase.logging.mdc.customobjects.Version;
 import liquibase.resource.*;
 import liquibase.ui.CompositeUIService;
@@ -48,6 +49,7 @@ import java.util.jar.Manifest;
 import java.util.logging.*;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
+import java.util.zip.ZipEntry;
 
 import static java.util.ResourceBundle.getBundle;
 import static liquibase.configuration.LiquibaseConfiguration.REGISTERED_VALUE_PROVIDERS_KEY;
@@ -354,6 +356,7 @@ public class LiquibaseCommandLine {
             });
 
             return Scope.child(Collections.singletonMap(Scope.Attr.logService.name(), newLogService), () -> {
+                addEmptyMdcValues();
                 try {
                     return Scope.child(configureScope(args), () -> {
 
@@ -416,6 +419,28 @@ public class LiquibaseCommandLine {
             return 1;
         } finally {
             cleanup();
+        }
+    }
+
+    private void addEmptyMdcValues() {
+        if (LiquibaseCommandLineConfiguration.ADD_EMPTY_MDC_VALUES.getCurrentValue()) {
+            Scope.getCurrentScope().addMdcValue(MdcKey.DEPLOYMENT_ID, "");
+            Scope.getCurrentScope().addMdcValue(MdcKey.DEPLOYMENT_OUTCOME, "NOOP");
+            Scope.getCurrentScope().addMdcValue(MdcKey.DEPLOYMENT_OUTCOME_COUNT, "0");
+            Scope.getCurrentScope().addMdcValue(MdcKey.ROWS_AFFECTED, "0");
+            Scope.getCurrentScope().addMdcValue(MdcKey.CHANGELOG_FILE, "");
+            Scope.getCurrentScope().addMdcValue(MdcKey.CHANGESET_ID, "");
+            Scope.getCurrentScope().addMdcValue(MdcKey.CHANGESET_AUTHOR, "");
+            Scope.getCurrentScope().addMdcValue(MdcKey.CHANGESET_OUTCOME, "NOOP");
+            Scope.getCurrentScope().addMdcValue(MdcKey.CHANGESETS_UPDATED, new ChangesetsUpdated());
+            Scope.getCurrentScope().addMdcValue(MdcKey.OPERATION_START_TIME, "");
+            Scope.getCurrentScope().addMdcValue(MdcKey.OPERATION_STOP_TIME, "");
+            Scope.getCurrentScope().addMdcValue(MdcKey.LIQUIBASE_SYSTEM_NAME, "");
+            Scope.getCurrentScope().addMdcValue(MdcKey.LIQUIBASE_SYSTEM_USER, "");
+            Scope.getCurrentScope().addMdcValue(MdcKey.LIQUIBASE_TARGET_URL, "");
+            Scope.getCurrentScope().addMdcValue(MdcKey.LIQUIBASE_VERSION, "");
+            Scope.getCurrentScope().addMdcValue(MdcKey.LIQUIBASE_SCHEMA_NAME, "");
+            Scope.getCurrentScope().addMdcValue(MdcKey.LIQUIBASE_CATALOG_NAME, "");
         }
     }
 
@@ -1341,10 +1366,35 @@ public class LiquibaseCommandLine {
                     libraryInfo.vendor = getValue(manifest, "Bundle-Vendor", "Implementation-Vendor", "Specification-Vendor");
                 }
 
+                handleCompilerJarEdgeCase(pathEntryFile, jarFile, libraryInfo);
+
                 if (libraryInfo.name == null) {
                     libraryInfo.name = pathEntryFile.getName().replace(".jar", "");
                 }
                 return libraryInfo;
+            }
+        }
+
+        /**
+         * The compiler.jar file was accidentally added to the liquibase tar.gz distribution, and the compiler.jar
+         * file does not contain a completed MANIFEST.MF file. This method loads the version out of the pom.xml
+         * instead of using the manifest, only for the compiler.jar file.
+         */
+        private void handleCompilerJarEdgeCase(File pathEntryFile, JarFile jarFile, LibraryInfo libraryInfo) {
+            try {
+                if (pathEntryFile.toString().endsWith("compiler.jar") && StringUtil.isEmpty(libraryInfo.version)) {
+                    ZipEntry entry = jarFile.getEntry("META-INF/maven/com.github.spullara.mustache.java/compiler/pom.properties");
+                    InputStream inputStream = jarFile.getInputStream(entry);
+
+                    Properties jarProperties = new Properties();
+                    jarProperties.load(inputStream);
+
+                    libraryInfo.version = jarProperties.getProperty("version");
+                }
+            } catch (Exception e) {
+                Scope.getCurrentScope().getLog(getClass()).fine("Failed to load the version of compiler.jar from " +
+                        "its pom.properties, this is relatively harmless, but could mean that the version of compiler.jar will " +
+                        "not appear in the liquibase --version console output.", e);
             }
         }
 
