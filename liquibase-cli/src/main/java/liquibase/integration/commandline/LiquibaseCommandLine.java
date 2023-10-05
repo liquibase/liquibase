@@ -49,6 +49,7 @@ import java.util.jar.Manifest;
 import java.util.logging.*;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
+import java.util.zip.ZipEntry;
 
 import static java.util.ResourceBundle.getBundle;
 import static liquibase.configuration.LiquibaseConfiguration.REGISTERED_VALUE_PROVIDERS_KEY;
@@ -1365,10 +1366,35 @@ public class LiquibaseCommandLine {
                     libraryInfo.vendor = getValue(manifest, "Bundle-Vendor", "Implementation-Vendor", "Specification-Vendor");
                 }
 
+                handleCompilerJarEdgeCase(pathEntryFile, jarFile, libraryInfo);
+
                 if (libraryInfo.name == null) {
                     libraryInfo.name = pathEntryFile.getName().replace(".jar", "");
                 }
                 return libraryInfo;
+            }
+        }
+
+        /**
+         * The compiler.jar file was accidentally added to the liquibase tar.gz distribution, and the compiler.jar
+         * file does not contain a completed MANIFEST.MF file. This method loads the version out of the pom.xml
+         * instead of using the manifest, only for the compiler.jar file.
+         */
+        private void handleCompilerJarEdgeCase(File pathEntryFile, JarFile jarFile, LibraryInfo libraryInfo) {
+            try {
+                if (pathEntryFile.toString().endsWith("compiler.jar") && StringUtil.isEmpty(libraryInfo.version)) {
+                    ZipEntry entry = jarFile.getEntry("META-INF/maven/com.github.spullara.mustache.java/compiler/pom.properties");
+                    InputStream inputStream = jarFile.getInputStream(entry);
+
+                    Properties jarProperties = new Properties();
+                    jarProperties.load(inputStream);
+
+                    libraryInfo.version = jarProperties.getProperty("version");
+                }
+            } catch (Exception e) {
+                Scope.getCurrentScope().getLog(getClass()).fine("Failed to load the version of compiler.jar from " +
+                        "its pom.properties, this is relatively harmless, but could mean that the version of compiler.jar will " +
+                        "not appear in the liquibase --version console output.", e);
             }
         }
 
