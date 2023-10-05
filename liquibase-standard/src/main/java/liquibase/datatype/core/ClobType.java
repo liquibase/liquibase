@@ -43,12 +43,21 @@ public class ClobType extends LiquibaseDataType {
     public DatabaseDataType toDatabaseDataType(Database database) {
         String originalDefinition = StringUtil.trimToEmpty(getRawDefinition());
         if (database instanceof MSSQLDatabase) {
-            if ((!GlobalConfiguration.CONVERT_DATA_TYPES.getCurrentValue()
-                    && originalDefinition.toLowerCase(Locale.US).startsWith("text"))
-                || originalDefinition.toLowerCase(Locale.US).startsWith("[text]")) {
-                DatabaseDataType type = new DatabaseDataType(database.escapeDataTypeName("varchar"));
-                // If there is additional specification after ntext (e.g.  COLLATE), import that.
-                String originalExtraInfo = originalDefinition.replaceFirst("^(?i)\\[?text\\]?\\s*", "");
+            if (originalDefinition.toLowerCase(Locale.US).startsWith("text") ||
+                originalDefinition.toLowerCase(Locale.US).startsWith("[text]") ||
+                originalDefinition.toLowerCase(Locale.US).startsWith("ntext") ||
+                originalDefinition.toLowerCase(Locale.US).startsWith("[ntext]")) {
+                if (! Boolean.TRUE.equals(GlobalConfiguration.CONVERT_DATA_TYPES.getCurrentValue())) {
+                    return new DatabaseDataType(database.escapeDataTypeName(originalDefinition));
+                }
+                String stringType = "varchar";
+                if (originalDefinition.toLowerCase(Locale.US).contains("ntext")) {
+                    stringType = "nvarchar";
+                }
+                DatabaseDataType type = new DatabaseDataType(database.escapeDataTypeName(stringType));
+                // If there is additional specification after ntext or text (e.g.  COLLATE), import that.
+                String originalExtraInfo = originalDefinition.replaceFirst("^(?i)\\[?ntext\\]?\\s*", "");
+                originalExtraInfo = originalExtraInfo.replaceFirst("^(?i)\\[?text\\]?\\s*", "");
                 type.addAdditionalInformation("(max)");
                 if(!StringUtil.isEmpty(originalExtraInfo)) {
                     //if we still have something like (25555) remove it
@@ -59,51 +68,17 @@ public class ClobType extends LiquibaseDataType {
                 }
                 return type;
             }
-        }
 
-        if (database instanceof FirebirdDatabase) {
+            if (Boolean.TRUE.equals(GlobalConfiguration.CONVERT_DATA_TYPES.getCurrentValue())) {
+                if ("nclob".equals(originalDefinition.toLowerCase(Locale.US))) {
+                    return new DatabaseDataType(database.escapeDataTypeName("nvarchar"), "MAX");
+                }
+                return new DatabaseDataType(database.escapeDataTypeName("varchar"), "MAX");
+            }
+        } else if (database instanceof FirebirdDatabase) {
             return new DatabaseDataType("BLOB SUB_TYPE TEXT");
         } else if (database instanceof SybaseASADatabase) {
             return new DatabaseDataType("LONG VARCHAR");
-        } else if (database instanceof MSSQLDatabase) {
-            if (originalDefinition.matches("^(?i)\\[?text\\]?.*")) {
-                // The SQL Server datatype "text" is deprecated and should be replaced with VARCHAR(MAX).
-                // See: https://docs.microsoft.com/en-us/sql/t-sql/data-types/ntext-text-and-image-transact-sql
-                DatabaseDataType type = new DatabaseDataType(database.escapeDataTypeName("varchar"));
-                // If there is additional specification after ntext (e.g.  COLLATE), import that.
-                String originalExtraInfo = originalDefinition.replaceFirst("^(?i)\\[?text\\]?\\s*", "");
-                type.addAdditionalInformation("(max)");
-                if(!StringUtil.isEmpty(originalExtraInfo)) {
-                    //if we still have something like (25555) remove it
-                    //since we already set it to max, otherwise add collate or other info
-                    if(originalExtraInfo.lastIndexOf(")") < (originalExtraInfo.length() - 1)) {
-                        type.addAdditionalInformation(originalExtraInfo.substring(originalExtraInfo.lastIndexOf(")") + 1));
-                    }
-                }
-                return type;
-            }
-            if (originalDefinition.toLowerCase(Locale.US).startsWith("ntext")
-                    || originalDefinition.toLowerCase(Locale.US).startsWith("[ntext]")) {
-                // The SQL Server datatype "ntext" is deprecated and should be replaced with NVARCHAR(MAX).
-                // See: https://docs.microsoft.com/en-us/sql/t-sql/data-types/ntext-text-and-image-transact-sql
-                DatabaseDataType type = new DatabaseDataType(database.escapeDataTypeName("nvarchar"));
-                // If there is additional specification after ntext (e.g.  COLLATE), import that.
-                String originalExtraInfo = originalDefinition.replaceFirst("^(?i)\\[?ntext\\]?\\s*", "");
-                type.addAdditionalInformation("(max)");
-                if(!StringUtil.isEmpty(originalExtraInfo)) {
-                    //if we still have something like (25555) remove it
-                    //since we already set it to max, otherwise add collate or other info
-                    if(originalExtraInfo.lastIndexOf(")") < (originalExtraInfo.length() - 1)) {
-                        type.addAdditionalInformation(originalExtraInfo.substring(originalExtraInfo.lastIndexOf(")") + 1));
-                    }
-                }
-                return type;
-            }
-            if ("nclob".equals(originalDefinition.toLowerCase(Locale.US))) {
-                return new DatabaseDataType(database.escapeDataTypeName("nvarchar"), "MAX");
-            }
-
-            return new DatabaseDataType(database.escapeDataTypeName("varchar"), "MAX");
         } else if (database instanceof MySQLDatabase) {
             if (originalDefinition.toLowerCase(Locale.US).startsWith("text")) {
                 return new DatabaseDataType("TEXT");
