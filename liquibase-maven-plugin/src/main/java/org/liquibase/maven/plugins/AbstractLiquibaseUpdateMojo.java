@@ -56,7 +56,8 @@ public abstract class AbstractLiquibaseUpdateMojo extends AbstractLiquibaseChang
   }
 
   protected void handleUpdateException(LiquibaseException exception) throws LiquibaseException, MojoExecutionException {
-    try(Database database = createDatabase()) {
+    ClassLoader mavenClassLoader = getMavenArtifactClassLoader();
+    try(Database database = getDatabase(mavenClassLoader)) {
       CommandScope liquibaseCommand = new CommandScope("internalRollbackOnError");
       liquibaseCommand.addArgumentValue("database", database);
       liquibaseCommand.addArgumentValue("exception", exception);
