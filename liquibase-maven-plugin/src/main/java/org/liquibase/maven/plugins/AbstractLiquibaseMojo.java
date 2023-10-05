@@ -791,7 +791,7 @@ public abstract class AbstractLiquibaseMojo extends AbstractMojo {
                     Database database = null;
                     try {
                         if (databaseConnectionRequired()) {
-                            database = getDatabase(mavenClassLoader);
+                            database = createDatabase();
                             DbUrlConnectionCommandStep.logMdc(url, database);
                             try (Liquibase liquibase = createLiquibase(database)) {
 
@@ -858,7 +858,15 @@ public abstract class AbstractLiquibaseMojo extends AbstractMojo {
         }
     }
 
-    protected Database getDatabase(ClassLoader mavenClassLoader) throws DatabaseException {
+    /**
+     *  Creates a database implementation setting up all its properties and returns a Database object.
+     *
+     * @return Database
+     * @throws DatabaseException
+     * @throws MojoExecutionException
+     */
+    protected Database createDatabase() throws DatabaseException, MojoExecutionException {
+        ClassLoader mavenClassLoader = getClassLoaderIncludingProjectClasspath();
         String dbPassword = (emptyPassword || (password == null)) ? "" : password;
         String driverPropsFile = (driverPropertiesFile == null) ? null : driverPropertiesFile.getAbsolutePath();
         Database database = CommandLineUtils.createDatabaseObject(mavenClassLoader,
@@ -994,25 +1002,19 @@ public abstract class AbstractLiquibaseMojo extends AbstractMojo {
     protected void configureChangeLogProperties() {
         if (propertyFile != null) {
             getLog().info("Parsing Liquibase Properties File " + propertyFile + " for changeLog parameters");
-            try {
-                ClassLoader mavenClassLoader = getClassLoaderIncludingProjectClasspath();
-                Database database = getDatabase(mavenClassLoader);
-                try (
-                        InputStream propertiesInputStream = handlePropertyFileInputStream(propertyFile);
-                        Liquibase liquibase = createLiquibase(database)) {
-                    Properties props = loadProperties(propertiesInputStream);
-                    for (Map.Entry entry : props.entrySet()) {
-                        String key = (String) entry.getKey();
-                        if (key.startsWith("parameter.")) {
-                            getLog().debug("Setting changeLog parameter " + key);
-                            liquibase.setChangeLogParameter(key.replaceFirst("^parameter.", ""), entry.getValue());
-                        }
+            try (
+                    Database database = createDatabase();
+                    InputStream propertiesInputStream = handlePropertyFileInputStream(propertyFile);
+                    Liquibase liquibase = createLiquibase(database)) {
+                Properties props = loadProperties(propertiesInputStream);
+                for (Map.Entry entry : props.entrySet()) {
+                    String key = (String) entry.getKey();
+                    if (key.startsWith("parameter.")) {
+                        getLog().debug("Setting changeLog parameter " + key);
+                        liquibase.setChangeLogParameter(key.replaceFirst("^parameter.", ""), entry.getValue());
                     }
-                } catch (IOException | LiquibaseException | MojoExecutionException | MojoFailureException e) {
-                    throw new UnexpectedLiquibaseException(e);
                 }
-            }
-            catch (MojoExecutionException | DatabaseException e) {
+            } catch (IOException | LiquibaseException | MojoExecutionException | MojoFailureException e) {
                 throw new UnexpectedLiquibaseException(e);
             }
         }

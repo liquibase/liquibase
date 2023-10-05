@@ -16,16 +16,12 @@ public class LiquibaseHistoryMojo extends AbstractLiquibaseMojo {
 
     @Override
     protected void performLiquibaseTask(Liquibase liquibase) throws LiquibaseException {
-        ClassLoader mavenClassLoader;
-        try {
-            mavenClassLoader = getMavenArtifactClassLoader();
-        } catch (MojoExecutionException e) {
-            throw new LiquibaseException(e);
-        }
-        try(Database database = getDatabase(mavenClassLoader)) {
+        try(Database database = createDatabase()) {
             CommandScope historyCommand = new CommandScope(InternalHistoryCommandStep.COMMAND_NAME);
             historyCommand.addArgumentValue(InternalHistoryCommandStep.DATABASE_ARG, database);
             historyCommand.execute();
+        } catch (MojoExecutionException e) {
+            throw new LiquibaseException(e);
         }
     }
 }
