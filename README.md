@@ -4,6 +4,8 @@ A Liquibase extension adding support for Google BigQuery.
 Include this in your application project to run Liquibase database migration scripts
 against a Google BigQuery database.
 
+Try out the [Liquibase + Bigquery with the getting started tutorial](https://contribute.liquibase.com/extensions-integrations/directory/database-tutorials/bigquery/).
+
 ## Supported features
 
 The following Liquibase ChangeTypes are supported:
