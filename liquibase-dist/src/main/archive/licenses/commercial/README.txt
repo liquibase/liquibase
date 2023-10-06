@@ -4,7 +4,8 @@ Version: ${project.version}
 Liquibase ships with 3rd party components using the following licenses:
 
 - Apache 2.0 License - https://opensource.org/licenses/Apache-2.0
-- GNU Affero General Public License version 3 https://opensource.org/licenses/AGPL-3.0
+- TrueLicense Commercial License
+- Oracle FDHUT License
 
 Libraries and their licenses:
 
@@ -17,6 +18,8 @@ Apache 2.0 License
 - com.github.jsqlparser:jsqlparser (Dual licence: Apache 2.0, LGPL 2.1)
 - org.liquibase:liquibase-core
 
-GNU Affero General Public License (AGPL) version 3
+TrueLicense Commercial License
 - net.java.truelicense:truelicense
 
+Oracle FDHUT License
+- ojdbc8.jar

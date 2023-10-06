@@ -60,7 +60,7 @@ public class SqlGeneratorFactory {
 
     public void register(SqlGenerator generator) {
         if (this.generators.size() == 0) {
-            //handle case in tests wher we clear out the generators
+            //handle case in tests where we clear out the generators
             this.generatorsByKey.clear();
         }
         generators.add(generator);
@@ -218,7 +218,8 @@ public class SqlGeneratorFactory {
     public Sql[] generateSql(SqlStatement statement, Database database) {
         SqlGeneratorChain generatorChain = createGeneratorChain(statement, database);
         if (generatorChain == null) {
-            throw new IllegalStateException("Cannot find generators for database " + database.getClass() + ", statement: " + statement);
+            throw new IllegalStateException("Cannot find generators for database " + database.getClass() + ", statement: " + statement
+                    + ". Either Liquibase or the database platform does not support the type of statement being generated. Please check your database documentation for more information.");
         }
         return putSqlArrayInScope(generatorChain.generateSql(statement, database));
     }

@@ -19,6 +19,7 @@ jobs:
       version: ${{ steps.collect-data.outputs.version }}
       branch: ${{ steps.collect-data.outputs.branch }}
       runId: ${{ steps.collect-data.outputs.runId }}
+      
     steps:
       - name: Collect Data
         id: collect-data
@@ -30,9 +31,17 @@ jobs:
             core.setOutput("runId", context.payload.inputs.runId);
       - run: |
           echo "Creating version ${{ steps.collect-data.outputs.version }} from ${{ steps.collect-data.outputs.branch }} with artifacts from build ${{ steps.collect-data.outputs.runId }} "
+          
+  build-azure-uber-jar:
+    needs: [ setup ]
+    uses: liquibase/liquibase/.github/workflows/build-azure-uber-jar.yml@master
+    with:
+      branch: ${{ needs.setup.outputs.branch }}
+      liquibase-version: ${{ needs.setup.outputs.version }}
+    secrets: inherit
 
   reversion:
-    needs: [ setup ]
+    needs: [ setup, build-azure-uber-jar ]
     name: Re-version artifacts ${{ needs.setup.outputs.version }}
     runs-on: ubuntu-22.04
     steps:
@@ -55,6 +64,14 @@ jobs:
           name: liquibase-artifacts
           path: download/liquibase-artifacts
 
+      - name: Download liquibase-pro-azure-artifacts
+        uses: liquibase/action-download-artifact@v2-liquibase
+        with:
+          workflow: build-azure-uber-jar.yml
+          run_id: ${{ needs.setup.outputs.runId }}
+          name: liquibase-pro-azure-artifacts
+          path: download/liquibase-pro-azure-artifacts
+
       - name: Set up JDK
         uses: actions/setup-java@v3
         with:
@@ -69,9 +86,11 @@ jobs:
         env:
           GPG_PASSWORD: ${{ secrets.GPG_PASSPHRASE }}
         run: |
-          .github/util/re-version.sh download/liquibase-artifacts "${{ needs.setup.outputs.version }}"
+          .github/util/re-version.sh download/liquibase-artifacts "${{ needs.setup.outputs.version }}" "${{ needs.setup.outputs.branch }}"
 
           ##Sign Files
+          ## liquibase-azure-deps is already on its correct version. Check reusable workflow: build-azure-uber-jar.yml
+          mv download/liquibase-pro-azure-artifacts/liquibase-azure-deps-${{ needs.setup.outputs.version }}.jar re-version/out
           .github/util/sign-artifacts.sh re-version/out
 
           mkdir re-version/final
@@ -79,6 +98,8 @@ jobs:
           mv re-version/out/liquibase-commercial-${{ needs.setup.outputs.version }}.jar re-version/final
           mv re-version/out/liquibase-${{ needs.setup.outputs.version }}.tar.gz re-version/final
           mv re-version/out/liquibase-${{ needs.setup.outputs.version }}.zip re-version/final
+          mv re-version/out/liquibase-azure-deps-${{ needs.setup.outputs.version }}.jar re-version/final
+          
 
           (cd re-version/out/ && zip liquibase-additional-${{ needs.setup.outputs.version }}.zip *)
           mv re-version/out/liquibase-additional-${{ needs.setup.outputs.version }}.zip re-version/final
@@ -103,6 +124,8 @@ jobs:
     needs: [ setup, reversion ]
     name: Build Installers
     runs-on: macos-latest #needs macos for apple notarization
+    env:
+      GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
     steps:
       - uses: actions/checkout@v3
 

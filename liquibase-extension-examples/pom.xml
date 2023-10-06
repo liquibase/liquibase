@@ -11,7 +11,10 @@
     <artifactId>liquibase-extension-examples</artifactId>
 	<packaging>jar</packaging>
 	<description>Liquibase Examples</description>
-
+    <properties>
+        <sonar.coverage.jacoco.xmlReportPaths>../target/jacoco.xml</sonar.coverage.jacoco.xmlReportPaths>
+    </properties>
+    
 	<dependencies>
         <dependency>
             <groupId>org.liquibase</groupId>

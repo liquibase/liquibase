@@ -1,11 +1,9 @@
 package org.liquibase.maven.plugins;
 
-import liquibase.GlobalConfiguration;
-import liquibase.Liquibase;
-import liquibase.Scope;
-import liquibase.ThreadLocalScopeManager;
+import liquibase.*;
 import liquibase.changelog.visitor.ChangeExecListener;
 import liquibase.changelog.visitor.DefaultChangeExecListener;
+import liquibase.command.core.helpers.DbUrlConnectionCommandStep;
 import liquibase.configuration.LiquibaseConfiguration;
 import liquibase.configuration.core.DefaultsFileValueProvider;
 import liquibase.database.Database;
@@ -32,6 +30,7 @@ import org.apache.maven.plugin.MojoFailureException;
 import org.apache.maven.plugin.descriptor.MojoDescriptor;
 import org.apache.maven.plugin.descriptor.Parameter;
 import org.apache.maven.plugin.descriptor.PluginDescriptor;
+import org.apache.maven.plugin.logging.Log;
 import org.apache.maven.project.MavenProject;
 import org.apache.maven.wagon.authentication.AuthenticationInfo;
 import org.liquibase.maven.property.PropertyElement;
@@ -63,10 +62,17 @@ import static liquibase.configuration.LiquibaseConfiguration.REGISTERED_VALUE_PR
 @SuppressWarnings("java:S2583")
 public abstract class AbstractLiquibaseMojo extends AbstractMojo {
 
+    static {
+        // If maven is called with -T and a value larger than 1, it can get confused under heavy thread load
+        Scope.setScopeManager( new ThreadLocalScopeManager(null));
+    }
+
     /**
      * Suffix for fields that are representing a default value for a another field.
      */
     private static final String DEFAULT_FIELD_SUFFIX = "Default";
+
+    private MavenLog logCache;
 
     /**
      *
@@ -216,6 +222,30 @@ public abstract class AbstractLiquibaseMojo extends AbstractMojo {
      */
     @PropertyElement
     protected String logging;
+
+    /**
+     * Determines the minimum log level liquibase uses when logging.
+     * <p>
+     * Supported values are:
+     *
+     * <ul>
+     *     <li>DEBUG</li>
+     *     <li>INFO</li>
+     *     <li>WARNING</li>
+     *     <li>ERROR</li>
+     * </ul>
+     *
+     * The primary use case for this option is to reduce the amount of logs from liquibase, while
+     * not changing the log level of maven itself, without changing ${maven.home}/conf/logging/simplelogger.properties.
+     * <p>
+     * <b>NOTE:</b> The final log level is the <i>maximum</i> of this value and the maven log level.
+     * Thus, it is not possible to <i>decrease</i> the effective log level with this option.
+     *
+     * @parameter property="liquibase.logLevel" default-value="DEBUG"
+     */
+    @PropertyElement
+    protected String logLevel;
+
     /**
      * Specifies the <i>liquibase.properties</i> you want to use to configure Liquibase.
      *
@@ -681,8 +711,6 @@ public abstract class AbstractLiquibaseMojo extends AbstractMojo {
             getLog().warn("Liquibase NOT skipped because file " + skipOnFileExists + " does NOT exists");
         }
 
-        // If maven is called with -T and a value larger than 1, it can get confused under heavy thread load
-        Scope.setScopeManager(new ThreadLocalScopeManager());
         try {
             Scope.child(setUpLogging(), () -> {
 
@@ -783,6 +811,7 @@ public abstract class AbstractLiquibaseMojo extends AbstractMojo {
                                     changelogSchemaName,
                                     databaseChangeLogTableName,
                                     databaseChangeLogLockTableName);
+                            DbUrlConnectionCommandStep.logMdc(url, database);
                             liquibase = createLiquibase(database);
 
                             configureChangeLogProperties();
@@ -1149,6 +1178,8 @@ public abstract class AbstractLiquibaseMojo extends AbstractMojo {
     private void setFieldValue(Field field, String value) throws IllegalAccessException {
         if (field.getType().equals(Boolean.class) || field.getType().equals(boolean.class)) {
             field.set(this, Boolean.valueOf(value));
+        } else if (field.getType().isEnum()) {
+            field.set(this, Enum.valueOf(field.getType().asSubclass(Enum.class), value));
         } else if (field.getType().equals(File.class)) {
             field.set(this, new File(value));
         } else {
@@ -1198,6 +1229,14 @@ public abstract class AbstractLiquibaseMojo extends AbstractMojo {
         nativeProperties.computeIfAbsent("liquibase.sqlcmd.logFile", val -> sqlcmdLogFile);
         nativeProperties.computeIfAbsent("liquibase.sqlcmd.catalogName", val -> sqlcmdCatalogName);
         return nativeProperties;
+    }
+
+    @Override
+    public synchronized Log getLog() {
+        if (logCache == null) {
+            logCache = new MavenLog(super.getLog(), logLevel);
+        }
+        return logCache;
     }
 
     /**

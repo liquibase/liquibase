@@ -69,10 +69,10 @@ public class DiffResult {
     }
 
     public <T extends DatabaseObject> Set<T> getMissingObjects(Class<T> type) {
-        Set returnSet = new HashSet();
+        Set<T> returnSet = new HashSet<>();
         for (DatabaseObject obj : missingObjects) {
             if (type.isAssignableFrom(obj.getClass())) {
-                returnSet.add(obj);
+                returnSet.add((T)obj);
             }
         }
         return returnSet;
@@ -185,7 +185,6 @@ public class DiffResult {
     }
 
     public boolean areEqual() throws DatabaseException, IOException {
-
         return missingObjects.isEmpty() && unexpectedObjects.isEmpty() && changedObjects.isEmpty();
     }
 

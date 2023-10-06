@@ -6,7 +6,6 @@ import liquibase.database.DatabaseConnection;
 import liquibase.database.OfflineConnection;
 import liquibase.database.jvm.JdbcConnection;
 import liquibase.exception.UnexpectedLiquibaseException;
-import liquibase.integration.commandline.LiquibaseCommandLineConfiguration;
 import liquibase.listener.LiquibaseListener;
 import liquibase.logging.LogService;
 import liquibase.logging.Logger;
@@ -16,7 +15,7 @@ import liquibase.logging.mdc.CustomMdcObject;
 import liquibase.logging.mdc.MdcManager;
 import liquibase.logging.mdc.MdcManagerFactory;
 import liquibase.logging.mdc.MdcObject;
-import liquibase.osgi.Activator;
+import liquibase.osgi.ContainerChecker;
 import liquibase.resource.ClassLoaderResourceAccessor;
 import liquibase.resource.ResourceAccessor;
 import liquibase.servicelocator.ServiceLocator;
@@ -26,6 +25,7 @@ import liquibase.ui.UIService;
 import liquibase.util.CollectionUtil;
 import liquibase.util.SmartMap;
 import liquibase.util.StringUtil;
+import lombok.Getter;
 
 import java.lang.reflect.Constructor;
 import java.nio.charset.Charset;
@@ -67,10 +67,13 @@ public class Scope {
         checksumVersion
     }
 
+    public static final String JAVA_PROPERTIES = "javaProperties";
+
     private static ScopeManager scopeManager;
 
     private Scope parent;
     private final SmartMap values = new SmartMap();
+    @Getter
     private String scopeId;
     private static final Map<String, List<MdcObject>> addedMdcEntries = new ConcurrentHashMap<>();
 
@@ -107,27 +110,13 @@ public class Scope {
             }
 
             rootScope.values.put(Attr.serviceLocator.name(), serviceLocator);
-            rootScope.values.put(Attr.osgiPlatform.name(), Activator.OSGIContainerChecker.isOsgiPlatform());
+            rootScope.values.put(Attr.osgiPlatform.name(), ContainerChecker.isOsgiPlatform());
         }
         return scopeManager.getCurrentScope();
     }
 
     public static void setScopeManager(ScopeManager scopeManager) {
-        Scope currentScope = getCurrentScope();
-        if (currentScope == null) {
-            currentScope = new Scope();
-        }
-
-        try {
-            currentScope = scopeManager.init(currentScope);
-        } catch (Exception e) {
-            Scope.getCurrentScope().getLog(Scope.class).warning(e.getMessage(), e);
-        }
-        scopeManager.setCurrentScope(currentScope);
-
         Scope.scopeManager = scopeManager;
-
-
     }
 
     /**
@@ -297,9 +286,14 @@ public class Scope {
      */
     public <T> T get(String key, Class<T> type) {
         T value = values.get(key, type);
+        if (value == null && values.containsKey(JAVA_PROPERTIES)) {
+            Map javaProperties = values.get(JAVA_PROPERTIES, Map.class);
+            value = (T)javaProperties.get(key);
+        }
         if (value == null && parent != null) {
             value = parent.get(key, type);
         }
+
         return value;
     }
 
@@ -444,7 +438,7 @@ public class Scope {
      * Add a key value pair to the MDC using the MDC manager. This key value pair will be automatically removed from the
      * MDC when this scope exits.
      */
-    public MdcObject addMdcValue(String key, Map<String, String> value) {
+    public MdcObject addMdcValue(String key, Map<String, Object> value) {
         return addMdcValue(key, value, true);
     }
 
@@ -454,7 +448,7 @@ public class Scope {
      *                             scope exits. If there is not a demonstrable reason for setting this parameter to false
      *                             then it should be set to true.
      */
-    public MdcObject addMdcValue(String key, Map<String, String> value, boolean removeWhenScopeExits) {
+    public MdcObject addMdcValue(String key, Map<String, Object> value, boolean removeWhenScopeExits) {
         MdcObject mdcObject = getMdcManager().put(key, value);
         removeMdcObjectWhenScopeExits(removeWhenScopeExits, mdcObject);
 
