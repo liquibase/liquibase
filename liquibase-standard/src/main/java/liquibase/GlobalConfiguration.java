@@ -31,6 +31,7 @@ public class GlobalConfiguration implements AutoloadedConfigurations {
     public static final ConfigurationDefinition<Boolean> GENERATED_CHANGESET_IDS_INCLUDE_DESCRIPTION;
     public static final ConfigurationDefinition<Boolean> INCLUDE_CATALOG_IN_SPECIFICATION;
     public static final ConfigurationDefinition<Boolean> SHOULD_SNAPSHOT_DATA;
+    public static final ConfigurationDefinition<Boolean> SHOULD_SNAPSHOT_RELATION_FOR_CALCULATED_COLUMNS;
     public static final ConfigurationDefinition<Boolean> PRESERVE_SCHEMA_CASE;
     public static final ConfigurationDefinition<Boolean> SHOW_BANNER;
     public static final ConfigurationDefinition<Boolean> ALWAYS_DROP_INSTEAD_OF_REPLACE;
@@ -168,6 +169,12 @@ public class GlobalConfiguration implements AutoloadedConfigurations {
         SHOULD_SNAPSHOT_DATA = builder.define("shouldSnapshotData", Boolean.class)
                 .setDescription("Should Liquibase snapshot data by default?")
                 .setDefaultValue(false)
+                .build();
+
+        SHOULD_SNAPSHOT_RELATION_FOR_CALCULATED_COLUMNS = builder.define("shouldSnapshotRelationForCalculatedColumns", Boolean.class)
+                .setDescription("If true, do not snapshot relation for computed or indexed columns.")
+                .setDefaultValue(true)
+                .setHidden(true)
                 .build();
 
         FILTER_LOG_MESSAGES = builder.define("filterLogMessages", Boolean.class)
