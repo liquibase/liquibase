@@ -5,11 +5,12 @@ on:
   #push:
     #branches:
       #- 'master'
-  pull_request:
+  pull_request_target:
     types:
       - opened
       - reopened
       - synchronize
+      - labeled
 
 env:
   MAVEN_VERSION: '3.9.2'
