@@ -36,15 +36,17 @@
             <version>${project.version}</version>
         </dependency>
         <dependency>
+            <groupId>info.picocli</groupId>
+            <artifactId>picocli</artifactId>
+            <version>4.7.5</version>
+            <optional>true</optional>
+        </dependency>
+        <dependency>
             <groupId>${project.groupId}</groupId>
             <artifactId>liquibase-cli</artifactId>
             <version>${project.version}</version>
             <exclusions>
                 <exclusion>
-                    <!--
-                        liquibase-core should not have a hard dependency on picocli since most people using the library is not using the CLI
-                        It would be nice if it come through as an optional dependency, but maven doesn't easily do that
-                    -->
                     <groupId>info.picocli</groupId>
                     <artifactId>picocli</artifactId>
                 </exclusion>
