@@ -22,6 +22,7 @@ public class LiquibaseLauncher {
     public static final String LIQUIBASE_COMMERCIAL_JAR_PATTERN = ".*?/liquibase-commercial.*?.jar";
     public static final String LIQUIBASE_CORE_MESSAGE = "Liquibase Core";
     public static final String LIQUIBASE_COMMERCIAL_MESSAGE = "Liquibase Commercial";
+    public static final String DEPENDENCY_JAR_VERSION_PATTERN = "(.*?)-([0-9.]*).jar";
     public static final String DEPENDENCY_JAR_PATTERN = "(.*?)-([0-9.]*).jar";
     private static boolean debug = false;
 
@@ -110,21 +111,9 @@ public class LiquibaseLauncher {
         if (duplicateCommercial.size() > 1) {
             buildDupsMessage(duplicateCommercial, LIQUIBASE_COMMERCIAL_MESSAGE);
         }
-        Pattern versionedJarPattern = Pattern.compile(DEPENDENCY_JAR_PATTERN);
         Map<String, List<String>> duplicates = new LinkedHashMap<>();
-        urls
-          .forEach(url -> {
-              Matcher m = versionedJarPattern.matcher(new File(url.getFile()).getName());
-              if (m.find()) {
-                  String key = m.group(1);
-                  List<String> dupEntries = duplicates.get(key);
-                  if (dupEntries == null) {
-                      dupEntries = new ArrayList<>();
-                  }
-                  dupEntries.add(url.getFile());
-                  duplicates.put(key, dupEntries);
-              }
-          });
+        findDuplicates(urls, Pattern.compile(DEPENDENCY_JAR_VERSION_PATTERN), duplicates);
+        findDuplicates(urls, Pattern.compile(DEPENDENCY_JAR_PATTERN), duplicates);
         duplicates.forEach((key, value) -> {
             if (value.size() > 1) {
                 buildDupsMessage(value, key);
@@ -156,6 +145,22 @@ public class LiquibaseLauncher {
         final Class<?> cli = classloader.loadClass(LiquibaseCommandLine.class.getName());
 
         cli.getMethod("main", String[].class).invoke(null, new Object[]{args});
+    }
+
+    private static void findDuplicates(List<URL> urls, Pattern versionedJarPattern, Map<String, List<String>> duplicates) {
+        urls
+          .forEach(url -> {
+              Matcher m = versionedJarPattern.matcher(new File(url.getFile()).getName());
+              if (m.find()) {
+                  String key = m.group(1);
+                  List<String> dupEntries = duplicates.get(key);
+                  if (dupEntries == null) {
+                      dupEntries = new ArrayList<>();
+                  }
+                  dupEntries.add(url.getFile());
+                  duplicates.put(key, dupEntries);
+              }
+          });
     }
 
     private static void buildDupsMessage(List<String> duplicates, String title) {
