@@ -5,11 +5,17 @@ on:
   #push:
     #branches:
       #- 'master'
-  pull_request:
+  pull_request_target:
     types:
       - opened
       - reopened
       - synchronize
+      
+  push:
+    branches:
+      - github-action-**
+    paths-ignore:
+      - '**.md'
 
 env:
   MAVEN_VERSION: '3.9.2'
