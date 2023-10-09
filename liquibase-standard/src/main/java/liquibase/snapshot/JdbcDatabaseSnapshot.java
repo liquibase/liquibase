@@ -116,14 +116,13 @@ public class JdbcDatabaseSnapshot extends DatabaseSnapshot {
                                         "c.TABLE_NAME, " +
                                         "c.COLUMN_NAME, " +
                                         "c.COLUMN_POSITION AS ORDINAL_POSITION, " +
-                                        "e.COLUMN_EXPRESSION AS FILTER_CONDITION, " +
+                                        "c.INDEX_OWNER AS FILTER_CONDITION, " +
                                         "CASE I.UNIQUENESS WHEN 'UNIQUE' THEN 0 ELSE 1 END AS NON_UNIQUE, " +
                                         "CASE c.DESCEND WHEN 'Y' THEN 'D' WHEN 'DESC' THEN 'D' WHEN 'N' THEN 'A' WHEN 'ASC' THEN 'A' END AS ASC_OR_DESC, " +
                                         "CASE WHEN tablespace_name = (SELECT default_tablespace FROM user_users) " +
                                         "THEN NULL ELSE tablespace_name END AS tablespace_name  " +
                                         "FROM ALL_IND_COLUMNS c " +
                                         "JOIN ALL_INDEXES i ON i.owner=c.index_owner AND i.index_name = c.index_name and i.table_owner = c.table_owner " +
-                                        "LEFT OUTER JOIN all_ind_expressions e ON e.index_owner=c.index_owner AND e.index_name = c.index_name AND e.column_position = c.column_position   " +
                                         "LEFT OUTER JOIN " + (((OracleDatabase) database).canAccessDbaRecycleBin() ? "dba_recyclebin" : "user_recyclebin") + " d ON d.object_name=c.table_name ";
                         if (!isBulkFetchMode || getAllCatalogsStringScratchData() == null) {
                             sql += "WHERE c.TABLE_OWNER = '" + database.correctObjectName(catalogAndSchema.getCatalogName(), Schema.class) + "' ";
