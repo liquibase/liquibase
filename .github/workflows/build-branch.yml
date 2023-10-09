@@ -10,7 +10,6 @@ on:
       - opened
       - reopened
       - synchronize
-      - labeled
 
 env:
   MAVEN_VERSION: '3.9.2'
@@ -21,7 +20,7 @@ jobs:
     runs-on: ubuntu-22.04
     steps:
       - name: Emit failure code for unsafe fork PRs
-        if: github.event.label.name != 'SafeToBuild'
+        if: github.event.pull_request && github.event.pull_request.head.repo.full_name != 'liquibase/liquibase' && github.event.label.name != 'SafeToBuild'
         run: |
           echo "PR from Fork is NOT safe to build"
           echo "A member of Liquibase team needs to apply label 'SafeToBuild'! "
