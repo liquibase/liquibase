@@ -32,7 +32,7 @@ public class PrimaryKeySnapshotGenerator extends JdbcSnapshotGenerator {
             searchTableName = database.correctObjectName(searchTableName, Table.class);
         }
 
-        List<CachedRow> rs = null;
+        List<CachedRow> rs;
         try {
             JdbcDatabaseSnapshot.CachingDatabaseMetaData metaData = ((JdbcDatabaseSnapshot) snapshot)
                     .getMetaDataFromCache();
@@ -107,7 +107,7 @@ public class PrimaryKeySnapshotGenerator extends JdbcSnapshotGenerator {
             Database database = snapshot.getDatabase();
             Schema schema = table.getSchema();
 
-            List<CachedRow> rs = null;
+            List<CachedRow> rs;
             try {
                 JdbcDatabaseSnapshot.CachingDatabaseMetaData metaData = ((JdbcDatabaseSnapshot) snapshot)
                         .getMetaDataFromCache();

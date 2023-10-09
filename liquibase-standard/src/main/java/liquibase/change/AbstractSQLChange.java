@@ -4,6 +4,8 @@ import liquibase.ChecksumVersion;
 import liquibase.GlobalConfiguration;
 import liquibase.Scope;
 import liquibase.change.core.RawSQLChange;
+import liquibase.Scope;
+import liquibase.GlobalConfiguration;
 import liquibase.database.Database;
 import liquibase.database.core.Db2zDatabase;
 import liquibase.database.core.MSSQLDatabase;
@@ -22,6 +24,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.PushbackInputStream;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 import static liquibase.statement.SqlStatement.EMPTY_SQL_STATEMENT;
@@ -330,7 +333,7 @@ public abstract class AbstractSQLChange extends AbstractChange implements DbmsTa
     }
 
     public static class NormalizingStream extends InputStream {
-        private InputStream stream;
+        private final InputStream stream;
 
         @Deprecated
         public NormalizingStream(String endDelimiter, Boolean splitStatements, Boolean stripComments, InputStream stream) {

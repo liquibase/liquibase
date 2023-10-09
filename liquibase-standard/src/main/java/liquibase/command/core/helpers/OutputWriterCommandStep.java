@@ -1,19 +1,8 @@
 package liquibase.command.core.helpers;
 
-import liquibase.GlobalConfiguration;
-import liquibase.Scope;
-import liquibase.command.*;
 import liquibase.database.Database;
-import liquibase.executor.Executor;
-import liquibase.executor.ExecutorService;
-import liquibase.executor.LoggingExecutor;
-import liquibase.logging.mdc.MdcKey;
 
-import java.io.IOException;
-import java.io.OutputStreamWriter;
 import java.io.Writer;
-import java.util.Collections;
-import java.util.List;
 
 /**
  * This helper class can be run prior to any command (but usually the *-sql commands, like update-sql) to redirect
