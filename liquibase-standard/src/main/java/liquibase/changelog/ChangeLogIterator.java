@@ -4,7 +4,6 @@ import liquibase.ContextExpression;
 import liquibase.Labels;
 import liquibase.RuntimeEnvironment;
 import liquibase.Scope;
-import liquibase.change.CheckSum;
 import liquibase.changelog.filter.ChangeSetFilter;
 import liquibase.changelog.filter.ChangeSetFilterResult;
 import liquibase.changelog.visitor.ChangeSetVisitor;
@@ -97,7 +96,12 @@ public class ChangeLogIterator {
                         }
 
                         boolean finalShouldVisit = shouldVisit;
-                        Scope.child(Scope.Attr.changeSet.name(), changeSet, () -> {
+
+                        Map<String, Object> scopeValues = new HashMap<>();
+                        scopeValues.put(Scope.Attr.changeSet.name(), changeSet);
+                        scopeValues.put(Scope.Attr.database.name(), env.getTargetDatabase());
+
+                        Scope.child(scopeValues, () -> {
                             if (finalShouldVisit) {
                                 //
                                 // Go validate any changesets with an Executor if

@@ -154,6 +154,7 @@ public class StandardLockService implements LockService {
                         Thread.sleep(random.nextInt(1000));
                     } catch (InterruptedException ex) {
                         Scope.getCurrentScope().getLog(getClass()).warning("Lock table retry loop thread sleep interrupted", ex);
+                        Thread.currentThread().interrupt();
                     }
                 }
             }

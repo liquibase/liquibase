@@ -321,7 +321,7 @@ public abstract class AbstractJdbcDatabase implements Database {
         }
     }
 
-    private boolean isCatalogOrSchemaType(Class<? extends DatabaseObject> objectType) {
+    protected boolean isCatalogOrSchemaType(Class<? extends DatabaseObject> objectType) {
         return objectType.equals(Catalog.class) || objectType.equals(Schema.class);
     }
 
