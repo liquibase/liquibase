@@ -24,6 +24,7 @@
         <spock-reports.version>1.8.0</spock-reports.version>
         <groovy-all.version>2.4.17</groovy-all.version>
         <junit-platform.version>1.10.0</junit-platform.version>
+        <sonar.tests>src/test/groovy</sonar.tests>
     </properties>
 
     <dependencyManagement>
