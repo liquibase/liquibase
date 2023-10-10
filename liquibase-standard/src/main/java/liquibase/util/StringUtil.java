@@ -203,7 +203,10 @@ public class StringUtil {
      * @param wrapPoint        The point at which to split the lines
      * @param extraLinePadding Any additional spaces to add
      * @return String                  Output string with new lines
+     * @deprecated Liquibase does not wrap any console output, and instead lets the terminal handle its own wrapping.
+     * If you wish to use this method, consider whether its usage is truly necessary.
      */
+    @Deprecated
     public static String wrap(final String inputStr, int wrapPoint, int extraLinePadding) {
         //
         // Just return
