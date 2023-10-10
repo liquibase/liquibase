@@ -7,7 +7,7 @@ on:
 
 jobs:
     nightly-build:
-      uses: liquibase/build-logic/.github/workflows/os-extension-test.yml@v0.4.1
+      uses: liquibase/build-logic/.github/workflows/os-extension-test.yml@v0.4.8
       with:
         nightly: true
       secrets: inherit
