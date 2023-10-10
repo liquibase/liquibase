@@ -6,9 +6,9 @@ import liquibase.util.StringUtil;
 import java.io.File;
 import java.net.URL;
 import java.net.URLClassLoader;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Locale;
+import java.util.*;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 /**
@@ -18,6 +18,11 @@ import java.util.stream.Collectors;
  */
 public class LiquibaseLauncher {
 
+    public static final String LIQUIBASE_CORE_JAR_PATTERN = ".*?/liquibase-core.*?.jar";
+    public static final String LIQUIBASE_COMMERCIAL_JAR_PATTERN = ".*?/liquibase-commercial.*?.jar";
+    public static final String LIQUIBASE_CORE_MESSAGE = "Liquibase Core";
+    public static final String LIQUIBASE_COMMERCIAL_MESSAGE = "Liquibase Commercial";
+    public static final String DEPENDENCY_JAR_PATTERN = "(.*?)-([0-9.]*).jar";
     private static boolean debug = false;
 
     public static void main(final String[] args) throws Exception {
@@ -86,25 +91,45 @@ public class LiquibaseLauncher {
         //
         // Check for duplicate core and commercial JAR files
         //
+
         List<String> duplicateCore =
                 urls
                   .stream()
                   .map(URL::getFile)
-                  .filter(file -> file.matches(".*?/liquibase-core.*?.jar"))
+                  .filter(file -> file.matches(LIQUIBASE_CORE_JAR_PATTERN))
                   .collect(Collectors.toList());
         List<String> duplicateCommercial =
                 urls
                   .stream()
                   .map(URL::getFile)
-                  .filter(file -> file.matches(".*?/liquibase-commercial.*?.jar"))
+                  .filter(file -> file.matches(LIQUIBASE_COMMERCIAL_JAR_PATTERN))
                   .collect(Collectors.toList());
         if (duplicateCore.size() > 1) {
-            buildDupsMessage(duplicateCore, "Liquibase Core");
+            buildDupsMessage(duplicateCore, LIQUIBASE_CORE_MESSAGE);
         }
         if (duplicateCommercial.size() > 1) {
-            buildDupsMessage(duplicateCommercial, "Liquibase Commercial");
+            buildDupsMessage(duplicateCommercial, LIQUIBASE_COMMERCIAL_MESSAGE);
         }
-
+        Pattern versionedJarPattern = Pattern.compile(DEPENDENCY_JAR_PATTERN);
+        Map<String, List<String>> duplicates = new LinkedHashMap<>();
+        urls
+          .forEach(url -> {
+              Matcher m = versionedJarPattern.matcher(new File(url.getFile()).getName());
+              if (m.find()) {
+                  String key = m.group(1);
+                  List<String> dupEntries = duplicates.get(key);
+                  if (dupEntries == null) {
+                      dupEntries = new ArrayList<>();
+                  }
+                  dupEntries.add(url.getFile());
+                  duplicates.put(key, dupEntries);
+              }
+          });
+        duplicates.forEach((key, value) -> {
+            if (value.size() > 1) {
+                buildDupsMessage(value, key);
+            }
+        });
         if (debug) {
             debug("Final Classpath:");
             for (URL url : urls) {
