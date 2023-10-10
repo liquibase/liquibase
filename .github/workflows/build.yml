@@ -19,6 +19,7 @@ on:
       - opened
       - reopened
       - synchronize
+      - labeled
 
   push:
     branches:
