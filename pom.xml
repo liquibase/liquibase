@@ -11,7 +11,7 @@
 
     <groupId>org.liquibase.ext</groupId>
     <artifactId>liquibase-bigquery</artifactId>
-    <version>0-SNAPSHOT</version>
+    <version>4.24.1-SNAPSHOT</version>
 
     <name>Liquibase Extension: Google BigQuery support</name>
     <description>Add this Liquibase extension to your project to support Google BigQuery</description>
