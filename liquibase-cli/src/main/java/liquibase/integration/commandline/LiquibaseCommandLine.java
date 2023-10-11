@@ -957,7 +957,7 @@ public class LiquibaseCommandLine {
                     if (i > 0) {
                         builder.hidden(true);
                     } else {
-                        builder.hidden(def.getHidden());
+                        builder.hidden(def.getHidden() && !LiquibaseCommandLineConfiguration.SHOW_HIDDEN_ARGS.getCurrentValue());
                     }
 
                     subCommandSpec.addOption(builder.build());
@@ -1128,7 +1128,7 @@ public class LiquibaseCommandLine {
                 }
 
                 //only show the first/standard variation of a name
-                if (i > 0 || def.isHidden()) {
+                if (i > 0 || (def.isHidden() && !LiquibaseCommandLineConfiguration.SHOW_HIDDEN_ARGS.getCurrentValue())) {
                     optionBuilder.hidden(true);
                 }
 
