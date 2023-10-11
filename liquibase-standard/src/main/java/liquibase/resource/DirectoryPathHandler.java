@@ -1,7 +1,12 @@
 package liquibase.resource;
 
+import liquibase.Scope;
+
 import java.io.*;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.*;
+
+import static java.net.URLDecoder.*;
 
 /**
  * {@link PathHandler} that converts the path into a {@link DirectoryResourceAccessor}.
@@ -33,6 +38,13 @@ public class DirectoryPathHandler extends AbstractPathHandler {
         root = root
                 .replace("file:", "")
                 .replace("\\", "/");
+        try {
+            // Because this method is passed a URL from liquibase.resource.ClassLoaderResourceAccessor.configureAdditionalResourceAccessors,
+            // it should be decoded from its URL-encoded form.
+            root = decode(root, StandardCharsets.UTF_8.name());
+        } catch (UnsupportedEncodingException e) {
+            Scope.getCurrentScope().getLog(getClass()).fine("Failed to decode path " + root + "; continuing without decoding.", e);
+        }
         return new DirectoryResourceAccessor(new File(root));
     }
 

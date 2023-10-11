@@ -1,13 +1,8 @@
 package liquibase.command.diff
 
+import liquibase.CatalogAndSchema
 import liquibase.Scope
-import liquibase.change.core.AddForeignKeyConstraintChange
-import liquibase.change.core.DropForeignKeyConstraintChange
-import liquibase.changelog.ChangeLogParameters
-import liquibase.changelog.ChangeSet
-import liquibase.changelog.DatabaseChangeLog
 import liquibase.command.CommandScope
-import liquibase.command.core.DiffChangelogCommandStep
 import liquibase.command.core.DiffCommandStep
 import liquibase.command.core.helpers.DbUrlConnectionCommandStep
 import liquibase.command.core.helpers.DiffOutputControlCommandStep
@@ -22,14 +17,7 @@ import liquibase.diff.output.StandardObjectChangeFilter
 import liquibase.extension.testing.testsystem.DatabaseTestSystem
 import liquibase.extension.testing.testsystem.TestSystemFactory
 import liquibase.extension.testing.testsystem.spock.LiquibaseIntegrationTest
-import liquibase.parser.core.json.JsonChangeLogParser
 import liquibase.resource.SearchPathResourceAccessor
-import liquibase.snapshot.SnapshotControl
-import liquibase.snapshot.SnapshotGeneratorFactory
-import liquibase.structure.core.DatabaseObjectFactory
-import liquibase.structure.core.Sequence
-import liquibase.util.FileUtil
-import liquibase.util.StringUtil
 import spock.lang.Shared
 import spock.lang.Specification
 
@@ -54,7 +42,11 @@ class DiffIntegrationTest extends Specification {
         Database refDatabase =
                 DatabaseFactory.getInstance().openDatabase(refUrl, null, null, null, new SearchPathResourceAccessor("."))
         String excludeObjects = "(?i)DATABASECHANGELOG, (?i)DATABASECHANGELOGLOCK"
-        ObjectChangeFilter objectChangeFilter = new StandardObjectChangeFilter(StandardObjectChangeFilter.FilterType.EXCLUDE, excludeObjects);
+        ObjectChangeFilter objectChangeFilter = new StandardObjectChangeFilter(StandardObjectChangeFilter.FilterType.EXCLUDE, excludeObjects)
+
+        CatalogAndSchema refCatalogAndSchema = new CatalogAndSchema("refTestCatalog", "refTestSchema")
+        refDatabase.setLiquibaseCatalogName(refCatalogAndSchema.catalogName)
+        refDatabase.setLiquibaseSchemaName(refCatalogAndSchema.schemaName)
 
         CommandScope commandScope = new CommandScope(DiffCommandStep.COMMAND_NAME)
         commandScope.addArgumentValue(ReferenceDbUrlConnectionCommandStep.REFERENCE_DATABASE_ARG, refDatabase)
@@ -62,6 +54,8 @@ class DiffIntegrationTest extends Specification {
         commandScope.addArgumentValue(DbUrlConnectionCommandStep.DATABASE_ARG, targetDatabase)
         commandScope.addArgumentValue(DiffOutputControlCommandStep.INCLUDE_SCHEMA_ARG, true)
         commandScope.addArgumentValue(PreCompareCommandStep.OBJECT_CHANGE_FILTER_ARG, objectChangeFilter)
+        commandScope.addArgumentValue(ReferenceDbUrlConnectionCommandStep.REFERENCE_LIQUIBASE_SCHEMA_NAME_ARG, refDatabase.getLiquibaseSchemaName())
+        commandScope.addArgumentValue(ReferenceDbUrlConnectionCommandStep.REFERENCE_LIQUIBASE_CATALOG_NAME_ARG, refDatabase.getLiquibaseCatalogName())
         def diffOutput = new File(diffFile)
         OutputStream outputStream = new FileOutputStream(diffOutput)
         commandScope.setOutput(outputStream)

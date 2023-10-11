@@ -19,10 +19,12 @@ public class ContextExpression {
     public ContextExpression(String... contexts) {
         if (contexts.length == 1) {
             parseContextString(contexts[0]);
+            originalString = contexts[0];
         } else {
             for (String context : contexts) {
                 parseContextString(context.toLowerCase());
             }
+            originalString = StringUtil.join(contexts, ",");
         }
     }
 
@@ -36,6 +38,7 @@ public class ContextExpression {
             for (String context : contexts) {
                 this.contexts.add(context.toLowerCase());
             }
+            originalString = StringUtil.join(contexts, ",");
         }
     }
 
@@ -71,8 +74,8 @@ public class ContextExpression {
      * Returns true if the passed runtime contexts match this context expression
      */
     public boolean matches(Contexts runtimeContexts) {
-        if ((runtimeContexts == null) || runtimeContexts.isEmpty()) {
-            return true;
+        if (runtimeContexts == null) {
+            runtimeContexts = new Contexts();
         }
         if (this.contexts.isEmpty()) {
             return true;
@@ -87,6 +90,9 @@ public class ContextExpression {
     }
 
     private boolean matches(String expression, Contexts runtimeContexts) {
+        if (runtimeContexts == null) {
+            runtimeContexts = new Contexts();
+        }
         return ExpressionMatcher.matches(expression, runtimeContexts.getContexts());
     }
 
@@ -98,9 +104,7 @@ public class ContextExpression {
         if ((expressions == null) || expressions.isEmpty()) {
             return true;
         }
-        if ((contexts == null) || contexts.isEmpty()) {
-            return true;
-        }
+
         for (ContextExpression expression : expressions) {
             if (!expression.matches(contexts)) {
                 return false;

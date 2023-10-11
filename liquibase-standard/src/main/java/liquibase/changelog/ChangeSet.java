@@ -1,5 +1,6 @@
 package liquibase.changelog;
 
+import liquibase.ChecksumVersion;
 import liquibase.ContextExpression;
 import liquibase.Labels;
 import liquibase.Scope;
@@ -7,12 +8,12 @@ import liquibase.change.*;
 import liquibase.change.core.EmptyChange;
 import liquibase.change.core.RawSQLChange;
 import liquibase.change.core.SQLFileChange;
+import liquibase.change.visitor.ChangeVisitor;
 import liquibase.changelog.visitor.ChangeExecListener;
 import liquibase.configuration.LiquibaseConfiguration;
 import liquibase.database.Database;
 import liquibase.database.DatabaseList;
 import liquibase.database.ObjectQuotingStrategy;
-import liquibase.database.core.MSSQLDatabase;
 import liquibase.exception.*;
 import liquibase.executor.Executor;
 import liquibase.executor.ExecutorService;
@@ -28,12 +29,15 @@ import liquibase.precondition.ErrorPrecondition;
 import liquibase.precondition.FailedPrecondition;
 import liquibase.precondition.core.PreconditionContainer;
 import liquibase.resource.ResourceAccessor;
-import liquibase.sql.visitor.*;
+import liquibase.sql.visitor.SqlVisitor;
+import liquibase.sql.visitor.SqlVisitorFactory;
 import liquibase.sqlgenerator.SqlGeneratorFactory;
 import liquibase.statement.SqlStatement;
 import liquibase.util.SqlUtil;
 import liquibase.util.StreamUtil;
 import liquibase.util.StringUtil;
+import lombok.Getter;
+import lombok.Setter;
 
 import java.time.Instant;
 import java.util.*;
@@ -148,7 +152,7 @@ public class ChangeSet implements Conditional, ChangeLogChild {
     private ContextExpression contextFilter;
 
     /**
-     * "Labels" associated with this changeSet.  If null or empty, will execute regardless of contexts set
+     * "Labels" associated with this changeSet.  If null or empty, will execute regardless of labels set
      */
     private Labels labels;
 
@@ -237,6 +241,18 @@ public class ChangeSet implements Conditional, ChangeLogChild {
      */
     private String deploymentId;
 
+    @Getter
+    @Setter
+    private List<String> generatedSql = new ArrayList<>();
+
+    @Getter
+    @Setter
+    private ExecType execType;
+
+    @Getter
+    @Setter
+    private String errorMsg;
+
     public boolean shouldAlwaysRun() {
         return alwaysRun;
     }
@@ -318,8 +334,11 @@ public class ChangeSet implements Conditional, ChangeLogChild {
         this.storedFilePath = storedFilePath;
     }
 
+    /**
+     * @return the runWith value. If the runWith value is empty or not set this method will return null.
+     */
     public String getRunWith() {
-        return runWith;
+        return runWith == null || runWith.isEmpty() ? null : runWith;
     }
 
     public void setRunWith(String runWith) {
@@ -338,22 +357,32 @@ public class ChangeSet implements Conditional, ChangeLogChild {
         this.checkSum = null;
     }
 
-    public CheckSum generateCheckSum() {
-        if (checkSum == null) {
-            StringBuilder stringToMD5 = new StringBuilder();
-            for (Change change : getChanges()) {
-                stringToMD5.append(change.generateCheckSum()).append(":");
-            }
+    public CheckSum generateCheckSum(ChecksumVersion version) {
+        try {
+            return Scope.child(Collections.singletonMap(Scope.Attr.checksumVersion.name(), version), () -> {
+                if (checkSum == null) {
+                    StringBuilder stringToMD5 = new StringBuilder();
+                    for (Change change : this.getChanges()) {
+                        // checksum v8 requires changes that are applied even to other databases to be calculated
+                        // checksum v9 excludes them from calculation
+                        if (!(change instanceof DbmsTargetedChange) ||
+                                Scope.getCurrentScope().getChecksumVersion().lowerOrEqualThan(ChecksumVersion.V8) ||
+                                DatabaseList.definitionMatches(((DbmsTargetedChange) change).getDbms(), Scope.getCurrentScope().getDatabase(), true)) {
+                            stringToMD5.append(change.generateCheckSum()).append(":");
+                        }
+                    }
 
-            for (SqlVisitor visitor : this.getSqlVisitors()) {
-                stringToMD5.append(visitor.generateCheckSum()).append(";");
-            }
+                    for (SqlVisitor visitor : this.getSqlVisitors()) {
+                        stringToMD5.append(visitor.generateCheckSum()).append(";");
+                    }
+                    checkSum = CheckSum.compute(stringToMD5.toString());
+                }
 
-
-            checkSum = CheckSum.compute(stringToMD5.toString());
+                return checkSum;
+            });
+        } catch (Exception e) {
+            throw new RuntimeException(e);
         }
-
-        return checkSum;
     }
 
     @Override
@@ -567,7 +596,9 @@ public class ChangeSet implements Conditional, ChangeLogChild {
             return null;
         } else {
             change.load(value, resourceAccessor);
-
+            for(ChangeVisitor changeVisitor : getChangeVisitors()){
+                change.modify(changeVisitor);
+            }
             return change;
         }
     }
@@ -602,8 +633,6 @@ public class ChangeSet implements Conditional, ChangeLogChild {
 
         long startTime = new Date().getTime();
         Scope.getCurrentScope().addMdcValue(MdcKey.CHANGESET_OPERATION_START_TIME, Instant.ofEpochMilli(startTime).toString());
-
-        ExecType execType = null;
 
         boolean skipChange = false;
 
@@ -708,19 +737,22 @@ public class ChangeSet implements Conditional, ChangeLogChild {
 
                 log.fine("Reading ChangeSet: " + this);
                 for (Change change : getChanges()) {
-                    if (listener != null) {
-                        listener.willRun(change, this, changeLog, database);
-                    }
-                    if (change.generateStatementsVolatile(database)) {
-                        executor.comment("WARNING The following SQL may change each run and therefore is possibly incorrect and/or invalid:");
-                    }
+                    if ((!(change instanceof DbmsTargetedChange)) || DatabaseList.definitionMatches(((DbmsTargetedChange) change).getDbms(), database, true)) {
+                        if (listener != null) {
+                            listener.willRun(change, this, changeLog, database);
+                        }
+                        if (change.generateStatementsVolatile(database)) {
+                            executor.comment("WARNING The following SQL may change each run and therefore is possibly incorrect and/or invalid:");
+                        }
 
-                    addSqlMdc(change, database, false);
+                        String sql = addSqlMdc(change, database, false);
+                        this.getGeneratedSql().add(sql);
 
-                    database.executeStatements(change, databaseChangeLog, sqlVisitors);
-                    log.info(change.getConfirmationMessage());
-                    if (listener != null) {
-                        listener.ran(change, this, changeLog, database);
+                        database.executeStatements(change, databaseChangeLog, sqlVisitors);
+                        log.info(change.getConfirmationMessage());
+                        if (listener != null) {
+                            listener.ran(change, this, changeLog, database);
+                        }
                     } else {
                         log.fine("Change " + change.getSerializedObjectName() + " not included for database " + database.getShortName());
                     }
@@ -744,6 +776,7 @@ public class ChangeSet implements Conditional, ChangeLogChild {
             Scope.getCurrentScope().addMdcValue(MdcKey.CHANGESET_OPERATION_STOP_TIME, Instant.ofEpochMilli(new Date().getTime()).toString());
             Scope.getCurrentScope().addMdcValue(MdcKey.CHANGESET_OUTCOME, ExecType.FAILED.value.toLowerCase());
             log.severe(String.format("ChangeSet %s encountered an exception.", toString(false)));
+            setErrorMsg(e.getMessage());
             try {
                 database.rollback();
             } catch (Exception e1) {
@@ -868,7 +901,8 @@ public class ChangeSet implements Conditional, ChangeLogChild {
                     }
                     //
                     SqlStatement[] changeStatements = change.generateStatements(database);
-                    addSqlMdc(change, database, false);
+                    String sql = addSqlMdc(change, database, false);
+                    this.getGeneratedSql().add(sql);
                     if (change instanceof SQLFileChange) {
                         addSqlFileMdc((SQLFileChange) change);
                     }
@@ -891,7 +925,8 @@ public class ChangeSet implements Conditional, ChangeLogChild {
                         throw new RollbackFailedException("Liquibase does not support automatic rollback generation for raw " +
                             "sql changes (did you mean to specify keyword \"empty\" to ignore rolling back this change?)");
                     }
-                    addSqlMdc(change, database, true);
+                    String sql = addSqlMdc(change, database, true);
+                    this.getGeneratedSql().add(sql);
                     database.executeRollbackStatements(change, sqlVisitors);
                 }
             }
@@ -1121,7 +1156,9 @@ public class ChangeSet implements Conditional, ChangeLogChild {
     }
 
     public String toString(boolean includeMD5Sum) {
-        return filePath + "::" + getId() + "::" + getAuthor() + (includeMD5Sum ? ("::(Checksum: " + generateCheckSum() + ")") : "");
+        ChecksumVersion checksumVersion = ChecksumVersion.enumFromChecksumVersion(this.checkSum != null ? this.checkSum.getVersion() : ChecksumVersion.latest().getVersion());
+        return filePath + "::" + getId() + "::" + getAuthor() +
+                (includeMD5Sum ? ("::(Checksum: " + generateCheckSum(checksumVersion) + ")") : "");
     }
 
     @Override
@@ -1239,7 +1276,7 @@ public class ChangeSet implements Conditional, ChangeLogChild {
                 return true;
             }
         }
-        CheckSum currentMd5Sum = generateCheckSum();
+        CheckSum currentMd5Sum = storedCheckSum != null ? generateCheckSum(ChecksumVersion.enumFromChecksumVersion(storedCheckSum.getVersion())) : null;
         if (currentMd5Sum == null) {
             return true;
         }
@@ -1548,13 +1585,13 @@ public class ChangeSet implements Conditional, ChangeLogChild {
      * @throws RollbackImpossibleException if you cannot generate rollback statements
      *
      */
-    private void addSqlMdc(Change change, Database database, boolean generateRollbackStatements) throws Exception {
+    private String addSqlMdc(Change change, Database database, boolean generateRollbackStatements) throws Exception {
         //
         // If the change is for this Database
         // add a Boolean flag to Scope to indicate that the Change should not be executed when adding MDC context
         //
         if (! change.supports(database)) {
-            return;
+            return null;
         }
         AtomicReference<SqlStatement[]> statementsReference = new AtomicReference<>();
         Map<String, Object> scopeValues = new HashMap<>();
@@ -1565,5 +1602,10 @@ public class ChangeSet implements Conditional, ChangeLogChild {
                     .map(statement -> SqlUtil.getSqlString(statement, SqlGeneratorFactory.getInstance(), database))
                     .collect(Collectors.joining("\n"));
         Scope.getCurrentScope().addMdcValue(MdcKey.CHANGESET_SQL, sqlStatementsMdc);
+        return sqlStatementsMdc;
+    }
+
+    private List<ChangeVisitor> getChangeVisitors(){
+       return getChangeLog().getChangeVisitors();
     }
 }

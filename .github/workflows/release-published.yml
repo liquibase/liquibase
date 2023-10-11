@@ -43,16 +43,13 @@ jobs:
     runs-on: ubuntu-22.04
     steps:
       - name: Get Version to deploy
-        run: |
-          version=${{ needs.setup.outputs.version }}
-      - uses: trstringer/manual-approval@v1
+        uses: trstringer/manual-approval@v1
         with:
           secret: ${{ secrets.GITHUB_TOKEN }}
-          # approvers: suryaaki2,XDelphiGrl,jnewton03,kristyldatical
-          approvers: sayaliM0412
-          minimum-approvals: 1
-          issue-title: "Deploying ${version} to sonatype"
-          issue-body: "Please approve or deny the deployment of version ${version}"
+          approvers: suryaaki2,rberezen,jnewton03,kristyldatical,sayaliM0412
+          minimum-approvals: 2
+          issue-title: "Deploying ${{ needs.setup.outputs.version }} to sonatype"
+          issue-body: "Please approve or deny the deployment of version ${{ needs.setup.outputs.version }}"
           additional-approved-words: 'lgtm,✅,👍,proceed,shipit,:shipit:'
           additional-denied-words: 'stop,error,failed,fail,broken,:x:,👎'
 
@@ -254,7 +251,7 @@ jobs:
           java-version: '17'
           distribution: 'temurin'
           cache: 'maven'
-          server-id: github
+          server-id: liquibase
       - name: Set up Maven
         uses: stCarolas/setup-maven@v4.5
         with:
@@ -268,7 +265,7 @@ jobs:
         run: mvn -B clean deploy -DskipTests=true
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          TARGET_ARTIFACT_REPOSITORY: github
+          TARGET_ARTIFACT_REPOSITORY: liquibase
 
   deploy_xsd:
       name: Upload xsds
@@ -320,4 +317,12 @@ jobs:
             sed -ie "s/<\/ul>/  <li><a href=\"\/xml\/ns\/dbchangelog\/dbchangelog-${xsd_version}.xsd\">dbchangelog-${xsd_version}.xsd<\/a><\/li>\n<\/ul>/" index-file/index.htm
             aws s3 sync index-file s3://liquibaseorg-origin/xml/ns/dbchangelog/ --only-show-errors
           fi
-          
+
+  package-deb:
+    uses: liquibase/build-logic/.github/workflows/package-deb.yml@v0.4.0
+    needs: [ setup ]
+    secrets: inherit
+    with:
+      groupId: 'org.liquibase'
+      artifactId: 'liquibase'
+      version: ${{ needs.setup.outputs.version }}

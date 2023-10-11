@@ -1,6 +1,8 @@
 package liquibase.change;
 
+import liquibase.ChecksumVersion;
 import liquibase.Scope;
+import liquibase.database.Database;
 import liquibase.exception.UnexpectedLiquibaseException;
 import liquibase.plugin.AbstractPluginFactory;
 import liquibase.plugin.Plugin;
@@ -18,7 +20,8 @@ import java.util.concurrent.ConcurrentHashMap;
  */
 public class ChangeFactory extends AbstractPluginFactory<Change>{
 
-    private final Map<Class<? extends Change>, ChangeMetaData> metaDataByClass = new ConcurrentHashMap<>();
+    private final Map<String, ChangeMetaData> cachedMetadata = new ConcurrentHashMap<>();
+    private boolean performSupportsDatabaseValidation = true;
 
     private ChangeFactory() {
 
@@ -49,10 +52,23 @@ public class ChangeFactory extends AbstractPluginFactory<Change>{
     }
 
     public ChangeMetaData getChangeMetaData(Change change) {
-        if (!metaDataByClass.containsKey(change.getClass())) {
-            metaDataByClass.put(change.getClass(), change.createChangeMetaData());
+        String cacheKey = generateCacheKey(change);
+        cachedMetadata.putIfAbsent(cacheKey, change.createChangeMetaData());
+        return cachedMetadata.get(cacheKey);
+    }
+
+    private String generateCacheKey(Change change) {
+        String key;
+        try {
+            ChecksumVersion version = Scope.getCurrentScope().getChecksumVersion();
+            if (version == null) {
+                 throw new NullPointerException();
+            }
+            key = change.getClass().getName() + version;
+        } catch (Exception ignored) {
+            key = change.getClass().getName();
         }
-        return metaDataByClass.get(change.getClass());
+        return key;
     }
 
 
@@ -83,12 +99,22 @@ public class ChangeFactory extends AbstractPluginFactory<Change>{
      * Each call to create will return a new instance of the Change.
      */
     public Change create(String name) {
-        Change plugin = getPlugin(name);
-        if (plugin == null) {
+        Set<Change> plugins = getPlugins(name);
+
+        if (plugins.isEmpty()) {
             return null;
+        } else if (plugins.size() > 1) {
+            Database database = Scope.getCurrentScope().getDatabase();
+            if (database != null && performSupportsDatabaseValidation) {
+                plugins.removeIf(a -> !a.supports(database));
+                if (plugins.isEmpty()) {
+                    throw new UnexpectedLiquibaseException(String.format("No registered %s plugin found for %s database", name, database.getDisplayName()));
+                }
+            }
         }
+
         try {
-            return plugin.getClass().getConstructor().newInstance();
+            return plugins.iterator().next().getClass().getConstructor().newInstance();
         } catch (Exception e) {
             throw new UnexpectedLiquibaseException(e);
         }
@@ -112,5 +138,16 @@ public class ChangeFactory extends AbstractPluginFactory<Change>{
      */
     public static ChangeFactory getInstance() {
         return Scope.getCurrentScope().getSingleton(ChangeFactory.class);
+    }
+
+    /**
+     * Should the change be checked to see if it supports
+     * the current database?
+     * Default is true
+     *
+     * @param performSupportsDatabaseValidation
+     */
+    public void setPerformSupportsDatabaseValidation(boolean performSupportsDatabaseValidation) {
+        this.performSupportsDatabaseValidation = performSupportsDatabaseValidation;
     }
 }

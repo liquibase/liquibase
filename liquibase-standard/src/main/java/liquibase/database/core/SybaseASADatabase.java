@@ -145,8 +145,12 @@ public class SybaseASADatabase extends AbstractJdbcDatabase {
      */
     @Override
     public String getDefaultDriver(String url) {
-        if (url.startsWith("jdbc:sybase")) {
+        if (url.startsWith("jdbc:sqlanywhere")) {
+            return "sap.jdbc4.sqlanywhere.IDriver";
+        } else if (url.startsWith("jdbc:sybase")) {
             return "com.sybase.jdbc4.jdbc.SybDriver";
+        } else if (url.startsWith("jdbc:ianywhere")) {
+            return "ianywhere.ml.jdbcodbc.jdbc3.IDriver";
         } else {
             return null;
         }
@@ -219,7 +223,7 @@ public class SybaseASADatabase extends AbstractJdbcDatabase {
      */
     @Override
     public boolean supportsInitiallyDeferrableColumns() {
-        return false;
+        return true;
     }
 
     @Override
@@ -313,5 +317,14 @@ public class SybaseASADatabase extends AbstractJdbcDatabase {
          * http://dcx.sap.com/index.html#sqla170/en/html/819378356ce21014a17f8d51529119ee.html
          */
         return true;
+    }
+
+    @Override
+    public int getMaxFractionalDigitsForTimestamp() {
+        /*
+         * SQL Anywhere statically uses exactly 6 decimal places for the fraction.
+         * See: https://help.sap.com/docs/SAP_SQL_Anywhere/93079d4ba8e44920ae63ffb4def91f5b/81fe344c6ce21014a4f29d9e0af358b9.html
+         */
+        return 6;
     }
 }

@@ -11,6 +11,7 @@ import liquibase.changelog.visitor.DefaultChangeExecListener;
 import liquibase.command.*;
 import liquibase.command.core.helpers.DatabaseChangelogCommandStep;
 import liquibase.database.Database;
+import liquibase.exception.CommandValidationException;
 import liquibase.exception.DatabaseException;
 import liquibase.lockservice.LockService;
 import liquibase.logging.mdc.MdcKey;
@@ -31,7 +32,7 @@ public class ChangelogSyncCommandStep extends AbstractCommandStep {
     private String tag = null;
 
     static {
-        CommandBuilder builder = new CommandBuilder(COMMAND_NAME);
+        new CommandBuilder(COMMAND_NAME);
     }
 
     @Override
@@ -56,7 +57,9 @@ public class ChangelogSyncCommandStep extends AbstractCommandStep {
         final Database database = (Database) commandScope.getDependency(Database.class);
         final DatabaseChangeLog changeLog = (DatabaseChangeLog) commandScope.getDependency(DatabaseChangeLog.class);
         final ChangeLogParameters changeLogParameters = (ChangeLogParameters) commandScope.getDependency(ChangeLogParameters.class);
-
+        final ChangeLogHistoryService changeLogHistoryService = Scope.getCurrentScope().getSingleton(ChangeLogHistoryServiceFactory.class).getChangeLogService(database);
+        changeLogHistoryService.init();
+        changeLogHistoryService.generateDeploymentId();
         try {
             ChangeLogIterator runChangeLogIterator = buildChangeLogIterator(tag, changeLog, changeLogParameters.getContexts(), changeLogParameters.getLabels(), database);
             AtomicInteger changesetCount = new AtomicInteger(0);
@@ -101,13 +104,19 @@ public class ChangelogSyncCommandStep extends AbstractCommandStep {
         } else {
             List<RanChangeSet> ranChangeSetList = database.getRanChangeSetList();
             return new ChangeLogIterator(changeLog,
+                    new UpToTagChangeSetFilter(tag, ranChangeSetList),
                     new NotRanChangeSetFilter(database.getRanChangeSetList()),
                     new ContextChangeSetFilter(contexts),
                     new LabelChangeSetFilter(labelExpression),
                     new IgnoreChangeSetFilter(),
-                    new DbmsChangeSetFilter(database),
-                    new UpToTagChangeSetFilter(tag, ranChangeSetList));
+                    new DbmsChangeSetFilter(database));
         }
+    }
+
+    @Override
+    public void validate(CommandScope commandScope) throws CommandValidationException {
+        // update null checksums when running validate.
+        commandScope.addArgumentValue(DatabaseChangelogCommandStep.UPDATE_NULL_CHECKSUMS, Boolean.TRUE);
     }
 
     /**

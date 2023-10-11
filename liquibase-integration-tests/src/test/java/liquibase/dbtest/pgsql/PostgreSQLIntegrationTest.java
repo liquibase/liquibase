@@ -1,5 +1,6 @@
 package liquibase.dbtest.pgsql;
 
+import liquibase.CatalogAndSchema;
 import liquibase.Contexts;
 import liquibase.Liquibase;
 import liquibase.Scope;
@@ -13,6 +14,7 @@ import liquibase.command.core.GenerateChangelogCommandStep;
 import liquibase.command.core.helpers.DbUrlConnectionCommandStep;
 import liquibase.database.Database;
 import liquibase.database.DatabaseFactory;
+import liquibase.database.jvm.JdbcConnection;
 import liquibase.dbtest.AbstractIntegrationTest;
 import liquibase.diff.DiffGeneratorFactory;
 import liquibase.diff.DiffResult;
@@ -21,20 +23,20 @@ import liquibase.diff.output.DiffOutputControl;
 import liquibase.diff.output.changelog.DiffToChangeLog;
 import liquibase.exception.ValidationFailedException;
 import liquibase.executor.ExecutorService;
+import liquibase.extension.testing.testsystem.DatabaseTestSystem;
 import liquibase.snapshot.DatabaseSnapshot;
 import liquibase.snapshot.SnapshotControl;
 import liquibase.snapshot.SnapshotGeneratorFactory;
 import liquibase.statement.core.RawSqlStatement;
 import liquibase.structure.core.Sequence;
 import liquibase.structure.core.Table;
+import liquibase.test.JUnitResourceAccessor;
 import org.junit.Assert;
 import org.junit.Test;
 
 import java.io.ByteArrayOutputStream;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-import java.util.Map;
+import java.sql.SQLException;
+import java.util.*;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
@@ -45,11 +47,13 @@ public class PostgreSQLIntegrationTest extends AbstractIntegrationTest {
 
     private String dependenciesChangeLog;
     private String blobChangeLog;
+    private static DatabaseTestSystem localTestSystem;
 
     public PostgreSQLIntegrationTest() throws Exception {
         super("pgsql", DatabaseFactory.getInstance().getDatabase("postgresql"));
         dependenciesChangeLog = "changelogs/pgsql/complete/testFkPkDependencies.xml";
         blobChangeLog = "changelogs/pgsql/complete/testBlob.changelog.xml";
+        localTestSystem = testSystem;
     }
 
     @Test
@@ -263,5 +267,36 @@ public class PostgreSQLIntegrationTest extends AbstractIntegrationTest {
 
             assertTrue(baos.toString().contains(textToTest));
 
+    }
+
+    @Test
+    public void validateUserCanOnlyAccessTablesFromSchemasAllowedToRead() throws Exception {
+        assumeNotNull(this.getDatabase());
+
+        //Set up changelog to be deployed to have some tables in the public schema
+        Liquibase liquibase = createLiquibase(completeChangeLog);
+        clearDatabase();
+        liquibase.setChangeLogParameter( "loginuser", testSystem.getUsername());
+        liquibase.update(this.contexts);
+
+        //Create a new table with a serial type field on a new schema for a new user to test it can only get access to the created table
+        ((JdbcConnection) getDatabase().getConnection()).getUnderlyingConnection().createStatement().executeUpdate(
+                "DROP SCHEMA IF EXISTS TEST_SCHEMA CASCADE;" +
+                        "DROP USER IF EXISTS TEST_USER;" +
+                        "CREATE SCHEMA TEST_SCHEMA;" +
+                        "CREATE USER TEST_USER WITH PASSWORD '1234';" +
+                        "CREATE TABLE TEST_SCHEMA.permissionDeniedTable(id serial, name varchar(50));" +
+                        "GRANT ALL ON ALL TABLES IN SCHEMA public TO TEST_USER"
+        );
+        getDatabase().commit();
+
+        String url = getDatabase().getConnection().getURL();
+        Database newDatabase = DatabaseFactory.getInstance().openDatabase(url, "test_user", "1234", null, new JUnitResourceAccessor());
+        DatabaseSnapshot snapshot = SnapshotGeneratorFactory.getInstance().createSnapshot(new CatalogAndSchema(null, "test_schema"), newDatabase, new SnapshotControl(newDatabase));
+
+        Set<Table> tableList = snapshot.get(Table.class);
+
+        assertEquals(tableList.size(), 1);
+        assertEquals(tableList.iterator().next().getName(), "permissiondeniedtable");
     }
 }

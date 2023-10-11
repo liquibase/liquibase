@@ -96,7 +96,12 @@ public class ChangeLogIterator {
                         }
 
                         boolean finalShouldVisit = shouldVisit;
-                        Scope.child(Scope.Attr.changeSet.name(), changeSet, () -> {
+
+                        Map<String, Object> scopeValues = new HashMap<>();
+                        scopeValues.put(Scope.Attr.changeSet.name(), changeSet);
+                        scopeValues.put(Scope.Attr.database.name(), env.getTargetDatabase());
+
+                        Scope.child(scopeValues, () -> {
                             if (finalShouldVisit) {
                                 //
                                 // Go validate any changesets with an Executor if

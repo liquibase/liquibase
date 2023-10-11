@@ -321,7 +321,7 @@ public abstract class AbstractJdbcDatabase implements Database {
         }
     }
 
-    private boolean isCatalogOrSchemaType(Class<? extends DatabaseObject> objectType) {
+    protected boolean isCatalogOrSchemaType(Class<? extends DatabaseObject> objectType) {
         return objectType.equals(Catalog.class) || objectType.equals(Schema.class);
     }
 
@@ -648,10 +648,10 @@ public abstract class AbstractJdbcDatabase implements Database {
     @Override
     public String getDatabaseChangeLogTableName() {
         if (databaseChangeLogTableName != null) {
-            return databaseChangeLogTableName;
+            return correctObjectName(databaseChangeLogTableName, Table.class);
         }
 
-        return GlobalConfiguration.DATABASECHANGELOG_TABLE_NAME.getCurrentValue();
+        return correctObjectName(GlobalConfiguration.DATABASECHANGELOG_TABLE_NAME.getCurrentValue(), Table.class);
     }
 
     @Override
@@ -662,10 +662,10 @@ public abstract class AbstractJdbcDatabase implements Database {
     @Override
     public String getDatabaseChangeLogLockTableName() {
         if (databaseChangeLogLockTableName != null) {
-            return databaseChangeLogLockTableName;
+            return correctObjectName(databaseChangeLogLockTableName, Table.class);
         }
 
-        return GlobalConfiguration.DATABASECHANGELOGLOCK_TABLE_NAME.getCurrentValue();
+        return correctObjectName(GlobalConfiguration.DATABASECHANGELOGLOCK_TABLE_NAME.getCurrentValue(), Table.class);
     }
 
     @Override
@@ -688,7 +688,7 @@ public abstract class AbstractJdbcDatabase implements Database {
     }
 
     protected boolean canCreateChangeLogTable() throws DatabaseException {
-        return ((StandardChangeLogHistoryService) ChangeLogHistoryServiceFactory.getInstance().getChangeLogService(this)).canCreateChangeLogTable();
+        return ((StandardChangeLogHistoryService) Scope.getCurrentScope().getSingleton(ChangeLogHistoryServiceFactory.class).getChangeLogService(this)).canCreateChangeLogTable();
     }
 
     @Override
@@ -840,7 +840,7 @@ public abstract class AbstractJdbcDatabase implements Database {
                 }
             }
 
-            ChangeLogHistoryServiceFactory.getInstance().getChangeLogService(this).destroy();
+            Scope.getCurrentScope().getSingleton(ChangeLogHistoryServiceFactory.class).getChangeLogService(this).destroy();
             LockServiceFactory.getInstance().getLockService(this).destroy();
 
             this.setAutoCommit(previousAutoCommit);
@@ -901,12 +901,12 @@ public abstract class AbstractJdbcDatabase implements Database {
 
     @Override
     public void tag(final String tagString) throws DatabaseException {
-        ChangeLogHistoryServiceFactory.getInstance().getChangeLogService(this).tag(tagString);
+        Scope.getCurrentScope().getSingleton(ChangeLogHistoryServiceFactory.class).getChangeLogService(this).tag(tagString);
     }
 
     @Override
     public boolean doesTagExist(final String tag) throws DatabaseException {
-        return ChangeLogHistoryServiceFactory.getInstance().getChangeLogService(this).tagExists(tag);
+        return Scope.getCurrentScope().getSingleton(ChangeLogHistoryServiceFactory.class).getChangeLogService(this).tagExists(tag);
     }
 
     @Override
@@ -1143,32 +1143,32 @@ public abstract class AbstractJdbcDatabase implements Database {
 
     @Override
     public ChangeSet.RunStatus getRunStatus(final ChangeSet changeSet) throws DatabaseException, DatabaseHistoryException {
-        return ChangeLogHistoryServiceFactory.getInstance().getChangeLogService(this).getRunStatus(changeSet);
+        return Scope.getCurrentScope().getSingleton(ChangeLogHistoryServiceFactory.class).getChangeLogService(this).getRunStatus(changeSet);
     }
 
     @Override
     public RanChangeSet getRanChangeSet(final ChangeSet changeSet) throws DatabaseException, DatabaseHistoryException {
-        return ChangeLogHistoryServiceFactory.getInstance().getChangeLogService(this).getRanChangeSet(changeSet);
+        return Scope.getCurrentScope().getSingleton(ChangeLogHistoryServiceFactory.class).getChangeLogService(this).getRanChangeSet(changeSet);
     }
 
     @Override
     public List<RanChangeSet> getRanChangeSetList() throws DatabaseException {
-        return ChangeLogHistoryServiceFactory.getInstance().getChangeLogService(this).getRanChangeSets();
+        return Scope.getCurrentScope().getSingleton(ChangeLogHistoryServiceFactory.class).getChangeLogService(this).getRanChangeSets();
     }
 
     @Override
     public Date getRanDate(final ChangeSet changeSet) throws DatabaseException, DatabaseHistoryException {
-        return ChangeLogHistoryServiceFactory.getInstance().getChangeLogService(this).getRanDate(changeSet);
+        return Scope.getCurrentScope().getSingleton(ChangeLogHistoryServiceFactory.class).getChangeLogService(this).getRanDate(changeSet);
     }
 
     @Override
     public void markChangeSetExecStatus(final ChangeSet changeSet, final ChangeSet.ExecType execType) throws DatabaseException {
-        ChangeLogHistoryServiceFactory.getInstance().getChangeLogService(this).setExecType(changeSet, execType);
+        Scope.getCurrentScope().getSingleton(ChangeLogHistoryServiceFactory.class).getChangeLogService(this).setExecType(changeSet, execType);
     }
 
     @Override
     public void removeRanStatus(final ChangeSet changeSet) throws DatabaseException {
-        ChangeLogHistoryServiceFactory.getInstance().getChangeLogService(this).removeFromHistory(changeSet);
+        Scope.getCurrentScope().getSingleton(ChangeLogHistoryServiceFactory.class).getChangeLogService(this).removeFromHistory(changeSet);
     }
 
     @Override
@@ -1367,7 +1367,7 @@ public abstract class AbstractJdbcDatabase implements Database {
 
     @Override
     public void resetInternalState() {
-        ChangeLogHistoryServiceFactory.getInstance().getChangeLogService(this).reset();
+        Scope.getCurrentScope().getSingleton(ChangeLogHistoryServiceFactory.class).getChangeLogService(this).reset();
         LockServiceFactory.getInstance().getLockService(this).reset();
     }
 
@@ -1609,9 +1609,7 @@ public abstract class AbstractJdbcDatabase implements Database {
             Scope.getCurrentScope().getLog(getClass()).warning(
                     "No database connection available - specified"
                             + " DATETIME/TIMESTAMP precision will be tried");
-            return DEFAULT_MAX_TIMESTAMP_FRACTIONAL_DIGITS;
         }
-
         return DEFAULT_MAX_TIMESTAMP_FRACTIONAL_DIGITS;
     }
 

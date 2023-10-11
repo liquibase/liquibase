@@ -1,5 +1,6 @@
 package liquibase.integration.commandline;
 
+import liquibase.ChecksumVersion;
 import liquibase.configuration.AutoloadedConfigurations;
 import liquibase.configuration.ConfigurationDefinition;
 import liquibase.configuration.ConfigurationValueConverter;
@@ -31,6 +32,7 @@ public class LiquibaseCommandLineConfiguration implements AutoloadedConfiguratio
     public static final ConfigurationDefinition<Boolean> SHOULD_RUN;
     public static final ConfigurationDefinition<ArgumentConverter> ARGUMENT_CONVERTER;
     public static final ConfigurationDefinition<String> MONITOR_PERFORMANCE;
+    public static final ConfigurationDefinition<Boolean> ADD_EMPTY_MDC_VALUES;
 
     static {
         ConfigurationDefinition.Builder builder = new ConfigurationDefinition.Builder("liquibase");
@@ -93,7 +95,7 @@ public class LiquibaseCommandLineConfiguration implements AutoloadedConfiguratio
                         "Open Source users default to unstructured \"" + LogFormat.TEXT + "\" logs to the console or output log files. " +
                         "Pro users have the option to set value as \"" + LogFormat.JSON + "\" or \"" + LogFormat.JSON_PRETTY + "\" to enable json-structured log files to the console or output log files.")
                 .setDefaultValue(LogFormat.TEXT)
-                .setValueHandler((logFormat) -> {
+                .setValueHandler(logFormat -> {
                     if (logFormat == null) {
                         return null;
                     }
@@ -114,6 +116,11 @@ public class LiquibaseCommandLineConfiguration implements AutoloadedConfiguratio
                 })
                 .build();
 
+        ADD_EMPTY_MDC_VALUES = builder.define("addEmptyMdcValues", Boolean.class)
+                .setDescription("If true, a subset of the MdcKeys, as defined by product, will be set to empty strings upon system startup.")
+                .setDefaultValue(true)
+                .setHidden(true)
+                .build();
    }
 
     public interface ArgumentConverter {

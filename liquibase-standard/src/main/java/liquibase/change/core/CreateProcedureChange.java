@@ -1,5 +1,6 @@
 package liquibase.change.core;
 
+import liquibase.ChecksumVersion;
 import liquibase.GlobalConfiguration;
 import liquibase.Scope;
 import liquibase.change.*;
@@ -8,6 +9,7 @@ import liquibase.changelog.PropertyExpandingStream;
 import liquibase.database.Database;
 import liquibase.database.DatabaseList;
 import liquibase.database.core.*;
+import liquibase.exception.DatabaseException;
 import liquibase.exception.UnexpectedLiquibaseException;
 import liquibase.exception.ValidationErrors;
 import liquibase.resource.ResourceAccessor;
@@ -20,6 +22,7 @@ import liquibase.util.StringUtil;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.UnsupportedEncodingException;
 import java.nio.charset.Charset;
 import java.util.Map;
 
@@ -106,6 +109,7 @@ public class CreateProcedureChange extends AbstractChange implements DbmsTargete
         this.relativeToChangelogFile = relativeToChangelogFile;
     }
 
+    @DatabaseChangeProperty(serializationType = SerializationType.DIRECT_VALUE, version = {ChecksumVersion.V8})
     @DatabaseChangeProperty(isChangeProperty = false)
     /**
      * @deprecated Use getProcedureText() instead
@@ -122,9 +126,13 @@ public class CreateProcedureChange extends AbstractChange implements DbmsTargete
         this.procedureText = procedureText;
     }
 
+    private final String procedureTextDescription = "The SQL creating the procedure. You need to define either this attribute or 'path'. " +
+            "procedureText is not supported in the XML format; however, you can specify the procedure SQL inline within the createProcedure definition.";
     @DatabaseChangeProperty(
-        description = "The SQL creating the procedure. You need to define either this attribute or 'path'. " +
-            "procedureText is not supported in the XML format; however, you can specify the procedure SQL inline within the createProcedure definition.",
+        description = procedureTextDescription,
+            isChangeProperty = false, version = {ChecksumVersion.V8})
+    @DatabaseChangeProperty(
+        description = procedureTextDescription,
             serializationType = SerializationType.DIRECT_VALUE)
     public String getProcedureText() {
         return procedureText;
@@ -196,7 +204,7 @@ public class CreateProcedureChange extends AbstractChange implements DbmsTargete
         }
 
         if ((this.getReplaceIfExists() != null) && (DatabaseList.definitionMatches(getDbms(), database, true))) {
-            if (database instanceof MSSQLDatabase || database instanceof MySQLDatabase) {
+            if (databaseSupportsReplaceIfExists(database)) {
                 if (this.getReplaceIfExists() && (this.getProcedureName() == null)) {
                     validate.addError("procedureName is required if replaceIfExists = true");
                 }
@@ -235,14 +243,63 @@ public class CreateProcedureChange extends AbstractChange implements DbmsTargete
     /**
      * Calculates the checksum based on the contained SQL.
      *
-     * @see liquibase.change.AbstractChange#generateCheckSum()
+     * @see Change#generateCheckSum()
      */
     @Override
     public CheckSum generateCheckSum() {
-        return generateCheckSum(this.procedureText);
+        ChecksumVersion version = Scope.getCurrentScope().getChecksumVersion();
+        if (version.lowerOrEqualThan(ChecksumVersion.V8)) {
+            return generateCheckSumV8();
+        }
+        return generateCheckSumLatest(this.procedureText);
     }
 
-    protected CheckSum generateCheckSum(String sqlText) {
+    @Deprecated
+    private CheckSum generateCheckSumV8() {
+        if (this.path == null) {
+            return super.generateCheckSum();
+        }
+
+        InputStream stream = null;
+        try {
+            stream = openSqlStream();
+        } catch (IOException e) {
+            throw new UnexpectedLiquibaseException(e);
+        }
+
+        try {
+            String procedureText = this.procedureText;
+            if ((stream == null) && (procedureText == null)) {
+                procedureText = "";
+            }
+
+            String localEncoding = GlobalConfiguration.OUTPUT_FILE_ENCODING.getCurrentValue();
+            if (procedureText != null) {
+                try {
+                    stream = new ByteArrayInputStream(procedureText.getBytes(localEncoding));
+                } catch (UnsupportedEncodingException e) {
+                    throw new AssertionError(localEncoding +
+                            " is not supported by the JVM, this should not happen according to the JavaDoc of " +
+                            "the Charset class"
+                    );
+                }
+            }
+
+            CheckSum checkSum = CheckSum.compute(new NormalizingStreamV8(";", false, false, stream), false);
+
+            return CheckSum.compute(super.generateCheckSum().toString() + ":" + checkSum);
+        } finally {
+            if (stream != null) {
+                try {
+                    stream.close();
+                } catch (IOException ignore) {
+                    // Do nothing
+                }
+            }
+        }
+    }
+
+    protected CheckSum generateCheckSumLatest(String sqlText) {
         InputStream stream = null;
         CheckSum checkSum;
         try {
@@ -285,7 +342,10 @@ public class CreateProcedureChange extends AbstractChange implements DbmsTargete
      * change types.
      */
     @Override
-    public String[] getExcludedFieldFilters() {
+    public String[] getExcludedFieldFilters(ChecksumVersion version) {
+        if (version.lowerOrEqualThan(ChecksumVersion.V8)) {
+            return new String[0];
+        }
         return new String[]{
                 "path",
                 "dbms",
@@ -386,5 +446,33 @@ public class CreateProcedureChange extends AbstractChange implements DbmsTargete
         } else {
             return super.createExampleValueMetaData(parameterName, changePropertyAnnotation);
         }
+    }
+
+    private static boolean databaseSupportsReplaceIfExists(Database database) {
+        if (database instanceof MSSQLDatabase) {
+            return true;
+        }
+        if (database instanceof MySQLDatabase) {
+            return true;
+        }
+        if (database instanceof DB2Database) {
+            return true;
+        }
+
+        if (database instanceof Db2zDatabase) {
+           try {
+                int major = database.getDatabaseMajorVersion();
+                if (major > 12) {
+                    return true;
+                }
+                if (major < 12) {
+                    return false;
+                }
+                return database.getDatabaseMinorVersion() >= 1;
+            } catch (DatabaseException e) {
+                return false;
+            }
+        }
+        return false;
     }
 }

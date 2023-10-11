@@ -65,7 +65,7 @@ public class InternalHistoryCommandStep extends AbstractCommandStep {
 
         Database database = commandScope.getArgumentValue(DATABASE_ARG);
 
-        ChangeLogHistoryService historyService = ChangeLogHistoryServiceFactory.getInstance().getChangeLogService(database);
+        ChangeLogHistoryService historyService = Scope.getCurrentScope().getSingleton(ChangeLogHistoryServiceFactory.class).getChangeLogService(database);
 
         String headerMsg = "Liquibase History for " + database.getConnection().getURL();
         output.println(headerMsg);
@@ -192,7 +192,8 @@ public class InternalHistoryCommandStep extends AbstractCommandStep {
                 "Update Date",
                 "Changelog Path",
                 "Changeset Author",
-                "Changeset ID");
+                "Changeset ID",
+                "Tag");
 
         private final List<RanChangeSet> changeSets;
         private final CommandScope commandScope;
@@ -217,7 +218,8 @@ public class InternalHistoryCommandStep extends AbstractCommandStep {
                                     dateFormat.format(changeSet.getDateExecuted()),
                                     changeSet.getChangeLog(),
                                     changeSet.getAuthor(),
-                                    changeSet.getId()
+                                    changeSet.getId(),
+                                    changeSet.getTag() == null ? "" : changeSet.getTag()
                             )
                     )
                     .collect(Collectors.toList());
