@@ -20,6 +20,7 @@ import liquibase.util.StringUtil;
 
 import java.sql.*;
 import java.util.*;
+import java.util.concurrent.atomic.AtomicReference;
 
 public class JdbcDatabaseSnapshot extends DatabaseSnapshot {
 
@@ -27,6 +28,8 @@ public class JdbcDatabaseSnapshot extends DatabaseSnapshot {
     private static final boolean ignoreWarnAboutDbaRecycleBin = Boolean.getBoolean("liquibase.ignoreRecycleBinWarning");
 
     private CachingDatabaseMetaData cachingDatabaseMetaData;
+
+    private Map<String, CachedRow> cachedExpressionMap = null;
 
     private Set<String> userDefinedTypes;
 
@@ -116,7 +119,8 @@ public class JdbcDatabaseSnapshot extends DatabaseSnapshot {
                                         "c.TABLE_NAME, " +
                                         "c.COLUMN_NAME, " +
                                         "c.COLUMN_POSITION AS ORDINAL_POSITION, " +
-                                        "c.INDEX_OWNER AS FILTER_CONDITION, " +
+                                        "NULL AS FILTER_CONDITION, " +
+                                        "c.INDEX_OWNER, " +
                                         "CASE I.UNIQUENESS WHEN 'UNIQUE' THEN 0 ELSE 1 END AS NON_UNIQUE, " +
                                         "CASE c.DESCEND WHEN 'Y' THEN 'D' WHEN 'DESC' THEN 'D' WHEN 'N' THEN 'A' WHEN 'ASC' THEN 'A' END AS ASC_OR_DESC, " +
                                         "CASE WHEN tablespace_name = (SELECT default_tablespace FROM user_users) " +
@@ -143,7 +147,7 @@ public class JdbcDatabaseSnapshot extends DatabaseSnapshot {
 
                         sql += " ORDER BY c.INDEX_NAME, ORDINAL_POSITION";
 
-                        returnList.addAll(executeAndExtract(sql, database));
+                        returnList.addAll(setIndexExpressions(sql, executeAndExtract(sql, database)));
                     } else if (database instanceof MSSQLDatabase) {
                         String tableCat = "original_db_name()";
 
@@ -275,6 +279,35 @@ public class JdbcDatabaseSnapshot extends DatabaseSnapshot {
                     return returnList;
                 }
 
+                private List<CachedRow> setIndexExpressions(String sql, List<CachedRow> c) throws DatabaseException, SQLException {
+                    Map<String, CachedRow> expressionMap = getCachedExpressionMap();
+                    c.forEach(row -> {
+                        row.set("FILTER_CONDITION", null);
+                        String key = row.getString("INDEX_OWNER") + "::" + row.getString("INDEX_NAME") + "::" +
+                                     row.getInt("ORDINAL_POSITION");
+                        CachedRow fromMap = expressionMap.get(key);
+                        if (fromMap != null) {
+                            row.set("FILTER_CONDITION", fromMap.get("COLUMN_EXPRESSION"));
+                        }
+                    });
+                    return c;
+                }
+
+                private Map<String, CachedRow> getCachedExpressionMap() throws DatabaseException, SQLException {
+                    if (cachedExpressionMap != null) {
+                        return cachedExpressionMap;
+                    }
+                    String expSql = "SELECT e.column_expression, e.index_owner, e.index_name, e.column_position FROM all_ind_expressions e";
+                    List<CachedRow> ec = executeAndExtract(expSql, database);
+                    cachedExpressionMap = new HashMap<>();
+                    ec.forEach(row -> {
+                        String key = row.getString("INDEX_OWNER") + "::" + row.getString("INDEX_NAME") + "::" +
+                                row.getInt("COLUMN_POSITION");
+                        cachedExpressionMap.put(key, row);
+                    });
+                    return cachedExpressionMap;
+                }
+
                 @Override
                 public List<CachedRow> bulkFetch() throws SQLException, DatabaseException {
                     this.isBulkFetchMode = true;
@@ -290,6 +323,7 @@ public class JdbcDatabaseSnapshot extends DatabaseSnapshot {
                 }
             });
         }
+
 
         protected void warnAboutDbaRecycleBin() {
             if (!ignoreWarnAboutDbaRecycleBin && !warnedAboutDbaRecycleBin && !(((OracleDatabase) database).canAccessDbaRecycleBin())) {
