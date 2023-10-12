@@ -36,6 +36,7 @@ import liquibase.util.*;
 import picocli.CommandLine;
 
 import java.io.*;
+import java.lang.reflect.InvocationTargetException;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLClassLoader;
@@ -683,15 +684,14 @@ public class LiquibaseCommandLine {
         Map<String, String> javaProperties = addJavaPropertiesToChangelogParameters();
         Scope.child(new HashMap<>(javaProperties), () -> returnMap.putAll(configureResourceAccessor(classLoader)));
 
-        UIService defaultUiService = GlobalConfiguration.UI_SERVICE.getCurrentValue().getUiServiceClass()
-                .getDeclaredConstructor().newInstance();
+        UIService defaultUiService = getDefaultUiService();
 
         if (defaultUiService instanceof ConsoleUIService) {
             defaultUiService.setAllowPrompt(true);
-            ((ConsoleUIService) defaultUiService).setOutputStream(System.err);
+            ((ConsoleUIService) defaultUiService).setOutputStream(System.err); //NOSONAR
             List<UIService> outputServices = new ArrayList<>();
             outputServices.add(defaultUiService);
-            if (LiquibaseCommandLineConfiguration.MIRROR_CONSOLE_MESSAGES_TO_LOG.getCurrentValue()) {
+            if (BooleanUtil.isTrue(LiquibaseCommandLineConfiguration.MIRROR_CONSOLE_MESSAGES_TO_LOG.getCurrentValue())) {
                 outputServices.add(new LoggerUIService());
             }
             CompositeUIService compositeUIService = new CompositeUIService(defaultUiService, outputServices);
@@ -706,6 +706,19 @@ public class LiquibaseCommandLine {
         returnMap.put(Scope.JAVA_PROPERTIES, javaProperties);
 
         return returnMap;
+    }
+
+    private static UIService getDefaultUiService() throws InstantiationException, IllegalAccessException, InvocationTargetException, NoSuchMethodException {
+        List<UIService> uiServices = Scope.getCurrentScope().getServiceLocator().findInstances(UIService.class);
+        Class<? extends UIService> configuredUiServiceClass = GlobalConfiguration.UI_SERVICE.getCurrentValue().getUiServiceClass();
+        Optional<UIService> optionalDefaultUiService =
+                uiServices.stream().filter(uiService -> uiService.getClass().isAssignableFrom(configuredUiServiceClass)).findFirst();
+
+        if (optionalDefaultUiService.isPresent()) {
+            return optionalDefaultUiService.get();
+        } else {
+            return GlobalConfiguration.UI_SERVICE.getCurrentValue().getUiServiceClass().getDeclaredConstructor().newInstance();
+        }
     }
 
     private void configureVersionInfo() {
