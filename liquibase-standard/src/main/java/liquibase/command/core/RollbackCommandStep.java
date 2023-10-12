@@ -45,10 +45,6 @@ public class RollbackCommandStep extends AbstractRollbackCommandStep {
                 StringUtil.upperCaseFirst(Arrays.toString(
                         defineCommandNames()[0]).replace("[","").replace("]","").replace("rollback", "rollback ").trim()));
         resultsBuilder.addResult("rollbackReport", rollbackReportParameters);
-        Scope.child(Collections.singletonMap("rollbackReport", rollbackReportParameters), () -> doRun(resultsBuilder, rollbackReportParameters));
-    }
-
-    private void doRun(CommandResultsBuilder resultsBuilder, RollbackReportParameters rollbackReportParameters) throws Exception {
         CommandScope commandScope = resultsBuilder.getCommandScope();
 
         String tagToRollBackTo = commandScope.getArgumentValue(TAG_ARG);

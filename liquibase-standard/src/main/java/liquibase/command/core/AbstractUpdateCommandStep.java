@@ -59,12 +59,6 @@ public abstract class AbstractUpdateCommandStep extends AbstractCommandStep impl
             StringUtil.upperCaseFirst(Arrays.toString(
                getCommandName()).replace("[","").replace("]","").replace("update", "update ").trim()));
         resultsBuilder.addResult("updateReport", updateReportParameters);
-        Scope.child(Collections.singletonMap("updateReport", updateReportParameters), () -> {
-            doRun(resultsBuilder, updateReportParameters);
-        });
-    }
-
-    private void doRun(CommandResultsBuilder resultsBuilder, UpdateReportParameters updateReportParameters) throws Exception {
         CommandScope commandScope = resultsBuilder.getCommandScope();
         Database database = (Database) commandScope.getDependency(Database.class);
         updateReportParameters.getDatabaseInfo().setDatabaseType(database.getDatabaseProductName());
