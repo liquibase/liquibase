@@ -9,6 +9,7 @@ on:
 permissions:
   contents: read
 
+
 jobs:
   create_draft_release_release_branch:
     permissions:
@@ -19,6 +20,14 @@ jobs:
       pull-requests: write
     runs-on: ubuntu-latest
     steps:
+      - name: Throttle Requests (Release)
+        if: github.ref == 'refs/heads/release'
+        uses: actions/github-script@v5
+        with:
+          script: |
+            console.log('Delaying for 30 seconds...');
+            await new Promise(resolve => setTimeout(resolve, 30000)); // Add a 30-second delay
+
       - name: Create Draft Release (Release)
         if: github.ref == 'refs/heads/release'
 
@@ -31,20 +40,28 @@ jobs:
 
   create_draft_release_master:
     permissions:
-        # write permission is required to create a github release
-        contents: write
-        # write permission is required for autolabeler
-        # otherwise, read permission is required at least
-        pull-requests: write
+      # write permission is required to create a github release
+      contents: write
+      # write permission is required for autolabeler
+      # otherwise, read permission is required at least
+      pull-requests: write
     runs-on: ubuntu-latest
     steps:
-       - name: Create Draft Release (Master)
-         if: github.ref == 'refs/heads/master'
+      - name: Throttle Requests (Master)
+        if: github.ref == 'refs/heads/master'
+        uses: actions/github-script@v5
+        with:
+          script: |
+            console.log('Delaying for 30 seconds...');
+            await new Promise(resolve => setTimeout(resolve, 30000)); // Add a 30-second delay
 
-      # Drafts your next Release notes as Pull Requests are merged into the default branch
-         uses: release-drafter/release-drafter@v5
-         with:
+
+      - name: Create Draft Release (Master)
+        if: github.ref == 'refs/heads/master'
+
+        # Drafts your next Release notes as Pull Requests are merged into the default branch
+        uses: release-drafter/release-drafter@v5
+        with:
           config-name: release-drafter-master.yml # located in .github/ in default branch
-         env:
+        env:
           GITHUB_TOKEN: ${{ secrets.RELEASEDRAFTERTOKEN }}
-
