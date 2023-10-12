@@ -18,11 +18,11 @@ import java.util.stream.Collectors;
  */
 public class LiquibaseLauncher {
 
-    public static final String LIQUIBASE_CORE_JAR_PATTERN = ".*?/liquibase-core([-0-9.])*.jar";
-    public static final String LIQUIBASE_COMMERCIAL_JAR_PATTERN = ".*?/liquibase-commercial([-0-9.])*.jar";
-    public static final String LIQUIBASE_CORE_MESSAGE = "Liquibase Core";
-    public static final String LIQUIBASE_COMMERCIAL_MESSAGE = "Liquibase Commercial";
-    public static final String DEPENDENCY_JAR_VERSION_PATTERN = "(.*?)-([0-9.]*).jar";
+    private static final String LIQUIBASE_CORE_JAR_PATTERN = ".*?/liquibase-core([-0-9.])*.jar";
+    private static final String LIQUIBASE_COMMERCIAL_JAR_PATTERN = ".*?/liquibase-commercial([-0-9.])*.jar";
+    private static final String LIQUIBASE_CORE_MESSAGE = "Liquibase Core";
+    private static final String LIQUIBASE_COMMERCIAL_MESSAGE = "Liquibase Commercial";
+    private static final String DEPENDENCY_JAR_VERSION_PATTERN = "(.*?)-([0-9.]*).jar";
     private static boolean debug = false;
 
     public static void main(final String[] args) throws Exception {
