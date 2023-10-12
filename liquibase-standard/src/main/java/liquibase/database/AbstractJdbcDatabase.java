@@ -94,7 +94,7 @@ public abstract class AbstractJdbcDatabase implements Database {
     private static final String NON_WORD_REGEX = ".*\\W.*";
     private static final Pattern NON_WORD_PATTERN = Pattern.compile(NON_WORD_REGEX);
 
-    private static final String CREATE_VIEW_AS_REGEX = "^CREATE\\s+.*?VIEW\\s+.*?AS\\s+";
+    private static final String CREATE_VIEW_AS_REGEX = "^CREATE\\s+.*?VIEW\\s+.*?\\s+AS(?:\\s+|(?=\\())";
     private static final Pattern CREATE_VIEW_AS_PATTERN = Pattern.compile(CREATE_VIEW_AS_REGEX, Pattern.CASE_INSENSITIVE | Pattern.DOTALL);
 
     private static final String DATE_ONLY_REGEX = "^\\d{4}\\-\\d{2}\\-\\d{2}$";
@@ -321,7 +321,7 @@ public abstract class AbstractJdbcDatabase implements Database {
         }
     }
 
-    private boolean isCatalogOrSchemaType(Class<? extends DatabaseObject> objectType) {
+    protected boolean isCatalogOrSchemaType(Class<? extends DatabaseObject> objectType) {
         return objectType.equals(Catalog.class) || objectType.equals(Schema.class);
     }
 
@@ -648,10 +648,10 @@ public abstract class AbstractJdbcDatabase implements Database {
     @Override
     public String getDatabaseChangeLogTableName() {
         if (databaseChangeLogTableName != null) {
-            return databaseChangeLogTableName;
+            return correctObjectName(databaseChangeLogTableName, Table.class);
         }
 
-        return GlobalConfiguration.DATABASECHANGELOG_TABLE_NAME.getCurrentValue();
+        return correctObjectName(GlobalConfiguration.DATABASECHANGELOG_TABLE_NAME.getCurrentValue(), Table.class);
     }
 
     @Override
@@ -662,10 +662,10 @@ public abstract class AbstractJdbcDatabase implements Database {
     @Override
     public String getDatabaseChangeLogLockTableName() {
         if (databaseChangeLogLockTableName != null) {
-            return databaseChangeLogLockTableName;
+            return correctObjectName(databaseChangeLogLockTableName, Table.class);
         }
 
-        return GlobalConfiguration.DATABASECHANGELOGLOCK_TABLE_NAME.getCurrentValue();
+        return correctObjectName(GlobalConfiguration.DATABASECHANGELOGLOCK_TABLE_NAME.getCurrentValue(), Table.class);
     }
 
     @Override
@@ -1609,9 +1609,7 @@ public abstract class AbstractJdbcDatabase implements Database {
             Scope.getCurrentScope().getLog(getClass()).warning(
                     "No database connection available - specified"
                             + " DATETIME/TIMESTAMP precision will be tried");
-            return DEFAULT_MAX_TIMESTAMP_FRACTIONAL_DIGITS;
         }
-
         return DEFAULT_MAX_TIMESTAMP_FRACTIONAL_DIGITS;
     }
 

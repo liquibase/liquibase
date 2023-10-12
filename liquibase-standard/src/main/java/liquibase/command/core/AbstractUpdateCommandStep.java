@@ -43,6 +43,9 @@ public abstract class AbstractUpdateCommandStep extends AbstractCommandStep impl
     public abstract String getLabelFilterArg(CommandScope commandScope);
     public abstract String[] getCommandName();
     public abstract UpdateSummaryEnum getShowSummary(CommandScope commandScope);
+    public UpdateSummaryOutputEnum getShowSummaryOutput(CommandScope commandScope) {
+        return (UpdateSummaryOutputEnum) commandScope.getDependency(UpdateSummaryOutputEnum.class);
+    }
 
     @Override
     public List<Class<?>> requiredDependencies() {
@@ -52,6 +55,9 @@ public abstract class AbstractUpdateCommandStep extends AbstractCommandStep impl
     @Override
     public void run(CommandResultsBuilder resultsBuilder) throws Exception {
         UpdateReportParameters updateReportParameters = new UpdateReportParameters();
+        updateReportParameters.setCommandTitle(
+            StringUtil.upperCaseFirst(Arrays.toString(
+               getCommandName()).replace("[","").replace("]","").replace("update", "update ").trim()));
         resultsBuilder.addResult("updateReport", updateReportParameters);
         Scope.child(Collections.singletonMap("updateReport", updateReportParameters), () -> {
             doRun(resultsBuilder, updateReportParameters);
@@ -98,7 +104,7 @@ public abstract class AbstractUpdateCommandStep extends AbstractCommandStep impl
             Scope.child(scopeValues, () -> {
                 runChangeLogIterator.run(new UpdateVisitor(database, changeExecListener, new ShouldRunChangeSetFilter(database)),
                         new RuntimeEnvironment(database, contexts, labelExpression));
-                ShowSummaryUtil.showUpdateSummary(databaseChangeLog, getShowSummary(commandScope), statusVisitor, resultsBuilder.getOutputStream());
+                ShowSummaryUtil.showUpdateSummary(databaseChangeLog, getShowSummary(commandScope), getShowSummaryOutput(commandScope), statusVisitor, resultsBuilder.getOutputStream());
             });
 
             resultsBuilder.addResult("statusCode", 0);
@@ -282,7 +288,8 @@ public abstract class AbstractUpdateCommandStep extends AbstractCommandStep impl
             Scope.getCurrentScope().getUI().sendMessage("Database is up to date, no changesets to execute");
             StatusVisitor statusVisitor = getStatusVisitor(commandScope, database, contexts, labelExpression, databaseChangeLog);
             UpdateSummaryEnum showSummary = getShowSummary(commandScope);
-            ShowSummaryUtil.showUpdateSummary(databaseChangeLog, showSummary, statusVisitor, outputStream);
+            UpdateSummaryOutputEnum showSummaryOutput = getShowSummaryOutput(commandScope);
+            ShowSummaryUtil.showUpdateSummary(databaseChangeLog, showSummary, showSummaryOutput, statusVisitor, outputStream);
             return true;
         }
         return false;

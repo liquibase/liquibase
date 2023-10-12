@@ -834,9 +834,11 @@ public class DatabaseChangeLog implements Comparable<DatabaseChangeLog>, Conditi
             path = normalizePath(path);
         }
 
-        path = path.replace("\\", "/");
-        if (StringUtil.isNotEmpty(path) && !(path.endsWith("/"))) {
-            path = path + '/';
+        if(path != null) {
+            path = path.replace("\\", "/");
+            if (StringUtil.isNotEmpty(path) && !(path.endsWith("/"))) {
+                path = path + '/';
+            }
         }
         return path;
     }
@@ -982,6 +984,7 @@ public class DatabaseChangeLog implements Comparable<DatabaseChangeLog>, Conditi
             }
             addChangeSet(changeSet);
         }
+        skippedChangeSets.addAll(changeLog.getSkippedChangeSets());
 
         return true;
     }

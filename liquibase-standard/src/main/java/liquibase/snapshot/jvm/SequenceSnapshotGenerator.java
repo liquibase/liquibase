@@ -163,7 +163,7 @@ public class SequenceSnapshotGenerator extends JdbcSnapshotGenerator {
             if (database.getDatabaseProductName().startsWith("DB2 UDB for AS/400")) {
                 return new RawSqlStatement("SELECT SEQNAME AS SEQUENCE_NAME FROM QSYS2.SYSSEQUENCES WHERE SEQSCHEMA = '" + schema.getCatalogName() + "'");
             }
-            return new RawSqlStatement("SELECT SEQNAME AS SEQUENCE_NAME FROM SYSCAT.SEQUENCES WHERE SEQTYPE='S' AND SEQSCHEMA = '" + schema.getCatalogName() + "'");
+            return new RawParameterizedSqlStatement("SELECT SEQNAME AS SEQUENCE_NAME FROM SYSCAT.SEQUENCES WHERE SEQTYPE='S' AND SEQSCHEMA = ?", schema.getCatalogName());
         } else if (database instanceof Db2zDatabase) {
             return new RawParameterizedSqlStatement ("SELECT NAME AS SEQUENCE_NAME, " +
                     "START AS START_VALUE, " +

@@ -1,25 +1,46 @@
 name: Build Branch SNAPSHOT
 
 on:
-  workflow_call:
-
-  pull_request:
+  workflow_dispatch:
+  #push:
+    #branches:
+      #- 'master'
+  pull_request_target:
     types:
       - opened
       - reopened
       - synchronize
+      - labeled
+
+  push:
+    branches:
+      - github-action-**
+    paths-ignore:
+      - '**.md'
 
 env:
   MAVEN_VERSION: '3.9.2'
 
 jobs:
+  check_build_safety:
+    name: Check if Build should be done
+    runs-on: ubuntu-22.04
+    steps:
+      - name: Emit failure code for unsafe fork PRs
+        if: github.event.pull_request && github.event.pull_request.head.repo.full_name != 'liquibase/liquibase' && github.event.label.name != 'SafeToBuild'
+        run: |
+          echo "PR from Fork is NOT safe to build"
+          echo "A member of Liquibase team needs to apply label 'SafeToBuild'! "
+          exit 1
+
   setup:
     name: Setup
+    needs: check_build_safety
     runs-on: ubuntu-22.04
     outputs:
       timeStamp: ${{ steps.get-timestamp.outputs.timestamp }}
       thisBranchName: ${{ steps.get-branch-name.outputs.thisBranchName }}
-      latestMergeSha: ${{ steps.get-sha.outputs.latestMergeSha }}
+      thisSha: ${{ steps.get-commit-sha.outputs.thisSha }}
       setupSuccessful: "true"
 
     steps:
@@ -27,11 +48,15 @@ jobs:
         with:
           ref: ${{ github.event.pull_request.head.sha || github.event.after}}
 
-      - name: Get Latest Merge Commit SHA
-        id: get-sha
-        run: |
-          latest_merge_sha=`(git rev-parse --short HEAD)`
-          echo "latestMergeSha=${latest_merge_sha}" >> $GITHUB_OUTPUT
+      - name: Get commit-sha
+        id: get-commit-sha
+        uses: actions/github-script@v6
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          script: |
+              const helper = require('./.github/util/workflow-helper.js')({github, context});
+              core.setOutput("thisSha", helper.getCurrentSha());
 
       - name: Get Timestamp
         id: get-timestamp
@@ -52,9 +77,8 @@ jobs:
 
           modified_branch_name=`(echo $branch_name | tr / -)`
           echo "thisBranchName=$modified_branch_name" >> $GITHUB_OUTPUT          
-          echo $thisBranchName
 
-  build_branch:
+  build:
     name: Build & Package
     runs-on: ubuntu-22.04
     needs: setup
@@ -78,32 +102,15 @@ jobs:
         with:
           maven-version: ${{ env.MAVEN_VERSION }}
 
-      # Publish branch-SNAPSHOT version to GPM
+      # Version artifact based off of branch and commit SHA.
       - name: Version Artifact
         run: |
            mvn versions:set "-DnewVersion=${{ needs.setup.outputs.thisBranchName }}-SNAPSHOT"
+           #mvn versions:set "-DnewVersion=${{ inputs.branchName }}-SNAPSHOT"
 
-      - name: Publish branch-SNAPSHOT package
+      # Publish to GitHub Packages
+      - name: Publish package
         run: |
-          mvn -B clean deploy -pl '!liquibase-dist' -DskipTests=true "-Dbuild.repository.owner=liquibase" "-Dbuild.repository.name=liquibase" "-Dbuild.branch=${{ needs.setup.outputs.thisBranchName }}" "-Dbuild.number=${{ github.run_number }}" "-Dbuild.commit=${{ needs.setup.outputs.latestMergeSha }}" "-Dbuild.timestamp=${{ needs.setup.outputs.timeStamp }}"
-
+          mvn -B clean deploy -pl '!liquibase-dist' -DskipTests=true "-Dbuild.repository.owner=liquibase" "-Dbuild.repository.name=liquibase" "-Dbuild.branch=${{ needs.setup.outputs.thisBranchName }}" "-Dbuild.number=${{ github.run_number }}" "-Dbuild.commit=${{ needs.setup.outputs.thisSha }}" "-Dbuild.timestamp=${{ needs.setup.outputs.timeStamp }}"
         env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-
-      # Publish <commitsha>-SNAPSHOT version to GPM
-      - name: Version Artifact
-        run: |
-          mvn versions:set "-DnewVersion=${{ needs.setup.outputs.latestMergeSha }}-SNAPSHOT"
-
-      - name: Publish <commitsha>-SNAPSHOT package
-        run: |
-          mvn -B clean deploy -pl '!liquibase-dist' -DskipTests=true "-Dbuild.repository.owner=liquibase" "-Dbuild.repository.name=liquibase" "-Dbuild.branch=${{ needs.setup.outputs.thisBranchName }}" "-Dbuild.number=${{ github.run_number }}" "-Dbuild.commit=${{ needs.setup.outputs.latestMergeSha }}" "-Dbuild.timestamp=${{ needs.setup.outputs.timeStamp }}"
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-
-      #Publish to GitHub Packages. We are building a tar file which includes liquibase-commercial hence we need "-Dliquibase-pro.version"
-      - name: Publish tar.gz package to GPM
-        run: |
-          mvn -B -pl liquibase-dist -P liquibase-commercial clean deploy -DskipTests=true "-Dliquibase-pro.version=${{ needs.setup.outputs.branch_name }}-SNAPSHOT" "-Dbuild.timestamp=${{ needs.setup.outputs.timeStamp }}" "-Dbuild.repository.owner=liquibase" "-Dbuild.repository.name=liquibase" "-Dbuild.branch=${{ needs.setup.outputs.branch_name }}" "-Dbuild.number=${{ github.run_number }}" "-Dbuild.commit=${{ needs.setup.outputs.latestMergeSha }}"
-          env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
