@@ -28,7 +28,7 @@ jobs:
           config-name: release-drafter-master.yml # located in .github/ in default branch
           draft: true
          env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GITHUB_TOKEN: ${{ secrets.RELEASEDRAFTERTOKEN }}
 
   create_draft_release_release_branch:
     permissions:
@@ -48,4 +48,4 @@ jobs:
           config-name: release-drafter-release.yml # located in .github/ in default branch
           draft: true
         env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GITHUB_TOKEN: ${{ secrets.RELEASEDRAFTERTOKEN }}
