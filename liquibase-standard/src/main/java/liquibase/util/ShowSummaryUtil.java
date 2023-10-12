@@ -160,7 +160,7 @@ public class ShowSummaryUtil {
             AtomicBoolean flag = new AtomicBoolean(true);
             StringBuilder builder = new StringBuilder();
             st.getFilterResults().forEach(consumer -> {
-                if (consumer.getFilter() != null && !consumer.getFilter().isAssignableFrom(MockChangeSetFilter.class)) {
+                if (consumer.getFilter() != null && !consumer.getFilter().isAssignableFrom(ShouldNotCountAsSkipChangesetFilter.class)) {
                     String displayName = consumer.getMdcName();
                     mdcSkipCounts.merge(displayName, 1, Integer::sum);
                 }
@@ -199,7 +199,7 @@ public class ShowSummaryUtil {
     /**
      * Internal use only filter.
      */
-    public interface MockChangeSetFilter extends ChangeSetFilter {
+    public interface ShouldNotCountAsSkipChangesetFilter extends ChangeSetFilter {
 
     }
 
