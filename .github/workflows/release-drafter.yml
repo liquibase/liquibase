@@ -10,6 +10,25 @@ permissions:
   contents: read
 
 jobs:
+  create_draft_release_release_branch:
+    permissions:
+      # write permission is required to create a github release
+      contents: write
+      # write permission is required for autolabeler
+      # otherwise, read permission is required at least
+      pull-requests: write
+    runs-on: ubuntu-latest
+    steps:
+      - name: Create Draft Release (Release)
+        if: github.ref == 'refs/heads/release'
+
+        # Drafts your next Release notes as Pull Requests are merged into the default branch
+        uses: release-drafter/release-drafter@v5
+        with:
+          config-name: release-drafter-release.yml # located in .github/ in default branch
+        env:
+          GITHUB_TOKEN: ${{ secrets.RELEASEDRAFTERTOKEN }}
+
   create_draft_release_master:
     permissions:
         # write permission is required to create a github release
@@ -29,21 +48,3 @@ jobs:
          env:
           GITHUB_TOKEN: ${{ secrets.RELEASEDRAFTERTOKEN }}
 
-  create_draft_release_release_branch:
-    permissions:
-      # write permission is required to create a github release
-      contents: write
-      # write permission is required for autolabeler
-      # otherwise, read permission is required at least
-      pull-requests: write
-    runs-on: ubuntu-latest
-    steps:
-      - name: Create Draft Release (Release)
-        if: github.ref == 'refs/heads/release'
-
-        # Drafts your next Release notes as Pull Requests are merged into the default branch
-        uses: release-drafter/release-drafter@v5
-        with:
-          config-name: release-drafter-release.yml # located in .github/ in default branch
-        env:
-          GITHUB_TOKEN: ${{ secrets.RELEASEDRAFTERTOKEN }}
