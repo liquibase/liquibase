@@ -1,5 +1,8 @@
 package liquibase.integration.commandline;
 
+import static liquibase.integration.commandline.LiquibaseLauncherSettings.LiquibaseLauncherSetting.LIQUIBASE_HOME;
+import static liquibase.integration.commandline.LiquibaseLauncherSettings.getSetting;
+
 import liquibase.Scope;
 import liquibase.command.CommandArgumentDefinition;
 import liquibase.command.CommandDefinition;
@@ -1267,7 +1270,7 @@ public class LiquibaseCommandLine {
             String liquibaseHome;
             Path liquibaseHomePath = null;
             try {
-                liquibaseHomePath = new File(ObjectUtil.defaultIfNull(System.getenv("LIQUIBASE_HOME"), workingDirectory.toAbsolutePath().toString())).getAbsoluteFile().getCanonicalFile().toPath();
+                liquibaseHomePath = new File(ObjectUtil.defaultIfNull(getSetting(LIQUIBASE_HOME), workingDirectory.toAbsolutePath().toString())).getAbsoluteFile().getCanonicalFile().toPath();
                 liquibaseHome = liquibaseHomePath.toString();
             } catch (IOException e) {
                 liquibaseHome = "Cannot resolve LIQUIBASE_HOME: " + e.getMessage();
