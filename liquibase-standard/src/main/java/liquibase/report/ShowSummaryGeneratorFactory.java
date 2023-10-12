@@ -4,6 +4,9 @@ import liquibase.plugin.AbstractPluginFactory;
 
 public class ShowSummaryGeneratorFactory extends AbstractPluginFactory<ShowSummaryGenerator> {
 
+    private ShowSummaryGeneratorFactory() {
+    }
+
     @Override
     protected Class<ShowSummaryGenerator> getPluginClass() {
         return ShowSummaryGenerator.class;
