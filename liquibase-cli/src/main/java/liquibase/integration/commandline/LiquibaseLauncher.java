@@ -18,12 +18,11 @@ import java.util.stream.Collectors;
  */
 public class LiquibaseLauncher {
 
-    public static final String LIQUIBASE_CORE_JAR_PATTERN = ".*?/liquibase-core.*?.jar";
-    public static final String LIQUIBASE_COMMERCIAL_JAR_PATTERN = ".*?/liquibase-commercial.*?.jar";
+    public static final String LIQUIBASE_CORE_JAR_PATTERN = ".*?/liquibase-core([-0-9.])*.jar";
+    public static final String LIQUIBASE_COMMERCIAL_JAR_PATTERN = ".*?/liquibase-commercial([-0-9.])*.jar";
     public static final String LIQUIBASE_CORE_MESSAGE = "Liquibase Core";
     public static final String LIQUIBASE_COMMERCIAL_MESSAGE = "Liquibase Commercial";
     public static final String DEPENDENCY_JAR_VERSION_PATTERN = "(.*?)-([0-9.]*).jar";
-    public static final String DEPENDENCY_JAR_PATTERN = "(.*?)-([0-9.]*).jar";
     private static boolean debug = false;
 
     public static void main(final String[] args) throws Exception {
@@ -112,8 +111,8 @@ public class LiquibaseLauncher {
             buildDupsMessage(duplicateCommercial, LIQUIBASE_COMMERCIAL_MESSAGE);
         }
         Map<String, List<String>> duplicates = new LinkedHashMap<>();
-        findDuplicates(urls, Pattern.compile(DEPENDENCY_JAR_VERSION_PATTERN), duplicates);
-        findDuplicates(urls, Pattern.compile(DEPENDENCY_JAR_PATTERN), duplicates);
+        findVersionedDuplicates(urls, Pattern.compile(DEPENDENCY_JAR_VERSION_PATTERN), duplicates);
+        findExactDuplicates(urls, duplicates);
         duplicates.forEach((key, value) -> {
             if (value.size() > 1) {
                 buildDupsMessage(value, key);
@@ -147,7 +146,7 @@ public class LiquibaseLauncher {
         cli.getMethod("main", String[].class).invoke(null, new Object[]{args});
     }
 
-    private static void findDuplicates(List<URL> urls, Pattern versionedJarPattern, Map<String, List<String>> duplicates) {
+    private static void findVersionedDuplicates(List<URL> urls, Pattern versionedJarPattern, Map<String, List<String>> duplicates) {
         urls
           .forEach(url -> {
               Matcher m = versionedJarPattern.matcher(new File(url.getFile()).getName());
@@ -161,6 +160,22 @@ public class LiquibaseLauncher {
                   duplicates.put(key, dupEntries);
               }
           });
+    }
+
+    private static void findExactDuplicates(List<URL> urls, Map<String, List<String>> duplicates) {
+        urls
+            .forEach(url -> {
+                String key = new File(url.getFile()).getName();
+                if (! (url.toString().endsWith("/") || url.toString().endsWith("\\") ||
+                       key.contains("liquibase-core") || key.contains("liquibase-commercial"))) {
+                    List<String> dupEntries = duplicates.get(key);
+                    if (dupEntries == null) {
+                        dupEntries = new ArrayList<>();
+                    }
+                    dupEntries.add(url.getFile());
+                    duplicates.put(key, dupEntries);
+                }
+            });
     }
 
     private static void buildDupsMessage(List<String> duplicates, String title) {
