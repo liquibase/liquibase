@@ -146,6 +146,9 @@ public class LiquibaseLauncher {
         cli.getMethod("main", String[].class).invoke(null, new Object[]{args});
     }
 
+    //
+    // Find duplicates that match pattern <name>-<version>, like snakeyaml-1.33.0 and snakeyaml-2.0
+    //
     private static void findVersionedDuplicates(List<URL> urls, Pattern versionedJarPattern, Map<String, List<String>> duplicates) {
         urls
           .forEach(url -> {
@@ -162,6 +165,10 @@ public class LiquibaseLauncher {
           });
     }
 
+    //
+    // Find exact duplicates in the list of URL
+    // skip core and commercial JARs and any directories
+    //
     private static void findExactDuplicates(List<URL> urls, Map<String, List<String>> duplicates) {
         urls
             .forEach(url -> {
