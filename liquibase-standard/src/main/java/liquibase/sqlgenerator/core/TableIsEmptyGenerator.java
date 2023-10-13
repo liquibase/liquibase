@@ -1,6 +1,8 @@
 package liquibase.sqlgenerator.core;
 
 import liquibase.database.Database;
+import liquibase.database.core.DB2Database;
+import liquibase.database.core.Db2zDatabase;
 import liquibase.database.core.FirebirdDatabase;
 import liquibase.database.core.HsqlDatabase;
 import liquibase.database.core.MySQLDatabase;
@@ -32,11 +34,16 @@ public class TableIsEmptyGenerator extends AbstractSqlGenerator<TableIsEmptyStat
 
     protected String generateCountSql(TableIsEmptyStatement statement, Database database) {
         String tableName = database.escapeTableName(statement.getCatalogName(), statement.getSchemaName(), statement.getTableName());
-        if (database instanceof HsqlDatabase) {
+        if (database instanceof HsqlDatabase || database instanceof DB2Database) {
             return String.format("SELECT COUNT(1) FROM (VALUES(0)) WHERE EXISTS (SELECT * FROM %s)", tableName);
-        } else if (database instanceof OracleDatabase || database instanceof MySQLDatabase) {
+        }
+        if (database instanceof Db2zDatabase) {
+            return String.format("SELECT COUNT(1) FROM SYSIBM.SYSDUMMY1 WHERE EXISTS (SELECT * FROM %s)", tableName);
+        }
+        if (database instanceof OracleDatabase || database instanceof MySQLDatabase) {
             return String.format("SELECT COUNT(1) FROM DUAL WHERE EXISTS (SELECT * FROM %s)", tableName);
-        } else if (database instanceof FirebirdDatabase) {
+        }
+        if (database instanceof FirebirdDatabase) {
             return String.format("SELECT COUNT(1) FROM RDB$DATABASE WHERE EXISTS (SELECT * FROM %s)", tableName);
         }
         return String.format("SELECT COUNT(1) WHERE EXISTS (SELECT * FROM %s)", tableName);
@@ -47,6 +54,4 @@ public class TableIsEmptyGenerator extends AbstractSqlGenerator<TableIsEmptyStat
     public Sql[] generateSql(TableIsEmptyStatement statement, Database database, SqlGeneratorChain sqlGeneratorChain) {
         return new Sql[] { new UnparsedSql(generateCountSql(statement, database)) };
     }
-
-
 }
