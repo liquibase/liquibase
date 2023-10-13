@@ -321,7 +321,7 @@ public abstract class AbstractJdbcDatabase implements Database {
         }
     }
 
-    private boolean isCatalogOrSchemaType(Class<? extends DatabaseObject> objectType) {
+    protected boolean isCatalogOrSchemaType(Class<? extends DatabaseObject> objectType) {
         return objectType.equals(Catalog.class) || objectType.equals(Schema.class);
     }
 
@@ -1609,9 +1609,7 @@ public abstract class AbstractJdbcDatabase implements Database {
             Scope.getCurrentScope().getLog(getClass()).warning(
                     "No database connection available - specified"
                             + " DATETIME/TIMESTAMP precision will be tried");
-            return DEFAULT_MAX_TIMESTAMP_FRACTIONAL_DIGITS;
         }
-
         return DEFAULT_MAX_TIMESTAMP_FRACTIONAL_DIGITS;
     }
 
