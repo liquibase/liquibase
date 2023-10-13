@@ -715,7 +715,7 @@ public class LiquibaseCommandLine {
         List<UIService> uiServices = Scope.getCurrentScope().getServiceLocator().findInstances(UIService.class);
         Class<? extends UIService> configuredUiServiceClass = GlobalConfiguration.UI_SERVICE.getCurrentValue().getUiServiceClass();
         Optional<UIService> optionalDefaultUiService =
-                uiServices.stream().filter(uiService -> uiService.getClass().isAssignableFrom(configuredUiServiceClass)).findFirst();
+                uiServices.stream().filter(uiService -> configuredUiServiceClass.isAssignableFrom(uiService.getClass())).findFirst();
 
         if (optionalDefaultUiService.isPresent()) {
             return optionalDefaultUiService.get();
