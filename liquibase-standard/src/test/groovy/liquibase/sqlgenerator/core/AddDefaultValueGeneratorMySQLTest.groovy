@@ -31,7 +31,7 @@ class AddDefaultValueGeneratorMySQLTest extends Specification {
     }
 
     @Unroll
-    def "validate generated errors message when setting up Default Value for MySQL version #majorVersion "() {
+    def "validate generated errors message when setting up Default Value for MySQL version #majorVersion dot #minorVersion "() {
         when:
         def addDefaultValueStatement = new AddDefaultValueStatement("lbcat", "public", "testTable", "testColumn", columnDataType, finalDefaultValue);
         AddDefaultValueGeneratorMySQL defaultValueGenerator = new AddDefaultValueGeneratorMySQL();
