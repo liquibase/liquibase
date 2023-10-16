@@ -1198,8 +1198,8 @@ public class ChangeSet implements Conditional, ChangeLogChild {
             return;
         }
 
-        for (String statment : StringUtil.splitSQL(sql, null)) {
-            rollback.getChanges().add(new RawSQLChange(statment.trim()));
+        for (String statement : StringUtil.splitSQL(sql, null)) {
+            rollback.getChanges().add(new RawSQLChange(statement.trim()));
         }
     }
 
