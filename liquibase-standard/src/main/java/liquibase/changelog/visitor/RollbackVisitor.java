@@ -24,7 +24,7 @@ public class RollbackVisitor implements ChangeSetVisitor {
     private final Database database;
 
     private ChangeExecListener execListener;
-    private List<ChangesetsRolledback.ChangeSet> processedChangesets = new ArrayList<>();
+    private List<ChangeSet> processedChangesets = new ArrayList<>();
 
     /**
      * @deprecated - please use the constructor with ChangeExecListener, which can be null.
@@ -39,7 +39,7 @@ public class RollbackVisitor implements ChangeSetVisitor {
         this.execListener = listener;
     }
 
-    public RollbackVisitor(Database database, ChangeExecListener listener, List<ChangesetsRolledback.ChangeSet> processedChangesets) {
+    public RollbackVisitor(Database database, ChangeExecListener listener, List<ChangeSet> processedChangesets) {
         this(database);
         this.execListener = listener;
         this.processedChangesets = processedChangesets;
@@ -71,7 +71,7 @@ public class RollbackVisitor implements ChangeSetVisitor {
         this.database.commit();
         checkForEmptyRollbackFile(changeSet);
         if (processedChangesets != null) {
-            processedChangesets.add(new ChangesetsRolledback.ChangeSet(changeSet.getId(), changeSet.getAuthor(), changeSet.getFilePath(), changeSet.getDeploymentId()));
+            processedChangesets.add(changeSet);
         }
     }
 
