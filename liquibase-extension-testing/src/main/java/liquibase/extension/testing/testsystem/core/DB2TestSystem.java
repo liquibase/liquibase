@@ -9,6 +9,12 @@ import org.testcontainers.utility.DockerImageName;
 
 public class DB2TestSystem extends DatabaseTestSystem {
 
+    private Db2Container db2 = new Db2Container(DockerImageName.parse(getImageName())
+            .withTag(getVersion()))
+            .withUsername(getUsername())
+            .withPassword(getPassword())
+            .withDatabaseName(getCatalog())
+            .acceptLicense();
 
     public DB2TestSystem() {
         super("db2");
@@ -27,35 +33,11 @@ public class DB2TestSystem extends DatabaseTestSystem {
     @Override
     protected @NotNull DatabaseWrapper createContainerWrapper() {
 
-//         new GenericContainer<>("ibmcom/db2")
-//                .withEnv("LICENSE", "accept")
-//                .withEnv("DB2INST1_PASSWORD", getPassword())
-//                .withEnv("DBNAME", "testdb")
-////            .withNetwork(network)
-//                .withNetworkAliases(db2NetworkAlias)
-//                .withExposedPorts(50000, 55000)
-//                //.withFileSystemBind(System.getProperty("java.io.tmpdir"), "/database")
-//                .waitingFor(new LogMessageWaitStrategy().withRegEx(".*Setup has completed.*").withStartupTimeout(Duration.ofMinutes(10)))
-//                .withCommand("db2start")
-//                .withPrivilegedMode(true)
-//                .withReuse(true); // It is necessary to have this set to true, because the stop method will stop the containers if necessary.
-
-
+        db2.start();
         return new DockerDatabaseWrapper(
-                new Db2Container(DockerImageName.parse(getImageName()).withTag(getVersion()))
-                        .withUsername(getUsername())
-                        .withPassword(getPassword())
-                        .withDatabaseName(getCatalog())
-                        .acceptLicense()
-                        .withPrivilegedMode(true)
-                        .withReuse(true)
+                db2
                 , this
-        ) {
-            @Override
-            public Runnable requireLicense() {
-                return ((Db2Container) this.getContainer())::acceptLicense;
-            }
-        };
+        );
     }
 
     @Override
