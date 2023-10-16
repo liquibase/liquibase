@@ -11,6 +11,7 @@ on:
           description: 'liquibase version'
           required: true
           type: string
+  workflow_dispatch:
 
 env:
   MAVEN_VERSION: '3.9.2'
@@ -28,7 +29,7 @@ jobs:
         name: Checkout liquibase-pro
         with:
             repository: liquibase/liquibase-pro
-            ref: "${{ github.event.inputs.branch}}"
+            ref: ${{ inputs.branch}}
             token: ${{ secrets.BOT_TOKEN }}
 
       - name: Set up JDK 17
@@ -44,7 +45,7 @@ jobs:
           maven-version: ${{ env.MAVEN_VERSION }}
 
       - name: Set version
-        run: mvn versions:set "-DnewVersion=v4.24.0"
+        run: mvn versions:set -DnewVersion=${{ inputs.liquibase-version }}
 
       - name: Build & Test
         run: mvn -B clean package

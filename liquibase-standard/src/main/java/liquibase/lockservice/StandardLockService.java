@@ -45,9 +45,7 @@ public class StandardLockService implements LockService {
     protected static final ResourceBundle coreBundle = getBundle("liquibase/i18n/liquibase-core");
 
     protected Database database;
-
     protected boolean hasChangeLogLock;
-
     protected Long changeLogLockPollRate;
     protected Long changeLogLockRecheckTime;
 
@@ -58,6 +56,7 @@ public class StandardLockService implements LockService {
 
 
     public StandardLockService() {
+        //Empty constructos
     }
 
     @Override
@@ -107,7 +106,7 @@ public class StandardLockService implements LockService {
         int maxIterations = 10;
         if (executor instanceof LoggingExecutor) {
             //can't / don't have to re-check
-            if (hasDatabaseChangeLogLockTable()) {
+            if (isDatabaseChangeLogLockTableCreated()) {
                 maxIterations = 0;
             } else {
                 maxIterations = 1;
@@ -115,7 +114,7 @@ public class StandardLockService implements LockService {
         }
         for (int i = 0; i < maxIterations; i++) {
             try {
-                if (!hasDatabaseChangeLogLockTable(true)) {
+                if (!isDatabaseChangeLogLockTableCreated(true)) {
                     executor.comment("Create Database Lock Table");
                     SqlStatement createLockTableStatement = new CreateDatabaseChangeLogLockTableStatement();
                     ChangelogJdbcMdcListener.execute(database, ex -> ex.execute(createLockTableStatement));
@@ -155,6 +154,7 @@ public class StandardLockService implements LockService {
                         Thread.sleep(random.nextInt(1000));
                     } catch (InterruptedException ex) {
                         Scope.getCurrentScope().getLog(getClass()).warning("Lock table retry loop thread sleep interrupted", ex);
+                        Thread.currentThread().interrupt();
                     }
                 }
             }
@@ -233,7 +233,7 @@ public class StandardLockService implements LockService {
      * Check whether the databasechangeloglock table exists in the database.
      * @param forceRecheck if true, do not use any cached information and check the actual database
      */
-    protected boolean hasDatabaseChangeLogLockTable(boolean forceRecheck) {
+    protected boolean isDatabaseChangeLogLockTableCreated(boolean forceRecheck) {
         if (forceRecheck || hasDatabaseChangeLogLockTable == null) {
             try {
                 hasDatabaseChangeLogLockTable = SnapshotGeneratorFactory.getInstance()
@@ -245,8 +245,8 @@ public class StandardLockService implements LockService {
         return hasDatabaseChangeLogLockTable;
     }
 
-    protected boolean hasDatabaseChangeLogLockTable() throws DatabaseException {
-        return hasDatabaseChangeLogLockTable(false);
+    protected boolean isDatabaseChangeLogLockTableCreated() throws DatabaseException {
+        return isDatabaseChangeLogLockTableCreated(false);
     }
 
     @Override
@@ -363,7 +363,7 @@ public class StandardLockService implements LockService {
         boolean success = false;
         Executor executor = Scope.getCurrentScope().getSingleton(ExecutorService.class).getExecutor("jdbc", database);
         try {
-            if (this.hasDatabaseChangeLogLockTable()) {
+            if (this.isDatabaseChangeLogLockTableCreated()) {
                 executor.comment("Release Database Lock");
                 database.rollback();
                 SqlStatement unlockStatement = new UnlockDatabaseChangeLogStatement();
@@ -424,7 +424,7 @@ public class StandardLockService implements LockService {
     @Override
     public DatabaseChangeLogLock[] listLocks() throws LockException {
         try {
-            if (!this.hasDatabaseChangeLogLockTable()) {
+            if (!this.isDatabaseChangeLogLockTableCreated()) {
                 return new DatabaseChangeLogLock[0];
             }
 

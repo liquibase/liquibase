@@ -129,4 +129,19 @@ public class CollectionUtil {
         return outMap;
     }
 
+    /**
+     * Find the actual key in a map, by searching the keys in the map and checking them ignoring case.
+     * @param key the key to search for, in any case
+     * @param map the map in which to search
+     * @return the properly cased key, if found, or null if not found
+     */
+    public static String findKeyInMapIgnoreCase(String key, Map<String, Object> map) {
+        for (Map.Entry<String, Object> mapEntry : map.entrySet()) {
+            String actualKey = mapEntry.getKey();
+            if (actualKey.equalsIgnoreCase(key)) {
+                return actualKey;
+            }
+        }
+        return null;
+    }
 }
