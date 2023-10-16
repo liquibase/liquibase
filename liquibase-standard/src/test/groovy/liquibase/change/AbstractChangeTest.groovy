@@ -451,7 +451,7 @@ class AbstractChangeTest extends Specification {
         ChecksumVersion.latest() | "9:d41d8cd98f00b204e9800998ecf8427e" | "9:d41d8cd98f00b204e9800998ecf8427e"
     }
 
-    @DatabaseChange(name = "exampleParamelessAbstractChange", description = "Used for the AbstractChangeTest unit test", priority = 1)
+    @DatabaseChange(name = "exampleParamlessAbstractChange", description = "Used for the AbstractChangeTest unit test", priority = 1)
     private static class ExampleParamlessAbstractChange extends AbstractChange {
 
         @Override
