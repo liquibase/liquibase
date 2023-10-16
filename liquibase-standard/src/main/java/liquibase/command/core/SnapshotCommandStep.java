@@ -108,9 +108,9 @@ public class SnapshotCommandStep extends AbstractCommandStep {
         InternalSnapshotCommandStep.logUnsupportedDatabase(database, this.getClass());
         SnapshotControl snapshotControl;
         if (commandScope.getArgumentValue(SNAPSHOT_CONTROL_ARG) == null) {
-            String types = commandScope.getArgumentValue(SNAPSHOT_TYPES_ARG);
-            if (types != null) {
-                Scope.getCurrentScope().getLog(SnapshotCommandStep.class).info(DatabaseObjectFactory.getInstance().getStandardTypes().toString());
+            String typesString = commandScope.getArgumentValue(SNAPSHOT_TYPES_ARG);
+            if (typesString != null) {
+                Class<? extends DatabaseObject>[] types = DiffCommandStep.parseSnapshotTypes(typesString);
                 snapshotControl = new SnapshotControl(database, types);
             } else {
                 snapshotControl = new SnapshotControl(database);
