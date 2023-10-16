@@ -181,8 +181,7 @@ public class Index extends AbstractDatabaseObject {
         super.load(parsedNode, resourceAccessor);
         ParsedNode columns = parsedNode.getChild(null, "columns");
         List<ParsedNode> nodes = columns.getChildren(null, "column");
-        for (int i=0; i < nodes.size(); i++) {
-            ParsedNode node = nodes.get(i);
+        for (ParsedNode node : nodes) {
             Column column = new Column();
             column.load(node, resourceAccessor);
             column.setName((String) node.getChildren(null, "name").get(0).getValue());
