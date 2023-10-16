@@ -139,7 +139,9 @@ public class StandardLockService implements LockService {
                     database.commit();
                 }
 
-                handleOldChangelogTableFormat(executor);
+                if(!(executor instanceof LoggingExecutor)) {
+                    handleOldChangelogTableFormat(executor);
+                }
                 break;
             } catch (Exception e) {
                 if (i == maxIterations - 1) {
@@ -154,6 +156,7 @@ public class StandardLockService implements LockService {
                         Thread.sleep(random.nextInt(1000));
                     } catch (InterruptedException ex) {
                         Scope.getCurrentScope().getLog(getClass()).warning("Lock table retry loop thread sleep interrupted", ex);
+                        Thread.currentThread().interrupt();
                     }
                 }
             }
@@ -162,7 +165,7 @@ public class StandardLockService implements LockService {
 
     private void handleOldChangelogTableFormat(Executor executor) throws DatabaseException {
         if (executor.updatesDatabase() && (database instanceof DerbyDatabase) && ((DerbyDatabase) database)
-                .supportsBooleanDataType() || database.getClass().isAssignableFrom(DB2Database.class) && ((DB2Database) database)
+                .supportsBooleanDataType() || DB2Database.class.isAssignableFrom( database.getClass() ) && ((DB2Database) database)
                 .supportsBooleanDataType()) {
             //check if the changelog table is of an old smallint vs. boolean format
             String lockTable = database.escapeTableName(
