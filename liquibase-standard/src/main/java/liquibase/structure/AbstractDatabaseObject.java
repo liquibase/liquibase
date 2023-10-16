@@ -22,7 +22,7 @@ import java.util.regex.Pattern;
  * DBMS. Examples for things that are represented are {@link liquibase.structure.core.Table},
  * {@link liquibase.structure.core.PrimaryKey} and {@link liquibase.structure.core.Column}.
  * <p/>
- * Core features of this class include the functionality for the attributes collection ( {@link #getAttributes()} }
+ * Core features of this class include the functionality for the attributes collection ( {@link #getAttributes()} )
  * and the ability to load an object from a serialised form {@link #load(ParsedNode, ResourceAccessor)} .
  */
 public abstract class AbstractDatabaseObject implements DatabaseObject {
