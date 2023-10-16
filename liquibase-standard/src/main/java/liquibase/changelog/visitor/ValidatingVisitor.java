@@ -1,11 +1,10 @@
 package liquibase.changelog.visitor;
 
+import liquibase.ChecksumVersion;
 import liquibase.GlobalConfiguration;
 import liquibase.Scope;
 import liquibase.change.Change;
-import liquibase.changelog.ChangeSet;
-import liquibase.changelog.DatabaseChangeLog;
-import liquibase.changelog.RanChangeSet;
+import liquibase.changelog.*;
 import liquibase.changelog.filter.ChangeSetFilterResult;
 import liquibase.database.Database;
 import liquibase.database.DatabaseList;
@@ -14,21 +13,22 @@ import liquibase.precondition.ErrorPrecondition;
 import liquibase.precondition.FailedPrecondition;
 import liquibase.precondition.core.PreconditionContainer;
 import liquibase.util.StringUtil;
+import liquibase.util.ValidatingVisitorUtil;
 
 import java.util.*;
 
 public class ValidatingVisitor implements ChangeSetVisitor {
 
-    private List<String> invalidMD5Sums = new ArrayList<>();
-    private List<FailedPrecondition> failedPreconditions = new ArrayList<>();
-    private List<ErrorPrecondition> errorPreconditions = new ArrayList<>();
-    private Set<ChangeSet> duplicateChangeSets = new HashSet<>();
-    private List<SetupException> setupExceptions = new ArrayList<>();
-    private List<Throwable> changeValidationExceptions = new ArrayList<>();
-    private ValidationErrors validationErrors = new ValidationErrors();
-    private Warnings warnings = new Warnings();
+    private final List<String> invalidMD5Sums = new ArrayList<>();
+    private final List<FailedPrecondition> failedPreconditions = new ArrayList<>();
+    private final List<ErrorPrecondition> errorPreconditions = new ArrayList<>();
+    private final Set<ChangeSet> duplicateChangeSets = new HashSet<>();
+    private final List<SetupException> setupExceptions = new ArrayList<>();
+    private final List<Throwable> changeValidationExceptions = new ArrayList<>();
+    private final ValidationErrors validationErrors = new ValidationErrors();
+    private final Warnings warnings = new Warnings();
 
-    private Set<String> seenChangeSets = new HashSet<>();
+    private final Set<String> seenChangeSets = new HashSet<>();
 
     private Map<String, RanChangeSet> ranIndex;
     private Database database;
@@ -96,6 +96,10 @@ public class ValidatingVisitor implements ChangeSetVisitor {
         
     @Override
     public void visit(ChangeSet changeSet, DatabaseChangeLog databaseChangeLog, Database database, Set<ChangeSetFilterResult> filterResults) throws LiquibaseException {
+        if (changeSet.isIgnore()) {
+            Scope.getCurrentScope().getLog(ValidatingVisitor.class).info("Not validating ignored change set '" + changeSet.toString() + "'");
+            return;
+        }
         RanChangeSet ranChangeSet = findChangeSet(changeSet);
         boolean ran = ranChangeSet != null;
         Set<String> dbmsSet = changeSet.getDbmsSet();
@@ -103,6 +107,7 @@ public class ValidatingVisitor implements ChangeSetVisitor {
             DatabaseList.validateDefinitions(changeSet.getDbmsSet(), validationErrors);
         }
         changeSet.setStoredCheckSum(ran?ranChangeSet.getLastCheckSum():null);
+        changeSet.setStoredFilePath(ran?ranChangeSet.getStoredChangeLog():null);
         boolean shouldValidate = !ran || changeSet.shouldRunOnChange() || changeSet.shouldAlwaysRun();
 
         if (!areChangeSetAttributesValid(changeSet)) {
@@ -144,11 +149,13 @@ public class ValidatingVisitor implements ChangeSetVisitor {
             }
         }
 
-        if(ranChangeSet != null){
-            if (!changeSet.isCheckSumValid(ranChangeSet.getLastCheckSum())) {
-                if (!changeSet.shouldRunOnChange()) {
-                    invalidMD5Sums.add(changeSet.toString(false)+" was: "+ranChangeSet.getLastCheckSum().toString()+" but is now: "+changeSet.generateCheckSum().toString());
-                }
+        if(ranChangeSet != null) {
+            if (!changeSet.isCheckSumValid(ranChangeSet.getLastCheckSum()) &&
+                !ValidatingVisitorUtil.isChecksumIssue(changeSet, ranChangeSet, databaseChangeLog, database) &&
+                !changeSet.shouldRunOnChange() &&
+                !changeSet.shouldAlwaysRun()) {
+                    invalidMD5Sums.add(changeSet.toString(false)+" was: "+ranChangeSet.getLastCheckSum().toString()
+                            +" but is now: "+changeSet.generateCheckSum(ChecksumVersion.enumFromChecksumVersion(ranChangeSet.getLastCheckSum().getVersion())).toString());
             }
         }
 

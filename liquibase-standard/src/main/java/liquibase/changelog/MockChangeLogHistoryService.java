@@ -31,7 +31,7 @@ public class MockChangeLogHistoryService implements ChangeLogHistoryService {
 
     @Override
     public int getPriority() {
-        return PRIORITY_DATABASE;
+        return 5;
     }
 
     @Override
@@ -61,6 +61,11 @@ public class MockChangeLogHistoryService implements ChangeLogHistoryService {
 
     @Override
     public List<RanChangeSet> getRanChangeSets() throws DatabaseException {
+        return ranChangeSets;
+    }
+
+    @Override
+    public List<RanChangeSet> getRanChangeSets(boolean a) throws DatabaseException {
         return ranChangeSets;
     }
 
@@ -127,5 +132,10 @@ public class MockChangeLogHistoryService implements ChangeLogHistoryService {
     @Override
     public void generateDeploymentId() {
 
+    }
+
+    @Override
+    public boolean isDatabaseChecksumsCompatible() {
+        return true;
     }
 }

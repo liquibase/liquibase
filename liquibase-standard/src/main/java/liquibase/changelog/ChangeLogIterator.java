@@ -22,28 +22,36 @@ import static java.util.ResourceBundle.getBundle;
 
 public class ChangeLogIterator {
 
-    protected DatabaseChangeLog databaseChangeLog;
-    protected List<ChangeSetFilter> changeSetFilters;
-    private static ResourceBundle coreBundle = getBundle("liquibase/i18n/liquibase-core");
+    protected final DatabaseChangeLog databaseChangeLog;
+    protected final List<ChangeSetFilter> changeSetFilters;
+    private static final ResourceBundle coreBundle = getBundle("liquibase/i18n/liquibase-core");
     private static final String MSG_COULD_NOT_FIND_EXECUTOR = coreBundle.getString("no.executor.found");
-    private Set<String> seenChangeSets = new HashSet<>();
+    private final Set<String> seenChangeSets = new HashSet<>();
 
     public ChangeLogIterator(DatabaseChangeLog databaseChangeLog, ChangeSetFilter... changeSetFilters) {
+        this(databaseChangeLog, Arrays.asList(changeSetFilters));
+    }
+
+    public ChangeLogIterator(DatabaseChangeLog databaseChangeLog, List<ChangeSetFilter> changeSetFilters) {
         this.databaseChangeLog = databaseChangeLog;
-        this.changeSetFilters = Arrays.asList(changeSetFilters);
+        this.changeSetFilters = changeSetFilters;
     }
 
     public ChangeLogIterator(List<RanChangeSet> changeSetList, DatabaseChangeLog changeLog, ChangeSetFilter... changeSetFilters) {
+        this(changeSetList, changeLog, Arrays.asList(changeSetFilters));
+    }
+
+    public ChangeLogIterator(List<RanChangeSet> changeSetList, DatabaseChangeLog changeLog, List<ChangeSetFilter> changeSetFilters) {
         final List<ChangeSet> changeSets = new ArrayList<>();
         for (RanChangeSet ranChangeSet : changeSetList) {
-	        final List<ChangeSet> changeSetsForRanChangeSet = changeLog.getChangeSets(ranChangeSet);
-	        for (ChangeSet changeSet : changeSetsForRanChangeSet) {
+            final List<ChangeSet> changeSetsForRanChangeSet = changeLog.getChangeSets(ranChangeSet);
+            for (ChangeSet changeSet : changeSetsForRanChangeSet) {
                 if (changeSet != null) {
                     changeSet.setFilePath(DatabaseChangeLog.normalizePath(ranChangeSet.getChangeLog()));
                     changeSet.setDeploymentId(ranChangeSet.getDeploymentId());
                     changeSets.add(changeSet);
                 }
-	        }
+            }
         }
         this.databaseChangeLog = (new DatabaseChangeLog() {
             @Override
@@ -56,7 +64,7 @@ public class ChangeLogIterator {
                 return "";
             }
         });
-        this.changeSetFilters = Arrays.asList(changeSetFilters);
+        this.changeSetFilters = changeSetFilters;
     }
 
     public void run(ChangeSetVisitor visitor, RuntimeEnvironment env) throws LiquibaseException {
@@ -88,7 +96,12 @@ public class ChangeLogIterator {
                         }
 
                         boolean finalShouldVisit = shouldVisit;
-                        Scope.child(Scope.Attr.changeSet.name(), changeSet, () -> {
+
+                        Map<String, Object> scopeValues = new HashMap<>();
+                        scopeValues.put(Scope.Attr.changeSet.name(), changeSet);
+                        scopeValues.put(Scope.Attr.database.name(), env.getTargetDatabase());
+
+                        Scope.child(scopeValues, () -> {
                             if (finalShouldVisit) {
                                 //
                                 // Go validate any changesets with an Executor if

@@ -44,6 +44,7 @@ import org.junit.Assume
 import org.junit.ComparisonFailure
 import spock.lang.Specification
 import spock.lang.Unroll
+import spock.util.environment.OperatingSystem
 
 import java.util.logging.Level
 import java.util.regex.Pattern
@@ -188,8 +189,15 @@ Long Description: ${commandDefinition.getLongDescription() ?: "NOT SET"}
         if (!foundOptional) {
             signature.println "  NONE"
         }
-        assert StringUtil.standardizeLineEndings(StringUtil.trimToEmpty(signature.toString())) ==
-               StringUtil.standardizeLineEndings(StringUtil.trimToEmpty(commandTestDefinition.signature))
+        def actualSignature = signature.toString()
+        def expectedSignature = commandTestDefinition.signature
+
+        if (expectedSignature == NOT_NULL) {
+            assert actualSignature != null: "The result is null"
+        } else {
+            assert StringUtil.standardizeLineEndings(StringUtil.trimToEmpty(actualSignature)) ==
+                    StringUtil.standardizeLineEndings(StringUtil.trimToEmpty(expectedSignature))
+        }
 
         where:
         commandTestDefinition << getCommandTestDefinitions()
@@ -223,7 +231,11 @@ Long Description: ${commandDefinition.getLongDescription() ?: "NOT SET"}
         }
 
         when:
-        final commandScope
+        if (testDef.supportedOs != null) {
+            def currentOs = OperatingSystem.getCurrent()
+            Assume.assumeTrue("The current operating system (" + currentOs.name + ") does not support this test.", testDef.supportedOs.contains(currentOs))
+        }
+        def commandScope
         try {
             commandScope = new CommandScope(testDef.commandTestDefinition.command as String[])
         }
@@ -375,6 +387,11 @@ Long Description: ${commandDefinition.getLongDescription() ?: "NOT SET"}
                 checkFileContent(testDef.expectedFileContent, "Command File Content")
                 checkDatabaseContent(testDef.expectedDatabaseContent, database, "Database snapshot content")
 
+                if (!testDef.expectedResult.isEmpty()) {
+                    def entrySet = testDef.expectedResult.entrySet()
+                    def oneEntry = entrySet.iterator().next()
+                    assert results.getResult(oneEntry.getKey()) == oneEntry.getValue()
+                }
                 if (!testDef.expectedResults.isEmpty()) {
                     for (def returnedResult : results.getResults().entrySet()) {
                         def expectedResult = testDef.expectedResults.get(returnedResult.getKey())
@@ -556,7 +573,7 @@ Long Description: ${commandDefinition.getLongDescription() ?: "NOT SET"}
     }
 
     private static File takeDatabaseSnapshot(Database database, String format) {
-        final ChangeLogHistoryService changeLogService = ChangeLogHistoryServiceFactory.getInstance().getChangeLogService(database)
+        final ChangeLogHistoryService changeLogService = Scope.getCurrentScope().getSingleton(ChangeLogHistoryServiceFactory.class).getChangeLogService(database)
         changeLogService.init()
         changeLogService.reset()
 
@@ -621,7 +638,9 @@ Long Description: ${commandDefinition.getLongDescription() ?: "NOT SET"}
                 } else if (expectedOutputCheck instanceof Pattern) {
                     def matcher = expectedOutputCheck.matcher(fullOutput)
                     assert matcher.groupCount() == 0: "Unescaped parentheses in regexp /$expectedOutputCheck/"
-                    assert matcher.find(): "$outputDescription\n$fullOutput\n\nDoes not match regexp\n\n/$expectedOutputCheck/"
+                    if (!matcher.find()) {
+                        throw new ComparisonFailure("$outputDescription\n$fullOutput\n\nDoes not match regexp\n\n/$expectedOutputCheck/", expectedOutputCheck.toString(), fullOutput)
+                    }
                 } else if (expectedOutputCheck instanceof OutputCheck) {
                     try {
                         ((OutputCheck) expectedOutputCheck).check(fullOutput)
@@ -806,6 +825,7 @@ Long Description: ${commandDefinition.getLongDescription() ?: "NOT SET"}
         private Map<String, ?> globalArguments = new HashMap<>()
 
         private String searchPath
+        private ArrayList<OperatingSystem> supportedOs
 
         /**
          * Arguments to command as key/value pairs
@@ -834,10 +854,15 @@ Long Description: ${commandDefinition.getLongDescription() ?: "NOT SET"}
         private File outputFile
 
         private Map<String, ?> expectedResults = new HashMap<>()
+        private Map<String, ?> expectedResult = new HashMap<>()
         private Class<Throwable> expectedException
         private Object expectedExceptionMessage
         private File expectFileToExist
         private File expectFileToNotExist
+
+        def setExpectedResult(Map<String, ?> expectedResult) {
+            this.expectedResult = expectedResult
+        }
 
         def setup(@DelegatesTo(TestSetupDefinition) Closure closure) {
             def setupDef = new TestSetupDefinition()
@@ -878,6 +903,10 @@ Long Description: ${commandDefinition.getLongDescription() ?: "NOT SET"}
 
         def setSearchPath(String searchPath) {
             this.searchPath = searchPath
+        }
+
+        def setSupportedOs(ArrayList<OperatingSystem> supportedOs) {
+            this.supportedOs = supportedOs;
         }
 
         def setExpectedFileContent(Map<String, Object> content) {
@@ -1111,17 +1140,7 @@ Long Description: ${commandDefinition.getLongDescription() ?: "NOT SET"}
         }
 
         void copyResource(String originalFile, String newFile, boolean writeInTargetTestClasses) {
-            URL url = Thread.currentThread().getContextClassLoader().getResource(originalFile)
-            File f = new File(url.toURI())
-            String contents = FileUtil.getContents(f)
-            File outputFile
-            if (writeInTargetTestClasses) {
-                outputFile = new File("target/test-classes", newFile)
-            } else {
-                outputFile = new File(newFile)
-            }
-            FileUtil.write(contents, outputFile)
-            println "Copied file " + originalFile + " to file " + newFile
+            this.setups.add(new SetupCreateTempResources(originalFile, newFile, writeInTargetTestClasses ? "target/test-classes" : "."))
         }
 
         /**

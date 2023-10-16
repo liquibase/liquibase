@@ -4,6 +4,7 @@ import liquibase.changelog.ChangeSet
 import liquibase.database.jvm.JdbcConnection
 import liquibase.exception.LiquibaseException
 import liquibase.resource.ClassLoaderResourceAccessor
+import spock.lang.Ignore
 import spock.lang.Specification
 
 import java.sql.*

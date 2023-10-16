@@ -1,11 +1,9 @@
 package org.liquibase.maven.plugins;
 
-import liquibase.GlobalConfiguration;
-import liquibase.Liquibase;
-import liquibase.Scope;
-import liquibase.ThreadLocalScopeManager;
+import liquibase.*;
 import liquibase.changelog.visitor.ChangeExecListener;
 import liquibase.changelog.visitor.DefaultChangeExecListener;
+import liquibase.command.core.helpers.DbUrlConnectionCommandStep;
 import liquibase.configuration.LiquibaseConfiguration;
 import liquibase.configuration.core.DefaultsFileValueProvider;
 import liquibase.database.Database;
@@ -32,6 +30,7 @@ import org.apache.maven.plugin.MojoFailureException;
 import org.apache.maven.plugin.descriptor.MojoDescriptor;
 import org.apache.maven.plugin.descriptor.Parameter;
 import org.apache.maven.plugin.descriptor.PluginDescriptor;
+import org.apache.maven.plugin.logging.Log;
 import org.apache.maven.project.MavenProject;
 import org.apache.maven.wagon.authentication.AuthenticationInfo;
 import org.liquibase.maven.property.PropertyElement;
@@ -47,6 +46,7 @@ import java.text.MessageFormat;
 import java.util.*;
 import java.util.logging.Handler;
 
+import static java.util.ResourceBundle.getBundle;
 import static liquibase.configuration.LiquibaseConfiguration.REGISTERED_VALUE_PROVIDERS_KEY;
 
 /**
@@ -62,10 +62,17 @@ import static liquibase.configuration.LiquibaseConfiguration.REGISTERED_VALUE_PR
 @SuppressWarnings("java:S2583")
 public abstract class AbstractLiquibaseMojo extends AbstractMojo {
 
+    static {
+        // If maven is called with -T and a value larger than 1, it can get confused under heavy thread load
+        Scope.setScopeManager( new ThreadLocalScopeManager(null));
+    }
+
     /**
      * Suffix for fields that are representing a default value for a another field.
      */
     private static final String DEFAULT_FIELD_SUFFIX = "Default";
+
+    private MavenLog logCache;
 
     /**
      *
@@ -215,6 +222,30 @@ public abstract class AbstractLiquibaseMojo extends AbstractMojo {
      */
     @PropertyElement
     protected String logging;
+
+    /**
+     * Determines the minimum log level liquibase uses when logging.
+     * <p>
+     * Supported values are:
+     *
+     * <ul>
+     *     <li>DEBUG</li>
+     *     <li>INFO</li>
+     *     <li>WARNING</li>
+     *     <li>ERROR</li>
+     * </ul>
+     *
+     * The primary use case for this option is to reduce the amount of logs from liquibase, while
+     * not changing the log level of maven itself, without changing ${maven.home}/conf/logging/simplelogger.properties.
+     * <p>
+     * <b>NOTE:</b> The final log level is the <i>maximum</i> of this value and the maven log level.
+     * Thus, it is not possible to <i>decrease</i> the effective log level with this option.
+     *
+     * @parameter property="liquibase.logLevel" default-value="DEBUG"
+     */
+    @PropertyElement
+    protected String logLevel;
+
     /**
      * Specifies the <i>liquibase.properties</i> you want to use to configure Liquibase.
      *
@@ -263,6 +294,15 @@ public abstract class AbstractLiquibaseMojo extends AbstractMojo {
      */
     @PropertyElement
     protected boolean skip;
+
+    /**
+     * Skip plugin execution if the specified file exists.
+     * The use of this parameter is NOT RECOMMENDED but can be used when needed.
+     *
+     * @parameter property="liquibase.skipOnFileExists"
+     */
+    @PropertyElement
+    protected String skipOnFileExists;
 
     /**
      * A flag which indicates you want to set the character encoding of the output file during the updateSQL phase.
@@ -592,6 +632,8 @@ public abstract class AbstractLiquibaseMojo extends AbstractMojo {
 
     protected String commandName;
     protected DefaultChangeExecListener defaultChangeExecListener;
+    private static final ResourceBundle coreBundle = getBundle("liquibase/i18n/liquibase-core");
+
 
     /**
      * Get the specified license key. This first checks liquibaseLicenseKey and if no key is found, then returns
@@ -655,9 +697,20 @@ public abstract class AbstractLiquibaseMojo extends AbstractMojo {
         if (StringUtil.trimToNull(logging) != null) {
             getLog().error("The liquibase-maven-plugin now manages logging via the standard maven logging config, not the 'logging' configuration. Use the -e, -X or -q flags or see https://maven.apache.org/maven-logging.html");
         }
+        if (skip) {
+            getLog().warn("Liquibase skipped due to Maven configuration");
+            return;
+        }
 
-        // If maven is called with -T and a value larger than 1, it can get confused under heavy thread load
-        Scope.setScopeManager(new ThreadLocalScopeManager());
+        if (skipOnFileExists != null) {
+            File f = new File(skipOnFileExists);
+            if (f.exists()) {
+                getLog().warn("Liquibase skipped because file " + skipOnFileExists + " exists");
+                return;
+            }
+            getLog().warn("Liquibase NOT skipped because file " + skipOnFileExists + " does NOT exists");
+        }
+
         try {
             Scope.child(setUpLogging(), () -> {
 
@@ -675,10 +728,6 @@ public abstract class AbstractLiquibaseMojo extends AbstractMojo {
 
                 if (!LiquibaseCommandLineConfiguration.SHOULD_RUN.getCurrentValue()) {
                     getLog().info("Liquibase did not run because " + LiquibaseCommandLineConfiguration.SHOULD_RUN.getKey() + " was set to false");
-                    return;
-                }
-                if (skip) {
-                    getLog().warn("Liquibase skipped due to Maven configuration");
                     return;
                 }
 
@@ -762,6 +811,7 @@ public abstract class AbstractLiquibaseMojo extends AbstractMojo {
                                     changelogSchemaName,
                                     databaseChangeLogTableName,
                                     databaseChangeLogLockTableName);
+                            DbUrlConnectionCommandStep.logMdc(url, database);
                             liquibase = createLiquibase(database);
 
                             configureChangeLogProperties();
@@ -1128,6 +1178,8 @@ public abstract class AbstractLiquibaseMojo extends AbstractMojo {
     private void setFieldValue(Field field, String value) throws IllegalAccessException {
         if (field.getType().equals(Boolean.class) || field.getType().equals(boolean.class)) {
             field.set(this, Boolean.valueOf(value));
+        } else if (field.getType().isEnum()) {
+            field.set(this, Enum.valueOf(field.getType().asSubclass(Enum.class), value));
         } else if (field.getType().equals(File.class)) {
             field.set(this, new File(value));
         } else {
@@ -1177,5 +1229,36 @@ public abstract class AbstractLiquibaseMojo extends AbstractMojo {
         nativeProperties.computeIfAbsent("liquibase.sqlcmd.logFile", val -> sqlcmdLogFile);
         nativeProperties.computeIfAbsent("liquibase.sqlcmd.catalogName", val -> sqlcmdCatalogName);
         return nativeProperties;
+    }
+
+    @Override
+    public synchronized Log getLog() {
+        if (logCache == null) {
+            logCache = new MavenLog(super.getLog(), logLevel);
+        }
+        return logCache;
+    }
+
+    /**
+     * Returns the OutputStream based on whether there is an outputFile provided.
+     * If no outputFile parameter is provided, defaults to System.out.
+     * @param outputFile the string outputFile
+     * @return the OutputStream to use
+     * @throws LiquibaseException if we cannot create the provided outputFile
+     */
+    protected OutputStream getOutputStream(String outputFile) throws LiquibaseException {
+        if (outputFile == null) {
+            return System.out;
+        }
+        FileOutputStream fileOut;
+        try {
+            fileOut = new FileOutputStream(outputFile, false);
+        } catch (IOException e) {
+            Scope.getCurrentScope().getLog(getClass()).severe(String.format(
+                    coreBundle.getString("could.not.create.output.file"),
+                    outputFile));
+            throw new LiquibaseException(e);
+        }
+        return fileOut;
     }
 }

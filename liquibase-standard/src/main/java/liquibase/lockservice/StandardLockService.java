@@ -45,9 +45,7 @@ public class StandardLockService implements LockService {
     protected static final ResourceBundle coreBundle = getBundle("liquibase/i18n/liquibase-core");
 
     protected Database database;
-
     protected boolean hasChangeLogLock;
-
     protected Long changeLogLockPollRate;
     protected Long changeLogLockRecheckTime;
 
@@ -58,6 +56,7 @@ public class StandardLockService implements LockService {
 
 
     public StandardLockService() {
+        //Empty constructos
     }
 
     @Override
@@ -107,7 +106,7 @@ public class StandardLockService implements LockService {
         int maxIterations = 10;
         if (executor instanceof LoggingExecutor) {
             //can't / don't have to re-check
-            if (hasDatabaseChangeLogLockTable()) {
+            if (isDatabaseChangeLogLockTableCreated()) {
                 maxIterations = 0;
             } else {
                 maxIterations = 1;
@@ -115,7 +114,7 @@ public class StandardLockService implements LockService {
         }
         for (int i = 0; i < maxIterations; i++) {
             try {
-                if (!hasDatabaseChangeLogLockTable(true)) {
+                if (!isDatabaseChangeLogLockTableCreated(true)) {
                     executor.comment("Create Database Lock Table");
                     SqlStatement createLockTableStatement = new CreateDatabaseChangeLogLockTableStatement();
                     ChangelogJdbcMdcListener.execute(database, ex -> ex.execute(createLockTableStatement));
@@ -155,6 +154,7 @@ public class StandardLockService implements LockService {
                         Thread.sleep(random.nextInt(1000));
                     } catch (InterruptedException ex) {
                         Scope.getCurrentScope().getLog(getClass()).warning("Lock table retry loop thread sleep interrupted", ex);
+                        Thread.currentThread().interrupt();
                     }
                 }
             }
@@ -233,7 +233,7 @@ public class StandardLockService implements LockService {
      * Check whether the databasechangeloglock table exists in the database.
      * @param forceRecheck if true, do not use any cached information and check the actual database
      */
-    protected boolean hasDatabaseChangeLogLockTable(boolean forceRecheck) {
+    protected boolean isDatabaseChangeLogLockTableCreated(boolean forceRecheck) {
         if (forceRecheck || hasDatabaseChangeLogLockTable == null) {
             try {
                 hasDatabaseChangeLogLockTable = SnapshotGeneratorFactory.getInstance()
@@ -245,8 +245,8 @@ public class StandardLockService implements LockService {
         return hasDatabaseChangeLogLockTable;
     }
 
-    protected boolean hasDatabaseChangeLogLockTable() throws DatabaseException {
-        return hasDatabaseChangeLogLockTable(false);
+    protected boolean isDatabaseChangeLogLockTableCreated() throws DatabaseException {
+        return isDatabaseChangeLogLockTableCreated(false);
     }
 
     @Override
@@ -254,8 +254,9 @@ public class StandardLockService implements LockService {
 
         boolean locked = false;
         long timeToGiveUp = new Date().getTime() + (getChangeLogLockWaitTime() * 1000 * 60);
-        while (!locked && (new Date().getTime() < timeToGiveUp)) {
-            locked = acquireLock();
+
+        locked = acquireLock();
+        do {
             if (!locked) {
                 Scope.getCurrentScope().getLog(getClass()).info("Waiting for changelog lock....");
                 try {
@@ -265,7 +266,8 @@ public class StandardLockService implements LockService {
                     Thread.currentThread().interrupt();
                 }
             }
-        }
+            locked = acquireLock();
+        } while (!locked && (new Date().getTime() < timeToGiveUp));
 
         if (!locked) {
             DatabaseChangeLogLock[] locks = listLocks();
@@ -333,7 +335,7 @@ public class StandardLockService implements LockService {
 
                 hasChangeLogLock = true;
 
-                ChangeLogHistoryServiceFactory.getInstance().resetAll();
+                Scope.getCurrentScope().getSingleton(ChangeLogHistoryServiceFactory.class).resetAll();
                 database.setCanCacheLiquibaseTableInfo(true);
                 return true;
             }
@@ -361,7 +363,7 @@ public class StandardLockService implements LockService {
         boolean success = false;
         Executor executor = Scope.getCurrentScope().getSingleton(ExecutorService.class).getExecutor("jdbc", database);
         try {
-            if (this.hasDatabaseChangeLogLockTable()) {
+            if (this.isDatabaseChangeLogLockTableCreated()) {
                 executor.comment("Release Database Lock");
                 database.rollback();
                 SqlStatement unlockStatement = new UnlockDatabaseChangeLogStatement();
@@ -407,7 +409,7 @@ public class StandardLockService implements LockService {
 
                 database.setCanCacheLiquibaseTableInfo(false);
                 try (MdcObject releaseLocksOutcome = Scope.getCurrentScope().addMdcValue(MdcKey.RELEASE_LOCKS_OUTCOME, success ? MdcValue.COMMAND_SUCCESSFUL : MdcValue.COMMAND_FAILED)) {
-                    Scope.getCurrentScope().getLog(getClass()).log(success ? Level.INFO : Level.WARNING, success ? "Successfully released" : "Failed to release" + " change log lock", null);
+                    Scope.getCurrentScope().getLog(getClass()).log(success ? Level.INFO : Level.WARNING, (success ? "Successfully released" : "Failed to release") + " change log lock", null);
                 }
 
                 database.rollback();
@@ -422,7 +424,7 @@ public class StandardLockService implements LockService {
     @Override
     public DatabaseChangeLogLock[] listLocks() throws LockException {
         try {
-            if (!this.hasDatabaseChangeLogLockTable()) {
+            if (!this.isDatabaseChangeLogLockTableCreated()) {
                 return new DatabaseChangeLogLock[0];
             }
 
@@ -475,7 +477,7 @@ public class StandardLockService implements LockService {
         isDatabaseChangeLogLockTableInitialized = false;
 
         if (this.database != null) {
-            ChangeLogHistoryService changelogService = ChangeLogHistoryServiceFactory.getInstance().getChangeLogService(database);
+            ChangeLogHistoryService changelogService = Scope.getCurrentScope().getSingleton(ChangeLogHistoryServiceFactory.class).getChangeLogService(database);
             // On reseting the lock the changelog service has to be invalidated due to the fact that
             // some liquibase component released the lock temporarily. In this time span another JVM instance
             // might have acquired the database lock and could have applied further changesets to prevent that

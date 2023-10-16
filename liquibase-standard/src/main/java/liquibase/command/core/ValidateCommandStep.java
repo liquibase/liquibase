@@ -1,10 +1,12 @@
 package liquibase.command.core;
 
+import liquibase.Scope;
 import liquibase.changelog.DatabaseChangeLog;
-import liquibase.command.*;
-import liquibase.command.core.helpers.DatabaseChangelogCommandStep;
+import liquibase.command.AbstractCommandStep;
+import liquibase.command.CommandBuilder;
+import liquibase.command.CommandDefinition;
+import liquibase.command.CommandResultsBuilder;
 import liquibase.database.Database;
-import liquibase.exception.CommandValidationException;
 
 import java.util.Arrays;
 import java.util.List;
@@ -33,14 +35,9 @@ public class ValidateCommandStep extends AbstractCommandStep {
     }
 
     @Override
-    public void validate(CommandScope commandScope) throws CommandValidationException {
-        // Do not update checksums when running validate.
-        commandScope.addArgumentValue(DatabaseChangelogCommandStep.UPDATE_CHECKSUMS, Boolean.FALSE);
-    }
-
-    @Override
     public void run(CommandResultsBuilder resultsBuilder) throws Exception {
         // Do nothing. This is all handled in DatabaseChangelogCommandStep.
+        Scope.getCurrentScope().getUI().sendMessage(coreBundle.getString("no.validation.errors.found"));
         resultsBuilder.addResult("statusCode", 0);
     }
 }

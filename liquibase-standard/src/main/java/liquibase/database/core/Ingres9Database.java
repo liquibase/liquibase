@@ -10,6 +10,7 @@ import liquibase.structure.DatabaseObject;
 import liquibase.structure.core.Table;
 import liquibase.util.JdbcUtil;
 
+import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.Statement;
 import java.util.regex.Pattern;
@@ -22,7 +23,7 @@ public class Ingres9Database extends AbstractJdbcDatabase {
     public static final String PRODUCT_NAME = "INGRES";
 
     private static final String CREATE_VIEW_REGEX = "^CREATE\\s+.*?VIEW\\s+.*?AS\\s+";
-    private static Pattern CREATE_VIEW_AS_PATTERN = Pattern.compile(CREATE_VIEW_REGEX, Pattern.CASE_INSENSITIVE | Pattern.DOTALL);
+    private static final Pattern CREATE_VIEW_AS_PATTERN = Pattern.compile(CREATE_VIEW_REGEX, Pattern.CASE_INSENSITIVE | Pattern.DOTALL);
 
     public Ingres9Database() {
         setCurrentDateTimeFunction("date('now')");
@@ -40,15 +41,16 @@ public class Ingres9Database extends AbstractJdbcDatabase {
 
     @Override
     public String getViewDefinition(CatalogAndSchema schema, String viewName) throws DatabaseException {
-        final String sql = "select text_segment from iiviews where table_name = '" + viewName + "'";
-        Statement stmt = null;
+        final String sql = "select text_segment from iiviews where table_name = ?";
+        PreparedStatement stmt = null;
         final StringBuilder definition = new StringBuilder();
         try {
             if (getConnection() instanceof OfflineConnection) {
                 throw new DatabaseException("Cannot execute commands against an offline database");
             }
-            stmt = ((JdbcConnection) getConnection()).getUnderlyingConnection().createStatement();
-            try (ResultSet rs = stmt.executeQuery(sql)) {
+            stmt = ((JdbcConnection) getConnection()).getUnderlyingConnection().prepareStatement(sql);
+            stmt.setString(1, viewName);
+            try (ResultSet rs = stmt.executeQuery()) {
                 while (rs.next()) {
                     definition.append(rs.getString("text_segment"));
                 }

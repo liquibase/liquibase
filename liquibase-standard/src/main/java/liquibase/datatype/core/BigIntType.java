@@ -54,16 +54,15 @@ public class BigIntType extends LiquibaseDataType {
             return new DatabaseDataType("BIGINT");
         }
         if (database instanceof PostgresDatabase) {
-            if (isAutoIncrement()) {
-                if (((PostgresDatabase) database).useSerialDatatypes()) {
-                    return new DatabaseDataType("BIGSERIAL");
+            if (isAutoIncrement() && ((PostgresDatabase) database).useSerialDatatypes()) {
+                return new DatabaseDataType("BIGSERIAL");
+            } else {
+                if (GlobalConfiguration.CONVERT_DATA_TYPES.getCurrentValue() || this.getRawDefinition() == null) {
+                    DatabaseDataType type = new DatabaseDataType("BIGINT");
+                    type.addAdditionalInformation(getAdditionalInformation());
+                    return type;
                 } else {
-                    if (GlobalConfiguration.CONVERT_DATA_TYPES.getCurrentValue() || this.getRawDefinition() == null) {
-                        return new DatabaseDataType("BIGINT");
-                    } else {
-                        return new DatabaseDataType(this.getRawDefinition());
-                    }
-
+                    return new DatabaseDataType(this.getRawDefinition());
                 }
             }
         }

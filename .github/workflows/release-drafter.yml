@@ -1,0 +1,28 @@
+name: Release Drafter
+
+on:
+  workflow_dispatch:
+  #This job will be triggered when changes are pushed to the master branch, and it will also be triggered when a branch is created with a name that starts with 'refs/heads/release-'
+  push:
+    branches:
+          - master
+
+permissions:
+  contents: read
+
+jobs:
+  update_release_draft:
+    permissions:
+        # write permission is required to create a github release
+        contents: write
+        # write permission is required for autolabeler
+        # otherwise, read permission is required at least
+        pull-requests: write
+    runs-on: ubuntu-latest
+    steps:
+      - name: Draft Release
+        uses: release-drafter/release-drafter@v5
+        with:
+          config-name: release-drafter-master.yml # located in .github/ in default branch
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

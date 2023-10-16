@@ -1,6 +1,6 @@
 package liquibase.command
 
-
+import liquibase.Scope
 import liquibase.changelog.ChangeLogHistoryService
 import liquibase.changelog.ChangeLogHistoryServiceFactory
 import liquibase.changelog.ChangeSet
@@ -24,8 +24,12 @@ class InternalHistoryCommandStepTest extends Specification {
 
     Database database
 
+    ChangeLogHistoryServiceFactory changeLogHistoryServiceFactory = Scope.getCurrentScope().getSingleton(ChangeLogHistoryServiceFactory.class)
+
+    ChangeLogHistoryService changeLogHistoryService
+
     def setup() {
-        def changeLogHistoryService = Mock(ChangeLogHistoryService)
+        changeLogHistoryService = Mock(ChangeLogHistoryService)
         changeLogHistoryService.getRanChangeSets() >> [
                 new RanChangeSet("some/change/log", "some/id", "me", null, new Date(1670000000000), "", ChangeSet.ExecType.EXECUTED, "", "", null, null, "deployment-id-1"),
                 new RanChangeSet("some/change/log", "some/other/id", "me", null, new Date(1670000000000), "", ChangeSet.ExecType.EXECUTED, "", "", null, null, "deployment-id-1"),
@@ -34,10 +38,14 @@ class InternalHistoryCommandStepTest extends Specification {
         database = databaseAt("jdbc:some://url")
         changeLogHistoryService.supports(database) >> true
         changeLogHistoryService.getPriority() >> PRIORITY_DATABASE
-        ChangeLogHistoryServiceFactory.getInstance().register(changeLogHistoryService)
+        changeLogHistoryServiceFactory.register(changeLogHistoryService)
 
         historyCommand = new InternalHistoryCommandStep()
         outputStream = new ByteArrayOutputStream()
+    }
+
+    void cleanup() {
+        changeLogHistoryServiceFactory.unregister(changeLogHistoryService)
     }
 
     def "displays the history in tabular format"() {
@@ -57,19 +65,19 @@ class InternalHistoryCommandStepTest extends Specification {
         StringUtil.standardizeLineEndings(output.trim()) == StringUtil.standardizeLineEndings("""
 Liquibase History for jdbc:some://url
 
-+-----------------+-------------+-----------------+------------------+---------------+
-| Deployment ID   | Update Date | Changelog Path  | Changeset Author | Changeset ID  |
-+-----------------+-------------+-----------------+------------------+---------------+
-| deployment-id-1 | 2022        | some/change/log | me               | some/id       |
-+-----------------+-------------+-----------------+------------------+---------------+
-| deployment-id-1 | 2022        | some/change/log | me               | some/other/id |
-+-----------------+-------------+-----------------+------------------+---------------+
++-----------------+-------------+-----------------+------------------+---------------+-----+
+| Deployment ID   | Update Date | Changelog Path  | Changeset Author | Changeset ID  | Tag |
++-----------------+-------------+-----------------+------------------+---------------+-----+
+| deployment-id-1 | 2022        | some/change/log | me               | some/id       |     |
++-----------------+-------------+-----------------+------------------+---------------+-----+
+| deployment-id-1 | 2022        | some/change/log | me               | some/other/id |     |
++-----------------+-------------+-----------------+------------------+---------------+-----+
 
-+-----------------+-------------+-----------------+------------------+----------------+
-| Deployment ID   | Update Date | Changelog Path  | Changeset Author | Changeset ID   |
-+-----------------+-------------+-----------------+------------------+----------------+
-| deployment-id-2 | 2023        | some/change/log | me               | yet/another/id |
-+-----------------+-------------+-----------------+------------------+----------------+
++-----------------+-------------+-----------------+------------------+----------------+-----+
+| Deployment ID   | Update Date | Changelog Path  | Changeset Author | Changeset ID   | Tag |
++-----------------+-------------+-----------------+------------------+----------------+-----+
+| deployment-id-2 | 2023        | some/change/log | me               | yet/another/id |     |
++-----------------+-------------+-----------------+------------------+----------------+-----+
 
 """.trim())
 

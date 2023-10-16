@@ -57,7 +57,7 @@ public class LiquibaseRollbackOneUpdateMojo extends AbstractLiquibaseChangeLogMo
         // Check the Pro license
         //
         Database database = liquibase.getDatabase();
-        CommandScope liquibaseCommand = new CommandScope("internalRollbackOneUpdate");
+        CommandScope liquibaseCommand = new CommandScope("rollbackOneUpdate");
         Map<String, Object> argsMap = getCommandArgsObjectMap(liquibase);
         ChangeLogParameters clp = new ChangeLogParameters(database);
         argsMap.put("changeLogParameters", clp);

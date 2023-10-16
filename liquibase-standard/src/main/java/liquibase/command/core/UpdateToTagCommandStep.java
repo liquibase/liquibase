@@ -4,6 +4,7 @@ import liquibase.Contexts;
 import liquibase.LabelExpression;
 import liquibase.Scope;
 import liquibase.UpdateSummaryEnum;
+import liquibase.change.core.TagDatabaseChange;
 import liquibase.changelog.*;
 import liquibase.changelog.filter.*;
 import liquibase.command.*;
@@ -12,7 +13,6 @@ import liquibase.exception.DatabaseException;
 import liquibase.logging.mdc.MdcKey;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 
 public class UpdateToTagCommandStep extends AbstractUpdateCommandStep {
@@ -32,7 +32,8 @@ public class UpdateToTagCommandStep extends AbstractUpdateCommandStep {
         LABEL_FILTER_ARG = builder.argument("labelFilter", String.class)
                 .addAlias("labels")
                 .description("Changeset labels to match").build();
-        CONTEXTS_ARG = builder.argument("contexts", String.class)
+        CONTEXTS_ARG = builder.argument("contextFilter", String.class)
+                .addAlias("contexts")
                 .description("Changeset contexts to match").build();
         TAG_ARG = builder.argument("tag", String.class).required()
             .description("The tag to update to").build();
@@ -40,6 +41,15 @@ public class UpdateToTagCommandStep extends AbstractUpdateCommandStep {
                 .hidden()
                 .build();
     }
+
+    private boolean warningMessageShown = false;
+
+    @Override
+    public void run(CommandResultsBuilder resultsBuilder) throws Exception {
+        this.setFastCheckEnabled(false);
+        super.run(resultsBuilder);
+    }
+
 
     @Override
     public String[][] defineCommandNames() {
@@ -80,13 +90,36 @@ public class UpdateToTagCommandStep extends AbstractUpdateCommandStep {
     public ChangeLogIterator getStandardChangelogIterator(CommandScope commandScope, Database database, Contexts contexts, LabelExpression labelExpression, DatabaseChangeLog changeLog) throws DatabaseException {
         List<RanChangeSet> ranChangeSetList = database.getRanChangeSetList();
         String tag = commandScope.getArgumentValue(TAG_ARG);
-        return new ChangeLogIterator(changeLog,
-                new ShouldRunChangeSetFilter(database),
-                new ContextChangeSetFilter(contexts),
-                new LabelChangeSetFilter(labelExpression),
-                new DbmsChangeSetFilter(database),
-                new IgnoreChangeSetFilter(),
-                new UpToTagChangeSetFilter(tag, ranChangeSetList));
+
+        UpToTagChangeSetFilter upToTagChangeSetFilter = getUpToTagChangeSetFilter(tag, ranChangeSetList);
+        if (! warningMessageShown && ! upToTagChangeSetFilter.isSeenTag()) {
+            checkForTagExists(changeLog, tag);
+        }
+
+        List<ChangeSetFilter> changesetFilters = this.getStandardChangelogIteratorFilters(database, contexts, labelExpression);
+        changesetFilters.add(upToTagChangeSetFilter);
+        return new ChangeLogIterator(changeLog, changesetFilters.toArray(new ChangeSetFilter[0]));
+    }
+
+    private void checkForTagExists(DatabaseChangeLog changeLog, String tag) {
+        boolean found =
+            changeLog.getChangeSets().stream().anyMatch(cs ->
+                cs.getChanges().stream().anyMatch(ch ->
+                    ch instanceof TagDatabaseChange && ((TagDatabaseChange) ch).getTag().equals(tag)
+                )
+            );
+        if (! found) {
+            String message = String.format(
+                    "The tag '%s' was not found in the changelog '%s'. All changesets in the changelog were deployed.%nLearn about options for undoing these changes at https://docs.liquibase.com.",
+                    tag, changeLog.getPhysicalFilePath());
+            Scope.getCurrentScope().getLog(UpdateToTagCommandStep.class).warning(message);
+            Scope.getCurrentScope().getUI().sendMessage("WARNING:  " + message);
+            warningMessageShown = true;
+        }
+    }
+
+    private UpToTagChangeSetFilter getUpToTagChangeSetFilter(String tag, List<RanChangeSet> ranChangeSetList) {
+        return new UpToTagChangeSetFilter(tag, ranChangeSetList);
     }
 
     @Override
@@ -94,12 +127,12 @@ public class UpdateToTagCommandStep extends AbstractUpdateCommandStep {
         List<RanChangeSet> ranChangeSetList = database.getRanChangeSetList();
         String tag = commandScope.getArgumentValue(TAG_ARG);
         return new StatusChangeLogIterator(changeLog, tag,
+                getUpToTagChangeSetFilter(tag, ranChangeSetList),
                 new ShouldRunChangeSetFilter(database),
                 new ContextChangeSetFilter(contexts),
                 new LabelChangeSetFilter(labelExpression),
                 new DbmsChangeSetFilter(database),
-                new IgnoreChangeSetFilter(),
-                new UpToTagChangeSetFilter(tag, ranChangeSetList));
+                new IgnoreChangeSetFilter());
     }
 
     @Override
@@ -112,5 +145,14 @@ public class UpdateToTagCommandStep extends AbstractUpdateCommandStep {
     @Override
     protected void customMdcLogging(CommandScope commandScope) {
         Scope.getCurrentScope().addMdcValue(MdcKey.UPDATE_TO_TAG, commandScope.getArgumentValue(TAG_ARG));
+    }
+
+    @Override
+    public void postUpdateLog(int rowsAffected) {
+        if (rowsAffected > -1) {
+            Scope.getCurrentScope().getUI().sendMessage(String.format(coreBundle.getString("update.to.tag.successful.with.row.count"), rowsAffected));
+        } else {
+            Scope.getCurrentScope().getUI().sendMessage(coreBundle.getString("update.to.tag.successful"));
+        }
     }
 }

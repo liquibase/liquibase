@@ -34,16 +34,16 @@ public abstract class DatabaseSnapshot implements LiquibaseSerializable {
     public static final String ALL_CATALOGS_STRING_SCRATCH_KEY = "DatabaseSnapshot.allCatalogsString";
 
     private final DatabaseObject[] originalExamples;
-    private HashSet<String> serializableFields;
-    private SnapshotControl snapshotControl;
-    private Database database;
-    private DatabaseObjectCollection allFound;
-    private DatabaseObjectCollection referencedObjects;
-    private Map<Class<? extends DatabaseObject>, Set<DatabaseObject>> knownNull = new ConcurrentHashMap<>();
+    private final HashSet<String> serializableFields;
+    private final SnapshotControl snapshotControl;
+    private final Database database;
+    private final DatabaseObjectCollection allFound;
+    private final DatabaseObjectCollection referencedObjects;
+    private final Map<Class<? extends DatabaseObject>, Set<DatabaseObject>> knownNull = new ConcurrentHashMap<>();
 
-    private Map<String, Object> snapshotScratchPad = new ConcurrentHashMap<>();
+    private final Map<String, Object> snapshotScratchPad = new ConcurrentHashMap<>();
 
-    private Map<String, ResultSetCache> resultSetCaches = new ConcurrentHashMap<>();
+    private final Map<String, ResultSetCache> resultSetCaches = new ConcurrentHashMap<>();
     private CompareControl.SchemaComparison[] schemaComparisons;
 
     private Map<String, Object> metadata = new ConcurrentHashMap<>();

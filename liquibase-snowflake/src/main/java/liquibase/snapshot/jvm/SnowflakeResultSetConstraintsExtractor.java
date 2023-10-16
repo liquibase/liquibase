@@ -14,10 +14,10 @@ import java.util.List;
 
 public class SnowflakeResultSetConstraintsExtractor extends ResultSetCacheSnowflake.SingleResultSetExtractor {
 
-    private Database database;
-    private String catalogName;
-    private String schemaName;
-    private String tableName;
+    private final Database database;
+    private final String catalogName;
+    private final String schemaName;
+    private final String tableName;
 
     public SnowflakeResultSetConstraintsExtractor(DatabaseSnapshot databaseSnapshot, String catalogName, String schemaName,
                                                   String tableName) {
@@ -49,10 +49,9 @@ public class SnowflakeResultSetConstraintsExtractor extends ResultSetCacheSnowfl
         CatalogAndSchema catalogAndSchema = new CatalogAndSchema(this.catalogName, this.schemaName)
                 .customize(this.database);
 
-        return executeAndExtract(
+        return executeAndExtract(this.database,
                 createSql(((AbstractJdbcDatabase) this.database).getJdbcCatalogName(catalogAndSchema),
-                        ((AbstractJdbcDatabase) this.database).getJdbcSchemaName(catalogAndSchema), this.tableName),
-                this.database, false);
+                        ((AbstractJdbcDatabase) this.database).getJdbcSchemaName(catalogAndSchema), this.tableName));
     }
 
     @Override
@@ -60,10 +59,9 @@ public class SnowflakeResultSetConstraintsExtractor extends ResultSetCacheSnowfl
         CatalogAndSchema catalogAndSchema = new CatalogAndSchema(this.catalogName, this.schemaName)
                 .customize(this.database);
 
-        return executeAndExtract(
+        return executeAndExtract(this.database,
                 createSql(((AbstractJdbcDatabase) this.database).getJdbcCatalogName(catalogAndSchema),
-                        ((AbstractJdbcDatabase) this.database).getJdbcSchemaName(catalogAndSchema), null),
-                this.database);
+                        ((AbstractJdbcDatabase) this.database).getJdbcSchemaName(catalogAndSchema), null));
     }
 
     private String createSql(String catalog, String schema, String table) {
@@ -81,5 +79,4 @@ public class SnowflakeResultSetConstraintsExtractor extends ResultSetCacheSnowfl
 
         return sql;
     }
-
 }

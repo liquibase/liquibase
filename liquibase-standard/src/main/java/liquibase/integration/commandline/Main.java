@@ -12,6 +12,7 @@ import liquibase.configuration.ConfiguredValue;
 import liquibase.configuration.LiquibaseConfiguration;
 import liquibase.configuration.core.DeprecatedConfigurationValueProvider;
 import liquibase.database.Database;
+import liquibase.database.jvm.JdbcConnection;
 import liquibase.exception.*;
 import liquibase.integration.IntegrationDetails;
 import liquibase.io.WriterOutputStream;
@@ -71,7 +72,7 @@ public class Main {
 
     private static final String ERRORMSG_UNEXPECTED_PARAMETERS = "unexpected.command.parameters";
     private static final Logger LOG = Scope.getCurrentScope().getLog(Main.class);
-    private static ResourceBundle coreBundle = getBundle("liquibase/i18n/liquibase-core");
+    private static final ResourceBundle coreBundle = getBundle("liquibase/i18n/liquibase-core");
 
     protected ClassLoader classLoader;
     protected String driver;
@@ -129,7 +130,8 @@ public class Main {
     protected String schemas;
     protected String snapshotFormat;
     protected String liquibaseProLicenseKey;
-    private boolean outputsLogMessages = false;
+    private static final Boolean managingLogConfig = null;
+    private static final boolean outputsLogMessages = false;
     protected String sqlFile;
     protected String delimiter;
     protected String rollbackScript;
@@ -971,19 +973,7 @@ public class Main {
             return;
         }
 
-        final int CHANGESET_MINIMUM_IDENTIFIER_PARTS = 3;
-
-        if (COMMANDS.CALCULATE_CHECKSUM.equalsIgnoreCase(command)) {
-            for (final String param : commandParams) {
-                if ((param != null) && !param.startsWith("-")) {
-                    final String[] parts = param.split("::");
-                    if (parts.length < CHANGESET_MINIMUM_IDENTIFIER_PARTS) {
-                        messages.add(coreBundle.getString("changeset.identifier.must.have.form.filepath.id.author"));
-                        break;
-                    }
-                }
-            }
-        } else if (COMMANDS.DIFF_CHANGELOG.equalsIgnoreCase(command) && (diffTypes != null) && diffTypes.toLowerCase
+       if (COMMANDS.DIFF_CHANGELOG.equalsIgnoreCase(command) && (diffTypes != null) && diffTypes.toLowerCase
                 ().contains("data")) {
             messages.add(String.format(coreBundle.getString("including.data.diffchangelog.has.no.effect"),
                     OPTIONS.DIFF_TYPES, COMMANDS.GENERATE_CHANGELOG
@@ -1397,7 +1387,7 @@ public class Main {
         final ResourceAccessor fileOpener = this.getFileOpenerResourceAccessor();
 
         if (COMMANDS.DIFF.equalsIgnoreCase(command) || COMMANDS.DIFF_CHANGELOG.equalsIgnoreCase(command)
-            || COMMANDS.GENERATE_CHANGELOG.equalsIgnoreCase(command) || COMMANDS.UPDATE.equalsIgnoreCase(command)
+            || COMMANDS.GENERATE_CHANGELOG.equalsIgnoreCase(command)
             || COMMANDS.RELEASE_LOCKS.equalsIgnoreCase(command)
             || COMMANDS.ROLLBACK.equalsIgnoreCase(command) || COMMANDS.ROLLBACK_SQL.equalsIgnoreCase(command)) {
             this.runUsingCommandFramework();
@@ -1412,7 +1402,7 @@ public class Main {
                     this.databaseClass, this.driverPropertiesFile, this.propertyProviderClass,
                     this.liquibaseCatalogName, this.liquibaseSchemaName, this.databaseChangeLogTableName,
                     this.databaseChangeLogLockTableName);
-            Scope.getCurrentScope().addMdcValue(MdcKey.LIQUIBASE_TARGET_URL, this.url);
+            Scope.getCurrentScope().addMdcValue(MdcKey.LIQUIBASE_TARGET_URL, JdbcConnection.sanitizeUrl(this.url));
             Scope.getCurrentScope().addMdcValue(MdcKey.LIQUIBASE_CATALOG_NAME, database.getLiquibaseCatalogName());
             Scope.getCurrentScope().addMdcValue(MdcKey.LIQUIBASE_SCHEMA_NAME, database.getLiquibaseSchemaName());
             if (this.databaseChangeLogTablespaceName != null) {
@@ -1477,47 +1467,6 @@ public class Main {
                 String tag = commandParams.iterator().next();
                 liquibase.tagExists(tag);
                 return;
-            } else if (COMMANDS.ROLLBACK_ONE_CHANGE_SET.equalsIgnoreCase(command)) {
-                Map<String, Object> argsMap = new HashMap<>();
-                loadChangeSetInfoToMap(argsMap);
-                argsMap.put("changeLogFile", changeLogFile);
-                String internalCommand = "internalRollbackOneChangeSet";
-                Scope.getCurrentScope().addMdcValue(MdcKey.LIQUIBASE_INTERNAL_COMMAND, internalCommand);
-                CommandScope liquibaseCommand = createLiquibaseCommand(database, liquibase, internalCommand, argsMap);
-                liquibaseCommand.execute();
-                return;
-            } else if (COMMANDS.ROLLBACK_ONE_CHANGE_SET_SQL.equalsIgnoreCase(command)) {
-                Writer outputWriter = getOutputWriter();
-                Map<String, Object> argsMap = new HashMap<>();
-                loadChangeSetInfoToMap(argsMap);
-                argsMap.put("changeLogFile", changeLogFile);
-                argsMap.put("outputWriter", outputWriter);
-                argsMap.put("force", Boolean.TRUE);
-                String internalCommand = "internalRollbackOneChangeSetSQL";
-                Scope.getCurrentScope().addMdcValue(MdcKey.LIQUIBASE_INTERNAL_COMMAND, internalCommand);
-                CommandScope liquibaseCommand = createLiquibaseCommand(database, liquibase, internalCommand, argsMap);
-                liquibaseCommand.execute();
-                return;
-            } else if (COMMANDS.ROLLBACK_ONE_UPDATE.equalsIgnoreCase(command)) {
-                Map<String, Object> argsMap = new HashMap<>();
-                argsMap.put("changeLogFile", changeLogFile);
-                argsMap.put("deploymentId", getCommandParam(OPTIONS.DEPLOYMENT_ID, null));
-                String internalCommand = "internalRollbackOneUpdate";
-                Scope.getCurrentScope().addMdcValue(MdcKey.LIQUIBASE_INTERNAL_COMMAND, internalCommand);
-                CommandScope liquibaseCommand = createLiquibaseCommand(database, liquibase, internalCommand, argsMap);
-                liquibaseCommand.execute();
-                return;
-            } else if (COMMANDS.ROLLBACK_ONE_UPDATE_SQL.equalsIgnoreCase(command)) {
-                Writer outputWriter = getOutputWriter();
-                Map<String, Object> argsMap = new HashMap<>();
-                argsMap.put("deploymentId", getCommandParam(OPTIONS.DEPLOYMENT_ID, null));
-                argsMap.put("force", Boolean.TRUE);
-                argsMap.put("outputWriter", outputWriter);
-                String internalCommand = "internalRollbackOneUpdateSQL";
-                Scope.getCurrentScope().addMdcValue(MdcKey.LIQUIBASE_INTERNAL_COMMAND, internalCommand);
-                CommandScope liquibaseCommand = createLiquibaseCommand(database, liquibase, internalCommand, argsMap);
-                liquibaseCommand.execute();
-                return;
             } else if (COMMANDS.DROP_ALL.equalsIgnoreCase(command)) {
                 CommandScope dropAllCommand = new CommandScope("dropAll");
                 dropAllCommand
@@ -1552,7 +1501,17 @@ public class Main {
                 liquibase.clearCheckSums();
                 return;
             } else if (COMMANDS.CALCULATE_CHECKSUM.equalsIgnoreCase(command)) {
-                liquibase.calculateCheckSum(commandParams.iterator().next());
+                CommandScope calculateChecksumCommand = new CommandScope("calculateChecksum");
+
+                calculateChecksumCommand
+                        .addArgumentValue(DbUrlConnectionCommandStep.DATABASE_ARG, database)
+                        .addArgumentValue(CalculateChecksumCommandStep.CHANGESET_PATH_ARG, getCommandParam(OPTIONS.CHANGE_SET_PATH, null))
+                        .addArgumentValue(CalculateChecksumCommandStep.CHANGESET_ID_ARG, getCommandParam(OPTIONS.CHANGE_SET_ID, null))
+                        .addArgumentValue(CalculateChecksumCommandStep.CHANGESET_AUTHOR_ARG, getCommandParam(OPTIONS.CHANGE_SET_AUTHOR, null))
+                        .addArgumentValue(CalculateChecksumCommandStep.CHANGESET_IDENTIFIER_ARG, getCommandParam(OPTIONS.CHANGE_SET_IDENTIFIER, null))
+                        .addArgumentValue(CalculateChecksumCommandStep.CHANGELOG_FILE_ARG, this.changeLogFile);
+
+                calculateChecksumCommand.execute();
                 return;
             } else if (COMMANDS.DB_DOC.equalsIgnoreCase(command)) {
                 if (commandParams.isEmpty()) {
@@ -1602,6 +1561,8 @@ public class Main {
                     } catch (LiquibaseException updateException) {
                         handleUpdateException(database, updateException, defaultChangeExecListener, rollbackOnError);
                     }
+                } else if (COMMANDS.UPDATE.equalsIgnoreCase(command)) {
+                    liquibase.update(new Contexts(contexts), new LabelExpression(getLabelFilter()));
                 } else if (COMMANDS.UPDATE_COUNT_SQL.equalsIgnoreCase(command)) {
                     liquibase.update(Integer.parseInt(commandParams.iterator().next()), new Contexts(contexts), new
                             LabelExpression(getLabelFilter()), getOutputWriter());
@@ -1693,6 +1654,7 @@ public class Main {
                 } else if (COMMANDS.HISTORY.equalsIgnoreCase(command)) {
                     CommandScope historyCommand = new CommandScope("internalHistory");
                     historyCommand.addArgumentValue(InternalHistoryCommandStep.DATABASE_ARG, database);
+                    historyCommand.addArgumentValue(InternalHistoryCommandStep.FORMAT_ARG, HistoryFormat.valueOf(format));
                     historyCommand.setOutput(getOutputStream());
 
                     historyCommand.execute();
@@ -1737,6 +1699,14 @@ public class Main {
             runRollbackSqlCommand();
         } else if (COMMANDS.EXECUTE_SQL.equalsIgnoreCase(command)) {
             runExecuteSqlCommand();
+        } else if (COMMANDS.ROLLBACK_ONE_CHANGE_SET.equalsIgnoreCase(command)) {
+            runRollbackOneChangeSetCommandStep();
+        } else if (COMMANDS.ROLLBACK_ONE_CHANGE_SET_SQL.equalsIgnoreCase(command)) {
+            runRollbackOneChangeSetSqlCommandStep();
+        } else if (COMMANDS.ROLLBACK_ONE_UPDATE.equalsIgnoreCase(command)) {
+            runRollbackOneUpdateCommandStep();
+        } else if (COMMANDS.ROLLBACK_ONE_UPDATE_SQL.equalsIgnoreCase(command)) {
+            runRollbackOneUpdateSqlCommandStep();
         }
     }
 
@@ -1829,6 +1799,64 @@ public class Main {
         updateCommand.addArgumentValue(ChangeExecListenerCommandStep.CHANGE_EXEC_LISTENER_PROPERTIES_FILE_ARG, changeExecListenerPropertiesFile);
         setDatabaseArgumentsToCommand(updateCommand);
         updateCommand.execute();
+    }
+
+    private void runRollbackOneChangeSetCommandStep() throws CommandExecutionException, CommandLineParsingException {
+        CommandScope rollbackOneChangeSet = new CommandScope("rollbackOneChangeset");
+        setDatabaseArgumentsToCommand(rollbackOneChangeSet);
+        rollbackOneChangeSet.addArgumentValue(ChangeExecListenerCommandStep.CHANGE_EXEC_LISTENER_CLASS_ARG, changeExecListenerClass)
+                .addArgumentValue(ChangeExecListenerCommandStep.CHANGE_EXEC_LISTENER_PROPERTIES_FILE_ARG, changeExecListenerPropertiesFile)
+                .addArgumentValue(DatabaseChangelogCommandStep.CHANGELOG_FILE_ARG, changeLogFile)
+                .addArgumentValue("changesetId", getCommandParam(OPTIONS.CHANGE_SET_ID, null))
+                .addArgumentValue("changesetAuthor", getCommandParam(OPTIONS.CHANGE_SET_AUTHOR, null))
+                .addArgumentValue("changesetPath", getCommandParam(OPTIONS.CHANGE_SET_PATH, null))
+                .addArgumentValue("force", getCommandParam(OPTIONS.FORCE, null));
+        String internalCommand = "rollbackOneChangeset";
+        Scope.getCurrentScope().addMdcValue(MdcKey.LIQUIBASE_INTERNAL_COMMAND, internalCommand);
+        rollbackOneChangeSet.execute();
+    }
+
+    private void runRollbackOneChangeSetSqlCommandStep() throws CommandExecutionException, CommandLineParsingException, IOException {
+        CommandScope rollbackOneChangeSet = new CommandScope("rollbackOneChangesetSql");
+        setDatabaseArgumentsToCommand(rollbackOneChangeSet);
+        rollbackOneChangeSet.addArgumentValue(ChangeExecListenerCommandStep.CHANGE_EXEC_LISTENER_CLASS_ARG, changeExecListenerClass)
+                .addArgumentValue(ChangeExecListenerCommandStep.CHANGE_EXEC_LISTENER_PROPERTIES_FILE_ARG, changeExecListenerPropertiesFile)
+                .addArgumentValue(DatabaseChangelogCommandStep.CHANGELOG_FILE_ARG, changeLogFile)
+                .addArgumentValue("changesetId", getCommandParam(OPTIONS.CHANGE_SET_ID, null))
+                .addArgumentValue("changesetAuthor", getCommandParam(OPTIONS.CHANGE_SET_AUTHOR, null))
+                .addArgumentValue("changesetPath", getCommandParam(OPTIONS.CHANGE_SET_PATH, null))
+                .addArgumentValue("force", getCommandParam(OPTIONS.FORCE, null));
+        String internalCommand = "rollbackOneChangeset";
+        Scope.getCurrentScope().addMdcValue(MdcKey.LIQUIBASE_INTERNAL_COMMAND, internalCommand);
+        rollbackOneChangeSet.setOutput(new WriterOutputStream(getOutputWriter(), GlobalConfiguration.OUTPUT_FILE_ENCODING.getCurrentValue()));
+        rollbackOneChangeSet.execute();
+    }
+
+    private void runRollbackOneUpdateCommandStep() throws CommandExecutionException, CommandLineParsingException {
+        CommandScope rollbackOneUpdate = new CommandScope("rollbackOneUpdate");
+        setDatabaseArgumentsToCommand(rollbackOneUpdate);
+        rollbackOneUpdate.addArgumentValue(ChangeExecListenerCommandStep.CHANGE_EXEC_LISTENER_CLASS_ARG, changeExecListenerClass)
+                .addArgumentValue(ChangeExecListenerCommandStep.CHANGE_EXEC_LISTENER_PROPERTIES_FILE_ARG, changeExecListenerPropertiesFile)
+                .addArgumentValue(DatabaseChangelogCommandStep.CHANGELOG_FILE_ARG, changeLogFile)
+                .addArgumentValue("deploymentId", getCommandParam(OPTIONS.DEPLOYMENT_ID, null))
+                .addArgumentValue("force", getCommandParam(OPTIONS.FORCE, null));
+        String internalCommand = "rollbackOneUpdate";
+        Scope.getCurrentScope().addMdcValue(MdcKey.LIQUIBASE_INTERNAL_COMMAND, internalCommand);
+        rollbackOneUpdate.execute();
+    }
+
+    private void runRollbackOneUpdateSqlCommandStep() throws CommandExecutionException, CommandLineParsingException, IOException {
+        CommandScope rollbackOneUpdate = new CommandScope("rollbackOneUpdateSql");
+        setDatabaseArgumentsToCommand(rollbackOneUpdate);
+        rollbackOneUpdate.addArgumentValue(ChangeExecListenerCommandStep.CHANGE_EXEC_LISTENER_CLASS_ARG, changeExecListenerClass)
+                .addArgumentValue(ChangeExecListenerCommandStep.CHANGE_EXEC_LISTENER_PROPERTIES_FILE_ARG, changeExecListenerPropertiesFile)
+                .addArgumentValue(DatabaseChangelogCommandStep.CHANGELOG_FILE_ARG, changeLogFile)
+                .addArgumentValue("deploymentId", getCommandParam(OPTIONS.DEPLOYMENT_ID, null))
+                .addArgumentValue("force", getCommandParam(OPTIONS.FORCE, null));
+        String internalCommand = "rollbackOneUpdate";
+        Scope.getCurrentScope().addMdcValue(MdcKey.LIQUIBASE_INTERNAL_COMMAND, internalCommand);
+        rollbackOneUpdate.setOutput(new WriterOutputStream(getOutputWriter(), GlobalConfiguration.OUTPUT_FILE_ENCODING.getCurrentValue()));
+        rollbackOneUpdate.execute();
     }
 
     /**
@@ -2155,6 +2183,8 @@ public class Main {
         private static final String CHANGELOG_FILE = "changeLogFile";
         private static final String DATA_OUTPUT_DIRECTORY = "dataOutputDirectory";
         private static final String DIFF_TYPES = "diffTypes";
+
+        public static final String CHANGE_SET_IDENTIFIER = "changeSetIdentifier";
         private static final String CHANGE_SET_ID = "changeSetId";
         private static final String CHANGE_SET_AUTHOR = "changeSetAuthor";
         private static final String CHANGE_SET_PATH = "changeSetPath";

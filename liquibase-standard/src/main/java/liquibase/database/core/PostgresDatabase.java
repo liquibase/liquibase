@@ -29,7 +29,7 @@ import java.util.*;
  * Encapsulates PostgreSQL database support.
  */
 public class PostgresDatabase extends AbstractJdbcDatabase {
-    private String dbFullVersion = null;
+    private static final String dbFullVersion = null;
     public static final String PRODUCT_NAME = "PostgreSQL";
     public static final int MINIMUM_DBMS_MAJOR_VERSION = 9;
     public static final int MINIMUM_DBMS_MINOR_VERSION = 2;
@@ -49,9 +49,9 @@ public class PostgresDatabase extends AbstractJdbcDatabase {
     private static final int PGSQL_DEFAULT_TCP_PORT_NUMBER = 5432;
     private static final Logger LOG = Scope.getCurrentScope().getLog(PostgresDatabase.class);
 
-    private Set<String> systemTablesAndViews = new HashSet<>();
+    private final Set<String> systemTablesAndViews = new HashSet<>();
 
-    private Set<String> reservedWords = new HashSet<>();
+    private final Set<String> reservedWords = new HashSet<>();
 
     public PostgresDatabase() {
         super.setCurrentDateTimeFunction("NOW()");
@@ -402,5 +402,13 @@ public class PostgresDatabase extends AbstractJdbcDatabase {
 
         //Rollback in postgresql resets the search path. Need to put it back to the defaults
         DatabaseUtils.initializeDatabase(getDefaultCatalogName(), getDefaultSchemaName(), this);
+    }
+
+    @Override
+    public void setDefaultCatalogName(String defaultCatalogName) {
+        if (StringUtil.isNotEmpty(defaultCatalogName)) {
+            Scope.getCurrentScope().getUI().sendMessage("WARNING: Postgres does not support catalogs, so the values set in 'defaultCatalogName' and 'referenceDefaultCatalogName' will be ignored.");
+        }
+        super.setDefaultCatalogName(defaultCatalogName);
     }
 }

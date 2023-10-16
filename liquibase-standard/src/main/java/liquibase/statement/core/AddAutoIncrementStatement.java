@@ -6,15 +6,15 @@ import java.math.BigInteger;
 
 public class AddAutoIncrementStatement extends AbstractSqlStatement {
 
-    private String catalogName;
-    private String schemaName;
-    private String tableName;
-    private String columnName;
-    private String columnDataType;
-    private BigInteger startWith;
-    private BigInteger incrementBy;
-    private Boolean defaultOnNull;
-    private String generationType;
+    private final String catalogName;
+    private final String schemaName;
+    private final String tableName;
+    private final String columnName;
+    private final String columnDataType;
+    private final BigInteger startWith;
+    private final BigInteger incrementBy;
+    private final Boolean defaultOnNull;
+    private final String generationType;
 
     public AddAutoIncrementStatement(
             String catalogName,

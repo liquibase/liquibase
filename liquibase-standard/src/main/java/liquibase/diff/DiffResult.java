@@ -16,17 +16,17 @@ import java.util.*;
 
 public class DiffResult {
 
-    private DatabaseSnapshot referenceSnapshot;
-    private DatabaseSnapshot comparisonSnapshot;
+    private final DatabaseSnapshot referenceSnapshot;
+    private final DatabaseSnapshot comparisonSnapshot;
 
-    private CompareControl compareControl;
+    private final CompareControl compareControl;
 
     private StringDiff productNameDiff;
     private StringDiff productVersionDiff;
 
-    private Set<DatabaseObject> missingObjects = new HashSet<>();
-    private Set<DatabaseObject> unexpectedObjects = new HashSet<>();
-    private Map<DatabaseObject, ObjectDifferences> changedObjects = new HashMap<>();
+    private final Set<DatabaseObject> missingObjects = new HashSet<>();
+    private final Set<DatabaseObject> unexpectedObjects = new HashSet<>();
+    private final Map<DatabaseObject, ObjectDifferences> changedObjects = new HashMap<>();
 
 
     public DiffResult(DatabaseSnapshot referenceDatabaseSnapshot, DatabaseSnapshot comparisonDatabaseSnapshot, CompareControl compareControl) {
@@ -69,10 +69,10 @@ public class DiffResult {
     }
 
     public <T extends DatabaseObject> Set<T> getMissingObjects(Class<T> type) {
-        Set returnSet = new HashSet();
+        Set<T> returnSet = new HashSet<>();
         for (DatabaseObject obj : missingObjects) {
             if (type.isAssignableFrom(obj.getClass())) {
-                returnSet.add(obj);
+                returnSet.add((T)obj);
             }
         }
         return returnSet;
@@ -185,7 +185,6 @@ public class DiffResult {
     }
 
     public boolean areEqual() throws DatabaseException, IOException {
-
         return missingObjects.isEmpty() && unexpectedObjects.isEmpty() && changedObjects.isEmpty();
     }
 

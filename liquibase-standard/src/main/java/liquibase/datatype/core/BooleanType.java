@@ -40,8 +40,15 @@ public class BooleanType extends LiquibaseDataType {
             if (originalDefinition.toLowerCase(Locale.US).startsWith("bit")) {
                 return new DatabaseDataType("BIT", getParameters());
             }
-            return new DatabaseDataType("BIT", 1);
+            return new DatabaseDataType("TINYINT", 1);
         } else if (database instanceof OracleDatabase) {
+            try {
+                if (database.getDatabaseMajorVersion() >= OracleDatabase.ORACLE_23C_MAJOR_VERSION) {
+                    return new DatabaseDataType("BOOLEAN");
+                }
+            } catch (DatabaseException e) {
+                Scope.getCurrentScope().getLog(getClass()).fine("Error checking database major version, assuming version <23: "+e.getMessage(), e);
+            }
             return new DatabaseDataType("NUMBER", 1);
         } else if ((database instanceof SybaseASADatabase) || (database instanceof SybaseDatabase)) {
             return new DatabaseDataType("BIT");
@@ -62,7 +69,10 @@ public class BooleanType extends LiquibaseDataType {
             if (originalDefinition.toLowerCase(Locale.US).startsWith("bit")) {
                 return new DatabaseDataType("BIT", getParameters());
             }
-    }
+        } else if (database instanceof H2Database && getParameters().length > 0) {
+          return new DatabaseDataType("BOOLEAN");
+      }
+
 
         return super.toDatabaseDataType(database);
     }
@@ -88,6 +98,8 @@ public class BooleanType extends LiquibaseDataType {
                                 .replace("\"", "")
                                 .replace("::it", "")
                         + "'::\"bit\"";
+            } else if (database instanceof SybaseASADatabase && ((String) value).startsWith("COMPUTE")) {
+                returnValue = (String) value;
             } else {
                 throw new UnexpectedLiquibaseException("Unknown boolean value: " + value);
             }

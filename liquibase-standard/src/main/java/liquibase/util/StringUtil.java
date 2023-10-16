@@ -8,6 +8,7 @@ import java.io.UnsupportedEncodingException;
 import java.nio.charset.StandardCharsets;
 import java.security.SecureRandom;
 import java.util.*;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -745,12 +746,26 @@ public class StringUtil {
     }
 
     public static class ToStringFormatter implements StringUtilFormatter {
+        private final boolean shouldLowercase;
+
+        public ToStringFormatter() {
+            this(false);
+        }
+
+        public ToStringFormatter(boolean shouldLowercase) {
+            this.shouldLowercase = shouldLowercase;
+        }
+
         @Override
         public String toString(Object obj) {
             if (obj == null) {
                 return null;
             }
-            return obj.toString();
+            String string = obj.toString();
+            if (shouldLowercase) {
+                string = string.toLowerCase();
+            }
+            return string;
         }
     }
 

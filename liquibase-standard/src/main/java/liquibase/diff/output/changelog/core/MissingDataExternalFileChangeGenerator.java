@@ -6,6 +6,7 @@ import liquibase.change.core.LoadDataChange;
 import liquibase.change.core.LoadDataColumnConfig;
 import liquibase.GlobalConfiguration;
 import liquibase.database.Database;
+import liquibase.database.core.DB2Database;
 import liquibase.database.jvm.JdbcConnection;
 import liquibase.diff.output.DiffOutputControl;
 import liquibase.diff.output.changelog.ChangeGeneratorChain;
@@ -33,7 +34,7 @@ import java.util.List;
 @LiquibaseService(skip = true)
 public class MissingDataExternalFileChangeGenerator extends MissingDataChangeGenerator {
 
-    private String dataDir;
+    private final String dataDir;
 
     public MissingDataExternalFileChangeGenerator(String dataDir) {
         this.dataDir = dataDir;
@@ -47,13 +48,22 @@ public class MissingDataExternalFileChangeGenerator extends MissingDataChangeGen
         return PRIORITY_NONE;
     }
 
+    private Statement createStatement(Database database) throws Exception {
+        if (! (database instanceof DB2Database)) {
+            Statement stmt = ((JdbcConnection) database.getConnection()).createStatement(
+                    ResultSet.TYPE_FORWARD_ONLY, ResultSet.CONCUR_READ_ONLY);
+            return stmt;
+        }
+        Statement stmt = ((JdbcConnection) database.getConnection()).createStatement();
+        return stmt;
+    }
+
     @Override
     public Change[] fixMissing(DatabaseObject missingObject, DiffOutputControl outputControl, Database referenceDatabase, Database comparisionDatabase, ChangeGeneratorChain chain) {
     
         ResultSet rs = null;
         try (
-            Statement stmt = ((JdbcConnection) referenceDatabase.getConnection()).createStatement(
-                ResultSet.TYPE_FORWARD_ONLY, ResultSet.CONCUR_READ_ONLY)
+            Statement stmt = createStatement(referenceDatabase);
         )
         {
             Data data = (Data) missingObject;
@@ -69,7 +79,7 @@ public class MissingDataExternalFileChangeGenerator extends MissingDataChangeGen
             stmt.setFetchSize(100);
             rs = stmt.executeQuery(sql);
 
-            if (rs.isBeforeFirst()) {
+            if (referenceDatabase instanceof DB2Database || rs.isBeforeFirst()) {
                 List<String> columnNames = new ArrayList<>();
                 for (int i = 0; i < rs.getMetaData().getColumnCount(); i++) {
                     columnNames.add(rs.getMetaData().getColumnName(i + 1));
@@ -99,43 +109,48 @@ public class MissingDataExternalFileChangeGenerator extends MissingDataChangeGen
                     outputFile.writeNext(line);
 
                     int rowNum = 0;
-                    while (rs.next()) {
-                        line = new String[columnNames.size()];
+                    if (rs.next()) {
+                        do {
+                            line = new String[columnNames.size()];
 
-                        for (int i = 0; i < columnNames.size(); i++) {
-                            Object value = JdbcUtil.getResultSetValue(rs, i + 1);
-                            if ((dataTypes[i] == null) && (value != null)) {
-                                if (value instanceof Number) {
-                                    dataTypes[i] = "NUMERIC";
-                                } else if (value instanceof Boolean) {
-                                    dataTypes[i] = "BOOLEAN";
-                                } else if (value instanceof Date) {
-                                    dataTypes[i] = "DATE";
-                                } else if (value instanceof byte[]) {
-                                    dataTypes[i] = "BLOB";
+                            for (int i = 0; i < columnNames.size(); i++) {
+                                Object value = JdbcUtil.getResultSetValue(rs, i + 1);
+                                if ((dataTypes[i] == null) && (value != null)) {
+                                    if (value instanceof Number) {
+                                        dataTypes[i] = "NUMERIC";
+                                    } else if (value instanceof Boolean) {
+                                        dataTypes[i] = "BOOLEAN";
+                                    } else if (value instanceof Date) {
+                                        dataTypes[i] = "DATE";
+                                    } else if (value instanceof byte[]) {
+                                        dataTypes[i] = "BLOB";
+                                    } else {
+                                        dataTypes[i] = "STRING";
+                                    }
+                                }
+                                if (value == null) {
+                                    line[i] = "NULL";
                                 } else {
-                                    dataTypes[i] = "STRING";
+                                    if (value instanceof Date) {
+                                        line[i] = new ISODateFormat().format(((Date) value));
+                                    } else if (value instanceof byte[]) {
+                                        // extract the value as a Base64 string, to safely store the
+                                        // binary data
+                                        line[i] = Base64.getEncoder().encodeToString((byte[]) value);
+                                    } else {
+                                        line[i] = value.toString();
+                                    }
                                 }
                             }
-                            if (value == null) {
-                                line[i] = "NULL";
-                            } else {
-                                if (value instanceof Date) {
-                                    line[i] = new ISODateFormat().format(((Date) value));
-                                } else if (value instanceof byte[]) {
-                                    // extract the value as a Base64 string, to safely store the
-                                    // binary data
-                                    line[i] = Base64.getEncoder().encodeToString((byte[])value);
-                                } else {
-                                    line[i] = value.toString();
-                                }
+                            outputFile.writeNext(line);
+                            rowNum++;
+                            if ((rowNum % 5000) == 0) {
+                                outputFile.flush();
                             }
-                        }
-                        outputFile.writeNext(line);
-                        rowNum++;
-                        if ((rowNum % 5000) == 0) {
-                            outputFile.flush();
-                        }
+                        } while (rs.next());
+                    }
+                    if (rowNum == 0) {
+                        return Change.EMPTY_CHANGE;
                     }
                 }
 

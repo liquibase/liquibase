@@ -44,12 +44,13 @@ public class OracleDatabase extends AbstractJdbcDatabase {
     private static final Pattern VERSION_PATTERN = Pattern.compile(VERSION_REGEX);
 
     public static final String PRODUCT_NAME = "oracle";
-    private static ResourceBundle coreBundle = getBundle("liquibase/i18n/liquibase-core");
+    private static final ResourceBundle coreBundle = getBundle("liquibase/i18n/liquibase-core");
     protected final int SHORT_IDENTIFIERS_LENGTH = 30;
     protected final int LONG_IDENTIFIERS_LEGNTH = 128;
     public static final int ORACLE_12C_MAJOR_VERSION = 12;
+    public static final int ORACLE_23C_MAJOR_VERSION = 23;
 
-    private Set<String> reservedWords = new HashSet<>();
+    private final Set<String> reservedWords = new HashSet<>();
     private Set<String> userDefinedTypes;
     private Map<String, String> savedSessionNlsSettings;
 

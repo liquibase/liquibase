@@ -18,8 +18,8 @@ import java.util.*;
 public class DiffToReport {
 
     protected DiffResult diffResult;
-    private PrintStream out;
-    private StringUtil.StringUtilFormatter formatter;
+    private final PrintStream out;
+    private final StringUtil.StringUtilFormatter formatter;
 
     public DiffToReport(DiffResult diffResult, PrintStream out) {
         this.diffResult = diffResult;
