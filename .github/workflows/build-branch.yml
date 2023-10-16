@@ -2,9 +2,9 @@ name: Build Branch SNAPSHOT
 
 on:
   #workflow_run:
-    #workflows: "Run Tests"
-    #types:
-      #- completed
+  #workflows: "Run Tests"
+  #types:
+  #- completed
 
   workflow_dispatch:
 
@@ -102,7 +102,7 @@ jobs:
       # Publish branch-SNAPSHOT version to GPM
       - name: Version Artifact
         run: |
-           mvn versions:set "-DnewVersion=${{ needs.setup.outputs.thisBranchName }}-SNAPSHOT"
+          mvn versions:set "-DnewVersion=${{ needs.setup.outputs.thisBranchName }}-SNAPSHOT"
 
       - name: Publish branch-SNAPSHOT package
         run: |
@@ -158,4 +158,3 @@ jobs:
         with:
           name: liquibase-artifacts-${{ needs.setup.outputs.thisBranchName }}
           path: artifacts-named/*
-

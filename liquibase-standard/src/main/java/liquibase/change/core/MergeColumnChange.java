@@ -182,7 +182,7 @@ public class MergeColumnChange extends AbstractChange {
                     return true;
                 }
             };
-            List<SqlStatement> workAroundStatements = null;
+            List<SqlStatement> workAroundStatements;
             try {
                 workAroundStatements = SQLiteDatabase.getAlterTableStatements(alterTableVisitor, database, getCatalogName(), getSchemaName(), getTableName());
                 statements.addAll(workAroundStatements);

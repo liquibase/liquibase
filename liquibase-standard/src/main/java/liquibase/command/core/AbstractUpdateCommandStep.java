@@ -59,12 +59,6 @@ public abstract class AbstractUpdateCommandStep extends AbstractCommandStep impl
             StringUtil.upperCaseFirst(Arrays.toString(
                getCommandName()).replace("[","").replace("]","").replace("update", "update ").trim()));
         resultsBuilder.addResult("updateReport", updateReportParameters);
-        Scope.child(Collections.singletonMap("updateReport", updateReportParameters), () -> {
-            doRun(resultsBuilder, updateReportParameters);
-        });
-    }
-
-    private void doRun(CommandResultsBuilder resultsBuilder, UpdateReportParameters updateReportParameters) throws Exception {
         CommandScope commandScope = resultsBuilder.getCommandScope();
         Database database = (Database) commandScope.getDependency(Database.class);
         updateReportParameters.getDatabaseInfo().setDatabaseType(database.getDatabaseProductName());
@@ -180,8 +174,8 @@ public abstract class AbstractUpdateCommandStep extends AbstractCommandStep impl
             int failedChangeSetCount = failedChangeSets.size();
             ChangesetsUpdated changesetsUpdated = new ChangesetsUpdated(deployedChangeSets);
             updateReportParameters.getChangesetInfo().setChangesetCount(deployedChangeSetCount + failedChangeSetCount);
-            updateReportParameters.getChangesetInfo().addAllToChangesetInfoList(deployedChangeSets);
-            updateReportParameters.getChangesetInfo().addAllToChangesetInfoList(failedChangeSets);
+            updateReportParameters.getChangesetInfo().addAllToChangesetInfoList(deployedChangeSets, false);
+            updateReportParameters.getChangesetInfo().addAllToChangesetInfoList(failedChangeSets, false);
             Scope.getCurrentScope().addMdcValue(MdcKey.DEPLOYMENT_OUTCOME_COUNT, String.valueOf(deployedChangeSetCount));
             Scope.getCurrentScope().addMdcValue(MdcKey.CHANGESETS_UPDATED, changesetsUpdated);
         }
