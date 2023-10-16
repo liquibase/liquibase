@@ -190,6 +190,19 @@ jobs:
             ]
 
 
+      - name: Set up Maven
+        uses: stCarolas/setup-maven@v4.5
+        with:
+          maven-version: ${{ env.MAVEN_VERSION }}
+
+      # Version artifact based off of branch
+      - name: Version Artifact
+        run: |
+          version=${{ needs.setup.outputs.thisBranchName }}-SNAPSHOT
+          # Replace / with - in branch name
+                  version=$(echo "$version" | sed 's/\//-/g')
+                  mvn versions:set -DnewVersion="$version"
+
       #publish_tar_package_to_build_artifact:
       - name: Build & Sign Artifacts
         env:
