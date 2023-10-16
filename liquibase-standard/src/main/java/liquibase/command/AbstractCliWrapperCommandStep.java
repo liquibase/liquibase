@@ -1,6 +1,7 @@
 package liquibase.command;
 
 import liquibase.exception.CommandExecutionException;
+import liquibase.integration.commandline.LiquibaseCommandLineConfiguration;
 import liquibase.integration.commandline.Main;
 
 import java.io.OutputStream;
@@ -70,7 +71,7 @@ public abstract class AbstractCliWrapperCommandStep extends AbstractCommandStep 
         List<String> argsList = new ArrayList<>();
         Map<String, CommandArgumentDefinition<?>> arguments = commandScope.getCommand().getArguments();
         arguments.forEach((key, value) -> {
-            if (value.getHidden()) { // This may impact tests that use the legacy Main class. Previously hidden arguments were not being hidden when executing.
+            if (value.getHidden() && !LiquibaseCommandLineConfiguration.SHOW_HIDDEN_ARGS.getCurrentValue()) { // This may impact tests that use the legacy Main class. Previously hidden arguments were not being hidden when executing.
                 return;
             }
             if (finalLegacyCommandArguments.contains(key)) {
