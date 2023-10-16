@@ -46,14 +46,11 @@
         <url>https://github.com/liquibase/liquibase/actions</url>
     </ciManagement>
 
-
     <scm>
         <connection>scm:git:git@github.com:liquibase/liquibase.git</connection>
         <url>scm:git:git@github.com:liquibase/liquibase.git</url>
         <developerConnection>scm:git:git@github.com:liquibase/liquibase.git</developerConnection>
     </scm>
-
-
 
     <properties>
         <maven.compiler.source>1.8</maven.compiler.source>
@@ -69,17 +66,26 @@
         <build.repository.owner>unknown</build.repository.owner>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
-        <sonar.moduleKey>${project.artifactId}</sonar.moduleKey>
         <trimStackTrace>false</trimStackTrace>
         <liquibase-pro.version>0-SNAPSHOT</liquibase-pro.version>
         <argLine></argLine>
-
         <ant.version>1.10.14</ant.version>
         <junit.version>4.13.2</junit.version>
         <junit-jupiter.version>5.10.0</junit-jupiter.version>
         <groovy.version>2.5.23</groovy.version>
         <spock.version>1.3-groovy-2.5</spock.version>
         <spring.version>5.3.28</spring.version>
+        <maven-failsafe-plugin.version>3.1.2</maven-failsafe-plugin.version>
+        <jacoco-maven-plugin.version>0.8.10</jacoco-maven-plugin.version>
+        <maven-surefire-plugin.version>3.1.2</maven-surefire-plugin.version>
+        <sonar.projectName>Liquibase</sonar.projectName>
+        <sonar.projectDescription>Liquibase</sonar.projectDescription>
+        <sonar.projectKey>liquibase</sonar.projectKey>
+        <sonar.moduleKey>${project.groupId}:${project.artifactId}</sonar.moduleKey>
+        <code.coverage.project.folder>${basedir}/../</code.coverage.project.folder>
+        <code.coverage.overall.data.folder>${basedir}/target/</code.coverage.overall.data.folder>      
+        <itCoverageAgent></itCoverageAgent>
+        <sonar.coverage.jacoco.xmlReportPaths>target/jacoco.xml</sonar.coverage.jacoco.xmlReportPaths>
     </properties>
 
     <!-- comment -->
@@ -370,16 +376,15 @@
 
             <plugin>
                 <artifactId>maven-surefire-plugin</artifactId>
-                <version>3.1.2</version>
+                <version>${maven-surefire-plugin.version}</version>
                 <dependencies>
                     <dependency>
                         <groupId>org.apache.maven.surefire</groupId>
                         <artifactId>surefire-junit4</artifactId>
-                        <version>3.1.2</version>
+                        <version>${maven-surefire-plugin.version}</version>
                     </dependency>
                 </dependencies>
                 <configuration>
-                    <redirectTestOutputToFile>true</redirectTestOutputToFile>
                     <argLine>-Dfile.encoding=${project.build.sourceEncoding}</argLine>
                     <includes>
                         <include>**/Test*.java</include>
@@ -389,6 +394,69 @@
                         <include>**/*Spec.java</include>
                     </includes>
                 </configuration>
+            </plugin>
+
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-failsafe-plugin</artifactId>
+                <version>${maven-failsafe-plugin.version}</version>
+                <executions>
+                    <execution>
+                        <id>integration-tests</id>
+                        <goals>
+                        <goal>verify</goal>
+                        </goals>
+                        <configuration>
+                            <includes>
+                                <include>liquibase-integration-tests/**/*Test.java</include>
+                            </includes>
+                            <reuseForks>true</reuseForks>
+                            <!-- When running as a Maven plugin, the JaCoCo agent configuration is prepared by invoking the prepare-agent
+                            or prepare-agent-integration goals, before the actual tests are run. This sets a property named argLine which
+                            points to the JaCoCo agent, later passed as a JVM argument to the test runner -->
+                            <argLine>${itCoverageAgent}</argLine>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+
+            <plugin>
+                <groupId>org.jacoco</groupId>
+                <artifactId>jacoco-maven-plugin</artifactId>
+                <version>${jacoco-maven-plugin.version}</version>
+                <executions>
+                    <execution>
+                        <id>prepare-unit-tests</id>
+                        <goals>
+                            <goal>prepare-agent</goal>
+                        </goals>
+                    </execution>
+                    <!-- prepare agent before integration tests -->
+                    <execution>
+                        <id>prepare-agent</id>
+                        <goals>
+                            <goal>prepare-agent</goal>
+                        </goals>
+                        <phase>pre-integration-test</phase>
+                        <configuration>
+                            <propertyName>itCoverageAgent</propertyName>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+            
+            <plugin>
+                <groupId>org.sonarsource.scanner.maven</groupId>
+                <artifactId>sonar-maven-plugin</artifactId>
+                <version>3.9.1.2184</version>
+                <executions>
+                    <execution>
+                        <id>sonar</id>
+                        <goals>
+                            <goal>sonar</goal>
+                        </goals>
+                    </execution>
+                </executions>
             </plugin>
 
             <plugin>
@@ -487,16 +555,6 @@
             <!--        </plugin>-->
 
         </plugins>
-        <!--        <pluginManagement>-->
-        <!--            <plugins>-->
-        <!--                <plugin>-->
-        <!--                    <groupId>org.jacoco</groupId>-->
-        <!--                    <artifactId>jacoco-maven-plugin</artifactId>-->
-        <!--                    <version>0.8.5</version>-->
-        <!--                </plugin>-->
-        <!--            </plugins>-->
-        <!--        </pluginManagement>-->
-
         <pluginManagement>
             <plugins>
                 <plugin>
@@ -528,58 +586,6 @@
                                 --add-opens java.base/java.lang=ALL-UNNAMED
                             </argLine>
                         </configuration>
-                    </plugin>
-                </plugins>
-            </build>
-        </profile>
-
-        <profile>
-            <id>sonar</id>
-            <properties>
-                <sonar.organization>liquibase</sonar.organization>
-                <sonar.projectKey>liquibase</sonar.projectKey>
-                <sonar.projectName>Liquibase</sonar.projectName>
-                <sonar.projectDescription>Liquibase</sonar.projectDescription>
-                <sonar.host.url>https://sonarcloud.io</sonar.host.url>
-                <sonar.scm.provider>git</sonar.scm.provider>
-                <sonar.qualitygate.wait>true</sonar.qualitygate.wait>
-                <sonar.skip>true</sonar.skip>
-            </properties>
-            <build>
-                <plugins>
-                    <plugin>
-                        <groupId>org.sonarsource.scanner.maven</groupId>
-                        <artifactId>sonar-maven-plugin</artifactId>
-                        <version>3.9.1.2184</version>
-                        <executions>
-                            <execution>
-                                <id>sonar</id>
-                                <goals>
-                                    <goal>sonar</goal>
-                                </goals>
-                            </execution>
-                        </executions>
-                    </plugin>
-
-                    <plugin>
-                        <groupId>org.jacoco</groupId>
-                        <artifactId>jacoco-maven-plugin</artifactId>
-                        <version>0.8.10</version>
-                        <executions>
-                            <execution>
-                                <id>prepare-agent</id>
-                                <goals>
-                                    <goal>prepare-agent</goal>
-                                </goals>
-                            </execution>
-                            <execution>
-                                <id>report</id>
-                                <phase>test</phase>
-                                <goals>
-                                    <goal>report</goal>
-                                </goals>
-                            </execution>
-                        </executions>
                     </plugin>
                 </plugins>
             </build>

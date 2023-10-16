@@ -24,6 +24,7 @@ import liquibase.logging.core.LogServiceFactory;
 import liquibase.logging.mdc.MdcKey;
 import liquibase.logging.mdc.MdcManager;
 import liquibase.logging.mdc.MdcObject;
+import liquibase.logging.mdc.customobjects.ChangesetsUpdated;
 import liquibase.logging.mdc.customobjects.Version;
 import liquibase.resource.*;
 import liquibase.ui.CompositeUIService;
@@ -354,6 +355,7 @@ public class LiquibaseCommandLine {
             });
 
             return Scope.child(Collections.singletonMap(Scope.Attr.logService.name(), newLogService), () -> {
+                addEmptyMdcValues();
                 try {
                     return Scope.child(configureScope(args), () -> {
 
@@ -416,6 +418,28 @@ public class LiquibaseCommandLine {
             return 1;
         } finally {
             cleanup();
+        }
+    }
+
+    private void addEmptyMdcValues() {
+        if (LiquibaseCommandLineConfiguration.ADD_EMPTY_MDC_VALUES.getCurrentValue()) {
+            Scope.getCurrentScope().addMdcValue(MdcKey.DEPLOYMENT_ID, "");
+            Scope.getCurrentScope().addMdcValue(MdcKey.DEPLOYMENT_OUTCOME, "NOOP");
+            Scope.getCurrentScope().addMdcValue(MdcKey.DEPLOYMENT_OUTCOME_COUNT, "0");
+            Scope.getCurrentScope().addMdcValue(MdcKey.ROWS_AFFECTED, "0");
+            Scope.getCurrentScope().addMdcValue(MdcKey.CHANGELOG_FILE, "");
+            Scope.getCurrentScope().addMdcValue(MdcKey.CHANGESET_ID, "");
+            Scope.getCurrentScope().addMdcValue(MdcKey.CHANGESET_AUTHOR, "");
+            Scope.getCurrentScope().addMdcValue(MdcKey.CHANGESET_OUTCOME, "NOOP");
+            Scope.getCurrentScope().addMdcValue(MdcKey.CHANGESETS_UPDATED, new ChangesetsUpdated());
+            Scope.getCurrentScope().addMdcValue(MdcKey.OPERATION_START_TIME, "");
+            Scope.getCurrentScope().addMdcValue(MdcKey.OPERATION_STOP_TIME, "");
+            Scope.getCurrentScope().addMdcValue(MdcKey.LIQUIBASE_SYSTEM_NAME, "");
+            Scope.getCurrentScope().addMdcValue(MdcKey.LIQUIBASE_SYSTEM_USER, "");
+            Scope.getCurrentScope().addMdcValue(MdcKey.LIQUIBASE_TARGET_URL, "");
+            Scope.getCurrentScope().addMdcValue(MdcKey.LIQUIBASE_VERSION, "");
+            Scope.getCurrentScope().addMdcValue(MdcKey.LIQUIBASE_SCHEMA_NAME, "");
+            Scope.getCurrentScope().addMdcValue(MdcKey.LIQUIBASE_CATALOG_NAME, "");
         }
     }
 
@@ -649,7 +673,13 @@ public class LiquibaseCommandLine {
         final ClassLoader classLoader = configureClassLoader();
 
         returnMap.putAll(configureLogging());
-        returnMap.putAll(configureResourceAccessor(classLoader));
+
+        //
+        // Pass any -D properties in the scope so that they will be available to
+        // any logging that might happen
+        //
+        Map<String, String> javaProperties = addJavaPropertiesToChangelogParameters();
+        Scope.child(new HashMap<>(javaProperties), () -> returnMap.putAll(configureResourceAccessor(classLoader)));
 
         ConsoleUIService console = null;
         List<UIService> uiServices = Scope.getCurrentScope().getServiceLocator().findInstances(UIService.class);
@@ -676,8 +706,7 @@ public class LiquibaseCommandLine {
         returnMap.put(LiquibaseCommandLineConfiguration.ARGUMENT_CONVERTER.getKey(),
                 (LiquibaseCommandLineConfiguration.ArgumentConverter) argument -> "--" + StringUtil.toKabobCase(argument));
 
-        Map<String, String> javaProperties = addJavaPropertiesToChangelogParameters();
-        returnMap.put("javaProperties", javaProperties);
+        returnMap.put(Scope.JAVA_PROPERTIES, javaProperties);
 
         return returnMap;
     }

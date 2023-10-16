@@ -19,6 +19,9 @@ public class JdbcConnectionPatterns extends ConnectionPatterns {
     private static final String FILTER_CREDS_PRIVATE_KEY_FILE = "(?i)(.+?)private_key_file=([^;&?]+)[;&]*?(.*?)$";
 
     @SuppressWarnings("squid:S2068")
+    private static final String FILTER_ACCOUNT_KEY = "(?i)(^cosmosdb:\\/\\/.+?):(.*?)@.*?(.*?)$";
+
+    @SuppressWarnings("squid:S2068")
     private static final String FILTER_CREDS_PRIVATE_KEY_FILE_PWD = "(?i)(.+?)private_key_file_pwd=([^;&?]+)[;&]*?(.*?)$";
 
     private static final String FILTER_CREDS = "(?i)/(.*)((?=@))";
@@ -42,5 +45,6 @@ public class JdbcConnectionPatterns extends ConnectionPatterns {
         addJdbcObfuscatePatterns(PatternPair.of(Pattern.compile("(?i)(.*)"), Pattern.compile(FILTER_CREDS_USER)));
         addJdbcObfuscatePatterns(PatternPair.of(Pattern.compile("(?i)(.*)"), Pattern.compile(FILTER_CREDS_PRIVATE_KEY_FILE)));
         addJdbcObfuscatePatterns(PatternPair.of(Pattern.compile("(?i)(.*)"), Pattern.compile(FILTER_CREDS_PRIVATE_KEY_FILE_PWD)));
+        addJdbcObfuscatePatterns(PatternPair.of(Pattern.compile("(?i)^cosmosdb:\\/\\/.*"), Pattern.compile(FILTER_ACCOUNT_KEY)));
     }
 }

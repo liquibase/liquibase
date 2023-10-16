@@ -25,6 +25,7 @@ import liquibase.serializer.ChangeLogSerializer;
 import liquibase.serializer.ChangeLogSerializerFactory;
 import liquibase.snapshot.DatabaseSnapshot;
 import liquibase.snapshot.EmptyDatabaseSnapshot;
+import liquibase.statement.core.RawParameterizedSqlStatement;
 import liquibase.statement.core.RawSqlStatement;
 import liquibase.structure.DatabaseObject;
 import liquibase.structure.core.Column;
@@ -521,8 +522,8 @@ public class DiffToChangeLog {
     protected void addDependencies(DependencyUtil.DependencyGraph<String> graph, List<String> schemas, Database database) throws DatabaseException {
         if (database instanceof DB2Database) {
             Executor executor = Scope.getCurrentScope().getSingleton(ExecutorService.class).getExecutor("jdbc", database);
-            List<Map<String, ?>> rs = executor.queryForList(new RawSqlStatement("select TABSCHEMA, TABNAME, BSCHEMA, BNAME from syscat.tabdep where (" + StringUtil.join(schemas, " OR ", (StringUtil.StringUtilFormatter<String>) obj -> "TABSCHEMA='" + obj + "'"
-            ) + ")"));
+            String sql = "select TABSCHEMA, TABNAME, BSCHEMA, BNAME from syscat.tabdep where TABSCHEMA in (" + StringUtil.join(schemas, ", ", obj -> "?") + ")";
+            List<Map<String, ?>> rs = executor.queryForList(new RawParameterizedSqlStatement(sql, schemas.toArray()));
             for (Map<String, ?> row : rs) {
                 String tabName = StringUtil.trimToNull((String) row.get("TABSCHEMA")) + "." + StringUtil.trimToNull((String) row.get("TABNAME"));
                 String bName = StringUtil.trimToNull((String) row.get("BSCHEMA")) + "." + StringUtil.trimToNull((String) row.get("BNAME"));
@@ -531,9 +532,8 @@ public class DiffToChangeLog {
             }
         } else if (database instanceof Db2zDatabase) {
             Executor executor = Scope.getCurrentScope().getSingleton(ExecutorService.class).getExecutor("jdbc", database);
-            String db2ZosSql = "SELECT DSCHEMA AS TABSCHEMA, DNAME AS TABNAME, BSCHEMA, BNAME FROM SYSIBM.SYSDEPENDENCIES WHERE (" + StringUtil.join(schemas, " OR ", (StringUtil.StringUtilFormatter<String>) obj -> "DSCHEMA='" + obj + "'"
-            ) + ")";
-            List<Map<String, ?>> rs = executor.queryForList(new RawSqlStatement(db2ZosSql));
+            String sql = "SELECT DSCHEMA AS TABSCHEMA, DNAME AS TABNAME, BSCHEMA, BNAME FROM SYSIBM.SYSDEPENDENCIES WHERE DSCHEMA IN (" + StringUtil.join(schemas, ", ", obj -> "?") + ")";
+            List<Map<String, ?>> rs = executor.queryForList(new RawParameterizedSqlStatement(sql, schemas.toArray()));
             for (Map<String, ?> row : rs) {
                 String tabName = StringUtil.trimToNull((String) row.get("TABSCHEMA")) + "." + StringUtil.trimToNull((String) row.get("TABNAME"));
                 String bName = StringUtil.trimToNull((String) row.get("BSCHEMA")) + "." + StringUtil.trimToNull((String) row.get("BNAME"));

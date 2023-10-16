@@ -6,7 +6,6 @@ import liquibase.database.DatabaseConnection;
 import liquibase.database.OfflineConnection;
 import liquibase.database.jvm.JdbcConnection;
 import liquibase.exception.UnexpectedLiquibaseException;
-import liquibase.integration.commandline.LiquibaseCommandLineConfiguration;
 import liquibase.listener.LiquibaseListener;
 import liquibase.logging.LogService;
 import liquibase.logging.Logger;
@@ -26,6 +25,7 @@ import liquibase.ui.UIService;
 import liquibase.util.CollectionUtil;
 import liquibase.util.SmartMap;
 import liquibase.util.StringUtil;
+import lombok.Getter;
 
 import java.lang.reflect.Constructor;
 import java.nio.charset.Charset;
@@ -67,10 +67,13 @@ public class Scope {
         checksumVersion
     }
 
+    public static final String JAVA_PROPERTIES = "javaProperties";
+
     private static ScopeManager scopeManager;
 
     private Scope parent;
     private final SmartMap values = new SmartMap();
+    @Getter
     private String scopeId;
     private static final Map<String, List<MdcObject>> addedMdcEntries = new ConcurrentHashMap<>();
 
@@ -283,9 +286,14 @@ public class Scope {
      */
     public <T> T get(String key, Class<T> type) {
         T value = values.get(key, type);
+        if (value == null && values.containsKey(JAVA_PROPERTIES)) {
+            Map javaProperties = values.get(JAVA_PROPERTIES, Map.class);
+            value = (T)javaProperties.get(key);
+        }
         if (value == null && parent != null) {
             value = parent.get(key, type);
         }
+
         return value;
     }
 
