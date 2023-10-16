@@ -1,5 +1,6 @@
 package liquibase.snapshot
 
+import liquibase.GlobalConfiguration
 import liquibase.Scope
 import liquibase.change.core.CreateIndexChange
 import liquibase.changelog.ChangeLogParameters
@@ -19,12 +20,16 @@ import liquibase.database.jvm.JdbcConnection
 import liquibase.diff.DiffResult
 import liquibase.extension.testing.testsystem.DatabaseTestSystem
 import liquibase.extension.testing.testsystem.TestSystemFactory
+import liquibase.parser.SnapshotParser
+import liquibase.parser.SnapshotParserFactory
 import liquibase.parser.core.json.JsonChangeLogParser
 import liquibase.resource.ResourceAccessor
 import liquibase.resource.SearchPathResourceAccessor
 import liquibase.statement.SqlStatement
 import liquibase.statement.core.RawSqlStatement
 import liquibase.structure.DatabaseObject
+import liquibase.structure.DatabaseObjectCollection
+import liquibase.structure.core.Column
 import liquibase.structure.core.Index
 import liquibase.util.StringUtil
 import org.junit.Rule
@@ -36,7 +41,7 @@ class IndexWithDescendingColumnSnapshotIntegrationTest extends Specification {
     public DatabaseTestSystem mssqlDb = Scope.currentScope.getSingleton(TestSystemFactory).getTestSystem("mssql")
 
     @Unroll
-    def "Index with a descending column is snapshot correctly"() {
+    def "Index with a descending column is snapshot correctly"(boolean snapshotRelation) {
         when:
         def connection = mssqlDb.getConnection()
         def db = DatabaseFactory.instance.findCorrectDatabaseImplementation(new JdbcConnection(connection))
@@ -66,6 +71,7 @@ class IndexWithDescendingColumnSnapshotIntegrationTest extends Specification {
         Map<String, Object> scopeValues = new HashMap<>()
         def resourceAccessor = new SearchPathResourceAccessor(".", Scope.getCurrentScope().getResourceAccessor())
         scopeValues.put(Scope.Attr.resourceAccessor.name(), resourceAccessor)
+        scopeValues.put(GlobalConfiguration.SHOULD_SNAPSHOT_RELATION_FOR_CALCULATED_COLUMNS.getKey(), snapshotRelation)
         def diffResults
         DatabaseSnapshot snapshot
         OutputStream outputStream
@@ -103,6 +109,10 @@ class IndexWithDescendingColumnSnapshotIntegrationTest extends Specification {
                 diffResults = diffScope.execute()
             }
         })
+        SnapshotParser parser = SnapshotParserFactory.getInstance().getParser(snapshotFile, resourceAccessor)
+        DatabaseSnapshot snapshotFromFile = parser.parse(snapshotFile, resourceAccessor)
+        DatabaseObjectCollection referencedObjects = snapshotFromFile.getSerializableFieldValue("referencedObjects") as DatabaseObjectCollection
+        Set<Column> columns = referencedObjects.toMap().get(Column.class)
 
         then:
         noExceptionThrown()
@@ -121,6 +131,18 @@ class IndexWithDescendingColumnSnapshotIntegrationTest extends Specification {
         diffResult.getMissingObjects().size() == 0
         diffResult.getUnexpectedObjects().size() == 0
         diffResult.getChangedObjects().size() == 0
+
+        columns.forEach({ column ->
+            if (snapshotRelation) {
+                assert column.getAttribute("relation", String.class) != null;
+            } else {
+                if (column.getDescending()) {
+                    assert column.getAttribute("relation", String.class) == null;
+                } else {
+                    assert column.getAttribute("relation", String.class) != null;
+                }
+            }
+        })
 
         cleanup:
         db.execute([
@@ -144,6 +166,11 @@ class IndexWithDescendingColumnSnapshotIntegrationTest extends Specification {
         if (f.exists()) {
             f.delete()
         }
+
+        where:
+        snapshotRelation |_
+        true             |_
+        false            |_
     }
 
     @Unroll
