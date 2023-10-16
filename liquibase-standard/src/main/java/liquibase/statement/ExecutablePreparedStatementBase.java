@@ -42,7 +42,7 @@ public abstract class ExecutablePreparedStatementBase implements ExecutablePrepa
     private final String schemaName;
     private final String tableName;
     private final List<? extends ColumnConfig> columns;
-    private ChangeSet changeSet;
+    private final ChangeSet changeSet;
 
     private final Set<Closeable> closeables;
 
@@ -64,7 +64,6 @@ public abstract class ExecutablePreparedStatementBase implements ExecutablePrepa
     protected ExecutablePreparedStatementBase(Database database, String catalogName, String schemaName, String
             tableName, List<? extends ColumnConfig> columns, ChangeSet changeSet, ResourceAccessor resourceAccessor) {
         this.database = database;
-        this.changeSet = changeSet;
         this.catalogName = catalogName;
         this.schemaName = schemaName;
         this.tableName = tableName;
