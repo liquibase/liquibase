@@ -408,7 +408,7 @@ jobs:
       # https://datical.atlassian.net/browse/DAT-15548
       - name: Version Artifact
         run: |
-          version=${{ needs.setup.outputs.thisBranchName }}-SNAPSHOT
+          version=${{ needs.setup.outputs.thisBranchFileName }}-SNAPSHOT
           # Replace / with - in branch name
           version=$(echo "$version" | sed 's/\//-/g')
           mvn versions:set -DnewVersion="$version"
