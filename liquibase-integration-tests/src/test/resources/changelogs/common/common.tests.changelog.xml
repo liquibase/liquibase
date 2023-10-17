@@ -1282,7 +1282,7 @@
             <column name="other_col" type="varchar(100)"/>
         </loadUpdateData>
     </changeSet>
-    <changeSet id="addColumn" author="kiran" dbms="!oracle, !mssql, !firebird">
+    <changeSet id="addColumn" author="kiran" dbms="!oracle, !mssql, !firebird, !db2">
         <addColumn tableName="my_table">
             <column name="new_column" type="varchar(50)" afterColumn="test_col">
             </column>
