@@ -205,6 +205,7 @@ jobs:
           run: |
             ## save install4j code signing keys
             mkdir -p liquibase-dist/target/keys
+            ls -l
             echo "Saving apple key"
             echo "$INSTALL4J_APPLE_KEY" | base64 -d > liquibase-dist/target/keys/datical_apple.p12
   
@@ -212,7 +213,7 @@ jobs:
             echo "$INSTALL4J_WINDOWS_KEY" | base64 -d > liquibase-dist/target/keys/datical_windows.pfx
             # we are packaging and deploying liquibase tar which includes liquibase-commercial
             mvn -B -pl liquibase-dist -P liquibase-commercial source:jar package "-Dliquibase-pro.version=${{ needs.setup.outputs.thisBranchName }}-SNAPSHOT" "-Dbuild.repository.owner=liquibase" "-Dbuild.repository.name=liquibase" "-Dbuild.branch=${{ needs.setup.outputs.thisBranchName }}" "-Dbuild.number=${{ github.run_number }}" "-Dbuild.commit=${{ needs.setup.outputs.latestMergeSha }}-SNAPSHOT" "-Dbuild.timestamp=${{ needs.setup.outputs.timeStamp }}"
-  
+            
             ## extract tar content for other artifacts
             mkdir -p liquibase-dist/target/liquibase-${{ needs.setup.outputs.thisBranchName }}-SNAPSHOT
             (cd liquibase-dist/target/liquibase-${{ needs.setup.outputs.thisBranchName }}-SNAPSHOT && tar -xzf ../liquibase-${{ needs.setup.outputs.thisBranchName }}-SNAPSHOT.tar.gz)
@@ -227,11 +228,12 @@ jobs:
             find . -name original-*.jar -exec rm {} \;
   
             mkdir -p artifacts
-            ls -l
-            tree
             cp liquibase-dist/target/liquibase-${{ needs.setup.outputs.thisBranchName }}-SNAPSHOT.tar.gz artifacts
             cp liquibase-dist/target/liquibase-${{ needs.setup.outputs.thisBranchName }}-SNAPSHOT.zip artifacts
+            ls -l liquibase-core/target
+            tree
             cp liquibase-core/target/liquibase-core-0-SNAPSHOT.jar artifacts/liquibase-core-0-SNAPSHOT.jar
+            
             cp liquibase-core/target/liquibase-core-0-SNAPSHOT-sources.jar artifacts/liquibase-core-0-SNAPSHOT-sources.jar
             cp target/liquibase-0-SNAPSHOT-javadoc.jar artifacts/liquibase-core-0-SNAPSHOT-javadoc.jar
   
