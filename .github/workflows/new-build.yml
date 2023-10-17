@@ -110,15 +110,16 @@ jobs:
           with:
             ref: ${{ github.event.pull_request.head.sha || github.event.after}}
         # this includes all the tar files included in the previous runs. So in the next step we deploy what was previously build
-        - name: Upload Artifacts for build.yml
+        - name: Download Artifacts for build.yml
           uses: actions/download-artifact@v3
           with:
             name: temp-artifact
             path: liquibase-core/target
 
-        - name: Display structure of downloaded files
+        - name: Unzip temp-artifact.tar.gz file
           run: |
-              ls -R liquibase-core/target
+            cd liquibase-core/target && tar -xzf temp-artifact.tar.gz
+            ls -R liquibase-core/target
 
         ##Cache based on install4j file, since changes to JVM is seen in there. If install4j version changes without changing the file, change the prefix letter before hashFiles to force a new cache
         - name: Install4j Cache
