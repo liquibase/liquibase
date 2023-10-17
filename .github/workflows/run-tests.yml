@@ -164,11 +164,15 @@ jobs:
         run: |
           find . -name original-*.jar -exec rm {} \;
 
+      - name: Compress Artifacts
+        run: |
+          tar -czf temp-artifact.tar.gz ./**/target
+
       - name: Upload Artifacts for build.yml
         uses: actions/upload-artifact@v3
         with:
           name: temp-artifact
-          path: ./**/target
+          path: temp-artifact.tar.gz
 
       - name: Archive Test Results
         if: ${{ inputs.archive_test_results == 'true' }}
