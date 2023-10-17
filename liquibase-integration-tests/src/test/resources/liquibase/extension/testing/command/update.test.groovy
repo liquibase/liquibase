@@ -479,4 +479,30 @@ Optional Args:
                 updateReport: 'not_null'
         ]
     }
+
+    run "Deployment fails on first changeset", {
+        arguments = [
+                url          : { it.url },
+                username     : { it.username },
+                password     : { it.password },
+                changelogFile: "changelogs/common/invalid.sql.changelog.xml",
+                showSummary: "VERBOSE"
+        ]
+
+        outputFile = new File("target/test-classes/happyPath.txt")
+
+        expectedFileContent = [ "target/test-classes/happyPath.txt":
+                                        [
+                                                """
+UPDATE SUMMARY
+Run:                          1
+Previously run:               0
+Filtered out:                 0
+-------------------------------
+Total change sets:            1
+"""
+                                        ]
+        ]
+        expectedException = CommandExecutionException
+    }
 }
