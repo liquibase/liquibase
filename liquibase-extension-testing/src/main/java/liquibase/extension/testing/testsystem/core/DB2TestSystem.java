@@ -23,21 +23,23 @@ public class DB2TestSystem extends DatabaseTestSystem {
     public DB2TestSystem(Definition definition) {
         super(definition);
     }
-//
-//    public String getUrl() {
-//        return "jdbc:db2://localhost:"+db2.getMappedPort(50000)+"/testdb";
-//    }
 
+    @Override
+    public void start() throws Exception {
+        if (db2.isRunning()) {
+            return;
+        }
+        // overriding db2 container start here, as using start from parent command calls exec on the docker containers
+        // and for some unknown reason db2 does not start the tcpip listener. It causes tests to fail with error:
+        // Reply.fill() - insufficient data (-1).  Message: Insuficient data. ERRORCODE=-4499, SQLSTATE=08001
+        db2.start();
+        super.start();
+    }
 
     @SuppressWarnings("java:S2095")
     @Override
     protected @NotNull DatabaseWrapper createContainerWrapper() {
-
-        db2.start();
-        return new DockerDatabaseWrapper(
-                db2
-                , this
-        );
+        return new DockerDatabaseWrapper(db2, this);
     }
 
     @Override
