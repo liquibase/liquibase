@@ -1,5 +1,8 @@
 package liquibase.integration.commandline;
 
+import static liquibase.integration.commandline.LiquibaseLauncherSettings.LiquibaseLauncherSetting.LIQUIBASE_HOME;
+import static liquibase.integration.commandline.LiquibaseLauncherSettings.getSetting;
+
 import liquibase.Scope;
 import liquibase.command.CommandArgumentDefinition;
 import liquibase.command.CommandDefinition;
@@ -14,6 +17,7 @@ import liquibase.configuration.core.DefaultsFileValueProvider;
 import liquibase.exception.CommandLineParsingException;
 import liquibase.exception.CommandValidationException;
 import liquibase.exception.LiquibaseException;
+import liquibase.integration.IntegrationDetails;
 import liquibase.license.LicenseInfo;
 import liquibase.license.LicenseService;
 import liquibase.license.LicenseServiceFactory;
@@ -23,6 +27,7 @@ import liquibase.logging.core.LogServiceFactory;
 import liquibase.logging.mdc.MdcKey;
 import liquibase.logging.mdc.MdcManager;
 import liquibase.logging.mdc.MdcObject;
+import liquibase.logging.mdc.customobjects.ChangesetsUpdated;
 import liquibase.logging.mdc.customobjects.Version;
 import liquibase.resource.*;
 import liquibase.ui.CompositeUIService;
@@ -44,10 +49,10 @@ import java.time.Duration;
 import java.util.*;
 import java.util.jar.JarFile;
 import java.util.jar.Manifest;
-import java.util.logging.Formatter;
 import java.util.logging.*;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
+import java.util.zip.ZipEntry;
 
 import static java.util.ResourceBundle.getBundle;
 import static liquibase.configuration.LiquibaseConfiguration.REGISTERED_VALUE_PROVIDERS_KEY;
@@ -55,6 +60,8 @@ import static liquibase.util.SystemUtil.isWindows;
 
 
 public class LiquibaseCommandLine {
+
+    public static final String COMMAND_ARGUMENTS = "commandArguments";
 
     private final Map<String, String> legacyPositionalArguments;
 
@@ -352,8 +359,9 @@ public class LiquibaseCommandLine {
             });
 
             return Scope.child(Collections.singletonMap(Scope.Attr.logService.name(), newLogService), () -> {
+                addEmptyMdcValues();
                 try {
-                    return Scope.child(configureScope(), () -> {
+                    return Scope.child(configureScope(args), () -> {
 
                         if (!LiquibaseCommandLineConfiguration.SHOULD_RUN.getCurrentValue()) {
                             Scope.getCurrentScope().getUI().sendErrorMessage((
@@ -414,6 +422,28 @@ public class LiquibaseCommandLine {
             return 1;
         } finally {
             cleanup();
+        }
+    }
+
+    private void addEmptyMdcValues() {
+        if (LiquibaseCommandLineConfiguration.ADD_EMPTY_MDC_VALUES.getCurrentValue()) {
+            Scope.getCurrentScope().addMdcValue(MdcKey.DEPLOYMENT_ID, "");
+            Scope.getCurrentScope().addMdcValue(MdcKey.DEPLOYMENT_OUTCOME, "NOOP");
+            Scope.getCurrentScope().addMdcValue(MdcKey.DEPLOYMENT_OUTCOME_COUNT, "0");
+            Scope.getCurrentScope().addMdcValue(MdcKey.ROWS_AFFECTED, "0");
+            Scope.getCurrentScope().addMdcValue(MdcKey.CHANGELOG_FILE, "");
+            Scope.getCurrentScope().addMdcValue(MdcKey.CHANGESET_ID, "");
+            Scope.getCurrentScope().addMdcValue(MdcKey.CHANGESET_AUTHOR, "");
+            Scope.getCurrentScope().addMdcValue(MdcKey.CHANGESET_OUTCOME, "NOOP");
+            Scope.getCurrentScope().addMdcValue(MdcKey.CHANGESETS_UPDATED, new ChangesetsUpdated());
+            Scope.getCurrentScope().addMdcValue(MdcKey.OPERATION_START_TIME, "");
+            Scope.getCurrentScope().addMdcValue(MdcKey.OPERATION_STOP_TIME, "");
+            Scope.getCurrentScope().addMdcValue(MdcKey.LIQUIBASE_SYSTEM_NAME, "");
+            Scope.getCurrentScope().addMdcValue(MdcKey.LIQUIBASE_SYSTEM_USER, "");
+            Scope.getCurrentScope().addMdcValue(MdcKey.LIQUIBASE_TARGET_URL, "");
+            Scope.getCurrentScope().addMdcValue(MdcKey.LIQUIBASE_VERSION, "");
+            Scope.getCurrentScope().addMdcValue(MdcKey.LIQUIBASE_SCHEMA_NAME, "");
+            Scope.getCurrentScope().addMdcValue(MdcKey.LIQUIBASE_CATALOG_NAME, "");
         }
     }
 
@@ -636,13 +666,24 @@ public class LiquibaseCommandLine {
      *
      * @return values to set in the scope
      */
-    private Map<String, Object> configureScope() throws Exception {
+    private Map<String, Object> configureScope(String[] args) throws Exception {
         Map<String, Object> returnMap = new HashMap<>();
+        returnMap.put(COMMAND_ARGUMENTS, args);
+
+        final IntegrationDetails integrationDetails = new IntegrationDetails();
+        integrationDetails.setName("cli");
+        returnMap.put("integrationDetails", integrationDetails);
 
         final ClassLoader classLoader = configureClassLoader();
 
         returnMap.putAll(configureLogging());
-        returnMap.putAll(configureResourceAccessor(classLoader));
+
+        //
+        // Pass any -D properties in the scope so that they will be available to
+        // any logging that might happen
+        //
+        Map<String, String> javaProperties = addJavaPropertiesToChangelogParameters();
+        Scope.child(new HashMap<>(javaProperties), () -> returnMap.putAll(configureResourceAccessor(classLoader)));
 
         ConsoleUIService console = null;
         List<UIService> uiServices = Scope.getCurrentScope().getServiceLocator().findInstances(UIService.class);
@@ -669,8 +710,7 @@ public class LiquibaseCommandLine {
         returnMap.put(LiquibaseCommandLineConfiguration.ARGUMENT_CONVERTER.getKey(),
                 (LiquibaseCommandLineConfiguration.ArgumentConverter) argument -> "--" + StringUtil.toKabobCase(argument));
 
-        Map<String, String> javaProperties = addJavaPropertiesToChangelogParameters();
-        returnMap.put("javaProperties", javaProperties);
+        returnMap.put(Scope.JAVA_PROPERTIES, javaProperties);
 
         return returnMap;
     }
@@ -920,7 +960,7 @@ public class LiquibaseCommandLine {
                     if (i > 0) {
                         builder.hidden(true);
                     } else {
-                        builder.hidden(def.getHidden());
+                        builder.hidden(def.getHidden() && !LiquibaseCommandLineConfiguration.SHOW_HIDDEN_ARGS.getCurrentValue());
                     }
 
                     subCommandSpec.addOption(builder.build());
@@ -1091,7 +1131,7 @@ public class LiquibaseCommandLine {
                 }
 
                 //only show the first/standard variation of a name
-                if (i > 0 || def.isHidden()) {
+                if (i > 0 || (def.isHidden() && !LiquibaseCommandLineConfiguration.SHOW_HIDDEN_ARGS.getCurrentValue())) {
                     optionBuilder.hidden(true);
                 }
 
@@ -1159,14 +1199,18 @@ public class LiquibaseCommandLine {
     }
 
     protected static String[] toArgNames(CommandArgumentDefinition<?> def) {
+        //
+        // Use an ordered Set so that the command name shows up first
+        // and is listed as the argument in the help
+        //
         LinkedHashSet<String> returnList = new LinkedHashSet<>();
-        Set<String> baseNames = new HashSet<>();
+        Set<String> baseNames = new LinkedHashSet<>();
         baseNames.add(def.getName());
         baseNames.addAll(def.getAliases());
 
         for (String baseName : baseNames) {
             returnList.add("--" + StringUtil.toKabobCase(baseName).replace(".", "-"));
-            returnList.add("--" + baseName.replaceAll("\\.", ""));
+            returnList.add("--" + baseName.replace("\\.", ""));
         }
 
         return returnList.toArray(new String[0]);
@@ -1226,7 +1270,7 @@ public class LiquibaseCommandLine {
             String liquibaseHome;
             Path liquibaseHomePath = null;
             try {
-                liquibaseHomePath = new File(ObjectUtil.defaultIfNull(System.getenv("LIQUIBASE_HOME"), workingDirectory.toAbsolutePath().toString())).getAbsoluteFile().getCanonicalFile().toPath();
+                liquibaseHomePath = new File(ObjectUtil.defaultIfNull(getSetting(LIQUIBASE_HOME), workingDirectory.toAbsolutePath().toString())).getAbsoluteFile().getCanonicalFile().toPath();
                 liquibaseHome = liquibaseHomePath.toString();
             } catch (IOException e) {
                 liquibaseHome = "Cannot resolve LIQUIBASE_HOME: " + e.getMessage();
@@ -1325,10 +1369,35 @@ public class LiquibaseCommandLine {
                     libraryInfo.vendor = getValue(manifest, "Bundle-Vendor", "Implementation-Vendor", "Specification-Vendor");
                 }
 
+                handleCompilerJarEdgeCase(pathEntryFile, jarFile, libraryInfo);
+
                 if (libraryInfo.name == null) {
                     libraryInfo.name = pathEntryFile.getName().replace(".jar", "");
                 }
                 return libraryInfo;
+            }
+        }
+
+        /**
+         * The compiler.jar file was accidentally added to the liquibase tar.gz distribution, and the compiler.jar
+         * file does not contain a completed MANIFEST.MF file. This method loads the version out of the pom.xml
+         * instead of using the manifest, only for the compiler.jar file.
+         */
+        private void handleCompilerJarEdgeCase(File pathEntryFile, JarFile jarFile, LibraryInfo libraryInfo) {
+            try {
+                if (pathEntryFile.toString().endsWith("compiler.jar") && StringUtil.isEmpty(libraryInfo.version)) {
+                    ZipEntry entry = jarFile.getEntry("META-INF/maven/com.github.spullara.mustache.java/compiler/pom.properties");
+                    InputStream inputStream = jarFile.getInputStream(entry);
+
+                    Properties jarProperties = new Properties();
+                    jarProperties.load(inputStream);
+
+                    libraryInfo.version = jarProperties.getProperty("version");
+                }
+            } catch (Exception e) {
+                Scope.getCurrentScope().getLog(getClass()).fine("Failed to load the version of compiler.jar from " +
+                        "its pom.properties, this is relatively harmless, but could mean that the version of compiler.jar will " +
+                        "not appear in the liquibase --version console output.", e);
             }
         }
 

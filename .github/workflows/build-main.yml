@@ -8,19 +8,45 @@ on:
     branches:
       - 'main'
       - 'master'
+
 env:
   MAVEN_VERSION: '3.9.2'
+
 jobs:
-  build-master:
-    name: Build & Package Master
+  setup:
+    name: Setup
     runs-on: ubuntu-22.04
-    permissions:
-      contents: read
-      packages: write
+    outputs:
+      timeStamp: ${{ steps.get-timestamp.outputs.timeStamp }}
+      latestMergeSha: ${{ steps.get-sha.outputs.latestMergeSha }}
+      setupSuccessful: "true"
 
     steps:
       - uses: actions/checkout@v3
+      - name: Get Latest Merge Commit SHA
+        id: get-sha
+        run: |
+          latest_merge_sha=`(git rev-parse --short HEAD)`
+          echo "latestMergeSha=${latest_merge_sha}" >> $GITHUB_OUTPUT
 
+      - name: Get Timestamp
+        id: get-timestamp
+        run: |
+          timestamp=`(date +'%Y-%m-%d %H:%M:%S %Z')`
+          echo "timeStamp=${timestamp}" >> $GITHUB_OUTPUT
+
+
+  build-and-publish:
+    name: Build & Publish
+    runs-on: ubuntu-22.04
+    needs: setup
+    permissions:
+      contents: read
+      packages: write
+    env:
+      GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+    steps:
+      - uses: actions/checkout@v3
       - name: Set up Java for publishing to GitHub Repository
         uses: actions/setup-java@v3
         with:
@@ -28,50 +54,22 @@ jobs:
           distribution: 'temurin'
           cache: 'maven'
           server-id: liquibase
+
       - name: Set up Maven
         uses: stCarolas/setup-maven@v4.5
         with:
           maven-version: ${{ env.MAVEN_VERSION }}
 
-      # Version artifact based off of branch and commit SHA.
-      - name: Version Artifact
-        run: mvn versions:set -DnewVersion="master-SNAPSHOT"
+        # Publish master-SNAPSHOT version to GPM
+      - name: Version Artifact as master-SNAPSHOT
+        run: mvn versions:set "-DnewVersion=master-SNAPSHOT"
 
-      # Publish to GitHub Packages
-      - name: Publish package
-        run: mvn -B clean deploy -DskipTests=true
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      - name: Publish master-SNAPSHOT
+        run: mvn -B clean deploy -pl '!liquibase-dist' -DskipTests=true "-Dbuild.repository.owner=liquibase" "-Dbuild.repository.name=liquibase" "-Dbuild.branch=master" "-Dbuild.number=${{ github.run_number }}" "-Dbuild.commit=${{ needs.setup.outputs.latestMergeSha }}" "-Dbuild.timestamp=${{ needs.setup.outputs.timeStamp }}"
 
-  build-sha:
-    name: Build & Package SHA
-    runs-on: ubuntu-22.04
-    permissions:
-      contents: read
-      packages: write
+      # Publish <commitsha>-SNAPSHOT version to GPM
+      - name: Version Artifact as commit-SNAPSHOT
+        run: mvn versions:set -DnewVersion="${{ needs.setup.outputs.latestMergeSha }}-SNAPSHOT"
 
-    steps:
-      - uses: actions/checkout@v3
-
-      - name: Set up Java for publishing to GitHub Repository
-        uses: actions/setup-java@v3
-        with:
-          java-version: '17'
-          distribution: 'temurin'
-          cache: 'maven'
-          server-id: liquibase
-      - name: Set up Maven
-        uses: stCarolas/setup-maven@v4.5
-        with:
-          maven-version: ${{ env.MAVEN_VERSION }}
-
-      # Version artifact based off of branch and commit SHA.
-      - name: Version Artifact
-        run: mvn versions:set -DnewVersion="$(git rev-parse --short HEAD)-SNAPSHOT"
-
-      # This would still deploy a package if there are test failures. Might help to have build.yml complete and then run this workflow
-      # Publish to GitHub Packages
-      - name: Publish package
-        run: mvn -B clean deploy -DskipTests=true "-Dbuild.branch=${{ github.ref_name }}" "-Dbuild.number=${{ github.run_number }}" "-Dbuild.commit=${{ github.sha }}" "-Dbuild.repository.owner=${{ github.repository_owner }}" "-Dbuild.repository.name=${{ github.repository }}"
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      - name: Publish commit-SNAPSHOT
+        run: mvn -B clean deploy -pl '!liquibase-dist' -DskipTests=true "-Dbuild.repository.owner=liquibase" "-Dbuild.repository.name=liquibase" "-Dbuild.branch=master" "-Dbuild.number=${{ github.run_number }}" "-Dbuild.commit=${{ needs.setup.outputs.latestMergeSha }}" "-Dbuild.timestamp=${{ needs.setup.outputs.timeStamp }}"

@@ -78,7 +78,7 @@ class AbstractChangeTest extends Specification {
 
     def createChangeMetaData() {
         when:
-        ExampleAbstractChange change = new ExampleAbstractChange()
+        def change = new ExampleAbstractChange()
         ChangeMetaData changeMetaData = change.createChangeMetaData()
         Map<String, ChangeParameterMetaData> parameters = changeMetaData.getParameters()
 
@@ -120,7 +120,7 @@ class AbstractChangeTest extends Specification {
 
     def createChangeMetaData_noParams() {
         when:
-        ExampleParamlessAbstractChange change = new ExampleParamlessAbstractChange()
+        def change = new ExampleParamlessAbstractChange()
         ChangeMetaData changeMetaData = change.createChangeMetaData()
         Map<String, ChangeParameterMetaData> parameters = changeMetaData.getParameters()
 
@@ -144,7 +144,7 @@ class AbstractChangeTest extends Specification {
 
     def getChangeSet() {
         when:
-        ExampleAbstractChange change = new ExampleAbstractChange()
+        def change = new ExampleAbstractChange()
         ChangeSet changeSet = new ChangeSet(new DatabaseChangeLog())
         change.setChangeSet(changeSet)
 
@@ -249,7 +249,7 @@ class AbstractChangeTest extends Specification {
 
     def validate_missingRequiredValue() throws Exception {
         when:
-        ExampleAbstractChange change = new ExampleAbstractChange()
+        def change = new ExampleAbstractChange()
         ValidationErrors errors = change.validate(new MSSQLDatabase())
         then:
 
@@ -259,7 +259,7 @@ class AbstractChangeTest extends Specification {
 
     def validate_noErrors() throws Exception {
         when:
-        ExampleAbstractChange change = new ExampleAbstractChange()
+        def change = new ExampleAbstractChange()
         change.setParamTwo(3)
 
         then:
@@ -451,7 +451,7 @@ class AbstractChangeTest extends Specification {
         ChecksumVersion.latest() | "9:d41d8cd98f00b204e9800998ecf8427e" | "9:d41d8cd98f00b204e9800998ecf8427e"
     }
 
-    @DatabaseChange(name = "exampleParamelessAbstractChange", description = "Used for the AbstractChangeTest unit test", priority = 1)
+    @DatabaseChange(name = "exampleParamlessAbstractChange", description = "Used for the AbstractChangeTest unit test", priority = 1)
     private static class ExampleParamlessAbstractChange extends AbstractChange {
 
         @Override

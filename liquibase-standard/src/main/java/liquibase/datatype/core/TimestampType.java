@@ -66,7 +66,7 @@ public class TimestampType extends DateTimeType {
             return super.toDatabaseDataType(database);
         }
         if (database instanceof MSSQLDatabase) {
-            if (!GlobalConfiguration.CONVERT_DATA_TYPES.getCurrentValue()
+            if (Boolean.TRUE.equals(!GlobalConfiguration.CONVERT_DATA_TYPES.getCurrentValue())
                     && originalDefinition.toLowerCase(Locale.US).startsWith("timestamp")) {
                 return new DatabaseDataType(database.escapeDataTypeName("timestamp"));
             }

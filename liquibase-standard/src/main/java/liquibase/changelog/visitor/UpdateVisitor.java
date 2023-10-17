@@ -20,8 +20,6 @@ import liquibase.exception.MigrationFailedException;
 import liquibase.executor.Executor;
 import liquibase.executor.ExecutorService;
 import liquibase.executor.LoggingExecutor;
-import liquibase.integration.commandline.LiquibaseCommandLineConfiguration;
-import liquibase.statement.core.UpdateChangeSetChecksumStatement;
 
 import java.util.Objects;
 import java.util.Set;

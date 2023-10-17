@@ -1,12 +1,18 @@
 name: Build and Test
 
+
+
 concurrency:
   group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
   cancel-in-progress: true
 
 on:
   workflow_dispatch:
-
+    inputs:
+      archive_test_results:
+        description: 'If set to true, the unit and integration test results will be archived to the build artifacts page.'
+        required: false
+        default: 'false'
   # DAT branches can get triggered from this logic
   pull_request_target:
     types:
@@ -19,7 +25,7 @@ on:
     branches:
       - master
       - main
-      - github-action-*
+      - github-action-**
     paths-ignore:
       - '**.md'
 
@@ -50,10 +56,11 @@ jobs:
       thisSha: ${{ steps.find-branches.outputs.thisSha }}
       thisBranchName: ${{ steps.find-branches.outputs.thisBranchName }}
       thisBranchFileName: ${{ steps.find-branches.outputs.thisBranchFileName }}
-      thisRepositoryName: ${{ steps.find-branches.outputs.thisRepositoryName }}
-      thisRepositoryOwner: ${{ steps.find-branches.outputs.thisRepositoryName }}
+      thisRepositoryName: ${{ steps.find-branches.outputs.thisRepoName }}
+      thisRepositoryOwner: ${{ steps.find-branches.outputs.thisRepoName }}
       standAlonePR: ${{ steps.find-branches.outputs.standAlonePR }}
       stablePro: ${{ steps.find-branches.outputs.stablePro }}
+      timestamp: ${{ steps.get-date.outputs.date }}
       setupSuccessful: "true"
     steps:
       - name: Failsafe
@@ -67,6 +74,10 @@ jobs:
         with:
           ref: ${{ github.event.pull_request.head.sha || github.event.after}}
 
+      - name: Get current date
+        id: get-date
+        run: echo "::set-output name=date::$(date +'%Y-%m-%d %H:%M:%S %Z')"
+
       - name: Find corresponding branches
         id: find-branches
         uses: actions/github-script@v6
@@ -77,7 +88,7 @@ jobs:
 
             core.setOutput("thisSha", helper.getCurrentSha());
             core.setOutput("thisBranchName", helper.getCurrentBranch());
-            core.setOutput("thisBranchFileName", helper.getCurrentBranch().replace(/[^a-zA-Z0-9\-_]/g, "_"));
+            core.setOutput("thisBranchFileName", helper.getCurrentBranch().replace(/[^a-zA-Z0-9\-_\.]/g, "_"));
             core.setOutput("thisRepoName", helper.getRepositoryName());
             core.setOutput("thisRepoOwner", helper.getRepositoryOwner());
 
@@ -159,13 +170,14 @@ jobs:
     runs-on: ${{ matrix.os }}
     env:
       OS_TYPE: ${{ matrix.os }}
+      GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
     steps:
       - uses: actions/checkout@v3
         with:
           ref: ${{ github.event.pull_request.head.sha || github.event.after}}
       - name: Built Code Cache
         if: ${{ matrix.java == 11}}
-        uses: actions/cache@v3.3.1
+        uses: actions/cache@v3.3.2
         with:
           key: built-code-${{ github.run_number }}-${{ github.run_attempt }}
           path: ./**/target
@@ -185,11 +197,11 @@ jobs:
       - name: Build & Test Java 8
         if: ${{ matrix.java == 8}}
         run: |
-          mvn -B "-Dbuild.repository.owner=${{ needs.setup.outputs.thisRepositoryOwner }}" "-Dbuild.repository.name=${{ needs.setup.outputs.thisRepositoryName }}" "-Dbuild.branch=${{ needs.setup.outputs.thisBranchName }}" "-Dbuild.number=${{ github.run_number }}" "-Dbuild.commit=${{ needs.setup.outputs.thisSha }}" "-DtrimStackTrace=false" -pl '!liquibase-dist,!liquibase-cdi-jakarta' clean test package surefire-report:report
+          mvn -B "-Dbuild.repository.owner=${{ needs.setup.outputs.thisRepositoryOwner }}" "-Dbuild.repository.name=${{ needs.setup.outputs.thisRepositoryName }}" "-Dbuild.branch=${{ needs.setup.outputs.thisBranchName }}" "-Dbuild.number=${{ github.run_number }}" "-Dbuild.commit=${{ needs.setup.outputs.thisSha }}" "-DtrimStackTrace=false" -pl '!liquibase-cdi-jakarta' clean verify -DskipITs
       - name: Build & Test Java non-jdk-8
         if: ${{ matrix.java != 8}}
         run: |
-          mvn -B "-Dbuild.repository.owner=${{ needs.setup.outputs.thisRepositoryOwner }}" "-Dbuild.repository.name=${{ needs.setup.outputs.thisRepositoryName }}" "-Dbuild.branch=${{ needs.setup.outputs.thisBranchName }}" "-Dbuild.number=${{ github.run_number }}" "-Dbuild.commit=${{ needs.setup.outputs.thisSha }}" "-DtrimStackTrace=false" -pl '!liquibase-dist' clean test package surefire-report:report
+          mvn -B "-Dbuild.repository.owner=${{ needs.setup.outputs.thisRepositoryOwner }}" "-Dbuild.repository.name=${{ needs.setup.outputs.thisRepositoryName }}" "-Dbuild.branch=${{ needs.setup.outputs.thisBranchName }}" "-Dbuild.number=${{ github.run_number }}" "-Dbuild.commit=${{ needs.setup.outputs.thisSha }}" "-DtrimStackTrace=false" clean verify -DskipITs
 
       - name: Remove Original Jars for *nix
         if: env.OS_TYPE != 'windows-2019'
@@ -197,13 +209,21 @@ jobs:
           find . -name original-*.jar -exec rm {} \;
 
       - name: Archive Test Results
-        if: ${{ always() }}
+        if: ${{ inputs.archive_test_results == 'true' }}
         uses: actions/upload-artifact@v3
         with:
           name: liquibase-test-results-jdk${{ matrix.java }}
           path: |
             ./**/target/surefire-reports
             ./**/target/site
+
+      - name: Save Jacoco Report for Sonar
+        if: ${{ matrix.java == 11 && matrix.os == 'ubuntu-22.04'}}
+        uses: actions/upload-artifact@v3
+        with:
+          name: liquibase-jacoco-test-results
+          path: |
+            ./liquibase-standard/target/jacoco.exec
 
       - name: Archive Modules
         if: ${{ matrix.java == 11 && matrix.os == 'ubuntu-22.04'}}
@@ -213,40 +233,6 @@ jobs:
           path: |
             */target/*-0-SNAPSHOT.jar
 
-  sonar:
-    name: Sonar Scan
-    runs-on: ubuntu-22.04
-    needs: build
-    steps:
-      - uses: actions/checkout@v3
-        with:
-          fetch-depth: 0  # Shallow clones should be disabled for a better relevancy of analysis
-          ref: ${{ github.event.pull_request.head.sha || github.event.after}}
-      - name: Set up JDK
-        uses: actions/setup-java@v3
-        with:
-          java-version: 11
-          distribution: 'adopt'
-          cache: 'maven'
-
-          # getting from build results page. If we remove 0-snapshot then we will need settings.xml
-
-      - name: Set up Maven
-        uses: stCarolas/setup-maven@v4.5
-        with:
-          maven-version: ${{ env.MAVEN_VERSION }}
-      - name: Cache SonarCloud packages
-        uses: actions/cache@v3.3.1
-        with:
-          path: ~/.sonar/cache
-          key: ${{ runner.os }}-sonar
-          restore-keys: ${{ runner.os }}-sonar
-      - name: Build and analyze
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}  # Needed to get PR information, if any
-          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
-        run: mvn clean verify sonar:sonar -P sonar -Dsonar.login=$SONAR_TOKEN -Dsonar.pullrequest.key=${{ github.event.pull_request.number }} -Dsonar.pullrequest.branch=${{ github.event.pull_request.head.ref }} -Dsonar.pullrequest.base=${{ github.event.pull_request.base.ref }}
-
   integration-test:
     name: Integration Test
     runs-on: ubuntu-22.04
@@ -254,17 +240,17 @@ jobs:
       fail-fast: false
       matrix:
         testSystem:
-          - h2
-          #          - h2:1.4
-          - hsqldb
-          - mariadb
-          - mssql
-          - mysql
-          - oracle
-          - postgresql
-          - sqlite
-          - firebird
-    needs: build
+           - h2
+           #- h2:1.4
+           - hsqldb
+           - mariadb
+           - mssql
+           - mysql
+           - oracle
+           - postgresql
+           - sqlite
+           - firebird
+    needs: setup
     timeout-minutes: 30
     steps:
       - uses: actions/checkout@v3
@@ -278,10 +264,10 @@ jobs:
           script: |
             core.setOutput("testResultsArtifact", "liquibase-test-results-integration-${{ matrix.testSystem }}".replace(/[^a-zA-Z0-9\-_]/g, "_"));
 
-      - name: Set up JDK 8
+      - name: Set up JDK 11
         uses: actions/setup-java@v3
         with:
-          java-version: '8'
+          java-version: '11'
           distribution: 'temurin'
           cache: 'maven'
 
@@ -292,7 +278,7 @@ jobs:
         with:
           maven-version: ${{ env.MAVEN_VERSION }}
       - name: Restore Built Code Cache
-        uses: actions/cache@v3.3.1
+        uses: actions/cache@v3.3.2
         with:
           key: built-code-${{ github.run_number }}-${{ github.run_attempt }}
           path: ./**/target
@@ -305,15 +291,36 @@ jobs:
           password: ${{ secrets.ARTIFACTORY_TOKEN }}
 
       - name: Run Tests
-        run: mvn -B jar:jar jar:test-jar surefire:test -DtrimStackTrace=false -Dliquibase.sdk.testSystem.test=${{ matrix.testSystem }} -Dliquibase.sdk.testSystem.acceptLicenses=${{ matrix.testSystem }} -Dtest=*IntegrationTest,*ExecutorTest -DfailIfNoTests=false -Dsurefire.failIfNoSpecifiedTests=false
+        run: mvn -B clean verify -DtrimStackTrace=false -Dliquibase.sdk.testSystem.test=${{ matrix.testSystem }} -Dliquibase.sdk.testSystem.acceptLicenses=${{ matrix.testSystem }} -Dtest='*IntegrationTest,*ExecutorTest' -DfailIfNoTests=false -Dsurefire.failIfNoSpecifiedTests=false
 
       - name: Archive Test Results
-        if: ${{ always() }}
+        if: ${{ inputs.archive_test_results == 'true' }}
         uses: actions/upload-artifact@v3
         with:
           name: ${{ steps.prepare.outputs.testResultsArtifact }}
           path: |
             ./**/target/surefire-reports
+
+      - name: Save Jacoco Report for Sonar
+        uses: actions/upload-artifact@v3
+        with:
+          name: liquibase-integration-jacoco-test-results-${{ matrix.testSystem }}
+          path: |
+            ./liquibase-integration-tests/target/jacoco.exec
+
+  sonar:
+    needs: [ build, integration-test ]
+    uses: liquibase/build-logic/.github/workflows/sonar-test-scan.yml@v0.4.7
+    with:
+      thisBranchName: ${{ needs.setup.outputs.thisBranchName }}
+      thisSha: ${{ needs.setup.outputs.thisSha }}
+      liquibaseBranchName: ${{ needs.setup.outputs.liquibaseBranchName }}
+      pullRequestNumber: ${{ github.event.pull_request.number }}
+      pullRequestBranchName: ${{ github.event.pull_request.head.ref }}
+      pullRequestBaseBranchName: ${{ github.event.pull_request.base.ref }}
+      testedClassesModuleName: liquibase-standard
+      dbPlatforms: h2,hsqldb,mariadb,mssql,mysql,oracle,postgresql,sqlite,firebird
+    secrets: inherit
 
   package:
     name: Package Artifacts
@@ -325,14 +332,14 @@ jobs:
           ref: ${{ github.event.pull_request.head.sha || github.event.after}}
       # this includes all the tar files included in the previous runs. So in the next step we deploy what was previously build
       - name: Built Code Cache
-        uses: actions/cache@v3.3.1
+        uses: actions/cache@v3.3.2
         with:
           key: built-code-${{ github.run_number }}-${{ github.run_attempt }}
           path: ./**/target
 
       ##Cache based on install4j file, since changes to JVM is seen in there. If install4j version changes without changing the file, change the prefix letter before hashFiles to force a new cache
       - name: Install4j Cache
-        uses: actions/cache@v3.3.1
+        uses: actions/cache@v3.3.2
         with:
           key: install4j-A${{ hashFiles('liquibase-dist/src/main/install4j/liquibase.install4j') }}
           path: ~/.install4j8/**
@@ -351,7 +358,7 @@ jobs:
 
       # look for dependencies in maven
       - name: maven-settings-xml-action
-        uses: whelk-io/maven-settings-xml-action@v20
+        uses: whelk-io/maven-settings-xml-action@v21
         with:
           repositories: |
             [
@@ -396,6 +403,14 @@ jobs:
         uses: stCarolas/setup-maven@v4.5
         with:
           maven-version: ${{ env.MAVEN_VERSION }}
+
+      # Version artifact based off of branch
+      - name: Version Artifact
+        run: |
+          version=${{ needs.setup.outputs.thisBranchFileName }}-SNAPSHOT
+          # Replace / with - in branch name
+          version=$(echo "$version" | sed 's/\//-/g')
+          mvn versions:set -DnewVersion="$version"
 
       - name: Build & Sign Artifacts
         env:
@@ -479,6 +494,7 @@ jobs:
           cp liquibase-extension-testing/target/liquibase-extension-testing-0-SNAPSHOT-deps.jar artifacts-named/liquibase-extension-testing-${{ needs.setup.outputs.thisBranchFileName }}-deps.jar
           cp $commercialJarM2Location artifacts-named/liquibase-commercial-${{ needs.setup.outputs.thisBranchFileName }}.jar
 
+
       - name: Archive Packages
         uses: actions/upload-artifact@v3
         with:
@@ -501,15 +517,15 @@ jobs:
       # Publish to GitHub Packages. We are building a tar file which includes liquibase-commercial hence we need "-Dliquibase-pro.version"
       - name: Publish tar.gz package to GPM
         run: |
-          mvn -B -pl liquibase-dist -P liquibase-commercial clean deploy -DskipTests=true -Dliquibase-pro.version="${{ needs.setup.outputs.proBranchName }}-SNAPSHOT" -Dbuild.timestamp=${{ steps.date.outputs.date }}
+          mvn -B -pl liquibase-dist -P liquibase-commercial clean deploy -DskipTests "-Dliquibase-pro.version=${{ needs.setup.outputs.proBranchName }}-SNAPSHOT" "-Dbuild.timestamp=${{ needs.setup.outputs.timestamp }}" "-Dbuild.repository.owner=${{ needs.setup.outputs.thisRepositoryOwner }}" "-Dbuild.repository.name=${{ needs.setup.outputs.thisRepositoryName }}" "-Dbuild.branch=${{ needs.setup.outputs.thisBranchFileName }}" "-Dbuild.number=${{ github.run_number }}" "-Dbuild.commit=${{ needs.setup.outputs.thisSha }}"
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
-# this triggers the pro-tests and test-harness to run
+  # this triggers the pro-tests and test-harness to run
   finish:
     name: Finish Build
     runs-on: ubuntu-22.04
-    needs: [ setup, build, integration-test, package, sonar]
+    needs: [ setup, build, package, sonar]
     if: ${{ needs.setup.outputs.setupSuccessful }}
     steps:
       - uses: actions/checkout@v3
