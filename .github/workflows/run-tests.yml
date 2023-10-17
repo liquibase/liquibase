@@ -155,6 +155,7 @@ jobs:
         if: ${{ matrix.java == 8}}
         run: |
           mvn -B "-Dbuild.repository.owner=liquibase" "-Dbuild.repository.name=liquibase" "-Dbuild.branch=${GITHUB_HEAD_REF}" "-Dbuild.number=${{ github.run_number }}" "-Dbuild.commit=${{ needs.setup.outputs.latestMergeSha }}" "-DtrimStackTrace=false" -pl '!liquibase-cdi-jakarta' clean test package surefire-report:report
+
       - name: Build & Test Java non-jdk-8
         if: ${{ matrix.java != 8}}
         run: |
@@ -165,10 +166,12 @@ jobs:
           find . -name original-*.jar -exec rm {} \;
 
       - name: Compress Artifacts
+        if: ${{ matrix.java == 11 && matrix.os == 'ubuntu-22.04'}}
         run: |
           tar -czf temp-artifact.tar.gz ./**/target
 
       - name: Upload Artifacts for build.yml
+        if: ${{ matrix.java == 11 && matrix.os == 'ubuntu-22.04'}}
         uses: actions/upload-artifact@v3
         with:
           name: temp-artifact
