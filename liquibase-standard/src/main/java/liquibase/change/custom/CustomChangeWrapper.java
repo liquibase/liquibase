@@ -322,7 +322,7 @@ public class CustomChangeWrapper extends AbstractChange {
             this.setParam(paramName, (String) value);
         }
 
-        CustomChange customChange = null;
+        CustomChange customChange;
         try {
             Boolean osgiPlatform = Scope.getCurrentScope().get(Scope.Attr.osgiPlatform, Boolean.class);
             if (Boolean.TRUE.equals(osgiPlatform)) {

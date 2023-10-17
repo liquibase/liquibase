@@ -19,16 +19,16 @@ import spock.lang.Unroll
 @LiquibaseIntegrationTest
 class UpgradeChecksumVersionIntegrationTest extends Specification{
     @Shared
-    private DatabaseTestSystem mysql = (DatabaseTestSystem) Scope.getCurrentScope().getSingleton(TestSystemFactory.class).getTestSystem("mysql")
+    private DatabaseTestSystem h2 = (DatabaseTestSystem) Scope.getCurrentScope().getSingleton(TestSystemFactory.class).getTestSystem("h2")
 
     private List<RanChangeSet> getRanChangesets(ChangeLogHistoryService changeLogService) {
-        mysql.getConnection().commit()
+        h2.getConnection().commit()
         changeLogService.reset()
         return changeLogService.getRanChangeSets()
     }
 
     private insertDbclRecord(String changelogfile) {
-        mysql.execute(new RawSqlStatement("""
+        h2.execute(new RawSqlStatement("""
 INSERT INTO DATABASECHANGELOG
 (ID, AUTHOR, FILENAME, DATEEXECUTED, ORDEREXECUTED, EXECTYPE, MD5SUM, DESCRIPTION, COMMENTS, TAG, LIQUIBASE, CONTEXTS, LABELS, DEPLOYMENT_ID)
 VALUES('1', 'your.name', '$changelogfile', '2023-05-31 14:33:39.108', 1, 'EXECUTED', '8:d925207397a5bb8863a41d513a65afd1', 'sql', 'example comment', NULL, 'DEV', 'example-context1', 'example-label', '5561619071');
@@ -38,7 +38,7 @@ VALUES('1', 'your.name', '$changelogfile', '2023-05-31 14:33:39.108', 1, 'EXECUT
     @Unroll
     def "update command should upgrade all checksums when no filters supplied" () {
         def changesetFilepath = "changelogs/common/checksum-changelog.xml"
-        final ChangeLogHistoryService changeLogService = ChangeLogHistoryServiceFactory.getInstance().getChangeLogService(mysql.getDatabaseFromFactory())
+        final ChangeLogHistoryService changeLogService = Scope.getCurrentScope().getSingleton(ChangeLogHistoryServiceFactory.class).getChangeLogService(h2.getDatabaseFromFactory())
         changeLogService.init()
         insertDbclRecord(storedFilepathPrefix + changesetFilepath)
 
@@ -51,9 +51,9 @@ VALUES('1', 'your.name', '$changelogfile', '2023-05-31 14:33:39.108', 1, 'EXECUT
 
         when:
         CommandScope updateCommandScope = new CommandScope(UpdateCommandStep.COMMAND_NAME)
-        updateCommandScope.addArgumentValue(DbUrlConnectionCommandStep.URL_ARG, mysql.getConnectionUrl())
-        updateCommandScope.addArgumentValue(DbUrlConnectionCommandStep.USERNAME_ARG, mysql.getUsername())
-        updateCommandScope.addArgumentValue(DbUrlConnectionCommandStep.PASSWORD_ARG, mysql.getPassword())
+        updateCommandScope.addArgumentValue(DbUrlConnectionCommandStep.URL_ARG, h2.getConnectionUrl())
+        updateCommandScope.addArgumentValue(DbUrlConnectionCommandStep.USERNAME_ARG, h2.getUsername())
+        updateCommandScope.addArgumentValue(DbUrlConnectionCommandStep.PASSWORD_ARG, h2.getPassword())
         updateCommandScope.addArgumentValue(UpdateCommandStep.CHANGELOG_FILE_ARG, changesetFilepath)
         updateCommandScope.execute()
         ranChangeSets = getRanChangesets(changeLogService)
@@ -63,7 +63,7 @@ VALUES('1', 'your.name', '$changelogfile', '2023-05-31 14:33:39.108', 1, 'EXECUT
         ranChangeSets.forEach({ rcs -> assert rcs.getLastCheckSum().getVersion() == 9 })
 
         cleanup:
-        CommandUtil.runDropAll(mysql)
+        CommandUtil.runDropAll(h2)
 
         where:
         storedFilepathPrefix | _
@@ -73,7 +73,7 @@ VALUES('1', 'your.name', '$changelogfile', '2023-05-31 14:33:39.108', 1, 'EXECUT
 
     def "update command should upgrade only matching changesets when filter is applied" () {
         def changesetFilepath = "changelogs/common/checksum-changelog.xml"
-        final ChangeLogHistoryService changeLogService = ChangeLogHistoryServiceFactory.getInstance().getChangeLogService(mysql.getDatabaseFromFactory())
+        final ChangeLogHistoryService changeLogService = Scope.getCurrentScope().getSingleton(ChangeLogHistoryServiceFactory.class).getChangeLogService(h2.getDatabaseFromFactory())
         changeLogService.init()
         insertDbclRecord(changesetFilepath)
 
@@ -86,9 +86,9 @@ VALUES('1', 'your.name', '$changelogfile', '2023-05-31 14:33:39.108', 1, 'EXECUT
 
         when:
         CommandScope updateCommandScope = new CommandScope(UpdateCommandStep.COMMAND_NAME)
-        updateCommandScope.addArgumentValue(DbUrlConnectionCommandStep.URL_ARG, mysql.getConnectionUrl())
-        updateCommandScope.addArgumentValue(DbUrlConnectionCommandStep.USERNAME_ARG, mysql.getUsername())
-        updateCommandScope.addArgumentValue(DbUrlConnectionCommandStep.PASSWORD_ARG, mysql.getPassword())
+        updateCommandScope.addArgumentValue(DbUrlConnectionCommandStep.URL_ARG, h2.getConnectionUrl())
+        updateCommandScope.addArgumentValue(DbUrlConnectionCommandStep.USERNAME_ARG, h2.getUsername())
+        updateCommandScope.addArgumentValue(DbUrlConnectionCommandStep.PASSWORD_ARG, h2.getPassword())
         updateCommandScope.addArgumentValue(UpdateCommandStep.CHANGELOG_FILE_ARG, changesetFilepath)
         updateCommandScope.addArgumentValue(UpdateCommandStep.CONTEXTS_ARG, "example-context2")
         updateCommandScope.execute()
@@ -100,12 +100,12 @@ VALUES('1', 'your.name', '$changelogfile', '2023-05-31 14:33:39.108', 1, 'EXECUT
         ranChangeSets.get(1).getLastCheckSum().getVersion() == 9
 
         cleanup:
-        CommandUtil.runDropAll(mysql)
+        CommandUtil.runDropAll(h2)
     }
 
     def "update-to-tag" () {
         def changesetFilepath = "changelogs/common/checksum-changelog-tag.xml"
-        final ChangeLogHistoryService changeLogService = ChangeLogHistoryServiceFactory.getInstance().getChangeLogService(mysql.getDatabaseFromFactory())
+        final ChangeLogHistoryService changeLogService = Scope.getCurrentScope().getSingleton(ChangeLogHistoryServiceFactory.class).getChangeLogService(h2.getDatabaseFromFactory())
         changeLogService.init()
         insertDbclRecord(changesetFilepath)
 
@@ -118,9 +118,9 @@ VALUES('1', 'your.name', '$changelogfile', '2023-05-31 14:33:39.108', 1, 'EXECUT
 
         when:
         CommandScope updateCommandScope = new CommandScope(UpdateToTagCommandStep.COMMAND_NAME)
-        updateCommandScope.addArgumentValue(DbUrlConnectionCommandStep.URL_ARG, mysql.getConnectionUrl())
-        updateCommandScope.addArgumentValue(DbUrlConnectionCommandStep.USERNAME_ARG, mysql.getUsername())
-        updateCommandScope.addArgumentValue(DbUrlConnectionCommandStep.PASSWORD_ARG, mysql.getPassword())
+        updateCommandScope.addArgumentValue(DbUrlConnectionCommandStep.URL_ARG, h2.getConnectionUrl())
+        updateCommandScope.addArgumentValue(DbUrlConnectionCommandStep.USERNAME_ARG, h2.getUsername())
+        updateCommandScope.addArgumentValue(DbUrlConnectionCommandStep.PASSWORD_ARG, h2.getPassword())
         updateCommandScope.addArgumentValue(UpdateToTagCommandStep.CHANGELOG_FILE_ARG, changesetFilepath)
         updateCommandScope.addArgumentValue(UpdateToTagCommandStep.TAG_ARG, "version_1.3")
         updateCommandScope.execute()
@@ -133,12 +133,12 @@ VALUES('1', 'your.name', '$changelogfile', '2023-05-31 14:33:39.108', 1, 'EXECUT
         ranChangeSets.get(2).getLastCheckSum().getVersion() == 9
 
         cleanup:
-        CommandUtil.runDropAll(mysql)
+        CommandUtil.runDropAll(h2)
     }
 
     def "update-count"() {
         def changesetFilepath = "changelogs/common/checksum-changelog.xml"
-        final ChangeLogHistoryService changeLogService = ChangeLogHistoryServiceFactory.getInstance().getChangeLogService(mysql.getDatabaseFromFactory())
+        final ChangeLogHistoryService changeLogService = Scope.getCurrentScope().getSingleton(ChangeLogHistoryServiceFactory.class).getChangeLogService(h2.getDatabaseFromFactory())
         changeLogService.init()
         insertDbclRecord(changesetFilepath)
 
@@ -151,9 +151,9 @@ VALUES('1', 'your.name', '$changelogfile', '2023-05-31 14:33:39.108', 1, 'EXECUT
 
         when:
         CommandScope updateCommandScope = new CommandScope(UpdateCountCommandStep.COMMAND_NAME)
-        updateCommandScope.addArgumentValue(DbUrlConnectionCommandStep.URL_ARG, mysql.getConnectionUrl())
-        updateCommandScope.addArgumentValue(DbUrlConnectionCommandStep.USERNAME_ARG, mysql.getUsername())
-        updateCommandScope.addArgumentValue(DbUrlConnectionCommandStep.PASSWORD_ARG, mysql.getPassword())
+        updateCommandScope.addArgumentValue(DbUrlConnectionCommandStep.URL_ARG, h2.getConnectionUrl())
+        updateCommandScope.addArgumentValue(DbUrlConnectionCommandStep.USERNAME_ARG, h2.getUsername())
+        updateCommandScope.addArgumentValue(DbUrlConnectionCommandStep.PASSWORD_ARG, h2.getPassword())
         updateCommandScope.addArgumentValue(UpdateCountCommandStep.CHANGELOG_FILE_ARG, changesetFilepath)
         updateCommandScope.addArgumentValue(UpdateCountCommandStep.COUNT_ARG, 1)
         updateCommandScope.execute()
@@ -165,16 +165,16 @@ VALUES('1', 'your.name', '$changelogfile', '2023-05-31 14:33:39.108', 1, 'EXECUT
         ranChangeSets.get(1).getLastCheckSum().getVersion() == 9
 
         cleanup:
-        CommandUtil.runDropAll(mysql)
+        CommandUtil.runDropAll(h2)
     }
 
 
     def "update-testing-rollback"() {
         def changesetFilepath = "changelogs/common/checksum-changelog.xml"
-        final ChangeLogHistoryService changeLogService = ChangeLogHistoryServiceFactory.getInstance().getChangeLogService(mysql.getDatabaseFromFactory())
+        final ChangeLogHistoryService changeLogService = Scope.getCurrentScope().getSingleton(ChangeLogHistoryServiceFactory.class).getChangeLogService(h2.getDatabaseFromFactory())
         changeLogService.init()
         insertDbclRecord(changesetFilepath)
-        mysql.executeSql("CREATE TABLE person(id int)")
+        h2.executeSql("CREATE TABLE person(id int)")
 
         when:
         def ranChangeSets = getRanChangesets(changeLogService)
@@ -185,9 +185,9 @@ VALUES('1', 'your.name', '$changelogfile', '2023-05-31 14:33:39.108', 1, 'EXECUT
 
         when:
         CommandScope updateTestingRollbackCommand = new CommandScope(UpdateTestingRollbackCommandStep.COMMAND_NAME)
-        updateTestingRollbackCommand.addArgumentValue(DbUrlConnectionCommandStep.URL_ARG, mysql.getConnectionUrl())
-        updateTestingRollbackCommand.addArgumentValue(DbUrlConnectionCommandStep.USERNAME_ARG, mysql.getUsername())
-        updateTestingRollbackCommand.addArgumentValue(DbUrlConnectionCommandStep.PASSWORD_ARG, mysql.getPassword())
+        updateTestingRollbackCommand.addArgumentValue(DbUrlConnectionCommandStep.URL_ARG, h2.getConnectionUrl())
+        updateTestingRollbackCommand.addArgumentValue(DbUrlConnectionCommandStep.USERNAME_ARG, h2.getUsername())
+        updateTestingRollbackCommand.addArgumentValue(DbUrlConnectionCommandStep.PASSWORD_ARG, h2.getPassword())
         updateTestingRollbackCommand.addArgumentValue(DatabaseChangelogCommandStep.CHANGELOG_FILE_ARG, changesetFilepath)
         updateTestingRollbackCommand.execute()
         ranChangeSets = getRanChangesets(changeLogService)
@@ -197,13 +197,13 @@ VALUES('1', 'your.name', '$changelogfile', '2023-05-31 14:33:39.108', 1, 'EXECUT
         ranChangeSets.forEach({ rcs -> assert rcs.getLastCheckSum().getVersion() == 9 })
 
         cleanup:
-        CommandUtil.runDropAll(mysql)
+        CommandUtil.runDropAll(h2)
     }
 
 
     def "update-sql calculates checksum but does not update DBCL"() {
         def changesetFilepath = "changelogs/common/checksum-changelog.xml"
-        final ChangeLogHistoryService changeLogService = ChangeLogHistoryServiceFactory.getInstance().getChangeLogService(mysql.getDatabaseFromFactory())
+        final ChangeLogHistoryService changeLogService = Scope.getCurrentScope().getSingleton(ChangeLogHistoryServiceFactory.class).getChangeLogService(h2.getDatabaseFromFactory())
         changeLogService.init()
         insertDbclRecord(changesetFilepath)
 
@@ -216,9 +216,9 @@ VALUES('1', 'your.name', '$changelogfile', '2023-05-31 14:33:39.108', 1, 'EXECUT
 
         when:
         CommandScope updateCommandScope = new CommandScope(UpdateSqlCommandStep.COMMAND_NAME)
-        updateCommandScope.addArgumentValue(DbUrlConnectionCommandStep.URL_ARG, mysql.getConnectionUrl())
-        updateCommandScope.addArgumentValue(DbUrlConnectionCommandStep.USERNAME_ARG, mysql.getUsername())
-        updateCommandScope.addArgumentValue(DbUrlConnectionCommandStep.PASSWORD_ARG, mysql.getPassword())
+        updateCommandScope.addArgumentValue(DbUrlConnectionCommandStep.URL_ARG, h2.getConnectionUrl())
+        updateCommandScope.addArgumentValue(DbUrlConnectionCommandStep.USERNAME_ARG, h2.getUsername())
+        updateCommandScope.addArgumentValue(DbUrlConnectionCommandStep.PASSWORD_ARG, h2.getPassword())
         updateCommandScope.addArgumentValue(UpdateSqlCommandStep.CHANGELOG_FILE_ARG, changesetFilepath)
         updateCommandScope.execute()
         ranChangeSets = getRanChangesets(changeLogService)
@@ -228,12 +228,12 @@ VALUES('1', 'your.name', '$changelogfile', '2023-05-31 14:33:39.108', 1, 'EXECUT
         ranChangeSets.forEach({ rcs -> assert rcs.getLastCheckSum().getVersion() == 8 })
 
         cleanup:
-        CommandUtil.runDropAll(mysql)
+        CommandUtil.runDropAll(h2)
     }
 
     def "update-count-sql calculates checksum but does not update DBCL"() {
         def changesetFilepath = "changelogs/common/checksum-changelog.xml"
-        final ChangeLogHistoryService changeLogService = ChangeLogHistoryServiceFactory.getInstance().getChangeLogService(mysql.getDatabaseFromFactory())
+        final ChangeLogHistoryService changeLogService = Scope.getCurrentScope().getSingleton(ChangeLogHistoryServiceFactory.class).getChangeLogService(h2.getDatabaseFromFactory())
         changeLogService.init()
         insertDbclRecord(changesetFilepath)
 
@@ -246,9 +246,9 @@ VALUES('1', 'your.name', '$changelogfile', '2023-05-31 14:33:39.108', 1, 'EXECUT
 
         when:
         CommandScope updateCommandScope = new CommandScope(UpdateCountSqlCommandStep.COMMAND_NAME)
-        updateCommandScope.addArgumentValue(DbUrlConnectionCommandStep.URL_ARG, mysql.getConnectionUrl())
-        updateCommandScope.addArgumentValue(DbUrlConnectionCommandStep.USERNAME_ARG, mysql.getUsername())
-        updateCommandScope.addArgumentValue(DbUrlConnectionCommandStep.PASSWORD_ARG, mysql.getPassword())
+        updateCommandScope.addArgumentValue(DbUrlConnectionCommandStep.URL_ARG, h2.getConnectionUrl())
+        updateCommandScope.addArgumentValue(DbUrlConnectionCommandStep.USERNAME_ARG, h2.getUsername())
+        updateCommandScope.addArgumentValue(DbUrlConnectionCommandStep.PASSWORD_ARG, h2.getPassword())
         updateCommandScope.addArgumentValue(UpdateCountSqlCommandStep.CHANGELOG_FILE_ARG, changesetFilepath)
         updateCommandScope.addArgumentValue(UpdateCountSqlCommandStep.COUNT_ARG, 1)
         updateCommandScope.execute()
@@ -259,12 +259,12 @@ VALUES('1', 'your.name', '$changelogfile', '2023-05-31 14:33:39.108', 1, 'EXECUT
         ranChangeSets.forEach({ rcs -> assert rcs.getLastCheckSum().getVersion() == 8 })
 
         cleanup:
-        CommandUtil.runDropAll(mysql)
+        CommandUtil.runDropAll(h2)
     }
 
     def "update-to-tag-sql calculates checksum but does not update DBCL"() {
         def changesetFilepath = "changelogs/common/checksum-changelog-tag.xml"
-        final ChangeLogHistoryService changeLogService = ChangeLogHistoryServiceFactory.getInstance().getChangeLogService(mysql.getDatabaseFromFactory())
+        final ChangeLogHistoryService changeLogService = Scope.getCurrentScope().getSingleton(ChangeLogHistoryServiceFactory.class).getChangeLogService(h2.getDatabaseFromFactory())
         changeLogService.init()
         insertDbclRecord(changesetFilepath)
 
@@ -277,9 +277,9 @@ VALUES('1', 'your.name', '$changelogfile', '2023-05-31 14:33:39.108', 1, 'EXECUT
 
         when:
         CommandScope updateCommandScope = new CommandScope(UpdateToTagSqlCommandStep.COMMAND_NAME)
-        updateCommandScope.addArgumentValue(DbUrlConnectionCommandStep.URL_ARG, mysql.getConnectionUrl())
-        updateCommandScope.addArgumentValue(DbUrlConnectionCommandStep.USERNAME_ARG, mysql.getUsername())
-        updateCommandScope.addArgumentValue(DbUrlConnectionCommandStep.PASSWORD_ARG, mysql.getPassword())
+        updateCommandScope.addArgumentValue(DbUrlConnectionCommandStep.URL_ARG, h2.getConnectionUrl())
+        updateCommandScope.addArgumentValue(DbUrlConnectionCommandStep.USERNAME_ARG, h2.getUsername())
+        updateCommandScope.addArgumentValue(DbUrlConnectionCommandStep.PASSWORD_ARG, h2.getPassword())
         updateCommandScope.addArgumentValue(UpdateToTagSqlCommandStep.CHANGELOG_FILE_ARG, changesetFilepath)
         updateCommandScope.addArgumentValue(UpdateToTagSqlCommandStep.TAG_ARG, "version_1.3")
         updateCommandScope.execute()
@@ -290,6 +290,49 @@ VALUES('1', 'your.name', '$changelogfile', '2023-05-31 14:33:39.108', 1, 'EXECUT
         ranChangeSets.forEach({ rcs -> assert rcs.getLastCheckSum().getVersion() == 8 })
 
         cleanup:
-        CommandUtil.runDropAll(mysql)
+        CommandUtil.runDropAll(h2)
+    }
+
+    @Unroll
+    def "DBMS filtered changes should be used to calculate v8 checksum but not v9" () {
+        def changesetFilepath = "changelogs/h2/checksum/dbms-filter-changelog.xml"
+        final ChangeLogHistoryService changeLogService = Scope.getCurrentScope().getSingleton(ChangeLogHistoryServiceFactory.class).getChangeLogService(h2.getDatabaseFromFactory())
+        changeLogService.init()
+        h2.execute(new RawSqlStatement("""
+INSERT INTO DATABASECHANGELOG
+(ID, AUTHOR, FILENAME, DATEEXECUTED, ORDEREXECUTED, EXECTYPE, MD5SUM, DESCRIPTION, COMMENTS, TAG, LIQUIBASE, CONTEXTS, LABELS, DEPLOYMENT_ID)
+VALUES('1', 'fl', '$changesetFilepath', '2023-09-29 14:33:39.108', 1, 'EXECUTED', '8:0a36c7b201a287dd3348e8dd19e44be7', 'sql', 'example comment', NULL, 'DEV', 'example-context1', 'example-label', '5561619071');
+"""))
+        h2.execute(new RawSqlStatement("""
+INSERT INTO DATABASECHANGELOG
+(ID, AUTHOR, FILENAME, DATEEXECUTED, ORDEREXECUTED, EXECTYPE, MD5SUM, DESCRIPTION, COMMENTS, TAG, LIQUIBASE, CONTEXTS, LABELS, DEPLOYMENT_ID)
+VALUES('2', 'fl', '$changesetFilepath', '2023-09-29 14:33:39.112', 2, 'EXECUTED', '8:a6a54dbc65048ebf1388da78c31ef1a9', 'sqlFile; sqlFile', '', NULL, 'DEV', 'example-context1', 'example-label', '5561619071');
+"""))
+
+        when:
+        def ranChangeSets = getRanChangesets(changeLogService)
+
+        then:
+        ranChangeSets.size() == 2
+        ranChangeSets.forEach({ rcs -> assert rcs.getLastCheckSum().getVersion() == 8 })
+
+        when:
+        CommandScope updateCommandScope = new CommandScope(UpdateCommandStep.COMMAND_NAME)
+        updateCommandScope.addArgumentValue(DbUrlConnectionCommandStep.URL_ARG, h2.getConnectionUrl())
+        updateCommandScope.addArgumentValue(DbUrlConnectionCommandStep.USERNAME_ARG, h2.getUsername())
+        updateCommandScope.addArgumentValue(DbUrlConnectionCommandStep.PASSWORD_ARG, h2.getPassword())
+        updateCommandScope.addArgumentValue(UpdateCommandStep.CHANGELOG_FILE_ARG, changesetFilepath)
+        updateCommandScope.execute()
+        ranChangeSets = getRanChangesets(changeLogService)
+
+        then:
+        ranChangeSets.size() == 3
+        ranChangeSets.get(0).getLastCheckSum().toString() == "9:d41d8cd98f00b204e9800998ecf8427e"
+        ranChangeSets.get(1).getLastCheckSum().toString() == "9:62336a615e62e89c9d86128d1ca60ecf"
+        ranChangeSets.get(2).getLastCheckSum().toString() == "9:3b78b9910981c62ca27148640fad7bc2"
+
+        cleanup:
+        CommandUtil.runDropAll(h2)
+
     }
 }

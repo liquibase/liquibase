@@ -241,7 +241,9 @@ public abstract class AbstractRollbackCommandStep extends AbstractCommandStep {
     private static void handleRollbackException(String operationName, RollbackReportParameters rollbackReportParameters) {
         try (MdcObject deploymentOutcomeMdc = Scope.getCurrentScope().addMdcValue(MdcKey.DEPLOYMENT_OUTCOME, MdcValue.COMMAND_FAILED)) {
             Scope.getCurrentScope().getLog(AbstractRollbackCommandStep.class).info(operationName + " command encountered an exception.");
-            rollbackReportParameters.getOperationInfo().setOperationOutcome(MdcValue.COMMAND_FAILED);
+            if (rollbackReportParameters != null) {
+                rollbackReportParameters.getOperationInfo().setOperationOutcome(MdcValue.COMMAND_FAILED);
+            }
         }
     }
 

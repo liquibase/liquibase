@@ -73,7 +73,7 @@ public class IndexComparator implements DatabaseObjectComparator {
                 }
 
 
-                if ((thisIndexSize > 0) && (otherIndexSize > 0) && (thisIndexSize != otherIndexSize)) {
+                if (thisIndexSize != otherIndexSize) {
                     return false;
                 }
 

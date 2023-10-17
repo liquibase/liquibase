@@ -29,7 +29,7 @@ public class ReflectionSerializer {
             Map<String, Field> fields = new HashMap<>();
             Set<Field> allFields = new HashSet<>();
 
-            Class<? extends Object> classToExtractFieldsFrom = object.getClass();
+            Class<?> classToExtractFieldsFrom = object.getClass();
             while (!classToExtractFieldsFrom.equals(Object.class)) {
                 allFields.addAll(Arrays.asList(classToExtractFieldsFrom.getDeclaredFields()));
                 classToExtractFieldsFrom = classToExtractFieldsFrom.getSuperclass();
@@ -55,7 +55,7 @@ public class ReflectionSerializer {
 
     private Field findField(Object object, String field) {
         Field foundField = null;
-        Class<? extends Object> classToCheck = object.getClass();
+        Class<?> classToCheck = object.getClass();
         while ((foundField == null) && !classToCheck.equals(Object.class)) {
             try {
                 foundField = classToCheck.getDeclaredField(field);
