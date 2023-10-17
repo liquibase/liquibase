@@ -2,12 +2,14 @@ package liquibase.change;
 
 import liquibase.ExtensibleObject;
 import liquibase.Scope;
+import liquibase.change.visitor.ChangeVisitor;
 import liquibase.changelog.ChangeSet;
 import liquibase.database.Database;
 import liquibase.exception.RollbackImpossibleException;
 import liquibase.exception.SetupException;
 import liquibase.exception.ValidationErrors;
 import liquibase.exception.Warnings;
+import liquibase.parser.core.ParsedNodeException;
 import liquibase.plugin.Plugin;
 import liquibase.resource.ResourceAccessor;
 import liquibase.serializer.LiquibaseSerializable;
@@ -77,7 +79,7 @@ public interface Change extends LiquibaseSerializable, Plugin, ExtensibleObject 
 
     /**
      * Returns example {@link DatabaseObject} instances describing the objects affected by this change.
-     * This method is not called during the normal execution of a changelog, but but can be used as metadata for documentation or other integrations.
+     * This method is not called during the normal execution of a changelog, but can be used as metadata for documentation or other integrations.
      */
     Set<DatabaseObject> getAffectedDatabaseObjects(Database database);
 
@@ -142,4 +144,11 @@ public interface Change extends LiquibaseSerializable, Plugin, ExtensibleObject 
      * Short, scannable description for the DATABASECHANGELOG.DESCRIPTION column
      */
     String getDescription();
+
+    /**
+     *
+     * @param changeVisitor
+     * @throws liquibase.parser.core.ParsedNodeException if there is an error processing ChangeVisitor
+     */
+    void modify(ChangeVisitor changeVisitor) throws ParsedNodeException;
 }

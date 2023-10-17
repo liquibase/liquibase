@@ -1,7 +1,10 @@
 package liquibase.structure.core;
 
+import liquibase.GlobalConfiguration;
+import liquibase.Scope;
 import liquibase.change.ColumnConfig;
 import liquibase.change.ConstraintsConfig;
+import liquibase.configuration.LiquibaseConfiguration;
 import liquibase.parser.core.ParsedNode;
 import liquibase.parser.core.ParsedNodeException;
 import liquibase.resource.ResourceAccessor;
@@ -472,11 +475,26 @@ public class Column extends AbstractDatabaseObject {
     public Set<String> getSerializableFields() {
         final Set<String> fields = super.getSerializableFields();
         //if this is a computed or indexed column, don't have the serializer try to traverse down to the relation since it may not be a "real" object with an objectId
-        if (BooleanUtil.isTrue(getDescending()) || BooleanUtil.isTrue(getComputed())) {
+        if ((BooleanUtil.isTrue(getDescending()) || BooleanUtil.isTrue(getComputed())) && ! isRealObject()) {
             fields.remove("relation");
         }
         fields.remove("forIndex");
         return fields;
+    }
+
+    private boolean isRealObject() {
+        //
+        // Backwards compatibility if this flag is set then consider this object to not be "real"
+        //
+        if (Boolean.FALSE.equals( GlobalConfiguration.SHOULD_SNAPSHOT_RELATION_FOR_CALCULATED_COLUMNS.getCurrentValue())) {
+            return false;
+        }
+        Object obj = getAttribute("relation", Object.class);
+        if (obj instanceof DatabaseObject) {
+            DatabaseObject databaseObject = (DatabaseObject) obj;
+            return databaseObject.getSnapshotId() != null;
+        }
+        return false;
     }
 }
 

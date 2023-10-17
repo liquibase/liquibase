@@ -164,7 +164,7 @@ public abstract class DatabaseTestSystem extends TestSystem {
                 //
                 final URLClassLoader isolatedClassloader = new URLClassLoader(new URL[]{
                         driverPath.toUri().toURL(),
-                }, null);
+                }, this.getClass().getClassLoader());
 
                 final Class<?> isolatedDriverManager = Class.forName(DriverManager.class.getName(), true, isolatedClassloader);
                 final Method getDriverMethod = isolatedDriverManager.getMethod("getDriver", String.class);
@@ -328,8 +328,13 @@ public abstract class DatabaseTestSystem extends TestSystem {
     protected abstract String[] getSetupSql();
 
     public boolean executeSql(String sql) throws SQLException {
-        try (Statement statement = getConnection().createStatement()) {
-            return statement.execute(sql);
+        Connection connection = getConnection();
+        try (Statement statement = connection.createStatement()) {
+            boolean execute = statement.execute(sql);
+            if (!connection.getAutoCommit()) {
+                connection.commit();
+            }
+            return execute;
         }
     }
 

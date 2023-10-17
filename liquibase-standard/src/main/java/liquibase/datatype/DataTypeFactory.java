@@ -163,8 +163,12 @@ public class DataTypeFactory {
         // record additional information that is still attached to the data type name
         String additionalInfo = null;
         if (dataTypeName.toLowerCase(Locale.US).startsWith("bit varying")
-            || dataTypeName.toLowerCase(Locale.US).startsWith("character varying")) {
-            // not going to do anything. Special case for postgres in our tests,
+            || dataTypeName.toLowerCase(Locale.US).startsWith("character varying")
+            || dataTypeName.toLowerCase(Locale.US).startsWith("long varchar")
+            || dataTypeName.toLowerCase(Locale.US).startsWith("long nvarchar")
+            || dataTypeName.toLowerCase(Locale.US).startsWith("long binary")
+            || dataTypeName.toLowerCase(Locale.US).startsWith("long varbinary")) {
+            // not going to do anything. Special case for postgres and asany,
             // need to better support handling these types of differences
         } else {
             // Heuristic: from what we now have left of the data type name, everything after the first space

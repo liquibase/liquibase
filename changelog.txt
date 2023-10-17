@@ -1,6 +1,236 @@
 Liquibase Core Changelog
 ===========================================
 
+Changes in version 4.24.0 (2023.09.28)
+
+### Liquibase 4.24.0 is a major release
+
+## New Features
+
+- (#4574) Implement showSummaryOutput parameter @EvaristeGalois11
+- (#4395) Improve update summary usability @EvaristeGalois11
+- (#4697) Replacing special constants specific to SQL Anywhere by commonly supported JDBC Escape Functions @mkarg
+- (#4805) include tag in history tabular output (DAT-15244) @StevenMassaro
+- (#4692) add update report (DAT-15576) @StevenMassaro
+- (#4352) Adding support to parameters referenceLiquibaseCatalogName and referenceLiquibaseSchemaName. @filipelautert
+- (#3978) Introducing removeChangeSetProperty feature  @kirangodishala
+- (#4461) support concurrent build in maven plugin @piotrwielgolaski-tomtom
+- (#4537) SQL Anywhere: Switching off view definition checks to allow creation of dependent views even if dependency does not yet exist. @mkarg
+- (#4658) Upgrade installer version to 17.0.8+7 @filipelautert
+- (#4402) New Feature: Add an endsWithFilter attribute to includeAll @jasonlyle88
+- (#4387) Use more parameter markers for DB2z catalogue queries @MichaelKern-IVV
+- (#4148) maven-plugin: Support increasing maven log level @mensinda
+- (#4534) Fix database test system external driver load. @filipelautert
+- (#4660) Add labels/contexts arguments to diffChangelog and generateChangelog change sets DAT-14793 @wwillard7800
+- (#4680) Allow both include and includeAll to appear in modifyChangeSets tag @wwillard7800
+- (#4659) DAT-15646 DevOps - Reusable Debian Package Creation Workflow Migration @jandroav
+- (#4605) custom log data key-value pairs are injected multiple times per operation (DAT-15572) @StevenMassaro
+- (#4628) DAT -15524 Clear-Checksums implementation using command scope @MalloD12
+- (#4905) Check for duplicate core and commercial JARs DAT-15837  @wwillard7800
+- (#4799) parameter binding for DB2luw to improve performance and other trifles @MichaelKern-IVV
+- (#4926) Adding properties to the update report template to allow all the update family commands to use reports DAT-15638 @wwillard7800
+- (#4688) MySQL/MariaDB add extra info for date/timestamp columns for the diffChangeLog @filipelautert
+- (#4579) Use native oracle BOOLEAN for >=23c | fixes #4576 @mensinda
+- (#4834) Optimise the logic for tableIsEmpty check constraint  @filipelautert
+- (#4729) DAT-15603 Attach Azure jar to liquibase release artifacts @jandroav
+
+## Bug Fixes
+
+- (#4827) Handle XML data types for DB2 DAT-12878 @wwillard7800
+- (#4812) More consistent message when included file is empty DAT-15551 @wwillard7800
+- (#4670) Fixed: Fails to detect LONG VARCHAR as CLOB and LONG BINARY as BLOB @mkarg
+- (#4648) Fixed: SQL Anywhere reports fancy precision with LONG NVARCHAR @mkarg
+- (#4845) Fix liquibase.bat java home handling under Windows @filipelautert
+- (#4726) Allow update command to handle additional properties that are passed on the command line DAT-15769 @wwillard7800
+- (#4841) Update README link to contribution docs @nwcm
+- (#4589) Fixes JdbcExecutor's uses of RawParameterizedSqlStatement @andrew-simmons
+- (#4683) Fixed: #4682 - MSSQL: Doesn't support (n CHAR) syntax, but only (n) syntax @mkarg
+- (#4798) Fix poor performance of listunrunchangesets @filipelautert
+- (#4803) Fix liquibase 4.23.1 won't work on windows if there is no JAVA\_HOME system variable set @filipelautert
+- (#4502) Fixed: generateChangelog creates invalid changelog @mkarg
+- (#4772) Make sure that the correct argument name is displayed in help for commands with aliases DAT-15681 @wwillard7800
+- (#4441) Fix primaryKeyTablespace when attribute value is an empty string @delayk
+- (#4651) Fixing issue #4650 @mkarg
+- (#4404) enable REPLACE OR EXISTS for procedures on DB2 @MichaelKern-IVV
+- (#4541) remove dependency on javax.activation @filipelautert
+- (#4520) Fixed: SQL Anywhere reports fancy precision with DOUBLE, SMALLINT and TINYINT @mkarg
+- (#4609) fix standardlockservice when changelog-lock-wait-time-in-minutes is set to 0 and lock does not exist in database @jgarec
+- (#4591) Added changelog parameters to rollback commands @blaghed
+- (#4531) SQL Anywhere does not support "NO ACTION", but reports it for "SET DEFAULT" foreign keys @mkarg
+- (#4653) Allow DatabaseChangelog object to be passed as a parameter to DatabaseChangelogCommandStep @filipelautert
+- (#4613) Fix sequence from serial pre-condition validation for Postgresql @filipelautert
+- (#4507) Fixing Issue #4429: SQL Anywhere: generateChangeLog fails when column's default value is an expression (e. g. Unexpected error running Liquibase: Unknown boolean value: if "mycol" is null then 0 else 1 endif) @mkarg
+- (#4090) Fixes MySQL BIT / TINYINT(1) Boolean Behaviours @nwcm
+- (#4052) Fix H2 database case-sensitive identifier issues + upgrades JUnit tests cases to version 5 @mches
+- (#4709) Fix Regression in 4.23.1 where Log table is created multiple times for H2 and HSQLDB @filipelautert
+- (#4480) not to use class field for thread safe. @Wenkee
+- (#4515) Fixed: LONG VARCHAR DEFAULT NULL instead of LONG VARCHAR DEFAULT 'NULL' @mkarg
+- (#4534) Fix database test system external driver load. @filipelautert
+- (#4702) DAT-15602 @sayaliM0412
+- (#4689) Make operation start time be UTC DAT-15593 @wwillard7800
+- (#4585) DAT-15470 @sayaliM0412
+- (#4611) [DAT-15439] Fix adding redundant semicolon character for generateChangelog for MSSQL @vitaliimak
+- (#4625) Handle leading spaces in formatted SQL changelog  DAT-15221 @wwillard7800
+- (#4672) DAT-15602 @sayaliM0412
+- (#4654) Correctly escape spaces in table name when it is used in a query DAT-11529 @wwillard7800
+- (#4956) Fix typo in SqlGeneratorFactory @asashour
+- (#4937) [DAT-15924] Handle AbstractSQLChange runWith checksum v8 variants @filipelautert
+- (#4900) Enable scoped value to be looked up from Java properties loaded from the command line -D properties DAT-15668 @wwillard7800
+- (#4725) Change type of `RowCountPrecondition#expectedRows` from `Integer` to `Long` (#1549) @kzander91
+- (#4762) Fetch ran change sets before updating check sums @hpoettker
+- (#4598) SQL Anywhere allows two foreign keys to differ only by name @mkarg
+- (#4621) Fixed: Issue #4620 - "SQL Anywhere DOES support CREATE OR REPLACE VIEW, despite what the source code says!" @mkarg
+- (#4705) DAT-15338 Refactor connection string patterns to allow extensions to extend they @vitaliimak
+- (#4902) obfuscate user/pass in urls entered in MDC (DAT-15860) @StevenMassaro
+- (#4862) DAT-15821 :: OperationOutcomeErrorMsg field added to Operation Info @MalloD12
+- (#4909) Rollbacks Oracle Driver to LTS series 19.x  @filipelautert
+- (#4853) update truelicense text @suryaaki2
+- (#4854) Fix LabelExpression constructors when using array or collection @MalloD12
+- (#4859) Fix regression in recognizing formatted SQL file DAT-15865  @wwillard7800
+- (#4846) do not attempt to recreate DBCL when it is specified with mixed case (DAT-15570) @StevenMassaro
+
+## API Breaking Changes
+
+- (#4785) change MdcManager API to accept Map\<String, Object> instead of Map\<String, String> (DAT-15799) @StevenMassaro
+
+## Security, Driver and Other Updates
+
+- (#4717) Bump org.apache.maven.plugins:maven-enforcer-plugin from 3.3.0 to 3.4.0 @dependabot
+- (#4838) Bump groovy.version from 2.5.22 to 2.5.23 @MalloD12
+- (#4752) Bump ant.version from 1.10.13 to 1.10.14 @dependabot
+- (#4784) Bump org.xerial:sqlite-jdbc from 3.42.0.0 to 3.43.0.0 @dependabot
+- (#4768) Bump info.picocli:picocli from 4.7.4 to 4.7.5 @dependabot
+- (#4747) Bump net.snowflake:snowflake-jdbc from 3.14.0 to 3.14.1 @dependabot
+- (#4828) Bump com.h2database:h2 from 2.2.220 to 2.2.222 @dependabot
+- (#4767) Bump org.junit:junit-bom from 5.9.3 to 5.10.0 @dependabot
+- (#4601) Bump targetMavenVersion from 3.9.2 to 3.9.4 @dependabot
+- (#4793) Bump com.microsoft.sqlserver:mssql-jdbc from 12.2.0.jre8 to 12.4.1.jre8 @dependabot
+- (#4792) Bump org.junit.jupiter:junit-jupiter-params from 5.9.3 to 5.10.0 @MalloD12
+- (#4529) Bump com.opencsv:opencsv from 5.7.1 to 5.8 @dependabot
+- (#4791) Bump whelk-io/maven-settings-xml-action from 20 to 21 @MalloD12
+- (#4782) DAT-15790 add security reports @jnewton03
+- (#4764) Bump org.yaml:snakeyaml from 2.0 to 2.2 @dependabot
+- (#4477) Bump h2 from 2.1.214 to 2.2.220 in /liquibase-dist @dependabot
+- (#4410) Bump xml-maven-plugin from 1.0.2 to 1.1.0 @dependabot
+- (#4557) Bump net.snowflake:snowflake-jdbc from 3.13.32 to 3.14.0 @dependabot
+- (#4829) Bump org.slf4j:slf4j-jdk14 from 2.0.7 to 2.0.9 @dependabot
+- (#4940) Bump org.projectlombok:lombok from 1.18.28 to 1.18.30 @dependabot
+- (#4766) Bump org.mariadb.jdbc:mariadb-java-client from 3.1.4 to 3.2.0 @dependabot
+- (#4923) DAT-15922 add fossa license checking action @jnewton03
+
+
+Changes in version 4.23.2 (2023.09.11)
+
+### Liquibase 4.23.2 is a patch release
+
+## Bug Fixes
+- (#4870) Tweaked exception message for invalid formatted SQL file @wwillard7800
+- (#4874) DAT-15857 - Fix for checksum upgrade in runWith change sets  @wwillard7800
+
+
+Changes in version 4.23.1 (2023.08.09)
+
+### Liquibase 4.23.1 is a patch release
+
+## Notable Changes
+### [PRO]
+* Introduce two new commands: `set-labels` and `set-contexts` to batch update the labels or contexts on existing changesets. Use these to scale database DevOps by bulk updating your changesets with one command. Or consolidate changes from different teams with different coding standards to ensure adherence to current standards. Learn more at https://docs.liquibase.com
+
+## New Features
+
+* (#4476) [DAT-15258] Ensure Mongo extension doesnt control createIndex/dropIndex checksums for non-Mongo DBs. @filipelautert
+* (#4506) Add command line args to scope DAT-15396 @wwillard7800
+* (#4539) DAT-15417 PR for setLabels/setContexts build @wwillard7800
+* (#4599) run tests on any branch @sayaliM0412
+* (#4538) add warning message about using catalogs in Postgres (DAT-14933) @StevenMassaro
+* (#4361) [DAT-14970] FormattedSqlChangeLogParser refactoring @vitaliimak
+* (#4197) Consume CORE and PRO packages from GitHub Package Manager (DAT-14615) @sayaliM0412
+* (#4483) Add ability to set labels and contexts in included changelogs DAT-15202 @wwillard7800
+* (#4485) DAT-14929: include rows affected in update command console output @StevenMassaro
+* (#4321) DAT-6585 Apt-based Linux package @jandroav
+* (#4317) Reworked rollback to tag logic to look for use first occurrence of tag DAT-13057 @wwillard7800
+* (#4375) switch contexts argument to contextFilter (DAT-13423) @StevenMassaro
+* (#4162) Allow whitespace within a foreign key statement @sideeffffect
+* (#4407) improve error message when no sql generators can be found (DAT-14688) @StevenMassaro
+* (#4420) add additional MDC properties to update and diff mojos (DAT-14672) @StevenMassaro
+* (#4219) Fixed CommandLineUtilsTest for german locale @nvoxland
+* (#4450) Fix deploymentId not populating after locking @wwillard7800
+* (#4409) DAT-15030 @sayaliM0412
+
+
+## Changes and Bug Fixes
+
+### [PRO]
+
+* DAT-14909: Add changelogFile back to rollback-one/rollback-on-error mdc success messages by @abrackx in https://github.com/liquibase/liquibase-pro/pull/1024
+* DAT-14751 fix issues with nested flow files and logging by @wwillard7800 in https://github.com/liquibase/liquibase-pro/pull/1036
+* DAT-13397: Respect rollback-script argument for rollback-one-update command by @abrackx in https://github.com/liquibase/liquibase-pro/pull/1037
+* DAT-13423: switch contexts argument to contextFilter by @StevenMassaro in https://github.com/liquibase/liquibase-pro/pull/1043
+* DAT-14694: Add Pro Tag and Pro Rollback commands by @wwillard7800 in https://github.com/liquibase/liquibase-pro/pull/1013
+* DAT-13398: Respect contexts/labels on update-one-changeset, add changelogFile required parameter. by @abrackx in https://github.com/liquibase/liquibase-pro/pull/1042
+* DAT-14448 Implemented user metadata for the Flow file and cleaned up tests by @wwillard7800 in https://github.com/liquibase/liquibase-pro/pull/961
+* DAT-9715: change sql parser exception log level to fine by @StevenMassaro in https://github.com/liquibase/liquibase-pro/pull/1079
+* DAT-14791 Implement ability to exec shell commands within variables by @wwillard7800 in https://github.com/liquibase/liquibase-pro/pull/1059
+* DAT-12252: remove unusable pro arguments by @StevenMassaro in https://github.com/liquibase/liquibase-pro/pull/1081
+* DAT-14455: customize checks run output with --checks-output arg by @StevenMassaro in https://github.com/liquibase/liquibase-pro/pull/1078
+- fix flow command test for windows by @StevenMassaro in https://github.com/liquibase/liquibase-pro/pull/1098
+* DAT-8278: replace JSqlParserException with custom exception class by @StevenMassaro in https://github.com/liquibase/liquibase-pro/pull/1080
+* DAT-15202 Implement ability to modify labels in included changelogs by @wwillard7800 in https://github.com/liquibase/liquibase-pro/pull/1083
+* DAT-14615: Consume CORE and PRO artifact from GPM by @sayaliM0412 in https://github.com/liquibase/liquibase-pro/pull/963
+* DAT-9678: set severity exit code for SQL parser fails by @StevenMassaro in https://github.com/liquibase/liquibase-pro/pull/1100
+* DAT-14615: move repositories block into profile activated only on GHA by @StevenMassaro in https://github.com/liquibase/liquibase-pro/pull/1122
+* DAT-15384: sort checks run console output by the severity order specified in checks-output arg by @StevenMassaro in https://github.com/liquibase/liquibase-pro/pull/1101
+* DAT-15414 Rework to allow bash exec on Windows by @wwillard7800 in https://github.com/liquibase/liquibase-pro/pull/1086
+* DAT-15417 Added DBMS argument and refactored by @wwillard7800 in https://github.com/liquibase/liquibase-pro/pull/1104
+* DAT-15610: resolve license generator build failure that occurs on both-repo PRs by @StevenMassaro in https://github.com/liquibase/liquibase-pro/pull/1157
+
+
+### [OSS]
+
+* (#4370) add liquibaseHostName MDC key (DAT-14956) @StevenMassaro
+* (#4452) Fix checksum upgrade changes preventing useless updates and using AbstractChangeLogHistoryService for extensions compatibility @filipelautert
+* (#4353) Add support for valueSequenceNext in Snowflake @jccampanero
+* (#4308) Fix issue #3317 - StringIndexOutOfBoundsException if date is set to 1970-01-01 @Mika2147
+* (#4400) Fix ordering problem in ShowSummaryUtil. fixes #4399 @mensinda
+* (#4416) Normalize path using static function for Strings rather than Path.nor… @ffffionn
+* (#4533) decode URL encoded path in DirectoryPathHandler (DAT-15154) @StevenMassaro
+* (#4581) DAT-15208 :: Changeset object added back to "Update command completed successfully" JSON @MalloD12
+* (#4540) [DAT-15489] Fixes changelog-sync-to-tag ignores the tag if  it is already in database after 4.23.0 @filipelautert
+* (#4499) Fixed #4489: SQL Anywhere incorrectly reports VARCHAR(n CHAR) as VARCHAR(n) @mkarg
+* (#4089) Fix formatted SQL parse error when property has context, labels and global attributes @droy-sandbox
+* (#4362) docs file fixes, link updates @adrian-velonis1
+* (#4495) Do not throw exception when runWith is empty string (DAT-14316) @abrackx
+* (#4496) throw validation error on missing sqlFile (DAT-14920) @StevenMassaro
+* (#4490) fix format argument for history command (DAT-13382) @StevenMassaro
+* (#4470) [DAT-15327] Fix dropAll clean up behavior. @filipelautert
+* (#4508) [DAT-15383] Fix checksum upgrade changes preventing useless updates and using AbstractChangeLogHistoryService for extensions compatibility @filipelautert
+* (#4452) Fix checksum upgrade changes preventing useless updates and using AbstractChangeLogHistoryService for extensions compatibility @filipelautert
+* (#4422) Fixed #3971: "SAP SQL Anywhere 17.0.11: Liquibase incorrectly reports that TIMESTAMP requested precision is longer than TIMESTAMP supported precision" @mkarg
+* (#4453) Implements equals method on AbstractChange to make sure that we can compare Changes correctly @filipelautert
+* (#4444) Improvements after 4230 @filipelautert
+* (#4307) Fixes #3661 @farion
+* (#4454) Fix changelogsync no longer generating deployment id. @abrackx
+* (#4414) Fixes issue #4413: Undocumented IT requirement: Username "liquibase" @mkarg
+* (#4417) Fixes issue #4415: "Wrong DDL syntax CREATE SEQUENCE ... AS ..." @mkarg
+* (#4306) Fixes #3625 JAVA\_HOME Path when parenthesis are present @JulienMa94
+* (#4450) Fix deploymentId not populating after locking @wwillard7800
+* (#4228) #4227 fix for BOOLEAN with precision like BOOLEAN(1) @sfrevel
+* (#4354) Make CreateTableStatement backward compatible @jccampanero
+* (#4427) Fix update fast check behavior @MalloD12
+
+## Security, Driver and Other Updates
+
+* Bump ch.qos.logback:logback-classic from 1.4.7 to 1.4.9 by @dependabot in https://github.com/liquibase/liquibase-pro/pull/1153
+* (#4612) deprecate snyk in favor of github advanced security @jnewton03
+* (#4378) Bump snowflake-jdbc from 3.13.32 to 3.13.33 @dependabot
+* (#4368) Bump jaxb-runtime from 4.0.2 to 4.0.3 @dependabot
+* (#4360) Bump jaybird from 5.0.1.java8 to 5.0.2.java8 @dependabot
+* (#4334) Bump testcontainers-bom from 1.18.1 to 1.18.3 @dependabot
+* (#4397) Bump maven-shade-plugin from 3.4.1 to 3.5.0 @dependabot
+* (#4367) Bump jaxb-core from 4.0.2 to 4.0.3 @dependabot
+
+
+
 Changes in version 4.23.0 (2023.06.22)
 
 ### Liquibase 4.23.0 is a major release

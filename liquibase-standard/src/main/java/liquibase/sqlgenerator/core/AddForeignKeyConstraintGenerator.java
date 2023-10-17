@@ -36,6 +36,10 @@ public class AddForeignKeyConstraintGenerator extends AbstractSqlGenerator<AddFo
 
         validationErrors.checkDisallowedField("onDelete", addForeignKeyConstraintStatement.getOnDelete(), database, SybaseDatabase.class);
 
+        if (database instanceof SybaseASADatabase) {
+            validationErrors.addWarning("SQL Anywhere will apply RESTRICT instead of NO ACTION.");
+        }
+
         return validationErrors;
     }
 
@@ -66,6 +70,8 @@ public class AddForeignKeyConstraintGenerator extends AbstractSqlGenerator<AddFo
                 //don't use
             } else if (database instanceof SybaseDatabase) {
                 //don't use
+            } else if ((database instanceof SybaseASADatabase) && "NO ACTION".equalsIgnoreCase(statement.getOnUpdate())) {
+                //SQL Anywhere cannot do "nothing", so we let SQL Anywhere choose its implicit default (i. e. RESTRICT)
             } else {
                 sb.append(" ON UPDATE ").append(statement.getOnUpdate());
             }
@@ -84,18 +90,24 @@ public class AddForeignKeyConstraintGenerator extends AbstractSqlGenerator<AddFo
                 //don't use
             } else if (database instanceof SybaseDatabase) {
                 //don't use
+            } else if ((database instanceof SybaseASADatabase) && "NO ACTION".equalsIgnoreCase(statement.getOnDelete())) {
+                //SQL Anywhere cannot do "nothing", so we let SQL Anywhere choose its implicit default (i. e. RESTRICT)
             } else {
                 sb.append(" ON DELETE ").append(statement.getOnDelete());
             }
         }
 
         if (statement.isDeferrable() || statement.isInitiallyDeferred()) {
-            if (statement.isDeferrable()) {
+            if (statement.isDeferrable() && !(database instanceof SybaseASADatabase)) {
                 sb.append(" DEFERRABLE");
             }
 
             if (statement.isInitiallyDeferred()) {
-                sb.append(" INITIALLY DEFERRED");
+                if (database instanceof SybaseASADatabase) {
+                    sb.append(" CHECK ON COMMIT");
+                } else {
+                    sb.append(" INITIALLY DEFERRED");
+                }
             }
         }
 
