@@ -55,7 +55,7 @@ jobs:
       proBranchSha: ${{ steps.find-branches.outputs.proBranchSha }}
       thisSha: ${{ steps.find-branches.outputs.thisSha }}
       thisBranchName: ${{ steps.find-branches.outputs.thisBranchName }}
-      thisBranchFileName: ${{ steps.find-branches.outputs.thisBranchFileName }}
+      thisBranchName: ${{ steps.find-branches.outputs.thisBranchName }}
       thisRepositoryName: ${{ steps.find-branches.outputs.thisRepoName }}
       thisRepositoryOwner: ${{ steps.find-branches.outputs.thisRepoName }}
       standAlonePR: ${{ steps.find-branches.outputs.standAlonePR }}
@@ -88,7 +88,7 @@ jobs:
 
             core.setOutput("thisSha", helper.getCurrentSha());
             core.setOutput("thisBranchName", helper.getCurrentBranch());
-            core.setOutput("thisBranchFileName", helper.getCurrentBranch().replace(/[^a-zA-Z0-9\-_\.]/g, "_"));
+            core.setOutput("thisBranchName", helper.getCurrentBranch().replace(/[^a-zA-Z0-9\-_\.]/g, "_"));
             core.setOutput("thisRepoName", helper.getRepositoryName());
             core.setOutput("thisRepoOwner", helper.getRepositoryOwner());
 
@@ -408,7 +408,7 @@ jobs:
       # https://datical.atlassian.net/browse/DAT-15548
       - name: Version Artifact
         run: |
-          version=${{ needs.setup.outputs.thisBranchFileName }}-SNAPSHOT
+          version=${{ needs.setup.outputs.thisBranchName }}-SNAPSHOT
           # Replace / with - in branch name
           version=$(echo "$version" | sed 's/\//-/g')
           mvn versions:set -DnewVersion="$version"
@@ -433,24 +433,24 @@ jobs:
           echo "Saving windows key"
           echo "$INSTALL4J_WINDOWS_KEY" | base64 -d > liquibase-dist/target/keys/datical_windows.pfx
           # we are packaging and deploying liquibase tar which includes liquibase-commercial
-          mvn -B -pl liquibase-dist -P liquibase-commercial source:jar package -DskipTest "-Dliquibase-pro.version=${{ needs.setup.outputs.proBranchName }}-SNAPSHOT" "-Dbuild.repository.owner=${{ needs.setup.outputs.thisRepositoryOwner }}" "-Dbuild.repository.name=${{ needs.setup.outputs.thisRepositoryName }}" "-Dbuild.branch=${{ needs.setup.outputs.thisBranchFileName }}" "-Dbuild.number=${{ github.run_number }}" "-Dbuild.commit=${{ needs.setup.outputs.thisSha }}" "-Dbuild.timestamp=${{ needs.setup.outputs.timestamp }}"
+          mvn -B -pl liquibase-dist -P liquibase-commercial source:jar package -DskipTest "-Dliquibase-pro.version=${{ needs.setup.outputs.proBranchName }}-SNAPSHOT" "-Dbuild.repository.owner=${{ needs.setup.outputs.thisRepositoryOwner }}" "-Dbuild.repository.name=${{ needs.setup.outputs.thisRepositoryName }}" "-Dbuild.branch=${{ needs.setup.outputs.thisBranchName }}" "-Dbuild.number=${{ github.run_number }}" "-Dbuild.commit=${{ needs.setup.outputs.thisSha }}" "-Dbuild.timestamp=${{ needs.setup.outputs.timestamp }}"
 
           ## extract tar content for other artifacts
-          mkdir -p liquibase-dist/target/liquibase-${{ needs.setup.outputs.thisBranchFileName }}-SNAPSHOT
-          (cd liquibase-dist/target/liquibase-${{ needs.setup.outputs.thisBranchFileName }}-SNAPSHOT && tar -xzf ../liquibase-${{ needs.setup.outputs.thisBranchFileName }}-SNAPSHOT.tar.gz)
+          mkdir -p liquibase-dist/target/liquibase-${{ needs.setup.outputs.thisBranchName }}-SNAPSHOT
+          (cd liquibase-dist/target/liquibase-${{ needs.setup.outputs.thisBranchName }}-SNAPSHOT && tar -xzf ../liquibase-${{ needs.setup.outputs.thisBranchName }}-SNAPSHOT.tar.gz)
 
           ## verify that the contents of the tar matches the expectation
           echo "Comparing the contents of the tar.gz with the expected contents (using baseline file in liquibase-dist directory) to ensure that no new files were accidentally added. A failure here indicates that a new file was added to the tar.gz, and it should either be rectififed or added to the baseline."
           brew install tree --quiet
-          tree liquibase-dist/target/liquibase-${{ needs.setup.outputs.thisBranchFileName }}-SNAPSHOT -o actual-distribution-contents.txt --noreport
+          tree liquibase-dist/target/liquibase-${{ needs.setup.outputs.thisBranchName }}-SNAPSHOT -o actual-distribution-contents.txt --noreport
           # remove first line of actual, because it contains the folder name, which the expected will not have
           echo "$(tail -n +2 actual-distribution-contents.txt)" > actual-distribution-contents.txt
           diff actual-distribution-contents.txt liquibase-dist/expected-distribution-contents.txt
           rm -rf actual-distribution-contents.txt
           
           ##create zip file from tar content
-          (cd liquibase-dist/target/liquibase-${{ needs.setup.outputs.thisBranchFileName }}-SNAPSHOT && zip -r ../liquibase-${{ needs.setup.outputs.thisBranchFileName }}-SNAPSHOT.zip *)
-          ls liquibase-dist/target/liquibase-${{ needs.setup.outputs.thisBranchFileName }}-SNAPSHOT
+          (cd liquibase-dist/target/liquibase-${{ needs.setup.outputs.thisBranchName }}-SNAPSHOT && zip -r ../liquibase-${{ needs.setup.outputs.thisBranchName }}-SNAPSHOT.zip *)
+          ls liquibase-dist/target/liquibase-${{ needs.setup.outputs.thisBranchName }}-SNAPSHOT
           
           ##create installer - disabled here but run as nightly job and as part of release workflow
           # (cd liquibase-dist && ${{ github.workspace }}/.github/util/package-install4j.sh 0-SNAPSHOT)
@@ -458,8 +458,8 @@ jobs:
           find . -name original-*.jar -exec rm {} \;
 
           mkdir -p artifacts
-          cp liquibase-dist/target/liquibase-${{ needs.setup.outputs.thisBranchFileName }}-SNAPSHOT.tar.gz artifacts
-          cp liquibase-dist/target/liquibase-${{ needs.setup.outputs.thisBranchFileName }}-SNAPSHOT.zip artifacts
+          cp liquibase-dist/target/liquibase-${{ needs.setup.outputs.thisBranchName }}-SNAPSHOT.tar.gz artifacts
+          cp liquibase-dist/target/liquibase-${{ needs.setup.outputs.thisBranchName }}-SNAPSHOT.zip artifacts
           cp liquibase-core/target/liquibase-core-0-SNAPSHOT.jar artifacts/liquibase-core-0-SNAPSHOT.jar
           cp liquibase-core/target/liquibase-core-0-SNAPSHOT-sources.jar artifacts/liquibase-core-0-SNAPSHOT-sources.jar
           cp target/liquibase-0-SNAPSHOT-javadoc.jar artifacts/liquibase-core-0-SNAPSHOT-javadoc.jar
@@ -494,14 +494,14 @@ jobs:
 
           ##prepare branch-named convenience artifacts directories
           mkdir artifacts-named
-          cp liquibase-dist/target/liquibase-${{ needs.setup.outputs.thisBranchFileName }}-SNAPSHOT.tar.gz artifacts-named/liquibase-${{ needs.setup.outputs.thisBranchFileName }}.tar.gz
-          cp liquibase-core/target/liquibase-core-0-SNAPSHOT.jar artifacts-named/liquibase-core-${{ needs.setup.outputs.thisBranchFileName }}.jar
-          cp liquibase-maven-plugin/target/liquibase-maven-plugin-0-SNAPSHOT.jar artifacts-named/liquibase-maven-plugin-${{ needs.setup.outputs.thisBranchFileName }}.jar
-          cp liquibase-cdi/target/liquibase-cdi-0-SNAPSHOT.jar artifacts-named/liquibase-cdi-${{ needs.setup.outputs.thisBranchFileName }}.jar
-          cp liquibase-cdi-jakarta/target/liquibase-cdi-jakarta-0-SNAPSHOT.jar artifacts-named/liquibase-cdi-jakarta-${{ needs.setup.outputs.thisBranchFileName }}.jar
-          cp liquibase-extension-testing/target/liquibase-extension-testing-0-SNAPSHOT.jar artifacts-named/liquibase-extension-testing-${{ needs.setup.outputs.thisBranchFileName }}.jar
-          cp liquibase-extension-testing/target/liquibase-extension-testing-0-SNAPSHOT-deps.jar artifacts-named/liquibase-extension-testing-${{ needs.setup.outputs.thisBranchFileName }}-deps.jar
-          cp $commercialJarM2Location artifacts-named/liquibase-commercial-${{ needs.setup.outputs.thisBranchFileName }}.jar
+          cp liquibase-dist/target/liquibase-${{ needs.setup.outputs.thisBranchName }}-SNAPSHOT.tar.gz artifacts-named/liquibase-${{ needs.setup.outputs.thisBranchName }}.tar.gz
+          cp liquibase-core/target/liquibase-core-0-SNAPSHOT.jar artifacts-named/liquibase-core-${{ needs.setup.outputs.thisBranchName }}.jar
+          cp liquibase-maven-plugin/target/liquibase-maven-plugin-0-SNAPSHOT.jar artifacts-named/liquibase-maven-plugin-${{ needs.setup.outputs.thisBranchName }}.jar
+          cp liquibase-cdi/target/liquibase-cdi-0-SNAPSHOT.jar artifacts-named/liquibase-cdi-${{ needs.setup.outputs.thisBranchName }}.jar
+          cp liquibase-cdi-jakarta/target/liquibase-cdi-jakarta-0-SNAPSHOT.jar artifacts-named/liquibase-cdi-jakarta-${{ needs.setup.outputs.thisBranchName }}.jar
+          cp liquibase-extension-testing/target/liquibase-extension-testing-0-SNAPSHOT.jar artifacts-named/liquibase-extension-testing-${{ needs.setup.outputs.thisBranchName }}.jar
+          cp liquibase-extension-testing/target/liquibase-extension-testing-0-SNAPSHOT-deps.jar artifacts-named/liquibase-extension-testing-${{ needs.setup.outputs.thisBranchName }}-deps.jar
+          cp $commercialJarM2Location artifacts-named/liquibase-commercial-${{ needs.setup.outputs.thisBranchName }}.jar
 
       - name: Archive Packages
         uses: actions/upload-artifact@v3
@@ -512,20 +512,20 @@ jobs:
       - name: Archive Convenience Zip
         uses: actions/upload-artifact@v3
         with:
-          name: liquibase-zip-${{ needs.setup.outputs.thisBranchFileName }}
-          path: liquibase-dist/target/liquibase-${{ needs.setup.outputs.thisBranchFileName }}-SNAPSHOT/*
+          name: liquibase-zip-${{ needs.setup.outputs.thisBranchName }}
+          path: liquibase-dist/target/liquibase-${{ needs.setup.outputs.thisBranchName }}-SNAPSHOT/*
 
       - name: Archive Convenience Artifacts
         uses: actions/upload-artifact@v3
         with:
-          name: liquibase-artifacts-${{ needs.setup.outputs.thisBranchFileName }}
+          name: liquibase-artifacts-${{ needs.setup.outputs.thisBranchName }}
           path: artifacts-named/*
 
 
       # Publish to GitHub Packages. We are building a tar file which includes liquibase-commercial hence we need "-Dliquibase-pro.version"
       - name: Publish tar.gz package to GPM
         run: |
-          mvn -B -pl liquibase-dist -P liquibase-commercial clean deploy -DskipTests "-Dliquibase-pro.version=${{ needs.setup.outputs.proBranchName }}-SNAPSHOT" "-Dbuild.timestamp=${{ needs.setup.outputs.timestamp }}" "-Dbuild.repository.owner=${{ needs.setup.outputs.thisRepositoryOwner }}" "-Dbuild.repository.name=${{ needs.setup.outputs.thisRepositoryName }}" "-Dbuild.branch=${{ needs.setup.outputs.thisBranchFileName }}" "-Dbuild.number=${{ github.run_number }}" "-Dbuild.commit=${{ needs.setup.outputs.thisSha }}"
+          mvn -B -pl liquibase-dist -P liquibase-commercial clean deploy -DskipTests "-Dliquibase-pro.version=${{ needs.setup.outputs.proBranchName }}-SNAPSHOT" "-Dbuild.timestamp=${{ needs.setup.outputs.timestamp }}" "-Dbuild.repository.owner=${{ needs.setup.outputs.thisRepositoryOwner }}" "-Dbuild.repository.name=${{ needs.setup.outputs.thisRepositoryName }}" "-Dbuild.branch=${{ needs.setup.outputs.thisBranchName }}" "-Dbuild.number=${{ github.run_number }}" "-Dbuild.commit=${{ needs.setup.outputs.thisSha }}"
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
