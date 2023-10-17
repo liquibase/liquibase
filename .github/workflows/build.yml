@@ -55,7 +55,7 @@ jobs:
       proBranchSha: ${{ steps.find-branches.outputs.proBranchSha }}
       thisSha: ${{ steps.find-branches.outputs.thisSha }}
       thisBranchName: ${{ steps.find-branches.outputs.thisBranchName }}
-      thisBranchName: ${{ steps.find-branches.outputs.thisBranchName }}
+      thisBranchFileName: ${{ steps.find-branches.outputs.thisBranchFileName }}
       thisRepositoryName: ${{ steps.find-branches.outputs.thisRepoName }}
       thisRepositoryOwner: ${{ steps.find-branches.outputs.thisRepoName }}
       standAlonePR: ${{ steps.find-branches.outputs.standAlonePR }}
@@ -88,7 +88,7 @@ jobs:
 
             core.setOutput("thisSha", helper.getCurrentSha());
             core.setOutput("thisBranchName", helper.getCurrentBranch());
-            core.setOutput("thisBranchName", helper.getCurrentBranch().replace(/[^a-zA-Z0-9\-_\.]/g, "_"));
+            core.setOutput("thisBranchFileName", helper.getCurrentBranch().replace(/[^a-zA-Z0-9\-_\.]/g, "_"));
             core.setOutput("thisRepoName", helper.getRepositoryName());
             core.setOutput("thisRepoOwner", helper.getRepositoryOwner());
 
