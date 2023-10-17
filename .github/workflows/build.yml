@@ -87,7 +87,7 @@ jobs:
             const helper = require('./.github/util/workflow-helper.js')({github, context});
 
             core.setOutput("thisSha", helper.getCurrentSha());
-            core.setOutput("thisBranchName", helper.getCurrentBranch());
+            core.setOutput("thisBranchName", helper.getCurrentBranch().replace(/\//g, "-"));
             core.setOutput("thisBranchFileName", helper.getCurrentBranch().replace(/[^a-zA-Z0-9\-_\.]/g, "_"));
             core.setOutput("thisRepoName", helper.getRepositoryName());
             core.setOutput("thisRepoOwner", helper.getRepositoryOwner());
