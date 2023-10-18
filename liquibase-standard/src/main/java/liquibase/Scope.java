@@ -71,10 +71,10 @@ public class Scope {
 
     private static ScopeManager scopeManager;
 
-    private Scope parent;
+    private final Scope parent;
     private final SmartMap values = new SmartMap();
     @Getter
-    private String scopeId;
+    private final String scopeId;
     private static final Map<String, List<MdcObject>> addedMdcEntries = new ConcurrentHashMap<>();
 
     private LiquibaseListener listener;
@@ -140,9 +140,7 @@ public class Scope {
         this.parent = parent;
         scopeId = generateScopeId();
         if (scopeValues != null) {
-            for (Map.Entry<String, Object> entry : scopeValues.entrySet()) {
-                values.put(entry.getKey(), entry.getValue());
-            }
+            values.putAll(scopeValues);
         }
     }
 

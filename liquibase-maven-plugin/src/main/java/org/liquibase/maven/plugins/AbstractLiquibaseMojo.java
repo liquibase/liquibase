@@ -56,7 +56,7 @@ import static liquibase.configuration.LiquibaseConfiguration.REGISTERED_VALUE_PR
  * @author Florent Biville
  * <p>
  * Test dependency is used because when you run a goal outside the build phases you want to have the same dependencies
- * that it would had if it was ran inside test phase
+ * that it would have if it was run inside test phase
  * @requiresDependencyResolution test
  */
 @SuppressWarnings("java:S2583")
@@ -271,7 +271,7 @@ public abstract class AbstractLiquibaseMojo extends AbstractMojo {
     @PropertyElement
     protected boolean clearCheckSums;
     /**
-     * Specifies a list of system properties you want to to pass to the database.
+     * Specifies a list of system properties you want to pass to the database.
      *
      * @parameter
      */
@@ -784,7 +784,7 @@ public abstract class AbstractLiquibaseMojo extends AbstractMojo {
                         getLog().info(CommandLineUtils.getBanner());
                     }
 
-                    // Displays the settings for the Mojo depending of verbosity mode.
+                    // Displays the settings for the Mojo depending on verbosity mode.
                     displayMojoSettings();
 
                     // Check that all the parameters that must be specified have been by the user.
