@@ -88,13 +88,6 @@ jobs:
         with:
           ref: ${{ github.event.pull_request.head.sha || github.event.after}}
 
-#      - name: Built Code Cache
-#        if: ${{ matrix.java == 11}}
-#        uses: actions/cache@v3.3.1
-#        with:
-#          key: built-code-${{ github.run_number }}-${{ github.run_attempt }}
-#          path: ./**/target
-
       - name: Set up JDK ${{ matrix.java }}
         uses: actions/setup-java@v3
         with:
@@ -151,6 +144,7 @@ jobs:
         uses: stCarolas/setup-maven@v4.5
         with:
           maven-version: ${{ env.MAVEN_VERSION }}
+
       - name: Build & Test Java 8
         if: ${{ matrix.java == 8}}
         run: |
@@ -160,6 +154,7 @@ jobs:
         if: ${{ matrix.java != 8}}
         run: |
           mvn -B "-Dbuild.repository.owner=liquibase" "-Dbuild.repository.name=liquibase" "-Dbuild.branch=${GITHUB_HEAD_REF}" "-Dbuild.number=${{ github.run_number }}" "-Dbuild.commit=${{ needs.setup.outputs.latestMergeSha }}" "-DtrimStackTrace=false" clean test package surefire-report:report
+
       - name: Remove Original Jars for *nix
         if: env.OS_TYPE != 'windows-2019'
         run: |
@@ -168,14 +163,17 @@ jobs:
       - name: Compress Artifacts
         if: ${{ matrix.java == 11 && matrix.os == 'ubuntu-22.04'}}
         run: |
-          tar -czf temp-artifact.tar.gz ./**/target
+          tar -czvf temp-artifact.tar.gz ./**/target 
+          tar -czvf base-temp-artifact.tar.gz ./target 
 
       - name: Upload Artifacts for build.yml
         if: ${{ matrix.java == 11 && matrix.os == 'ubuntu-22.04'}}
         uses: actions/upload-artifact@v3
         with:
           name: temp-artifact
-          path: temp-artifact.tar.gz
+          path: |
+            temp-artifact.tar.gz
+            temp-artifact-2.tar.gz
 
       - name: Archive Test Results
         if: ${{ inputs.archive_test_results == 'true' }}
