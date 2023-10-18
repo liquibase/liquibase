@@ -99,7 +99,7 @@ jobs:
 
   build_publish_branch:
     name: Build & Package
-    runs-on: ubuntu-22.04
+    runs-on: macos-latest
     needs: [setup, run-tests]
     if: needs.setup.outputs.branchExistsInBoth == 'true'
     permissions:
@@ -254,7 +254,7 @@ jobs:
             echo "Javadocs not available for liquibase-commercial" > /tmp/readme.javadocs.txt
             (cd /tmp && jar cf liquibase-commercial-${{ needs.setup.outputs.thisBranchName }}-SNAPSHOT-javadoc.jar readme.javadocs.txt)
             
-            ls -R /Users
+            ls -R /Users/runner/.m2/repository/org/liquibase/liquibase-commercial
             
             commercialJarM2Location=/Users/runner/.m2/repository/org/liquibase/liquibase-commercial/${{ needs.setup.outputs.thisBranchName }}-SNAPSHOT/liquibase-commercial-${{ needs.setup.outputs.thisBranchName }}-SNAPSHOT.jar
             cp $commercialJarM2Location artifacts
