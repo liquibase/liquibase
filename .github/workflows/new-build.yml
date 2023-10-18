@@ -254,7 +254,7 @@ jobs:
             echo "Javadocs not available for liquibase-commercial" > /tmp/readme.javadocs.txt
             (cd /tmp && jar cf liquibase-commercial-${{ needs.setup.outputs.thisBranchName }}-SNAPSHOT-javadoc.jar readme.javadocs.txt)
             
-            ls -R /Users/runner/.m2/repository/
+            ls -R /Users
             
             commercialJarM2Location=/Users/runner/.m2/repository/org/liquibase/liquibase-commercial/${{ needs.setup.outputs.thisBranchName }}-SNAPSHOT/liquibase-commercial-${{ needs.setup.outputs.thisBranchName }}-SNAPSHOT.jar
             cp $commercialJarM2Location artifacts
