@@ -173,7 +173,7 @@ jobs:
           name: temp-artifact
           path: |
             temp-artifact.tar.gz
-            temp-artifact-2.tar.gz
+            base-temp-artifact.tar.gz
 
       - name: Archive Test Results
         if: ${{ inputs.archive_test_results == 'true' }}
