@@ -6,9 +6,9 @@ on:
     branches:
       - master
       - release
+
 permissions:
   contents: read
-
 
 jobs:
   create_draft_release_release_branch:
@@ -36,7 +36,7 @@ jobs:
         with:
           config-name: release-drafter-release.yml # located in .github/ in default branch
         env:
-          GITHUB_TOKEN: ${{ secrets.RELEASEDRAFTERTOKEN }}
+          GITHUB_TOKEN: ${{ secrets.RELEASE_DRAFTER_TOKEN }}
 
   create_draft_release_master:
     permissions:
@@ -47,15 +47,6 @@ jobs:
       pull-requests: write
     runs-on: ubuntu-latest
     steps:
-#      - name: Throttle Requests (Master)
-#        if: github.ref == 'refs/heads/master'
-#        uses: actions/github-script@v6
-#        with:
-#          script: |
-#            console.log('Delaying for 30 seconds...');
-#            await new Promise(resolve => setTimeout(resolve, 30000)); // Add a 30-second delay
-
-
       - name: Create Draft Release (Master)
         if: github.ref == 'refs/heads/master'
 
@@ -64,4 +55,4 @@ jobs:
         with:
           config-name: release-drafter-master.yml # located in .github/ in default branch
         env:
-          GITHUB_TOKEN: ${{ secrets.RELEASEDRAFTERTOKEN }}
+          GITHUB_TOKEN: ${{ secrets.RELEASE_DRAFTER_TOKEN }}
