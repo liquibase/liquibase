@@ -160,20 +160,13 @@ jobs:
         run: |
           find . -name original-*.jar -exec rm {} \;
 
-      - name: Compress Artifacts
-        if: ${{ matrix.java == 11 && matrix.os == 'ubuntu-22.04'}}
-        run: |
-          tar -czvf temp-artifact.tar.gz ./**/target 
-          tar -czvf base-temp-artifact.tar.gz ./target 
-
       - name: Upload Artifacts for build.yml
         if: ${{ matrix.java == 11 && matrix.os == 'ubuntu-22.04'}}
         uses: actions/upload-artifact@v3
         with:
           name: temp-artifact
           path: |
-            temp-artifact.tar.gz
-            base-temp-artifact.tar.gz
+            ./**/target/*.jar 
 
       - name: Archive Test Results
         if: ${{ inputs.archive_test_results == 'true' }}
