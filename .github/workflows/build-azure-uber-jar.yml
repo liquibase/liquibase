@@ -30,7 +30,7 @@ jobs:
         with:
             repository: liquibase/liquibase-pro
             ref: ${{ inputs.branch}}
-            token: ${{ secrets.BOT_TOKEN }}
+            token: ${{ secrets.LIQUIBOT_PAT }}
 
       - name: Set up JDK 17
         uses: actions/setup-java@v3
