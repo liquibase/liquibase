@@ -15,6 +15,7 @@ import liquibase.exception.ValidationErrors;
 import liquibase.executor.Executor;
 import liquibase.executor.ExecutorService;
 import liquibase.util.StringUtil;
+import lombok.Getter;
 
 import java.util.*;
 
@@ -27,6 +28,16 @@ public class ChangeLogIterator {
     private static final ResourceBundle coreBundle = getBundle("liquibase/i18n/liquibase-core");
     private static final String MSG_COULD_NOT_FIND_EXECUTOR = coreBundle.getString("no.executor.found");
     private final Set<String> seenChangeSets = new HashSet<>();
+    /**
+     * Changesets which encountered an exception during visit.
+     */
+    @Getter
+    private final List<ChangeSet> exceptionChangeSets = new ArrayList<>();
+    /**
+     * Changesets that were never visited because a previous changeset encountered an exception.
+     */
+    @Getter
+    private final List<ChangeSet> skippedDueToExceptionChangeSets = new ArrayList<>();
 
     public ChangeLogIterator(DatabaseChangeLog databaseChangeLog, ChangeSetFilter... changeSetFilters) {
         this(databaseChangeLog, Arrays.asList(changeSetFilters));
@@ -78,7 +89,8 @@ public class ChangeLogIterator {
                     if (visitor.getDirection().equals(ChangeSetVisitor.Direction.REVERSE)) {
                         Collections.reverse(changeSetList);
                     }
-                    for (ChangeSet changeSet : changeSetList) {
+                    for (int i = 0; i < changeSetList.size(); i++) {
+                        ChangeSet changeSet = changeSetList.get(i);
                         boolean shouldVisit = true;
                         Set<ChangeSetFilterResult> reasonsAccepted = new HashSet<>();
                         Set<ChangeSetFilterResult> reasonsDenied = new HashSet<>();
@@ -101,6 +113,7 @@ public class ChangeLogIterator {
                         scopeValues.put(Scope.Attr.changeSet.name(), changeSet);
                         scopeValues.put(Scope.Attr.database.name(), env.getTargetDatabase());
 
+                        int finalI = i;
                         Scope.child(scopeValues, () -> {
                             if (finalShouldVisit) {
                                 //
@@ -111,7 +124,14 @@ public class ChangeLogIterator {
                                     validateChangeSetExecutor(changeSet, env);
                                 }
 
-                                visitor.visit(changeSet, databaseChangeLog, env.getTargetDatabase(), reasonsAccepted);
+                                try {
+                                    visitor.visit(changeSet, databaseChangeLog, env.getTargetDatabase(), reasonsAccepted);
+                                } catch (Exception e) {
+                                    exceptionChangeSets.add(changeSet);
+                                    skippedDueToExceptionChangeSets.addAll(changeSetList.subList(finalI + 1, changeSetList.size()));
+
+                                    throw e;
+                                }
                                 markSeen(changeSet);
                             } else {
                                 if (visitor instanceof SkippedChangeSetVisitor) {

@@ -41,13 +41,21 @@ public class CharType extends LiquibaseDataType {
             type.addAdditionalInformation(getAdditionalInformation());
             return type;
         } else if (database instanceof PostgresDatabase){
-            if ((getParameters() != null) && (getParameters().length == 1) && "2147483647".equals(getParameters()[0]
-                .toString())) {
-                DatabaseDataType type = new DatabaseDataType("CHARACTER");
-                type.addAdditionalInformation("VARYING");
+            final Object[] parameters = getParameters();
+            if ((parameters != null) && (parameters.length == 1)) {
+                // PostgreSQL only supports (n) syntax but not (n CHAR) syntax, so we need to remove CHAR.
+                final String parameter = parameters[0].toString().replaceFirst("(?<=\\d+)\\s*(?i)CHAR$", "");
+                // PostgreSQL uses max. length implicitly if no length is provided to CHARACTER VARYING, so we can spare it.
+                if ("2147483647".equals(parameter)) {
+                    DatabaseDataType type = new DatabaseDataType("CHARACTER");
+                    type.addAdditionalInformation("VARYING");
+                    return type;
+                }
+                parameters[0] = parameter;
+                DatabaseDataType type = new DatabaseDataType(this.getName().toUpperCase(Locale.US), parameters);
+                type.addAdditionalInformation(this.getAdditionalInformation());
                 return type;
             }
-            return super.toDatabaseDataType(database);
         } else if (database instanceof H2Database) {
             if (getRawDefinition().toLowerCase(Locale.US).contains("large object")) {
                 return new DatabaseDataType("CHARACTER LARGE OBJECT");
