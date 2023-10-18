@@ -114,12 +114,6 @@ jobs:
           uses: actions/download-artifact@v3
           with:
             name: temp-artifact
-            path: download
-
-        - name: Unzip temp-artifact.tar.gz file
-          run: |
-            tar -xzf download/temp-artifact.tar.gz
-            ls -l liquibase-core/target
 
         ##Cache based on install4j file, since changes to JVM is seen in there. If install4j version changes without changing the file, change the prefix letter before hashFiles to force a new cache
         - name: Install4j Cache
