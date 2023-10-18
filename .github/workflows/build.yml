@@ -164,9 +164,9 @@ jobs:
           - os: windows-2019
             java: 17
           - os: macos-latest
-            java: 20
+            java: 21
           - os: windows-2019
-            java: 20
+            java: 21
     runs-on: ${{ matrix.os }}
     env:
       OS_TYPE: ${{ matrix.os }}
