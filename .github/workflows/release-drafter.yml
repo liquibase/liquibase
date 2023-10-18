@@ -38,7 +38,7 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.RELEASE_DRAFTER_TOKEN }}
 
-  create_draft_release_master:
+  create_draft_release_master_branch:
     permissions:
       # write permission is required to create a github release
       contents: write
