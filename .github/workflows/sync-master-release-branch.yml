@@ -8,6 +8,7 @@ on:
 jobs:
   sync-branches:
     runs-on: ubuntu-latest
+    permissions: write-all
     name: Syncing branches
     steps:
       - name: Checkout
