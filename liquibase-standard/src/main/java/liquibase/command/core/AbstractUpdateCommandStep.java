@@ -96,9 +96,12 @@ public abstract class AbstractUpdateCommandStep extends AbstractCommandStep impl
             scopeValues.put("showSummary", getShowSummary(commandScope));
             scopeValues.put("rowsAffected", rowsAffected);
             Scope.child(scopeValues, () -> {
-                runChangeLogIterator.run(new UpdateVisitor(database, changeExecListener, new ShouldRunChangeSetFilter(database)),
-                        new RuntimeEnvironment(database, contexts, labelExpression));
-                ShowSummaryUtil.showUpdateSummary(databaseChangeLog, getShowSummary(commandScope), getShowSummaryOutput(commandScope), statusVisitor, resultsBuilder.getOutputStream());
+                try {
+                    runChangeLogIterator.run(new UpdateVisitor(database, changeExecListener, new ShouldRunChangeSetFilter(database)),
+                            new RuntimeEnvironment(database, contexts, labelExpression));
+                } finally {
+                    ShowSummaryUtil.showUpdateSummary(databaseChangeLog, getShowSummary(commandScope), getShowSummaryOutput(commandScope), statusVisitor, resultsBuilder.getOutputStream(), runChangeLogIterator);
+                }
             });
 
             resultsBuilder.addResult("statusCode", 0);
@@ -219,7 +222,7 @@ public abstract class AbstractUpdateCommandStep extends AbstractCommandStep impl
     private final Map<String, Boolean> upToDateFastCheck = new ConcurrentHashMap<>();
 
     public boolean isUpToDateFastCheck(CommandScope commandScope, Database database, DatabaseChangeLog databaseChangeLog, Contexts contexts, LabelExpression labelExpression) throws LiquibaseException {
-        String cacheKey = String.format("%s/%s/%s/%s/%s", contexts, labelExpression, database.getDefaultSchemaName(), database.getDefaultCatalogName(), database.getConnection().getURL());
+        String cacheKey = String.format("%s/%s/%s/%s/%s/%s", contexts, labelExpression, database.getDefaultSchemaName(), database.getDefaultCatalogName(), database.getConnection().getURL(), databaseChangeLog.getLogicalFilePath());
         if (!upToDateFastCheck.containsKey(cacheKey)) {
             ChangeLogHistoryService changeLogService = Scope.getCurrentScope().getSingleton(ChangeLogHistoryServiceFactory.class).getChangeLogService(database);
             try {
@@ -283,7 +286,7 @@ public abstract class AbstractUpdateCommandStep extends AbstractCommandStep impl
             StatusVisitor statusVisitor = getStatusVisitor(commandScope, database, contexts, labelExpression, databaseChangeLog);
             UpdateSummaryEnum showSummary = getShowSummary(commandScope);
             UpdateSummaryOutputEnum showSummaryOutput = getShowSummaryOutput(commandScope);
-            ShowSummaryUtil.showUpdateSummary(databaseChangeLog, showSummary, showSummaryOutput, statusVisitor, outputStream);
+            ShowSummaryUtil.showUpdateSummary(databaseChangeLog, showSummary, showSummaryOutput, statusVisitor, outputStream, null);
             return true;
         }
         return false;

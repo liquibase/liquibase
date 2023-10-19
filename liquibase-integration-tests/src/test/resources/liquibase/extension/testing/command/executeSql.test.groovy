@@ -43,7 +43,7 @@ Optional Args:
         }
         expectedOutput = [
                 'Output of select * from databasechangelog:',
-                'AUTHOR | COMMENTS | CONTEXTS | DATEEXECUTED | DEPLOYMENT_ID | DESCRIPTION | EXECTYPE | FILENAME | ID | LABELS | LIQUIBASE | MD5SUM | ORDEREXECUTED | TAG |'
+                'ID | AUTHOR | FILENAME | DATEEXECUTED | ORDEREXECUTED | EXECTYPE | MD5SUM | DESCRIPTION | COMMENTS | TAG | LIQUIBASE | CONTEXTS | LABELS | DEPLOYMENT_ID |'
         ]
     }
 
