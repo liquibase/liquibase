@@ -1,4 +1,4 @@
-name: Sync Master to Release Branch
+name: Sync Release to Master Branch
 
 on:
   push:
