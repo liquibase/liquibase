@@ -3,19 +3,41 @@ name: Build Azure Uber jar
 on:
   workflow_call:
     inputs:
-        branch:
-          description: 'branch to check out'
-          required: true
-          type: string
-        liquibase-version:
-          description: 'liquibase version'
-          required: true
-          type: string
+      branch:
+        description: 'branch to check out'
+        required: true
+        type: string
+      liquibase-version:
+        description: 'liquibase version'
+        required: true
+        type: string
   workflow_dispatch:
 
 env:
   MAVEN_VERSION: '3.9.2'
-
+  PLUGIN_REPOSITORIES: |
+    [
+      {
+        "id": "file-replacer-maven-plugin",
+        "url": "https://maven.pkg.github.com/StevenMassaro/file-replacer-maven-plugin",
+        "releases": {
+          "enabled": "true",
+          "updatePolicy": "always"
+        },
+        "snapshots": {
+          "enabled": "true",
+          "updatePolicy": "always"
+        }
+      }
+    ]
+  SERVERS: |
+    [
+      {
+        "id": "file-replacer-maven-plugin",
+        "username": "liquibot",
+        "password": "${{ secrets.LIQUIBOT_PAT }}"
+      }
+    ]
 jobs:
 
   build:
@@ -28,9 +50,9 @@ jobs:
       - uses: actions/checkout@v3
         name: Checkout liquibase-pro
         with:
-            repository: liquibase/liquibase-pro
-            ref: ${{ inputs.branch}}
-            token: ${{ secrets.LIQUIBOT_PAT }}
+          repository: liquibase/liquibase-pro
+          ref: ${{ inputs.branch}}
+          token: ${{ secrets.LIQUIBOT_PAT }}
 
       - name: Set up JDK 17
         uses: actions/setup-java@v3
@@ -38,6 +60,13 @@ jobs:
           java-version: 17
           distribution: 'temurin'
           cache: 'maven'
+
+      - name: maven-settings-xml-action
+        uses: whelk-io/maven-settings-xml-action@v21
+        with:
+          repositories: ${{ env.REPOSITORIES }}
+          plugin_repositories: ${{ env.PLUGIN_REPOSITORIES }}
+          servers: ${{ env.SERVERS }}
 
       - name: Set up Maven
         uses: stCarolas/setup-maven@v4.5
