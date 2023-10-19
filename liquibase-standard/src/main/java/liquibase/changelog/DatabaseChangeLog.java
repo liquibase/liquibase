@@ -7,6 +7,8 @@ import liquibase.changelog.filter.ContextChangeSetFilter;
 import liquibase.changelog.filter.DbmsChangeSetFilter;
 import liquibase.changelog.filter.LabelChangeSetFilter;
 import liquibase.changelog.visitor.ValidatingVisitor;
+import liquibase.changeset.ChangeSetService;
+import liquibase.changeset.ChangeSetServiceFactory;
 import liquibase.database.Database;
 import liquibase.database.DatabaseList;
 import liquibase.database.ObjectQuotingStrategy;
@@ -25,8 +27,6 @@ import liquibase.precondition.core.PreconditionContainer;
 import liquibase.resource.Resource;
 import liquibase.resource.ResourceAccessor;
 import liquibase.servicelocator.LiquibaseService;
-import liquibase.sql.visitor.SqlVisitor;
-import liquibase.sql.visitor.SqlVisitorFactory;
 import liquibase.util.FileUtil;
 import liquibase.util.StringUtil;
 
@@ -425,9 +425,7 @@ public class DatabaseChangeLog implements Comparable<DatabaseChangeLog>, Conditi
                 }
                 break;
             case "modifyChangeSets":
-                ModifyChangeSets modifyChangeSets = new ModifyChangeSets(
-                        (String) node.getChildValue(null, "runWith"),
-                        (String) node.getChildValue(null, "runWithSpoolFile"));
+                ModifyChangeSets modifyChangeSets = createModifyChangeSets(node);
                 nodeScratch = new HashMap<>();
                 nodeScratch.put("modifyChangeSets", modifyChangeSets);
                 for (ParsedNode modifyChildNode : node.getChildren()) {
@@ -612,6 +610,13 @@ public class DatabaseChangeLog implements Comparable<DatabaseChangeLog>, Conditi
                     throw new ParsedNodeException("Unexpected node found under databaseChangeLog: " + nodeName);
                 }
         }
+    }
+
+    private ModifyChangeSets createModifyChangeSets(ParsedNode node) throws ParsedNodeException {
+        ModifyChangeSets modifyChangeSets = new ModifyChangeSets(
+                (String) node.getChildValue(null, "runWith"),
+                (String) node.getChildValue(null, "runWithSpoolFile"));
+        return modifyChangeSets;
     }
 
     //
@@ -990,7 +995,14 @@ public class DatabaseChangeLog implements Comparable<DatabaseChangeLog>, Conditi
     }
 
     protected ChangeSet createChangeSet(ParsedNode node, ResourceAccessor resourceAccessor) throws ParsedNodeException {
-        ChangeSet changeSet = new ChangeSet(this);
+        ChangeSet changeSet = null;
+        try {
+            ChangeSetServiceFactory factory = ChangeSetServiceFactory.getInstance();
+            ChangeSetService service = factory.createChangeSetService();
+            changeSet = service.createChangeSet(this);
+        } catch (LiquibaseException le) {
+            throw new ParsedNodeException("Unable to create change set");
+        }
         changeSet.setChangeLogParameters(this.getChangeLogParameters());
         changeSet.load(node, resourceAccessor);
         return changeSet;
@@ -1039,32 +1051,6 @@ public class DatabaseChangeLog implements Comparable<DatabaseChangeLog>, Conditi
     public void clearCheckSums() {
         for (ChangeSet changeSet : getChangeSets()) {
             changeSet.clearCheckSum();
-        }
-    }
-
-    /**
-     * Container class to handle the modifyChangeSets tag.
-     * Other attributes may be added later
-     */
-    private static class ModifyChangeSets {
-        private final String runWith;
-        private final String runWithSpool;
-
-        /**
-         * @param runWith      The native executor to execute all included change sets with. Can be null
-         * @param runWithSpool The name of the spool file to be created
-         */
-        public ModifyChangeSets(String runWith, String runWithSpool) {
-            this.runWith = runWith;
-            this.runWithSpool = runWithSpool;
-        }
-
-        public String getRunWith() {
-            return runWith;
-        }
-
-        public String getRunWithSpool() {
-            return runWithSpool;
         }
     }
 
