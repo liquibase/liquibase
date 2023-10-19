@@ -64,7 +64,6 @@ jobs:
       - name: maven-settings-xml-action
         uses: whelk-io/maven-settings-xml-action@v21
         with:
-          repositories: ${{ env.REPOSITORIES }}
           plugin_repositories: ${{ env.PLUGIN_REPOSITORIES }}
           servers: ${{ env.SERVERS }}
 
