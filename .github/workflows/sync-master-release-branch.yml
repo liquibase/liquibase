@@ -8,7 +8,8 @@ on:
 jobs:
   sync-branches:
     runs-on: ubuntu-latest
-    permissions: write-all
+    permissions: 
+      id-token: write
     name: Syncing branches
     steps:
       - name: Checkout
@@ -23,6 +24,6 @@ jobs:
         id: pull
         uses: tretuna/sync-branches@1.4.0
         with:
-          GITHUB_TOKEN: ${{secrets.GITHUB_TOKEN}}
+          GITHUB_TOKEN: ${{secrets.SYNC_MASTER_RELEASE_BRANCH}}
           FROM_BRANCH: 'master'
           TO_BRANCH: 'release'
