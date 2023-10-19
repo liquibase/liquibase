@@ -5,10 +5,7 @@ import liquibase.change.ColumnConfig;
 import liquibase.change.ConstraintsConfig;
 import liquibase.change.core.CreateTableChange;
 import liquibase.database.Database;
-import liquibase.database.core.InformixDatabase;
-import liquibase.database.core.MSSQLDatabase;
-import liquibase.database.core.MySQLDatabase;
-import liquibase.database.core.PostgresDatabase;
+import liquibase.database.core.*;
 import liquibase.datatype.DataTypeFactory;
 import liquibase.datatype.DatabaseDataType;
 import liquibase.datatype.LiquibaseDataType;
@@ -135,6 +132,11 @@ public class MissingTableChangeGenerator extends AbstractChangeGenerator impleme
         }
         if (control.getIncludeTablespace() && (missingTable.getTablespace() != null) && comparisonDatabase.supportsTablespaces()) {
             change.setTablespace(missingTable.getTablespace());
+        }
+
+        if (referenceDatabase instanceof OracleDatabase &&
+            missingTable.getAttribute("temporary", "no").equals("GLOBAL")) {
+                change.setTableType("TEMPORARY GLOBAL");
         }
 
         for (Column column : missingTable.getColumns()) {
