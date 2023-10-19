@@ -15,29 +15,29 @@ on:
 
 env:
   MAVEN_VERSION: '3.9.2'
-  PLUGIN_REPOSITORIES: |
-    [
-      {
-        "id": "file-replacer-maven-plugin",
-        "url": "https://maven.pkg.github.com/StevenMassaro/file-replacer-maven-plugin",
-        "releases": {
-          "enabled": "true",
-          "updatePolicy": "always"
-        },
-        "snapshots": {
-          "enabled": "true",
-          "updatePolicy": "always"
-        }
-      }
-    ]
-  SERVERS: |
-    [
-      {
-        "id": "file-replacer-maven-plugin",
-        "username": "liquibot",
-        "password": "${{ secrets.LIQUIBOT_PAT }}"
-      }
-    ]
+#  PLUGIN_REPOSITORIES: |
+#    [
+#      {
+#        "id": "file-replacer-maven-plugin",
+#        "url": "https://maven.pkg.github.com/StevenMassaro/file-replacer-maven-plugin",
+#        "releases": {
+#          "enabled": "true",
+#          "updatePolicy": "always"
+#        },
+#        "snapshots": {
+#          "enabled": "true",
+#          "updatePolicy": "always"
+#        }
+#      }
+#    ]
+#  SERVERS: |
+#    [
+#      {
+#        "id": "file-replacer-maven-plugin",
+#        "username": "liquibot",
+#        "password": "${{ secrets.LIQUIBOT_PAT }}"
+#      }
+#    ]
 jobs:
 
   build:
@@ -62,10 +62,29 @@ jobs:
           cache: 'maven'
 
       - name: maven-settings-xml-action
-        uses: whelk-io/maven-settings-xml-action@v21
+        uses: whelk-io/maven-settings-xml-action@v20
         with:
-          plugin_repositories: ${{ env.PLUGIN_REPOSITORIES }}
-          servers: ${{ env.SERVERS }}
+          repositories: |
+            [
+              {
+                "id": "file-replacer-maven-plugin",
+                "url": "https://maven.pkg.github.com/StevenMassaro/file-replacer-maven-plugin",
+                "releases": {
+                  "updatePolicy": "always",
+                  "enabled": "false"
+                },
+                "snapshots": {
+                  "enabled": "true",
+                  "updatePolicy": "always"
+                }
+              }
+            ]
+          servers: |
+            [
+              "id": "file-replacer-maven-plugin",
+              "username": "liquibot",
+              "password": "${{ secrets.LIQUIBOT_PAT }}"
+            ]
 
       - name: Set up Maven
         uses: stCarolas/setup-maven@v4.5
