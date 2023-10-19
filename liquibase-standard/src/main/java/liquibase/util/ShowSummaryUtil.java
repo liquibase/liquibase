@@ -4,25 +4,22 @@ import liquibase.GlobalConfiguration;
 import liquibase.Scope;
 import liquibase.UpdateSummaryEnum;
 import liquibase.UpdateSummaryOutputEnum;
+import liquibase.changelog.ChangeLogIterator;
 import liquibase.changelog.ChangeSet;
 import liquibase.changelog.ChangeSetStatus;
 import liquibase.changelog.DatabaseChangeLog;
 import liquibase.changelog.filter.*;
 import liquibase.changelog.visitor.StatusVisitor;
 import liquibase.exception.LiquibaseException;
-import liquibase.exception.UnexpectedLiquibaseException;
-import liquibase.logging.Logger;
-import liquibase.logging.core.AbstractLogger;
-import liquibase.logging.core.CompositeLogger;
 import liquibase.logging.mdc.MdcKey;
 import liquibase.logging.mdc.MdcObject;
 import liquibase.logging.mdc.customobjects.UpdateSummary;
+import liquibase.report.ShowSummaryGenerator;
+import liquibase.report.ShowSummaryGeneratorFactory;
 
 import java.io.*;
 import java.util.*;
 import java.util.concurrent.atomic.AtomicBoolean;
-import java.util.function.Predicate;
-import java.util.logging.Level;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -46,7 +43,24 @@ public class ShowSummaryUtil {
      * @throws  IOException                        Thrown by this method
      *
      */
+    @Deprecated
     public static void showUpdateSummary(DatabaseChangeLog changeLog, UpdateSummaryEnum showSummary, UpdateSummaryOutputEnum showSummaryOutput, StatusVisitor statusVisitor, OutputStream outputStream)
+            throws LiquibaseException, IOException {
+        showUpdateSummary(changeLog, showSummary, showSummaryOutput, statusVisitor, outputStream, null);
+    }
+
+    /**
+     * Show a summary of the changesets which were executed
+     *
+     * @param changeLog            The changelog used in this update
+     * @param showSummary          Flag to control whether or not we show the summary
+     * @param showSummaryOutput    Flag to control where we show the summary
+     * @param statusVisitor        The StatusVisitor used to determine statuses
+     * @param outputStream         The OutputStream to use for the summary
+     * @throws LiquibaseException Thrown by this method
+     * @throws IOException        Thrown by this method
+     */
+    public static void showUpdateSummary(DatabaseChangeLog changeLog, UpdateSummaryEnum showSummary, UpdateSummaryOutputEnum showSummaryOutput, StatusVisitor statusVisitor, OutputStream outputStream, ChangeLogIterator runChangeLogIterator)
             throws LiquibaseException, IOException {
         //
         // Check the global flag to turn the summary off
@@ -75,17 +89,21 @@ public class ShowSummaryUtil {
                                 .stream().anyMatch(result ->  result.getFilter() != ShouldRunChangeSetFilter.class))
                         .collect(Collectors.toList());
 
+        ShowSummaryGeneratorFactory showSummaryGeneratorFactory = Scope.getCurrentScope().getSingleton(ShowSummaryGeneratorFactory.class);
+        ShowSummaryGenerator showSummaryGenerator = showSummaryGeneratorFactory.getShowSummaryGenerator();
+        List<ChangeSetStatus> additionalChangeSetStatus = showSummaryGenerator.getAllAdditionalChangeSetStatus(runChangeLogIterator);
+
         //
         // Only show the summary
         //
-        UpdateSummary updateSummaryMdc = showSummary(changeLog, statusVisitor, skippedChangeSets, filterDenied, outputStream, showSummaryOutput);
+        UpdateSummary updateSummaryMdc = showSummary(changeLog, statusVisitor, skippedChangeSets, filterDenied, outputStream, showSummaryOutput, runChangeLogIterator);
         updateSummaryMdc.setValue(showSummary.toString());
-        boolean shouldPrintDetailTable = showSummary != UpdateSummaryEnum.SUMMARY && (!skippedChangeSets.isEmpty() || !denied.isEmpty());
+        boolean shouldPrintDetailTable = showSummary != UpdateSummaryEnum.SUMMARY && (!skippedChangeSets.isEmpty() || !denied.isEmpty() || !additionalChangeSetStatus.isEmpty());
 
         //
         // Show the details too
         //
-        SortedMap<String, Integer> skippedMdc = showDetailTable(skippedChangeSets, filterDenied, outputStream, shouldPrintDetailTable, showSummaryOutput);
+        SortedMap<String, Integer> skippedMdc = showDetailTable(skippedChangeSets, filterDenied, outputStream, shouldPrintDetailTable, showSummaryOutput, additionalChangeSetStatus, runChangeLogIterator);
         updateSummaryMdc.setSkipped(skippedMdc);
         try(MdcObject updateSummaryMdcObject = Scope.getCurrentScope().addMdcValue(MdcKey.UPDATE_SUMMARY, updateSummaryMdc)) {
             Scope.getCurrentScope().getLog(ShowSummaryUtil.class).info("Update summary generated");
@@ -95,13 +113,19 @@ public class ShowSummaryUtil {
     //
     // Show the details
     //
-    private static SortedMap<String, Integer> showDetailTable(List<ChangeSet> skippedChangeSets, List<ChangeSetStatus> filterDenied, OutputStream outputStream, boolean shouldPrintDetailTable, UpdateSummaryOutputEnum showSummaryOutput)
+    private static SortedMap<String, Integer> showDetailTable(List<ChangeSet> skippedChangeSets,
+                                                              List<ChangeSetStatus> filterDenied,
+                                                              OutputStream outputStream,
+                                                              boolean shouldPrintDetailTable,
+                                                              UpdateSummaryOutputEnum showSummaryOutput,
+                                                              List<ChangeSetStatus> additionalChangesets,
+                                                              ChangeLogIterator runChangeLogIterator)
             throws IOException, LiquibaseException {
         String totalSkippedMdcKey = "totalSkipped";
         //
         // Nothing to do
         //
-        if (filterDenied.isEmpty() && skippedChangeSets.isEmpty()) {
+        if (filterDenied.isEmpty() && skippedChangeSets.isEmpty() && additionalChangesets.isEmpty()) {
             return new TreeMap<>(Collections.singletonMap(totalSkippedMdcKey, 0));
         }
         List<String> columnHeaders = new ArrayList<>();
@@ -113,6 +137,9 @@ public class ShowSummaryUtil {
         mdcSkipCounts.put(totalSkippedMdcKey, skippedChangeSets.size() + filterDenied.size());
 
         List<ChangeSetStatus> finalList = createFinalStatusList(skippedChangeSets, filterDenied, mdcSkipCounts);
+        ShowSummaryGeneratorFactory showSummaryGeneratorFactory = Scope.getCurrentScope().getSingleton(ShowSummaryGeneratorFactory.class);
+        ShowSummaryGenerator showSummaryGenerator = showSummaryGeneratorFactory.getShowSummaryGenerator();
+        finalList.addAll(showSummaryGenerator.getAllAdditionalChangeSetStatus(runChangeLogIterator));
 
         finalList.sort(new Comparator<ChangeSetStatus>() {
             @Override
@@ -133,7 +160,7 @@ public class ShowSummaryUtil {
             AtomicBoolean flag = new AtomicBoolean(true);
             StringBuilder builder = new StringBuilder();
             st.getFilterResults().forEach(consumer -> {
-                if (consumer.getFilter() != null) {
+                if (consumer.getFilter() != null && !consumer.getFilter().isAssignableFrom(ShouldNotCountAsSkipChangesetFilter.class)) {
                     String displayName = consumer.getMdcName();
                     mdcSkipCounts.merge(displayName, 1, Integer::sum);
                 }
@@ -165,6 +192,15 @@ public class ShowSummaryUtil {
             }
         }
         return mdcSkipCounts;
+    }
+
+
+
+    /**
+     * Internal use only filter.
+     */
+    public interface ShouldNotCountAsSkipChangesetFilter extends ChangeSetFilter {
+
     }
 
     private static void printDetailTable(List<List<String>> table, OutputStream outputStream) throws IOException, LiquibaseException {
@@ -213,18 +249,22 @@ public class ShowSummaryUtil {
     // Show the summary list
     //
     private static UpdateSummary showSummary(DatabaseChangeLog changeLog,
-                                    StatusVisitor statusVisitor,
-                                    List<ChangeSet> skippedChangeSets,
-                                    List<ChangeSetStatus> filterDenied,
-                                    OutputStream outputStream,
-                                    UpdateSummaryOutputEnum showSummaryOutput) throws LiquibaseException {
+                                             StatusVisitor statusVisitor,
+                                             List<ChangeSet> skippedChangeSets,
+                                             List<ChangeSetStatus> filterDenied,
+                                             OutputStream outputStream,
+                                             UpdateSummaryOutputEnum showSummaryOutput,
+                                             ChangeLogIterator runChangeLogIterator) throws LiquibaseException {
         StringBuilder builder = new StringBuilder();
         builder.append(System.lineSeparator());
         int totalInChangelog = changeLog.getChangeSets().size() + skippedChangeSets.size();
         int skipped = skippedChangeSets.size();
         int filtered = filterDenied.size();
-        int totalAccepted = statusVisitor.getChangeSetsToRun().size();
-        int totalPreviouslyRun = totalInChangelog - filtered - skipped - totalAccepted;
+        ShowSummaryGeneratorFactory showSummaryGeneratorFactory = Scope.getCurrentScope().getSingleton(ShowSummaryGeneratorFactory.class);
+        ShowSummaryGenerator showSummaryGenerator = showSummaryGeneratorFactory.getShowSummaryGenerator();
+        int additional = showSummaryGenerator.getAllAdditionalChangeSetStatus(runChangeLogIterator).size();
+        int totalAccepted = statusVisitor.getChangeSetsToRun().size() - additional;
+        int totalPreviouslyRun = totalInChangelog - filtered - skipped - totalAccepted - additional;
         UpdateSummary updateSummaryMdc = new UpdateSummary(null, totalAccepted, totalPreviouslyRun, null, totalInChangelog);
 
         String message = "UPDATE SUMMARY";
@@ -242,6 +282,8 @@ public class ShowSummaryUtil {
         message = String.format("Filtered out:            %6d", filtered + skipped);
         builder.append(message);
         builder.append(System.lineSeparator());
+
+        showSummaryGenerator.appendAdditionalSummaryMessages(builder, runChangeLogIterator);
 
         message = "-------------------------------";
         builder.append(message);

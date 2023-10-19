@@ -65,7 +65,7 @@ class CreateViewGeneratorTest extends Specification {
         sql[0].toString() == "CREATE OR REPLACE VIEW PUBLIC.my_view AS " + selectQuery + ";"
     }
 
-    def "creates drop view statement for Postgres when replace is true and alwaysDropInsteadOfReplace propery is set"() {
+    def "creates drop view statement for Postgres when replace is true and alwaysDropInsteadOfReplace property is set"() {
         given:
         System.setProperty("liquibase.alwaysDropInsteadOfReplace", alwaysDropInsteadOfReplacePropValue)
 

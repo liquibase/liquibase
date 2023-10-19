@@ -435,10 +435,6 @@ public class H2Database extends AbstractJdbcDatabase {
                 || isIllegalIdentifier(objectName) || isReservedWord(objectName);
     }
 
-    private boolean isCatalogOrSchemaType(Class<? extends DatabaseObject> objectType) {
-        return objectType == Catalog.class || objectType == Schema.class;
-    }
-
     private boolean isIllegalIdentifier(String objectName) {
         return !LEGAL_IDENTIFIER_PATTERN.matcher(objectName).matches();
     }

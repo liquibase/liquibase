@@ -33,6 +33,7 @@ public class LiquibaseCommandLineConfiguration implements AutoloadedConfiguratio
     public static final ConfigurationDefinition<ArgumentConverter> ARGUMENT_CONVERTER;
     public static final ConfigurationDefinition<String> MONITOR_PERFORMANCE;
     public static final ConfigurationDefinition<Boolean> ADD_EMPTY_MDC_VALUES;
+    public static final ConfigurationDefinition<Boolean> SHOW_HIDDEN_ARGS;
 
     static {
         ConfigurationDefinition.Builder builder = new ConfigurationDefinition.Builder("liquibase");
@@ -119,6 +120,12 @@ public class LiquibaseCommandLineConfiguration implements AutoloadedConfiguratio
         ADD_EMPTY_MDC_VALUES = builder.define("addEmptyMdcValues", Boolean.class)
                 .setDescription("If true, a subset of the MdcKeys, as defined by product, will be set to empty strings upon system startup.")
                 .setDefaultValue(true)
+                .setHidden(true)
+                .build();
+
+        SHOW_HIDDEN_ARGS = builder.define("showHiddenArgs", Boolean.class)
+                .setDescription("If true, all command arguments marked as hidden will be shown in the help output, ignoring the hidden flag. NOTE, due to the order of value provider loading at such an early point in Liquibase startup, you MUST set this as a environment variable. Command line parameters will not be recognized.")
+                .setDefaultValue(false)
                 .setHidden(true)
                 .build();
    }

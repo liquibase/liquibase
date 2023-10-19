@@ -32,7 +32,7 @@ public class PrimaryKeySnapshotGenerator extends JdbcSnapshotGenerator {
             searchTableName = database.correctObjectName(searchTableName, Table.class);
         }
 
-        List<CachedRow> rs = null;
+        List<CachedRow> rs;
         try {
             JdbcDatabaseSnapshot.CachingDatabaseMetaData metaData = ((JdbcDatabaseSnapshot) snapshot)
                     .getMetaDataFromCache();
@@ -57,7 +57,14 @@ public class PrimaryKeySnapshotGenerator extends JdbcSnapshotGenerator {
                 }
 
                 String ascOrDesc = row.getString("ASC_OR_DESC");
-                Boolean descending = "D".equals(ascOrDesc) ? Boolean.TRUE : "A".equals(ascOrDesc) ? Boolean.FALSE : null;
+                Boolean descending = null;
+                if("D".equals(ascOrDesc)) {
+                    descending = Boolean.TRUE;
+                } else {
+                    if ("A".equals(ascOrDesc)) {
+                        descending = Boolean.FALSE;
+                    }
+                }
                 boolean computed = descending != null && descending;
                 returnKey.addColumn(position - 1, new Column(columnName)
                         .setDescending(descending)
@@ -107,7 +114,7 @@ public class PrimaryKeySnapshotGenerator extends JdbcSnapshotGenerator {
             Database database = snapshot.getDatabase();
             Schema schema = table.getSchema();
 
-            List<CachedRow> rs = null;
+            List<CachedRow> rs;
             try {
                 JdbcDatabaseSnapshot.CachingDatabaseMetaData metaData = ((JdbcDatabaseSnapshot) snapshot)
                         .getMetaDataFromCache();
