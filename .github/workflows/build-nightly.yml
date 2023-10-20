@@ -2,12 +2,13 @@
 name: "Nightly build"
 
 on:
+  workflow_dispatch:
   schedule:
     - cron: '0 7 * * 1-5'
 
 jobs:
     nightly-build:
-      uses: liquibase/build-logic/.github/workflows/os-extension-test.yml@v0.4.8
+      uses: liquibase/build-logic/.github/workflows/os-extension-test.yml@v0.5.1
       with:
         nightly: true
       secrets: inherit

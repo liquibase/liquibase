@@ -10,5 +10,5 @@ on:
 
 jobs:
   build-test:
-    uses: liquibase/build-logic/.github/workflows/os-extension-test.yml@v0.4.8
+    uses: liquibase/build-logic/.github/workflows/os-extension-test.yml@v0.5.1
     secrets: inherit
