@@ -58,7 +58,7 @@
             <artifactId>GoogleBigQueryJDBC42</artifactId>
             <version>4.2</version>
             <scope>system</scope>
-            <systemPath>${basedir}/lib/GoogleBigQueryJDBC42.jar</systemPath>
+            <systemPath>${project.basedir}/lib/GoogleBigQueryJDBC42.jar</systemPath>
         </dependency>
         <dependency>
             <groupId>com.google.cloud</groupId>
