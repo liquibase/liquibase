@@ -70,7 +70,7 @@ jobs:
             if (${{ github.run_attempt }} % 5 == 0) {
               core.setFailed("Fail every 5 run attempts to catch accidental infinite loops");
             }
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
         with:
           ref: ${{ github.event.pull_request.head.sha || github.event.after}}
 
@@ -172,7 +172,7 @@ jobs:
       OS_TYPE: ${{ matrix.os }}
       GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
         with:
           ref: ${{ github.event.pull_request.head.sha || github.event.after}}
       - name: Built Code Cache
@@ -253,7 +253,7 @@ jobs:
     needs: setup
     timeout-minutes: 30
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
         with:
           ref: ${{ github.event.pull_request.head.sha || github.event.after}}
 
@@ -327,7 +327,7 @@ jobs:
     runs-on: macos-latest
     needs: [ setup, build ]
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
         with:
           ref: ${{ github.event.pull_request.head.sha || github.event.after}}
       # this includes all the tar files included in the previous runs. So in the next step we deploy what was previously build
@@ -535,7 +535,7 @@ jobs:
     needs: [ setup, build, package, sonar]
     if: ${{ needs.setup.outputs.setupSuccessful }}
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
         with:
           ref: ${{ github.event.pull_request.head.sha || github.event.after}}
 
