@@ -7,5 +7,7 @@ on:
 
 jobs:
   release:
-    uses: liquibase/build-logic/.github/workflows/extension-release-published.yml@v0.5.1
+    uses: liquibase/build-logic/.github/workflows/extension-release-published.yml@v0.5.2
     secrets: inherit
+    with:
+      extraCommand: mvn install:install-file -Dfile=lib/GoogleBigQueryJDBC42.jar -DgroupId=com.simba.googlebigquery.jdbc -DartifactId=GoogleBigQueryJDBC42 -Dversion=4.2 -Dpackaging=jar
