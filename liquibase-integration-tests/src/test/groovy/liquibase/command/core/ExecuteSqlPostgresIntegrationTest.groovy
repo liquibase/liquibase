@@ -36,4 +36,26 @@ class ExecuteSqlPostgresIntegrationTest extends Specification {
         cleanup:
         CommandUtil.runDropAll(postgres)
     }
+
+    def "validate executeSql output display columns in the same order they were specified in the select"() {
+        given:
+        CommandUtil.runUpdate(postgres,"src/test/resources/changelogs/pgsql/update/showSummaryWithLabels.xml")
+        String sql = "select filename, author, exectype, comments, description from databasechangelog order by filename,exectype"
+
+        when:
+        CommandScope executeSql = new CommandScope(ExecuteSqlCommandStep.COMMAND_NAME[0])
+        executeSql.addArgumentValue(ExecuteSqlCommandStep.SQL_ARG, sql)
+        executeSql.addArgumentValue(DbUrlConnectionCommandStep.URL_ARG, postgres.getConnectionUrl())
+        executeSql.addArgumentValue(DbUrlConnectionCommandStep.USERNAME_ARG, postgres.getUsername())
+        executeSql.addArgumentValue(DbUrlConnectionCommandStep.PASSWORD_ARG, postgres.getPassword())
+
+        then:
+        CommandResults results = executeSql.execute()
+        String output = results.getResult("output") as String
+        output.contains("Output of select filename, author, exectype, comments, description from databasechangelog order by filename,exectype:")
+        output.contains("FILENAME | AUTHOR | EXECTYPE | COMMENTS | DESCRIPTION |")
+
+        cleanup:
+        CommandUtil.runDropAll(postgres)
+    }
 }

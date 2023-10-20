@@ -81,7 +81,7 @@ public class ColumnAutoIncrementService {
                     "CAST(seed_value AS bigint) AS start_value, " +
                     "CAST(increment_value AS bigint) AS increment_by " +
                     "FROM sys.identity_columns " +
-                    "WHERE sys.schemas = '" + schema.getName() + "'";
+                    "WHERE object_schema_name(object_id) = '" + schema.getName() + "'";
         } else if (database instanceof PostgresDatabase) {
             int version = 9;
             try {
