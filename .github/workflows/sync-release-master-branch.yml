@@ -1,0 +1,29 @@
+name: Sync Release to Master Branch
+
+on:
+  push:
+    branches:
+      - master
+
+jobs:
+  sync-branches:
+    runs-on: ubuntu-latest
+    permissions:
+      id-token: write
+    name: Syncing branches
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+
+      - name: Set up Node
+        uses: actions/setup-node@v1
+        with:
+          node-version: 16
+
+      - name: Opening pull request
+        id: pull
+        uses: tretuna/sync-branches@1.4.0
+        with:
+          GITHUB_TOKEN: ${{secrets.SYNC_RELEASE_MASTER_BRANCH}}
+          FROM_BRANCH: 'master'
+          TO_BRANCH: 'release'

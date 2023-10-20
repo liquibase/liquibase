@@ -16,6 +16,7 @@ import liquibase.structure.core.Table;
 import liquibase.util.JdbcUtil;
 import liquibase.util.StringUtil;
 
+import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
@@ -121,11 +122,8 @@ public class ColumnExistsPrecondition extends AbstractPrecondition {
     private void checkFast(Database database, DatabaseChangeLog changeLog)
             throws PreconditionFailedException, PreconditionErrorException {
 
-        Statement statement = null;
+        PreparedStatement statement = null;
         try {
-            statement = ((JdbcConnection) database.getConnection())
-                    .createStatement();
-
             String schemaName = getSchemaName();
             if (schemaName == null) {
                 schemaName = database.getDefaultSchemaName();
@@ -134,9 +132,14 @@ public class ColumnExistsPrecondition extends AbstractPrecondition {
             String columnName = getColumnName();
 
             if (database instanceof PostgresDatabase) {
-                String sql = "SELECT 1 FROM pg_attribute a WHERE EXISTS (SELECT 1 FROM pg_class JOIN pg_catalog.pg_namespace ns ON ns.oid = pg_class.relnamespace WHERE lower(ns.nspname)='"+schemaName.toLowerCase()+"' AND lower(relname) = lower('"+tableName+"') AND pg_class.oid = a.attrelid) AND lower(a.attname) = lower('"+columnName+"');";
+                String sql = "SELECT 1 FROM pg_attribute a WHERE EXISTS (SELECT 1 FROM pg_class JOIN pg_catalog.pg_namespace ns ON ns.oid = pg_class.relnamespace WHERE lower(ns.nspname) = ? AND lower(relname) = lower(?) AND pg_class.oid = a.attrelid) AND lower(a.attname) = lower(?);";
+                statement = ((JdbcConnection) database.getConnection())
+                        .prepareStatement(sql);
+                statement.setString(1, schemaName.toLowerCase());
+                statement.setString(2, tableName);
+                statement.setString(3, columnName);
                 try {
-                    try (ResultSet rs = statement.executeQuery(sql)) {
+                    try (ResultSet rs = statement.executeQuery()) {
                         if (rs.next()) {
                             return;
                         } else {
@@ -160,8 +163,10 @@ public class ColumnExistsPrecondition extends AbstractPrecondition {
                             database.escapeObjectName(tableName, Table.class));
                 }
 
+                statement = ((JdbcConnection) database.getConnection())
+                        .prepareStatement(sql);
                 try {
-                    statement.executeQuery(sql).close();
+                    statement.executeQuery().close();
                     // column exists
                 } catch (SQLException e) {
                     // column or table does not exist
@@ -169,9 +174,12 @@ public class ColumnExistsPrecondition extends AbstractPrecondition {
                             "Column %s.%s.%s does not exist", schemaName,
                             tableName, columnName), changeLog, this);
                 }
+                finally {
+                    JdbcUtil.closeStatement(statement);
+                }
             }
 
-        } catch (DatabaseException e) {
+        } catch (DatabaseException | SQLException e) {
             throw new PreconditionErrorException(e, changeLog, this);
 
         } finally {

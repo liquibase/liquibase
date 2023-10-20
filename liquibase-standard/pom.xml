@@ -11,6 +11,7 @@
 
     <properties>
         <maven.deploy.skip>true</maven.deploy.skip>
+        <sonar.coverage.jacoco.xmlReportPaths>../target/jacoco.xml</sonar.coverage.jacoco.xmlReportPaths>
     </properties>
 
     <artifactId>liquibase-standard</artifactId>
@@ -345,6 +346,7 @@
                     <services>
                         <param>liquibase.logging.mdc.MdcManager</param>
                         <param>liquibase.logging.mdc.CustomMdcObject</param>
+                        <param>liquibase.report.ShowSummaryGenerator</param>
                     </services>
                 </configuration>
                 <executions>

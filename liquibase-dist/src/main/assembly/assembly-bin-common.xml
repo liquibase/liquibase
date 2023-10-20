@@ -133,7 +133,10 @@
 				<exclude>commons-codec:commons-codec:jar:</exclude> <!-- from liquibase-commercial -->
 				<exclude>com.fasterxml.jackson.core:*:jar:</exclude> <!-- from liquibase-commercial -->
 				<exclude>com.fasterxml.jackson.module:*:jar:</exclude> <!-- from liquibase-commercial -->
-            </excludes>
+				<exclude>com.github.spullara.mustache.java:compiler:jar:</exclude> <!-- from liquibase-commercial -->
+				<exclude>io.github.java-diff-utils:java-diff-utils:jar:</exclude> <!-- from liquibase-commercial -->
+				<exclude>com.github.vertical-blank:sql-formatter:jar:</exclude> <!-- from liquibase-commercial -->
+			</excludes>
 		</dependencySet>
 	</dependencySets>
 </component>

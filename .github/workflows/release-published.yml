@@ -47,7 +47,7 @@ jobs:
         with:
           secret: ${{ secrets.GITHUB_TOKEN }}
           approvers: suryaaki2,rberezen,jnewton03,kristyldatical,sayaliM0412
-          minimum-approvals: 1
+          minimum-approvals: 2
           issue-title: "Deploying ${{ needs.setup.outputs.version }} to sonatype"
           issue-body: "Please approve or deny the deployment of version ${{ needs.setup.outputs.version }}"
           additional-approved-words: 'lgtm,✅,👍,proceed,shipit,:shipit:'

@@ -2,7 +2,6 @@ package liquibase.integration.commandline;
 
 import liquibase.*;
 import liquibase.changelog.ChangeLogParameters;
-import liquibase.changelog.DatabaseChangeLog;
 import liquibase.changelog.visitor.ChangeExecListener;
 import liquibase.changelog.visitor.DefaultChangeExecListener;
 import liquibase.command.CommandResults;
@@ -974,19 +973,7 @@ public class Main {
             return;
         }
 
-        final int CHANGESET_MINIMUM_IDENTIFIER_PARTS = 3;
-
-        if (COMMANDS.CALCULATE_CHECKSUM.equalsIgnoreCase(command)) {
-            for (final String param : commandParams) {
-                if ((param != null) && !param.startsWith("-")) {
-                    final String[] parts = param.split("::");
-                    if (parts.length < CHANGESET_MINIMUM_IDENTIFIER_PARTS) {
-                        messages.add(coreBundle.getString("changeset.identifier.must.have.form.filepath.id.author"));
-                        break;
-                    }
-                }
-            }
-        } else if (COMMANDS.DIFF_CHANGELOG.equalsIgnoreCase(command) && (diffTypes != null) && diffTypes.toLowerCase
+       if (COMMANDS.DIFF_CHANGELOG.equalsIgnoreCase(command) && (diffTypes != null) && diffTypes.toLowerCase
                 ().contains("data")) {
             messages.add(String.format(coreBundle.getString("including.data.diffchangelog.has.no.effect"),
                     OPTIONS.DIFF_TYPES, COMMANDS.GENERATE_CHANGELOG
@@ -1514,7 +1501,17 @@ public class Main {
                 liquibase.clearCheckSums();
                 return;
             } else if (COMMANDS.CALCULATE_CHECKSUM.equalsIgnoreCase(command)) {
-                liquibase.calculateCheckSum(commandParams.iterator().next());
+                CommandScope calculateChecksumCommand = new CommandScope("calculateChecksum");
+
+                calculateChecksumCommand
+                        .addArgumentValue(DbUrlConnectionCommandStep.DATABASE_ARG, database)
+                        .addArgumentValue(CalculateChecksumCommandStep.CHANGESET_PATH_ARG, getCommandParam(OPTIONS.CHANGE_SET_PATH, null))
+                        .addArgumentValue(CalculateChecksumCommandStep.CHANGESET_ID_ARG, getCommandParam(OPTIONS.CHANGE_SET_ID, null))
+                        .addArgumentValue(CalculateChecksumCommandStep.CHANGESET_AUTHOR_ARG, getCommandParam(OPTIONS.CHANGE_SET_AUTHOR, null))
+                        .addArgumentValue(CalculateChecksumCommandStep.CHANGESET_IDENTIFIER_ARG, getCommandParam(OPTIONS.CHANGE_SET_IDENTIFIER, null))
+                        .addArgumentValue(CalculateChecksumCommandStep.CHANGELOG_FILE_ARG, this.changeLogFile);
+
+                calculateChecksumCommand.execute();
                 return;
             } else if (COMMANDS.DB_DOC.equalsIgnoreCase(command)) {
                 if (commandParams.isEmpty()) {
@@ -2186,6 +2183,8 @@ public class Main {
         private static final String CHANGELOG_FILE = "changeLogFile";
         private static final String DATA_OUTPUT_DIRECTORY = "dataOutputDirectory";
         private static final String DIFF_TYPES = "diffTypes";
+
+        public static final String CHANGE_SET_IDENTIFIER = "changeSetIdentifier";
         private static final String CHANGE_SET_ID = "changeSetId";
         private static final String CHANGE_SET_AUTHOR = "changeSetAuthor";
         private static final String CHANGE_SET_PATH = "changeSetPath";
