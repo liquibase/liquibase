@@ -54,6 +54,12 @@ Add files from the archive to the liquibase lib directory.
 
 ### Liquibase BigQuery extension
 
+Before building the extension be sure to locally install the Simba driver as follows:
+
+```bash
+mvn install:install-file -Dfile=lib/GoogleBigQueryJDBC42.jar -DgroupId=com.simba.googlebigquery.jdbc -DartifactId=GoogleBigQueryJDBC42 -Dversion=4.2 -Dpackaging=jar
+````
+
 Build this project with `mvn` or download the jar file
 corresponding to the latest release and put it
 into `liquibase/lib` lib directory.
