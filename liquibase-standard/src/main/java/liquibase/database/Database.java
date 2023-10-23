@@ -473,7 +473,9 @@ public interface Database extends PrioritizedService, AutoCloseable {
 
     ValidationErrors validate();
 
-    boolean failOnDefferable();
+    default boolean failOnDefferable() {
+        return true;
+    }
 
 }
 
