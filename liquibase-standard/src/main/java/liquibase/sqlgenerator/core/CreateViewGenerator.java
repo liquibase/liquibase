@@ -2,19 +2,20 @@ package liquibase.sqlgenerator.core;
 
 import liquibase.CatalogAndSchema;
 import liquibase.GlobalConfiguration;
+import liquibase.Scope;
 import liquibase.database.Database;
 import liquibase.database.core.*;
 import liquibase.exception.DatabaseException;
 import liquibase.exception.ValidationErrors;
+import liquibase.parser.LiquibaseSqlParser;
+import liquibase.parser.SqlParserFactory;
 import liquibase.sql.Sql;
 import liquibase.sql.UnparsedSql;
 import liquibase.sqlgenerator.SqlGeneratorChain;
 import liquibase.statement.core.CreateViewStatement;
 import liquibase.structure.core.Relation;
 import liquibase.structure.core.View;
-import liquibase.util.SqlParser;
 import liquibase.util.StringClauses;
-import liquibase.util.StringUtil;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -63,7 +64,9 @@ public class CreateViewGenerator extends AbstractSqlGenerator<CreateViewStatemen
             sql.add(new UnparsedSql("SET TEMPORARY OPTION force_view_creation='ON'"));
         }
 
-        StringClauses viewDefinition = SqlParser.parse(statement.getSelectQuery(), true, true);
+        SqlParserFactory sqlParserFactory = Scope.getCurrentScope().getSingleton(SqlParserFactory.class);
+        LiquibaseSqlParser sqlParser = sqlParserFactory.getSqlParser();
+        StringClauses viewDefinition = sqlParser.parse(statement.getSelectQuery(), true, true);
 
         if (!statement.isFullDefinition()) {
             viewDefinition
