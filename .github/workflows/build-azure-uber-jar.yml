@@ -24,7 +24,7 @@ jobs:
       GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
     steps:
       - name: Checkout liquibase-pro
-        uses: actions/checkout@v4
+        uses: actions/checkout@v3
         with:
           repository: liquibase/liquibase-pro
           ref: ${{ inputs.branch }}
