@@ -398,7 +398,7 @@ public abstract class AbstractJdbcDatabase implements Database {
     /**
      * Used to obtain the connection schema name through a statement
      * Override this method to change the statement.
-     * Only override this if getConnectionSchemaName is left unchanges or is using this method.
+     * Only override this if getConnectionSchemaName is left unchanged or is using this method.
      *
      * @see AbstractJdbcDatabase#getConnectionSchemaName()
      */
@@ -542,7 +542,7 @@ public abstract class AbstractJdbcDatabase implements Database {
     /***
      * Returns true if the String conforms to an ISO 8601 date
      * plus a timestamp (hours, minutes, seconds and at least one decimal fraction) in UTC,
-     * e.g. 2016-12-31T18:43:59.3 or 2016-12-31T18:43:59.345.  (Or, if it is a "NOW" or "TODAY" type value.
+     * e.g. 2016-12-31T18:43:59.3 or 2016-12-31T18:43:59.345.  (Or, if it is a "NOW" or "TODAY" type value).
      * CAUTION: Does NOT recognize values with a timezone information (...[+-Z]...)
      * The "T" may be replaced by a space.
      * @param isoDate value to check
@@ -554,7 +554,7 @@ public abstract class AbstractJdbcDatabase implements Database {
 
     /***
      * Returns true if the String conforms to an ISO 8601 time (hours, minutes and whole seconds) in UTC,
-     * e.g. 18:43:59.  (Or, if it is a "NOW" or "TODAY" type value.
+     * e.g. 18:43:59.  (Or, if it is a "NOW" or "TODAY" type value).
      * CAUTION: Does NOT recognize values with a timezone information (...[+-Z]...)
      * @param isoDate value to check
      */
@@ -787,7 +787,7 @@ public abstract class AbstractJdbcDatabase implements Database {
 
                 if (supportsForeignKeyDisable() || getShortName().equals("postgresql")) {
                     //We do not remove ForeignKey because they will be disabled and removed as parts of tables.
-                    // Postgress is treated as if we can disable foreign keys because we can't drop
+                    // Postgres is treated as if we can disable foreign keys because we can't drop
                     // the foreign keys of a partitioned table, as discovered in
                     // https://github.com/liquibase/liquibase/issues/1212
                     typesToInclude.remove(ForeignKey.class);
@@ -1600,7 +1600,7 @@ public abstract class AbstractJdbcDatabase implements Database {
      * Most relational databases support 9 fractional digits, and subclasses must overwrite this method if they
      * support less than that.
      *
-     * @return the maxmimum number of supported fractional digits in TIMESTAMP columns
+     * @return the maximum number of supported fractional digits in TIMESTAMP columns
      */
     @Override
     public int getMaxFractionalDigitsForTimestamp() {

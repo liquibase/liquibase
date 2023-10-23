@@ -304,9 +304,8 @@ public class CreateProcedureChange extends AbstractChange implements DbmsTargete
         CheckSum checkSum;
         try {
             if (getPath() == null) {
-                String procedureText = sqlText;
                 Charset encoding = GlobalConfiguration.FILE_ENCODING.getCurrentValue();
-                if (procedureText != null) {
+                if (sqlText != null) {
                     stream = new ByteArrayInputStream(sqlText.getBytes(encoding));
                 }
             }

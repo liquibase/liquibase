@@ -1,12 +1,7 @@
 package liquibase.sqlgenerator.core;
 
 import liquibase.database.Database;
-import liquibase.database.core.DB2Database;
-import liquibase.database.core.Db2zDatabase;
-import liquibase.database.core.FirebirdDatabase;
-import liquibase.database.core.HsqlDatabase;
-import liquibase.database.core.MySQLDatabase;
-import liquibase.database.core.OracleDatabase;
+import liquibase.database.core.*;
 import liquibase.exception.ValidationErrors;
 import liquibase.sql.Sql;
 import liquibase.sql.UnparsedSql;
@@ -45,6 +40,8 @@ public class TableIsEmptyGenerator extends AbstractSqlGenerator<TableIsEmptyStat
         }
         if (database instanceof FirebirdDatabase) {
             return String.format("SELECT COUNT(1) FROM RDB$DATABASE WHERE EXISTS (SELECT * FROM %s)", tableName);
+        } else if (database instanceof DB2Database) {
+            return String.format("SELECT COUNT(1) FROM sysibm.sysdummy1 WHERE EXISTS (SELECT * FROM %s)", tableName);
         }
         return String.format("SELECT COUNT(1) WHERE EXISTS (SELECT * FROM %s)", tableName);
     }

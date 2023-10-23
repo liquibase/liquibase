@@ -134,7 +134,7 @@ public class DropPrimaryKeyChange extends AbstractChange {
                 return true;
             }
         };
-        List<SqlStatement> statements = null;
+        List<SqlStatement> statements;
         try {
             statements = SQLiteDatabase.getAlterTableStatements(alterTableVisitor, database, getCatalogName(), getSchemaName(), getTableName());
         } catch (DatabaseException e) {
