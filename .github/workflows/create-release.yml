@@ -1,0 +1,196 @@
+name: Attach Artifacts To Draft Release
+on:
+  workflow_dispatch:
+    inputs:
+      version:
+        description: 'Version (example: 4.8.2)'
+        required: true
+      branch:
+        description: 'Branch to release (Defaults to master)'
+        required: false
+      runId:
+        description: 'RunId of liquibase/liquibase artifacts to attach'
+        required: true
+jobs:
+  setup:
+    name: Setup
+    runs-on: ubuntu-22.04
+    outputs:
+      version: ${{ steps.collect-data.outputs.version }}
+      branch: ${{ steps.collect-data.outputs.branch }}
+      runId: ${{ steps.collect-data.outputs.runId }}
+      
+    steps:
+      - name: Collect Data
+        id: collect-data
+        uses: actions/github-script@v6
+        with:
+          script: |
+            core.setOutput("version", context.payload.inputs.version);
+            core.setOutput("branch", context.payload.inputs.branch || "master");
+            core.setOutput("runId", context.payload.inputs.runId);
+      - run: |
+          echo "Creating version ${{ steps.collect-data.outputs.version }} from ${{ steps.collect-data.outputs.branch }} with artifacts from build ${{ steps.collect-data.outputs.runId }} "
+          
+  build-azure-uber-jar:
+    needs: [ setup ]
+    uses: liquibase/liquibase/.github/workflows/build-azure-uber-jar.yml@master
+    with:
+      branch: ${{ needs.setup.outputs.branch }}
+      liquibase-version: ${{ needs.setup.outputs.version }}
+    secrets: inherit
+
+  reversion:
+    needs: [ setup, build-azure-uber-jar ]
+    name: Re-version artifacts ${{ needs.setup.outputs.version }}
+    runs-on: ubuntu-22.04
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/checkout@v4
+        name: Checkout liquibase-pro
+        with:
+          repository: liquibase/liquibase-pro
+          ref: "${{ needs.setup.outputs.branch }}"
+          path: download/repo/liquibase-pro
+          token: ${{ secrets.BOT_TOKEN }}
+
+
+      - name: Download liquibase-artifacts
+        uses: liquibase/action-download-artifact@v2-liquibase
+        with:
+          workflow: build.yml
+          run_id: ${{ needs.setup.outputs.runId }}
+          name: liquibase-artifacts
+          path: download/liquibase-artifacts
+
+      - name: Download liquibase-pro-azure-artifacts
+        uses: liquibase/action-download-artifact@v2-liquibase
+        with:
+          workflow: build-azure-uber-jar.yml
+          run_id: ${{ needs.setup.outputs.runId }}
+          name: liquibase-pro-azure-artifacts
+          path: download/liquibase-pro-azure-artifacts
+
+      - name: Set up JDK
+        uses: actions/setup-java@v3
+        with:
+          java-version: '8'
+          distribution: 'adopt'
+          gpg-private-key: ${{ secrets.GPG_SECRET }}
+          gpg-passphrase: GPG_PASSPHRASE
+        env:
+          GPG_PASSWORD: ${{ secrets.GPG_PASSPHRASE }}
+
+      - name: Re-version Artifacts
+        env:
+          GPG_PASSWORD: ${{ secrets.GPG_PASSPHRASE }}
+        run: |
+          .github/util/re-version.sh download/liquibase-artifacts "${{ needs.setup.outputs.version }}" "${{ needs.setup.outputs.branch }}"
+
+          ##Sign Files
+          ## liquibase-azure-deps is already on its correct version. Check reusable workflow: build-azure-uber-jar.yml
+          mv download/liquibase-pro-azure-artifacts/liquibase-azure-deps-${{ needs.setup.outputs.version }}.jar re-version/out
+          .github/util/sign-artifacts.sh re-version/out
+
+          mkdir re-version/final
+          mv re-version/out/liquibase-core-${{ needs.setup.outputs.version }}.jar re-version/final
+          mv re-version/out/liquibase-commercial-${{ needs.setup.outputs.version }}.jar re-version/final
+          mv re-version/out/liquibase-${{ needs.setup.outputs.version }}.tar.gz re-version/final
+          mv re-version/out/liquibase-${{ needs.setup.outputs.version }}.zip re-version/final
+          mv re-version/out/liquibase-azure-deps-${{ needs.setup.outputs.version }}.jar re-version/final
+          
+
+          (cd re-version/out/ && zip liquibase-additional-${{ needs.setup.outputs.version }}.zip *)
+          mv re-version/out/liquibase-additional-${{ needs.setup.outputs.version }}.zip re-version/final
+
+      - name: Cache Completed Artifacts
+        uses: actions/cache@v3.3.2
+        with:
+          key: completed-artifacts-${{ github.run_number }}-${{ github.run_attempt }}
+          path: re-version/final
+
+      - name: Set repository tags
+        run: |
+          git tag -f v${{ needs.setup.outputs.version }}
+          git push -f origin v${{ needs.setup.outputs.version }}
+
+          (cd download/repo/liquibase-pro && git tag -f v${{ needs.setup.outputs.version }})
+          (cd download/repo/liquibase-pro && git push -f origin v${{ needs.setup.outputs.version }})
+
+  build-installers:
+    permissions:
+      contents: write  # for softprops/action-gh-release to create GitHub release
+    needs: [ setup, reversion ]
+    name: Build Installers
+    runs-on: macos-latest #needs macos for apple notarization
+    env:
+      GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Restore Completed Artifacts
+        uses: actions/cache@v3.3.2
+        with:
+          key: completed-artifacts-${{ github.run_number }}-${{ github.run_attempt }}
+          path: re-version/final
+
+      - name: Set up JDK for GPG
+        uses: actions/setup-java@v3
+        with:
+          java-version: '8'
+          distribution: 'adopt'
+          gpg-private-key: ${{ secrets.GPG_SECRET }}
+          gpg-passphrase: GPG_PASSPHRASE
+        env:
+          GPG_PASSWORD: ${{ secrets.GPG_PASSPHRASE }}
+
+
+      - name: Re-version Installers
+        env:
+          INSTALL4J_10_LICENSE: ${{ secrets.INSTALL4J_10_LICENSE }}
+          INSTALL4J_APPLE_KEY: ${{ secrets.INSTALL4J_APPLE_KEY }}
+          INSTALL4J_APPLE_KEY_PASSWORD: ${{ secrets.INSTALL4J_APPLE_KEY_PASSWORD }}
+          INSTALL4J_APPLE_ID: ${{ secrets.INSTALL4J_APPLE_ID }}
+          INSTALL4J_APPLE_ID_PASSWORD: ${{ secrets.INSTALL4J_APPLE_ID_PASSWORD }}
+          INSTALL4J_WINDOWS_KEY: ${{ secrets.INSTALL4J_WINDOWS_KEY }}
+          INSTALL4J_WINDOWS_KEY_PASSWORD: ${{ secrets.INSTALL4J_WINDOWS_KEY_PASSWORD }}
+          GPG_PASSWORD: ${{ secrets.GPG_PASSPHRASE }}
+        run: |
+          mkdir -p liquibase-dist/target/keys
+          echo "Saving apple key"
+          echo "$INSTALL4J_APPLE_KEY" | base64 -d > liquibase-dist/target/keys/datical_apple.p12
+
+          echo "Saving windows key"
+          echo "$INSTALL4J_WINDOWS_KEY" | base64 -d > liquibase-dist/target/keys/datical_windows.pfx
+
+          version="${{ needs.setup.outputs.version }}"
+          
+          ##### Rebuild installers
+          tarFile=$(pwd)/re-version/final/liquibase-$version.tar.gz
+          scriptDir=$(pwd)/.github/util/
+          
+          mkdir -p liquibase-dist/target/liquibase-$version
+          (cd liquibase-dist/target/liquibase-$version && tar xfz $tarFile)
+          (cd liquibase-dist && $scriptDir/package-install4j.sh $version)
+          mv liquibase-dist/target/liquibase-*-installer-* re-version/final
+          
+          ##Sign Files
+          .github/util/sign-artifacts.sh re-version/final
+          
+          (cd re-version/final && zip liquibase-additional-$version.zip *.asc *.md5 *.sha1)
+          rm re-version/final/*.asc
+          rm re-version/final/*.md5
+          rm re-version/final/*.sha1
+
+      - name: Attach Files to Draft Release
+        uses: softprops/action-gh-release@v1
+        with:
+          tag_name: v${{ needs.setup.outputs.version }}
+          draft: true
+          fail_on_unmatched_files: true
+          body: Liquibase ${{ needs.setup.outputs.version }}
+          generate_release_notes: true
+          files: re-version/final/*
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

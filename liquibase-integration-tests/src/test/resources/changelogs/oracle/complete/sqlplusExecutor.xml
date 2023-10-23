@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-latest.xsd"
+        logicalFilePath="changelogs/oracle/complete/indexOnSchema.xml">
+    <preConditions>
+            <dbms type="oracle"/>
+    </preConditions>
+
+    <changeSet runWith="example" author="Liquibase Pro User" id="5::createTable"
+               objectQuotingStrategy="QUOTE_ALL_OBJECTS" runAlways="false" runOnChange="true" labels="setup">
+        <sqlFile path="sql/oracle_create_table.sql" splitStatements="false" />
+        <rollback>
+            <sqlFile endDelimiter=";" path="sql/oracle_table_rollback.sql" splitStatements="true" stripComments="true"/>
+        </rollback>
+    </changeSet>
+</databaseChangeLog>

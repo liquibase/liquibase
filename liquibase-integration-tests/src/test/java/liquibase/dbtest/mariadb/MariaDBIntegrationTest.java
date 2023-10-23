@@ -27,39 +27,16 @@ public class MariaDBIntegrationTest extends AbstractIntegrationTest {
         super("mariadb", DatabaseFactory.getInstance().getDatabase("mariadb"));
     }
 
-    @Override
-    protected boolean isDatabaseProvidedByTravisCI() {
-        return true;
-    }
-
-    @Test
-    @Override
-    public void testRunChangeLog() throws Exception {
-        super.testRunChangeLog();    //To change body of overridden methods use File | Settings | File Templates.
-    }
-
-    @Test
-    public void snapshot() throws Exception {
-        if (getDatabase() == null) {
-            return;
-        }
-
-
-        runCompleteChangeLog();
-        DatabaseSnapshot snapshot = SnapshotGeneratorFactory.getInstance().createSnapshot(getDatabase().getDefaultSchema(), getDatabase(), new SnapshotControl(getDatabase()));
-        System.out.println(snapshot);
-    }
-
     @Test
     public void dateDefaultValue() throws Exception {
         if (getDatabase() == null) {
             return;
         }
-        ExecutorService.getInstance().getExecutor(getDatabase()).execute(new RawSqlStatement("DROP TABLE IF " +
+        Scope.getCurrentScope().getSingleton(ExecutorService.class).getExecutor("jdbc", getDatabase()).execute(new RawSqlStatement("DROP TABLE IF " +
              "EXISTS ad"));
-    
+
         try {
-            ExecutorService.getInstance().getExecutor(getDatabase()).execute(new RawSqlStatement("CREATE TABLE ad (\n" +
+            Scope.getCurrentScope().getSingleton(ExecutorService.class).getExecutor("jdbc", getDatabase()).execute(new RawSqlStatement("CREATE TABLE ad (\n" +
                     "ad_id int(10) unsigned NOT NULL AUTO_INCREMENT,\n" +
                     "advertiser_id int(10) unsigned NOT NULL,\n" +
                     "ad_type_id int(10) unsigned NOT NULL,\n" +
@@ -76,12 +53,12 @@ public class MariaDBIntegrationTest extends AbstractIntegrationTest {
             if (e.getCause() instanceof SQLSyntaxErrorException) {
                 Scope.getCurrentScope().getLog(getClass()).warning("MariaDB returned DatabaseException", e);
                 assumeTrue("MariaDB seems to run in strict mode (no datetime literals with 0000-00-00 allowed). " + "Cannot run this test", false);
-                
+
             } else {
                 throw e;
             }
         }
-    
+
         DatabaseSnapshot snapshot = SnapshotGeneratorFactory.getInstance().createSnapshot(CatalogAndSchema.DEFAULT, getDatabase(), new SnapshotControl(getDatabase()));
         Column createdColumn = snapshot.get(new Column().setRelation(new Table().setName("ad").setSchema(new Schema())).setName("created"));
 

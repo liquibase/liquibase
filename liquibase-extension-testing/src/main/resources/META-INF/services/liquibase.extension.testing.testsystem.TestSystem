@@ -1,0 +1,15 @@
+liquibase.extension.testing.testsystem.core.CockroachTestSystem
+liquibase.extension.testing.testsystem.core.DB2TestSystem
+liquibase.extension.testing.testsystem.core.DB2zTestSystem
+liquibase.extension.testing.testsystem.core.DerbyTestSystem
+liquibase.extension.testing.testsystem.core.FirebirdTestSystem
+liquibase.extension.testing.testsystem.core.H2TestSystem
+liquibase.extension.testing.testsystem.core.HsqlTestSystem
+liquibase.extension.testing.testsystem.core.InformixTestSystem
+liquibase.extension.testing.testsystem.core.MariaDBTestSystem
+liquibase.extension.testing.testsystem.core.MSSQLTestSystem
+liquibase.extension.testing.testsystem.core.MySQLTestSystem
+liquibase.extension.testing.testsystem.core.OracleTestSystem
+liquibase.extension.testing.testsystem.core.PostgresTestSystem
+liquibase.extension.testing.testsystem.core.SQLiteTestSystem
+liquibase.extension.testing.testsystem.core.SybaseASATestSystem

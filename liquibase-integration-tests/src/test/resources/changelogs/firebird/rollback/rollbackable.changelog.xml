@@ -3,7 +3,7 @@
 <databaseChangeLog
         xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-2.0.xsd">
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-latest.xsd">
     <preConditions>
             <dbms type="firebird"/>
     </preConditions>
@@ -29,9 +29,9 @@
             <column name="sku"/>
         </createIndex>
     </changeSet>
-    <!--<changeSet id="3" author="nvoxland">-->
-        <!--<dropNotNullConstraint tableName="magazine" columnName="title" columnDataType="varchar(50)"/>-->
-    <!--</changeSet>-->
+    <changeSet id="3" author="nvoxland">
+        <dropNotNullConstraint tableName="magazine" columnName="title"/>
+    </changeSet>
     <changeSet id="4" author="nvoxland">
         <renameColumn tableName="magazine" oldColumnName="sku" newColumnName="isbn"/>
     </changeSet>
@@ -68,9 +68,9 @@
             <column name="numPages" type="int"/>
         </addColumn>
     </changeSet>
-    <!--<changeSet id="8" author="nvoxland">-->
-        <!--<addNotNullConstraint tableName="publication" columnName="title" columnDataType="varchar(50)" defaultNullValue="-1"/>-->
-    <!--</changeSet>-->
+    <changeSet id="8" author="nvoxland">
+        <addNotNullConstraint tableName="magazine" columnName="title" defaultNullValue="-1"/>
+    </changeSet>
 
     <changeSet id="9" author="nvoxland">
         <createSequence sequenceName="seq_magazine_id"/>
@@ -133,10 +133,17 @@
     </changeSet>
 
     <changeSet id="20" author="nvoxland">
-        <customChange class="liquibase.change.custom.ExampleCustomSqlChange" tableName="pageTable" columnName="magazine_id" newValue="4"/>
+        <customChange class="liquibase.change.custom.ExampleCustomSqlChange">
+            <param name="tableName" value="pageTable"/>
+            <param name="columnName" value="magazine_id"/>
+            <param name="newValue" value="4"/>
+        </customChange>
     </changeSet>
     <changeSet id="21" author="nvoxland">
-        <customChange class="liquibase.change.custom.ExampleCustomTaskChange" helloTo="world"/>
+                <customChange class="liquibase.change.custom.ExampleCustomTaskChange">
+            <param name="helloTo" value="world"/>
+        </customChange>
+
     </changeSet>
-    
+
 </databaseChangeLog>

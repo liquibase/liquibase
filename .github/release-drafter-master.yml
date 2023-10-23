@@ -1,0 +1,55 @@
+
+name-template: 'Liquibase v$RESOLVED_VERSION'
+tag-template: 'v$RESOLVED_VERSION'
+filter-by-commitish: true
+commitish: master
+exclude-labels:
+  - 'skipReleaseNotes'
+categories:
+  - title: ':green_book: Notable Changes'
+    labels:
+      - 'notableChanges'
+  - title: '🚀 New Features'
+    labels:
+      - 'TypeEnhancement'
+      - 'TypeTest'
+  - title: '🐛 Bug Fixes 🛠'
+    labels:
+      - 'TypeBug'
+  - title: '💥 Breaking Changes'
+    labels:
+      - 'breakingChanges'
+  - title: '💥 API Breaking Changes'
+    labels:
+      - 'APIBreakingChanges'
+  - title: '🤖 Security, Driver and Other Updates'
+    collapse-after: 5
+    labels:
+      - 'sdou'
+      - 'dependencies'
+  - title: '👏 New Contributors'
+    labels:
+      - 'newContributors'
+
+
+change-template: '- (#$NUMBER) $TITLE @$AUTHOR '
+change-title-escapes: '\<*_&' # You can add # and @ to disable mentions, and add ` to disable code blocks.
+version-resolver:
+  major:
+    labels:
+      - 'major'
+  minor:
+    labels:
+      - 'minor'
+  patch:
+    labels:
+      - 'feature'
+      - 'enhancement'
+      - 'patch'
+      - 'bugfix'
+      - 'sdou'
+  default: patch
+template: |
+  ## Changes
+
+  $CHANGES

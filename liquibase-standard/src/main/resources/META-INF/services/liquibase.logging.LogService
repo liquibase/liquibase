@@ -1,0 +1,3 @@
+liquibase.logging.core.BufferedLogService
+liquibase.logging.core.CompositeLogService
+liquibase.logging.core.JavaLogService

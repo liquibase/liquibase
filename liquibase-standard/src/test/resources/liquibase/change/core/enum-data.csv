@@ -1,0 +1,4 @@
+"int_col","str_col","enum_col"
+1084,"This is a String Value","EnumValOne"
+1984,"This is another String Value","EnumValTwo"
+2084,"This is yet another String Value","NULL"

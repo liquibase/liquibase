@@ -1,9 +1,9 @@
-Liquibase Version ${liquibase.version}
+Liquibase Version ${project.version}
 
 
 Getting Started
 --------------------------------------------
-Thanks for downloading and installing Liquibase ${liquibase.version} from Datical.
+Thanks for downloading and installing Liquibase ${project.version} from Liquibase.
 
 By using the installer, you already have all the dependencies, directories, config, 
 and properties files to get started exploring the Liquibase examples provided, which 
@@ -65,7 +65,7 @@ the command line can also be specified in the properties file. If a parameter is
 specified in both the properties file and the command line, the command line value 
 will override the value in the file.
 
-Learn more: https://www.liquibase.org/documentation/config_properties.html
+Learn more: https://docs.liquibase.com/concepts/connections/creating-config-properties.html
 
 
 Starting the Example H2 Database
@@ -77,15 +77,14 @@ complex database.
 
 To start the example database: 
     * open your command line or Terminal app
-    * navigate to the directory where you placed "examples" directory
-    * run `examples/start-h2`.
+    * run `liquibase init start-h2`.
 
 To stop the example database:
-    * run `ctrl-c' in the terminal running examples/start-h2
+    * run `ctrl-c' in the terminal running `liquibase init start-h2`
 
 Notes
 
-Running `examples/start-h2` starts local H2 databases that listen on port 9090, and 
+Running `liquibase init start-h2` starts local H2 databases that listen on port 9090, and
 it opens a browser to the database console on the same port. 
     * The Example h2 databases do not store data and will reset when the start-h2 
       process ends via "ctrl-c".
@@ -140,7 +139,7 @@ as defined by the changelog script.
 The DATABASECHANGELOG and DATABASECHANGELOGLOCK tables are liquibase-metadata tables. 
 Also, the changelog created the COMPANY and PERSON tables.
 
-Now, open the sample.changelog.xml or sample.changelog.sql file in your favorite 
+Now, open the `example-changelog.xml` or `example-changelog.sql` file in your favorite 
 text editor.
 
 In each file, you can see how changes were defined as a series of changeSets. Each 
@@ -221,7 +220,7 @@ COMPANY and PERSON tables in your integration web console.
 Standard Development Workflow
 -----------------------------
 For more information on the Standard Development Workflow you just completed, see: 
-https://www.liquibase.org/documentation/workflows/lb-developer-workflow.html
+https://www.liquibase.org/get-started/developer-workflow
 
 
 Next Steps
@@ -244,15 +243,13 @@ For questions regarding Liquibase, you can submit an email to support@liquibase.
 or submit a post on stack overflow and use the #liquibase tag here: 
 https://stackoverflow.com/questions/tagged/liquibase
 
-You can also post questions to these Liquibase forums:
-Liquibase User Forum: https://forum.liquibase.org/#Forum/liquibase-users
-Liquibase Developer Forum: https://forum.liquibase.org/#Forum/liquibase-development.
+You can also post questions to the Liquibase forum: https://forum.liquibase.org
 
-Liquibase Documentation: www.liquibase.org/documentation/index.html
+Liquibase Documentation: https://docs.liquibase.com
 
 Need Liquibase Support? Get customer support by upgrading to Liquibase Pro here: 
-https://support.liquibase.org/
+https://liquibase.com/pricing
 
 
-Copyright 2020 Datical, Inc. All rights reserved. The program is subject to the 
+Copyright ${current.year} Liquibase, Inc. All rights reserved. The program is subject to the
 license agreement, copyright, trademark, patent, and other laws.
