@@ -1,0 +1,28 @@
+<?xml version="1.1" encoding="UTF-8" standalone="no"?>
+<databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog" xmlns:ext="http://www.liquibase.org/xml/ns/dbchangelog-ext" xmlns:pro="http://www.liquibase.org/xml/ns/pro" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog-ext http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-ext.xsd http://www.liquibase.org/xml/ns/pro http://www.liquibase.org/xml/ns/pro/liquibase-pro-latest.xsd http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-latest.xsd">
+
+    <!-- first changeset -->
+    <changeSet id="2" author="me" context="ctx1">
+        <!-- 1) update stuff -->
+        <sql>insert into tmp_tbl (col1) values ('1')</sql>
+        <rollback>
+            <!-- 2) rollback stuff -->
+            <sql>
+                insert into tmp_tbl (col1) values ('2')
+            </sql>
+        </rollback>
+    </changeSet>
+
+    <!-- second changeset -->
+    <changeSet id="2" author="me" context="ctx2">
+        <!-- 3) update stuff -->
+        <sql>insert into tmp_tbl (col1) values ('3')</sql>
+        <rollback>
+            <!-- 4) rollback stuff -->
+            <sql>
+                insert into tmp_tbl (col1) values ('4')
+            </sql>
+        </rollback>
+    </changeSet>
+
+</databaseChangeLog>

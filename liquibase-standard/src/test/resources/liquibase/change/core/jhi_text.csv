@@ -1,0 +1,3 @@
+id,selected_pickup_date,effective_pickup_date,textfield
+01,2020-09-01T07:00:00.000000,NULL,mytext
+02,2020-09-01T07:00:00.000000,NULL,their_text

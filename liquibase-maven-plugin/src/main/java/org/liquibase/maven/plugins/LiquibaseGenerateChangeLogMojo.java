@@ -1,9 +1,11 @@
 package org.liquibase.maven.plugins;
 
+import liquibase.CatalogAndSchema;
+import liquibase.GlobalConfiguration;
 import liquibase.Liquibase;
-import liquibase.configuration.GlobalConfiguration;
-import liquibase.configuration.LiquibaseConfiguration;
+import liquibase.Scope;
 import liquibase.database.Database;
+import liquibase.diff.compare.CompareControl;
 import liquibase.diff.output.DiffOutputControl;
 import liquibase.diff.output.StandardObjectChangeFilter;
 import liquibase.exception.LiquibaseException;
@@ -12,9 +14,7 @@ import liquibase.integration.commandline.CommandLineUtils;
 import liquibase.util.StringUtil;
 import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.plugin.MojoFailureException;
-
-import javax.xml.parsers.ParserConfigurationException;
-import java.io.IOException;
+import org.liquibase.maven.property.PropertyElement;
 
 /**
  * <p>Generates a changelog based on the current database schema. Typically used when
@@ -33,6 +33,7 @@ public class LiquibaseGenerateChangeLogMojo extends
      *
      * @parameter property="liquibase.diffTypes"
      */
+    @PropertyElement
     protected String diffTypes;
 
     /**
@@ -40,26 +41,30 @@ public class LiquibaseGenerateChangeLogMojo extends
      *
      * @parameter property="liquibase.dataDir"
      */
+    @PropertyElement
     protected String dataDir;
 
     /**
-     * The author to be specified for Change Sets in the generated Change Log.
+     * The author to be specified for Changesets in the generated Change Log.
      *
      * @parameter property="liquibase.changeSetAuthor"
      */
+    @PropertyElement
     protected String changeSetAuthor;
 
     /**
      * are required. If no context is specified then ALL contexts will be executed.
      * @parameter property="liquibase.contexts" default-value=""
      */
+    @PropertyElement
     protected String contexts;
 
     /**
-     * The execution context to be used for Change Sets in the generated Change Log, which can be "," separated if multiple contexts.
+     * The execution context to be used for Changesets in the generated Change Log, which can be "," separated if multiple contexts.
      *
      * @parameter property="liquibase.changeSetContext"
      */
+    @PropertyElement
     protected String changeSetContext;
 
     /**
@@ -67,6 +72,7 @@ public class LiquibaseGenerateChangeLogMojo extends
      *
      * @parameter property="liquibase.outputChangeLogFile"
      */
+    @PropertyElement
     protected String outputChangeLogFile;
 
 
@@ -75,6 +81,7 @@ public class LiquibaseGenerateChangeLogMojo extends
      *
      * @parameter property="liquibase.diffExcludeObjects"
      */
+    @PropertyElement
     protected String diffExcludeObjects;
 
     /**
@@ -82,8 +89,30 @@ public class LiquibaseGenerateChangeLogMojo extends
      *
      * @parameter property="liquibase.diffIncludeObjects"
      */
+    @PropertyElement
     protected String diffIncludeObjects;
 
+    /**
+     * Specifies the a list of schemas to indicate liquibase where to apply change objects or where to read current state from
+     * @parameter property="liquibase.schemas"
+     */
+    @PropertyElement
+    protected String schemas;
+
+    /**
+     * Flag to Indicate liquibase whether or not to include schema name on changelog
+     * @parameter property="liquibase.includeSchema"
+     */
+    @PropertyElement
+    protected  Boolean includeSchema;
+
+    /**
+     * Flag to allow overwriting of output changelog file
+     *
+     * @parameter property="liquibase.overwriteOutputFile" default-value="false"
+     */
+    @PropertyElement
+    protected boolean overwriteOutputFile;
 
     @Override
 	protected void performLiquibaseTask(Liquibase liquibase)
@@ -102,7 +131,7 @@ public class LiquibaseGenerateChangeLogMojo extends
 
         getLog().info("Generating Change Log from database " + database.toString());
         try {
-            DiffOutputControl diffOutputControl = new DiffOutputControl(outputDefaultCatalog, outputDefaultSchema, true, null);
+            DiffOutputControl diffOutputControl = new DiffOutputControl(outputDefaultCatalog, includeSchema == null ? Boolean.FALSE : includeSchema, true, null);
             if ((diffExcludeObjects != null) && (diffIncludeObjects != null)) {
                 throw new UnexpectedLiquibaseException("Cannot specify both excludeObjects and includeObjects");
             }
@@ -117,13 +146,16 @@ public class LiquibaseGenerateChangeLogMojo extends
             // Set the global configuration option based on presence of the dataOutputDirectory
             //
             boolean b = dataDir != null;
-            LiquibaseConfiguration.getInstance().getConfiguration(GlobalConfiguration.class).setShouldSnapshotData(b);
+            Scope.child(GlobalConfiguration.SHOULD_SNAPSHOT_DATA.getKey(), b, () -> {
+            CompareControl.ComputedSchemas computedSchemas = CompareControl.computeSchemas(schemas, null, null,
+                    defaultCatalogName, defaultSchemaName, null, null, database);
+            CatalogAndSchema[] targetSchemas = computedSchemas.finalTargetSchemas;
 
-            CommandLineUtils.doGenerateChangeLog(outputChangeLogFile, database, defaultCatalogName, defaultSchemaName, StringUtil.trimToNull(diffTypes),
-                    StringUtil.trimToNull(changeSetAuthor), StringUtil.trimToNull(changeSetContext), StringUtil.trimToNull(dataDir), diffOutputControl);
-            getLog().info("Output written to Change Log file, " + outputChangeLogFile);
-        }
-        catch (IOException | ParserConfigurationException e) {
+                CommandLineUtils.doGenerateChangeLog(outputChangeLogFile, database, targetSchemas, StringUtil.trimToNull(diffTypes),
+                        StringUtil.trimToNull(changeSetAuthor), StringUtil.trimToNull(changeSetContext), StringUtil.trimToNull(dataDir), diffOutputControl, overwriteOutputFile);
+                getLog().info("Output written to Change Log file, " + outputChangeLogFile);
+            });
+        }  catch (Exception e) {
             throw new LiquibaseException(e);
         }
     }
@@ -139,7 +171,7 @@ public class LiquibaseGenerateChangeLogMojo extends
     protected void checkRequiredParametersAreSpecified() throws MojoFailureException {
         super.checkRequiredParametersAreSpecified();
         if (outputChangeLogFile == null) {
-            throw new MojoFailureException("The output changeLogFile must be specified.");
+            throw new MojoFailureException("The outputChangeLogFile property must be specified.");
         }
     }
 

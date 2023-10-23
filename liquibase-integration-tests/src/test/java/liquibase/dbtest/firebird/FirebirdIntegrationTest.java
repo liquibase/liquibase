@@ -4,6 +4,9 @@ import liquibase.CatalogAndSchema;
 import liquibase.database.DatabaseFactory;
 import liquibase.dbtest.AbstractIntegrationTest;
 import liquibase.exception.DatabaseException;
+import org.junit.After;
+import org.junit.Ignore;
+import org.junit.Test;
 
 /**
  * To configure database:
@@ -20,12 +23,6 @@ public class FirebirdIntegrationTest extends AbstractIntegrationTest {
     }
 
     @Override
-    protected boolean isDatabaseProvidedByTravisCI() {
-        // Seems unlikely to ever be provided by Travis, as it's not free
-        return false;
-    }
-
-    @Override
     protected boolean shouldRollBack() {
         return false;
     }
@@ -36,5 +33,35 @@ public class FirebirdIntegrationTest extends AbstractIntegrationTest {
                 CatalogAndSchema.DEFAULT
         };
     }
+
+    @After
+    @Override
+    public void tearDown() throws Exception {
+        super.tearDown();
+        getDatabase().close();
+    }
+
+    @Test
+    @Override
+    @Ignore
+    public void testTableExistsPreconditionTableNameMatch() throws Exception {
+    }
+
+    @Test
+    @Override
+    @Ignore
+    public void testRunUpdateOnOldChangelogTableFormat() throws Exception {
+    }
+
+    @Test
+    @Override
+    @Ignore
+    public void testOutputChangeLog() throws Exception {}
+
+    @Test
+    @Override
+    @Ignore
+    public void testSnapshotReportsAllObjectTypes() throws Exception {}
+
 
 }

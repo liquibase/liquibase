@@ -3,7 +3,7 @@
 <databaseChangeLog
         xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.6.xsd">
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-latest.xsd">
     <preConditions>
             <dbms type="oracle"/>
             <runningAs username="${loginUser}"/>
@@ -38,7 +38,7 @@
         <comment>Fix misspelled "username" column</comment>
         <renameColumn tableName="person" oldColumnName="usernae" newColumnName="username"/>
     </changeSet>
-    <changeSet id="5" author="nvoxland" context="test">
+    <changeSet id="5" author="nvoxland" contextFilter="test">
         <insert tableName="person">
             <column name="id" value="1"/>
             <column name="firstname" value="John"/>
@@ -72,7 +72,7 @@
             </column>
         </createTable>
     </changeSet>
-    <changeSet id="7" author="bjohnson" context="test">
+    <changeSet id="7" author="bjohnson" contextFilter="test">
         <insert tableName="employee">
             <column name="id" value="1"/>
             <column name="name" value="ACME Corp"/>
@@ -108,7 +108,7 @@
                 <constraints nullable="false"/>
             </column>
             <column name="person_id" type="int">
-                <constraints nullable="false" foreignKeyName="fk_test_person" references="liquibase.person(id)"/>
+                <constraints nullable="false" foreignKeyName="fk_test_person" references="lbuser.person(id)"/>
             </column>
         </createTable>
     </changeSet>
@@ -154,10 +154,10 @@
 
     <changeSet id="19" author="nvoxland">
         <createView viewName="personView">
-            select * from liquibase.person
+            select * from lbuser.person
         </createView>
         <createView viewName="personView" replaceIfExists="true">
-            select * from liquibase.person
+            select * from lbuser.person
         </createView>
     </changeSet>
 
@@ -299,12 +299,6 @@
             <param name="newValue" value="3"/>
         </customChange>
     </changeSet>
-    <changeSet id="57" author="nvoxland">
-        <customChange class="liquibase.change.custom.ExampleCustomSqlChange" tableName="person" columnName="employer_id" newValue="4"/>
-    </changeSet>
-    <changeSet id="58" author="nvoxland">
-        <customChange class="liquibase.change.custom.ExampleCustomTaskChange" helloTo="world"/>
-    </changeSet>
 
     <changeSet id="59" author="nvoxland">
         <createProcedure>
@@ -436,4 +430,31 @@ END testSP;
             END;
         </createProcedure>
     </changeSet>
+
+
+
+    <!-- check named not null constraints -->
+    <changeSet id="2" author="constraint-check">
+        <createTable tableName="named_constraint">
+            <column name="id" type="int"/>
+        </createTable>
+    </changeSet>
+    <changeSet id="3" author="constraint-check">
+        <createTable tableName="unnamed_constraint">
+            <column name="id" type="int"/>
+        </createTable>
+    </changeSet>
+    <changeSet id="5" author="constraint-check">
+        <addNotNullConstraint tableName="named_constraint" columnName="id" constraintName="ck_named_notnull"/>
+    </changeSet>
+    <changeSet id="6" author="constraint-check">
+        <addNotNullConstraint tableName="unnamed_constraint" columnName="id"/>
+    </changeSet>
+    <changeSet id="7" author="constraint-check">
+        <dropNotNullConstraint tableName="named_constraint" columnName="id" constraintName="ck_named_notnull"/>
+    </changeSet>
+    <changeSet id="8" author="constraint-check">
+        <dropNotNullConstraint tableName="unnamed_constraint" columnName="id"/>
+    </changeSet>
+
 </databaseChangeLog>

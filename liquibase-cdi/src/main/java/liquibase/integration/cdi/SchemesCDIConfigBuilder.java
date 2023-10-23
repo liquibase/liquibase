@@ -4,7 +4,7 @@ import liquibase.Scope;
 import liquibase.integration.cdi.annotations.Liquibase;
 import liquibase.integration.cdi.annotations.LiquibaseSchema;
 import liquibase.logging.Logger;
-import liquibase.resource.FileSystemResourceAccessor;
+import liquibase.resource.DirectoryResourceAccessor;
 import liquibase.resource.ResourceAccessor;
 import liquibase.util.FileUtil;
 import liquibase.util.StreamUtil;
@@ -26,7 +26,8 @@ import java.util.*;
 import java.util.concurrent.Callable;
 
 /**
- * @author Nikita Lipatov (https://github.com/islonik)
+ * @author <a href="https://github.com/islonik)">Nikita Lipatov</a>
+ *
  * @since 27/5/17.
  */
 @Singleton
@@ -54,8 +55,8 @@ public class SchemesCDIConfigBuilder {
     /**
      * API method.
      */
-    public ResourceAccessor createResourceAccessor() {
-        return new FileSystemResourceAccessor(new File(ROOT_PATH));
+    public ResourceAccessor createResourceAccessor() throws IOException {
+        return new DirectoryResourceAccessor(new File(ROOT_PATH));
     }
 
     /**
@@ -67,11 +68,7 @@ public class SchemesCDIConfigBuilder {
 
         final InputStream is = SchemesCDIConfigBuilder.class.getResourceAsStream(SCHEMA_NAME);
         try {
-            return jvmLocked(id, new Callable<CDILiquibaseConfig>() {
-                public CDILiquibaseConfig call() throws Exception {
-                    return createCDILiquibaseConfig(id, is);
-                }
-            });
+            return jvmLocked(id, () -> createCDILiquibaseConfig(id, is));
         } catch (Exception ex) {
             log.warning(String.format("[id = %s] Unable to initialize liquibase where '%s'.", id, ex.getMessage()), ex);
             return null;
@@ -83,7 +80,7 @@ public class SchemesCDIConfigBuilder {
             }
         }
     }
-    
+
     private CDILiquibaseConfig createCDILiquibaseConfig(final String id, final InputStream is) throws IOException {
         File liquibaseDir = new File(String.format("%s/liquibase/schemes", ROOT_PATH));
         if (!liquibaseDir.exists() && (!liquibaseDir.mkdirs())) {
@@ -102,6 +99,7 @@ public class SchemesCDIConfigBuilder {
                 log.fine(String.format("[id = %s] File [path='%s'] already exists, failed to delete.", id, path));
             }
         }
+
         if (!output.createNewFile()) {
             throw new RuntimeException(String.format("[id = %s] Cannot create [%s] file.", id, output));
         }
@@ -117,10 +115,12 @@ public class SchemesCDIConfigBuilder {
         for (Bean<?> bean : beans) {
             classesSet.add(bean.getBeanClass());
         }
+
         Set<Annotation> annotationsSet = new LinkedHashSet<>();
         for (Class clazz : classesSet) {
             annotationsSet.add(clazz.getAnnotation(LiquibaseSchema.class));
         }
+
         List<LiquibaseSchema> liquibaseSchemaList = new ArrayList<>();
         for (Annotation ann : annotationsSet) {
             liquibaseSchemaList.add((LiquibaseSchema) ann);
@@ -145,7 +145,8 @@ public class SchemesCDIConfigBuilder {
             schemes.append(String.format(INCLUDE_TPL, schema)).append("\n");
         }
 
-        log.info(String.format("[id = %s] Scan complete [took=%s milliseconds].", id, System.currentTimeMillis() - start));
+        long end = System.currentTimeMillis();
+        log.info(String.format("[id = %s] Scan complete [took=%s milliseconds].", id, end - start));
         log.fine(String.format("[id = %s] Resolved schemes: %n%s%n", id, schemes));
         log.fine(String.format("[id = %s] Generating root liquibase file...", id));
 
@@ -171,6 +172,7 @@ public class SchemesCDIConfigBuilder {
     /**
      * Synchronization among multiple JVM's.
      */
+    @SuppressWarnings("squid:S2142") // false positive ignored as per https://sonarsource.atlassian.net/browse/SONARJAVA-4406
     CDILiquibaseConfig fileLocked(final String id, Callable<CDILiquibaseConfig> action) throws Exception {
         log.info(String.format("[id = %s] JVM lock acquired, acquiring file lock", id));
         String lockPath = String.format("%s/schema.liquibase.lock", ROOT_PATH);
@@ -185,8 +187,8 @@ public class SchemesCDIConfigBuilder {
         CDILiquibaseConfig actionResult = null;
         FileLock lock = null;
         try (
-            FileOutputStream fileStream = new FileOutputStream(lockPath);
-            FileChannel fileChannel = fileStream.getChannel();
+                FileOutputStream fileStream = new FileOutputStream(lockPath);
+                FileChannel fileChannel = fileStream.getChannel()
         )
         {
             while (null == lock) {
@@ -197,7 +199,12 @@ public class SchemesCDIConfigBuilder {
                 }
                 if (null == lock) {
                     log.fine(String.format("[id = %s] Waiting for the lock...", id));
-                    Thread.sleep(FILE_LOCK_TIMEOUT);
+                    try {
+                        Thread.sleep(FILE_LOCK_TIMEOUT);
+                    } catch (InterruptedException interruptedException) {
+                        log.severe(interruptedException.getMessage(), interruptedException);
+                        Thread.currentThread().interrupt();
+                    }
                 }
             }
             log.info(String.format("[id = %s] File lock acquired, running liquibase...", id));

@@ -1,70 +1,61 @@
----
-name: Pull Request
-about: Create a report to help us improve
-title: ''
-labels: Status:Discovery
-assignees: ''
+## Impact
 
----
-
-<!--- This environment context section helps us quickly review your PR. 
-      Please take a minute to fill-out this information. -->
-## Environment
-
-**Liquibase Version**:
-
-**Liquibase Integration & Version**: <Pick one: CLI, maven, gradle, spring boot, servlet, etc.>
-
-**Liquibase Extension(s) & Version**: 
-
-**Database Vendor & Version**:
-
-**Operating System Type & Version**:
-
-## Pull Request Type
-
-<!--- What types of changes does your code introduce?
-      Put an `x` in all the boxes that apply: 
-      If this PR fixes an existing GH issue, edit the next line to add "closes #XXXX" to auto-link.
-      If this PR fixes an existing CORE Jira issue, note that as well, although there will be no auto-linking. -->
-- [ ] Bug fix (non-breaking change which fixes an issue.)
-- [ ] Enhancement/New feature (non-breaking change which adds functionality)
+<!--- What types of changes does your code introduce? Put an `x` in all the boxes that apply: -->
+- [ ] Bug fix (non-breaking change which fixes expected existing functionality)
+- [ ] Enhancement/New feature (adds functionality without impacting existing logic)
 - [ ] Breaking change (fix or feature that would cause existing functionality to change)
+ 
+<!--  Mandatory Labels to add to a PR
+
+At least one of the labels must be added to the PR before it's merged. If no label is provided the workflow will fail and you will not be able to merge the PR. After the label is added it re-runs the `Pull Request Labels / label (pull_request)` and gives a green check. 
+
+`skipReleaseNotes`   - Don't show up on the Draft Release Notes page
+`notableChanges`     - Any notable changes
+`TypeEnhancement`    - New features
+`TypeTest`           - New Test features
+`TypeBug`            - bug fixes
+`breakingChanges`    - any breaking changes
+`APIBreakingChanges` - any API breaking changes
+`sdou`               - Security, Driver and Other Updates -dependabot PR's
+`newContributors`    - New Contributors -->
+
 
 ## Description
 
-A clear and concise description of the issue being addressed.
-- Describe the actual problematic behavior.
+<!--
+A clear and concise description of the change being made.  
+
+- Introduce what was/will be done in the title
+  - Titles show in release notes and search results, so make them useful
+  - Use verbs at the beginning of the title, such as "fix", "implement", "improve", "update", and "add" 
+  - Be specific about what was fixed or changed
+  - Good Example: `Fix the --should-snapshot-data CLI parameter to be preserved when the --data-output-directory property is not specified in the command.`
+  - Bad Example: `Fixed --should-snapshot-data`  
+- If there is an existing issue this addresses, include "Fixes #XXXX" to auto-link the issue to this PR
+- If there is NOT an existing issue, consider creating one.
+  - In general, issues describe wanted change from an end-user perspective and PRs describe the technical change.
+  - If this change is very small and not worth splitting off an issue, include `Steps To Reproduce`, `Expected Behavior`, and `Actual Behavior` sections in this PR as you would have in the issue.
+- Describe what users need and how the fix will affect them
+- Describe how the code change addresses the problem
 - Ensure private information is redacted.
+-->
 
-## Steps To Reproduce
+## Things to be aware of
 
-List the steps to reproduce the behavior.
-- Please be precise and ensure private information is redacted
-- Include things like
-  - Files used - sql scripts, changelog file(s), property file(s), config files, POM Files
-  - Exact commands used - CLI, maven, gradle, spring boot, servlet, etc.
+<!--
+- Describe the technical choices you made
+- Describe impacts on the codebase
+-->
 
-## Actual Behavior
-A clear and concise description of what happens in the software **before** this pull request.
-- Include console output if relevant
-- Include log files if available.
+## Things to worry about
 
-## Expected/Desired Behavior
-A clear and concise description of what happens in the software **after** this pull request.
-
-## Screenshots (if appropriate)
-If applicable, add screenshots to help explain your problem.
+<!--
+- List any questions or concerns you have with the change
+- List unknowns you have 
+-->
 
 ## Additional Context
+
+<!--
 Add any other context about the problem here.
-
-## Fast Track PR Acceptance Checklist:
-<!--- Completing these speeds up the acceptance of your pull request -->
-<!--- Put an `x` in all the boxes that apply. -->
-<!--- If you're unsure about any of these, just ask us in a comment. We're here to help! -->
-- [ ] Build is successful and all new and existing tests pass
-- [ ] Added Unit Test(s)
-- [ ] Added Integration Test(s)
-- [ ] Documentation Updated
-
+-->

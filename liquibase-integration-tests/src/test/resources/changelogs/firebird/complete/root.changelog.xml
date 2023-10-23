@@ -3,7 +3,7 @@
 <databaseChangeLog
         xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-2.0.xsd">
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-latest.xsd">
     <preConditions>
             <dbms type="firebird"/>
             <runningAs username="${loginUser}"/>
@@ -14,7 +14,7 @@
             You can add comments to changeSets.
             They can even be multiple lines if you would like.
             They aren't used to compute the changeSet MD5Sum, so you can update them whenever you want without causing problems.
-        </comment>        
+        </comment>
         <createTable tableName="person">
             <column name="id" type="int">
                 <constraints primaryKey="true" nullable="false"/>
@@ -38,7 +38,7 @@
         <comment>Fix misspelled "username" column</comment>
         <renameColumn tableName="person" oldColumnName="usernae" newColumnName="username"/>
     </changeSet>
-    <changeSet id="5" author="nvoxland" context="test">
+    <changeSet id="5" author="nvoxland" contextFilter="test">
         <insert tableName="person">
             <column name="id" value="1"/>
             <column name="firstname" value="John"/>
@@ -72,7 +72,7 @@
             </column>
         </createTable>
     </changeSet>
-    <changeSet id="7" author="bjohnson" context="test">
+    <changeSet id="7" author="bjohnson" contextFilter="test">
         <insert tableName="company">
             <column name="id" value="1"/>
             <column name="name" value="ACME Corp"/>
@@ -82,23 +82,14 @@
             <column name="name" value="Widgets Inc."/>
         </insert>
     </changeSet>
-    <!--<changeSet id="7a" author="nvoxland">-->
-        <!--<addColumn tableName="company">-->
-            <!--<column name="company_id" type="int">-->
-                <!--<constraints nullable="true" foreignKeyName="fk_employee_company" references="employee(id)"/>-->
-            <!--</column>-->
-        <!--</addColumn>-->
-    <!--</changeSet>-->
-    <!--<changeSet id="8" author="bjohnson">-->
-        <!--<dropNotNullConstraint tableName="employee" columnName="name" columnDataType="varchar(50)"/>-->
-    <!--</changeSet>-->
-    <!--<changeSet id="8.1" author="bjohnson">-->
-        <!--<comment>I guess name needs to be not-null</comment>-->
-        <!--<addNotNullConstraint tableName='employee' columnName="name" defaultNullValue="UNKNOWN"/>-->
-    <!--</changeSet>-->
-    <!--<changeSet id="9" author="nvoxland">-->
-        <!--<renameTable oldTableName="employee" newTableName="company"/>-->
-    <!--</changeSet>-->
+
+    <changeSet id="8" author="bjohnson">
+        <dropNotNullConstraint tableName="company" columnName="name"/>
+    </changeSet>
+    <changeSet id="8.1" author="bjohnson">
+        <comment>I guess name needs to be not-null</comment>
+        <addNotNullConstraint tableName='company' columnName="name" defaultNullValue="UNKNOWN"/>
+    </changeSet>
     <changeSet id="10" author="nvoxland">
         <createTable tableName="testtable">
             <column name="id" type="int">
@@ -117,10 +108,10 @@
     </changeSet>
 
     <changeSet id="12" author="nvoxland">
-        <createIndex indexName="idx_company_name" tableName="company">
+        <createIndex indexName="idx_company_name" tableName="company" unique="true">
             <column name="name"/>
         </createIndex>
-        <createIndex indexName="idx_person_lastname" tableName="person">
+        <createIndex indexName="idx_person_lastname" tableName="person" unique="false">
             <column name="lastname"/>
         </createIndex>
     </changeSet>
@@ -183,10 +174,6 @@
         </createView>
     </changeSet>
 
-    <!--<changeSet id="23" author="nvoxland">-->
-        <!--<renameView oldViewName="personView" newViewName="v_person"/>-->
-    <!--</changeSet>-->
-
     <changeSet id="24" author="nvoxland">
         <addColumn tableName="person">
             <column name="employer_id" type="int"/>
@@ -210,9 +197,9 @@
             <column name="id" type="int">
                 <constraints nullable="false"/>
             </column>
-            <column name="line1" type="varchar(255)"/>
-            <column name="line2" type="varchar(255)"/>
-            <column name="city" type="varchar(255)"/>
+            <column name="line1" type="varchar(100)"/>
+            <column name="line2" type="varchar(100)"/>
+            <column name="city" type="varchar(100)"/>
             <column name="state" type="char(2)"/>
             <column name="postalcode" type="varchar(15)"/>
         </createTable>
@@ -253,12 +240,6 @@
         </insert>
     </changeSet>
 
-    <!--<changeSet id="29" author="nvoxland">-->
-        <!--<addLookupTable-->
-            <!--existingTableName="address" existingColumnName="state"-->
-            <!--newTableName="state" newColumnName="id" newColumnDataType="char(2)"/>-->
-    <!--</changeSet>-->
-
     <changeSet id="30" author="nvoxland">
         <addDefaultValue tableName="address" columnName="line2" defaultValue="N/A"/>
     </changeSet>
@@ -291,9 +272,7 @@
 
     <include file="changelogs/firebird/complete/renamed.changelog.xml"/>
 
-    <include file="changelogs/common/common.tests.changelog.xml" />
-
-    <!--<include file="changelogs/common/schema.tests.changelog.xml" />-->
+<!--    <include file="changelogs/common/common.tests.changelog.xml" />-->
 
     <changeSet id="56" author="nvoxland">
         <customChange class="liquibase.change.custom.ExampleCustomSqlChange">
@@ -303,10 +282,17 @@
         </customChange>
     </changeSet>
     <changeSet id="57" author="nvoxland">
-        <customChange class="liquibase.change.custom.ExampleCustomSqlChange" tableName="person" columnName="employer_id" newValue="4"/>
+                <customChange class="liquibase.change.custom.ExampleCustomSqlChange">
+            <param name="tableName" value="person"/>
+            <param name="columnName" value="employer_id"/>
+            <param name="newValue" value="3"/>
+        </customChange>
+
     </changeSet>
     <changeSet id="58" author="nvoxland">
-        <customChange class="liquibase.change.custom.ExampleCustomTaskChange" helloTo="world"/>
+                <customChange class="liquibase.change.custom.ExampleCustomTaskChange">
+            <param name="helloTo" value="world"/>
+        </customChange>
     </changeSet>
 
     <changeSet id="60" author="nvoxland">

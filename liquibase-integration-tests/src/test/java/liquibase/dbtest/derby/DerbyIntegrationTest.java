@@ -3,21 +3,17 @@ package liquibase.dbtest.derby;
 import liquibase.database.DatabaseFactory;
 import liquibase.database.jvm.JdbcConnection;
 import liquibase.dbtest.AbstractIntegrationTest;
+import org.junit.Ignore;
 
 import java.sql.SQLException;
 
+@Ignore("Not officially supported")
 public class DerbyIntegrationTest extends AbstractIntegrationTest {
 
     public static final String DERBY_SQLSTATE_OBJECT_ALREADY_EXISTS = "X0Y68";
 
     public DerbyIntegrationTest() throws Exception {
         super("derby", DatabaseFactory.getInstance().getDatabase("derby"));
-    }
-
-    @Override
-    protected boolean isDatabaseProvidedByTravisCI() {
-        // Derby is an in-process database
-        return true;
     }
 
     @Override

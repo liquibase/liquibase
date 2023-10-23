@@ -3,10 +3,10 @@
 <databaseChangeLog
         xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-2.0.xsd">
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-latest.xsd">
 
     <changeSet id="1" author="lujop">
-        <createTable tableName="countries" schemaName="lbcat2">
+        <createTable tableName="countries" schemaName="lbschem2">
             <column name="id" type="int">
                 <constraints primaryKey="true" nullable="false"/>
             </column>
@@ -26,7 +26,7 @@
         <addForeignKeyConstraint
                 baseTableName="person" baseColumnNames="country_id"
                 constraintName="fk_person_country"
-                referencedTableName="countries" referencedTableSchemaName="lbcat2" referencedColumnNames="id"
+                referencedTableName="countries" referencedTableSchemaName="lbschem2" referencedColumnNames="id"
         />
     </changeSet>
     

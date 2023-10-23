@@ -3,6 +3,7 @@ package org.liquibase.maven.plugins;
 import liquibase.Liquibase;
 import liquibase.exception.LiquibaseException;
 import org.apache.maven.plugin.MojoFailureException;
+import org.liquibase.maven.property.PropertyElement;
 
 /**
  * <p>Writes a Liquibase tag to the database.</p>
@@ -18,6 +19,7 @@ public class LiquibaseTag extends AbstractLiquibaseMojo {
    * @parameter property="liquibase.tag"
    * @required
    */
+  @PropertyElement
   private String tag;
 
   @Override

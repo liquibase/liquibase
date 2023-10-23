@@ -4,16 +4,37 @@
 
     <parent>
         <groupId>org.liquibase</groupId>
-        <artifactId>liquibase-base-module</artifactId>
-        <version>${liquibase.version}</version>
-        <relativePath>../base-module.pom.xml</relativePath>
+        <artifactId>liquibase</artifactId>
+        <version>0-SNAPSHOT</version>
     </parent>
 
     <description>Configures Liquibase for use in a CDI environment</description>
 
     <artifactId>liquibase-cdi</artifactId>
 
+    <properties>
+        <maven.install.skip>false</maven.install.skip>
+        <maven.deploy.skip>false</maven.deploy.skip>
+        <maven.javadoc.skip>false</maven.javadoc.skip>
+        <sonar.coverage.jacoco.xmlReportPaths>../target/jacoco.xml</sonar.coverage.jacoco.xmlReportPaths>
+    </properties>
+
     <dependencies>
+        <dependency>
+            <groupId>org.liquibase</groupId>
+            <artifactId>liquibase-core</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+
+        <!-- we have a liquibase-standard dependency here for tests-jar -->
+        <dependency>
+            <groupId>org.liquibase</groupId>
+            <artifactId>liquibase-standard</artifactId>
+            <version>${project.version}</version>
+            <type>test-jar</type>
+            <scope>test</scope>
+        </dependency>
+
         <dependency>
             <groupId>org.jboss.weld.se</groupId>
             <artifactId>weld-se</artifactId>
@@ -25,7 +46,7 @@
         <dependency>
             <groupId>javax.enterprise</groupId>
             <artifactId>cdi-api</artifactId>
-            <version>1.0-SP4</version>
+            <version>2.0</version>
             <scope>provided</scope>
         </dependency>
 
@@ -34,47 +55,14 @@
     <build>
         <plugins>
             <plugin>
-                <groupId>org.codehaus.mojo</groupId>
-                <artifactId>flatten-maven-plugin</artifactId>
-                <version>1.1.0</version>
-                <configuration>
-                    <updatePomFile>true</updatePomFile>
-                    <outputDirectory>${project.build.directory}/flattened-pom</outputDirectory>
-                    <flattenedPomFilename>release.pom.xml</flattenedPomFilename>
-                    <pomElements>
-                        <profiles>remove</profiles>
-                        <organization/>
-                        <issueManagement/>
-                    </pomElements>
-                    <flattenMode>ossrh</flattenMode>
-                </configuration>
-                <executions>
-                    <execution>
-                        <id>flatten</id>
-                        <phase>process-resources</phase>
-                        <goals>
-                            <goal>flatten</goal>
-                        </goals>
-                    </execution>
-                    <execution>
-                        <id>flatten.clean</id>
-                        <phase>clean</phase>
-                        <goals>
-                            <goal>clean</goal>
-                        </goals>
-                    </execution>
-                </executions>
-            </plugin>
-
-            <plugin>
                 <!-- Converts the generated flattened-pom into a cleaner version for maven distribution -->
                 <groupId>org.codehaus.mojo</groupId>
                 <artifactId>xml-maven-plugin</artifactId>
-                <version>1.0.2</version>
+                <version>1.1.0</version>
                 <executions>
                     <execution>
                         <id>transform-deploy-pom</id>
-                        <phase>process-resources</phase>
+                        <phase>prepare-package</phase>
                         <goals>
                             <goal>transform</goal>
                         </goals>
@@ -94,34 +82,12 @@
             </plugin>
 
             <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-javadoc-plugin</artifactId>
-                <configuration>
-                    <author>false</author>
-                    <doctitle>Liquibase CDI ${project.version} API</doctitle>
-                    <quiet>true</quiet>
-                    <doclint>none</doclint>
-                    <encoding>UTF-8</encoding>
-                    <jarOutputDirectory>${project.basedir}/target</jarOutputDirectory>
-                </configuration>
-                <executions>
-                    <execution>
-                        <id>jar-javadoc</id>
-                        <goals>
-                            <goal>jar</goal>
-                        </goals>
-                        <phase>package</phase>
-                    </execution>
-                </executions>
-            </plugin>
-
-            <plugin>
                 <artifactId>maven-install-plugin</artifactId>
                 <configuration>
                     <artifactId>${project.artifactId}</artifactId>
-                    <file>${project.build.directory}/${project.artifactId}-${version}.jar</file>
-                    <sources>${project.build.directory}/${project.artifactId}-${version}-sources.jar</sources>
-                    <javadoc>${project.build.directory}/${project.artifactId}-${version}-javadoc.jar</javadoc>
+                    <file>${project.build.directory}/${project.artifactId}-${project.version}.jar</file>
+                    <sources>${project.build.directory}/${project.artifactId}-${project.version}-sources.jar</sources>
+                    <javadoc>${project.build.directory}/${project.artifactId}-${project.version}-javadoc.jar</javadoc>
                     <pomFile>${project.build.directory}/release.pom.xml</pomFile>
                 </configuration>
                 <executions>
@@ -134,31 +100,6 @@
                     </execution>
                 </executions>
             </plugin>
-
-            <plugin>
-                <artifactId>maven-deploy-plugin</artifactId>
-                <configuration>
-                    <skip>false</skip>
-                    <repositoryId>${deploy.repositoryId}</repositoryId>
-                    <artifactId>${project.artifactId}</artifactId>
-                    <version>${liquibase.version}</version>
-                    <url>${deploy.url}</url>
-                    <file>${project.build.directory}/${project.artifactId}-${liquibase.version}.jar</file>
-                    <sources>${project.build.directory}/${project.artifactId}-${version}-sources.jar</sources>
-                    <javadoc>${project.build.directory}/${project.artifactId}-${version}-javadoc.jar</javadoc>
-                    <pomFile>${project.build.directory}/release.pom.xml</pomFile>
-                </configuration>
-                <executions>
-                    <execution>
-                        <id>custom-deploy</id>
-                        <phase>deploy</phase>
-                        <goals>
-                            <goal>deploy-file</goal>
-                        </goals>
-                    </execution>
-                </executions>
-            </plugin>
         </plugins>
     </build>
-
 </project>

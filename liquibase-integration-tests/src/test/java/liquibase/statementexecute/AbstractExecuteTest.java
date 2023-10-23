@@ -5,6 +5,8 @@ import liquibase.Scope;
 import liquibase.changelog.ChangeLogHistoryServiceFactory;
 import liquibase.database.Database;
 import liquibase.database.DatabaseConnection;
+import liquibase.database.DatabaseFactory;
+import liquibase.database.core.MockDatabase;
 import liquibase.database.core.UnsupportedDatabase;
 import liquibase.database.example.ExampleCustomDatabase;
 import liquibase.database.jvm.JdbcConnection;
@@ -12,15 +14,15 @@ import liquibase.datatype.DataTypeFactory;
 import liquibase.exception.DatabaseException;
 import liquibase.exception.UnexpectedLiquibaseException;
 import liquibase.executor.ExecutorService;
+import liquibase.extension.testing.testsystem.DatabaseTestSystem;
+import liquibase.extension.testing.testsystem.TestSystemFactory;
 import liquibase.listener.SqlListener;
 import liquibase.lockservice.LockServiceFactory;
-import liquibase.database.core.MockDatabase;
 import liquibase.snapshot.SnapshotGeneratorFactory;
 import liquibase.sql.Sql;
 import liquibase.sqlgenerator.SqlGeneratorFactory;
 import liquibase.statement.SqlStatement;
 import liquibase.structure.core.Table;
-import liquibase.test.DatabaseTestContext;
 import liquibase.test.TestContext;
 import org.junit.After;
 
@@ -96,7 +98,7 @@ public abstract class AbstractExecuteTest {
                     testedDatabases.add(database.getClass());
 
                     if (database.getConnection() != null) {
-                        ChangeLogHistoryServiceFactory.getInstance().getChangeLogService(database).init();
+                        Scope.getCurrentScope().getSingleton(ChangeLogHistoryServiceFactory.class).getChangeLogService(database).init();
                         LockServiceFactory.getInstance().getLockService(database).init();
                     }
 
@@ -119,17 +121,21 @@ public abstract class AbstractExecuteTest {
         }
 
         resetAvailableDatabases();
-        for (Database availableDatabase : DatabaseTestContext.getInstance().getAvailableDatabases()) {
-            Statement statement = ((JdbcConnection) availableDatabase.getConnection()).getUnderlyingConnection().createStatement();
-            if (shouldTestDatabase(availableDatabase, includeDatabases, excludeDatabases)) {
-                String sqlToRun = SqlGeneratorFactory.getInstance().generateSql(statementUnderTest, availableDatabase)[0].toSql();
+        for (DatabaseTestSystem testSystem : Scope.getCurrentScope().getSingleton(TestSystemFactory.class).getAvailable(DatabaseTestSystem.class)) {
+            testSystem.start();
+
+            Database database = DatabaseFactory.getInstance().findCorrectDatabaseImplementation(new JdbcConnection(testSystem.getConnection()));
+
+            Statement statement = ((JdbcConnection) database.getConnection()).getUnderlyingConnection().createStatement();
+            if (shouldTestDatabase(database, includeDatabases, excludeDatabases)) {
+                String sqlToRun = SqlGeneratorFactory.getInstance().generateSql(statementUnderTest, database)[0].toSql();
                 try {
                     for (SqlListener listener : Scope.getCurrentScope().getListeners(SqlListener.class)) {
                         listener.writeSqlWillRun(sqlToRun);
                     }
                     statement.execute(sqlToRun);
                 } catch (Exception e) {
-                    System.out.println("Failed to execute against " + availableDatabase.getShortName() + ": " + sqlToRun);
+                    System.out.println("Failed to execute against " + database.getShortName() + ": " + sqlToRun);
                     throw e;
 
                 }
@@ -200,12 +206,17 @@ public abstract class AbstractExecuteTest {
     }
 
     public void resetAvailableDatabases() throws Exception {
-        for (Database database : DatabaseTestContext.getInstance().getAvailableDatabases()) {
+        for (DatabaseTestSystem testSystem : Scope.getCurrentScope().getSingleton(TestSystemFactory.class).getAvailable(DatabaseTestSystem.class)) {
+            testSystem.start();
+            Database database = DatabaseFactory.getInstance().findCorrectDatabaseImplementation(new JdbcConnection(testSystem.getConnection()));
             DatabaseConnection connection = database.getConnection();
             Statement connectionStatement = ((JdbcConnection) connection).getUnderlyingConnection().createStatement();
+            connection.commit();
 
             try {
                 database.dropDatabaseObjects(CatalogAndSchema.DEFAULT);
+                CatalogAndSchema alt = new CatalogAndSchema(testSystem.getAltCatalog(), testSystem.getAltSchema());
+                database.dropDatabaseObjects(alt);
             } catch (Exception e) {
                 throw new UnexpectedLiquibaseException("Error dropping objects for database "+database.getShortName(), e);
             }
@@ -221,17 +232,21 @@ public abstract class AbstractExecuteTest {
             connection.commit();
 
             if (database.supportsSchemas()) {
-                database.dropDatabaseObjects(new CatalogAndSchema(DatabaseTestContext.ALT_CATALOG, DatabaseTestContext.ALT_SCHEMA));
+                try {
+                database.dropDatabaseObjects(new CatalogAndSchema(null, testSystem.getAltSchema()));
+                } catch (DatabaseException e) {
+                    //ok
+                }
                 connection.commit();
 
                 try {
-                    connectionStatement.executeUpdate("drop table " + database.escapeTableName(DatabaseTestContext.ALT_CATALOG, DatabaseTestContext.ALT_SCHEMA, database.getDatabaseChangeLogLockTableName()));
+                    connectionStatement.executeUpdate("drop table " + database.escapeTableName(testSystem.getAltCatalog(), testSystem.getAltSchema(), database.getDatabaseChangeLogLockTableName()));
                 } catch (SQLException e) {
                     //ok
                 }
                 connection.commit();
                 try {
-                    connectionStatement.executeUpdate("drop table " + database.escapeTableName(DatabaseTestContext.ALT_CATALOG, DatabaseTestContext.ALT_SCHEMA, database.getDatabaseChangeLogTableName()));
+                    connectionStatement.executeUpdate("drop table " + database.escapeTableName(testSystem.getAltCatalog(), testSystem.getAltSchema(), database.getDatabaseChangeLogTableName()));
                 } catch (SQLException e) {
                     //ok
                 }
@@ -241,7 +256,7 @@ public abstract class AbstractExecuteTest {
             List<? extends SqlStatement> setupStatements = setupStatements(database);
             if (setupStatements != null) {
                 for (SqlStatement statement : setupStatements) {
-                    ExecutorService.getInstance().getExecutor(database).execute(statement);
+                    Scope.getCurrentScope().getSingleton(ExecutorService.class).getExecutor("jdbc", database).execute(statement);
                 }
             }
             connectionStatement.close();

@@ -1,0 +1,41 @@
+##########           LIQUIBASE FLOWFILE                ##########
+##########  learn more http://docs.liquibase.com/flow  ##########
+
+## Note: Any command which fails in any stage below result in the command stopping, and endStage being run.
+## A flow file can have one or more stages, each with multiple "actions", 
+## or your flow file can have multiple stages with fewer actions in each stage.
+stages:
+
+
+  ## The first stage of actions. 
+  Default:
+        
+    actions:
+      #
+      # Quality Checks for changelog
+      #
+      - type: liquibase
+        command: checks run
+        cmdArgs: {checks-scope: changelog}
+      #
+      # Run the update
+      #
+      - type: liquibase
+        command: update
+          
+      #
+      # Quality Checks for database
+      #
+      - type: liquibase
+        command: checks run
+        cmdArgs: {checks-scope: database}
+
+
+## The endStage ALWAYS RUNS. 
+## So put actions here which you desire to perform whether previous stages' actions succeed or fail.
+## If you do not want any actions to ALWAYS RUN, simply delete the endStage from your flow file.
+
+endStage:
+  actions:
+    - type: liquibase
+      command: history

@@ -1,0 +1,85 @@
+########
+## This file defines the default settings to connect to test systems understood by Liquibase core.
+##
+## To override values for your particular environment, create a liquibase.sdk.local.yaml file in the classpath and set
+## whatever settings you want to be different than this default.
+########
+
+liquibase:
+  sdk:
+    testSystem:
+      default:
+        username: lbuser
+        password: LiquibasePass1
+        catalog: lbcat
+        altCatalog: lbcat2
+        altSchema: lbschem2
+        altTablespace: liquibase2
+        keepRunning: true
+
+      test: h2,hsqldb,sqlite
+
+      cockroachdb:
+        version: latest-v21.2
+        imageName: cockroachdb/cockroach
+        password: ""
+        setup:
+          username: root
+
+      derby:
+        url: jdbc:derby:memory:${catalog}
+
+      db2:
+        imageName: ibmcom/db2
+        version: 11.5.6.0a
+
+      h2:
+        url: jdbc:h2:mem:${catalog};DB_CLOSE_DELAY=-1
+        profiles:
+          "1.4":
+            version: 1.4.200
+          "2.0":
+
+      hsqldb:
+        url: jdbc:hsqldb:mem:${catalog}
+
+      mariadb:
+        imageName: mariadb
+        version: 10.3
+        setup:
+          username: root
+
+      mssql:
+        imageName: mcr.microsoft.com/mssql/server
+        version: 2017-latest
+        setup:
+          username: SA
+          password: A_Str0ng_Required_Password
+
+
+      mysql:
+        version: latest
+        imageName: mysql
+        setup:
+          username: root
+        profiles:
+          "5.7":
+          "8.0":
+            version: 8.0
+
+      oracle:
+        imageName: gvenzl/oracle-xe
+        version: 18-slim
+        setup:
+          username: system
+
+      postgresql:
+        imageName: postgres
+        version: 15
+
+      sqlite:
+        url: "jdbc:sqlite::memory:"
+
+      firebird:
+        imageName: jacobalberty/firebird
+        version: v4

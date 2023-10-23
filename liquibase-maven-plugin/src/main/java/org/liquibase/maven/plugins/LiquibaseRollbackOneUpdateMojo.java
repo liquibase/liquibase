@@ -2,14 +2,12 @@ package org.liquibase.maven.plugins;
 
 import liquibase.Liquibase;
 import liquibase.changelog.ChangeLogParameters;
-import liquibase.command.AbstractSelfConfiguratingCommand;
-import liquibase.command.CommandExecutionException;
-import liquibase.command.CommandFactory;
-import liquibase.command.LiquibaseCommand;
+import liquibase.command.*;
 import liquibase.database.Database;
 import liquibase.exception.LiquibaseException;
 import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.plugin.MojoFailureException;
+import org.liquibase.maven.property.PropertyElement;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -32,6 +30,7 @@ public class LiquibaseRollbackOneUpdateMojo extends AbstractLiquibaseChangeLogMo
      * @parameter property="liquibase.deploymentId"
      *
      */
+    @PropertyElement
     protected String deploymentId;
 
     /**
@@ -41,6 +40,7 @@ public class LiquibaseRollbackOneUpdateMojo extends AbstractLiquibaseChangeLogMo
      * @parameter property="liquibase.force"
      *
      */
+    @PropertyElement
     protected String force;
 
     @Override
@@ -51,16 +51,13 @@ public class LiquibaseRollbackOneUpdateMojo extends AbstractLiquibaseChangeLogMo
 
     @Override
     protected void performLiquibaseTask(Liquibase liquibase) throws LiquibaseException {
+        super.performLiquibaseTask(liquibase);
+
         //
         // Check the Pro license
         //
-        boolean hasProLicense = MavenUtils.checkProLicense(liquibaseProLicenseKey, commandName, getLog());
-        if (! hasProLicense) {
-            throw new LiquibaseException("The command 'rollbackOneUpdate' requires a Liquibase Pro License, available at http://liquibase.org.");
-        }
         Database database = liquibase.getDatabase();
-        LiquibaseCommand liquibaseCommand = (CommandFactory.getInstance().getCommand("rollbackOneUpdate"));
-        AbstractSelfConfiguratingCommand configuratingCommand = (AbstractSelfConfiguratingCommand)liquibaseCommand;
+        CommandScope liquibaseCommand = new CommandScope("rollbackOneUpdate");
         Map<String, Object> argsMap = getCommandArgsObjectMap(liquibase);
         ChangeLogParameters clp = new ChangeLogParameters(database);
         argsMap.put("changeLogParameters", clp);
@@ -69,23 +66,22 @@ public class LiquibaseRollbackOneUpdateMojo extends AbstractLiquibaseChangeLogMo
         }
         argsMap.put("force", Boolean.TRUE);
         argsMap.put("liquibase", liquibase);
-        configuratingCommand.configure(argsMap);
-        try {
-            liquibaseCommand.execute();
+        for (Map.Entry<String, Object> entry : argsMap.entrySet()) {
+            liquibaseCommand.addArgumentValue(entry.getKey(), entry.getValue());
         }
-        catch (CommandExecutionException cee) {
-            throw new LiquibaseException("Error executing rollbackOneUpdate", cee);
-        }
+
+        liquibaseCommand.execute();
     }
 
     private Map<String, Object> getCommandArgsObjectMap(Liquibase liquibase) throws LiquibaseException {
         Database database = liquibase.getDatabase();
-        Map<String, Object> argsMap = new HashMap<String, Object>();
+        Map<String, Object> argsMap = new HashMap<>();
         argsMap.put("deploymentId", this.deploymentId);
         argsMap.put("force", this.force);
         argsMap.put("database", database);
         argsMap.put("changeLog", liquibase.getDatabaseChangeLog());
         argsMap.put("resourceAccessor", liquibase.getResourceAccessor());
+        argsMap.put("changeLogFile", changeLogFile);
         return argsMap;
     }
 

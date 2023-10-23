@@ -3,16 +3,15 @@ package liquibase.integration.cdi;
 import liquibase.integration.cdi.annotations.LiquibaseType;
 import liquibase.resource.ClassLoaderResourceAccessor;
 import liquibase.resource.ResourceAccessor;
-import org.hsqldb.jdbc.JDBCDataSource;
+import org.h2.jdbcx.JdbcDataSource;
 
 import javax.enterprise.inject.Produces;
 import javax.sql.DataSource;
-import java.sql.SQLException;
 
 /**
  * A Test CDI Producer used for testing CDILiquibase
  *
- * @author Aaron Walker (http://github.com/aaronwalker)
+ * @author <a href="http://github.com/aaronwalker">Aaron Walker</a>
  */
 public class CDITestProducer {
 
@@ -28,11 +27,11 @@ public class CDITestProducer {
 
     @Produces
     @LiquibaseType
-    public DataSource createDataSource() throws SQLException {
-        JDBCDataSource ds = new JDBCDataSource();
-        ds.setDatabase("jdbc:hsqldb:mem:test");
+    public DataSource createDataSource() {
+        JdbcDataSource ds = new JdbcDataSource();
+        ds.setURL("jdbc:h2:mem:test");
         ds.setUser("sa");
-        ds.setPassword("");
+        ds.setPassword("sa");
         return ds;
     }
 

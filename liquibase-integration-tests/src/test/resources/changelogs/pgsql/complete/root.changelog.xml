@@ -3,7 +3,7 @@
 <databaseChangeLog
         xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.0.xsd">
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-latest.xsd">
 
     <preConditions>
             <dbms type="postgresql"/>
@@ -15,7 +15,7 @@
             You can add comments to changeSets.
             They can even be multiple lines if you would like.
             They aren't used to compute the changeSet MD5Sum, so you can update them whenever you want without causing problems.
-        </comment>        
+        </comment>
         <createTable tableName="person">
             <column name="id" type="int">
                 <constraints primaryKey="true" nullable="false"/>
@@ -42,7 +42,7 @@
         <comment>Fix misspelled "username" column</comment>
         <renameColumn tableName="person" oldColumnName="usernae" newColumnName="username"/>
     </changeSet>
-    <changeSet id="5" author="nvoxland" context="test">
+    <changeSet id="5" author="nvoxland" contextFilter="test">
         <insert tableName="person">
             <column name="id" value="1"/>
             <column name="firstname" value="John"/>
@@ -76,7 +76,7 @@
             </column>
         </createTable>
     </changeSet>
-    <changeSet id="7" author="bjohnson" context="test">
+    <changeSet id="7" author="bjohnson" contextFilter="test">
         <insert tableName="employee">
             <column name="id" value="1"/>
             <column name="name" value="ACME Corp"/>
@@ -122,10 +122,14 @@
 
     <changeSet id="12" author="nvoxland">
         <createIndex indexName="idx_company_name" tableName="company">
-            <column name="name"/>
+            <column name="name" />
         </createIndex>
         <createIndex indexName="idx_person_lastname" tableName="person">
             <column name="lastname"/>
+        </createIndex>
+        <createIndex indexName="idx_person_firstname_lastname" tableName="person">
+            <column name="lastname" descending="true"/>
+            <column name="firstname"/>
         </createIndex>
     </changeSet>
 
@@ -160,10 +164,10 @@
 
     <changeSet id="19" author="nvoxland">
         <createView viewName="personView">
-            select * from public.person
+            select * from person
         </createView>
         <createView viewName="personView" replaceIfExists="true">
-            select * from public.person
+            select * from person
         </createView>
     </changeSet>
 
@@ -287,7 +291,7 @@
 
     <changeSet id="50" author="nvoxland">
         <modifyDataType tableName="address" columnName="postalcode" newDataType="varchar(20)"/>
-    </changeSet>    
+    </changeSet>
 
     <include file="changelogs/pgsql/complete/included.changelog.xml"/>
 
@@ -305,11 +309,17 @@
         </customChange>
     </changeSet>
     <changeSet id="57" author="nvoxland">
-        <customChange class="liquibase.change.custom.ExampleCustomSqlChange" tableName="person" columnName="employer_id" newValue="4"/>
+        <customChange class="liquibase.change.custom.ExampleCustomSqlChange">
+            <param name="tableName" value="person"/>
+            <param name="columnName" value="employer_id"/>
+            <param name="newValue" value="4"/>
+        </customChange>
     </changeSet>
     <changeSet id="58" author="nvoxland">
-        <customChange class="liquibase.change.custom.ExampleCustomTaskChange" helloTo="world"/>
-    </changeSet>    
+        <customChange class="liquibase.change.custom.ExampleCustomTaskChange">
+            <param name="helloTo" value="world"/>
+        </customChange>
+    </changeSet>
 
     <changeSet id="60" author="nvoxland">
         <executeCommand executable="getmac" os="Windows XP">
@@ -324,7 +334,7 @@
             <column name="bigSerialColumn" type="bigserial"/>
             <column name="bitVarColumn" type="bit varying(10)"/>
             <column name="doubleColumn" type="double precision"/>
-            <column name="realColumn" type="real"/>            
+            <column name="realColumn" type="real"/>
         </createTable>
     </changeSet>
 
@@ -359,4 +369,104 @@
         <comment>Auto increment the primary keys</comment>
         <addAutoIncrement tableName="cp1_table" columnName="id" columnDataType="int"/>
     </changeSet>
+    <!--
+      Changesets to test  https://github.com/liquibase/liquibase/issues/1212.
+      To test this, we'll need 3 things:
+      0. Postgresql >= 10
+      1. A parent table to reference.
+      2. A partitioned table with a foreign key to the parent table.
+      3. A default partition in the table.
+      These tables don't need any data.  We just need the structure to make sure we can
+      drop all the objects without having trouble with foreign keys.
+   -->
+    <changeSet id="issue-1212-parent" author="ssaliman">
+        <preConditions onFail="CONTINUE">
+            <sqlCheck expectedResult="t">select cast(current_setting('server_version_num') as integer) >= 100000</sqlCheck>
+        </preConditions>
+        <createTable tableName="partition_parent">
+            <column name="id" type="bigint">
+                <constraints primaryKey="true"/>
+            </column>
+            <column name="parent_data" type="varchar(50)"/>
+        </createTable>
+    </changeSet>
+    <changeSet id="issue-1212-child" author="ssaliman">
+        <preConditions onFail="CONTINUE">
+            <changeSetExecuted id="issue-1212-parent" author="ssaliman" changeLogFile="changelogs/pgsql/complete/root.changelog.xml"/>
+        </preConditions>
+        <createTable tableName="partitioned_child">
+            <column name="partition_key" type="datetime">
+                <constraints primaryKey="true"/>
+            </column>
+            <column name="parent_id" type="bigint"/>
+            <column name="some_data" type="varchar(2000)"/>
+        </createTable>
+        <modifySql>
+            <append value=" PARTITION BY RANGE (partition_key)"/>
+        </modifySql>
+    </changeSet>
+    <changeSet id="issue-1212-partition" author="ssaliman">
+        <preConditions onFail="CONTINUE">
+            <changeSetExecuted id="issue-1212-parent" author="ssaliman" changeLogFile="changelogs/pgsql/complete/root.changelog.xml"/>
+        </preConditions>
+        <sql>create table partitioned_childp partition of partitioned_child default;</sql>
+    </changeSet>
+    <changeSet id="issue-1212-constraint" author="ssaliman">
+        <preConditions onFail="CONTINUE">
+            <changeSetExecuted id="issue-1212-parent" author="ssaliman" changeLogFile="changelogs/pgsql/complete/root.changelog.xml"/>
+        </preConditions>
+        <addForeignKeyConstraint baseTableName="partitioned_child"
+                                 baseColumnNames="parent_id"
+                                 constraintName="fk_child_parent"
+                                 referencedTableName="partition_parent"
+                                 referencedColumnNames="id"/>
+    </changeSet>
+
+    <changeSet author="author" id="initially deferred PK">
+        <createTable tableName="deferred_pk">
+            <column name="id" type="INTEGER">
+                <constraints nullable="false" primaryKey="true" primaryKeyName="abc_PK" deferrable="true" initiallyDeferred="true"/>
+            </column>
+        </createTable>
+    </changeSet>
+
+
+    <changeSet id="cluster-pk-check" author="nvoxland">
+        <createTable tableName="cluster_table">
+            <column name="id" type="int"/>
+        </createTable>
+        <addPrimaryKey tableName="cluster_table" columnNames="id" clustered="true" constraintName="cluster_pkey"/>
+    </changeSet>
+
+    <changeSet id="not-clustered-pk-check" author="nvoxland">
+        <createTable tableName="nocluster_table">
+            <column name="id" type="int"/>
+        </createTable>
+        <addPrimaryKey tableName="nocluster_table" columnNames="id" clustered="false"/>
+    </changeSet>
+    <changeSet id="table-type-test" author="mallod" dbms="oracle,mysql,h2,mariadb,snowflake">
+        <createTable tableName="tableTypeTestTable" tableType="TEMPORARY">
+            <column name="id" type="int">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="testColumn" type="varchar(50)">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+    </changeSet>
+
+    <changeSet id="serial-sequence-test-part1" author="fl">
+        <createTable tableName="serial_sequence_test">
+            <column name="id" type="serial">
+            </column>
+        </createTable>
+    </changeSet>
+
+    <changeSet id="serial-sequence-test-part2" author="fl">
+        <preConditions onFail="MARK_RAN">
+            <sequenceExists sequenceName="serial_sequence_test_id_seq"/>
+        </preConditions>
+        <renameSequence oldSequenceName="serial_sequence_test_id_seq" newSequenceName="new_test_id_seq"/>
+    </changeSet>
+
 </databaseChangeLog>

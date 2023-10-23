@@ -13,10 +13,10 @@ delete from test1;
 insert into test1 (id, name) values (1, 'name 1');
 insert into test1 (id, name) values (2, 'name 2');
 
---changeset ryan:1 context:hyphen-context-using-sql
+--changeset ryan:1 contextFilter:hyphen-context-using-sql
 create table hyphen_context (id integer);
 
---changeset ryan:2 context:camelCaseContextUsingSql
+--changeset ryan:2 contextFilter:camelCaseContextUsingSql
 create table camel_context (id integer);
 
 --changeset ryan:1-bar
