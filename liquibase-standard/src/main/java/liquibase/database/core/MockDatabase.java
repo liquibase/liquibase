@@ -4,7 +4,10 @@ import liquibase.CatalogAndSchema;
 import liquibase.Liquibase;
 import liquibase.Scope;
 import liquibase.change.Change;
-import liquibase.changelog.*;
+import liquibase.changelog.ChangeLogHistoryServiceFactory;
+import liquibase.changelog.ChangeSet;
+import liquibase.changelog.DatabaseChangeLog;
+import liquibase.changelog.RanChangeSet;
 import liquibase.database.*;
 import liquibase.exception.DatabaseException;
 import liquibase.exception.DatabaseHistoryException;
@@ -795,11 +798,6 @@ public class MockDatabase implements Database, InternalDatabase {
     @Override
     public ValidationErrors validate() {
         return new ValidationErrors();
-    }
-
-    @Override
-    public boolean failOnDefferable() {
-        return true;
     }
 
     @Override
