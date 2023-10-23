@@ -35,7 +35,7 @@ See also how to [get started with Liquibase in minutes](https://www.liquibase.or
 
 ## Documentation
 
-Visit the [Liquibase Documentation](https://docs.liquibase.com/home.html) website to find the information on how Liquibase works.
+the [Liquibase Documentation](https://docs.liquibase.com/home.html) website to find the information on how Liquibase works.
 
 ## Courses
 
