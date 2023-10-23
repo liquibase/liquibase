@@ -2,7 +2,10 @@ package liquibase.parser;
 
 
 import liquibase.plugin.AbstractPluginFactory;
+import lombok.AccessLevel;
+import lombok.NoArgsConstructor;
 
+@NoArgsConstructor(access = AccessLevel.PRIVATE)
 public class SqlParserFactory extends AbstractPluginFactory<LiquibaseSqlParser> {
     @Override
     protected Class<LiquibaseSqlParser> getPluginClass() {
