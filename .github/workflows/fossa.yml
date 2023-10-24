@@ -21,7 +21,7 @@ jobs:
     steps:
     # Checkout the code to the GitHub runner
     - name: Checkout Code
-      uses: actions/checkout@v3
+      uses: actions/checkout@v4
 
     # Run FOSSA scan and tests
     - name: Run FOSSA Scan and Tests
