@@ -4,6 +4,8 @@ import liquibase.ChecksumVersion;
 import liquibase.GlobalConfiguration;
 import liquibase.Scope;
 import liquibase.change.core.RawSQLChange;
+import liquibase.changeset.ChangeSetService;
+import liquibase.changeset.ChangeSetServiceFactory;
 import liquibase.database.Database;
 import liquibase.database.core.Db2zDatabase;
 import liquibase.database.core.MSSQLDatabase;
@@ -202,7 +204,11 @@ public abstract class AbstractSQLChange extends AbstractChange implements DbmsTa
      */
     @DatabaseChangeProperty(description = "Delimiter to apply to the end of the statement. Defaults to ';', may be set to ''.", exampleValue = "\\nGO")
     public String getEndDelimiter() {
-        return endDelimiter;
+        if (endDelimiter != null) {
+            return endDelimiter;
+        }
+        ChangeSetService service = ChangeSetServiceFactory.getInstance().createChangeSetService();
+        return service.getEndDelimiter(getChangeSet());
     }
 
     /**

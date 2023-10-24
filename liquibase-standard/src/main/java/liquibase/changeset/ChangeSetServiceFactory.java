@@ -1,13 +1,12 @@
 package liquibase.changeset;
 
-import liquibase.Scope;
-import liquibase.exception.LiquibaseException;
 import liquibase.plugin.AbstractPluginFactory;
-import liquibase.servicelocator.ServiceLocator;
 
-import java.util.ArrayList;
-import java.util.List;
-
+/**
+ *
+ * Create the appropriate ChangeSetService instance
+ *
+ */
 public class ChangeSetServiceFactory extends AbstractPluginFactory<ChangeSetService> {
 
     private static ChangeSetServiceFactory factory = null;
@@ -32,7 +31,7 @@ public class ChangeSetServiceFactory extends AbstractPluginFactory<ChangeSetServ
         return obj.getPriority();
     }
 
-    public ChangeSetService createChangeSetService() throws LiquibaseException {
+    public ChangeSetService createChangeSetService() {
         return getPlugin();
     }
 }
