@@ -222,7 +222,7 @@ public abstract class AbstractUpdateCommandStep extends AbstractCommandStep impl
     private final Map<String, Boolean> upToDateFastCheck = new ConcurrentHashMap<>();
 
     public boolean isUpToDateFastCheck(CommandScope commandScope, Database database, DatabaseChangeLog databaseChangeLog, Contexts contexts, LabelExpression labelExpression) throws LiquibaseException {
-        String cacheKey = String.format("%s/%s/%s/%s/%s", contexts, labelExpression, database.getDefaultSchemaName(), database.getDefaultCatalogName(), database.getConnection().getURL());
+        String cacheKey = String.format("%s/%s/%s/%s/%s/%s", contexts, labelExpression, database.getDefaultSchemaName(), database.getDefaultCatalogName(), database.getConnection().getURL(), databaseChangeLog.getLogicalFilePath());
         if (!upToDateFastCheck.containsKey(cacheKey)) {
             ChangeLogHistoryService changeLogService = Scope.getCurrentScope().getSingleton(ChangeLogHistoryServiceFactory.class).getChangeLogService(database);
             try {
