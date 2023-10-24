@@ -543,7 +543,7 @@ jobs:
       - name: Coordinate Liquibase-Pro
         uses: actions/github-script@v6
         with:
-          github-token: ${{ secrets.INSTALL_SNAPSHOT_LIQUIBASE }}
+          github-token: ${{ secrets.BOT_TOKEN }}
           script: |
             const helper = require('./.github/util/workflow-helper.js')({github, context});
             let currentBranchInfo = await helper.findMatchingBranch("liquibase", "liquibase-pro");
