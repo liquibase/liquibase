@@ -8,6 +8,7 @@ import liquibase.change.core.EmptyChange;
 import liquibase.changelog.ChangeLogParameters;
 import liquibase.changelog.ChangeSet;
 import liquibase.changelog.DatabaseChangeLog;
+import liquibase.changeset.ChangeSetService;
 import liquibase.changeset.ChangeSetServiceFactory;
 import liquibase.exception.ChangeLogParseException;
 import liquibase.exception.LiquibaseException;
@@ -549,14 +550,14 @@ public abstract class AbstractFormattedChangeLogParser implements ChangeLogParse
     protected ChangeSet configureChangeSet(DatabaseChangeLog changeLog, boolean runOnChange, boolean runAlways,
                                            boolean runInTransaction, boolean failOnError, String runWith,
                                            String runWithSpoolFile, String context, String labels, String logicalFilePath,
-                                           String dbms, String ignore, String changeSetId, String changeSetAuthor)
-        throws ChangeLogParseException {
+                                           String dbms, String ignore, String changeSetId, String changeSetAuthor) {
+        ChangeSetService service = ChangeSetServiceFactory.getInstance().createChangeSetService();
         ChangeSet changeSet =
-                ChangeSetServiceFactory.getInstance().createChangeSetService().createChangeSet(changeSetId, changeSetAuthor, runAlways, runOnChange,
-                    DatabaseChangeLog.normalizePath(logicalFilePath),
-                    context, dbms, runWith, runWithSpoolFile,
-                    runInTransaction,
-                    changeLog.getObjectQuotingStrategy(), changeLog);
+           service.createChangeSet(changeSetId, changeSetAuthor, runAlways, runOnChange,
+                                   DatabaseChangeLog.normalizePath(logicalFilePath),
+                                   context, dbms, runWith, runWithSpoolFile,
+                                   runInTransaction,
+                                   changeLog.getObjectQuotingStrategy(), changeLog);
         changeSet.setLabels(new Labels(labels));
         changeSet.setIgnore(Boolean.parseBoolean(ignore));
         changeSet.setFailOnError(failOnError);
