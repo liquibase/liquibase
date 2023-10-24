@@ -322,6 +322,7 @@ jobs:
         uses: wangyucode/sftp-upload-action@v2.0.2
         with:
           host: ${{ secrets.WPENGINE_SFTP_HOST }}
+          port: ${{ secrets.WPENGINE_SFTP_PORT }}
           username: ${{ secrets.WPENGINE_SFTP_USER }}
           password: ${{ secrets.WPENGINE_SFTP_PASSWORD }} 
           compress: true
@@ -333,6 +334,7 @@ jobs:
         uses: wangyucode/sftp-upload-action@v2.0.2
         with:
           host: ${{ secrets.WPENGINE_SFTP_HOST }}
+          port: ${{ secrets.WPENGINE_SFTP_PORT }}
           username: ${{ secrets.WPENGINE_SFTP_USER }}
           password: ${{ secrets.WPENGINE_SFTP_PASSWORD }} 
           compress: false
@@ -344,6 +346,7 @@ jobs:
         uses: wangyucode/sftp-upload-action@v2.0.2
         with:
           host: ${{ secrets.WPENGINE_SFTP_HOST }}
+          port: ${{ secrets.WPENGINE_SFTP_PORT }}
           username: ${{ secrets.WPENGINE_SFTP_USER }}
           password: ${{ secrets.WPENGINE_SFTP_PASSWORD }} 
           compress: false
