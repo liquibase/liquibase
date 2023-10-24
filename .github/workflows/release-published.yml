@@ -318,8 +318,15 @@ jobs:
             aws s3 sync index-file s3://liquibaseorg-origin/xml/ns/dbchangelog/ --only-show-errors
           fi
 
+  release-extensions:
+    needs: [ setup ]
+    uses: liquibase/liquibase/.github/workflows/release-extensions.yml@master
+    secrets: inherit
+    with:
+      version: ${{ needs.setup.outputs.version }}
+
   package-deb:
-    uses: liquibase/build-logic/.github/workflows/package-deb.yml@v0.4.0
+    uses: liquibase/build-logic/.github/workflows/package-deb.yml@v0.5.3
     needs: [ setup ]
     secrets: inherit
     with:
