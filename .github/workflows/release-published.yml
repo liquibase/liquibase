@@ -351,7 +351,7 @@ jobs:
           password: ${{ secrets.WPENGINE_SFTP_PASSWORD }} 
           compress: false
           forceUpload: true
-          localDir: 'liquibase-pro/pro/src/main/resources/schemas/'
+          localDir: 'liquibase-pro-repo/pro/src/main/resources/schemas/'
           remoteDir: '/schemas/'
 
   package-deb:
