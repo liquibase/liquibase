@@ -340,17 +340,6 @@ jobs:
           localDir: 'liquibase-pro-repo/pro/src/main/resources/www.liquibase.org/xml/ns/pro/'
           remoteDir: '/xml/ns/pro/'
 
-      - name: Liquibase xsds SFTP upload
-        uses: wangyucode/sftp-upload-action@v2.0.2
-        with:
-          host: ${{ secrets.WPENGINE_SFTP_HOST }}
-          username: ${{ secrets.WPENGINE_SFTP_USER }}
-          password: ${{ secrets.WPENGINE_SFTP_PASSWORD }} 
-          compress: false
-          forceUpload: true
-          localDir: 'liquibase-core-repo/liquibase-standard/src/main/resources/www.liquibase.org/xml/ns/dbchangelog/'
-          remoteDir: '/xml/ns/dbchangelog/'
-
       - name: Liquibase flow-file schema SFTP upload
         uses: wangyucode/sftp-upload-action@v2.0.2
         with:
