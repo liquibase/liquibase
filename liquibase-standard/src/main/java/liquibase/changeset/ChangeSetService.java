@@ -63,11 +63,11 @@ public interface ChangeSetService extends Plugin {
      *
      * Create a change set with the changelog
      *
-     * @param  databaseChangeLog
+     * @param  databaseChangeLog                Construct this change set with the DatabaseChangeLog
      * @return ChangeSet
      *
      */
-    ChangeSet createChangeSet(DatabaseChangeLog changeLog);
+    ChangeSet createChangeSet(DatabaseChangeLog databaseChangeLog);
 
     /**
      *
@@ -94,10 +94,11 @@ public interface ChangeSetService extends Plugin {
      *
      * Default implementation returns null
      *
-     * @param   changeSet
+     * @param   changeSet            Unused
      * @return  null
      *
      */
+    @SuppressWarnings("useless")
     default String getEndDelimiter(ChangeSet changeSet) {
         return null;
     }
