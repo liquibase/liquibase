@@ -92,10 +92,10 @@ TOKEN:
 
     /* SQL-standard is that string literals are delimited only by single-quote, and double-quotes are only for identifiers... */
 |   < #S_QUOTED_STRING_A: ( "'" ( <ESC_S_QUOTE_A> | <ESC_NON_QUOTE> | ~["'"] )* "'") >
-|   < #S_QUOTED_STRING_B: ( "'" ( <ESC_S_QUOTE_A> | <ESC_S_QUOTE_B> | <ESC_NON_QUOTE> | ~["\\","'"] )* "'") >
+|   < #S_QUOTED_STRING_B: ( "'" ( <ESC_S_QUOTE_A> | <ESC_S_QUOTE_B> | <ESC_D_QUOTE_B> | <ESC_NON_QUOTE> | ~["\\","'"] )* "'") >
     /* ... but many DBs tolerate double-quotes around string literals, including MySQL (unless you enable ANSI SQL mode), and MSSQL (if you disable SET QUOTED_IDENTIFIER) */
 |   < #D_QUOTED_STRING_A: ( "\"" ( <ESC_D_QUOTE_A> | <ESC_NON_QUOTE> | ~["\""] )* "\"") >
-|   < #D_QUOTED_STRING_B: ( "\"" ( <ESC_D_QUOTE_A> | <ESC_D_QUOTE_B> | <ESC_NON_QUOTE> | ~["\\","\""] )* "\"") >
+|   < #D_QUOTED_STRING_B: ( "\"" ( <ESC_S_QUOTE_B> | <ESC_D_QUOTE_A> | <ESC_D_QUOTE_B> | <ESC_NON_QUOTE> | ~["\\","\""] )* "\"") >
     /* Finally... */
 |   < S_CHAR_LITERAL: (["U","E","N","R","B"]|"RB"|"_utf8")? ( <S_QUOTED_STRING_A> | <S_QUOTED_STRING_B> | <D_QUOTED_STRING_A> | <D_QUOTED_STRING_B> ) >
 
