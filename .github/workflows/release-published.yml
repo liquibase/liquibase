@@ -352,7 +352,7 @@ jobs:
           compress: false
           forceUpload: true
           localDir: 'liquibase-pro-repo/pro/src/main/resources/schemas/'
-          remoteDir: '/schemas/'
+          remoteDir: '/json/schema/'
 
   package-deb:
     uses: liquibase/build-logic/.github/workflows/package-deb.yml@v0.4.0
