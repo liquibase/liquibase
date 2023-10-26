@@ -13,7 +13,7 @@ public class LiquibaseTableNamesFactory implements SingletonObject {
     private List<String> cachedTableNames;
 
 
-    public LiquibaseTableNamesFactory() {
+    private LiquibaseTableNamesFactory() {
         ServiceLocator serviceLocator = Scope.getCurrentScope().getServiceLocator();
         generators = serviceLocator.findInstances(LiquibaseTableNames.class);
     }
