@@ -1,12 +1,5 @@
 name: Release Extensions
-
 on:
-  workflow_call:
-    inputs:
-      version:
-        description: 'Liquibase Version'
-        required: true
-        type: string
   workflow_dispatch:
     inputs:
       version:
