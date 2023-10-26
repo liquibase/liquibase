@@ -340,7 +340,7 @@ jobs:
              });
 
   package-deb:
-    uses: liquibase/build-logic/.github/workflows/package-deb.yml@v0.5.3
+    uses: liquibase/build-logic/.github/workflows/package-deb.yml@v0.5.5
     needs: [ setup ]
     secrets: inherit
     with:
