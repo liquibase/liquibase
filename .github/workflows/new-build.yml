@@ -92,7 +92,7 @@ jobs:
           
   run-tests:
     needs: [setup]
-    if: needs.setup.outputs.branchExistsInBoth == 'true'
+    if: needs.setup.outputs.branchExistsInBoth == 'true' && success()
     uses: liquibase/liquibase/.github/workflows/run-tests.yml@github-action-DAT-15775
     secrets: inherit
 
