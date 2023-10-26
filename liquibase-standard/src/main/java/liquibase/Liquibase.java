@@ -517,7 +517,8 @@ public class Liquibase implements AutoCloseable {
 
     public void rollback(int changesToRollback, String rollbackScript, Contexts contexts,
                          LabelExpression labelExpression, Writer output) throws LiquibaseException {
-        new CommandScope(RollbackCountSqlCommandStep.COMMAND_NAME)
+        runInScope(() ->
+            new CommandScope(RollbackCountSqlCommandStep.COMMAND_NAME)
                 .addArgumentValue(DbUrlConnectionCommandStep.DATABASE_ARG, Liquibase.this.getDatabase())
                 .addArgumentValue(DatabaseChangelogCommandStep.CHANGELOG_FILE_ARG, changeLogFile)
                 .addArgumentValue(DatabaseChangelogCommandStep.CONTEXTS_ARG, (contexts != null? contexts.toString() : null))
@@ -527,7 +528,8 @@ public class Liquibase implements AutoCloseable {
                 .addArgumentValue(AbstractRollbackCommandStep.ROLLBACK_SCRIPT_ARG, rollbackScript)
                 .addArgumentValue(DatabaseChangelogCommandStep.CHANGELOG_PARAMETERS, changeLogParameters)
                 .setOutput(new WriterOutputStream(output, GlobalConfiguration.OUTPUT_FILE_ENCODING.getCurrentValue()))
-                .execute();
+                .execute()
+        );
     }
     // ---------- End RollbackCountSql Family of methods
 
@@ -559,7 +561,8 @@ public class Liquibase implements AutoCloseable {
      */
     public void rollback(int changesToRollback, String rollbackScript, Contexts contexts,
                          LabelExpression labelExpression) throws LiquibaseException {
-        new CommandScope(RollbackCountCommandStep.COMMAND_NAME)
+        runInScope(() ->
+            new CommandScope(RollbackCountCommandStep.COMMAND_NAME)
                 .addArgumentValue(DbUrlConnectionCommandStep.DATABASE_ARG, Liquibase.this.getDatabase())
                 .addArgumentValue(DatabaseChangelogCommandStep.CHANGELOG_FILE_ARG, changeLogFile)
                 .addArgumentValue(DatabaseChangelogCommandStep.CONTEXTS_ARG, (contexts != null? contexts.toString() : null))
@@ -568,7 +571,8 @@ public class Liquibase implements AutoCloseable {
                 .addArgumentValue(RollbackCountCommandStep.COUNT_ARG, changesToRollback)
                 .addArgumentValue(AbstractRollbackCommandStep.ROLLBACK_SCRIPT_ARG, rollbackScript)
                 .addArgumentValue(DatabaseChangelogCommandStep.CHANGELOG_PARAMETERS, changeLogParameters)
-                .execute();
+                .execute()
+        );
     }
     // ---------- End RollbackCount Family of methods
 
