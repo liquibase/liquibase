@@ -17,7 +17,7 @@ jobs:
     name: Build Installers
     runs-on: macos-latest #needs macos for apple notarization
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
 
       - name: Set up JDK for GPG
         uses: actions/setup-java@v3

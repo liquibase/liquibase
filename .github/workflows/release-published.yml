@@ -244,7 +244,7 @@ jobs:
       packages: write
 
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
       - name: Set up Java for publishing to GitHub Repository
         uses: actions/setup-java@v3
         with:
@@ -276,14 +276,14 @@ jobs:
           version: ${{ needs.setup.outputs.version }}
       steps:
       - name: Download liquibase xsd
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
         with:
           # Relative path under $GITHUB_WORKSPACE to place the repository
           path: liquibase-core-repo 
           repository: "liquibase/liquibase"
     
       - name: Download liquibase-pro xsd
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
         with:
           token: ${{ secrets.BOT_TOKEN }}
           # Relative path under $GITHUB_WORKSPACE to place the repository
