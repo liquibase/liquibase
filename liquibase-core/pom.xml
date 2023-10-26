@@ -9,6 +9,7 @@
     </parent>
     <artifactId>liquibase-core</artifactId>
     <packaging>jar</packaging>
+    <!-- must use "Liquibase" as the name for the publicly released artifact -->
 
     <!-- must use "Liquibase" as the name for the publicly released artifact -->
     <name>Liquibase</name>
