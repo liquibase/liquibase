@@ -1,9 +1,11 @@
 package liquibase.command.core
 
+
 import liquibase.Scope
 import liquibase.changelog.ChangeLogHistoryService
 import liquibase.changelog.ChangeLogHistoryServiceFactory
 import liquibase.changelog.RanChangeSet
+import liquibase.checksum.LatestChecksumVersionPluginAsV8
 import liquibase.command.CommandScope
 import liquibase.command.core.helpers.DatabaseChangelogCommandStep
 import liquibase.command.core.helpers.DbUrlConnectionCommandStep
@@ -330,6 +332,56 @@ VALUES('2', 'fl', '$changesetFilepath', '2023-09-29 14:33:39.112', 2, 'EXECUTED'
         ranChangeSets.get(0).getLastCheckSum().toString() == "9:d41d8cd98f00b204e9800998ecf8427e"
         ranChangeSets.get(1).getLastCheckSum().toString() == "9:62336a615e62e89c9d86128d1ca60ecf"
         ranChangeSets.get(2).getLastCheckSum().toString() == "9:3b78b9910981c62ca27148640fad7bc2"
+
+        cleanup:
+        CommandUtil.runDropAll(h2)
+
+    }
+
+
+    @Unroll
+    def "Calculate change using v8 forced calculator" () {
+        def changesetFilepath = "changelogs/h2/checksum/dbms-filter-changelog.xml"
+        final ChangeLogHistoryService changeLogService = Scope.getCurrentScope().getSingleton(ChangeLogHistoryServiceFactory.class).getChangeLogService(h2.getDatabaseFromFactory())
+        changeLogService.init()
+        h2.execute(new RawSqlStatement("""
+INSERT INTO DATABASECHANGELOG
+(ID, AUTHOR, FILENAME, DATEEXECUTED, ORDEREXECUTED, EXECTYPE, MD5SUM, DESCRIPTION, COMMENTS, TAG, LIQUIBASE, CONTEXTS, LABELS, DEPLOYMENT_ID)
+VALUES('1', 'fl', '$changesetFilepath', '2023-09-29 14:33:39.108', 1, 'EXECUTED', '8:0a36c7b201a287dd3348e8dd19e44be7', 'sql', 'example comment', NULL, 'DEV', 'example-context1', 'example-label', '5561619071');
+"""))
+        h2.execute(new RawSqlStatement("""
+INSERT INTO DATABASECHANGELOG
+(ID, AUTHOR, FILENAME, DATEEXECUTED, ORDEREXECUTED, EXECTYPE, MD5SUM, DESCRIPTION, COMMENTS, TAG, LIQUIBASE, CONTEXTS, LABELS, DEPLOYMENT_ID)
+VALUES('2', 'fl', '$changesetFilepath', '2023-09-29 14:33:39.112', 2, 'EXECUTED', '8:a6a54dbc65048ebf1388da78c31ef1a9', 'sqlFile; sqlFile', '', NULL, 'DEV', 'example-context1', 'example-label', '5561619071');
+"""))
+
+        when:
+        def ranChangeSets = getRanChangesets(changeLogService)
+
+        then:
+        ranChangeSets.size() == 2
+        ranChangeSets.forEach({ rcs -> assert rcs.getLastCheckSum().getVersion() == 8 })
+
+        when:
+        def scopeSettings = [
+                "liquibase.plugin.liquibase.checksum.LatestChecksumVersionPlugin": LatestChecksumVersionPluginAsV8.class
+        ]
+        Scope.child(scopeSettings, {
+            CommandScope updateCommandScope = new CommandScope(UpdateCommandStep.COMMAND_NAME)
+            updateCommandScope.addArgumentValue(DbUrlConnectionCommandStep.URL_ARG, h2.getConnectionUrl())
+            updateCommandScope.addArgumentValue(DbUrlConnectionCommandStep.USERNAME_ARG, h2.getUsername())
+            updateCommandScope.addArgumentValue(DbUrlConnectionCommandStep.PASSWORD_ARG, h2.getPassword())
+            updateCommandScope.addArgumentValue(UpdateCommandStep.CHANGELOG_FILE_ARG, changesetFilepath)
+            updateCommandScope.execute()
+        } as Scope.ScopedRunnerWithReturn<Void>)
+
+        ranChangeSets = getRanChangesets(changeLogService)
+
+        then:
+        ranChangeSets.size() == 3
+        ranChangeSets.get(0).getLastCheckSum().toString() == "8:0a36c7b201a287dd3348e8dd19e44be7"
+        ranChangeSets.get(1).getLastCheckSum().toString() == "8:a6a54dbc65048ebf1388da78c31ef1a9"
+        ranChangeSets.get(2).getLastCheckSum().toString() == "8:551a6b5455d661ce7101a063b818ca3e"
 
         cleanup:
         CommandUtil.runDropAll(h2)
