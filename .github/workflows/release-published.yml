@@ -318,12 +318,26 @@ jobs:
             aws s3 sync index-file s3://liquibaseorg-origin/xml/ns/dbchangelog/ --only-show-errors
           fi
 
-  release-extensions:
+  release-docker:
+    name: Release docker images
     needs: [ setup ]
-    uses: liquibase/liquibase/.github/workflows/release-extensions.yml@master
-    secrets: inherit
-    with:
-      version: ${{ needs.setup.outputs.version }}
+    runs-on: ubuntu-22.04
+    steps:
+      - name: Release liquibase/docker v${{ needs.setup.outputs.version }}
+        uses: actions/github-script@v6
+        with:
+          github-token: ${{ secrets.BOT_TOKEN }}
+          script: |
+            console.log("Sending liquibase-release event to liquibase/docker");
+
+            await github.rest.repos.createDispatchEvent({
+               "owner": "liquibase",
+               "repo": "docker",
+               "event_type": "liquibase-release",
+               "client_payload": {
+                  "liquibaseVersion": "${{ needs.setup.outputs.version }}"
+                }
+             });
 
   package-deb:
     uses: liquibase/build-logic/.github/workflows/package-deb.yml@v0.5.3

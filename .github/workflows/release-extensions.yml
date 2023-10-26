@@ -22,7 +22,6 @@ jobs:
       fail-fast: false
       matrix:
         extension:
-          - docker
           - liquibase-bigquery
           - liquibase-cache
           - liquibase-cassandra
