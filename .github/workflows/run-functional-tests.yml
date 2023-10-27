@@ -8,16 +8,16 @@ on:
     types:
       - completed
 
-  pull_request:
-    types:
-      - labeled
+#  pull_request:
+#    types:
+#      - labeled
 
 env:
   MAVEN_VERSION: '3.9.2'
 
 jobs:
   build:
-    #if: contains(github.event.pull_request.labels.*.name, 'runFunctionalTests')
+#    if: contains(github.event.pull_request.labels.*.name, 'runFunctionalTests')
     runs-on: ubuntu-latest
 
     steps:
@@ -31,20 +31,20 @@ jobs:
 #          script: |
 #            console.log(github.event.pull_request.labels);
 
-      - name: Get PR Labels
-        id: get_labels
-        uses: actions/checkout@v3
-        with:
-          endpoint: issues
-          method: GET
-          url: ${{ github.api_url }}/repos/${{ github.repository }}/issues/${{ github.event.pull_request.number }}/labels
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-
-      - name: Use PR Labels
-        run: |
-          PR_LABELS="${{ steps.get_labels.outputs.data }}"
-          echo "Labels: $PR_LABELS"    
+#      - name: Get PR Labels
+#        id: get_labels
+#        uses: actions/checkout@v3
+#        with:
+#          endpoint: issues
+#          method: GET
+#          url: ${{ github.api_url }}/repos/${{ github.repository }}/issues/${{ github.event.pull_request.number }}/labels
+#        env:
+#          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+#
+#      - name: Use PR Labels
+#        run: |
+#          PR_LABELS="${{ steps.get_labels.outputs.data }}"
+#          echo "Labels: $PR_LABELS"
 
       #run the functional tests only against the head-branch of the PR
       - name: Trigger Functional Tests Workflow
