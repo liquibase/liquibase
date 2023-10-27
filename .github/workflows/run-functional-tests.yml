@@ -4,13 +4,13 @@ on:
   workflow_call:
 
   workflow_run:
-    workflows: [ "Build Branch SNAPSHOT", "Build and Publish (Matching Branch)" ]
+    workflows: [ Build Branch SNAPSHOT, Build and Publish (Matching Branch) ]
     types:
       - completed
 
-#  pull_request:
-#    types:
-#      - labeled
+  pull_request:
+    types:
+      - labeled
 
 env:
   MAVEN_VERSION: '3.9.2'
@@ -25,11 +25,6 @@ jobs:
       - uses: actions/checkout@v3
         with:
           ref: ${{ github.event.pull_request.head.sha || github.event.after}} #sets the Git reference (commit or branch) to be checked out in the workflow
-
-#      - uses: actions/github-script@v6
-#        with:
-#          script: |
-#            console.log(github.event.pull_request.labels);
 
 #      - name: Get PR Labels
 #        id: get_labels
