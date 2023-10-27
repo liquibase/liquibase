@@ -6,6 +6,7 @@ import liquibase.changelog.visitor.ValidatingVisitor;
 import liquibase.precondition.ErrorPrecondition;
 import liquibase.precondition.FailedPrecondition;
 import liquibase.util.StreamUtil;
+import liquibase.util.StringUtil;
 
 import java.io.PrintStream;
 import java.util.List;
@@ -20,7 +21,9 @@ public class ValidationFailedException extends MigrationFailedException {
     public static final String INDENT_SPACES = "     ";
     private static final ResourceBundle coreBundle = getBundle("liquibase/i18n/liquibase-core");
     private final List<String> invalidMD5Sums;
+    private final String failedPreconditionsMessage;
     private final List<FailedPrecondition> failedPreconditions;
+    private final String errorPreconditionMessage;
     private final List<ErrorPrecondition> errorPreconditions;
     private final Set<ChangeSet> duplicateChangeSets;
     private final List<SetupException> setupExceptions;
@@ -29,7 +32,9 @@ public class ValidationFailedException extends MigrationFailedException {
 
     public ValidationFailedException(ValidatingVisitor changeLogHandler) {
         this.invalidMD5Sums = changeLogHandler.getInvalidMD5Sums();
+        this.failedPreconditionsMessage = changeLogHandler.getFailedPreconditionsMessage();
         this.failedPreconditions = changeLogHandler.getFailedPreconditions();
+        this.errorPreconditionMessage = changeLogHandler.getErrorPreconditionsMessage();
         this.errorPreconditions = changeLogHandler.getErrorPreconditions();
         this.duplicateChangeSets = changeLogHandler.getDuplicateChangeSets();
         this.setupExceptions = changeLogHandler.getSetupExceptions();
@@ -54,21 +59,27 @@ public class ValidationFailedException extends MigrationFailedException {
                 message.append(separator);
             }
         }
-        
+
         if (!failedPreconditions.isEmpty()) {
             message.append(INDENT_SPACES).append(
                 String.format(coreBundle.getString("preconditions.failed"), failedPreconditions.size()))
                 .append(separator);
+            if (StringUtil.isNotEmpty(failedPreconditionsMessage)) {
+                message.append(INDENT_SPACES).append(failedPreconditionsMessage).append(separator);
+            }
             for (FailedPrecondition invalid : failedPreconditions) {
                 message.append(INDENT_SPACES).append(invalid.toString());
                 message.append(separator);
             }
         }
-        
+
         if (!errorPreconditions.isEmpty()) {
             message.append(INDENT_SPACES).append(String.format(coreBundle.getString(
                 "preconditions.generated.error"), errorPreconditions.size()))
                 .append(separator);
+            if (StringUtil.isNotEmpty(errorPreconditionMessage)) {
+                message.append(INDENT_SPACES).append(errorPreconditionMessage).append(separator);
+            }
             for (ErrorPrecondition invalid : errorPreconditions) {
                 message.append(INDENT_SPACES).append(invalid.toString());
                 message.append(separator);
