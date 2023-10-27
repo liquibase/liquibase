@@ -37,7 +37,9 @@ import liquibase.lockservice.LockServiceFactory;
 import liquibase.logging.LogService;
 import liquibase.logging.Logger;
 import liquibase.logging.core.JavaLogService;
+import liquibase.precondition.core.RowCountPrecondition;
 import liquibase.precondition.core.TableExistsPrecondition;
+import liquibase.precondition.core.TableIsEmptyPrecondition;
 import liquibase.resource.ResourceAccessor;
 import liquibase.snapshot.DatabaseSnapshot;
 import liquibase.snapshot.SnapshotControl;
@@ -638,7 +640,7 @@ public abstract class AbstractIntegrationTest {
         DiffResult diffResult = DiffGeneratorFactory.getInstance().compare(database, database, compareControl);
 
         try {
-            assertTrue("comapring a database with itself should return a result of 'DBs are equal'",
+            assertTrue("comparing a database with itself should return a result of 'DBs are equal'",
                     diffResult.areEqual());
         } catch (AssertionError e) {
             new DiffToReport(diffResult, System.err).print();
@@ -669,7 +671,7 @@ public abstract class AbstractIntegrationTest {
                 compareControl.addSuppressedField(Column.class, "type"); //database returns different nvarchar2 info even though they are the same
             }
             if (database instanceof H2Database) {
-                //original changeset 2659-Create-MyView-with-quotes in the h2 changelog uses QUOTE_ALL_OBJECTS, but generated changesets do not use that attribute so the name comes through as differnt
+                //original changeset 2659-Create-MyView-with-quotes in the h2 changelog uses QUOTE_ALL_OBJECTS, but generated changesets do not use that attribute so the name comes through as different
                 compareControl.addSuppressedField(View.class, "name");
             }
 
@@ -1108,6 +1110,61 @@ public abstract class AbstractIntegrationTest {
         TableExistsPrecondition precondition = new TableExistsPrecondition();
         precondition.setTableName("standardTypesTest");
         precondition.check(this.getDatabase(), null, null, null);
+    }
+
+    @Test
+    public void testTableIsEmptyPrecondition() throws Exception {
+        assumeNotNull(this.getDatabase());
+        runChangeLogFile(commonChangeLog);
+
+        checkTableIsEmptyPrecondition("empty_table", 0L);
+        checkTableIsEmptyPrecondition("single_row_table", 1L);
+        checkTableIsEmptyPrecondition("multi_row_table", 2L);
+    }
+
+    private void checkTableIsEmptyPrecondition(String tableName, long actualRows) throws PreconditionFailedException, PreconditionErrorException {
+        TableIsEmptyPrecondition precondition = new TableIsEmptyPrecondition();
+        precondition.setTableName(tableName);
+        if (actualRows == 0L) {
+            precondition.check(this.getDatabase(), null, null, null);
+        } else {
+            PreconditionFailedException ex = assertThrows(PreconditionFailedException.class, () -> precondition.check(this.getDatabase(), null, null, null));
+            assertEquals(1, ex.getFailedPreconditions().size());
+
+            String expectedMessage = String.format("Table %s is not empty.", tableName);
+            assertEquals(expectedMessage, ex.getFailedPreconditions().get(0).getMessage());
+        }
+    }
+
+    @Test
+    public void testRowCountPrecondition() throws Exception {
+        assumeNotNull(this.getDatabase());
+        runChangeLogFile(commonChangeLog);
+
+        checkRowCountPrecondition("empty_table", 0L, 0L);
+        checkRowCountPrecondition("empty_table", 1L, 0L);
+        checkRowCountPrecondition("empty_table", Long.MAX_VALUE, 0L);
+        checkRowCountPrecondition("single_row_table", 0L, 1L);
+        checkRowCountPrecondition("single_row_table", 1L, 1L);
+        checkRowCountPrecondition("single_row_table", Long.MAX_VALUE, 1L);
+        checkRowCountPrecondition("multi_row_table", 0L, 2L);
+        checkRowCountPrecondition("multi_row_table", 2L, 2L);
+        checkRowCountPrecondition("multi_row_table", Long.MAX_VALUE, 2L);
+    }
+
+    private void checkRowCountPrecondition(String tableName, long expectedRows, long actualRows) throws PreconditionFailedException, PreconditionErrorException {
+        RowCountPrecondition precondition = new RowCountPrecondition();
+        precondition.setTableName(tableName);
+        precondition.setExpectedRows(expectedRows);
+        if (expectedRows == actualRows) {
+            precondition.check(this.getDatabase(), null, null, null);
+        } else {
+            PreconditionFailedException ex = assertThrows(PreconditionFailedException.class, () -> precondition.check(this.getDatabase(), null, null, null));
+            assertEquals(1, ex.getFailedPreconditions().size());
+
+            String expectedMessage = String.format("Table %s does not have the expected row count of %s. It contains %s rows", tableName, expectedRows, actualRows);
+            assertEquals(expectedMessage, ex.getFailedPreconditions().get(0).getMessage());
+        }
     }
 
     protected Database getDatabase(){

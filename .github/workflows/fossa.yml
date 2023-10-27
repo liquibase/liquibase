@@ -1,0 +1,31 @@
+# Name of the GitHub Action workflow
+name: FOSSA License Compliance and Security Check
+
+# Event triggers for the workflow
+on:
+  workflow_dispatch:  # Run this action manually from the GitHub Actions tab
+
+# Define the jobs in the workflow
+jobs:
+  fossa-scan:
+    # Specifies the type of runner to use
+    runs-on: ubuntu-latest
+
+    # Sequence of steps that make up a single job
+    steps:
+    # Checkout the code to the GitHub runner
+    - name: Checkout Code
+      uses: actions/checkout@v4
+
+    # Run FOSSA Scan
+    - name: Run FOSSA Scan
+      uses: fossas/fossa-action@main
+      with:
+        api-key: ${{secrets.FOSSA_API_KEY}}  # Set this secret in your GitHub repo settings
+
+    # Run FOSSA Tests
+    - name: Run FOSSA Tests
+      uses: fossas/fossa-action@main
+      with:
+        api-key: ${{secrets.FOSSA_API_KEY}}  # Set this secret in your GitHub repo settings
+        run-tests: true  # Run FOSSA tests for policy checks

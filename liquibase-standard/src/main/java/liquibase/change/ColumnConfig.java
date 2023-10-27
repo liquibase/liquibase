@@ -383,7 +383,7 @@ public class ColumnConfig extends AbstractLiquibaseSerializable {
      * Set the date this column should be set to. Supports any of the date or datetime formats handled by {@link ISODateFormat}.
      * If the passed value cannot be parsed as a date, it is assumed to be a function that returns a date.
      * If the string "null" is passed, it will set a null value.
-     * @param valueDate the Date Value to use (may be null or "null", or start with "now" or "today".
+     * @param valueDate the Date Value to use (may be null or "null", or start with "now" or "today").
      * @throws DateParseException if the columnType isn't supported for "now" or "today" values.
      */
     public ColumnConfig setValueDate(String valueDate) throws DateParseException {
