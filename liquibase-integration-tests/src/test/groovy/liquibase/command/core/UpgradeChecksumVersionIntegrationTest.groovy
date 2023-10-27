@@ -1,11 +1,10 @@
 package liquibase.command.core
 
-
+import liquibase.ChecksumVersion
 import liquibase.Scope
 import liquibase.changelog.ChangeLogHistoryService
 import liquibase.changelog.ChangeLogHistoryServiceFactory
 import liquibase.changelog.RanChangeSet
-import liquibase.checksum.LatestChecksumVersionPluginAsV8
 import liquibase.command.CommandScope
 import liquibase.command.core.helpers.DatabaseChangelogCommandStep
 import liquibase.command.core.helpers.DbUrlConnectionCommandStep
@@ -364,7 +363,7 @@ VALUES('2', 'fl', '$changesetFilepath', '2023-09-29 14:33:39.112', 2, 'EXECUTED'
 
         when:
         def scopeSettings = [
-                "liquibase.plugin.liquibase.checksum.LatestChecksumVersionPlugin": LatestChecksumVersionPluginAsV8.class
+                (Scope.Attr.latestChecksumVersion.name()): ChecksumVersion.V8
         ]
         Scope.child(scopeSettings, {
             CommandScope updateCommandScope = new CommandScope(UpdateCommandStep.COMMAND_NAME)

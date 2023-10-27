@@ -1,6 +1,5 @@
 package liquibase;
 
-import liquibase.checksum.LatestChecksumVersionFactory;
 import liquibase.exception.UnsupportedChecksumVersionException;
 import lombok.Getter;
 
@@ -35,7 +34,7 @@ public enum ChecksumVersion {
     }
 
     public static ChecksumVersion latest() {
-        return Scope.getCurrentScope().getSingleton(LatestChecksumVersionFactory.class).get().getChecksumVersion();
+        return Scope.getCurrentScope().get(Scope.Attr.latestChecksumVersion, ChecksumVersion.class);
     }
 
     public static ChecksumVersion enumFromChecksumVersion(int i) {
