@@ -1,5 +1,8 @@
 package liquibase.util
 
+import liquibase.Scope
+import liquibase.parser.LiquibaseSqlParser
+import liquibase.parser.SqlParserFactory
 import spock.lang.Specification
 import spock.lang.Unroll
 
@@ -8,7 +11,9 @@ class SqlParserTest extends Specification {
     @Unroll("#featureName `#input`")
     def "parse with standard options"() {
         expect:
-        SqlParser.parse(input).toArray(true) == output
+        SqlParserFactory sqlParserFactory = Scope.getCurrentScope().getSingleton(SqlParserFactory.class)
+        LiquibaseSqlParser sqlParser = sqlParserFactory.getSqlParser()
+        sqlParser.parse(input).toArray(true) == output
 
         where:
         input                                                                                              | output
@@ -57,7 +62,9 @@ class SqlParserTest extends Specification {
     @Unroll
     def "parse with unicode"() {
         expect:
-        SqlParser.parse(input).toArray(true) == output
+        SqlParserFactory sqlParserFactory = Scope.getCurrentScope().getSingleton(SqlParserFactory.class)
+        LiquibaseSqlParser sqlParser = sqlParserFactory.getSqlParser()
+        sqlParser.parse(input).toArray(true) == output
 
         where:
         input                                               | output
@@ -74,7 +81,9 @@ class SqlParserTest extends Specification {
     @Unroll("#featureName `#input`")
     def "parse with whitespace preserved"() {
         expect:
-        SqlParser.parse(input, true, false).toArray(true) == output
+        SqlParserFactory sqlParserFactory = Scope.getCurrentScope().getSingleton(SqlParserFactory.class)
+        LiquibaseSqlParser sqlParser = sqlParserFactory.getSqlParser()
+        sqlParser.parse(input, true, false).toArray(true) == output
 
         where:
         input                                                                        | output
@@ -95,7 +104,9 @@ class SqlParserTest extends Specification {
     @Unroll("#featureName `#input`")
     def "parse with comments preserved"() {
         expect:
-        SqlParser.parse(input, false, true).toArray(true) == output
+        SqlParserFactory sqlParserFactory = Scope.getCurrentScope().getSingleton(SqlParserFactory.class)
+        LiquibaseSqlParser sqlParser = sqlParserFactory.getSqlParser()
+        sqlParser.parse(input, false, true).toArray(true) == output
 
         where:
         input                                                                                              | output
