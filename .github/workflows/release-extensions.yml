@@ -5,6 +5,7 @@ on:
       version:
         description: 'Liquibase Version'
         required: true
+        type: string
 
 jobs:
   trigger-release:
@@ -14,7 +15,6 @@ jobs:
       fail-fast: false
       matrix:
         extension:
-          - docker
           - liquibase-bigquery
           - liquibase-cache
           - liquibase-cassandra
