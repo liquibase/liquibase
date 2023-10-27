@@ -17,15 +17,21 @@ env:
 
 jobs:
   build:
-    if: contains(github.event.workflow_run.event,  'completed') && contains(github.event.pull_request.labels.*.name, 'runFunctionalTests')
+    #if: contains(github.event.pull_request.labels.*.name, 'runFunctionalTests')
     runs-on: ubuntu-latest
 
     steps:
+
       - uses: actions/checkout@v3
         with:
           ref: ${{ github.event.pull_request.head.sha || github.event.after}} #sets the Git reference (commit or branch) to be checked out in the workflow
 
-       #run the functional tests only against the head-branch of the PR
+      - uses: actions/github-script@v6
+        with:
+          script: |
+            console.log(github.event.pull_request.labels)
+
+      #run the functional tests only against the head-branch of the PR
       - name: Trigger Functional Tests Workflow
         uses: peter-evans/repository-dispatch@v2
         with:
