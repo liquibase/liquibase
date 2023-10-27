@@ -311,4 +311,9 @@ jobs:
           env:
             GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
-  #- trigger functional tests on label runFunctionalTests
+  #- run functional tests
+
+  run-functional-tests:
+    needs: [ build_publish_branch ]
+    uses: liquibase/liquibase/.github/workflows/run-functional-tests.yml@github-action-DAT-15775
+    secrets: inherit
