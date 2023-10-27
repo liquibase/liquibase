@@ -111,29 +111,29 @@ jobs:
           with:
             ref: ${{ github.event.pull_request.head.sha || github.event.after}}
         # this includes all the tar files included in the previous runs. So in the next step we deploy what was previously build
-        - name: Download Artifacts for build.yml
-          uses: actions/download-artifact@v3
-          with:
-            name: temp-artifact
-
-        ##Cache based on install4j file, since changes to JVM is seen in there. If install4j version changes without changing the file, change the prefix letter before hashFiles to force a new cache
-        - name: Install4j Cache
-          uses: actions/cache@v3.3.1
-          with:
-            key: install4j-A${{ hashFiles('liquibase-dist/src/main/install4j/liquibase.install4j') }}
-            path: ~/.install4j8/**
-
-        - name: Set up JDK 11
-          uses: actions/setup-java@v3
-          with:
-            java-version: '11'
-            distribution: 'temurin'
-            gpg-private-key: ${{ secrets.GPG_SECRET }}
-            gpg-passphrase: GPG_PASSPHRASE
-            cache: 'maven'
-            overwrite-settings: false
-          env:
-            GPG_PASSWORD: ${{ secrets.GPG_PASSPHRASE }}
+#        - name: Download Artifacts for build.yml
+#          uses: actions/download-artifact@v3
+#          with:
+#            name: temp-artifact
+#
+#        ##Cache based on install4j file, since changes to JVM is seen in there. If install4j version changes without changing the file, change the prefix letter before hashFiles to force a new cache
+#        - name: Install4j Cache
+#          uses: actions/cache@v3.3.1
+#          with:
+#            key: install4j-A${{ hashFiles('liquibase-dist/src/main/install4j/liquibase.install4j') }}
+#            path: ~/.install4j8/**
+#
+#        - name: Set up JDK 11
+#          uses: actions/setup-java@v3
+#          with:
+#            java-version: '11'
+#            distribution: 'temurin'
+#            gpg-private-key: ${{ secrets.GPG_SECRET }}
+#            gpg-passphrase: GPG_PASSPHRASE
+#            cache: 'maven'
+#            overwrite-settings: false
+#          env:
+#            GPG_PASSWORD: ${{ secrets.GPG_PASSPHRASE }}
 
         # look for dependencies in maven
 #        - name: maven-settings-xml-action
