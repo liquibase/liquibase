@@ -2,6 +2,7 @@ package liquibase.database;
 
 import liquibase.Scope;
 import liquibase.SingletonObject;
+import liquibase.exception.DatabaseException;
 import liquibase.servicelocator.ServiceLocator;
 
 import java.util.List;
@@ -18,5 +19,11 @@ public class LiquibaseTableNamesFactory implements SingletonObject {
 
     public List<String> getLiquibaseTableNames(Database database) {
         return generators.stream().flatMap(f -> f.getLiquibaseGeneratedTableNames(database).stream()).collect(Collectors.toList());
+    }
+
+    public void destroy(Database abstractJdbcDatabase) throws DatabaseException {
+        for (LiquibaseTableNames generator : generators) {
+            generator.destroy(abstractJdbcDatabase);
+        }
     }
 }

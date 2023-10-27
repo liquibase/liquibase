@@ -1,5 +1,7 @@
 package liquibase.database;
 
+import liquibase.exception.DatabaseException;
+
 import java.util.List;
 
 public interface LiquibaseTableNames {
@@ -9,4 +11,6 @@ public interface LiquibaseTableNames {
      * like DATABASECHANGELOG and DATABASECHANGELOGLOCK.
      */
     List<String> getLiquibaseGeneratedTableNames(Database database);
+
+    void destroy(Database database) throws DatabaseException;
 }
