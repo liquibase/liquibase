@@ -33,7 +33,7 @@ jobs:
 
       - name: Get PR Labels
         id: get_labels
-        uses: softprops/action-gh-release@v1
+        uses: actions/checkout@v3
         with:
           endpoint: issues
           method: GET
