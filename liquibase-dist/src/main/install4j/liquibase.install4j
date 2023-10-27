@@ -16,7 +16,7 @@
         <entry>sqlite-*</entry>
       </macSearchedJars>
     </codeSigning>
-    <jreBundles jdkProviderId="AdoptOpenJDK" release="openjdk17/jdk-17.0.8+7" />
+    <jreBundles jdkProviderId="AdoptOpenJDK" release="openjdk17/jdk-17.0.9+9.1" />
   </application>
   <files>
     <mountPoints>
