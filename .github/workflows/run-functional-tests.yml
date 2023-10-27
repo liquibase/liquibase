@@ -26,10 +26,25 @@ jobs:
         with:
           ref: ${{ github.event.pull_request.head.sha || github.event.after}} #sets the Git reference (commit or branch) to be checked out in the workflow
 
-      - uses: actions/github-script@v6
+#      - uses: actions/github-script@v6
+#        with:
+#          script: |
+#            console.log(github.event.pull_request.labels);
+
+      - name: Get PR Labels
+        id: get_labels
+        uses: softprops/action-gh-release@v1
         with:
-          script: |
-            console.log(github.event.pull_request.labels);
+          endpoint: issues
+          method: GET
+          url: ${{ github.api_url }}/repos/${{ github.repository }}/issues/${{ github.event.pull_request.number }}/labels
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Use PR Labels
+        run: |
+          PR_LABELS="${{ steps.get_labels.outputs.data }}"
+          echo "Labels: $PR_LABELS"    
 
       #run the functional tests only against the head-branch of the PR
       - name: Trigger Functional Tests Workflow
