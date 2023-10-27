@@ -299,7 +299,7 @@ jobs:
         run: |
           aws s3 sync liquibase-pro-repo/pro/src/main/resources/www.liquibase.org/xml/ns/pro/ s3://liquibaseorg-origin/xml/ns/pro/ --content-type application/octet-stream --only-show-errors
           aws s3 sync liquibase-core-repo/liquibase-standard/src/main/resources/www.liquibase.org/xml/ns/dbchangelog/ s3://liquibaseorg-origin/xml/ns/dbchangelog/ --content-type application/octet-stream --only-show-errors
-
+          aws s3 sync liquibase-pro-repo/pro/src/main/resources/schemas/ s3://liquibaseorg-origin/json/schema/ --content-type application/octet-stream --only-show-errors
 
       - name: Index.htm file upload
         env:
@@ -318,8 +318,44 @@ jobs:
             aws s3 sync index-file s3://liquibaseorg-origin/xml/ns/dbchangelog/ --only-show-errors
           fi
 
+      - name: Liquibase xsds SFTP upload
+        uses: wangyucode/sftp-upload-action@v2.0.2
+        with:
+          host: ${{ secrets.WPENGINE_SFTP_HOST }}
+          port: ${{ secrets.WPENGINE_SFTP_PORT }}
+          username: ${{ secrets.WPENGINE_SFTP_USER }}
+          password: ${{ secrets.WPENGINE_SFTP_PASSWORD }} 
+          compress: true
+          forceUpload: true
+          localDir: 'liquibase-core-repo/liquibase-standard/src/main/resources/www.liquibase.org/xml/ns/dbchangelog/'
+          remoteDir: '/xml/ns/dbchangelog/'
+
+      - name: Liquibase PRO xsds SFTP upload
+        uses: wangyucode/sftp-upload-action@v2.0.2
+        with:
+          host: ${{ secrets.WPENGINE_SFTP_HOST }}
+          port: ${{ secrets.WPENGINE_SFTP_PORT }}
+          username: ${{ secrets.WPENGINE_SFTP_USER }}
+          password: ${{ secrets.WPENGINE_SFTP_PASSWORD }} 
+          compress: false
+          forceUpload: true
+          localDir: 'liquibase-pro-repo/pro/src/main/resources/www.liquibase.org/xml/ns/pro/'
+          remoteDir: '/xml/ns/pro/'
+
+      - name: Liquibase flow-file schema SFTP upload
+        uses: wangyucode/sftp-upload-action@v2.0.2
+        with:
+          host: ${{ secrets.WPENGINE_SFTP_HOST }}
+          port: ${{ secrets.WPENGINE_SFTP_PORT }}
+          username: ${{ secrets.WPENGINE_SFTP_USER }}
+          password: ${{ secrets.WPENGINE_SFTP_PASSWORD }} 
+          compress: false
+          forceUpload: true
+          localDir: 'liquibase-pro-repo/pro/src/main/resources/schemas/'
+          remoteDir: '/json/schema/'
+
   package-deb:
-    uses: liquibase/build-logic/.github/workflows/package-deb.yml@v0.4.0
+    uses: liquibase/build-logic/.github/workflows/package-deb.yml@v0.5.5
     needs: [ setup ]
     secrets: inherit
     with:
