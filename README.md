@@ -73,8 +73,6 @@ LIQUIBASE is a registered trademark of [Liquibase Inc.](https://www.liquibase.co
 
 [Get Support & Advanced Features](https://liquibase.com/pricing)
 
-.
-
 ## Publish Release Manual Trigger to Sonatype 
 
 1. When a PO (Product Owner) or a Team Leader navigates to Publish a release from here -> https://github.com/liquibase/liquibase/releases/new, the workflow from /workflow/release-published.yml job is triggered. 

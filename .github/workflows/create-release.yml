@@ -37,9 +37,9 @@ jobs:
     name: Re-version artifacts ${{ needs.setup.outputs.version }}
     runs-on: ubuntu-22.04
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
 
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
         name: Checkout liquibase-pro
         with:
           repository: liquibase/liquibase-pro
@@ -102,7 +102,7 @@ jobs:
     env:
       GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
 
       - name: Restore Completed Artifacts
         uses: actions/cache@v3.3.1
