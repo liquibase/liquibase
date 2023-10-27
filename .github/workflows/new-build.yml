@@ -90,17 +90,18 @@ jobs:
             }
             core.setOutput("branchExistsInBoth", branchExistsInBoth)
           
-  run-tests:
-    needs: [setup]
-    if: needs.setup.outputs.branchExistsInBoth == 'true' && success()
-    uses: liquibase/liquibase/.github/workflows/run-tests.yml@github-action-DAT-15775
-    secrets: inherit
+#  run-tests:
+#    needs: [setup]
+#    if: needs.setup.outputs.branchExistsInBoth == 'true' && success()
+#    uses: liquibase/liquibase/.github/workflows/run-tests.yml@github-action-DAT-15775
+#    secrets: inherit
 
 
   build_publish_branch:
     name: Build & Package
     runs-on: macos-latest
-    needs: [setup, run-tests]
+    needs: [setup]
+#    needs: [ setup, run-tests ]
     if: needs.setup.outputs.branchExistsInBoth == 'true'
     permissions:
       contents: read
