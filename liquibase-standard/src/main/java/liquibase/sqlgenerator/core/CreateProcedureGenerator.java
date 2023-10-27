@@ -9,6 +9,8 @@ import liquibase.executor.Executor;
 import liquibase.executor.ExecutorService;
 import liquibase.executor.jvm.JdbcExecutor;
 import liquibase.parser.ChangeLogParserConfiguration;
+import liquibase.parser.LiquibaseSqlParser;
+import liquibase.parser.SqlParserFactory;
 import liquibase.sql.Sql;
 import liquibase.sql.UnparsedSql;
 import liquibase.sqlgenerator.SqlGeneratorChain;
@@ -16,9 +18,9 @@ import liquibase.statement.core.CreateProcedureStatement;
 import liquibase.statement.core.RawSqlStatement;
 import liquibase.structure.core.Schema;
 import liquibase.structure.core.StoredProcedure;
-import liquibase.util.SqlParser;
 import liquibase.util.StringClauses;
 import liquibase.util.StringUtil;
+
 import java.util.ArrayList;
 import java.util.List;
 
@@ -56,6 +58,8 @@ public class CreateProcedureGenerator extends AbstractSqlGenerator<CreateProcedu
         }
 
         String procedureText = addSchemaToText(statement.getProcedureText(), schemaName, "PROCEDURE", database);
+        SqlParserFactory sqlParserFactory = Scope.getCurrentScope().getSingleton(SqlParserFactory.class);
+        LiquibaseSqlParser sqlParser = sqlParserFactory.getSqlParser();
 
         if ((statement.getReplaceIfExists() != null) && statement.getReplaceIfExists()) {
             if (database instanceof MSSQLDatabase) {
@@ -65,7 +69,7 @@ public class CreateProcedureGenerator extends AbstractSqlGenerator<CreateProcedu
                 }
                 sql.add(new UnparsedSql("if object_id('" + fullyQualifiedName + "', 'p') is null exec ('create procedure " + fullyQualifiedName + " as select 1 a')"));
 
-                StringClauses parsedSql = SqlParser.parse(procedureText, true, true);
+                StringClauses parsedSql = sqlParser.parse(procedureText, true, true);
                 StringClauses.ClauseIterator clauseIterator = parsedSql.getClauseIterator();
                 Object next = "START";
                 while ((next != null) && !("create".equalsIgnoreCase(next.toString()) || "alter".equalsIgnoreCase(next
@@ -88,7 +92,7 @@ public class CreateProcedureGenerator extends AbstractSqlGenerator<CreateProcedu
         if ((database instanceof MSSQLDatabase) &&
             procedureText.toLowerCase().contains("merge") &&
                 !procedureText.endsWith(";")) { //mssql "AS MERGE" procedures need a trailing ; (regardless of the end delimiter)
-            StringClauses parsed = SqlParser.parse(procedureText);
+            StringClauses parsed = sqlParser.parse(procedureText);
             StringClauses.ClauseIterator clauseIterator = parsed.getClauseIterator();
             boolean reallyMerge = false;
             while (clauseIterator.hasNext()) {
@@ -175,7 +179,9 @@ public class CreateProcedureGenerator extends AbstractSqlGenerator<CreateProcedu
             return procedureText;
         }
         if ((StringUtil.trimToNull(schemaName) != null) && ChangeLogParserConfiguration.USE_PROCEDURE_SCHEMA.getCurrentValue()) {
-            StringClauses parsedSql = SqlParser.parse(procedureText, true, true);
+            SqlParserFactory sqlParserFactory = Scope.getCurrentScope().getSingleton(SqlParserFactory.class);
+            LiquibaseSqlParser sqlParser = sqlParserFactory.getSqlParser();
+            StringClauses parsedSql = sqlParser.parse(procedureText, true, true);
             StringClauses.ClauseIterator clauseIterator = parsedSql.getClauseIterator();
             Object next = "START";
             while ((next != null) && !next.toString().equalsIgnoreCase(keywordBeforeName) && clauseIterator.hasNext()) {
