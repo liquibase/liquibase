@@ -842,6 +842,8 @@ public abstract class AbstractJdbcDatabase implements Database {
 
             LiquibaseTableNamesFactory liquibaseTableNamesFactory = Scope.getCurrentScope().getSingleton(LiquibaseTableNamesFactory.class);
             liquibaseTableNamesFactory.destroy(this);
+            Scope.getCurrentScope().getSingleton(ChangeLogHistoryServiceFactory.class).getChangeLogService(this).destroy();
+            LockServiceFactory.getInstance().getLockService(this).destroy();
 
             this.setAutoCommit(previousAutoCommit);
             Scope.getCurrentScope().getLog(getClass()).info(String.format("Successfully deleted all supported object types in schema %s.", schemaToDrop.toString()));

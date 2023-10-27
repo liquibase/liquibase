@@ -16,7 +16,6 @@ public class StandardLiquibaseTableNames implements LiquibaseTableNames {
 
     @Override
     public void destroy(Database database) throws DatabaseException {
-        Scope.getCurrentScope().getSingleton(ChangeLogHistoryServiceFactory.class).getChangeLogService(database).destroy();
-        LockServiceFactory.getInstance().getLockService(database).destroy();
+
     }
 }
