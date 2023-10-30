@@ -35,6 +35,6 @@ jobs:
           event-type: run-functional-tests
           client-payload: |
             {
-              "Running liquibase/liquibase commit": "${{ github.event.pull_request.head.sha }}"
+              "Running liquibase/liquibase commit": "${{ github.event.pull_request.head.sha }}",
               "Triggered by" : "${{ needs.setup.outputs.workflow_url }}"
             }
