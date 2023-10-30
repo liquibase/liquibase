@@ -110,7 +110,7 @@ public class CreateTableChange extends AbstractChange implements ChangeWithColum
                 if (constraints.isNullable() != null && !constraints.isNullable()) {
                     NotNullConstraint notNullConstraint = new NotNullConstraint(column.getName())
                             .setConstraintName(constraints.getNotNullConstraintName())
-                            .setValidateNullable(constraints.getValidateNullable() == null ? true : constraints.getValidateNullable());
+                            .setValidateNullable(constraints.getValidateNullable() == null || constraints.getValidateNullable());
                     statement.addColumnConstraint(notNullConstraint);
                 }
 
@@ -139,7 +139,7 @@ public class CreateTableChange extends AbstractChange implements ChangeWithColum
 
                 if ((constraints.isUnique() != null) && constraints.isUnique()) {
                     statement.addColumnConstraint(new UniqueConstraint(constraints.getUniqueConstraintName(),
-                        constraints.getValidateUnique()==null?true:constraints.getValidateUnique()).addColumns(column.getName()));
+                            constraints.getValidateUnique() == null || constraints.getValidateUnique()).addColumns(column.getName()));
                 }
             }
 

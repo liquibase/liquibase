@@ -1,12 +1,15 @@
 package liquibase.command.core.helpers;
 
 import liquibase.Beta;
+import liquibase.GlobalConfiguration;
 import liquibase.Scope;
 import liquibase.command.*;
 import liquibase.configuration.ConfigurationValueObfuscator;
 import liquibase.database.Database;
+import liquibase.database.jvm.JdbcConnection;
 import liquibase.exception.DatabaseException;
 import liquibase.logging.mdc.MdcKey;
+import liquibase.util.StringUtil;
 
 import java.util.Collections;
 import java.util.List;
@@ -80,7 +83,7 @@ public class DbUrlConnectionCommandStep extends AbstractDatabaseConnectionComman
      * @param commandScope current command scope
      * @throws DatabaseException Thrown when there is a connection error
      */
-    private Database obtainDatabase(CommandScope commandScope) throws DatabaseException {
+    public Database obtainDatabase(CommandScope commandScope) throws DatabaseException {
         if (commandScope.getArgumentValue(DATABASE_ARG) == null) {
             String url = commandScope.getArgumentValue(URL_ARG);
             String username = commandScope.getArgumentValue(USERNAME_ARG);
@@ -89,7 +92,9 @@ public class DbUrlConnectionCommandStep extends AbstractDatabaseConnectionComman
             String defaultCatalogName = commandScope.getArgumentValue(DEFAULT_CATALOG_NAME_ARG);
             String driver = commandScope.getArgumentValue(DRIVER_ARG);
             String driverPropertiesFile = commandScope.getArgumentValue(DRIVER_PROPERTIES_FILE_ARG);
-            Database database = createDatabaseObject(url, username, password, defaultSchemaName, defaultCatalogName, driver, driverPropertiesFile);
+            Database database = createDatabaseObject(url, username, password, defaultSchemaName, defaultCatalogName, driver, driverPropertiesFile,
+                    StringUtil.trimToNull(GlobalConfiguration.LIQUIBASE_CATALOG_NAME.getCurrentValue()),
+                    StringUtil.trimToNull(GlobalConfiguration.LIQUIBASE_SCHEMA_NAME.getCurrentValue()));
             logMdc(url, database);
             return database;
         } else {
@@ -98,7 +103,7 @@ public class DbUrlConnectionCommandStep extends AbstractDatabaseConnectionComman
     }
 
     public static void logMdc(String url, Database database) {
-        Scope.getCurrentScope().addMdcValue(MdcKey.LIQUIBASE_TARGET_URL, url);
+        Scope.getCurrentScope().addMdcValue(MdcKey.LIQUIBASE_TARGET_URL, JdbcConnection.sanitizeUrl(url));
         Scope.getCurrentScope().addMdcValue(MdcKey.LIQUIBASE_CATALOG_NAME, database.getLiquibaseCatalogName());
         Scope.getCurrentScope().addMdcValue(MdcKey.LIQUIBASE_SCHEMA_NAME, database.getLiquibaseSchemaName());
     }

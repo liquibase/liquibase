@@ -47,7 +47,7 @@ Want to file a bug or improve documentation? Excellent! Read up on our guideline
 
 ### Contribute code 
 
-Use our [step-by-step instructions](https://www.liquibase.org/community/contribute/code) for contributing code to the Liquibase open source project. 
+Use our [step-by-step instructions](https://contribute.liquibase.com/code/) for contributing code to the Liquibase open source project. 
 
 ### Join the Liquibase Community
 
@@ -72,8 +72,6 @@ LIQUIBASE is a registered trademark of [Liquibase Inc.](https://www.liquibase.co
 [Liquibase Blog](https://www.liquibase.com/blog)
 
 [Get Support & Advanced Features](https://liquibase.com/pricing)
-
-.
 
 ## Publish Release Manual Trigger to Sonatype 
 

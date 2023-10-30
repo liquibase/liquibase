@@ -102,7 +102,9 @@ public class JdbcExecutor extends AbstractExecutor {
     }
 
     private void showSqlWarnings(Statement stmtToUse) throws SQLException {
-        if (! SqlConfiguration.SHOW_SQL_WARNING_MESSAGES.getCurrentValue() || stmtToUse.getWarnings() == null) {
+        if (Boolean.TRUE.equals(! SqlConfiguration.SHOW_SQL_WARNING_MESSAGES.getCurrentValue() ||
+            stmtToUse == null) ||
+            stmtToUse.getWarnings() == null) {
             return;
         }
         SQLWarning sqlWarning = stmtToUse.getWarnings();
@@ -153,10 +155,7 @@ public class JdbcExecutor extends AbstractExecutor {
             String finalSql = applyVisitors((RawParameterizedSqlStatement) sql, sqlVisitors);
 
             try (PreparedStatement pstmt = factory.create(finalSql)) {
-                final List<?> parameters = ((RawParameterizedSqlStatement) sql).getParameters();
-                for (int i = 0; i < parameters.size(); i++) {
-                    pstmt.setObject(i, parameters.get(i));
-                }
+                setParameters(pstmt, (RawParameterizedSqlStatement) sql);
                 pstmt.execute();
 
                 return;
@@ -178,6 +177,13 @@ public class JdbcExecutor extends AbstractExecutor {
         }
 
         execute(new ExecuteStatementCallback(sql, sqlVisitors), sqlVisitors);
+    }
+
+    private void setParameters(final PreparedStatement pstmt, final RawParameterizedSqlStatement sql) throws SQLException {
+        final List<Object> parameters = sql.getParameters();
+        for (int i = 0; i < parameters.size(); i++) {
+            pstmt.setObject(i + 1, parameters.get(i));
+        }
     }
 
     private String applyVisitors(RawParameterizedSqlStatement sql, List<SqlVisitor> sqlVisitors) {
@@ -204,10 +210,7 @@ public class JdbcExecutor extends AbstractExecutor {
             String finalSql = applyVisitors((RawParameterizedSqlStatement) sql, sqlVisitors);
 
             try (PreparedStatement pstmt = factory.create(finalSql)) {
-                final List<?> parameters = ((RawParameterizedSqlStatement) sql).getParameters();
-                for (int i = 0; i < parameters.size(); i++) {
-                    pstmt.setObject(i, parameters.get(0));
-                }
+                setParameters(pstmt, (RawParameterizedSqlStatement) sql);
                 return rse.extractData(pstmt.executeQuery());
             } catch (SQLException e) {
                 throw new DatabaseException(e);

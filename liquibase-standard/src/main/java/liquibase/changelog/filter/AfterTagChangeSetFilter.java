@@ -1,10 +1,13 @@
 package liquibase.changelog.filter;
 
+import liquibase.Scope;
 import liquibase.TagVersionEnum;
 import liquibase.changelog.ChangeSet;
 import liquibase.changelog.RanChangeSet;
 import liquibase.command.core.RollbackCommandStep;
 import liquibase.exception.RollbackFailedException;
+import liquibase.logging.mdc.MdcKey;
+import liquibase.logging.mdc.MdcValue;
 import liquibase.util.StringUtil;
 
 import java.util.Collections;
@@ -33,6 +36,7 @@ public class AfterTagChangeSetFilter implements ChangeSetFilter {
             return tag.equalsIgnoreCase(ranChangeSet.getTag());
         });
         if (! seenTag) {
+            Scope.getCurrentScope().addMdcValue(MdcKey.DEPLOYMENT_OUTCOME, MdcValue.COMMAND_FAILED);
             throw new RollbackFailedException("Could not find tag '"+tag+"' in the database");
         }
 
@@ -77,6 +81,7 @@ public class AfterTagChangeSetFilter implements ChangeSetFilter {
         }
 
         if (!seenTag) {
+            Scope.getCurrentScope().addMdcValue(MdcKey.DEPLOYMENT_OUTCOME, MdcValue.COMMAND_FAILED);
             throw new RollbackFailedException("Could not find tag '" + tag + "' in the database");
         }
     }
