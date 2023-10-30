@@ -12,4 +12,11 @@ public class RanChangeSetTest {
         ChangeSet incomingChangeSet = new ChangeSet("1", "author", false, false, "classpath:/db/file.log", null, null, null);
         assertTrue(ranChangeSet.isSameAs(incomingChangeSet));
     }
+
+    @Test
+    public void is_same_when_we_use_relative_directories() throws Exception {
+        RanChangeSet ranChangeSet = new RanChangeSet("db/file.log", "1", "author", null, null, null, null, null, null, null, null, null);
+        ChangeSet incomingChangeSet = new ChangeSet("1", "author", false, false, "db/../db/file.log", null, null, null);
+        assertTrue(ranChangeSet.isSameAs(incomingChangeSet));
+    }
 }
