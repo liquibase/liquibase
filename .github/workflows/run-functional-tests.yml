@@ -15,15 +15,10 @@ env:
 jobs:
   build:
     runs-on: ubuntu-latest
-    outputs:
-      workflow_url: ${{ steps.get-workflow-url.outputs.workflow_url }}
-
     steps:
-
       - uses: actions/checkout@v3
         with:
           ref: ${{ github.event.pull_request.head.sha || github.event.after}} #sets the Git reference (commit or branch) to be checked out in the workflow
-
 
       - name: Get Workflow Run URL
         id: get-workflow-url
@@ -42,5 +37,5 @@ jobs:
           client-payload: |
             {
               "New Running liquibase/liquibase commit": "${{ inputs.latestMergeSha }}",
-              "Triggered by" : "${{ needs.build.outputs.workflow_url }}"
+              "Triggered by" : "${{ steps.get-workflow-url.workflow_url }}"
             }
