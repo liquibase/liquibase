@@ -36,6 +36,6 @@ jobs:
           event-type: run-functional-tests
           client-payload: |
             {
-              "New Running liquibase/liquibase commit": "${{ inputs.latestMergeSha }}",
-              "Triggered by" : "${{ env.workflow_url }}"
+              "liquibaseCommit": "${{ inputs.latestMergeSha }}",
+              "runDescription" : "${{ env.workflow_url }}"
             }
