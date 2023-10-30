@@ -22,4 +22,4 @@ jobs:
           token: ${{ secrets.RUN_FUNCTIONAL_TEST_HARNESS_TESTS_TOKEN }}
           repository: liquibase/liquibase-test-harness
           event-type: run-test-harness
-          client-payload: '{"ref": "${{ github.event.pull_request.head.ref }}" }'
+          client-payload: '{"ref": "${{ github.event.pull_request.head.sha }}" }'
