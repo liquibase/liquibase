@@ -2,6 +2,12 @@ name: Run Functional Tests
 
 on:
   workflow_call:
+    inputs:
+      latestMergeSha:
+        description: 'Latest Merge sha of OSS PR'
+        required: false
+        default: ''
+        type: string
 
 env:
   MAVEN_VERSION: '3.9.2'
@@ -35,6 +41,6 @@ jobs:
           event-type: run-functional-tests
           client-payload: |
             {
-              "Running liquibase/liquibase commit": "${{ github.event.pull_request.head.sha }}",
-              "Triggered by" : "${{ needs.setup.outputs.workflow_url }}"
+              "New Running liquibase/liquibase commit": "${{ inputs.latestMergeSha }}",
+              "Triggered by" : "${{ needs.build.outputs.workflow_url }}"
             }

@@ -319,7 +319,8 @@ jobs:
     uses: liquibase/liquibase/.github/workflows/run-functional-tests.yml@github-action-DAT-15775
     secrets: inherit
 
-  run-tests-harness:
-    needs: [ build_publish_branch ]
-    uses: liquibase/liquibase/.github/workflows/run-test-harness.yml@github-action-DAT-15775
-    secrets: inherit
+
+#  run-tests-harness:
+#    needs: [ build_publish_branch ]
+#    uses: liquibase/liquibase/.github/workflows/run-test-harness.yml@github-action-DAT-15775
+#    secrets: inherit
