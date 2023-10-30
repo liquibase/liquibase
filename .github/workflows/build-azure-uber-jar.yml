@@ -43,11 +43,36 @@ jobs:
           repositories: |
             [
               {
+                "id": "liquibase",
+                "url": "https://maven.pkg.github.com/liquibase/liquibase",
+                "releases": {
+                  "enabled": "false"
+                },
+                "snapshots": {
+                  "enabled": "true",
+                  "updatePolicy": "always"
+                }
+              },
+              {
+                "id": "liquibase-pro",
+                "url": "https://maven.pkg.github.com/liquibase/liquibase-pro",
+                "releases": {
+                  "enabled": "false"
+                },
+                "snapshots": {
+                  "enabled": "true",
+                  "updatePolicy": "always"
+                }
+              }
+            ]
+          plugin_repositories: |
+            [
+              {
                 "id": "file-replacer-maven-plugin",
                 "url": "https://maven.pkg.github.com/StevenMassaro/file-replacer-maven-plugin",
                 "releases": {
                   "updatePolicy": "always",
-                  "enabled": "false"
+                  "enabled": "true"
                 },
                 "snapshots": {
                   "enabled": "true",
@@ -57,6 +82,16 @@ jobs:
             ]
           servers: |
             [
+              {
+                "id": "liquibase-pro",
+                "username": "liquibot",
+                "password": "${{ secrets.LIQUIBOT_PAT }}"
+              },
+              {
+                "id": "liquibase",
+                "username": "liquibot",
+                "password": "${{ secrets.LIQUIBOT_PAT }}"
+              },
               {
                 "id": "file-replacer-maven-plugin",
                 "username": "liquibot",
