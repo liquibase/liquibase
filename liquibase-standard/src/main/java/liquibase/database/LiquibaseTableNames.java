@@ -13,4 +13,11 @@ public interface LiquibaseTableNames {
     List<String> getLiquibaseGeneratedTableNames(Database database);
 
     void destroy(Database database) throws DatabaseException;
+
+    /**
+     * Returns the order in which modifiers should be run. Modifiers with a higher order will run after modifiers with a lower order value.
+     *
+     * @return int
+     */
+    int getOrder();
 }

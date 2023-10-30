@@ -5,16 +5,20 @@ import liquibase.SingletonObject;
 import liquibase.exception.DatabaseException;
 import liquibase.servicelocator.ServiceLocator;
 
+import java.util.Comparator;
 import java.util.List;
+import java.util.SortedSet;
+import java.util.TreeSet;
 import java.util.stream.Collectors;
 
 public class LiquibaseTableNamesFactory implements SingletonObject {
 
-    private final List<LiquibaseTableNames> generators;
+    private final SortedSet<LiquibaseTableNames> generators;
 
     private LiquibaseTableNamesFactory() {
         ServiceLocator serviceLocator = Scope.getCurrentScope().getServiceLocator();
-        generators = serviceLocator.findInstances(LiquibaseTableNames.class);
+        generators = new TreeSet<>(Comparator.comparingInt(LiquibaseTableNames::getOrder));
+        generators.addAll(serviceLocator.findInstances(LiquibaseTableNames.class));
     }
 
     public List<String> getLiquibaseTableNames(Database database) {

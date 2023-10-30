@@ -16,6 +16,13 @@ public class StandardLiquibaseTableNames implements LiquibaseTableNames {
 
     @Override
     public void destroy(Database database) throws DatabaseException {
+        Scope.getCurrentScope().getSingleton(ChangeLogHistoryServiceFactory.class).getChangeLogService(database).destroy();
+        LockServiceFactory.getInstance().getLockService(database).destroy();
+    }
 
+    @Override
+    public int getOrder() {
+        // We always want this to run last.
+        return Integer.MAX_VALUE;
     }
 }
