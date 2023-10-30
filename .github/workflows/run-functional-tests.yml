@@ -25,7 +25,7 @@ jobs:
         run: |
           repo_url="https://github.com/${{ github.repository }}"
           workflow_url="${repo_url}/actions/runs/${{ github.run_id }}"
-          echo "workflow_url=${workflow_url}" >> $GITHUB_OUTPUT
+          echo "workflow_url=${workflow_url}" >> $GITHUB_ENV
 
       #run the functional tests only against the head-branch of the PR
       - name: Trigger Functional Tests Workflow
@@ -37,5 +37,5 @@ jobs:
           client-payload: |
             {
               "New Running liquibase/liquibase commit": "${{ inputs.latestMergeSha }}",
-              "Triggered by" : "${{ steps.get-workflow-url.workflow_url }}"
+              "Triggered by" : "${{ env.workflow_url }}"
             }
