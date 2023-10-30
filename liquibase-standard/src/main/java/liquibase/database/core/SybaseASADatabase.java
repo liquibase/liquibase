@@ -10,7 +10,10 @@ import liquibase.database.OfflineConnection;
 import liquibase.database.jvm.JdbcConnection;
 import liquibase.database.jvm.SybaseASAConnection;
 import liquibase.exception.DatabaseException;
+import liquibase.exception.LiquibaseException;
 import liquibase.exception.UnexpectedLiquibaseException;
+import liquibase.statement.SqlStatement;
+import liquibase.statement.core.RawSqlStatement;
 import liquibase.structure.core.Index;
 
 import java.math.BigInteger;
@@ -330,20 +333,12 @@ public class SybaseASADatabase extends AbstractJdbcDatabase {
     }
 
     @Override
-    public void afterUpdate() {
+    public void afterUpdate() throws LiquibaseException {
         /*
          * SQL Anywhere needs recompilation of views after an update, when the underlying tables have changed.
          * It is safe to always recompile as long as we ignore any compilation failures.
          */
-        executeSql("sa_recompile_views(1)");
-    }
-
-    private void executeSql(final String sql) {
-        try (final Statement statement = ((JdbcConnection) getConnection()).getWrappedConnection().createStatement()) {
-            statement.execute(sql);
-        } catch (final SQLException e) {
-            throw new UnexpectedLiquibaseException(e);
-        }
+        this.execute(new SqlStatement[] {new RawSqlStatement("sa_recompile_views(1)")}, null);
     }
 
 }
