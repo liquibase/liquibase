@@ -3,21 +3,11 @@ name: Run Test Harness Tests
 on:
   workflow_call:
 
-  workflow_run:
-    workflows: [ "Build Branch SNAPSHOT", "Build and Publish (Matching Branch)" ]
-    types:
-      - completed
-
-  pull_request:
-    types:
-      - labeled
-
 env:
   MAVEN_VERSION: '3.9.2'
 
 jobs:
   build:
-    if: contains(github.event.workflow_run.event,  'completed') && contains(github.event.pull_request.labels.*.name, 'runTestHarnessTests')
     runs-on: ubuntu-latest
 
     steps:
