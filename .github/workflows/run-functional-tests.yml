@@ -9,6 +9,8 @@ env:
 jobs:
   build:
     runs-on: ubuntu-latest
+    outputs:
+      workflow_url: ${{ steps.get-workflow-url.outputs.workflow_url }}
 
     steps:
 
@@ -17,6 +19,13 @@ jobs:
           ref: ${{ github.event.pull_request.head.sha || github.event.after}} #sets the Git reference (commit or branch) to be checked out in the workflow
 
 
+      - name: Get Workflow Run URL
+        id: get-workflow-url
+        run: |
+          repo_url="https://github.com/${{ github.repository }}"
+          workflow_url="${repo_url}/actions/runs/${{ github.run_id }}"
+          echo "workflow_url=${workflow_url}" >> $GITHUB_OUTPUT
+
       #run the functional tests only against the head-branch of the PR
       - name: Trigger Functional Tests Workflow
         uses: peter-evans/repository-dispatch@v2
@@ -24,4 +33,8 @@ jobs:
           token: ${{ secrets.RUN_FUNCTIONAL_TEST_HARNESS_TESTS_TOKEN }}
           repository: liquibase/liquibase-pro-tests
           event-type: run-functional-tests
-          client-payload: '{"ref": "${{ github.event.pull_request.head.sha }}" }'
+          client-payload: |
+            {
+              "Running liquibase/liquibase commit": "${{ github.event.pull_request.head.sha }}"
+              "Triggered by" : "${{ needs.setup.outputs.workflow_url }}"
+            }
