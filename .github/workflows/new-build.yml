@@ -321,5 +321,5 @@ jobs:
 
   run-tests-harness:
     needs: [ build_publish_branch ]
-    uses: liquibase/liquibase/.github/workflows/run-tests-harness.yml@github-action-DAT-15775
+    uses: liquibase/liquibase/.github/workflows/run-test-harness.yml@github-action-DAT-15775
     secrets: inherit
