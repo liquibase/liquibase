@@ -1328,11 +1328,13 @@ public class Liquibase implements AutoCloseable {
      */
     @Deprecated
     public void validate() throws LiquibaseException {
-        new CommandScope("validate")
+        runInScope(() ->
+            new CommandScope("validate")
                 .addArgumentValue(DbUrlConnectionCommandStep.DATABASE_ARG, database)
                 .addArgumentValue(DatabaseChangelogCommandStep.CHANGELOG_FILE_ARG, changeLogFile)
                 .addArgumentValue(DatabaseChangelogCommandStep.CHANGELOG_PARAMETERS, changeLogParameters)
-                .execute();
+                .execute()
+        );
     }
 
     public void setChangeLogParameter(String key, Object value) {
