@@ -24,7 +24,7 @@ jobs:
       GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
     steps:
       - name: Checkout liquibase-pro
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
         with:
           repository: liquibase/liquibase-pro
           ref: ${{ inputs.branch }}
@@ -40,6 +40,31 @@ jobs:
       - name: maven-settings-xml-action
         uses: whelk-io/maven-settings-xml-action@v20
         with:
+          repositories: |
+              [
+                {
+                  "id": "liquibase",
+                  "url": "https://maven.pkg.github.com/liquibase/liquibase",
+                  "releases": {
+                    "enabled": "false"
+                  },
+                  "snapshots": {
+                    "enabled": "true",
+                    "updatePolicy": "always"
+                  }
+                },
+                {
+                  "id": "liquibase-pro",
+                  "url": "https://maven.pkg.github.com/liquibase/liquibase-pro",
+                  "releases": {
+                    "enabled": "false"
+                  },
+                  "snapshots": {
+                    "enabled": "true",
+                    "updatePolicy": "always"
+                  }
+                }
+              ]
           plugin_repositories: |
             [
               {
@@ -57,6 +82,16 @@ jobs:
             ]
           servers: |
             [
+              {
+                "id": "liquibase-pro",
+                "username": "liquibot",
+                "password": "${{ secrets.LIQUIBOT_PAT }}"
+              },
+              {
+                "id": "liquibase",
+                "username": "liquibot",
+                "password": "${{ secrets.LIQUIBOT_PAT }}"
+              },
               {
                 "id": "file-replacer-maven-plugin",
                 "username": "liquibot",
