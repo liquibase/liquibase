@@ -120,4 +120,4 @@ jobs:
         with:
           name: liquibase-pro-azure-artifacts
           path: |
-            */target/*.jar
+            liquibase-azure-deps/target/*.jar
