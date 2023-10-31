@@ -118,7 +118,7 @@ jobs:
         run: mvn versions:set -DnewVersion=${{ inputs.liquibase-version }}
 
       - name: Build & Test
-        run: mvn -B clean package
+        run: mvn -B "-DnewVersion=4.24.1" clean package
 
       - name: Archive Modules
         uses: actions/upload-artifact@v3
