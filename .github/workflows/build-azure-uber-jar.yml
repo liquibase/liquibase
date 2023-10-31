@@ -44,6 +44,9 @@ jobs:
           distribution: 'temurin'
           cache: 'maven'
 
+      - name: Set version
+        run: mvn versions:set -DnewVersion=master-SNAPSHOT
+
       - name: maven-settings-xml-action
         uses: whelk-io/maven-settings-xml-action@v20
         with:
