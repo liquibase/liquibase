@@ -29,6 +29,12 @@ jobs:
           repository: liquibase/liquibase-pro
           ref: ${{ inputs.branch }}
           token: ${{ secrets.BOT_TOKEN }}
+          path: liquibase-pro
+
+      - name: LS
+        run: |
+          cd liquibase-pro
+          ls -L
 
       - name: Set up JDK 17
         uses: actions/setup-java@v3
@@ -109,7 +115,6 @@ jobs:
 
       - name: Build & Test
         run: |
-          ls -l
           cd liquibase-azure-deps 
           mvn -B clean package
 
