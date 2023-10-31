@@ -13,6 +13,7 @@ import liquibase.configuration.LiquibaseConfiguration;
 import liquibase.configuration.core.DefaultsFileValueProvider;
 import liquibase.exception.CommandLineParsingException;
 import liquibase.exception.CommandValidationException;
+import liquibase.exception.ExitCodeException;
 import liquibase.exception.LiquibaseException;
 import liquibase.integration.IntegrationDetails;
 import liquibase.license.LicenseInfo;
@@ -296,9 +297,12 @@ public class LiquibaseCommandLine {
         } catch (IOException e) {
             Scope.getCurrentScope().getLog(getClass()).warning("Error closing stream: " + e.getMessage(), e);
         }
-        if (exception.getCause() != null && exception.getCause() instanceof CommandFailedException) {
-            CommandFailedException cfe = (CommandFailedException) exception.getCause();
-            return cfe.getExitCode();
+        Throwable exitCodeException = ExceptionUtil.findExceptionInCauseChain(exception, ExitCodeException.class);
+        if (exitCodeException != null) {
+            Integer exitCode = ((ExitCodeException) exitCodeException.getCause()).getExitCode();
+            if (exitCode != null) {
+                return exitCode;
+            }
         }
         return 1;
     }
