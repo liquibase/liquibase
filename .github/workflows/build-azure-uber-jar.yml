@@ -112,7 +112,7 @@ jobs:
           maven-version: ${{ env.MAVEN_VERSION }}
 
       - name: Set version
-        run: mvn versions:set -DnewVersion=master-SNAPSHOT
+        run: mvn versions:set -DnewVersion=${{ inputs.liquibase-version }}
 
       - name: Build & Test
         run: mvn -B clean package
