@@ -29,13 +29,6 @@ jobs:
           repository: liquibase/liquibase-pro
           ref: ${{ inputs.branch }}
           token: ${{ secrets.BOT_TOKEN }}
-
-      - name: Checkout liquibase
-        uses: actions/checkout@v4
-        with:
-          repository: liquibase/liquibase
-          ref: ${{ inputs.branch }}
-          token: ${{ secrets.BOT_TOKEN }}
           
       - name: Set up JDK 17
         uses: actions/setup-java@v3
@@ -118,7 +111,9 @@ jobs:
         run: mvn versions:set -DnewVersion=${{ inputs.liquibase-version }}
 
       - name: Build & Test
-        run: mvn -B "-DnewVersion=${{ inputs.liquibase-version }}" clean package
+        run: |
+          cd liquibase-azure-deps 
+          mvn -B clean package
 
       - name: Archive Modules
         uses: actions/upload-artifact@v3
