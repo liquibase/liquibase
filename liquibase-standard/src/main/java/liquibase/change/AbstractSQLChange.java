@@ -204,10 +204,10 @@ public abstract class AbstractSQLChange extends AbstractChange implements DbmsTa
      */
     @DatabaseChangeProperty(description = "Delimiter to apply to the end of the statement. Defaults to ';', may be set to ''.", exampleValue = "\\nGO")
     public String getEndDelimiter() {
-        if (endDelimiter != null) {
-            return endDelimiter;
-        }
         ChangeSetService service = ChangeSetServiceFactory.getInstance().createChangeSetService();
+        if (endDelimiter != null) {
+            return service.getOverrideDelimiter(endDelimiter);
+        }
         return service.getEndDelimiter(getChangeSet());
     }
 

@@ -1,5 +1,6 @@
 package liquibase.changeset;
 
+import liquibase.change.Change;
 import liquibase.changelog.ChangeSet;
 import liquibase.changelog.DatabaseChangeLog;
 import liquibase.changelog.ModifyChangeSets;
@@ -75,7 +76,7 @@ public interface ChangeSetService extends Plugin {
      *
      * @param  node                       The ParsedNode that was created during load
      * @return ModifyChangeSets           The object which will perform the modifications
-     * @throws ParsedNodeException
+     * @throws ParsedNodeException        Thrown if unable to access values from the node
      *
      */
     ModifyChangeSets createModifyChangeSets(ParsedNode node) throws ParsedNodeException;
@@ -92,13 +93,24 @@ public interface ChangeSetService extends Plugin {
 
     /**
      *
+     * Check for an override for a change-level delimiter
+     *
+     * @param  endDelimiter   The endDelimiter to override
+     * @return String         The override setting
+     *
+     */
+    default String getOverrideDelimiter(String endDelimiter) {
+        return endDelimiter;
+    }
+
+    /**
+     *
      * Default implementation returns null
      *
      * @param   changeSet            Unused
      * @return  null
      *
      */
-    @SuppressWarnings("useless")
     default String getEndDelimiter(ChangeSet changeSet) {
         return null;
     }
