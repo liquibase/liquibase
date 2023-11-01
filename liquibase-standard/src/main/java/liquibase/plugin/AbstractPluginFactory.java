@@ -95,7 +95,9 @@ public abstract class AbstractPluginFactory<T extends Plugin> implements PluginF
     protected synchronized Collection<T> findAllInstances() {
         if (this.allInstances == null) {
             this.allInstances = new ArrayList<>();
+        }
 
+        if (this.allInstances.isEmpty()) {
             ServiceLocator serviceLocator = Scope.getCurrentScope().getServiceLocator();
             this.allInstances.addAll(serviceLocator.findInstances(getPluginClass()));
         }
