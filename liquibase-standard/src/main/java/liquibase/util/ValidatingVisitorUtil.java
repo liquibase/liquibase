@@ -27,7 +27,8 @@ public class ValidatingVisitorUtil {
 
     public static boolean isChecksumIssue(ChangeSet changeSet, RanChangeSet ranChangeSet, DatabaseChangeLog databaseChangeLog, Database database) {
         return ValidatingVisitorUtil.validateMongoDbExtensionIssue(changeSet, ranChangeSet, databaseChangeLog, database) ||
-               ValidatingVisitorUtil.validateAbstractSqlChangeV8ChecksumVariant(changeSet, ranChangeSet);
+               ValidatingVisitorUtil.validateAbstractSqlChangeV8ChecksumVariant(changeSet, ranChangeSet) ||
+               ValidatingVisitorUtil.validateCreateFunctionChangeV8ChecksumVariant(changeSet, ranChangeSet);
     }
 
 
@@ -55,6 +56,22 @@ public class ValidatingVisitorUtil {
                     revertIgnoreOriginalSplitStatementsFlag(changeSet, changes);
                 }
                 return valid;
+            }
+        }
+        return false;
+    }
+
+    private static boolean validateCreateFunctionChangeV8ChecksumVariant(ChangeSet changeSet, RanChangeSet ranChangeSet) {
+        if (ChecksumVersion.V8.lowerOrEqualThan(Scope.getCurrentScope().getChecksumVersion())) {
+            List<Change> changes = changeSet.getChanges().stream()
+                    .filter(c -> c.getClass().getTypeName().equals("com.datical.liquibase.ext.storedlogic.function.change.CreateFunctionChange"))
+                    .collect(Collectors.toList());
+            if (!changes.isEmpty()) {
+                String[] liquibaseVersion = ranChangeSet.getLiquibaseVersion().split("\\.");
+                // body parsing strategy changed on 4.21.0 so we are not able to really validate this v8 changes anymore.
+                //
+                return liquibaseVersion.length == 3 && Integer.parseInt(liquibaseVersion[0]) <= 4
+                        && Integer.parseInt(liquibaseVersion[1]) <= 20;
             }
         }
         return false;
