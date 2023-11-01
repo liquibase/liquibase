@@ -2,10 +2,7 @@ package liquibase.snapshot;
 
 import liquibase.CatalogAndSchema;
 import liquibase.Scope;
-import liquibase.database.Database;
-import liquibase.database.DatabaseConnection;
-import liquibase.database.ObjectQuotingStrategy;
-import liquibase.database.OfflineConnection;
+import liquibase.database.*;
 import liquibase.database.core.PostgresDatabase;
 import liquibase.diff.compare.DatabaseObjectComparatorFactory;
 import liquibase.exception.DatabaseException;
@@ -106,8 +103,9 @@ public class SnapshotGeneratorFactory {
          * SELECT COUNT(*) on that table. If that works, we count that as confirmation of existence.
          */
         // @todo Actually, there may be extreme cases (distorted table statistics etc.) where a COUNT(*) might not be so cheap. Maybe SELECT a dummy constant is the better way?
-        if ((example instanceof Table) && (example.getName().equals(database.getDatabaseChangeLogTableName()) ||
-            example.getName().equals(database.getDatabaseChangeLogLockTableName()))) {
+        LiquibaseTableNamesFactory liquibaseTableNamesFactory = Scope.getCurrentScope().getSingleton(LiquibaseTableNamesFactory.class);
+        List<String> liquibaseTableNames = liquibaseTableNamesFactory.getLiquibaseTableNames(database);
+        if ((example instanceof Table) && (liquibaseTableNames.stream().anyMatch(tableName -> example.getName().equals(tableName)))) {
             try {
                 Scope.getCurrentScope().getSingleton(ExecutorService.class).getExecutor("jdbc", database).queryForInt(
                         new RawSqlStatement("SELECT COUNT(*) FROM " +
