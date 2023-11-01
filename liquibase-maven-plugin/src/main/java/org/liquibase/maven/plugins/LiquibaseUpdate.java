@@ -33,6 +33,15 @@ public class LiquibaseUpdate extends AbstractLiquibaseUpdateMojo {
     @PropertyElement
     protected UpdateSummaryEnum showSummary;
 
+    /**
+     * Flag to control where we show the summary.
+     * Allowed values: 'LOG', 'CONSOLE', OR 'ALL' (default)
+     *
+     * @parameter property="liquibase.showSummaryOutput"
+     */
+    @PropertyElement
+    protected UpdateSummaryOutputEnum showSummaryOutput;
+
     @Override
     protected void doUpdate(Liquibase liquibase) throws LiquibaseException {
         if (dropFirst) {
@@ -60,6 +69,7 @@ public class LiquibaseUpdate extends AbstractLiquibaseUpdateMojo {
     protected Liquibase createLiquibase(Database db) throws MojoExecutionException {
         Liquibase liquibase = super.createLiquibase(db);
         liquibase.setShowSummary(showSummary);
+        liquibase.setShowSummaryOutput(showSummaryOutput);
         return liquibase;
     }
 

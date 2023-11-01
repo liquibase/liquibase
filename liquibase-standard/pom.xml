@@ -346,6 +346,8 @@
                     <services>
                         <param>liquibase.logging.mdc.MdcManager</param>
                         <param>liquibase.logging.mdc.CustomMdcObject</param>
+                        <param>liquibase.report.ShowSummaryGenerator</param>
+                        <param>liquibase.parser.LiquibaseSqlParser</param>
                     </services>
                 </configuration>
                 <executions>
