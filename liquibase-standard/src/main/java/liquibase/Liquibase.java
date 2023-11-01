@@ -152,6 +152,10 @@ public class Liquibase implements AutoCloseable {
      *
      * @see <a href="https://docs.liquibase.com/concepts/changelogs/attributes/contexts.html" target="_top">contexts</a> in documentation
      */
+
+    /**
+     * @deprecated use {@link CommandScope}
+     **/
     @Deprecated
     public void update() throws LiquibaseException {
         this.update(new Contexts());
@@ -163,6 +167,10 @@ public class Liquibase implements AutoCloseable {
      *
      * @see <a href="https://docs.liquibase.com/concepts/changelogs/attributes/contexts.html" target="_top">contexts</a> in documentation
      */
+
+    /**
+     * @deprecated use {@link CommandScope}
+     **/
     @Deprecated
     public void update(String contexts) throws LiquibaseException {
         this.update(new Contexts(contexts));
@@ -174,6 +182,10 @@ public class Liquibase implements AutoCloseable {
      *
      * @see <a href="https://docs.liquibase.com/concepts/changelogs/attributes/contexts.html" target="_top">contexts</a> in documentation
      */
+
+    /**
+     * @deprecated use {@link CommandScope}
+     **/
     @Deprecated
     public void update(Contexts contexts) throws LiquibaseException {
         update(contexts, new LabelExpression());
@@ -188,6 +200,10 @@ public class Liquibase implements AutoCloseable {
      * @see <a href="https://docs.liquibase.com/concepts/changelogs/attributes/contexts.html" target="_top">Liquibase Contexts</a> in the Liquibase documentation
      * @see <a href="https://docs.liquibase.com/concepts/changelogs/attributes/labels.html" target="_top">Liquibase Labels</a> in the Liquibase documentation
      */
+
+    /**
+     * @deprecated use {@link CommandScope}
+     **/
     @Deprecated
     public void update(Contexts contexts, LabelExpression labelExpression) throws LiquibaseException {
         update(contexts, labelExpression, true);
@@ -206,6 +222,10 @@ public class Liquibase implements AutoCloseable {
      * @see <a href="https://docs.liquibase.com/concepts/changelogs/attributes/contexts.html" target="_top">Liquibase Contexts</a>
      * @see <a href="https://docs.liquibase.com/concepts/changelogs/attributes/labels.html" target="_top">Liquibase Labels</a>
      */
+
+    /**
+     * @deprecated use {@link CommandScope}
+     **/
     @Deprecated
     public void update(Contexts contexts, LabelExpression labelExpression, boolean checkLiquibaseTables) throws LiquibaseException {
         runInScope(() -> {
@@ -286,18 +306,22 @@ public class Liquibase implements AutoCloseable {
                 new IgnoreChangeSetFilter());
     }
 
+    @Deprecated
     public void update(String contexts, Writer output) throws LiquibaseException {
         this.update(new Contexts(contexts), output);
     }
 
+    @Deprecated
     public void update(Contexts contexts, Writer output) throws LiquibaseException {
         update(contexts, new LabelExpression(), output);
     }
 
+    @Deprecated
     public void update(Contexts contexts, LabelExpression labelExpression, Writer output) throws LiquibaseException {
         update(contexts, labelExpression, output, true);
     }
 
+    @Deprecated
     public void update(Contexts contexts, LabelExpression labelExpression, Writer output, boolean checkLiquibaseTables)
             throws LiquibaseException {
         runInScope(() -> {
@@ -493,7 +517,8 @@ public class Liquibase implements AutoCloseable {
 
     public void rollback(int changesToRollback, String rollbackScript, Contexts contexts,
                          LabelExpression labelExpression, Writer output) throws LiquibaseException {
-        new CommandScope(RollbackCountSqlCommandStep.COMMAND_NAME)
+        runInScope(() ->
+            new CommandScope(RollbackCountSqlCommandStep.COMMAND_NAME)
                 .addArgumentValue(DbUrlConnectionCommandStep.DATABASE_ARG, Liquibase.this.getDatabase())
                 .addArgumentValue(DatabaseChangelogCommandStep.CHANGELOG_FILE_ARG, changeLogFile)
                 .addArgumentValue(DatabaseChangelogCommandStep.CONTEXTS_ARG, (contexts != null? contexts.toString() : null))
@@ -503,7 +528,8 @@ public class Liquibase implements AutoCloseable {
                 .addArgumentValue(AbstractRollbackCommandStep.ROLLBACK_SCRIPT_ARG, rollbackScript)
                 .addArgumentValue(DatabaseChangelogCommandStep.CHANGELOG_PARAMETERS, changeLogParameters)
                 .setOutput(new WriterOutputStream(output, GlobalConfiguration.OUTPUT_FILE_ENCODING.getCurrentValue()))
-                .execute();
+                .execute()
+        );
     }
     // ---------- End RollbackCountSql Family of methods
 
@@ -535,7 +561,8 @@ public class Liquibase implements AutoCloseable {
      */
     public void rollback(int changesToRollback, String rollbackScript, Contexts contexts,
                          LabelExpression labelExpression) throws LiquibaseException {
-        new CommandScope(RollbackCountCommandStep.COMMAND_NAME)
+        runInScope(() ->
+            new CommandScope(RollbackCountCommandStep.COMMAND_NAME)
                 .addArgumentValue(DbUrlConnectionCommandStep.DATABASE_ARG, Liquibase.this.getDatabase())
                 .addArgumentValue(DatabaseChangelogCommandStep.CHANGELOG_FILE_ARG, changeLogFile)
                 .addArgumentValue(DatabaseChangelogCommandStep.CONTEXTS_ARG, (contexts != null? contexts.toString() : null))
@@ -544,7 +571,8 @@ public class Liquibase implements AutoCloseable {
                 .addArgumentValue(RollbackCountCommandStep.COUNT_ARG, changesToRollback)
                 .addArgumentValue(AbstractRollbackCommandStep.ROLLBACK_SCRIPT_ARG, rollbackScript)
                 .addArgumentValue(DatabaseChangelogCommandStep.CHANGELOG_PARAMETERS, changeLogParameters)
-                .execute();
+                .execute()
+        );
     }
     // ---------- End RollbackCount Family of methods
 
@@ -1230,23 +1258,25 @@ public class Liquibase implements AutoCloseable {
      */
     @Deprecated
     public final CheckSum calculateCheckSum(final String changeSetIdentifier) throws LiquibaseException {
-        CommandResults commandResults = new CommandScope("calculateChecksum")
-                .addArgumentValue(DbUrlConnectionCommandStep.DATABASE_ARG, database)
-                .addArgumentValue(CalculateChecksumCommandStep.CHANGESET_IDENTIFIER_ARG, changeSetIdentifier)
-                .addArgumentValue(CalculateChecksumCommandStep.CHANGELOG_FILE_ARG, this.changeLogFile)
-                .execute();
-        return commandResults.getResult(CalculateChecksumCommandStep.CHECKSUM_RESULT);
+        String changeSetAttributes[] = changeSetIdentifier.split("::");
+        //validate changeSet parameters and return an error or removed/ignore any other '::' occurrence when processing either a path, id or author.
+        return this.calculateCheckSum(changeSetAttributes[0], changeSetAttributes[1], changeSetAttributes[2]);
     }
 
     /**
-     * Calculates the checksum for the values that form a given identifier
-     *
-     * @deprecated Use {link {@link CommandScope(String)}.
+     * Calculate the checksum for a given changeset specified by path, changeset id and author
      */
-    @Deprecated
-    public CheckSum calculateCheckSum(final String filename, final String id, final String author)
+    public CheckSum calculateCheckSum(final String changeSetPath, final String changeSetId, final String changeSetAuthor)
             throws LiquibaseException {
-        return this.calculateCheckSum(String.format("%s::%s::%s", filename, id, author));
+        CommandResults commandResults = new CommandScope("calculateChecksum")
+                .addArgumentValue(DbUrlConnectionCommandStep.DATABASE_ARG, database)
+                .addArgumentValue(CalculateChecksumCommandStep.CHANGESET_PATH_ARG, changeSetPath)
+                .addArgumentValue(CalculateChecksumCommandStep.CHANGESET_ID_ARG, changeSetId)
+                .addArgumentValue(CalculateChecksumCommandStep.CHANGESET_AUTHOR_ARG, changeSetAuthor)
+                .addArgumentValue(CalculateChecksumCommandStep.CHANGESET_IDENTIFIER_ARG, String.format("%s::%s::%s", changeSetPath, changeSetId, changeSetAuthor))
+                .addArgumentValue(CalculateChecksumCommandStep.CHANGELOG_FILE_ARG, this.changeLogFile)
+                .execute();
+        return commandResults.getResult(CalculateChecksumCommandStep.CHECKSUM_RESULT);
     }
 
     @Deprecated
@@ -1298,11 +1328,13 @@ public class Liquibase implements AutoCloseable {
      */
     @Deprecated
     public void validate() throws LiquibaseException {
-        new CommandScope("validate")
+        runInScope(() ->
+            new CommandScope("validate")
                 .addArgumentValue(DbUrlConnectionCommandStep.DATABASE_ARG, database)
                 .addArgumentValue(DatabaseChangelogCommandStep.CHANGELOG_FILE_ARG, changeLogFile)
                 .addArgumentValue(DatabaseChangelogCommandStep.CHANGELOG_PARAMETERS, changeLogParameters)
-                .execute();
+                .execute()
+        );
     }
 
     public void setChangeLogParameter(String key, Object value) {

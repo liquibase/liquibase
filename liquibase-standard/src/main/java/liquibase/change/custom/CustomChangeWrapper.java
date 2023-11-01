@@ -159,19 +159,17 @@ public class CustomChangeWrapper extends AbstractChange {
     @Override
     public SqlStatement[] generateStatements(Database database) {
         SqlStatement[] statements = null;
-        if (shouldExecuteChange(database)) {
-            try {
-                configureCustomChange();
-                if (customChange instanceof CustomSqlChange) {
-                    statements = ((CustomSqlChange) customChange).generateStatements(database);
-                } else if (customChange instanceof CustomTaskChange) {
-                    ((CustomTaskChange) customChange).execute(database);
-                } else {
-                    throw new UnexpectedLiquibaseException(customChange.getClass().getName() + " does not implement " + CustomSqlChange.class.getName() + " or " + CustomTaskChange.class.getName());
-                }
-            } catch (CustomChangeException e) {
-                throw new UnexpectedLiquibaseException(e);
+        try {
+            configureCustomChange();
+            if (customChange instanceof CustomSqlChange) {
+                statements = ((CustomSqlChange) customChange).generateStatements(database);
+            } else if (customChange instanceof CustomTaskChange) {
+                ((CustomTaskChange) customChange).execute(database);
+            } else {
+                throw new UnexpectedLiquibaseException(customChange.getClass().getName() + " does not implement " + CustomSqlChange.class.getName() + " or " + CustomTaskChange.class.getName());
             }
+        } catch (CustomChangeException e) {
+            throw new UnexpectedLiquibaseException(e);
         }
 
         if (statements == null) {
@@ -322,7 +320,7 @@ public class CustomChangeWrapper extends AbstractChange {
             this.setParam(paramName, (String) value);
         }
 
-        CustomChange customChange = null;
+        CustomChange customChange;
         try {
             Boolean osgiPlatform = Scope.getCurrentScope().get(Scope.Attr.osgiPlatform, Boolean.class);
             if (Boolean.TRUE.equals(osgiPlatform)) {

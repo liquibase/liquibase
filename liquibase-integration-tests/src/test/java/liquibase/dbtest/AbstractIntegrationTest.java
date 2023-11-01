@@ -7,8 +7,10 @@ import liquibase.change.core.LoadDataChange;
 import liquibase.changelog.ChangeLogHistoryServiceFactory;
 import liquibase.changelog.ChangeSet;
 import liquibase.changelog.DatabaseChangeLog;
+import liquibase.command.CommandResults;
 import liquibase.command.CommandScope;
 import liquibase.command.core.DropAllCommandStep;
+import liquibase.command.core.SnapshotCommandStep;
 import liquibase.command.core.UpdateCommandStep;
 import liquibase.command.core.helpers.DbUrlConnectionCommandStep;
 import liquibase.database.Database;
@@ -96,6 +98,8 @@ public abstract class AbstractIntegrationTest {
     private final String invalidSqlChangeLog;
     private final String objectQuotingStrategyChangeLog;
     private final String commonChangeLog;
+
+    private final String indexWithAssociatedWithChangeLog;
     private Database database;
     private String defaultSchemaName;
 
@@ -117,6 +121,7 @@ public abstract class AbstractIntegrationTest {
         this.objectQuotingStrategyChangeLog = "changelogs/common/object.quoting.strategy.changelog.xml";
         this.emptyRollbackSqlChangeLog = "changelogs/common/rollbackable.changelog.sql";
         this.pathChangeLog = "changelogs/common/pathChangeLog.xml";
+        this.indexWithAssociatedWithChangeLog = "changelogs/common/index.with.associatedwith.changelog.xml";
         logger = Scope.getCurrentScope().getLog(getClass());
 
         Scope.setScopeManager(new TestScopeManager(Scope.getCurrentScope()));
@@ -640,7 +645,7 @@ public abstract class AbstractIntegrationTest {
         DiffResult diffResult = DiffGeneratorFactory.getInstance().compare(database, database, compareControl);
 
         try {
-            assertTrue("comapring a database with itself should return a result of 'DBs are equal'",
+            assertTrue("comparing a database with itself should return a result of 'DBs are equal'",
                     diffResult.areEqual());
         } catch (AssertionError e) {
             new DiffToReport(diffResult, System.err).print();
@@ -671,7 +676,7 @@ public abstract class AbstractIntegrationTest {
                 compareControl.addSuppressedField(Column.class, "type"); //database returns different nvarchar2 info even though they are the same
             }
             if (database instanceof H2Database) {
-                //original changeset 2659-Create-MyView-with-quotes in the h2 changelog uses QUOTE_ALL_OBJECTS, but generated changesets do not use that attribute so the name comes through as differnt
+                //original changeset 2659-Create-MyView-with-quotes in the h2 changelog uses QUOTE_ALL_OBJECTS, but generated changesets do not use that attribute so the name comes through as different
                 compareControl.addSuppressedField(View.class, "name");
             }
 
@@ -1278,6 +1283,31 @@ public abstract class AbstractIntegrationTest {
         } finally {
             getDatabase().setDatabaseChangeLogTableName(oldDbChangelogTableName);
         }
+    }
+
+    @Test
+    public void verifyIndexIsCreatedWhenAssociatedWithPropertyIsSetAsNone() throws DatabaseException {
+       clearDatabase();
+        try {
+            Database database = getDatabase();
+            CommandScope commandScope = new CommandScope(UpdateCommandStep.COMMAND_NAME);
+            commandScope.addArgumentValue(DbUrlConnectionCommandStep.DATABASE_ARG, database);
+            commandScope.addArgumentValue(UpdateCommandStep.CHANGELOG_FILE_ARG, indexWithAssociatedWithChangeLog);
+            commandScope.execute();
+
+            final CommandScope snapshotScope = new CommandScope("snapshot");
+            snapshotScope.addArgumentValue(DbUrlConnectionCommandStep.DATABASE_ARG, database);
+            snapshotScope.addArgumentValue(SnapshotCommandStep.SNAPSHOT_FORMAT_ARG, "json");
+            CommandResults results = snapshotScope.execute();
+            DatabaseSnapshot snapshot = (DatabaseSnapshot) results.getResult("snapshot");
+            Index index = snapshot.get(new Index("idx_test"));
+            Assert.assertNotNull(index );
+        } catch (Exception e) {
+            Assert.fail("Should not fail. Reason: " + e.getMessage());
+        } finally {
+            clearDatabase();
+        }
+
     }
 
     private ProcessBuilder prepareExternalLiquibaseProcess() {

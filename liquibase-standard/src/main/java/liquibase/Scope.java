@@ -25,6 +25,7 @@ import liquibase.ui.UIService;
 import liquibase.util.CollectionUtil;
 import liquibase.util.SmartMap;
 import liquibase.util.StringUtil;
+import lombok.Getter;
 
 import java.lang.reflect.Constructor;
 import java.nio.charset.Charset;
@@ -70,9 +71,10 @@ public class Scope {
 
     private static ScopeManager scopeManager;
 
-    private Scope parent;
+    private final Scope parent;
     private final SmartMap values = new SmartMap();
-    private String scopeId;
+    @Getter
+    private final String scopeId;
     private static final Map<String, List<MdcObject>> addedMdcEntries = new ConcurrentHashMap<>();
 
     private LiquibaseListener listener;
@@ -138,9 +140,7 @@ public class Scope {
         this.parent = parent;
         scopeId = generateScopeId();
         if (scopeValues != null) {
-            for (Map.Entry<String, Object> entry : scopeValues.entrySet()) {
-                values.put(entry.getKey(), entry.getValue());
-            }
+            values.putAll(scopeValues);
         }
     }
 
