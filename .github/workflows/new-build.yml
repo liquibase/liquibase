@@ -218,6 +218,7 @@ jobs:
             mkdir -p liquibase-dist/target/liquibase-${{ needs.setup.outputs.thisBranchName }}-SNAPSHOT
             (cd liquibase-dist/target/liquibase-${{ needs.setup.outputs.thisBranchName }}-SNAPSHOT && tar -xzf ../liquibase-${{ needs.setup.outputs.thisBranchName }}-SNAPSHOT.tar.gz)
 
+            cp -r liquibase-standard/src/main/resources/liquibase/examples liquibase-dist/target/liquibase-${{ needs.setup.outputs.thisBranchName }}-SNAPSHOT
             ##create zip file from tar content
             (cd liquibase-dist/target/liquibase-${{ needs.setup.outputs.thisBranchName }}-SNAPSHOT && zip -r ../liquibase-${{ needs.setup.outputs.thisBranchName }}-SNAPSHOT.zip *)
             echo "EXAMPLES FOLDER"
@@ -283,6 +284,15 @@ jobs:
           with:
             name: liquibase-artifacts
             path: artifacts/*
+
+        - name: Checkout OSS Repo
+          uses: actions/checkout@v3
+          with:
+            repository: liquibase/liquibase
+
+        - name: Get examples folder
+          run: |
+            mvn clean install -DskipTests
 
         - name: Archive Convenience Zip
           uses: actions/upload-artifact@v3
