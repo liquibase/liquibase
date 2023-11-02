@@ -32,13 +32,13 @@ jobs:
       - run: |
           echo "Creating version ${{ steps.collect-data.outputs.version }} from ${{ steps.collect-data.outputs.branch }} with artifacts from build ${{ steps.collect-data.outputs.runId }} "
           
-  build-azure-uber-jar:
-    needs: [ setup ]
-    uses: liquibase/liquibase/.github/workflows/build-azure-uber-jar.yml@master
-    with:
-      branch: ${{ needs.setup.outputs.branch }}
-      liquibase-version: ${{ needs.setup.outputs.version }}
-    secrets: inherit
+  # build-azure-uber-jar:
+  #   needs: [ setup ]
+  #   uses: liquibase/liquibase/.github/workflows/build-azure-uber-jar.yml@master
+  #   with:
+  #     branch: ${{ needs.setup.outputs.branch }}
+  #     liquibase-version: ${{ needs.setup.outputs.version }}
+  #   secrets: inherit
 
   reversion:
     needs: [ setup, build-azure-uber-jar ]
