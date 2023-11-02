@@ -90,11 +90,11 @@ jobs:
             }
             core.setOutput("branchExistsInBoth", branchExistsInBoth)
           
-#  run-tests:
-#    needs: [setup]
-#    if: needs.setup.outputs.branchExistsInBoth == 'true' && success()
-#    uses: liquibase/liquibase/.github/workflows/run-tests.yml@github-action-DAT-15775
-#    secrets: inherit
+  run-tests:
+    needs: [setup]
+    if: needs.setup.outputs.branchExistsInBoth == 'true' && success()
+    uses: liquibase/liquibase/.github/workflows/run-tests.yml@github-action-DAT-15775
+    secrets: inherit
 
 
   build_publish_branch:
@@ -111,10 +111,10 @@ jobs:
           with:
             ref: ${{ github.event.pull_request.head.sha || github.event.after}}
         # this includes all the tar files included in the previous runs. So in the next step we deploy what was previously build
-#        - name: Download Artifacts for build.yml
-#          uses: actions/download-artifact@v3
-#          with:
-#            name: temp-artifact
+        - name: Download Artifacts for build.yml
+          uses: actions/download-artifact@v3
+          with:
+            name: temp-artifact
 
         ##Cache based on install4j file, since changes to JVM is seen in there. If install4j version changes without changing the file, change the prefix letter before hashFiles to force a new cache
         - name: Install4j Cache
@@ -205,7 +205,6 @@ jobs:
           run: |
             ## save install4j code signing keys
             mkdir -p liquibase-dist/target/keys
-            ls -l
             echo "Saving apple key"
             echo "$INSTALL4J_APPLE_KEY" | base64 -d > liquibase-dist/target/keys/datical_apple.p12
 
@@ -219,8 +218,7 @@ jobs:
             (cd liquibase-dist/target/liquibase-${{ needs.setup.outputs.thisBranchName }}-SNAPSHOT && tar -xzf ../liquibase-${{ needs.setup.outputs.thisBranchName }}-SNAPSHOT.tar.gz)
             
             cp -r liquibase-standard/src/main/resources/liquibase/examples liquibase-dist/target/liquibase-${{ needs.setup.outputs.thisBranchName }}-SNAPSHOT
-            echo "CHECK liquibase-dist/target/liquibase-${{ needs.setup.outputs.thisBranchName }}-SNAPSHOT"
-            ls -l 
+            echo "CHECK liquibase-dist/target/liquibase-${{ needs.setup.outputs.thisBranchName }}-SNAPSHOT" 
             ##create zip file from tar content
             (cd liquibase-dist/target/liquibase-${{ needs.setup.outputs.thisBranchName }}-SNAPSHOT && zip -r ../liquibase-${{ needs.setup.outputs.thisBranchName }}-SNAPSHOT.zip *)
             echo "EXAMPLES FOLDER"
@@ -260,7 +258,6 @@ jobs:
             echo "Javadocs not available for liquibase-commercial" > /tmp/readme.javadocs.txt
             (cd /tmp && jar cf liquibase-commercial-${{ needs.setup.outputs.thisBranchName }}-SNAPSHOT-javadoc.jar readme.javadocs.txt)
 
-            ls -R /Users/runner/.m2/repository/org/liquibase/liquibase-commercial
 
             commercialJarM2Location=/Users/runner/.m2/repository/org/liquibase/liquibase-commercial/${{ needs.setup.outputs.thisBranchName }}-SNAPSHOT/liquibase-commercial-${{ needs.setup.outputs.thisBranchName }}-SNAPSHOT.jar
             cp $commercialJarM2Location artifacts
@@ -271,7 +268,6 @@ jobs:
 
             ##prepare branch-named convenience artifacts directories
             mkdir artifacts-named
-            ls -l
             cp liquibase-dist/target/liquibase-${{ needs.setup.outputs.thisBranchName }}-SNAPSHOT.tar.gz artifacts-named/liquibase-${{ needs.setup.outputs.thisBranchName }}.tar.gz
             cp liquibase-core/target/liquibase-core-0-SNAPSHOT.jar artifacts-named/liquibase-core-${{ needs.setup.outputs.thisBranchName }}.jar
             cp liquibase-maven-plugin/target/liquibase-maven-plugin-0-SNAPSHOT.jar artifacts-named/liquibase-maven-plugin-${{ needs.setup.outputs.thisBranchName }}.jar
@@ -291,7 +287,7 @@ jobs:
           uses: actions/upload-artifact@v3
           with:
             name: liquibase-zip-${{ needs.setup.outputs.thisBranchName }}
-            path: liquibase-dist/target/liquibase-${{ needs.setup.outputs.thisBranchName }}-SNAPSHOT/*
+            path: liquibase-dist/target/liquibase-${{ needs.setup.outputs.thisBranchName }}-SNAPSHOT
 
 
         # Publish <commitsha>-SNAPSHOT version to GPM
