@@ -630,6 +630,10 @@ Long Description: ${commandDefinition.getLongDescription() ?: "NOT SET"}
                     continue
                 }
 
+                if (expectedOutputCheck instanceof GString) {
+                    expectedOutputCheck = expectedOutputCheck.toString()
+                }
+
                 if (expectedOutputCheck instanceof String) {
                     if (!fullOutput.replaceAll(/\s+/," ")
                             .contains(StringUtil.standardizeLineEndings(StringUtil.trimToEmpty(expectedOutputCheck)).replaceAll(/\s+/," "))) {
