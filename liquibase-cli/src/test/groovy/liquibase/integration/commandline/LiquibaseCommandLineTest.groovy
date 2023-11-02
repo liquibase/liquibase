@@ -420,6 +420,12 @@ Global Options
                                supportPropertyEscaping', environment variable:
                                'LIQUIBASE_SUPPORT_PROPERTY_ESCAPING')
 
+      --ui-service=PARAM     Changes the default UI Service Logger used by
+                               Liquibase. Options are CONSOLE or LOGGER.
+                             DEFAULT: CONSOLE
+                             (defaults file: 'liquibase.uiService', environment
+                               variable: 'LIQUIBASE_UI_SERVICE')
+
       --use-procedure-schema=PARAM
                              If set to true (default value), createProcedure
                                tags with a set schemaName will modify the
