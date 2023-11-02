@@ -855,7 +855,7 @@ public class DiffToChangeLog {
     }
 
     private boolean isContainedInRunOnChangeTypes(final Change change) {
-        return Arrays.asList(getChangeSetRunOnChangeTypes()).contains(change.getSerializedObjectName());
+        return getChangeSetRunOnChangeTypes() != null && Arrays.asList(getChangeSetRunOnChangeTypes()).contains(change.getSerializedObjectName());
     }
 
     public void setChangeReplaceIfExistsTypes(final String[] replaceIfExistsTypes) {
