@@ -180,7 +180,7 @@ public class GlobalConfiguration implements AutoloadedConfigurations {
                 .build();
 
         INCLUDE_RELATIONS_FOR_COMPUTED_COLUMNS = builder.define("includeRelationsForComputedColumns", Boolean.class)
-                .setDescription("If true, the parent relationship for computed columns is preserved in snapshot-dependent commands: snapshot, diff, diff-changelog, generate-changelog")
+                .setDescription("If true, the parent relationship for computed columns is preserved in snapshot-dependent commands: snapshot and diff")
                 .setValueHandler(ValueHandlerUtil::booleanValueHandler)
                 .setDefaultValue(false)
                 .build();
