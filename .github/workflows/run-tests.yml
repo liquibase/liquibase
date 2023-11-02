@@ -166,6 +166,11 @@ jobs:
         run: |
           mvn -B "-Dbuild.repository.owner=liquibase" "-Dbuild.repository.name=liquibase" "-Dbuild.branch=${{ needs.setup.outputs.thisBranchName }}" "-Dbuild.number=${{ github.run_number }}" "-Dbuild.commit=${{ needs.setup.outputs.latestMergeSha }}" "-DtrimStackTrace=false" -pl '!liquibase-cdi-jakarta' clean test package surefire-report:report 
 
+      - name: GET INFO
+        run: |
+          echo "GET INFO"
+          ls 
+
       - name: Build & Test Java non-jdk-8
         if: ${{ matrix.java != 8}}
         run: |
