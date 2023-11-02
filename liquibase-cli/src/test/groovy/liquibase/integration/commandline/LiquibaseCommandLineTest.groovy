@@ -212,7 +212,6 @@ Global Options
                              If true, the parent relationship for computed
                                columns is preserved in snapshot-dependent
                                commands: snapshot and diff
-                               generate-changelog
                              DEFAULT: false
                              (defaults file: 'liquibase.
                                includeRelationsForComputedColumns', environment
