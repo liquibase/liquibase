@@ -220,6 +220,7 @@ jobs:
 
             ##create zip file from tar content
             (cd liquibase-dist/target/liquibase-${{ needs.setup.outputs.thisBranchName }}-SNAPSHOT && zip -r ../liquibase-${{ needs.setup.outputs.thisBranchName }}-SNAPSHOT.zip *)
+            echo "EXAMPLES FOLDER"
             ls liquibase-dist/target/liquibase-${{ needs.setup.outputs.thisBranchName }}-SNAPSHOT
 
             ##create installer - disabled here but run as nightly job and as part of release workflow
@@ -229,14 +230,12 @@ jobs:
             brew install tree
 
             mkdir -p artifacts
-            ls
-            tree
             cp liquibase-dist/target/liquibase-${{ needs.setup.outputs.thisBranchName }}-SNAPSHOT.tar.gz artifacts
             cp liquibase-dist/target/liquibase-${{ needs.setup.outputs.thisBranchName }}-SNAPSHOT.zip artifacts
             cp liquibase-core/target/liquibase-core-0-SNAPSHOT.jar artifacts/liquibase-core-0-SNAPSHOT.jar
             cp liquibase-core/target/liquibase-core-0-SNAPSHOT-sources.jar artifacts/liquibase-core-0-SNAPSHOT-sources.jar
             cp target/liquibase-0-SNAPSHOT-javadoc.jar artifacts/liquibase-core-0-SNAPSHOT-javadoc.jar
-
+            
             ##create installer - disabled here but run as nightly job and as part of release workflow
             #cp liquibase-dist/target/liquibase-*-installer-* artifacts
 
