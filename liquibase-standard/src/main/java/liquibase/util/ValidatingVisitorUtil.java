@@ -11,7 +11,6 @@ import liquibase.change.core.DropIndexChange;
 import liquibase.changelog.*;
 import liquibase.database.Database;
 import liquibase.exception.DatabaseException;
-import liquibase.exception.LiquibaseException;
 import liquibase.exception.UnexpectedLiquibaseException;
 
 import java.lang.reflect.InvocationTargetException;
@@ -63,6 +62,12 @@ public class ValidatingVisitorUtil {
         return false;
     }
 
+    /**
+     * CreateFunctionChange checksum had the calculated value changed for Liquibase versions 4.21.X
+     * due to incorrect annotations being added to CreateProcedureChange .
+     * This method validates the v8 checksum using the alternative algorithm as a way to allow users to upgrade to
+     * checksums v9 without facing any errors or unexpected behaviours.
+     */
     private static boolean validateCreateFunctionChangeV8ChecksumVariant(ChangeSet changeSet, RanChangeSet ranChangeSet) {
         if (ChecksumVersion.V8.lowerOrEqualThan(Scope.getCurrentScope().getChecksumVersion())) {
             List<Change> changes = changeSet.getChanges().stream()
