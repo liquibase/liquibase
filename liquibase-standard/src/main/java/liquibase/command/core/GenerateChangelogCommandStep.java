@@ -81,7 +81,7 @@ public class GenerateChangelogCommandStep extends AbstractCommandStep {
         final String replaceIfExistsTypeNames = supportedReplaceIfExistsTypes().collect(Collectors.joining(", "));
         REPLACEIFEXISTS_TYPES_ARG = builder.argument("replaceIfExistsTypes", String.class)
                 .defaultValue("none")
-                .description(String.format("Sets replaceIfExists=\"true\" for changes of these types (supported types: createView, createProcedure)", replaceIfExistsTypeNames)).build();
+                .description(String.format("Sets replaceIfExists=\"true\" for changes of these types (supported types: %s)", replaceIfExistsTypeNames)).build();
 
         // this happens because the command line asks for "url", but in fact uses it as "referenceUrl"
         REFERENCE_URL_ARG = builder.argument("referenceUrl", String.class).hidden().build();
