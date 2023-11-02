@@ -111,10 +111,10 @@ jobs:
           with:
             ref: ${{ github.event.pull_request.head.sha || github.event.after}}
         # this includes all the tar files included in the previous runs. So in the next step we deploy what was previously build
-#        - name: Download Artifacts for build.yml
-#          uses: actions/download-artifact@v3
-#          with:
-#            name: temp-artifact
+        - name: Download Artifacts for build.yml
+          uses: actions/download-artifact@v3
+          with:
+            name: temp-artifact
 
         ##Cache based on install4j file, since changes to JVM is seen in there. If install4j version changes without changing the file, change the prefix letter before hashFiles to force a new cache
         - name: Install4j Cache
@@ -212,14 +212,15 @@ jobs:
             echo "Saving windows key"
             echo "$INSTALL4J_WINDOWS_KEY" | base64 -d > liquibase-dist/target/keys/datical_windows.pfx
             # we are packaging and deploying liquibase tar which includes liquibase-commercial
-            mvn -B -pl liquibase-dist -P liquibase-commercial source:jar package "-Dliquibase-pro.version=${{ needs.setup.outputs.thisBranchName }}-SNAPSHOT" "-Dbuild.repository.owner=liquibase" "-Dbuild.repository.name=liquibase" "-Dbuild.branch=${{ needs.setup.outputs.thisBranchName }}" "-Dbuild.number=${{ github.run_number }}" "-Dbuild.commit=${{ needs.setup.outputs.latestMergeSha }}-SNAPSHOT" "-Dbuild.timestamp=${{ needs.setup.outputs.timeStamp }}"
+            mvn -B -pl liquibase-dist -P liquibase-commercial source:jar package -DskipTests"-Dliquibase-pro.version=${{ needs.setup.outputs.thisBranchName }}-SNAPSHOT" "-Dbuild.repository.owner=liquibase" "-Dbuild.repository.name=liquibase" "-Dbuild.branch=${{ needs.setup.outputs.thisBranchName }}" "-Dbuild.number=${{ github.run_number }}" "-Dbuild.commit=${{ needs.setup.outputs.latestMergeSha }}-SNAPSHOT" "-Dbuild.timestamp=${{ needs.setup.outputs.timeStamp }}"
 
             ## extract tar content for other artifacts
             mkdir -p liquibase-dist/target/liquibase-${{ needs.setup.outputs.thisBranchName }}-SNAPSHOT
             (cd liquibase-dist/target/liquibase-${{ needs.setup.outputs.thisBranchName }}-SNAPSHOT && tar -xzf ../liquibase-${{ needs.setup.outputs.thisBranchName }}-SNAPSHOT.tar.gz)
             
-            ls -lR
-            #cp -r liquibase-standard/src/main/resources/liquibase/examples liquibase-dist/target/liquibase-${{ needs.setup.outputs.thisBranchName }}-SNAPSHOT
+            cp -r liquibase-standard/src/main/resources/liquibase/examples liquibase-dist/target/liquibase-${{ needs.setup.outputs.thisBranchName }}-SNAPSHOT
+            echo "CHECK liquibase-dist/target/liquibase-${{ needs.setup.outputs.thisBranchName }}-SNAPSHOT"
+            ls -l 
             ##create zip file from tar content
             (cd liquibase-dist/target/liquibase-${{ needs.setup.outputs.thisBranchName }}-SNAPSHOT && zip -r ../liquibase-${{ needs.setup.outputs.thisBranchName }}-SNAPSHOT.zip *)
             echo "EXAMPLES FOLDER"
@@ -286,20 +287,12 @@ jobs:
             name: liquibase-artifacts
             path: artifacts/*
 
-        - name: Checkout OSS Repo
-          uses: actions/checkout@v3
-          with:
-            repository: liquibase/liquibase
-
-        - name: Get examples folder
-          run: |
-            mvn clean install -DskipTests
-
         - name: Archive Convenience Zip
           uses: actions/upload-artifact@v3
           with:
             name: liquibase-zip-${{ needs.setup.outputs.thisBranchName }}
             path: liquibase-dist/target/liquibase-${{ needs.setup.outputs.thisBranchName }}-SNAPSHOT/*
+
 
         # Publish <commitsha>-SNAPSHOT version to GPM
         - name: Version Artifact
