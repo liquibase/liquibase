@@ -41,7 +41,7 @@ jobs:
   #   secrets: inherit
 
   reversion:
-    needs: [ setup, build-azure-uber-jar ]
+    needs: [ setup ]
     name: Re-version artifacts ${{ needs.setup.outputs.version }}
     runs-on: ubuntu-22.04
     steps:
