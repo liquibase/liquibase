@@ -11,8 +11,10 @@ import liquibase.change.core.DropIndexChange;
 import liquibase.changelog.*;
 import liquibase.database.Database;
 import liquibase.exception.DatabaseException;
+import liquibase.exception.LiquibaseException;
 import liquibase.exception.UnexpectedLiquibaseException;
 
+import java.lang.reflect.InvocationTargetException;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -66,15 +68,42 @@ public class ValidatingVisitorUtil {
             List<Change> changes = changeSet.getChanges().stream()
                     .filter(c -> c.getClass().getTypeName().equals("com.datical.liquibase.ext.storedlogic.function.change.CreateFunctionChange"))
                     .collect(Collectors.toList());
-            if (!changes.isEmpty()) {
-                String[] liquibaseVersion = ranChangeSet.getLiquibaseVersion().split("\\.");
-                // body parsing strategy changed on 4.21.0 so we are not able to really validate this v8 changes anymore.
-                //
-                return liquibaseVersion.length == 3 && Integer.parseInt(liquibaseVersion[0]) <= 4
-                        && Integer.parseInt(liquibaseVersion[1]) <= 20;
+            if (!changes.isEmpty() && checkLiquibaseVersionIs(ranChangeSet.getLiquibaseVersion(), 4, 21)) {
+                // packageText was not used when calculating a 4.21.x checksum as it was before
+                setUp421xChecksumFlagForCreateFunctionChange(changes, true);
+                changeSet.clearCheckSum();
+                boolean valid = changeSet.isCheckSumValid(ranChangeSet.getLastCheckSum());
+                if (!valid) {
+                    setUp421xChecksumFlagForCreateFunctionChange(changes, false);
+                }
+                return valid;
             }
         }
         return false;
+    }
+
+    private static boolean checkLiquibaseVersionIs(String version, int major, int minor) {
+        String[] liquibaseVersion = version.split("\\.");
+        try {
+            return (liquibaseVersion.length == 3 && Integer.parseInt(liquibaseVersion[0]) == major && Integer.parseInt(liquibaseVersion[1]) == minor);
+        } catch (NumberFormatException ne) { //we don't have numbers were we expected them to be
+            return false;
+        }
+    }
+
+    /**
+     * AS we don't have core here, we use reflection to call this method that changes the checksum behavior for this specific class.
+     */
+    private static void setUp421xChecksumFlagForCreateFunctionChange(List<Change> changes, boolean set) {
+        changes.forEach(change -> {
+            try {
+                change.getClass().getMethod("setUseChecksumV8ForLiquibase421x", boolean.class).invoke(change, set);
+            } catch (IllegalAccessException | InvocationTargetException  | NoSuchMethodException e) {
+                Scope.getCurrentScope().getLog(ValidatingVisitorUtil.class).severe("Commercial jar version doesn't provide " +
+                        "method setUseChecksumV8ForLiquibase421x method for CreateFunctionChange. " +
+                        "Make sure that you are using a commercial jar version compatible with this core version.", e);
+            }
+        });
     }
 
     /**
