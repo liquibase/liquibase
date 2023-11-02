@@ -867,7 +867,7 @@ public class DiffToChangeLog {
     }
 
     private boolean isContainedInReplaceIfExistsTypes(final Change change) {
-        return Arrays.asList(getChangeReplaceIfExistsTypes()).contains(change.getSerializedObjectName());
+        return getChangeReplaceIfExistsTypes() != null && Arrays.asList(getChangeReplaceIfExistsTypes()).contains(change.getSerializedObjectName());
     }
 
     public void setIdRoot(String idRoot) {
