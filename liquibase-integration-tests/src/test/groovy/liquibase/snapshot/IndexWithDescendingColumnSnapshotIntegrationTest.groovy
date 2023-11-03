@@ -71,7 +71,7 @@ class IndexWithDescendingColumnSnapshotIntegrationTest extends Specification {
         Map<String, Object> scopeValues = new HashMap<>()
         def resourceAccessor = new SearchPathResourceAccessor(".", Scope.getCurrentScope().getResourceAccessor())
         scopeValues.put(Scope.Attr.resourceAccessor.name(), resourceAccessor)
-        scopeValues.put(GlobalConfiguration.SHOULD_SNAPSHOT_RELATION_FOR_CALCULATED_COLUMNS.getKey(), snapshotRelation)
+        scopeValues.put(GlobalConfiguration.INCLUDE_RELATIONS_FOR_COMPUTED_COLUMNS.getKey(), snapshotRelation)
         def diffResults
         DatabaseSnapshot snapshot
         OutputStream outputStream
