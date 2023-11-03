@@ -191,6 +191,9 @@ class DataTypeFactoryTest extends Specification {
         "[varchar](255) COLLATE Latin1_General_BIN"    | new MSSQLDatabase()    | "varchar(255) COLLATE Latin1_General_BIN"      | VarcharType   | false
         "varchar(MAX) COLLATE Latin1_General_BIN"      | new MSSQLDatabase()    | "varchar(MAX) COLLATE Latin1_General_BIN"      | VarcharType   | false
         "[varchar](MAX) COLLATE Latin1_General_BIN"    | new MSSQLDatabase()    | "varchar(MAX) COLLATE Latin1_General_BIN"      | VarcharType   | false
+        "VARCHAR(20 CHAR)"                             | new MSSQLDatabase()    | "varchar(20)"                                  | VarcharType   | false
+        "varchar(20 char)"                             | new MSSQLDatabase()    | "varchar(20)"                                  | VarcharType   | false
+        "CHAR(20 CHAR)"                                | new MSSQLDatabase()    | "char(20)"                                     | CharType      | false
         "INT"                                          | new MySQLDatabase()    | "INT"                                          | IntType       | false
         "INT UNSIGNED"                                 | new MySQLDatabase()    | "INT UNSIGNED"                                 | IntType       | false
         "INT(11) UNSIGNED"                             | new MySQLDatabase()    | "INT UNSIGNED"                                 | IntType       | false
@@ -265,6 +268,11 @@ class DataTypeFactoryTest extends Specification {
         "INT(20)"                                      | new SybaseDatabase()   | "INT"                                          | IntType       | false
         "SMALLINT(20)"                                 | new SybaseDatabase()   | "SMALLINT"                                     | SmallIntType  | false
         "TINYINT(20)"                                  | new SybaseDatabase()   | "TINYINT"                                      | TinyIntType   | false
+        "long binary"                                  | new SybaseDatabase()   | "IMAGE"                                        | BlobType      | false
+        "long varbinary"                               | new SybaseDatabase()   | "IMAGE"                                        | BlobType      | false
+        "long varchar"                                 | new SybaseDatabase()   | "TEXT"                                         | ClobType      | false
+        "long nvarchar"                                | new SybaseDatabase()   | "TEXT"                                         | ClobType      | false
+        "character varying"                            | new SybaseDatabase()   | "VARCHAR"                                      | VarcharType   | false
     }
 
     @Unroll("#featureName: #object for #database")

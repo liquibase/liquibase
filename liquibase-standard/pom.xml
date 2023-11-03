@@ -11,6 +11,7 @@
 
     <properties>
         <maven.deploy.skip>true</maven.deploy.skip>
+        <sonar.coverage.jacoco.xmlReportPaths>../target/jacoco.xml</sonar.coverage.jacoco.xmlReportPaths>
     </properties>
 
     <artifactId>liquibase-standard</artifactId>
@@ -123,13 +124,14 @@
         <dependency>
             <groupId>org.junit.jupiter</groupId>
             <artifactId>junit-jupiter</artifactId>
+            <version>5.10.0</version>
             <scope>test</scope>
         </dependency>
 
         <dependency>
             <groupId>com.opencsv</groupId>
             <artifactId>opencsv</artifactId>
-            <version>5.7.1</version>
+            <version>5.8</version>
             <exclusions>
                 <exclusion>
                     <groupId>commons-beanutils</groupId>
@@ -160,7 +162,7 @@
         <dependency>
             <groupId>org.projectlombok</groupId>
             <artifactId>lombok</artifactId>
-            <version>1.18.28</version>
+            <version>1.18.30</version>
             <scope>provided</scope>
         </dependency>
     </dependencies>
@@ -344,6 +346,8 @@
                     <services>
                         <param>liquibase.logging.mdc.MdcManager</param>
                         <param>liquibase.logging.mdc.CustomMdcObject</param>
+                        <param>liquibase.report.ShowSummaryGenerator</param>
+                        <param>liquibase.parser.LiquibaseSqlParser</param>
                     </services>
                 </configuration>
                 <executions>

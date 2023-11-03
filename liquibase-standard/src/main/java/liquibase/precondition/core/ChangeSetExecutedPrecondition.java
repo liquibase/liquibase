@@ -60,7 +60,7 @@ public class ChangeSetExecutedPrecondition extends AbstractPrecondition {
     @Override
     public void check(Database database, DatabaseChangeLog changeLog, ChangeSet changeSet, ChangeExecListener changeExecListener)
             throws PreconditionFailedException, PreconditionErrorException {
-        ObjectQuotingStrategy objectQuotingStrategy = null;
+        ObjectQuotingStrategy objectQuotingStrategy;
         if (changeSet == null) {
             objectQuotingStrategy = ObjectQuotingStrategy.LEGACY;
         } else {

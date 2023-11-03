@@ -26,7 +26,7 @@
     
     <changeSet id="2" author="nvoxland">
         <addColumn tableName="magazine">
-            <column name="sku" type="varchar(50)" defaultValue="UNKNOWN">
+            <column name="sku" type="varchar(50)">
                 <constraints nullable="true"/>
             </column>
         </addColumn>

@@ -4,16 +4,19 @@
     xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
 
+    <artifactId>liquibase-integration-tests</artifactId>
+
     <parent>
         <groupId>org.liquibase</groupId>
         <artifactId>liquibase</artifactId>
         <version>0-SNAPSHOT</version>
+        <relativePath>../pom.xml</relativePath>
     </parent>
-
-    <artifactId>liquibase-integration-tests</artifactId>
 
     <properties>
         <maven.deploy.skip>false</maven.deploy.skip>
+        <sonar.coverage.jacoco.xmlReportPaths>../target/jacoco.xml</sonar.coverage.jacoco.xmlReportPaths>
+        <sonar.skip>true</sonar.skip>
     </properties>
 
     <dependencies>
@@ -35,7 +38,7 @@
         <dependency>
             <groupId>info.picocli</groupId>
             <artifactId>picocli</artifactId>
-            <version>4.7.4</version>
+            <version>4.7.5</version>
             <scope>test</scope>
         </dependency>
 
@@ -48,6 +51,12 @@
     </dependencies>
 
     <build>
+        <plugins>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-surefire-plugin</artifactId>
+                </plugin>
+        </plugins>
         <testResources>
             <testResource>
                 <directory>src/test/resources</directory>

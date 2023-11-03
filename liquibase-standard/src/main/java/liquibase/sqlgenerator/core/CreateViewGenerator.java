@@ -2,17 +2,19 @@ package liquibase.sqlgenerator.core;
 
 import liquibase.CatalogAndSchema;
 import liquibase.GlobalConfiguration;
+import liquibase.Scope;
 import liquibase.database.Database;
 import liquibase.database.core.*;
 import liquibase.exception.DatabaseException;
 import liquibase.exception.ValidationErrors;
+import liquibase.parser.LiquibaseSqlParser;
+import liquibase.parser.SqlParserFactory;
 import liquibase.sql.Sql;
 import liquibase.sql.UnparsedSql;
 import liquibase.sqlgenerator.SqlGeneratorChain;
 import liquibase.statement.core.CreateViewStatement;
 import liquibase.structure.core.Relation;
 import liquibase.structure.core.View;
-import liquibase.util.SqlParser;
 import liquibase.util.StringClauses;
 
 import java.util.ArrayList;
@@ -41,7 +43,7 @@ public class CreateViewGenerator extends AbstractSqlGenerator<CreateViewStatemen
                 validationErrors.addError("'replaceIfExists' is not allowed on DB2 version < 10.5");
             }
             else {
-                validationErrors.checkDisallowedField("replaceIfExists", createViewStatement.isReplaceIfExists(), database, Db2zDatabase.class, DerbyDatabase.class, SybaseASADatabase.class, InformixDatabase.class);
+                validationErrors.checkDisallowedField("replaceIfExists", createViewStatement.isReplaceIfExists(), database, Db2zDatabase.class, DerbyDatabase.class, InformixDatabase.class);
             }
         }
 
@@ -62,7 +64,9 @@ public class CreateViewGenerator extends AbstractSqlGenerator<CreateViewStatemen
             sql.add(new UnparsedSql("SET TEMPORARY OPTION force_view_creation='ON'"));
         }
 
-        StringClauses viewDefinition = SqlParser.parse(statement.getSelectQuery(), true, true);
+        SqlParserFactory sqlParserFactory = Scope.getCurrentScope().getSingleton(SqlParserFactory.class);
+        LiquibaseSqlParser sqlParser = sqlParserFactory.getSqlParser();
+        StringClauses viewDefinition = sqlParser.parse(statement.getSelectQuery(), true, true);
 
         if (!statement.isFullDefinition()) {
             viewDefinition
@@ -80,23 +84,26 @@ public class CreateViewGenerator extends AbstractSqlGenerator<CreateViewStatemen
         if (statement.isReplaceIfExists()) {
             if (database instanceof FirebirdDatabase) {
                 viewDefinition.replace("CREATE", "RECREATE");
-            } else if ((database instanceof SybaseASADatabase) && statement.getSelectQuery().toLowerCase().startsWith
-                ("create view")) {
-                // Sybase ASA saves view definitions with header.
             } else if (database instanceof MSSQLDatabase) {
-                //from http://stackoverflow.com/questions/163246/sql-server-equivalent-to-oracles-create-or-replace-view
-                CatalogAndSchema schema = new CatalogAndSchema(
-                    statement.getCatalogName(), statement.getSchemaName()).customize(database);
-                sql.add(new UnparsedSql(
-                    "IF NOT EXISTS (SELECT * FROM sys.views WHERE object_id = OBJECT_ID(N'["
-                        + schema.getSchemaName()
-                        + "].[" + statement.getViewName()
-                        + "]'))\n"
-                        + "    EXEC sp_executesql N'CREATE VIEW [" + schema.getSchemaName() + "].["
-                        + statement.getViewName()
-                        + "] AS SELECT " +
-                        "''This is a code stub which will be replaced by an Alter Statement'' as [code_stub]'"));
-                viewDefinition.replace("CREATE", "ALTER");
+                //
+                // If we find CREATE OR ALTER then we will let the SQL itself take
+                // care of the existence of the view
+                //
+                if (!viewDefinitionContains(viewDefinition,  "CREATE OR ALTER")) {
+                    //from http://stackoverflow.com/questions/163246/sql-server-equivalent-to-oracles-create-or-replace-view
+                    CatalogAndSchema schema = new CatalogAndSchema(
+                            statement.getCatalogName(), statement.getSchemaName()).customize(database);
+                    sql.add(new UnparsedSql(
+                            "IF NOT EXISTS (SELECT * FROM sys.views WHERE object_id = OBJECT_ID(N'["
+                                    + schema.getSchemaName()
+                                    + "].[" + statement.getViewName()
+                                    + "]'))\n"
+                                    + "    EXEC sp_executesql N'CREATE VIEW [" + schema.getSchemaName() + "].["
+                                    + statement.getViewName()
+                                    + "] AS SELECT " +
+                                    "''This is a code stub which will be replaced by an Alter Statement'' as [code_stub]'"));
+                    viewDefinition.replace("CREATE", "ALTER");
+                }
             } else if (shouldPrependDropViewStatement(database)) {
                 sql.add(new UnparsedSql(
                     "DROP VIEW IF EXISTS " + database.escapeViewName(statement.getCatalogName(),
@@ -114,6 +121,17 @@ public class CreateViewGenerator extends AbstractSqlGenerator<CreateViewStatemen
         }
         sql.add(new UnparsedSql(viewDefinition.toString(), getAffectedView(statement)));
         return sql.toArray(EMPTY_SQL);
+    }
+
+    //
+    // Check to see if the collection of clauses are in the view definition
+    //
+    private boolean viewDefinitionContains(StringClauses viewDefinition, String phrase) {
+        return viewDefinition.toString()
+                             .toUpperCase()
+                             .replace('\n',' ')
+                             .replaceAll("\\s{2,}"," ")
+                             .contains(phrase.toUpperCase());
     }
 
     private boolean shouldPrependDropViewStatement(Database database) {

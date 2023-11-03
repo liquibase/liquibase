@@ -7,6 +7,7 @@ import liquibase.changelog.*;
 import liquibase.changelog.filter.*;
 import liquibase.changelog.visitor.ChangeExecListener;
 import liquibase.changelog.visitor.ChangeSetVisitor;
+import liquibase.changelog.visitor.DefaultChangeExecListener;
 import liquibase.changelog.visitor.RollbackVisitor;
 import liquibase.command.*;
 import liquibase.command.core.helpers.DatabaseChangelogCommandStep;
@@ -20,6 +21,7 @@ import liquibase.logging.mdc.MdcKey;
 import liquibase.logging.mdc.MdcObject;
 import liquibase.logging.mdc.MdcValue;
 import liquibase.logging.mdc.customobjects.ChangesetsRolledback;
+import liquibase.report.RollbackReportParameters;
 import liquibase.resource.Resource;
 import liquibase.util.StreamUtil;
 import liquibase.util.StringUtil;
@@ -50,8 +52,16 @@ public abstract class AbstractRollbackCommandStep extends AbstractCommandStep {
 
     protected void doRollback(CommandResultsBuilder resultsBuilder, List<RanChangeSet> ranChangeSetList,
                               ChangeSetFilter changeSetFilter) throws Exception {
+        doRollback(resultsBuilder, ranChangeSetList, changeSetFilter, null);
+    }
+
+    protected void doRollback(CommandResultsBuilder resultsBuilder, List<RanChangeSet> ranChangeSetList,
+                              ChangeSetFilter changeSetFilter, RollbackReportParameters rollbackReportParameters) throws Exception {
         CommandScope commandScope = resultsBuilder.getCommandScope();
         String changelogFile = commandScope.getArgumentValue(DatabaseChangelogCommandStep.CHANGELOG_FILE_ARG);
+        if (rollbackReportParameters != null) {
+            rollbackReportParameters.setChangelogArgValue(changelogFile);
+        }
         String rollbackScript = commandScope.getArgumentValue(ROLLBACK_SCRIPT_ARG);
         Scope.getCurrentScope().addMdcValue(MdcKey.ROLLBACK_SCRIPT, rollbackScript);
 
@@ -70,39 +80,62 @@ public abstract class AbstractRollbackCommandStep extends AbstractCommandStep {
                     changeSetFilter);
 
             doRollback(database, changelogFile, rollbackScript, logIterator, changeLogParameters, databaseChangeLog,
-                    (ChangeExecListener) commandScope.getDependency(ChangeExecListener.class));
+                    (ChangeExecListener) commandScope.getDependency(ChangeExecListener.class), rollbackReportParameters);
         }
         catch (Throwable t) {
-            handleRollbackException(defineCommandNames()[0][0]);
+            handleRollbackException(defineCommandNames()[0][0], rollbackReportParameters);
             throw t;
         } finally {
             Scope.getCurrentScope().getMdcManager().remove(MdcKey.CHANGESETS_ROLLED_BACK);
         }
     }
 
+
     /**
      * Actually perform the rollback operation. Determining which changesets to roll back is the responsibility of the
      * logIterator.
      */
-    public static void doRollback(Database database, String changelogFile, String rollbackScript, ChangeLogIterator logIterator,ChangeLogParameters changeLogParameters,
+    public static void doRollback(Database database, String changelogFile, String rollbackScript, ChangeLogIterator logIterator, ChangeLogParameters changeLogParameters,
                                   DatabaseChangeLog databaseChangeLog, ChangeExecListener changeExecListener) throws Exception {
-        if (rollbackScript == null) {
-            List<ChangesetsRolledback.ChangeSet> processedChangesets = new ArrayList<>();
-            logIterator.run(new RollbackVisitor(database, changeExecListener, processedChangesets), new RuntimeEnvironment(database, changeLogParameters.getContexts(), changeLogParameters.getLabels()));
-            addChangelogFileToMdc(changelogFile, databaseChangeLog);
-            Scope.getCurrentScope().addMdcValue(MdcKey.CHANGESETS_ROLLED_BACK, new ChangesetsRolledback(processedChangesets), false);
-            if (processedChangesets.isEmpty()) {
-                Scope.getCurrentScope().getUI().sendMessage("INFO: 0 changesets rolled back.");
+        doRollback(database, changelogFile, rollbackScript, logIterator, changeLogParameters, databaseChangeLog, changeExecListener, null);
+    }
+
+    /**
+     * Actually perform the rollback operation. Determining which changesets to roll back is the responsibility of the
+     * logIterator.
+     */
+    public static void doRollback(Database database, String changelogFile, String rollbackScript, ChangeLogIterator logIterator, ChangeLogParameters changeLogParameters,
+                                  DatabaseChangeLog databaseChangeLog, ChangeExecListener changeExecListener, RollbackReportParameters rollbackReportParameters) throws Exception {
+        try {
+            if (rollbackScript == null) {
+                List<ChangeSet> processedChangesets = new ArrayList<>();
+                logIterator.run(new RollbackVisitor(database, changeExecListener, processedChangesets), new RuntimeEnvironment(database, changeLogParameters.getContexts(), changeLogParameters.getLabels()));
+                addChangelogFileToMdc(changelogFile, databaseChangeLog);
+                Scope.getCurrentScope().addMdcValue(MdcKey.CHANGESETS_ROLLED_BACK, ChangesetsRolledback.fromChangesetList(processedChangesets), false);
+                if (processedChangesets.isEmpty()) {
+                    Scope.getCurrentScope().getUI().sendMessage("INFO: 0 changesets rolled back.");
+                }
+            } else {
+                List<ChangeSet> changeSets = determineRollbacks(database, logIterator, changeLogParameters);
+                executeRollbackScript(database, rollbackScript, changeSets, databaseChangeLog, changeLogParameters, changeExecListener);
+                removeRunStatus(changeSets, database);
+                addChangelogFileToMdc(changelogFile, databaseChangeLog);
+                Scope.getCurrentScope().addMdcValue(MdcKey.CHANGESETS_ROLLED_BACK, ChangesetsRolledback.fromChangesetList(changeSets));
             }
-        } else {
-            List<ChangeSet> changeSets = determineRollbacks(database, logIterator, changeLogParameters);
-            executeRollbackScript(database, rollbackScript, changeSets, databaseChangeLog, changeLogParameters, changeExecListener);
-            removeRunStatus(changeSets, database);
-            addChangelogFileToMdc(changelogFile, databaseChangeLog);
-            Scope.getCurrentScope().addMdcValue(MdcKey.CHANGESETS_ROLLED_BACK, ChangesetsRolledback.fromChangesetList(changeSets));
-        }
-        try (MdcObject deploymentOutcomeMdc = Scope.getCurrentScope().getMdcManager().put(MdcKey.DEPLOYMENT_OUTCOME, MdcValue.COMMAND_SUCCESSFUL)) {
-            Scope.getCurrentScope().getLog(AbstractRollbackCommandStep.class).info("Rollback command completed successfully.");
+            try (MdcObject deploymentOutcomeMdc = Scope.getCurrentScope().getMdcManager().put(MdcKey.DEPLOYMENT_OUTCOME, MdcValue.COMMAND_SUCCESSFUL)) {
+                Scope.getCurrentScope().getLog(AbstractRollbackCommandStep.class).info("Rollback command completed successfully.");
+                if (rollbackReportParameters != null) {
+                    rollbackReportParameters.getOperationInfo().setOperationOutcome(MdcValue.COMMAND_SUCCESSFUL);
+                }
+            }
+        } finally {
+            if (rollbackReportParameters != null && changeExecListener instanceof DefaultChangeExecListener) {
+                List<ChangeSet> failedChangeSets = ((DefaultChangeExecListener) changeExecListener).getFailedRollbackChangeSets();
+                List<ChangeSet> rolledBackChangeSets = ((DefaultChangeExecListener) changeExecListener).getRolledBackChangeSets();
+                rollbackReportParameters.getChangesetInfo().setChangesetCount(failedChangeSets.size() + rolledBackChangeSets.size());
+                rollbackReportParameters.getChangesetInfo().addAllToChangesetInfoList(rolledBackChangeSets, true);
+                rollbackReportParameters.getChangesetInfo().addAllToChangesetInfoList(failedChangeSets, true);
+            }
         }
     }
 
@@ -205,9 +238,12 @@ public abstract class AbstractRollbackCommandStep extends AbstractCommandStep {
         }
     }
 
-    private static void handleRollbackException(String operationName) {
+    private static void handleRollbackException(String operationName, RollbackReportParameters rollbackReportParameters) {
         try (MdcObject deploymentOutcomeMdc = Scope.getCurrentScope().addMdcValue(MdcKey.DEPLOYMENT_OUTCOME, MdcValue.COMMAND_FAILED)) {
             Scope.getCurrentScope().getLog(AbstractRollbackCommandStep.class).info(operationName + " command encountered an exception.");
+            if (rollbackReportParameters != null) {
+                rollbackReportParameters.getOperationInfo().setOperationOutcome(MdcValue.COMMAND_FAILED);
+            }
         }
     }
 
