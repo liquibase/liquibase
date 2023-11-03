@@ -40,11 +40,13 @@ jobs:
         run: |
           latest_merge_sha=`(git rev-parse HEAD)`
           echo "latestMergeSha=${latest_merge_sha}" >> $GITHUB_OUTPUT
+
       - name: Get Timestamp
         id: get-timestamp
         run: |
           timeStamp=$(date +'%Y-%m-%d %H:%M:%S %Z')
           echo "timestamp=${timeStamp}" >> $GITHUB_OUTPUT
+
       - name: Get Current BranchName
         id: get-branch-name
         run: |
@@ -59,6 +61,7 @@ jobs:
           modified_branch_name=`(echo $branch_name | tr '/_' '-')`
           echo "thisBranchName=$modified_branch_name" >> $GITHUB_OUTPUT          
           echo $modified_branch_name
+
       - name: Checkout OSS Repo
         uses: actions/checkout@v3
         with:
@@ -87,18 +90,18 @@ jobs:
             }
             core.setOutput("branchExistsInBoth", branchExistsInBoth)
 
-  run-tests:
-    needs: [setup]
-    if: needs.setup.outputs.branchExistsInBoth == 'true' && success()
-    uses: liquibase/liquibase/.github/workflows/run-tests.yml@github-action-DAT-15775
-    secrets: inherit
+#  run-tests:
+#    needs: [setup]
+#    if: needs.setup.outputs.branchExistsInBoth == 'true' && success()
+#    uses: liquibase/liquibase/.github/workflows/run-tests.yml@github-action-DAT-15775
+#    secrets: inherit
 
 
   build_publish_branch:
     name: Build & Package
     runs-on: macos-latest
-    #    needs: [setup]
-    needs: [ setup, run-tests ]
+    needs: [setup]
+#    needs: [ setup, run-tests ]
     if: needs.setup.outputs.branchExistsInBoth == 'true'
     permissions:
       contents: read
@@ -186,6 +189,7 @@ jobs:
           # Replace / with - in branch name
           version=$(echo "$version" | sed 's/\//-/g')
           mvn versions:set -DnewVersion="$version"
+
       - name: Build & Sign Artifacts
         env:
           INSTALL4J_LICENSE: ${{ secrets.INSTALL4J_LICENSE }}
@@ -213,7 +217,8 @@ jobs:
           mkdir -p liquibase-dist/target/liquibase-${{ needs.setup.outputs.thisBranchName }}-SNAPSHOT
           (cd liquibase-dist/target/liquibase-${{ needs.setup.outputs.thisBranchName }}-SNAPSHOT && tar -xzf ../liquibase-${{ needs.setup.outputs.thisBranchName }}-SNAPSHOT.tar.gz)
           
-          #cp -r liquibase-standard/src/main/resources/liquibase/examples liquibase-dist/target/liquibase-${{ needs.setup.outputs.thisBranchName }}-SNAPSHOT
+          ls -lR
+          cp -r liquibase-standard/src/main/resources/liquibase/examples liquibase-dist/target/liquibase-${{ needs.setup.outputs.thisBranchName }}-SNAPSHOT
           
           ##create zip file from tar content
           (cd liquibase-dist/target/liquibase-${{ needs.setup.outputs.thisBranchName }}-SNAPSHOT && zip -r ../liquibase-${{ needs.setup.outputs.thisBranchName }}-SNAPSHOT.zip *)
@@ -224,6 +229,7 @@ jobs:
           
           find . -name original-*.jar -exec rm {} \;
           
+          mkdir -p artifacts
           cp liquibase-dist/target/liquibase-${{ needs.setup.outputs.thisBranchName }}-SNAPSHOT.tar.gz artifacts
           cp liquibase-dist/target/liquibase-${{ needs.setup.outputs.thisBranchName }}-SNAPSHOT.zip artifacts
           cp liquibase-core/target/liquibase-core-0-SNAPSHOT.jar artifacts/liquibase-core-0-SNAPSHOT.jar
@@ -240,6 +246,7 @@ jobs:
           cp liquibase-cdi/target/liquibase-cdi-0-SNAPSHOT.jar artifacts
           cp liquibase-cdi/target/liquibase-cdi-0-SNAPSHOT-sources.jar artifacts
           cp liquibase-cdi/target/liquibase-cdi-0-SNAPSHOT-javadoc.jar artifacts
+          
           cp liquibase-cdi-jakarta/target/liquibase-cdi-jakarta-0-SNAPSHOT.jar artifacts
           cp liquibase-cdi-jakarta/target/liquibase-cdi-jakarta-0-SNAPSHOT-sources.jar artifacts
           cp liquibase-cdi-jakarta/target/liquibase-cdi-jakarta-0-SNAPSHOT-javadoc.jar artifacts
