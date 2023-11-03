@@ -208,6 +208,17 @@ Global Options
                                variable:
                                'LIQUIBASE_INCLUDE_CATALOG_IN_SPECIFICATION')
 
+      --include-relations-for-computed-columns=PARAM
+                             If true, the parent relationship for computed
+                               columns is preserved in snapshot-dependent
+                               commands: snapshot and diff
+                             DEFAULT: false
+                             (defaults file: 'liquibase.
+                               includeRelationsForComputedColumns', environment
+                               variable:
+                               'LIQUIBASE_INCLUDE_RELATIONS_FOR_COMPUTED_COLUMNS
+                               ')
+
       --include-system-classpath=PARAM
                              Include the system classpath when resolving
                                classes at runtime
