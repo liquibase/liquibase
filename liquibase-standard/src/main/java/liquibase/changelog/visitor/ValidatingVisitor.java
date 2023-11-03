@@ -14,12 +14,16 @@ import liquibase.precondition.FailedPrecondition;
 import liquibase.precondition.core.PreconditionContainer;
 import liquibase.util.StringUtil;
 import liquibase.util.ValidatingVisitorUtil;
+import lombok.Getter;
 
 import java.util.*;
 
+@Getter
 public class ValidatingVisitor implements ChangeSetVisitor {
 
     private final List<String> invalidMD5Sums = new ArrayList<>();
+    private String failedPreconditionsMessage = null;
+    private String errorPreconditionsMessage = null;
     private final List<FailedPrecondition> failedPreconditions = new ArrayList<>();
     private final List<ErrorPrecondition> errorPreconditions = new ArrayList<>();
     private final Set<ChangeSet> duplicateChangeSets = new HashSet<>();
@@ -60,10 +64,12 @@ public class ValidatingVisitor implements ChangeSetVisitor {
                 preconditions.check(database, changeLog, null, null);
             }
         } catch (PreconditionFailedException e) {
-            Scope.getCurrentScope().getLog(getClass()).fine("Precondition Failed: "+e.getMessage(), e);
+            Scope.getCurrentScope().getLog(getClass()).warning("Precondition Failed: "+e.getMessage(), e);
+            failedPreconditionsMessage = e.getMessage();
             failedPreconditions.addAll(e.getFailedPreconditions());
         } catch (PreconditionErrorException e) {
-            Scope.getCurrentScope().getLog(getClass()).fine("Precondition Error: "+e.getMessage(), e);
+            Scope.getCurrentScope().getLog(getClass()).severe("Precondition Error: "+e.getMessage(), e);
+            errorPreconditionsMessage = e.getMessage();
             errorPreconditions.addAll(e.getErrorPreconditions());
         } finally {
             try {
@@ -163,7 +169,6 @@ public class ValidatingVisitor implements ChangeSetVisitor {
         String changeSetString = changeSet.toString(false);
         if (seenChangeSets.contains(changeSetString)) {
             duplicateChangeSets.add(changeSet);
-            return;
         } else {
             seenChangeSets.add(changeSetString);
         }
@@ -187,46 +192,10 @@ public class ValidatingVisitor implements ChangeSetVisitor {
         return valid;
     }
 
-    public List<String> getInvalidMD5Sums() {
-        return invalidMD5Sums;
-    }
-
-
-    public List<FailedPrecondition> getFailedPreconditions() {
-        return failedPreconditions;
-    }
-
-    public List<ErrorPrecondition> getErrorPreconditions() {
-        return errorPreconditions;
-    }
-
-    public Set<ChangeSet> getDuplicateChangeSets() {
-        return duplicateChangeSets;
-    }
-
-    public List<SetupException> getSetupExceptions() {
-        return setupExceptions;
-    }
-
-    public List<Throwable> getChangeValidationExceptions() {
-        return changeValidationExceptions;
-    }
-
-    public ValidationErrors getValidationErrors() {
-        return validationErrors;
-    }
-
-    public Warnings getWarnings() {
-        return warnings;
-    }
-
     public boolean validationPassed() {
         return invalidMD5Sums.isEmpty() && failedPreconditions.isEmpty() && errorPreconditions.isEmpty() &&
             duplicateChangeSets.isEmpty() && changeValidationExceptions.isEmpty() && setupExceptions.isEmpty() &&
             !validationErrors.hasErrors();
     }
 
-    public Database getDatabase() {
-        return database;
-    }
 }
