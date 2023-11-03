@@ -9,6 +9,14 @@ import liquibase.parser.core.ParsedNode;
 import liquibase.parser.core.ParsedNodeException;
 import liquibase.plugin.Plugin;
 
+/**
+ *
+ * The ChangSetService allows for creation and modification of ChangeSets to be pluggable
+ * The implemented createChangeSet methods support calls from the Liquibase Core to create
+ * Change Sets.  Not all ChangeSet constructors are supported at this point.  Those
+ * constructors will need to be called directly.
+ *
+ */
 public interface ChangeSetService extends Plugin {
     /**
      *
