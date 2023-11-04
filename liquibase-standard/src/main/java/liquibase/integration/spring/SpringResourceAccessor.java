@@ -93,11 +93,7 @@ public class SpringResourceAccessor extends AbstractResourceAccessor {
         try {
             String url = resource.getURL().toExternalForm();
 
-            try {
-                url = decode(resource.getURL().toExternalForm(), StandardCharsets.UTF_8.name());
-            } catch(UnsupportedEncodingException e) {
-                Scope.getCurrentScope().getLog(getClass()).fine("Failed to decode path " + url + "; continuing without decoding.", e);
-            }
+            url = decodeUrl(resource, url);
 
             if (url.contains("!")) {
                 return url.replaceFirst(".*!", "");
@@ -196,6 +192,15 @@ public class SpringResourceAccessor extends AbstractResourceAccessor {
         searchPath = StringUtils.cleanPath(searchPath);
 
         return searchPath;
+    }
+
+    private String decodeUrl(Resource resource, String url) throws IOException {
+        try {
+            url = decode(resource.getURL().toExternalForm(), StandardCharsets.UTF_8.name());
+        } catch(UnsupportedEncodingException e) {
+            Scope.getCurrentScope().getLog(getClass()).fine("Failed to decode path " + url + "; continuing without decoding.", e);
+        }
+        return url;
     }
 
 }
