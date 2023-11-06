@@ -21,7 +21,7 @@ public abstract class AbstractPluginFactory<T extends Plugin> implements PluginF
 
     /**
      * Returns the priority of the given object based on the passed args array.
-     * The args are created as as part of the custom public getPlugin method in implementations are are passed through {@link #getPlugin(Object...)}
+     * The args are created as part of the custom public getPlugin method in implementations are passed through {@link #getPlugin(Object...)}
      */
     protected abstract int getPriority(T obj, Object... args);
 
@@ -95,9 +95,7 @@ public abstract class AbstractPluginFactory<T extends Plugin> implements PluginF
     protected synchronized Collection<T> findAllInstances() {
         if (this.allInstances == null) {
             this.allInstances = new ArrayList<>();
-        }
 
-        if (this.allInstances.isEmpty()) {
             ServiceLocator serviceLocator = Scope.getCurrentScope().getServiceLocator();
             this.allInstances.addAll(serviceLocator.findInstances(getPluginClass()));
         }
