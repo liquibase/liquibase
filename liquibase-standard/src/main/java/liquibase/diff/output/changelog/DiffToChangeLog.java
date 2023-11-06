@@ -241,11 +241,10 @@ public class DiffToChangeLog {
             Scope.getCurrentScope().getLog(getClass()).info("No changesets to add.");
         } else {
             Scope.getCurrentScope().getLog(getClass()).info(file + " does not exist, creating and adding " + changeSets.size() + " changesets.");
-        }
-
-        try (OutputStream stream = file.openOutputStream(new OpenOptions());
-             PrintStream out = new PrintStream(stream, true, GlobalConfiguration.OUTPUT_FILE_ENCODING.getCurrentValue())) {
-            changeLogSerializer.write(changeSets, out);
+            try (OutputStream stream = file.openOutputStream(new OpenOptions());
+                 PrintStream out = new PrintStream(stream, true, GlobalConfiguration.OUTPUT_FILE_ENCODING.getCurrentValue())) {
+                 changeLogSerializer.write(changeSets, out);
+            }
         }
     }
 
