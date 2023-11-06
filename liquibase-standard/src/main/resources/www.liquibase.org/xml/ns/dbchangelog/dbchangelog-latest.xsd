@@ -239,6 +239,7 @@
                             </xsd:choice>
                             <xsd:attribute name="runWith" type="xsd:string" />
                             <xsd:attribute name="runWithSpoolFile" type="xsd:string" />
+                            <xsd:attribute name="endDelimiter" type="xsd:string" />
                         </xsd:complexType>
                     </xsd:element>
                 </xsd:choice>
