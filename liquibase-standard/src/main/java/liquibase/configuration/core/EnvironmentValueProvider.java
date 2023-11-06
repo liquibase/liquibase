@@ -77,14 +77,13 @@ public class EnvironmentValueProvider extends AbstractMapConfigurationValueProvi
                     // Remove "liquibaseCommand<commandName>" from the key
                     String simplifiedKey = StringUtil.lowerCaseFirst(editedKey.replace("liquibaseCommand", "")
                             .replaceFirst(fullName.toString(), ""));
-                    CommandArgumentDefinition<?> argDef = arguments.get(simplifiedKey);
-                    if (argDef != null) {
-                        found = true;
-                    }
-                    for (CommandArgumentDefinition<?> argumentDefinition : arguments.values()) {
-                        if (argumentDefinition.getAliases().contains(simplifiedKey)) {
-                            found = true;
-                        }
+                    // check the normal arguments
+                    found = arguments.get(simplifiedKey) != null;
+                    if (!found) {
+                        // then check aliases too if we didn't find anything
+                        found = arguments.values()
+                                .stream()
+                                .anyMatch(argDef -> argDef.getAliases().contains(simplifiedKey));
                     }
                     if (found) {
                         break;
