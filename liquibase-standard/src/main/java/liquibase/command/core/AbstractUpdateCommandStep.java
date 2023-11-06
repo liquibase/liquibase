@@ -104,6 +104,8 @@ public abstract class AbstractUpdateCommandStep extends AbstractCommandStep impl
                 }
             });
 
+            database.afterUpdate();
+
             resultsBuilder.addResult("statusCode", 0);
             addChangelogFileToMdc(getChangelogFileArg(commandScope), databaseChangeLog);
             Scope.getCurrentScope().addMdcValue(MdcKey.ROWS_AFFECTED, String.valueOf(rowsAffected.get()));
