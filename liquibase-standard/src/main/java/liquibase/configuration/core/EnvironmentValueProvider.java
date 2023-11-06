@@ -49,13 +49,12 @@ public class EnvironmentValueProvider extends AbstractMapConfigurationValueProvi
         List<String> unknownVariables = new ArrayList<>();
         LiquibaseConfiguration liquibaseConfiguration = Scope.getCurrentScope().getSingleton(LiquibaseConfiguration.class);
         for (Map.Entry<?, ?> entry : getMap().entrySet()) {
-            String originalKey = ((String)entry.getKey());
-            String key = ((String)entry.getKey()).toLowerCase();
-            if (! key.startsWith("liquibase_") || key.equals("liquibase_home")  || key.startsWith("liquibase_launcher_")) {
+            String originalKey = ((String) entry.getKey());
+            String key = ((String) entry.getKey()).toLowerCase();
+            if (!key.startsWith("liquibase_") || key.equals("liquibase_home") || key.startsWith("liquibase_launcher_")) {
                 continue;
             }
 
-            //
             // Convert to camel case to do the lookup
             // We check for variables that:
             // 1. are not defined.  If not defined then we check the command arguments.  Skip internal commands.
@@ -64,7 +63,6 @@ public class EnvironmentValueProvider extends AbstractMapConfigurationValueProvi
             //        LIQUIBASE_COMMAND_<command name>_<argument>
             // 2. do not have a current value
             // 3. or only use the default value
-            //
             String editedKey = StringUtil.toCamelCase(key);
             ConfigurationDefinition<?> def = liquibaseConfiguration.getRegisteredDefinition(editedKey);
             if (def == null) {
@@ -74,19 +72,25 @@ public class EnvironmentValueProvider extends AbstractMapConfigurationValueProvi
                     SortedMap<String, CommandArgumentDefinition<?>> arguments = commandDef.getArguments();
                     StringBuilder fullName = new StringBuilder();
                     for (String name : commandDef.getName()) {
-                       fullName.append(StringUtil.upperCaseFirst(name));
+                        fullName.append(StringUtil.upperCaseFirst(name));
                     }
-                    String newKey =
-                        StringUtil.lowerCaseFirst(
-                            editedKey.replace("liquibaseCommand","")
-                                     .replaceFirst(fullName.toString(), ""));
-                    CommandArgumentDefinition<?> argDef = arguments.get(newKey);
+                    // Remove "liquibaseCommand<commandName>" from the key
+                    String simplifiedKey = StringUtil.lowerCaseFirst(editedKey.replace("liquibaseCommand", "")
+                            .replaceFirst(fullName.toString(), ""));
+                    CommandArgumentDefinition<?> argDef = arguments.get(simplifiedKey);
                     if (argDef != null) {
                         found = true;
+                    }
+                    for (CommandArgumentDefinition<?> argumentDefinition : arguments.values()) {
+                        if (argumentDefinition.getAliases().contains(simplifiedKey)) {
+                            found = true;
+                        }
+                    }
+                    if (found) {
                         break;
                     }
                 }
-                if (! found) {
+                if (!found) {
                     unknownVariables.add("- " + originalKey);
                 }
             } else if (def.getCurrentValue() == null || def.getCurrentConfiguredValue().wasDefaultValueUsed()) {
@@ -94,10 +98,10 @@ public class EnvironmentValueProvider extends AbstractMapConfigurationValueProvi
             }
         }
         Boolean strict = GlobalConfiguration.STRICT.getCurrentValue();
-        if (! unknownVariables.isEmpty()) {
+        if (!unknownVariables.isEmpty()) {
             String message = System.lineSeparator() + System.lineSeparator() +
-                "Liquibase detected the following invalid LIQUIBASE_* environment variables:" + System.lineSeparator() + System.lineSeparator() +
-                             StringUtil.join(unknownVariables, System.lineSeparator(), true) + System.lineSeparator() + System.lineSeparator();
+                    "Liquibase detected the following invalid LIQUIBASE_* environment variables:" + System.lineSeparator() + System.lineSeparator() +
+                    StringUtil.join(unknownVariables, System.lineSeparator(), true) + System.lineSeparator() + System.lineSeparator();
             if (strict) {
                 message += "Please rename them and run your command again, or set liquibase.strict=FALSE or LIQUIBASE_STRICT=FALSE." + System.lineSeparator();
             }
