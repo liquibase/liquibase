@@ -27,13 +27,17 @@ class SetupCreateTempResources extends TestSetup {
 
     @Override
     void setup(TestSetupEnvironment testSetupEnvironment) throws Exception {
-        URL url = Thread.currentThread().getContextClassLoader().getResource(originalFile)
-        File f = new File(url.toURI())
-        String contents = FileUtil.getContents(f)
-        File outputFile = new File(baseDir, newFile)
-        FileUtil.write(contents, outputFile)
-        if (lastModified != null) {
-            outputFile.setLastModified(lastModified.getTime())
+        try {
+            URL url = Thread.currentThread().getContextClassLoader().getResource(originalFile)
+            File f = new File(url.toURI())
+            String contents = FileUtil.getContents(f)
+            File outputFile = new File(baseDir, newFile)
+            FileUtil.write(contents, outputFile)
+            if (lastModified != null) {
+                outputFile.setLastModified(lastModified.getTime())
+            }
+        } catch (Exception e) {
+            throw new Exception("Failed to copy resource " + originalFile + " during test setup.", e)
         }
     }
 }

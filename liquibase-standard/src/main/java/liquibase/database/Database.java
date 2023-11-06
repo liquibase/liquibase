@@ -477,5 +477,13 @@ public interface Database extends PrioritizedService, AutoCloseable {
         return true;
     }
 
+    /**
+     * Allows the database to perform actions after an update is finished,
+     * i. e. after the last change of a changelog was applied.
+     */
+    default void afterUpdate() throws LiquibaseException {
+        // Do nothing by default
+    }
+
 }
 

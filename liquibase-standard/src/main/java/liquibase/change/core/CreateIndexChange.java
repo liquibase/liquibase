@@ -1,5 +1,6 @@
 package liquibase.change.core;
 
+import liquibase.ChecksumVersion;
 import liquibase.change.*;
 import liquibase.database.Database;
 import liquibase.exception.ValidationErrors;
@@ -186,8 +187,7 @@ public class CreateIndexChange extends AbstractChange implements ChangeWithColum
      * <li>uniqueConstraint</li>
      * <li>none</li>
      * */
-    @DatabaseChangeProperty(isChangeProperty = false,
-        description = "Index associations. Valid values: primaryKey, foreignKey, uniqueConstriant, none")
+    @DatabaseChangeProperty(description = "Index associations. Valid values: primaryKey, foreignKey, uniqueConstriant, none")
     public String getAssociatedWith() {
         return associatedWith;
     }
@@ -243,5 +243,12 @@ public class CreateIndexChange extends AbstractChange implements ChangeWithColum
             }
         }
         return validationErrors;
+    }
+
+    @Override
+    public String[] getExcludedFieldFilters(ChecksumVersion version) {
+        return new String[]{
+                "associatedWith"
+        };
     }
 }
