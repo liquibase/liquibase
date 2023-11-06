@@ -49,7 +49,6 @@ class EnvironmentValueProviderTest extends Specification {
         "no.space"       | "no_space "       | true
     }
 
-    @Unroll
     def "should see aliases as valid"() {
         given:
         def provider = new EnvironmentValueProvider() {
