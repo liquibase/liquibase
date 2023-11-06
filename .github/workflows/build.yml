@@ -653,10 +653,12 @@ jobs:
                 "workflow_id": "main.yml",
                 "ref": testHarnessBranch.name,
                 "inputs": {
+                  "liquibaseCommit": helper.getCurrentSha(),
                   "runDescription": "Triggered by https://github.com/liquibase/liquibase/actions/runs/"+context.runId,
-                  "liquibaseBranch": helper.getCurrentBranchLabel(),
+                  "liquibaseBranch": helper.getCurrentBranch(),
                   "liquibaseRepo": "liquibase/liquibase",
                   "runDetails": JSON.stringify({
+                    "liquibaseBranch": helper.getCurrentBranch(),
                     "notices": notices
                   })
                 }

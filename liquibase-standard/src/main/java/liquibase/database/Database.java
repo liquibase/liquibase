@@ -472,5 +472,10 @@ public interface Database extends PrioritizedService, AutoCloseable {
     String unescapeDataTypeString(String dataTypeString);
 
     ValidationErrors validate();
+
+    default boolean failOnDefferable() {
+        return true;
+    }
+
 }
 
