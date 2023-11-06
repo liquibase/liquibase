@@ -9,7 +9,6 @@ import liquibase.command.*;
 import liquibase.command.core.helpers.DatabaseChangelogCommandStep;
 import liquibase.database.Database;
 import liquibase.exception.CommandValidationException;
-import liquibase.util.ValueHandlerUtil;
 
 import java.util.Arrays;
 import java.util.List;
