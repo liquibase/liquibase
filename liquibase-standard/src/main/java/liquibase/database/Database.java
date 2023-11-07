@@ -485,5 +485,17 @@ public interface Database extends PrioritizedService, AutoCloseable {
         // Do nothing by default
     }
 
+    /**
+     * Temporarily set the database's object quoting strategy. The caller is responsible for calling
+     * {@link TempObjectQuotingStrategy#close()} on the returned object to reset the object quoting strategy back to
+     * its original setting.
+     * @param objectQuotingStrategy the desired quoting strategy
+     * @return an object that, when closed, will reset the databases object quoting strategy to the original setting
+     */
+    default TempObjectQuotingStrategy temporarilySetObjectQuotingStrategy(ObjectQuotingStrategy objectQuotingStrategy) {
+        ObjectQuotingStrategy originalObjectQuotingStrategy = this.getObjectQuotingStrategy();
+        this.setObjectQuotingStrategy(objectQuotingStrategy);
+        return new TempObjectQuotingStrategy(this, originalObjectQuotingStrategy);
+    }
 }
 
