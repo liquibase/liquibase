@@ -88,7 +88,7 @@ public class ValidatingVisitor implements ChangeSetVisitor {
     }
 
     private RanChangeSet findChangeSet(ChangeSet changeSet) {
-        String key = changeSet.toNormalizedString(false);
+        String key = changeSet.toNormalizedString();
         return ranIndex.get(key);
     }
         

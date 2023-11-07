@@ -55,7 +55,7 @@ public class ShouldRunChangeSetFilter implements ChangeSetFilter {
     @Override
     @SuppressWarnings({"RedundantIfStatement"})
     public ChangeSetFilterResult accepts(ChangeSet changeSet) {
-        String key = changeSet.toNormalizedString(false);
+        String key = changeSet.toNormalizedString();
         RanChangeSet ranChangeSet = this.ranChangeSets.get(key);
         if (ranChangeSet != null && ranChangeSet.isSameAs(changeSet)) {
             if (changeSet.shouldAlwaysRun()) {

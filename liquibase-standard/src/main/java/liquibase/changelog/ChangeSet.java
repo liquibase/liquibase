@@ -1168,8 +1168,8 @@ public class ChangeSet implements Conditional, ChangeLogChild {
                 (includeMD5Sum ? ("::(Checksum: " + generateCheckSum(checksumVersion) + ")") : "");
     }
 
-    public String toNormalizedString(boolean includeMD5Sum) {
-        return DatabaseChangeLog.normalizePath(filePath) + "::" + getId() + "::" + getAuthor() + (includeMD5Sum ? ("::(Checksum: " + generateCheckSum() + ")") : "");
+    public String toNormalizedString() {
+        return DatabaseChangeLog.normalizePath(filePath) + "::" + getId() + "::" + getAuthor();
     }
 
     @Override
