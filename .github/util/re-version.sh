@@ -64,7 +64,7 @@ do
   rm -rf $workdir/META-INF
 
   ## Fix up liquibase.build.properties
-  if [[ $jar == "liquibase-core-0-SNAPSHOT.jar" || $jar == "liquibase-commercial-$branch-SNAPSHOT.jar" ]]; then
+  if [[ $jar == "liquibase-core-$branch.jar" || $jar == "liquibase-core-$branch-SNAPSHOT.jar" || $jar == "liquibase-commercial-$branch-SNAPSHOT.jar" ]]; then
     unzip -q $workdir/$jar liquibase.build.properties -d $workdir
     sed -i -e "s/build.version=.*/build.version=$version/" $workdir/liquibase.build.properties
     (cd $workdir && jar -uf $jar liquibase.build.properties)
@@ -72,7 +72,7 @@ do
 
     ##TODO: update XSD
   fi
-
+  
   ##rebuild jar to ensure META-INF manifest is correct
   rm -rf $workdir/finalize-jar
   mkdir $workdir/finalize-jar
