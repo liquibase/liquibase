@@ -2,13 +2,20 @@ package liquibase.command.core
 
 import liquibase.ChecksumVersion
 import liquibase.Scope
+import liquibase.change.ColumnConfig
+import liquibase.change.ConstraintsConfig
+import liquibase.change.core.CreateTableChange
 import liquibase.changelog.ChangeLogHistoryService
 import liquibase.changelog.ChangeLogHistoryServiceFactory
+import liquibase.changelog.ChangeSet
 import liquibase.changelog.RanChangeSet
 import liquibase.command.CommandScope
 import liquibase.command.core.helpers.DatabaseChangelogCommandStep
 import liquibase.command.core.helpers.DbUrlConnectionCommandStep
 import liquibase.command.util.CommandUtil
+import liquibase.exception.DatabaseException
+import liquibase.executor.Executor
+import liquibase.executor.ExecutorService
 import liquibase.extension.testing.testsystem.DatabaseTestSystem
 import liquibase.extension.testing.testsystem.TestSystemFactory
 import liquibase.extension.testing.testsystem.spock.LiquibaseIntegrationTest
@@ -385,5 +392,36 @@ VALUES('2', 'fl', '$changesetFilepath', '2023-09-29 14:33:39.112', 2, 'EXECUTED'
         cleanup:
         CommandUtil.runDropAll(h2)
 
+    }
+
+    @Unroll
+    def "manually generate v8 checksum" () {
+
+        given:
+        def database = h2.getDatabaseFromFactory()
+        ChangeSet changeSet =
+                new ChangeSet("1", "mock-author", false, false, "test/changelog.xml",
+                        null, null, null, null, false, null, null)
+
+        CreateTableChange exampleChange = new CreateTableChange()
+        exampleChange.setTableName("first")
+        ColumnConfig config = (ColumnConfig) ColumnConfig.fromName("first")
+        config.setType("VARCHAR (255)")
+        exampleChange.getColumns().add(config)
+        changeSet.addChange(exampleChange)
+
+        when:
+        ChangeLogHistoryService changeLogService = Scope.getCurrentScope()
+                .getSingleton(ChangeLogHistoryServiceFactory.class).getChangeLogService(database)
+        changeLogService.init()
+        changeSet.execute(null, null, database)
+        database.commit()
+        changeLogService = Scope.getCurrentScope()
+                .getSingleton(ChangeLogHistoryServiceFactory.class).getChangeLogService(database)
+        def ranChangeSets = changeLogService.getRanChangeSets()
+
+        then:
+        ranChangeSets.size() == 1
+        ranChangeSets.get(0).getLastCheckSum().toString() == "8:0a36c7b201a287dd3348e8dd19e44be7"
     }
 }
