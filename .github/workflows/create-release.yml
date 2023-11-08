@@ -31,23 +31,15 @@ jobs:
             core.setOutput("runId", context.payload.inputs.runId);
       - run: |
           echo "Creating version ${{ steps.collect-data.outputs.version }} from ${{ steps.collect-data.outputs.branch }} with artifacts from build ${{ steps.collect-data.outputs.runId }} "
-          
-  # build-azure-uber-jar:
-  #   needs: [ setup ]
-  #   uses: liquibase/liquibase/.github/workflows/build-azure-uber-jar.yml@master
-  #   with:
-  #     branch: ${{ needs.setup.outputs.branch }}
-  #     liquibase-version: ${{ needs.setup.outputs.version }}
-  #   secrets: inherit
 
   reversion:
     needs: [ setup ]
     name: Re-version artifacts ${{ needs.setup.outputs.version }}
     runs-on: ubuntu-22.04
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v3
 
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v3
         name: Checkout liquibase-pro
         with:
           repository: liquibase/liquibase-pro
@@ -59,7 +51,7 @@ jobs:
       - name: Download liquibase-artifacts
         uses: liquibase/action-download-artifact@v2-liquibase
         with:
-          workflow: new-build.yml
+          workflow: build.yml
           run_id: ${{ needs.setup.outputs.runId }}
           name: liquibase-artifacts
           path: download/liquibase-artifacts
@@ -80,6 +72,7 @@ jobs:
           GPG_PASSWORD: ${{ secrets.GPG_PASSPHRASE }}
         run: |
           .github/util/re-version.sh download/liquibase-artifacts "${{ needs.setup.outputs.version }}" "${{ needs.setup.outputs.branch }}"
+          
           ##Sign Files
           .github/util/sign-artifacts.sh re-version/out
           mkdir re-version/final
@@ -89,6 +82,7 @@ jobs:
           mv re-version/out/liquibase-${{ needs.setup.outputs.version }}.zip re-version/final
           (cd re-version/out/ && zip liquibase-additional-${{ needs.setup.outputs.version }}.zip *)
           mv re-version/out/liquibase-additional-${{ needs.setup.outputs.version }}.zip re-version/final
+
       - name: Cache Completed Artifacts
         uses: actions/cache@v3.3.1
         with:
@@ -101,6 +95,7 @@ jobs:
           git push -f origin v${{ needs.setup.outputs.version }}
           (cd download/repo/liquibase-pro && git tag -f v${{ needs.setup.outputs.version }})
           (cd download/repo/liquibase-pro && git push -f origin v${{ needs.setup.outputs.version }})
+
   build-installers:
     permissions:
       contents: write  # for softprops/action-gh-release to create GitHub release
@@ -110,7 +105,7 @@ jobs:
     env:
       GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v3
 
       - name: Restore Completed Artifacts
         uses: actions/cache@v3.3.1
@@ -163,6 +158,7 @@ jobs:
           rm re-version/final/*.asc
           rm re-version/final/*.md5
           rm re-version/final/*.sha1
+
       - name: Attach Files to Draft Release
         uses: softprops/action-gh-release@v1
         with:
