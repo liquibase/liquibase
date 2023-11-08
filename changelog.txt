@@ -9,7 +9,6 @@ Changes in version 4.25.0 (2023.11.09)
 
 - (#4577) SQL Anywhere: Recompile all views after last change of update @mkarg
 - (#5117) Implementing a ChangeSetService for modification of model objects DAT-16079 @wwillard7800
-- (#5148) Implement global end delimiter prioritized flag DAT-16166 @wwillard7800
 - (#4893) Quality Checks Packages (DAT-15553) @StevenMassaro
 - (#4584) Allow changing default UI service + change Spring default UI service allowing log level control @filipelautert
 - (#5087) Handles snapshot of Oracle temporary tables + ignore queue tables @filipelautert
