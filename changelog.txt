@@ -1,6 +1,94 @@
 Liquibase Core Changelog
 ===========================================
 
+Changes in version 4.25.0 (2023.11.09)
+
+### Liquibase 4.25.0 is a major release
+
+## New Features
+
+- (#4577) SQL Anywhere: Recompile all views after last change of update @mkarg
+- (#5117) Implementing a ChangeSetService for modification of model objects DAT-16079 @wwillard7800
+- (#5148) Implement global end delimiter prioritized flag DAT-16166 @wwillard7800
+- (#4893) Quality Checks Packages (DAT-15553) @StevenMassaro
+- (#4584) Allow changing default UI service + change Spring default UI service allowing log level control @filipelautert
+- (#5087) Handles snapshot of Oracle temporary tables + ignore queue tables @filipelautert
+- (#5077) showSummaryOutput property added for update command @MalloD12
+- (#4991) Update MySQL default value handling to allow defaultValueComputed on MySQL 5.7 @Axel-1
+- (#5075) DAT-16016 @sayaliM0412
+- (#5042) Makes picocli dependency optional for core @filipelautert
+- (#5041) add rollback-to-date report (DAT-15660) @StevenMassaro
+- (#5045) add rollback-count report (DAT-15659) @StevenMassaro
+- (#5047) show failed changesets in verbose show-summary output (DAT-15141) @StevenMassaro
+- (#4301) Simplified expressions, removed redundant expressions, fixed javadocs @anton-erofeev
+- (#4104) Support system properties as a way of providing configuration options to the CLI @jccampanero
+- (#4919) Add '@Deprecated' annotation to update() methods @tati-qalified
+- (#4996) Check for other duplicate JAR files in classpath DAT-15963 @wwillard7800
+- (#5012) DAT-15755 - Sonar issues fix @MalloD12
+- (#4463) Split calculate-checksum parameter changeSetIdentifier into changeSetPath / changesetId / changeSetAuthor  @JulienMa94
+- (#5019) [DAT-15756] Fix sonar blocker warnings @filipelautert
+- (#4842) DAT-15791  OSS: Sonar Refactor @jandroav
+- (#4904) add empty mdc values to all commands (DAT-15671) @StevenMassaro
+- (#4984) DatabaseTestSystem: commit after executing statement @StevenMassaro
+
+## Bug Fixes
+
+- (#5165) Do not warn when env var matches argument alias (DAT-16117) @abrackx
+- (#5099) Apply SQL visitors to prepared SQL @mches
+- (#5080) Fix tests DAT-16053 @wwillard7800
+- (#5141) Fix Liquibase changeset relative path check @filipelautert
+- (#5134) Makes sure that precondition onErrorMessage and onFailMessage are logged when an error happens @filipelautert
+- (#5143) load services using ServiceLocator if allInstances is empty @yairogen
+- (#5087) Handles snapshot of Oracle temporary tables + ignore queue tables @filipelautert
+- (#4801) CreateIndex associatedWith property deserialization issue @spacepost
+- (#5127) 5126 fix extra column info for mariadb database @LonwoLonwo
+- (#5122) Fix Liquibase.validate scope execution. @filipelautert
+- (#5078) Fix Liquibase.rollback scope execution @filipelautert
+- (#5090) Fixed changelog parsing performance issue @filipelautert
+- (#4293) Fix DB2 integration tests DAT-13113 @wwillard7800
+- (#4424) Fix custom SQL generation issue - Github issue 4369 @wwillard7800
+- (#5062) Modify MSSQL query for when obtaining autoincrement column information GH-4719 @wwillard7800
+- (#5054) Handle duplicates of the commercial JAR DAT-16059 @wwillard7800
+- (#5039) Add changelog file path to upToDateFastCheck cache key (#4891) @ggwadera
+- (#4994) execute-sql command logic updated to not display select columns sorted @MalloD12
+- (#4664) Fixed: #4662 - PostgreSQL: Doesn't support (n CHAR) syntax, but only (n) syntax. @mkarg
+- (#5064) Handle some potential NPEs  @wwillard7800
+- (#5028) Fix some typos. @asashour
+- (#4754) Corrected determination of the DB2 version for the support of BOOLEAN columns. (patch for #4723) @haltenwe
+- (#4549) generateChangelog creates crippled view definition SQL @mkarg
+- (#4985) Fix liquibase bat @erasmussen-first
+- (#4995) [DAT-16006] Fixing v8 Checksum calculation issue when using sql dbms attribute @filipelautert
+- (#4988) Do not remove relation attribute for column if the relation object has a snapshot ID DAT-15709 @wwillard7800
+- (#5007) Handle CREATE OR ALTER VIEW when replaceIfExists = true DAT-14147 @wwillard7800
+- (#5009) Do not convert if global flag is false DAT-15745 @wwillard7800
+- (#4982) DAT-15880 @sayaliM0412
+- (#4928) CodeQL scan issue fixes @MalloD12
+- (#4945) Filter additional credential-like strings in the URL sanitization process DAT-9973 @wwillard7800
+- (#567) Improve deferrable validation for AddForeignKey constraints generator @alero
+- (#5101) Remove a forgotten `.` in `README.md` @Benjamin-Loison
+- (#4959) Remove unnecessary conditions in IndexComparator @asashour
+
+## Security, Driver and Other Updates
+
+- (#5095) Bump org.glassfish.jaxb:jaxb-core from 4.0.3 to 4.0.4 @dependabot
+- (#5140) Bump org.xerial:sqlite-jdbc from 3.43.0.0 to 3.43.2.2 @dependabot
+- (#4989) Bump org.codehaus.gmavenplus:gmavenplus-plugin from 3.0.0 to 3.0.2 @dependabot
+- (#5020) Bump targetMavenVersion from 3.9.4 to 3.9.5 @dependabot
+- (#4918) Bump org.apache.maven.plugins:maven-javadoc-plugin from 3.5.0 to 3.6.0 @dependabot
+- (#5096) Bump org.apache.maven.plugins:maven-plugin-plugin from 3.9.0 to 3.10.1 @dependabot
+- (#5135) Update installer JDK @filipelautert
+- (#4927) DAT-15922 FOSSA Support @jnewton03
+- (#5026) Bump org.jboss.weld.se:weld-se-core from 5.1.1.Final to 5.1.2.Final @dependabot
+- (#4839) Bump actions/checkout from 3 to 4 @dependabot
+- (#4914) Bump org.sonarsource.scanner.maven:sonar-maven-plugin from 3.9.1.2184 to 3.10.0.2594 @dependabot
+- (#5001) Bump org.testcontainers:testcontainers-bom from 1.19.0 to 1.19.1 @dependabot
+- (#4860) Bump actions/cache from 3.3.1 to 3.3.2 @dependabot
+- (#4866) Bump org.apache.maven.plugins:maven-enforcer-plugin from 3.4.0 to 3.4.1 @dependabot
+- (#4949) Bump org.apache.maven.plugins:maven-shade-plugin from 3.5.0 to 3.5.1 @dependabot
+- (#4929) Bump com.h2database:h2 from 2.2.222 to 2.2.224 @dependabot
+</details>
+
+
 Changes in version 4.24.0 (2023.09.28)
 
 ### Liquibase 4.24.0 is a major release
