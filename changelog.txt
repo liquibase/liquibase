@@ -15,7 +15,6 @@ Changes in version 4.25.0 (2023.11.09)
 - (#5087) Handles snapshot of Oracle temporary tables + ignore queue tables @filipelautert
 - (#5077) showSummaryOutput property added for update command @MalloD12
 - (#4991) Update MySQL default value handling to allow defaultValueComputed on MySQL 5.7 @Axel-1
-- (#5075) DAT-16016 @sayaliM0412
 - (#5042) Makes picocli dependency optional for core @filipelautert
 - (#5041) add rollback-to-date report (DAT-15660) @StevenMassaro
 - (#5045) add rollback-count report (DAT-15659) @StevenMassaro
@@ -27,7 +26,6 @@ Changes in version 4.25.0 (2023.11.09)
 - (#5012) DAT-15755 - Sonar issues fix @MalloD12
 - (#4463) Split calculate-checksum parameter changeSetIdentifier into changeSetPath / changesetId / changeSetAuthor  @JulienMa94
 - (#5019) [DAT-15756] Fix sonar blocker warnings @filipelautert
-- (#4842) DAT-15791  OSS: Sonar Refactor @jandroav
 - (#4904) add empty mdc values to all commands (DAT-15671) @StevenMassaro
 - (#4984) DatabaseTestSystem: commit after executing statement @StevenMassaro
 
@@ -35,7 +33,6 @@ Changes in version 4.25.0 (2023.11.09)
 
 - (#5165) Do not warn when env var matches argument alias (DAT-16117) @abrackx
 - (#5099) Apply SQL visitors to prepared SQL @mches
-- (#5080) Fix tests DAT-16053 @wwillard7800
 - (#5141) Fix Liquibase changeset relative path check @filipelautert
 - (#5134) Makes sure that precondition onErrorMessage and onFailMessage are logged when an error happens @filipelautert
 - (#5143) load services using ServiceLocator if allInstances is empty @yairogen
