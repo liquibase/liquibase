@@ -83,7 +83,6 @@ Changes in version 4.25.0 (2023.11.09)
 - (#4866) Bump org.apache.maven.plugins:maven-enforcer-plugin from 3.4.0 to 3.4.1 @dependabot
 - (#4949) Bump org.apache.maven.plugins:maven-shade-plugin from 3.5.0 to 3.5.1 @dependabot
 - (#4929) Bump com.h2database:h2 from 2.2.222 to 2.2.224 @dependabot
-</details>
 
 
 Changes in version 4.24.0 (2023.09.28)
