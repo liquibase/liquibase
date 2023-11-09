@@ -3,13 +3,18 @@ package liquibase.command;
 import liquibase.GlobalConfiguration;
 import liquibase.Scope;
 import liquibase.configuration.*;
+import liquibase.database.Database;
 import liquibase.exception.CommandExecutionException;
 import liquibase.exception.CommandValidationException;
+import liquibase.exception.DatabaseException;
+import liquibase.exception.LiquibaseException;
 import liquibase.integration.commandline.LiquibaseCommandLineConfiguration;
 import liquibase.listener.LiquibaseListener;
 import liquibase.logging.mdc.MdcKey;
+import liquibase.logging.mdc.MdcManager;
 import liquibase.logging.mdc.MdcObject;
-import liquibase.util.ISODateFormat;
+import liquibase.logging.mdc.customobjects.ExceptionDetails;
+import liquibase.util.LiquibaseUtil;
 import liquibase.util.StringUtil;
 
 import java.io.FilterOutputStream;
@@ -219,6 +224,11 @@ public class CommandScope {
                 }
                 executedCommands.add(command);
             }
+            String source = null;
+            Database database = (Database)getDependency(Database.class);
+            if (database != null) {
+                source = getDatabaseInfo(database);
+            }
 
             // after executing our pipeline, runs cleanup in inverse order
             for (int i = executedCommands.size() -1; i >= 0; i--) {
@@ -228,6 +238,9 @@ public class CommandScope {
                 }
             }
             if (thrownException.isPresent()) { // Now that we've executed all our cleanup, rethrow the exception if there was one
+                if (!executedCommands.isEmpty()) {
+                    logPrimaryExceptionToMdc(thrownException.get(), source);
+                }
                 throw thrownException.get();
             }
         } catch (Exception e) {
@@ -250,6 +263,39 @@ public class CommandScope {
         }
 
         return resultsBuilder.build();
+    }
+
+    private static String getDatabaseInfo(Database database) {
+        String source = "Database";
+        try {
+            source = String.format("%s %s", database.getDatabaseProductName(), database.getDatabaseProductVersion());
+        } catch (DatabaseException dbe) {
+            source = database.getDatabaseProductName();
+        }
+        return source;
+    }
+
+    private void logPrimaryExceptionToMdc(Exception exception, String source) {
+        //
+        // Drill down to get the lowest level exception
+        //
+        Exception primaryException = exception;
+        while (primaryException != null && primaryException.getCause() != null) {
+            primaryException = (Exception)primaryException.getCause();
+        }
+        if (primaryException != null) {
+            if (primaryException instanceof LiquibaseException) {
+                source = LiquibaseUtil.getBuildVersionInfo();
+            }
+            ExceptionDetails exceptionDetails = new ExceptionDetails();
+            exceptionDetails.setPrimaryException(primaryException.getClass().getSimpleName());
+            exceptionDetails.setPrimaryExceptionReason(primaryException.getMessage());
+            exceptionDetails.setPrimaryExceptionSource(source);
+            MdcManager mdcManager = Scope.getCurrentScope().getMdcManager();
+            try (MdcObject primaryExceptionObject = mdcManager.put(MdcKey.EXCEPTION_DETAILS, exceptionDetails)) {
+                Scope.getCurrentScope().getLog(getClass()).info("Logging exception.");
+            }
+        }
     }
 
     private void addOutputFileToMdc() throws Exception {
