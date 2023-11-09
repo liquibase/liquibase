@@ -1,6 +1,12 @@
 package liquibase.extension.testing.command
 
+import liquibase.Scope
+import liquibase.changelog.ChangeLogHistoryServiceFactory
+import liquibase.changelog.RanChangeSet
+import liquibase.database.Database
 import liquibase.exception.CommandValidationException
+
+import static org.junit.Assert.assertNotNull
 
 CommandTests.define {
     command = ["updateCount"]
@@ -54,6 +60,15 @@ Optional Args:
                 defaultChangeExecListener: 'not_null',
                 updateReport: 'not_null'
         ]
+
+        expectations = {
+            def database = (Database) Scope.getCurrentScope().get("database", null)
+            def changelogHistoryService = Scope.getCurrentScope().getSingleton(ChangeLogHistoryServiceFactory.class).getChangeLogService(database)
+            List<RanChangeSet> ranChangeSets = changelogHistoryService.getRanChangeSets()
+            for (RanChangeSet ranChangeSet : ranChangeSets) {
+                assertNotNull(ranChangeSet.getDeploymentId())
+            }
+        }
     }
 
     run "Happy path with verbose summary output", {

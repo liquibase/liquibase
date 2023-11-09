@@ -1,8 +1,12 @@
 package liquibase.extension.testing.command
 
+import liquibase.Scope
+import liquibase.changelog.ChangeLogHistoryServiceFactory
+import liquibase.changelog.RanChangeSet
+import liquibase.database.Database
 import liquibase.exception.CommandValidationException
 
-import java.util.regex.Pattern
+import static org.junit.Assert.assertNotNull
 
 CommandTests.define {
     command = ["updateTestingRollback"]
@@ -48,6 +52,15 @@ Optional Args:
         setup {
             runChangelog "changelogs/h2/complete/rollback.changelog.xml"
             rollback 5, "changelogs/h2/complete/rollback.changelog.xml"
+        }
+
+        expectations = {
+            def database = (Database) Scope.getCurrentScope().get("database", null)
+            def changelogHistoryService = Scope.getCurrentScope().getSingleton(ChangeLogHistoryServiceFactory.class).getChangeLogService(database)
+            List<RanChangeSet> ranChangeSets = changelogHistoryService.getRanChangeSets()
+            for (RanChangeSet ranChangeSet : ranChangeSets) {
+                assertNotNull(ranChangeSet.getDeploymentId())
+            }
         }
     }
 
