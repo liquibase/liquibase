@@ -93,8 +93,7 @@ public abstract class AbstractPluginFactory<T extends Plugin> implements PluginF
      * If the instances should not be treated as singletons, clone the objects before returning them from {@link #getPlugin(Object...)}.
      */
     protected synchronized Collection<T> findAllInstances() {
-        Boolean osgiPlatform = Scope.getCurrentScope().get(Scope.Attr.osgiPlatform, Boolean.class);
-        if (this.allInstances == null || (this.allInstances.isEmpty() && Boolean.TRUE.equals(osgiPlatform))) {
+        if (this.allInstances == null) {
             this.allInstances = new ArrayList<>();
 
             ServiceLocator serviceLocator = Scope.getCurrentScope().getServiceLocator();
