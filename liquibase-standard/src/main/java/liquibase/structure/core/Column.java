@@ -486,7 +486,7 @@ public class Column extends AbstractDatabaseObject {
         //
         // Backwards compatibility if this flag is set then consider this object to not be "real"
         //
-        if (Boolean.FALSE.equals( GlobalConfiguration.SHOULD_SNAPSHOT_RELATION_FOR_CALCULATED_COLUMNS.getCurrentValue())) {
+        if (Boolean.FALSE.equals( GlobalConfiguration.INCLUDE_RELATIONS_FOR_COMPUTED_COLUMNS.getCurrentValue())) {
             return false;
         }
         Object obj = getAttribute("relation", Object.class);
