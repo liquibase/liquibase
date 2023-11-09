@@ -457,21 +457,10 @@ jobs:
 
           find . -name original-*.jar -exec rm {} \;
           
-          echo "liquibase-core/target"
-          ls liquibase-core/target
-          ls liquibase-dist/target
-          echo "ls into target"
-          ls target
-          
           mkdir -p artifacts
           cp liquibase-dist/target/liquibase-${{ needs.setup.outputs.thisBranchFileName }}-SNAPSHOT.tar.gz artifacts
           cp liquibase-dist/target/liquibase-${{ needs.setup.outputs.thisBranchFileName }}-SNAPSHOT.zip artifacts
           cp liquibase-dist/target/liquibase-${{ needs.setup.outputs.thisBranchFileName }}-SNAPSHOT/internal/lib/liquibase-core.jar artifacts/liquibase-core-0-SNAPSHOT.jar
-          
-          cp liquibase-core/target/liquibase-core-0-SNAPSHOT.jar artifacts/liquibase-core-old-SNAPSHOT.jar
-          echo "Looking at old jars" 
-          ls artifacts/
-          
           cp liquibase-core/target/liquibase-core-0-SNAPSHOT-sources.jar artifacts/liquibase-core-0-SNAPSHOT-sources.jar
           cp target/liquibase-0-SNAPSHOT-javadoc.jar artifacts/liquibase-core-0-SNAPSHOT-javadoc.jar
 
