@@ -349,6 +349,7 @@
                         <param>liquibase.report.ShowSummaryGenerator</param>
                         <param>liquibase.changeset.ChangeSetService</param>
                         <param>liquibase.parser.LiquibaseSqlParser</param>
+                        <param>liquibase.database.LiquibaseTableNames</param>
                     </services>
                 </configuration>
                 <executions>

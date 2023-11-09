@@ -74,7 +74,7 @@ public class CommandFactory implements SingletonObject {
             // order > 0 means is means that this CommandStep has been declared as part of this command
             if (step.getOrder(commandDefinition) > 0) {
                 Optional<CommandStep> overrideStep = getOverride(overrides, step);
-                findDependenciesForCommand(pipelineGraph, allCommandStepInstances, overrideStep.orElse(step));
+                findDependenciesForCommand(pipelineGraph, allCommandStepInstances, overrideStep.orElse(step), overrides);
             }
         }
         pipelineGraph.computeDependencies();
@@ -96,23 +96,24 @@ public class CommandFactory implements SingletonObject {
      * Given a CommandStep step this method adds to the pipelineGraph all the CommandSteps that are providing the dependencies that it requires.
      */
     private void findDependenciesForCommand(DependencyUtil.DependencyGraph<CommandStep> pipelineGraph, Collection<CommandStep> allCommandStepInstances,
-                                            CommandStep step) {
+                                            CommandStep step, Map<Class<? extends CommandStep>, CommandStep> overrides) {
         if (step.requiredDependencies() == null || step.requiredDependencies().isEmpty()) {
             pipelineGraph.add(null, step);
         } else {
             for (Class<?> d : step.requiredDependencies()) {
-                CommandStep provider = whoProvidesClass(d, allCommandStepInstances);
-                pipelineGraph.add(provider, step);
-                findDependenciesForCommand(pipelineGraph, allCommandStepInstances, provider);
+                CommandStep provider = whoProvidesClass(d, allCommandStepInstances, overrides);
+                Optional<CommandStep> override = getOverride(overrides, provider);
+                pipelineGraph.add(override.orElse(provider), step);
+                findDependenciesForCommand(pipelineGraph, allCommandStepInstances, override.orElse(provider), overrides);
             }
         }
     }
 
     /**
-     * Go through all command steps and find the step that provides the desired class.
+     * Go through all command steps and find the step that provides the desired class, ignoring the overrides.
      */
-    private CommandStep whoProvidesClass(Class<?> dependency, Collection<CommandStep> allCommandStepInstances) {
-        return allCommandStepInstances.stream().filter(cs -> cs.providedDependencies() != null && cs.providedDependencies().contains(dependency))
+    private CommandStep whoProvidesClass(Class<?> dependency, Collection<CommandStep> allCommandStepInstances, Map<Class<? extends CommandStep>, CommandStep> overrides) {
+        return allCommandStepInstances.stream().filter(cs -> cs.providedDependencies() != null && cs.providedDependencies().contains(dependency) && !overrides.containsValue(cs))
                 .reduce((a, b) -> {
                     throw new IllegalStateException(String.format("More than one CommandStep provides class %s. Steps: %s, %s",
                             dependency.getName(), a.getClass().getName(), b.getClass().getName()));

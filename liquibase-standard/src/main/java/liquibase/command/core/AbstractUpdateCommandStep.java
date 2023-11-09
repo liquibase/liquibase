@@ -31,6 +31,7 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import static liquibase.Liquibase.MSG_COULD_NOT_RELEASE_LOCK;
+import static liquibase.executor.jvm.JdbcExecutor.ROWS_AFFECTED_SCOPE_KEY;
 
 public abstract class AbstractUpdateCommandStep extends AbstractCommandStep implements CleanUpCommandStep {
     public static final String DEFAULT_CHANGE_EXEC_LISTENER_RESULT_KEY = "defaultChangeExecListener";
@@ -98,7 +99,7 @@ public abstract class AbstractUpdateCommandStep extends AbstractCommandStep impl
 
             HashMap<String, Object> scopeValues = new HashMap<>();
             scopeValues.put("showSummary", getShowSummary(commandScope));
-            scopeValues.put("rowsAffected", rowsAffected);
+            scopeValues.put(ROWS_AFFECTED_SCOPE_KEY, rowsAffected);
             Scope.child(scopeValues, () -> {
                 try {
                     runChangeLogIterator.run(new UpdateVisitor(database, changeExecListener, new ShouldRunChangeSetFilter(database)),
