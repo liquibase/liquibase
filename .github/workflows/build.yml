@@ -470,7 +470,7 @@ jobs:
           
           cp liquibase-core/target/liquibase-core-0-SNAPSHOT.jar artifacts/liquibase-core-old-SNAPSHOT.jar
           echo "Looking at old jar" 
-          ls artifacts/liquibase-core-old-SNAPSHOT.jar
+          ls artifacts/
           
           cp liquibase-core/target/liquibase-core-0-SNAPSHOT-sources.jar artifacts/liquibase-core-0-SNAPSHOT-sources.jar
           cp target/liquibase-0-SNAPSHOT-javadoc.jar artifacts/liquibase-core-0-SNAPSHOT-javadoc.jar
