@@ -10,7 +10,6 @@ import liquibase.changelog.ChangeSet
 import liquibase.changelog.DatabaseChangeLog
 import liquibase.database.core.MockDatabase
 import liquibase.exception.UnexpectedLiquibaseException
-import liquibase.integration.commandline.LiquibaseCommandLineConfiguration
 import liquibase.statement.SqlStatement
 import liquibase.test.JUnitResourceAccessor
 import liquibase.util.StreamUtil

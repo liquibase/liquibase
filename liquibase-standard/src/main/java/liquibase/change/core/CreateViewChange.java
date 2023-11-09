@@ -96,6 +96,7 @@ public class CreateViewChange extends AbstractChange implements ReplaceIfExists 
         return replaceIfExists;
     }
 
+    @Override
     public void setReplaceIfExists(Boolean replaceIfExists) {
         this.replaceIfExists = replaceIfExists;
     }
@@ -157,7 +158,7 @@ public class CreateViewChange extends AbstractChange implements ReplaceIfExists 
             if ((StringUtil.trimToNull(getSelectQuery()) == null) && (StringUtil.trimToNull(getPath()) == null)) {
                 validate.addError("For a createView change, you must specify either 'path' or a nested view " +
                         "definition in " +
-                        "" + Scope.getCurrentScope().getSingleton(ChangeFactory.class).getChangeMetaData(this).getName());
+                        Scope.getCurrentScope().getSingleton(ChangeFactory.class).getChangeMetaData(this).getName());
             }
 
         }
@@ -327,7 +328,8 @@ public class CreateViewChange extends AbstractChange implements ReplaceIfExists 
                     .setFullDefinition(fullDefinition));
         }
 
-        List<Class<?>> databaseSupportsViewComments = Arrays.asList(OracleDatabase.class, PostgresDatabase.class, MSSQLDatabase.class, DB2Database.class);
+        List<Class<?>> databaseSupportsViewComments = Arrays.asList(OracleDatabase.class, PostgresDatabase.class, MSSQLDatabase.class, DB2Database.class,
+                SybaseASADatabase.class);
         boolean supportsViewComments = databaseSupportsViewComments.stream().anyMatch(clazz -> clazz.isInstance(database));
 
         if (supportsViewComments && (StringUtil.trimToNull(remarks) != null)) {

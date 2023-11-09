@@ -15,7 +15,7 @@ jobs:
     name: Build Installers
     runs-on: macos-latest #needs macos for apple notarization
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
 
       - name: Download liquibase-artifacts
         uses: liquibase/action-download-artifact@v2-liquibase
@@ -52,17 +52,15 @@ jobs:
           echo "$INSTALL4J_APPLE_KEY" | base64 -d > liquibase-dist/target/keys/datical_apple.p12
           echo "Saving windows key"
           echo "$INSTALL4J_WINDOWS_KEY" | base64 -d > liquibase-dist/target/keys/datical_windows.pfx
-          version="${{ needs.setup.outputs.version }}"
           
           ##### Rebuild installers
-          tarFile=$(pwd)/re-version/final/liquibase-0-SNAPSHOT.tar.gz
+          tarFile=$(pwd)/re-version/final/liquibase-master-SNAPSHOT.tar.gz
           scriptDir=$(pwd)/.github/util/
           
           mkdir -p liquibase-dist/target/liquibase-0-SNAPSHOT
           (cd liquibase-dist/target/liquibase-0-SNAPSHOT && tar xfz $tarFile)
           (cd liquibase-dist && $scriptDir/package-install4j.sh 0-SNAPSHOT)
           mv liquibase-dist/target/liquibase-*-installer-* re-version/final
-          mv liquibase-dist/target/liquibase-*deb re-version/final
 
           ##Sign Files
           .github/util/sign-artifacts.sh re-version/final

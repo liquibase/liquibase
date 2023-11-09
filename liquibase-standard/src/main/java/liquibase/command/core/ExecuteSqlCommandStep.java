@@ -106,7 +106,7 @@ public class ExecuteSqlCommandStep extends AbstractCommandStep {
         if (rows.isEmpty()) {
             out.append("-- Empty Resultset --\n");
         } else {
-            SortedSet<String> keys = new TreeSet<>();
+            LinkedHashSet<String> keys = new LinkedHashSet<>();
             for (Map<String, ?> row : rows) {
                 keys.addAll(row.keySet());
             }

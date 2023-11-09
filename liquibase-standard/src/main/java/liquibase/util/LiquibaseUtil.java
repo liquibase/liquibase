@@ -90,8 +90,10 @@ public class LiquibaseUtil {
             }
         }
 
-        String value;
-        value = liquibaseBuildProperties.getProperty(propertyId);
+        String value = null;
+        if(liquibaseBuildProperties != null) {
+            value = liquibaseBuildProperties.getProperty(propertyId);
+        }
         if (value == null) {
             value = "UNKNOWN";
         }

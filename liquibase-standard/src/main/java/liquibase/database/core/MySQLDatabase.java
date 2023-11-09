@@ -646,6 +646,9 @@ public class MySQLDatabase extends AbstractJdbcDatabase {
     @Override
     public String generateDatabaseFunctionValue(DatabaseFunction databaseFunction) {
         if (databaseFunction.getValue() != null && isCurrentTimeFunction(databaseFunction.getValue().toLowerCase())) {
+            if (databaseFunction.getValue().toLowerCase().contains("on update")) {
+                return databaseFunction.getValue();
+            }
             int precision = extractPrecision(databaseFunction);
             return precision != 0 ? getCurrentDateTimeFunction(precision) : getCurrentDateTimeFunction();
         }

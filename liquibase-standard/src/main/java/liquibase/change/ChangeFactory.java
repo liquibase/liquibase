@@ -53,7 +53,7 @@ public class ChangeFactory extends AbstractPluginFactory<Change>{
 
     public ChangeMetaData getChangeMetaData(Change change) {
         String cacheKey = generateCacheKey(change);
-        cachedMetadata.putIfAbsent(cacheKey, change.createChangeMetaData());
+        cachedMetadata.computeIfAbsent(cacheKey, c -> change.createChangeMetaData());
         return cachedMetadata.get(cacheKey);
     }
 

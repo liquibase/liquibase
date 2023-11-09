@@ -27,7 +27,11 @@ public class AddDefaultValueGeneratorMySQL extends AddDefaultValueGenerator {
     public ValidationErrors validate(AddDefaultValueStatement addDefaultValueStatement, Database database, SqlGeneratorChain sqlGeneratorChain) {
         ValidationErrors errors = super.validate(addDefaultValueStatement, database, sqlGeneratorChain);
         try {
-            if (addDefaultValueStatement.getDefaultValue() instanceof DatabaseFunction && database.getDatabaseMajorVersion() < 8) {
+            int majorVersion = database.getDatabaseMajorVersion();
+            int minorVersion = database.getDatabaseMinorVersion();
+
+            if (addDefaultValueStatement.getDefaultValue() instanceof DatabaseFunction
+                    && (majorVersion < 5 || (majorVersion == 5 && minorVersion < 7))) {
                 errors.addError("This version of mysql does not support non-literal default values");
             }
         }
@@ -41,6 +45,19 @@ public class AddDefaultValueGeneratorMySQL extends AddDefaultValueGenerator {
         Object defaultValue = statement.getDefaultValue();
         String finalDefaultValue;
         if (defaultValue instanceof DatabaseFunction) {
+            try {
+                if (database.getDatabaseMajorVersion() == 5 && database.getDatabaseMinorVersion() >= 7) {
+                    finalDefaultValue = defaultValue.toString();
+                    return new Sql[]{
+                            new UnparsedSql("ALTER TABLE " + database.escapeTableName(statement.getCatalogName(), statement.getSchemaName(), statement.getTableName()) + " MODIFY COLUMN " + database.escapeColumnName(statement.getCatalogName(), statement.getSchemaName(), statement.getTableName(), statement.getColumnName()) + " " + DataTypeFactory.getInstance().fromDescription(statement.getColumnDataType(), database).toDatabaseDataType(database) + " DEFAULT " + finalDefaultValue,
+                                    getAffectedColumn(statement))
+                    };
+                }
+            }
+            catch (DatabaseException e) {
+                Scope.getCurrentScope().getLog(getClass()).fine("Can't get database version");
+            }
+
             finalDefaultValue = "("+defaultValue+")";
             if (finalDefaultValue.startsWith("((")) {
                 finalDefaultValue = defaultValue.toString();
