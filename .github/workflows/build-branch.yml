@@ -92,7 +92,7 @@ jobs:
       - name: Set up Java for publishing to GitHub Repository
         uses: actions/setup-java@v3
         with:
-          java-version: '17'
+          java-version: '11'
           distribution: 'temurin'
           cache: 'maven'
           server-id: liquibase
