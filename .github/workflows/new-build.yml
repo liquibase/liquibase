@@ -98,7 +98,7 @@ jobs:
 
 
   build_publish_branch:
-    name: Build & Package
+    name: Artifacts- Build & Package
     runs-on: macos-latest
 #    needs: [setup]
     needs: [ setup, run-tests ]
@@ -135,7 +135,7 @@ jobs:
         env:
           GPG_PASSWORD: ${{ secrets.GPG_PASSPHRASE }}
 
-      #         #look for dependencies in maven
+      #look for dependencies in maven
       - name: maven-settings-xml-action
         uses: whelk-io/maven-settings-xml-action@v20
         with:
@@ -190,7 +190,7 @@ jobs:
           version=$(echo "$version" | sed 's/\//-/g')
           mvn versions:set -DnewVersion="$version"
 
-      - name: Build & Sign Artifacts
+      - name: Artifacts- Build & Sign
         env:
           INSTALL4J_LICENSE: ${{ secrets.INSTALL4J_LICENSE }}
           INSTALL4J_APPLE_KEY: ${{ secrets.INSTALL4J_APPLE_KEY }}
@@ -291,7 +291,7 @@ jobs:
           path: liquibase-dist/target/liquibase-${{ needs.setup.outputs.thisBranchName }}-SNAPSHOT/*
 
       # Publish <commitsha>-SNAPSHOT version to GPM
-      - name: Version Artifact
+      - name: Version Artifact Publish <commitsha>-SNAPSHOT version to GPM
         run: |
           mvn versions:set "-DnewVersion=${{ needs.setup.outputs.latestMergeSha }}-SNAPSHOT"
       - name: Publish <commitsha>-SNAPSHOT package
@@ -301,7 +301,7 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
       # Publish branch-SNAPSHOT version to GPM
-      - name: Version Artifact
+      - name: Version Artifact Publish branch-SNAPSHOT version to GPM
         run: |
           mvn versions:set "-DnewVersion=${{ needs.setup.outputs.thisBranchName }}-SNAPSHOT"
       - name: Publish branch-SNAPSHOT package
