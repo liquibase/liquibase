@@ -33,7 +33,7 @@ jobs:
 
       - name: LS
         run: |
-          cd liquibase-pro
+          cd liquibase-pro/liquibase-azure-deps
           ls -LR
 
       - name: Set up JDK 17
@@ -115,8 +115,7 @@ jobs:
 
       - name: Build & Test
         run: |
-          cd liquibase-azure-deps 
-          mvn -B clean package
+          cd liquibase-pro/liquibase-azure-deps && mvn -B clean package
 
       - name: Archive Modules
         uses: actions/upload-artifact@v3
