@@ -31,11 +31,6 @@ jobs:
           token: ${{ secrets.BOT_TOKEN }}
           path: liquibase-pro
 
-      - name: LS
-        run: |
-          cd liquibase-pro/liquibase-azure-deps
-          ls -LR
-
       - name: Set up JDK 17
         uses: actions/setup-java@v3
         with:
@@ -111,8 +106,7 @@ jobs:
           maven-version: ${{ env.MAVEN_VERSION }}
 
       - name: Set version
-#        run: mvn versions:set -DnewVersion=${{ inputs.liquibase-version }}
-        run: cd liquibase-pro/liquibase-azure-deps && mvn versions:set -DnewVersion=testing
+        run: cd liquibase-pro/liquibase-azure-deps && mvn versions:set -DnewVersion=${{ inputs.liquibase-version }}
 
       - name: Build & Test
         run: |
