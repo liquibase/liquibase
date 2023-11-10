@@ -72,7 +72,7 @@ do
 
     ##TODO: update XSD
   fi
-
+  
   ##rebuild jar to ensure META-INF manifest is correct
   rm -rf $workdir/finalize-jar
   mkdir $workdir/finalize-jar
