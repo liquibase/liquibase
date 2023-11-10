@@ -49,6 +49,17 @@ jobs:
           repositories: |
               [
                 {
+                  "id": "liquibase",
+                  "url": "https://maven.pkg.github.com/liquibase/liquibase",
+                  "releases": {
+                    "enabled": "false"
+                  },
+                  "snapshots": {
+                    "enabled": "true",
+                    "updatePolicy": "always"
+                  }
+                },
+                {
                   "id": "liquibase-pro",
                   "url": "https://maven.pkg.github.com/liquibase/liquibase-pro",
                   "releases": {
@@ -78,6 +89,11 @@ jobs:
           servers: |
             [
               {
+                "id": "liquibase",
+                "username": "liquibot",
+                "password": "${{ secrets.LIQUIBOT_PAT }}"
+              },
+              {
                 "id": "liquibase-pro",
                 "username": "liquibot",
                 "password": "${{ secrets.LIQUIBOT_PAT }}"
@@ -93,6 +109,11 @@ jobs:
         uses: stCarolas/setup-maven@v4.5
         with:
           maven-version: ${{ env.MAVEN_VERSION }}
+
+      - name: LS
+        run: |
+          echo "CHECK pom"
+          cd /home/runner/work/liquibase/liquibase
 
       - name: Set version
 #        run: mvn versions:set -DnewVersion=${{ inputs.liquibase-version }}
