@@ -21,4 +21,19 @@ public interface ConfiguredValueModifier<DataType> extends Plugin {
      * If an implementation wants to modify the value, it should call {@link ConfiguredValue#override(ProvidedValue)}
      */
     void override(ConfiguredValue<DataType> object);
+
+    /**
+     * Called to potentially override the given value.
+     * @param value value to override
+     * @return the overridden value if it was overridden, or the provided <code>value</code> otherwise
+     */
+    default String override(String value) {
+        // create a simple ConfiguredValue wrapper
+        ConfiguredValue valueWrapper = new ConfiguredValue(value, null, null);
+        // set the current value in the wrapper
+        valueWrapper.override(value, "argument");
+        // call the value modifier to replace this value if appropriate
+        override(valueWrapper);
+        return String.valueOf(valueWrapper.getValue());
+    }
 }
