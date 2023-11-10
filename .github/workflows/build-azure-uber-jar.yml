@@ -112,7 +112,7 @@ jobs:
 
       - name: Set version
 #        run: mvn versions:set -DnewVersion=${{ inputs.liquibase-version }}
-        run: mvn versions:set -DnewVersion=testing
+        run: cd liquibase-pro/liquibase-azure-deps && mvn versions:set -DnewVersion=testing
 
       - name: Build & Test
         run: |
