@@ -49,17 +49,6 @@ jobs:
           repositories: |
               [
                 {
-                  "id": "liquibase",
-                  "url": "https://maven.pkg.github.com/liquibase/liquibase",
-                  "releases": {
-                    "enabled": "false"
-                  },
-                  "snapshots": {
-                    "enabled": "true",
-                    "updatePolicy": "always"
-                  }
-                },
-                {
                   "id": "liquibase-pro",
                   "url": "https://maven.pkg.github.com/liquibase/liquibase-pro",
                   "releases": {
@@ -88,11 +77,6 @@ jobs:
             ]
           servers: |
             [
-              {
-                "id": "liquibase",
-                "username": "liquibot",
-                "password": "${{ secrets.LIQUIBOT_PAT }}"
-              },
               {
                 "id": "liquibase-pro",
                 "username": "liquibot",
