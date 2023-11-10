@@ -110,11 +110,6 @@ jobs:
         with:
           maven-version: ${{ env.MAVEN_VERSION }}
 
-      - name: LS
-        run: |
-          echo "CHECK pom"
-          cd /home/runner/work/liquibase/liquibase
-
       - name: Set version
 #        run: mvn versions:set -DnewVersion=${{ inputs.liquibase-version }}
         run: mvn versions:set -DnewVersion=testing
