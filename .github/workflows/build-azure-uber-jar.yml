@@ -111,7 +111,8 @@ jobs:
           maven-version: ${{ env.MAVEN_VERSION }}
 
       - name: Set version
-        run: mvn versions:set -DnewVersion=${{ inputs.liquibase-version }}
+#        run: mvn versions:set -DnewVersion=${{ inputs.liquibase-version }}
+        run: mvn versions:set -DnewVersion=testing
 
       - name: Build & Test
         run: |
