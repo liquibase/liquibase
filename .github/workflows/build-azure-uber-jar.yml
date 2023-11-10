@@ -33,7 +33,7 @@ jobs:
 
       - name: LS
         run: |
-          cd liquibase-pro/liquibase-azure-deps
+          cd liquibase-pro
           ls -LR
 
       - name: Set up JDK 17
