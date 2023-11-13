@@ -270,6 +270,27 @@ public class PostgreSQLIntegrationTest extends AbstractIntegrationTest {
     }
 
     @Test
+    public void testGeneratedClobColumn() throws Exception {
+        assumeNotNull(getDatabase());
+        assumeTrue(getDatabase().getDatabaseMajorVersion() >= 12);
+        clearDatabase();
+        String textToTest = "GENERATED ALWAYS AS ((surname || ', '::text) || forename) STORED";
+
+        Scope.getCurrentScope().getSingleton(ExecutorService.class).getExecutor("jdbc", getDatabase())
+            .execute(new RawSqlStatement(String.format(
+                    "CREATE TABLE generated_text_test (fullname text %s, surname text, forename text)",
+                    textToTest)));
+
+        ByteArrayOutputStream baos = new ByteArrayOutputStream();
+        new CommandScope(GenerateChangelogCommandStep.COMMAND_NAME)
+            .addArgumentValue(DbUrlConnectionCommandStep.DATABASE_ARG, getDatabase())
+            .setOutput(baos)
+            .execute();
+
+        assertTrue(baos.toString().contains(textToTest));
+    }
+
+    @Test
     public void validateUserCanOnlyAccessTablesFromSchemasAllowedToRead() throws Exception {
         assumeNotNull(this.getDatabase());
 
