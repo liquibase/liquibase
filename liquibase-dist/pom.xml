@@ -149,6 +149,12 @@
 			<version>2.2</version>
 		</dependency>
 
+		<dependency>
+			<groupId>org.mvel</groupId>
+			<artifactId>mvel2</artifactId>
+			<version>2.5.0.Final</version>
+		</dependency>
+
 		<!-- needed for inclusion in CLI when running in newer java versions -->
 		<dependency>
 			<groupId>javax.xml.bind</groupId>

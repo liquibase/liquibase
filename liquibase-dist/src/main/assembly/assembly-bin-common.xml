@@ -93,6 +93,7 @@
 				<include>org.liquibase:liquibase-commercial:</include>
                 <include>com.opencsv:opencsv:</include>
 				<include>org.yaml:snakeyaml:jar:</include>
+        <include>org.mvel:mvel2:jar:</include>
 				<include>javax.xml.bind:jaxb-api:jar:</include>
                 <include>org.glassfish.jaxb:jaxb-runtime:jar:</include>
                 <include>org.glassfish.jaxb:jaxb-core:jar:</include>
