@@ -66,10 +66,11 @@ public class UpdateVisitor implements ChangeSetVisitor {
         CheckSum oldChecksum = updateCheckSumIfRequired(changeSet);
         if (isAccepted) {
             executeAcceptedChange(changeSet, databaseChangeLog, database);
+            this.database.commit();
         } else if ((oldChecksum == null || oldChecksum.getVersion() < ChecksumVersion.latest().getVersion())) {
             upgradeCheckSumVersionForAlreadyExecutedOrNullChange(changeSet, database, oldChecksum);
+            this.database.commit();
         }
-        this.database.commit();
     }
 
     /**
