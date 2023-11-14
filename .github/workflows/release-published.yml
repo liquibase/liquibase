@@ -91,24 +91,29 @@ jobs:
 
           ##extracts and sign poms
           unzip -j liquibase-core-${version}.jar META-INF/maven/org.liquibase/liquibase-core/pom.xml
+          sed -i 's/<version>release-SNAPSHOT<\/version>/<version>${version}<\/version>/' pom.xml
           mv pom.xml liquibase-core-${version}.pom
           gpg --batch --pinentry-mode=loopback --passphrase "$GPG_PASSWORD" -ab liquibase-core-${version}.pom
 
           unzip -j liquibase-maven-plugin-${version}.jar META-INF/maven/org.liquibase/liquibase-maven-plugin/pom.xml
+          sed -i 's/<version>release-SNAPSHOT<\/version>/<version>${version}<\/version>/' pom.xml
           mv pom.xml liquibase-maven-plugin-${version}.pom
           gpg --batch --pinentry-mode=loopback --passphrase "$GPG_PASSWORD" -ab liquibase-maven-plugin-${version}.pom
 
           unzip -j liquibase-cdi-${version}.jar META-INF/maven/org.liquibase/liquibase-cdi/pom.xml
+          sed -i 's/<version>release-SNAPSHOT<\/version>/<version>${version}<\/version>/' pom.xml
           mv pom.xml liquibase-cdi-${version}.pom
           sed -i -e "s/<description>/<name>Liquibase CDI Plugin<\/name><description>/" liquibase-cdi-${version}.pom   ## name didn't end up in pom. Hack it in for now
           gpg --batch --pinentry-mode=loopback --passphrase "$GPG_PASSWORD" -ab liquibase-cdi-${version}.pom
 
           unzip -j liquibase-cdi-jakarta-${version}.jar META-INF/maven/org.liquibase/liquibase-cdi-jakarta/pom.xml
+          sed -i 's/<version>release-SNAPSHOT<\/version>/<version>${version}<\/version>/' pom.xml
           mv pom.xml liquibase-cdi-jakarta-${version}.pom
           sed -i -e "s/<description>/<name>Liquibase cdi-jakarta Plugin<\/name><description>/" liquibase-cdi-jakarta-${version}.pom   ## name didn't end up in pom. Hack it in for now
           gpg --batch --pinentry-mode=loopback --passphrase "$GPG_PASSWORD" -ab liquibase-cdi-jakarta-${version}.pom
 
           unzip -j liquibase-commercial-${version}.jar META-INF/maven/org.liquibase/liquibase-commercial/pom.xml
+          sed -i 's/<version>release-SNAPSHOT<\/version>/<version>${version}<\/version>/' pom.xml
           mv pom.xml liquibase-commercial-${version}.pom
           sed -i -e "s/<\/licenses>/<\/licenses><scm><connection>private<\/connection><developerConnection>private<\/developerConnection><url>private<\/url><\/scm>/" liquibase-commercial-${version}.pom   ## scm info not in the pom          
           gpg --batch --pinentry-mode=loopback --passphrase "$GPG_PASSWORD" -ab liquibase-commercial-${version}.pom
