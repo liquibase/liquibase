@@ -257,6 +257,12 @@ public class ChangeSet implements Conditional, ChangeLogChild {
     @Setter
     private ExecType rollbackExecType;
 
+    @Getter
+    private Date operationStartTime;
+
+    @Getter
+    private Date operationStopTime;
+
     public boolean shouldAlwaysRun() {
         return alwaysRun;
     }
@@ -635,7 +641,8 @@ public class ChangeSet implements Conditional, ChangeLogChild {
             return ExecType.MARK_RAN;
         }
 
-        long startTime = new Date().getTime();
+        operationStartTime = new Date();
+        long startTime = operationStartTime.getTime();
         Scope.getCurrentScope().addMdcValue(MdcKey.CHANGESET_OPERATION_START_TIME, Instant.ofEpochMilli(startTime).toString());
 
         boolean skipChange = false;
@@ -768,7 +775,8 @@ public class ChangeSet implements Conditional, ChangeLogChild {
                 if (execType == null) {
                     execType = ExecType.EXECUTED;
                 }
-                long stopTime = new Date().getTime();
+                operationStopTime = new Date();
+                long stopTime = operationStopTime.getTime();
                 Scope.getCurrentScope().addMdcValue(MdcKey.CHANGESET_OPERATION_STOP_TIME, Instant.ofEpochMilli(stopTime).toString());
                 Scope.getCurrentScope().addMdcValue(MdcKey.CHANGESET_OUTCOME, execType.value.toLowerCase());
                 log.info("ChangeSet " + toString(false) + " ran successfully in " + (stopTime - startTime) + "ms");
@@ -777,7 +785,8 @@ public class ChangeSet implements Conditional, ChangeLogChild {
             }
 
         } catch (Exception e) {
-            Scope.getCurrentScope().addMdcValue(MdcKey.CHANGESET_OPERATION_STOP_TIME, Instant.ofEpochMilli(new Date().getTime()).toString());
+            operationStopTime = new Date();
+            Scope.getCurrentScope().addMdcValue(MdcKey.CHANGESET_OPERATION_STOP_TIME, Instant.ofEpochMilli(operationStopTime.getTime()).toString());
             Scope.getCurrentScope().addMdcValue(MdcKey.CHANGESET_OUTCOME, ExecType.FAILED.value.toLowerCase());
             log.severe(String.format("ChangeSet %s encountered an exception.", toString(false)));
             setErrorMsg(e.getMessage());
@@ -873,7 +882,8 @@ public class ChangeSet implements Conditional, ChangeLogChild {
     }
 
     public void rollback(Database database, ChangeExecListener listener) throws RollbackFailedException {
-        Scope.getCurrentScope().addMdcValue(MdcKey.CHANGESET_OPERATION_START_TIME, Instant.ofEpochMilli(new Date().getTime()).toString());
+        operationStartTime = new Date();
+        Scope.getCurrentScope().addMdcValue(MdcKey.CHANGESET_OPERATION_START_TIME, Instant.ofEpochMilli(operationStartTime.getTime()).toString());
         addChangeSetMdcProperties();
         Scope.getCurrentScope().addMdcValue(MdcKey.DEPLOYMENT_ID, getDeploymentId());
         Executor originalExecutor = setupCustomExecutorIfNecessary(database);
@@ -940,11 +950,13 @@ public class ChangeSet implements Conditional, ChangeLogChild {
             }
             rollbackExecType = ExecType.EXECUTED;
             Scope.getCurrentScope().addMdcValue(MdcKey.CHANGESET_OUTCOME, ExecType.EXECUTED.value.toLowerCase());
-            Scope.getCurrentScope().addMdcValue(MdcKey.CHANGESET_OPERATION_STOP_TIME, Instant.ofEpochMilli(new Date().getTime()).toString());
+            operationStopTime = new Date();
+            Scope.getCurrentScope().addMdcValue(MdcKey.CHANGESET_OPERATION_STOP_TIME, Instant.ofEpochMilli(operationStopTime.getTime()).toString());
             Scope.getCurrentScope().getLog(getClass()).fine("ChangeSet " + toString() + " has been successfully rolled back.");
         } catch (Exception e) {
             setErrorMsg(e.getMessage());
-            Scope.getCurrentScope().addMdcValue(MdcKey.CHANGESET_OPERATION_STOP_TIME, Instant.ofEpochMilli(new Date().getTime()).toString());
+            operationStopTime = new Date();
+            Scope.getCurrentScope().addMdcValue(MdcKey.CHANGESET_OPERATION_STOP_TIME, Instant.ofEpochMilli(operationStopTime.getTime()).toString());
             try {
                 rollbackExecType = ExecType.FAILED;
                 Scope.getCurrentScope().addMdcValue(MdcKey.CHANGESET_OUTCOME, ExecType.FAILED.value.toLowerCase());
