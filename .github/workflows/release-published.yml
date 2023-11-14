@@ -91,7 +91,7 @@ jobs:
 
           ##extracts and sign poms
           unzip -j liquibase-core-${version}.jar META-INF/maven/org.liquibase/liquibase-core/pom.xml
-          sed -i -e 's/<version>release-SNAPSHOT<\/version>/<version>${version}<\/version>/' pom.xml
+          sed -i -e "s/<version>release-SNAPSHOT<\/version>/<version>${version}<\/version>/" pom.xml ## version didn't end up in pom. So using double quotes
           mv pom.xml liquibase-core-${version}.pom
           gpg --batch --pinentry-mode=loopback --passphrase "$GPG_PASSWORD" -ab liquibase-core-${version}.pom
 
