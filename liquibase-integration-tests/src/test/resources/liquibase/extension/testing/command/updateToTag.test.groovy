@@ -1,6 +1,8 @@
 package liquibase.extension.testing.command
 
+
 import liquibase.exception.CommandValidationException
+import liquibase.util.TestUtil
 
 CommandTests.define {
     command = ["updateToTag"]
@@ -55,6 +57,10 @@ Optional Args:
                 defaultChangeExecListener: 'not_null',
                 updateReport: 'not_null'
         ]
+
+        expectations = {
+            TestUtil.assertAllDeploymentIdsNonNull()
+        }
     }
 
     run "Happy path with a change set that has complicated labels and contexts", {
