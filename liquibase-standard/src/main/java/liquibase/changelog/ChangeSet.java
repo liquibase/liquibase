@@ -258,9 +258,11 @@ public class ChangeSet implements Conditional, ChangeLogChild {
     private ExecType rollbackExecType;
 
     @Getter
+    @Setter
     private Date operationStartTime;
 
     @Getter
+    @Setter
     private Date operationStopTime;
 
     public boolean shouldAlwaysRun() {
