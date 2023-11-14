@@ -187,10 +187,9 @@ jobs:
         uses: softprops/action-gh-release@v1
         with:
           tag_name: v${{ needs.setup.outputs.version }}
-          draft: true
           fail_on_unmatched_files: true
           body: Liquibase ${{ needs.setup.outputs.version }}
-          generate_release_notes: true
+          generate_release_notes: false
           files: re-version/final/*
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
