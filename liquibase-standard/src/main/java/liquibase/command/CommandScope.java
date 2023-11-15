@@ -9,8 +9,8 @@ import liquibase.integration.commandline.LiquibaseCommandLineConfiguration;
 import liquibase.listener.LiquibaseListener;
 import liquibase.logging.mdc.MdcKey;
 import liquibase.logging.mdc.MdcObject;
-import liquibase.util.ISODateFormat;
 import liquibase.util.StringUtil;
+import lombok.Getter;
 
 import java.io.FilterOutputStream;
 import java.io.IOException;
@@ -48,6 +48,8 @@ public class CommandScope {
     private final String shortConfigPrefix;
 
     private OutputStream outputStream;
+    @Getter
+    private Date operationStartTime;
 
     /**
      * Creates a new scope for the given command.
@@ -194,7 +196,8 @@ public class CommandScope {
      * Executes the command in this scope, and returns the results.
      */
     public CommandResults execute() throws CommandExecutionException {
-        Scope.getCurrentScope().addMdcValue(MdcKey.OPERATION_START_TIME, Instant.ofEpochMilli(new Date().getTime()).toString());
+        operationStartTime = new Date();
+        Scope.getCurrentScope().addMdcValue(MdcKey.OPERATION_START_TIME, Instant.ofEpochMilli(operationStartTime.getTime()).toString());
         // We don't want to reset the command name even when defining another CommandScope during execution
         // because we intend on keeping this value as the command entered to the console
         if (!Scope.getCurrentScope().isMdcKeyPresent(MdcKey.LIQUIBASE_COMMAND_NAME)) {
