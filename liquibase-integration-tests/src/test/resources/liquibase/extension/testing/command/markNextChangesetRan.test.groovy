@@ -1,6 +1,7 @@
 package liquibase.extension.testing.command
 
 import liquibase.exception.CommandValidationException
+import liquibase.util.TestUtil
 
 CommandTests.define {
     command = ["markNextChangesetRan"]
@@ -38,6 +39,10 @@ Optional Args:
                 password : { it.password },
                 changelogFile: "changelogs/h2/complete/simple.changelog.xml"
         ]
+
+        expectations = {
+            TestUtil.assertAllDeploymentIdsNonNull()
+        }
     }
 
     run "Run without a URL throws an exception", {

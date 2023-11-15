@@ -4,6 +4,7 @@ import liquibase.Contexts;
 import liquibase.LabelExpression;
 import liquibase.RuntimeEnvironment;
 import liquibase.Scope;
+import liquibase.changelog.ChangeLogHistoryServiceFactory;
 import liquibase.changelog.ChangeLogIterator;
 import liquibase.changelog.DatabaseChangeLog;
 import liquibase.changelog.filter.*;
@@ -43,6 +44,8 @@ public class MarkNextChangesetRanCommandStep extends AbstractCommandStep {
             Database database = ((Database) commandScope.getDependency(Database.class));
             Contexts contexts = ((Contexts) commandScope.getDependency(Contexts.class));
             LabelExpression labelExpression = ((LabelExpression) commandScope.getDependency(LabelExpression.class));
+
+            Scope.getCurrentScope().getSingleton(ChangeLogHistoryServiceFactory.class).getChangeLogService(database).generateDeploymentId();
 
             ChangeLogIterator logIterator = new ChangeLogIterator(changeLog,
                     new NotRanChangeSetFilter(database.getRanChangeSetList()),
