@@ -11,7 +11,7 @@
 
     <groupId>org.liquibase.ext</groupId>
     <artifactId>liquibase-bigquery</artifactId>
-    <version>4.24.1-SNAPSHOT</version>
+    <version>4.25.0-SNAPSHOT</version>
 
     <name>Liquibase Extension Google BigQuery support</name>
     <description>Add this Liquibase extension to your project to support Google BigQuery</description>
@@ -19,7 +19,7 @@
 
 
     <properties>
-        <liquibase.version>4.24.0</liquibase.version>
+        <liquibase.version>4.25.0</liquibase.version>
         <spock-core.version>1.3-groovy-2.4</spock-core.version>
         <spock-reports.version>1.8.0</spock-reports.version>
         <groovy-all.version>2.4.17</groovy-all.version>
@@ -119,7 +119,7 @@
             <plugin>
                 <groupId>org.liquibase</groupId>
                 <artifactId>liquibase-maven-plugin</artifactId>
-                <version>4.24.0</version>
+                <version>4.25.0</version>
                 <configuration>
                     <propertyFileWillOverride>true</propertyFileWillOverride>
                     <propertyFile>target/classes/liquibase.properties</propertyFile>
