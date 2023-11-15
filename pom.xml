@@ -10,7 +10,7 @@
 
     <groupId>org.liquibase.ext</groupId>
     <artifactId>liquibase-bigquery</artifactId>
-    <version>4.25.0</version>
+    <version>4.26.0-SNAPSHOT</version>
 
     <name>Liquibase Extension Google BigQuery support</name>
     <description>Add this Liquibase extension to your project to support Google BigQuery</description>
@@ -29,7 +29,7 @@
         <connection>scm:git:${project.scm.url}</connection>
         <developerConnection>scm:git:${project.scm.url}</developerConnection>
 		<url>https://github.com/liquibase/liquibase-bigquery.git</url>
-		<tag>liquibase-bigquery-4.25.0</tag>
+		<tag>HEAD</tag>
 	</scm>
 
     <dependencyManagement>
