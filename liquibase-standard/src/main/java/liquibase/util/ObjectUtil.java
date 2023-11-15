@@ -17,6 +17,7 @@ import java.math.BigInteger;
 import java.text.ParseException;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.function.Function;
 
 /**
  * Various methods that make it easier to read and write object properties using the propertyName, instead of having
@@ -392,6 +393,23 @@ public class ObjectUtil {
             return defaultValue;
         } else {
             return value;
+        }
+    }
+
+    /**
+     * Return the defaultValue if the object is null. Otherwise, call the getter on the supplied object and return that
+     * value. This is essentially equivalent to the ternary operation:
+     * <code>
+     *     return object == null ? defaultValue : getter.apply(object)
+     * </code>
+     * @param <T> the return type
+     * @param <U> the type of the object upon which a null check is conducted
+     */
+    public static <T, U> T defaultIfNull(U object, T defaultValue, Function<U, T> getter) {
+        if (object == null) {
+            return defaultValue;
+        } else {
+            return getter.apply(object);
         }
     }
 
