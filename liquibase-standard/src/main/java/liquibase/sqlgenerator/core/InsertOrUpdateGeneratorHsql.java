@@ -77,7 +77,7 @@ public class InsertOrUpdateGeneratorHsql extends InsertOrUpdateGenerator {
 	// Copied from liquibase.sqlgenerator.core.InsertOrUpdateGeneratorMySQL
 	private String convertToString(Object newValue, Database database) {
 		String sqlString;
-		if ((newValue == null) || "".equals(newValue.toString()) || "NULL".equalsIgnoreCase(newValue.toString())) {
+		if ((newValue == null) || newValue.toString().isEmpty() || "NULL".equalsIgnoreCase(newValue.toString())) {
 			sqlString = "NULL";
 		} else if ((newValue instanceof String) && !looksLikeFunctionCall(((String) newValue), database)) {
 			sqlString = "'" + database.escapeStringForDatabase(newValue.toString()) + "'";

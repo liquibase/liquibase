@@ -706,6 +706,9 @@ public class LoadDataChangeTest extends StandardChangeTest {
         assert dCol2 instanceof Timestamp
         ((Timestamp) dCol2).toLocalDateTime() == LocalDateTime.parse("2020-01-02T03:04:05")
         columnValue(sqlStatements[2], Col.bool) == Boolean.TRUE
+        for (Col n : [Col.name, Col.id, Col.date, Col.bool]) {
+            columnValue(sqlStatements[4], n) == null
+        }
     }
 
     def "defaults"() {
@@ -744,6 +747,9 @@ public class LoadDataChangeTest extends StandardChangeTest {
         assert dCol2 instanceof Timestamp
         ((Timestamp) dCol2).toLocalDateTime() == LocalDateTime.parse("2020-01-02T03:04:05")
         columnValue(sqlStatements[2], Col.bool) == Boolean.TRUE
+        for (Col n : [Col.name, Col.id, Col.date, Col.bool]) {
+            columnValue(sqlStatements[4], n) == null
+        }
     }
 
     def "inconsistent NULL handling"() {

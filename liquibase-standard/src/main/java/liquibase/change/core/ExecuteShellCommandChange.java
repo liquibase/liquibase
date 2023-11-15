@@ -355,7 +355,7 @@ public class ExecuteShellCommandChange extends AbstractChange {
         } else {
             List<String> os = StringUtil.splitAndTrim(StringUtil.trimToEmpty(parsedNode.getChildValue(null, "os",
                     String.class)), ",");
-            if ((os.size() == 1) && ("".equals(os.get(0)))) {
+            if ((os.size() == 1) && (os.get(0).isEmpty())) {
                 this.os = null;
             } else if (!os.isEmpty()) {
                 this.os = os;

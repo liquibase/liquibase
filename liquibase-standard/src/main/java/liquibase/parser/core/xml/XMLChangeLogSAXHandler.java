@@ -100,7 +100,7 @@ class XMLChangeLogSAXHandler extends DefaultHandler {
         ParsedNode node = nodeStack.pop();
         try {
             String seenText = this.textStack.pop().toString();
-            if (!"".equals(StringUtil.trimToEmpty(seenText))) {
+            if (!StringUtil.trimToEmpty(seenText).isEmpty()) {
                 node.setValue(seenText.trim());
             }
         } catch (ParsedNodeException e) {

@@ -142,7 +142,7 @@ public class LoadDataChange extends AbstractTableChange implements ChangeWithCol
         //if the value is null (not provided) we want to use default value
         if (commentLineStartsWith == null) {
             this.commentLineStartsWith = DEFAULT_COMMENT_PATTERN;
-        } else if ("".equals(commentLineStartsWith)) {
+        } else if (commentLineStartsWith.isEmpty()) {
             this.commentLineStartsWith = null;
         } else {
             this.commentLineStartsWith = commentLineStartsWith;
@@ -350,13 +350,10 @@ public class LoadDataChange extends AbstractTableChange implements ChangeWithCol
                         } else if (columnConfig.getType().equalsIgnoreCase("date")
                                 || columnConfig.getType().equalsIgnoreCase("datetime")
                                 || columnConfig.getType().equalsIgnoreCase("time")) {
-                            if ("NULL".equalsIgnoreCase(value) || "".equals(value)) {
-                                valueConfig.setValue(null);
-                            } else {
                                 try {
                                     // Need the column type for handling 'NOW' or 'TODAY' type column value
                                     valueConfig.setType(columnConfig.getType());
-                                    if (value != null) {
+                                    if (value != null && !(StringUtil.equalsWordNull(value) || value.isEmpty())) {
                                         valueConfig.setValueDate(value);
                                     } else {
                                         valueConfig.setValueDate(columnConfig.getDefaultValueDate());
@@ -364,7 +361,6 @@ public class LoadDataChange extends AbstractTableChange implements ChangeWithCol
                                 } catch (DateParseException e) {
                                     throw new UnexpectedLiquibaseException(e);
                                 }
-                            }
                         } else if (columnConfig.getTypeEnum() == LOAD_DATA_TYPE.STRING) {
                             valueConfig.setType(columnConfig.getType());
                             valueConfig.setValue(value == null ? "" : value);
