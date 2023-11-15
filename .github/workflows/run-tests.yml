@@ -27,6 +27,9 @@ on:
 #      - github-action-**
 #      - DAT-**
 #      - dependabot-**
+#      branches:
+#       - *
+
     paths-ignore:
         - '**.md'
 
