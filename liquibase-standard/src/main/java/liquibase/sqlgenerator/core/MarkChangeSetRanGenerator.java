@@ -105,10 +105,12 @@ public class MarkChangeSetRanGenerator extends AbstractSqlGenerator<MarkChangeSe
     }
 
     public static String getTagFromChangeset(ChangeSet changeSet) {
-        for (Change change : changeSet.getChanges()) {
-            if (change instanceof TagDatabaseChange) {
-                TagDatabaseChange tagChange = (TagDatabaseChange) change;
-                return tagChange.getTag();
+        if (changeSet != null) {
+            for (Change change : changeSet.getChanges()) {
+                if (change instanceof TagDatabaseChange) {
+                    TagDatabaseChange tagChange = (TagDatabaseChange) change;
+                    return tagChange.getTag();
+                }
             }
         }
         return null;
