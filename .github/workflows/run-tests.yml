@@ -20,15 +20,14 @@ on:
       - opened
       - reopened
       - synchronize
-      - labeled
   #remove commented code later
-#  push:
-#    branches-ignore:
-#      - github-action-**
-#      - DAT-**
-#      - dependabot-**
-#    branches:
-#       - *
+  push:
+    branches-ignore:
+      - github-action-**
+      - DAT-**
+      - dependabot-**
+    branches:
+      - *
 
     paths-ignore:
         - '**.md'
