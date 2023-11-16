@@ -40,13 +40,11 @@ jobs:
         run: |
           latest_merge_sha=`(git rev-parse HEAD)`
           echo "latestMergeSha=${latest_merge_sha}" >> $GITHUB_OUTPUT
-
       - name: Get Timestamp
         id: get-timestamp
         run: |
           timeStamp=$(date +'%Y-%m-%d %H:%M:%S %Z')
           echo "timestamp=${timeStamp}" >> $GITHUB_OUTPUT
-
       - name: Get Current BranchName
         id: get-branch-name
         run: |
@@ -61,7 +59,6 @@ jobs:
           modified_branch_name=`(echo $branch_name | tr '/_' '-')`
           echo "thisBranchName=$modified_branch_name" >> $GITHUB_OUTPUT          
           echo $modified_branch_name
-
       - name: Checkout OSS Repo
         uses: actions/checkout@v3
         with:
@@ -89,7 +86,6 @@ jobs:
               branchExistsInBoth = false
             }
             core.setOutput("branchExistsInBoth", branchExistsInBoth)
-
   run-tests:
     needs: [setup]
     if: needs.setup.outputs.branchExistsInBoth == 'true' && success()
@@ -100,7 +96,7 @@ jobs:
   build_publish_branch:
     name: Artifacts- Build & Package
     runs-on: macos-latest
-#    needs: [setup]
+    #    needs: [setup]
     needs: [ setup, run-tests ]
     if: needs.setup.outputs.branchExistsInBoth == 'true'
     permissions:
@@ -189,7 +185,6 @@ jobs:
           # Replace / with - in branch name
           version=$(echo "$version" | sed 's/\//-/g')
           mvn versions:set -DnewVersion="$version"
-
       - name: Artifacts- Build & Sign
         env:
           INSTALL4J_LICENSE: ${{ secrets.INSTALL4J_LICENSE }}
@@ -263,7 +258,7 @@ jobs:
           cp $commercialJarM2Location artifacts
           cp /tmp/liquibase-commercial-${{ needs.setup.outputs.thisBranchName }}-SNAPSHOT-sources.jar artifacts
           cp /tmp/liquibase-commercial-${{ needs.setup.outputs.thisBranchName }}-SNAPSHOT-javadoc.jar artifacts
-         
+          
           .github/util/sign-artifacts.sh artifacts
           
           ##prepare branch-named convenience artifacts directories
@@ -277,7 +272,6 @@ jobs:
           cp liquibase-extension-testing/target/liquibase-extension-testing-0-SNAPSHOT.jar artifacts-named/liquibase-extension-testing-${{ needs.setup.outputs.thisBranchName }}.jar
           cp liquibase-extension-testing/target/liquibase-extension-testing-0-SNAPSHOT-deps.jar artifacts-named/liquibase-extension-testing-${{ needs.setup.outputs.thisBranchName }}-deps.jar
           cp $commercialJarM2Location artifacts-named/liquibase-commercial-${{ needs.setup.outputs.thisBranchName }}.jar
-
       - name: Archive Packages
         uses: actions/upload-artifact@v3
         with:
@@ -328,6 +322,6 @@ jobs:
       latestMergeSha: ${{ needs.setup.outputs.latestMergeSha }}
 
   run-tests-harness:
-    needs: [ setup, build_publish_branch ]
+    needs: [ setup,build_publish_branch ]
     uses: liquibase/liquibase/.github/workflows/run-test-harness.yml@github-action-DAT-15775
     secrets: inherit
