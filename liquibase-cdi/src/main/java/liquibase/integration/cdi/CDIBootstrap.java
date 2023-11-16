@@ -16,6 +16,7 @@ import java.util.Set;
 /**
  * CDI Bootstrap
  * <p/>
+ * 
  * Observes CDI container startup events and triggers the Liquibase update
  * process via @PostConstruct on CDILiquibase
  *
