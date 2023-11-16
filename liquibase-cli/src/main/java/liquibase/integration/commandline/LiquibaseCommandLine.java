@@ -73,7 +73,7 @@ public class LiquibaseCommandLine {
     private final Set<String> legacyNoLongerGlobalArguments;
 
     /**
-     * Arguments that used to be command arguments but are now global
+     * Arguments that used to be command arguments are now global
      */
     private final Set<String> legacyNoLongerCommandArguments;
     private Level configuredLogLevel;
