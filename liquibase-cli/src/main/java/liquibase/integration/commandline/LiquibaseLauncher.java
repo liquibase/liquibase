@@ -18,6 +18,7 @@ import static liquibase.integration.commandline.LiquibaseLauncherSettings.getSet
 /**
  * Launcher which builds up the classpath needed to run Liquibase, then calls {@link LiquibaseCommandLine#main(String[])}.
  * <p>
+ *  
  * Supports the following configuration options that can be passed as JVM properties and/or environment variables, taking
  * the former precedence over the latter:
  * <table>
