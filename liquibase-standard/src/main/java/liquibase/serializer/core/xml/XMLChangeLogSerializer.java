@@ -127,7 +127,7 @@ public class XMLChangeLogSerializer implements ChangeLogSerializer {
         }
 
         for (Map.Entry<String, String> entry : shortNameByNamespace.entrySet()) {
-            if (!entry.getValue().isEmpty()) {
+            if (StringUtil.isNotEmpty(entry.getValue())) {
                 changeLogElement.setAttribute("xmlns:" + entry.getValue(), entry.getKey());
             }
         }
@@ -135,7 +135,7 @@ public class XMLChangeLogSerializer implements ChangeLogSerializer {
 
         StringBuilder schemaLocationAttribute = new StringBuilder();
         for (Map.Entry<String, String> entry : urlByNamespace.entrySet()) {
-            if (!entry.getValue().isEmpty()) {
+            if (StringUtil.isNotEmpty(entry.getValue())) {
                 schemaLocationAttribute
                     .append(entry.getKey())
                     .append(" ")

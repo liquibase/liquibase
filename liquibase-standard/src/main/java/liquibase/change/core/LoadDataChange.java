@@ -350,17 +350,18 @@ public class LoadDataChange extends AbstractTableChange implements ChangeWithCol
                         } else if (columnConfig.getType().equalsIgnoreCase("date")
                                 || columnConfig.getType().equalsIgnoreCase("datetime")
                                 || columnConfig.getType().equalsIgnoreCase("time")) {
-                                try {
-                                    // Need the column type for handling 'NOW' or 'TODAY' type column value
-                                    valueConfig.setType(columnConfig.getType());
-                                    if (value != null && !(StringUtil.equalsWordNull(value) || value.isEmpty())) {
-                                        valueConfig.setValueDate(value);
-                                    } else {
-                                        valueConfig.setValueDate(columnConfig.getDefaultValueDate());
-                                    }
-                                } catch (DateParseException e) {
-                                    throw new UnexpectedLiquibaseException(e);
+                            try {
+                                // Need the column type for handling 'NOW' or 'TODAY' type column value
+                                valueConfig.setType(columnConfig.getType());
+                                if (StringUtil.equalsWordNull(value) || StringUtil.isEmpty(value)) {
+                                    valueConfig.setValueDate(columnConfig.getDefaultValueDate());
+                                } else {
+                                    valueConfig.setValueDate(value);
                                 }
+                            }
+                            catch (DateParseException e) {
+                                throw new UnexpectedLiquibaseException(e);
+                            }
                         } else if (columnConfig.getTypeEnum() == LOAD_DATA_TYPE.STRING) {
                             valueConfig.setType(columnConfig.getType());
                             valueConfig.setValue(value == null ? "" : value);

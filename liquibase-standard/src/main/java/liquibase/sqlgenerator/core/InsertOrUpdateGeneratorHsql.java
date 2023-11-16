@@ -6,6 +6,7 @@ import liquibase.datatype.DataTypeFactory;
 import liquibase.exception.LiquibaseException;
 import liquibase.sqlgenerator.SqlGeneratorChain;
 import liquibase.statement.core.InsertOrUpdateStatement;
+import liquibase.util.StringUtil;
 
 import java.util.Date;
 
@@ -77,7 +78,7 @@ public class InsertOrUpdateGeneratorHsql extends InsertOrUpdateGenerator {
 	// Copied from liquibase.sqlgenerator.core.InsertOrUpdateGeneratorMySQL
 	private String convertToString(Object newValue, Database database) {
 		String sqlString;
-		if ((newValue == null) || newValue.toString().isEmpty() || "NULL".equalsIgnoreCase(newValue.toString())) {
+		if (StringUtil.isEmpty(newValue.toString()) || StringUtil.equalsWordNull(newValue.toString())) {
 			sqlString = "NULL";
 		} else if ((newValue instanceof String) && !looksLikeFunctionCall(((String) newValue), database)) {
 			sqlString = "'" + database.escapeStringForDatabase(newValue.toString()) + "'";

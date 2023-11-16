@@ -468,7 +468,7 @@ public class StringClauses {
         }
 
         List<Object> finalList = new ArrayList<>(clauses.values());
-        finalList.removeIf(next -> (next == null) || next.toString().isEmpty());
+        finalList.removeIf(next -> StringUtil.isEmpty(next.toString()));
 
         return start
                 + StringUtil.join(finalList, separator, new StringUtil.ToStringFormatter())
