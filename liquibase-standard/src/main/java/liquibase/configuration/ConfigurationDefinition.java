@@ -125,7 +125,8 @@ public class ConfigurationDefinition<DataType> implements Comparable<Configurati
         final ProvidedValue providedValue = configurationValue.getProvidedValue();
         final Object originalValue = providedValue.getValue();
         try {
-            final DataType finalValue = convertDataType(providedValue, originalValue);
+            final DataType finalValue =
+               ConfigurationValueUtils.convertDataType(providedValue.getActualKey(), (DataType)originalValue, valueConverter);
             if (originalValue != finalValue) {
                 configurationValue.override(new ConvertedValueProvider<>(finalValue, providedValue).getProvidedValue(key));
             }
@@ -133,21 +134,6 @@ public class ConfigurationDefinition<DataType> implements Comparable<Configurati
         } catch (IllegalArgumentException e) {
             throw new IllegalArgumentException("An invalid " + (providedValue.getSourceDescription().toLowerCase() + " value " + providedValue.getActualKey() + " detected: " + StringUtil.lowerCaseFirst(e.getMessage())), e);
         }
-    }
-
-    //
-    // Call the convert method with the argument key in the current scope
-    // so that it can be used in an error message
-    //
-    private DataType convertDataType(ProvidedValue providedValue, Object originalValue) {
-        AtomicReference<DataType> reference = new AtomicReference<>();
-        try {
-            Scope.child(ValueHandlerUtil.ARGUMENT_KEY, providedValue.getActualKey(), () ->
-                    reference.set(valueConverter.convert(originalValue)));
-        } catch (Exception e) {
-            throw new IllegalArgumentException(e);
-        }
-        return reference.get();
     }
 
     /**

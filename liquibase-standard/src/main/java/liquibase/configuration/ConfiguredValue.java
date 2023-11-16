@@ -36,22 +36,8 @@ public class ConfiguredValue<DataType> {
         if (providedValue == null) {
             return null;
         }
-        return convertDataType(providedValue);
-    }
-
-    //
-    // Call the convert method with the argument key in the current scope
-    // so that it can be used in an error message
-    //
-    private DataType convertDataType(ProvidedValue providedValue) {
-        AtomicReference<DataType> reference = new AtomicReference<>();
-        try {
-            Scope.child("key", providedValue.getActualKey(), () ->
-                    reference.set(valueConverter.convert(providedValue.getValue())));
-            return reference.get();
-        } catch (Exception e) {
-            throw new IllegalArgumentException(e);
-        }
+        return
+           ConfigurationValueUtils.convertDataType(providedValue.getActualKey(), (DataType)providedValue.getValue(), valueConverter);
     }
 
     public DataType getValueObfuscated() {

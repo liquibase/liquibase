@@ -131,22 +131,7 @@ public class CommandScope {
      */
     public <T> T getArgumentValue(CommandArgumentDefinition<T> argument) {
         final T value = getConfiguredValue(argument).getValue();
-        return convertDataType(argument,value);
-    }
-
-    //
-    // Call the convert method with the argument key in the current scope
-    // so that it can be used in an error message
-    //
-    private <T> T convertDataType(CommandArgumentDefinition<T> argument, T value) {
-        AtomicReference<T> reference = new AtomicReference<>();
-        try {
-            Scope.child(ValueHandlerUtil.ARGUMENT_KEY, argument.getName(), () ->
-                    reference.set(argument.getValueConverter().convert(value)));
-        } catch (Exception e) {
-            throw new IllegalArgumentException(e);
-        }
-        return reference.get();
+        return ConfigurationValueUtils.convertDataType(argument.getName(), value, argument.getValueConverter());
     }
 
     /**
