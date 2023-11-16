@@ -10,6 +10,7 @@ import liquibase.exception.CommandValidationException
 import java.util.regex.Pattern
 
 import static org.junit.Assert.assertEquals
+import static org.junit.Assert.assertNotNull
 
 CommandTests.define {
     command = ["update"]
@@ -76,6 +77,7 @@ Optional Args:
              for (RanChangeSet ranChangeSet : ranChangeSets) {
                  assertEquals(expectedOrder, ranChangeSet.getOrderExecuted())
                  expectedOrder++
+                 assertNotNull(ranChangeSet.getDeploymentId())
              }
         }
 
