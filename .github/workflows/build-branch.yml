@@ -1,10 +1,10 @@
 name: Build Branch SNAPSHOT
 
 on:
-  workflow_run:
-  workflows: "Run Tests"
-  types:
-  - completed
+#  workflow_run:
+#  workflows: "Run Tests"
+#  types:
+#  - completed
 
   workflow_dispatch:
 
@@ -15,7 +15,7 @@ jobs:
   setup:
     name: Setup
     runs-on: ubuntu-22.04
-    if: ${{ github.event.workflow_run.conclusion == 'success' }}
+#    if: ${{ github.event.workflow_run.conclusion == 'success' }}
     outputs:
       timeStamp: ${{ steps.get-timestamp.outputs.timestamp }}
       thisBranchName: ${{ steps.get-branch-name.outputs.thisBranchName }}
