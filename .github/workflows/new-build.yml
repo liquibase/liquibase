@@ -1,4 +1,4 @@
-name: Build and Publish (Matching Branch)
+name: Build and Publish
 
 #the concurrency check will cancel in-progress runs on non-master branches and pull requests on forked repositories, but not on the specified branches (master, github-action-**, DAT-**, dependabot-**).
 concurrency:
@@ -6,12 +6,16 @@ concurrency:
   cancel-in-progress: false
 
 on:
-  push:
-    branches:
-      - master
-      - github-action-**
-      - DAT-**
-      - dependabot-**
+#  push:
+#    branches:
+#      - master
+#      - github-action-**
+#      - DAT-**
+#      - dependabot-**
+  workflow_run:
+    workflows: "Run Tests"
+    types:
+      - completed
     paths-ignore:
       - '**.md'
   workflow_dispatch:
@@ -30,6 +34,7 @@ jobs:
       thisBranchName: ${{ steps.get-branch-name.outputs.thisBranchName }}
       latestMergeSha: ${{ steps.get-sha.outputs.latestMergeSha }}
       timeStamp: ${{ steps.get-timestamp.outputs.timestamp }}
+      proBranchNamePrefix: ${{ steps.check-branch.outputs.proBranchNamePrefix }}
     steps:
 
       - uses: actions/checkout@v3
@@ -40,11 +45,13 @@ jobs:
         run: |
           latest_merge_sha=`(git rev-parse HEAD)`
           echo "latestMergeSha=${latest_merge_sha}" >> $GITHUB_OUTPUT
+
       - name: Get Timestamp
         id: get-timestamp
         run: |
           timeStamp=$(date +'%Y-%m-%d %H:%M:%S %Z')
           echo "timestamp=${timeStamp}" >> $GITHUB_OUTPUT
+
       - name: Get Current BranchName
         id: get-branch-name
         run: |
@@ -57,8 +64,14 @@ jobs:
           fi 
           
           modified_branch_name=`(echo $branch_name | tr '/_' '-')`
-          echo "thisBranchName=$modified_branch_name" >> $GITHUB_OUTPUT          
-          echo $modified_branch_name
+          echo "thisBranchName=$modified_branch_name" >> $GITHUB_OUTPUT 
+
+#          this is to check if the same branch name exists in PRO, we need it in check-branch step
+          echo "unmodifiedBranchName=$branch_name" >> $GITHUB_OUTPUT 
+          
+          echo "Modified Branch Name:" $modified_branch_name
+          echo "Branch Name:" $branch_name
+
       - name: Checkout OSS Repo
         uses: actions/checkout@v3
         with:
@@ -67,13 +80,15 @@ jobs:
       #RUN THIS LOGIC WHEN THERE IS A SAME BRANCH IN OSS AND PRO
 
       #checking if the branch specified by $currentBranch exists in the PRO repository, If the getBranch call throws an error, it means the branch doesn't exist in the PRO repo. Also, remove refs/heads/
+      # if the value of branchExistsInBoth = false then set liquibaseProVersionPrefix = master else $currentBranch
       - name: Check branch existence
         id: check-branch
         uses: actions/github-script@v6
         with:
           github-token: ${{ secrets.LIQUIBOT_PAT_GPM_ACCESS }}
           script: |
-            const currentBranch = context.ref.replace("refs/heads/",""); 
+            const currentBranch = ${{ steps.get-branch-name.outputs.unmodifiedBranchName }} 
+            console.log(currentBranch)
             let branchExistsInBoth;
             try {
               await github.rest.repos.getBranch({
@@ -85,14 +100,20 @@ jobs:
             } catch (error){
               branchExistsInBoth = false
             }
+            let liquibaseProVersionPrefix= branchExistsInBoth ? currentBranch : 'master'
+            liquibaseProVersionPrefix=liquibaseProVersionPrefix.replaceAll("_","-")
+            
             core.setOutput("branchExistsInBoth", branchExistsInBoth)
-  run-tests:
-    needs: [setup]
-    if: needs.setup.outputs.branchExistsInBoth == 'true' && success()
-    uses: liquibase/liquibase/.github/workflows/run-tests.yml@github-action-DAT-15775
-    secrets: inherit
+            core.setOutput("proBranchNamePrefix", liquibaseProVersionPrefix)
+            
 
+#  run-tests:
+#    needs: [setup]
+#    if: needs.setup.outputs.branchExistsInBoth == 'true' && success()
+#    uses: liquibase/liquibase/.github/workflows/run-tests.yml@github-action-DAT-15775
+#    secrets: inherit
 
+#### MATCHING BRANCH RUN THIS LOGIC
   build_publish_branch:
     name: Artifacts- Build & Package
     runs-on: macos-latest
@@ -185,6 +206,7 @@ jobs:
           # Replace / with - in branch name
           version=$(echo "$version" | sed 's/\//-/g')
           mvn versions:set -DnewVersion="$version"
+
       - name: Artifacts- Build & Sign
         env:
           INSTALL4J_LICENSE: ${{ secrets.INSTALL4J_LICENSE }}
@@ -206,7 +228,7 @@ jobs:
           echo "Saving windows key"
           echo "$INSTALL4J_WINDOWS_KEY" | base64 -d > liquibase-dist/target/keys/datical_windows.pfx
           # we are packaging and deploying liquibase tar which includes liquibase-commercial
-          mvn -B -pl liquibase-dist -P liquibase-commercial source:jar package "-Dliquibase-pro.version=${{ needs.setup.outputs.thisBranchName }}-SNAPSHOT" "-Dbuild.repository.owner=liquibase" "-Dbuild.repository.name=liquibase" "-Dbuild.branch=${{ needs.setup.outputs.thisBranchName }}" "-Dbuild.number=${{ github.run_number }}" "-Dbuild.commit=${{ needs.setup.outputs.latestMergeSha }}-SNAPSHOT" "-Dbuild.timestamp=${{ needs.setup.outputs.timeStamp }}"
+          mvn -B -pl liquibase-dist -P liquibase-commercial source:jar package "-Dliquibase-pro.version=${{ needs.setup.outputs.proBranchNamePrefix }}-SNAPSHOT" "-Dbuild.repository.owner=liquibase" "-Dbuild.repository.name=liquibase" "-Dbuild.branch=${{ needs.setup.outputs.thisBranchName }}" "-Dbuild.number=${{ github.run_number }}" "-Dbuild.commit=${{ needs.setup.outputs.latestMergeSha }}-SNAPSHOT" "-Dbuild.timestamp=${{ needs.setup.outputs.timeStamp }}"
           
           ## extract tar content for other artifacts
           mkdir -p liquibase-dist/target/liquibase-${{ needs.setup.outputs.thisBranchName }}-SNAPSHOT
@@ -308,7 +330,7 @@ jobs:
       #Publish to GitHub Packages. We are building a tar file which includes liquibase-commercial hence we need "-Dliquibase-pro.version"
       - name: Publish tar.gz package to GPM
         run: |
-          mvn -B -pl liquibase-dist -P liquibase-commercial clean deploy -DskipTests=true "-Dliquibase-pro.version=${{ needs.setup.outputs.thisBranchName }}-SNAPSHOT" "-Dbuild.timestamp=${{ needs.setup.outputs.timestamp }}" "-Dbuild.repository.owner=liquibase" "-Dbuild.repository.name=liquibase" "-Dbuild.branch=${{ needs.setup.outputs.thisBranchName }}" "-Dbuild.number=${{ github.run_number }}" "-Dbuild.commit=${{ needs.setup.outputs.thisSha }}"
+          mvn -B -pl liquibase-dist -P liquibase-commercial clean deploy -DskipTests=true "-Dliquibase-pro.version=${{ needs.setup.outputs.proBranchNamePrefix }}-SNAPSHOT" "-Dbuild.timestamp=${{ needs.setup.outputs.timestamp }}" "-Dbuild.repository.owner=liquibase" "-Dbuild.repository.name=liquibase" "-Dbuild.branch=${{ needs.setup.outputs.thisBranchName }}" "-Dbuild.number=${{ github.run_number }}" "-Dbuild.commit=${{ needs.setup.outputs.thisSha }}"
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
