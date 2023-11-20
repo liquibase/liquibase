@@ -16,8 +16,7 @@ on:
     workflows: "Run Tests"
     types:
       - completed
-    paths-ignore:
-      - '**.md'
+
   workflow_dispatch:
 
 env:
