@@ -16,12 +16,14 @@ import liquibase.logging.mdc.MdcObject;
 import liquibase.logging.mdc.customobjects.ExceptionDetails;
 import liquibase.util.LiquibaseUtil;
 import liquibase.util.StringUtil;
+import liquibase.util.ValueHandlerUtil;
 
 import java.io.FilterOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.time.Instant;
 import java.util.*;
+import java.util.concurrent.atomic.AtomicReference;
 import java.util.regex.Pattern;
 
 /**
@@ -134,7 +136,7 @@ public class CommandScope {
      */
     public <T> T getArgumentValue(CommandArgumentDefinition<T> argument) {
         final T value = getConfiguredValue(argument).getValue();
-        return argument.getValueConverter().convert(value);
+        return ConfigurationValueUtils.convertDataType(argument.getName(), value, argument.getValueConverter());
     }
 
     /**

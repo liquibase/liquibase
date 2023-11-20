@@ -14,6 +14,7 @@ import java.util.List;
 public class UpdateReportParameters implements UpdateRollbackReportParameters {
     private String changelogArgValue;
     private String jdbcUrl;
+    private String tag;
     private String commandTitle = "Update";
     private final DatabaseInfo databaseInfo = new DatabaseInfo();
     private final RuntimeInfo runtimeInfo = new RuntimeInfo();

@@ -6,10 +6,12 @@ import liquibase.changelog.RanChangeSet
 import liquibase.database.Database
 import liquibase.exception.CommandExecutionException
 import liquibase.exception.CommandValidationException
+import liquibase.extension.testing.setup.SetupEnvironmentVariableProvider
 
 import java.util.regex.Pattern
 
 import static org.junit.Assert.assertEquals
+import static org.junit.Assert.assertNotNull
 
 CommandTests.define {
     command = ["update"]
@@ -76,6 +78,7 @@ Optional Args:
              for (RanChangeSet ranChangeSet : ranChangeSets) {
                  assertEquals(expectedOrder, ranChangeSet.getOrderExecuted())
                  expectedOrder++
+                 assertNotNull(ranChangeSet.getDeploymentId())
              }
         }
 
@@ -442,6 +445,19 @@ Optional Args:
                 showSummary  : "foo"
         ]
         expectedException = IllegalArgumentException.class
+    }
+
+    run "Run with a bad global flag value throws an exception", {
+        arguments = [
+                url          : { it.url },
+                username     : { it.username },
+                password     : { it.password },
+                changelogFile: "changelogs/h2/complete/simple.changelog.xml"
+        ]
+        globalArguments = ["liquibase.preserveSchemaCase": "off"]
+
+        expectedException = CommandExecutionException.class
+        expectedExceptionMessage = Pattern.compile(".*WARNING:  The input for 'liquibase.preserveSchemaCase' is 'off', which is not valid.  Options: 'true' or 'false'.*")
     }
 
     run "Should use LoggingChangeExecListener", {
