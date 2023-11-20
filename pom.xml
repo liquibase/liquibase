@@ -195,7 +195,7 @@
         <dependency>
             <groupId>org.mockito</groupId>
             <artifactId>mockito-core</artifactId>
-            <version>5.6.0</version>
+            <version>4.11.0</version>
             <scope>test</scope>
         </dependency>
 
@@ -572,7 +572,16 @@
             </activation>
             <properties>
                 <maven.compiler.release>8</maven.compiler.release>
+                <net.bytebuddy.experimental>true</net.bytebuddy.experimental>
             </properties>
+            <dependencies>
+                <dependency>
+                    <groupId>org.mockito</groupId>
+                    <artifactId>mockito-core</artifactId>
+                    <version>5.7.0</version>
+                    <scope>test</scope>
+                </dependency>
+            </dependencies>
             <build>
                 <plugins>
                     <plugin>
@@ -583,6 +592,7 @@
                                 @{argLine}
                                 --illegal-access=warn
                                 --add-opens java.base/java.lang=ALL-UNNAMED
+                                -Dnet.bytebuddy.experimental=true
                             </argLine>
                         </configuration>
                     </plugin>
