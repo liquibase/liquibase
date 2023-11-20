@@ -624,6 +624,22 @@ public class StringUtil {
     }
 
     /**
+     * Checks whether the given <code>value</code> ends with the specified <code>endsWith</code> string.
+     *
+     * @param value      the string to check
+     * @param endsWith   the prefix to check for
+     * @return <code>true</code> if <code>value</code> ends with <code>endsWith</code>, <code>false</code> otherwise.
+     * Returns <code>false</code> if either argument is <code>null</code>.
+     */
+    public static boolean endsWith(String value, String endsWith) {
+        if ((value == null) || (endsWith == null)) {
+            return false;
+        }
+
+        return value.endsWith(endsWith);
+    }
+
+    /**
      * Returns true if the given string only consists of whitespace characters (null-safe)
      *
      * @param string the string to test

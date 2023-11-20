@@ -460,6 +460,20 @@ class StringUtilTest extends Specification {
     }
 
     @Unroll
+    def "endsWith"() {
+        expect:
+        StringUtil.endsWith(value, endsWith) == expected
+
+        where:
+        value | endsWith | expected
+        null  | "x"        | false
+        ""    | "x"        | false
+        "a"   | "x"        | false
+        "ax"  | "a"        | false
+        "abc" | "bc"       | true
+    }
+
+    @Unroll
     def "isWhitespace"() {
         expect:
         StringUtil.isWhitespace(value) == expected
