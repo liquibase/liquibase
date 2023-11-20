@@ -67,7 +67,7 @@ jobs:
           echo "unmodifiedBranchName=$branch_name" >> $GITHUB_OUTPUT 
           
           echo "Modified Branch Name:" $modified_branch_name
-          echo "Branch Name:" $branch_name
+          echo "Original Branch Name:" $branch_name
 
       - name: Checkout OSS Repo
         uses: actions/checkout@v3
@@ -84,6 +84,8 @@ jobs:
         with:
           github-token: ${{ secrets.LIQUIBOT_PAT_GPM_ACCESS }}
           script: |
+            const github = require('@actions/github');
+            const core = require('@actions/core');
             const currentBranch = ${{ steps.get-branch-name.outputs.unmodifiedBranchName }} 
             console.log(currentBranch)
             let branchExistsInBoth;
