@@ -66,7 +66,7 @@ jobs:
           modified_branch_name=`(echo $branch_name | tr '/_' '-')`
           echo "thisBranchName=$modified_branch_name" >> $GITHUB_OUTPUT 
 
-#          this is to check if the same branch name exists in PRO, we need it in check-branch step
+          #this is to check if the same branch name exists in PRO, we need it in check-branch step
           echo "unmodifiedBranchName=$branch_name" >> $GITHUB_OUTPUT 
           
           echo "Modified Branch Name:" $modified_branch_name
