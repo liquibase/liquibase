@@ -117,8 +117,8 @@ jobs:
   build_publish_branch:
     name: Artifacts- Build & Package
     runs-on: macos-latest
-    #    needs: [setup]
-    needs: [ setup, run-tests ]
+    needs: [setup]
+    #needs: [ setup, run-tests ]
     if: needs.setup.outputs.branchExistsInBoth == 'true'
     permissions:
       contents: read
