@@ -4,7 +4,6 @@ concurrency:
   group: ${{ github.workflow }}-${{ github.head_ref || github.ref }}
   cancel-in-progress: ${{ !contains(github.ref, 'refs/heads/master') }}
 
-
 on:
   workflow_call:
 
@@ -19,12 +18,14 @@ on:
     - feat/DAT-rus-standAlonePR
     - feat/DAT-rus-matchingBranchPR
 
-
   pull_request_target:
     types:
       - opened
       - reopened
       - synchronize
+
+    paths-ignore:
+      - '**.md'
 
 
 env:
