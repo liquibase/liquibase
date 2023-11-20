@@ -6,13 +6,14 @@ concurrency:
   cancel-in-progress: false
 
 on:
-  workflow_run:
-    workflows: "Run Tests"
-    types:
-      - completed
-  push:
-    branches:
-      - github-action-DAT-15775
+#  workflow_run:
+#    workflows: "Run Tests"
+#    types:
+#      - completed
+#  push:
+#    branches:
+#      - github-action-DAT-15775
+  workflow_call:
 
   workflow_dispatch:
 
