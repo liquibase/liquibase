@@ -734,8 +734,7 @@ public abstract class AbstractJdbcDatabase implements Database {
 
     @Override
     public void dropDatabaseObjects(final CatalogAndSchema schemaToDrop) throws LiquibaseException {
-        final SnapshotControl snapshotControl = new SnapshotControl(this);
-        dropDatabaseObjects(schemaToDrop, snapshotControl);
+        dropDatabaseObjects(schemaToDrop, null);
     }
 
     @Override

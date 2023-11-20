@@ -197,6 +197,9 @@ public interface Database extends PrioritizedService, AutoCloseable {
     void dropDatabaseObjects(CatalogAndSchema schema) throws LiquibaseException;
 
     default void dropDatabaseObjects(CatalogAndSchema schemaToDrop, SnapshotControl snapshotControl) throws LiquibaseException {
+        if (snapshotControl == null) {
+            snapshotControl = new SnapshotControl(this);
+        }
         ObjectQuotingStrategy currentStrategy = this.getObjectQuotingStrategy();
         this.setObjectQuotingStrategy(ObjectQuotingStrategy.QUOTE_ALL_OBJECTS);
         try {
