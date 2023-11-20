@@ -7,7 +7,7 @@ on:
 
 jobs:
   attach-artifact-to-release:
-    uses: liquibase/build-logic/.github/workflows/extension-attach-artifact-release.yml@v0.5.5
+    uses: liquibase/build-logic/.github/workflows/extension-attach-artifact-release.yml@v0.5.7
     secrets: inherit
     with:
       extraCommand: mvn install:install-file -Dfile=lib/GoogleBigQueryJDBC42.jar -DgroupId=com.simba.googlebigquery.jdbc -DartifactId=GoogleBigQueryJDBC42 -Dversion=4.2 -Dpackaging=jar
