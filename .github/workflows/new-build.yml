@@ -13,7 +13,7 @@ on:
   push:
     branches:
       - github-action-DAT-15775
-      -
+
   workflow_dispatch:
 
 env:
