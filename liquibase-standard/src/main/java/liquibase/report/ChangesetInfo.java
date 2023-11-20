@@ -22,10 +22,12 @@ public class ChangesetInfo {
                 } else {
                     changesetOutcome = deployedChangeSet.getExecType() == null ? "" : deployedChangeSet.getExecType().toString();
                 }
+                boolean success = true;
                 // If the changeset fails, the exec type it has is null, but if there's an error message, then it failed, and we want to indicate that it failed.
                 String errorMsg = deployedChangeSet.getErrorMsg();
                 if (StringUtil.isNotEmpty(errorMsg)) {
                     changesetOutcome = ChangeSet.ExecType.FAILED.value;
+                    success = false;
                 }
                 changesetInfoList.add(new IndividualChangesetInfo(
                         changesetInfoList.size() + 1,
@@ -33,6 +35,7 @@ public class ChangesetInfo {
                         deployedChangeSet.getId(),
                         deployedChangeSet.getFilePath(),
                         deployedChangeSet.getComments(),
+                        success,
                         changesetOutcome,
                         errorMsg,
                         deployedChangeSet.getLabels() == null ? null : deployedChangeSet.getLabels().toString(),
