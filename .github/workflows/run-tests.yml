@@ -119,7 +119,7 @@ jobs:
 
       # look for dependencies in maven
       - name: maven-settings-xml-action
-        uses: whelk-io/maven-settings-xml-action@v20
+        uses: whelk-io/maven-settings-xml-action@v21
         with:
           repositories: |
             [
@@ -273,7 +273,7 @@ jobs:
             ./**/target/surefire-reports
             
             
-  run-build-publish:
+  run-build-publish-file:
     needs: [ build_tests,integration-test ]
     uses: liquibase/liquibase/.github/workflows/new-build.yml@github-action-DAT-15775
     secrets: inherit

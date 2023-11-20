@@ -8,6 +8,11 @@ on:
         required: false
         default: ''
         type: string
+      thisBranchName:
+        description: 'Branch Name of OSS PR'
+        required: false
+        default: ''
+        type: string
 
 env:
   MAVEN_VERSION: '3.9.2'
@@ -18,7 +23,7 @@ jobs:
     steps:
       - uses: actions/checkout@v3
         with:
-          ref: ${{ github.event.pull_request.head.sha || github.event.after}} #sets the Git reference (commit or branch) to be checked out in the workflow
+          ref: ${{ github.event.pull_request.head.sha || github.event.after}} # get the sha of the commit or the new commit created when branch is merged to master
 
       - name: Get Workflow Run URL
         id: get-workflow-url
@@ -37,5 +42,6 @@ jobs:
           client-payload: |
             {
               "liquibaseCommit": "${{ inputs.latestMergeSha }}",
-              "runDescription" : "${{ env.workflow_url }}"
+              "runDescription" : "${{ env.workflow_url }}",
+              "ossBranchName" : "${{ inputs.thisBranchName }}"
             }
