@@ -26,8 +26,6 @@ on:
       - reopened
       - synchronize
 
-    paths-ignore:
-        - '**.md'
 
 env:
   MAVEN_VERSION: '3.9.2'
