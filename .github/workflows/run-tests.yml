@@ -15,20 +15,11 @@ on:
         required: false
         default: 'false'
 
-  pull_request:
+  pull_request_target:
     types:
       - opened
       - reopened
       - synchronize
-
-  #remove commented code later
-#  push:
-#    branches-ignore:
-#      - github-action-**
-#      - DAT-**
-#      - dependabot-**
-#    branches:
-#       - *
 
     paths-ignore:
         - '**.md'
@@ -37,8 +28,15 @@ env:
   MAVEN_VERSION: '3.9.2'
 
 jobs:
+  authorize:
+    environment: ${{ github.event_name == 'pull_request_target' && github.event.pull_request.head.repo.full_name != github.repository && 'external' || 'internal' }}
+    runs-on: ubuntu-latest
+    steps:
+      - run: true
+
   setup:
-    name: Setup
+    name: setup
+    needs: authorize
     runs-on: ubuntu-22.04
     outputs:
       timestamp: ${{ steps.get-date.outputs.date }}
@@ -268,3 +266,5 @@ jobs:
           name: ${{ steps.prepare.outputs.testResultsArtifact }}
           path: |
             ./**/target/surefire-reports
+            
+            
