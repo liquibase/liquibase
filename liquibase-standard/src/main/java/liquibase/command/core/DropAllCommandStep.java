@@ -90,6 +90,7 @@ public class DropAllCommandStep extends AbstractCommandStep {
     }
 
     public SnapshotControl getSnapshotControl(CommandScope commandScope, Database database) {
+        // This is purposefully returning null. It is overridden in other implementations of this command step, like in pro.
         return null;
     }
 
