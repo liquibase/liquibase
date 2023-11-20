@@ -20,6 +20,7 @@ Apache 2.0 License
 - com.github.jsqlparser:jsqlparser (Dual licence: Apache 2.0, LGPL 2.1)
 - org.liquibase:liquibase-core
 - io.github.java-diff-utils:java-diff-utils
+- org.mvel:mvel2
 
 MIT License
 - com.github.vertical-blank:sql-formatter
