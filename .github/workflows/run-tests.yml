@@ -14,9 +14,10 @@ on:
         required: false
         default: 'false'
   push:
-    - github-action-DAT-15775
-    - feat/DAT-rus-standAlonePR
-    - feat/DAT-rus-matchingBranchPR
+     branches:
+        - github-action-DAT-15775
+        - feat/DAT-rus-standAlonePR
+        - feat/DAT-rus-matchingBranchPR
 
   pull_request_target:
     types:
