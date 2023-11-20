@@ -85,7 +85,7 @@ jobs:
           github-token: ${{ secrets.LIQUIBOT_PAT_GPM_ACCESS }}
           script: |
             const githubContext = require('@actions/github');
-            const core = require('@actions/core');
+            const actionsCore = require('@actions/core');
             const currentBranch = ${{ steps.get-branch-name.outputs.unmodifiedBranchName }} 
             console.log(currentBranch)
             let branchExistsInBoth;
