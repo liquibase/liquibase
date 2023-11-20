@@ -116,6 +116,7 @@ public abstract class AbstractUpdateCommandStep extends AbstractCommandStep impl
             DatabaseChangeLog databaseChangeLog = (DatabaseChangeLog) commandScope.getDependency(DatabaseChangeLog.class);
             addChangelogFileToMdc(getChangelogFileArg(commandScope), databaseChangeLog);
             logDeploymentOutcomeMdc(changeExecListener, false, updateReportParameters);
+            updateReportParameters.getOperationInfo().setException(e.getCause().getMessage());
             resultsBuilder.addResult("statusCode", 1);
             throw e;
         } finally {
