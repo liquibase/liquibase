@@ -14,6 +14,11 @@ on:
         description: 'If set to true, the unit and integration test results will be archived to the build artifacts page.'
         required: false
         default: 'false'
+  push:
+    - github-action-DAT-15775
+    - feat/DAT-rus-standAlonePR
+    - feat/DAT-rus-matchingBranchPR
+
 
   pull_request_target:
     types:

@@ -23,6 +23,7 @@ env:
   MAVEN_VERSION: '3.9.2'
 
 jobs:
+
   setup:
     name: Setup
     runs-on: ubuntu-22.04
@@ -106,11 +107,6 @@ jobs:
             core.setOutput("proBranchNamePrefix", liquibaseProVersionPrefix)
             
 
-#  run-tests:
-#    needs: [setup]
-#    if: needs.setup.outputs.branchExistsInBoth == 'true' && success()
-#    uses: liquibase/liquibase/.github/workflows/run-tests.yml@github-action-DAT-15775
-#    secrets: inherit
 
 #### MATCHING BRANCH RUN THIS LOGIC
   build_publish_branch:
