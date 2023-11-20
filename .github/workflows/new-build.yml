@@ -84,34 +84,27 @@ jobs:
         with:
           github-token: ${{ secrets.LIQUIBOT_PAT_GPM_ACCESS }}
           script: |
-            const github = require('@actions/github');
-            const core = require('@actions/core');
-
-            const currentBranch = ${{ github.event.inputs.branch_name || github.ref.split('/').pop() }};
-            console.log(currentBranch);
-
+            const currentBranch = ${{ steps.get-branch-name.outputs.unmodifiedBranchName }} 
+            console.log(currentBranch)
             let branchExistsInBoth;
             try {
               await github.rest.repos.getBranch({
-                owner: github.context.repo.owner,
-                repo: github.context.repo.repo,
+                owner: "liquibase",
+                repo: "liquibase-pro",
                 branch: currentBranch
               });
-              branchExistsInBoth = true;
-            } catch (error) {
-              branchExistsInBoth = false;
+              branchExistsInBoth = true
+            } catch (error){
+              branchExistsInBoth = false
             }
+            let liquibaseProVersionPrefix= branchExistsInBoth ? currentBranch : 'master'
+            liquibaseProVersionPrefix=liquibaseProVersionPrefix.replaceAll("_","-")
+            
+            core.setOutput("branchExistsInBoth", branchExistsInBoth)
+            core.setOutput("proBranchNamePrefix", liquibaseProVersionPrefix)
 
-            let liquibaseProVersionPrefix = branchExistsInBoth ? currentBranch : 'master';
-            liquibaseProVersionPrefix = liquibaseProVersionPrefix.replaceAll("_", "-");
 
-            core.setOutput("branchExistsInBoth", branchExistsInBoth);
-            core.setOutput("proBranchNamePrefix", liquibaseProVersionPrefix);
-  
-  
-  
-
-  #### MATCHING BRANCH RUN THIS LOGIC
+#### MATCHING BRANCH RUN THIS LOGIC
   build_publish_branch:
     name: Artifacts- Build & Package
     runs-on: macos-latest
