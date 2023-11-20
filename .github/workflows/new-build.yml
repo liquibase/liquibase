@@ -84,7 +84,7 @@ jobs:
         with:
           github-token: ${{ secrets.LIQUIBOT_PAT_GPM_ACCESS }}
           script: |
-            const currentBranch = ${{ steps.get-branch-name.outputs.unmodifiedBranchName }} 
+            const currentBranch = "${{ steps.get-branch-name.outputs.unmodifiedBranchName }}" 
             console.log(currentBranch)
             let branchExistsInBoth;
             try {
