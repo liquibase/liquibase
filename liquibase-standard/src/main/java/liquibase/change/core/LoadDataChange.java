@@ -80,7 +80,7 @@ public class LoadDataChange extends AbstractTableChange implements ChangeWithCol
      * If not, the value "toString()" representation (trimmed of spaces left and right) is returned.
      */
     protected static String getValueToWrite(Object value) {
-        if ((value == null) || "NULL".equalsIgnoreCase(value.toString())) {
+        if ((value == null) || StringUtil.equalsWordNull(value.toString())) {
             return "";
         } else {
             return value.toString().trim();
@@ -317,20 +317,17 @@ public class LoadDataChange extends AbstractTableChange implements ChangeWithCol
                         if (columnConfig.getName() != null) {
                             columnName = columnConfig.getName();
                         }
-
-                        //
-                        // Always set the type for the valueConfig if the value is NULL
-                        //
-                        if ("NULL".equalsIgnoreCase(value)) {
-                            valueConfig.setType(columnConfig.getType());
-                        }
                         valueConfig.setName(columnName);
                         valueConfig.setAllowUpdate(columnConfig.getAllowUpdate());
 
-                        if (value.isEmpty()) {
+                        if (StringUtil.isEmpty(value)) {
                             value = columnConfig.getDefaultValue();
                         }
                         if (StringUtil.equalsWordNull(value)) {
+                            //
+                            // Always set the type for the valueConfig if the value is NULL
+                            //
+                            valueConfig.setType(columnConfig.getType());
                             valueConfig.setValue(null);
                         } else if (columnConfig.getType() == null) {
                             // columnConfig did not specify a type
@@ -384,7 +381,7 @@ public class LoadDataChange extends AbstractTableChange implements ChangeWithCol
                             valueConfig.setValueComputed(function);
 
                         } else if (columnConfig.getType().equalsIgnoreCase(LOAD_DATA_TYPE.BLOB.toString())) {
-                            if ("NULL".equalsIgnoreCase(value)) {
+                            if (StringUtil.equalsWordNull(value)) {
                                 valueConfig.setValue(null);
                             } else if (BASE64_PATTERN.matcher(value).matches()) {
                                 valueConfig.setType(columnConfig.getType());
@@ -399,14 +396,14 @@ public class LoadDataChange extends AbstractTableChange implements ChangeWithCol
                             needsPreparedStatement = true;
                         } else if (columnConfig.getTypeEnum() == LOAD_DATA_TYPE.UUID) {
                             valueConfig.setType(columnConfig.getType());
-                            if ("NULL".equalsIgnoreCase(value)) {
+                            if (StringUtil.equalsWordNull(value)) {
                                 valueConfig.setValue(null);
                             } else {
                                 valueConfig.setValue(value);
                             }
                         } else if (columnConfig.getType().equalsIgnoreCase(LOAD_DATA_TYPE.OTHER.toString())) {
                             valueConfig.setType(columnConfig.getType());
-                            if ("NULL".equalsIgnoreCase(value)) {
+                            if (StringUtil.equalsWordNull(value)) {
                                 valueConfig.setValue(null);
                             } else {
                                 valueConfig.setValue(value);
