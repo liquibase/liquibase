@@ -34,6 +34,7 @@ import static liquibase.Liquibase.MSG_COULD_NOT_RELEASE_LOCK;
 
 public abstract class AbstractUpdateCommandStep extends AbstractCommandStep implements CleanUpCommandStep {
     public static final String DEFAULT_CHANGE_EXEC_LISTENER_RESULT_KEY = "defaultChangeExecListener";
+    private static final String DATABASE_UP_TO_DATE_MESSAGE = "Database is up to date, no changesets to execute";
     private boolean isFastCheckEnabled = true;
 
     private boolean isDBLocked = true;
@@ -77,6 +78,8 @@ public abstract class AbstractUpdateCommandStep extends AbstractCommandStep impl
             ChangeLogIterator runChangeLogIterator = getStandardChangelogIterator(commandScope, database, contexts, labelExpression, databaseChangeLog);
             preRun(commandScope, runChangeLogIterator, changeLogParameters);
             if (isFastCheckEnabled && isUpToDate(commandScope, database, databaseChangeLog, contexts, labelExpression, resultsBuilder.getOutputStream())) {
+                updateReportParameters.getOperationInfo().setRowsAffected(0);
+                updateReportParameters.getOperationInfo().setUpdateSummaryMsg(DATABASE_UP_TO_DATE_MESSAGE);
                 return;
             }
             if(!isDBLocked) {
@@ -92,6 +95,7 @@ public abstract class AbstractUpdateCommandStep extends AbstractCommandStep impl
             StatusVisitor statusVisitor = getStatusVisitor(commandScope, database, contexts, labelExpression, databaseChangeLog);
 
             AtomicInteger rowsAffected = new AtomicInteger(0);
+            ShowSummaryUtil.UpdateSummaryDetails summaryDetails = new ShowSummaryUtil.UpdateSummaryDetails();
 
             HashMap<String, Object> scopeValues = new HashMap<>();
             scopeValues.put("showSummary", getShowSummary(commandScope));
@@ -101,10 +105,15 @@ public abstract class AbstractUpdateCommandStep extends AbstractCommandStep impl
                     runChangeLogIterator.run(new UpdateVisitor(database, changeExecListener, new ShouldRunChangeSetFilter(database)),
                             new RuntimeEnvironment(database, contexts, labelExpression));
                 } finally {
-                    ShowSummaryUtil.showUpdateSummary(databaseChangeLog, getShowSummary(commandScope), getShowSummaryOutput(commandScope), statusVisitor, resultsBuilder.getOutputStream(), runChangeLogIterator);
+                    ShowSummaryUtil.UpdateSummaryDetails details = ShowSummaryUtil.buildSummaryDetails(databaseChangeLog, getShowSummary(commandScope), getShowSummaryOutput(commandScope), statusVisitor, resultsBuilder.getOutputStream(), runChangeLogIterator);
+                    if (details != null) {
+                        summaryDetails.setSummary(details.getSummary());
+                        summaryDetails.setOutput(details.getOutput());
+                    }
                 }
             });
-
+            updateReportParameters.getOperationInfo().setUpdateSummaryMsg(summaryDetails.getOutput());
+            updateReportParameters.getOperationInfo().setRowsAffected(rowsAffected.get());
             database.afterUpdate();
 
             resultsBuilder.addResult("statusCode", 0);
@@ -294,7 +303,7 @@ public abstract class AbstractUpdateCommandStep extends AbstractCommandStep impl
     @Beta
     public boolean isUpToDate(CommandScope commandScope, Database database, DatabaseChangeLog databaseChangeLog, Contexts contexts, LabelExpression labelExpression, OutputStream outputStream) throws LiquibaseException, IOException {
         if (isUpToDateFastCheck(commandScope, database, databaseChangeLog, contexts, labelExpression)) {
-            Scope.getCurrentScope().getUI().sendMessage("Database is up to date, no changesets to execute");
+            Scope.getCurrentScope().getUI().sendMessage(DATABASE_UP_TO_DATE_MESSAGE);
             StatusVisitor statusVisitor = getStatusVisitor(commandScope, database, contexts, labelExpression, databaseChangeLog);
             UpdateSummaryEnum showSummary = getShowSummary(commandScope);
             UpdateSummaryOutputEnum showSummaryOutput = getShowSummaryOutput(commandScope);

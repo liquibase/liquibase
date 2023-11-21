@@ -8,4 +8,6 @@ public class OperationInfo {
     private String operationOutcome;
     private String operationOutcomeErrorMsg;
     private String exception;
+    private String updateSummaryMsg;
+    private Integer rowsAffected;
 }
