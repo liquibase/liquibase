@@ -290,13 +290,18 @@ public class CommandScope {
                 source = LiquibaseUtil.getBuildVersionInfo();
             }
             ExceptionDetails exceptionDetails = new ExceptionDetails();
-            exceptionDetails.setPrimaryException(primaryException.getClass().getSimpleName());
+            String simpleName = primaryException.getClass().getSimpleName();
+            exceptionDetails.setPrimaryException(simpleName);
             exceptionDetails.setPrimaryExceptionReason(primaryException.getMessage());
             exceptionDetails.setPrimaryExceptionSource(source);
             MdcManager mdcManager = Scope.getCurrentScope().getMdcManager();
             try (MdcObject primaryExceptionObject = mdcManager.put(MdcKey.EXCEPTION_DETAILS, exceptionDetails)) {
                 Scope.getCurrentScope().getLog(getClass()).info("Logging exception.");
             }
+            Scope.getCurrentScope().getUI().sendMessage("ERROR: Exception Details");
+            Scope.getCurrentScope().getUI().sendMessage("ERROR: Exception Primary Class:  " + simpleName);
+            Scope.getCurrentScope().getUI().sendMessage("ERROR: Exception Primary Reason: " + primaryException.getMessage());
+            Scope.getCurrentScope().getUI().sendMessage("ERROR: Exception Primary Source: " + source);
         }
     }
 
