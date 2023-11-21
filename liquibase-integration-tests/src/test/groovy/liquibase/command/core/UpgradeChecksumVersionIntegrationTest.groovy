@@ -3,7 +3,6 @@ package liquibase.command.core
 import liquibase.ChecksumVersion
 import liquibase.Scope
 import liquibase.change.ColumnConfig
-import liquibase.change.ConstraintsConfig
 import liquibase.change.core.CreateTableChange
 import liquibase.changelog.ChangeLogHistoryService
 import liquibase.changelog.ChangeLogHistoryServiceFactory
@@ -13,12 +12,11 @@ import liquibase.command.CommandScope
 import liquibase.command.core.helpers.DatabaseChangelogCommandStep
 import liquibase.command.core.helpers.DbUrlConnectionCommandStep
 import liquibase.command.util.CommandUtil
-import liquibase.exception.DatabaseException
-import liquibase.executor.Executor
-import liquibase.executor.ExecutorService
 import liquibase.extension.testing.testsystem.DatabaseTestSystem
 import liquibase.extension.testing.testsystem.TestSystemFactory
 import liquibase.extension.testing.testsystem.spock.LiquibaseIntegrationTest
+import liquibase.statement.SqlStatement
+import liquibase.statement.core.MarkChangeSetRanStatement
 import liquibase.statement.core.RawSqlStatement
 import spock.lang.Shared
 import spock.lang.Specification
@@ -395,12 +393,11 @@ VALUES('2', 'fl', '$changesetFilepath', '2023-09-29 14:33:39.112', 2, 'EXECUTED'
     }
 
     @Unroll
-    def "manually generate v8 checksum" () {
+    def "manually generate v7 checksum" () {
 
         given:
         def database = h2.getDatabaseFromFactory()
-        ChangeSet changeSet =
-                new ChangeSet("1", "mock-author", false, false, "test/changelog.xml",
+        ChangeSet changeSet = new ChangeSet("1", "mock-author", false, false, "com/example/root.xml",
                         null, null, null, null, false, null, null)
 
         CreateTableChange exampleChange = new CreateTableChange()
@@ -411,17 +408,20 @@ VALUES('2', 'fl', '$changesetFilepath', '2023-09-29 14:33:39.112', 2, 'EXECUTED'
         changeSet.addChange(exampleChange)
 
         when:
-        ChangeLogHistoryService changeLogService = Scope.getCurrentScope()
-                .getSingleton(ChangeLogHistoryServiceFactory.class).getChangeLogService(database)
-        changeLogService.init()
-        changeSet.execute(null, null, database)
-        database.commit()
-        changeLogService = Scope.getCurrentScope()
-                .getSingleton(ChangeLogHistoryServiceFactory.class).getChangeLogService(database)
-        def ranChangeSets = changeLogService.getRanChangeSets()
+        ChangeLogHistoryService changeLogService = Scope.getCurrentScope().getSingleton(ChangeLogHistoryServiceFactory.class).getChangeLogService(database)
+        def scopeSettings = [
+                (Scope.Attr.latestChecksumVersion.name()): ChecksumVersion.V7
+        ]
+        Scope.child(scopeSettings, {
+            changeLogService.init()
+            changeSet.execute(null, null, database)
+            database.execute([new MarkChangeSetRanStatement(changeSet, ChangeSet.ExecType.EXECUTED)] as SqlStatement[], null)
+            database.commit()
+        } as Scope.ScopedRunnerWithReturn<Void>)
 
         then:
+        def ranChangeSets = changeLogService.getRanChangeSets()
         ranChangeSets.size() == 1
-        ranChangeSets.get(0).getLastCheckSum().toString() == "8:0a36c7b201a287dd3348e8dd19e44be7"
+        ranChangeSets.get(0).getLastCheckSum().toString() == "7:72c7eea8dda3c3582e3cfb39eec12033"
     }
 }
