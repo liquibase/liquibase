@@ -4,7 +4,14 @@ import liquibase.database.core.H2Database;
 import liquibase.database.core.MSSQLDatabase;
 import liquibase.database.core.MySQLDatabase;
 import liquibase.database.core.OracleDatabase;
+import liquibase.exception.ValidationErrors;
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.Arguments;
+import org.junit.jupiter.params.provider.MethodSource;
+
+import java.util.stream.Stream;
 
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -42,5 +49,26 @@ public class DatabaseListTest {
 
         assertFalse(DatabaseList.definitionMatches("!h2,mysql", new H2Database(), false));
         assertTrue(DatabaseList.definitionMatches("!h2,mysql", new MySQLDatabase(), false));
+    }
+
+    @ParameterizedTest
+    @MethodSource("validateDefinitionsParameters")
+    public void validateDefinitions(String definition, boolean expectedResult, String message) {
+        ValidationErrors vErrors = new ValidationErrors();
+        DatabaseList.validateDefinitions(definition, vErrors);
+        boolean valid = !vErrors.hasErrors();
+        Assertions.assertEquals(expectedResult, valid, message);
+    }
+
+    public static Stream<Arguments> validateDefinitionsParameters() {
+        return Stream.of(
+            Arguments.of("all", true, "'all' should be valid"),
+            Arguments.of("none", true, "'none' should be valid"),
+            Arguments.of("mysqlll", false, "'mysqlll' should not be valid"),
+            Arguments.of("mysql", true, "'mysql' should be valid"),
+            Arguments.of("mariadb", true, "'mariadb' should be valid"),
+            Arguments.of("mysql,mariadb", true, "'mysql,mariadb' should be valid"),
+            Arguments.of("mysql, mariadb", true, "'mysql, mariadb' should be valid")
+        );
     }
 }

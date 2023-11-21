@@ -80,18 +80,14 @@ public class DatabaseList {
     }
 
     /**
-     * This method will validate whether a dbms is valid and match with supported database, if it doesn't then
+     * This method will validate whether a dbms (optional: comma separated list) is valid and match with supported database, if it doesn't then
      * will add a validation error for it.
      * @param definition
      * @param vErrors
      */
     public static void validateDefinitions(String definition, ValidationErrors vErrors) {
-        if(!definition.contentEquals("none") && !definition.contentEquals("all") && !definition.startsWith("!")) {
-            Database database = DatabaseFactory.getInstance().getDatabase(definition.toLowerCase());
-            if (database == null) {
-                vErrors.addError(String.format("%s is not a supported DB", definition));
-            }
-        }
+        Set<String> dbmsSet = toDbmsSet(definition);
+        validateDefinitions(dbmsSet, vErrors);
     }
 
     /**
@@ -100,6 +96,15 @@ public class DatabaseList {
      * @param vErrors
      */
     public static void validateDefinitions(Collection<String> definitions, ValidationErrors vErrors) {
-        definitions.stream().forEach( definition -> validateDefinitions(definition, vErrors));
+        definitions.stream().forEach( definition -> validateDefinition(definition, vErrors));
+    }
+
+    private static void validateDefinition(String definition, ValidationErrors vErrors) {
+        if(!definition.contentEquals("none") && !definition.contentEquals("all") && !definition.startsWith("!")) {
+            Database database = DatabaseFactory.getInstance().getDatabase(definition.toLowerCase());
+            if (database == null) {
+                vErrors.addError(String.format("%s is not a supported DB", definition));
+            }
+        }
     }
 }
