@@ -94,7 +94,7 @@ public class SpringResourceAccessor extends AbstractResourceAccessor {
                 while (!getResource("classpath:" + url).exists()) {
                     String newUrl = url.replaceFirst("^/?.*?/", "");
                     if (newUrl.equals(url)) {
-                        throw new UnexpectedLiquibaseException("Could determine path for " + resource.getURL().toExternalForm());
+                        throw new UnexpectedLiquibaseException("Could not determine path for " + resource.getURL().toExternalForm());
                     }
                     url = newUrl;
                 }
