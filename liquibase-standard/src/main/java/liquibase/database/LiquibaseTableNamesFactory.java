@@ -28,6 +28,7 @@ public class LiquibaseTableNamesFactory implements SingletonObject {
     public void destroy(Database abstractJdbcDatabase) throws DatabaseException {
         for (LiquibaseTableNames generator : generators) {
             generator.destroy(abstractJdbcDatabase);
+            abstractJdbcDatabase.commit();
         }
     }
 }
