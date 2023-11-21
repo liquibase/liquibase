@@ -16,14 +16,12 @@ import liquibase.logging.mdc.MdcObject;
 import liquibase.logging.mdc.customobjects.ExceptionDetails;
 import liquibase.util.LiquibaseUtil;
 import liquibase.util.StringUtil;
-import liquibase.util.ValueHandlerUtil;
 
 import java.io.FilterOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.time.Instant;
 import java.util.*;
-import java.util.concurrent.atomic.AtomicReference;
 import java.util.regex.Pattern;
 
 /**
@@ -286,7 +284,7 @@ public class CommandScope {
             primaryException = (Exception)primaryException.getCause();
         }
         if (primaryException != null) {
-            if (primaryException instanceof LiquibaseException) {
+            if (primaryException instanceof LiquibaseException || source == null) {
                 source = LiquibaseUtil.getBuildVersionInfo();
             }
             ExceptionDetails exceptionDetails = new ExceptionDetails();
