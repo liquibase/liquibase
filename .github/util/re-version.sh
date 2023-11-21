@@ -58,6 +58,7 @@ do
 
   java -cp $scriptDir ManifestReversion $workdir/META-INF/MANIFEST.MF $version
   find $workdir/META-INF -name pom.xml -exec sed -i -e "s/<version>0-SNAPSHOT<\/version>/<version>$version<\/version>/g" {} \;
+  find $workdir/META-INF -name pom.xml -exec sed -i -e "s/<version>$branch-SNAPSHOT<\/version>/<version>$version<\/version>/g" {} \;
   find $workdir/META-INF -name pom.properties -exec sed -i -e "s/0-SNAPSHOT/$version/g" {} \;
   find $workdir/META-INF -name plugin*.xml -exec sed -i -e "s/<version>0-SNAPSHOT<\/version>/<version>$version<\/version>/g" {} \;
   (cd $workdir && jar -uMf $jar META-INF)
@@ -155,6 +156,6 @@ mkdir $workdir/tgz-repackage
 (cd $workdir/tgz-repackage && tar -xzf $workdir/liquibase-$branch-SNAPSHOT.tar.gz)
 cp $workdir/internal/lib/liquibase-core.jar $workdir/tgz-repackage/internal/lib/liquibase-core.jar
 cp $workdir/internal/lib/liquibase-commercial.jar $workdir/tgz-repackage/internal/lib/liquibase-commercial.jar
-find $workdir/tgz-repackage -name "*.txt" -exec sed -i -e "s/0-SNAPSHOT/$version/" {} \;
+find $workdir/tgz-repackage -name "*.txt" -exec sed -i -e "s/0-SNAPSHOT/$version/" -e "s/release-SNAPSHOT/$version/" {} \;
 (cd $workdir/tgz-repackage && tar -czf $outdir/liquibase-$version.tar.gz *)
 (cd $workdir/tgz-repackage && zip -qr $outdir/liquibase-$version.zip *)

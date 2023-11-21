@@ -516,11 +516,13 @@ public class JdbcDatabaseSnapshot extends DatabaseSnapshot {
                 //
                 StringBuilder selectStatement = new StringBuilder(
                     "SELECT TABLE_SCHEMA, TABLE_NAME, COLUMN_NAME, DATA_TYPE FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_SCHEMA = ?");
+                if(tableName != null) {
+                    selectStatement.append(" AND TABLE_NAME = ?");
+                }
                 Connection underlyingConnection = ((JdbcConnection) database.getConnection()).getUnderlyingConnection();
                 PreparedStatement statement = underlyingConnection.prepareStatement(selectStatement.toString());
                 statement.setString(1, schemaName);
                 if (tableName != null) {
-                    selectStatement.append(" AND TABLE_NAME = ?");
                     statement.setString(2, tableName);
                 }
                 try {

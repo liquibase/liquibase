@@ -190,7 +190,7 @@ public class RanChangeSet {
 
     @Override
     public String toString() {
-        return getChangeLog() + "::" + getId() + "::" + getAuthor();
+        return DatabaseChangeLog.normalizePath(getChangeLog()) + "::" + getId() + "::" + getAuthor();
     }
 
     public boolean isSameAs(ChangeSet changeSet) {
