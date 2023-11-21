@@ -12,6 +12,7 @@ class LiquibaseLauncherSettings {
   private static final String LIQUIBASE_LAUNCHER_PARENT_CLASSLOADER_JVM_PROPERTY_NAME = "liquibase.launcher.parent_classloader";
 
   /**
+   * 
    * Agglutinates the different settings, i.e., environment variables or associated JVM system properties, that can be
    * used for customizing the behavior of the class.
    */
