@@ -39,6 +39,7 @@ public class CommandLineArgumentValueProvider extends AbstractMapConfigurationVa
         if (super.keyMatches(wantedKey, storedKey)) {
             return true;
         }
+        // test
         if (wantedKey.startsWith("liquibase.command.")) {
             return super.keyMatches(wantedKey.replaceFirst("^liquibase\\.command\\.", ""), storedKey);
         }
