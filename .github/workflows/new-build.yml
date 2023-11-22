@@ -111,7 +111,7 @@ jobs:
     runs-on: macos-latest
     needs: [setup]
     #needs: [ setup, run-tests ]
-    if: needs.setup.outputs.branchExistsInBoth == 'true'
+    #if: needs.setup.outputs.branchExistsInBoth == 'true'
     permissions:
       contents: read
       packages: write
