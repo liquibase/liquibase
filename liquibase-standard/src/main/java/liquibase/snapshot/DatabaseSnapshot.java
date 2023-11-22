@@ -641,7 +641,7 @@ public abstract class DatabaseSnapshot implements LiquibaseSerializable {
                         if ((value != null) && ObjectUtil.hasProperty(object, attr)) {
                             if ((value instanceof byte[]) && ObjectUtil.getPropertyType(object, attr).equals(String
                                     .class)) {
-                                value = new String((byte[]) value, GlobalConfiguration.OUTPUT_FILE_ENCODING.getCurrentValue());
+                                value = new String((byte[]) value, GlobalConfiguration.FILE_ENCODING.getCurrentValue());
                             }
                             object.setAttribute(attr, null);
                             ObjectUtil.setProperty(object, attr, value);

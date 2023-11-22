@@ -21,7 +21,7 @@ public abstract class AbstractAntTaskTest {
         final String resourceName = "/" + name.replace('.', '/') + ".class";
         String absoluteFilePath = BaseLiquibaseTask.class.getResource(resourceName).getFile();
         try {
-            absoluteFilePath = URLDecoder.decode(absoluteFilePath, GlobalConfiguration.OUTPUT_FILE_ENCODING.getCurrentValue());
+            absoluteFilePath = URLDecoder.decode(absoluteFilePath, GlobalConfiguration.FILE_ENCODING.getCurrentValue().name());
         } catch (UnsupportedEncodingException e) {
             throw new RuntimeException("Missing UTF-8 encoding in JVM.", e);
         }
@@ -34,7 +34,7 @@ public abstract class AbstractAntTaskTest {
         final String testResourceName = "/" + testClassName.replace('.', '/') + ".class";
         String testAbsoluteFilePath = AbstractAntTaskTest.class.getResource(testResourceName).getFile();
         try {
-            testAbsoluteFilePath = URLDecoder.decode(testAbsoluteFilePath, GlobalConfiguration.OUTPUT_FILE_ENCODING.getCurrentValue());
+            testAbsoluteFilePath = URLDecoder.decode(testAbsoluteFilePath, GlobalConfiguration.FILE_ENCODING.getCurrentValue().name());
         } catch (UnsupportedEncodingException e) {
             throw new RuntimeException("Missing UTF-8 encoding in JVM.", e);
         }
