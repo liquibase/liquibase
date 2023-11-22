@@ -542,7 +542,7 @@ public abstract class AbstractFormattedChangeLogParser implements ChangeLogParse
             }
         } else if (rollbackSqlFileMatcher.matches()) {
             if (resourceAccessor != null) {
-                currentRollbackSequence.append(readRollbackSqlFile(rollbackSqlFileMatcher.group(1), resourceAccessor));
+                currentRollbackSequence.append(readRollbackSqlFile(rollbackSqlFileMatcher.group(1), resourceAccessor, physicalChangeLogLocation));
             }
         } else if (preconditionsMatcher.matches()) {
             handlePreconditionsCase(changeSet, count, preconditionsMatcher);
@@ -596,10 +596,17 @@ public abstract class AbstractFormattedChangeLogParser implements ChangeLogParse
         return resourceAccessor.getExisting(physicalChangeLogLocation).openInputStream();
     }
 
-    protected String readRollbackSqlFile(String physicalChangeLogLocation, ResourceAccessor resourceAccessor) throws IOException {
-        try (InputStream inputStream = resourceAccessor.getExisting(physicalChangeLogLocation).openInputStream()) {
+    protected String readRollbackSqlFile(String rollbackSpecification, ResourceAccessor resourceAccessor, String physicalChangelogLocation)
+            throws IOException {
+        try (InputStream inputStream = resourceAccessor.get(physicalChangelogLocation).resolveSibling(rollbackSpecification).openInputStream()) {
             return StreamUtil.readStreamAsString(inputStream);
         }
+
+        /*
+        try (InputStream inputStream = resourceAccessor.getExisting(rollbackSpecification).openInputStream()) {
+            return StreamUtil.readStreamAsString(inputStream);
+        }
+         */
     }
 
     private void handleRollbackSequence(String physicalChangeLogLocation, ChangeLogParameters changeLogParameters, DatabaseChangeLog changeLog, StringBuilder currentRollbackSequence, ChangeSet changeSet, Matcher rollbackSplitStatementsPatternMatcher, boolean rollbackSplitStatements, String rollbackEndDelimiter) throws ChangeLogParseException {
