@@ -106,7 +106,7 @@ jobs:
             
             core.setOutput("branchExistsInBoth", branchExistsInBoth)
             core.setOutput("proBranchNamePrefix", liquibaseProVersionPrefix)
-            console.log($liquibaseProVersionPrefix)
+            console.log(liquibaseProVersionPrefix)
 
 #### MATCHING BRANCH RUN THIS LOGIC
   build_publish_branch:
