@@ -358,6 +358,18 @@ jobs:
           forceUpload: true
           localDir: 'liquibase-pro-repo/pro/src/main/resources/schemas/'
           remoteDir: '/json/schema/'
+
+      - name: Liquibase index.htm SFTP upload
+        uses: wangyucode/sftp-upload-action@v2.0.2
+        with:
+          host: ${{ secrets.WPENGINE_SFTP_HOST }}
+          port: ${{ secrets.WPENGINE_SFTP_PORT }}
+          username: ${{ secrets.WPENGINE_SFTP_USER }}
+          password: ${{ secrets.WPENGINE_SFTP_PASSWORD }} 
+          compress: false
+          forceUpload: true
+          localDir: 'index-file/'
+          remoteDir: '/xml/ns/dbchangelog/'
           
   release-docker:
     name: Release docker images

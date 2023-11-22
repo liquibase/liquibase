@@ -516,11 +516,13 @@ public class JdbcDatabaseSnapshot extends DatabaseSnapshot {
                 //
                 StringBuilder selectStatement = new StringBuilder(
                     "SELECT TABLE_SCHEMA, TABLE_NAME, COLUMN_NAME, DATA_TYPE FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_SCHEMA = ?");
+                if(tableName != null) {
+                    selectStatement.append(" AND TABLE_NAME = ?");
+                }
                 Connection underlyingConnection = ((JdbcConnection) database.getConnection()).getUnderlyingConnection();
                 PreparedStatement statement = underlyingConnection.prepareStatement(selectStatement.toString());
                 statement.setString(1, schemaName);
                 if (tableName != null) {
-                    selectStatement.append(" AND TABLE_NAME = ?");
                     statement.setString(2, tableName);
                 }
                 try {
@@ -1244,12 +1246,13 @@ public class JdbcDatabaseSnapshot extends DatabaseSnapshot {
                             "(SELECT DEFAULT_TABLESPACE FROM USER_USERS) THEN 'true' ELSE null END as default_tablespace " +
                             "from ALL_TABLES a " +
                             "join ALL_TAB_COMMENTS c on a.TABLE_NAME=c.table_name and a.owner=c.owner " +
-                            "left outer join ALL_QUEUE_TABLES q ON a.TABLE_NAME = q.QUEUE_TABLE and a.OWNER = q.OWNER ";
+                            "left outer join ALL_QUEUE_TABLES q ON a.TABLE_NAME = q.QUEUE_TABLE and a.OWNER = q.OWNER " +
+                            "WHERE q.QUEUE_TABLE is null ";
                     String allCatalogsString = getAllCatalogsStringScratchData();
                     if (tableName != null || allCatalogsString == null) {
-                        sql += "WHERE a.OWNER='" + ownerName + "'";
+                        sql += "AND a.OWNER='" + ownerName + "'";
                     } else {
-                        sql += "WHERE a.OWNER IN ('" + ownerName + "', " + allCatalogsString + ")";
+                        sql += "AND a.OWNER IN ('" + ownerName + "', " + allCatalogsString + ")";
                     }
                     if (tableName != null) {
                         sql += " AND a.TABLE_NAME='" + tableName + "'";
