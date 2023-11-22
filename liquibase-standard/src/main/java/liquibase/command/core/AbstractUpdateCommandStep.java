@@ -23,6 +23,7 @@ import liquibase.logging.mdc.customobjects.ChangesetsUpdated;
 import liquibase.report.UpdateReportParameters;
 import liquibase.util.ShowSummaryUtil;
 import liquibase.util.StringUtil;
+import liquibase.util.UpdateSummaryDetails;
 
 import java.io.IOException;
 import java.io.OutputStream;
@@ -95,7 +96,7 @@ public abstract class AbstractUpdateCommandStep extends AbstractCommandStep impl
             StatusVisitor statusVisitor = getStatusVisitor(commandScope, database, contexts, labelExpression, databaseChangeLog);
 
             AtomicInteger rowsAffected = new AtomicInteger(0);
-            ShowSummaryUtil.UpdateSummaryDetails summaryDetails = new ShowSummaryUtil.UpdateSummaryDetails();
+            UpdateSummaryDetails summaryDetails = new UpdateSummaryDetails();
 
             HashMap<String, Object> scopeValues = new HashMap<>();
             scopeValues.put("showSummary", getShowSummary(commandScope));
@@ -105,7 +106,7 @@ public abstract class AbstractUpdateCommandStep extends AbstractCommandStep impl
                     runChangeLogIterator.run(new UpdateVisitor(database, changeExecListener, new ShouldRunChangeSetFilter(database)),
                             new RuntimeEnvironment(database, contexts, labelExpression));
                 } finally {
-                    ShowSummaryUtil.UpdateSummaryDetails details = ShowSummaryUtil.buildSummaryDetails(databaseChangeLog, getShowSummary(commandScope), getShowSummaryOutput(commandScope), statusVisitor, resultsBuilder.getOutputStream(), runChangeLogIterator);
+                    UpdateSummaryDetails details = ShowSummaryUtil.buildSummaryDetails(databaseChangeLog, getShowSummary(commandScope), getShowSummaryOutput(commandScope), statusVisitor, resultsBuilder.getOutputStream(), runChangeLogIterator);
                     if (details != null) {
                         summaryDetails.setSummary(details.getSummary());
                         summaryDetails.setOutput(details.getOutput());

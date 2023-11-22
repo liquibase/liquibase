@@ -16,7 +16,6 @@ import liquibase.logging.mdc.MdcObject;
 import liquibase.logging.mdc.customobjects.UpdateSummary;
 import liquibase.report.ShowSummaryGenerator;
 import liquibase.report.ShowSummaryGeneratorFactory;
-import lombok.Data;
 
 import java.io.IOException;
 import java.io.OutputStream;
@@ -380,15 +379,5 @@ public class ShowSummaryUtil {
         Stream.of(message.split(System.lineSeparator()))
                 .filter(s -> !StringUtil.isWhitespace(s))
                 .forEach(Scope.getCurrentScope().getLog(ShowSummaryUtil.class)::info);
-    }
-
-    /**
-     * Container to handle sharing update summary message between different services
-     */
-    @Data
-    @Beta
-    public static class UpdateSummaryDetails {
-        private UpdateSummary summary;
-        private String output;
     }
 }
