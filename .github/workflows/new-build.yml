@@ -271,8 +271,8 @@ jobs:
           
           commercialJarM2Location=/Users/runner/.m2/repository/org/liquibase/liquibase-commercial/${{ needs.setup.outputs.thisBranchName }}-SNAPSHOT/liquibase-commercial-${{ needs.setup.outputs.thisBranchName }}-SNAPSHOT.jar
           cp $commercialJarM2Location artifacts
-          cp /tmp/liquibase-commercial-${{ needs.setup.outputs.thisBranchName }}-SNAPSHOT-sources.jar artifacts
-          cp /tmp/liquibase-commercial-${{ needs.setup.outputs.thisBranchName }}-SNAPSHOT-javadoc.jar artifacts
+          cp /tmp/liquibase-commercial-${{ needs.setup.outputs.unmodifiedBranchName }}-SNAPSHOT-sources.jar artifacts
+          cp /tmp/liquibase-commercial-${{ needs.setup.outputs.unmodifiedBranchName }}-SNAPSHOT-javadoc.jar artifacts
           
           .github/util/sign-artifacts.sh artifacts
           
@@ -286,7 +286,7 @@ jobs:
           cp liquibase-cdi-jakarta/target/liquibase-cdi-jakarta-0-SNAPSHOT.jar artifacts-named/liquibase-cdi-jakarta-${{ needs.setup.outputs.thisBranchName }}.jar
           cp liquibase-extension-testing/target/liquibase-extension-testing-0-SNAPSHOT.jar artifacts-named/liquibase-extension-testing-${{ needs.setup.outputs.thisBranchName }}.jar
           cp liquibase-extension-testing/target/liquibase-extension-testing-0-SNAPSHOT-deps.jar artifacts-named/liquibase-extension-testing-${{ needs.setup.outputs.thisBranchName }}-deps.jar
-          cp $commercialJarM2Location artifacts-named/liquibase-commercial-${{ needs.setup.outputs.thisBranchName }}.jar
+          cp $commercialJarM2Location artifacts-named/liquibase-commercial-${{ needs.setup.outputs.unmodifiedBranchName }}.jar
       - name: Archive Packages
         uses: actions/upload-artifact@v3
         with:
