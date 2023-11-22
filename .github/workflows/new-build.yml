@@ -86,7 +86,7 @@ jobs:
         with:
           github-token: ${{ secrets.LIQUIBOT_PAT_GPM_ACCESS }}
           script: |
-            const currentBranch = "${{ steps.get-branch-name.outputs.thisBranchName }}" 
+            const currentBranch = "${{ steps.get-branch-name.outputs.unmodifiedBranchName }}" 
             console.log(currentBranch)
             let branchExistsInBoth;
             try {
@@ -107,7 +107,6 @@ jobs:
             
             core.setOutput("branchExistsInBoth", branchExistsInBoth)
             core.setOutput("proBranchNamePrefix", liquibaseProVersionPrefix)
-            echo "proBranchNamePrefix:" $proBranchNamePrefix
 
 #### MATCHING BRANCH RUN THIS LOGIC
   build_publish_branch:
