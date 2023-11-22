@@ -80,13 +80,14 @@ jobs:
       #checking if the branch specified by $currentBranch exists in the PRO repository, If the getBranch call throws an error, it means the branch doesn't exist in the PRO repo. Also, remove refs/heads/
       # if the value of branchExistsInBoth = false then set liquibaseProVersionPrefix = master else $currentBranch
       # if the value of branchExistsInBoth = true then set liquibaseProVersionPrefix = thisBranchName else $currentBranch as PRO also has replacement logic for / with _
+      #check this logic as to why it is needed? liquibaseProVersionPrefix=liquibaseProVersionPrefix.replaceAll("/","_")
       - name: Check branch existence
         id: check-branch
         uses: actions/github-script@v6
         with:
           github-token: ${{ secrets.LIQUIBOT_PAT_GPM_ACCESS }}
           script: |
-            const currentBranch = "${{ steps.get-branch-name.outputs.thisBranchName }}" 
+            const currentBranch = "${{ steps.get-branch-name.outputs.unmodifiedBranchName }}" 
             console.log(currentBranch)
             let branchExistsInBoth;
             try {
@@ -100,14 +101,12 @@ jobs:
               branchExistsInBoth = false
             }
             let liquibaseProVersionPrefix= branchExistsInBoth ? currentBranch : 'master'
-            
-            # check this logic as to why it is needed?
             liquibaseProVersionPrefix=liquibaseProVersionPrefix.replaceAll("/","_")
             
             
             core.setOutput("branchExistsInBoth", branchExistsInBoth)
             core.setOutput("proBranchNamePrefix", liquibaseProVersionPrefix)
-            echo "proBranchNamePrefix:" $proBranchNamePrefix
+            console.log(liquibaseProVersionPrefix)
 
 #### MATCHING BRANCH RUN THIS LOGIC
   build_publish_branch:
