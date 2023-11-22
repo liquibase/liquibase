@@ -36,6 +36,9 @@ public class UUIDType extends LiquibaseDataType {
         if (database instanceof SQLiteDatabase) {
             return new DatabaseDataType("TEXT");
         }
+        if(database instanceof MariaDBDatabase) {
+            return new DatabaseDataType("UUID");
+        }
         return new DatabaseDataType("char", 36);
     }
 
