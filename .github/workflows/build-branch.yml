@@ -75,7 +75,7 @@ jobs:
             branch_name=${{ github.ref_name }}
           fi 
 
-          modified_branch_name=`(echo $branch_name | tr / -)`
+          modified_branch_name=`(echo $branch_name | tr '/' '_')`
           echo "thisBranchName=$modified_branch_name" >> $GITHUB_OUTPUT          
 
   build:
