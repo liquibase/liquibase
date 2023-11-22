@@ -14,6 +14,7 @@ class LiquibaseLauncherSettings {
   /**
    * 
    * Agglutinates the different settings, i.e., environment variables or associated JVM system properties, that can be
+   * 
    * used for customizing the behavior of the class.
    */
   enum LiquibaseLauncherSetting {
