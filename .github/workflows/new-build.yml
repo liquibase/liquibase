@@ -102,11 +102,12 @@ jobs:
             let liquibaseProVersionPrefix= branchExistsInBoth ? currentBranch : 'master'
             
             # check this logic as to why it is needed?
-            liquibaseProVersionPrefix=liquibaseProVersionPrefix.replaceAll("/","_")
+            liquibaseProVersionPrefix=liquibaseProVersionPrefix.replaceAll("_","-")
             
             
             core.setOutput("branchExistsInBoth", branchExistsInBoth)
             core.setOutput("proBranchNamePrefix", liquibaseProVersionPrefix)
+            console.log($liquibaseProVersionPrefix)
 
 #### MATCHING BRANCH RUN THIS LOGIC
   build_publish_branch:
