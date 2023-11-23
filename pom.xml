@@ -76,7 +76,7 @@
         <spock.version>1.3-groovy-2.5</spock.version>
         <spring.version>5.3.28</spring.version>
         <maven-failsafe-plugin.version>3.1.2</maven-failsafe-plugin.version>
-        <jacoco-maven-plugin.version>0.8.10</jacoco-maven-plugin.version>
+        <jacoco-maven-plugin.version>0.8.11</jacoco-maven-plugin.version>
         <maven-surefire-plugin.version>3.1.2</maven-surefire-plugin.version>
         <sonar.projectName>Liquibase</sonar.projectName>
         <sonar.projectDescription>Liquibase</sonar.projectDescription>
@@ -106,7 +106,6 @@
         <module>liquibase-cdi</module>
         <module>liquibase-integration-tests</module>
         <module>liquibase-dist</module>
-        <module>liquibase-extension-examples</module>
         <module>liquibase-extension-testing</module>
         <module>liquibase-snowflake</module>
     </modules>
@@ -195,8 +194,8 @@
 
         <dependency>
             <groupId>org.mockito</groupId>
-            <artifactId>mockito-inline</artifactId>
-            <version>4.10.0</version>
+            <artifactId>mockito-core</artifactId>
+            <version>4.11.0</version>
             <scope>test</scope>
         </dependency>
 
@@ -257,7 +256,7 @@
         <dependency>
             <groupId>org.postgresql</groupId>
             <artifactId>postgresql</artifactId>
-            <version>42.6.0</version>
+            <version>42.7.0</version>
             <scope>test</scope>
         </dependency>
 
@@ -271,7 +270,7 @@
         <dependency>
             <groupId>com.ibm.db2</groupId>
             <artifactId>jcc</artifactId>
-            <version>11.5.8.0</version>
+            <version>11.5.9.0</version>
             <scope>test</scope>
         </dependency>
 
@@ -313,7 +312,7 @@
         <dependency>
             <groupId>org.glassfish.jaxb</groupId>
             <artifactId>jaxb-runtime</artifactId>
-            <version>4.0.3</version>
+            <version>4.0.4</version>
             <scope>test</scope>
         </dependency>
     </dependencies>
@@ -573,7 +572,16 @@
             </activation>
             <properties>
                 <maven.compiler.release>8</maven.compiler.release>
+                <net.bytebuddy.experimental>true</net.bytebuddy.experimental>
             </properties>
+            <dependencies>
+                <dependency>
+                    <groupId>org.mockito</groupId>
+                    <artifactId>mockito-core</artifactId>
+                    <version>5.7.0</version>
+                    <scope>test</scope>
+                </dependency>
+            </dependencies>
             <build>
                 <plugins>
                     <plugin>
@@ -584,6 +592,7 @@
                                 @{argLine}
                                 --illegal-access=warn
                                 --add-opens java.base/java.lang=ALL-UNNAMED
+                                -Dnet.bytebuddy.experimental=true
                             </argLine>
                         </configuration>
                     </plugin>
