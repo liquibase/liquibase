@@ -152,7 +152,7 @@ jobs:
       fail-fast: false
       matrix:
         os: [ ubuntu-22.04, macos-latest, windows-2019 ]
-        java: [ 8, 11, 17, 20 ]
+        java: [ 8, 11, 17, 21 ]
         exclude:
           # exclude non-java 8 on macos and windows builds
           - os: macos-latest
@@ -164,9 +164,9 @@ jobs:
           - os: windows-2019
             java: 17
           - os: macos-latest
-            java: 20
+            java: 21
           - os: windows-2019
-            java: 20
+            java: 21
     runs-on: ${{ matrix.os }}
     env:
       OS_TYPE: ${{ matrix.os }}
@@ -311,7 +311,7 @@ jobs:
 
   sonar:
     needs: [ build, integration-test ]
-    uses: liquibase/build-logic/.github/workflows/sonar-test-scan.yml@v0.4.7
+    uses: liquibase/build-logic/.github/workflows/sonar-test-scan.yml@v0.5.7
     with:
       thisBranchName: ${{ needs.setup.outputs.thisBranchName }}
       thisSha: ${{ needs.setup.outputs.thisSha }}
