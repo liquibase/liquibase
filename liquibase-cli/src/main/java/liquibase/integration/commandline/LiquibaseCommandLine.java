@@ -85,6 +85,7 @@ public class LiquibaseCommandLine {
 
     /**
      * Pico's defaultFactory does a lot of reflection, checking for classes we know we don't have.
+     *
      * That is slow on older JVMs and impact initial startup time, so do our own factory for performance reasons.
      * It is easy to configure pico to it's default factory, when profiling check for `CommandLine$DefaultFactory` usage
      */
