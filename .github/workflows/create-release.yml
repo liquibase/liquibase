@@ -59,7 +59,7 @@ jobs:
       - name: Download liquibase-artifacts
         uses: liquibase/action-download-artifact@v2-liquibase
         with:
-          workflow: build.yml
+          workflow: run-tests.yml
           run_id: ${{ needs.setup.outputs.runId }}
           name: liquibase-artifacts
           path: download/liquibase-artifacts
