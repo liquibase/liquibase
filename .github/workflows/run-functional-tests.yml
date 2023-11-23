@@ -18,7 +18,7 @@ env:
   MAVEN_VERSION: '3.9.2'
 
 jobs:
-  build:
+  functional-tests-build:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3

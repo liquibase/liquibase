@@ -7,7 +7,7 @@ env:
   MAVEN_VERSION: '3.9.2'
 
 jobs:
-  build:
+  test-harness-build:
     runs-on: ubuntu-latest
 
     steps:
