@@ -29,6 +29,7 @@ jobs:
           repository: liquibase/liquibase-pro
           ref: ${{ inputs.branch }}
           token: ${{ secrets.BOT_TOKEN }}
+          path: liquibase-pro
 
       - name: Set up JDK 17
         uses: actions/setup-java@v3
@@ -40,6 +41,31 @@ jobs:
       - name: maven-settings-xml-action
         uses: whelk-io/maven-settings-xml-action@v20
         with:
+          repositories: |
+              [
+                {
+                  "id": "liquibase",
+                  "url": "https://maven.pkg.github.com/liquibase/liquibase",
+                  "releases": {
+                    "enabled": "false"
+                  },
+                  "snapshots": {
+                    "enabled": "true",
+                    "updatePolicy": "always"
+                  }
+                },
+                {
+                  "id": "liquibase-pro",
+                  "url": "https://maven.pkg.github.com/liquibase/liquibase-pro",
+                  "releases": {
+                    "enabled": "false"
+                  },
+                  "snapshots": {
+                    "enabled": "true",
+                    "updatePolicy": "always"
+                  }
+                }
+              ]
           plugin_repositories: |
             [
               {
@@ -58,6 +84,16 @@ jobs:
           servers: |
             [
               {
+                "id": "liquibase",
+                "username": "liquibot",
+                "password": "${{ secrets.LIQUIBOT_PAT }}"
+              },
+              {
+                "id": "liquibase-pro",
+                "username": "liquibot",
+                "password": "${{ secrets.LIQUIBOT_PAT }}"
+              },
+              {
                 "id": "file-replacer-maven-plugin",
                 "username": "liquibot",
                 "password": "${{ secrets.LIQUIBOT_PAT }}"
@@ -70,14 +106,15 @@ jobs:
           maven-version: ${{ env.MAVEN_VERSION }}
 
       - name: Set version
-        run: mvn versions:set -DnewVersion=${{ inputs.liquibase-version }}
+        run: cd liquibase-pro/liquibase-azure-deps && mvn versions:set -DnewVersion=${{ inputs.liquibase-version }}
 
       - name: Build & Test
-        run: mvn -B clean package
+        run: |
+          cd liquibase-pro/liquibase-azure-deps && mvn -B clean package
 
       - name: Archive Modules
         uses: actions/upload-artifact@v3
         with:
           name: liquibase-pro-azure-artifacts
           path: |
-            */target/*.jar
+            liquibase-azure-deps/target/*.jar

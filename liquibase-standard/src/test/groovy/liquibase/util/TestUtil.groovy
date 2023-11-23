@@ -1,8 +1,14 @@
 package liquibase.util
 
 import liquibase.ExtensibleObject
+import liquibase.Scope
+import liquibase.changelog.ChangeLogHistoryServiceFactory
+import liquibase.changelog.RanChangeSet
+import liquibase.database.Database
 
 import java.lang.reflect.Modifier
+
+import static org.junit.Assert.assertNotNull
 
 /**
  * Test-centric utility methods
@@ -138,4 +144,12 @@ public abstract class TestUtil {
         return true;
     }
 
+    static void assertAllDeploymentIdsNonNull() {
+        def database = (Database) Scope.getCurrentScope().get("database", null)
+        def changelogHistoryService = Scope.getCurrentScope().getSingleton(ChangeLogHistoryServiceFactory.class).getChangeLogService(database)
+        List<RanChangeSet> ranChangeSets = changelogHistoryService.getRanChangeSets()
+        for (RanChangeSet ranChangeSet : ranChangeSets) {
+            assertNotNull(ranChangeSet.getDeploymentId())
+        }
+    }
 }

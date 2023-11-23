@@ -31,16 +31,21 @@ class AddDefaultValueGeneratorMySQLTest extends Specification {
     }
 
     @Unroll
-    def "validate generated errors message when setting up Default Value for MySQL version #majorVersion "() {
+    def "validate generated errors message when setting up Default Value for MySQL version #majorVersion dot #minorVersion "() {
         when:
         def addDefaultValueStatement = new AddDefaultValueStatement("lbcat", "public", "testTable", "testColumn", columnDataType, finalDefaultValue);
         AddDefaultValueGeneratorMySQL defaultValueGenerator = new AddDefaultValueGeneratorMySQL();
 
         int majorDBVersion =  majorVersion;
+        int minorDBVersion = minorVersion
         def errors = defaultValueGenerator.validate(addDefaultValueStatement, new MySQLDatabase() {
             @Override
             int getDatabaseMajorVersion() throws DatabaseException {
                 return majorDBVersion
+            }
+            @Override
+            int getDatabaseMinorVersion() throws DatabaseException {
+                return minorDBVersion
             }
         }, null)
 
@@ -48,8 +53,42 @@ class AddDefaultValueGeneratorMySQLTest extends Specification {
         errors.getErrorMessages() == expectedErrors
 
         where:
-        majorVersion | expectedErrors                                                         | columnDataType | finalDefaultValue
-        5            | ["This version of mysql does not support non-literal default values"]  | "timestamp"    | new DatabaseFunction("CURRENT_TIMESTAMP()")
-        8            | []                                                                     | "timestamp"    | "2002-01-1"
+        majorVersion | minorVersion | expectedErrors                                                         | columnDataType | finalDefaultValue
+        5            | 6            | ["This version of mysql does not support non-literal default values"]  | "timestamp"    | new DatabaseFunction("CURRENT_TIMESTAMP()")
+        5            | 7            | []                                                                     | "timestamp"    | new DatabaseFunction("CURRENT_TIMESTAMP()")
+        8            | 0            | []                                                                     | "timestamp"    | "2002-01-1"
+    }
+
+    @Unroll
+    def "set default value #finalDefaultValue for MySQL database and validate expected SQL is #expectedSQL for MySQL version #majorVersion dot #minorVersion"() throws DatabaseException {
+        when:
+        def addDefaultValueStatement = new AddDefaultValueStatement("lbcat", "public", "testTable", "testColumn", columnDataType, finalDefaultValue)
+        AddDefaultValueGeneratorMySQL defaultValueGenerator = new AddDefaultValueGeneratorMySQL()
+
+        int majorDBVersion = majorVersion
+        int minorDBVersion = minorVersion
+        MySQLDatabase db = new MySQLDatabase() {
+            @Override
+            int getDatabaseMajorVersion() throws DatabaseException {
+                return majorDBVersion
+            }
+
+            @Override
+            int getDatabaseMinorVersion() throws DatabaseException {
+                return minorDBVersion
+            }
+        }
+
+        def unparseSQL = defaultValueGenerator.generateSql(addDefaultValueStatement, db, new SqlGeneratorChain(null))
+
+        then:
+        unparseSQL*.toSql() == expectedSQL
+
+        where:
+        majorVersion | minorVersion | columnDataType | finalDefaultValue                           | expectedSQL
+        5            | 7            | "timestamp"    | new DatabaseFunction("CURRENT_TIMESTAMP()") | ["ALTER TABLE lbcat.testTable MODIFY COLUMN testColumn timestamp DEFAULT CURRENT_TIMESTAMP()"]
+        5            | 7            | "timestamp"    | "2002-01-1"                                 | ["ALTER TABLE lbcat.testTable ALTER testColumn SET DEFAULT '2002-01-1'"]
+        8            | 0            | "timestamp"    | new DatabaseFunction("CURRENT_TIMESTAMP()") | ["ALTER TABLE lbcat.testTable ALTER testColumn SET DEFAULT (CURRENT_TIMESTAMP())"]
+        8            | 0            | "timestamp"    | "2002-01-1"                                 | ["ALTER TABLE lbcat.testTable ALTER testColumn SET DEFAULT '2002-01-1'"]
     }
 }

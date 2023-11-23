@@ -3,12 +3,13 @@ package liquibase.util;
 import liquibase.ExtensibleObject;
 import liquibase.GlobalConfiguration;
 import liquibase.Scope;
+import liquibase.parser.LiquibaseSqlParser;
+import liquibase.parser.SqlParserFactory;
 
 import java.io.UnsupportedEncodingException;
 import java.nio.charset.StandardCharsets;
 import java.security.SecureRandom;
 import java.util.*;
-import java.util.concurrent.atomic.AtomicInteger;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -62,7 +63,9 @@ public class StringUtil {
      */
     public static String[] processMultiLineSQL(String multiLineSQL, boolean stripComments, boolean splitStatements, String endDelimiter) {
 
-        StringClauses parsed = SqlParser.parse(multiLineSQL, true, !stripComments);
+        SqlParserFactory sqlParserFactory = Scope.getCurrentScope().getSingleton(SqlParserFactory.class);
+        LiquibaseSqlParser sqlParser = sqlParserFactory.getSqlParser();
+        StringClauses parsed = sqlParser.parse(multiLineSQL, true, !stripComments);
 
         List<String> returnArray = new ArrayList<>();
 
@@ -314,7 +317,9 @@ public class StringUtil {
         if (StringUtil.isEmpty(multiLineSQL)) {
             return multiLineSQL;
         }
-        return SqlParser.parse(multiLineSQL, true, false).toString().trim();
+        SqlParserFactory sqlParserFactory = Scope.getCurrentScope().getSingleton(SqlParserFactory.class);
+        LiquibaseSqlParser sqlParser = sqlParserFactory.getSqlParser();
+        return sqlParser.parse(multiLineSQL, true, false).toString().trim();
     }
 
     public static String join(Object[] array, String delimiter, StringUtilFormatter formatter) {

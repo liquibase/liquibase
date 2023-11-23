@@ -1273,7 +1273,6 @@ public class Liquibase implements AutoCloseable {
                 .addArgumentValue(CalculateChecksumCommandStep.CHANGESET_PATH_ARG, changeSetPath)
                 .addArgumentValue(CalculateChecksumCommandStep.CHANGESET_ID_ARG, changeSetId)
                 .addArgumentValue(CalculateChecksumCommandStep.CHANGESET_AUTHOR_ARG, changeSetAuthor)
-                .addArgumentValue(CalculateChecksumCommandStep.CHANGESET_IDENTIFIER_ARG, String.format("%s::%s::%s", changeSetPath, changeSetId, changeSetAuthor))
                 .addArgumentValue(CalculateChecksumCommandStep.CHANGELOG_FILE_ARG, this.changeLogFile)
                 .execute();
         return commandResults.getResult(CalculateChecksumCommandStep.CHECKSUM_RESULT);
@@ -1328,11 +1327,13 @@ public class Liquibase implements AutoCloseable {
      */
     @Deprecated
     public void validate() throws LiquibaseException {
-        new CommandScope("validate")
+        runInScope(() ->
+            new CommandScope("validate")
                 .addArgumentValue(DbUrlConnectionCommandStep.DATABASE_ARG, database)
                 .addArgumentValue(DatabaseChangelogCommandStep.CHANGELOG_FILE_ARG, changeLogFile)
                 .addArgumentValue(DatabaseChangelogCommandStep.CHANGELOG_PARAMETERS, changeLogParameters)
-                .execute();
+                .execute()
+        );
     }
 
     public void setChangeLogParameter(String key, Object value) {
