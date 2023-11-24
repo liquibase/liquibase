@@ -15,14 +15,12 @@ import liquibase.structure.core.DataType;
 
 import java.math.BigDecimal;
 import java.sql.Types;
-import java.util.Arrays;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Scanner;
+import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
+import static java.util.Locale.ENGLISH;
 import static java.util.Locale.US;
 
 public abstract class SqlUtil {
@@ -112,6 +110,12 @@ public abstract class SqlUtil {
                     return new DatabaseFunction(stringVal);
                 }
             }
+        }
+
+        if ((database instanceof PostgresDatabase) && (liquibaseDataType instanceof CharType || liquibaseDataType instanceof ClobType)
+            && stringVal.toUpperCase(ENGLISH).startsWith("GENERATED ALWAYS AS ")
+        ) {
+            return new DatabaseFunction(stringVal);
         }
 
         boolean strippedSingleQuotes = false;
