@@ -43,5 +43,5 @@ jobs:
             {
               "liquibaseCommit": "${{ inputs.latestMergeSha }}",
               "runDescription" : "${{ env.workflow_url }}",
-              "ossBranchName" : "${{ inputs.thisBranchName }}"
+              "liquibaseBranch" : "${{ inputs.thisBranchName }}"
             }
