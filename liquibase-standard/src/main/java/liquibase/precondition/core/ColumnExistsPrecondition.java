@@ -163,12 +163,11 @@ public class ColumnExistsPrecondition extends AbstractPrecondition {
                             database.escapeObjectName(tableName, Table.class));
                 }
 
-                statement = ((JdbcConnection) database.getConnection())
-                        .prepareStatement(sql);
                 try {
-                    statement.executeQuery().close();
+                    statement = ((JdbcConnection) database.getConnection()).prepareStatement(sql);
+                    statement.executeQuery();
                     // column exists
-                } catch (SQLException e) {
+                } catch (SQLException | DatabaseException e) {
                     // column or table does not exist
                     throw new PreconditionFailedException(format(
                             "Column %s.%s.%s does not exist", schemaName,
