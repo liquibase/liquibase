@@ -94,6 +94,8 @@ declare -a javadocJars=("liquibase-core-0-SNAPSHOT-javadoc.jar" "liquibase-cdi-0
 for jar in "${javadocJars[@]}"
 do
   mkdir $workdir/rebuild
+  ls $workdir
+  echo "debug"
   unzip -q $workdir/$jar -d $workdir/rebuild
 
   find $workdir/rebuild -name "*.html" -exec sed -i -e "s/0-SNAPSHOT/$version/g" {} \;
