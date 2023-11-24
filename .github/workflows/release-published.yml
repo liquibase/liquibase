@@ -365,7 +365,7 @@ jobs:
           host: ${{ secrets.WPENGINE_SFTP_HOST }}
           port: ${{ secrets.WPENGINE_SFTP_PORT }}
           username: ${{ secrets.WPENGINE_SFTP_USER }}
-          password: ${{ secrets.WPENGINE_SFTP_PASSWORD }}
+          password: ${{ secrets.WPENGINE_SFTP_PASSWORD }} 
           compress: false
           forceUpload: true
           localDir: 'index-file/'
