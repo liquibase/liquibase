@@ -2,34 +2,46 @@ name: Run Functional Tests
 
 on:
   workflow_call:
-
-  workflow_run:
-    workflows: [ "Build Branch SNAPSHOT", "Build and Publish (Matching Branch)" ]
-    types:
-      - completed
-
-  pull_request:
-    types:
-      - labeled
+    inputs:
+      latestMergeSha:
+        description: 'Latest Merge sha of OSS PR'
+        required: false
+        default: ''
+        type: string
+      thisBranchName:
+        description: 'Branch Name of OSS PR'
+        required: false
+        default: ''
+        type: string
 
 env:
   MAVEN_VERSION: '3.9.2'
 
 jobs:
-  build:
-    if: contains(github.event.workflow_run.event,  'completed') && contains(github.event.pull_request.labels.*.name, 'runFunctionalTests')
+  functional-tests-build:
     runs-on: ubuntu-latest
-
     steps:
       - uses: actions/checkout@v3
         with:
-          ref: ${{ github.event.pull_request.head.sha || github.event.after}} #sets the Git reference (commit or branch) to be checked out in the workflow
+          ref: ${{ github.event.pull_request.head.sha || github.event.after}} # get the sha of the commit or the new commit created when branch is merged to master
 
-       #run the functional tests only against the head-branch of the PR
+      - name: Get Workflow Run URL
+        id: get-workflow-url
+        run: |
+          repo_url="https://github.com/${{ github.repository }}"
+          workflow_url="${repo_url}/actions/runs/${{ github.run_id }}"
+          echo "workflow_url=${workflow_url}" >> $GITHUB_ENV
+
+      #run the functional tests only against the head-branch of the PR
       - name: Trigger Functional Tests Workflow
         uses: peter-evans/repository-dispatch@v2
         with:
           token: ${{ secrets.RUN_FUNCTIONAL_TEST_HARNESS_TESTS_TOKEN }}
           repository: liquibase/liquibase-pro-tests
           event-type: run-functional-tests
-          client-payload: '{"ref": "${{ github.event.pull_request.head.ref }}" }'
+          client-payload: |
+            {
+              "liquibaseCommit": "${{ inputs.latestMergeSha }}",
+              "runDescription" : "${{ env.workflow_url }}",
+              "ossBranchName" : "${{ inputs.thisBranchName }}"
+            }

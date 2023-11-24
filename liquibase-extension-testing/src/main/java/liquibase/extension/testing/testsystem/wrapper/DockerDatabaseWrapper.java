@@ -9,6 +9,7 @@ import liquibase.configuration.ConfiguredValue;
 import liquibase.configuration.LiquibaseConfiguration;
 import liquibase.exception.UnexpectedLiquibaseException;
 import liquibase.extension.testing.testsystem.TestSystem;
+import liquibase.extension.testing.testsystem.core.DB2TestSystem;
 import liquibase.util.CollectionUtil;
 import liquibase.util.StringUtil;
 import org.testcontainers.containers.JdbcDatabaseContainer;
@@ -58,7 +59,7 @@ public class DockerDatabaseWrapper extends DatabaseWrapper {
 
         container.withReuse(testSystem.getKeepRunning());
 
-        if (testSystem.getKeepRunning()) {
+        if (testSystem.getKeepRunning() && !(testSystem instanceof DB2TestSystem)) {
             mapPorts(container);
         }
 

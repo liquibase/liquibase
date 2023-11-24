@@ -23,7 +23,7 @@
 		<mysql.version>8.0.21</mysql.version>
 		<mariadb.version>3.2.0</mariadb.version>
 		<oracle.version>19.20.0.0</oracle.version>
-		<sqlite.version>3.43.0.0</sqlite.version>
+		<sqlite.version>3.43.2.2</sqlite.version>
 		<db2.version>11.5.8.0</db2.version>
 		<firebird.version>5.0.2.java8</firebird.version>
 		<liquibase-pro.version>master-SNAPSHOT</liquibase-pro.version>
@@ -158,7 +158,7 @@
 		<dependency>
 			<groupId>org.glassfish.jaxb</groupId>
 			<artifactId>jaxb-core</artifactId>
-			<version>4.0.3</version>
+			<version>4.0.4</version>
 			<optional>true</optional>
 		</dependency>
 		<dependency>
@@ -212,7 +212,7 @@
 			<plugin>
 				<groupId>org.liquibase.ext</groupId>
 				<artifactId>liquibase-sdk-maven-plugin</artifactId>
-				<version>0.10.18</version>
+				<version>0.10.21</version>
 			</plugin>
 
 			<plugin>

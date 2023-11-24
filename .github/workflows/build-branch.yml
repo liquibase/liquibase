@@ -1,37 +1,62 @@
 name: Build Branch SNAPSHOT
 
 on:
-  #workflow_run:
-  #workflows: "Run Tests"
-  #types:
-  #- completed
-
   workflow_dispatch:
+  #push:
+  #branches:
+  #- 'master'
+  pull_request_target:
+    types:
+      - opened
+      - reopened
+      - synchronize
+      - labeled
+
+  push:
+    branches:
+      - github-action-**
+    paths-ignore:
+      - '**.md'
 
 env:
   MAVEN_VERSION: '3.9.2'
 
 jobs:
+  check_build_safety:
+    name: Check if Build should be done
+    runs-on: ubuntu-22.04
+    steps:
+      - name: Emit failure code for unsafe fork PRs
+        if: github.event.pull_request && github.event.pull_request.head.repo.full_name != 'liquibase/liquibase' && github.event.label.name != 'SafeToBuild'
+        run: |
+          echo "PR from Fork is NOT safe to build"
+          echo "A member of Liquibase team needs to apply label 'SafeToBuild'! "
+          exit 1
+
   setup:
     name: Setup
+    needs: check_build_safety
     runs-on: ubuntu-22.04
-    #if: ${{ github.event.workflow_run.conclusion == 'success' }}
     outputs:
       timeStamp: ${{ steps.get-timestamp.outputs.timestamp }}
       thisBranchName: ${{ steps.get-branch-name.outputs.thisBranchName }}
-      latestMergeSha: ${{ steps.get-sha.outputs.latestMergeSha }}
+      thisSha: ${{ steps.get-commit-sha.outputs.thisSha }}
       setupSuccessful: "true"
 
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
         with:
           ref: ${{ github.event.pull_request.head.sha || github.event.after}}
 
-      - name: Get Latest Merge Commit SHA
-        id: get-sha
-        run: |
-          latest_merge_sha=`(git rev-parse --short HEAD)`
-          echo "latestMergeSha=${latest_merge_sha}" >> $GITHUB_OUTPUT
+      - name: Get commit-sha
+        id: get-commit-sha
+        uses: actions/github-script@v6
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          script: |
+            const helper = require('./.github/util/workflow-helper.js')({github, context});
+            core.setOutput("thisSha", helper.getCurrentSha());
 
       - name: Get Timestamp
         id: get-timestamp
@@ -50,30 +75,20 @@ jobs:
             branch_name=${{ github.ref_name }}
           fi 
 
-          modified_branch_name=`(echo $branch_name | tr / -)`
+          modified_branch_name=`(echo $branch_name | tr '/' '_')`
           echo "thisBranchName=$modified_branch_name" >> $GITHUB_OUTPUT          
-          echo $modified_branch_name
 
-  build_branch:
+  build:
     name: Build & Package
     runs-on: ubuntu-22.04
     needs: setup
     permissions:
       contents: read
       packages: write
-
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
         with:
           ref: ${{ github.event.pull_request.head.sha || github.event.after}}
-
-      # this includes all the tar files included in the previous runs. So in the next step we deploy what was previously build
-      - name: Built Code Cache
-        uses: actions/cache@v3.3.1
-        with:
-          key: built-code-${{ github.run_number }}-${{ github.run_attempt }}
-          path: ./**/target
-
       - name: Set up Java for publishing to GitHub Repository
         uses: actions/setup-java@v3
         with:
@@ -87,74 +102,15 @@ jobs:
         with:
           maven-version: ${{ env.MAVEN_VERSION }}
 
-
-      # Publish <commitsha>-SNAPSHOT version to GPM
-      - name: Version Artifact
-        run: |
-          mvn versions:set "-DnewVersion=${{ needs.setup.outputs.latestMergeSha }}-SNAPSHOT"
-
-      - name: Publish <commitsha>-SNAPSHOT package
-        run: |
-          mvn -B clean deploy -pl '!liquibase-dist' -DskipTests=true "-Dbuild.repository.owner=liquibase" "-Dbuild.repository.name=liquibase" "-Dbuild.branch=${{ needs.setup.outputs.latestMergeSha }}" "-Dbuild.number=${{ github.run_number }}" "-Dbuild.commit=${{ needs.setup.outputs.latestMergeSha }}" "-Dbuild.timestamp=${{ needs.setup.outputs.timeStamp }}"
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-
-      # Publish branch-SNAPSHOT version to GPM
+      # Version artifact based off of branch and commit SHA.
       - name: Version Artifact
         run: |
           mvn versions:set "-DnewVersion=${{ needs.setup.outputs.thisBranchName }}-SNAPSHOT"
+          #mvn versions:set "-DnewVersion=${{ inputs.branchName }}-SNAPSHOT"
 
-      - name: Publish branch-SNAPSHOT package
+      # Publish to GitHub Packages
+      - name: Publish package
         run: |
-          mvn -B clean deploy -pl '!liquibase-dist' -DskipTests=true "-Dbuild.repository.owner=liquibase" "-Dbuild.repository.name=liquibase" "-Dbuild.branch=${{ needs.setup.outputs.thisBranchName }}" "-Dbuild.number=${{ github.run_number }}" "-Dbuild.commit=${{ needs.setup.outputs.latestMergeSha }}" "-Dbuild.timestamp=${{ needs.setup.outputs.timeStamp }}"
+          mvn -B clean deploy -pl '!liquibase-dist' -DskipTests=true "-Dbuild.repository.owner=liquibase" "-Dbuild.repository.name=liquibase" "-Dbuild.branch=${{ needs.setup.outputs.thisBranchName }}" "-Dbuild.number=${{ github.run_number }}" "-Dbuild.commit=${{ needs.setup.outputs.thisSha }}" "-Dbuild.timestamp=${{ needs.setup.outputs.timeStamp }}"
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-
-
-      #publish_tar_package_to_build_artifact:
-      - name: Build & Publish tar.gz to Build Artifact Page
-        env:
-          INSTALL4J_LICENSE: ${{ secrets.INSTALL4J_LICENSE }}
-          INSTALL4J_APPLE_KEY: ${{ secrets.INSTALL4J_APPLE_KEY }}
-          INSTALL4J_APPLE_KEY_PASSWORD: ${{ secrets.INSTALL4J_APPLE_KEY_PASSWORD }}
-          INSTALL4J_APPLE_ID: ${{ secrets.INSTALL4J_APPLE_ID }}
-          INSTALL4J_APPLE_ID_PASSWORD: ${{ secrets.INSTALL4J_APPLE_ID_PASSWORD }}
-          INSTALL4J_WINDOWS_KEY: ${{ secrets.INSTALL4J_WINDOWS_KEY }}
-          INSTALL4J_WINDOWS_KEY_PASSWORD: ${{ secrets.INSTALL4J_WINDOWS_KEY_PASSWORD }}
-          GPG_PASSWORD: ${{ secrets.GPG_PASSPHRASE }}
-          GITHUB_TOKEN: ${{ secrets.LIQUIBOT_PAT }}
-        run: |
-          ## save install4j code signing keys
-          mkdir -p liquibase-dist/target/keys
-          echo "Saving apple key"
-          echo "$INSTALL4J_APPLE_KEY" | base64 -d > liquibase-dist/target/keys/datical_apple.p12
-          echo "Saving windows key"
-          echo "$INSTALL4J_WINDOWS_KEY" | base64 -d > liquibase-dist/target/keys/datical_windows.pfx
-          
-          mvn versions:set -DnewVersion=${{ needs.setup.outputs.thisBranchName }}-SNAPSHOT
-
-          # we are packaging and deploying liquibase tar which includes liquibase-commercial
-          mvn -B -pl liquibase-dist -P liquibase-commercial source:jar package "-Dliquibase-pro.version=master-SNAPSHOT" "-Dbuild.repository.owner=liquibase" "-Dbuild.repository.name=liquibase" "-Dbuild.branch=${{ needs.setup.outputs.thisBranchName }}" "-Dbuild.number=${{ github.run_number }}" "-Dbuild.commit=${{ needs.setup.outputs.latestMergeSha }}-SNAPSHOT" "-Dbuild.timestamp=${{ needs.setup.outputs.timeStamp }}"
-
-          ## extract tar content for other artifacts
-          mkdir -p liquibase-dist/target/liquibase-${{ needs.setup.outputs.thisBranchName }}-SNAPSHOT
-          ls -l liquibase-dist/target
-          (cd liquibase-dist/target/liquibase-${{ needs.setup.outputs.thisBranchName }}-SNAPSHOT && tar -xzf ../liquibase-${{ needs.setup.outputs.thisBranchName }}-SNAPSHOT.tar.gz)
-
-          mkdir -p artifacts
-          cp liquibase-dist/target/liquibase-${{ needs.setup.outputs.thisBranchName }}-SNAPSHOT.tar.gz artifacts
-
-          mkdir artifacts-named
-          cp liquibase-dist/target/liquibase-${{ needs.setup.outputs.thisBranchName }}-SNAPSHOT.tar.gz artifacts-named/liquibase-${{ needs.setup.outputs.thisBranchName }}.tar.gz
-
-      - name: Archive Convenience Zip
-        uses: actions/upload-artifact@v3
-        with:
-          name: liquibase-zip-${{ needs.setup.outputs.thisBranchName }}
-          path: liquibase-dist/target/liquibase-${{ needs.setup.outputs.thisBranchName }}-SNAPSHOT/*
-
-      - name: Archive Convenience Artifacts
-        uses: actions/upload-artifact@v3
-        with:
-          name: liquibase-artifacts-${{ needs.setup.outputs.thisBranchName }}
-          path: artifacts-named/*
