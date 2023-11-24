@@ -11,6 +11,13 @@ on:
       runId:
         description: 'RunId of liquibase/liquibase artifacts to attach'
         required: true
+
+    push:
+      branches:
+        - github-action-DAT-15775
+        - feat/DAT-rus-standAlonePR
+        - feat/DAT-rus-matchingBranchPR
+
 jobs:
   setup:
     name: Setup
