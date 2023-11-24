@@ -4,22 +4,13 @@ import liquibase.Contexts
 import liquibase.LabelExpression
 import liquibase.Liquibase
 import liquibase.Scope
-import liquibase.changelog.ChangeLogParameters
-import liquibase.changelog.DatabaseChangeLog
-import liquibase.changelog.visitor.DefaultChangeExecListener
-import liquibase.command.CommandScope
-import liquibase.command.core.helpers.DatabaseChangelogCommandStep
-import liquibase.command.core.helpers.DbUrlConnectionCommandStep
 import liquibase.command.util.CommandUtil
 import liquibase.extension.testing.testsystem.DatabaseTestSystem
 import liquibase.extension.testing.testsystem.TestSystemFactory
 import liquibase.extension.testing.testsystem.spock.LiquibaseIntegrationTest
 import liquibase.resource.ClassLoaderResourceAccessor
-import liquibase.resource.SearchPathResourceAccessor
-import org.h2.jdbc.JdbcSQLSyntaxErrorException
 import spock.lang.Shared
 import spock.lang.Specification
-import spock.lang.Unroll
 
 @LiquibaseIntegrationTest
 class UpdateTestingRollbackCommandsIntegrationTest extends Specification {
