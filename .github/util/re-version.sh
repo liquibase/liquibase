@@ -81,7 +81,7 @@ do
   (cd $workdir/finalize-jar && jar cfm $workdir/$jar $workdir/tmp-manifest.mf .)
 
   cp $workdir/$jar $outdir
-  RENAME_SNAPSHOTS=$(ls "$outdir/$jar" | sed -e "s/$branch-SNAPSHOT/$version/g" -e "s/0-SNAPSHOT/$version/g")
+  RENAME_SNAPSHOTS=$(ls "$outdir/$jar" | sed -e "s|$branch-SNAPSHOT|$version|g" -e "s|0-SNAPSHOT|$version|g")
   if [[ "$RENAME_SNAPSHOTS" != "$outdir/$jar" ]]; then
       mv -v "$outdir/$jar" "$RENAME_SNAPSHOTS"
   fi
