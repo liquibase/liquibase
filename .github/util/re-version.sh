@@ -108,7 +108,7 @@ do
   rm -rf $workdir/rebuild
 
   cp $workdir/$jar $outdir
-  RENAME_JAVADOC_SNAPSHOTS=$(ls "$outdir/$jar" | sed -e "s|$MODIFIED_BRANCH_NAME-SNAPSHOT|$version|g" -e "s|0-SNAPSHOT|$version/g")
+  RENAME_JAVADOC_SNAPSHOTS=$(ls "$outdir/$jar" | sed -e "s|$MODIFIED_BRANCH_NAME-SNAPSHOT|$version|g" -e "s|0-SNAPSHOT|$version|g")
   if [[ "$RENAME_JAVADOC_SNAPSHOTS" != "$outdir/$jar" ]]; then
     mv -v "$outdir/$jar" "$RENAME_JAVADOC_SNAPSHOTS"
   fi
