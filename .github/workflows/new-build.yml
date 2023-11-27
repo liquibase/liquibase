@@ -312,7 +312,7 @@ jobs:
 
 
   run-functional-tests:
-#    needs: [ setup, build_publish_branch ]
+    #needs: [ setup, build_publish_branch ]
     needs: [ setup ]
     uses: liquibase/liquibase/.github/workflows/run-functional-tests.yml@github-action-DAT-15775
     secrets: inherit
@@ -321,7 +321,7 @@ jobs:
       thisBranchName: ${{ needs.setup.outputs.thisBranchName }}
 
   run-tests-harness:
-#    needs: [ setup,build_publish_branch ]
+    #needs: [ setup,build_publish_branch ]
     needs: [ setup ]
     uses: liquibase/liquibase/.github/workflows/run-test-harness.yml@github-action-DAT-15775
     secrets: inherit
