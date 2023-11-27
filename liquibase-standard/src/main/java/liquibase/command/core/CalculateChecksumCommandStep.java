@@ -157,15 +157,15 @@ public class CalculateChecksumCommandStep extends AbstractCommandStep {
                     "If --changeset-identifier is not provided than --changeset-id, --changeset-author and --changeset-path must be specified. " +
                     "Missing argument: ";
 
-            if (commandScope.getArgumentValue(CHANGESET_ID_ARG) == null) {
+            if (StringUtil.isEmpty(commandScope.getArgumentValue(CHANGESET_ID_ARG))) {
                 errorMessage = errorMessage + " '--changeset-id',";
             }
 
-            if (commandScope.getArgumentValue(CHANGESET_AUTHOR_ARG) == null) {
+            if (StringUtil.isEmpty(commandScope.getArgumentValue(CHANGESET_AUTHOR_ARG))) {
                 errorMessage = errorMessage + " '--changeset-author',";
             }
 
-            if (commandScope.getArgumentValue(CHANGESET_PATH_ARG) == null) {
+            if (StringUtil.isEmpty(commandScope.getArgumentValue(CHANGESET_PATH_ARG))) {
                 errorMessage = errorMessage + " '--changeset-path',";
             }
 

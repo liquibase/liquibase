@@ -46,14 +46,13 @@ jobs:
   #     branch: ${{ needs.setup.outputs.branch }}
   #     liquibase-version: ${{ needs.setup.outputs.version }}
   #   secrets: inherit
+          
 
   reversion:
     needs: [ setup ]
     name: Re-version artifacts ${{ needs.setup.outputs.version }}
     runs-on: ubuntu-22.04
     steps:
-      - uses: actions/checkout@v4
-
       - uses: actions/checkout@v4
         name: Checkout liquibase-pro
         with:
@@ -71,13 +70,13 @@ jobs:
           name: liquibase-artifacts
           path: download/liquibase-artifacts
 
-      # - name: Download liquibase-pro-azure-artifacts
-      #   uses: liquibase/action-download-artifact@v2-liquibase
-      #   with:
-      #     workflow: build-azure-uber-jar.yml
-      #     run_id: ${{ needs.setup.outputs.runId }}
-      #     name: liquibase-pro-azure-artifacts
-      #     path: download/liquibase-pro-azure-artifacts
+#      - name: Download liquibase-pro-azure-artifacts
+#        uses: liquibase/action-download-artifact@v2-liquibase
+#        with:
+#          workflow: build-azure-uber-jar.yml
+#          run_id: ${{ needs.setup.outputs.runId }}
+#          name: liquibase-pro-azure-artifacts
+#          path: download/liquibase-pro-azure-artifacts
 
       - name: Set up JDK
         uses: actions/setup-java@v3

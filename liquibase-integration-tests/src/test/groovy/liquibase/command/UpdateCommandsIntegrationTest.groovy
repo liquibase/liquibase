@@ -29,6 +29,7 @@ class UpdateCommandsIntegrationTest extends Specification {
 
     def "run UpdateSql from CommandStep"() {
         when:
+        CommandUtil.runDropAll(h2)
         def updateSqlCommand = new CommandScope(UpdateSqlCommandStep.COMMAND_NAME)
         updateSqlCommand.addArgumentValue(DbUrlConnectionCommandStep.DATABASE_ARG, h2.getDatabaseFromFactory())
         updateSqlCommand.addArgumentValue(UpdateSqlCommandStep.CHANGELOG_FILE_ARG, "liquibase/update-tests.yml")

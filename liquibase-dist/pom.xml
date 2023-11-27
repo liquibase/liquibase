@@ -18,13 +18,13 @@
 		<deploy.url>https://maven.pkg.github.com/liquibase/liquibase</deploy.url>
 		<h2.version>2.2.224</h2.version>
 		<hsqldb.version>2.7.2</hsqldb.version>
-		<postgresql.version>42.6.0</postgresql.version>
-		<mssql.version>12.4.1.jre8</mssql.version>
+		<postgresql.version>42.7.0</postgresql.version>
+		<mssql.version>12.5.0.jre8-preview</mssql.version>
 		<mysql.version>8.0.21</mysql.version>
 		<mariadb.version>3.2.0</mariadb.version>
-		<oracle.version>19.20.0.0</oracle.version>
+		<oracle.version>19.21.0.0</oracle.version>
 		<sqlite.version>3.43.2.2</sqlite.version>
-		<db2.version>11.5.8.0</db2.version>
+		<db2.version>11.5.9.0</db2.version>
 		<firebird.version>5.0.2.java8</firebird.version>
 		<liquibase-pro.version>master-SNAPSHOT</liquibase-pro.version>
 		<assemblyConfigFile>src/main/assembly/assembly-bin.xml</assemblyConfigFile>
@@ -92,7 +92,7 @@
         <dependency>
             <groupId>net.snowflake</groupId>
             <artifactId>snowflake-jdbc</artifactId>
-            <version>3.14.1</version>
+            <version>3.14.3</version>
         </dependency>
 
 		<!--        CANNOT INCLUDE MYSQL FOR LICENSING REASONS -->
@@ -164,7 +164,7 @@
 		<dependency>
 			<groupId>org.glassfish.jaxb</groupId>
 			<artifactId>jaxb-runtime</artifactId>
-			<version>4.0.3</version>
+			<version>4.0.4</version>
 			<optional>true</optional>
 		</dependency>
 	</dependencies>
@@ -212,7 +212,7 @@
 			<plugin>
 				<groupId>org.liquibase.ext</groupId>
 				<artifactId>liquibase-sdk-maven-plugin</artifactId>
-				<version>0.10.21</version>
+				<version>0.10.22</version>
 			</plugin>
 
 			<plugin>
