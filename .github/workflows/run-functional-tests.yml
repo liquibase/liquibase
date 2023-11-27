@@ -35,7 +35,7 @@ jobs:
 
   run-pro-tests:
     runs-on: ubuntu-latest
-    needs: [functional-tests-build]
+    needs: [ functional-tests-build ]
     name: RUN Tests
     steps:
       - uses: actions/checkout@v4
@@ -47,11 +47,12 @@ jobs:
           repo: liquibase-pro-tests
           owner: liquibase
           workflow: test.yml
-          workflow_inputs: {
-            "liquibaseCommit": "${{ inputs.latestMergeSha }}",
+          workflow_inputs:
+            '{"liquibaseCommit":"${{ inputs.latestMergeSha }}",
             "runDescription": "${{ env.workflow_url }}",
             "liquibaseBranch": "${{ inputs.thisBranchName }}"
-            }
+            }'
+
 
       - name: Display run ID
         run: echo ${{ steps.return_dispatch.outputs.run_id }}
