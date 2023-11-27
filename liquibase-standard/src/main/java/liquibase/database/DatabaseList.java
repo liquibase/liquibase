@@ -87,7 +87,9 @@ public class DatabaseList {
      */
     public static void validateDefinitions(String definition, ValidationErrors vErrors) {
         Set<String> dbmsSet = toDbmsSet(definition);
-        validateDefinitions(dbmsSet, vErrors);
+        if(dbmsSet != null) {
+            validateDefinitions(dbmsSet, vErrors);
+        }
     }
 
     /**

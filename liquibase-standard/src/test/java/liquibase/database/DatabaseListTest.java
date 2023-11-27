@@ -53,7 +53,7 @@ public class DatabaseListTest {
 
     @ParameterizedTest
     @MethodSource("validateDefinitionsParameters")
-    public void validateDefinitions(String definition, boolean expectedResult, String message) {
+    void validateDefinitions(String definition, boolean expectedResult, String message) {
         ValidationErrors vErrors = new ValidationErrors();
         DatabaseList.validateDefinitions(definition, vErrors);
         boolean valid = !vErrors.hasErrors();
