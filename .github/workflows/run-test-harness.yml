@@ -48,9 +48,9 @@ jobs:
           owner: liquibase
           workflow: main.yml
           workflow_inputs:
-            '{"liquibaseCommit":"${{ inputs.latestMergeSha }}",
-            "runDescription": "${{ env.workflow_url }}",
-            "liquibaseBranch": "${{ inputs.thisBranchName }}"
+            '{"liquibaseCommit": "${{ inputs.latestMergeSha }}",
+              "runDescription": "${{ env.workflow_url }}",
+              "liquibaseBranch": "${{ inputs.thisBranchName }}"
             }'
 
       - name: Display run ID
