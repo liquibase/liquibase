@@ -310,7 +310,6 @@ jobs:
 #        env:
 #          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
-
   run-functional-tests:
     #needs: [ setup, build_publish_branch ]
     needs: [ setup ]
