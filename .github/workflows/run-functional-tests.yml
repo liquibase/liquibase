@@ -43,7 +43,7 @@ jobs:
         uses: codex-/return-dispatch@v1
         id: return_dispatch
         with:
-          token: ${{ secrets.LIQUIBOT_PAT }}
+          token: ${{ secrets.RUN_FUNCTIONAL_TEST_HARNESS_TESTS_TOKEN  }}
           repo: liquibase-pro-tests
           owner: liquibase
           workflow: test.yml
