@@ -54,6 +54,6 @@ jobs:
         uses: actions/github-script@v6.4.1
         with:
           script: |
-            const targetURL = "https://github.com/liquibase/liquibase-pro-tests/actions/runs/${{ steps.return_dispatch.outputs.run_id }}"
+            const targetURL = "https://github.com/liquibase/liquibase-test-harness/actions/runs/${{ steps.return_dispatch.outputs.run_id }}"
             core.notice("TestHarness-Tests Run URL: " + targetURL);
         }
