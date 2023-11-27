@@ -34,6 +34,7 @@ jobs:
 
 
   run-pro-tests:
+    runs-on: ubuntu-latest
     needs: [setup]
     name: RUN Tests
     steps:
