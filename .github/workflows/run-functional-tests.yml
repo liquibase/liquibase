@@ -35,9 +35,10 @@ jobs:
 
   run-pro-tests:
     runs-on: ubuntu-latest
-    needs: [setup]
+    needs: [functional-tests-build]
     name: RUN Tests
     steps:
+      - uses: actions/checkout@v4
       - name: Dispatch an action and get the run ID
         uses: codex-/return-dispatch@v1
         id: return_dispatch
