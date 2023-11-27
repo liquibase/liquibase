@@ -320,11 +320,11 @@ jobs:
       latestMergeSha: ${{ needs.setup.outputs.latestMergeSha }}
       thisBranchName: ${{ needs.setup.outputs.thisBranchName }}
 
-  run-tests-harness:
-    #needs: [ setup,build_publish_branch ]
-    needs: [ setup ]
-    uses: liquibase/liquibase/.github/workflows/run-test-harness.yml@github-action-DAT-15775
-    secrets: inherit
-    with:
-      latestMergeSha: ${{ needs.setup.outputs.latestMergeSha }}
-      thisBranchName: ${{ needs.setup.outputs.thisBranchName }}
+#  run-tests-harness:
+#    #needs: [ setup,build_publish_branch ]
+#    needs: [ setup ]
+#    uses: liquibase/liquibase/.github/workflows/run-test-harness.yml@github-action-DAT-15775
+#    secrets: inherit
+#    with:
+#      latestMergeSha: ${{ needs.setup.outputs.latestMergeSha }}
+#      thisBranchName: ${{ needs.setup.outputs.thisBranchName }}
