@@ -73,39 +73,17 @@ TOKEN:
 | 	< #LETTER: ["a"-"z", "A"-"Z", "_", "$"] >
 |   < #SPECIAL_CHARS: "$" | "_" | "#" | "@" >
 
-    /* Per https://github.com/highlightjs/highlight.js/issues/1748
-       Some SQL implementations support only quote-char-twice as an escaped-quote, others only support backslash-quote, some support both, and sometimes it is configurable.
-       This means it is not possible to always conclusively identify quoted text boundaries without context about SQL platform and configuration.
-       A real fix is possibly to invoke a block of code defined here to dynamically check for false-positive matches on S_CHAR_LITERAL.
-
-       A related complication is that '\' is sometimes a valid string literal, and sometimes is is not.
-
-       A similar issue in a different SQL parser using JavaCC is mentioned here: https://github.com/JSQLParser/JSqlParser/issues/1172.
-       It was fixed, in theory, here: https://github.com/JSQLParser/JSqlParser/pull/1715/files#diff-d323df58a0300a038ac87b328bf05b8255ff06e6b5d0e9aeae641fa566e4068c
-       That fix may be overly specific to one SQL platform, but the core approach of adding a block of Java code here (ala Lex) might be feasible.
-    */
 |   < #ESC_S_QUOTE_A: ( "''" ) > /* probably the closest to a universal standard */
 |   < #ESC_S_QUOTE_B: ( "\\'" ) > /* Valid in Postgres and MySQL (if NO_BACKSLASH_ESCAPES not enabled), NOT valid in Oracle or MSSQL */
 |   < #ESC_D_QUOTE_A: ( "\"\"" ) > /* probably the 2nd closest to a universal standard */
 |   < #ESC_D_QUOTE_B: ( "\\\"" ) > /* Valid in Postgres and MySQL (if NO_BACKSLASH_ESCAPES not enabled), NOT valid in Oracle or MSSQL */
 |   < #ESC_NON_QUOTE: "\\" ["n","t","b","r","f","\\","0"] >
-
     /* SQL-standard is that string literals are delimited only by single-quote, and double-quotes are only for identifiers... */
-//|   < #S_QUOTED_STRING_A: ( "'" ( <ESC_S_QUOTE_A> | <ESC_NON_QUOTE> | ~["'"] )* "'") >
-//|   < #S_QUOTED_STRING_B: ( "'" ( <ESC_S_QUOTE_A> | <ESC_S_QUOTE_B> | <ESC_D_QUOTE_B> | <ESC_NON_QUOTE>  | ~["\\","'"] )* "'") >
 |   < #S_QUOTED_STRING_HYBRID: ( "'" ( <ESC_S_QUOTE_A> | <ESC_S_QUOTE_B> | <ESC_D_QUOTE_B> | <ESC_NON_QUOTE>  | ~["\\","'"] )* ("'" | "\\'")) >
     /* ... but many DBs tolerate double-quotes around string literals, including MySQL (unless you enable ANSI SQL mode), and MSSQL (if you disable SET QUOTED_IDENTIFIER) */
-//|   < #D_QUOTED_STRING_A: ( "\"" ( <ESC_D_QUOTE_A> | <ESC_NON_QUOTE> | ~["\""] )* "\"") >
-//|   < #D_QUOTED_STRING_B: ( "\"" ( <ESC_S_QUOTE_B> | <ESC_D_QUOTE_A> | <ESC_D_QUOTE_B> | <ESC_NON_QUOTE> | ~["\\","\""] )* "\"") >
 |   < #D_QUOTED_STRING_HYBRID: ( "\"" ( <ESC_S_QUOTE_B> | <ESC_D_QUOTE_A> | <ESC_D_QUOTE_B> | <ESC_NON_QUOTE> | ~["\\","\""] )* ("\"" | "\\\"")) >
     /* Finally... */
-//|   < S_CHAR_LITERAL: (["U","E","N","R","B"]|"RB"|"_utf8")? ( <S_QUOTED_STRING_A> | <S_QUOTED_STRING_B> | <D_QUOTED_STRING_A> | <D_QUOTED_STRING_B> ) >
 |   < S_CHAR_LITERAL: (["U","E","N","R","B"]|"RB"|"_utf8")? (<S_QUOTED_STRING_HYBRID> | <D_QUOTED_STRING_HYBRID>) >
-
-// Previous logic...
-//|   < S_CHAR_LITERAL: (["U","E","N","R","B"]|"RB"|"_utf8")? (("'" ( <ESC> | ~["'", "\\", "\n", "\r"] )* "'") | ("'" ("''" | ~["'"])* "'")) >
-//|   < #ESC: "\\" ["n","t","b","r","f","\\","'","\""] >
-
 
 |   < S_QUOTED_IDENTIFIER: "\"" (~["\n","\r","\""])+ "\"" | ("`" (~["\n","\r","`"])+ "`") | ( "[" ~["0"-"9","]"] (~["\n","\r","]"])* "]" ) >
 |    < EMPTY_QUOTE: "\"" "\"">
