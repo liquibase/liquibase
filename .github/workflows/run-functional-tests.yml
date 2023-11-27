@@ -32,11 +32,10 @@ jobs:
           workflow_url="${repo_url}/actions/runs/${{ github.run_id }}"
           echo "workflow_url=${workflow_url}" >> $GITHUB_ENV
 
-
   run-pro-tests:
     runs-on: ubuntu-latest
     needs: [ functional-tests-build ]
-    name: RUN Tests
+    name: RUN PRO-Tests
     steps:
       - uses: actions/checkout@v4
       - name: Dispatch an action and get the run ID
@@ -44,7 +43,7 @@ jobs:
         id: return_dispatch
         with:
           token: ${{ secrets.RUN_FUNCTIONAL_TEST_HARNESS_TESTS_TOKEN  }}
-          ref: master
+          ref: "master"
           repo: liquibase-pro-tests
           owner: liquibase
           workflow: test.yml
@@ -53,7 +52,6 @@ jobs:
             "runDescription": "${{ env.workflow_url }}",
             "liquibaseBranch": "${{ inputs.thisBranchName }}"
             }'
-
 
       - name: Display run ID
         run: echo ${{ steps.return_dispatch.outputs.run_id }}
@@ -64,17 +62,4 @@ jobs:
           script: |
             const targetURL = "https://github.com/liquibase/liquibase-pro-tests/actions/runs/${{ steps.return_dispatch.outputs.run_id }}"
             core.notice("Pro-Tests Run URL: " + targetURL);
-
-      #run the functional tests only against the head-branch of the PR
-#      - name: Trigger Functional Tests Workflow
-#        uses: peter-evans/repository-dispatch@v2
-#        with:
-#          token: ${{ secrets.RUN_FUNCTIONAL_TEST_HARNESS_TESTS_TOKEN }}
-#          repository: liquibase/liquibase-pro-tests
-#          event-type: run-functional-tests
-#          client-payload: |
-#            {
-#              "liquibaseCommit": "${{ inputs.latestMergeSha }}",
-#              "runDescription" : "${{ env.workflow_url }}",
-#              "liquibaseBranch" : "${{ inputs.thisBranchName }}"
-#            }
+         }

@@ -73,7 +73,6 @@ jobs:
       #checking if the branch specified by $currentBranch exists in the PRO repository, If the getBranch call throws an error, it means the branch doesn't exist in the PRO repo. Also, remove refs/heads/
       # if the value of branchExistsInBoth = false then set liquibaseProVersionPrefix = master else $currentBranch
       # if the value of branchExistsInBoth = true then set liquibaseProVersionPrefix = thisBranchName else $currentBranch as PRO also has replacement logic for / with _
-      #check this logic as to why it is needed? liquibaseProVersionPrefix=liquibaseProVersionPrefix.replaceAll("/","_")
       - name: Check branch existence
         id: check-branch
         uses: actions/github-script@v6
@@ -101,13 +100,11 @@ jobs:
             core.setOutput("proBranchNamePrefix", liquibaseProVersionPrefix)
             console.log(liquibaseProVersionPrefix)
 
-#### MATCHING BRANCH RUN THIS LOGIC
+### MATCHING BRANCH RUN THIS LOGIC
 #  build_publish_branch:
 #    name: Artifacts- Build & Package
 #    runs-on: macos-latest
 #    needs: [ setup ]
-#    #needs: [ setup, run-tests ]
-#    #if: needs.setup.outputs.branchExistsInBoth == 'true'
 #    permissions:
 #      contents: read
 #      packages: write
@@ -207,7 +204,6 @@ jobs:
 #        run: |
 #          ## save install4j code signing keys
 #          mkdir -p liquibase-dist/target/keys
-#          ls -l
 #          echo "Saving apple key"
 #          echo "$INSTALL4J_APPLE_KEY" | base64 -d > liquibase-dist/target/keys/datical_apple.p12
 #
@@ -307,38 +303,30 @@ jobs:
 #        env:
 #          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 #
-#      # Publish branch-SNAPSHOT version to GPM
-#      #      - name: Version Artifact Publish branch-SNAPSHOT version to GPM
-#      #        run: |
-#      #          mvn versions:set "-DnewVersion=${{ needs.setup.outputs.thisBranchName }}-SNAPSHOT"
-#      #      - name: Publish branch-SNAPSHOT package
-#      #        run: |
-#      #          mvn -B clean deploy -pl '!liquibase-dist' -DskipTests=true "-Dbuild.repository.owner=liquibase" "-Dbuild.repository.name=liquibase" "-Dbuild.branch=${{ needs.setup.outputs.thisBranchName }}" "-Dbuild.number=${{ github.run_number }}" "-Dbuild.commit=${{ needs.setup.outputs.latestMergeSha }}" "-Dbuild.timestamp=${{ needs.setup.outputs.timeStamp }}"
-#      #        env:
-#      #          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-#
-#
 #      #Publish to GitHub Packages. We are building a tar file which includes liquibase-commercial hence we need "-Dliquibase-pro.version"
 #      - name: Publish tar.gz package to GPM
 #        run: |
 #          mvn -B -pl liquibase-dist -P liquibase-commercial clean deploy -DskipTests=true "-Dliquibase-pro.version=${{ needs.setup.outputs.proBranchNamePrefix }}-SNAPSHOT" "-Dbuild.timestamp=${{ needs.setup.outputs.timestamp }}" "-Dbuild.repository.owner=liquibase" "-Dbuild.repository.name=liquibase" "-Dbuild.branch=${{ needs.setup.outputs.thisBranchName }}" "-Dbuild.number=${{ github.run_number }}" "-Dbuild.commit=${{ needs.setup.outputs.thisSha }}"
 #        env:
 #          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-#
-#    #- run functional tests : this is an async call hence getting a workflow run_id is not possible right now https://github.com/orgs/community/discussions/9752#discussioncomment-1964203
-
 
 
   run-functional-tests:
 #    needs: [ setup, build_publish_branch ]
     needs: [ setup ]
+
     uses: liquibase/liquibase/.github/workflows/run-functional-tests.yml@github-action-DAT-15775
     secrets: inherit
     with:
       latestMergeSha: ${{ needs.setup.outputs.latestMergeSha }}
       thisBranchName: ${{ needs.setup.outputs.thisBranchName }}
 
-#  run-tests-harness:
+  run-tests-harness:
 #    needs: [ setup,build_publish_branch ]
-#    uses: liquibase/liquibase/.github/workflows/run-test-harness.yml@github-action-DAT-15775
-#    secrets: inherit
+    needs: [ setup ]
+
+    uses: liquibase/liquibase/.github/workflows/run-test-harness.yml@github-action-DAT-15775
+    secrets: inherit
+    with:
+      latestMergeSha: ${{ needs.setup.outputs.latestMergeSha }}
+      thisBranchName: ${{ needs.setup.outputs.thisBranchName }}
