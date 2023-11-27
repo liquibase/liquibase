@@ -20,11 +20,17 @@ env:
 jobs:
   test-harness-build:
     runs-on: ubuntu-latest
-
     steps:
       - uses: actions/checkout@v3
         with:
           ref: ${{ github.event.pull_request.head.sha || github.event.after}} #sets the Git reference (commit or branch) to be checked out in the workflow
+
+      - name: Get Workflow Run URL
+        id: get-workflow-url
+        run: |
+          repo_url="https://github.com/${{ github.repository }}"
+          workflow_url="${repo_url}/actions/runs/${{ github.run_id }}"
+          echo "workflow_url=${workflow_url}" >> $GITHUB_ENV
 
   run-test-harness-tests:
     runs-on: ubuntu-latest
