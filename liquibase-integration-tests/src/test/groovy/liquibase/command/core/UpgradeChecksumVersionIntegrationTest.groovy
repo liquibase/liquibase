@@ -1,8 +1,12 @@
 package liquibase.command.core
 
+import liquibase.ChecksumVersion
 import liquibase.Scope
+import liquibase.change.ColumnConfig
+import liquibase.change.core.CreateTableChange
 import liquibase.changelog.ChangeLogHistoryService
 import liquibase.changelog.ChangeLogHistoryServiceFactory
+import liquibase.changelog.ChangeSet
 import liquibase.changelog.RanChangeSet
 import liquibase.command.CommandScope
 import liquibase.command.core.helpers.DatabaseChangelogCommandStep
@@ -11,6 +15,8 @@ import liquibase.command.util.CommandUtil
 import liquibase.extension.testing.testsystem.DatabaseTestSystem
 import liquibase.extension.testing.testsystem.TestSystemFactory
 import liquibase.extension.testing.testsystem.spock.LiquibaseIntegrationTest
+import liquibase.statement.SqlStatement
+import liquibase.statement.core.MarkChangeSetRanStatement
 import liquibase.statement.core.RawSqlStatement
 import spock.lang.Shared
 import spock.lang.Specification
@@ -334,5 +340,88 @@ VALUES('2', 'fl', '$changesetFilepath', '2023-09-29 14:33:39.112', 2, 'EXECUTED'
         cleanup:
         CommandUtil.runDropAll(h2)
 
+    }
+
+
+    @Unroll
+    def "Calculate change using v8 forced calculator" () {
+        def changesetFilepath = "changelogs/h2/checksum/dbms-filter-changelog.xml"
+        final ChangeLogHistoryService changeLogService = Scope.getCurrentScope().getSingleton(ChangeLogHistoryServiceFactory.class).getChangeLogService(h2.getDatabaseFromFactory())
+        changeLogService.init()
+        h2.execute(new RawSqlStatement("""
+INSERT INTO DATABASECHANGELOG
+(ID, AUTHOR, FILENAME, DATEEXECUTED, ORDEREXECUTED, EXECTYPE, MD5SUM, DESCRIPTION, COMMENTS, TAG, LIQUIBASE, CONTEXTS, LABELS, DEPLOYMENT_ID)
+VALUES('1', 'fl', '$changesetFilepath', '2023-09-29 14:33:39.108', 1, 'EXECUTED', '8:0a36c7b201a287dd3348e8dd19e44be7', 'sql', 'example comment', NULL, 'DEV', 'example-context1', 'example-label', '5561619071');
+"""))
+        h2.execute(new RawSqlStatement("""
+INSERT INTO DATABASECHANGELOG
+(ID, AUTHOR, FILENAME, DATEEXECUTED, ORDEREXECUTED, EXECTYPE, MD5SUM, DESCRIPTION, COMMENTS, TAG, LIQUIBASE, CONTEXTS, LABELS, DEPLOYMENT_ID)
+VALUES('2', 'fl', '$changesetFilepath', '2023-09-29 14:33:39.112', 2, 'EXECUTED', '8:a6a54dbc65048ebf1388da78c31ef1a9', 'sqlFile; sqlFile', '', NULL, 'DEV', 'example-context1', 'example-label', '5561619071');
+"""))
+
+        when:
+        def ranChangeSets = getRanChangesets(changeLogService)
+
+        then:
+        ranChangeSets.size() == 2
+        ranChangeSets.forEach({ rcs -> assert rcs.getLastCheckSum().getVersion() == 8 })
+
+        when:
+        def scopeSettings = [
+                (Scope.Attr.latestChecksumVersion.name()): ChecksumVersion.V8
+        ]
+        Scope.child(scopeSettings, {
+            CommandScope updateCommandScope = new CommandScope(UpdateCommandStep.COMMAND_NAME)
+            updateCommandScope.addArgumentValue(DbUrlConnectionCommandStep.URL_ARG, h2.getConnectionUrl())
+            updateCommandScope.addArgumentValue(DbUrlConnectionCommandStep.USERNAME_ARG, h2.getUsername())
+            updateCommandScope.addArgumentValue(DbUrlConnectionCommandStep.PASSWORD_ARG, h2.getPassword())
+            updateCommandScope.addArgumentValue(UpdateCommandStep.CHANGELOG_FILE_ARG, changesetFilepath)
+            updateCommandScope.execute()
+        } as Scope.ScopedRunnerWithReturn<Void>)
+
+        ranChangeSets = getRanChangesets(changeLogService)
+
+        then:
+        ranChangeSets.size() == 3
+        ranChangeSets.get(0).getLastCheckSum().toString() == "8:0a36c7b201a287dd3348e8dd19e44be7"
+        ranChangeSets.get(1).getLastCheckSum().toString() == "8:a6a54dbc65048ebf1388da78c31ef1a9"
+        ranChangeSets.get(2).getLastCheckSum().toString() == "8:551a6b5455d661ce7101a063b818ca3e"
+
+        cleanup:
+        CommandUtil.runDropAll(h2)
+
+    }
+
+    @Unroll
+    def "manually generate v7 checksum" () {
+
+        given:
+        def database = h2.getDatabaseFromFactory()
+        ChangeSet changeSet = new ChangeSet("1", "mock-author", false, false, "com/example/root.xml",
+                        null, null, null, null, false, null, null)
+
+        CreateTableChange exampleChange = new CreateTableChange()
+        exampleChange.setTableName("first")
+        ColumnConfig config = (ColumnConfig) ColumnConfig.fromName("first")
+        config.setType("VARCHAR (255)")
+        exampleChange.getColumns().add(config)
+        changeSet.addChange(exampleChange)
+
+        when:
+        ChangeLogHistoryService changeLogService = Scope.getCurrentScope().getSingleton(ChangeLogHistoryServiceFactory.class).getChangeLogService(database)
+        def scopeSettings = [
+                (Scope.Attr.latestChecksumVersion.name()): ChecksumVersion.V7
+        ]
+        Scope.child(scopeSettings, {
+            changeLogService.init()
+            changeSet.execute(null, null, database)
+            database.execute([new MarkChangeSetRanStatement(changeSet, ChangeSet.ExecType.EXECUTED)] as SqlStatement[], null)
+            database.commit()
+        } as Scope.ScopedRunnerWithReturn<Void>)
+
+        then:
+        def ranChangeSets = changeLogService.getRanChangeSets()
+        ranChangeSets.size() == 1
+        ranChangeSets.get(0).getLastCheckSum().toString() == "7:72c7eea8dda3c3582e3cfb39eec12033"
     }
 }
