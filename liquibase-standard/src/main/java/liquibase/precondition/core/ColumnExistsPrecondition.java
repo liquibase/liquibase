@@ -122,7 +122,6 @@ public class ColumnExistsPrecondition extends AbstractPrecondition {
     private void checkFast(Database database, DatabaseChangeLog changeLog)
             throws PreconditionFailedException, PreconditionErrorException {
 
-        PreparedStatement statement = null;
         try {
             String schemaName = getSchemaName();
             if (schemaName == null) {
@@ -133,12 +132,11 @@ public class ColumnExistsPrecondition extends AbstractPrecondition {
 
             if (database instanceof PostgresDatabase) {
                 String sql = "SELECT 1 FROM pg_attribute a WHERE EXISTS (SELECT 1 FROM pg_class JOIN pg_catalog.pg_namespace ns ON ns.oid = pg_class.relnamespace WHERE lower(ns.nspname) = ? AND lower(relname) = lower(?) AND pg_class.oid = a.attrelid) AND lower(a.attname) = lower(?);";
-                statement = ((JdbcConnection) database.getConnection())
-                        .prepareStatement(sql);
-                statement.setString(1, schemaName.toLowerCase());
-                statement.setString(2, tableName);
-                statement.setString(3, columnName);
-                try {
+                try (PreparedStatement statement = ((JdbcConnection) database.getConnection())
+                            .prepareStatement(sql)){
+                    statement.setString(1, schemaName.toLowerCase());
+                    statement.setString(2, tableName);
+                    statement.setString(3, columnName);
                     try (ResultSet rs = statement.executeQuery()) {
                         if (rs.next()) {
                             return;
@@ -163,9 +161,8 @@ public class ColumnExistsPrecondition extends AbstractPrecondition {
                             database.escapeObjectName(tableName, Table.class));
                 }
 
-                try {
-                    statement = ((JdbcConnection) database.getConnection()).prepareStatement(sql);
-                    statement.executeQuery();
+                try (PreparedStatement statement2 = ((JdbcConnection) database.getConnection()).prepareStatement(sql)){
+                    statement2.executeQuery();
                     // column exists
                 } catch (SQLException | DatabaseException e) {
                     // column or table does not exist
@@ -173,16 +170,10 @@ public class ColumnExistsPrecondition extends AbstractPrecondition {
                             "Column %s.%s.%s does not exist", schemaName,
                             tableName, columnName), changeLog, this);
                 }
-                finally {
-                    JdbcUtil.closeStatement(statement);
-                }
             }
 
-        } catch (DatabaseException | SQLException e) {
+        } catch (DatabaseException e) {
             throw new PreconditionErrorException(e, changeLog, this);
-
-        } finally {
-            JdbcUtil.closeStatement(statement);
         }
     }
 
