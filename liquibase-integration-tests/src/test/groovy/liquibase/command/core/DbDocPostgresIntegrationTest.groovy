@@ -3,7 +3,7 @@ package liquibase.command.core
 import liquibase.Scope
 import liquibase.command.CommandScope
 import liquibase.command.core.helpers.DatabaseChangelogCommandStep
-import liquibase.command.core.helpers.DbUrlConnectionCommandStep
+import liquibase.command.core.helpers.DbUrlConnectionArgumentsCommandStep
 import liquibase.command.util.CommandUtil
 import liquibase.extension.testing.testsystem.DatabaseTestSystem
 import liquibase.extension.testing.testsystem.TestSystemFactory
@@ -35,9 +35,9 @@ class DbDocPostgresIntegrationTest extends Specification {
         ]
         Scope.child(scopeSettings, {
             CommandScope dbDocCommand = new CommandScope(DbDocCommandStep.COMMAND_NAME[0])
-            dbDocCommand.addArgumentValue(DbUrlConnectionCommandStep.URL_ARG, postgres.getConnectionUrl())
-            dbDocCommand.addArgumentValue(DbUrlConnectionCommandStep.USERNAME_ARG, postgres.getUsername())
-            dbDocCommand.addArgumentValue(DbUrlConnectionCommandStep.PASSWORD_ARG, postgres.getPassword())
+            dbDocCommand.addArgumentValue(DbUrlConnectionArgumentsCommandStep.URL_ARG, postgres.getConnectionUrl())
+            dbDocCommand.addArgumentValue(DbUrlConnectionArgumentsCommandStep.USERNAME_ARG, postgres.getUsername())
+            dbDocCommand.addArgumentValue(DbUrlConnectionArgumentsCommandStep.PASSWORD_ARG, postgres.getPassword())
             dbDocCommand.addArgumentValue(DatabaseChangelogCommandStep.CHANGELOG_FILE_ARG, changelogFile)
             dbDocCommand.addArgumentValue(DbDocCommandStep.OUTPUT_DIRECTORY_ARG, outputDirectory)
             OutputStream outputStream = new ByteArrayOutputStream()
