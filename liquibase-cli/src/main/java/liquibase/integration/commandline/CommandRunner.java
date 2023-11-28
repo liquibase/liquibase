@@ -58,7 +58,8 @@ class CommandRunner implements Callable<CommandResults> {
             if (cause instanceof MissingRequiredArgumentException) {
                 // This is a list of the arguments which the init project command supports. The thinking here is that if the user
                 // forgets to
-                // supply one of these arguments, we're going to remind them about the init project command, which
+                // supply 
+                // one of these arguments, we're going to remind them about the init project command, which
                 // can help them figure out what they should be providing here.
                 final Set<String> initProjectArguments = Stream.of(CommonArgumentNames.CHANGELOG_FILE, CommonArgumentNames.URL, CommonArgumentNames.USERNAME, CommonArgumentNames.PASSWORD).map(CommonArgumentNames::getArgumentName).collect(Collectors.toSet());
                 throw new CommandValidationException(cve.getMessage() + (initProjectArguments.contains(((MissingRequiredArgumentException) cause).getArgumentName()) ? ". If you need to configure new liquibase project files and arguments, run the 'liquibase init project' command." : ""));
