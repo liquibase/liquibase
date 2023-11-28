@@ -26,6 +26,7 @@ jobs:
       latestMergeSha: ${{ steps.get-sha.outputs.latestMergeSha }}
       timeStamp: ${{ steps.get-timestamp.outputs.timestamp }}
       proBranchNamePrefix: ${{ steps.check-branch.outputs.proBranchNamePrefix }}
+      unmodifiedBranchName: ${{ steps.get-branch-name.outputs.branch_name }}
     steps:
 
       - uses: actions/checkout@v3
