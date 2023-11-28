@@ -474,6 +474,20 @@ class StringUtilTest extends Specification {
     }
 
     @Unroll
+    def "contains"() {
+        expect:
+        StringUtil.contains(value, contains) == expected
+
+        where:
+        value | contains   | expected
+        null  | "x"        | false
+        ""    | "x"        | false
+        "a"   | "x"        | false
+        "ax"  | "a"        | true
+        "abc" | "bc"       | true
+    }
+
+    @Unroll
     def "isWhitespace"() {
         expect:
         StringUtil.isWhitespace(value) == expected

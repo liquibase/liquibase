@@ -588,6 +588,19 @@ public class StringUtil {
     }
 
     /**
+     *
+     * Returns true if the input string contains the specified value
+     *
+     * @param  value                  String to be checked
+     * @param  containsValue          String to look for
+     * @return true if String contains the value
+     *
+     */
+    public static boolean contains(String value, String containsValue) {
+        return value != null && value.contains(containsValue);
+    }
+
+    /**
      * Returns true if the input string is the empty string (null-safe).
      *
      * @param value String to be checked
