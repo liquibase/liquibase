@@ -11,6 +11,9 @@ import liquibase.database.Database;
 import java.util.Collections;
 import java.util.List;
 
+/**
+ * This class contains only the arguments used by {@link DbUrlConnectionCommandStep}.
+ */
 public class DbUrlConnectionArgumentsCommandStep extends AbstractArgumentCommandStep {
 
     public static final String[] COMMAND_NAME = new String[]{"dbUrlConnectionArguments"};
