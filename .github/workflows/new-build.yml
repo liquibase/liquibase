@@ -318,7 +318,7 @@ jobs:
     secrets: inherit
     with:
       latestMergeSha: ${{ needs.setup.outputs.latestMergeSha }}
-      thisBranchName: ${{ needs.setup.outputs.thisBranchName }}
+      thisBranchName: ${{ needs.setup.outputs.unmodifiedBranchName }}
 
   run-tests-harness:
     needs: [ setup,build_publish_branch ]
@@ -327,4 +327,4 @@ jobs:
     secrets: inherit
     with:
       latestMergeSha: ${{ needs.setup.outputs.latestMergeSha }}
-      thisBranchName: ${{ needs.setup.outputs.thisBranchName }}
+      thisBranchName: ${{ needs.setup.outputs.unmodifiedBranchName }}
