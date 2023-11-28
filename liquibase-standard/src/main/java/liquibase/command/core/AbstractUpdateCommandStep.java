@@ -30,6 +30,7 @@ import java.io.OutputStream;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.stream.Collectors;
 
 import static liquibase.Liquibase.MSG_COULD_NOT_RELEASE_LOCK;
 
@@ -41,10 +42,15 @@ public abstract class AbstractUpdateCommandStep extends AbstractCommandStep impl
     private boolean isDBLocked = true;
 
     public abstract String getChangelogFileArg(CommandScope commandScope);
+
     public abstract String getContextsArg(CommandScope commandScope);
+
     public abstract String getLabelFilterArg(CommandScope commandScope);
+
     public abstract String[] getCommandName();
+
     public abstract UpdateSummaryEnum getShowSummary(CommandScope commandScope);
+
     public UpdateSummaryOutputEnum getShowSummaryOutput(CommandScope commandScope) {
         return (UpdateSummaryOutputEnum) commandScope.getDependency(UpdateSummaryOutputEnum.class);
     }
@@ -57,9 +63,7 @@ public abstract class AbstractUpdateCommandStep extends AbstractCommandStep impl
     @Override
     public void run(CommandResultsBuilder resultsBuilder) throws Exception {
         UpdateReportParameters updateReportParameters = new UpdateReportParameters();
-        updateReportParameters.setCommandTitle(
-            StringUtil.upperCaseFirst(Arrays.toString(
-               getCommandName()).replace("[","").replace("]","").replace("update", "update ").trim()));
+        updateReportParameters.setCommandTitle(getFormattedCommandName(getCommandName()));
         resultsBuilder.addResult("updateReport", updateReportParameters);
         CommandScope commandScope = resultsBuilder.getCommandScope();
         Database database = (Database) commandScope.getDependency(Database.class);
@@ -83,7 +87,7 @@ public abstract class AbstractUpdateCommandStep extends AbstractCommandStep impl
                 updateReportParameters.getOperationInfo().setUpdateSummaryMsg(DATABASE_UP_TO_DATE_MESSAGE);
                 return;
             }
-            if(!isDBLocked) {
+            if (!isDBLocked) {
                 LockServiceFactory.getInstance().getLockService(database).waitForLock();
             }
             // waitForLock resets the changelog history service, so we need to rebuild that and generate a final deploymentId.
@@ -163,7 +167,7 @@ public abstract class AbstractUpdateCommandStep extends AbstractCommandStep impl
         // Because of MDC we need to reset the cached changesets in the listener, because in the case of something like
         // update-testing-rollback, the same listener is used for both updates
         if (changeExecListener instanceof DefaultChangeExecListener) {
-            ((DefaultChangeExecListener)changeExecListener).reset();
+            ((DefaultChangeExecListener) changeExecListener).reset();
         }
         resultsBuilder.addResult(DEFAULT_CHANGE_EXEC_LISTENER_RESULT_KEY, changeExecListener);
         return changeExecListener;
@@ -192,7 +196,7 @@ public abstract class AbstractUpdateCommandStep extends AbstractCommandStep impl
         String successLog = "Update command completed successfully.";
         String failureLog = "Update command encountered an exception.";
         if (defaultListener instanceof DefaultChangeExecListener) {
-            List<ChangeSet> deployedChangeSets = ((DefaultChangeExecListener)defaultListener).getDeployedChangeSets();
+            List<ChangeSet> deployedChangeSets = ((DefaultChangeExecListener) defaultListener).getDeployedChangeSets();
             int deployedChangeSetCount = deployedChangeSets.size();
             List<ChangeSet> failedChangeSets = ((DefaultChangeExecListener) defaultListener).getFailedChangeSets();
             int failedChangeSetCount = failedChangeSets.size();
@@ -328,5 +332,20 @@ public abstract class AbstractUpdateCommandStep extends AbstractCommandStep impl
 
     protected void setDBLock(boolean locked) {
         isDBLocked = locked;
+    }
+
+    /**
+     * Given a camel case command name array, format into a user-friendly command name string.
+     * Ex: Given {"updateToTag"}, produces "Update To Tag"
+     *
+     * @param commandName the command name to reformat
+     * @return the formatted command name
+     */
+    private String getFormattedCommandName(String[] commandName) {
+        return Arrays.stream(commandName)
+                .filter(Objects::nonNull)
+                .map(camelCaseName -> StringUtil.join(StringUtil.splitCamelCase(camelCaseName), " "))
+                .map(StringUtil::upperCaseFirst)
+                .collect(Collectors.joining(" "));
     }
 }
