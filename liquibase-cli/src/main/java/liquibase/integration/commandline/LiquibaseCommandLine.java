@@ -2,7 +2,7 @@ package liquibase.integration.commandline;
 
 import static liquibase.integration.commandline.LiquibaseLauncherSettings.LiquibaseLauncherSetting.LIQUIBASE_HOME;
 import static liquibase.integration.commandline.LiquibaseLauncherSettings.getSetting;
-
+//
 import liquibase.GlobalConfiguration;
 import liquibase.Scope;
 import liquibase.command.CommandArgumentDefinition;
