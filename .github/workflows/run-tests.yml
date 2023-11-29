@@ -277,5 +277,5 @@ jobs:
   run-build-publish-file:
     needs: [ build_tests,integration-test ]
     #needs: [ setup ]
-    uses: liquibase/liquibase/.github/workflows/new-build.yml@github-action-DAT-15775
+    uses: liquibase/liquibase/.github/workflows/build.yml@github-action-DAT-15775
     secrets: inherit
