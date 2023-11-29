@@ -64,27 +64,3 @@ jobs:
           script: |
             const targetURL = "https://github.com/liquibase/liquibase-pro-tests/actions/runs/${{ steps.return_dispatch.outputs.run_id }}"
             core.notice("Pro-Tests Run URL: " + targetURL);
-            
-
-      - name: Set Commit Status
-        uses: actions/github-script@v6
-        with:
-          github-token: ${{ secrets.RUN_FUNCTIONAL_TEST_HARNESS_TESTS_TOKEN }}
-        run: |
-          const github = require('@actions/github');
-          const context = github.context;
-          
-          const octokit = new github.getOctokit(process.env.GITHUB_TOKEN);
-          
-          const status = {
-            owner: 'liquibase',
-            repo: 'liquibase-pro',
-            sha: '${{ inputs.latestMergeSha }}',
-            state: 'success', // or 'failure', 'error', 'pending'
-            target_url: 'https://example.com', // URL to the CI/CD job
-            description: 'Run Functional Tests',
-          };
-          
-          await octokit.repos.createCommitStatus(status);
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
