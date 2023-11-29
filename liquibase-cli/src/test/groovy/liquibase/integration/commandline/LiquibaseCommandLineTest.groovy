@@ -19,6 +19,16 @@ Usage: liquibase [GLOBAL OPTIONS] [COMMAND] [COMMAND OPTIONS]
 Command-specific help: "liquibase <command-name> --help"
 
 Global Options
+      --allow-duplicated-changeset-identifiers=PARAM
+                             Allows duplicated changeset identifiers without
+                               failing Liquibase execution.
+                             DEFAULT: false
+                             (defaults file: 'liquibase.
+                               allowDuplicatedChangesetIdentifiers',
+                               environment variable:
+                               'LIQUIBASE_ALLOW_DUPLICATED_CHANGESET_IDENTIFIERS
+                               ')
+
       --always-drop-instead-of-replace=PARAM
                              If true, drop and recreate a view instead of
                                replacing it.
