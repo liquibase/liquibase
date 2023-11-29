@@ -33,7 +33,7 @@ jobs:
       - name: Download liquibase-artifacts
         uses: liquibase/action-download-artifact@v2-liquibase
         with:
-          # workflow: new-build.yml
+          workflow: build.yml
           workflow_conclusion: success
           branch: master
           name: liquibase-artifacts
