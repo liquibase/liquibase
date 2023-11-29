@@ -14,7 +14,7 @@ import java.util.List;
 /**
  * This class contains only the arguments used by {@link DbUrlConnectionCommandStep}.
  */
-public class DbUrlConnectionArgumentsCommandStep extends AbstractArgumentCommandStep {
+public class DbUrlConnectionArgumentsCommandStep extends AbstractHelperCommandStep {
 
     public static final String[] COMMAND_NAME = new String[]{"dbUrlConnectionArguments"};
 
