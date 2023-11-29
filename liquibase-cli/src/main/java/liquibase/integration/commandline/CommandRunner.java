@@ -23,6 +23,15 @@ import java.util.stream.Stream;
 
 class CommandRunner implements Callable<CommandResults> {
 
+
+
+
+
+
+
+
+
+
     private CommandLine.Model.CommandSpec spec;
 
     @Override
