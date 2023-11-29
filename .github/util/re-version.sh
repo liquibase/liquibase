@@ -48,7 +48,7 @@ mkdir -p $outdir
 
 (cd $scriptDir && javac ManifestReversion.java)
 
-#the branchName might have / in it. Hence replace it with _ as we do the same in new-build.yml file
+#the branchName might have / in it. Hence replace it with _ as we do the same in build.yml file
 MODIFIED_BRANCH_NAME=$(echo "$branch" | sed -e "s/[^a-zA-Z0-9-]/_/g")
 
 #### Update  jars
