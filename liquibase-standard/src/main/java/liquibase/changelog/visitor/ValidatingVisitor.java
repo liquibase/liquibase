@@ -37,6 +37,8 @@ public class ValidatingVisitor implements ChangeSetVisitor {
     private Map<String, RanChangeSet> ranIndex;
     private Database database;
 
+    private static final Boolean ALLOW_DUPLICATED_CHANGESETS_IDENTIFIERS = GlobalConfiguration.ALLOW_DUPLICATED_CHANGESETS_IDENTIFIERS.getCurrentValue();
+
     //
     // Added for test
     //
@@ -185,9 +187,10 @@ public class ValidatingVisitor implements ChangeSetVisitor {
     }
 
     public boolean validationPassed() {
+        boolean noDuplicateChangeSets = ALLOW_DUPLICATED_CHANGESETS_IDENTIFIERS || duplicateChangeSets.isEmpty();
         return invalidMD5Sums.isEmpty() && failedPreconditions.isEmpty() && errorPreconditions.isEmpty() &&
-            duplicateChangeSets.isEmpty() && changeValidationExceptions.isEmpty() && setupExceptions.isEmpty() &&
-            !validationErrors.hasErrors();
+            changeValidationExceptions.isEmpty() && setupExceptions.isEmpty() &&
+            !validationErrors.hasErrors() &&noDuplicateChangeSets;
     }
 
 }
