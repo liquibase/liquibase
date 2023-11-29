@@ -32,6 +32,7 @@ public class CommandLineArgumentValueProvider extends AbstractMapConfigurationVa
         return argumentValues;
     }
 //
+    //
     @Override
     protected boolean keyMatches(String wantedKey, String storedKey) {
         storedKey = String.valueOf(storedKey).replaceFirst("^--", "");
