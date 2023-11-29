@@ -18,7 +18,8 @@ import java.util.Set;
  * <p/>
  * 
  * Observes CDI container startup events and triggers the Liquibase update
- * process via @PostConstruct on CDILiquibase
+ * process 
+ * via @PostConstruct on CDILiquibase
  *
  * @author <a href="http://github.com/aaronwalker">Aaron Walker</a>
  */
