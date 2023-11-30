@@ -1,5 +1,6 @@
 package liquibase.command.core
 
+import liquibase.GlobalConfiguration
 import liquibase.Scope
 import liquibase.command.CommandScope
 import liquibase.command.core.helpers.DbUrlConnectionCommandStep
@@ -7,6 +8,7 @@ import liquibase.command.util.CommandUtil
 import liquibase.extension.testing.testsystem.DatabaseTestSystem
 import liquibase.extension.testing.testsystem.TestSystemFactory
 import liquibase.extension.testing.testsystem.spock.LiquibaseIntegrationTest
+import liquibase.parser.ChangeLogParserConfiguration
 import liquibase.util.FileUtil
 import liquibase.util.StringUtil
 import spock.lang.Shared
@@ -112,6 +114,63 @@ create table str4 (
         outputFile.delete()
         CommandUtil.runDropAll(mysql)
 
+    }
+
+    def "Ensure generated changelog SQL format contains 'OR REPLACE' instruction for a view when USE_OR_REPLACE_OPTION is set as true"() {
+        given:
+        mysql.executeSql("""create table foo(               
+                id numeric not null primary key, 
+                some_json json null)""")
+        mysql.executeSql("CREATE VIEW fooView AS Select * from foo;")
+
+        when:
+        Scope.child([
+                (GlobalConfiguration.USE_OR_REPLACE_OPTION.getKey()): true,
+        ], new Scope.ScopedRunner() {
+            @Override
+            void run() throws Exception {
+                CommandUtil.runGenerateChangelog(mysql, "output.mysql.sql")
+            }
+        })
+
+        def outputFile = new File("output.mysql.sql")
+        def contents = FileUtil.getContents(outputFile)
+
+        then:
+        contents.contains("CREATE OR REPLACE VIEW fooView")
+
+        cleanup:
+        outputFile.delete()
+        CommandUtil.runDropAll(mysql)
+    }
+
+    def "Ensure generated changelog SQL format does NOT contain 'OR REPLACE' instruction for a view when USE_OR_REPLACE_OPTION is set as false"() {
+        given:
+        mysql.executeSql("""create table foo(               
+                id numeric not null primary key, 
+                some_json json null)""")
+        mysql.executeSql("CREATE VIEW fooView AS Select * from foo;")
+
+        when:
+        Scope.child([
+                (GlobalConfiguration.USE_OR_REPLACE_OPTION.getKey()): false,
+        ], new Scope.ScopedRunner() {
+            @Override
+            void run() throws Exception {
+                CommandUtil.runGenerateChangelog(mysql, "output.mysql.sql")
+            }
+        })
+
+        def outputFile = new File("output.mysql.sql")
+        def contents = FileUtil.getContents(outputFile)
+
+        then:
+        !contents.contains("CREATE OR REPLACE VIEW fooView")
+        contents.contains("CREATE VIEW fooView")
+
+        cleanup:
+        outputFile.delete()
+        CommandUtil.runDropAll(mysql)
     }
 }
 

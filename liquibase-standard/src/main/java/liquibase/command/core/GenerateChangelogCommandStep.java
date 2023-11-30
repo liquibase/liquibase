@@ -1,5 +1,6 @@
 package liquibase.command.core;
 
+import liquibase.GlobalConfiguration;
 import liquibase.Scope;
 import liquibase.command.*;
 import liquibase.command.core.helpers.DbUrlConnectionCommandStep;
@@ -16,6 +17,7 @@ import liquibase.exception.CommandValidationException;
 import liquibase.resource.PathHandlerFactory;
 import liquibase.resource.Resource;
 import liquibase.util.StringUtil;
+import liquibase.util.ValueHandlerUtil;
 
 import java.io.IOException;
 import java.io.PrintStream;
@@ -114,6 +116,10 @@ public class GenerateChangelogCommandStep extends AbstractCommandStep {
         DiffOutputControl diffOutputControl = (DiffOutputControl) resultsBuilder.getResult(DiffOutputControlCommandStep.DIFF_OUTPUT_CONTROL.getName());
         diffOutputControl.setDataDir(commandScope.getArgumentValue(DATA_OUTPUT_DIR_ARG));
         referenceDatabase.setOutputDefaultSchema(diffOutputControl.getIncludeSchema());
+
+        if(GlobalConfiguration.USE_OR_REPLACE_OPTION.getCurrentValue()) {
+            diffOutputControl.setReplaceIfExistsSet(true);
+        }
 
         InternalSnapshotCommandStep.logUnsupportedDatabase(referenceDatabase, this.getClass());
 

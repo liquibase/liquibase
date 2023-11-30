@@ -114,7 +114,7 @@ public class CreateViewGenerator extends AbstractSqlGenerator<CreateViewStatemen
                 // 1) It is already in the SQL
                 // 2) The DB2 version is < 10.5
                 //
-                if (!statement.getSelectQuery().toUpperCase().contains("OR REPLACE")) {
+                if ((!statement.getSelectQuery().toUpperCase().contains("OR REPLACE"))) {
                     viewDefinition.replace("CREATE", "CREATE OR REPLACE");
                 }
             }
@@ -137,7 +137,7 @@ public class CreateViewGenerator extends AbstractSqlGenerator<CreateViewStatemen
     private boolean shouldPrependDropViewStatement(Database database) {
         // allow overriding the value of the dropIfCannotReplace attribute
         // from liquibase.properties or command line
-        boolean dropIfCannotReplace = false;
+        boolean dropIfCannotReplace = GlobalConfiguration.ALWAYS_DROP_INSTEAD_OF_REPLACE.getDefaultValue();
         if (GlobalConfiguration.ALWAYS_DROP_INSTEAD_OF_REPLACE.getCurrentValue() != null) {
             dropIfCannotReplace = GlobalConfiguration.ALWAYS_DROP_INSTEAD_OF_REPLACE.getCurrentValue();
         } 

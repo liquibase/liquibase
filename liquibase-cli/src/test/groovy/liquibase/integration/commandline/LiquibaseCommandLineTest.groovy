@@ -22,6 +22,7 @@ Global Options
       --always-drop-instead-of-replace=PARAM
                              If true, drop and recreate a view instead of
                                replacing it.
+                             DEFAULT: false
                              (defaults file: 'liquibase.
                                alwaysDropInsteadOfReplace', environment
                                variable:
@@ -424,6 +425,15 @@ Global Options
                              DEFAULT: CONSOLE
                              (defaults file: 'liquibase.uiService', environment
                                variable: 'LIQUIBASE_UI_SERVICE')
+
+      --use-or-replace-option=PARAM
+                             If true, will add 'OR REPLACE' option to the given
+                               stored logic change object for example, create
+                               view, create procedure, etc.)
+                             DEFAULT: false
+                             (defaults file: 'liquibase.useOrReplaceOption',
+                               environment variable:
+                               'LIQUIBASE_USE_OR_REPLACE_OPTION')
 
       --use-procedure-schema=PARAM
                              If set to true (default value), createProcedure

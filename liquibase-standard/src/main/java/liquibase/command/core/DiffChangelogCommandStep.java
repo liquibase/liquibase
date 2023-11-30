@@ -1,5 +1,6 @@
 package liquibase.command.core;
 
+import liquibase.GlobalConfiguration;
 import liquibase.Scope;
 import liquibase.command.*;
 import liquibase.command.core.helpers.DiffOutputControlCommandStep;
@@ -72,6 +73,9 @@ public class DiffChangelogCommandStep extends AbstractCommandStep {
             CommandScope commandScope = resultsBuilder.getCommandScope();
             Database referenceDatabase = (Database) commandScope.getDependency(ReferenceDatabase.class);
             DiffOutputControl diffOutputControl = (DiffOutputControl) resultsBuilder.getResult(DiffOutputControlCommandStep.DIFF_OUTPUT_CONTROL.getName());
+            if(GlobalConfiguration.USE_OR_REPLACE_OPTION.getCurrentValue()) {
+                diffOutputControl.setReplaceIfExistsSet(true);
+            }
             referenceDatabase.setOutputDefaultSchema(diffOutputControl.getIncludeSchema());
 
             InternalSnapshotCommandStep.logUnsupportedDatabase(referenceDatabase, this.getClass());
