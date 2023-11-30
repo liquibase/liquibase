@@ -101,219 +101,220 @@ jobs:
             core.setOutput("proBranchNamePrefix", liquibaseProVersionPrefix)
             console.log(liquibaseProVersionPrefix)
 
-  ### MATCHING BRANCH RUN THIS LOGIC
-  build_publish_branch:
-    name: Artifacts- Build & Package
-    runs-on: macos-latest
-    needs: [ setup ]
-    permissions:
-      contents: read
-      packages: write
-    steps:
-      - uses: actions/checkout@v3
-        with:
-          ref: ${{ github.event.pull_request.head.sha || github.event.after}}
-      # this includes all the tar files included in the previous runs. So in the next step we deploy what was previously build
-      - name: Download Artifacts for build.yml
-        uses: actions/download-artifact@v3
-        with:
-          name: temp-artifact
 
-      ##Cache based on install4j file, since changes to JVM is seen in there. If install4j version changes without changing the file, change the prefix letter before hashFiles to force a new cache
-      - name: Install4j Cache
-        uses: actions/cache@v3.3.1
-        with:
-          key: install4j-A${{ hashFiles('liquibase-dist/src/main/install4j/liquibase.install4j') }}
-          path: ~/.install4j8/**
-
-      - name: Set up JDK 11
-        uses: actions/setup-java@v3
-        with:
-          java-version: '11'
-          distribution: 'temurin'
-          gpg-private-key: ${{ secrets.GPG_SECRET }}
-          gpg-passphrase: GPG_PASSPHRASE
-          cache: 'maven'
-          overwrite-settings: false
-        env:
-          GPG_PASSWORD: ${{ secrets.GPG_PASSPHRASE }}
-
-      #look for dependencies in maven
-      - name: maven-settings-xml-action
-        uses: whelk-io/maven-settings-xml-action@v21
-        with:
-          repositories: |
-            [
-              {
-                "id": "liquibase",
-                "url": "https://maven.pkg.github.com/liquibase/liquibase",
-                "releases": {
-                  "enabled": "false"
-                },
-                "snapshots": {
-                  "enabled": "true",
-                  "updatePolicy": "always"
-                }
-              },
-              {
-                "id": "liquibase-pro",
-                "url": "https://maven.pkg.github.com/liquibase/liquibase-pro",
-                "releases": {
-                  "enabled": "false"
-                },
-                "snapshots": {
-                  "enabled": "true",
-                  "updatePolicy": "always"
-                }
-              }
-            ]
-          servers: |
-            [
-              {
-                "id": "liquibase-pro",
-                "username": "liquibot",
-                "password": "${{ secrets.LIQUIBOT_PAT }}"
-              },
-              {
-                "id": "liquibase",
-                "username": "liquibot",
-                "password": "${{ secrets.LIQUIBOT_PAT }}"
-              }
-            ]
-      - name: Set up Maven
-        uses: stCarolas/setup-maven@v4.5
-        with:
-          maven-version: ${{ env.MAVEN_VERSION }}
-
-      # Version artifact based off of branch
-      - name: Version Artifact
-        run: |
-          version=${{ needs.setup.outputs.thisBranchName }}-SNAPSHOT
-          mvn versions:set -DnewVersion="$version"
-
-      - name: Artifacts- Build & Sign
-        env:
-          INSTALL4J_LICENSE: ${{ secrets.INSTALL4J_LICENSE }}
-          INSTALL4J_APPLE_KEY: ${{ secrets.INSTALL4J_APPLE_KEY }}
-          INSTALL4J_APPLE_KEY_PASSWORD: ${{ secrets.INSTALL4J_APPLE_KEY_PASSWORD }}
-          INSTALL4J_APPLE_ID: ${{ secrets.INSTALL4J_APPLE_ID }}
-          INSTALL4J_APPLE_ID_PASSWORD: ${{ secrets.INSTALL4J_APPLE_ID_PASSWORD }}
-          INSTALL4J_WINDOWS_KEY: ${{ secrets.INSTALL4J_WINDOWS_KEY }}
-          INSTALL4J_WINDOWS_KEY_PASSWORD: ${{ secrets.INSTALL4J_WINDOWS_KEY_PASSWORD }}
-          GPG_PASSWORD: ${{ secrets.GPG_PASSPHRASE }}
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: |
-          ## save install4j code signing keys
-          mkdir -p liquibase-dist/target/keys
-          echo "Saving apple key"
-          echo "$INSTALL4J_APPLE_KEY" | base64 -d > liquibase-dist/target/keys/datical_apple.p12
-
-          echo "Saving windows key"
-          echo "$INSTALL4J_WINDOWS_KEY" | base64 -d > liquibase-dist/target/keys/datical_windows.pfx
-          # we are packaging and deploying liquibase tar which includes liquibase-commercial
-          mvn -B -pl liquibase-dist -P liquibase-commercial source:jar package "-Dliquibase-pro.version=${{ needs.setup.outputs.proBranchNamePrefix }}-SNAPSHOT" "-Dbuild.repository.owner=liquibase" "-Dbuild.repository.name=liquibase" "-Dbuild.branch=${{ needs.setup.outputs.thisBranchName }}" "-Dbuild.number=${{ github.run_number }}" "-Dbuild.commit=${{ needs.setup.outputs.latestMergeSha }}-SNAPSHOT" "-Dbuild.timestamp=${{ needs.setup.outputs.timeStamp }}"
-
-          ## extract tar content for other artifacts
-          mkdir -p liquibase-dist/target/liquibase-${{ needs.setup.outputs.thisBranchName }}-SNAPSHOT
-          (cd liquibase-dist/target/liquibase-${{ needs.setup.outputs.thisBranchName }}-SNAPSHOT && tar -xzf ../liquibase-${{ needs.setup.outputs.thisBranchName }}-SNAPSHOT.tar.gz)
-
-          ls -lR
-          cp -r liquibase-standard/src/main/resources/liquibase/examples liquibase-dist/target/liquibase-${{ needs.setup.outputs.thisBranchName }}-SNAPSHOT
-
-          ##create zip file from tar content
-          (cd liquibase-dist/target/liquibase-${{ needs.setup.outputs.thisBranchName }}-SNAPSHOT && zip -r ../liquibase-${{ needs.setup.outputs.thisBranchName }}-SNAPSHOT.zip *)
-          ls liquibase-dist/target/liquibase-${{ needs.setup.outputs.thisBranchName }}-SNAPSHOT
-
-          ##create installer - disabled here but run as nightly job and as part of release workflow
-          # (cd liquibase-dist && ${{ github.workspace }}/.github/util/package-install4j.sh 0-SNAPSHOT)
-
-          find . -name original-*.jar -exec rm {} \;
-
-          mkdir -p artifacts
-          cp liquibase-dist/target/liquibase-${{ needs.setup.outputs.thisBranchName }}-SNAPSHOT.tar.gz artifacts
-          cp liquibase-dist/target/liquibase-${{ needs.setup.outputs.thisBranchName }}-SNAPSHOT.zip artifacts
-          cp liquibase-dist/target/liquibase-${{ needs.setup.outputs.thisBranchName }}-SNAPSHOT/internal/lib/liquibase-core.jar artifacts/liquibase-core-0-SNAPSHOT.jar
-          cp liquibase-core/target/liquibase-core-0-SNAPSHOT-sources.jar artifacts/liquibase-core-0-SNAPSHOT-sources.jar
-          cp target/liquibase-0-SNAPSHOT-javadoc.jar artifacts/liquibase-core-0-SNAPSHOT-javadoc.jar
-
-          ##create installer - disabled here but run as nightly job and as part of release workflow
-          #cp liquibase-dist/target/liquibase-*-installer-* artifacts
-
-          cp liquibase-maven-plugin/target/liquibase-maven-plugin-0-SNAPSHOT.jar artifacts
-          cp liquibase-maven-plugin/target/liquibase-maven-plugin-0-SNAPSHOT-sources.jar artifacts
-          cp liquibase-maven-plugin/target/liquibase-maven-plugin-0-SNAPSHOT-javadoc.jar artifacts
-
-          cp liquibase-cdi/target/liquibase-cdi-0-SNAPSHOT.jar artifacts
-          cp liquibase-cdi/target/liquibase-cdi-0-SNAPSHOT-sources.jar artifacts
-          cp liquibase-cdi/target/liquibase-cdi-0-SNAPSHOT-javadoc.jar artifacts
-
-          cp liquibase-cdi-jakarta/target/liquibase-cdi-jakarta-0-SNAPSHOT.jar artifacts
-          cp liquibase-cdi-jakarta/target/liquibase-cdi-jakarta-0-SNAPSHOT-sources.jar artifacts
-          cp liquibase-cdi-jakarta/target/liquibase-cdi-jakarta-0-SNAPSHOT-javadoc.jar artifacts
-
-          echo "Source code not available for liquibase-commercial" > /tmp/readme.source.txt
-          (cd /tmp && jar cf liquibase-commercial-${{ needs.setup.outputs.proBranchNamePrefix }}-SNAPSHOT-sources.jar readme.source.txt)
-
-          echo "Javadocs not available for liquibase-commercial" > /tmp/readme.javadocs.txt
-          (cd /tmp && jar cf liquibase-commercial-${{ needs.setup.outputs.proBranchNamePrefix }}-SNAPSHOT-javadoc.jar readme.javadocs.txt)
-
-          ls -R /Users/runner/.m2/repository/org/liquibase/liquibase-commercial
-          echo "/Users/runner/.m2/repository/org/liquibase/liquibase-commercial "
-
-          commercialJarM2Location=/Users/runner/.m2/repository/org/liquibase/liquibase-commercial/${{ needs.setup.outputs.proBranchNamePrefix }}-SNAPSHOT/liquibase-commercial-${{ needs.setup.outputs.proBranchNamePrefix }}-SNAPSHOT.jar
-          cp $commercialJarM2Location artifacts
-          cp /tmp/liquibase-commercial-${{ needs.setup.outputs.proBranchNamePrefix }}-SNAPSHOT-sources.jar artifacts
-          cp /tmp/liquibase-commercial-${{ needs.setup.outputs.proBranchNamePrefix }}-SNAPSHOT-javadoc.jar artifacts
-
-          .github/util/sign-artifacts.sh artifacts
-
-          ##prepare branch-named convenience artifacts directories
-          mkdir artifacts-named
-          cp liquibase-dist/target/liquibase-${{ needs.setup.outputs.thisBranchName }}-SNAPSHOT.tar.gz artifacts-named/liquibase-${{ needs.setup.outputs.thisBranchName }}.tar.gz
-          cp liquibase-dist/target/liquibase-${{ needs.setup.outputs.thisBranchName }}-SNAPSHOT/internal/lib/liquibase-core.jar artifacts-named/liquibase-core-${{ needs.setup.outputs.thisBranchName }}.jar
-          cp liquibase-core/target/liquibase-core-0-SNAPSHOT.jar artifacts-named/liquibase-core-${{ needs.setup.outputs.thisBranchName }}.jar
-          cp liquibase-maven-plugin/target/liquibase-maven-plugin-0-SNAPSHOT.jar artifacts-named/liquibase-maven-plugin-${{ needs.setup.outputs.thisBranchName }}.jar
-          cp liquibase-cdi/target/liquibase-cdi-0-SNAPSHOT.jar artifacts-named/liquibase-cdi-${{ needs.setup.outputs.thisBranchName }}.jar
-          cp liquibase-cdi-jakarta/target/liquibase-cdi-jakarta-0-SNAPSHOT.jar artifacts-named/liquibase-cdi-jakarta-${{ needs.setup.outputs.thisBranchName }}.jar
-          cp liquibase-extension-testing/target/liquibase-extension-testing-0-SNAPSHOT.jar artifacts-named/liquibase-extension-testing-${{ needs.setup.outputs.thisBranchName }}.jar
-          cp liquibase-extension-testing/target/liquibase-extension-testing-0-SNAPSHOT-deps.jar artifacts-named/liquibase-extension-testing-${{ needs.setup.outputs.thisBranchName }}-deps.jar
-
-          #check why only this step has branchName when there is a standalone PR
-          cp $commercialJarM2Location artifacts-named/liquibase-commercial-${{ needs.setup.outputs.thisBranchName }}.jar
-
-
-      - name: Archive Packages
-        uses: actions/upload-artifact@v3
-        with:
-          name: liquibase-artifacts
-          path: artifacts/*
-
-      - name: Archive Convenience Zip
-        uses: actions/upload-artifact@v3
-        with:
-          name: liquibase-zip-${{ needs.setup.outputs.thisBranchName }}
-          path: liquibase-dist/target/liquibase-${{ needs.setup.outputs.thisBranchName }}-SNAPSHOT/*
-
-      # Publish <commitsha>-SNAPSHOT version to GPM
-      - name: Version Artifact Publish <commitsha>-SNAPSHOT version to GPM
-        run: |
-          mvn versions:set "-DnewVersion=${{ needs.setup.outputs.latestMergeSha }}-SNAPSHOT"
-      - name: Publish <commitsha>-SNAPSHOT package
-        run: |
-          mvn -B clean deploy -pl '!liquibase-dist' -DskipTests=true "-Dbuild.repository.owner=liquibase" "-Dbuild.repository.name=liquibase" "-Dbuild.branch=${{ needs.setup.outputs.thisBranchName }}" "-Dbuild.number=${{ github.run_number }}" "-Dbuild.commit=${{ needs.setup.outputs.latestMergeSha }}" "-Dbuild.timestamp=${{ needs.setup.outputs.timeStamp }}"
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-
-      #Publish to GitHub Packages. We are building a tar file which includes liquibase-commercial hence we need "-Dliquibase-pro.version"
-      - name: Publish tar.gz package to GPM
-        run: |
-          mvn -B -pl liquibase-dist -P liquibase-commercial clean deploy -DskipTests=true "-Dliquibase-pro.version=${{ needs.setup.outputs.proBranchNamePrefix }}-SNAPSHOT" "-Dbuild.timestamp=${{ needs.setup.outputs.timestamp }}" "-Dbuild.repository.owner=liquibase" "-Dbuild.repository.name=liquibase" "-Dbuild.branch=${{ needs.setup.outputs.thisBranchName }}" "-Dbuild.number=${{ github.run_number }}" "-Dbuild.commit=${{ needs.setup.outputs.thisSha }}"
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+#  ### MATCHING BRANCH RUN THIS LOGIC
+#  build_publish_branch:
+#    name: Artifacts- Build & Package
+#    runs-on: macos-latest
+#    needs: [ setup ]
+#    permissions:
+#      contents: read
+#      packages: write
+#    steps:
+#      - uses: actions/checkout@v3
+#        with:
+#          ref: ${{ github.event.pull_request.head.sha || github.event.after}}
+#      # this includes all the tar files included in the previous runs. So in the next step we deploy what was previously build
+#      - name: Download Artifacts for build.yml
+#        uses: actions/download-artifact@v3
+#        with:
+#          name: temp-artifact
+#
+#      ##Cache based on install4j file, since changes to JVM is seen in there. If install4j version changes without changing the file, change the prefix letter before hashFiles to force a new cache
+#      - name: Install4j Cache
+#        uses: actions/cache@v3.3.1
+#        with:
+#          key: install4j-A${{ hashFiles('liquibase-dist/src/main/install4j/liquibase.install4j') }}
+#          path: ~/.install4j8/**
+#
+#      - name: Set up JDK 11
+#        uses: actions/setup-java@v3
+#        with:
+#          java-version: '11'
+#          distribution: 'temurin'
+#          gpg-private-key: ${{ secrets.GPG_SECRET }}
+#          gpg-passphrase: GPG_PASSPHRASE
+#          cache: 'maven'
+#          overwrite-settings: false
+#        env:
+#          GPG_PASSWORD: ${{ secrets.GPG_PASSPHRASE }}
+#
+#      #look for dependencies in maven
+#      - name: maven-settings-xml-action
+#        uses: whelk-io/maven-settings-xml-action@v21
+#        with:
+#          repositories: |
+#            [
+#              {
+#                "id": "liquibase",
+#                "url": "https://maven.pkg.github.com/liquibase/liquibase",
+#                "releases": {
+#                  "enabled": "false"
+#                },
+#                "snapshots": {
+#                  "enabled": "true",
+#                  "updatePolicy": "always"
+#                }
+#              },
+#              {
+#                "id": "liquibase-pro",
+#                "url": "https://maven.pkg.github.com/liquibase/liquibase-pro",
+#                "releases": {
+#                  "enabled": "false"
+#                },
+#                "snapshots": {
+#                  "enabled": "true",
+#                  "updatePolicy": "always"
+#                }
+#              }
+#            ]
+#          servers: |
+#            [
+#              {
+#                "id": "liquibase-pro",
+#                "username": "liquibot",
+#                "password": "${{ secrets.LIQUIBOT_PAT }}"
+#              },
+#              {
+#                "id": "liquibase",
+#                "username": "liquibot",
+#                "password": "${{ secrets.LIQUIBOT_PAT }}"
+#              }
+#            ]
+#      - name: Set up Maven
+#        uses: stCarolas/setup-maven@v4.5
+#        with:
+#          maven-version: ${{ env.MAVEN_VERSION }}
+#
+#      # Version artifact based off of branch
+#      - name: Version Artifact
+#        run: |
+#          version=${{ needs.setup.outputs.thisBranchName }}-SNAPSHOT
+#          mvn versions:set -DnewVersion="$version"
+#
+#      - name: Artifacts- Build & Sign
+#        env:
+#          INSTALL4J_LICENSE: ${{ secrets.INSTALL4J_LICENSE }}
+#          INSTALL4J_APPLE_KEY: ${{ secrets.INSTALL4J_APPLE_KEY }}
+#          INSTALL4J_APPLE_KEY_PASSWORD: ${{ secrets.INSTALL4J_APPLE_KEY_PASSWORD }}
+#          INSTALL4J_APPLE_ID: ${{ secrets.INSTALL4J_APPLE_ID }}
+#          INSTALL4J_APPLE_ID_PASSWORD: ${{ secrets.INSTALL4J_APPLE_ID_PASSWORD }}
+#          INSTALL4J_WINDOWS_KEY: ${{ secrets.INSTALL4J_WINDOWS_KEY }}
+#          INSTALL4J_WINDOWS_KEY_PASSWORD: ${{ secrets.INSTALL4J_WINDOWS_KEY_PASSWORD }}
+#          GPG_PASSWORD: ${{ secrets.GPG_PASSPHRASE }}
+#          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+#        run: |
+#          ## save install4j code signing keys
+#          mkdir -p liquibase-dist/target/keys
+#          echo "Saving apple key"
+#          echo "$INSTALL4J_APPLE_KEY" | base64 -d > liquibase-dist/target/keys/datical_apple.p12
+#
+#          echo "Saving windows key"
+#          echo "$INSTALL4J_WINDOWS_KEY" | base64 -d > liquibase-dist/target/keys/datical_windows.pfx
+#          # we are packaging and deploying liquibase tar which includes liquibase-commercial
+#          mvn -B -pl liquibase-dist -P liquibase-commercial source:jar package "-Dliquibase-pro.version=${{ needs.setup.outputs.proBranchNamePrefix }}-SNAPSHOT" "-Dbuild.repository.owner=liquibase" "-Dbuild.repository.name=liquibase" "-Dbuild.branch=${{ needs.setup.outputs.thisBranchName }}" "-Dbuild.number=${{ github.run_number }}" "-Dbuild.commit=${{ needs.setup.outputs.latestMergeSha }}-SNAPSHOT" "-Dbuild.timestamp=${{ needs.setup.outputs.timeStamp }}"
+#
+#          ## extract tar content for other artifacts
+#          mkdir -p liquibase-dist/target/liquibase-${{ needs.setup.outputs.thisBranchName }}-SNAPSHOT
+#          (cd liquibase-dist/target/liquibase-${{ needs.setup.outputs.thisBranchName }}-SNAPSHOT && tar -xzf ../liquibase-${{ needs.setup.outputs.thisBranchName }}-SNAPSHOT.tar.gz)
+#
+#          ls -lR
+#          cp -r liquibase-standard/src/main/resources/liquibase/examples liquibase-dist/target/liquibase-${{ needs.setup.outputs.thisBranchName }}-SNAPSHOT
+#
+#          ##create zip file from tar content
+#          (cd liquibase-dist/target/liquibase-${{ needs.setup.outputs.thisBranchName }}-SNAPSHOT && zip -r ../liquibase-${{ needs.setup.outputs.thisBranchName }}-SNAPSHOT.zip *)
+#          ls liquibase-dist/target/liquibase-${{ needs.setup.outputs.thisBranchName }}-SNAPSHOT
+#
+#          ##create installer - disabled here but run as nightly job and as part of release workflow
+#          # (cd liquibase-dist && ${{ github.workspace }}/.github/util/package-install4j.sh 0-SNAPSHOT)
+#
+#          find . -name original-*.jar -exec rm {} \;
+#
+#          mkdir -p artifacts
+#          cp liquibase-dist/target/liquibase-${{ needs.setup.outputs.thisBranchName }}-SNAPSHOT.tar.gz artifacts
+#          cp liquibase-dist/target/liquibase-${{ needs.setup.outputs.thisBranchName }}-SNAPSHOT.zip artifacts
+#          cp liquibase-dist/target/liquibase-${{ needs.setup.outputs.thisBranchName }}-SNAPSHOT/internal/lib/liquibase-core.jar artifacts/liquibase-core-0-SNAPSHOT.jar
+#          cp liquibase-core/target/liquibase-core-0-SNAPSHOT-sources.jar artifacts/liquibase-core-0-SNAPSHOT-sources.jar
+#          cp target/liquibase-0-SNAPSHOT-javadoc.jar artifacts/liquibase-core-0-SNAPSHOT-javadoc.jar
+#
+#          ##create installer - disabled here but run as nightly job and as part of release workflow
+#          #cp liquibase-dist/target/liquibase-*-installer-* artifacts
+#
+#          cp liquibase-maven-plugin/target/liquibase-maven-plugin-0-SNAPSHOT.jar artifacts
+#          cp liquibase-maven-plugin/target/liquibase-maven-plugin-0-SNAPSHOT-sources.jar artifacts
+#          cp liquibase-maven-plugin/target/liquibase-maven-plugin-0-SNAPSHOT-javadoc.jar artifacts
+#
+#          cp liquibase-cdi/target/liquibase-cdi-0-SNAPSHOT.jar artifacts
+#          cp liquibase-cdi/target/liquibase-cdi-0-SNAPSHOT-sources.jar artifacts
+#          cp liquibase-cdi/target/liquibase-cdi-0-SNAPSHOT-javadoc.jar artifacts
+#
+#          cp liquibase-cdi-jakarta/target/liquibase-cdi-jakarta-0-SNAPSHOT.jar artifacts
+#          cp liquibase-cdi-jakarta/target/liquibase-cdi-jakarta-0-SNAPSHOT-sources.jar artifacts
+#          cp liquibase-cdi-jakarta/target/liquibase-cdi-jakarta-0-SNAPSHOT-javadoc.jar artifacts
+#
+#          echo "Source code not available for liquibase-commercial" > /tmp/readme.source.txt
+#          (cd /tmp && jar cf liquibase-commercial-${{ needs.setup.outputs.proBranchNamePrefix }}-SNAPSHOT-sources.jar readme.source.txt)
+#
+#          echo "Javadocs not available for liquibase-commercial" > /tmp/readme.javadocs.txt
+#          (cd /tmp && jar cf liquibase-commercial-${{ needs.setup.outputs.proBranchNamePrefix }}-SNAPSHOT-javadoc.jar readme.javadocs.txt)
+#
+#          ls -R /Users/runner/.m2/repository/org/liquibase/liquibase-commercial
+#          echo "/Users/runner/.m2/repository/org/liquibase/liquibase-commercial "
+#
+#          commercialJarM2Location=/Users/runner/.m2/repository/org/liquibase/liquibase-commercial/${{ needs.setup.outputs.proBranchNamePrefix }}-SNAPSHOT/liquibase-commercial-${{ needs.setup.outputs.proBranchNamePrefix }}-SNAPSHOT.jar
+#          cp $commercialJarM2Location artifacts
+#          cp /tmp/liquibase-commercial-${{ needs.setup.outputs.proBranchNamePrefix }}-SNAPSHOT-sources.jar artifacts
+#          cp /tmp/liquibase-commercial-${{ needs.setup.outputs.proBranchNamePrefix }}-SNAPSHOT-javadoc.jar artifacts
+#
+#          .github/util/sign-artifacts.sh artifacts
+#
+#          ##prepare branch-named convenience artifacts directories
+#          mkdir artifacts-named
+#          cp liquibase-dist/target/liquibase-${{ needs.setup.outputs.thisBranchName }}-SNAPSHOT.tar.gz artifacts-named/liquibase-${{ needs.setup.outputs.thisBranchName }}.tar.gz
+#          cp liquibase-dist/target/liquibase-${{ needs.setup.outputs.thisBranchName }}-SNAPSHOT/internal/lib/liquibase-core.jar artifacts-named/liquibase-core-${{ needs.setup.outputs.thisBranchName }}.jar
+#          cp liquibase-core/target/liquibase-core-0-SNAPSHOT.jar artifacts-named/liquibase-core-${{ needs.setup.outputs.thisBranchName }}.jar
+#          cp liquibase-maven-plugin/target/liquibase-maven-plugin-0-SNAPSHOT.jar artifacts-named/liquibase-maven-plugin-${{ needs.setup.outputs.thisBranchName }}.jar
+#          cp liquibase-cdi/target/liquibase-cdi-0-SNAPSHOT.jar artifacts-named/liquibase-cdi-${{ needs.setup.outputs.thisBranchName }}.jar
+#          cp liquibase-cdi-jakarta/target/liquibase-cdi-jakarta-0-SNAPSHOT.jar artifacts-named/liquibase-cdi-jakarta-${{ needs.setup.outputs.thisBranchName }}.jar
+#          cp liquibase-extension-testing/target/liquibase-extension-testing-0-SNAPSHOT.jar artifacts-named/liquibase-extension-testing-${{ needs.setup.outputs.thisBranchName }}.jar
+#          cp liquibase-extension-testing/target/liquibase-extension-testing-0-SNAPSHOT-deps.jar artifacts-named/liquibase-extension-testing-${{ needs.setup.outputs.thisBranchName }}-deps.jar
+#
+#          #check why only this step has branchName when there is a standalone PR
+#          cp $commercialJarM2Location artifacts-named/liquibase-commercial-${{ needs.setup.outputs.thisBranchName }}.jar
+#
+#
+#      - name: Archive Packages
+#        uses: actions/upload-artifact@v3
+#        with:
+#          name: liquibase-artifacts
+#          path: artifacts/*
+#
+#      - name: Archive Convenience Zip
+#        uses: actions/upload-artifact@v3
+#        with:
+#          name: liquibase-zip-${{ needs.setup.outputs.thisBranchName }}
+#          path: liquibase-dist/target/liquibase-${{ needs.setup.outputs.thisBranchName }}-SNAPSHOT/*
+#
+#      # Publish <commitsha>-SNAPSHOT version to GPM
+#      - name: Version Artifact Publish <commitsha>-SNAPSHOT version to GPM
+#        run: |
+#          mvn versions:set "-DnewVersion=${{ needs.setup.outputs.latestMergeSha }}-SNAPSHOT"
+#      - name: Publish <commitsha>-SNAPSHOT package
+#        run: |
+#          mvn -B clean deploy -pl '!liquibase-dist' -DskipTests=true "-Dbuild.repository.owner=liquibase" "-Dbuild.repository.name=liquibase" "-Dbuild.branch=${{ needs.setup.outputs.thisBranchName }}" "-Dbuild.number=${{ github.run_number }}" "-Dbuild.commit=${{ needs.setup.outputs.latestMergeSha }}" "-Dbuild.timestamp=${{ needs.setup.outputs.timeStamp }}"
+#        env:
+#          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+#
+#      #Publish to GitHub Packages. We are building a tar file which includes liquibase-commercial hence we need "-Dliquibase-pro.version"
+#      - name: Publish tar.gz package to GPM
+#        run: |
+#          mvn -B -pl liquibase-dist -P liquibase-commercial clean deploy -DskipTests=true "-Dliquibase-pro.version=${{ needs.setup.outputs.proBranchNamePrefix }}-SNAPSHOT" "-Dbuild.timestamp=${{ needs.setup.outputs.timestamp }}" "-Dbuild.repository.owner=liquibase" "-Dbuild.repository.name=liquibase" "-Dbuild.branch=${{ needs.setup.outputs.thisBranchName }}" "-Dbuild.number=${{ github.run_number }}" "-Dbuild.commit=${{ needs.setup.outputs.thisSha }}"
+#        env:
+#          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
   run-functional-tests:
-    needs: [ setup, build_publish_branch ]
-    #needs: [ setup ]
+    #needs: [ setup, build_publish_branch ]
+    needs: [ setup ]
     uses: liquibase/liquibase/.github/workflows/run-functional-tests.yml@github-action-DAT-15775
     secrets: inherit
     with:
@@ -321,8 +322,8 @@ jobs:
       thisBranchName: ${{ needs.setup.outputs.unmodifiedBranchName }}
 
   run-tests-harness:
-    needs: [ setup,build_publish_branch ]
-    #needs: [ setup ]
+    #needs: [ setup,build_publish_branch ]
+    needs: [ setup ]
     uses: liquibase/liquibase/.github/workflows/run-test-harness.yml@github-action-DAT-15775
     secrets: inherit
     with:
