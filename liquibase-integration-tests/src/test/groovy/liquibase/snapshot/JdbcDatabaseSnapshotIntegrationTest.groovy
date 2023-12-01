@@ -61,6 +61,8 @@ class JdbcDatabaseSnapshotIntegrationTest extends Specification {
         mssql.executeSql('CREATE COLUMNSTORE INDEX IX_address ON address(id1, id2, id3)')
         def snapshotFile = CommandTests.takeDatabaseSnapshot(mssql.getDatabaseFromFactory(), "json")
         def outputFile = 'output.mssql.sql'
+        // The results of this operation are unimportant. All this serves to do is to cause Liquibase to deserialize
+        // the snapshot file.
         Scope.child(Collections.singletonMap(Scope.Attr.resourceAccessor.name(), new SearchPathResourceAccessor(".,target/test-classes/")), new Scope.ScopedRunner() {
             @Override
             void run() throws Exception {
