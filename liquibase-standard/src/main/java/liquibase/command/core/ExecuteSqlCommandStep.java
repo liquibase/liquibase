@@ -2,6 +2,8 @@ package liquibase.command.core;
 
 import liquibase.GlobalConfiguration;
 import liquibase.Scope;
+import liquibase.changeset.ChangeSetService;
+import liquibase.changeset.ChangeSetServiceFactory;
 import liquibase.command.*;
 import liquibase.database.Database;
 import liquibase.exception.DatabaseException;
@@ -62,7 +64,7 @@ public class ExecuteSqlCommandStep extends AbstractCommandStep {
         final Executor executor = Scope.getCurrentScope().getSingleton(ExecutorService.class).getExecutor("jdbc", database);
         final String sqlText = getSqlScript(sql, sqlFile);
         final StringBuilder out = new StringBuilder();
-        final String[] sqlStrings = StringUtil.processMultiLineSQL(sqlText, true, true, commandScope.getArgumentValue(DELIMITER_ARG));
+        final String[] sqlStrings = StringUtil.processMultiLineSQL(sqlText, true, true, determineEndDelimiter(commandScope));
 
         for (String sqlString : sqlStrings) {
             if (sqlString.toLowerCase().matches("\\s*select .*")) {
@@ -77,6 +79,15 @@ public class ExecuteSqlCommandStep extends AbstractCommandStep {
         database.commit();
         handleOutput(resultsBuilder, out.toString());
         resultsBuilder.addResult("output", out.toString());
+    }
+
+    private static String determineEndDelimiter(CommandScope commandScope) {
+        String delimiter = commandScope.getArgumentValue(DELIMITER_ARG);
+        if (delimiter == null) {
+            ChangeSetService service = ChangeSetServiceFactory.getInstance().createChangeSetService();
+            delimiter = service.getEndDelimiter(null);
+        }
+        return delimiter;
     }
 
     private void handleOutput(CommandResultsBuilder resultsBuilder, String output) throws IOException {
@@ -106,7 +117,7 @@ public class ExecuteSqlCommandStep extends AbstractCommandStep {
         if (rows.isEmpty()) {
             out.append("-- Empty Resultset --\n");
         } else {
-            SortedSet<String> keys = new TreeSet<>();
+            LinkedHashSet<String> keys = new LinkedHashSet<>();
             for (Map<String, ?> row : rows) {
                 keys.addAll(row.keySet());
             }

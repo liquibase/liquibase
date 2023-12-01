@@ -1,5 +1,9 @@
 package liquibase.integration.commandline;
 
+import static liquibase.integration.commandline.LiquibaseLauncherSettings.LiquibaseLauncherSetting.LIQUIBASE_HOME;
+import static liquibase.integration.commandline.LiquibaseLauncherSettings.getSetting;
+
+import liquibase.GlobalConfiguration;
 import liquibase.Scope;
 import liquibase.command.CommandArgumentDefinition;
 import liquibase.command.CommandDefinition;
@@ -35,6 +39,7 @@ import liquibase.util.*;
 import picocli.CommandLine;
 
 import java.io.*;
+import java.lang.reflect.InvocationTargetException;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLClassLoader;
@@ -682,27 +687,21 @@ public class LiquibaseCommandLine {
         Map<String, String> javaProperties = addJavaPropertiesToChangelogParameters();
         Scope.child(new HashMap<>(javaProperties), () -> returnMap.putAll(configureResourceAccessor(classLoader)));
 
-        ConsoleUIService console = null;
-        List<UIService> uiServices = Scope.getCurrentScope().getServiceLocator().findInstances(UIService.class);
-        for (UIService uiService : uiServices) {
-            if (uiService instanceof ConsoleUIService) {
-                console = (ConsoleUIService) uiService;
-                break;
-            }
-        }
-        if (console == null) {
-            console = new ConsoleUIService();
-        }
+        UIService defaultUiService = getDefaultUiService();
 
-        console.setAllowPrompt(true);
-        console.setOutputStream(System.err);
-        List<UIService> outputServices = new ArrayList<>();
-        outputServices.add(console);
-        if (LiquibaseCommandLineConfiguration.MIRROR_CONSOLE_MESSAGES_TO_LOG.getCurrentValue()) {
-            outputServices.add(new LoggerUIService());
+        if (defaultUiService instanceof ConsoleUIService) {
+            defaultUiService.setAllowPrompt(true);
+            ((ConsoleUIService) defaultUiService).setOutputStream(System.err); //NOSONAR
+            List<UIService> outputServices = new ArrayList<>();
+            outputServices.add(defaultUiService);
+            if (BooleanUtil.isTrue(LiquibaseCommandLineConfiguration.MIRROR_CONSOLE_MESSAGES_TO_LOG.getCurrentValue())) {
+                outputServices.add(new LoggerUIService());
+            }
+            CompositeUIService compositeUIService = new CompositeUIService(defaultUiService, outputServices);
+            returnMap.put(Scope.Attr.ui.name(), compositeUIService);
+        } else {
+            returnMap.put(Scope.Attr.ui.name(), defaultUiService);
         }
-        CompositeUIService compositeUIService = new CompositeUIService(console, outputServices);
-        returnMap.put(Scope.Attr.ui.name(), compositeUIService);
 
         returnMap.put(LiquibaseCommandLineConfiguration.ARGUMENT_CONVERTER.getKey(),
                 (LiquibaseCommandLineConfiguration.ArgumentConverter) argument -> "--" + StringUtil.toKabobCase(argument));
@@ -710,6 +709,19 @@ public class LiquibaseCommandLine {
         returnMap.put(Scope.JAVA_PROPERTIES, javaProperties);
 
         return returnMap;
+    }
+
+    private static UIService getDefaultUiService() throws InstantiationException, IllegalAccessException, InvocationTargetException, NoSuchMethodException {
+        List<UIService> uiServices = Scope.getCurrentScope().getServiceLocator().findInstances(UIService.class);
+        Class<? extends UIService> configuredUiServiceClass = GlobalConfiguration.UI_SERVICE.getCurrentValue().getUiServiceClass();
+        Optional<UIService> optionalDefaultUiService =
+                uiServices.stream().filter(uiService -> configuredUiServiceClass.isAssignableFrom(uiService.getClass())).findFirst();
+
+        if (optionalDefaultUiService.isPresent()) {
+            return optionalDefaultUiService.get();
+        } else {
+            return GlobalConfiguration.UI_SERVICE.getCurrentValue().getUiServiceClass().getDeclaredConstructor().newInstance();
+        }
     }
 
     private void configureVersionInfo() {
@@ -957,7 +969,7 @@ public class LiquibaseCommandLine {
                     if (i > 0) {
                         builder.hidden(true);
                     } else {
-                        builder.hidden(def.getHidden());
+                        builder.hidden(def.getHidden() && !LiquibaseCommandLineConfiguration.SHOW_HIDDEN_ARGS.getCurrentValue());
                     }
 
                     subCommandSpec.addOption(builder.build());
@@ -1128,7 +1140,7 @@ public class LiquibaseCommandLine {
                 }
 
                 //only show the first/standard variation of a name
-                if (i > 0 || def.isHidden()) {
+                if (i > 0 || (def.isHidden() && !LiquibaseCommandLineConfiguration.SHOW_HIDDEN_ARGS.getCurrentValue())) {
                     optionBuilder.hidden(true);
                 }
 
@@ -1267,7 +1279,7 @@ public class LiquibaseCommandLine {
             String liquibaseHome;
             Path liquibaseHomePath = null;
             try {
-                liquibaseHomePath = new File(ObjectUtil.defaultIfNull(System.getenv("LIQUIBASE_HOME"), workingDirectory.toAbsolutePath().toString())).getAbsoluteFile().getCanonicalFile().toPath();
+                liquibaseHomePath = new File(ObjectUtil.defaultIfNull(getSetting(LIQUIBASE_HOME), workingDirectory.toAbsolutePath().toString())).getAbsoluteFile().getCanonicalFile().toPath();
                 liquibaseHome = liquibaseHomePath.toString();
             } catch (IOException e) {
                 liquibaseHome = "Cannot resolve LIQUIBASE_HOME: " + e.getMessage();

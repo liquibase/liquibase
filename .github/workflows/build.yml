@@ -70,7 +70,7 @@ jobs:
             if (${{ github.run_attempt }} % 5 == 0) {
               core.setFailed("Fail every 5 run attempts to catch accidental infinite loops");
             }
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
         with:
           ref: ${{ github.event.pull_request.head.sha || github.event.after}}
 
@@ -152,7 +152,7 @@ jobs:
       fail-fast: false
       matrix:
         os: [ ubuntu-22.04, macos-latest, windows-2019 ]
-        java: [ 8, 11, 17, 20 ]
+        java: [ 8, 11, 17, 21 ]
         exclude:
           # exclude non-java 8 on macos and windows builds
           - os: macos-latest
@@ -164,20 +164,20 @@ jobs:
           - os: windows-2019
             java: 17
           - os: macos-latest
-            java: 20
+            java: 21
           - os: windows-2019
-            java: 20
+            java: 21
     runs-on: ${{ matrix.os }}
     env:
       OS_TYPE: ${{ matrix.os }}
       GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
         with:
           ref: ${{ github.event.pull_request.head.sha || github.event.after}}
       - name: Built Code Cache
         if: ${{ matrix.java == 11}}
-        uses: actions/cache@v3.3.2
+        uses: actions/cache@v3.3.1
         with:
           key: built-code-${{ github.run_number }}-${{ github.run_attempt }}
           path: ./**/target
@@ -240,6 +240,7 @@ jobs:
       fail-fast: false
       matrix:
         testSystem:
+           - db2
            - h2
            #- h2:1.4
            - hsqldb
@@ -253,7 +254,7 @@ jobs:
     needs: setup
     timeout-minutes: 30
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
         with:
           ref: ${{ github.event.pull_request.head.sha || github.event.after}}
 
@@ -278,7 +279,7 @@ jobs:
         with:
           maven-version: ${{ env.MAVEN_VERSION }}
       - name: Restore Built Code Cache
-        uses: actions/cache@v3.3.2
+        uses: actions/cache@v3.3.1
         with:
           key: built-code-${{ github.run_number }}-${{ github.run_attempt }}
           path: ./**/target
@@ -310,7 +311,7 @@ jobs:
 
   sonar:
     needs: [ build, integration-test ]
-    uses: liquibase/build-logic/.github/workflows/sonar-test-scan.yml@v0.4.7
+    uses: liquibase/build-logic/.github/workflows/sonar-test-scan.yml@v0.5.7
     with:
       thisBranchName: ${{ needs.setup.outputs.thisBranchName }}
       thisSha: ${{ needs.setup.outputs.thisSha }}
@@ -327,19 +328,19 @@ jobs:
     runs-on: macos-latest
     needs: [ setup, build ]
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
         with:
           ref: ${{ github.event.pull_request.head.sha || github.event.after}}
       # this includes all the tar files included in the previous runs. So in the next step we deploy what was previously build
       - name: Built Code Cache
-        uses: actions/cache@v3.3.2
+        uses: actions/cache@v3.3.1
         with:
           key: built-code-${{ github.run_number }}-${{ github.run_attempt }}
           path: ./**/target
 
       ##Cache based on install4j file, since changes to JVM is seen in there. If install4j version changes without changing the file, change the prefix letter before hashFiles to force a new cache
       - name: Install4j Cache
-        uses: actions/cache@v3.3.2
+        uses: actions/cache@v3.3.1
         with:
           key: install4j-A${{ hashFiles('liquibase-dist/src/main/install4j/liquibase.install4j') }}
           path: ~/.install4j8/**
@@ -432,7 +433,7 @@ jobs:
           echo "Saving windows key"
           echo "$INSTALL4J_WINDOWS_KEY" | base64 -d > liquibase-dist/target/keys/datical_windows.pfx
           # we are packaging and deploying liquibase tar which includes liquibase-commercial
-          mvn -B -pl liquibase-dist -P liquibase-commercial source:jar package -DskipTest "-Dliquibase-pro.version=${{ needs.setup.outputs.proBranchName }}-SNAPSHOT" "-Dbuild.repository.owner=${{ needs.setup.outputs.thisRepositoryOwner }}" "-Dbuild.repository.name=${{ needs.setup.outputs.thisRepositoryName }}" "-Dbuild.branch=${{ needs.setup.outputs.thisBranchFileName }}" "-Dbuild.number=${{ github.run_number }}" "-Dbuild.commit=${{ needs.setup.outputs.thisSha }}" "-Dbuild.timestamp=${{ needs.setup.outputs.timestamp }}"
+          mvn -B -pl liquibase-dist -P liquibase-commercial source:jar package -DskipTests "-Dliquibase-pro.version=${{ needs.setup.outputs.proBranchName }}-SNAPSHOT" "-Dbuild.repository.owner=${{ needs.setup.outputs.thisRepositoryOwner }}" "-Dbuild.repository.name=${{ needs.setup.outputs.thisRepositoryName }}" "-Dbuild.branch=${{ needs.setup.outputs.thisBranchFileName }}" "-Dbuild.number=${{ github.run_number }}" "-Dbuild.commit=${{ needs.setup.outputs.thisSha }}" "-Dbuild.timestamp=${{ needs.setup.outputs.timestamp }}"
 
           ## extract tar content for other artifacts
           mkdir -p liquibase-dist/target/liquibase-${{ needs.setup.outputs.thisBranchFileName }}-SNAPSHOT
@@ -455,11 +456,11 @@ jobs:
           # (cd liquibase-dist && ${{ github.workspace }}/.github/util/package-install4j.sh 0-SNAPSHOT)
 
           find . -name original-*.jar -exec rm {} \;
-
+          
           mkdir -p artifacts
           cp liquibase-dist/target/liquibase-${{ needs.setup.outputs.thisBranchFileName }}-SNAPSHOT.tar.gz artifacts
           cp liquibase-dist/target/liquibase-${{ needs.setup.outputs.thisBranchFileName }}-SNAPSHOT.zip artifacts
-          cp liquibase-core/target/liquibase-core-0-SNAPSHOT.jar artifacts/liquibase-core-0-SNAPSHOT.jar
+          cp liquibase-dist/target/liquibase-${{ needs.setup.outputs.thisBranchFileName }}-SNAPSHOT/internal/lib/liquibase-core.jar artifacts/liquibase-core-0-SNAPSHOT.jar
           cp liquibase-core/target/liquibase-core-0-SNAPSHOT-sources.jar artifacts/liquibase-core-0-SNAPSHOT-sources.jar
           cp target/liquibase-0-SNAPSHOT-javadoc.jar artifacts/liquibase-core-0-SNAPSHOT-javadoc.jar
 
@@ -494,7 +495,8 @@ jobs:
           ##prepare branch-named convenience artifacts directories
           mkdir artifacts-named
           cp liquibase-dist/target/liquibase-${{ needs.setup.outputs.thisBranchFileName }}-SNAPSHOT.tar.gz artifacts-named/liquibase-${{ needs.setup.outputs.thisBranchFileName }}.tar.gz
-          cp liquibase-core/target/liquibase-core-0-SNAPSHOT.jar artifacts-named/liquibase-core-${{ needs.setup.outputs.thisBranchFileName }}.jar
+          cp liquibase-dist/target/liquibase-${{ needs.setup.outputs.thisBranchFileName }}-SNAPSHOT/internal/lib/liquibase-core.jar artifacts-named/liquibase-core-${{ needs.setup.outputs.thisBranchFileName }}.jar
+          #cp liquibase-core/target/liquibase-core-0-SNAPSHOT.jar artifacts-named/liquibase-core-${{ needs.setup.outputs.thisBranchFileName }}.jar
           cp liquibase-maven-plugin/target/liquibase-maven-plugin-0-SNAPSHOT.jar artifacts-named/liquibase-maven-plugin-${{ needs.setup.outputs.thisBranchFileName }}.jar
           cp liquibase-cdi/target/liquibase-cdi-0-SNAPSHOT.jar artifacts-named/liquibase-cdi-${{ needs.setup.outputs.thisBranchFileName }}.jar
           cp liquibase-cdi-jakarta/target/liquibase-cdi-jakarta-0-SNAPSHOT.jar artifacts-named/liquibase-cdi-jakarta-${{ needs.setup.outputs.thisBranchFileName }}.jar
@@ -535,7 +537,7 @@ jobs:
     needs: [ setup, build, package, sonar]
     if: ${{ needs.setup.outputs.setupSuccessful }}
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
         with:
           ref: ${{ github.event.pull_request.head.sha || github.event.after}}
 
@@ -652,10 +654,12 @@ jobs:
                 "workflow_id": "main.yml",
                 "ref": testHarnessBranch.name,
                 "inputs": {
+                  "liquibaseCommit": helper.getCurrentSha(),
                   "runDescription": "Triggered by https://github.com/liquibase/liquibase/actions/runs/"+context.runId,
-                  "liquibaseBranch": helper.getCurrentBranchLabel(),
+                  "liquibaseBranch": helper.getCurrentBranch(),
                   "liquibaseRepo": "liquibase/liquibase",
                   "runDetails": JSON.stringify({
+                    "liquibaseBranch": helper.getCurrentBranch(),
                     "notices": notices
                   })
                 }

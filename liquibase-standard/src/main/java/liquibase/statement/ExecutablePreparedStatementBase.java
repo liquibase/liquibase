@@ -17,6 +17,8 @@ import liquibase.listener.SqlListener;
 import liquibase.logging.Logger;
 import liquibase.resource.ResourceAccessor;
 import liquibase.snapshot.SnapshotGeneratorFactory;
+import liquibase.sql.SqlConfiguration;
+import liquibase.sql.visitor.SqlVisitor;
 import liquibase.structure.core.Column;
 import liquibase.structure.core.Table;
 import liquibase.util.FilenameUtil;
@@ -30,6 +32,7 @@ import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.sql.*;
 import java.util.*;
+import java.util.logging.Level;
 
 import static java.util.ResourceBundle.getBundle;
 
@@ -42,7 +45,7 @@ public abstract class ExecutablePreparedStatementBase implements ExecutablePrepa
     private final String schemaName;
     private final String tableName;
     private final List<? extends ColumnConfig> columns;
-    private ChangeSet changeSet;
+    private final ChangeSet changeSet;
 
     private final Set<Closeable> closeables;
 
@@ -64,7 +67,6 @@ public abstract class ExecutablePreparedStatementBase implements ExecutablePrepa
     protected ExecutablePreparedStatementBase(Database database, String catalogName, String schemaName, String
             tableName, List<? extends ColumnConfig> columns, ChangeSet changeSet, ResourceAccessor resourceAccessor) {
         this.database = database;
-        this.changeSet = changeSet;
         this.catalogName = catalogName;
         this.schemaName = schemaName;
         this.tableName = tableName;
@@ -85,10 +87,15 @@ public abstract class ExecutablePreparedStatementBase implements ExecutablePrepa
         // build the sql statement
         List<ColumnConfig> cols = new ArrayList<>(getColumns().size());
 
-        String sql = generateSql(cols);
+        List<SqlVisitor> sqlVisitors = Optional.ofNullable(changeSet)
+                .map(ChangeSet::getSqlVisitors)
+                .orElseGet(ArrayList::new);
+        String sql = applyVisitors(generateSql(cols), sqlVisitors);
         for (SqlListener listener : Scope.getCurrentScope().getListeners(SqlListener.class)) {
             listener.writeSqlWillRun(sql);
         }
+        Level sqlLogLevel = SqlConfiguration.SHOW_AT_LOG_LEVEL.getCurrentValue();
+        log.log(sqlLogLevel, sql, null);
         log.fine("Number of columns = " + cols.size());
 
         PreparedStatement stmt = getCachedStatement(sql);
@@ -120,6 +127,18 @@ public abstract class ExecutablePreparedStatementBase implements ExecutablePrepa
                 }
             }
         }
+    }
+
+    protected String applyVisitors(String sql, List<SqlVisitor> sqlVisitors) {
+        String finalSql = sql;
+        if (sqlVisitors != null) {
+            for (SqlVisitor visitor : sqlVisitors) {
+                if (visitor != null) {
+                    finalSql = visitor.modifySql(finalSql, database);
+                }
+            }
+        }
+        return finalSql;
     }
 
     protected PreparedStatement getCachedStatement(String sql) {

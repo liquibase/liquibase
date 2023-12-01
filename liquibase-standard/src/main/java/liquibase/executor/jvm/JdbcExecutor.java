@@ -102,7 +102,9 @@ public class JdbcExecutor extends AbstractExecutor {
     }
 
     private void showSqlWarnings(Statement stmtToUse) throws SQLException {
-        if (! SqlConfiguration.SHOW_SQL_WARNING_MESSAGES.getCurrentValue() || stmtToUse.getWarnings() == null) {
+        if (Boolean.TRUE.equals(! SqlConfiguration.SHOW_SQL_WARNING_MESSAGES.getCurrentValue() ||
+            stmtToUse == null) ||
+            stmtToUse.getWarnings() == null) {
             return;
         }
         SQLWarning sqlWarning = stmtToUse.getWarnings();

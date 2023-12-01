@@ -64,17 +64,18 @@ public class Scope {
         databaseChangeLog,
         changeSet,
         osgiPlatform,
-        checksumVersion
+        checksumVersion,
+        latestChecksumVersion
     }
 
     public static final String JAVA_PROPERTIES = "javaProperties";
 
     private static ScopeManager scopeManager;
 
-    private Scope parent;
+    private final Scope parent;
     private final SmartMap values = new SmartMap();
     @Getter
-    private String scopeId;
+    private final String scopeId;
     private static final Map<String, List<MdcObject>> addedMdcEntries = new ConcurrentHashMap<>();
 
     private LiquibaseListener listener;
@@ -90,6 +91,7 @@ public class Scope {
             rootScope.values.put(Attr.logService.name(), new JavaLogService());
             rootScope.values.put(Attr.serviceLocator.name(), new StandardServiceLocator());
             rootScope.values.put(Attr.resourceAccessor.name(), new ClassLoaderResourceAccessor());
+            rootScope.values.put(Attr.latestChecksumVersion.name(), ChecksumVersion.V9);
             rootScope.values.put(Attr.checksumVersion.name(), ChecksumVersion.latest());
 
             rootScope.values.put(Attr.ui.name(), new ConsoleUIService());
@@ -140,9 +142,7 @@ public class Scope {
         this.parent = parent;
         scopeId = generateScopeId();
         if (scopeValues != null) {
-            for (Map.Entry<String, Object> entry : scopeValues.entrySet()) {
-                values.put(entry.getKey(), entry.getValue());
-            }
+            values.putAll(scopeValues);
         }
     }
 

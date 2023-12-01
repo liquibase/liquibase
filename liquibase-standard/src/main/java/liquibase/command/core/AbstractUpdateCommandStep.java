@@ -59,17 +59,12 @@ public abstract class AbstractUpdateCommandStep extends AbstractCommandStep impl
             StringUtil.upperCaseFirst(Arrays.toString(
                getCommandName()).replace("[","").replace("]","").replace("update", "update ").trim()));
         resultsBuilder.addResult("updateReport", updateReportParameters);
-        Scope.child(Collections.singletonMap("updateReport", updateReportParameters), () -> {
-            doRun(resultsBuilder, updateReportParameters);
-        });
-    }
-
-    private void doRun(CommandResultsBuilder resultsBuilder, UpdateReportParameters updateReportParameters) throws Exception {
         CommandScope commandScope = resultsBuilder.getCommandScope();
         Database database = (Database) commandScope.getDependency(Database.class);
         updateReportParameters.getDatabaseInfo().setDatabaseType(database.getDatabaseProductName());
         updateReportParameters.getDatabaseInfo().setVersion(database.getDatabaseProductVersion());
         updateReportParameters.setJdbcUrl(database.getConnection().getURL());
+        final ChangeLogParameters changeLogParameters = (ChangeLogParameters) commandScope.getDependency(ChangeLogParameters.class);
         Contexts contexts = new Contexts(getContextsArg(commandScope));
         LabelExpression labelExpression = new LabelExpression(getLabelFilterArg(commandScope));
         DatabaseChangelogCommandStep.addCommandFiltersMdc(labelExpression, contexts);
@@ -79,33 +74,38 @@ public abstract class AbstractUpdateCommandStep extends AbstractCommandStep impl
         try {
             DatabaseChangeLog databaseChangeLog = (DatabaseChangeLog) commandScope.getDependency(DatabaseChangeLog.class);
             updateReportParameters.setChangelogArgValue(databaseChangeLog.getFilePath());
+            ChangeLogIterator runChangeLogIterator = getStandardChangelogIterator(commandScope, database, contexts, labelExpression, databaseChangeLog);
+            preRun(commandScope, runChangeLogIterator, changeLogParameters);
             if (isFastCheckEnabled && isUpToDate(commandScope, database, databaseChangeLog, contexts, labelExpression, resultsBuilder.getOutputStream())) {
                 return;
             }
             if(!isDBLocked) {
                 LockServiceFactory.getInstance().getLockService(database).waitForLock();
-                // waitForLock resets the changelog history service, so we need to rebuild that and generate a final deploymentId.
-                ChangeLogHistoryService changeLogHistoryService = Scope.getCurrentScope().getSingleton(ChangeLogHistoryServiceFactory.class).getChangeLogService(database);
-                changeLogHistoryService.generateDeploymentId();
             }
-
+            // waitForLock resets the changelog history service, so we need to rebuild that and generate a final deploymentId.
             ChangeLogHistoryService changelogService = Scope.getCurrentScope().getSingleton(ChangeLogHistoryServiceFactory.class).getChangeLogService(database);
+            changelogService.generateDeploymentId();
+
             Scope.getCurrentScope().addMdcValue(MdcKey.DEPLOYMENT_ID, changelogService.getDeploymentId());
             Scope.getCurrentScope().getLog(getClass()).info(String.format("Using deploymentId: %s", changelogService.getDeploymentId()));
 
             StatusVisitor statusVisitor = getStatusVisitor(commandScope, database, contexts, labelExpression, databaseChangeLog);
 
-            ChangeLogIterator runChangeLogIterator = getStandardChangelogIterator(commandScope, database, contexts, labelExpression, databaseChangeLog);
             AtomicInteger rowsAffected = new AtomicInteger(0);
 
             HashMap<String, Object> scopeValues = new HashMap<>();
             scopeValues.put("showSummary", getShowSummary(commandScope));
             scopeValues.put("rowsAffected", rowsAffected);
             Scope.child(scopeValues, () -> {
-                runChangeLogIterator.run(new UpdateVisitor(database, changeExecListener, new ShouldRunChangeSetFilter(database)),
-                        new RuntimeEnvironment(database, contexts, labelExpression));
-                ShowSummaryUtil.showUpdateSummary(databaseChangeLog, getShowSummary(commandScope), getShowSummaryOutput(commandScope), statusVisitor, resultsBuilder.getOutputStream());
+                try {
+                    runChangeLogIterator.run(new UpdateVisitor(database, changeExecListener, new ShouldRunChangeSetFilter(database)),
+                            new RuntimeEnvironment(database, contexts, labelExpression));
+                } finally {
+                    ShowSummaryUtil.showUpdateSummary(databaseChangeLog, getShowSummary(commandScope), getShowSummaryOutput(commandScope), statusVisitor, resultsBuilder.getOutputStream(), runChangeLogIterator);
+                }
             });
+
+            database.afterUpdate();
 
             resultsBuilder.addResult("statusCode", 0);
             addChangelogFileToMdc(getChangelogFileArg(commandScope), databaseChangeLog);
@@ -127,6 +127,13 @@ public abstract class AbstractUpdateCommandStep extends AbstractCommandStep impl
                 Scope.getCurrentScope().getLog(getClass()).severe(MSG_COULD_NOT_RELEASE_LOCK, e);
             }
         }
+    }
+
+    /**
+     * Executed before running any updates against the database.
+     */
+    protected void preRun(CommandScope commandScope, ChangeLogIterator runChangeLogIterator, ChangeLogParameters changeLogParameters) throws LiquibaseException {
+        // do nothing by default
     }
 
     private StatusVisitor getStatusVisitor(CommandScope commandScope, Database database, Contexts contexts, LabelExpression labelExpression, DatabaseChangeLog databaseChangeLog) throws LiquibaseException {
@@ -180,8 +187,8 @@ public abstract class AbstractUpdateCommandStep extends AbstractCommandStep impl
             int failedChangeSetCount = failedChangeSets.size();
             ChangesetsUpdated changesetsUpdated = new ChangesetsUpdated(deployedChangeSets);
             updateReportParameters.getChangesetInfo().setChangesetCount(deployedChangeSetCount + failedChangeSetCount);
-            updateReportParameters.getChangesetInfo().addAllToChangesetInfoList(deployedChangeSets);
-            updateReportParameters.getChangesetInfo().addAllToChangesetInfoList(failedChangeSets);
+            updateReportParameters.getChangesetInfo().addAllToChangesetInfoList(deployedChangeSets, false);
+            updateReportParameters.getChangesetInfo().addAllToChangesetInfoList(failedChangeSets, false);
             Scope.getCurrentScope().addMdcValue(MdcKey.DEPLOYMENT_OUTCOME_COUNT, String.valueOf(deployedChangeSetCount));
             Scope.getCurrentScope().addMdcValue(MdcKey.CHANGESETS_UPDATED, changesetsUpdated);
         }
@@ -193,13 +200,13 @@ public abstract class AbstractUpdateCommandStep extends AbstractCommandStep impl
     }
 
     @Beta
-    public ChangeLogIterator getStandardChangelogIterator(CommandScope commandScope, Database database, Contexts contexts, LabelExpression labelExpression, DatabaseChangeLog changeLog) throws DatabaseException {
+    public ChangeLogIterator getStandardChangelogIterator(CommandScope commandScope, Database database, Contexts contexts, LabelExpression labelExpression, DatabaseChangeLog changeLog) throws LiquibaseException {
         List<ChangeSetFilter> changesetFilters = this.getStandardChangelogIteratorFilters(database, contexts, labelExpression);
         return new ChangeLogIterator(changeLog, changesetFilters.toArray(new ChangeSetFilter[0]));
     }
 
     @Beta
-    public ChangeLogIterator getStatusChangelogIterator(CommandScope commandScope, Database database, Contexts contexts, LabelExpression labelExpression, DatabaseChangeLog changeLog) throws DatabaseException {
+    public ChangeLogIterator getStatusChangelogIterator(CommandScope commandScope, Database database, Contexts contexts, LabelExpression labelExpression, DatabaseChangeLog changeLog) throws LiquibaseException {
         List<ChangeSetFilter> changesetFilters = this.getStandardChangelogIteratorFilters(database, contexts, labelExpression);
         changesetFilters.add(new ShouldRunChangeSetFilter(database));
         return new StatusChangeLogIterator(changeLog, changesetFilters.toArray(new ChangeSetFilter[0]));
@@ -225,7 +232,7 @@ public abstract class AbstractUpdateCommandStep extends AbstractCommandStep impl
     private final Map<String, Boolean> upToDateFastCheck = new ConcurrentHashMap<>();
 
     public boolean isUpToDateFastCheck(CommandScope commandScope, Database database, DatabaseChangeLog databaseChangeLog, Contexts contexts, LabelExpression labelExpression) throws LiquibaseException {
-        String cacheKey = String.format("%s/%s/%s/%s/%s", contexts, labelExpression, database.getDefaultSchemaName(), database.getDefaultCatalogName(), database.getConnection().getURL());
+        String cacheKey = String.format("%s/%s/%s/%s/%s/%s", contexts, labelExpression, database.getDefaultSchemaName(), database.getDefaultCatalogName(), database.getConnection().getURL(), databaseChangeLog.getLogicalFilePath());
         if (!upToDateFastCheck.containsKey(cacheKey)) {
             ChangeLogHistoryService changeLogService = Scope.getCurrentScope().getSingleton(ChangeLogHistoryServiceFactory.class).getChangeLogService(database);
             try {
@@ -289,7 +296,7 @@ public abstract class AbstractUpdateCommandStep extends AbstractCommandStep impl
             StatusVisitor statusVisitor = getStatusVisitor(commandScope, database, contexts, labelExpression, databaseChangeLog);
             UpdateSummaryEnum showSummary = getShowSummary(commandScope);
             UpdateSummaryOutputEnum showSummaryOutput = getShowSummaryOutput(commandScope);
-            ShowSummaryUtil.showUpdateSummary(databaseChangeLog, showSummary, showSummaryOutput, statusVisitor, outputStream);
+            ShowSummaryUtil.showUpdateSummary(databaseChangeLog, showSummary, showSummaryOutput, statusVisitor, outputStream, null);
             return true;
         }
         return false;

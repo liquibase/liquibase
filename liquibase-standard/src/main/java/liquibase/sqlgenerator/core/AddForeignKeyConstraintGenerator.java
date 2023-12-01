@@ -23,9 +23,18 @@ public class AddForeignKeyConstraintGenerator extends AbstractSqlGenerator<AddFo
     public ValidationErrors validate(AddForeignKeyConstraintStatement addForeignKeyConstraintStatement, Database database, SqlGeneratorChain sqlGeneratorChain) {
         ValidationErrors validationErrors = new ValidationErrors();
 
-        if ((addForeignKeyConstraintStatement.isInitiallyDeferred() || addForeignKeyConstraintStatement.isDeferrable()) && !database.supportsInitiallyDeferrableColumns()) {
-            validationErrors.checkDisallowedField("initiallyDeferred", addForeignKeyConstraintStatement.isInitiallyDeferred(), database);
-            validationErrors.checkDisallowedField("deferrable", addForeignKeyConstraintStatement.isDeferrable(), database);
+        if ((addForeignKeyConstraintStatement.isInitiallyDeferred() || addForeignKeyConstraintStatement.isDeferrable())
+                && !database.supportsInitiallyDeferrableColumns()
+                ) {
+            if(database.failOnDefferable()) {
+                validationErrors.checkDisallowedField("initiallyDeferred", addForeignKeyConstraintStatement.isInitiallyDeferred(), database);
+                validationErrors.checkDisallowedField("deferrable", addForeignKeyConstraintStatement.isDeferrable(), database);
+            }else{
+                // reset this as its not supported
+                addForeignKeyConstraintStatement.setDeferrable(false);
+                addForeignKeyConstraintStatement.setInitiallyDeferred(false);
+            }
+
         }
 
         validationErrors.checkRequiredField("baseColumnNames", addForeignKeyConstraintStatement.getBaseColumnNames());
@@ -71,7 +80,7 @@ public class AddForeignKeyConstraintGenerator extends AbstractSqlGenerator<AddFo
             } else if (database instanceof SybaseDatabase) {
                 //don't use
             } else if ((database instanceof SybaseASADatabase) && "NO ACTION".equalsIgnoreCase(statement.getOnUpdate())) {
-                //SQL Anywhere cannot do "nothing", so we let SQL Aynwhere choose its implicit default (i. e. RESTRICT)
+                //SQL Anywhere cannot do "nothing", so we let SQL Anywhere choose its implicit default (i. e. RESTRICT)
             } else {
                 sb.append(" ON UPDATE ").append(statement.getOnUpdate());
             }
@@ -91,7 +100,7 @@ public class AddForeignKeyConstraintGenerator extends AbstractSqlGenerator<AddFo
             } else if (database instanceof SybaseDatabase) {
                 //don't use
             } else if ((database instanceof SybaseASADatabase) && "NO ACTION".equalsIgnoreCase(statement.getOnDelete())) {
-                //SQL Anywhere cannot do "nothing", so we let SQL Aynwhere choose its implicit default (i. e. RESTRICT)
+                //SQL Anywhere cannot do "nothing", so we let SQL Anywhere choose its implicit default (i. e. RESTRICT)
             } else {
                 sb.append(" ON DELETE ").append(statement.getOnDelete());
             }
