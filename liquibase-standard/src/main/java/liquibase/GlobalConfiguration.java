@@ -241,7 +241,7 @@ public class GlobalConfiguration implements AutoloadedConfigurations {
                 .setDescription("Complete list of Location(s) to search for files such as changelog files in. Multiple paths can be specified by separating them with commas.")
                 .build();
 
-        ALWAYS_DROP_INSTEAD_OF_REPLACE = builder.define("alwaysDropInsteadOfReplace", Boolean.class)
+            ALWAYS_DROP_INSTEAD_OF_REPLACE = builder.define("alwaysDropInsteadOfReplace", Boolean.class)
                 .setDescription("If true, drop and recreate a view instead of replacing it.")
                 .setDefaultValue(false)
                 .setValueHandler(ValueHandlerUtil::booleanValueHandler)
@@ -250,6 +250,7 @@ public class GlobalConfiguration implements AutoloadedConfigurations {
         USE_OR_REPLACE_OPTION = builder.define("useOrReplaceOption", Boolean.class)
                 .setDescription("If true, will add 'OR REPLACE' option to the given stored logic change object for example, create view, create procedure, etc.)")
                 .setDefaultValue(false)
+                .setValueHandler(ValueHandlerUtil::booleanValueHandler)
                 .build();
 
         VALIDATE_XML_CHANGELOG_FILES = builder.define("validateXmlChangelogFiles", Boolean.class)
