@@ -19,8 +19,7 @@ on:
         - github-action-DAT-15775
         - feat/DAT-rus-standAlonePR
         - feat/DAT-rus-matchingBranchPR
-        - feat_DAT-rus-standAlonePR
-        - feat_DAT-rus-matchingBranchPR
+
 
   pull_request_target:
     types:
