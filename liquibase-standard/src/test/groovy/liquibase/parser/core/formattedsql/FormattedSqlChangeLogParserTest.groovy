@@ -278,7 +278,16 @@ CREATE TABLE ALL_CAPS_TABLE_2 (
     create table singular (
             id int primary key
     );
-    --rollbackSqlFile dropTableSingular.sql
+    --rollbackSqlFile path:dropTableSingular.sql
+"""
+
+    private static final String VALID_CHANGELOG_WITH_ROLLBACK_FILE_RELATIVE_TO_CHANGELOG =
+            """
+    --ChangeSet paikens:8
+    create table singular (
+            id int primary key
+    );
+    --rollbackSqlFile path:dropTableSingular.sql relativeToChangelog:true
 """
 
     def supports() throws Exception {
@@ -460,6 +469,22 @@ CREATE TABLE ALL_CAPS_TABLE_2 (
         Scope.child(Scope.Attr.resourceAccessor.name(), resourceAccessor, { ->
             DatabaseChangeLog changeLog =
                 new MockFormattedSqlChangeLogParser(VALID_CHANGELOG_WITH_ROLLBACK_FILE).parse("asdf.sql", params, new JUnitResourceAccessor())
+            assert changeLog
+            assert changeLog.getChangeSets().get(0).getRollback().getChanges().size() == 1
+            def rawSql = (RawSQLChange)changeLog.getChangeSets().get(0).getRollback().getChanges().get(0)
+            assert rawSql.getSql() == "drop table singular;"
+        })
+
+    }
+
+    def parseWithRollbackFileRelative() throws Exception {
+        expect:
+        ChangeLogParameters params = new ChangeLogParameters()
+        def resourceAccessor = new SearchPathResourceAccessor(".,target/test-classes")
+        Scope.child(Scope.Attr.resourceAccessor.name(), resourceAccessor, { ->
+            DatabaseChangeLog changeLog =
+                new MockFormattedSqlChangeLogParser(VALID_CHANGELOG_WITH_ROLLBACK_FILE_RELATIVE_TO_CHANGELOG)
+                   .parse("asdf.sql", params, new JUnitResourceAccessor())
             assert changeLog
             assert changeLog.getChangeSets().get(0).getRollback().getChanges().size() == 1
             def rawSql = (RawSQLChange)changeLog.getChangeSets().get(0).getRollback().getChanges().get(0)

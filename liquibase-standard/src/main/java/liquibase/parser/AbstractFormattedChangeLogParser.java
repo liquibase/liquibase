@@ -19,6 +19,7 @@ import liquibase.util.StringUtil;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
+import java.nio.file.Paths;
 import java.util.ResourceBundle;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -133,6 +134,12 @@ public abstract class AbstractFormattedChangeLogParser implements ChangeLogParse
 
     protected static final String LABELS_REGEX = ".*labels:(\".*?\"|\\S*).*";
     protected final Pattern LABELS_PATTERN = Pattern.compile(LABELS_REGEX, Pattern.CASE_INSENSITIVE);
+
+    protected static final String PATH_REGEX = ".*path:(\".*?\"|\\S*).*";
+    protected final Pattern PATH_PATTERN = Pattern.compile(PATH_REGEX, Pattern.CASE_INSENSITIVE);
+
+    protected static final String RELATIVE_TO_CHANGELOG_REGEX = ".*relativeToChangelog:(\".*?\"|\\S*).*";
+    protected final Pattern RELATIVE_TO_CHANGELOG_PATTERN = Pattern.compile(RELATIVE_TO_CHANGELOG_REGEX, Pattern.CASE_INSENSITIVE);
 
     protected static final String RUN_IN_TRANSACTION_REGEX = ".*runInTransaction:(\\w+).*";
     protected final Pattern RUN_IN_TRANSACTION_PATTERN = Pattern.compile(RUN_IN_TRANSACTION_REGEX, Pattern.CASE_INSENSITIVE);
@@ -542,7 +549,21 @@ public abstract class AbstractFormattedChangeLogParser implements ChangeLogParse
             }
         } else if (rollbackSqlFileMatcher.matches()) {
             if (resourceAccessor != null) {
-                currentRollbackSequence.append(readRollbackSqlFile(rollbackSqlFileMatcher.group(1), resourceAccessor, physicalChangeLogLocation));
+                String rollbackSqlAttributes = rollbackSqlFileMatcher.group(1);
+                Matcher m = PATH_PATTERN.matcher(rollbackSqlAttributes);
+                if (! m.matches()) {
+                    String message =
+                       String.format(EXCEPTION_MESSAGE, physicalChangeLogLocation, count, getSequenceName(),
+                          "--rollbackSqlFile path:<SQL file path> [relativeToChangelog:true|false]", getDocumentationLink());
+                    throw new ChangeLogParseException("\n" + message);
+                }
+                String path = DatabaseChangeLog.normalizePath(m.group(1));
+                boolean isRelativeToChangelog = false;
+                m = RELATIVE_TO_CHANGELOG_PATTERN.matcher(rollbackSqlAttributes);
+                if (m.matches()) {
+                    isRelativeToChangelog = Boolean.parseBoolean(m.group(1));
+                }
+                currentRollbackSequence.append(readRollbackSqlFile(path, resourceAccessor, physicalChangeLogLocation, isRelativeToChangelog));
             }
         } else if (preconditionsMatcher.matches()) {
             handlePreconditionsCase(changeSet, count, preconditionsMatcher);
@@ -596,17 +617,15 @@ public abstract class AbstractFormattedChangeLogParser implements ChangeLogParse
         return resourceAccessor.getExisting(physicalChangeLogLocation).openInputStream();
     }
 
-    protected String readRollbackSqlFile(String rollbackSpecification, ResourceAccessor resourceAccessor, String physicalChangelogLocation)
+    protected String readRollbackSqlFile(String rollbackSpecification, ResourceAccessor resourceAccessor, String physicalChangelogLocation, boolean isRelativeToChangelog)
             throws IOException {
-        try (InputStream inputStream = resourceAccessor.get(physicalChangelogLocation).resolveSibling(rollbackSpecification).openInputStream()) {
+        if (isRelativeToChangelog) {
+            rollbackSpecification = resourceAccessor.get(physicalChangelogLocation).resolveSibling(rollbackSpecification).getPath();
+            rollbackSpecification = DatabaseChangeLog.normalizePath(Paths.get(rollbackSpecification).toString());
+        }
+        try (InputStream inputStream = resourceAccessor.get(rollbackSpecification).openInputStream()) {
             return StreamUtil.readStreamAsString(inputStream);
         }
-
-        /*
-        try (InputStream inputStream = resourceAccessor.getExisting(rollbackSpecification).openInputStream()) {
-            return StreamUtil.readStreamAsString(inputStream);
-        }
-         */
     }
 
     private void handleRollbackSequence(String physicalChangeLogLocation, ChangeLogParameters changeLogParameters, DatabaseChangeLog changeLog, StringBuilder currentRollbackSequence, ChangeSet changeSet, Matcher rollbackSplitStatementsPatternMatcher, boolean rollbackSplitStatements, String rollbackEndDelimiter) throws ChangeLogParseException {
