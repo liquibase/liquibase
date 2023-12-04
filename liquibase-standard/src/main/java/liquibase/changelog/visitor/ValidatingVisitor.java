@@ -186,7 +186,7 @@ public class ValidatingVisitor implements ChangeSetVisitor {
 
     public boolean validationPassed() {
         return invalidMD5Sums.isEmpty() && failedPreconditions.isEmpty() && errorPreconditions.isEmpty() &&
-                duplicateChangeSets.isEmpty() && changeValidationExceptions.isEmpty() && setupExceptions.isEmpty() &&
+            duplicateChangeSets.isEmpty() && changeValidationExceptions.isEmpty() && setupExceptions.isEmpty() &&
             !validationErrors.hasErrors();
     }
 
