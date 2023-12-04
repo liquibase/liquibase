@@ -1,7 +1,7 @@
 package liquibase.diffchangelog
 
+import liquibase.GlobalConfiguration
 import liquibase.Scope
-import liquibase.UpdateSummaryEnum
 import liquibase.change.core.AddForeignKeyConstraintChange
 import liquibase.change.core.DropForeignKeyConstraintChange
 import liquibase.changelog.ChangeLogParameters
@@ -9,7 +9,6 @@ import liquibase.changelog.ChangeSet
 import liquibase.changelog.DatabaseChangeLog
 import liquibase.command.CommandScope
 import liquibase.command.core.DiffChangelogCommandStep
-import liquibase.command.core.UpdateCommandStep
 import liquibase.command.core.helpers.*
 import liquibase.command.util.CommandUtil
 import liquibase.database.Database
@@ -168,6 +167,69 @@ COMMENT ON COLUMN $viewName.$columnName IS '$columnComment';
         postgres.getConnection().close()
         refDatabase.close()
         targetDatabase.close()
+        CommandUtil.runDropAll(postgres)
+    }
+
+    def "Ensure diff-changelog with SQL output format contains 'OR REPLACE' instruction for a view when USE_OR_REPLACE_OPTION is set as true"() {
+        given:
+        def outputChangelogFile = String.format("diffChangelogFile-%s-output.mysql.sql", StringUtil.randomIdentifer(10))
+        Database refDatabase =
+                DatabaseFactory.instance.openDatabase(postgres.getConnectionUrl(), postgres.getUsername(), postgres.getPassword(), null, null)
+        Database targetDatabase =
+                DatabaseFactory.instance.openDatabase(postgres.getConnectionUrl().replace("lbcat", "lbcat2"), postgres.getUsername(), postgres.getPassword(), null, null)
+
+        postgres.executeSql("""create table foo(               
+                id numeric not null primary key, 
+                some_json json null)""")
+        postgres.executeSql("CREATE VIEW fooView AS Select * from foo;")
+
+        when:
+        Map<String, Object> scopeValues = new HashMap<>()
+        scopeValues.put(GlobalConfiguration.USE_OR_REPLACE_OPTION.getKey(), true)
+        Scope.child(scopeValues, ({ ->
+            CommandUtil.runDiffToChangelog(targetDatabase, refDatabase, outputChangelogFile)
+        } as Scope.ScopedRunnerWithReturn))
+
+        def outputFile = new File(outputChangelogFile)
+        def contents = FileUtil.getContents(outputFile)
+
+        then:
+        contents.contains("CREATE OR REPLACE VIEW fooView")
+
+        cleanup:
+        outputFile.delete()
+        CommandUtil.runDropAll(postgres)
+    }
+
+    def "Ensure diff-changelog with SQL output format does NOT contain 'OR REPLACE' instruction for a view when USE_OR_REPLACE_OPTION is set as false"() {
+        given:
+        def outputChangelogFile = String.format("diffChangelogFile-%s-output.mysql.sql", StringUtil.randomIdentifer(10))
+        Database refDatabase =
+                DatabaseFactory.instance.openDatabase(postgres.getConnectionUrl(), postgres.getUsername(), postgres.getPassword(), null, null)
+        Database targetDatabase =
+                DatabaseFactory.instance.openDatabase(postgres.getConnectionUrl().replace("lbcat", "lbcat2"), postgres.getUsername(), postgres.getPassword(), null, null)
+
+        postgres.executeSql("""create table foo(               
+                id numeric not null primary key, 
+                some_json json null)""")
+        postgres.executeSql("CREATE VIEW fooView AS Select * from foo;")
+
+        when:
+        Map<String, Object> scopeValues = new HashMap<>()
+        scopeValues.put(GlobalConfiguration.USE_OR_REPLACE_OPTION.getKey(), false)
+        Scope.child(scopeValues, ({ ->
+            CommandUtil.runDiffToChangelog(targetDatabase, refDatabase, outputChangelogFile)
+        } as Scope.ScopedRunnerWithReturn))
+
+        def outputFile = new File(outputChangelogFile)
+        def contents = FileUtil.getContents(outputFile)
+
+        then:
+        !contents.contains("CREATE OR REPLACE VIEW fooView")
+        contents.contains("CREATE VIEW fooView")
+
+        cleanup:
+        outputFile.delete()
         CommandUtil.runDropAll(postgres)
     }
 }
