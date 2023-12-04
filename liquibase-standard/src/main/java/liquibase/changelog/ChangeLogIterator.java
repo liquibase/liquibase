@@ -45,7 +45,7 @@ public class ChangeLogIterator {
     @Getter
     private final List<ChangeSet> skippedDueToExceptionChangeSets = new ArrayList<>();
 
-    private static final Boolean ALLOW_DUPLICATED_CHANGESETS_IDENTIFIERS = GlobalConfiguration.ALLOW_DUPLICATED_CHANGESETS_IDENTIFIERS.getCurrentValue();
+    private final Boolean allowDuplicatedChangesetsIdentifiers = GlobalConfiguration.ALLOW_DUPLICATED_CHANGESETS_IDENTIFIERS.getCurrentValue();
 
     public ChangeLogIterator(DatabaseChangeLog databaseChangeLog, ChangeSetFilter... changeSetFilters) {
         this(databaseChangeLog, Arrays.asList(changeSetFilters));
@@ -212,7 +212,7 @@ public class ChangeLogIterator {
      * ALLOW_DUPLICATED_CHANGESETS_IDENTIFIERS
      */
     private boolean alreadySaw(ChangeSet changeSet) {
-        if (BooleanUtil.isTrue(ALLOW_DUPLICATED_CHANGESETS_IDENTIFIERS)) {
+        if (BooleanUtil.isTrue(allowDuplicatedChangesetsIdentifiers)) {
             if (changeSet.key == null) {
                 changeSet.key = createKey(changeSet);
             }
