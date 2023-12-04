@@ -42,6 +42,7 @@ class SpringResourceAccessorTest extends Specification {
         list.contains("liquibase/database/AbstractJdbcDatabaseTest.class")
         list.contains("liquibase/database/DatabaseFactoryTest.class")
         list.contains("liquibase/database/core/H2Database.class")
+        list.contains("liquibase/database/test-changelog with-space-in-filename.yml")
     }
 
     def "list relative to file"() {

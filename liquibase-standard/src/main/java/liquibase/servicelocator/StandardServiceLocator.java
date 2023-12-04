@@ -25,7 +25,7 @@ public class StandardServiceLocator implements ServiceLocator {
                 log.fine("Loaded "+interfaceType.getName()+" instance "+service.getClass().getName());
                 allInstances.add(service);
             } catch (Throwable e) {
-                log.info("Cannot load service: "+e.getMessage());
+                log.info("Cannot load service", e);
                 log.fine(e.getMessage(), e);
             }
         }
