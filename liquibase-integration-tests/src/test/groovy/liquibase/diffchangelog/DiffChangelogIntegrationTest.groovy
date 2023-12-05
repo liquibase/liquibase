@@ -182,7 +182,7 @@ COMMENT ON COLUMN $viewName.$columnName IS '$columnComment';
         postgres.executeSql("""create table foo(               
                 id numeric not null primary key, 
                 some_json json null)""")
-        postgres.executeSql("CREATE VIEW fooView AS Select * from foo;")
+        postgres.executeSql("CREATE VIEW fooview AS Select * from foo;")
 
         when:
         runDiffToChangelogWithUseOrReplaceCommandArgument(targetDatabase, refDatabase, outputChangelogFile, true)
@@ -190,7 +190,7 @@ COMMENT ON COLUMN $viewName.$columnName IS '$columnComment';
         def contents = FileUtil.getContents(outputFile)
 
         then:
-        contents.contains("CREATE OR REPLACE VIEW \"fooView\"")
+        contents.contains("CREATE OR REPLACE VIEW \"fooview\"")
 
         cleanup:
         outputFile.delete()
@@ -211,7 +211,7 @@ COMMENT ON COLUMN $viewName.$columnName IS '$columnComment';
         postgres.executeSql("""create table foo(               
                 id numeric not null primary key, 
                 some_json json null)""")
-        postgres.executeSql("CREATE VIEW fooView AS Select * from foo;")
+        postgres.executeSql("CREATE VIEW fooview AS Select * from foo;")
 
         when:
         runDiffToChangelogWithUseOrReplaceCommandArgument(targetDatabase, refDatabase, outputChangelogFile, false)
@@ -219,8 +219,8 @@ COMMENT ON COLUMN $viewName.$columnName IS '$columnComment';
         def contents = FileUtil.getContents(outputFile)
 
         then:
-        !contents.contains("CREATE OR REPLACE VIEW \"fooView\"")
-        contents.contains("CREATE VIEW \"fooView\"")
+        !contents.contains("CREATE OR REPLACE VIEW \"fooview\"")
+        contents.contains("CREATE VIEW \"fooview\"")
 
         cleanup:
         outputFile.delete()
