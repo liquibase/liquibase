@@ -190,7 +190,7 @@ COMMENT ON COLUMN $viewName.$columnName IS '$columnComment';
         def contents = FileUtil.getContents(outputFile)
 
         then:
-        contents.contains("CREATE OR REPLACE VIEW public.fooView")
+        contents.contains("CREATE OR REPLACE VIEW \"fooView\"")
 
         cleanup:
         outputFile.delete()
@@ -219,8 +219,8 @@ COMMENT ON COLUMN $viewName.$columnName IS '$columnComment';
         def contents = FileUtil.getContents(outputFile)
 
         then:
-        !contents.contains("CREATE OR REPLACE VIEW public.fooView")
-        contents.contains("CREATE VIEW public.fooView")
+        !contents.contains("CREATE OR REPLACE VIEW \"fooView\"")
+        contents.contains("CREATE VIEW \"fooView\"")
 
         cleanup:
         outputFile.delete()

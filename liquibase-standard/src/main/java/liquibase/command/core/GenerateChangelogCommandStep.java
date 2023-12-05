@@ -93,7 +93,7 @@ public class GenerateChangelogCommandStep extends AbstractCommandStep {
         REFERENCE_LIQUIBASE_CATALOG_NAME_ARG = builder.argument("referenceLiquibaseCatalogName", String.class)
                 .hidden().build();
         USE_OR_REPLACE_OPTION = builder.argument("useOrReplaceOption", Boolean.class)
-                .description("If true, will add 'OR REPLACE' option to the given stored logic change object for example, create view, create procedure, etc.)")
+                .description("If true, will add 'OR REPLACE' option to the create view change object")
                 .defaultValue(false)
                 .setValueHandler(ValueHandlerUtil::booleanValueHandler)
                 .build();
