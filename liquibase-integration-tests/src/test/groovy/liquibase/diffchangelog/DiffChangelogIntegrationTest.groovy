@@ -194,7 +194,10 @@ COMMENT ON COLUMN $viewName.$columnName IS '$columnComment';
 
         cleanup:
         outputFile.delete()
+        refDatabase.close()
+        targetDatabase.close()
         CommandUtil.runDropAll(postgres)
+        postgres.getConnection().close()
     }
 
     def "Ensure diff-changelog with SQL output format does NOT contain 'OR REPLACE' instruction for a view when USE_OR_REPLACE_OPTION is set as false"() {
@@ -221,7 +224,10 @@ COMMENT ON COLUMN $viewName.$columnName IS '$columnComment';
 
         cleanup:
         outputFile.delete()
+        refDatabase.close()
+        targetDatabase.close()
         CommandUtil.runDropAll(postgres)
+        postgres.getConnection().close()
     }
 
     static void runDiffToChangelogWithUseOrReplaceCommandArgument(Database targetDatabase, Database referenceDatabase,
