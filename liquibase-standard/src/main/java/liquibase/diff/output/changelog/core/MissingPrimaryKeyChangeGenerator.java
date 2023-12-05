@@ -78,8 +78,12 @@ public class MissingPrimaryKeyChangeGenerator extends AbstractChangeGenerator im
             .getBackingIndex() != null) && !comparisonDatabase.isSystemObject(pk.getBackingIndex()))) {
             Index backingIndex = pk.getBackingIndex();
             if ((backingIndex != null) && (backingIndex.getName() != null)) {
+                Schema originalRelationSchema = backingIndex.getRelation().getSchema();
                 try {
+                    // Save the original schema and catalog, so we can find it again if we need to examine diff results
+                    // after standard command execution
                     if (!control.getIncludeCatalog() && !control.getIncludeSchema()) {
+                        // I'm not too sure what this if is accomplishing
                         CatalogAndSchema schema = comparisonDatabase.getDefaultSchema().customize(comparisonDatabase);
                         backingIndex.getRelation().setSchema(schema.getCatalogName(), schema.getSchemaName()); //set table schema so it is found in the correct schema
                     }
@@ -93,7 +97,6 @@ public class MissingPrimaryKeyChangeGenerator extends AbstractChangeGenerator im
                                 }
                             }
                         }
-
                     }
                 } catch (Exception e) {
                     throw new UnexpectedLiquibaseException(e);
@@ -110,6 +113,8 @@ public class MissingPrimaryKeyChangeGenerator extends AbstractChangeGenerator im
                         change.setForIndexSchemaName(schema.getName());
                     }
                 }
+                // We've generated our changes with the updated schema if needed, set it back to the original.
+                backingIndex.getRelation().setSchema(originalRelationSchema);
             }
         }
 
