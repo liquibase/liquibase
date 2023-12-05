@@ -22,10 +22,7 @@ import static java.util.ResourceBundle.getBundle;
 /**
  * The ChangeLogIterator class is responsible for iterating through a list of ChangeSets in a DatabaseChangeLog
  * and executing a visitor for each ChangeSet that passes the specified filters.
- *
  * It provides methods for running the visitor and validating the Executor for each ChangeSet.
- *
- * @since 1.0.0
  */
 public class ChangeLogIterator {
 
