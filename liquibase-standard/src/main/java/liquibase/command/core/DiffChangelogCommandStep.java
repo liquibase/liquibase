@@ -15,6 +15,7 @@ import liquibase.logging.mdc.MdcKey;
 import liquibase.logging.mdc.MdcObject;
 import liquibase.logging.mdc.MdcValue;
 import liquibase.util.StringUtil;
+import liquibase.util.ValueHandlerUtil;
 
 import java.io.PrintStream;
 import java.util.Arrays;
@@ -29,6 +30,7 @@ public class DiffChangelogCommandStep extends AbstractCommandStep {
     public static final CommandArgumentDefinition<String> CHANGELOG_FILE_ARG;
     public static final CommandArgumentDefinition<String> CONTEXTS_ARG;
     public static final CommandArgumentDefinition<String> LABEL_FILTER_ARG;
+    public static final CommandArgumentDefinition<Boolean> USE_OR_REPLACE_OPTION;
 
     static {
         final CommandBuilder builder = new CommandBuilder(COMMAND_NAME);
@@ -43,6 +45,11 @@ public class DiffChangelogCommandStep extends AbstractCommandStep {
         CONTEXTS_ARG = builder.argument("contextFilter", String.class)
                 .addAlias("contexts")
                 .description("Changeset contexts to generate")
+                .build();
+        USE_OR_REPLACE_OPTION = builder.argument("useOrReplaceOption", Boolean.class)
+                .description("If true, will add 'OR REPLACE' option to the given stored logic change object for example, create view, create procedure, etc.)")
+                .defaultValue(false)
+                .setValueHandler(ValueHandlerUtil::booleanValueHandler)
                 .build();
     }
 
@@ -73,7 +80,7 @@ public class DiffChangelogCommandStep extends AbstractCommandStep {
             CommandScope commandScope = resultsBuilder.getCommandScope();
             Database referenceDatabase = (Database) commandScope.getDependency(ReferenceDatabase.class);
             DiffOutputControl diffOutputControl = (DiffOutputControl) resultsBuilder.getResult(DiffOutputControlCommandStep.DIFF_OUTPUT_CONTROL.getName());
-            if(GlobalConfiguration.USE_OR_REPLACE_OPTION.getCurrentValue()) {
+            if(commandScope.getArgumentValue(DiffChangelogCommandStep.USE_OR_REPLACE_OPTION).booleanValue()) {
                 diffOutputControl.setReplaceIfExistsSet(true);
             }
             referenceDatabase.setOutputDefaultSchema(diffOutputControl.getIncludeSchema());

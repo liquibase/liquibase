@@ -426,15 +426,6 @@ Global Options
                              (defaults file: 'liquibase.uiService', environment
                                variable: 'LIQUIBASE_UI_SERVICE')
 
-      --use-or-replace-option=PARAM
-                             If true, will add 'OR REPLACE' option to the given
-                               stored logic change object for example, create
-                               view, create procedure, etc.)
-                             DEFAULT: false
-                             (defaults file: 'liquibase.useOrReplaceOption',
-                               environment variable:
-                               'LIQUIBASE_USE_OR_REPLACE_OPTION')
-
       --use-procedure-schema=PARAM
                              If set to true (default value), createProcedure
                                tags with a set schemaName will modify the

@@ -1,6 +1,6 @@
 package liquibase.diffchangelog
 
-import liquibase.GlobalConfiguration
+
 import liquibase.Scope
 import liquibase.change.core.AddForeignKeyConstraintChange
 import liquibase.change.core.DropForeignKeyConstraintChange
@@ -14,6 +14,7 @@ import liquibase.command.util.CommandUtil
 import liquibase.database.Database
 import liquibase.database.DatabaseFactory
 import liquibase.diff.compare.CompareControl
+import liquibase.exception.CommandExecutionException
 import liquibase.extension.testing.testsystem.DatabaseTestSystem
 import liquibase.extension.testing.testsystem.TestSystemFactory
 import liquibase.extension.testing.testsystem.spock.LiquibaseIntegrationTest
@@ -172,7 +173,7 @@ COMMENT ON COLUMN $viewName.$columnName IS '$columnComment';
 
     def "Ensure diff-changelog with SQL output format contains 'OR REPLACE' instruction for a view when USE_OR_REPLACE_OPTION is set as true"() {
         given:
-        def outputChangelogFile = String.format("diffChangelogFile-%s-output.mysql.sql", StringUtil.randomIdentifer(10))
+        def outputChangelogFile = String.format("diffChangelogFile-%s-output.postgresql.sql", StringUtil.randomIdentifer(10))
         Database refDatabase =
                 DatabaseFactory.instance.openDatabase(postgres.getConnectionUrl(), postgres.getUsername(), postgres.getPassword(), null, null)
         Database targetDatabase =
@@ -184,12 +185,7 @@ COMMENT ON COLUMN $viewName.$columnName IS '$columnComment';
         postgres.executeSql("CREATE VIEW fooView AS Select * from foo;")
 
         when:
-        Map<String, Object> scopeValues = new HashMap<>()
-        scopeValues.put(GlobalConfiguration.USE_OR_REPLACE_OPTION.getKey(), true)
-        Scope.child(scopeValues, ({ ->
-            CommandUtil.runDiffToChangelog(targetDatabase, refDatabase, outputChangelogFile)
-        } as Scope.ScopedRunnerWithReturn))
-
+        runDiffToChangelogWithUseOrReplaceCommandArgument(targetDatabase, refDatabase, outputChangelogFile, true)
         def outputFile = new File(outputChangelogFile)
         def contents = FileUtil.getContents(outputFile)
 
@@ -203,7 +199,7 @@ COMMENT ON COLUMN $viewName.$columnName IS '$columnComment';
 
     def "Ensure diff-changelog with SQL output format does NOT contain 'OR REPLACE' instruction for a view when USE_OR_REPLACE_OPTION is set as false"() {
         given:
-        def outputChangelogFile = String.format("diffChangelogFile-%s-output.mysql.sql", StringUtil.randomIdentifer(10))
+        def outputChangelogFile = String.format("diffChangelogFile-%s-output.postgresql.sql", StringUtil.randomIdentifer(10))
         Database refDatabase =
                 DatabaseFactory.instance.openDatabase(postgres.getConnectionUrl(), postgres.getUsername(), postgres.getPassword(), null, null)
         Database targetDatabase =
@@ -215,12 +211,7 @@ COMMENT ON COLUMN $viewName.$columnName IS '$columnComment';
         postgres.executeSql("CREATE VIEW fooView AS Select * from foo;")
 
         when:
-        Map<String, Object> scopeValues = new HashMap<>()
-        scopeValues.put(GlobalConfiguration.USE_OR_REPLACE_OPTION.getKey(), false)
-        Scope.child(scopeValues, ({ ->
-            CommandUtil.runDiffToChangelog(targetDatabase, refDatabase, outputChangelogFile)
-        } as Scope.ScopedRunnerWithReturn))
-
+        runDiffToChangelogWithUseOrReplaceCommandArgument(targetDatabase, refDatabase, outputChangelogFile, false)
         def outputFile = new File(outputChangelogFile)
         def contents = FileUtil.getContents(outputFile)
 
@@ -231,5 +222,15 @@ COMMENT ON COLUMN $viewName.$columnName IS '$columnComment';
         cleanup:
         outputFile.delete()
         CommandUtil.runDropAll(postgres)
+    }
+
+    static void runDiffToChangelogWithUseOrReplaceCommandArgument(Database targetDatabase, Database referenceDatabase,
+                                                                  String outputFile, boolean useOrReplaceOption) throws CommandExecutionException {
+        CommandScope commandScope = new CommandScope(DiffChangelogCommandStep.COMMAND_NAME)
+        commandScope.addArgumentValue(DbUrlConnectionCommandStep.DATABASE_ARG, targetDatabase)
+        commandScope.addArgumentValue(DiffChangelogCommandStep.CHANGELOG_FILE_ARG, outputFile)
+        commandScope.addArgumentValue(DiffChangelogCommandStep.USE_OR_REPLACE_OPTION, useOrReplaceOption)
+        commandScope.addArgumentValue(ReferenceDbUrlConnectionCommandStep.REFERENCE_DATABASE_ARG, referenceDatabase)
+        commandScope.execute()
     }
 }

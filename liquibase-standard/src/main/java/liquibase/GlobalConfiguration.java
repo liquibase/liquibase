@@ -53,8 +53,6 @@ public class GlobalConfiguration implements AutoloadedConfigurations {
 
     public static final ConfigurationDefinition<UIServiceEnum> UI_SERVICE;
 
-    public static final ConfigurationDefinition<Boolean> USE_OR_REPLACE_OPTION;
-
     static {
         ConfigurationDefinition.Builder builder = new ConfigurationDefinition.Builder("liquibase");
 
@@ -243,12 +241,6 @@ public class GlobalConfiguration implements AutoloadedConfigurations {
 
             ALWAYS_DROP_INSTEAD_OF_REPLACE = builder.define("alwaysDropInsteadOfReplace", Boolean.class)
                 .setDescription("If true, drop and recreate a view instead of replacing it.")
-                .setDefaultValue(false)
-                .setValueHandler(ValueHandlerUtil::booleanValueHandler)
-                .build();
-
-        USE_OR_REPLACE_OPTION = builder.define("useOrReplaceOption", Boolean.class)
-                .setDescription("If true, will add 'OR REPLACE' option to the given stored logic change object for example, create view, create procedure, etc.)")
                 .setDefaultValue(false)
                 .setValueHandler(ValueHandlerUtil::booleanValueHandler)
                 .build();

@@ -1,14 +1,13 @@
 package liquibase.command.core
 
-import liquibase.GlobalConfiguration
 import liquibase.Scope
 import liquibase.command.CommandScope
 import liquibase.command.core.helpers.DbUrlConnectionCommandStep
 import liquibase.command.util.CommandUtil
+import liquibase.exception.CommandExecutionException
 import liquibase.extension.testing.testsystem.DatabaseTestSystem
 import liquibase.extension.testing.testsystem.TestSystemFactory
 import liquibase.extension.testing.testsystem.spock.LiquibaseIntegrationTest
-import liquibase.parser.ChangeLogParserConfiguration
 import liquibase.util.FileUtil
 import liquibase.util.StringUtil
 import spock.lang.Shared
@@ -124,15 +123,7 @@ create table str4 (
         mysql.executeSql("CREATE VIEW fooView AS Select * from foo;")
 
         when:
-        Scope.child([
-                (GlobalConfiguration.USE_OR_REPLACE_OPTION.getKey()): true,
-        ], new Scope.ScopedRunner() {
-            @Override
-            void run() throws Exception {
-                CommandUtil.runGenerateChangelog(mysql, "output.mysql.sql")
-            }
-        })
-
+        runGenerateChangelog(mysql, "output.mysql.sql", true)
         def outputFile = new File("output.mysql.sql")
         def contents = FileUtil.getContents(outputFile)
 
@@ -152,15 +143,7 @@ create table str4 (
         mysql.executeSql("CREATE VIEW fooView AS Select * from foo;")
 
         when:
-        Scope.child([
-                (GlobalConfiguration.USE_OR_REPLACE_OPTION.getKey()): false,
-        ], new Scope.ScopedRunner() {
-            @Override
-            void run() throws Exception {
-                CommandUtil.runGenerateChangelog(mysql, "output.mysql.sql")
-            }
-        })
-
+        runGenerateChangelog(mysql, "output.mysql.sql", false)
         def outputFile = new File("output.mysql.sql")
         def contents = FileUtil.getContents(outputFile)
 
@@ -171,6 +154,19 @@ create table str4 (
         cleanup:
         outputFile.delete()
         CommandUtil.runDropAll(mysql)
+    }
+
+    static void runGenerateChangelog(DatabaseTestSystem db, String outputFile, boolean useOrReplaceOption) throws CommandExecutionException {
+        CommandScope commandScope = new CommandScope(GenerateChangelogCommandStep.COMMAND_NAME)
+        commandScope.addArgumentValue(DbUrlConnectionCommandStep.URL_ARG, db.getConnectionUrl())
+        commandScope.addArgumentValue(DbUrlConnectionCommandStep.USERNAME_ARG, db.getUsername())
+        commandScope.addArgumentValue(DbUrlConnectionCommandStep.PASSWORD_ARG, db.getPassword())
+        commandScope.addArgumentValue(GenerateChangelogCommandStep.OVERWRITE_OUTPUT_FILE_ARG, true)
+        commandScope.addArgumentValue(GenerateChangelogCommandStep.CHANGELOG_FILE_ARG, outputFile)
+        commandScope.addArgumentValue(GenerateChangelogCommandStep.USE_OR_REPLACE_OPTION, useOrReplaceOption)
+        OutputStream outputStream = new ByteArrayOutputStream()
+        commandScope.setOutput(outputStream)
+        commandScope.execute()
     }
 }
 

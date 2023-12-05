@@ -98,15 +98,6 @@ class CommandUtil {
         commandScope.execute()
     }
 
-    static void runDiffToChangelog(Database targetDatabase, Database referenceDatabase,
-                        String outputFile) throws CommandExecutionException {
-        CommandScope commandScope = new CommandScope(DiffChangelogCommandStep.COMMAND_NAME)
-        commandScope.addArgumentValue(DbUrlConnectionCommandStep.DATABASE_ARG, targetDatabase)
-        commandScope.addArgumentValue(DiffChangelogCommandStep.CHANGELOG_FILE_ARG, outputFile)
-        commandScope.addArgumentValue(ReferenceDbUrlConnectionCommandStep.REFERENCE_DATABASE_ARG, referenceDatabase)
-        commandScope.execute()
-    }
-
     static void runDropAll(DatabaseTestSystem db) throws Exception {
         if (! db.shouldTest()) {
             return;

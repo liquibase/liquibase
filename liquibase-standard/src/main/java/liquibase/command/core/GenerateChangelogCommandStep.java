@@ -51,6 +51,8 @@ public class GenerateChangelogCommandStep extends AbstractCommandStep {
     public static final CommandArgumentDefinition<String> REFERENCE_LIQUIBASE_SCHEMA_NAME_ARG;
     public static final CommandArgumentDefinition<String> REFERENCE_LIQUIBASE_CATALOG_NAME_ARG;
 
+    public static final CommandArgumentDefinition<Boolean> USE_OR_REPLACE_OPTION;
+
     static {
         final CommandBuilder builder = new CommandBuilder(COMMAND_NAME);
         CHANGELOG_FILE_ARG = builder.argument(CommonArgumentNames.CHANGELOG_FILE, String.class)
@@ -90,6 +92,11 @@ public class GenerateChangelogCommandStep extends AbstractCommandStep {
                 .hidden().build();
         REFERENCE_LIQUIBASE_CATALOG_NAME_ARG = builder.argument("referenceLiquibaseCatalogName", String.class)
                 .hidden().build();
+        USE_OR_REPLACE_OPTION = builder.argument("useOrReplaceOption", Boolean.class)
+                .description("If true, will add 'OR REPLACE' option to the given stored logic change object for example, create view, create procedure, etc.)")
+                .defaultValue(false)
+                .setValueHandler(ValueHandlerUtil::booleanValueHandler)
+                .build();
     }
 
     @Override
@@ -117,7 +124,7 @@ public class GenerateChangelogCommandStep extends AbstractCommandStep {
         diffOutputControl.setDataDir(commandScope.getArgumentValue(DATA_OUTPUT_DIR_ARG));
         referenceDatabase.setOutputDefaultSchema(diffOutputControl.getIncludeSchema());
 
-        if(GlobalConfiguration.USE_OR_REPLACE_OPTION.getCurrentValue()) {
+        if(commandScope.getArgumentValue(GenerateChangelogCommandStep.USE_OR_REPLACE_OPTION).booleanValue()) {
             diffOutputControl.setReplaceIfExistsSet(true);
         }
 

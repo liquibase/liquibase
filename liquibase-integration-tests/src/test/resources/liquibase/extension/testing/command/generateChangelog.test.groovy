@@ -60,6 +60,8 @@ Optional Args:
     OBFUSCATED
   schemas (String) Schemas to include in diff
     Default: null
+  useOrReplaceOption (Boolean) If true, will add 'OR REPLACE' option to the given stored logic change object for example, create view, create procedure, etc.)
+    Default: false
   username (String) Username to use to connect to the database
     Default: null
 """
