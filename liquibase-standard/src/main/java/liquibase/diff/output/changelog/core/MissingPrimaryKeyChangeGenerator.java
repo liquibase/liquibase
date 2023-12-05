@@ -78,10 +78,10 @@ public class MissingPrimaryKeyChangeGenerator extends AbstractChangeGenerator im
             .getBackingIndex() != null) && !comparisonDatabase.isSystemObject(pk.getBackingIndex()))) {
             Index backingIndex = pk.getBackingIndex();
             if ((backingIndex != null) && (backingIndex.getName() != null)) {
+                // Save the original schema and catalog, so we can find it again if we need to examine diff results
+                // after standard command execution
                 Schema originalRelationSchema = backingIndex.getRelation().getSchema();
                 try {
-                    // Save the original schema and catalog, so we can find it again if we need to examine diff results
-                    // after standard command execution
                     if (!control.getIncludeCatalog() && !control.getIncludeSchema()) {
                         // I'm not too sure what this is accomplishing
                         CatalogAndSchema schema = comparisonDatabase.getDefaultSchema().customize(comparisonDatabase);
