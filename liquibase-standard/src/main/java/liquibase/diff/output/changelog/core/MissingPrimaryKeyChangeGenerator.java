@@ -83,7 +83,7 @@ public class MissingPrimaryKeyChangeGenerator extends AbstractChangeGenerator im
                     // Save the original schema and catalog, so we can find it again if we need to examine diff results
                     // after standard command execution
                     if (!control.getIncludeCatalog() && !control.getIncludeSchema()) {
-                        // I'm not too sure what this if is accomplishing
+                        // I'm not too sure what this is accomplishing
                         CatalogAndSchema schema = comparisonDatabase.getDefaultSchema().customize(comparisonDatabase);
                         backingIndex.getRelation().setSchema(schema.getCatalogName(), schema.getSchemaName()); //set table schema so it is found in the correct schema
                     }
