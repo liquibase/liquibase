@@ -186,7 +186,7 @@ jobs:
           tag_name: v${{ needs.setup.outputs.version }}
           fail_on_unmatched_files: true
           body: Liquibase ${{ needs.setup.outputs.version }}
-          generate_release_notes: false
+          generate_release_notes: true
           files: re-version/final/*
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

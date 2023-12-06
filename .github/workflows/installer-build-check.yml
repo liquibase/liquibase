@@ -5,11 +5,10 @@ name: Build Test Installers
 on:
   schedule:
     - cron: "5 7 * * *"
-  workflow_run:
-    workflows: [ "Build Branch SNAPSHOT", "Build and Publish (Matching Branch)" ]
-    types:
-      - completed
   workflow_dispatch:
+  push:
+    branches:
+      - gha-scheduled-*
 
 
 jobs:
@@ -33,7 +32,7 @@ jobs:
       - name: Download liquibase-artifacts
         uses: liquibase/action-download-artifact@v2-liquibase
         with:
-          workflow: build.yml
+          workflow: run-tests.yml
           workflow_conclusion: success
           branch: master
           name: liquibase-artifacts
