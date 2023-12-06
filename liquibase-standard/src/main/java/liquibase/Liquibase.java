@@ -611,7 +611,8 @@ public class Liquibase implements AutoCloseable {
     @Deprecated
     public void rollback(String tagToRollBackTo, String rollbackScript, Contexts contexts,
                          LabelExpression labelExpression, Writer output) throws LiquibaseException {
-        new CommandScope(RollbackSqlCommandStep.COMMAND_NAME)
+        runInScope(() ->
+            new CommandScope(RollbackSqlCommandStep.COMMAND_NAME)
                 .addArgumentValue(DbUrlConnectionArgumentsCommandStep.DATABASE_ARG, Liquibase.this.getDatabase())
                 .addArgumentValue(DatabaseChangelogCommandStep.CHANGELOG_FILE_ARG, changeLogFile)
                 .addArgumentValue(DatabaseChangelogCommandStep.CONTEXTS_ARG, (contexts != null? contexts.toString() : null))
@@ -621,7 +622,8 @@ public class Liquibase implements AutoCloseable {
                 .addArgumentValue(AbstractRollbackCommandStep.ROLLBACK_SCRIPT_ARG, rollbackScript)
                 .addArgumentValue(DatabaseChangelogCommandStep.CHANGELOG_PARAMETERS, changeLogParameters)
                 .setOutput(new WriterOutputStream(output, GlobalConfiguration.OUTPUT_FILE_ENCODING.getCurrentValue()))
-                .execute();
+                .execute()
+        );
     }
     // ---------- End RollbackSQL Family of methods
 
@@ -663,7 +665,8 @@ public class Liquibase implements AutoCloseable {
      */
     public void rollback(String tagToRollBackTo, String rollbackScript, Contexts contexts,
                          LabelExpression labelExpression) throws LiquibaseException {
-        new CommandScope(RollbackCommandStep.COMMAND_NAME)
+        runInScope(() ->
+            new CommandScope(RollbackCommandStep.COMMAND_NAME)
                 .addArgumentValue(DbUrlConnectionArgumentsCommandStep.DATABASE_ARG, Liquibase.this.getDatabase())
                 .addArgumentValue(DatabaseChangelogCommandStep.CHANGELOG_FILE_ARG, changeLogFile)
                 .addArgumentValue(DatabaseChangelogCommandStep.CONTEXTS_ARG, (contexts != null? contexts.toString() : null))
@@ -672,7 +675,8 @@ public class Liquibase implements AutoCloseable {
                 .addArgumentValue(RollbackCommandStep.TAG_ARG, tagToRollBackTo)
                 .addArgumentValue(RollbackCommandStep.ROLLBACK_SCRIPT_ARG, rollbackScript)
                 .addArgumentValue(DatabaseChangelogCommandStep.CHANGELOG_PARAMETERS, changeLogParameters)
-                .execute();
+                .execute()
+        );
     }
     // ---------- End Rollback (To Tag) Family of methods
 
@@ -693,7 +697,8 @@ public class Liquibase implements AutoCloseable {
 
     public void rollback(Date dateToRollBackTo, String rollbackScript, Contexts contexts,
                          LabelExpression labelExpression, Writer output) throws LiquibaseException {
-        new CommandScope(RollbackToDateSqlCommandStep.COMMAND_NAME)
+        runInScope(() ->
+            new CommandScope(RollbackToDateSqlCommandStep.COMMAND_NAME)
                 .addArgumentValue(DbUrlConnectionArgumentsCommandStep.DATABASE_ARG, Liquibase.this.getDatabase())
                 .addArgumentValue(DatabaseChangelogCommandStep.CHANGELOG_FILE_ARG, changeLogFile)
                 .addArgumentValue(DatabaseChangelogCommandStep.CONTEXTS_ARG, (contexts != null? contexts.toString() : null))
@@ -703,7 +708,8 @@ public class Liquibase implements AutoCloseable {
                 .addArgumentValue(AbstractRollbackCommandStep.ROLLBACK_SCRIPT_ARG, rollbackScript)
                 .addArgumentValue(DatabaseChangelogCommandStep.CHANGELOG_PARAMETERS, changeLogParameters)
                 .setOutput(new WriterOutputStream(output, GlobalConfiguration.OUTPUT_FILE_ENCODING.getCurrentValue()))
-                .execute();
+                .execute()
+        );
     }
     // ---------- End RollbackToDateSql Family of methods
 
@@ -739,7 +745,8 @@ public class Liquibase implements AutoCloseable {
         changeLogParameters.setLabels(labelExpression);
         addCommandFiltersMdc(labelExpression, contexts);
 
-        new CommandScope(RollbackToDateCommandStep.COMMAND_NAME)
+        runInScope(() ->
+            new CommandScope(RollbackToDateCommandStep.COMMAND_NAME)
                 .addArgumentValue(DbUrlConnectionArgumentsCommandStep.DATABASE_ARG, Liquibase.this.getDatabase())
                 .addArgumentValue(DatabaseChangelogCommandStep.CHANGELOG_FILE_ARG, changeLogFile)
                 .addArgumentValue(DatabaseChangelogCommandStep.CONTEXTS_ARG, (contexts != null? contexts.toString() : null))
@@ -748,7 +755,8 @@ public class Liquibase implements AutoCloseable {
                 .addArgumentValue(RollbackToDateCommandStep.DATE_ARG, dateToRollBackTo)
                 .addArgumentValue(AbstractRollbackCommandStep.ROLLBACK_SCRIPT_ARG, rollbackScript)
                 .addArgumentValue(DatabaseChangelogCommandStep.CHANGELOG_PARAMETERS, changeLogParameters)
-                .execute();
+                .execute()
+        );
 
     }
     // ---------- End RollbackToDate Family of methods
