@@ -1,7 +1,6 @@
 package liquibase.diffchangelog
 
 import liquibase.Scope
-import liquibase.UpdateSummaryEnum
 import liquibase.change.core.AddForeignKeyConstraintChange
 import liquibase.change.core.DropForeignKeyConstraintChange
 import liquibase.changelog.ChangeLogParameters
@@ -9,8 +8,10 @@ import liquibase.changelog.ChangeSet
 import liquibase.changelog.DatabaseChangeLog
 import liquibase.command.CommandScope
 import liquibase.command.core.DiffChangelogCommandStep
-import liquibase.command.core.UpdateCommandStep
-import liquibase.command.core.helpers.*
+import liquibase.command.core.helpers.DbUrlConnectionArgumentsCommandStep
+import liquibase.command.core.helpers.DiffOutputControlCommandStep
+import liquibase.command.core.helpers.PreCompareCommandStep
+import liquibase.command.core.helpers.ReferenceDbUrlConnectionCommandStep
 import liquibase.command.util.CommandUtil
 import liquibase.database.Database
 import liquibase.database.DatabaseFactory
@@ -58,7 +59,7 @@ CREATE TABLE $tableName ( product_no varchar(20) DEFAULT nextval('$sequenceName'
         commandScope.addArgumentValue(ReferenceDbUrlConnectionCommandStep.REFERENCE_DATABASE_ARG, refDatabase)
         commandScope.addArgumentValue(DiffChangelogCommandStep.CHANGELOG_FILE_ARG, changelogfile)
         commandScope.addArgumentValue(PreCompareCommandStep.COMPARE_CONTROL_ARG, CompareControl.STANDARD)
-        commandScope.addArgumentValue(DbUrlConnectionCommandStep.DATABASE_ARG, targetDatabase)
+        commandScope.addArgumentValue(DbUrlConnectionArgumentsCommandStep.DATABASE_ARG, targetDatabase)
         commandScope.addArgumentValue(DiffOutputControlCommandStep.INCLUDE_SCHEMA_ARG, true)
         commandScope.addArgumentValue(DiffChangelogCommandStep.LABEL_FILTER_ARG, "newLabels")
         commandScope.addArgumentValue(DiffChangelogCommandStep.CONTEXTS_ARG, "newContexts")
@@ -99,7 +100,7 @@ CREATE TABLE $tableName ( product_no varchar(20) DEFAULT nextval('$sequenceName'
         commandScope.addArgumentValue(ReferenceDbUrlConnectionCommandStep.REFERENCE_DATABASE_ARG, refDatabase)
         commandScope.addArgumentValue(DiffChangelogCommandStep.CHANGELOG_FILE_ARG, diffChangelogFile)
         commandScope.addArgumentValue(PreCompareCommandStep.COMPARE_CONTROL_ARG, CompareControl.STANDARD)
-        commandScope.addArgumentValue(DbUrlConnectionCommandStep.DATABASE_ARG, targetDatabase)
+        commandScope.addArgumentValue(DbUrlConnectionArgumentsCommandStep.DATABASE_ARG, targetDatabase)
         commandScope.addArgumentValue(DiffOutputControlCommandStep.INCLUDE_SCHEMA_ARG, true)
         commandScope.execute()
         def generatedChangelog = new File(diffChangelogFile)
@@ -149,7 +150,7 @@ COMMENT ON COLUMN $viewName.$columnName IS '$columnComment';
         commandScope.addArgumentValue(ReferenceDbUrlConnectionCommandStep.REFERENCE_DATABASE_ARG, refDatabase)
         commandScope.addArgumentValue(DiffChangelogCommandStep.CHANGELOG_FILE_ARG, changelogfile)
         commandScope.addArgumentValue(PreCompareCommandStep.COMPARE_CONTROL_ARG, CompareControl.STANDARD)
-        commandScope.addArgumentValue(DbUrlConnectionCommandStep.DATABASE_ARG, targetDatabase)
+        commandScope.addArgumentValue(DbUrlConnectionArgumentsCommandStep.DATABASE_ARG, targetDatabase)
         commandScope.addArgumentValue(DiffOutputControlCommandStep.INCLUDE_SCHEMA_ARG, true)
 
         then:
