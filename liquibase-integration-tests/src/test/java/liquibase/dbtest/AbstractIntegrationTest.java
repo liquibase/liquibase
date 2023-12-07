@@ -12,7 +12,7 @@ import liquibase.command.CommandScope;
 import liquibase.command.core.DropAllCommandStep;
 import liquibase.command.core.SnapshotCommandStep;
 import liquibase.command.core.UpdateCommandStep;
-import liquibase.command.core.helpers.DbUrlConnectionCommandStep;
+import liquibase.command.core.helpers.DbUrlConnectionArgumentsCommandStep;
 import liquibase.database.Database;
 import liquibase.database.DatabaseConnection;
 import liquibase.database.DatabaseFactory;
@@ -289,7 +289,7 @@ public abstract class AbstractIntegrationTest {
             }
             try {
                 CommandScope commandScope = new CommandScope(DropAllCommandStep.COMMAND_NAME);
-                commandScope.addArgumentValue(DbUrlConnectionCommandStep.DATABASE_ARG, database);
+                commandScope.addArgumentValue(DbUrlConnectionArgumentsCommandStep.DATABASE_ARG, database);
                 commandScope.execute();
             } catch (Exception ignored) {
             }
@@ -1275,7 +1275,7 @@ public abstract class AbstractIntegrationTest {
         try {
             getDatabase().setDatabaseChangeLogTableName("lowercase");
             CommandScope commandScope = new CommandScope(UpdateCommandStep.COMMAND_NAME);
-            commandScope.addArgumentValue(DbUrlConnectionCommandStep.DATABASE_ARG, getDatabase());
+            commandScope.addArgumentValue(DbUrlConnectionArgumentsCommandStep.DATABASE_ARG, getDatabase());
             commandScope.addArgumentValue(UpdateCommandStep.CHANGELOG_FILE_ARG, objectQuotingStrategyChangeLog);
             commandScope.execute();
         } catch (Exception e) {
@@ -1291,12 +1291,12 @@ public abstract class AbstractIntegrationTest {
         try {
             Database database = getDatabase();
             CommandScope commandScope = new CommandScope(UpdateCommandStep.COMMAND_NAME);
-            commandScope.addArgumentValue(DbUrlConnectionCommandStep.DATABASE_ARG, database);
+            commandScope.addArgumentValue(DbUrlConnectionArgumentsCommandStep.DATABASE_ARG, database);
             commandScope.addArgumentValue(UpdateCommandStep.CHANGELOG_FILE_ARG, indexWithAssociatedWithChangeLog);
             commandScope.execute();
 
             final CommandScope snapshotScope = new CommandScope("snapshot");
-            snapshotScope.addArgumentValue(DbUrlConnectionCommandStep.DATABASE_ARG, database);
+            snapshotScope.addArgumentValue(DbUrlConnectionArgumentsCommandStep.DATABASE_ARG, database);
             snapshotScope.addArgumentValue(SnapshotCommandStep.SNAPSHOT_FORMAT_ARG, "json");
             CommandResults results = snapshotScope.execute();
             DatabaseSnapshot snapshot = (DatabaseSnapshot) results.getResult("snapshot");
@@ -1332,9 +1332,9 @@ public abstract class AbstractIntegrationTest {
 
     protected void runUpdate(String changelog) throws CommandExecutionException {
         CommandScope commandScope = new CommandScope(UpdateCommandStep.COMMAND_NAME);
-        commandScope.addArgumentValue(DbUrlConnectionCommandStep.URL_ARG, testSystem.getConnectionUrl());
-        commandScope.addArgumentValue(DbUrlConnectionCommandStep.USERNAME_ARG, testSystem.getUsername());
-        commandScope.addArgumentValue(DbUrlConnectionCommandStep.PASSWORD_ARG, testSystem.getPassword());
+        commandScope.addArgumentValue(DbUrlConnectionArgumentsCommandStep.URL_ARG, testSystem.getConnectionUrl());
+        commandScope.addArgumentValue(DbUrlConnectionArgumentsCommandStep.USERNAME_ARG, testSystem.getUsername());
+        commandScope.addArgumentValue(DbUrlConnectionArgumentsCommandStep.PASSWORD_ARG, testSystem.getPassword());
         commandScope.addArgumentValue(UpdateCommandStep.CHANGELOG_FILE_ARG, changelog);
         commandScope.execute();
     }

@@ -11,7 +11,7 @@ import liquibase.change.core.CreateTableChange;
 import liquibase.changelog.ChangeSet;
 import liquibase.command.CommandScope;
 import liquibase.command.core.GenerateChangelogCommandStep;
-import liquibase.command.core.helpers.DbUrlConnectionCommandStep;
+import liquibase.command.core.helpers.DbUrlConnectionArgumentsCommandStep;
 import liquibase.database.Database;
 import liquibase.database.DatabaseFactory;
 import liquibase.database.jvm.JdbcConnection;
@@ -35,7 +35,6 @@ import org.junit.Assert;
 import org.junit.Test;
 
 import java.io.ByteArrayOutputStream;
-import java.sql.SQLException;
 import java.util.*;
 
 import static org.junit.Assert.assertEquals;
@@ -261,7 +260,7 @@ public class PostgreSQLIntegrationTest extends AbstractIntegrationTest {
 
             ByteArrayOutputStream baos = new ByteArrayOutputStream();
             new CommandScope(GenerateChangelogCommandStep.COMMAND_NAME)
-                    .addArgumentValue(DbUrlConnectionCommandStep.DATABASE_ARG, getDatabase())
+                    .addArgumentValue(DbUrlConnectionArgumentsCommandStep.DATABASE_ARG, getDatabase())
                     .setOutput(baos)
                     .execute();
 
