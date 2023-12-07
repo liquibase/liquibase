@@ -1,9 +1,6 @@
 package liquibase.changelog;
 
-import liquibase.ContextExpression;
-import liquibase.Labels;
-import liquibase.RuntimeEnvironment;
-import liquibase.Scope;
+import liquibase.*;
 import liquibase.changelog.filter.ChangeSetFilter;
 import liquibase.changelog.filter.ChangeSetFilterResult;
 import liquibase.changelog.visitor.ChangeSetVisitor;
@@ -14,6 +11,7 @@ import liquibase.exception.UnexpectedLiquibaseException;
 import liquibase.exception.ValidationErrors;
 import liquibase.executor.Executor;
 import liquibase.executor.ExecutorService;
+import liquibase.util.BooleanUtil;
 import liquibase.util.StringUtil;
 import lombok.Getter;
 
@@ -21,6 +19,11 @@ import java.util.*;
 
 import static java.util.ResourceBundle.getBundle;
 
+/**
+ * The ChangeLogIterator class is responsible for iterating through a list of ChangeSets in a DatabaseChangeLog
+ * and executing a visitor for each ChangeSet that passes the specified filters.
+ * It provides methods for running the visitor and validating the Executor for each ChangeSet.
+ */
 public class ChangeLogIterator {
 
     protected final DatabaseChangeLog databaseChangeLog;
@@ -38,6 +41,8 @@ public class ChangeLogIterator {
      */
     @Getter
     private final List<ChangeSet> skippedDueToExceptionChangeSets = new ArrayList<>();
+
+    private final Boolean allowDuplicatedChangesetsIdentifiers = GlobalConfiguration.ALLOW_DUPLICATED_CHANGESETS_IDENTIFIERS.getCurrentValue();
 
     public ChangeLogIterator(DatabaseChangeLog databaseChangeLog, ChangeSetFilter... changeSetFilters) {
         this(databaseChangeLog, Arrays.asList(changeSetFilters));
@@ -115,7 +120,7 @@ public class ChangeLogIterator {
 
                         int finalI = i;
                         Scope.child(scopeValues, () -> {
-                            if (finalShouldVisit) {
+                            if (finalShouldVisit && !alreadySaw(changeSet)) {
                                 //
                                 // Go validate any changesets with an Executor if
                                 // we are using a ValidatingVisitor
@@ -193,9 +198,24 @@ public class ChangeLogIterator {
         if (changeSet.key == null) {
             changeSet.key = createKey(changeSet);
         }
-
         seenChangeSets.add(changeSet.key);
+    }
 
+
+    /**
+     * By default, this returns false as finalShouldVisit logic has better performance.
+     * But prior to 4.19.1 the below logic worked, were if a changeset was already saw we would
+     * just ignore it instead of throwing an error. This logic was backported under flag
+     * ALLOW_DUPLICATED_CHANGESETS_IDENTIFIERS
+     */
+    private boolean alreadySaw(ChangeSet changeSet) {
+        if (BooleanUtil.isTrue(allowDuplicatedChangesetsIdentifiers)) {
+            if (changeSet.key == null) {
+                changeSet.key = createKey(changeSet);
+            }
+            return seenChangeSets.contains(changeSet.key);
+        }
+        return false;
     }
 
     /**
@@ -204,7 +224,6 @@ public class ChangeLogIterator {
     protected String createKey(ChangeSet changeSet) {
         Labels labels = changeSet.getLabels();
         ContextExpression contexts = changeSet.getContextFilter();
-        changeSet.getRunOrder();
 
         return changeSet.toString(false)
                 + ":" + (labels == null ? null : labels.toString())

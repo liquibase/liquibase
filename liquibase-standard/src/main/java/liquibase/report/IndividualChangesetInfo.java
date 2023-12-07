@@ -14,6 +14,7 @@ public class IndividualChangesetInfo {
     private String changesetId;
     private String changelogFile;
     private String comment;
+    private Boolean success;
     private String changesetOutcome;
     private String errorMsg;
     private String labels;

@@ -63,6 +63,8 @@ Changes in version 4.25.0 (2023.11.09)
 - (#567) Improve deferrable validation for AddForeignKey constraints generator @alero
 - (#5101) Remove a forgotten `.` in `README.md` @Benjamin-Loison
 - (#4959) Remove unnecessary conditions in IndexComparator @asashour
+- (#5185) generate deployment ID for all update family commands (DAT-16240) @StevenMassaro
+- (#5182) Invoke database.commit only if needed (DAT-16225) @filipelautert
 
 ## Security, Driver and Other Updates
 

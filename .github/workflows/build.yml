@@ -152,7 +152,7 @@ jobs:
       fail-fast: false
       matrix:
         os: [ ubuntu-22.04, macos-latest, windows-2019 ]
-        java: [ 8, 11, 17, 20 ]
+        java: [ 8, 11, 17, 21 ]
         exclude:
           # exclude non-java 8 on macos and windows builds
           - os: macos-latest
@@ -164,9 +164,9 @@ jobs:
           - os: windows-2019
             java: 17
           - os: macos-latest
-            java: 20
+            java: 21
           - os: windows-2019
-            java: 20
+            java: 21
     runs-on: ${{ matrix.os }}
     env:
       OS_TYPE: ${{ matrix.os }}
@@ -177,7 +177,7 @@ jobs:
           ref: ${{ github.event.pull_request.head.sha || github.event.after}}
       - name: Built Code Cache
         if: ${{ matrix.java == 11}}
-        uses: actions/cache@v3.3.1
+        uses: actions/cache@v3.3.2
         with:
           key: built-code-${{ github.run_number }}-${{ github.run_attempt }}
           path: ./**/target
@@ -279,7 +279,7 @@ jobs:
         with:
           maven-version: ${{ env.MAVEN_VERSION }}
       - name: Restore Built Code Cache
-        uses: actions/cache@v3.3.1
+        uses: actions/cache@v3.3.2
         with:
           key: built-code-${{ github.run_number }}-${{ github.run_attempt }}
           path: ./**/target
@@ -311,7 +311,7 @@ jobs:
 
   sonar:
     needs: [ build, integration-test ]
-    uses: liquibase/build-logic/.github/workflows/sonar-test-scan.yml@v0.4.7
+    uses: liquibase/build-logic/.github/workflows/sonar-test-scan.yml@v0.5.7
     with:
       thisBranchName: ${{ needs.setup.outputs.thisBranchName }}
       thisSha: ${{ needs.setup.outputs.thisSha }}
@@ -333,14 +333,14 @@ jobs:
           ref: ${{ github.event.pull_request.head.sha || github.event.after}}
       # this includes all the tar files included in the previous runs. So in the next step we deploy what was previously build
       - name: Built Code Cache
-        uses: actions/cache@v3.3.1
+        uses: actions/cache@v3.3.2
         with:
           key: built-code-${{ github.run_number }}-${{ github.run_attempt }}
           path: ./**/target
 
       ##Cache based on install4j file, since changes to JVM is seen in there. If install4j version changes without changing the file, change the prefix letter before hashFiles to force a new cache
       - name: Install4j Cache
-        uses: actions/cache@v3.3.1
+        uses: actions/cache@v3.3.2
         with:
           key: install4j-A${{ hashFiles('liquibase-dist/src/main/install4j/liquibase.install4j') }}
           path: ~/.install4j8/**

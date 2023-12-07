@@ -3,7 +3,7 @@ name: Sync Release to Master Branch
 on:
   push:
     branches:
-      - master
+      - release
 
 jobs:
   sync-branches:
@@ -16,7 +16,7 @@ jobs:
         uses: actions/checkout@v4
 
       - name: Set up Node
-        uses: actions/setup-node@v1
+        uses: actions/setup-node@v4
         with:
           node-version: 16
 
@@ -25,5 +25,5 @@ jobs:
         uses: tretuna/sync-branches@1.4.0
         with:
           GITHUB_TOKEN: ${{secrets.SYNC_RELEASE_MASTER_BRANCH}}
-          FROM_BRANCH: 'master'
-          TO_BRANCH: 'release'
+          FROM_BRANCH: 'release'
+          TO_BRANCH: 'master'
