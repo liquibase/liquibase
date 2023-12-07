@@ -1,7 +1,6 @@
 package liquibase.diffchangelog
 
 import liquibase.Scope
-import liquibase.UpdateSummaryEnum
 import liquibase.change.core.AddForeignKeyConstraintChange
 import liquibase.change.core.DropForeignKeyConstraintChange
 import liquibase.changelog.ChangeLogParameters
@@ -9,7 +8,6 @@ import liquibase.changelog.ChangeSet
 import liquibase.changelog.DatabaseChangeLog
 import liquibase.command.CommandScope
 import liquibase.command.core.DiffChangelogCommandStep
-import liquibase.command.core.UpdateCommandStep
 import liquibase.command.core.helpers.*
 import liquibase.command.util.CommandUtil
 import liquibase.database.Database
@@ -169,5 +167,38 @@ COMMENT ON COLUMN $viewName.$columnName IS '$columnComment';
         refDatabase.close()
         targetDatabase.close()
         CommandUtil.runDropAll(postgres)
+    }
+
+    def "Ensure diff-changelog set runOnChange and replaceIfExists properties correctly for a created view changeset"() {
+        given:
+        CommandUtil.runUpdate(postgres, "changelogs/mysql/complete/createtable.and.view.changelog.xml", null, null, null)
+        def outputChangelogFile = String.format("diffChangelogFile-%s-output.xml", StringUtil.randomIdentifer(10))
+        Database refDatabase = DatabaseFactory.instance.openDatabase(postgres.getConnectionUrl(), postgres.getUsername(), postgres.getPassword(), null, null)
+
+        Database targetDatabase =
+                DatabaseFactory.instance.openDatabase(postgres.getConnectionUrl().replace("lbcat", "lbcat2"), postgres.getUsername(), postgres.getPassword(), null, null)
+
+        when:
+        CommandScope commandScope = new CommandScope(DiffChangelogCommandStep.COMMAND_NAME)
+        commandScope.addArgumentValue(DbUrlConnectionCommandStep.DATABASE_ARG, targetDatabase)
+        commandScope.addArgumentValue(DiffChangelogCommandStep.CHANGELOG_FILE_ARG, outputChangelogFile)
+        commandScope.addArgumentValue(DiffChangelogCommandStep.REPLACEIFEXISTS_TYPES_ARG, "createView")
+        commandScope.addArgumentValue(DiffChangelogCommandStep.RUNONCHANGE_TYPES_ARG, "createView")
+        commandScope.addArgumentValue(ReferenceDbUrlConnectionCommandStep.REFERENCE_DATABASE_ARG, refDatabase)
+        commandScope.execute()
+
+        then:
+
+        def outputFile = new File(outputChangelogFile)
+        def outputContent = FileUtil.getContents(outputFile)
+        outputContent.contains(" runOnChange=\"true\">")
+        outputContent.contains(" replaceIfExists=\"true\"")
+
+        cleanup:
+        outputFile.delete()
+        refDatabase.close()
+        targetDatabase.close()
+        CommandUtil.runDropAll(postgres)
+        postgres.getConnection().close()
     }
 }
