@@ -3,7 +3,10 @@ package liquibase;
 import liquibase.change.CheckSum;
 import liquibase.changelog.*;
 import liquibase.changelog.filter.*;
-import liquibase.changelog.visitor.*;
+import liquibase.changelog.visitor.ChangeExecListener;
+import liquibase.changelog.visitor.DefaultChangeExecListener;
+import liquibase.changelog.visitor.ListVisitor;
+import liquibase.changelog.visitor.StatusVisitor;
 import liquibase.command.CommandResults;
 import liquibase.command.CommandScope;
 import liquibase.command.core.*;
@@ -230,7 +233,7 @@ public class Liquibase implements AutoCloseable {
     public void update(Contexts contexts, LabelExpression labelExpression, boolean checkLiquibaseTables) throws LiquibaseException {
         runInScope(() -> {
             CommandScope updateCommand = new CommandScope(UpdateCommandStep.COMMAND_NAME);
-            updateCommand.addArgumentValue(DbUrlConnectionCommandStep.DATABASE_ARG, getDatabase());
+            updateCommand.addArgumentValue(DbUrlConnectionArgumentsCommandStep.DATABASE_ARG, getDatabase());
             updateCommand.addArgumentValue(UpdateCommandStep.CHANGELOG_ARG, databaseChangeLog);
             updateCommand.addArgumentValue(UpdateCommandStep.CHANGELOG_FILE_ARG, changeLogFile);
             updateCommand.addArgumentValue(UpdateCommandStep.CONTEXTS_ARG, contexts != null ? contexts.toString() : null);
@@ -326,7 +329,7 @@ public class Liquibase implements AutoCloseable {
             throws LiquibaseException {
         runInScope(() -> {
             CommandScope updateCommand = new CommandScope(UpdateSqlCommandStep.COMMAND_NAME);
-            updateCommand.addArgumentValue(DbUrlConnectionCommandStep.DATABASE_ARG, getDatabase());
+            updateCommand.addArgumentValue(DbUrlConnectionArgumentsCommandStep.DATABASE_ARG, getDatabase());
             updateCommand.addArgumentValue(UpdateSqlCommandStep.CHANGELOG_FILE_ARG, changeLogFile);
             updateCommand.addArgumentValue(DatabaseChangelogCommandStep.CHANGELOG_ARG, databaseChangeLog);
             updateCommand.addArgumentValue(UpdateSqlCommandStep.CONTEXTS_ARG, contexts != null ? contexts.toString() : null);
@@ -357,7 +360,7 @@ public class Liquibase implements AutoCloseable {
             throws LiquibaseException {
         runInScope(() -> {
             CommandScope updateCommand = new CommandScope(UpdateCountCommandStep.COMMAND_NAME);
-            updateCommand.addArgumentValue(DbUrlConnectionCommandStep.DATABASE_ARG, getDatabase());
+            updateCommand.addArgumentValue(DbUrlConnectionArgumentsCommandStep.DATABASE_ARG, getDatabase());
             updateCommand.addArgumentValue(UpdateCountCommandStep.CHANGELOG_FILE_ARG, changeLogFile);
             updateCommand.addArgumentValue(DatabaseChangelogCommandStep.CHANGELOG_ARG, databaseChangeLog);
             updateCommand.addArgumentValue(UpdateCountCommandStep.CONTEXTS_ARG, contexts != null ? contexts.toString() : null);
@@ -399,7 +402,7 @@ public class Liquibase implements AutoCloseable {
 
         runInScope(() -> {
             CommandScope updateCommand = new CommandScope(UpdateToTagCommandStep.COMMAND_NAME);
-            updateCommand.addArgumentValue(DbUrlConnectionCommandStep.DATABASE_ARG, getDatabase());
+            updateCommand.addArgumentValue(DbUrlConnectionArgumentsCommandStep.DATABASE_ARG, getDatabase());
             updateCommand.addArgumentValue(UpdateToTagCommandStep.CHANGELOG_FILE_ARG, changeLogFile);
             updateCommand.addArgumentValue(DatabaseChangelogCommandStep.CHANGELOG_ARG, databaseChangeLog);
             updateCommand.addArgumentValue(UpdateToTagCommandStep.CONTEXTS_ARG, contexts != null ? contexts.toString() : null);
@@ -519,7 +522,7 @@ public class Liquibase implements AutoCloseable {
                          LabelExpression labelExpression, Writer output) throws LiquibaseException {
         runInScope(() ->
             new CommandScope(RollbackCountSqlCommandStep.COMMAND_NAME)
-                .addArgumentValue(DbUrlConnectionCommandStep.DATABASE_ARG, Liquibase.this.getDatabase())
+                .addArgumentValue(DbUrlConnectionArgumentsCommandStep.DATABASE_ARG, Liquibase.this.getDatabase())
                 .addArgumentValue(DatabaseChangelogCommandStep.CHANGELOG_FILE_ARG, changeLogFile)
                 .addArgumentValue(DatabaseChangelogCommandStep.CONTEXTS_ARG, (contexts != null? contexts.toString() : null))
                 .addArgumentValue(DatabaseChangelogCommandStep.LABEL_FILTER_ARG, (labelExpression != null ? labelExpression.getOriginalString() : null))
@@ -563,7 +566,7 @@ public class Liquibase implements AutoCloseable {
                          LabelExpression labelExpression) throws LiquibaseException {
         runInScope(() ->
             new CommandScope(RollbackCountCommandStep.COMMAND_NAME)
-                .addArgumentValue(DbUrlConnectionCommandStep.DATABASE_ARG, Liquibase.this.getDatabase())
+                .addArgumentValue(DbUrlConnectionArgumentsCommandStep.DATABASE_ARG, Liquibase.this.getDatabase())
                 .addArgumentValue(DatabaseChangelogCommandStep.CHANGELOG_FILE_ARG, changeLogFile)
                 .addArgumentValue(DatabaseChangelogCommandStep.CONTEXTS_ARG, (contexts != null? contexts.toString() : null))
                 .addArgumentValue(DatabaseChangelogCommandStep.LABEL_FILTER_ARG, (labelExpression != null ? labelExpression.getOriginalString() : null))
@@ -608,8 +611,9 @@ public class Liquibase implements AutoCloseable {
     @Deprecated
     public void rollback(String tagToRollBackTo, String rollbackScript, Contexts contexts,
                          LabelExpression labelExpression, Writer output) throws LiquibaseException {
-        new CommandScope(RollbackSqlCommandStep.COMMAND_NAME)
-                .addArgumentValue(DbUrlConnectionCommandStep.DATABASE_ARG, Liquibase.this.getDatabase())
+        runInScope(() ->
+            new CommandScope(RollbackSqlCommandStep.COMMAND_NAME)
+                .addArgumentValue(DbUrlConnectionArgumentsCommandStep.DATABASE_ARG, Liquibase.this.getDatabase())
                 .addArgumentValue(DatabaseChangelogCommandStep.CHANGELOG_FILE_ARG, changeLogFile)
                 .addArgumentValue(DatabaseChangelogCommandStep.CONTEXTS_ARG, (contexts != null? contexts.toString() : null))
                 .addArgumentValue(DatabaseChangelogCommandStep.LABEL_FILTER_ARG, (labelExpression != null ? labelExpression.getOriginalString() : null))
@@ -618,7 +622,8 @@ public class Liquibase implements AutoCloseable {
                 .addArgumentValue(AbstractRollbackCommandStep.ROLLBACK_SCRIPT_ARG, rollbackScript)
                 .addArgumentValue(DatabaseChangelogCommandStep.CHANGELOG_PARAMETERS, changeLogParameters)
                 .setOutput(new WriterOutputStream(output, GlobalConfiguration.OUTPUT_FILE_ENCODING.getCurrentValue()))
-                .execute();
+                .execute()
+        );
     }
     // ---------- End RollbackSQL Family of methods
 
@@ -660,8 +665,9 @@ public class Liquibase implements AutoCloseable {
      */
     public void rollback(String tagToRollBackTo, String rollbackScript, Contexts contexts,
                          LabelExpression labelExpression) throws LiquibaseException {
-        new CommandScope(RollbackCommandStep.COMMAND_NAME)
-                .addArgumentValue(DbUrlConnectionCommandStep.DATABASE_ARG, Liquibase.this.getDatabase())
+        runInScope(() ->
+            new CommandScope(RollbackCommandStep.COMMAND_NAME)
+                .addArgumentValue(DbUrlConnectionArgumentsCommandStep.DATABASE_ARG, Liquibase.this.getDatabase())
                 .addArgumentValue(DatabaseChangelogCommandStep.CHANGELOG_FILE_ARG, changeLogFile)
                 .addArgumentValue(DatabaseChangelogCommandStep.CONTEXTS_ARG, (contexts != null? contexts.toString() : null))
                 .addArgumentValue(DatabaseChangelogCommandStep.LABEL_FILTER_ARG, (labelExpression != null ? labelExpression.getOriginalString() : null))
@@ -669,7 +675,8 @@ public class Liquibase implements AutoCloseable {
                 .addArgumentValue(RollbackCommandStep.TAG_ARG, tagToRollBackTo)
                 .addArgumentValue(RollbackCommandStep.ROLLBACK_SCRIPT_ARG, rollbackScript)
                 .addArgumentValue(DatabaseChangelogCommandStep.CHANGELOG_PARAMETERS, changeLogParameters)
-                .execute();
+                .execute()
+        );
     }
     // ---------- End Rollback (To Tag) Family of methods
 
@@ -690,8 +697,9 @@ public class Liquibase implements AutoCloseable {
 
     public void rollback(Date dateToRollBackTo, String rollbackScript, Contexts contexts,
                          LabelExpression labelExpression, Writer output) throws LiquibaseException {
-        new CommandScope(RollbackToDateSqlCommandStep.COMMAND_NAME)
-                .addArgumentValue(DbUrlConnectionCommandStep.DATABASE_ARG, Liquibase.this.getDatabase())
+        runInScope(() ->
+            new CommandScope(RollbackToDateSqlCommandStep.COMMAND_NAME)
+                .addArgumentValue(DbUrlConnectionArgumentsCommandStep.DATABASE_ARG, Liquibase.this.getDatabase())
                 .addArgumentValue(DatabaseChangelogCommandStep.CHANGELOG_FILE_ARG, changeLogFile)
                 .addArgumentValue(DatabaseChangelogCommandStep.CONTEXTS_ARG, (contexts != null? contexts.toString() : null))
                 .addArgumentValue(DatabaseChangelogCommandStep.LABEL_FILTER_ARG, (labelExpression != null ? labelExpression.getOriginalString() : null))
@@ -700,7 +708,8 @@ public class Liquibase implements AutoCloseable {
                 .addArgumentValue(AbstractRollbackCommandStep.ROLLBACK_SCRIPT_ARG, rollbackScript)
                 .addArgumentValue(DatabaseChangelogCommandStep.CHANGELOG_PARAMETERS, changeLogParameters)
                 .setOutput(new WriterOutputStream(output, GlobalConfiguration.OUTPUT_FILE_ENCODING.getCurrentValue()))
-                .execute();
+                .execute()
+        );
     }
     // ---------- End RollbackToDateSql Family of methods
 
@@ -736,8 +745,9 @@ public class Liquibase implements AutoCloseable {
         changeLogParameters.setLabels(labelExpression);
         addCommandFiltersMdc(labelExpression, contexts);
 
-        new CommandScope(RollbackToDateCommandStep.COMMAND_NAME)
-                .addArgumentValue(DbUrlConnectionCommandStep.DATABASE_ARG, Liquibase.this.getDatabase())
+        runInScope(() ->
+            new CommandScope(RollbackToDateCommandStep.COMMAND_NAME)
+                .addArgumentValue(DbUrlConnectionArgumentsCommandStep.DATABASE_ARG, Liquibase.this.getDatabase())
                 .addArgumentValue(DatabaseChangelogCommandStep.CHANGELOG_FILE_ARG, changeLogFile)
                 .addArgumentValue(DatabaseChangelogCommandStep.CONTEXTS_ARG, (contexts != null? contexts.toString() : null))
                 .addArgumentValue(DatabaseChangelogCommandStep.LABEL_FILTER_ARG, (labelExpression != null ? labelExpression.getOriginalString() : null))
@@ -745,7 +755,8 @@ public class Liquibase implements AutoCloseable {
                 .addArgumentValue(RollbackToDateCommandStep.DATE_ARG, dateToRollBackTo)
                 .addArgumentValue(AbstractRollbackCommandStep.ROLLBACK_SCRIPT_ARG, rollbackScript)
                 .addArgumentValue(DatabaseChangelogCommandStep.CHANGELOG_PARAMETERS, changeLogParameters)
-                .execute();
+                .execute()
+        );
 
     }
     // ---------- End RollbackToDate Family of methods
@@ -815,7 +826,7 @@ public class Liquibase implements AutoCloseable {
         String commandToRun = StringUtil.isEmpty(tag) ? ChangelogSyncCommandStep.COMMAND_NAME[0] : ChangelogSyncToTagCommandStep.COMMAND_NAME[0];
         runInScope(() -> {
             new CommandScope(commandToRun)
-                    .addArgumentValue(DbUrlConnectionCommandStep.DATABASE_ARG, Liquibase.this.getDatabase())
+                    .addArgumentValue(DbUrlConnectionArgumentsCommandStep.DATABASE_ARG, Liquibase.this.getDatabase())
                     .addArgumentValue(DatabaseChangelogCommandStep.CHANGELOG_FILE_ARG, changeLogFile)
                     .addArgumentValue(DatabaseChangelogCommandStep.CONTEXTS_ARG, (contexts != null? contexts.toString() : null))
                     .addArgumentValue(DatabaseChangelogCommandStep.LABEL_FILTER_ARG, (labelExpression != null ? labelExpression.getOriginalString() : null))
@@ -839,7 +850,7 @@ public class Liquibase implements AutoCloseable {
                                     Supplier<String> header) throws LiquibaseException {
         String commandToRun = StringUtil.isEmpty(tag) ? ChangelogSyncSqlCommandStep.COMMAND_NAME[0] : ChangelogSyncToTagSqlCommandStep.COMMAND_NAME[0];
         runInScope(() -> new CommandScope(commandToRun)
-                .addArgumentValue(DbUrlConnectionCommandStep.DATABASE_ARG, Liquibase.this.getDatabase())
+                .addArgumentValue(DbUrlConnectionArgumentsCommandStep.DATABASE_ARG, Liquibase.this.getDatabase())
                 .addArgumentValue(DatabaseChangelogCommandStep.CHANGELOG_FILE_ARG, changeLogFile)
                 .addArgumentValue(DatabaseChangelogCommandStep.CONTEXTS_ARG, (contexts != null? contexts.toString() : null))
                 .addArgumentValue(DatabaseChangelogCommandStep.LABEL_FILTER_ARG, (labelExpression != null ? labelExpression.getOriginalString() : null))
@@ -857,7 +868,7 @@ public class Liquibase implements AutoCloseable {
     public void markNextChangeSetRan(Contexts contexts, LabelExpression labelExpression, Writer output)
             throws LiquibaseException {
         runInScope(() -> new CommandScope(MarkNextChangesetRanSqlCommandStep.COMMAND_NAME)
-                .addArgumentValue(DbUrlConnectionCommandStep.DATABASE_ARG, getDatabase())
+                .addArgumentValue(DbUrlConnectionArgumentsCommandStep.DATABASE_ARG, getDatabase())
                 .addArgumentValue(DatabaseChangelogCommandStep.CHANGELOG_FILE_ARG, changeLogFile)
                 .addArgumentValue(DatabaseChangelogCommandStep.CHANGELOG_PARAMETERS, changeLogParameters)
                 .addArgumentValue(DatabaseChangelogCommandStep.CONTEXTS_ARG, (contexts != null ? contexts.toString() : null))
@@ -874,7 +885,7 @@ public class Liquibase implements AutoCloseable {
     @Deprecated
     public void markNextChangeSetRan(Contexts contexts, LabelExpression labelExpression) throws LiquibaseException {
         runInScope(() -> new CommandScope(MarkNextChangesetRanCommandStep.COMMAND_NAME)
-                .addArgumentValue(DbUrlConnectionCommandStep.DATABASE_ARG, getDatabase())
+                .addArgumentValue(DbUrlConnectionArgumentsCommandStep.DATABASE_ARG, getDatabase())
                 .addArgumentValue(DatabaseChangelogCommandStep.CHANGELOG_FILE_ARG, changeLogFile)
                 .addArgumentValue(DatabaseChangelogCommandStep.CHANGELOG_PARAMETERS, changeLogParameters)
                 .addArgumentValue(DatabaseChangelogCommandStep.CONTEXTS_ARG, (contexts != null ? contexts.toString() : null))
@@ -953,7 +964,7 @@ public class Liquibase implements AutoCloseable {
             commandScope.addArgumentValue(FutureRollbackFromTagSqlCommandStep.TAG_ARG, tag);
         }
 
-        commandScope.addArgumentValue(DbUrlConnectionCommandStep.DATABASE_ARG, getDatabase())
+        commandScope.addArgumentValue(DbUrlConnectionArgumentsCommandStep.DATABASE_ARG, getDatabase())
                 .addArgumentValue(DatabaseChangelogCommandStep.CHANGELOG_FILE_ARG, changeLogFile)
                 .addArgumentValue(DatabaseChangelogCommandStep.CHANGELOG_PARAMETERS, changeLogParameters)
                 .addArgumentValue(DatabaseChangelogCommandStep.CONTEXTS_ARG, (contexts != null ? contexts.toString() : null))
@@ -985,7 +996,7 @@ public class Liquibase implements AutoCloseable {
         CatalogAndSchema[] finalSchemas = schemas;
         try {
             CommandScope dropAll = new CommandScope("dropAll")
-                    .addArgumentValue(DbUrlConnectionCommandStep.DATABASE_ARG, Liquibase.this.getDatabase())
+                    .addArgumentValue(DbUrlConnectionArgumentsCommandStep.DATABASE_ARG, Liquibase.this.getDatabase())
                     .addArgumentValue(DropAllCommandStep.CATALOG_AND_SCHEMAS_ARG, finalSchemas);
 
             try {
@@ -1010,7 +1021,7 @@ public class Liquibase implements AutoCloseable {
     @Deprecated
     public void tag(String tagString) throws LiquibaseException {
         new CommandScope("tag")
-                .addArgumentValue(DbUrlConnectionCommandStep.DATABASE_ARG, database)
+                .addArgumentValue(DbUrlConnectionArgumentsCommandStep.DATABASE_ARG, database)
                 .addArgumentValue(TagCommandStep.TAG_ARG, tagString)
                 .execute();
     }
@@ -1023,7 +1034,7 @@ public class Liquibase implements AutoCloseable {
     @Deprecated
     public boolean tagExists(String tagString) throws LiquibaseException {
         CommandResults commandResults = new CommandScope("tagExists")
-                .addArgumentValue(DbUrlConnectionCommandStep.DATABASE_ARG, database)
+                .addArgumentValue(DbUrlConnectionArgumentsCommandStep.DATABASE_ARG, database)
                 .addArgumentValue(TagExistsCommandStep.TAG_ARG, tagString)
                 .execute();
         return commandResults.getResult(TagExistsCommandStep.TAG_EXISTS_RESULT);
@@ -1045,7 +1056,7 @@ public class Liquibase implements AutoCloseable {
             throws LiquibaseException {
         runInScope(() -> {
             CommandScope updateTestingRollback = new CommandScope(UpdateTestingRollbackCommandStep.COMMAND_NAME);
-            updateTestingRollback.addArgumentValue(DbUrlConnectionCommandStep.DATABASE_ARG, getDatabase());
+            updateTestingRollback.addArgumentValue(DbUrlConnectionArgumentsCommandStep.DATABASE_ARG, getDatabase());
             updateTestingRollback.addArgumentValue(DatabaseChangelogCommandStep.CHANGELOG_PARAMETERS, changeLogParameters);
             updateTestingRollback.addArgumentValue(DatabaseChangelogCommandStep.CHANGELOG_FILE_ARG, changeLogFile);
             updateTestingRollback.addArgumentValue(DatabaseChangelogCommandStep.CONTEXTS_ARG, (contexts != null? contexts.toString() : null));
@@ -1089,7 +1100,7 @@ public class Liquibase implements AutoCloseable {
     public void reportLocks(PrintStream out) throws LiquibaseException {
         runInScope(() -> {
             CommandScope listLocksCommand = new CommandScope(ListLocksCommandStep.COMMAND_NAME);
-            listLocksCommand.addArgumentValue(DbUrlConnectionCommandStep.DATABASE_ARG, getDatabase());
+            listLocksCommand.addArgumentValue(DbUrlConnectionArgumentsCommandStep.DATABASE_ARG, getDatabase());
             listLocksCommand.setOutput(out);
             listLocksCommand.execute();
         });
@@ -1097,7 +1108,7 @@ public class Liquibase implements AutoCloseable {
 
     public void forceReleaseLocks() throws LiquibaseException {
         new CommandScope(ReleaseLocksCommandStep.COMMAND_NAME[0])
-                .addArgumentValue(DbUrlConnectionCommandStep.DATABASE_ARG, getDatabase())
+                .addArgumentValue(DbUrlConnectionArgumentsCommandStep.DATABASE_ARG, getDatabase())
                 .execute();
     }
 
@@ -1195,7 +1206,7 @@ public class Liquibase implements AutoCloseable {
         changeLogParameters.setLabels(labels);
         runInScope(() -> {
             CommandScope statusCommand = new CommandScope(StatusCommandStep.COMMAND_NAME);
-            statusCommand.addArgumentValue(DbUrlConnectionCommandStep.DATABASE_ARG, getDatabase());
+            statusCommand.addArgumentValue(DbUrlConnectionArgumentsCommandStep.DATABASE_ARG, getDatabase());
             statusCommand.addArgumentValue(DatabaseChangelogCommandStep.CHANGELOG_PARAMETERS, changeLogParameters);
             statusCommand.addArgumentValue(StatusCommandStep.VERBOSE_ARG, verbose);
             statusCommand.addArgumentValue(DatabaseChangelogCommandStep.CHANGELOG_FILE_ARG, changeLogFile);
@@ -1227,7 +1238,7 @@ public class Liquibase implements AutoCloseable {
         changeLogParameters.setLabels(labelExpression);
         runInScope(() -> {
             CommandScope unexpectedChangesetsCommand = new CommandScope(UnexpectedChangesetsCommandStep.COMMAND_NAME);
-            unexpectedChangesetsCommand.addArgumentValue(DbUrlConnectionCommandStep.DATABASE_ARG, getDatabase());
+            unexpectedChangesetsCommand.addArgumentValue(DbUrlConnectionArgumentsCommandStep.DATABASE_ARG, getDatabase());
             unexpectedChangesetsCommand.addArgumentValue(DatabaseChangelogCommandStep.CHANGELOG_PARAMETERS, changeLogParameters);
             unexpectedChangesetsCommand.addArgumentValue(UnexpectedChangesetsCommandStep.VERBOSE_ARG, verbose);
             unexpectedChangesetsCommand.addArgumentValue(DatabaseChangelogCommandStep.CHANGELOG_FILE_ARG, changeLogFile);
@@ -1246,8 +1257,8 @@ public class Liquibase implements AutoCloseable {
     @Deprecated
     public void clearCheckSums() throws LiquibaseException {
         CommandResults commandResults = new CommandScope(ClearChecksumsCommandStep.COMMAND_NAME)
-                .addArgumentValue(DbUrlConnectionCommandStep.DATABASE_ARG, database)
-                .addArgumentValue(DbUrlConnectionCommandStep.URL_ARG, database.getConnection().getURL())
+                .addArgumentValue(DbUrlConnectionArgumentsCommandStep.DATABASE_ARG, database)
+                .addArgumentValue(DbUrlConnectionArgumentsCommandStep.URL_ARG, database.getConnection().getURL())
                 .execute();
     }
 
@@ -1269,7 +1280,7 @@ public class Liquibase implements AutoCloseable {
     public CheckSum calculateCheckSum(final String changeSetPath, final String changeSetId, final String changeSetAuthor)
             throws LiquibaseException {
         CommandResults commandResults = new CommandScope("calculateChecksum")
-                .addArgumentValue(DbUrlConnectionCommandStep.DATABASE_ARG, database)
+                .addArgumentValue(DbUrlConnectionArgumentsCommandStep.DATABASE_ARG, database)
                 .addArgumentValue(CalculateChecksumCommandStep.CHANGESET_PATH_ARG, changeSetPath)
                 .addArgumentValue(CalculateChecksumCommandStep.CHANGESET_ID_ARG, changeSetId)
                 .addArgumentValue(CalculateChecksumCommandStep.CHANGESET_AUTHOR_ARG, changeSetAuthor)
@@ -1301,7 +1312,7 @@ public class Liquibase implements AutoCloseable {
     public void generateDocumentation(String outputDirectory, Contexts contexts,
                                       LabelExpression labelExpression, CatalogAndSchema... schemaList) throws LiquibaseException {
         runInScope(() -> new CommandScope(DbDocCommandStep.COMMAND_NAME[0])
-                .addArgumentValue(DbUrlConnectionCommandStep.DATABASE_ARG, Liquibase.this.getDatabase())
+                .addArgumentValue(DbUrlConnectionArgumentsCommandStep.DATABASE_ARG, Liquibase.this.getDatabase())
                 .addArgumentValue(DatabaseChangelogCommandStep.CHANGELOG_FILE_ARG, changeLogFile)
                 .addArgumentValue(DatabaseChangelogCommandStep.CHANGELOG_PARAMETERS, changeLogParameters)
                 .addArgumentValue(DatabaseChangelogCommandStep.CONTEXTS_ARG, (contexts != null ? contexts.toString() : null))
@@ -1329,7 +1340,7 @@ public class Liquibase implements AutoCloseable {
     public void validate() throws LiquibaseException {
         runInScope(() ->
             new CommandScope("validate")
-                .addArgumentValue(DbUrlConnectionCommandStep.DATABASE_ARG, database)
+                .addArgumentValue(DbUrlConnectionArgumentsCommandStep.DATABASE_ARG, database)
                 .addArgumentValue(DatabaseChangelogCommandStep.CHANGELOG_FILE_ARG, changeLogFile)
                 .addArgumentValue(DatabaseChangelogCommandStep.CHANGELOG_PARAMETERS, changeLogParameters)
                 .execute()
@@ -1387,7 +1398,7 @@ public class Liquibase implements AutoCloseable {
         new CommandScope(GenerateChangelogCommandStep.COMMAND_NAME[0])
                 .addArgumentValue(GenerateChangelogCommandStep.CHANGELOG_FILE_ARG, changeLogFile)
                 .addArgumentValue(PreCompareCommandStep.COMPARE_CONTROL_ARG, compareControl)
-                .addArgumentValue(DbUrlConnectionCommandStep.DATABASE_ARG, getDatabase())
+                .addArgumentValue(DbUrlConnectionArgumentsCommandStep.DATABASE_ARG, getDatabase())
                 .addArgumentValue(PreCompareCommandStep.SNAPSHOT_TYPES_ARG, snapshotTypes)
                 .setOutput(outputStream)
                 .execute();

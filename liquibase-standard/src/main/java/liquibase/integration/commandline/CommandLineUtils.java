@@ -4,8 +4,10 @@ import liquibase.CatalogAndSchema;
 import liquibase.GlobalConfiguration;
 import liquibase.Scope;
 import liquibase.command.CommandScope;
-import liquibase.command.core.*;
-import liquibase.command.core.helpers.DbUrlConnectionCommandStep;
+import liquibase.command.core.DiffChangelogCommandStep;
+import liquibase.command.core.DiffCommandStep;
+import liquibase.command.core.GenerateChangelogCommandStep;
+import liquibase.command.core.helpers.DbUrlConnectionArgumentsCommandStep;
 import liquibase.command.core.helpers.DiffOutputControlCommandStep;
 import liquibase.command.core.helpers.PreCompareCommandStep;
 import liquibase.command.core.helpers.ReferenceDbUrlConnectionCommandStep;
@@ -21,13 +23,11 @@ import liquibase.exception.DatabaseException;
 import liquibase.exception.LiquibaseException;
 import liquibase.resource.ClassLoaderResourceAccessor;
 import liquibase.resource.ResourceAccessor;
-import liquibase.util.LiquibaseUtil;
 import liquibase.util.StringUtil;
 
 import javax.xml.parsers.ParserConfigurationException;
-import java.io.*;
-import java.text.SimpleDateFormat;
-import java.util.Calendar;
+import java.io.IOException;
+import java.io.PrintStream;
 import java.util.ResourceBundle;
 
 import static java.util.ResourceBundle.getBundle;
@@ -164,7 +164,7 @@ public class CommandLineUtils {
 
         diffCommand
                 .addArgumentValue(ReferenceDbUrlConnectionCommandStep.REFERENCE_DATABASE_ARG, referenceDatabase)
-                .addArgumentValue(DbUrlConnectionCommandStep.DATABASE_ARG, targetDatabase)
+                .addArgumentValue(DbUrlConnectionArgumentsCommandStep.DATABASE_ARG, targetDatabase)
                 .addArgumentValue(PreCompareCommandStep.COMPARE_CONTROL_ARG, new CompareControl(schemaComparisons, snapshotTypes))
                 .addArgumentValue(PreCompareCommandStep.OBJECT_CHANGE_FILTER_ARG, objectChangeFilter)
                 .addArgumentValue(PreCompareCommandStep.SNAPSHOT_TYPES_ARG, DiffCommandStep.parseSnapshotTypes(snapshotTypes))
@@ -214,7 +214,7 @@ public class CommandLineUtils {
         CommandScope command = new CommandScope("diffChangeLog");
         command
                 .addArgumentValue(ReferenceDbUrlConnectionCommandStep.REFERENCE_DATABASE_ARG, referenceDatabase)
-                .addArgumentValue(DbUrlConnectionCommandStep.DATABASE_ARG, targetDatabase)
+                .addArgumentValue(DbUrlConnectionArgumentsCommandStep.DATABASE_ARG, targetDatabase)
                 .addArgumentValue(PreCompareCommandStep.SNAPSHOT_TYPES_ARG, DiffCommandStep.parseSnapshotTypes(snapshotTypes))
                 .addArgumentValue(PreCompareCommandStep.COMPARE_CONTROL_ARG, new CompareControl(schemaComparisons, snapshotTypes))
                 .addArgumentValue(PreCompareCommandStep.OBJECT_CHANGE_FILTER_ARG, objectChangeFilter)
@@ -262,7 +262,7 @@ public class CommandLineUtils {
         CommandScope command = new CommandScope("generateChangeLog");
         command
                 .addArgumentValue(ReferenceDbUrlConnectionCommandStep.REFERENCE_DATABASE_ARG, originalDatabase)
-                .addArgumentValue(DbUrlConnectionCommandStep.DATABASE_ARG, originalDatabase)
+                .addArgumentValue(DbUrlConnectionArgumentsCommandStep.DATABASE_ARG, originalDatabase)
                 .addArgumentValue(PreCompareCommandStep.SNAPSHOT_TYPES_ARG, DiffCommandStep.parseSnapshotTypes(snapshotTypes))
                 .addArgumentValue(PreCompareCommandStep.COMPARE_CONTROL_ARG, compareControl)
                 .addArgumentValue(DiffChangelogCommandStep.CHANGELOG_FILE_ARG, changeLogFile)
