@@ -17,9 +17,7 @@ import liquibase.logging.mdc.customobjects.ExceptionDetails;
 import liquibase.util.LiquibaseUtil;
 import liquibase.util.StringUtil;
 
-import java.io.FilterOutputStream;
-import java.io.IOException;
-import java.io.OutputStream;
+import java.io.*;
 import java.time.Instant;
 import java.util.*;
 import java.util.regex.Pattern;
@@ -292,6 +290,11 @@ public class CommandScope {
             exceptionDetails.setPrimaryException(simpleName);
             exceptionDetails.setPrimaryExceptionReason(primaryException.getMessage());
             exceptionDetails.setPrimaryExceptionSource(source);
+            StringWriter sw = new StringWriter();
+            PrintWriter pw = new PrintWriter(sw);
+            exception.printStackTrace(pw);
+            String exceptionString = sw.toString();
+            exceptionDetails.setException(exceptionString);
             MdcManager mdcManager = Scope.getCurrentScope().getMdcManager();
             try (MdcObject primaryExceptionObject = mdcManager.put(MdcKey.EXCEPTION_DETAILS, exceptionDetails)) {
                 Scope.getCurrentScope().getLog(getClass()).info("Logging exception.");

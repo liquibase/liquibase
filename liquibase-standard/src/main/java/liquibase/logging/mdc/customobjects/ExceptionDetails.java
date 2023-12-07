@@ -10,6 +10,7 @@ public class ExceptionDetails implements CustomMdcObject {
     private String primaryException;
     private String primaryExceptionReason;
     private String primaryExceptionSource;
+    private String exception;
 
     public ExceptionDetails() {
     }
