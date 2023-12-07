@@ -4,9 +4,9 @@ package org.liquibase.maven.plugins;
 
 import liquibase.CatalogAndSchema;
 import liquibase.Liquibase;
-import liquibase.command.*;
-import liquibase.command.core.helpers.DbUrlConnectionCommandStep;
+import liquibase.command.CommandScope;
 import liquibase.command.core.DiffCommandStep;
+import liquibase.command.core.helpers.DbUrlConnectionArgumentsCommandStep;
 import liquibase.command.core.helpers.PreCompareCommandStep;
 import liquibase.command.core.helpers.ReferenceDbUrlConnectionCommandStep;
 import liquibase.database.Database;
@@ -275,7 +275,7 @@ public class LiquibaseDatabaseDiff extends AbstractLiquibaseChangeLogMojo {
                 CommandScope liquibaseCommand = new CommandScope("diff");
                 liquibaseCommand.setOutput(output);
                 liquibaseCommand.addArgumentValue(DiffCommandStep.FORMAT_ARG, format);
-                liquibaseCommand.addArgumentValue(DbUrlConnectionCommandStep.DATABASE_ARG, db);
+                liquibaseCommand.addArgumentValue(DbUrlConnectionArgumentsCommandStep.DATABASE_ARG, db);
                 liquibaseCommand.addArgumentValue(ReferenceDbUrlConnectionCommandStep.REFERENCE_DATABASE_ARG, referenceDatabase);
                 liquibaseCommand.addArgumentValue(PreCompareCommandStep.COMPARE_CONTROL_ARG, new CompareControl(schemaComparisons, diffTypes));
                 liquibaseCommand.addArgumentValue(PreCompareCommandStep.OBJECT_CHANGE_FILTER_ARG, objectChangeFilter);

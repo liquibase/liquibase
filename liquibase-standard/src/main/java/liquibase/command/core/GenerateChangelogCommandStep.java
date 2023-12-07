@@ -2,7 +2,7 @@ package liquibase.command.core;
 
 import liquibase.Scope;
 import liquibase.command.*;
-import liquibase.command.core.helpers.DbUrlConnectionCommandStep;
+import liquibase.command.core.helpers.DbUrlConnectionArgumentsCommandStep;
 import liquibase.command.core.helpers.DiffOutputControlCommandStep;
 import liquibase.command.core.helpers.ReferenceDbUrlConnectionCommandStep;
 import liquibase.command.providers.ReferenceDatabase;
@@ -154,15 +154,15 @@ public class GenerateChangelogCommandStep extends AbstractCommandStep {
     @Override
     public void validate(CommandScope commandScope) throws CommandValidationException {
         // sets the values to the reference database, as this is what we expect.
-        commandScope.addArgumentValue(ReferenceDbUrlConnectionCommandStep.REFERENCE_DATABASE_ARG, commandScope.getArgumentValue(DbUrlConnectionCommandStep.DATABASE_ARG));
-        commandScope.addArgumentValue(ReferenceDbUrlConnectionCommandStep.REFERENCE_URL_ARG, commandScope.getArgumentValue(DbUrlConnectionCommandStep.URL_ARG));
-        commandScope.addArgumentValue(ReferenceDbUrlConnectionCommandStep.REFERENCE_USERNAME_ARG, commandScope.getArgumentValue(DbUrlConnectionCommandStep.USERNAME_ARG));
-        commandScope.addArgumentValue(ReferenceDbUrlConnectionCommandStep.REFERENCE_PASSWORD_ARG, commandScope.getArgumentValue(DbUrlConnectionCommandStep.PASSWORD_ARG));
-        commandScope.addArgumentValue(ReferenceDbUrlConnectionCommandStep.REFERENCE_DRIVER_ARG, commandScope.getArgumentValue(DbUrlConnectionCommandStep.DRIVER_ARG));
-        commandScope.addArgumentValue(ReferenceDbUrlConnectionCommandStep.REFERENCE_DEFAULT_SCHEMA_NAME_ARG, commandScope.getArgumentValue(DbUrlConnectionCommandStep.DEFAULT_SCHEMA_NAME_ARG));
-        commandScope.addArgumentValue(ReferenceDbUrlConnectionCommandStep.REFERENCE_DEFAULT_CATALOG_NAME_ARG, commandScope.getArgumentValue(DbUrlConnectionCommandStep.DEFAULT_CATALOG_NAME_ARG));
-        commandScope.addArgumentValue(ReferenceDbUrlConnectionCommandStep.REFERENCE_DRIVER_PROPERTIES_FILE_ARG, commandScope.getArgumentValue(DbUrlConnectionCommandStep.DRIVER_PROPERTIES_FILE_ARG));
-        commandScope.addArgumentValue(DbUrlConnectionCommandStep.SKIP_DATABASE_STEP_ARG, true);
+        commandScope.addArgumentValue(ReferenceDbUrlConnectionCommandStep.REFERENCE_DATABASE_ARG, commandScope.getArgumentValue(DbUrlConnectionArgumentsCommandStep.DATABASE_ARG));
+        commandScope.addArgumentValue(ReferenceDbUrlConnectionCommandStep.REFERENCE_URL_ARG, commandScope.getArgumentValue(DbUrlConnectionArgumentsCommandStep.URL_ARG));
+        commandScope.addArgumentValue(ReferenceDbUrlConnectionCommandStep.REFERENCE_USERNAME_ARG, commandScope.getArgumentValue(DbUrlConnectionArgumentsCommandStep.USERNAME_ARG));
+        commandScope.addArgumentValue(ReferenceDbUrlConnectionCommandStep.REFERENCE_PASSWORD_ARG, commandScope.getArgumentValue(DbUrlConnectionArgumentsCommandStep.PASSWORD_ARG));
+        commandScope.addArgumentValue(ReferenceDbUrlConnectionCommandStep.REFERENCE_DRIVER_ARG, commandScope.getArgumentValue(DbUrlConnectionArgumentsCommandStep.DRIVER_ARG));
+        commandScope.addArgumentValue(ReferenceDbUrlConnectionCommandStep.REFERENCE_DEFAULT_SCHEMA_NAME_ARG, commandScope.getArgumentValue(DbUrlConnectionArgumentsCommandStep.DEFAULT_SCHEMA_NAME_ARG));
+        commandScope.addArgumentValue(ReferenceDbUrlConnectionCommandStep.REFERENCE_DEFAULT_CATALOG_NAME_ARG, commandScope.getArgumentValue(DbUrlConnectionArgumentsCommandStep.DEFAULT_CATALOG_NAME_ARG));
+        commandScope.addArgumentValue(ReferenceDbUrlConnectionCommandStep.REFERENCE_DRIVER_PROPERTIES_FILE_ARG, commandScope.getArgumentValue(DbUrlConnectionArgumentsCommandStep.DRIVER_PROPERTIES_FILE_ARG));
+        commandScope.addArgumentValue(DbUrlConnectionArgumentsCommandStep.SKIP_DATABASE_STEP_ARG, true);
         commandScope.addArgumentValue(DiffCommandStep.FORMAT_ARG, "none");
         validateConditionsToOverwriteChangelogFile(commandScope);
     }

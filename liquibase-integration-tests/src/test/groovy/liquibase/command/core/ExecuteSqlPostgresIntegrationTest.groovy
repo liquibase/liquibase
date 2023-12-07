@@ -3,7 +3,7 @@ package liquibase.command.core
 import liquibase.Scope
 import liquibase.command.CommandResults
 import liquibase.command.CommandScope
-import liquibase.command.core.helpers.DbUrlConnectionCommandStep
+import liquibase.command.core.helpers.DbUrlConnectionArgumentsCommandStep
 import liquibase.command.util.CommandUtil
 import liquibase.extension.testing.testsystem.DatabaseTestSystem
 import liquibase.extension.testing.testsystem.TestSystemFactory
@@ -24,9 +24,9 @@ class ExecuteSqlPostgresIntegrationTest extends Specification {
         when:
         CommandScope executeSql = new CommandScope(ExecuteSqlCommandStep.COMMAND_NAME[0])
         executeSql.addArgumentValue(ExecuteSqlCommandStep.SQL_ARG, sql)
-        executeSql.addArgumentValue(DbUrlConnectionCommandStep.URL_ARG, postgres.getConnectionUrl())
-        executeSql.addArgumentValue(DbUrlConnectionCommandStep.USERNAME_ARG, postgres.getUsername())
-        executeSql.addArgumentValue(DbUrlConnectionCommandStep.PASSWORD_ARG, postgres.getPassword())
+        executeSql.addArgumentValue(DbUrlConnectionArgumentsCommandStep.URL_ARG, postgres.getConnectionUrl())
+        executeSql.addArgumentValue(DbUrlConnectionArgumentsCommandStep.USERNAME_ARG, postgres.getUsername())
+        executeSql.addArgumentValue(DbUrlConnectionArgumentsCommandStep.PASSWORD_ARG, postgres.getPassword())
 
         then:
         CommandResults results = executeSql.execute()
@@ -45,9 +45,9 @@ class ExecuteSqlPostgresIntegrationTest extends Specification {
         when:
         CommandScope executeSql = new CommandScope(ExecuteSqlCommandStep.COMMAND_NAME[0])
         executeSql.addArgumentValue(ExecuteSqlCommandStep.SQL_ARG, sql)
-        executeSql.addArgumentValue(DbUrlConnectionCommandStep.URL_ARG, postgres.getConnectionUrl())
-        executeSql.addArgumentValue(DbUrlConnectionCommandStep.USERNAME_ARG, postgres.getUsername())
-        executeSql.addArgumentValue(DbUrlConnectionCommandStep.PASSWORD_ARG, postgres.getPassword())
+        executeSql.addArgumentValue(DbUrlConnectionArgumentsCommandStep.URL_ARG, postgres.getConnectionUrl())
+        executeSql.addArgumentValue(DbUrlConnectionArgumentsCommandStep.USERNAME_ARG, postgres.getUsername())
+        executeSql.addArgumentValue(DbUrlConnectionArgumentsCommandStep.PASSWORD_ARG, postgres.getPassword())
 
         then:
         CommandResults results = executeSql.execute()
