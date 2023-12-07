@@ -1,7 +1,9 @@
 package liquibase.database;
 
 import liquibase.Scope;
+import liquibase.change.ColumnConfig;
 import liquibase.change.core.CreateTableChange;
+import liquibase.changelog.ChangeSet;
 import liquibase.exception.DatabaseException;
 import liquibase.executor.ExecutorService;
 import liquibase.sdk.executor.MockExecutor;
@@ -11,6 +13,7 @@ import liquibase.statement.SqlStatement;
 import liquibase.statement.core.DropTableStatement;
 import liquibase.structure.core.Table;
 import org.junit.jupiter.api.Test;
+import org.mockito.Mockito;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -304,4 +307,23 @@ public abstract class AbstractJdbcDatabaseTest {
 //            assertEquals("VARCHAR(255)", database.getDataType("java.sql.Types.VARCHAR(255)", false).toUpperCase().replaceAll("VARCHAR2", "VARCHAR"));
 //        }
 //    }
+
+    @Test
+    public void executeStatements() throws Exception {
+        final Database database = getDatabase();
+        final MockExecutor mockExecutor = Mockito.spy(new MockExecutor());
+        final List<SqlVisitor> sqlVisitors = new ArrayList<>();
+        Scope.getCurrentScope().getSingleton(ExecutorService.class).setExecutor("jdbc", database, mockExecutor);
+
+        final ChangeSet changeSet = new ChangeSet("test1", "nvoxland", false, true, "/test/me.txt", null, null, false, null);
+        CreateTableChange change = new CreateTableChange();
+        change.setTableName("testTable");
+        change.addColumn(new ColumnConfig().setName("id").setType("int"));
+        changeSet.addChange(change);
+
+        database.executeStatements(change, null, sqlVisitors);
+
+        assertEquals("CREATE TABLE testTable (id INT);", mockExecutor.getRanSql().trim());
+        Mockito.verify(mockExecutor).execute(change, sqlVisitors);
+    }
 }
