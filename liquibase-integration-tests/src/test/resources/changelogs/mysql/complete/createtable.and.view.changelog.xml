@@ -6,7 +6,7 @@
         xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-latest.xsd">
 
     <changeSet id="createTable" author="mallod">
-        <createTable tableName="testTable">
+        <createTable tableName="test_table">
             <column name="id" type="int"/>
             <column name="name" type="varchar(255)"/>
         </createTable>
@@ -14,7 +14,7 @@
 
     <changeSet id="createView" author="mallod">
         <createView viewName="testView">
-            select * from testTable
+            select * from test_table
         </createView>
     </changeSet>
 </databaseChangeLog>
