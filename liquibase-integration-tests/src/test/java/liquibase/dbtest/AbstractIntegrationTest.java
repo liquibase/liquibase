@@ -1311,8 +1311,9 @@ public abstract class AbstractIntegrationTest {
     }
 
     @Test
-    public void makeSureErrorIsReturnedWhenTableNameIsNotSpecified() throws DatabaseException {
-       // This is a H2 and MySQL only test.
+    public void makeSureNoErrorIsReturnedWhenTableNameIsNotSpecified() throws DatabaseException {
+        // This is a test to validate most of the DBs do not throw an error when tableName is not
+        // specified as part of primaryKeyExistsPrecondition.
         clearDatabase();
         String errorMsg = "";
         try {
@@ -1324,7 +1325,7 @@ public abstract class AbstractIntegrationTest {
             clearDatabase();
         }
 
-        Assert.assertTrue(errorMsg.contains("Database driver requires a table name to be specified in order to search for a primary key."));
+        Assert.assertTrue(errorMsg.isEmpty());
     }
 
     private ProcessBuilder prepareExternalLiquibaseProcess() {

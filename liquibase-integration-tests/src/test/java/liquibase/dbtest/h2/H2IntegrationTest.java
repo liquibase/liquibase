@@ -11,6 +11,7 @@ import liquibase.diff.compare.CompareControl;
 import liquibase.diff.output.DiffOutputControl;
 import liquibase.diff.output.changelog.DiffToChangeLog;
 import liquibase.diff.output.report.DiffToReport;
+import liquibase.exception.CommandExecutionException;
 import liquibase.exception.DatabaseException;
 import liquibase.exception.ValidationFailedException;
 import liquibase.executor.ExecutorService;
@@ -209,6 +210,22 @@ public class H2IntegrationTest extends AbstractIntegrationTest {
         catch (DatabaseException e) {
             Assert.assertTrue(e.getMessage().contains("Table \"ANYDB\" not found"));
         }
+    }
+
+    @Test
+    public void makeSureErrorIsReturnedWhenTableNameIsNotSpecified() throws DatabaseException {
+        clearDatabase();
+        String errorMsg = "";
+        try {
+            runUpdate("changelogs/common/preconditions/preconditions.changelog.xml");
+        }catch(CommandExecutionException e) {
+            errorMsg = e.getMessage();
+        }
+        finally {
+            clearDatabase();
+        }
+
+        Assert.assertTrue(errorMsg.contains("Database driver requires a table name to be specified in order to search for a primary key."));
     }
 
     @Override

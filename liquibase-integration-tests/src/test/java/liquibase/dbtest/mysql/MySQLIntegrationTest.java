@@ -4,6 +4,7 @@ import liquibase.CatalogAndSchema;
 import liquibase.Scope;
 import liquibase.database.DatabaseFactory;
 import liquibase.dbtest.AbstractIntegrationTest;
+import liquibase.exception.CommandExecutionException;
 import liquibase.exception.DatabaseException;
 import liquibase.executor.ExecutorService;
 import liquibase.snapshot.DatabaseSnapshot;
@@ -13,6 +14,7 @@ import liquibase.statement.core.RawSqlStatement;
 import liquibase.structure.core.Column;
 import liquibase.structure.core.Schema;
 import liquibase.structure.core.Table;
+import org.junit.Assert;
 import org.junit.Test;
 
 import java.sql.SQLSyntaxErrorException;
@@ -87,4 +89,20 @@ public class MySQLIntegrationTest extends AbstractIntegrationTest {
         assertEquals("0000-00-00 00:00:00", defaultValue);
     }
 
+    @Test
+    public void makeSureErrorIsReturnedWhenTableNameIsNotSpecified() throws DatabaseException {
+        clearDatabase();
+        String errorMsg = "";
+        try {
+            runUpdate("changelogs/common/preconditions/preconditions.changelog.xml");
+        }catch(CommandExecutionException e) {
+            errorMsg = e.getMessage();
+        }
+        finally {
+            clearDatabase();
+        }
+
+        Assert.assertTrue(errorMsg.contains("Database driver requires a table name to be specified in order to search for a primary key."));
     }
+
+}
