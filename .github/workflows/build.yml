@@ -222,9 +222,9 @@ jobs:
           # there is some issue while doing a tar -xzf hence copying this manually
           cp -r liquibase-standard/src/main/resources/liquibase/examples liquibase-dist/target/liquibase-${{ needs.setup.outputs.thisBranchName }}-SNAPSHOT
           
+          ls -l liquibase-dist/target
           #zip the above folder again which contains examples folder
-          cd liquibase-dist/target && tar -czf liquibase-${{ needs.setup.outputs.thisBranchName }}-SNAPSHOT.tar.gz liquibase-${{ needs.setup.outputs.thisBranchName }}-SNAPSHOT  
-          
+          (cd liquibase-dist/target && tar -czf liquibase-${{ needs.setup.outputs.thisBranchName }}-SNAPSHOT.tar.gz liquibase-${{ needs.setup.outputs.thisBranchName }}-SNAPSHOT)  
           
           ## verify that the contents of the tar matches the expectation
           #echo "Comparing the contents of the tar.gz with the expected contents (using baseline file in liquibase-dist directory) to ensure that no new files were accidentally added. A failure here indicates that a new file was added to the tar.gz, and it should either be rectififed or added to the baseline."
