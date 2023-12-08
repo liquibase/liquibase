@@ -4,6 +4,9 @@ import liquibase.ChecksumVersion;
 import liquibase.ContextExpression;
 import liquibase.Labels;
 import liquibase.change.CheckSum;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
 
 import java.nio.file.Paths;
 import java.util.Date;
@@ -11,23 +14,25 @@ import java.util.Date;
 /**
  * Encapsulates information about a previously-ran changeset.  Used to build rollback statements.
  */
+@NoArgsConstructor
+@Getter
+@Setter
 public class RanChangeSet {
-    private final String changeLog;
-    private final String storedChangeLog;
-    private final String id;
-    private final String author;
-    private final CheckSum lastCheckSum;
-    private final Date dateExecuted;
+    private String changeLog;
+    private String storedChangeLog;
+    private String id;
+    private String author;
+    private CheckSum lastCheckSum;
+    private Date dateExecuted;
     private String tag;
-    private final ChangeSet.ExecType execType;
+    private ChangeSet.ExecType execType;
     private String description;
     private String comments;
     private Integer orderExecuted;
-    private final ContextExpression contextExpression;
-    private final Labels labels;
+    private ContextExpression contextExpression;
+    private Labels labels;
     private String deploymentId;
     private String liquibaseVersion;
-
 
     public RanChangeSet(ChangeSet changeSet) {
         this(changeSet, null, null, null);
@@ -74,94 +79,11 @@ public class RanChangeSet {
         this.deploymentId = deploymentId;
     }
 
-    public String getChangeLog() {
-        return changeLog;
-    }
-
-    /**
-     * Get the path stored in the DatabaseChangeLog table
-     */
-    public String getStoredChangeLog() {
-        return storedChangeLog;
-    }
-
-    public String getId() {
-        return id;
-    }
-
-    public String getAuthor() {
-        return author;
-    }
-
-    public CheckSum getLastCheckSum() {
-        return lastCheckSum;
-    }
-
     public Date getDateExecuted() {
         if (dateExecuted == null) {
             return null;
         }
         return (Date) dateExecuted.clone();
-    }
-
-    public String getTag() {
-        return tag;
-    }
-
-    public void setTag(String tag) {
-        this.tag = tag;
-    }
-
-    public ChangeSet.ExecType getExecType() {
-        return execType;
-    }
-
-    public String getDescription() {
-        return description;
-    }
-
-    public void setDescription(String description) {
-        this.description = description;
-    }
-
-    public String getComments() {
-        return comments;
-    }
-
-    public void setComments(String comments) {
-        this.comments = comments;
-    }
-
-    public ContextExpression getContextExpression() {
-        return contextExpression;
-    }
-
-    public Labels getLabels() {
-        return labels;
-    }
-
-    public Integer getOrderExecuted() {
-        return orderExecuted;
-    }
-
-    public void setOrderExecuted(Integer orderExecuted) {
-        this.orderExecuted = orderExecuted;
-    }
-
-    public String getDeploymentId() {
-        return deploymentId;
-    }
-
-    public void setDeploymentId(String deploymentId) {
-        this.deploymentId = deploymentId;
-    }
-
-    public String getLiquibaseVersion() {
-        return liquibaseVersion;
-    }
-
-    public void setLiquibaseVersion(String liquibaseVersion) {
-        this.liquibaseVersion = liquibaseVersion;
     }
 
     @Override

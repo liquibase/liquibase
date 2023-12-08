@@ -4,6 +4,9 @@ import liquibase.ChecksumVersion;
 import liquibase.Scope;
 import liquibase.util.MD5Util;
 import liquibase.util.StringUtil;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -20,9 +23,16 @@ import java.util.regex.Pattern;
  * <p></p>
  * It is not up to this class to determine what should be storedCheckSum-ed, it simply hashes what is passed to it.
  */
+@NoArgsConstructor
+@Setter
 public final class CheckSum {
-    private final int version;
-    private final String storedCheckSum;
+    /**
+     * -- GETTER --
+     *  Return the Checksum Algorithm version for this CheckSum
+     */
+    @Getter
+    private int version;
+    private String storedCheckSum;
 
     private static final char DELIMITER = ':';
     private static final String CHECKSUM_REGEX = "(^\\d++)" + DELIMITER + "([a-zA-Z0-9]++)";
@@ -112,13 +122,6 @@ public final class CheckSum {
     @Override
     public String toString() {
         return version + String.valueOf(DELIMITER) + storedCheckSum;
-    }
-
-    /**
-     * Return the Checksum Algorithm version for this CheckSum
-     */
-    public int getVersion() {
-        return version;
     }
 
     @Override
