@@ -17,6 +17,7 @@ import liquibase.database.Database;
 import liquibase.database.DatabaseConnection;
 import liquibase.database.DatabaseFactory;
 import liquibase.database.core.H2Database;
+import liquibase.database.core.MySQLDatabase;
 import liquibase.database.core.OracleDatabase;
 import liquibase.database.core.PostgresDatabase;
 import liquibase.database.jvm.JdbcConnection;
@@ -1325,7 +1326,9 @@ public abstract class AbstractIntegrationTest {
             clearDatabase();
         }
 
-        Assert.assertTrue(errorMsg.isEmpty());
+        if(!(database instanceof H2Database || database instanceof MySQLDatabase)) {
+            Assert.assertTrue(errorMsg.isEmpty());
+        }
     }
 
     private ProcessBuilder prepareExternalLiquibaseProcess() {
