@@ -117,4 +117,5 @@ public class MdcKey {
     public static final String PRIMARY_EXCEPTION = "primaryException";
     public static final String PRIMARY_EXCEPTION_REASON = "primaryExceptionReason";
     public static final String PRIMARY_EXCEPTION_SOURCE = "primaryExceptionSource";
+    public static final String QUALITY_CHECKS = "qualityChecks";
 }
