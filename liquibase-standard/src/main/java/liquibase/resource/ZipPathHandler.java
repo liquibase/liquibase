@@ -6,8 +6,10 @@ import java.io.IOException;
 import java.io.OutputStream;
 import java.net.URI;
 import java.nio.file.Files;
+import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.StandardOpenOption;
+import java.util.Arrays;
 
 /**
  * {@link PathHandler} that converts the path into a {@link DirectoryResourceAccessor}.
@@ -36,10 +38,22 @@ public class ZipPathHandler extends AbstractPathHandler {
 
     @Override
     public ResourceAccessor getResourceAccessor(String root) throws FileNotFoundException {
-        root = root.replace("jar:", "").replace("!/", "");
+        int startIndex = root.startsWith("jar:") ? 4 : 0;
+        int endIndex = root.lastIndexOf('!');
+        root = root.substring(startIndex, endIndex > 4 ? endIndex : root.length());
 
         if (root.matches("^\\w\\w+:.*")) {
-            return new ZipResourceAccessor(Paths.get(URI.create(root)));
+            String[] paths = root.split("!");
+
+            Path rootPath = Paths.get(URI.create(paths[0]));
+
+            // check for embedded jar files
+            if (paths.length > 1) {
+                return new ZipResourceAccessor(rootPath, Arrays.copyOfRange(paths, 1, paths.length));
+            }
+            else {
+                return new ZipResourceAccessor(rootPath);
+            }
         }
         return new ZipResourceAccessor(new File(root));
     }
