@@ -225,7 +225,12 @@ public class CommandScope {
             String source = null;
             Database database = (Database)getDependency(Database.class);
             if (database != null) {
-                source = getDatabaseInfo(database);
+                try {
+                    source = getDatabaseInfo(database);
+                } catch (Exception e) {
+                    Scope.getCurrentScope().getLog(CommandScope.class).warning("Unable to obtain database info: " + e.getMessage());
+                    source = database.getDisplayName();
+                }
             }
 
             // after executing our pipeline, runs cleanup in inverse order
