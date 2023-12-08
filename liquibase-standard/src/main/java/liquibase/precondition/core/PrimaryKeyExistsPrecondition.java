@@ -5,6 +5,7 @@ import liquibase.changelog.DatabaseChangeLog;
 import liquibase.changelog.visitor.ChangeExecListener;
 import liquibase.database.Database;
 import liquibase.database.core.H2Database;
+import liquibase.database.core.MySQLDatabase;
 import liquibase.exception.*;
 import liquibase.precondition.AbstractPrecondition;
 import liquibase.snapshot.SnapshotGeneratorFactory;
@@ -47,8 +48,8 @@ public class PrimaryKeyExistsPrecondition extends AbstractPrecondition {
             table.setSchema(new Schema(getCatalogName(), getSchemaName()));
             if (StringUtil.trimToNull(getTableName()) != null) {
                 table.setName(getTableName());
-            } else if (database instanceof H2Database) {
-                throw new DatabaseException("H2 Database driver requires a table name to be specified in order to search for a primary key.");
+            } else if (database instanceof H2Database || database instanceof MySQLDatabase) {
+                throw new DatabaseException("Database driver requires a table name to be specified in order to search for a primary key.");
             }
             example.setTable(table);
             example.setName(getPrimaryKeyName());
