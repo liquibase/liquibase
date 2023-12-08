@@ -1310,6 +1310,22 @@ public abstract class AbstractIntegrationTest {
 
     }
 
+    @Test
+    public void makeSureErrorIsReturnedWhenTableNameIsNotSpecified() throws DatabaseException {
+        clearDatabase();
+        String errorMsg = "";
+        try {
+            runUpdate("changelogs/common/preconditions/preconditions.changelog.xml");
+        }catch(CommandExecutionException e) {
+            errorMsg = e.getMessage();
+        }
+        finally {
+            clearDatabase();
+        }
+
+        Assert.assertTrue(errorMsg.contains("Database driver requires a table name to be specified in order to search for a primary key.") || errorMsg.contains("Table not specified."));
+    }
+
     private ProcessBuilder prepareExternalLiquibaseProcess() {
         String javaHome = System.getProperty("java.home");
         String javaBin = javaHome + File.separator + "bin" + File.separator + "java";
