@@ -16,10 +16,7 @@ import liquibase.command.core.helpers.DbUrlConnectionArgumentsCommandStep;
 import liquibase.database.Database;
 import liquibase.database.DatabaseConnection;
 import liquibase.database.DatabaseFactory;
-import liquibase.database.core.H2Database;
-import liquibase.database.core.MySQLDatabase;
-import liquibase.database.core.OracleDatabase;
-import liquibase.database.core.PostgresDatabase;
+import liquibase.database.core.*;
 import liquibase.database.jvm.JdbcConnection;
 import liquibase.datatype.DataTypeFactory;
 import liquibase.datatype.core.ClobType;
@@ -1326,7 +1323,8 @@ public abstract class AbstractIntegrationTest {
             clearDatabase();
         }
 
-        if(!(database instanceof H2Database || database instanceof MySQLDatabase)) {
+        if(!(database instanceof H2Database || database instanceof MySQLDatabase || database instanceof HsqlDatabase
+                || database instanceof SQLiteDatabase || database instanceof DB2Database)) {
             Assert.assertTrue(errorMsg.isEmpty());
         }
     }

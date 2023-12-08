@@ -4,8 +4,11 @@ import liquibase.Liquibase;
 import liquibase.Scope;
 import liquibase.database.DatabaseFactory;
 import liquibase.dbtest.AbstractIntegrationTest;
+import liquibase.exception.CommandExecutionException;
+import liquibase.exception.DatabaseException;
 import liquibase.exception.ValidationFailedException;
 import liquibase.snapshot.DatabaseSnapshot;
+import org.junit.Assert;
 import org.junit.Test;
 
 import java.io.File;
@@ -74,6 +77,22 @@ public class SQLiteIntegrationTest extends AbstractIntegrationTest {
     @Test
     public void testDiffExternalForeignKeys() throws Exception {
         //cross-schema security for oracle is a bother, ignoring test for now
+    }
+
+    @Test
+    public void makeSureErrorIsReturnedWhenTableNameIsNotSpecified() throws DatabaseException {
+        clearDatabase();
+        String errorMsg = "";
+        try {
+            runUpdate("changelogs/common/preconditions/preconditions.changelog.xml");
+        }catch(CommandExecutionException e) {
+            errorMsg = e.getMessage();
+        }
+        finally {
+            clearDatabase();
+        }
+
+        Assert.assertTrue(errorMsg.contains("Database driver requires a table name to be specified in order to search for a primary key."));
     }
 
     @Override

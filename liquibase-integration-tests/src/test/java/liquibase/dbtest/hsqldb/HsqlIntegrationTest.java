@@ -3,8 +3,12 @@ package liquibase.dbtest.hsqldb;
 import liquibase.database.DatabaseFactory;
 import liquibase.database.jvm.JdbcConnection;
 import liquibase.dbtest.AbstractIntegrationTest;
+import liquibase.exception.CommandExecutionException;
+import liquibase.exception.DatabaseException;
 import liquibase.util.SystemUtil;
+import org.junit.Assert;
 import org.junit.Assume;
+import org.junit.Test;
 
 import java.sql.SQLSyntaxErrorException;
 
@@ -32,5 +36,21 @@ public class HsqlIntegrationTest extends AbstractIntegrationTest {
             }
         }
         getDatabase().commit();
+    }
+
+    @Test
+    public void makeSureErrorIsReturnedWhenTableNameIsNotSpecified() throws DatabaseException {
+        clearDatabase();
+        String errorMsg = "";
+        try {
+            runUpdate("changelogs/common/preconditions/preconditions.changelog.xml");
+        }catch(CommandExecutionException e) {
+            errorMsg = e.getMessage();
+        }
+        finally {
+            clearDatabase();
+        }
+
+        Assert.assertTrue(errorMsg.contains("Database driver requires a table name to be specified in order to search for a primary key."));
     }
 }
