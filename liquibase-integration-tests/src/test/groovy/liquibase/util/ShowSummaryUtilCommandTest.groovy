@@ -5,17 +5,17 @@ import liquibase.UpdateSummaryEnum
 import liquibase.UpdateSummaryOutputEnum
 import liquibase.command.CommandScope
 import liquibase.command.core.UpdateCommandStep
-import liquibase.command.core.helpers.DbUrlConnectionCommandStep
+import liquibase.command.core.helpers.DbUrlConnectionArgumentsCommandStep
 import liquibase.command.core.helpers.ShowSummaryArgument
 import liquibase.command.util.CommandUtil
 import liquibase.extension.testing.testsystem.DatabaseTestSystem
 import liquibase.extension.testing.testsystem.TestSystemFactory
 import liquibase.extension.testing.testsystem.spock.LiquibaseIntegrationTest
 import liquibase.logging.core.BufferedLogService
-
-import java.util.logging.Level
 import spock.lang.Shared
 import spock.lang.Specification
+
+import java.util.logging.Level
 
 @LiquibaseIntegrationTest
 class ShowSummaryUtilCommandTest extends Specification {
@@ -60,9 +60,9 @@ class ShowSummaryUtilCommandTest extends Specification {
             @Override
             void run() throws Exception {
                 CommandScope commandScope = new CommandScope(UpdateCommandStep.COMMAND_NAME)
-                commandScope.addArgumentValue(DbUrlConnectionCommandStep.URL_ARG, postgres.getConnectionUrl())
-                commandScope.addArgumentValue(DbUrlConnectionCommandStep.USERNAME_ARG, postgres.getUsername())
-                commandScope.addArgumentValue(DbUrlConnectionCommandStep.PASSWORD_ARG, postgres.getPassword())
+                commandScope.addArgumentValue(DbUrlConnectionArgumentsCommandStep.URL_ARG, postgres.getConnectionUrl())
+                commandScope.addArgumentValue(DbUrlConnectionArgumentsCommandStep.USERNAME_ARG, postgres.getUsername())
+                commandScope.addArgumentValue(DbUrlConnectionArgumentsCommandStep.PASSWORD_ARG, postgres.getPassword())
                 commandScope.addArgumentValue(UpdateCommandStep.CHANGELOG_FILE_ARG, "changelogs/pgsql/update/showSummaryWithLabels.xml")
                 commandScope.addArgumentValue(UpdateCommandStep.LABEL_FILTER_ARG, "testtable1")
                 commandScope.addArgumentValue(UpdateCommandStep.CONTEXTS_ARG, null)
@@ -105,9 +105,9 @@ class ShowSummaryUtilCommandTest extends Specification {
             @Override
             void run() throws Exception {
                 CommandScope commandScope = new CommandScope(UpdateCommandStep.COMMAND_NAME)
-                commandScope.addArgumentValue(DbUrlConnectionCommandStep.URL_ARG, postgres.getConnectionUrl())
-                commandScope.addArgumentValue(DbUrlConnectionCommandStep.USERNAME_ARG, postgres.getUsername())
-                commandScope.addArgumentValue(DbUrlConnectionCommandStep.PASSWORD_ARG, postgres.getPassword())
+                commandScope.addArgumentValue(DbUrlConnectionArgumentsCommandStep.URL_ARG, postgres.getConnectionUrl())
+                commandScope.addArgumentValue(DbUrlConnectionArgumentsCommandStep.USERNAME_ARG, postgres.getUsername())
+                commandScope.addArgumentValue(DbUrlConnectionArgumentsCommandStep.PASSWORD_ARG, postgres.getPassword())
                 commandScope.addArgumentValue(UpdateCommandStep.CHANGELOG_FILE_ARG, "changelogs/pgsql/update/showSummaryWithLabels.xml")
                 commandScope.addArgumentValue(UpdateCommandStep.LABEL_FILTER_ARG, "testtable1")
                 commandScope.addArgumentValue(UpdateCommandStep.CONTEXTS_ARG, null)
@@ -152,9 +152,9 @@ class ShowSummaryUtilCommandTest extends Specification {
             @Override
             void run() throws Exception {
                 CommandScope commandScope = new CommandScope(UpdateCommandStep.COMMAND_NAME)
-                commandScope.addArgumentValue(DbUrlConnectionCommandStep.URL_ARG, postgres.getConnectionUrl())
-                commandScope.addArgumentValue(DbUrlConnectionCommandStep.USERNAME_ARG, postgres.getUsername())
-                commandScope.addArgumentValue(DbUrlConnectionCommandStep.PASSWORD_ARG, postgres.getPassword())
+                commandScope.addArgumentValue(DbUrlConnectionArgumentsCommandStep.URL_ARG, postgres.getConnectionUrl())
+                commandScope.addArgumentValue(DbUrlConnectionArgumentsCommandStep.USERNAME_ARG, postgres.getUsername())
+                commandScope.addArgumentValue(DbUrlConnectionArgumentsCommandStep.PASSWORD_ARG, postgres.getPassword())
                 commandScope.addArgumentValue(UpdateCommandStep.CHANGELOG_FILE_ARG, "changelogs/pgsql/update/showSummaryWithLabels.xml")
                 commandScope.addArgumentValue(UpdateCommandStep.LABEL_FILTER_ARG, "testtable1")
                 commandScope.addArgumentValue(UpdateCommandStep.CONTEXTS_ARG, null)
