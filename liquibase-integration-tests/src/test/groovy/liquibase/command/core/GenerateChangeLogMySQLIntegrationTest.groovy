@@ -113,5 +113,29 @@ create table str4 (
         CommandUtil.runDropAll(mysql)
 
     }
+
+    def "Ensure generate changelog set runOnChange and replaceIfExists properties correctly for a created view changeset"() {
+        given:
+        CommandUtil.runUpdate(mysql, "changelogs/mysql/complete/createtable.and.view.changelog.xml", null, null, null)
+        OutputStream outputStream = new ByteArrayOutputStream()
+
+        when:
+        CommandScope commandScope = new CommandScope(GenerateChangelogCommandStep.COMMAND_NAME)
+        commandScope.addArgumentValue(DbUrlConnectionArgumentsCommandStep.URL_ARG, mysql.getConnectionUrl())
+        commandScope.addArgumentValue(DbUrlConnectionArgumentsCommandStep.USERNAME_ARG, mysql.getUsername())
+        commandScope.addArgumentValue(DbUrlConnectionArgumentsCommandStep.PASSWORD_ARG, mysql.getPassword())
+        commandScope.addArgumentValue(GenerateChangelogCommandStep.REPLACEIFEXISTS_TYPES_ARG, "createView")
+        commandScope.addArgumentValue(GenerateChangelogCommandStep.RUNONCHANGE_TYPES_ARG, "createView")
+        commandScope.setOutput(outputStream)
+        commandScope.execute()
+
+        then:
+        def outputContent = outputStream.toString();
+        outputContent.contains(" runOnChange=\"true\">")
+        outputContent.contains(" replaceIfExists=\"true\"")
+
+        cleanup:
+        CommandUtil.runDropAll(mysql)
+    }
 }
 

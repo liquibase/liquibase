@@ -4,6 +4,7 @@ import liquibase.GlobalConfiguration;
 import liquibase.Labels;
 import liquibase.Scope;
 import liquibase.change.Change;
+import liquibase.change.ReplaceIfExists;
 import liquibase.change.core.*;
 import liquibase.changelog.ChangeSet;
 import liquibase.configuration.core.DeprecatedConfigurationValueProvider;
@@ -60,8 +61,8 @@ public class DiffToChangeLog {
     private String changeSetLabels;
     private String changeSetAuthor;
     private String changeSetPath;
-    private boolean changeSetRunOnChangeForCreateViewChange;
-    private boolean changeReplaceIfExistsForCreateViewChange;
+    private String[] changeSetRunOnChangeTypes;
+    private String[] changeReplaceIfExistsTypes;
     private DiffResult diffResult;
     private final DiffOutputControl diffOutputControl;
     private boolean tryDbaDependencies = true;
@@ -756,10 +757,8 @@ public class DiffToChangeLog {
 
             if (useSeparateChangeSets(changes)) {
                 for (Change change : changes) {
-                    final boolean onlyCreateViewChanges = change instanceof CreateViewChange;
-                    final boolean runOnChange = onlyCreateViewChanges && getChangeSetRunOnChangeForCreateViewChange();
-                    ChangeSet changeSet =
-                       new ChangeSet(generateId(changes), getChangeSetAuthor(), false, false, this.changeSetPath, changeSetContext,
+                    final boolean runOnChange = isContainedInRunOnChangeTypes(change);
+                    ChangeSet changeSet = new ChangeSet(generateId(changes), getChangeSetAuthor(), false, runOnChange, this.changeSetPath, changeSetContext,
                             null, true, quotingStrategy, null);
                     changeSet.setCreated(created);
                     if (diffOutputControl.getLabels() != null) {
@@ -767,15 +766,14 @@ public class DiffToChangeLog {
                     } else {
                         changeSet.setLabels(new Labels(this.changeSetLabels));
                     }
-                    if (change instanceof CreateViewChange && getChangeReplaceIfExistsForCreateViewChange()) {
-                        ((CreateViewChange) change).setReplaceIfExists(true);
+                    if (change instanceof ReplaceIfExists && isContainedInReplaceIfExistsTypes(change)) {
+                        ((ReplaceIfExists) change).setReplaceIfExists(true);
                     }
                     changeSet.addChange(change);
                     changeSets.add(changeSet);
                 }
             } else {
-                final boolean onlyCreateViewChanges = Arrays.asList(changes).stream().allMatch(CreateViewChange.class::isInstance);
-                final boolean runOnChange = onlyCreateViewChanges && getChangeSetRunOnChangeForCreateViewChange();
+                final boolean runOnChange = Arrays.asList(changes).stream().allMatch(change -> isContainedInRunOnChangeTypes(change));
                 ChangeSet changeSet = new ChangeSet(generateId(changes), getChangeSetAuthor(), false, runOnChange, this.changeSetPath, csContext,
                         null, true, quotingStrategy, null);
                 changeSet.setCreated(created);
@@ -785,8 +783,8 @@ public class DiffToChangeLog {
                     changeSet.setLabels(new Labels(this.changeSetLabels));
                 }
                 for (Change change : changes) {
-                    if (change instanceof CreateViewChange && getChangeReplaceIfExistsForCreateViewChange()) {
-                        ((CreateViewChange) change).setReplaceIfExists(true);
+                    if (change instanceof ReplaceIfExists && isContainedInReplaceIfExistsTypes(change)) {
+                        ((ReplaceIfExists) change).setReplaceIfExists(true);
                     }
                     changeSet.addChange(change);
                 }
@@ -848,20 +846,28 @@ public class DiffToChangeLog {
         this.changeSetPath = changeSetPath;
     }
 
-    public void setChangeSetRunOnChangeForCreateViewChange(final boolean runOnChange) {
-        changeSetRunOnChangeForCreateViewChange = runOnChange;
+    public void setChangeSetRunOnChangeTypes(final String[] runOnChangeTypes) {
+        changeSetRunOnChangeTypes = runOnChangeTypes;
     }
 
-    protected boolean getChangeSetRunOnChangeForCreateViewChange() {
-        return changeSetRunOnChangeForCreateViewChange;
+    protected String[] getChangeSetRunOnChangeTypes() {
+        return changeSetRunOnChangeTypes;
     }
 
-    public void setChangeReplaceIfExistsForCreateViewChange(final boolean replaceIfExists) {
-        changeReplaceIfExistsForCreateViewChange = replaceIfExists;
+    private boolean isContainedInRunOnChangeTypes(final Change change) {
+        return getChangeSetRunOnChangeTypes() != null && Arrays.asList(getChangeSetRunOnChangeTypes()).contains(change.getSerializedObjectName());
     }
 
-    protected boolean getChangeReplaceIfExistsForCreateViewChange() {
-        return changeReplaceIfExistsForCreateViewChange;
+    public void setChangeReplaceIfExistsTypes(final String[] replaceIfExistsTypes) {
+        changeReplaceIfExistsTypes = replaceIfExistsTypes;
+    }
+
+    protected String[] getChangeReplaceIfExistsTypes() {
+        return changeReplaceIfExistsTypes;
+    }
+
+    private boolean isContainedInReplaceIfExistsTypes(final Change change) {
+        return getChangeReplaceIfExistsTypes() != null && Arrays.asList(getChangeReplaceIfExistsTypes()).contains(change.getSerializedObjectName());
     }
 
     public void setIdRoot(String idRoot) {

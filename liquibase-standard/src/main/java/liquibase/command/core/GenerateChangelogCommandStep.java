@@ -1,7 +1,10 @@
 package liquibase.command.core;
 
 import liquibase.Scope;
+import liquibase.change.ChangeFactory;
+import liquibase.change.ReplaceIfExists;
 import liquibase.command.*;
+import liquibase.command.core.helpers.AbstractChangelogCommandStep;
 import liquibase.command.core.helpers.DbUrlConnectionArgumentsCommandStep;
 import liquibase.command.core.helpers.DiffOutputControlCommandStep;
 import liquibase.command.core.helpers.ReferenceDbUrlConnectionCommandStep;
@@ -20,9 +23,13 @@ import liquibase.util.StringUtil;
 import java.io.IOException;
 import java.io.PrintStream;
 import java.util.Arrays;
+import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
-public class GenerateChangelogCommandStep extends AbstractCommandStep {
+public class GenerateChangelogCommandStep extends AbstractChangelogCommandStep {
 
     public static final String[] COMMAND_NAME = {"generateChangelog"};
 
@@ -37,9 +44,6 @@ public class GenerateChangelogCommandStep extends AbstractCommandStep {
     public static final CommandArgumentDefinition<String> DATA_OUTPUT_DIR_ARG;
     public static final CommandArgumentDefinition<Boolean> OVERWRITE_OUTPUT_FILE_ARG;
     public static final CommandArgumentDefinition<String> CHANGELOG_FILE_ARG;
-    public static final CommandArgumentDefinition<Boolean> CREATEVIEW_RUNONCHANGE_ARG;
-    public static final CommandArgumentDefinition<Boolean> CREATEVIEW_REPLACEIFEXISTS_ARG;
-
     public static final CommandArgumentDefinition<String> REFERENCE_URL_ARG;
     public static final CommandArgumentDefinition<String> REFERENCE_USERNAME_ARG;
     public static final CommandArgumentDefinition<String> REFERENCE_PASSWORD_ARG;
@@ -72,10 +76,6 @@ public class GenerateChangelogCommandStep extends AbstractCommandStep {
                 .description("Directory to write table data to").build();
         OVERWRITE_OUTPUT_FILE_ARG = builder.argument("overwriteOutputFile", Boolean.class)
                 .defaultValue(false).description("Flag to allow overwriting of output changelog file. Default: false").build();
-        CREATEVIEW_RUNONCHANGE_ARG = builder.argument("createViewRunOnChange", Boolean.class)
-                .defaultValue(false).description("Sets runOnChange=\"true\" for changesets containing solely createView changes").build();
-        CREATEVIEW_REPLACEIFEXISTS_ARG = builder.argument("createViewReplaceIfExists", Boolean.class)
-                .defaultValue(false).description("Sets replaceIfExists=\"true\" for createView changes").build();
 
         // this happens because the command line asks for "url", but in fact uses it as "referenceUrl"
         REFERENCE_URL_ARG = builder.argument("referenceUrl", String.class).hidden().build();
@@ -137,8 +137,8 @@ public class GenerateChangelogCommandStep extends AbstractCommandStep {
             changeLogWriter.setChangeSetLabels(commandScope.getArgumentValue(LABEL_FILTER_ARG));
         }
         changeLogWriter.setChangeSetPath(changeLogFile);
-        changeLogWriter.setChangeSetRunOnChangeForCreateViewChange(commandScope.getArgumentValue(CREATEVIEW_RUNONCHANGE_ARG));
-        changeLogWriter.setChangeReplaceIfExistsForCreateViewChange(commandScope.getArgumentValue(CREATEVIEW_REPLACEIFEXISTS_ARG));
+        changeLogWriter.setChangeSetRunOnChangeTypes(commandScope.getArgumentValue(RUNONCHANGE_TYPES_ARG).split("\\s*,\\s*"));
+        changeLogWriter.setChangeReplaceIfExistsTypes(commandScope.getArgumentValue(REPLACEIFEXISTS_TYPES_ARG).split("\\s*,\\s*"));
 
         ObjectQuotingStrategy originalStrategy = referenceDatabase.getObjectQuotingStrategy();
         try {
@@ -173,6 +173,8 @@ public class GenerateChangelogCommandStep extends AbstractCommandStep {
         commandScope.addArgumentValue(DbUrlConnectionArgumentsCommandStep.SKIP_DATABASE_STEP_ARG, true);
         commandScope.addArgumentValue(DiffCommandStep.FORMAT_ARG, "none");
         validateConditionsToOverwriteChangelogFile(commandScope);
+        validateReplaceIfExistsTypes(commandScope);
+        validateRunOnChangeTypes(commandScope);
     }
 
     /**

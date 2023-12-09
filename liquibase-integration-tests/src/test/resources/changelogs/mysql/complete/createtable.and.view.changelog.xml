@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<databaseChangeLog
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-latest.xsd">
+
+    <changeSet id="createTable" author="mallod">
+        <createTable tableName="test_table">
+            <column name="id" type="int"/>
+            <column name="name" type="varchar(255)"/>
+        </createTable>
+    </changeSet>
+
+    <changeSet id="createView" author="mallod">
+        <createView viewName="testView">
+            select * from test_table
+        </createView>
+    </changeSet>
+</databaseChangeLog>
