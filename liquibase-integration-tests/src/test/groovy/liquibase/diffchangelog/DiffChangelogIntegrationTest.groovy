@@ -235,7 +235,7 @@ COMMENT ON COLUMN $viewName.$columnName IS '$columnComment';
     static void runDiffToChangelogWithUseOrReplaceCommandArgument(Database targetDatabase, Database referenceDatabase,
                                                                   String outputFile, boolean useOrReplaceOption) throws CommandExecutionException {
         CommandScope commandScope = new CommandScope(DiffChangelogCommandStep.COMMAND_NAME)
-        commandScope.addArgumentValue(DbUrlConnectionCommandStep.DATABASE_ARG, targetDatabase)
+        commandScope.addArgumentValue(DbUrlConnectionArgumentsCommandStep.DATABASE_ARG, targetDatabase)
         commandScope.addArgumentValue(DiffChangelogCommandStep.CHANGELOG_FILE_ARG, outputFile)
         commandScope.addArgumentValue(DiffChangelogCommandStep.USE_OR_REPLACE_OPTION, useOrReplaceOption)
         commandScope.addArgumentValue(ReferenceDbUrlConnectionCommandStep.REFERENCE_DATABASE_ARG, referenceDatabase)
