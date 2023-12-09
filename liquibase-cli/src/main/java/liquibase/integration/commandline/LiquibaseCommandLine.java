@@ -934,14 +934,14 @@ public class LiquibaseCommandLine {
                         String envStringToPresent =
                                 toEnvVariable("environment variable: 'liquibase.command." + StringUtil.join(commandDefinition.getName(), ".") +
                                         "." + def.getName()) + "')" + argDisplaySuffix;
-                        description = propertyStringToPresent + envStringToPresent;
+                        description = propertyStringToPresent + " " + envStringToPresent;
                     } else {
                         String propertyStringToPresent = "\n(defaults file: 'liquibase.command." + def.getName() + "' OR 'liquibase.command." +
                                 StringUtil.join(commandDefinition.getName(), ".") + "." + def.getName() + "'";
                         String envStringToPresent = ", environment variable: '" + toEnvVariable("liquibase.command." + def.getName()) + "' OR '" +
                                 toEnvVariable("liquibase.command." + StringUtil.join(commandDefinition.getName(), ".") +
                                         "." + def.getName()) + "')" + argDisplaySuffix;
-                        description = propertyStringToPresent + envStringToPresent;
+                        description = propertyStringToPresent + " " + envStringToPresent;
                     }
 
                     if (def.getDefaultValue() != null) {
