@@ -37,6 +37,7 @@ public class GlobalConfiguration implements AutoloadedConfigurations {
     public static final ConfigurationDefinition<Boolean> SHOW_BANNER;
     public static final ConfigurationDefinition<Boolean> ALWAYS_DROP_INSTEAD_OF_REPLACE;
     public static final ConfigurationDefinition<DuplicateFileMode> DUPLICATE_FILE_MODE;
+    public static final ConfigurationDefinition<Boolean> ALLOW_DUPLICATED_CHANGESETS_IDENTIFIERS;
 
     public static final ConfigurationDefinition<Boolean> VALIDATE_XML_CHANGELOG_FILES;
 
@@ -243,6 +244,12 @@ public class GlobalConfiguration implements AutoloadedConfigurations {
                 .setDescription("If true, drop and recreate a view instead of replacing it.")
                 .setDefaultValue(false)
                 .setValueHandler(ValueHandlerUtil::booleanValueHandler)
+                .build();
+
+        ALLOW_DUPLICATED_CHANGESETS_IDENTIFIERS = builder.define("allowDuplicatedChangesetIdentifiers", Boolean.class)
+                .setDescription("Allows duplicated changeset identifiers without failing Liquibase execution.")
+                .setValueHandler(ValueHandlerUtil::booleanValueHandler)
+                .setDefaultValue(false)
                 .build();
 
         VALIDATE_XML_CHANGELOG_FILES = builder.define("validateXmlChangelogFiles", Boolean.class)
