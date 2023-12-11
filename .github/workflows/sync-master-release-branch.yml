@@ -1,9 +1,9 @@
 name: Sync Master to Release Branch
 
 on:
-  push:
-    branches:
-      - master
+#  push:
+#    branches:
+#      - master
 
 jobs:
   sync-branches:
