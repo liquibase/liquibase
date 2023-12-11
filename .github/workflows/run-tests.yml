@@ -257,7 +257,7 @@ jobs:
         with:
           maven-version: ${{ env.MAVEN_VERSION }}
       - name: Restore Built Code Cache
-        uses: actions/cache@v3.3.1
+        uses: actions/cache@v3.3.2
         with:
           key: built-code-${{ github.run_number }}-${{ github.run_attempt }}
           path: ./**/target
