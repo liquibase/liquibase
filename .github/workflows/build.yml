@@ -311,6 +311,12 @@ jobs:
           name: liquibase-zip-${{ needs.setup.outputs.thisBranchName }}
           path: liquibase-dist/target/liquibase-${{ needs.setup.outputs.thisBranchName }}-SNAPSHOT/*
 
+      - name: Archive Convenience Artifacts
+        uses: actions/upload-artifact@v3
+        with:
+          name: liquibase-artifacts-${{ needs.setup.outputs.thisBranchName }}
+          path: artifacts-named/*
+
       # Publish <commitsha>-SNAPSHOT version to GPM
       - name: Version Artifact Publish <commitsha>-SNAPSHOT version to GPM
         run: |
