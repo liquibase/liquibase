@@ -48,8 +48,11 @@ mkdir -p $outdir
 
 (cd $scriptDir && javac ManifestReversion.java)
 
+#the branchName might have / in it. Hence replace it with _ as we do the same in build.yml file
+MODIFIED_BRANCH_NAME=$(echo "$branch" | sed -e "s/[^a-zA-Z0-9-]/_/g")
+
 #### Update  jars
-declare -a jars=("liquibase-core-0-SNAPSHOT.jar" "liquibase-core-0-SNAPSHOT-sources.jar" "liquibase-commercial-$branch-SNAPSHOT.jar" "liquibase-commercial-$branch-SNAPSHOT-sources.jar" "liquibase-cdi-0-SNAPSHOT.jar" "liquibase-cdi-0-SNAPSHOT-sources.jar" "liquibase-cdi-jakarta-0-SNAPSHOT.jar" "liquibase-cdi-jakarta-0-SNAPSHOT-sources.jar" "liquibase-maven-plugin-0-SNAPSHOT.jar" "liquibase-maven-plugin-0-SNAPSHOT-sources.jar")
+declare -a jars=("liquibase-core-0-SNAPSHOT.jar" "liquibase-core-0-SNAPSHOT-sources.jar" "liquibase-commercial-$MODIFIED_BRANCH_NAME-SNAPSHOT.jar" "liquibase-commercial-$MODIFIED_BRANCH_NAME-SNAPSHOT-sources.jar" "liquibase-cdi-0-SNAPSHOT.jar" "liquibase-cdi-0-SNAPSHOT-sources.jar" "liquibase-cdi-jakarta-0-SNAPSHOT.jar" "liquibase-cdi-jakarta-0-SNAPSHOT-sources.jar" "liquibase-maven-plugin-0-SNAPSHOT.jar" "liquibase-maven-plugin-0-SNAPSHOT-sources.jar")
 
 for jar in "${jars[@]}"
 do
@@ -58,14 +61,14 @@ do
 
   java -cp $scriptDir ManifestReversion $workdir/META-INF/MANIFEST.MF $version
   find $workdir/META-INF -name pom.xml -exec sed -i -e "s/<version>0-SNAPSHOT<\/version>/<version>$version<\/version>/g" {} \;
-  find $workdir/META-INF -name pom.xml -exec sed -i -e "s/<version>$branch-SNAPSHOT<\/version>/<version>$version<\/version>/g" {} \;
+  find $workdir/META-INF -name pom.xml -exec sed -i -e "s/<version>$MODIFIED_BRANCH_NAME-SNAPSHOT<\/version>/<version>$version<\/version>/g" {} \;
   find $workdir/META-INF -name pom.properties -exec sed -i -e "s/0-SNAPSHOT/$version/g" {} \;
   find $workdir/META-INF -name plugin*.xml -exec sed -i -e "s/<version>0-SNAPSHOT<\/version>/<version>$version<\/version>/g" {} \;
   (cd $workdir && jar -uMf $jar META-INF)
   rm -rf $workdir/META-INF
 
   ## Fix up liquibase.build.properties
-  if [[ $jar == "liquibase-core-0-SNAPSHOT.jar" || $jar == "liquibase-commercial-$branch-SNAPSHOT.jar" ]]; then
+  if [[ $jar == "liquibase-core-0-SNAPSHOT.jar" || $jar == "liquibase-commercial-$MODIFIED_BRANCH_NAME-SNAPSHOT.jar" ]]; then
     unzip -q $workdir/$jar liquibase.build.properties -d $workdir
     sed -i -e "s/build.version=.*/build.version=$version/" $workdir/liquibase.build.properties
     (cd $workdir && jar -uf $jar liquibase.build.properties)
@@ -82,7 +85,7 @@ do
   (cd $workdir/finalize-jar && jar cfm $workdir/$jar $workdir/tmp-manifest.mf .)
 
   cp $workdir/$jar $outdir
-  RENAME_SNAPSHOTS=$(ls "$outdir/$jar" | sed -e "s/$branch-SNAPSHOT/$version/g" -e "s/0-SNAPSHOT/$version/g")
+  RENAME_SNAPSHOTS=$(ls "$outdir/$jar" | sed -e "s|$MODIFIED_BRANCH_NAME-SNAPSHOT|$version|g" -e "s|0-SNAPSHOT|$version|g")
   if [[ "$RENAME_SNAPSHOTS" != "$outdir/$jar" ]]; then
       mv -v "$outdir/$jar" "$RENAME_SNAPSHOTS"
   fi
@@ -90,11 +93,13 @@ do
 done
 
 #### Update  javadoc jars
-declare -a javadocJars=("liquibase-core-0-SNAPSHOT-javadoc.jar" "liquibase-cdi-0-SNAPSHOT-javadoc.jar" "liquibase-cdi-jakarta-0-SNAPSHOT-javadoc.jar" "liquibase-maven-plugin-0-SNAPSHOT-javadoc.jar" "liquibase-commercial-$branch-SNAPSHOT-javadoc.jar")
+declare -a javadocJars=("liquibase-core-0-SNAPSHOT-javadoc.jar" "liquibase-cdi-0-SNAPSHOT-javadoc.jar" "liquibase-cdi-jakarta-0-SNAPSHOT-javadoc.jar" "liquibase-maven-plugin-0-SNAPSHOT-javadoc.jar" "liquibase-commercial-$MODIFIED_BRANCH_NAME-SNAPSHOT-javadoc.jar")
 
 for jar in "${javadocJars[@]}"
 do
   mkdir $workdir/rebuild
+  ls $workdir
+  echo "debug"
   unzip -q $workdir/$jar -d $workdir/rebuild
 
   find $workdir/rebuild -name "*.html" -exec sed -i -e "s/0-SNAPSHOT/$version/g" {} \;
@@ -104,7 +109,7 @@ do
   rm -rf $workdir/rebuild
 
   cp $workdir/$jar $outdir
-  RENAME_JAVADOC_SNAPSHOTS=$(ls "$outdir/$jar" | sed -e "s/$branch-SNAPSHOT/$version/g" -e "s/0-SNAPSHOT/$version/g")
+  RENAME_JAVADOC_SNAPSHOTS=$(ls "$outdir/$jar" | sed -e "s|$MODIFIED_BRANCH_NAME-SNAPSHOT|$version|g" -e "s|0-SNAPSHOT|$version|g")
   if [[ "$RENAME_JAVADOC_SNAPSHOTS" != "$outdir/$jar" ]]; then
     mv -v "$outdir/$jar" "$RENAME_JAVADOC_SNAPSHOTS"
   fi
@@ -153,7 +158,7 @@ cp $outdir/liquibase-commercial-$version.jar $workdir/internal/lib/liquibase-com
 
 ## Extract tar.gz and rebuild it back into the tar.gz and zip
 mkdir $workdir/tgz-repackage
-(cd $workdir/tgz-repackage && tar -xzf $workdir/liquibase-$branch-SNAPSHOT.tar.gz)
+(cd $workdir/tgz-repackage && tar -xzf $workdir/liquibase-$MODIFIED_BRANCH_NAME-SNAPSHOT.tar.gz)
 cp $workdir/internal/lib/liquibase-core.jar $workdir/tgz-repackage/internal/lib/liquibase-core.jar
 cp $workdir/internal/lib/liquibase-commercial.jar $workdir/tgz-repackage/internal/lib/liquibase-commercial.jar
 find $workdir/tgz-repackage -name "*.txt" -exec sed -i -e "s/0-SNAPSHOT/$version/" -e "s/release-SNAPSHOT/$version/" {} \;
