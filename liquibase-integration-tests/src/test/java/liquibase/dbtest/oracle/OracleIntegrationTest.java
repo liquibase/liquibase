@@ -8,7 +8,7 @@ import liquibase.command.CommandResults;
 import liquibase.command.CommandScope;
 import liquibase.command.core.SnapshotCommandStep;
 import liquibase.command.core.UpdateCommandStep;
-import liquibase.command.core.helpers.DbUrlConnectionCommandStep;
+import liquibase.command.core.helpers.DbUrlConnectionArgumentsCommandStep;
 import liquibase.database.Database;
 import liquibase.database.DatabaseFactory;
 import liquibase.database.jvm.JdbcConnection;
@@ -21,8 +21,6 @@ import liquibase.structure.core.Index;
 import org.junit.Assert;
 import org.junit.Test;
 
-import java.io.ByteArrayOutputStream;
-import java.io.OutputStream;
 import java.sql.ResultSet;
 import java.sql.Statement;
 import java.util.Date;
@@ -197,12 +195,12 @@ public class OracleIntegrationTest extends AbstractIntegrationTest {
         try {
             Database database = getDatabase();
             CommandScope commandScope = new CommandScope(UpdateCommandStep.COMMAND_NAME);
-            commandScope.addArgumentValue(DbUrlConnectionCommandStep.DATABASE_ARG, database);
+            commandScope.addArgumentValue(DbUrlConnectionArgumentsCommandStep.DATABASE_ARG, database);
             commandScope.addArgumentValue(UpdateCommandStep.CHANGELOG_FILE_ARG, indexWithAssociatedWithChangeLog);
             commandScope.execute();
 
             final CommandScope snapshotScope = new CommandScope("snapshot");
-            snapshotScope.addArgumentValue(DbUrlConnectionCommandStep.DATABASE_ARG, database);
+            snapshotScope.addArgumentValue(DbUrlConnectionArgumentsCommandStep.DATABASE_ARG, database);
             snapshotScope.addArgumentValue(SnapshotCommandStep.SNAPSHOT_FORMAT_ARG, "json");
             CommandResults results = snapshotScope.execute();
             DatabaseSnapshot snapshot = (DatabaseSnapshot) results.getResult("snapshot");

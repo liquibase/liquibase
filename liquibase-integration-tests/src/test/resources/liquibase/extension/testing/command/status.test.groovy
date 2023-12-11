@@ -47,7 +47,7 @@ Optional Args:
         }
 
         expectedOutput = """
-1 changesets have not been applied to LBUSER@jdbc:h2:mem:lbcat
+1 changeset has not been applied to LBUSER@jdbc:h2:mem:lbcat
      changelogs/h2/complete/rollback.tag.plus.changelog.xml::1.111::nvoxland
 """
     }
