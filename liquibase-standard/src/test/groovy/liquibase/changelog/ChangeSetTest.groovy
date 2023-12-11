@@ -10,7 +10,9 @@ import liquibase.parser.core.ParsedNode
 import liquibase.parser.core.ParsedNodeException
 import liquibase.precondition.core.RunningAsPrecondition
 import liquibase.sdk.supplier.resource.ResourceSupplier
+import liquibase.serializer.core.yaml.YamlChangeLogSerializer
 import liquibase.sql.visitor.ReplaceSqlVisitor
+import liquibase.util.FileUtil
 import org.hamcrest.Matchers
 import spock.lang.Shared
 import spock.lang.Specification
@@ -663,6 +665,27 @@ public class ChangeSetTest extends Specification {
 
         cleanup:
         new File("liquibase_shell_out").delete()
+    }
+
+    def "validate rollback serialization doesn't duplicate rollback key"() {
+        when:
+        DatabaseChangeLog changeLog = new DatabaseChangeLog();
+        ChangeSet changeSet = new ChangeSet(UUID.randomUUID().toString(), "author", false, false, "", "test", "mysql", changeLog);
+        changeSet.addRollbackChange(new EmptyChange());
+        changeLog.addChangeSet(changeSet);
+
+        YamlChangeLogSerializer serializer = new YamlChangeLogSerializer();
+        OutputStream outputStream = new FileOutputStream("changelog-with-rollback.yaml");
+        serializer.write(changeLog.getChangeSets(), outputStream);
+
+        then:
+        def outputFile = new File("changelog-with-rollback.yaml")
+        def contents = FileUtil.getContents(outputFile)
+        contents.contains("rollback:\n      empty: {}")
+
+        cleanup:
+        outputFile.delete()
+        outputStream.close();
     }
 
 }
