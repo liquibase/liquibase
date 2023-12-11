@@ -1,2 +1,0 @@
-liquibase.parser.core.json.JsonSnapshotParser
-liquibase.parser.core.yaml.YamlSnapshotParser

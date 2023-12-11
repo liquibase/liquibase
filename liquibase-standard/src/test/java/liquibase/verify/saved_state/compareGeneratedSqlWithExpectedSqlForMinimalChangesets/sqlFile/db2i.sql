@@ -1,2 +1,0 @@
--- Database: db2i
--- Change Parameter: path=my/path/file.sql

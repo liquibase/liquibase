@@ -1,2 +1,0 @@
--- Database: db2z
--- Change Parameter: path=my/path/file.sql

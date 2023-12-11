@@ -1,2 +1,0 @@
-liquibase.resource.DirectoryPathHandler
-liquibase.resource.ZipPathHandler

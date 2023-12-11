@@ -1,4 +1,0 @@
-liquibase.serializer.core.json.JsonSnapshotSerializer
-liquibase.serializer.core.string.StringSnapshotSerializer
-liquibase.serializer.core.string.StringSnapshotSerializerReadable
-liquibase.serializer.core.yaml.YamlSnapshotSerializer
