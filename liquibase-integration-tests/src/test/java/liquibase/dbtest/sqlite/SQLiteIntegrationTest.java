@@ -79,22 +79,6 @@ public class SQLiteIntegrationTest extends AbstractIntegrationTest {
         //cross-schema security for oracle is a bother, ignoring test for now
     }
 
-    @Test
-    public void makeSureErrorIsReturnedWhenTableNameIsNotSpecified() throws DatabaseException {
-        clearDatabase();
-        String errorMsg = "";
-        try {
-            runUpdate("changelogs/common/preconditions/preconditions.changelog.xml");
-        }catch(CommandExecutionException e) {
-            errorMsg = e.getMessage();
-        }
-        finally {
-            clearDatabase();
-        }
-
-        Assert.assertTrue(errorMsg.contains("Database driver requires a table name to be specified in order to search for a primary key."));
-    }
-
     @Override
     public void testOutputChangeLog() throws Exception {
         Scope.getCurrentScope().getLog(getClass()).info("Due to several unimplemented ALTER TABLE substatements in SQLite, " +
