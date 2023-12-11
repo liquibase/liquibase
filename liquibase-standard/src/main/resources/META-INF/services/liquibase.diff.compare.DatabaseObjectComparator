@@ -1,0 +1,9 @@
+liquibase.diff.compare.core.CatalogComparator
+liquibase.diff.compare.core.ColumnComparator
+liquibase.diff.compare.core.DefaultDatabaseObjectComparator
+liquibase.diff.compare.core.ForeignKeyComparator
+liquibase.diff.compare.core.IndexComparator
+liquibase.diff.compare.core.PrimaryKeyComparator
+liquibase.diff.compare.core.SchemaComparator
+liquibase.diff.compare.core.TableComparator
+liquibase.diff.compare.core.UniqueConstraintComparator

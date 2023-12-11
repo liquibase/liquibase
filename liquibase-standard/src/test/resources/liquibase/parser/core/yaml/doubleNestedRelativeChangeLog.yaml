@@ -1,0 +1,21 @@
+databaseChangeLog:
+
+    - changeSet:
+        id: 1
+        author: nvoxland
+        changes:
+            - createTable:
+                tableName: partner
+                columns:
+                    - column:
+                        name: id
+                        type: int
+                        constraints:
+                            primaryKey: true
+                            nullable: false
+                    - column:
+                        name: name
+                        type: varchar(255)
+
+    - include:
+        file: liquibase/parser/core/yaml/nestedRelativeChangeLog.yaml

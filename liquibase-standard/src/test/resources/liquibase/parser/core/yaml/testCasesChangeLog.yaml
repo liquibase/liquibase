@@ -1,0 +1,525 @@
+databaseChangeLog:
+    - changeSet:
+        id: standard changeSet
+        author: nvoxland
+        changes:
+            - sql:
+                sql: select * from simple
+
+    - changeSet:
+        id: using after column attribute
+        author: cmouttet
+        changes:
+            - addColumn:
+                columns:
+                    - column:
+                        afterColumn: firstname
+                        name: middlename
+                        type: varchar(50)
+                tableName: person
+
+    - changeSet:
+        id: using before column attribute
+        author: cmouttet
+        comment: add column after
+        changes:
+            - addColumn:
+                columns:
+                    - column:
+                        beforeColumn: lastname
+                        name: middlename
+                        type: varchar(50)
+                tableName: person
+
+    - changeSet:
+        id: using position attribute
+        author: cmouttet
+        changes:
+            - addColumn:
+                columns:
+                    - column:
+                        name: middlename
+                        position: 1
+                        type: varchar(50)
+                tableName: person
+
+    - changeSet:
+        id: validCheckSums set
+        author: nvoxland
+        validCheckSum:
+            - a9b7b29ce3a75940858cd022501852e2
+            - 8:b3d6a29ce3a75940858cd093501151d1
+        changes:
+            - sql:
+                sql: select count(*) from validchecksum_set
+
+    - changeSet:
+        id: validCheckSums any
+        author: nvoxland
+        changes:
+            - sql:
+                sql: select count(*) from validchecksum_all
+        validCheckSum:
+            - ANY
+
+    - changeSet:
+        id: only preconditions
+        author: nvoxland
+        preConditions:
+            - sqlCheck:
+                expectedResult: 1
+                sql: select count(*) from only_preconditions
+
+    - changeSet:
+        id: complex preconditions
+        author: nvoxland
+        preConditions:
+            - or:
+                - and:
+                    - not:
+                        - dbms:
+                            type: oracle
+                        - dbms:
+                            type: mysql
+                    - runningAs:
+                        username: sa
+                - not:
+                    - sqlCheck:
+                        expectedResult: 3
+                        sql: select count(*) from test
+                    - or:
+                        - tableExists:
+                            tableName: test_table
+                        - sequenceExists:
+                            sequenceName: test_seq
+            - and:
+                - indexExists:
+                    indexName: test_idx
+                - primaryKeyExists:
+                    primaryKeyName: test_pk
+                    
+    - changeSet:
+        id: multiple changes
+        author: nvoxland
+        changes:
+            - insert:
+                tableName: multiple_changes
+                columns:
+                    - column:
+                        name: id
+                        valueNumeric: 1
+            - insert:
+                tableName: multiple_changes
+                columns:
+                    - column:
+                        name: id
+                        valueNumeric: 2
+            - update:
+                tableName: multiple_changes
+                columns:
+                    - column:
+                        name: id
+                        valueNumeric: 3
+            - insert:
+                tableName: multiple_changes
+                columns:
+                - column:
+                    name: id
+                    valueNumeric: 4
+
+    - changeSet:
+        id: context and dbms
+        author: nvoxland
+        context: qa, test
+        dbms: mock,oracle
+        changes:
+            - sql:
+                sql: select * from context_and_dbms
+
+    - changeSet:
+        id: runAlways set
+        author: nvoxland
+        runAlways: true
+        changes:
+            - sql:
+                sql: select * from run_always
+
+    - changeSet:
+        id: runOnChange set
+        author: nvoxland
+        runOnChange: true
+        changes:
+        - sql:
+            sql: select * from run_on_change
+
+    - changeSet:
+        id: failOnError set
+        author: nvoxland
+        failOnError: false
+        changes:
+        - sql:
+            sql: select * from fail_on_error
+
+    - changeSet:
+        id: logicalFilePath set
+        author: nvoxland
+        logicalFilePath: com/example/other/path.yaml
+        changes:
+        - sql:
+            sql: select * from logical_file_path
+
+    - changeSet:
+        id: objectQuotingStrategy LEGACY
+        author: nvoxland
+        objectQuotingStrategy: LEGACY
+        changes:
+        - sql:
+            sql: select * from legacy_strategy
+
+    - changeSet:
+        id: objectQuotingStrategy ALL
+        objectQuotingStrategy: QUOTE_ALL_OBJECTS
+        author: nvoxland
+        changes:
+        - sql:
+            sql: select * from all_strategy
+
+    - changeSet:
+        id: objectQuotingStrategy RESERVED
+        objectQuotingStrategy: QUOTE_ONLY_RESERVED_WORDS
+        author: nvoxland
+        changes:
+        - sql:
+            sql: select * from reserved
+
+    - changeSet:
+        id: onValidationFail HALT
+        author: nvoxland
+        onValidationFail: HALT
+        changes:
+        - sql:
+            sql: select * from halt_on_validation_fail
+
+    - changeSet:
+        id: onValidationFail MARK_RAN
+        author: nvoxland
+        onValidationFail: MARK_RAN
+        changes:
+        - sql:
+            sql: select * from mark_ran_on_validation_fail
+
+    - changeSet:
+        id: runInTransaction set
+        author: nvoxland
+        runInTransaction: false
+        changes:
+        - sql:
+            sql: select * from run_in_transaction
+
+    - changeSet:
+        id: comment in sql
+        author: nvoxland
+        comment: This is a changeSet level comment
+        changes:
+        - sql:
+            comment: There is a comment in the SQL
+            sql: select * from comment_in_sql
+
+    - changeSet:
+        id: nested column and constraint objects
+        author: nvoxland
+        changes:
+        - createTable:
+            tableName: nested_objects
+            columns:
+            - column:
+                name: id
+                type: int
+                constraints:
+                    nullable: false
+                    primaryKey: true
+                    primaryKeyName: pk_name
+
+    - changeSet:
+        id: precondition attributes 1
+        author: nvoxland
+        preConditions:
+            - onSqlOutput: FAIL
+            - onErrorMessage: My Error Message
+            - onError: HALT
+            - onFail: HALT
+            - onFailMessage: My Fail Message
+            - sqlCheck:
+                expectedResult: 1
+                sql: select count(*) from precondition_check_1
+
+
+    - changeSet:
+        id: precondition attributes 2
+        author: nvoxland
+        preConditions:
+            - onSqlOutput: IGNORE
+            - onError: CONTINUE
+            - onFail: CONTINUE
+            - sqlCheck:
+                expectedResult: 1
+                sql: select count(*) from precondition_check_2
+
+    - changeSet:
+        id: precondition attributes 3
+        author: nvoxland
+        preConditions:
+            - onSqlOutput: TEST
+            - onError: MARK_RAN
+            - onFail: MARK_RAN
+            - sqlCheck:
+                expectedResult: 1
+                sql: select count(*) from precondition_check_3
+
+    - changeSet:
+        id: precondition attributes 4
+        author: nvoxland
+        preConditions:
+            - onError: WARN
+            - onFail: WARN
+            - sqlCheck:
+                expectedResult: 1
+                sql: select count(*) from precondition_check_4
+
+    - changeSet:
+        id: changeSet with modifySql
+        author: nvoxland
+        changes:
+            - createTable:
+                tableName: with_modifysql
+                columns:
+                - column:
+                    name: id
+                    type: int
+        modifySql:
+            - replace:
+                replace: with_modifysql
+                with: after_modifysql
+            - replace:
+                replace: ")"
+                with: ""
+                dbms: mysql, mock
+                applyToRollback: true
+            - append:
+                value: " , name varchar(255) )"
+                dbms: mysql, mock
+                applyToRollback: true
+            - append:
+                value: " partitioned by stuff"
+                context: prod, qa
+            - append:
+                value: " engine innodb"
+                context: prod
+                dbms: mysql
+
+
+    - changeSet:
+        id: changeSet with UTF8
+        author: nvoxland
+        changes:
+        - sql:
+            sql: insert into testutf8insert (stringvalue) values ('string with € and £')
+
+    - changeSet:
+        id: one rollback block
+        author: nvoxland
+        changes:
+        - sql:
+            sql: create 1 tables
+        rollback:
+        - sql:
+            sql: drop table rollback_test
+
+    - changeSet:
+        id: empty rollback block
+        author: nvoxland
+        changes:
+        - sql:
+            sql: create 1 tables
+        rollback:
+
+    - changeSet:
+        id: multiple rollback blocks
+        author: nvoxland
+        changes:
+        - sql:
+            sql: create multiple tables
+        rollback:
+        - sql:
+            sql: drop table multiRollback1
+        - sql:
+            sql: drop table multiRollback2
+        - sql:
+            sql: drop table multiRollback3
+        - dropTable:
+            tableName: multiRollback4
+        - dropTable:
+            tableName: multiRollback5
+        - dropTable:
+            tableName: multiRollback6
+
+    - include:
+        file: liquibase/parser/core/yaml/simpleChangeLog.yaml
+
+    - include:
+        file: liquibase/parser/core/yaml/simpleChangeLog.yaml
+
+    - changeSet:
+        id: custom precondition and change
+        author: nvoxland
+        preConditions:
+            - customPrecondition:
+                className: liquibase.precondition.ExampleCustomPrecondition
+                params:
+                    - param:
+                        name: name
+                        value: test_1
+                    - param:
+                        name: count
+                        value: 31
+        changes:
+            - customChange:
+                class: liquibase.change.custom.ExampleCustomSqlChange
+                params:
+                    - param:
+                        name: tableName
+                        value: tab_name
+                    - param:
+                        name: columnName
+                        value: col_name
+                    - param:
+                        name: newValue
+                        value: ""
+
+    - changeSet:
+        id: different object types for column
+        author: nvoxland
+        changes:
+        - createTable:
+            tableName: new_table
+            columns:
+            - column:
+                name: id
+                type: int
+                autoIncrement: true
+                constraints:
+                    nullable: false
+                    primaryKey: true
+                    primaryKeyName: pk_name
+        - addColumn:
+            tableName: new_table
+            columns:
+            - column:
+                name: new_col
+                type: varchar(10)
+                defaultValue: new value
+                constraints:
+                    nullable: false
+            - column:
+                defaultValueNumeric: 12
+                name: new_col_int
+                type: int
+            - column:
+                defaultValueBoolean: true
+                name: new_col_bool
+                type: boolean
+            - column:
+                defaultValueComputed: average_size()
+                name: new_col_computed
+                type: int
+            - column:
+                defaultValueDate: 2014-12-01T19:15:33Z
+                name: new_col_datetime
+                type: datetime
+            - column:
+                defaultValueSequenceNext: seq_test
+                name: new_col_seq
+                type: int
+        - createIndex:
+            indexName: idx_new
+            tableName: new_table
+            columns:
+            - column:
+                name: id
+                constraints:
+                    unique: true
+        - loadData:
+            tableName: new_table
+            columns:
+            - column:
+                name: id
+            - column:
+                header: new_col_header
+                name: new_col
+        - update:
+            tableName: new_table
+            columns:
+            - column:
+                name: new_col_boolean
+                value: 'false'
+            where: id=3
+
+    - changeSet:
+        id: update with whereParams
+        author: nvoxland
+        changes:
+        - update:
+            tableName: updateTest
+            columns:
+            - column:
+                name: varcharColumn
+                value: new column 1 value
+            - column:
+                name: dateCol
+                valueDate: 2008-01-01T06:00:00Z
+            - column:
+                name: intCol
+                valueNumeric: 11
+            where: id=:value and other_val=:value
+        - update:
+            tableName: updateTest
+            columns:
+            - column:
+                name: varcharColumn
+                value: new column 2 value
+            - column:
+                name: dateCol
+                valueDate: 2008-01-02T06:00:00Z
+            - column:
+                name: intCol
+                valueNumeric: 12
+            where: id=2
+
+    - changeSet:
+        id: shell command
+        author: nvoxland
+        changes:
+        - executeCommand:
+            executable: /usr/bin/test
+            os: linux, mac
+            args:
+                - arg:
+                    value: "-out"
+                -  arg:
+                    value: "-test"
+
+    - changeSet:
+        id: view creation
+        author: nvoxland
+        changes:
+        - createView:
+            selectQuery: select * from test_table
+            viewName: test_view
+
+    - changeSet:
+        id: stop change
+        author: nvoxland
+        changes:
+        - stop:
+            message: Stop message!
+

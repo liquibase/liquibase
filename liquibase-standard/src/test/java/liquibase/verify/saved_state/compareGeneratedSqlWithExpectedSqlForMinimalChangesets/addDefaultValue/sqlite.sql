@@ -1,0 +1,4 @@
+-- Database: sqlite
+-- Change Parameter: columnName=fileName
+-- Change Parameter: defaultValue=Something Else
+-- Change Parameter: tableName=file

@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<databaseChangeLog
+				xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+				xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+				xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.6.xsd">
+
+	<changeSet id="simpleTable" author="abuschka">
+		<createTable tableName="simple_table">
+
+			<column name="pk_column" type="int">
+				<constraints primaryKey="true" primaryKeyName="pk_simple_table"/>
+			</column>
+
+			<column name="description" type="varchar(200)"/>
+		</createTable>
+
+	</changeSet>
+
+</databaseChangeLog>

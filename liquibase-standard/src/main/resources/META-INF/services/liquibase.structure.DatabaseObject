@@ -1,0 +1,12 @@
+liquibase.structure.core.Catalog
+liquibase.structure.core.Column
+liquibase.structure.core.Data
+liquibase.structure.core.ForeignKey
+liquibase.structure.core.Index
+liquibase.structure.core.PrimaryKey
+liquibase.structure.core.Schema
+liquibase.structure.core.Sequence
+liquibase.structure.core.StoredProcedure
+liquibase.structure.core.Table
+liquibase.structure.core.UniqueConstraint
+liquibase.structure.core.View

@@ -1,0 +1,4 @@
+liquibase.configuration.core.DeprecatedConfigurationValueProvider
+liquibase.configuration.core.SystemPropertyValueProvider
+liquibase.configuration.core.ScopeValueProvider
+liquibase.configuration.core.EnvironmentValueProvider

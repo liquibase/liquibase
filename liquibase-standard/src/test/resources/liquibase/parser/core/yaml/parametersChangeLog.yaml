@@ -1,0 +1,60 @@
+databaseChangeLog:
+    - property:
+        name: overridden
+        value: value from changelog 1
+    - property:
+        name: not.overridden
+        value: value from changelog 2
+    - property:
+        name: dbNote
+        value: value from oracle
+        dbms: oracle
+    - property:
+        name: dbNote
+        value: value from mock
+        dbms: mock
+
+    - property:
+        name: contextNote
+        value: context test
+        context: test
+    - property:
+        name: contextNote
+        value: context prod
+        context: prod
+    - property:
+        name: contextNote2
+        value: context a
+        context: a
+    - property:
+        name: contextNote2
+        value: context b
+        context: b
+
+    - property:
+        file: liquibase/parser/core/yaml/parameters.properties
+
+    - changeSet:
+        id: 1
+        author: paikens
+        comment: "Some values: overridden: '${overridden}', not.overridden: '${not.overridden}', database: '${dbNote}', contextNote: '${contextNote}', contextNote2: '${contextNote2}'"
+        changes:
+            - sql:
+                sql: create table ${tablename}
+        rollback:
+            - sql:
+                sql: drop table ${tablename}
+
+    - changeSet:
+        id: 2
+        author: nvoxland
+        comment: "Some values from the file: fileProperty1: '${fileProperty1}', fileProperty2: '${fileProperty2}'"
+        changes:
+            - createTable:
+                tableName: ${tablename2}
+                columns:
+                    - column:
+                        name: ${columnName}
+                        type: int
+                        defaultValue: a string with an ${unused} param against ${dbNote}
+
