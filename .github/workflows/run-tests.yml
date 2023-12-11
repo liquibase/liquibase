@@ -16,10 +16,9 @@ on:
         default: 'false'
   push:
      branches:
-        - github-action-DAT-15775
-        - feat/DAT-rus-standAlonePR
-        - feat/DAT-rus-matchingBranchPR
-
+        - '*'
+     paths-ignore:
+        - '**.md'
 
   pull_request_target:
     types:
