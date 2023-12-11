@@ -6,6 +6,7 @@ import liquibase.database.Database;
 import liquibase.database.DatabaseConnection;
 import liquibase.database.DatabaseFactory;
 import liquibase.database.OfflineConnection;
+import liquibase.database.core.DerbyDatabase;
 import liquibase.database.jvm.JdbcConnection;
 import liquibase.exception.DatabaseException;
 import liquibase.exception.LiquibaseException;
@@ -360,6 +361,10 @@ public class SpringLiquibase implements InitializingBean, BeanNameAware, Resourc
 
         liquibase.setShowSummaryOutput(showSummaryOutput);
         liquibase.setShowSummary(showSummary);
+
+        if (liquibase.getDatabase() instanceof DerbyDatabase) {
+            ((DerbyDatabase) liquibase.getDatabase()).setShutdownEmbeddedDerby(false);
+        }
 
 		return liquibase;
 	}

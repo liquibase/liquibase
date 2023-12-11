@@ -2,7 +2,7 @@ package liquibase.command
 
 import liquibase.Scope
 import liquibase.command.core.CalculateChecksumCommandStep
-import liquibase.command.core.helpers.DbUrlConnectionCommandStep
+import liquibase.command.core.helpers.DbUrlConnectionArgumentsCommandStep
 import liquibase.database.core.MockDatabase
 import liquibase.exception.CommandExecutionException
 import liquibase.resource.SearchPathResourceAccessor
@@ -75,7 +75,7 @@ class CalculateChecksumCommandStepTest extends Specification {
         Scope.child(scopeSettings, {
             CommandResults commandResults = new CommandScope("calculateChecksum")
                     .addArgumentValue(CalculateChecksumCommandStep.CHANGELOG_FILE_ARG, "tagged-changelog.xml")
-                    .addArgumentValue(DbUrlConnectionCommandStep.DATABASE_ARG, new MockDatabase())
+                    .addArgumentValue(DbUrlConnectionArgumentsCommandStep.DATABASE_ARG, new MockDatabase())
                     .addArgumentValue(CalculateChecksumCommandStep.CHANGESET_PATH_ARG, "tagged-changelog.xml")
                     .addArgumentValue(CalculateChecksumCommandStep.CHANGESET_ID_ARG, "1")
                     .addArgumentValue(CalculateChecksumCommandStep.CHANGESET_AUTHOR_ARG, "liquibase")
@@ -102,7 +102,7 @@ class CalculateChecksumCommandStepTest extends Specification {
             Scope.child(scopeSettings, {
                 CommandResults commandResults = new CommandScope("calculateChecksum")
                         .addArgumentValue(CalculateChecksumCommandStep.CHANGELOG_FILE_ARG, "tagged-changelog.xml")
-                        .addArgumentValue(DbUrlConnectionCommandStep.DATABASE_ARG, new MockDatabase())
+                        .addArgumentValue(DbUrlConnectionArgumentsCommandStep.DATABASE_ARG, new MockDatabase())
                         .addArgumentValue(CalculateChecksumCommandStep.CHANGESET_PATH_ARG, path)
                         .addArgumentValue(CalculateChecksumCommandStep.CHANGESET_ID_ARG, id)
                         .addArgumentValue(CalculateChecksumCommandStep.CHANGESET_AUTHOR_ARG, author)

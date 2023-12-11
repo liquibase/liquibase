@@ -249,6 +249,7 @@ jobs:
           cp liquibase-dist/target/liquibase-${{ needs.setup.outputs.thisBranchName }}-SNAPSHOT.tar.gz artifacts
           cp liquibase-dist/target/liquibase-${{ needs.setup.outputs.thisBranchName }}-SNAPSHOT.zip artifacts
           cp liquibase-dist/target/liquibase-${{ needs.setup.outputs.thisBranchName }}-SNAPSHOT/internal/lib/liquibase-core.jar artifacts/liquibase-core-0-SNAPSHOT.jar
+
           cp liquibase-core/target/liquibase-core-0-SNAPSHOT-sources.jar artifacts/liquibase-core-0-SNAPSHOT-sources.jar
           cp target/liquibase-0-SNAPSHOT-javadoc.jar artifacts/liquibase-core-0-SNAPSHOT-javadoc.jar
 
@@ -297,7 +298,6 @@ jobs:
           #check why only this step has branchName when there is a standalone PR
           cp $commercialJarM2Location artifacts-named/liquibase-commercial-${{ needs.setup.outputs.thisBranchName }}.jar
 
-
       - name: Archive Packages
         uses: actions/upload-artifact@v3
         with:
@@ -329,7 +329,6 @@ jobs:
 
   run-functional-tests:
     needs: [ setup, build_publish_branch ]
-    #needs: [ setup ]
     uses: liquibase/liquibase/.github/workflows/run-functional-tests.yml@github-action-DAT-15775
     secrets: inherit
     with:
@@ -338,7 +337,6 @@ jobs:
 
   run-tests-harness:
     needs: [ setup,build_publish_branch ]
-    #needs: [ setup ]
     uses: liquibase/liquibase/.github/workflows/run-test-harness.yml@github-action-DAT-15775
     secrets: inherit
     with:

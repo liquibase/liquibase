@@ -113,4 +113,5 @@ public class MdcKey {
     public static final String STATUS = "status";
     public static final String ROWS_AFFECTED = "rowsAffected";
     public static final String USER_METADATA = "userMetadata";
+    public static final String QUALITY_CHECKS = "qualityChecks";
 }
