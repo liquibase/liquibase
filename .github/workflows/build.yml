@@ -336,7 +336,7 @@ jobs:
 
   run-functional-tests:
     needs: [ setup, build_publish_branch ]
-    uses: liquibase/liquibase/.github/workflows/run-functional-tests.yml@github-action-DAT-15775
+    uses: liquibase/liquibase/.github/workflows/run-functional-tests.yml@master
     secrets: inherit
     with:
       latestMergeSha: ${{ needs.setup.outputs.latestMergeSha }}
@@ -344,7 +344,7 @@ jobs:
 
   run-tests-harness:
     needs: [ setup,build_publish_branch ]
-    uses: liquibase/liquibase/.github/workflows/run-test-harness.yml@github-action-DAT-15775
+    uses: liquibase/liquibase/.github/workflows/run-test-harness.yml@master
     secrets: inherit
     with:
       latestMergeSha: ${{ needs.setup.outputs.latestMergeSha }}
