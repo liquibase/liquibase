@@ -191,18 +191,18 @@ jobs:
             exit 1
           fi
 
-#          mvn org.sonatype.plugins:nexus-staging-maven-plugin:1.6.8:rc-close \
-#            -DnexusUrl=https://oss.sonatype.org/ \
-#            -DserverId=sonatype-nexus-staging \
-#            -DstagingRepositoryId=$stagingRepositoryId \
-#            -DstagingProgressTimeoutMinutes=10
-#
-#          mvn org.sonatype.plugins:nexus-staging-maven-plugin:1.6.8:rc-release \
-#            -DautoDropAfterRelease=true \
-#            -DnexusUrl=https://oss.sonatype.org/ \
-#            -DserverId=sonatype-nexus-staging \
-#            -DstagingRepositoryId=$stagingRepositoryId \
-#            -DstagingProgressTimeoutMinutes=10
+          mvn org.sonatype.plugins:nexus-staging-maven-plugin:1.6.8:rc-close \
+            -DnexusUrl=https://oss.sonatype.org/ \
+            -DserverId=sonatype-nexus-staging \
+            -DstagingRepositoryId=$stagingRepositoryId \
+            -DstagingProgressTimeoutMinutes=10
+
+          mvn org.sonatype.plugins:nexus-staging-maven-plugin:1.6.8:rc-release \
+            -DautoDropAfterRelease=true \
+            -DnexusUrl=https://oss.sonatype.org/ \
+            -DserverId=sonatype-nexus-staging \
+            -DstagingRepositoryId=$stagingRepositoryId \
+            -DstagingProgressTimeoutMinutes=10
 
   deploy_javadocs:
     name: Upload Javadocs
