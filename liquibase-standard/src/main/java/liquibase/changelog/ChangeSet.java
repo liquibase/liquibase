@@ -253,6 +253,10 @@ public class ChangeSet implements Conditional, ChangeLogChild {
     @Setter
     private String errorMsg;
 
+    @Getter
+    @Setter
+    private ExecType rollbackExecType;
+
     public boolean shouldAlwaysRun() {
         return alwaysRun;
     }
@@ -934,12 +938,15 @@ public class ChangeSet implements Conditional, ChangeLogChild {
             if (runInTransaction) {
                 database.commit();
             }
+            rollbackExecType = ExecType.EXECUTED;
             Scope.getCurrentScope().addMdcValue(MdcKey.CHANGESET_OUTCOME, ExecType.EXECUTED.value.toLowerCase());
             Scope.getCurrentScope().addMdcValue(MdcKey.CHANGESET_OPERATION_STOP_TIME, Instant.ofEpochMilli(new Date().getTime()).toString());
             Scope.getCurrentScope().getLog(getClass()).fine("ChangeSet " + toString() + " has been successfully rolled back.");
         } catch (Exception e) {
+            setErrorMsg(e.getMessage());
             Scope.getCurrentScope().addMdcValue(MdcKey.CHANGESET_OPERATION_STOP_TIME, Instant.ofEpochMilli(new Date().getTime()).toString());
             try {
+                rollbackExecType = ExecType.FAILED;
                 Scope.getCurrentScope().addMdcValue(MdcKey.CHANGESET_OUTCOME, ExecType.FAILED.value.toLowerCase());
                 Scope.getCurrentScope().getLog(getClass()).fine("ChangeSet " + this + " rollback failed.");
                 database.rollback();
@@ -1161,6 +1168,10 @@ public class ChangeSet implements Conditional, ChangeLogChild {
                 (includeMD5Sum ? ("::(Checksum: " + generateCheckSum(checksumVersion) + ")") : "");
     }
 
+    public String toNormalizedString() {
+        return DatabaseChangeLog.normalizePath(filePath) + "::" + getId() + "::" + getAuthor();
+    }
+
     @Override
     public String toString() {
         return toString(false);
@@ -1198,8 +1209,8 @@ public class ChangeSet implements Conditional, ChangeLogChild {
             return;
         }
 
-        for (String statment : StringUtil.splitSQL(sql, null)) {
-            rollback.getChanges().add(new RawSQLChange(statment.trim()));
+        for (String statement : StringUtil.splitSQL(sql, null)) {
+            rollback.getChanges().add(new RawSQLChange(statement.trim()));
         }
     }
 

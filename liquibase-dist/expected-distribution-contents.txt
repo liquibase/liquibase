@@ -10,6 +10,7 @@
 │   │   ├── example-changelog.json
 │   │   ├── example-changeset-json.txt
 │   │   ├── liquibase.advanced.flowfile.yaml
+│   │   ├── liquibase.checks-package.yaml
 │   │   ├── liquibase.customlogdata.yaml
 │   │   ├── liquibase.endstage.flow
 │   │   ├── liquibase.flowfile.yaml
@@ -20,6 +21,7 @@
 │   │   ├── example-changelog.sql
 │   │   ├── example-changeset-sql.txt
 │   │   ├── liquibase.advanced.flowfile.yaml
+│   │   ├── liquibase.checks-package.yaml
 │   │   ├── liquibase.customlogdata.yaml
 │   │   ├── liquibase.endstage.flow
 │   │   ├── liquibase.flowfile.yaml
@@ -35,6 +37,7 @@
 │   │   ├── example-changelog.xml
 │   │   ├── example-changeset-xml.txt
 │   │   ├── liquibase.advanced.flowfile.yaml
+│   │   ├── liquibase.checks-package.yaml
 │   │   ├── liquibase.customlogdata.yaml
 │   │   ├── liquibase.endstage.flow
 │   │   ├── liquibase.flowfile.yaml
@@ -48,6 +51,7 @@
 │       ├── example-changelog.yaml
 │       ├── example-changeset-yaml.txt
 │       ├── liquibase.advanced.flowfile.yaml
+│       ├── liquibase.checks-package.yaml
 │       ├── liquibase.customlogdata.yaml
 │       ├── liquibase.endstage.flow
 │       ├── liquibase.flowfile.yaml
@@ -86,7 +90,9 @@
 │   │   ├── FDHUT.txt
 │   │   ├── Liquibase Pro EULA Software License Subscription and Support Agreement.txt
 │   │   ├── README.txt
-│   │   └── apache-2.0.txt
+│   │   ├── apache-2.0.txt
+│   │   ├── bsd-3-clause.txt
+│   │   └── mit.txt
 │   └── oss
 │       ├── README.txt
 │       ├── apache-2.0.txt

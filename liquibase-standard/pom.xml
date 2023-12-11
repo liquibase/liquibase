@@ -124,7 +124,7 @@
         <dependency>
             <groupId>org.junit.jupiter</groupId>
             <artifactId>junit-jupiter</artifactId>
-            <version>5.10.0</version>
+            <version>5.10.1</version>
             <scope>test</scope>
         </dependency>
 
@@ -184,7 +184,7 @@
                     <dependency>
                         <groupId>net.java.dev.javacc</groupId>
                         <artifactId>javacc</artifactId>
-                        <version>7.0.12</version>
+                        <version>7.0.13</version>
                     </dependency>
                 </dependencies>
                 <executions>
@@ -346,6 +346,9 @@
                     <services>
                         <param>liquibase.logging.mdc.MdcManager</param>
                         <param>liquibase.logging.mdc.CustomMdcObject</param>
+                        <param>liquibase.report.ShowSummaryGenerator</param>
+                        <param>liquibase.changeset.ChangeSetService</param>
+                        <param>liquibase.parser.LiquibaseSqlParser</param>
                     </services>
                 </configuration>
                 <executions>

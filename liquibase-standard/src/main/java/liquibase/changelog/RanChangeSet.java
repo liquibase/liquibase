@@ -4,8 +4,8 @@ import liquibase.ChecksumVersion;
 import liquibase.ContextExpression;
 import liquibase.Labels;
 import liquibase.change.CheckSum;
-import liquibase.integration.commandline.LiquibaseCommandLineConfiguration;
 
+import java.nio.file.Paths;
 import java.util.Date;
 
 /**
@@ -190,12 +190,27 @@ public class RanChangeSet {
 
     @Override
     public String toString() {
-        return getChangeLog() + "::" + getId() + "::" + getAuthor();
+        return DatabaseChangeLog.normalizePath(getChangeLog()) + "::" + getId() + "::" + getAuthor();
     }
 
     public boolean isSameAs(ChangeSet changeSet) {
-        return DatabaseChangeLog.normalizePath(this.getChangeLog()).equalsIgnoreCase(DatabaseChangeLog.normalizePath(changeSet.getFilePath()))
-                && this.getId().equalsIgnoreCase(changeSet.getId())
-                && this.getAuthor().equalsIgnoreCase(changeSet.getAuthor());
+        return this.getId().equalsIgnoreCase(changeSet.getId())
+                && this.getAuthor().equalsIgnoreCase(changeSet.getAuthor())
+                && isSamePath(changeSet.getFilePath());
+
+    }
+
+    /**
+     * Liquibase path handling has changed over time leading to valid paths not being
+     * accepted thus breaking changesets. This method aims to check for all possible path variations
+     * that Liquibase used over time.
+     *
+     * @param filePath the file path
+     * @return does it somehow match what we have at database?
+     */
+    private boolean isSamePath(String filePath) {
+        String normalizedFilePath = DatabaseChangeLog.normalizePath(this.getChangeLog());
+        return normalizedFilePath.equalsIgnoreCase(DatabaseChangeLog.normalizePath(filePath))
+                || normalizedFilePath.equalsIgnoreCase(Paths.get(filePath).normalize().toString().replace("\\", "/"));
     }
 }
