@@ -122,7 +122,6 @@ public class ColumnExistsPrecondition extends AbstractPrecondition {
     private void checkFast(Database database, DatabaseChangeLog changeLog)
             throws PreconditionFailedException, PreconditionErrorException {
 
-        PreparedStatement statement = null;
         try {
             String schemaName = getSchemaName();
             if (schemaName == null) {
@@ -132,58 +131,58 @@ public class ColumnExistsPrecondition extends AbstractPrecondition {
             String columnName = getColumnName();
 
             if (database instanceof PostgresDatabase) {
-                String sql = "SELECT 1 FROM pg_attribute a WHERE EXISTS (SELECT 1 FROM pg_class JOIN pg_catalog.pg_namespace ns ON ns.oid = pg_class.relnamespace WHERE lower(ns.nspname) = ? AND lower(relname) = lower(?) AND pg_class.oid = a.attrelid) AND lower(a.attname) = lower(?);";
-                statement = ((JdbcConnection) database.getConnection())
-                        .prepareStatement(sql);
-                statement.setString(1, schemaName.toLowerCase());
-                statement.setString(2, tableName);
-                statement.setString(3, columnName);
-                try {
-                    try (ResultSet rs = statement.executeQuery()) {
-                        if (rs.next()) {
-                            return;
-                        } else {
-                            // column or table does not exist
-                            throw new PreconditionFailedException(format("Column %s.%s.%s does not exist", schemaName, tableName, columnName), changeLog, this);
-                        }
-                    }
-                } catch (SQLException e) {
-                    throw new PreconditionErrorException(e, changeLog, this);
-                }
+                makeSureColumnExistsInPostgres(database, changeLog, schemaName, tableName, columnName);
             } else {
-                String sql;
-                if (database instanceof FirebirdDatabase) {
-                    sql = format("select t.%s from %s t where 0=1",
-                            database.escapeColumnNameList(columnName),
-                            database.escapeObjectName(tableName, Table.class));
-                } else {
-                    sql = format("select t.%s from %s.%s t where 0=1",
-                            database.escapeColumnNameList(columnName),
-                            database.escapeObjectName(schemaName, Schema.class),
-                            database.escapeObjectName(tableName, Table.class));
-                }
-
-                statement = ((JdbcConnection) database.getConnection())
-                        .prepareStatement(sql);
-                try {
-                    statement.executeQuery().close();
-                    // column exists
-                } catch (SQLException e) {
-                    // column or table does not exist
-                    throw new PreconditionFailedException(format(
-                            "Column %s.%s.%s does not exist", schemaName,
-                            tableName, columnName), changeLog, this);
-                }
-                finally {
-                    JdbcUtil.closeStatement(statement);
-                }
+                makeSureColumnExistsInOtherDBs(database, changeLog, schemaName, tableName, columnName);
             }
 
-        } catch (DatabaseException | SQLException e) {
+        } catch (DatabaseException e) {
             throw new PreconditionErrorException(e, changeLog, this);
+        }
+    }
 
-        } finally {
-            JdbcUtil.closeStatement(statement);
+    private void makeSureColumnExistsInOtherDBs(Database database, DatabaseChangeLog changeLog, String schemaName, String tableName, String columnName) throws PreconditionFailedException {
+        String sql;
+        if (database instanceof FirebirdDatabase) {
+            sql = format("select t.%s from %s t where 0=1",
+                    database.escapeColumnNameList(columnName),
+                    database.escapeObjectName(tableName, Table.class));
+        } else {
+            sql = format("select t.%s from %s.%s t where 0=1",
+                    database.escapeColumnNameList(columnName),
+                    database.escapeObjectName(schemaName, Schema.class),
+                    database.escapeObjectName(tableName, Table.class));
+        }
+
+        try (PreparedStatement statement2 = ((JdbcConnection) database.getConnection()).prepareStatement(sql);
+             ResultSet rs = statement2.executeQuery()
+        ){
+            // column exists
+        } catch (SQLException | DatabaseException e) {
+            // column or table does not exist
+            throw new PreconditionFailedException(format(
+                    "Column %s.%s.%s does not exist", schemaName,
+                    tableName, columnName), changeLog, this);
+        }
+    }
+
+    private void makeSureColumnExistsInPostgres(Database database, DatabaseChangeLog changeLog, String schemaName, String tableName, String columnName) throws PreconditionFailedException, PreconditionErrorException, DatabaseException {
+        String sql = "SELECT 1 FROM pg_attribute a WHERE EXISTS (SELECT 1 FROM pg_class JOIN pg_catalog.pg_namespace ns ON ns.oid = pg_class.relnamespace WHERE lower(ns.nspname) = ? AND lower(relname) = lower(?) AND pg_class.oid = a.attrelid) AND lower(a.attname) = lower(?);";
+        try (PreparedStatement statement = ((JdbcConnection) database.getConnection())
+                    .prepareStatement(sql)){
+            statement.setString(1, schemaName.toLowerCase());
+            statement.setString(2, tableName);
+            statement.setString(3, columnName);
+            try (ResultSet rs = statement.executeQuery()) {
+                if (rs.next()) {
+                    return;
+                } else {
+                    // column or table does not exist
+                    throw new PreconditionFailedException(format("Column %s.%s.%s does not exist", schemaName, tableName, columnName), changeLog, this);
+                }
+            }
+        } catch (SQLException e) {
+            throw new PreconditionErrorException(e, changeLog, this);
         }
     }
 

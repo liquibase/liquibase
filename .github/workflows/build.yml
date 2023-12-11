@@ -177,7 +177,7 @@ jobs:
           ref: ${{ github.event.pull_request.head.sha || github.event.after}}
       - name: Built Code Cache
         if: ${{ matrix.java == 11}}
-        uses: actions/cache@v3.3.1
+        uses: actions/cache@v3.3.2
         with:
           key: built-code-${{ github.run_number }}-${{ github.run_attempt }}
           path: ./**/target
@@ -279,7 +279,7 @@ jobs:
         with:
           maven-version: ${{ env.MAVEN_VERSION }}
       - name: Restore Built Code Cache
-        uses: actions/cache@v3.3.1
+        uses: actions/cache@v3.3.2
         with:
           key: built-code-${{ github.run_number }}-${{ github.run_attempt }}
           path: ./**/target
@@ -333,14 +333,14 @@ jobs:
           ref: ${{ github.event.pull_request.head.sha || github.event.after}}
       # this includes all the tar files included in the previous runs. So in the next step we deploy what was previously build
       - name: Built Code Cache
-        uses: actions/cache@v3.3.1
+        uses: actions/cache@v3.3.2
         with:
           key: built-code-${{ github.run_number }}-${{ github.run_attempt }}
           path: ./**/target
 
       ##Cache based on install4j file, since changes to JVM is seen in there. If install4j version changes without changing the file, change the prefix letter before hashFiles to force a new cache
       - name: Install4j Cache
-        uses: actions/cache@v3.3.1
+        uses: actions/cache@v3.3.2
         with:
           key: install4j-A${{ hashFiles('liquibase-dist/src/main/install4j/liquibase.install4j') }}
           path: ~/.install4j8/**
@@ -460,7 +460,8 @@ jobs:
           mkdir -p artifacts
           cp liquibase-dist/target/liquibase-${{ needs.setup.outputs.thisBranchFileName }}-SNAPSHOT.tar.gz artifacts
           cp liquibase-dist/target/liquibase-${{ needs.setup.outputs.thisBranchFileName }}-SNAPSHOT.zip artifacts
-          cp liquibase-dist/target/liquibase-${{ needs.setup.outputs.thisBranchFileName }}-SNAPSHOT/internal/lib/liquibase-core.jar artifacts/liquibase-core-0-SNAPSHOT.jar
+          cp liquibase-core/target/liquibase-core-0-SNAPSHOT.jar artifacts/liquibase-core-0-SNAPSHOT.jar
+          #cp liquibase-dist/target/liquibase-${{ needs.setup.outputs.thisBranchFileName }}-SNAPSHOT/internal/lib/liquibase-core.jar artifacts/liquibase-core-0-SNAPSHOT.jar
           cp liquibase-core/target/liquibase-core-0-SNAPSHOT-sources.jar artifacts/liquibase-core-0-SNAPSHOT-sources.jar
           cp target/liquibase-0-SNAPSHOT-javadoc.jar artifacts/liquibase-core-0-SNAPSHOT-javadoc.jar
 
@@ -495,8 +496,8 @@ jobs:
           ##prepare branch-named convenience artifacts directories
           mkdir artifacts-named
           cp liquibase-dist/target/liquibase-${{ needs.setup.outputs.thisBranchFileName }}-SNAPSHOT.tar.gz artifacts-named/liquibase-${{ needs.setup.outputs.thisBranchFileName }}.tar.gz
-          cp liquibase-dist/target/liquibase-${{ needs.setup.outputs.thisBranchFileName }}-SNAPSHOT/internal/lib/liquibase-core.jar artifacts-named/liquibase-core-${{ needs.setup.outputs.thisBranchFileName }}.jar
-          #cp liquibase-core/target/liquibase-core-0-SNAPSHOT.jar artifacts-named/liquibase-core-${{ needs.setup.outputs.thisBranchFileName }}.jar
+          #cp liquibase-dist/target/liquibase-${{ needs.setup.outputs.thisBranchFileName }}-SNAPSHOT/internal/lib/liquibase-core.jar artifacts-named/liquibase-core-${{ needs.setup.outputs.thisBranchFileName }}.jar
+          cp liquibase-core/target/liquibase-core-0-SNAPSHOT.jar artifacts-named/liquibase-core-${{ needs.setup.outputs.thisBranchFileName }}.jar
           cp liquibase-maven-plugin/target/liquibase-maven-plugin-0-SNAPSHOT.jar artifacts-named/liquibase-maven-plugin-${{ needs.setup.outputs.thisBranchFileName }}.jar
           cp liquibase-cdi/target/liquibase-cdi-0-SNAPSHOT.jar artifacts-named/liquibase-cdi-${{ needs.setup.outputs.thisBranchFileName }}.jar
           cp liquibase-cdi-jakarta/target/liquibase-cdi-jakarta-0-SNAPSHOT.jar artifacts-named/liquibase-cdi-jakarta-${{ needs.setup.outputs.thisBranchFileName }}.jar
