@@ -2,10 +2,6 @@ package liquibase.dbtest.db2;
 
 import liquibase.database.DatabaseFactory;
 import liquibase.dbtest.AbstractIntegrationTest;
-import liquibase.exception.CommandExecutionException;
-import liquibase.exception.DatabaseException;
-import org.junit.Assert;
-import org.junit.Test;
 
 /**
  * Integration test für IBM's DB2 database.

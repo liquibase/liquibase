@@ -4,11 +4,8 @@ import liquibase.Liquibase;
 import liquibase.Scope;
 import liquibase.database.DatabaseFactory;
 import liquibase.dbtest.AbstractIntegrationTest;
-import liquibase.exception.CommandExecutionException;
-import liquibase.exception.DatabaseException;
 import liquibase.exception.ValidationFailedException;
 import liquibase.snapshot.DatabaseSnapshot;
-import org.junit.Assert;
 import org.junit.Test;
 
 import java.io.File;

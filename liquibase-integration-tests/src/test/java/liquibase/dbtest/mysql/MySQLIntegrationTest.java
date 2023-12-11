@@ -4,7 +4,6 @@ import liquibase.CatalogAndSchema;
 import liquibase.Scope;
 import liquibase.database.DatabaseFactory;
 import liquibase.dbtest.AbstractIntegrationTest;
-import liquibase.exception.CommandExecutionException;
 import liquibase.exception.DatabaseException;
 import liquibase.executor.ExecutorService;
 import liquibase.snapshot.DatabaseSnapshot;
@@ -14,7 +13,6 @@ import liquibase.statement.core.RawSqlStatement;
 import liquibase.structure.core.Column;
 import liquibase.structure.core.Schema;
 import liquibase.structure.core.Table;
-import org.junit.Assert;
 import org.junit.Test;
 
 import java.sql.SQLSyntaxErrorException;

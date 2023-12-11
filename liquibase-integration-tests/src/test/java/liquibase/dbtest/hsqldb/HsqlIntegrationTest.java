@@ -3,12 +3,8 @@ package liquibase.dbtest.hsqldb;
 import liquibase.database.DatabaseFactory;
 import liquibase.database.jvm.JdbcConnection;
 import liquibase.dbtest.AbstractIntegrationTest;
-import liquibase.exception.CommandExecutionException;
-import liquibase.exception.DatabaseException;
 import liquibase.util.SystemUtil;
-import org.junit.Assert;
 import org.junit.Assume;
-import org.junit.Test;
 
 import java.sql.SQLSyntaxErrorException;
 
