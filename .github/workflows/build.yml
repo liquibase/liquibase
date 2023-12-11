@@ -64,7 +64,7 @@ jobs:
       setupSuccessful: "true"
     steps:
       - name: Failsafe
-        uses: actions/github-script@v6
+        uses: actions/github-script@v7
         with:
           script: |
             if (${{ github.run_attempt }} % 5 == 0) {
@@ -80,7 +80,7 @@ jobs:
 
       - name: Find corresponding branches
         id: find-branches
-        uses: actions/github-script@v6
+        uses: actions/github-script@v7
         with:
           github-token: ${{ secrets.BOT_TOKEN }}
           script: |
@@ -260,7 +260,7 @@ jobs:
 
       - name: Prepare
         id: prepare
-        uses: actions/github-script@v6
+        uses: actions/github-script@v7
         with:
           script: |
             core.setOutput("testResultsArtifact", "liquibase-test-results-integration-${{ matrix.testSystem }}".replace(/[^a-zA-Z0-9\-_]/g, "_"));
@@ -543,7 +543,7 @@ jobs:
           ref: ${{ github.event.pull_request.head.sha || github.event.after}}
 
       - name: Coordinate Liquibase-Pro
-        uses: actions/github-script@v6
+        uses: actions/github-script@v7
         with:
           github-token: ${{ secrets.BOT_TOKEN }}
           script: |

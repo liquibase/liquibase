@@ -22,7 +22,7 @@ jobs:
     steps:
       - name: Throttle Requests (Release)
         if: github.ref == 'refs/heads/release'
-        uses: actions/github-script@v6
+        uses: actions/github-script@v7
         with:
           script: |
             console.log('Delaying for 10 seconds...');
