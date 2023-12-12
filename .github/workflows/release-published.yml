@@ -203,7 +203,7 @@ jobs:
             -DserverId=sonatype-nexus-staging \
             -DstagingRepositoryId=$stagingRepositoryId \
             -DstagingProgressTimeoutMinutes=10
-  
+
   deploy_javadocs:
     name: Upload Javadocs
     needs: [ setup ]
@@ -213,32 +213,32 @@ jobs:
       id-token: write
       contents: read
     steps:
-    - name: Download release javadocs
-      uses: robinraju/release-downloader@v1.8
-      with:
-        repository: "liquibase/liquibase"
-        tag: "${{ needs.setup.outputs.tag }}"
-        filename: "liquibase-additional*.zip"
-        out-file-path: "."
+      - name: Download release javadocs
+        uses: robinraju/release-downloader@v1.8
+        with:
+          repository: "liquibase/liquibase"
+          tag: "${{ needs.setup.outputs.tag }}"
+          filename: "liquibase-additional*.zip"
+          out-file-path: "."
 
-    - name: Unpack javadoc files and upload to s3
-      env:
-        AWS_ACCESS_KEY_ID: ${{ secrets.JAVADOCS_ACCESS_KEY_ID }}
-        AWS_SECRET_ACCESS_KEY: ${{ secrets.JAVADOCS_SECRET_ACCESS_KEY }}
-        AWS_DEFAULT_REGION: us-east-1
-      # unzip archives, create directory for each jar, and extract jar contents to directory.  Then delete the jar and zip files.  Then upload to s3.
-      run: |
-        unzip -j '*.zip' '*javadoc*.jar' 
-        
-        for jar in *liquibase*.jar; do
-          dir_name=$(basename "$jar" .jar)
-          dir_name=$(echo "$dir_name" | sed -E 's/(-[0-9]+(\.[0-9]+)*(-javadoc)?)//')
-          mkdir -p "$dir_name"
-          unzip -o "$jar" -d "$dir_name"
-        done
-        
-        rm -rf *.jar *.zip
-        aws s3 sync . s3://javadocsliquibasecom-origin --only-show-errors
+      - name: Unpack javadoc files and upload to s3
+        env:
+          AWS_ACCESS_KEY_ID: ${{ secrets.JAVADOCS_ACCESS_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.JAVADOCS_SECRET_ACCESS_KEY }}
+          AWS_DEFAULT_REGION: us-east-1
+        # unzip archives, create directory for each jar, and extract jar contents to directory.  Then delete the jar and zip files.  Then upload to s3.
+        run: |
+          unzip -j '*.zip' '*javadoc*.jar' 
+          
+          for jar in *liquibase*.jar; do
+            dir_name=$(basename "$jar" .jar)
+            dir_name=$(echo "$dir_name" | sed -E 's/(-[0-9]+(\.[0-9]+)*(-javadoc)?)//')
+            mkdir -p "$dir_name"
+            unzip -o "$jar" -d "$dir_name"
+          done
+          
+          rm -rf *.jar *.zip
+          aws s3 sync . s3://javadocsliquibasecom-origin --only-show-errors
 
   publish_to_github_packages:
     name: Publish artifacts to Github Packages
@@ -273,20 +273,20 @@ jobs:
           TARGET_ARTIFACT_REPOSITORY: liquibase
 
   deploy_xsd:
-      name: Upload xsds
-      needs: [ setup ]
-      runs-on: ubuntu-22.04
-      outputs:
-          tag: ${{ steps.collect-data.outputs.tag }}
-          version: ${{ needs.setup.outputs.version }}
-      steps:
+    name: Upload xsds
+    needs: [ setup ]
+    runs-on: ubuntu-22.04
+    outputs:
+      tag: ${{ steps.collect-data.outputs.tag }}
+      version: ${{ needs.setup.outputs.version }}
+    steps:
       - name: Download liquibase xsd
         uses: actions/checkout@v4
         with:
           # Relative path under $GITHUB_WORKSPACE to place the repository
-          path: liquibase-core-repo 
+          path: liquibase-core-repo
           repository: "liquibase/liquibase"
-    
+
       - name: Download liquibase-pro xsd
         uses: actions/checkout@v4
         with:
@@ -329,7 +329,7 @@ jobs:
           host: ${{ secrets.WPENGINE_SFTP_HOST }}
           port: ${{ secrets.WPENGINE_SFTP_PORT }}
           username: ${{ secrets.WPENGINE_SFTP_USER }}
-          password: ${{ secrets.WPENGINE_SFTP_PASSWORD }} 
+          password: ${{ secrets.WPENGINE_SFTP_PASSWORD }}
           compress: true
           forceUpload: true
           localDir: 'liquibase-core-repo/liquibase-standard/src/main/resources/www.liquibase.org/xml/ns/dbchangelog/'
@@ -341,7 +341,7 @@ jobs:
           host: ${{ secrets.WPENGINE_SFTP_HOST }}
           port: ${{ secrets.WPENGINE_SFTP_PORT }}
           username: ${{ secrets.WPENGINE_SFTP_USER }}
-          password: ${{ secrets.WPENGINE_SFTP_PASSWORD }} 
+          password: ${{ secrets.WPENGINE_SFTP_PASSWORD }}
           compress: false
           forceUpload: true
           localDir: 'liquibase-pro-repo/pro/src/main/resources/www.liquibase.org/xml/ns/pro/'
@@ -353,7 +353,7 @@ jobs:
           host: ${{ secrets.WPENGINE_SFTP_HOST }}
           port: ${{ secrets.WPENGINE_SFTP_PORT }}
           username: ${{ secrets.WPENGINE_SFTP_USER }}
-          password: ${{ secrets.WPENGINE_SFTP_PASSWORD }} 
+          password: ${{ secrets.WPENGINE_SFTP_PASSWORD }}
           compress: false
           forceUpload: true
           localDir: 'liquibase-pro-repo/pro/src/main/resources/schemas/'
@@ -370,7 +370,7 @@ jobs:
           forceUpload: true
           localDir: 'index-file/'
           remoteDir: '/xml/ns/dbchangelog/'
-          
+
   release-docker:
     name: Release docker images
     needs: [ setup ]
