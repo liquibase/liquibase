@@ -167,11 +167,6 @@ jobs:
         run: |
           mvn -B "-Dbuild.repository.owner=liquibase" "-Dbuild.repository.name=liquibase" "-Dbuild.branch=${{ needs.setup.outputs.thisBranchName }}" "-Dbuild.number=${{ github.run_number }}" "-Dbuild.commit=${{ needs.setup.outputs.latestMergeSha }}" "-DtrimStackTrace=false" -pl '!liquibase-cdi-jakarta' clean test package surefire-report:report
 
-#      - name: GET INFO
-#        run: |
-#          echo "GET INFO"
-#          ls
-
       - name: Build & Test Java non-jdk-8
         if: ${{ matrix.java != 8}}
         run: |
@@ -224,7 +219,7 @@ jobs:
           - postgresql
           - sqlite
           - firebird
-    needs: setup
+    needs: build_tests
     timeout-minutes: 30
     steps:
       - uses: actions/checkout@v3
@@ -237,10 +232,11 @@ jobs:
         with:
           script: |
             core.setOutput("testResultsArtifact", "liquibase-test-results-integration-${{ matrix.testSystem }}".replace(/[^a-zA-Z0-9\-_]/g, "_"));
-      - name: Set up JDK 8
+
+      - name: Set up JDK 11
         uses: actions/setup-java@v3
         with:
-          java-version: '8'
+          java-version: '11'
           distribution: 'temurin'
           cache: 'maven'
 
@@ -250,10 +246,11 @@ jobs:
         uses: stCarolas/setup-maven@v4.5
         with:
           maven-version: ${{ env.MAVEN_VERSION }}
-      - name: Restore Built Code Cache
-        uses: actions/cache@v3.3.1
+
+      - name: Download Artifacts for integration tests to run
+        uses: actions/download-artifact@v3
         with:
-          key: built-code-${{ github.run_number }}-${{ github.run_attempt }}
+          name: temp-artifact
           path: ./**/target
 
       - name: Run Tests
