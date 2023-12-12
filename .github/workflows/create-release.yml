@@ -11,6 +11,7 @@ on:
       runId:
         description: 'RunId of liquibase/liquibase artifacts to attach'
         required: true
+
 jobs:
   setup:
     name: Setup
@@ -19,7 +20,7 @@ jobs:
       version: ${{ steps.collect-data.outputs.version }}
       branch: ${{ steps.collect-data.outputs.branch }}
       runId: ${{ steps.collect-data.outputs.runId }}
-      
+
     steps:
       - name: Collect Data
         id: collect-data
@@ -31,14 +32,15 @@ jobs:
             core.setOutput("runId", context.payload.inputs.runId);
       - run: |
           echo "Creating version ${{ steps.collect-data.outputs.version }} from ${{ steps.collect-data.outputs.branch }} with artifacts from build ${{ steps.collect-data.outputs.runId }} "
+
+  # build-azure-uber-jar:
+  #   needs: [ setup ]
+  #   uses: liquibase/liquibase/.github/workflows/build-azure-uber-jar.yml@master
+  #   with:
+  #     branch: ${{ needs.setup.outputs.branch }}
+  #     liquibase-version: ${{ needs.setup.outputs.version }}
+  #   secrets: inherit
           
-  build-azure-uber-jar:
-   needs: [ setup ]
-   uses: liquibase/liquibase/.github/workflows/build-azure-uber-jar.yml@master
-   with:
-     branch: ${{ needs.setup.outputs.branch }}
-     liquibase-version: ${{ needs.setup.outputs.version }}
-   secrets: inherit
 
   reversion:
     needs: [ setup ]
@@ -57,18 +59,18 @@ jobs:
       - name: Download liquibase-artifacts
         uses: liquibase/action-download-artifact@v2-liquibase
         with:
-          workflow: build.yml
+          workflow: run-tests.yml
           run_id: ${{ needs.setup.outputs.runId }}
           name: liquibase-artifacts
           path: download/liquibase-artifacts
 
-      - name: Download liquibase-pro-azure-artifacts
-        uses: liquibase/action-download-artifact@v2-liquibase
-        with:
-          workflow: build-azure-uber-jar.yml
-          run_id: ${{ needs.setup.outputs.runId }}
-          name: liquibase-pro-azure-artifacts
-          path: download/liquibase-pro-azure-artifacts
+#      - name: Download liquibase-pro-azure-artifacts
+#        uses: liquibase/action-download-artifact@v2-liquibase
+#        with:
+#          workflow: build-azure-uber-jar.yml
+#          run_id: ${{ needs.setup.outputs.runId }}
+#          name: liquibase-pro-azure-artifacts
+#          path: download/liquibase-pro-azure-artifacts
 
       - name: Set up JDK
         uses: actions/setup-java@v3
@@ -85,12 +87,10 @@ jobs:
           GPG_PASSWORD: ${{ secrets.GPG_PASSPHRASE }}
         run: |
           .github/util/re-version.sh download/liquibase-artifacts "${{ needs.setup.outputs.version }}" "${{ needs.setup.outputs.branch }}"
-
           ##Sign Files
           ## liquibase-azure-deps is already on its correct version. Check reusable workflow: build-azure-uber-jar.yml
           # mv download/liquibase-pro-azure-artifacts/liquibase-azure-deps-${{ needs.setup.outputs.version }}.jar re-version/out
           .github/util/sign-artifacts.sh re-version/out
-
           mkdir re-version/final
           mv re-version/out/liquibase-core-${{ needs.setup.outputs.version }}.jar re-version/final
           mv re-version/out/liquibase-commercial-${{ needs.setup.outputs.version }}.jar re-version/final
@@ -98,10 +98,8 @@ jobs:
           mv re-version/out/liquibase-${{ needs.setup.outputs.version }}.zip re-version/final
           # mv re-version/out/liquibase-azure-deps-${{ needs.setup.outputs.version }}.jar re-version/final
           
-
           (cd re-version/out/ && zip liquibase-additional-${{ needs.setup.outputs.version }}.zip *)
           mv re-version/out/liquibase-additional-${{ needs.setup.outputs.version }}.zip re-version/final
-
       - name: Cache Completed Artifacts
         uses: actions/cache@v3.3.2
         with:
@@ -112,10 +110,8 @@ jobs:
         run: |
           git tag -f v${{ needs.setup.outputs.version }}
           git push -f origin v${{ needs.setup.outputs.version }}
-
           (cd download/repo/liquibase-pro && git tag -f v${{ needs.setup.outputs.version }})
           (cd download/repo/liquibase-pro && git push -f origin v${{ needs.setup.outputs.version }})
-
   build-installers:
     permissions:
       contents: write  # for softprops/action-gh-release to create GitHub release
@@ -158,10 +154,8 @@ jobs:
           mkdir -p liquibase-dist/target/keys
           echo "Saving apple key"
           echo "$INSTALL4J_APPLE_KEY" | base64 -d > liquibase-dist/target/keys/datical_apple.p12
-
           echo "Saving windows key"
           echo "$INSTALL4J_WINDOWS_KEY" | base64 -d > liquibase-dist/target/keys/datical_windows.pfx
-
           version="${{ needs.setup.outputs.version }}"
           
           ##### Rebuild installers
@@ -180,12 +174,10 @@ jobs:
           rm re-version/final/*.asc
           rm re-version/final/*.md5
           rm re-version/final/*.sha1
-
       - name: Attach Files to Draft Release
         uses: softprops/action-gh-release@v1
         with:
           tag_name: v${{ needs.setup.outputs.version }}
-          draft: true
           fail_on_unmatched_files: true
           body: Liquibase ${{ needs.setup.outputs.version }}
           generate_release_notes: true

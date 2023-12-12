@@ -1,0 +1,64 @@
+name: Run Test Harness Tests
+
+on:
+  workflow_call:
+    inputs:
+      latestMergeSha:
+        description: 'Latest Merge sha of OSS PR'
+        required: false
+        default: ''
+        type: string
+      thisBranchName:
+        description: 'Branch Name of OSS PR'
+        required: false
+        default: ''
+        type: string
+
+env:
+  MAVEN_VERSION: '3.9.2'
+
+jobs:
+  test-harness-build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.event.after}} #sets the Git reference (commit or branch) to be checked out in the workflow
+
+      - name: Get Workflow Run URL
+        id: get-workflow-url
+        run: |
+          repo_url="https://github.com/${{ github.repository }}"
+          workflow_url="${repo_url}/actions/runs/${{ github.run_id }}"
+          echo "workflow_url=${workflow_url}" >> $GITHUB_ENV
+
+  run-test-harness-tests:
+    runs-on: ubuntu-latest
+    needs: [ test-harness-build ]
+    name: Trigger Test Harness Tests
+    steps:
+      - uses: actions/checkout@v4
+      - name: Dispatch an action and get the run ID
+        uses: codex-/return-dispatch@v1
+        id: return_dispatch
+        with:
+          token: ${{ secrets.RUN_FUNCTIONAL_TEST_HARNESS_TESTS_TOKEN  }}
+          ref: "main"
+          repo: liquibase-test-harness
+          owner: liquibase
+          workflow: main.yml
+          workflow_inputs:
+            '{"liquibaseCommit": "${{ inputs.latestMergeSha }}",
+              "runDescription": "${{ env.workflow_url }}",
+              "liquibaseBranch": "${{ inputs.thisBranchName }}"
+            }'
+
+      - name: Display run ID
+        run: echo ${{ steps.return_dispatch.outputs.run_id }}
+
+      - name: Report TestHarness Run URL
+        uses: actions/github-script@v6.4.1
+        with:
+          script: |
+            const targetURL = "https://github.com/liquibase/liquibase-test-harness/actions/runs/${{ steps.return_dispatch.outputs.run_id }}"
+            core.notice("TestHarness-Tests Run URL: " + targetURL);
