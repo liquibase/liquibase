@@ -1,8 +1,6 @@
 package liquibase.command.core;
 
 import liquibase.Scope;
-import liquibase.change.ChangeFactory;
-import liquibase.change.ReplaceIfExists;
 import liquibase.command.*;
 import liquibase.command.core.helpers.AbstractChangelogCommandStep;
 import liquibase.command.core.helpers.DbUrlConnectionArgumentsCommandStep;
@@ -23,11 +21,8 @@ import liquibase.util.StringUtil;
 import java.io.IOException;
 import java.io.PrintStream;
 import java.util.Arrays;
-import java.util.ArrayList;
-import java.util.Collection;
 import java.util.List;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 public class GenerateChangelogCommandStep extends AbstractChangelogCommandStep {
 
@@ -94,6 +89,10 @@ public class GenerateChangelogCommandStep extends AbstractChangelogCommandStep {
                 .hidden().build();
         REFERENCE_LIQUIBASE_CATALOG_NAME_ARG = builder.argument("referenceLiquibaseCatalogName", String.class)
                 .hidden().build();
+
+        builder.addArgument(AbstractChangelogCommandStep.RUN_ON_CHANGE_TYPES_ARG).build();
+
+        builder.addArgument(AbstractChangelogCommandStep.REPLACE_IF_EXISTS_TYPES_ARG).build();
     }
 
     @Override
@@ -137,8 +136,8 @@ public class GenerateChangelogCommandStep extends AbstractChangelogCommandStep {
             changeLogWriter.setChangeSetLabels(commandScope.getArgumentValue(LABEL_FILTER_ARG));
         }
         changeLogWriter.setChangeSetPath(changeLogFile);
-        changeLogWriter.setChangeSetRunOnChangeTypes(commandScope.getArgumentValue(RUNONCHANGE_TYPES_ARG).split("\\s*,\\s*"));
-        changeLogWriter.setChangeReplaceIfExistsTypes(commandScope.getArgumentValue(REPLACEIFEXISTS_TYPES_ARG).split("\\s*,\\s*"));
+        changeLogWriter.setChangeSetRunOnChangeTypes(commandScope.getArgumentValue(RUN_ON_CHANGE_TYPES_ARG).split("\\s*,\\s*"));
+        changeLogWriter.setChangeReplaceIfExistsTypes(commandScope.getArgumentValue(REPLACE_IF_EXISTS_TYPES_ARG).split("\\s*,\\s*"));
 
         ObjectQuotingStrategy originalStrategy = referenceDatabase.getObjectQuotingStrategy();
         try {
