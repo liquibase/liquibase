@@ -316,4 +316,42 @@ class ParsedNodeTest extends Specification {
         thrown(ParsedNodeException)
 
     }
+
+    def "converts values to boxed types"() {
+        when:
+        def result = new ParsedNode(null, "root").convertObject(input, targetType)
+
+        then:
+        result == expectedResult
+
+        where:
+        input      | targetType      | expectedResult
+        "true"     | Boolean.class   | Boolean.TRUE
+        (byte) 10  | Byte.class      | Byte.valueOf((byte) 10)
+        (short) 20 | Short.class     | Short.valueOf((short) 20)
+        30         | Integer.class   | Integer.valueOf(30)
+        40L        | Long.class      | Long.valueOf(40L)
+        50.0f      | Float.class     | Float.valueOf(50.0f)
+        60.0d      | Double.class    | Double.valueOf(60.0d)
+        "a"        | Character.class | Character.valueOf((char) 'a')
+    }
+
+    def "converts values to primitive types"() {
+        when:
+        def result = new ParsedNode(null, "root").convertObject(input, targetType)
+
+        then:
+        result == expectedResult
+
+        where:
+        input                     | targetType    | expectedResult
+        "true"                    | boolean.class | true
+        Byte.valueOf((byte) 10)   | byte.class    | (byte) 10
+        Short.valueOf((short) 20) | short.class   | (short) 20
+        Integer.valueOf(30)       | int.class     | 30
+        Long.valueOf(40L)         | long.class    | 40L
+        Float.valueOf(50.0f)      | float.class   | 50.0f
+        Double.valueOf(60.0d)     | double.class  | 60.0d
+        "a"                       | char.class    | (char) 'a'
+    }
 }
