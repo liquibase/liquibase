@@ -203,6 +203,14 @@ public class LiquibaseDatabaseDiff extends AbstractLiquibaseChangeLogMojo {
     @PropertyElement
     protected String format;
 
+    /**
+     * Flag to allow adding 'OR REPLACE' option to the create view change object when generating changelog in SQL format
+     *
+     * @parameter property="liquibase.useOrReplaceOption" default-value="false"
+     */
+    @PropertyElement
+    protected boolean useOrReplaceOption;
+
     @Override
     public void execute() throws MojoExecutionException, MojoFailureException {
         if (this.referenceServer != null) {
@@ -262,6 +270,9 @@ public class LiquibaseDatabaseDiff extends AbstractLiquibaseChangeLogMojo {
                 try {
                     DiffOutputControl diffOutputControl = new DiffOutputControl(diffIncludeCatalog, diffIncludeSchema, diffIncludeTablespace, null).addIncludedSchema(new CatalogAndSchema(referenceDefaultCatalogName, referenceDefaultSchemaName));
                     diffOutputControl.setObjectChangeFilter(objectChangeFilter);
+                    if(useOrReplaceOption) {
+                        diffOutputControl.setReplaceIfExistsSet(true);
+                    }
                     CommandLineUtils.doDiffToChangeLog(diffChangeLogFile, referenceDatabase, db, changeSetAuthor, diffOutputControl,
                             objectChangeFilter, StringUtil.trimToNull(diffTypes), schemaComparisons);
                     if (new File(diffChangeLogFile).exists()) {
