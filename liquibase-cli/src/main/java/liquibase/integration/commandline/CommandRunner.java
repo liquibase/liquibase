@@ -56,6 +56,7 @@ class CommandRunner implements Callable<CommandResults> {
         } catch (CommandValidationException cve) {
             Throwable cause = cve.getCause();
             if (cause instanceof MissingRequiredArgumentException) {
+                // 
                 // This is a list of the arguments which the init project command supports. The thinking here is that if the user
                 // forgets to supply one of these arguments, we're going to remind them about the init project command, which
                 // can help them figure out what they should be providing here.
