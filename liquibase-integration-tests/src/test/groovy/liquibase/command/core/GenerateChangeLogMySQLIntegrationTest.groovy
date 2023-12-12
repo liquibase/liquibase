@@ -124,8 +124,8 @@ create table str4 (
         commandScope.addArgumentValue(DbUrlConnectionArgumentsCommandStep.URL_ARG, mysql.getConnectionUrl())
         commandScope.addArgumentValue(DbUrlConnectionArgumentsCommandStep.USERNAME_ARG, mysql.getUsername())
         commandScope.addArgumentValue(DbUrlConnectionArgumentsCommandStep.PASSWORD_ARG, mysql.getPassword())
-        commandScope.addArgumentValue(GenerateChangelogCommandStep.REPLACEIFEXISTS_TYPES_ARG, "createView")
-        commandScope.addArgumentValue(GenerateChangelogCommandStep.RUNONCHANGE_TYPES_ARG, "createView")
+        commandScope.addArgumentValue(GenerateChangelogCommandStep.REPLACE_IF_EXISTS_TYPES_ARG, "createView")
+        commandScope.addArgumentValue(GenerateChangelogCommandStep.RUN_ON_CHANGE_TYPES_ARG, "createView")
         commandScope.setOutput(outputStream)
         commandScope.execute()
 

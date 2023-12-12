@@ -185,8 +185,8 @@ COMMENT ON COLUMN $viewName.$columnName IS '$columnComment';
         CommandScope commandScope = new CommandScope(DiffChangelogCommandStep.COMMAND_NAME)
         commandScope.addArgumentValue(DbUrlConnectionArgumentsCommandStep.DATABASE_ARG, targetDatabase)
         commandScope.addArgumentValue(DiffChangelogCommandStep.CHANGELOG_FILE_ARG, outputChangelogFile)
-        commandScope.addArgumentValue(DiffChangelogCommandStep.REPLACEIFEXISTS_TYPES_ARG, "createView")
-        commandScope.addArgumentValue(DiffChangelogCommandStep.RUNONCHANGE_TYPES_ARG, "createView")
+        commandScope.addArgumentValue(DiffChangelogCommandStep.REPLACE_IF_EXISTS_TYPES_ARG, "createView")
+        commandScope.addArgumentValue(DiffChangelogCommandStep.RUN_ON_CHANGE_TYPES_ARG, "createView")
         commandScope.addArgumentValue(ReferenceDbUrlConnectionCommandStep.REFERENCE_DATABASE_ARG, refDatabase)
         commandScope.execute()
 
