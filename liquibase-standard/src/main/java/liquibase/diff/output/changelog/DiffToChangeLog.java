@@ -6,6 +6,8 @@ import liquibase.Scope;
 import liquibase.change.Change;
 import liquibase.change.core.*;
 import liquibase.changelog.ChangeSet;
+import liquibase.changeset.ChangeSetService;
+import liquibase.changeset.ChangeSetServiceFactory;
 import liquibase.configuration.core.DeprecatedConfigurationValueProvider;
 import liquibase.database.*;
 import liquibase.database.core.*;
@@ -745,30 +747,14 @@ public class DiffToChangeLog {
 
     private void addToChangeSets(Change[] changes, List<ChangeSet> changeSets, ObjectQuotingStrategy quotingStrategy, String created) {
         if (changes != null) {
-            String csContext = this.changeSetContext;
-
-            if (diffOutputControl.getContext() != null) {
-                csContext = diffOutputControl.getContext().toString().replaceFirst("^\\(", "")
-                        .replaceFirst("\\)$", "");
-            }
-
             if (useSeparateChangeSets(changes)) {
                 for (Change change : changes) {
-                    ChangeSet changeSet =
-                       new ChangeSet(generateId(changes), getChangeSetAuthor(), false, false, this.changeSetPath, changeSetContext,
-                            null, true, quotingStrategy, null);
-                    changeSet.setCreated(created);
-                    if (diffOutputControl.getLabels() != null) {
-                        changeSet.setLabels(diffOutputControl.getLabels());
-                    } else {
-                        changeSet.setLabels(new Labels(this.changeSetLabels));
-                    }
+                    ChangeSet changeSet = createChangeSet(changes, quotingStrategy, created);
                     changeSet.addChange(change);
                     changeSets.add(changeSet);
                 }
             } else {
-                ChangeSet changeSet = new ChangeSet(generateId(changes), getChangeSetAuthor(), false, false, this.changeSetPath, csContext,
-                        null, true, quotingStrategy, null);
+                ChangeSet changeSet = createChangeSet(changes, quotingStrategy, created);
                 changeSet.setCreated(created);
                 if (diffOutputControl.getLabels() != null) {
                     changeSet.setLabels(diffOutputControl.getLabels());
@@ -779,9 +765,26 @@ public class DiffToChangeLog {
                     changeSet.addChange(change);
                 }
                 changeSets.add(changeSet);
-
             }
         }
+    }
+
+    //
+    // Use the ChangeSetService to create a new ChangeSet instance
+    //
+    private ChangeSet createChangeSet(Change[] changes, ObjectQuotingStrategy quotingStrategy, String created) {
+        ChangeSetServiceFactory factory = ChangeSetServiceFactory.getInstance();
+        ChangeSetService service = factory.createChangeSetService();
+        ChangeSet changeSet =
+            service.createChangeSet(generateId(changes), getChangeSetAuthor(), false, false, this.changeSetPath, changeSetContext,
+                null, true, quotingStrategy, null);
+        changeSet.setCreated(created);
+        if (diffOutputControl.getLabels() != null) {
+            changeSet.setLabels(diffOutputControl.getLabels());
+        } else {
+            changeSet.setLabels(new Labels(this.changeSetLabels));
+        }
+        return changeSet;
     }
 
     protected boolean useSeparateChangeSets(Change[] changes) {

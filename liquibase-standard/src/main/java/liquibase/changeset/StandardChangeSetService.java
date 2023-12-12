@@ -23,6 +23,10 @@ public class StandardChangeSetService implements ChangeSetService {
     public ChangeSet createChangeSet(DatabaseChangeLog changeLog) {
         return new ChangeSet(changeLog);
     }
+    public ChangeSet createChangeSet(String id, String author, boolean alwaysRun, boolean runOnChange, String filePath, String contextFilter, String dbmsList,
+                     boolean runInTransaction, ObjectQuotingStrategy quotingStrategy, DatabaseChangeLog databaseChangeLog) {
+        return new ChangeSet(id, author, alwaysRun, runOnChange, filePath, contextFilter, dbmsList, null, null, runInTransaction, quotingStrategy, databaseChangeLog);
+    }
 
     @Override
     public ChangeSet createChangeSet(String id, String author, boolean alwaysRun, boolean runOnChange, String filePath, String contextFilter, String dbmsList, DatabaseChangeLog databaseChangeLog) {
