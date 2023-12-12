@@ -87,4 +87,4 @@ public class MySQLIntegrationTest extends AbstractIntegrationTest {
         assertEquals("0000-00-00 00:00:00", defaultValue);
     }
 
-    }
+}
