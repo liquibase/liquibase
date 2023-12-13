@@ -14,7 +14,10 @@ on:
         description: 'If set to true, the unit and integration test results will be archived to the build artifacts page.'
         required: false
         default: 'false'
-
+  push:
+    types:
+      - master
+      
   pull_request_target:
     types:
       - opened
