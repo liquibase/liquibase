@@ -87,15 +87,24 @@ jobs:
           GPG_PASSWORD: ${{ secrets.GPG_PASSPHRASE }}
         run: |
           mkdir -p $PWD/.github/util/
-          curl -o $PWD/.github/util/re-version.sh https://raw.githubusercontent.com/liquibase/liquibase/${{ steps.collect-data.outputs.branch }}/.github/util/re-version.sh
-          curl -o $PWD/.github/util/sign-artifacts.sh https://raw.githubusercontent.com/liquibase/liquibase/${{ steps.collect-data.outputs.branch }}/.github/util/sign-artifacts.sh
+          # Download a script (re-version.sh) from a URL and save it to the specified directory
+          curl -o $PWD/.github/util/re-version.sh https://raw.githubusercontent.com/liquibase/liquibase/${{ needs.setup.outputs.branch }}/.github/util/re-version.sh
+          
+          # Download another script (sign-artifacts.sh) from a URL and save it to the specified directory
+          curl -o $PWD/.github/util/sign-artifacts.sh https://raw.githubusercontent.com/liquibase/liquibase/${{ needs.setup.outputs.branch }}/.github/util/sign-artifacts.sh
           chmod +x $PWD/.github/util/re-version.sh
           chmod +x $PWD/.github/util/sign-artifacts.sh
+          
+          # Execute the sign-artifacts.sh script with specific arguments
           $PWD/.github/util/sign-artifacts.sh download/liquibase-artifacts "${{ needs.setup.outputs.version }}" "${{ needs.setup.outputs.branch }}"
+          
           ##Sign Files
           ## liquibase-azure-deps is already on its correct version. Check reusable workflow: build-azure-uber-jar.yml
           # mv download/liquibase-pro-azure-artifacts/liquibase-azure-deps-${{ needs.setup.outputs.version }}.jar re-version/out
+          
           $PWD/.github/util/sign-artifacts.sh re-version/out
+          
+          # Move files to a specific directory
           mkdir re-version/final
           mv re-version/out/liquibase-core-${{ needs.setup.outputs.version }}.jar re-version/final
           mv re-version/out/liquibase-commercial-${{ needs.setup.outputs.version }}.jar re-version/final
