@@ -1,5 +1,6 @@
 package liquibase.parser.core.xml
 
+import com.example.liquibase.change.ChangeWithPrimitiveFields
 import com.example.liquibase.change.ColumnConfig
 import com.example.liquibase.change.ComputedConfig
 import com.example.liquibase.change.CreateTableExampleChange
@@ -8,27 +9,42 @@ import com.example.liquibase.change.IdentityConfig
 import com.example.liquibase.change.KeyColumnConfig
 import com.example.liquibase.change.PrimaryKeyConfig
 import com.example.liquibase.change.UniqueConstraintConfig
-
 import liquibase.Contexts
-import liquibase.GlobalConfiguration
 import liquibase.Scope
 import liquibase.change.Change
 import liquibase.change.ChangeFactory
 import liquibase.change.CheckSum
-import liquibase.change.core.*
+import liquibase.change.core.AddColumnChange
+import liquibase.change.core.CreateIndexChange
+import liquibase.change.core.CreateSequenceChange
+import liquibase.change.core.CreateTableChange
+import liquibase.change.core.CreateViewChange
+import liquibase.change.core.DropTableChange
+import liquibase.change.core.EmptyChange
+import liquibase.change.core.ExecuteShellCommandChange
+import liquibase.change.core.InsertDataChange
+import liquibase.change.core.LoadDataChange
+import liquibase.change.core.RawSQLChange
+import liquibase.change.core.StopChange
+import liquibase.change.core.UpdateDataChange
 import liquibase.change.custom.CustomChangeWrapper
 import liquibase.change.custom.ExampleCustomSqlChange
 import liquibase.changelog.ChangeLogParameters
 import liquibase.changelog.ChangeSet
 import liquibase.changelog.DatabaseChangeLog
-import liquibase.configuration.LiquibaseConfiguration
 import liquibase.database.ObjectQuotingStrategy
 import liquibase.database.core.H2Database
 import liquibase.database.core.MSSQLDatabase
 import liquibase.database.core.MockDatabase
 import liquibase.exception.ChangeLogParseException
 import liquibase.precondition.CustomPreconditionWrapper
-import liquibase.precondition.core.*
+import liquibase.precondition.core.AndPrecondition
+import liquibase.precondition.core.DBMSPrecondition
+import liquibase.precondition.core.NotPrecondition
+import liquibase.precondition.core.OrPrecondition
+import liquibase.precondition.core.PreconditionContainer
+import liquibase.precondition.core.PrimaryKeyExistsPrecondition
+import liquibase.precondition.core.RunningAsPrecondition
 import liquibase.sdk.supplier.resource.ResourceSupplier
 import liquibase.sql.visitor.AppendSqlVisitor
 import liquibase.sql.visitor.ReplaceSqlVisitor
@@ -37,6 +53,7 @@ import spock.lang.FailsWith
 import spock.lang.Shared
 import spock.lang.Specification
 import spock.lang.Unroll
+
 import static org.hamcrest.Matchers.containsInAnyOrder
 import static spock.util.matcher.HamcrestSupport.that
 
@@ -769,4 +786,23 @@ public class XMLChangeLogSAXParser_RealFile_Test extends Specification {
         change1.getTableName() == "a"
         change1.getColumns().get(0).getType() == "int"
     }
+
+    def "parsesChangeWithPrimitiveFields"() {
+        given:
+        Scope.getCurrentScope().getSingleton(ChangeFactory.class).register(new ChangeWithPrimitiveFields())
+
+        when:
+        def path = "liquibase/parser/core/xml/primitiveChangeLog.xml"
+        def changeLog = new XMLChangeLogSAXParser().parse(path, new ChangeLogParameters(), new JUnitResourceAccessor())
+
+
+        then:
+        def changeSets = changeLog.getChangeSets()
+        assert changeSets.size() == 1
+        def changes = changeSets.first().getChanges()
+        assert changes.size() == 1
+        def change = changes.first() as ChangeWithPrimitiveFields
+        assert change.aBoolean && change.anInt == 42 && change.aChar == (char) 'b'
+    }
+
 }
