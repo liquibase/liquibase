@@ -32,15 +32,15 @@ jobs:
             core.setOutput("runId", context.payload.inputs.runId);
       - run: |
           echo "Creating version ${{ steps.collect-data.outputs.version }} from ${{ steps.collect-data.outputs.branch }} with artifacts from build ${{ steps.collect-data.outputs.runId }} "
-
-  # build-azure-uber-jar:
-  #   needs: [ setup ]
-  #   uses: liquibase/liquibase/.github/workflows/build-azure-uber-jar.yml@master
-  #   with:
-  #     branch: ${{ needs.setup.outputs.branch }}
-  #     liquibase-version: ${{ needs.setup.outputs.version }}
-  #   secrets: inherit
           
+          # build-azure-uber-jar:
+          #   needs: [ setup ]
+          #   uses: liquibase/liquibase/.github/workflows/build-azure-uber-jar.yml@master
+          #   with:
+          #     branch: ${{ needs.setup.outputs.branch }}
+          #     liquibase-version: ${{ needs.setup.outputs.version }}
+          #   secrets: inherit
+  
 
   reversion:
     needs: [ setup ]
@@ -64,13 +64,13 @@ jobs:
           name: liquibase-artifacts
           path: download/liquibase-artifacts
 
-#      - name: Download liquibase-pro-azure-artifacts
-#        uses: liquibase/action-download-artifact@v2-liquibase
-#        with:
-#          workflow: build-azure-uber-jar.yml
-#          run_id: ${{ needs.setup.outputs.runId }}
-#          name: liquibase-pro-azure-artifacts
-#          path: download/liquibase-pro-azure-artifacts
+      #      - name: Download liquibase-pro-azure-artifacts
+      #        uses: liquibase/action-download-artifact@v2-liquibase
+      #        with:
+      #          workflow: build-azure-uber-jar.yml
+      #          run_id: ${{ needs.setup.outputs.runId }}
+      #          name: liquibase-pro-azure-artifacts
+      #          path: download/liquibase-pro-azure-artifacts
 
       - name: Set up JDK
         uses: actions/setup-java@v3
@@ -86,18 +86,16 @@ jobs:
         env:
           GPG_PASSWORD: ${{ secrets.GPG_PASSPHRASE }}
         run: |
-          
           mkdir -p $PWD/.github/util/
-          ls -lR $PWD
           curl -o $PWD/.github/util/re-version.sh https://raw.githubusercontent.com/liquibase/liquibase/${{ steps.collect-data.outputs.branch }}/.github/util/re-version.sh
           curl -o $PWD/.github/util/sign-artifacts.sh https://raw.githubusercontent.com/liquibase/liquibase/${{ steps.collect-data.outputs.branch }}/.github/util/sign-artifacts.sh
           chmod +x $PWD/.github/util/re-version.sh
           chmod +x $PWD/.github/util/sign-artifacts.sh
-          .github/util/re-version.sh download/liquibase-artifacts "${{ needs.setup.outputs.version }}" "${{ needs.setup.outputs.branch }}"
+          $PWD/.github/util/sign-artifacts.sh download/liquibase-artifacts "${{ needs.setup.outputs.version }}" "${{ needs.setup.outputs.branch }}"
           ##Sign Files
           ## liquibase-azure-deps is already on its correct version. Check reusable workflow: build-azure-uber-jar.yml
           # mv download/liquibase-pro-azure-artifacts/liquibase-azure-deps-${{ needs.setup.outputs.version }}.jar re-version/out
-          .github/util/sign-artifacts.sh re-version/out
+          $PWD/.github/util/sign-artifacts.sh re-version/out
           mkdir re-version/final
           mv re-version/out/liquibase-core-${{ needs.setup.outputs.version }}.jar re-version/final
           mv re-version/out/liquibase-commercial-${{ needs.setup.outputs.version }}.jar re-version/final
@@ -175,7 +173,7 @@ jobs:
           mv liquibase-dist/target/liquibase-*-installer-* re-version/final
           
           ##Sign Files
-          .github/util/sign-artifacts.sh re-version/final
+          $PWD/.github/util/sign-artifacts.sh re-version/final
           
           (cd re-version/final && zip liquibase-additional-$version.zip *.asc *.md5 *.sha1)
           rm re-version/final/*.asc
