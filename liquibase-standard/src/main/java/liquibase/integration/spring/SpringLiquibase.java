@@ -6,12 +6,15 @@ import liquibase.database.Database;
 import liquibase.database.DatabaseConnection;
 import liquibase.database.DatabaseFactory;
 import liquibase.database.OfflineConnection;
+import liquibase.database.core.DerbyDatabase;
 import liquibase.database.jvm.JdbcConnection;
 import liquibase.exception.DatabaseException;
 import liquibase.exception.LiquibaseException;
+import liquibase.exception.UnexpectedLiquibaseException;
 import liquibase.integration.commandline.LiquibaseCommandLineConfiguration;
 import liquibase.logging.Logger;
 import liquibase.resource.ResourceAccessor;
+import liquibase.ui.UIServiceEnum;
 import liquibase.util.StringUtil;
 import org.springframework.beans.factory.BeanNameAware;
 import org.springframework.beans.factory.InitializingBean;
@@ -78,6 +81,8 @@ public class SpringLiquibase implements InitializingBean, BeanNameAware, Resourc
     protected UpdateSummaryOutputEnum showSummaryOutput = UpdateSummaryOutputEnum.LOG;
 
 	protected boolean testRollbackOnUpdate = false;
+
+    protected UIServiceEnum uiService = UIServiceEnum.LOGGER;
 
 	public SpringLiquibase() {
 		super();
@@ -277,19 +282,26 @@ public class SpringLiquibase implements InitializingBean, BeanNameAware, Resourc
             return;
 		}
 
-		Connection c = null;
-		Liquibase liquibase = null;
         try {
-            c = getDataSource().getConnection();
-            liquibase = createLiquibase(c);
-            generateRollbackFile(liquibase);
-            performUpdate(liquibase);
-        } catch (SQLException e) {
-        	throw new DatabaseException(e);
-        } finally {
-            if (liquibase != null) {
-                liquibase.close();
-            }
+
+            Scope.child(Scope.Attr.ui.name(), this.uiService.getUiServiceClass().getDeclaredConstructor().newInstance(),
+                    () -> {
+                Liquibase liquibase = null;
+                try {
+                    final Connection c = getDataSource().getConnection();
+                    liquibase = createLiquibase(c);
+                    generateRollbackFile(liquibase);
+                    performUpdate(liquibase);
+                } catch (SQLException e) {
+                    throw new DatabaseException(e);
+                } finally {
+                    if (liquibase != null) {
+                        liquibase.close();
+                    }
+                }
+            });
+        } catch (Exception e) {
+            throw new UnexpectedLiquibaseException(e);
         }
     }
 
@@ -349,6 +361,10 @@ public class SpringLiquibase implements InitializingBean, BeanNameAware, Resourc
 
         liquibase.setShowSummaryOutput(showSummaryOutput);
         liquibase.setShowSummary(showSummary);
+
+        if (liquibase.getDatabase() instanceof DerbyDatabase) {
+            ((DerbyDatabase) liquibase.getDatabase()).setShutdownEmbeddedDerby(false);
+        }
 
 		return liquibase;
 	}
@@ -459,6 +475,17 @@ public class SpringLiquibase implements InitializingBean, BeanNameAware, Resourc
             return;
         }
         this.showSummaryOutput = showSummaryOutput;
+    }
+
+    public void setUiService(UIServiceEnum uiService) {
+        if (uiService == null) {
+            return;
+        }
+        this.uiService = uiService;
+    }
+
+    public UIServiceEnum getUiService() {
+        return uiService;
     }
 
     @Override

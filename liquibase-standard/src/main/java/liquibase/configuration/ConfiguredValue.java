@@ -1,8 +1,11 @@
 package liquibase.configuration;
 
+import liquibase.Scope;
+
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.concurrent.atomic.AtomicReference;
 
 /**
  * This wraps all the {@link ProvidedValue}s to return the overall value returned from the collection of {@link ConfigurationValueProvider}s.
@@ -33,8 +36,8 @@ public class ConfiguredValue<DataType> {
         if (providedValue == null) {
             return null;
         }
-
-        return valueConverter.convert(providedValue.getValue());
+        return
+           ConfigurationValueUtils.convertDataType(providedValue.getActualKey(), (DataType)providedValue.getValue(), valueConverter);
     }
 
     public DataType getValueObfuscated() {

@@ -1,0 +1,275 @@
+name: Run Tests
+
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.head_ref || github.ref }}
+  cancel-in-progress: ${{ !contains(github.ref, 'refs/heads/master') }}
+
+on:
+  workflow_call:
+
+  workflow_dispatch:
+    inputs:
+      archive_test_results:
+        description: 'If set to true, the unit and integration test results will be archived to the build artifacts page.'
+        required: false
+        default: 'false'
+
+  pull_request_target:
+    types:
+      - opened
+      - reopened
+      - synchronize
+
+    paths-ignore:
+      - '**.md'
+
+env:
+  MAVEN_VERSION: '3.9.2'
+
+jobs:
+  authorize:
+    environment: ${{ github.event_name == 'pull_request_target' && github.event.pull_request.head.repo.full_name != github.repository && 'external' || 'internal' }}
+    runs-on: ubuntu-latest
+    steps:
+      - run: true
+
+  setup:
+    name: setup
+    needs: authorize
+    runs-on: ubuntu-22.04
+    outputs:
+      timestamp: ${{ steps.get-date.outputs.date }}
+      latestMergeSha: ${{ steps.get-sha.outputs.latestMergeSha }}
+      thisBranchName: ${{ steps.get-branch-name.outputs.thisBranchName }}
+      setupSuccessful: "true"
+    steps:
+      - uses: actions/checkout@v3
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.ref }}
+
+      - name: Get current date
+        id: get-date
+        run: |
+          echo "date=$(date +'%Y-%m-%d %H:%M:%S %Z')" >> $GITHUB_OUTPUT
+
+      - name: Get Latest Merge Commit SHA
+        id: get-sha
+        run: |
+          latest_merge_sha=`(git rev-parse HEAD)`
+          echo "latestMergeSha=${latest_merge_sha}" >> $GITHUB_OUTPUT
+
+      - name: Get Current BranchName
+        id: get-branch-name
+        run: |
+          # this logic checks if the branch is from a forked repository PR or not. Where -n is the inverse of -z (not empty)
+          if [ -n "${GITHUB_HEAD_REF}" ];
+          then
+            branch_name=${GITHUB_HEAD_REF}
+          else
+            branch_name=${{ github.ref_name }}
+          fi 
+
+          modified_branch_name=`(echo $branch_name | tr '/_' '-')`
+          echo "thisBranchName=$modified_branch_name" >> $GITHUB_OUTPUT          
+          echo $modified_branch_name
+
+  build_tests:
+    name: Run Test for (Java ${{ matrix.java }} ${{ matrix.os }})
+    needs: setup
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ ubuntu-22.04, macos-latest, windows-2019 ]
+        java: [ 8, 11, 17, 21 ]
+        exclude:
+          # exclude non-java 8 on macos and windows builds
+          - os: macos-latest
+            java: 11
+          - os: windows-2019
+            java: 11
+          - os: macos-latest
+            java: 17
+          - os: windows-2019
+            java: 17
+          - os: macos-latest
+            java: 21
+          - os: windows-2019
+            java: 21
+    runs-on: ${{ matrix.os }}
+    env:
+      OS_TYPE: ${{ matrix.os }}
+      GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+    steps:
+      - uses: actions/checkout@v3
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.event.after}}
+
+      - name: Set up JDK ${{ matrix.java }}
+        uses: actions/setup-java@v3
+        with:
+          java-version: ${{ matrix.java }}
+          distribution: 'temurin'
+          cache: 'maven'
+
+      # look for dependencies in maven
+      - name: maven-settings-xml-action
+        uses: whelk-io/maven-settings-xml-action@v21
+        with:
+          repositories: |
+            [
+              {
+                "id": "liquibase",
+                "url": "https://maven.pkg.github.com/liquibase/liquibase",
+                "releases": {
+                  "enabled": "false"
+                },
+                "snapshots": {
+                  "enabled": "true",
+                  "updatePolicy": "always"
+                }
+              },
+              {
+                "id": "liquibase-pro",
+                "url": "https://maven.pkg.github.com/liquibase/liquibase-pro",
+                "releases": {
+                  "enabled": "false"
+                },
+                "snapshots": {
+                  "enabled": "true",
+                  "updatePolicy": "always"
+                }
+              }
+            ]
+          servers: |
+            [
+              {
+                "id": "liquibase-pro",
+                "username": "liquibot",
+                "password": "${{ secrets.LIQUIBOT_PAT }}"
+              },
+              {
+                "id": "liquibase",
+                "username": "liquibot",
+                "password": "${{ secrets.LIQUIBOT_PAT }}"
+              }
+            ]
+
+      # getting from build results page. If we remove 0-snapshot then we will need settings.xml
+
+      - name: Set up Maven
+        uses: stCarolas/setup-maven@v4.5
+        with:
+          maven-version: ${{ env.MAVEN_VERSION }}
+
+      - name: Build & Test Java 8
+        if: ${{ matrix.java == 8}}
+        run: |
+          mvn -B "-Dbuild.repository.owner=liquibase" "-Dbuild.repository.name=liquibase" "-Dbuild.branch=${{ needs.setup.outputs.thisBranchName }}" "-Dbuild.number=${{ github.run_number }}" "-Dbuild.commit=${{ needs.setup.outputs.latestMergeSha }}" "-DtrimStackTrace=false" -pl '!liquibase-cdi-jakarta' clean test package surefire-report:report
+
+#      - name: GET INFO
+#        run: |
+#          echo "GET INFO"
+#          ls
+
+      - name: Build & Test Java non-jdk-8
+        if: ${{ matrix.java != 8}}
+        run: |
+          mvn -B "-Dbuild.repository.owner=liquibase" "-Dbuild.repository.name=liquibase" "-Dbuild.branch=${{ needs.setup.outputs.thisBranchName }}" "-Dbuild.number=${{ github.run_number }}" "-Dbuild.commit=${{ needs.setup.outputs.latestMergeSha }}" "-DtrimStackTrace=false" clean test package surefire-report:report
+
+      - name: Remove Original Jars for *nix
+        if: env.OS_TYPE != 'windows-2019'
+        run: |
+          find . -name original-*.jar -exec rm {} \;
+
+      - name: Upload Artifacts for build.yml
+        if: ${{ matrix.java == 11 && matrix.os == 'ubuntu-22.04'}}
+        uses: actions/upload-artifact@v3
+        with:
+          name: temp-artifact
+          path: |
+            ./**/target/*.jar
+
+      - name: Archive Test Results
+        if: ${{ inputs.archive_test_results == 'true' }}
+        uses: actions/upload-artifact@v3
+        with:
+          name: liquibase-test-results-jdk${{ matrix.java }}
+          path: |
+            ./**/target/surefire-reports
+            ./**/target/site
+
+      - name: Archive Modules
+        if: ${{ matrix.java == 11 && matrix.os == 'ubuntu-22.04'}}
+        uses: actions/upload-artifact@v3
+        with:
+          name: liquibase-modules
+          path: |
+            */target/*-0-SNAPSHOT.jar
+
+  integration-test:
+    name: Integration Test
+    runs-on: ubuntu-22.04
+    strategy:
+      fail-fast: false
+      matrix:
+        testSystem:
+          - h2
+          #- h2:1.4
+          - hsqldb
+          - mariadb
+          - mssql
+          - mysql
+          - oracle
+          - postgresql
+          - sqlite
+          - firebird
+    needs: setup
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v3
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.event.after}}
+
+      - name: Prepare
+        id: prepare
+        uses: actions/github-script@v6
+        with:
+          script: |
+            core.setOutput("testResultsArtifact", "liquibase-test-results-integration-${{ matrix.testSystem }}".replace(/[^a-zA-Z0-9\-_]/g, "_"));
+      - name: Set up JDK 8
+        uses: actions/setup-java@v3
+        with:
+          java-version: '8'
+          distribution: 'temurin'
+          cache: 'maven'
+
+      # getting from build results page. If we remove 0-snapshot then we will need settings.xml
+
+      - name: Set up Maven
+        uses: stCarolas/setup-maven@v4.5
+        with:
+          maven-version: ${{ env.MAVEN_VERSION }}
+      - name: Restore Built Code Cache
+        uses: actions/cache@v3.3.1
+        with:
+          key: built-code-${{ github.run_number }}-${{ github.run_attempt }}
+          path: ./**/target
+
+      - name: Run Tests
+        run: mvn -B jar:jar jar:test-jar surefire:test -DtrimStackTrace=false -Dliquibase.sdk.testSystem.test=${{ matrix.testSystem }} -Dliquibase.sdk.testSystem.acceptLicenses=${{ matrix.testSystem }} -Dtest=*IntegrationTest,*ExecutorTest -DfailIfNoTests=false -Dsurefire.failIfNoSpecifiedTests=false
+
+      - name: Archive Test Results
+        if: ${{ inputs.archive_test_results == 'true' }}
+        uses: actions/upload-artifact@v3
+        with:
+          name: ${{ steps.prepare.outputs.testResultsArtifact }}
+          path: |
+            ./**/target/surefire-reports
+
+
+
+  run-build-publish-file:
+    needs: [ build_tests,integration-test ]
+    uses: liquibase/liquibase/.github/workflows/build.yml@master
+    secrets: inherit

@@ -7,16 +7,16 @@ import liquibase.change.core.LoadDataChange;
 import liquibase.changelog.ChangeLogHistoryServiceFactory;
 import liquibase.changelog.ChangeSet;
 import liquibase.changelog.DatabaseChangeLog;
+import liquibase.command.CommandResults;
 import liquibase.command.CommandScope;
 import liquibase.command.core.DropAllCommandStep;
+import liquibase.command.core.SnapshotCommandStep;
 import liquibase.command.core.UpdateCommandStep;
-import liquibase.command.core.helpers.DbUrlConnectionCommandStep;
+import liquibase.command.core.helpers.DbUrlConnectionArgumentsCommandStep;
 import liquibase.database.Database;
 import liquibase.database.DatabaseConnection;
 import liquibase.database.DatabaseFactory;
-import liquibase.database.core.H2Database;
-import liquibase.database.core.OracleDatabase;
-import liquibase.database.core.PostgresDatabase;
+import liquibase.database.core.*;
 import liquibase.database.jvm.JdbcConnection;
 import liquibase.datatype.DataTypeFactory;
 import liquibase.datatype.core.ClobType;
@@ -96,6 +96,8 @@ public abstract class AbstractIntegrationTest {
     private final String invalidSqlChangeLog;
     private final String objectQuotingStrategyChangeLog;
     private final String commonChangeLog;
+
+    private final String indexWithAssociatedWithChangeLog;
     private Database database;
     private String defaultSchemaName;
 
@@ -117,6 +119,7 @@ public abstract class AbstractIntegrationTest {
         this.objectQuotingStrategyChangeLog = "changelogs/common/object.quoting.strategy.changelog.xml";
         this.emptyRollbackSqlChangeLog = "changelogs/common/rollbackable.changelog.sql";
         this.pathChangeLog = "changelogs/common/pathChangeLog.xml";
+        this.indexWithAssociatedWithChangeLog = "changelogs/common/index.with.associatedwith.changelog.xml";
         logger = Scope.getCurrentScope().getLog(getClass());
 
         Scope.setScopeManager(new TestScopeManager(Scope.getCurrentScope()));
@@ -284,7 +287,7 @@ public abstract class AbstractIntegrationTest {
             }
             try {
                 CommandScope commandScope = new CommandScope(DropAllCommandStep.COMMAND_NAME);
-                commandScope.addArgumentValue(DbUrlConnectionCommandStep.DATABASE_ARG, database);
+                commandScope.addArgumentValue(DbUrlConnectionArgumentsCommandStep.DATABASE_ARG, database);
                 commandScope.execute();
             } catch (Exception ignored) {
             }
@@ -1270,13 +1273,80 @@ public abstract class AbstractIntegrationTest {
         try {
             getDatabase().setDatabaseChangeLogTableName("lowercase");
             CommandScope commandScope = new CommandScope(UpdateCommandStep.COMMAND_NAME);
-            commandScope.addArgumentValue(DbUrlConnectionCommandStep.DATABASE_ARG, getDatabase());
+            commandScope.addArgumentValue(DbUrlConnectionArgumentsCommandStep.DATABASE_ARG, getDatabase());
             commandScope.addArgumentValue(UpdateCommandStep.CHANGELOG_FILE_ARG, objectQuotingStrategyChangeLog);
             commandScope.execute();
         } catch (Exception e) {
             Assert.fail("Should not fail. Reason: " + e.getMessage());
         } finally {
             getDatabase().setDatabaseChangeLogTableName(oldDbChangelogTableName);
+        }
+    }
+
+    @Test
+    public void verifyIndexIsCreatedWhenAssociatedWithPropertyIsSetAsNone() throws DatabaseException {
+       clearDatabase();
+        try {
+            Database database = getDatabase();
+            CommandScope commandScope = new CommandScope(UpdateCommandStep.COMMAND_NAME);
+            commandScope.addArgumentValue(DbUrlConnectionArgumentsCommandStep.DATABASE_ARG, database);
+            commandScope.addArgumentValue(UpdateCommandStep.CHANGELOG_FILE_ARG, indexWithAssociatedWithChangeLog);
+            commandScope.execute();
+
+            final CommandScope snapshotScope = new CommandScope("snapshot");
+            snapshotScope.addArgumentValue(DbUrlConnectionArgumentsCommandStep.DATABASE_ARG, database);
+            snapshotScope.addArgumentValue(SnapshotCommandStep.SNAPSHOT_FORMAT_ARG, "json");
+            CommandResults results = snapshotScope.execute();
+            DatabaseSnapshot snapshot = (DatabaseSnapshot) results.getResult("snapshot");
+            Index index = snapshot.get(new Index("idx_test"));
+            Assert.assertNotNull(index );
+        } catch (Exception e) {
+            Assert.fail("Should not fail. Reason: " + e.getMessage());
+        } finally {
+            clearDatabase();
+        }
+
+    }
+
+    @Test
+    public void makeSureNoErrorIsReturnedWhenTableNameIsNotSpecified() throws DatabaseException {
+        // This is a test to validate most of the DBs do not throw an error when tableName is not
+        // specified as part of primaryKeyExistsPrecondition.
+        clearDatabase();
+        String errorMsg = "";
+        try {
+            runUpdate("changelogs/common/preconditions/preconditions.changelog.xml");
+        }catch(CommandExecutionException e) {
+            errorMsg = e.getMessage();
+        }
+        finally {
+            clearDatabase();
+        }
+
+        if(!(database instanceof H2Database || database instanceof MySQLDatabase || database instanceof HsqlDatabase
+                || database instanceof SQLiteDatabase || database instanceof DB2Database)) {
+            Assert.assertTrue(errorMsg.isEmpty());
+        }
+    }
+
+    @Test
+    public void makeSureErrorIsReturnedWhenTableNameIsNotSpecified() throws DatabaseException {
+        // This is a test to validate some DBs do require a tableName as part of primaryKeyExistsPrecondition,
+        // if it's not specified an error will be thrown.
+        clearDatabase();
+        String errorMsg = "";
+        try {
+            runUpdate("changelogs/common/preconditions/preconditions.changelog.xml");
+        }catch(CommandExecutionException e) {
+            errorMsg = e.getMessage();
+        }
+        finally {
+            clearDatabase();
+        }
+
+        if(database instanceof H2Database || database instanceof MySQLDatabase || database instanceof HsqlDatabase
+                || database instanceof SQLiteDatabase || database instanceof DB2Database) {
+            Assert.assertTrue(errorMsg.contains("Database driver requires a table name to be specified in order to search for a primary key."));
         }
     }
 
@@ -1302,9 +1372,9 @@ public abstract class AbstractIntegrationTest {
 
     protected void runUpdate(String changelog) throws CommandExecutionException {
         CommandScope commandScope = new CommandScope(UpdateCommandStep.COMMAND_NAME);
-        commandScope.addArgumentValue(DbUrlConnectionCommandStep.URL_ARG, testSystem.getConnectionUrl());
-        commandScope.addArgumentValue(DbUrlConnectionCommandStep.USERNAME_ARG, testSystem.getUsername());
-        commandScope.addArgumentValue(DbUrlConnectionCommandStep.PASSWORD_ARG, testSystem.getPassword());
+        commandScope.addArgumentValue(DbUrlConnectionArgumentsCommandStep.URL_ARG, testSystem.getConnectionUrl());
+        commandScope.addArgumentValue(DbUrlConnectionArgumentsCommandStep.USERNAME_ARG, testSystem.getUsername());
+        commandScope.addArgumentValue(DbUrlConnectionArgumentsCommandStep.PASSWORD_ARG, testSystem.getPassword());
         commandScope.addArgumentValue(UpdateCommandStep.CHANGELOG_FILE_ARG, changelog);
         commandScope.execute();
     }

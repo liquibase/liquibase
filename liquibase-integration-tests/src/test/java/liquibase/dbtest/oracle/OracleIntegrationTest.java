@@ -4,12 +4,21 @@ import liquibase.Liquibase;
 import liquibase.Scope;
 import liquibase.changelog.ChangeSet;
 import liquibase.changelog.DatabaseChangeLog;
+import liquibase.command.CommandResults;
+import liquibase.command.CommandScope;
+import liquibase.command.core.SnapshotCommandStep;
+import liquibase.command.core.UpdateCommandStep;
+import liquibase.command.core.helpers.DbUrlConnectionArgumentsCommandStep;
 import liquibase.database.Database;
 import liquibase.database.DatabaseFactory;
 import liquibase.database.jvm.JdbcConnection;
 import liquibase.dbtest.AbstractIntegrationTest;
+import liquibase.exception.DatabaseException;
 import liquibase.exception.ValidationFailedException;
+import liquibase.snapshot.DatabaseSnapshot;
 import liquibase.sql.visitor.AbstractSqlVisitor;
+import liquibase.structure.core.Index;
+import org.junit.Assert;
 import org.junit.Test;
 
 import java.sql.ResultSet;
@@ -27,12 +36,14 @@ public class OracleIntegrationTest extends AbstractIntegrationTest {
     String indexOnSchemaChangeLog;
     String viewOnSchemaChangeLog;
     String customExecutorChangeLog;
+    String indexWithAssociatedWithChangeLog;
 
     public OracleIntegrationTest() throws Exception {
         super("oracle", DatabaseFactory.getInstance().getDatabase("oracle"));
          indexOnSchemaChangeLog = "changelogs/oracle/complete/indexOnSchema.xml";
          viewOnSchemaChangeLog = "changelogs/oracle/complete/viewOnSchema.xml";
          customExecutorChangeLog = "changelogs/oracle/complete/sqlplusExecutor.xml";
+         indexWithAssociatedWithChangeLog = "changelogs/common/index.with.associatedwith.changelog.xml";
         // Respect a user-defined location for sqlnet.ora, tnsnames.ora etc. stored in the environment
         // variable TNS_ADMIN. This allowes the use of TNSNAMES.
         if (System.getenv("TNS_ADMIN") != null)
@@ -176,5 +187,30 @@ public class OracleIntegrationTest extends AbstractIntegrationTest {
     @Test
     public void testDiffExternalForeignKeys() throws Exception {
         //cross-schema security for oracle is a bother, ignoring test for now
+    }
+
+    @Test
+    public void verifyIndexIsCreatedWhenAssociatedWithPropertyIsSetAsForeignKey() throws DatabaseException {
+        clearDatabase();
+        try {
+            Database database = getDatabase();
+            CommandScope commandScope = new CommandScope(UpdateCommandStep.COMMAND_NAME);
+            commandScope.addArgumentValue(DbUrlConnectionArgumentsCommandStep.DATABASE_ARG, database);
+            commandScope.addArgumentValue(UpdateCommandStep.CHANGELOG_FILE_ARG, indexWithAssociatedWithChangeLog);
+            commandScope.execute();
+
+            final CommandScope snapshotScope = new CommandScope("snapshot");
+            snapshotScope.addArgumentValue(DbUrlConnectionArgumentsCommandStep.DATABASE_ARG, database);
+            snapshotScope.addArgumentValue(SnapshotCommandStep.SNAPSHOT_FORMAT_ARG, "json");
+            CommandResults results = snapshotScope.execute();
+            DatabaseSnapshot snapshot = (DatabaseSnapshot) results.getResult("snapshot");
+            Index index = snapshot.get(new Index("idx_test_oracle"));
+            Assert.assertNotNull(index);
+        } catch (Exception e) {
+            Assert.fail("Should not fail. Reason: " + e.getMessage());
+        } finally {
+            clearDatabase();
+        }
+
     }
 }

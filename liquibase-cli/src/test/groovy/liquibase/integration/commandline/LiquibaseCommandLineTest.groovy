@@ -19,6 +19,16 @@ Usage: liquibase [GLOBAL OPTIONS] [COMMAND] [COMMAND OPTIONS]
 Command-specific help: "liquibase <command-name> --help"
 
 Global Options
+      --allow-duplicated-changeset-identifiers=PARAM
+                             Allows duplicated changeset identifiers without
+                               failing Liquibase execution.
+                             DEFAULT: false
+                             (defaults file: 'liquibase.
+                               allowDuplicatedChangesetIdentifiers',
+                               environment variable:
+                               'LIQUIBASE_ALLOW_DUPLICATED_CHANGESET_IDENTIFIERS
+                               ')
+
       --always-drop-instead-of-replace=PARAM
                              If true, drop and recreate a view instead of
                                replacing it.
@@ -207,6 +217,17 @@ Global Options
                                includeCatalogInSpecification', environment
                                variable:
                                'LIQUIBASE_INCLUDE_CATALOG_IN_SPECIFICATION')
+
+      --include-relations-for-computed-columns=PARAM
+                             If true, the parent relationship for computed
+                               columns is preserved in snapshot-dependent
+                               commands: snapshot and diff
+                             DEFAULT: false
+                             (defaults file: 'liquibase.
+                               includeRelationsForComputedColumns', environment
+                               variable:
+                               'LIQUIBASE_INCLUDE_RELATIONS_FOR_COMPUTED_COLUMNS
+                               ')
 
       --include-system-classpath=PARAM
                              Include the system classpath when resolving
@@ -407,6 +428,12 @@ Global Options
                              (defaults file: 'liquibase.
                                supportPropertyEscaping', environment variable:
                                'LIQUIBASE_SUPPORT_PROPERTY_ESCAPING')
+
+      --ui-service=PARAM     Changes the default UI Service Logger used by
+                               Liquibase. Options are CONSOLE or LOGGER.
+                             DEFAULT: CONSOLE
+                             (defaults file: 'liquibase.uiService', environment
+                               variable: 'LIQUIBASE_UI_SERVICE')
 
       --use-procedure-schema=PARAM
                              If set to true (default value), createProcedure
