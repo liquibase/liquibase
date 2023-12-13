@@ -68,7 +68,8 @@ public class LiquibaseCommandLine {
     private final Map<String, String> legacyPositionalArguments;
 
     /**
-     * Arguments that used to be global arguments but are now command-level
+     * Arguments 
+     * that used to be global arguments but are now command-level
      */
     private final Set<String> legacyNoLongerGlobalArguments;
 
