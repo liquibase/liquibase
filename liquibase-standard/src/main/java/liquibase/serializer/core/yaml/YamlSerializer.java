@@ -1,7 +1,9 @@
 package liquibase.serializer.core.yaml;
 
+import liquibase.change.Change;
 import liquibase.change.ConstraintsConfig;
 import liquibase.changelog.ChangeSet;
+import liquibase.changelog.RollbackContainer;
 import liquibase.exception.UnexpectedLiquibaseException;
 import liquibase.parser.core.yaml.YamlParser;
 import liquibase.serializer.LiquibaseSerializable;
@@ -105,7 +107,16 @@ public abstract class YamlSerializer implements LiquibaseSerializer {
                     value = ((Map) toMap((ConstraintsConfig) value)).values().iterator().next();
                 }
                 if (value instanceof LiquibaseSerializable) {
-                    value = toMap((LiquibaseSerializable) value);
+                    if(value instanceof RollbackContainer) {
+                        List<Change> changesToRollback = ((RollbackContainer) value).getChanges();
+                        if(changesToRollback.size() == 1) {
+                            value = toMap(changesToRollback.get(0));
+                        } else {
+                            value = toMap((LiquibaseSerializable) value);
+                        }
+                    } else {
+                        value = toMap((LiquibaseSerializable) value);
+                    }
                 }
                 if (value instanceof Collection) {
                     List valueAsList = new ArrayList((Collection) value);
