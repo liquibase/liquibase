@@ -77,8 +77,13 @@ public class StatusCommandStep extends AbstractCommandStep {
             out.append(StreamUtil.getLineSeparator());
         } else {
             message = "undeployed";
-            out.append(String.valueOf(unrunChangeSets.size()));
-            out.append(" changesets have not been applied to ");
+            int size = unrunChangeSets.size();
+            out.append(String.valueOf(size));
+            if (size == 1) {
+                out.append(" changeset has not been applied to ");
+            } else {
+                out.append(" changesets have not been applied to ");
+            }
             out.append(database.getConnection().getConnectionUserName());
             out.append("@");
             out.append(database.getConnection().getURL());
