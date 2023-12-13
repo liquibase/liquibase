@@ -1,6 +1,9 @@
 package org.liquibase.maven.plugins;
 
-import liquibase.*;
+import liquibase.GlobalConfiguration;
+import liquibase.Liquibase;
+import liquibase.Scope;
+import liquibase.ThreadLocalScopeManager;
 import liquibase.changelog.visitor.ChangeExecListener;
 import liquibase.changelog.visitor.DefaultChangeExecListener;
 import liquibase.command.core.helpers.DbUrlConnectionCommandStep;
@@ -630,6 +633,26 @@ public abstract class AbstractLiquibaseMojo extends AbstractMojo {
     @PropertyElement
     protected String logFormat;
 
+    /**
+     * This property enables Liquibase Pro users to store a record of all database changing liquibase operations in a new table
+     * DATABASECHANGELOGHISTORY. This table includes records of rollback, dropalls, and repeated runOnChange type activity,
+     * which is not available in the standard DATABASECHANGELOG table.
+     *
+     * @parameter property="liquibase.dbclHistoryEnabled"
+     */
+    @PropertyElement
+    protected Boolean dbclHistoryEnabled;
+
+    /**
+     * This property enables Liquibase Pro users to store a record of all database changing liquibase operations in a new table
+     * DATABASECHANGELOGHISTORY. This table includes records of rollback, dropalls, and repeated runOnChange type activity,
+     * which is not available in the standard DATABASECHANGELOG table.
+     *
+     * @parameter property="liquibase.databaseChangelogHistoryEnabled"
+     */
+    @PropertyElement
+    protected Boolean databaseChangelogHistoryEnabled;
+
     protected String commandName;
     protected DefaultChangeExecListener defaultChangeExecListener;
     private static final ResourceBundle coreBundle = getBundle("liquibase/i18n/liquibase-core");
@@ -645,6 +668,17 @@ public abstract class AbstractLiquibaseMojo extends AbstractMojo {
         } else {
             return liquibaseProLicenseKey;
         }
+    }
+
+    private boolean isDbclHistoryEnabled() {
+        // The default value of this parameter is true, which is why this has this goofy logic.
+        if (dbclHistoryEnabled != null) {
+            return dbclHistoryEnabled;
+        }
+        if (databaseChangelogHistoryEnabled != null) {
+            return databaseChangelogHistoryEnabled;
+        }
+        return true;
     }
 
     protected Writer getOutputWriter(final File outputFile) throws IOException {
@@ -738,6 +772,8 @@ public abstract class AbstractLiquibaseMojo extends AbstractMojo {
 
                 IntegrationDetails integrationDetails = new IntegrationDetails();
                 integrationDetails.setName("maven");
+
+                scopeValues.put("liquibase.dbclhistory.enabled", isDbclHistoryEnabled());
 
                 final PluginDescriptor pluginDescriptor = (PluginDescriptor) getPluginContext().get("pluginDescriptor");
                 for (MojoDescriptor descriptor : pluginDescriptor.getMojos()) {
