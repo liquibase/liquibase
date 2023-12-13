@@ -4,7 +4,7 @@
 Liquibase helps millions of developers track, version, and deploy database schema changes. It will help you to:
 - Control database schema changes for specific versions
 - Eliminate errors and delays when releasing databases
-- Automatically order scripts for deployment
+- Automatically order scripts for deployment   
 - Easily rollback changes
 - Collaborate with tools you already use
 
