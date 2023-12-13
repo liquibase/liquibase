@@ -15,7 +15,7 @@ on:
         required: false
         default: 'false'
   push:
-    types:
+    branches:
       - master
       
   pull_request_target:
