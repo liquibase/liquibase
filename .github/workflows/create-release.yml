@@ -86,7 +86,9 @@ jobs:
         env:
           GPG_PASSWORD: ${{ secrets.GPG_PASSPHRASE }}
         run: |
+          
           mkdir -p $PWD/.github/util/
+          ls -lR $PWD
           curl -o $PWD/.github/util/re-version.sh https://raw.githubusercontent.com/liquibase/liquibase/${{ steps.collect-data.outputs.branch }}/.github/util/re-version.sh
           curl -o $PWD/.github/util/sign-artifacts.sh https://raw.githubusercontent.com/liquibase/liquibase/${{ steps.collect-data.outputs.branch }}/.github/util/sign-artifacts.sh
           chmod +x $PWD/.github/util/re-version.sh
