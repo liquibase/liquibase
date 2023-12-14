@@ -164,6 +164,8 @@ pwd
 ls -ltr
 echo "debug 2"
 ls -ltr $workdir/internal/lib/
+echo "debug 3"
+ls -ltr $workdir/tgz-repackage
 cp $workdir/internal/lib/liquibase-core.jar $workdir/tgz-repackage/internal/lib/liquibase-core.jar
 cp $workdir/internal/lib/liquibase-commercial.jar $workdir/tgz-repackage/internal/lib/liquibase-commercial.jar
 find $workdir/tgz-repackage -name "*.txt" -exec sed -i -e "s/0-SNAPSHOT/$version/" -e "s/release-SNAPSHOT/$version/" {} \;
