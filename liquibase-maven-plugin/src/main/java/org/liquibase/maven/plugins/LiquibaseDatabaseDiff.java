@@ -203,6 +203,22 @@ public class LiquibaseDatabaseDiff extends AbstractLiquibaseChangeLogMojo {
     @PropertyElement
     protected String format;
 
+    /**
+     * Sets runOnChange="true" for changesets containing solely changes of these types (e.g. createView, createProcedure, ...).
+     *
+     * @parameter property="liquibase.runOnChangeTypes" default-value="none"
+     */
+    @PropertyElement
+    protected String runOnChangeTypes;
+
+    /**
+     * Sets replaceIfExists="true" for changes of the supported types, at the moment they are createView and createProcedure.
+     *
+     * @parameter property="liquibase.replaceIfExistsTypes" default-value="none"
+     */
+    @PropertyElement
+    protected String replaceIfExistsTypes;
+
     @Override
     public void execute() throws MojoExecutionException, MojoFailureException {
         if (this.referenceServer != null) {
@@ -263,7 +279,7 @@ public class LiquibaseDatabaseDiff extends AbstractLiquibaseChangeLogMojo {
                     DiffOutputControl diffOutputControl = new DiffOutputControl(diffIncludeCatalog, diffIncludeSchema, diffIncludeTablespace, null).addIncludedSchema(new CatalogAndSchema(referenceDefaultCatalogName, referenceDefaultSchemaName));
                     diffOutputControl.setObjectChangeFilter(objectChangeFilter);
                     CommandLineUtils.doDiffToChangeLog(diffChangeLogFile, referenceDatabase, db, changeSetAuthor, diffOutputControl,
-                            objectChangeFilter, StringUtil.trimToNull(diffTypes), schemaComparisons);
+                            objectChangeFilter, StringUtil.trimToNull(diffTypes), schemaComparisons, runOnChangeTypes, replaceIfExistsTypes);
                     if (new File(diffChangeLogFile).exists()) {
                         getLog().info("Differences written to Change Log File, " + diffChangeLogFile);
                     }
