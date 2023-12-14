@@ -89,6 +89,17 @@ class CommandUtil {
         commandScope.execute()
     }
 
+    static void runDiff(Database targetDatabase, String referenceDatabaseUrl, String outputFile) throws CommandExecutionException {
+        CommandScope commandScope = new CommandScope(DiffCommandStep.COMMAND_NAME)
+        commandScope.addArgumentValue(ReferenceDbUrlConnectionCommandStep.REFERENCE_URL_ARG, referenceDatabaseUrl)
+        commandScope.addArgumentValue(PreCompareCommandStep.COMPARE_CONTROL_ARG, CompareControl.STANDARD)
+        commandScope.addArgumentValue(DbUrlConnectionCommandStep.DATABASE_ARG, targetDatabase)
+        commandScope.addArgumentValue(DiffOutputControlCommandStep.INCLUDE_SCHEMA_ARG, true)
+        OutputStream outputStream = new FileOutputStream(new File(outputFile))
+        commandScope.setOutput(outputStream)
+        commandScope.execute()
+    }
+
     static void runTag(DatabaseTestSystem db, String tag) throws CommandExecutionException {
         CommandScope commandScope = new CommandScope(TagCommandStep.COMMAND_NAME)
         commandScope.addArgumentValue(DbUrlConnectionArgumentsCommandStep.URL_ARG, db.getConnectionUrl())

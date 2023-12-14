@@ -59,7 +59,7 @@ jobs:
       - name: Get Latest Merge Commit SHA
         id: get-sha
         run: |
-          latest_merge_sha=`(git rev-parse HEAD)`
+          latest_merge_sha=`(git rev-parse --short=7 HEAD)`
           echo "latestMergeSha=${latest_merge_sha}" >> $GITHUB_OUTPUT
 
       - name: Get Current BranchName
