@@ -3,7 +3,7 @@ on:
   workflow_dispatch:
     inputs:
       version:
-        description: 'Version to release (4.26.0, 4.26.1, etc.))'
+        description: 'Liquibase Version'
         required: true
 
 jobs:
@@ -12,4 +12,4 @@ jobs:
     secrets: inherit
     with:
       version: ${{ inputs.version }}
-      
+
