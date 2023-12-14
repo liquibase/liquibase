@@ -158,7 +158,7 @@ cp $outdir/liquibase-commercial-$version.jar $workdir/internal/lib/liquibase-com
 
 ## Extract tar.gz and rebuild it back into the tar.gz and zip
 mkdir $workdir/tgz-repackage
-tar -xzf $workdir/liquibase-$MODIFIED_BRANCH_NAME-SNAPSHOT.tar.gz -C $workdir/tgz-repackage
+tar -xzf $workdir/liquibase-$MODIFIED_BRANCH_NAME-SNAPSHOT.tar.gz -C $workdir/tgz-repackage --strip-components=1
 echo "debug 1"
 pwd
 ls -ltr
