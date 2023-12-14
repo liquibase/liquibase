@@ -86,13 +86,14 @@ jobs:
         env:
           GPG_PASSWORD: ${{ secrets.GPG_PASSPHRASE }}
         run: |
+          scripts_branch=${{ github.ref }}
           mkdir -p $PWD/.github/util/
           # Download a script (re-version.sh) from a URL and save it to the specified directory
-          curl -o $PWD/.github/util/re-version.sh https://raw.githubusercontent.com/liquibase/liquibase/${{ needs.setup.outputs.branch }}/.github/util/re-version.sh
+          curl -o $PWD/.github/util/re-version.sh https://raw.githubusercontent.com/liquibase/liquibase/$scripts_branch/.github/util/re-version.sh
           
           # Download another script (sign-artifacts.sh) from a URL and save it to the specified directory
-          curl -o $PWD/.github/util/sign-artifacts.sh https://raw.githubusercontent.com/liquibase/liquibase/${{ needs.setup.outputs.branch }}/.github/util/sign-artifacts.sh
-          curl -o $PWD/.github/util/ManifestReversion.java https://raw.githubusercontent.com/liquibase/liquibase/${{ needs.setup.outputs.branch }}/.github/util/ManifestReversion.java
+          curl -o $PWD/.github/util/sign-artifacts.sh https://raw.githubusercontent.com/liquibase/liquibase/$scripts_branch/.github/util/sign-artifacts.sh
+          curl -o $PWD/.github/util/ManifestReversion.java https://raw.githubusercontent.com/liquibase/liquibase/$scripts_branch/.github/util/ManifestReversion.java
           chmod +x $PWD/.github/util/re-version.sh
           chmod +x $PWD/.github/util/ManifestReversion.java
           chmod +x $PWD/.github/util/sign-artifacts.sh
