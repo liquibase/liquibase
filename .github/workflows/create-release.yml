@@ -201,6 +201,7 @@ jobs:
           fail_on_unmatched_files: true
           body: Liquibase ${{ needs.setup.outputs.version }}
           generate_release_notes: true
+          draft: true
           files: re-version/final/*
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
