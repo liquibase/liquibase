@@ -48,6 +48,10 @@ jobs:
     runs-on: ubuntu-22.04
     steps:
       - uses: actions/checkout@v4
+        name: Checkout liquibase
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.event.after}}
+      - uses: actions/checkout@v4
         name: Checkout liquibase-pro
         with:
           repository: liquibase/liquibase-pro
