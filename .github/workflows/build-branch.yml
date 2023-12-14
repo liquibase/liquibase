@@ -22,20 +22,8 @@ env:
   MAVEN_VERSION: '3.9.2'
 
 jobs:
-  check_build_safety:
-    name: Check if Build should be done
-    runs-on: ubuntu-22.04
-    steps:
-      - name: Emit failure code for unsafe fork PRs
-        if: github.event.pull_request && github.event.pull_request.head.repo.full_name != 'liquibase/liquibase' && github.event.label.name != 'SafeToBuild'
-        run: |
-          echo "PR from Fork is NOT safe to build"
-          echo "A member of Liquibase team needs to apply label 'SafeToBuild'! "
-          exit 1
-
   setup:
     name: Setup
-    needs: check_build_safety
     runs-on: ubuntu-22.04
     outputs:
       timeStamp: ${{ steps.get-timestamp.outputs.timestamp }}
@@ -51,7 +39,7 @@ jobs:
       - name: Get Latest Merge Commit SHA
         id: get-sha
         run: |
-          latest_merge_sha=`(git rev-parse HEAD)`
+          latest_merge_sha=`(git rev-parse --short=7 HEAD)`
           echo "latestMergeSha=${latest_merge_sha}" >> $GITHUB_OUTPUT
 
       - name: Get Timestamp
