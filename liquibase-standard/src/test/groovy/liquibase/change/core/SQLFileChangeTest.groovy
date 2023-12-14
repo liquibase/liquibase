@@ -85,6 +85,39 @@ class SQLFileChangeTest extends StandardChangeTest {
         assertEquals("create prfx_customer (nofx INTEGER NOT NULL, PRIMARY KEY (nofx));", change.getSql());
     }
 
+    def noReplacementOfPropertiesInChecksum() throws Exception {
+        when:
+        def changelog = new DatabaseChangeLog("com/example/changelog.xml")
+        def change1 = new SQLFileChange()
+        change1.path = "com/example-2/fileWithSchemaNameProperty.sql"
+        change1.relativeToChangelogFile = false
+        def changeLogParameters1 = new ChangeLogParameters()
+        changeLogParameters1.set("database.liquibaseSchemaName", "schema1")
+        def changeSet1 = new ChangeSet("x", "y", false, false, null, null, null, changelog)
+        changeSet1.setChangeLogParameters(changeLogParameters1)
+        change1.setChangeSet(changeSet1)
+ 
+        def sqlForSchema1 = change1.getSql().trim()
+        def checksum1 = change1.generateCheckSum()
+
+        def change2 = new SQLFileChange()
+        change2.path = "com/example-2/fileWithSchemaNameProperty.sql"
+        change2.relativeToChangelogFile = false
+        def changeLogParameters2 = new ChangeLogParameters()
+        changeLogParameters2.set("database.liquibaseSchemaName", "schema2")
+        def changeSet2 = new ChangeSet("x", "y", false, false, null, null, null, changelog)
+        changeSet2.setChangeLogParameters(changeLogParameters2)
+        change2.setChangeSet(changeSet2)
+
+        def sqlForSchema2 = change2.getSql().trim()
+        def checksum2 = change2.generateCheckSum()
+
+        then:
+        assertEquals("select * from schema1.customer;", sqlForSchema1)
+        assertEquals("select * from schema2.customer;", sqlForSchema2)
+        assertEquals(checksum1, checksum2)
+    }
+
     def "checkStatus"() {
         when:
         def database = new MockDatabase()
