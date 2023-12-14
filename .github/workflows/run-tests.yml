@@ -83,7 +83,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        os: [ ubuntu-22.04, macos-latest, windows-2019 ]
+        os: [ ubuntu-20.04, macos-latest, windows-2019 ]
         java: [ 8, 11, 17, 21 ]
         exclude:
           # exclude non-java 8 on macos and windows builds
