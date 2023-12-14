@@ -94,7 +94,7 @@ jobs:
           curl -o $PWD/.github/util/sign-artifacts.sh https://raw.githubusercontent.com/liquibase/liquibase/${{ needs.setup.outputs.branch }}/.github/util/sign-artifacts.sh
           chmod +x $PWD/.github/util/re-version.sh
           chmod +x $PWD/.github/util/sign-artifacts.sh
-          
+          $PWD/.github/util/re-version.sh download/liquibase-artifacts "${{ needs.setup.outputs.version }}" "${{ needs.setup.outputs.branch }}"
           # Execute the sign-artifacts.sh script with specific arguments
           $PWD/.github/util/sign-artifacts.sh download/liquibase-artifacts "${{ needs.setup.outputs.version }}" "${{ needs.setup.outputs.branch }}"
           
