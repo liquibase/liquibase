@@ -80,6 +80,24 @@ public interface ChangeSetService extends Plugin {
 
     /**
      *
+     * Create a change set with the indicated arguments
+     *
+     * @param  id
+     * @param  author
+     * @param  alwaysRun
+     * @param  runOnChange
+     * @param  filePath
+     * @param  contextFilter
+     * @param  dbmsList
+     * @param  databaseChangeLog
+     * @return ChangeSet
+     *
+     */
+    ChangeSet createChangeSet(String id, String author, boolean alwaysRun, boolean runOnChange, String filePath, String contextFilter, String dbmsList,
+                              boolean runInTransaction, ObjectQuotingStrategy quotingStrategy, DatabaseChangeLog databaseChangeLog);
+
+    /**
+     *
      * Create the ModifyChangeSets instance which will do the modifications
      *
      * @param  node                       The ParsedNode that was created during load
