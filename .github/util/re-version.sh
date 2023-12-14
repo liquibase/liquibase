@@ -162,11 +162,7 @@ tar -xzf $workdir/liquibase-$MODIFIED_BRANCH_NAME-SNAPSHOT.tar.gz -C $workdir/tg
 echo "debug 1"
 pwd
 ls -ltr
-cd ..
 echo "debug 2"
-pwd
-ls -ltr
-echo "debug 3"
 ls -ltr $workdir/internal/lib/
 cp $workdir/internal/lib/liquibase-core.jar $workdir/tgz-repackage/internal/lib/liquibase-core.jar
 cp $workdir/internal/lib/liquibase-commercial.jar $workdir/tgz-repackage/internal/lib/liquibase-commercial.jar
