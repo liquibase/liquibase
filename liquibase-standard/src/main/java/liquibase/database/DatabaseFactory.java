@@ -1,6 +1,7 @@
 package liquibase.database;
 
 import liquibase.Scope;
+import liquibase.SingletonObject;
 import liquibase.database.core.UnsupportedDatabase;
 import liquibase.database.jvm.JdbcConnection;
 import liquibase.exception.DatabaseException;
@@ -11,19 +12,27 @@ import liquibase.resource.Resource;
 import liquibase.resource.ResourceAccessor;
 import liquibase.util.StringUtil;
 import liquibase.util.SystemUtil;
-import liquibase.SingletonObject;
 
 import java.io.IOException;
 import java.io.InputStream;
 import java.lang.reflect.InvocationTargetException;
 import java.sql.Driver;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Comparator;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Properties;
+import java.util.SortedSet;
+import java.util.TreeSet;
 
 public class DatabaseFactory implements SingletonObject {
     private static final Logger LOG = Scope.getCurrentScope().getLog(DatabaseFactory.class);
     private static DatabaseFactory instance;
     private final Map<String, SortedSet<Database>> implementedDatabases = new HashMap<>();
     private final Map<String, SortedSet<Database>> internalDatabases = new HashMap<>();
+
+    private Database specifiedDbClass;
 
     private DatabaseFactory() {
         try {
@@ -196,9 +205,20 @@ public class DatabaseFactory implements SingletonObject {
         DatabaseConnection databaseConnection;
         try {
             DatabaseFactory databaseFactory = DatabaseFactory.getInstance();
+            // If databaseClass was provided, mark it as the specified database and ensure it's registered
             if (databaseClass != null) {
-                databaseFactory.clearRegistry();
-                databaseFactory.register((Database) Class.forName(databaseClass, true, Scope.getCurrentScope().getClassLoader()).getConstructor().newInstance());
+                specifiedDbClass = (Database) Class.forName(databaseClass, true, Scope.getCurrentScope().getClassLoader()).getConstructor().newInstance();
+                boolean registered = false;
+                if (implementedDatabases.containsKey(specifiedDbClass.getShortName())) {
+                    for (Database database : implementedDatabases.get(specifiedDbClass.getShortName())) {
+                        if (database.getClass().getName().equals(specifiedDbClass.getClass().getName())) {
+                            registered = true;
+                        }
+                    }
+                }
+                if (!registered) {
+                    databaseFactory.register(specifiedDbClass);
+                }
             }
 
             String selectedDriverClass = findDriverClass(url, driver, databaseFactory);
@@ -251,6 +271,11 @@ public class DatabaseFactory implements SingletonObject {
     public Database getDatabase(String shortName) {
         if (!implementedDatabases.containsKey(shortName)) {
             return null;
+        }
+        if (specifiedDbClass != null) {
+            if (specifiedDbClass.getShortName().equals(shortName)) {
+                return specifiedDbClass;
+            }
         }
         return implementedDatabases.get(shortName).iterator().next();
 
