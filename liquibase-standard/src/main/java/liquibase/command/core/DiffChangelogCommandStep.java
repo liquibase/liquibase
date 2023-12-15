@@ -2,6 +2,7 @@ package liquibase.command.core;
 
 import liquibase.Scope;
 import liquibase.command.*;
+import liquibase.command.core.helpers.AbstractChangelogCommandStep;
 import liquibase.command.core.helpers.DiffOutputControlCommandStep;
 import liquibase.command.providers.ReferenceDatabase;
 import liquibase.database.Database;
@@ -16,11 +17,9 @@ import liquibase.logging.mdc.MdcValue;
 import liquibase.util.StringUtil;
 
 import java.io.PrintStream;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.List;
+import java.util.*;
 
-public class DiffChangelogCommandStep extends AbstractCommandStep {
+public class DiffChangelogCommandStep extends AbstractChangelogCommandStep {
 
     public static final String[] COMMAND_NAME = {"diffChangelog"};
 
@@ -43,6 +42,10 @@ public class DiffChangelogCommandStep extends AbstractCommandStep {
                 .addAlias("contexts")
                 .description("Changeset contexts to generate")
                 .build();
+
+        builder.addArgument(AbstractChangelogCommandStep.RUN_ON_CHANGE_TYPES_ARG).build();
+
+        builder.addArgument(AbstractChangelogCommandStep.REPLACE_IF_EXISTS_TYPES_ARG).build();
     }
 
     @Override
@@ -88,6 +91,8 @@ public class DiffChangelogCommandStep extends AbstractCommandStep {
                 changeLogWriter.setChangeSetContext(commandScope.getArgumentValue(CONTEXTS_ARG));
                 changeLogWriter.setChangeSetLabels(commandScope.getArgumentValue(LABEL_FILTER_ARG));
                 changeLogWriter.setChangeSetAuthor(commandScope.getArgumentValue(AUTHOR_ARG));
+                changeLogWriter.setChangeSetRunOnChangeTypes(commandScope.getArgumentValue(RUN_ON_CHANGE_TYPES_ARG).split("\\s*,\\s*"));
+                changeLogWriter.setChangeReplaceIfExistsTypes(commandScope.getArgumentValue(REPLACE_IF_EXISTS_TYPES_ARG).split("\\s*,\\s*"));
                 if (StringUtil.trimToNull(changeLogFile) == null) {
                     changeLogWriter.print(outputStream);
                 } else {
@@ -112,6 +117,8 @@ public class DiffChangelogCommandStep extends AbstractCommandStep {
     @Override
     public void validate(CommandScope commandScope) throws CommandValidationException {
         commandScope.addArgumentValue(DiffCommandStep.FORMAT_ARG, "none");
+        validateReplaceIfExistsTypes(commandScope);
+        validateRunOnChangeTypes(commandScope);
     }
 
     protected DiffToChangeLog createDiffToChangeLogObject(DiffResult diffResult, DiffOutputControl diffOutputControl) {
