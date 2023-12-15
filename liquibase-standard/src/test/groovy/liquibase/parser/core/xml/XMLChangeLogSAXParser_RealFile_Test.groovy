@@ -787,7 +787,7 @@ public class XMLChangeLogSAXParser_RealFile_Test extends Specification {
         change1.getColumns().get(0).getType() == "int"
     }
 
-    def "parsesChangeWithPrimitiveFields"() {
+    def "parses change with primitive fields"() {
         given:
         Scope.getCurrentScope().getSingleton(ChangeFactory.class).register(new ChangeWithPrimitiveFields())
 
@@ -802,7 +802,13 @@ public class XMLChangeLogSAXParser_RealFile_Test extends Specification {
         def changes = changeSets.first().getChanges()
         assert changes.size() == 1
         def change = changes.first() as ChangeWithPrimitiveFields
-        assert change.aBoolean && change.anInt == 42 && change.aChar == (char) 'b'
+        assert change.aBoolean
+        assert change.aChar == (char) 'b'
+        assert change.aDouble == 0.42d
+        assert change.aFloat == 4.2f
+        assert change.anInt == 42
+        assert change.aLong == 420L
+        assert change.aShort == (short) 4200
     }
 
 }

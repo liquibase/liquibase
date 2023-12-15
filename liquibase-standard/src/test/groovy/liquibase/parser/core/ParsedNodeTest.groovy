@@ -325,21 +325,22 @@ class ParsedNodeTest extends Specification {
         result == expectedResult
 
         where:
-        input      | targetType      | expectedResult
-        "true"     | Boolean.class   | Boolean.TRUE
-        (byte) 10  | Byte.class      | Byte.valueOf((byte) 10)
-        "10"       | Byte.class      | Byte.valueOf((byte) 10)
-        (short) 20 | Short.class     | Short.valueOf((short) 20)
-        "20"       | Short.class     | Short.valueOf((short) 20)
-        30         | Integer.class   | Integer.valueOf(30)
-        "30"       | Integer.class   | Integer.valueOf(30)
-        40L        | Long.class      | Long.valueOf(40L)
-        "40"       | Long.class      | Long.valueOf(40L)
-        50.0f      | Float.class     | Float.valueOf(50.0f)
-        "50.0"     | Float.class     | Float.valueOf(50.0f)
-        60.0d      | Double.class    | Double.valueOf(60.0d)
-        "60.0"     | Double.class    | Double.valueOf(60.0d)
-        "a"        | Character.class | Character.valueOf((char) 'a')
+        input        | targetType      | expectedResult
+        Boolean.TRUE | Boolean.class   | Boolean.TRUE
+        "true"       | Boolean.class   | Boolean.TRUE
+        (byte) 10    | Byte.class      | Byte.valueOf((byte) 10)
+        "10"         | Byte.class      | Byte.valueOf((byte) 10)
+        (short) 20   | Short.class     | Short.valueOf((short) 20)
+        "20"         | Short.class     | Short.valueOf((short) 20)
+        30           | Integer.class   | Integer.valueOf(30)
+        "30"         | Integer.class   | Integer.valueOf(30)
+        40L          | Long.class      | Long.valueOf(40L)
+        "40"         | Long.class      | Long.valueOf(40L)
+        50.0f        | Float.class     | Float.valueOf(50.0f)
+        "50.0"       | Float.class     | Float.valueOf(50.0f)
+        60.0d        | Double.class    | Double.valueOf(60.0d)
+        "60.0"       | Double.class    | Double.valueOf(60.0d)
+        "a"          | Character.class | Character.valueOf((char) 'a')
     }
 
     def "converts values to primitive types"() {
@@ -351,6 +352,7 @@ class ParsedNodeTest extends Specification {
 
         where:
         input                     | targetType    | expectedResult
+        Boolean.TRUE              | boolean.class | Boolean.TRUE
         "true"                    | boolean.class | true
         Byte.valueOf((byte) 10)   | byte.class    | (byte) 10
         "10"                      | byte.class    | (byte) 10

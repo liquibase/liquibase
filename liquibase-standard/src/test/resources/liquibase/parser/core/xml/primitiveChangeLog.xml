@@ -7,7 +7,13 @@
         http://www.liquibase.org/xml/ns/dbchangelog-ext http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-ext.xsd">
 
     <changeSet id="1" author="example">
-        <ext:primitiveChange aBoolean="true" anInt="42" aChar="b" />
+        <ext:primitiveChange aBoolean="true"
+                             aChar="b"
+                             aDouble="0.42"
+                             aFloat="4.2"
+                             anInt="42"
+                             aLong="420"
+                             aShort="4200" />
     </changeSet>
 
 </databaseChangeLog>

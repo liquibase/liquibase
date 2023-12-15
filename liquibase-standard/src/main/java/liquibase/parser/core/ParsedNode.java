@@ -254,7 +254,7 @@ public class ParsedNode {
                 return (T) new BigInteger(rawValue.toString());
             } else if (type.equals(BigDecimal.class)) {
                 return (T) new BigDecimal(rawValue.toString());
-            } else if ((type.equals(Boolean.class) || type.equals(boolean.class)) && (rawValue instanceof String)) {
+            } else if ((type.equals(Boolean.class) || type.equals(boolean.class))) {
                 return (T) Boolean.valueOf(rawValue.toString());
             } else if (type.isAssignableFrom(Date.class)) {
                 return (T) new ISODateFormat().parse(rawValue.toString());
