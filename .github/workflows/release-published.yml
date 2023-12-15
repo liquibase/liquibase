@@ -19,7 +19,7 @@ jobs:
     steps:
       - name: Collect Data
         id: collect-data
-        uses: actions/github-script@v6
+        uses: actions/github-script@v7
         with:
           script: |
             let tag;
@@ -377,7 +377,7 @@ jobs:
     runs-on: ubuntu-22.04
     steps:
       - name: Release liquibase/docker v${{ needs.setup.outputs.version }}
-        uses: actions/github-script@v6
+        uses: actions/github-script@v7
         with:
           github-token: ${{ secrets.BOT_TOKEN }}
           script: |
