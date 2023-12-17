@@ -1,7 +1,16 @@
 package liquibase.dbtest.h2;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertThrows;
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
+import static org.junit.Assume.assumeNotNull;
+
 import liquibase.Liquibase;
 import liquibase.Scope;
+import liquibase.change.Change;
+import liquibase.database.Database;
+import liquibase.database.DatabaseConnection;
 import liquibase.database.DatabaseFactory;
 import liquibase.database.jvm.JdbcConnection;
 import liquibase.dbtest.AbstractIntegrationTest;
@@ -12,8 +21,16 @@ import liquibase.diff.output.DiffOutputControl;
 import liquibase.diff.output.changelog.DiffToChangeLog;
 import liquibase.diff.output.report.DiffToReport;
 import liquibase.exception.DatabaseException;
+import liquibase.exception.PreconditionFailedException;
 import liquibase.exception.ValidationFailedException;
+import liquibase.executor.Executor;
 import liquibase.executor.ExecutorService;
+import liquibase.executor.jvm.JdbcExecutor;
+import liquibase.extension.testing.testsystem.DatabaseTestSystem;
+import liquibase.extension.testing.testsystem.TestSystemFactory;
+import liquibase.precondition.core.RowCountPrecondition;
+import liquibase.precondition.core.TableExistsPrecondition;
+import liquibase.sql.visitor.SqlVisitor;
 import liquibase.statement.core.RawSqlStatement;
 import org.junit.Assert;
 import org.junit.Test;
@@ -208,6 +225,81 @@ public class H2IntegrationTest extends AbstractIntegrationTest {
         }
         catch (DatabaseException e) {
             Assert.assertTrue(e.getMessage().contains("Table \"ANYDB\" not found"));
+        }
+    }
+
+    /**
+     * Verifies that the {@link Executor#execute(Change)} method is called by testing an Executor implementation
+     * that uses a separate database connection and commits after each change completes.
+     *
+     * @throws Exception
+     */
+    @Test
+    public void testCustomExecutorInvokedPerChange() throws Exception {
+        assumeNotNull(this.getDatabase());
+        String tableName = "test_numbers";
+        try {
+            runChangeLogFile("changelogs/common/runWith.executor.changelog.xml");
+        } catch (Exception e) {
+            // ok - expect a failure to prove that the changes earlier in the change set committed
+        }
+
+        AlternateConnectionExecutor alternateConnectionExecutor = (AlternateConnectionExecutor) Scope.getCurrentScope().getSingleton(ExecutorService.class).getExecutor("h2alt", getDatabase());
+        Scope.getCurrentScope().getSingleton(ExecutorService.class).setExecutor("jdbc", getDatabase(), alternateConnectionExecutor);
+
+        // Rollback anything in progress on the connection to ensure the executor actually committed
+        alternateConnectionExecutor.getDatabase().rollback();
+
+        // Confirm the number of expected rows were inserted into the table in the alt schema
+        RowCountPrecondition precondition = new RowCountPrecondition();
+        precondition.setSchemaName(testSystem.getAltSchema());
+        precondition.setTableName(tableName);
+        precondition.setExpectedRows(2L);
+        try {
+            precondition.check(alternateConnectionExecutor.getDatabase(), null, null, null);
+        } catch (PreconditionFailedException e) {
+            fail(e.getFailedPreconditions().get(0).getMessage());
+        }
+
+        // Confirm the table was not created in default database and schema
+        TableExistsPrecondition tableExistsPrecondition = new TableExistsPrecondition();
+        tableExistsPrecondition.setTableName(tableName);
+        PreconditionFailedException ex = assertThrows(PreconditionFailedException.class, () -> tableExistsPrecondition.check(this.getDatabase(), null, null, null));
+        assertEquals(1, ex.getFailedPreconditions().size());
+        String expectedMessage = String.format("%s does not exist", tableName);
+        assertTrue(ex.getFailedPreconditions().get(0).getMessage().endsWith(expectedMessage));
+    }
+
+    /**
+     * An {@link JdbcExecutor} that provides its own {@link DatabaseConnection} and commits after executing
+     * each change
+     */
+    public static class AlternateConnectionExecutor extends JdbcExecutor {
+
+        public AlternateConnectionExecutor() throws Exception {
+            String urlParameters = ";INIT=CREATE SCHEMA IF NOT EXISTS lbschem2\\;SET SCHEMA lbschem2";
+            DatabaseTestSystem testSystem = (DatabaseTestSystem) Scope.getCurrentScope().getSingleton(TestSystemFactory.class).getTestSystem("h2");
+            database = DatabaseFactory.getInstance().openDatabase(testSystem.getConnectionUrl().replace("lbcat", "lbcat2") + urlParameters,
+                    testSystem.getUsername(), testSystem.getPassword(), null, null);
+            database.setAutoCommit(false);
+        }
+
+        @Override
+        public String getName() {
+            return "h2alt";
+        }
+
+        public void setDatabase(Database database) {
+            // ignore the database connection passed in since we're providing our own
+        }
+
+        public Database getDatabase() {
+            return database;
+        }
+
+        public void execute(Change change, List<SqlVisitor> sqlVisitors) throws DatabaseException {
+            super.execute(change, sqlVisitors);
+            database.commit();
         }
     }
 
