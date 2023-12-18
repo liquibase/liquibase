@@ -1,9 +1,9 @@
 name: Run Tests
 
-
+#concurrent runs will be canceled for all pull requests, regardless of their origin (internal or forked).
 concurrency:
   group: ${{ github.workflow }}-${{ github.head_ref || github.ref }}
-  cancel-in-progress: ${{ !contains(github.ref, 'refs/heads/master') }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' && github.event.pull_request }}
 
 on:
   workflow_call:
