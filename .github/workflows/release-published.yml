@@ -55,7 +55,7 @@ jobs:
 
   deploy_maven:
     name: Deploy to Maven
-    needs: [ setup, manual_trigger_deployment ]
+    needs: [ setup, manual_trigger_deployment, deploy_javadocs, publish_to_github_packages, deploy_xsd, package-linux, release-docker ]
     runs-on: ubuntu-22.04
     steps:
       - name: Download release assets
@@ -206,7 +206,7 @@ jobs:
 
   deploy_javadocs:
     name: Upload Javadocs
-    needs: [ setup ]
+    needs: [ setup, manual_trigger_deployment ]
     runs-on: ubuntu-22.04
     # These permissions are needed to interact with GitHub's OIDC Token endpoint.
     permissions:
@@ -243,7 +243,7 @@ jobs:
   publish_to_github_packages:
     name: Publish artifacts to Github Packages
     runs-on: ubuntu-22.04
-    needs: [ setup ]
+    needs: [ setup, manual_trigger_deployment ]
     permissions:
       contents: read
       packages: write
@@ -274,7 +274,7 @@ jobs:
 
   deploy_xsd:
     name: Upload xsds
-    needs: [ setup ]
+    needs: [ setup, manual_trigger_deployment, deploy_maven]
     runs-on: ubuntu-22.04
     outputs:
       tag: ${{ steps.collect-data.outputs.tag }}
@@ -373,7 +373,7 @@ jobs:
 
   release-docker:
     name: Release docker images
-    needs: [ setup ]
+    needs: [ setup, manual_trigger_deployment ]
     runs-on: ubuntu-22.04
     steps:
       - name: Release liquibase/docker v${{ needs.setup.outputs.version }}
@@ -394,7 +394,7 @@ jobs:
 
   package-linux:
     uses: liquibase/build-logic/.github/workflows/package-linux.yml@v0.5.8
-    needs: [ setup ]
+    needs: [ setup, manual_trigger_deployment ]
     secrets: inherit
     with:
       groupId: 'org.liquibase'
