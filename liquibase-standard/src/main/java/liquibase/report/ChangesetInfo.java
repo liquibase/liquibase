@@ -1,7 +1,6 @@
 package liquibase.report;
 
 import liquibase.changelog.ChangeSet;
-import liquibase.changelog.ChangeSetStatus;
 import liquibase.util.CollectionUtil;
 import liquibase.util.StringUtil;
 import lombok.Data;
@@ -99,16 +98,18 @@ public class ChangesetInfo {
      * @param pendingChanges the map of ChangeSetStatus and their reason for being skipped.
      */
     public void addAllToPendingChangesetInfoList(Map<ChangeSet, String> pendingChanges) {
-        pendingChanges.forEach((changeSet, reason) -> {
-            PendingChangesetInfo pendingChangesetInfo = new PendingChangesetInfo(
-                    changeSet.getAuthor(),
-                    changeSet.getId(),
-                    changeSet.getFilePath(),
-                    changeSet.getComments(),
-                    changeSet.getLabels() == null ? null : changeSet.getLabels().toString(),
-                    changeSet.getContextFilter() == null ? null : changeSet.getContextFilter().getOriginalString(),
-                    reason);
-            pendingChangesetInfoList.add(pendingChangesetInfo);
-        });
+        if (pendingChanges != null) {
+            pendingChanges.forEach((changeSet, reason) -> {
+                PendingChangesetInfo pendingChangesetInfo = new PendingChangesetInfo(
+                        changeSet.getAuthor(),
+                        changeSet.getId(),
+                        changeSet.getFilePath(),
+                        changeSet.getComments(),
+                        changeSet.getLabels() == null ? null : changeSet.getLabels().toString(),
+                        changeSet.getContextFilter() == null ? null : changeSet.getContextFilter().getOriginalString(),
+                        reason);
+                pendingChangesetInfoList.add(pendingChangesetInfo);
+            });
+        }
     }
 }

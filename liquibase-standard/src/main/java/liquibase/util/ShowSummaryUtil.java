@@ -143,7 +143,7 @@ public class ShowSummaryUtil {
         // Nothing to do
         //
         if (filterDenied.isEmpty() && skippedChangeSets.isEmpty() && additionalChangesets.isEmpty()) {
-            return new FilteredChanges(new TreeMap<>(Collections.singletonMap(totalSkippedMdcKey, 0)), null);
+            return new FilteredChanges(new TreeMap<>(Collections.singletonMap(totalSkippedMdcKey, 0)), new LinkedHashMap<>());
         }
         List<String> columnHeaders = new ArrayList<>();
         columnHeaders.add("Changeset Info");
