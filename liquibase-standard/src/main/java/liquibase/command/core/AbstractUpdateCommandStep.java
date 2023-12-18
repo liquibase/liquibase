@@ -100,8 +100,6 @@ public abstract class AbstractUpdateCommandStep extends AbstractCommandStep impl
             StatusVisitor statusVisitor = getStatusVisitor(commandScope, database, contexts, labelExpression, databaseChangeLog);
 
             AtomicInteger rowsAffected = new AtomicInteger(0);
-            UpdateSummaryDetails summaryDetails = new UpdateSummaryDetails();
-
             HashMap<String, Object> scopeValues = new HashMap<>();
             scopeValues.put("showSummary", getShowSummary(commandScope));
             scopeValues.put("rowsAffected", rowsAffected);
