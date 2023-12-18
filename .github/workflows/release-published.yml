@@ -274,7 +274,7 @@ jobs:
 
   deploy_xsd:
     name: Upload xsds
-    needs: [ setup, manual_trigger_deployment, deploy_maven]
+    needs: [ setup, manual_trigger_deployment]
     runs-on: ubuntu-22.04
     outputs:
       tag: ${{ steps.collect-data.outputs.tag }}
