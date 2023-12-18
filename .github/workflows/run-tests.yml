@@ -1,6 +1,7 @@
 name: Run Tests
 
 # concurrent runs for pull requests (both internal and forked) will be canceled when a new run is triggered.
+# It does not specifically target or exclude the 'master' branch; it cancels concurrent runs whenever a pull request is triggered.
 concurrency:
   group: ${{ github.workflow }}-${{ github.head_ref || github.ref }}
   cancel-in-progress: ${{ github.event_name == 'pull_request' }}
