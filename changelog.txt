@@ -1,6 +1,166 @@
 Liquibase Core Changelog
 ===========================================
 
+Changes in version 4.25.1 (2023.12.18)
+
+### Liquibase 4.25.1 is a patch release
+
+## Notable Changes
+
+### [PRO]
+#### Observability: Update Reports
+* These reports give you insights into the status of your database and enable you to quickly find and resolve errors in your automation pipeline. These reports can also help you detect patterns of failures that you can catch with Quality Checks or use to inform internal training and education for your teams.
+* Learn more about [Update Reports](https://docs.liquibase.com/tools-integrations/observability/operation-reports-update-report.html)
+
+#### Observability: Drift Report extended to diffchangelog command
+* With our new HTML format, you can quickly see the differences between databases, including detailed object differences. This easy-to-read and shareable report makes it faster than ever to detect and fix database drift.
+* Learn more [Drift Reports](https://docs.liquibase.com/drift-reports)
+
+#### Convenience: new `liquibase connect` command
+*  A new command to test your database's url, username, and password are all configured correctly and that Liquibase can reach your database -- and no changelog required.
+* Learn more [liquibase connect command](https://docs.liquibase.com/commands/change-tracking/connect.html)
+
+#### Convenience: Global endDelimiters
+* Global endDelimiters decrease the friction of incorporating work from different teams and save you time from the manual process of updating existing code.
+* Learn more [Global endDelimiters](https://docs.liquibase.com/parameters/pro-global-end-delimiter.html)
+
+## [PRO]
+### Changes and Bug Fixes
+- (#1417) DAT-16405: make report arguments visible on update-family commands by StevenMassaro
+- (#1361) DAT-16064: Added test for exception details by wwillard7800
+- (#1420) DAT-16429: Handle no license key in checks run command by wwillard7800
+- (#1411) DAT-16063: include changeset identifier in log message for failing comment removal by StevenMassaro
+- (#1408) DAT-15379: Updated pattern matching for 'USE DATABASE' statements by filipelautert
+- (#1404) DAT-16157: do not upgrade checks file if autoUpdate is off by StevenMassaro
+- (#1390) DAT-14570: add checks run results to MDC by StevenMassaro
+- (#1401) DAT-16322: add liquibase connect command by StevenMassaro
+- (#1398) DAT-16318: Handle rollback changes during modifyChangeSets logic by wwillard7800
+- (#1389) DAT-16207: Styled update reports by abrackx
+- (#1383) DAT-16136: expand TableMustHaveAComment check to check changelogs by StevenMassaro
+- (#1366) DAT-15394: Generate report for diff-changelog by abrackx
+- (#1387) Init checksSettingsFiles list to avoid NPE by wwillard7800
+- (#1364) DAT-15404: Tweak endDelimiter name and remove hidden flag by wwillard7800
+- (#1351) DAT-15640: Report for updateToTag by wwillard7800
+- (#5366) add duplicatedChangesets to MDC (DAT-16452) @StevenMassaro
+- (#1400) DAT-16268: Fix unexpected objects verbiage by abrackx
+- (#1342) Fixes problematic V8 checksums for pro CreateFunctionChange by filipelautert
+
+
+## [OSS]
+
+### New Features
+- (#5186) Adding exception details key and implementation DAT-16064 @wwillard7800
+- (#5323) Updated PrimaryKeyExistsPrecondition to require table name for H2 databases @filipelautert
+- (#5268) Rework update summary to support reporting, add new update report fields (DAT-16207) @abrackx
+- (#5130) Update MySQL boolean behaviour from TinyInt(1) to TinyInt @MalloD12
+- (#5300) output entire exception in StandardServiceLocator (DAT-16305) @StevenMassaro
+- (#5131) Allows to set older checksum versions for testing purposes @filipelautert
+- (#5151) Bump com.oracle.database.jdbc:ojdbc8 from 19.20.0.0 to 19.21.0.0 @dependabot
+- (#5166) Exclude QUEUE tables from snapshoting @filipelautert
+- (#5232) Show a better message if a boolean configuration argument has bad input DAT-16276 @wwillard7800
+- (#5167) Added tag attribute to update report parameters DAT-15640 @wwillard7800
+- (#4577) SQL Anywhere: Recompile all views after last change of update @mkarg
+- (#5117) Implementing a ChangeSetService for modification of model objects DAT-16079 @wwillard7800
+- (#4584) Allow changing default UI service + change Spring default UI service allowing log level control @filipelautert
+- (#5087) Handles snapshot of Oracle temporary tables + ignore queue tables @filipelautert
+- (#5077) showSummaryOutput property added for update command @MalloD12
+- (#4991) Update MySQL default value handling to allow defaultValueComputed on MySQL 5.7 @Axel-1
+- (#5042) Makes picocli dependency optional for core @filipelautert
+- (#5041) add rollback-to-date report (DAT-15660) @StevenMassaro
+- (#5045) add rollback-count report (DAT-15659) @StevenMassaro
+- (#5047) show failed changesets in verbose show-summary output (DAT-15141) @StevenMassaro
+- (#4301) Simplified expressions, removed redundant expressions, fixed javadocs @anton-erofeev
+- (#4104) Support system properties as a way of providing configuration options to the CLI @jccampanero
+- (#4919) Add '@Deprecated' annotation to update() methods @tati-qalified
+- (#4996) Check for other duplicate JAR files in classpath DAT-15963 @wwillard7800
+- (#4463) Split calculate-checksum parameter changeSetIdentifier into changeSetPath / changesetId / changeSetAuthor  @JulienMa94
+- (#4904) add empty mdc values to all commands (DAT-15671) @StevenMassaro
+
+## Bug Fixes
+- (#5305) DAT-16354: fix reading snapshots when columns array does not exist in an index @StevenMassaro
+- (#5348) Make message grammar correct @wwillard7800
+- (#5341) Don't execute CustomTaskChanges twice @filipelautert
+- (#5283) [4.24 Regression] Checksum error while performing update and then rollback with a changelog parameter - Fix for issue #5278 @ebussieres
+- (#5293) Disable Derby shutdown in Spring Boot context @tleipzig
+- (#5296) Global flag to restore behaviour of not failing on duplicated changeset identifiers  @filipelautert
+- (#5315) Allow DiffResults to be reused in pipeline after running DiffChangelogCommandStep (DAT-16374) @abrackx
+- (#5282) Fix #5271: ColumnExistsPrecondition throws error when table is missing @Januson
+- (#5291) Run all Liquibase.rollback commands inside scope. @filipelautert
+- (#5288) Add missing classes to osgi.serviceloader @filipelautert
+- (#5108) Improve SQL parsing of character literals (quoted strings) @erasmussen-first
+- (#5156) Decode encoded URLs from Spring resources @Ayrossi
+- (#5166) Exclude QUEUE tables from snapshoting @filipelautert
+- (#5249) Fixed query for actual data type for column @MalloD12
+- (#5235) Fix calculateCheckSum issue when using Liquibase API method @MalloD12
+- (#5172) Search ran changeset by key @n-13
+- (#5150) Fixes problematic V8 checksums for pro CreateFunctionChange @filipelautert
+- (#5165) Do not warn when env var matches argument alias (DAT-16117) @abrackx
+- (#5099) Apply SQL visitors to prepared SQL @mches
+- (#5141) Fix Liquibase changeset relative path check @filipelautert
+- (#5134) Makes sure that precondition onErrorMessage and onFailMessage are logged when an error happens @filipelautert
+- (#5143) load services using ServiceLocator if allInstances is empty @yairogen
+- (#5087) Handles snapshot of Oracle temporary tables + ignore queue tables @filipelautert
+- (#4801) CreateIndex associatedWith property deserialization issue @spacepost
+- (#5127) 5126 fix extra column info for mariadb database @LonwoLonwo
+- (#5122) Fix Liquibase.validate scope execution. @filipelautert
+- (#5078) Fix Liquibase.rollback scope execution @filipelautert
+- (#5090) Fixed changelog parsing performance issue @filipelautert
+- (#4293) Fix DB2 integration tests DAT-13113 @wwillard7800
+- (#4424) Fix custom SQL generation issue - Github issue 4369 @wwillard7800
+- (#5062) Modify MSSQL query for when obtaining autoincrement column information GH-4719 @wwillard7800
+- (#5054) Handle duplicates of the commercial JAR DAT-16059 @wwillard7800
+- (#5039) Add changelog file path to upToDateFastCheck cache key (#4891) @ggwadera
+- (#4994) execute-sql command logic updated to not display select columns sorted @MalloD12
+- (#4664) Fixed: #4662 - PostgreSQL: Doesn't support (n CHAR) syntax, but only (n) syntax. @mkarg
+- (#5064) Handle some potential NPEs  @wwillard7800
+- (#5028) Fix some typos. @asashour
+- (#4754) Corrected determination of the DB2 version for the support of BOOLEAN columns. (patch for #4723) @haltenwe
+- (#4549) generateChangelog creates crippled view definition SQL @mkarg
+- (#4985) Fix liquibase bat @erasmussen-first
+- (#4995) [DAT-16006] Fixing v8 Checksum calculation issue when using sql dbms attribute @filipelautert
+- (#4988) Do not remove relation attribute for column if the relation object has a snapshot ID DAT-15709 @wwillard7800
+- (#5007) Handle CREATE OR ALTER VIEW when replaceIfExists = true DAT-14147 @wwillard7800
+- (#5009) Do not convert if global flag is false DAT-15745 @wwillard7800
+- (#4945) Filter additional credential-like strings in the URL sanitization process DAT-9973 @wwillard7800
+- (#567) Improve deferrable validation for AddForeignKey constraints generator @alero
+- (#5101) Remove a forgotten `.` in `README.md` @Benjamin-Loison
+- (#4959) Remove unnecessary conditions in IndexComparator @asashour
+
+## Security, Driver and Other Updates
+- (#5368) Bump liquibase/build-logic from 0.5.7 to 0.5.8 @dependabot
+- (#5325) Bump org.postgresql:postgresql from 42.7.0 to 42.7.1 @dependabot
+- (#5260) Remove Apache Derby test dependency from pom.xml @dependabot
+- (#5310) Bump org.mockito:mockito-core from 5.7.0 to 5.8.0 for java 11+ tests @dependabot
+- (#5187) Bump actions/cache from 3.3.1 to 3.3.2 @dependabot
+- (#5169) Bump org.apache.maven.plugins:maven-plugin-plugin from 3.10.1 to 3.10.2 @dependabot
+- (#5151) Bump com.oracle.database.jdbc:ojdbc8 from 19.20.0.0 to 19.21.0.0 @dependabot
+- (#5168) Bump maven-surefire-plugin.version from 3.1.2 to 3.2.2 @dependabot
+- (#5162) Bump org.junit:junit-bom from 5.10.0 to 5.10.1 @dependabot
+- (#5161) Bump org.junit.jupiter:junit-jupiter from 5.10.0 to 5.10.1 @dependabot
+- (#5279) Bump org.apache.maven.plugins:maven-failsafe-plugin from 3.1.2 to 3.2.2 @dependabot
+- (#5173) Bump net.snowflake:snowflake-jdbc from 3.14.1 to 3.14.3 @dependabot
+- (#5250) Bump net.java.dev.javacc:javacc from 7.0.12 to 7.0.13 @dependabot
+- (#5251) Bump com.ibm.db2:jcc from 11.5.8.0 to 11.5.9.0 @dependabot
+- (#5261) Bump org.postgresql:postgresql from 42.6.0 to 42.7.0 @dependabot
+- (#5241) Bump liquibase/build-logic from 0.4.7 to 0.5.7 @dependabot
+- (#5065) Bump org.jacoco:jacoco-maven-plugin from 0.8.10 to 0.8.11 @dependabot
+- (#5094) Bump org.glassfish.jaxb:jaxb-runtime from 4.0.3 to 4.0.4 @dependabot
+- (#5095) Bump org.glassfish.jaxb:jaxb-core from 4.0.3 to 4.0.4 @dependabot
+- (#5140) Bump org.xerial:sqlite-jdbc from 3.43.0.0 to 3.43.2.2 @dependabot
+- (#4989) Bump org.codehaus.gmavenplus:gmavenplus-plugin from 3.0.0 to 3.0.2 @dependabot
+- (#5020) Bump targetMavenVersion from 3.9.4 to 3.9.5 @dependabot
+- (#4918) Bump org.apache.maven.plugins:maven-javadoc-plugin from 3.5.0 to 3.6.0 @dependabot
+- (#5096) Bump org.apache.maven.plugins:maven-plugin-plugin from 3.9.0 to 3.10.1 @dependabot
+- (#5135) Update installer JDK @filipelautert
+- (#5026) Bump org.jboss.weld.se:weld-se-core from 5.1.1.Final to 5.1.2.Final @dependabot
+- (#4839) Bump actions/checkout from 3 to 4 @dependabot
+- (#4914) Bump org.sonarsource.scanner.maven:sonar-maven-plugin from 3.9.1.2184 to 3.10.0.2594 @dependabot
+- (#5001) Bump org.testcontainers:testcontainers-bom from 1.19.0 to 1.19.1 @dependabot
+- (#4860) Bump actions/cache from 3.3.1 to 3.3.2 @dependabot
+- (#4866) Bump org.apache.maven.plugins:maven-enforcer-plugin from 3.4.0 to 3.4.1 @dependabot
+- (#4949) Bump org.apache.maven.plugins:maven-shade-plugin from 3.5.0 to 3.5.1 @dependabot
+- (#4929) Bump com.h2database:h2 from 2.2.222 to 2.2.224 @dependabot
+
 Changes in version 4.25.0 (2023.11.09)
 
 ### Liquibase 4.25.0 is a major release
