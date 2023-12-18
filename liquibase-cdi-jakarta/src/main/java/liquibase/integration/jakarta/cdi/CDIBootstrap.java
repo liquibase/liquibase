@@ -1,6 +1,5 @@
 package liquibase.integration.jakarta.cdi;
 
-
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.enterprise.context.spi.CreationalContext;
 import jakarta.enterprise.event.Observes;
