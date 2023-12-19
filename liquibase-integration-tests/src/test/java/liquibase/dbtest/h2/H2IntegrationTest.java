@@ -289,6 +289,7 @@ public class H2IntegrationTest extends AbstractIntegrationTest {
             return "h2alt";
         }
 
+        @Override
         public void setDatabase(Database database) {
             // ignore the database connection passed in since we're providing our own
         }
@@ -297,6 +298,7 @@ public class H2IntegrationTest extends AbstractIntegrationTest {
             return database;
         }
 
+        @Override
         public void execute(Change change, List<SqlVisitor> sqlVisitors) throws DatabaseException {
             super.execute(change, sqlVisitors);
             database.commit();
