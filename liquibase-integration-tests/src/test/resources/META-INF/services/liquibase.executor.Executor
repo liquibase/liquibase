@@ -1,1 +1,1 @@
-liquibase.dbtest.h2.H2IntegrationTest$AlternateConnectionExecutor
+liquibase.helper.AlternateConnectionExecutor
