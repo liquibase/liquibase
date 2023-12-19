@@ -2,6 +2,7 @@ package liquibase.parser.core.formattedsql
 
 import liquibase.Contexts
 import liquibase.LabelExpression
+import liquibase.Scope
 import liquibase.change.core.EmptyChange
 import liquibase.change.core.RawSQLChange
 import liquibase.changelog.ChangeLogParameters
@@ -12,6 +13,8 @@ import liquibase.exception.ChangeLogParseException
 import liquibase.precondition.core.PreconditionContainer
 import liquibase.precondition.core.SqlPrecondition
 import liquibase.resource.ResourceAccessor
+import liquibase.resource.SearchPathResourceAccessor
+import liquibase.resource.SearchPathResourceAccessorTest
 import liquibase.servicelocator.LiquibaseService
 import liquibase.test.JUnitResourceAccessor
 import liquibase.util.StringUtil
@@ -66,6 +69,7 @@ create table \${tablename} (
     id int primary key
 );
 --rollback drop table \${tablename};
+
 
 -- changeset mysql:1
 -- comment: this is a comment
@@ -268,6 +272,24 @@ CREATE TABLE ALL_CAPS_TABLE_2 (
 )
 """
 
+    private static final String VALID_CHANGELOG_WITH_ROLLBACK_FILE =
+"""
+    --ChangeSet paikens:8
+    create table singular (
+            id int primary key
+    );
+    --rollbackSqlFile path:dropTableSingular.sql
+"""
+
+    private static final String VALID_CHANGELOG_WITH_ROLLBACK_FILE_RELATIVE_TO_CHANGELOG =
+            """
+    --ChangeSet paikens:8
+    create table singular (
+            id int primary key
+    );
+    --rollbackSqlFile path:dropTableSingular.sql relativeToChangelog:true
+"""
+
     def supports() throws Exception {
         expect:
         assert new MockFormattedSqlChangeLogParser(VALID_CHANGELOG).supports("asdf.sql", new JUnitResourceAccessor())
@@ -438,6 +460,37 @@ CREATE TABLE ALL_CAPS_TABLE_2 (
 
         changeLog.getChangeSets().get(24).getRollback().getChanges().size() == 1
         ((RawSQLChange) changeLog.getChangeSets().get(24).getRollback().getChanges().get(0)).getSql().startsWith("create table test_table (")
+    }
+
+    def parseWithRollbackFile() throws Exception {
+        expect:
+        ChangeLogParameters params = new ChangeLogParameters()
+        def resourceAccessor = new SearchPathResourceAccessor(".,target/test-classes")
+        Scope.child(Scope.Attr.resourceAccessor.name(), resourceAccessor, { ->
+            DatabaseChangeLog changeLog =
+                new MockFormattedSqlChangeLogParser(VALID_CHANGELOG_WITH_ROLLBACK_FILE).parse("asdf.sql", params, new JUnitResourceAccessor())
+            assert changeLog
+            assert changeLog.getChangeSets().get(0).getRollback().getChanges().size() == 1
+            def rawSql = (RawSQLChange)changeLog.getChangeSets().get(0).getRollback().getChanges().get(0)
+            assert rawSql.getSql() == "drop table singular;"
+        })
+
+    }
+
+    def parseWithRollbackFileRelative() throws Exception {
+        expect:
+        ChangeLogParameters params = new ChangeLogParameters()
+        def resourceAccessor = new SearchPathResourceAccessor(".,target/test-classes")
+        Scope.child(Scope.Attr.resourceAccessor.name(), resourceAccessor, { ->
+            DatabaseChangeLog changeLog =
+                new MockFormattedSqlChangeLogParser(VALID_CHANGELOG_WITH_ROLLBACK_FILE_RELATIVE_TO_CHANGELOG)
+                   .parse("asdf.sql", params, new JUnitResourceAccessor())
+            assert changeLog
+            assert changeLog.getChangeSets().get(0).getRollback().getChanges().size() == 1
+            def rawSql = (RawSQLChange)changeLog.getChangeSets().get(0).getRollback().getChanges().get(0)
+            assert rawSql.getSql() == "drop table singular;"
+        })
+
     }
 
     def parseWithSpaces() throws Exception {
