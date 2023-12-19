@@ -274,7 +274,7 @@ public class H2IntegrationTest extends AbstractIntegrationTest {
      * An {@link JdbcExecutor} that provides its own {@link DatabaseConnection} and commits after executing
      * each change
      */
-    public static class AlternateConnectionExecutor extends JdbcExecutor {
+    public class AlternateConnectionExecutor extends JdbcExecutor {
 
         public AlternateConnectionExecutor() throws Exception {
             String urlParameters = ";INIT=CREATE SCHEMA IF NOT EXISTS lbschem2\\;SET SCHEMA lbschem2";
