@@ -19,7 +19,6 @@ import liquibase.util.StringUtil;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
-import java.nio.file.Paths;
 import java.util.ResourceBundle;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -50,9 +49,6 @@ public abstract class AbstractFormattedChangeLogParser implements ChangeLogParse
 
     protected final String ALT_CHANGE_SET_NO_OTHER_INFO_REGEX = String.format("\\s*%s[\\s]*changeset[\\s]*.*$", getSingleLineCommentSequence());
     protected final Pattern ALT_CHANGE_SET_NO_OTHER_INFO_PATTERN = Pattern.compile(ALT_CHANGE_SET_NO_OTHER_INFO_REGEX, Pattern.CASE_INSENSITIVE);
-
-    protected final String ROLLBACK_SQL_FILE_REGEX = String.format("\\s*%s[\\s]*rollbackSqlFile[\\s]+(.*)", getSingleLineCommentSequence());
-    protected final Pattern ROLLBACK_SQL_FILE_PATTERN = Pattern.compile(ROLLBACK_SQL_FILE_REGEX, Pattern.CASE_INSENSITIVE);
 
     protected final String ROLLBACK_REGEX = String.format("\\s*%s[\\s]*rollback (.*)", getSingleLineCommentSequence());
     protected final Pattern ROLLBACK_PATTERN = Pattern.compile(ROLLBACK_REGEX, Pattern.CASE_INSENSITIVE);
@@ -134,12 +130,6 @@ public abstract class AbstractFormattedChangeLogParser implements ChangeLogParse
 
     protected static final String LABELS_REGEX = ".*labels:(\".*?\"|\\S*).*";
     protected final Pattern LABELS_PATTERN = Pattern.compile(LABELS_REGEX, Pattern.CASE_INSENSITIVE);
-
-    protected static final String PATH_REGEX = ".*path:(\".*?\"|\\S*).*";
-    protected final Pattern PATH_PATTERN = Pattern.compile(PATH_REGEX, Pattern.CASE_INSENSITIVE);
-
-    protected static final String RELATIVE_TO_CHANGELOG_REGEX = ".*relativeToChangelog:(\".*?\"|\\S*).*";
-    protected final Pattern RELATIVE_TO_CHANGELOG_PATTERN = Pattern.compile(RELATIVE_TO_CHANGELOG_REGEX, Pattern.CASE_INSENSITIVE);
 
     protected static final String RUN_IN_TRANSACTION_REGEX = ".*runInTransaction:(\\w+).*";
     protected final Pattern RUN_IN_TRANSACTION_PATTERN = Pattern.compile(RUN_IN_TRANSACTION_REGEX, Pattern.CASE_INSENSITIVE);
@@ -466,7 +456,7 @@ public abstract class AbstractFormattedChangeLogParser implements ChangeLogParse
                         throw new ChangeLogParseException("\n" + message);
                     }
                     if (changeSet != null) {
-                        configureChangeSet(physicalChangeLogLocation, changeLogParameters, reader, currentSequence, currentRollbackSequence, changeSet, count, line, commentMatcher, resourceAccessor);
+                        configureChangeSet(physicalChangeLogLocation, changeLogParameters, reader, currentSequence, currentRollbackSequence, changeSet, count, line, commentMatcher);
                     } else {
                         if (commentMatcher.matches()) {
                             String message =
@@ -495,11 +485,6 @@ public abstract class AbstractFormattedChangeLogParser implements ChangeLogParse
     }
 
     protected void configureChangeSet(String physicalChangeLogLocation, ChangeLogParameters changeLogParameters, BufferedReader reader, StringBuilder currentSequence, StringBuilder currentRollbackSequence, ChangeSet changeSet, int count, String line, Matcher commentMatcher) throws ChangeLogParseException, IOException {
-        configureChangeSet(physicalChangeLogLocation, changeLogParameters, reader, currentSequence, currentRollbackSequence, changeSet, count, line, commentMatcher, null);
-    }
-
-    protected void configureChangeSet(String physicalChangeLogLocation, ChangeLogParameters changeLogParameters, BufferedReader reader, StringBuilder currentSequence, StringBuilder currentRollbackSequence, ChangeSet changeSet, int count, String line, Matcher commentMatcher, ResourceAccessor resourceAccessor)
-            throws ChangeLogParseException, IOException {
         Matcher altCommentOneDashMatcher = ALT_COMMENT_ONE_CHARACTER_PATTERN.matcher(line);
         Matcher altCommentPluralMatcher = ALT_COMMENT_PLURAL_PATTERN.matcher(line);
         Matcher rollbackMatcher = ROLLBACK_PATTERN.matcher(line);
@@ -511,7 +496,6 @@ public abstract class AbstractFormattedChangeLogParser implements ChangeLogParse
         Matcher validCheckSumMatcher = VALID_CHECK_SUM_PATTERN.matcher(line);
         Matcher altValidCheckSumOneDashMatcher = ALT_VALID_CHECK_SUM_ONE_CHARACTER_PATTERN.matcher(line);
         Matcher rollbackMultiLineStartMatcher = ROLLBACK_MULTI_LINE_START_PATTERN.matcher(line);
-        Matcher rollbackSqlFileMatcher = ROLLBACK_SQL_FILE_PATTERN.matcher(line);
 
         if (commentMatcher.matches()) {
             if (commentMatcher.groupCount() == 0) {
@@ -546,24 +530,6 @@ public abstract class AbstractFormattedChangeLogParser implements ChangeLogParse
         } else if (rollbackMultiLineStartMatcher.matches()) {
             if (rollbackMultiLineStartMatcher.groupCount() == 0) {
                 currentRollbackSequence.append(extractMultiLineRollBack(reader));
-            }
-        } else if (rollbackSqlFileMatcher.matches()) {
-            if (resourceAccessor != null) {
-                String rollbackSqlAttributes = rollbackSqlFileMatcher.group(1);
-                Matcher m = PATH_PATTERN.matcher(rollbackSqlAttributes);
-                if (! m.matches()) {
-                    String message =
-                       String.format(EXCEPTION_MESSAGE, physicalChangeLogLocation, count, getSequenceName(),
-                          "--rollbackSqlFile path:<SQL file path> [relativeToChangelog:true|false]", getDocumentationLink());
-                    throw new ChangeLogParseException("\n" + message);
-                }
-                String path = DatabaseChangeLog.normalizePath(m.group(1));
-                boolean isRelativeToChangelog = false;
-                m = RELATIVE_TO_CHANGELOG_PATTERN.matcher(rollbackSqlAttributes);
-                if (m.matches()) {
-                    isRelativeToChangelog = Boolean.parseBoolean(m.group(1));
-                }
-                currentRollbackSequence.append(readRollbackSqlFile(path, resourceAccessor, physicalChangeLogLocation, isRelativeToChangelog));
             }
         } else if (preconditionsMatcher.matches()) {
             handlePreconditionsCase(changeSet, count, preconditionsMatcher);
@@ -615,17 +581,6 @@ public abstract class AbstractFormattedChangeLogParser implements ChangeLogParse
 
     protected InputStream openChangeLogFile(String physicalChangeLogLocation, ResourceAccessor resourceAccessor) throws IOException {
         return resourceAccessor.getExisting(physicalChangeLogLocation).openInputStream();
-    }
-
-    protected String readRollbackSqlFile(String rollbackSpecification, ResourceAccessor resourceAccessor, String physicalChangelogLocation, boolean isRelativeToChangelog)
-            throws IOException {
-        if (isRelativeToChangelog) {
-            rollbackSpecification = resourceAccessor.get(physicalChangelogLocation).resolveSibling(rollbackSpecification).getPath();
-            rollbackSpecification = DatabaseChangeLog.normalizePath(Paths.get(rollbackSpecification).toString());
-        }
-        try (InputStream inputStream = resourceAccessor.get(rollbackSpecification).openInputStream()) {
-            return StreamUtil.readStreamAsString(inputStream);
-        }
     }
 
     private void handleRollbackSequence(String physicalChangeLogLocation, ChangeLogParameters changeLogParameters, DatabaseChangeLog changeLog, StringBuilder currentRollbackSequence, ChangeSet changeSet, Matcher rollbackSplitStatementsPatternMatcher, boolean rollbackSplitStatements, String rollbackEndDelimiter) throws ChangeLogParseException {
