@@ -1,10 +1,12 @@
 name: Run Tests
 
-# concurrent runs for pull requests (both internal and forked) will be canceled when a new run is triggered.
-# It does not specifically target or exclude the 'master' branch; it cancels concurrent runs whenever a pull request is triggered.
+#This setup ensures that runs triggered by pushes to the master branch won't interfere with each other, and concurrent merges to the master branch won't cancel runs triggered by pushes.
+#For regular pushes to the master branch, the concurrency group is labeled as 'push-to-master'.
+#For merges to the master branch (pull requests being merged into master), the concurrency group is labeled as 'merge-to-master'.
+#For other scenarios or branches, the concurrency group includes the github.run_id.
 concurrency:
-  group: ${{ github.workflow }}-${{ github.head_ref || github.ref }}
-  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+  group: ${{ github.workflow }}-${{ github.head_ref == 'master' && (github.event_name == 'push' && 'push-to-master' || github.event_name == 'pull_request' && 'merge-to-master') || github.run_id }}
+  cancel-in-progress: true
 
 on:
   workflow_call:
