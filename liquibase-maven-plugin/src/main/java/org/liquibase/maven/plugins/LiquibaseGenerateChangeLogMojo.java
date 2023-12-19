@@ -4,6 +4,7 @@ import liquibase.CatalogAndSchema;
 import liquibase.GlobalConfiguration;
 import liquibase.Liquibase;
 import liquibase.Scope;
+import liquibase.command.core.GenerateChangelogCommandStep;
 import liquibase.database.Database;
 import liquibase.diff.compare.CompareControl;
 import liquibase.diff.output.DiffOutputControl;
@@ -114,6 +115,14 @@ public class LiquibaseGenerateChangeLogMojo extends
     @PropertyElement
     protected boolean overwriteOutputFile;
 
+    /**
+     * Flag to allow adding 'OR REPLACE' option to the create view change object when generating changelog in SQL format
+     *
+     * @parameter property="liquibase.useOrReplaceOption" default-value="false"
+     */
+    @PropertyElement
+    protected boolean useOrReplaceOption;
+
     @Override
 	protected void performLiquibaseTask(Liquibase liquibase)
 			throws LiquibaseException {
@@ -140,6 +149,9 @@ public class LiquibaseGenerateChangeLogMojo extends
             }
             if (diffIncludeObjects != null) {
                 diffOutputControl.setObjectChangeFilter(new StandardObjectChangeFilter(StandardObjectChangeFilter.FilterType.INCLUDE, diffIncludeObjects));
+            }
+            if(useOrReplaceOption) {
+                diffOutputControl.setReplaceIfExistsSet(true);
             }
 
             //
