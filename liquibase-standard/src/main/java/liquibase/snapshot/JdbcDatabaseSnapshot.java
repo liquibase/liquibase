@@ -147,7 +147,7 @@ public class JdbcDatabaseSnapshot extends DatabaseSnapshot {
 
                         sql += " ORDER BY c.INDEX_NAME, ORDINAL_POSITION";
 
-                        returnList.addAll(setIndexExpressions(sql, executeAndExtract(sql, database)));
+                        returnList.addAll(setIndexExpressions(executeAndExtract(sql, database)));
                     } else if (database instanceof MSSQLDatabase) {
                         String tableCat = "original_db_name()";
 
@@ -279,7 +279,7 @@ public class JdbcDatabaseSnapshot extends DatabaseSnapshot {
                     return returnList;
                 }
 
-                private List<CachedRow> setIndexExpressions(String sql, List<CachedRow> c) throws DatabaseException, SQLException {
+                private List<CachedRow> setIndexExpressions(List<CachedRow> c) throws DatabaseException, SQLException {
                     Map<String, CachedRow> expressionMap = getCachedExpressionMap();
                     c.forEach(row -> {
                         row.set("FILTER_CONDITION", null);
