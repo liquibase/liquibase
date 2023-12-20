@@ -5,8 +5,9 @@ name: Run Tests
 #For pull requests, the concurrency group includes the pull request head reference (github.head_ref).
 #The cancel-in-progress: true setting will cancel concurrent runs for the same concurrency group when a new run is triggered.
 concurrency:
-  group: ${{ github.workflow }}-${{ github.head_ref == 'master' || github.base_ref == 'refs/heads/master' && 'master' || github.head_ref || github.ref }}
-  cancel-in-progress: true
+  group: ${{ github.workflow }}-${{ github.head_ref == 'master' && (github.event_name == 'push' && 'push-to-master' || github.event_name == 'pull_request' && 'merge-to-master') || github.run_id }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' && github.base_ref == 'master' }}
+
 
 on:
   workflow_call:
@@ -35,6 +36,10 @@ env:
 
 jobs:
   authorize:
+    #concurrent runs for pull requests from forked repositories will be canceled, while runs for pull requests from the main repository won't be affected.
+    concurrency:
+      group: ${{ github.workflow }}-${{ github.event_name == 'pull_request' && github.event.pull_request.number || github.run_id }}
+      cancel-in-progress: ${{ github.event_name == 'pull_request' && github.event.pull_request.head.repo.fork == 'true' }}
     environment: ${{ github.event_name == 'pull_request_target' && github.event.pull_request.head.repo.full_name != github.repository && 'external' || 'internal' }}
     runs-on: ubuntu-latest
     steps:
