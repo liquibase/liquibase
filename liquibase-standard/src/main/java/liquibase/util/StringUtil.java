@@ -69,7 +69,7 @@ public class StringUtil {
         LiquibaseSqlParser sqlParser = sqlParserFactory.getSqlParser();
         StringClauses parsed;
         try {
-            parsed = Scope.child(Collections.singletonMap(StandardSqlParser.CHANGESET_SCOPE_KEY, changeSet), () -> sqlParser.parse(multiLineSQL, true, !stripComments));
+            parsed = sqlParser.parse(multiLineSQL, true, !stripComments, changeSet);
         } catch (Exception e) {
             // this should not happen
             throw new UnexpectedLiquibaseException(e);
@@ -328,7 +328,7 @@ public class StringUtil {
         SqlParserFactory sqlParserFactory = Scope.getCurrentScope().getSingleton(SqlParserFactory.class);
         LiquibaseSqlParser sqlParser = sqlParserFactory.getSqlParser();
         try {
-            return Scope.child(Collections.singletonMap(StandardSqlParser.CHANGESET_SCOPE_KEY, changeSet), () -> sqlParser.parse(multiLineSQL, true, false).toString().trim());
+            return sqlParser.parse(multiLineSQL, true, false, changeSet).toString().trim();
         } catch (Exception e) {
             // this should not happen
             throw new UnexpectedLiquibaseException(e);
