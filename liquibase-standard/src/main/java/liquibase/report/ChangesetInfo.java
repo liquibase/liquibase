@@ -107,7 +107,8 @@ public class ChangesetInfo {
                         changeSet.getComments(),
                         changeSet.getLabels() == null ? null : changeSet.getLabels().toString(),
                         changeSet.getContextFilter() == null ? null : changeSet.getContextFilter().getOriginalString(),
-                        reason);
+                        reason,
+                        changeSet);
                 pendingChangesetInfoList.add(pendingChangesetInfo);
             });
         }

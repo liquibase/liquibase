@@ -127,11 +127,6 @@ public abstract class AbstractUpdateCommandStep extends AbstractCommandStep impl
             DatabaseChangeLog databaseChangeLog = (DatabaseChangeLog) commandScope.getDependency(DatabaseChangeLog.class);
             addChangelogFileToMdc(getChangelogFileArg(commandScope), databaseChangeLog);
             logDeploymentOutcomeMdc(changeExecListener, false, updateReportParameters);
-            if (!updateReportParameters.getChangesetInfo().getPendingChangesetInfoList().isEmpty()) {
-                //Remove the first item in this list, because it duplicates the changeset that failed.
-                updateReportParameters.getChangesetInfo().getPendingChangesetInfoList().remove(0);
-                updateReportParameters.getChangesetInfo().setPendingChangesetCount(updateReportParameters.getChangesetInfo().getPendingChangesetCount() - 1);
-            }
             updateReportParameters.getOperationInfo().setException(e.getCause().getMessage());
             resultsBuilder.addResult("statusCode", 1);
             throw e;
@@ -207,6 +202,13 @@ public abstract class AbstractUpdateCommandStep extends AbstractCommandStep impl
             updateReportParameters.getChangesetInfo().setFailedChangesetCount(failedChangeSetCount);
             updateReportParameters.getChangesetInfo().addAllToChangesetInfoList(deployedChangeSets, false);
             updateReportParameters.getChangesetInfo().addAllToChangesetInfoList(failedChangeSets, false);
+            if (!updateReportParameters.getChangesetInfo().getPendingChangesetInfoList().isEmpty()) {
+                // If there are failures remove these changes from the pending changeset list
+                // and update the count to reflect only skipped(pending) changes by removing the failed count
+                updateReportParameters.getChangesetInfo().getPendingChangesetInfoList()
+                        .removeIf(pendingChangesetInfo -> failedChangeSets.stream().anyMatch(changeSet -> changeSet.equals(pendingChangesetInfo.getChangeSet())));
+                updateReportParameters.getChangesetInfo().setPendingChangesetCount(updateReportParameters.getChangesetInfo().getPendingChangesetCount() - failedChangeSetCount);
+            }
             Scope.getCurrentScope().addMdcValue(MdcKey.DEPLOYMENT_OUTCOME_COUNT, String.valueOf(deployedChangeSetCount));
             Scope.getCurrentScope().addMdcValue(MdcKey.CHANGESETS_UPDATED, changesetsUpdated);
         }

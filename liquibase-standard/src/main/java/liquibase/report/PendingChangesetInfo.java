@@ -1,5 +1,6 @@
 package liquibase.report;
 
+import liquibase.changelog.ChangeSet;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 
@@ -13,4 +14,5 @@ public class PendingChangesetInfo {
     private String labels;
     private String contexts;
     private String reason;
+    private ChangeSet changeSet;
 }
