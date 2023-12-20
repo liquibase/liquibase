@@ -32,6 +32,7 @@ Global Options
       --always-drop-instead-of-replace=PARAM
                              If true, drop and recreate a view instead of
                                replacing it.
+                             DEFAULT: false
                              (defaults file: 'liquibase.
                                alwaysDropInsteadOfReplace', environment
                                variable:
