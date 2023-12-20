@@ -204,6 +204,22 @@ public class LiquibaseDatabaseDiff extends AbstractLiquibaseChangeLogMojo {
     protected String format;
 
     /**
+     * Sets runOnChange="true" for changesets containing solely changes of these types (e.g. createView, createProcedure, ...).
+     *
+     * @parameter property="liquibase.runOnChangeTypes" default-value="none"
+     */
+    @PropertyElement
+    protected String runOnChangeTypes;
+
+    /**
+     * Sets replaceIfExists="true" for changes of the supported types, at the moment they are createView and createProcedure.
+     *
+     * @parameter property="liquibase.replaceIfExistsTypes" default-value="none"
+     */
+    @PropertyElement
+    protected String replaceIfExistsTypes;
+
+    /**
      * Flag to allow adding 'OR REPLACE' option to the create view change object when generating changelog in SQL format
      *
      * @parameter property="liquibase.useOrReplaceOption" default-value="false"
@@ -274,7 +290,7 @@ public class LiquibaseDatabaseDiff extends AbstractLiquibaseChangeLogMojo {
                         diffOutputControl.setReplaceIfExistsSet(true);
                     }
                     CommandLineUtils.doDiffToChangeLog(diffChangeLogFile, referenceDatabase, db, changeSetAuthor, diffOutputControl,
-                            objectChangeFilter, StringUtil.trimToNull(diffTypes), schemaComparisons);
+                            objectChangeFilter, StringUtil.trimToNull(diffTypes), schemaComparisons, runOnChangeTypes, replaceIfExistsTypes);
                     if (new File(diffChangeLogFile).exists()) {
                         getLog().info("Differences written to Change Log File, " + diffChangeLogFile);
                     }

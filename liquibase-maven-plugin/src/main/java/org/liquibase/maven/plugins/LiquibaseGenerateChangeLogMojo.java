@@ -4,7 +4,6 @@ import liquibase.CatalogAndSchema;
 import liquibase.GlobalConfiguration;
 import liquibase.Liquibase;
 import liquibase.Scope;
-import liquibase.command.core.GenerateChangelogCommandStep;
 import liquibase.database.Database;
 import liquibase.diff.compare.CompareControl;
 import liquibase.diff.output.DiffOutputControl;
@@ -116,6 +115,22 @@ public class LiquibaseGenerateChangeLogMojo extends
     protected boolean overwriteOutputFile;
 
     /**
+     * Sets runOnChange="true" for changesets containing solely changes of these types (e.g. createView, createProcedure, ...).
+     *
+     * @parameter property="liquibase.runOnChangeTypes" default-value="none"
+     */
+    @PropertyElement
+    protected String runOnChangeTypes;
+
+    /**
+     * Sets replaceIfExists="true" for changes of the supported types, at the moment they are createView and createProcedure.
+     *
+     * @parameter property="liquibase.replaceIfExistsTypes" default-value="none"
+     */
+    @PropertyElement
+    protected String replaceIfExistsTypes;
+
+    /**
      * Flag to allow adding 'OR REPLACE' option to the create view change object when generating changelog in SQL format
      *
      * @parameter property="liquibase.useOrReplaceOption" default-value="false"
@@ -164,7 +179,7 @@ public class LiquibaseGenerateChangeLogMojo extends
             CatalogAndSchema[] targetSchemas = computedSchemas.finalTargetSchemas;
 
                 CommandLineUtils.doGenerateChangeLog(outputChangeLogFile, database, targetSchemas, StringUtil.trimToNull(diffTypes),
-                        StringUtil.trimToNull(changeSetAuthor), StringUtil.trimToNull(changeSetContext), StringUtil.trimToNull(dataDir), diffOutputControl, overwriteOutputFile);
+                        StringUtil.trimToNull(changeSetAuthor), StringUtil.trimToNull(changeSetContext), StringUtil.trimToNull(dataDir), diffOutputControl, overwriteOutputFile, runOnChangeTypes, replaceIfExistsTypes);
                 getLog().info("Output written to Change Log file, " + outputChangeLogFile);
             });
         }  catch (Exception e) {

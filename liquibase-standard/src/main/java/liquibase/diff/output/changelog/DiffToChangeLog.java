@@ -65,6 +65,8 @@ public class DiffToChangeLog {
     private String changeSetLabels;
     private String changeSetAuthor;
     private String changeSetPath;
+    private String[] changeSetRunOnChangeTypes;
+    private String[] changeReplaceIfExistsTypes;
     private DiffResult diffResult;
     private final DiffOutputControl diffOutputControl;
     private boolean tryDbaDependencies = true;
@@ -772,8 +774,8 @@ public class DiffToChangeLog {
 
             if (useSeparateChangeSets(changes)) {
                 for (Change change : changes) {
-                    ChangeSet changeSet =
-                       new ChangeSet(generateId(changes), getChangeSetAuthor(), false, false, this.changeSetPath, changeSetContext,
+                    final boolean runOnChange = isContainedInRunOnChangeTypes(change);
+                    ChangeSet changeSet = new ChangeSet(generateId(changes), getChangeSetAuthor(), false, runOnChange, this.changeSetPath, changeSetContext,
                             null, true, quotingStrategy, null);
                     changeSet.setCreated(created);
                     if (diffOutputControl.getLabels() != null) {
@@ -781,11 +783,15 @@ public class DiffToChangeLog {
                     } else {
                         changeSet.setLabels(new Labels(this.changeSetLabels));
                     }
+                    if (change instanceof ReplaceIfExists && isContainedInReplaceIfExistsTypes(change)) {
+                        ((ReplaceIfExists) change).setReplaceIfExists(true);
+                    }
                     changeSet.addChange(change);
                     changeSets.add(changeSet);
                 }
             } else {
-                ChangeSet changeSet = new ChangeSet(generateId(changes), getChangeSetAuthor(), false, false, this.changeSetPath, csContext,
+                final boolean runOnChange = Arrays.asList(changes).stream().allMatch(change -> isContainedInRunOnChangeTypes(change));
+                ChangeSet changeSet = new ChangeSet(generateId(changes), getChangeSetAuthor(), false, runOnChange, this.changeSetPath, csContext,
                         null, true, quotingStrategy, null);
                 changeSet.setCreated(created);
                 if (diffOutputControl.getLabels() != null) {
@@ -794,6 +800,9 @@ public class DiffToChangeLog {
                     changeSet.setLabels(new Labels(this.changeSetLabels));
                 }
                 for (Change change : changes) {
+                    if (change instanceof ReplaceIfExists && isContainedInReplaceIfExistsTypes(change)) {
+                        ((ReplaceIfExists) change).setReplaceIfExists(true);
+                    }
                     changeSet.addChange(change);
                 }
                 changeSets.add(changeSet);
@@ -852,6 +861,30 @@ public class DiffToChangeLog {
 
     public void setChangeSetPath(String changeSetPath) {
         this.changeSetPath = changeSetPath;
+    }
+
+    public void setChangeSetRunOnChangeTypes(final String[] runOnChangeTypes) {
+        changeSetRunOnChangeTypes = runOnChangeTypes;
+    }
+
+    protected String[] getChangeSetRunOnChangeTypes() {
+        return changeSetRunOnChangeTypes;
+    }
+
+    private boolean isContainedInRunOnChangeTypes(final Change change) {
+        return getChangeSetRunOnChangeTypes() != null && Arrays.asList(getChangeSetRunOnChangeTypes()).contains(change.getSerializedObjectName());
+    }
+
+    public void setChangeReplaceIfExistsTypes(final String[] replaceIfExistsTypes) {
+        changeReplaceIfExistsTypes = replaceIfExistsTypes;
+    }
+
+    protected String[] getChangeReplaceIfExistsTypes() {
+        return changeReplaceIfExistsTypes;
+    }
+
+    private boolean isContainedInReplaceIfExistsTypes(final Change change) {
+        return getChangeReplaceIfExistsTypes() != null && Arrays.asList(getChangeReplaceIfExistsTypes()).contains(change.getSerializedObjectName());
     }
 
     public void setIdRoot(String idRoot) {
