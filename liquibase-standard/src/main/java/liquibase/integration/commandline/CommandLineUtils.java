@@ -223,6 +223,9 @@ public class CommandLineUtils {
                 .addArgumentValue(DiffOutputControlCommandStep.INCLUDE_SCHEMA_ARG, diffOutputControl.getIncludeSchema())
                 .addArgumentValue(DiffOutputControlCommandStep.INCLUDE_TABLESPACE_ARG, diffOutputControl.getIncludeTablespace())
                 .addArgumentValue(DiffChangelogCommandStep.AUTHOR_ARG, author);
+        if(diffOutputControl.isReplaceIfExistsSet()) {
+            command.addArgumentValue(GenerateChangelogCommandStep.USE_OR_REPLACE_OPTION, true);
+        }
         command.setOutput(System.out);
         try {
             command.execute();
@@ -273,6 +276,9 @@ public class CommandLineUtils {
                 .addArgumentValue(GenerateChangelogCommandStep.CONTEXT_ARG, context)
                 .addArgumentValue(GenerateChangelogCommandStep.OVERWRITE_OUTPUT_FILE_ARG, overwriteOutputFile);
 
+        if(diffOutputControl.isReplaceIfExistsSet()) {
+            command.addArgumentValue(GenerateChangelogCommandStep.USE_OR_REPLACE_OPTION, true);
+        }
         command.setOutput(System.out);
         try {
             command.execute();
