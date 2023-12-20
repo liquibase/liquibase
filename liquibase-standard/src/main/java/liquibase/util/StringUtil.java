@@ -4,7 +4,6 @@ import liquibase.ExtensibleObject;
 import liquibase.GlobalConfiguration;
 import liquibase.Scope;
 import liquibase.changelog.ChangeSet;
-import liquibase.exception.UnexpectedLiquibaseException;
 import liquibase.parser.LiquibaseSqlParser;
 import liquibase.parser.SqlParserFactory;
 
@@ -79,13 +78,7 @@ public class StringUtil {
 
         SqlParserFactory sqlParserFactory = Scope.getCurrentScope().getSingleton(SqlParserFactory.class);
         LiquibaseSqlParser sqlParser = sqlParserFactory.getSqlParser();
-        StringClauses parsed;
-        try {
-            parsed = sqlParser.parse(multiLineSQL, true, !stripComments, changeSet);
-        } catch (Exception e) {
-            // this should not happen
-            throw new UnexpectedLiquibaseException(e);
-        }
+        StringClauses parsed = sqlParser.parse(multiLineSQL, true, !stripComments, changeSet);
 
         List<String> returnArray = new ArrayList<>();
 
@@ -374,12 +367,7 @@ public class StringUtil {
         }
         SqlParserFactory sqlParserFactory = Scope.getCurrentScope().getSingleton(SqlParserFactory.class);
         LiquibaseSqlParser sqlParser = sqlParserFactory.getSqlParser();
-        try {
-            return sqlParser.parse(multiLineSQL, true, false, changeSet).toString().trim();
-        } catch (Exception e) {
-            // this should not happen
-            throw new UnexpectedLiquibaseException(e);
-        }
+        return sqlParser.parse(multiLineSQL, true, false, changeSet).toString().trim();
     }
 
     public static String join(Object[] array, String delimiter, StringUtilFormatter formatter) {
