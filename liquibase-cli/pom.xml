@@ -7,8 +7,6 @@
         <artifactId>liquibase</artifactId>
         <version>0-SNAPSHOT</version>
     </parent>
-
-         
     <description>Liquibase CLI interface</description>
 
     <artifactId>liquibase-cli</artifactId>
