@@ -19,6 +19,7 @@
         <sonar.coverage.jacoco.xmlReportPaths>../target/jacoco.xml</sonar.coverage.jacoco.xmlReportPaths>
     </properties>
 
+         
     <description>Liquibase is a tool for managing and executing database changes.</description>
     <url>http://www.liquibase.com</url>
 
