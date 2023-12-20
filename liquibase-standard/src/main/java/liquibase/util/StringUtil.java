@@ -3,6 +3,8 @@ package liquibase.util;
 import liquibase.ExtensibleObject;
 import liquibase.GlobalConfiguration;
 import liquibase.Scope;
+import liquibase.changelog.ChangeSet;
+import liquibase.exception.UnexpectedLiquibaseException;
 import liquibase.parser.LiquibaseSqlParser;
 import liquibase.parser.SqlParserFactory;
 
@@ -55,17 +57,23 @@ public class StringUtil {
     }
 
     /**
-     * Removes any comments from multiple line SQL using {@link #stripComments(String)}
-     * and then extracts each individual statement using {@link #splitSQL(String, String)}.
+     * Removes any comments from multiple line SQL using {@link #stripComments(String, ChangeSet)}
+     * and then extracts each individual statement using {@link #splitSQL(String, String, ChangeSet)}.
      *
      * @param multiLineSQL  A String containing all the SQL statements
      * @param stripComments If true then comments will be stripped, if false then they will be left in the code
      */
-    public static String[] processMultiLineSQL(String multiLineSQL, boolean stripComments, boolean splitStatements, String endDelimiter) {
+    public static String[] processMultiLineSQL(String multiLineSQL, boolean stripComments, boolean splitStatements, String endDelimiter, ChangeSet changeSet) {
 
         SqlParserFactory sqlParserFactory = Scope.getCurrentScope().getSingleton(SqlParserFactory.class);
         LiquibaseSqlParser sqlParser = sqlParserFactory.getSqlParser();
-        StringClauses parsed = sqlParser.parse(multiLineSQL, true, !stripComments);
+        StringClauses parsed;
+        try {
+            parsed = Scope.child(Collections.singletonMap(StandardSqlParser.CHANGESET_SCOPE_KEY, changeSet), () -> sqlParser.parse(multiLineSQL, true, !stripComments));
+        } catch (Exception e) {
+            // this should not happen
+            throw new UnexpectedLiquibaseException(e);
+        }
 
         List<String> returnArray = new ArrayList<>();
 
@@ -85,13 +93,13 @@ public class StringUtil {
             }
 
             if (piece instanceof String && ((String) piece).equalsIgnoreCase("BEGIN")
-                    &&  (!"transaction".equalsIgnoreCase(nextPiece)
-                        && !"trans".equalsIgnoreCase(nextPiece)
-                        && !"tran".equalsIgnoreCase(nextPiece))) {
+                    && (!"transaction".equalsIgnoreCase(nextPiece)
+                    && !"trans".equalsIgnoreCase(nextPiece)
+                    && !"tran".equalsIgnoreCase(nextPiece))) {
                 isInClause++;
             }
             if (piece instanceof String && ((String) piece).equalsIgnoreCase("END") && isInClause > 0
-                && (!"transaction".equalsIgnoreCase(nextPiece)
+                    && (!"transaction".equalsIgnoreCase(nextPiece)
                     && !"trans".equalsIgnoreCase(nextPiece)
                     && !"tran".equalsIgnoreCase(nextPiece))) {
                 isInClause--;
@@ -124,15 +132,15 @@ public class StringUtil {
     }
 
     /**
-     * Removes any comments from multiple line SQL using {@link #stripComments(String)}
-     * and then extracts each individual statement using {@link #splitSQL(String, String)}.
+     * Removes any comments from multiple line SQL using {@link #stripComments(String, ChangeSet)}
+     * and then extracts each individual statement using {@link #splitSQL(String, String, ChangeSet)}.
      *
      * @param multiLineSQL  A String containing all the SQL statements
      * @param stripComments If true then comments will be stripped, if false then they will be left in the code
-     * @deprecated The new method is {@link #processMultiLineSQL(String, boolean, boolean, String)} (String)}
+     * @deprecated The new method is {@link #processMultiLineSQL(String, boolean, boolean, String, ChangeSet)} (String)}
      */
-    public static String[] processMutliLineSQL(String multiLineSQL, boolean stripComments, boolean splitStatements, String endDelimiter) {
-        return processMultiLineSQL(multiLineSQL, stripComments, splitStatements, endDelimiter);
+    public static String[] processMutliLineSQL(String multiLineSQL, boolean stripComments, boolean splitStatements, String endDelimiter, ChangeSet changeSet) {
+        return processMultiLineSQL(multiLineSQL, stripComments, splitStatements, endDelimiter, changeSet);
     }
 
     /**
@@ -301,8 +309,8 @@ public class StringUtil {
     /**
      * Splits a candidate multi-line SQL statement along ;'s and "go"'s.
      */
-    public static String[] splitSQL(String multiLineSQL, String endDelimiter) {
-        return processMultiLineSQL(multiLineSQL, false, true, endDelimiter);
+    public static String[] splitSQL(String multiLineSQL, String endDelimiter, ChangeSet changeSet) {
+        return processMultiLineSQL(multiLineSQL, false, true, endDelimiter, changeSet);
     }
 
     /**
@@ -313,13 +321,18 @@ public class StringUtil {
      *
      * @return The String without the comments in
      */
-    public static String stripComments(String multiLineSQL) {
+    public static String stripComments(String multiLineSQL, ChangeSet changeSet) {
         if (StringUtil.isEmpty(multiLineSQL)) {
             return multiLineSQL;
         }
         SqlParserFactory sqlParserFactory = Scope.getCurrentScope().getSingleton(SqlParserFactory.class);
         LiquibaseSqlParser sqlParser = sqlParserFactory.getSqlParser();
-        return sqlParser.parse(multiLineSQL, true, false).toString().trim();
+        try {
+            return Scope.child(Collections.singletonMap(StandardSqlParser.CHANGESET_SCOPE_KEY, changeSet), () -> sqlParser.parse(multiLineSQL, true, false).toString().trim());
+        } catch (Exception e) {
+            // this should not happen
+            throw new UnexpectedLiquibaseException(e);
+        }
     }
 
     public static String join(Object[] array, String delimiter, StringUtilFormatter formatter) {
@@ -927,7 +940,7 @@ public class StringUtil {
             } else if (c == '\r' || c == '\n') {
                 // new line found
                 startOfNewLine = true;
-				idxOfDoubleDash = -1;
+                idxOfDoubleDash = -1;
             }
 
         }

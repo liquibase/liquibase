@@ -1,12 +1,21 @@
 package liquibase.util;
 
+import liquibase.Scope;
+import liquibase.changelog.ChangeSet;
 import liquibase.exception.UnexpectedLiquibaseException;
 import liquibase.parser.LiquibaseSqlParser;
 import liquibase.util.grammar.*;
 
 import java.io.StringReader;
+import java.util.HashSet;
+import java.util.Set;
 
 public class StandardSqlParser implements LiquibaseSqlParser {
+
+    public static final String CHANGESET_SCOPE_KEY = "changeset";
+
+    private static final Set<ChangeSet> changeSetsWithLoggedWarning = new HashSet<>();
+
     @Override
     public StringClauses parse(String sqlBlock) {
         return parse(sqlBlock, false, false);
@@ -42,8 +51,13 @@ public class StandardSqlParser implements LiquibaseSqlParser {
                 token = t.getNextToken();
             }
 
-        } catch (Exception e) {
-            throw new UnexpectedLiquibaseException(e);
+        } catch (Throwable e) {
+            ChangeSet changeSet = Scope.getCurrentScope().get(CHANGESET_SCOPE_KEY, ChangeSet.class);
+            if (changeSet != null) {
+                throw new UnexpectedLiquibaseException(changeSet.toString(), e);
+            } else {
+                throw new UnexpectedLiquibaseException(e);
+            }
         }
         return clauses;
     }
