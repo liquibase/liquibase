@@ -38,7 +38,7 @@ public class UUIDType extends LiquibaseDataType {
         }
         try {
             if(database instanceof MariaDBDatabase && (database.getDatabaseMajorVersion() == 10 && database.getDatabaseMinorVersion() >= 7)
-                    || database.getDatabaseMajorVersion() > 11) {
+                    || database.getDatabaseMajorVersion() >= 11) {
                 return new DatabaseDataType("UUID");
             }
         } catch (DatabaseException e) {
