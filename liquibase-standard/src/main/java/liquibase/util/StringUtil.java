@@ -63,6 +63,18 @@ public class StringUtil {
      * @param multiLineSQL  A String containing all the SQL statements
      * @param stripComments If true then comments will be stripped, if false then they will be left in the code
      */
+    public static String[] processMultiLineSQL(String multiLineSQL, boolean stripComments, boolean splitStatements, String endDelimiter) {
+        return processMultiLineSQL(multiLineSQL, stripComments, splitStatements, endDelimiter, null);
+    }
+
+    /**
+     * Removes any comments from multiple line SQL using {@link #stripComments(String, ChangeSet)}
+     * and then extracts each individual statement using {@link #splitSQL(String, String, ChangeSet)}.
+     *
+     * @param multiLineSQL  A String containing all the SQL statements
+     * @param stripComments If true then comments will be stripped, if false then they will be left in the code
+     * @param changeSet     the changeset associated with the sql being parsed
+     */
     public static String[] processMultiLineSQL(String multiLineSQL, boolean stripComments, boolean splitStatements, String endDelimiter, ChangeSet changeSet) {
 
         SqlParserFactory sqlParserFactory = Scope.getCurrentScope().getSingleton(SqlParserFactory.class);
@@ -137,6 +149,19 @@ public class StringUtil {
      *
      * @param multiLineSQL  A String containing all the SQL statements
      * @param stripComments If true then comments will be stripped, if false then they will be left in the code
+     * @deprecated The new method is {@link #processMultiLineSQL(String, boolean, boolean, String, ChangeSet)} (String)}
+     */
+    public static String[] processMutliLineSQL(String multiLineSQL, boolean stripComments, boolean splitStatements, String endDelimiter) {
+        return processMultiLineSQL(multiLineSQL, stripComments, splitStatements, endDelimiter, null);
+    }
+
+    /**
+     * Removes any comments from multiple line SQL using {@link #stripComments(String, ChangeSet)}
+     * and then extracts each individual statement using {@link #splitSQL(String, String, ChangeSet)}.
+     *
+     * @param multiLineSQL  A String containing all the SQL statements
+     * @param stripComments If true then comments will be stripped, if false then they will be left in the code
+     * @param changeSet     the changeset associated with the sql being parsed
      * @deprecated The new method is {@link #processMultiLineSQL(String, boolean, boolean, String, ChangeSet)} (String)}
      */
     public static String[] processMutliLineSQL(String multiLineSQL, boolean stripComments, boolean splitStatements, String endDelimiter, ChangeSet changeSet) {
@@ -309,6 +334,15 @@ public class StringUtil {
     /**
      * Splits a candidate multi-line SQL statement along ;'s and "go"'s.
      */
+    public static String[] splitSQL(String multiLineSQL, String endDelimiter) {
+        return splitSQL(multiLineSQL, endDelimiter, null);
+    }
+
+    /**
+     * Splits a candidate multi-line SQL statement along ;'s and "go"'s.
+     *
+     * @param changeSet the changeset associated with the sql being parsed
+     */
     public static String[] splitSQL(String multiLineSQL, String endDelimiter, ChangeSet changeSet) {
         return processMultiLineSQL(multiLineSQL, false, true, endDelimiter, changeSet);
     }
@@ -319,6 +353,19 @@ public class StringUtil {
      * SP--SP<text>\n (to support the ANSI standard commenting of --
      * at the end of a line).
      *
+     * @return The String without the comments in
+     */
+    public static String stripComments(String multiLineSQL) {
+        return stripComments(multiLineSQL, null);
+    }
+
+    /**
+     * Searches through a String which contains SQL code and strips out
+     * any comments that are between \/**\/ or anything that matches
+     * SP--SP<text>\n (to support the ANSI standard commenting of --
+     * at the end of a line).
+     *
+     * @param changeSet the changeset associated with the sql being parsed
      * @return The String without the comments in
      */
     public static String stripComments(String multiLineSQL, ChangeSet changeSet) {
