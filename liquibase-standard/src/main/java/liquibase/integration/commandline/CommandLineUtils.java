@@ -229,6 +229,9 @@ public class CommandLineUtils {
                 .addArgumentValue(DiffChangelogCommandStep.AUTHOR_ARG, author)
                 .addArgumentValue(DiffChangelogCommandStep.RUN_ON_CHANGE_TYPES_ARG, runOnChangeTypes)
                 .addArgumentValue(DiffChangelogCommandStep.REPLACE_IF_EXISTS_TYPES_ARG, replaceIfExistsTypes);
+        if(diffOutputControl.isReplaceIfExistsSet()) {
+            command.addArgumentValue(GenerateChangelogCommandStep.USE_OR_REPLACE_OPTION, true);
+        }
         command.setOutput(System.out);
         try {
             command.execute();
@@ -282,6 +285,9 @@ public class CommandLineUtils {
                 .addArgumentValue(GenerateChangelogCommandStep.REPLACE_IF_EXISTS_TYPES_ARG, replaceIfExistsTypes);
 
 
+        if(diffOutputControl.isReplaceIfExistsSet()) {
+            command.addArgumentValue(GenerateChangelogCommandStep.USE_OR_REPLACE_OPTION, true);
+        }
         command.setOutput(System.out);
         try {
             command.execute();

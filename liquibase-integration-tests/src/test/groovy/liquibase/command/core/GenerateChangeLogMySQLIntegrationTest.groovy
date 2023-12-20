@@ -4,6 +4,7 @@ import liquibase.Scope
 import liquibase.command.CommandScope
 import liquibase.command.core.helpers.DbUrlConnectionArgumentsCommandStep
 import liquibase.command.util.CommandUtil
+import liquibase.exception.CommandExecutionException
 import liquibase.extension.testing.testsystem.DatabaseTestSystem
 import liquibase.extension.testing.testsystem.TestSystemFactory
 import liquibase.extension.testing.testsystem.spock.LiquibaseIntegrationTest
@@ -136,6 +137,60 @@ create table str4 (
 
         cleanup:
         CommandUtil.runDropAll(mysql)
+    }
+
+    def "Ensure generated changelog SQL format contains 'OR REPLACE' instruction for a view when USE_OR_REPLACE_OPTION is set as true"() {
+        given:
+        mysql.executeSql("""create table foo(               
+                id numeric not null primary key, 
+                some_json json null)""")
+        mysql.executeSql("CREATE VIEW fooView AS Select * from foo;")
+
+        when:
+        runGenerateChangelog(mysql, "output.mysql.sql", true)
+        def outputFile = new File("output.mysql.sql")
+        def contents = FileUtil.getContents(outputFile)
+
+        then:
+        contents.contains("CREATE OR REPLACE VIEW fooView")
+
+        cleanup:
+        outputFile.delete()
+        CommandUtil.runDropAll(mysql)
+    }
+
+    def "Ensure generated changelog SQL format does NOT contain 'OR REPLACE' instruction for a view when USE_OR_REPLACE_OPTION is set as false"() {
+        given:
+        mysql.executeSql("""create table foo(               
+                id numeric not null primary key, 
+                some_json json null)""")
+        mysql.executeSql("CREATE VIEW fooView AS Select * from foo;")
+
+        when:
+        runGenerateChangelog(mysql, "output.mysql.sql", false)
+        def outputFile = new File("output.mysql.sql")
+        def contents = FileUtil.getContents(outputFile)
+
+        then:
+        !contents.contains("CREATE OR REPLACE VIEW fooView")
+        contents.contains("CREATE VIEW fooView")
+
+        cleanup:
+        outputFile.delete()
+        CommandUtil.runDropAll(mysql)
+    }
+
+    static void runGenerateChangelog(DatabaseTestSystem db, String outputFile, boolean useOrReplaceOption) throws CommandExecutionException {
+        CommandScope commandScope = new CommandScope(GenerateChangelogCommandStep.COMMAND_NAME)
+        commandScope.addArgumentValue(DbUrlConnectionArgumentsCommandStep.URL_ARG, db.getConnectionUrl())
+        commandScope.addArgumentValue(DbUrlConnectionArgumentsCommandStep.USERNAME_ARG, db.getUsername())
+        commandScope.addArgumentValue(DbUrlConnectionArgumentsCommandStep.PASSWORD_ARG, db.getPassword())
+        commandScope.addArgumentValue(GenerateChangelogCommandStep.OVERWRITE_OUTPUT_FILE_ARG, true)
+        commandScope.addArgumentValue(GenerateChangelogCommandStep.CHANGELOG_FILE_ARG, outputFile)
+        commandScope.addArgumentValue(GenerateChangelogCommandStep.USE_OR_REPLACE_OPTION, useOrReplaceOption)
+        OutputStream outputStream = new ByteArrayOutputStream()
+        commandScope.setOutput(outputStream)
+        commandScope.execute()
     }
 }
 

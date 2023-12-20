@@ -49,7 +49,7 @@
 		<dependency>
 			<groupId>com.opencsv</groupId>
 			<artifactId>opencsv</artifactId>
-			<version>5.8</version>
+			<version>5.9</version>
 			<scope>compile</scope>
 			<exclusions>
 				<!-- not used by liquibase code -->
@@ -292,7 +292,7 @@
 			<plugin>
 				<groupId>org.codehaus.mojo</groupId>
 				<artifactId>build-helper-maven-plugin</artifactId>
-				<version>3.4.0</version>
+				<version>3.5.0</version>
 				<executions>
 					<execution>
 						<id>timestamp-property</id>

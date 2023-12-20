@@ -1,9 +1,10 @@
 name: Run Tests
 
-
+# concurrent runs for pull requests (both internal and forked) will be canceled when a new run is triggered.
+# It does not specifically target or exclude the 'master' branch; it cancels concurrent runs whenever a pull request is triggered.
 concurrency:
   group: ${{ github.workflow }}-${{ github.head_ref || github.ref }}
-  cancel-in-progress: ${{ !contains(github.ref, 'refs/heads/master') }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
 
 on:
   workflow_call:
@@ -40,7 +41,7 @@ jobs:
   setup:
     name: setup
     needs: authorize
-    runs-on: ubuntu-22.04
+    runs-on: ubuntu-20.04
     outputs:
       timestamp: ${{ steps.get-date.outputs.date }}
       latestMergeSha: ${{ steps.get-sha.outputs.latestMergeSha }}
@@ -59,7 +60,7 @@ jobs:
       - name: Get Latest Merge Commit SHA
         id: get-sha
         run: |
-          latest_merge_sha=`(git rev-parse --short=7 HEAD)`
+          latest_merge_sha=`(git rev-parse HEAD)`
           echo "latestMergeSha=${latest_merge_sha}" >> $GITHUB_OUTPUT
 
       - name: Get Current BranchName
@@ -83,7 +84,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        os: [ ubuntu-22.04, macos-latest, windows-2019 ]
+        os: [ ubuntu-20.04, macos-latest, windows-2019 ]
         java: [ 8, 11, 17, 21 ]
         exclude:
           # exclude non-java 8 on macos and windows builds
@@ -188,7 +189,7 @@ jobs:
           find . -name original-*.jar -exec rm {} \;
 
       - name: Upload Artifacts for build.yml
-        if: ${{ matrix.java == 11 && matrix.os == 'ubuntu-22.04'}}
+        if: ${{ matrix.java == 11 && matrix.os == 'ubuntu-20.04'}}
         uses: actions/upload-artifact@v3
         with:
           name: temp-artifact
@@ -205,7 +206,7 @@ jobs:
             ./**/target/site
 
       - name: Archive Modules
-        if: ${{ matrix.java == 11 && matrix.os == 'ubuntu-22.04'}}
+        if: ${{ matrix.java == 11 && matrix.os == 'ubuntu-20.04'}}
         uses: actions/upload-artifact@v3
         with:
           name: liquibase-modules
@@ -214,7 +215,7 @@ jobs:
 
   integration-test:
     name: Integration Test
-    runs-on: ubuntu-22.04
+    runs-on: ubuntu-20.04
     strategy:
       fail-fast: false
       matrix:

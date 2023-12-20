@@ -1,6 +1,6 @@
 name: Build and Publish
 
-#the concurrency check will cancel in-progress runs on non-master branches and pull requests on forked repositories
+#the concurrency check will cancel in-progress runs on non-master branches and pull requests on forked repositories regardless of the target branch.
 concurrency:
   group: ${{ github.workflow }}-${{ github.head_ref == 'master' && 'master' || github.run_id }}
   cancel-in-progress: true
@@ -35,7 +35,7 @@ jobs:
       - name: Get Latest Merge Commit SHA
         id: get-sha
         run: |
-          latest_merge_sha=`(git rev-parse --short=7 HEAD)`
+          latest_merge_sha=`(git rev-parse HEAD)`
           echo "latestMergeSha=${latest_merge_sha}" >> $GITHUB_OUTPUT
 
       - name: Get Timestamp
@@ -227,7 +227,7 @@ jobs:
           (cd liquibase-dist/target && tar -czf liquibase-${{ needs.setup.outputs.thisBranchName }}-SNAPSHOT.tar.gz liquibase-${{ needs.setup.outputs.thisBranchName }}-SNAPSHOT)  
           
           ## verify that the contents of the tar matches the expectation
-          #echo "Comparing the contents of the tar.gz with the expected contents (using baseline file in liquibase-dist directory) to ensure that no new files were accidentally added. A failure here indicates that a new file was added to the tar.gz, and it should either be rectififed or added to the baseline."
+          echo "Comparing the contents of the tar.gz with the expected contents (using baseline file in liquibase-dist directory) to ensure that no new files were accidentally added. A failure here indicates that a new file was added to the tar.gz, and it should either be rectififed or added to the baseline."
           brew install tree --quiet
           tree liquibase-dist/target/liquibase-${{ needs.setup.outputs.thisBranchName }}-SNAPSHOT -o actual-distribution-contents.txt --noreport
           # remove first line of actual, because it contains the folder name, which the expected will not have

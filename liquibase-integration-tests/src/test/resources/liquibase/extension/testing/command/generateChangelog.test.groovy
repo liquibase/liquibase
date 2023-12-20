@@ -64,6 +64,8 @@ Optional Args:
     Default: none
   schemas (String) Schemas to include in diff
     Default: null
+  useOrReplaceOption (Boolean) If true, will add 'OR REPLACE' option to the create view change object
+    Default: false
   username (String) Username to use to connect to the database
     Default: null
 """

@@ -7,6 +7,8 @@ import liquibase.change.Change;
 import liquibase.change.ReplaceIfExists;
 import liquibase.change.core.*;
 import liquibase.changelog.ChangeSet;
+import liquibase.command.CommandScope;
+import liquibase.command.core.GenerateChangelogCommandStep;
 import liquibase.configuration.core.DeprecatedConfigurationValueProvider;
 import liquibase.database.*;
 import liquibase.database.core.*;
@@ -31,6 +33,8 @@ import liquibase.statement.core.RawSqlStatement;
 import liquibase.structure.DatabaseObject;
 import liquibase.structure.core.Column;
 import liquibase.structure.core.StoredDatabaseLogic;
+import liquibase.structure.core.StoredProcedure;
+import liquibase.structure.core.View;
 import liquibase.util.DependencyUtil;
 import liquibase.util.StreamUtil;
 import liquibase.util.StringUtil;
@@ -290,6 +294,7 @@ public class DiffToChangeLog {
             for (Map.Entry<? extends DatabaseObject, ObjectDifferences> entry : diffResult.getChangedObjects(type, comparator).entrySet()) {
                 if (!diffResult.getReferenceSnapshot().getDatabase().isLiquibaseObject(entry.getKey()) && !diffResult.getReferenceSnapshot().getDatabase().isSystemObject(entry.getKey())) {
                     Change[] changes = changeGeneratorFactory.fixChanged(entry.getKey(), entry.getValue(), diffOutputControl, diffResult.getReferenceSnapshot().getDatabase(), diffResult.getComparisonSnapshot().getDatabase());
+                    setReplaceIfExistsTrueIfApplicable(changes);
                     addToChangeSets(changes, updateChangeSets, quotingStrategy, created);
                 }
             }
@@ -314,6 +319,7 @@ public class DiffToChangeLog {
             ObjectQuotingStrategy quotingStrategy = diffOutputControl.getObjectQuotingStrategy();
 
             Change[] changes = changeGeneratorFactory.fixMissing(object, diffOutputControl, diffResult.getReferenceSnapshot().getDatabase(), diffResult.getComparisonSnapshot().getDatabase());
+            setReplaceIfExistsTrueIfApplicable(changes);
             addToChangeSets(changes, createChangeSets, quotingStrategy, created);
         }
 
@@ -325,6 +331,7 @@ public class DiffToChangeLog {
             for (DatabaseObject object : sortUnexpectedObjects(diffResult.getUnexpectedObjects(type, comparator), diffResult.getReferenceSnapshot().getDatabase())) {
                 if (!diffResult.getComparisonSnapshot().getDatabase().isLiquibaseObject(object) && !diffResult.getComparisonSnapshot().getDatabase().isSystemObject(object)) {
                     Change[] changes = changeGeneratorFactory.fixUnexpected(object, diffOutputControl, diffResult.getReferenceSnapshot().getDatabase(), diffResult.getComparisonSnapshot().getDatabase());
+                    setReplaceIfExistsTrueIfApplicable(changes);
                     addToChangeSets(changes, deleteChangeSets, quotingStrategy, created);
                 }
             }
@@ -341,6 +348,16 @@ public class DiffToChangeLog {
         changeSets.addAll(updateChangeSets);
         changeSets = bringDropFKToTop(changeSets);
         return changeSets;
+    }
+
+    private void setReplaceIfExistsTrueIfApplicable(Change[] changes) {
+        if(changes !=null && diffOutputControl.isReplaceIfExistsSet()) {
+            for(int i=0; i < changes.length; i++) {
+                if (changes[i] instanceof ReplaceIfExists) {
+                    ((ReplaceIfExists) changes[i]).setReplaceIfExists(true);
+                }
+            }
+        }
     }
 
     //
