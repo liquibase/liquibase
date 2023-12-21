@@ -1,7 +1,6 @@
 package liquibase.database;
 
 import static liquibase.util.StringUtil.join;
-
 import java.io.IOException;
 import java.io.Writer;
 import java.math.BigInteger;
@@ -18,7 +17,6 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
 import java.util.regex.Pattern;
-
 import liquibase.CatalogAndSchema;
 import liquibase.GlobalConfiguration;
 import liquibase.Scope;
@@ -1657,10 +1655,5 @@ public abstract class AbstractJdbcDatabase implements Database {
     @Override
     public CatalogAndSchema.CatalogAndSchemaCase getSchemaAndCatalogCase() {
         return CatalogAndSchema.CatalogAndSchemaCase.UPPER_CASE;
-    }
-
-    @Override
-    public boolean supportsCreateIfNotExists(Class<? extends DatabaseObject> type) {
-        return false;
     }
 }

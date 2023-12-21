@@ -39,9 +39,8 @@ public class CreateTableGeneratorInformix extends CreateTableGenerator {
 
     /**
      * Informix SQL-specific implementation of the CREATE TABLE SQL generator.
-     *
-     * @param statement         The properties of the statement that we will translate into SQL
-     * @param database          For this implementation always an object of the InformixDatabase type
+     * @param statement The properties of the statement that we will translate into SQL
+     * @param database For this implementation always an object of the InformixDatabase type
      * @param sqlGeneratorChain Other generators in the pipeline for this command
      * @return An array of Sql[] statements containing the requested SQL statements for Informix SQL
      */

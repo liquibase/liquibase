@@ -5,6 +5,7 @@ import static liquibase.statement.SqlStatement.EMPTY_SQL_STATEMENT;
 import java.util.ArrayList;
 import java.util.List;
 
+import liquibase.ChecksumVersion;
 import liquibase.change.AbstractChange;
 import liquibase.change.Change;
 import liquibase.change.ChangeMetaData;
@@ -50,7 +51,6 @@ public class CreateTableChange extends AbstractChange implements ChangeWithColum
     private String tableName;
     private String tablespace;
     private String remarks;
-
     private Boolean ifNotExists;
 
     public CreateTableChange() {
@@ -326,5 +326,12 @@ public class CreateTableChange extends AbstractChange implements ChangeWithColum
 
     public void setIfNotExists(Boolean ifNotExists) {
         this.ifNotExists = ifNotExists;
+    }
+
+    @Override
+    public String[] getExcludedFieldFilters(ChecksumVersion version) {
+        return new String[] {
+                "ifNotExists"
+        };
     }
 }
