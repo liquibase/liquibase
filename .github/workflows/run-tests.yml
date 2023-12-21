@@ -1,10 +1,5 @@
 name: Run Tests
 
-
-concurrency:
-  group: ${{ github.workflow }}-${{ github.head_ref || github.ref }}
-  cancel-in-progress: ${{ !contains(github.ref, 'refs/heads/master') }}
-
 on:
   workflow_call:
 
@@ -15,7 +10,7 @@ on:
         required: false
         default: 'false'
   push:
-    types:
+    branches:
       - master
       
   pull_request_target:
@@ -32,6 +27,11 @@ env:
 
 jobs:
   authorize:
+    #concurrent runs for pull requests from forked repositories will be canceled, while runs for pull requests from the master repository won't be affected.
+    #for a pull_request against master: the concurrency check will cancel commit A so that commit B check can run.
+    concurrency:
+      group: ${{ github.workflow }}-${{ github.head_ref == 'master' && (github.event_name == 'push' && 'push-to-master' || github.event_name == 'pull_request' && 'merge-to-master') || github.event_name == 'pull_request_target' && github.event.pull_request.number || github.run_id }}
+      cancel-in-progress: ${{ github.event_name == 'pull_request' && github.base_ref == 'master' }}
     environment: ${{ github.event_name == 'pull_request_target' && github.event.pull_request.head.repo.full_name != github.repository && 'external' || 'internal' }}
     runs-on: ubuntu-latest
     steps:
@@ -40,7 +40,7 @@ jobs:
   setup:
     name: setup
     needs: authorize
-    runs-on: ubuntu-22.04
+    runs-on: ubuntu-20.04
     outputs:
       timestamp: ${{ steps.get-date.outputs.date }}
       latestMergeSha: ${{ steps.get-sha.outputs.latestMergeSha }}
@@ -83,7 +83,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        os: [ ubuntu-22.04, macos-latest, windows-2019 ]
+        os: [ ubuntu-20.04, macos-latest, windows-2019 ]
         java: [ 8, 11, 17, 21 ]
         exclude:
           # exclude non-java 8 on macos and windows builds
@@ -188,7 +188,7 @@ jobs:
           find . -name original-*.jar -exec rm {} \;
 
       - name: Upload Artifacts for build.yml
-        if: ${{ matrix.java == 11 && matrix.os == 'ubuntu-22.04'}}
+        if: ${{ matrix.java == 11 && matrix.os == 'ubuntu-20.04'}}
         uses: actions/upload-artifact@v3
         with:
           name: temp-artifact
@@ -205,7 +205,7 @@ jobs:
             ./**/target/site
 
       - name: Archive Modules
-        if: ${{ matrix.java == 11 && matrix.os == 'ubuntu-22.04'}}
+        if: ${{ matrix.java == 11 && matrix.os == 'ubuntu-20.04'}}
         uses: actions/upload-artifact@v3
         with:
           name: liquibase-modules
@@ -214,7 +214,7 @@ jobs:
 
   integration-test:
     name: Integration Test
-    runs-on: ubuntu-22.04
+    runs-on: ubuntu-20.04
     strategy:
       fail-fast: false
       matrix:
