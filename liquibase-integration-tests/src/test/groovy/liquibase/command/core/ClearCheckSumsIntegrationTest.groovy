@@ -4,7 +4,7 @@ import liquibase.Scope
 import liquibase.changelog.ChangeLogHistoryService
 import liquibase.changelog.ChangeLogHistoryServiceFactory
 import liquibase.command.CommandScope
-import liquibase.command.core.helpers.DbUrlConnectionCommandStep
+import liquibase.command.core.helpers.DbUrlConnectionArgumentsCommandStep
 import liquibase.command.util.CommandUtil
 import liquibase.extension.testing.testsystem.DatabaseTestSystem
 import liquibase.extension.testing.testsystem.TestSystemFactory
@@ -20,7 +20,7 @@ class ClearCheckSumsIntegrationTest extends Specification {
 
     def setupSpec(){
         def updateCommand = new CommandScope(UpdateCommandStep.COMMAND_NAME)
-        updateCommand.addArgumentValue(DbUrlConnectionCommandStep.DATABASE_ARG, h2.getDatabaseFromFactory())
+        updateCommand.addArgumentValue(DbUrlConnectionArgumentsCommandStep.DATABASE_ARG, h2.getDatabaseFromFactory())
         updateCommand.addArgumentValue(UpdateSqlCommandStep.CHANGELOG_FILE_ARG, "liquibase/update-tests.yml")
         updateCommand.execute()
     }
@@ -29,8 +29,8 @@ class ClearCheckSumsIntegrationTest extends Specification {
         when:
         def h2Database = h2.getDatabaseFromFactory()
         def commandResults = new CommandScope("clearChecksums")
-                .addArgumentValue(DbUrlConnectionCommandStep.URL_ARG, h2.getConnectionUrl())
-                .addArgumentValue(DbUrlConnectionCommandStep.DATABASE_ARG, h2Database)
+                .addArgumentValue(DbUrlConnectionArgumentsCommandStep.URL_ARG, h2.getConnectionUrl())
+                .addArgumentValue(DbUrlConnectionArgumentsCommandStep.DATABASE_ARG, h2Database)
                 .execute()
 
         ChangeLogHistoryService changeLogService = ChangeLogHistoryServiceFactory.getInstance().getChangeLogService(h2Database);

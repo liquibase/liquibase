@@ -7,10 +7,9 @@ import liquibase.changelog.ChangeLogParameters
 import liquibase.changelog.ChangeSet
 import liquibase.changelog.DatabaseChangeLog
 import liquibase.command.CommandScope
-
 import liquibase.command.core.GenerateChangelogCommandStep
 import liquibase.command.core.SnapshotCommandStep
-import liquibase.command.core.helpers.DbUrlConnectionCommandStep
+import liquibase.command.core.helpers.DbUrlConnectionArgumentsCommandStep
 import liquibase.command.core.helpers.PreCompareCommandStep
 import liquibase.command.core.helpers.ReferenceDbUrlConnectionCommandStep
 import liquibase.command.util.CommandUtil
@@ -80,7 +79,7 @@ class IndexWithDescendingColumnSnapshotIntegrationTest extends Specification {
             void run() throws Exception {
 
                 final CommandScope snapshotScope = new CommandScope("snapshot")
-                snapshotScope.addArgumentValue(DbUrlConnectionCommandStep.DATABASE_ARG, db)
+                snapshotScope.addArgumentValue(DbUrlConnectionArgumentsCommandStep.DATABASE_ARG, db)
                 snapshotScope.addArgumentValue(SnapshotCommandStep.SNAPSHOT_FORMAT_ARG, "json")
                 outputStream = new FileOutputStream(snapshotFile)
                 snapshotScope.setOutput(outputStream)
@@ -92,7 +91,7 @@ class IndexWithDescendingColumnSnapshotIntegrationTest extends Specification {
                 //
                 String offlineUrl = "offline:mssql?snapshot=" + snapshotFile
                 CommandScope generateScope = new CommandScope(GenerateChangelogCommandStep.COMMAND_NAME)
-                generateScope.addArgumentValue(DbUrlConnectionCommandStep.URL_ARG, offlineUrl)
+                generateScope.addArgumentValue(DbUrlConnectionArgumentsCommandStep.URL_ARG, offlineUrl)
                 generateScope.addArgumentValue(GenerateChangelogCommandStep.CHANGELOG_FILE_ARG, changelogFile)
                 generateScope.execute()
 
@@ -103,8 +102,8 @@ class IndexWithDescendingColumnSnapshotIntegrationTest extends Specification {
                         DatabaseFactory.instance.openDatabase(offlineUrl, null, null, null, resourceAccessor)
                 final CommandScope diffScope = new CommandScope("diff")
                 diffScope.addArgumentValue(ReferenceDbUrlConnectionCommandStep.REFERENCE_DATABASE_ARG, db)
-                diffScope.addArgumentValue(DbUrlConnectionCommandStep.URL_ARG, offlineUrl)
-                diffScope.addArgumentValue(DbUrlConnectionCommandStep.DATABASE_ARG, targetDatabase)
+                diffScope.addArgumentValue(DbUrlConnectionArgumentsCommandStep.URL_ARG, offlineUrl)
+                diffScope.addArgumentValue(DbUrlConnectionArgumentsCommandStep.DATABASE_ARG, targetDatabase)
                 diffScope.addArgumentValue(PreCompareCommandStep.SNAPSHOT_TYPES_ARG.getName(), new Class[0])
                 diffResults = diffScope.execute()
             }
@@ -180,7 +179,7 @@ class IndexWithDescendingColumnSnapshotIntegrationTest extends Specification {
         String snapshotFile = "oldSnapshotWithDescendingIndex.json"
         final CommandScope snapshotScope = new CommandScope("snapshot")
         String offlineUrl = "offline:mssql?snapshot=" + snapshotFile
-        snapshotScope.addArgumentValue(DbUrlConnectionCommandStep.URL_ARG, offlineUrl)
+        snapshotScope.addArgumentValue(DbUrlConnectionArgumentsCommandStep.URL_ARG, offlineUrl)
         snapshotScope.addArgumentValue(SnapshotCommandStep.SNAPSHOT_FORMAT_ARG, "json")
         OutputStream outputStream = new ByteArrayOutputStream()
         snapshotScope.setOutput(outputStream)
@@ -193,7 +192,7 @@ class IndexWithDescendingColumnSnapshotIntegrationTest extends Specification {
         //
         String changelogFile = StringUtil.randomIdentifer(10) + "-changelog.json"
         final CommandScope generateChangelogScope = new CommandScope("generateChangelog")
-        generateChangelogScope.addArgumentValue(DbUrlConnectionCommandStep.URL_ARG, offlineUrl)
+        generateChangelogScope.addArgumentValue(DbUrlConnectionArgumentsCommandStep.URL_ARG, offlineUrl)
         generateChangelogScope.addArgumentValue(GenerateChangelogCommandStep.CHANGELOG_FILE_ARG, changelogFile)
         generateChangelogScope.execute()
 

@@ -3,19 +3,18 @@ package liquibase.dbtest.asany;
 import liquibase.Scope;
 import liquibase.command.CommandScope;
 import liquibase.command.core.GenerateChangelogCommandStep;
-import liquibase.command.core.helpers.DbUrlConnectionCommandStep;
+import liquibase.command.core.helpers.DbUrlConnectionArgumentsCommandStep;
 import liquibase.database.DatabaseFactory;
 import liquibase.dbtest.AbstractIntegrationTest;
 import liquibase.executor.ExecutorService;
 import liquibase.statement.core.RawSqlStatement;
-
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assume.assumeNotNull;
+import org.junit.Ignore;
+import org.junit.Test;
 
 import java.io.ByteArrayOutputStream;
 
-import org.junit.Ignore;
-import org.junit.Test;
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assume.assumeNotNull;
 
 @Ignore("No test database implementation")
 public class SybaseASAIntegrationTest extends AbstractIntegrationTest {
@@ -41,7 +40,7 @@ public class SybaseASAIntegrationTest extends AbstractIntegrationTest {
         // when
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
         new CommandScope(GenerateChangelogCommandStep.COMMAND_NAME)
-                .addArgumentValue(DbUrlConnectionCommandStep.DATABASE_ARG, getDatabase())
+                .addArgumentValue(DbUrlConnectionArgumentsCommandStep.DATABASE_ARG, getDatabase())
                 .setOutput(baos)
                 .execute();
 

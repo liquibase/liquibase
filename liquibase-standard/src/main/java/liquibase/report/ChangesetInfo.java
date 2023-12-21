@@ -7,6 +7,7 @@ import lombok.Data;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Data
 public class ChangesetInfo {
@@ -22,23 +23,30 @@ public class ChangesetInfo {
                 } else {
                     changesetOutcome = deployedChangeSet.getExecType() == null ? "" : deployedChangeSet.getExecType().toString();
                 }
+                boolean success = true;
                 // If the changeset fails, the exec type it has is null, but if there's an error message, then it failed, and we want to indicate that it failed.
                 String errorMsg = deployedChangeSet.getErrorMsg();
                 if (StringUtil.isNotEmpty(errorMsg)) {
                     changesetOutcome = ChangeSet.ExecType.FAILED.value;
+                    success = false;
                 }
+                List<String> generatedSql = deployedChangeSet.getGeneratedSql()
+                        .stream()
+                        .filter(sql -> sql != null && !sql.isEmpty())
+                        .collect(Collectors.toList());
                 changesetInfoList.add(new IndividualChangesetInfo(
                         changesetInfoList.size() + 1,
                         deployedChangeSet.getAuthor(),
                         deployedChangeSet.getId(),
                         deployedChangeSet.getFilePath(),
                         deployedChangeSet.getComments(),
+                        success,
                         changesetOutcome,
                         errorMsg,
                         deployedChangeSet.getLabels() == null ? null : deployedChangeSet.getLabels().toString(),
                         deployedChangeSet.getContextFilter() == null ? null : deployedChangeSet.getContextFilter().getOriginalString(),
                         buildAttributesString(deployedChangeSet),
-                        deployedChangeSet.getGeneratedSql()
+                        generatedSql
                 ));
             }
         }
@@ -50,7 +58,7 @@ public class ChangesetInfo {
         if (changeSet.getFailOnError() != null && !changeSet.getFailOnError()) {
             attributes.add("failOnError = false");
         }
-        if (changeSet.isAlwaysRun()){
+        if (changeSet.isAlwaysRun()) {
             attributes.add("alwaysRun");
         }
         if (changeSet.isRunOnChange()) {

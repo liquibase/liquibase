@@ -10,7 +10,7 @@ import liquibase.changelog.ChangeSet
 import liquibase.changelog.RanChangeSet
 import liquibase.command.CommandScope
 import liquibase.command.core.helpers.DatabaseChangelogCommandStep
-import liquibase.command.core.helpers.DbUrlConnectionCommandStep
+import liquibase.command.core.helpers.DbUrlConnectionArgumentsCommandStep
 import liquibase.command.util.CommandUtil
 import liquibase.extension.testing.testsystem.DatabaseTestSystem
 import liquibase.extension.testing.testsystem.TestSystemFactory
@@ -57,9 +57,9 @@ VALUES('1', 'your.name', '$changelogfile', '2023-05-31 14:33:39.108', 1, 'EXECUT
 
         when:
         CommandScope updateCommandScope = new CommandScope(UpdateCommandStep.COMMAND_NAME)
-        updateCommandScope.addArgumentValue(DbUrlConnectionCommandStep.URL_ARG, h2.getConnectionUrl())
-        updateCommandScope.addArgumentValue(DbUrlConnectionCommandStep.USERNAME_ARG, h2.getUsername())
-        updateCommandScope.addArgumentValue(DbUrlConnectionCommandStep.PASSWORD_ARG, h2.getPassword())
+        updateCommandScope.addArgumentValue(DbUrlConnectionArgumentsCommandStep.URL_ARG, h2.getConnectionUrl())
+        updateCommandScope.addArgumentValue(DbUrlConnectionArgumentsCommandStep.USERNAME_ARG, h2.getUsername())
+        updateCommandScope.addArgumentValue(DbUrlConnectionArgumentsCommandStep.PASSWORD_ARG, h2.getPassword())
         updateCommandScope.addArgumentValue(UpdateCommandStep.CHANGELOG_FILE_ARG, changesetFilepath)
         updateCommandScope.execute()
         ranChangeSets = getRanChangesets(changeLogService)
@@ -92,9 +92,9 @@ VALUES('1', 'your.name', '$changelogfile', '2023-05-31 14:33:39.108', 1, 'EXECUT
 
         when:
         CommandScope updateCommandScope = new CommandScope(UpdateCommandStep.COMMAND_NAME)
-        updateCommandScope.addArgumentValue(DbUrlConnectionCommandStep.URL_ARG, h2.getConnectionUrl())
-        updateCommandScope.addArgumentValue(DbUrlConnectionCommandStep.USERNAME_ARG, h2.getUsername())
-        updateCommandScope.addArgumentValue(DbUrlConnectionCommandStep.PASSWORD_ARG, h2.getPassword())
+        updateCommandScope.addArgumentValue(DbUrlConnectionArgumentsCommandStep.URL_ARG, h2.getConnectionUrl())
+        updateCommandScope.addArgumentValue(DbUrlConnectionArgumentsCommandStep.USERNAME_ARG, h2.getUsername())
+        updateCommandScope.addArgumentValue(DbUrlConnectionArgumentsCommandStep.PASSWORD_ARG, h2.getPassword())
         updateCommandScope.addArgumentValue(UpdateCommandStep.CHANGELOG_FILE_ARG, changesetFilepath)
         updateCommandScope.addArgumentValue(UpdateCommandStep.CONTEXTS_ARG, "example-context2")
         updateCommandScope.execute()
@@ -124,9 +124,9 @@ VALUES('1', 'your.name', '$changelogfile', '2023-05-31 14:33:39.108', 1, 'EXECUT
 
         when:
         CommandScope updateCommandScope = new CommandScope(UpdateToTagCommandStep.COMMAND_NAME)
-        updateCommandScope.addArgumentValue(DbUrlConnectionCommandStep.URL_ARG, h2.getConnectionUrl())
-        updateCommandScope.addArgumentValue(DbUrlConnectionCommandStep.USERNAME_ARG, h2.getUsername())
-        updateCommandScope.addArgumentValue(DbUrlConnectionCommandStep.PASSWORD_ARG, h2.getPassword())
+        updateCommandScope.addArgumentValue(DbUrlConnectionArgumentsCommandStep.URL_ARG, h2.getConnectionUrl())
+        updateCommandScope.addArgumentValue(DbUrlConnectionArgumentsCommandStep.USERNAME_ARG, h2.getUsername())
+        updateCommandScope.addArgumentValue(DbUrlConnectionArgumentsCommandStep.PASSWORD_ARG, h2.getPassword())
         updateCommandScope.addArgumentValue(UpdateToTagCommandStep.CHANGELOG_FILE_ARG, changesetFilepath)
         updateCommandScope.addArgumentValue(UpdateToTagCommandStep.TAG_ARG, "version_1.3")
         updateCommandScope.execute()
@@ -157,9 +157,9 @@ VALUES('1', 'your.name', '$changelogfile', '2023-05-31 14:33:39.108', 1, 'EXECUT
 
         when:
         CommandScope updateCommandScope = new CommandScope(UpdateCountCommandStep.COMMAND_NAME)
-        updateCommandScope.addArgumentValue(DbUrlConnectionCommandStep.URL_ARG, h2.getConnectionUrl())
-        updateCommandScope.addArgumentValue(DbUrlConnectionCommandStep.USERNAME_ARG, h2.getUsername())
-        updateCommandScope.addArgumentValue(DbUrlConnectionCommandStep.PASSWORD_ARG, h2.getPassword())
+        updateCommandScope.addArgumentValue(DbUrlConnectionArgumentsCommandStep.URL_ARG, h2.getConnectionUrl())
+        updateCommandScope.addArgumentValue(DbUrlConnectionArgumentsCommandStep.USERNAME_ARG, h2.getUsername())
+        updateCommandScope.addArgumentValue(DbUrlConnectionArgumentsCommandStep.PASSWORD_ARG, h2.getPassword())
         updateCommandScope.addArgumentValue(UpdateCountCommandStep.CHANGELOG_FILE_ARG, changesetFilepath)
         updateCommandScope.addArgumentValue(UpdateCountCommandStep.COUNT_ARG, 1)
         updateCommandScope.execute()
@@ -191,9 +191,9 @@ VALUES('1', 'your.name', '$changelogfile', '2023-05-31 14:33:39.108', 1, 'EXECUT
 
         when:
         CommandScope updateTestingRollbackCommand = new CommandScope(UpdateTestingRollbackCommandStep.COMMAND_NAME)
-        updateTestingRollbackCommand.addArgumentValue(DbUrlConnectionCommandStep.URL_ARG, h2.getConnectionUrl())
-        updateTestingRollbackCommand.addArgumentValue(DbUrlConnectionCommandStep.USERNAME_ARG, h2.getUsername())
-        updateTestingRollbackCommand.addArgumentValue(DbUrlConnectionCommandStep.PASSWORD_ARG, h2.getPassword())
+        updateTestingRollbackCommand.addArgumentValue(DbUrlConnectionArgumentsCommandStep.URL_ARG, h2.getConnectionUrl())
+        updateTestingRollbackCommand.addArgumentValue(DbUrlConnectionArgumentsCommandStep.USERNAME_ARG, h2.getUsername())
+        updateTestingRollbackCommand.addArgumentValue(DbUrlConnectionArgumentsCommandStep.PASSWORD_ARG, h2.getPassword())
         updateTestingRollbackCommand.addArgumentValue(DatabaseChangelogCommandStep.CHANGELOG_FILE_ARG, changesetFilepath)
         updateTestingRollbackCommand.execute()
         ranChangeSets = getRanChangesets(changeLogService)
@@ -222,9 +222,9 @@ VALUES('1', 'your.name', '$changelogfile', '2023-05-31 14:33:39.108', 1, 'EXECUT
 
         when:
         CommandScope updateCommandScope = new CommandScope(UpdateSqlCommandStep.COMMAND_NAME)
-        updateCommandScope.addArgumentValue(DbUrlConnectionCommandStep.URL_ARG, h2.getConnectionUrl())
-        updateCommandScope.addArgumentValue(DbUrlConnectionCommandStep.USERNAME_ARG, h2.getUsername())
-        updateCommandScope.addArgumentValue(DbUrlConnectionCommandStep.PASSWORD_ARG, h2.getPassword())
+        updateCommandScope.addArgumentValue(DbUrlConnectionArgumentsCommandStep.URL_ARG, h2.getConnectionUrl())
+        updateCommandScope.addArgumentValue(DbUrlConnectionArgumentsCommandStep.USERNAME_ARG, h2.getUsername())
+        updateCommandScope.addArgumentValue(DbUrlConnectionArgumentsCommandStep.PASSWORD_ARG, h2.getPassword())
         updateCommandScope.addArgumentValue(UpdateSqlCommandStep.CHANGELOG_FILE_ARG, changesetFilepath)
         updateCommandScope.execute()
         ranChangeSets = getRanChangesets(changeLogService)
@@ -252,9 +252,9 @@ VALUES('1', 'your.name', '$changelogfile', '2023-05-31 14:33:39.108', 1, 'EXECUT
 
         when:
         CommandScope updateCommandScope = new CommandScope(UpdateCountSqlCommandStep.COMMAND_NAME)
-        updateCommandScope.addArgumentValue(DbUrlConnectionCommandStep.URL_ARG, h2.getConnectionUrl())
-        updateCommandScope.addArgumentValue(DbUrlConnectionCommandStep.USERNAME_ARG, h2.getUsername())
-        updateCommandScope.addArgumentValue(DbUrlConnectionCommandStep.PASSWORD_ARG, h2.getPassword())
+        updateCommandScope.addArgumentValue(DbUrlConnectionArgumentsCommandStep.URL_ARG, h2.getConnectionUrl())
+        updateCommandScope.addArgumentValue(DbUrlConnectionArgumentsCommandStep.USERNAME_ARG, h2.getUsername())
+        updateCommandScope.addArgumentValue(DbUrlConnectionArgumentsCommandStep.PASSWORD_ARG, h2.getPassword())
         updateCommandScope.addArgumentValue(UpdateCountSqlCommandStep.CHANGELOG_FILE_ARG, changesetFilepath)
         updateCommandScope.addArgumentValue(UpdateCountSqlCommandStep.COUNT_ARG, 1)
         updateCommandScope.execute()
@@ -283,9 +283,9 @@ VALUES('1', 'your.name', '$changelogfile', '2023-05-31 14:33:39.108', 1, 'EXECUT
 
         when:
         CommandScope updateCommandScope = new CommandScope(UpdateToTagSqlCommandStep.COMMAND_NAME)
-        updateCommandScope.addArgumentValue(DbUrlConnectionCommandStep.URL_ARG, h2.getConnectionUrl())
-        updateCommandScope.addArgumentValue(DbUrlConnectionCommandStep.USERNAME_ARG, h2.getUsername())
-        updateCommandScope.addArgumentValue(DbUrlConnectionCommandStep.PASSWORD_ARG, h2.getPassword())
+        updateCommandScope.addArgumentValue(DbUrlConnectionArgumentsCommandStep.URL_ARG, h2.getConnectionUrl())
+        updateCommandScope.addArgumentValue(DbUrlConnectionArgumentsCommandStep.USERNAME_ARG, h2.getUsername())
+        updateCommandScope.addArgumentValue(DbUrlConnectionArgumentsCommandStep.PASSWORD_ARG, h2.getPassword())
         updateCommandScope.addArgumentValue(UpdateToTagSqlCommandStep.CHANGELOG_FILE_ARG, changesetFilepath)
         updateCommandScope.addArgumentValue(UpdateToTagSqlCommandStep.TAG_ARG, "version_1.3")
         updateCommandScope.execute()
@@ -324,9 +324,9 @@ VALUES('2', 'fl', '$changesetFilepath', '2023-09-29 14:33:39.112', 2, 'EXECUTED'
 
         when:
         CommandScope updateCommandScope = new CommandScope(UpdateCommandStep.COMMAND_NAME)
-        updateCommandScope.addArgumentValue(DbUrlConnectionCommandStep.URL_ARG, h2.getConnectionUrl())
-        updateCommandScope.addArgumentValue(DbUrlConnectionCommandStep.USERNAME_ARG, h2.getUsername())
-        updateCommandScope.addArgumentValue(DbUrlConnectionCommandStep.PASSWORD_ARG, h2.getPassword())
+        updateCommandScope.addArgumentValue(DbUrlConnectionArgumentsCommandStep.URL_ARG, h2.getConnectionUrl())
+        updateCommandScope.addArgumentValue(DbUrlConnectionArgumentsCommandStep.USERNAME_ARG, h2.getUsername())
+        updateCommandScope.addArgumentValue(DbUrlConnectionArgumentsCommandStep.PASSWORD_ARG, h2.getPassword())
         updateCommandScope.addArgumentValue(UpdateCommandStep.CHANGELOG_FILE_ARG, changesetFilepath)
         updateCommandScope.execute()
         ranChangeSets = getRanChangesets(changeLogService)
@@ -372,9 +372,9 @@ VALUES('2', 'fl', '$changesetFilepath', '2023-09-29 14:33:39.112', 2, 'EXECUTED'
         ]
         Scope.child(scopeSettings, {
             CommandScope updateCommandScope = new CommandScope(UpdateCommandStep.COMMAND_NAME)
-            updateCommandScope.addArgumentValue(DbUrlConnectionCommandStep.URL_ARG, h2.getConnectionUrl())
-            updateCommandScope.addArgumentValue(DbUrlConnectionCommandStep.USERNAME_ARG, h2.getUsername())
-            updateCommandScope.addArgumentValue(DbUrlConnectionCommandStep.PASSWORD_ARG, h2.getPassword())
+            updateCommandScope.addArgumentValue(DbUrlConnectionArgumentsCommandStep.URL_ARG, h2.getConnectionUrl())
+            updateCommandScope.addArgumentValue(DbUrlConnectionArgumentsCommandStep.USERNAME_ARG, h2.getUsername())
+            updateCommandScope.addArgumentValue(DbUrlConnectionArgumentsCommandStep.PASSWORD_ARG, h2.getPassword())
             updateCommandScope.addArgumentValue(UpdateCommandStep.CHANGELOG_FILE_ARG, changesetFilepath)
             updateCommandScope.execute()
         } as Scope.ScopedRunnerWithReturn<Void>)

@@ -47,7 +47,7 @@ class CommandFactoryTest extends Specification {
         command.name*.toString() == ["tag"]
         command.arguments.keySet().contains("tag")
         command.arguments.keySet().contains("database")
-        command.pipeline*.class*.name == ["liquibase.command.core.helpers.DbUrlConnectionCommandStep", "liquibase.command.core.helpers.LockServiceCommandStep", "liquibase.command.core.TagCommandStep"]
+        command.pipeline*.class*.name == ["liquibase.command.core.helpers.DbUrlConnectionArgumentsCommandStep", "liquibase.command.core.helpers.DbUrlConnectionCommandStep", "liquibase.command.core.helpers.LockServiceCommandStep", "liquibase.command.core.TagCommandStep"]
 
     }
 }
