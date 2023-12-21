@@ -33,6 +33,7 @@ public class SQLFileChange extends AbstractSQLChange {
 
     private String path;
     private Boolean relativeToChangelogFile;
+    private Boolean doExpandExpressionsInGenerateChecksum = false;
 
     @Override
     public boolean generateStatementsVolatile(Database database) {
@@ -84,6 +85,14 @@ public class SQLFileChange extends AbstractSQLChange {
 
     public void setRelativeToChangelogFile(Boolean relativeToChangelogFile) {
         this.relativeToChangelogFile = relativeToChangelogFile;
+    }
+
+    public Boolean getDoExpandExpressionsInGenerateChecksum() {
+        return doExpandExpressionsInGenerateChecksum;
+    }
+
+    public void setDoExpandExpressionsInGenerateChecksum(Boolean doExpandExpressionsInGenerateChecksum) {
+        this.doExpandExpressionsInGenerateChecksum = doExpandExpressionsInGenerateChecksum;
     }
 
     @Override
@@ -202,7 +211,7 @@ public class SQLFileChange extends AbstractSQLChange {
         }
         InputStream stream = null;
         try {
-            String sqlContent = getSql(false);
+            String sqlContent = getSql(doExpandExpressionsInGenerateChecksum);
             Charset encoding = GlobalConfiguration.FILE_ENCODING.getCurrentValue();
             stream = new ByteArrayInputStream(sqlContent.getBytes(encoding));
             return CheckSum.compute(new AbstractSQLChange.NormalizingStream(stream), false);
