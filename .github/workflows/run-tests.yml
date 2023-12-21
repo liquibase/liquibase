@@ -1,11 +1,5 @@
 name: Run Tests
 
-# concurrent runs for pull requests (both internal and forked) will be canceled when a new run is triggered.
-# It does not specifically target or exclude the 'master' branch; it cancels concurrent runs whenever a pull request is triggered.
-concurrency:
-  group: ${{ github.workflow }}-${{ github.head_ref || github.ref }}
-  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
-
 on:
   workflow_call:
 
@@ -33,6 +27,11 @@ env:
 
 jobs:
   authorize:
+    #concurrent runs for pull requests from forked repositories will be canceled, while runs for pull requests from the master repository won't be affected.
+    #for a pull_request against master: the concurrency check will cancel commit A so that commit B check can run.
+    concurrency:
+      group: ${{ github.workflow }}-${{ github.head_ref == 'master' && (github.event_name == 'push' && 'push-to-master' || github.event_name == 'pull_request' && 'merge-to-master') || github.event_name == 'pull_request_target' && github.event.pull_request.number || github.run_id }}
+      cancel-in-progress: ${{ github.event_name == 'pull_request' && github.base_ref == 'master' }}
     environment: ${{ github.event_name == 'pull_request_target' && github.event.pull_request.head.repo.full_name != github.repository && 'external' || 'internal' }}
     runs-on: ubuntu-latest
     steps:
