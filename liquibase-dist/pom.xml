@@ -212,7 +212,7 @@
 			<plugin>
 				<groupId>org.liquibase.ext</groupId>
 				<artifactId>liquibase-sdk-maven-plugin</artifactId>
-				<version>0.10.22</version>
+				<version>0.10.23</version>
 			</plugin>
 
 			<plugin>
