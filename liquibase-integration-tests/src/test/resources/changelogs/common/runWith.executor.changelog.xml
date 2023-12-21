@@ -11,6 +11,9 @@
         </createTable>
     </changeSet>
     <changeSet id="2" author="your.name" runWith="h2alt">
+        <preConditions onFail="MARK_RAN">
+            <rowCount tableName="test_numbers" expectedRows="0"/>
+        </preConditions>
         <insert tableName="test_numbers">
             <column name="id">1</column>
         </insert>
@@ -21,5 +24,20 @@
             insert into test_numbers(id) values(3);
             insert into test_numbers(id) values("fail");
         </sql>
+    </changeSet>
+
+    <changeSet id="3" author="your.name" runWith="h2alt">
+        <preConditions onFail="HALT">
+            <sqlCheck expectedResult="2">select count(*) from test_numbers where id in (1,2)</sqlCheck>
+            <sqlCheck expectedResult="0">select count(*) from test_numbers where id in (3)</sqlCheck>
+        </preConditions>
+    </changeSet>
+    <changeSet id="4" author="your.name">
+        <preConditions onFail="HALT" onFailMessage="Found test_numbers in the default schema">
+            <not>
+                <tableExists tableName="test_numbers" />
+            </not>
+        </preConditions>
+
     </changeSet>
 </databaseChangeLog>

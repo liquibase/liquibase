@@ -1,16 +1,11 @@
 package liquibase.dbtest.h2;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertThrows;
-import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 import static org.junit.Assume.assumeNotNull;
 
 import liquibase.Liquibase;
 import liquibase.Scope;
 import liquibase.change.Change;
-import liquibase.database.Database;
-import liquibase.database.DatabaseConnection;
 import liquibase.database.DatabaseFactory;
 import liquibase.database.jvm.JdbcConnection;
 import liquibase.dbtest.AbstractIntegrationTest;
@@ -25,13 +20,6 @@ import liquibase.exception.PreconditionFailedException;
 import liquibase.exception.ValidationFailedException;
 import liquibase.executor.Executor;
 import liquibase.executor.ExecutorService;
-import liquibase.executor.jvm.JdbcExecutor;
-import liquibase.extension.testing.testsystem.DatabaseTestSystem;
-import liquibase.extension.testing.testsystem.TestSystemFactory;
-import liquibase.helper.AlternateConnectionExecutor;
-import liquibase.precondition.core.RowCountPrecondition;
-import liquibase.precondition.core.TableExistsPrecondition;
-import liquibase.sql.visitor.SqlVisitor;
 import liquibase.statement.core.RawSqlStatement;
 import org.junit.Assert;
 import org.junit.Test;
@@ -238,37 +226,21 @@ public class H2IntegrationTest extends AbstractIntegrationTest {
     @Test
     public void testCustomExecutorInvokedPerChange() throws Exception {
         assumeNotNull(this.getDatabase());
-        String tableName = "test_numbers";
+        final String changeLogFile = "changelogs/common/runWith.executor.changelog.xml";
         try {
-            runChangeLogFile("changelogs/common/runWith.executor.changelog.xml");
+            Liquibase liquibase = createLiquibase(changeLogFile);
+            liquibase.update();
         } catch (Exception e) {
             // ok - expect a failure to prove that the changes earlier in the change set committed
         }
 
-        AlternateConnectionExecutor alternateConnectionExecutor = (AlternateConnectionExecutor) Scope.getCurrentScope().getSingleton(ExecutorService.class).getExecutor("h2alt", getDatabase());
-        Scope.getCurrentScope().getSingleton(ExecutorService.class).setExecutor("jdbc", getDatabase(), alternateConnectionExecutor);
-
-        // Rollback anything in progress on the connection to ensure the executor actually committed
-        alternateConnectionExecutor.getDatabase().rollback();
-
-        // Confirm the number of expected rows were inserted into the table in the alt schema
-        RowCountPrecondition precondition = new RowCountPrecondition();
-        precondition.setSchemaName(testSystem.getAltSchema());
-        precondition.setTableName(tableName);
-        precondition.setExpectedRows(2L);
+        // Confirm the number of expected rows were inserted into the table in the alt schema by running the changelog again to get to the precondition checks
         try {
-            precondition.check(alternateConnectionExecutor.getDatabase(), null, null, null);
+            Liquibase liquibase = createLiquibase(changeLogFile);
+            liquibase.update();
         } catch (PreconditionFailedException e) {
             fail(e.getFailedPreconditions().get(0).getMessage());
         }
-
-        // Confirm the table was not created in default database and schema
-        TableExistsPrecondition tableExistsPrecondition = new TableExistsPrecondition();
-        tableExistsPrecondition.setTableName(tableName);
-        PreconditionFailedException ex = assertThrows(PreconditionFailedException.class, () -> tableExistsPrecondition.check(this.getDatabase(), null, null, null));
-        assertEquals(1, ex.getFailedPreconditions().size());
-        String expectedMessage = String.format("%s does not exist", tableName);
-        assertTrue(ex.getFailedPreconditions().get(0).getMessage().endsWith(expectedMessage));
     }
 
     @Override

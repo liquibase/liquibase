@@ -1,17 +1,12 @@
-package liquibase.helper;
+package liquibase.executor.jvm;
 
-import liquibase.Scope;
+import java.util.List;
 import liquibase.change.Change;
 import liquibase.database.Database;
 import liquibase.database.DatabaseConnection;
 import liquibase.database.DatabaseFactory;
 import liquibase.exception.DatabaseException;
-import liquibase.executor.jvm.JdbcExecutor;
-import liquibase.extension.testing.testsystem.DatabaseTestSystem;
-import liquibase.extension.testing.testsystem.TestSystemFactory;
 import liquibase.sql.visitor.SqlVisitor;
-
-import java.util.List;
 
 /**
  * An {@link JdbcExecutor} that provides its own {@link DatabaseConnection} and commits after executing
@@ -20,10 +15,8 @@ import java.util.List;
 public class AlternateConnectionExecutor extends JdbcExecutor {
 
     public AlternateConnectionExecutor() throws Exception {
-        String urlParameters = ";INIT=CREATE SCHEMA IF NOT EXISTS lbschem2\\;SET SCHEMA lbschem2";
-        DatabaseTestSystem testSystem = (DatabaseTestSystem) Scope.getCurrentScope().getSingleton(TestSystemFactory.class).getTestSystem("h2");
-        database = DatabaseFactory.getInstance().openDatabase(testSystem.getConnectionUrl().replace("lbcat", "lbcat2") + urlParameters,
-                testSystem.getUsername(), testSystem.getPassword(), null, null);
+        String url = "jdbc:h2:mem:lbcat2;DB_CLOSE_DELAY=-1;INIT=CREATE SCHEMA IF NOT EXISTS lbschem2\\;SET SCHEMA lbschem2";
+        database = DatabaseFactory.getInstance().openDatabase(url, "lbuser", "LiquibasePass1", null, null);
         database.setAutoCommit(false);
     }
 
@@ -43,7 +36,11 @@ public class AlternateConnectionExecutor extends JdbcExecutor {
 
     @Override
     public void execute(Change change, List<SqlVisitor> sqlVisitors) throws DatabaseException {
-        super.execute(change, sqlVisitors);
-        database.commit();
+        try {
+            super.execute(change, sqlVisitors);
+            database.commit();
+        } catch (Exception e) {
+            database.rollback();
+        }
     }
 }
