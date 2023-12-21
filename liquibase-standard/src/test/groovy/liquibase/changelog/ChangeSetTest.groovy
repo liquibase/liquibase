@@ -681,9 +681,9 @@ class ChangeSetTest extends Specification {
 
         then:
         def outputFile = new File("changelog-with-rollback.yaml")
-        def contents = FileUtil.getContents(outputFile)
-        def expectKeys = "rollback:\n      empty: {}"
-        contents.trim().contains(expectKeys.trim())
+        def contents = FileUtil.getContents(outputFile).replace("\n","").replace("\r","").trim()
+        def expectKeys = "rollback:      empty: {}".trim()
+        contents.contains(expectKeys)
 
         cleanup:
         outputFile.delete()
@@ -703,9 +703,9 @@ class ChangeSetTest extends Specification {
 
         then:
         def outputFile = new File("changelog-with-rollback.xml")
-        def contents = FileUtil.getContents(outputFile)
-        def expectedKeys = "<rollback>\n            <empty/>\n        </rollback>"
-        contents.trim().contains(expectedKeys.trim())
+        def contents = FileUtil.getContents(outputFile).replace("\n","").replace("\r","").trim()
+        def expectedKeys = "<rollback>            <empty/>        </rollback>".trim()
+        contents.contains(expectedKeys)
 
         cleanup:
         outputFile.delete()
@@ -729,9 +729,9 @@ class ChangeSetTest extends Specification {
 
         then:
         def outputFile = new File("changelog-with-rollback.yaml")
-        def contents = FileUtil.getContents(outputFile)
-        def expectedKeys = "rollback:\n      sqlFile:\n        path: test/rollbackFile.sql\n        splitStatements: true\n        stripComments: false\n\n"
-        contents.trim().contains(expectedKeys.trim())
+        def contents = FileUtil.getContents(outputFile).replace("\n","").replace("\r","").trim()
+        def expectedKeys = "rollback:      sqlFile:        path: test/rollbackFile.sql        splitStatements: true        stripComments: false".trim()
+        contents.contains(expectedKeys)
 
         cleanup:
         outputFile.delete()
