@@ -18,6 +18,7 @@ import liquibase.sql.Sql;
 import liquibase.sqlgenerator.SqlGeneratorFactory;
 import liquibase.statement.SqlStatement;
 import liquibase.statement.core.*;
+import liquibase.structure.DatabaseObject;
 import liquibase.structure.core.*;
 import liquibase.util.ISODateFormat;
 
@@ -260,6 +261,11 @@ public class SQLiteDatabase extends AbstractJdbcDatabase {
     @Override
     public boolean supportsDropTableCascadeConstraints() {
         return false;
+    }
+
+    @Override
+    public boolean supportsCreateIfNotExists(Class<? extends DatabaseObject> type) {
+        return type.isAssignableFrom(Table.class);
     }
 
     public interface AlterTableVisitor {

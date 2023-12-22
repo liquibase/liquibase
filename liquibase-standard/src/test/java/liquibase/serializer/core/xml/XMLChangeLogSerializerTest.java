@@ -882,7 +882,7 @@ public class XMLChangeLogSerializerTest {
                      attsMap("name", "count", "value", "31"),
                      attsMap(params.item(1)));
     }
-    
+
     @Test
     public void createNode_ChangeSetParameters() throws Exception {
     	ChangeSet changeSet = new ChangeSet("1", "tms", true, true, "path/to/file.json", "context", "mssql",null,null, false,ObjectQuotingStrategy.LEGACY, null);
@@ -890,10 +890,9 @@ public class XMLChangeLogSerializerTest {
     	changeSet.setFailOnError(true);
     	changeSet.setLabels(new Labels("label"));
     	changeSet.setLogicalFilePath("path/to/file.json");
-    	
-    	
+
     	Element node = new XMLChangeLogSerializer(DocumentBuilderFactory.newInstance().newDocumentBuilder().newDocument()).createNode(changeSet);
-    	
+
     	assertEquals("element name","changeSet",node.getTagName());
     	assertEquals("changeSet Attributes",
     			attsMap("id","1",
@@ -909,10 +908,9 @@ public class XMLChangeLogSerializerTest {
     					"created","created",
                         "runInTransaction","false"),
     			attsMap(node));
-    	
+
     }
-    
-    
+
 
     @Test
     public void serialize_pretty() {
@@ -929,7 +927,7 @@ public class XMLChangeLogSerializerTest {
                 "    <where>Some Text</where>\n" +
                 "</update>", out);
     }
-    
+
     @Test
     public void serialize_pretty_ChangeSetParameters() throws Exception {
     	ChangeSet changeSet = new ChangeSet("1", "tms", true, true, "path/to/file.json", "context", "mssql","runWith","runWithSpoolFile", false,ObjectQuotingStrategy.LEGACY, null);
@@ -941,7 +939,7 @@ public class XMLChangeLogSerializerTest {
         changeSet.setRunOrder("last");
 
     	String out = new XMLChangeLogSerializer().serialize(changeSet, true);
-    	
+
     	assertEquals("<changeSet author=\"tms\"\n"
     			+ "        contextFilter=\"context\"\n"
     			+ "        created=\"created\"\n"
@@ -956,11 +954,30 @@ public class XMLChangeLogSerializerTest {
                 + "        runInTransaction=\"false\"\n"
     			+ "        runOnChange=\"true\"\n"
                 + "        runOrder=\"last\"/>", out);
-    	
     }
 
     @Test
     public void serialize_pretty_nestedNodeWithAttributes() {
+        CreateTableChange change = new CreateTableChange();
+        change.setCatalogName("a");
+        change.setSchemaName("b");
+        change.setTableName("c");
+        change.setIfNotExists(true);
+        change.addColumn(new ColumnConfig().setName("x").setDefaultValue("x1"));
+        change.addColumn(new ColumnConfig().setName("y").setDefaultValue("y1"));
+
+        String out = new XMLChangeLogSerializer().serialize(change, true);
+        assertEquals("<createTable catalogName=\"a\"\n" +
+                "        ifNotExists=\"true\"\n" +
+                "        schemaName=\"b\"\n" +
+                "        tableName=\"c\">\n" +
+                "    <column defaultValue=\"x1\" name=\"x\"/>\n" +
+                "    <column defaultValue=\"y1\" name=\"y\"/>\n" +
+                "</createTable>", out);
+    }
+
+    @Test
+    public void serialize_pretty_nestedNodeWithAttributesAndNotExistsIgnored() {
         CreateTableChange change = new CreateTableChange();
         change.setCatalogName("a");
         change.setSchemaName("b");

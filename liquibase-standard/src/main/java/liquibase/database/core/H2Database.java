@@ -1,7 +1,5 @@
 package liquibase.database.core;
 
-import static liquibase.util.BooleanUtil.isTrue;
-
 import liquibase.CatalogAndSchema;
 import liquibase.CatalogAndSchema.CatalogAndSchemaCase;
 import liquibase.GlobalConfiguration;
@@ -16,8 +14,7 @@ import liquibase.exception.DateParseException;
 import liquibase.exception.UnexpectedLiquibaseException;
 import liquibase.statement.DatabaseFunction;
 import liquibase.structure.DatabaseObject;
-import liquibase.structure.core.Catalog;
-import liquibase.structure.core.Schema;
+import liquibase.structure.core.Table;
 import liquibase.util.ISODateFormat;
 import liquibase.util.JdbcUtil;
 
@@ -37,6 +34,8 @@ import java.util.Locale;
 import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+
+import static liquibase.util.BooleanUtil.isTrue;
 
 public class H2Database extends AbstractJdbcDatabase {
 
@@ -581,5 +580,10 @@ public class H2Database extends AbstractJdbcDatabase {
     public int getMaxFractionalDigitsForTimestamp() {
         // http://www.h2database.com/html/datatypes.html seems to imply 9 digits
         return 9;
+    }
+
+    @Override
+    public boolean supportsCreateIfNotExists(Class<? extends DatabaseObject> type) {
+        return type.isAssignableFrom(Table.class);
     }
 }
