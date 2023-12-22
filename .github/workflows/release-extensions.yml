@@ -5,48 +5,11 @@ on:
       version:
         description: 'Liquibase Version'
         required: true
-        type: string
 
 jobs:
-  trigger-release:
-    name: "Trigger Releases"
-    runs-on: ubuntu-22.04
-    strategy:
-      fail-fast: false
-      matrix:
-        extension:
-          - liquibase-bigquery
-          - liquibase-cache
-          - liquibase-cassandra
-          - liquibase-cosmosdb
-          - liquibase-db2i
-          - liquibase-filechangelog
-          - liquibase-nochangeloglock
-          - liquibase-hanadb
-          - liquibase-hibernate
-          - liquibase-maxdb
-          - liquibase-modify-column
-          - liquibase-mssql
-          - liquibase-oracle
-          - liquibase-postgresql
-          - liquibase-redshift
-          - liquibase-sqlfire
-          - liquibase-teradata
-          - liquibase-vertica
-          - liquibase-yugabytedb
-    steps:
-      - name: Release liquibase/${{ matrix.extension }} v${{ github.event.inputs.version }}
-        uses: actions/github-script@v6
-        with:
-          github-token: ${{ secrets.BOT_TOKEN }}
-          script: |
-            console.log("Sending liquibase-release event to liquibase/${{ matrix.extension }}");
+  automated-os-extensions-release:
+    uses: liquibase/build-logic/.github/workflows/os-extension-automated-release.yml@v0.5.9
+    secrets: inherit
+    with:
+      version: ${{ inputs.version }}
 
-            await github.rest.repos.createDispatchEvent({
-               "owner": "liquibase",
-               "repo": "${{ matrix.extension }}",
-               "event_type": "liquibase-release",
-               "client_payload": {
-                  "liquibaseVersion": "${{ github.event.inputs.version }}"
-                }
-             });

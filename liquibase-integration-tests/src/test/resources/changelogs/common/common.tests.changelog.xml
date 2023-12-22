@@ -240,6 +240,21 @@
         </addColumn>
     </changeSet>
 
+    <changeSet id="column-exists-test" author="januson">
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <columnExists columnName="A_NEW_COLUMN" tableName="COLUMN_EXISTS_TEST_TABLE"/>
+            </not>
+        </preConditions>
+        <comment>Testing column exists precondition regression</comment>
+        <createTable tableName="COLUMN_EXISTS_TEST_TABLE">
+            <column name="id" type="int"/>
+        </createTable>
+        <addColumn tableName="COLUMN_EXISTS_TEST_TABLE">
+            <column name="A_NEW_COLUMN" type="int" defaultValueNumeric="1"/>
+        </addColumn>
+    </changeSet>
+
     <changeSet id="tablespace-test1" author="alan">
         <comment>Test tablespace support. Ignored if database does not support tablespaces</comment>
         <createTable tableName="TABLESPACE_TEST_TABLE" tablespace="liquibase2">

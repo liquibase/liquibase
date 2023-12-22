@@ -50,29 +50,31 @@ class XMLChangeLogSAXParserTest extends Specification {
 </databaseChangeLog>
 """
 
+    @Unroll
     def testAllProvidedChangesetsAreLoaded() throws ChangeLogParseException, Exception {
-        when:
+        given:
         def xmlParser = new XMLChangeLogSAXParser()
-        def changeLog = xmlParser.parse("liquibase/parser/core/xml/ignoreDuplicatedChangeLogs/master.changelog.xml",
+        final def changeLog = xmlParser.parse("liquibase/parser/core/xml/ignoreDuplicatedChangeLogs/master.changelog.xml",
                 new ChangeLogParameters(), new JUnitResourceAccessor())
 
-        final List<ChangeSet> changeSets = new ArrayList<ChangeSet>()
-
-        new ChangeLogIterator(changeLog).run(new ChangeSetVisitor() {
-            @Override
-            ChangeSetVisitor.Direction getDirection() {
-                return ChangeSetVisitor.Direction.FORWARD
-            }
-
-            @Override
-            void visit(ChangeSet changeSet, DatabaseChangeLog databaseChangeLog, Database database, Set<ChangeSetFilterResult> filterResults) throws LiquibaseException {
-                changeSets.add(changeSet)
-            }
-        }, new RuntimeEnvironment(new MockDatabase(), new Contexts(), new LabelExpression()))
+        when:
+        final def changeSets = new ArrayList<ChangeSet>()
+        Scope.child(GlobalConfiguration.ALLOW_DUPLICATED_CHANGESETS_IDENTIFIERS.key, allowDuplicatedChangesetIdentifiers, { ->
+            new ChangeLogIterator(changeLog).run(new ChangeSetVisitor() {
+                @Override
+                ChangeSetVisitor.Direction getDirection() {
+                    return ChangeSetVisitor.Direction.FORWARD
+                }
+                @Override
+                void visit(ChangeSet changeSet, DatabaseChangeLog databaseChangeLog, Database database, Set<ChangeSetFilterResult> filterResults) throws LiquibaseException {
+                    changeSets.add(changeSet)
+                }
+            }, new RuntimeEnvironment(new MockDatabase(), new Contexts(), new LabelExpression()))
+        })
 
 
         then:
-        changeSets.size() == 14
+        changeSets.size() == totalSize
         changeSets.get(0).toString() == "liquibase/parser/core/xml/ignoreDuplicatedChangeLogs/included.changelog4.xml::1::testuser"
         changeSets.get(1).toString() == "liquibase/parser/core/xml/ignoreDuplicatedChangeLogs/included.changelog4.xml::1::testuser"
         changeSets.get(1).getContextFilter().getContexts().size() == 1
@@ -83,9 +85,24 @@ class XMLChangeLogSAXParserTest extends Specification {
         changeSets.get(4).toString() == "liquibase/parser/core/xml/ignoreDuplicatedChangeLogs/included.changelog4.xml::1::testuser"
         changeSets.get(4).getDbmsSet().size() == 1
         changeSets.get(5).toString() == "liquibase/parser/core/xml/ignoreDuplicatedChangeLogs/included.changelog1.xml::1::testuser"
-        changeSets.get(6).toString() == "liquibase/parser/core/xml/ignoreDuplicatedChangeLogs/included.changelog4.xml::1::testuser"
-        changeSets.get(7).toString() == "liquibase/parser/core/xml/ignoreDuplicatedChangeLogs/included.changelog4.xml::1::testuser"
-        changeSets.get(13).toString() == "liquibase/parser/core/xml/ignoreDuplicatedChangeLogs/included.changelog3.xml::1::testuser"
+
+        if (!allowDuplicatedChangesetIdentifiers) {
+            changeSets.get(6).toString() == "liquibase/parser/core/xml/ignoreDuplicatedChangeLogs/included.changelog4.xml::1::testuser"
+            changeSets.get(7).toString() == "liquibase/parser/core/xml/ignoreDuplicatedChangeLogs/included.changelog4.xml::1::testuser"
+            changeSets.get(13).toString() == "liquibase/parser/core/xml/ignoreDuplicatedChangeLogs/included.changelog3.xml::1::testuser"
+        } else {
+            changeSets.get(6).toString() == "liquibase/parser/core/xml/ignoreDuplicatedChangeLogs/included.changelog3.xml::1::testuser"
+            changeSets.get(7).toString() == "liquibase/parser/core/xml/ignoreDuplicatedChangeLogs/included.changelog2.xml::1::testuser"
+        }
+
+
+        where:
+        allowDuplicatedChangesetIdentifiers | totalSize
+        false                               | 14
+        true                                | 8
+
+
+
     }
 
     def "uses liquibase.secureParsing by default"() {

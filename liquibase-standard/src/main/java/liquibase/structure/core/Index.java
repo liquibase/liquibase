@@ -180,30 +180,32 @@ public class Index extends AbstractDatabaseObject {
     public void load(ParsedNode parsedNode, ResourceAccessor resourceAccessor) throws ParsedNodeException {
         super.load(parsedNode, resourceAccessor);
         ParsedNode columns = parsedNode.getChild(null, "columns");
-        List<ParsedNode> nodes = columns.getChildren(null, "column");
-        for (ParsedNode node : nodes) {
-            Column column = new Column();
-            column.load(node, resourceAccessor);
-            column.setName((String) node.getChildren(null, "name").get(0).getValue());
-            column.setDescending(node.getChildValue(null, "descending", Boolean.class));
-            column.setComputed(node.getChildValue(null, "computed", Boolean.class));
-            getColumns().add(column);
-        }
-        //
-        // Clear out any null objects which may have been added before
-        // by the super class load. We check to see if the list only
-        // contains Column objects in order to support older snapshots
-        // which may have both Column objects and reference strings
-        //
-        if (!nodes.isEmpty() && allColumnObjects(getColumns())) {
-            List<Column> newList = new ArrayList<>();
-            for (Column column : getColumns()) {
-                if (column == null) {
-                    continue;
-                }
-                newList.add(column);
+        if (columns != null) {
+            List<ParsedNode> nodes = columns.getChildren(null, "column");
+            for (ParsedNode node : nodes) {
+                Column column = new Column();
+                column.load(node, resourceAccessor);
+                column.setName((String) node.getChildren(null, "name").get(0).getValue());
+                column.setDescending(node.getChildValue(null, "descending", Boolean.class));
+                column.setComputed(node.getChildValue(null, "computed", Boolean.class));
+                getColumns().add(column);
             }
-            setColumns(newList);
+            //
+            // Clear out any null objects which may have been added before
+            // by the super class load. We check to see if the list only
+            // contains Column objects in order to support older snapshots
+            // which may have both Column objects and reference strings
+            //
+            if (!nodes.isEmpty() && allColumnObjects(getColumns())) {
+                List<Column> newList = new ArrayList<>();
+                for (Column column : getColumns()) {
+                    if (column == null) {
+                        continue;
+                    }
+                    newList.add(column);
+                }
+                setColumns(newList);
+            }
         }
     }
 
