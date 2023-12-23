@@ -393,7 +393,7 @@ jobs:
              });
 
   package-linux:
-    uses: liquibase/build-logic/.github/workflows/package-linux.yml@v0.5.7
+    uses: liquibase/build-logic/.github/workflows/package-linux.yml@v0.5.8
     needs: [ setup ]
     secrets: inherit
     with:

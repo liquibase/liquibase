@@ -7,11 +7,7 @@ import liquibase.Scope
 import liquibase.change.Change
 import liquibase.changelog.ChangeLogHistoryService
 import liquibase.changelog.ChangeLogHistoryServiceFactory
-import liquibase.command.CommandArgumentDefinition
-import liquibase.command.CommandFactory
-import liquibase.command.CommandFailedException
-import liquibase.command.CommandResults
-import liquibase.command.CommandScope
+import liquibase.command.*
 import liquibase.command.core.InternalSnapshotCommandStep
 import liquibase.configuration.AbstractMapConfigurationValueProvider
 import liquibase.configuration.ConfigurationValueProvider
@@ -27,11 +23,7 @@ import liquibase.extension.testing.testsystem.TestSystemFactory
 import liquibase.integration.commandline.LiquibaseCommandLineConfiguration
 import liquibase.integration.commandline.Main
 import liquibase.logging.core.BufferedLogService
-import liquibase.resource.ClassLoaderResourceAccessor
-import liquibase.resource.PathHandlerFactory
-import liquibase.resource.Resource
-import liquibase.resource.ResourceAccessor
-import liquibase.resource.SearchPathResourceAccessor
+import liquibase.resource.*
 import liquibase.ui.ConsoleUIService
 import liquibase.ui.InputHandler
 import liquibase.ui.UIService
@@ -572,7 +564,7 @@ Long Description: ${commandDefinition.getLongDescription() ?: "NOT SET"}
         }
     }
 
-    private static File takeDatabaseSnapshot(Database database, String format) {
+    static File takeDatabaseSnapshot(Database database, String format) {
         final ChangeLogHistoryService changeLogService = Scope.getCurrentScope().getSingleton(ChangeLogHistoryServiceFactory.class).getChangeLogService(database)
         changeLogService.init()
         changeLogService.reset()
@@ -586,7 +578,7 @@ Long Description: ${commandDefinition.getLongDescription() ?: "NOT SET"}
         snapshotCommand
                 .addArgumentValue(InternalSnapshotCommandStep.DATABASE_ARG, database)
                 .addArgumentValue(InternalSnapshotCommandStep.SCHEMAS_ARG, schemas)
-                .addArgumentValue(InternalSnapshotCommandStep.SERIALIZER_FORMAT_ARG, "txt")
+                .addArgumentValue(InternalSnapshotCommandStep.SERIALIZER_FORMAT_ARG, format)
 
         Writer outputWriter = new FileWriter(tempFile)
         String result = InternalSnapshotCommandStep.printSnapshot(snapshotCommand, snapshotCommand.execute())

@@ -1,10 +1,5 @@
 name: Run Tests
 
-
-concurrency:
-  group: ${{ github.workflow }}-${{ github.head_ref || github.ref }}
-  cancel-in-progress: ${{ !contains(github.ref, 'refs/heads/master') }}
-
 on:
   workflow_call:
 
@@ -14,7 +9,10 @@ on:
         description: 'If set to true, the unit and integration test results will be archived to the build artifacts page.'
         required: false
         default: 'false'
-
+  push:
+    branches:
+      - master
+      
   pull_request_target:
     types:
       - opened
@@ -29,6 +27,11 @@ env:
 
 jobs:
   authorize:
+    #concurrent runs for pull requests from forked repositories will be canceled, while runs for pull requests from the master repository won't be affected.
+    #for a pull_request against master: the concurrency check will cancel commit A so that commit B check can run.
+    concurrency:
+      group: ${{ github.workflow }}-${{ github.head_ref == 'master' && (github.event_name == 'push' && 'push-to-master' || github.event_name == 'pull_request' && 'merge-to-master') || github.event_name == 'pull_request_target' && github.event.pull_request.number || github.run_id }}
+      cancel-in-progress: ${{ github.event_name == 'pull_request' && github.base_ref == 'master' }}
     environment: ${{ github.event_name == 'pull_request_target' && github.event.pull_request.head.repo.full_name != github.repository && 'external' || 'internal' }}
     runs-on: ubuntu-latest
     steps:
@@ -37,7 +40,7 @@ jobs:
   setup:
     name: setup
     needs: authorize
-    runs-on: ubuntu-22.04
+    runs-on: ubuntu-20.04
     outputs:
       timestamp: ${{ steps.get-date.outputs.date }}
       latestMergeSha: ${{ steps.get-sha.outputs.latestMergeSha }}
@@ -80,7 +83,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        os: [ ubuntu-22.04, macos-latest, windows-2019 ]
+        os: [ ubuntu-20.04, macos-latest, windows-2019 ]
         java: [ 8, 11, 17, 21 ]
         exclude:
           # exclude non-java 8 on macos and windows builds
@@ -104,6 +107,13 @@ jobs:
       - uses: actions/checkout@v3
         with:
           ref: ${{ github.event.pull_request.head.sha || github.event.after}}
+
+      - name: Built Code Cache
+        if: ${{ matrix.java == 11}}
+        uses: actions/cache@v3.3.1
+        with:
+          key: built-code-${{ github.run_number }}-${{ github.run_attempt }}
+          path: ./**/target
 
       - name: Set up JDK ${{ matrix.java }}
         uses: actions/setup-java@v3
@@ -167,11 +177,6 @@ jobs:
         run: |
           mvn -B "-Dbuild.repository.owner=liquibase" "-Dbuild.repository.name=liquibase" "-Dbuild.branch=${{ needs.setup.outputs.thisBranchName }}" "-Dbuild.number=${{ github.run_number }}" "-Dbuild.commit=${{ needs.setup.outputs.latestMergeSha }}" "-DtrimStackTrace=false" -pl '!liquibase-cdi-jakarta' clean test package surefire-report:report
 
-#      - name: GET INFO
-#        run: |
-#          echo "GET INFO"
-#          ls
-
       - name: Build & Test Java non-jdk-8
         if: ${{ matrix.java != 8}}
         run: |
@@ -183,7 +188,7 @@ jobs:
           find . -name original-*.jar -exec rm {} \;
 
       - name: Upload Artifacts for build.yml
-        if: ${{ matrix.java == 11 && matrix.os == 'ubuntu-22.04'}}
+        if: ${{ matrix.java == 11 && matrix.os == 'ubuntu-20.04'}}
         uses: actions/upload-artifact@v3
         with:
           name: temp-artifact
@@ -200,7 +205,7 @@ jobs:
             ./**/target/site
 
       - name: Archive Modules
-        if: ${{ matrix.java == 11 && matrix.os == 'ubuntu-22.04'}}
+        if: ${{ matrix.java == 11 && matrix.os == 'ubuntu-20.04'}}
         uses: actions/upload-artifact@v3
         with:
           name: liquibase-modules
@@ -209,7 +214,7 @@ jobs:
 
   integration-test:
     name: Integration Test
-    runs-on: ubuntu-22.04
+    runs-on: ubuntu-20.04
     strategy:
       fail-fast: false
       matrix:
@@ -224,7 +229,7 @@ jobs:
           - postgresql
           - sqlite
           - firebird
-    needs: setup
+    needs: build_tests
     timeout-minutes: 30
     steps:
       - uses: actions/checkout@v3
@@ -237,10 +242,11 @@ jobs:
         with:
           script: |
             core.setOutput("testResultsArtifact", "liquibase-test-results-integration-${{ matrix.testSystem }}".replace(/[^a-zA-Z0-9\-_]/g, "_"));
-      - name: Set up JDK 8
+
+      - name: Set up JDK 11
         uses: actions/setup-java@v3
         with:
-          java-version: '8'
+          java-version: '11'
           distribution: 'temurin'
           cache: 'maven'
 
@@ -250,6 +256,7 @@ jobs:
         uses: stCarolas/setup-maven@v4.5
         with:
           maven-version: ${{ env.MAVEN_VERSION }}
+
       - name: Restore Built Code Cache
         uses: actions/cache@v3.3.1
         with:
