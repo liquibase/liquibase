@@ -43,5 +43,10 @@ class SimpleSqlGrammarTest extends Specification {
         "unquoted \\\\ works"                                  | ["unquoted", " ", "\\", "\\", " ", "works"]
         "'one quote' then 'two quote' then 'three quote' more" | ["'one quote'", " ", "then", " ", "'two quote'", " ", "then", " ", "'three quote'", " ", "more"]
         "'\\\\' then quotes '')"                               | ["'\\\\'", " ", "then", " ", "quotes", " ", "''", ")"]
+        "stringwith escquote delim newline 'a\\'b;c\nd'"       | ["stringwith", " ", "escquote", " ", "delim", " ", "newline", " ", "'a\\'b;c\nd'"]
+        "\"a\\\"b;c\nd\""                                      | ["\"a\\\"b;c\nd\""]
+        "'''' sometimesEquals '\\''"                           | ["''''", " ", "sometimesEquals", " ", "'\\''"]
+        "'\\'' sometimesEquals \"'\""                          | ["'\\''", " ", "sometimesEquals", " ", "\"'\""]
+        "\"'\" sometimesEquals \"\\'\""                        | ["\"'\"", " ", "sometimesEquals", " ", "\"\\'\""]
     }
 }

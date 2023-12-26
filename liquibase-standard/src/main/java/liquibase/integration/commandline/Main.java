@@ -1470,7 +1470,7 @@ public class Main {
             } else if (COMMANDS.DROP_ALL.equalsIgnoreCase(command)) {
                 CommandScope dropAllCommand = new CommandScope("dropAll");
                 dropAllCommand
-                        .addArgumentValue(DbUrlConnectionCommandStep.DATABASE_ARG, liquibase.getDatabase())
+                        .addArgumentValue(DbUrlConnectionArgumentsCommandStep.DATABASE_ARG, liquibase.getDatabase())
                         .addArgumentValue(DropAllCommandStep.CATALOG_AND_SCHEMAS_ARG, InternalSnapshotCommandStep.parseSchemas(database, getSchemaParams(database)))
                         .addArgumentValue(GenerateChangelogCommandStep.CHANGELOG_FILE_ARG, changeLogFile);
 
@@ -1504,7 +1504,7 @@ public class Main {
                 CommandScope calculateChecksumCommand = new CommandScope("calculateChecksum");
 
                 calculateChecksumCommand
-                        .addArgumentValue(DbUrlConnectionCommandStep.DATABASE_ARG, database)
+                        .addArgumentValue(DbUrlConnectionArgumentsCommandStep.DATABASE_ARG, database)
                         .addArgumentValue(CalculateChecksumCommandStep.CHANGESET_PATH_ARG, getCommandParam(OPTIONS.CHANGE_SET_PATH, null))
                         .addArgumentValue(CalculateChecksumCommandStep.CHANGESET_ID_ARG, getCommandParam(OPTIONS.CHANGE_SET_ID, null))
                         .addArgumentValue(CalculateChecksumCommandStep.CHANGESET_AUTHOR_ARG, getCommandParam(OPTIONS.CHANGE_SET_AUTHOR, null))
@@ -1863,13 +1863,13 @@ public class Main {
      * Set database arguments values received by Main class to the provided command scope.
      */
     private void setDatabaseArgumentsToCommand(CommandScope command) {
-        command.addArgumentValue(DbUrlConnectionCommandStep.DEFAULT_SCHEMA_NAME_ARG, defaultSchemaName)
-                .addArgumentValue(DbUrlConnectionCommandStep.DEFAULT_CATALOG_NAME_ARG, defaultCatalogName)
-                .addArgumentValue(DbUrlConnectionCommandStep.DRIVER_ARG, driver)
-                .addArgumentValue(DbUrlConnectionCommandStep.DRIVER_PROPERTIES_FILE_ARG, driverPropertiesFile)
-                .addArgumentValue(DbUrlConnectionCommandStep.USERNAME_ARG, username)
-                .addArgumentValue(DbUrlConnectionCommandStep.PASSWORD_ARG, password)
-                .addArgumentValue(DbUrlConnectionCommandStep.URL_ARG, url);
+        command.addArgumentValue(DbUrlConnectionArgumentsCommandStep.DEFAULT_SCHEMA_NAME_ARG, defaultSchemaName)
+                .addArgumentValue(DbUrlConnectionArgumentsCommandStep.DEFAULT_CATALOG_NAME_ARG, defaultCatalogName)
+                .addArgumentValue(DbUrlConnectionArgumentsCommandStep.DRIVER_ARG, driver)
+                .addArgumentValue(DbUrlConnectionArgumentsCommandStep.DRIVER_PROPERTIES_FILE_ARG, driverPropertiesFile)
+                .addArgumentValue(DbUrlConnectionArgumentsCommandStep.USERNAME_ARG, username)
+                .addArgumentValue(DbUrlConnectionArgumentsCommandStep.PASSWORD_ARG, password)
+                .addArgumentValue(DbUrlConnectionArgumentsCommandStep.URL_ARG, url);
     }
 
     /**

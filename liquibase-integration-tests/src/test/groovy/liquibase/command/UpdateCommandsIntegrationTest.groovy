@@ -9,7 +9,7 @@ import liquibase.changelog.visitor.DefaultChangeExecListener
 import liquibase.command.core.UpdateCommandStep
 import liquibase.command.core.UpdateSqlCommandStep
 import liquibase.command.core.helpers.DatabaseChangelogCommandStep
-import liquibase.command.core.helpers.DbUrlConnectionCommandStep
+import liquibase.command.core.helpers.DbUrlConnectionArgumentsCommandStep
 import liquibase.command.util.CommandUtil
 import liquibase.extension.testing.testsystem.DatabaseTestSystem
 import liquibase.extension.testing.testsystem.TestSystemFactory
@@ -29,8 +29,9 @@ class UpdateCommandsIntegrationTest extends Specification {
 
     def "run UpdateSql from CommandStep"() {
         when:
+        CommandUtil.runDropAll(h2)
         def updateSqlCommand = new CommandScope(UpdateSqlCommandStep.COMMAND_NAME)
-        updateSqlCommand.addArgumentValue(DbUrlConnectionCommandStep.DATABASE_ARG, h2.getDatabaseFromFactory())
+        updateSqlCommand.addArgumentValue(DbUrlConnectionArgumentsCommandStep.DATABASE_ARG, h2.getDatabaseFromFactory())
         updateSqlCommand.addArgumentValue(UpdateSqlCommandStep.CHANGELOG_FILE_ARG, "liquibase/update-tests.yml")
 
         then:
@@ -60,7 +61,7 @@ class UpdateCommandsIntegrationTest extends Specification {
 
         Scope.child(scopeSettings, {
             def updateCommand = new CommandScope(UpdateCommandStep.COMMAND_NAME)
-            updateCommand.addArgumentValue(DbUrlConnectionCommandStep.DATABASE_ARG, h2.getDatabaseFromFactory())
+            updateCommand.addArgumentValue(DbUrlConnectionArgumentsCommandStep.DATABASE_ARG, h2.getDatabaseFromFactory())
             if (changelog instanceof DatabaseChangeLog) {
                 updateCommand.addArgumentValue(UpdateCommandStep.CHANGELOG_ARG, changelog)
             } else {

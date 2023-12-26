@@ -42,30 +42,30 @@ jobs:
         uses: whelk-io/maven-settings-xml-action@v20
         with:
           repositories: |
-              [
-                {
-                  "id": "liquibase",
-                  "url": "https://maven.pkg.github.com/liquibase/liquibase",
-                  "releases": {
-                    "enabled": "false"
-                  },
-                  "snapshots": {
-                    "enabled": "true",
-                    "updatePolicy": "always"
-                  }
+            [
+              {
+                "id": "liquibase",
+                "url": "https://maven.pkg.github.com/liquibase/liquibase",
+                "releases": {
+                  "enabled": "false"
                 },
-                {
-                  "id": "liquibase-pro",
-                  "url": "https://maven.pkg.github.com/liquibase/liquibase-pro",
-                  "releases": {
-                    "enabled": "false"
-                  },
-                  "snapshots": {
-                    "enabled": "true",
-                    "updatePolicy": "always"
-                  }
+                "snapshots": {
+                  "enabled": "true",
+                  "updatePolicy": "always"
                 }
-              ]
+              },
+              {
+                "id": "liquibase-pro",
+                "url": "https://maven.pkg.github.com/liquibase/liquibase-pro",
+                "releases": {
+                  "enabled": "false"
+                },
+                "snapshots": {
+                  "enabled": "true",
+                  "updatePolicy": "always"
+                }
+              }
+            ]
           plugin_repositories: |
             [
               {

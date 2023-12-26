@@ -10,21 +10,13 @@ on:
     branches:
       - gha-scheduled-*
 
+
 jobs:
   build-installers:
     name: Build Installers
     runs-on: macos-latest #needs macos for apple notarization
     steps:
       - uses: actions/checkout@v4
-
-      - name: Download liquibase-artifacts
-        uses: liquibase/action-download-artifact@v2-liquibase
-        with:
-          workflow: build.yml
-          workflow_conclusion: success
-          branch: master
-          name: liquibase-artifacts
-          path: re-version/final
 
       - name: Set up JDK for GPG
         uses: actions/setup-java@v3
@@ -33,8 +25,18 @@ jobs:
           distribution: 'temurin'
           gpg-private-key: ${{ secrets.GPG_SECRET }}
           gpg-passphrase: GPG_PASSPHRASE
+          overwrite-settings: false
         env:
           GPG_PASSWORD: ${{ secrets.GPG_PASSPHRASE }}
+
+      - name: Download liquibase-artifacts
+        uses: liquibase/action-download-artifact@v2-liquibase
+        with:
+          workflow: run-tests.yml
+          workflow_conclusion: success
+          branch: master
+          name: liquibase-artifacts
+          path: re-version/final
 
       - name: Re-version Installers
         env:

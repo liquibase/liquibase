@@ -16,6 +16,8 @@ import liquibase.exception.*;
 import liquibase.logging.Logger;
 import liquibase.logging.mdc.MdcKey;
 import liquibase.logging.mdc.MdcValue;
+import liquibase.logging.mdc.customobjects.DuplicateChangesets;
+import liquibase.logging.mdc.customobjects.MdcChangeset;
 import liquibase.parser.ChangeLogParser;
 import liquibase.parser.ChangeLogParserConfiguration;
 import liquibase.parser.ChangeLogParserFactory;
@@ -35,6 +37,7 @@ import java.io.InputStream;
 import java.nio.file.Paths;
 import java.util.*;
 import java.util.regex.Pattern;
+import java.util.stream.Collectors;
 
 
 /**
@@ -349,6 +352,8 @@ public class DatabaseChangeLog implements Comparable<DatabaseChangeLog>, Conditi
 
         if (!validatingVisitor.validationPassed()) {
             Scope.getCurrentScope().addMdcValue(MdcKey.DEPLOYMENT_OUTCOME, MdcValue.COMMAND_FAILED);
+            List<MdcChangeset> duplicateChangesetsMdc = validatingVisitor.getDuplicateChangeSets().stream().map(MdcChangeset::fromChangeset).collect(Collectors.toList());
+            Scope.getCurrentScope().addMdcValue(MdcKey.DUPLICATE_CHANGESETS, new DuplicateChangesets(duplicateChangesetsMdc));
             Scope.getCurrentScope().getLog(getClass()).info("Change failed validation!");
             throw new ValidationFailedException(validatingVisitor);
         }

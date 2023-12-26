@@ -1,12 +1,14 @@
 package liquibase;
 
 import liquibase.exception.UnsupportedChecksumVersionException;
+import lombok.Getter;
 
 import java.util.Arrays;
 
 /**
  * Enum used to keep track of Liquibase Checksum versions introduced to enable the support of multiple versions at the same time.
  */
+@Getter
 public enum ChecksumVersion {
 
     V9(9, "Version used from Liquibase 4.22.0 till now", "4.22.0"),
@@ -31,20 +33,8 @@ public enum ChecksumVersion {
         this.since = since;
     }
 
-    public int getVersion() {
-        return version;
-    }
-
-    public String getDescription() {
-        return description;
-    }
-
-    public String getSince() {
-        return since;
-    }
-
     public static ChecksumVersion latest() {
-        return V9;
+        return Scope.getCurrentScope().get(Scope.Attr.latestChecksumVersion, ChecksumVersion.class);
     }
 
     public static ChecksumVersion enumFromChecksumVersion(int i) {
