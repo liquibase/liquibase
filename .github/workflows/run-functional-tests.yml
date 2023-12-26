@@ -13,6 +13,11 @@ on:
         required: false
         default: ''
         type: string
+      oss_workflow_url:
+        description: 'Triggered by run in OSS'
+        required: false
+        default: ''
+        type: string
 
 env:
   MAVEN_VERSION: '3.9.2'
@@ -51,9 +56,9 @@ jobs:
           workflow_inputs:
             '{"liquibaseCommit":"${{ inputs.latestMergeSha }}",
             "runDescription": "${{ env.workflow_url }}",
-            "liquibaseBranch": "${{ inputs.thisBranchName }}"
+            "liquibaseBranch": "${{ inputs.thisBranchName }}",
+            "oss_workflow_url": "${{ inputs.oss_workflow_url }}"
             }'
-
 
       - name: Display run ID
         run: echo ${{ steps.return_dispatch.outputs.run_id }}
