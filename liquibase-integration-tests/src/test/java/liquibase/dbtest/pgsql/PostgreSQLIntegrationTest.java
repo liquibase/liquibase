@@ -282,7 +282,7 @@ public class PostgreSQLIntegrationTest extends AbstractIntegrationTest {
 
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
         new CommandScope(GenerateChangelogCommandStep.COMMAND_NAME)
-            .addArgumentValue(DbUrlConnectionCommandStep.DATABASE_ARG, getDatabase())
+            .addArgumentValue(DbUrlConnectionArgumentsCommandStep.DATABASE_ARG, getDatabase())
             .setOutput(baos)
             .execute();
 
