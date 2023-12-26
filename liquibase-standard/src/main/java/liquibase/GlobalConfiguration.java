@@ -1,5 +1,6 @@
 package liquibase;
 
+import liquibase.command.CommandArgumentDefinition;
 import liquibase.configuration.AutoloadedConfigurations;
 import liquibase.configuration.ConfigurationDefinition;
 import liquibase.ui.UIServiceEnum;
@@ -239,8 +240,9 @@ public class GlobalConfiguration implements AutoloadedConfigurations {
                 .setDescription("Complete list of Location(s) to search for files such as changelog files in. Multiple paths can be specified by separating them with commas.")
                 .build();
 
-        ALWAYS_DROP_INSTEAD_OF_REPLACE = builder.define("alwaysDropInsteadOfReplace", Boolean.class)
+            ALWAYS_DROP_INSTEAD_OF_REPLACE = builder.define("alwaysDropInsteadOfReplace", Boolean.class)
                 .setDescription("If true, drop and recreate a view instead of replacing it.")
+                .setDefaultValue(false)
                 .setValueHandler(ValueHandlerUtil::booleanValueHandler)
                 .build();
 
