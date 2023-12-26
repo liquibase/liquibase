@@ -112,8 +112,9 @@ public abstract class SqlUtil {
             }
         }
 
-        if ((database instanceof PostgresDatabase) && (liquibaseDataType instanceof CharType || liquibaseDataType instanceof ClobType)
-            && stringVal.toUpperCase(ENGLISH).startsWith("GENERATED ALWAYS AS ")
+        if ((database instanceof PostgresDatabase || database instanceof OracleDatabase) &&
+            (liquibaseDataType instanceof CharType || liquibaseDataType instanceof ClobType) &&
+            stringVal.toUpperCase(ENGLISH).startsWith("GENERATED ALWAYS AS ")
         ) {
             return new DatabaseFunction(stringVal);
         }

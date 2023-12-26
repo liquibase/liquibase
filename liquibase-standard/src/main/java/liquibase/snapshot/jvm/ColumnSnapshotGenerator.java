@@ -41,7 +41,6 @@ public class ColumnSnapshotGenerator extends JdbcSnapshotGenerator {
     private static final String MYSQL_DEFAULT_GENERATED = "DEFAULT_GENERATED";
     private static final String GENERATED_ALWAYS_AS = "GENERATED ALWAYS AS ";
     private static final String YES_VALUE = "YES";
-    private static final String NULL_VALUE = "null";
     private static final String IS_GENERATED_COLUMN = "IS_GENERATEDCOLUMN";
 
     private final ColumnAutoIncrementService columnAutoIncrementService = new ColumnAutoIncrementService();
@@ -519,14 +518,14 @@ public class ColumnSnapshotGenerator extends JdbcSnapshotGenerator {
             Object defaultValue = columnMetadataResultSet.get(COLUMN_DEF_COL);
 
             if (("(NULL)".equals(defaultValue))) {
-                columnMetadataResultSet.set(COLUMN_DEF_COL, new DatabaseFunction(NULL_VALUE));
+                columnMetadataResultSet.set(COLUMN_DEF_COL, new DatabaseFunction("null"));
             }
         }
 
         if ((database instanceof OracleDatabase) && (columnMetadataResultSet.get(COLUMN_DEF_COL) == null)) {
             columnMetadataResultSet.set(COLUMN_DEF_COL, columnMetadataResultSet.get("DATA_DEFAULT"));
 
-            if ((columnMetadataResultSet.get(COLUMN_DEF_COL) != null) && NULL_VALUE.equalsIgnoreCase((String)
+            if ((columnMetadataResultSet.get(COLUMN_DEF_COL) != null) && StringUtil.equalsWordNull((String)
                     columnMetadataResultSet.get(COLUMN_DEF_COL))) {
                 columnMetadataResultSet.set(COLUMN_DEF_COL, null);
             }
@@ -539,7 +538,7 @@ public class ColumnSnapshotGenerator extends JdbcSnapshotGenerator {
 
             if (YES_VALUE.equals(columnMetadataResultSet.get("VIRTUAL_COLUMN"))) {
                 Object virtColumnDef = columnMetadataResultSet.get(COLUMN_DEF_COL);
-                if ((virtColumnDef != null) && !NULL_VALUE.equals(virtColumnDef)) {
+                if ((virtColumnDef != null) && !StringUtil.equalsWordNull(virtColumnDef.toString())) {
                     columnMetadataResultSet.set(COLUMN_DEF_COL, GENERATED_ALWAYS_AS + "(" + virtColumnDef + ")");
                 }
             }
@@ -564,7 +563,7 @@ public class ColumnSnapshotGenerator extends JdbcSnapshotGenerator {
 
         if ((database instanceof AbstractDb2Database)
                 && ((columnMetadataResultSet.get(COLUMN_DEF_COL) != null)
-                && NULL_VALUE.equalsIgnoreCase((String) columnMetadataResultSet.get(COLUMN_DEF_COL)))) {
+                && StringUtil.equalsWordNull((String) columnMetadataResultSet.get(COLUMN_DEF_COL)))) {
             columnMetadataResultSet.set(COLUMN_DEF_COL, null);
         }
 
@@ -587,7 +586,7 @@ public class ColumnSnapshotGenerator extends JdbcSnapshotGenerator {
 
            if (YES_VALUE.equals(columnMetadataResultSet.get(IS_GENERATED_COLUMN))) {
                Object virtColumnDef = columnMetadataResultSet.get(COLUMN_DEF_COL);
-               if ((virtColumnDef != null) && !NULL_VALUE.equals(virtColumnDef)) {
+               if ((virtColumnDef != null) && !StringUtil.equalsWordNull(virtColumnDef.toString())) {
                    columnMetadataResultSet.set(COLUMN_DEF_COL, "COMPUTE (" + virtColumnDef + ")");
                }
            }
@@ -636,7 +635,7 @@ public class ColumnSnapshotGenerator extends JdbcSnapshotGenerator {
 
         if (YES_VALUE.equals(columnMetadataResultSet.get(IS_GENERATED_COLUMN))) {
             Object virtColumnDef = columnMetadataResultSet.get(COLUMN_DEF_COL);
-            if (virtColumnDef != null && !NULL_VALUE.equals(virtColumnDef) &&
+            if (virtColumnDef != null && !StringUtil.equalsWordNull(virtColumnDef.toString()) &&
                 !String.valueOf(virtColumnDef).startsWith(GENERATED_ALWAYS_AS) // to avoid duplication
             ) {
                 // Column type added on PG 12 and until PG 15 only STORED mode is supported and jdbc metadata just say "YES" or "NO"
