@@ -27,6 +27,7 @@ jobs:
       timeStamp: ${{ steps.get-timestamp.outputs.timestamp }}
       proBranchNamePrefix: ${{ steps.check-branch.outputs.proBranchNamePrefix }}
       unmodifiedBranchName: ${{ steps.get-branch-name.outputs.unmodifiedBranchName }}
+      oss_workflow_url: ${{ steps.get-workflow-url.oss_workflow_url }}
     steps:
 
       - uses: actions/checkout@v3
@@ -43,6 +44,13 @@ jobs:
         run: |
           timeStamp=$(date +'%Y-%m-%d %H:%M:%S %Z')
           echo "timestamp=${timeStamp}" >> $GITHUB_OUTPUT
+
+      - name: Get Workflow Run URL
+        id: get-workflow-url
+        run: |
+          repo_url="https://github.com/${{ github.repository }}"
+          oss_workflow_url="${repo_url}/actions/runs/${{ github.run_id }}"
+          echo "oss_workflow_url=${oss_workflow_url}" >> $GITHUB_OUTPUT
 
       - name: Get Current BranchName
         id: get-branch-name
@@ -341,6 +349,7 @@ jobs:
     with:
       latestMergeSha: ${{ needs.setup.outputs.latestMergeSha }}
       thisBranchName: ${{ needs.setup.outputs.unmodifiedBranchName }}
+      oss_workflow_url: ${{ needs.setup.outputs.oss_workflow_url }}
 
   run-tests-harness:
     needs: [ setup,build_publish_branch ]
@@ -349,3 +358,4 @@ jobs:
     with:
       latestMergeSha: ${{ needs.setup.outputs.latestMergeSha }}
       thisBranchName: ${{ needs.setup.outputs.unmodifiedBranchName }}
+      oss_workflow_url: ${{ needs.setup.outputs.oss_workflow_url }}
