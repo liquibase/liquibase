@@ -50,7 +50,7 @@ jobs:
           workflow: test.yml
           workflow_inputs:
             '{"liquibaseCommit":"${{ inputs.latestMergeSha }}",
-            "runDescription": "${{ env.ossWorkflowUrl }}",
+            "runDescription": "$ossWorkflowUrl",
             "liquibaseBranch": "${{ inputs.thisBranchName }}"
             }'
 
