@@ -32,7 +32,7 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - name: Get Workflow Run URL
+      - name: Get OSS Workflow Run URL
         id: get-workflow-url
         run: |
           repo_url="https://github.com/${{ github.repository }}"
