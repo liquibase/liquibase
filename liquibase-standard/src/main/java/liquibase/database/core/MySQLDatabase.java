@@ -12,6 +12,7 @@ import liquibase.statement.core.RawSqlStatement;
 import liquibase.structure.DatabaseObject;
 import liquibase.structure.core.Index;
 import liquibase.structure.core.PrimaryKey;
+import liquibase.structure.core.Table;
 import liquibase.util.StringUtil;
 
 import java.math.BigInteger;
@@ -666,5 +667,10 @@ public class MySQLDatabase extends AbstractJdbcDatabase {
 
     public void warnAboutAlterColumn(String changeName, Warnings warnings ) {
         warnings.addWarning("Due to " + this.getShortName() + " SQL limitations, " + changeName + " will lose primary key/autoincrement/not null/comment settings explicitly redefined in the change. Use <sql> or <modifySql> to re-specify all configuration if this is the case");
+    }
+
+    @Override
+    public boolean supportsCreateIfNotExists(Class<? extends DatabaseObject> type) {
+        return type.isAssignableFrom(Table.class);
     }
 }

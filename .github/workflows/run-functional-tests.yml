@@ -25,20 +25,20 @@ jobs:
         with:
           ref: ${{ github.event.pull_request.head.sha || github.event.after}} # get the sha of the commit or the new commit created when branch is merged to master
 
-      - name: Get Workflow Run URL
-        id: get-workflow-url
-        run: |
-          repo_url="https://github.com/${{ github.repository }}"
-          workflow_url="${repo_url}/actions/runs/${{ github.run_id }}"
-          echo "workflow_url=${workflow_url}" >> $GITHUB_ENV
-
-
   run-pro-tests:
     runs-on: ubuntu-latest
     needs: [ functional-tests-build ]
     name: Trigger Functional Tests
     steps:
       - uses: actions/checkout@v4
+
+      - name: Get OSS Workflow Run URL
+        id: get-workflow-url
+        run: |
+          repo_url="https://github.com/${{ github.repository }}"
+          ossWorkflowUrl="${repo_url}/actions/runs/${{ github.run_id }}"
+          echo "ossWorkflowUrl=${ossWorkflowUrl}" >> $GITHUB_ENV
+
       - name: Dispatch an action and get the run ID
         uses: codex-/return-dispatch@v1
         id: return_dispatch
@@ -50,10 +50,9 @@ jobs:
           workflow: test.yml
           workflow_inputs:
             '{"liquibaseCommit":"${{ inputs.latestMergeSha }}",
-            "runDescription": "${{ env.workflow_url }}",
+            "runDescription": "${{ env.ossWorkflowUrl }}",
             "liquibaseBranch": "${{ inputs.thisBranchName }}"
             }'
-
 
       - name: Display run ID
         run: echo ${{ steps.return_dispatch.outputs.run_id }}

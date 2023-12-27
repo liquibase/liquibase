@@ -173,6 +173,39 @@ COMMENT ON COLUMN $viewName.$columnName IS '$columnComment';
         CommandUtil.runDropAll(postgres)
     }
 
+    def "Ensure diff-changelog set runOnChange and replaceIfExists properties correctly for a created view changeset"() {
+        given:
+        CommandUtil.runUpdate(postgres, "changelogs/mysql/complete/createtable.and.view.changelog.xml", null, null, null)
+        def outputChangelogFile = String.format("diffChangelogFile-%s-output.xml", StringUtil.randomIdentifer(10))
+        Database refDatabase = DatabaseFactory.instance.openDatabase(postgres.getConnectionUrl(), postgres.getUsername(), postgres.getPassword(), null, null)
+
+        Database targetDatabase =
+                DatabaseFactory.instance.openDatabase(postgres.getConnectionUrl().replace("lbcat", "lbcat2"), postgres.getUsername(), postgres.getPassword(), null, null)
+
+        when:
+        CommandScope commandScope = new CommandScope(DiffChangelogCommandStep.COMMAND_NAME)
+        commandScope.addArgumentValue(DbUrlConnectionArgumentsCommandStep.DATABASE_ARG, targetDatabase)
+        commandScope.addArgumentValue(DiffChangelogCommandStep.CHANGELOG_FILE_ARG, outputChangelogFile)
+        commandScope.addArgumentValue(DiffChangelogCommandStep.REPLACE_IF_EXISTS_TYPES_ARG, "createView")
+        commandScope.addArgumentValue(DiffChangelogCommandStep.RUN_ON_CHANGE_TYPES_ARG, "createView")
+        commandScope.addArgumentValue(ReferenceDbUrlConnectionCommandStep.REFERENCE_DATABASE_ARG, refDatabase)
+        commandScope.execute()
+
+        then:
+
+        def outputFile = new File(outputChangelogFile)
+        def outputContent = FileUtil.getContents(outputFile)
+        outputContent.contains(" runOnChange=\"true\">")
+        outputContent.contains(" replaceIfExists=\"true\"")
+
+        cleanup:
+        outputFile.delete()
+        refDatabase.close()
+        targetDatabase.close()
+        CommandUtil.runDropAll(postgres)
+        postgres.getConnection().close()
+    }
+
     def "Ensure diff-changelog with SQL output format contains 'OR REPLACE' instruction for a view when USE_OR_REPLACE_OPTION is set as true"() {
         given:
         def outputChangelogFile = String.format("diffChangelogFile-%s-output.postgresql.sql", StringUtil.randomIdentifer(10))
