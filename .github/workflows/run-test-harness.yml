@@ -13,11 +13,6 @@ on:
         required: false
         default: ''
         type: string
-      ossWorkflowUrl:
-        description: 'Triggered by run in OSS'
-        required: false
-        default: ''
-        type: string
 
 env:
   MAVEN_VERSION: '3.9.2'
