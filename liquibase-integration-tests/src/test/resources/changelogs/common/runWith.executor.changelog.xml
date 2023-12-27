@@ -28,8 +28,7 @@
 
     <changeSet id="3" author="your.name" runWith="h2alt">
         <preConditions onFail="HALT">
-            <sqlCheck expectedResult="2">select count(*) from test_numbers where id in (1,2)</sqlCheck>
-            <sqlCheck expectedResult="0">select count(*) from test_numbers where id in (3)</sqlCheck>
+            <sqlCheck expectedResult="2">select count(id) from test_numbers </sqlCheck>
         </preConditions>
     </changeSet>
     <changeSet id="4" author="your.name">
