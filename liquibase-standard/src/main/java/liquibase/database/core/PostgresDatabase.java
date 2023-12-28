@@ -411,4 +411,9 @@ public class PostgresDatabase extends AbstractJdbcDatabase {
         }
         super.setDefaultCatalogName(defaultCatalogName);
     }
+
+    @Override
+    public boolean supportsCreateIfNotExists(Class<? extends DatabaseObject> type) {
+        return type.isAssignableFrom(Table.class);
+    }
 }

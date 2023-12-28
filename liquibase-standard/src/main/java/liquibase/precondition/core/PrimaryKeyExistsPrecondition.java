@@ -4,54 +4,25 @@ import liquibase.changelog.ChangeSet;
 import liquibase.changelog.DatabaseChangeLog;
 import liquibase.changelog.visitor.ChangeExecListener;
 import liquibase.database.Database;
-import liquibase.exception.PreconditionErrorException;
-import liquibase.exception.PreconditionFailedException;
-import liquibase.exception.ValidationErrors;
-import liquibase.exception.Warnings;
+import liquibase.database.core.*;
+import liquibase.exception.*;
 import liquibase.precondition.AbstractPrecondition;
 import liquibase.snapshot.SnapshotGeneratorFactory;
 import liquibase.structure.core.PrimaryKey;
 import liquibase.structure.core.Schema;
 import liquibase.structure.core.Table;
 import liquibase.util.StringUtil;
+import lombok.Getter;
+import lombok.Setter;
 
+@Getter
+@Setter
 public class PrimaryKeyExistsPrecondition extends AbstractPrecondition {
+
     private String catalogName;
     private String schemaName;
     private String primaryKeyName;
     private String tableName;
-
-    public String getCatalogName() {
-        return catalogName;
-    }
-
-    public void setCatalogName(String catalogName) {
-        this.catalogName = catalogName;
-    }
-
-    public String getSchemaName() {
-        return schemaName;
-    }
-
-    public void setSchemaName(String schemaName) {
-        this.schemaName = schemaName;
-    }
-
-    public String getPrimaryKeyName() {
-        return primaryKeyName;
-    }
-
-    public void setPrimaryKeyName(String primaryKeyName) {
-        this.primaryKeyName = primaryKeyName;
-    }
-
-    public String getTableName() {
-        return tableName;
-    }
-
-    public void setTableName(String tableName) {
-        this.tableName = tableName;
-    }
 
     @Override
     public Warnings warn(Database database) {
@@ -76,6 +47,9 @@ public class PrimaryKeyExistsPrecondition extends AbstractPrecondition {
             table.setSchema(new Schema(getCatalogName(), getSchemaName()));
             if (StringUtil.trimToNull(getTableName()) != null) {
                 table.setName(getTableName());
+            } else if (database instanceof H2Database || database instanceof MySQLDatabase || database instanceof HsqlDatabase
+                || database instanceof SQLiteDatabase || database instanceof DB2Database) {
+                throw new DatabaseException("Database driver requires a table name to be specified in order to search for a primary key.");
             }
             example.setTable(table);
             example.setName(getPrimaryKeyName());
