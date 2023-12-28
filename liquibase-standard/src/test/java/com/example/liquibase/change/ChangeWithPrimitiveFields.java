@@ -95,4 +95,9 @@ public class ChangeWithPrimitiveFields extends AbstractChange {
     public void setaShort(short aShort) {
         this.aShort = aShort;
     }
+
+    @Override
+    public Object clone() {
+        return super.clone();
+    }
 }

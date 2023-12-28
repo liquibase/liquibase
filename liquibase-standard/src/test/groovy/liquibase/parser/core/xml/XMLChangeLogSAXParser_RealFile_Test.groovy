@@ -57,7 +57,7 @@ import spock.lang.Unroll
 import static org.hamcrest.Matchers.containsInAnyOrder
 import static spock.util.matcher.HamcrestSupport.that
 
-public class XMLChangeLogSAXParser_RealFile_Test extends Specification {
+class XMLChangeLogSAXParser_RealFile_Test extends Specification {
 
     @Shared resourceSupplier = new ResourceSupplier()
 
@@ -86,8 +86,8 @@ public class XMLChangeLogSAXParser_RealFile_Test extends Specification {
         def path = "liquibase/parser/core/xml/simpleChangeLog.xml"
         when:
         def changeLog = new XMLChangeLogSAXParser().parse(path, new ChangeLogParameters(), new JUnitResourceAccessor());
-        def changeSet = changeLog.changeSets[0];
-        def change = changeSet.changes[0];
+        def changeSet = changeLog.changeSets[0]
+        def change = changeSet.changes[0]
 
         then:
         changeLog.getLogicalFilePath() == path
@@ -338,28 +338,28 @@ public class XMLChangeLogSAXParser_RealFile_Test extends Specification {
         changeLog.getPreconditions().getNestedPreconditions().size() == 0
         changeLog.getChangeSets().size() == 1
 
-        ChangeSet changeSet = changeLog.getChangeSets()[0];
+        ChangeSet changeSet = changeLog.getChangeSets()[0]
         changeSet.getAuthor() == "nvoxland"
         changeSet.getId() == "1"
         changeSet.getChanges().size() == 1
         changeSet.getFilePath() == path
         changeSet.getComments() == "Some comments go here"
 
-        Change change = changeSet.getChanges()[0];
+        Change change = changeSet.getChanges()[0]
         Scope.getCurrentScope().getSingleton(ChangeFactory.class).getChangeMetaData(change).getName() == "createTable"
         assert change instanceof CreateTableChange
     }
 
 	def "changeLog parameters are correctly expanded"() throws Exception {
         when:
-        def params = new ChangeLogParameters(new MockDatabase());
+        def params = new ChangeLogParameters(new MockDatabase())
         params.setContexts(new Contexts("prod"))
-		params.set("tablename", "my_table_name");
-        params.set("tablename2", "my_table_name_2");
-        params.set("columnName", "my_column_name");
-        params.set("date", new Date(9999999));
+		params.set("tablename", "my_table_name")
+        params.set("tablename2", "my_table_name_2")
+        params.set("columnName", "my_column_name")
+        params.set("date", new Date(9999999))
         params.set("overridden", "Value passed in")
-		def changeLog = new XMLChangeLogSAXParser().parse("liquibase/parser/core/xml/parametersChangeLog.xml", params, new JUnitResourceAccessor());
+		def changeLog = new XMLChangeLogSAXParser().parse("liquibase/parser/core/xml/parametersChangeLog.xml", params, new JUnitResourceAccessor())
 
         then: "changeSet 1"
 		changeLog.getChangeSets().size() == 2
@@ -401,17 +401,17 @@ public class XMLChangeLogSAXParser_RealFile_Test extends Specification {
 	def "tests for particular features and edge conditions part 1 testCasesChangeLog.xml"() throws Exception {
         when:
         def path = "liquibase/parser/core/xml/testCasesChangeLog.xml"
-        DatabaseChangeLog changeLog = new XMLChangeLogSAXParser().parse(path, new ChangeLogParameters(), new JUnitResourceAccessor());
+        DatabaseChangeLog changeLog = new XMLChangeLogSAXParser().parse(path, new ChangeLogParameters(), new JUnitResourceAccessor())
 
         then: "before/after/position attributes are read correctly"
-        ((AddColumnChange) changeLog.getChangeSet(path, "cmouttet", "using after column attribute").changes[0]).columns[0].getName() == "middlename";
-        ((AddColumnChange) changeLog.getChangeSet(path, "cmouttet", "using after column attribute").changes[0]).columns[0].getAfterColumn() == "firstname";
+        ((AddColumnChange) changeLog.getChangeSet(path, "cmouttet", "using after column attribute").changes[0]).columns[0].getName() == "middlename"
+        ((AddColumnChange) changeLog.getChangeSet(path, "cmouttet", "using after column attribute").changes[0]).columns[0].getAfterColumn() == "firstname"
 
-        ((AddColumnChange) changeLog.getChangeSet(path, "cmouttet", "using before column attribute").changes[0]).columns[0].getName() == "middlename";
-        ((AddColumnChange) changeLog.getChangeSet(path, "cmouttet", "using before column attribute").changes[0]).columns[0].getBeforeColumn() == "lastname";
+        ((AddColumnChange) changeLog.getChangeSet(path, "cmouttet", "using before column attribute").changes[0]).columns[0].getName() == "middlename"
+        ((AddColumnChange) changeLog.getChangeSet(path, "cmouttet", "using before column attribute").changes[0]).columns[0].getBeforeColumn() == "lastname"
 
-        ((AddColumnChange) changeLog.getChangeSet(path, "cmouttet", "using position attribute").changes[0]).columns[0].getName() == "middlename";
-        ((AddColumnChange) changeLog.getChangeSet(path, "cmouttet", "using position attribute").changes[0]).columns[0].getPosition() == 1;
+        ((AddColumnChange) changeLog.getChangeSet(path, "cmouttet", "using position attribute").changes[0]).columns[0].getName() == "middlename"
+        ((AddColumnChange) changeLog.getChangeSet(path, "cmouttet", "using position attribute").changes[0]).columns[0].getPosition() == 1
 
         and: "validCheckSums are parsed"
         that changeLog.getChangeSet(path, "nvoxland", "validCheckSums set").getValidCheckSums(), containsInAnyOrder([CheckSum.parse("a9b7b29ce3a75940858cd022501852e2"), CheckSum.parse("8:b3d6a29ce3a75940858cd093501151d1")].toArray())
@@ -552,7 +552,7 @@ public class XMLChangeLogSAXParser_RealFile_Test extends Specification {
         def path = "liquibase/parser/core/xml/testCasesChangeLog.xml"
         def params = new ChangeLogParameters()
         params.set("loginUser", "sa")
-        DatabaseChangeLog changeLog = new XMLChangeLogSAXParser().parse(path, params, new JUnitResourceAccessor());
+        DatabaseChangeLog changeLog = new XMLChangeLogSAXParser().parse(path, params, new JUnitResourceAccessor())
 
 
         then: "complex preconditions are parsed"
@@ -642,7 +642,7 @@ public class XMLChangeLogSAXParser_RealFile_Test extends Specification {
     def "changelog with multiple dropColumn columns can be parsed"() throws Exception {
         when:
         def path = "liquibase/parser/core/xml/addDropColumnsChangeLog.xml"
-        def changeLog = new XMLChangeLogSAXParser().parse(path, new ChangeLogParameters(), new JUnitResourceAccessor());
+        def changeLog = new XMLChangeLogSAXParser().parse(path, new ChangeLogParameters(), new JUnitResourceAccessor())
 
         then:  "add columns"
         assert 2 == changeLog.getChangeSets().get(1).getChanges().get(0).getColumns().size()
