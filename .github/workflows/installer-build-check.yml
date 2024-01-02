@@ -73,7 +73,7 @@ jobs:
           rm re-version/final/*.sha1
 
       - name: Archive Packages
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: liquibase-test-packages
           path: re-version/final/*

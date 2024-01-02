@@ -7,6 +7,8 @@ import liquibase.change.Change;
 import liquibase.change.ReplaceIfExists;
 import liquibase.change.core.*;
 import liquibase.changelog.ChangeSet;
+import liquibase.changeset.ChangeSetService;
+import liquibase.changeset.ChangeSetServiceFactory;
 import liquibase.command.CommandScope;
 import liquibase.command.core.GenerateChangelogCommandStep;
 import liquibase.configuration.core.DeprecatedConfigurationValueProvider;
@@ -772,11 +774,13 @@ public class DiffToChangeLog {
                         .replaceFirst("\\)$", "");
             }
 
+            ChangeSetService service = ChangeSetServiceFactory.getInstance().createChangeSetService();
             if (useSeparateChangeSets(changes)) {
                 for (Change change : changes) {
                     final boolean runOnChange = isContainedInRunOnChangeTypes(change);
-                    ChangeSet changeSet = new ChangeSet(generateId(changes), getChangeSetAuthor(), false, runOnChange, this.changeSetPath, changeSetContext,
-                            null, true, quotingStrategy, null);
+                    ChangeSet changeSet =
+                            service.createChangeSet(generateId(changes), getChangeSetAuthor(), false, runOnChange, this.changeSetPath, changeSetContext,
+                                    null, null, null, true, quotingStrategy, null);
                     changeSet.setCreated(created);
                     if (diffOutputControl.getLabels() != null) {
                         changeSet.setLabels(diffOutputControl.getLabels());
@@ -791,8 +795,8 @@ public class DiffToChangeLog {
                 }
             } else {
                 final boolean runOnChange = Arrays.asList(changes).stream().allMatch(change -> isContainedInRunOnChangeTypes(change));
-                ChangeSet changeSet = new ChangeSet(generateId(changes), getChangeSetAuthor(), false, runOnChange, this.changeSetPath, csContext,
-                        null, true, quotingStrategy, null);
+                ChangeSet changeSet = service.createChangeSet(generateId(changes), getChangeSetAuthor(), false, runOnChange, this.changeSetPath, changeSetContext,
+                                        null, null, null, true, quotingStrategy, null);
                 changeSet.setCreated(created);
                 if (diffOutputControl.getLabels() != null) {
                     changeSet.setLabels(diffOutputControl.getLabels());
