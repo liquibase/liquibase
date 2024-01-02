@@ -778,9 +778,14 @@ public class DiffToChangeLog {
             if (useSeparateChangeSets(changes)) {
                 for (Change change : changes) {
                     final boolean runOnChange = isContainedInRunOnChangeTypes(change);
-                    ChangeSet changeSet =
-                            service.createChangeSet(generateId(changes), getChangeSetAuthor(), false, runOnChange, this.changeSetPath, changeSetContext,
-                                    null, null, null, true, quotingStrategy, null);
+                    ChangeSet changeSet;
+                    if (service != null) {
+                        changeSet = service.createChangeSet(generateId(changes), getChangeSetAuthor(), false, runOnChange, this.changeSetPath, changeSetContext,
+                                null, null, null, true, quotingStrategy, null);
+                    } else {
+                        changeSet = new ChangeSet(generateId(changes), getChangeSetAuthor(), false, runOnChange, this.changeSetPath, changeSetContext,
+                                null, null, null, true, quotingStrategy, null);
+                    }
                     changeSet.setCreated(created);
                     if (diffOutputControl.getLabels() != null) {
                         changeSet.setLabels(diffOutputControl.getLabels());
@@ -795,8 +800,14 @@ public class DiffToChangeLog {
                 }
             } else {
                 final boolean runOnChange = Arrays.asList(changes).stream().allMatch(change -> isContainedInRunOnChangeTypes(change));
-                ChangeSet changeSet = service.createChangeSet(generateId(changes), getChangeSetAuthor(), false, runOnChange, this.changeSetPath, csContext,
-                                        null, null, null, true, quotingStrategy, null);
+                ChangeSet changeSet;
+                if (service != null) {
+                    changeSet = service.createChangeSet(generateId(changes), getChangeSetAuthor(), false, runOnChange, this.changeSetPath, csContext,
+                            null, null, null, true, quotingStrategy, null);
+                } else {
+                    changeSet = new ChangeSet(generateId(changes), getChangeSetAuthor(), false, runOnChange, this.changeSetPath, csContext,
+                            null, null, null, true, quotingStrategy, null);
+                }
                 changeSet.setCreated(created);
                 if (diffOutputControl.getLabels() != null) {
                     changeSet.setLabels(diffOutputControl.getLabels());
