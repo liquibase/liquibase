@@ -30,7 +30,7 @@ jobs:
 
     steps:
 
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
         with:
           ref: ${{ github.event.pull_request.head.sha || github.event.after}}
       - name: Get Latest Merge Commit SHA
@@ -66,7 +66,7 @@ jobs:
           echo "Original Branch Name thisBranchName:" $branch_name
 
       - name: Checkout OSS Repo
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
         with:
           repository: liquibase/liquibase
 
@@ -112,7 +112,7 @@ jobs:
       contents: read
       packages: write
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
         with:
           ref: ${{ github.event.pull_request.head.sha || github.event.after}}
       # this includes all the tar files included in the previous runs. So in the next step we deploy what was previously build
