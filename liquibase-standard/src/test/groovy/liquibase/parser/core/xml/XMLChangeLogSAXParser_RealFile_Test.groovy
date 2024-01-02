@@ -809,6 +809,9 @@ class XMLChangeLogSAXParser_RealFile_Test extends Specification {
         assert change.anInt == 42
         assert change.aLong == 420L
         assert change.aShort == (short) 4200
+
+        cleanup:
+        Scope.getCurrentScope().getSingleton(ChangeFactory.class).unregister("primitiveChange")
     }
 
 }
