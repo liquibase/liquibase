@@ -6,6 +6,7 @@ import liquibase.database.ObjectQuotingStrategy;
 import liquibase.exception.DatabaseException;
 import liquibase.exception.DateParseException;
 import liquibase.structure.DatabaseObject;
+import liquibase.structure.core.Table;
 import liquibase.util.ISODateFormat;
 
 import java.math.BigInteger;
@@ -472,7 +473,7 @@ public class HsqlDatabase extends AbstractJdbcDatabase {
     public boolean isCaseSensitive() {
         return false;
     }
-    
+
     @Override
     public void setConnection(DatabaseConnection conn) {
         oracleSyntax = null;
@@ -518,5 +519,10 @@ public class HsqlDatabase extends AbstractJdbcDatabase {
     public String getAutoIncrementClause(BigInteger startWith, BigInteger incrementBy, String generationType, Boolean defaultOnNull) {
         final String clause = super.getAutoIncrementClause(startWith, incrementBy, generationType, defaultOnNull);
         return clause.replace(",", ""); //sql doesn't use commas between the values
+    }
+
+    @Override
+    public boolean supportsCreateIfNotExists(Class<? extends DatabaseObject> type) {
+        return type.isAssignableFrom(Table.class);
     }
 }

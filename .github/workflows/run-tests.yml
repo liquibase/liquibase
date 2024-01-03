@@ -1,10 +1,5 @@
 name: Run Tests
 
-
-concurrency:
-  group: ${{ github.workflow }}-${{ github.head_ref || github.ref }}
-  cancel-in-progress: ${{ !contains(github.ref, 'refs/heads/master') }}
-
 on:
   workflow_call:
 
@@ -32,6 +27,11 @@ env:
 
 jobs:
   authorize:
+    #concurrent runs for pull requests from forked repositories will be canceled, while runs for pull requests from the master repository won't be affected.
+    #for a pull_request against master: the concurrency check will cancel commit A so that commit B check can run.
+    concurrency:
+      group: ${{ github.workflow }}-${{ github.head_ref == 'master' && (github.event_name == 'push' && 'push-to-master' || github.event_name == 'pull_request' && 'merge-to-master') || github.event_name == 'pull_request_target' && github.event.pull_request.number || github.run_id }}
+      cancel-in-progress: ${{ github.event_name == 'pull_request' && github.base_ref == 'master' }}
     environment: ${{ github.event_name == 'pull_request_target' && github.event.pull_request.head.repo.full_name != github.repository && 'external' || 'internal' }}
     runs-on: ubuntu-latest
     steps:
@@ -189,7 +189,7 @@ jobs:
 
       - name: Upload Artifacts for build.yml
         if: ${{ matrix.java == 11 && matrix.os == 'ubuntu-20.04'}}
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: temp-artifact
           path: |
@@ -197,7 +197,7 @@ jobs:
 
       - name: Archive Test Results
         if: ${{ inputs.archive_test_results == 'true' }}
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: liquibase-test-results-jdk${{ matrix.java }}
           path: |
@@ -206,7 +206,7 @@ jobs:
 
       - name: Archive Modules
         if: ${{ matrix.java == 11 && matrix.os == 'ubuntu-20.04'}}
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: liquibase-modules
           path: |
@@ -268,7 +268,7 @@ jobs:
 
       - name: Archive Test Results
         if: ${{ inputs.archive_test_results == 'true' }}
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: ${{ steps.prepare.outputs.testResultsArtifact }}
           path: |
