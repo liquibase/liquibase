@@ -113,7 +113,7 @@ jobs:
           cd liquibase-pro/liquibase-azure-deps && mvn -B clean package
 
       - name: Archive Modules
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: liquibase-pro-azure-artifacts
           path: |
