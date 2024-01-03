@@ -225,7 +225,7 @@ public class OracleIntegrationTest extends AbstractIntegrationTest {
         String textToTest = "GENERATED ALWAYS AS (QTY * PRICE)";
 
         Scope.getCurrentScope().getSingleton(ExecutorService.class).getExecutor("jdbc", getDatabase()).execute(new RawSqlStatement(
-            String.format("CREATE TABLE GENERATED_COLUMN_TEST(QTY INT, PRICE INT, TOTALVALUE INT %s);", textToTest)));
+            String.format("CREATE TABLE GENERATED_COLUMN_TEST(QTY INT, PRICE INT, TOTALVALUE INT %s)", textToTest)));
 
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
         new CommandScope(GenerateChangelogCommandStep.COMMAND_NAME)
