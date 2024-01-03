@@ -7,12 +7,22 @@ import lombok.Data;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 @Data
 public class ChangesetInfo {
+    /**
+     * The number of deployed (aka executed) changesets
+     */
     private int changesetCount;
+    /**
+     * The number of pending (aka skipped) changesets
+     */
+    private int pendingChangesetCount;
+    private int failedChangesetCount;
     private final List<IndividualChangesetInfo> changesetInfoList = new ArrayList<>();
+    private final List<PendingChangesetInfo> pendingChangesetInfoList = new ArrayList<>();
 
     public void addAllToChangesetInfoList(List<ChangeSet> changeSets, boolean isRollback) {
         if (changeSets != null) {
@@ -80,5 +90,27 @@ public class ChangesetInfo {
             attributes.add("dbms = " + StringUtil.join(changeSet.getDbmsSet(), ", "));
         }
         return attributes;
+    }
+
+    /**
+     * Map all changeset status and reason for skipping to a PendingChangesetInfo object and add to the list.
+     *
+     * @param pendingChanges the map of ChangeSetStatus and their reason for being skipped.
+     */
+    public void addAllToPendingChangesetInfoList(Map<ChangeSet, String> pendingChanges) {
+        if (pendingChanges != null) {
+            pendingChanges.forEach((changeSet, reason) -> {
+                PendingChangesetInfo pendingChangesetInfo = new PendingChangesetInfo(
+                        changeSet.getAuthor(),
+                        changeSet.getId(),
+                        changeSet.getFilePath(),
+                        changeSet.getComments(),
+                        changeSet.getLabels() == null ? null : changeSet.getLabels().toString(),
+                        changeSet.getContextFilter() == null ? null : changeSet.getContextFilter().getOriginalString(),
+                        reason,
+                        changeSet);
+                pendingChangesetInfoList.add(pendingChangesetInfo);
+            });
+        }
     }
 }
