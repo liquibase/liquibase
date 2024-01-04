@@ -278,13 +278,13 @@ public class CommandScope {
         return source;
     }
 
-    private void logPrimaryExceptionToMdc(Exception exception, String source) {
+    private void logPrimaryExceptionToMdc(Throwable exception, String source) {
         //
         // Drill down to get the lowest level exception
         //
-        Exception primaryException = exception;
+        Throwable primaryException = exception;
         while (primaryException != null && primaryException.getCause() != null) {
-            primaryException = (Exception)primaryException.getCause();
+            primaryException = primaryException.getCause();
         }
         if (primaryException != null) {
             if (primaryException instanceof LiquibaseException || source == null) {

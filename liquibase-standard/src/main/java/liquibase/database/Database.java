@@ -1,5 +1,17 @@
 package liquibase.database;
 
+import liquibase.CatalogAndSchema;
+import liquibase.change.Change;
+import liquibase.changelog.ChangeSet;
+import liquibase.changelog.DatabaseChangeLog;
+import liquibase.changelog.RanChangeSet;
+import liquibase.exception.*;
+import liquibase.servicelocator.PrioritizedService;
+import liquibase.sql.visitor.SqlVisitor;
+import liquibase.statement.DatabaseFunction;
+import liquibase.statement.SqlStatement;
+import liquibase.structure.DatabaseObject;
+
 import java.io.IOException;
 import java.io.Writer;
 import java.math.BigInteger;
@@ -7,21 +19,6 @@ import java.util.Collection;
 import java.util.Date;
 import java.util.List;
 import java.util.Locale;
-import liquibase.CatalogAndSchema;
-import liquibase.change.Change;
-import liquibase.changelog.ChangeSet;
-import liquibase.changelog.DatabaseChangeLog;
-import liquibase.changelog.RanChangeSet;
-import liquibase.exception.DatabaseException;
-import liquibase.exception.DatabaseHistoryException;
-import liquibase.exception.DateParseException;
-import liquibase.exception.LiquibaseException;
-import liquibase.exception.ValidationErrors;
-import liquibase.servicelocator.PrioritizedService;
-import liquibase.sql.visitor.SqlVisitor;
-import liquibase.statement.DatabaseFunction;
-import liquibase.statement.SqlStatement;
-import liquibase.structure.DatabaseObject;
 
 /**
  * Interface that every DBMS supported by this software must implement. Most methods belong into ont of these
@@ -262,8 +259,6 @@ public interface Database extends PrioritizedService, AutoCloseable {
      */
     String escapeColumnNameList(String columnNames);
 
-//    Set<UniqueConstraint> findUniqueConstraints(String schema) throws DatabaseException;
-
     boolean supportsTablespaces();
 
     boolean supportsCatalogs();
@@ -485,5 +480,13 @@ public interface Database extends PrioritizedService, AutoCloseable {
         // Do nothing by default
     }
 
+    /**
+     * Does the database support the "if not exits" syntax?
+     * @param type the DatabaseObject type to be checked.
+     * @return true if the "if not exists" syntax is supported, false otherwise.
+     */
+    default boolean supportsCreateIfNotExists(Class<? extends DatabaseObject> type) {
+        return false;
+    }
 }
 

@@ -27,6 +27,7 @@ jobs:
       timeStamp: ${{ steps.get-timestamp.outputs.timestamp }}
       proBranchNamePrefix: ${{ steps.check-branch.outputs.proBranchNamePrefix }}
       unmodifiedBranchName: ${{ steps.get-branch-name.outputs.unmodifiedBranchName }}
+
     steps:
 
       - uses: actions/checkout@v3
