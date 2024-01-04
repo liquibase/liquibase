@@ -4,6 +4,7 @@ import liquibase.change.AddColumnConfig
 import liquibase.change.Change
 import liquibase.change.ChangeFactory
 import liquibase.change.ChangeStatus
+import liquibase.change.ConstraintsConfig
 import liquibase.change.StandardChangeTest
 import liquibase.change.visitor.ChangeVisitor
 import liquibase.change.visitor.ChangeVisitorFactory
@@ -371,5 +372,28 @@ class AddColumnChangeTest extends StandardChangeTest {
                 column.setAutoIncrementInformation(autoIncrementInfo)
             }
         }
+    }
+
+    def "columns with delete cascade generate expected sql"() {
+        when:
+        def db = new PostgresDatabase()
+
+        def change = new AddColumnChange()
+        change.setTableName("test_table")
+
+        def constraintsConfig = new ConstraintsConfig()
+        constraintsConfig.setForeignKeyName("test_fk")
+        constraintsConfig.setReferencedColumnNames("ref_col")
+        constraintsConfig.setReferencedTableName("ref_table")
+        constraintsConfig.setDeleteCascade(true)
+        change.addColumn(new AddColumnConfig()
+                .setName("test_column")
+                .setType('BIGINT')
+                .setConstraints(constraintsConfig))
+
+        def statements = change.generateStatements(db)
+
+        then:
+        SqlGeneratorFactory.getInstance().generateSql(statements, db)*.toString() == ["ALTER TABLE test_table ADD test_column BIGINT;", "ALTER TABLE test_table ADD CONSTRAINT test_fk FOREIGN KEY (test_column) REFERENCES ref_table (ref_col) ON DELETE CASCADE;"]
     }
 }
