@@ -222,7 +222,7 @@ public class OracleIntegrationTest extends AbstractIntegrationTest {
     public void testChangeLogGenerationForTableWithGeneratedColumn() throws Exception {
         assumeNotNull(getDatabase());
         clearDatabase();
-        String textToTest = "GENERATED ALWAYS AS (QTY * PRICE)";
+        String textToTest = "GENERATED ALWAYS AS (QTY*PRICE)";
 
         Scope.getCurrentScope().getSingleton(ExecutorService.class).getExecutor("jdbc", getDatabase()).execute(new RawSqlStatement(
             String.format("CREATE TABLE GENERATED_COLUMN_TEST(QTY INT, PRICE INT, TOTALVALUE INT %s)", textToTest)));
@@ -233,6 +233,7 @@ public class OracleIntegrationTest extends AbstractIntegrationTest {
             .setOutput(baos)
             .execute();
 
-        assertTrue(baos.toString().contains(textToTest));
+        String generatedChangeLog = baos.toString();
+        assertTrue("Text '" + textToTest + "' not found in generated change log: " + generatedChangeLog, generatedChangeLog.contains(textToTest));
     }
 }

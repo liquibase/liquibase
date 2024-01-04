@@ -539,7 +539,7 @@ public class ColumnSnapshotGenerator extends JdbcSnapshotGenerator {
             if (YES_VALUE.equals(columnMetadataResultSet.get("VIRTUAL_COLUMN"))) {
                 Object virtColumnDef = columnMetadataResultSet.get(COLUMN_DEF_COL);
                 if ((virtColumnDef != null) && !StringUtil.equalsWordNull(virtColumnDef.toString())) {
-                    columnMetadataResultSet.set(COLUMN_DEF_COL, GENERATED_ALWAYS_AS + "(" + virtColumnDef + ")");
+                    columnMetadataResultSet.set(COLUMN_DEF_COL, GENERATED_ALWAYS_AS + "(" + virtColumnDef.toString().replace("\"", "") + ")");
                 }
             }
 
