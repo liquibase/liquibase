@@ -159,12 +159,15 @@ public class CustomChangeWrapper extends AbstractChange {
     @Override
     public SqlStatement[] generateStatements(Database database) {
         SqlStatement[] statements = null;
+        boolean shouldExecute = Scope.getCurrentScope().get(Change.SHOULD_EXECUTE, Boolean.TRUE);
         try {
             configureCustomChange();
             if (customChange instanceof CustomSqlChange) {
                 statements = ((CustomSqlChange) customChange).generateStatements(database);
             } else if (customChange instanceof CustomTaskChange) {
-                ((CustomTaskChange) customChange).execute(database);
+                if (shouldExecute) {
+                    ((CustomTaskChange) customChange).execute(database);
+                }
             } else {
                 throw new UnexpectedLiquibaseException(customChange.getClass().getName() + " does not implement " + CustomSqlChange.class.getName() + " or " + CustomTaskChange.class.getName());
             }
@@ -320,20 +323,20 @@ public class CustomChangeWrapper extends AbstractChange {
             this.setParam(paramName, (String) value);
         }
 
-        CustomChange customChange;
+        CustomChange localCustomChange;
         try {
             Boolean osgiPlatform = Scope.getCurrentScope().get(Scope.Attr.osgiPlatform, Boolean.class);
             if (Boolean.TRUE.equals(osgiPlatform)) {
-                customChange = (CustomChange)OsgiUtil.loadClass(className).getConstructor().newInstance();
+                localCustomChange = (CustomChange)OsgiUtil.loadClass(className).getConstructor().newInstance();
             } else {
-                customChange = (CustomChange) Class.forName(className, false, Scope.getCurrentScope().getClassLoader()).getConstructor().newInstance();
+                localCustomChange = (CustomChange) Class.forName(className, false, Scope.getCurrentScope().getClassLoader()).getConstructor().newInstance();
             }
         } catch (Exception e) {
             throw new UnexpectedLiquibaseException(e);
         }
         for (ParsedNode node : parsedNode.getChildren()) {
             Object value = node.getValue();
-            if ((value != null) && ObjectUtil.hasProperty(customChange, node.getName())) {
+            if ((value != null) && ObjectUtil.hasProperty(localCustomChange, node.getName())) {
                 this.setParam(node.getName(), value.toString());
             }
         }

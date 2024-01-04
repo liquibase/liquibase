@@ -2,6 +2,7 @@ package liquibase.command.core;
 
 import liquibase.Scope;
 import liquibase.command.*;
+import liquibase.command.core.helpers.AbstractChangelogCommandStep;
 import liquibase.command.core.helpers.DbUrlConnectionArgumentsCommandStep;
 import liquibase.command.core.helpers.DiffOutputControlCommandStep;
 import liquibase.command.core.helpers.ReferenceDbUrlConnectionCommandStep;
@@ -16,13 +17,15 @@ import liquibase.exception.CommandValidationException;
 import liquibase.resource.PathHandlerFactory;
 import liquibase.resource.Resource;
 import liquibase.util.StringUtil;
+import liquibase.util.ValueHandlerUtil;
 
 import java.io.IOException;
 import java.io.PrintStream;
 import java.util.Arrays;
 import java.util.List;
+import java.util.stream.Collectors;
 
-public class GenerateChangelogCommandStep extends AbstractCommandStep {
+public class GenerateChangelogCommandStep extends AbstractChangelogCommandStep {
 
     public static final String[] COMMAND_NAME = {"generateChangelog"};
 
@@ -37,7 +40,6 @@ public class GenerateChangelogCommandStep extends AbstractCommandStep {
     public static final CommandArgumentDefinition<String> DATA_OUTPUT_DIR_ARG;
     public static final CommandArgumentDefinition<Boolean> OVERWRITE_OUTPUT_FILE_ARG;
     public static final CommandArgumentDefinition<String> CHANGELOG_FILE_ARG;
-
     public static final CommandArgumentDefinition<String> REFERENCE_URL_ARG;
     public static final CommandArgumentDefinition<String> REFERENCE_USERNAME_ARG;
     public static final CommandArgumentDefinition<String> REFERENCE_PASSWORD_ARG;
@@ -48,6 +50,8 @@ public class GenerateChangelogCommandStep extends AbstractCommandStep {
     public static final CommandArgumentDefinition<String> REFERENCE_SCHEMAS_ARG;
     public static final CommandArgumentDefinition<String> REFERENCE_LIQUIBASE_SCHEMA_NAME_ARG;
     public static final CommandArgumentDefinition<String> REFERENCE_LIQUIBASE_CATALOG_NAME_ARG;
+
+    public static final CommandArgumentDefinition<Boolean> USE_OR_REPLACE_OPTION;
 
     static {
         final CommandBuilder builder = new CommandBuilder(COMMAND_NAME);
@@ -88,6 +92,14 @@ public class GenerateChangelogCommandStep extends AbstractCommandStep {
                 .hidden().build();
         REFERENCE_LIQUIBASE_CATALOG_NAME_ARG = builder.argument("referenceLiquibaseCatalogName", String.class)
                 .hidden().build();
+        USE_OR_REPLACE_OPTION = builder.argument("useOrReplaceOption", Boolean.class)
+                .description("If true, will add 'OR REPLACE' option to the create view change object")
+                .defaultValue(false)
+                .setValueHandler(ValueHandlerUtil::booleanValueHandler)
+                .build();
+        builder.addArgument(AbstractChangelogCommandStep.RUN_ON_CHANGE_TYPES_ARG).build();
+
+        builder.addArgument(AbstractChangelogCommandStep.REPLACE_IF_EXISTS_TYPES_ARG).build();
     }
 
     @Override
@@ -115,6 +127,10 @@ public class GenerateChangelogCommandStep extends AbstractCommandStep {
         diffOutputControl.setDataDir(commandScope.getArgumentValue(DATA_OUTPUT_DIR_ARG));
         referenceDatabase.setOutputDefaultSchema(diffOutputControl.getIncludeSchema());
 
+        if(commandScope.getArgumentValue(GenerateChangelogCommandStep.USE_OR_REPLACE_OPTION).booleanValue()) {
+            diffOutputControl.setReplaceIfExistsSet(true);
+        }
+
         InternalSnapshotCommandStep.logUnsupportedDatabase(referenceDatabase, this.getClass());
 
         DiffResult diffResult = (DiffResult) resultsBuilder.getResult(DiffCommandStep.DIFF_RESULT.getName());
@@ -131,6 +147,8 @@ public class GenerateChangelogCommandStep extends AbstractCommandStep {
             changeLogWriter.setChangeSetLabels(commandScope.getArgumentValue(LABEL_FILTER_ARG));
         }
         changeLogWriter.setChangeSetPath(changeLogFile);
+        changeLogWriter.setChangeSetRunOnChangeTypes(commandScope.getArgumentValue(RUN_ON_CHANGE_TYPES_ARG).split("\\s*,\\s*"));
+        changeLogWriter.setChangeReplaceIfExistsTypes(commandScope.getArgumentValue(REPLACE_IF_EXISTS_TYPES_ARG).split("\\s*,\\s*"));
 
         ObjectQuotingStrategy originalStrategy = referenceDatabase.getObjectQuotingStrategy();
         try {
@@ -165,6 +183,8 @@ public class GenerateChangelogCommandStep extends AbstractCommandStep {
         commandScope.addArgumentValue(DbUrlConnectionArgumentsCommandStep.SKIP_DATABASE_STEP_ARG, true);
         commandScope.addArgumentValue(DiffCommandStep.FORMAT_ARG, "none");
         validateConditionsToOverwriteChangelogFile(commandScope);
+        validateReplaceIfExistsTypes(commandScope);
+        validateRunOnChangeTypes(commandScope);
     }
 
     /**

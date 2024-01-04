@@ -16,9 +16,7 @@ import liquibase.command.core.helpers.DbUrlConnectionArgumentsCommandStep;
 import liquibase.database.Database;
 import liquibase.database.DatabaseConnection;
 import liquibase.database.DatabaseFactory;
-import liquibase.database.core.H2Database;
-import liquibase.database.core.OracleDatabase;
-import liquibase.database.core.PostgresDatabase;
+import liquibase.database.core.*;
 import liquibase.database.jvm.JdbcConnection;
 import liquibase.datatype.DataTypeFactory;
 import liquibase.datatype.core.ClobType;
@@ -1308,6 +1306,48 @@ public abstract class AbstractIntegrationTest {
             clearDatabase();
         }
 
+    }
+
+    @Test
+    public void makeSureNoErrorIsReturnedWhenTableNameIsNotSpecified() throws DatabaseException {
+        // This is a test to validate most of the DBs do not throw an error when tableName is not
+        // specified as part of primaryKeyExistsPrecondition.
+        clearDatabase();
+        String errorMsg = "";
+        try {
+            runUpdate("changelogs/common/preconditions/preconditions.changelog.xml");
+        }catch(CommandExecutionException e) {
+            errorMsg = e.getMessage();
+        }
+        finally {
+            clearDatabase();
+        }
+
+        if(!(database instanceof H2Database || database instanceof MySQLDatabase || database instanceof HsqlDatabase
+                || database instanceof SQLiteDatabase || database instanceof DB2Database)) {
+            Assert.assertTrue(errorMsg.isEmpty());
+        }
+    }
+
+    @Test
+    public void makeSureErrorIsReturnedWhenTableNameIsNotSpecified() throws DatabaseException {
+        // This is a test to validate some DBs do require a tableName as part of primaryKeyExistsPrecondition,
+        // if it's not specified an error will be thrown.
+        clearDatabase();
+        String errorMsg = "";
+        try {
+            runUpdate("changelogs/common/preconditions/preconditions.changelog.xml");
+        }catch(CommandExecutionException e) {
+            errorMsg = e.getMessage();
+        }
+        finally {
+            clearDatabase();
+        }
+
+        if(database instanceof H2Database || database instanceof MySQLDatabase || database instanceof HsqlDatabase
+                || database instanceof SQLiteDatabase || database instanceof DB2Database) {
+            Assert.assertTrue(errorMsg.contains("Database driver requires a table name to be specified in order to search for a primary key."));
+        }
     }
 
     private ProcessBuilder prepareExternalLiquibaseProcess() {
