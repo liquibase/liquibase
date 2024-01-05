@@ -1,7 +1,7 @@
 package liquibase.database.core;
 
-import liquibase.GlobalConfiguration;
 import liquibase.Scope;
+import liquibase.configuration.GlobalConfiguration;
 import liquibase.database.Database;
 import liquibase.database.OfflineConnection;
 import liquibase.exception.DatabaseException;
@@ -75,12 +75,51 @@ public class DatabaseUtils {
                 }
                 executor.execute(new RawSqlStatement("USE " + schema));
             } else if (database instanceof MSSQLDatabase) {
-                    defaultCatalogName = StringUtil.trimToNull(defaultCatalogName);
-                    if (defaultCatalogName != null) {
-                        executor.execute(new RawSqlStatement(String.format("USE %s", defaultCatalogName)));
-                    }
+                defaultCatalogName = StringUtil.trimToNull(defaultCatalogName);
+                if (defaultCatalogName != null) {
+                    executor.execute(new RawSqlStatement(String.format("USE %s", defaultCatalogName)));
+                }
             }
         }
     }
 
+    public static void initializePostgresSearchPathPermanently(String defaultCatalogName, String defaultSchemaName, Database database) {
+
+        final Executor executor = Scope.getCurrentScope().getSingleton(ExecutorService.class).getExecutor("jdbc", database);
+
+        if (database instanceof PostgresDatabase && defaultSchemaName != null) {
+            String searchPath = null;
+            try {
+                searchPath = executor.queryForObject(new RawSqlStatement("SHOW SEARCH_PATH"), String.class);
+            } catch (Throwable e) {
+                Scope.getCurrentScope().getLog(DatabaseUtils.class).info("Cannot get search_path", e);
+            }
+
+            if (!searchPath.equals(defaultCatalogName) && !searchPath.equals(defaultSchemaName) && !searchPath.equals("\"" + defaultSchemaName + "\"") && !searchPath.startsWith(defaultSchemaName + ",") && !searchPath.startsWith("\"" + defaultSchemaName + "\",")) {
+                String finalSearchPath;
+                if (GlobalConfiguration.PRESERVE_SCHEMA_CASE.getCurrentValue()) {
+                    finalSearchPath = ((PostgresDatabase) database).quoteObject(defaultSchemaName, Schema.class);
+                } else {
+                    finalSearchPath = defaultSchemaName;
+                }
+
+                if (StringUtil.isNotEmpty(searchPath)) {
+                    //If existing search path entries are not quoted, quote them. Some databases do not show them as quoted even though they need to be (like $user or case sensitive schemas)
+                    finalSearchPath += ", " + StringUtil.join(StringUtil.splitAndTrim(searchPath, ","), ",", (StringUtil.StringUtilFormatter<String>) obj -> {
+                        if (obj.startsWith("\"")) {
+                            return obj;
+                        }
+                        return ((PostgresDatabase) database).quoteObject(obj, Schema.class);
+                    });
+                }
+
+                try {
+                    executor.execute(new RawSqlStatement(String.format("ALTER DATABASE %s SET SEARCH_PATH TO %s", database.getLiquibaseCatalogName(), finalSearchPath)));
+                } catch (Throwable e) {
+                    Scope.getCurrentScope().getLog(DatabaseUtils.class).info("Cannot set search_path at database level", e);
+                }
+            }
+        }
+    }
 }
+

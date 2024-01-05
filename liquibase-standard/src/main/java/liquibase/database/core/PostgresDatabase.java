@@ -1,9 +1,9 @@
 package liquibase.database.core;
 
 import liquibase.CatalogAndSchema;
-import liquibase.GlobalConfiguration;
 import liquibase.Scope;
 import liquibase.changelog.column.LiquibaseColumn;
+import liquibase.configuration.GlobalConfiguration;
 import liquibase.database.AbstractJdbcDatabase;
 import liquibase.database.DatabaseConnection;
 import liquibase.database.ObjectQuotingStrategy;
@@ -399,9 +399,6 @@ public class PostgresDatabase extends AbstractJdbcDatabase {
     @Override
     public void rollback() throws DatabaseException {
         super.rollback();
-
-        //Rollback in postgresql resets the search path. Need to put it back to the defaults
-        DatabaseUtils.initializeDatabase(getDefaultCatalogName(), getDefaultSchemaName(), this);
     }
 
     @Override
@@ -415,5 +412,9 @@ public class PostgresDatabase extends AbstractJdbcDatabase {
     @Override
     public boolean supportsCreateIfNotExists(Class<? extends DatabaseObject> type) {
         return type.isAssignableFrom(Table.class);
+    }
+
+    public void setSearchPathPermanently() {
+        DatabaseUtils.initializePostgresSearchPathPermanently(defaultCatalogName, defaultSchemaName, this);
     }
 }

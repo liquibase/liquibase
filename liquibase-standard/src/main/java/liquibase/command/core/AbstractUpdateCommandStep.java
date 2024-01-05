@@ -10,6 +10,7 @@ import liquibase.command.CommandResultsBuilder;
 import liquibase.command.CommandScope;
 import liquibase.command.core.helpers.DatabaseChangelogCommandStep;
 import liquibase.database.Database;
+import liquibase.database.core.PostgresDatabase;
 import liquibase.exception.DatabaseException;
 import liquibase.exception.LiquibaseException;
 import liquibase.exception.LockException;
@@ -67,6 +68,9 @@ public abstract class AbstractUpdateCommandStep extends AbstractCommandStep impl
         resultsBuilder.addResult("updateReport", updateReportParameters);
         CommandScope commandScope = resultsBuilder.getCommandScope();
         Database database = (Database) commandScope.getDependency(Database.class);
+        if(database instanceof PostgresDatabase) {
+            ((PostgresDatabase) database).setSearchPathPermanently();
+        }
         updateReportParameters.getDatabaseInfo().setDatabaseType(database.getDatabaseProductName());
         updateReportParameters.getDatabaseInfo().setVersion(database.getDatabaseProductVersion());
         updateReportParameters.setJdbcUrl(database.getConnection().getURL());
