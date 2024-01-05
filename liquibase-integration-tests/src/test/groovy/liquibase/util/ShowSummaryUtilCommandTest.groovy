@@ -20,7 +20,7 @@ import java.util.logging.Level
 @LiquibaseIntegrationTest
 class ShowSummaryUtilCommandTest extends Specification {
     @Shared
-    private DatabaseTestSystem postgres = (DatabaseTestSystem) Scope.getCurrentScope().getSingleton(TestSystemFactory.class).getTestSystem("postgresql")
+    private DatabaseTestSystem h2 = (DatabaseTestSystem) Scope.getCurrentScope().getSingleton(TestSystemFactory.class).getTestSystem("h2")
 
     def "Should show summary output when run multiple times"() {
         given:
@@ -28,7 +28,7 @@ class ShowSummaryUtilCommandTest extends Specification {
 
         when:
         new File(outputFile).delete()
-        CommandUtil.runUpdate(postgres,'changelogs/pgsql/update/showSummaryWithLabels.xml', "testtable1", "none", outputFile)
+        CommandUtil.runUpdate(h2,'changelogs/pgsql/update/showSummaryWithLabels.xml', "testtable1", "none", outputFile)
 
         then:
         new File(outputFile).getText("UTF-8").contains("Run:                          2")
@@ -36,16 +36,16 @@ class ShowSummaryUtilCommandTest extends Specification {
 
         when:
         new File(outputFile).delete()
-        CommandUtil.runUpdate(postgres,'changelogs/pgsql/update/showSummaryWithLabels.xml', "testtable1", "none", outputFile)
+        CommandUtil.runUpdate(h2,'changelogs/pgsql/update/showSummaryWithLabels.xml', "testtable1", "none", outputFile)
 
         then:
         new File(outputFile).getText("UTF-8").contains("Run:                          0")
         new File(outputFile).getText("UTF-8").contains("Filtered out:                 4")
 
         cleanup:
-        CommandUtil.runDropAll(postgres)
-        if (postgres.getConnection() != null) {
-            postgres.getConnection().close()
+        CommandUtil.runDropAll(h2)
+        if (h2.getConnection() != null) {
+            h2.getConnection().close()
         }
     }
 
@@ -60,9 +60,9 @@ class ShowSummaryUtilCommandTest extends Specification {
             @Override
             void run() throws Exception {
                 CommandScope commandScope = new CommandScope(UpdateCommandStep.COMMAND_NAME)
-                commandScope.addArgumentValue(DbUrlConnectionArgumentsCommandStep.URL_ARG, postgres.getConnectionUrl())
-                commandScope.addArgumentValue(DbUrlConnectionArgumentsCommandStep.USERNAME_ARG, postgres.getUsername())
-                commandScope.addArgumentValue(DbUrlConnectionArgumentsCommandStep.PASSWORD_ARG, postgres.getPassword())
+                commandScope.addArgumentValue(DbUrlConnectionArgumentsCommandStep.URL_ARG, h2.getConnectionUrl())
+                commandScope.addArgumentValue(DbUrlConnectionArgumentsCommandStep.USERNAME_ARG, h2.getUsername())
+                commandScope.addArgumentValue(DbUrlConnectionArgumentsCommandStep.PASSWORD_ARG, h2.getPassword())
                 commandScope.addArgumentValue(UpdateCommandStep.CHANGELOG_FILE_ARG, "changelogs/pgsql/update/showSummaryWithLabels.xml")
                 commandScope.addArgumentValue(UpdateCommandStep.LABEL_FILTER_ARG, "testtable1")
                 commandScope.addArgumentValue(UpdateCommandStep.CONTEXTS_ARG, null)
@@ -88,9 +88,9 @@ class ShowSummaryUtilCommandTest extends Specification {
         !outputStream.toString().contains("UPDATE SUMMARY")
 
         cleanup:
-        CommandUtil.runDropAll(postgres)
-        if (postgres.getConnection() != null) {
-            postgres.getConnection().close()
+        CommandUtil.runDropAll(h2)
+        if (h2.getConnection() != null) {
+            h2.getConnection().close()
         }
     }
 
@@ -105,9 +105,9 @@ class ShowSummaryUtilCommandTest extends Specification {
             @Override
             void run() throws Exception {
                 CommandScope commandScope = new CommandScope(UpdateCommandStep.COMMAND_NAME)
-                commandScope.addArgumentValue(DbUrlConnectionArgumentsCommandStep.URL_ARG, postgres.getConnectionUrl())
-                commandScope.addArgumentValue(DbUrlConnectionArgumentsCommandStep.USERNAME_ARG, postgres.getUsername())
-                commandScope.addArgumentValue(DbUrlConnectionArgumentsCommandStep.PASSWORD_ARG, postgres.getPassword())
+                commandScope.addArgumentValue(DbUrlConnectionArgumentsCommandStep.URL_ARG, h2.getConnectionUrl())
+                commandScope.addArgumentValue(DbUrlConnectionArgumentsCommandStep.USERNAME_ARG, h2.getUsername())
+                commandScope.addArgumentValue(DbUrlConnectionArgumentsCommandStep.PASSWORD_ARG, h2.getPassword())
                 commandScope.addArgumentValue(UpdateCommandStep.CHANGELOG_FILE_ARG, "changelogs/pgsql/update/showSummaryWithLabels.xml")
                 commandScope.addArgumentValue(UpdateCommandStep.LABEL_FILTER_ARG, "testtable1")
                 commandScope.addArgumentValue(UpdateCommandStep.CONTEXTS_ARG, null)
@@ -135,9 +135,9 @@ class ShowSummaryUtilCommandTest extends Specification {
         !logContent.contains("UPDATE SUMMARY")
 
         cleanup:
-        CommandUtil.runDropAll(postgres)
-        if (postgres.getConnection() != null) {
-            postgres.getConnection().close()
+        CommandUtil.runDropAll(h2)
+        if (h2.getConnection() != null) {
+            h2.getConnection().close()
         }
     }
 
@@ -152,9 +152,9 @@ class ShowSummaryUtilCommandTest extends Specification {
             @Override
             void run() throws Exception {
                 CommandScope commandScope = new CommandScope(UpdateCommandStep.COMMAND_NAME)
-                commandScope.addArgumentValue(DbUrlConnectionArgumentsCommandStep.URL_ARG, postgres.getConnectionUrl())
-                commandScope.addArgumentValue(DbUrlConnectionArgumentsCommandStep.USERNAME_ARG, postgres.getUsername())
-                commandScope.addArgumentValue(DbUrlConnectionArgumentsCommandStep.PASSWORD_ARG, postgres.getPassword())
+                commandScope.addArgumentValue(DbUrlConnectionArgumentsCommandStep.URL_ARG, h2.getConnectionUrl())
+                commandScope.addArgumentValue(DbUrlConnectionArgumentsCommandStep.USERNAME_ARG, h2.getUsername())
+                commandScope.addArgumentValue(DbUrlConnectionArgumentsCommandStep.PASSWORD_ARG, h2.getPassword())
                 commandScope.addArgumentValue(UpdateCommandStep.CHANGELOG_FILE_ARG, "changelogs/pgsql/update/showSummaryWithLabels.xml")
                 commandScope.addArgumentValue(UpdateCommandStep.LABEL_FILTER_ARG, "testtable1")
                 commandScope.addArgumentValue(UpdateCommandStep.CONTEXTS_ARG, null)
@@ -190,9 +190,9 @@ class ShowSummaryUtilCommandTest extends Specification {
         streamContent.contains("DBMS mismatch:                1")
 
         cleanup:
-        CommandUtil.runDropAll(postgres)
-        if (postgres.getConnection() != null) {
-            postgres.getConnection().close()
+        CommandUtil.runDropAll(h2)
+        if (h2.getConnection() != null) {
+            h2.getConnection().close()
         }
     }
 
