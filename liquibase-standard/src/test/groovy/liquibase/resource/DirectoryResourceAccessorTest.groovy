@@ -137,6 +137,7 @@ class DirectoryResourceAccessorTest extends Specification {
                                      "com/example/everywhere/file-everywhere.txt",
                                      "com/example/everywhere/other-file-everywhere.txt",
                                      "com/example/file with space.txt",
+                                     "com/example/liquibase/change/ChangeWithPrimitiveFields.class",
                                      "com/example/liquibase/change/ColumnConfig.class",
                                      "com/example/liquibase/change/ComputedConfig.class",
                                      "com/example/liquibase/change/CreateTableExampleChange.class",
