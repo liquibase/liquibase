@@ -236,21 +236,25 @@ public class ParsedNode {
         try {
             if (type.equals(String.class)) {
                 return (T) rawValue.toString();
-            } else if (type.equals(Integer.class)) {
+            } else if (type.equals(Integer.class) || type.equals(int.class)) {
                 return (T) Integer.valueOf(rawValue.toString());
-            } else if (type.equals(Short.class)) {
+            } else if (type.equals(Byte.class) || type.equals(byte.class)) {
+                return (T) Byte.valueOf(rawValue.toString());
+            } else if ((type.equals(Character.class) || type.equals(char.class)) && (rawValue instanceof String) && ((String) rawValue).length() == 1) {
+                return (T) Character.valueOf(((String) rawValue).charAt(0));
+            } else if (type.equals(Short.class) || type.equals(short.class)) {
                 return (T) Short.valueOf(rawValue.toString());
-            } else if (type.equals(Float.class)) {
+            } else if (type.equals(Float.class) || type.equals(float.class)) {
                 return (T) Float.valueOf(rawValue.toString());
-            } else if (type.equals(Double.class)) {
+            } else if (type.equals(Double.class) || type.equals(double.class)) {
                 return (T) Double.valueOf(rawValue.toString());
-            } else if (type.equals(Long.class)) {
+            } else if (type.equals(Long.class) || type.equals(long.class)) {
                 return (T) Long.valueOf(rawValue.toString());
             } else if (type.equals(BigInteger.class)) {
                 return (T) new BigInteger(rawValue.toString());
             } else if (type.equals(BigDecimal.class)) {
                 return (T) new BigDecimal(rawValue.toString());
-            } else if (type.equals(Boolean.class) && (rawValue instanceof String)) {
+            } else if ((type.equals(Boolean.class) || type.equals(boolean.class))) {
                 return (T) Boolean.valueOf(rawValue.toString());
             } else if (type.isAssignableFrom(Date.class)) {
                 return (T) new ISODateFormat().parse(rawValue.toString());

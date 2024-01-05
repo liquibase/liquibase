@@ -10,7 +10,10 @@ import liquibase.parser.core.ParsedNode
 import liquibase.parser.core.ParsedNodeException
 import liquibase.precondition.core.RunningAsPrecondition
 import liquibase.sdk.supplier.resource.ResourceSupplier
+import liquibase.serializer.core.xml.XMLChangeLogSerializer
+import liquibase.serializer.core.yaml.YamlChangeLogSerializer
 import liquibase.sql.visitor.ReplaceSqlVisitor
+import liquibase.util.FileUtil
 import org.hamcrest.Matchers
 import spock.lang.Shared
 import spock.lang.Specification
@@ -19,15 +22,15 @@ import spock.lang.Unroll
 import static org.junit.Assert.assertTrue
 import static spock.util.matcher.HamcrestSupport.that
 
-public class ChangeSetTest extends Specification {
+class ChangeSetTest extends Specification {
 
     @Shared
             resourceSupplier = new ResourceSupplier()
 
     def getDescriptions() {
         when:
-        def insertDescription = "insert tableName=test_table";
-        def changeSet = new ChangeSet("testId", "testAuthor", false, false, null, null, null, null);
+        def insertDescription = "insert tableName=test_table"
+        def changeSet = new ChangeSet("testId", "testAuthor", false, false, null, null, null, null)
 
         def insertData1 = new InsertDataChange()
         insertData1.setTableName("test_table")
@@ -39,61 +42,61 @@ public class ChangeSetTest extends Specification {
         changeSet.getDescription() == "empty"
 
         when:
-        changeSet.addChange(insertData1);
+        changeSet.addChange(insertData1)
         then:
         changeSet.getDescription() == insertDescription
 
         when:
-        changeSet.addChange(insertData2);
+        changeSet.addChange(insertData2)
         then:
         changeSet.getDescription() == insertDescription+"; insert tableName=test_table2"
 
         when:
         def createTableChange = new CreateTableChange()
         createTableChange.setTableName("new_table")
-        changeSet.addChange(createTableChange);
+        changeSet.addChange(createTableChange)
         then:
         changeSet.getDescription() == insertDescription+"; insert tableName=test_table2; createTable tableName=new_table"
     }
 
     def generateCheckSum() {
         when:
-        def changeSet1 = new ChangeSet("testId", "testAuthor", false, false, null, null, null, null);
-        def changeSet2 = new ChangeSet("testId", "testAuthor", false, false, null, null, null, null);
+        def changeSet1 = new ChangeSet("testId", "testAuthor", false, false, null, null, null, null)
+        def changeSet2 = new ChangeSet("testId", "testAuthor", false, false, null, null, null, null)
 
-        def change = new AddDefaultValueChange();
-        change.setSchemaName("SCHEMA_NAME");
-        change.setTableName("TABLE_NAME");
-        change.setColumnName("COLUMN_NAME");
-        change.setDefaultValue("DEF STRING");
-        change.setDefaultValueNumeric("42");
-        change.setDefaultValueBoolean(true);
-        change.setDefaultValueDate("2007-01-02");
+        def change = new AddDefaultValueChange()
+        change.setSchemaName("SCHEMA_NAME")
+        change.setTableName("TABLE_NAME")
+        change.setColumnName("COLUMN_NAME")
+        change.setDefaultValue("DEF STRING")
+        change.setDefaultValueNumeric("42")
+        change.setDefaultValueBoolean(true)
+        change.setDefaultValueDate("2007-01-02")
 
-        changeSet1.addChange(change);
-        changeSet2.addChange(change);
+        changeSet1.addChange(change)
+        changeSet2.addChange(change)
 
-        CheckSum md5Sum1 = changeSet1.generateCheckSum();
+        CheckSum md5Sum1 = changeSet1.generateCheckSum()
 
-        change.setSchemaName("SCHEMA_NAME2");
-        CheckSum md5Sum2 = changeSet2.generateCheckSum();
+        change.setSchemaName("SCHEMA_NAME2")
+        CheckSum md5Sum2 = changeSet2.generateCheckSum()
 
         then:
-        assert !md5Sum1.equals(md5Sum2);
+        assert !md5Sum1.equals(md5Sum2)
     }
 
     def isCheckSumValid_validCheckSum() {
         when:
-        def changeSet = new ChangeSet("1", "2", false, false, "/test.xml", null, null, null);
+        def changeSet = new ChangeSet("1", "2", false, false, "/test.xml", null, null, null)
 
         then:
-        assertTrue(changeSet.isCheckSumValid(changeSet.generateCheckSum()));
+        assertTrue(changeSet.isCheckSumValid(changeSet.generateCheckSum()))
     }
 
     def isCheckSumValid_invalidCheckSum() {
         when:
-        def checkSum = CheckSum.parse("8:asdf");
-        def changeSet = new ChangeSet("1", "2", false, false, "/test.xml", null, null, null);
+        def checkSum = CheckSum.parse("8:asdf")
+        def changeSet = new ChangeSet("1", "2", false, false, "/test.xml", null, null, null)
 
         then:
         assert !changeSet.isCheckSumValid(checkSum)
@@ -101,10 +104,10 @@ public class ChangeSetTest extends Specification {
 
     def isCheckSumValid_differentButValidCheckSum() {
         when:
-        CheckSum checkSum = CheckSum.parse("8:asdf");
+        CheckSum checkSum = CheckSum.parse("8:asdf")
 
-        ChangeSet changeSet = new ChangeSet("1", "2", false, false, "/test.xml", null, null, null);
-        changeSet.addValidCheckSum(changeSet.generateCheckSum().toString());
+        ChangeSet changeSet = new ChangeSet("1", "2", false, false, "/test.xml", null, null, null)
+        changeSet.addValidCheckSum(changeSet.generateCheckSum().toString())
 
         then:
         assert changeSet.isCheckSumValid(checkSum)
@@ -579,7 +582,7 @@ public class ChangeSetTest extends Specification {
     @Unroll("#featureName: #dbmsList=#expectedValues")
     def "check serialization for field dbms"() {
         when:
-        def changeSet = new ChangeSet("id1", "author1", false, false, "/test.xml", null, dbmsList, null);
+        def changeSet = new ChangeSet("id1", "author1", false, false, "/test.xml", null, dbmsList, null)
 
         then:
         that(((String) changeSet.getSerializableFieldValue("dbms")).split(","), Matchers.arrayContainingInAnyOrder(*expectedValues))
@@ -593,7 +596,7 @@ public class ChangeSetTest extends Specification {
 
     def "check serialization for field dbms with empty and null value"() {
         when:
-        def changeSet = new ChangeSet("id2", "author2", false, false, "/test.xml", null, dbmsList, null);
+        def changeSet = new ChangeSet("id2", "author2", false, false, "/test.xml", null, dbmsList, null)
 
         then:
         changeSet.getSerializableFieldValue("dbms") == expectedValue
@@ -606,14 +609,14 @@ public class ChangeSetTest extends Specification {
 
     def isInheritableIgnore() {
         when:
-        def changeSet = new ChangeSet("id1", "author1", false, false, "/test.xml", null, null, null);
+        def changeSet = new ChangeSet("id1", "author1", false, false, "/test.xml", null, null, null)
 
         then:
         !changeSet.isInheritableIgnore()
 
         when:
         def parent = new DatabaseChangeLog("com/example/test.xml")
-        changeSet = new ChangeSet("id1", "author1", false, false, "/test.xml", null, null, parent);
+        changeSet = new ChangeSet("id1", "author1", false, false, "/test.xml", null, null, parent)
 
         then:
         !changeSet.isInheritableIgnore()
@@ -663,6 +666,76 @@ public class ChangeSetTest extends Specification {
 
         cleanup:
         new File("liquibase_shell_out").delete()
+    }
+
+    def "validate rollback serialization doesn't duplicate rollback key on a YAML changelog format"() {
+        when:
+        DatabaseChangeLog changeLog = new DatabaseChangeLog()
+        ChangeSet changeSet = new ChangeSet(UUID.randomUUID().toString(), "author", false, false, "", "test", "mysql", changeLog)
+        changeSet.addRollbackChange(new EmptyChange())
+        changeLog.addChangeSet(changeSet)
+
+        YamlChangeLogSerializer serializer = new YamlChangeLogSerializer()
+        OutputStream outputStream = new FileOutputStream("changelog-with-rollback.yaml")
+        serializer.write(changeLog.getChangeSets(), outputStream)
+
+        then:
+        def outputFile = new File("changelog-with-rollback.yaml")
+        def contents = FileUtil.getContents(outputFile).replace("\n","").replace("\r","").trim()
+        def expectKeys = "rollback:      empty: {}".trim()
+        contents.contains(expectKeys)
+
+        cleanup:
+        outputFile.delete()
+        outputStream.close()
+    }
+
+    def "validate rollback serialization doesn't duplicate rollback key on a XML changelog format"() {
+        when:
+        DatabaseChangeLog changeLog = new DatabaseChangeLog()
+        ChangeSet changeSet = new ChangeSet(UUID.randomUUID().toString(), "author", false, false, "", "test", "mysql", changeLog)
+        changeSet.addRollbackChange(new EmptyChange())
+        changeLog.addChangeSet(changeSet)
+
+        XMLChangeLogSerializer serializer = new XMLChangeLogSerializer()
+        OutputStream outputStream = new FileOutputStream("changelog-with-rollback.xml")
+        serializer.write(changeLog.getChangeSets(), outputStream)
+
+        then:
+        def outputFile = new File("changelog-with-rollback.xml")
+        def contents = FileUtil.getContents(outputFile).replace("\n","").replace("\r","").trim()
+        def expectedKeys = "<rollback>            <empty/>        </rollback>".trim()
+        contents.contains(expectedKeys)
+
+        cleanup:
+        outputFile.delete()
+        outputStream.close()
+    }
+
+    def "validate rollback serialization works as expected when having to rollback a SQLFile change"() {
+        when:
+        DatabaseChangeLog changeLog = new DatabaseChangeLog()
+        def changeSet = new ChangeSet(new DatabaseChangeLog("com/example/test.xml"))
+        def node = new ParsedNode(null, "changeSet").addChildren([id: "1", author: "nvoxland"])
+        changeSet.load(node, resourceSupplier.simpleResourceAccessor)
+        def sqlFileChange = new SQLFileChange()
+        sqlFileChange.setPath("test/rollbackFile.sql")
+        changeSet.addRollbackChange(sqlFileChange)
+        changeLog.addChangeSet(changeSet)
+
+        YamlChangeLogSerializer serializer = new YamlChangeLogSerializer()
+        OutputStream outputStream = new FileOutputStream("changelog-with-rollback.yaml")
+        serializer.write(changeLog.getChangeSets(), outputStream)
+
+        then:
+        def outputFile = new File("changelog-with-rollback.yaml")
+        def contents = FileUtil.getContents(outputFile).replace("\n","").replace("\r","").trim()
+        def expectedKeys = "rollback:      sqlFile:        path: test/rollbackFile.sql        splitStatements: true        stripComments: false".trim()
+        contents.contains(expectedKeys)
+
+        cleanup:
+        outputFile.delete()
+        outputStream.close()
     }
 
 }

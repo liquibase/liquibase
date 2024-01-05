@@ -1470,7 +1470,7 @@ public class ChangeSet implements Conditional, ChangeLogChild {
 
         if ("rollback".equals(field)) {
             if ((rollback.getChanges() != null) && !rollback.getChanges().isEmpty()) {
-                return rollback;
+               return rollback;
             } else {
                 return null;
             }
