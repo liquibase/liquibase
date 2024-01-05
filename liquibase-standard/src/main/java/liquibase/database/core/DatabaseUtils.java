@@ -95,28 +95,30 @@ public class DatabaseUtils {
                 Scope.getCurrentScope().getLog(DatabaseUtils.class).info("Cannot get search_path", e);
             }
 
-            if (!searchPath.equals(defaultCatalogName) && !searchPath.equals(defaultSchemaName) && !searchPath.equals("\"" + defaultSchemaName + "\"") && !searchPath.startsWith(defaultSchemaName + ",") && !searchPath.startsWith("\"" + defaultSchemaName + "\",")) {
-                String finalSearchPath;
-                if (GlobalConfiguration.PRESERVE_SCHEMA_CASE.getCurrentValue()) {
-                    finalSearchPath = ((PostgresDatabase) database).quoteObject(defaultSchemaName, Schema.class);
-                } else {
-                    finalSearchPath = defaultSchemaName;
-                }
+            if(searchPath != null) {
+                if (!searchPath.equals(defaultCatalogName) && !searchPath.equals(defaultSchemaName) && !searchPath.equals("\"" + defaultSchemaName + "\"") && !searchPath.startsWith(defaultSchemaName + ",") && !searchPath.startsWith("\"" + defaultSchemaName + "\",")) {
+                    String finalSearchPath;
+                    if (GlobalConfiguration.PRESERVE_SCHEMA_CASE.getCurrentValue()) {
+                        finalSearchPath = ((PostgresDatabase) database).quoteObject(defaultSchemaName, Schema.class);
+                    } else {
+                        finalSearchPath = defaultSchemaName;
+                    }
 
-                if (StringUtil.isNotEmpty(searchPath)) {
-                    //If existing search path entries are not quoted, quote them. Some databases do not show them as quoted even though they need to be (like $user or case sensitive schemas)
-                    finalSearchPath += ", " + StringUtil.join(StringUtil.splitAndTrim(searchPath, ","), ",", (StringUtil.StringUtilFormatter<String>) obj -> {
-                        if (obj.startsWith("\"")) {
-                            return obj;
-                        }
-                        return ((PostgresDatabase) database).quoteObject(obj, Schema.class);
-                    });
-                }
+                    if (StringUtil.isNotEmpty(searchPath)) {
+                        //If existing search path entries are not quoted, quote them. Some databases do not show them as quoted even though they need to be (like $user or case sensitive schemas)
+                        finalSearchPath += ", " + StringUtil.join(StringUtil.splitAndTrim(searchPath, ","), ",", (StringUtil.StringUtilFormatter<String>) obj -> {
+                            if (obj.startsWith("\"")) {
+                                return obj;
+                            }
+                            return ((PostgresDatabase) database).quoteObject(obj, Schema.class);
+                        });
+                    }
 
-                try {
-                    executor.execute(new RawSqlStatement(String.format("ALTER DATABASE %s SET SEARCH_PATH TO %s", database.getLiquibaseCatalogName(), finalSearchPath)));
-                } catch (Throwable e) {
-                    Scope.getCurrentScope().getLog(DatabaseUtils.class).info("Cannot set search_path at database level", e);
+                    try {
+                        executor.execute(new RawSqlStatement(String.format("ALTER DATABASE %s SET SEARCH_PATH TO %s", database.getLiquibaseCatalogName(), finalSearchPath)));
+                    } catch (Throwable e) {
+                        Scope.getCurrentScope().getLog(DatabaseUtils.class).info("Cannot set search_path at database level", e);
+                    }
                 }
             }
         }
