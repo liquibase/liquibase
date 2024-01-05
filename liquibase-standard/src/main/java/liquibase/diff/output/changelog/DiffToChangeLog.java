@@ -247,7 +247,7 @@ public class DiffToChangeLog {
 
         Scope.getCurrentScope().getLog(getClass()).info("changeSets count: " + changeSets.size());
         if (changeSets.isEmpty()) {
-            Scope.getCurrentScope().getLog(getClass()).info("No changesets to add.");
+            Scope.getCurrentScope().getLog(getClass()).info("No changesets to add to the changelog output.");
         } else {
             Scope.getCurrentScope().getLog(getClass()).info(file + " does not exist, creating and adding " + changeSets.size() + " changesets.");
             try (OutputStream stream = file.openOutputStream(new OpenOptions());
