@@ -2,23 +2,26 @@ package liquibase.change.core
 
 import liquibase.change.AddColumnConfig
 import liquibase.change.Change
-import liquibase.change.ChangeFactory
 import liquibase.change.ChangeStatus
 import liquibase.change.ConstraintsConfig
 import liquibase.change.StandardChangeTest
-import liquibase.change.visitor.ChangeVisitor
 import liquibase.change.visitor.ChangeVisitorFactory
+import liquibase.database.core.FirebirdDatabase
 import liquibase.database.core.H2Database
+import liquibase.database.core.HsqlDatabase
 import liquibase.database.core.MSSQLDatabase
+import liquibase.database.core.MariaDBDatabase
 import liquibase.database.core.MockDatabase
+import liquibase.database.core.MySQLDatabase
+import liquibase.database.core.OracleDatabase
 import liquibase.database.core.PostgresDatabase
+import liquibase.datatype.DataTypeFactory
 import liquibase.exception.SetupException
 import liquibase.parser.core.ParsedNode
 import liquibase.parser.core.ParsedNodeException
 import liquibase.snapshot.MockSnapshotGeneratorFactory
 import liquibase.snapshot.SnapshotGeneratorFactory
 import liquibase.sqlgenerator.SqlGeneratorFactory
-import liquibase.statement.SqlStatement
 import liquibase.structure.core.Column
 import liquibase.structure.core.PrimaryKey
 import liquibase.structure.core.Table
@@ -374,11 +377,12 @@ class AddColumnChangeTest extends StandardChangeTest {
         }
     }
 
-    def "columns with delete cascade generate expected sql"() {
+    @Unroll
+    def "column with delete cascade generates the expected sql for #database database"() {
         when:
-        def db = new PostgresDatabase()
-
         def change = new AddColumnChange()
+        def liquibaseType = DataTypeFactory.getInstance().fromDescription("INT", database)
+        def databaseType = liquibaseType.toDatabaseDataType(database)
         change.setTableName("test_table")
 
         def constraintsConfig = new ConstraintsConfig()
@@ -388,12 +392,23 @@ class AddColumnChangeTest extends StandardChangeTest {
         constraintsConfig.setDeleteCascade(true)
         change.addColumn(new AddColumnConfig()
                 .setName("test_column")
-                .setType('BIGINT')
+                .setType('INT')
                 .setConstraints(constraintsConfig))
 
-        def statements = change.generateStatements(db)
+        def statements = change.generateStatements(database)
 
         then:
-        SqlGeneratorFactory.getInstance().generateSql(statements, db)*.toString() == ["ALTER TABLE test_table ADD test_column BIGINT;", "ALTER TABLE test_table ADD CONSTRAINT test_fk FOREIGN KEY (test_column) REFERENCES ref_table (ref_col) ON DELETE CASCADE;"]
+        SqlGeneratorFactory.getInstance().generateSql(statements, database)*.toString() == [String.format("ALTER TABLE test_table ADD test_column %s%s;", databaseType, columnNull), "ALTER TABLE test_table ADD CONSTRAINT test_fk FOREIGN KEY (test_column) REFERENCES ref_table (ref_col) ON DELETE CASCADE;"]
+
+        where:
+        database                | columnNull
+        new PostgresDatabase()  | ""
+        new OracleDatabase()    | ""
+        new MySQLDatabase()     | " NULL"
+        new MSSQLDatabase()     | ""
+        new H2Database()        | ""
+        new MariaDBDatabase()   | " NULL"
+        new FirebirdDatabase()  | ""
+        new HsqlDatabase()      | ""
     }
 }
