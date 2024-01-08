@@ -78,6 +78,7 @@ class ClassLoaderResourceAccessorTest extends Specification {
                                 "com/example/file with space.txt",
                                 "com/example/file-in-jar.txt",
                                 "com/example/jar/file-in-jar.txt",
+                                "com/example/liquibase/change/ChangeWithPrimitiveFields.class",
                                 "com/example/file-in-zip.txt",
                                 "com/example/liquibase/change/ColumnConfig.class",
                                 "com/example/liquibase/change/ComputedConfig.class",
