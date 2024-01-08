@@ -119,7 +119,11 @@ public class RanChangeSet {
         return this.getId().equalsIgnoreCase(changeSet.getId())
                 && this.getAuthor().equalsIgnoreCase(changeSet.getAuthor())
                 && isSamePath(changeSet.getFilePath());
+    }
 
+    public boolean isSameAsIgnoreLiquibaseInternalChangeset(ChangeSet changeSet) {
+        String ranChangesetPath = DatabaseChangeLog.normalizePath(this.getChangeLog());
+        return ranChangesetPath.equalsIgnoreCase("liquibase-internal") || isSameAs(changeSet);
     }
 
     /**
