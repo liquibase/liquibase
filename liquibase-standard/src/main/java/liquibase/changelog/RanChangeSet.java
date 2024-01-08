@@ -121,7 +121,7 @@ public class RanChangeSet {
                 && isSamePath(changeSet.getFilePath());
     }
 
-    public boolean isSameAsIgnoreLiquibaseInternalChangeset(ChangeSet changeSet) {
+    public boolean isSameAsOrIsLiquibaseInternalChangeset(ChangeSet changeSet) {
         String ranChangesetPath = DatabaseChangeLog.normalizePath(this.getChangeLog());
         return ranChangesetPath.equalsIgnoreCase("liquibase-internal") || isSameAs(changeSet);
     }
