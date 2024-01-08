@@ -92,7 +92,7 @@ public class DatabaseUtils {
             try {
                 searchPath = executor.queryForObject(new RawSqlStatement("SHOW SEARCH_PATH"), String.class);
             } catch (Throwable e) {
-                Scope.getCurrentScope().getLog(DatabaseUtils.class).info("Cannot get search_path", e);
+                Scope.getCurrentScope().getLog(DatabaseUtils.class).warning("Cannot get search_path", e);
             }
 
             if(searchPath != null) {
@@ -117,7 +117,7 @@ public class DatabaseUtils {
                     try {
                         executor.execute(new RawSqlStatement(String.format("ALTER DATABASE %s SET SEARCH_PATH TO %s", database.getLiquibaseCatalogName(), finalSearchPath)));
                     } catch (Throwable e) {
-                        Scope.getCurrentScope().getLog(DatabaseUtils.class).info("Cannot set search_path at database level", e);
+                        Scope.getCurrentScope().getLog(DatabaseUtils.class).severe("Cannot set search_path at database level", e);
                     }
                 }
             }
