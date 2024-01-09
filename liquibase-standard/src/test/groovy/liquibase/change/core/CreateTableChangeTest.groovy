@@ -5,9 +5,25 @@ import liquibase.change.ChangeStatus
 import liquibase.change.ColumnConfig
 import liquibase.change.ConstraintsConfig
 import liquibase.change.StandardChangeTest
+import liquibase.database.core.CockroachDatabase
+import liquibase.database.core.DB2Database
+import liquibase.database.core.Db2zDatabase
+import liquibase.database.core.DerbyDatabase
+import liquibase.database.core.EnterpriseDBDatabase
+import liquibase.database.core.FirebirdDatabase
+import liquibase.database.core.H2Database
+import liquibase.database.core.HsqlDatabase
+import liquibase.database.core.InformixDatabase
+import liquibase.database.core.Ingres9Database
 import liquibase.database.core.MSSQLDatabase
+import liquibase.database.core.MariaDBDatabase
 import liquibase.database.core.MockDatabase
+import liquibase.database.core.MySQLDatabase
+import liquibase.database.core.OracleDatabase
 import liquibase.database.core.PostgresDatabase
+import liquibase.database.core.SQLiteDatabase
+import liquibase.database.core.SybaseASADatabase
+import liquibase.database.core.SybaseDatabase
 import liquibase.parser.core.ParsedNode
 import liquibase.parser.core.ParsedNodeException
 import liquibase.snapshot.MockSnapshotGeneratorFactory
@@ -323,5 +339,38 @@ public class CreateTableChangeTest extends StandardChangeTest {
         def statement = (CreateTableStatement) change.generateStatements(new MockDatabase())[0]
         assertTrue(statement.getColumnRemarks("id").equals("test remark"))
 
+    }
+
+    def "generateStatementsWithIfNotExists"() {
+        when:
+        def change = new CreateTableChange(tableName: "test_table")
+        def columnConfig = new ColumnConfig()
+        columnConfig.setName("id")
+        columnConfig.setType(type)
+        change.addColumn(columnConfig)
+        change.setIfNotExists(true)
+
+        then:
+        SqlGeneratorFactory.getInstance().generateSql(change, database)[0].toSql() == expected
+
+        where:
+        type  | autoinc | database                   | expected
+        "int" | true    | new CockroachDatabase()    | "CREATE TABLE IF NOT EXISTS test_table (id INTEGER)"
+        "int" | true    | new DB2Database()          | "CREATE TABLE IF NOT EXISTS test_table (id INTEGER)"
+        "int" | true    | new H2Database()           | "CREATE TABLE IF NOT EXISTS test_table (id INT)"
+        "int" | true    | new HsqlDatabase()         | "CREATE TABLE IF NOT EXISTS test_table (id INT)"
+        "int" | true    | new InformixDatabase()     | "CREATE TABLE IF NOT EXISTS test_table (id INT)"
+        "int" | true    | new Ingres9Database()      | "CREATE TABLE IF NOT EXISTS test_table (id INT)"
+        "int" | true    | new MariaDBDatabase()      | "CREATE TABLE IF NOT EXISTS test_table (id INT NULL)"
+        "int" | true    | new MySQLDatabase()        | "CREATE TABLE IF NOT EXISTS test_table (id INT NULL)"
+        "int" | true    | new PostgresDatabase()     | "CREATE TABLE IF NOT EXISTS test_table (id INTEGER)"
+        "int" | true    | new SQLiteDatabase()       | "CREATE TABLE IF NOT EXISTS test_table (id INTEGER)"
+        "int" | true    | new Db2zDatabase()         | "CREATE TABLE test_table (id INTEGER)"
+        "int" | true    | new DerbyDatabase()        | "CREATE TABLE test_table (id INTEGER)"
+        "int" | true    | new EnterpriseDBDatabase() | "CREATE TABLE test_table (id INTEGER)"
+        "int" | true    | new FirebirdDatabase()     | "CREATE TABLE test_table (id INT)"
+        "int" | true    | new OracleDatabase()       | "CREATE TABLE test_table (id INTEGER)"
+        "int" | true    | new SybaseASADatabase()    | "CREATE TABLE test_table (id INTEGER NULL)"
+        "int" | true    | new SybaseDatabase()       | "CREATE TABLE test_table (id INT NULL)"
     }
 }

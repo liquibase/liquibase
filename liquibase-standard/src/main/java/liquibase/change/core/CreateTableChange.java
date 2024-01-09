@@ -5,6 +5,7 @@ import static liquibase.statement.SqlStatement.EMPTY_SQL_STATEMENT;
 import java.util.ArrayList;
 import java.util.List;
 
+import liquibase.ChecksumVersion;
 import liquibase.change.AbstractChange;
 import liquibase.change.Change;
 import liquibase.change.ChangeMetaData;
@@ -50,6 +51,7 @@ public class CreateTableChange extends AbstractChange implements ChangeWithColum
     private String tableName;
     private String tablespace;
     private String remarks;
+    private Boolean ifNotExists;
 
     public CreateTableChange() {
         super();
@@ -179,7 +181,7 @@ public class CreateTableChange extends AbstractChange implements ChangeWithColum
     }
 
     protected CreateTableStatement generateCreateTableStatement() {
-        return new CreateTableStatement(getCatalogName(), getSchemaName(), getTableName(), getRemarks(), getTableType());
+        return new CreateTableStatement(getCatalogName(), getSchemaName(), getTableName(), getRemarks(), getTableType(), Boolean.TRUE.equals(getIfNotExists()));
     }
 
     @Override
@@ -315,5 +317,21 @@ public class CreateTableChange extends AbstractChange implements ChangeWithColum
 
     public void setTableType(String tableType) {
         this.tableType = tableType;
+    }
+
+    @DatabaseChangeProperty(description = "If true, creates the table only if it does not already exist. Appends IF NOT EXISTS syntax to SQL query")
+    public Boolean getIfNotExists() {
+        return ifNotExists;
+    }
+
+    public void setIfNotExists(Boolean ifNotExists) {
+        this.ifNotExists = ifNotExists;
+    }
+
+    @Override
+    public String[] getExcludedFieldFilters(ChecksumVersion version) {
+        return new String[] {
+                "ifNotExists"
+        };
     }
 }

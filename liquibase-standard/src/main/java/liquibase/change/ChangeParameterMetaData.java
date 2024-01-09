@@ -336,15 +336,18 @@ public class ChangeParameterMetaData {
         try {
             Method writeMethod = getWriteMethod(change);
             Class<?> expectedWriteType = writeMethod.getParameterTypes()[0];
-            if ((value != null) && !expectedWriteType.isAssignableFrom(value.getClass())) {
-                if (expectedWriteType.equals(String.class)) {
-                    value = value.toString();
-                } else {
-                    throw new UnexpectedLiquibaseException(
-                            "Could not convert " + value.getClass().getName() +
-                                    " to " +
-                                    expectedWriteType.getName()
-                    );
+            if ((value != null)) {
+                Class<?> actualType = value.getClass();
+                if (!expectedWriteType.isAssignableFrom(actualType)) {
+                    if (expectedWriteType.equals(String.class)) {
+                        value = value.toString();
+                    } else if (!allowUnboxing(actualType, expectedWriteType)) {
+                        throw new UnexpectedLiquibaseException(
+                                "Could not convert " + actualType.getName() +
+                                        " to " +
+                                        expectedWriteType.getName()
+                        );
+                    }
                 }
             }
             writeMethod.invoke(change, value);
@@ -353,6 +356,21 @@ public class ChangeParameterMetaData {
         } catch (Exception e) {
             throw new UnexpectedLiquibaseException("Error setting " + this.parameterName + " to " + value, e);
         }
+    }
+
+    private static boolean allowUnboxing(Class<?> actual, Class<?> expected) {
+        if (!expected.isPrimitive()) {
+            return false;
+        }
+        return
+                actual.equals(Boolean.class) && expected.equals(boolean.class) ||
+                actual.equals(Byte.class) && expected.equals(byte.class) ||
+                actual.equals(Character.class) && expected.equals(char.class) ||
+                actual.equals(Double.class) && expected.equals(double.class) ||
+                actual.equals(Float.class) && expected.equals(float.class) ||
+                actual.equals(Integer.class) && expected.equals(int.class) ||
+                actual.equals(Long.class) && expected.equals(long.class) ||
+                actual.equals(Short.class) && expected.equals(short.class);
     }
 
     private Method getWriteMethod(Change change) {

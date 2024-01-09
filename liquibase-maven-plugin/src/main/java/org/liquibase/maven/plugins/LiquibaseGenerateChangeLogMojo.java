@@ -114,6 +114,30 @@ public class LiquibaseGenerateChangeLogMojo extends
     @PropertyElement
     protected boolean overwriteOutputFile;
 
+    /**
+     * Sets runOnChange="true" for changesets containing solely changes of these types (e.g. createView, createProcedure, ...).
+     *
+     * @parameter property="liquibase.runOnChangeTypes" default-value="none"
+     */
+    @PropertyElement
+    protected String runOnChangeTypes;
+
+    /**
+     * Sets replaceIfExists="true" for changes of the supported types, at the moment they are createView and createProcedure.
+     *
+     * @parameter property="liquibase.replaceIfExistsTypes" default-value="none"
+     */
+    @PropertyElement
+    protected String replaceIfExistsTypes;
+
+    /**
+     * Flag to allow adding 'OR REPLACE' option to the create view change object when generating changelog in SQL format
+     *
+     * @parameter property="liquibase.useOrReplaceOption" default-value="false"
+     */
+    @PropertyElement
+    protected boolean useOrReplaceOption;
+
     @Override
 	protected void performLiquibaseTask(Liquibase liquibase)
 			throws LiquibaseException {
@@ -141,6 +165,9 @@ public class LiquibaseGenerateChangeLogMojo extends
             if (diffIncludeObjects != null) {
                 diffOutputControl.setObjectChangeFilter(new StandardObjectChangeFilter(StandardObjectChangeFilter.FilterType.INCLUDE, diffIncludeObjects));
             }
+            if(useOrReplaceOption) {
+                diffOutputControl.setReplaceIfExistsSet(true);
+            }
 
             //
             // Set the global configuration option based on presence of the dataOutputDirectory
@@ -152,7 +179,7 @@ public class LiquibaseGenerateChangeLogMojo extends
             CatalogAndSchema[] targetSchemas = computedSchemas.finalTargetSchemas;
 
                 CommandLineUtils.doGenerateChangeLog(outputChangeLogFile, database, targetSchemas, StringUtil.trimToNull(diffTypes),
-                        StringUtil.trimToNull(changeSetAuthor), StringUtil.trimToNull(changeSetContext), StringUtil.trimToNull(dataDir), diffOutputControl, overwriteOutputFile);
+                        StringUtil.trimToNull(changeSetAuthor), StringUtil.trimToNull(changeSetContext), StringUtil.trimToNull(dataDir), diffOutputControl, overwriteOutputFile, runOnChangeTypes, replaceIfExistsTypes);
                 getLog().info("Output written to Change Log file, " + outputChangeLogFile);
             });
         }  catch (Exception e) {

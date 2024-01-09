@@ -36,6 +36,14 @@ import liquibase.structure.DatabaseObject;
 import liquibase.structure.core.*;
 import liquibase.util.StringUtil;
 
+import java.io.IOException;
+import java.io.Writer;
+import java.math.BigInteger;
+import java.util.Collection;
+import java.util.Date;
+import java.util.List;
+import java.util.Locale;
+
 /**
  * Interface that every DBMS supported by this software must implement. Most methods belong into ont of these
  * categories:
@@ -376,8 +384,6 @@ public interface Database extends PrioritizedService, AutoCloseable {
      */
     String escapeColumnNameList(String columnNames);
 
-//    Set<UniqueConstraint> findUniqueConstraints(String schema) throws DatabaseException;
-
     boolean supportsTablespaces();
 
     boolean supportsCatalogs();
@@ -610,6 +616,15 @@ public interface Database extends PrioritizedService, AutoCloseable {
         ObjectQuotingStrategy originalObjectQuotingStrategy = this.getObjectQuotingStrategy();
         this.setObjectQuotingStrategy(objectQuotingStrategy);
         return new TempObjectQuotingStrategy(this, originalObjectQuotingStrategy);
+    }
+
+    /**
+     * Does the database support the "if not exits" syntax?
+     * @param type the DatabaseObject type to be checked.
+     * @return true if the "if not exists" syntax is supported, false otherwise.
+     */
+    default boolean supportsCreateIfNotExists(Class<? extends DatabaseObject> type) {
+        return false;
     }
 }
 

@@ -122,4 +122,5 @@ public interface ChangeSetService extends Plugin {
     default String getEndDelimiter(ChangeSet changeSet) {
         return null;
     }
+
 }

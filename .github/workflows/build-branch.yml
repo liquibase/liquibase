@@ -1,10 +1,14 @@
 name: Build Branch SNAPSHOT
 
+# concurrent runs for pull requests (both internal and forked) will be canceled when a new run is triggered.
+# It does not specifically target or exclude the 'master' branch; it cancels concurrent runs whenever a pull request is triggered.
+concurrency:
+  group: ${{ github.workflow }}-${{ github.head_ref || github.ref }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+
 on:
   workflow_dispatch:
-  #push:
-  #branches:
-  #- 'master'
+
   pull_request_target:
     types:
       - opened
@@ -39,7 +43,7 @@ jobs:
       - name: Get Latest Merge Commit SHA
         id: get-sha
         run: |
-          latest_merge_sha=`(git rev-parse --short=7 HEAD)`
+          latest_merge_sha=`(git rev-parse HEAD)`
           echo "latestMergeSha=${latest_merge_sha}" >> $GITHUB_OUTPUT
 
       - name: Get Timestamp

@@ -14,6 +14,8 @@ import liquibase.servicelocator.LiquibaseService;
 import liquibase.structure.DatabaseObject;
 import liquibase.structure.DatabaseObjectCollection;
 import liquibase.structure.core.Schema;
+import lombok.Getter;
+import lombok.Setter;
 
 import java.util.HashSet;
 import java.util.Set;
@@ -25,6 +27,10 @@ public class DiffOutputControl {
     private boolean includeSchema;
     private boolean includeCatalog;
     private boolean includeTablespace;
+
+    @Getter
+    @Setter
+    private boolean isReplaceIfExistsSet = false;
 
     private CompareControl.SchemaComparison[] schemaComparisons;
 
