@@ -3,6 +3,7 @@ package liquibase.command
 import liquibase.Scope
 import liquibase.command.core.UpdateSqlCommandStep
 import liquibase.command.core.helpers.DbUrlConnectionArgumentsCommandStep
+import liquibase.database.core.DatabaseUtils
 import liquibase.executor.Executor
 import liquibase.executor.ExecutorService
 import liquibase.extension.testing.testsystem.DatabaseTestSystem
@@ -20,13 +21,15 @@ class UpdateSqlCommandStepIntegrationTest extends Specification{
 
     def "validate UpdateSql only generates SQL statement to set SEARCH_PATH once"() {
         when:
-        final Executor executor = Scope.getCurrentScope().getSingleton(ExecutorService.class).getExecutor("jdbc", postgres.getDatabaseFromFactory())
-        def catalogName = postgres.getCatalog()
-        def searchPath = executor.queryForObject(new RawSqlStatement("SHOW SEARCH_PATH"), String.class)
+        def postgresDB = postgres.getDatabaseFromFactory()
+        final Executor executor = Scope.getCurrentScope().getSingleton(ExecutorService.class).getExecutor("jdbc", postgresDB)
+        def catalogName = postgres.getConnection().getCatalog()
+        def schemaName = postgres.getConnection().getSchema()
+        def searchPath = DatabaseUtils.getFinalPostgresSearchPath(executor, catalogName, schemaName, postgresDB)
 
         def outputStream = new ByteArrayOutputStream()
         def updateSqlCommand = new CommandScope(UpdateSqlCommandStep.COMMAND_NAME)
-        updateSqlCommand.addArgumentValue(DbUrlConnectionArgumentsCommandStep.DATABASE_ARG, postgres.getDatabaseFromFactory())
+        updateSqlCommand.addArgumentValue(DbUrlConnectionArgumentsCommandStep.DATABASE_ARG, postgresDB)
         updateSqlCommand.addArgumentValue(UpdateSqlCommandStep.CHANGELOG_FILE_ARG, "liquibase/update-tests.yml")
         updateSqlCommand.setOutput(outputStream)
         updateSqlCommand.execute()
@@ -37,7 +40,7 @@ class UpdateSqlCommandStepIntegrationTest extends Specification{
         countSetSearchPathOccurrences(generatedSql, String.format("ALTER DATABASE %s SET SEARCH_PATH TO %s;", catalogName, searchPath)) == 1
     }
 
-    private static int countSetSearchPathOccurrences(String updateSqlOutput, String searchPathSetup) {
+    private int countSetSearchPathOccurrences(String updateSqlOutput, String searchPathSetup) {
         int count = 0;
         int index = updateSqlOutput.indexOf(searchPathSetup)
 
@@ -45,7 +48,6 @@ class UpdateSqlCommandStepIntegrationTest extends Specification{
             count++;
             index = updateSqlOutput.indexOf(searchPathSetup, index + 1)
         }
-
         return count
     }
 }
