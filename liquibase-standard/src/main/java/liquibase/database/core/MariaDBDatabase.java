@@ -3,6 +3,8 @@ package liquibase.database.core;
 import liquibase.Scope;
 import liquibase.database.DatabaseConnection;
 import liquibase.exception.DatabaseException;
+import liquibase.structure.DatabaseObject;
+import liquibase.structure.core.Table;
 import liquibase.util.StringUtil;
 
 import java.util.Arrays;
@@ -112,5 +114,10 @@ public class MariaDBDatabase extends MySQLDatabase {
             Scope.getCurrentScope().getLog(getClass()).fine("Cannot retrieve database version", e);
             return false;
         }
+    }
+
+    @Override
+    public boolean supportsCreateIfNotExists(Class<? extends DatabaseObject> type) {
+        return type.isAssignableFrom(Table.class);
     }
 }

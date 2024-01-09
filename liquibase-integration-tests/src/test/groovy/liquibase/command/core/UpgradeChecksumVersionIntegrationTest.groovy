@@ -423,5 +423,8 @@ VALUES('2', 'fl', '$changesetFilepath', '2023-09-29 14:33:39.112', 2, 'EXECUTED'
         def ranChangeSets = changeLogService.getRanChangeSets()
         ranChangeSets.size() == 1
         ranChangeSets.get(0).getLastCheckSum().toString() == "7:72c7eea8dda3c3582e3cfb39eec12033"
+
+        cleanup:
+        CommandUtil.runDropAll(h2)
     }
 }
