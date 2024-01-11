@@ -44,7 +44,7 @@ public class LiquibaseIntegrationMethodInterceptor extends AbstractMethodInterce
         List<FieldInfo> allFields = spec.getAllFields();
         int databases = 0;
         for (FieldInfo field : allFields) {
-            if (field.getType().isAssignableFrom(DatabaseTestSystem.class)) {
+            if (field.getType() != Object.class && field.getType().isAssignableFrom(DatabaseTestSystem.class)) {
                 databases++;
             }
         }
