@@ -268,6 +268,56 @@ CREATE TABLE ALL_CAPS_TABLE_2 (
 )
 """
 
+    private static final String VALID_CHANGELOG_TABLE_EXISTS_CASE = """
+--liquibase formatted sql
+
+--property name:idProp value:1
+--property name:authorProp value:nvoxland
+--property nAmE:tableNameProp value:table1
+--property name:runwith value: sqlplus
+
+
+--changeset \${authorProp}:\${idProp}
+select * from \${tableNameProp};
+
+
+--changeset "n voxland":"change 2" (stripComments:false splitStatements:false endDelimiter:X runOnChange:true runAlways:true contextFilter:y dbms:mysql runInTransaction:false failOnError:false)
+create table table1 (
+    id int primary key
+);
+
+--changeset "n voxland":"change 3" (stripComments:false splitStatements:false endDelimiter:X runOnChange:true runAlways:true contextFilter:y dbms:mysql runInTransaction:false failOnError:false)
+--precondition-table-exists table:table1 catalog:catalog123 schema:12345
+create table table2 (
+    id int primary key
+);
+""".trim()
+
+    private static final String VALID_CHANGELOG_VIEW_EXISTS_CASE = """
+--liquibase formatted sql
+
+--property name:idProp value:1
+--property name:authorProp value:nvoxland
+--property nAmE:tableNameProp value:table1
+--property name:runwith value: sqlplus
+
+
+--changeset \${authorProp}:\${idProp}
+select * from \${tableNameProp};
+
+
+--changeset "n voxland":"change 2" (stripComments:false splitStatements:false endDelimiter:X runOnChange:true runAlways:true contextFilter:y dbms:mysql runInTransaction:false failOnError:false)
+create table table1 (
+    id int primary key
+);
+
+--changeset "n voxland":"change 3" (stripComments:false splitStatements:false endDelimiter:X runOnChange:true runAlways:true contextFilter:y dbms:mysql runInTransaction:false failOnError:false)
+--precondition-view-exists view:view1 catalog:catalog123 schema:12345'
+create table table1 (
+    id int primary key
+);
+""".trim()
+
     def supports() throws Exception {
         expect:
         assert new MockFormattedSqlChangeLogParser(VALID_CHANGELOG).supports("asdf.sql", new JUnitResourceAccessor())
@@ -1100,6 +1150,37 @@ create table table1 (
         then: "change log parameters are created"
         changeLog.getChangeLogParameters().hasValue("DEFAULT_VALUE", changeLog) == true
         changeLog.getChangeLogParameters().getValue("DEFAULT_VALUE", changeLog) == "0"
+    }
+
+    def parseTableExists() throws Exception {
+        expect:
+        ChangeLogParameters params = new ChangeLogParameters()
+        params.set("tablename", "table4")
+        DatabaseChangeLog changeLog = new MockFormattedSqlChangeLogParser(VALID_CHANGELOG_TABLE_EXISTS_CASE).parse("asdf.sql", params, new JUnitResourceAccessor())
+        changeLog.getLogicalFilePath() == "asdf.sql"
+        changeLog.getChangeSets().size() == 3
+        changeLog.getChangeSets().get(2).getPreconditions().nestedPreconditions.size() == 1
+        changeLog.getChangeSets().get(2).getPreconditions().nestedPreconditions.name[0] == "tableExists"
+        changeLog.getChangeSets().get(2).getPreconditions().nestedPreconditions.get(0).getSerializableFields().size() == 3
+        changeLog.getChangeSets().get(2).getPreconditions().nestedPreconditions.get(0).getSerializableFieldValue("tableName") == "table1"
+        changeLog.getChangeSets().get(2).getPreconditions().nestedPreconditions.get(0).getSerializableFieldValue("catalogName") == "catalog123"
+        changeLog.getChangeSets().get(2).getPreconditions().nestedPreconditions.get(0).getSerializableFieldValue("schemaName") == "12345"
+    }
+
+    def parseViewExists() throws Exception {
+        expect:
+        ChangeLogParameters params = new ChangeLogParameters()
+        params.set("tablename", "table4")
+        DatabaseChangeLog changeLog = new MockFormattedSqlChangeLogParser(VALID_CHANGELOG_VIEW_EXISTS_CASE).parse("asdf.sql", params, new JUnitResourceAccessor())
+
+        changeLog.getLogicalFilePath() == "asdf.sql"
+        changeLog.getChangeSets().size() == 3
+        changeLog.getChangeSets().get(2).getPreconditions().nestedPreconditions.size() == 1
+        changeLog.getChangeSets().get(2).getPreconditions().nestedPreconditions.name[0] == "viewExists"
+        changeLog.getChangeSets().get(2).getPreconditions().nestedPreconditions.get(0).getSerializableFields().size() == 3
+        changeLog.getChangeSets().get(2).getPreconditions().nestedPreconditions.get(0).getSerializableFieldValue("viewName") == "view1"
+        changeLog.getChangeSets().get(2).getPreconditions().nestedPreconditions.get(0).getSerializableFieldValue("catalogName") == "catalog123"
+        changeLog.getChangeSets().get(2).getPreconditions().nestedPreconditions.get(0).getSerializableFieldValue("schemaName") == "12345"
     }
 
     @LiquibaseService(skip = true)

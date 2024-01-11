@@ -11,7 +11,6 @@ import liquibase.changelog.DatabaseChangeLog;
 import liquibase.changeset.ChangeSetService;
 import liquibase.changeset.ChangeSetServiceFactory;
 import liquibase.exception.ChangeLogParseException;
-import liquibase.exception.LiquibaseException;
 import liquibase.resource.ResourceAccessor;
 import liquibase.util.StreamUtil;
 import liquibase.util.StringUtil;
@@ -182,6 +181,15 @@ public abstract class AbstractFormattedChangeLogParser implements ChangeLogParse
 
     protected static final String GLOBAL_REGEX = ".*global:(\\S+).*";
     protected final Pattern GLOBAL_PATTERN = Pattern.compile(GLOBAL_REGEX, Pattern.CASE_INSENSITIVE);
+
+    protected static final String VIEW_NAME_STATEMENT_REGEX = ".*view:(\\w+).*";
+    protected final Pattern VIEW_NAME_STATEMENT_PATTERN = Pattern.compile(VIEW_NAME_STATEMENT_REGEX, Pattern.CASE_INSENSITIVE);
+
+    protected static final String TABLE_NAME_STATEMENT_REGEX = ".*table:(\\w+).*";
+    protected final Pattern TABLE_NAME_STATEMENT_PATTERN = Pattern.compile(TABLE_NAME_STATEMENT_REGEX, Pattern.CASE_INSENSITIVE);
+
+    protected static final String SCHEMA_NAME_STATEMENT_REGEX = ".*schema:(\\w+).*";
+    protected final Pattern SCHEMA_NAME_STATEMENT_PATTERN = Pattern.compile(SCHEMA_NAME_STATEMENT_REGEX, Pattern.CASE_INSENSITIVE);
 
     protected abstract String getSingleLineCommentOneCharacter();
 
