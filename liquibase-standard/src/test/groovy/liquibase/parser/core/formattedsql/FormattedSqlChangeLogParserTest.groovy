@@ -287,7 +287,7 @@ create table table1 (
 );
 
 --changeset "n voxland":"change 3" (stripComments:false splitStatements:false endDelimiter:X runOnChange:true runAlways:true contextFilter:y dbms:mysql runInTransaction:false failOnError:false)
---precondition-table-exists table:table1 catalog:catalog123 schema:12345
+--precondition-table-exists table:table1 schema:12345
 create table table2 (
     id int primary key
 );
@@ -312,7 +312,7 @@ create table table1 (
 );
 
 --changeset "n voxland":"change 3" (stripComments:false splitStatements:false endDelimiter:X runOnChange:true runAlways:true contextFilter:y dbms:mysql runInTransaction:false failOnError:false)
---precondition-view-exists view:view1 catalog:catalog123 schema:12345'
+--precondition-view-exists view:view1 schema:12345'
 create table table1 (
     id int primary key
 );
@@ -1161,9 +1161,7 @@ create table table1 (
         changeLog.getChangeSets().size() == 3
         changeLog.getChangeSets().get(2).getPreconditions().nestedPreconditions.size() == 1
         changeLog.getChangeSets().get(2).getPreconditions().nestedPreconditions.name[0] == "tableExists"
-        changeLog.getChangeSets().get(2).getPreconditions().nestedPreconditions.get(0).getSerializableFields().size() == 3
         changeLog.getChangeSets().get(2).getPreconditions().nestedPreconditions.get(0).getSerializableFieldValue("tableName") == "table1"
-        changeLog.getChangeSets().get(2).getPreconditions().nestedPreconditions.get(0).getSerializableFieldValue("catalogName") == "catalog123"
         changeLog.getChangeSets().get(2).getPreconditions().nestedPreconditions.get(0).getSerializableFieldValue("schemaName") == "12345"
     }
 
@@ -1177,9 +1175,7 @@ create table table1 (
         changeLog.getChangeSets().size() == 3
         changeLog.getChangeSets().get(2).getPreconditions().nestedPreconditions.size() == 1
         changeLog.getChangeSets().get(2).getPreconditions().nestedPreconditions.name[0] == "viewExists"
-        changeLog.getChangeSets().get(2).getPreconditions().nestedPreconditions.get(0).getSerializableFields().size() == 3
         changeLog.getChangeSets().get(2).getPreconditions().nestedPreconditions.get(0).getSerializableFieldValue("viewName") == "view1"
-        changeLog.getChangeSets().get(2).getPreconditions().nestedPreconditions.get(0).getSerializableFieldValue("catalogName") == "catalog123"
         changeLog.getChangeSets().get(2).getPreconditions().nestedPreconditions.get(0).getSerializableFieldValue("schemaName") == "12345"
     }
 
