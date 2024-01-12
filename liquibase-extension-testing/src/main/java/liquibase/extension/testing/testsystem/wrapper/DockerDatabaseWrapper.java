@@ -12,6 +12,7 @@ import liquibase.extension.testing.testsystem.TestSystem;
 import liquibase.extension.testing.testsystem.core.DB2TestSystem;
 import liquibase.util.CollectionUtil;
 import liquibase.util.StringUtil;
+import org.springframework.test.util.TestSocketUtils;
 import org.testcontainers.containers.JdbcDatabaseContainer;
 
 import java.util.*;
@@ -116,6 +117,7 @@ public class DockerDatabaseWrapper extends DatabaseWrapper {
             return returnValue;
         }, false);
 
+        boolean shouldMapToRandomHostPort = ports == null;
         if (ports == null) {
             final List<Integer> exposedPorts = container.getExposedPorts();
             ports = new int[exposedPorts.size()];
@@ -128,7 +130,11 @@ public class DockerDatabaseWrapper extends DatabaseWrapper {
         if (ports != null) {
             List<PortBinding> portBindings = new ArrayList<>();
             for (int port : ports) {
-                portBindings.add(new PortBinding(Ports.Binding.bindPort(port), new ExposedPort(port)));
+                int hostPort = port;
+                if (shouldMapToRandomHostPort) {
+                    hostPort = TestSocketUtils.findAvailableTcpPort();
+                }
+                portBindings.add(new PortBinding(Ports.Binding.bindPort(hostPort), new ExposedPort(port)));
             }
 
             container.withCreateContainerCmdModifier((Consumer<CreateContainerCmd>) cmd ->
