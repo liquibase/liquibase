@@ -6,6 +6,7 @@ import liquibase.changelog.ChangeSet;
 import liquibase.changelog.DatabaseChangeLog;
 import liquibase.command.CommandResults;
 import liquibase.command.CommandScope;
+import liquibase.command.core.GenerateChangelogCommandStep;
 import liquibase.command.core.SnapshotCommandStep;
 import liquibase.command.core.UpdateCommandStep;
 import liquibase.command.core.helpers.DbUrlConnectionArgumentsCommandStep;
@@ -15,12 +16,15 @@ import liquibase.database.jvm.JdbcConnection;
 import liquibase.dbtest.AbstractIntegrationTest;
 import liquibase.exception.DatabaseException;
 import liquibase.exception.ValidationFailedException;
+import liquibase.executor.ExecutorService;
 import liquibase.snapshot.DatabaseSnapshot;
 import liquibase.sql.visitor.AbstractSqlVisitor;
+import liquibase.statement.core.RawSqlStatement;
 import liquibase.structure.core.Index;
 import org.junit.Assert;
 import org.junit.Test;
 
+import java.io.ByteArrayOutputStream;
 import java.sql.ResultSet;
 import java.sql.Statement;
 import java.util.Date;
@@ -212,5 +216,24 @@ public class OracleIntegrationTest extends AbstractIntegrationTest {
             clearDatabase();
         }
 
+    }
+
+    @Test
+    public void testChangeLogGenerationForTableWithGeneratedColumn() throws Exception {
+        assumeNotNull(getDatabase());
+        clearDatabase();
+        String textToTest = "GENERATED ALWAYS AS (QTY*PRICE)";
+
+        Scope.getCurrentScope().getSingleton(ExecutorService.class).getExecutor("jdbc", getDatabase()).execute(new RawSqlStatement(
+            String.format("CREATE TABLE GENERATED_COLUMN_TEST(QTY INT, PRICE INT, TOTALVALUE INT %s)", textToTest)));
+
+        ByteArrayOutputStream baos = new ByteArrayOutputStream();
+        new CommandScope(GenerateChangelogCommandStep.COMMAND_NAME)
+            .addArgumentValue(DbUrlConnectionArgumentsCommandStep.DATABASE_ARG, getDatabase())
+            .setOutput(baos)
+            .execute();
+
+        String generatedChangeLog = baos.toString();
+        assertTrue("Text '" + textToTest + "' not found in generated change log: " + generatedChangeLog, generatedChangeLog.contains(textToTest));
     }
 }
