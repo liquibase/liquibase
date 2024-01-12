@@ -135,7 +135,12 @@ class ScopeTest extends Specification {
         }
 
         @Override
-        MdcObject put(String key, List<? extends CustomMdcObject> values) {
+        MdcObject put(String key, String value, boolean removeWhenScopeExits) {
+            return put(key, (Object) value)
+        }
+
+        @Override
+        MdcObject put(String key, Map<String, Object> values, boolean removeWhenScopeExits) {
             return put(key, (Object) values)
         }
 
@@ -145,7 +150,17 @@ class ScopeTest extends Specification {
         }
 
         @Override
+        MdcObject put(String key, List<? extends CustomMdcObject> values) {
+            return put(key, (Object) values)
+        }
+
+        @Override
         MdcObject put(String key, CustomMdcObject customMdcObject) {
+            return put(key, (Object) customMdcObject)
+        }
+
+        @Override
+        MdcObject put(String key, CustomMdcObject customMdcObject, boolean removeWhenScopeExits) {
             return put(key, (Object) customMdcObject)
         }
 
