@@ -418,7 +418,7 @@ public class Scope {
      *                             then it should be set to true.
      */
     public MdcObject addMdcValue(String key, String value, boolean removeWhenScopeExits) {
-        MdcObject mdcObject = getMdcManager().put(key, value);
+        MdcObject mdcObject = getMdcManager().put(key, value, removeWhenScopeExits);
         removeMdcObjectWhenScopeExits(removeWhenScopeExits, mdcObject);
 
         return mdcObject;
@@ -449,7 +449,7 @@ public class Scope {
      *                             then it should be set to true.
      */
     public MdcObject addMdcValue(String key, Map<String, Object> value, boolean removeWhenScopeExits) {
-        MdcObject mdcObject = getMdcManager().put(key, value);
+        MdcObject mdcObject = getMdcManager().put(key, value, removeWhenScopeExits);
         removeMdcObjectWhenScopeExits(removeWhenScopeExits, mdcObject);
 
         return mdcObject;
@@ -470,7 +470,7 @@ public class Scope {
      *                             then it should be set to true.
      */
     public MdcObject addMdcValue(String key, CustomMdcObject customMdcObject, boolean removeWhenScopeExits) {
-        MdcObject mdcObject = getMdcManager().put(key, customMdcObject);
+        MdcObject mdcObject = getMdcManager().put(key, customMdcObject, removeWhenScopeExits);
         removeMdcObjectWhenScopeExits(removeWhenScopeExits, mdcObject);
 
         return mdcObject;
