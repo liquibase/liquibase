@@ -571,7 +571,7 @@ public class ChangeSet implements Conditional, ChangeLogChild {
             if (value instanceof String) {
                 String finalValue = StringUtil.trimToNull((String) value);
                 if (finalValue != null) {
-                    String[] strings = StringUtil.processMultiLineSQL(finalValue, true, true, ";");
+                    String[] strings = StringUtil.processMultiLineSQL(finalValue, true, true, ";", this);
                     for (String string : strings) {
                         addRollbackChange(new RawSQLChange(string));
                         foundValue = true;
@@ -1209,7 +1209,7 @@ public class ChangeSet implements Conditional, ChangeLogChild {
             return;
         }
 
-        for (String statement : StringUtil.splitSQL(sql, null)) {
+        for (String statement : StringUtil.splitSQL(sql, null, this)) {
             rollback.getChanges().add(new RawSQLChange(statement.trim()));
         }
     }
@@ -1470,7 +1470,7 @@ public class ChangeSet implements Conditional, ChangeLogChild {
 
         if ("rollback".equals(field)) {
             if ((rollback.getChanges() != null) && !rollback.getChanges().isEmpty()) {
-                return rollback;
+               return rollback;
             } else {
                 return null;
             }

@@ -273,6 +273,7 @@ class DataTypeFactoryTest extends Specification {
         "long varchar"                                 | new SybaseDatabase()   | "TEXT"                                         | ClobType      | false
         "long nvarchar"                                | new SybaseDatabase()   | "TEXT"                                         | ClobType      | false
         "character varying"                            | new SybaseDatabase()   | "VARCHAR"                                      | VarcharType   | false
+        "uuid"                                         | new MariaDBDatabase()  | "UUID"                                         | UUIDType      | false
     }
 
     @Unroll("#featureName: #object for #database")

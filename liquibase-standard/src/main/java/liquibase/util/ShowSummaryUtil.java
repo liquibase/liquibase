@@ -16,6 +16,7 @@ import liquibase.logging.mdc.MdcObject;
 import liquibase.logging.mdc.customobjects.UpdateSummary;
 import liquibase.report.ShowSummaryGenerator;
 import liquibase.report.ShowSummaryGeneratorFactory;
+import lombok.Data;
 
 import java.io.IOException;
 import java.io.OutputStream;
@@ -116,11 +117,10 @@ public class ShowSummaryUtil {
         summaryDetails.getSummary().setValue(showSummary.toString());
         boolean shouldPrintDetailTable = showSummary != UpdateSummaryEnum.SUMMARY && (!skippedChangeSets.isEmpty() || !denied.isEmpty() || !additionalChangeSetStatus.isEmpty());
 
-        //
         // Show the details too
-        //
-        SortedMap<String, Integer> skippedMdc = showDetailTable(skippedChangeSets, filterDenied, outputStream, shouldPrintDetailTable, showSummaryOutput, additionalChangeSetStatus, runChangeLogIterator);
-        summaryDetails.getSummary().setSkipped(skippedMdc);
+        FilteredChanges filteredChanges = showDetailTable(skippedChangeSets, filterDenied, outputStream, shouldPrintDetailTable, showSummaryOutput, additionalChangeSetStatus, runChangeLogIterator);
+        summaryDetails.getSummary().setSkipped(filteredChanges.getMdcSkipCounts());
+        summaryDetails.setSkipped(filteredChanges.getSkippedChangesetsMessage());
         try (MdcObject updateSummaryMdcObject = Scope.getCurrentScope().addMdcValue(MdcKey.UPDATE_SUMMARY, summaryDetails.getSummary())) {
             Scope.getCurrentScope().getLog(ShowSummaryUtil.class).info("Update summary generated");
         }
@@ -130,7 +130,7 @@ public class ShowSummaryUtil {
     //
     // Show the details
     //
-    private static SortedMap<String, Integer> showDetailTable(List<ChangeSet> skippedChangeSets,
+    private static FilteredChanges showDetailTable(List<ChangeSet> skippedChangeSets,
                                                               List<ChangeSetStatus> filterDenied,
                                                               OutputStream outputStream,
                                                               boolean shouldPrintDetailTable,
@@ -143,7 +143,7 @@ public class ShowSummaryUtil {
         // Nothing to do
         //
         if (filterDenied.isEmpty() && skippedChangeSets.isEmpty() && additionalChangesets.isEmpty()) {
-            return new TreeMap<>(Collections.singletonMap(totalSkippedMdcKey, 0));
+            return new FilteredChanges(new TreeMap<>(Collections.singletonMap(totalSkippedMdcKey, 0)), new LinkedHashMap<>());
         }
         List<String> columnHeaders = new ArrayList<>();
         columnHeaders.add("Changeset Info");
@@ -169,29 +169,29 @@ public class ShowSummaryUtil {
             }
         });
 
-        //
         // Filtered because of labels or context
-        //
+        Map<ChangeSet, String> filteredChangesets = new LinkedHashMap<>();
         List<String> skippedMessages = new ArrayList<>();
-        for (ChangeSetStatus st : finalList) {
+        for (ChangeSetStatus changeSetStatus : finalList) {
             AtomicBoolean flag = new AtomicBoolean(true);
             StringBuilder builder = new StringBuilder();
-            st.getFilterResults().forEach(consumer -> {
-                if (consumer.getFilter() != null && !consumer.getFilter().isAssignableFrom(ShouldNotCountAsSkipChangesetFilter.class)) {
-                    String displayName = consumer.getMdcName();
+            changeSetStatus.getFilterResults().forEach(filterResult -> {
+                if (filterResult.getFilter() != null && !filterResult.getFilter().isAssignableFrom(ShouldNotCountAsSkipChangesetFilter.class)) {
+                    String displayName = filterResult.getMdcName();
                     mdcSkipCounts.merge(displayName, 1, Integer::sum);
                 }
-                String skippedMessage = String.format("   '%s' : %s", st.getChangeSet().toString(), consumer.getMessage());
+                String skippedMessage = String.format("   '%s' : %s", changeSetStatus.getChangeSet().toString(), filterResult.getMessage());
                 skippedMessages.add(skippedMessage);
                 if (!flag.get()) {
                     builder.append(System.lineSeparator());
                 }
-                builder.append(consumer.getMessage());
+                builder.append(filterResult.getMessage());
                 flag.set(false);
             });
             List<String> outputRow = new ArrayList<>();
-            outputRow.add(st.getChangeSet().toString());
+            outputRow.add(changeSetStatus.getChangeSet().toString());
             outputRow.add(builder.toString());
+            filteredChangesets.put(changeSetStatus.getChangeSet(), builder.toString());
             table.add(outputRow);
         }
 
@@ -208,7 +208,7 @@ public class ShowSummaryUtil {
                     skippedMessages.forEach(ShowSummaryUtil::writeToLog);
             }
         }
-        return mdcSkipCounts;
+        return new FilteredChanges(mdcSkipCounts, filteredChangesets);
     }
 
 
@@ -379,5 +379,11 @@ public class ShowSummaryUtil {
         Stream.of(message.split(System.lineSeparator()))
                 .filter(s -> !StringUtil.isWhitespace(s))
                 .forEach(Scope.getCurrentScope().getLog(ShowSummaryUtil.class)::info);
+    }
+
+    @Data
+    private static class FilteredChanges {
+        private final SortedMap<String, Integer> mdcSkipCounts;
+        private final Map<ChangeSet, String> skippedChangesetsMessage;
     }
 }

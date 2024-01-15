@@ -15,12 +15,27 @@ public class NoOpMdcManager implements MdcManager {
     }
 
     @Override
+    public MdcObject put(String key, String value, boolean removeWhenScopeExits) {
+        return new MdcObject(key, value);
+    }
+
+    @Override
     public MdcObject put(String key, Map<String, Object> values) {
         return new MdcObject(key, values);
     }
 
     @Override
+    public MdcObject put(String key, Map<String, Object> values, boolean removeWhenScopeExits) {
+        return new MdcObject(key, values);
+    }
+
+    @Override
     public MdcObject put(String key, CustomMdcObject customMdcObject) {
+        return new MdcObject(key, customMdcObject);
+    }
+
+    @Override
+    public MdcObject put(String key, CustomMdcObject customMdcObject, boolean removeWhenScopeExits) {
         return new MdcObject(key, customMdcObject);
     }
 

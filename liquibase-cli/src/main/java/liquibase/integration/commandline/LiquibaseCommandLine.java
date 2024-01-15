@@ -1,8 +1,5 @@
 package liquibase.integration.commandline;
 
-import static liquibase.integration.commandline.LiquibaseLauncherSettings.LiquibaseLauncherSetting.LIQUIBASE_HOME;
-import static liquibase.integration.commandline.LiquibaseLauncherSettings.getSetting;
-
 import liquibase.GlobalConfiguration;
 import liquibase.Scope;
 import liquibase.command.CommandArgumentDefinition;
@@ -58,6 +55,8 @@ import java.util.zip.ZipEntry;
 
 import static java.util.ResourceBundle.getBundle;
 import static liquibase.configuration.LiquibaseConfiguration.REGISTERED_VALUE_PROVIDERS_KEY;
+import static liquibase.integration.commandline.LiquibaseLauncherSettings.LiquibaseLauncherSetting.LIQUIBASE_HOME;
+import static liquibase.integration.commandline.LiquibaseLauncherSettings.getSetting;
 import static liquibase.util.SystemUtil.isWindows;
 
 
@@ -417,6 +416,8 @@ public class LiquibaseCommandLine {
                     for (ConfigurationValueProvider provider : valueProviders) {
                         liquibaseConfiguration.unregisterProvider(provider);
                     }
+
+                    LogUtil.setPersistedMdcKeysToEmptyString();
                 }
             });
         } catch (Throwable e) {
@@ -434,14 +435,13 @@ public class LiquibaseCommandLine {
             Scope.getCurrentScope().addMdcValue(MdcKey.DEPLOYMENT_OUTCOME_COUNT, "0");
             Scope.getCurrentScope().addMdcValue(MdcKey.ROWS_AFFECTED, "0");
             Scope.getCurrentScope().addMdcValue(MdcKey.CHANGELOG_FILE, "");
-            Scope.getCurrentScope().addMdcValue(MdcKey.CHANGESET_ID, "");
-            Scope.getCurrentScope().addMdcValue(MdcKey.CHANGESET_AUTHOR, "");
+            LogUtil.setPersistedMdcKeysToEmptyString();
             Scope.getCurrentScope().addMdcValue(MdcKey.CHANGESET_OUTCOME, "NOOP");
             Scope.getCurrentScope().addMdcValue(MdcKey.CHANGESETS_UPDATED, new ChangesetsUpdated());
             Scope.getCurrentScope().addMdcValue(MdcKey.OPERATION_START_TIME, "");
             Scope.getCurrentScope().addMdcValue(MdcKey.OPERATION_STOP_TIME, "");
             Scope.getCurrentScope().addMdcValue(MdcKey.LIQUIBASE_SYSTEM_NAME, "");
-            Scope.getCurrentScope().addMdcValue(MdcKey.LIQUIBASE_SYSTEM_USER, "");
+            Scope.getCurrentScope().addMdcValue(MdcKey.LIQUIBASE_SYSTEM_USER, "", false);
             Scope.getCurrentScope().addMdcValue(MdcKey.LIQUIBASE_TARGET_URL, "");
             Scope.getCurrentScope().addMdcValue(MdcKey.LIQUIBASE_VERSION, "");
             Scope.getCurrentScope().addMdcValue(MdcKey.LIQUIBASE_SCHEMA_NAME, "");
@@ -455,8 +455,8 @@ public class LiquibaseCommandLine {
     private void logMdcData() throws IOException {
         MdcManager mdcManager = Scope.getCurrentScope().getMdcManager();
         String localHostName = NetUtil.getLocalHostName();
+        Scope.getCurrentScope().addMdcValue(MdcKey.LIQUIBASE_SYSTEM_USER, System.getProperty("user.name"), false);
         try (MdcObject version = mdcManager.put(MdcKey.LIQUIBASE_VERSION, LiquibaseUtil.getBuildVersion());
-             MdcObject systemUser = mdcManager.put(MdcKey.LIQUIBASE_SYSTEM_USER, System.getProperty("user.name"));
              MdcObject systemName = mdcManager.put(MdcKey.LIQUIBASE_SYSTEM_NAME, localHostName);
              // The host name here is purposefully the same as the system name. The system name is retained for backwards compatibility.
              MdcObject hostName = mdcManager.put(MdcKey.LIQUIBASE_HOST_NAME, localHostName)) {
@@ -934,14 +934,14 @@ public class LiquibaseCommandLine {
                         String envStringToPresent =
                                 toEnvVariable("environment variable: 'liquibase.command." + StringUtil.join(commandDefinition.getName(), ".") +
                                         "." + def.getName()) + "')" + argDisplaySuffix;
-                        description = propertyStringToPresent + envStringToPresent;
+                        description = propertyStringToPresent + " " + envStringToPresent;
                     } else {
                         String propertyStringToPresent = "\n(defaults file: 'liquibase.command." + def.getName() + "' OR 'liquibase.command." +
                                 StringUtil.join(commandDefinition.getName(), ".") + "." + def.getName() + "'";
                         String envStringToPresent = ", environment variable: '" + toEnvVariable("liquibase.command." + def.getName()) + "' OR '" +
                                 toEnvVariable("liquibase.command." + StringUtil.join(commandDefinition.getName(), ".") +
                                         "." + def.getName()) + "')" + argDisplaySuffix;
-                        description = propertyStringToPresent + envStringToPresent;
+                        description = propertyStringToPresent + " " + envStringToPresent;
                     }
 
                     if (def.getDefaultValue() != null) {

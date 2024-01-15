@@ -7,6 +7,8 @@ import liquibase.change.Change;
 import liquibase.change.ReplaceIfExists;
 import liquibase.change.core.*;
 import liquibase.changelog.ChangeSet;
+import liquibase.changeset.ChangeSetService;
+import liquibase.changeset.ChangeSetServiceFactory;
 import liquibase.command.CommandScope;
 import liquibase.command.core.GenerateChangelogCommandStep;
 import liquibase.configuration.core.DeprecatedConfigurationValueProvider;
@@ -245,14 +247,13 @@ public class DiffToChangeLog {
 
         Scope.getCurrentScope().getLog(getClass()).info("changeSets count: " + changeSets.size());
         if (changeSets.isEmpty()) {
-            Scope.getCurrentScope().getLog(getClass()).info("No changesets to add.");
+            Scope.getCurrentScope().getLog(getClass()).info("No changesets to add to the changelog output.");
         } else {
             Scope.getCurrentScope().getLog(getClass()).info(file + " does not exist, creating and adding " + changeSets.size() + " changesets.");
-        }
-
-        try (OutputStream stream = file.openOutputStream(new OpenOptions());
-             PrintStream out = new PrintStream(stream, true, GlobalConfiguration.OUTPUT_FILE_ENCODING.getCurrentValue())) {
-            changeLogSerializer.write(changeSets, out);
+            try (OutputStream stream = file.openOutputStream(new OpenOptions());
+                 PrintStream out = new PrintStream(stream, true, GlobalConfiguration.OUTPUT_FILE_ENCODING.getCurrentValue())) {
+                 changeLogSerializer.write(changeSets, out);
+            }
         }
     }
 
@@ -772,11 +773,13 @@ public class DiffToChangeLog {
                         .replaceFirst("\\)$", "");
             }
 
+            ChangeSetService service = ChangeSetServiceFactory.getInstance().createChangeSetService();
             if (useSeparateChangeSets(changes)) {
                 for (Change change : changes) {
                     final boolean runOnChange = isContainedInRunOnChangeTypes(change);
-                    ChangeSet changeSet = new ChangeSet(generateId(changes), getChangeSetAuthor(), false, runOnChange, this.changeSetPath, changeSetContext,
-                            null, true, quotingStrategy, null);
+                    ChangeSet changeSet =
+                            service.createChangeSet(generateId(changes), getChangeSetAuthor(), false, runOnChange, this.changeSetPath, changeSetContext,
+                                    null, null, null, true, quotingStrategy, null);
                     changeSet.setCreated(created);
                     if (diffOutputControl.getLabels() != null) {
                         changeSet.setLabels(diffOutputControl.getLabels());
@@ -791,8 +794,8 @@ public class DiffToChangeLog {
                 }
             } else {
                 final boolean runOnChange = Arrays.asList(changes).stream().allMatch(change -> isContainedInRunOnChangeTypes(change));
-                ChangeSet changeSet = new ChangeSet(generateId(changes), getChangeSetAuthor(), false, runOnChange, this.changeSetPath, csContext,
-                        null, true, quotingStrategy, null);
+                ChangeSet changeSet = service.createChangeSet(generateId(changes), getChangeSetAuthor(), false, runOnChange, this.changeSetPath, changeSetContext,
+                                        null, null, null, true, quotingStrategy, null);
                 changeSet.setCreated(created);
                 if (diffOutputControl.getLabels() != null) {
                     changeSet.setLabels(diffOutputControl.getLabels());
