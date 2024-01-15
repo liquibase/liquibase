@@ -40,8 +40,6 @@ public class TableIsEmptyGenerator extends AbstractSqlGenerator<TableIsEmptyStat
         }
         if (database instanceof FirebirdDatabase) {
             return String.format("SELECT COUNT(1) FROM RDB$DATABASE WHERE EXISTS (SELECT * FROM %s)", tableName);
-        } else if (database instanceof DB2Database) {
-            return String.format("SELECT COUNT(1) FROM sysibm.sysdummy1 WHERE EXISTS (SELECT * FROM %s)", tableName);
         }
         return String.format("SELECT COUNT(1) WHERE EXISTS (SELECT * FROM %s)", tableName);
     }
