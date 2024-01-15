@@ -1,7 +1,7 @@
 <databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
                    xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.25.xsd"
                    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
-    <changeSet id="10" author="test" dbms="postgresql,oracle,mssql,hsqldb">
+    <changeSet id="10" author="test" dbms="postgresql,oracle,mssql,hsqldb,h2">
         <createTable tableName="department">
             <column name="id" type="int">
                 <constraints primaryKey="true"/>
@@ -14,7 +14,7 @@
             </column>
         </createTable>
     </changeSet>
-    <changeSet id="20" author="test" dbms="postgresql,oracle,mssql,hsqldb">
+    <changeSet id="20" author="test" dbms="postgresql,oracle,mssql,hsqldb,h2">
         <preConditions onFail="HALT">
             <tableExists tableName="department"/>
         </preConditions>

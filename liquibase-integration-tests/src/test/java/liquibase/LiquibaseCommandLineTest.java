@@ -29,12 +29,12 @@ public class LiquibaseCommandLineTest {
     }
 
     @Test
-    public void specifyDatabaseClass() throws IOException {
+    public void specifyDatabaseClass() {
         final LiquibaseCommandLine cli = new LiquibaseCommandLine();
         int returnCode = cli.execute(new String[] {
-                "--url=jdbc:hsqldb:mem:liquibase;shutdown=true;hsqldb.database_collation=SQL_TEXT_UCC",
+                "--url=jdbc:h2:mem:liquibase",
                 "--changeLogFile=changelogs/specific.dbms.xml",
-                "--databaseClass=liquibase.database.core.HsqlDatabase",
+                "--databaseClass=liquibase.database.core.H2Database",
                 "--show-banner=false",
                 "update"
         });
@@ -43,10 +43,10 @@ public class LiquibaseCommandLineTest {
     }
 
     @Test
-    public void withoutSpecifyDatabaseClass() throws IOException {
+    public void withoutSpecifyDatabaseClass() {
         final LiquibaseCommandLine cli = new LiquibaseCommandLine();
         int returnCode = cli.execute(new String[] {
-                "--url=jdbc:hsqldb:mem:liquibase;shutdown=true;hsqldb.database_collation=SQL_TEXT_UCC",
+                "--url=jdbc:h2:mem:liquibase",
                 "--changeLogFile=changelogs/specific.dbms.xml",
                 "--show-banner=false",
                 "update"
