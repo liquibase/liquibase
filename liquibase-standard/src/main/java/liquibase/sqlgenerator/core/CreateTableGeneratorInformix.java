@@ -22,7 +22,7 @@ import java.util.List;
 
 /**
  * An Informix-specific create table statement generator.
- * 
+ *
  * @author islavov
  */
 public class CreateTableGeneratorInformix extends CreateTableGenerator {
@@ -49,10 +49,15 @@ public class CreateTableGeneratorInformix extends CreateTableGenerator {
         StringBuilder buffer = new StringBuilder();
 
         // CREATE TABLE table_name ...
-        buffer.append("CREATE TABLE ")
-                .append(database.escapeTableName(statement.getCatalogName(), statement.getSchemaName(), statement.getTableName()))
-                .append(" ");
-        buffer.append("(");
+        buffer.append("CREATE TABLE ");
+
+        if (statement.isIfNotExists() && database.supportsCreateIfNotExists(Table.class)) {
+            buffer.append("IF NOT EXISTS ");
+        }
+
+        buffer.append(database.escapeTableName(statement.getCatalogName(), statement.getSchemaName(), statement.getTableName()))
+                .append(" ")
+                .append("(");
 
         Iterator<String> columnIterator = statement.getColumns().iterator();
         List<String> primaryKeyColumns = new LinkedList<>();
@@ -70,12 +75,12 @@ public class CreateTableGeneratorInformix extends CreateTableGenerator {
          */
         while (columnIterator.hasNext()) {
             String column = columnIterator.next();
-            
+
             buffer.append(database.escapeColumnName(statement.getCatalogName(), statement.getSchemaName(), statement.getTableName(), column));
             buffer.append(" ").append(statement.getColumnTypes().get(column).toDatabaseDataType(database).toSql());
-            
+
             AutoIncrementConstraint autoIncrementConstraint = null;
-            
+
             for (AutoIncrementConstraint currentAutoIncrementConstraint : statement.getAutoIncrementConstraints()) {
                 if (column.equals(currentAutoIncrementConstraint.getColumnName())) {
                     autoIncrementConstraint = currentAutoIncrementConstraint;
@@ -83,14 +88,14 @@ public class CreateTableGeneratorInformix extends CreateTableGenerator {
                 }
             }
 
-            boolean isAutoIncrementColumn = autoIncrementConstraint != null;            
+            boolean isAutoIncrementColumn = autoIncrementConstraint != null;
             boolean isPrimaryKeyColumn = (statement.getPrimaryKeyConstraint() != null) && statement
-                .getPrimaryKeyConstraint().getColumns().contains(column);
+                    .getPrimaryKeyConstraint().getColumns().contains(column);
 
             if (isPrimaryKeyColumn) {
                 primaryKeyColumns.add(column);
             }
-            
+
             if (statement.getDefaultValue(column) != null) {
                 Object defaultValue = statement.getDefaultValue(column);
                 buffer.append(" DEFAULT ");
@@ -101,12 +106,12 @@ public class CreateTableGeneratorInformix extends CreateTableGenerator {
                 // TODO: check if database supports auto increment on non primary key column
                 if (database.supportsAutoIncrement()) {
                     String autoIncrementClause = database.getAutoIncrementClause(autoIncrementConstraint.getStartWith(), autoIncrementConstraint.getIncrementBy(), autoIncrementConstraint.getGenerationType(), autoIncrementConstraint.getDefaultOnNull());
-                
+
                     if (!autoIncrementClause.isEmpty()) {
                         buffer.append(" ").append(autoIncrementClause);
                     }
                 } else {
-                    Scope.getCurrentScope().getLog(getClass()).warning(database.getShortName()+" does not support autoincrement columns as requested for "+(database.escapeTableName(statement.getCatalogName(), statement.getSchemaName(), statement.getTableName())));
+                    Scope.getCurrentScope().getLog(getClass()).warning(database.getShortName() + " does not support autoincrement columns as requested for " + (database.escapeTableName(statement.getCatalogName(), statement.getSchemaName(), statement.getTableName())));
                 }
             }
 
@@ -127,7 +132,7 @@ public class CreateTableGeneratorInformix extends CreateTableGenerator {
          * https://www.ibm.com/support/knowledgecenter/SSGU8G_11.50.0/com.ibm.sqls.doc/ids_sqs_0100.htm
          * is:
          * ( columns ... --> PRIMARY KEY (column1, ..., columnN) [CONSTRAINT pk_name]
-          */
+         */
         //
 
         PrimaryKeyConstraint pkConstraint = statement.getPrimaryKeyConstraint();
@@ -136,7 +141,7 @@ public class CreateTableGeneratorInformix extends CreateTableGenerator {
             buffer.append(StringUtil.join(primaryKeyColumns, ", "));
             buffer.append(")");
 
-            if (! StringUtil.isEmpty(pkConstraint.getConstraintName() )) {
+            if (!StringUtil.isEmpty(pkConstraint.getConstraintName())) {
                 buffer.append(" CONSTRAINT ");
                 buffer.append(database.escapeConstraintName(pkConstraint.getConstraintName()));
             }
@@ -147,12 +152,12 @@ public class CreateTableGeneratorInformix extends CreateTableGenerator {
         for (ForeignKeyConstraint fkConstraint : statement.getForeignKeyConstraints()) {
             String referencesString = fkConstraint.getReferences();
             if (!referencesString.contains(".") && (database.getDefaultSchemaName() != null)) {
-                referencesString = database.getDefaultSchemaName()+"."+referencesString;
+                referencesString = database.getDefaultSchemaName() + "." + referencesString;
             }
             buffer.append(" FOREIGN KEY (")
-                .append(database.escapeColumnName(statement.getCatalogName(), statement.getSchemaName(), statement.getTableName(), fkConstraint.getColumn()))
-                .append(") REFERENCES ")
-                .append(referencesString);
+                    .append(database.escapeColumnName(statement.getCatalogName(), statement.getSchemaName(), statement.getTableName(), fkConstraint.getColumn()))
+                    .append(") REFERENCES ")
+                    .append(referencesString);
 
             if (fkConstraint.isDeleteCascade()) {
                 buffer.append(" ON DELETE CASCADE");
@@ -197,7 +202,7 @@ public class CreateTableGeneratorInformix extends CreateTableGenerator {
             sql += " IN " + statement.getTablespace();
         }
 
-        return new Sql[] { new UnparsedSql(sql, new Table().setName(statement.getTableName()).setSchema(new Schema(statement.getCatalogName(), statement.getSchemaName()))) };
+        return new Sql[]{new UnparsedSql(sql, new Table().setName(statement.getTableName()).setSchema(new Schema(statement.getCatalogName(), statement.getSchemaName())))};
     }
 
     private boolean constraintNameAfterUnique() {

@@ -567,7 +567,7 @@ public class MockDatabase implements Database, InternalDatabase {
     @Override
     public void executeRollbackStatements(final SqlStatement[] statements, final List<SqlVisitor> sqlVisitors) {
     }
-    
+
     @Override
     public void saveRollbackStatement(final Change change, final List<SqlVisitor> sqlVisitors, final Writer writer) {
     }
@@ -822,6 +822,11 @@ public class MockDatabase implements Database, InternalDatabase {
 
     @Override
     public boolean requiresExplicitNullForColumns() {
+        return false;
+    }
+
+    @Override
+    public boolean supportsCreateIfNotExists(Class<? extends DatabaseObject> type) {
         return false;
     }
 }

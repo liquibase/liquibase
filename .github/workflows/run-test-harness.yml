@@ -25,19 +25,20 @@ jobs:
         with:
           ref: ${{ github.event.pull_request.head.sha || github.event.after}} #sets the Git reference (commit or branch) to be checked out in the workflow
 
-      - name: Get Workflow Run URL
-        id: get-workflow-url
-        run: |
-          repo_url="https://github.com/${{ github.repository }}"
-          workflow_url="${repo_url}/actions/runs/${{ github.run_id }}"
-          echo "workflow_url=${workflow_url}" >> $GITHUB_ENV
-
   run-test-harness-tests:
     runs-on: ubuntu-latest
     needs: [ test-harness-build ]
     name: Trigger Test Harness Tests
     steps:
       - uses: actions/checkout@v4
+
+      - name: Get OSS Workflow Run URL
+        id: get-workflow-url
+        run: |
+          repo_url="https://github.com/${{ github.repository }}"
+          ossWorkflowUrl="${repo_url}/actions/runs/${{ github.run_id }}"
+          echo "ossWorkflowUrl=${ossWorkflowUrl}" >> $GITHUB_ENV
+
       - name: Dispatch an action and get the run ID
         uses: codex-/return-dispatch@v1
         id: return_dispatch
@@ -49,7 +50,7 @@ jobs:
           workflow: main.yml
           workflow_inputs:
             '{"liquibaseCommit": "${{ inputs.latestMergeSha }}",
-              "runDescription": "${{ env.workflow_url }}",
+              "runDescription": "${{ env.ossWorkflowUrl }}",
               "liquibaseBranch": "${{ inputs.thisBranchName }}"
             }'
 

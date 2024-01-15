@@ -122,4 +122,8 @@ public class Ingres9Database extends AbstractJdbcDatabase {
         return false;
     }
 
+    @Override
+    public boolean supportsCreateIfNotExists(Class<? extends DatabaseObject> type) {
+        return type.isAssignableFrom(Table.class);
+    }
 }
