@@ -41,4 +41,17 @@ public class LiquibaseCommandLineTest {
 
         Assert.assertEquals(0, returnCode);
     }
+
+    @Test
+    public void withoutSpecifyDatabaseClass() throws IOException {
+        final LiquibaseCommandLine cli = new LiquibaseCommandLine();
+        int returnCode = cli.execute(new String[] {
+                "--url=jdbc:hsqldb:mem:liquibase;shutdown=true;hsqldb.database_collation=SQL_TEXT_UCC",
+                "--changeLogFile=changelogs/specific.dbms.xml",
+                "--show-banner=false",
+                "update"
+        });
+
+        Assert.assertEquals(0, returnCode);
+    }
 }
