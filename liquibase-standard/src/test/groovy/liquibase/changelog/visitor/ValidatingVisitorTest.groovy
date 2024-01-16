@@ -309,6 +309,7 @@ class ValidatingVisitorTest extends Specification {
         changeSet1.addChange(sqlFileChange1)
         List<RanChangeSet> ran = new ArrayList<RanChangeSet>()
         ran.add(new RanChangeSet(changeSet1))
+        ran.get(0).setLiquibaseVersion("4.24.0")
 
         ValidatingVisitor handler = new ValidatingVisitor(ran)
         def changeSet2 = new ChangeSet("1", "testAuthor", false, false, "path/changelog", null, null, null)
