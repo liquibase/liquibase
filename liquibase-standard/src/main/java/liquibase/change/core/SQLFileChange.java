@@ -6,7 +6,6 @@ import liquibase.Scope;
 import liquibase.change.*;
 import liquibase.changelog.ChangeLogParameters;
 import liquibase.database.Database;
-import liquibase.exception.ChangeLogParseException;
 import liquibase.exception.SetupException;
 import liquibase.exception.UnexpectedLiquibaseException;
 import liquibase.exception.ValidationErrors;
@@ -85,10 +84,6 @@ public class SQLFileChange extends AbstractSQLChange {
 
     public void setRelativeToChangelogFile(Boolean relativeToChangelogFile) {
         this.relativeToChangelogFile = relativeToChangelogFile;
-    }
-
-    public Boolean getDoExpandExpressionsInGenerateChecksum() {
-        return doExpandExpressionsInGenerateChecksum;
     }
 
     public void setDoExpandExpressionsInGenerateChecksum(Boolean doExpandExpressionsInGenerateChecksum) {
