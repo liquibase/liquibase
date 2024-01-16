@@ -84,7 +84,7 @@ public class ExecuteSqlCommandStep extends AbstractCommandStep {
         resultsBuilder.addResult("output", out.toString());
     }
 
-    private static String determineEndDelimiter(CommandScope commandScope) {
+    protected static String determineEndDelimiter(CommandScope commandScope) {
         String delimiter = commandScope.getArgumentValue(DELIMITER_ARG);
         if (delimiter == null) {
             ChangeSetService service = ChangeSetServiceFactory.getInstance().createChangeSetService();
@@ -93,14 +93,14 @@ public class ExecuteSqlCommandStep extends AbstractCommandStep {
         return delimiter;
     }
 
-    private void handleOutput(CommandResultsBuilder resultsBuilder, String output) throws IOException {
+    protected void handleOutput(CommandResultsBuilder resultsBuilder, String output) throws IOException {
         String charsetName = GlobalConfiguration.OUTPUT_FILE_ENCODING.getCurrentValue();
         Writer outputWriter = new OutputStreamWriter(resultsBuilder.getOutputStream(), charsetName);
         outputWriter.write(output);
         outputWriter.flush();
     }
 
-    private String getSqlScript(String sql, String sqlFile) throws IOException, LiquibaseException {
+    protected String getSqlScript(String sql, String sqlFile) throws IOException, LiquibaseException {
         if (sqlFile == null) {
             return sql;
         } else {
