@@ -209,7 +209,6 @@ public class StringChangeLogSerializerTest extends Specification {
 
         then:
         new StringChangeLogSerializer().serialize(change, false) == "sqlFile:[\n" +
-                "    doExpandExpressionsInGenerateChecksum=\"false\"\n" +
                 "    splitStatements=\"true\"\n" +
                 "    stripComments=\"false\"\n]"
 
@@ -218,7 +217,6 @@ public class StringChangeLogSerializerTest extends Specification {
 
         then:
         new StringChangeLogSerializer().serialize(change, false) == "sqlFile:[\n" +
-                "    doExpandExpressionsInGenerateChecksum=\"false\"\n" +
                 "    path=\"PATH/TO/File.txt\"\n" +
                 "    splitStatements=\"true\"\n" +
                 "    stripComments=\"false\"\n" +
