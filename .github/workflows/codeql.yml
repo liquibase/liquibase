@@ -12,7 +12,8 @@ on:
 
 jobs:
   codeql:
-    uses: liquibase/build-logic/.github/workflows/codeql.yml@v0.6.0
+    uses: liquibase/build-logic/.github/workflows/codeql.yml@v0.6.1
     secrets: inherit
     with:
       languages: '["java"]'
+      extraCommand: mvn install:install-file -Dfile=lib/GoogleBigQueryJDBC42.jar -DgroupId=com.simba.googlebigquery.jdbc -DartifactId=GoogleBigQueryJDBC42 -Dversion=4.2 -Dpackaging=jar
