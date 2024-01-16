@@ -98,6 +98,16 @@ public class ValidatingVisitorUtil {
         }
     }
 
+    private static boolean checkLiquibaseVersionMinorThan(String version, int major, int minor) {
+        String[] liquibaseVersion = version.split("\\.");
+        try {
+            return (liquibaseVersion.length == 3 && Integer.parseInt(liquibaseVersion[0]) == major &&
+                    Integer.parseInt(liquibaseVersion[1]) < minor);
+        } catch (NumberFormatException ne) { //we don't have numbers were we expected them to be
+            return false;
+        }
+    }
+
     /**
      * AS we don't have core here, we use reflection to call this method that changes the checksum behavior for this specific class.
      */
@@ -192,7 +202,7 @@ public class ValidatingVisitorUtil {
                                                .filter(SQLFileChange.class::isInstance)
                                                .map(c -> (SQLFileChange) c)
                                                .collect(Collectors.toList());
-        if (changes.isEmpty()) {
+        if (changes.isEmpty() || !checkLiquibaseVersionMinorThan(ranChangeSet.getLiquibaseVersion(), 4, 26)) {
             return false;
         } else {
             try {
