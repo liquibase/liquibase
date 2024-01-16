@@ -84,7 +84,7 @@ Optional Args:
     Default: null
 """
 
-    run "Running diffChangelog against itself finds no differences", {
+    run "Running diffChangelog against itself finds no differences and don't generate an output file", {
         arguments = [
                 url              : { it.url },
                 username         : { it.username },
@@ -116,16 +116,7 @@ Optional Args:
 
         }
 
-        expectedFileContent = [
-                //
-                // Empty changelog contains no changeSet tags and an empty databaseChangeLog tag
-                //
-                "target/test-classes/diffChangelog-test.xml" :
-                        [
-                            CommandTests.assertNotContains("<changeSet"),
-                            Pattern.compile("^.*<?xml.*databaseChangeLog.*xsd./>", Pattern.MULTILINE|Pattern.DOTALL|Pattern.CASE_INSENSITIVE)
-                        ]
-        ]
+        expectFileToNotExist = new File("target/test-classes/diffChangelog-test.xml")
     }
 
     run "Running diffChangelog should add changesets with specified author", {
