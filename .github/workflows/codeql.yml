@@ -1,0 +1,18 @@
+name: CodeQL
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [ "main" ]
+  pull_request:
+    # The branches below must be a subset of the branches above
+    branches: [ "main" ]
+  schedule:
+    - cron: '16 14 * * 4'
+
+jobs:
+  codeql:
+    uses: liquibase/build-logic/.github/workflows/codeql.yml@v0.6.0
+    secrets: inherit
+    with:
+      languages: '["java"]'
