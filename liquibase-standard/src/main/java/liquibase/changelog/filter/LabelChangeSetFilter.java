@@ -1,4 +1,4 @@
-    package liquibase.changelog.filter;
+package liquibase.changelog.filter;
 
 import liquibase.LabelExpression;
 import liquibase.Labels;
@@ -34,12 +34,20 @@ public class LabelChangeSetFilter implements ChangeSetFilter {
             labelExpression = new LabelExpression();
         }
 
+        Labels changeSetLabels = changeSet.getLabels();
         Collection<Labels> inheritableLabels = changeSet.getInheritableLabels();
-        if (labelExpression.matches(changeSet.getLabels()) && LabelExpression.matchesAll(inheritableLabels, labelExpression)) {
-            return new ChangeSetFilterResult(true, "Labels matches '" + labelExpression.toString() + "'", this.getClass(), getMdcName(), getDisplayName());
-        }
-        else {
-            return new ChangeSetFilterResult(false, "Labels does not match '" + labelExpression.toString() + "'", this.getClass(), getMdcName(), getDisplayName());
+        boolean isThereAnyRequiredChangeSetLabel = LabelExpression.isThereAnyRequiredLabel(changeSetLabels);
+        boolean isThereAnyRequiredInheritLabel = LabelExpression.isThereAnyRequiredLabel(inheritableLabels);
+        if ((isThereAnyRequiredChangeSetLabel || isThereAnyRequiredInheritLabel) && labelExpression.isEmpty()) {
+            return new ChangeSetFilterResult(false, "There is a required Label not matching '" + labelExpression.toString() + "'", this.getClass(), getMdcName(), getDisplayName());
+        } else {
+            boolean matchedChangeSetLabel = labelExpression.matches(changeSetLabels);
+            boolean matchedAnyInheritableLabel = changeSet.getInheritableLabels().stream().anyMatch(label -> labelExpression.matches(label));
+            if (matchedChangeSetLabel || matchedAnyInheritableLabel) {
+                return new ChangeSetFilterResult(true, "Labels matches '" + labelExpression.toString() + "'", this.getClass(), getMdcName(), getDisplayName());
+            } else {
+                return new ChangeSetFilterResult(false, "Labels does not match '" + labelExpression.toString() + "'", this.getClass(), getMdcName(), getDisplayName());
+            }
         }
     }
 

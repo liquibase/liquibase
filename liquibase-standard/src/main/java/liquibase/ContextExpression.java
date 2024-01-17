@@ -74,10 +74,11 @@ public class ContextExpression {
      * Returns true if the passed runtime contexts match this context expression
      */
     public boolean matches(Contexts runtimeContexts) {
-        if (runtimeContexts == null) {
-            runtimeContexts = new Contexts();
+        boolean isThereAnyRequiredContextFilter = this.contexts != null ? this.contexts.stream().anyMatch(context -> context.startsWith("@")) : false;
+        if (runtimeContexts == null || (runtimeContexts.isEmpty())) {
+            return true;
         }
-        if (this.contexts.isEmpty()) {
+        if (this.contexts.isEmpty() && !isThereAnyRequiredContextFilter) {
             return true;
         }
 
@@ -98,19 +99,6 @@ public class ContextExpression {
 
     public boolean isEmpty() {
         return this.contexts.isEmpty();
-    }
-
-    public static boolean matchesAll(Collection<ContextExpression> expressions, Contexts contexts) {
-        if ((expressions == null) || expressions.isEmpty()) {
-            return true;
-        }
-
-        for (ContextExpression expression : expressions) {
-            if (!expression.matches(contexts)) {
-                return false;
-            }
-        }
-        return true;
     }
 
     public String getOriginalString() {
