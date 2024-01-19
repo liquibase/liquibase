@@ -3,6 +3,8 @@ package liquibase.extension.testing.testsystem.spock;
 import liquibase.Scope;
 import liquibase.configuration.ConfigurationValueConverter;
 import liquibase.configuration.LiquibaseConfiguration;
+import liquibase.exception.UnexpectedLiquibaseException;
+import liquibase.extension.testing.testsystem.DatabaseTestSystem;
 import liquibase.extension.testing.testsystem.TestSystem;
 import org.junit.Assume;
 import org.spockframework.runtime.extension.AbstractMethodInterceptor;
@@ -33,8 +35,22 @@ public class LiquibaseIntegrationMethodInterceptor extends AbstractMethodInterce
     }
 
     LiquibaseIntegrationMethodInterceptor(SpecInfo spec, LiquibaseIntegrationTestExtension.ErrorListener errorListener) {
+        verifyNoMultipleDatabases(spec);
         this.spec = spec;
         this.errorListener = errorListener;
+    }
+
+    private void verifyNoMultipleDatabases(SpecInfo spec) {
+        List<FieldInfo> allFields = spec.getAllFields();
+        int databases = 0;
+        for (FieldInfo field : allFields) {
+            if (field.getType() != Object.class && field.getType().isAssignableFrom(DatabaseTestSystem.class)) {
+                databases++;
+            }
+        }
+        if (databases > 1) {
+            throw new UnexpectedLiquibaseException(spec.getName() + " defines more than one " + DatabaseTestSystem.class.getSimpleName() + ". This is not permitted because the test will not be run in any of the matrices on GitHub Actions. You'll need to make a separate class for each of the databases.");
+        }
     }
 
     @Override

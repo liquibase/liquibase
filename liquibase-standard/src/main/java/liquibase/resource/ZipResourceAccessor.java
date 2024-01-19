@@ -21,6 +21,10 @@ public class ZipResourceAccessor extends AbstractPathResourceAccessor {
     }
 
     public ZipResourceAccessor(Path file) throws FileNotFoundException {
+        this(file, new String[0]);
+    }
+
+    protected ZipResourceAccessor(Path file, String[] embeddedPaths) throws FileNotFoundException {
         if (file == null) {
             throw new IllegalArgumentException("File must not be null");
         }
@@ -46,6 +50,15 @@ public class ZipResourceAccessor extends AbstractPathResourceAccessor {
                     this.fileSystem = FileSystems.newFileSystem(finalUri, Collections.emptyMap(), Scope.getCurrentScope().getClassLoader());
                 } catch (FileSystemAlreadyExistsException ex) {
                     this.fileSystem = FileSystems.getFileSystem(finalUri);
+                }
+            }
+
+            for (String embeddedPath : embeddedPaths) {
+                Path innerPath = fileSystem.getPath(embeddedPath);
+                try {
+                    this.fileSystem = FileSystems.newFileSystem(innerPath, null);
+                } catch (FileSystemNotFoundException e) {
+                    this.fileSystem = FileSystems.newFileSystem(innerPath, Scope.getCurrentScope().getClassLoader());
                 }
             }
         } catch (Throwable e) {
