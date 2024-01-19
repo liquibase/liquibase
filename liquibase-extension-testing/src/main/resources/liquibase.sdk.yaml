@@ -58,7 +58,8 @@ liquibase:
 
 
       mysql:
-        version: latest
+        # TODO: Update to latest when test containers fixes 8.3.0 (currently failing on test containers v 1.19.3)
+        version: 8.2.0
         imageName: mysql
         setup:
           username: root
