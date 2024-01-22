@@ -96,6 +96,7 @@ class RollbackIntegrationTest extends Specification {
 
     def "Should rollback correctly with duplicate tags to oldest copy of identical tag, but keep the duplicates when hidden property is set to false"() {
         given:
+        CommandUtil.runDropAll(h2)
         def changelogFile = 'target/test-classes/changelogs/common/example-changelog.xml'
         manuallyDuplicateTags(changelogFile)
         ConsoleUIService console = Scope.getCurrentScope().getUI() as ConsoleUIService
