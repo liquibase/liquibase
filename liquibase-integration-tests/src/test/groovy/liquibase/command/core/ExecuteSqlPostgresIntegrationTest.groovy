@@ -32,9 +32,6 @@ class ExecuteSqlPostgresIntegrationTest extends Specification {
         CommandResults results = executeSql.execute()
         String output = results.getResult("output") as String
         output.contains("Output of select * from databasechangelog")
-
-        cleanup:
-        CommandUtil.runDropAll(postgres)
     }
 
     def "validate executeSql output display columns in the same order they were specified in the select"() {
@@ -54,8 +51,5 @@ class ExecuteSqlPostgresIntegrationTest extends Specification {
         String output = results.getResult("output") as String
         output.contains("Output of select filename, author, exectype, comments, description from databasechangelog order by filename,exectype:")
         output.contains("FILENAME | AUTHOR | EXECTYPE | COMMENTS | DESCRIPTION |")
-
-        cleanup:
-        CommandUtil.runDropAll(postgres)
     }
 }

@@ -12,7 +12,6 @@ import liquibase.command.core.SnapshotCommandStep
 import liquibase.command.core.helpers.DbUrlConnectionArgumentsCommandStep
 import liquibase.command.core.helpers.PreCompareCommandStep
 import liquibase.command.core.helpers.ReferenceDbUrlConnectionCommandStep
-import liquibase.command.util.CommandUtil
 import liquibase.database.Database
 import liquibase.database.DatabaseFactory
 import liquibase.database.jvm.JdbcConnection
@@ -224,8 +223,5 @@ class IndexWithDescendingColumnSnapshotIntegrationTest extends Specification {
         if (f.exists()) {
             f.delete()
         }
-
-        CommandUtil.runDropAll(mssqlDb)
-        mssqlDb.getConnection().close()
     }
 }

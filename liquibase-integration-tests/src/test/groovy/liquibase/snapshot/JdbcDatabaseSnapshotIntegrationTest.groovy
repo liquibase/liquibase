@@ -72,8 +72,5 @@ class JdbcDatabaseSnapshotIntegrationTest extends Specification {
 
         then:
         noExceptionThrown()
-
-        cleanup:
-        CommandUtil.runDropAll(mssql)
     }
 }

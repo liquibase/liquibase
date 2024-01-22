@@ -16,7 +16,6 @@ class GenerateChangeLogMSSQLIntegrationTest extends Specification {
 
     def "Should generate table comments, view comments, table column comments, view column comments and be able to use the generated sql changelog"() {
         given:
-        CommandUtil.runDropAll(mssql)
         CommandUtil.runUpdate(mssql,'src/test/resources/changelogs/mssql/issues/generate.changelog.table.view.comments.sql')
 
         when:
@@ -40,13 +39,11 @@ class GenerateChangeLogMSSQLIntegrationTest extends Specification {
         noExceptionThrown()
 
         cleanup:
-        CommandUtil.runDropAll(mssql)
         outputFile.delete()
     }
 
     def "Should generate table comments, view comments, table column comments, view column comments and be able to use the generated xml/json/yml changelog"(String fileType) {
         given:
-        CommandUtil.runDropAll(mssql)
         CommandUtil.runUpdate(mssql,'src/test/resources/changelogs/mssql/issues/generate.changelog.table.view.comments.sql')
 
         when:
@@ -65,7 +62,6 @@ class GenerateChangeLogMSSQLIntegrationTest extends Specification {
         noExceptionThrown()
 
         cleanup:
-        CommandUtil.runDropAll(mssql)
         outputFile.delete()
 
         where:

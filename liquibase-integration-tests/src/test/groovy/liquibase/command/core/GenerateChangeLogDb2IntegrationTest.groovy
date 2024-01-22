@@ -36,7 +36,6 @@ class GenerateChangeLogDb2IntegrationTest extends Specification {
         noExceptionThrown()
 
         cleanup:
-        CommandUtil.runDropAll(db2)
         outputFile.delete()
     }
 }

@@ -30,7 +30,6 @@ class DiffIntegrationTest extends Specification {
 
     def "Diff with excludes that reference objects on target should work" () {
         when:
-        CommandUtil.runDropAll(h2)
         CommandUtil.runSnapshot(h2, "target/test-classes/snapshot.json")
         CommandUtil.runTag(h2, "1.0.0")
         def diffFile = "target/test-classes/diff.json"
@@ -72,7 +71,6 @@ class DiffIntegrationTest extends Specification {
         } catch (Exception ignored) {
 
         }
-        CommandUtil.runDropAll(h2)
         h2.getConnection().close()
         refDatabase.close()
         targetDatabase.close()

@@ -83,7 +83,6 @@ CREATE TABLE $tableName ( product_no varchar(20) DEFAULT nextval('$sequenceName'
         postgres.getConnection().close()
         refDatabase.close()
         targetDatabase.close()
-        CommandUtil.runDropAll(postgres)
     }
 
     def "FKs which are different but have same name" () {
@@ -170,7 +169,6 @@ COMMENT ON COLUMN $viewName.$columnName IS '$columnComment';
         postgres.getConnection().close()
         refDatabase.close()
         targetDatabase.close()
-        CommandUtil.runDropAll(postgres)
     }
 
     def "Ensure diff-changelog set runOnChange and replaceIfExists properties correctly for a created view changeset"() {
@@ -202,7 +200,6 @@ COMMENT ON COLUMN $viewName.$columnName IS '$columnComment';
         outputFile.delete()
         refDatabase.close()
         targetDatabase.close()
-        CommandUtil.runDropAll(postgres)
         postgres.getConnection().close()
     }
 
@@ -231,7 +228,6 @@ COMMENT ON COLUMN $viewName.$columnName IS '$columnComment';
         outputFile.delete()
         refDatabase.close()
         targetDatabase.close()
-        CommandUtil.runDropAll(postgres)
         postgres.getConnection().close()
     }
 
@@ -261,7 +257,6 @@ COMMENT ON COLUMN $viewName.$columnName IS '$columnComment';
         outputFile.delete()
         refDatabase.close()
         targetDatabase.close()
-        CommandUtil.runDropAll(postgres)
         postgres.getConnection().close()
     }
 

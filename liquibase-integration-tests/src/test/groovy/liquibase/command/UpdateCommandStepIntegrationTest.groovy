@@ -5,7 +5,6 @@ import liquibase.LabelExpression
 import liquibase.Liquibase
 import liquibase.Scope
 import liquibase.command.core.UpdateCommandStep
-import liquibase.command.util.CommandUtil
 import liquibase.extension.testing.testsystem.DatabaseTestSystem
 import liquibase.extension.testing.testsystem.TestSystemFactory
 import liquibase.extension.testing.testsystem.spock.LiquibaseIntegrationTest
@@ -28,9 +27,6 @@ class UpdateCommandStepIntegrationTest extends Specification {
 
         then:
         !new UpdateCommandStep().isUpToDateFastCheck(null, h2.getDatabaseFromFactory(), liquibase.getDatabaseChangeLog(), context, label)
-
-        cleanup:
-        CommandUtil.runDropAll(h2)
     }
 
     def "validate context and label entry has been added previously"() {
@@ -43,8 +39,5 @@ class UpdateCommandStepIntegrationTest extends Specification {
 
         then:
         new UpdateCommandStep().isUpToDateFastCheck(null, h2.getDatabaseFromFactory(), liquibase.getDatabaseChangeLog(), context, label)
-
-        cleanup:
-        CommandUtil.runDropAll(h2)
     }
 }

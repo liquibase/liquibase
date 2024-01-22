@@ -5,7 +5,6 @@ import liquibase.changelog.ChangeLogHistoryService
 import liquibase.changelog.ChangeLogHistoryServiceFactory
 import liquibase.command.CommandScope
 import liquibase.command.core.helpers.DbUrlConnectionArgumentsCommandStep
-import liquibase.command.util.CommandUtil
 import liquibase.extension.testing.testsystem.DatabaseTestSystem
 import liquibase.extension.testing.testsystem.TestSystemFactory
 import liquibase.extension.testing.testsystem.spock.LiquibaseIntegrationTest
@@ -36,8 +35,5 @@ class ClearCheckSumsIntegrationTest extends Specification {
 
         then:
         changeLogService.getRanChangeSets().stream().allMatch({ ranChangeSet -> ranChangeSet.getLastCheckSum() == null })
-
-        cleanup:
-        CommandUtil.runDropAll(h2)
     }
 }

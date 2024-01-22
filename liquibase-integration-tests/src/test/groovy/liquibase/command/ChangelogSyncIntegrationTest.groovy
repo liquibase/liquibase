@@ -4,7 +4,6 @@ import liquibase.Scope
 import liquibase.command.core.ChangelogSyncCommandStep
 import liquibase.command.core.helpers.DatabaseChangelogCommandStep
 import liquibase.command.core.helpers.DbUrlConnectionArgumentsCommandStep
-import liquibase.command.util.CommandUtil
 import liquibase.extension.testing.testsystem.DatabaseTestSystem
 import liquibase.extension.testing.testsystem.TestSystemFactory
 import liquibase.extension.testing.testsystem.spock.LiquibaseIntegrationTest
@@ -31,8 +30,5 @@ class ChangelogSyncIntegrationTest extends Specification {
         def detailsResultSet = h2.getConnection().createStatement().executeQuery("select DEPLOYMENT_ID from databasechangelog")
         detailsResultSet.next()
         assert detailsResultSet.getString(1) != null: "No deployment ID found for changelog sync"
-
-        cleanup:
-        CommandUtil.runDropAll(h2)
     }
 }
