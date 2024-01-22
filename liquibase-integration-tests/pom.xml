@@ -73,6 +73,9 @@
     <profiles>
         <profile>
             <id>skip-integration-tests</id>
+            <activation>
+                <activeByDefault>false</activeByDefault>
+            </activation>
             <properties>
                 <maven.test.skip>true</maven.test.skip>
             </properties>
