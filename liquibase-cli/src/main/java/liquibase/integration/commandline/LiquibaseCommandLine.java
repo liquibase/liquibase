@@ -46,12 +46,9 @@ import java.security.AccessController;
 import java.security.PrivilegedAction;
 import java.time.Duration;
 import java.util.*;
-import java.util.jar.JarFile;
-import java.util.jar.Manifest;
 import java.util.logging.*;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
-import java.util.zip.ZipEntry;
 
 import static java.util.ResourceBundle.getBundle;
 import static liquibase.configuration.LiquibaseConfiguration.REGISTERED_VALUE_PROVIDERS_KEY;
@@ -1003,6 +1000,8 @@ public class LiquibaseCommandLine {
                     subCommandSpec.addOption(kabobOptionBuilder.build());
                 }
             }
+
+            subCommandSpec.aliases(commandDefinition.getAliases().stream().map(cn -> cn[cn.length - 1]).collect(Collectors.toList()).toArray(new String[]{}));
 
             getParentCommandSpec(commandDefinition, rootCommand).addSubcommand(commandName[commandName.length - 1], new CommandLine(subCommandSpec, defaultFactory));
         }
