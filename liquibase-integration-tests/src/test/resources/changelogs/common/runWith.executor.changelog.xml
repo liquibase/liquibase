@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-latest.xsd">
+    <changeSet id="1" author="your.name" runWith="h2alt">
+        <createTable tableName="test_numbers">
+            <column name="id" type="int">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+        </createTable>
+    </changeSet>
+    <changeSet id="2" author="your.name" runWith="h2alt">
+        <preConditions onFail="MARK_RAN">
+            <rowCount tableName="test_numbers" expectedRows="0"/>
+        </preConditions>
+        <insert tableName="test_numbers">
+            <column name="id">1</column>
+        </insert>
+        <insert tableName="test_numbers">
+            <column name="id">2</column>
+        </insert>
+        <sql>
+            insert into test_numbers(id) values(3);
+            insert into test_numbers(id) values("fail");
+        </sql>
+    </changeSet>
+
+    <changeSet id="3" author="your.name" runWith="h2alt">
+        <preConditions onFail="HALT">
+            <sqlCheck expectedResult="2">select count(id) from test_numbers </sqlCheck>
+        </preConditions>
+    </changeSet>
+    <changeSet id="4" author="your.name">
+        <preConditions onFail="HALT" onFailMessage="Found test_numbers in the default schema">
+            <not>
+                <tableExists tableName="test_numbers" />
+            </not>
+        </preConditions>
+
+    </changeSet>
+</databaseChangeLog>

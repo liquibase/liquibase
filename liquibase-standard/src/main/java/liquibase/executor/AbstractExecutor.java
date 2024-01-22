@@ -1,5 +1,6 @@
 package liquibase.executor;
 
+import liquibase.Scope;
 import liquibase.change.AbstractSQLChange;
 import liquibase.change.Change;
 import liquibase.changelog.ChangeSet;
@@ -132,7 +133,19 @@ public abstract class AbstractExecutor implements Executor {
         SqlStatement[] sqlStatements = change.generateStatements(database);
         if (sqlStatements != null) {
             for (SqlStatement statement : sqlStatements) {
-                execute(statement, sqlVisitors);
+                if (statement.skipOnUnsupported() && !SqlGeneratorFactory.getInstance().supports(statement, database)) {
+                    continue;
+                }
+                Scope.getCurrentScope().getLog(getClass()).fine("Executing Statement: " + statement);
+                try {
+                    execute(statement, sqlVisitors);
+                } catch (DatabaseException e) {
+                    if (statement.continueOnError()) {
+                        Scope.getCurrentScope().getLog(getClass()).severe("Error executing statement '" + statement + "', but continuing", e);
+                    } else {
+                        throw e;
+                    }
+                }
             }
         }
     }

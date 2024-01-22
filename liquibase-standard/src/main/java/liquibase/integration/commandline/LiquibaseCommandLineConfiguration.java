@@ -1,6 +1,5 @@
 package liquibase.integration.commandline;
 
-import liquibase.ChecksumVersion;
 import liquibase.configuration.AutoloadedConfigurations;
 import liquibase.configuration.ConfigurationDefinition;
 import liquibase.configuration.ConfigurationValueConverter;
@@ -34,6 +33,7 @@ public class LiquibaseCommandLineConfiguration implements AutoloadedConfiguratio
     public static final ConfigurationDefinition<String> MONITOR_PERFORMANCE;
     public static final ConfigurationDefinition<Boolean> ADD_EMPTY_MDC_VALUES;
     public static final ConfigurationDefinition<Boolean> SHOW_HIDDEN_ARGS;
+    public static final ConfigurationDefinition<Boolean> INCLUDE_MATCHING_TAG_IN_ROLLBACK_OLDEST;
 
     static {
         ConfigurationDefinition.Builder builder = new ConfigurationDefinition.Builder("liquibase");
@@ -126,6 +126,12 @@ public class LiquibaseCommandLineConfiguration implements AutoloadedConfiguratio
         SHOW_HIDDEN_ARGS = builder.define("showHiddenArgs", Boolean.class)
                 .setDescription("If true, all command arguments marked as hidden will be shown in the help output, ignoring the hidden flag. NOTE, due to the order of value provider loading at such an early point in Liquibase startup, you MUST set this as a environment variable. Command line parameters will not be recognized.")
                 .setDefaultValue(false)
+                .setHidden(true)
+                .build();
+
+        INCLUDE_MATCHING_TAG_IN_ROLLBACK_OLDEST = builder.define("includeMatchingTagInRollbackOldest", Boolean.class)
+                .setDescription("If set to true, and there are multiple identical tags in the database changelog table, all of the newer matching tags will be rolled back while rolling back to the oldest tag. The default value for this option was false for all Liquibase versions equal to or older than 4.25.1.")
+                .setDefaultValue(true)
                 .setHidden(true)
                 .build();
    }
