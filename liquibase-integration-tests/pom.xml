@@ -70,4 +70,13 @@
 
     </build>
 
+    <profiles>
+        <profile>
+            <id>skip-integration-tests</id>
+            <properties>
+                <maven.test.skip>true</maven.test.skip>
+            </properties>
+        </profile>
+    </profiles>
+
 </project>
