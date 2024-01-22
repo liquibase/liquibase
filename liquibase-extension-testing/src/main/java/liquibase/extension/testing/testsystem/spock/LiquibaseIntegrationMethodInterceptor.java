@@ -63,7 +63,13 @@ public class LiquibaseIntegrationMethodInterceptor extends AbstractMethodInterce
     public void interceptSetupSpecMethod(IMethodInvocation invocation) throws Throwable {
         final List<FieldInfo> containers = findAllContainers();
         startContainers(containers, invocation);
+        dropAllDatabases();
+        invocation.proceed();
+    }
 
+    @Override
+    public void interceptSetupMethod(IMethodInvocation invocation) throws Throwable {
+        dropAllDatabases();
         invocation.proceed();
     }
 
