@@ -77,16 +77,7 @@
                 <activeByDefault>false</activeByDefault>
             </activation>
             <properties>
-                <maven.test.skip>true</maven.test.skip>
-            </properties>
-        </profile>
-        <profile>
-            <id>run-integration-tests</id>
-            <activation>
-                <activeByDefault>true</activeByDefault>
-            </activation>
-            <properties>
-                <maven.test.skip>false</maven.test.skip>
+                <skipTests>true</skipTests>
             </properties>
         </profile>
     </profiles>
