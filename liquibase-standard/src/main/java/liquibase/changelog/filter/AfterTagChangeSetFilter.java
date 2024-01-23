@@ -4,8 +4,8 @@ import liquibase.Scope;
 import liquibase.TagVersionEnum;
 import liquibase.changelog.ChangeSet;
 import liquibase.changelog.RanChangeSet;
-import liquibase.command.core.RollbackCommandStep;
 import liquibase.exception.RollbackFailedException;
+import liquibase.integration.commandline.LiquibaseCommandLineConfiguration;
 import liquibase.logging.mdc.MdcKey;
 import liquibase.logging.mdc.MdcValue;
 import liquibase.util.StringUtil;
@@ -66,7 +66,13 @@ public class AfterTagChangeSetFilter implements ChangeSetFilter {
     private void oldestVersion(List<RanChangeSet> ranChangeSets) throws RollbackFailedException {
         boolean seenTag = false;
         for (RanChangeSet ranChangeSet : ranChangeSets) {
-            if (seenTag && !tag.equalsIgnoreCase(ranChangeSet.getTag())) {
+            /*
+            In versions of Liquibase prior to (and including) 4.25.1, any newer duplicate tags are ignored when rolling
+            back to the oldest version of that tag. In future versions, newer duplicate tags are rolled back when rolling
+            back to the oldest version of that tag. This if statement and hidden config property allows a user to opt
+            for the older functionality if desired.
+             */
+            if (seenTag && (LiquibaseCommandLineConfiguration.INCLUDE_MATCHING_TAG_IN_ROLLBACK_OLDEST.getCurrentValue() || !tag.equalsIgnoreCase(ranChangeSet.getTag()))) {
                 changeLogsAfterTag.add(ranChangeSet.toString());
             }
 

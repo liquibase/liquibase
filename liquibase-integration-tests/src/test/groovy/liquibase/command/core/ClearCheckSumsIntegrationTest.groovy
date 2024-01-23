@@ -18,14 +18,13 @@ class ClearCheckSumsIntegrationTest extends Specification {
     @Shared
     private DatabaseTestSystem h2 = (DatabaseTestSystem) Scope.currentScope.getSingleton(TestSystemFactory.class).getTestSystem("h2")
 
-    def setupSpec(){
+    def "validate checksums are cleared"() {
+        given:
         def updateCommand = new CommandScope(UpdateCommandStep.COMMAND_NAME)
         updateCommand.addArgumentValue(DbUrlConnectionArgumentsCommandStep.DATABASE_ARG, h2.getDatabaseFromFactory())
         updateCommand.addArgumentValue(UpdateSqlCommandStep.CHANGELOG_FILE_ARG, "liquibase/update-tests.yml")
         updateCommand.execute()
-    }
 
-    def "validate checksums are cleared"() {
         when:
         def h2Database = h2.getDatabaseFromFactory()
         def commandResults = new CommandScope("clearChecksums")
