@@ -134,6 +134,8 @@ public class LiquibaseIntegrationMethodInterceptor extends AbstractMethodInterce
                 runDropAll(((DatabaseTestSystem) startedTestSystem));
             }
         }
+        // Start tests from a clean slate, otherwise the MDC will be polluted with info about the dropAll command.
+        Scope.getCurrentScope().getMdcManager().clear();
     }
 
     @Override
