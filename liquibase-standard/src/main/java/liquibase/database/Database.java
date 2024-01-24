@@ -1,12 +1,5 @@
 package liquibase.database;
 
-import java.io.IOException;
-import java.io.Writer;
-import java.math.BigInteger;
-import java.util.*;
-import java.util.concurrent.atomic.AtomicReference;
-import java.util.stream.Collectors;
-
 import liquibase.CatalogAndSchema;
 import liquibase.Scope;
 import liquibase.change.Change;
@@ -18,7 +11,6 @@ import liquibase.diff.DiffGeneratorFactory;
 import liquibase.diff.DiffResult;
 import liquibase.diff.compare.CompareControl;
 import liquibase.diff.output.DiffOutputControl;
-import liquibase.diff.output.StandardObjectChangeFilter;
 import liquibase.diff.output.changelog.DiffToChangeLog;
 import liquibase.exception.*;
 import liquibase.executor.ExecutorService;
@@ -33,16 +25,18 @@ import liquibase.sqlgenerator.SqlGeneratorFactory;
 import liquibase.statement.DatabaseFunction;
 import liquibase.statement.SqlStatement;
 import liquibase.structure.DatabaseObject;
-import liquibase.structure.core.*;
+import liquibase.structure.core.ForeignKey;
+import liquibase.structure.core.Index;
+import liquibase.structure.core.PrimaryKey;
+import liquibase.structure.core.UniqueConstraint;
 import liquibase.util.StringUtil;
 
 import java.io.IOException;
 import java.io.Writer;
 import java.math.BigInteger;
-import java.util.Collection;
-import java.util.Date;
-import java.util.List;
-import java.util.Locale;
+import java.util.*;
+import java.util.concurrent.atomic.AtomicReference;
+import java.util.stream.Collectors;
 
 /**
  * Interface that every DBMS supported by this software must implement. Most methods belong into ont of these
@@ -624,6 +618,15 @@ public interface Database extends PrioritizedService, AutoCloseable {
      * @return true if the "if not exists" syntax is supported, false otherwise.
      */
     default boolean supportsCreateIfNotExists(Class<? extends DatabaseObject> type) {
+        return false;
+    }
+
+    /**
+     * Does the particular database implementation support the database changelog history feature and associated
+     * table?
+     * @return true if supported, false otherwise
+     */
+    default boolean supportsDatabaseChangeLogHistory() {
         return false;
     }
 }
