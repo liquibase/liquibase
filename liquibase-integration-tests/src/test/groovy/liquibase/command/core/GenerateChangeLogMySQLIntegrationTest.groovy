@@ -19,7 +19,7 @@ class GenerateChangeLogMySQLIntegrationTest extends Specification {
     @Shared
     private DatabaseTestSystem mysql = (DatabaseTestSystem) Scope.getCurrentScope().getSingleton(TestSystemFactory.class).getTestSystem("mysql")
 
-    def setupSpec() {
+    def setup() {
         CommandUtil.runDropAll(mysql)
         def sql = """
 create table str4 (
