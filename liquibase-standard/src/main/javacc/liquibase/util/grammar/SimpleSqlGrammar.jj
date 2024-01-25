@@ -94,7 +94,7 @@ Built list from http://stackoverflow.com/a/37668315/45756
 | < #UNICODE_LETTERS: [
     "\u00C0"-"\u00D6",
     "\u00D8"-"\u00F6",
-    "\u00F8"-"\u02C1",
+    "\u00F7"-"\u02C1",
     "\u02C6"-"\u02D1",
     "\u02E0"-"\u02E4",
     "\u02EC",
@@ -592,6 +592,7 @@ Built list from http://stackoverflow.com/a/37668315/45756 list of punctuation
     "\u208E",
     "\u20A0"-"\u20BF", //Currency symbols https://www.Sutf8-chartable.de/unicode-utf8-table.pl
     "\u2116", //numero sign in Russian it's a regular symbol (https://en.wikipedia.org/wiki/Numero_sign)
+    "\u2200"-"\u22F1", //https://en.wikipedia.org/wiki/Mathematical_operators_and_symbols_in_Unicode
     "\u2308"-"\u230B",
     "\u2329",
     "\u232A",
