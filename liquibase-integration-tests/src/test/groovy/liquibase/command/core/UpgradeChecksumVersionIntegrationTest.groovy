@@ -156,13 +156,7 @@ VALUES('1', 'your.name', '$changelogfile', '2023-05-31 14:33:39.108', 1, 'EXECUT
         ranChangeSets.forEach({ rcs -> assert rcs.getLastCheckSum().getVersion() == 8 })
 
         when:
-        CommandScope updateCommandScope = new CommandScope(UpdateCountCommandStep.COMMAND_NAME)
-        updateCommandScope.addArgumentValue(DbUrlConnectionArgumentsCommandStep.URL_ARG, h2.getConnectionUrl())
-        updateCommandScope.addArgumentValue(DbUrlConnectionArgumentsCommandStep.USERNAME_ARG, h2.getUsername())
-        updateCommandScope.addArgumentValue(DbUrlConnectionArgumentsCommandStep.PASSWORD_ARG, h2.getPassword())
-        updateCommandScope.addArgumentValue(UpdateCountCommandStep.CHANGELOG_FILE_ARG, changesetFilepath)
-        updateCommandScope.addArgumentValue(UpdateCountCommandStep.COUNT_ARG, 1)
-        updateCommandScope.execute()
+        CommandUtil.runUpdateCount(h2, changesetFilepath, 1)
         ranChangeSets = getRanChangesets(changeLogService)
 
         then:
