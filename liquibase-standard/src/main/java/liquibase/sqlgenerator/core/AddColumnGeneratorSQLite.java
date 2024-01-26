@@ -4,6 +4,8 @@ import liquibase.change.ColumnConfig;
 import liquibase.change.ConstraintsConfig;
 import liquibase.database.Database;
 import liquibase.database.core.SQLiteDatabase;
+import liquibase.datatype.DataTypeFactory;
+import liquibase.diff.output.changelog.core.MissingTableChangeGenerator;
 import liquibase.exception.ValidationErrors;
 import liquibase.sql.Sql;
 import liquibase.sqlgenerator.SqlGeneratorChain;
@@ -65,6 +67,10 @@ public class AddColumnGeneratorSQLite extends AddColumnGenerator {
                     newColumn.setName(column.getColumnName());
                     newColumn.setType(column.getColumnType());
                     newColumn.setAutoIncrement(column.isAutoIncrement());
+                    newColumn.setDefaultValueObject(column.getDefaultValue());
+                    newColumn.setDefaultValueConstraintName(column.getDefaultValueConstraintName());
+                    newColumn.setRemarks(column.getRemarks());
+
                     ConstraintsConfig constraintsConfig = new ConstraintsConfig();
                     constraintsConfig.setPrimaryKey(column.isPrimaryKey());
                     constraintsConfig.setNullable(column.isNullable());
