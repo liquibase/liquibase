@@ -36,7 +36,7 @@ public class OfflineLockService implements LockService {
     }
 
     @Override
-    public void setChangeLogLockRecheckTime(long changeLogLocRecheckTime) {
+    public void setChangeLogLockRecheckTime(long changeLogLockRecheckTime) {
 
     }
 

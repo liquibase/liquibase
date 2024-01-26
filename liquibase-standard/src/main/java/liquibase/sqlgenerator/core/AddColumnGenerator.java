@@ -2,7 +2,16 @@ package liquibase.sqlgenerator.core;
 
 import liquibase.change.ColumnConfig;
 import liquibase.database.Database;
-import liquibase.database.core.*;
+import liquibase.database.core.AbstractDb2Database;
+import liquibase.database.core.DerbyDatabase;
+import liquibase.database.core.H2Database;
+import liquibase.database.core.HsqlDatabase;
+import liquibase.database.core.MSSQLDatabase;
+import liquibase.database.core.MySQLDatabase;
+import liquibase.database.core.OracleDatabase;
+import liquibase.database.core.SQLiteDatabase;
+import liquibase.database.core.SybaseASADatabase;
+import liquibase.database.core.SybaseDatabase;
 import liquibase.datatype.DataTypeFactory;
 import liquibase.datatype.DatabaseDataType;
 import liquibase.exception.DatabaseException;
@@ -12,7 +21,11 @@ import liquibase.sql.Sql;
 import liquibase.sql.UnparsedSql;
 import liquibase.sqlgenerator.SqlGeneratorChain;
 import liquibase.sqlgenerator.SqlGeneratorFactory;
-import liquibase.statement.*;
+import liquibase.statement.AutoIncrementConstraint;
+import liquibase.statement.ColumnConstraint;
+import liquibase.statement.DatabaseFunction;
+import liquibase.statement.ForeignKeyConstraint;
+import liquibase.statement.NotNullConstraint;
 import liquibase.statement.core.AddColumnStatement;
 import liquibase.statement.core.AddForeignKeyConstraintStatement;
 import liquibase.statement.core.AddUniqueConstraintStatement;
@@ -254,6 +267,9 @@ public class AddColumnGenerator extends AbstractSqlGenerator<AddColumnStatement>
 
 
                 AddForeignKeyConstraintStatement addForeignKeyConstraintStatement = new AddForeignKeyConstraintStatement(fkConstraint.getForeignKeyName(), statement.getCatalogName(), statement.getSchemaName(), statement.getTableName(), ColumnConfig.arrayFromNames(statement.getColumnName()), null, refSchemaName, refTableName, ColumnConfig.arrayFromNames(refColName));
+                if (fkConstraint.isDeleteCascade()) {
+                    addForeignKeyConstraintStatement.setOnDelete("CASCADE");
+                }
                 addForeignKeyConstraintStatement.setShouldValidate(fkConstraint.shouldValidateForeignKey());
                 returnSql.addAll(Arrays.asList(SqlGeneratorFactory.getInstance().generateSql(addForeignKeyConstraintStatement, database)));
             }
