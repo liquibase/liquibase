@@ -131,6 +131,7 @@
 				<exclude>org.liquibase:liquibase-standard:jar:</exclude> <!-- from liquibase-standard  -->
 				<exclude>net.java.truelicense:*:jar:</exclude> <!-- from liquibase-commercial -->
 				<exclude>com.github.jsqlparser:jsqlparser:jar:</exclude> <!-- from liquibase-commercial -->
+				<exclude>org.mvel:mvel2:jar:</exclude> <!-- from liquibase-commercial -->
 				<exclude>commons-codec:commons-codec:jar:</exclude> <!-- from liquibase-commercial -->
 				<exclude>com.fasterxml.jackson.core:*:jar:</exclude> <!-- from liquibase-commercial -->
 				<exclude>com.fasterxml.jackson.module:*:jar:</exclude> <!-- from liquibase-commercial -->
