@@ -57,7 +57,6 @@ public class AddColumnGeneratorSQLite extends AddColumnGenerator {
         SQLiteDatabase.AlterTableVisitor alterTableVisitor = new SQLiteDatabase.AlterTableVisitor() {
             @Override
             public ColumnConfig[] getColumnsToAdd() {
-
                 ColumnConfig[] columnConfigs = new ColumnConfig[columns.size()];
 
                 int i = 0;
@@ -67,15 +66,9 @@ public class AddColumnGeneratorSQLite extends AddColumnGenerator {
                     newColumn.setType(column.getColumnType());
                     newColumn.setAutoIncrement(column.isAutoIncrement());
                     ConstraintsConfig constraintsConfig = new ConstraintsConfig();
-                    if (column.isPrimaryKey()) {
-                        constraintsConfig.setPrimaryKey(true);
-                    }
-                    if (column.isNullable()) {
-                        constraintsConfig.setNullable(true);
-                    }
-                    if (column.isUnique()) {
-                        constraintsConfig.setUnique(true);
-                    }
+                    constraintsConfig.setPrimaryKey(column.isPrimaryKey());
+                    constraintsConfig.setNullable(column.isNullable());
+                    constraintsConfig.setUnique(column.isUnique());
                     newColumn.setConstraints(constraintsConfig);
 
                     for (ColumnConstraint constraint : column.getConstraints()) {
