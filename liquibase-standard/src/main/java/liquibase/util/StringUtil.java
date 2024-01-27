@@ -636,6 +636,19 @@ public class StringUtil {
     }
 
     /**
+     *
+     * Returns true if the input string contains the specified value
+     *
+     * @param  value                  String to be checked
+     * @param  containsValue          String to look for
+     * @return true if String contains the value
+     *
+     */
+    public static boolean contains(String value, String containsValue) {
+        return value != null && value.contains(containsValue);
+    }
+
+    /**
      * Returns true if the input string is the empty string (null-safe).
      *
      * @param value String to be checked
@@ -669,6 +682,22 @@ public class StringUtil {
         }
 
         return value.startsWith(startsWith);
+    }
+
+    /**
+     * Checks whether the given <code>value</code> ends with the specified <code>endsWith</code> string.
+     *
+     * @param value      the string to check
+     * @param endsWith   the prefix to check for
+     * @return <code>true</code> if <code>value</code> ends with <code>endsWith</code>, <code>false</code> otherwise.
+     * Returns <code>false</code> if either argument is <code>null</code>.
+     */
+    public static boolean endsWith(String value, String endsWith) {
+        if ((value == null) || (endsWith == null)) {
+            return false;
+        }
+
+        return value.endsWith(endsWith);
     }
 
     /**
