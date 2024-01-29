@@ -779,7 +779,7 @@ public class ChangeSet implements Conditional, ChangeLogChild {
         } catch (Exception e) {
             Scope.getCurrentScope().addMdcValue(MdcKey.CHANGESET_OPERATION_STOP_TIME, Instant.ofEpochMilli(new Date().getTime()).toString());
             Scope.getCurrentScope().addMdcValue(MdcKey.CHANGESET_OUTCOME, ExecType.FAILED.value.toLowerCase());
-            log.severe(String.format("ChangeSet %s encountered an exception.", toString(false)));
+            log.severe(String.format("ChangeSet %s encountered an exception.", toString(false)), e);
             setErrorMsg(e.getMessage());
             try {
                 database.rollback();
