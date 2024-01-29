@@ -11,6 +11,7 @@ import liquibase.statement.SqlStatement;
 import liquibase.util.ObjectUtil;
 
 import java.util.*;
+
 import liquibase.util.OsgiUtil;
 
 /**
@@ -20,9 +21,9 @@ import liquibase.util.OsgiUtil;
  * @see liquibase.change.custom.CustomSqlChange
  * @see liquibase.change.custom.CustomTaskChange
  */
-@DatabaseChange(name="customChange",
-    description = "Although Liquibase tries to provide a wide range of database refactorings, there are times you may" +
-        " want to create your own custom refactoring class.\n" +
+@DatabaseChange(name = "customChange",
+        description = "Although Liquibase tries to provide a wide range of database refactorings, there are times you may" +
+                " want to create your own custom refactoring class.\n" +
                 "\n" +
                 "To create your own custom refactoring, simply create a class that implements the liquibase.change.custom.CustomSqlChange " +
                 "or liquibase.change.custom.CustomTaskChange interface and use the <custom> tag in your changeset.\n" +
@@ -37,7 +38,7 @@ public class CustomChangeWrapper extends AbstractChange {
      * Non-private access only for testing.
      */
     CustomChange customChange;
-    
+
     private String className;
 
     private final SortedSet<String> params = new TreeSet<>();
@@ -68,20 +69,20 @@ public class CustomChangeWrapper extends AbstractChange {
         }
         this.className = className;
         try {
-           Boolean osgiPlatform = Scope.getCurrentScope().get(Scope.Attr.osgiPlatform, Boolean.class);
-           if (Boolean.TRUE.equals(osgiPlatform)) {
-              customChange = (CustomChange)OsgiUtil.loadClass(className).getConstructor().newInstance();
-           } else {
-              try {
-                  customChange = (CustomChange) Class.forName(className, true, Scope.getCurrentScope().getClassLoader()).getConstructor().newInstance();
-              } catch (ClassCastException e) { //fails in Ant in particular
+            Boolean osgiPlatform = Scope.getCurrentScope().get(Scope.Attr.osgiPlatform, Boolean.class);
+            if (Boolean.TRUE.equals(osgiPlatform)) {
+                customChange = (CustomChange) OsgiUtil.loadClass(className).getConstructor().newInstance();
+            } else {
                 try {
-                  customChange = (CustomChange) Thread.currentThread().getContextClassLoader().loadClass(className).getConstructor().newInstance();
-                } catch (ClassNotFoundException e1) {
-                  customChange = (CustomChange) Class.forName(className).getConstructor().newInstance();
+                    customChange = (CustomChange) Class.forName(className, true, Scope.getCurrentScope().getClassLoader()).getConstructor().newInstance();
+                } catch (ClassCastException e) { //fails in Ant in particular
+                    try {
+                        customChange = (CustomChange) Thread.currentThread().getContextClassLoader().loadClass(className).getConstructor().newInstance();
+                    } catch (ClassNotFoundException e1) {
+                        customChange = (CustomChange) Class.forName(className).getConstructor().newInstance();
+                    }
                 }
-              }
-           }
+            }
         } catch (Exception e) {
             throw new CustomChangeException(e);
         }
@@ -137,7 +138,7 @@ public class CustomChangeWrapper extends AbstractChange {
         try {
             return customChange.validate(database);
         } catch (Exception e) {
-            return new ValidationErrors().addError("Exception thrown calling "+getClassName()+".validate():"+ e.getMessage());
+            return new ValidationErrors().addError("Exception thrown calling " + getClassName() + ".validate():" + e.getMessage());
         }
     }
 
@@ -162,14 +163,14 @@ public class CustomChangeWrapper extends AbstractChange {
         boolean shouldExecute = Scope.getCurrentScope().get(Change.SHOULD_EXECUTE, Boolean.TRUE);
         try {
             configureCustomChange();
-            if (customChange instanceof CustomSqlChange) {
-                statements = ((CustomSqlChange) customChange).generateStatements(database);
-            } else if (customChange instanceof CustomTaskChange) {
-                if (shouldExecute) {
+            if (shouldExecute) {
+                if (customChange instanceof CustomSqlChange) {
+                    statements = ((CustomSqlChange) customChange).generateStatements(database);
+                } else if (customChange instanceof CustomTaskChange) {
                     ((CustomTaskChange) customChange).execute(database);
+                } else {
+                    throw new UnexpectedLiquibaseException(customChange.getClass().getName() + " does not implement " + CustomSqlChange.class.getName() + " or " + CustomTaskChange.class.getName());
                 }
-            } else {
-                throw new UnexpectedLiquibaseException(customChange.getClass().getName() + " does not implement " + CustomSqlChange.class.getName() + " or " + CustomTaskChange.class.getName());
             }
         } catch (CustomChangeException e) {
             throw new UnexpectedLiquibaseException(e);
@@ -198,7 +199,7 @@ public class CustomChangeWrapper extends AbstractChange {
             } else if (customChange instanceof CustomTaskRollback) {
                 ((CustomTaskRollback) customChange).rollback(database);
             } else {
-                throw new RollbackImpossibleException("Unknown rollback type: "+customChange.getClass().getName());
+                throw new RollbackImpossibleException("Unknown rollback type: " + customChange.getClass().getName());
             }
         } catch (CustomChangeException e) {
             throw new UnexpectedLiquibaseException(e);
@@ -327,7 +328,7 @@ public class CustomChangeWrapper extends AbstractChange {
         try {
             Boolean osgiPlatform = Scope.getCurrentScope().get(Scope.Attr.osgiPlatform, Boolean.class);
             if (Boolean.TRUE.equals(osgiPlatform)) {
-                localCustomChange = (CustomChange)OsgiUtil.loadClass(className).getConstructor().newInstance();
+                localCustomChange = (CustomChange) OsgiUtil.loadClass(className).getConstructor().newInstance();
             } else {
                 localCustomChange = (CustomChange) Class.forName(className, false, Scope.getCurrentScope().getClassLoader()).getConstructor().newInstance();
             }
