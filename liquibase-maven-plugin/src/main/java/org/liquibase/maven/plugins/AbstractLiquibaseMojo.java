@@ -671,14 +671,14 @@ public abstract class AbstractLiquibaseMojo extends AbstractMojo {
     }
 
     private boolean isDbclHistoryEnabled() {
-        // The default value of this parameter is true, which is why this has this goofy logic.
+        // The default value of this parameter is false, which is why this has this goofy logic.
         if (dbclHistoryEnabled != null) {
             return dbclHistoryEnabled;
         }
         if (databaseChangelogHistoryEnabled != null) {
             return databaseChangelogHistoryEnabled;
         }
-        return true;
+        return false;
     }
 
     protected Writer getOutputWriter(final File outputFile) throws IOException {
