@@ -116,14 +116,10 @@ public class RanChangeSet {
     }
 
     public boolean isSameAs(ChangeSet changeSet) {
-        return this.getId().equalsIgnoreCase(changeSet.getId())
+        String normalizedFilePath = DatabaseChangeLog.normalizePath(this.getChangeLog());
+        return normalizedFilePath.equalsIgnoreCase("liquibase-internal") || (this.getId().equalsIgnoreCase(changeSet.getId())
                 && this.getAuthor().equalsIgnoreCase(changeSet.getAuthor())
-                && isSamePath(changeSet.getFilePath());
-    }
-
-    public boolean isSameAsOrIsLiquibaseInternalChangeset(ChangeSet changeSet) {
-        String ranChangesetPath = DatabaseChangeLog.normalizePath(this.getChangeLog());
-        return ranChangesetPath.equalsIgnoreCase("liquibase-internal") || isSameAs(changeSet);
+                && isSamePath(changeSet.getFilePath(), normalizedFilePath));
     }
 
     /**
@@ -134,8 +130,8 @@ public class RanChangeSet {
      * @param filePath the file path
      * @return does it somehow match what we have at database?
      */
-    private boolean isSamePath(String filePath) {
-        String normalizedFilePath = DatabaseChangeLog.normalizePath(this.getChangeLog());
+    private boolean isSamePath(String filePath, String normalizedFilePath) {
+        //String normalizedFilePath = DatabaseChangeLog.normalizePath(this.getChangeLog());
         return normalizedFilePath.equalsIgnoreCase(DatabaseChangeLog.normalizePath(filePath))
                 || normalizedFilePath.equalsIgnoreCase(Paths.get(filePath).normalize().toString().replace("\\", "/"));
     }
