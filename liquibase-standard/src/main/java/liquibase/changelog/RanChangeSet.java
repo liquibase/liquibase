@@ -131,7 +131,6 @@ public class RanChangeSet {
      * @return does it somehow match what we have at database?
      */
     private boolean isSamePath(String filePath, String normalizedFilePath) {
-        //String normalizedFilePath = DatabaseChangeLog.normalizePath(this.getChangeLog());
         return normalizedFilePath.equalsIgnoreCase(DatabaseChangeLog.normalizePath(filePath))
                 || normalizedFilePath.equalsIgnoreCase(Paths.get(filePath).normalize().toString().replace("\\", "/"));
     }
