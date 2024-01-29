@@ -11,6 +11,7 @@ import liquibase.extension.testing.testsystem.DatabaseTestSystem;
 import liquibase.extension.testing.testsystem.TestSystem;
 import liquibase.lockservice.LockService;
 import liquibase.lockservice.LockServiceFactory;
+import liquibase.structure.core.DatabaseObjectFactory;
 import org.junit.Assume;
 import org.spockframework.runtime.extension.AbstractMethodInterceptor;
 import org.spockframework.runtime.extension.IMethodInvocation;
@@ -136,6 +137,7 @@ public class LiquibaseIntegrationMethodInterceptor extends AbstractMethodInterce
         }
         // Start tests from a clean slate, otherwise the MDC will be polluted with info about the dropAll command.
         Scope.getCurrentScope().getMdcManager().clear();
+        DatabaseObjectFactory.getInstance().reset();
     }
 
     @Override
