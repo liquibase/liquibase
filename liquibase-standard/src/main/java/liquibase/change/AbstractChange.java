@@ -28,6 +28,7 @@ import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.lang.reflect.Type;
 import java.util.*;
+import java.util.regex.Pattern;
 
 import static liquibase.statement.SqlStatement.EMPTY_SQL_STATEMENT;
 
@@ -42,6 +43,7 @@ import static liquibase.statement.SqlStatement.EMPTY_SQL_STATEMENT;
 public abstract class AbstractChange extends AbstractPlugin implements Change {
 
     protected static final String NODENAME_COLUMN = "column";
+    private static final Pattern ALPHABET = Pattern.compile("([A-Z])");
 
     private ChangeSet changeSet;
 
@@ -182,7 +184,7 @@ public abstract class AbstractChange extends AbstractPlugin implements Change {
     private ChangeParameterMetaData createChangeParameterMetadata(PropertyDescriptor property, Method readMethod) {
         try {
             String parameterName = property.getDisplayName();
-            String displayName = parameterName.replaceAll("([A-Z])", " $1");
+            String displayName = ALPHABET.matcher(parameterName).replaceAll(" $1");
             displayName = displayName.substring(0, 1).toUpperCase() + displayName.substring(1);
 
             Type type = readMethod.getGenericReturnType();
