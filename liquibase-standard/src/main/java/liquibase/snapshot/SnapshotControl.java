@@ -37,10 +37,12 @@ public class SnapshotControl implements LiquibaseSerializable {
      * @param database the DBMS for which snapshots should be generated
      * @param types the list of object types to be included in the snapshot
      */
+    @SafeVarargs
     public SnapshotControl(Database database, Class<? extends DatabaseObject>... types) {
         this(database, true, types);
     }
 
+    @SafeVarargs
     public SnapshotControl(Database database, boolean expandTypesIfNeeded, Class<? extends DatabaseObject>... types) {
         if ((types == null) || (types.length == 0)) {
             setTypes(DatabaseObjectFactory.getInstance().getStandardTypes(), database);
