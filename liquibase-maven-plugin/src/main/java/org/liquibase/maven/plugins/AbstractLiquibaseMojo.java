@@ -1193,11 +1193,7 @@ public abstract class AbstractLiquibaseMojo extends AbstractMojo {
     }
 
     private void setFieldValue(Field field, String value) throws IllegalAccessException {
-        try {
-            value = Scope.getCurrentScope().getSingleton(ConfiguredValueModifierFactory.class).override(value);
-        } catch (Exception e) {
-            getLog().warn("Failed to modify value for field " + field.getName(), e);
-        }
+        value = Scope.getCurrentScope().getSingleton(ConfiguredValueModifierFactory.class).override(value);
         if (field.getType().equals(Boolean.class) || field.getType().equals(boolean.class)) {
             field.set(this, Boolean.valueOf(value));
         } else if (field.getType().isEnum()) {
