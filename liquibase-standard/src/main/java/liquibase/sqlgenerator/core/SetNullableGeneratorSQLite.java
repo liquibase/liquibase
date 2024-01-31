@@ -38,44 +38,37 @@ public class SetNullableGeneratorSQLite extends AbstractSqlGenerator<SetNullable
 
     @Override
     public Sql[] generateSql(SetNullableStatement statement, Database database, SqlGeneratorChain sqlGeneratorChain) {
-        try {
-            Column columnSnapshot = SnapshotGeneratorFactory.getInstance().createSnapshot(new Column().setName(statement.getColumnName()).setRelation(new Table().setName(statement.getTableName()).setSchema(new Schema(new Catalog(null), null))), database);
-
-            ColumnConfig newColumnConfig = new ColumnConfig(columnSnapshot);
-            if (newColumnConfig.getConstraints() == null) {
-                newColumnConfig.setConstraints(new ConstraintsConfig());
+        SQLiteDatabase.AlterTableVisitor alterTableVisitor = new SQLiteDatabase.AlterTableVisitor() {
+            @Override
+            public ColumnConfig[] getColumnsToAdd() {
+                return new ColumnConfig[0];
             }
-            newColumnConfig.getConstraints().setNullable(statement.isNullable());
-            SQLiteDatabase.AlterTableVisitor alterTableVisitor = new SQLiteDatabase.AlterTableVisitor() {
-                @Override
-                public ColumnConfig[] getColumnsToAdd() {
-                    return new ColumnConfig[]{newColumnConfig};
+
+            @Override
+            public boolean copyThisColumn(ColumnConfig column) {
+                return true;
+            }
+
+            @Override
+            public boolean createThisColumn(ColumnConfig column) {
+                if (column.getName().equals(statement.getColumnName())) {
+                    if (column.getConstraints() == null) {
+                        column.setConstraints(new ConstraintsConfig());
+                    }
+                    column.getConstraints().setNullable(statement.isNullable());
                 }
+                return true;
+            }
 
-                @Override
-                public boolean copyThisColumn(ColumnConfig column) {
-                    return !column.getName().equals(newColumnConfig.getName()) || column == newColumnConfig;
-                }
+            @Override
+            public boolean createThisIndex(Index index) {
+                return true;
+            }
+        };
 
-                @Override
-                public boolean createThisColumn(ColumnConfig column) {
-                    return !column.getName().equals(newColumnConfig.getName()) || column == newColumnConfig;
-                }
+        Sql[] generatedSqls = SQLiteDatabase.getAlterTableSqls(database, alterTableVisitor, statement.getCatalogName(),
+                statement.getSchemaName(), statement.getTableName());
 
-                @Override
-                public boolean createThisIndex(Index index) {
-                    return true;
-                }
-            };
-
-            Sql[] generatedSqls = SQLiteDatabase.getAlterTableSqls(database, alterTableVisitor, statement.getCatalogName(),
-                    statement.getSchemaName(), statement.getTableName());
-
-            return generatedSqls;
-        } catch (DatabaseException e) {
-            throw new UnexpectedLiquibaseException(e);
-        } catch (InvalidExampleException e) {
-            throw new UnexpectedLiquibaseException(e);
-        }
+        return generatedSqls;
     }
 }
