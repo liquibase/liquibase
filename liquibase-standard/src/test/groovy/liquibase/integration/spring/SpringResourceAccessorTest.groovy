@@ -1,5 +1,6 @@
 package liquibase.integration.spring
 
+import liquibase.resource.ResourceAccessorUtils
 import liquibase.test.TestContext
 import org.springframework.core.io.DefaultResourceLoader
 import spock.lang.Specification
@@ -77,7 +78,7 @@ class SpringResourceAccessorTest extends Specification {
     @Unroll
     def finalizeSearchPath() {
         expect:
-        new SpringResourceAccessor().finalizeSearchPath(input) == expected
+        ResourceAccessorUtils.normalizeSearchPath(input, new SpringResourceAccessor()) == expected
 
         where:
         input                               | expected

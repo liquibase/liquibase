@@ -96,6 +96,7 @@ public class ClassLoaderResourceAccessor extends AbstractResourceAccessor {
 
         final Enumeration<URL> resources;
         try {
+            path = ResourceAccessorUtils.normalizeSearchPath(path, this);
             resources = classLoader.getResources(path);
         } catch (IOException e) {
             throw new IOException("Cannot list resources in path " + path + ": " + e.getMessage(), e);
@@ -136,6 +137,7 @@ public class ClassLoaderResourceAccessor extends AbstractResourceAccessor {
 
         path = path.replace("\\", "/").replaceFirst("^/", "");
 
+        path = ResourceAccessorUtils.normalizeSearchPath(path, this);
         Enumeration<URL> all = classLoader.getResources(path);
         try {
             while (all.hasMoreElements()) {

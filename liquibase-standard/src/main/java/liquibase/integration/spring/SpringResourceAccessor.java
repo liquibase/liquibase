@@ -3,10 +3,10 @@ package liquibase.integration.spring;
 import liquibase.Scope;
 import liquibase.exception.UnexpectedLiquibaseException;
 import liquibase.resource.AbstractResourceAccessor;
+import liquibase.resource.ResourceAccessorUtils;
 import org.springframework.core.io.*;
 import static java.net.URLDecoder.*;
 import org.springframework.core.io.support.ResourcePatternUtils;
-import org.springframework.util.StringUtils;
 
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
@@ -37,7 +37,7 @@ public class SpringResourceAccessor extends AbstractResourceAccessor {
 
     @Override
     public List<liquibase.resource.Resource> getAll(String path) throws IOException {
-        path = finalizeSearchPath(path);
+        path = ResourceAccessorUtils.normalizeSearchPath(path, this);
         final Resource[] springResources = ResourcePatternUtils.getResourcePatternResolver(resourceLoader).getResources(path);
         List<liquibase.resource.Resource> returnList = new ArrayList<>();
         for (Resource resource : springResources) {
@@ -59,7 +59,7 @@ public class SpringResourceAccessor extends AbstractResourceAccessor {
         } else {
             searchPath += "/*";
         }
-        searchPath = finalizeSearchPath(searchPath);
+        searchPath = ResourceAccessorUtils.normalizeSearchPath(searchPath, this);
 
         final Resource[] resources = ResourcePatternUtils.getResourcePatternResolver(resourceLoader).getResources(searchPath);
         List<liquibase.resource.Resource> returnList = new ArrayList<>();
@@ -173,25 +173,6 @@ public class SpringResourceAccessor extends AbstractResourceAccessor {
             final String filename = resource.getFilename();
             return filename != null && filename.contains(".");
         }
-    }
-
-    /**
-     * Ensure the given searchPath is a valid searchPath.
-     * Default implementation adds "classpath:" and removes duplicated /'s and classpath:'s
-     */
-    protected String finalizeSearchPath(String searchPath) {
-        if(searchPath.matches("^classpath\\*?:.*")) {
-            searchPath = searchPath.replace("classpath:","").replace("classpath*:","");
-            searchPath = "classpath*:/" +searchPath;
-        } else if(!searchPath.matches("^\\w+:.*")) {
-            searchPath = "classpath*:/" +searchPath;
-        }
-        searchPath = searchPath.replace("\\", "/");
-        searchPath = searchPath.replaceAll("//+", "/");
-
-        searchPath = StringUtils.cleanPath(searchPath);
-
-        return searchPath;
     }
 
     private String decodeUrl(Resource resource, String url) throws IOException {
