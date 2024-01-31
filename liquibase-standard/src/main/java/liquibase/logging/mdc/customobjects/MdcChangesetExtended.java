@@ -2,12 +2,14 @@ package liquibase.logging.mdc.customobjects;
 
 import liquibase.changelog.ChangeSet;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 import java.util.Objects;
 
 @Getter
 @Setter
+@NoArgsConstructor
 public class MdcChangesetExtended extends MdcChangeset {
     private String deploymentId;
     private String changesetOutcome;
