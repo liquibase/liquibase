@@ -136,8 +136,6 @@ public class ClassLoaderResourceAccessor extends AbstractResourceAccessor {
         LinkedHashSet<Resource> returnList = new LinkedHashSet<>();
 
         path = path.replace("\\", "/").replaceFirst("^/", "");
-
-        path = ResourceAccessorUtils.normalizeSearchPath(path, this);
         Enumeration<URL> all = classLoader.getResources(path);
         try {
             while (all.hasMoreElements()) {
