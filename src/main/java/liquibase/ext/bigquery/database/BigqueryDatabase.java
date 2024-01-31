@@ -166,6 +166,23 @@ public class BigqueryDatabase extends AbstractJdbcDatabase {
     }
 
     @Override
+    public String getDatabaseChangeLogTableName() {
+        if (this.getRawDatabaseChangeLogTableName() != null) {
+            return this.getRawDatabaseChangeLogTableName();
+        }
+
+        return GlobalConfiguration.DATABASECHANGELOG_TABLE_NAME.getCurrentValue();
+    }
+
+    @Override
+    public String getDatabaseChangeLogLockTableName() {
+        if (this.getRawDatabaseChangeLogLockTableName() != null) {
+            return this.getRawDatabaseChangeLogLockTableName();
+        }
+        return GlobalConfiguration.DATABASECHANGELOGLOCK_TABLE_NAME.getCurrentValue();
+    }
+
+    @Override
     public void setLiquibaseSchemaName(String schemaName) {
         this.liquibaseSchemaName = schemaName;
     }
@@ -195,7 +212,6 @@ public class BigqueryDatabase extends AbstractJdbcDatabase {
 
     @Override
     public void setAutoCommit(final boolean b) {
-        return;
     }
 
     @Override
