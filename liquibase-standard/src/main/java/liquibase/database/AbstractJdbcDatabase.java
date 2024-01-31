@@ -659,6 +659,13 @@ public abstract class AbstractJdbcDatabase implements Database {
         this.databaseChangeLogTableName = tableName;
     }
 
+    /**
+     * Method used by extensions to get raw dbcl table name
+     */
+    protected String getRawDatabaseChangeLogTableName() {
+        return databaseChangeLogTableName;
+    }
+
     @Override
     public String getDatabaseChangeLogLockTableName() {
         if (databaseChangeLogLockTableName != null) {
@@ -671,6 +678,13 @@ public abstract class AbstractJdbcDatabase implements Database {
     @Override
     public void setDatabaseChangeLogLockTableName(final String tableName) {
         this.databaseChangeLogLockTableName = tableName;
+    }
+
+    /**
+     * Method used by extensions to get raw dbcll table name
+     */
+    protected String getRawDatabaseChangeLogLockTableName() {
+        return databaseChangeLogLockTableName;
     }
 
     @Override
