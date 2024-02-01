@@ -9,8 +9,7 @@ import liquibase.change.core.*;
 import liquibase.changelog.ChangeSet;
 import liquibase.changeset.ChangeSetService;
 import liquibase.changeset.ChangeSetServiceFactory;
-import liquibase.command.CommandScope;
-import liquibase.command.core.GenerateChangelogCommandStep;
+import liquibase.command.core.helpers.AbstractChangelogCommandStep;
 import liquibase.configuration.core.DeprecatedConfigurationValueProvider;
 import liquibase.database.*;
 import liquibase.database.core.*;
@@ -35,8 +34,6 @@ import liquibase.statement.core.RawSqlStatement;
 import liquibase.structure.DatabaseObject;
 import liquibase.structure.core.Column;
 import liquibase.structure.core.StoredDatabaseLogic;
-import liquibase.structure.core.StoredProcedure;
-import liquibase.structure.core.View;
 import liquibase.util.DependencyUtil;
 import liquibase.util.StreamUtil;
 import liquibase.util.StringUtil;
@@ -73,7 +70,20 @@ public class DiffToChangeLog {
     private final DiffOutputControl diffOutputControl;
     private boolean tryDbaDependencies = true;
 
+    private boolean skipObjectSorting = false;
+
     private static final Set<Class> loggedOrderFor = new HashSet<>();
+
+    /**
+     * Creates a new DiffToChangeLog with the given DiffResult and default DiffOutputControl
+     * @param diffResult the DiffResult to convert to a ChangeLog
+     * @param diffOutputControl the DiffOutputControl to use to control the output
+     * @param skipObjectSorting if true, will skip dependency object sorting. This can be useful on databases that have a lot of packages/procedures that are linked to each other
+     */
+    public DiffToChangeLog(DiffResult diffResult, DiffOutputControl diffOutputControl, boolean skipObjectSorting) {
+        this(diffResult, diffOutputControl);
+        this.skipObjectSorting = skipObjectSorting;
+    }
 
     public DiffToChangeLog(DiffResult diffResult, DiffOutputControl diffOutputControl) {
         this.diffResult = diffResult;
@@ -81,14 +91,14 @@ public class DiffToChangeLog {
         respectSchemaAndCatalogCaseIfNeeded(diffOutputControl);
     }
 
+    public DiffToChangeLog(DiffOutputControl diffOutputControl) {
+        this.diffOutputControl = diffOutputControl;
+    }
+
     private void respectSchemaAndCatalogCaseIfNeeded(DiffOutputControl diffOutputControl) {
         if (this.diffResult.getComparisonSnapshot().getDatabase() instanceof AbstractDb2Database) {
             diffOutputControl.setRespectSchemaAndCatalogCase(true);
         }
-    }
-
-    public DiffToChangeLog(DiffOutputControl diffOutputControl) {
-        this.diffOutputControl = diffOutputControl;
     }
 
     public void setDiffResult(DiffResult diffResult) {
@@ -367,10 +377,10 @@ public class DiffToChangeLog {
     // drop FK goes first
     //
     private List<ChangeSet> bringDropFKToTop(List<ChangeSet> changeSets) {
-        List<ChangeSet> dropFk = changeSets.stream().filter(cs -> {
-            return cs.getChanges().stream().anyMatch(ch -> ch instanceof DropForeignKeyConstraintChange);
-        }).collect(Collectors.toList());
-        if (dropFk == null || dropFk.isEmpty()) {
+        List<ChangeSet> dropFk = changeSets.stream().filter(cs ->
+            cs.getChanges().stream().anyMatch(DropForeignKeyConstraintChange.class::isInstance)
+        ).collect(Collectors.toList());
+        if (dropFk.isEmpty()) {
             return changeSets;
         }
         List<ChangeSet> returnList = new ArrayList<>();
@@ -493,6 +503,10 @@ public class DiffToChangeLog {
                 }
             } catch (DatabaseException e) {
                 Scope.getCurrentScope().getLog(getClass()).fine("Cannot get object dependencies: " + e.getMessage());
+            } catch (StackOverflowError e) {
+                Scope.getCurrentScope().getLog(getClass()).warning("You have too many or recursive database object dependencies! " +
+                        "Liquibase is going to ignore dependency sorting and resume processing. To skip this message " +
+                        "(and gain a lot of processing time) use flag " + AbstractChangelogCommandStep.SKIP_OBJECT_SORTING.getName(), e);
             }
         }
         return new ArrayList<>(objects);
@@ -517,9 +531,7 @@ public class DiffToChangeLog {
             //   to stop the recursion
             //
             String message = dbe.getMessage();
-            if (!message.contains("ORA-00942")) {
-                throw new DatabaseException(dbe);
-            } else if (!tryDbaDependencies) {
+            if (!message.contains("ORA-00942") || !tryDbaDependencies) {
                 throw new DatabaseException(dbe);
             }
             Scope.getCurrentScope().getLog(getClass()).warning("Unable to query DBA_DEPENDENCIES table. Switching to USER_DEPENDENCIES");
@@ -533,6 +545,9 @@ public class DiffToChangeLog {
      * Used by {@link #sortMissingObjects(Collection, Database)} to determine whether to go into the sorting logic.
      */
     protected boolean supportsSortingObjects(Database database) {
+        if (this.skipObjectSorting) {
+            return false;
+        }
         return (database instanceof AbstractDb2Database) || (database instanceof MSSQLDatabase) || (database instanceof
                 OracleDatabase) || database instanceof PostgresDatabase;
     }
@@ -766,13 +781,6 @@ public class DiffToChangeLog {
 
     private void addToChangeSets(Change[] changes, List<ChangeSet> changeSets, ObjectQuotingStrategy quotingStrategy, String created) {
         if (changes != null) {
-            String csContext = this.changeSetContext;
-
-            if (diffOutputControl.getContext() != null) {
-                csContext = diffOutputControl.getContext().toString().replaceFirst("^\\(", "")
-                        .replaceFirst("\\)$", "");
-            }
-
             ChangeSetService service = ChangeSetServiceFactory.getInstance().createChangeSetService();
             if (useSeparateChangeSets(changes)) {
                 for (Change change : changes) {
@@ -793,7 +801,7 @@ public class DiffToChangeLog {
                     changeSets.add(changeSet);
                 }
             } else {
-                final boolean runOnChange = Arrays.asList(changes).stream().allMatch(change -> isContainedInRunOnChangeTypes(change));
+                final boolean runOnChange = Arrays.asList(changes).stream().allMatch(this::isContainedInRunOnChangeTypes);
                 ChangeSet changeSet = service.createChangeSet(generateId(changes), getChangeSetAuthor(), false, runOnChange, this.changeSetPath, changeSetContext,
                                         null, null, null, true, quotingStrategy, null);
                 changeSet.setCreated(created);
@@ -1039,20 +1047,10 @@ public class DiffToChangeLog {
             }
         }
 
-
-        private Node getNode(Class<? extends DatabaseObject> type) {
-            Node node = allNodes.get(type);
-            if (node == null) {
-                node = new Node(type);
-            }
-            return node;
-        }
-
-
         static class Node {
             public final Class<? extends DatabaseObject> type;
-            public final HashSet<Edge> inEdges;
-            public final HashSet<Edge> outEdges;
+            public final Set<Edge> inEdges;
+            public final Set<Edge> outEdges;
 
             public Node(Class<? extends DatabaseObject> type) {
                 this.type = type;
