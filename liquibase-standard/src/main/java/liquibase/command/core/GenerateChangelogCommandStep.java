@@ -49,6 +49,8 @@ public class GenerateChangelogCommandStep extends AbstractCommandStep {
     public static final CommandArgumentDefinition<String> REFERENCE_LIQUIBASE_SCHEMA_NAME_ARG;
     public static final CommandArgumentDefinition<String> REFERENCE_LIQUIBASE_CATALOG_NAME_ARG;
 
+    public static final CommandArgumentDefinition<Boolean> SKIP_OBJECT_SORTING;
+
     static {
         final CommandBuilder builder = new CommandBuilder(COMMAND_NAME);
         CHANGELOG_FILE_ARG = builder.argument(CommonArgumentNames.CHANGELOG_FILE, String.class)
@@ -88,6 +90,11 @@ public class GenerateChangelogCommandStep extends AbstractCommandStep {
                 .hidden().build();
         REFERENCE_LIQUIBASE_CATALOG_NAME_ARG = builder.argument("referenceLiquibaseCatalogName", String.class)
                 .hidden().build();
+
+        SKIP_OBJECT_SORTING = builder.argument("skipObjectSorting", Boolean.class)
+                .defaultValue(false)
+                .description("When true will skip object sorting. This can be useful on databases that have a lot of packages/procedures that are " +
+                        "linked to each other").build();
     }
 
     @Override
@@ -119,7 +126,7 @@ public class GenerateChangelogCommandStep extends AbstractCommandStep {
 
         DiffResult diffResult = (DiffResult) resultsBuilder.getResult(DiffCommandStep.DIFF_RESULT.getName());
 
-        DiffToChangeLog changeLogWriter = new DiffToChangeLog(diffResult, diffOutputControl);
+        DiffToChangeLog changeLogWriter = new DiffToChangeLog(diffResult, diffOutputControl, commandScope.getArgumentValue(SKIP_OBJECT_SORTING));
 
         changeLogWriter.setChangeSetAuthor(commandScope.getArgumentValue(AUTHOR_ARG));
         if (commandScope.getArgumentValue(CONTEXT_ARG) != null) {
