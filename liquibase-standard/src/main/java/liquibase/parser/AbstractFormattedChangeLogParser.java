@@ -11,7 +11,6 @@ import liquibase.changelog.DatabaseChangeLog;
 import liquibase.changeset.ChangeSetService;
 import liquibase.changeset.ChangeSetServiceFactory;
 import liquibase.exception.ChangeLogParseException;
-import liquibase.exception.LiquibaseException;
 import liquibase.resource.ResourceAccessor;
 import liquibase.util.StreamUtil;
 import liquibase.util.StringUtil;
@@ -29,7 +28,7 @@ import static java.util.ResourceBundle.getBundle;
 public abstract class AbstractFormattedChangeLogParser implements ChangeLogParser {
 
     private static final ResourceBundle coreBundle = getBundle("liquibase/i18n/liquibase-core");
-    private static final String EXCEPTION_MESSAGE = coreBundle.getString("formatted.changelog.exception.message");
+    protected static final String EXCEPTION_MESSAGE = coreBundle.getString("formatted.changelog.exception.message");
 
     protected final String FIRST_LINE_REGEX = String.format("^\\s*%s\\s*liquibase\\s*formatted.*", getSingleLineCommentSequence());
     protected final Pattern FIRST_LINE_PATTERN = Pattern.compile(FIRST_LINE_REGEX, Pattern.CASE_INSENSITIVE);
@@ -456,7 +455,7 @@ public abstract class AbstractFormattedChangeLogParser implements ChangeLogParse
                         throw new ChangeLogParseException("\n" + message);
                     }
                     if (changeSet != null) {
-                        configureChangeSet(physicalChangeLogLocation, changeLogParameters, reader, currentSequence, currentRollbackSequence, changeSet, count, line, commentMatcher);
+                        configureChangeSet(physicalChangeLogLocation, changeLogParameters, reader, currentSequence, currentRollbackSequence, changeSet, count, line, commentMatcher, resourceAccessor);
                     } else {
                         if (commentMatcher.matches()) {
                             String message =
@@ -484,7 +483,15 @@ public abstract class AbstractFormattedChangeLogParser implements ChangeLogParse
         return changeLog;
     }
 
+    /**
+     * @deprecated use {@link AbstractFormattedChangeLogParser#configureChangeSet(String, ChangeLogParameters, BufferedReader, StringBuilder, StringBuilder, ChangeSet, int, String, Matcher, ResourceAccessor)} instead
+     */
+    @Deprecated
     protected void configureChangeSet(String physicalChangeLogLocation, ChangeLogParameters changeLogParameters, BufferedReader reader, StringBuilder currentSequence, StringBuilder currentRollbackSequence, ChangeSet changeSet, int count, String line, Matcher commentMatcher) throws ChangeLogParseException, IOException {
+        configureChangeSet(physicalChangeLogLocation, changeLogParameters, reader, currentSequence, currentRollbackSequence, changeSet, count, line, commentMatcher, null);
+    }
+
+    protected void configureChangeSet(String physicalChangeLogLocation, ChangeLogParameters changeLogParameters, BufferedReader reader, StringBuilder currentSequence, StringBuilder currentRollbackSequence, ChangeSet changeSet, int count, String line, Matcher commentMatcher, ResourceAccessor resourceAccessor) throws ChangeLogParseException, IOException {
         Matcher altCommentOneDashMatcher = ALT_COMMENT_ONE_CHARACTER_PATTERN.matcher(line);
         Matcher altCommentPluralMatcher = ALT_COMMENT_PLURAL_PATTERN.matcher(line);
         Matcher rollbackMatcher = ROLLBACK_PATTERN.matcher(line);
