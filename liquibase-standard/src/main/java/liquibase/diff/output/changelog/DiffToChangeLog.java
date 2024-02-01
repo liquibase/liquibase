@@ -496,7 +496,7 @@ public class DiffToChangeLog {
             //   to stop the recursion
             //
             String message = dbe.getMessage();
-            if (!message.contains("ORA-00942: table or view does not exist")) {
+            if (!message.contains("ORA-00942")) {
                 throw new DatabaseException(dbe);
             } else if (!tryDbaDependencies) {
                 throw new DatabaseException(dbe);
