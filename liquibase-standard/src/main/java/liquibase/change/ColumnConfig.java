@@ -467,7 +467,7 @@ public class ColumnConfig extends AbstractLiquibaseSerializable {
             if (defaultValue instanceof Boolean) {
                 setDefaultValueBoolean((Boolean) defaultValue);
             } else if (defaultValue instanceof Number) {
-                setDefaultValueNumeric(defaultValue.toString());
+                setDefaultValueNumeric((Number) defaultValue);
             } else if (defaultValue instanceof SequenceNextValueFunction) {
                 setDefaultValueSequenceNext((SequenceNextValueFunction) defaultValue);
             } else if (defaultValue instanceof DatabaseFunction) {
