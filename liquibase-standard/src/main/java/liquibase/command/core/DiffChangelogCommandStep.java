@@ -84,7 +84,7 @@ public class DiffChangelogCommandStep extends AbstractCommandStep {
                 Scope.getCurrentScope().addMdcValue(MdcKey.DIFF_CHANGELOG_FILE, changeLogFile);
                 referenceDatabase.setObjectQuotingStrategy(ObjectQuotingStrategy.QUOTE_ALL_OBJECTS);
 
-                DiffToChangeLog changeLogWriter = createDiffToChangeLogObject(diffResult, diffOutputControl);
+                DiffToChangeLog changeLogWriter = createDiffToChangeLogObject(diffResult, diffOutputControl, false);
                 changeLogWriter.setChangeSetContext(commandScope.getArgumentValue(CONTEXTS_ARG));
                 changeLogWriter.setChangeSetLabels(commandScope.getArgumentValue(LABEL_FILTER_ARG));
                 changeLogWriter.setChangeSetAuthor(commandScope.getArgumentValue(AUTHOR_ARG));
@@ -114,8 +114,8 @@ public class DiffChangelogCommandStep extends AbstractCommandStep {
         commandScope.addArgumentValue(DiffCommandStep.FORMAT_ARG, "none");
     }
 
-    protected DiffToChangeLog createDiffToChangeLogObject(DiffResult diffResult, DiffOutputControl diffOutputControl) {
-        return new DiffToChangeLog(diffResult, diffOutputControl);
+    protected DiffToChangeLog createDiffToChangeLogObject(DiffResult diffResult, DiffOutputControl diffOutputControl, boolean skipObjectSorting) {
+        return new DiffToChangeLog(diffResult, diffOutputControl, skipObjectSorting);
     }
 
 }
