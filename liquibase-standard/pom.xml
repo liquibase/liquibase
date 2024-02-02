@@ -248,7 +248,8 @@
                             osgi.serviceloader; osgi.serviceloader=liquibase.logging.mdc.CustomMdcObject,
                             osgi.serviceloader; osgi.serviceloader=liquibase.resource.PathHandler,
                             osgi.serviceloader; osgi.serviceloader=liquibase.report.ShowSummaryGenerator,
-                            osgi.serviceloader; osgi.serviceloader=liquibase.parser.LiquibaseSqlParser
+                            osgi.serviceloader; osgi.serviceloader=liquibase.parser.LiquibaseSqlParser,
+                            osgi.serviceloader; osgi.serviceloader=liquibase.changeset.ChangeSetService
                         </Provide-Capability>
                         <Require-Capability>
                             osgi.extender; filter:="(osgi.extender=osgi.serviceloader.registrar)",
@@ -284,7 +285,8 @@
                             osgi.serviceloader; filter:="(osgi.serviceloader=liquibase.logging.mdc.CustomMdcObject)"; cardinality:=multiple,
                             osgi.serviceloader; filter:="(osgi.serviceloader=liquibase.resource.PathHandler)"; cardinality:=multiple,
                             osgi.serviceloader; filter:="(osgi.serviceloader=liquibase.report.ShowSummaryGenerator)"; cardinality:=multiple,
-                            osgi.serviceloader; filter:="(osgi.serviceloader=liquibase.parser.LiquibaseSqlParser)"; cardinality:=multiple
+                            osgi.serviceloader; filter:="(osgi.serviceloader=liquibase.parser.LiquibaseSqlParser)"; cardinality:=multiple,
+                            osgi.serviceloader; filter:="(osgi.serviceloader=liquibase.changeset.ChangeSetService)"; cardinality:=multiple
                         </Require-Capability>
                     </instructions>
                 </configuration>

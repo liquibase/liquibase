@@ -183,6 +183,7 @@ public class SnapshotGeneratorFactory {
 
         }
 
+        Scope.getCurrentScope().getLog(SnapshotGeneratorFactory.class).info("Creating snapshot");
         return createSnapshot(schemas, database, snapshotControl);
     }
 
