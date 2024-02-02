@@ -604,6 +604,7 @@ Long Description: ${commandDefinition.getLongDescription() ?: "NOT SET"}
                     contents = StreamUtil.readStreamAsString(resource.openInputStream())
                 } else {
                     contents = null
+                    throw new FileNotFoundException("File ${path} not found")
                 }
             }
 
