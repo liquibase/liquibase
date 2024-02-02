@@ -2,7 +2,6 @@ package liquibase.command.core;
 
 import liquibase.Scope;
 import liquibase.command.*;
-import liquibase.command.core.helpers.AbstractChangelogCommandStep;
 import liquibase.command.core.helpers.DiffOutputControlCommandStep;
 import liquibase.command.providers.ReferenceDatabase;
 import liquibase.database.Database;
@@ -44,7 +43,6 @@ public class DiffChangelogCommandStep extends AbstractCommandStep {
                 .addAlias("contexts")
                 .description("Changeset contexts to generate")
                 .build();
-        builder.addArgument(AbstractChangelogCommandStep.SKIP_OBJECT_SORTING).build();
     }
 
     @Override
@@ -86,7 +84,7 @@ public class DiffChangelogCommandStep extends AbstractCommandStep {
                 Scope.getCurrentScope().addMdcValue(MdcKey.DIFF_CHANGELOG_FILE, changeLogFile);
                 referenceDatabase.setObjectQuotingStrategy(ObjectQuotingStrategy.QUOTE_ALL_OBJECTS);
 
-                DiffToChangeLog changeLogWriter = createDiffToChangeLogObject(diffResult, diffOutputControl, commandScope.getArgumentValue(AbstractChangelogCommandStep.SKIP_OBJECT_SORTING));
+                DiffToChangeLog changeLogWriter = createDiffToChangeLogObject(diffResult, diffOutputControl, false);
                 changeLogWriter.setChangeSetContext(commandScope.getArgumentValue(CONTEXTS_ARG));
                 changeLogWriter.setChangeSetLabels(commandScope.getArgumentValue(LABEL_FILTER_ARG));
                 changeLogWriter.setChangeSetAuthor(commandScope.getArgumentValue(AUTHOR_ARG));
