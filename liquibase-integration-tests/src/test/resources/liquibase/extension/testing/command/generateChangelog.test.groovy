@@ -60,6 +60,8 @@ Optional Args:
     OBFUSCATED
   schemas (String) Schemas to include in diff
     Default: null
+  skipObjectSorting (Boolean) When true will skip object sorting. This can be useful on databases that have a lot of packages/procedures that are linked to each other
+    Default: false
   username (String) Username to use to connect to the database
     Default: null
 """
