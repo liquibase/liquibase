@@ -62,6 +62,8 @@
             <groupId>com.simba.googlebigquery.jdbc</groupId>
             <artifactId>GoogleBigQueryJDBC42</artifactId>
             <version>4.2</version>
+            <scope>system</scope>
+            <systemPath>${project.basedir}/lib/GoogleBigQueryJDBC42.jar</systemPath>
         </dependency>
         <dependency>
             <groupId>com.google.cloud</groupId>
@@ -88,6 +90,12 @@
             <groupId>com.google.api-client</groupId>
             <artifactId>google-api-client-jackson2</artifactId>
             <version>2.2.0</version>
+        </dependency>
+        <dependency>
+            <groupId>org.skyscreamer</groupId>
+            <artifactId>jsonassert</artifactId>
+            <version>1.5.1</version>
+            <scope>test</scope>
         </dependency>
     </dependencies>
 
