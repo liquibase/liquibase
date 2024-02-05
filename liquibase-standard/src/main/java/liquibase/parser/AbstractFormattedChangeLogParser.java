@@ -64,6 +64,10 @@ public abstract class AbstractFormattedChangeLogParser implements ChangeLogParse
     protected final String PRECONDITION_REGEX = String.format("\\s*%s[\\s]*precondition\\-([a-zA-Z0-9-]+) (.*)", getSingleLineCommentSequence());
     protected final Pattern PRECONDITION_PATTERN = Pattern.compile(PRECONDITION_REGEX, Pattern.CASE_INSENSITIVE);
 
+    protected final String INVALID_PRECONDITION_REGEX = String.format("\\s*%s[\\s]*precondition\\-([a-zA-Z0-9-]+)", getSingleLineCommentSequence());
+
+    protected final Pattern INVALID_PRECONDITION_PATTERN = Pattern.compile(INVALID_PRECONDITION_REGEX, Pattern.CASE_INSENSITIVE);
+
     protected final String ALT_PRECONDITION_ONE_CHARACTER_REGEX = String.format("\\s*%s[\\s]*precondition(.*)", getSingleLineCommentOneCharacter());
     protected final Pattern ALT_PRECONDITION_ONE_CHARACTER_PATTERN = Pattern.compile(ALT_PRECONDITION_ONE_CHARACTER_REGEX, Pattern.CASE_INSENSITIVE);
 
@@ -204,6 +208,8 @@ public abstract class AbstractFormattedChangeLogParser implements ChangeLogParse
     protected abstract void handlePreconditionCase(ChangeLogParameters changeLogParameters, ChangeSet changeSet, Matcher preconditionMatcher) throws ChangeLogParseException;
 
     protected abstract void handlePreconditionsCase(ChangeSet changeSet, int count, Matcher preconditionsMatcher) throws ChangeLogParseException;
+
+    protected abstract void handleInvalidPreconditionCase(ChangeLogParameters changeLogParameters, ChangeSet changeSet, Matcher preconditionMatcher) throws ChangeLogParseException;
 
     protected abstract AbstractSQLChange getChange();
 
@@ -504,6 +510,8 @@ public abstract class AbstractFormattedChangeLogParser implements ChangeLogParse
         Matcher validCheckSumMatcher = VALID_CHECK_SUM_PATTERN.matcher(line);
         Matcher altValidCheckSumOneDashMatcher = ALT_VALID_CHECK_SUM_ONE_CHARACTER_PATTERN.matcher(line);
         Matcher rollbackMultiLineStartMatcher = ROLLBACK_MULTI_LINE_START_PATTERN.matcher(line);
+        Matcher invalidPreconditionMatcher = INVALID_PRECONDITION_PATTERN.matcher(line);
+
 
         if (commentMatcher.matches()) {
             if (commentMatcher.groupCount() == 0) {
@@ -550,6 +558,8 @@ public abstract class AbstractFormattedChangeLogParser implements ChangeLogParse
             String message =
                     String.format(EXCEPTION_MESSAGE, physicalChangeLogLocation, count, getSequenceName(), "--precondition-sql-check", getDocumentationLink());
             throw new ChangeLogParseException("\n" + message);
+        } else if (invalidPreconditionMatcher.matches()) {
+            handleInvalidPreconditionCase(changeLogParameters, changeSet, invalidPreconditionMatcher);
         } else {
             currentSequence.append(line).append(System.lineSeparator());
         }
