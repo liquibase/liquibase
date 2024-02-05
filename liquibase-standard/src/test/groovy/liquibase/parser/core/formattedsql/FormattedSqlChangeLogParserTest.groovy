@@ -1215,7 +1215,7 @@ create table table1 (
         changeLog.getChangeSets().get(2).getPreconditions().nestedPreconditions.get(0).getSerializableFieldValue("schemaName") == "12345"
     }
 
-    def "parse error tableExists precondition when missing table name parameter"() throws Exception {
+    def "parse error empty tableExists precondition when missing table name parameter"() throws Exception {
         given:
         ChangeLogParameters params = new ChangeLogParameters()
         params.set("tablename", "table4")
@@ -1228,7 +1228,7 @@ create table table1 (
         e.getMessage().contains("Precondition table exists failed because of missing required table name parameter.")
     }
 
-    def "parse error viewExists precondition when missing view name parameter"() throws Exception {
+    def "parse error empty viewExists precondition when missing view name parameter"() throws Exception {
         given:
         ChangeLogParameters params = new ChangeLogParameters()
         params.set("tablename", "table4")
@@ -1241,7 +1241,7 @@ create table table1 (
         e.getMessage().contains("Precondition view exists failed because of missing required view name parameter.")
     }
 
-    def "parse error sqlCheck precondition when missing expectedResult parameter"() throws Exception {
+    def "parse error empty sqlCheck precondition when missing expectedResult parameter"() throws Exception {
         given:
         ChangeLogParameters params = new ChangeLogParameters()
         params.set("tablename", "table4")

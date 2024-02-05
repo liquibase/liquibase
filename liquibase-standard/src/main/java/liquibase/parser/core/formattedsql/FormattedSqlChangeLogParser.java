@@ -81,7 +81,7 @@ public class FormattedSqlChangeLogParser extends AbstractFormattedChangeLogParse
     }
 
     @Override
-    protected void handleInvalidPreconditionCase(ChangeLogParameters changeLogParameters, ChangeSet changeSet, Matcher preconditionMatcher) throws ChangeLogParseException {
+    protected void handleInvalidEmptyPreconditionCase(ChangeLogParameters changeLogParameters, ChangeSet changeSet, Matcher preconditionMatcher) throws ChangeLogParseException {
         if (preconditionMatcher.groupCount() == 1) {
             String name = StringUtil.trimToNull(preconditionMatcher.group(1));
             if (name != null) {
