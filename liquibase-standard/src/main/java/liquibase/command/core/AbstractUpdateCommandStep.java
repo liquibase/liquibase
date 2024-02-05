@@ -73,6 +73,8 @@ public abstract class AbstractUpdateCommandStep extends AbstractCommandStep impl
         final ChangeLogParameters changeLogParameters = (ChangeLogParameters) commandScope.getDependency(ChangeLogParameters.class);
         Contexts contexts = new Contexts(getContextsArg(commandScope));
         LabelExpression labelExpression = new LabelExpression(getLabelFilterArg(commandScope));
+        updateReportParameters.getOperationInfo().setLabels(labelExpression.getOriginalString());
+        updateReportParameters.getOperationInfo().setContexts(contexts.toString());
         DatabaseChangelogCommandStep.addCommandFiltersMdc(labelExpression, contexts);
         customMdcLogging(commandScope);
 
