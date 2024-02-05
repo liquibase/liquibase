@@ -1,6 +1,11 @@
 Liquibase Core Changelog
 ===========================================
 
+Changes in version 4.26.0 (2024.02.07)
+
+### Liquibase 4.26.0 is a major release
+
+
 Changes in version 4.25.1 (2023.12.18)
 
 ### Liquibase 4.25.1 is a patch release
