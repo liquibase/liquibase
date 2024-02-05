@@ -24,7 +24,7 @@ Changes in version 4.26.0 (2024.02.07)
 
 #### Observability: Checks Run Reports
 * Understand and share the data on the execution of Quality Checks with a new Checks Run Report. Easily scan and understand your results with the summary section, Analyze your checks by viewing details by ChangeSet, by check, and by database. And collaborate with your team with shareable report.
-* Learn more https://docs.liquibase.com/reports
+* Learn more https://docs.liquibase.com/observability
 
 ### [PRO] Changelog
 * DAT-16531: Add labels, contexts, rollback-on-error to update reports runtime info by @abrackx in https://github.com/liquibase/liquibase-pro/pull/1499
@@ -113,22 +113,6 @@ Changes in version 4.26.0 (2024.02.07)
 - (#5286) Bump org.codehaus.mojo:build-helper-maven-plugin from 3.4.0 to 3.5.0 @dependabot
 - (#5275) Bump com.opencsv:opencsv from 5.8 to 5.9 @dependabot
 - (#5269) Bump org.testcontainers:testcontainers-bom from 1.19.1 to 1.19.3 @dependabot
-
-### Get Certified
-Learn all the Liquibase fundamentals from free online courses by Liquibase experts and see how to apply them in the real world at https://learn.liquibase.com/.
-
-### Read the Documentation
-Please check out and contribute to the continually improving docs, now at https://docs.liquibase.com/.
-
-### Meet the Community
-Our community has built a lot. From extensions to integrations, you’ve helped make Liquibase the amazing open source project that it is today. Keep contributing to making it stronger:
-
-[Contribute code](https://www.liquibase.org/development/contribute.html)
-[Make doc updates](https://github.com/Datical/liquibase-docs)
-[Help by asking and answering questions](https://forum.liquibase.org/)
-[Set up a chat with the Product team](https://calendly.com/liquibase-outreach/product-feedback)
-
-Thanks to everyone who helps make the Liquibase community strong!
 
 
 Changes in version 4.25.1 (2023.12.18)
