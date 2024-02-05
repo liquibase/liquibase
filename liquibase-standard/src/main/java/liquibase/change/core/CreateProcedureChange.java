@@ -33,6 +33,8 @@ public class CreateProcedureChange extends AbstractChange implements DbmsTargete
     private String schemaName;
     private String procedureName;
     private String procedureText;
+
+    private String procedureBody;
     private String dbms;
 
     private String path;
@@ -109,21 +111,28 @@ public class CreateProcedureChange extends AbstractChange implements DbmsTargete
         this.relativeToChangelogFile = relativeToChangelogFile;
     }
 
-    @DatabaseChangeProperty(serializationType = SerializationType.DIRECT_VALUE, version = {ChecksumVersion.V8})
-    @DatabaseChangeProperty(isChangeProperty = false)
+    @DatabaseChangeProperty(
+            description = procedureTextDescription,
+            isChangeProperty = false, version = {ChecksumVersion.V8})
+    @DatabaseChangeProperty(
+            description = procedureTextDescription,
+            serializationType = SerializationType.DIRECT_VALUE)
     /**
      * @deprecated Use getProcedureText() instead
      */
+    @Deprecated
     public String getProcedureBody() {
-        return procedureText;
+        return procedureBody;
     }
 
     /**
      * @deprecated Use setProcedureText() instead
      */
     @Deprecated
-    public void setProcedureBody(String procedureText) {
-        this.procedureText = procedureText;
+    public void setProcedureBody(String procedureBody) {
+
+        this.procedureBody = procedureBody;
+        this.setProcedureText(procedureBody);
     }
 
     private final String procedureTextDescription = "The SQL creating the procedure. You need to define either this attribute or 'path'. " +
@@ -194,6 +203,13 @@ public class CreateProcedureChange extends AbstractChange implements DbmsTargete
             validate.addError(
                 "Cannot specify both 'path' and a nested procedure text in " +
                     Scope.getCurrentScope().getSingleton(ChangeFactory.class).getChangeMetaData(this).getName()
+            );
+        }
+
+        if(StringUtil.trimToNull(getProcedureBody())!= null) {
+            validate.addWarning(
+                    "procedureBody is a deprecated field, use procedureText instead. " +
+                            Scope.getCurrentScope().getSingleton(ChangeFactory.class).getChangeMetaData(this).getName()
             );
         }
 
