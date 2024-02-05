@@ -13,7 +13,7 @@ public interface LockService extends PrioritizedService {
 
     void setChangeLogLockWaitTime(long changeLogLockWaitTime);
 
-    void setChangeLogLockRecheckTime(long changeLogLocRecheckTime);
+    void setChangeLogLockRecheckTime(long changeLogLockRecheckTime);
 
     boolean hasChangeLogLock();
 

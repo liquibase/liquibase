@@ -1004,6 +1004,8 @@ public class LiquibaseCommandLine {
                 }
             }
 
+            subCommandSpec.aliases(commandDefinition.getAliases().stream().map(cn -> cn[cn.length - 1]).collect(Collectors.toList()).toArray(new String[]{}));
+
             getParentCommandSpec(commandDefinition, rootCommand).addSubcommand(commandName[commandName.length - 1], new CommandLine(subCommandSpec, defaultFactory));
         }
 
