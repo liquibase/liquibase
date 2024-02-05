@@ -506,7 +506,7 @@ public class DiffToChangeLog {
             } catch (StackOverflowError e) {
                 Scope.getCurrentScope().getLog(getClass()).warning("You have too many or recursive database object dependencies! " +
                         "Liquibase is going to ignore dependency sorting and resume processing. To skip this message " +
-                        "(and gain a lot of processing time) use flag " + AbstractChangelogCommandStep.SKIP_OBJECT_SORTING.getName(), e);
+                        "(and save a lot of processing time) use flag " + AbstractChangelogCommandStep.SKIP_OBJECT_SORTING.getName(), e);
             }
         }
         return new ArrayList<>(objects);
