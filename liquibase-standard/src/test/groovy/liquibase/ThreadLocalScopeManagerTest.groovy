@@ -4,6 +4,7 @@ import liquibase.changelog.ChangeSet
 import liquibase.database.jvm.JdbcConnection
 import liquibase.exception.LiquibaseException
 import liquibase.resource.ClassLoaderResourceAccessor
+import liquibase.util.StringUtil
 import spock.lang.Ignore
 import spock.lang.Specification
 
@@ -53,7 +54,7 @@ class ThreadLocalScopeManagerTest extends Specification {
         final ThreadAligner threadAligner = new ThreadAligner(threadCount)
 
         for (int i = 0; i < threadCount; i++) {
-            final String dbName = DATABASE_NAME_PREFIX + i
+            final String dbName = DATABASE_NAME_PREFIX + StringUtil.randomIdentifer(5) + i
 
             liveConnections.put(dbName, MemoryDatabase.create(dbName))
 
