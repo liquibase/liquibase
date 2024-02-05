@@ -1182,4 +1182,22 @@ public class StringUtil {
     public static boolean isEmpty(CharSequence cs) {
         return cs == null || cs.length() == 0;
     }
+
+    /**
+     * Split the input string into chunks no larger than the supplied chunkSize. If the string is shorter than the
+     * chunkSize, the resultant list will contain only a single entry.
+     */
+    public static List<String> splitToChunks(String input, int chunkSize) {
+        int length = input.length();
+        if (length < chunkSize) {
+            return Collections.singletonList(input);
+        }
+        List<String> chunks = new ArrayList<>((length / chunkSize) + 1);
+        for (int i = 0; i < length; i += chunkSize) {
+            int end = Math.min(i + chunkSize, length);
+            String chunk = input.substring(i, end);
+            chunks.add(chunk);
+        }
+        return chunks;
+    }
 }
