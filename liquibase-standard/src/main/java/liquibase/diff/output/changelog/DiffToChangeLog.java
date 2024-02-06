@@ -9,8 +9,6 @@ import liquibase.change.core.*;
 import liquibase.changelog.ChangeSet;
 import liquibase.changeset.ChangeSetService;
 import liquibase.changeset.ChangeSetServiceFactory;
-import liquibase.command.CommandScope;
-import liquibase.command.core.GenerateChangelogCommandStep;
 import liquibase.configuration.core.DeprecatedConfigurationValueProvider;
 import liquibase.database.*;
 import liquibase.database.core.*;
@@ -35,8 +33,6 @@ import liquibase.statement.core.RawSqlStatement;
 import liquibase.structure.DatabaseObject;
 import liquibase.structure.core.Column;
 import liquibase.structure.core.StoredDatabaseLogic;
-import liquibase.structure.core.StoredProcedure;
-import liquibase.structure.core.View;
 import liquibase.util.DependencyUtil;
 import liquibase.util.StreamUtil;
 import liquibase.util.StringUtil;
@@ -48,6 +44,8 @@ import java.io.OutputStream;
 import java.io.PrintStream;
 import java.text.SimpleDateFormat;
 import java.util.*;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 public class DiffToChangeLog {
@@ -456,7 +454,11 @@ public class DiffToChangeLog {
                                 schemaName = obj.getSchema().getName();
                             }
 
-                            String name = schemaName + "." + obj.getName();
+                            String objectName = obj.getName();
+                            if (database instanceof PostgresDatabase) {
+                                objectName = normalizeStoredLogicObjectName(objectName);
+                            }
+                            String name = schemaName + "." + objectName;
                             if (dependencyOrder.contains(name)) {
                                 toSort.add(obj);
                             } else {
@@ -496,6 +498,38 @@ public class DiffToChangeLog {
             }
         }
         return new ArrayList<>(objects);
+    }
+
+    /**
+     *
+     * If we have a stored logic object then we edit the name
+     * to replace the parameter list with a list of just the types
+     *
+     * @param  objectName     The input object name to work on
+     * @return String
+     *
+     */
+    private static String normalizeStoredLogicObjectName(String objectName) {
+        if (! (objectName.contains("(") && objectName.contains(")"))) {
+            return objectName;
+        }
+        Pattern p = Pattern.compile(".*?[(]+(.*)?[)]+");
+        Matcher m = p.matcher(objectName);
+        if (m.matches()) {
+            String originalParameters = m.group(1);
+            String editedParameters = originalParameters;
+            String[] parameters = m.group(1).split(",");
+            for (String parameter : parameters) {
+                parameter = parameter.trim();
+                String[] parts = parameter.split(" ");
+                String[] rest = Arrays.copyOfRange(parts, 1, parts.length);
+                String part = StringUtil.join(rest, " ");
+                editedParameters = editedParameters.replace(parameter, part);
+            }
+            objectName = objectName.replace(originalParameters, editedParameters)
+                                   .replace(", ",",");
+        }
+        return objectName;
     }
 
     private List<Map<String, ?>> queryForDependenciesOracle(Executor executor, List<String> schemas)
