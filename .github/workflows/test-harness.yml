@@ -7,7 +7,6 @@ on:
     branches:
       - 'main'
       - 'master'
-      - 'DAT-16339'
     paths:
       - 'src/test/resources/terraform/**'
 env:
@@ -212,5 +211,4 @@ jobs:
       - name: Terraform Destroy
         id: terraform_destroy
         run: |
-          spacectl stack task -id liquibase-bigquery-testharness-tests -tail true 
-          terraform destroy -auto-approve
+          spacectl stack task -id liquibase-bigquery-testharness-tests -tail terraform destroy -auto-approve
