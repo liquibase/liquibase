@@ -26,6 +26,44 @@ Changes in version 4.26.0 (2024.02.06)
 * Understand and share the data on the execution of Quality Checks with a new Checks Run Report. Easily scan and understand your results with the summary section, Analyze your checks by viewing details by ChangeSet, by check, and by database. And collaborate with your team with shareable report.
 * Learn more https://docs.liquibase.com/observability
 
+#### Formatted SQL changelogs can use rollback scripts
+* Previously, Formatted SQL ChangeLogs could only run in-line rollback commands. But, sometimes you need something more complex, like a full rollbackSqlFile. This functionality has been available for XML, JSON, and YAML formatted changelogs.
+* Learn more https://docs.liquibase.com/concepts/changelogs/sql-format.html
+
+### Liquibase Open Source and Liquibase Pro
+
+#### Liquibase capability enhancements
+* The `diffChangeLog` command has been updated only to create a changelog when changes are detected. This is a change from the previous behavior of creating an empty changelog.
+* Adds two new `generateChangelog` options:
+   * `--run-on-change-types=createView,createProcedure` will set `runOnChange="true"` for each changeSet which contains solely `createView` and `createProcedure` changes. For backward compatibility, the default is an empty list.
+   * `--replace-if-exists=createView,createProcedure` will set `replaceIfExists="true"` for each `createView` and `createProcedure` changes. For backward compatibility, the default is an empty list.
+   * `--useOrReplaceOption = true|false` (default is false) will add 'OR REPLACE' option to the create view change type.
+* Fix a bug that previously included substituted properties in the checksum calculation for SQLFile change types
+
+#### JDBC driver updates
+* MariaDB JDBC driver updated from 3.2.0 to 3.3.2
+* Snowflake JDBC driver updated from 3.14.3 to 3.14.4
+* Firebird SQL JDBC driver updated from 5.0.2.java8 to 5.0.3.java8
+* SQLite JDBC driver updated from 3.43.2.2 to 3.44.1.0
+
+#### Database platform improvements
+
+##### General
+* Adds `create table if not exists` support for the following databases: CockroachDB, DB2 LUW, H2, HSQL, Informix, Ingres9, MariaDB, MySQL, Postgres, and SQLite.
+* Fix the generated default column value in PostgreSQL and Oracle for char/clob data types.
+
+##### Maria DB
+* Adds Liquibase support for Maria DB 10.10.6 and later's new UUID data type.
+* For boolean columns on MariaDB, revert the change made in Liquibase 4.25.1. It has been returned from TINYINT back to TINYINT(1).
+
+##### DB2 z/OS
+* Improves support for the empty table precondition.
+
+#### Java API Changes
+* AbstractJdbcDatabase now delegates the execution of Changes to the executor, which allows the executor more control over how Changes are executed. This gives executors access to Changes and ChangeSets which enables the management of transaction commits.
+* Failure exceptions in ChangeSet.execute are now logged as a SEVERE level for easier access to a concise error message.
+
+
 ### [PRO] Changelog
 * DAT-16531: Add labels, contexts, rollback-on-error to update reports runtime info by @abrackx in https://github.com/liquibase/liquibase-pro/pull/1499
 * DAT-15455 Refactor ChangelogRewriters to follow general Factory approach by @vitaliimak in https://github.com/liquibase/liquibase-pro/pull/1195
