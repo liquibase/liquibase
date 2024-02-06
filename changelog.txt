@@ -20,7 +20,7 @@ Changes in version 4.26.0 (2024.02.06)
 
 #### Quality Checks: Simpler Regex-based pattern checks
 * Check four advanced patterns without having to figure out the complicated regex needed to do it—just supply the patterns and Quality Checks will link and execute them.
-* Learn more https://docs.liquibase.com/commands/quality-checks/home.html
+* Learn more https://docs.liquibase.com/quality-checks
 
 #### Observability: Checks Run Reports
 * Understand and share the data on the execution of Quality Checks with a new Checks Run Report. Easily scan and understand your results with the summary section, Analyze your checks by viewing details by ChangeSet, by check, and by database. And collaborate with your team with shareable report.
