@@ -37,7 +37,6 @@ Changes in version 4.26.0 (2024.02.06)
 * Adds two new `generateChangelog` options:
    * `--run-on-change-types=createView,createProcedure` will set `runOnChange="true"` for each changeSet which contains solely `createView` and `createProcedure` changes. For backward compatibility, the default is an empty list.
    * `--replace-if-exists=createView,createProcedure` will set `replaceIfExists="true"` for each `createView` and `createProcedure` changes. For backward compatibility, the default is an empty list.
-   * `--useOrReplaceOption = true|false` (default is false) will add 'OR REPLACE' option to the create view change type.
 * Fix a bug that previously included substituted properties in the checksum calculation for SQLFile change types
 
 #### JDBC driver updates
@@ -131,7 +130,6 @@ Changes in version 4.26.0 (2024.02.06)
 - (#5350) Fix getSerializableFieldValue when dealing with rollback object @MalloD12
 - (#5414) Fix NPE in generateChangelog and diffChangelog DAT-16534 @wwillard7800
 - (#5267) fix #5266: comma separated dbms-attribute for createProcedure-change triggers validation-check @jclohmann
-- (#5304) Fix for DAT-15716 :: Include 'OR REPLACE' instruction for a view when generate-changelog/diff-changelog command are executed @MalloD12
 
 ## Security, Driver and Other Updates
 - (#5447) Bump org.slf4j:slf4j-jdk14 from 2.0.9 to 2.0.11 @dependabot
