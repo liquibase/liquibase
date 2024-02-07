@@ -1255,7 +1255,7 @@ create table table1 (
 
         then:
         def e = thrown(ChangeLogParseException)
-        e.getMessage().contains("Precondition sql check failed because of missing required sql statement.")
+        e.getMessage().contains("Precondition sql check failed because of missing required expectedResult and sql parameters.")
     }
 
     @LiquibaseService(skip = true)

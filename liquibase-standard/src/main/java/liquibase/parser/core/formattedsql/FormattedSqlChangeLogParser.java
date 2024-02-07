@@ -86,7 +86,7 @@ public class FormattedSqlChangeLogParser extends AbstractFormattedChangeLogParse
             String name = StringUtil.trimToNull(preconditionMatcher.group(1));
             if (name != null) {
                 if ("sql-check".equals(name)) {
-                    throw new ChangeLogParseException("Precondition sql check failed because of missing required Parameter expectedResult and sql.");
+                    throw new ChangeLogParseException("Precondition sql check failed because of missing required expectedResult and sql parameters.");
                 } else if ("table-exists".equals(name)) {
                     throw new ChangeLogParseException("Precondition table exists failed because of missing required table name parameter.");
                 } else if ("view-exists".equals(name)) {
