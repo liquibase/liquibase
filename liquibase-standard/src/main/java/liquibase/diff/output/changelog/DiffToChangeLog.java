@@ -455,11 +455,9 @@ public class DiffToChangeLog {
                             }
 
                             String objectName = obj.getName();
-                            if (database instanceof PostgresDatabase) {
-                                objectName = normalizeStoredLogicObjectName(objectName);
-                            }
                             String name = schemaName + "." + objectName;
-                            if (dependencyOrder.contains(name)) {
+                            if (dependencyOrder.contains(name) ||
+                                dependencyOrder.contains(convertStoredLogicObjectName(schemaName, objectName, database))) {
                                 toSort.add(obj);
                             } else {
                                 toNotSort.add(obj);
@@ -502,18 +500,25 @@ public class DiffToChangeLog {
 
     /**
      *
+     * POSTGRES ONLY:
+     *
      * If we have a stored logic object then we edit the name
-     * to replace the parameter list with a list of just the types
+     * to replace the parameter list with a list of just the types.
+     * This is the format that the dependency computation puts out.
+     *
+     * Example:  calculate_bonus(emp_salary numeric, emp_name character varying) becomes
+     *           calculate_bonus(numeric, character varying)
      *
      * @param  objectName     The input object name to work on
      * @return String
      *
      */
-    private static String normalizeStoredLogicObjectName(String objectName) {
-        if (! (objectName.contains("(") && objectName.contains(")"))) {
-            return objectName;
+    private static String convertStoredLogicObjectName(String schemaName, String objectName, Database database) {
+        String name = schemaName + "." + objectName;
+        if (! (database instanceof PostgresDatabase) || ! (objectName.contains("(") && objectName.contains(")"))) {
+            return name;
         }
-        Pattern p = Pattern.compile(".*?[(]+(.*)?[)]+");
+        Pattern p = Pattern.compile(".*?[(]+(.*)?[)]+[\\s]*?$");
         Matcher m = p.matcher(objectName);
         if (m.matches()) {
             String originalParameters = m.group(1);
@@ -526,10 +531,10 @@ public class DiffToChangeLog {
                 String part = StringUtil.join(rest, " ");
                 editedParameters = editedParameters.replace(parameter, part);
             }
-            objectName = objectName.replace(originalParameters, editedParameters)
-                                   .replace(", ",",");
+            name = schemaName + "." + objectName.replace(originalParameters, editedParameters)
+                                                .replace(", ",",");
         }
-        return objectName;
+        return name;
     }
 
     private List<Map<String, ?>> queryForDependenciesOracle(Executor executor, List<String> schemas)
