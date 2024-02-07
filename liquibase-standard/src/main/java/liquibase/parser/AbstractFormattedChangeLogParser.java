@@ -28,7 +28,7 @@ import static java.util.ResourceBundle.getBundle;
 public abstract class AbstractFormattedChangeLogParser implements ChangeLogParser {
 
     private static final ResourceBundle coreBundle = getBundle("liquibase/i18n/liquibase-core");
-    private static final String EXCEPTION_MESSAGE = coreBundle.getString("formatted.changelog.exception.message");
+    protected static final String EXCEPTION_MESSAGE = coreBundle.getString("formatted.changelog.exception.message");
 
     protected final String FIRST_LINE_REGEX = String.format("^\\s*%s\\s*liquibase\\s*formatted.*", getSingleLineCommentSequence());
     protected final Pattern FIRST_LINE_PATTERN = Pattern.compile(FIRST_LINE_REGEX, Pattern.CASE_INSENSITIVE);
@@ -63,6 +63,11 @@ public abstract class AbstractFormattedChangeLogParser implements ChangeLogParse
 
     protected final String PRECONDITION_REGEX = String.format("\\s*%s[\\s]*precondition\\-([a-zA-Z0-9-]+) (.*)", getSingleLineCommentSequence());
     protected final Pattern PRECONDITION_PATTERN = Pattern.compile(PRECONDITION_REGEX, Pattern.CASE_INSENSITIVE);
+
+    protected final String
+            INVALID_EMPTY_PRECONDITION_REGEX = String.format("\\s*%s[\\s]*precondition\\-([a-zA-Z0-9-]+)", getSingleLineCommentSequence());
+
+    protected final Pattern INVALID_EMPTY_PRECONDITION_PATTERN = Pattern.compile(INVALID_EMPTY_PRECONDITION_REGEX, Pattern.CASE_INSENSITIVE);
 
     protected final String ALT_PRECONDITION_ONE_CHARACTER_REGEX = String.format("\\s*%s[\\s]*precondition(.*)", getSingleLineCommentOneCharacter());
     protected final Pattern ALT_PRECONDITION_ONE_CHARACTER_PATTERN = Pattern.compile(ALT_PRECONDITION_ONE_CHARACTER_REGEX, Pattern.CASE_INSENSITIVE);
@@ -204,6 +209,8 @@ public abstract class AbstractFormattedChangeLogParser implements ChangeLogParse
     protected abstract void handlePreconditionCase(ChangeLogParameters changeLogParameters, ChangeSet changeSet, Matcher preconditionMatcher) throws ChangeLogParseException;
 
     protected abstract void handlePreconditionsCase(ChangeSet changeSet, int count, Matcher preconditionsMatcher) throws ChangeLogParseException;
+
+    protected abstract void handleInvalidEmptyPreconditionCase(ChangeLogParameters changeLogParameters, ChangeSet changeSet, Matcher preconditionMatcher) throws ChangeLogParseException;
 
     protected abstract AbstractSQLChange getChange();
 
@@ -464,7 +471,7 @@ public abstract class AbstractFormattedChangeLogParser implements ChangeLogParse
                         throw new ChangeLogParseException("\n" + message);
                     }
                     if (changeSet != null) {
-                        configureChangeSet(physicalChangeLogLocation, changeLogParameters, reader, currentSequence, currentRollbackSequence, changeSet, count, line, commentMatcher);
+                        configureChangeSet(physicalChangeLogLocation, changeLogParameters, reader, currentSequence, currentRollbackSequence, changeSet, count, line, commentMatcher, resourceAccessor);
                     } else {
                         if (commentMatcher.matches()) {
                             String message =
@@ -492,7 +499,15 @@ public abstract class AbstractFormattedChangeLogParser implements ChangeLogParse
         return changeLog;
     }
 
+    /**
+     * @deprecated use {@link AbstractFormattedChangeLogParser#configureChangeSet(String, ChangeLogParameters, BufferedReader, StringBuilder, StringBuilder, ChangeSet, int, String, Matcher, ResourceAccessor)} instead
+     */
+    @Deprecated
     protected void configureChangeSet(String physicalChangeLogLocation, ChangeLogParameters changeLogParameters, BufferedReader reader, StringBuilder currentSequence, StringBuilder currentRollbackSequence, ChangeSet changeSet, int count, String line, Matcher commentMatcher) throws ChangeLogParseException, IOException {
+        configureChangeSet(physicalChangeLogLocation, changeLogParameters, reader, currentSequence, currentRollbackSequence, changeSet, count, line, commentMatcher, null);
+    }
+
+    protected void configureChangeSet(String physicalChangeLogLocation, ChangeLogParameters changeLogParameters, BufferedReader reader, StringBuilder currentSequence, StringBuilder currentRollbackSequence, ChangeSet changeSet, int count, String line, Matcher commentMatcher, ResourceAccessor resourceAccessor) throws ChangeLogParseException, IOException {
         Matcher altCommentOneDashMatcher = ALT_COMMENT_ONE_CHARACTER_PATTERN.matcher(line);
         Matcher altCommentPluralMatcher = ALT_COMMENT_PLURAL_PATTERN.matcher(line);
         Matcher rollbackMatcher = ROLLBACK_PATTERN.matcher(line);
@@ -504,6 +519,8 @@ public abstract class AbstractFormattedChangeLogParser implements ChangeLogParse
         Matcher validCheckSumMatcher = VALID_CHECK_SUM_PATTERN.matcher(line);
         Matcher altValidCheckSumOneDashMatcher = ALT_VALID_CHECK_SUM_ONE_CHARACTER_PATTERN.matcher(line);
         Matcher rollbackMultiLineStartMatcher = ROLLBACK_MULTI_LINE_START_PATTERN.matcher(line);
+        Matcher invalidEmptyPreconditionMatcher = INVALID_EMPTY_PRECONDITION_PATTERN.matcher(line);
+
 
         if (commentMatcher.matches()) {
             if (commentMatcher.groupCount() == 0) {
@@ -550,6 +567,8 @@ public abstract class AbstractFormattedChangeLogParser implements ChangeLogParse
             String message =
                     String.format(EXCEPTION_MESSAGE, physicalChangeLogLocation, count, getSequenceName(), "--precondition-sql-check", getDocumentationLink());
             throw new ChangeLogParseException("\n" + message);
+        } else if (invalidEmptyPreconditionMatcher.matches()) {
+            handleInvalidEmptyPreconditionCase(changeLogParameters, changeSet, invalidEmptyPreconditionMatcher);
         } else {
             currentSequence.append(line).append(System.lineSeparator());
         }

@@ -81,6 +81,24 @@ public class FormattedSqlChangeLogParser extends AbstractFormattedChangeLogParse
     }
 
     @Override
+    protected void handleInvalidEmptyPreconditionCase(ChangeLogParameters changeLogParameters, ChangeSet changeSet, Matcher preconditionMatcher) throws ChangeLogParseException {
+        if (preconditionMatcher.groupCount() == 1) {
+            String name = StringUtil.trimToNull(preconditionMatcher.group(1));
+            if (name != null) {
+                if ("sql-check".equals(name)) {
+                    throw new ChangeLogParseException("Precondition sql check failed because of missing required Parameter expectedResult and sql.");
+                } else if ("table-exists".equals(name)) {
+                    throw new ChangeLogParseException("Precondition table exists failed because of missing required table name parameter.");
+                } else if ("view-exists".equals(name)) {
+                    throw new ChangeLogParseException("Precondition view exists failed because of missing required view name parameter.");
+                } else {
+                    throw new ChangeLogParseException("The '" + name + "' precondition type is not supported.");
+                }
+            }
+        }
+    }
+
+    @Override
     protected void handlePreconditionCase(ChangeLogParameters changeLogParameters, ChangeSet changeSet, Matcher preconditionMatcher) throws ChangeLogParseException {
         if (changeSet.getPreconditions() == null) {
             // create the defaults
@@ -162,6 +180,10 @@ public class FormattedSqlChangeLogParser extends AbstractFormattedChangeLogParse
         TableExistsPrecondition tableExistsPrecondition = new TableExistsPrecondition();
 
         if (tableMatcher.matches()) {
+            if (tableMatcher.groupCount() == 0) {
+                throw new ChangeLogParseException("Table name was not specified in tableExists precondition but is required '" + body + "'.");
+            }
+
             if (tableMatcher.groupCount() > 1) {
                 throw new ChangeLogParseException("Multiple table names were specified in tableExists precondition '" + body + "'.");
             }
@@ -169,7 +191,7 @@ public class FormattedSqlChangeLogParser extends AbstractFormattedChangeLogParse
             tableExistsPrecondition.setTableName(tableMatcher.group(1));
             System.out.println(tableMatcher.group(1));
         } else {
-            throw new ChangeLogParseException("Table name was not specified in tableExists precondition '" + body + "'.");
+            throw new ChangeLogParseException("Table name was not specified correctly in tableExists precondition.");
         }
 
         if (schemaMatcher.matches() && schemaMatcher.groupCount() == 1) {
@@ -190,6 +212,10 @@ public class FormattedSqlChangeLogParser extends AbstractFormattedChangeLogParse
         ViewExistsPrecondition viewExistsPrecondition = new ViewExistsPrecondition();
 
         if (viewMatcher.matches()) {
+            if (viewMatcher.groupCount() == 0) {
+                throw new ChangeLogParseException("View name was not specified in viewExists precondition but is required '" + body + "'.");
+            }
+
             if (viewMatcher.groupCount() > 1) {
                 throw new ChangeLogParseException("Multiple view names were specified in viewExists precondition '" + body + "'.");
             }
@@ -197,7 +223,7 @@ public class FormattedSqlChangeLogParser extends AbstractFormattedChangeLogParse
             viewExistsPrecondition.setViewName(viewMatcher.group(1));
             System.out.println(viewMatcher.group(1));
         } else {
-            throw new ChangeLogParseException("View name was not specified in viewExists precondition '" + body + "'.");
+            throw new ChangeLogParseException("View name was not specified correctly in viewExists precondition.");
         }
 
         if (schemaMatcher.matches()) {
