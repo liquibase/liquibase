@@ -133,7 +133,8 @@ public class CreateProcedureChange extends AbstractChange implements DbmsTargete
             isChangeProperty = false, version = {ChecksumVersion.V8})
     @DatabaseChangeProperty(
         description = procedureTextDescription,
-            serializationType = SerializationType.DIRECT_VALUE)
+            serializationType = SerializationType.DIRECT_VALUE,
+            alternatePropertyNames = {"procedureBody"})
     public String getProcedureText() {
         return procedureText;
     }
