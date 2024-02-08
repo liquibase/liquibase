@@ -198,9 +198,10 @@ public abstract class AbstractChange extends AbstractPlugin implements Change {
             );
             String[] requiredForDatabase = createRequiredDatabasesMetaData(parameterName, changePropertyAnnotation);
             String[] supportsDatabase = createSupportedDatabasesMetaData(parameterName, changePropertyAnnotation);
+            String[] alternatePropertyNames = createAlternateParameterNames(changePropertyAnnotation);
 
             return new ChangeParameterMetaData(this, parameterName, displayName, description, examples, since,
-                type, requiredForDatabase, supportsDatabase, mustEqualExisting, serializationType).withAccessors(readMethod, property.getWriteMethod());
+                type, requiredForDatabase, supportsDatabase, mustEqualExisting, serializationType, alternatePropertyNames).withAccessors(readMethod, property.getWriteMethod());
         } catch (UnexpectedLiquibaseException e) {
             throw e;
         }
@@ -311,6 +312,14 @@ public abstract class AbstractChange extends AbstractPlugin implements Change {
             return changePropertyAnnotation.supportsDatabase();
         }
 
+    }
+
+    protected String[] createAlternateParameterNames(DatabaseChangeProperty changePropertyAnnotation) {
+        if (changePropertyAnnotation == null) {
+            return new String[]{};
+        } else {
+            return changePropertyAnnotation.alternatePropertyNames();
+        }
     }
 
     /**
@@ -775,14 +784,22 @@ public abstract class AbstractChange extends AbstractPlugin implements Change {
                         }
                     }
                 } else {
-                    Object childValue = parsedNode.getChildValue(
-                        null, param.getParameterName(), param.getDataTypeClass()
-                    );
-                    if ((childValue == null) && (param.getSerializationType() == SerializationType.DIRECT_VALUE)) {
-                        childValue = parsedNode.getValue();
+                    List<String> parameterNamesToCheck = new ArrayList<>();
+                    parameterNamesToCheck.add(param.getParameterName());
+                    if (param.getAlternateParameterNames() != null) {
+                        parameterNamesToCheck.addAll(Arrays.asList(param.getAlternateParameterNames()));
                     }
-                    if(null != childValue) {
-                        param.setValue(this, childValue);
+                    for (String paramName : parameterNamesToCheck) {
+                        Object childValue = parsedNode.getChildValue(
+                                null, paramName, param.getDataTypeClass()
+                        );
+                        if ((childValue == null) && (param.getSerializationType() == SerializationType.DIRECT_VALUE)) {
+                            childValue = parsedNode.getValue();
+                        }
+                        if(null != childValue) {
+                            param.setValue(this, childValue);
+                            break;
+                        }
                     }
                 }
             }
