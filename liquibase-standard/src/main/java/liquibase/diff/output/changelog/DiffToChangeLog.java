@@ -4,8 +4,13 @@ import liquibase.GlobalConfiguration;
 import liquibase.Labels;
 import liquibase.Scope;
 import liquibase.change.Change;
+import liquibase.change.ReplaceIfExists;
 import liquibase.change.core.*;
 import liquibase.changelog.ChangeSet;
+import liquibase.changeset.ChangeSetService;
+import liquibase.changeset.ChangeSetServiceFactory;
+import liquibase.command.CommandScope;
+import liquibase.command.core.GenerateChangelogCommandStep;
 import liquibase.configuration.core.DeprecatedConfigurationValueProvider;
 import liquibase.database.*;
 import liquibase.database.core.*;
@@ -30,6 +35,8 @@ import liquibase.statement.core.RawSqlStatement;
 import liquibase.structure.DatabaseObject;
 import liquibase.structure.core.Column;
 import liquibase.structure.core.StoredDatabaseLogic;
+import liquibase.structure.core.StoredProcedure;
+import liquibase.structure.core.View;
 import liquibase.util.DependencyUtil;
 import liquibase.util.StreamUtil;
 import liquibase.util.StringUtil;
@@ -60,6 +67,8 @@ public class DiffToChangeLog {
     private String changeSetLabels;
     private String changeSetAuthor;
     private String changeSetPath;
+    private String[] changeSetRunOnChangeTypes;
+    private String[] changeReplaceIfExistsTypes;
     private DiffResult diffResult;
     private final DiffOutputControl diffOutputControl;
     private boolean tryDbaDependencies = true;
@@ -238,14 +247,13 @@ public class DiffToChangeLog {
 
         Scope.getCurrentScope().getLog(getClass()).info("changeSets count: " + changeSets.size());
         if (changeSets.isEmpty()) {
-            Scope.getCurrentScope().getLog(getClass()).info("No changesets to add.");
+            Scope.getCurrentScope().getLog(getClass()).info("No changesets to add to the changelog output.");
         } else {
             Scope.getCurrentScope().getLog(getClass()).info(file + " does not exist, creating and adding " + changeSets.size() + " changesets.");
-        }
-
-        try (OutputStream stream = file.openOutputStream(new OpenOptions());
-             PrintStream out = new PrintStream(stream, true, GlobalConfiguration.OUTPUT_FILE_ENCODING.getCurrentValue())) {
-            changeLogSerializer.write(changeSets, out);
+            try (OutputStream stream = file.openOutputStream(new OpenOptions());
+                 PrintStream out = new PrintStream(stream, true, GlobalConfiguration.OUTPUT_FILE_ENCODING.getCurrentValue())) {
+                 changeLogSerializer.write(changeSets, out);
+            }
         }
     }
 
@@ -287,6 +295,7 @@ public class DiffToChangeLog {
             for (Map.Entry<? extends DatabaseObject, ObjectDifferences> entry : diffResult.getChangedObjects(type, comparator).entrySet()) {
                 if (!diffResult.getReferenceSnapshot().getDatabase().isLiquibaseObject(entry.getKey()) && !diffResult.getReferenceSnapshot().getDatabase().isSystemObject(entry.getKey())) {
                     Change[] changes = changeGeneratorFactory.fixChanged(entry.getKey(), entry.getValue(), diffOutputControl, diffResult.getReferenceSnapshot().getDatabase(), diffResult.getComparisonSnapshot().getDatabase());
+                    setReplaceIfExistsTrueIfApplicable(changes);
                     addToChangeSets(changes, updateChangeSets, quotingStrategy, created);
                 }
             }
@@ -311,6 +320,7 @@ public class DiffToChangeLog {
             ObjectQuotingStrategy quotingStrategy = diffOutputControl.getObjectQuotingStrategy();
 
             Change[] changes = changeGeneratorFactory.fixMissing(object, diffOutputControl, diffResult.getReferenceSnapshot().getDatabase(), diffResult.getComparisonSnapshot().getDatabase());
+            setReplaceIfExistsTrueIfApplicable(changes);
             addToChangeSets(changes, createChangeSets, quotingStrategy, created);
         }
 
@@ -322,6 +332,7 @@ public class DiffToChangeLog {
             for (DatabaseObject object : sortUnexpectedObjects(diffResult.getUnexpectedObjects(type, comparator), diffResult.getReferenceSnapshot().getDatabase())) {
                 if (!diffResult.getComparisonSnapshot().getDatabase().isLiquibaseObject(object) && !diffResult.getComparisonSnapshot().getDatabase().isSystemObject(object)) {
                     Change[] changes = changeGeneratorFactory.fixUnexpected(object, diffOutputControl, diffResult.getReferenceSnapshot().getDatabase(), diffResult.getComparisonSnapshot().getDatabase());
+                    setReplaceIfExistsTrueIfApplicable(changes);
                     addToChangeSets(changes, deleteChangeSets, quotingStrategy, created);
                 }
             }
@@ -338,6 +349,16 @@ public class DiffToChangeLog {
         changeSets.addAll(updateChangeSets);
         changeSets = bringDropFKToTop(changeSets);
         return changeSets;
+    }
+
+    private void setReplaceIfExistsTrueIfApplicable(Change[] changes) {
+        if(changes !=null && diffOutputControl.isReplaceIfExistsSet()) {
+            for(int i=0; i < changes.length; i++) {
+                if (changes[i] instanceof ReplaceIfExists) {
+                    ((ReplaceIfExists) changes[i]).setReplaceIfExists(true);
+                }
+            }
+        }
     }
 
     //
@@ -752,23 +773,29 @@ public class DiffToChangeLog {
                         .replaceFirst("\\)$", "");
             }
 
+            ChangeSetService service = ChangeSetServiceFactory.getInstance().createChangeSetService();
             if (useSeparateChangeSets(changes)) {
                 for (Change change : changes) {
+                    final boolean runOnChange = isContainedInRunOnChangeTypes(change);
                     ChangeSet changeSet =
-                       new ChangeSet(generateId(changes), getChangeSetAuthor(), false, false, this.changeSetPath, changeSetContext,
-                            null, true, quotingStrategy, null);
+                            service.createChangeSet(generateId(changes), getChangeSetAuthor(), false, runOnChange, this.changeSetPath, changeSetContext,
+                                    null, null, null, true, quotingStrategy, null);
                     changeSet.setCreated(created);
                     if (diffOutputControl.getLabels() != null) {
                         changeSet.setLabels(diffOutputControl.getLabels());
                     } else {
                         changeSet.setLabels(new Labels(this.changeSetLabels));
                     }
+                    if (change instanceof ReplaceIfExists && isContainedInReplaceIfExistsTypes(change)) {
+                        ((ReplaceIfExists) change).setReplaceIfExists(true);
+                    }
                     changeSet.addChange(change);
                     changeSets.add(changeSet);
                 }
             } else {
-                ChangeSet changeSet = new ChangeSet(generateId(changes), getChangeSetAuthor(), false, false, this.changeSetPath, csContext,
-                        null, true, quotingStrategy, null);
+                final boolean runOnChange = Arrays.asList(changes).stream().allMatch(change -> isContainedInRunOnChangeTypes(change));
+                ChangeSet changeSet = service.createChangeSet(generateId(changes), getChangeSetAuthor(), false, runOnChange, this.changeSetPath, changeSetContext,
+                                        null, null, null, true, quotingStrategy, null);
                 changeSet.setCreated(created);
                 if (diffOutputControl.getLabels() != null) {
                     changeSet.setLabels(diffOutputControl.getLabels());
@@ -776,6 +803,9 @@ public class DiffToChangeLog {
                     changeSet.setLabels(new Labels(this.changeSetLabels));
                 }
                 for (Change change : changes) {
+                    if (change instanceof ReplaceIfExists && isContainedInReplaceIfExistsTypes(change)) {
+                        ((ReplaceIfExists) change).setReplaceIfExists(true);
+                    }
                     changeSet.addChange(change);
                 }
                 changeSets.add(changeSet);
@@ -834,6 +864,30 @@ public class DiffToChangeLog {
 
     public void setChangeSetPath(String changeSetPath) {
         this.changeSetPath = changeSetPath;
+    }
+
+    public void setChangeSetRunOnChangeTypes(final String[] runOnChangeTypes) {
+        changeSetRunOnChangeTypes = runOnChangeTypes;
+    }
+
+    protected String[] getChangeSetRunOnChangeTypes() {
+        return changeSetRunOnChangeTypes;
+    }
+
+    private boolean isContainedInRunOnChangeTypes(final Change change) {
+        return getChangeSetRunOnChangeTypes() != null && Arrays.asList(getChangeSetRunOnChangeTypes()).contains(change.getSerializedObjectName());
+    }
+
+    public void setChangeReplaceIfExistsTypes(final String[] replaceIfExistsTypes) {
+        changeReplaceIfExistsTypes = replaceIfExistsTypes;
+    }
+
+    protected String[] getChangeReplaceIfExistsTypes() {
+        return changeReplaceIfExistsTypes;
+    }
+
+    private boolean isContainedInReplaceIfExistsTypes(final Change change) {
+        return getChangeReplaceIfExistsTypes() != null && Arrays.asList(getChangeReplaceIfExistsTypes()).contains(change.getSerializedObjectName());
     }
 
     public void setIdRoot(String idRoot) {

@@ -1,5 +1,6 @@
 package liquibase.parser.core.xml
 
+import com.example.liquibase.change.ChangeWithPrimitiveFields
 import com.example.liquibase.change.ColumnConfig
 import com.example.liquibase.change.ComputedConfig
 import com.example.liquibase.change.CreateTableExampleChange
@@ -8,27 +9,42 @@ import com.example.liquibase.change.IdentityConfig
 import com.example.liquibase.change.KeyColumnConfig
 import com.example.liquibase.change.PrimaryKeyConfig
 import com.example.liquibase.change.UniqueConstraintConfig
-
 import liquibase.Contexts
-import liquibase.GlobalConfiguration
 import liquibase.Scope
 import liquibase.change.Change
 import liquibase.change.ChangeFactory
 import liquibase.change.CheckSum
-import liquibase.change.core.*
+import liquibase.change.core.AddColumnChange
+import liquibase.change.core.CreateIndexChange
+import liquibase.change.core.CreateSequenceChange
+import liquibase.change.core.CreateTableChange
+import liquibase.change.core.CreateViewChange
+import liquibase.change.core.DropTableChange
+import liquibase.change.core.EmptyChange
+import liquibase.change.core.ExecuteShellCommandChange
+import liquibase.change.core.InsertDataChange
+import liquibase.change.core.LoadDataChange
+import liquibase.change.core.RawSQLChange
+import liquibase.change.core.StopChange
+import liquibase.change.core.UpdateDataChange
 import liquibase.change.custom.CustomChangeWrapper
 import liquibase.change.custom.ExampleCustomSqlChange
 import liquibase.changelog.ChangeLogParameters
 import liquibase.changelog.ChangeSet
 import liquibase.changelog.DatabaseChangeLog
-import liquibase.configuration.LiquibaseConfiguration
 import liquibase.database.ObjectQuotingStrategy
 import liquibase.database.core.H2Database
 import liquibase.database.core.MSSQLDatabase
 import liquibase.database.core.MockDatabase
 import liquibase.exception.ChangeLogParseException
 import liquibase.precondition.CustomPreconditionWrapper
-import liquibase.precondition.core.*
+import liquibase.precondition.core.AndPrecondition
+import liquibase.precondition.core.DBMSPrecondition
+import liquibase.precondition.core.NotPrecondition
+import liquibase.precondition.core.OrPrecondition
+import liquibase.precondition.core.PreconditionContainer
+import liquibase.precondition.core.PrimaryKeyExistsPrecondition
+import liquibase.precondition.core.RunningAsPrecondition
 import liquibase.sdk.supplier.resource.ResourceSupplier
 import liquibase.sql.visitor.AppendSqlVisitor
 import liquibase.sql.visitor.ReplaceSqlVisitor
@@ -37,10 +53,11 @@ import spock.lang.FailsWith
 import spock.lang.Shared
 import spock.lang.Specification
 import spock.lang.Unroll
+
 import static org.hamcrest.Matchers.containsInAnyOrder
 import static spock.util.matcher.HamcrestSupport.that
 
-public class XMLChangeLogSAXParser_RealFile_Test extends Specification {
+class XMLChangeLogSAXParser_RealFile_Test extends Specification {
 
     @Shared resourceSupplier = new ResourceSupplier()
 
@@ -69,8 +86,8 @@ public class XMLChangeLogSAXParser_RealFile_Test extends Specification {
         def path = "liquibase/parser/core/xml/simpleChangeLog.xml"
         when:
         def changeLog = new XMLChangeLogSAXParser().parse(path, new ChangeLogParameters(), new JUnitResourceAccessor());
-        def changeSet = changeLog.changeSets[0];
-        def change = changeSet.changes[0];
+        def changeSet = changeLog.changeSets[0]
+        def change = changeSet.changes[0]
 
         then:
         changeLog.getLogicalFilePath() == path
@@ -321,28 +338,28 @@ public class XMLChangeLogSAXParser_RealFile_Test extends Specification {
         changeLog.getPreconditions().getNestedPreconditions().size() == 0
         changeLog.getChangeSets().size() == 1
 
-        ChangeSet changeSet = changeLog.getChangeSets()[0];
+        ChangeSet changeSet = changeLog.getChangeSets()[0]
         changeSet.getAuthor() == "nvoxland"
         changeSet.getId() == "1"
         changeSet.getChanges().size() == 1
         changeSet.getFilePath() == path
         changeSet.getComments() == "Some comments go here"
 
-        Change change = changeSet.getChanges()[0];
+        Change change = changeSet.getChanges()[0]
         Scope.getCurrentScope().getSingleton(ChangeFactory.class).getChangeMetaData(change).getName() == "createTable"
         assert change instanceof CreateTableChange
     }
 
 	def "changeLog parameters are correctly expanded"() throws Exception {
         when:
-        def params = new ChangeLogParameters(new MockDatabase());
+        def params = new ChangeLogParameters(new MockDatabase())
         params.setContexts(new Contexts("prod"))
-		params.set("tablename", "my_table_name");
-        params.set("tablename2", "my_table_name_2");
-        params.set("columnName", "my_column_name");
-        params.set("date", new Date(9999999));
+		params.set("tablename", "my_table_name")
+        params.set("tablename2", "my_table_name_2")
+        params.set("columnName", "my_column_name")
+        params.set("date", new Date(9999999))
         params.set("overridden", "Value passed in")
-		def changeLog = new XMLChangeLogSAXParser().parse("liquibase/parser/core/xml/parametersChangeLog.xml", params, new JUnitResourceAccessor());
+		def changeLog = new XMLChangeLogSAXParser().parse("liquibase/parser/core/xml/parametersChangeLog.xml", params, new JUnitResourceAccessor())
 
         then: "changeSet 1"
 		changeLog.getChangeSets().size() == 2
@@ -384,17 +401,17 @@ public class XMLChangeLogSAXParser_RealFile_Test extends Specification {
 	def "tests for particular features and edge conditions part 1 testCasesChangeLog.xml"() throws Exception {
         when:
         def path = "liquibase/parser/core/xml/testCasesChangeLog.xml"
-        DatabaseChangeLog changeLog = new XMLChangeLogSAXParser().parse(path, new ChangeLogParameters(), new JUnitResourceAccessor());
+        DatabaseChangeLog changeLog = new XMLChangeLogSAXParser().parse(path, new ChangeLogParameters(), new JUnitResourceAccessor())
 
         then: "before/after/position attributes are read correctly"
-        ((AddColumnChange) changeLog.getChangeSet(path, "cmouttet", "using after column attribute").changes[0]).columns[0].getName() == "middlename";
-        ((AddColumnChange) changeLog.getChangeSet(path, "cmouttet", "using after column attribute").changes[0]).columns[0].getAfterColumn() == "firstname";
+        ((AddColumnChange) changeLog.getChangeSet(path, "cmouttet", "using after column attribute").changes[0]).columns[0].getName() == "middlename"
+        ((AddColumnChange) changeLog.getChangeSet(path, "cmouttet", "using after column attribute").changes[0]).columns[0].getAfterColumn() == "firstname"
 
-        ((AddColumnChange) changeLog.getChangeSet(path, "cmouttet", "using before column attribute").changes[0]).columns[0].getName() == "middlename";
-        ((AddColumnChange) changeLog.getChangeSet(path, "cmouttet", "using before column attribute").changes[0]).columns[0].getBeforeColumn() == "lastname";
+        ((AddColumnChange) changeLog.getChangeSet(path, "cmouttet", "using before column attribute").changes[0]).columns[0].getName() == "middlename"
+        ((AddColumnChange) changeLog.getChangeSet(path, "cmouttet", "using before column attribute").changes[0]).columns[0].getBeforeColumn() == "lastname"
 
-        ((AddColumnChange) changeLog.getChangeSet(path, "cmouttet", "using position attribute").changes[0]).columns[0].getName() == "middlename";
-        ((AddColumnChange) changeLog.getChangeSet(path, "cmouttet", "using position attribute").changes[0]).columns[0].getPosition() == 1;
+        ((AddColumnChange) changeLog.getChangeSet(path, "cmouttet", "using position attribute").changes[0]).columns[0].getName() == "middlename"
+        ((AddColumnChange) changeLog.getChangeSet(path, "cmouttet", "using position attribute").changes[0]).columns[0].getPosition() == 1
 
         and: "validCheckSums are parsed"
         that changeLog.getChangeSet(path, "nvoxland", "validCheckSums set").getValidCheckSums(), containsInAnyOrder([CheckSum.parse("a9b7b29ce3a75940858cd022501852e2"), CheckSum.parse("8:b3d6a29ce3a75940858cd093501151d1")].toArray())
@@ -535,7 +552,7 @@ public class XMLChangeLogSAXParser_RealFile_Test extends Specification {
         def path = "liquibase/parser/core/xml/testCasesChangeLog.xml"
         def params = new ChangeLogParameters()
         params.set("loginUser", "sa")
-        DatabaseChangeLog changeLog = new XMLChangeLogSAXParser().parse(path, params, new JUnitResourceAccessor());
+        DatabaseChangeLog changeLog = new XMLChangeLogSAXParser().parse(path, params, new JUnitResourceAccessor())
 
 
         then: "complex preconditions are parsed"
@@ -625,7 +642,7 @@ public class XMLChangeLogSAXParser_RealFile_Test extends Specification {
     def "changelog with multiple dropColumn columns can be parsed"() throws Exception {
         when:
         def path = "liquibase/parser/core/xml/addDropColumnsChangeLog.xml"
-        def changeLog = new XMLChangeLogSAXParser().parse(path, new ChangeLogParameters(), new JUnitResourceAccessor());
+        def changeLog = new XMLChangeLogSAXParser().parse(path, new ChangeLogParameters(), new JUnitResourceAccessor())
 
         then:  "add columns"
         assert 2 == changeLog.getChangeSets().get(1).getChanges().get(0).getColumns().size()
@@ -769,4 +786,32 @@ public class XMLChangeLogSAXParser_RealFile_Test extends Specification {
         change1.getTableName() == "a"
         change1.getColumns().get(0).getType() == "int"
     }
+
+    def "parses change with primitive fields"() {
+        given:
+        Scope.getCurrentScope().getSingleton(ChangeFactory.class).register(new ChangeWithPrimitiveFields())
+
+        when:
+        def path = "liquibase/parser/core/xml/primitiveChangeLog.xml"
+        def changeLog = new XMLChangeLogSAXParser().parse(path, new ChangeLogParameters(), new JUnitResourceAccessor())
+
+
+        then:
+        def changeSets = changeLog.getChangeSets()
+        assert changeSets.size() == 1
+        def changes = changeSets.first().getChanges()
+        assert changes.size() == 1
+        def change = changes.first() as ChangeWithPrimitiveFields
+        assert change.aBoolean
+        assert change.aChar == (char) 'b'
+        assert change.aDouble == 0.42d
+        assert change.aFloat == 4.2f
+        assert change.anInt == 42
+        assert change.aLong == 420L
+        assert change.aShort == (short) 4200
+
+        cleanup:
+        Scope.getCurrentScope().getSingleton(ChangeFactory.class).unregister("primitiveChange")
+    }
+
 }

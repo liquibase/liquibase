@@ -1,15 +1,24 @@
 package liquibase.extension.testing.testsystem.spock;
 
 import liquibase.Scope;
+import liquibase.command.CommandScope;
+import liquibase.command.core.DropAllCommandStep;
+import liquibase.command.core.helpers.DbUrlConnectionArgumentsCommandStep;
 import liquibase.configuration.ConfigurationValueConverter;
 import liquibase.configuration.LiquibaseConfiguration;
+import liquibase.exception.UnexpectedLiquibaseException;
+import liquibase.extension.testing.testsystem.DatabaseTestSystem;
 import liquibase.extension.testing.testsystem.TestSystem;
+import liquibase.lockservice.LockService;
+import liquibase.lockservice.LockServiceFactory;
+import liquibase.structure.core.DatabaseObjectFactory;
 import org.junit.Assume;
 import org.spockframework.runtime.extension.AbstractMethodInterceptor;
 import org.spockframework.runtime.extension.IMethodInvocation;
 import org.spockframework.runtime.model.FieldInfo;
 import org.spockframework.runtime.model.SpecInfo;
 
+import java.io.ByteArrayOutputStream;
 import java.util.*;
 
 public class LiquibaseIntegrationMethodInterceptor extends AbstractMethodInterceptor {
@@ -33,15 +42,35 @@ public class LiquibaseIntegrationMethodInterceptor extends AbstractMethodInterce
     }
 
     LiquibaseIntegrationMethodInterceptor(SpecInfo spec, LiquibaseIntegrationTestExtension.ErrorListener errorListener) {
+        verifyNoMultipleDatabases(spec);
         this.spec = spec;
         this.errorListener = errorListener;
+    }
+
+    private void verifyNoMultipleDatabases(SpecInfo spec) {
+        List<FieldInfo> allFields = spec.getAllFields();
+        int databases = 0;
+        for (FieldInfo field : allFields) {
+            if (field.getType() != Object.class && field.getType().isAssignableFrom(DatabaseTestSystem.class)) {
+                databases++;
+            }
+        }
+        if (databases > 1) {
+            throw new UnexpectedLiquibaseException(spec.getName() + " defines more than one " + DatabaseTestSystem.class.getSimpleName() + ". This is not permitted because the test will not be run in any of the matrices on GitHub Actions. You'll need to make a separate class for each of the databases.");
+        }
     }
 
     @Override
     public void interceptSetupSpecMethod(IMethodInvocation invocation) throws Throwable {
         final List<FieldInfo> containers = findAllContainers();
         startContainers(containers, invocation);
+        dropAllDatabases();
+        invocation.proceed();
+    }
 
+    @Override
+    public void interceptSetupMethod(IMethodInvocation invocation) throws Throwable {
+        dropAllDatabases();
         invocation.proceed();
     }
 
@@ -96,6 +125,35 @@ public class LiquibaseIntegrationMethodInterceptor extends AbstractMethodInterce
      */
     @Override
     public void interceptCleanupSpecMethod(IMethodInvocation invocation) throws Throwable {
+        dropAllDatabases();
         invocation.proceed();
+    }
+
+    private static void dropAllDatabases() throws Exception {
+        for (TestSystem startedTestSystem : startedTestSystems) {
+            if (startedTestSystem instanceof DatabaseTestSystem) {
+                runDropAll(((DatabaseTestSystem) startedTestSystem));
+            }
+        }
+        // Start tests from a clean slate, otherwise the MDC will be polluted with info about the dropAll command.
+        Scope.getCurrentScope().getMdcManager().clear();
+        DatabaseObjectFactory.getInstance().reset();
+    }
+
+    @Override
+    public void interceptCleanupMethod(IMethodInvocation invocation) throws Throwable {
+        dropAllDatabases();
+        invocation.proceed();
+    }
+
+    private static void runDropAll(DatabaseTestSystem db) throws Exception {
+        LockService lockService = LockServiceFactory.getInstance().getLockService(db.getDatabaseFromFactory());
+        lockService.releaseLock();
+        CommandScope commandScope = new CommandScope(DropAllCommandStep.COMMAND_NAME);
+        commandScope.addArgumentValue(DbUrlConnectionArgumentsCommandStep.URL_ARG, db.getConnectionUrl());
+        commandScope.addArgumentValue(DbUrlConnectionArgumentsCommandStep.USERNAME_ARG, db.getUsername());
+        commandScope.addArgumentValue(DbUrlConnectionArgumentsCommandStep.PASSWORD_ARG, db.getPassword());
+        commandScope.setOutput(new ByteArrayOutputStream());
+        commandScope.execute();
     }
 }

@@ -8,6 +8,7 @@ import liquibase.change.ChangeFactory;
 import liquibase.change.DatabaseChange;
 import liquibase.change.core.CreateIndexChange;
 import liquibase.change.core.DropIndexChange;
+import liquibase.change.core.SQLFileChange;
 import liquibase.changelog.*;
 import liquibase.database.Database;
 import liquibase.exception.DatabaseException;
@@ -29,7 +30,8 @@ public class ValidatingVisitorUtil {
     public static boolean isChecksumIssue(ChangeSet changeSet, RanChangeSet ranChangeSet, DatabaseChangeLog databaseChangeLog, Database database) {
         return ValidatingVisitorUtil.validateMongoDbExtensionIssue(changeSet, ranChangeSet, databaseChangeLog, database) ||
                ValidatingVisitorUtil.validateAbstractSqlChangeV8ChecksumVariant(changeSet, ranChangeSet) ||
-               ValidatingVisitorUtil.validateCreateFunctionChangeV8ChecksumVariant(changeSet, ranChangeSet);
+               ValidatingVisitorUtil.validateCreateFunctionChangeV8ChecksumVariant(changeSet, ranChangeSet) ||
+               ValidatingVisitorUtil.validateSqlFileChangeAndExpandExpressions(changeSet, ranChangeSet, database);
     }
 
 
@@ -91,6 +93,19 @@ public class ValidatingVisitorUtil {
         String[] liquibaseVersion = version.split("\\.");
         try {
             return (liquibaseVersion.length == 3 && Integer.parseInt(liquibaseVersion[0]) == major && Integer.parseInt(liquibaseVersion[1]) == minor);
+        } catch (NumberFormatException ne) { //we don't have numbers were we expected them to be
+            return false;
+        }
+    }
+
+    private static boolean checkLiquibaseVersionMinorThan(String version, int major, int minor) {
+        if (StringUtil.isEmpty(version)) {
+            return false;
+        }
+        String[] liquibaseVersion = version.split("\\.");
+        try {
+            return (liquibaseVersion.length == 3 && Integer.parseInt(liquibaseVersion[0]) == major &&
+                    Integer.parseInt(liquibaseVersion[1]) < minor);
         } catch (NumberFormatException ne) { //we don't have numbers were we expected them to be
             return false;
         }
@@ -173,5 +188,55 @@ public class ValidatingVisitorUtil {
             }
         }
         return  newChangeset;
+    }
+
+    /**
+     * returns true iff the changeset's checksum was incorrect due to SQLFileChange doing
+     * property substitution on the contents of an external SQL file. If it returns true,
+     * the changeset's checksum has been fixed.
+     *
+     * @param changeSet
+     * @param ranChangeSet
+     * @param database
+     * @return
+     */
+    private static boolean validateSqlFileChangeAndExpandExpressions(ChangeSet changeSet, RanChangeSet ranChangeSet, Database database) {
+        List<SQLFileChange> changes = changeSet.getChanges().stream()
+                                               .filter(SQLFileChange.class::isInstance)
+                                               .map(c -> (SQLFileChange) c)
+                                               .collect(Collectors.toList());
+        if (changes.isEmpty() || !checkLiquibaseVersionMinorThan(ranChangeSet.getLiquibaseVersion(), 4, 26)) {
+            return false;
+        } else {
+            try {
+                /*
+                 * There could be more than one SQLFileChange change in the changeset,
+                 * so call setDoExpandExpressionsInGenerateChecksum(true) on all of them
+                 * before generating the checksum.
+                 */
+                for (SQLFileChange change : changes) {
+                    change.setDoExpandExpressionsInGenerateChecksum(true);
+                }
+                changeSet.clearCheckSum();
+                /*
+                 * If the changeset's checksum with SQLFileChange.doExpandExpressionsInGenerateChecksum=true
+                 * matches ranChangeSet's checksum, then ranChangeSet's checksum was calculated incorrectly
+                 * (i.e., with expressions expanded). In that case, calculate the changeset's checksum correctly
+                 * (with expressions not expanded) and update the database.
+                 */
+                boolean valid = changeSet.isCheckSumValid(ranChangeSet.getLastCheckSum());
+                for (SQLFileChange change : changes) {
+                    change.setDoExpandExpressionsInGenerateChecksum(false);
+                }
+                changeSet.clearCheckSum();
+                if (valid) {
+                    ChangeLogHistoryService changeLogService = Scope.getCurrentScope().getSingleton(ChangeLogHistoryServiceFactory.class).getChangeLogService(database);
+                    changeLogService.replaceChecksum(changeSet);
+                }
+                return valid;
+            } catch (DatabaseException e) {
+                throw new UnexpectedLiquibaseException(e);
+            }
+        }
     }
 }

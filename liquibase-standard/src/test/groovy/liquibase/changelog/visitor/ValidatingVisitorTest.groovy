@@ -5,6 +5,8 @@ import liquibase.Scope
 import liquibase.change.ColumnConfig
 import liquibase.change.core.CreateTableChange
 import liquibase.change.core.OutputChange
+import liquibase.change.core.SQLFileChange
+import liquibase.changelog.ChangeLogParameters
 import liquibase.changelog.ChangeSet
 import liquibase.changelog.DatabaseChangeLog
 import liquibase.changelog.RanChangeSet
@@ -290,6 +292,44 @@ class ValidatingVisitorTest extends Specification {
 
         then:
         handler.getSetupExceptions().size() == 0
+        handler.validationPassed()
+    }
+
+    void "validate successful visit when SQLFileChange checksum changes from expanding-properties to not expanding-properties"() throws Exception {
+        when:
+        def changeSet1 = new ChangeSet("1", "testAuthor", false, false, "path/changelog", null, null, null)
+        def changeLogParameters1 = new ChangeLogParameters()
+        changeLogParameters1.set("database.liquibaseSchemaName", "schema1")
+        changeSet1.setChangeLogParameters(changeLogParameters1)
+        def sqlFileChange1 = new SQLFileChange()
+        sqlFileChange1.path = "com/example-2/fileWithSchemaNameProperty.sql"
+        sqlFileChange1.relativeToChangelogFile = false
+        sqlFileChange1.setChangeSet(changeSet1)
+        sqlFileChange1.doExpandExpressionsInGenerateChecksum = true
+        changeSet1.addChange(sqlFileChange1)
+        List<RanChangeSet> ran = new ArrayList<RanChangeSet>()
+        ran.add(new RanChangeSet(changeSet1))
+        ran.get(0).setLiquibaseVersion("4.24.0")
+
+        ValidatingVisitor handler = new ValidatingVisitor(ran)
+        def changeSet2 = new ChangeSet("1", "testAuthor", false, false, "path/changelog", null, null, null)
+        def changeLogParameters2 = new ChangeLogParameters()
+        /*
+         * Note that the changelog parameters must be the same as when
+         * the changeset's checksum was stored. Otherwise, there's no way
+         * to reproduce the original checksum.
+         */
+        changeLogParameters2.set("database.liquibaseSchemaName", "schema1")
+        changeSet2.setChangeLogParameters(changeLogParameters2)
+        def sqlFileChange2 = new SQLFileChange()
+        sqlFileChange2.path = "com/example-2/fileWithSchemaNameProperty.sql"
+        sqlFileChange2.relativeToChangelogFile = false
+        sqlFileChange2.setChangeSet(changeSet2)
+        sqlFileChange2.doExpandExpressionsInGenerateChecksum = false
+        changeSet2.addChange(sqlFileChange2)
+        handler.visit(changeSet2, new DatabaseChangeLog(), new MockDatabase(), null)
+
+        then:
         handler.validationPassed()
     }
 }

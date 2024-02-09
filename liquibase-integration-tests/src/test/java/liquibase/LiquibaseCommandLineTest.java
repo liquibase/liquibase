@@ -16,7 +16,7 @@ public class LiquibaseCommandLineTest {
         final LiquibaseCommandLine cli = new LiquibaseCommandLine();
         int returnCode = cli.execute(new String[] {"--url=jdbc:h2:mem:liquibase",
                 "--defaults-file=variables/liquibase.variables.replacement.properties",
-                "--changeLogFile=variables/changelog.xml",
+                "--changeLogFile=variables/changelog.xml", "--show-banner=false",
                 "--output-file=" + tempFile.toAbsolutePath(), "update-sql"});
 
         Assert.assertEquals(0, returnCode);
@@ -26,5 +26,32 @@ public class LiquibaseCommandLineTest {
         Assert.assertFalse(updateSqlOutput.contains("replaceKey"));
 
         Files.delete(tempFile);
+    }
+
+    @Test
+    public void specifyDatabaseClass() {
+        final LiquibaseCommandLine cli = new LiquibaseCommandLine();
+        int returnCode = cli.execute(new String[] {
+                "--url=jdbc:h2:mem:liquibase",
+                "--changeLogFile=changelogs/specific.dbms.xml",
+                "--databaseClass=liquibase.database.core.H2Database",
+                "--show-banner=false",
+                "update"
+        });
+
+        Assert.assertEquals(0, returnCode);
+    }
+
+    @Test
+    public void withoutSpecifyDatabaseClass() {
+        final LiquibaseCommandLine cli = new LiquibaseCommandLine();
+        int returnCode = cli.execute(new String[] {
+                "--url=jdbc:h2:mem:liquibase",
+                "--changeLogFile=changelogs/specific.dbms.xml",
+                "--show-banner=false",
+                "update"
+        });
+
+        Assert.assertEquals(0, returnCode);
     }
 }

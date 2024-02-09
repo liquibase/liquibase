@@ -137,7 +137,7 @@ public class CreateViewGenerator extends AbstractSqlGenerator<CreateViewStatemen
     private boolean shouldPrependDropViewStatement(Database database) {
         // allow overriding the value of the dropIfCannotReplace attribute
         // from liquibase.properties or command line
-        boolean dropIfCannotReplace = false;
+        boolean dropIfCannotReplace = GlobalConfiguration.ALWAYS_DROP_INSTEAD_OF_REPLACE.getDefaultValue();
         if (GlobalConfiguration.ALWAYS_DROP_INSTEAD_OF_REPLACE.getCurrentValue() != null) {
             dropIfCannotReplace = GlobalConfiguration.ALWAYS_DROP_INSTEAD_OF_REPLACE.getCurrentValue();
         } 

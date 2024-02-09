@@ -3,6 +3,7 @@ package liquibase.util;
 import liquibase.ExtensibleObject;
 import liquibase.GlobalConfiguration;
 import liquibase.Scope;
+import liquibase.changelog.ChangeSet;
 import liquibase.parser.LiquibaseSqlParser;
 import liquibase.parser.SqlParserFactory;
 
@@ -55,17 +56,29 @@ public class StringUtil {
     }
 
     /**
-     * Removes any comments from multiple line SQL using {@link #stripComments(String)}
-     * and then extracts each individual statement using {@link #splitSQL(String, String)}.
+     * Removes any comments from multiple line SQL using {@link #stripComments(String, ChangeSet)}
+     * and then extracts each individual statement using {@link #splitSQL(String, String, ChangeSet)}.
      *
      * @param multiLineSQL  A String containing all the SQL statements
      * @param stripComments If true then comments will be stripped, if false then they will be left in the code
      */
     public static String[] processMultiLineSQL(String multiLineSQL, boolean stripComments, boolean splitStatements, String endDelimiter) {
+        return processMultiLineSQL(multiLineSQL, stripComments, splitStatements, endDelimiter, null);
+    }
+
+    /**
+     * Removes any comments from multiple line SQL using {@link #stripComments(String, ChangeSet)}
+     * and then extracts each individual statement using {@link #splitSQL(String, String, ChangeSet)}.
+     *
+     * @param multiLineSQL  A String containing all the SQL statements
+     * @param stripComments If true then comments will be stripped, if false then they will be left in the code
+     * @param changeSet     the changeset associated with the sql being parsed
+     */
+    public static String[] processMultiLineSQL(String multiLineSQL, boolean stripComments, boolean splitStatements, String endDelimiter, ChangeSet changeSet) {
 
         SqlParserFactory sqlParserFactory = Scope.getCurrentScope().getSingleton(SqlParserFactory.class);
         LiquibaseSqlParser sqlParser = sqlParserFactory.getSqlParser();
-        StringClauses parsed = sqlParser.parse(multiLineSQL, true, !stripComments);
+        StringClauses parsed = sqlParser.parse(multiLineSQL, true, !stripComments, changeSet);
 
         List<String> returnArray = new ArrayList<>();
 
@@ -85,13 +98,13 @@ public class StringUtil {
             }
 
             if (piece instanceof String && ((String) piece).equalsIgnoreCase("BEGIN")
-                    &&  (!"transaction".equalsIgnoreCase(nextPiece)
-                        && !"trans".equalsIgnoreCase(nextPiece)
-                        && !"tran".equalsIgnoreCase(nextPiece))) {
+                    && (!"transaction".equalsIgnoreCase(nextPiece)
+                    && !"trans".equalsIgnoreCase(nextPiece)
+                    && !"tran".equalsIgnoreCase(nextPiece))) {
                 isInClause++;
             }
             if (piece instanceof String && ((String) piece).equalsIgnoreCase("END") && isInClause > 0
-                && (!"transaction".equalsIgnoreCase(nextPiece)
+                    && (!"transaction".equalsIgnoreCase(nextPiece)
                     && !"trans".equalsIgnoreCase(nextPiece)
                     && !"tran".equalsIgnoreCase(nextPiece))) {
                 isInClause--;
@@ -124,15 +137,28 @@ public class StringUtil {
     }
 
     /**
-     * Removes any comments from multiple line SQL using {@link #stripComments(String)}
-     * and then extracts each individual statement using {@link #splitSQL(String, String)}.
+     * Removes any comments from multiple line SQL using {@link #stripComments(String, ChangeSet)}
+     * and then extracts each individual statement using {@link #splitSQL(String, String, ChangeSet)}.
      *
      * @param multiLineSQL  A String containing all the SQL statements
      * @param stripComments If true then comments will be stripped, if false then they will be left in the code
-     * @deprecated The new method is {@link #processMultiLineSQL(String, boolean, boolean, String)} (String)}
+     * @deprecated The new method is {@link #processMultiLineSQL(String, boolean, boolean, String, ChangeSet)} (String)}
      */
     public static String[] processMutliLineSQL(String multiLineSQL, boolean stripComments, boolean splitStatements, String endDelimiter) {
-        return processMultiLineSQL(multiLineSQL, stripComments, splitStatements, endDelimiter);
+        return processMultiLineSQL(multiLineSQL, stripComments, splitStatements, endDelimiter, null);
+    }
+
+    /**
+     * Removes any comments from multiple line SQL using {@link #stripComments(String, ChangeSet)}
+     * and then extracts each individual statement using {@link #splitSQL(String, String, ChangeSet)}.
+     *
+     * @param multiLineSQL  A String containing all the SQL statements
+     * @param stripComments If true then comments will be stripped, if false then they will be left in the code
+     * @param changeSet     the changeset associated with the sql being parsed
+     * @deprecated The new method is {@link #processMultiLineSQL(String, boolean, boolean, String, ChangeSet)} (String)}
+     */
+    public static String[] processMutliLineSQL(String multiLineSQL, boolean stripComments, boolean splitStatements, String endDelimiter, ChangeSet changeSet) {
+        return processMultiLineSQL(multiLineSQL, stripComments, splitStatements, endDelimiter, changeSet);
     }
 
     /**
@@ -302,7 +328,16 @@ public class StringUtil {
      * Splits a candidate multi-line SQL statement along ;'s and "go"'s.
      */
     public static String[] splitSQL(String multiLineSQL, String endDelimiter) {
-        return processMultiLineSQL(multiLineSQL, false, true, endDelimiter);
+        return splitSQL(multiLineSQL, endDelimiter, null);
+    }
+
+    /**
+     * Splits a candidate multi-line SQL statement along ;'s and "go"'s.
+     *
+     * @param changeSet the changeset associated with the sql being parsed
+     */
+    public static String[] splitSQL(String multiLineSQL, String endDelimiter, ChangeSet changeSet) {
+        return processMultiLineSQL(multiLineSQL, false, true, endDelimiter, changeSet);
     }
 
     /**
@@ -314,12 +349,25 @@ public class StringUtil {
      * @return The String without the comments in
      */
     public static String stripComments(String multiLineSQL) {
+        return stripComments(multiLineSQL, null);
+    }
+
+    /**
+     * Searches through a String which contains SQL code and strips out
+     * any comments that are between \/**\/ or anything that matches
+     * SP--SP<text>\n (to support the ANSI standard commenting of --
+     * at the end of a line).
+     *
+     * @param changeSet the changeset associated with the sql being parsed
+     * @return The String without the comments in
+     */
+    public static String stripComments(String multiLineSQL, ChangeSet changeSet) {
         if (StringUtil.isEmpty(multiLineSQL)) {
             return multiLineSQL;
         }
         SqlParserFactory sqlParserFactory = Scope.getCurrentScope().getSingleton(SqlParserFactory.class);
         LiquibaseSqlParser sqlParser = sqlParserFactory.getSqlParser();
-        return sqlParser.parse(multiLineSQL, true, false).toString().trim();
+        return sqlParser.parse(multiLineSQL, true, false, changeSet).toString().trim();
     }
 
     public static String join(Object[] array, String delimiter, StringUtilFormatter formatter) {
@@ -588,6 +636,19 @@ public class StringUtil {
     }
 
     /**
+     *
+     * Returns true if the input string contains the specified value
+     *
+     * @param  value                  String to be checked
+     * @param  containsValue          String to look for
+     * @return true if String contains the value
+     *
+     */
+    public static boolean contains(String value, String containsValue) {
+        return value != null && value.contains(containsValue);
+    }
+
+    /**
      * Returns true if the input string is the empty string (null-safe).
      *
      * @param value String to be checked
@@ -621,6 +682,22 @@ public class StringUtil {
         }
 
         return value.startsWith(startsWith);
+    }
+
+    /**
+     * Checks whether the given <code>value</code> ends with the specified <code>endsWith</code> string.
+     *
+     * @param value      the string to check
+     * @param endsWith   the prefix to check for
+     * @return <code>true</code> if <code>value</code> ends with <code>endsWith</code>, <code>false</code> otherwise.
+     * Returns <code>false</code> if either argument is <code>null</code>.
+     */
+    public static boolean endsWith(String value, String endsWith) {
+        if ((value == null) || (endsWith == null)) {
+            return false;
+        }
+
+        return value.endsWith(endsWith);
     }
 
     /**
@@ -927,7 +1004,7 @@ public class StringUtil {
             } else if (c == '\r' || c == '\n') {
                 // new line found
                 startOfNewLine = true;
-				idxOfDoubleDash = -1;
+                idxOfDoubleDash = -1;
             }
 
         }

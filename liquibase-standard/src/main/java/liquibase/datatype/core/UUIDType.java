@@ -36,6 +36,18 @@ public class UUIDType extends LiquibaseDataType {
         if (database instanceof SQLiteDatabase) {
             return new DatabaseDataType("TEXT");
         }
+        try {
+            if(database instanceof MariaDBDatabase && (database.getDatabaseMajorVersion() == 10 && database.getDatabaseMinorVersion() >= 7)
+                    || database.getDatabaseMajorVersion() >= 11) {
+                return new DatabaseDataType("UUID");
+            }
+        } catch (DatabaseException e) {
+            try {
+                throw new DatabaseException("UUID data type is not supported in versions lower than 10.7");
+            } catch (DatabaseException ex) {
+                throw new RuntimeException(ex);
+            }
+        }
         return new DatabaseDataType("char", 36);
     }
 

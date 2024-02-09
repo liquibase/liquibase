@@ -54,6 +54,12 @@ class CommandUtil {
         SearchPathResourceAccessor resourceAccessor = new SearchPathResourceAccessor(".,target/test-classes")
         execUpdateCommandInScope(resourceAccessor, db, changelogFile, labels, contexts, outputFile)
     }
+
+    static void runUpdateCount(DatabaseTestSystem db, String changelogFile, int count) {
+        SearchPathResourceAccessor resourceAccessor = new SearchPathResourceAccessor(".,target/test-classes")
+        execUpdateCountCommandInScope(resourceAccessor, db, changelogFile, count)
+    }
+
     static void runGenerateChangelog(DatabaseTestSystem db, String outputFile) throws CommandExecutionException {
         CommandScope commandScope = new CommandScope(GenerateChangelogCommandStep.COMMAND_NAME)
         commandScope.addArgumentValue(DbUrlConnectionArgumentsCommandStep.URL_ARG, db.getConnectionUrl())
@@ -180,6 +186,21 @@ class CommandUtil {
             commandScope.addArgumentValue(DbUrlConnectionArgumentsCommandStep.PASSWORD_ARG, db.getPassword())
             commandScope.addArgumentValue(UpdateCommandStep.CHANGELOG_FILE_ARG, changelogFile)
             commandScope.addArgumentValue(ShowSummaryArgument.SHOW_SUMMARY, UpdateSummaryEnum.SUMMARY)
+            commandScope.execute()
+        } as Scope.ScopedRunnerWithReturn<Void>)
+    }
+
+    private static void execUpdateCountCommandInScope(SearchPathResourceAccessor resourceAccessor, DatabaseTestSystem db, String changelogFile, int count) {
+        def scopeSettings = [
+                (Scope.Attr.resourceAccessor.name()): resourceAccessor
+        ]
+        Scope.child(scopeSettings, {
+            CommandScope commandScope = new CommandScope(UpdateCountCommandStep.COMMAND_NAME)
+            commandScope.addArgumentValue(DbUrlConnectionArgumentsCommandStep.URL_ARG, db.getConnectionUrl())
+            commandScope.addArgumentValue(DbUrlConnectionArgumentsCommandStep.USERNAME_ARG, db.getUsername())
+            commandScope.addArgumentValue(DbUrlConnectionArgumentsCommandStep.PASSWORD_ARG, db.getPassword())
+            commandScope.addArgumentValue(UpdateCountCommandStep.CHANGELOG_FILE_ARG, changelogFile)
+            commandScope.addArgumentValue(UpdateCountCommandStep.COUNT_ARG, count)
             commandScope.execute()
         } as Scope.ScopedRunnerWithReturn<Void>)
     }

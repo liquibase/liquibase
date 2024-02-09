@@ -1,9 +1,13 @@
 package org.liquibase.maven.plugins;
 
-import liquibase.*;
+import liquibase.GlobalConfiguration;
+import liquibase.Liquibase;
+import liquibase.Scope;
+import liquibase.ThreadLocalScopeManager;
 import liquibase.changelog.visitor.ChangeExecListener;
 import liquibase.changelog.visitor.DefaultChangeExecListener;
 import liquibase.command.core.helpers.DbUrlConnectionCommandStep;
+import liquibase.configuration.ConfiguredValueModifierFactory;
 import liquibase.configuration.LiquibaseConfiguration;
 import liquibase.configuration.core.DefaultsFileValueProvider;
 import liquibase.database.Database;
@@ -100,6 +104,10 @@ public abstract class AbstractLiquibaseMojo extends AbstractMojo {
     @PropertyElement
     protected String url;
 
+    public void setUrl(String url) throws Exception {
+        this.url = modifyValue(url);
+    }
+
     /**
      * The Maven Wagon manager to use when obtaining server authentication details.
      *
@@ -115,6 +123,11 @@ public abstract class AbstractLiquibaseMojo extends AbstractMojo {
      */
     @PropertyElement
     protected String username;
+
+    public void setUsername(String username) throws Exception {
+        this.username = modifyValue(username);
+    }
+
     /**
      * Specifies the database password for database connection.
      *
@@ -122,6 +135,10 @@ public abstract class AbstractLiquibaseMojo extends AbstractMojo {
      */
     @PropertyElement
     protected String password;
+
+    public void setPassword(String password) throws Exception {
+        this.password = modifyValue(password);
+    }
 
     /**
      * Use an empty string as the password for the database connection. This should not be
@@ -1176,6 +1193,7 @@ public abstract class AbstractLiquibaseMojo extends AbstractMojo {
     }
 
     private void setFieldValue(Field field, String value) throws IllegalAccessException {
+        value = Scope.getCurrentScope().getSingleton(ConfiguredValueModifierFactory.class).override(value);
         if (field.getType().equals(Boolean.class) || field.getType().equals(boolean.class)) {
             field.set(this, Boolean.valueOf(value));
         } else if (field.getType().isEnum()) {
@@ -1260,5 +1278,14 @@ public abstract class AbstractLiquibaseMojo extends AbstractMojo {
             throw new LiquibaseException(e);
         }
         return fileOut;
+    }
+
+    /**
+     * Calls the {@link ConfiguredValueModifierFactory} to expand the provided value.
+     * @return the expanded value, or the original value if expansion is not needed
+     * @throws Exception if expansion fails
+     */
+    private String modifyValue(String value) throws Exception {
+        return Scope.child(Collections.singletonMap("liquibase.licenseKey", getLicenseKey()), () -> Scope.getCurrentScope().getSingleton(ConfiguredValueModifierFactory.class).override(value));
     }
 }
