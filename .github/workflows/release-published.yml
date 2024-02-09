@@ -406,8 +406,8 @@ jobs:
           event-type: oss-released-tag
 
   package-linux:
-    uses: liquibase/build-logic/.github/workflows/package-linux.yml@v0.5.8
-    needs: [ setup, manual_trigger_deployment ]
+    uses: liquibase/build-logic/.github/workflows/package-linux.yml@v0.6.1
+    needs: [ setup ]
     secrets: inherit
     with:
       groupId: 'org.liquibase'
