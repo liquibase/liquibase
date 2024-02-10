@@ -44,7 +44,7 @@ jobs:
         id: return_dispatch
         with:
           token: ${{ secrets.RUN_FUNCTIONAL_TEST_HARNESS_TESTS_TOKEN  }}
-          ref: "main"
+          ref: "develop"
           repo: liquibase-test-harness
           owner: liquibase
           workflow: main.yml
