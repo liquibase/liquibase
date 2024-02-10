@@ -30,7 +30,7 @@ public class AddUniqueConstraintGenerator extends AbstractSqlGenerator<AddUnique
         validationErrors.checkRequiredField("columnNames", addUniqueConstraintStatement.getColumnNames());
         validationErrors.checkRequiredField("tableName", addUniqueConstraintStatement.getTableName());
 
-        if (!(database instanceof OracleDatabase)) {
+        if (!((database instanceof OracleDatabase) || (database instanceof PostgresDatabase))) {
             validationErrors.checkDisallowedField("forIndexName", addUniqueConstraintStatement.getForIndexName(), database);
         }
 

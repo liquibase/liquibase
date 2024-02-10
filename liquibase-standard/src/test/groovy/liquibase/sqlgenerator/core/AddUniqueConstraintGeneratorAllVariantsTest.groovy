@@ -1,29 +1,12 @@
 package liquibase.sqlgenerator.core
 
 import liquibase.change.ColumnConfig
-import liquibase.database.core.CockroachDatabase
-import liquibase.database.core.DB2Database
-import liquibase.database.core.Db2zDatabase
-import liquibase.database.core.DerbyDatabase
-import liquibase.database.core.EnterpriseDBDatabase
-import liquibase.database.core.FirebirdDatabase
-import liquibase.database.core.H2Database
-import liquibase.database.core.HsqlDatabase
-import liquibase.database.core.InformixDatabase
-import liquibase.database.core.Ingres9Database
-import liquibase.database.core.MSSQLDatabase
-import liquibase.database.core.MariaDBDatabase
-import liquibase.database.core.MySQLDatabase
-import liquibase.database.core.OracleDatabase
-import liquibase.database.core.PostgresDatabase
-import liquibase.database.core.SybaseASADatabase
-import liquibase.database.core.SybaseDatabase
-import liquibase.database.core.UnsupportedDatabase
+import liquibase.database.core.*
+import liquibase.sqlgenerator.MockSqlGeneratorChain
 import liquibase.sqlgenerator.SqlGenerator
 import liquibase.statement.core.AddUniqueConstraintStatement
 import spock.lang.Specification
 import spock.lang.Unroll
-
 
 class AddUniqueConstraintGeneratorAllVariantsTest extends Specification {
 
@@ -34,7 +17,7 @@ class AddUniqueConstraintGeneratorAllVariantsTest extends Specification {
     private static final String INDEX_NAME = "uqIndex";
 
     @Unroll
-    def  "test unique constraint using index with constraint name for #database database"() {
+    def  "test unique constraint using index with constraint name for #database"() {
         when:
             SqlGenerator<AddUniqueConstraintStatement> generatorUnderTest = new AddUniqueConstraintGenerator()
             AddUniqueConstraintStatement statement = new AddUniqueConstraintStatement(null, null, TABLE_NAME, [new ColumnConfig().setName(COLUMN_NAME), new ColumnConfig().setName(COLUMN_NAME2)] as ColumnConfig[], CONSTRAINT_NAME);
@@ -64,7 +47,7 @@ class AddUniqueConstraintGeneratorAllVariantsTest extends Specification {
     }
 
     @Unroll
-    def  "test unique constraint using index without constraint name for #database database"() {
+    def  "test unique constraint using index without constraint name for #database"() {
         when:
             SqlGenerator<AddUniqueConstraintStatement> generatorUnderTest = new AddUniqueConstraintGenerator()
             AddUniqueConstraintStatement statement = new AddUniqueConstraintStatement(null, null, TABLE_NAME, [new ColumnConfig().setName(COLUMN_NAME), new ColumnConfig().setName(COLUMN_NAME2)] as ColumnConfig[], null);
@@ -94,7 +77,7 @@ class AddUniqueConstraintGeneratorAllVariantsTest extends Specification {
     }
 
     @Unroll
-    def  "test unique constraint set clustered with constraint name for #database database"() {
+    def  "test unique constraint set clustered with constraint name for #database"() {
         when:
             SqlGenerator<AddUniqueConstraintStatement> generatorUnderTest = new AddUniqueConstraintGenerator()
             AddUniqueConstraintStatement statement = new AddUniqueConstraintStatement(null, null, TABLE_NAME, [new ColumnConfig().setName(COLUMN_NAME), new ColumnConfig().setName(COLUMN_NAME2)] as ColumnConfig[], CONSTRAINT_NAME);
@@ -121,6 +104,38 @@ class AddUniqueConstraintGeneratorAllVariantsTest extends Specification {
             new MySQLDatabase() || "ALTER TABLE AddUQTest ADD CONSTRAINT UQ_TEST UNIQUE CLUSTERED (colToMakeUQ, colToMakeUQ2)"
             new PostgresDatabase() || "ALTER TABLE \"AddUQTest\" ADD CONSTRAINT UQ_TEST UNIQUE CLUSTERED (\"colToMakeUQ\", \"colToMakeUQ2\")"
             new InformixDatabase() || "ALTER TABLE AddUQTest ADD CONSTRAINT UQ_TEST UNIQUE CLUSTERED (colToMakeUQ, colToMakeUQ2)"
+    }
+
+
+    @Unroll
+    def "test validation of forIndexName for #database"() {
+        when:
+            SqlGenerator<AddUniqueConstraintStatement> generatorUnderTest = new AddUniqueConstraintGenerator()
+            AddUniqueConstraintStatement statement = new AddUniqueConstraintStatement(null, null, TABLE_NAME, [new ColumnConfig().setName(COLUMN_NAME), new ColumnConfig().setName(COLUMN_NAME2)] as ColumnConfig[], CONSTRAINT_NAME);
+            statement.setForIndexName(INDEX_NAME)
+        then:
+            validationErrors == generatorUnderTest.validate(statement, database, new MockSqlGeneratorChain()).errorMessages
+        where:
+            database | validationErrors
+            new H2Database() || ["forIndexName is not allowed on h2"]
+            new SybaseDatabase() || ["forIndexName is not allowed on sybase"]
+            new FirebirdDatabase() || ["forIndexName is not allowed on firebird"]
+            new H2Database() || ["forIndexName is not allowed on h2"]
+            new UnsupportedDatabase() || ["forIndexName is not allowed on unsupported"]
+            new MSSQLDatabase() || ["forIndexName is not allowed on mssql"]
+            new OracleDatabase() || []
+            new SybaseASADatabase() || ["forIndexName is not allowed on asany"]
+            new Db2zDatabase() || ["forIndexName is not allowed on db2z"]
+            new Ingres9Database() || ["forIndexName is not allowed on ingres"]
+            new DerbyDatabase() || ["forIndexName is not allowed on derby"]
+            new CockroachDatabase() || []
+            new EnterpriseDBDatabase() || []
+            new MariaDBDatabase() || ["forIndexName is not allowed on mariadb"]
+            new HsqlDatabase() || ["forIndexName is not allowed on hsqldb"]
+            new DB2Database() || ["forIndexName is not allowed on db2"]
+            new MySQLDatabase() || ["forIndexName is not allowed on mysql"]
+            new PostgresDatabase() || []
+            new InformixDatabase() || ["forIndexName is not allowed on informix"]
     }
 
 }
