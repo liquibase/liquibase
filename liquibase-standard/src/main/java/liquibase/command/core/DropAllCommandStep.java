@@ -77,6 +77,7 @@ public class DropAllCommandStep extends AbstractCommandStep {
 
             Scope.getCurrentScope().getUI().sendMessage(message);
             log.severe(message, liquibaseException);
+            throw liquibaseException;
         } catch (Exception e) {
             throw new DatabaseException(e);
         } finally {
