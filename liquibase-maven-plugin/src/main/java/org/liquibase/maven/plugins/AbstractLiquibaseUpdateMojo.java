@@ -1,8 +1,10 @@
 package org.liquibase.maven.plugins;
 
-import liquibase.Liquibase;
+import liquibase.*;
+import liquibase.database.Database;
 import liquibase.command.CommandScope;
 import liquibase.exception.LiquibaseException;
+import org.apache.maven.plugin.MojoExecutionException;
 import org.liquibase.maven.property.PropertyElement;
 
 /**
@@ -35,6 +37,25 @@ public abstract class AbstractLiquibaseUpdateMojo extends AbstractLiquibaseChang
   @PropertyElement
   protected boolean rollbackOnError;
 
+  /**
+   * Whether or not to print a summary of the update operation.
+   * Allowed values: 'OFF', 'SUMMARY' (default), 'VERBOSE'
+   *
+   * @parameter property="liquibase.showSummary"
+   */
+  @PropertyElement
+  protected UpdateSummaryEnum showSummary;
+
+  /**
+   * Flag to control where we show the summary.
+   * Allowed values: 'LOG', 'CONSOLE', OR 'ALL' (default)
+   *
+   * @parameter property="liquibase.showSummaryOutput"
+   */
+  @PropertyElement
+  protected UpdateSummaryOutputEnum showSummaryOutput;
+
+
   @Override
   protected void performLiquibaseTask(Liquibase liquibase) throws LiquibaseException {
     super.performLiquibaseTask(liquibase);
@@ -46,6 +67,14 @@ public abstract class AbstractLiquibaseUpdateMojo extends AbstractLiquibaseChang
    * @param liquibase The Liquibase object to use to perform the "update".
    */
   protected abstract void doUpdate(Liquibase liquibase) throws LiquibaseException;
+
+  @Override
+  protected Liquibase createLiquibase(Database db) throws MojoExecutionException {
+    Liquibase liquibase = super.createLiquibase(db);
+    liquibase.setShowSummary(showSummary);
+    liquibase.setShowSummaryOutput(showSummaryOutput);
+    return liquibase;
+  }
 
   @Override
   protected void printSettings(String indent) {
