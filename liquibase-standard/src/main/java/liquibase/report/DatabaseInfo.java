@@ -33,6 +33,9 @@ public class DatabaseInfo {
      * @return the modified url if longer than {@link CONNECTION_URL_MAX_LENGTH}
      */
     protected String getVisibleUrl(String originalUrl) {
+        if (originalUrl == null) {
+            return "";
+        }
         final String modifiedUrl = originalUrl.length() >= CONNECTION_URL_MAX_LENGTH ? handleSqlServerDbUrlParameters(DB_URL_VISIBLE_KEYS, originalUrl) : originalUrl;
         return appendEllipsisIfDifferent(originalUrl, hideConnectionUrlLength(modifiedUrl));
     }
