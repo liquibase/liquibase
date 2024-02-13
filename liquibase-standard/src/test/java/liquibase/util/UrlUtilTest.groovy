@@ -1,13 +1,12 @@
 package liquibase.util
 
-import com.datical.liquibase.ext.command.DriftReportCommandStep
-import liquibase.util.UrlUtil
+import liquibase.report.DatabaseInfo
 import spock.lang.Specification
 
 class UrlUtilTest extends Specification {
     def "should bring important url parameters to front of connection string and remove other params"(String url, String expected) {
         when:
-        def modified = UrlUtil.handleSqlServerDbUrlParameters(DriftReportCommandStep.DB_URL_VISIBLE_KEYS, url)
+        def modified = UrlUtil.handleSqlServerDbUrlParameters(DatabaseInfo.DB_URL_VISIBLE_KEYS, url)
         then:
         modified == expected
         where:
