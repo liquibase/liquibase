@@ -48,6 +48,7 @@ public class CreateDatabaseChangeLogTableGeneratorSybase extends AbstractSqlGene
                             "CONTEXTS VARCHAR(255) NULL, " +
                             "LABELS VARCHAR(255) NULL, " +
                             "DEPLOYMENT_ID VARCHAR(10) NULL, " +
+                            "EXECUTION_MILLISECONDS INT NULL, " +
                             "PRIMARY KEY(ID, AUTHOR, FILENAME))",
                             getAffectedTable(database))
             };

@@ -149,6 +149,7 @@ public class StandardChangeLogHistoryService extends AbstractChangeLogHistorySer
             boolean hasExecTypeColumn = changeLogTable.getColumn("EXECTYPE") != null;
             String charTypeName = getCharTypeName();
             boolean hasDeploymentIdColumn = changeLogTable.getColumn("DEPLOYMENT_ID") != null;
+            boolean hasExecutionMillisecondsColumn = changeLogTable.getColumn("EXECUTION_MILLISECONDS") != null;
 
             if (!hasDescription) {
                 executor.comment("Adding missing databasechangelog.description column");
@@ -241,6 +242,16 @@ public class StandardChangeLogHistoryService extends AbstractChangeLogHistorySer
                 if (database instanceof DB2Database) {
                     statementsToExecute.add(new ReorganizeTableStatement(getLiquibaseCatalogName(),
                         getLiquibaseSchemaName(), getDatabaseChangeLogTableName()));
+                }
+            }
+
+            if (!hasExecutionMillisecondsColumn) {
+                executor.comment("Adding missing databasechangelog.execution_milliseconds column");
+                statementsToExecute.add(new AddColumnStatement(getLiquibaseCatalogName(), getLiquibaseSchemaName(),
+                        getDatabaseChangeLogTableName(), "EXECUTION_MILLISECONDS", "int", null));
+                if (database instanceof DB2Database) {
+                    statementsToExecute.add(new ReorganizeTableStatement(getLiquibaseCatalogName(),
+                            getLiquibaseSchemaName(), getDatabaseChangeLogTableName()));
                 }
             }
 
