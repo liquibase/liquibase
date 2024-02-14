@@ -50,8 +50,8 @@ public class DiffChangelogCommandStep extends AbstractChangelogCommandStep {
                 .setValueHandler(ValueHandlerUtil::booleanValueHandler)
                 .build();
         builder.addArgument(AbstractChangelogCommandStep.RUN_ON_CHANGE_TYPES_ARG).build();
-
         builder.addArgument(AbstractChangelogCommandStep.REPLACE_IF_EXISTS_TYPES_ARG).build();
+        builder.addArgument(AbstractChangelogCommandStep.SKIP_OBJECT_SORTING).build();
     }
 
     @Override
@@ -96,7 +96,7 @@ public class DiffChangelogCommandStep extends AbstractChangelogCommandStep {
                 Scope.getCurrentScope().addMdcValue(MdcKey.DIFF_CHANGELOG_FILE, changeLogFile);
                 referenceDatabase.setObjectQuotingStrategy(ObjectQuotingStrategy.QUOTE_ALL_OBJECTS);
 
-                DiffToChangeLog changeLogWriter = createDiffToChangeLogObject(diffResult, diffOutputControl);
+                DiffToChangeLog changeLogWriter = createDiffToChangeLogObject(diffResult, diffOutputControl, commandScope.getArgumentValue(AbstractChangelogCommandStep.SKIP_OBJECT_SORTING));
                 changeLogWriter.setChangeSetContext(commandScope.getArgumentValue(CONTEXTS_ARG));
                 changeLogWriter.setChangeSetLabels(commandScope.getArgumentValue(LABEL_FILTER_ARG));
                 changeLogWriter.setChangeSetAuthor(commandScope.getArgumentValue(AUTHOR_ARG));
@@ -130,8 +130,8 @@ public class DiffChangelogCommandStep extends AbstractChangelogCommandStep {
         validateRunOnChangeTypes(commandScope);
     }
 
-    protected DiffToChangeLog createDiffToChangeLogObject(DiffResult diffResult, DiffOutputControl diffOutputControl) {
-        return new DiffToChangeLog(diffResult, diffOutputControl);
+    protected DiffToChangeLog createDiffToChangeLogObject(DiffResult diffResult, DiffOutputControl diffOutputControl, boolean skipObjectSorting) {
+        return new DiffToChangeLog(diffResult, diffOutputControl, skipObjectSorting);
     }
 
 }
