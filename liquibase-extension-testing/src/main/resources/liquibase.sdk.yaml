@@ -59,7 +59,7 @@ liquibase:
 
       mysql:
         # MySQL 8.0 is the latest major release.
-        # Subsequent major releases can contain breaking changes.
+        # Subsequent minor releases can contain breaking changes.
         version: 8.0
         imageName: mysql
         setup:
