@@ -1,13 +1,12 @@
 package liquibase.changelog;
 
-import liquibase.ContextExpression;
-import liquibase.Contexts;
-import liquibase.LabelExpression;
-import liquibase.Labels;
+import liquibase.*;
 import liquibase.database.Database;
 import liquibase.database.DatabaseList;
 import liquibase.exception.DatabaseException;
 import liquibase.exception.UnknownChangeLogParameterException;
+import liquibase.parser.core.ParsedNode;
+import liquibase.parser.core.ParsedNodeException;
 import liquibase.util.StringUtil;
 
 import java.util.*;
@@ -35,6 +34,81 @@ public class ChangeLogParameters {
     private String filterDatabase;
     private Contexts filterContexts;
     private LabelExpression filterLabels;
+
+    private enum LiquibaseExecutionParameter {
+        LIQUIBASE_EXECUTION_DEPLOYMENT_ID {
+            @Override
+            public String getValue(DatabaseChangeLog changeLog) {
+                final Scope currentScope = Scope.getCurrentScope();
+                final Database currentDatabase = currentScope.getDatabase();
+                final ChangeLogHistoryService changelogService = currentScope.getSingleton(ChangeLogHistoryServiceFactory.class).getChangeLogService(currentDatabase);
+                String deploymentId = changelogService.getDeploymentId();
+
+                if (deploymentId == null || deploymentId.isEmpty()) {
+                    changelogService.generateDeploymentId();
+                    deploymentId = changelogService.getDeploymentId();
+                }
+
+                // TODO: This is not returning the correct deployment ID. Why?
+                return deploymentId;
+            }
+        },
+        LIQUIBASE_EXECUTION_CHANGELOG_FILE {
+            @Override
+            public String getValue(DatabaseChangeLog changeLog) {
+                return changeLog.getFilePath();
+            }
+        },
+        LIQUIBASE_EXECUTION_CHANGESET_ID {
+            @Override
+            public String getValue(DatabaseChangeLog changeLog) {
+                ParsedNode changeSetParsedNode = changeLog.getCurrentlyLoadedChangeSetNode();
+                String changesetId;
+
+                try {
+                    changesetId = changeSetParsedNode.getChildValue(null, "id", String.class);
+                    return changesetId;
+                }
+                catch (ParsedNodeException e) {
+                    return null;
+                }
+            }
+        },
+        LIQUIBASE_EXECUTION_CHANGESET_AUTHOR {
+            @Override
+            public String getValue(DatabaseChangeLog changeLog) {
+                ParsedNode changeSetParsedNode = changeLog.getCurrentlyLoadedChangeSetNode();
+                String changesetAuthor;
+
+                try {
+                    changesetAuthor = changeSetParsedNode.getChildValue(null, "author", String.class);
+                    return changesetAuthor;
+                }
+                catch (ParsedNodeException e) {
+                    return null;
+                }
+            }
+        };
+
+        public abstract String getValue(DatabaseChangeLog changeLog);
+
+        /**
+         * @param name the name of the {@link LiquibaseExecutionParameter} to find
+         * @return The {@link LiquibaseExecutionParameter} if found, else null
+         */
+        public static LiquibaseExecutionParameter findByName(String name) {
+            LiquibaseExecutionParameter result = null;
+
+            for (LiquibaseExecutionParameter param: LiquibaseExecutionParameter.values()) {
+                if (param.name().equalsIgnoreCase(name)) {
+                    result = param;
+                    break;
+                }
+            }
+
+            return result;
+        }
+    }
 
     /**
      * Calls {@link #ChangeLogParameters(Database)} with a null database.
@@ -177,6 +251,7 @@ public class ChangeLogParameters {
         if (param == null) {
             return null;
         }
+
         return param.getValue();
     }
 
@@ -246,6 +321,11 @@ public class ChangeLogParameters {
     private ChangeLogParameter getChangelogParameter(String key, DatabaseChangeLog changeLog, Filter filter) {
         List<ChangeLogParameter> localList = null;
         if (changeLog != null) {
+            LiquibaseExecutionParameter executionParameter = LiquibaseExecutionParameter.findByName(key);
+            if (executionParameter != null) {
+                return new ChangeLogParameter(executionParameter.name(), executionParameter.getValue(changeLog));
+            }
+
             localList = localParameters.get(getLocalKey(changeLog));
             if (localList != null) {
                 localList = new ArrayList<>(localList); // make a copy as we don't want to reverse the original list
