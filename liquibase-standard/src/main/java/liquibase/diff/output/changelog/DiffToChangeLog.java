@@ -34,6 +34,7 @@ import liquibase.statement.core.RawSqlStatement;
 import liquibase.structure.DatabaseObject;
 import liquibase.structure.core.Column;
 import liquibase.structure.core.StoredDatabaseLogic;
+import liquibase.structure.core.Table;
 import liquibase.util.DependencyUtil;
 import liquibase.util.StreamUtil;
 import liquibase.util.StringUtil;
@@ -482,6 +483,15 @@ public class DiffToChangeLog {
                     }
 
                     toSort.sort((o1, o2) -> {
+                        //
+                        // For Postgres, make tables appear before stored logic
+                        //
+                        if (database instanceof PostgresDatabase) {
+                            Integer x = determineOrderingForTablesAndStoredLogic(o1, o2);
+                            if (x != null) {
+                                return x;
+                            }
+                        }
                         String o1Schema = null;
                         if (o1.getSchema() != null) {
                             o1Schema = o1.getSchema().getName();
@@ -514,6 +524,16 @@ public class DiffToChangeLog {
             }
         }
         return new ArrayList<>(objects);
+    }
+
+    private static Integer determineOrderingForTablesAndStoredLogic(DatabaseObject o1, DatabaseObject o2) {
+        if (o1 instanceof Table && o2 instanceof StoredDatabaseLogic) {
+            return -1;
+        }
+        if (o1 instanceof StoredDatabaseLogic && o2 instanceof Table) {
+            return 1;
+        }
+        return null;
     }
 
     /**
