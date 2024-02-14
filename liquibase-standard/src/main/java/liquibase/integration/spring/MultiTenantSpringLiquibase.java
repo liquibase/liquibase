@@ -1,5 +1,5 @@
 /**
- * 
+ *
  */
 package liquibase.integration.spring;
 
@@ -31,25 +31,28 @@ import java.util.Map;
  * Example:<br/>
  * <br/><pre>
  * &lt;bean id="liquibase" class="liquibase.integration.spring.MultiTenantSpringLiquibase"&gt;
- *	&lt;property name="jndiBase" value="java:comp/env/jdbc/db" /&gt;
- *	&lt;property name="changeLog" value="classpath:db/migration/db-changelog.xml" /&gt;	
+ * 	&lt;property name="jndiBase" value="java:comp/env/jdbc/db" /&gt;
+ * 	&lt;property name="changeLog" value="classpath:db/migration/db-changelog.xml" /&gt;
  * &lt;/bean&gt;
  * </pre>
- * 
- * @see SpringLiquibase
- * 
+ *
  * @author ladislav.gazo
+ * @see SpringLiquibase
  */
 public class MultiTenantSpringLiquibase implements InitializingBean, ResourceLoaderAware {
     private final List<DataSource> dataSources = new ArrayList<>();
 
-    /** Defines the location of data sources suitable for multi-tenant environment. */
-	private String jndiBase;
-		/** Defines a single data source and several schemas for a multi-tenant environment. */
-	private DataSource dataSource;
-	private List<String> schemas;
-	
-	private ResourceLoader resourceLoader;
+    /**
+     * Defines the location of data sources suitable for multi-tenant environment.
+     */
+    private String jndiBase;
+    /**
+     * Defines a single data source and several schemas for a multi-tenant environment.
+     */
+    private DataSource dataSource;
+    private List<String> schemas;
+
+    private ResourceLoader resourceLoader;
 
     private String changeLog;
 
@@ -61,13 +64,13 @@ public class MultiTenantSpringLiquibase implements InitializingBean, ResourceLoa
 
     private String defaultSchema;
 
-	private String liquibaseSchema;
+    private String liquibaseSchema;
 
-	private String liquibaseTablespace;
+    private String liquibaseTablespace;
 
-	private String databaseChangeLogTable;
+    private String databaseChangeLogTable;
 
-	private String databaseChangeLogLockTable;
+    private String databaseChangeLogLockTable;
 
     private boolean dropFirst;
 
@@ -76,252 +79,253 @@ public class MultiTenantSpringLiquibase implements InitializingBean, ResourceLoa
     private boolean shouldRun = true;
 
     private File rollbackFile;
-	
 
-	@Override
-	public void afterPropertiesSet() throws Exception {
-		Logger log = Scope.getCurrentScope().getLog(getClass());
 
-		if((dataSource != null) || (schemas != null)) {
-			if((dataSource == null) && (schemas != null)) {
-				throw new LiquibaseException("When schemas are defined you should also define a base dataSource");				
-			}else if(dataSource!=null){
-				log.info("Schema based multitenancy enabled");
-				if((schemas == null) || schemas.isEmpty()) {
-					log.warning("Schemas not defined, using defaultSchema only");
-					schemas = new ArrayList<>();
-					schemas.add(defaultSchema);
-				}
-				runOnAllSchemas();
-			}
-		}else {
-			log.info("DataSources based multitenancy enabled");
-			resolveDataSources();
-			runOnAllDataSources();
-		}
-	}
+    @Override
+    public void afterPropertiesSet() throws Exception {
+        Logger log = Scope.getCurrentScope().getLog(getClass());
 
-	private void resolveDataSources() throws NamingException {
-		Logger log = Scope.getCurrentScope().getLog(getClass());
+        if ((dataSource != null) || (schemas != null)) {
+            if ((dataSource == null) && (schemas != null)) {
+                throw new LiquibaseException("When schemas are defined you should also define a base dataSource");
+            } else if (dataSource != null) {
+                log.info("Schema based multitenancy enabled");
+                if ((schemas == null) || schemas.isEmpty()) {
+                    log.warning("Schemas not defined, using defaultSchema only");
+                    schemas = new ArrayList<>();
+                    schemas.add(defaultSchema);
+                }
+                runOnAllSchemas();
+            }
+        } else {
+            log.info("DataSources based multitenancy enabled");
+            resolveDataSources();
+            runOnAllDataSources();
+        }
+    }
 
-		Context context = new InitialContext();
-		int lastIndexOf = jndiBase.lastIndexOf("/");
-		String jndiRoot = jndiBase.substring(0, lastIndexOf);
-		String jndiParent = jndiBase.substring(lastIndexOf + 1);
-		Context base = (Context) context.lookup(jndiRoot);
-		NamingEnumeration<NameClassPair> list = base.list(jndiParent);
-		while(list.hasMoreElements()) {
-			NameClassPair entry = list.nextElement();
-			String name = entry.getName();
-			String jndiUrl;
-			if(entry.isRelative()) {
-				jndiUrl = jndiBase + "/" + name;
-			} else {
-				jndiUrl = name;
-			}
-			
-			Object lookup = context.lookup(jndiUrl);
-			if(lookup instanceof DataSource) {
-				dataSources.add((DataSource) lookup);
-				log.fine("Added a data source at " + jndiUrl);
-			} else {
-				log.info("Skipping a resource " + jndiUrl + " not compatible with DataSource.");
-			}
-		}
-	}
+    private void resolveDataSources() throws NamingException {
+        Logger log = Scope.getCurrentScope().getLog(getClass());
 
-	private void runOnAllDataSources() throws LiquibaseException {
-		Logger log = Scope.getCurrentScope().getLog(getClass());
+        Context context = new InitialContext();
+        int lastIndexOf = jndiBase.lastIndexOf("/");
+        String jndiRoot = jndiBase.substring(0, lastIndexOf);
+        String jndiParent = jndiBase.substring(lastIndexOf + 1);
+        Context base = (Context) context.lookup(jndiRoot);
+        NamingEnumeration<NameClassPair> list = base.list(jndiParent);
+        while (list.hasMoreElements()) {
+            NameClassPair entry = list.nextElement();
+            String name = entry.getName();
+            String jndiUrl;
+            if (entry.isRelative()) {
+                jndiUrl = jndiBase + "/" + name;
+            } else {
+                jndiUrl = name;
+            }
 
-		for(DataSource aDataSource : dataSources) {
+            Object lookup = context.lookup(jndiUrl);
+            if (lookup instanceof DataSource) {
+                dataSources.add((DataSource) lookup);
+                log.fine("Added a data source at " + jndiUrl);
+            } else {
+                log.info("Skipping a resource " + jndiUrl + " not compatible with DataSource.");
+            }
+        }
+    }
+
+    private void runOnAllDataSources() throws LiquibaseException {
+        Logger log = Scope.getCurrentScope().getLog(getClass());
+
+        for (DataSource aDataSource : dataSources) {
             log.info("Initializing Liquibase for data source " + aDataSource);
             SpringLiquibase liquibase = getSpringLiquibase(aDataSource);
-			liquibase.afterPropertiesSet();
+            liquibase.afterPropertiesSet();
             log.info("Liquibase ran for data source " + aDataSource);
         }
-	}
-	
-	private void runOnAllSchemas() throws LiquibaseException {
-		Logger log = Scope.getCurrentScope().getLog(getClass());
+    }
 
-		for(String schema : schemas) {
-			if("default".equals(schema)) {
-				schema = null;
-			}
+    private void runOnAllSchemas() throws LiquibaseException {
+        Logger log = Scope.getCurrentScope().getLog(getClass());
+
+        for (String schema : schemas) {
+            if ("default".equals(schema)) {
+                schema = null;
+            }
             log.info("Initializing Liquibase for schema " + schema);
             SpringLiquibase liquibase = getSpringLiquibase(dataSource);
-			liquibase.setDefaultSchema(schema);
-			liquibase.afterPropertiesSet();
+            liquibase.setDefaultSchema(schema);
+            liquibase.afterPropertiesSet();
             log.info("Liquibase ran for schema " + schema);
         }
-	}
+    }
 
-	private SpringLiquibase getSpringLiquibase(DataSource dataSource) {
-		SpringLiquibase liquibase = new SpringLiquibase();
-		liquibase.setChangeLog(changeLog);
-		liquibase.setChangeLogParameters(parameters);
-		liquibase.setContexts(contexts);
+    private SpringLiquibase getSpringLiquibase(DataSource dataSource) {
+        SpringLiquibase liquibase = new SpringLiquibase();
+        liquibase.setChangeLog(changeLog);
+        liquibase.setChangeLogParameters(parameters);
+        liquibase.setContexts(contexts);
         liquibase.setLabelFilter(labelFilter);
-		liquibase.setDropFirst(dropFirst);
-		liquibase.setClearCheckSums(clearCheckSums);
-		liquibase.setShouldRun(shouldRun);
-		liquibase.setRollbackFile(rollbackFile);
-		liquibase.setResourceLoader(resourceLoader);
-		liquibase.setDataSource(dataSource);
-		liquibase.setDefaultSchema(defaultSchema);
-		liquibase.setLiquibaseSchema(liquibaseSchema);
-		liquibase.setLiquibaseTablespace(liquibaseTablespace);
-		liquibase.setDatabaseChangeLogTable(databaseChangeLogTable);
-		liquibase.setDatabaseChangeLogLockTable(databaseChangeLogLockTable);
-		return liquibase;
-	}
+        liquibase.setDropFirst(dropFirst);
+        liquibase.setClearCheckSums(clearCheckSums);
+        liquibase.setShouldRun(shouldRun);
+        liquibase.setRollbackFile(rollbackFile);
+        liquibase.setResourceLoader(resourceLoader);
+        liquibase.setDataSource(dataSource);
+        liquibase.setDefaultSchema(defaultSchema);
+        liquibase.setLiquibaseSchema(liquibaseSchema);
+        liquibase.setLiquibaseTablespace(liquibaseTablespace);
+        liquibase.setDatabaseChangeLogTable(databaseChangeLogTable);
+        liquibase.setDatabaseChangeLogLockTable(databaseChangeLogLockTable);
+        return liquibase;
+    }
 
-	
-	public String getJndiBase() {
-		return jndiBase;
-	}
 
-	public void setJndiBase(String jndiBase) {
-		this.jndiBase = jndiBase;
-	}
+    public String getJndiBase() {
+        return jndiBase;
+    }
 
-	public String getChangeLog() {
-		return changeLog;
-	}
+    public void setJndiBase(String jndiBase) {
+        this.jndiBase = jndiBase;
+    }
 
-	public void setChangeLog(String changeLog) {
-		this.changeLog = changeLog;
-	}
+    public String getChangeLog() {
+        return changeLog;
+    }
 
-	public String getContexts() {
-		return contexts;
-	}
+    public void setChangeLog(String changeLog) {
+        this.changeLog = changeLog;
+    }
 
-	public void setContexts(String contexts) {
-		this.contexts = contexts;
-	}
+    public String getContexts() {
+        return contexts;
+    }
 
-	/**
-	 * @deprecated use {@link #getLabelFilter()}
-	 */
-	public String getLabels() {
-		return getLabelFilter();
-	}
+    public void setContexts(String contexts) {
+        this.contexts = contexts;
+    }
 
-	/**
-	 * @deprecated use {@link #setLabelFilter(String)}
-	 */
-	public void setLabels(String labels) {
-		setLabelFilter(labels);
-	}
+    /**
+     * @deprecated use {@link #getLabelFilter()}
+     */
+    public String getLabels() {
+        return getLabelFilter();
+    }
 
-	public String getLabelFilter() {
-		return labelFilter;
-	}
+    /**
+     * @deprecated use {@link #setLabelFilter(String)}
+     */
+    public void setLabels(String labels) {
+        setLabelFilter(labels);
+    }
 
-	public void setLabelFilter(String labelFilter) {
-		this.labelFilter = labelFilter;
-	}
+    public String getLabelFilter() {
+        return labelFilter;
+    }
 
-	public Map<String, String> getParameters() {
-		return parameters;
-	}
+    public void setLabelFilter(String labelFilter) {
+        this.labelFilter = labelFilter;
+    }
 
-	public void setParameters(Map<String, String> parameters) {
-		this.parameters = parameters;
-	}
+    public Map<String, String> getParameters() {
+        return parameters;
+    }
 
-	public String getDefaultSchema() {
-		return defaultSchema;
-	}
+    public void setParameters(Map<String, String> parameters) {
+        this.parameters = parameters;
+    }
 
-	public void setDefaultSchema(String defaultSchema) {
-		this.defaultSchema = defaultSchema;
-	}
+    public String getDefaultSchema() {
+        return defaultSchema;
+    }
 
-	public String getLiquibaseSchema() {
-		return liquibaseSchema;
-	}
+    public void setDefaultSchema(String defaultSchema) {
+        this.defaultSchema = defaultSchema;
+    }
 
-	public void setLiquibaseSchema(String liquibaseSchema) {
-		this.liquibaseSchema = liquibaseSchema;
-	}
+    public String getLiquibaseSchema() {
+        return liquibaseSchema;
+    }
 
-	public String getLiquibaseTablespace() {
-		return liquibaseTablespace;
-	}
+    public void setLiquibaseSchema(String liquibaseSchema) {
+        this.liquibaseSchema = liquibaseSchema;
+    }
 
-	public void setLiquibaseTablespace(String liquibaseTablespace) {
-		this.liquibaseTablespace = liquibaseTablespace;
-	}
+    public String getLiquibaseTablespace() {
+        return liquibaseTablespace;
+    }
 
-	public String getDatabaseChangeLogTable() {
-		return databaseChangeLogTable;
-	}
+    public void setLiquibaseTablespace(String liquibaseTablespace) {
+        this.liquibaseTablespace = liquibaseTablespace;
+    }
 
-	public void setDatabaseChangeLogTable(String databaseChangeLogTable) {
-		this.databaseChangeLogTable = databaseChangeLogTable;
-	}
+    public String getDatabaseChangeLogTable() {
+        return databaseChangeLogTable;
+    }
 
-	public String getDatabaseChangeLogLockTable() {
-		return databaseChangeLogLockTable;
-	}
+    public void setDatabaseChangeLogTable(String databaseChangeLogTable) {
+        this.databaseChangeLogTable = databaseChangeLogTable;
+    }
 
-	public void setDatabaseChangeLogLockTable(String databaseChangeLogLockTable) {
-		this.databaseChangeLogLockTable = databaseChangeLogLockTable;
-	}
+    public String getDatabaseChangeLogLockTable() {
+        return databaseChangeLogLockTable;
+    }
 
-	public boolean isDropFirst() {
-		return dropFirst;
-	}
+    public void setDatabaseChangeLogLockTable(String databaseChangeLogLockTable) {
+        this.databaseChangeLogLockTable = databaseChangeLogLockTable;
+    }
 
-	public void setDropFirst(boolean dropFirst) {
-		this.dropFirst = dropFirst;
-	}
+    public boolean isDropFirst() {
+        return dropFirst;
+    }
 
-	public boolean isClearCheckSums() {
-		return clearCheckSums;
-	}
+    public void setDropFirst(boolean dropFirst) {
+        this.dropFirst = dropFirst;
+    }
 
-	public void setClearCheckSums(boolean clearCheckSums) {
-		this.clearCheckSums = clearCheckSums;
-	}
+    public boolean isClearCheckSums() {
+        return clearCheckSums;
+    }
 
-	public boolean isShouldRun() {
-		return shouldRun;
-	}
+    public void setClearCheckSums(boolean clearCheckSums) {
+        this.clearCheckSums = clearCheckSums;
+    }
 
-	public void setShouldRun(boolean shouldRun) {
-		this.shouldRun = shouldRun;
-	}
+    public boolean isShouldRun() {
+        return shouldRun;
+    }
 
-	public File getRollbackFile() {
-		return rollbackFile;
-	}
+    public void setShouldRun(boolean shouldRun) {
+        this.shouldRun = shouldRun;
+    }
 
-	public void setRollbackFile(File rollbackFile) {
-		this.rollbackFile = rollbackFile;
-	}
+    public File getRollbackFile() {
+        return rollbackFile;
+    }
 
-	@Override
-	public void setResourceLoader(ResourceLoader resourceLoader) {
-		this.resourceLoader = resourceLoader;
-	}
+    public void setRollbackFile(File rollbackFile) {
+        this.rollbackFile = rollbackFile;
+    }
 
-	public List<String> getSchemas() {
-		return schemas;
-	}
+    @Override
+    public void setResourceLoader(ResourceLoader resourceLoader) {
+        this.resourceLoader = resourceLoader;
+    }
 
-	public void setSchemas(List<String> schemas) {
-		this.schemas = schemas;
-	}
+    public List<String> getSchemas() {
+        return schemas;
+    }
 
-	public DataSource getDataSource() {
-		return dataSource;
-	}
-	public void setDataSource(DataSource dataSource) {
-		this.dataSource = dataSource;
-	}
+    public void setSchemas(List<String> schemas) {
+        this.schemas = schemas;
+    }
 
-	
+    public DataSource getDataSource() {
+        return dataSource;
+    }
+
+    public void setDataSource(DataSource dataSource) {
+        this.dataSource = dataSource;
+    }
+
+
 }
