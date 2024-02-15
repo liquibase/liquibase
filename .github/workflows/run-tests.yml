@@ -276,7 +276,7 @@ jobs:
           localstack extensions install localstack-extension-snowflake
           DEBUG=1 DOCKER_FLAGS='-e SF_LOG=trace' localstack start -d
           echo "Waiting for LocalStack startup..."
-          localstack wait
+          localstack wait -t 30
           echo "Startup complete"
           echo "TH_DB_ADMIN=test" >> $GITHUB_ENV  
           echo "TH_DB_PASSWD=test" >> $GITHUB_ENV
