@@ -265,6 +265,12 @@ jobs:
           key: built-code-${{ github.run_number }}-${{ github.run_attempt }}
           path: ./**/target
 
+      - name: Setup Python
+        if: ${{ matrix.testSystem == 'snowflake' }}
+        uses: actions/setup-python@v5.0.0
+        with:
+          python-version: '3.12.1'
+
       - name: Start & Configure LocalStack
         if: ${{ matrix.testSystem == 'snowflake' }}
         env:
