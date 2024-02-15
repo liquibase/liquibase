@@ -117,7 +117,7 @@ public class RanChangeSet {
 
     public boolean isSameAs(ChangeSet changeSet) {
         String normalizedFilePath = DatabaseChangeLog.normalizePath(this.getChangeLog());
-        return normalizedFilePath.equalsIgnoreCase("liquibase-internal") || (this.getId().equalsIgnoreCase(changeSet.getId())
+        return (this.getId().equalsIgnoreCase(changeSet.getId())
                 && this.getAuthor().equalsIgnoreCase(changeSet.getAuthor())
                 && isSamePath(changeSet.getFilePath(), normalizedFilePath));
     }
