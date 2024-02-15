@@ -731,4 +731,17 @@ class StringUtilTest extends Specification {
         ""    | true
         "s"   | false
     }
+
+    @Unroll
+    def "splitToChunks"() {
+        expect:
+        StringUtil.splitToChunks(input, 10) == expected
+
+        where:
+        input | expected
+        "hello" | ["hello"]
+        "hellohello" | ["hellohello"]
+        "hellohellohello" | ["hellohello", "hello"]
+        "hellohellohellohellohellohello" | ["hellohello", "hellohello", "hellohello"]
+    }
 }
