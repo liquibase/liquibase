@@ -7,8 +7,6 @@ on:
       tag:
         description: 'Release Tag'
         required: true
-env:
-  MAVEN_VERSION: '3.9.2'
 jobs:
   setup:
     name: Setup
@@ -118,7 +116,7 @@ jobs:
           sed -i -e "s/<\/licenses>/<\/licenses><scm><connection>private<\/connection><developerConnection>private<\/developerConnection><url>private<\/url><\/scm>/" liquibase-commercial-${version}.pom   ## scm info not in the pom          
           gpg --batch --pinentry-mode=loopback --passphrase "$GPG_PASSWORD" -ab liquibase-commercial-${version}.pom
           
-          mvn -B org.apache.maven.plugins:maven-deploy-plugin:3.0.0-M1:deploy-file \
+          ./mvnw -B org.apache.maven.plugins:maven-deploy-plugin:3.0.0-M1:deploy-file \
             -Durl=https://oss.sonatype.org/service/local/staging/deploy/maven2/ \
             -DrepositoryId=sonatype-nexus-staging \
             -DpomFile=liquibase-core-${version}.pom \
@@ -130,7 +128,7 @@ jobs:
             -Dtypes=jar.asc,jar.asc,jar.asc,pom.asc \
             -Dclassifiers=,sources,javadoc,
 
-          mvn -B org.apache.maven.plugins:maven-deploy-plugin:3.0.0-M1:deploy-file \
+          ./mvnw -B org.apache.maven.plugins:maven-deploy-plugin:3.0.0-M1:deploy-file \
             -Durl=https://oss.sonatype.org/service/local/staging/deploy/maven2/ \
             -DrepositoryId=sonatype-nexus-staging \
             -DpomFile=liquibase-commercial-${version}.pom \
@@ -142,7 +140,7 @@ jobs:
             -Dtypes=jar.asc,jar.asc,jar.asc,pom.asc \
             -Dclassifiers=,sources,javadoc,
 
-          mvn -B org.apache.maven.plugins:maven-deploy-plugin:3.0.0-M1:deploy-file \
+          ./mvnw -B org.apache.maven.plugins:maven-deploy-plugin:3.0.0-M1:deploy-file \
             -Durl=https://oss.sonatype.org/service/local/staging/deploy/maven2/ \
             -DrepositoryId=sonatype-nexus-staging \
             -DpomFile=liquibase-maven-plugin-${version}.pom \
@@ -154,7 +152,7 @@ jobs:
             -Dtypes=jar.asc,jar.asc,jar.asc,pom.asc \
             -Dclassifiers=,sources,javadoc,
 
-          mvn -B org.apache.maven.plugins:maven-deploy-plugin:3.0.0-M1:deploy-file \
+          ./mvnw -B org.apache.maven.plugins:maven-deploy-plugin:3.0.0-M1:deploy-file \
             -Durl=https://oss.sonatype.org/service/local/staging/deploy/maven2/ \
             -DrepositoryId=sonatype-nexus-staging \
             -DpomFile=liquibase-cdi-${version}.pom \
@@ -166,7 +164,7 @@ jobs:
             -Dtypes=jar.asc,jar.asc,jar.asc,pom.asc \
             -Dclassifiers=,sources,javadoc,
 
-          mvn -B org.apache.maven.plugins:maven-deploy-plugin:3.0.0-M1:deploy-file \
+          ./mvnw -B org.apache.maven.plugins:maven-deploy-plugin:3.0.0-M1:deploy-file \
             -Durl=https://oss.sonatype.org/service/local/staging/deploy/maven2/ \
             -DrepositoryId=sonatype-nexus-staging \
             -DpomFile=liquibase-cdi-jakarta-${version}.pom \
@@ -180,7 +178,7 @@ jobs:
 
           ## Release repository
           ## Have to find the stagingRepositoryId that was auto-generated
-          rcList=$(mvn -B org.sonatype.plugins:nexus-staging-maven-plugin:1.6.8:rc-list -DnexusUrl=https://oss.sonatype.org/ -DserverId=sonatype-nexus-staging)
+          rcList=$(./mvnw -B org.sonatype.plugins:nexus-staging-maven-plugin:1.6.8:rc-list -DnexusUrl=https://oss.sonatype.org/ -DserverId=sonatype-nexus-staging)
           #echo $rcList
 
           stagingRepositoryId=$(echo $rcList | grep -o "\[INFO\] orgliquibase-[0-9]*[ ]*OPEN" | grep -o "orgliquibase-[0-9]*")
@@ -191,13 +189,13 @@ jobs:
             exit 1
           fi
 
-          mvn org.sonatype.plugins:nexus-staging-maven-plugin:1.6.8:rc-close \
+          ./mvnw org.sonatype.plugins:nexus-staging-maven-plugin:1.6.8:rc-close \
             -DnexusUrl=https://oss.sonatype.org/ \
             -DserverId=sonatype-nexus-staging \
             -DstagingRepositoryId=$stagingRepositoryId \
             -DstagingProgressTimeoutMinutes=10
 
-          mvn org.sonatype.plugins:nexus-staging-maven-plugin:1.6.8:rc-release \
+          ./mvnw org.sonatype.plugins:nexus-staging-maven-plugin:1.6.8:rc-release \
             -DautoDropAfterRelease=true \
             -DnexusUrl=https://oss.sonatype.org/ \
             -DserverId=sonatype-nexus-staging \
@@ -257,17 +255,13 @@ jobs:
           distribution: 'temurin'
           cache: 'maven'
           server-id: liquibase
-      - name: Set up Maven
-        uses: stCarolas/setup-maven@v4.5
-        with:
-          maven-version: ${{ env.MAVEN_VERSION }}
 
       - name: Version artifact
-        run: mvn versions:set -DnewVersion="${{ needs.setup.outputs.version }}"
+        run: ./mvnw versions:set -DnewVersion="${{ needs.setup.outputs.version }}"
 
       # Publish to GitHub Packages
       - name: Publish package to Github
-        run: mvn -B clean deploy -DskipTests=true
+        run: ./mvnw -B clean deploy -DskipTests=true
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           TARGET_ARTIFACT_REPOSITORY: liquibase
