@@ -22,9 +22,6 @@ on:
     paths-ignore:
       - '**.md'
 
-env:
-  MAVEN_VERSION: '3.9.2'
-
 jobs:
   authorize:
     #concurrent runs for pull requests from forked repositories will be canceled, while runs for pull requests from the master repository won't be affected.
@@ -167,20 +164,15 @@ jobs:
 
       # getting from build results page. If we remove 0-snapshot then we will need settings.xml
 
-      - name: Set up Maven
-        uses: stCarolas/setup-maven@v4.5
-        with:
-          maven-version: ${{ env.MAVEN_VERSION }}
-
       - name: Build & Test Java 8
         if: ${{ matrix.java == 8}}
         run: |
-          mvn -B "-Dbuild.repository.owner=liquibase" "-Dbuild.repository.name=liquibase" "-Dbuild.branch=${{ needs.setup.outputs.thisBranchName }}" "-Dbuild.number=${{ github.run_number }}" "-Dbuild.commit=${{ needs.setup.outputs.latestMergeSha }}" "-DtrimStackTrace=false" -P 'skip-integration-tests' -pl '!liquibase-cdi-jakarta' clean test package surefire-report:report
+          ./mvnw -B "-Dbuild.repository.owner=liquibase" "-Dbuild.repository.name=liquibase" "-Dbuild.branch=${{ needs.setup.outputs.thisBranchName }}" "-Dbuild.number=${{ github.run_number }}" "-Dbuild.commit=${{ needs.setup.outputs.latestMergeSha }}" "-DtrimStackTrace=false" -P 'skip-integration-tests'  -pl '!liquibase-cdi-jakarta' clean test package surefire-report:report
 
       - name: Build & Test Java non-jdk-8
         if: ${{ matrix.java != 8}}
         run: |
-          mvn -B "-Dbuild.repository.owner=liquibase" "-Dbuild.repository.name=liquibase" "-Dbuild.branch=${{ needs.setup.outputs.thisBranchName }}" "-Dbuild.number=${{ github.run_number }}" "-Dbuild.commit=${{ needs.setup.outputs.latestMergeSha }}" "-DtrimStackTrace=false" -P 'skip-integration-tests' clean test package surefire-report:report
+          ./mvnw -B "-Dbuild.repository.owner=liquibase" "-Dbuild.repository.name=liquibase" "-Dbuild.branch=${{ needs.setup.outputs.thisBranchName }}" "-Dbuild.number=${{ github.run_number }}" "-Dbuild.commit=${{ needs.setup.outputs.latestMergeSha }}" "-DtrimStackTrace=false" -P 'skip-integration-tests' clean test package surefire-report:report
 
       - name: Remove Original Jars for *nix
         if: env.OS_TYPE != 'windows-2019'
@@ -219,6 +211,7 @@ jobs:
       fail-fast: false
       matrix:
         testSystem:
+          - db2
           - h2
           #- h2:1.4
           - hsqldb
@@ -252,11 +245,6 @@ jobs:
 
       # getting from build results page. If we remove 0-snapshot then we will need settings.xml
 
-      - name: Set up Maven
-        uses: stCarolas/setup-maven@v4.5
-        with:
-          maven-version: ${{ env.MAVEN_VERSION }}
-
       - name: Restore Built Code Cache
         uses: actions/cache@v3.3.1
         with:
@@ -264,7 +252,7 @@ jobs:
           path: ./**/target
 
       - name: Run Tests
-        run: mvn -B jar:jar jar:test-jar surefire:test -DtrimStackTrace=false -Dliquibase.sdk.testSystem.test=${{ matrix.testSystem }} -Dliquibase.sdk.testSystem.acceptLicenses=${{ matrix.testSystem }} -Dtest=*IntegrationTest,*ExecutorTest -DfailIfNoTests=false -Dsurefire.failIfNoSpecifiedTests=false
+        run: ./mvnw -B jar:jar jar:test-jar surefire:test -DtrimStackTrace=false -Dliquibase.sdk.testSystem.test=${{ matrix.testSystem }} -Dliquibase.sdk.testSystem.acceptLicenses=${{ matrix.testSystem }} -Dtest=*IntegrationTest,*ExecutorTest -DfailIfNoTests=false -Dsurefire.failIfNoSpecifiedTests=false
 
       - name: Archive Test Results
         if: ${{ inputs.archive_test_results == 'true' }}
