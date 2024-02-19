@@ -95,7 +95,7 @@ public class ChangeGeneratorFactory {
     }
 
     public Change[] fixUnexpected(DatabaseObject unexpectedObject, DiffOutputControl control, Database referenceDatabase, Database comparisionDatabase) {
-        if (!control.shouldOutput(unexpectedObject, comparisionDatabase)) {
+        if (!control.shouldOutput(unexpectedObject, comparisionDatabase) || unexpectedObject == null) {
             return null;
         }
         ChangeGeneratorChain chain = createGeneratorChain(UnexpectedObjectChangeGenerator.class, unexpectedObject.getClass(), referenceDatabase);
