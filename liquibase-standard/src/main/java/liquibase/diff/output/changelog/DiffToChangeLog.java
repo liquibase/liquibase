@@ -34,6 +34,7 @@ import liquibase.statement.core.RawSqlStatement;
 import liquibase.structure.DatabaseObject;
 import liquibase.structure.core.Column;
 import liquibase.structure.core.StoredDatabaseLogic;
+import liquibase.structure.core.Table;
 import liquibase.util.DependencyUtil;
 import liquibase.util.StreamUtil;
 import liquibase.util.StringUtil;
@@ -45,6 +46,8 @@ import java.io.OutputStream;
 import java.io.PrintStream;
 import java.text.SimpleDateFormat;
 import java.util.*;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 public class DiffToChangeLog {
@@ -466,8 +469,10 @@ public class DiffToChangeLog {
                                 schemaName = obj.getSchema().getName();
                             }
 
-                            String name = schemaName + "." + obj.getName();
-                            if (dependencyOrder.contains(name)) {
+                            String objectName = obj.getName();
+                            String name = schemaName + "." + objectName;
+                            if (dependencyOrder.contains(name) ||
+                                dependencyOrder.contains(convertStoredLogicObjectName(schemaName, objectName, database))) {
                                 toSort.add(obj);
                             } else {
                                 toNotSort.add(obj);
@@ -478,6 +483,15 @@ public class DiffToChangeLog {
                     }
 
                     toSort.sort((o1, o2) -> {
+                        //
+                        // For Postgres, make tables appear before stored logic
+                        //
+                        if (database instanceof PostgresDatabase) {
+                            Integer x = determineOrderingForTablesAndStoredLogic(o1, o2);
+                            if (x != null) {
+                                return x;
+                            }
+                        }
                         String o1Schema = null;
                         if (o1.getSchema() != null) {
                             o1Schema = o1.getSchema().getName();
@@ -510,6 +524,55 @@ public class DiffToChangeLog {
             }
         }
         return new ArrayList<>(objects);
+    }
+
+    private static Integer determineOrderingForTablesAndStoredLogic(DatabaseObject o1, DatabaseObject o2) {
+        if (o1 instanceof Table && o2 instanceof StoredDatabaseLogic) {
+            return -1;
+        }
+        if (o1 instanceof StoredDatabaseLogic && o2 instanceof Table) {
+            return 1;
+        }
+        return null;
+    }
+
+    /**
+     *
+     * POSTGRES ONLY:
+     *
+     * If we have a stored logic object then we edit the name
+     * to replace the parameter list with a list of just the types.
+     * This is the format that the dependency computation puts out.
+     *
+     * Example:  calculate_bonus(emp_salary numeric, emp_name character varying) becomes
+     *           calculate_bonus(numeric, character varying)
+     *
+     * @param  objectName     The input object name to work on
+     * @return String
+     *
+     */
+    private static String convertStoredLogicObjectName(String schemaName, String objectName, Database database) {
+        String name = schemaName + "." + objectName;
+        if (! (database instanceof PostgresDatabase) || ! (objectName.contains("(") && objectName.contains(")"))) {
+            return name;
+        }
+        Pattern p = Pattern.compile(".*?[(]+(.*)?[)]+[\\s]*?$");
+        Matcher m = p.matcher(objectName);
+        if (m.matches()) {
+            String originalParameters = m.group(1);
+            String editedParameters = originalParameters;
+            String[] parameters = m.group(1).split(",");
+            for (String parameter : parameters) {
+                parameter = parameter.trim();
+                String[] parts = parameter.split(" ");
+                String[] rest = Arrays.copyOfRange(parts, 1, parts.length);
+                String part = StringUtil.join(rest, " ");
+                editedParameters = editedParameters.replace(parameter, part);
+            }
+            name = schemaName + "." + objectName.replace(originalParameters, editedParameters)
+                                                .replace(", ",",");
+        }
+        return name;
     }
 
     private List<Map<String, ?>> queryForDependenciesOracle(Executor executor, List<String> schemas)
