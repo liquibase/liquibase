@@ -111,15 +111,27 @@ public abstract class AbstractDatabaseConnectionCommandStep extends AbstractHelp
 
     @Override
     public void cleanUp(CommandResultsBuilder resultsBuilder) {
+        Database releaseLockDatabase;
         LockService lockService;
+
+        releaseLockDatabase = database != null
+            ? database
+            : (Database)resultsBuilder.getCommandScope().getDependency(Database.class);
+
+        if (releaseLockDatabase != null) {
+            lockService = LockServiceFactory.getInstance().getLockService(releaseLockDatabase);
+            if (lockService.hasChangeLogLock()) {
+                try {
+                    lockService.forceReleaseLock();
+                } catch (Exception e) {
+                    Scope.getCurrentScope().getLog(getClass()).warning(coreBundle.getString("could.not.release.lock"), e);
+                }
+            }
+        }
+
         // this class only closes a database that it created
         if (database != null) {
             try {
-                lockService = LockServiceFactory.getInstance().getLockService(database);
-                if (lockService.hasChangeLogLock()) {
-                    lockService.forceReleaseLock();
-                }
-
                 database.close();
                 database = null;
             } catch (Exception e) {
