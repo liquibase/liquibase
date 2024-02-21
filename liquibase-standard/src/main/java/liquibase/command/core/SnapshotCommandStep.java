@@ -53,27 +53,13 @@ public class SnapshotCommandStep extends AbstractCommandStep {
         commandDefinition.setShortDescription("Capture the current state of the database");
     }
 
-    private CatalogAndSchema[] parseSchemas(Database database, String... schemas) {
-        if ((schemas == null) || (schemas.length == 0) || (schemas[0] == null)) {
-            return null;
-        }
-
-        schemas = StringUtil.join(schemas, ",").split("\\s*,\\s*");
-        List<CatalogAndSchema> finalList = new ArrayList<>();
-        for (String schema : schemas) {
-            finalList.add(new CatalogAndSchema(null, schema).customize(database));
-        }
-
-        return finalList.toArray(new CatalogAndSchema[0]);
-    }
-
     @Override
     public void run(CommandResultsBuilder resultsBuilder) throws Exception {
         CommandScope commandScope = resultsBuilder.getCommandScope();
 
         Database database = (Database) commandScope.getDependency(Database.class);
 
-        CatalogAndSchema[] schemas = parseSchemas(database, commandScope.getArgumentValue(SCHEMAS_ARG));
+        CatalogAndSchema[] schemas = InternalSnapshotCommandStep.parseSchemas(database, commandScope.getArgumentValue(SCHEMAS_ARG));
 
         InternalSnapshotCommandStep.logUnsupportedDatabase(database, this.getClass());
         SnapshotControl snapshotControl;
