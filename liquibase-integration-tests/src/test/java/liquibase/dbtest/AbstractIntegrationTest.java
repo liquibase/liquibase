@@ -447,9 +447,8 @@ public abstract class AbstractIntegrationTest {
         assertTrue("generated output contains a correctly encoded Euro sign", outputResult.contains("€"));
 
         DatabaseSnapshot snapshot = SnapshotGeneratorFactory.getInstance().createSnapshot(database.getDefaultSchema(), database, new SnapshotControl(database));
-        // JML TODO: I'm not sure why snapshot is picking up the creation of the DATBASECHANGELOGLOCK table now when it wasnt before. Would like some help on how to best handle this...
-//        assertEquals("no database objects were actually created during creation of the output changelog",
-//                0, snapshot.get(Schema.class).iterator().next().getDatabaseObjects(Table.class).size());
+        assertEquals("no database objects were actually created during creation of the output changelog",
+                0, snapshot.get(Schema.class).iterator().next().getDatabaseObjects(Table.class).size());
     }
 
     /**

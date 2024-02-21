@@ -9,6 +9,7 @@ import liquibase.command.CleanUpCommandStep;
 import liquibase.command.CommandArgumentDefinition;
 import liquibase.command.CommandResultsBuilder;
 import liquibase.command.CommandScope;
+import liquibase.command.core.UpdateCommandStep;
 import liquibase.database.Database;
 import liquibase.database.jvm.JdbcConnection;
 import liquibase.exception.DatabaseException;
@@ -88,13 +89,15 @@ public class DbUrlConnectionCommandStep extends AbstractDatabaseConnectionComman
         database = this.obtainDatabase(commandScope);
         commandScope.provideDependency(Database.class, database);
 
-        lockService = LockServiceFactory.getInstance().getLockService(database);
-        if (!lockService.hasChangeLogLock()) {
-            lockService.waitForLock();
+        if (commandScope.getCommand().getName() == UpdateCommandStep.COMMAND_NAME) {
+            lockService = LockServiceFactory.getInstance().getLockService(database);
+            if (!lockService.hasChangeLogLock()) {
+                lockService.waitForLock();
+            }
+            // waitForLock resets the changelog history service, so we need to rebuild that and generate a final deploymentId.
+            ChangeLogHistoryService changelogService = Scope.getCurrentScope().getSingleton(ChangeLogHistoryServiceFactory.class).getChangeLogService(database);
+            changelogService.generateDeploymentId();
         }
-        // waitForLock resets the changelog history service, so we need to rebuild that and generate a final deploymentId.
-        ChangeLogHistoryService changelogService = Scope.getCurrentScope().getSingleton(ChangeLogHistoryServiceFactory.class).getChangeLogService(database);
-        changelogService.generateDeploymentId();
     }
 
     @Override
