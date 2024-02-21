@@ -10,6 +10,8 @@ import liquibase.exception.DatabaseException;
 import liquibase.executor.ExecutorService;
 import liquibase.statement.core.RawSqlStatement;
 import liquibase.structure.DatabaseObject;
+import liquibase.structure.core.Schema;
+import liquibase.structure.core.Sequence;
 
 import java.sql.Driver;
 import java.sql.DriverManager;
@@ -71,6 +73,18 @@ public class DerbyDatabase extends AbstractJdbcDatabase {
     @Override
     public int getPriority() {
         return PRIORITY_DEFAULT;
+    }
+
+
+    @Override
+    public boolean supports(Class<? extends DatabaseObject> object) {
+        if (Schema.class.isAssignableFrom(object)) {
+            return false;
+        }
+        if (Sequence.class.isAssignableFrom(object)) {
+            return ((driverVersionMajor == 10) && (driverVersionMinor >= 6)) || (driverVersionMajor >= 11);
+        }
+        return super.supports(object);
     }
 
     @Override

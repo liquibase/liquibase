@@ -94,7 +94,7 @@ public abstract class DatabaseSnapshot implements LiquibaseSerializable {
                 }
             }
 
-            if (getDatabase().supportsCatalogs()) {
+            if (getDatabase().supports(Catalog.class)) {
                 for (Catalog catalog : catalogs) {
                     this.snapshotControl.addType(catalog.getClass(), database);
                     include(catalog);
