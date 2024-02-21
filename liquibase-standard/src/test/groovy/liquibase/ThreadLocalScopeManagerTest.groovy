@@ -24,7 +24,7 @@ class ThreadLocalScopeManagerTest extends Specification {
 
     def setup() {
         Scope.getCurrentScope()
-        originalScopeManager = Scope.scopeManager
+        originalScopeManager = Scope.scopeManager.get()
         Scope.setScopeManager(new ThreadLocalScopeManager())
     }
 
