@@ -12,6 +12,7 @@ import liquibase.statement.core.GetViewDefinitionStatement;
 import liquibase.statement.core.RawSqlStatement;
 import liquibase.structure.DatabaseObject;
 import liquibase.structure.core.Column;
+import liquibase.structure.core.Sequence;
 import liquibase.structure.core.Table;
 import liquibase.structure.core.View;
 import liquibase.util.StringUtil;
@@ -92,6 +93,14 @@ public class SybaseDatabase extends AbstractJdbcDatabase {
     @Override
     public boolean supportsInitiallyDeferrableColumns() {
         return false;
+    }
+
+    @Override
+    public boolean supports(Class<? extends DatabaseObject> object) {
+        if (Sequence.class.isAssignableFrom(object)) {
+            return false;
+        }
+        return super.supports(object);
     }
 
     @Override

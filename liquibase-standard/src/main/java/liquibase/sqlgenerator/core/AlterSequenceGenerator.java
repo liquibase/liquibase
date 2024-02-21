@@ -15,7 +15,7 @@ public class AlterSequenceGenerator extends AbstractSqlGenerator<AlterSequenceSt
 
     @Override
     public boolean supports(AlterSequenceStatement statement, Database database) {
-        return database.supportsSequences();
+        return database.supports(Sequence.class);
     }
 
     @Override

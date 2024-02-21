@@ -26,7 +26,7 @@ public class CatalogSnapshotGenerator extends JdbcSnapshotGenerator {
         Database database = snapshot.getDatabase();
         Catalog match = null;
         String catalogName = example.getName();
-        if ((catalogName == null) && database.supportsCatalogs()) {
+        if ((catalogName == null) && database.supports(Catalog.class)) {
             catalogName = database.getDefaultCatalogName();
         }
         example = new Catalog(catalogName);

@@ -4,6 +4,8 @@ import liquibase.CatalogAndSchema;
 import liquibase.database.Database;
 import liquibase.diff.compare.CompareControl;
 import liquibase.diff.compare.DatabaseObjectComparator;
+import liquibase.structure.core.Catalog;
+import liquibase.structure.core.Schema;
 import liquibase.util.StringUtil;
 
 /**
@@ -19,18 +21,18 @@ public abstract class CommonCatalogSchemaComparator implements DatabaseObjectCom
     }
 
     protected String getComparisonSchemaOrCatalog(Database accordingTo, CompareControl.SchemaComparison comparison) {
-        if (accordingTo.supportsSchemas()) {
+        if (accordingTo.supports(Schema.class)) {
             return comparison.getComparisonSchema().getSchemaName();
-        } else if (accordingTo.supportsCatalogs()) {
+        } else if (accordingTo.supports(Catalog.class)) {
             return comparison.getComparisonSchema().getCatalogName();
         }
         return null;
     }
 
     protected String getReferenceSchemaOrCatalog(Database accordingTo, CompareControl.SchemaComparison comparison) {
-        if (accordingTo.supportsSchemas()) {
+        if (accordingTo.supports(Schema.class)) {
             return comparison.getReferenceSchema().getSchemaName();
-        } else if (accordingTo.supportsCatalogs()) {
+        } else if (accordingTo.supports(Catalog.class)) {
             return comparison.getReferenceSchema().getCatalogName();
         }
 

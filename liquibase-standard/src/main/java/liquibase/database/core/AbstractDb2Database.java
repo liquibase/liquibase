@@ -52,6 +52,14 @@ public abstract class AbstractDb2Database extends AbstractJdbcDatabase {
     }
 
     @Override
+    public boolean supports(Class<? extends DatabaseObject> object) {
+        if (Schema.class.isAssignableFrom(object)) {
+            return false;
+        }
+        return true;
+    }
+
+    @Override
     public boolean supportsSchemas() {
         return false;
     }
