@@ -3,6 +3,8 @@ package liquibase.command.core.helpers;
 import liquibase.Beta;
 import liquibase.GlobalConfiguration;
 import liquibase.Scope;
+import liquibase.changelog.ChangeLogHistoryService;
+import liquibase.changelog.ChangeLogHistoryServiceFactory;
 import liquibase.command.CleanUpCommandStep;
 import liquibase.command.CommandArgumentDefinition;
 import liquibase.command.CommandResultsBuilder;
@@ -10,6 +12,8 @@ import liquibase.command.CommandScope;
 import liquibase.database.Database;
 import liquibase.database.jvm.JdbcConnection;
 import liquibase.exception.DatabaseException;
+import liquibase.lockservice.LockService;
+import liquibase.lockservice.LockServiceFactory;
 import liquibase.logging.mdc.MdcKey;
 import liquibase.util.StringUtil;
 
@@ -74,10 +78,23 @@ public class DbUrlConnectionCommandStep extends AbstractDatabaseConnectionComman
     @Override
     public void run(CommandResultsBuilder resultsBuilder) throws Exception {
         CommandScope commandScope = resultsBuilder.getCommandScope();
+        Database database;
+        LockService lockService;
+
         if (commandScope.getArgumentValue(DbUrlConnectionArgumentsCommandStep.SKIP_DATABASE_STEP_ARG)) {
             return;
         }
-        commandScope.provideDependency(Database.class, this.obtainDatabase(commandScope));
+
+        database = this.obtainDatabase(commandScope);
+        commandScope.provideDependency(Database.class, database);
+
+        lockService = LockServiceFactory.getInstance().getLockService(database);
+        if (!lockService.hasChangeLogLock()) {
+            lockService.waitForLock();
+        }
+        // waitForLock resets the changelog history service, so we need to rebuild that and generate a final deploymentId.
+        ChangeLogHistoryService changelogService = Scope.getCurrentScope().getSingleton(ChangeLogHistoryServiceFactory.class).getChangeLogService(database);
+        changelogService.generateDeploymentId();
     }
 
     @Override

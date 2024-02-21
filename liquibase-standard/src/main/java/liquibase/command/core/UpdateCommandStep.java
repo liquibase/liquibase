@@ -9,6 +9,8 @@ import liquibase.command.*;
 import liquibase.command.core.helpers.DatabaseChangelogCommandStep;
 import liquibase.database.Database;
 import liquibase.exception.CommandValidationException;
+import liquibase.lockservice.LockService;
+import liquibase.lockservice.LockServiceFactory;
 
 import java.util.Arrays;
 import java.util.List;
@@ -101,7 +103,10 @@ public class UpdateCommandStep extends AbstractUpdateCommandStep implements Clea
 
     @Override
     public void run(CommandResultsBuilder resultsBuilder) throws Exception {
-        setDBLock(false);
+        Database database = (Database)resultsBuilder.getCommandScope().getDependency(Database.class);
+        LockService lockService = LockServiceFactory.getInstance().getLockService(database);
+
+        setDBLock(lockService.hasChangeLogLock());
         super.run(resultsBuilder);
     }
 }

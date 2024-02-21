@@ -9,6 +9,8 @@ import liquibase.database.DatabaseFactory;
 import liquibase.database.core.DatabaseUtils;
 import liquibase.exception.DatabaseException;
 import liquibase.integration.commandline.LiquibaseCommandLineConfiguration;
+import liquibase.lockservice.LockService;
+import liquibase.lockservice.LockServiceFactory;
 import liquibase.resource.ResourceAccessor;
 import liquibase.util.StringUtil;
 
@@ -109,9 +111,15 @@ public abstract class AbstractDatabaseConnectionCommandStep extends AbstractHelp
 
     @Override
     public void cleanUp(CommandResultsBuilder resultsBuilder) {
+        LockService lockService;
         // this class only closes a database that it created
         if (database != null) {
             try {
+                lockService = LockServiceFactory.getInstance().getLockService(database);
+                if (lockService.hasChangeLogLock()) {
+                    lockService.forceReleaseLock();
+                }
+
                 database.close();
                 database = null;
             } catch (Exception e) {
