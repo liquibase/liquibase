@@ -4,6 +4,7 @@ import liquibase.Scope;
 import liquibase.database.DatabaseConnection;
 import liquibase.exception.DatabaseException;
 import liquibase.structure.DatabaseObject;
+import liquibase.structure.core.Sequence;
 import liquibase.structure.core.Table;
 import liquibase.util.StringUtil;
 
@@ -105,12 +106,29 @@ public class MariaDBDatabase extends MySQLDatabase {
         return "5.3.0";
     }
 
+
+    @Override
+    public boolean supports(Class<? extends DatabaseObject> object) {
+        if (Sequence.class.isAssignableFrom(object)) {
+            try {
+                // From https://liquibase.jira.com/browse/CORE-3457 (by Lijun Liao) corrected
+                int majorVersion = getDatabaseMajorVersion();
+                return majorVersion > 10 || (majorVersion == 10 && getDatabaseMinorVersion() >= 3);
+            } catch (DatabaseException e) {
+                Scope.getCurrentScope().getLog(getClass()).fine("Cannot retrieve database version", e);
+                return false;
+            }
+        }
+        return super.supports(object);
+    }
+
     @Override
     public boolean supportsSequences() {
         try {
             // From https://liquibase.jira.com/browse/CORE-3457 (by Lijun Liao) corrected
             int majorVersion = getDatabaseMajorVersion();
-            return majorVersion > 10 || (majorVersion == 10 && getDatabaseMinorVersion() >= 3);        } catch (DatabaseException e) {
+            return majorVersion > 10 || (majorVersion == 10 && getDatabaseMinorVersion() >= 3);
+        } catch (DatabaseException e) {
             Scope.getCurrentScope().getLog(getClass()).fine("Cannot retrieve database version", e);
             return false;
         }

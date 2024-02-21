@@ -140,6 +140,11 @@ public interface Database extends PrioritizedService, AutoCloseable {
      */
     boolean supportsInitiallyDeferrableColumns();
 
+    /**
+     * Whether this database supports sequences
+     * @deprecated please call {@link Database#supports(Class)} with the {@link liquibase.structure.core.Sequence} type instead
+     */
+    @Deprecated
     boolean supportsSequences();
 
     boolean supportsDropTableCascadeConstraints();
@@ -380,10 +385,25 @@ public interface Database extends PrioritizedService, AutoCloseable {
 
     boolean supportsTablespaces();
 
+    /**
+     * Whether this database supports catalogs
+     * @deprecated please call {@link Database#supports(Class)} with the {@link liquibase.structure.core.Catalog} type instead
+     */
+    @Deprecated
     boolean supportsCatalogs();
+
+    default boolean supports(Class<? extends DatabaseObject> object) {
+        return true;
+    }
+
 
     CatalogAndSchema.CatalogAndSchemaCase getSchemaAndCatalogCase();
 
+    /**
+     * Whether this database supports schemas
+     * @deprecated please call {@link Database#supports(Class)} with the {@link liquibase.structure.core.Schema} type instead
+     */
+    @Deprecated
     boolean supportsSchemas();
 
     boolean supportsCatalogInObjectName(Class<? extends DatabaseObject> type);
