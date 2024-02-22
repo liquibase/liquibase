@@ -400,8 +400,8 @@ jobs:
           repository: liquibase/liquibase-pro
           event-type: oss-released-tag
 
-  package-linux:
-    uses: liquibase/build-logic/.github/workflows/package-linux.yml@v0.6.1
+  package:
+    uses: liquibase/build-logic/.github/workflows/package.yml@v0.6.3
     needs: [ setup ]
     secrets: inherit
     with:
