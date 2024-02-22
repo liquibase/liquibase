@@ -82,10 +82,6 @@ public class SequenceSnapshotGenerator extends JdbcSnapshotGenerator {
                 return example;
             }
 
-            if (!database.supports(Sequence.class)) {
-                return null;
-            }
-
             sequences = Scope.getCurrentScope().getSingleton(ExecutorService.class)
                     .getExecutor("jdbc", database)
                     .queryForList(getSelectSequenceStatement(example.getSchema(), database));
