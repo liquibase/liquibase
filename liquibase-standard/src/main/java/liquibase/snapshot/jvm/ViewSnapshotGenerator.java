@@ -123,15 +123,12 @@ public class ViewSnapshotGenerator extends JdbcSnapshotGenerator {
 
     @Override
     protected void addTo(DatabaseObject foundObject, DatabaseSnapshot snapshot) throws DatabaseException, InvalidExampleException {
-        if (!snapshot.getSnapshotControl().shouldInclude(View.class)) {
+        Database database = snapshot.getDatabase();
+        if (!snapshot.getSnapshotControl().shouldInclude(View.class) || !database.supports(View.class)) {
             return;
         }
 
         if (!(foundObject instanceof Schema)) {
-            return;
-        }
-        Database database = snapshot.getDatabase();
-        if (!database.supports(View.class)) {
             return;
         }
         Schema schema = (Schema) foundObject;
