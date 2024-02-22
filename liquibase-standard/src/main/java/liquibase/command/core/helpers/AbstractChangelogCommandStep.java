@@ -20,6 +20,7 @@ public abstract class AbstractChangelogCommandStep extends AbstractCommandStep {
     protected static final String[] COMMAND_NAME = {"abstractChangelogCommandStep"};
     public static final CommandArgumentDefinition<String> RUN_ON_CHANGE_TYPES_ARG;
     public static final CommandArgumentDefinition<String> REPLACE_IF_EXISTS_TYPES_ARG;
+    public static final CommandArgumentDefinition<Boolean> SKIP_OBJECT_SORTING;
 
     static {
         final CommandBuilder builder = new CommandBuilder(COMMAND_NAME);
@@ -29,6 +30,10 @@ public abstract class AbstractChangelogCommandStep extends AbstractCommandStep {
         REPLACE_IF_EXISTS_TYPES_ARG = builder.argument("replaceIfExistsTypes", String.class)
                 .defaultValue("none")
                 .description(String.format("Sets replaceIfExists=\"true\" for changes of these types (supported types: %s)", replaceIfExistsTypeNames)).build();
+        SKIP_OBJECT_SORTING = builder.argument("skipObjectSorting", Boolean.class)
+                .defaultValue(false)
+                .description("When true will skip object sorting. This can be useful on databases that have a lot of packages/procedures that are " +
+                        "linked to each other").build();
     }
 
     protected static void validateRunOnChangeTypes(final CommandScope commandScope) throws CommandValidationException {
