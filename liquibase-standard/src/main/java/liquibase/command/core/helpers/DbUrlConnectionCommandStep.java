@@ -5,10 +5,10 @@ import liquibase.GlobalConfiguration;
 import liquibase.Scope;
 import liquibase.changelog.ChangeLogHistoryService;
 import liquibase.changelog.ChangeLogHistoryServiceFactory;
-import liquibase.command.CleanUpCommandStep;
-import liquibase.command.CommandArgumentDefinition;
-import liquibase.command.CommandResultsBuilder;
-import liquibase.command.CommandScope;
+import liquibase.command.*;
+import liquibase.command.core.AbstractFutureRollbackCommandStep;
+import liquibase.command.core.AbstractUpdateCommandStep;
+import liquibase.command.core.DropAllCommandStep;
 import liquibase.command.core.UpdateCommandStep;
 import liquibase.database.Database;
 import liquibase.database.jvm.JdbcConnection;
@@ -81,6 +81,8 @@ public class DbUrlConnectionCommandStep extends AbstractDatabaseConnectionComman
         CommandScope commandScope = resultsBuilder.getCommandScope();
         Database database;
         LockService lockService;
+        List<CommandStep> commandSteps;
+        boolean shouldAcquireLock = false;
 
         if (commandScope.getArgumentValue(DbUrlConnectionArgumentsCommandStep.SKIP_DATABASE_STEP_ARG)) {
             return;
@@ -88,8 +90,22 @@ public class DbUrlConnectionCommandStep extends AbstractDatabaseConnectionComman
 
         database = this.obtainDatabase(commandScope);
         commandScope.provideDependency(Database.class, database);
+        commandSteps = commandScope.getCommand().getPipeline();
 
-        if (commandScope.getCommand().getName() == UpdateCommandStep.COMMAND_NAME) {
+        // Check for step types that instantiate changelog locks
+        for (CommandStep commandStep: commandSteps) {
+            if (
+                    commandStep instanceof LockServiceCommandStep
+                    || commandStep instanceof DropAllCommandStep
+                    || commandStep instanceof AbstractFutureRollbackCommandStep
+                    || commandStep instanceof AbstractUpdateCommandStep
+            ) {
+                shouldAcquireLock = true;
+                break;
+            }
+        }
+
+        if (shouldAcquireLock) {
             lockService = LockServiceFactory.getInstance().getLockService(database);
             if (!lockService.hasChangeLogLock()) {
                 lockService.waitForLock();
