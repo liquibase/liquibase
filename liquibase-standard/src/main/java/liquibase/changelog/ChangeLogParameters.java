@@ -42,15 +42,8 @@ public class ChangeLogParameters {
                 final Scope currentScope = Scope.getCurrentScope();
                 final Database currentDatabase = currentScope.getDatabase();
                 final ChangeLogHistoryService changelogService = currentScope.getSingleton(ChangeLogHistoryServiceFactory.class).getChangeLogService(currentDatabase);
-                String deploymentId = changelogService.getDeploymentId();
 
-                if (deploymentId == null || deploymentId.isEmpty()) {
-                    changelogService.generateDeploymentId();
-                    deploymentId = changelogService.getDeploymentId();
-                }
-
-                // TODO: This is not returning the correct deployment ID. Why?
-                return deploymentId;
+                return changelogService.getDeploymentId();
             }
         },
         LIQUIBASE_EXECUTION_CHANGELOG_FILE {
