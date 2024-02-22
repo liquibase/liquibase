@@ -123,9 +123,9 @@ public class SnapshotControl implements LiquibaseSerializable {
 
     private void setTypes(Set<Class<? extends DatabaseObject>> types, Database database) {
         this.types = new HashSet<>();
-        for (Class<? extends DatabaseObject> type : types) {
-            addType(type, database);
-        }
+        types.stream()
+                .filter(database::supports)
+                .forEach(type -> addType(type, database));
     }
     
     /**
