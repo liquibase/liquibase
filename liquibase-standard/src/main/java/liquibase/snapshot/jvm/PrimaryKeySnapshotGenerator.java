@@ -105,7 +105,7 @@ public class PrimaryKeySnapshotGenerator extends JdbcSnapshotGenerator {
 
     @Override
     protected void addTo(DatabaseObject foundObject, DatabaseSnapshot snapshot) throws DatabaseException {
-        if (!snapshot.getSnapshotControl().shouldInclude(PrimaryKey.class)) {
+        if (!snapshot.getSnapshotControl().shouldInclude(PrimaryKey.class) || !snapshot.getDatabase().supports(PrimaryKey.class)) {
             return;
         }
 
