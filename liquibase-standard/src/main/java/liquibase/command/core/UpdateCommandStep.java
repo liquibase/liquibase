@@ -12,6 +12,7 @@ import liquibase.exception.CommandValidationException;
 import liquibase.lockservice.LockService;
 import liquibase.lockservice.LockServiceFactory;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
@@ -97,7 +98,8 @@ public class UpdateCommandStep extends AbstractUpdateCommandStep implements Clea
 
     @Override
     public List<Class<?>> requiredDependencies() {
-        List<Class<?>> deps = Arrays.asList(Database.class, DatabaseChangeLog.class, ChangeExecListener.class, ChangeLogParameters.class, UpdateSummaryEnum.class);
+        List<Class<?>> deps = new ArrayList<>(super.requiredDependencies());
+        deps.add(UpdateSummaryEnum.class);
         return deps;
     }
 

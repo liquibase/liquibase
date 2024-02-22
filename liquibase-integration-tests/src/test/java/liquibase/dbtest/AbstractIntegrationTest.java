@@ -443,6 +443,7 @@ public abstract class AbstractIntegrationTest {
         // TODO should better written to a file so CI servers can pick it up as test artifacts.
         System.out.println(outputResult);
         assertTrue("create databasechangelog command not found in: \n" + outputResult, outputResult.contains("CREATE TABLE "+database.escapeTableName(database.getLiquibaseCatalogName(), database.getLiquibaseSchemaName(), database.getDatabaseChangeLogTableName())));
+        assertTrue("create databasechangeloglock command not found in: \n" + outputResult, outputResult.contains("CREATE TABLE "+database.escapeTableName(database.getLiquibaseCatalogName(), database.getLiquibaseSchemaName(), database.getDatabaseChangeLogLockTableName())));
 
         assertTrue("generated output contains a correctly encoded Euro sign", outputResult.contains("€"));
 

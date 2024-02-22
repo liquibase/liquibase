@@ -2,6 +2,7 @@ package liquibase.command.core.helpers;
 
 import liquibase.Liquibase;
 import liquibase.Scope;
+import liquibase.changelog.ChangeLogHistoryServiceFactory;
 import liquibase.command.CleanUpCommandStep;
 import liquibase.command.CommandResultsBuilder;
 import liquibase.command.CommandScope;
@@ -35,6 +36,7 @@ public class LockServiceCommandStep extends AbstractHelperCommandStep implements
         CommandScope commandScope = resultsBuilder.getCommandScope();
         Database database = (Database) commandScope.getDependency(Database.class);
         LockServiceFactory.getInstance().getLockService(database).waitForLock();
+        Scope.getCurrentScope().getSingleton(ChangeLogHistoryServiceFactory.class).getChangeLogService(database).generateDeploymentId();
     }
 
     @Override

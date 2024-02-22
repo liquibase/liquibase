@@ -3,18 +3,13 @@ package liquibase.command.core.helpers;
 import liquibase.Beta;
 import liquibase.GlobalConfiguration;
 import liquibase.Scope;
-import liquibase.changelog.ChangeLogHistoryService;
-import liquibase.changelog.ChangeLogHistoryServiceFactory;
-import liquibase.command.*;
-import liquibase.command.core.AbstractFutureRollbackCommandStep;
-import liquibase.command.core.AbstractUpdateCommandStep;
-import liquibase.command.core.DropAllCommandStep;
-import liquibase.command.core.UpdateCommandStep;
+import liquibase.command.CleanUpCommandStep;
+import liquibase.command.CommandArgumentDefinition;
+import liquibase.command.CommandResultsBuilder;
+import liquibase.command.CommandScope;
 import liquibase.database.Database;
 import liquibase.database.jvm.JdbcConnection;
 import liquibase.exception.DatabaseException;
-import liquibase.lockservice.LockService;
-import liquibase.lockservice.LockServiceFactory;
 import liquibase.logging.mdc.MdcKey;
 import liquibase.util.StringUtil;
 
@@ -79,41 +74,10 @@ public class DbUrlConnectionCommandStep extends AbstractDatabaseConnectionComman
     @Override
     public void run(CommandResultsBuilder resultsBuilder) throws Exception {
         CommandScope commandScope = resultsBuilder.getCommandScope();
-        Database database;
-        LockService lockService;
-        List<CommandStep> commandSteps;
-        boolean shouldAcquireLock = false;
-
         if (commandScope.getArgumentValue(DbUrlConnectionArgumentsCommandStep.SKIP_DATABASE_STEP_ARG)) {
             return;
         }
-
-        database = this.obtainDatabase(commandScope);
-        commandScope.provideDependency(Database.class, database);
-        commandSteps = commandScope.getCommand().getPipeline();
-
-        // Check for step types that instantiate changelog locks
-        for (CommandStep commandStep: commandSteps) {
-            if (
-                    commandStep instanceof LockServiceCommandStep
-                    || commandStep instanceof DropAllCommandStep
-                    || commandStep instanceof AbstractFutureRollbackCommandStep
-                    || commandStep instanceof AbstractUpdateCommandStep
-            ) {
-                shouldAcquireLock = true;
-                break;
-            }
-        }
-
-        if (shouldAcquireLock) {
-            lockService = LockServiceFactory.getInstance().getLockService(database);
-            if (!lockService.hasChangeLogLock()) {
-                lockService.waitForLock();
-            }
-            // waitForLock resets the changelog history service, so we need to rebuild that and generate a final deploymentId.
-            ChangeLogHistoryService changelogService = Scope.getCurrentScope().getSingleton(ChangeLogHistoryServiceFactory.class).getChangeLogService(database);
-            changelogService.generateDeploymentId();
-        }
+        commandScope.provideDependency(Database.class, this.obtainDatabase(commandScope));
     }
 
     @Override

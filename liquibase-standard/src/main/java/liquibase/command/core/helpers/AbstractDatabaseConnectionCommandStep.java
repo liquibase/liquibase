@@ -9,8 +9,6 @@ import liquibase.database.DatabaseFactory;
 import liquibase.database.core.DatabaseUtils;
 import liquibase.exception.DatabaseException;
 import liquibase.integration.commandline.LiquibaseCommandLineConfiguration;
-import liquibase.lockservice.LockService;
-import liquibase.lockservice.LockServiceFactory;
 import liquibase.resource.ResourceAccessor;
 import liquibase.util.StringUtil;
 
@@ -111,24 +109,6 @@ public abstract class AbstractDatabaseConnectionCommandStep extends AbstractHelp
 
     @Override
     public void cleanUp(CommandResultsBuilder resultsBuilder) {
-        Database releaseLockDatabase;
-        LockService lockService;
-
-        releaseLockDatabase = database != null
-            ? database
-            : (Database)resultsBuilder.getCommandScope().getDependency(Database.class);
-
-        if (releaseLockDatabase != null) {
-            lockService = LockServiceFactory.getInstance().getLockService(releaseLockDatabase);
-            if (lockService.hasChangeLogLock()) {
-                try {
-                    lockService.forceReleaseLock();
-                } catch (Exception e) {
-                    Scope.getCurrentScope().getLog(getClass()).warning(coreBundle.getString("could.not.release.lock"), e);
-                }
-            }
-        }
-
         // this class only closes a database that it created
         if (database != null) {
             try {
