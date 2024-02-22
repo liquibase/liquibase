@@ -1,9 +1,11 @@
 package liquibase.snapshot;
 
+import liquibase.Scope;
 import liquibase.exception.DatabaseException;
 import liquibase.structure.DatabaseObject;
 
 import java.util.*;
+import java.util.function.Predicate;
 
 public class SnapshotGeneratorChain {
     private Iterator<SnapshotGenerator> snapshotGenerators;
@@ -40,34 +42,31 @@ public class SnapshotGeneratorChain {
             return null;
         }
 
-        SnapshotGenerator next = getNextValidGenerator();
-
-        if (next == null) {
-            return null;
-        }
-
-        T obj = next.snapshot(example, snapshot, this);
-        if ((obj != null) && (obj.getSnapshotId() == null)) {
-            obj.setSnapshotId(snapshotIdService.generateId());
-        }
-        return obj;
-    }
-
-    public SnapshotGenerator getNextValidGenerator() {
         if (snapshotGenerators == null) {
             return null;
         }
 
-        if (!snapshotGenerators.hasNext()) {
-            return null;
-        }
-
-        SnapshotGenerator next = snapshotGenerators.next();
-        for (Class<? extends SnapshotGenerator> removedGenerator : replacedGenerators) {
-            if (removedGenerator.equals(next.getClass())) {
-                return getNextValidGenerator();
+        T result = null;
+        boolean resultInitialized = false;
+        while (snapshotGenerators.hasNext()) {
+            SnapshotGenerator generator = snapshotGenerators.next();
+            if (replacedGenerators.stream()
+                    .anyMatch(Predicate.isEqual(generator.getClass()))) {
+                continue;
             }
+            T object = generator.snapshot(example, snapshot, this);
+            if ((object != null) && (object.getSnapshotId() == null)) {
+                object.setSnapshotId(snapshotIdService.generateId());
+            }
+            if (resultInitialized && result != object) {
+                Scope.getCurrentScope().getLog(getClass())
+                        .warning(String.format("Snapshot generator %s has returned a different reference." +
+                                 "Main snapshot object was: %s, it is now: %s",
+                                generator.getClass().getName(), result, object));
+            }
+            result = object;
+            resultInitialized = true;
         }
-        return next;
+        return result;
     }
 }
