@@ -20,7 +20,7 @@ public class DataSnapshotGenerator extends JdbcSnapshotGenerator {
 
     @Override
     protected void addTo(DatabaseObject foundObject, DatabaseSnapshot snapshot) throws DatabaseException, InvalidExampleException {
-        if (!snapshot.getSnapshotControl().shouldInclude(Data.class)) {
+        if (!snapshot.getSnapshotControl().shouldInclude(Data.class) || !snapshot.getDatabase().supports(Table.class)) {
             return;
         }
         if (foundObject instanceof Table) {
