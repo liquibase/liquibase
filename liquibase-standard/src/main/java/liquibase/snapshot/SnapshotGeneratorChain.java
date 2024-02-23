@@ -1,10 +1,13 @@
 package liquibase.snapshot;
 
-import liquibase.Scope;
 import liquibase.exception.DatabaseException;
 import liquibase.structure.DatabaseObject;
 
-import java.util.*;
+import java.util.Arrays;
+import java.util.HashSet;
+import java.util.Iterator;
+import java.util.Set;
+import java.util.SortedSet;
 import java.util.function.Predicate;
 
 public class SnapshotGeneratorChain {
@@ -46,27 +49,38 @@ public class SnapshotGeneratorChain {
             return null;
         }
 
-        T result = null;
+        T lastObject = null;
+        SnapshotGenerator lastGenerator = null;
         boolean resultInitialized = false;
         while (snapshotGenerators.hasNext()) {
             SnapshotGenerator generator = snapshotGenerators.next();
-            if (replacedGenerators.stream()
-                    .anyMatch(Predicate.isEqual(generator.getClass()))) {
+            if (replacedGenerators.contains(generator.getClass())) {
                 continue;
             }
             T object = generator.snapshot(example, snapshot, this);
             if ((object != null) && (object.getSnapshotId() == null)) {
                 object.setSnapshotId(snapshotIdService.generateId());
             }
-            if (resultInitialized && result != object) {
-                Scope.getCurrentScope().getLog(getClass())
-                        .warning(String.format("Snapshot generator %s has returned a different reference." +
-                                 "Main snapshot object was: %s, it is now: %s",
-                                generator.getClass().getName(), result, object));
+            if (resultInitialized && lastObject != object) {
+                throw new DatabaseException(String.format("Snapshot generator %s has returned a different reference from the previous generator %s.\n" +
+                                                          "\tSnapshot object was: %s, it is now: %s.\n" +
+                                                          "\tConsider adding one of the generator to the result of the other's implementation of liquibase.snapshot.SnapshotGenerator#replaces.",
+                        generator.getClass().getName(),
+                        lastGenerator.getClass().getName(),
+                        identity(lastObject),
+                        identity(object)));
             }
-            result = object;
+            lastObject = object;
+            lastGenerator = generator;
             resultInitialized = true;
         }
-        return result;
+        return lastObject;
+    }
+
+    private static String identity(Object object) {
+        if (object == null) {
+            return "null";
+        }
+        return String.format("%s@%s", object.getClass(), System.identityHashCode(object));
     }
 }
