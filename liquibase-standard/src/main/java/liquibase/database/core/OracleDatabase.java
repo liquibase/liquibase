@@ -287,7 +287,7 @@ public class OracleDatabase extends AbstractJdbcDatabase {
         if (Schema.class.isAssignableFrom(object)) {
             return false;
         }
-        return true;
+        return super.supports(object);
     }
 
     /**
