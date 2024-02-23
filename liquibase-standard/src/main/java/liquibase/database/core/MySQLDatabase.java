@@ -196,7 +196,7 @@ public class MySQLDatabase extends AbstractJdbcDatabase {
         if (Sequence.class.isAssignableFrom(object)) {
             return false;
         }
-        return true;
+        return super.supports(object);
     }
 
     @Override
