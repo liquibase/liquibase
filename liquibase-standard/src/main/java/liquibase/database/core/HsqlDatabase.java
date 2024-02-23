@@ -384,9 +384,6 @@ public class HsqlDatabase extends AbstractJdbcDatabase {
 
     @Override
     public boolean supports(Class<? extends DatabaseObject> object) {
-        if (Schema.class.isAssignableFrom(object)) {
-            return false;
-        }
         if (Catalog.class.isAssignableFrom(object)) {
             try {
                 return getDatabaseMajorVersion() >= 2;
