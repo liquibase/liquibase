@@ -473,10 +473,8 @@ public class StandardChangeLogHistoryService extends AbstractChangeLogHistorySer
                 DiffOutputControl diffOutputControl = new DiffOutputControl(true, true, false, null);
                 Change[] change = ChangeGeneratorFactory.getInstance().fixUnexpected(table, diffOutputControl,database
                     , database);
-                if (change != null && change.length > 0) {
-                    SqlStatement[] sqlStatement = change[0].generateStatements(database);
-                    ChangelogJdbcMdcListener.execute(getDatabase(), executor -> executor.execute(sqlStatement[0]));
-                }
+                SqlStatement[] sqlStatement = change[0].generateStatements(database);
+                ChangelogJdbcMdcListener.execute(getDatabase(), executor -> executor.execute(sqlStatement[0]));
             }
             reset();
         } catch (InvalidExampleException e) {
