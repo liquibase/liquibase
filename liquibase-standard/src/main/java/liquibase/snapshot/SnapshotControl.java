@@ -11,6 +11,7 @@ import liquibase.structure.DatabaseObject;
 import liquibase.structure.core.DatabaseObjectFactory;
 
 import java.util.*;
+import java.util.stream.Stream;
 
 /**
  * Allows the class user to influence various aspects of the database object snapshot generation, e.g.
@@ -123,9 +124,11 @@ public class SnapshotControl implements LiquibaseSerializable {
 
     private void setTypes(Set<Class<? extends DatabaseObject>> types, Database database) {
         this.types = new HashSet<>();
-        types.stream()
-                .filter(database::supports)
-                .forEach(type -> addType(type, database));
+        Stream<Class<? extends DatabaseObject>> objectStream = types.stream();
+        if (database != null) {
+            objectStream = objectStream.filter(database::supports);
+        }
+        objectStream.forEach(type -> addType(type, database));
     }
     
     /**
