@@ -672,7 +672,7 @@ public abstract class AbstractLiquibaseMojo extends AbstractMojo {
      *
      * @parameter property="liquibase.dbclHistoryEnabled"
      */
-    @PropertyElement
+    @PropertyElement(key = "liquibase.dbclHistory.enabled")
     protected Boolean dbclHistoryEnabled;
 
     /**
@@ -682,7 +682,7 @@ public abstract class AbstractLiquibaseMojo extends AbstractMojo {
      *
      * @parameter property="liquibase.databaseChangelogHistoryEnabled"
      */
-    @PropertyElement
+    @PropertyElement(key = "liquibase.databaseChangelogHistory.enabled")
     protected Boolean databaseChangelogHistoryEnabled;
 
     protected String commandName;
@@ -806,8 +806,6 @@ public abstract class AbstractLiquibaseMojo extends AbstractMojo {
                 IntegrationDetails integrationDetails = new IntegrationDetails();
                 integrationDetails.setName("maven");
 
-                scopeValues.put("liquibase.dbclhistory.enabled", isDbclHistoryEnabled());
-
                 final PluginDescriptor pluginDescriptor = (PluginDescriptor) getPluginContext().get("pluginDescriptor");
                 for (MojoDescriptor descriptor : pluginDescriptor.getMojos()) {
                     if (!descriptor.getImplementationClass().equals(this.getClass())) {
@@ -928,6 +926,7 @@ public abstract class AbstractLiquibaseMojo extends AbstractMojo {
                         //
                         Map<String, Object> innerScopeValues = new HashMap<>();
                         innerScopeValues.put(key, preserveSchemaCase);
+                        innerScopeValues.put("liquibase.dbclhistory.enabled", isDbclHistoryEnabled());
                         Scope.child(innerScopeValues, () -> performLiquibaseTask(liquibase));
                     } catch (LiquibaseException e) {
                         cleanup(database);
