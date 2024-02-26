@@ -6,6 +6,7 @@ Changes in version 4.26.0 (2024.02.07)
 ### Liquibase 4.26.0 is a major release
 
 > [!IMPORTANT]
+> [!IMPORTANT]
 > Liquibase 4.26.0 contains several Notable Changes for Liquibase Pro users: Advanced IF conditionals, Simpler Regex-based pattern checks, and Checks Run Reports.
 
 > [!NOTE]
