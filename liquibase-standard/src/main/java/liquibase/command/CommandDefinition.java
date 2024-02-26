@@ -1,6 +1,7 @@
 package liquibase.command;
 
 import liquibase.util.StringUtil;
+import lombok.Getter;
 
 import java.util.*;
 
@@ -28,6 +29,12 @@ public class CommandDefinition implements Comparable<CommandDefinition> {
 
     private final Map<String, String> groupLongDescription = new HashMap<>();
     private final Map<String, String> groupShortDescription = new HashMap<>();
+
+    /**
+     * The aliases for the command's name. Aliases show up in the help output.
+     */
+    @Getter
+    private List<String[]> aliases = new ArrayList<>();
 
     protected CommandDefinition(String[] name) {
         this.name = name;
@@ -224,4 +231,10 @@ public class CommandDefinition implements Comparable<CommandDefinition> {
         return Arrays.equals(getName(), commandName);
     }
 
+    /**
+     * Add an alias to the command.
+     */
+    public void addAlias(String[] alias) {
+        this.aliases.add(alias);
+    }
 }

@@ -82,6 +82,12 @@ public class LiquibaseChecksRunMojo extends AbstractLiquibaseChecksMojo {
     @PropertyElement
     protected File outputFile;
 
+    /**
+     * @parameter property="liquibase.sqlParserExceptionLogAtLevel"
+     */
+    @PropertyElement
+    protected String sqlParserExceptionLogAtLevel;
+
     @Override
     protected void performLiquibaseTask(Liquibase liquibase) throws CommandExecutionException {
         CommandScope liquibaseCommand = new CommandScope("checks", "run");
@@ -99,6 +105,7 @@ public class LiquibaseChecksRunMojo extends AbstractLiquibaseChecksMojo {
         addArgumentIfNotEmpty(liquibaseCommand, defaultCatalogName, "defaultCatalogName");
         addArgumentIfNotEmpty(liquibaseCommand, driver, "driver");
         addArgumentIfNotEmpty(liquibaseCommand, driverPropertiesFile, "driverPropertiesFile");
+        addArgumentIfNotEmpty(liquibaseCommand, sqlParserExceptionLogAtLevel, "sqlParserExceptionLogAtLevel");
         if (outputFile != null) {
             try {
                 liquibaseCommand.setOutput(Files.newOutputStream(outputFile.toPath()));

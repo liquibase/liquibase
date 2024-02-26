@@ -14,9 +14,6 @@ on:
         default: ''
         type: string
 
-env:
-  MAVEN_VERSION: '3.9.2'
-
 jobs:
   test-harness-build:
     runs-on: ubuntu-latest
@@ -44,7 +41,7 @@ jobs:
         id: return_dispatch
         with:
           token: ${{ secrets.RUN_FUNCTIONAL_TEST_HARNESS_TESTS_TOKEN  }}
-          ref: "main"
+          ref: "develop"
           repo: liquibase-test-harness
           owner: liquibase
           workflow: main.yml

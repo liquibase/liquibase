@@ -636,6 +636,19 @@ public class StringUtil {
     }
 
     /**
+     *
+     * Returns true if the input string contains the specified value
+     *
+     * @param  value                  String to be checked
+     * @param  containsValue          String to look for
+     * @return true if String contains the value
+     *
+     */
+    public static boolean contains(String value, String containsValue) {
+        return value != null && value.contains(containsValue);
+    }
+
+    /**
      * Returns true if the input string is the empty string (null-safe).
      *
      * @param value String to be checked
@@ -669,6 +682,22 @@ public class StringUtil {
         }
 
         return value.startsWith(startsWith);
+    }
+
+    /**
+     * Checks whether the given <code>value</code> ends with the specified <code>endsWith</code> string.
+     *
+     * @param value      the string to check
+     * @param endsWith   the prefix to check for
+     * @return <code>true</code> if <code>value</code> ends with <code>endsWith</code>, <code>false</code> otherwise.
+     * Returns <code>false</code> if either argument is <code>null</code>.
+     */
+    public static boolean endsWith(String value, String endsWith) {
+        if ((value == null) || (endsWith == null)) {
+            return false;
+        }
+
+        return value.endsWith(endsWith);
     }
 
     /**
@@ -1152,5 +1181,23 @@ public class StringUtil {
 
     public static boolean isEmpty(CharSequence cs) {
         return cs == null || cs.length() == 0;
+    }
+
+    /**
+     * Split the input string into chunks no larger than the supplied chunkSize. If the string is shorter than the
+     * chunkSize, the resultant list will contain only a single entry.
+     */
+    public static List<String> splitToChunks(String input, int chunkSize) {
+        int length = input.length();
+        if (length < chunkSize) {
+            return Collections.singletonList(input);
+        }
+        List<String> chunks = new ArrayList<>((length / chunkSize) + 1);
+        for (int i = 0; i < length; i += chunkSize) {
+            int end = Math.min(i + chunkSize, length);
+            String chunk = input.substring(i, end);
+            chunks.add(chunk);
+        }
+        return chunks;
     }
 }

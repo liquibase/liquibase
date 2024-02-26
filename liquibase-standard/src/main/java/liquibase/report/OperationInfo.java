@@ -10,4 +10,7 @@ public class OperationInfo {
     private String exception;
     private String updateSummaryMsg;
     private Integer rowsAffected;
+    private Boolean rollbackOnError = Boolean.FALSE; // assume false unless set
+    private String labels;
+    private String contexts;
 }

@@ -69,10 +69,13 @@ public abstract class AbstractUpdateCommandStep extends AbstractCommandStep impl
         Database database = (Database) commandScope.getDependency(Database.class);
         updateReportParameters.getDatabaseInfo().setDatabaseType(database.getDatabaseProductName());
         updateReportParameters.getDatabaseInfo().setVersion(database.getDatabaseProductVersion());
+        updateReportParameters.getDatabaseInfo().setDatabaseUrl(database.getConnection().getURL());
         updateReportParameters.setJdbcUrl(database.getConnection().getURL());
         final ChangeLogParameters changeLogParameters = (ChangeLogParameters) commandScope.getDependency(ChangeLogParameters.class);
         Contexts contexts = new Contexts(getContextsArg(commandScope));
         LabelExpression labelExpression = new LabelExpression(getLabelFilterArg(commandScope));
+        updateReportParameters.getOperationInfo().setLabels(labelExpression.getOriginalString());
+        updateReportParameters.getOperationInfo().setContexts(contexts.toString());
         DatabaseChangelogCommandStep.addCommandFiltersMdc(labelExpression, contexts);
         customMdcLogging(commandScope);
 
@@ -127,7 +130,7 @@ public abstract class AbstractUpdateCommandStep extends AbstractCommandStep impl
             DatabaseChangeLog databaseChangeLog = (DatabaseChangeLog) commandScope.getDependency(DatabaseChangeLog.class);
             addChangelogFileToMdc(getChangelogFileArg(commandScope), databaseChangeLog);
             logDeploymentOutcomeMdc(changeExecListener, false, updateReportParameters);
-            updateReportParameters.getOperationInfo().setException(e.getCause().getMessage());
+            updateReportParameters.getOperationInfo().setException(e.getCause() != null ? e.getCause().getMessage() : e.getMessage());
             resultsBuilder.addResult("statusCode", 1);
             throw e;
         } finally {

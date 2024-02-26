@@ -460,6 +460,34 @@ class StringUtilTest extends Specification {
     }
 
     @Unroll
+    def "endsWith"() {
+        expect:
+        StringUtil.endsWith(value, endsWith) == expected
+
+        where:
+        value | endsWith | expected
+        null  | "x"        | false
+        ""    | "x"        | false
+        "a"   | "x"        | false
+        "ax"  | "a"        | false
+        "abc" | "bc"       | true
+    }
+
+    @Unroll
+    def "contains"() {
+        expect:
+        StringUtil.contains(value, contains) == expected
+
+        where:
+        value | contains   | expected
+        null  | "x"        | false
+        ""    | "x"        | false
+        "a"   | "x"        | false
+        "ax"  | "a"        | true
+        "abc" | "bc"       | true
+    }
+
+    @Unroll
     def "isWhitespace"() {
         expect:
         StringUtil.isWhitespace(value) == expected
@@ -702,5 +730,18 @@ class StringUtilTest extends Specification {
         null  | true
         ""    | true
         "s"   | false
+    }
+
+    @Unroll
+    def "splitToChunks"() {
+        expect:
+        StringUtil.splitToChunks(input, 10) == expected
+
+        where:
+        input | expected
+        "hello" | ["hello"]
+        "hellohello" | ["hellohello"]
+        "hellohellohello" | ["hellohello", "hello"]
+        "hellohellohellohellohellohello" | ["hellohello", "hellohello", "hellohello"]
     }
 }
