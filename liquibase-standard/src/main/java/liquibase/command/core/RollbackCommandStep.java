@@ -51,9 +51,8 @@ public class RollbackCommandStep extends AbstractRollbackCommandStep {
         Scope.getCurrentScope().addMdcValue(MdcKey.ROLLBACK_TO_TAG, tagToRollBackTo);
 
         Database database = (Database) commandScope.getDependency(Database.class);
-        rollbackReportParameters.getDatabaseInfo().setDatabaseType(database.getDatabaseProductName());
-        rollbackReportParameters.getDatabaseInfo().setVersion(database.getDatabaseProductVersion());
-        rollbackReportParameters.setJdbcUrl(database.getConnection().getURL());
+        rollbackReportParameters.setupDatabaseInfo(database);
+        rollbackReportParameters.setRollbackTag(tagToRollBackTo);
 
         List<RanChangeSet> ranChangeSetList = database.getRanChangeSetList();
         TagVersionEnum tagVersion = TagVersionEnum.valueOf(commandScope.getArgumentValue(TAG_VERSION_ARG));

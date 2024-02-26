@@ -243,6 +243,7 @@ public abstract class AbstractRollbackCommandStep extends AbstractCommandStep {
             Scope.getCurrentScope().getLog(AbstractRollbackCommandStep.class).info(operationName + " command encountered an exception.");
             if (rollbackReportParameters != null) {
                 rollbackReportParameters.getOperationInfo().setOperationOutcome(MdcValue.COMMAND_FAILED);
+                rollbackReportParameters.setSuccess(false);
             }
         }
     }
