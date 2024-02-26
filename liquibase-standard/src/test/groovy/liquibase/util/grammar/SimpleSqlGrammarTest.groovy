@@ -48,5 +48,9 @@ class SimpleSqlGrammarTest extends Specification {
         "'''' sometimesEquals '\\''"                           | ["''''", " ", "sometimesEquals", " ", "'\\''"]
         "'\\'' sometimesEquals \"'\""                          | ["'\\''", " ", "sometimesEquals", " ", "\"'\""]
         "\"'\" sometimesEquals \"\\'\""                        | ["\"'\"", " ", "sometimesEquals", " ", "\"\\'\""]
+        "This has a symbol ≤ (u2264) but no backslash"         | ["This", " ", "has", " ", "a", " ", "symbol", " ", "≤", " ", "(", "u2264", ")", " ", "but", " ", "no", " ", "backslash"]
+        "This has a \\ and symbol ≤ (u2264)"                   | ["This", " ", "has", " ", "a", " ", "\\", " ", "and", " ", "symbol", " ", "≤", " ", "(", "u2264", ")"]
+        "This ≤ (u2264) is before the \\"                      | ["This", " ", "≤", " ", "(", "u2264", ")", " ", "is", " ", "before", " ", "the", " ", "\\"]
+        "This has an unicode char ÀÀÀÀÀÀ+++ãããioú≤₢"           | ["This", " ", "has", " ", "an", " ", "unicode"," ", "char", " ", "ÀÀÀÀÀÀ", "+", "+", "+", "ãããioú", "≤", "₢"]
     }
 }
