@@ -48,7 +48,7 @@ public class ChangeLogHistoryServiceFactory extends AbstractPluginFactory<Change
     }
 
 
-    public ChangeLogHistoryService getChangeLogService(Database database) {
+    public synchronized ChangeLogHistoryService getChangeLogService(Database database) {
             if (services.containsKey(database)) {
                 return services.get(database);
             }
