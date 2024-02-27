@@ -76,7 +76,7 @@ public class CustomConstructYamlTimestamp extends SafeConstructor.ConstructYamlT
             if (timeZone == null) {
                 return new java.text.SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(calendar.getTime());
             } else {
-                return calendar.getTime();
+                return calendar.getTime().toString();
             }
         }
     }
