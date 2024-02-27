@@ -5,7 +5,6 @@ import liquibase.changelog.ChangeSet;
 import liquibase.changelog.RanChangeSet;
 import liquibase.database.Database;
 import liquibase.exception.DatabaseException;
-import lombok.Getter;
 
 import java.util.Date;
 import java.util.HashMap;
@@ -13,7 +12,6 @@ import java.util.Map;
 
 public class ShouldRunChangeSetFilter implements ChangeSetFilter {
 
-    @Getter
     private final Map<String, RanChangeSet> ranChangeSets;
     private final boolean ignoreClasspathPrefix;
     public static final String CHANGESET_ALREADY_RAN_MESSAGE = "Changeset already ran";
