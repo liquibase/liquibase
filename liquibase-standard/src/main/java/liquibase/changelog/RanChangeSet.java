@@ -116,10 +116,10 @@ public class RanChangeSet {
     }
 
     public boolean isSameAs(ChangeSet changeSet) {
-        String normalizedFilePath = DatabaseChangeLog.normalizePath(this.getChangeLog());
-        return (this.getId().equalsIgnoreCase(changeSet.getId())
+        return this.getId().equalsIgnoreCase(changeSet.getId())
                 && this.getAuthor().equalsIgnoreCase(changeSet.getAuthor())
-                && isSamePath(changeSet.getFilePath(), normalizedFilePath));
+                && isSamePath(changeSet.getFilePath());
+
     }
 
     /**
@@ -130,7 +130,8 @@ public class RanChangeSet {
      * @param filePath the file path
      * @return does it somehow match what we have at database?
      */
-    private boolean isSamePath(String filePath, String normalizedFilePath) {
+    private boolean isSamePath(String filePath) {
+        String normalizedFilePath = DatabaseChangeLog.normalizePath(this.getChangeLog());
         return normalizedFilePath.equalsIgnoreCase(DatabaseChangeLog.normalizePath(filePath))
                 || normalizedFilePath.equalsIgnoreCase(Paths.get(filePath).normalize().toString().replace("\\", "/"));
     }
