@@ -120,7 +120,6 @@ public class FormattedSqlChangeLogParser extends AbstractFormattedChangeLogParse
                     changeSet.getPreconditions().addNestedPrecondition(
                             parseViewExistsCondition(changeLogParameters.expandExpressions(StringUtil.trimToNull(body), changeSet.getChangeLog()))
                     );
-                    System.out.print("New view exists precondition");
                 } else {
                     throw new ChangeLogParseException("The '" + name + "' precondition type is not supported.");
                 }
@@ -189,7 +188,6 @@ public class FormattedSqlChangeLogParser extends AbstractFormattedChangeLogParse
             }
 
             tableExistsPrecondition.setTableName(tableMatcher.group(1));
-            System.out.println(tableMatcher.group(1));
         } else {
             throw new ChangeLogParseException("Table name was not specified correctly in tableExists precondition.");
         }
@@ -200,7 +198,6 @@ public class FormattedSqlChangeLogParser extends AbstractFormattedChangeLogParse
             }
 
             tableExistsPrecondition.setSchemaName(schemaMatcher.group(1));
-            System.out.println(schemaMatcher.group(1));
         }
 
         return tableExistsPrecondition;
@@ -221,7 +218,6 @@ public class FormattedSqlChangeLogParser extends AbstractFormattedChangeLogParse
             }
 
             viewExistsPrecondition.setViewName(viewMatcher.group(1));
-            System.out.println(viewMatcher.group(1));
         } else {
             throw new ChangeLogParseException("View name was not specified correctly in viewExists precondition.");
         }
@@ -232,7 +228,6 @@ public class FormattedSqlChangeLogParser extends AbstractFormattedChangeLogParse
             }
 
             viewExistsPrecondition.setSchemaName(schemaMatcher.group(1));
-            System.out.println(schemaMatcher.group(1));
         }
 
         return viewExistsPrecondition;
