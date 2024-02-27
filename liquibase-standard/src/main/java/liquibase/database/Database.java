@@ -284,14 +284,14 @@ public interface Database extends PrioritizedService, AutoCloseable {
 
             this.setAutoCommit(previousAutoCommit);
             Scope.getCurrentScope().getLog(getClass()).info(String.format("Successfully deleted all supported object types in schema %s.", schemaToDrop.toString()));
-            addCompleteSqlToScope(completeSql);
+            addCompleteSqlToScope(completeSql.toString());
         } finally {
             this.setObjectQuotingStrategy(currentStrategy);
             this.commit();
         }
     }
 
-    default void addCompleteSqlToScope(StringBuilder completeSql) {
+    default void addCompleteSqlToScope(String completeSql) {
         AtomicReference<String> sqlsReference = Scope.getCurrentScope().get(COMPLETE_SQL_SCOPE_KEY, AtomicReference.class);
         if (sqlsReference != null) {
             sqlsReference.set(completeSql.toString());
