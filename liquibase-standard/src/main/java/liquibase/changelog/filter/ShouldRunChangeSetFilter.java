@@ -5,6 +5,7 @@ import liquibase.changelog.ChangeSet;
 import liquibase.changelog.RanChangeSet;
 import liquibase.database.Database;
 import liquibase.exception.DatabaseException;
+import lombok.Getter;
 
 import java.util.Date;
 import java.util.HashMap;
@@ -12,8 +13,11 @@ import java.util.Map;
 
 public class ShouldRunChangeSetFilter implements ChangeSetFilter {
 
+    @Getter
     private final Map<String, RanChangeSet> ranChangeSets;
     private final boolean ignoreClasspathPrefix;
+    public static final String CHANGESET_ALREADY_RAN_MESSAGE = "Changeset already ran";
+
 
     public ShouldRunChangeSetFilter(Database database, boolean ignoreClasspathPrefix) throws DatabaseException {
         this.ignoreClasspathPrefix = ignoreClasspathPrefix;
@@ -64,7 +68,7 @@ public class ShouldRunChangeSetFilter implements ChangeSetFilter {
             if (changeSet.shouldRunOnChange() && checksumChanged(changeSet, ranChangeSet)) {
                 return new ChangeSetFilterResult(true, "Changeset checksum changed", this.getClass(), getMdcName(), getDisplayName());
             }
-            return new ChangeSetFilterResult(false, "Changeset already ran", this.getClass(), getMdcName(), getDisplayName());
+            return new ChangeSetFilterResult(false, CHANGESET_ALREADY_RAN_MESSAGE, this.getClass(), getMdcName(), getDisplayName());
         }
         return new ChangeSetFilterResult(true, "Changeset has not ran yet", this.getClass(), getMdcName(), getDisplayName());
     }

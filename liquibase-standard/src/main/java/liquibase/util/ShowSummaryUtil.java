@@ -305,7 +305,7 @@ public class ShowSummaryUtil {
         ShowSummaryGenerator showSummaryGenerator = showSummaryGeneratorFactory.getShowSummaryGenerator();
         showSummaryGenerator.getAllAdditionalChangeSetStatus(runChangeLogIterator);
         int totalAccepted = calculateAccepted(statusVisitor, changeExecListener);
-        int totalPreviouslyRun = totalInChangelog - filtered - skipped - totalAccepted;
+        int totalPreviouslyRun = calculatePreviouslyRun(statusVisitor);
         UpdateSummary updateSummaryMdc = new UpdateSummary(null, totalAccepted, totalPreviouslyRun, null, totalInChangelog);
 
         String message = "UPDATE SUMMARY";
@@ -366,6 +366,14 @@ public class ShowSummaryUtil {
         updateSummaryDetails.setSummary(updateSummaryMdc);
         updateSummaryDetails.setOutput(outputMessage);
         return updateSummaryDetails;
+    }
+
+    private static int calculatePreviouslyRun(StatusVisitor statusVisitor) {
+        return (int) statusVisitor.getStatuses().stream().filter(
+                s -> s.getFilterResults().stream().anyMatch(
+                        fr -> fr.getFilter().isAssignableFrom(ShouldRunChangeSetFilter.class) && !fr.isAccepted() && fr.getMessage().equals(ShouldRunChangeSetFilter.CHANGESET_ALREADY_RAN_MESSAGE)
+                )
+        ).count();
     }
 
     /**
