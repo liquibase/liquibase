@@ -32,7 +32,7 @@ jobs:
           path: liquibase-pro
 
       - name: Set up JDK 17
-        uses: actions/setup-java@v3
+        uses: actions/setup-java@v4
         with:
           java-version: 17
           distribution: 'temurin'
