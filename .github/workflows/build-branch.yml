@@ -75,7 +75,7 @@ jobs:
         with:
           ref: ${{ github.event.pull_request.head.sha || github.event.after}}
       - name: Set up Java for publishing to GitHub Repository
-        uses: actions/setup-java@v3
+        uses: actions/setup-java@v4
         with:
           java-version: '17'
           distribution: 'temurin'
