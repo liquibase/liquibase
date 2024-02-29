@@ -153,6 +153,16 @@ class CommandUtil {
         } as Scope.ScopedRunnerWithReturn<Void>)
     }
 
+    static void runUnexpectedChangeSet(DatabaseTestSystem db, String changelog, OutputStream outputStream) {
+        CommandScope commandScope = new CommandScope(UnexpectedChangesetsCommandStep.COMMAND_NAME)
+        commandScope.addArgumentValue(DatabaseChangelogCommandStep.CHANGELOG_FILE_ARG, changelog)
+        commandScope.addArgumentValue(DbUrlConnectionArgumentsCommandStep.URL_ARG, db.getConnectionUrl())
+        commandScope.addArgumentValue(DbUrlConnectionArgumentsCommandStep.USERNAME_ARG, db.getUsername())
+        commandScope.addArgumentValue(DbUrlConnectionArgumentsCommandStep.PASSWORD_ARG, db.getPassword())
+        commandScope.setOutput(outputStream)
+        commandScope.execute()
+    }
+
     private static void execUpdateCommandInScope(SearchPathResourceAccessor resourceAccessor, DatabaseTestSystem db, String changelogFile,
                                                  String labels, String contexts, String outputFile) {
         def scopeSettings = [
