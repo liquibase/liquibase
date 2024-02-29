@@ -305,7 +305,7 @@ public class ShowSummaryUtil {
         showSummaryGenerator.getAllAdditionalChangeSetStatus(runChangeLogIterator);
         int totalAccepted = calculateAccepted(statusVisitor, changeExecListener);
         int totalPreviouslyRun = calculatePreviouslyRun(statusVisitor);
-        int totalInChangelog = totalAccepted + totalPreviouslyRun + skipped;
+        int totalInChangelog = totalAccepted + totalPreviouslyRun + skipped + filtered;
         UpdateSummary updateSummaryMdc = new UpdateSummary(null, totalAccepted, totalPreviouslyRun, null, totalInChangelog);
 
         String message = "UPDATE SUMMARY";
