@@ -23,7 +23,7 @@ public class ExpectedChangesVisitor implements ChangeSetVisitor {
 
     @Override
     public void visit(ChangeSet changeSet, DatabaseChangeLog databaseChangeLog, Database database, Set<ChangeSetFilterResult> filterResults) throws LiquibaseException {
-        unexpectedChangeSets.removeIf(ranChangeSet -> ranChangeSet.isSameAs(changeSet));
+        unexpectedChangeSets.removeIf(ranChangeSet -> ranChangeSet.isSameAs(changeSet) || ranChangeSet.getChangeLog().equalsIgnoreCase("liquibase-internal"));
     }
 
     public Collection<RanChangeSet> getUnexpectedChangeSets() {
