@@ -298,7 +298,6 @@ public class ShowSummaryUtil {
                                                     ChangeExecListener changeExecListener) throws LiquibaseException {
         StringBuilder builder = new StringBuilder();
         builder.append(System.lineSeparator());
-        int totalInChangelog = changeLog.getChangeSets().size() + skippedChangeSets.size();
         int skipped = skippedChangeSets.size();
         int filtered = filterDenied.size();
         ShowSummaryGeneratorFactory showSummaryGeneratorFactory = Scope.getCurrentScope().getSingleton(ShowSummaryGeneratorFactory.class);
@@ -306,6 +305,7 @@ public class ShowSummaryUtil {
         showSummaryGenerator.getAllAdditionalChangeSetStatus(runChangeLogIterator);
         int totalAccepted = calculateAccepted(statusVisitor, changeExecListener);
         int totalPreviouslyRun = calculatePreviouslyRun(statusVisitor);
+        int totalInChangelog = totalAccepted + totalPreviouslyRun + skipped;
         UpdateSummary updateSummaryMdc = new UpdateSummary(null, totalAccepted, totalPreviouslyRun, null, totalInChangelog);
 
         String message = "UPDATE SUMMARY";
