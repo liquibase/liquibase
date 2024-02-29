@@ -20,7 +20,6 @@ import liquibase.util.StringUtil;
 
 import java.sql.*;
 import java.util.*;
-import java.util.concurrent.atomic.AtomicReference;
 
 public class JdbcDatabaseSnapshot extends DatabaseSnapshot {
 
@@ -842,7 +841,11 @@ public class JdbcDatabaseSnapshot extends DatabaseSnapshot {
                         if (database instanceof OracleDatabase) {
                             throw new RuntimeException("Should have bulk selected");
                         } else {
-                            returnList.addAll(extract(databaseMetaData.getImportedKeys(jdbcCatalogName, jdbcSchemaName, foundTable)));
+//                            try {
+                                returnList.addAll(extract(databaseMetaData.getImportedKeys(jdbcCatalogName, jdbcSchemaName, foundTable)));
+//                            } catch (Exception e) {
+//
+//                            }
                         }
                     }
 
