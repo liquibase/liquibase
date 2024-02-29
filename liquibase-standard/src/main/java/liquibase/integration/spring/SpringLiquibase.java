@@ -463,6 +463,7 @@ public class SpringLiquibase implements InitializingBean, BeanNameAware, Resourc
     /**
      * @deprecated Always ignoring classpath prefix
      */
+    @Deprecated
     public void setIgnoreClasspathPrefix(boolean ignoreClasspathPrefix) {
 
     }
