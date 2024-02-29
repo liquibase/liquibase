@@ -82,6 +82,8 @@ public class SpringLiquibase implements InitializingBean, BeanNameAware, Resourc
 
 	protected boolean testRollbackOnUpdate = false;
 
+    protected Customizer<Liquibase> customizer;
+
     protected UIServiceEnum uiService = UIServiceEnum.LOGGER;
 
 	public SpringLiquibase() {
@@ -366,6 +368,10 @@ public class SpringLiquibase implements InitializingBean, BeanNameAware, Resourc
             ((DerbyDatabase) liquibase.getDatabase()).setShutdownEmbeddedDerby(false);
         }
 
+        if (customizer != null) {
+            customizer.customize(liquibase);
+        }
+
 		return liquibase;
 	}
 
@@ -482,6 +488,14 @@ public class SpringLiquibase implements InitializingBean, BeanNameAware, Resourc
             return;
         }
         this.uiService = uiService;
+    }
+
+    public Customizer<Liquibase> getCustomizer() {
+        return customizer;
+    }
+
+    public void setCustomizer(Customizer<Liquibase> customizer) {
+        this.customizer = customizer;
     }
 
     public UIServiceEnum getUiService() {
