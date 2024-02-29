@@ -39,7 +39,7 @@ jobs:
           cache: 'maven'
 
       - name: maven-settings-xml-action
-        uses: whelk-io/maven-settings-xml-action@v20
+        uses: whelk-io/maven-settings-xml-action@v22
         with:
           repositories: |
             [
