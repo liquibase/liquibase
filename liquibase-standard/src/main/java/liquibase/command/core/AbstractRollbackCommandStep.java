@@ -155,6 +155,7 @@ public abstract class AbstractRollbackCommandStep extends AbstractCommandStep {
                 rollbackReportParameters.getChangesetInfo().addAllToChangesetInfoList(failedChangeSets, true);
                 rollbackReportParameters.getChangesetInfo().setFailedChangesetCount(failedChangeSets.size());
                 rollbackReportParameters.getChangesetInfo().addAllToPendingChangesetInfoList(pendingChangeSetMap);
+                rollbackReportParameters.getChangesetInfo().setPendingChangesetCount(pendingChangeSetMap.size());
                 rollbackReportParameters.setFailedChangeset(failedChangeSets.stream().map(ChangeSet::toString).collect(Collectors.joining(", ")));
             }
         }
