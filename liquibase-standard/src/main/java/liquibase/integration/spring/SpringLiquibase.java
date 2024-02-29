@@ -456,18 +456,6 @@ public class SpringLiquibase implements InitializingBean, BeanNameAware, Resourc
         this.showSummary = showSummary;
     }
 
-    public boolean isIgnoreClasspathPrefix() {
-        return true;
-    }
-
-    /**
-     * @deprecated Always ignoring classpath prefix
-     */
-    @Deprecated
-    public void setIgnoreClasspathPrefix(boolean ignoreClasspathPrefix) {
-
-    }
-
     public void setShowSummaryOutput(UpdateSummaryOutputEnum showSummaryOutput) {
         if (showSummaryOutput == null) {
             return;
