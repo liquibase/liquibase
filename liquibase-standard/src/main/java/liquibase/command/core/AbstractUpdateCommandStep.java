@@ -69,7 +69,6 @@ public abstract class AbstractUpdateCommandStep extends AbstractCommandStep impl
         Database database = (Database) commandScope.getDependency(Database.class);
         updateReportParameters.getDatabaseInfo().setDatabaseType(database.getDatabaseProductName());
         updateReportParameters.getDatabaseInfo().setVersion(database.getDatabaseProductVersion());
-        updateReportParameters.getDatabaseInfo().setDatabaseUrl(database.getConnection().getURL());
         updateReportParameters.setJdbcUrl(database.getConnection().getURL());
         final ChangeLogParameters changeLogParameters = (ChangeLogParameters) commandScope.getDependency(ChangeLogParameters.class);
         Contexts contexts = new Contexts(getContextsArg(commandScope));
@@ -90,8 +89,13 @@ public abstract class AbstractUpdateCommandStep extends AbstractCommandStep impl
                 updateReportParameters.getOperationInfo().setUpdateSummaryMsg(DATABASE_UP_TO_DATE_MESSAGE);
                 return;
             }
-
+            if (!isDBLocked) {
+                LockServiceFactory.getInstance().getLockService(database).waitForLock();
+            }
+            // waitForLock resets the changelog history service, so we need to rebuild that and generate a final deploymentId.
             ChangeLogHistoryService changelogService = Scope.getCurrentScope().getSingleton(ChangeLogHistoryServiceFactory.class).getChangeLogService(database);
+            changelogService.generateDeploymentId();
+
             Scope.getCurrentScope().addMdcValue(MdcKey.DEPLOYMENT_ID, changelogService.getDeploymentId());
             Scope.getCurrentScope().getLog(getClass()).info(String.format("Using deploymentId: %s", changelogService.getDeploymentId()));
 
@@ -125,7 +129,7 @@ public abstract class AbstractUpdateCommandStep extends AbstractCommandStep impl
             DatabaseChangeLog databaseChangeLog = (DatabaseChangeLog) commandScope.getDependency(DatabaseChangeLog.class);
             addChangelogFileToMdc(getChangelogFileArg(commandScope), databaseChangeLog);
             logDeploymentOutcomeMdc(changeExecListener, false, updateReportParameters);
-            updateReportParameters.getOperationInfo().setException(e.getCause() != null ? e.getCause().getMessage() : e.getMessage());
+            updateReportParameters.getOperationInfo().setException(e.getCause().getMessage());
             resultsBuilder.addResult("statusCode", 1);
             throw e;
         } finally {

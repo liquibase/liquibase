@@ -36,16 +36,6 @@ public class ChangeLogParameters {
     private LabelExpression filterLabels;
 
     private enum LiquibaseExecutionParameter {
-        LIQUIBASE_EXECUTION_DEPLOYMENT_ID {
-            @Override
-            public String getValue(DatabaseChangeLog changeLog) {
-                final Scope currentScope = Scope.getCurrentScope();
-                final Database currentDatabase = currentScope.getDatabase();
-                final ChangeLogHistoryService changelogService = currentScope.getSingleton(ChangeLogHistoryServiceFactory.class).getChangeLogService(currentDatabase);
-
-                return changelogService.getDeploymentId();
-            }
-        },
         LIQUIBASE_EXECUTION_CHANGELOG_FILE {
             @Override
             public String getValue(DatabaseChangeLog changeLog) {
@@ -244,7 +234,6 @@ public class ChangeLogParameters {
         if (param == null) {
             return null;
         }
-
         return param.getValue();
     }
 
