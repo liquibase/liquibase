@@ -686,9 +686,7 @@ public abstract class AbstractLiquibaseMojo extends AbstractMojo {
     protected Boolean databaseChangelogHistoryEnabled;
 
     /**
-     * This property enables Liquibase Pro users to store a record of all database changing liquibase operations in a new table
-     * DATABASECHANGELOGHISTORY. This table includes records of rollback, dropalls, and repeated runOnChange type activity,
-     * which is not available in the standard DATABASECHANGELOG table.
+     * If true, executed SQL is captured in the history table
      *
      * @parameter property="liquibase.databaseChangelogCaptureSql"
      */
@@ -696,9 +694,7 @@ public abstract class AbstractLiquibaseMojo extends AbstractMojo {
     protected Boolean dbclHistoryCaptureSql;
 
     /**
-     * This property enables Liquibase Pro users to store a record of all database changing liquibase operations in a new table
-     * DATABASECHANGELOGHISTORY. This table includes records of rollback, dropalls, and repeated runOnChange type activity,
-     * which is not available in the standard DATABASECHANGELOG table.
+     * If true, executed SQL is captured in the history table
      *
      * @parameter property="liquibase.databaseChangelogCaptureSql"
      */
@@ -706,9 +702,7 @@ public abstract class AbstractLiquibaseMojo extends AbstractMojo {
     protected Boolean databaseChangelogHistoryCaptureSql;
 
     /**
-     * This property enables Liquibase Pro users to store a record of all database changing liquibase operations in a new table
-     * DATABASECHANGELOGHISTORY. This table includes records of rollback, dropalls, and repeated runOnChange type activity,
-     * which is not available in the standard DATABASECHANGELOG table.
+     * If true, extensions are captured in the history table
      *
      * @parameter property="liquibase.dbclHistoryCaptureExtensions"
      */
@@ -716,9 +710,7 @@ public abstract class AbstractLiquibaseMojo extends AbstractMojo {
     protected Boolean dbclHistoryCaptureExtensions;
 
     /**
-     * This property enables Liquibase Pro users to store a record of all database changing liquibase operations in a new table
-     * DATABASECHANGELOGHISTORY. This table includes records of rollback, dropalls, and repeated runOnChange type activity,
-     * which is not available in the standard DATABASECHANGELOG table.
+     * If true, extensions are captured in the history table
      *
      * @parameter property="liquibase.databaseChangelogCaptureExtensions"
      */
