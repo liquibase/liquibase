@@ -62,26 +62,31 @@ public class MarkChangeSetRanGenerator extends AbstractSqlGenerator<MarkChangeSe
                     }
                 }
 
-            if (statement.getExecType().ranBefore) {
-                runStatement = new UpdateStatement(database.getLiquibaseCatalogName(), database.getLiquibaseSchemaName(), database.getDatabaseChangeLogTableName())
-                        .addNewColumnValue("DATEEXECUTED", new DatabaseFunction(dateValue))
-                        .addNewColumnValue("ORDEREXECUTED", Scope.getCurrentScope().getSingleton(ChangeLogHistoryServiceFactory.class).getChangeLogService(database).getNextSequenceValue())
-                        .addNewColumnValue("MD5SUM", changeSet.generateCheckSum(ChecksumVersion.latest()).toString())
-                        .addNewColumnValue("EXECTYPE", statement.getExecType().value)
-                        .addNewColumnValue("DEPLOYMENT_ID", Scope.getCurrentScope().getSingleton(ChangeLogHistoryServiceFactory.class).getChangeLogService(database).getDeploymentId())
-                        .addNewColumnValue(COMMENTS, getCommentsColumn(changeSet))
-                        .addNewColumnValue(CONTEXTS, getContextsColumn(changeSet))
-                        .addNewColumnValue(LABELS, getLabelsColumn(changeSet))
-                        .setWhereClause(database.escapeObjectName("ID", LiquibaseColumn.class) + " = ? " +
-                                "AND " + database.escapeObjectName("AUTHOR", LiquibaseColumn.class) + " = ? " +
-                                "AND " + database.escapeObjectName("FILENAME", LiquibaseColumn.class) + " = ?")
-                        .addWhereParameters(changeSet.getId(), changeSet.getAuthor(), changeSet.getFilePath());
+                final String liquibaseVersion = StringUtil.limitSize(LiquibaseUtil.getBuildVersion()
+                        .replaceAll("SNAPSHOT", "SNP")
+                        .replaceAll("beta", "b")
+                        .replaceAll("alpha", "b"), 20);
+	            if (statement.getExecType().ranBefore) {
+	                runStatement = new UpdateStatement(database.getLiquibaseCatalogName(), database.getLiquibaseSchemaName(), database.getDatabaseChangeLogTableName())
+	                        .addNewColumnValue("DATEEXECUTED", new DatabaseFunction(dateValue))
+	                        .addNewColumnValue("ORDEREXECUTED", Scope.getCurrentScope().getSingleton(ChangeLogHistoryServiceFactory.class).getChangeLogService(database).getNextSequenceValue())
+	                        .addNewColumnValue("MD5SUM", changeSet.generateCheckSum(ChecksumVersion.latest()).toString())
+	                        .addNewColumnValue("EXECTYPE", statement.getExecType().value)
+	                        .addNewColumnValue("DEPLOYMENT_ID", Scope.getCurrentScope().getSingleton(ChangeLogHistoryServiceFactory.class).getChangeLogService(database).getDeploymentId())
+	                        .addNewColumnValue(COMMENTS, getCommentsColumn(changeSet))
+	                        .addNewColumnValue(CONTEXTS, getContextsColumn(changeSet))
+	                        .addNewColumnValue(LABELS, getLabelsColumn(changeSet))
+                            .addNewColumnValue("LIQUIBASE", liquibaseVersion)
+	                        .setWhereClause(database.escapeObjectName("ID", LiquibaseColumn.class) + " = ? " +
+	                                "AND " + database.escapeObjectName("AUTHOR", LiquibaseColumn.class) + " = ? " +
+	                                "AND " + database.escapeObjectName("FILENAME", LiquibaseColumn.class) + " = ?")
+	                        .addWhereParameters(changeSet.getId(), changeSet.getAuthor(), changeSet.getFilePath());
 
                     if (tag != null) {
                         ((UpdateStatement) runStatement).addNewColumnValue("TAG", tag);
                     }
                 } else {
-                    runStatement = new InsertStatement(database.getLiquibaseCatalogName(), database.getLiquibaseSchemaName(), database.getDatabaseChangeLogTableName())
+					runStatement = new InsertStatement(database.getLiquibaseCatalogName(), database.getLiquibaseSchemaName(), database.getDatabaseChangeLogTableName())
                             .addColumnValue("ID", changeSet.getId())
                             .addColumnValue("AUTHOR", changeSet.getAuthor())
                             .addColumnValue("FILENAME", changeSet.getFilePath())
@@ -93,11 +98,7 @@ public class MarkChangeSetRanGenerator extends AbstractSqlGenerator<MarkChangeSe
                             .addColumnValue("EXECTYPE", statement.getExecType().value)
                             .addColumnValue(CONTEXTS, getContextsColumn(changeSet))
                             .addColumnValue(LABELS, getLabelsColumn(changeSet))
-                        .addColumnValue("LIQUIBASE", StringUtil.limitSize(LiquibaseUtil.getBuildVersion()
-                                                                                            .replaceAll("SNAPSHOT", "SNP")
-                                                                                            .replaceAll("beta", "b")
-                                                                                            .replaceAll("alpha", "b"), 20)
-                            )
+                            .addColumnValue("LIQUIBASE", liquibaseVersion)
                             .addColumnValue("DEPLOYMENT_ID", Scope.getCurrentScope().getSingleton(ChangeLogHistoryServiceFactory.class).getChangeLogService(database).getDeploymentId());
 
                     if (tag != null) {
