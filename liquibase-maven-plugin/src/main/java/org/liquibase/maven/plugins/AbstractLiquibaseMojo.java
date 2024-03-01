@@ -688,7 +688,7 @@ public abstract class AbstractLiquibaseMojo extends AbstractMojo {
     /**
      * If true, executed SQL is captured in the history table
      *
-     * @parameter property="liquibase.databaseChangelogCaptureSql"
+     * @parameter property="liquibase.dbclHistoryCaptureSql"
      */
     @PropertyElement(key = "liquibase.dbclHistory.captureSql")
     protected Boolean dbclHistoryCaptureSql;
@@ -696,7 +696,7 @@ public abstract class AbstractLiquibaseMojo extends AbstractMojo {
     /**
      * If true, executed SQL is captured in the history table
      *
-     * @parameter property="liquibase.databaseChangelogCaptureSql"
+     * @parameter property="liquibase.databaseChangelogHistoryCaptureSql"
      */
     @PropertyElement(key = "liquibase.databaseChangelogHistory.captureSql")
     protected Boolean databaseChangelogHistoryCaptureSql;
@@ -712,7 +712,7 @@ public abstract class AbstractLiquibaseMojo extends AbstractMojo {
     /**
      * If true, extensions are captured in the history table
      *
-     * @parameter property="liquibase.databaseChangelogCaptureExtensions"
+     * @parameter property="liquibase.databaseChangelogHistoryCaptureExtensions"
      */
     @PropertyElement(key = "liquibase.databaseChangelogHistory.captureExtensions")
     protected Boolean databaseChangelogHistoryCaptureExtensions;
