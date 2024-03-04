@@ -16,6 +16,8 @@ import liquibase.logging.Logger;
 import liquibase.resource.ResourceAccessor;
 import liquibase.ui.UIServiceEnum;
 import liquibase.util.StringUtil;
+import lombok.Getter;
+import lombok.Setter;
 import org.springframework.beans.factory.BeanNameAware;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.context.ResourceLoaderAware;
@@ -60,52 +62,71 @@ public class SpringLiquibase implements InitializingBean, BeanNameAware, Resourc
     protected final Logger log = Scope.getCurrentScope().getLog(SpringLiquibase.class);
     protected String beanName;
 
+    @Getter
+    @Setter
     protected ResourceLoader resourceLoader;
 
     protected DataSource dataSource;
     protected String changeLog;
+
+    @Getter
+    @Setter
     protected String contexts;
+
+    @Getter
+    @Setter
     protected String labelFilter;
+
+    @Getter
+    @Setter
     protected String tag;
     protected Map<String, String> parameters;
+
+    @Getter
+    @Setter
     protected String defaultSchema;
+
+    @Getter
+    @Setter
     protected String liquibaseSchema;
+
+    @Getter
+    @Setter
     protected String databaseChangeLogTable;
+
+    @Getter
+    @Setter
     protected String databaseChangeLogLockTable;
+
+    @Getter
+    @Setter
     protected String liquibaseTablespace;
+
+    @Getter
+    @Setter
     protected boolean dropFirst;
+
+    @Getter
+    @Setter
     protected boolean clearCheckSums;
+
+    @Setter
     protected boolean shouldRun = true;
+
+    @Setter
     protected File rollbackFile;
+
+    @Setter
     protected UpdateSummaryEnum showSummary;
     protected UpdateSummaryOutputEnum showSummaryOutput = UpdateSummaryOutputEnum.LOG;
 
     protected boolean testRollbackOnUpdate = false;
 
+    @Getter
     protected UIServiceEnum uiService = UIServiceEnum.LOGGER;
 
     public SpringLiquibase() {
         super();
-    }
-
-    public boolean isDropFirst() {
-        return dropFirst;
-    }
-
-    public void setDropFirst(boolean dropFirst) {
-        this.dropFirst = dropFirst;
-    }
-
-    public boolean isClearCheckSums() {
-        return clearCheckSums;
-    }
-
-    public void setClearCheckSums(boolean clearCheckSums) {
-        this.clearCheckSums = clearCheckSums;
-    }
-
-    public void setShouldRun(boolean shouldRun) {
-        this.shouldRun = shouldRun;
     }
 
     @java.lang.SuppressWarnings("squid:S2095")
@@ -168,14 +189,6 @@ public class SpringLiquibase implements InitializingBean, BeanNameAware, Resourc
         this.changeLog = dataModel;
     }
 
-    public String getContexts() {
-        return contexts;
-    }
-
-    public void setContexts(String contexts) {
-        this.contexts = contexts;
-    }
-
     /**
      * @deprecated use {@link #getLabelFilter()}
      */
@@ -188,62 +201,6 @@ public class SpringLiquibase implements InitializingBean, BeanNameAware, Resourc
      */
     public void setLabels(String labels) {
         setLabelFilter(labels);
-    }
-
-    public String getLabelFilter() {
-        return labelFilter;
-    }
-
-    public void setLabelFilter(String labelFilter) {
-        this.labelFilter = labelFilter;
-    }
-
-    public String getTag() {
-        return tag;
-    }
-
-    public void setTag(String tag) {
-        this.tag = tag;
-    }
-
-    public String getDefaultSchema() {
-        return defaultSchema;
-    }
-
-    public void setDefaultSchema(String defaultSchema) {
-        this.defaultSchema = defaultSchema;
-    }
-
-    public String getLiquibaseTablespace() {
-        return liquibaseTablespace;
-    }
-
-    public void setLiquibaseTablespace(String liquibaseTablespace) {
-        this.liquibaseTablespace = liquibaseTablespace;
-    }
-
-    public String getLiquibaseSchema() {
-        return liquibaseSchema;
-    }
-
-    public void setLiquibaseSchema(String liquibaseSchema) {
-        this.liquibaseSchema = liquibaseSchema;
-    }
-
-    public String getDatabaseChangeLogTable() {
-        return databaseChangeLogTable;
-    }
-
-    public void setDatabaseChangeLogTable(String databaseChangeLogTable) {
-        this.databaseChangeLogTable = databaseChangeLogTable;
-    }
-
-    public String getDatabaseChangeLogLockTable() {
-        return databaseChangeLogLockTable;
-    }
-
-    public void setDatabaseChangeLogLockTable(String databaseChangeLogLockTable) {
-        this.databaseChangeLogLockTable = databaseChangeLogLockTable;
     }
 
     /**
@@ -439,23 +396,6 @@ public class SpringLiquibase implements InitializingBean, BeanNameAware, Resourc
         this.beanName = name;
     }
 
-    public ResourceLoader getResourceLoader() {
-        return resourceLoader;
-    }
-
-    @Override
-    public void setResourceLoader(ResourceLoader resourceLoader) {
-        this.resourceLoader = resourceLoader;
-    }
-
-    public void setRollbackFile(File rollbackFile) {
-        this.rollbackFile = rollbackFile;
-    }
-
-    public void setShowSummary(UpdateSummaryEnum showSummary) {
-        this.showSummary = showSummary;
-    }
-
     public void setShowSummaryOutput(UpdateSummaryOutputEnum showSummaryOutput) {
         if (showSummaryOutput == null) {
             return;
@@ -468,10 +408,6 @@ public class SpringLiquibase implements InitializingBean, BeanNameAware, Resourc
             return;
         }
         this.uiService = uiService;
-    }
-
-    public UIServiceEnum getUiService() {
-        return uiService;
     }
 
     @Override
