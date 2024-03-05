@@ -77,6 +77,7 @@ public class MarkChangeSetRanGenerator extends AbstractSqlGenerator<MarkChangeSe
 	                        .addNewColumnValue(CONTEXTS, getContextsColumn(changeSet))
 	                        .addNewColumnValue(LABELS, getLabelsColumn(changeSet))
                             .addNewColumnValue("LIQUIBASE", liquibaseVersion)
+                            .addNewColumnValue("DESCRIPTION", limitSize(changeSet.getDescription()))
 	                        .setWhereClause(database.escapeObjectName("ID", LiquibaseColumn.class) + " = ? " +
 	                                "AND " + database.escapeObjectName("AUTHOR", LiquibaseColumn.class) + " = ? " +
 	                                "AND " + database.escapeObjectName("FILENAME", LiquibaseColumn.class) + " = ?")
