@@ -610,7 +610,7 @@ public abstract class AbstractFormattedChangeLogParser implements ChangeLogParse
     }
 
     protected void handleInvalidEmptyPreconditionCase(ChangeLogParameters changeLogParameters, ChangeSet changeSet, Matcher preconditionMatcher) throws ChangeLogParseException {
-        throw new NotImplementedException();
+        throw new NotImplementedException("Invalid empty precondition found");
     }
 
     private void handleRollbackSequence(String physicalChangeLogLocation, ChangeLogParameters changeLogParameters, DatabaseChangeLog changeLog, StringBuilder currentRollbackSequence, ChangeSet changeSet, Matcher rollbackSplitStatementsPatternMatcher, boolean rollbackSplitStatements, String rollbackEndDelimiter) throws ChangeLogParseException {
