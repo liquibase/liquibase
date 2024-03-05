@@ -4,6 +4,7 @@ import liquibase.parser.core.ParsedNode;
 import liquibase.parser.core.ParsedNodeException;
 import liquibase.resource.ResourceAccessor;
 import liquibase.util.StringUtil;
+import lombok.Getter;
 
 import java.util.HashSet;
 import java.util.Set;
@@ -12,6 +13,7 @@ public class AddColumnChangeVisitor extends AbstractChangeVisitor {
 
     private String change;
     private Set<String> dbms;
+    @Getter
     private String remove;
     @Override
     public String getName() {
@@ -25,9 +27,7 @@ public class AddColumnChangeVisitor extends AbstractChangeVisitor {
     public Set<String> getDbms() {
         return dbms;
     }
-    public String getRemove() {
-        return remove;
-    }
+
     @Override
     public String getSerializedObjectName() {
         return getName();
@@ -45,6 +45,5 @@ public class AddColumnChangeVisitor extends AbstractChangeVisitor {
         if (dbmsString != null) {
             this.dbms.addAll(StringUtil.splitAndTrim(dbmsString, ","));
         }
-
     }
 }
