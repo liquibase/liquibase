@@ -685,6 +685,38 @@ public abstract class AbstractLiquibaseMojo extends AbstractMojo {
     @PropertyElement(key = "liquibase.databaseChangelogHistory.enabled")
     protected Boolean databaseChangelogHistoryEnabled;
 
+    /**
+     * If true, executed SQL is captured in the history table
+     *
+     * @parameter property="liquibase.dbclHistoryCaptureSql"
+     */
+    @PropertyElement(key = "liquibase.dbclHistory.captureSql")
+    protected Boolean dbclHistoryCaptureSql;
+
+    /**
+     * If true, executed SQL is captured in the history table
+     *
+     * @parameter property="liquibase.databaseChangelogHistoryCaptureSql"
+     */
+    @PropertyElement(key = "liquibase.databaseChangelogHistory.captureSql")
+    protected Boolean databaseChangelogHistoryCaptureSql;
+
+    /**
+     * If true, extensions are captured in the history table
+     *
+     * @parameter property="liquibase.dbclHistoryCaptureExtensions"
+     */
+    @PropertyElement(key = "liquibase.dbclHistory.captureExtensions")
+    protected Boolean dbclHistoryCaptureExtensions;
+
+    /**
+     * If true, extensions are captured in the history table
+     *
+     * @parameter property="liquibase.databaseChangelogHistoryCaptureExtensions"
+     */
+    @PropertyElement(key = "liquibase.databaseChangelogHistory.captureExtensions")
+    protected Boolean databaseChangelogHistoryCaptureExtensions;
+
     protected String commandName;
     protected DefaultChangeExecListener defaultChangeExecListener;
     private static final ResourceBundle coreBundle = getBundle("liquibase/i18n/liquibase-core");
@@ -702,16 +734,40 @@ public abstract class AbstractLiquibaseMojo extends AbstractMojo {
         }
     }
 
-    private boolean isDbclHistoryEnabled() {
-        // The default value of this parameter is false, which is why this has this goofy logic.
-        if (dbclHistoryEnabled != null) {
-            return dbclHistoryEnabled;
-        }
-        if (databaseChangelogHistoryEnabled != null) {
-            return databaseChangelogHistoryEnabled;
-        }
-        return false;
+    /**
+     * Returns the first non-null Boolean value from the given two Boolean values.
+     * If the first value is not null, returns it. Otherwise, returns the second value.
+     * If both values are null, returns null.
+     *
+     * @param value The first Boolean value to check.
+     * @param altValue The second Boolean value to check.
+     * @return The first non-null Boolean value or null if both values are null.
+     */
+    private Boolean getBooleanValue(Boolean value, Boolean altValue) {
+        return value != null ? value : altValue;
     }
+
+    /**
+     * Checks if the database changelog history is enabled.
+     */
+    private Boolean isDbclHistoryEnabled() {
+        return getBooleanValue(dbclHistoryEnabled, databaseChangelogHistoryEnabled);
+    }
+
+    /**
+     * Checks if SQL capture is enabled for database changelog history.
+     */
+    private Boolean isDbclHistoryCaptureSql() {
+        return getBooleanValue(dbclHistoryCaptureSql, databaseChangelogHistoryCaptureSql);
+    }
+
+    /**
+     * Checks if extension capture is enabled for database changelog history.
+     */
+    private Boolean isDbclHistoryCaptureExtensions() {
+        return getBooleanValue(dbclHistoryCaptureExtensions, databaseChangelogHistoryCaptureExtensions);
+    }
+
 
     protected Writer getOutputWriter(final File outputFile) throws IOException {
         String encoding = this.outputFileEncoding;
@@ -927,6 +983,8 @@ public abstract class AbstractLiquibaseMojo extends AbstractMojo {
                         Map<String, Object> innerScopeValues = new HashMap<>();
                         innerScopeValues.put(key, preserveSchemaCase);
                         innerScopeValues.put("liquibase.dbclhistory.enabled", isDbclHistoryEnabled());
+                        innerScopeValues.put("liquibase.dbclhistory.captureSql", isDbclHistoryCaptureSql());
+                        innerScopeValues.put("liquibase.dbclhistory.captureExtensions", isDbclHistoryCaptureExtensions());
                         Scope.child(innerScopeValues, () -> performLiquibaseTask(liquibase));
                     } catch (LiquibaseException e) {
                         cleanup(database);
