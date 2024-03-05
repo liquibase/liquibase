@@ -13,6 +13,7 @@ public class RollbackReportParameters implements UpdateRollbackReportParameters 
     private Integer rollbackCount;
     private String rollbackTag;
     private String rollbackDate;
+    private String failedChangeset;
     private Boolean success = Boolean.TRUE; // assume success until we know we failed
     private String commandTitle = "Rollback";
     private final DatabaseInfo databaseInfo = new DatabaseInfo();
