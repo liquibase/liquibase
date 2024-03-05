@@ -81,24 +81,6 @@ public class FormattedSqlChangeLogParser extends AbstractFormattedChangeLogParse
     }
 
     @Override
-    protected void handleInvalidEmptyPreconditionCase(ChangeLogParameters changeLogParameters, ChangeSet changeSet, Matcher preconditionMatcher) throws ChangeLogParseException {
-        if (preconditionMatcher.groupCount() == 1) {
-            String name = StringUtil.trimToNull(preconditionMatcher.group(1));
-            if (name != null) {
-                if ("sql-check".equals(name)) {
-                    throw new ChangeLogParseException("Precondition sql check failed because of missing required expectedResult and sql parameters.");
-                } else if ("table-exists".equals(name)) {
-                    throw new ChangeLogParseException("Precondition table exists failed because of missing required table name parameter.");
-                } else if ("view-exists".equals(name)) {
-                    throw new ChangeLogParseException("Precondition view exists failed because of missing required view name parameter.");
-                } else {
-                    throw new ChangeLogParseException("The '" + name + "' precondition type is not supported.");
-                }
-            }
-        }
-    }
-
-    @Override
     protected void handlePreconditionCase(ChangeLogParameters changeLogParameters, ChangeSet changeSet, Matcher preconditionMatcher) throws ChangeLogParseException {
         if (changeSet.getPreconditions() == null) {
             // create the defaults
@@ -158,6 +140,24 @@ public class FormattedSqlChangeLogParser extends AbstractFormattedChangeLogParse
     @Override
     protected void setChangeSequence(ChangeLogParameters changeLogParameters, StringBuilder currentSequence, ChangeSet changeSet, AbstractSQLChange change) {
         change.setSql(changeLogParameters.expandExpressions(StringUtil.trimToNull(currentSequence.toString()), changeSet.getChangeLog()));
+    }
+
+    @Override
+    protected void handleInvalidEmptyPreconditionCase(ChangeLogParameters changeLogParameters, ChangeSet changeSet, Matcher preconditionMatcher) throws ChangeLogParseException {
+        if (preconditionMatcher.groupCount() == 1) {
+            String name = StringUtil.trimToNull(preconditionMatcher.group(1));
+            if (name != null) {
+                if ("sql-check".equals(name)) {
+                    throw new ChangeLogParseException("Precondition sql check failed because of missing required expectedResult and sql parameters.");
+                } else if ("table-exists".equals(name)) {
+                    throw new ChangeLogParseException("Precondition table exists failed because of missing required table name parameter.");
+                } else if ("view-exists".equals(name)) {
+                    throw new ChangeLogParseException("Precondition view exists failed because of missing required view name parameter.");
+                } else {
+                    throw new ChangeLogParseException("The '" + name + "' precondition type is not supported.");
+                }
+            }
+        }
     }
 
     private SqlPrecondition parseSqlCheckCondition(String body) throws ChangeLogParseException {
