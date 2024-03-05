@@ -13,6 +13,7 @@ import liquibase.statement.SequenceNextValueFunction;
 import liquibase.statement.SqlStatement;
 import liquibase.util.ObjectUtil;
 import liquibase.util.StringUtil;
+import lombok.Getter;
 
 import java.beans.PropertyDescriptor;
 import java.lang.reflect.Method;
@@ -48,11 +49,21 @@ public class ChangeParameterMetaData {
     private final String[] supportedDatabasesArg;
     private Optional<Method> readMethodRef = Optional.empty();
     private Optional<Method> writeMethodRef = Optional.empty();
+    @Getter
+    private final String[] alternateParameterNames;
 
     public ChangeParameterMetaData(Change change, String parameterName, String displayName, String description,
                                    Map<String, Object> exampleValues, String since, Type dataType,
                                    String[] requiredForDatabase, String[] supportedDatabases, String mustEqualExisting,
                                    LiquibaseSerializable.SerializationType serializationType) {
+        this(change, parameterName, displayName, description, exampleValues, since, dataType, requiredForDatabase,
+                supportedDatabases, mustEqualExisting, serializationType, null);
+    }
+
+    public ChangeParameterMetaData(Change change, String parameterName, String displayName, String description,
+                                   Map<String, Object> exampleValues, String since, Type dataType,
+                                   String[] requiredForDatabase, String[] supportedDatabases, String mustEqualExisting,
+                                   LiquibaseSerializable.SerializationType serializationType, String[] alternateParameterNames) {
         if (parameterName == null) {
             throw new UnexpectedLiquibaseException("Unexpected null parameterName");
         }
@@ -92,6 +103,7 @@ public class ChangeParameterMetaData {
 
         this.supportedDatabasesArg = supportedDatabases;
         this.requiredForDatabaseArg = requiredForDatabase;
+        this.alternateParameterNames = alternateParameterNames;
     }
 
     public ChangeParameterMetaData withAccessors(Method readMethod, Method writeMethod) {
