@@ -20,7 +20,6 @@ public class AddPrimaryKeyStatement extends AbstractSqlStatement {
     private final ColumnConfig[] columns;
     @Getter
     private final String constraintName;
-    @Getter
     private Boolean clustered;
 
     @Getter
@@ -56,6 +55,10 @@ public class AddPrimaryKeyStatement extends AbstractSqlStatement {
 
     public String getColumnNames() {
         return StringUtil.join(columns, ", ", (StringUtil.StringUtilFormatter<ColumnConfig>) obj -> obj.getName() + (obj.getDescending() != null && obj.getDescending() ? " DESC" : ""));
+    }
+
+    public Boolean isClustered() {
+        return clustered;
     }
 
     public AddPrimaryKeyStatement setClustered(Boolean clustered) {
