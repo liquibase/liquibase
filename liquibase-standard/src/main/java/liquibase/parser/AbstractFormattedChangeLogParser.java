@@ -14,6 +14,7 @@ import liquibase.exception.ChangeLogParseException;
 import liquibase.resource.ResourceAccessor;
 import liquibase.util.StreamUtil;
 import liquibase.util.StringUtil;
+import org.apache.commons.lang3.NotImplementedException;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -609,20 +610,7 @@ public abstract class AbstractFormattedChangeLogParser implements ChangeLogParse
     }
 
     protected void handleInvalidEmptyPreconditionCase(ChangeLogParameters changeLogParameters, ChangeSet changeSet, Matcher preconditionMatcher) throws ChangeLogParseException {
-        if (preconditionMatcher.groupCount() == 1) {
-            String name = StringUtil.trimToNull(preconditionMatcher.group(1));
-            if (name != null) {
-                if ("sql-check".equals(name)) {
-                    throw new ChangeLogParseException("Precondition sql check failed because of missing required expectedResult and sql parameters.");
-                } else if ("table-exists".equals(name)) {
-                    throw new ChangeLogParseException("Precondition table exists failed because of missing required table name parameter.");
-                } else if ("view-exists".equals(name)) {
-                    throw new ChangeLogParseException("Precondition view exists failed because of missing required view name parameter.");
-                } else {
-                    throw new ChangeLogParseException("The '" + name + "' precondition type is not supported.");
-                }
-            }
-        }
+        throw new NotImplementedException();
     }
 
     private void handleRollbackSequence(String physicalChangeLogLocation, ChangeLogParameters changeLogParameters, DatabaseChangeLog changeLog, StringBuilder currentRollbackSequence, ChangeSet changeSet, Matcher rollbackSplitStatementsPatternMatcher, boolean rollbackSplitStatements, String rollbackEndDelimiter) throws ChangeLogParseException {
