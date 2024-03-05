@@ -1,6 +1,9 @@
 package liquibase.integration.spring;
 
 import liquibase.Liquibase;
+import org.junit.Test;
+
+import static org.junit.Assert.assertEquals;
 
 /**
  * Tests for {@link SpringLiquibase}
@@ -20,7 +23,7 @@ public class SpringLiquibaseTest {
 //    private ArgumentCaptor<String> stringCaptor ;
 
 //    @Before
-//    public void setUp(){
+//    public void setUp() {
 //        liquibase = mock(Liquibase.class);
 //        springLiquibase.setContexts(TEST_CONTEXT);
 //        springLiquibase.setLabels(TEST_LABELS);
@@ -73,4 +76,14 @@ public class SpringLiquibaseTest {
 //        assertTrue(labelCaptor.getValue().getLabels().contains(TEST_LABELS));
 //        assertSame(stringCaptor.getValue(),TEST_TAG);
 //    }
+
+    @Test
+    public void customizer() throws Exception {
+        LiquibaseCustomizer customizer = liquibase -> liquibase.setChangeLogParameter("some key", "some value");
+        springLiquibase.setCustomizer(customizer);
+        try (Liquibase liquibase = springLiquibase.createLiquibase(null)) {
+            Object value = liquibase.getChangeLogParameters().getValue("some key", null);
+            assertEquals("some value", value);
+        }
+    }
 }
