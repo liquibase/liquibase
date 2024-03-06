@@ -14,6 +14,7 @@ import liquibase.exception.ChangeLogParseException;
 import liquibase.resource.ResourceAccessor;
 import liquibase.util.StreamUtil;
 import liquibase.util.StringUtil;
+import org.apache.commons.lang3.NotImplementedException;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -63,6 +64,11 @@ public abstract class AbstractFormattedChangeLogParser implements ChangeLogParse
 
     protected final String PRECONDITION_REGEX = String.format("\\s*%s[\\s]*precondition\\-([a-zA-Z0-9-]+) (.*)", getSingleLineCommentSequence());
     protected final Pattern PRECONDITION_PATTERN = Pattern.compile(PRECONDITION_REGEX, Pattern.CASE_INSENSITIVE);
+
+    protected final String
+            INVALID_EMPTY_PRECONDITION_REGEX = String.format("\\s*%s[\\s]*precondition\\-([a-zA-Z0-9-]+)", getSingleLineCommentSequence());
+
+    protected final Pattern INVALID_EMPTY_PRECONDITION_PATTERN = Pattern.compile(INVALID_EMPTY_PRECONDITION_REGEX, Pattern.CASE_INSENSITIVE);
 
     protected final String ALT_PRECONDITION_ONE_CHARACTER_REGEX = String.format("\\s*%s[\\s]*precondition(.*)", getSingleLineCommentOneCharacter());
     protected final Pattern ALT_PRECONDITION_ONE_CHARACTER_PATTERN = Pattern.compile(ALT_PRECONDITION_ONE_CHARACTER_REGEX, Pattern.CASE_INSENSITIVE);
@@ -181,6 +187,15 @@ public abstract class AbstractFormattedChangeLogParser implements ChangeLogParse
 
     protected static final String GLOBAL_REGEX = ".*global:(\\S+).*";
     protected final Pattern GLOBAL_PATTERN = Pattern.compile(GLOBAL_REGEX, Pattern.CASE_INSENSITIVE);
+
+    protected static final String VIEW_NAME_STATEMENT_REGEX = ".*view:(\\w+).*";
+    protected final Pattern VIEW_NAME_STATEMENT_PATTERN = Pattern.compile(VIEW_NAME_STATEMENT_REGEX, Pattern.CASE_INSENSITIVE);
+
+    protected static final String TABLE_NAME_STATEMENT_REGEX = ".*table:(\\w+).*";
+    protected final Pattern TABLE_NAME_STATEMENT_PATTERN = Pattern.compile(TABLE_NAME_STATEMENT_REGEX, Pattern.CASE_INSENSITIVE);
+
+    protected static final String SCHEMA_NAME_STATEMENT_REGEX = ".*schema:(\\w+).*";
+    protected final Pattern SCHEMA_NAME_STATEMENT_PATTERN = Pattern.compile(SCHEMA_NAME_STATEMENT_REGEX, Pattern.CASE_INSENSITIVE);
 
     protected abstract String getSingleLineCommentOneCharacter();
 
@@ -503,6 +518,8 @@ public abstract class AbstractFormattedChangeLogParser implements ChangeLogParse
         Matcher validCheckSumMatcher = VALID_CHECK_SUM_PATTERN.matcher(line);
         Matcher altValidCheckSumOneDashMatcher = ALT_VALID_CHECK_SUM_ONE_CHARACTER_PATTERN.matcher(line);
         Matcher rollbackMultiLineStartMatcher = ROLLBACK_MULTI_LINE_START_PATTERN.matcher(line);
+        Matcher invalidEmptyPreconditionMatcher = INVALID_EMPTY_PRECONDITION_PATTERN.matcher(line);
+
 
         if (commentMatcher.matches()) {
             if (commentMatcher.groupCount() == 0) {
@@ -549,6 +566,8 @@ public abstract class AbstractFormattedChangeLogParser implements ChangeLogParse
             String message =
                     String.format(EXCEPTION_MESSAGE, physicalChangeLogLocation, count, getSequenceName(), "--precondition-sql-check", getDocumentationLink());
             throw new ChangeLogParseException("\n" + message);
+        } else if (invalidEmptyPreconditionMatcher.matches()) {
+            handleInvalidEmptyPreconditionCase(changeLogParameters, changeSet, invalidEmptyPreconditionMatcher);
         } else {
             currentSequence.append(line).append(System.lineSeparator());
         }
@@ -588,6 +607,10 @@ public abstract class AbstractFormattedChangeLogParser implements ChangeLogParse
 
     protected InputStream openChangeLogFile(String physicalChangeLogLocation, ResourceAccessor resourceAccessor) throws IOException {
         return resourceAccessor.getExisting(physicalChangeLogLocation).openInputStream();
+    }
+
+    protected void handleInvalidEmptyPreconditionCase(ChangeLogParameters changeLogParameters, ChangeSet changeSet, Matcher preconditionMatcher) throws ChangeLogParseException {
+        throw new NotImplementedException("Invalid empty precondition found");
     }
 
     private void handleRollbackSequence(String physicalChangeLogLocation, ChangeLogParameters changeLogParameters, DatabaseChangeLog changeLog, StringBuilder currentRollbackSequence, ChangeSet changeSet, Matcher rollbackSplitStatementsPatternMatcher, boolean rollbackSplitStatements, String rollbackEndDelimiter) throws ChangeLogParseException {
