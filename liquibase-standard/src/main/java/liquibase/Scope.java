@@ -65,7 +65,8 @@ public class Scope {
         changeSet,
         osgiPlatform,
         checksumVersion,
-        latestChecksumVersion
+        latestChecksumVersion,
+        lpmArgs
     }
 
     public static final String JAVA_PROPERTIES = "javaProperties";
@@ -501,6 +502,10 @@ public class Scope {
         }
 
         return returnList;
+    }
+
+    public void setLpmArgs(String args) {
+        this.values.put(Attr.lpmArgs.name(), args);
     }
 
     @Override

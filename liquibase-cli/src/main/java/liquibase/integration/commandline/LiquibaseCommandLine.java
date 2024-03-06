@@ -347,7 +347,7 @@ public class LiquibaseCommandLine {
 
     public int execute(String[] args) {
         try {
-            final String[] finalArgs = adjustLegacyArgs(args);
+            final String[] finalArgs = adjustLpmArgs(adjustLegacyArgs(args));
 
             configureLogging(Level.OFF, null);
 
@@ -426,6 +426,29 @@ public class LiquibaseCommandLine {
         } finally {
             cleanup();
         }
+    }
+
+    /**
+     * If we find lpm command, everything after that should be treated as parameters to LPM.
+     * To handle that we use Scope.Attr.lpmArgs to store the parameters.
+     */
+    private String[] adjustLpmArgs(String[] strings) {
+        List<String> returnArgs = new ArrayList<>();
+        StringBuilder lpmArgs = null;
+        for (String arg : strings) {
+            if (lpmArgs == null) {
+                returnArgs.add(arg);
+            } else {
+                lpmArgs.append(arg).append(" ");
+            }
+            if ("lpm".equals(arg)) {
+                lpmArgs = new StringBuilder();
+            }
+        }
+        if (lpmArgs != null) {
+            Scope.getCurrentScope().setLpmArgs(lpmArgs.toString());
+        }
+        return returnArgs.toArray(new String[0]);
     }
 
     private void addEmptyMdcValues() {

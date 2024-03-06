@@ -17,6 +17,7 @@ liquibase.command.core.HistoryCommandStep
 liquibase.command.core.InternalHistoryCommandStep
 liquibase.command.core.InternalSnapshotCommandStep
 liquibase.command.core.ListLocksCommandStep
+liquibase.command.core.LpmCommandStep
 liquibase.command.core.MarkNextChangesetRanCommandStep
 liquibase.command.core.MarkNextChangesetRanSqlCommandStep
 liquibase.command.core.ReleaseLocksCommandStep
