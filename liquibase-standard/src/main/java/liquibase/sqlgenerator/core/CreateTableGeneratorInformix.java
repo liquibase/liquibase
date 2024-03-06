@@ -145,7 +145,7 @@ public class CreateTableGeneratorInformix extends CreateTableGenerator {
                 buffer.append(" CONSTRAINT ");
                 buffer.append(database.escapeConstraintName(pkConstraint.getConstraintName()));
             }
-            // Setting up table space for PK's index if it exist
+            // Setting up table space for PK's index if it exists
             buffer.append(",");
         }
 

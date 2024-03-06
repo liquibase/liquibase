@@ -187,7 +187,7 @@ public class CustomChangeWrapper extends AbstractChange {
      * or {@link CustomTaskRollback#rollback(liquibase.database.Database)} depending on the CustomChange implementation.
      * <p></p>
      * If the CustomChange returns a null SqlStatement array, this method returns an empty array. If a CustomTaskChange is being used, this method will return an empty array.
-     * Any {@link RollbackImpossibleException} exceptions thrown by the CustomChange will thrown by this method.
+     * Any {@link RollbackImpossibleException} exceptions thrown by the CustomChange will be thrown by this method.
      */
     @Override
     public SqlStatement[] generateRollbackStatements(Database database) throws RollbackImpossibleException {

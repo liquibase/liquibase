@@ -24,7 +24,7 @@ public @interface DatabaseChange {
     String description();
 
     /**
-     * Value to put into {@link ChangeMetaData#getPriority()} ()}
+     * Value to put into {@link ChangeMetaData#getPriority()}
      */
     int priority();
 

@@ -69,7 +69,7 @@ public class CreateSequenceGenerator extends AbstractSqlGenerator<CreateSequence
                     queryStringBuilder.append(" IF NOT EXISTS ");
                 }
             } catch (DatabaseException e) {
-                // we can not determinate the PostgreSQL version so we do not add this statement
+                // we can not determine the PostgreSQL version so we do not add this statement
             }
         }
         queryStringBuilder.append(database.escapeSequenceName(statement.getCatalogName(), statement.getSchemaName(), statement.getSequenceName()));
