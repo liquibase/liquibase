@@ -225,7 +225,7 @@ public interface ResourceAccessor extends AutoCloseable {
     }
 
     /**
-     * Finds a single specific {@link }. If multiple files match the given path, handle based on the {@link GlobalConfiguration#DUPLICATE_FILE_MODE} setting.
+     * Finds a single specific {@link Resource}. If multiple files match the given path, handle based on the {@link GlobalConfiguration#DUPLICATE_FILE_MODE} setting.
      * Default implementation calls {@link #getAll(String)}.
      *
      * @return a Resource even if the path does not exist
