@@ -38,7 +38,9 @@ public interface ExtensibleObject extends Cloneable {
     /**
      * Return the current value of the given attribute name, converted to the passed type.
      * If the passed attribute is null or not defined, returns null.
-     * If you do not know the type to convert to, pass Object.class as the type.
+     * If you do not know the type to convert to, pass Object.
+     *
+     * class as the type.
      * Conversion is done using {@link liquibase.util.ObjectUtil#convert(Object, Class)}.
      * Should traverse dot-separated attributes.
      */

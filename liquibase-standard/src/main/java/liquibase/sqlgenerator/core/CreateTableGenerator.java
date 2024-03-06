@@ -262,7 +262,7 @@ public class CreateTableGenerator extends AbstractSqlGenerator<CreateTableStatem
                 buffer.append(" PRIMARY KEY (");
                 buffer.append(database.escapeColumnNameList(StringUtil.join(getPrimaryKeyColumns(statement.getPrimaryKeyConstraint().getColumns(), database, autoIncrementColumns), ", ")));
                 buffer.append(")");
-                // Setting up table space for PK's index if it exist
+                // Setting up table space for PK's index if it exists
                 if (((database instanceof OracleDatabase) || (database instanceof PostgresDatabase)) && (StringUtil.isNotEmpty(statement
                         .getPrimaryKeyConstraint().getTablespace()))) {
                     buffer.append(" USING INDEX TABLESPACE ");
