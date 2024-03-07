@@ -76,7 +76,7 @@ public class LpmCommandStep extends AbstractCommandStep {
         Scope.getCurrentScope().getLog(getClass()).fine("Checking for LPM at " + lpmExecutable);
         File lpmExecutableFile = new File(lpmExecutable);
         if (!lpmExecutableFile.exists() || !lpmExecutableFile.isFile()) {
-            Scope.getCurrentScope().getUI().sendMessage("LPM not found at + '" + lpmExecutable + "' +. Don't worry, I'll install it for you.");
+            Scope.getCurrentScope().getUI().sendMessage("LPM not found at '" + lpmExecutable + "'. Don't worry, I'll install it for you.");
             this.installLpm(lpmHome);
         }
 
@@ -85,9 +85,11 @@ public class LpmCommandStep extends AbstractCommandStep {
     private void installLpm(String lpmHome) {
         ConfiguredValue<String> lpmVersionProperty = Scope.getCurrentScope().getSingleton(LiquibaseConfiguration.class)
                 .getCurrentConfiguredValue(ConfigurationValueConverter.STRING, null, "liquibase.lpmVersion");
+        //FIXME Need to find latest version of LPM from github release page if not specified
         final String version =  lpmVersionProperty != null && lpmVersionProperty.getValue() != null ? lpmVersionProperty.getValue() : "0.2.4";
         final String lpmUrl = String.format("https://github.com/liquibase/liquibase-package-manager/releases/download/v%s/lpm-%s-%s.zip", version, version, System.getProperty("os.name").toLowerCase().split(" ")[0]);
         final String lpmZip = String.format("%s%slpm.zip", lpmHome, File.separator);
+        Scope.getCurrentScope().getUI().sendMessage("Downloading LPM from " + lpmUrl);
         Path downloadedFilePath = DownloadUtil.downloadToFile(lpmUrl, new File(lpmZip));
         this.unzipLpm(downloadedFilePath, lpmHome);
         try {
