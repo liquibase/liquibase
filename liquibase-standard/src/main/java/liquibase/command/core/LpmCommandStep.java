@@ -66,11 +66,7 @@ public class LpmCommandStep extends AbstractCommandStep {
                 } while (line != null);
             }
 
-            int exitCode = process.waitFor();
-            if (exitCode != 0) {
-                throw new UnexpectedLiquibaseException("LPM command failed with error code " + exitCode + ". Check the logs for more information.");
-            }
-
+            process.waitFor();
         } catch (IOException | InterruptedException e) {
             throw new UnexpectedLiquibaseException(e);
         }
