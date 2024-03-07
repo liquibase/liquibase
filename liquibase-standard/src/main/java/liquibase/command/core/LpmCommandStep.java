@@ -100,7 +100,7 @@ public class LpmCommandStep extends AbstractCommandStep {
     }
 
     private void unzipLpm(Path lpmZip, String lpmHome) {
-        Scope.getCurrentScope().getUI().sendMessage("Unzipping LPM to " + lpmHome);
+        Scope.getCurrentScope().getLog(getClass()).info("Unzipping LPM to " + lpmHome);
         try {
             FileInputStream fis = new FileInputStream(lpmZip.toFile());
             ZipInputStream zis = new ZipInputStream(fis);
