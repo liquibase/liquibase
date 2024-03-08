@@ -2,7 +2,9 @@ package liquibase.report;
 
 import liquibase.database.Database;
 import liquibase.exception.DatabaseException;
+import lombok.AllArgsConstructor;
 import lombok.Data;
+import lombok.Getter;
 
 import java.util.Date;
 
@@ -14,6 +16,8 @@ public class RollbackReportParameters implements UpdateRollbackReportParameters 
     private String rollbackTag;
     private String rollbackDate;
     private String failedChangeset;
+    private String deploymentId;
+    private ChangesetDetails changesetDetails;
     private Boolean success = Boolean.TRUE; // assume success until we know we failed
     private String commandTitle = "Rollback";
     private final DatabaseInfo databaseInfo = new DatabaseInfo();
@@ -34,5 +38,13 @@ public class RollbackReportParameters implements UpdateRollbackReportParameters 
         this.getDatabaseInfo().setVersion(database.getDatabaseProductVersion());
         this.getDatabaseInfo().setDatabaseUrl(database.getConnection().getURL());
         this.setJdbcUrl(database.getConnection().getURL());
+    }
+
+    @Getter
+    @AllArgsConstructor
+    public static class ChangesetDetails {
+        private String id;
+        private String author;
+        private String path;
     }
 }
