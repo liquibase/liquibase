@@ -15,7 +15,7 @@ import static liquibase.ext.bigquery.database.BigqueryDatabase.BIGQUERY_PRIORITY
         minParameters = 0,
         maxParameters = 0,
         priority = BIGQUERY_PRIORITY_DATABASE,
-        aliases = { "clob" }
+        aliases = { "varchar", "clob" }
 )
 public class StringDataTypeBigQuery extends LiquibaseDataType {
     public StringDataTypeBigQuery() {
