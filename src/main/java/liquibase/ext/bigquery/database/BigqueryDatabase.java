@@ -53,6 +53,11 @@ public class BigqueryDatabase extends AbstractJdbcDatabase {
     }
 
     @Override
+    public boolean supportsDatabaseChangeLogHistory() {
+        return true;
+    }
+
+    @Override
     public String getCurrentDateTimeFunction() {
         return "CURRENT_DATETIME()";
     }

@@ -14,16 +14,19 @@ import static liquibase.ext.bigquery.database.BigqueryDatabase.BIGQUERY_PRIORITY
         name = "string",
         minParameters = 0,
         maxParameters = 0,
-        priority = BIGQUERY_PRIORITY_DATABASE
+        priority = BIGQUERY_PRIORITY_DATABASE,
+        aliases = { "clob" }
 )
 public class StringDataTypeBigQuery extends LiquibaseDataType {
     public StringDataTypeBigQuery() {
     }
 
+    @Override
     public boolean supports(Database database) {
         return database instanceof BigqueryDatabase;
     }
 
+    @Override
     public DatabaseDataType toDatabaseDataType(Database database) {
         if (database instanceof BigqueryDatabase) {
 
