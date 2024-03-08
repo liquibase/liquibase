@@ -249,7 +249,7 @@
         <dependency>
             <groupId>com.microsoft.sqlserver</groupId>
             <artifactId>mssql-jdbc</artifactId>
-            <version>12.4.1.jre8</version>
+            <version>12.6.1.jre8</version>
             <scope>test</scope>
         </dependency>
 
@@ -263,7 +263,7 @@
         <dependency>
             <groupId>org.mariadb.jdbc</groupId>
             <artifactId>mariadb-java-client</artifactId>
-            <version>3.3.2</version>
+            <version>3.3.3</version>
             <scope>test</scope>
         </dependency>
 
@@ -277,7 +277,7 @@
         <dependency>
             <groupId>com.oracle.database.jdbc</groupId>
             <artifactId>ojdbc8</artifactId>
-            <version>19.21.0.0</version>
+            <version>19.22.0.0</version>
             <scope>test</scope>
         </dependency>
 

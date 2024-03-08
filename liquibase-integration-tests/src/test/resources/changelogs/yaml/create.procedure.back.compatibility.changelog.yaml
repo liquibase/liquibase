@@ -1,0 +1,15 @@
+databaseChangeLog:
+  - changeSet:
+      id: 1
+      author: user
+      dbms: postgresql
+      changes:
+        - createProcedure:
+            procedureBody: |-
+              CREATE OR REPLACE PROCEDURE testHello()
+              LANGUAGE plpgsql
+              AS $$
+              BEGIN
+              raise notice 'this is test';
+              END $$
+            procedureName: MyProc
