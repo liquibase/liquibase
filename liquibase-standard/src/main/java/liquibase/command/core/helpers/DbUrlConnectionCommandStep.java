@@ -118,7 +118,7 @@ public class DbUrlConnectionCommandStep extends AbstractDatabaseConnectionComman
     }
 
     private static String getDriver(CommandScope commandScope) {
-        ConfiguredValue<Class> globalConfig = LiquibaseCommandLineConfiguration.DRIVER.getCurrentConfiguredValue();
+        ConfiguredValue<String> globalConfig = LiquibaseCommandLineConfiguration.DRIVER.getCurrentConfiguredValue();
         ConfiguredValue<String> commandConfig = commandScope.getConfiguredValue(DbUrlConnectionArgumentsCommandStep.DRIVER_ARG);
         if (globalConfig.found() && commandConfig.found()) {
             Scope.getCurrentScope().getLog(DbUrlConnectionCommandStep.class).warning("Ignoring the global " + LiquibaseCommandLineConfiguration.DRIVER.getKey() + " value in favor of the command value.");
@@ -127,7 +127,7 @@ public class DbUrlConnectionCommandStep extends AbstractDatabaseConnectionComman
             return commandConfig.getValue();
         }
         if (globalConfig.found()) {
-            return globalConfig.getValue().getName();
+            return globalConfig.getValue();
         }
         return null;
     }
