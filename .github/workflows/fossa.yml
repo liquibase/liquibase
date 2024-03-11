@@ -36,7 +36,7 @@ jobs:
       run: fossa report attribution --format csv
 
     - name: FTP Deploy
-      uses: SamKirkland/FTP-Deploy-Action@4.3.5
+      uses: SamKirkland/FTP-Deploy-Action@v4.3.5
       with:
         server: ${{ secrets.WP_ENGINE_SERVER }}
         username: ${{ secrets.WP_ENGINE_USERNAME }}
