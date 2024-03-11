@@ -25,7 +25,9 @@ jobs:
     # Run FOSSA Tests
     - name: Run FOSSA Tests
       uses: fossas/fossa-action@main
-      run-tests: true  # Run FOSSA tests for policy checks
+      with:
+        api-key: ${{ secrets.FOSSA_API_KEY }}  # Set this secret in your GitHub repo settings
+        run-tests: true  # Run FOSSA tests for policy checks
 
     - name: Generate FOSSA CSV Report
       if: always()
