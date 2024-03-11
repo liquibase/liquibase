@@ -302,10 +302,11 @@ public class ShowSummaryUtil {
         int filtered = filterDenied.size();
         ShowSummaryGeneratorFactory showSummaryGeneratorFactory = Scope.getCurrentScope().getSingleton(ShowSummaryGeneratorFactory.class);
         ShowSummaryGenerator showSummaryGenerator = showSummaryGeneratorFactory.getShowSummaryGenerator();
-        showSummaryGenerator.getAllAdditionalChangeSetStatus(runChangeLogIterator);
+        List<ChangeSetStatus> additionalChangeSetStatus = showSummaryGenerator.getAllAdditionalChangeSetStatus(runChangeLogIterator);
         int totalAccepted = calculateAccepted(statusVisitor, changeExecListener);
         int totalPreviouslyRun = calculatePreviouslyRun(statusVisitor);
-        int totalInChangelog = totalAccepted + totalPreviouslyRun + skipped + filtered;
+        int additionalStatusCount = additionalChangeSetStatus.size();
+        int totalInChangelog = totalAccepted + totalPreviouslyRun + skipped + filtered + additionalStatusCount;
         UpdateSummary updateSummaryMdc = new UpdateSummary(null, totalAccepted, totalPreviouslyRun, null, totalInChangelog);
 
         String message = "UPDATE SUMMARY";
