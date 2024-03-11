@@ -10,7 +10,8 @@ jobs:
   fossa-scan:
     # Specifies the type of runner to use
     runs-on: ubuntu-latest
-
+    env:
+      FOSSA_API_KEY: ${{ secrets.FOSSA_API_KEY }}
     # Sequence of steps that make up a single job
     steps:
     # Checkout the code to the GitHub runner
@@ -20,20 +21,14 @@ jobs:
     # Run FOSSA Scan
     - name: Run FOSSA Scan
       uses: fossas/fossa-action@main
-      with:
-        api-key: ${{ secrets.FOSSA_API_KEY }}  # Set this secret in your GitHub repo settings
 
     # Run FOSSA Tests
     - name: Run FOSSA Tests
       uses: fossas/fossa-action@main
-      with:
-        api-key: ${{ secrets.FOSSA_API_KEY }}  # Set this secret in your GitHub repo settings
-        run-tests: true  # Run FOSSA tests for policy checks
+      run-tests: true  # Run FOSSA tests for policy checks
 
     - name: Generate FOSSA CSV Report
       if: always()
-      with:
-        api-key: ${{ secrets.FOSSA_API_KEY }}
       run: fossa report attribution --format csv
 
 #    - name: FTP Deploy
