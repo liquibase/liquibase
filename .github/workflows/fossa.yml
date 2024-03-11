@@ -29,3 +29,8 @@ jobs:
       with:
         api-key: ${{secrets.FOSSA_API_KEY}}  # Set this secret in your GitHub repo settings
         run-tests: true  # Run FOSSA tests for policy checks
+
+
+    - name: Generate FOSSA CSV Report
+      if: always()
+      run: fossa --json-to-csv fossa_report.json > fossa_report.csv
