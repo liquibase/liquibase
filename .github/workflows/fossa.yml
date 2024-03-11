@@ -21,27 +21,28 @@ jobs:
     - name: Run FOSSA Scan
       uses: fossas/fossa-action@main
       with:
-        api-key: ${{secrets.FOSSA_API_KEY}}  # Set this secret in your GitHub repo settings
+        api-key: ${{ secrets.FOSSA_API_KEY }}  # Set this secret in your GitHub repo settings
 
     # Run FOSSA Tests
     - name: Run FOSSA Tests
       uses: fossas/fossa-action@main
       with:
-        api-key: ${{secrets.FOSSA_API_KEY}}  # Set this secret in your GitHub repo settings
+        api-key: ${{ secrets.FOSSA_API_KEY }}  # Set this secret in your GitHub repo settings
         run-tests: true  # Run FOSSA tests for policy checks
-
 
     - name: Generate FOSSA CSV Report
       if: always()
+      with:
+        api-key: ${{ secrets.FOSSA_API_KEY }}
       run: fossa report attribution --format csv
 
-    - name: FTP Deploy
-      uses: SamKirkland/FTP-Deploy-Action@v4.3.5
-      with:
-        server: ${{ secrets.WP_ENGINE_SERVER }}
-        username: ${{ secrets.WP_ENGINE_USERNAME }}
-        password: ${{ secrets.WP_ENGINE_PASSWORD }}
-        local-dir: './'
-        remote-dir: '/path/to/remote/directory/'
-        protocol: 'sftp'
-        port: 2222
+#    - name: FTP Deploy
+#      uses: SamKirkland/FTP-Deploy-Action@v4.3.5
+#      with:
+#        server: ${{ secrets.WP_ENGINE_SERVER }}
+#        username: ${{ secrets.WP_ENGINE_USERNAME }}
+#        password: ${{ secrets.WP_ENGINE_PASSWORD }}
+#        local-dir: './'
+#        remote-dir: '/path/to/remote/directory/'
+#        protocol: 'sftp'
+#        port: 2222
