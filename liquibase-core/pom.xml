@@ -23,6 +23,7 @@
     <url>http://www.liquibase.com</url>
 
     <!-- must re-specify this or the final pom will have the submodule info appended to it -->
+    <!-- must re-specify this or the final pom will have the submodule info appended to it -->
     <scm>
         <connection>scm:git:git@github.com:liquibase/liquibase.git</connection>
         <developerConnection>scm:git:git@github.com:liquibase/liquibase.git</developerConnection>
