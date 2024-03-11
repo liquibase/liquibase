@@ -33,4 +33,15 @@ jobs:
 
     - name: Generate FOSSA CSV Report
       if: always()
-      run: fossa --json-to-csv fossa_report.json > fossa_report.csv
+      run: fossa report attribution --format csv
+
+    - name: FTP Deploy
+      uses: SamKirkland/FTP-Deploy-Action@4.3.5
+      with:
+        server: ${{ secrets.WP_ENGINE_SERVER }}
+        username: ${{ secrets.WP_ENGINE_USERNAME }}
+        password: ${{ secrets.WP_ENGINE_PASSWORD }}
+        local-dir: './'
+        remote-dir: '/path/to/remote/directory/'
+        protocol: 'sftp'
+        port: 2222
