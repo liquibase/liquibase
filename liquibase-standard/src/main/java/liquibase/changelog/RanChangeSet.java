@@ -4,6 +4,7 @@ import liquibase.ChecksumVersion;
 import liquibase.ContextExpression;
 import liquibase.Labels;
 import liquibase.change.CheckSum;
+import liquibase.util.FilenameUtil;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
@@ -133,6 +134,6 @@ public class RanChangeSet {
     private boolean isSamePath(String filePath) {
         String normalizedFilePath = DatabaseChangeLog.normalizePath(this.getChangeLog());
         return normalizedFilePath.equalsIgnoreCase(DatabaseChangeLog.normalizePath(filePath))
-                || normalizedFilePath.equalsIgnoreCase(Paths.get(filePath).normalize().toString().replace("\\", "/"));
+                || (FilenameUtil.isValidPath(filePath) && normalizedFilePath.equalsIgnoreCase(Paths.get(filePath).normalize().toString().replace("\\", "/")));
     }
 }

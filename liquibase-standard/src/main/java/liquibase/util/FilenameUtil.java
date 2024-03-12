@@ -132,4 +132,19 @@ public class FilenameUtil {
         }
         return fileName;
     }
+
+    /**
+     * Check if the given path is a valid path
+     *
+     * @param path to check
+     * @return true if the path is valid, false otherwise
+     */
+    public static boolean isValidPath(String path) {
+        try {
+            Paths.get(path);
+        } catch (InvalidPathException e) {
+            return false;
+        }
+        return true;
+    }
 }
