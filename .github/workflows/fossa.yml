@@ -35,6 +35,13 @@ jobs:
         FOSSA_API_KEY: ${{ secrets.FOSSA_API_KEY }}
       run: fossa report attribution --format csv
 
+    - name: Upload FOSSA CSV Report
+      uses: actions/upload-artifact@v2
+      with:
+        name: fossa-report
+        path: .
+
+
 #    - name: FTP Deploy
 #      uses: SamKirkland/FTP-Deploy-Action@v4.3.5
 #      with:
