@@ -95,8 +95,7 @@ public class UpdateCommandStep extends AbstractUpdateCommandStep implements Clea
 
     @Override
     public List<Class<?>> requiredDependencies() {
-        List<Class<?>> deps = Arrays.asList(Database.class, DatabaseChangeLog.class, ChangeExecListener.class, ChangeLogParameters.class, UpdateSummaryEnum.class);
-        return deps;
+        return Arrays.asList(Database.class, DatabaseChangeLog.class, ChangeExecListener.class, ChangeLogParameters.class, UpdateSummaryEnum.class);
     }
 
     @Override
