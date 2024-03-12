@@ -59,7 +59,7 @@ public class BigqueryDatabase extends AbstractJdbcDatabase {
 
     @Override
     public String correctObjectName(String objectName, Class<? extends DatabaseObject> objectType) {
-        if (objectType.isInstance(Table.class) && objectName.equalsIgnoreCase("DATABASECHANGELOGHISTORY")) {
+        if (Table.class.isAssignableFrom(objectType) && objectName.equalsIgnoreCase("DATABASECHANGELOGHISTORY")) {
             return "DATABASECHANGELOGHISTORY"; // historically Bigquery control tables have been upper case
         }
         return super.correctObjectName(objectName, objectType);
