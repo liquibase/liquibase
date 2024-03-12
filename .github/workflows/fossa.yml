@@ -36,7 +36,8 @@ jobs:
       run: fossa report attribution --format csv
 
     - name: Upload FOSSA CSV Report
-      uses: actions/upload-artifact@v2
+      if: always()
+      uses: actions/upload-artifact@v3
       with:
         name: fossa-report
         path: .
