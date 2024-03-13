@@ -33,7 +33,7 @@ jobs:
       if: always()
       env:
         FOSSA_API_KEY: ${{ secrets.FOSSA_API_KEY }}
-      run: fossa report attribution --format csv
+      run: fossa report attribution --format html > fossa_report.html
 
     - name: Upload FOSSA CSV Report
       if: always()
