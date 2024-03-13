@@ -22,9 +22,6 @@ on:
     paths-ignore:
       - '**.md'
 
-env:
-  MAVEN_VERSION: '3.9.2'
-
 jobs:
   setup:
     name: Setup
@@ -78,27 +75,22 @@ jobs:
         with:
           ref: ${{ github.event.pull_request.head.sha || github.event.after}}
       - name: Set up Java for publishing to GitHub Repository
-        uses: actions/setup-java@v3
+        uses: actions/setup-java@v4
         with:
           java-version: '17'
           distribution: 'temurin'
           cache: 'maven'
           server-id: liquibase
 
-      - name: Set up Maven
-        uses: stCarolas/setup-maven@v4.5
-        with:
-          maven-version: ${{ env.MAVEN_VERSION }}
-
       # Version artifact based off of branch and commit SHA.
       - name: Version Artifact
         run: |
-          mvn versions:set "-DnewVersion=${{ needs.setup.outputs.thisBranchName }}-SNAPSHOT"
-          #mvn versions:set "-DnewVersion=${{ inputs.branchName }}-SNAPSHOT"
+          ./mvnw versions:set "-DnewVersion=${{ needs.setup.outputs.thisBranchName }}-SNAPSHOT"
+          #./mvnw versions:set "-DnewVersion=${{ inputs.branchName }}-SNAPSHOT"
 
       # Publish to GitHub Packages
       - name: Publish package
         run: |
-          mvn -B clean deploy -pl '!liquibase-dist' -DskipTests=true "-Dbuild.repository.owner=liquibase" "-Dbuild.repository.name=liquibase" "-Dbuild.branch=${{ needs.setup.outputs.thisBranchName }}" "-Dbuild.number=${{ github.run_number }}" "-Dbuild.commit=${{ needs.setup.outputs.latestMergeSha }}" "-Dbuild.timestamp=${{ needs.setup.outputs.timeStamp }}"
+          ./mvnw -B clean deploy -pl '!liquibase-dist' -DskipTests=true "-Dbuild.repository.owner=liquibase" "-Dbuild.repository.name=liquibase" "-Dbuild.branch=${{ needs.setup.outputs.thisBranchName }}" "-Dbuild.number=${{ github.run_number }}" "-Dbuild.commit=${{ needs.setup.outputs.latestMergeSha }}" "-Dbuild.timestamp=${{ needs.setup.outputs.timeStamp }}"
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

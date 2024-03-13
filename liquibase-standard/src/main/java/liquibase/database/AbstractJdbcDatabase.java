@@ -592,7 +592,12 @@ public abstract class AbstractJdbcDatabase implements Database {
 
             if (generateIncrementBy) {
                 if (generateStartWith) {
-                    autoIncrementClause += ", ";
+                    if(!(this instanceof PostgresDatabase)) {
+                        autoIncrementClause += ", ";
+                    }
+                    else {
+                        autoIncrementClause += " ";
+                    }
 
                 }
 
