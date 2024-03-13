@@ -14,7 +14,7 @@ import java.util.logging.Level;
  */
 public class LiquibaseCommandLineConfiguration implements AutoloadedConfigurations {
 
-    public static final ConfigurationDefinition<Class> DRIVER;
+    public static final ConfigurationDefinition<String> DRIVER;
     public static final ConfigurationDefinition<Class> DATABASE_CLASS;
     public static final ConfigurationDefinition<String> CLASSPATH;
     public static final ConfigurationDefinition<String> DRIVER_PROPERTIES_FILE;
@@ -39,7 +39,7 @@ public class LiquibaseCommandLineConfiguration implements AutoloadedConfiguratio
     static {
         ConfigurationDefinition.Builder builder = new ConfigurationDefinition.Builder("liquibase");
 
-        DRIVER = builder.define("driver", Class.class).setDescription("Database driver class").build();
+        DRIVER = builder.define("driver", String.class).setDescription("Database driver class").build();
         DATABASE_CLASS = builder.define("databaseClass", Class.class).setDescription("Class to use for Database implementation").build();
         CLASSPATH = builder.define("classpath", String.class).setDescription("Additional classpath entries to use").build();
         DRIVER_PROPERTIES_FILE = builder.define("driverPropertiesFile", String.class)
