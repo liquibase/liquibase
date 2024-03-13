@@ -41,6 +41,8 @@ public class GlobalConfiguration implements AutoloadedConfigurations {
 
     public static final ConfigurationDefinition<Boolean> VALIDATE_XML_CHANGELOG_FILES;
 
+    public static final ConfigurationDefinition<Boolean> DROPALL_REQUIRE_FORCE;
+
     /**
      * @deprecated No longer used
      */
@@ -256,6 +258,12 @@ public class GlobalConfiguration implements AutoloadedConfigurations {
                 .setDescription("Will perform xsd validation of XML changelog files. When many XML changelog files are included this validation may impact Liquibase performance. Defaults to true.")
                 .setValueHandler(ValueHandlerUtil::booleanValueHandler)
                 .setDefaultValue(true)
+                .build();
+
+        DROPALL_REQUIRE_FORCE = builder.define("dropAllRequireForce", Boolean.class)
+                .setDescription("Should Liquibase require the user to specify a 'force' argument to use the dropAll command")
+                .setValueHandler(ValueHandlerUtil::booleanValueHandler)
+                .setDefaultValue(false)
                 .build();
 
         UI_SERVICE = builder.define("uiService", UIServiceEnum.class)

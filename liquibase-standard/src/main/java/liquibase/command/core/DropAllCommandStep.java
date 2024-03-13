@@ -1,9 +1,11 @@
 package liquibase.command.core;
 
 import liquibase.CatalogAndSchema;
+import liquibase.GlobalConfiguration;
 import liquibase.Scope;
 import liquibase.changelog.ChangeLogHistoryServiceFactory;
 import liquibase.command.*;
+import liquibase.configuration.LiquibaseConfiguration;
 import liquibase.database.Database;
 import liquibase.exception.DatabaseException;
 import liquibase.exception.LiquibaseException;
@@ -12,6 +14,7 @@ import liquibase.lockservice.LockService;
 import liquibase.lockservice.LockServiceFactory;
 import liquibase.logging.Logger;
 import liquibase.util.StringUtil;
+import liquibase.util.ValueHandlerUtil;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -27,12 +30,20 @@ public class DropAllCommandStep extends AbstractCommandStep {
     public static final CommandArgumentDefinition<String> SCHEMAS_ARG;
     public static final CommandArgumentDefinition<CatalogAndSchema[]> CATALOG_AND_SCHEMAS_ARG;
 
+    public static final CommandArgumentDefinition<Boolean> FORCE_ARG;
+
     static {
         CommandBuilder builder = new CommandBuilder(COMMAND_NAME);
         SCHEMAS_ARG = builder.argument("schemas", String.class).description("Schemas to include in drop").build();
         CATALOG_AND_SCHEMAS_ARG = builder.argument("catalogAndSchemas", CatalogAndSchema[].class)
                 .description("Catalog and schemas to include in drop. It has precedence over SCHEMAS_ARG").supersededBy(SCHEMAS_ARG).hidden().build();
         SCHEMAS_ARG.setSupersededBy(CATALOG_AND_SCHEMAS_ARG);
+        FORCE_ARG = builder.argument("force", Boolean.class)
+                .description("Argument to allow use of dropAll with values of 'true' or 'false'. The default is 'false'.")
+                .setValueHandler(ValueHandlerUtil::booleanValueHandler)
+                .required()
+                .defaultValue(false)
+                .build();
     }
 
     @Override
@@ -54,6 +65,23 @@ public class DropAllCommandStep extends AbstractCommandStep {
     public void run(CommandResultsBuilder resultsBuilder) throws Exception {
         CommandScope commandScope = resultsBuilder.getCommandScope();
         Database database = (Database) commandScope.getDependency(Database.class);
+        if (Boolean.FALSE.equals(GlobalConfiguration.DROPALL_REQUIRE_FORCE.getCurrentValue())) {
+            String noRequirementForForceMessage =
+               String.format("The drop-all command may result in unrecoverable destructive changes to objects at '%s'.%n" +
+                             "To protect against unwanted drops, set --dropAll=true, which " +
+                             "will require a --force=true flag on the command.%nLearn more at https://docs.liquibase.com/dropall.%n",
+                        database.getConnection().getURL());
+            Scope.getCurrentScope().getUI().sendMessage("INFO: " + noRequirementForForceMessage);
+        } else {
+            boolean force = commandScope.getArgumentValue(FORCE_ARG);
+            if (!force) {
+                String message =
+                    "The drop-all command may result in unrecoverable destructive changes by dropping all the objects at database '" +
+                    database.getConnection().getURL() +
+                    "'.  This message can be suppressed and the drop-all command executed by adding the --force flag.";
+                throw new LiquibaseException(message);
+            }
+        }
         LockService lockService = LockServiceFactory.getInstance().getLockService(database);
         lockService.waitForLock();
 
