@@ -66,6 +66,14 @@ public class BigqueryDatabase extends AbstractJdbcDatabase {
     }
 
     @Override
+    public String escapeStringForDatabase(String string) {
+        if (string == null) {
+            return null;
+        }
+        return super.escapeStringForDatabase(string).replace("''", "\\'");
+    }
+
+    @Override
     public String getCurrentDateTimeFunction() {
         return "CURRENT_DATETIME()";
     }
