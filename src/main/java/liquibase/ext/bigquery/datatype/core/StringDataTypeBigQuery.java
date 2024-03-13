@@ -47,6 +47,16 @@ public class StringDataTypeBigQuery extends LiquibaseDataType {
 
     }
 
+    @Override
+    public String objectToSql(Object value, Database database) {
+        String ret =  super.objectToSql(value, database);
+        if (ret.contains("\n")) {
+            return "''" + ret + "''";
+        } else {
+            return ret;
+        }
+    }
+
     public LoadDataChange.LOAD_DATA_TYPE getLoadTypeName() {
         return LoadDataChange.LOAD_DATA_TYPE.STRING;
     }
