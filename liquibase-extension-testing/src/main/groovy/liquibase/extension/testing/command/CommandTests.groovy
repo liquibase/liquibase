@@ -722,6 +722,12 @@ Long Description: ${commandDefinition.getLongDescription() ?: "NOT SET"}
             }
         }
 
+        if (returnList.isEmpty()) {
+            throw new RuntimeException("Required test systems not found! " +
+                    "Make sure your test systems are specified in your liquibase.sdk.yaml " +
+                    "and that you are not accidentally filtering out all tests.")
+        }
+
         def descriptions =
                 returnList.stream()
                         .map({ rtp -> rtp.definition.commandTestDefinition.joinedCommand + ": '" + rtp.definition.description + "'" })
