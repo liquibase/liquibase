@@ -37,7 +37,7 @@ class SimpleSqlGrammarTest extends Specification {
         "mysql escaped quotes '\\''"                           | ["mysql", " ", "escaped", " ", "quotes", " ", "'\\''"]
         "invalid ' sql"                                        | ["invalid", " ", "'", " ", "sql"]
         "'invalid' ' sql"                                      | ["'invalid'", " ", "'", " ", "sql"]
-        "utf8-〠＠chars works"                                   | ["utf8", "-", "〠＠chars", " ", "works"]
+        "utf8-〠＠chars works"                                  | ["utf8", "-", "〠＠chars", " ", "works"]
         "single '\\' works"                                    | ["single", " ", "'\\'", " ", "works"]
         "double '\\\\' works"                                  | ["double", " ", "'\\\\'", " ", "works"]
         "unquoted \\\\ works"                                  | ["unquoted", " ", "\\", "\\", " ", "works"]
@@ -52,5 +52,11 @@ class SimpleSqlGrammarTest extends Specification {
         "This has a \\ and symbol ≤ (u2264)"                   | ["This", " ", "has", " ", "a", " ", "\\", " ", "and", " ", "symbol", " ", "≤", " ", "(", "u2264", ")"]
         "This ≤ (u2264) is before the \\"                      | ["This", " ", "≤", " ", "(", "u2264", ")", " ", "is", " ", "before", " ", "the", " ", "\\"]
         "This has an unicode char ÀÀÀÀÀÀ+++ãããioú≤₢"           | ["This", " ", "has", " ", "an", " ", "unicode"," ", "char", " ", "ÀÀÀÀÀÀ", "+", "+", "+", "ãããioú", "≤", "₢"]
+        "select 'foo\\_bar' from sys.dual;"                    | ["select", " ", "'foo\\_bar'", " ", "from", " ", "sys.dual", ";"]
+        "select \"foo\\_bar\" from sys.dual;"                    | ["select", " ", "\"foo\\_bar\"", " ", "from", " ", "sys.dual", ";"]
+        "select 'foo\\sbar' from sys.dual;"                    | ["select", " ", "'foo\\sbar'", " ", "from", " ", "sys.dual", ";"]
+        "select \"foo\\sbar\" from sys.dual;"                    | ["select", " ", "\"foo\\sbar\"", " ", "from", " ", "sys.dual", ";"]
+        "select '' from sys.dual;"                             | ["select", " ", "''", " ", "from", " ", "sys.dual", ";"]
+        "select \"\" from sys.dual;"                           | ["select", " ", "\"\"", " ", "from", " ", "sys.dual", ";"]
     }
 }
