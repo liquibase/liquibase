@@ -35,11 +35,35 @@ jobs:
         FOSSA_API_KEY: ${{ secrets.FOSSA_API_KEY }}
       run: fossa report attribution --format html > fossa_report.html
 
+    - name: Get latest draft release tag from OSS repository
+      id: get_tag
+      uses: actions/github-script@v7
+      with:
+        github-token: ${{ secrets.GITHUB_TOKEN }}
+        script: |
+          const response = await github.rest.repos.getLatestRelease({
+            owner: 'liquibase',
+            repo: 'liquibase',
+          });
+          const tag_name = response.data.tag_name;
+          console.log(tag_name);
+          core.setOutput("tag_name", tag_name.startsWith('v') ? tag_name.substring(1) : tag_name);
+          core.setOutput("release_date", response.data.created_at.substr(0, 10));  // Extract only the date part
+
+    - name: Generate FOSSA CSV Report
+      if: always()
+      env:
+        FOSSA_API_KEY: ${{ secrets.FOSSA_API_KEY }}
+      run: |
+        report_filename="liquibase-${{ steps.get_tag.outputs.tag_name }}-${{ steps.get_tag.outputs.release_date }}.html"
+        fossa report attribution --format html > $report_filename
+        echo "FOSSA report generated: $report_filename"
+
     - name: Upload FOSSA CSV Report
       if: always()
       uses: actions/upload-artifact@v3
       with:
-        name: fossa-report
+        name: ${{ report_filename }}
         path: .
 
 
