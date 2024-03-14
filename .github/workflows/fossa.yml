@@ -54,11 +54,12 @@ jobs:
         report_filename="liquibase-${{ steps.get_tag.outputs.tag_name }}-${{ steps.get_tag.outputs.release_date }}.html"
         fossa report attribution --format html > $report_filename
         echo "FOSSA report generated: $report_filename"
+        echo "::set-output name=report_filename::$report_filename"
 
     - name: Upload FOSSA HTML Report
       if: always()
       uses: actions/upload-artifact@v3
       with:
-        name: ${{ steps.generate_report.outputs.report_filename }}
+        name: "${{ steps.generate_report.outputs.report_filename }}"
         path: .
 
