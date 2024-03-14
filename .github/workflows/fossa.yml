@@ -45,6 +45,7 @@ jobs:
           core.setOutput("release_date", response.data.created_at.substr(0, 10));  // Extract only the date part
 
     - name: Generate FOSSA CSV Report
+      id: generate_report
       if: always()
       env:
         FOSSA_API_KEY: ${{ secrets.FOSSA_API_KEY }}
@@ -57,7 +58,7 @@ jobs:
       if: always()
       uses: actions/upload-artifact@v3
       with:
-        name: ${{ report_filename }}
+        name: ${{ steps.generate_report.outputs.report_filename }}
         path: .
 
 
