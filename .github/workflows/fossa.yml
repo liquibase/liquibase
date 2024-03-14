@@ -30,6 +30,7 @@ jobs:
         run-tests: true  # Run FOSSA tests for policy checks
 
     - name: Get latest draft release tag from OSS repository
+      if: always()
       id: get_tag
       uses: actions/github-script@v7
       with:
@@ -44,7 +45,7 @@ jobs:
           core.setOutput("tag_name", tag_name.startsWith('v') ? tag_name.substring(1) : tag_name);
           core.setOutput("release_date", response.data.created_at.substr(0, 10));  // Extract only the date part
 
-    - name: Generate FOSSA CSV Report
+    - name: Generate FOSSA HTML Report
       id: generate_report
       if: always()
       env:
@@ -54,21 +55,10 @@ jobs:
         fossa report attribution --format html > $report_filename
         echo "FOSSA report generated: $report_filename"
 
-    - name: Upload FOSSA CSV Report
+    - name: Upload FOSSA HTML Report
       if: always()
       uses: actions/upload-artifact@v3
       with:
         name: ${{ steps.generate_report.outputs.report_filename }}
         path: .
 
-
-#    - name: FTP Deploy
-#      uses: SamKirkland/FTP-Deploy-Action@v4.3.5
-#      with:
-#        server: ${{ secrets.WP_ENGINE_SERVER }}
-#        username: ${{ secrets.WP_ENGINE_USERNAME }}
-#        password: ${{ secrets.WP_ENGINE_PASSWORD }}
-#        local-dir: './'
-#        remote-dir: '/path/to/remote/directory/'
-#        protocol: 'sftp'
-#        port: 2222
