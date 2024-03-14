@@ -10,6 +10,7 @@ import liquibase.command.providers.ReferenceDatabase;
 import liquibase.configuration.ConfigurationValueObfuscator;
 import liquibase.database.Database;
 import liquibase.database.ObjectQuotingStrategy;
+import liquibase.database.core.MSSQLDatabase;
 import liquibase.diff.DiffResult;
 import liquibase.diff.output.DiffOutputControl;
 import liquibase.diff.output.changelog.DiffToChangeLog;
@@ -126,8 +127,15 @@ public class GenerateChangelogCommandStep extends AbstractChangelogCommandStep {
         diffOutputControl.setDataDir(commandScope.getArgumentValue(DATA_OUTPUT_DIR_ARG));
         referenceDatabase.setOutputDefaultSchema(diffOutputControl.getIncludeSchema());
 
-        if(commandScope.getArgumentValue(GenerateChangelogCommandStep.USE_OR_REPLACE_OPTION).booleanValue()) {
+        //
+        // For MSSQL, if we have the --use-or-replace-option, then we need to also include the schema
+        // because the generator code might need it for CreateView
+        //
+        if (commandScope.getArgumentValue(GenerateChangelogCommandStep.USE_OR_REPLACE_OPTION).booleanValue()) {
             diffOutputControl.setReplaceIfExistsSet(true);
+            if (referenceDatabase instanceof MSSQLDatabase) {
+                diffOutputControl.setIncludeSchema(true);
+            }
         }
 
         InternalSnapshotCommandStep.logUnsupportedDatabase(referenceDatabase, this.getClass());
