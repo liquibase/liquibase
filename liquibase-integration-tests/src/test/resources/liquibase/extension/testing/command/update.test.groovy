@@ -6,7 +6,6 @@ import liquibase.changelog.RanChangeSet
 import liquibase.database.Database
 import liquibase.exception.CommandExecutionException
 import liquibase.exception.CommandValidationException
-import liquibase.extension.testing.setup.SetupEnvironmentVariableProvider
 
 import java.util.regex.Pattern
 
@@ -520,5 +519,36 @@ Total change sets:            1
                                         ]
         ]
         expectedException = CommandExecutionException
+    }
+
+    run "Ignore on includeAll", {
+        arguments = [
+                url          : { it.url },
+                username     : { it.username },
+                password     : { it.password },
+                changelogFile: "changelogs/common/includerelative/pathinclude1.ignored.changelog.xml",
+                showSummary: "VERBOSE"
+        ]
+
+        expectedOutput = """
+UPDATE SUMMARY
+Run:                          1
+Previously run:               0
+Filtered out:                 1
+-------------------------------
+Total change sets:            2
+
+
+FILTERED CHANGE SETS SUMMARY
+Ignored:                      1
+
++--------------------------------------------------------------+----------------------+
+| Changeset Info                                               | Reason Skipped       |
++--------------------------------------------------------------+----------------------+
+|                                                              | Changeset is ignored |
+| changelogs/common/includerelative/includeAll/pathinclude2.ch |                      |
+| angelog.xml::1::nvoxland                                     |                      |
++--------------------------------------------------------------+----------------------+
+"""
     }
 }
