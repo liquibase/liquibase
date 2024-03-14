@@ -29,12 +29,6 @@ jobs:
         api-key: ${{ secrets.FOSSA_API_KEY }}  # Set this secret in your GitHub repo settings
         run-tests: true  # Run FOSSA tests for policy checks
 
-    - name: Generate FOSSA CSV Report
-      if: always()
-      env:
-        FOSSA_API_KEY: ${{ secrets.FOSSA_API_KEY }}
-      run: fossa report attribution --format html > fossa_report.html
-
     - name: Get latest draft release tag from OSS repository
       id: get_tag
       uses: actions/github-script@v7
