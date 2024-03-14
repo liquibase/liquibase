@@ -4,7 +4,7 @@ import liquibase.change.core.LoadDataChange;
 import liquibase.database.Database;
 import liquibase.datatype.DataTypeInfo;
 import liquibase.datatype.DatabaseDataType;
-import liquibase.datatype.LiquibaseDataType;
+import liquibase.datatype.core.VarcharType;
 import liquibase.ext.bigquery.database.BigqueryDatabase;
 
 import static liquibase.ext.bigquery.database.BigqueryDatabase.BIGQUERY_PRIORITY_DATABASE;
@@ -15,9 +15,9 @@ import static liquibase.ext.bigquery.database.BigqueryDatabase.BIGQUERY_PRIORITY
         minParameters = 0,
         maxParameters = 0,
         priority = BIGQUERY_PRIORITY_DATABASE,
-        aliases = { "varchar", "clob" }
+        aliases = { "varchar", "clob", "java.lang.String" }
 )
-public class StringDataTypeBigQuery extends LiquibaseDataType {
+public class StringDataTypeBigQuery extends VarcharType {
     public StringDataTypeBigQuery() {
     }
 
