@@ -6,7 +6,6 @@ import liquibase.changelog.RanChangeSet
 import liquibase.database.Database
 import liquibase.exception.CommandExecutionException
 import liquibase.exception.CommandValidationException
-import liquibase.extension.testing.setup.SetupEnvironmentVariableProvider
 
 import java.util.regex.Pattern
 
@@ -511,11 +510,11 @@ Optional Args:
                                         [
                                                 """
 UPDATE SUMMARY
-Run:                          1
+Run:                          0
 Previously run:               0
 Filtered out:                 0
 -------------------------------
-Total change sets:            1
+Total change sets:            0
 """
                                         ]
         ]
