@@ -131,7 +131,7 @@ CREATE VIEW employees_view AS SELECT FirstName FROM [dbo].Employees;
 
         then:
         noExceptionThrown()
-        generatedChangelogContents.contains("N'CREATE VIEW [DBO].[employees_view] AS SELECT '")
+        generatedChangelogContents.contains("N'CREATE VIEW [employees_view] AS SELECT '")
 
         cleanup:
         try {
