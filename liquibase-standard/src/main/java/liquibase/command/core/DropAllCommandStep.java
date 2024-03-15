@@ -68,7 +68,7 @@ public class DropAllCommandStep extends AbstractCommandStep {
         if (Boolean.FALSE.equals(GlobalConfiguration.DROPALL_REQUIRE_FORCE.getCurrentValue())) {
             String noRequirementForForceMessage =
                String.format("The drop-all command may result in unrecoverable destructive changes to objects at '%s'.%n" +
-                             "To protect against unwanted drops, set --dropAll=true, which " +
+                             "To protect against unwanted drops, set --dropAllRequireForce=true, which " +
                              "will require a --force=true flag on the command.%nLearn more at https://docs.liquibase.com/dropall.%n",
                         database.getConnection().getURL());
             Scope.getCurrentScope().getUI().sendMessage("INFO: " + noRequirementForForceMessage);
