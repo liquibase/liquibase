@@ -148,14 +148,6 @@ Global Options
                                environment variable:
                                'LIQUIBASE_DRIVER_PROPERTIES_FILE')
 
-      --drop-all-require-force=PARAM
-                             Should Liquibase require the user to specify a
-                               'force' argument to use the dropAll command
-                             DEFAULT: false
-                             (defaults file: 'liquibase.dropAllRequireForce',
-                               environment variable:
-                               'LIQUIBASE_DROP_ALL_REQUIRE_FORCE')
-
       --duplicate-file-mode=PARAM
                              How to handle multiple files being found in the
                                search path that have duplicate paths. Options
