@@ -74,7 +74,7 @@
         <junit-jupiter.version>5.10.2</junit-jupiter.version>
         <groovy.version>2.5.23</groovy.version>
         <spock.version>1.3-groovy-2.5</spock.version>
-        <spring.version>5.3.28</spring.version>
+        <spring.version>6.1.5</spring.version>
         <maven-failsafe-plugin.version>3.2.5</maven-failsafe-plugin.version>
         <jacoco-maven-plugin.version>0.8.11</jacoco-maven-plugin.version>
         <maven-surefire-plugin.version>3.2.5</maven-surefire-plugin.version>
