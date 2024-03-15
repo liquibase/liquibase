@@ -59,8 +59,6 @@ public class SnapshotGeneratorChain {
             return null;
         }
 
-        boolean firstRoundDone = false;
-        SnapshotGenerator lastGenerator = null;
         T lastObject = example;
         while (snapshotGenerators.hasNext()) {
             SnapshotGenerator generator = snapshotGenerators.next();
@@ -71,27 +69,8 @@ public class SnapshotGeneratorChain {
             if ((object != null) && (object.getSnapshotId() == null)) {
                 object.setSnapshotId(snapshotIdService.generateId());
             }
-            // only first generator in the chain is allowed to create new instances - subsequent ones are not
-            if (firstRoundDone && object != lastObject) {
-                throw new DatabaseException(String.format("Snapshot generator %s has returned a different reference from the previous generator %s.\n" +
-                                                          "\tSnapshot object was: %s, it is now: %s.\n" +
-                                                          "\tConsider declaring %1$s as being replaced by one the generator in the chain via liquibase.snapshot.SnapshotGenerator#replaces.",
-                        generator.getClass().getName(),
-                        lastGenerator.getClass().getName(),
-                        identity(lastObject),
-                        identity(object)));
-            }
             lastObject = object;
-            lastGenerator = generator;
-            firstRoundDone = true;
         }
         return lastObject;
-    }
-
-    private static String identity(Object object) {
-        if (object == null) {
-            return "null";
-        }
-        return String.format("%s@%s", object.getClass(), System.identityHashCode(object));
     }
 }
