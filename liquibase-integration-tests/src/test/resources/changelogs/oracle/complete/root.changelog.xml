@@ -456,5 +456,11 @@ END testSP;
     <changeSet id="8" author="constraint-check">
         <dropNotNullConstraint tableName="unnamed_constraint" columnName="id"/>
     </changeSet>
+    <changeSet id="SlashEndDelimiterTest" author="mallod">
+        <sql endDelimiter="/" splitStatements="true" stripComments="false">
+            CREATE USER mytestuser1 IDENTIFIED BY "abcde12345" PROFILE DEFAULT ACCOUNT UNLOCK/
+            GRANT CREATE TABLE TO mytestuser1/
+        </sql>
+    </changeSet>
 
 </databaseChangeLog>
