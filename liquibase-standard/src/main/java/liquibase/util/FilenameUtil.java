@@ -112,14 +112,15 @@ public class FilenameUtil {
         }
 
         fileName = fileName.replaceAll(" ", "_")
-                .replaceAll("/", "_")
-                .replaceAll(":", "_")
-                .replaceAll("\"", "_")
-                .replaceAll("\\|", "_")
-                .replaceAll("\\*", "_")
-                .replaceAll("\\?", "_")
-                .replaceAll("<", "_")
-                .replaceAll(">", "_");
+                .replace("/", "_")
+                .replace(":", "_")
+                .replace("\"", "_")
+                .replace("\\|", "_")
+                .replace("\\*", "_")
+                .replace("\\?", "_")
+                .replace("<", "_")
+                .replace(">", "_")
+                .replace("@", "_");
 
         boolean done = false;
         while (!done) {
