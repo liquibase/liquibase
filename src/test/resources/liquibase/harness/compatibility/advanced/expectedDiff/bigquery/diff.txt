@@ -1,0 +1,45 @@
+Reference Database:  @ jdbc:bigquery://https://console.cloud.google.com/bigquery;ProjectId=testautomation-370822;OAuthType=1;DefaultDataset=tatiana_testing; (Default Schema: tatiana_testing)
+Comparison Database:  @ jdbc:bigquery://https://console.cloud.google.com/bigquery;ProjectId=testautomation-370822;OAuthType=1;DefaultDataset=tatiana_alternate_ds; (Default Schema: tatiana_alternate_ds)
+Compared Schemas: tatiana_testing -> tatiana_alternate_ds
+Product Name: EQUAL
+Product Version: EQUAL
+Missing Catalog(s): NONE
+Unexpected Catalog(s): NONE
+Changed Catalog(s): NONE
+Missing Column(s): 
+     tatiana_testing.test_table.dateColumn
+     tatiana_testing.test_table.intColumn
+     tatiana_testing.test_table.test_column
+     tatiana_testing.test_table_xml.test_column
+     tatiana_testing.test_table.varcharColumn
+Unexpected Column(s): 
+     tatiana_alternate_ds.test_table_secondary.test_column
+     tatiana_alternate_ds.test_table_secondary.varcharColumn
+Changed Column(s): NONE
+Missing Foreign Key(s): NONE
+Unexpected Foreign Key(s): NONE
+Changed Foreign Key(s): NONE
+Missing Index(s): NONE
+Unexpected Index(s): NONE
+Changed Index(s): NONE
+Missing Primary Key(s): NONE
+Unexpected Primary Key(s): NONE
+Changed Primary Key(s): NONE
+Missing Schema(s): NONE
+Unexpected Schema(s): NONE
+Changed Schema(s): NONE
+Missing Sequence(s): NONE
+Unexpected Sequence(s): NONE
+Changed Sequence(s): NONE
+Missing Table(s): 
+     test_table
+     test_table_xml
+Unexpected Table(s): 
+     test_table_secondary
+Changed Table(s): NONE
+Missing Unique Constraint(s): NONE
+Unexpected Unique Constraint(s): NONE
+Changed Unique Constraint(s): NONE
+Missing View(s): NONE
+Unexpected View(s): NONE
+Changed View(s): NONE
