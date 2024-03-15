@@ -458,8 +458,8 @@ END testSP;
     </changeSet>
     <changeSet id="SlashEndDelimiterTest" author="mallod">
         <sql endDelimiter="/" splitStatements="true" stripComments="false">
-            CREATE USER mytestuser1 IDENTIFIED BY "abcde12345" PROFILE DEFAULT ACCOUNT UNLOCK/
-            GRANT CREATE TABLE TO mytestuser1/
+            SELECT * FROM unnamed_constraint/
+            update liquibaseRunInfo set timesRan=timesRan+1/
         </sql>
     </changeSet>
 
