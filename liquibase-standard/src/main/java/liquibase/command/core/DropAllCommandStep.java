@@ -30,6 +30,8 @@ public class DropAllCommandStep extends AbstractCommandStep {
     public static final CommandArgumentDefinition<String> SCHEMAS_ARG;
     public static final CommandArgumentDefinition<CatalogAndSchema[]> CATALOG_AND_SCHEMAS_ARG;
 
+    public static final CommandArgumentDefinition<Boolean> REQUIRE_FORCE_ARG;
+
     public static final CommandArgumentDefinition<Boolean> FORCE_ARG;
 
     static {
@@ -38,6 +40,12 @@ public class DropAllCommandStep extends AbstractCommandStep {
         CATALOG_AND_SCHEMAS_ARG = builder.argument("catalogAndSchemas", CatalogAndSchema[].class)
                 .description("Catalog and schemas to include in drop. It has precedence over SCHEMAS_ARG").supersededBy(SCHEMAS_ARG).hidden().build();
         SCHEMAS_ARG.setSupersededBy(CATALOG_AND_SCHEMAS_ARG);
+        REQUIRE_FORCE_ARG = builder.argument("requireForce", Boolean.class)
+                .description("Argument to require user of dropAll to supply a 'force' argument, with values of 'true' or 'false'. The default is 'false'.")
+                .setValueHandler(ValueHandlerUtil::booleanValueHandler)
+                .required()
+                .defaultValue(false)
+                .build();
         FORCE_ARG = builder.argument("force", Boolean.class)
                 .description("Argument to allow use of dropAll with values of 'true' or 'false'. The default is 'false'.")
                 .setValueHandler(ValueHandlerUtil::booleanValueHandler)
@@ -65,12 +73,12 @@ public class DropAllCommandStep extends AbstractCommandStep {
     public void run(CommandResultsBuilder resultsBuilder) throws Exception {
         CommandScope commandScope = resultsBuilder.getCommandScope();
         Database database = (Database) commandScope.getDependency(Database.class);
-        if (Boolean.FALSE.equals(GlobalConfiguration.DROPALL_REQUIRE_FORCE.getCurrentValue())) {
+        if (Boolean.FALSE.equals(commandScope.getArgumentValue(REQUIRE_FORCE_ARG))) {
             String noRequirementForForceMessage =
-               String.format("The drop-all command may result in unrecoverable destructive changes to objects at '%s'.%n" +
-                             "To protect against unwanted drops, set --dropAllRequireForce=true, which " +
-                             "will require a --force=true flag on the command.%nLearn more at https://docs.liquibase.com/dropall.%n",
-                        database.getConnection().getURL());
+                    String.format("The drop-all command may result in unrecoverable destructive changes to objects at '%s'.%n" +
+                                    "To protect against unwanted drops, set --requireForce=true, which " +
+                                    "will require a --force=true flag on the command.%nLearn more at https://docs.liquibase.com/dropall.%n",
+                            database.getConnection().getURL());
             Scope.getCurrentScope().getUI().sendMessage("INFO: " + noRequirementForForceMessage);
         } else {
             boolean force = commandScope.getArgumentValue(FORCE_ARG);

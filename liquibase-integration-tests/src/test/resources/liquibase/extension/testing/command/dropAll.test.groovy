@@ -15,6 +15,7 @@ Short Description: Drop all database objects owned by the user
 Long Description: NOT SET
 Required Args:
   force (Boolean) Argument to allow use of dropAll with values of 'true' or 'false'. The default is 'false'.
+  requireForce (Boolean) Argument to require user of dropAll to supply a 'force' argument, with values of 'true' or 'false'. The default is 'false'.
   url (String) The JDBC database connection URL
     OBFUSCATED
 Optional Args:
@@ -75,7 +76,7 @@ Optional Args:
 
         expectedUI = [
             "INFO: The drop-all command may result in unrecoverable destructive changes to objects at",
-            "To protect against unwanted drops, set --dropAll=true, which will require a --force=true flag on the command.",
+            "To protect against unwanted drops, set --requireForce=true, which will require a --force=true flag on the command.",
             "Learn more at https://docs.liquibase.com/dropall."
         ]
     }
@@ -126,7 +127,7 @@ Optional Args:
 
         expectedUI = [
                 "INFO: The drop-all command may result in unrecoverable destructive changes to objects at",
-                "To protect against unwanted drops, set --dropAll=true, which will require a --force=true flag on the command.",
+                "To protect against unwanted drops, set --requireForce=true, which will require a --force=true flag on the command.",
                 "Learn more at https://docs.liquibase.com/dropall."
         ]
     }
@@ -139,7 +140,7 @@ Optional Args:
                 force: { true }
         ]
         setup {
-            def add = [ LIQUIBASE_DROP_ALL_REQUIRE_FORCE:"true" ]
+            def add = [ LIQUIBASE_COMMAND_DROP_ALL_REQUIRE_FORCE:"true" ]
             String[] remove = [:]
             run(
                     new SetupEnvironmentVariableProvider(add, remove)
@@ -185,15 +186,11 @@ Optional Args:
         arguments = [
                 url       : { it.url },
                 username  : { it.username },
-                password  : { it.password }
+                password  : { it.password },
+                requireForce: { true }
         ]
         setup {
             cleanResources(SetupCleanResources.CleanupMode.CLEAN_ON_BOTH, "liquibase.flowfile.yaml")
-            def add = [ LIQUIBASE_DROP_ALL_REQUIRE_FORCE:"true" ]
-            String[] remove = [:]
-            run(
-                    new SetupEnvironmentVariableProvider(add, remove)
-            )
             database = [
                     new CreateTableChange(
                             tableName: "FirstTable",
