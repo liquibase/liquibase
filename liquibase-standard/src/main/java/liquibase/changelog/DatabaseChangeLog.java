@@ -924,11 +924,12 @@ public class DatabaseChangeLog implements Comparable<DatabaseChangeLog>, Conditi
         if (isRelativePath) {
             try {
                 fileName = resourceAccessor.get(this.getPhysicalFilePath()).resolveSibling(fileName).getPath();
+                fileName = normalizePath(Paths.get(fileName).toString());
             } catch (IOException e) {
                 throw new UnexpectedLiquibaseException(e);
             }
         }
-        final String normalizedFilePath = normalizePath(Paths.get(fileName).toString());
+        final String normalizedFilePath = fileName;
 
         DatabaseChangeLog changeLog;
         try {
