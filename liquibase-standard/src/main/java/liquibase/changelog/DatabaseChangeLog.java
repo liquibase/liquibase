@@ -951,6 +951,7 @@ public class DatabaseChangeLog implements Comparable<DatabaseChangeLog>, Conditi
                 ChangeLogParser parser = ChangeLogParserFactory.getInstance().getParser(normalizedFilePath, resourceAccessor);
 
                 if (modifyChangeSets != null) {
+                    // Some parser need to know it's not a top level changelog, in modifyChangeSets flow 'runWith' attributes are added later on
                     changeLog = Scope.child(Collections.singletonMap("modifyChangeSets", true),
                             () -> parser.parse(normalizedFilePath, changeLogParameters, resourceAccessor));
                 } else {
