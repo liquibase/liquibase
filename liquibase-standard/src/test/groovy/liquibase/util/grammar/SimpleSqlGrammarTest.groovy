@@ -53,10 +53,12 @@ class SimpleSqlGrammarTest extends Specification {
         "This ≤ (u2264) is before the \\"                      | ["This", " ", "≤", " ", "(", "u2264", ")", " ", "is", " ", "before", " ", "the", " ", "\\"]
         "This has an unicode char ÀÀÀÀÀÀ+++ãããioú≤₢"           | ["This", " ", "has", " ", "an", " ", "unicode"," ", "char", " ", "ÀÀÀÀÀÀ", "+", "+", "+", "ãããioú", "≤", "₢"]
         "select 'foo\\_bar' from sys.dual;"                    | ["select", " ", "'foo\\_bar'", " ", "from", " ", "sys.dual", ";"]
-        "select \"foo\\_bar\" from sys.dual;"                    | ["select", " ", "\"foo\\_bar\"", " ", "from", " ", "sys.dual", ";"]
+        "select \"foo\\_bar\" from sys.dual;"                  | ["select", " ", "\"foo\\_bar\"", " ", "from", " ", "sys.dual", ";"]
         "select 'foo\\sbar' from sys.dual;"                    | ["select", " ", "'foo\\sbar'", " ", "from", " ", "sys.dual", ";"]
-        "select \"foo\\sbar\" from sys.dual;"                    | ["select", " ", "\"foo\\sbar\"", " ", "from", " ", "sys.dual", ";"]
+        "select \"foo\\sbar\" from sys.dual;"                  | ["select", " ", "\"foo\\sbar\"", " ", "from", " ", "sys.dual", ";"]
         "select '' from sys.dual;"                             | ["select", " ", "''", " ", "from", " ", "sys.dual", ";"]
         "select \"\" from sys.dual;"                           | ["select", " ", "\"\"", " ", "from", " ", "sys.dual", ";"]
+        "select q'~;\\~' from sys.dual;"                       | ["select", " ", "q", "'~;\\~'", " ", "from", " ", "sys.dual", ";"]
+        "select q'{\\\n;\n\\}' from sys.dual;"                 | ["select", " ", "q", "'{\\\n;\n\\}'", " ", "from", " ", "sys.dual", ";"]
     }
 }
