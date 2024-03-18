@@ -66,7 +66,6 @@ class StandardServiceLocatorTest extends Specification {
                 SqlGenerator.class,
                 SnapshotGenerator.class,
                 Executor.class,
-//                LicenseService.class,
                 DatabaseConnection.class,
         ]
     }
