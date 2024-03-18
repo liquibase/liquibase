@@ -71,8 +71,8 @@
         <argLine></argLine>
         <ant.version>1.10.14</ant.version>
         <junit-jupiter.version>5.10.2</junit-jupiter.version>
-        <groovy.version>2.5.23</groovy.version>
-        <spock.version>1.3-groovy-2.5</spock.version>
+        <groovy.version>4.0.20</groovy.version>
+        <spock.version>2.3-groovy-4.0</spock.version>
         <spring.version>5.3.28</spring.version>
         <maven-failsafe-plugin.version>3.2.5</maven-failsafe-plugin.version>
         <jacoco-maven-plugin.version>0.8.11</jacoco-maven-plugin.version>
@@ -112,7 +112,7 @@
     <dependencyManagement>
         <dependencies>
             <dependency>
-                <groupId>org.codehaus.groovy</groupId>
+                <groupId>org.apache.groovy</groupId>
                 <artifactId>groovy-bom</artifactId>
                 <version>${groovy.version}</version>
                 <type>pom</type>
@@ -146,13 +146,13 @@
                 <version>${ant.version}</version>
             </dependency>
             <dependency> <!-- use a specific Groovy version rather than the one specified by spock-core -->
-                <groupId>org.codehaus.groovy</groupId>
+                <groupId>org.apache.groovy</groupId>
                 <artifactId>groovy-all</artifactId>
                 <version>${groovy.version}</version>
                 <type>pom</type>
                 <exclusions>
                     <exclusion>
-                        <groupId>org.codehaus.groovy</groupId>
+                        <groupId>org.apache.groovy</groupId>
                         <artifactId>groovy-testng</artifactId>
                     </exclusion>
                 </exclusions>
@@ -195,7 +195,7 @@
         </dependency>
 
         <dependency>
-            <groupId>org.codehaus.groovy</groupId>
+            <groupId>org.apache.groovy</groupId>
             <artifactId>groovy-all</artifactId>
             <type>pom</type>
             <scope>test</scope>
