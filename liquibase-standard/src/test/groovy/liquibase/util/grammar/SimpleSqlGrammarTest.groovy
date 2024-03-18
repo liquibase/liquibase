@@ -8,12 +8,15 @@ class SimpleSqlGrammarTest extends Specification {
     @Unroll
     def test() {
         when:
-        def tokenManager = new SimpleSqlGrammarTokenManager(new SimpleCharStream(new StringReader(input)));
+        def tokenManager = new SimpleSqlGrammarTokenManager(new SimpleCharStream(new StringReader(input)))
         def grammar = new SimpleSqlGrammar(tokenManager)
 
         def tokens = new ArrayList<String>()
         Token token
+        System.out.println("----------------------------------------------------------------")
+        System.out.println("'" + input + "'")
         while ((token = grammar.getNextToken()).kind != SimpleSqlGrammarConstants.EOF) {
+            System.out.println("    " + String.format('%1$-32s', SimpleSqlGrammarConstants.tokenImage[token.kind]) + ": '" + token.toString() + "'")
             tokens.add(token.toString())
         }
 
