@@ -4,7 +4,7 @@ import liquibase.change.core.LoadDataChange;
 import liquibase.database.Database;
 import liquibase.datatype.DataTypeInfo;
 import liquibase.datatype.DatabaseDataType;
-import liquibase.datatype.LiquibaseDataType;
+import liquibase.datatype.core.VarcharType;
 import liquibase.ext.bigquery.database.BigqueryDatabase;
 
 import static liquibase.ext.bigquery.database.BigqueryDatabase.BIGQUERY_PRIORITY_DATABASE;
@@ -14,16 +14,19 @@ import static liquibase.ext.bigquery.database.BigqueryDatabase.BIGQUERY_PRIORITY
         name = "string",
         minParameters = 0,
         maxParameters = 0,
-        priority = BIGQUERY_PRIORITY_DATABASE
+        priority = BIGQUERY_PRIORITY_DATABASE,
+        aliases = { "varchar", "clob", "java.lang.String" }
 )
-public class StringDataTypeBigQuery extends LiquibaseDataType {
+public class StringDataTypeBigQuery extends VarcharType {
     public StringDataTypeBigQuery() {
     }
 
+    @Override
     public boolean supports(Database database) {
         return database instanceof BigqueryDatabase;
     }
 
+    @Override
     public DatabaseDataType toDatabaseDataType(Database database) {
         if (database instanceof BigqueryDatabase) {
 
@@ -42,6 +45,16 @@ public class StringDataTypeBigQuery extends LiquibaseDataType {
             return super.toDatabaseDataType(database);
         }
 
+    }
+
+    @Override
+    public String objectToSql(Object value, Database database) {
+        String ret =  super.objectToSql(value, database);
+        if (ret.contains("\n")) {
+            return "''" + ret + "''";
+        } else {
+            return ret;
+        }
     }
 
     public LoadDataChange.LOAD_DATA_TYPE getLoadTypeName() {
