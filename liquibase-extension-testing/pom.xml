@@ -92,6 +92,10 @@
             <version>5.3.29</version>
             <scope>compile</scope>
         </dependency>
+        <dependency>
+            <groupId>org.junit.jupiter</groupId>
+            <artifactId>junit-jupiter-api</artifactId>
+        </dependency>
 
     </dependencies>
 
