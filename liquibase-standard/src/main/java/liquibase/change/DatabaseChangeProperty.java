@@ -74,4 +74,6 @@ public @interface DatabaseChangeProperty {
      * is requested, the second annotation is used.
      */
     ChecksumVersion[] version() default {};
+
+    String[] alternatePropertyNames() default {};
 }
