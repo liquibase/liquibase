@@ -37,7 +37,7 @@ public class AddPrimaryKeyGenerator extends AbstractSqlGenerator<AddPrimaryKeySt
             }
         }
 
-        if (!((database instanceof OracleDatabase) || (database instanceof AbstractDb2Database))) {
+        if (!((database instanceof OracleDatabase) || (database instanceof AbstractDb2Database) || (database instanceof PostgresDatabase))) {
             validationErrors.checkDisallowedField("forIndexName", addPrimaryKeyStatement.getForIndexName(), database);
         }
 

@@ -83,4 +83,22 @@ public class DatabaseUtils {
         }
     }
 
+    /**
+     * Build a string containing the catalog and schema, separated by a period, if they are not empty.
+     * @return the built string, or an empty string if both catalog and schema are empty
+     */
+    public static String buildCatalogAndSchemaString(String catalog, String schema) {
+        String info = "";
+        if (StringUtil.isNotEmpty(catalog)) {
+            info += catalog;
+        }
+        if (StringUtil.isNotEmpty(schema)) {
+            if (!info.endsWith(".")) {
+                info += ".";
+            }
+            info += schema;
+        }
+        return info;
+    }
+
 }

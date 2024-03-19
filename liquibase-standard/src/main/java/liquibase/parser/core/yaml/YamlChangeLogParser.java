@@ -13,8 +13,10 @@ import liquibase.parser.core.ParsedNode;
 import liquibase.resource.Resource;
 import liquibase.resource.ResourceAccessor;
 import liquibase.util.FileUtil;
+import org.yaml.snakeyaml.LoaderOptions;
 import org.yaml.snakeyaml.Yaml;
 import org.yaml.snakeyaml.constructor.SafeConstructor;
+import org.yaml.snakeyaml.nodes.Tag;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -25,7 +27,7 @@ public class YamlChangeLogParser extends YamlParser implements ChangeLogParser {
 
     @Override
     public DatabaseChangeLog parse(String physicalChangeLogLocation, ChangeLogParameters changeLogParameters, ResourceAccessor resourceAccessor) throws ChangeLogParseException {
-        Yaml yaml = new Yaml(new SafeConstructor(createLoaderOptions()));
+        Yaml yaml = new Yaml(new CustomSafeConstructor(createLoaderOptions()));
 
         try {
             Resource changelog = resourceAccessor.get(physicalChangeLogLocation);
@@ -181,6 +183,18 @@ public class YamlChangeLogParser extends YamlParser implements ChangeLogParser {
                     iterator.set(changeLogParameters.expandExpressions((String) child, changeLog));
                 }
             }
+        }
+    }
+
+    static class CustomSafeConstructor extends SafeConstructor {
+        /**
+         * Create an instance
+         *
+         * @param loaderOptions - the configuration options
+         */
+        public CustomSafeConstructor(LoaderOptions loaderOptions) {
+            super(loaderOptions);
+            this.yamlConstructors.put(Tag.TIMESTAMP, new CustomConstructYamlTimestamp());
         }
     }
 }
