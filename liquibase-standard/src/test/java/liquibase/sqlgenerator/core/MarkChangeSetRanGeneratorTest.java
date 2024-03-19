@@ -161,7 +161,7 @@ public class MarkChangeSetRanGeneratorTest extends AbstractSqlGeneratorTest<Mark
 
         String sql = Scope.child(newMap, () -> changeSetRanGenerator.generateSql(changeSetRanStatement, new MockDatabase(), new MockSqlGeneratorChain())[0].toSql());
 
-        final int descriptionColumnIndex = 18;
+        final int descriptionColumnIndex = 19;
         String databaseChangeLogDescription = sql.split(",")[descriptionColumnIndex];
         String truncatedPath = databaseChangeLogDescription.split("path=")[1].split("'")[0];
 

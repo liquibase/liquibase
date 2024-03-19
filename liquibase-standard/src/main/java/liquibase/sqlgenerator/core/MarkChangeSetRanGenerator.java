@@ -72,6 +72,7 @@ public class MarkChangeSetRanGenerator extends AbstractSqlGenerator<MarkChangeSe
                         .addNewColumnValue(COMMENTS, getCommentsColumn(changeSet))
                         .addNewColumnValue(CONTEXTS, getContextsColumn(changeSet))
                         .addNewColumnValue(LABELS, getLabelsColumn(changeSet))
+                        .addNewColumnValue("EXECUTION_MILLISECONDS", changeSet.getExecutionMilliseconds())
                         .setWhereClause(database.escapeObjectName("ID", LiquibaseColumn.class) + " = ? " +
                                 "AND " + database.escapeObjectName("AUTHOR", LiquibaseColumn.class) + " = ? " +
                                 "AND " + database.escapeObjectName("FILENAME", LiquibaseColumn.class) + " = ?")
@@ -93,12 +94,13 @@ public class MarkChangeSetRanGenerator extends AbstractSqlGenerator<MarkChangeSe
                             .addColumnValue("EXECTYPE", statement.getExecType().value)
                             .addColumnValue(CONTEXTS, getContextsColumn(changeSet))
                             .addColumnValue(LABELS, getLabelsColumn(changeSet))
-                        .addColumnValue("LIQUIBASE", StringUtil.limitSize(LiquibaseUtil.getBuildVersion()
+                            .addColumnValue("LIQUIBASE", StringUtil.limitSize(LiquibaseUtil.getBuildVersion()
                                                                                             .replaceAll("SNAPSHOT", "SNP")
                                                                                             .replaceAll("beta", "b")
                                                                                             .replaceAll("alpha", "b"), 20)
                             )
-                            .addColumnValue("DEPLOYMENT_ID", Scope.getCurrentScope().getSingleton(ChangeLogHistoryServiceFactory.class).getChangeLogService(database).getDeploymentId());
+                            .addColumnValue("DEPLOYMENT_ID", Scope.getCurrentScope().getSingleton(ChangeLogHistoryServiceFactory.class).getChangeLogService(database).getDeploymentId())
+                            .addColumnValue("EXECUTION_MILLISECONDS", changeSet.getExecutionMilliseconds());
 
                     if (tag != null) {
                         ((InsertStatement) runStatement).addColumnValue("TAG", tag);
