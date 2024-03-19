@@ -150,6 +150,11 @@ class ScopeTest extends Specification {
         }
 
         @Override
+        MdcObject put(String key, List<? extends CustomMdcObject> values) {
+            return put(key, (Object) values)
+        }
+
+        @Override
         MdcObject put(String key, CustomMdcObject customMdcObject) {
             return put(key, (Object) customMdcObject)
         }
