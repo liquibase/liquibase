@@ -16,6 +16,7 @@ import liquibase.logging.mdc.MdcObject;
 import liquibase.logging.mdc.customobjects.ExceptionDetails;
 import liquibase.util.LiquibaseUtil;
 import liquibase.util.StringUtil;
+import lombok.Getter;
 
 import java.io.*;
 import java.time.Instant;
@@ -51,6 +52,8 @@ public class CommandScope {
     private final String shortConfigPrefix;
 
     private OutputStream outputStream;
+    @Getter
+    private Date operationStartTime;
 
     /**
      * Creates a new scope for the given command.
@@ -142,7 +145,7 @@ public class CommandScope {
      * <p>
      * Means that this class will LockService.class using object lock
      */
-    public  CommandScope provideDependency(Class<?> clazz, Object value) {
+    public CommandScope provideDependency(Class<?> clazz, Object value) {
         this.dependencies.put(clazz, value);
 
         return this;
@@ -197,7 +200,8 @@ public class CommandScope {
      * Executes the command in this scope, and returns the results.
      */
     public CommandResults execute() throws CommandExecutionException {
-        Scope.getCurrentScope().addMdcValue(MdcKey.OPERATION_START_TIME, Instant.ofEpochMilli(new Date().getTime()).toString());
+        operationStartTime = new Date();
+        Scope.getCurrentScope().addMdcValue(MdcKey.OPERATION_START_TIME, Instant.ofEpochMilli(operationStartTime.getTime()).toString());
         // We don't want to reset the command name even when defining another CommandScope during execution
         // because we intend on keeping this value as the command entered to the console
         if (!Scope.getCurrentScope().isMdcKeyPresent(MdcKey.LIQUIBASE_COMMAND_NAME)) {
@@ -223,7 +227,7 @@ public class CommandScope {
                 executedCommands.add(command);
             }
             String source = null;
-            Database database = (Database)getDependency(Database.class);
+            Database database = (Database) getDependency(Database.class);
             if (database != null) {
                 try {
                     source = getDatabaseInfo(database);
@@ -234,10 +238,10 @@ public class CommandScope {
             }
 
             // after executing our pipeline, runs cleanup in inverse order
-            for (int i = executedCommands.size() -1; i >= 0; i--) {
+            for (int i = executedCommands.size() - 1; i >= 0; i--) {
                 CommandStep command = pipeline.get(i);
                 if (command instanceof CleanUpCommandStep) {
-                    ((CleanUpCommandStep)command).cleanUp(resultsBuilder);
+                    ((CleanUpCommandStep) command).cleanUp(resultsBuilder);
                 }
             }
             if (thrownException.isPresent()) { // Now that we've executed all our cleanup, rethrow the exception if there was one
@@ -349,6 +353,7 @@ public class CommandScope {
 
     /**
      * Returns a string of the entire defined command names, joined together with spaces
+     *
      * @param commandStep the command step to get the name of
      * @return the full command step name definition delimited by spaces or an empty string if there are no defined command names
      */
