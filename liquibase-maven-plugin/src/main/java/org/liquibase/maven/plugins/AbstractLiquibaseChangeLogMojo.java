@@ -62,6 +62,7 @@ public abstract class AbstractLiquibaseChangeLogMojo extends AbstractLiquibaseMo
      * @deprecated
      */
     @PropertyElement
+    @Deprecated
     protected String labels;
 
     /**

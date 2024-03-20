@@ -84,6 +84,7 @@ public abstract class StreamUtil {
     /**
      * @deprecated use {@link ResourceAccessor#openStream(String, String)}
      */
+    @Deprecated
     public static InputStream openStream(String path, Boolean relativeToChangelogFile, ChangeSet changeSet, ResourceAccessor resourceAccessor) throws IOException {
         if (relativeToChangelogFile != null && relativeToChangelogFile) {
             path = resourceAccessor.get(changeSet.getChangeLog().getPhysicalFilePath()).resolveSibling(path).getPath();

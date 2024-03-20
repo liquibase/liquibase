@@ -218,6 +218,7 @@ public class MultiTenantSpringLiquibase implements InitializingBean, ResourceLoa
     /**
      * @deprecated use {@link #getLabelFilter()}
      */
+    @Deprecated
     public String getLabels() {
         return getLabelFilter();
     }
@@ -225,6 +226,7 @@ public class MultiTenantSpringLiquibase implements InitializingBean, ResourceLoa
     /**
      * @deprecated use {@link #setLabelFilter(String)}
      */
+    @Deprecated
     public void setLabels(String labels) {
         setLabelFilter(labels);
     }

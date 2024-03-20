@@ -61,6 +61,7 @@ public abstract class AbstractModifyDataChange extends AbstractChange {
      * @deprecated use getWhere().
      */
     @DatabaseChangeProperty(isChangeProperty = false, description = "Deprecated. Use 'where'")
+    @Deprecated
     public String getWhereClause() {
         return where;
     }
@@ -68,6 +69,7 @@ public abstract class AbstractModifyDataChange extends AbstractChange {
     /**
      * @deprecated use setWhere()
      */
+    @Deprecated
     public void setWhereClause(String where) {
         this.where = where;
     }

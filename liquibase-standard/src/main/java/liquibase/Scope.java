@@ -60,6 +60,7 @@ public class Scope {
         /**
          * @deprecated use {@link GlobalConfiguration#FILE_ENCODING}
          */
+        @Deprecated
         fileEncoding,
         databaseChangeLog,
         changeSet,
@@ -395,6 +396,7 @@ public class Scope {
     /**
      * @deprecated use {@link GlobalConfiguration#FILE_ENCODING}
      */
+    @Deprecated
     public Charset getFileEncoding() {
         return get(Attr.fileEncoding, Charset.defaultCharset());
     }

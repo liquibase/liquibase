@@ -58,6 +58,7 @@ public interface Change extends LiquibaseSerializable, Plugin, ExtensibleObject 
     * Called automatically by Liquibase during the changelog parsing process.
      * @deprecated this is now set via {@link Scope}
     */
+    @Deprecated
     void setResourceAccessor(ResourceAccessor resourceAccessor);
 
     /**

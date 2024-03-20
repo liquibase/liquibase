@@ -192,6 +192,7 @@ public class SpringLiquibase implements InitializingBean, BeanNameAware, Resourc
     /**
      * @deprecated use {@link #getLabelFilter()}
      */
+    @Deprecated
     public String getLabels() {
         return getLabelFilter();
     }
@@ -199,6 +200,7 @@ public class SpringLiquibase implements InitializingBean, BeanNameAware, Resourc
     /**
      * @deprecated use {@link #setLabelFilter(String)}
      */
+    @Deprecated
     public void setLabels(String labels) {
         setLabelFilter(labels);
     }

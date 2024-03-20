@@ -114,6 +114,7 @@ public class CreateProcedureChange extends AbstractChange implements DbmsTargete
     /**
      * @deprecated Use getProcedureText() instead
      */
+    @Deprecated
     public String getProcedureBody() {
         return procedureText;
     }

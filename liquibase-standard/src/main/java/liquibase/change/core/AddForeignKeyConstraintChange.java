@@ -203,6 +203,7 @@ public class AddForeignKeyConstraintChange extends AbstractChange {
      */
     @DatabaseChangeProperty(
         description = "Deprecated. This is true to set onDelete to Cascade, priority given to onDelete tag if one exists")
+    @Deprecated
     public Boolean getDeleteCascade() {
         return null;
     }
