@@ -50,7 +50,7 @@ public class ColumnComparator implements DatabaseObjectComparator {
         Column thisColumn = (Column) databaseObject1;
         Column otherColumn = (Column) databaseObject2;
 
-        //short circut chain.isSameObject for performance reasons. There can be a lot of columns in a database
+        //short circuit chain.isSameObject for performance reasons. There can be a lot of columns in a database
         if (!DefaultDatabaseObjectComparator.nameMatches(thisColumn, otherColumn, accordingTo)) {
             return false;
         }
@@ -85,7 +85,7 @@ public class ColumnComparator implements DatabaseObjectComparator {
         boolean autoIncrement1 = ((Column) databaseObject1).isAutoIncrement();
         boolean autoIncrement2 = ((Column) databaseObject2).isAutoIncrement();
 
-        if (autoIncrement1 != autoIncrement2 && !compareControl.isSuppressedField(Column.class, "autoIncrementInformation")) { //only compare if autoIncrement or not since there are sometimes expected differences in start/increment/etc value.
+        if (autoIncrement1 != autoIncrement2 && !compareControl.isSuppressedField(Column.class, "autoIncrementInformation")) { //only compare if autoIncrement or not since there are sometimes expected differences in start/increment/etc. value.
             differences.addDifference("autoIncrement", autoIncrement1, autoIncrement2);
         }
         if (accordingTo instanceof PostgresDatabase && autoIncrement1 && autoIncrement2) {

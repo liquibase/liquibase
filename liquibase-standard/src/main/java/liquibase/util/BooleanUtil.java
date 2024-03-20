@@ -22,7 +22,7 @@ public class BooleanUtil {
         }
         String value = booleanStr.trim().toLowerCase();
 
-        // Check is made to parse int as later as possible
+        // Check is made to parse int as late as possible
         return trueValues.contains(value) || (!falseValues.contains(value) && isTrue(value));
     }
 

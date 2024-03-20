@@ -145,7 +145,7 @@ public class CreateSequenceGenerator extends AbstractSqlGenerator<CreateSequence
         try {
             return database instanceof PostgresDatabase && database.getDatabaseMajorVersion() < 10;
         } catch (DatabaseException e) {
-            // we can't determinate the PostgreSQL version so we shouldn't throw validation error as it might work for this DB
+            // we can't determine the PostgreSQL version so we shouldn't throw validation error as it might work for this DB
             return false;
         }
     }
@@ -155,7 +155,7 @@ public class CreateSequenceGenerator extends AbstractSqlGenerator<CreateSequence
             // H2 supports the `AS <dataType>` clause since version 2.0
             return database instanceof H2Database && database.getDatabaseMajorVersion() < 2;
         } catch (DatabaseException e) {
-            // we can't determinate the H2 version so we shouldn't throw validation error as it might work for this DB
+            // we can't determine the H2 version so we shouldn't throw validation error as it might work for this DB
             return false;
         }
     }
