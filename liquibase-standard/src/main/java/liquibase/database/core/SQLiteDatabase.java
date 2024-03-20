@@ -277,4 +277,9 @@ public class SQLiteDatabase extends AbstractJdbcDatabase {
 
         boolean createThisIndex(Index index);
     }
+
+    @Override
+    public boolean supportsDatabaseChangeLogHistory() {
+        return true;
+    }
 }

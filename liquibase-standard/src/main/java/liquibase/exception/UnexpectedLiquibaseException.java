@@ -1,11 +1,15 @@
 package liquibase.exception;
 
+import lombok.Getter;
+
 /**
  * Marks an internal error (runtime exception) that prevents this software from further processing. Should
  * only be thrown in "impossible" cases where the software suspects a bug in itself.
  */
-public class UnexpectedLiquibaseException extends RuntimeException {
+@Getter
+public class UnexpectedLiquibaseException extends RuntimeException implements ExitCodeException {
     private static final long serialVersionUID = 1570124571347160550L;
+    private Integer exitCode = null;
     
     /**
      * Constructs a new {@link UnexpectedLiquibaseException} with the given message
@@ -32,5 +36,15 @@ public class UnexpectedLiquibaseException extends RuntimeException {
      */
     public UnexpectedLiquibaseException(Throwable cause) {
         super(cause);
+    }
+
+    /**
+     * Constructs a new {@link UnexpectedLiquibaseException} from a
+     * {@link Throwable} event.
+     * @param cause The {@link Throwable} event that should never have happened
+     */
+    public UnexpectedLiquibaseException(Throwable cause, int exitCode) {
+        super(cause);
+        this.exitCode = exitCode;
     }
 }

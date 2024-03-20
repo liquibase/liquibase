@@ -19,6 +19,7 @@ import java.util.stream.Collectors;
  * when the object is constructed.
  */
 public class DefaultChangeExecListener implements ChangeExecListener, ChangeLogSyncListener {
+    @Getter
     private final List<ChangeExecListener> listeners;
     /**
      * Get the list of ChangeSets that have been deployed during a given Liquibase command.

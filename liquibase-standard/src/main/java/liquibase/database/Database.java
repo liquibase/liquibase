@@ -1,24 +1,42 @@
 package liquibase.database;
 
 import liquibase.CatalogAndSchema;
+import liquibase.Scope;
 import liquibase.change.Change;
+import liquibase.change.core.DropTableChange;
 import liquibase.changelog.ChangeSet;
 import liquibase.changelog.DatabaseChangeLog;
 import liquibase.changelog.RanChangeSet;
+import liquibase.diff.DiffGeneratorFactory;
+import liquibase.diff.DiffResult;
+import liquibase.diff.compare.CompareControl;
+import liquibase.diff.output.DiffOutputControl;
+import liquibase.diff.output.changelog.DiffToChangeLog;
 import liquibase.exception.*;
+import liquibase.executor.ExecutorService;
 import liquibase.servicelocator.PrioritizedService;
+import liquibase.snapshot.DatabaseSnapshot;
+import liquibase.snapshot.EmptyDatabaseSnapshot;
+import liquibase.snapshot.SnapshotControl;
+import liquibase.snapshot.SnapshotGeneratorFactory;
+import liquibase.sql.Sql;
 import liquibase.sql.visitor.SqlVisitor;
+import liquibase.sqlgenerator.SqlGeneratorFactory;
 import liquibase.statement.DatabaseFunction;
 import liquibase.statement.SqlStatement;
 import liquibase.structure.DatabaseObject;
+import liquibase.structure.core.ForeignKey;
+import liquibase.structure.core.Index;
+import liquibase.structure.core.PrimaryKey;
+import liquibase.structure.core.UniqueConstraint;
+import liquibase.util.StringUtil;
 
 import java.io.IOException;
 import java.io.Writer;
 import java.math.BigInteger;
-import java.util.Collection;
-import java.util.Date;
-import java.util.List;
-import java.util.Locale;
+import java.util.*;
+import java.util.concurrent.atomic.AtomicReference;
+import java.util.stream.Collectors;
 
 /**
  * Interface that every DBMS supported by this software must implement. Most methods belong into ont of these
@@ -33,6 +51,7 @@ public interface Database extends PrioritizedService, AutoCloseable {
 
     String databaseChangeLogTableName = "DatabaseChangeLog".toUpperCase(Locale.US);
     String databaseChangeLogLockTableName = "DatabaseChangeLogLock".toUpperCase(Locale.US);
+    String COMPLETE_SQL_SCOPE_KEY = "completeSql";
 
     /**
      * Is this AbstractDatabase subclass the correct one to use for the given connection.
@@ -178,6 +197,106 @@ public interface Database extends PrioritizedService, AutoCloseable {
      * @throws LiquibaseException if any problem occurs
      */
     void dropDatabaseObjects(CatalogAndSchema schema) throws LiquibaseException;
+
+    default void dropDatabaseObjects(CatalogAndSchema schemaToDrop, SnapshotControl snapshotControl) throws LiquibaseException {
+        if (snapshotControl == null) {
+            snapshotControl = new SnapshotControl(this);
+        }
+        ObjectQuotingStrategy currentStrategy = this.getObjectQuotingStrategy();
+        this.setObjectQuotingStrategy(ObjectQuotingStrategy.QUOTE_ALL_OBJECTS);
+        try {
+            DatabaseSnapshot snapshot;
+            try {
+                final Set<Class<? extends DatabaseObject>> typesToInclude = snapshotControl.getTypesToInclude();
+
+                //We do not need to remove indexes and primary/unique keys explicitly. They should be removed
+                //as part of tables.
+                typesToInclude.remove(Index.class);
+                typesToInclude.remove(PrimaryKey.class);
+                typesToInclude.remove(UniqueConstraint.class);
+
+                if (supportsForeignKeyDisable() || getShortName().equals("postgresql")) {
+                    //We do not remove ForeignKey because they will be disabled and removed as parts of tables.
+                    // Postgres is treated as if we can disable foreign keys because we can't drop
+                    // the foreign keys of a partitioned table, as discovered in
+                    // https://github.com/liquibase/liquibase/issues/1212
+                    typesToInclude.remove(ForeignKey.class);
+                }
+
+                final long createSnapshotStarted = System.currentTimeMillis();
+                snapshot = SnapshotGeneratorFactory.getInstance().createSnapshot(schemaToDrop, this, snapshotControl);
+                Scope.getCurrentScope().getLog(getClass()).fine(String.format("Database snapshot generated in %d ms. Snapshot includes: %s", System.currentTimeMillis() - createSnapshotStarted, typesToInclude));
+            } catch (LiquibaseException e) {
+                throw new UnexpectedLiquibaseException(e);
+            }
+
+            final long changeSetStarted = System.currentTimeMillis();
+            CompareControl compareControl = new CompareControl(
+                    new CompareControl.SchemaComparison[]{
+                            new CompareControl.SchemaComparison(
+                                    CatalogAndSchema.DEFAULT,
+                                    schemaToDrop)},
+                    snapshot.getSnapshotControl().getTypesToInclude());
+            DiffResult diffResult = DiffGeneratorFactory.getInstance().compare(
+                    new EmptyDatabaseSnapshot(this),
+                    snapshot,
+                    compareControl);
+
+            List<ChangeSet> changeSets = new DiffToChangeLog(diffResult, new DiffOutputControl(true, true, false, null).addIncludedSchema(schemaToDrop)).generateChangeSets();
+            Scope.getCurrentScope().getLog(getClass()).fine(String.format("ChangeSet to Remove Database Objects generated in %d ms.", System.currentTimeMillis() - changeSetStarted));
+
+            boolean previousAutoCommit = this.getAutoCommitMode();
+            this.commit(); //clear out currently executed statements
+            this.setAutoCommit(false); //some DDL doesn't work in autocommit mode
+            final boolean reEnableFK = supportsForeignKeyDisable() && disableForeignKeyChecks();
+            StringBuilder completeSql = new StringBuilder();
+            try {
+                for (ChangeSet changeSet : changeSets) {
+                    changeSet.setFailOnError(false);
+                    for (Change change : changeSet.getChanges()) {
+                        if (change instanceof DropTableChange) {
+                            ((DropTableChange) change).setCascadeConstraints(true);
+                        }
+                        SqlStatement[] sqlStatements = change.generateStatements(this);
+                        for (SqlStatement statement : sqlStatements) {
+                            AtomicReference<Sql[]> sqls = new AtomicReference<>(null);
+                            Scope.child(Collections.singletonMap(SqlGeneratorFactory.GENERATED_SQL_ARRAY_SCOPE_KEY, sqls), () -> {
+                                Scope.getCurrentScope().getSingleton(ExecutorService.class).getExecutor("jdbc", this).execute(statement);
+                            });
+                            if (StringUtil.isNotEmpty(completeSql.toString()) && !completeSql.toString().endsWith("; ")) {
+                                completeSql.append("; ");
+                            }
+                            completeSql.append(StringUtil.join(Arrays.stream(sqls.get()).map(Sql::toSql).collect(Collectors.toList()), "; "));
+                        }
+                    }
+                    this.commit();
+                }
+            } catch (Exception e) {
+                throw new UnexpectedLiquibaseException(e);
+            } finally {
+                if (reEnableFK) {
+                    enableForeignKeyChecks();
+                }
+            }
+
+            LiquibaseTableNamesFactory liquibaseTableNamesFactory = Scope.getCurrentScope().getSingleton(LiquibaseTableNamesFactory.class);
+            liquibaseTableNamesFactory.destroy(this);
+
+            this.setAutoCommit(previousAutoCommit);
+            Scope.getCurrentScope().getLog(getClass()).info(String.format("Successfully deleted all supported object types in schema %s.", schemaToDrop.toString()));
+            addCompleteSqlToScope(completeSql.toString());
+        } finally {
+            this.setObjectQuotingStrategy(currentStrategy);
+            this.commit();
+        }
+    }
+
+    default void addCompleteSqlToScope(String completeSql) {
+        AtomicReference<String> sqlsReference = Scope.getCurrentScope().get(COMPLETE_SQL_SCOPE_KEY, AtomicReference.class);
+        if (sqlsReference != null) {
+            sqlsReference.set(completeSql.toString());
+        }
+    }
 
     /**
      * Tags the database changelog with the given string.
@@ -481,11 +600,33 @@ public interface Database extends PrioritizedService, AutoCloseable {
     }
 
     /**
+     * Temporarily set the database's object quoting strategy. The caller is responsible for calling
+     * {@link TempObjectQuotingStrategy#close()} on the returned object to reset the object quoting strategy back to
+     * its original setting.
+     * @param objectQuotingStrategy the desired quoting strategy
+     * @return an object that, when closed, will reset the databases object quoting strategy to the original setting
+     */
+    default TempObjectQuotingStrategy temporarilySetObjectQuotingStrategy(ObjectQuotingStrategy objectQuotingStrategy) {
+        ObjectQuotingStrategy originalObjectQuotingStrategy = this.getObjectQuotingStrategy();
+        this.setObjectQuotingStrategy(objectQuotingStrategy);
+        return new TempObjectQuotingStrategy(this, originalObjectQuotingStrategy);
+    }
+
+    /**
      * Does the database support the "if not exits" syntax?
      * @param type the DatabaseObject type to be checked.
      * @return true if the "if not exists" syntax is supported, false otherwise.
      */
     default boolean supportsCreateIfNotExists(Class<? extends DatabaseObject> type) {
+        return false;
+    }
+
+    /**
+     * Does the particular database implementation support the database changelog history feature and associated
+     * table?
+     * @return true if supported, false otherwise
+     */
+    default boolean supportsDatabaseChangeLogHistory() {
         return false;
     }
 }
