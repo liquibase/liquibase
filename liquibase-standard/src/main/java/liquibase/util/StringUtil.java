@@ -22,7 +22,6 @@ public class StringUtil {
     private static final Pattern upperCasePattern = Pattern.compile(".*[A-Z].*");
     private static final Pattern lowerCasePattern = Pattern.compile(".*[a-z].*");
     private static final Pattern spacePattern = Pattern.compile(" ");
-    private static final SecureRandom rnd = new SecureRandom();
 
     /**
      * Returns the trimmed (left and right) version of the input string. If null is passed, an empty string is returned.
