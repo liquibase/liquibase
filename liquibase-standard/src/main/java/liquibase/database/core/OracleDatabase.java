@@ -671,4 +671,9 @@ public class OracleDatabase extends AbstractJdbcDatabase {
 
     }
 
+    @Override
+    public boolean supportsDatabaseChangeLogHistory() {
+        return true;
+    }
+
 }
