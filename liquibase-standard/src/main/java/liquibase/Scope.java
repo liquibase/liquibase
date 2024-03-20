@@ -147,7 +147,7 @@ public class Scope {
     }
 
     private String generateScopeId() {
-        return StringUtil.randomIdentifer(10).toLowerCase();
+        return StringUtil.randomIdentifier(10).toLowerCase();
     }
 
     /**

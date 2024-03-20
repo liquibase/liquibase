@@ -532,10 +532,10 @@ class StringUtilTest extends Specification {
         "abcdefghij" | 5      | "ab..."
     }
 
-    def randomIdentifer() {
+    def randomIdentifier() {
         expect:
-        StringUtil.randomIdentifer(5).length() == 5
-        StringUtil.randomIdentifer(5) != StringUtil.randomIdentifer(5)
+        StringUtil.randomIdentifier(5).length() == 5
+        StringUtil.randomIdentifier(5) != StringUtil.randomIdentifier(5)
     }
 
     @Unroll
