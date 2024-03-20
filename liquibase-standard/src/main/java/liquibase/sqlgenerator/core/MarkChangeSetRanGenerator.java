@@ -53,24 +53,27 @@ public class MarkChangeSetRanGenerator extends AbstractSqlGenerator<MarkChangeSe
                     return EMPTY_SQL; //don't mark
                 }
 
-                String tag = getTagFromChangeset(changeSet);
+                final String tag = getTagFromChangeset(changeSet);
+                final int orderExecuted = Scope.getCurrentScope().getSingleton(ChangeLogHistoryServiceFactory.class).getChangeLogService(database).getNextSequenceValue();
+	            final DatabaseFunction dateExecuted = new DatabaseFunction(dateValue);
+                final String liquibaseVersion = getLiquibaseBuildVersion();
+                final String description = StringUtil.limitSize(changeSet.getDescription(), 250);
+                final String md5Sum = changeSet.generateCheckSum(ChecksumVersion.latest()).toString();
+				final String execType = statement.getExecType().value;
+				final String deploymentId = Scope.getCurrentScope().getSingleton(ChangeLogHistoryServiceFactory.class).getChangeLogService(database).getDeploymentId();
 
-                final String liquibaseVersion = StringUtil.limitSize(LiquibaseUtil.getBuildVersion()
-                        .replaceAll("SNAPSHOT", "SNP")
-                        .replaceAll("beta", "b")
-                        .replaceAll("alpha", "b"), 20);
-	            if (statement.getExecType().ranBefore) {
+				if (statement.getExecType().ranBefore) {
 	                runStatement = new UpdateStatement(database.getLiquibaseCatalogName(), database.getLiquibaseSchemaName(), database.getDatabaseChangeLogTableName())
-	                        .addNewColumnValue("DATEEXECUTED", new DatabaseFunction(dateValue))
-	                        .addNewColumnValue("ORDEREXECUTED", Scope.getCurrentScope().getSingleton(ChangeLogHistoryServiceFactory.class).getChangeLogService(database).getNextSequenceValue())
-	                        .addNewColumnValue("MD5SUM", changeSet.generateCheckSum(ChecksumVersion.latest()).toString())
-	                        .addNewColumnValue("EXECTYPE", statement.getExecType().value)
-	                        .addNewColumnValue("DEPLOYMENT_ID", Scope.getCurrentScope().getSingleton(ChangeLogHistoryServiceFactory.class).getChangeLogService(database).getDeploymentId())
+	                        .addNewColumnValue("DATEEXECUTED", dateExecuted)
+	                        .addNewColumnValue("ORDEREXECUTED", orderExecuted)
+	                        .addNewColumnValue("MD5SUM", md5Sum)
+	                        .addNewColumnValue("EXECTYPE", execType)
+	                        .addNewColumnValue("DEPLOYMENT_ID", deploymentId)
 	                        .addNewColumnValue(COMMENTS, getCommentsColumn(changeSet))
 	                        .addNewColumnValue(CONTEXTS, getContextsColumn(changeSet))
 	                        .addNewColumnValue(LABELS, getLabelsColumn(changeSet))
                             .addNewColumnValue("LIQUIBASE", liquibaseVersion)
-                            .addNewColumnValue("DESCRIPTION", limitSize(changeSet.getDescription()))
+                            .addNewColumnValue("DESCRIPTION", description)
 	                        .setWhereClause(database.escapeObjectName("ID", LiquibaseColumn.class) + " = ? " +
 	                                "AND " + database.escapeObjectName("AUTHOR", LiquibaseColumn.class) + " = ? " +
 	                                "AND " + database.escapeObjectName("FILENAME", LiquibaseColumn.class) + " = ?")
@@ -84,16 +87,16 @@ public class MarkChangeSetRanGenerator extends AbstractSqlGenerator<MarkChangeSe
                             .addColumnValue("ID", changeSet.getId())
                             .addColumnValue("AUTHOR", changeSet.getAuthor())
                             .addColumnValue("FILENAME", changeSet.getFilePath())
-                            .addColumnValue("DATEEXECUTED", new DatabaseFunction(dateValue))
-                            .addColumnValue("ORDEREXECUTED", Scope.getCurrentScope().getSingleton(ChangeLogHistoryServiceFactory.class).getChangeLogService(database).getNextSequenceValue())
-                            .addColumnValue("MD5SUM", changeSet.generateCheckSum(ChecksumVersion.latest()).toString())
-                            .addColumnValue("DESCRIPTION", StringUtil.limitSize(changeSet.getDescription(), 250))
+                            .addColumnValue("DATEEXECUTED", dateExecuted)
+                            .addColumnValue("ORDEREXECUTED", orderExecuted)
+                            .addColumnValue("MD5SUM", md5Sum)
+                            .addColumnValue("DESCRIPTION", description)
                             .addColumnValue(COMMENTS, getCommentsColumn(changeSet))
-                            .addColumnValue("EXECTYPE", statement.getExecType().value)
+                            .addColumnValue("EXECTYPE", execType)
                             .addColumnValue(CONTEXTS, getContextsColumn(changeSet))
                             .addColumnValue(LABELS, getLabelsColumn(changeSet))
                             .addColumnValue("LIQUIBASE", liquibaseVersion)
-                            .addColumnValue("DEPLOYMENT_ID", Scope.getCurrentScope().getSingleton(ChangeLogHistoryServiceFactory.class).getChangeLogService(database).getDeploymentId());
+                            .addColumnValue("DEPLOYMENT_ID", deploymentId);
 
                     if (tag != null) {
                         ((InsertStatement) runStatement).addColumnValue("TAG", tag);
