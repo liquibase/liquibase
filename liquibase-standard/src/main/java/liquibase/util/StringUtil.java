@@ -4,7 +4,6 @@ import liquibase.ExtensibleObject;
 import liquibase.GlobalConfiguration;
 import liquibase.Scope;
 import liquibase.changelog.ChangeSet;
-import liquibase.command.CommandScope;
 import liquibase.parser.LiquibaseSqlParser;
 import liquibase.parser.SqlParserFactory;
 import org.apache.commons.lang3.RandomStringUtils;
