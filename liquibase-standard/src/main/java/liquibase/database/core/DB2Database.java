@@ -68,4 +68,9 @@ public class DB2Database extends AbstractDb2Database {
 	public boolean supportsCreateIfNotExists(Class<? extends DatabaseObject> type) {
 		return type.isAssignableFrom(Table.class);
 	}
+
+	@Override
+	public boolean supportsDatabaseChangeLogHistory() {
+		return true;
+	}
 }

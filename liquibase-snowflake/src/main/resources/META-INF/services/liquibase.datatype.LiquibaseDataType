@@ -2,3 +2,4 @@ liquibase.datatype.core.TextDataTypeSnowflake
 liquibase.datatype.core.TimestampNTZTypeSnowflake
 liquibase.datatype.core.DoubleDataTypeSnowflake
 liquibase.datatype.core.BinaryTypeSnowflake
+liquibase.datatype.core.ClobTypeSnowflake
