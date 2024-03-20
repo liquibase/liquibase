@@ -309,4 +309,9 @@ public class SnowflakeDatabase extends AbstractJdbcDatabase {
         }
         return CREATE_VIEW_AS_PATTERN.matcher(definition).replaceFirst("");
     }
+
+    @Override
+    public boolean supportsDatabaseChangeLogHistory() {
+        return true;
+    }
 }

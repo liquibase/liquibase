@@ -33,6 +33,7 @@ public class ChangelogJdbcMdcListener {
                 jdbcQuery.execute(Scope.getCurrentScope().getSingleton(ExecutorService.class).getExecutor("jdbc", database));
             });
             addSqlMdc(sqls);
+            addSqlToScope(sqls, database);
             logSuccess();
         } catch (Exception e) {
             Scope.getCurrentScope().addMdcValue(MdcKey.DATABASE_CHANGELOG_TABLE_OUTCOME, MdcValue.DATABASE_CHANGELOG_OUTCOME_FAILED);
@@ -53,6 +54,7 @@ public class ChangelogJdbcMdcListener {
             AtomicReference<Sql[]> sqls = new AtomicReference<>(null);
             T value = Scope.child(Collections.singletonMap(SqlGeneratorFactory.GENERATED_SQL_ARRAY_SCOPE_KEY, sqls), () -> jdbcQuery.execute(Scope.getCurrentScope().getSingleton(ExecutorService.class).getExecutor("jdbc", database)));
             addSqlMdc(sqls);
+            addSqlToScope(sqls, database);
             logSuccess();
             return value;
         } catch (Exception e) {
@@ -66,6 +68,15 @@ public class ChangelogJdbcMdcListener {
             Sql[] sqls = sqlsRef.get();
             if (sqls != null) {
                 Scope.getCurrentScope().addMdcValue(MdcKey.DATABASE_CHANGELOG_SQL, SqlUtil.convertSqlArrayToString(sqls));
+            }
+        }
+    }
+
+    private static void addSqlToScope(AtomicReference<Sql[]> sqlsRef, Database database) {
+        if (sqlsRef != null) {
+            Sql[] sqls = sqlsRef.get();
+            if (sqls != null) {
+                database.addCompleteSqlToScope(SqlUtil.convertSqlArrayToString(sqls));
             }
         }
     }

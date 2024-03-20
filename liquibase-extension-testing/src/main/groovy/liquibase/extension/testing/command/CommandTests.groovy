@@ -222,6 +222,8 @@ Long Description: ${commandDefinition.getLongDescription() ?: "NOT SET"}
             altDatabase.dropDatabaseObjects(altCatalogAndSchemas[0])
         }
 
+        Scope.getCurrentScope().getMdcManager().clear()
+
         when:
         if (testDef.supportedOs != null) {
             def currentOs = OperatingSystem.getCurrent()

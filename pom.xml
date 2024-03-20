@@ -69,6 +69,7 @@
         <trimStackTrace>false</trimStackTrace>
         <liquibase-pro.version>0-SNAPSHOT</liquibase-pro.version>
         <argLine></argLine>
+        <commons-lang3.version>3.14.0</commons-lang3.version>
         <ant.version>1.10.14</ant.version>
         <junit.version>4.13.2</junit.version>
         <junit-jupiter.version>5.10.2</junit-jupiter.version>
