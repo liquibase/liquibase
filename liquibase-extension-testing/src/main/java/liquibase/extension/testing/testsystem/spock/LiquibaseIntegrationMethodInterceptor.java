@@ -153,6 +153,8 @@ public class LiquibaseIntegrationMethodInterceptor extends AbstractMethodInterce
         commandScope.addArgumentValue(DbUrlConnectionArgumentsCommandStep.URL_ARG, db.getConnectionUrl());
         commandScope.addArgumentValue(DbUrlConnectionArgumentsCommandStep.USERNAME_ARG, db.getUsername());
         commandScope.addArgumentValue(DbUrlConnectionArgumentsCommandStep.PASSWORD_ARG, db.getPassword());
+        // this is a pro only argument, but is added here because there is no mechanism for adding the argument from the pro tests
+        commandScope.addArgumentValue("dropDbclhistory", true);
         commandScope.setOutput(new ByteArrayOutputStream());
         commandScope.execute();
     }

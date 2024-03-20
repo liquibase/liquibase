@@ -11,6 +11,7 @@ import liquibase.executor.ExecutorService;
 import liquibase.lockservice.LockService;
 import liquibase.lockservice.LockServiceFactory;
 import liquibase.logging.Logger;
+import liquibase.snapshot.SnapshotControl;
 import liquibase.util.StringUtil;
 
 import java.util.ArrayList;
@@ -62,7 +63,12 @@ public class DropAllCommandStep extends AbstractCommandStep {
         try {
             for (CatalogAndSchema catalogAndSchema : catalogAndSchemas) {
                 log.info("Dropping Database Objects in schema: " + catalogAndSchema);
-                database.dropDatabaseObjects(catalogAndSchema);
+                SnapshotControl snapshotControl = getSnapshotControl(commandScope, database);
+                if (snapshotControl != null) {
+                    database.dropDatabaseObjects(catalogAndSchema, snapshotControl);
+                } else {
+                    database.dropDatabaseObjects(catalogAndSchema);
+                }
             }
         } catch (LiquibaseException liquibaseException) {
             String message =
@@ -82,6 +88,11 @@ public class DropAllCommandStep extends AbstractCommandStep {
 
         Scope.getCurrentScope().getUI().sendMessage("All objects dropped from " + database.getConnection().getConnectionUserName() + "@" + database.getConnection().getURL());
         resultsBuilder.addResult("statusCode", 0);
+    }
+
+    public SnapshotControl getSnapshotControl(CommandScope commandScope, Database database) {
+        // This is purposefully returning null. It is overridden in other implementations of this command step, like in pro.
+        return null;
     }
 
     private List<CatalogAndSchema> getCatalogAndSchemas(Database database, CommandScope commandScope) {

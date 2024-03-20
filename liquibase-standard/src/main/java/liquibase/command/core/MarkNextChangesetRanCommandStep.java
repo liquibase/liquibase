@@ -8,9 +8,12 @@ import liquibase.changelog.ChangeLogHistoryServiceFactory;
 import liquibase.changelog.ChangeLogIterator;
 import liquibase.changelog.DatabaseChangeLog;
 import liquibase.changelog.filter.*;
+import liquibase.changelog.visitor.ChangeLogSyncListener;
 import liquibase.changelog.visitor.ChangeLogSyncVisitor;
-import liquibase.command.*;
-import liquibase.command.core.helpers.DatabaseChangelogCommandStep;
+import liquibase.command.AbstractCommandStep;
+import liquibase.command.CommandDefinition;
+import liquibase.command.CommandResultsBuilder;
+import liquibase.command.CommandScope;
 import liquibase.database.Database;
 import liquibase.executor.ExecutorService;
 
@@ -55,11 +58,15 @@ public class MarkNextChangesetRanCommandStep extends AbstractCommandStep {
                     new IgnoreChangeSetFilter(),
                     new CountChangeSetFilter(1));
 
-            logIterator.run(new ChangeLogSyncVisitor(database),
+            logIterator.run(new ChangeLogSyncVisitor(database, getChangeExecListener()),
                     new RuntimeEnvironment(database, contexts, labelExpression)
             );
         } finally {
             Scope.getCurrentScope().getSingleton(ExecutorService.class).reset();
         }
+    }
+
+    public ChangeLogSyncListener getChangeExecListener() {
+        return null;
     }
 }

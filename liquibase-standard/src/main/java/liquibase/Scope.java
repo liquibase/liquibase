@@ -65,7 +65,11 @@ public class Scope {
         changeSet,
         osgiPlatform,
         checksumVersion,
-        latestChecksumVersion
+        latestChecksumVersion,
+        /**
+         * A <code>Map<String, String></code> of arguments/configuration properties used in the maven invocation of Liquibase.
+         */
+        mavenConfigurationProperties
     }
 
     public static final String JAVA_PROPERTIES = "javaProperties";
