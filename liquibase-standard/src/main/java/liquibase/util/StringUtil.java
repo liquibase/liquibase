@@ -4,6 +4,7 @@ import liquibase.ExtensibleObject;
 import liquibase.GlobalConfiguration;
 import liquibase.Scope;
 import liquibase.changelog.ChangeSet;
+import liquibase.command.CommandScope;
 import liquibase.parser.LiquibaseSqlParser;
 import liquibase.parser.SqlParserFactory;
 import org.apache.commons.lang3.RandomStringUtils;
@@ -756,12 +757,24 @@ public class StringUtil {
     }
 
     /**
-     * Produce a random identifer of the given length, consisting only of uppercase letters.
+     * Produce a random identifier of the given length, consisting only of uppercase letters.
+     *
+     * @param len desired length of the string
+     * @return an identifier of the desired length
+     * @deprecated use {@link #randomIdentifier}
+     */
+    @Deprecated
+    public static String randomIdentifer(int len) {
+        return randomIdentifier(len);
+    }
+
+    /**
+     * Produce a random identifier of the given length, consisting only of uppercase letters.
      *
      * @param len desired length of the string
      * @return an identifier of the desired length
      */
-    public static String randomIdentifer(int len) {
+    public static String randomIdentifier(int len) {
         return RandomStringUtils.random(len, true, false);
     }
 
