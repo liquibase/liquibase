@@ -13,6 +13,7 @@ import liquibase.listener.LiquibaseListener;
 import liquibase.logging.mdc.MdcKey;
 import liquibase.logging.mdc.MdcManager;
 import liquibase.logging.mdc.MdcObject;
+import liquibase.logging.mdc.MdcValue;
 import liquibase.logging.mdc.customobjects.ExceptionDetails;
 import liquibase.util.LiquibaseUtil;
 import liquibase.util.StringUtil;
@@ -222,6 +223,7 @@ public class CommandScope {
                 } catch (Exception runException) {
                     // Suppress the exception for now so that we can run the cleanup steps even when encountering an exception.
                     thrownException = Optional.of(runException);
+                    Scope.getCurrentScope().addMdcValue(MdcKey.OPERATION_OUTCOME, MdcValue.COMMAND_FAILED, false);
                     break;
                 }
                 executedCommands.add(command);
@@ -249,6 +251,8 @@ public class CommandScope {
                     logPrimaryExceptionToMdc(thrownException.get(), source);
                 }
                 throw thrownException.get();
+            } else {
+                Scope.getCurrentScope().addMdcValue(MdcKey.OPERATION_OUTCOME, MdcValue.COMMAND_SUCCESSFUL, false);
             }
         } catch (Exception e) {
             if (e instanceof CommandExecutionException) {
