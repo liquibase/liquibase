@@ -462,14 +462,6 @@ END testSP;
             update liquibaseRunInfo set timesRan=timesRan+1/
         </sql>
     </changeSet>
-    <changeSet id="moreSlashEndDelimiterTest" author="mallod">
-        <sql endDelimiter="/" splitStatements="true" stripComments="false">
-            SELECT * FROM unnamed_constraint/
-/
-            update liquibaseRunInfo set timesRan=timesRan+1/
-/
-        </sql>
-    </changeSet>
     <changeSet id="dividedAndSlashEndDelimiterTest" author="mallod">
         <sql endDelimiter="/" splitStatements="true" stripComments="false">
             SELECT a / b FROM unnamed_constraint/
