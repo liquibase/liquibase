@@ -194,14 +194,14 @@ public class GlobalConfiguration implements AutoloadedConfigurations {
                 .build();
 
         HEADLESS = builder.define("headless", Boolean.class)
-                .setDescription("Force liquibase to think it has no access to a keyboard")
+                .setDescription("Force Liquibase to think it has no access to a keyboard")
                 .setValueHandler(ValueHandlerUtil::booleanValueHandler)
                 .setDefaultValue(false)
                 .setCommonlyUsed(true)
                 .build();
 
         STRICT = builder.define("strict", Boolean.class)
-                .setDescription("Be stricter on allowed Liquibase configuration and setup?")
+                .setDescription("If true, Liquibase enforces certain best practices and proactively looks for common errors")
                 .setValueHandler(ValueHandlerUtil::booleanValueHandler)
                 .setDefaultValue(false)
                 .build();
@@ -220,7 +220,7 @@ public class GlobalConfiguration implements AutoloadedConfigurations {
                 .build();
 
         PRESERVE_SCHEMA_CASE = builder.define("preserveSchemaCase", Boolean.class)
-                .setDescription("Should liquibase treat schema and catalog names as case sensitive?")
+                .setDescription("If true, Liquibase treats schema and catalog names as case sensitive")
                 .setValueHandler(ValueHandlerUtil::booleanValueHandler)
                 .setDefaultValue(false)
                 .build();
@@ -253,7 +253,7 @@ public class GlobalConfiguration implements AutoloadedConfigurations {
                 .build();
 
         VALIDATE_XML_CHANGELOG_FILES = builder.define("validateXmlChangelogFiles", Boolean.class)
-                .setDescription("Will perform xsd validation of XML changelog files. When many XML changelog files are included this validation may impact Liquibase performance. Defaults to true.")
+                .setDescription("Will perform XSD validation of XML changelog files. When many XML changelog files are included, this validation may impact Liquibase performance. Defaults to true.")
                 .setValueHandler(ValueHandlerUtil::booleanValueHandler)
                 .setDefaultValue(true)
                 .build();
