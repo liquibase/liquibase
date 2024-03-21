@@ -7,6 +7,7 @@ import liquibase.changelog.filter.AfterTagChangeSetFilter;
 import liquibase.command.*;
 import liquibase.database.Database;
 import liquibase.logging.mdc.MdcKey;
+import liquibase.logging.mdc.customobjects.ExceptionDetails;
 import liquibase.report.RollbackReportParameters;
 import liquibase.util.StringUtil;
 
@@ -56,7 +57,16 @@ public class RollbackCommandStep extends AbstractRollbackCommandStep {
 
         List<RanChangeSet> ranChangeSetList = database.getRanChangeSetList();
         TagVersionEnum tagVersion = TagVersionEnum.valueOf(commandScope.getArgumentValue(TAG_VERSION_ARG));
-        this.doRollback(resultsBuilder, ranChangeSetList, new AfterTagChangeSetFilter(tagToRollBackTo, ranChangeSetList, tagVersion), rollbackReportParameters);
+        try {
+            AfterTagChangeSetFilter afterTagChangeSetFilter = new AfterTagChangeSetFilter(tagToRollBackTo, ranChangeSetList, tagVersion); // This can throw an exception
+            this.doRollback(resultsBuilder, ranChangeSetList, afterTagChangeSetFilter, rollbackReportParameters);
+        } catch (Exception exception) {
+            rollbackReportParameters.setSuccess(false);
+            String source = ExceptionDetails.findSource(database);
+            ExceptionDetails exceptionDetails = new ExceptionDetails(exception, source);
+            rollbackReportParameters.setRollbackException(exceptionDetails);
+            throw exception;
+        }
     }
 
     @Override

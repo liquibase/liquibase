@@ -2,6 +2,7 @@ package liquibase.report;
 
 import liquibase.database.Database;
 import liquibase.exception.DatabaseException;
+import liquibase.logging.mdc.customobjects.ExceptionDetails;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.Getter;
@@ -46,5 +47,16 @@ public class RollbackReportParameters implements UpdateRollbackReportParameters 
         private String id;
         private String author;
         private String path;
+    }
+
+    public void setRollbackException(ExceptionDetails exceptionDetails) {
+        // Set the exception similar to how it is formatted in the console.
+        // The double newline is intentional.
+        this.getOperationInfo().setException(String.format("%s\n%s\n%s\n\n%s",
+                exceptionDetails.getFormattedPrimaryException(),
+                exceptionDetails.getFormattedPrimaryExceptionReason(),
+                exceptionDetails.getFormattedPrimaryExceptionSource(),
+                // Intentionally not using the formatted version for this last item.
+                exceptionDetails.getPrimaryExceptionReason()));
     }
 }

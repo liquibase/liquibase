@@ -129,16 +129,10 @@ public abstract class AbstractRollbackCommandStep extends AbstractCommandStep {
             }
         } catch (Exception exception) {
             if (rollbackReportParameters != null) {
+                rollbackReportParameters.setSuccess(false);
                 String source = ExceptionDetails.findSource(database);
                 ExceptionDetails exceptionDetails = new ExceptionDetails(exception, source);
-                // Set the exception similar to how it is formatted in the console.
-                // The double newline is intentional.
-                rollbackReportParameters.getOperationInfo().setException(String.format("%s\n%s\n%s\n\n%s",
-                        exceptionDetails.getFormattedPrimaryException(),
-                        exceptionDetails.getFormattedPrimaryExceptionReason(),
-                        exceptionDetails.getFormattedPrimaryExceptionSource(),
-                        // Intentionally not using the formatted version for this last item.
-                        exceptionDetails.getPrimaryExceptionReason()));
+                rollbackReportParameters.setRollbackException(exceptionDetails);
                 // Rethrow the exception to be handled by child classes.
                 throw exception;
             }
