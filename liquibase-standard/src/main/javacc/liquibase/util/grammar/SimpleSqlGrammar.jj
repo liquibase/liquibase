@@ -57,36 +57,39 @@ TOKEN:
 TOKEN : /* Numeric Constants */
 {
    < S_DOUBLE: ((<S_LONG>)? "." <S_LONG> ( ["e","E"] (["+", "-"])? <S_LONG>)?
-			|
-			<S_LONG> "." (["e","E"] (["+", "-"])? <S_LONG>)?
-			|
-			<S_LONG> ["e","E"] (["+", "-"])? <S_LONG>
-			)>
-  | 	< S_LONG: ( <DIGIT> )+ >
-  | 	< #DIGIT: ["0" - "9"] >
+      |
+      <S_LONG> "." (["e","E"] (["+", "-"])? <S_LONG>)?
+      |
+      <S_LONG> ["e","E"] (["+", "-"])? <S_LONG>
+      )>
+  |   < S_LONG: ( <DIGIT> )+ >
+  |   < #DIGIT: ["0" - "9"] >
 }
 
 TOKEN:
 {
     < COMPLEX_IDENTIFIER: (<S_IDENTIFIER> | <S_QUOTED_IDENTIFIER>) ((["\r","\n"," "])* "." (["\r","\n"," "])* (<S_IDENTIFIER> | <S_QUOTED_IDENTIFIER>))+ >
-|	< S_IDENTIFIER: ( <LETTER> | <UNICODE_LETTERS> )+ ( <DIGIT> | <LETTER> | <UNICODE_LETTERS> | <SPECIAL_CHARS> )* >
-| 	< #LETTER: ["a"-"z", "A"-"Z", "_", "$"] >
-|   < #SPECIAL_CHARS: "$" | "_" | "#" | "@" >
+|   < S_IDENTIFIER: ( <LETTER> | <UNICODE_LETTERS> | <FIRST_CHAR_SPECIAL_CHARS> ) ( <LETTER> | <UNICODE_LETTERS> | <SPECIAL_CHARS> | <DIGIT> )* >
+|   < #LETTER: ["a"-"z", "A"-"Z"] >
+|   < #FIRST_CHAR_SPECIAL_CHARS: "$" | "_" >
+|   < #SPECIAL_CHARS: <FIRST_CHAR_SPECIAL_CHARS> | "#" | "@" >
 
-|   < #ESC_S_QUOTE_A: ( "''" ) > /* probably the closest to a universal standard */
-|   < #ESC_S_QUOTE_B: ( "\\'" ) > /* Valid in Postgres and MySQL (if NO_BACKSLASH_ESCAPES not enabled), NOT valid in Oracle or MSSQL */
-|   < #ESC_D_QUOTE_A: ( "\"\"" ) > /* probably the 2nd closest to a universal standard */
-|   < #ESC_D_QUOTE_B: ( "\\\"" ) > /* Valid in Postgres and MySQL (if NO_BACKSLASH_ESCAPES not enabled), NOT valid in Oracle or MSSQL */
-|   < #ESC_NON_QUOTE: "\\" ["n","t","b","r","f","\\","0"] >
+|   < #ESC_S_QUOTE: ( "''" ) > /* probably the closest to a universal standard */
+|   < #ESC_D_QUOTE: ( "\"\"" ) > /* probably the 2nd closest to a universal standard */
+|   < #ESC_ANY_CHAR: "\\" ~[] > // Matches any character following '\'
     /* SQL-standard is that string literals are delimited only by single-quote, and double-quotes are only for identifiers... */
-|   < #S_QUOTED_STRING_HYBRID: ( "'" ( <ESC_S_QUOTE_A> | <ESC_S_QUOTE_B> | <ESC_D_QUOTE_B> | <ESC_NON_QUOTE>  | ~["\\","'"] )* ("'" | "\\'")) >
+    /*
+        Negative match in hybrid string tokens looks for a single slash (i.e. "\\") so that slashes are matched
+        with the ESC_ANY_CHAR token rather than prematuraly ending a match
+    */
+|   < #S_QUOTED_STRING_HYBRID: ( "'" ( <ESC_S_QUOTE> | <ESC_ANY_CHAR> | ~["\\","'"] )* ("'" | "\\'")) >
     /* ... but many DBs tolerate double-quotes around string literals, including MySQL (unless you enable ANSI SQL mode), and MSSQL (if you disable SET QUOTED_IDENTIFIER) */
-|   < #D_QUOTED_STRING_HYBRID: ( "\"" ( <ESC_S_QUOTE_B> | <ESC_D_QUOTE_A> | <ESC_D_QUOTE_B> | <ESC_NON_QUOTE> | ~["\\","\""] )* ("\"" | "\\\"")) >
+|   < #D_QUOTED_STRING_HYBRID: ( "\"" ( <ESC_D_QUOTE> | <ESC_ANY_CHAR> | ~["\\","\""] )* ("\"" | "\\\"")) >
     /* Finally... */
 |   < S_CHAR_LITERAL: (["U","E","N","R","B"]|"RB"|"_utf8")? (<S_QUOTED_STRING_HYBRID> | <D_QUOTED_STRING_HYBRID>) >
 
 |   < S_QUOTED_IDENTIFIER: "\"" (~["\n","\r","\""])+ "\"" | ("`" (~["\n","\r","`"])+ "`") | ( "[" ~["0"-"9","]"] (~["\n","\r","]"])* "]" ) >
-|    < EMPTY_QUOTE: "\"" "\"">
+|   < EMPTY_QUOTE: "\"" "\"">
 
 /*
 Built list from http://stackoverflow.com/a/37668315/45756
@@ -514,4 +517,3 @@ TOKEN: /* symbols */
     "\u00A1"-"\uFF65" /* everything else */
     ] >
 }
-
