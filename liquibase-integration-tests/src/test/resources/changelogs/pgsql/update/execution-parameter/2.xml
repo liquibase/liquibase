@@ -6,21 +6,27 @@
         xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-latest.xsd">
 
     <changeSet author="jlyle" id="2.1">
-        <output>Changelog File: ${LIQUIBASE_EXECUTION_CHANGELOG_FILE}</output>
-        <output>Changeset ID: ${LIQUIBASE_EXECUTION_CHANGESET_ID}</output>
-        <output>Changeset Author: ${LIQUIBASE_EXECUTION_CHANGESET_AUTHOR}</output>
+        <insert tableName="parameter_value_tests">
+            <column name="changelog_file" value="${LIQUIBASE_EXECUTION_CHANGELOG_FILE}" />
+            <column name="changeset_id" value="${LIQUIBASE_EXECUTION_CHANGESET_ID}" />
+            <column name="changeset_author" value="${LIQUIBASE_EXECUTION_CHANGESET_AUTHOR}" />
+        </insert>
     </changeSet>
 
     <changeSet author="not_jlyle" id="2.2">
-        <output>Changelog File: ${LIQUIBASE_EXECUTION_CHANGELOG_FILE}</output>
-        <output>Changeset ID: ${LIQUIBASE_EXECUTION_CHANGESET_ID}</output>
-        <output>Changeset Author: ${LIQUIBASE_EXECUTION_CHANGESET_AUTHOR}</output>
+        <insert tableName="parameter_value_tests">
+            <column name="changelog_file" value="${LIQUIBASE_EXECUTION_CHANGELOG_FILE}" />
+            <column name="changeset_id" value="${LIQUIBASE_EXECUTION_CHANGESET_ID}" />
+            <column name="changeset_author" value="${LIQUIBASE_EXECUTION_CHANGESET_AUTHOR}" />
+        </insert>
     </changeSet>
 
     <changeSet author="jlyle" id="2.3">
-        <output>Changelog File: ${LIQUIBASE_EXECUTION_CHANGELOG_FILE}</output>
-        <output>Changeset ID: ${LIQUIBASE_EXECUTION_CHANGESET_ID}</output>
-        <output>Changeset Author: ${LIQUIBASE_EXECUTION_CHANGESET_AUTHOR}</output>
+        <insert tableName="parameter_value_tests">
+            <column name="changelog_file" value="${LIQUIBASE_EXECUTION_CHANGELOG_FILE}" />
+            <column name="changeset_id" value="${LIQUIBASE_EXECUTION_CHANGESET_ID}" />
+            <column name="changeset_author" value="${LIQUIBASE_EXECUTION_CHANGESET_AUTHOR}" />
+        </insert>
     </changeSet>
 
 </databaseChangeLog>
