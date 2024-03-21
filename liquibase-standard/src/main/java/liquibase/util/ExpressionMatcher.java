@@ -5,6 +5,7 @@ import liquibase.exception.UnexpectedLiquibaseException;
 import java.util.Collection;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import java.util.stream.Collectors;
 
 /**
  * Common functionality for matching set of Context/Labels against provided expression.
@@ -97,13 +98,14 @@ public final class ExpressionMatcher {
             expression = expression.replaceFirst(requiredNotRegex, "").trim();
         }
 
-        boolean requiredExpression = false;
-        if (expression.startsWith("@")) {
-            requiredExpression = true;
-            expression = expression.substring(1).trim();
+        boolean itemRequired = false;
+        if (items.stream().anyMatch(item -> item.startsWith("@"))) {
+            itemRequired = true;
+            items = items.stream().map(item -> item.replace("@","")).collect(Collectors.toSet());
+
         }
 
-        if (!requiredExpression && items.isEmpty()) {
+        if (!itemRequired && items.isEmpty()) {
             return true;
         }
 

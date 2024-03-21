@@ -2,6 +2,7 @@ package liquibase.changelog.filter;
 
 import liquibase.ContextExpression;
 import liquibase.Contexts;
+import liquibase.Labels;
 import liquibase.changelog.ChangeSet;
 import liquibase.sql.visitor.SqlVisitor;
 
@@ -39,7 +40,10 @@ public class ContextChangeSetFilter implements ChangeSetFilter {
             return new ChangeSetFilterResult(true, "Changeset runs under all contexts", this.getClass(), getMdcName(), getDisplayName());
         }
 
-        if (changeSet.getContextFilter().matches(contexts) && ContextExpression.matchesAll(inheritableContexts, contexts)) {
+        ContextExpression changeSetContextFilter = changeSet.getContextFilter();
+        boolean contextFilterChangeSetMatched = changeSetContextFilter.matches(contexts);
+        boolean inheritableContextsMatched = inheritableContexts.stream().anyMatch(contextExpression -> contextExpression.matches(contexts));
+        if (contextFilterChangeSetMatched || inheritableContextsMatched) {
             return new ChangeSetFilterResult(true, "Context matches '"+contexts.toString()+"'", this.getClass(), getMdcName(), getDisplayName());
         } else {
             return new ChangeSetFilterResult(false, "Context does not match '"+contexts.toString()+"'", this.getClass(), getMdcName(), getDisplayName());
