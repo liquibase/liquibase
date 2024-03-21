@@ -673,4 +673,9 @@ public class MySQLDatabase extends AbstractJdbcDatabase {
     public boolean supportsCreateIfNotExists(Class<? extends DatabaseObject> type) {
         return type.isAssignableFrom(Table.class);
     }
+
+    @Override
+    public boolean supportsDatabaseChangeLogHistory() {
+        return true;
+    }
 }

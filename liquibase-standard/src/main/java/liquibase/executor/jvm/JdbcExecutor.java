@@ -39,6 +39,9 @@ import java.util.logging.Level;
  */
 public class JdbcExecutor extends AbstractExecutor {
 
+    public static final String SHOULD_UPDATE_ROWS_AFFECTED_SCOPE_KEY = "shouldUpdateRowsAffected";
+    public static final String ROWS_AFFECTED_SCOPE_KEY = "rowsAffected";
+
     /**
      * Return the name of the Executor
      *
@@ -496,8 +499,9 @@ public class JdbcExecutor extends AbstractExecutor {
 
     private void addUpdateCountToScope(int updateCount) {
         if (updateCount > -1) {
-            AtomicInteger scopeRowsAffected = Scope.getCurrentScope().get("rowsAffected", AtomicInteger.class);
-            if (scopeRowsAffected != null) {
+            AtomicInteger scopeRowsAffected = Scope.getCurrentScope().get(ROWS_AFFECTED_SCOPE_KEY, AtomicInteger.class);
+            Boolean shouldUpdateRowsAffected = Scope.getCurrentScope().get(SHOULD_UPDATE_ROWS_AFFECTED_SCOPE_KEY, true);
+            if (scopeRowsAffected != null && Boolean.TRUE.equals(shouldUpdateRowsAffected)) {
                 scopeRowsAffected.addAndGet(updateCount);
             }
         }
