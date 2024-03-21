@@ -3,6 +3,7 @@ package liquibase.command.core.helpers;
 import liquibase.UpdateSummaryEnum;
 import liquibase.UpdateSummaryOutputEnum;
 import liquibase.command.*;
+import liquibase.util.HelpUtil;
 
 import java.util.Arrays;
 import java.util.Collections;
@@ -78,8 +79,6 @@ public class ShowSummaryArgument extends AbstractCommandStep {
 
     @Override
     public void adjustCommandDefinition(CommandDefinition commandDefinition) {
-        if (commandDefinition.getPipeline().size() == 1) {
-            commandDefinition.setInternal(true);
-        }
+        HelpUtil.hideCommandNameInHelpView(commandDefinition);
     }
 }
