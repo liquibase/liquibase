@@ -464,7 +464,7 @@ END testSP;
     </changeSet>
     <changeSet id="dividedAndSlashEndDelimiterTest" author="mallod">
         <sql endDelimiter="/" splitStatements="true" stripComments="false">
-            SELECT a / b FROM unnamed_constraint/
+            SELECT 6 / 3 FROM unnamed_constraint/
             update liquibaseRunInfo set timesRan=timesRan+1/
         </sql>
     </changeSet>
