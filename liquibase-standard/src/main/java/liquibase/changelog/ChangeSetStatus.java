@@ -4,6 +4,7 @@ import liquibase.ChecksumVersion;
 import liquibase.change.CheckSum;
 import liquibase.changelog.filter.ChangeSetFilter;
 import liquibase.changelog.filter.ChangeSetFilterResult;
+import liquibase.exception.LiquibaseException;
 import liquibase.integration.commandline.LiquibaseCommandLineConfiguration;
 
 import java.util.Date;
@@ -37,6 +38,18 @@ public class ChangeSetStatus {
         this.currentCheckSum = changeSet.generateCheckSum(version);
         this.description = changeSet.getDescription();
         this.comments = changeSet.getComments();
+    }
+
+    public ChangeSetStatus(ChangeSet changeSet, boolean skipChangeSetStatusGeneration) throws LiquibaseException {
+        if(skipChangeSetStatusGeneration) {
+            this.changeSet = changeSet;
+            this.currentCheckSum = null;
+            this.description = null;
+            this.comments = null;
+        }
+        else {
+            throw new LiquibaseException(String.format("ChangeSetStatus for ChangeSet %s cannot generated", changeSet.toString()));
+        }
     }
 
     public ChangeSet getChangeSet() {
