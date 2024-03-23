@@ -124,40 +124,40 @@ public class MarkChangeSetRanExecuteTest extends AbstractExecuteTest {
 
         this.statementUnderTest = new MarkChangeSetRanStatement(new ChangeSet("a", "b", false, false, "c", "e", "f",
                 null), ChangeSet.ExecType.RERAN);
-        assertCorrect("update [databasechangelog] set [comments] = '', [contexts] = 'e', [dateexecuted] = getdate(), [deployment_id] = null, [exectype] " +
-                        "= 'reran', [labels] = null, [md5sum] = '9:d41d8cd98f00b204e9800998ecf8427e', [orderexecuted] = 1 where [id] =" +
+        assertCorrect("update [databasechangelog] set [comments] = '', [contexts] = 'e', [dateexecuted] = getdate(), [deployment_id] = null, [description] = 'empty', [exectype] " +
+                        "= 'reran', [labels] = null, liquibase = 'dev', [md5sum] = '9:d41d8cd98f00b204e9800998ecf8427e', [orderexecuted] = 1 where [id] =" +
                         " 'a' and" +
                         " [author] = 'b' and [filename] = 'c'",
                 MSSQLDatabase.class);
-        assertCorrect("update databasechangelog set comments = '', contexts = 'e', dateexecuted = systimestamp, deployment_id = null, exectype = " +
-                        "'reran', labels = null, md5sum = '9:d41d8cd98f00b204e9800998ecf8427e', orderexecuted = 1 where id = 'a' and" +
+        assertCorrect("update databasechangelog set comments = '', contexts = 'e', dateexecuted = systimestamp, deployment_id = null, [description] = 'empty', exectype = " +
+                        "'reran', labels = null, liquibase = 'dev', md5sum = '9:d41d8cd98f00b204e9800998ecf8427e', orderexecuted = 1 where id = 'a' and" +
                         " author " +
                         "= 'b' and filename = 'c'",
                 OracleDatabase.class);
-        assertCorrect("update [databasechangelog] set [comments] = '', [contexts] = 'e', [dateexecuted] = getdate(), [deployment_id] = null, [exectype] " +
-                "= 'reran', [labels] = null, [md5sum] = '9:d41d8cd98f00b204e9800998ecf8427e', [orderexecuted] = 1 where [id] = 'a' and" +
+        assertCorrect("update [databasechangelog] set [comments] = '', [contexts] = 'e', [dateexecuted] = getdate(), [deployment_id] = null, [description] = 'empty', [exectype] " +
+                "= 'reran', [labels] = null, liquibase = 'dev', [md5sum] = '9:d41d8cd98f00b204e9800998ecf8427e', [orderexecuted] = 1 where [id] = 'a' and" +
                 " [author] = 'b' and [filename] = 'c'", SybaseDatabase.class);
         assertCorrect("update [databasechangelog] set [comments] = '', [contexts] = 'e', [dateexecuted] = current year to fraction(5), deployment_id = " +
-                "null, exectype = 'reran', [labels] = null, md5sum = '9:d41d8cd98f00b204e9800998ecf8427e', orderexecuted = 1 where id " +
+                "null, [description] = 'empty', exectype = 'reran', [labels] = null, liquibase = 'dev', md5sum = '9:d41d8cd98f00b204e9800998ecf8427e', orderexecuted = 1 where id " +
                 "= 'a' and author = 'b' and filename = 'c'", InformixDatabase.class);
-        assertCorrect("update [databasechangelog] set [comments] = '', [contexts] = 'e', [dateexecuted] = current timestamp, deployment_id = null, " +
-                        "exectype = 'reran', [labels] = null, md5sum = '9:d41d8cd98f00b204e9800998ecf8427e', orderexecuted = 1 where " +
+        assertCorrect("update [databasechangelog] set [comments] = '', [contexts] = 'e', [dateexecuted] = current timestamp, deployment_id = null, [description] = 'empty', " +
+                        "exectype = 'reran', [labels] = null, liquibase = 'dev', md5sum = '9:d41d8cd98f00b204e9800998ecf8427e', orderexecuted = 1 where " +
                         "id = 'a' and author = 'b' and filename = 'c'",
                 DB2Database.class);
-        assertCorrect("update [databasechangelog] set [comments] = '', [contexts] = 'e', [dateexecuted] = current_timestamp, deployment_id = null, " +
-                        "exectype = 'reran', [labels] = null, md5sum = '9:d41d8cd98f00b204e9800998ecf8427e', orderexecuted = 1 where " +
+        assertCorrect("update [databasechangelog] set [comments] = '', [contexts] = 'e', [dateexecuted] = current_timestamp, deployment_id = null, [description] = 'empty', " +
+                        "exectype = 'reran', [labels] = null, liquibase = 'dev', md5sum = '9:d41d8cd98f00b204e9800998ecf8427e', orderexecuted = 1 where " +
                         "id = 'a' and author = 'b' and filename = 'c'",
                 FirebirdDatabase.class,
                 DerbyDatabase.class);
-        assertCorrect("update [databasechangelog] set [comments] = '', [contexts] = 'e', [dateexecuted] = NOW(), deployment_id = null, exectype = " +
-                        "'reran', [labels] = null, md5sum = '9:d41d8cd98f00b204e9800998ecf8427e', orderexecuted = 1 where id = 'a' and" +
+        assertCorrect("update [databasechangelog] set [comments] = '', [contexts] = 'e', [dateexecuted] = NOW(), deployment_id = null, [description] = 'empty', exectype = " +
+                        "'reran', [labels] = null, liquibase = 'dev', md5sum = '9:d41d8cd98f00b204e9800998ecf8427e', orderexecuted = 1 where id = 'a' and" +
                         " author = 'b' and filename = 'c'",
                 SybaseASADatabase.class);
-        assertCorrect("update [databasechangelog] set [comments] = '', [contexts] = 'e', [dateexecuted] = NOW(), deployment_id = null, exectype = " +
-                        "'reran', [labels] = null, md5sum = '9:d41d8cd98f00b204e9800998ecf8427e', orderexecuted = 1 where id = 'a' and" +
+        assertCorrect("update [databasechangelog] set [comments] = '', [contexts] = 'e', [dateexecuted] = NOW(), deployment_id = null, [description] = 'empty', exectype = " +
+                        "'reran', [labels] = null, liquibase = 'dev', md5sum = '9:d41d8cd98f00b204e9800998ecf8427e', orderexecuted = 1 where id = 'a' and" +
                         " author = 'b' and filename = 'c'",
                 MySQLDatabase.class, MariaDBDatabase.class, HsqlDatabase.class, PostgresDatabase.class, H2Database.class, CockroachDatabase.class);
-        assertCorrectOnRest("update [databasechangelog] set [comments] = '', [contexts] = 'e', [dateexecuted] = NOW(), [deployment_id] = null, [exectype] = 'reran', [labels] = null, [md5sum] = " +
+        assertCorrectOnRest("update [databasechangelog] set [comments] = '', [contexts] = 'e', [dateexecuted] = NOW(), [deployment_id] = null, [description] = 'empty', [exectype] = 'reran', [labels] = null, liquibase = 'dev', [md5sum] = " +
                 "'9:d41d8cd98f00b204e9800998ecf8427e', [orderexecuted] = 1 where id = 'a' and author = 'b' and filename = 'c'");
     }
 }
