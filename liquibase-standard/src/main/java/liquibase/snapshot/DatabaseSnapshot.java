@@ -94,7 +94,7 @@ public abstract class DatabaseSnapshot implements LiquibaseSerializable {
                 }
             }
 
-            if (getDatabase().supportsCatalogs()) {
+            if (getDatabase().supports(Catalog.class)) {
                 for (Catalog catalog : catalogs) {
                     this.snapshotControl.addType(catalog.getClass(), database);
                     include(catalog);
@@ -311,7 +311,6 @@ public abstract class DatabaseSnapshot implements LiquibaseSerializable {
         }
 
         T object = chain.snapshot(example, this);
-
         if (object == null) {
             Set<DatabaseObject> collection = knownNull.computeIfAbsent(example.getClass(), k -> new HashSet<>());
             collection.add(example);

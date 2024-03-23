@@ -185,15 +185,24 @@ public class MSSQLDatabase extends AbstractJdbcDatabase {
     }
 
     @Override
+    public boolean supports(Class<? extends DatabaseObject> object) {
+        if (Sequence.class.isAssignableFrom(object)) {
+            try {
+                return isAzureDb() || this.getDatabaseMajorVersion() >= MSSQL_SERVER_VERSIONS.MSSQL2012;
+            } catch (DatabaseException e) {
+                throw new UnexpectedLiquibaseException(e);
+            }
+        }
+        return super.supports(object);
+    }
+
+    @Override
     public boolean supportsSequences() {
         try {
-            if (isAzureDb() || this.getDatabaseMajorVersion() >= MSSQL_SERVER_VERSIONS.MSSQL2012) {
-                return true;
-            }
+            return isAzureDb() || this.getDatabaseMajorVersion() >= MSSQL_SERVER_VERSIONS.MSSQL2012;
         } catch (DatabaseException e) {
             throw new UnexpectedLiquibaseException(e);
         }
-        return false;
     }
 
     @Override

@@ -215,6 +215,19 @@ public class SQLiteDatabase extends AbstractJdbcDatabase {
         return false;
     }
 
+
+
+    @Override
+    public boolean supports(Class<? extends DatabaseObject> object) {
+        if (Schema.class.isAssignableFrom(object)) {
+            return false;
+        }
+        if (Sequence.class.isAssignableFrom(object)) {
+            return false;
+        }
+        return super.supports(object);
+    }
+
     @Override
     public boolean supportsSchemas() {
         return false;

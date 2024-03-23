@@ -14,7 +14,7 @@ public class DropSequenceGenerator extends AbstractSqlGenerator<DropSequenceStat
 
     @Override
     public boolean supports(DropSequenceStatement statement, Database database) {
-        return database.supportsSequences();
+        return database.supports(Sequence.class);
     }
 
     @Override
