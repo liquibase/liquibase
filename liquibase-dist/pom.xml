@@ -227,7 +227,7 @@
 			<!-- this builds and attaches the tar file of liquibase (which has liquibase cli) -->
 			<plugin>
 				<artifactId>maven-assembly-plugin</artifactId>
-				<version>3.6.0</version>
+				<version>3.7.1</version>
 				<configuration>
 					<tarLongFileMode>posix</tarLongFileMode>
 					<finalName>liquibase-${project.version}</finalName>
