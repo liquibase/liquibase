@@ -69,6 +69,7 @@ import java.util.stream.Collectors;
 import static liquibase.test.SnapshotAssert.assertThat;
 import static org.junit.Assert.*;
 import static org.junit.Assume.assumeNotNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 /**
  * Base class for all database integration tests.  There is an AbstractIntegrationTest subclass for each supported database.

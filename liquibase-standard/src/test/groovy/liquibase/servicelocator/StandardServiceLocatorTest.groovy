@@ -10,7 +10,6 @@ import liquibase.diff.DiffGenerator
 import liquibase.diff.compare.DatabaseObjectComparator
 import liquibase.diff.output.changelog.ChangeGenerator
 import liquibase.executor.Executor
-import liquibase.license.LicenseService
 import liquibase.lockservice.LockService
 import liquibase.parser.ChangeLogParser
 import liquibase.parser.NamespaceDetails
@@ -67,7 +66,6 @@ class StandardServiceLocatorTest extends Specification {
                 SqlGenerator.class,
                 SnapshotGenerator.class,
                 Executor.class,
-                LicenseService.class,
                 DatabaseConnection.class,
         ]
     }

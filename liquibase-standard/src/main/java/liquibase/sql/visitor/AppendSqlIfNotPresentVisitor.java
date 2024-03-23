@@ -1,7 +1,9 @@
 package liquibase.sql.visitor;
 
 import liquibase.database.Database;
+import lombok.EqualsAndHashCode;
 
+@EqualsAndHashCode(callSuper = false)
 public class AppendSqlIfNotPresentVisitor extends AppendSqlVisitor {
     @Override
     public String modifySql(String sql, Database database) {
