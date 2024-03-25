@@ -1,25 +1,23 @@
 package liquibase.changelog;
 
-import liquibase.ChecksumVersion;
-import liquibase.Contexts;
-import liquibase.LabelExpression;
-import liquibase.Scope;
+import liquibase.*;
 import liquibase.changelog.filter.ContextChangeSetFilter;
 import liquibase.changelog.filter.DbmsChangeSetFilter;
 import liquibase.database.Database;
 import liquibase.exception.DatabaseException;
 import liquibase.exception.DatabaseHistoryException;
 import liquibase.executor.ExecutorService;
+import liquibase.resource.ResourceAccessor;
 import liquibase.statement.core.UpdateChangeSetChecksumStatement;
 
 import java.text.DecimalFormat;
+import java.util.Comparator;
 import java.util.Date;
 import java.util.List;
 
 public abstract class AbstractChangeLogHistoryService implements ChangeLogHistoryService {
 
     private Database database;
-    private String deploymentId;
 
     public Database getDatabase() {
         return database;
@@ -129,26 +127,26 @@ public abstract class AbstractChangeLogHistoryService implements ChangeLogHistor
         reset();
     }
 
+    /**
+     * @deprecated use {@link Scope#getDeploymentId()}
+     */
     @Override
-    public String getDeploymentId() {
-        return this.deploymentId;
-    }
+    @Deprecated
+    public String getDeploymentId() { return Scope.getCurrentScope().getDeploymentId(); }
 
+    /**
+     * @deprecated This is now handled automatically by the root scope
+     */
     @Override
-    public void resetDeploymentId() {
-        this.deploymentId = null;
-    }
+    @Deprecated
+    public void resetDeploymentId() {}
 
+    /**
+     * @deprecated This is now handled automatically by the root scope
+     */
     @Override
-    public void generateDeploymentId() {
-        if (this.deploymentId == null) {
-            long time = (new Date()).getTime();
-            String dateString = String.valueOf(time);
-            DecimalFormat decimalFormat = new DecimalFormat("0000000000");
-            this.deploymentId = dateString.length() > 9 ? dateString.substring(dateString.length() - 10) :
-                    decimalFormat.format(time);
-        }
-    }
+    @Deprecated
+    public void generateDeploymentId() {}
 
 
 }

@@ -23,7 +23,6 @@ class SetupChangelogHistory extends TestSetup {
 
         final ChangeLogHistoryService changeLogService = Scope.getCurrentScope().getSingleton(ChangeLogHistoryServiceFactory.class).getChangeLogService(database)
         changeLogService.init()
-        changeLogService.generateDeploymentId()
 
         List<RanChangeSet> toRemoveList = new ArrayList<>()
         for (RanChangeSet ranChangeSet : changeLogService.getRanChangeSets()) {

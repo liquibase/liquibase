@@ -61,7 +61,7 @@ public class MarkChangeSetRanGenerator extends AbstractSqlGenerator<MarkChangeSe
                         .addNewColumnValue("ORDEREXECUTED", Scope.getCurrentScope().getSingleton(ChangeLogHistoryServiceFactory.class).getChangeLogService(database).getNextSequenceValue())
                         .addNewColumnValue("MD5SUM", changeSet.generateCheckSum(ChecksumVersion.latest()).toString())
                         .addNewColumnValue("EXECTYPE", statement.getExecType().value)
-                        .addNewColumnValue("DEPLOYMENT_ID", Scope.getCurrentScope().getSingleton(ChangeLogHistoryServiceFactory.class).getChangeLogService(database).getDeploymentId())
+                        .addNewColumnValue("DEPLOYMENT_ID", Scope.getCurrentScope().getDeploymentId())
                         .addNewColumnValue(COMMENTS, getCommentsColumn(changeSet))
                         .addNewColumnValue(CONTEXTS, getContextsColumn(changeSet))
                         .addNewColumnValue(LABELS, getLabelsColumn(changeSet))
@@ -88,7 +88,7 @@ public class MarkChangeSetRanGenerator extends AbstractSqlGenerator<MarkChangeSe
                             .addColumnValue(LABELS, getLabelsColumn(changeSet))
                         .addColumnValue("LIQUIBASE", getLiquibaseBuildVersion()
                             )
-                            .addColumnValue("DEPLOYMENT_ID", Scope.getCurrentScope().getSingleton(ChangeLogHistoryServiceFactory.class).getChangeLogService(database).getDeploymentId());
+                            .addColumnValue("DEPLOYMENT_ID", Scope.getCurrentScope().getDeploymentId());
 
                     if (tag != null) {
                         ((InsertStatement) runStatement).addColumnValue("TAG", tag);
