@@ -188,9 +188,34 @@ Changes in version 4.27.0 (2024.03.26)
 - (#5267) fix #5266: comma separated dbms-attribute for createProcedure-change triggers validation-check @jclohmann
 - (#5304) Fix for DAT-15716 :: Include 'OR REPLACE' instruction for a view when generate-changelog/diff-changelog command are executed @MalloD12
 
+
 ## 🤖 Security, Driver and Other Updates
 
 - (#5447) Bump org.slf4j:slf4j-jdk14 from 2.0.9 to 2.0.11 @dependabot
+- Bump org.postgresql:postgresql from 42.7.1 to 42.7.2 by @dependabot in https://github.com/liquibase/liquibase/pull/5613
+- Bump org.postgresql:postgresql from 42.7.1 to 42.7.2 in /liquibase-dist by @dependabot in https://github.com/liquibase/liquibase/pull/5612
+- Bump org.apache.maven.plugins:maven-failsafe-plugin from 3.2.2 to 3.2.5 by @dependabot in https://github.com/liquibase/liquibase/pull/5449
+- Bump maven-surefire-plugin.version from 3.2.2 to 3.2.5 by @dependabot in https://github.com/liquibase/liquibase/pull/5448
+- Bump org.codehaus.mojo:flatten-maven-plugin from 1.5.0 to 1.6.0 by @dependabot in https://github.com/liquibase/liquibase/pull/5464
+- chore(deps): Bump org.junit:junit-bom from 5.10.1 to 5.10.2 by @dependabot in https://github.com/liquibase/liquibase/pull/5556
+- chore(deps-dev): Bump org.junit.jupiter:junit-jupiter from 5.10.1 to 5.10.2 by @dependabot in https://github.com/liquibase/liquibase/pull/5557
+- Bump org.testcontainers:testcontainers-bom from 1.19.3 to 1.19.6 by @dependabot in https://github.com/liquibase/liquibase/pull/5621
+- Bump actions/github-script from 6 to 7 by @dependabot in https://github.com/liquibase/liquibase/pull/5281
+- Bump actions/setup-java from 3 to 4 by @dependabot in https://github.com/liquibase/liquibase/pull/5301
+- Bump actions/checkout from 2 to 4 by @dependabot in https://github.com/liquibase/liquibase/pull/5324
+- Bump github/codeql-action from 2 to 3 by @dependabot in https://github.com/liquibase/liquibase/pull/5380
+- chore(deps-dev): Bump org.assertj:assertj-core from 3.25.1 to 3.25.3 by @dependabot in https://github.com/liquibase/liquibase/pull/5558
+- chore(deps): Bump org.slf4j:slf4j-jdk14 from 2.0.11 to 2.0.12 by @dependabot in https://github.com/liquibase/liquibase/pull/5568
+- Bump release-drafter/release-drafter from 5 to 6 by @dependabot in https://github.com/liquibase/liquibase/pull/5589
+- Bump org.apache.maven.plugins:maven-shade-plugin from 3.5.1 to 3.5.2 by @dependabot in https://github.com/liquibase/liquibase/pull/5614
+- bump version of setup-maven action by @StevenMassaro in https://github.com/liquibase/liquibase/pull/5643
+- Bump com.oracle.database.jdbc:ojdbc8 from 19.21.0.0 to 19.22.0.0 by @dependabot in https://github.com/liquibase/liquibase/pull/5588
+- Bump com.microsoft.sqlserver:mssql-jdbc from 12.4.1.jre8 to 12.6.1.jre8 by @dependabot in https://github.com/liquibase/liquibase/pull/5615
+- Bump org.mariadb.jdbc:mariadb-java-client from 3.3.2 to 3.3.3 by @dependabot in https://github.com/liquibase/liquibase/pull/5616
+- Bump whelk-io/maven-settings-xml-action from 20 to 22 by @dependabot in https://github.com/liquibase/liquibase/pull/5639
+- Bump robinraju/release-downloader from 1.8 to 1.9 by @dependabot in https://github.com/liquibase/liquibase/pull/5640
+- Bump actions/delete-package-versions from 3 to 5 by @dependabot in https://github.com/liquibase/liquibase/pull/5641
+- Bump org.projectlombok:lombok from 1.18.30 to 1.18.32 by @dependabot in https://github.com/liquibase/liquibase/pull/5712
 
 
 ### Get Certified
