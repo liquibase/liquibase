@@ -73,7 +73,6 @@ class ObjectUtilTest extends Specification {
         new PreconditionContainer()  | "onSqlOutput"          | "IGNORE"      | PreconditionContainer.OnSqlOutputOption.class
     }
 
-    @Unroll
     def "convert #input"() {
         expect:
         ObjectUtil.convert(input, targetClass) == expected
