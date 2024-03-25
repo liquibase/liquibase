@@ -11,7 +11,6 @@ import liquibase.statement.core.AddDefaultValueStatement
 import liquibase.structure.core.Column
 import liquibase.structure.core.Table
 import liquibase.util.ISODateFormat
-import spock.lang.Unroll
 
 public class AddDefaultValueChangeTest extends StandardChangeTest {
 
@@ -26,7 +25,6 @@ public class AddDefaultValueChangeTest extends StandardChangeTest {
         change.getConfirmationMessage() == "Default value added to TABLE_NAME.COLUMN_NAME"
     }
 
-    @Unroll
     def "Make sure that generateStatements is not changing internal structures"() {
         given:
         def database = new MockDatabase()
@@ -46,7 +44,6 @@ public class AddDefaultValueChangeTest extends StandardChangeTest {
         assert defaultValueStatement.schemaName == change.schemaName
     }
 
-    @Unroll
     def "checkStatus"() {
         when:
         def database = new MockDatabase()

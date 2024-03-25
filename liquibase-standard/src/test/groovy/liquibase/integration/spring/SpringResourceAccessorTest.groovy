@@ -3,7 +3,6 @@ package liquibase.integration.spring
 import liquibase.test.TestContext
 import org.springframework.core.io.DefaultResourceLoader
 import spock.lang.Specification
-import spock.lang.Unroll
 
 class SpringResourceAccessorTest extends Specification {
 
@@ -74,7 +73,6 @@ class SpringResourceAccessorTest extends Specification {
         thrown(IOException)
     }
 
-    @Unroll
     def finalizeSearchPath() {
         expect:
         new SpringResourceAccessor().finalizeSearchPath(input) == expected

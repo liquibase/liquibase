@@ -1,19 +1,14 @@
 package liquibase.changelog
 
 import liquibase.Scope
-import liquibase.changelog.ChangeLogParameters
-import liquibase.changelog.DatabaseChangeLog
-import liquibase.changelog.ExpressionExpander
 import liquibase.exception.UnknownChangeLogParameterException
 import liquibase.parser.ChangeLogParserConfiguration
 import spock.lang.Specification
-import spock.lang.Unroll
 
 import static liquibase.parser.ChangeLogParserConfiguration.MissingPropertyMode.*
 
 class ExpressionExpanderTest extends Specification {
 
-    @Unroll
     def "expandExpressions"() {
         when:
         def params = new ChangeLogParameters();
@@ -79,7 +74,6 @@ class ExpressionExpanderTest extends Specification {
     }
 
 
-    @Unroll
     def "expandExpressions with ERROR configured unknown properties"() {
         when:
         def params = new ChangeLogParameters();

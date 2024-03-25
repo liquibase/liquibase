@@ -1,6 +1,5 @@
 package liquibase.snapshot
 
-
 import liquibase.Scope
 import liquibase.command.util.CommandUtil
 import liquibase.database.DatabaseFactory
@@ -16,7 +15,6 @@ import liquibase.structure.core.Table
 import liquibase.structure.core.View
 import org.junit.Rule
 import spock.lang.Specification
-import spock.lang.Unroll
 
 class JdbcDatabaseSnapshotIntegrationTest extends Specification {
 
@@ -26,7 +24,6 @@ class JdbcDatabaseSnapshotIntegrationTest extends Specification {
     @Rule
     public DatabaseTestSystem mssql = Scope.currentScope.getSingleton(TestSystemFactory).getTestSystem("mssql")
 
-    @Unroll
     def "getTables, getColumns and getViews works with underscores in schema names"() {
         when:
         def connection = h2.getConnection()

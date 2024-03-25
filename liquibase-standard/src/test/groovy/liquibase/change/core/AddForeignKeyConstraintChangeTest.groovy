@@ -8,7 +8,6 @@ import liquibase.snapshot.SnapshotGeneratorFactory
 import liquibase.structure.core.Column
 import liquibase.structure.core.ForeignKey
 import liquibase.structure.core.Table
-import spock.lang.Unroll
 
 public class AddForeignKeyConstraintChangeTest extends StandardChangeTest {
 
@@ -39,7 +38,6 @@ public class AddForeignKeyConstraintChangeTest extends StandardChangeTest {
 
     }
 
-    @Unroll
     def "checkStatus"() {
         when:
         def database = new MockDatabase()

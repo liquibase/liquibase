@@ -2,12 +2,9 @@ package liquibase.datatype.core
 
 import liquibase.database.core.*
 import liquibase.exception.UnexpectedLiquibaseException
-import liquibase.database.core.MockDatabase
 import spock.lang.Specification
-import spock.lang.Unroll
 
 class CharTypeTest extends Specification {
-    @Unroll
     def "toDatabaseType"() {
         when:
         def type = new CharType()

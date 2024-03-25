@@ -10,11 +10,10 @@ import liquibase.changelog.ChangeSet
 import liquibase.changelog.DatabaseChangeLog
 import liquibase.database.Database
 import liquibase.database.core.MSSQLDatabase
+import liquibase.database.core.MockDatabase
 import liquibase.exception.RollbackImpossibleException
 import liquibase.exception.UnexpectedLiquibaseException
 import liquibase.exception.ValidationErrors
-import liquibase.database.core.MockDatabase
-import liquibase.integration.commandline.LiquibaseCommandLineConfiguration
 import liquibase.serializer.LiquibaseSerializable
 import liquibase.statement.SqlStatement
 import liquibase.util.TestUtil
@@ -371,7 +370,6 @@ class AbstractChangeTest extends Specification {
         "This/is/a/very/very/very/very/very/very/very/very/very/very/very/very/very/very/very/very/very/very/very/very/very/very/very/very/very/very/ver/long/test/change/path" | new CreateProcedureChange()
     }
 
-    @Unroll
     def "context filter checksum generation - #version"(ChecksumVersion version, String originalChecksum, String updatedChecksum) {
         when:
         ChangeSet originalChange = new ChangeSet("testId", "testAuthor", false, false, "path/changelog", null, null, null)
@@ -391,7 +389,6 @@ class AbstractChangeTest extends Specification {
         ChecksumVersion.latest() | "9:d41d8cd98f00b204e9800998ecf8427e" | "9:d41d8cd98f00b204e9800998ecf8427e"
     }
 
-    @Unroll
     def "label checksum generation - #version"(ChecksumVersion version, String originalChecksum, String updatedChecksum) {
         when:
         ChangeSet originalChange = new ChangeSet("testId", "testAuthor", false, false, "path/changelog", null, null, null)
@@ -411,7 +408,6 @@ class AbstractChangeTest extends Specification {
         ChecksumVersion.latest() | "9:d41d8cd98f00b204e9800998ecf8427e" | "9:d41d8cd98f00b204e9800998ecf8427e"
     }
 
-    @Unroll
     def "dbms checksum generation - #version"(ChecksumVersion version, String originalChecksum, String updatedChecksum) {
         when:
         ChangeSet originalChange = new ChangeSet("testId", "testAuthor", false, false, "path/changelog", null, null, null)
@@ -431,7 +427,6 @@ class AbstractChangeTest extends Specification {
         ChecksumVersion.latest() | "9:d41d8cd98f00b204e9800998ecf8427e" | "9:d41d8cd98f00b204e9800998ecf8427e"
     }
 
-    @Unroll
     def "comment checksum generation - #version"(ChecksumVersion version, String originalChecksum, String updatedChecksum) {
         when:
         ChangeSet originalChange = new ChangeSet("testId", "testAuthor", false, false, "path/changelog", null, null, null)

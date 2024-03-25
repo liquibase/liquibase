@@ -21,7 +21,6 @@ class FileSystemResourceAccessorTest extends Specification {
 
     }
 
-    @Unroll
     def "openStreams and openStream"() {
         when:
         def accessor = new FileSystemResourceAccessor("src/main" as File)
@@ -41,7 +40,6 @@ class FileSystemResourceAccessorTest extends Specification {
         "java/liquibase/Liquibase.java" | "util/StringUtil.java"          | "class StringUtil"
     }
 
-    @Unroll
     def "list non-recursive"() {
         when:
         def accessor = new FileSystemResourceAccessor("src/main" as File)
@@ -80,7 +78,6 @@ class FileSystemResourceAccessorTest extends Specification {
         simpleTestAccessor.getAll("com/example/invalid.txt").size() == 0
     }
 
-    @Unroll
     def "search fails with invalid values: #path"() {
         when:
         simpleTestAccessor.search(path, true)
@@ -95,7 +92,6 @@ class FileSystemResourceAccessorTest extends Specification {
         "liquibase/resource/FileSystemResourceAccessorTest.class" | "'liquibase/resource/FileSystemResourceAccessorTest.class' is a file, not a directory"
     }
 
-    @Unroll
     def "list"() {
         expect:
         simpleTestAccessor.search(path, recursive)*.getPath() as SortedSet == expected as SortedSet

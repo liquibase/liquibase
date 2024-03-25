@@ -1,8 +1,6 @@
 package liquibase.util
 
-
 import spock.lang.Specification
-import spock.lang.Unroll
 
 import java.sql.Time
 import java.sql.Timestamp
@@ -11,7 +9,6 @@ class ISODateFormatTest extends Specification {
 
     private ISODateFormat dateFormat = new ISODateFormat()
 
-    @Unroll
     def "parse and reformat"() {
         expect:
         dateFormat.format(dateFormat.parse(input)) == expected
@@ -29,7 +26,6 @@ class ISODateFormatTest extends Specification {
         "10:13:40"                         | "10:13:40"
     }
 
-    @Unroll
     def format() {
         expect:
         dateFormat.format(input) == expected

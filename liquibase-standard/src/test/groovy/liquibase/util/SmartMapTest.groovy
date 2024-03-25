@@ -1,7 +1,6 @@
 package liquibase.util
 
 import spock.lang.Specification
-import spock.lang.Unroll
 
 class SmartMapTest extends Specification {
 
@@ -18,7 +17,6 @@ class SmartMapTest extends Specification {
         map.get("stringNumber", Integer) == 456
     }
 
-    @Unroll
     def "get passing default"() {
         when:
         def map = new SmartMap()

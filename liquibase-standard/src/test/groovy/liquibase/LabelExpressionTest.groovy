@@ -201,7 +201,6 @@ class LabelExpressionTest extends Specification {
         "! (a and  b ) or ( ! c and  d)"| "!(a and b) or (!c and d)"
     }
 
-    @Unroll
     def isEmpty() {
         expect:
         assert new LabelExpression(expression).isEmpty() == expected

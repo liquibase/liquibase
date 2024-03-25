@@ -9,7 +9,6 @@ import liquibase.changelog.ChangeSet
 import liquibase.changelog.DatabaseChangeLog
 import liquibase.database.core.MockDatabase
 import liquibase.exception.SetupException
-import liquibase.integration.commandline.LiquibaseCommandLineConfiguration
 import liquibase.parser.core.ParsedNodeException
 import liquibase.sdk.resource.MockResourceAccessor
 import liquibase.snapshot.MockSnapshotGeneratorFactory
@@ -17,7 +16,6 @@ import liquibase.snapshot.SnapshotGeneratorFactory
 import liquibase.structure.core.View
 import liquibase.test.JUnitResourceAccessor
 import liquibase.util.StreamUtil
-import spock.lang.Unroll
 
 class CreateViewChangeTest extends StandardChangeTest {
 
@@ -68,7 +66,6 @@ class CreateViewChangeTest extends StandardChangeTest {
         change.selectQuery == "select * from test"
     }
 
-    @Unroll
     def "openSqlStream correctly opens files"() {
         when:
         def changelog = new DatabaseChangeLog("com/example/changelog.xml")
@@ -95,7 +92,6 @@ class CreateViewChangeTest extends StandardChangeTest {
         "my-logic.sql"             | "a/logical/path.xml" | true
     }
 
-    @Unroll
     def "path checksum generation - #version"(ChecksumVersion version, String originalChecksum, String updatedChecksum) {
         when:
         String testScopeId = Scope.enter([
@@ -129,7 +125,6 @@ class CreateViewChangeTest extends StandardChangeTest {
         ChecksumVersion.latest() | "9:44c9d30cc310fbecd58e03d557fe85df" | "9:44c9d30cc310fbecd58e03d557fe85df"
     }
 
-    @Unroll
     def "encoding checksum generation - #version"(ChecksumVersion version, String originalChecksum, String updatedChecksum) {
         when:
         CreateViewChange change = new CreateViewChange()
@@ -155,7 +150,6 @@ class CreateViewChangeTest extends StandardChangeTest {
         ChecksumVersion.latest() | "9:44c9d30cc310fbecd58e03d557fe85df" | "9:44c9d30cc310fbecd58e03d557fe85df"
     }
 
-    @Unroll
     def "select query updated with whitespaces checksum - #version"(ChecksumVersion version, String originalChecksum, String updatedChecksum) {
         when:
         CreateViewChange change = new CreateViewChange()
@@ -179,7 +173,6 @@ class CreateViewChangeTest extends StandardChangeTest {
         ChecksumVersion.latest() | "9:44c9d30cc310fbecd58e03d557fe85df" | "9:44c9d30cc310fbecd58e03d557fe85df"
     }
 
-    @Unroll
     def "checksum change on select query - #version"(ChecksumVersion version, String originalChecksum, String updatedChecksum) {
         when:
         CreateViewChange change = new CreateViewChange()
@@ -205,7 +198,6 @@ class CreateViewChangeTest extends StandardChangeTest {
         ChecksumVersion.latest() | "9:44c9d30cc310fbecd58e03d557fe85df" | "9:43b9ff024ff5b5212a12e4ffc13f4790"
     }
 
-    @Unroll
     def "validate checksum if select query text gets updated - #version"(ChecksumVersion version, String originalChecksum, String updatedChecksum) {
         when:
         String selectQueryText = "SELECT id, name FROM person WHERE id > valueToReplace;"
@@ -235,7 +227,6 @@ class CreateViewChangeTest extends StandardChangeTest {
         ChecksumVersion.latest() | "9:e70628fe4f941c2d8822214dbd7cd28f" | "9:ed9a064736c8974be6ac35bb231032ff"
     }
 
-    @Unroll
     def "relativeToChangelogFile attribute checksum generation - #version"(ChecksumVersion version, String originalChecksum, String updatedChecksum) {
         when:
         CreateViewChange changeWithoutRelativeToChangelogFileAttribSet = new CreateViewChange()

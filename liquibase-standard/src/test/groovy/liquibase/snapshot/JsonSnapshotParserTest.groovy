@@ -8,7 +8,6 @@ import liquibase.resource.SearchPathResourceAccessor
 import liquibase.structure.core.Index
 import liquibase.structure.core.View
 import spock.lang.Specification
-import spock.lang.Unroll
 
 class JsonSnapshotParserTest extends Specification {
     def "Test parsing a large file"() {
@@ -21,7 +20,6 @@ class JsonSnapshotParserTest extends Specification {
         snapshot != null
     }
 
-    @Unroll
     def "Correctly parse a snapshot that contains Index objects on Views"() {
         def snapshotFile = "snapshot-with-index-views.json"
         when:

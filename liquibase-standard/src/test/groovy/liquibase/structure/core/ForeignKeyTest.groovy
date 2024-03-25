@@ -1,7 +1,6 @@
 package liquibase.structure.core
 
 import spock.lang.Specification
-import spock.lang.Unroll
 
 class ForeignKeyTest extends Specification {
 
@@ -12,7 +11,6 @@ class ForeignKeyTest extends Specification {
     def static pkCol1 = new Column(Table, null, null, "pk_table", "pk_col1")
     def static pkCol2 = new Column(Table, null, null, "pk_table", "pk_col2")
 
-    @Unroll
     def "toString() logic"() {
         expect:
         fk.toString() == expected

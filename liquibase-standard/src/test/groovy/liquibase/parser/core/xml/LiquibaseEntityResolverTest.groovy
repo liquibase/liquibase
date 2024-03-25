@@ -7,11 +7,9 @@ import liquibase.resource.DirectoryResourceAccessor
 import liquibase.util.LiquibaseUtil
 import org.xml.sax.InputSource
 import spock.lang.Specification
-import spock.lang.Unroll
 
 class LiquibaseEntityResolverTest extends Specification {
 
-    @Unroll
     def "resolveEntity finds packaged files correctly"() {
         expect:
         new LiquibaseEntityResolver().resolveEntity(null, null, null, systemId) != null
@@ -29,7 +27,6 @@ class LiquibaseEntityResolverTest extends Specification {
         ]
     }
 
-    @Unroll
     def "warning message for mismatched xsd and build versions #systemId /// #buildVersion"() {
         given:
         def uiService = new LiquibaseTest.TestConsoleUIService()
@@ -70,7 +67,6 @@ class LiquibaseEntityResolverTest extends Specification {
         "4.12.0" | "http://liquibase/banner.txt" | false
     }
 
-    @Unroll
     def "resolveEntity finds packaged files correctly even if the configured resourceAccessor doesn't have it"() {
         expect:
         Scope.child([(Scope.Attr.resourceAccessor.name()): new DirectoryResourceAccessor(new File("."))], { ->
@@ -84,7 +80,6 @@ class LiquibaseEntityResolverTest extends Specification {
         ]
     }
 
-    @Unroll
     def "resolveEntity returns null for non-packaged files"() {
         expect:
         Scope.child(GlobalConfiguration.SECURE_PARSING.key, false, { ->

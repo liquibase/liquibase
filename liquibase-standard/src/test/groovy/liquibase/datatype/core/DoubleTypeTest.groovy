@@ -4,11 +4,9 @@ import liquibase.database.core.*
 import liquibase.datatype.DataTypeFactory
 import liquibase.exception.UnexpectedLiquibaseException
 import spock.lang.Specification
-import spock.lang.Unroll
 
 class DoubleTypeTest extends Specification {
 
-    @Unroll
     def "toDatabaseType '#input' on #database.shortName"() {
         when:
         def type = DataTypeFactory.getInstance().fromDescription(input, database)

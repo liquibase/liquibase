@@ -1,12 +1,11 @@
 package liquibase.change.core
 
-import liquibase.change.ChangeStatus;
+import liquibase.change.ChangeStatus
 import liquibase.change.StandardChangeTest
 import liquibase.database.core.MockDatabase
 import liquibase.snapshot.MockSnapshotGeneratorFactory
 import liquibase.snapshot.SnapshotGeneratorFactory
 import liquibase.sqlgenerator.SqlGeneratorFactory
-import spock.lang.Unroll
 
 public class CreateSequenceChangeTest extends StandardChangeTest {
 
@@ -38,7 +37,6 @@ public class CreateSequenceChangeTest extends StandardChangeTest {
         assert warnings.messages.get(0) == 'liquibase.statement.core.CreateSequenceStatement is not supported on mock, but createSequence will still execute'
     }
 
-    @Unroll
     def "checkStatus"() {
         when:
         def database = new MockDatabase()

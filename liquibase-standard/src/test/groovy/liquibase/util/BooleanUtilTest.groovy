@@ -1,7 +1,6 @@
 package liquibase.util
 
 import spock.lang.Specification
-import spock.lang.Unroll
 
 class BooleanUtilTest extends Specification {
 
@@ -17,7 +16,6 @@ class BooleanUtilTest extends Specification {
         false         | false
     }
 
-    @Unroll
     def "parseBoolean"() {
         expect:
         BooleanUtil.parseBoolean(input) == expected

@@ -12,7 +12,6 @@ class ZipResourceAccessorTest extends Specification {
 
     }
 
-    @Unroll
     def "Cannot construct invalid values IllegalArgumentException"() {
         when:
         new ZipResourceAccessor(testFile)
@@ -51,7 +50,6 @@ class ZipResourceAccessorTest extends Specification {
         simpleTestAccessor.getAll("com/example/invalid.txt").size() == 0
     }
 
-    @Unroll
     def "list"() {
         expect:
         simpleTestAccessor.search(path, recursive)*.getPath() == expected

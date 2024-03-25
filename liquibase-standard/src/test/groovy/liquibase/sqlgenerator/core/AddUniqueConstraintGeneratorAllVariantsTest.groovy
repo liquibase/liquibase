@@ -6,7 +6,6 @@ import liquibase.sqlgenerator.MockSqlGeneratorChain
 import liquibase.sqlgenerator.SqlGenerator
 import liquibase.statement.core.AddUniqueConstraintStatement
 import spock.lang.Specification
-import spock.lang.Unroll
 
 class AddUniqueConstraintGeneratorAllVariantsTest extends Specification {
 
@@ -16,7 +15,6 @@ class AddUniqueConstraintGeneratorAllVariantsTest extends Specification {
     protected static final String CONSTRAINT_NAME = "UQ_TEST"
     private static final String INDEX_NAME = "uqIndex"
 
-    @Unroll
     def  "test unique constraint using index with constraint name for #database"() {
         when:
             SqlGenerator<AddUniqueConstraintStatement> generatorUnderTest = new AddUniqueConstraintGenerator()
@@ -48,7 +46,6 @@ class AddUniqueConstraintGeneratorAllVariantsTest extends Specification {
             new InformixDatabase()     | "ALTER TABLE AddUQTest ADD CONSTRAINT UQ_TEST UNIQUE (colToMakeUQ, colToMakeUQ2) USING INDEX uqIndex"
     }
 
-    @Unroll
     def  "test unique constraint using index without constraint name for #database"() {
         when:
             SqlGenerator<AddUniqueConstraintStatement> generatorUnderTest = new AddUniqueConstraintGenerator()
@@ -80,7 +77,6 @@ class AddUniqueConstraintGeneratorAllVariantsTest extends Specification {
             new InformixDatabase()     | "ALTER TABLE AddUQTest ADD UNIQUE (colToMakeUQ, colToMakeUQ2) USING INDEX uqIndex"
     }
 
-    @Unroll
     def  "test unique constraint set clustered with constraint name for #database"() {
         when:
             SqlGenerator<AddUniqueConstraintStatement> generatorUnderTest = new AddUniqueConstraintGenerator()
@@ -113,7 +109,6 @@ class AddUniqueConstraintGeneratorAllVariantsTest extends Specification {
     }
 
 
-    @Unroll
     def "test validation of forIndexName for #database"() {
         when:
             SqlGenerator<AddUniqueConstraintStatement> generatorUnderTest = new AddUniqueConstraintGenerator()

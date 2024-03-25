@@ -3,12 +3,10 @@ package liquibase.configuration.core
 import liquibase.Scope
 import liquibase.configuration.ProvidedValue
 import spock.lang.Specification
-import spock.lang.Unroll
 
 class ScopeValueProviderTest extends Specification {
 
 
-    @Unroll
     def "GetValue"() {
         when:
         def env = [

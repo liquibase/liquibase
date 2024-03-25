@@ -1,13 +1,11 @@
 package liquibase.configuration
 
 import spock.lang.Specification
-import spock.lang.Unroll
 
 import java.util.logging.Level
 
 class ConfigurationValueConverterTest extends Specification {
 
-    @Unroll
     def "LOG_LEVEL instance"() {
         expect:
         ConfigurationValueConverter.LOG_LEVEL.convert(input) == expected
@@ -24,7 +22,6 @@ class ConfigurationValueConverterTest extends Specification {
         null      | null
     }
 
-    @Unroll
     def "STRING instance"() {
         expect:
         ConfigurationValueConverter.STRING.convert(input) == expected
@@ -37,7 +34,6 @@ class ConfigurationValueConverterTest extends Specification {
         123        | "123"
     }
 
-    @Unroll
     def "CLASS instance"() {
         expect:
         ConfigurationValueConverter.CLASS.convert(input) == expected

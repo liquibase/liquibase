@@ -6,7 +6,6 @@ import liquibase.sqlgenerator.MockSqlGeneratorChain
 import liquibase.sqlgenerator.SqlGenerator
 import liquibase.statement.core.AddPrimaryKeyStatement
 import spock.lang.Specification
-import spock.lang.Unroll
 
 class AddPrimaryKeyGeneratorAllVariantsTest extends Specification {
 
@@ -16,7 +15,6 @@ class AddPrimaryKeyGeneratorAllVariantsTest extends Specification {
     protected static final String CONSTRAINT_NAME = "PK_TEST"
     private static final String INDEX_NAME = "pkIndex"
 
-    @Unroll
     def "test validation of forIndexName for #database"() {
         when:
             SqlGenerator<AddPrimaryKeyStatement> generatorUnderTest = new AddPrimaryKeyGenerator()

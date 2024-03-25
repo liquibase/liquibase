@@ -3,10 +3,8 @@ package liquibase.datatype.core
 import liquibase.database.core.*
 import liquibase.statement.DatabaseFunction
 import spock.lang.Specification
-import spock.lang.Unroll
 
 class ClobTypeTest extends Specification {
-    @Unroll
     def "toDatabaseType"() {
         when:
         def type = new ClobType()
@@ -51,7 +49,6 @@ class ClobTypeTest extends Specification {
 
     }
 
-    @Unroll
     def "objectToSql"() {
         when:
         def type = new ClobType()

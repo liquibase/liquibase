@@ -1,12 +1,9 @@
 package liquibase.util
 
-
 import spock.lang.Specification
-import spock.lang.Unroll
 
 class BomAwareInputStreamTest extends Specification {
 
-    @Unroll
     def "reads string and detects encoding"() {
         when:
         BomAwareInputStream stream = new BomAwareInputStream(new ByteArrayInputStream(contents));

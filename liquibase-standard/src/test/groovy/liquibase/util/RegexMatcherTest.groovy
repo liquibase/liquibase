@@ -1,10 +1,6 @@
 package liquibase.util
 
-
 import spock.lang.Specification
-import spock.lang.Unroll
-
-import static org.junit.Assert.assertTrue
 
 class RegexMatcherTest extends Specification {
 
@@ -17,7 +13,6 @@ class RegexMatcherTest extends Specification {
         e.message.startsWith("Unclosed group near index 3")
     }
 
-    @Unroll
     def matchingInSequentialOrder() {
         when:
         def matcher = new RegexMatcher("Pulp Fiction\n" +

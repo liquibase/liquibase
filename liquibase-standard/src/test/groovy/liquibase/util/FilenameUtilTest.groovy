@@ -2,11 +2,9 @@ package liquibase.util
 
 import org.junit.Assume
 import spock.lang.Specification
-import spock.lang.Unroll
 
 class FilenameUtilTest extends Specification {
 
-    @Unroll
     def "normalize"() {
         expect:
         FilenameUtil.normalize(filename) == expected
@@ -29,7 +27,6 @@ class FilenameUtilTest extends Specification {
         ""                    | ""
     }
 
-    @Unroll
     def "normalize (windows)"() {
         setup:
         Assume.assumeTrue(SystemUtil.isWindows())
@@ -43,7 +40,6 @@ class FilenameUtilTest extends Specification {
         "C:\\..\\bar"      | "C:/bar"
     }
 
-    @Unroll
     def "concat"() {
         expect:
         FilenameUtil.concat(basePath, filename) == expected
@@ -60,7 +56,6 @@ class FilenameUtilTest extends Specification {
         "\\base\\path" | "\\liquibase\\changelogs"         | "/base/path/liquibase/changelogs"
     }
 
-    @Unroll
     def "sanitizeFileName"() {
         expect:
         FilenameUtil.sanitizeFileName(filename) == expected
@@ -72,7 +67,6 @@ class FilenameUtilTest extends Specification {
         null                             | null
     }
 
-    @Unroll
     def "getFullPath"() {
         expect:
         FilenameUtil.getDirectory(filename) == expected
@@ -85,7 +79,6 @@ class FilenameUtilTest extends Specification {
         null     | null
     }
 
-    @Unroll
     def "getFullPath (windows)"() {
         setup:
         Assume.assumeTrue(SystemUtil.isWindows())

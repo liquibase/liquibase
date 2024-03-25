@@ -59,7 +59,6 @@ class SqlParserTest extends Specification {
 
     }
 
-    @Unroll
     def "parse with unicode"() {
         expect:
         SqlParserFactory sqlParserFactory = Scope.getCurrentScope().getSingleton(SqlParserFactory.class)

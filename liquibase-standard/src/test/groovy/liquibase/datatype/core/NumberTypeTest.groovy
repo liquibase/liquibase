@@ -3,11 +3,9 @@ package liquibase.datatype.core
 import liquibase.database.core.H2Database
 import liquibase.database.core.PostgresDatabase
 import spock.lang.Specification
-import spock.lang.Unroll
 
 class NumberTypeTest extends Specification {
 
-    @Unroll
     def "toDatabaseDataType"() {
         when:
         def type = new NumberType()

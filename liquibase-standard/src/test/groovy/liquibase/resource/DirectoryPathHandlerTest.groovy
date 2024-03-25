@@ -2,7 +2,6 @@ package liquibase.resource
 
 import liquibase.util.StreamUtil
 import spock.lang.Specification
-import spock.lang.Unroll
 
 import java.nio.file.FileAlreadyExistsException
 
@@ -11,7 +10,6 @@ import static liquibase.plugin.Plugin.PRIORITY_NOT_APPLICABLE
 
 class DirectoryPathHandlerTest extends Specification {
 
-    @Unroll
     def "getPriority: #input"() {
         expect:
         new DirectoryPathHandler().getPriority(input) == expected
@@ -41,7 +39,6 @@ class DirectoryPathHandlerTest extends Specification {
         !new DirectoryPathHandler().getResource("/invalid/file/path.txt").exists()
     }
 
-    @Unroll
     def getResourceAccessor() {
         when:
         def accessor = new DirectoryPathHandler().getResourceAccessor(root)

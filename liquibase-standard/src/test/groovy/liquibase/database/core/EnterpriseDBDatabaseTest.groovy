@@ -44,7 +44,6 @@ class EnterpriseDBDatabaseTest extends Specification {
         QUOTE_ALL_OBJECTS         || 'col with space' | Column     || 'col with space' | '"col with space"'
     }
 
-    @Unroll
     def "isCorrectDatabaseImplementation"() {
         when:
         def conn = Mock(JdbcConnection)

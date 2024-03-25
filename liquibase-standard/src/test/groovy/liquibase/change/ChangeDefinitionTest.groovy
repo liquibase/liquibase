@@ -5,7 +5,6 @@ import liquibase.util.StringUtil
 import org.junit.Ignore
 import org.yaml.snakeyaml.Yaml
 import spock.lang.Specification
-import spock.lang.Unroll
 
 @Ignore
 class ChangeDefinitionTest extends Specification {
@@ -21,7 +20,6 @@ class ChangeDefinitionTest extends Specification {
      * Compare the current change metadata with the golden master stored in source as ChangeDefinitionTest.yaml.
      * Helpful for seeing/catching changes to the Change definitions and ensuring docs match the code
      */
-    @Unroll
     def "check change attributes: #changeName"() {
         when:
         def definition = ""

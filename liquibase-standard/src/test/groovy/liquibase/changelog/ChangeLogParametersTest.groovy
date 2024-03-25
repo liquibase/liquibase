@@ -3,16 +3,12 @@ package liquibase.changelog
 import liquibase.*
 import liquibase.database.core.MockDatabase
 import liquibase.database.core.MySQLDatabase
-import liquibase.exception.ChangeLogParseException
-import liquibase.exception.UnexpectedLiquibaseException
 import liquibase.exception.UnknownChangeLogParameterException
 import liquibase.parser.ChangeLogParserConfiguration
 import spock.lang.Specification
-import spock.lang.Unroll
 
 class ChangeLogParametersTest extends Specification {
 
-    @Unroll
     def "correctly finds values"() {
         when:
         def changelog = new DatabaseChangeLog("com/example/changelog.txt")
@@ -97,7 +93,6 @@ class ChangeLogParametersTest extends Specification {
     }
 
 
-    @Unroll
     def "getValue with null changelog"() {
         when:
         def database = new MockDatabase()

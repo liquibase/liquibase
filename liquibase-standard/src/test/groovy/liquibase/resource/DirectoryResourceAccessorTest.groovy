@@ -17,7 +17,6 @@ class DirectoryResourceAccessorTest extends Specification {
 
     }
 
-    @Unroll
     def "openStreams and openStream"() {
         when:
         def accessor = new DirectoryResourceAccessor("src/main" as File)
@@ -37,7 +36,6 @@ class DirectoryResourceAccessorTest extends Specification {
         "java/liquibase/Liquibase.java" | "util/StringUtil.java"          | "class StringUtil"
     }
 
-    @Unroll
     def "list non-recursive"() {
         when:
         def accessor = new DirectoryResourceAccessor("src/main" as File)
@@ -54,7 +52,6 @@ class DirectoryResourceAccessorTest extends Specification {
         "java/file.txt" | "liquibase"
     }
 
-    @Unroll
     def "list recursive"() {
         when:
         def accessor = new DirectoryResourceAccessor("src/main" as File)
@@ -72,7 +69,6 @@ class DirectoryResourceAccessorTest extends Specification {
     }
 
 
-    @Unroll
     def "Cannot construct invalid values"() {
         when:
         new DirectoryResourceAccessor(testDir);
@@ -109,7 +105,6 @@ class DirectoryResourceAccessorTest extends Specification {
         simpleTestAccessor.getAll("com/example/invalid.txt").size() == 0
     }
 
-    @Unroll
     def "search fails with invalid values: #path"() {
         when:
         simpleTestAccessor.search(path, true)
@@ -124,7 +119,6 @@ class DirectoryResourceAccessorTest extends Specification {
         "liquibase/resource/DirectoryResourceAccessorTest.class" | "'liquibase/resource/DirectoryResourceAccessorTest.class' is a file, not a directory"
     }
 
-    @Unroll
     def "list"() {
         expect:
         simpleTestAccessor.search(path, recursive)*.getPath() as SortedSet == expected as SortedSet

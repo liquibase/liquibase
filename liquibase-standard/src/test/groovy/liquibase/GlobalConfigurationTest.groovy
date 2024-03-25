@@ -1,14 +1,12 @@
 package liquibase
 
 import spock.lang.Specification
-import spock.lang.Unroll
 
 import java.nio.charset.Charset
 import java.nio.charset.StandardCharsets
 
 class GlobalConfigurationTest extends Specification {
 
-    @Unroll
     def "file_encoding"() {
         expect:
         GlobalConfiguration.FILE_ENCODING.valueConverter.convert(input) == expected

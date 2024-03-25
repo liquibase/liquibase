@@ -6,18 +6,16 @@ import liquibase.change.CheckSum
 import liquibase.change.StandardChangeTest
 import liquibase.changelog.ChangeSet
 import liquibase.changelog.DatabaseChangeLog
+import liquibase.database.core.MockDatabase
 import liquibase.database.core.OracleDatabase
 import liquibase.database.core.PostgresDatabase
 import liquibase.exception.ValidationErrors
-import liquibase.integration.commandline.LiquibaseCommandLineConfiguration
 import liquibase.parser.core.ParsedNode
-import liquibase.database.core.MockDatabase
 import liquibase.sdk.resource.MockResourceAccessor
 import liquibase.snapshot.MockSnapshotGeneratorFactory
 import liquibase.snapshot.SnapshotGeneratorFactory
 import liquibase.test.JUnitResourceAccessor
 import liquibase.util.StreamUtil
-import spock.lang.Unroll
 
 class CreateProcedureChangeTest extends StandardChangeTest {
 
@@ -53,7 +51,6 @@ class CreateProcedureChangeTest extends StandardChangeTest {
         change.serialize().toString() == "createProcedure[procedureText=create procedure sql]"
     }
 
-    @Unroll
     def "load correct file"() {
         when:
         def changelog = new DatabaseChangeLog("com/example/changelog.xml")
@@ -81,7 +78,6 @@ class CreateProcedureChangeTest extends StandardChangeTest {
 
     }
 
-    @Unroll
     def "validate CreateProcedure with dmbs attribute set"() {
         when:
 
@@ -101,7 +97,6 @@ class CreateProcedureChangeTest extends StandardChangeTest {
         new PostgresDatabase() | "all"                            | ""
     }
 
-    @Unroll
     def "dbms checksum generation - #version"(ChecksumVersion version, String originalChecksum, String updatedChecksum) {
         when:
         CreateProcedureChange change = new CreateProcedureChange()
@@ -128,7 +123,6 @@ class CreateProcedureChangeTest extends StandardChangeTest {
 
     }
 
-    @Unroll
     def "path checksum generation - #version"(ChecksumVersion version, String originalChecksum, String updatedChecksum) {
         when:
         String testScopeId = Scope.enter([
@@ -163,7 +157,6 @@ class CreateProcedureChangeTest extends StandardChangeTest {
         ChecksumVersion.latest() | "9:4ec1db90234ea750169f7d94f7e5c425" | "9:4ec1db90234ea750169f7d94f7e5c425"
     }
 
-    @Unroll
     def "comment checksum generation - #version"(ChecksumVersion version, String originalChecksum, String updatedChecksum) {
         when:
         CreateProcedureChange change = new CreateProcedureChange()
@@ -189,7 +182,6 @@ class CreateProcedureChangeTest extends StandardChangeTest {
         ChecksumVersion.latest() | "9:4ec1db90234ea750169f7d94f7e5c425" | "9:4ec1db90234ea750169f7d94f7e5c425"
     }
 
-    @Unroll
     def "encoding checksum generation - #version"(ChecksumVersion version, String originalChecksum, String updatedChecksum) {
         when:
         CreateProcedureChange change = new CreateProcedureChange()
@@ -215,7 +207,6 @@ class CreateProcedureChangeTest extends StandardChangeTest {
         ChecksumVersion.latest() | "9:4ec1db90234ea750169f7d94f7e5c425" | "9:4ec1db90234ea750169f7d94f7e5c425"
     }
 
-    @Unroll
     def "procedure text updated with whitespaces checksum - #version"(ChecksumVersion version, String originalChecksum, String updatedChecksum) {
         when:
         CreateProcedureChange change = new CreateProcedureChange()
@@ -240,7 +231,6 @@ class CreateProcedureChangeTest extends StandardChangeTest {
         ChecksumVersion.latest() | "9:4ec1db90234ea750169f7d94f7e5c425" | "9:4ec1db90234ea750169f7d94f7e5c425"
     }
 
-    @Unroll
     def "checksum change on procedure text - #version"(ChecksumVersion version, String originalChecksum, String updatedChecksum) {
         when:
         CreateProcedureChange change = new CreateProcedureChange()
@@ -266,7 +256,6 @@ class CreateProcedureChangeTest extends StandardChangeTest {
         ChecksumVersion.latest() | "9:4ec1db90234ea750169f7d94f7e5c425" | "9:36f93561a3ca75d53c84639669d74b51"
     }
 
-    @Unroll
     def "validate checksum gets re-computed if procedure text gets updated - #version"(ChecksumVersion version, String originalChecksum, String updatedChecksum) {
         when:
         String procedureText =
@@ -302,7 +291,6 @@ class CreateProcedureChangeTest extends StandardChangeTest {
         ChecksumVersion.latest() | "9:eec1dde2b2197528f030a2917d2602c3" | "9:06085ea7538bfe94b70b7196d520cc2f"
     }
 
-    @Unroll
     def "relativeToChangelogFile attribute checksum generation - #version"(ChecksumVersion version, String originalChecksum, String updatedChecksum) {
         when:
         CreateProcedureChange changeWithoutRelativeToChangelogFileAttribSet = new CreateProcedureChange()

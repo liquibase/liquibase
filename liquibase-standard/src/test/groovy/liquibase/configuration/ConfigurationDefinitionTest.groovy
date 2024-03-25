@@ -3,7 +3,6 @@ package liquibase.configuration
 import liquibase.Scope
 import liquibase.integration.commandline.LiquibaseCommandLineConfiguration
 import spock.lang.Specification
-import spock.lang.Unroll
 
 class ConfigurationDefinitionTest extends Specification {
 
@@ -11,7 +10,6 @@ class ConfigurationDefinitionTest extends Specification {
         System.clearProperty("test.property")
     }
 
-    @Unroll
     def "does not allow invalid keys"() {
         when:
         new ConfigurationDefinition.Builder(prefix).define(property, String).addAliasKey(alias)
@@ -43,7 +41,6 @@ class ConfigurationDefinitionTest extends Specification {
         definition.description == "A description here"
     }
 
-    @Unroll
     def "getCurrentValueDetails"() {
         when:
         def definition = new ConfigurationDefinition.Builder("test")
@@ -74,7 +71,6 @@ class ConfigurationDefinitionTest extends Specification {
 
     }
 
-    @Unroll
     def "getCurrentValueDetails for aliases"() {
         when:
         def definition = new ConfigurationDefinition.Builder("test")
@@ -180,7 +176,6 @@ class ConfigurationDefinitionTest extends Specification {
 
     }
 
-    @Unroll
     def equalsKey() {
         expect:
         LiquibaseCommandLineConfiguration.SHOULD_RUN.equalsKey(input) == expected

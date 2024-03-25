@@ -6,11 +6,9 @@ import liquibase.database.core.MySQLDatabase
 import liquibase.database.core.OracleDatabase
 import liquibase.exception.ValidationErrors
 import spock.lang.Specification
-import spock.lang.Unroll
 
 class DatabaseListTest extends Specification {
 
-    @Unroll
     def "check if database matches dbms definition (definition: #definition, database: #database, returnValueIfEmpty: #returnValueIfEmpty)"() {
         when:
         def result = DatabaseList.definitionMatches(definition, database, returnValueIfEmpty)
@@ -43,7 +41,6 @@ class DatabaseListTest extends Specification {
         "!h2,mysql"          | new MySQLDatabase()  | false              | true
     }
 
-    @Unroll
     def "validate definition parameters dbms: #dbms"() {
         when:
         def vErrors = new ValidationErrors()

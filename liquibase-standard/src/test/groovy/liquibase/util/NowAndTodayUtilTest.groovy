@@ -6,7 +6,6 @@ package liquibase.util
 
 import liquibase.exception.DateParseException
 import spock.lang.Specification
-import spock.lang.Unroll
 
 import static java.lang.Math.abs
 import static org.junit.Assert.fail
@@ -60,7 +59,6 @@ class NowAndTodayUtilTest extends Specification {
         plusTenMinutes = c.getTime()
     }
 
-    @Unroll
     def "is today format"() {
         expect:
         NowAndTodayUtil.isNowOrTodayFormat(input) == expected
@@ -236,7 +234,6 @@ class NowAndTodayUtilTest extends Specification {
         "now+10m"       | "TIMESTAMP" | plusTenMinutes
     }
 
-    @Unroll
     def "doNowOrToday invalid values"() {
         expect:
         NowAndTodayUtil.doNowOrToday(input, null) == null
@@ -250,7 +247,6 @@ class NowAndTodayUtilTest extends Specification {
         ]
     }
 
-    @Unroll
     void "doNowOrToday invalidColType"() throws Exception {
         when:
         NowAndTodayUtil.doNowOrToday(input, type)

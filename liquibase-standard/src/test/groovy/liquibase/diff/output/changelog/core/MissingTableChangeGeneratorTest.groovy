@@ -8,11 +8,9 @@ import liquibase.structure.core.Column
 import liquibase.structure.core.DataType
 import liquibase.structure.core.Table
 import spock.lang.Specification
-import spock.lang.Unroll
 
 class MissingTableChangeGeneratorTest extends Specification {
 
-    @Unroll
     def "fixMissing respects control settings"() {
         when:
         def generator = new MissingTableChangeGenerator()

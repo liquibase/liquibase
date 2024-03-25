@@ -11,11 +11,9 @@ import liquibase.sdk.executor.MockExecutor
 import liquibase.sql.Sql
 import liquibase.sql.UnparsedSql
 import spock.lang.Specification
-import spock.lang.Unroll
 
 class CreateProcedureGeneratorTest extends Specification {
 
-    @Unroll
     def "removeTrailingDelimiter"() {
         expect:
         CreateProcedureGenerator.removeTrailingDelimiter(text, delimiter) == expected
@@ -53,7 +51,6 @@ class CreateProcedureGeneratorTest extends Specification {
 
     }
 
-    @Unroll
     def "addSchemaToText for databases"() {
         when:
         String sql = CreateProcedureGenerator.addSchemaToText(body, "MYSCHEMA", "PROCEDURE", database)
@@ -80,7 +77,6 @@ class CreateProcedureGeneratorTest extends Specification {
                  ]]
     }
 
-    @Unroll
     def surroundWithSchemaSets() {
         when:
         List<Sql> sql = new ArrayList<>([new UnparsedSql("passed sql 1"), new UnparsedSql("passed sql 2")])

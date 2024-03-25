@@ -1,11 +1,9 @@
 package liquibase.util
 
 import spock.lang.Specification
-import spock.lang.Unroll
 
 class NumberUtilTest extends Specification {
 
-    @Unroll
     def "parseNumber"() {
         when:
         def output = NumberUtil.parseNumber(input, targetType)

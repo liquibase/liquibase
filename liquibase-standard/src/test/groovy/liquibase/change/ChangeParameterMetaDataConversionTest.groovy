@@ -3,11 +3,9 @@ package liquibase.change
 import com.example.liquibase.change.ChangeWithPrimitiveFields
 import liquibase.serializer.LiquibaseSerializable
 import spock.lang.Specification
-import spock.lang.Unroll
 
 class ChangeParameterMetaDataConversionTest extends Specification {
 
-    @Unroll
     def "supports invoking primitive setter with #boxedValue boxed value and expect #expectedResult"() {
         when:
         def change = new ChangeWithPrimitiveFields()

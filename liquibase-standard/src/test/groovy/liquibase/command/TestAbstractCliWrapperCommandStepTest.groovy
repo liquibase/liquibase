@@ -1,11 +1,9 @@
 package liquibase.command
 
 import spock.lang.Specification
-import spock.lang.Unroll
 
 class TestAbstractCliWrapperCommandStepTest extends Specification {
 
-    @Unroll
     def "collectArguments"() {
         when:
         def commandScope = new CommandScope(commandName)
@@ -31,7 +29,6 @@ class TestAbstractCliWrapperCommandStepTest extends Specification {
         "update"    | ["changelogFile": "x", "url": "y", "password": "z"] | ["password"]             | "url"              | "--changelogFile, x, --showSummary, SUMMARY, --showSummaryOutput, ALL, update, --password, z, y"
     }
 
-    @Unroll
     def "removeArgumentValues"() {
         expect:
         new TestCliWrapperCommandStep().removeArgumentValues(allArgs as String[], noValueArgs as String[]).join(", ") == expected

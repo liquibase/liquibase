@@ -1,11 +1,9 @@
 package liquibase.util.csv
 
 import spock.lang.Specification
-import spock.lang.Unroll
 
 class CSVWriterTest extends Specification {
 
-    @Unroll
     def writeNext() {
         when:
         def out = new StringWriter()

@@ -3,18 +3,16 @@ package liquibase.change.core
 import liquibase.ChecksumVersion
 import liquibase.Scope
 import liquibase.change.ChangeStatus
-import liquibase.database.core.PostgresDatabase
+import liquibase.change.StandardChangeTest
 import liquibase.database.DatabaseConnection
-import liquibase.integration.commandline.LiquibaseCommandLineConfiguration
+import liquibase.database.core.MSSQLDatabase
+import liquibase.database.core.MockDatabase
+import liquibase.database.core.PostgresDatabase
+import liquibase.resource.ClassLoaderResourceAccessor
 import liquibase.snapshot.MockSnapshotGeneratorFactory
 import liquibase.snapshot.SnapshotGeneratorFactory
-import liquibase.change.StandardChangeTest;
-import liquibase.database.core.MockDatabase
-import liquibase.resource.ClassLoaderResourceAccessor;
 import liquibase.statement.SqlStatement
 import liquibase.statement.core.InsertOrUpdateStatement
-import liquibase.database.core.MSSQLDatabase
-import spock.lang.Unroll
 
 public class LoadUpdateDataChangeTest extends StandardChangeTest {
 
@@ -120,7 +118,6 @@ public class LoadUpdateDataChangeTest extends StandardChangeTest {
         assert statements[0].getOnlyUpdate()
     }
 
-    @Unroll
     def "generateChecksum produces different values with each field - #version"(ChecksumVersion version, String originalChecksum, String updatedChecksum) {
         when:
         LoadUpdateDataChange refactoring = new LoadUpdateDataChange();
@@ -164,7 +161,6 @@ public class LoadUpdateDataChangeTest extends StandardChangeTest {
         assert change.checkStatus(database).message == "Cannot check loadUpdateData status"
     }
 
-    @Unroll
     def "checksum does not change when no comments in CSV and comment property changes"(ChecksumVersion version, String originalChecksum, String updatedChecksum) {
         when:
         LoadUpdateDataChange refactoring = new LoadUpdateDataChange();
@@ -193,7 +189,6 @@ public class LoadUpdateDataChangeTest extends StandardChangeTest {
         ChecksumVersion.latest() | "9:55d574d66869989f7208b9f05b7409bb" | "9:55d574d66869989f7208b9f05b7409bb"
     }
 
-    @Unroll
     def "checksum changes when there are comments in CSV"(ChecksumVersion version, String originalChecksum, String updatedChecksum) {
         when:
         LoadUpdateDataChange refactoring = new LoadUpdateDataChange();
@@ -221,7 +216,6 @@ public class LoadUpdateDataChangeTest extends StandardChangeTest {
         ChecksumVersion.latest() | "9:c02972964ae29d51fa8e7801951fbb70" | "9:91298c1042fcb57394a242e8c838ce51"
     }
 
-    @Unroll
     def "checksum same for CSV files with comments and file with removed comments manually - #version"(ChecksumVersion version, String originalChecksum, String updatedChecksum) {
         when:
         LoadUpdateDataChange refactoring = new LoadUpdateDataChange();

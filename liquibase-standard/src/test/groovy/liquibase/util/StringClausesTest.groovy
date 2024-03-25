@@ -1,8 +1,6 @@
 package liquibase.util
 
-
 import spock.lang.Specification
-import spock.lang.Unroll
 
 class StringClausesTest extends Specification {
 
@@ -136,7 +134,6 @@ class StringClausesTest extends Specification {
         clauses.toString() == "first second new key third enumKey new enum"
     }
 
-    @Unroll
     def get() {
         when:
         def clauses = new StringClauses()

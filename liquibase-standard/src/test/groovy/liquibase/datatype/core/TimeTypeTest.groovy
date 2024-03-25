@@ -3,10 +3,8 @@ package liquibase.datatype.core
 import liquibase.database.core.DerbyDatabase
 import liquibase.database.core.PostgresDatabase
 import spock.lang.Specification
-import spock.lang.Unroll
 
 class TimeTypeTest extends Specification {
-    @Unroll
     def "toDatabaseType"() {
         when:
         def type = new TimeType()

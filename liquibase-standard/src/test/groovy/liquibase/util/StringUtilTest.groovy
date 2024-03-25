@@ -9,7 +9,6 @@ import static spock.util.matcher.HamcrestSupport.that
 
 class StringUtilTest extends Specification {
 
-    @Unroll
     def "processMultilineSql examples"() {
         expect:
         that Arrays.asList(StringUtil.processMultiLineSQL(rawString, stripComments, splitStatements, endDelimiter)), Matchers.contains(expected.toArray())
@@ -43,7 +42,6 @@ class StringUtilTest extends Specification {
 
     }
 
-    @Unroll
     def "stripComments examples"() {
         expect:
         StringUtil.stripComments(rawString) == expected
@@ -60,7 +58,6 @@ class StringUtilTest extends Specification {
         "some sql/*Some text\nmore text*/more sql"                | "some sqlmore sql"
     }
 
-    @Unroll
     def "splitSql examples"() {
         expect:
         that Arrays.asList(StringUtil.splitSQL(rawString, endDelimiter)), Matchers.contains(expected.toArray())
@@ -130,7 +127,6 @@ class StringUtilTest extends Specification {
         null                  | null
     }
 
-    @Unroll
     def "join sorted"() {
         expect:
         StringUtil.join(array, ",", sorted) == expected
@@ -141,7 +137,6 @@ class StringUtilTest extends Specification {
         ["a", "c", "b"] | false  | "a,c,b"
     }
 
-    @Unroll
     def "join with formatter sorted"() {
         expect:
         StringUtil.join(array, ",", new StringUtil.ToStringFormatter(), sorted) == expected
@@ -153,7 +148,6 @@ class StringUtilTest extends Specification {
     }
 
 
-    @Unroll
     def "pad"() {
         expect:
         StringUtil.pad(input, pad) == output
@@ -172,7 +166,6 @@ class StringUtilTest extends Specification {
         "abc "  | 5   | "abc  "
     }
 
-    @Unroll
     def "leftPad"() {
         expect:
         StringUtil.leftPad(input, pad) == output
@@ -192,7 +185,6 @@ class StringUtilTest extends Specification {
         " abc"  | 5   | "  abc"
     }
 
-    @Unroll
     def "stripSqlCommentsFromTheEnd"() {
         expect:
         StringUtil.stripSqlCommentsAndWhitespacesFromTheEnd(input) == output
@@ -215,7 +207,6 @@ class StringUtilTest extends Specification {
     }
 
 
-    @Unroll
     def "concatConsistentCase"() {
         expect:
         StringUtil.concatConsistentCase(base, addition) == expected
@@ -257,7 +248,6 @@ class StringUtilTest extends Specification {
         "\n\r\ttest string\r\n\t" | "test string"
     }
 
-    @Unroll
     def "toKabobCase"() {
         expect:
         StringUtil.toKabobCase(input) == expected
@@ -272,7 +262,6 @@ class StringUtilTest extends Specification {
         null            | null
     }
 
-    @Unroll
     def "toCamelCase"() {
         expect:
         StringUtil.toCamelCase(input) == expected
@@ -290,7 +279,6 @@ class StringUtilTest extends Specification {
         null              | null
     }
 
-    @Unroll
     def join() {
         expect:
         StringUtil.join(input, delimiter) == expected
@@ -307,7 +295,6 @@ class StringUtilTest extends Specification {
         ["a": 1, "b": 2] as Map | ","       | "a=1,b=2"
     }
 
-    @Unroll
     def "join with complex options"() {
         when:
         def extensible = new CreateTableChange()
@@ -332,7 +319,6 @@ class StringUtilTest extends Specification {
         StringUtil.join(extensible, ", ") == "schemaName=schema_name, tableName=table_name"
     }
 
-    @Unroll
     def splitAndTrim() {
         expect:
         StringUtil.splitAndTrim(input, regexp) == expected
@@ -404,7 +390,6 @@ class StringUtilTest extends Specification {
         StringUtil.standardizeLineEndings("a\nb\n") == "a\nb\n"
     }
 
-    @Unroll
     def "isAscii"() {
         expect:
         StringUtil.isAscii(input) == expected
@@ -418,7 +403,6 @@ class StringUtilTest extends Specification {
         "ab¢" | false
     }
 
-    @Unroll
     def "escapeHtml"() {
         expect:
         StringUtil.escapeHtml(input) == expected
@@ -431,7 +415,6 @@ class StringUtilTest extends Specification {
         "ab¢" | "ab&#162;"
     }
 
-    @Unroll
     def "isEmpty and isNotEmpty"() {
         expect:
         StringUtil.isEmpty(input) == empty
@@ -445,7 +428,6 @@ class StringUtilTest extends Specification {
         "abc" | false
     }
 
-    @Unroll
     def "startsWith"() {
         expect:
         StringUtil.startsWith(value, startsWith) == expected
@@ -459,7 +441,6 @@ class StringUtilTest extends Specification {
         "abc" | "ab"       | true
     }
 
-    @Unroll
     def "endsWith"() {
         expect:
         StringUtil.endsWith(value, endsWith) == expected
@@ -473,7 +454,6 @@ class StringUtilTest extends Specification {
         "abc" | "bc"       | true
     }
 
-    @Unroll
     def "contains"() {
         expect:
         StringUtil.contains(value, contains) == expected
@@ -487,7 +467,6 @@ class StringUtilTest extends Specification {
         "abc" | "bc"       | true
     }
 
-    @Unroll
     def "isWhitespace"() {
         expect:
         StringUtil.isWhitespace(value) == expected
@@ -501,7 +480,6 @@ class StringUtilTest extends Specification {
         "   " | true
     }
 
-    @Unroll
     def "isMinimumVersion"() {
         expect:
         StringUtil.isMinimumVersion(version, major, minor, patch) == expected
@@ -518,7 +496,6 @@ class StringUtilTest extends Specification {
         "10.2.8" | 10    | 2     | 9     | true
     }
 
-    @Unroll
     def "limitSize"() {
         expect:
         StringUtil.limitSize(input, length) == expected
@@ -538,7 +515,6 @@ class StringUtilTest extends Specification {
         StringUtil.randomIdentifer(5) != StringUtil.randomIdentifer(5)
     }
 
-    @Unroll
     def defaultValueFormatter() {
         expect:
         new StringUtil.DefaultFormatter().toString(input) == expected
@@ -555,7 +531,6 @@ class StringUtilTest extends Specification {
         ["a", "b"]             | "[a, b]"
     }
 
-    @Unroll
     def equalsIgnoreCaseAndEmpty() {
         expect:
         StringUtil.equalsIgnoreCaseAndEmpty(s1, s2) == expected
@@ -575,7 +550,6 @@ class StringUtilTest extends Specification {
     }
 
 
-    @Unroll
     def "trimRight"() {
         expect:
         StringUtil.trimRight(value) == expected
@@ -589,7 +563,6 @@ class StringUtilTest extends Specification {
         "\na\n" | "\na"
     }
 
-    @Unroll
     def getLastBlockComment() {
         expect:
         StringUtil.getLastBlockComment(sql) == expected
@@ -603,7 +576,6 @@ class StringUtilTest extends Specification {
         "select * from /* a comment here */"   | "/* a comment here */"
     }
 
-    @Unroll
     def getLastLineComment() {
         expect:
         StringUtil.getLastLineComment(sql) == expected
@@ -618,7 +590,6 @@ class StringUtilTest extends Specification {
         "select * from -- a comment here\n--foobar\n--" | "--"
     }
 
-    @Unroll
     def stripSqlCommentsAndWhitespacesFromTheEnd() {
         expect:
         StringUtil.stripSqlCommentsAndWhitespacesFromTheEnd(sql) == expected
@@ -634,7 +605,6 @@ class StringUtilTest extends Specification {
 
     }
 
-    @Unroll
     def equalsNullWord() {
         expect:
         StringUtil.equalsWordNull(input) == expected
@@ -649,7 +619,6 @@ class StringUtilTest extends Specification {
 
     }
 
-    @Unroll
     def "stripEnclosingQuotes"() {
         expect:
         StringUtil.stripEnclosingQuotes(input) == expected
@@ -664,7 +633,6 @@ class StringUtilTest extends Specification {
         "\"testValue"   | "\"testValue"
     }
 
-    @Unroll
     def "wrap"() {
         expect:
         StringUtil.wrap(input, point, padding) == expected
@@ -677,7 +645,6 @@ class StringUtilTest extends Specification {
         "abc defg"      | 5     | 3       | "abc${System.lineSeparator()}   defg"
     }
 
-    @Unroll
     def "splitCamelCase"() {
         expect:
         StringUtil.splitCamelCase(input) == expected
@@ -693,7 +660,6 @@ class StringUtilTest extends Specification {
         "abCDef"    | true  | ["ab", "C", "Def"]
     }
 
-    @Unroll
     def getBytesWithEncoding() {
         expect:
         StringUtil.getBytesWithEncoding(input) == expected
@@ -705,7 +671,6 @@ class StringUtilTest extends Specification {
 
     }
 
-    @Unroll
     def "isNumeric"() {
         expect:
         StringUtil.isNumeric(input) == expected
@@ -720,7 +685,6 @@ class StringUtilTest extends Specification {
         "1"    | true
     }
 
-    @Unroll
     def "isEmpty"() {
         expect:
         StringUtil.isEmpty(input) == expected
@@ -732,7 +696,6 @@ class StringUtilTest extends Specification {
         "s"   | false
     }
 
-    @Unroll
     def "splitToChunks"() {
         expect:
         StringUtil.splitToChunks(input, 10) == expected
