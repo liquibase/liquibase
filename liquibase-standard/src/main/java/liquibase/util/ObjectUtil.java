@@ -17,6 +17,7 @@ import java.math.BigInteger;
 import java.text.ParseException;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.logging.Level;
 
 /**
  * Various methods that make it easier to read and write object properties using the propertyName, instead of having
@@ -366,6 +367,8 @@ public class ObjectUtil {
                 return (T) UUID.fromString(object.toString());
             } else if (Date.class.isAssignableFrom(targetClass)) {
                 return (T) new ISODateFormat().parse(object.toString());
+            } else if (Level.class.isAssignableFrom(targetClass)) {
+                return (T) Level.parse(object.toString().toUpperCase());
             }
 
             return (T) object;
