@@ -1032,18 +1032,22 @@ public class DatabaseChangeLog implements Comparable<DatabaseChangeLog>, Conditi
             filePath = filePath.substring("classpath:".length());
         }
 
+        if (filePath.contains("\\")) {
+            filePath = filePath.replace("\\", "/");
+        }
+
         if (filePath.indexOf(":") == 1) {
             filePath = NO_LETTER_PATTERN.matcher(filePath).replaceFirst("");
+        }
+
+        if (filePath.startsWith("/")) {
+            filePath = filePath.substring(1);
         }
 
         filePath = Paths.get(filePath).normalize().toString();
 
         if (filePath.contains("\\")) {
             filePath = filePath.replace("\\", "/");
-        }
-
-        if (filePath.startsWith("/")) {
-            filePath = filePath.substring(1);
         }
 
         return filePath;
