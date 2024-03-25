@@ -155,7 +155,7 @@
         <dependency>
             <groupId>org.projectlombok</groupId>
             <artifactId>lombok</artifactId>
-            <version>1.18.30</version>
+            <version>1.18.32</version>
             <scope>provided</scope>
         </dependency>
     </dependencies>
@@ -348,6 +348,7 @@
                         <param>liquibase.report.ShowSummaryGenerator</param>
                         <param>liquibase.changeset.ChangeSetService</param>
                         <param>liquibase.parser.LiquibaseSqlParser</param>
+                        <param>liquibase.database.LiquibaseTableNames</param>
                     </services>
                 </configuration>
                 <executions>

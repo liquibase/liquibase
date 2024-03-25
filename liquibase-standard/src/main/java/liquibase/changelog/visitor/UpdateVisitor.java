@@ -125,11 +125,11 @@ public class UpdateVisitor implements ChangeSetVisitor {
         if (!Objects.equals(runStatus, RunStatus.NOT_RAN) && Objects.equals(execType, ExecType.EXECUTED)) {
             execType = ExecType.RERAN;
         }
-        fireRan(changeSet, databaseChangeLog, database, execType);
         addAttributesForMdc(changeSet, execType);
         // reset object quoting strategy after running changeset
         this.database.setObjectQuotingStrategy(previousStr);
         this.database.markChangeSetExecStatus(changeSet, execType);
+        fireRan(changeSet, databaseChangeLog, database, execType);
     }
 
     protected void fireRunFailed(ChangeSet changeSet, DatabaseChangeLog databaseChangeLog, Database database, MigrationFailedException e) {
