@@ -247,10 +247,19 @@ public class ObjectUtil {
         return methodCache.computeIfAbsent(object.getClass(), k -> object.getClass().getMethods());
     }
 
-      /**
-     * Converts the given object to the targetClass
-     */
+    /**
+    * Converts the given object to the targetClass
+    */
     public static <T> T convert(Object object, Class<T> targetClass) throws IllegalArgumentException {
+        return convert(object, targetClass, null);
+    }
+
+    /**
+     * Converts the given object to the targetClass
+     * @param name The name of the argument being converted, which can be used in error messages for more descriptiveness.
+     *             If null, the name will not be used in any error messages.
+     */
+    public static <T> T convert(Object object, Class<T> targetClass, String name) throws IllegalArgumentException {
         if (object == null) {
             return null;
         }
@@ -267,7 +276,13 @@ public class ObjectUtil {
                     for (Enum value : ((Class<Enum>) targetClass).getEnumConstants()) {
                         values.add(value.name());
                     }
-                    throw new IllegalArgumentException("Invalid value "+object+". Acceptable values are "+StringUtil.join(values, ", "));
+                    String exceptionMessage;
+                    if (StringUtil.isEmpty(name)) {
+                        exceptionMessage = "Invalid value '"+object+"'.";
+                    } else {
+                        exceptionMessage = "The " + name.toLowerCase() + " value '" + object + "' is not valid.";
+                    }
+                    throw new IllegalArgumentException(exceptionMessage + " Acceptable values are '"+StringUtil.join(values, "', '") +"'");
                 }
             } else if (Number.class.isAssignableFrom(targetClass)) {
                 if (object instanceof Number) {
