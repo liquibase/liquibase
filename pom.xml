@@ -316,6 +316,12 @@
             <version>4.0.4</version>
             <scope>test</scope>
         </dependency>
+        <dependency>
+            <groupId>info.solidsoft.spock</groupId>
+            <artifactId>spock-global-unroll</artifactId>
+            <version>0.5.1</version>
+            <scope>test</scope>
+        </dependency>
     </dependencies>
 
     <build>
