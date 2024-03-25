@@ -8,7 +8,7 @@ import liquibase.executor.ExecutorService;
 import liquibase.snapshot.CachedRow;
 import liquibase.snapshot.DatabaseSnapshot;
 import liquibase.snapshot.SnapshotGenerator;
-import liquibase.statement.core.RawSqlStatement;
+import liquibase.statement.core.RawParameterizedSqlStatement;
 import liquibase.structure.DatabaseObject;
 import liquibase.structure.core.*;
 
@@ -48,13 +48,13 @@ public class UniqueConstraintSnapshotGeneratorSnowflake extends UniqueConstraint
         String tableName = database.correctObjectName(table.getName(), Table.class);
         String constraintName = database.correctObjectName(name, UniqueConstraint.class);
 
-        String showSql = "SHOW UNIQUE KEYS IN " + tableName;
-        String sql = "SELECT \"column_name\" AS COLUMN_NAME FROM TABLE(result_scan(last_query_id())) WHERE \"constraint_name\"= '" + constraintName +"'";
+        String showSql = "SHOW UNIQUE KEYS IN ?";
+        String sql = "SELECT \"column_name\" AS COLUMN_NAME FROM TABLE(result_scan(last_query_id())) WHERE \"constraint_name\"= ?";
 
         Scope.getCurrentScope().getSingleton(ExecutorService.class).getExecutor("jdbc", database)
-                .queryForList(new RawSqlStatement(showSql));
+                .queryForList(new RawParameterizedSqlStatement(showSql, tableName));
 
         return Scope.getCurrentScope().getSingleton(ExecutorService.class).getExecutor("jdbc", database)
-                .queryForList(new RawSqlStatement(sql));
+                .queryForList(new RawParameterizedSqlStatement(sql, constraintName));
     }
 }
