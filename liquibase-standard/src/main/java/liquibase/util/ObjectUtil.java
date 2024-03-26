@@ -1,5 +1,6 @@
 package liquibase.util;
 
+import liquibase.Scope;
 import liquibase.exception.UnexpectedLiquibaseException;
 import liquibase.statement.DatabaseFunction;
 import liquibase.statement.SequenceCurrentValueFunction;
@@ -32,6 +33,7 @@ public class ObjectUtil {
      * Cache for the methods of classes that we have been queried about so far.
      */
     private static final Map<Class<?>, Method[]> methodCache = new ConcurrentHashMap<>();
+    public static String ARGUMENT_KEY = "key";
 
     /**
      * For a given object, try to find the appropriate reader method and return the value, if set
@@ -356,7 +358,26 @@ public class ObjectUtil {
                 }
             } else if (targetClass.isAssignableFrom(Boolean.class)) {
                 String lowerCase = object.toString().toLowerCase();
-                return (T) (Boolean) (lowerCase.equals("true") || lowerCase.equals("t") || lowerCase.equals("1") || lowerCase.equals("1.0") || lowerCase.equals("yes"));
+                boolean isTruthy = Arrays.asList("true", "t", "1", "1.0", "yes", "y", "on").contains(lowerCase);
+                boolean isFalsy = Arrays.asList("false", "f", "0", "0.0", "no", "n", "off").contains(lowerCase);
+
+                if (!isTruthy && !isFalsy) {
+                    String key = Scope.getCurrentScope().get(ARGUMENT_KEY, String.class);
+                    String messageString;
+                    if (key != null) {
+                        messageString = "\nWARNING:  The input for '" + key + "' is '" + object + "', which is not valid.  " +
+                                "Options: 'true' or 'false'.";
+                    } else {
+                        messageString = "\nWARNING:  The input '" + object + "' is not valid.  Options: 'true' or 'false'.";
+                    }
+                    throw new IllegalArgumentException(messageString);
+                }
+
+                if (isTruthy) {
+                    return (T) Boolean.TRUE;
+                } else {
+                    return (T) Boolean.FALSE;
+                }
             } else if (targetClass.isAssignableFrom(String.class)) {
                 return (T) object.toString();
             } else if (targetClass.isAssignableFrom(List.class)) {
