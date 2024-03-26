@@ -13,7 +13,7 @@ public interface ChangeWithColumns<T extends ColumnConfig> {
     void addColumn(T column);
 
     /**
-     * Return all the {@link ColumnConfig} objects defined for this {@link Change }
+     * Return all the {@link ColumnConfig} objects defined for this {@link Change}
      */
     List<T> getColumns();
 

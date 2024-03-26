@@ -28,7 +28,7 @@ Examples of unacceptable behavior by participants include:
 * Public or private harassment
 * Publishing others' private information, such as a physical or electronic
  address, without explicit permission
-* Publishing or using any name other than an @mentionable Github account name.
+* Publishing or using any name other than a @mentionable GitHub account name.
 * Other conduct which could reasonably be considered inappropriate in a
  professional setting
 

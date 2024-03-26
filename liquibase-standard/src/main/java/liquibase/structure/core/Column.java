@@ -199,7 +199,7 @@ public class Column extends AbstractDatabaseObject {
     }
 
     /**
-     * VALIDATE keyword defines whether a all constraints on a column in a table
+     * VALIDATE keyword defines whether all constraints on a column in a table
      * should be checked if it refers to a valid row or not.
      * @return true if ENABLE VALIDATE (this is the default), or false if ENABLE NOVALIDATE.
      */

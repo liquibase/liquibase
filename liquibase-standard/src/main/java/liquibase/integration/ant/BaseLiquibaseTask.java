@@ -159,7 +159,7 @@ public abstract class BaseLiquibaseTask extends Task {
     }
 
     /**
-     * Creates a suitable ResourceAccessor for use in an Ant task..
+     * Creates a suitable ResourceAccessor for use in an Ant task.
      *
      * @param classLoader The ClassLoader to use in the ResourceAccessor. It is preferable that it is an AntClassLoader.
      * @return A ResourceAccessor.

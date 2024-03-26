@@ -11,7 +11,7 @@ import java.util.Set;
 
 /**
  * Contains the current status of a ChangeSet. Normally returned by {@link liquibase.changelog.visitor.StatusVisitor}.
- * Contains information on whether the changeSet has ran before and will run next time.
+ * Contains information on whether the changeSet has run before and will run next time.
  */
 public class ChangeSetStatus {
 
@@ -112,7 +112,7 @@ public class ChangeSetStatus {
     }
 
     /**
-     * Return the checksum stored from the last execution of the changeset. Returns null if it has not ran before
+     * Return the checksum stored from the last execution of the changeset. Returns null if it has not run before
      */
     public CheckSum getStoredCheckSum() {
         return storedCheckSum;
@@ -123,7 +123,7 @@ public class ChangeSetStatus {
     }
 
     /**
-     * Return the date the changeset was last executed. Returns null if it has not ran before
+     * Return the date the changeset was last executed. Returns null if it has not run before
      */
     public Date getDateLastExecuted() {
         return dateLastExecuted;
@@ -134,7 +134,7 @@ public class ChangeSetStatus {
     }
 
     /**
-     * Returns true if the changeset was ran previously.
+     * Returns true if the changeset was run previously.
      */
     public boolean getPreviouslyRan() {
         return previouslyRan;

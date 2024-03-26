@@ -36,7 +36,7 @@ public class CachedRow {
             return Integer.valueOf((String) o);
         } else if (o instanceof byte[]) {
             //
-            // Added this condition after finding that Clustrix (MariadDB/MySQL)
+            // Added this condition after finding that Clustrix (MariaDB/MySQL)
             // returns the size value as a byte[] that contains the ASCII values
             // of the numbers
             //

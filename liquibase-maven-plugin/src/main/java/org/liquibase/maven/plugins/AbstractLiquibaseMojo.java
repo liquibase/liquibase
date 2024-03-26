@@ -76,7 +76,7 @@ public abstract class AbstractLiquibaseMojo extends AbstractMojo {
     }
 
     /**
-     * Suffix for fields that are representing a default value for a another field.
+     * Suffix for fields that are representing a default value for another field.
      */
     private static final String DEFAULT_FIELD_SUFFIX = "Default";
 

@@ -49,7 +49,7 @@ public interface ChangeLogHistoryService extends Plugin {
     ChangeSet.RunStatus getRunStatus(ChangeSet changeSet) throws DatabaseException, DatabaseHistoryException;
 
     /**
-     * Returns the date the given changeSet was ran. Returns null if changeSet was not null.
+     * Returns the date the given changeSet was run. Returns null if changeSet was not null.
      */
     Date getRanDate(ChangeSet changeSet) throws DatabaseException, DatabaseHistoryException;
 
