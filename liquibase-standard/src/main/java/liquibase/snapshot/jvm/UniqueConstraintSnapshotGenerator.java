@@ -226,14 +226,12 @@ public class UniqueConstraintSnapshotGenerator extends JdbcSnapshotGenerator {
                         .append("ON [kc].[parent_object_id] = [t].[object_id] INNER JOIN [sys].[indexes] AS [i] ON [i].[object_id] = [kc].[parent_object_id] ")
                         .append("AND [i].[index_id] = [kc].[unique_index_id] INNER JOIN [sys].[index_columns] AS [ic] ON [ic].[object_id] = [i].[object_id] ")
                         .append("AND [ic].[index_id] = [i].[index_id] INNER JOIN [sys].[columns] AS [c] ON [c].[object_id] = [ic].[object_id] AND [c].[column_id] = [ic].[column_id] ")
-                        .append("WHERE [s].[name] = N'?' ");
+                        .append(String.format("WHERE [s].[name] = N'%s' ", database.escapeStringForDatabase(database.correctObjectName(schema.getName(), Schema.class))));
                     if (!bulkQuery) {
-                        sql.append("AND [t].[name] = N'?' AND [kc].[name] = N'?' ");
+                        sql.append(String.format("AND [t].[name] = N'%s' AND [kc].[name] = N'%s' ", database.escapeStringForDatabase(database.correctObjectName(example.getRelation().getName(), Table.class)),
+                                database.escapeStringForDatabase(database.correctObjectName(name, UniqueConstraint.class))));
                     }
                     sql.append("ORDER BY [ic].[key_ordinal]");
-                parameters.add(database.escapeStringForDatabase(database.correctObjectName(schema.getName(), Schema.class)));
-                parameters.add(database.escapeStringForDatabase(database.correctObjectName(example.getRelation().getName(), Table.class)));
-                parameters.add(database.escapeStringForDatabase(database.correctObjectName(name, UniqueConstraint.class)));
                 rawSql = sql.toString();
             } else if (database instanceof OracleDatabase) {
                 StringBuilder sql = new StringBuilder("select ucc.owner as constraint_container, ucc.constraint_name as constraint_name, ucc.column_name, f.validated as constraint_validate, ucc.table_name ")

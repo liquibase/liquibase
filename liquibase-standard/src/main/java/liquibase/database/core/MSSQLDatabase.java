@@ -17,7 +17,6 @@ import liquibase.sql.visitor.AppendSqlIfNotPresentVisitor;
 import liquibase.sql.visitor.SqlVisitor;
 import liquibase.statement.SqlStatement;
 import liquibase.statement.core.GetViewDefinitionStatement;
-import liquibase.statement.core.RawParameterizedSqlStatement;
 import liquibase.statement.core.RawSqlStatement;
 import liquibase.structure.DatabaseObject;
 import liquibase.structure.core.*;
@@ -431,9 +430,9 @@ public class MSSQLDatabase extends AbstractJdbcDatabase {
             try {
                 if (getConnection() instanceof JdbcConnection) {
                     String catalog = getConnection().getCatalog();
-                    String sql = "SELECT CONVERT([sysname], DATABASEPROPERTYEX(N'?', 'Collation'))";
+                    String sql = String.format("SELECT CONVERT([sysname], DATABASEPROPERTYEX(N'?', 'Collation'))", escapeStringForDatabase(catalog));
                     String collation = Scope.getCurrentScope().getSingleton(ExecutorService.class).getExecutor("jdbc", this)
-                        .queryForObject(new RawParameterizedSqlStatement(sql, escapeStringForDatabase(catalog)), String.class);
+                        .queryForObject(new RawSqlStatement(sql ), String.class);
                     caseSensitive = (collation != null) && !collation.contains("_CI_");
                 } else if (getConnection() instanceof OfflineConnection) {
                     caseSensitive = ((OfflineConnection) getConnection()).isCaseSensitive();
