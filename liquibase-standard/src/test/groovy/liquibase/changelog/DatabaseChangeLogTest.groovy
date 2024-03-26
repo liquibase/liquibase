@@ -740,13 +740,14 @@ http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbch
         "../path/changelog.xml"               | "../path/changelog.xml"
         "..\\..\\path\\changelog.xml"         | "../../path/changelog.xml"
         "../../path/changelog.xml"            | "../../path/changelog.xml"
+        "path/../path/changelog.xml"          | "path/changelog.xml"
     }
 
-    def "relative paths for changelog include are not resolved to their full path"() {
+    def "relative paths for changelog include are resolved as normalized path"() {
         given:
         def changelog = new DatabaseChangeLog("com/example/root1.xml")
         def resourceAccessor = new MockResourceAccessor(["com/example/root1.xml"               : test1Xml,
-                                                         "com/example/../../path/changelog.xml": test2Xml])
+                                                         "path/changelog.xml": test2Xml])
 
         when:
         boolean result = changelog.include("../../path/changelog.xml", true, false,
