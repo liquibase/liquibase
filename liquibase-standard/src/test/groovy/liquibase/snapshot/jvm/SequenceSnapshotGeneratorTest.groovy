@@ -6,14 +6,12 @@ import liquibase.database.core.PostgresDatabase
 import liquibase.statement.SqlStatement
 import liquibase.structure.core.Schema
 import spock.lang.Specification
-import spock.lang.Unroll
 
 class SequenceSnapshotGeneratorTest extends Specification {
 
     private final static DEFAULT_CATALOG_NAME = "DEFAULT_CATALOG_NAME"
     private final static DEFAULT_SCHEMA_NAME = "public"
 
-    @Unroll
     def "When catalog on changeset is #changesetCatalog, the SEQUENCE_OWNER will be #expectedSequenceOwner"() {
         given:
         SequenceSnapshotGenerator sequenceSnapshotGenerator = new SequenceSnapshotGenerator()
@@ -38,7 +36,6 @@ class SequenceSnapshotGeneratorTest extends Specification {
         null             | DEFAULT_CATALOG_NAME
     }
 
-    @Unroll
     def "When schema is '#schemaName', the return SQL schema name will be '#expectedSchemaName'"() {
         given:
         SequenceSnapshotGenerator sequenceSnapshotGenerator = new SequenceSnapshotGenerator()

@@ -1,14 +1,12 @@
 package liquibase.diff.compare.core
 
-import liquibase.diff.compare.DatabaseObjectComparatorFactory
 import liquibase.database.core.MockDatabase
+import liquibase.diff.compare.DatabaseObjectComparatorFactory
 import liquibase.structure.core.Column
 import liquibase.structure.core.Index
 import spock.lang.Specification
-import spock.lang.Unroll
 
 class IndexComparatorTest extends Specification {
-    @Unroll
     def "test equality"() {
         expect:
         assert DatabaseObjectComparatorFactory.instance.isSameObject(constraint1, constraint2, null, new MockDatabase()) == expected

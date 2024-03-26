@@ -2,11 +2,9 @@ package liquibase.util.csv
 
 import com.opencsv.exceptions.CsvMalformedLineException
 import spock.lang.Specification
-import spock.lang.Unroll
 
 class CSVReaderTest extends Specification {
 
-    @Unroll
     def "readNext"() {
         when:
         def reader = new CSVReader(new StringReader("id${separator}name${separator}address\n" + input), separator as char, quote as char)
@@ -28,7 +26,6 @@ class CSVReaderTest extends Specification {
         ","                         | "'"                               | "a, b,c , d ,"                        | ["a", " b", "c ", " d ", ""]
     }
 
-    @Unroll
     def "invalid csv"() {
         when:
         def reader = new CSVReader(new StringReader("id${separator}name${separator}address\n" + input), separator as char, quote as char)

@@ -2,7 +2,6 @@ package liquibase.extension.testing.testsystem
 
 import liquibase.Scope
 import spock.lang.Specification
-import spock.lang.Unroll
 
 class TestSystemFactoryTest extends Specification {
 
@@ -20,7 +19,6 @@ class TestSystemFactoryTest extends Specification {
         factory.getTestSystem("mysql:x").toString() == "mysql:x"
     }
 
-    @Unroll
     def "can construct all defined types: #name"() {
         expect:
         assert Scope.currentScope.getSingleton(TestSystemFactory).getTestSystem(name).getDefinition().getName() == name

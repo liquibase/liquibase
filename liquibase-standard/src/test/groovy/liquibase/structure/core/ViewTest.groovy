@@ -1,11 +1,9 @@
 package liquibase.structure.core
 
 import spock.lang.Specification
-import spock.lang.Unroll
 
 class ViewTest extends Specification {
 
-    @Unroll
     def "toString() logic"() {
         expect:
         view.toString() == expected

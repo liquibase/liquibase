@@ -1,11 +1,9 @@
 package liquibase.ui
 
 import spock.lang.Specification
-import spock.lang.Unroll
 
 class ConsoleUIServiceTest extends Specification {
 
-    @Unroll
     def "prompt"() {
         when:
         def passedInput = input

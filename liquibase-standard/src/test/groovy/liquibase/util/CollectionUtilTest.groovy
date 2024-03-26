@@ -65,7 +65,6 @@ class CollectionUtilTest extends Specification {
                                                       ["a": 1, "b": 6, "c": 9], ["a": 2, "b": 6, "c": 9], ["a": 3, "b": 6, "c": 9]]
     }
 
-    @Unroll
     def "flatten"() {
         expect:
         CollectionUtil.flatten(input as Map) == expected

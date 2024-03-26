@@ -2,7 +2,6 @@
 package liquibase.util
 
 import spock.lang.Specification
-import spock.lang.Unroll
 
 class LiquibaseUtilTest extends Specification {
 
@@ -10,7 +9,6 @@ class LiquibaseUtilTest extends Specification {
         LiquibaseUtil.liquibaseBuildProperties = null
     }
 
-    @Unroll
     def "getBuildVersionInfo from mock data"() {
         when:
         LiquibaseUtil.liquibaseBuildProperties = new Properties()

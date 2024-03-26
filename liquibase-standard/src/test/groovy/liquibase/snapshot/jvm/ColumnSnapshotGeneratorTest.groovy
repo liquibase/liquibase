@@ -7,7 +7,6 @@ import liquibase.statement.DatabaseFunction
 import liquibase.structure.core.Column
 import liquibase.structure.core.DataType
 import spock.lang.Specification
-import spock.lang.Unroll
 
 class ColumnSnapshotGeneratorTest extends Specification {
     private ColumnSnapshotGenerator columnSnapshotGenerator
@@ -49,7 +48,6 @@ class ColumnSnapshotGeneratorTest extends Specification {
         dataType.getTypeName() == "varchar"
     }
 
-    @Unroll
     def "readDefaultValue"() {
         expect:
         columnSnapshotGenerator.readDefaultValue(new CachedRow(["COLUMN_DEF": columnValue]), new Column("col").setType(new DataType(datatype)), db) == expected

@@ -1,13 +1,11 @@
-package liquibase.datatype.core;
+package liquibase.datatype.core
 
-import liquibase.database.core.*;
-import liquibase.datatype.DataTypeFactory;
-import spock.lang.Specification;
-import spock.lang.Unroll;
+import liquibase.database.core.*
+import liquibase.datatype.DataTypeFactory
+import spock.lang.Specification
 
 class BigIntTypeTest extends Specification {
 
-    @Unroll
     def "toDatabaseType '#input' on #database.shortName"() {
 
         when:

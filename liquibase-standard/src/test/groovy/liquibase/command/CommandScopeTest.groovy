@@ -5,10 +5,8 @@ import liquibase.command.core.MockCommandStep
 import liquibase.configuration.ConfiguredValue
 import liquibase.configuration.ConfiguredValueModifier
 import liquibase.configuration.ConfiguredValueModifierFactory
-import liquibase.configuration.ProvidedValue
 import liquibase.exception.CommandValidationException
 import spock.lang.Specification
-import spock.lang.Unroll
 
 class CommandScopeTest extends Specification {
 
@@ -16,7 +14,6 @@ class CommandScopeTest extends Specification {
         MockCommandStep.reset()
     }
 
-    @Unroll
     def "can get and set argument values"() {
         when:
         def scope = new CommandScope("mock")

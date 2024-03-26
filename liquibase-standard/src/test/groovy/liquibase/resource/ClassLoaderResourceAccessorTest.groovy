@@ -3,7 +3,6 @@ package liquibase.resource
 import liquibase.test.TestContext
 import liquibase.util.StreamUtil
 import spock.lang.Specification
-import spock.lang.Unroll
 
 class ClassLoaderResourceAccessorTest extends Specification {
 
@@ -19,7 +18,6 @@ class ClassLoaderResourceAccessorTest extends Specification {
             )
     ))
 
-    @Unroll
     def "getAll, checking content: #path"() {
         given:
         def resources = testResourceAccessor.getAll(path)
@@ -39,7 +37,6 @@ class ClassLoaderResourceAccessorTest extends Specification {
         "com/example/jar/file-in-jar.txt" | "File in jar"
     }
 
-    @Unroll
     def "getAll, doesn't exist: #path"() {
         expect:
         testResourceAccessor.getAll(path) == null
@@ -54,7 +51,6 @@ class ClassLoaderResourceAccessorTest extends Specification {
     }
 
 
-    @Unroll
     def "search"() {
         expect:
         //have to resort them because different test runners may put classloader entries in different orders

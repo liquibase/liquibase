@@ -5,11 +5,9 @@ import liquibase.Scope
 import liquibase.command.CommandScope
 import liquibase.command.core.UpdateCommandStep
 import spock.lang.Specification
-import spock.lang.Unroll
 
 class EnvironmentValueProviderTest extends Specification {
 
-    @Unroll
     def "getProvidedValue"() {
         when:
         def provider = new EnvironmentValueProvider() {
@@ -32,7 +30,6 @@ class EnvironmentValueProviderTest extends Specification {
 
     }
 
-    @Unroll
     def "keyMatches"() {
         expect:
         assert new EnvironmentValueProvider().keyMatches(wantedKey, storedKey) == matches

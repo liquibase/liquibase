@@ -1,10 +1,8 @@
 package liquibase.resource
 
 import liquibase.Scope
-import liquibase.test.JUnitResourceAccessor
 import liquibase.util.StreamUtil
 import spock.lang.Specification
-import spock.lang.Unroll
 
 class PathHandlerFactoryTest extends Specification {
 
@@ -13,7 +11,6 @@ class PathHandlerFactoryTest extends Specification {
         Scope.getCurrentScope().getSingleton(PathHandlerFactory).getResourceAccessor("src/test/groovy") instanceof DirectoryResourceAccessor
     }
 
-    @Unroll
     def "parse unparseable file path: #input"() {
         when:
         Scope.getCurrentScope().getSingleton(PathHandlerFactory).getResourceAccessor(input) instanceof DirectoryResourceAccessor
@@ -26,7 +23,6 @@ class PathHandlerFactoryTest extends Specification {
         input << [null, "proto:unsupported"]
     }
 
-    @Unroll
     def "getResource: #path"() {
         when:
         def pathHandlerFactory = Scope.getCurrentScope().getSingleton(PathHandlerFactory)

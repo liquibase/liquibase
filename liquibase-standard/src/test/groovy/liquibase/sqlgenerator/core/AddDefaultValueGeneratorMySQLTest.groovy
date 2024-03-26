@@ -6,11 +6,9 @@ import liquibase.sqlgenerator.SqlGeneratorChain
 import liquibase.statement.DatabaseFunction
 import liquibase.statement.core.AddDefaultValueStatement
 import spock.lang.Specification
-import spock.lang.Unroll
 
 class AddDefaultValueGeneratorMySQLTest extends Specification {
 
-    @Unroll
     def "set default value #finalDefaultValue for MySQL database and validate expected SQL is #expectedSQL"() throws DatabaseException{
         when:
         def addDefaultValueStatement = new AddDefaultValueStatement("lbcat", "public", "testTable", "testColumn", columnDataType, finalDefaultValue);
@@ -30,7 +28,6 @@ class AddDefaultValueGeneratorMySQLTest extends Specification {
         "int"          | new DatabaseFunction("CEILING(4)")          | ["ALTER TABLE lbcat.testTable ALTER testColumn SET DEFAULT (CEILING(4))"]
     }
 
-    @Unroll
     def "validate generated errors message when setting up Default Value for MySQL version #majorVersion dot #minorVersion "() {
         when:
         def addDefaultValueStatement = new AddDefaultValueStatement("lbcat", "public", "testTable", "testColumn", columnDataType, finalDefaultValue);
@@ -59,7 +56,6 @@ class AddDefaultValueGeneratorMySQLTest extends Specification {
         8            | 0            | []                                                                     | "timestamp"    | "2002-01-1"
     }
 
-    @Unroll
     def "set default value #finalDefaultValue for MySQL database and validate expected SQL is #expectedSQL for MySQL version #majorVersion dot #minorVersion"() throws DatabaseException {
         when:
         def addDefaultValueStatement = new AddDefaultValueStatement("lbcat", "public", "testTable", "testColumn", columnDataType, finalDefaultValue)

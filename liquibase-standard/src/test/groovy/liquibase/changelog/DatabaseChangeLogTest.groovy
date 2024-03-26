@@ -22,12 +22,10 @@ import liquibase.resource.ResourceAccessor
 import liquibase.sdk.resource.MockResourceAccessor
 import liquibase.sdk.supplier.resource.ResourceSupplier
 import liquibase.util.FileUtil
-import org.mockito.Mock
 import spock.lang.Shared
 import spock.lang.Specification
 import spock.lang.Unroll
 
-import java.nio.file.Paths
 import java.util.logging.Level
 
 class DatabaseChangeLogTest extends Specification {
@@ -658,7 +656,6 @@ http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbch
         rootChangeLog.getChangeLogParameters().hasValue("context", rootChangeLog) == false
     }
 
-    @Unroll
     def "an error is thrown when properties file is not found and is set to error"() {
         when:
         def propertiesResourceAccessor = new MockResourceAccessor(["com/example/file.properties": testProperties])
@@ -685,7 +682,6 @@ http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbch
         true              | true                       | "com/example/file.properties"
     }
 
-    @Unroll
     def "no error is thrown when properties file is not found and errorIfMissing flag is either set as false or null"() {
         when:
         def propertiesResourceAccessor = new MockResourceAccessor(["com/example/file.properties": testProperties])
@@ -715,7 +711,6 @@ http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbch
         false             | true                       | "file.properties"
     }
 
-    @Unroll
     def "normalizePath: #path"() {
         expect:
         DatabaseChangeLog.normalizePath(path) == expected
@@ -783,7 +778,6 @@ http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbch
         bufferLog.getLogAsString(Level.WARNING).contains(FileUtil.getFileNotFoundMessage(includedChangeLogPath));
     }
 
-    @Unroll
     def "includeAll finds all expected changelogs with MinDepth: #minDepth and MaxDepth: #maxDepth"() {
         when:
         def rootChangeLogPath = "com/example/root.xml"
@@ -811,7 +805,6 @@ http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbch
         0        | Integer.MAX_VALUE | 4
     }
 
-    @Unroll
     def "includeAll finds all expected changelogs with EndsWithFilter: #endsWithFilter"() {
         when:
         def rootChangeLogPath = "com/example/root.xml"

@@ -2,7 +2,6 @@ package liquibase.resource
 
 import spock.lang.Shared
 import spock.lang.Specification
-import spock.lang.Unroll
 
 class CompositeResourceAccessorTest extends Specification {
 
@@ -39,7 +38,6 @@ class CompositeResourceAccessorTest extends Specification {
 
     }
 
-    @Unroll
     def "search"() {
         when:
         1 * first.search("file", true) >> firstAccessorMock

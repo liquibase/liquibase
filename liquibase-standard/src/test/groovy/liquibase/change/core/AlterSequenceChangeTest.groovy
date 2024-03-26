@@ -1,11 +1,10 @@
 package liquibase.change.core
 
-import liquibase.change.ChangeStatus;
+import liquibase.change.ChangeStatus
 import liquibase.change.StandardChangeTest
 import liquibase.database.core.MockDatabase
 import liquibase.snapshot.MockSnapshotGeneratorFactory
 import liquibase.snapshot.SnapshotGeneratorFactory
-import spock.lang.Unroll
 
 public class AlterSequenceChangeTest extends StandardChangeTest {
 
@@ -18,7 +17,6 @@ public class AlterSequenceChangeTest extends StandardChangeTest {
         refactoring.getConfirmationMessage() == "Sequence SEQ_NAME altered"
     }
 
-    @Unroll
     def "checkStatus"() {
         when:
         def database = new MockDatabase()

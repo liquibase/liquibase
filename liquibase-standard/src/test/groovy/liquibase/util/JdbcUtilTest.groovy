@@ -1,10 +1,8 @@
 package liquibase.util
 
-
 import liquibase.database.core.H2Database
 import liquibase.exception.DatabaseException
 import spock.lang.Specification
-import spock.lang.Unroll
 
 import java.sql.*
 
@@ -57,7 +55,6 @@ class JdbcUtilTest extends Specification {
         2 * rs.close() //close called twice and no exceptions passed along
     }
 
-    @Unroll
     def getResultSetValue() {
         given:
         def rs = Mock(ResultSet)
@@ -77,7 +74,6 @@ class JdbcUtilTest extends Specification {
         Mock(Blob) | [0, 1, 2] as byte[]
     }
 
-    @Unroll
     def isNumeric() {
         expect:
         JdbcUtil.isNumeric(input) == expected
@@ -105,7 +101,6 @@ class JdbcUtilTest extends Specification {
 
     }
 
-    @Unroll
     def "requiredSingleResult exception"() {
         when:
         JdbcUtil.requiredSingleResult(input)
@@ -121,7 +116,6 @@ class JdbcUtilTest extends Specification {
         ["x", "y"] | "Result set larger than one row"
     }
 
-    @Unroll
     def getValueForColumn() {
         given:
         def data = [

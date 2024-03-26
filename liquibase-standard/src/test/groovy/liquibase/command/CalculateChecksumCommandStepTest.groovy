@@ -8,7 +8,6 @@ import liquibase.exception.CommandExecutionException
 import liquibase.resource.SearchPathResourceAccessor
 import liquibase.util.StringUtil
 import spock.lang.Specification
-import spock.lang.Unroll
 
 class CalculateChecksumCommandStepTest extends Specification {
 
@@ -21,7 +20,6 @@ class CalculateChecksumCommandStepTest extends Specification {
     }
 
     //Negative Tests
-    @Unroll
     def "validate CheckSum is not calculated having a missing path argument"(String path) {
         when:
         def generatedCheckSum = calculateCheckSum(path, "1", "liquibase")
@@ -35,7 +33,6 @@ class CalculateChecksumCommandStepTest extends Specification {
         path << ["", null]
     }
 
-    @Unroll
     def "validate CheckSum is not calculated having a missing author argument"(String author) {
         when:
         def generatedCheckSum = calculateCheckSum("tagged-changelog.xml", "1", author)
@@ -49,7 +46,6 @@ class CalculateChecksumCommandStepTest extends Specification {
         author << ["", null]
     }
 
-    @Unroll
     def "validate CheckSum is not calculated having a missing Id argument"(String id) {
         when:
         def generatedCheckSum = calculateCheckSum("tagged-changelog.xml", id, "liquibase")

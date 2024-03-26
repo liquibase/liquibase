@@ -1,11 +1,9 @@
 package liquibase.util
 
 import spock.lang.Specification
-import spock.lang.Unroll
 
 class ExpressionMatcherTest extends Specification {
 
-    @Unroll
     def match() {
         expect:
         ExpressionMatcher.matches(expression, items) == expected

@@ -1,12 +1,10 @@
 package liquibase.database.jvm
 
 import spock.lang.Specification
-import spock.lang.Unroll
 
 import java.sql.SQLException
 
 class JdbcConnectionTest extends Specification {
-    @Unroll
     def "getUrl"() {
         when:
         def passedInput = input
@@ -40,7 +38,6 @@ class JdbcConnectionTest extends Specification {
         null                                                                                 | null
     }
 
-    @Unroll
     def "sanitizeUrl"() {
         when:
         def passedInput = input

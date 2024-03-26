@@ -14,7 +14,6 @@ import liquibase.exception.LiquibaseException
 import liquibase.sdk.resource.MockResourceAccessor
 import liquibase.test.JUnitResourceAccessor
 import spock.lang.Specification
-import spock.lang.Unroll
 
 class XMLChangeLogSAXParserTest extends Specification {
 
@@ -50,7 +49,6 @@ class XMLChangeLogSAXParserTest extends Specification {
 </databaseChangeLog>
 """
 
-    @Unroll
     def testAllProvidedChangesetsAreLoaded() throws ChangeLogParseException, Exception {
         given:
         def xmlParser = new XMLChangeLogSAXParser()
@@ -167,7 +165,6 @@ class XMLChangeLogSAXParserTest extends Specification {
         XMLChangeLogSAXParser.getSchemaVersion() == "latest" //because test run in an environment with build.version == DEV
     }
 
-    @Unroll
     def "computeSchemaVersion"() {
         expect:
         XMLChangeLogSAXParser.computeSchemaVersion(buildVersion) == expected

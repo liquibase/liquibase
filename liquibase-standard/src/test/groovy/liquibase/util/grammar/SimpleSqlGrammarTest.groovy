@@ -1,11 +1,9 @@
 package liquibase.util.grammar
 
 import spock.lang.Specification
-import spock.lang.Unroll
 
 class SimpleSqlGrammarTest extends Specification {
 
-    @Unroll
     def test() {
         when:
         def tokenManager = new SimpleSqlGrammarTokenManager(new SimpleCharStream(new StringReader(input)))

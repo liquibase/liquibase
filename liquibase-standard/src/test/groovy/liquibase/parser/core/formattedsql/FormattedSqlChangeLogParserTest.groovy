@@ -917,7 +917,6 @@ not ignoreLines here
         assert e.getMessage().contains("--ignoreLines:end")
     }
 
-    @Unroll
     def parse_multipleDbms() throws Exception {
         when:
         def changeLog = new MockFormattedSqlChangeLogParser(changelog).parse("asdf.sql", new ChangeLogParameters(), new JUnitResourceAccessor())
@@ -981,7 +980,6 @@ not ignoreLines here
         changeLog.getChangeSets().size() == 2
     }
 
-    @Unroll
     def parse_MultiLineRollback() throws Exception {
         when:
         String changeLogWithMultiLineRollback = """                
@@ -1008,7 +1006,6 @@ create table table1 (
         ((RawSQLChange) changeLog.getChangeSets().get(0).getRollback().getChanges().get(0)).getSql() == "delete from table1; drop table table1;"
     }
 
-    @Unroll
     def parse_MultiLineRollbackInBetween() throws Exception {
         when:
         String changeLogWithMultiLineRollback = """                
@@ -1058,7 +1055,6 @@ select (*) from table3;
         assert changeLog.getChangeSets().get(2).getRollback().getChanges().get(0) instanceof EmptyChange
     }
 
-    @Unroll
     def parse_MultiLineRollbackEndingOnCodeLine() throws Exception {
         when:
         String changeLogWithMultiLineRollback = """                

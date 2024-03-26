@@ -33,13 +33,11 @@ import liquibase.structure.core.Index
 import liquibase.util.StringUtil
 import org.junit.Rule
 import spock.lang.Specification
-import spock.lang.Unroll
 
 class IndexWithDescendingColumnSnapshotIntegrationTest extends Specification {
     @Rule
     public DatabaseTestSystem mssqlDb = Scope.currentScope.getSingleton(TestSystemFactory).getTestSystem("mssql")
 
-    @Unroll
     def "Index with a descending column is snapshot correctly"(boolean snapshotRelation) {
         when:
         def connection = mssqlDb.getConnection()
@@ -172,7 +170,6 @@ class IndexWithDescendingColumnSnapshotIntegrationTest extends Specification {
         false            |_
     }
 
-    @Unroll
     def "Index with a descending column in older format is handled correctly"() {
         when:
 

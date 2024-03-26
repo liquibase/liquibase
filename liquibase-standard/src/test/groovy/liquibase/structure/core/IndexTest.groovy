@@ -1,11 +1,9 @@
 package liquibase.structure.core
 
 import spock.lang.Specification
-import spock.lang.Unroll
 
 class IndexTest extends Specification {
 
-    @Unroll
     def "toString test"() {
         expect:
         index.toString() == expected

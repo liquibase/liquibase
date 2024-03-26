@@ -1,13 +1,12 @@
 package liquibase.change.core
 
 import liquibase.Scope
-import liquibase.change.ChangeStatus;
+import liquibase.change.ChangeStatus
 import liquibase.change.StandardChangeTest
 import liquibase.changelog.ChangeLogHistoryService
-import liquibase.changelog.ChangeLogHistoryServiceFactory;
+import liquibase.changelog.ChangeLogHistoryServiceFactory
 import liquibase.database.core.MockDatabase
 import liquibase.plugin.Plugin
-import spock.lang.Unroll
 
 public class TagDatabaseChangeTest extends StandardChangeTest {
 
@@ -23,7 +22,6 @@ public class TagDatabaseChangeTest extends StandardChangeTest {
         "Tag 'TAG_NAME' applied to database" == change.getConfirmationMessage()
     }
 
-    @Unroll
     def "checkStatus"() {
         when:
         def change = new TagDatabaseChange()

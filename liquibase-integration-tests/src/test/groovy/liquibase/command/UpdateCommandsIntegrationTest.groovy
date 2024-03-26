@@ -19,7 +19,6 @@ import liquibase.resource.SearchPathResourceAccessor
 import org.h2.jdbc.JdbcSQLSyntaxErrorException
 import spock.lang.Shared
 import spock.lang.Specification
-import spock.lang.Unroll
 
 @LiquibaseIntegrationTest
 class UpdateCommandsIntegrationTest extends Specification {
@@ -50,7 +49,6 @@ class UpdateCommandsIntegrationTest extends Specification {
         CommandUtil.runDropAll(h2)
     }
 
-    @Unroll
     def "run Update from CommandStep"() {
         when:
 

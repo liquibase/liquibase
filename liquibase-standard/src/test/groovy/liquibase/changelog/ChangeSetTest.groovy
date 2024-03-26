@@ -550,7 +550,6 @@ class ChangeSetTest extends Specification {
         "runAlways" | "false"
     }
 
-    @Unroll
     def "load handles validCheckSum(s) as a collection or a single value"() {
         when:
         def changeSet = new ChangeSet(new DatabaseChangeLog("com/example/test.xml"))

@@ -1,11 +1,9 @@
 package liquibase.util
 
 import spock.lang.Specification
-import spock.lang.Unroll
 
 class MD5UtilTest extends Specification {
 
-    @Unroll
     def computeMD5() throws Exception {
         when:
         ByteArrayInputStream inputStream = new ByteArrayInputStream(input.getBytes())

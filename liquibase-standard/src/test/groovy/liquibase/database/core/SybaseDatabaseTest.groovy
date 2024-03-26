@@ -62,7 +62,6 @@ public class SybaseDatabaseTest extends Specification {
             assert database.isSybaseProductName("Adaptive Server Enterprise")
     }
 
-    @Unroll
     def getViewDefinition() throws Exception {
         when:
             def executor = Mock(Executor)

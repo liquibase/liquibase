@@ -67,7 +67,6 @@ class ParsedNodeTest extends Specification {
         new ParsedNode(null, "a").addChild(null, "1", ["1a", "1b"]).addChild(null, "2", ["2a", "2b"])        | "a[1=(1a,1b),2=(2a,2b)]"
     }
 
-    @Unroll
     def "setValue with different inputs"() {
         when:
         def changeLog = new ParsedNode(null, "root")
@@ -85,7 +84,6 @@ class ParsedNodeTest extends Specification {
         [a: "val"] | null
     }
 
-    @Unroll
     def "equals method takes attributes and all into account"() {
         expect:
         assert changeLog1.equals(changeLog2) == expected
@@ -286,7 +284,6 @@ class ParsedNodeTest extends Specification {
         node.getChild(null, "valueNode2").value == "value 2"
     }
 
-    @Unroll
     def "addChild with a map"() {
         when:
         def node = new ParsedNode(null, "root").addChildren(map)
@@ -317,7 +314,6 @@ class ParsedNodeTest extends Specification {
 
     }
 
-    @Unroll
     def "converts value to boxed types"() {
         when:
         def result = new ParsedNode(null, "root").convertObject(input, targetType)
@@ -344,7 +340,6 @@ class ParsedNodeTest extends Specification {
         "a"          | Character.class | Character.valueOf((char) 'a')
     }
 
-    @Unroll
     def "converts values to primitive types"() {
         when:
         def result = new ParsedNode(null, "root").convertObject(input, targetType)

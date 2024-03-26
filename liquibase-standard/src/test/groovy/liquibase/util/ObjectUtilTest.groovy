@@ -12,13 +12,11 @@ import liquibase.statement.DatabaseFunction
 import liquibase.statement.SequenceCurrentValueFunction
 import liquibase.statement.SequenceNextValueFunction
 import spock.lang.Specification
-import spock.lang.Unroll
 
 import java.beans.PropertyDescriptor
 
 class ObjectUtilTest extends Specification {
 
-    @Unroll
     def "getProperty examples"() {
         expect:
         ObjectUtil.getProperty(object, property) == expected
@@ -38,7 +36,6 @@ class ObjectUtilTest extends Specification {
         thrown(UnexpectedLiquibaseException.class)
     }
 
-    @Unroll
     def "hasProperty examples"() {
         expect:
         ObjectUtil.hasReadProperty(object, property) == readExists
@@ -53,7 +50,6 @@ class ObjectUtilTest extends Specification {
         new CreateTableChange() | "time"      | false      | false       | false
     }
 
-    @Unroll
     def "setProperty examples"() {
         expect:
         ObjectUtil.setProperty(object, property, value)
@@ -119,7 +115,6 @@ class ObjectUtilTest extends Specification {
 
     }
 
-    @Unroll
     def "convert with invalid inputs throws an exception"() {
         when:
         ObjectUtil.convert(input, targetClass)
@@ -134,7 +129,6 @@ class ObjectUtilTest extends Specification {
         "xyz"                                  | Integer                | "java.lang.NumberFormatException: For input string: \"xyz\""
     }
 
-    @Unroll
     def getPropertyType() {
         expect:
         ObjectUtil.getPropertyType(object, property) == expected
@@ -146,7 +140,6 @@ class ObjectUtilTest extends Specification {
         null              | "time"    | null
     }
 
-    @Unroll
     def setProperty() {
         given:
         def object = new CreateTableChange()
@@ -163,7 +156,6 @@ class ObjectUtilTest extends Specification {
         123           | "123"
     }
 
-    @Unroll
     def defaultIfNull() {
         expect:
         ObjectUtil.defaultIfNull(input, value) == expected

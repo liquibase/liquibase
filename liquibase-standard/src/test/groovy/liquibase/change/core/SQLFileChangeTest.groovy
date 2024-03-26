@@ -13,7 +13,6 @@ import liquibase.exception.UnexpectedLiquibaseException
 import liquibase.statement.SqlStatement
 import liquibase.test.JUnitResourceAccessor
 import liquibase.util.StreamUtil
-import spock.lang.Unroll
 
 import static org.junit.Assert.assertEquals
 
@@ -31,7 +30,6 @@ class SQLFileChangeTest extends StandardChangeTest {
         thrown(UnexpectedLiquibaseException.class)
     }
 
-    @Unroll
     def "lines from file parse into one or more statements correctly"() throws Exception {
         when:
         SQLFileChange change2 = new SQLFileChange();
@@ -148,7 +146,6 @@ class SQLFileChangeTest extends StandardChangeTest {
         e.message.startsWith("The file non-existing.sql was not found")
     }
 
-    @Unroll
     def "openSqlStream correctly opens files"() {
         when:
         def changelog = new DatabaseChangeLog("com/example/changelog.xml")
@@ -176,7 +173,6 @@ class SQLFileChangeTest extends StandardChangeTest {
 
     }
 
-    @Unroll
     def "validate checksum if sql(file) content change - #version"(ChecksumVersion version, String originalChecksum, String updatedChecksum) {
         when:
         String procedureText =

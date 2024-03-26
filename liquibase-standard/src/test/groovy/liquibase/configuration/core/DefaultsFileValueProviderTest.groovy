@@ -21,7 +21,6 @@ long.multiWord: Long MultiWord
         provider.getProvidedValue("long.multiWord").getValue() == "Long MultiWord"
     }
 
-    @Unroll
     def "getProvidedValue"() {
         setup:
         def provider = new DefaultsFileValueProvider([

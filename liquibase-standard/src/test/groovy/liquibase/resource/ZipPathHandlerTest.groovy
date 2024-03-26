@@ -1,15 +1,12 @@
 package liquibase.resource
 
 import liquibase.plugin.Plugin
-import liquibase.servicelocator.PrioritizedService
 import spock.lang.Requires
 import spock.lang.Specification
-import spock.lang.Unroll
 
 class ZipPathHandlerTest extends Specification {
 
     @Requires({ os.windows })
-    @Unroll
     def "getResourceAccessor with different root patterns #input"() {
         when:
         new ZipPathHandler().getResourceAccessor(input)
@@ -32,7 +29,6 @@ class ZipPathHandlerTest extends Specification {
         "jar:file:/C:/path/outer.jar!/BOOT-INF/lib/embedded.jar!/" | ":\\path\\outer.jar"
     }
 
-    @Unroll
     def supports() {
         expect:
         new ZipPathHandler().getPriority(input) == expected

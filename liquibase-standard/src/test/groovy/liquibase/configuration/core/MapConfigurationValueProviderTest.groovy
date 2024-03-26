@@ -2,7 +2,6 @@ package liquibase.configuration.core
 
 import liquibase.configuration.AbstractMapConfigurationValueProvider
 import spock.lang.Specification
-import spock.lang.Unroll
 
 /**
  * Tests the base {@link AbstractMapConfigurationValueProvider} logic. Can't call this
@@ -28,7 +27,6 @@ class MapConfigurationValueProviderTest extends Specification {
         provider.getProvidedValue("null-property") == null
     }
 
-    @Unroll
     def "keyMatches"() {
         expect:
         new MapConfigurationValueProvider([:]).keyMatches(wantedKey, storedKey) == matches

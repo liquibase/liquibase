@@ -20,7 +20,6 @@ import liquibase.statement.core.MarkChangeSetRanStatement
 import liquibase.statement.core.RawSqlStatement
 import spock.lang.Shared
 import spock.lang.Specification
-import spock.lang.Unroll
 
 @LiquibaseIntegrationTest
 class UpgradeChecksumVersionIntegrationTest extends Specification{
@@ -41,7 +40,6 @@ VALUES('1', 'your.name', '$changelogfile', '2023-05-31 14:33:39.108', 1, 'EXECUT
 """))
     }
 
-    @Unroll
     def "update command should upgrade all checksums when no filters supplied" () {
         def changesetFilepath = "changelogs/common/checksum-changelog.xml"
         final ChangeLogHistoryService changeLogService = Scope.getCurrentScope().getSingleton(ChangeLogHistoryServiceFactory.class).getChangeLogService(h2.getDatabaseFromFactory())
@@ -293,7 +291,6 @@ VALUES('1', 'your.name', '$changelogfile', '2023-05-31 14:33:39.108', 1, 'EXECUT
         CommandUtil.runDropAll(h2)
     }
 
-    @Unroll
     def "DBMS filtered changes should be used to calculate v8 checksum but not v9" () {
         def changesetFilepath = "changelogs/h2/checksum/dbms-filter-changelog.xml"
         final ChangeLogHistoryService changeLogService = Scope.getCurrentScope().getSingleton(ChangeLogHistoryServiceFactory.class).getChangeLogService(h2.getDatabaseFromFactory())
@@ -337,7 +334,6 @@ VALUES('2', 'fl', '$changesetFilepath', '2023-09-29 14:33:39.112', 2, 'EXECUTED'
     }
 
 
-    @Unroll
     def "Calculate change using v8 forced calculator" () {
         def changesetFilepath = "changelogs/h2/checksum/dbms-filter-changelog.xml"
         final ChangeLogHistoryService changeLogService = Scope.getCurrentScope().getSingleton(ChangeLogHistoryServiceFactory.class).getChangeLogService(h2.getDatabaseFromFactory())
@@ -386,7 +382,6 @@ VALUES('2', 'fl', '$changesetFilepath', '2023-09-29 14:33:39.112', 2, 'EXECUTED'
 
     }
 
-    @Unroll
     def "manually generate v7 checksum" () {
 
         given:

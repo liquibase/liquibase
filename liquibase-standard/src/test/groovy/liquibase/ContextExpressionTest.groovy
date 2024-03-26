@@ -4,7 +4,7 @@ import liquibase.util.StringUtil
 import spock.lang.Specification
 import spock.lang.Unroll
 
-import static org.hamcrest.Matchers.*
+import static org.hamcrest.Matchers.containsInAnyOrder
 
 class ContextExpressionTest extends Specification {
 
@@ -189,7 +189,6 @@ class ContextExpressionTest extends Specification {
         "! (a and  b ) or ( ! c and  d)"| "!(a and b) or (!c and d)"
     }
 
-    @Unroll
     def isEmpty() {
         expect:
         assert new ContextExpression(expression).isEmpty() == expected

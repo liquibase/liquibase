@@ -8,7 +8,6 @@ import liquibase.logging.core.BufferedLogService
 import liquibase.ui.ConsoleUIService
 import liquibase.util.StringUtil
 import spock.lang.Specification
-import spock.lang.Unroll
 
 import java.util.logging.Level
 
@@ -590,7 +589,6 @@ Full documentation is available at
 https://docs.liquibase.com
 """
 
-    @Unroll
     def "toArgNames for command arguments"() {
         expect:
         LiquibaseCommandLine.toArgNames(new CommandBuilder(["argTest"] as String[][]).argument(argName, String).build()).join(", ") == expected
@@ -602,7 +600,6 @@ https://docs.liquibase.com
         "threeWordsHere" | "--three-words-here, --threeWordsHere"
     }
 
-    @Unroll
     def "toArgNames for configuration arguments"() {
         expect:
         LiquibaseCommandLine.toArgNames(new ConfigurationDefinition.Builder(prefix).define(argName, String).buildTemporary()).join(", ") == expected
@@ -616,7 +613,6 @@ https://docs.liquibase.com
         "other"         | "twoWords"       | "--other-two-words, --othertwoWords"
     }
 
-    @Unroll
     def "toArgNames for configuration arguments and aliases"() {
         expect:
         LiquibaseCommandLine.toArgNames(new ConfigurationDefinition.Builder(prefix).define(argName, String).addAliasKey(alias).buildTemporary()).join(", ") == expected
@@ -626,7 +622,6 @@ https://docs.liquibase.com
         "liquibase" | "test"  | "testAlias" | "--test, --liquibase-test, --liquibasetest, --test-alias, --testAlias"
     }
 
-    @Unroll
     def "toArgNames for command arguments and aliases"() {
         expect:
         LiquibaseCommandLine.toArgNames(new CommandBuilder([["argCommand"]] as String[][]).argument(argName, String).addAlias(alias).build()).join(", ") == expected
@@ -636,7 +631,6 @@ https://docs.liquibase.com
         "liquibase"     | "test"           | "testAlias"           | "--test, --test-alias, --testAlias"
     }
 
-    @Unroll
     def "adjustLegacyArgs"() {
         expect:
         new LiquibaseCommandLine().adjustLegacyArgs(input as String[]).toArrayString() == (expected as String[]).toArrayString()
@@ -666,7 +660,6 @@ https://docs.liquibase.com
         subcommands["snapshot"].commandSpec.findOption("-D") == null
     }
 
-    @Unroll
     def "cleanExceptionMessage"() {
         expect:
         new LiquibaseCommandLine().cleanExceptionMessage(input) == expected
@@ -682,7 +675,6 @@ https://docs.liquibase.com
         "java.io.RuntimeException: java.lang.RuntimeException: message here" | "message here"
     }
 
-    @Unroll
     def "handleException should show WARNING if specified"(def level, def expected) {
         when:
         BufferedLogService logService = new BufferedLogService()

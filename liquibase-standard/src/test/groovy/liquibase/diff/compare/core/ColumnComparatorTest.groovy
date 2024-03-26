@@ -1,24 +1,16 @@
 package liquibase.diff.compare.core
 
 import liquibase.database.core.PostgresDatabase
-import liquibase.diff.Difference
-import liquibase.diff.ObjectDifferences
 import liquibase.diff.compare.CompareControl
 import liquibase.diff.compare.DatabaseObjectComparatorChain
-import liquibase.diff.output.DiffOutputControl
-import liquibase.diff.output.changelog.core.ChangedColumnChangeGenerator
 import liquibase.snapshot.SnapshotIdService
 import liquibase.structure.core.Column
 import liquibase.structure.core.DataType
-import liquibase.structure.core.Relation
 import liquibase.structure.core.Table
-import liquibase.util.StringUtil
 import spock.lang.Specification
-import spock.lang.Unroll
 
 class ColumnComparatorTest extends Specification {
 
-    @Unroll
     def "expect no differences between two columns that have essentially equivalent types (#type1 and #type2) for Postgres auto increment columns" (String type1, String type2) {
         when:
         def comparator = new ColumnComparator()

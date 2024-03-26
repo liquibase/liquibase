@@ -1,11 +1,9 @@
 package liquibase.resource
 
 import spock.lang.Specification
-import spock.lang.Unroll
 
 class URIResourceAccessorTest extends Specification {
 
-    @Unroll
     def resolveSibling() {
         when:
         def newResource = new URIResource(path, URI.create(uri)).resolveSibling(input)

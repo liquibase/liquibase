@@ -1,20 +1,8 @@
 package liquibase.change.core
 
-import liquibase.change.AddColumnConfig
-import liquibase.change.Change
-import liquibase.change.ChangeStatus
-import liquibase.change.ConstraintsConfig
-import liquibase.change.StandardChangeTest
+import liquibase.change.*
 import liquibase.change.visitor.ChangeVisitorFactory
-import liquibase.database.core.FirebirdDatabase
-import liquibase.database.core.H2Database
-import liquibase.database.core.HsqlDatabase
-import liquibase.database.core.MSSQLDatabase
-import liquibase.database.core.MariaDBDatabase
-import liquibase.database.core.MockDatabase
-import liquibase.database.core.MySQLDatabase
-import liquibase.database.core.OracleDatabase
-import liquibase.database.core.PostgresDatabase
+import liquibase.database.core.*
 import liquibase.datatype.DataTypeFactory
 import liquibase.exception.SetupException
 import liquibase.parser.core.ParsedNode
@@ -25,12 +13,10 @@ import liquibase.sqlgenerator.SqlGeneratorFactory
 import liquibase.structure.core.Column
 import liquibase.structure.core.PrimaryKey
 import liquibase.structure.core.Table
-import spock.lang.Unroll
 
 class AddColumnChangeTest extends StandardChangeTest {
 
 
-    @Unroll
     def "valid setups are allowed"() {
         when:
         def change = new AddColumnChange()
@@ -217,7 +203,6 @@ class AddColumnChangeTest extends StandardChangeTest {
 
     }
 
-    @Unroll
     def "modify method works for removing afterColumn"() {
         when:
         def removeChangeSetPropertyNode = new ParsedNode(null, "removeChangeSetProperty")
@@ -262,7 +247,6 @@ class AddColumnChangeTest extends StandardChangeTest {
         "postgres,any_unsupported_db"     | "after_col"   || null
     }
 
-    @Unroll
     def "modify method works for removing beforeColumn"() {
         when:
         def removeChangeSetPropertyNode = new ParsedNode(null, "removeChangeSetProperty")
@@ -307,7 +291,6 @@ class AddColumnChangeTest extends StandardChangeTest {
         "postgres,any_unsupported_db"     | "before_col"   || null
     }
 
-    @Unroll
     def "modify method works for removing position"() {
         when:
         def removeChangeSetPropertyNode = new ParsedNode(null, "removeChangeSetProperty")
@@ -377,7 +360,6 @@ class AddColumnChangeTest extends StandardChangeTest {
         }
     }
 
-    @Unroll
     def "column with delete cascade generates the expected sql for #database database"() {
         when:
         def change = new AddColumnChange()

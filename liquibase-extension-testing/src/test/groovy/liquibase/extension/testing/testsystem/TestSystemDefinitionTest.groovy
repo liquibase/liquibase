@@ -1,11 +1,9 @@
-package liquibase.extension.testing.testsystem;
+package liquibase.extension.testing.testsystem
 
 import spock.lang.Specification
-import spock.lang.Unroll;
 
 class TestSystemDefinitionTest extends Specification {
 
-    @Unroll
     def parse() {
         expect:
         TestSystem.Definition.parse(input).toString() == expected
@@ -28,7 +26,6 @@ class TestSystemDefinitionTest extends Specification {
         TestSystem.Definition.parse(null) == null
     }
 
-    @Unroll
     def "equals, compareTo, and hashCode"() {
         when:
         def obj1 = TestSystem.Definition.parse(def1)

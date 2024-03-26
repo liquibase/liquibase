@@ -1,12 +1,9 @@
 package liquibase.util
 
-
 import spock.lang.Specification
-import spock.lang.Unroll
 
 class StreamUtilTest extends Specification {
 
-    @Unroll
     def copy() {
         when:
         def input = new ByteArrayInputStream(testString.getBytes())
@@ -30,7 +27,6 @@ class StreamUtilTest extends Specification {
         StreamUtil.readStream(new ByteArrayInputStream("a string".getBytes())) == "a string".getBytes()
     }
 
-    @Unroll
     def readStreamAsString() throws IOException {
         when:
         ByteArrayInputStream stream = new ByteArrayInputStream(contents);

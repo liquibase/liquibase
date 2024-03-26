@@ -1,15 +1,14 @@
 package liquibase.change.core
 
-import liquibase.Scope;
+import liquibase.Scope
 import liquibase.change.ChangeFactory
-import liquibase.change.ChangeStatus;
+import liquibase.change.ChangeStatus
 import liquibase.change.StandardChangeTest
 import liquibase.database.core.MockDatabase
 import liquibase.snapshot.MockSnapshotGeneratorFactory
 import liquibase.snapshot.SnapshotGeneratorFactory
 import liquibase.structure.core.Column
 import liquibase.structure.core.Table
-import spock.lang.Unroll
 
 public class AddAutoIncrementChangeTest extends StandardChangeTest {
 
@@ -40,7 +39,6 @@ public class AddAutoIncrementChangeTest extends StandardChangeTest {
 
     }
 
-    @Unroll
     def "checkStatus"() {
         when:
         def database = new MockDatabase()

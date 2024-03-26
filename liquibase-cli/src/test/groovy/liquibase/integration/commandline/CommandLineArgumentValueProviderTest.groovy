@@ -1,11 +1,9 @@
 package liquibase.integration.commandline
 
 import spock.lang.Specification
-import spock.lang.Unroll
 
 class CommandLineArgumentValueProviderTest extends Specification {
 
-    @Unroll
     def keyMatches() {
         expect:
         new CommandLineArgumentValueProvider(null).keyMatches(wantedKey, storedKey) == expected
