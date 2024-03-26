@@ -136,6 +136,7 @@ public class ChangeFactory extends AbstractPluginFactory<Change>{
     /**
      * @deprecated Use {@link liquibase.Scope#getSingleton(Class)}
      */
+    @Deprecated
     public static ChangeFactory getInstance() {
         return Scope.getCurrentScope().getSingleton(ChangeFactory.class);
     }

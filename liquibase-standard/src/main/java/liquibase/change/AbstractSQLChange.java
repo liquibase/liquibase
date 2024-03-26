@@ -50,6 +50,7 @@ public abstract class AbstractSQLChange extends AbstractChange implements DbmsTa
      * @deprecated  To be removed when splitStatements is changed to be type Boolean
      *
      */
+    @Deprecated
     private boolean splitStatementsSet;
 
     private String endDelimiter;

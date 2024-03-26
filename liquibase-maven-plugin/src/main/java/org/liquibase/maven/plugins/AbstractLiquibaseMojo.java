@@ -151,6 +151,7 @@ public abstract class AbstractLiquibaseMojo extends AbstractMojo {
      * @parameter property="liquibase.emptyPassword" default-value="false"
      * @deprecated Use an empty or null value for the password instead.
      */
+    @Deprecated
     @PropertyElement
     protected boolean emptyPassword;
     /**
@@ -207,6 +208,7 @@ public abstract class AbstractLiquibaseMojo extends AbstractMojo {
      * @deprecated No longer prompts
      */
     @PropertyElement
+    @Deprecated
     protected boolean promptOnNonLocalDatabase;
 
     /**
@@ -242,6 +244,7 @@ public abstract class AbstractLiquibaseMojo extends AbstractMojo {
      * @deprecated Logging managed by maven
      */
     @PropertyElement
+    @Deprecated
     protected String logging;
 
     /**

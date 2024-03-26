@@ -145,6 +145,7 @@ public class StringUtil {
      * @param stripComments If true then comments will be stripped, if false then they will be left in the code
      * @deprecated The new method is {@link #processMultiLineSQL(String, boolean, boolean, String, ChangeSet)} (String)}
      */
+    @Deprecated
     public static String[] processMutliLineSQL(String multiLineSQL, boolean stripComments, boolean splitStatements, String endDelimiter) {
         return processMultiLineSQL(multiLineSQL, stripComments, splitStatements, endDelimiter, null);
     }
@@ -158,6 +159,7 @@ public class StringUtil {
      * @param changeSet     the changeset associated with the sql being parsed
      * @deprecated The new method is {@link #processMultiLineSQL(String, boolean, boolean, String, ChangeSet)} (String)}
      */
+    @Deprecated
     public static String[] processMutliLineSQL(String multiLineSQL, boolean stripComments, boolean splitStatements, String endDelimiter, ChangeSet changeSet) {
         return processMultiLineSQL(multiLineSQL, stripComments, splitStatements, endDelimiter, changeSet);
     }
