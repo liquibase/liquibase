@@ -235,8 +235,8 @@ public class SequenceSnapshotGenerator extends JdbcSnapshotGenerator {
         } else if (database instanceof MSSQLDatabase) {
             StringBuilder sql = new StringBuilder("SELECT SEQUENCE_NAME, cast(START_VALUE AS BIGINT) AS START_VALUE, cast(MINIMUM_VALUE AS BIGINT) AS MIN_VALUE, ")
                     .append("cast(MAXIMUM_VALUE AS BIGINT) AS MAX_VALUE, CAST(INCREMENT AS BIGINT) AS INCREMENT_BY, CYCLE_OPTION AS WILL_CYCLE")
-                    .append("FROM INFORMATION_SCHEMA.SEQUENCES WHERE SEQUENCE_SCHEMA = ?");
-            return new RawParameterizedSqlStatement( sql.toString(), schema.getName());
+                    .append(String.format("FROM INFORMATION_SCHEMA.SEQUENCES WHERE SEQUENCE_SCHEMA = '%s'", schema.getName()));
+            return new RawSqlStatement( sql.toString());
         } else if (database instanceof MariaDBDatabase) {
             StringJoiner j = new StringJoiner(" \n UNION\n");
             try {
