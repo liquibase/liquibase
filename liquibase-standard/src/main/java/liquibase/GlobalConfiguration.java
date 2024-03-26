@@ -1,10 +1,8 @@
 package liquibase;
 
-import liquibase.command.CommandArgumentDefinition;
 import liquibase.configuration.AutoloadedConfigurations;
 import liquibase.configuration.ConfigurationDefinition;
 import liquibase.ui.UIServiceEnum;
-import liquibase.util.ValueHandlerUtil;
 
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
@@ -131,7 +129,6 @@ public class GlobalConfiguration implements AutoloadedConfigurations {
         CONVERT_DATA_TYPES = builder.define("convertDataTypes", Boolean.class)
                 .setDescription("Should Liquibase convert to/from STANDARD data types. Applies to both snapshot and " +
                         "update commands.")
-                .setValueHandler(ValueHandlerUtil::booleanValueHandler)
                 .setDefaultValue(true)
                 .build();
 
@@ -139,25 +136,21 @@ public class GlobalConfiguration implements AutoloadedConfigurations {
                 .addAliasKey("liquibase.generateChangeSetCreatedValues")
                 .setDescription("Should Liquibase include a 'created' attribute in diff/generateChangelog changesets with" +
                         " the current datetime")
-                .setValueHandler(ValueHandlerUtil::booleanValueHandler)
                 .setDefaultValue(false)
                 .build();
 
         AUTO_REORG = builder.define("autoReorg", Boolean.class)
                 .setDescription("Should Liquibase automatically include REORG TABLE commands when needed?")
-                .setValueHandler(ValueHandlerUtil::booleanValueHandler)
                 .setDefaultValue(true)
                 .build();
 
         DIFF_COLUMN_ORDER = builder.define("diffColumnOrder", Boolean.class)
                 .setDescription("Should Liquibase compare column order in diff operation?")
-                .setValueHandler(ValueHandlerUtil::booleanValueHandler)
                 .setDefaultValue(true)
                 .build();
 
         ALWAYS_OVERRIDE_STORED_LOGIC_SCHEMA = builder.define("alwaysOverrideStoredLogicSchema", Boolean.class)
                 .setDescription("When generating SQL for createProcedure, should the procedure schema be forced to the default schema if no schemaName attribute is set?")
-                .setValueHandler(ValueHandlerUtil::booleanValueHandler)
                 .setDefaultValue(false)
                 .build();
 
@@ -165,44 +158,37 @@ public class GlobalConfiguration implements AutoloadedConfigurations {
         GENERATED_CHANGESET_IDS_INCLUDE_DESCRIPTION = builder.define("generatedChangesetIdsContainsDescription", Boolean.class)
                 .addAliasKey("liquibase.generatedChangeSetIdsContainsDescription")
                 .setDescription("Should Liquibase include the change description in the id when generating changesets?")
-                .setValueHandler(ValueHandlerUtil::booleanValueHandler)
                 .setDefaultValue(false)
                 .build();
 
         INCLUDE_CATALOG_IN_SPECIFICATION = builder.define("includeCatalogInSpecification", Boolean.class)
                 .setDescription("Should Liquibase include the catalog name when determining equality?")
-                .setValueHandler(ValueHandlerUtil::booleanValueHandler)
                 .setDefaultValue(false)
                 .build();
 
         SHOULD_SNAPSHOT_DATA = builder.define("shouldSnapshotData", Boolean.class)
                 .setDescription("Should Liquibase snapshot data by default?")
-                .setValueHandler(ValueHandlerUtil::booleanValueHandler)
                 .setDefaultValue(false)
                 .build();
 
         INCLUDE_RELATIONS_FOR_COMPUTED_COLUMNS = builder.define("includeRelationsForComputedColumns", Boolean.class)
                 .setDescription("If true, the parent relationship for computed columns is preserved in snapshot-dependent commands: snapshot and diff")
-                .setValueHandler(ValueHandlerUtil::booleanValueHandler)
                 .setDefaultValue(false)
                 .build();
 
         FILTER_LOG_MESSAGES = builder.define("filterLogMessages", Boolean.class)
                 .setDescription("DEPRECATED: No longer used")
                 .setCommonlyUsed(false)
-                .setValueHandler(ValueHandlerUtil::booleanValueHandler)
                 .build();
 
         HEADLESS = builder.define("headless", Boolean.class)
                 .setDescription("Force liquibase to think it has no access to a keyboard")
-                .setValueHandler(ValueHandlerUtil::booleanValueHandler)
                 .setDefaultValue(false)
                 .setCommonlyUsed(true)
                 .build();
 
         STRICT = builder.define("strict", Boolean.class)
                 .setDescription("Be stricter on allowed Liquibase configuration and setup?")
-                .setValueHandler(ValueHandlerUtil::booleanValueHandler)
                 .setDefaultValue(false)
                 .build();
 
@@ -215,19 +201,16 @@ public class GlobalConfiguration implements AutoloadedConfigurations {
 
         SECURE_PARSING = builder.define("secureParsing", Boolean.class)
                 .setDescription("If true, remove functionality from file parsers which could be used insecurely. Examples include (but not limited to) disabling remote XML entity support.")
-                .setValueHandler(ValueHandlerUtil::booleanValueHandler)
                 .setDefaultValue(true)
                 .build();
 
         PRESERVE_SCHEMA_CASE = builder.define("preserveSchemaCase", Boolean.class)
                 .setDescription("Should liquibase treat schema and catalog names as case sensitive?")
-                .setValueHandler(ValueHandlerUtil::booleanValueHandler)
                 .setDefaultValue(false)
                 .build();
 
         SHOW_BANNER = builder.define("showBanner", Boolean.class)
                 .setDescription("If true, show a Liquibase banner on startup.")
-                .setValueHandler(ValueHandlerUtil::booleanValueHandler)
                 .setDefaultValue(true)
                 .build();
 
@@ -243,25 +226,21 @@ public class GlobalConfiguration implements AutoloadedConfigurations {
         ALWAYS_DROP_INSTEAD_OF_REPLACE = builder.define("alwaysDropInsteadOfReplace", Boolean.class)
                 .setDescription("If true, drop and recreate a view instead of replacing it.")
                 .setDefaultValue(false)
-                .setValueHandler(ValueHandlerUtil::booleanValueHandler)
                 .build();
 
         ALLOW_DUPLICATED_CHANGESETS_IDENTIFIERS = builder.define("allowDuplicatedChangesetIdentifiers", Boolean.class)
                 .setDescription("Allows duplicated changeset identifiers without failing Liquibase execution.")
-                .setValueHandler(ValueHandlerUtil::booleanValueHandler)
                 .setDefaultValue(false)
                 .build();
 
         VALIDATE_XML_CHANGELOG_FILES = builder.define("validateXmlChangelogFiles", Boolean.class)
                 .setDescription("Will perform xsd validation of XML changelog files. When many XML changelog files are included this validation may impact Liquibase performance. Defaults to true.")
-                .setValueHandler(ValueHandlerUtil::booleanValueHandler)
                 .setDefaultValue(true)
                 .build();
 
         UI_SERVICE = builder.define("uiService", UIServiceEnum.class)
                 .setDescription("Changes the default UI Service Logger used by Liquibase. Options are CONSOLE or LOGGER.")
                 .setDefaultValue(UIServiceEnum.CONSOLE)
-                .setValueHandler(o -> ValueHandlerUtil.getEnum(UIServiceEnum.class, o, "UiService"))
                 .build();
     }
 

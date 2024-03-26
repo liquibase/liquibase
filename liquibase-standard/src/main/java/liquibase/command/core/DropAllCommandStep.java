@@ -1,11 +1,9 @@
 package liquibase.command.core;
 
 import liquibase.CatalogAndSchema;
-import liquibase.GlobalConfiguration;
 import liquibase.Scope;
 import liquibase.changelog.ChangeLogHistoryServiceFactory;
 import liquibase.command.*;
-import liquibase.configuration.LiquibaseConfiguration;
 import liquibase.database.Database;
 import liquibase.exception.DatabaseException;
 import liquibase.exception.LiquibaseException;
@@ -15,7 +13,6 @@ import liquibase.lockservice.LockServiceFactory;
 import liquibase.logging.Logger;
 import liquibase.snapshot.SnapshotControl;
 import liquibase.util.StringUtil;
-import liquibase.util.ValueHandlerUtil;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -43,13 +40,11 @@ public class DropAllCommandStep extends AbstractCommandStep {
         SCHEMAS_ARG.setSupersededBy(CATALOG_AND_SCHEMAS_ARG);
         REQUIRE_FORCE_ARG = builder.argument("requireForce", Boolean.class)
                 .description("Argument to require user of dropAll to supply a 'force' argument, with values of 'true' or 'false'. The default is 'false'.")
-                .setValueHandler(ValueHandlerUtil::booleanValueHandler)
                 .required()
                 .defaultValue(false)
                 .build();
         FORCE_ARG = builder.argument("force", Boolean.class)
                 .description("Argument to allow use of dropAll with values of 'true' or 'false'. The default is 'false'.")
-                .setValueHandler(ValueHandlerUtil::booleanValueHandler)
                 .required()
                 .defaultValue(false)
                 .build();
