@@ -43,7 +43,7 @@ Learn all about Liquibase by taking our free online courses at [Liquibase Univer
 
 ## Want to help?
 
-Want to file a bug or improve documentation? Excellent! Read up on our guidelines for [contributing](https://www.liquibase.org/community/index.html)!
+Want to file a bug or improve documentation? Excellent! Read up on our guidelines for [contributing](https://www.liquibase.com/community/contributors)!
 
 ### Contribute code 
 
@@ -61,11 +61,11 @@ Earn points for your achievements and contributions, collect and show off your b
 
 Liquibase Open Source is [licensed under the Apache 2.0 License](https://github.com/liquibase/liquibase/blob/master/LICENSE.txt).
 
-[Liquibase Pro](https://www.liquibase.com/products/pro) and [Liquibase Enterprise](https://www.liquibase.com/products/enterprise), with additional features and support, are commercially licensed.
+[Liquibase Pro](https://www.liquibase.com/liquibase-pro), with additional features and support, is commercially licensed.
 
 LIQUIBASE is a registered trademark of [Liquibase Inc.](https://www.liquibase.com/company)
 
-## [Contact us](https://www.liquibase.org/contact)
+## [Contact us](https://www.liquibase.com/contact-us)
 
 [Liquibase Forum](https://forum.liquibase.org/) 
 
@@ -75,7 +75,7 @@ LIQUIBASE is a registered trademark of [Liquibase Inc.](https://www.liquibase.co
 
 ## Publish Release Manual Trigger to Sonatype 
 
-1. When a PO (Product Owner) or a Team Leader navigates to Publish a release from here -> https://github.com/liquibase/liquibase/releases/new, the workflow from /workflow/release-published.yml job is triggered. 
+1. When a PO (Product Owner) or a Team Leader navigates to Publish a release from here -> https://github.com/liquibase/liquibase/releases, the workflow from /workflow/release-published.yml job is triggered. 
 2. When a release is triggered, the workflow file will stop after `Setup` step and an email will be sent out to the list of `approvers` mentioned in job `manual_trigger_deployment`. You can click on the link and perform anyone of the options mentioned in description. 
 3. A minimum of 2 approvers are needed in order for the other jobs such as `deploy_maven`, `deploy_javadocs`, `publish_to_github_packages`, etc to be executed.
 4. When you view the GitHub PR, make sure to verify the version which is being published. It should say something like `Deploying v4.20.0 to sonatype`
