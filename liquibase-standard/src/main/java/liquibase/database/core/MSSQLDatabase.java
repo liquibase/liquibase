@@ -430,7 +430,7 @@ public class MSSQLDatabase extends AbstractJdbcDatabase {
             try {
                 if (getConnection() instanceof JdbcConnection) {
                     String catalog = getConnection().getCatalog();
-                    String sql = String.format("SELECT CONVERT([sysname], DATABASEPROPERTYEX(N'?', 'Collation'))", escapeStringForDatabase(catalog));
+                    String sql = String.format("SELECT CONVERT([sysname], DATABASEPROPERTYEX(N'%s', 'Collation'))", escapeStringForDatabase(catalog));
                     String collation = Scope.getCurrentScope().getSingleton(ExecutorService.class).getExecutor("jdbc", this)
                         .queryForObject(new RawSqlStatement(sql ), String.class);
                     caseSensitive = (collation != null) && !collation.contains("_CI_");
