@@ -1,9 +1,11 @@
 package liquibase.statement.core;
 
 import liquibase.statement.AbstractSqlStatement;
+import lombok.Getter;
 
 import java.math.BigInteger;
 
+@Getter
 public class AlterSequenceStatement extends AbstractSqlStatement {
 
     private final String catalogName;
@@ -28,29 +30,9 @@ public class AlterSequenceStatement extends AbstractSqlStatement {
         return true;
     }
 
-    public String getCatalogName() {
-        return catalogName;
-    }
-
-    public String getSchemaName() {
-        return schemaName;
-    }
-
-    public String getSequenceName() {
-        return sequenceName;
-    }
-
-    public BigInteger getIncrementBy() {
-        return incrementBy;
-    }
-
     public AlterSequenceStatement setIncrementBy(BigInteger incrementBy) {
         this.incrementBy = incrementBy;
         return this;
-    }
-
-    public BigInteger getMaxValue() {
-        return maxValue;
     }
 
     public AlterSequenceStatement setMaxValue(BigInteger maxValue) {
@@ -58,17 +40,9 @@ public class AlterSequenceStatement extends AbstractSqlStatement {
         return this;
     }
 
-    public BigInteger getMinValue() {
-        return minValue;
-    }
-
     public AlterSequenceStatement setMinValue(BigInteger minValue) {
         this.minValue = minValue;
         return this;
-    }
-
-    public Boolean getOrdered() {
-        return ordered;
     }
 
     public AlterSequenceStatement setOrdered(Boolean ordered) {
@@ -76,26 +50,14 @@ public class AlterSequenceStatement extends AbstractSqlStatement {
         return this;
     }
 
-    public BigInteger getCacheSize() {
-        return cacheSize;
-    }
-
     public AlterSequenceStatement setCacheSize(BigInteger cacheSize) {
         this.cacheSize = cacheSize;
         return this;
     }
 
-    public Boolean getCycle() {
-        return cycle;
-    }
-
     public AlterSequenceStatement setCycle(Boolean cycle) {
         this.cycle = cycle;
         return this;
-    }
-
-    public String getDataType() {
-        return dataType;
     }
 
     public AlterSequenceStatement setDataType(String dataType) {

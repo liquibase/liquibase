@@ -11,6 +11,7 @@ import liquibase.exception.DatabaseException;
 import liquibase.exception.DatabaseHistoryException;
 import liquibase.executor.ExecutorService;
 import liquibase.statement.core.UpdateChangeSetChecksumStatement;
+import lombok.Getter;
 
 import java.text.DecimalFormat;
 import java.util.Date;
@@ -18,12 +19,9 @@ import java.util.List;
 
 public abstract class AbstractChangeLogHistoryService implements ChangeLogHistoryService {
 
+    @Getter
     private Database database;
     private String deploymentId;
-
-    public Database getDatabase() {
-        return database;
-    }
 
     @Override
     public void setDatabase(Database database) {
@@ -32,7 +30,6 @@ public abstract class AbstractChangeLogHistoryService implements ChangeLogHistor
 
     @Override
     public void reset() {
-
     }
 
     @Override

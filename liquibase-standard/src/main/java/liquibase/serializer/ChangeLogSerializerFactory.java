@@ -3,10 +3,12 @@ package liquibase.serializer;
 import liquibase.Scope;
 import liquibase.exception.UnexpectedLiquibaseException;
 import liquibase.servicelocator.PrioritizedService;
+import lombok.Getter;
 
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 
+@Getter
 public class ChangeLogSerializerFactory {
     private static ChangeLogSerializerFactory instance;
 
@@ -32,10 +34,6 @@ public class ChangeLogSerializerFactory {
         } catch (Exception e) {
             throw new UnexpectedLiquibaseException(e);
         }
-    }
-
-    public Map<String, List<ChangeLogSerializer>> getSerializers() {
-        return serializers;
     }
 
     public List<ChangeLogSerializer> getSerializers(String fileNameOrExtension) {

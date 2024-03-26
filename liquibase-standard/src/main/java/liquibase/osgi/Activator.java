@@ -6,6 +6,7 @@ import java.util.List;
 import java.util.concurrent.CopyOnWriteArrayList;
 
 import liquibase.osgi.Activator.LiquibaseBundle;
+import lombok.Getter;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleActivator;
 import org.osgi.framework.BundleContext;
@@ -62,6 +63,7 @@ public class Activator implements BundleActivator, BundleTrackerCustomizer<Liqui
         }
     }
 
+    @Getter
     public static class LiquibaseBundle {
 
         private final Bundle bundle;
@@ -78,17 +80,9 @@ public class Activator implements BundleActivator, BundleTrackerCustomizer<Liqui
             this.allowedPackages = Collections.unmodifiableList(Arrays.asList(allowedPackages.split(",")));
         }
 
-        public Bundle getBundle() {
-            return bundle;
-        }
-
         public boolean allowedAllPackages() {
             return allowedPackages.size() == 1
                     && "*".equals(allowedPackages.get(0));
-        }
-
-        public List<String> getAllowedPackages() {
-            return allowedPackages;
         }
 
     }

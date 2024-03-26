@@ -38,8 +38,11 @@ public class ChangeParameterMetaData {
     private final Map<String, Object> exampleValues;
     private final String displayName;
     private String dataType;
+    @Getter
     private Class dataTypeClass;
+    @Getter
     private Type[] dataTypeClassParameters = new Type[0];
+    @Getter
     private final String since;
     private Set<String> requiredForDatabase;
     private Set<String> supportedDatabases;
@@ -229,24 +232,12 @@ public class ChangeParameterMetaData {
         return displayName;
     }
 
-    public String getSince() {
-        return since;
-    }
-
     /**
      * Return the data type of value stored in this parameter. Used for documentation and integration purposes as well
      * as validation.
      */
     public String getDataType() {
         return dataType;
-    }
-
-    public Class getDataTypeClass() {
-        return dataTypeClass;
-    }
-
-    public Type[] getDataTypeClassParameters() {
-        return dataTypeClassParameters;
     }
 
     /**

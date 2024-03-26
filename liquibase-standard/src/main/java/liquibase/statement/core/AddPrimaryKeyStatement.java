@@ -3,19 +3,33 @@ package liquibase.statement.core;
 import liquibase.change.ColumnConfig;
 import liquibase.statement.AbstractSqlStatement;
 import liquibase.util.StringUtil;
+import lombok.Getter;
+import lombok.Setter;
 
 public class AddPrimaryKeyStatement extends AbstractSqlStatement {
 
+    @Getter
     private final String catalogName;
+    @Getter
     private final String schemaName;
+    @Getter
     private final String tableName;
+    @Getter
     private String tablespace;
+    @Getter
     private final ColumnConfig[] columns;
+    @Getter
     private final String constraintName;
     private Boolean clustered;
 
+    @Getter
+    @Setter
     private String forIndexName;
+    @Getter
+    @Setter
     private String forIndexSchemaName;
+    @Getter
+    @Setter
     private String forIndexCatalogName;
     private boolean shouldValidate = true;
 
@@ -34,38 +48,13 @@ public class AddPrimaryKeyStatement extends AbstractSqlStatement {
         this.constraintName = constraintName;
     }
 
-    public String getCatalogName() {
-        return catalogName;
-    }
-
-    public String getSchemaName() {
-        return schemaName;
-    }
-
-    public String getTableName() {
-        return tableName;
-    }
-
-    public String getTablespace() {
-        return tablespace;
-    }
-
     public AddPrimaryKeyStatement setTablespace(String tablespace) {
         this.tablespace = tablespace;
         return this;
     }
 
-    public ColumnConfig[] getColumns() {
-        return columns;
-    }
-
     public String getColumnNames() {
         return StringUtil.join(columns, ", ", (StringUtil.StringUtilFormatter<ColumnConfig>) obj -> obj.getName() + (obj.getDescending() != null && obj.getDescending() ? " DESC" : ""));
-    }
-
-
-    public String getConstraintName() {
-        return constraintName;
     }
 
     public Boolean isClustered() {
@@ -75,30 +64,6 @@ public class AddPrimaryKeyStatement extends AbstractSqlStatement {
     public AddPrimaryKeyStatement setClustered(Boolean clustered) {
         this.clustered = clustered;
         return this;
-    }
-
-    public String getForIndexName() {
-        return forIndexName;
-    }
-
-    public void setForIndexName(String forIndexName) {
-        this.forIndexName = forIndexName;
-    }
-
-    public String getForIndexSchemaName() {
-        return forIndexSchemaName;
-    }
-
-    public void setForIndexSchemaName(String forIndexSchemaName) {
-        this.forIndexSchemaName = forIndexSchemaName;
-    }
-
-    public String getForIndexCatalogName() {
-        return forIndexCatalogName;
-    }
-
-    public void setForIndexCatalogName(String forIndexCatalogName) {
-        this.forIndexCatalogName = forIndexCatalogName;
     }
 
     /**

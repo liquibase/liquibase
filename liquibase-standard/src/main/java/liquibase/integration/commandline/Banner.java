@@ -4,6 +4,8 @@ import liquibase.GlobalConfiguration;
 import liquibase.Scope;
 import liquibase.util.LiquibaseUtil;
 import liquibase.util.StringUtil;
+import lombok.Getter;
+import lombok.Setter;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -15,6 +17,8 @@ import java.util.ResourceBundle;
 
 import static java.util.ResourceBundle.getBundle;
 
+@Getter
+@Setter
 public class Banner {
     private String version;
     private String build;
@@ -71,51 +75,4 @@ public class Banner {
         return resultStringBuilder.toString();
     }
 
-    public String getVersion() {
-        return version;
-    }
-
-    public void setVersion(String version) {
-        this.version = version;
-    }
-
-    public String getBuild() {
-        return build;
-    }
-
-    public void setBuild(String build) {
-        this.build = build;
-    }
-
-    public String getBuilt() {
-        return built;
-    }
-
-    public void setBuilt(String built) {
-        this.built = built;
-    }
-
-    public String getPath() {
-        return path;
-    }
-
-    public void setPath(String path) {
-        this.path = path;
-    }
-
-    public String getLicensee() {
-        return licensee;
-    }
-
-    public void setLicensee(String licensee) {
-        this.licensee = licensee;
-    }
-
-    public String getLicenseEndDate() {
-        return licenseEndDate;
-    }
-
-    public void setLicenseEndDate(String licenseEndDate) {
-        this.licenseEndDate = licenseEndDate;
-    }
 }

@@ -4,6 +4,7 @@ import liquibase.database.Database;
 import liquibase.structure.core.Catalog;
 import liquibase.structure.core.Schema;
 import liquibase.util.StringUtil;
+import lombok.Getter;
 
 import java.util.Locale;
 
@@ -13,6 +14,7 @@ import java.util.Locale;
  * <p>
  * A null value for catalogName or schemaName signifies the default catalog/schema.
  */
+@Getter
 public class CatalogAndSchema {
     public static final CatalogAndSchema DEFAULT = new CatalogAndSchema(null, null);
     private final String catalogName;
@@ -25,14 +27,6 @@ public class CatalogAndSchema {
 
     public enum CatalogAndSchemaCase {
         LOWER_CASE, UPPER_CASE, ORIGINAL_CASE
-    }
-
-    public String getCatalogName() {
-        return catalogName;
-    }
-
-    public String getSchemaName() {
-        return schemaName;
     }
 
     public boolean equals(CatalogAndSchema catalogAndSchema, Database accordingTo) {
