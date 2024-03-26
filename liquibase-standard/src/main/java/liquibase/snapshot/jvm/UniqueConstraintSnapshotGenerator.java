@@ -166,28 +166,23 @@ public class UniqueConstraintSnapshotGenerator extends JdbcSnapshotGenerator {
 
             if ((database instanceof MySQLDatabase) || (database instanceof HsqlDatabase)) {
                 StringBuilder sql = new StringBuilder("select const.CONSTRAINT_NAME, const.TABLE_NAME, COLUMN_NAME, const.constraint_schema as CONSTRAINT_CONTAINER ")
-                        .append("from ?.table_constraints const ")
-                        .append("join ?.key_column_usage col ")
+                        .append(String.format("from %s.table_constraints const ", database.getSystemSchema()))
+                        .append(String.format("join %s.key_column_usage col ", database.getSystemSchema()))
                         .append("on const.constraint_schema=col.constraint_schema ")
                         .append("and const.table_name=col.table_name ")
                         .append("and const.constraint_name=col.constraint_name ")
-                        .append("where const.constraint_schema=? ");
+                        .append(String.format("where const.constraint_schema='%s' ", database.correctObjectName(schema.getCatalogName(), Catalog.class)));
                 if (!bulkQuery) {
-                    sql.append("and const.table_name=? ")
-                            .append("and const.constraint_name=?");
+                    sql.append(String.format("and const.table_name='%s' ", database.correctObjectName(example.getRelation().getName(), Table.class)))
+                            .append(String.format("and const.constraint_name='%s' ", database.correctObjectName(name, UniqueConstraint.class)));
                 }
                 sql.append("order by ordinal_position");
-                parameters.add(database.getSystemSchema());
-                parameters.add(database.getSystemSchema());
-                parameters.add(database.correctObjectName(schema.getCatalogName(), Catalog.class));
-                parameters.add(database.correctObjectName(example.getRelation().getName(), Table.class));
-                parameters.add(database.correctObjectName(name, UniqueConstraint.class));
                 rawSql = sql.toString();
             } else if (database instanceof PostgresDatabase) {
                 List<String> conditions = new ArrayList<>();
                 StringBuilder sql = new StringBuilder("select const.CONSTRAINT_NAME, COLUMN_NAME, const.constraint_schema as CONSTRAINT_CONTAINER ")
-                        .append("from ?.table_constraints const ")
-                        .append("join ?.key_column_usage col ")
+                        .append(String.format("from %s.table_constraints const ", database.getSystemSchema()))
+                        .append(String.format("join %s.key_column_usage col ", database.getSystemSchema()))
                         .append("on const.constraint_schema=col.constraint_schema ")
                         .append("and const.table_name=col.table_name ")
                         .append("and const.constraint_name=col.constraint_name ");
@@ -214,8 +209,6 @@ public class UniqueConstraintSnapshotGenerator extends JdbcSnapshotGenerator {
                 }
 
                 sql.append(" order by ordinal_position");
-                parameters.add(database.getSystemSchema());
-                parameters.add(database.getSystemSchema());
                 parameters.add(database.correctObjectName(schema.getCatalogName(), Catalog.class));
                 parameters.add(database.correctObjectName(schema.getSchema().getName(), Schema.class));
                 parameters.add(database.correctObjectName(example.getRelation().getName(), Table.class));
@@ -233,9 +226,9 @@ public class UniqueConstraintSnapshotGenerator extends JdbcSnapshotGenerator {
                         .append("ON [kc].[parent_object_id] = [t].[object_id] INNER JOIN [sys].[indexes] AS [i] ON [i].[object_id] = [kc].[parent_object_id] ")
                         .append("AND [i].[index_id] = [kc].[unique_index_id] INNER JOIN [sys].[index_columns] AS [ic] ON [ic].[object_id] = [i].[object_id] ")
                         .append("AND [ic].[index_id] = [i].[index_id] INNER JOIN [sys].[columns] AS [c] ON [c].[object_id] = [ic].[object_id] AND [c].[column_id] = [ic].[column_id] ")
-                        .append("WHERE [s].[name] = N? ");
+                        .append("WHERE [s].[name] = N'?' ");
                     if (!bulkQuery) {
-                        sql.append("AND [t].[name] = N? AND [kc].[name] = N? ");
+                        sql.append("AND [t].[name] = N'?' AND [kc].[name] = N'?' ");
                     }
                     sql.append("ORDER BY [ic].[key_ordinal]");
                 parameters.add(database.escapeStringForDatabase(database.correctObjectName(schema.getName(), Schema.class)));
@@ -304,9 +297,11 @@ public class UniqueConstraintSnapshotGenerator extends JdbcSnapshotGenerator {
                     String descriptor = rowData.get("DESCRIPTOR").toString();
                     descriptor = descriptor.replaceFirst(".*\\(", "").replaceFirst("\\).*", "");
                     for (String columnNumber : StringUtil.splitAndTrim(descriptor, ",")) {
-                        String columnName = Scope.getCurrentScope().getSingleton(ExecutorService.class).getExecutor("jdbc", database).queryForObject(new RawSqlStatement(
-                                "select c.columnname from sys.syscolumns c join sys.systables t on t.tableid=c.referenceid where t.tablename='"
-                                        + rowData.get("TABLENAME") + "' and c.columnnumber=" + columnNumber), String.class);
+                        parameters = new ArrayList<>();
+                        parameters.add((String) rowData.get("TABLENAME"));
+                        parameters.add(columnNumber);
+                        String columnName = Scope.getCurrentScope().getSingleton(ExecutorService.class).getExecutor("jdbc", database).queryForObject(new RawParameterizedSqlStatement(
+                                "select c.columnname from sys.syscolumns c join sys.systables t on t.tableid=c.referenceid where t.tablename=? and c.columnnumber=?", parameters.toArray()), String.class);
 
                         Map<String, String> row = new HashMap<>();
                         row.put("COLUMN_NAME", columnName);
@@ -321,7 +316,7 @@ public class UniqueConstraintSnapshotGenerator extends JdbcSnapshotGenerator {
                 // Careful! FIELD_NAME and INDEX_NAME in RDB$INDEX_SEGMENTS are CHAR, not VARCHAR columns.
                 StringBuilder sql = new StringBuilder("SELECT TRIM(RDB$INDEX_SEGMENTS.RDB$FIELD_NAME) AS column_name ")
                         .append("FROM RDB$INDEX_SEGMENTS LEFT JOIN RDB$INDICES ON RDB$INDICES.RDB$INDEX_NAME = RDB$INDEX_SEGMENTS.RDB$INDEX_NAME ")
-                        .append("WHERE UPPER(TRIM(RDB$INDICES.RDB$INDEX_NAME))='?' ORDER BY RDB$INDEX_SEGMENTS.RDB$FIELD_POSITION");
+                        .append("WHERE UPPER(TRIM(RDB$INDICES.RDB$INDEX_NAME))=? ORDER BY RDB$INDEX_SEGMENTS.RDB$FIELD_POSITION");
                 parameters.add(database.correctObjectName(name, UniqueConstraint.class));
                 rawSql = sql.toString();
             } else if (database instanceof SybaseDatabase) {
