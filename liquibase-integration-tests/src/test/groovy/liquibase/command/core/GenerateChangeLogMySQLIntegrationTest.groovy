@@ -29,7 +29,7 @@ create table str4 (
     primary key(col2, col1)
 )
 """
-        def updateChangelogFile = "target/test-classes/create-table-" + StringUtil.randomIdentifer(10) + ".sql"
+        def updateChangelogFile = "target/test-classes/create-table-" + StringUtil.randomIdentifier(10) + ".sql"
         File updateFile = new File(updateChangelogFile)
         updateFile.write(sql.toString())
         CommandUtil.runUpdate(mysql, updateChangelogFile)

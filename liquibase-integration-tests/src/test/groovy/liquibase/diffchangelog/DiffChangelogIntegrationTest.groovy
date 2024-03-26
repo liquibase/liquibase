@@ -38,9 +38,9 @@ class DiffChangelogIntegrationTest extends Specification {
 
     def "auto increment on varchar column" () {
         when:
-        def changelogfile = StringUtil.randomIdentifer(10) + ".sql"
+        def changelogfile = StringUtil.randomIdentifier(10) + ".sql"
         def sequenceName = "customer_customer_id_seq"
-        def tableName = StringUtil.randomIdentifer(10)
+        def tableName = StringUtil.randomIdentifier(10)
         def sql = """
 CREATE SEQUENCE $sequenceName INCREMENT 5 START 100;
 CREATE TABLE $tableName ( product_no varchar(20) DEFAULT nextval('$sequenceName'));
@@ -127,9 +127,9 @@ CREATE TABLE $tableName ( product_no varchar(20) DEFAULT nextval('$sequenceName'
 
     def "should include view comments"() {
         when:
-        def changelogfile = StringUtil.randomIdentifer(10) + ".sql"
-        def viewName = StringUtil.randomIdentifer(10)
-        def columnName = StringUtil.randomIdentifer(10)
+        def changelogfile = StringUtil.randomIdentifier(10) + ".sql"
+        def viewName = StringUtil.randomIdentifier(10)
+        def columnName = StringUtil.randomIdentifier(10)
         def viewComment = "some insightful comment"
         def columnComment = "some comment relating to this column"
         def sql = """
@@ -176,7 +176,7 @@ COMMENT ON COLUMN $viewName.$columnName IS '$columnComment';
     def "Ensure diff-changelog set runOnChange and replaceIfExists properties correctly for a created view changeset"() {
         given:
         CommandUtil.runUpdate(postgres, "changelogs/mysql/complete/createtable.and.view.changelog.xml", null, null, null)
-        def outputChangelogFile = String.format("diffChangelogFile-%s-output.xml", StringUtil.randomIdentifer(10))
+        def outputChangelogFile = String.format("diffChangelogFile-%s-output.xml", StringUtil.randomIdentifier(10))
         Database refDatabase = DatabaseFactory.instance.openDatabase(postgres.getConnectionUrl(), postgres.getUsername(), postgres.getPassword(), null, null)
 
         Database targetDatabase =
@@ -208,7 +208,7 @@ COMMENT ON COLUMN $viewName.$columnName IS '$columnComment';
 
     def "Ensure diff-changelog with SQL output format contains 'OR REPLACE' instruction for a view when USE_OR_REPLACE_OPTION is set as true"() {
         given:
-        def outputChangelogFile = String.format("diffChangelogFile-%s-output.postgresql.sql", StringUtil.randomIdentifer(10))
+        def outputChangelogFile = String.format("diffChangelogFile-%s-output.postgresql.sql", StringUtil.randomIdentifier(10))
         Database refDatabase =
                 DatabaseFactory.instance.openDatabase(postgres.getConnectionUrl(), postgres.getUsername(), postgres.getPassword(), null, null)
         Database targetDatabase =
@@ -237,7 +237,7 @@ COMMENT ON COLUMN $viewName.$columnName IS '$columnComment';
 
     def "Ensure diff-changelog with SQL output format does NOT contain 'OR REPLACE' instruction for a view when USE_OR_REPLACE_OPTION is set as false"() {
         given:
-        def outputChangelogFile = String.format("diffChangelogFile-%s-output.postgresql.sql", StringUtil.randomIdentifer(10))
+        def outputChangelogFile = String.format("diffChangelogFile-%s-output.postgresql.sql", StringUtil.randomIdentifier(10))
         Database refDatabase =
                 DatabaseFactory.instance.openDatabase(postgres.getConnectionUrl(), postgres.getUsername(), postgres.getPassword(), null, null)
         Database targetDatabase =
