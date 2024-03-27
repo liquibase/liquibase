@@ -53,7 +53,7 @@ jobs:
 
   deploy_maven:
     name: Deploy to Maven
-    needs: [ setup, manual_trigger_deployment, deploy_javadocs, publish_to_github_packages, deploy_xsd, package-linux, release-docker ]
+    needs: [ setup, manual_trigger_deployment, deploy_javadocs, publish_to_github_packages, deploy_xsd, release-docker ]
     runs-on: ubuntu-22.04
     steps:
       - name: Download release assets
