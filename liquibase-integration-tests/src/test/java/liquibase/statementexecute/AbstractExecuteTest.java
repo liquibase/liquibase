@@ -22,6 +22,7 @@ import liquibase.snapshot.SnapshotGeneratorFactory;
 import liquibase.sql.Sql;
 import liquibase.sqlgenerator.SqlGeneratorFactory;
 import liquibase.statement.SqlStatement;
+import liquibase.structure.core.Schema;
 import liquibase.structure.core.Table;
 import liquibase.test.TestContext;
 import org.junit.After;
@@ -231,7 +232,7 @@ public abstract class AbstractExecuteTest {
             }
             connection.commit();
 
-            if (database.supportsSchemas()) {
+            if (database.supports(Schema.class)) {
                 try {
                 database.dropDatabaseObjects(new CatalogAndSchema(null, testSystem.getAltSchema()));
                 } catch (DatabaseException e) {

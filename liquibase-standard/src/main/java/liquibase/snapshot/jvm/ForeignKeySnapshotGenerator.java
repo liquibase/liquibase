@@ -47,7 +47,7 @@ public class ForeignKeySnapshotGenerator extends JdbcSnapshotGenerator {
 
     @Override
     protected void addTo(DatabaseObject foundObject, DatabaseSnapshot snapshot) throws DatabaseException, InvalidExampleException {
-        if (!snapshot.getSnapshotControl().shouldInclude(ForeignKey.class)) {
+        if (!snapshot.getSnapshotControl().shouldInclude(ForeignKey.class) || !snapshot.getDatabase().supports(ForeignKey.class)) {
             return;
         }
 

@@ -45,11 +45,11 @@ public class SchemaComparator extends CommonCatalogSchemaComparator {
                 return false;
             }
         }
-        if (accordingTo.supportsSchemas()) {
+        if (accordingTo.supports(Schema.class)) {
             schemaName1 = databaseObject1.getName();
             schemaName2 = databaseObject2.getName();
 
-        } else if (accordingTo.supportsCatalogs()) {
+        } else if (accordingTo.supports(Catalog.class)) {
             schemaName1 = ((Schema) databaseObject1).getCatalogName();
             schemaName2 = ((Schema) databaseObject2).getCatalogName();
         }
@@ -94,9 +94,9 @@ public class SchemaComparator extends CommonCatalogSchemaComparator {
 
     private String getSchemaAfterComparison(Database accordingTo, String schemaName1) {
         if (schemaName1 == null) {
-            if (accordingTo.supportsSchemas()) {
+            if (accordingTo.supports(Schema.class)) {
                 schemaName1 = accordingTo.getDefaultSchemaName();
-            } else if (accordingTo.supportsCatalogs()) {
+            } else if (accordingTo.supports(Catalog.class)) {
                 schemaName1 = accordingTo.getDefaultCatalogName();
             }
         }

@@ -17,7 +17,9 @@ import liquibase.sql.visitor.SqlVisitor;
 import liquibase.statement.DatabaseFunction;
 import liquibase.statement.SqlStatement;
 import liquibase.structure.DatabaseObject;
+import liquibase.structure.core.Catalog;
 import liquibase.structure.core.Schema;
+import liquibase.structure.core.Sequence;
 
 import java.io.Writer;
 import java.math.BigInteger;
@@ -426,6 +428,22 @@ public class MockDatabase implements Database, InternalDatabase {
 
     public String convertRequestedSchemaToCatalog(final String requestedSchema) {
         return null;
+    }
+
+
+
+    @Override
+    public boolean supports(Class<? extends DatabaseObject> object) {
+        if (Schema.class.isAssignableFrom(object)) {
+            return supportsSchemas;
+        }
+        if (Catalog.class.isAssignableFrom(object)) {
+            return supportsCatalogs;
+        }
+        if (Sequence.class.isAssignableFrom(object)) {
+            return supportsSequences;
+        }
+        return true;
     }
 
     @Override

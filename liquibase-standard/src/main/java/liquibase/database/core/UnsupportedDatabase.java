@@ -3,6 +3,8 @@ package liquibase.database.core;
 import liquibase.database.AbstractJdbcDatabase;
 import liquibase.database.DatabaseConnection;
 import liquibase.exception.DatabaseException;
+import liquibase.structure.DatabaseObject;
+import liquibase.structure.core.Sequence;
 
 public class UnsupportedDatabase extends AbstractJdbcDatabase {
 
@@ -69,6 +71,14 @@ public class UnsupportedDatabase extends AbstractJdbcDatabase {
     @Override
     public boolean supportsTablespaces() {
         return false;
+    }
+
+    @Override
+    public boolean supports(Class<? extends DatabaseObject> object) {
+        if (Sequence.class.isAssignableFrom(object)) {
+            return false;
+        }
+        return super.supports(object);
     }
 
     @Override
