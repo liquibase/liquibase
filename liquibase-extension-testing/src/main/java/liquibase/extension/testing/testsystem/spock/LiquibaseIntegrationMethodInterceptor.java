@@ -132,12 +132,7 @@ public class LiquibaseIntegrationMethodInterceptor extends AbstractMethodInterce
     private static void dropAllDatabases() throws Exception {
         for (TestSystem startedTestSystem : startedTestSystems) {
             if (startedTestSystem instanceof DatabaseTestSystem) {
-                try {
-
-                    runDropAll(((DatabaseTestSystem) startedTestSystem));
-                } catch (Exception e) {
-
-                }
+                runDropAll(((DatabaseTestSystem) startedTestSystem));
             }
         }
         // Start tests from a clean slate, otherwise the MDC will be polluted with info about the dropAll command.

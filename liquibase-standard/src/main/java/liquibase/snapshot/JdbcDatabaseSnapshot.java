@@ -841,11 +841,7 @@ public class JdbcDatabaseSnapshot extends DatabaseSnapshot {
                         if (database instanceof OracleDatabase) {
                             throw new RuntimeException("Should have bulk selected");
                         } else {
-//                            try {
-                                returnList.addAll(extract(databaseMetaData.getImportedKeys(jdbcCatalogName, jdbcSchemaName, foundTable)));
-//                            } catch (Exception e) {
-//
-//                            }
+                            returnList.addAll(extract(databaseMetaData.getImportedKeys(jdbcCatalogName, jdbcSchemaName, foundTable)));
                         }
                     }
 
