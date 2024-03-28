@@ -31,7 +31,7 @@ Liquibase system requirements can be found on the [Download Liquibase](https://w
 6. Run the `liquibase update` command.
 7. Run the `liquibase history` command to see what has executed!
 
-See also how to [get started with Liquibase in minutes](https://www.liquibase.org/get-started/quickstart) or refer to our [Installing Liquibase](https://docs.liquibase.com/start/install/home.html) documentation page for more details.
+See also how to [get started with Liquibase in minutes](https://docs.liquibase.com/start/home.html) or refer to our [Installing Liquibase](https://docs.liquibase.com/start/install/home.html) documentation page for more details.
 
 ## Documentation
 
@@ -43,7 +43,7 @@ Learn all about Liquibase by taking our free online courses at [Liquibase Univer
 
 ## Want to help?
 
-Want to file a bug or improve documentation? Excellent! Read up on our guidelines for [contributing](https://www.liquibase.org/community/index.html)!
+Want to file a bug or improve documentation? Excellent! Read up on our guidelines for [contributing](https://contribute.liquibase.com/)!
 
 ### Contribute code 
 
@@ -51,11 +51,11 @@ Use our [step-by-step instructions](https://contribute.liquibase.com/code/) for 
 
 ### Join the Liquibase Community
 
-Earn points for your achievements and contributions, collect and show off your badges, add accreditations to your LinkedIn. [Learn more about the pathway to Legend and benefits](https://www.liquibase.org/community/liquibase-legends). Enjoy being part of the community!
+Earn points for your achievements and contributions, collect and show off your badges, add accreditations to your LinkedIn. [Learn more about the pathway to Legend and benefits](https://www.liquibase.com/community/liquibase-legends). Enjoy being part of the community!
 
 ## Liquibase Extensions
 
-[Provide more database support and features for Liquibase](https://www.liquibase.org/extensions).
+[Provide more database support and features for Liquibase](https://contribute.liquibase.com/extensions-integrations/directory/).
 
 ## License
 
