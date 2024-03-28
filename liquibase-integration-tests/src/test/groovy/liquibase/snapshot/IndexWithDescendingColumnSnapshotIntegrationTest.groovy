@@ -19,6 +19,7 @@ import liquibase.database.jvm.JdbcConnection
 import liquibase.diff.DiffResult
 import liquibase.extension.testing.testsystem.DatabaseTestSystem
 import liquibase.extension.testing.testsystem.TestSystemFactory
+import liquibase.extension.testing.testsystem.spock.LiquibaseIntegrationTest
 import liquibase.parser.SnapshotParser
 import liquibase.parser.SnapshotParserFactory
 import liquibase.parser.core.json.JsonChangeLogParser
@@ -31,12 +32,13 @@ import liquibase.structure.DatabaseObjectCollection
 import liquibase.structure.core.Column
 import liquibase.structure.core.Index
 import liquibase.util.StringUtil
-import org.junit.Rule
+import spock.lang.Shared
 import spock.lang.Specification
 import spock.lang.Unroll
 
+@LiquibaseIntegrationTest
 class IndexWithDescendingColumnSnapshotIntegrationTest extends Specification {
-    @Rule
+    @Shared
     public DatabaseTestSystem mssqlDb = Scope.currentScope.getSingleton(TestSystemFactory).getTestSystem("mssql")
 
     @Unroll
