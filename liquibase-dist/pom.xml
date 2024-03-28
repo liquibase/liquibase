@@ -171,7 +171,26 @@
 
 	<build>
 		<plugins>
-
+			<plugin>
+				<artifactId>maven-antrun-plugin</artifactId>
+				<version>3.0.0</version>
+				<executions>
+					<execution>
+						<phase>generate-sources</phase>
+						<configuration>
+							<target>
+								<mkdir dir="${basedir}/src/main/archive/" />
+								<copy todir="${basedir}/src/main/archive">
+									<fileset dir="${basedir}/../" includes="LICENSE.txt" />
+								</copy>
+							</target>
+						</configuration>
+						<goals>
+							<goal>run</goal>
+						</goals>
+					</execution>
+				</executions>
+			</plugin>
 			<plugin>
 				<artifactId>maven-resources-plugin</artifactId>
 				<version>3.3.1</version>
