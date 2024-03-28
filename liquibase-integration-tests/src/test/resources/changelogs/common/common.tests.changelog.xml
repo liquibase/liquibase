@@ -5,7 +5,7 @@
         xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
         xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-latest.xsd">
 
-    <removeChangeSetProperty dbms="mysql, postgresql, hsqldb, snowflake" change="addColumn" remove="afterColumn" />
+    <removeChangeSetProperty dbms="mysql, postgresql, hsqldb" change="addColumn" remove="afterColumn" />
 
     <property name="table.name" value="paramter_table"/>
     <property file="changelogs/common/dynamic.parameters.properties"/>
@@ -88,7 +88,7 @@
 
     </changeSet>
 
-    <changeSet id="defaultValueTest-1" author="nvoxland" dbms="!mysql,!derby,!mariadb,!snowflake">
+    <changeSet id="defaultValueTest-1" author="nvoxland" dbms="!mysql,!derby,!mariadb">
         <createTable tableName="defaultValueTest">
             <column name="id" type="int"/>
             <column name="intA" type="int"/>
@@ -121,7 +121,7 @@
         </insert>
     </changeSet>
 
-    <changeSet id="defaultValueTest-2" author="nvoxland" dbms="!snowflake">
+    <changeSet id="defaultValueTest-2" author="nvoxland">
         <createTable tableName="defaultValueTest2">
             <column name="id" type="int" />
             <column name="intA" type="int" defaultValueNumeric="1"/>
@@ -160,7 +160,7 @@
     </changeSet>
 
 
-    <changeSet id="compoundIndexTest" author="nvoxland" dbms="!snowflake">
+    <changeSet id="compoundIndexTest" author="nvoxland">
         <createTable tableName="compoundIndexTest">
             <column name="id" type="int">
                 <constraints primaryKey="true" nullable="false"/>
@@ -174,7 +174,7 @@
         </createIndex>
     </changeSet>
 
-    <changeSet id="indexWithAscDescColumns" author="abuschka" dbms="!firebird,!snowflake">
+    <changeSet id="indexWithAscDescColumns" author="abuschka" dbms="!firebird">
         <createTable tableName="indexWithAscDescColumns">
             <column name="id" type="int">
                 <constraints primaryKey="true" nullable="false"/>
@@ -305,7 +305,7 @@
         </insert>
     </changeSet>
 
-    <changeSet id="datatype-conversion-teset" author="nvoxland" dbms="!snowflake">
+    <changeSet id="datatype-conversion-teset" author="nvoxland">
         <createTable tableName="datatypeConversionTest">
             <column name="booleanColumn" type="boolean"/>
             <column name="currencyColumn" type="currency"/>
@@ -672,7 +672,7 @@
         </preConditions>
     </changeSet>
 
-    <changeSet id="indexPrecondition" author="nvoxland" dbms="!snowflake">
+    <changeSet id="indexPrecondition" author="nvoxland">
         <preConditions>
             <indexExists indexName="idx_compoundtest"/>
         </preConditions>
@@ -1062,7 +1062,7 @@
             <column name="other" type="int"/>
         </createTable>
     </changeSet>
-    <changeSet id="CORE-977" author="nvoxland" dbms="!hsqldb,!snowflake"> <!-- currently failing due to a bug in hsql 2.2.9 -->
+    <changeSet id="CORE-977" author="nvoxland" dbms="!hsqldb"> <!-- currently failing due to a bug in hsql 2.2.9 -->
         <loadUpdateData tableName="instrument" file="changelogs/common/instrument.csv" primaryKey="name">
             <column header="name" type="STRING"/>
         </loadUpdateData>
