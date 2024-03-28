@@ -6,6 +6,7 @@ import liquibase.Scope;
 import liquibase.changelog.ChangeSet;
 import liquibase.parser.LiquibaseSqlParser;
 import liquibase.parser.SqlParserFactory;
+import org.apache.commons.lang3.RandomStringUtils;
 
 import java.io.UnsupportedEncodingException;
 import java.nio.charset.StandardCharsets;
@@ -761,12 +762,7 @@ public class StringUtil {
      * @return an identifier of the desired length
      */
     public static String randomIdentifer(int len) {
-        final String AB = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
-
-        StringBuilder sb = new StringBuilder(len);
-        for (int i = 0; i < len; i++)
-            sb.append(AB.charAt(rnd.nextInt(AB.length())));
-        return sb.toString();
+        return RandomStringUtils.random(len, true, false);
     }
 
     /**

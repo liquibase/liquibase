@@ -8,6 +8,8 @@ import liquibase.exception.ChangeLogParseException;
 import liquibase.parser.AbstractFormattedChangeLogParser;
 import liquibase.precondition.core.PreconditionContainer;
 import liquibase.precondition.core.SqlPrecondition;
+import liquibase.precondition.core.TableExistsPrecondition;
+import liquibase.precondition.core.ViewExistsPrecondition;
 import liquibase.util.StringUtil;
 
 import java.util.regex.Matcher;
@@ -89,7 +91,17 @@ public class FormattedSqlChangeLogParser extends AbstractFormattedChangeLogParse
             if (name != null) {
                 String body = preconditionMatcher.group(2).trim();
                 if ("sql-check".equals(name)) {
-                    changeSet.getPreconditions().addNestedPrecondition(parseSqlCheckCondition(changeLogParameters.expandExpressions(StringUtil.trimToNull(body), changeSet.getChangeLog())));
+                    changeSet.getPreconditions().addNestedPrecondition(
+                            parseSqlCheckCondition(changeLogParameters.expandExpressions(StringUtil.trimToNull(body), changeSet.getChangeLog()))
+                    );
+                } else if ("table-exists".equals(name)) {
+                    changeSet.getPreconditions().addNestedPrecondition(
+                            parseTableExistsCondition(changeLogParameters.expandExpressions(StringUtil.trimToNull(body), changeSet.getChangeLog()))
+                    );
+                } else if ("view-exists".equals(name)) {
+                    changeSet.getPreconditions().addNestedPrecondition(
+                            parseViewExistsCondition(changeLogParameters.expandExpressions(StringUtil.trimToNull(body), changeSet.getChangeLog()))
+                    );
                 } else {
                     throw new ChangeLogParseException("The '" + name + "' precondition type is not supported.");
                 }
@@ -130,6 +142,24 @@ public class FormattedSqlChangeLogParser extends AbstractFormattedChangeLogParse
         change.setSql(changeLogParameters.expandExpressions(StringUtil.trimToNull(currentSequence.toString()), changeSet.getChangeLog()));
     }
 
+    @Override
+    protected void handleInvalidEmptyPreconditionCase(ChangeLogParameters changeLogParameters, ChangeSet changeSet, Matcher preconditionMatcher) throws ChangeLogParseException {
+        if (preconditionMatcher.groupCount() == 1) {
+            String name = StringUtil.trimToNull(preconditionMatcher.group(1));
+            if (name != null) {
+                if ("sql-check".equals(name)) {
+                    throw new ChangeLogParseException("Precondition sql check failed because of missing required expectedResult and sql parameters.");
+                } else if ("table-exists".equals(name)) {
+                    throw new ChangeLogParseException("Precondition table exists failed because of missing required table name parameter.");
+                } else if ("view-exists".equals(name)) {
+                    throw new ChangeLogParseException("Precondition view exists failed because of missing required view name parameter.");
+                } else {
+                    throw new ChangeLogParseException("The '" + name + "' precondition type is not supported.");
+                }
+            }
+        }
+    }
+
     private SqlPrecondition parseSqlCheckCondition(String body) throws ChangeLogParseException {
         for (Pattern pattern : WORD_AND_QUOTING_PATTERNS) {
             Matcher matcher = pattern.matcher(body);
@@ -141,5 +171,65 @@ public class FormattedSqlChangeLogParser extends AbstractFormattedChangeLogParse
             }
         }
         throw new ChangeLogParseException("Could not parse a SqlCheck precondition from '" + body + "'.");
+    }
+
+    private TableExistsPrecondition parseTableExistsCondition(String body) throws ChangeLogParseException {
+        Matcher tableMatcher = TABLE_NAME_STATEMENT_PATTERN.matcher(body);
+        Matcher schemaMatcher = SCHEMA_NAME_STATEMENT_PATTERN.matcher(body);
+        TableExistsPrecondition tableExistsPrecondition = new TableExistsPrecondition();
+
+        if (tableMatcher.matches()) {
+            if (tableMatcher.groupCount() == 0) {
+                throw new ChangeLogParseException("Table name was not specified in tableExists precondition but is required '" + body + "'.");
+            }
+
+            if (tableMatcher.groupCount() > 1) {
+                throw new ChangeLogParseException("Multiple table names were specified in tableExists precondition '" + body + "'.");
+            }
+
+            tableExistsPrecondition.setTableName(tableMatcher.group(1));
+        } else {
+            throw new ChangeLogParseException("Table name was not specified correctly in tableExists precondition.");
+        }
+
+        if (schemaMatcher.matches() && schemaMatcher.groupCount() == 1) {
+            if (schemaMatcher.groupCount() > 1) {
+                throw new ChangeLogParseException("Multiple schema names were specified in tableExists precondition '" + body + "'.");
+            }
+
+            tableExistsPrecondition.setSchemaName(schemaMatcher.group(1));
+        }
+
+        return tableExistsPrecondition;
+    }
+
+    private ViewExistsPrecondition parseViewExistsCondition(String body) throws ChangeLogParseException {
+        Matcher viewMatcher = VIEW_NAME_STATEMENT_PATTERN.matcher(body);
+        Matcher schemaMatcher = SCHEMA_NAME_STATEMENT_PATTERN.matcher(body);
+        ViewExistsPrecondition viewExistsPrecondition = new ViewExistsPrecondition();
+
+        if (viewMatcher.matches()) {
+            if (viewMatcher.groupCount() == 0) {
+                throw new ChangeLogParseException("View name was not specified in viewExists precondition but is required '" + body + "'.");
+            }
+
+            if (viewMatcher.groupCount() > 1) {
+                throw new ChangeLogParseException("Multiple view names were specified in viewExists precondition '" + body + "'.");
+            }
+
+            viewExistsPrecondition.setViewName(viewMatcher.group(1));
+        } else {
+            throw new ChangeLogParseException("View name was not specified correctly in viewExists precondition.");
+        }
+
+        if (schemaMatcher.matches()) {
+            if (schemaMatcher.groupCount() > 1) {
+                throw new ChangeLogParseException("Multiple schema names were specified in viewExists precondition '" + body + "'.");
+            }
+
+            viewExistsPrecondition.setSchemaName(schemaMatcher.group(1));
+        }
+
+        return viewExistsPrecondition;
     }
 }

@@ -222,6 +222,8 @@ Long Description: ${commandDefinition.getLongDescription() ?: "NOT SET"}
             altDatabase.dropDatabaseObjects(altCatalogAndSchemas[0])
         }
 
+        Scope.getCurrentScope().getMdcManager().clear()
+
         when:
         if (testDef.supportedOs != null) {
             def currentOs = OperatingSystem.getCurrent()
@@ -718,6 +720,12 @@ Long Description: ${commandDefinition.getLongDescription() ?: "NOT SET"}
                     }
                 }
             }
+        }
+
+        if (returnList.isEmpty()) {
+            throw new RuntimeException("Required test systems not found! " +
+                    "Make sure your test systems are specified in your liquibase.sdk.yaml " +
+                    "and that you are not accidentally filtering out all tests.")
         }
 
         def descriptions =

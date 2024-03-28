@@ -929,6 +929,8 @@ public class DatabaseChangeLog implements Comparable<DatabaseChangeLog>, Conditi
                 throw new UnexpectedLiquibaseException(e);
             }
         }
+        final String normalizedFilePath = fileName;
+
         DatabaseChangeLog changeLog;
         try {
             DatabaseChangeLog rootChangeLog = ROOT_CHANGE_LOG.get();
@@ -938,17 +940,24 @@ public class DatabaseChangeLog implements Comparable<DatabaseChangeLog>, Conditi
             DatabaseChangeLog parentChangeLog = PARENT_CHANGE_LOG.get();
             PARENT_CHANGE_LOG.set(this);
             try {
-                if (!resourceAccessor.get(fileName).exists()) {
+                if (!resourceAccessor.get(normalizedFilePath).exists()) {
                     if (ChangeLogParserConfiguration.ON_MISSING_INCLUDE_CHANGELOG.getCurrentValue().equals(ChangeLogParserConfiguration.MissingIncludeConfiguration.WARN)
                             || !errorIfMissing) {
-                        Scope.getCurrentScope().getLog(getClass()).warning(FileUtil.getFileNotFoundMessage(fileName));
+                        Scope.getCurrentScope().getLog(getClass()).warning(FileUtil.getFileNotFoundMessage(normalizedFilePath));
                         return false;
                     } else {
-                        throw new ChangeLogParseException(FileUtil.getFileNotFoundMessage(fileName));
+                        throw new ChangeLogParseException(FileUtil.getFileNotFoundMessage(normalizedFilePath));
                     }
                 }
-                ChangeLogParser parser = ChangeLogParserFactory.getInstance().getParser(fileName, resourceAccessor);
-                changeLog = parser.parse(fileName, changeLogParameters, resourceAccessor);
+                ChangeLogParser parser = ChangeLogParserFactory.getInstance().getParser(normalizedFilePath, resourceAccessor);
+
+                if (modifyChangeSets != null) {
+                    // Some parser need to know it's not a top level changelog, in modifyChangeSets flow 'runWith' attributes are added later on
+                    changeLog = Scope.child(Collections.singletonMap("modifyChangeSets", true),
+                            () -> parser.parse(normalizedFilePath, changeLogParameters, resourceAccessor));
+                } else {
+                    changeLog = parser.parse(normalizedFilePath, changeLogParameters, resourceAccessor);
+                }
                 changeLog.setIncludeContextFilter(includeContextFilter);
                 changeLog.setIncludeLabels(labels);
                 changeLog.setIncludeIgnore(ignore != null ? ignore.booleanValue() : false);
@@ -967,14 +976,14 @@ public class DatabaseChangeLog implements Comparable<DatabaseChangeLog>, Conditi
                 throw e;
             }
             // This matches only an extension, but filename can be a full path, too. Is it right?
-            boolean matchesFileExtension = StringUtil.trimToEmpty(fileName).matches("\\.\\w+$");
+            boolean matchesFileExtension = StringUtil.trimToEmpty(normalizedFilePath).matches("\\.\\w+$");
             if (matchesFileExtension || onUnknownFileFormat == OnUnknownFileFormat.WARN) {
                 Scope.getCurrentScope().getLog(getClass()).warning(
-                        "included file " + fileName + "/" + fileName + " is not a recognized file type"
+                        "included file " + normalizedFilePath + "/" + normalizedFilePath + " is not a recognized file type"
                 );
             }
             return false;
-        } catch (IOException e) {
+        } catch (Exception e) {
             throw new LiquibaseException(e.getMessage(), e);
         }
         PreconditionContainer preconditions = changeLog.getPreconditions();

@@ -57,6 +57,11 @@
             <artifactId>liquibase-snowflake</artifactId>
             <version>${project.version}</version>
         </dependency>
+        <dependency>
+            <groupId>org.apache.commons</groupId>
+            <artifactId>commons-lang3</artifactId>
+            <version>${commons-lang3.version}</version>
+        </dependency>
     </dependencies>
 
     <build>
@@ -86,7 +91,7 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-shade-plugin</artifactId>
-                <version>3.5.1</version>
+                <version>3.5.2</version>
                 <dependencies>
                     <dependency>
                         <groupId>com.github.marcosemiao.maven.plugins.shade.resource</groupId>
@@ -138,7 +143,7 @@
             <plugin>
                 <groupId>org.codehaus.mojo</groupId>
                 <artifactId>flatten-maven-plugin</artifactId>
-                <version>1.5.0</version>
+                <version>1.6.0</version>
                 <configuration>
                     <outputDirectory>${project.build.directory}/classes/META-INF/maven/org.liquibase/liquibase-core/</outputDirectory>
                     <flattenedPomFilename>pom.xml</flattenedPomFilename>

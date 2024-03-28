@@ -28,6 +28,7 @@ import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.lang.reflect.Type;
 import java.util.*;
+import java.util.regex.Pattern;
 
 import static liquibase.statement.SqlStatement.EMPTY_SQL_STATEMENT;
 
@@ -42,6 +43,7 @@ import static liquibase.statement.SqlStatement.EMPTY_SQL_STATEMENT;
 public abstract class AbstractChange extends AbstractPlugin implements Change {
 
     protected static final String NODENAME_COLUMN = "column";
+    private static final Pattern ALPHABET = Pattern.compile("([A-Z])");
 
     private ChangeSet changeSet;
 
@@ -182,7 +184,7 @@ public abstract class AbstractChange extends AbstractPlugin implements Change {
     private ChangeParameterMetaData createChangeParameterMetadata(PropertyDescriptor property, Method readMethod) {
         try {
             String parameterName = property.getDisplayName();
-            String displayName = parameterName.replaceAll("([A-Z])", " $1");
+            String displayName = ALPHABET.matcher(parameterName).replaceAll(" $1");
             displayName = displayName.substring(0, 1).toUpperCase() + displayName.substring(1);
 
             Type type = readMethod.getGenericReturnType();
@@ -198,9 +200,10 @@ public abstract class AbstractChange extends AbstractPlugin implements Change {
             );
             String[] requiredForDatabase = createRequiredDatabasesMetaData(parameterName, changePropertyAnnotation);
             String[] supportsDatabase = createSupportedDatabasesMetaData(parameterName, changePropertyAnnotation);
+            String[] alternatePropertyNames = createAlternateParameterNames(changePropertyAnnotation);
 
             return new ChangeParameterMetaData(this, parameterName, displayName, description, examples, since,
-                type, requiredForDatabase, supportsDatabase, mustEqualExisting, serializationType).withAccessors(readMethod, property.getWriteMethod());
+                type, requiredForDatabase, supportsDatabase, mustEqualExisting, serializationType, alternatePropertyNames).withAccessors(readMethod, property.getWriteMethod());
         } catch (UnexpectedLiquibaseException e) {
             throw e;
         }
@@ -311,6 +314,14 @@ public abstract class AbstractChange extends AbstractPlugin implements Change {
             return changePropertyAnnotation.supportsDatabase();
         }
 
+    }
+
+    protected String[] createAlternateParameterNames(DatabaseChangeProperty changePropertyAnnotation) {
+        if (changePropertyAnnotation == null) {
+            return new String[]{};
+        } else {
+            return changePropertyAnnotation.alternatePropertyNames();
+        }
     }
 
     /**
@@ -775,14 +786,22 @@ public abstract class AbstractChange extends AbstractPlugin implements Change {
                         }
                     }
                 } else {
-                    Object childValue = parsedNode.getChildValue(
-                        null, param.getParameterName(), param.getDataTypeClass()
-                    );
-                    if ((childValue == null) && (param.getSerializationType() == SerializationType.DIRECT_VALUE)) {
-                        childValue = parsedNode.getValue();
+                    List<String> parameterNamesToCheck = new ArrayList<>();
+                    parameterNamesToCheck.add(param.getParameterName());
+                    if (param.getAlternateParameterNames() != null) {
+                        parameterNamesToCheck.addAll(Arrays.asList(param.getAlternateParameterNames()));
                     }
-                    if(null != childValue) {
-                        param.setValue(this, childValue);
+                    for (String paramName : parameterNamesToCheck) {
+                        Object childValue = parsedNode.getChildValue(
+                                null, paramName, param.getDataTypeClass()
+                        );
+                        if ((childValue == null) && (param.getSerializationType() == SerializationType.DIRECT_VALUE)) {
+                            childValue = parsedNode.getValue();
+                        }
+                        if(null != childValue) {
+                            param.setValue(this, childValue);
+                            break;
+                        }
                     }
                 }
             }
