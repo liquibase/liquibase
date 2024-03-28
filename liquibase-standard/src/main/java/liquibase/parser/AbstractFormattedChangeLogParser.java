@@ -68,6 +68,9 @@ public abstract class AbstractFormattedChangeLogParser implements ChangeLogParse
     protected final String
             INVALID_EMPTY_PRECONDITION_REGEX = String.format("\\s*%s[\\s]*precondition\\-([a-zA-Z0-9-]+)", getSingleLineCommentSequence());
 
+    /*
+    add a comment
+     */
     protected final Pattern INVALID_EMPTY_PRECONDITION_PATTERN = Pattern.compile(INVALID_EMPTY_PRECONDITION_REGEX, Pattern.CASE_INSENSITIVE);
 
     protected final String ALT_PRECONDITION_ONE_CHARACTER_REGEX = String.format("\\s*%s[\\s]*precondition(.*)", getSingleLineCommentOneCharacter());
