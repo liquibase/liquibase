@@ -11,6 +11,7 @@ import org.junit.Test;
  * <code>--add-opens=java.base/java.nio=ALL-UNNAMED</code>. See more information
  * <a href="https://arrow.apache.org/docs/java/install.html#java-compatibility">here</a>.
  */
+@Ignore("The localstack Snowflake integration is not mature enough to support the test framework. See DAT-17037.")
 public class SnowflakeIntegrationTest extends AbstractIntegrationTest {
 
     public SnowflakeIntegrationTest() throws Exception {
