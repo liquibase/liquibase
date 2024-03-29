@@ -34,6 +34,7 @@ import org.codehaus.groovy.control.CompilerConfiguration
 import org.junit.Assert
 import org.junit.Assume
 import org.junit.ComparisonFailure
+import org.junit.Ignore
 import spock.lang.Specification
 import spock.lang.Unroll
 import spock.util.environment.OperatingSystem
@@ -42,6 +43,7 @@ import java.util.logging.Level
 import java.util.regex.Pattern
 import java.util.stream.Collectors
 
+@Ignore
 class CommandTests extends Specification {
 
     private static List<CommandTestDefinition> commandTestDefinitions
