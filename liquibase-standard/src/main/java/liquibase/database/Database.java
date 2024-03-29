@@ -629,5 +629,15 @@ public interface Database extends PrioritizedService, AutoCloseable {
     default boolean supportsDatabaseChangeLogHistory() {
         return false;
     }
+
+    /**
+     * Some databases (such as MongoDB) require you to verify the connection to the database
+     * to ensure that the database is accessible.
+     * It can be "ping" signal to the database
+     */
+    default void checkDatabaseConnection() throws DatabaseException {
+        // Do nothing by default
+        // Implementation required only for some specific databases in extensions
+    }
 }
 
