@@ -629,5 +629,16 @@ public interface Database extends PrioritizedService, AutoCloseable {
     default boolean supportsDatabaseChangeLogHistory() {
         return false;
     }
+
+    /**
+     * Returns a custom message to be displayed upon successful execution of the connect command.
+     * This method can be overridden by a database implementation to provide a specific message.
+     * If not overridden, it returns null by default.
+     *
+     * @return A custom success message for the connect command, or null if not provided.
+     */
+    default String generateConnectCommandSuccessMessage() {
+        return null;
+    }
 }
 
