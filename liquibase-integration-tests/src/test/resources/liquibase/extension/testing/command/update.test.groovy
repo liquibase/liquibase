@@ -453,10 +453,10 @@ Optional Args:
                 password     : { it.password },
                 changelogFile: "changelogs/h2/complete/simple.changelog.xml"
         ]
-        globalArguments = ["liquibase.preserveSchemaCase": "off"]
+        globalArguments = ["liquibase.preserveSchemaCase": "foo"]
 
         expectedException = CommandExecutionException.class
-        expectedExceptionMessage = Pattern.compile(".*WARNING:  The input for 'liquibase.preserveSchemaCase' is 'off', which is not valid.  Options: 'true' or 'false'.*")
+        expectedExceptionMessage = Pattern.compile(".*WARNING:  The input for 'liquibase.preserveSchemaCase' is 'foo', which is not valid.  Options: 'true' or 'false'.*")
     }
 
     run "Should use LoggingChangeExecListener", {
