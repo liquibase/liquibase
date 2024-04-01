@@ -147,7 +147,7 @@ jobs:
           mvn -Dtest=liquibase.ext.bigquery.${{ matrix.liquibase-support-level }}HarnessSuiteIT test # Run the Liquibase test harness at each test level
 
       - name: Test Reporter # Generate a test report using the Test Reporter action
-        uses: dorny/test-reporter@v1.6.0
+        uses: dorny/test-reporter@v1.8.0
         if: always() # Run the action even if the previous steps fail
         with:
           name: Liquibase Test Harness - ${{ matrix.liquibase-support-level }} Reports # Set the name of the test report
