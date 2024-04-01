@@ -162,7 +162,7 @@ jobs:
           path: target/surefire-reports
 
       - name: Test Summary
-        uses: test-summary/action@v1
+        uses: test-summary/action@v2
         with:
           paths: "target/surefire-reports/**/TEST-*.xml"
         if: always()
