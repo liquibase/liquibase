@@ -209,9 +209,21 @@ public class CustomChangeWrapper extends AbstractChange {
             statements = SqlStatement.EMPTY_SQL_STATEMENT;
         }
         return statements;
-
     }
 
+    @Override
+    public CheckSum generateCheckSum() {
+        try {
+            configureCustomChange();
+            if (customChange instanceof CustomChangeChecksum) {
+                return ((CustomChangeChecksum) customChange).generateChecksum();
+            } else {
+                return super.generateCheckSum();
+            }
+        } catch (CustomChangeException e) {
+            throw new UnexpectedLiquibaseException(e);
+        }
+    }
 
     /**
      * Returns true if the customChange supports rolling back.

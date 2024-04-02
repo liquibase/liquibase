@@ -453,10 +453,10 @@ Optional Args:
                 password     : { it.password },
                 changelogFile: "changelogs/h2/complete/simple.changelog.xml"
         ]
-        globalArguments = ["liquibase.preserveSchemaCase": "off"]
+        globalArguments = ["liquibase.preserveSchemaCase": "foo"]
 
         expectedException = CommandExecutionException.class
-        expectedExceptionMessage = Pattern.compile(".*WARNING:  The input for 'liquibase.preserveSchemaCase' is 'off', which is not valid.  Options: 'true' or 'false'.*")
+        expectedExceptionMessage = Pattern.compile(".*WARNING:  The input for 'liquibase.preserveSchemaCase' is 'foo', which is not valid.  Options: 'true' or 'false'.*")
     }
 
     run "Should use LoggingChangeExecListener", {
@@ -519,5 +519,36 @@ Total change sets:            0
                                         ]
         ]
         expectedException = CommandExecutionException
+    }
+
+    run "Ignore on includeAll", {
+        arguments = [
+                url          : { it.url },
+                username     : { it.username },
+                password     : { it.password },
+                changelogFile: "changelogs/common/includerelative/pathinclude1.ignored.changelog.xml",
+                showSummary: "VERBOSE"
+        ]
+
+        expectedOutput = """
+UPDATE SUMMARY
+Run:                          1
+Previously run:               0
+Filtered out:                 1
+-------------------------------
+Total change sets:            2
+
+
+FILTERED CHANGE SETS SUMMARY
+Ignored:                      1
+
++--------------------------------------------------------------+----------------------+
+| Changeset Info                                               | Reason Skipped       |
++--------------------------------------------------------------+----------------------+
+|                                                              | Changeset is ignored |
+| changelogs/common/includerelative/includeAll/pathinclude2.ch |                      |
+| angelog.xml::1::nvoxland                                     |                      |
++--------------------------------------------------------------+----------------------+
+"""
     }
 }
