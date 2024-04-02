@@ -24,7 +24,7 @@ class MssqlIntegrationTest extends Specification {
         CommandUtil.runDropAll(mssql)
     }
 
-    def "Should not fail with merge statement"() {
+    def "Should not fail with execution of create procedures with begin-end blocks"() {
         when:
         CommandUtil.runUpdate(mssql,'src/test/resources/changelogs/mssql/issues/begin.examples.changelog.xml')
         then:
