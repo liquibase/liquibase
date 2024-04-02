@@ -70,10 +70,6 @@
 	<files>
 		<!-- specifying the outputDirectory as file.separator puts it in the root -->
 		<file>
-			<source>../LICENSE.txt</source>
-			<outputDirectory>${file.separator}</outputDirectory>
-		</file>
-		<file>
 			<source>../ABOUT.txt</source>
 			<outputDirectory>${file.separator}</outputDirectory>
 		</file>
