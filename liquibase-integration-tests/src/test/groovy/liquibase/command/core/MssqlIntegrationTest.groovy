@@ -9,7 +9,7 @@ import spock.lang.Shared
 import spock.lang.Specification
 
 @LiquibaseIntegrationTest
-class MssqlMergeIntegrationTest extends Specification {
+class MssqlIntegrationTest extends Specification {
     @Shared
     private DatabaseTestSystem mssql = (DatabaseTestSystem) Scope.getCurrentScope().getSingleton(TestSystemFactory.class).getTestSystem("mssql")
 
@@ -22,5 +22,12 @@ class MssqlMergeIntegrationTest extends Specification {
         noExceptionThrown()
         cleanup:
         CommandUtil.runDropAll(mssql)
+    }
+
+    def "Should not fail with merge statement"() {
+        when:
+        CommandUtil.runUpdate(mssql,'src/test/resources/changelogs/mssql/issues/begin.examples.changelog.xml')
+        then:
+        noExceptionThrown()
     }
 }
