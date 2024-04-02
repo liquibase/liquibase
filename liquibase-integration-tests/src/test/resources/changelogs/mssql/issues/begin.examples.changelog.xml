@@ -15,4 +15,12 @@
         </sql>
     </changeSet>
 
+    <changeSet id="3" author="mallod">
+        <sql>
+            BEGIN TRANSACTION;
+            DELETE FROM dbo.JobCandidate
+            COMMIT;
+        </sql>
+    </changeSet>
+
 </databaseChangeLog>
