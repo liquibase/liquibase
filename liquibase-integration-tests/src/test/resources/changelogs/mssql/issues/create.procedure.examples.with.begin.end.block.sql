@@ -40,10 +40,6 @@ BEGIN
     BEGIN DISTRIBUTED TRANSACTION;
     -- Delete candidate from local instance.
     DELETE dbo.HumanResources.JobCandidate
-        WHERE JobCandidateID = 13;
-    -- Delete candidate from remote instance.
-    DELETE dbo.AdventureWorks2022.HumanResources.JobCandidate
-        WHERE JobCandidateID = 13;
     COMMIT TRANSACTION;
 END;
 GO
