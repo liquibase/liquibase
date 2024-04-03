@@ -10,8 +10,10 @@
 
     <changeSet id="2" author="mallod">
         <sql>
+            CREATE TABLE TestCommitTable(id int, name varchar(255));
+
             BEGIN TRANSACTION;
-            DELETE FROM dbo.JobCandidate
+            DELETE FROM TestCommitTable
             COMMIT;
         </sql>
     </changeSet>
