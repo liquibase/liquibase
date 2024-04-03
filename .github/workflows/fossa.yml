@@ -50,4 +50,3 @@ jobs:
         --header 'Authorization: Bearer ${{ secrets.FOSSA_API_KEY }}' -o /home/runner/fossa_reports/liquibase.csv
 
         ls -l /home/runner/fossa_reports
-        vi /home/runner/fossa_reports/liquibase.csv
