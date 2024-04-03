@@ -36,6 +36,7 @@ jobs:
       # https://docs.fossa.com/docs/download-fossa-project-attribution-reports
     - name: Set the dependency metadata information
       run: |
+        mkdir /home/runner/fossa_reports
         curl --location --request PUT 'https://app.fossa.com/api/projects/git+github.com/liquibase/liquibase' \
         --header 'Authorization: Bearer ${{ secrets.FOSSA_API_KEY }}' \
         --header 'Content-Type: application/x-www-form-urlencoded' \
