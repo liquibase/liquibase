@@ -631,6 +631,16 @@ public interface Database extends PrioritizedService, AutoCloseable {
     }
 
     /**
+     * Some databases (such as MongoDB) require you to verify the connection to the database
+     * to ensure that the database is accessible.
+     * It can be "ping" signal to the database
+     */
+    default void checkDatabaseConnection() throws DatabaseException {
+        // Do nothing by default
+        // Implementation required only for some specific databases in extensions
+    }
+
+    /**
      * Returns a custom message to be displayed upon successful execution of the connect command.
      * This method can be overridden by a database implementation to provide a specific message.
      * If not overridden, it returns null by default.
