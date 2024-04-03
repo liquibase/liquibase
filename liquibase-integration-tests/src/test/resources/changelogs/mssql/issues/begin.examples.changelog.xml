@@ -10,14 +10,6 @@
 
     <changeSet id="2" author="mallod">
         <sql>
-            DECLARE @dialog_handle UNIQUEIDENTIFIER = @dialog_handle;
-            BEGIN CONVERSATION TIMER (@dialog_handle)
-            TIMEOUT = 120 ;
-        </sql>
-    </changeSet>
-
-    <changeSet id="3" author="mallod">
-        <sql>
             BEGIN TRANSACTION;
             DELETE FROM dbo.JobCandidate
             COMMIT;
