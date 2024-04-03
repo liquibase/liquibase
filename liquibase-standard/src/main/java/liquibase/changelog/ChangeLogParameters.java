@@ -11,6 +11,7 @@ import liquibase.exception.UnknownChangeLogParameterException;
 import liquibase.structure.core.Schema;
 import liquibase.structure.core.Sequence;
 import liquibase.util.StringUtil;
+import lombok.Getter;
 
 import java.util.*;
 import java.util.stream.Collectors;
@@ -282,11 +283,15 @@ public class ChangeLogParameters {
     }
 
     private static class ChangeLogParameter {
+        @Getter
         private final String key;
+        @Getter
         private final Object value;
 
+        @Getter
         private final ContextExpression validContexts;
         private final Labels validLabels;
+        @Getter
         private final List<String> validDatabases;
 
         public ChangeLogParameter(String key, Object value) {
@@ -304,22 +309,6 @@ public class ChangeLogParameters {
             } else {
                 this.validDatabases = Arrays.asList(validDatabases);
             }
-        }
-
-        public String getKey() {
-            return key;
-        }
-
-        public Object getValue() {
-            return value;
-        }
-
-        public List<String> getValidDatabases() {
-            return validDatabases;
-        }
-
-        public ContextExpression getValidContexts() {
-            return validContexts;
         }
 
         public Labels getLabels() {
