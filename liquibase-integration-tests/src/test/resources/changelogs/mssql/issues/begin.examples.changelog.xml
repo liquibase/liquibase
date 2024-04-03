@@ -10,6 +10,7 @@
 
     <changeSet id="2" author="mallod">
         <sql>
+            DECLARE @dialog_handle UNIQUEIDENTIFIER;
             BEGIN CONVERSATION TIMER (@dialog_handle)
             TIMEOUT = 120 ;
         </sql>
