@@ -5,6 +5,7 @@ import liquibase.Scope;
 import liquibase.database.AbstractJdbcDatabase;
 import liquibase.database.Database;
 import liquibase.database.DatabaseConnection;
+import liquibase.database.LiquibaseTableNamesFactory;
 import liquibase.database.core.*;
 import liquibase.database.jvm.JdbcConnection;
 import liquibase.exception.DatabaseException;
@@ -20,7 +21,6 @@ import liquibase.util.StringUtil;
 
 import java.sql.*;
 import java.util.*;
-import java.util.concurrent.atomic.AtomicReference;
 
 public class JdbcDatabaseSnapshot extends DatabaseSnapshot {
 
@@ -411,7 +411,9 @@ public class JdbcDatabaseSnapshot extends DatabaseSnapshot {
 
             @Override
             protected boolean shouldBulkSelect(String schemaKey, ResultSetCache resultSetCache) {
-                return !(tableName.equalsIgnoreCase(database.getDatabaseChangeLogTableName()) || tableName.equalsIgnoreCase(database.getDatabaseChangeLogLockTableName()));
+                LiquibaseTableNamesFactory liquibaseTableNamesFactory = Scope.getCurrentScope().getSingleton(LiquibaseTableNamesFactory.class);
+                List<String> liquibaseTableNames = liquibaseTableNamesFactory.getLiquibaseTableNames(database);
+                return liquibaseTableNames.stream().noneMatch(tableName::equalsIgnoreCase);
             }
 
             @Override
@@ -1088,11 +1090,9 @@ public class JdbcDatabaseSnapshot extends DatabaseSnapshot {
 
             @Override
             protected boolean shouldBulkSelect(String schemaKey, ResultSetCache resultSetCache) {
-                if (tableName.equalsIgnoreCase(database.getDatabaseChangeLogTableName()) ||
-                        tableName.equalsIgnoreCase(database.getDatabaseChangeLogLockTableName())) {
-                    return false;
-                }
-                return true;
+                LiquibaseTableNamesFactory liquibaseTableNamesFactory = Scope.getCurrentScope().getSingleton(LiquibaseTableNamesFactory.class);
+                List<String> liquibaseTableNames = liquibaseTableNamesFactory.getLiquibaseTableNames(database);
+                return liquibaseTableNames.stream().noneMatch(tableName::equalsIgnoreCase);
             }
 
             @Override

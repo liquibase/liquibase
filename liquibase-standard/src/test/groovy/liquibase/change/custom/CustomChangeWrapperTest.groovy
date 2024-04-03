@@ -1,5 +1,6 @@
 package liquibase.change.custom
 
+import liquibase.change.CheckSum
 import liquibase.database.Database
 import liquibase.exception.CustomChangeException
 import liquibase.exception.RollbackImpossibleException
@@ -322,5 +323,22 @@ class CustomChangeWrapperTest extends Specification {
         change.getParamValue("tableName") == "my_table"
         change.getParamValue("columnName") == "my_col"
         change.getParamValue("unusedParam") == null
+    }
+
+    def "custom checksum is used"() {
+        when:
+        def change1 = new CustomChangeWrapper()
+        change1.setClass(ExampleCustomSqlChangeWithChecksum.class.getName())
+        change1.setParam("tableName", "my_table")
+        def change2 = new CustomChangeWrapper()
+        change2.setClass(ExampleCustomSqlChangeWithChecksum.class.getName())
+        change2.setParam("tableName", "my_other_table_name")
+        def change3 = new CustomChangeWrapper()
+        change3.setClass(ExampleCustomSqlChange.class.getName())
+        change3.setParam("tableName", "my_table")
+
+        then: "The checksum not affected by parameters set"
+        change1.generateCheckSum() == change2.generateCheckSum()
+        change1.generateCheckSum() != change3.generateCheckSum()
     }
 }
