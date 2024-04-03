@@ -223,15 +223,19 @@ public class ChangeSet implements Conditional, ChangeLogChild {
      */
     private final List<SqlVisitor> sqlVisitors = new ArrayList<>();
 
+    @Getter
     private ObjectQuotingStrategy objectQuotingStrategy;
 
     private final DatabaseChangeLog changeLog;
 
+    @Getter
+    @Setter
     private String created;
 
     /**
      * Allow changeSet to be ran "first" or "last". Multiple changeSets with the same runOrder will preserve their order relative to each other.
      */
+    @Getter
     private String runOrder;
 
     private final Map<String, Object> attributes = new HashMap<>();
@@ -1354,22 +1358,6 @@ public class ChangeSet implements Conditional, ChangeLogChild {
      */
     public void setFilePath(String filePath) {
         this.filePath = filePath;
-    }
-
-    public ObjectQuotingStrategy getObjectQuotingStrategy() {
-        return objectQuotingStrategy;
-    }
-
-    public String getCreated() {
-        return created;
-    }
-
-    public void setCreated(String created) {
-        this.created = created;
-    }
-
-    public String getRunOrder() {
-        return runOrder;
     }
 
     public void setRunOrder(String runOrder) {
