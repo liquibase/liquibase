@@ -56,14 +56,18 @@ public class SnapshotGeneratorChain {
         }
 
         T lastObject = example;
+        T lastObjectToProcess = example;
         while (snapshotGenerators.hasNext()) {
             SnapshotGenerator generator = snapshotGenerators.next();
             if (replacedGenerators.contains(generator.getClass())) {
                 continue;
             }
-            T object = generator.snapshot(lastObject, snapshot, this);
-            if ((object != null) && (object.getSnapshotId() == null)) {
-                object.setSnapshotId(snapshotIdService.generateId());
+            T object = generator.snapshot(lastObjectToProcess, snapshot, this);
+            if (object != null) {
+                lastObjectToProcess = object;
+                if (object.getSnapshotId() == null) {
+                    object.setSnapshotId(snapshotIdService.generateId());
+                }
             }
             lastObject = object;
         }
