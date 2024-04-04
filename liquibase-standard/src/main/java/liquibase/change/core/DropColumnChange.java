@@ -17,6 +17,7 @@ import liquibase.structure.core.Column;
 import liquibase.structure.core.Index;
 import liquibase.structure.core.Table;
 import liquibase.util.StringUtil;
+import lombok.Setter;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -31,9 +32,13 @@ import java.util.stream.Collectors;
     appliesTo = "column")
 public class DropColumnChange extends AbstractChange implements ChangeWithColumns<ColumnConfig> {
     
+    @Setter
     private String catalogName;
+    @Setter
     private String schemaName;
+    @Setter
     private String tableName;
+    @Setter
     private String columnName;
     private List<ColumnConfig> columns = new ArrayList<>();
     
@@ -67,40 +72,24 @@ public class DropColumnChange extends AbstractChange implements ChangeWithColumn
     public String getColumnName() {
         return columnName;
     }
-    
-    public void setColumnName(String columnName) {
-        this.columnName = columnName;
-    }
-    
+
     @DatabaseChangeProperty(since = "3.0", mustEqualExisting = "column.relation.schema.catalog",
         description = "Name of the database catalog")
     public String getCatalogName() {
         return catalogName;
     }
-    
-    public void setCatalogName(String catalogName) {
-        this.catalogName = catalogName;
-    }
-    
+
     @DatabaseChangeProperty(mustEqualExisting = "column.relation.schema", description = "Name of the database schema")
     public String getSchemaName() {
         return schemaName;
     }
-    
-    public void setSchemaName(String schemaName) {
-        this.schemaName = schemaName;
-    }
-    
+
     @DatabaseChangeProperty(description = "Name of the table containing the column to drop",
         mustEqualExisting = "column.relation")
     public String getTableName() {
         return tableName;
     }
-    
-    public void setTableName(String tableName) {
-        this.tableName = tableName;
-    }
-    
+
     @Override
     public SqlStatement[] generateStatements(Database database) {
         try {
