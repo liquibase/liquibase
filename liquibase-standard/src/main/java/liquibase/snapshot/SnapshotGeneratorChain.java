@@ -64,8 +64,8 @@ public class SnapshotGeneratorChain {
             T object = generator.snapshot(lastObject, snapshot, this);
             if ((object != null) && (object.getSnapshotId() == null)) {
                 object.setSnapshotId(snapshotIdService.generateId());
+                lastObject = object;
             }
-            lastObject = object;
         }
         return lastObject;
     }
