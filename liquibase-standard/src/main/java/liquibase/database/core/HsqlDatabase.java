@@ -6,6 +6,8 @@ import liquibase.database.ObjectQuotingStrategy;
 import liquibase.exception.DatabaseException;
 import liquibase.exception.DateParseException;
 import liquibase.structure.DatabaseObject;
+import liquibase.structure.core.Catalog;
+import liquibase.structure.core.Schema;
 import liquibase.structure.core.Table;
 import liquibase.util.ISODateFormat;
 
@@ -381,6 +383,18 @@ public class HsqlDatabase extends AbstractJdbcDatabase {
     }
 
     @Override
+    public boolean supports(Class<? extends DatabaseObject> object) {
+        if (Catalog.class.isAssignableFrom(object)) {
+            try {
+                return getDatabaseMajorVersion() >= 2;
+            } catch (DatabaseException e) {
+                return true;
+            }
+        }
+        return super.supports(object);
+    }
+
+    @Override
     public boolean supportsCatalogs() {
         try {
             return getDatabaseMajorVersion() >= 2;
@@ -391,7 +405,7 @@ public class HsqlDatabase extends AbstractJdbcDatabase {
 
     @Override
     protected String getConnectionCatalogName() throws DatabaseException {
-        if (supportsCatalogs()) {
+        if (supports(Catalog.class)) {
             return "PUBLIC";
         } else {
             return null;

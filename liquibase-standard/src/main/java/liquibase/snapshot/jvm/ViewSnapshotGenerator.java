@@ -123,32 +123,33 @@ public class ViewSnapshotGenerator extends JdbcSnapshotGenerator {
 
     @Override
     protected void addTo(DatabaseObject foundObject, DatabaseSnapshot snapshot) throws DatabaseException, InvalidExampleException {
-        if (!snapshot.getSnapshotControl().shouldInclude(View.class)) {
+        Database database = snapshot.getDatabase();
+        if (!snapshot.getSnapshotControl().shouldInclude(View.class) || !database.supports(View.class)) {
             return;
         }
 
-        if (foundObject instanceof Schema) {
-            Schema schema = (Schema) foundObject;
-            Database database = snapshot.getDatabase();
-            List<CachedRow> viewsMetadataRs;
-            try {
-                viewsMetadataRs = ((JdbcDatabaseSnapshot) snapshot).getMetaDataFromCache().getViews(((AbstractJdbcDatabase) database).getJdbcCatalogName(schema), ((AbstractJdbcDatabase) database).getJdbcSchemaName(schema), null);
-                for (CachedRow row : viewsMetadataRs) {
-                    CatalogAndSchema catalogAndSchema = ((AbstractJdbcDatabase) database).getSchemaFromJdbcInfo(row.getString("TABLE_CAT"), row.getString("TABLE_SCHEM"));
-                    View view = new View();
-                    view.setName(row.getString("TABLE_NAME"));
-                    view.setSchema(new Schema(catalogAndSchema.getCatalogName(), catalogAndSchema.getSchemaName()));
-                    view.setRemarks(row.getString("REMARKS"));
-                    String definition = StringUtil.standardizeLineEndings(row.getString("OBJECT_BODY"));
-                    view.setDefinition(definition);
-                    if(database instanceof OracleDatabase) {
-                        view.setAttribute("editioning", "Y".equals(row.getString("EDITIONING_VIEW")));
-                    }
-                    schema.addDatabaseObject(view);
+        if (!(foundObject instanceof Schema)) {
+            return;
+        }
+        Schema schema = (Schema) foundObject;
+        List<CachedRow> viewsMetadataRs;
+        try {
+            viewsMetadataRs = ((JdbcDatabaseSnapshot) snapshot).getMetaDataFromCache().getViews(((AbstractJdbcDatabase) database).getJdbcCatalogName(schema), ((AbstractJdbcDatabase) database).getJdbcSchemaName(schema), null);
+            for (CachedRow row : viewsMetadataRs) {
+                CatalogAndSchema catalogAndSchema = ((AbstractJdbcDatabase) database).getSchemaFromJdbcInfo(row.getString("TABLE_CAT"), row.getString("TABLE_SCHEM"));
+                View view = new View();
+                view.setName(row.getString("TABLE_NAME"));
+                view.setSchema(new Schema(catalogAndSchema.getCatalogName(), catalogAndSchema.getSchemaName()));
+                view.setRemarks(row.getString("REMARKS"));
+                String definition = StringUtil.standardizeLineEndings(row.getString("OBJECT_BODY"));
+                view.setDefinition(definition);
+                if(database instanceof OracleDatabase) {
+                    view.setAttribute("editioning", "Y".equals(row.getString("EDITIONING_VIEW")));
                 }
-            } catch (SQLException e) {
-                throw new DatabaseException(e);
+                schema.addDatabaseObject(view);
             }
+        } catch (SQLException e) {
+            throw new DatabaseException(e);
         }
     }
 }
