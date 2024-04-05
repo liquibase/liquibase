@@ -230,7 +230,7 @@ jobs:
           - postgresql
           - sqlite
           - firebird
-          #- snowflake
+          - snowflake
     needs: build_tests
     timeout-minutes: 30
     steps:
@@ -280,7 +280,7 @@ jobs:
           echo "TH_DB_ADMIN=test" >> $GITHUB_ENV  
           echo "TH_DB_PASSWD=test" >> $GITHUB_ENV
           echo "TH_DB=snowflake" >> $GITHUB_ENV
-          echo "TH_SNOW_URL=jdbc:snowflake://http://snowflake.localhost.localstack.cloud:4566" >> $GITHUB_ENV
+          echo "TH_SNOW_URL=jdbc:snowflake://http://snowflake.localhost.localstack.cloud:4566?JDBC_QUERY_RESULT_FORMAT=JSON" >> $GITHUB_ENV
 
       - name: Run Tests
         run: ./mvnw -B clean verify -DtrimStackTrace=false -Dliquibase.sdk.testSystem.test=${{ matrix.testSystem }} -Dliquibase.sdk.testSystem.acceptLicenses=${{ matrix.testSystem }} -Dliquibase.sdk.testSystem.snowflake.url=${{ env.TH_SNOW_URL }} -Dliquibase.sdk.testSystem.snowflake.username=${{ env.TH_DB_ADMIN }} -Dliquibase.sdk.testSystem.snowflake.password=${{ env.TH_DB_PASSWD }} -Dtest=*IntegrationTest,*ExecutorTest -DfailIfNoTests=false -Dsurefire.failIfNoSpecifiedTests=false
