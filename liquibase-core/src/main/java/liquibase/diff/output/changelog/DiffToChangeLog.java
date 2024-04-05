@@ -1,15 +1,5 @@
 package liquibase.diff.output.changelog;
 
-import java.io.ByteArrayOutputStream;
-import java.io.File;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.PrintStream;
-import java.io.RandomAccessFile;
-import java.text.SimpleDateFormat;
-import java.util.*;
-import javax.xml.parsers.ParserConfigurationException;
-
 import liquibase.change.Change;
 import liquibase.change.core.*;
 import liquibase.changelog.ChangeSet;
@@ -39,6 +29,11 @@ import liquibase.structure.core.Column;
 import liquibase.structure.core.StoredDatabaseLogic;
 import liquibase.util.DependencyUtil;
 import liquibase.util.StringUtils;
+
+import javax.xml.parsers.ParserConfigurationException;
+import java.io.*;
+import java.text.SimpleDateFormat;
+import java.util.*;
 
 public class DiffToChangeLog {
 
@@ -565,9 +560,9 @@ public class DiffToChangeLog {
 
             for (Map<String, ?> row : queryForListResult) {
                 String bName = StringUtils.trimToNull(StringUtils.trimToNull((String) row.get("REFERENCING_SCHEMA_NAME")) +
-                        "." + StringUtils.trimToNull(row.get("REFERENCING_NAME").toString().replaceAll("\\s*\\([^)]*\\)\\s*", "")));
+                        "." + StringUtils.trimToNull(row.get("REFERENCING_NAME").toString()));
                 String tabName = StringUtils.trimToNull(StringUtils.trimToNull(row.get("REFERENCED_SCHEMA_NAME").toString()) +
-                        "." + StringUtils.trimToNull(row.get("REFERENCED_NAME").toString().replaceAll("\\s*\\([^)]*\\)\\s*", "")));
+                        "." + StringUtils.trimToNull(row.get("REFERENCED_NAME").toString()));
 
                 if (tabName != null && bName != null) {
                     graph.add(bName.replace("\"", ""), tabName.replace("\"", ""));
