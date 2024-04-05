@@ -282,6 +282,14 @@ public class OracleDatabase extends AbstractJdbcDatabase {
         return true;
     }
 
+    @Override
+    public boolean supports(Class<? extends DatabaseObject> object) {
+        if (Schema.class.isAssignableFrom(object)) {
+            return false;
+        }
+        return super.supports(object);
+    }
+
     /**
      * Oracle supports catalogs in liquibase terms
      *
@@ -669,6 +677,11 @@ public class OracleDatabase extends AbstractJdbcDatabase {
             throw new UnexpectedLiquibaseException("Cannot determine the Oracle database version number", ex);
         }
 
+    }
+
+    @Override
+    public boolean supportsDatabaseChangeLogHistory() {
+        return true;
     }
 
 }

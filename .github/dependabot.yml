@@ -3,6 +3,7 @@ updates:
 
   - package-ecosystem: "github-actions"
     directory: "/"
+    open-pull-requests-limit: 50
     schedule:
       interval: "daily"
     labels:

@@ -17,13 +17,11 @@ import liquibase.exception.CommandValidationException;
 import liquibase.resource.PathHandlerFactory;
 import liquibase.resource.Resource;
 import liquibase.util.StringUtil;
-import liquibase.util.ValueHandlerUtil;
 
 import java.io.IOException;
 import java.io.PrintStream;
 import java.util.Arrays;
 import java.util.List;
-import java.util.stream.Collectors;
 
 public class GenerateChangelogCommandStep extends AbstractChangelogCommandStep {
 
@@ -95,11 +93,10 @@ public class GenerateChangelogCommandStep extends AbstractChangelogCommandStep {
         USE_OR_REPLACE_OPTION = builder.argument("useOrReplaceOption", Boolean.class)
                 .description("If true, will add 'OR REPLACE' option to the create view change object")
                 .defaultValue(false)
-                .setValueHandler(ValueHandlerUtil::booleanValueHandler)
                 .build();
         builder.addArgument(AbstractChangelogCommandStep.RUN_ON_CHANGE_TYPES_ARG).build();
-
         builder.addArgument(AbstractChangelogCommandStep.REPLACE_IF_EXISTS_TYPES_ARG).build();
+        builder.addArgument(AbstractChangelogCommandStep.SKIP_OBJECT_SORTING).build();
     }
 
     @Override
@@ -135,7 +132,7 @@ public class GenerateChangelogCommandStep extends AbstractChangelogCommandStep {
 
         DiffResult diffResult = (DiffResult) resultsBuilder.getResult(DiffCommandStep.DIFF_RESULT.getName());
 
-        DiffToChangeLog changeLogWriter = new DiffToChangeLog(diffResult, diffOutputControl);
+        DiffToChangeLog changeLogWriter = new DiffToChangeLog(diffResult, diffOutputControl, commandScope.getArgumentValue(SKIP_OBJECT_SORTING));
 
         changeLogWriter.setChangeSetAuthor(commandScope.getArgumentValue(AUTHOR_ARG));
         if (commandScope.getArgumentValue(CONTEXT_ARG) != null) {

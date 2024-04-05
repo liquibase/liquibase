@@ -65,12 +65,16 @@ public class Scope {
         changeSet,
         osgiPlatform,
         checksumVersion,
-        latestChecksumVersion
+        latestChecksumVersion,
+        /**
+         * A <code>Map<String, String></code> of arguments/configuration properties used in the maven invocation of Liquibase.
+         */
+        mavenConfigurationProperties
     }
 
     public static final String JAVA_PROPERTIES = "javaProperties";
 
-    private static ScopeManager scopeManager;
+    private static final ThreadLocal<ScopeManager> scopeManager = new ThreadLocal<>();
 
     private final Scope parent;
     private final SmartMap values = new SmartMap();
@@ -81,12 +85,12 @@ public class Scope {
     private LiquibaseListener listener;
 
     public static Scope getCurrentScope() {
-        if (scopeManager == null) {
-            scopeManager = new SingletonScopeManager();
+        if (scopeManager.get() == null) {
+            scopeManager.set(new SingletonScopeManager());
         }
-        if (scopeManager.getCurrentScope() == null) {
+        if (scopeManager.get().getCurrentScope() == null) {
             Scope rootScope = new Scope();
-            scopeManager.setCurrentScope(rootScope);
+            scopeManager.get().setCurrentScope(rootScope);
 
             rootScope.values.put(Attr.logService.name(), new JavaLogService());
             rootScope.values.put(Attr.serviceLocator.name(), new StandardServiceLocator());
@@ -114,11 +118,11 @@ public class Scope {
             rootScope.values.put(Attr.serviceLocator.name(), serviceLocator);
             rootScope.values.put(Attr.osgiPlatform.name(), ContainerChecker.isOsgiPlatform());
         }
-        return scopeManager.getCurrentScope();
+        return scopeManager.get().getCurrentScope();
     }
 
     public static void setScopeManager(ScopeManager scopeManager) {
-        Scope.scopeManager = scopeManager;
+        Scope.scopeManager.set(scopeManager);
     }
 
     /**
@@ -217,7 +221,7 @@ public class Scope {
         Scope originalScope = getCurrentScope();
         Scope child = new Scope(originalScope, scopeValues);
         child.listener = listener;
-        scopeManager.setCurrentScope(child);
+        scopeManager.get().setCurrentScope(child);
 
         return child.scopeId;
     }
@@ -239,7 +243,7 @@ public class Scope {
             mdcObject.close();
         }
 
-        scopeManager.setCurrentScope(currentScope.getParent());
+        scopeManager.get().setCurrentScope(currentScope.getParent());
     }
 
     /**

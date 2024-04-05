@@ -3,6 +3,7 @@ package liquibase.logging.mdc;
 import liquibase.Beta;
 import liquibase.plugin.Plugin;
 
+import java.util.List;
 import java.util.Map;
 
 @Beta
@@ -41,6 +42,13 @@ public interface MdcManager extends Plugin {
      */
     @Beta
     MdcObject put(String key, Map<String, Object> values, boolean removeWhenScopeExits);
+
+    /**
+     * Puts a context value (the <code>values</code> parameter) as identified with the <code>key</code> parameter into
+     * the MDC. The caller is responsible for cleaning up this entry at an appropriate time.
+     */
+    @Beta
+    MdcObject put(String key, List<? extends CustomMdcObject> values);
 
     /**
      * Puts a context value (the <code>customMdcObject</code> parameter) as identified with the <code>key</code> parameter into

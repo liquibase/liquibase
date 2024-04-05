@@ -69,15 +69,15 @@
         <trimStackTrace>false</trimStackTrace>
         <liquibase-pro.version>0-SNAPSHOT</liquibase-pro.version>
         <argLine></argLine>
+        <commons-lang3.version>3.14.0</commons-lang3.version>
         <ant.version>1.10.14</ant.version>
-        <junit.version>4.13.2</junit.version>
-        <junit-jupiter.version>5.10.1</junit-jupiter.version>
-        <groovy.version>2.5.23</groovy.version>
-        <spock.version>1.3-groovy-2.5</spock.version>
+        <junit-jupiter.version>5.10.2</junit-jupiter.version>
+        <groovy.version>4.0.20</groovy.version>
+        <spock.version>2.3-groovy-4.0</spock.version>
         <spring.version>5.3.28</spring.version>
-        <maven-failsafe-plugin.version>3.2.2</maven-failsafe-plugin.version>
+        <maven-failsafe-plugin.version>3.2.5</maven-failsafe-plugin.version>
         <jacoco-maven-plugin.version>0.8.11</jacoco-maven-plugin.version>
-        <maven-surefire-plugin.version>3.2.2</maven-surefire-plugin.version>
+        <maven-surefire-plugin.version>3.2.5</maven-surefire-plugin.version>
         <sonar.projectName>Liquibase</sonar.projectName>
         <sonar.projectDescription>Liquibase</sonar.projectDescription>
         <sonar.projectKey>liquibase</sonar.projectKey>
@@ -113,7 +113,7 @@
     <dependencyManagement>
         <dependencies>
             <dependency>
-                <groupId>org.codehaus.groovy</groupId>
+                <groupId>org.apache.groovy</groupId>
                 <artifactId>groovy-bom</artifactId>
                 <version>${groovy.version}</version>
                 <type>pom</type>
@@ -125,11 +125,6 @@
                 <version>${junit-jupiter.version}</version>
                 <type>pom</type>
                 <scope>import</scope>
-            </dependency>
-            <dependency>
-                <groupId>junit</groupId>
-                <artifactId>junit</artifactId>
-                <version>${junit.version}</version>
             </dependency>
             <dependency>
                 <groupId>org.apache.ant</groupId>
@@ -152,14 +147,18 @@
                 <version>${ant.version}</version>
             </dependency>
             <dependency> <!-- use a specific Groovy version rather than the one specified by spock-core -->
-                <groupId>org.codehaus.groovy</groupId>
+                <groupId>org.apache.groovy</groupId>
                 <artifactId>groovy-all</artifactId>
                 <version>${groovy.version}</version>
                 <type>pom</type>
                 <exclusions>
                     <exclusion>
-                        <groupId>org.codehaus.groovy</groupId>
+                        <groupId>org.apache.groovy</groupId>
                         <artifactId>groovy-testng</artifactId>
+                    </exclusion>
+                    <exclusion>
+                        <groupId>junit</groupId>
+                        <artifactId>junit</artifactId>
                     </exclusion>
                 </exclusions>
             </dependency>
@@ -173,8 +172,9 @@
     <dependencies>
 
         <dependency>
-            <groupId>junit</groupId>
-            <artifactId>junit</artifactId>
+            <groupId>org.junit.jupiter</groupId>
+            <artifactId>junit-jupiter-api</artifactId>
+            <version>${junit-jupiter.version}</version>
             <scope>test</scope>
         </dependency>
 
@@ -188,7 +188,7 @@
         <dependency>
             <groupId>org.assertj</groupId>
             <artifactId>assertj-core</artifactId>
-            <version>3.25.1</version>
+            <version>3.25.3</version>
             <scope>test</scope>
         </dependency>
 
@@ -200,9 +200,21 @@
         </dependency>
 
         <dependency>
-            <groupId>org.codehaus.groovy</groupId>
+            <groupId>org.apache.groovy</groupId>
             <artifactId>groovy-all</artifactId>
             <type>pom</type>
+            <scope>test</scope>
+            <exclusions>
+                <exclusion>
+                    <groupId>junit</groupId>
+                    <artifactId>junit</artifactId>
+                </exclusion>
+            </exclusions>
+        </dependency>
+        <dependency>
+            <groupId>org.junit.vintage</groupId>
+            <artifactId>junit-vintage-engine</artifactId>
+            <version>${junit-jupiter.version}</version>
             <scope>test</scope>
         </dependency>
 
@@ -249,21 +261,21 @@
         <dependency>
             <groupId>com.microsoft.sqlserver</groupId>
             <artifactId>mssql-jdbc</artifactId>
-            <version>12.4.1.jre8</version>
+            <version>12.6.1.jre8</version>
             <scope>test</scope>
         </dependency>
 
         <dependency>
             <groupId>org.postgresql</groupId>
             <artifactId>postgresql</artifactId>
-            <version>42.7.1</version>
+            <version>42.7.2</version>
             <scope>test</scope>
         </dependency>
 
         <dependency>
             <groupId>org.mariadb.jdbc</groupId>
             <artifactId>mariadb-java-client</artifactId>
-            <version>3.3.2</version>
+            <version>3.3.3</version>
             <scope>test</scope>
         </dependency>
 
@@ -277,7 +289,7 @@
         <dependency>
             <groupId>com.oracle.database.jdbc</groupId>
             <artifactId>ojdbc8</artifactId>
-            <version>19.21.0.0</version>
+            <version>19.22.0.0</version>
             <scope>test</scope>
         </dependency>
 
@@ -291,7 +303,7 @@
         <dependency>
             <groupId>net.snowflake</groupId>
             <artifactId>snowflake-jdbc</artifactId>
-            <version>3.14.4</version>
+            <version>3.15.0</version>
             <scope>test</scope>
         </dependency>
 
@@ -376,13 +388,6 @@
             <plugin>
                 <artifactId>maven-surefire-plugin</artifactId>
                 <version>${maven-surefire-plugin.version}</version>
-                <dependencies>
-                    <dependency>
-                        <groupId>org.apache.maven.surefire</groupId>
-                        <artifactId>surefire-junit4</artifactId>
-                        <version>${maven-surefire-plugin.version}</version>
-                    </dependency>
-                </dependencies>
                 <configuration>
                     <argLine>-Dfile.encoding=${project.build.sourceEncoding}</argLine>
                     <includes>
@@ -515,7 +520,7 @@
             <plugin>
                 <groupId>org.codehaus.mojo</groupId>
                 <artifactId>flatten-maven-plugin</artifactId>
-                <version>1.5.0</version>
+                <version>1.6.0</version>
                 <configuration>
                     <updatePomFile>true</updatePomFile>
                     <outputDirectory>${project.build.directory}/flattened-pom</outputDirectory>

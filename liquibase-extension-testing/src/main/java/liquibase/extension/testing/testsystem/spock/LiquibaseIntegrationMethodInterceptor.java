@@ -12,7 +12,7 @@ import liquibase.extension.testing.testsystem.TestSystem;
 import liquibase.lockservice.LockService;
 import liquibase.lockservice.LockServiceFactory;
 import liquibase.structure.core.DatabaseObjectFactory;
-import org.junit.Assume;
+import org.junit.jupiter.api.Assumptions;
 import org.spockframework.runtime.extension.AbstractMethodInterceptor;
 import org.spockframework.runtime.extension.IMethodInvocation;
 import org.spockframework.runtime.model.FieldInfo;
@@ -89,7 +89,7 @@ public class LiquibaseIntegrationMethodInterceptor extends AbstractMethodInterce
         for (FieldInfo field : containers) {
             TestSystem testSystem = readContainerFromField(field, invocation);
 
-            Assume.assumeTrue("Not running test against " + testSystem.getDefinition() + ": liquibase.sdk.testSystem.test is " + configuredTestSystems + " and liquibase.sdk.testSystem.skip is " + skippedTestSystems, testSystem.shouldTest());
+            Assumptions.assumeTrue(testSystem.shouldTest(), "Not running test against " + testSystem.getDefinition() + ": liquibase.sdk.testSystem.test is " + configuredTestSystems + " and liquibase.sdk.testSystem.skip is " + skippedTestSystems);
 
             testSystem.start();
             startedTestSystems.add(testSystem);
@@ -153,6 +153,8 @@ public class LiquibaseIntegrationMethodInterceptor extends AbstractMethodInterce
         commandScope.addArgumentValue(DbUrlConnectionArgumentsCommandStep.URL_ARG, db.getConnectionUrl());
         commandScope.addArgumentValue(DbUrlConnectionArgumentsCommandStep.USERNAME_ARG, db.getUsername());
         commandScope.addArgumentValue(DbUrlConnectionArgumentsCommandStep.PASSWORD_ARG, db.getPassword());
+        // this is a pro only argument, but is added here because there is no mechanism for adding the argument from the pro tests
+        commandScope.addArgumentValue("dropDbclhistory", true);
         commandScope.setOutput(new ByteArrayOutputStream());
         commandScope.execute();
     }

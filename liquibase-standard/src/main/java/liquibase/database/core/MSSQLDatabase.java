@@ -3,7 +3,6 @@ package liquibase.database.core;
 import liquibase.CatalogAndSchema;
 import liquibase.GlobalConfiguration;
 import liquibase.Scope;
-import liquibase.change.AbstractSQLChange;
 import liquibase.change.Change;
 import liquibase.changelog.DatabaseChangeLog;
 import liquibase.database.AbstractJdbcDatabase;
@@ -122,7 +121,7 @@ public class MSSQLDatabase extends AbstractJdbcDatabase {
     //  Setup up an appending SQL visitor if this is not an AbstractSQLChange or
     //  if there is no end delimiter
     //
-    private List<SqlVisitor> addSqlVisitors(List<SqlVisitor> sqlVisitors) {
+    protected static List<SqlVisitor> addSqlVisitors(List<SqlVisitor> sqlVisitors) {
         List<SqlVisitor> sqlChangeVisitors = new ArrayList<>(sqlVisitors);
         AppendSqlIfNotPresentVisitor appendVisitor = new AppendSqlIfNotPresentVisitor();
         appendVisitor.setValue(";");
@@ -186,15 +185,24 @@ public class MSSQLDatabase extends AbstractJdbcDatabase {
     }
 
     @Override
+    public boolean supports(Class<? extends DatabaseObject> object) {
+        if (Sequence.class.isAssignableFrom(object)) {
+            try {
+                return isAzureDb() || this.getDatabaseMajorVersion() >= MSSQL_SERVER_VERSIONS.MSSQL2012;
+            } catch (DatabaseException e) {
+                throw new UnexpectedLiquibaseException(e);
+            }
+        }
+        return super.supports(object);
+    }
+
+    @Override
     public boolean supportsSequences() {
         try {
-            if (isAzureDb() || this.getDatabaseMajorVersion() >= MSSQL_SERVER_VERSIONS.MSSQL2012) {
-                return true;
-            }
+            return isAzureDb() || this.getDatabaseMajorVersion() >= MSSQL_SERVER_VERSIONS.MSSQL2012;
         } catch (DatabaseException e) {
             throw new UnexpectedLiquibaseException(e);
         }
-        return false;
     }
 
     @Override
@@ -685,5 +693,10 @@ public class MSSQLDatabase extends AbstractJdbcDatabase {
                 "UNION", "UNIQUE", "UNPIVOT", "UPDATE", "UPDATETEXT", "USE", "USER",
                 "VALUES", "VARYING", "VIEW",
                 "WAITFOR", "WHEN", "WHERE", "WHILE", "WITH", "WITHIN GROUP", "WRITETEXT");
+    }
+
+    @Override
+    public boolean supportsDatabaseChangeLogHistory() {
+        return true;
     }
 }

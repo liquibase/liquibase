@@ -1,7 +1,10 @@
 package liquibase.statement.core;
 
 import liquibase.statement.AbstractSqlStatement;
+import lombok.Getter;
+import lombok.Setter;
 
+@Getter
 public class AddDefaultValueStatement extends AbstractSqlStatement {
     private final String catalogName;
     private final String schemaName;
@@ -10,6 +13,7 @@ public class AddDefaultValueStatement extends AbstractSqlStatement {
     private final String columnDataType;
     private final Object defaultValue;
 
+    @Setter
     private String defaultValueConstraintName;
 
     public AddDefaultValueStatement(String catalogName, String schemaName, String tableName, String columnName, String columnDataType) {
@@ -25,35 +29,4 @@ public class AddDefaultValueStatement extends AbstractSqlStatement {
         this.defaultValue = defaultValue;
     }
 
-    public String getColumnName() {
-        return columnName;
-    }
-    
-    public String getColumnDataType() {
-        return columnDataType;
-    }
-
-    public String getCatalogName() {
-        return catalogName;
-    }
-
-    public String getSchemaName() {
-        return schemaName;
-    }
-
-    public String getTableName() {
-        return tableName;
-    }
-
-    public Object getDefaultValue() {
-        return defaultValue;
-    }
-
-    public String getDefaultValueConstraintName() {
-        return defaultValueConstraintName;
-    }
-
-    public void setDefaultValueConstraintName(String defaultValueConstraintName) {
-        this.defaultValueConstraintName = defaultValueConstraintName;
-    }
 }
