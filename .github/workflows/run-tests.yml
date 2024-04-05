@@ -246,9 +246,18 @@ jobs:
             core.setOutput("testResultsArtifact", "liquibase-test-results-integration-${{ matrix.testSystem }}".replace(/[^a-zA-Z0-9\-_]/g, "_"));
 
       - name: Set up JDK 17
+        if: ${{ matrix.testSystem != 'snowflake' }}
         uses: actions/setup-java@v4
         with:
           java-version: '17'
+          distribution: 'temurin'
+          cache: 'maven'
+
+      - name: Set up JDK 11 # get rid of this after https://github.com/snowflakedb/snowflake-jdbc/issues/589 is fixed
+        if: ${{ matrix.testSystem == 'snowflake' }}
+        uses: actions/setup-java@v4
+        with:
+          java-version: '11'
           distribution: 'temurin'
           cache: 'maven'
 
@@ -280,7 +289,7 @@ jobs:
           echo "TH_DB_ADMIN=test" >> $GITHUB_ENV  
           echo "TH_DB_PASSWD=test" >> $GITHUB_ENV
           echo "TH_DB=snowflake" >> $GITHUB_ENV
-          echo "TH_SNOW_URL=jdbc:snowflake://http://snowflake.localhost.localstack.cloud:4566?JDBC_QUERY_RESULT_FORMAT=JSON" >> $GITHUB_ENV
+          echo "TH_SNOW_URL=jdbc:snowflake://http://snowflake.localhost.localstack.cloud:4566" >> $GITHUB_ENV
 
       - name: Run Tests
         run: ./mvnw -B clean verify -DtrimStackTrace=false -Dliquibase.sdk.testSystem.test=${{ matrix.testSystem }} -Dliquibase.sdk.testSystem.acceptLicenses=${{ matrix.testSystem }} -Dliquibase.sdk.testSystem.snowflake.url=${{ env.TH_SNOW_URL }} -Dliquibase.sdk.testSystem.snowflake.username=${{ env.TH_DB_ADMIN }} -Dliquibase.sdk.testSystem.snowflake.password=${{ env.TH_DB_PASSWD }} -Dtest=*IntegrationTest,*ExecutorTest -DfailIfNoTests=false -Dsurefire.failIfNoSpecifiedTests=false
