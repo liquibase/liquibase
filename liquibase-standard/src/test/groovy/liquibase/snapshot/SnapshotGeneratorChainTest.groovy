@@ -90,6 +90,23 @@ class SnapshotGeneratorChainTest extends Specification {
         snapshot.getAttribute("visited", Boolean.class) == expectedTable.getAttribute("visited", Boolean.class)
     }
 
+    def "snapshotting fails if subsequent generator returns a different instance"() {
+        given:
+        def chain = new SnapshotGeneratorChain(sortedSetOf(visitingGenerator, badGenerator))
+        def object = new Table()
+        database.isSystemObject(object) >> false
+        snapshotControl.shouldInclude(object.class) >> true
+        def expectedTable = new Table()
+        expectedTable.setAttribute("visited", true)
+
+
+        when:
+        chain.snapshot(object, snapshotContext)
+
+        then:
+        def exception = thrown(DatabaseException)
+        exception.message.startsWith("Snapshot generator liquibase.snapshot.BadSnapshotGenerator has returned a different reference from the previous generator liquibase.snapshot.VisitedSnapshotGenerator.")
+    }
 
     def "snapshotting works even if first generator returns a different instance"() {
         given:
@@ -106,6 +123,25 @@ class SnapshotGeneratorChainTest extends Specification {
 
         then:
         result != null
+    }
+
+    def "snapshotting works if bad generator is replaced in the chain"() {
+        given:
+        def chain = new SnapshotGeneratorChain(sortedSetOf(visitingGenerator, badGenerator, replacementForBadGenerator))
+        def object = new Table()
+        database.isSystemObject(object) >> false
+        snapshotControl.shouldInclude(object.class) >> true
+        def expectedTable = new Table()
+        expectedTable.setAttribute("visited", true)
+        expectedTable.setAttribute("replacement", "done")
+
+
+        when:
+        def snapshot = chain.snapshot(object, snapshotContext)
+
+        then:
+        snapshot.getAttribute("visited", Boolean.class) == expectedTable.getAttribute("visited", Boolean.class)
+        snapshot.getAttribute("replacement", String.class) == expectedTable.getAttribute("replacement", String.class)
     }
 
     private static SortedSet<SnapshotGenerator> sortedSetOf(SnapshotGenerator... generators) {
@@ -132,7 +168,7 @@ class VisitedSnapshotGenerator implements SnapshotGenerator, Comparable<Snapshot
     }
 
     @Override
-    def <T extends DatabaseObject> T snapshot(T example, DatabaseSnapshot snapshot, SnapshotGeneratorChain chain) throws DatabaseException, InvalidExampleException {
+    <T extends DatabaseObject> T snapshot(T example, DatabaseSnapshot snapshot, SnapshotGeneratorChain chain) throws DatabaseException, InvalidExampleException {
         example.setAttribute("visited", true)
         return example
     }
@@ -150,9 +186,9 @@ class VisitedSnapshotGenerator implements SnapshotGenerator, Comparable<Snapshot
     @Override
     int compareTo(SnapshotGenerator o) {
         if (System.identityHashCode(this) == System.identityHashCode(o)) {
-            return 0;
+            return 0
         }
-        return 1; // smaller than == most priority
+        return 1 // smaller than == most priority
     }
 }
 
@@ -177,7 +213,7 @@ class ReplacingSnapshotGenerator implements SnapshotGenerator, Comparable<Snapsh
     }
 
     @Override
-    def <T extends DatabaseObject> T snapshot(T example, DatabaseSnapshot snapshot, SnapshotGeneratorChain chain) throws DatabaseException, InvalidExampleException {
+    <T extends DatabaseObject> T snapshot(T example, DatabaseSnapshot snapshot, SnapshotGeneratorChain chain) throws DatabaseException, InvalidExampleException {
         example.setAttribute("replacement", "done")
         return example
     }
@@ -195,9 +231,9 @@ class ReplacingSnapshotGenerator implements SnapshotGenerator, Comparable<Snapsh
     @Override
     int compareTo(SnapshotGenerator o) {
         if (System.identityHashCode(this) == System.identityHashCode(o)) {
-            return 0;
+            return 0
         }
-        return 1; // greater than == least priority
+        return 1 // greater than == least priority
     }
 }
 
@@ -218,7 +254,7 @@ class BadSnapshotGenerator implements SnapshotGenerator, Comparable<SnapshotGene
     }
 
     @Override
-    def <T extends DatabaseObject> T snapshot(T example, DatabaseSnapshot snapshot, SnapshotGeneratorChain chain) throws DatabaseException, InvalidExampleException {
+    <T extends DatabaseObject> T snapshot(T example, DatabaseSnapshot snapshot, SnapshotGeneratorChain chain) throws DatabaseException, InvalidExampleException {
         // generators are expected to add nested attributes, ... to the provided example or delegate if the example type does not match
         // they are NOT expected to create new instances of the same type
         return acceptedType.newInstance() as T
@@ -237,8 +273,8 @@ class BadSnapshotGenerator implements SnapshotGenerator, Comparable<SnapshotGene
     @Override
     int compareTo(SnapshotGenerator o) {
         if (System.identityHashCode(this) == System.identityHashCode(o)) {
-            return 0;
+            return 0
         }
-        return 1; // greater than == least priority
+        return 1 // greater than == least priority
     }
 }
