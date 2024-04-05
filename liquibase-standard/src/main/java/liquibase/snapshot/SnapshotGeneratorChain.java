@@ -26,6 +26,17 @@ public class SnapshotGeneratorChain {
         }
     }
 
+    /**
+     * This calls all the non-replaced {@link SnapshotGenerator} in the chain, by comparison order
+     * Only the first generator in the chain is allowed to create a new instance of T
+     * Subsequent generators must modify the instance or call the chain if the provided object is not handled,
+     * otherwise a {@link DatabaseException} is thrown
+     *
+     * @return snapshot object
+     * @throws DatabaseException if any of the subsequent generators return an instance different from the first generator's
+     *                           invocation result
+     * @see SnapshotGenerator#replaces() to skip generators that do not comply to the above requireemnts
+     */
     public <T extends DatabaseObject> T snapshot(T example, DatabaseSnapshot snapshot)
             throws DatabaseException, InvalidExampleException {
         if (example == null) {
@@ -40,34 +51,27 @@ public class SnapshotGeneratorChain {
             return null;
         }
 
-        SnapshotGenerator next = getNextValidGenerator();
-
-        if (next == null) {
-            return null;
-        }
-
-        T obj = next.snapshot(example, snapshot, this);
-        if ((obj != null) && (obj.getSnapshotId() == null)) {
-            obj.setSnapshotId(snapshotIdService.generateId());
-        }
-        return obj;
-    }
-
-    public SnapshotGenerator getNextValidGenerator() {
         if (snapshotGenerators == null) {
             return null;
         }
 
-        if (!snapshotGenerators.hasNext()) {
-            return null;
-        }
-
-        SnapshotGenerator next = snapshotGenerators.next();
-        for (Class<? extends SnapshotGenerator> removedGenerator : replacedGenerators) {
-            if (removedGenerator.equals(next.getClass())) {
-                return getNextValidGenerator();
+        T lastObject = example;
+        T lastObjectToProcess = example;
+        while (snapshotGenerators.hasNext()) {
+            SnapshotGenerator generator = snapshotGenerators.next();
+            if (replacedGenerators.contains(generator.getClass())) {
+                continue;
             }
+            T object = generator.snapshot(lastObjectToProcess, snapshot, this);
+            if (object != null) {
+                lastObjectToProcess = object;
+                if (object.getSnapshotId() == null) {
+                    object.setSnapshotId(snapshotIdService.generateId());
+                }
+            }
+            lastObject = object;
         }
-        return next;
+        return lastObject;
     }
+
 }

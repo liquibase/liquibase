@@ -1,5 +1,6 @@
 package liquibase.util;
 
+import liquibase.Scope;
 import liquibase.exception.UnexpectedLiquibaseException;
 import liquibase.statement.DatabaseFunction;
 import liquibase.statement.SequenceCurrentValueFunction;
@@ -18,6 +19,7 @@ import java.text.ParseException;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Function;
+import java.util.logging.Level;
 
 /**
  * Various methods that make it easier to read and write object properties using the propertyName, instead of having
@@ -31,6 +33,7 @@ public class ObjectUtil {
      * Cache for the methods of classes that we have been queried about so far.
      */
     private static final Map<Class<?>, Method[]> methodCache = new ConcurrentHashMap<>();
+    public static String ARGUMENT_KEY = "key";
 
     /**
      * For a given object, try to find the appropriate reader method and return the value, if set
@@ -247,10 +250,19 @@ public class ObjectUtil {
         return methodCache.computeIfAbsent(object.getClass(), k -> object.getClass().getMethods());
     }
 
-      /**
-     * Converts the given object to the targetClass
-     */
+    /**
+    * Converts the given object to the targetClass
+    */
     public static <T> T convert(Object object, Class<T> targetClass) throws IllegalArgumentException {
+        return convert(object, targetClass, null);
+    }
+
+    /**
+     * Converts the given object to the targetClass
+     * @param name The name of the argument being converted, which can be used in error messages for more descriptiveness.
+     *             If null, the name will not be used in any error messages.
+     */
+    public static <T> T convert(Object object, Class<T> targetClass, String name) throws IllegalArgumentException {
         if (object == null) {
             return null;
         }
@@ -267,7 +279,13 @@ public class ObjectUtil {
                     for (Enum value : ((Class<Enum>) targetClass).getEnumConstants()) {
                         values.add(value.name());
                     }
-                    throw new IllegalArgumentException("Invalid value "+object+". Acceptable values are "+StringUtil.join(values, ", "));
+                    String exceptionMessage;
+                    if (StringUtil.isEmpty(name)) {
+                        exceptionMessage = "Invalid value '"+object+"'.";
+                    } else {
+                        exceptionMessage = "The " + name.toLowerCase() + " value '" + object + "' is not valid.";
+                    }
+                    throw new IllegalArgumentException(exceptionMessage + " Acceptable values are '"+StringUtil.join(values, "', '") +"'");
                 }
             } else if (Number.class.isAssignableFrom(targetClass)) {
                 if (object instanceof Number) {
@@ -340,7 +358,26 @@ public class ObjectUtil {
                 }
             } else if (targetClass.isAssignableFrom(Boolean.class)) {
                 String lowerCase = object.toString().toLowerCase();
-                return (T) (Boolean) (lowerCase.equals("true") || lowerCase.equals("t") || lowerCase.equals("1") || lowerCase.equals("1.0") || lowerCase.equals("yes"));
+                boolean isTruthy = Arrays.asList("true", "t", "1", "1.0", "yes", "y", "on").contains(lowerCase);
+                boolean isFalsy = Arrays.asList("false", "f", "0", "0.0", "no", "n", "off").contains(lowerCase);
+
+                if (!isTruthy && !isFalsy) {
+                    String key = Scope.getCurrentScope().get(ARGUMENT_KEY, String.class);
+                    String messageString;
+                    if (key != null) {
+                        messageString = "\nWARNING:  The input for '" + key + "' is '" + object + "', which is not valid.  " +
+                                "Options: 'true' or 'false'.";
+                    } else {
+                        messageString = "\nWARNING:  The input '" + object + "' is not valid.  Options: 'true' or 'false'.";
+                    }
+                    throw new IllegalArgumentException(messageString);
+                }
+
+                if (isTruthy) {
+                    return (T) Boolean.TRUE;
+                } else {
+                    return (T) Boolean.FALSE;
+                }
             } else if (targetClass.isAssignableFrom(String.class)) {
                 return (T) object.toString();
             } else if (targetClass.isAssignableFrom(List.class)) {
@@ -367,6 +404,8 @@ public class ObjectUtil {
                 return (T) UUID.fromString(object.toString());
             } else if (Date.class.isAssignableFrom(targetClass)) {
                 return (T) new ISODateFormat().parse(object.toString());
+            } else if (Level.class.isAssignableFrom(targetClass)) {
+                return (T) Level.parse(object.toString().toUpperCase());
             }
 
             return (T) object;

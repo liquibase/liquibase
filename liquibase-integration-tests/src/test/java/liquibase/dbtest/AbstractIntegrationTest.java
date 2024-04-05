@@ -69,6 +69,7 @@ import java.util.stream.Collectors;
 import static liquibase.test.SnapshotAssert.assertThat;
 import static org.junit.Assert.*;
 import static org.junit.Assume.assumeNotNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 /**
  * Base class for all database integration tests.  There is an AbstractIntegrationTest subclass for each supported database.
@@ -202,11 +203,11 @@ public abstract class AbstractIntegrationTest {
             String altSchema = testSystem.getAltSchema();
             String altCatalog = testSystem.getAltCatalog();
 
-            if (database.supportsSchemas()) {
+            if (database.supports(Schema.class)) {
                 emptyTestSchema(null, altSchema, database);
             }
             if (supportsAltCatalogTests()) {
-                if (database.supportsSchemas() && database.supportsCatalogs()) {
+                if (database.supports(Schema.class) && database.supports(Catalog.class)) {
                     emptyTestSchema(altCatalog, altSchema, database);
                 }
             }
@@ -263,7 +264,7 @@ public abstract class AbstractIntegrationTest {
     }
 
     protected boolean supportsAltCatalogTests() {
-        return database.supportsCatalogs();
+        return database.supports(Catalog.class);
     }
 
     protected Properties createProperties() {
@@ -755,7 +756,7 @@ public abstract class AbstractIntegrationTest {
         if (database.getShortName().equalsIgnoreCase("mssql")) {
             return; // not possible on MSSQL.
         }
-        if (!database.supportsSchemas()) {
+        if (!database.supports(Schema.class)) {
             return;
         }
 

@@ -1,9 +1,11 @@
 package liquibase.statement.core;
 
 import liquibase.statement.AbstractSqlStatement;
+import lombok.Getter;
 
 import java.math.BigInteger;
 
+@Getter
 public class AddAutoIncrementStatement extends AbstractSqlStatement {
 
     private final String catalogName;
@@ -37,39 +39,4 @@ public class AddAutoIncrementStatement extends AbstractSqlStatement {
         this.generationType = generationType;
     }
 
-    public String getCatalogName() {
-        return catalogName;
-    }
-
-    public String getSchemaName() {
-        return schemaName;
-    }
-
-    public String getTableName() {
-        return tableName;
-    }
-
-    public String getColumnName() {
-        return columnName;
-    }
-
-    public String getColumnDataType() {
-        return columnDataType;
-    }
-    
-    public BigInteger getStartWith() {
-        return startWith;
-    }
-    
-    public BigInteger getIncrementBy() {
-        return incrementBy;
-    }
-
-    public Boolean getDefaultOnNull() {
-        return defaultOnNull;
-    }
-
-    public String getGenerationType() {
-        return generationType;
-    }
 }

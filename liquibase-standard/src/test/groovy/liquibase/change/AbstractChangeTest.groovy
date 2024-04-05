@@ -10,11 +10,10 @@ import liquibase.changelog.ChangeSet
 import liquibase.changelog.DatabaseChangeLog
 import liquibase.database.Database
 import liquibase.database.core.MSSQLDatabase
+import liquibase.database.core.MockDatabase
 import liquibase.exception.RollbackImpossibleException
 import liquibase.exception.UnexpectedLiquibaseException
 import liquibase.exception.ValidationErrors
-import liquibase.database.core.MockDatabase
-import liquibase.integration.commandline.LiquibaseCommandLineConfiguration
 import liquibase.serializer.LiquibaseSerializable
 import liquibase.statement.SqlStatement
 import liquibase.util.TestUtil
@@ -354,7 +353,7 @@ class AbstractChangeTest extends Specification {
 
     @Test
     void createSupportedDatabasesMetaData_nullAnnotation() {
-        assertArraysEqual(["COMPUTE"].toArray(), new ExampleAbstractChange().createSupportedDatabasesMetaData("x", null))
+        assertArraysEqual(["COMPUTE"].toArray() as String[], new ExampleAbstractChange().createSupportedDatabasesMetaData("x", null))
     }
 
     @Unroll("#featureName: #path is included as part of description for a #change")

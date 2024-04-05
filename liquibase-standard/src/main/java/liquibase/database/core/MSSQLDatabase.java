@@ -121,7 +121,7 @@ public class MSSQLDatabase extends AbstractJdbcDatabase {
     //  Setup up an appending SQL visitor if this is not an AbstractSQLChange or
     //  if there is no end delimiter
     //
-    private List<SqlVisitor> addSqlVisitors(List<SqlVisitor> sqlVisitors) {
+    protected static List<SqlVisitor> addSqlVisitors(List<SqlVisitor> sqlVisitors) {
         List<SqlVisitor> sqlChangeVisitors = new ArrayList<>(sqlVisitors);
         AppendSqlIfNotPresentVisitor appendVisitor = new AppendSqlIfNotPresentVisitor();
         appendVisitor.setValue(";");
@@ -185,15 +185,24 @@ public class MSSQLDatabase extends AbstractJdbcDatabase {
     }
 
     @Override
+    public boolean supports(Class<? extends DatabaseObject> object) {
+        if (Sequence.class.isAssignableFrom(object)) {
+            try {
+                return isAzureDb() || this.getDatabaseMajorVersion() >= MSSQL_SERVER_VERSIONS.MSSQL2012;
+            } catch (DatabaseException e) {
+                throw new UnexpectedLiquibaseException(e);
+            }
+        }
+        return super.supports(object);
+    }
+
+    @Override
     public boolean supportsSequences() {
         try {
-            if (isAzureDb() || this.getDatabaseMajorVersion() >= MSSQL_SERVER_VERSIONS.MSSQL2012) {
-                return true;
-            }
+            return isAzureDb() || this.getDatabaseMajorVersion() >= MSSQL_SERVER_VERSIONS.MSSQL2012;
         } catch (DatabaseException e) {
             throw new UnexpectedLiquibaseException(e);
         }
-        return false;
     }
 
     @Override
