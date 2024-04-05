@@ -55,7 +55,7 @@ public class SnapshotGeneratorChain {
             return null;
         }
 
-        T lastObject = example;
+        T lastObject = null;
         T lastObjectToProcess = example;
         while (snapshotGenerators.hasNext()) {
             SnapshotGenerator generator = snapshotGenerators.next();
