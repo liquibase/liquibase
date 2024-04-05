@@ -51,27 +51,34 @@ public class SnapshotGeneratorChain {
             return null;
         }
 
+        SnapshotGenerator next = getNextValidGenerator();
+
+        if (next == null) {
+            return null;
+        }
+
+        T obj = next.snapshot(example, snapshot, this);
+        if ((obj != null) && (obj.getSnapshotId() == null)) {
+            obj.setSnapshotId(snapshotIdService.generateId());
+        }
+        return obj;
+    }
+
+    public SnapshotGenerator getNextValidGenerator() {
         if (snapshotGenerators == null) {
             return null;
         }
 
-        T lastObject = null;
-        T lastObjectToProcess = example;
-        while (snapshotGenerators.hasNext()) {
-            SnapshotGenerator generator = snapshotGenerators.next();
-            if (replacedGenerators.contains(generator.getClass())) {
-                continue;
-            }
-            T object = generator.snapshot(lastObjectToProcess, snapshot, this);
-            if (object != null) {
-                lastObjectToProcess = object;
-                if (object.getSnapshotId() == null) {
-                    object.setSnapshotId(snapshotIdService.generateId());
-                }
-            }
-            lastObject = object;
+        if (!snapshotGenerators.hasNext()) {
+            return null;
         }
-        return lastObject;
-    }
 
+        SnapshotGenerator next = snapshotGenerators.next();
+        for (Class<? extends SnapshotGenerator> removedGenerator : replacedGenerators) {
+            if (removedGenerator.equals(next.getClass())) {
+                return getNextValidGenerator();
+            }
+        }
+        return next;
+    }
 }
