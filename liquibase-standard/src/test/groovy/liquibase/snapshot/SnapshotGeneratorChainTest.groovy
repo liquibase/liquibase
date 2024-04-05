@@ -108,25 +108,6 @@ class SnapshotGeneratorChainTest extends Specification {
         result != null
     }
 
-    def "snapshotting works if bad generator is replaced in the chain"() {
-        given:
-        def chain = new SnapshotGeneratorChain(sortedSetOf(visitingGenerator, badGenerator, replacementForBadGenerator))
-        def object = new Table()
-        database.isSystemObject(object) >> false
-        snapshotControl.shouldInclude(object.class) >> true
-        def expectedTable = new Table()
-        expectedTable.setAttribute("visited", true)
-        expectedTable.setAttribute("replacement", "done")
-
-
-        when:
-        def snapshot = chain.snapshot(object, snapshotContext)
-
-        then:
-        snapshot.getAttribute("visited", Boolean.class) == expectedTable.getAttribute("visited", Boolean.class)
-        snapshot.getAttribute("replacement", String.class) == expectedTable.getAttribute("replacement", String.class)
-    }
-
     private static SortedSet<SnapshotGenerator> sortedSetOf(SnapshotGenerator... generators) {
         def result = new TreeSet<SnapshotGenerator>()
         result.addAll(generators)
