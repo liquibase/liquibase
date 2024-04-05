@@ -30,7 +30,7 @@ public class CatalogAndSchema {
     }
 
     public boolean equals(CatalogAndSchema catalogAndSchema, Database accordingTo) {
-        if (!accordingTo.supportsCatalogs()) {
+        if (!accordingTo.supports(Catalog.class)) {
             return true;
         }
 
@@ -47,7 +47,7 @@ public class CatalogAndSchema {
             return false;
         }
 
-        if (accordingTo.supportsSchemas()) {
+        if (accordingTo.supports(Schema.class)) {
             if (workCatalogAndSchema.getSchemaName() == null) {
                 return thisCatalogAndSchema.getSchemaName() == null;
             } else {
@@ -73,11 +73,11 @@ public class CatalogAndSchema {
         String workCatalogName = StringUtil.trimToNull(getCatalogName());
         String workSchemaName = StringUtil.trimToNull(getSchemaName());
 
-        if (!accordingTo.supportsCatalogs()) {
+        if (!accordingTo.supports(Catalog.class)) {
             return new CatalogAndSchema(null, null);
         }
 
-        if (accordingTo.supportsSchemas()) {
+        if (accordingTo.supports(Schema.class)) {
             if ((workSchemaName != null) && workSchemaName.equalsIgnoreCase(accordingTo.getDefaultSchemaName())) {
                 workSchemaName = null;
             }
@@ -94,7 +94,7 @@ public class CatalogAndSchema {
         if (workSchemaName != null && equals(accordingTo, workSchemaName, accordingTo.getDefaultSchemaName())) {
             workSchemaName = null;
         }
-        if (!accordingTo.supportsSchemas() && (workCatalogName != null) && (workSchemaName != null) &&
+        if (!accordingTo.supports(Schema.class) && (workCatalogName != null) && (workSchemaName != null) &&
             !workCatalogName.equals(workSchemaName)) {
             workSchemaName = null;
         }
@@ -137,7 +137,7 @@ public class CatalogAndSchema {
         String workSchemaName = standard.getSchemaName();
 
         if (workCatalogName == null) {
-            if (!accordingTo.supportsSchemas() && (workSchemaName != null)) {
+            if (!accordingTo.supports(Schema.class) && (workSchemaName != null)) {
                 return new CatalogAndSchema(accordingTo.correctObjectName(workSchemaName, Catalog.class), null);
             }
             workCatalogName = accordingTo.getDefaultCatalogName();
