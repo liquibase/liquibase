@@ -140,7 +140,7 @@ public class DBDocVisitor implements ChangeSetVisitor {
 
         new ChangeLogListWriter(rootOutputDir).writeHTML(changeLogs);
         SortedSet<Table> tables = new TreeSet<>(snapshot.get(Table.class));
-        tables.removeIf(table -> database.isLiquibaseObject(table));
+        tables.removeIf(database::isLiquibaseObject);
 
         new TableListWriter(rootOutputDir).writeHTML(tables);
         new AuthorListWriter(rootOutputDir).writeHTML(new TreeSet<Object>(changesByAuthor.keySet()));
