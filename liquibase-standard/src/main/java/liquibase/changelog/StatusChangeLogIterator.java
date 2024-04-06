@@ -36,28 +36,25 @@ public class StatusChangeLogIterator extends ChangeLogIterator {
     public void run(ChangeSetVisitor visitor, RuntimeEnvironment env) throws LiquibaseException {
         databaseChangeLog.setRuntimeEnvironment(env);
         try {
-            Scope.child(Scope.Attr.databaseChangeLog, databaseChangeLog, new Scope.ScopedRunner() {
-                @Override
-                public void run() throws Exception {
-                    List<ChangeSet> changeSetList = new ArrayList<>(databaseChangeLog.getChangeSets());
-                    if (visitor.getDirection().equals(ChangeSetVisitor.Direction.REVERSE)) {
-                        Collections.reverse(changeSetList);
+            Scope.child(Scope.Attr.databaseChangeLog, databaseChangeLog, () -> {
+                List<ChangeSet> changeSetList = new ArrayList<>(databaseChangeLog.getChangeSets());
+                if (visitor.getDirection().equals(ChangeSetVisitor.Direction.REVERSE)) {
+                    Collections.reverse(changeSetList);
+                }
+                for (ChangeSet changeSet : changeSetList) {
+                    AtomicBoolean shouldVisit = new AtomicBoolean(true);
+                    Set<ChangeSetFilterResult> reasonsAccepted = new LinkedHashSet<>();
+                    Set<ChangeSetFilterResult> reasonsDenied = new LinkedHashSet<>();
+                    if (changeSetFilters != null) {
+                        shouldVisit.set(iterateFilters(changeSet, reasonsAccepted, reasonsDenied));
                     }
-                    for (ChangeSet changeSet : changeSetList) {
-                        AtomicBoolean shouldVisit = new AtomicBoolean(true);
-                        Set<ChangeSetFilterResult> reasonsAccepted = new LinkedHashSet<>();
-                        Set<ChangeSetFilterResult> reasonsDenied = new LinkedHashSet<>();
-                        if (changeSetFilters != null) {
-                            shouldVisit.set(iterateFilters(changeSet, reasonsAccepted, reasonsDenied));
-                        }
 
-                        if (shouldVisit.get()) {
-                            visitor.visit(changeSet, databaseChangeLog, env.getTargetDatabase(), reasonsAccepted);
-                            markSeen(changeSet);
-                        } else{
-                            if (visitor instanceof SkippedChangeSetVisitor) {
-                                ((SkippedChangeSetVisitor) visitor).skipped(changeSet, databaseChangeLog, env.getTargetDatabase(), reasonsDenied);
-                            }
+                    if (shouldVisit.get()) {
+                        visitor.visit(changeSet, databaseChangeLog, env.getTargetDatabase(), reasonsAccepted);
+                        markSeen(changeSet);
+                    } else{
+                        if (visitor instanceof SkippedChangeSetVisitor) {
+                            ((SkippedChangeSetVisitor) visitor).skipped(changeSet, databaseChangeLog, env.getTargetDatabase(), reasonsDenied);
                         }
                     }
                 }
