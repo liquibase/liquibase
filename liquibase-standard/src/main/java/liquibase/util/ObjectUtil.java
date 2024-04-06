@@ -409,9 +409,7 @@ public class ObjectUtil {
             }
 
             return (T) object;
-        } catch (NumberFormatException e) {
-            throw new IllegalArgumentException(e);
-        } catch (ParseException e) {
+        } catch (NumberFormatException | ParseException e) {
             throw new IllegalArgumentException(e);
         }
     }
