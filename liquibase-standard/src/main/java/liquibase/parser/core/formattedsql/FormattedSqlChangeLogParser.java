@@ -90,20 +90,24 @@ public class FormattedSqlChangeLogParser extends AbstractFormattedChangeLogParse
             String name = StringUtil.trimToNull(preconditionMatcher.group(1));
             if (name != null) {
                 String body = preconditionMatcher.group(2).trim();
-                if ("sql-check".equals(name)) {
-                    changeSet.getPreconditions().addNestedPrecondition(
-                            parseSqlCheckCondition(changeLogParameters.expandExpressions(StringUtil.trimToNull(body), changeSet.getChangeLog()))
-                    );
-                } else if ("table-exists".equals(name)) {
-                    changeSet.getPreconditions().addNestedPrecondition(
-                            parseTableExistsCondition(changeLogParameters.expandExpressions(StringUtil.trimToNull(body), changeSet.getChangeLog()))
-                    );
-                } else if ("view-exists".equals(name)) {
-                    changeSet.getPreconditions().addNestedPrecondition(
-                            parseViewExistsCondition(changeLogParameters.expandExpressions(StringUtil.trimToNull(body), changeSet.getChangeLog()))
-                    );
-                } else {
-                    throw new ChangeLogParseException("The '" + name + "' precondition type is not supported.");
+                switch (name) {
+                    case "sql-check":
+                        changeSet.getPreconditions().addNestedPrecondition(
+                                parseSqlCheckCondition(changeLogParameters.expandExpressions(StringUtil.trimToNull(body), changeSet.getChangeLog()))
+                        );
+                        break;
+                    case "table-exists":
+                        changeSet.getPreconditions().addNestedPrecondition(
+                                parseTableExistsCondition(changeLogParameters.expandExpressions(StringUtil.trimToNull(body), changeSet.getChangeLog()))
+                        );
+                        break;
+                    case "view-exists":
+                        changeSet.getPreconditions().addNestedPrecondition(
+                                parseViewExistsCondition(changeLogParameters.expandExpressions(StringUtil.trimToNull(body), changeSet.getChangeLog()))
+                        );
+                        break;
+                    default:
+                        throw new ChangeLogParseException("The '" + name + "' precondition type is not supported.");
                 }
             }
         }
@@ -147,14 +151,15 @@ public class FormattedSqlChangeLogParser extends AbstractFormattedChangeLogParse
         if (preconditionMatcher.groupCount() == 1) {
             String name = StringUtil.trimToNull(preconditionMatcher.group(1));
             if (name != null) {
-                if ("sql-check".equals(name)) {
-                    throw new ChangeLogParseException("Precondition sql check failed because of missing required expectedResult and sql parameters.");
-                } else if ("table-exists".equals(name)) {
-                    throw new ChangeLogParseException("Precondition table exists failed because of missing required table name parameter.");
-                } else if ("view-exists".equals(name)) {
-                    throw new ChangeLogParseException("Precondition view exists failed because of missing required view name parameter.");
-                } else {
-                    throw new ChangeLogParseException("The '" + name + "' precondition type is not supported.");
+                switch (name) {
+                    case "sql-check":
+                        throw new ChangeLogParseException("Precondition sql check failed because of missing required expectedResult and sql parameters.");
+                    case "table-exists":
+                        throw new ChangeLogParseException("Precondition table exists failed because of missing required table name parameter.");
+                    case "view-exists":
+                        throw new ChangeLogParseException("Precondition view exists failed because of missing required view name parameter.");
+                    default:
+                        throw new ChangeLogParseException("The '" + name + "' precondition type is not supported.");
                 }
             }
         }
