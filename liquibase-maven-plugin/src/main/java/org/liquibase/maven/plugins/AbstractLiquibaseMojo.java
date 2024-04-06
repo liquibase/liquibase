@@ -1362,10 +1362,9 @@ public abstract class AbstractLiquibaseMojo extends AbstractMojo {
             systemProperties = new Properties();
         }
         // Add all system properties configured by the user
-        Iterator<Object> iter = systemProperties.keySet().iterator();
-        while (iter.hasNext()) {
-            String key = (String) iter.next();
-            String value = systemProperties.getProperty(key);
+        for (Map.Entry<?, ?> entry : systemProperties.entrySet()) {
+            String key = (String) entry.getKey();
+            String value = (String) entry.getValue();
             System.setProperty(key, value);
         }
     }
