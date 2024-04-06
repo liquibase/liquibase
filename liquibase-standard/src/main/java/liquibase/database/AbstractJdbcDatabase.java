@@ -731,7 +731,7 @@ public abstract class AbstractJdbcDatabase implements Database {
         if (caseSensitive == null) {
             return false;
         } else {
-            return caseSensitive.booleanValue();
+            return caseSensitive;
         }
     }
 
