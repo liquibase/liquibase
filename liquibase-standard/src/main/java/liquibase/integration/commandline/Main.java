@@ -1116,8 +1116,8 @@ public class Main {
     protected static CodePointCheck checkArg(String arg) {
         char[] chars = arg.toCharArray();
         for (int i = 0; i < chars.length; i++) {
-            for (int j = 0; j < suspiciousCodePoints.length; j++) {
-                if (suspiciousCodePoints[j] == chars[i]) {
+            for (int suspiciousCodePoint : suspiciousCodePoints) {
+                if (suspiciousCodePoint == chars[i]) {
                     CodePointCheck codePointCheck = new CodePointCheck();
                     codePointCheck.position = i;
                     codePointCheck.ch = chars[i];
