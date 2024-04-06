@@ -14,6 +14,8 @@ import liquibase.exception.UnexpectedLiquibaseException;
 import liquibase.integration.commandline.LiquibaseCommandLineConfiguration;
 import liquibase.logging.Logger;
 import liquibase.resource.ResourceAccessor;
+import liquibase.structure.core.Catalog;
+import liquibase.structure.core.Schema;
 import liquibase.ui.UIServiceEnum;
 import liquibase.util.StringUtil;
 import lombok.Getter;
@@ -342,17 +344,17 @@ public class SpringLiquibase implements InitializingBean, BeanNameAware, Resourc
         }
 
         Database database = DatabaseFactory.getInstance().findCorrectDatabaseImplementation(liquibaseConnection);
-        if (StringUtil.trimToNull(this.defaultSchema) != null) {
-            if (database.supportsSchemas()) {
+		if (StringUtil.trimToNull(this.defaultSchema) != null) {
+            if (database.supports(Schema.class)) {
                 database.setDefaultSchemaName(this.defaultSchema);
-            } else if (database.supportsCatalogs()) {
+            } else if (database.supports(Catalog.class)) {
                 database.setDefaultCatalogName(this.defaultSchema);
             }
         }
         if (StringUtil.trimToNull(this.liquibaseSchema) != null) {
-            if (database.supportsSchemas()) {
+            if (database.supports(Schema.class)) {
                 database.setLiquibaseSchemaName(this.liquibaseSchema);
-            } else if (database.supportsCatalogs()) {
+            } else if (database.supports(Catalog.class)) {
                 database.setLiquibaseCatalogName(this.liquibaseSchema);
             }
         }

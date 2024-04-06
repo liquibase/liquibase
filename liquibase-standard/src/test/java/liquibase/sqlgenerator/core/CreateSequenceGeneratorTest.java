@@ -11,6 +11,7 @@ import liquibase.sql.Sql;
 import liquibase.sqlgenerator.AbstractSqlGeneratorTest;
 import liquibase.sqlgenerator.MockSqlGeneratorChain;
 import liquibase.statement.core.CreateSequenceStatement;
+import liquibase.structure.core.Sequence;
 import org.junit.Test;
 
 import java.math.BigInteger;
@@ -237,7 +238,7 @@ public class CreateSequenceGeneratorTest extends AbstractSqlGeneratorTest<Create
     @Override
     protected boolean shouldBeImplementation(Database database) {
 
-        return database.supportsSequences();
+        return database.supports(Sequence.class);
     }
 
 //    //    @Test
