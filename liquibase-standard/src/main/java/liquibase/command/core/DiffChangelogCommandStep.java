@@ -81,7 +81,7 @@ public class DiffChangelogCommandStep extends AbstractChangelogCommandStep {
             CommandScope commandScope = resultsBuilder.getCommandScope();
             Database referenceDatabase = (Database) commandScope.getDependency(ReferenceDatabase.class);
             DiffOutputControl diffOutputControl = (DiffOutputControl) resultsBuilder.getResult(DiffOutputControlCommandStep.DIFF_OUTPUT_CONTROL.getName());
-            if(commandScope.getArgumentValue(DiffChangelogCommandStep.USE_OR_REPLACE_OPTION).booleanValue()) {
+            if (commandScope.getArgumentValue(DiffChangelogCommandStep.USE_OR_REPLACE_OPTION)) {
                 diffOutputControl.setReplaceIfExistsSet(true);
             }
             referenceDatabase.setOutputDefaultSchema(diffOutputControl.getIncludeSchema());
