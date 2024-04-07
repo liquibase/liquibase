@@ -288,6 +288,10 @@ public class JdbcConnection implements DatabaseConnection {
         }
     }
 
+    public boolean getUseAffectedRows() throws DatabaseException {
+        return getURL().contains("useAffectedRows=true");
+    }
+
     @Override
     public String getCatalog() throws DatabaseException {
         try {
