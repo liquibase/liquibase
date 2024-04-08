@@ -35,10 +35,6 @@ public interface DatabaseConnection extends PrioritizedService, AutoCloseable {
 
     boolean getAutoCommit() throws DatabaseException;
 
-    default boolean getUseAffectedRows() throws DatabaseException {
-        return false;
-    }
-
     String getCatalog() throws DatabaseException;
 
     String nativeSQL(String sql) throws DatabaseException;

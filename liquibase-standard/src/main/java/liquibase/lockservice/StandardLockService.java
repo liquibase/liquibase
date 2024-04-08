@@ -376,7 +376,7 @@ public class StandardLockService implements LockService {
                             "Database did not return a proper row count (Might have useAffectedRows enabled.)"
                     );
                     // NOTE: if using useAffectedRows, MySQL will return 0 rows affected if the changelog lock was not set or already released
-                    if (database.getConnection().getUseAffectedRows()) {
+                    if (((MySQLDatabase) database).getUseAffectedRows()) {
                         // Assume the lock was released successfully
                         updatedRows = 1;
                     }
