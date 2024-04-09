@@ -3,6 +3,7 @@ package liquibase.database.core;
 import liquibase.CatalogAndSchema;
 import liquibase.GlobalConfiguration;
 import liquibase.Scope;
+import liquibase.change.AbstractSQLChange;
 import liquibase.change.Change;
 import liquibase.changelog.DatabaseChangeLog;
 import liquibase.database.AbstractJdbcDatabase;
@@ -114,7 +115,12 @@ public class MSSQLDatabase extends AbstractJdbcDatabase {
 
     @Override
     public void executeStatements(Change change, DatabaseChangeLog changeLog, List<SqlVisitor> sqlVisitors) throws LiquibaseException {
-        super.executeStatements(change, changeLog, addSqlVisitors(sqlVisitors));
+        if (change instanceof AbstractSQLChange && StringUtil.trimToNull(((AbstractSQLChange) change).getEndDelimiter()) != null) {
+            super.executeStatements(change, changeLog, sqlVisitors);
+        }
+        else {
+            super.executeStatements(change, changeLog, addSqlVisitors(sqlVisitors));
+        }
     }
 
     //
