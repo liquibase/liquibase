@@ -407,7 +407,7 @@ jobs:
           event-type: oss-released-tag
 
   package:
-    uses: liquibase/build-logic/.github/workflows/package.yml@v0.6.7
+    uses: liquibase/build-logic/.github/workflows/package.yml@v0.6.9
     needs: [ setup ]
     secrets: inherit
     with:
