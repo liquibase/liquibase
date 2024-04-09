@@ -195,7 +195,7 @@ jobs:
           rm re-version/final/*.md5
           rm re-version/final/*.sha1
       - name: Attach Files to Draft Release
-        uses: softprops/action-gh-release@v1
+        uses: softprops/action-gh-release@v2
         with:
           tag_name: v${{ needs.setup.outputs.version }}
           fail_on_unmatched_files: true
