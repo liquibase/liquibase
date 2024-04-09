@@ -470,9 +470,9 @@ public abstract class AbstractFormattedChangeLogParser implements ChangeLogParse
                         throw new ChangeLogParseException("\n" + message);
                     }
                     if (changeSet != null) {
-                        AtomicBoolean exitFlag = new AtomicBoolean(false);
-                        configureChangeSet(physicalChangeLogLocation, changeLogParameters, reader, currentSequence, currentRollbackSequence, changeSet, count, line, commentMatcher, resourceAccessor, changeLog, change, rollbackSplitStatementsPatternMatcher, rollbackSplitStatements, rollbackEndDelimiter, exitFlag);
-                        if (exitFlag.get()) {
+                        AtomicBoolean changeSetFinished = new AtomicBoolean(false);
+                        configureChangeSet(physicalChangeLogLocation, changeLogParameters, reader, currentSequence, currentRollbackSequence, changeSet, count, line, commentMatcher, resourceAccessor, changeLog, change, rollbackSplitStatementsPatternMatcher, rollbackSplitStatements, rollbackEndDelimiter, changeSetFinished);
+                        if (changeSetFinished.get()) {
                             changeSet = null;
                         }
                     } else {
@@ -544,7 +544,7 @@ public abstract class AbstractFormattedChangeLogParser implements ChangeLogParse
 
     /**
      *
-     * Configure the change set with its attributes. An exitFlag is available for override versions
+     * Configure the change set with its attributes. An changeSetFinished flag is available for override versions
      * to indicate that processing is done for the change set
      *
      * @param  physicalChangeLogLocation
@@ -562,7 +562,7 @@ public abstract class AbstractFormattedChangeLogParser implements ChangeLogParse
      * @param  rollbackSplitStatementsMatcher
      * @param  rollbackSplitStatements
      * @param  rollbackEndDelimiter
-     * @param  exitFlag
+     * @param  changeSetFinished
      * @throws ChangeLogParseException
      * @throws IOException
      *
@@ -582,7 +582,7 @@ public abstract class AbstractFormattedChangeLogParser implements ChangeLogParse
                                       Matcher rollbackSplitStatementsMatcher,
                                       boolean rollbackSplitStatements,
                                       String rollbackEndDelimiter,
-                                      AtomicBoolean exitFlag)
+                                      AtomicBoolean changeSetFinished)
             throws ChangeLogParseException, IOException {
         Matcher altCommentOneDashMatcher = ALT_COMMENT_ONE_CHARACTER_PATTERN.matcher(line);
         Matcher altCommentPluralMatcher = ALT_COMMENT_PLURAL_PATTERN.matcher(line);
@@ -647,7 +647,7 @@ public abstract class AbstractFormattedChangeLogParser implements ChangeLogParse
         } else {
             currentSequence.append(line).append(System.lineSeparator());
         }
-        exitFlag.set(false);
+        changeSetFinished.set(false);
     }
 
     protected ChangeSet configureChangeSet(DatabaseChangeLog changeLog, boolean runOnChange, boolean runAlways,
