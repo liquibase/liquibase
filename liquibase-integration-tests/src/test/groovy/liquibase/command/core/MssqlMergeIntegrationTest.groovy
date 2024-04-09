@@ -5,6 +5,8 @@ import liquibase.command.util.CommandUtil
 import liquibase.extension.testing.testsystem.DatabaseTestSystem
 import liquibase.extension.testing.testsystem.TestSystemFactory
 import liquibase.extension.testing.testsystem.spock.LiquibaseIntegrationTest
+import liquibase.util.FileUtil
+import static org.junit.Assert.fail
 import spock.lang.Shared
 import spock.lang.Specification
 
@@ -45,7 +47,7 @@ class MssqlMergeIntegrationTest extends Specification {
             def deployedSPContent = resultSet.getString("SPBody")
             changelogContent.contains(deployedSPContent.split(String.format("procedure dbo.%s", sProcedureName))[1])
         } else {
-            Assert.fail(String.format("There is not procedure stored in the DB with name %s", sProcedureName))
+            fail(String.format("There is not procedure stored in the DB with name %s", sProcedureName))
         }
     }
 }
