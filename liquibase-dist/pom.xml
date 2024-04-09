@@ -158,7 +158,7 @@
 		<dependency>
 			<groupId>org.glassfish.jaxb</groupId>
 			<artifactId>jaxb-core</artifactId>
-			<version>4.0.4</version>
+			<version>4.0.5</version>
 			<optional>true</optional>
 		</dependency>
 		<dependency>
