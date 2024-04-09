@@ -1,6 +1,5 @@
 package liquibase.changeset;
 
-import liquibase.change.Change;
 import liquibase.changelog.ChangeSet;
 import liquibase.changelog.DatabaseChangeLog;
 import liquibase.changelog.ModifyChangeSets;
@@ -98,7 +97,9 @@ public interface ChangeSetService extends Plugin {
      * @return ModifyChangeSets           The object which will perform the modifications
      *
      */
-    ModifyChangeSets createModifyChangeSets(String runWith, String runWithSpool);
+    default ModifyChangeSets createModifyChangeSets(String runWith, String runWithSpool) {
+        return new ModifyChangeSets(runWith, runWithSpool);
+    }
 
     /**
      *

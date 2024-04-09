@@ -44,10 +44,6 @@ public class StandardChangeSetService implements ChangeSetService {
                 (String) node.getChildValue(null, "runWith"),
                 (String) node.getChildValue(null, "runWithSpoolFile"));
     }
-    @Override
-    public ModifyChangeSets createModifyChangeSets(String runWith, String runWithSpool) {
-        return new ModifyChangeSets(runWith, runWithSpool);
-    }
 
     @Override
     public void modifyChangeSets(ChangeSet changeSet, ModifyChangeSets modifyChangeSets) {

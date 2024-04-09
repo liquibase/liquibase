@@ -667,10 +667,6 @@ public abstract class AbstractFormattedChangeLogParser implements ChangeLogParse
         return changeSet;
     }
 
-    protected void handleExtraDirectives(String line) {
-        
-    }
-    
     protected void setLogicalFilePath(DatabaseChangeLog changeLog, String line, Matcher changeLogPatterMatcher) {
         if (changeLogPatterMatcher.matches()) {
             Matcher logicalFilePathMatcher = LOGICAL_FILE_PATH_PATTERN.matcher(line);
