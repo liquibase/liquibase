@@ -121,7 +121,7 @@ jobs:
           (cd re-version/out/ && zip liquibase-additional-${{ needs.setup.outputs.version }}.zip *)
           mv re-version/out/liquibase-additional-${{ needs.setup.outputs.version }}.zip re-version/final
       - name: Cache Completed Artifacts
-        uses: actions/cache@v3.3.2
+        uses: actions/cache@v4.0.2
         with:
           key: completed-artifacts-${{ github.run_number }}-${{ github.run_attempt }}
           path: re-version/final
@@ -144,7 +144,7 @@ jobs:
       - uses: actions/checkout@v4
 
       - name: Restore Completed Artifacts
-        uses: actions/cache@v3.3.2
+        uses: actions/cache@v4.0.2
         with:
           key: completed-artifacts-${{ github.run_number }}-${{ github.run_attempt }}
           path: re-version/final
@@ -195,7 +195,7 @@ jobs:
           rm re-version/final/*.md5
           rm re-version/final/*.sha1
       - name: Attach Files to Draft Release
-        uses: softprops/action-gh-release@v1
+        uses: softprops/action-gh-release@v2
         with:
           tag_name: v${{ needs.setup.outputs.version }}
           fail_on_unmatched_files: true

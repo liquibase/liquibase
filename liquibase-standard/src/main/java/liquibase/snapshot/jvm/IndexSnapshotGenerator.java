@@ -30,7 +30,7 @@ public class IndexSnapshotGenerator extends JdbcSnapshotGenerator {
 
     @Override
     protected void addTo(DatabaseObject foundObject, DatabaseSnapshot snapshot) throws DatabaseException, InvalidExampleException {
-        if (!snapshot.getSnapshotControl().shouldInclude(Index.class)) {
+        if (!snapshot.getSnapshotControl().shouldInclude(Index.class) || !snapshot.getDatabase().supports(Index.class)) {
             return;
         }
 

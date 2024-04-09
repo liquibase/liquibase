@@ -1,11 +1,13 @@
 package liquibase.changelog;
 
 import liquibase.serializer.AbstractLiquibaseSerializable;
+import lombok.Getter;
 
 import java.util.Arrays;
 import java.util.LinkedHashSet;
 import java.util.Set;
 
+@Getter
 public class ChangeLogProperty extends AbstractLiquibaseSerializable implements ChangeLogChild {
     private String file;
     private Boolean relativeToChangelogFile;
@@ -32,40 +34,20 @@ public class ChangeLogProperty extends AbstractLiquibaseSerializable implements 
         return STANDARD_CHANGELOG_NAMESPACE;
     }
 
-    public String getFile() {
-        return file;
-    }
-
     public void setFile(String file) {
         this.file = file;
-    }
-
-    public Boolean getRelativeToChangelogFile() {
-        return relativeToChangelogFile;
     }
 
     public void setRelativeToChangelogFile(Boolean getRelativeToChangelogFile) {
         this.relativeToChangelogFile = getRelativeToChangelogFile;
     }
 
-    public Boolean getErrorIfMissing() {
-        return errorIfMissing;
-    }
-
     public void setErrorIfMissing(Boolean errorIfMissing) {
         this.errorIfMissing = errorIfMissing;
     }
 
-    public String getName() {
-        return name;
-    }
-
     public void setName(String name) {
         this.name = name;
-    }
-
-    public String getValue() {
-        return value;
     }
 
     public void setValue(String value) {
@@ -88,33 +70,17 @@ public class ChangeLogProperty extends AbstractLiquibaseSerializable implements 
         this.contextFilter = context;
     }
 
-    public String getContextFilter() {
-        return contextFilter;
-    }
-
     public ChangeLogProperty setContextFilter(String contextFilter) {
         this.contextFilter = contextFilter;
         return this;
-    }
-
-    public String getLabels() {
-        return labels;
     }
 
     public void setLabels(String labels) {
         this.labels = labels;
     }
 
-    public String getDbms() {
-        return dbms;
-    }
-
     public void setDbms(String dbms) {
         this.dbms = dbms;
-    }
-
-    public Boolean getGlobal() {
-        return global;
     }
 
     public void setGlobal(Boolean global) {

@@ -314,4 +314,11 @@ public class SnowflakeDatabase extends AbstractJdbcDatabase {
     public boolean supportsDatabaseChangeLogHistory() {
         return true;
     }
+
+    @Override
+    public String generateConnectCommandSuccessMessage() {
+        return "WARNING: The 'connect' command relies on information reported by the JDBC driver. " +
+                "The Snowflake driver does not report on schema issues, " +
+                "and therefore users should manually confirm Snowflake schemas for accuracy.";
+    }
 }

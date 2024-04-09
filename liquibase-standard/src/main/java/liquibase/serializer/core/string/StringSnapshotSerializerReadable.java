@@ -48,7 +48,7 @@ public class StringSnapshotSerializerReadable implements SnapshotSerializer {
             List<Schema> schemas = sort(snapshot.get(Schema.class), Comparator.comparing(Schema::toString));
 
             for (Schema schema : schemas) {
-                if (database.supportsSchemas()) {
+                if (database.supports(Schema.class)) {
                     buffer.append("\nCatalog & Schema: ").append(schema.getCatalogName()).append(" / ").append(schema.getName()).append("\n");
                 } else {
                     buffer.append("\nCatalog: ").append(schema.getCatalogName()).append("\n");

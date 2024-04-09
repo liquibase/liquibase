@@ -107,7 +107,7 @@ jobs:
 
       - name: Built Code Cache
         if: ${{ matrix.java == 11}}
-        uses: actions/cache@v3.3.1
+        uses: actions/cache@v4.0.2
         with:
           key: built-code-${{ github.run_number }}-${{ github.run_attempt }}
           path: ./**/target
@@ -222,6 +222,7 @@ jobs:
           - postgresql
           - sqlite
           - firebird
+          - snowflake
     needs: build_tests
     timeout-minutes: 30
     steps:
@@ -246,13 +247,35 @@ jobs:
       # getting from build results page. If we remove 0-snapshot then we will need settings.xml
 
       - name: Restore Built Code Cache
-        uses: actions/cache@v3.3.1
+        uses: actions/cache@v4.0.2
         with:
           key: built-code-${{ github.run_number }}-${{ github.run_attempt }}
           path: ./**/target
 
+      - name: Setup Python
+        if: ${{ matrix.testSystem == 'snowflake' }}
+        uses: actions/setup-python@v5.1.0
+        with:
+          python-version: '3.12.1'
+
+      - name: Start & Configure LocalStack
+        if: ${{ matrix.testSystem == 'snowflake' }}
+        env:
+          LOCALSTACK_API_KEY: ${{ secrets.LOCALSTACK_API_KEY }}
+          GITHUB_TOKEN: ${{ secrets.BOT_TOKEN }}
+        run: |
+          pip install localstack awscli-local
+          DEBUG=1 DOCKER_FLAGS='-e SF_LOG=trace' IMAGE_NAME=localstack/snowflake localstack start -d
+          echo "Waiting for LocalStack startup..."
+          localstack wait -t 30
+          echo "Startup complete"
+          echo "TH_DB_ADMIN=test" >> $GITHUB_ENV  
+          echo "TH_DB_PASSWD=test" >> $GITHUB_ENV
+          echo "TH_DB=snowflake" >> $GITHUB_ENV
+          echo "TH_SNOW_URL=jdbc:snowflake://http://snowflake.localhost.localstack.cloud:4566" >> $GITHUB_ENV
+
       - name: Run Tests
-        run: ./mvnw -B jar:jar jar:test-jar surefire:test -DtrimStackTrace=false -Dliquibase.sdk.testSystem.test=${{ matrix.testSystem }} -Dliquibase.sdk.testSystem.acceptLicenses=${{ matrix.testSystem }} -Dtest=*IntegrationTest,*ExecutorTest -DfailIfNoTests=false -Dsurefire.failIfNoSpecifiedTests=false
+        run: ./mvnw -B jar:jar jar:test-jar surefire:test -DtrimStackTrace=false -Dliquibase.sdk.testSystem.test=${{ matrix.testSystem }} -Dliquibase.sdk.testSystem.acceptLicenses=${{ matrix.testSystem }} -Dliquibase.sdk.testSystem.snowflake.url=${{ env.TH_SNOW_URL }} -Dliquibase.sdk.testSystem.snowflake.username=${{ env.TH_DB_ADMIN }} -Dliquibase.sdk.testSystem.snowflake.password=${{ env.TH_DB_PASSWD }} -Dtest=*IntegrationTest,*ExecutorTest -DfailIfNoTests=false -Dsurefire.failIfNoSpecifiedTests=false
 
       - name: Archive Test Results
         if: ${{ inputs.archive_test_results == 'true' }}
