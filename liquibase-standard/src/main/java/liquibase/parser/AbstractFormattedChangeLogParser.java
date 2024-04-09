@@ -20,6 +20,7 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.ResourceBundle;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -469,8 +470,9 @@ public abstract class AbstractFormattedChangeLogParser implements ChangeLogParse
                         throw new ChangeLogParseException("\n" + message);
                     }
                     if (changeSet != null) {
-                        configureChangeSet(physicalChangeLogLocation, changeLogParameters, reader, currentSequence, currentRollbackSequence, changeSet, count, line, commentMatcher, resourceAccessor, changeLog, change, rollbackSplitStatementsPatternMatcher, rollbackSplitStatements, rollbackEndDelimiter);
-                        if (currentSequence.length() == 0) {
+                        AtomicBoolean exitFlag = new AtomicBoolean(false);
+                        configureChangeSet(physicalChangeLogLocation, changeLogParameters, reader, currentSequence, currentRollbackSequence, changeSet, count, line, commentMatcher, resourceAccessor, changeLog, change, rollbackSplitStatementsPatternMatcher, rollbackSplitStatements, rollbackEndDelimiter, exitFlag);
+                        if (exitFlag.get()) {
                             changeSet = null;
                         }
                     } else {
@@ -537,9 +539,34 @@ public abstract class AbstractFormattedChangeLogParser implements ChangeLogParse
                                       Matcher commentMatcher,
                                       ResourceAccessor resourceAccessor)
             throws ChangeLogParseException, IOException {
-        configureChangeSet(physicalChangeLogLocation, changeLogParameters, reader, currentSequence, currentRollbackSequence, changeSet, count, line, commentMatcher, resourceAccessor, null, null, null, false, null);
+        configureChangeSet(physicalChangeLogLocation, changeLogParameters, reader, currentSequence, currentRollbackSequence, changeSet, count, line, commentMatcher, resourceAccessor, null, null, null, false, null, new AtomicBoolean(false));
     }
 
+    /**
+     *
+     * Configure the change set with its attributes. An exitFlag is available for override versions
+     * to indicate that processing is done for the change set
+     *
+     * @param  physicalChangeLogLocation
+     * @param  changeLogParameters
+     * @param  reader
+     * @param  currentSequence
+     * @param  currentRollbackSequence
+     * @param  changeSet
+     * @param  count
+     * @param  line
+     * @param  commentMatcher
+     * @param  resourceAccessor
+     * @param  changeLog
+     * @param  change
+     * @param  rollbackSplitStatementsMatcher
+     * @param  rollbackSplitStatements
+     * @param  rollbackEndDelimiter
+     * @param  exitFlag
+     * @throws ChangeLogParseException
+     * @throws IOException
+     *
+     */
     protected void configureChangeSet(String physicalChangeLogLocation,
                                       ChangeLogParameters changeLogParameters,
                                       BufferedReader reader,
@@ -554,7 +581,8 @@ public abstract class AbstractFormattedChangeLogParser implements ChangeLogParse
                                       AbstractSQLChange change,
                                       Matcher rollbackSplitStatementsMatcher,
                                       boolean rollbackSplitStatements,
-                                      String rollbackEndDelimiter)
+                                      String rollbackEndDelimiter,
+                                      AtomicBoolean exitFlag)
             throws ChangeLogParseException, IOException {
         Matcher altCommentOneDashMatcher = ALT_COMMENT_ONE_CHARACTER_PATTERN.matcher(line);
         Matcher altCommentPluralMatcher = ALT_COMMENT_PLURAL_PATTERN.matcher(line);
@@ -568,7 +596,6 @@ public abstract class AbstractFormattedChangeLogParser implements ChangeLogParse
         Matcher altValidCheckSumOneDashMatcher = ALT_VALID_CHECK_SUM_ONE_CHARACTER_PATTERN.matcher(line);
         Matcher rollbackMultiLineStartMatcher = ROLLBACK_MULTI_LINE_START_PATTERN.matcher(line);
         Matcher invalidEmptyPreconditionMatcher = INVALID_EMPTY_PRECONDITION_PATTERN.matcher(line);
-
 
         if (commentMatcher.matches()) {
             if (commentMatcher.groupCount() == 0) {
@@ -620,6 +647,7 @@ public abstract class AbstractFormattedChangeLogParser implements ChangeLogParse
         } else {
             currentSequence.append(line).append(System.lineSeparator());
         }
+        exitFlag.set(false);
     }
 
     protected ChangeSet configureChangeSet(DatabaseChangeLog changeLog, boolean runOnChange, boolean runAlways,
