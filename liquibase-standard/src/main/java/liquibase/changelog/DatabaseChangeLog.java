@@ -698,8 +698,10 @@ public class DatabaseChangeLog implements Comparable<DatabaseChangeLog>, Conditi
                            int minDepth,
                            int maxDepth)
             throws SetupException {
+        ChangeSetService changeSetService = ChangeSetServiceFactory.getInstance().createChangeSetService();
+        ModifyChangeSets modifyChangeSets = changeSetService.createModifyChangeSets(null, null);
         includeAll(pathName, isRelativeToChangelogFile, resourceFilter, errorIfMissingOrEmpty, resourceComparator,
-                   resourceAccessor, includeContextFilter, labels, ignore, minDepth, maxDepth, "", new ModifyChangeSets(null, null));
+                   resourceAccessor, includeContextFilter, labels, ignore, minDepth, maxDepth, "", modifyChangeSets);
     }
 
     @Deprecated

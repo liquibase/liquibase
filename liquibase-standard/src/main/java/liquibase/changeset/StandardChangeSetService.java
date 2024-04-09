@@ -1,6 +1,5 @@
 package liquibase.changeset;
 
-import liquibase.change.Change;
 import liquibase.changelog.ChangeSet;
 import liquibase.changelog.DatabaseChangeLog;
 import liquibase.changelog.ModifyChangeSets;
@@ -44,6 +43,10 @@ public class StandardChangeSetService implements ChangeSetService {
         return new ModifyChangeSets(
                 (String) node.getChildValue(null, "runWith"),
                 (String) node.getChildValue(null, "runWithSpoolFile"));
+    }
+    @Override
+    public ModifyChangeSets createModifyChangeSets(String runWith, String runWithSpool) {
+        return new ModifyChangeSets(runWith, runWithSpool);
     }
 
     @Override
