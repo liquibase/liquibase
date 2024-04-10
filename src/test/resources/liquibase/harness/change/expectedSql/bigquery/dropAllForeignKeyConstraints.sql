@@ -1,1 +1,1 @@
-INVALID TEST BigQuery does not support FK
+INVALID TEST -- BigQuery does not support FK

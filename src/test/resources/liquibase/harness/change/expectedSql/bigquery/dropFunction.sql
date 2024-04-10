@@ -1,2 +1,1 @@
-INVALID TEST
--- BigQuery doesn't support functions
+INVALID TEST -- BigQuery doesn't support functions

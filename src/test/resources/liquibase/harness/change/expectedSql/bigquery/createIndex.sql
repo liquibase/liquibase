@@ -1,2 +1,1 @@
-INVALID TEST
--- BigQuery doesn't support indexes
+INVALID TEST -- BigQuery doesn't support indexes

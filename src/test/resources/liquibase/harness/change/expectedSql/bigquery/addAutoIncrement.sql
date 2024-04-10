@@ -1,2 +1,1 @@
-INVALID TEST
--- BigQuery doesn't support auto increment
+INVALID TEST -- BigQuery doesn't support auto increment

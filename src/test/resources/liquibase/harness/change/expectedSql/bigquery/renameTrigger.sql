@@ -1,2 +1,1 @@
-INVALID TEST
--- BigQuery doesn't support rename
+INVALID TEST -- BigQuery doesn't support rename

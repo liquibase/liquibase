@@ -1,2 +1,1 @@
-INVALID TEST
--- BigQuery doesn't support remarks
+INVALID TEST -- BigQuery doesn't support remarks

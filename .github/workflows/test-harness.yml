@@ -78,7 +78,7 @@ jobs:
     needs: [setup]
     strategy:
       matrix:
-        liquibase-support-level: [Foundational ] # Define the different test levels to run
+        liquibase-support-level: [Contributed ] # Define the different test levels to run
       fail-fast: false # Set fail-fast to false to run all test levels even if some of them fail
     env:
       github-token: ${{ secrets.LIQUIBOT_PAT_GPM_ACCESS }}
