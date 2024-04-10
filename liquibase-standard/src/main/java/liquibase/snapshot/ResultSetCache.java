@@ -8,6 +8,8 @@ import liquibase.exception.DatabaseException;
 import liquibase.exception.UnexpectedLiquibaseException;
 import liquibase.executor.jvm.ColumnMapRowMapper;
 import liquibase.executor.jvm.RowMapperResultSetExtractor;
+import liquibase.structure.core.Catalog;
+import liquibase.structure.core.Schema;
 import liquibase.util.JdbcUtil;
 import liquibase.util.StringUtil;
 
@@ -162,9 +164,9 @@ public class ResultSetCache {
         }
 
         public String createSchemaKey(Database database) {
-            if (!database.supportsCatalogs() && !database.supportsSchemas()) {
+            if (!database.supports(Catalog.class) && !database.supports(Schema.class)) {
                 return "all";
-            } else if (database.supportsCatalogs() && database.supportsSchemas()) {
+            } else if (database.supports(Catalog.class) && database.supports(Schema.class)) {
                 if (CatalogAndSchema.CatalogAndSchemaCase.ORIGINAL_CASE.
                         equals(database.getSchemaAndCatalogCase())) {
                     return (catalog + "." + schema);

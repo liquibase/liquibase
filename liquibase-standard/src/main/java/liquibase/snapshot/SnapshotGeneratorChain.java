@@ -26,6 +26,17 @@ public class SnapshotGeneratorChain {
         }
     }
 
+    /**
+     * This calls all the non-replaced {@link SnapshotGenerator} in the chain, by comparison order
+     * Only the first generator in the chain is allowed to create a new instance of T
+     * Subsequent generators must modify the instance or call the chain if the provided object is not handled,
+     * otherwise a {@link DatabaseException} is thrown
+     *
+     * @return snapshot object
+     * @throws DatabaseException if any of the subsequent generators return an instance different from the first generator's
+     *                           invocation result
+     * @see SnapshotGenerator#replaces() to skip generators that do not comply to the above requireemnts
+     */
     public <T extends DatabaseObject> T snapshot(T example, DatabaseSnapshot snapshot)
             throws DatabaseException, InvalidExampleException {
         if (example == null) {
