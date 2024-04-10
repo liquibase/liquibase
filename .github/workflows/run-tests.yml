@@ -106,8 +106,8 @@ jobs:
           ref: ${{ github.event.pull_request.head.sha || github.event.after}}
 
       - name: Built Code Cache
-        if: ${{ matrix.java == 11}}
-        uses: actions/cache@v3.3.1
+        if: ${{ matrix.java == 17}}
+        uses: actions/cache@v4.0.2
         with:
           key: built-code-${{ github.run_number }}-${{ github.run_attempt }}
           path: ./**/target
@@ -180,7 +180,7 @@ jobs:
           find . -name original-*.jar -exec rm {} \;
 
       - name: Upload Artifacts for build.yml
-        if: ${{ matrix.java == 11 && matrix.os == 'ubuntu-20.04'}}
+        if: ${{ matrix.java == 17 && matrix.os == 'ubuntu-20.04'}}
         uses: actions/upload-artifact@v3
         with:
           name: temp-artifact
@@ -196,8 +196,16 @@ jobs:
             ./**/target/surefire-reports
             ./**/target/site
 
+      - name: Save Jacoco Report for Sonar
+        if: ${{ matrix.java == 17 && matrix.os == 'ubuntu-20.04'}}
+        uses: actions/upload-artifact@v3
+        with:
+          name: liquibase-jacoco-test-results
+          path: |
+            ./liquibase-standard/target/jacoco.exec
+
       - name: Archive Modules
-        if: ${{ matrix.java == 11 && matrix.os == 'ubuntu-20.04'}}
+        if: ${{ matrix.java == 17 && matrix.os == 'ubuntu-20.04'}}
         uses: actions/upload-artifact@v3
         with:
           name: liquibase-modules
@@ -237,7 +245,16 @@ jobs:
           script: |
             core.setOutput("testResultsArtifact", "liquibase-test-results-integration-${{ matrix.testSystem }}".replace(/[^a-zA-Z0-9\-_]/g, "_"));
 
-      - name: Set up JDK 11
+      - name: Set up JDK 17
+        if: ${{ matrix.testSystem != 'snowflake' }}
+        uses: actions/setup-java@v4
+        with:
+          java-version: '17'
+          distribution: 'temurin'
+          cache: 'maven'
+
+      - name: Set up JDK 11 # get rid of this after https://github.com/snowflakedb/snowflake-jdbc/issues/589 is fixed
+        if: ${{ matrix.testSystem == 'snowflake' }}
         uses: actions/setup-java@v4
         with:
           java-version: '11'
@@ -247,14 +264,14 @@ jobs:
       # getting from build results page. If we remove 0-snapshot then we will need settings.xml
 
       - name: Restore Built Code Cache
-        uses: actions/cache@v3.3.1
+        uses: actions/cache@v4.0.2
         with:
           key: built-code-${{ github.run_number }}-${{ github.run_attempt }}
           path: ./**/target
 
       - name: Setup Python
         if: ${{ matrix.testSystem == 'snowflake' }}
-        uses: actions/setup-python@v5.0.0
+        uses: actions/setup-python@v5.1.0
         with:
           python-version: '3.12.1'
 
@@ -275,7 +292,7 @@ jobs:
           echo "TH_SNOW_URL=jdbc:snowflake://http://snowflake.localhost.localstack.cloud:4566" >> $GITHUB_ENV
 
       - name: Run Tests
-        run: ./mvnw -B jar:jar jar:test-jar surefire:test -DtrimStackTrace=false -Dliquibase.sdk.testSystem.test=${{ matrix.testSystem }} -Dliquibase.sdk.testSystem.acceptLicenses=${{ matrix.testSystem }} -Dliquibase.sdk.testSystem.snowflake.url=${{ env.TH_SNOW_URL }} -Dliquibase.sdk.testSystem.snowflake.username=${{ env.TH_DB_ADMIN }} -Dliquibase.sdk.testSystem.snowflake.password=${{ env.TH_DB_PASSWD }} -Dtest=*IntegrationTest,*ExecutorTest -DfailIfNoTests=false -Dsurefire.failIfNoSpecifiedTests=false
+        run: ./mvnw -B clean verify -DtrimStackTrace=false -Dliquibase.sdk.testSystem.test=${{ matrix.testSystem }} -Dliquibase.sdk.testSystem.acceptLicenses=${{ matrix.testSystem }} -Dliquibase.sdk.testSystem.snowflake.url=${{ env.TH_SNOW_URL }} -Dliquibase.sdk.testSystem.snowflake.username=${{ env.TH_DB_ADMIN }} -Dliquibase.sdk.testSystem.snowflake.password=${{ env.TH_DB_PASSWD }} -Dtest=*IntegrationTest,*ExecutorTest -DfailIfNoTests=false -Dsurefire.failIfNoSpecifiedTests=false
 
       - name: Archive Test Results
         if: ${{ inputs.archive_test_results == 'true' }}
@@ -285,7 +302,26 @@ jobs:
           path: |
             ./**/target/surefire-reports
 
+      - name: Save Jacoco Report for Sonar
+        uses: actions/upload-artifact@v3
+        with:
+          name: liquibase-integration-jacoco-test-results-${{ matrix.testSystem }}
+          path: |
+            ./liquibase-integration-tests/target/jacoco.exec
 
+  sonar:
+    needs: [ build_tests, integration-test ]
+    uses: liquibase/build-logic/.github/workflows/sonar-test-scan.yml@v0.6.9
+    with:
+      thisBranchName: ${{ needs.setup.outputs.thisBranchName }}
+      thisSha: ${{ needs.setup.outputs.thisSha }}
+      liquibaseBranchName: ${{ needs.setup.outputs.liquibaseBranchName }}
+      pullRequestNumber: ${{ github.event.pull_request.number }}
+      pullRequestBranchName: ${{ github.event.pull_request.head.ref }}
+      pullRequestBaseBranchName: ${{ github.event.pull_request.base.ref }}
+      testedClassesModuleName: liquibase-standard
+      dbPlatforms: h2,hsqldb,mariadb,mssql,mysql,oracle,postgresql,sqlite,firebird
+    secrets: inherit
 
   run-build-publish-file:
     needs: [ build_tests,integration-test ]

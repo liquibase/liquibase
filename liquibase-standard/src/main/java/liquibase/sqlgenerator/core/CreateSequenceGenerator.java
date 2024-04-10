@@ -16,7 +16,7 @@ public class CreateSequenceGenerator extends AbstractSqlGenerator<CreateSequence
 
     @Override
     public boolean supports(CreateSequenceStatement statement, Database database) {
-        return database.supportsSequences();
+        return database.supports(Sequence.class);
     }
 
     @Override
