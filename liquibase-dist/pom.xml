@@ -158,13 +158,13 @@
 		<dependency>
 			<groupId>org.glassfish.jaxb</groupId>
 			<artifactId>jaxb-core</artifactId>
-			<version>4.0.4</version>
+			<version>4.0.5</version>
 			<optional>true</optional>
 		</dependency>
 		<dependency>
 			<groupId>org.glassfish.jaxb</groupId>
 			<artifactId>jaxb-runtime</artifactId>
-			<version>4.0.4</version>
+			<version>4.0.5</version>
 			<optional>true</optional>
 		</dependency>
 	</dependencies>
@@ -236,7 +236,7 @@
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-source-plugin</artifactId>
-				<version>3.3.0</version>
+				<version>3.3.1</version>
 				<configuration>
 					<!-- sources.jar from this module is the shaded sources of others -->
 					<skipSource>true</skipSource>
@@ -245,7 +245,7 @@
 			<!-- this builds and attaches the tar file of liquibase (which has liquibase cli) -->
 			<plugin>
 				<artifactId>maven-assembly-plugin</artifactId>
-				<version>3.6.0</version>
+				<version>3.7.1</version>
 				<configuration>
 					<tarLongFileMode>posix</tarLongFileMode>
 					<finalName>liquibase-${project.version}</finalName>
