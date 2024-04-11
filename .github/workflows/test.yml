@@ -16,7 +16,3 @@ jobs:
       extraCommand: mvn install:install-file -Dfile=lib/GoogleBigQueryJDBC42.jar -DgroupId=com.simba.googlebigquery.jdbc -DartifactId=GoogleBigQueryJDBC42 -Dversion=4.2 -Dpackaging=jar
       os: '["ubuntu-latest"]'
       java: "[11, 17, 18]"
-
-  dependabot-automerge:
-    uses: liquibase/build-logic/.github/workflows/dependabot-automerge.yml@v0.6.9
-    secrets: inherit
