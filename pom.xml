@@ -76,7 +76,7 @@
         <spock.version>2.3-groovy-4.0</spock.version>
         <spring.version>5.3.28</spring.version>
         <maven-failsafe-plugin.version>3.2.5</maven-failsafe-plugin.version>
-        <jacoco-maven-plugin.version>0.8.11</jacoco-maven-plugin.version>
+        <jacoco-maven-plugin.version>0.8.12</jacoco-maven-plugin.version>
         <maven-surefire-plugin.version>3.2.5</maven-surefire-plugin.version>
         <sonar.projectName>Liquibase</sonar.projectName>
         <sonar.projectDescription>Liquibase</sonar.projectDescription>
@@ -268,7 +268,7 @@
         <dependency>
             <groupId>org.postgresql</groupId>
             <artifactId>postgresql</artifactId>
-            <version>42.7.2</version>
+            <version>42.7.3</version>
             <scope>test</scope>
         </dependency>
 
@@ -296,7 +296,7 @@
         <dependency>
             <groupId>org.xerial</groupId>
             <artifactId>sqlite-jdbc</artifactId>
-            <version>3.44.1.0</version>
+            <version>3.45.2.0</version>
             <scope>test</scope>
         </dependency>
 
@@ -310,7 +310,7 @@
         <dependency>
             <groupId>org.firebirdsql.jdbc</groupId>
             <artifactId>jaybird</artifactId>
-            <version>5.0.3.java8</version>
+            <version>5.0.4.java8</version>
             <scope>test</scope>
         </dependency>
 
@@ -471,7 +471,7 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-source-plugin</artifactId>
-                <version>3.3.0</version>
+                <version>3.3.1</version>
                 <executions>
                     <execution>
                         <id>attach-sources</id>

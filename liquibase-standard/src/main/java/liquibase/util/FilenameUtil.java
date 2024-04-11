@@ -119,7 +119,8 @@ public class FilenameUtil {
                 .replaceAll("\\*", "_")
                 .replaceAll("\\?", "_")
                 .replaceAll("<", "_")
-                .replaceAll(">", "_");
+                .replaceAll(">", "_")
+                .replaceAll("@", "_");
 
         boolean done = false;
         while (!done) {
