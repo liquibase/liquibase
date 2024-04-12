@@ -13,7 +13,7 @@ public class OutputFileHandlerFactory extends AbstractPluginFactory<OutputFileHa
 
     @Override
     protected int getPriority(OutputFileHandler obj, Object... args) {
-        return obj.getPriority((String) args[0]);
+        return obj.getPriority();
     }
 
     public OutputFileHandler getOutputFileHandler(String outputFile) {
