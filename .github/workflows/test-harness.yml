@@ -32,6 +32,8 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
+      - uses: ahmadnassri/action-workflow-queue@v1
+
       - name: configure auth
         id: auth
         uses: 'google-github-actions/auth@v2'
