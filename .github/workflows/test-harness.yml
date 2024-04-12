@@ -36,6 +36,7 @@ jobs:
       - uses: ahmadnassri/action-workflow-queue@v1
         with:
           timeout: 1800000 # 30 minutes
+          delay: 300000 # 5 minutes
 
       - name: configure auth
         id: auth
