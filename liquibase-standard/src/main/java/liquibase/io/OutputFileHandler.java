@@ -12,10 +12,9 @@ public interface OutputFileHandler extends Plugin {
 
     /**
      * Returns the priority of the output file handler based on the specified output file.
-     * @param outputFile the path or name of the output file
      * @return the priority of the output file handler
      */
-    int getPriority(String outputFile);
+    int getPriority();
 
     /**
      * Creates a new output file with the specified name and sets the output stream in the command scope.

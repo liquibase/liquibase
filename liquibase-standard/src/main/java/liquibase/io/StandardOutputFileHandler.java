@@ -16,7 +16,7 @@ public class StandardOutputFileHandler implements OutputFileHandler {
     protected OutputStream outputStream;
 
     @Override
-    public int getPriority(String outputFile) {
+    public int getPriority() {
         return PRIORITY_DEFAULT;
     }
 
