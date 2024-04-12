@@ -32,6 +32,7 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
+      # This action will queue the workflow if another workflow is already running
       - uses: ahmadnassri/action-workflow-queue@v1
 
       - name: configure auth
