@@ -97,10 +97,15 @@ public class UniqueConstraintExistsPrecondition extends AbstractPrecondition {
 	public void check(Database database, DatabaseChangeLog changeLog, ChangeSet changeSet, ChangeExecListener changeExecListener)
 		throws PreconditionFailedException, PreconditionErrorException {
 
+		String schemaName = getSchemaName();
+		if (schemaName == null) {
+			schemaName = database.getDefaultSchemaName();
+		}
+
 		UniqueConstraint example = new UniqueConstraint(
 			StringUtil.trimToNull(getConstraintName()),
 			StringUtil.trimToNull(getCatalogName()),
-			StringUtil.trimToNull(getSchemaName()),
+			StringUtil.trimToNull(schemaName),
 			StringUtil.trimToNull(getTableName()));
 
 		String columnNames = StringUtil.trimToNull(getColumnNames());
