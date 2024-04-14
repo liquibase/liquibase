@@ -47,19 +47,35 @@ public class FormattedSqlChangeLogSerializer  implements ChangeLogSerializer {
 
             StringBuilder builder = new StringBuilder();
             createChangeSetInfo(changeSet, builder);
+            StringBuilder sqlBuilder = new StringBuilder();
             for (Change change : changeSet.getChanges()) {
                 Sql[] sqls = SqlGeneratorFactory.getInstance().generateSql(change.generateStatements(database), database);
                 if (sqls != null) {
                     for (Sql sql : sqls) {
-                        builder.append(sql.toSql().endsWith(sql.getEndDelimiter()) ? sql.toSql() : sql.toSql() + sql.getEndDelimiter()).append("\n");
+                        sqlBuilder.append(sql.toSql().endsWith(sql.getEndDelimiter()) ? sql.toSql() : sql.toSql() + sql.getEndDelimiter()).append("\n");
                     }
                 }
             }
+            StringBuilder newBuilder = createFinalSql(sqlBuilder, builder);
 
-            return builder.toString();
+            return newBuilder.toString();
         } else {
             throw new UnexpectedLiquibaseException("Cannot serialize object type: "+object.getClass().getName());
         }
+    }
+
+    private static StringBuilder createFinalSql(StringBuilder sqlBuilder, StringBuilder builder) {
+        StringBuilder newBuilder;
+        String[] parts = sqlBuilder.toString().split("\n");
+        if (parts.length > 1) {
+            newBuilder = new StringBuilder(builder.toString().trim());
+            newBuilder.append(" splitStatements:false");
+            newBuilder.append("\n");
+        } else {
+            newBuilder = new StringBuilder(builder);
+        }
+        newBuilder.append(sqlBuilder);
+        return newBuilder;
     }
 
     /**
