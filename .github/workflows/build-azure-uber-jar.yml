@@ -115,12 +115,13 @@ jobs:
           maven-version: ${{ env.MAVEN_VERSION }}
 
       - name: Set version
-        run: cd liquibase-pro/liquibase-azure-deps && mvn versions:set -DnewVersion=${{ inputs.liquibase-version }}
+        run: |
+          cd liquibase-pro/liquibase-azure-deps && mvn versions:set -DnewVersion=${{ inputs.liquibase-version }}
+          ls -l liquibase-pro/liquibase-azure-deps
 
       - name: Build & Test
         run: |
           cd liquibase-pro/liquibase-azure-deps && mvn -B clean package
-          ls -l liquibase-pro
 
       - name: Archive Modules
         uses: actions/upload-artifact@v3
