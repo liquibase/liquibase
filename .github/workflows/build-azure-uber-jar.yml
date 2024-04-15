@@ -120,7 +120,7 @@ jobs:
       - name: Build & Test
         run: |
           cd liquibase-pro/liquibase-azure-deps && mvn -B clean package
-          ls -l liquibase-azure-deps
+          ls -l liquibase-pro
 
       - name: Archive Modules
         uses: actions/upload-artifact@v3
