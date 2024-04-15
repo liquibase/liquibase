@@ -128,4 +128,4 @@ jobs:
         with:
           name: liquibase-pro-azure-artifacts
           path: |
-            liquibase-azure-deps/target/*.jar
+            liquibase-azure-deps/target/liquibase-azure-deps-${{ inputs.liquibase-version }}.jar
