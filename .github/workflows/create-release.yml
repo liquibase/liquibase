@@ -66,11 +66,15 @@ jobs:
           name: liquibase-artifacts
           path: download/liquibase-artifacts
 
+      - name: Get Current Run ID
+        id: get_run_id
+        run: echo "::set-output name=run_id::${{ github.run_id }}"
+
       - name: Download liquibase-pro-azure-artifacts
         uses: liquibase/action-download-artifact@v2-liquibase
         with:
           workflow: build-azure-uber-jar.yml
-          run_id: ${{ needs.setup.outputs.runId }}
+          run_id: ${{ steps.get_run_id.outputs.run_id }}
           name: liquibase-pro-azure-artifacts
           path: liquibase-pro/liquibase-azure-deps/target/liquibase-azure-deps-${{ inputs.liquibase-version }}.jar
 
