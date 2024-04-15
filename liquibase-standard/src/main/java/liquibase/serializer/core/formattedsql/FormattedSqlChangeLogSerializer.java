@@ -64,6 +64,17 @@ public class FormattedSqlChangeLogSerializer  implements ChangeLogSerializer {
         }
     }
 
+    /**
+     *
+     * Create the final SQL string by appending the change SQL to the change set line
+     * If the change SQL is multi-line, then add a splitStatements:false setting so
+     * that the SQL will be executed as one statement
+     *
+     * @param   sqlBuilder                The change SQL
+     * @param   builder                   The change set line
+     * @return  StringBuilder
+     *
+     */
     private static StringBuilder createFinalSql(StringBuilder sqlBuilder, StringBuilder builder) {
         StringBuilder newBuilder;
         String[] parts = sqlBuilder.toString().split("\n");
