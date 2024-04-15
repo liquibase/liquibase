@@ -7,6 +7,7 @@ import liquibase.changelog.filter.ContextChangeSetFilter;
 import liquibase.changelog.filter.DbmsChangeSetFilter;
 import liquibase.changelog.filter.LabelChangeSetFilter;
 import liquibase.changelog.visitor.ValidatingVisitor;
+import liquibase.changelog.visitor.ValidatingVisitorFactory;
 import liquibase.changeset.ChangeSetService;
 import liquibase.changeset.ChangeSetServiceFactory;
 import liquibase.database.Database;
@@ -341,7 +342,9 @@ public class DatabaseChangeLog implements Comparable<DatabaseChangeLog>, Conditi
                 new LabelChangeSetFilter(labelExpression)
         );
 
-        ValidatingVisitor validatingVisitor = new ValidatingVisitor(database.getRanChangeSetList());
+        ValidatingVisitorFactory validatingVisitorFactory = Scope.getCurrentScope().getSingleton(ValidatingVisitorFactory.class);
+        ValidatingVisitor validatingVisitor = validatingVisitorFactory.getValidatingVisitor();
+        validatingVisitor.setRanChangeSetList(database.getRanChangeSetList());
         validatingVisitor.validate(database, this);
         logIterator.run(validatingVisitor, new RuntimeEnvironment(database, contexts, labelExpression));
 
