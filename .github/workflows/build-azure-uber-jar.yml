@@ -12,6 +12,15 @@ on:
         required: true
         type: string
   workflow_dispatch:
+    inputs:
+      branch:
+          description: 'branch to check out'
+          required: true
+          type: string
+      liquibase-version:
+          description: 'liquibase version'
+          required: true
+          type: string
 
 env:
   MAVEN_VERSION: '3.9.2'
