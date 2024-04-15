@@ -117,12 +117,11 @@ jobs:
       - name: Set version
         run: |
           cd liquibase-pro/liquibase-azure-deps && mvn versions:set -DnewVersion=${{ inputs.liquibase-version }}
-          ls -l 
 
       - name: Build & Test
         run: |
           cd liquibase-pro/liquibase-azure-deps && mvn -B clean package
-          ls -l
+          ls -l target
 
       - name: Archive Modules
         uses: actions/upload-artifact@v3
