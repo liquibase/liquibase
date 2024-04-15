@@ -32,6 +32,12 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
+      # This action will queue the workflow if another workflow is already running
+      - uses: ahmadnassri/action-workflow-queue@v1
+        with:
+          timeout: 3000000 # 30 minutes
+          delay: 300000 # 5 minutes
+
       - name: configure auth
         id: auth
         uses: 'google-github-actions/auth@v2'
@@ -77,8 +83,9 @@ jobs:
     runs-on: ubuntu-latest
     needs: [setup]
     strategy:
+      max-parallel: 1
       matrix:
-        liquibase-support-level: [Contributed ] # Define the different test levels to run
+        liquibase-support-level: [Contributed, Foundational] # Define the different test levels to run
       fail-fast: false # Set fail-fast to false to run all test levels even if some of them fail
     env:
       github-token: ${{ secrets.LIQUIBOT_PAT_GPM_ACCESS }}
