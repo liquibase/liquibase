@@ -70,7 +70,7 @@ jobs:
         uses: liquibase/action-download-artifact@v2-liquibase
         with:
           workflow: build-azure-uber-jar.yml
-          run_id: 8696034501
+          run_id: ${{ needs.setup.outputs.runId }}
           name: liquibase-pro-azure-artifacts
           path: liquibase-pro/liquibase-azure-deps/target/liquibase-azure-deps-${{ inputs.liquibase-version }}.jar
 
