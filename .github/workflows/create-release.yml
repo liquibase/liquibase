@@ -43,7 +43,7 @@ jobs:
   
 
   reversion:
-    needs: [ setup ]
+    needs: [ setup, build-azure-uber-jar ]
     name: Re-version artifacts ${{ needs.setup.outputs.version }}
     runs-on: ubuntu-22.04
     steps:
@@ -62,7 +62,7 @@ jobs:
         uses: liquibase/action-download-artifact@v2-liquibase
         with:
           workflow: run-tests.yml
-          run_id: ${{ needs.setup.outputs.runId }}
+          run_id: 8696034501
           name: liquibase-artifacts
           path: download/liquibase-artifacts
 
