@@ -1,3 +1,1 @@
-INVALID TEST
-'CREATE VIEW test_view AS select dim_channel_key, channel_name, channel_type, publisher from authors
-ALTER VIEW RENAME test_view TO test_view_new'
+INVALID TEST -- BigQuery doesn't support view rename https://cloud.google.com/bigquery/docs/managing-views#rename_a_view

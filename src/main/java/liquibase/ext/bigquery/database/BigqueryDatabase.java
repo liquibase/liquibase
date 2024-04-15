@@ -13,6 +13,7 @@ import liquibase.statement.core.GetViewDefinitionStatement;
 import liquibase.structure.DatabaseObject;
 import liquibase.structure.core.Catalog;
 import liquibase.structure.core.Schema;
+import liquibase.structure.core.Table;
 
 import java.util.HashSet;
 import java.util.Set;
@@ -50,6 +51,26 @@ public class BigqueryDatabase extends AbstractJdbcDatabase {
     @Override
     public int getPriority() {
         return BIGQUERY_PRIORITY_DATABASE;
+    }
+
+    public boolean supportsDatabaseChangeLogHistory() {
+        return true;
+    }
+
+    @Override
+    public String correctObjectName(String objectName, Class<? extends DatabaseObject> objectType) {
+        if (Table.class.isAssignableFrom(objectType) && objectName.equalsIgnoreCase("DATABASECHANGELOGHISTORY")) {
+            return "DATABASECHANGELOGHISTORY"; // historically Bigquery control tables have been upper case
+        }
+        return super.correctObjectName(objectName, objectType);
+    }
+
+    @Override
+    public String escapeStringForDatabase(String string) {
+        if (string == null) {
+            return null;
+        }
+        return super.escapeStringForDatabase(string).replace("''", "\\'");
     }
 
     @Override

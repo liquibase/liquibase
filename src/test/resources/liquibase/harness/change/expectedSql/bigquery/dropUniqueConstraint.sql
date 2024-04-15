@@ -1,1 +1,1 @@
-INVALID TEST BigQuery does not support constraints
+INVALID TEST -- BigQuery does not support constraints
