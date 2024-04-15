@@ -10,6 +10,7 @@ import liquibase.database.ObjectQuotingStrategy;
 import liquibase.database.core.DB2Database;
 import liquibase.database.core.DerbyDatabase;
 import liquibase.database.core.MSSQLDatabase;
+import liquibase.database.core.MySQLDatabase;
 import liquibase.diff.output.DiffOutputControl;
 import liquibase.diff.output.changelog.ChangeGeneratorFactory;
 import liquibase.exception.DatabaseException;
@@ -370,6 +371,16 @@ public class StandardLockService implements LockService {
                 database.rollback();
                 SqlStatement unlockStatement = new UnlockDatabaseChangeLogStatement();
                 int updatedRows = ChangelogJdbcMdcListener.query(database, ex -> ex.update(unlockStatement));
+                if ((updatedRows == 0) && (database instanceof MySQLDatabase)) {
+                    Scope.getCurrentScope().getLog(getClass()).fine(
+                            "Database did not return a proper row count (Might have useAffectedRows enabled.)"
+                    );
+                    // NOTE: if using useAffectedRows, MySQL will return 0 rows affected if the changelog lock was not set or already released
+                    if (((MySQLDatabase) database).getUseAffectedRows()) {
+                        // Assume the lock was released successfully
+                        updatedRows = 1;
+                    }
+                }
                 if ((updatedRows == -1) && (database instanceof MSSQLDatabase)) {
                     Scope.getCurrentScope().getLog(getClass()).fine(
                             "Database did not return a proper row count (Might have NOCOUNT enabled.)"
