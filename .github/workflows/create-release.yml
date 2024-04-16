@@ -78,7 +78,7 @@ jobs:
           workflow: build-azure-uber-jar.yml
           run_id: ${{ steps.get_run_id.outputs.run_id }}
           name: liquibase-pro-azure-artifacts
-          path: liquibase-pro/liquibase-azure-deps/target/liquibase-azure-deps-${{ inputs.version }}.jar
+          path: liquibase-pro/liquibase-azure-deps/target/liquibase-azure-deps-${{ steps.collect-data.outputs.version }}.jar
 
       - name: Set up JDK
         uses: actions/setup-java@v4
@@ -112,20 +112,21 @@ jobs:
           
           ##Sign Files
           ## liquibase-azure-deps is already on its correct version. Check reusable workflow: build-azure-uber-jar.yml
-          # mv download/liquibase-pro-azure-artifacts/liquibase-azure-deps-${{ needs.setup.outputs.version }}.jar re-version/out
+          mv download/liquibase-pro-azure-artifacts/liquibase-azure-deps-${{ steps.collect-data.outputs.version }}.jar re-version/out
           
           $PWD/.github/util/sign-artifacts.sh re-version/out
           
           # Move files to a specific directory
           mkdir re-version/final
-          mv re-version/out/liquibase-core-${{ needs.setup.outputs.version }}.jar re-version/final
-          mv re-version/out/liquibase-commercial-${{ needs.setup.outputs.version }}.jar re-version/final
-          mv re-version/out/liquibase-${{ needs.setup.outputs.version }}.tar.gz re-version/final
-          mv re-version/out/liquibase-${{ needs.setup.outputs.version }}.zip re-version/final
-          # mv re-version/out/liquibase-azure-deps-${{ needs.setup.outputs.version }}.jar re-version/final
+#          mv re-version/out/liquibase-core-${{ needs.setup.outputs.version }}.jar re-version/final
+#          mv re-version/out/liquibase-commercial-${{ needs.setup.outputs.version }}.jar re-version/final
+#          mv re-version/out/liquibase-${{ needs.setup.outputs.version }}.tar.gz re-version/final
+#          mv re-version/out/liquibase-${{ needs.setup.outputs.version }}.zip re-version/final
+          mv re-version/out/liquibase-azure-deps-${{ steps.collect-data.outputs.version }}.jar re-version/final
           
           (cd re-version/out/ && zip liquibase-additional-${{ needs.setup.outputs.version }}.zip *)
           mv re-version/out/liquibase-additional-${{ needs.setup.outputs.version }}.zip re-version/final
+
       - name: Cache Completed Artifacts
         uses: actions/cache@v4.0.2
         with:
@@ -138,6 +139,7 @@ jobs:
           git push -f origin v${{ needs.setup.outputs.version }}
           (cd download/repo/liquibase-pro && git tag -f v${{ needs.setup.outputs.version }})
           (cd download/repo/liquibase-pro && git push -f origin v${{ needs.setup.outputs.version }})
+
   build-installers:
     permissions:
       contents: write  # for softprops/action-gh-release to create GitHub release
