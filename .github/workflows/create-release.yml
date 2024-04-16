@@ -118,10 +118,10 @@ jobs:
           
           # Move files to a specific directory
           mkdir re-version/final
-#          mv re-version/out/liquibase-core-${{ needs.setup.outputs.version }}.jar re-version/final
-#          mv re-version/out/liquibase-commercial-${{ needs.setup.outputs.version }}.jar re-version/final
-#          mv re-version/out/liquibase-${{ needs.setup.outputs.version }}.tar.gz re-version/final
-#          mv re-version/out/liquibase-${{ needs.setup.outputs.version }}.zip re-version/final
+          # mv re-version/out/liquibase-core-${{ needs.setup.outputs.version }}.jar re-version/final
+          # mv re-version/out/liquibase-commercial-${{ needs.setup.outputs.version }}.jar re-version/final
+          # mv re-version/out/liquibase-${{ needs.setup.outputs.version }}.tar.gz re-version/final
+          # mv re-version/out/liquibase-${{ needs.setup.outputs.version }}.zip re-version/final
           mv re-version/out/liquibase-azure-deps-${{ steps.collect-data.outputs.version }}.jar re-version/final
           
           (cd re-version/out/ && zip liquibase-additional-${{ needs.setup.outputs.version }}.zip *)
