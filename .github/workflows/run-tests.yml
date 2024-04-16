@@ -230,7 +230,6 @@ jobs:
           - postgresql
           - sqlite
           - firebird
-          - snowflake
     needs: build_tests
     timeout-minutes: 30
     steps:
@@ -254,7 +253,7 @@ jobs:
           cache: 'maven'
 
       - name: Set up JDK 11 # get rid of this after https://github.com/snowflakedb/snowflake-jdbc/issues/589 is fixed
-        if: ${{ github.event_name == 'pull_request' && github.ref == 'refs/heads/master' && matrix.testSystem == 'snowflake' }}
+        if: ${{ matrix.testSystem == 'snowflake' }}
         uses: actions/setup-java@v4
         with:
           java-version: '11'
@@ -270,13 +269,13 @@ jobs:
           path: ./**/target
 
       - name: Setup Python
-        if: ${{ github.event_name == 'pull_request' && github.ref == 'refs/heads/master' && matrix.testSystem == 'snowflake' }}
+        if: ${{ matrix.testSystem == 'snowflake' }}
         uses: actions/setup-python@v5.1.0
         with:
           python-version: '3.12.1'
 
       - name: Start & Configure LocalStack
-        if: ${{ github.event_name == 'pull_request' && github.ref == 'refs/heads/master' && matrix.testSystem == 'snowflake' }}
+        if: ${{ matrix.testSystem == 'snowflake' }}
         env:
           LOCALSTACK_API_KEY: ${{ secrets.LOCALSTACK_API_KEY }}
           GITHUB_TOKEN: ${{ secrets.BOT_TOKEN }}
@@ -292,7 +291,6 @@ jobs:
           echo "TH_SNOW_URL=jdbc:snowflake://http://snowflake.localhost.localstack.cloud:4566" >> $GITHUB_ENV
 
       - name: Run Tests
-        if: ${{ github.ref == 'refs/heads/master' || matrix.testSystem != 'snowflake' }}
         run: ./mvnw -B clean verify -DtrimStackTrace=false -Dliquibase.sdk.testSystem.test=${{ matrix.testSystem }} -Dliquibase.sdk.testSystem.acceptLicenses=${{ matrix.testSystem }} -Dliquibase.sdk.testSystem.snowflake.url=${{ env.TH_SNOW_URL }} -Dliquibase.sdk.testSystem.snowflake.username=${{ env.TH_DB_ADMIN }} -Dliquibase.sdk.testSystem.snowflake.password=${{ env.TH_DB_PASSWD }} -Dtest=*IntegrationTest,*ExecutorTest -DfailIfNoTests=false -Dsurefire.failIfNoSpecifiedTests=false
 
       - name: Archive Test Results
