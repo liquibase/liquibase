@@ -3,26 +3,40 @@ package liquibase.statement.core;
 import liquibase.change.ColumnConfig;
 import liquibase.statement.AbstractSqlStatement;
 import liquibase.util.StringUtil;
+import lombok.Getter;
 
 public class AddForeignKeyConstraintStatement extends AbstractSqlStatement {
 
+    @Getter
     private final String baseTableCatalogName;
+    @Getter
     private final String baseTableSchemaName;
+    @Getter
     private final String baseTableName;
+    @Getter
     private final ColumnConfig[] baseColumns;
 
+    @Getter
     private final String referencedTableCatalogName;
+    @Getter
     private final String referencedTableSchemaName;
+    @Getter
     private final String referencedTableName;
+    @Getter
     private final ColumnConfig[] referencedColumns;
 
+    @Getter
     private final String constraintName;
 
+    @Getter
     private boolean deferrable;
+    @Getter
     private boolean initiallyDeferred;
     private boolean shouldValidate = true; //only Oracle PL/SQL feature
 
+    @Getter
     private String onDelete;
+    @Getter
     private String onUpdate;
 
     public AddForeignKeyConstraintStatement(String constraintName, String baseTableCatalogName, String baseTableSchemaName,
@@ -40,69 +54,17 @@ public class AddForeignKeyConstraintStatement extends AbstractSqlStatement {
         this.constraintName = constraintName;
     }
 
-    public String getBaseTableCatalogName() {
-        return baseTableCatalogName;
-    }
-
-    public String getBaseTableSchemaName() {
-        return baseTableSchemaName;
-    }
-
-    public String getBaseTableName() {
-        return baseTableName;
-    }
-
-    public ColumnConfig[] getBaseColumns() {
-        return baseColumns;
-    }
-
     public String getBaseColumnNames() {
         return StringUtil.join(baseColumns, ", ", (StringUtil.StringUtilFormatter<ColumnConfig>) ColumnConfig::getName);
-    }
-
-    public String getReferencedTableCatalogName() {
-        return referencedTableCatalogName;
-    }
-
-    public String getReferencedTableSchemaName() {
-        return referencedTableSchemaName;
-    }
-
-    public String getReferencedTableName() {
-        return referencedTableName;
-    }
-
-    public ColumnConfig[] getReferencedColumns() {
-        return referencedColumns;
     }
 
     public String getReferencedColumnNames() {
         return StringUtil.join(referencedColumns, ", ", (StringUtil.StringUtilFormatter<ColumnConfig>) ColumnConfig::getName);
     }
 
-    public String getConstraintName() {
-        return constraintName;
-    }
-
-    public boolean isDeferrable() {
-        return deferrable;
-    }
-
-    public String getOnDelete() {
-        return onDelete;
-    }
-
-    public String getOnUpdate() {
-        return onUpdate;
-    }
-
     public AddForeignKeyConstraintStatement setDeferrable(boolean deferrable) {
         this.deferrable = deferrable;
         return this;
-    }
-
-    public boolean isInitiallyDeferred() {
-        return initiallyDeferred;
     }
 
     public AddForeignKeyConstraintStatement setInitiallyDeferred(boolean initiallyDeferred) {

@@ -20,6 +20,7 @@ import liquibase.sql.UnparsedSql;
 import liquibase.sqlgenerator.SqlGeneratorChain;
 import liquibase.statement.*;
 import liquibase.statement.core.CreateTableStatement;
+import liquibase.structure.core.Catalog;
 import liquibase.structure.core.ForeignKey;
 import liquibase.structure.core.Relation;
 import liquibase.structure.core.Schema;
@@ -294,7 +295,7 @@ public class CreateTableGenerator extends AbstractSqlGenerator<CreateTableStatem
                     .append(") REFERENCES ");
             if (referencesString != null) {
                 if (!referencesString.contains(".") && (database.getDefaultSchemaName() != null) && database
-                        .getOutputDefaultSchema() && (database.supportsSchemas() || database.supportsCatalogs())) {
+                        .getOutputDefaultSchema() && (database.supports(Schema.class) || database.supports(Catalog.class))) {
                     referencesString = database.escapeObjectName(database.getDefaultSchemaName(), Schema.class) + "." + referencesString;
                 }
                 buffer.append(referencesString);

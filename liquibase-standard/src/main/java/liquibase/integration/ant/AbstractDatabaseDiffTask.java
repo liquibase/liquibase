@@ -10,11 +10,15 @@ import liquibase.integration.ant.type.DatabaseType;
 import liquibase.snapshot.DatabaseSnapshot;
 import liquibase.snapshot.SnapshotControl;
 import liquibase.snapshot.SnapshotGeneratorFactory;
+import lombok.Getter;
+import lombok.Setter;
 import org.apache.tools.ant.BuildException;
 import org.apache.tools.ant.types.Reference;
 
 public abstract class AbstractDatabaseDiffTask extends BaseLiquibaseTask {
     private DatabaseType referenceDatabaseType;
+    @Getter
+    @Setter
     private String diffTypes;
 
     protected DiffResult getDiffResult() {
@@ -69,13 +73,5 @@ public abstract class AbstractDatabaseDiffTask extends BaseLiquibaseTask {
     public void setReferenceDatabaseRef(Reference referenceDatabaseRef) {
         referenceDatabaseType = new DatabaseType(getProject());
         referenceDatabaseType.setRefid(referenceDatabaseRef);
-    }
-
-    public String getDiffTypes() {
-        return diffTypes;
-    }
-
-    public void setDiffTypes(String diffTypes) {
-        this.diffTypes = diffTypes;
     }
 }

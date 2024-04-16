@@ -59,7 +59,7 @@ jobs:
     runs-on: ubuntu-22.04
     steps:
       - name: Download release assets
-        uses: robinraju/release-downloader@v1.9
+        uses: robinraju/release-downloader@v1.10
         with:
           repository: "liquibase/liquibase"
           tag: "${{ needs.setup.outputs.tag }}"
@@ -214,7 +214,7 @@ jobs:
       contents: read
     steps:
       - name: Download release javadocs
-        uses: robinraju/release-downloader@v1.9
+        uses: robinraju/release-downloader@v1.10
         with:
           repository: "liquibase/liquibase"
           tag: "${{ needs.setup.outputs.tag }}"
@@ -407,7 +407,7 @@ jobs:
           event-type: oss-released-tag
 
   package:
-    uses: liquibase/build-logic/.github/workflows/package.yml@v0.6.7
+    uses: liquibase/build-logic/.github/workflows/package.yml@v0.6.9
     needs: [ setup ]
     secrets: inherit
     with:
