@@ -230,10 +230,9 @@ jobs:
           - postgresql
           - sqlite
           - firebird
-          - snowflake
+          #- snowflake
     needs: build_tests
     timeout-minutes: 30
-    if: ${{ matrix.testSystem != 'snowflake' }}  # Skip integration test if testSystem is 'snowflake'
     steps:
       - uses: actions/checkout@v4
         with:
