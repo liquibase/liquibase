@@ -254,7 +254,7 @@ jobs:
           cache: 'maven'
 
       - name: Set up JDK 11 # get rid of this after https://github.com/snowflakedb/snowflake-jdbc/issues/589 is fixed
-        if: ${{ matrix.testSystem == 'snowflake' }}
+        if: github.ref == 'refs/heads/master' && matrix.testSystem == 'snowflake'
         uses: actions/setup-java@v4
         with:
           java-version: '11'
@@ -270,13 +270,13 @@ jobs:
           path: ./**/target
 
       - name: Setup Python
-        if: ${{ matrix.testSystem == 'snowflake' }}
+        if: github.ref == 'refs/heads/master' && matrix.testSystem == 'snowflake' 
         uses: actions/setup-python@v5.1.0
         with:
           python-version: '3.12.1'
 
       - name: Start & Configure LocalStack
-        if: ${{ matrix.testSystem == 'snowflake' }}
+        if: github.ref == 'refs/heads/master' && matrix.testSystem == 'snowflake' 
         env:
           LOCALSTACK_API_KEY: ${{ secrets.LOCALSTACK_API_KEY }}
           GITHUB_TOKEN: ${{ secrets.BOT_TOKEN }}
