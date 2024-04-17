@@ -343,22 +343,26 @@ public class DatabaseChangeLog implements Comparable<DatabaseChangeLog>, Conditi
         );
 
         ValidatingVisitorFactory validatingVisitorFactory = Scope.getCurrentScope().getSingleton(ValidatingVisitorFactory.class);
-        ValidatingVisitor validatingVisitor = validatingVisitorFactory.getValidatingVisitor();
-        validatingVisitor.setRanChangeSetList(database.getRanChangeSetList());
-        validatingVisitor.validate(database, this);
-        logIterator.run(validatingVisitor, new RuntimeEnvironment(database, contexts, labelExpression));
+        try {
+            ValidatingVisitor validatingVisitor = validatingVisitorFactory.getValidatingVisitor();
+            validatingVisitor.setRanChangeSetList(database.getRanChangeSetList());
+            validatingVisitor.validate(database, this);
+            logIterator.run(validatingVisitor, new RuntimeEnvironment(database, contexts, labelExpression));
 
-        final Logger log = Scope.getCurrentScope().getLog(getClass());
-        for (String message : validatingVisitor.getWarnings().getMessages()) {
-            log.warning(message);
-        }
+            final Logger log = Scope.getCurrentScope().getLog(getClass());
+            for (String message : validatingVisitor.getWarnings().getMessages()) {
+                log.warning(message);
+            }
 
-        if (!validatingVisitor.validationPassed()) {
-            Scope.getCurrentScope().addMdcValue(MdcKey.DEPLOYMENT_OUTCOME, MdcValue.COMMAND_FAILED);
-            List<MdcChangeset> duplicateChangesetsMdc = validatingVisitor.getDuplicateChangeSets().stream().map(MdcChangeset::fromChangeset).collect(Collectors.toList());
-            Scope.getCurrentScope().addMdcValue(MdcKey.DUPLICATE_CHANGESETS, new DuplicateChangesets(duplicateChangesetsMdc));
-            Scope.getCurrentScope().getLog(getClass()).info("Change failed validation!");
-            throw new ValidationFailedException(validatingVisitor);
+            if (!validatingVisitor.validationPassed()) {
+                Scope.getCurrentScope().addMdcValue(MdcKey.DEPLOYMENT_OUTCOME, MdcValue.COMMAND_FAILED);
+                List<MdcChangeset> duplicateChangesetsMdc = validatingVisitor.getDuplicateChangeSets().stream().map(MdcChangeset::fromChangeset).collect(Collectors.toList());
+                Scope.getCurrentScope().addMdcValue(MdcKey.DUPLICATE_CHANGESETS, new DuplicateChangesets(duplicateChangesetsMdc));
+                Scope.getCurrentScope().getLog(getClass()).info("Change failed validation!");
+                throw new ValidationFailedException(validatingVisitor);
+            }
+        } finally {
+            validatingVisitorFactory.reset();
         }
     }
 
