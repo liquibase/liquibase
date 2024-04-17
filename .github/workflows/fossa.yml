@@ -110,12 +110,15 @@ jobs:
           aws s3 cp s3://liquibaseorg-origin/fossa_reports_liquibase-pro/liquibase.csv /home/runner/fossa_reports_s3/ 
           ls -l /home/runner/fossa_reports_s3
           
-          tail -n +2 /home/runner/fossa_reports_s3/liquibase.csv >> /home/runner/fossa_reports_s3/liquibase_no_header.csv
-          tail -n +2 /home/runner/fossa_reports_s3/liquibase_pro.csv >> /home/runner/fossa_reports_s3/liquibase_pro_no_header.csv
+          tail -n +3 /home/runner/fossa_reports_s3/liquibase.csv >> /home/runner/fossa_reports_s3/liquibase_no_header.csv
+          tail -n +3 /home/runner/fossa_reports_s3/liquibase_pro.csv >> /home/runner/fossa_reports_s3/liquibase_pro_no_header.csv
+          
 
       - name: Merge and Remove Duplicates
         run: |
           cat /home/runner/fossa_reports_s3/liquibase_no_header.csv /home/runner/fossa_reports_s3/liquibase_pro_no_header.csv | sort | uniq > /home/runner/fossa_reports_s3/liquibase_pro-${{ steps.get_tag.outputs.tag_name }}-${{ steps.get_tag.outputs.release_date }}.csv
+          
+          echo 'Title,Version,Declared License,Package Homepage' | cat - /home/runner/fossa_reports_s3/liquibase_pro-${{ steps.get_tag.outputs.tag_name }}-${{ steps.get_tag.outputs.release_date }}.csv > temp && mv temp /home/runner/fossa_reports_s3/liquibase_pro-${{ steps.get_tag.outputs.tag_name }}-${{ steps.get_tag.outputs.release_date }}.csv
 
       - name: Upload merged CSV to S3
         run: aws s3 cp /home/runner/fossa_reports_s3/liquibase_pro-${{ steps.get_tag.outputs.tag_name }}-${{ steps.get_tag.outputs.release_date }}.csv s3://liquibaseorg-origin/fossa_reports_liquibase-pro/
