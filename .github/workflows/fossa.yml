@@ -113,8 +113,10 @@ jobs:
         run: |
           aws s3 cp s3://liquibaseorg-origin/fossa_reports_liquibase-pro/liquibase_pro.csv /home/runner/fossa_reports/ --recursive
           aws s3 cp s3://liquibaseorg-origin/fossa_reports_liquibase-pro/liquibase.csv /home/runner/fossa_reports/ --recursive
-          tail -n +2 /home/runner/fossa_reports/liquibase.csv > /home/runner/fossa_reports/liquibase_no_header.csv
-          tail -n +2 /home/runner/fossa_reports/liquibase_pro.csv > /home/runner/fossa_reports/liquibase_pro_no_header.csv
+          ls -l /home/runner/fossa_reports
+          
+          # tail -n +2 /home/runner/fossa_reports/liquibase.csv > /home/runner/fossa_reports/liquibase_no_header.csv
+          # tail -n +2 /home/runner/fossa_reports/liquibase_pro.csv > /home/runner/fossa_reports/liquibase_pro_no_header.csv
 
       - name: Merge and Remove Duplicates
         run: |
