@@ -26,13 +26,6 @@ public class RawParameterizedSqlStatement extends AbstractSqlStatement {
         }
     }
 
-//    public RawParameterizedSqlStatement(String sql, String endDelimiter, Object... parameters) {
-//        this(sql, parameters);
-//        if (endDelimiter != null) {
-//            this.endDelimiter = endDelimiter;
-//        }
-//    }
-
     public String getSql() {
         return sql;
     }
