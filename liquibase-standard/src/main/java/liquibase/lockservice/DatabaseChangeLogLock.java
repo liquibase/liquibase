@@ -1,5 +1,7 @@
 package liquibase.lockservice;
 
+import lombok.Getter;
+
 import java.util.Date;
 
 /**
@@ -7,8 +9,10 @@ import java.util.Date;
  * update a database at a time. Immutable class
  */
 public class DatabaseChangeLogLock {
+    @Getter
     private final int id;
     private final Date lockGranted;
+    @Getter
     private final String lockedBy;
 
     public DatabaseChangeLogLock(int id, Date lockGranted, String lockedBy) {
@@ -17,15 +21,8 @@ public class DatabaseChangeLogLock {
         this.lockedBy = lockedBy;
     }
 
-    public int getId() {
-        return id;
-    }
-
     public Date getLockGranted() {
         return (Date) lockGranted.clone();
     }
 
-    public String getLockedBy() {
-        return lockedBy;
-    }
 }

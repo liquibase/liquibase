@@ -3,8 +3,12 @@ package liquibase.integration.ant;
 import liquibase.Liquibase;
 import liquibase.exception.LiquibaseException;
 import liquibase.util.StringUtil;
+import lombok.Getter;
+import lombok.Setter;
 import org.apache.tools.ant.BuildException;
 
+@Getter
+@Setter
 public class TagDatabaseTask extends BaseLiquibaseTask {
     private String tag;
 
@@ -27,11 +31,4 @@ public class TagDatabaseTask extends BaseLiquibaseTask {
         }
     }
 
-    public String getTag() {
-        return tag;
-    }
-
-    public void setTag(String tag) {
-        this.tag = tag;
-    }
 }
