@@ -103,15 +103,12 @@ jobs:
           aws-secret-access-key: ${{ secrets.LIQUIBASEORIGIN_SECRET_ACCESS_KEY }}
           aws-region: us-east-1
 
-      - name: Download reports from S3
+      - name: Download reports from S3 and Rearrange CSV files
         run: |
           aws s3 cp s3://liquibaseorg-origin/fossa_reports_liquibase-pro/liquibase_pro.csv /home/runner/fossa_reports/ --recursive
           aws s3 cp s3://liquibaseorg-origin/fossa_reports_liquibase-pro/liquibase.csv /home/runner/fossa_reports/ --recursive
-
-      - name: Rearrange CSV files
-        run: |
-          tail -n +2 liquibase.csv > liquibase_no_header.csv
-          tail -n +2 liquibase_pro.csv > liquibase_pro_no_header.csv
+          tail -n +2 /home/runner/fossa_reports/liquibase.csv > /home/runner/fossa_reports/liquibase_no_header.csv
+          tail -n +2 /home/runner/fossa_reports/liquibase_pro.csv > /home/runner/fossa_reports/liquibase_pro_no_header.csv
 
       - name: Merge and Remove Duplicates
         run: |
