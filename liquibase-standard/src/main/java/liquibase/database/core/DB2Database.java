@@ -5,7 +5,7 @@ import liquibase.database.DatabaseConnection;
 import liquibase.database.OfflineConnection;
 import liquibase.exception.DatabaseException;
 import liquibase.executor.ExecutorService;
-import liquibase.statement.core.RawSqlStatement;
+import liquibase.statement.core.RawParameterizedSqlStatement;
 import liquibase.structure.DatabaseObject;
 import liquibase.structure.core.Table;
 import liquibase.util.StringUtil;
@@ -51,7 +51,7 @@ public class DB2Database extends AbstractDb2Database {
 			return null;
 		try {
 			return Scope.getCurrentScope().getSingleton(ExecutorService.class).getExecutor("jdbc", this).queryForObject(
-					new RawSqlStatement("SELECT fixpack_num FROM TABLE (sysproc.env_get_inst_info()) as INSTANCEINFO"),
+					new RawParameterizedSqlStatement("SELECT fixpack_num FROM TABLE (sysproc.env_get_inst_info()) as INSTANCEINFO"),
 					Integer.class);
 		} catch (final Exception e) {
 			Scope.getCurrentScope().getLog(getClass()).info("Error getting fix pack number", e);

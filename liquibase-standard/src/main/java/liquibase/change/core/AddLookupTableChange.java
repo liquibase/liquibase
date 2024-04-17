@@ -20,7 +20,7 @@ import liquibase.snapshot.SnapshotGeneratorFactory;
 import liquibase.statement.NotNullConstraint;
 import liquibase.statement.SqlStatement;
 import liquibase.statement.core.CreateTableStatement;
-import liquibase.statement.core.RawSqlStatement;
+import liquibase.statement.core.RawParameterizedSqlStatement;
 import liquibase.statement.core.ReorganizeTableStatement;
 import liquibase.structure.core.Column;
 import liquibase.structure.core.ForeignKey;
@@ -194,30 +194,54 @@ public class AddLookupTableChange extends AbstractChange {
         String existingTableCatalogName = getExistingTableCatalogName();
         String existingTableSchemaName = getExistingTableSchemaName();
 
-        SqlStatement[] createTablesSQL = {new RawSqlStatement("CREATE TABLE " + database.escapeTableName(newTableCatalogName, newTableSchemaName, getNewTableName()) + " AS SELECT DISTINCT " + database.escapeObjectName(getExistingColumnName(), Column.class) + " AS " + database.escapeObjectName(getNewColumnName(), Column.class) + " FROM " + database.escapeTableName(existingTableCatalogName, existingTableSchemaName, getExistingTableName()) + " WHERE " + database.escapeObjectName(getExistingColumnName(), Column.class) + " IS NOT NULL")};
+        StringBuilder createTableQuery = new StringBuilder(String.format("CREATE TABLE %s", database.escapeTableName(newTableCatalogName, newTableSchemaName, getNewTableName())))
+                .append(String.format(" AS SELECT DISTINCT %s", database.escapeObjectName(getExistingColumnName(), Column.class)))
+                .append(String.format(" AS %s FROM %s WHERE %s IS NOT NULL", database.escapeObjectName(getNewColumnName(), Column.class),
+                        database.escapeTableName(existingTableCatalogName, existingTableSchemaName, getExistingTableName()),
+                        database.escapeObjectName(getExistingColumnName(), Column.class)));
+        SqlStatement[] createTablesSQL = {new RawParameterizedSqlStatement(createTableQuery.toString())};
+        StringBuilder selectQuery = new StringBuilder(String.format("SELECT DISTINCT %s", database.escapeObjectName(getExistingColumnName(), Column.class)))
+                .append(String.format(" AS %s", database.escapeObjectName(getNewColumnName(), Column.class)))
+                .append(String.format(" INTO %s", database.escapeTableName(newTableCatalogName, newTableSchemaName, getNewTableName())))
+                .append(String.format(" FROM %s WHERE %s IS NOT NULL", database.escapeTableName(existingTableCatalogName, existingTableSchemaName, getExistingTableName()), database.escapeObjectName(getExistingColumnName(), Column.class)));
         if (database instanceof MSSQLDatabase) {
-            createTablesSQL = new SqlStatement[]{new RawSqlStatement("SELECT DISTINCT " + database.escapeObjectName(getExistingColumnName(), Column.class) + " AS " + database.escapeObjectName(getNewColumnName(), Column.class) + " INTO " + database.escapeTableName(newTableCatalogName, newTableSchemaName, getNewTableName()) + " FROM " + database.escapeTableName(existingTableCatalogName, existingTableSchemaName, getExistingTableName()) + " WHERE " + database.escapeObjectName(getExistingColumnName(), Column.class) + " IS NOT NULL"),};
+            createTablesSQL = new SqlStatement[]{new RawParameterizedSqlStatement(selectQuery.toString()),};
         } else if (database instanceof SybaseASADatabase) {
-            createTablesSQL = new SqlStatement[]{new RawSqlStatement("SELECT DISTINCT " + database.escapeObjectName(getExistingColumnName(), Column.class) + " AS " + database.escapeObjectName(getNewColumnName(), Column.class) + " INTO " + database.escapeTableName(newTableCatalogName, newTableSchemaName, getNewTableName()) + " FROM " + database.escapeTableName(existingTableCatalogName, existingTableSchemaName, getExistingTableName()) + " WHERE " + database.escapeObjectName(getExistingColumnName(), Column.class) + " IS NOT NULL"),};
+            createTablesSQL = new SqlStatement[]{new RawParameterizedSqlStatement( selectQuery.toString()),};
         } else if (database instanceof Db2zDatabase) {
             CreateTableStatement tableStatement = new CreateTableStatement(newTableCatalogName, newTableSchemaName, getNewTableName());
             if (getNewColumnName() != null) {
                 tableStatement.addColumn(getNewColumnName(), DataTypeFactory.getInstance().fromDescription(getNewColumnDataType(), database));
                 tableStatement.addColumnConstraint(new NotNullConstraint(getNewColumnName()));
             }
+            StringBuilder insertQuery = new StringBuilder(String.format("INSERT INTO %s", database.escapeTableName(newTableCatalogName, newTableSchemaName, getNewTableName())))
+                    .append(String.format(" SELECT DISTINCT %s", database.escapeObjectName(getExistingColumnName(), Column.class)))
+                    .append(String.format(" FROM %s WHERE %s IS NOT NULL", database.escapeTableName(existingTableCatalogName, existingTableSchemaName, getExistingTableName()), database.escapeObjectName(getExistingColumnName(), Column.class)));
             createTablesSQL = new SqlStatement[]{
                     tableStatement,
-                    new RawSqlStatement("INSERT INTO " + database.escapeTableName(newTableCatalogName, newTableSchemaName, getNewTableName()) + " SELECT DISTINCT " + database.escapeObjectName(getExistingColumnName(), Column.class) + " FROM " + database.escapeTableName(existingTableCatalogName, existingTableSchemaName, getExistingTableName()) + " WHERE " + database.escapeObjectName(getExistingColumnName(), Column.class) + " IS NOT NULL"),
+                    new RawParameterizedSqlStatement( insertQuery.toString()),
             };
         } else if (database instanceof DB2Database) {
+            StringBuilder cTableQuery = new StringBuilder(String.format("CREATE TABLE %s", database.escapeTableName(newTableCatalogName, newTableSchemaName, getNewTableName())))
+                    .append(String.format(" AS (SELECT %s", database.escapeObjectName(getExistingColumnName(), Column.class)))
+                    .append(String.format(" AS %s FROM %s) WITH NO DATA", database.escapeObjectName(getNewColumnName(), Column.class), database.escapeTableName(existingTableCatalogName, existingTableSchemaName, getExistingTableName())));
+            StringBuilder insertQuery = new StringBuilder(String.format("INSERT INTO %s", database.escapeTableName(newTableCatalogName, newTableSchemaName, getNewTableName())))
+                    .append(String.format(" SELECT DISTINCT %s", database.escapeObjectName(getExistingColumnName(), Column.class)))
+                    .append(String.format(" FROM %s WHERE %s IS NOT NULL", database.escapeTableName(existingTableCatalogName, existingTableSchemaName, getExistingTableName()), database.escapeObjectName(getExistingColumnName(), Column.class)));
             createTablesSQL = new SqlStatement[]{
-                    new RawSqlStatement("CREATE TABLE " + database.escapeTableName(newTableCatalogName, newTableSchemaName, getNewTableName()) + " AS (SELECT " + database.escapeObjectName(getExistingColumnName(), Column.class) + " AS " + database.escapeObjectName(getNewColumnName(), Column.class) + " FROM " + database.escapeTableName(existingTableCatalogName, existingTableSchemaName, getExistingTableName()) + ") WITH NO DATA"),
-                    new RawSqlStatement("INSERT INTO " + database.escapeTableName(newTableCatalogName, newTableSchemaName, getNewTableName()) + " SELECT DISTINCT " + database.escapeObjectName(getExistingColumnName(), Column.class) + " FROM " + database.escapeTableName(existingTableCatalogName, existingTableSchemaName, getExistingTableName()) + " WHERE " + database.escapeObjectName(getExistingColumnName(), Column.class) + " IS NOT NULL"),
+                    new RawParameterizedSqlStatement(cTableQuery.toString()),
+                    new RawParameterizedSqlStatement(insertQuery.toString()),
             };
         } else if (database instanceof InformixDatabase) {
+            StringBuilder cTableQuery = new StringBuilder(String.format("CREATE TABLE %s", database.escapeTableName(newTableCatalogName, newTableSchemaName, getNewTableName())))
+                    .append(String.format(" ( %s %s )", database.escapeObjectName(getNewColumnName(), Column.class), getNewColumnDataType()));
+            StringBuilder insertQuery = new StringBuilder(String.format("INSERT INTO %s", database.escapeTableName(newTableCatalogName, newTableSchemaName, getNewTableName())))
+                    .append(String.format(" ( %s ) SELECT DISTINCT %s FROM %s WHERE %s IS NOT NULL", database.escapeObjectName(getNewColumnName(), Column.class),
+                            database.escapeObjectName(getExistingColumnName(), Column.class), database.escapeTableName(existingTableCatalogName, existingTableSchemaName, getExistingTableName()),
+                            database.escapeObjectName(getExistingColumnName(), Column.class)));
             createTablesSQL = new SqlStatement[] {
-                    new RawSqlStatement("CREATE TABLE " + database.escapeTableName(newTableCatalogName, newTableSchemaName, getNewTableName()) + " ( "  + database.escapeObjectName(getNewColumnName(), Column.class) + " " + getNewColumnDataType() + " )"),
-                    new RawSqlStatement("INSERT INTO " + database.escapeTableName(newTableCatalogName, newTableSchemaName, getNewTableName()) + " ( "  + database.escapeObjectName(getNewColumnName(), Column.class) + " ) SELECT DISTINCT "  + database.escapeObjectName(getExistingColumnName(), Column.class) + " FROM " + database.escapeTableName(existingTableCatalogName, existingTableSchemaName, getExistingTableName()) + " WHERE " + database.escapeObjectName(getExistingColumnName(), Column.class) + " IS NOT NULL"),
+                    new RawParameterizedSqlStatement(cTableQuery.toString()),
+                    new RawParameterizedSqlStatement(insertQuery.toString()),
             };
         }
 

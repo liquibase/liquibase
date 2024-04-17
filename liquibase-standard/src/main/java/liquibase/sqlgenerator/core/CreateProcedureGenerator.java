@@ -15,7 +15,7 @@ import liquibase.sql.Sql;
 import liquibase.sql.UnparsedSql;
 import liquibase.sqlgenerator.SqlGeneratorChain;
 import liquibase.statement.core.CreateProcedureStatement;
-import liquibase.statement.core.RawSqlStatement;
+import liquibase.statement.core.RawParameterizedSqlStatement;
 import liquibase.structure.core.Schema;
 import liquibase.structure.core.StoredProcedure;
 import liquibase.util.StringClauses;
@@ -149,7 +149,7 @@ public class CreateProcedureGenerator extends AbstractSqlGenerator<CreateProcedu
                 String originalSearchPath = null;
                 if (executor instanceof JdbcExecutor) {
                     try {
-                        originalSearchPath = executor.queryForObject(new RawSqlStatement("SHOW SEARCH_PATH"), String.class);
+                        originalSearchPath = executor.queryForObject(new RawParameterizedSqlStatement("SHOW SEARCH_PATH"), String.class);
                     } catch (Throwable e) {
                         Scope.getCurrentScope().getLog(CreateProcedureGenerator.class).warning("Cannot get search_path", e);
                     }

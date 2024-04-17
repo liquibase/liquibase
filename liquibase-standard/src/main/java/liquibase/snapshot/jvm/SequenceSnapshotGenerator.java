@@ -12,7 +12,6 @@ import liquibase.snapshot.InvalidExampleException;
 import liquibase.snapshot.SnapshotIdService;
 import liquibase.statement.SqlStatement;
 import liquibase.statement.core.RawParameterizedSqlStatement;
-import liquibase.statement.core.RawSqlStatement;
 import liquibase.structure.DatabaseObject;
 import liquibase.structure.core.Schema;
 import liquibase.structure.core.Sequence;
@@ -164,16 +163,16 @@ public class SequenceSnapshotGenerator extends JdbcSnapshotGenerator {
             StringBuilder sql = new StringBuilder("SELECT seq.SEQUENCENAME AS SEQUENCE_NAME FROM SYS.SYSSEQUENCES seq, SYS.SYSSCHEMAS sch WHERE sch.SCHEMANAME = ? AND sch.SCHEMAID = seq.SCHEMAID");
             return new RawParameterizedSqlStatement( sql.toString(), new CatalogAndSchema(null, schema.getName()).customize(database).getSchemaName());
         } else if (database instanceof FirebirdDatabase) {
-            return new RawSqlStatement("SELECT TRIM(RDB$GENERATOR_NAME) AS SEQUENCE_NAME FROM RDB$GENERATORS WHERE RDB$SYSTEM_FLAG IS NULL OR RDB$SYSTEM_FLAG = 0");
+            return new RawParameterizedSqlStatement("SELECT TRIM(RDB$GENERATOR_NAME) AS SEQUENCE_NAME FROM RDB$GENERATORS WHERE RDB$SYSTEM_FLAG IS NULL OR RDB$SYSTEM_FLAG = 0");
         } else if (database instanceof H2Database) {
             try {
                 if (database.getDatabaseMajorVersion() <= 1) {
-                    return new RawSqlStatement(String.format("SELECT SEQUENCE_NAME FROM INFORMATION_SCHEMA.SEQUENCES WHERE SEQUENCE_SCHEMA = '%s' AND IS_GENERATED=FALSE", schema.getName()));
+                    return new RawParameterizedSqlStatement("SELECT SEQUENCE_NAME FROM INFORMATION_SCHEMA.SEQUENCES WHERE SEQUENCE_SCHEMA = ? AND IS_GENERATED=FALSE", schema.getName());
                 }
             } catch (DatabaseException e) {
                 Scope.getCurrentScope().getLog(getClass()).fine("Cannot determine h2 version in order to generate sequence snapshot query");
             }
-            return new RawSqlStatement(String.format("SELECT SEQUENCE_NAME FROM INFORMATION_SCHEMA.SEQUENCES WHERE SEQUENCE_SCHEMA = '%s'", schema.getName()));
+            return new RawParameterizedSqlStatement("SELECT SEQUENCE_NAME FROM INFORMATION_SCHEMA.SEQUENCES WHERE SEQUENCE_SCHEMA = ?", schema.getName());
         } else if (database instanceof HsqlDatabase) {
             return new RawParameterizedSqlStatement("SELECT SEQUENCE_NAME FROM INFORMATION_SCHEMA.SYSTEM_SEQUENCES WHERE SEQUENCE_SCHEMA = ?", schema.getName());
         } else if (database instanceof InformixDatabase) {
@@ -206,7 +205,7 @@ public class SequenceSnapshotGenerator extends JdbcSnapshotGenerator {
                     .append("LAST_NUMBER as START_VALUE, \n")
                     .append("CASE WHEN cache_size = 20 THEN NULL ELSE cache_size END AS cache_size \n")
                     .append(String.format("FROM ALL_SEQUENCES WHERE SEQUENCE_OWNER = '%s'", catalogName));
-            return new RawSqlStatement(sql.toString());
+            return new RawParameterizedSqlStatement(sql.toString());
         } else if (database instanceof PostgresDatabase) {
             int version = 9;
             try {
@@ -220,7 +219,7 @@ public class SequenceSnapshotGenerator extends JdbcSnapshotGenerator {
             }
             String pgSequenceQuery = COMMON_PG_SEQUENCE_QUERY.toString().replace("SCHEMA_NAME", schemaName);
             if (version < 10) { // 'pg_sequence' view does not exists yet
-                return new RawSqlStatement(String.format("SELECT c.relname AS \"SEQUENCE_NAME\" FROM pg_class c %s", pgSequenceQuery));
+                return new RawParameterizedSqlStatement(String.format("SELECT c.relname AS \"SEQUENCE_NAME\" FROM pg_class c %s", pgSequenceQuery));
             } else {
                 StringBuilder sql = new StringBuilder("SELECT c.relname AS \"SEQUENCE_NAME\", ")
                         .append("  s.seqmin AS \"MIN_VALUE\", s.seqmax AS \"MAX_VALUE\", s.seqincrement AS \"INCREMENT_BY\", ")
@@ -229,13 +228,13 @@ public class SequenceSnapshotGenerator extends JdbcSnapshotGenerator {
                         .append("FROM pg_class c ")
                         .append("JOIN pg_sequence s on c.oid = s.seqrelid ")
                         .append(pgSequenceQuery);
-                return new RawSqlStatement(sql.toString());
+                return new RawParameterizedSqlStatement(sql.toString());
             }
         } else if (database instanceof MSSQLDatabase) {
             StringBuilder sql = new StringBuilder("SELECT SEQUENCE_NAME, cast(START_VALUE AS BIGINT) AS START_VALUE, cast(MINIMUM_VALUE AS BIGINT) AS MIN_VALUE, ")
                     .append("cast(MAXIMUM_VALUE AS BIGINT) AS MAX_VALUE, CAST(INCREMENT AS BIGINT) AS INCREMENT_BY, CYCLE_OPTION AS WILL_CYCLE ")
-                    .append(String.format("FROM INFORMATION_SCHEMA.SEQUENCES WHERE SEQUENCE_SCHEMA = '%s'", schema.getName()));
-            return new RawSqlStatement( sql.toString());
+                    .append("FROM INFORMATION_SCHEMA.SEQUENCES WHERE SEQUENCE_SCHEMA = ?");
+            return new RawParameterizedSqlStatement( sql.toString(), schema.getName());
         } else if (database instanceof MariaDBDatabase) {
             StringJoiner j = new StringJoiner(" \n UNION\n");
             try {
@@ -245,7 +244,7 @@ public class SequenceSnapshotGenerator extends JdbcSnapshotGenerator {
                         .getExecutor("jdbc", database)
                         .queryForList(new RawParameterizedSqlStatement(sql.toString(), schema.getName()));
                 if (res.size() == 0) {
-                    return new RawSqlStatement("SELECT 'name' AS SEQUENCE_NAME from dual WHERE 1=0");
+                    return new RawParameterizedSqlStatement("SELECT 'name' AS SEQUENCE_NAME from dual WHERE 1=0");
                 }
                 for (Map<String, ?> e : res) {
                     String seqName = (String) e.get("SEQUENCE_NAME");
@@ -260,7 +259,7 @@ public class SequenceSnapshotGenerator extends JdbcSnapshotGenerator {
             } catch (DatabaseException e) {
                 throw new UnexpectedLiquibaseException("Could not get list of schemas ", e);
             }
-            return new RawSqlStatement(j.toString());
+            return new RawParameterizedSqlStatement(j.toString());
         } else if (database instanceof SybaseASADatabase) {
             StringBuilder sql = new StringBuilder("SELECT SEQUENCE_NAME, START_WITH AS START_VALUE, MIN_VALUE, ")
                     .append("MAX_VALUE, INCREMENT_BY, CYCLE AS WILL_CYCLE FROM SYS.SYSSEQUENCE s JOIN SYS.SYSUSER u ON s.OWNER = u.USER_ID ")

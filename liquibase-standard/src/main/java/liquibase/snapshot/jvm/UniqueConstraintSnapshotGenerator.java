@@ -18,7 +18,6 @@ import liquibase.snapshot.CachedRow;
 import liquibase.snapshot.DatabaseSnapshot;
 import liquibase.snapshot.JdbcDatabaseSnapshot;
 import liquibase.statement.core.RawParameterizedSqlStatement;
-import liquibase.statement.core.RawSqlStatement;
 import liquibase.structure.DatabaseObject;
 import liquibase.structure.core.Catalog;
 import liquibase.structure.core.Column;
@@ -283,7 +282,7 @@ public class UniqueConstraintSnapshotGenerator extends JdbcSnapshotGenerator {
                         .append("FROM sys.sysconglomerates cg JOIN sys.syskeys k ON cg.conglomerateid = k.conglomerateid ")
                         .append("JOIN sys.sysconstraints c ON c.constraintid = k.constraintid JOIN sys.systables t ON c.tableid = t.tableid ")
                         .append(String.format("WHERE c.constraintname='%s'", database.correctObjectName(name, UniqueConstraint.class)));
-                List<Map<String, ?>> rows = Scope.getCurrentScope().getSingleton(ExecutorService.class).getExecutor("jdbc", database).queryForList(new RawSqlStatement(sql.toString()));
+                List<Map<String, ?>> rows = Scope.getCurrentScope().getSingleton(ExecutorService.class).getExecutor("jdbc", database).queryForList(new RawParameterizedSqlStatement(sql.toString()));
 
                 List<Map<String, ?>> returnList = new ArrayList<>();
                 if (rows.isEmpty()) {

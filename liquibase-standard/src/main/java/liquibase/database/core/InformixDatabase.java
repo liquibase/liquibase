@@ -9,7 +9,7 @@ import liquibase.exception.DatabaseException;
 import liquibase.exception.UnexpectedLiquibaseException;
 import liquibase.executor.ExecutorService;
 import liquibase.statement.core.GetViewDefinitionStatement;
-import liquibase.statement.core.RawSqlStatement;
+import liquibase.statement.core.RawParameterizedSqlStatement;
 import liquibase.structure.DatabaseObject;
 import liquibase.structure.core.Table;
 
@@ -135,7 +135,7 @@ public class InformixDatabase extends AbstractJdbcDatabase {
                  * For each session this statement has to be executed,
                  * to allow newlines in quoted strings
                  */
-                Scope.getCurrentScope().getSingleton(ExecutorService.class).getExecutor("jdbc", this).execute(new RawSqlStatement("EXECUTE PROCEDURE IFX_ALLOW_NEWLINE('T');"));
+                Scope.getCurrentScope().getSingleton(ExecutorService.class).getExecutor("jdbc", this).execute(new RawParameterizedSqlStatement("EXECUTE PROCEDURE IFX_ALLOW_NEWLINE('T');"));
             } catch (Exception e) {
                 throw new UnexpectedLiquibaseException("Could not allow newline characters in quoted strings with IFX_ALLOW_NEWLINE", e);
             }
@@ -244,7 +244,7 @@ public class InformixDatabase extends AbstractJdbcDatabase {
             return null;
         }
         try {
-            String schemaName = Scope.getCurrentScope().getSingleton(ExecutorService.class).getExecutor("jdbc", this).queryForObject(new RawSqlStatement("select username from sysmaster:informix.syssessions where sid = dbinfo('sessionid')"), String.class);
+            String schemaName = Scope.getCurrentScope().getSingleton(ExecutorService.class).getExecutor("jdbc", this).queryForObject(new RawParameterizedSqlStatement("select username from sysmaster:informix.syssessions where sid = dbinfo('sessionid')"), String.class);
             if (schemaName != null) {
                 return schemaName.trim();
             }

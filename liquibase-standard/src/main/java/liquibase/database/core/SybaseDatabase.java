@@ -9,7 +9,7 @@ import liquibase.executor.Executor;
 import liquibase.executor.ExecutorService;
 import liquibase.statement.SqlStatement;
 import liquibase.statement.core.GetViewDefinitionStatement;
-import liquibase.statement.core.RawSqlStatement;
+import liquibase.statement.core.RawParameterizedSqlStatement;
 import liquibase.structure.DatabaseObject;
 import liquibase.structure.core.Column;
 import liquibase.structure.core.Sequence;
@@ -187,7 +187,7 @@ public class SybaseDatabase extends AbstractJdbcDatabase {
 
     @Override
     protected SqlStatement getConnectionSchemaNameCallStatement() {
-        return new RawSqlStatement("select user_name()");
+        return new RawParameterizedSqlStatement("select user_name()");
     }
 
     @Override

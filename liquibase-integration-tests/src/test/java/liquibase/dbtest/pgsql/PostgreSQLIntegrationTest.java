@@ -27,7 +27,7 @@ import liquibase.extension.testing.testsystem.DatabaseTestSystem;
 import liquibase.snapshot.DatabaseSnapshot;
 import liquibase.snapshot.SnapshotControl;
 import liquibase.snapshot.SnapshotGeneratorFactory;
-import liquibase.statement.core.RawSqlStatement;
+import liquibase.statement.core.RawParameterizedSqlStatement;
 import liquibase.structure.core.Sequence;
 import liquibase.structure.core.Table;
 import liquibase.test.JUnitResourceAccessor;
@@ -91,7 +91,7 @@ public class PostgreSQLIntegrationTest extends AbstractIntegrationTest {
             liquibase.update();
             List<Map<String, ?>>  data = Scope.getCurrentScope().getSingleton(ExecutorService.class).getExecutor("jdbc", getDatabase())
                     .queryForList(
-                            new RawSqlStatement("SELECT pg_column_size(content_bytea) as BYTEASIZE, pg_column_size(lo_get(content_oid)) as OIDSIZE FROM  public.blobtest"));
+                            new RawParameterizedSqlStatement("SELECT pg_column_size(content_bytea) as BYTEASIZE, pg_column_size(lo_get(content_oid)) as OIDSIZE FROM  public.blobtest"));
             Assert.assertNotNull(data.get(0));
             Assert.assertTrue(((Integer)data.get(0).get("BYTEASIZE")) > 0);
             Assert.assertEquals(data.get(0).get("BYTEASIZE"), data.get(0).get("OIDSIZE"));
@@ -105,38 +105,38 @@ public class PostgreSQLIntegrationTest extends AbstractIntegrationTest {
     public void testMissingDataGenerator() throws Exception {
         Scope.getCurrentScope().getSingleton(ExecutorService.class).getExecutor("jdbc", getDatabase())
                   .execute(
-                          new RawSqlStatement("CREATE TABLE \"FIRST_TABLE\" (\"ID\" INT, \"NAME\" VARCHAR(20), \"LAST_NAME\" VARCHAR(20) DEFAULT 'Snow', " +
+                          new RawParameterizedSqlStatement("CREATE TABLE \"FIRST_TABLE\" (\"ID\" INT, \"NAME\" VARCHAR(20), \"LAST_NAME\" VARCHAR(20) DEFAULT 'Snow', " +
                                                     "\"AGE\" INT DEFAULT 25, \"REGISTRATION_DATE\" date DEFAULT TO_DATE('2014-08-11', 'YYYY-MM-DD'), " +
                                                     "\"COMPVALCOL\" INT DEFAULT 1*22)"));
 
         Scope.getCurrentScope().getSingleton(ExecutorService.class).getExecutor("jdbc", getDatabase())
                   .execute(
-                          new RawSqlStatement("CREATE TABLE \"SECOND_TABLE\" (\"ID\" INT, \"NAME\" VARCHAR(20))"));
+                          new RawParameterizedSqlStatement("CREATE TABLE \"SECOND_TABLE\" (\"ID\" INT, \"NAME\" VARCHAR(20))"));
 
         Scope.getCurrentScope().getSingleton(ExecutorService.class).getExecutor("jdbc", getDatabase())
                   .execute(
-                          new RawSqlStatement("ALTER TABLE \"FIRST_TABLE\" ADD CONSTRAINT \"FIRST_TABLE_PK\" PRIMARY KEY (\"ID\")"));
+                          new RawParameterizedSqlStatement("ALTER TABLE \"FIRST_TABLE\" ADD CONSTRAINT \"FIRST_TABLE_PK\" PRIMARY KEY (\"ID\")"));
 
         Scope.getCurrentScope().getSingleton(ExecutorService.class).getExecutor("jdbc", getDatabase())
                   .execute(
-                          new RawSqlStatement("ALTER TABLE \"SECOND_TABLE\" ADD CONSTRAINT \"FIRST_TABLE_FK\" FOREIGN KEY (\"ID\") REFERENCES \"FIRST_TABLE\"(\"ID\")"));
+                          new RawParameterizedSqlStatement("ALTER TABLE \"SECOND_TABLE\" ADD CONSTRAINT \"FIRST_TABLE_FK\" FOREIGN KEY (\"ID\") REFERENCES \"FIRST_TABLE\"(\"ID\")"));
 
         Scope.getCurrentScope().getSingleton(ExecutorService.class).getExecutor("jdbc", getDatabase())
                   .execute(
-                          new RawSqlStatement("CREATE INDEX \"IDX_FIRST_TABLE\" ON \"FIRST_TABLE\"(\"NAME\")"));
+                          new RawParameterizedSqlStatement("CREATE INDEX \"IDX_FIRST_TABLE\" ON \"FIRST_TABLE\"(\"NAME\")"));
 
         Scope.getCurrentScope().getSingleton(ExecutorService.class).getExecutor("jdbc", getDatabase())
                   .execute(
-                          new RawSqlStatement("INSERT INTO \"FIRST_TABLE\"(\"ID\", \"NAME\") VALUES (1, 'JOHN')"));
+                          new RawParameterizedSqlStatement("INSERT INTO \"FIRST_TABLE\"(\"ID\", \"NAME\") VALUES (1, 'JOHN')"));
         Scope.getCurrentScope().getSingleton(ExecutorService.class).getExecutor("jdbc", getDatabase())
                   .execute(
-                          new RawSqlStatement("INSERT INTO \"FIRST_TABLE\"(\"ID\", \"NAME\", \"LAST_NAME\", \"AGE\", \"REGISTRATION_DATE\", \"COMPVALCOL\") VALUES (2, 'JEREMY', 'IRONS', 71, TO_DATE('2020-04-01', 'YYYY-MM-DD'), 2*11 )"));
+                          new RawParameterizedSqlStatement("INSERT INTO \"FIRST_TABLE\"(\"ID\", \"NAME\", \"LAST_NAME\", \"AGE\", \"REGISTRATION_DATE\", \"COMPVALCOL\") VALUES (2, 'JEREMY', 'IRONS', 71, TO_DATE('2020-04-01', 'YYYY-MM-DD'), 2*11 )"));
         Scope.getCurrentScope().getSingleton(ExecutorService.class).getExecutor("jdbc", getDatabase())
                   .execute(
-                          new RawSqlStatement("INSERT INTO \"SECOND_TABLE\"(\"ID\", \"NAME\") VALUES (1, 'JOHN')"));
+                          new RawParameterizedSqlStatement("INSERT INTO \"SECOND_TABLE\"(\"ID\", \"NAME\") VALUES (1, 'JOHN')"));
         Scope.getCurrentScope().getSingleton(ExecutorService.class).getExecutor("jdbc", getDatabase())
                   .execute(
-                          new RawSqlStatement("INSERT INTO \"SECOND_TABLE\"(\"ID\", \"NAME\") VALUES (2, 'JEREMY')"));
+                          new RawParameterizedSqlStatement("INSERT INTO \"SECOND_TABLE\"(\"ID\", \"NAME\") VALUES (2, 'JEREMY')"));
         DiffResult diffResult = DiffGeneratorFactory.getInstance().compare(getDatabase(), null, new CompareControl());
 
         DiffToChangeLog changeLogWriter =
@@ -167,11 +167,11 @@ public class PostgreSQLIntegrationTest extends AbstractIntegrationTest {
         String function = "UPPER";
         Scope.getCurrentScope().getSingleton(ExecutorService.class).getExecutor("jdbc", getDatabase())
                 .execute(
-                        new RawSqlStatement("CREATE TABLE INDEX_TEST (ID INT, NAME VARCHAR(20))"));
+                        new RawParameterizedSqlStatement("CREATE TABLE INDEX_TEST (ID INT, NAME VARCHAR(20))"));
 
         Scope.getCurrentScope().getSingleton(ExecutorService.class).getExecutor("jdbc", getDatabase())
                 .execute(
-                        new RawSqlStatement("CREATE INDEX INDEX_TEST_IDX ON INDEX_TEST(ID, " + function +"(NAME)) WHERE ID > 0"));
+                        new RawParameterizedSqlStatement(String.format("CREATE INDEX INDEX_TEST_IDX ON INDEX_TEST(ID, %s(NAME)) WHERE ID > 0", function)));
         DiffResult diffResult = DiffGeneratorFactory.getInstance().compare(getDatabase(), null, new CompareControl());
 
         DiffToChangeLog changeLogWriter =
@@ -204,27 +204,27 @@ public class PostgreSQLIntegrationTest extends AbstractIntegrationTest {
 
         Scope.getCurrentScope().getSingleton(ExecutorService.class).getExecutor("jdbc", database)
                 .execute(
-                        new RawSqlStatement("CREATE TABLE serial_table (id serial)"));
+                        new RawParameterizedSqlStatement("CREATE TABLE serial_table (id serial)"));
 
 
         if (supportsIdentity) {
             Scope.getCurrentScope().getSingleton(ExecutorService.class).getExecutor("jdbc", database)
                     .execute(
-                            new RawSqlStatement("CREATE TABLE autoinc_table (id int generated by default as identity)"));
+                            new RawParameterizedSqlStatement("CREATE TABLE autoinc_table (id int generated by default as identity)"));
         }
 
 
         Scope.getCurrentScope().getSingleton(ExecutorService.class).getExecutor("jdbc", database)
                 .execute(
-                        new RawSqlStatement("CREATE TABLE owned_by_table (id int)"));
+                        new RawParameterizedSqlStatement("CREATE TABLE owned_by_table (id int)"));
 
         Scope.getCurrentScope().getSingleton(ExecutorService.class).getExecutor("jdbc", database)
                 .execute(
-                        new RawSqlStatement("create sequence seq_owned owned by owned_by_table.id"));
+                        new RawParameterizedSqlStatement("create sequence seq_owned owned by owned_by_table.id"));
 
         Scope.getCurrentScope().getSingleton(ExecutorService.class).getExecutor("jdbc", database)
                 .execute(
-                        new RawSqlStatement("create sequence seq_unowned"));
+                        new RawParameterizedSqlStatement("create sequence seq_unowned"));
 
 
         SnapshotGeneratorFactory.resetAll();
@@ -256,7 +256,7 @@ public class PostgreSQLIntegrationTest extends AbstractIntegrationTest {
 
         Scope.getCurrentScope().getSingleton(ExecutorService.class).getExecutor("jdbc", getDatabase())
                 .execute(
-                        new RawSqlStatement(String.format("CREATE TABLE generated_test (height_cm numeric, height_stored numeric %s)", textToTest)));
+                        new RawParameterizedSqlStatement(String.format("CREATE TABLE generated_test (height_cm numeric, height_stored numeric %s)", textToTest)));
 
             ByteArrayOutputStream baos = new ByteArrayOutputStream();
             new CommandScope(GenerateChangelogCommandStep.COMMAND_NAME)
@@ -276,7 +276,7 @@ public class PostgreSQLIntegrationTest extends AbstractIntegrationTest {
         String textToTest = "GENERATED ALWAYS AS ((surname || ', '::text) || forename) STORED";
 
         Scope.getCurrentScope().getSingleton(ExecutorService.class).getExecutor("jdbc", getDatabase())
-            .execute(new RawSqlStatement(String.format(
+            .execute(new RawParameterizedSqlStatement(String.format(
                     "CREATE TABLE generated_text_test (fullname text %s, surname text, forename text)",
                     textToTest)));
 

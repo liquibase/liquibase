@@ -26,7 +26,7 @@ import liquibase.parser.core.json.JsonChangeLogParser
 import liquibase.resource.ResourceAccessor
 import liquibase.resource.SearchPathResourceAccessor
 import liquibase.statement.SqlStatement
-import liquibase.statement.core.RawSqlStatement
+import liquibase.statement.core.RawParameterizedSqlStatement
 import liquibase.structure.DatabaseObject
 import liquibase.structure.DatabaseObjectCollection
 import liquibase.structure.core.Column
@@ -47,7 +47,7 @@ class IndexWithDescendingColumnSnapshotIntegrationTest extends Specification {
         def connection = mssqlDb.getConnection()
         def db = DatabaseFactory.instance.findCorrectDatabaseImplementation(new JdbcConnection(connection))
         db.execute([
-                new RawSqlStatement(
+                new RawParameterizedSqlStatement(
                         "CREATE TABLE tbl_Preferences (fld_EmployeeID INTEGER NOT NULL, " +
                                 "fld_JobClass CHAR(4) NOT NULL, " +
                                 "fld_Mon VARCHAR(25) NULL, " +
@@ -58,7 +58,7 @@ class IndexWithDescendingColumnSnapshotIntegrationTest extends Specification {
                                 "fld_Sat VARCHAR(25) NULL, " +
                                 "fld_Sun VARCHAR(25) NULL)"
                 ),
-                new RawSqlStatement(
+                new RawParameterizedSqlStatement(
                         "CREATE INDEX IX_temp_tbl_Preferences_Plain " +
                                 "ON tbl_Preferences(" +
                                 "fld_Fri," +
@@ -147,10 +147,10 @@ class IndexWithDescendingColumnSnapshotIntegrationTest extends Specification {
 
         cleanup:
         db.execute([
-                new RawSqlStatement(
+                new RawParameterizedSqlStatement(
                         "DROP INDEX IX_temp_tbl_Preferences_Plain ON tbl_Preferences"
                 ),
-                new RawSqlStatement(
+                new RawParameterizedSqlStatement(
                         "DROP TABLE tbl_Preferences"
                 )
         ] as SqlStatement[], null)
