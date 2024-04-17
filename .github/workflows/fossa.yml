@@ -50,7 +50,7 @@ jobs:
       uses: actions/upload-artifact@v2
       with:
         name: fossa-reports
-        path: /home/runner/fossa_reports/liquibase
+        path: /home/runner/fossa_reports/liquibase.csv
 
       # Upload report to S3
     - name: Upload report to S3
@@ -107,7 +107,7 @@ jobs:
         uses: actions/download-artifact@v2
         with:
           name: fossa-reports
-          path: /home/runner/fossa_reports/liquibase
+          path: /home/runner/fossa_reports/liquibase.csv
 
       - name: Download reports from S3 and Rearrange CSV files
         run: |
