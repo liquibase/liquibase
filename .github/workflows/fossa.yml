@@ -50,7 +50,7 @@ jobs:
       uses: actions/upload-artifact@v2
       with:
         name: fossa-reports
-        path: /home/runner/fossa_reports/liquibase-pro
+        path: /home/runner/fossa_reports/liquibase
 
       # Upload report to S3
     - name: Upload report to S3
