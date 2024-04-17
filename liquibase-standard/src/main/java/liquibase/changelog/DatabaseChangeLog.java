@@ -343,8 +343,8 @@ public class DatabaseChangeLog implements Comparable<DatabaseChangeLog>, Conditi
         );
 
         ValidatingVisitorFactory validatingVisitorFactory = Scope.getCurrentScope().getSingleton(ValidatingVisitorFactory.class);
+        ValidatingVisitor validatingVisitor = validatingVisitorFactory.getValidatingVisitor();
         try {
-            ValidatingVisitor validatingVisitor = validatingVisitorFactory.getValidatingVisitor();
             validatingVisitor.setRanChangeSetList(database.getRanChangeSetList());
             validatingVisitor.validate(database, this);
             logIterator.run(validatingVisitor, new RuntimeEnvironment(database, contexts, labelExpression));
@@ -362,7 +362,7 @@ public class DatabaseChangeLog implements Comparable<DatabaseChangeLog>, Conditi
                 throw new ValidationFailedException(validatingVisitor);
             }
         } finally {
-            validatingVisitorFactory.reset();
+            validatingVisitor.clear();
         }
     }
 
