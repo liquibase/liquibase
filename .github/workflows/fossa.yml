@@ -103,12 +103,6 @@ jobs:
           aws-secret-access-key: ${{ secrets.LIQUIBASEORIGIN_SECRET_ACCESS_KEY }}
           aws-region: us-east-1
 
-      #- name: Download to build page
-        #uses: actions/download-artifact@v2
-        #with:
-          #name: fossa-reports
-          #path: /home/runner/fossa_reports
-
       - name: Download reports from S3 and Rearrange CSV files
         run: |
           mkdir /home/runner/fossa_reports_s3
@@ -116,8 +110,8 @@ jobs:
           aws s3 cp s3://liquibaseorg-origin/fossa_reports_liquibase-pro/liquibase.csv /home/runner/fossa_reports_s3/ 
           ls -l /home/runner/fossa_reports_s3
           
-          tail -n +2 /home/runner/fossa_reports_s3/liquibase.csv > /home/runner/fossa_reports/liquibase_no_header.csv
-          tail -n +2 /home/runner/fossa_reports_s3/liquibase_pro.csv > /home/runner/fossa_reports/liquibase_pro_no_header.csv
+          tail -n +2 /home/runner/fossa_reports_s3/liquibase.csv >> /home/runner/fossa_reports_s3/liquibase_no_header.csv
+          tail -n +2 /home/runner/fossa_reports_s3/liquibase_pro.csv >> /home/runner/fossa_reports_s3/liquibase_pro_no_header.csv
 
       - name: Merge and Remove Duplicates
         run: |
