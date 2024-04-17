@@ -14,6 +14,11 @@ import liquibase.precondition.FailedPrecondition;
 import java.util.List;
 import java.util.Set;
 
+/**
+ * The ValidatingVisitor interface allows implementations to supply their own version of a ValidatingVisitor. By default
+ * Liquibase uses the {@link StandardValidatingVisitor}. To use your own, you must register it with a higher priority
+ * in the {@link ValidatingVisitorFactory}.
+ */
 public interface ValidatingVisitor extends Plugin, ChangeSetVisitor {
 
     int getPriority();
