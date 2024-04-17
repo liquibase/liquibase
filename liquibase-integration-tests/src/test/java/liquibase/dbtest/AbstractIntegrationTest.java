@@ -997,7 +997,16 @@ public abstract class AbstractIntegrationTest {
             liquibase.update(new Contexts());
             fail("Did not fail with invalid SQL");
         } catch (CommandExecutionException executionException) {
-            Assert.assertTrue(executionException.getCause().getCause().getCause() instanceof DatabaseException);
+            boolean dbExceptionFound = false;
+            Throwable cause = executionException.getCause();
+            while (cause != null) {
+                if (cause.getCause() instanceof DatabaseException) {
+                    dbExceptionFound = true;
+                    break;
+                }
+                cause = cause.getCause();
+            }
+            Assert.assertTrue(dbExceptionFound);
         }
 
         LockService lockService = LockServiceFactory.getInstance().getLockService(database);
