@@ -103,11 +103,11 @@ jobs:
           aws-secret-access-key: ${{ secrets.LIQUIBASEORIGIN_SECRET_ACCESS_KEY }}
           aws-region: us-east-1
 
-      - name: Upload to build page
+      - name: Download to build page
         uses: actions/download-artifact@v2
         with:
           name: fossa-reports
-          path: /home/runner/fossa_reports/liquibase.csv
+          path: /home/runner/fossa_reports
 
       - name: Download reports from S3 and Rearrange CSV files
         run: |
