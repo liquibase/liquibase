@@ -203,7 +203,7 @@ public class SQLiteDatabase extends AbstractJdbcDatabase {
     @Override
     public String getViewDefinition(CatalogAndSchema schema, String viewName) throws DatabaseException {
         String definition = Scope.getCurrentScope().getSingleton(ExecutorService.class).getExecutor("jdbc", this).queryForObject(
-                new RawParameterizedSqlStatement("SELECT sql FROM sqlite_master WHERE name=?", this.quoteObject(viewName, View.class)),
+                new RawParameterizedSqlStatement(String.format("SELECT sql FROM sqlite_master WHERE name=%s", this.quoteObject(viewName, View.class))),
                 String.class);
         // SQLite is friendly and already returns the form CREATE VIEW ... AS. However, we cannot use this, so we have
         // to cut off that header.

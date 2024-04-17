@@ -997,7 +997,7 @@ public abstract class AbstractIntegrationTest {
             liquibase.update(new Contexts());
             fail("Did not fail with invalid SQL");
         } catch (CommandExecutionException executionException) {
-            Assert.assertTrue(executionException.getMessage().contains("this sql is not valid and should throw an exception"));
+            Assert.assertTrue(executionException.getMessage().toLowerCase().contains("syntax error"));
         }
 
         LockService lockService = LockServiceFactory.getInstance().getLockService(database);

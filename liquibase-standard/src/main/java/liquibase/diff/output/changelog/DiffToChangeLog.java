@@ -579,11 +579,11 @@ public class DiffToChangeLog {
         List<Map<String, ?>> rs = null;
         try {
             if (tryDbaDependencies) {
-                rs = executor.queryForList(new RawParameterizedSqlStatement(String.format("select OWNER, NAME, REFERENCED_OWNER, REFERENCED_NAME from DBA_DEPENDENCIES where REFERENCED_OWNER != 'SYS' AND NOT(NAME LIKE 'BIN$%') AND NOT(OWNER = REFERENCED_OWNER AND NAME = REFERENCED_NAME) AND (%s)",
-                        StringUtil.join(schemas, " OR ", (StringUtil.StringUtilFormatter<String>) obj -> "OWNER='" + obj + "'"))));
+                rs = executor.queryForList(new RawParameterizedSqlStatement("select OWNER, NAME, REFERENCED_OWNER, REFERENCED_NAME from DBA_DEPENDENCIES where REFERENCED_OWNER != 'SYS' AND NOT(NAME LIKE 'BIN$%') AND NOT(OWNER = REFERENCED_OWNER AND NAME = REFERENCED_NAME) AND (" + StringUtil.join(schemas, " OR ", (StringUtil.StringUtilFormatter<String>) obj -> "OWNER='" + obj + "'"
+                ) + ")"));
             } else {
-                rs = executor.queryForList(new RawParameterizedSqlStatement(String.format("select NAME, REFERENCED_OWNER, REFERENCED_NAME from USER_DEPENDENCIES where REFERENCED_OWNER != 'SYS' AND NOT(NAME LIKE 'BIN$%') AND NOT(NAME = REFERENCED_NAME) AND (%s)",
-                        StringUtil.join(schemas, " OR ", (StringUtil.StringUtilFormatter<String>) obj -> "REFERENCED_OWNER='" + obj + "'"))));
+                rs = executor.queryForList(new RawParameterizedSqlStatement("select NAME, REFERENCED_OWNER, REFERENCED_NAME from USER_DEPENDENCIES where REFERENCED_OWNER != 'SYS' AND NOT(NAME LIKE 'BIN$%') AND NOT(NAME = REFERENCED_NAME) AND (" + StringUtil.join(schemas, " OR ", (StringUtil.StringUtilFormatter<String>) obj -> "REFERENCED_OWNER='" + obj + "'"
+                ) + ")"));
             }
         } catch (DatabaseException dbe) {
             //
