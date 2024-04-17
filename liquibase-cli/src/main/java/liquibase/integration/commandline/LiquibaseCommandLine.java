@@ -47,12 +47,17 @@ import java.security.AccessController;
 import java.security.PrivilegedAction;
 import java.time.Duration;
 import java.util.*;
+import java.util.jar.JarFile;
+import java.util.jar.Manifest;
 import java.util.logging.*;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
+import java.util.zip.ZipEntry;
 
 import static java.util.ResourceBundle.getBundle;
 import static liquibase.configuration.LiquibaseConfiguration.REGISTERED_VALUE_PROVIDERS_KEY;
+import static liquibase.integration.commandline.LiquibaseLauncherSettings.LiquibaseLauncherSetting.LIQUIBASE_HOME;
+import static liquibase.integration.commandline.LiquibaseLauncherSettings.getSetting;
 import static liquibase.integration.commandline.VersionUtils.*;
 import static liquibase.util.SystemUtil.isWindows;
 
@@ -621,33 +626,31 @@ public class LiquibaseCommandLine {
         }
 
         final PathHandlerFactory pathHandlerFactory = Scope.getCurrentScope().getSingleton(PathHandlerFactory.class);
-        String defaultsFileConfigValue = defaultsFileConfig.getValue();
-        Resource resource = pathHandlerFactory.getResource(defaultsFileConfigValue);
+        Resource resource = pathHandlerFactory.getResource(defaultsFileConfig.getValue());
         if (resource.exists()) {
             try (InputStream defaultsStream = resource.openInputStream()) {
                 if (defaultsStream != null) {
-                    final DefaultsFileValueProvider fileProvider = new DefaultsFileValueProvider(defaultsStream, "File exists at path " + defaultsFileConfigValue);
+                    final DefaultsFileValueProvider fileProvider = new DefaultsFileValueProvider(defaultsStream, "File exists at path " + defaultsFileConfig.getValue());
                     liquibaseConfiguration.registerProvider(fileProvider);
                     returnList.add(fileProvider);
                 }
             }
         } else {
-            InputStream inputStreamOnClasspath = Thread.currentThread().getContextClassLoader().getResourceAsStream(defaultsFileConfigValue);
+            InputStream inputStreamOnClasspath = Thread.currentThread().getContextClassLoader().getResourceAsStream(defaultsFileConfig.getValue());
             if (inputStreamOnClasspath == null) {
-                Scope.getCurrentScope().getLog(getClass()).fine("Cannot find defaultsFile " + defaultsFileConfigValue);
+                Scope.getCurrentScope().getLog(getClass()).fine("Cannot find defaultsFile " + defaultsFileConfig.getValue());
                 if (!defaultsFileConfig.wasDefaultValueUsed()) {
-                    DefaultsFileErrorHandlerFactory defaultsFileErrorHandlerFactory = Scope.getCurrentScope().getSingleton(DefaultsFileErrorHandlerFactory.class);
-                    DefaultsFileErrorHandler defaultsFileErrorHandler = defaultsFileErrorHandlerFactory.getDefaultsFileErrorHandler();
-                    defaultsFileErrorHandler.fileNotFound(defaultsFileConfigValue);
+                            //can't use UI since it's not configured correctly yet
+                    System.err.println("Could not find defaults file " + defaultsFileConfig.getValue());
                 }
             } else {
-                final DefaultsFileValueProvider fileProvider = new DefaultsFileValueProvider(inputStreamOnClasspath, "File in classpath " + defaultsFileConfigValue);
+                final DefaultsFileValueProvider fileProvider = new DefaultsFileValueProvider(inputStreamOnClasspath, "File in classpath " + defaultsFileConfig.getValue());
                 liquibaseConfiguration.registerProvider(fileProvider);
                 returnList.add(fileProvider);
             }
         }
 
-        final File defaultsFile = new File(defaultsFileConfigValue);
+        final File defaultsFile = new File(defaultsFileConfig.getValue());
         File localDefaultsFile = new File(defaultsFile.getAbsolutePath().replaceFirst(".properties$", ".local.properties"));
         if (localDefaultsFile.exists()) {
             final DefaultsFileValueProvider fileProvider = new DefaultsFileValueProvider(localDefaultsFile) {
