@@ -10,13 +10,13 @@
             <column name="id" type="int" autoIncrement="true">
                 <constraints primaryKey="true" nullable="false"/>
             </column>
-            <column name="name" type="clob">
+            <column name="name" type="blob">
                 <constraints nullable="false"/>
             </column>
         </createTable>
     </changeSet>
 
     <changeSet id="2" author="your.name" labels="example-label" context="example-context">
-        <loadData file="names.csv" tableName="person" relativeToChangelogFile="true"/>
+        <loadData file="names-binary.csv" tableName="person" relativeToChangelogFile="true"/>
     </changeSet>
 </databaseChangeLog>

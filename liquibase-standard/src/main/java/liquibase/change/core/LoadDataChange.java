@@ -394,11 +394,17 @@ public class LoadDataChange extends AbstractTableChange implements ChangeWithCol
                                 valueConfig.setValue(value);
                                 needsPreparedStatement = true;
                             } else {
-                                valueConfig.setValueBlobFile(value);
-                                needsPreparedStatement = true;
+                                // Previously in the fallthrough case we would use `setValueBlobFile` to set the blob file to `value`.
+                                // When executing the statement we would then try to find a file with the filename of the contents of `value`.
+                                // I removed this behaviour as I can't understand how it was expected to work in the first place and replaced
+                                // it with an exception. Reading anything besides binary causes downstream parsing errors anyway.
+                                throw new UnexpectedLiquibaseException(String.format("Error parsing value on line %d: '%s'  is not a valid blob value.", lineNumber, value));
                             }
                         } else if (columnConfig.getTypeEnum() == LOAD_DATA_TYPE.CLOB) {
-                            valueConfig.setValueClobFile(value);
+                            // Similarly to the BLOB case, we previously ONLY used `setValueClobFile` to set the clob file to the contents of `value`.
+                            // When executing the statement we would then try to find a file with the filename of the contents of `value`.
+                            // My understanding is CLOBs are basically just text, so setting this value naively seems acceptable.
+                            valueConfig.setValue(value);
                             needsPreparedStatement = true;
                         } else if (columnConfig.getTypeEnum() == LOAD_DATA_TYPE.UUID) {
                             valueConfig.setType(columnConfig.getType());
