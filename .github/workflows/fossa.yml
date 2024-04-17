@@ -115,7 +115,7 @@ jobs:
 
       - name: Merge and Remove Duplicates
         run: |
-          cat liquibase_no_header.csv liquibase_pro_no_header.csv | sort | uniq > liquibase_pro-${{ steps.get_tag.outputs.tag_name }}-${{ steps.get_tag.outputs.release_date }}.csv
+          cat /home/runner/fossa_reports_s3/liquibase_no_header.csv /home/runner/fossa_reports_s3/liquibase_pro_no_header.csv | sort | uniq > /home/runner/fossa_reports_s3/liquibase_pro-${{ steps.get_tag.outputs.tag_name }}-${{ steps.get_tag.outputs.release_date }}.csv
 
       - name: Upload merged CSV to S3
-        run: aws s3 cp liquibase_pro-${{ steps.get_tag.outputs.tag_name }}-${{ steps.get_tag.outputs.release_date }}.csv s3://liquibaseorg-origin/fossa_reports_liquibase-pro/
+        run: aws s3 cp /home/runner/fossa_reports_s3/liquibase_pro-${{ steps.get_tag.outputs.tag_name }}-${{ steps.get_tag.outputs.release_date }}.csv s3://liquibaseorg-origin/fossa_reports_liquibase-pro/
