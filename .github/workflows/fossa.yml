@@ -61,64 +61,13 @@ jobs:
         AWS_SECRET_ACCESS_KEY: ${{ secrets.LIQUIBASEORIGIN_SECRET_ACCESS_KEY }}
         AWS_DEFAULT_REGION: us-east-1
 
-  #run-pro-fossa-report:
-    #runs-on: ubuntu-latest
-    #needs: [ fossa-scan ]
-    #steps:
-      #- name: Dispatch event to PRO repository
-        #uses: peter-evans/repository-dispatch@v1
-        #with:
-          #token: ${{ secrets.LIQUIBOT_PAT_GPM_ACCESS }}
-          #repository: liquibase/liquibase-pro
-          #event-type: FOSSA_Scan_PRO
-
-  combine-fossa-reports:
+  run-pro-fossa-report:
     runs-on: ubuntu-latest
     needs: [ fossa-scan ]
     steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
-
-      # Get the latest OSS release tag from OSS repository
-      - name: Get latest OSS release tag from OSS repository
-        id: get_tag
-        if: always()
-        uses: actions/github-script@v7
+      - name: Dispatch event to PRO repository
+        uses: peter-evans/repository-dispatch@v1
         with:
-          github-token: ${{ secrets.GITHUB_TOKEN }}
-          script: |
-            const response = await github.rest.repos.getLatestRelease({
-              owner: 'liquibase',
-              repo: 'liquibase',
-            });
-            const tag_name = response.data.tag_name;
-            console.log(tag_name);
-            core.setOutput("tag_name", tag_name.startsWith('v') ? tag_name.substring(1) : tag_name);
-            core.setOutput("release_date", response.data.created_at.substr(0, 10));  // Extract only the date part 
-
-      - name: Set up AWS credentials
-        uses: aws-actions/configure-aws-credentials@v4
-        with:
-          aws-access-key-id: ${{ secrets.LIQUIBASEORIGIN_ACCESS_KEY_ID }}
-          aws-secret-access-key: ${{ secrets.LIQUIBASEORIGIN_SECRET_ACCESS_KEY }}
-          aws-region: us-east-1
-
-      - name: Download reports from S3 and Rearrange CSV files
-        run: |
-          mkdir /home/runner/fossa_reports_s3
-          aws s3 cp s3://liquibaseorg-origin/fossa_reports_liquibase-pro/liquibase_pro.csv /home/runner/fossa_reports_s3/ 
-          aws s3 cp s3://liquibaseorg-origin/fossa_reports_liquibase-pro/liquibase.csv /home/runner/fossa_reports_s3/ 
-          ls -l /home/runner/fossa_reports_s3
-          
-          tail -n +3 /home/runner/fossa_reports_s3/liquibase.csv >> /home/runner/fossa_reports_s3/liquibase_no_header.csv
-          tail -n +3 /home/runner/fossa_reports_s3/liquibase_pro.csv >> /home/runner/fossa_reports_s3/liquibase_pro_no_header.csv
-          
-
-      - name: Merge and Remove Duplicates
-        run: |
-          cat /home/runner/fossa_reports_s3/liquibase_no_header.csv /home/runner/fossa_reports_s3/liquibase_pro_no_header.csv | sort | uniq > /home/runner/fossa_reports_s3/liquibase_pro-${{ steps.get_tag.outputs.tag_name }}-${{ steps.get_tag.outputs.release_date }}.csv
-          
-          echo 'Title,Version,Declared License,Package Homepage' | cat - /home/runner/fossa_reports_s3/liquibase_pro-${{ steps.get_tag.outputs.tag_name }}-${{ steps.get_tag.outputs.release_date }}.csv > temp && mv temp /home/runner/fossa_reports_s3/liquibase_pro-${{ steps.get_tag.outputs.tag_name }}-${{ steps.get_tag.outputs.release_date }}.csv
-
-      - name: Upload merged CSV to S3
-        run: aws s3 cp /home/runner/fossa_reports_s3/liquibase_pro-${{ steps.get_tag.outputs.tag_name }}-${{ steps.get_tag.outputs.release_date }}.csv s3://liquibaseorg-origin/fossa_reports_liquibase-pro/
+          token: ${{ secrets.LIQUIBOT_PAT_GPM_ACCESS }}
+          repository: liquibase/liquibase-pro
+          event-type: FOSSA_Scan_PRO
