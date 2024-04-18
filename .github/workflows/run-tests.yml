@@ -42,7 +42,6 @@ jobs:
       timestamp: ${{ steps.get-date.outputs.date }}
       latestMergeSha: ${{ steps.get-sha.outputs.latestMergeSha }}
       thisBranchName: ${{ steps.get-branch-name.outputs.thisBranchName }}
-      modified_branch_name: ${{ steps.get-branch-name.outputs.modified_branch_name }}
       setupSuccessful: "true"
     steps:
       - uses: actions/checkout@v4
