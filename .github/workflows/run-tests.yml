@@ -42,6 +42,7 @@ jobs:
       timestamp: ${{ steps.get-date.outputs.date }}
       latestMergeSha: ${{ steps.get-sha.outputs.latestMergeSha }}
       thisBranchName: ${{ steps.get-branch-name.outputs.thisBranchName }}
+      modified_branch_name: ${{ steps.get-branch-name.outputs.modified_branch_name }}
       setupSuccessful: "true"
     steps:
       - uses: actions/checkout@v4
@@ -312,9 +313,9 @@ jobs:
     needs: [ build_tests, integration-test ]
     uses: liquibase/build-logic/.github/workflows/sonar-test-scan.yml@v0.7.0
     with:
-      thisBranchName: ${{ needs.setup.outputs.thisBranchName }}
+      thisBranchName: ${{ needs.setup.outputs.modified_branch_name }}
       thisSha: ${{ needs.setup.outputs.thisSha }}
-      liquibaseBranchName: ${{ needs.setup.outputs.thisBranchName }}
+      liquibaseBranchName: ${{ needs.setup.outputs.modified_branch_name }}
       pullRequestNumber: ${{ github.event.pull_request.number }}
       pullRequestBranchName: ${{ github.event.pull_request.head.ref }}
       pullRequestBaseBranchName: ${{ github.event.pull_request.base.ref }}
