@@ -47,7 +47,7 @@ class OracleTest extends Specification {
         new String(resultSet.getBytes(2)) == lorem
     }
 
-    def "Use loadData with invalid blob"() {
+    def "Use loadData with invalid clob"() {
         when:
         CommandUtil.runUpdate(oracle, "src/test/resources/changelogs/common/invalid-clob-data-load.xml")
 
