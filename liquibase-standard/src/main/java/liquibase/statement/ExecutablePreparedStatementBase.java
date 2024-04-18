@@ -24,6 +24,7 @@ import liquibase.structure.core.Table;
 import liquibase.util.FilenameUtil;
 import liquibase.util.JdbcUtil;
 import liquibase.util.StreamUtil;
+import org.apache.commons.lang3.exception.ExceptionUtils;
 
 import java.io.*;
 import java.lang.reflect.InvocationTargetException;
@@ -328,11 +329,12 @@ public abstract class ExecutablePreparedStatementBase implements ExecutablePrepa
                     stmt.setBlob(i, lob.content, lob.length);
                 }
             } catch (IOException | LiquibaseException e) {
-                throw new DatabaseException(e.getMessage(), e); // wrap
+                String message = handleLOBExceptionMessage("blob", e, col.getValueBlobFile());
+                throw new DatabaseException(message, e); // wrap the exception
             }
         } else if (col.getValueClobFile() != null) {
             try {
-                LOG.fine("value is clob = " + col.getValueClobFile());
+                LOG.fine(String.format("Loading clob file: %s", col.getValueClobFile()));
                 LOBContent<Reader> lob = toCharacterStream(col.getValueClobFile(), col.getEncoding());
                 if (lob.length <= Integer.MAX_VALUE) {
                     stmt.setCharacterStream(i, lob.content, (int) lob.length);
@@ -340,7 +342,8 @@ public abstract class ExecutablePreparedStatementBase implements ExecutablePrepa
                     stmt.setCharacterStream(i, lob.content, lob.length);
                 }
             } catch (IOException | LiquibaseException e) {
-                throw new DatabaseException(e.getMessage(), e); // wrap
+                String message = handleLOBExceptionMessage("clob", e, col.getValueClobFile());
+                throw new DatabaseException(message, e); // wrap the exception
             }
         } else {
             // NULL values might intentionally be set into a change, we must also add them to the prepared statement
@@ -560,4 +563,13 @@ public abstract class ExecutablePreparedStatementBase implements ExecutablePrepa
         }
     }
 
+    private String handleLOBExceptionMessage(String type, Exception exception, String missingFile) throws DatabaseException {
+        String message = exception.getMessage();
+        if (ExceptionUtils.hasCause(exception, FileNotFoundException.class)) {
+            message = String.format("Could not find %s file: %s! Make sure the value of the %s " +
+                    "is a valid path to a file containing the %s's actual value to be loaded.", type, missingFile, type, type);
+            Scope.getCurrentScope().getLog(getClass()).severe(message);
+        }
+        return message;
+    }
 }
