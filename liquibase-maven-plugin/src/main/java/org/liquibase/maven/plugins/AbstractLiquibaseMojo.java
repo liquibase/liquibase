@@ -3,7 +3,6 @@ package org.liquibase.maven.plugins;
 import liquibase.GlobalConfiguration;
 import liquibase.Liquibase;
 import liquibase.Scope;
-import liquibase.ThreadLocalScopeManager;
 import liquibase.changelog.visitor.ChangeExecListener;
 import liquibase.changelog.visitor.DefaultChangeExecListener;
 import liquibase.command.core.helpers.DbUrlConnectionCommandStep;
@@ -69,11 +68,6 @@ import static org.apache.commons.lang3.StringUtils.defaultIfBlank;
  */
 @SuppressWarnings("java:S2583")
 public abstract class AbstractLiquibaseMojo extends AbstractMojo {
-
-    static {
-        // If maven is called with -T and a value larger than 1, it can get confused under heavy thread load
-        Scope.setScopeManager( new ThreadLocalScopeManager(null));
-    }
 
     /**
      * Suffix for fields that are representing a default value for a another field.
