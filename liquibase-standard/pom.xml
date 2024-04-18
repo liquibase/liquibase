@@ -343,6 +343,7 @@
                         <param>liquibase.parser.LiquibaseSqlParser</param>
                         <param>liquibase.database.LiquibaseTableNames</param>
                         <param>liquibase.changelog.visitor.ValidatingVisitor</param>
+                        <param>liquibase.io.OutputFileHandler</param>
                     </services>
                 </configuration>
                 <executions>
