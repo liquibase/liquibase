@@ -41,6 +41,8 @@ class OracleTest extends Specification {
         CommandUtil.runUpdate(oracle, "src/test/resources/changelogs/common/invalid-blob-data-load.xml")
 
         then:
-        thrown(CommandExecutionException)
+        def exception = thrown(CommandExecutionException)
+        exception.cause.message.contains("Error parsing value on line 2")
+        exception.cause.message.contains("is not a valid blob value")
     }
 }
