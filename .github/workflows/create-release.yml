@@ -78,7 +78,7 @@ jobs:
           workflow: build-azure-uber-jar.yml
           run_id: ${{ steps.get_run_id.outputs.run_id }}
           name: liquibase-pro-azure-artifacts
-          path: liquibase-pro/liquibase-azure-deps/target/liquibase-azure-deps-${{ needs.setup.outputs.version }}.jar
+          path: liquibase-pro/liquibase-azure-deps
 
       - name: Set up JDK
         uses: actions/setup-java@v4
@@ -112,7 +112,7 @@ jobs:
           
           ##Sign Files
           ## liquibase-azure-deps is already on its correct version. Check reusable workflow: build-azure-uber-jar.yml
-          mv liquibase-pro/liquibase-azure-deps/target/liquibase-azure-deps-${{ needs.setup.outputs.version }}.jar re-version/out
+          mv liquibase-pro/liquibase-azure-deps/liquibase-azure-deps-${{ needs.setup.outputs.version }}.jar re-version/out
           
           $PWD/.github/util/sign-artifacts.sh re-version/out
           
