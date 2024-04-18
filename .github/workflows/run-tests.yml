@@ -314,7 +314,7 @@ jobs:
     with:
       thisBranchName: ${{ needs.setup.outputs.thisBranchName }}
       thisSha: ${{ needs.setup.outputs.thisSha }}
-      liquibaseBranchName: ${{ needs.setup.outputs.liquibaseBranchName }}
+      liquibaseBranchName: ${{ needs.setup.outputs.thisBranchName }}
       pullRequestNumber: ${{ github.event.pull_request.number }}
       pullRequestBranchName: ${{ github.event.pull_request.head.ref }}
       pullRequestBaseBranchName: ${{ github.event.pull_request.base.ref }}
