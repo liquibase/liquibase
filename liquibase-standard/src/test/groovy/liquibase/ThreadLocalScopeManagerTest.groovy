@@ -54,7 +54,7 @@ class ThreadLocalScopeManagerTest extends Specification {
         final ThreadAligner threadAligner = new ThreadAligner(threadCount)
 
         for (int i = 0; i < threadCount; i++) {
-            final String dbName = DATABASE_NAME_PREFIX + StringUtil.randomIdentifer(10) + i
+            final String dbName = DATABASE_NAME_PREFIX + StringUtil.randomIdentifier(10) + i
 
             liveConnections.put(dbName, MemoryDatabase.create(dbName))
 
