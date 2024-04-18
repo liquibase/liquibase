@@ -66,8 +66,8 @@ class IndexWithDescendingColumnSnapshotIntegrationTest extends Specification {
                                 "fld_Wed DESC)"
                 )
         ] as SqlStatement[], null)
-        String snapshotFile = StringUtil.randomIdentifer(10) + "-snapshot.json"
-        String changelogFile = StringUtil.randomIdentifer(10) + "-changelog.json"
+        String snapshotFile = StringUtil.randomIdentifier(10) + "-snapshot.json"
+        String changelogFile = StringUtil.randomIdentifier(10) + "-changelog.json"
 
         Map<String, Object> scopeValues = new HashMap<>()
         def resourceAccessor = new SearchPathResourceAccessor(".", Scope.getCurrentScope().getResourceAccessor())
@@ -192,7 +192,7 @@ class IndexWithDescendingColumnSnapshotIntegrationTest extends Specification {
         //
         // Generate a changelog
         //
-        String changelogFile = StringUtil.randomIdentifer(10) + "-changelog.json"
+        String changelogFile = StringUtil.randomIdentifier(10) + "-changelog.json"
         final CommandScope generateChangelogScope = new CommandScope("generateChangelog")
         generateChangelogScope.addArgumentValue(DbUrlConnectionArgumentsCommandStep.URL_ARG, offlineUrl)
         generateChangelogScope.addArgumentValue(GenerateChangelogCommandStep.CHANGELOG_FILE_ARG, changelogFile)
