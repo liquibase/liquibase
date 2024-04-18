@@ -300,13 +300,9 @@ public class ShowSummaryUtil {
         builder.append(System.lineSeparator());
         int skipped = skippedChangeSets.size();
         int filtered = filterDenied.size();
-        ShowSummaryGeneratorFactory showSummaryGeneratorFactory = Scope.getCurrentScope().getSingleton(ShowSummaryGeneratorFactory.class);
-        ShowSummaryGenerator showSummaryGenerator = showSummaryGeneratorFactory.getShowSummaryGenerator();
-        List<ChangeSetStatus> additionalChangeSetStatus = showSummaryGenerator.getAllAdditionalChangeSetStatus(runChangeLogIterator);
         int totalAccepted = calculateAccepted(statusVisitor, changeExecListener);
         int totalPreviouslyRun = calculatePreviouslyRun(statusVisitor);
-        int additionalStatusCount = additionalChangeSetStatus.size();
-        int totalInChangelog = totalAccepted + totalPreviouslyRun + skipped + filtered + additionalStatusCount;
+        int totalInChangelog = CollectionUtil.createIfNull(changeLog.getChangeSets()).size() + CollectionUtil.createIfNull(changeLog.getSkippedChangeSets()).size();
         UpdateSummary updateSummaryMdc = new UpdateSummary(null, totalAccepted, totalPreviouslyRun, null, totalInChangelog);
 
         String message = "UPDATE SUMMARY";
@@ -325,6 +321,8 @@ public class ShowSummaryUtil {
         builder.append(message);
         builder.append(System.lineSeparator());
 
+        ShowSummaryGeneratorFactory showSummaryGeneratorFactory = Scope.getCurrentScope().getSingleton(ShowSummaryGeneratorFactory.class);
+        ShowSummaryGenerator showSummaryGenerator = showSummaryGeneratorFactory.getShowSummaryGenerator();
         showSummaryGenerator.appendAdditionalSummaryMessages(builder, runChangeLogIterator);
 
         message = "-------------------------------";
