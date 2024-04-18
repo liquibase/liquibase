@@ -3,11 +3,9 @@ package liquibase.change
 import liquibase.Scope
 import liquibase.util.StringUtil
 import org.yaml.snakeyaml.Yaml
-import spock.lang.Ignore
 import spock.lang.Specification
 import spock.lang.Unroll
 
-@Ignore
 class ChangeDefinitionTest extends Specification {
 
     Map<String, String> changeDefinitions = new Yaml().load((InputStream) this.class.getClassLoader().getResourceAsStream("liquibase/change/ChangeDefinitionTest.yaml"))

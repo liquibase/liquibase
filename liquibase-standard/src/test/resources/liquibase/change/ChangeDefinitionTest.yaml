@@ -108,13 +108,13 @@ addForeignKeyConstraint: |
     Required For: all
   deferrable boolean 
     Description: Defines whether the foreign key is deferrable
-    Supported: edb,oracle,postgresql,sqlite
+    Supported: asany,edb,oracle,postgresql,sqlite
   deleteCascade boolean 
     Description: Deprecated. This is true to set onDelete to Cascade, priority given to onDelete tag if one exists
     Supported: asany,cockroachdb,db2,db2z,derby,edb,firebird,h2,hsqldb,informix,ingres,mariadb,mssql,mysql,oracle,postgresql
   initiallyDeferred boolean 
     Description: Defines whether the foreign key is initially deferred
-    Supported: edb,oracle,postgresql,sqlite
+    Supported: asany,edb,oracle,postgresql,sqlite
   onDelete string 
     Description: ON DELETE functionality. Possible values: 'CASCADE', 'SET NULL', 'SET DEFAULT', 'RESTRICT', 'NO ACTION'
     Supported: asany,cockroachdb,db2,db2z,derby,edb,firebird,h2,hsqldb,informix,ingres,mariadb,mssql,mysql,oracle,postgresql
@@ -229,7 +229,7 @@ addPrimaryKey: |
     Supported: all
   forIndexName string 
     Description: Name of the index to associate with the primary key
-    Supported: db2,db2z,oracle
+    Supported: cockroachdb,db2,db2z,edb,oracle,postgresql
   forIndexSchemaName string 
     Description: Name of the database schema of the index to associate with the primary key
     Supported: all
@@ -273,7 +273,7 @@ addUniqueConstraint: |
     Supported: all
   forIndexName string 
     Description: Name of the index to associate with the constraint
-    Supported: oracle
+    Supported: cockroachdb,edb,oracle,postgresql
   forIndexSchemaName string 
     Description: Name of the schema of the index to associate with the constraint
     Supported: all
@@ -329,6 +329,9 @@ alterSequence: |
     Required For: all
 
 createIndex: |
+  associatedWith string 
+    Description: Index associations. Valid values: primaryKey, foreignKey, uniqueConstriant, none
+    Supported: all
   catalogName string (since 3.0)
     Description: Name of the database catalog
     Supported: all
@@ -387,7 +390,7 @@ createProcedure: |
     Supported: all
   replaceIfExists boolean 
     Description: If the stored procedure defined by createProcedure already exists, alter it instead of creating it. Default: false
-    Supported: mariadb,mssql,mysql
+    Supported: db2,db2z,mariadb,mssql,mysql
   schemaName string 
     Description: Name of the database schema
     Supported: all
@@ -437,6 +440,9 @@ createTable: |
     Description: Column definitions
     Supported: all
     Required For: all
+  ifNotExists boolean 
+    Description: If true, creates the table only if it does not already exist. Appends IF NOT EXISTS syntax to SQL query
+    Supported: all
   remarks string 
     Description: A brief descriptive comment to store in the table metadata
     Supported: all
@@ -476,7 +482,7 @@ createView: |
     Supported: all
   replaceIfExists boolean (since 1.5)
     Description: Use 'CREATE OR REPLACE' syntax
-    Supported: cockroachdb,db2,edb,firebird,h2,hsqldb,ingres,mariadb,mssql,mysql,oracle,postgresql,sqlite,sybase
+    Supported: asany,cockroachdb,db2,edb,firebird,h2,hsqldb,ingres,mariadb,mssql,mysql,oracle,postgresql,sqlite,sybase
   schemaName string 
     Description: Name of the database schema
     Supported: all
@@ -1024,6 +1030,8 @@ sql: |
   endDelimiter string 
     Description: Delimiter to apply to the end of the statement. Defaults to ';', may be set to ''.
     Supported: all
+  ignoreOriginalSplitStatements boolean 
+    Supported: all
   splitStatements boolean 
     Description: Set to false to not have liquibase split statements on ;'s and GO's. Defaults to true if not set
     Supported: all
@@ -1044,6 +1052,8 @@ sqlFile: |
     Supported: all
   endDelimiter string 
     Description: Delimiter to apply to the end of the statement. Defaults to ';', may be set to ''.
+    Supported: all
+  ignoreOriginalSplitStatements boolean 
     Supported: all
   path string 
     Description: The file path of the SQL file to load
