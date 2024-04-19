@@ -6,14 +6,11 @@ import liquibase.command.CommandScope;
 import liquibase.command.CommonArgumentNames;
 import liquibase.exception.CommandValidationException;
 import liquibase.exception.MissingRequiredArgumentException;
-import liquibase.resource.OpenOptions;
-import liquibase.resource.PathHandlerFactory;
+import liquibase.io.OutputFileHandler;
+import liquibase.io.OutputFileHandlerFactory;
 import liquibase.util.StringUtil;
 import picocli.CommandLine;
 
-import java.io.File;
-import java.io.FileOutputStream;
-import java.io.OutputStream;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
@@ -43,13 +40,12 @@ class CommandRunner implements Callable<CommandResults> {
 
         final CommandScope commandScope = new CommandScope(commandName);
         final String outputFile = LiquibaseCommandLineConfiguration.OUTPUT_FILE.getCurrentValue();
-        OutputStream outputStream = null;
+        final OutputFileHandlerFactory outputFileHandlerFactory = Scope.getCurrentScope().getSingleton(OutputFileHandlerFactory.class);
+        OutputFileHandler outputFileHandler = outputFileHandlerFactory.getOutputFileHandler(outputFile);
 
         try {
             if (outputFile != null) {
-                final PathHandlerFactory pathHandlerFactory = Scope.getCurrentScope().getSingleton(PathHandlerFactory.class);
-                outputStream = pathHandlerFactory.openResourceOutputStream(outputFile, new OpenOptions());
-                commandScope.setOutput(outputStream);
+                outputFileHandler.create(outputFile, commandScope);
             }
 
             return commandScope.execute();
@@ -65,10 +61,7 @@ class CommandRunner implements Callable<CommandResults> {
                 throw cve;
             }
         } finally {
-            if (outputStream != null) {
-                outputStream.flush();
-                outputStream.close();
-            }
+            outputFileHandler.close();
         }
     }
 

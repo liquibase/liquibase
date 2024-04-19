@@ -127,6 +127,10 @@ public class SpringLiquibase implements InitializingBean, BeanNameAware, Resourc
     @Getter
     protected UIServiceEnum uiService = UIServiceEnum.LOGGER;
 
+    @Getter
+    @Setter
+    protected Customizer<Liquibase> customizer;
+
     public SpringLiquibase() {
         super();
     }
@@ -320,6 +324,10 @@ public class SpringLiquibase implements InitializingBean, BeanNameAware, Resourc
 
         if (liquibase.getDatabase() instanceof DerbyDatabase) {
             ((DerbyDatabase) liquibase.getDatabase()).setShutdownEmbeddedDerby(false);
+        }
+
+        if (customizer != null) {
+            customizer.customize(liquibase);
         }
 
         return liquibase;

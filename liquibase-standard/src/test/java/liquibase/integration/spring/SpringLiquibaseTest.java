@@ -1,6 +1,10 @@
 package liquibase.integration.spring;
 
 import liquibase.Liquibase;
+import org.junit.Test;
+
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNull;
 
 /**
  * Tests for {@link SpringLiquibase}
@@ -15,12 +19,12 @@ public class SpringLiquibaseTest {
 
     private Liquibase liquibase;
 
-//    private ArgumentCaptor<Contexts> contextCaptor ;
-//    private ArgumentCaptor<LabelExpression> labelCaptor ;
-//    private ArgumentCaptor<String> stringCaptor ;
+//    private ArgumentCaptor<Contexts> contextCaptor;
+//    private ArgumentCaptor<LabelExpression> labelCaptor;
+//    private ArgumentCaptor<String> stringCaptor;
 
 //    @Before
-//    public void setUp(){
+//    public void setUp() {
 //        liquibase = mock(Liquibase.class);
 //        springLiquibase.setContexts(TEST_CONTEXT);
 //        springLiquibase.setLabels(TEST_LABELS);
@@ -73,4 +77,33 @@ public class SpringLiquibaseTest {
 //        assertTrue(labelCaptor.getValue().getLabels().contains(TEST_LABELS));
 //        assertSame(stringCaptor.getValue(),TEST_TAG);
 //    }
+
+    @Test
+    public void customizer() throws Exception {
+        Customizer<Liquibase> customizer = liquibase -> liquibase.setChangeLogParameter("some key", "some value");
+        springLiquibase.setCustomizer(customizer);
+        try (Liquibase liquibase = springLiquibase.createLiquibase(null)) {
+            Object value = liquibase.getChangeLogParameters().getValue("some key", null);
+            assertEquals("some value", value);
+        }
+    }
+
+    @Test
+    public void customizer_withDefaults() throws Exception {
+        Customizer<Liquibase> customizer = Customizer.withDefaults();
+        springLiquibase.setCustomizer(customizer);
+        try (Liquibase liquibase = springLiquibase.createLiquibase(null)) {
+            Object value = liquibase.getChangeLogParameters().getValue("some key", null);
+            assertNull(value);
+        }
+    }
+
+    @Test
+    public void customizer_null() throws Exception {
+        springLiquibase.setCustomizer(null);
+        try (Liquibase liquibase = springLiquibase.createLiquibase(null)) {
+            Object value = liquibase.getChangeLogParameters().getValue("some key", null);
+            assertNull(value);
+        }
+    }
 }
