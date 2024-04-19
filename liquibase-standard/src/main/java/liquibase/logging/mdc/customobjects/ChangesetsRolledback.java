@@ -1,11 +1,15 @@
 package liquibase.logging.mdc.customobjects;
 
 import liquibase.logging.mdc.CustomMdcObject;
+import lombok.Getter;
+import lombok.Setter;
 
 import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
 
+@Getter
+@Setter
 public class ChangesetsRolledback implements CustomMdcObject {
 
     private int changesetCount;
@@ -22,22 +26,6 @@ public class ChangesetsRolledback implements CustomMdcObject {
         this.changesets = changeSets;
     }
 
-    public int getChangesetCount() {
-        return changesetCount;
-    }
-
-    public void setChangesetCount(int changesetCount) {
-        this.changesetCount = changesetCount;
-    }
-
-    public List<ChangeSet> getChangesets() {
-        return changesets;
-    }
-
-    public void setChangesets(List<ChangeSet> changesets) {
-        this.changesets = changesets;
-    }
-
     /**
      * Generate a {@link ChangesetsRolledback} object from a list of {@link liquibase.changelog.ChangeSet}s.
      */
@@ -50,6 +38,8 @@ public class ChangesetsRolledback implements CustomMdcObject {
         }
     }
 
+    @Getter
+    @Setter
     public static class ChangeSet {
 
         private String changesetId;
@@ -61,38 +51,6 @@ public class ChangesetsRolledback implements CustomMdcObject {
             this.changesetId = changesetId;
             this.author = author;
             this.filepath = filepath;
-            this.deploymentId = deploymentId;
-        }
-
-        public String getChangesetId() {
-            return changesetId;
-        }
-
-        public void setChangesetId(String changesetId) {
-            this.changesetId = changesetId;
-        }
-
-        public String getAuthor() {
-            return author;
-        }
-
-        public void setAuthor(String author) {
-            this.author = author;
-        }
-
-        public String getFilepath() {
-            return filepath;
-        }
-
-        public void setFilepath(String filepath) {
-            this.filepath = filepath;
-        }
-
-        public String getDeploymentId() {
-            return deploymentId;
-        }
-
-        public void setDeploymentId(String deploymentId) {
             this.deploymentId = deploymentId;
         }
 

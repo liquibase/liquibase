@@ -18,14 +18,14 @@
 		<deploy.url>https://maven.pkg.github.com/liquibase/liquibase</deploy.url>
 		<h2.version>2.2.224</h2.version>
 		<hsqldb.version>2.7.2</hsqldb.version>
-		<postgresql.version>42.7.2</postgresql.version>
+		<postgresql.version>42.7.3</postgresql.version>
 		<mssql.version>12.6.1.jre8</mssql.version>
 		<mysql.version>8.0.21</mysql.version>
 		<mariadb.version>3.3.3</mariadb.version>
 		<oracle.version>19.22.0.0</oracle.version>
-		<sqlite.version>3.44.1.0</sqlite.version>
+		<sqlite.version>3.45.2.0</sqlite.version>
 		<db2.version>11.5.9.0</db2.version>
-		<firebird.version>5.0.3.java8</firebird.version>
+		<firebird.version>5.0.4.java8</firebird.version>
 		<liquibase-pro.version>master-SNAPSHOT</liquibase-pro.version>
 		<assemblyConfigFile>src/main/assembly/assembly-bin.xml</assemblyConfigFile>
 		<maven.deploy.skip>true</maven.deploy.skip>
@@ -92,7 +92,7 @@
         <dependency>
             <groupId>net.snowflake</groupId>
             <artifactId>snowflake-jdbc</artifactId>
-            <version>3.14.4</version>
+            <version>3.15.1</version>
         </dependency>
 
 		<!--        CANNOT INCLUDE MYSQL FOR LICENSING REASONS -->
@@ -158,20 +158,19 @@
 		<dependency>
 			<groupId>org.glassfish.jaxb</groupId>
 			<artifactId>jaxb-core</artifactId>
-			<version>4.0.4</version>
+			<version>4.0.5</version>
 			<optional>true</optional>
 		</dependency>
 		<dependency>
 			<groupId>org.glassfish.jaxb</groupId>
 			<artifactId>jaxb-runtime</artifactId>
-			<version>4.0.4</version>
+			<version>4.0.5</version>
 			<optional>true</optional>
 		</dependency>
 	</dependencies>
 
 	<build>
 		<plugins>
-
 			<plugin>
 				<artifactId>maven-resources-plugin</artifactId>
 				<version>3.3.1</version>
@@ -193,6 +192,25 @@
 							<outputDirectory>${project.build.directory}/archive</outputDirectory>
 						</configuration>
 
+					</execution>
+					<execution>
+						<id>copy-license-file</id>
+						<phase>generate-sources</phase>
+						<goals>
+							<goal>copy-resources</goal>
+						</goals>
+						<configuration>
+							<outputDirectory>${project.build.directory}/archive</outputDirectory>
+							<resources>
+								<resource>
+									<directory>${basedir}/../</directory>
+									<includes>
+										<include>LICENSE.txt</include>
+									</includes>
+									<filtering>true</filtering>
+								</resource>
+							</resources>
+						</configuration>
 					</execution>
 				</executions>
 			</plugin>
@@ -218,7 +236,7 @@
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-source-plugin</artifactId>
-				<version>3.3.0</version>
+				<version>3.3.1</version>
 				<configuration>
 					<!-- sources.jar from this module is the shaded sources of others -->
 					<skipSource>true</skipSource>
@@ -227,7 +245,7 @@
 			<!-- this builds and attaches the tar file of liquibase (which has liquibase cli) -->
 			<plugin>
 				<artifactId>maven-assembly-plugin</artifactId>
-				<version>3.6.0</version>
+				<version>3.7.1</version>
 				<configuration>
 					<tarLongFileMode>posix</tarLongFileMode>
 					<finalName>liquibase-${project.version}</finalName>

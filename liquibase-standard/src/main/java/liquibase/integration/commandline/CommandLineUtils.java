@@ -20,6 +20,7 @@ import liquibase.exception.DatabaseException;
 import liquibase.exception.LiquibaseException;
 import liquibase.resource.ClassLoaderResourceAccessor;
 import liquibase.resource.ResourceAccessor;
+import liquibase.structure.core.Schema;
 import liquibase.util.StringUtil;
 
 import javax.xml.parsers.ParserConfigurationException;
@@ -93,7 +94,7 @@ public class CommandLineUtils {
             Database database = DatabaseFactory.getInstance().openDatabase(url, username, password, driver,
                     databaseClass, driverPropertiesFile, propertyProviderClass, resourceAccessor);
 
-            if (!database.supportsSchemas()) {
+            if (!database.supports(Schema.class)) {
                 if ((defaultSchemaName != null) && (defaultCatalogName == null)) {
                     defaultCatalogName = defaultSchemaName;
                 }

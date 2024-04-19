@@ -21,7 +21,7 @@
             <dependency>
                 <groupId>org.testcontainers</groupId>
                 <artifactId>testcontainers-bom</artifactId>
-                <version>1.19.6</version>
+                <version>1.19.7</version>
                 <type>pom</type>
                 <scope>import</scope>
             </dependency>
@@ -76,9 +76,15 @@
         </dependency>
 
         <dependency>
-            <groupId>org.codehaus.groovy</groupId>
+            <groupId>org.apache.groovy</groupId>
             <artifactId>groovy-all</artifactId>
             <type>pom</type>
+            <exclusions>
+                <exclusion>
+                    <groupId>junit</groupId>
+                    <artifactId>junit</artifactId>
+                </exclusion>
+            </exclusions>
         </dependency>
 
         <dependency>
@@ -87,8 +93,13 @@
         </dependency>
 
         <dependency>
-            <groupId>junit</groupId>
-            <artifactId>junit</artifactId>
+            <groupId>org.junit.jupiter</groupId>
+            <artifactId>junit-jupiter-api</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.junit.platform</groupId>
+            <artifactId>junit-platform-suite</artifactId>
+            <version>1.10.2</version>
         </dependency>
         <dependency>
             <groupId>org.springframework</groupId>
@@ -118,7 +129,7 @@
                                     <include>org.slf4j:*</include>
                                     <include>com.github.docker-java:*</include>
                                     <include>org.apache.commons:*</include>
-                                    <include>junit:*</include>
+                                    <include>org.junit.jupiter:*</include>
                                     <include>org.rnorth.duct-tape:*</include>
                                     <include>net.java.dev.jna:*</include>
                                 </includes>

@@ -140,6 +140,11 @@ public interface Database extends PrioritizedService, AutoCloseable {
      */
     boolean supportsInitiallyDeferrableColumns();
 
+    /**
+     * Whether this database supports sequences
+     * @deprecated please call {@link Database#supports(Class)} with the {@link liquibase.structure.core.Sequence} type instead
+     */
+    @Deprecated
     boolean supportsSequences();
 
     boolean supportsDropTableCascadeConstraints();
@@ -380,10 +385,25 @@ public interface Database extends PrioritizedService, AutoCloseable {
 
     boolean supportsTablespaces();
 
+    /**
+     * Whether this database supports catalogs
+     * @deprecated please call {@link Database#supports(Class)} with the {@link liquibase.structure.core.Catalog} type instead
+     */
+    @Deprecated
     boolean supportsCatalogs();
+
+    default boolean supports(Class<? extends DatabaseObject> object) {
+        return true;
+    }
+
 
     CatalogAndSchema.CatalogAndSchemaCase getSchemaAndCatalogCase();
 
+    /**
+     * Whether this database supports schemas
+     * @deprecated please call {@link Database#supports(Class)} with the {@link liquibase.structure.core.Schema} type instead
+     */
+    @Deprecated
     boolean supportsSchemas();
 
     boolean supportsCatalogInObjectName(Class<? extends DatabaseObject> type);
@@ -628,6 +648,27 @@ public interface Database extends PrioritizedService, AutoCloseable {
      */
     default boolean supportsDatabaseChangeLogHistory() {
         return false;
+    }
+
+    /**
+     * Some databases (such as MongoDB) require you to verify the connection to the database
+     * to ensure that the database is accessible.
+     * It can be "ping" signal to the database
+     */
+    default void checkDatabaseConnection() throws DatabaseException {
+        // Do nothing by default
+        // Implementation required only for some specific databases in extensions
+    }
+
+    /**
+     * Returns a custom message to be displayed upon successful execution of the connect command.
+     * This method can be overridden by a database implementation to provide a specific message.
+     * If not overridden, it returns null by default.
+     *
+     * @return A custom success message for the connect command, or null if not provided.
+     */
+    default String generateConnectCommandSuccessMessage() {
+        return null;
     }
 }
 

@@ -3,6 +3,7 @@ package liquibase.integration.ant;
 import liquibase.Contexts;
 import liquibase.Liquibase;
 import liquibase.exception.LiquibaseException;
+import lombok.Getter;
 import org.apache.tools.ant.BuildException;
 import org.apache.tools.ant.types.resources.FileResource;
 import org.apache.tools.ant.util.FileUtils;
@@ -11,6 +12,7 @@ import java.io.IOException;
 import java.io.OutputStreamWriter;
 import java.io.UnsupportedEncodingException;
 
+@Getter
 public class ChangeLogSyncToTagTask extends AbstractChangeLogBasedTask {
     private String toTag;
 
@@ -35,10 +37,6 @@ public class ChangeLogSyncToTagTask extends AbstractChangeLogBasedTask {
         } finally {
             FileUtils.close(writer);
         }
-    }
-
-    public String getToTag() {
-        return toTag;
     }
 
     public void setToTag(String toTag) {

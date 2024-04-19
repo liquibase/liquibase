@@ -32,8 +32,8 @@ import liquibase.util.StreamUtil
 import liquibase.util.StringUtil
 import org.codehaus.groovy.control.CompilerConfiguration
 import org.junit.Assert
-import org.junit.Assume
 import org.junit.ComparisonFailure
+import org.junit.jupiter.api.Assumptions
 import spock.lang.Specification
 import spock.lang.Unroll
 import spock.util.environment.OperatingSystem
@@ -200,7 +200,7 @@ Long Description: ${commandDefinition.getLongDescription() ?: "NOT SET"}
     def "run"() {
         setup:
         Main.runningFromNewCli = true
-        Assume.assumeTrue("Skipping test: " + permutation.testSetupEnvironment.errorMessage, permutation.testSetupEnvironment.connection != null)
+        Assumptions.assumeTrue(permutation.testSetupEnvironment.connection != null, "Skipping test: " + permutation.testSetupEnvironment.errorMessage)
 
         def testDef = permutation.definition
 
@@ -227,7 +227,7 @@ Long Description: ${commandDefinition.getLongDescription() ?: "NOT SET"}
         when:
         if (testDef.supportedOs != null) {
             def currentOs = OperatingSystem.getCurrent()
-            Assume.assumeTrue("The current operating system (" + currentOs.name + ") does not support this test.", testDef.supportedOs.contains(currentOs))
+            Assumptions.assumeTrue(testDef.supportedOs.contains(currentOs), "The current operating system (" + currentOs.name + ") does not support this test.")
         }
         def commandScope
         try {
@@ -1227,7 +1227,7 @@ Long Description: ${commandDefinition.getLongDescription() ?: "NOT SET"}
     }
 
     public static String createRandomFilePath(String suffix) {
-        String rand = "target/test-classes/" + StringUtil.randomIdentifer(10) + "." + suffix
+        String rand = "target/test-classes/" + StringUtil.randomIdentifier(10) + "." + suffix
         rand
     }
 
