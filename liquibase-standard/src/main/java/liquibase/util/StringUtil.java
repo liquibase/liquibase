@@ -22,7 +22,6 @@ public class StringUtil {
     private static final Pattern upperCasePattern = Pattern.compile(".*[A-Z].*");
     private static final Pattern lowerCasePattern = Pattern.compile(".*[a-z].*");
     private static final Pattern spacePattern = Pattern.compile(" ");
-    private static final SecureRandom rnd = new SecureRandom();
 
     /**
      * Returns the trimmed (left and right) version of the input string. If null is passed, an empty string is returned.
@@ -756,12 +755,24 @@ public class StringUtil {
     }
 
     /**
-     * Produce a random identifer of the given length, consisting only of uppercase letters.
+     * Produce a random identifier of the given length, consisting only of uppercase letters.
+     *
+     * @param len desired length of the string
+     * @return an identifier of the desired length
+     * @deprecated use {@link #randomIdentifier}
+     */
+    @Deprecated
+    public static String randomIdentifer(int len) {
+        return randomIdentifier(len);
+    }
+
+    /**
+     * Produce a random identifier of the given length, consisting only of uppercase letters.
      *
      * @param len desired length of the string
      * @return an identifier of the desired length
      */
-    public static String randomIdentifer(int len) {
+    public static String randomIdentifier(int len) {
         return RandomStringUtils.random(len, true, false);
     }
 
