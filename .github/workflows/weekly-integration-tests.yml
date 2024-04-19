@@ -71,13 +71,13 @@ jobs:
         if: ${{ matrix.java != 8}}
         run: |
           ./mvnw -B "-DtrimStackTrace=false" \
-            -Dliquibase.sdk.testSystem.test=snowflake \
-            -Dliquibase.sdk.testSystem.snowflake.url=${{ secrets.LIQUIBASEOSS_URL }} \
-            -Dliquibase.sdk.testSystem.snowflake.username=${{ secrets.LIQUIBASEOSS_USERNAME }} \
-            -Dliquibase.sdk.testSystem.snowflake.password=${{ secrets.LIQUIBASEOSS_PASSWORD_KEY }} \
-            -Dtest=*IntegrationTest,*ExecutorTest \
-            -DfailIfNoTests=false \
-            -Dsurefire.failIfNoSpecifiedTests=false \
+            "-Dliquibase.sdk.testSystem.test=snowflake" \
+            "-Dliquibase.sdk.testSystem.snowflake.url=${{ secrets.LIQUIBASEOSS_URL }}" \
+            "-Dliquibase.sdk.testSystem.snowflake.username=${{ secrets.LIQUIBASEOSS_USERNAME }}" \
+            "-Dliquibase.sdk.testSystem.snowflake.password=${{ secrets.LIQUIBASEOSS_PASSWORD_KEY }}" \
+            "-Dtest=*IntegrationTest,*ExecutorTest" \
+            "-DfailIfNoTests=false" \
+            "-Dsurefire.failIfNoSpecifiedTests=false" \
             clean verify
 
       - name: Archive Test Results
