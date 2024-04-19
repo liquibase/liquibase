@@ -2,6 +2,9 @@ name: Weekly Integration Tests
 
 on:
   workflow_dispatch:
+  push:
+    branches:
+      - *
   schedule:
     - cron: '0 1 * * 0'
 
