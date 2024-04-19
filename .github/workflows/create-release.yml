@@ -197,6 +197,7 @@ jobs:
           
           ##Sign Files
           $PWD/.github/util/sign-artifacts.sh re-version/final
+          cat /Users/runner/work/liquibase/liquibase/liquibase-dist/target/liquibase-macos-installer-4.27.1.dmg.notarization.log
           
           (cd re-version/final && zip liquibase-additional-$version.zip *.asc *.md5 *.sha1)
           rm re-version/final/*.asc
