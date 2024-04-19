@@ -20,6 +20,9 @@ public class SnowflakeTestSystem extends DatabaseTestSystem {
 
     @Override
     protected String[] getSetupSql() {
-        return new String[0];
+        return new String[]{
+                "create schema " + getAltSchema(),
+                "grant all on schema " + getAltSchema() + " to " + getUsername(),
+        };
     }
 }
