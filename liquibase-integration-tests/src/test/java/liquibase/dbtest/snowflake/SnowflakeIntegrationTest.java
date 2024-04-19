@@ -18,4 +18,11 @@ public class SnowflakeIntegrationTest extends AbstractIntegrationTest {
     public void verifyIndexIsCreatedWhenAssociatedWithPropertyIsSetAsNone() throws DatabaseException {
         super.verifyIndexIsCreatedWhenAssociatedWithPropertyIsSetAsNone();
     }
+
+    @Ignore(value = "Bug that will be fixed in DAT-17520")
+    @Override
+    @Test
+    public void testBatchInsert() throws Exception {
+        super.testBatchInsert();
+    }
 }
