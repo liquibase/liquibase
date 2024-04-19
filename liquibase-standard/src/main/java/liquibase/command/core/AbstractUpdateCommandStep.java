@@ -215,6 +215,9 @@ public abstract class AbstractUpdateCommandStep extends AbstractCommandStep impl
             }
             Scope.getCurrentScope().addMdcValue(MdcKey.DEPLOYMENT_OUTCOME_COUNT, String.valueOf(deployedChangeSetCount));
             Scope.getCurrentScope().addMdcValue(MdcKey.CHANGESETS_UPDATED, changesetsUpdated);
+            // Now that the command is completed reset the generated sql in case we are running these changes in some chain
+            // like during update-testing-rollback
+            deployedChangeSets.forEach(changeSet -> changeSet.setGeneratedSql(new ArrayList<>()));
         }
         String deploymentOutcome = success ? MdcValue.COMMAND_SUCCESSFUL : MdcValue.COMMAND_FAILED;
         updateReportParameters.setSuccess(success);
