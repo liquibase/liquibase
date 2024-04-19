@@ -1116,11 +1116,12 @@ public class Main {
     protected static CodePointCheck checkArg(String arg) {
         char[] chars = arg.toCharArray();
         for (int i = 0; i < chars.length; i++) {
+            char ch = chars[i];
             for (int suspiciousCodePoint : suspiciousCodePoints) {
-                if (suspiciousCodePoint == chars[i]) {
+                if (suspiciousCodePoint == ch) {
                     CodePointCheck codePointCheck = new CodePointCheck();
                     codePointCheck.position = i;
-                    codePointCheck.ch = chars[i];
+                    codePointCheck.ch = ch;
                     return codePointCheck;
                 }
             }
