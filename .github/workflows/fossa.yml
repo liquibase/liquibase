@@ -4,7 +4,9 @@ name: FOSSA License Compliance and Security Check
 # Event triggers for the workflow
 on:
   workflow_dispatch:  # Run this action manually from the GitHub Actions tab
-
+  release:
+   types: [published] # Run this action when a release is published
+   
 # Define the jobs in the workflow
 jobs:
   fossa-scan:
@@ -17,15 +19,57 @@ jobs:
     - name: Checkout Code
       uses: actions/checkout@v4
 
-    # Run FOSSA Scan
-    - name: Run FOSSA Scan
+    - name: run FOSSA CLI
       uses: fossas/fossa-action@main
       with:
-        api-key: ${{secrets.FOSSA_API_KEY}}  # Set this secret in your GitHub repo settings
+        api-key: ${{ secrets.FOSSA_API_KEY }}
 
-    # Run FOSSA Tests
-    - name: Run FOSSA Tests
-      uses: fossas/fossa-action@main
+    - name: Get the commit sha
+      id: get_commit_sha_oss
+      run: |
+        commit_sha_lb=`(git rev-parse HEAD)`
+        echo "commit_sha_lb=${commit_sha_lb}" >> $GITHUB_OUTPUT
+
+      # from the below curl commands we output the fossa report with the headers we need. Following this documentation : https://docs.fossa.com/docs/download-fossa-project-attribution-reports
+    - name: Set the dependency metadata information
+      run: |
+        mkdir /home/runner/fossa_reports
+        curl --location --request PUT 'https://app.fossa.com/api/projects/git+github.com/liquibase/liquibase' \
+        --header 'Authorization: Bearer ${{ secrets.FOSSA_API_KEY }}' \
+        --header 'Content-Type: application/x-www-form-urlencoded' \
+          --data-urlencode 'bom_column_settings%5B%5D=Title' \
+          --data-urlencode 'bom_column_settings%5B%5D=Version' \
+          --data-urlencode 'bom_column_settings%5B%5D=Authors' \
+          --data-urlencode 'bom_column_settings%5B%5D=DeclaredLicense' \
+          --data-urlencode 'bom_column_settings%5B%5D=PackageHomepage' \
+
+        curl --location 'https://app.fossa.com/api/revisions/git%2Bgithub.com%2Fliquibase%2Fliquibase%24${{ steps.get_commit_sha_oss.outputs.commit_sha_lb }}/attribution/download?format=CSV&includeDeepDependencies=true&download=true' \
+        --header 'Authorization: Bearer ${{ secrets.FOSSA_API_KEY }}' -o /home/runner/fossa_reports/liquibase.csv
+
+      # Upload to build page for the team to check the csv file contents.
+    - name: Upload to build page
+      uses: actions/upload-artifact@v2
       with:
-        api-key: ${{secrets.FOSSA_API_KEY}}  # Set this secret in your GitHub repo settings
-        run-tests: true  # Run FOSSA tests for policy checks
+        name: fossa-reports
+        path: /home/runner/fossa_reports/liquibase.csv
+
+      # Upload report to S3
+    - name: Upload report to S3
+      if: always()
+      run: aws s3 cp /home/runner/fossa_reports/liquibase.csv s3://liquibaseorg-origin/fossa_reports_liquibase-pro/
+      env:
+        AWS_ACCESS_KEY_ID: ${{ secrets.LIQUIBASEORIGIN_ACCESS_KEY_ID }}
+        AWS_SECRET_ACCESS_KEY: ${{ secrets.LIQUIBASEORIGIN_SECRET_ACCESS_KEY }}
+        AWS_DEFAULT_REGION: us-east-1
+
+  # trigger a job in liquibase-pro for the fossa-scan report generation and merging of OSS and PRO reports 
+  run-pro-fossa-report:
+    runs-on: ubuntu-latest
+    needs: [ fossa-scan ]
+    steps:
+      - name: Dispatch event to PRO repository
+        uses: peter-evans/repository-dispatch@v1
+        with:
+          token: ${{ secrets.LIQUIBOT_PAT_GPM_ACCESS }}
+          repository: liquibase/liquibase-pro
+          event-type: FOSSA_Scan_PRO

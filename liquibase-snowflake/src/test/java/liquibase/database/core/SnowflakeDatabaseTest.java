@@ -2,6 +2,9 @@ package liquibase.database.core;
 
 import liquibase.CatalogAndSchema;
 import liquibase.database.jvm.JdbcConnection;
+import liquibase.structure.core.Catalog;
+import liquibase.structure.core.Schema;
+import liquibase.structure.core.Sequence;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -72,11 +75,13 @@ public class SnowflakeDatabaseTest {
     @Test
     public void testSupportsSchemas() {
         assertTrue(database.supportsSchemas());
+        assertTrue(database.supports(Schema.class));
     }
 
     @Test
     public void testSupportsCatalogs() {
         assertTrue(database.supportsCatalogs());
+        assertTrue(database.supports(Catalog.class));
     }
 
     @Test
@@ -87,6 +92,7 @@ public class SnowflakeDatabaseTest {
     @Test
     public void testSupportsSequences() {
         assertTrue(database.supportsSequences());
+        assertTrue(database.supports(Sequence.class));
     }
 
     @Test

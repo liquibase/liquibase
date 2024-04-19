@@ -6,7 +6,10 @@ package liquibase;
  * <br><br>
  * The value of Scope.getCurrentScope() at the time of the ThreadLocalScopeManger's creation will be the basis of all scopes created after setScopeManager() is changed,
  * so you will generally want to setScopeManager as soon as possible.
+ *
+ * @deprecated ScopeManager now uses ThreadLocal to prevent concurrent modification issues. This class is no longer needed.
  */
+@Deprecated
 @SuppressWarnings("java:S5164")
 public class ThreadLocalScopeManager extends ScopeManager {
 
