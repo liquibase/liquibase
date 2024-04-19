@@ -45,7 +45,7 @@
         </createTable>
     </changeSet>
 
-    <changeSet id="12" author="nvoxland">
+    <changeSet id="12" author="nvoxland" dbms="!snowflake">
         <addForeignKeyConstraint
                 baseTableName="article" baseColumnNames="publication_id"
                 constraintName="fk_article_publication"
