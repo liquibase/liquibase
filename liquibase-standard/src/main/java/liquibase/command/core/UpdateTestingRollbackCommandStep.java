@@ -1,9 +1,6 @@
 package liquibase.command.core;
 
-import liquibase.Contexts;
-import liquibase.LabelExpression;
-import liquibase.Liquibase;
-import liquibase.Scope;
+import liquibase.*;
 import liquibase.changelog.ChangeLogHistoryService;
 import liquibase.changelog.ChangeLogHistoryServiceFactory;
 import liquibase.changelog.DatabaseChangeLog;
@@ -34,7 +31,7 @@ public class UpdateTestingRollbackCommandStep extends AbstractCommandStep {
 
     @Override
     public String[][] defineCommandNames() {
-        return new String[][] { COMMAND_NAME };
+        return new String[][]{COMMAND_NAME};
     }
 
     @Override
@@ -56,11 +53,53 @@ public class UpdateTestingRollbackCommandStep extends AbstractCommandStep {
 
         ChangeLogHistoryService changeLogService = Scope.getCurrentScope().getSingleton(ChangeLogHistoryServiceFactory.class).getChangeLogService(database);
         int originalSize = changeLogService.getRanChangeSets().size();
-        liquibase.update(tag, contexts, labelExpression);
+        initialUpdate(liquibase, tag, contexts, labelExpression);
         changeLogService.reset();
         int changesetsToRollback = changeLogService.getRanChangeSets().size() - originalSize;
         Scope.getCurrentScope().getLog(getClass()).info(String.format("Rolling back %d changeset(s).", changesetsToRollback));
+        rollbackUpdate(liquibase, changesetsToRollback, contexts, labelExpression);
+        finalUpdate(liquibase, tag, contexts, labelExpression);
+    }
+
+    /**
+     * Runs the first update operation in the update-testing-rollback chain
+     *
+     * @param liquibase       the liquibase object to used for running operations
+     * @param tag             the tag to update to if available
+     * @param contexts        the contexts to filter on if available
+     * @param labelExpression the labels to filter on if available
+     * @throws Exception if there was a problem with the update
+     */
+    @Beta
+    protected void initialUpdate(Liquibase liquibase, String tag, Contexts contexts, LabelExpression labelExpression) throws Exception {
+        liquibase.update(tag, contexts, labelExpression);
+    }
+
+    /**
+     * Runs the rollback operation in the update-testing-rollback chain which rolls back the initial update
+     *
+     * @param liquibase            the liquibase object to used for running operations
+     * @param changesetsToRollback the number of changes to roll back
+     * @param contexts             the contexts to filter on if available
+     * @param labelExpression      the labels to filter on if available
+     * @throws Exception if there was a problem with the rollback
+     */
+    @Beta
+    protected void rollbackUpdate(Liquibase liquibase, int changesetsToRollback, Contexts contexts, LabelExpression labelExpression) throws Exception {
         liquibase.rollback(changesetsToRollback, null, contexts, labelExpression);
+    }
+
+    /**
+     * Runs the final update operation in the update-testing-rollback chain
+     *
+     * @param liquibase       the liquibase object to used for running operations
+     * @param tag             the tag to update to if available
+     * @param contexts        the contexts to filter on if available
+     * @param labelExpression the labels to filter on if available
+     * @throws Exception if there was a problem with the update
+     */
+    @Beta
+    protected void finalUpdate(Liquibase liquibase, String tag, Contexts contexts, LabelExpression labelExpression) throws Exception {
         liquibase.update(tag, contexts, labelExpression);
     }
 }

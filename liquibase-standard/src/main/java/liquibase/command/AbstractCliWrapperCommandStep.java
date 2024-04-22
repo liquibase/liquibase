@@ -13,6 +13,7 @@ import java.util.*;
  *
  * @deprecated
  */
+@Deprecated
 public abstract class AbstractCliWrapperCommandStep extends AbstractCommandStep {
 
     @Override
