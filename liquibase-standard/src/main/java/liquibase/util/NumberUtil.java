@@ -15,8 +15,8 @@ public abstract class NumberUtil {
      *
      * @deprecated use {@link ObjectUtil#convert(Object, Class)}
      */
-    public static Number convertNumberToTargetClass(Number number, Class targetClass) throws IllegalArgumentException {
-        return (Number) ObjectUtil.convert(number, targetClass);
+    public static <T extends Number> T convertNumberToTargetClass(Number number, Class<T> targetClass) throws IllegalArgumentException {
+        return (T) ObjectUtil.convert(number, targetClass);
     }
 
     /**
@@ -38,25 +38,25 @@ public abstract class NumberUtil {
      * @see java.lang.Double#valueOf
      * @see java.math.BigDecimal#BigDecimal(String)
      */
-    public static Number parseNumber(String text, Class targetClass) {
+    public static <T extends Number> T parseNumber(String text, Class<T> targetClass) {
         String trimmed = text.trim();
 
         if (targetClass.equals(Byte.class)) {
-            return Byte.decode(trimmed);
+            return (T) Byte.decode(trimmed);
         } else if (targetClass.equals(Short.class)) {
-            return Short.decode(trimmed);
+            return (T) Short.decode(trimmed);
         } else if (targetClass.equals(Integer.class)) {
-            return Integer.decode(trimmed);
+            return (T) Integer.decode(trimmed);
         } else if (targetClass.equals(Long.class)) {
-            return Long.decode(trimmed);
+            return (T) Long.decode(trimmed);
         } else if (targetClass.equals(BigInteger.class)) {
-            return new BigInteger(trimmed);
+            return (T) new BigInteger(trimmed);
         } else if (targetClass.equals(Float.class)) {
-            return Float.valueOf(trimmed);
+            return (T) Float.valueOf(trimmed);
         } else if (targetClass.equals(Double.class)) {
-            return Double.valueOf(trimmed);
+            return (T) Double.valueOf(trimmed);
         } else if (targetClass.equals(BigDecimal.class) || targetClass.equals(Number.class)) {
-            return new BigDecimal(trimmed);
+            return (T) new BigDecimal(trimmed);
         } else {
             throw new IllegalArgumentException(
                     "Cannot convert String [" + text + "] to target class [" + targetClass.getName() + "]");

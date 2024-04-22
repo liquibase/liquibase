@@ -16,7 +16,7 @@ import java.sql.Statement;
  *
  * @author Spring Framework
  */
-interface StatementCallback {
+interface StatementCallback<T> {
 
     /**
      * Gets called by <code>JdbcTemplate.execute</code> with an active JDBC
@@ -28,7 +28,7 @@ interface StatementCallback {
      * @param stmt active JDBC Statement
      * @return a result object, or <code>null</code> if none
      */
-    Object doInStatement(Statement stmt) throws SQLException, DatabaseException;
+    T doInStatement(Statement stmt) throws SQLException, DatabaseException;
 
     SqlStatement getStatement();
 }

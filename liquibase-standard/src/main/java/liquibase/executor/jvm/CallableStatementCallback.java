@@ -14,7 +14,7 @@ import java.sql.SQLException;
  *
  * @author Spring Framework
  */
-interface CallableStatementCallback {
+interface CallableStatementCallback<T> {
 
     /**
      * Gets called by <code>JdbcTemplate.execute</code> with an active JDBC
@@ -27,7 +27,7 @@ interface CallableStatementCallback {
      *                             into a DataAccessException by a SQLExceptionTranslator
      * @throws liquibase.exception.DatabaseException in case of custom exceptions
      */
-    Object doInCallableStatement(CallableStatement cs) throws SQLException, DatabaseException;
+    T doInCallableStatement(CallableStatement cs) throws SQLException, DatabaseException;
 
     SqlStatement getStatement();
 }

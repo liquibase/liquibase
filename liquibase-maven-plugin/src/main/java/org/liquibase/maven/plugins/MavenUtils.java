@@ -49,8 +49,8 @@ public class MavenUtils {
         // Find project dependencies, including the transitive ones.
         Set<Artifact> dependencies = project.getArtifacts();
         if ((dependencies != null) && !dependencies.isEmpty()) {
-            for (Iterator it = dependencies.iterator(); it.hasNext(); ) {
-                addArtifact(uris, (Artifact) it.next(), log, verbose);
+            for (Artifact artifact : dependencies) {
+                addArtifact(uris, artifact, log, verbose);
             }
         } else {
             log.info("there are no resolved artifacts for the Maven project.");

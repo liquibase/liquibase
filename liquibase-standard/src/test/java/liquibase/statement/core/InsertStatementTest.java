@@ -1,12 +1,9 @@
 package liquibase.statement.core;
 
-import liquibase.statement.SqlStatement;
-
-public class InsertStatementTest extends AbstractSqStatementTest {
+public class InsertStatementTest extends AbstractSqStatementTest<InsertStatement> {
 
     @Override
-    protected SqlStatement createStatementUnderTest() {
+    protected InsertStatement createStatementUnderTest() {
         return new InsertStatement(null, null, null);
     }
-
 }

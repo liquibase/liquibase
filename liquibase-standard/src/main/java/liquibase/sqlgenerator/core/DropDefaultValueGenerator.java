@@ -14,7 +14,7 @@ import java.util.function.BiFunction;
 
 public class DropDefaultValueGenerator extends AbstractSqlGenerator<DropDefaultValueStatement> {
 
-    public static BiFunction DROP_DF_MSSQL = (tableName, columnName) -> "DECLARE @sql [nvarchar](MAX)\r\n" +
+    public static BiFunction<String,String,String> DROP_DF_MSSQL = (tableName, columnName) -> "DECLARE @sql [nvarchar](MAX)\r\n" +
             "SELECT @sql = N'ALTER TABLE " + tableName + " DROP CONSTRAINT ' + QUOTENAME([df].[name]) " +
             "FROM [sys].[columns] AS [c] " +
             "INNER JOIN [sys].[default_constraints] AS [df] " +
@@ -47,7 +47,7 @@ public class DropDefaultValueGenerator extends AbstractSqlGenerator<DropDefaultV
         String sql;
         String escapedTableName = database.escapeTableName(statement.getCatalogName(), statement.getSchemaName(), statement.getTableName());
         if (database instanceof MSSQLDatabase) {
-            sql = (String) DROP_DF_MSSQL.apply(database.escapeStringForDatabase(escapedTableName), database.escapeStringForDatabase(statement.getColumnName()));
+            sql = DROP_DF_MSSQL.apply(database.escapeStringForDatabase(escapedTableName), database.escapeStringForDatabase(statement.getColumnName()));
         } else if (database instanceof MySQLDatabase) {
             sql = "ALTER TABLE " + escapedTableName + " ALTER " + database.escapeColumnName(statement.getCatalogName(), statement.getSchemaName(), statement.getTableName(), statement.getColumnName()) + " DROP DEFAULT";
         } else if (database instanceof OracleDatabase) {

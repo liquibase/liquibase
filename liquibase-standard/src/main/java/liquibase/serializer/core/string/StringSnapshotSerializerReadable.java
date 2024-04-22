@@ -196,9 +196,8 @@ public class StringSnapshotSerializerReadable implements SnapshotSerializer {
     }
 
     private <T> List<T> sort(Collection objects, Comparator<T> comparator) {
-        List returnList = new ArrayList(objects);
+        List<T> returnList = new ArrayList<>(objects);
         returnList.sort(comparator);
-
         return returnList;
     }
 

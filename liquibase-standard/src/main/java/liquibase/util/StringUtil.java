@@ -403,8 +403,7 @@ public class StringUtil {
             buffer.append(formatter.toString(val)).append(delimiter);
         }
 
-        String returnString = buffer.toString();
-        return returnString.substring(0, returnString.length() - delimiter.length());
+        return buffer.substring(0, buffer.length() - delimiter.length());
     }
 
     public static String join(Collection collection, String delimiter, StringUtilFormatter formatter, boolean sorted) {
@@ -426,14 +425,14 @@ public class StringUtil {
         }
     }
 
-    public static String join(Map map, String delimiter) {
+    public static String join(Map<String,?> map, String delimiter) {
         return join(map, delimiter, new ToStringFormatter());
     }
 
-    public static String join(Map map, String delimiter, StringUtilFormatter formatter) {
+    public static String join(Map<String,?> map, String delimiter, StringUtilFormatter formatter) {
         List<String> list = new ArrayList<>();
-        for (Map.Entry entry : (Set<Map.Entry>) map.entrySet()) {
-            list.add(entry.getKey().toString() + "=" + formatter.toString(entry.getValue()));
+        for (Map.Entry<String,?> entry : map.entrySet()) {
+            list.add(entry.getKey() + "=" + formatter.toString(entry.getValue()));
         }
         return join(list, delimiter);
     }

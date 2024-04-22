@@ -1144,7 +1144,7 @@ public class JdbcDatabaseSnapshot extends DatabaseSnapshot {
                 resultSet.setFetchSize(database.getFetchSize());
 
                 try {
-                    List<Map> result = (List<Map>) new RowMapperNotNullConstraintsResultSetExtractor(new ColumnMapRowMapper(database.isCaseSensitive()) {
+                    List<Map<String,?>> result = new RowMapperNotNullConstraintsResultSetExtractor(new ColumnMapRowMapper(database.isCaseSensitive()) {
                         @Override
                         protected Object getColumnValue(ResultSet rs, int index) throws SQLException {
                             Object value = super.getColumnValue(rs, index);
@@ -1155,7 +1155,7 @@ public class JdbcDatabaseSnapshot extends DatabaseSnapshot {
                         }
                     }).extractData(resultSet);
 
-                    for (Map row : result) {
+                    for (Map<String,?> row : result) {
                         cachedRowList.add(new CachedRow(row));
                     }
                 } finally {

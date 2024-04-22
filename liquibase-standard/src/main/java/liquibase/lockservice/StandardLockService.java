@@ -446,7 +446,7 @@ public class StandardLockService implements LockService {
                     "ID", "LOCKED", "LOCKGRANTED", "LOCKEDBY"
             );
             List<Map<String, ?>> rows = ChangelogJdbcMdcListener.query(database, executor -> executor.queryForList(sqlStatement));
-            for (Map columnMap : rows) {
+            for (Map<String,?> columnMap : rows) {
                 Object lockedValue = columnMap.get("LOCKED");
                 Boolean locked;
                 if (lockedValue instanceof Number) {
