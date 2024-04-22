@@ -74,7 +74,7 @@ jobs:
             "-Dliquibase.sdk.testSystem.test=snowflake" \
             "-Dliquibase.sdk.testSystem.snowflake.url=jdbc:${{ secrets.LIQUIBASEOSS_URL }}" \
             "-Dliquibase.sdk.testSystem.snowflake.username=${{ secrets.LIQUIBASEOSS_USERNAME }}" \
-            "-Dliquibase.sdk.testSystem.snowflake.password=${{ secrets.LIQUIBASEOSS_PASSWORD_KEY }}" \
+            "-Dliquibase.sdk.testSystem.snowflake.password=${{ secrets.LIQUIBASEOSS_PASSWORD }}" \
             "-Dtest=*IntegrationTest,*ExecutorTest" \
             "-DfailIfNoTests=false" \
             "-Dsurefire.failIfNoSpecifiedTests=false" \
