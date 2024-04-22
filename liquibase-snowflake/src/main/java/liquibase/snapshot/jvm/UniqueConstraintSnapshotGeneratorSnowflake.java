@@ -48,11 +48,11 @@ public class UniqueConstraintSnapshotGeneratorSnowflake extends UniqueConstraint
         String tableName = database.correctObjectName(table.getName(), Table.class);
         String constraintName = database.correctObjectName(name, UniqueConstraint.class);
 
-        String showSql = "SHOW UNIQUE KEYS IN ?";
+        String showSql = String.format("SHOW UNIQUE KEYS IN %s", tableName);
         String sql = "SELECT \"column_name\" AS COLUMN_NAME FROM TABLE(result_scan(last_query_id())) WHERE \"constraint_name\"= ?";
 
         Scope.getCurrentScope().getSingleton(ExecutorService.class).getExecutor("jdbc", database)
-                .queryForList(new RawParameterizedSqlStatement(showSql, tableName));
+                .queryForList(new RawParameterizedSqlStatement(showSql));
 
         return Scope.getCurrentScope().getSingleton(ExecutorService.class).getExecutor("jdbc", database)
                 .queryForList(new RawParameterizedSqlStatement(sql, constraintName));

@@ -30,12 +30,12 @@ public class SequenceSnapshotGeneratorSnowflake extends SequenceSnapshotGenerato
     @Override
     protected SqlStatement getSelectSequenceStatement(Schema schema, Database database) {
         if (database instanceof SnowflakeDatabase) {
-            List<String> parameter = new ArrayList<>(3);
-            parameter.add(database.escapeObjectName("INCREMENT", Column.class));
+            List<String> parameter = new ArrayList<>(2);
             parameter.add(database.getDefaultCatalogName());
             parameter.add(database.getDefaultSchemaName());
 
-            StringBuilder sql = new StringBuilder("SELECT SEQUENCE_NAME, START_VALUE, MINIMUM_VALUE AS MIN_VALUE, MAXIMUM_VALUE AS MAX_VALUE, ? AS INCREMENT_BY, ")
+            StringBuilder sql = new StringBuilder(String.format("SELECT SEQUENCE_NAME, START_VALUE, MINIMUM_VALUE AS MIN_VALUE, MAXIMUM_VALUE AS MAX_VALUE, %s AS INCREMENT_BY, ",
+                    database.escapeObjectName("INCREMENT", Column.class)))
                     .append("CYCLE_OPTION AS WILL_CYCLE FROM information_schema.sequences ")
                     .append("WHERE SEQUENCE_CATALOG=? AND SEQUENCE_SCHEMA=?");
 

@@ -41,7 +41,7 @@ public class SetColumnRemarksGeneratorSnowflake extends SetColumnRemarksGenerato
                 // Check if we're trying to set the column remarks on a view, and if so, note that this is not supported.
                 try {
                     List<Map<String, ?>> viewList = Scope.getCurrentScope().getSingleton(ExecutorService.class).getExecutor("jdbc", database).queryForList(
-                            new RawParameterizedSqlStatement("SHOW VIEWS LIKE '?'", statement.getTableName()));
+                            new RawParameterizedSqlStatement(String.format("SHOW VIEWS LIKE %s", statement.getTableName())));
                     if (!viewList.isEmpty()) {
                         validationErrors.addError(SET_COLUMN_REMARKS_NOT_SUPPORTED_ON_VIEW_MSG);
                     }

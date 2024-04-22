@@ -187,6 +187,7 @@ public class UniqueConstraintSnapshotGenerator extends JdbcSnapshotGenerator {
                         .append("and const.constraint_name=col.constraint_name ");
                 if (schema.getCatalogName() != null) {
                     conditions.add("const.constraint_catalog=?");
+                    parameters.add(database.correctObjectName(schema.getCatalogName(), Catalog.class));
                 }
                 if (database instanceof CockroachDatabase) {
                     conditions.add("(select count(*) from (select indexdef from pg_indexes where schemaname='\" + database.correctObjectName(schema.getSchema().getName(), Schema.class) + \"' AND indexname='\" + database.correctObjectName(name, UniqueConstraint.class) + \"' AND (position('DESC,' in indexdef) > 0 OR position('DESC)' in indexdef) > 0))) = 0");
@@ -194,11 +195,14 @@ public class UniqueConstraintSnapshotGenerator extends JdbcSnapshotGenerator {
                 }
                 if (schema.getSchema().getName() != null) {
                     conditions.add("const.constraint_schema=?");
+                    parameters.add(database.correctObjectName(schema.getSchema().getName(), Schema.class));
                 }
                 if (!bulkQuery) {
                     conditions.add("const.table_name=?");
+                    parameters.add(database.correctObjectName(example.getRelation().getName(), Table.class));
                     if (name != null) {
                         conditions.add("const.constraint_name=? ");
+                        parameters.add(database.correctObjectName(name, UniqueConstraint.class));
                     }
                 }
 
@@ -208,10 +212,6 @@ public class UniqueConstraintSnapshotGenerator extends JdbcSnapshotGenerator {
                 }
 
                 sql.append(" order by ordinal_position");
-                parameters.add(database.correctObjectName(schema.getCatalogName(), Catalog.class));
-                parameters.add(database.correctObjectName(schema.getSchema().getName(), Schema.class));
-                parameters.add(database.correctObjectName(example.getRelation().getName(), Table.class));
-                parameters.add(database.correctObjectName(name, UniqueConstraint.class));
                 rawSql = sql.toString();
             } else if (database.getClass().getName().contains("MaxDB")) { //have to check classname as this is currently an extension
                 String sql = "select CONSTRAINTNAME as constraint_name, COLUMNNAME as column_name from CONSTRAINTCOLUMNS WHERE CONSTRAINTTYPE = 'UNIQUE_CONST' AND tablename = ? AND constraintname = ?";
@@ -237,9 +237,9 @@ public class UniqueConstraintSnapshotGenerator extends JdbcSnapshotGenerator {
                         .append("from all_cons_columns ucc INNER JOIN all_constraints f ON ucc.owner = f.owner AND ucc.constraint_name = f.constraint_name where ");
                         if(!bulkQuery) {
                             sql.append("ucc.constraint_name=? and ");
+                            parameters.add(database.correctObjectName(name, UniqueConstraint.class));
                         }
                         sql.append("ucc.owner=? and ucc.table_name not like 'BIN$%' order by ucc.position");
-                parameters.add(database.correctObjectName(name, UniqueConstraint.class));
                 parameters.add(database.correctObjectName(schema.getCatalogName(), Catalog.class));
                 rawSql = sql.toString();
             } else if (database instanceof DB2Database) {
@@ -259,9 +259,9 @@ public class UniqueConstraintSnapshotGenerator extends JdbcSnapshotGenerator {
                             .append("where k.constname = t.constname and k.tabschema = t.tabschema and t.type = 'U' ");
                             if(!bulkQuery) {
                                 sql.append("and k.constname = ? ");
+                                parameters.add(database.correctObjectName(name, UniqueConstraint.class));
                             }
                             sql.append("and t.tabschema = ? order by colseq");
-                    parameters.add(database.correctObjectName(name, UniqueConstraint.class));
                     parameters.add(database.correctObjectName(schema.getName(), Schema.class));
                     rawSql = sql.toString();
                 }
@@ -271,9 +271,9 @@ public class UniqueConstraintSnapshotGenerator extends JdbcSnapshotGenerator {
                         .append(" and KC.TBCREATOR = TC.TBCREATOR and KC.TBNAME = TC.TBNAME where TC.TYPE = 'U'");
                         if(!bulkQuery) {
                             sql.append(" and TC.CONSTNAME = ?");
+                            parameters.add(database.correctObjectName(name, UniqueConstraint.class));
                         }
                         sql.append(" and TC.TBCREATOR = ? order by KC.COLSEQ");
-                parameters.add(database.correctObjectName(name, UniqueConstraint.class));
                 parameters.add(database.correctObjectName(schema.getName(), Schema.class));
                 rawSql = sql.toString();
             } else if (database instanceof DerbyDatabase) {
@@ -351,23 +351,23 @@ public class UniqueConstraintSnapshotGenerator extends JdbcSnapshotGenerator {
                         .append("from information_schema.table_constraints join information_schema.index_columns on index_columns.index_name=table_constraints.index_name where constraint_type='UNIQUE' ");
                 if (catalogName != null) {
                     sql.append("and constraint_catalog=? ");
+                    parameters.add(catalogName);
                 }
                 if (schemaName != null) {
                     sql.append("and constraint_schema=? ");
+                    parameters.add(schemaName);
                 }
                 if (!bulkQuery) {
                     if (tableName != null) {
                         sql.append("and table_constraints.table_name=? ");
+                        parameters.add(tableName);
                     }
                     if (constraintName != null) {
                         sql.append("and constraint_name=?");
+                        parameters.add(constraintName);
                     }
                 }
                 rawSql = sql.toString();
-                parameters.add(catalogName);
-                parameters.add(schemaName);
-                parameters.add(tableName);
-                parameters.add(constraintName);
             } else {
                 // If we do not have a specific handler for the RDBMS, we assume that the database has an
                 // INFORMATION_SCHEMA we can use. This is a last-resort measure and might fail.
@@ -377,26 +377,26 @@ public class UniqueConstraintSnapshotGenerator extends JdbcSnapshotGenerator {
                 String tableName = database.correctObjectName(table.getName(), Table.class);
                 StringBuilder sql = new StringBuilder("select CONSTRAINT_NAME, COLUMN_LIST as COLUMN_NAME, constraint_schema as CONSTRAINT_CONTAINER ")
                         .append("from ?.constraints where constraint_type='UNIQUE' ");
+                parameters.add(database.getSystemSchema());
                 if (catalogName != null) {
                     sql.append("and constraint_catalog=? ");
+                    parameters.add(catalogName);
                 }
                 if (schemaName != null) {
                     sql.append("and constraint_schema=? ");
+                    parameters.add(schemaName);
                 }
 
                 if (!bulkQuery) {
                     if (tableName != null) {
                         sql.append("and table_name=? ");
+                        parameters.add(tableName);
                     }
                     if (constraintName != null) {
                         sql.append("and constraint_name=?");
+                        parameters.add(constraintName);
                     }
                 }
-                parameters.add(database.getSystemSchema());
-                parameters.add(catalogName);
-                parameters.add(schemaName);
-                parameters.add(tableName);
-                parameters.add(constraintName);
                 rawSql = sql.toString();
             }
             List<Map<String, ?>> rows = Scope.getCurrentScope().getSingleton(ExecutorService.class).getExecutor("jdbc", database).queryForList(new RawParameterizedSqlStatement(rawSql, parameters.toArray()));
