@@ -603,6 +603,7 @@ public abstract class AbstractChange extends AbstractPlugin implements Change {
      * @deprecated Should get from {@link Scope}
      */
     @DatabaseChangeProperty(isChangeProperty = false)
+    @Deprecated
     public ResourceAccessor getResourceAccessor() {
         return Scope.getCurrentScope().getResourceAccessor();
     }

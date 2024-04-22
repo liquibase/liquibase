@@ -60,6 +60,7 @@ public class Scope {
         /**
          * @deprecated use {@link GlobalConfiguration#FILE_ENCODING}
          */
+        @Deprecated
         fileEncoding,
         databaseChangeLog,
         changeSet,
@@ -151,7 +152,7 @@ public class Scope {
     }
 
     private String generateScopeId() {
-        return StringUtil.randomIdentifer(10).toLowerCase();
+        return StringUtil.randomIdentifier(10).toLowerCase();
     }
 
     /**
@@ -395,6 +396,7 @@ public class Scope {
     /**
      * @deprecated use {@link GlobalConfiguration#FILE_ENCODING}
      */
+    @Deprecated
     public Charset getFileEncoding() {
         return get(Attr.fileEncoding, Charset.defaultCharset());
     }

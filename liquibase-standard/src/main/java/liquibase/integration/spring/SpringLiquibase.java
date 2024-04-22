@@ -127,6 +127,10 @@ public class SpringLiquibase implements InitializingBean, BeanNameAware, Resourc
     @Getter
     protected UIServiceEnum uiService = UIServiceEnum.LOGGER;
 
+    @Getter
+    @Setter
+    protected Customizer<Liquibase> customizer;
+
     public SpringLiquibase() {
         super();
     }
@@ -194,6 +198,7 @@ public class SpringLiquibase implements InitializingBean, BeanNameAware, Resourc
     /**
      * @deprecated use {@link #getLabelFilter()}
      */
+    @Deprecated
     public String getLabels() {
         return getLabelFilter();
     }
@@ -201,6 +206,7 @@ public class SpringLiquibase implements InitializingBean, BeanNameAware, Resourc
     /**
      * @deprecated use {@link #setLabelFilter(String)}
      */
+    @Deprecated
     public void setLabels(String labels) {
         setLabelFilter(labels);
     }
@@ -320,6 +326,10 @@ public class SpringLiquibase implements InitializingBean, BeanNameAware, Resourc
 
         if (liquibase.getDatabase() instanceof DerbyDatabase) {
             ((DerbyDatabase) liquibase.getDatabase()).setShutdownEmbeddedDerby(false);
+        }
+
+        if (customizer != null) {
+            customizer.customize(liquibase);
         }
 
         return liquibase;
