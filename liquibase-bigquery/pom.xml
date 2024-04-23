@@ -3,14 +3,12 @@
     <modelVersion>4.0.0</modelVersion>
 
     <parent>
+        <artifactId>liquibase</artifactId>
         <groupId>org.liquibase</groupId>
-        <artifactId>liquibase-parent-pom</artifactId>
-        <version>0.3.6</version>
+        <version>0-SNAPSHOT</version>
     </parent>
 
-    <groupId>org.liquibase.ext</groupId>
     <artifactId>liquibase-bigquery</artifactId>
-    <version>4.28.0-SNAPSHOT</version>
 
     <name>Liquibase Extension Google BigQuery support</name>
     <description>Add this Liquibase extension to your project to support Google BigQuery</description>
@@ -22,14 +20,8 @@
         <spock-reports.version>1.8.0</spock-reports.version>
         <groovy-all.version>2.4.21</groovy-all.version>
         <sonar.tests>src/test/groovy</sonar.tests>
+        <sonar.coverage.jacoco.xmlReportPaths>../target/jacoco.xml</sonar.coverage.jacoco.xmlReportPaths>
     </properties>
-
-    <scm>
-        <connection>scm:git:${project.scm.url}</connection>
-        <developerConnection>scm:git:${project.scm.url}</developerConnection>
-		<url>https://github.com/liquibase/liquibase-bigquery.git</url>
-		<tag>HEAD</tag>
-	</scm>
 
     <dependencyManagement>
         <dependencies>
@@ -51,6 +43,11 @@
     </dependencyManagement>
 
     <dependencies>
+        <dependency>
+            <groupId>org.liquibase</groupId>
+            <artifactId>liquibase-standard</artifactId>
+            <version>${project.version}</version>
+        </dependency>
         <dependency>
             <groupId>junit</groupId>
             <artifactId>junit</artifactId>
@@ -93,37 +90,4 @@
         </dependency>
     </dependencies>
 
-    <build>
-        <resources>
-            <resource>
-                <directory>src/main/resources</directory>
-                <filtering>true</filtering>
-            </resource>
-        </resources>
-        <plugins>
-            <plugin>
-                <artifactId>maven-surefire-plugin</artifactId>
-                <version>${maven-surefire-plugin.version}</version>
-                <configuration>
-                    <redirectTestOutputToFile>true</redirectTestOutputToFile>
-                    <reportFormat>plain</reportFormat>
-                </configuration>
-            </plugin>
-            <plugin>
-                <groupId>org.liquibase</groupId>
-                <artifactId>liquibase-maven-plugin</artifactId>
-                <version>4.27.0</version>
-                <configuration>
-                    <propertyFileWillOverride>true</propertyFileWillOverride>
-                    <propertyFile>target/classes/liquibase.properties</propertyFile>
-                    <logging>DEBUG</logging>
-                    <changeLogFile>target/classes/changelog.sql</changeLogFile>
-                    <outputChangeLogFile>target/classes/generatedChangelog.bigquery.sql</outputChangeLogFile>
-                    <diffTypes>tables,views</diffTypes>
-                    <diffIncludeCatalog>true</diffIncludeCatalog>
-                    <diffIncludeSchema>true</diffIncludeSchema>
-                </configuration>
-            </plugin>
-        </plugins>
-    </build>
 </project>

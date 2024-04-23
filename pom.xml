@@ -108,6 +108,7 @@
         <module>liquibase-dist</module>
         <module>liquibase-extension-testing</module>
         <module>liquibase-snowflake</module>
+        <module>liquibase-bigquery</module>
     </modules>
 
     <dependencyManagement>
