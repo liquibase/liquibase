@@ -18,7 +18,7 @@ import java.util.List;
 public class CreateTableExampleChange extends AbstractChange {
     private String schemaName;
     private String tableName;
-    private List<ColumnConfig> columns = new ArrayList<ColumnConfig>();
+    private List<ColumnConfigExample> columns = new ArrayList<ColumnConfigExample>();
     private PrimaryKeyConfig primaryKey;
     private List<UniqueConstraintConfig> uniqueConstraints = new ArrayList<UniqueConstraintConfig>();
     private BigDecimal decimalValue;
@@ -56,11 +56,11 @@ public class CreateTableExampleChange extends AbstractChange {
         return this;
     }
 
-    public List<ColumnConfig> getColumns() {
+    public List<ColumnConfigExample> getColumns() {
         return columns;
     }
 
-    public CreateTableExampleChange setColumns(List<ColumnConfig> columns) {
+    public CreateTableExampleChange setColumns(List<ColumnConfigExample> columns) {
         this.columns = columns;
         return this;
     }
