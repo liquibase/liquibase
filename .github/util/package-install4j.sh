@@ -55,5 +55,5 @@ else
 fi
 
 "$install4jc" --license=$INSTALL4J_10_LICENSE
-"$install4jc" $INSTALL4J_ARGS src/main/install4j/liquibase.install4j
+"$install4jc" -v $INSTALL4J_ARGS src/main/install4j/liquibase.install4j
 
