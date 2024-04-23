@@ -5,7 +5,7 @@ import liquibase.change.core.CreateTableChange
 import liquibase.changelog.ChangeSet
 import liquibase.changelog.DatabaseChangeLog
 import liquibase.changelog.RanChangeSet
-import liquibase.changelog.visitor.StandardValidatingVisitor
+import liquibase.changelog.visitor.ValidatingVisitor
 import liquibase.database.Database
 import liquibase.database.core.MockDatabase
 import liquibase.precondition.core.NotPrecondition
@@ -16,7 +16,7 @@ import spock.lang.Specification
  * Tests for correct behaviour of non-trivial exception class ValidationFailedException
  */
 class ValidationFailedExceptionTest extends Specification {
-    StandardValidatingVisitor handler;
+    ValidatingVisitor handler;
     ChangeSet changeSet1;
     ChangeSet changeSet2;
     ChangeSet duplicateChangeSet;
@@ -58,7 +58,7 @@ class ValidationFailedExceptionTest extends Specification {
         changeSet1.addChange(change1);
         changeSet2.addChange(change2);
 
-        handler = new StandardValidatingVisitor(new ArrayList<RanChangeSet>());
+        handler = new ValidatingVisitor(new ArrayList<RanChangeSet>());
         // Duplicate
         handler.visit(duplicateChangeSet, new DatabaseChangeLog(), new MockDatabase(), null);
         handler.visit(duplicateChangeSet, new DatabaseChangeLog(), new MockDatabase(), null);

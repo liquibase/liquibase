@@ -10,7 +10,7 @@ import liquibase.change.core.CreateIndexChange;
 import liquibase.change.core.DropIndexChange;
 import liquibase.change.core.SQLFileChange;
 import liquibase.changelog.*;
-import liquibase.changelog.visitor.StandardValidatingVisitor;
+import liquibase.changelog.visitor.ValidatingVisitor;
 import liquibase.database.Database;
 import liquibase.exception.DatabaseException;
 import liquibase.exception.UnexpectedLiquibaseException;
@@ -21,7 +21,7 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 
 /**
- * Util class to offload methods that are used by {@link StandardValidatingVisitor} class
+ * Util class to offload methods that are used by {@link ValidatingVisitor} class
  * and may make it more complex than it should be
  */
 public class ValidatingVisitorUtil {

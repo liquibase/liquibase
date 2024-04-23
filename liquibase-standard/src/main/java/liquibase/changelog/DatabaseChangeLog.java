@@ -7,7 +7,8 @@ import liquibase.changelog.filter.ContextChangeSetFilter;
 import liquibase.changelog.filter.DbmsChangeSetFilter;
 import liquibase.changelog.filter.LabelChangeSetFilter;
 import liquibase.changelog.visitor.ValidatingVisitor;
-import liquibase.changelog.visitor.ValidatingVisitorFactory;
+import liquibase.changelog.visitor.ValidatingVisitorGenerator;
+import liquibase.changelog.visitor.ValidatingVisitorGeneratorFactory;
 import liquibase.changeset.ChangeSetService;
 import liquibase.changeset.ChangeSetServiceFactory;
 import liquibase.database.Database;
@@ -368,27 +369,24 @@ public class DatabaseChangeLog implements Comparable<DatabaseChangeLog>, Conditi
                 new LabelChangeSetFilter(labelExpression)
         );
 
-        ValidatingVisitorFactory validatingVisitorFactory = Scope.getCurrentScope().getSingleton(ValidatingVisitorFactory.class);
-        try {
-            ValidatingVisitor validatingVisitor = validatingVisitorFactory.getValidatingVisitor();
-            validatingVisitor.setRanChangeSetList(database.getRanChangeSetList());
-            validatingVisitor.validate(database, this);
-            logIterator.run(validatingVisitor, new RuntimeEnvironment(database, contexts, labelExpression));
+        ValidatingVisitorGeneratorFactory validatingVisitorGeneratorFactory = Scope.getCurrentScope().getSingleton(ValidatingVisitorGeneratorFactory.class);
+        ValidatingVisitorGenerator generator = validatingVisitorGeneratorFactory.getValidatingVisitorGenerator();
+        ValidatingVisitor validatingVisitor = generator.generateValidatingVisitor();
+        validatingVisitor.setRanChangeSetList(database.getRanChangeSetList());
+        validatingVisitor.validate(database, this);
+        logIterator.run(validatingVisitor, new RuntimeEnvironment(database, contexts, labelExpression));
 
-            final Logger log = Scope.getCurrentScope().getLog(getClass());
-            for (String message : validatingVisitor.getWarnings().getMessages()) {
-                log.warning(message);
-            }
+        final Logger log = Scope.getCurrentScope().getLog(getClass());
+        for (String message : validatingVisitor.getWarnings().getMessages()) {
+            log.warning(message);
+        }
 
-            if (!validatingVisitor.validationPassed()) {
-                Scope.getCurrentScope().addMdcValue(MdcKey.DEPLOYMENT_OUTCOME, MdcValue.COMMAND_FAILED);
-                List<MdcChangeset> duplicateChangesetsMdc = validatingVisitor.getDuplicateChangeSets().stream().map(MdcChangeset::fromChangeset).collect(Collectors.toList());
-                Scope.getCurrentScope().addMdcValue(MdcKey.DUPLICATE_CHANGESETS, new DuplicateChangesets(duplicateChangesetsMdc));
-                Scope.getCurrentScope().getLog(getClass()).info("Change failed validation!");
-                throw new ValidationFailedException(validatingVisitor);
-            }
-        } finally {
-            validatingVisitorFactory.reset();
+        if (!validatingVisitor.validationPassed()) {
+            Scope.getCurrentScope().addMdcValue(MdcKey.DEPLOYMENT_OUTCOME, MdcValue.COMMAND_FAILED);
+            List<MdcChangeset> duplicateChangesetsMdc = validatingVisitor.getDuplicateChangeSets().stream().map(MdcChangeset::fromChangeset).collect(Collectors.toList());
+            Scope.getCurrentScope().addMdcValue(MdcKey.DUPLICATE_CHANGESETS, new DuplicateChangesets(duplicateChangesetsMdc));
+            Scope.getCurrentScope().getLog(getClass()).info("Change failed validation!");
+            throw new ValidationFailedException(validatingVisitor);
         }
     }
 

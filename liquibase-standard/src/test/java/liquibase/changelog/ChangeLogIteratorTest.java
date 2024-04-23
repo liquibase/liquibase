@@ -6,7 +6,7 @@ import liquibase.changelog.filter.ChangeSetFilterResult;
 import liquibase.changelog.filter.ContextChangeSetFilter;
 import liquibase.changelog.filter.DbmsChangeSetFilter;
 import liquibase.changelog.visitor.ChangeSetVisitor;
-import liquibase.changelog.visitor.StandardValidatingVisitor;
+import liquibase.changelog.visitor.ValidatingVisitor;
 import liquibase.database.Database;
 import liquibase.database.ObjectQuotingStrategy;
 import liquibase.database.core.MySQLDatabase;
@@ -106,7 +106,7 @@ public class ChangeLogIteratorTest {
         assertEquals("1", testChangeLogVisitor.visitedChangeSets.get(2).getId());
     }
 
-    private static class TestChangeSetVisitor extends StandardValidatingVisitor {
+    private static class TestChangeSetVisitor extends ValidatingVisitor {
 
         public List<ChangeSet> visitedChangeSets = new ArrayList<ChangeSet>();
 

@@ -26,7 +26,7 @@ import static org.junit.Assert.assertTrue;
  *
  * @author chris
  */
-public class StandardValidatingVisitorPreConditionsTest {
+public class ValidatingVisitorPreConditionsTest {
 
     private DatabaseChangeLog changeLog;
     private ChangeSet changeSet1;

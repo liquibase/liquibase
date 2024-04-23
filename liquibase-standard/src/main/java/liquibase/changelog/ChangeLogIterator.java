@@ -5,7 +5,7 @@ import liquibase.changelog.filter.ChangeSetFilter;
 import liquibase.changelog.filter.ChangeSetFilterResult;
 import liquibase.changelog.visitor.ChangeSetVisitor;
 import liquibase.changelog.visitor.SkippedChangeSetVisitor;
-import liquibase.changelog.visitor.StandardValidatingVisitor;
+import liquibase.changelog.visitor.ValidatingVisitor;
 import liquibase.exception.LiquibaseException;
 import liquibase.exception.UnexpectedLiquibaseException;
 import liquibase.exception.ValidationErrors;
@@ -125,7 +125,7 @@ public class ChangeLogIterator {
                                 // Go validate any changesets with an Executor if
                                 // we are using a ValidatingVisitor
                                 //
-                                if (visitor instanceof StandardValidatingVisitor) {
+                                if (visitor instanceof ValidatingVisitor) {
                                     validateChangeSetExecutor(changeSet, env);
                                 }
 

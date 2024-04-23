@@ -16,7 +16,7 @@ import liquibase.exception.SetupException
 import liquibase.exception.ValidationErrors
 import spock.lang.Specification
 
-class StandardValidatingVisitorTest extends Specification {
+class ValidatingVisitorTest extends Specification {
 
      void "validate successful visit"() throws Exception {
          when:
@@ -40,7 +40,7 @@ class StandardValidatingVisitorTest extends Specification {
         changeSet1.addChange(change1)
         changeSet2.addChange(change2)
 
-        StandardValidatingVisitor handler = new StandardValidatingVisitor(new ArrayList<RanChangeSet>())
+        ValidatingVisitor handler = new ValidatingVisitor(new ArrayList<RanChangeSet>())
         handler.visit(changeSet1, new DatabaseChangeLog(), new MockDatabase(), null)
         handler.visit(changeSet2, new DatabaseChangeLog(), new MockDatabase(), null)
 
@@ -58,7 +58,7 @@ class StandardValidatingVisitorTest extends Specification {
             }
         });
 
-        StandardValidatingVisitor handler = new StandardValidatingVisitor(new ArrayList<RanChangeSet>())
+        ValidatingVisitor handler = new ValidatingVisitor(new ArrayList<RanChangeSet>())
         handler.visit(changeSet1, new DatabaseChangeLog(), null, null)
 
         then:
@@ -80,7 +80,7 @@ class StandardValidatingVisitorTest extends Specification {
         })
 
         List<RanChangeSet> ran = new ArrayList<RanChangeSet>()
-        StandardValidatingVisitor handler = new StandardValidatingVisitor(ran)
+        ValidatingVisitor handler = new ValidatingVisitor(ran)
         handler.visit(changeSet1, new DatabaseChangeLog(), null, null)
 
         then:
@@ -92,7 +92,7 @@ class StandardValidatingVisitorTest extends Specification {
     void "validate visit duplicate"() throws Exception {
         when:
         def changeSet1 = new ChangeSet("1", "testAuthor", false, false, "path/changelog", null, null, null)
-        StandardValidatingVisitor handler = new StandardValidatingVisitor(new ArrayList<RanChangeSet>())
+        ValidatingVisitor handler = new ValidatingVisitor(new ArrayList<RanChangeSet>())
         handler.visit(changeSet1, new DatabaseChangeLog(), null, null)
         handler.visit(changeSet1, new DatabaseChangeLog(), null, null)
 
@@ -104,7 +104,7 @@ class StandardValidatingVisitorTest extends Specification {
     void "validate error on empty author when strict configuration is set as true"() {
         when:
         ChangeSet changeSet = new ChangeSet("emptyAuthor", "", false, false, "path/changelog", null, null, null)
-        StandardValidatingVisitor handler = new StandardValidatingVisitor(new ArrayList<>())
+        ValidatingVisitor handler = new ValidatingVisitor(new ArrayList<>())
 
         Scope.child([
                 (GlobalConfiguration.STRICT.getKey()): Boolean.TRUE,
@@ -122,7 +122,7 @@ class StandardValidatingVisitorTest extends Specification {
     void "validate there is no error on empty author when strict configuration is set as false"() {
         when:
         ChangeSet changeSet = new ChangeSet("emptyAuthor", "", false, false, "path/changelog", null, null, null)
-        StandardValidatingVisitor handler = new StandardValidatingVisitor(new ArrayList<>())
+        ValidatingVisitor handler = new ValidatingVisitor(new ArrayList<>())
 
         Scope.child([
                 (GlobalConfiguration.STRICT.getKey()): Boolean.FALSE,
@@ -140,7 +140,7 @@ class StandardValidatingVisitorTest extends Specification {
     void "validate visit error on empty id"() throws Exception {
         when:
         def changeSet = new ChangeSet("", "emptyId", false, false, "path/changelog", null, null, null)
-        StandardValidatingVisitor handler = new StandardValidatingVisitor(new ArrayList<>())
+        ValidatingVisitor handler = new ValidatingVisitor(new ArrayList<>())
         handler.visit(changeSet, new DatabaseChangeLog(), null, null)
 
         then:
@@ -152,7 +152,7 @@ class StandardValidatingVisitorTest extends Specification {
     void "validate visit error on empty author and id"() throws Exception {
         when:
         def changeSet = new ChangeSet("", "", false, false, "path/changelog", null, null, null)
-        StandardValidatingVisitor handler = new StandardValidatingVisitor(new ArrayList<>())
+        ValidatingVisitor handler = new ValidatingVisitor(new ArrayList<>())
         handler.visit(changeSet, new DatabaseChangeLog(), null, null)
 
         then:
@@ -175,7 +175,7 @@ class StandardValidatingVisitorTest extends Specification {
 
         List<RanChangeSet> ran = new ArrayList<RanChangeSet>()
         ran.add(new RanChangeSet(changeSet))
-        StandardValidatingVisitor handler = new StandardValidatingVisitor(ran)
+        ValidatingVisitor handler = new ValidatingVisitor(ran)
         handler.visit(changeSet, new DatabaseChangeLog(), null, null)
 
         then:
@@ -194,7 +194,7 @@ class StandardValidatingVisitorTest extends Specification {
 
         ChangeSet changeSet = new ChangeSet("1", "testAuthor", false, false, "path/changelog", null, "postgresql", null)
         changeSet.addChange(change)
-        StandardValidatingVisitor handler = new StandardValidatingVisitor(new ArrayList<RanChangeSet>())
+        ValidatingVisitor handler = new ValidatingVisitor(new ArrayList<RanChangeSet>())
         handler.visit(changeSet, new DatabaseChangeLog(), new MockDatabase(), null)
 
         then:
@@ -212,7 +212,7 @@ class StandardValidatingVisitorTest extends Specification {
         ChangeSet changeSet = new ChangeSet("1", "testAuthor", false, false, "path/changelog", null, "postgresql, mssql, h2", null)
         changeSet.addChange(change)
 
-        StandardValidatingVisitor handler = new StandardValidatingVisitor(new ArrayList<RanChangeSet>())
+        ValidatingVisitor handler = new ValidatingVisitor(new ArrayList<RanChangeSet>())
         handler.visit(changeSet, new DatabaseChangeLog(), new MockDatabase(), null)
 
         then:
@@ -230,7 +230,7 @@ class StandardValidatingVisitorTest extends Specification {
         ChangeSet changeSet = new ChangeSet("1", "testAuthor", false, false, "path/changelog", null, "post", null)
         changeSet.addChange(change)
 
-        StandardValidatingVisitor handler = new StandardValidatingVisitor(new ArrayList<RanChangeSet>())
+        ValidatingVisitor handler = new ValidatingVisitor(new ArrayList<RanChangeSet>())
         handler.visit(changeSet, new DatabaseChangeLog(), new MockDatabase(), null)
 
         then:
@@ -248,7 +248,7 @@ class StandardValidatingVisitorTest extends Specification {
         ChangeSet changeSet = new ChangeSet("1", "testAuthor", false, false, "path/changelog", null, "none", null)
         changeSet.addChange(change)
 
-        StandardValidatingVisitor handler = new StandardValidatingVisitor(new ArrayList<RanChangeSet>())
+        ValidatingVisitor handler = new ValidatingVisitor(new ArrayList<RanChangeSet>())
         handler.visit(changeSet, new DatabaseChangeLog(), new MockDatabase(), null)
 
         then:
@@ -266,7 +266,7 @@ class StandardValidatingVisitorTest extends Specification {
         ChangeSet changeSet = new ChangeSet("1", "testAuthor", false, false, "path/changelog", null, "all", null)
         changeSet.addChange(change)
 
-        StandardValidatingVisitor handler = new StandardValidatingVisitor(new ArrayList<RanChangeSet>())
+        ValidatingVisitor handler = new ValidatingVisitor(new ArrayList<RanChangeSet>())
         handler.visit(changeSet, new DatabaseChangeLog(), new MockDatabase(), null)
 
         then:
@@ -282,7 +282,7 @@ class StandardValidatingVisitorTest extends Specification {
         List<RanChangeSet> ran = new ArrayList<RanChangeSet>()
         ran.add(new RanChangeSet(changeSet))
 
-        StandardValidatingVisitor handler = new StandardValidatingVisitor(ran)
+        ValidatingVisitor handler = new ValidatingVisitor(ran)
 
         def theSameChangeSetWithDifferentChanges = new ChangeSet("1", "testAuthor", true, false, "path/changelog", null, null, null);
         def outputChangeWithModifiedMessage = new OutputChange()
@@ -311,7 +311,7 @@ class StandardValidatingVisitorTest extends Specification {
         ran.add(new RanChangeSet(changeSet1))
         ran.get(0).setLiquibaseVersion("4.24.0")
 
-        StandardValidatingVisitor handler = new StandardValidatingVisitor(ran)
+        ValidatingVisitor handler = new ValidatingVisitor(ran)
         def changeSet2 = new ChangeSet("1", "testAuthor", false, false, "path/changelog", null, null, null)
         def changeLogParameters2 = new ChangeLogParameters()
         /*
