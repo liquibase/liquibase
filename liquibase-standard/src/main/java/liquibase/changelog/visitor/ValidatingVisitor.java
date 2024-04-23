@@ -108,7 +108,12 @@ public class ValidatingVisitor implements ChangeSetVisitor {
         }
         changeSet.setStoredCheckSum(ran?ranChangeSet.getLastCheckSum():null);
         changeSet.setStoredFilePath(ran?ranChangeSet.getStoredChangeLog():null);
-        boolean shouldValidate = isShouldValidate(changeSet, ran);
+        boolean shouldValidate = !ran || changeSet.shouldRunOnChange() || changeSet.shouldAlwaysRun();
+
+        if (!areChangeSetAttributesValid(changeSet)) {
+            changeSet.setValidationFailed(true);
+            shouldValidate = false;
+        }
 
         for (Change change : changeSet.getChanges()) {
             validateChange(changeSet, database, change, shouldValidate);
@@ -135,18 +140,11 @@ public class ValidatingVisitor implements ChangeSetVisitor {
         }
     }
 
+    /**
+     * Other implementations of this class might optionally provide additional validations to do in this method.
+     */
     protected void additionalValidations(ChangeSet changeSet, Database database, boolean shouldValidate, boolean ran) {
-
-    }
-
-    private boolean isShouldValidate(ChangeSet changeSet, boolean ran) {
-        boolean shouldValidate = !ran || changeSet.shouldRunOnChange() || changeSet.shouldAlwaysRun();
-
-        if (!areChangeSetAttributesValid(changeSet)) {
-            changeSet.setValidationFailed(true);
-            shouldValidate = false;
-        }
-        return shouldValidate;
+        // purposefully empty
     }
 
     protected void validateChange(ChangeSet changeSet, Database database, Change change, boolean shouldValidate) {
