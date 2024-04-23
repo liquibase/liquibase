@@ -123,6 +123,7 @@
                 <exclude>com.sun.activation:jakarta.activation:jar:</exclude> <!-- from jaxb-runtime -->
                 <exclude>javax.activation:javax.activation-api:jar:</exclude> <!-- from jaxb-api -->
 				<exclude>org.liquibase:liquibase-snowflake:jar:</exclude> <!-- from liquibase-core -->
+				<exclude>org.liquibase:liquibase-bigquery:jar:</exclude> <!-- from liquibase-core -->
 				<exclude>org.liquibase:liquibase-cli:jar:</exclude> <!-- from liquibase-core  -->
 				<exclude>org.liquibase:liquibase-standard:jar:</exclude> <!-- from liquibase-standard  -->
 				<exclude>net.java.truelicense:*:jar:</exclude> <!-- from liquibase-commercial -->
