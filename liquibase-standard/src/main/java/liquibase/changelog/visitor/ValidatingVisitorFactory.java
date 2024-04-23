@@ -4,6 +4,8 @@ import liquibase.plugin.AbstractPluginFactory;
 import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
 
+import java.util.Collection;
+
 @NoArgsConstructor(access = AccessLevel.PRIVATE)
 public class ValidatingVisitorFactory extends AbstractPluginFactory<ValidatingVisitor> {
     @Override
@@ -18,5 +20,15 @@ public class ValidatingVisitorFactory extends AbstractPluginFactory<ValidatingVi
 
     public ValidatingVisitor getValidatingVisitor() {
         return getPlugin();
+    }
+
+    /**
+     * Clear all cached instances of the validating visitor.
+     */
+    public void reset() {
+        Collection<ValidatingVisitor> allInstances = this.findAllInstances();
+        for (ValidatingVisitor instance : allInstances) {
+            removeInstance(instance);
+        }
     }
 }

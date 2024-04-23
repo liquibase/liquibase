@@ -33,7 +33,7 @@ public class StandardValidatingVisitor implements ChangeSetVisitor, ValidatingVi
     private final List<SetupException> setupExceptions = new ArrayList<>();
     private final List<Throwable> changeValidationExceptions = new ArrayList<>();
     private final ValidationErrors validationErrors = new ValidationErrors();
-    private Warnings warnings = new Warnings();
+    private final Warnings warnings = new Warnings();
 
     private final Set<String> seenChangeSets = new HashSet<>();
 
@@ -218,23 +218,5 @@ public class StandardValidatingVisitor implements ChangeSetVisitor, ValidatingVi
     @Override
     public int getPriority() {
         return Plugin.PRIORITY_DEFAULT;
-    }
-
-    @Override
-    public void clear() {
-        invalidMD5Sums.clear();
-        failedPreconditionsMessage = null;
-        errorPreconditionsMessage = null;
-        failedPreconditions.clear();
-        errorPreconditions.clear();
-        duplicateChangeSets.clear();
-        setupExceptions.clear();
-        changeValidationExceptions.clear();
-        validationErrors.getErrorMessages().clear();
-        validationErrors.getWarningMessages().clear();
-        warnings = new Warnings();
-        seenChangeSets.clear();
-        ranIndex.clear();
-        database = null;
     }
 }

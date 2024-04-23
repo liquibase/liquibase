@@ -48,6 +48,4 @@ public interface ValidatingVisitor extends Plugin, ChangeSetVisitor {
     Warnings getWarnings();
 
     void setRanChangeSetList(List<RanChangeSet> ranChangeSetList);
-
-    void clear();
 }
