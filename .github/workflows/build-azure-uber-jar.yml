@@ -12,6 +12,15 @@ on:
         required: true
         type: string
   workflow_dispatch:
+    inputs:
+      branch:
+          description: 'branch to check out'
+          required: true
+          type: string
+      liquibase-version:
+          description: 'liquibase version'
+          required: true
+          type: string
 
 env:
   MAVEN_VERSION: '3.9.2'
@@ -106,7 +115,8 @@ jobs:
           maven-version: ${{ env.MAVEN_VERSION }}
 
       - name: Set version
-        run: cd liquibase-pro/liquibase-azure-deps && mvn versions:set -DnewVersion=${{ inputs.liquibase-version }}
+        run: |
+          cd liquibase-pro/liquibase-azure-deps && mvn versions:set -DnewVersion=${{ inputs.liquibase-version }}
 
       - name: Build & Test
         run: |
@@ -116,5 +126,4 @@ jobs:
         uses: actions/upload-artifact@v3
         with:
           name: liquibase-pro-azure-artifacts
-          path: |
-            liquibase-azure-deps/target/*.jar
+          path: liquibase-pro/liquibase-azure-deps/target/liquibase-azure-deps-${{ inputs.liquibase-version }}.jar

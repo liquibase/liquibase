@@ -1038,6 +1038,7 @@ public class ChangeSet implements Conditional, ChangeLogChild {
     /**
      * @deprecated use {@link #getContextFilter()}
      */
+    @Deprecated
     public ContextExpression getContexts() {
         return getContextFilter();
     }
@@ -1045,6 +1046,7 @@ public class ChangeSet implements Conditional, ChangeLogChild {
     /**
      * @deprecated use {@link #setContextFilter(ContextExpression)}
      */
+    @Deprecated
     public ChangeSet setContexts(ContextExpression contexts) {
         return setContextFilter(contexts);
     }
