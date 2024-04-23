@@ -1,1 +1,1 @@
-liquibase.ext.bigquery.database.BigqueryDatabase
+liquibase.database.BigqueryDatabase
