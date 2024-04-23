@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+         http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-latest.xsd">
+    <changeSet id="1" author="yodzh">
+        <createTable tableName="test_table">
+            <column name="test_id" type="int">
+                <constraints primaryKey="true" nullable="false" primaryKeyName="PK_cs_guaranteed_delivery"/>
+            </column>
+            <column name="test_column" type="string">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+        <modifySql>
+            <prepend value="/* prepend 123message45 */ "/>
+        </modifySql>
+        <modifySql>
+            <append value=" -- append comment"/>
+        </modifySql>
+        <modifySql>
+            <regExpReplace replace="[0-9]{3}[A-z]+[0-9]{2}" with="comment"/>
+        </modifySql>
+    </changeSet>
+</databaseChangeLog>

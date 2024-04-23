@@ -1,0 +1,10 @@
+inputFormat: xml
+context: testContext
+# https://simba.wpengine.com/products/BigQuery/doc/JDBC_InstallGuide/content/jdbc/bq/using/connectionurl.htm
+# jdbc:bigquery://[Host]:[Port];ProjectId=[Project];OAuthType=[AuthValue];[DefaultDataset]=[Value1];[Property2]=[Value2];...
+
+databasesUnderTest:
+  - name: bigquery
+    version:
+    url: jdbc:bigquery://https://www.googleapis.com/bigquery/v2:443;ProjectId=testharnesstests;DefaultDataset=harness_test_ds;OAuthType=3;timeout=3600;
+    dbSchema: harness_test_ds

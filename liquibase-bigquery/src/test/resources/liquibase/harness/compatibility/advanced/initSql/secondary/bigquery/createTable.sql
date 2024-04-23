@@ -1,0 +1,1 @@
+CREATE TABLE `harness_test_ds.test_table_secondary` (test_column INT);

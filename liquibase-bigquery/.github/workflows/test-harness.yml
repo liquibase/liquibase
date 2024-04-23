@@ -1,0 +1,221 @@
+name: Liquibase Test Harness for BigQuery
+on:
+  pull_request:
+    branches:
+      - '*'
+  push:
+    branches:
+      - 'main'
+      - 'master'
+    paths:
+      - 'src/test/resources/terraform/**'
+env:
+  tf_version: 'latest'
+
+jobs:
+  setup:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: 'read'
+      id-token: 'write'
+    env:
+      GOOGLE_CREDENTIALS: ${{ secrets.GOOGLE_CREDENTIALS }}
+      SPACELIFT_API_KEY_ENDPOINT: ${{ secrets.SPACELIFT_API_KEY_ENDPOINT }}
+      SPACELIFT_API_KEY_ID: ${{ secrets.SPACELIFT_API_KEY_ID }}
+      SPACELIFT_API_KEY_SECRET: ${{ secrets.SPACELIFT_API_KEY_SECRET }}
+      TF_TOKEN_spacelift_io: ${{ secrets.SPACELIFT_API_TOKEN }}
+      GOOGLE_IMPERSONATE_SERVICE_ACCOUNT: ${{ secrets.GOOGLE_IMPERSONATE_SERVICE_ACCOUNT }}
+
+    defaults:
+      run:
+        working-directory: src/test/resources/terraform
+    steps:
+      - uses: actions/checkout@v4
+
+      # This action will queue the workflow if another workflow is already running
+      - uses: ahmadnassri/action-workflow-queue@v1
+        with:
+          timeout: 3000000 # 30 minutes
+          delay: 300000 # 5 minutes
+
+      - name: configure auth
+        id: auth
+        uses: 'google-github-actions/auth@v2'
+        with:
+          credentials_json: ${{ secrets.GOOGLE_CREDENTIALS }}
+
+      - name: set GCP project
+        id: config_project
+        run: gcloud config set project testharnesstests
+
+      - name: Install spacectl
+        uses: spacelift-io/setup-spacectl@main
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Terraform Format
+        if: ${{ github.event_name == 'pull_request' }}
+        id: terraform_fmt
+        run: terraform fmt
+
+      - name: Terraform Init
+        id: terraform_init
+        run: terraform init
+
+      - name: Terraform Validate
+        if: ${{ github.event_name == 'pull_request' }}
+        id: terraform_validate
+        run: terraform validate -no-color
+
+      - name: Preview infrastructure
+        run: |
+          spacectl stack local-preview --id liquibase-bigquery-testharness-tests > ${GITHUB_WORKSPACE}/plan.out
+          cat ${GITHUB_WORKSPACE}/plan.out
+
+      - name: Deploy infrastructure
+        #if: ${{ github.event_name == 'push' }}
+        run: |
+          spacectl stack set-current-commit --id liquibase-bigquery-testharness-tests --sha ${{ github.sha }}
+          spacectl stack deploy --id liquibase-bigquery-testharness-tests --auto-confirm 
+
+  test:
+    name: Run Test Harness
+    runs-on: ubuntu-latest
+    needs: [setup]
+    strategy:
+      max-parallel: 1
+      matrix:
+        liquibase-support-level: [Contributed, Foundational, Advanced] # Define the different test levels to run
+      fail-fast: false # Set fail-fast to false to run all test levels even if some of them fail
+    env:
+      github-token: ${{ secrets.LIQUIBOT_PAT_GPM_ACCESS }}
+    permissions:
+      contents: 'read'
+      id-token: 'write'
+      checks: write
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+        #look for dependencies in maven
+      - name: maven-settings-xml-action
+        uses: whelk-io/maven-settings-xml-action@v22
+        with:
+          repositories: |
+            [
+              {
+                "id": "liquibase",
+                "url": "https://maven.pkg.github.com/liquibase/liquibase",
+                "releases": {
+                  "enabled": "false"
+                },
+                "snapshots": {
+                  "enabled": "true",
+                  "updatePolicy": "always"
+                }
+              },
+              {
+                "id": "liquibase-pro",
+                "url": "https://maven.pkg.github.com/liquibase/liquibase-pro",
+                "releases": {
+                  "enabled": "false"
+                },
+                "snapshots": {
+                  "enabled": "true",
+                  "updatePolicy": "always"
+                }
+              }
+            ]
+          servers: |
+            [
+              {
+                "id": "liquibase-pro",
+                "username": "liquibot",
+                "password": "${{ secrets.LIQUIBOT_PAT }}"
+              },
+              {
+                "id": "liquibase",
+                "username": "liquibot",
+                "password": "${{ secrets.LIQUIBOT_PAT }}"
+              }
+            ]
+
+      - name: configure auth
+        id: auth
+        uses: 'google-github-actions/auth@v2'
+        with:
+          credentials_json: ${{ secrets.GOOGLE_CREDENTIALS }}
+
+      - name: Run ${{ matrix.liquibase-support-level }} Liquibase Test Harness # Run the Liquibase test harness at each test level
+        env:
+          LIQUIBASE_PRO_LICENSE_KEY: ${{ secrets.PRO_LICENSE_KEY }} # Set the environment variable for the Liquibase Pro license key
+        run: |
+          mvn -Dtest=liquibase.ext.bigquery.${{ matrix.liquibase-support-level }}HarnessSuiteIT test # Run the Liquibase test harness at each test level
+
+      - name: Test Reporter # Generate a test report using the Test Reporter action
+        uses: dorny/test-reporter@v1.9.0
+        if: always() # Run the action even if the previous steps fail
+        with:
+          name: Liquibase Test Harness - ${{ matrix.liquibase-support-level }} Reports # Set the name of the test report
+          path: target/surefire-reports/TEST-*.xml # Set the path to the test report files
+          reporter: java-junit # Set the reporter to use
+          fail-on-error: false # Set fail-on-error to false to show report even if it has failed tests
+
+      - name: Archive Bigquery Database Test Results
+        uses: actions/upload-artifact@v3
+        with:
+          name: bigquery-test-results
+          path: target/surefire-reports
+
+      - name: Test Summary
+        uses: test-summary/action@v2
+        with:
+          paths: "target/surefire-reports/**/TEST-*.xml"
+        if: always()
+
+
+  destroy:
+    runs-on: ubuntu-latest
+    needs: [setup,test]
+    env:
+      GOOGLE_CREDENTIALS: ${{ secrets.GOOGLE_CREDENTIALS }}
+      SPACELIFT_API_KEY_ENDPOINT: ${{ secrets.SPACELIFT_API_KEY_ENDPOINT }}
+      SPACELIFT_API_KEY_ID: ${{ secrets.SPACELIFT_API_KEY_ID }}
+      SPACELIFT_API_KEY_SECRET: ${{ secrets.SPACELIFT_API_KEY_SECRET }}
+      TF_TOKEN_spacelift_io: ${{ secrets.SPACELIFT_API_TOKEN }}
+      GOOGLE_IMPERSONATE_SERVICE_ACCOUNT: ${{ secrets.GOOGLE_IMPERSONATE_SERVICE_ACCOUNT }}
+
+    defaults:
+      run:
+        working-directory: src/test/resources/terraform
+
+    permissions:
+      contents: 'read'
+      id-token: 'write'
+
+    steps:
+      - uses: actions/checkout@v4
+      - name: configure auth
+        id: auth
+        uses: 'google-github-actions/auth@v2'
+        with:
+          credentials_json: ${{ secrets.GOOGLE_CREDENTIALS }}
+
+      - name: set GCP project
+        id: config_project
+        run: gcloud config set project testharnesstests
+
+      - name: Install spacectl
+        uses: spacelift-io/setup-spacectl@main
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Terraform Init
+        id: terraform_init
+        run: terraform init
+
+      - name: Terraform Destroy
+        id: terraform_destroy
+        run: |
+          spacectl stack task -id liquibase-bigquery-testharness-tests -tail terraform destroy -auto-approve

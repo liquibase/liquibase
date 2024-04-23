@@ -1,0 +1,1 @@
+CREATE TABLE test_table (test_column INT64, varcharColumn STRING(25)INITIAL_VALUE, intColumn INT645, dateColumn date'2020-09-21');
