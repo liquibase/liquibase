@@ -6,13 +6,17 @@ import liquibase.plugin.Plugin;
 import java.util.List;
 
 /**
- * The ValidatingVisitor interface allows implementations to supply their own version of a ValidatingVisitor. By default
- * Liquibase uses the {@link ValidatingVisitor}. To use your own, you must register it with a higher priority
- * in the {@link ValidatingVisitorGeneratorFactory}.
+ * An interface for generating validating visitors, which are used to validate changesets.
  */
 public interface ValidatingVisitorGenerator extends Plugin {
 
     int getPriority();
 
+    /**
+     * Generates a validating visitor for the provided list of ran change sets.
+     *
+     * @param ranChangeSetList The list of ran change sets to validate.
+     * @return A validating visitor for the provided list of ran change sets.
+     */
     ValidatingVisitor generateValidatingVisitor(List<RanChangeSet> ranChangeSetList);
 }
