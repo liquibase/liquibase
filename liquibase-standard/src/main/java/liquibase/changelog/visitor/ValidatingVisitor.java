@@ -46,12 +46,8 @@ public class ValidatingVisitor implements ChangeSetVisitor {
     }
 
     public ValidatingVisitor(List<RanChangeSet> ranChangeSets) {
-        setRanChangeSetList(ranChangeSets);
-    }
-
-    public void setRanChangeSetList(List<RanChangeSet> ranChangeSetList) {
         ranIndex = new HashMap<>();
-        for(RanChangeSet changeSet: ranChangeSetList) {
+        for(RanChangeSet changeSet: ranChangeSets) {
             ranIndex.put(changeSet.toString(), changeSet);
         }
     }

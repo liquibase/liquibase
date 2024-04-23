@@ -1,5 +1,9 @@
 package liquibase.changelog.visitor;
 
+import liquibase.changelog.RanChangeSet;
+
+import java.util.List;
+
 public class StandardValidatingVisitorGenerator implements ValidatingVisitorGenerator {
     @Override
     public int getPriority() {
@@ -7,7 +11,7 @@ public class StandardValidatingVisitorGenerator implements ValidatingVisitorGene
     }
 
     @Override
-    public ValidatingVisitor generateValidatingVisitor() {
-        return new ValidatingVisitor();
+    public ValidatingVisitor generateValidatingVisitor(List<RanChangeSet> ranChangeSetList) {
+        return new ValidatingVisitor(ranChangeSetList);
     }
 }

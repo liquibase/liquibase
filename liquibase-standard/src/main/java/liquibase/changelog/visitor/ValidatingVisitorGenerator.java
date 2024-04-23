@@ -1,6 +1,9 @@
 package liquibase.changelog.visitor;
 
+import liquibase.changelog.RanChangeSet;
 import liquibase.plugin.Plugin;
+
+import java.util.List;
 
 /**
  * The ValidatingVisitor interface allows implementations to supply their own version of a ValidatingVisitor. By default
@@ -11,5 +14,5 @@ public interface ValidatingVisitorGenerator extends Plugin {
 
     int getPriority();
 
-    ValidatingVisitor generateValidatingVisitor();
+    ValidatingVisitor generateValidatingVisitor(List<RanChangeSet> ranChangeSetList);
 }
