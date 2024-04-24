@@ -10,6 +10,8 @@
     </variables>
     <codeSigning macEnabled="true" macPkcs12File="../../../target/keys/datical_apple.p12" windowsEnabled="true" windowsPkcs12File="../../../target/keys/datical_windows.pfx" macNotarize="true" appleId="daticaldev@datical.com" useAscProvider="true" ascProvider="BQ3PYUB226">
       <macSearchedJars>
+        <entry>*.dylib</entry>
+        <entry>*.jnilib</entry>
         <entry>jna-*</entry>
         <entry>swt-*</entry>
         <entry>javafx-*</entry>
