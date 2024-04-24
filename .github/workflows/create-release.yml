@@ -204,11 +204,6 @@ jobs:
           rm re-version/final/*.sha1
 
 
-      - name: cat into the file
-        if: always()
-        run: |  
-          cat /Users/runner/work/liquibase/liquibase/liquibase-dist/target/liquibase-macos-installer-4.27.1.dmg.notarization.log
-
       - name: Attach Files to Draft Release
         uses: softprops/action-gh-release@v2
         with:
