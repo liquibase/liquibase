@@ -8,7 +8,7 @@ import liquibase.executor.ExecutorService;
 import liquibase.snapshot.CachedRow;
 import liquibase.snapshot.DatabaseSnapshot;
 import liquibase.snapshot.SnapshotGenerator;
-import liquibase.statement.core.RawSqlStatement;
+import liquibase.statement.core.RawParameterizedSqlStatement;
 import liquibase.structure.DatabaseObject;
 import liquibase.structure.core.*;
 
@@ -39,7 +39,7 @@ public class BigQueryUniqueConstraintSnapshotGenerator extends UniqueConstraintS
     @Override
     protected List<CachedRow> listConstraints(Table table, DatabaseSnapshot snapshot, Schema schema) throws DatabaseException, SQLException {
         Scope.getCurrentScope().getLog(this.getClass()).info("Constraints not supported by BigQuery");
-        return new ArrayList<>(); //new BigQueryResultSetConstraintsExtractor(snapshot, schema.getCatalogName(), schema.getName(), table.getName())).fastFetch();
+        return new ArrayList<>();
     }
 
     @Override
@@ -51,20 +51,30 @@ public class BigQueryUniqueConstraintSnapshotGenerator extends UniqueConstraintS
         String constraintName = database.correctObjectName(name, UniqueConstraint.class);
         String tableName = database.correctObjectName(table.getName(), Table.class);
 
-        String sql = "select CONSTRAINT_NAME, CONSTRAINT_NAME as COLUMN_NAME FROM " + database.getSystemSchema() + ".TABLE_CONSTRAINTS WHERE CONSTRAINT_TYPE='UNIQUE'";
+        List<String> parameters = new ArrayList<>();
+
+        StringBuilder sqlBuilder = new StringBuilder();
+        sqlBuilder.append("select CONSTRAINT_NAME, COLUMN_NAME FROM ")
+                .append(database.getSystemSchema())
+                .append(".TABLE_CONSTRAINTS WHERE CONSTRAINT_TYPE='UNIQUE'");
+
         if (schemaName != null) {
-            sql = sql + "and CONSTRAINT_SCHEMA='" + schemaName + "' ";
+            sqlBuilder.append("and CONSTRAINT_SCHEMA=? ");
+            parameters.add(schemaName);
         }
 
         if (tableName != null) {
-            sql = sql + "AND TABLE_NAME='" + tableName + "' ";
+            sqlBuilder.append("and TABLE_NAME=? ");
+            parameters.add(tableName);
         }
 
         if (constraintName != null) {
-            sql = sql + "AND CONSTRAINT_NAME='" + constraintName + "'";
+            sqlBuilder.append("and CONSTRAINT_NAME=? ");
+            parameters.add(constraintName);
         }
 
-        return Scope.getCurrentScope().getSingleton(ExecutorService.class).getExecutor("jdbc", database).queryForList(new RawSqlStatement(sql));
+        return Scope.getCurrentScope().getSingleton(ExecutorService.class).getExecutor("jdbc", database)
+                .queryForList(new RawParameterizedSqlStatement(sqlBuilder.toString(), parameters.toArray()));
     }
 }
 
