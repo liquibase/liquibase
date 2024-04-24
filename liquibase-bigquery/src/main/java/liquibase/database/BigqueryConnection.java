@@ -18,7 +18,7 @@ import java.util.Properties;
  */
 
 public class BigqueryConnection extends JdbcConnection {
-    private String location = "US";
+    private static final String LOCATION = "Location";
     private S42Connection con;
 
     public BigqueryConnection() {
@@ -78,17 +78,10 @@ public class BigqueryConnection extends JdbcConnection {
     }
 
     @Override
-    public Connection getUnderlyingConnection() {
-        return con;
-    }
-
-    @Override
     public void open(String url, Driver driverObject, Properties driverProperties) throws DatabaseException {
-        if (driverProperties.stringPropertyNames().contains("Location")) {
-            this.location = driverProperties.getProperty("Location");
-        } else {
-            this.location = getUrlParamValue(url, "Location", "US");
-            driverProperties.setProperty("Location", this.location);
+        if (!driverProperties.stringPropertyNames().contains(LOCATION)) {
+            String locationValue = getUrlParamValue(url, LOCATION, "US");
+            driverProperties.setProperty(LOCATION, locationValue);
         }
 
         Scope.getCurrentScope().getLog(this.getClass()).fine(String.format("Opening connection to %s  driverProperties=%s", url, driverProperties));
@@ -125,6 +118,7 @@ public class BigqueryConnection extends JdbcConnection {
 
     @Override
     public void setAutoCommit(boolean autoCommit) throws DatabaseException {
+        // not supported by BigQuery
     }
 
     @Override
