@@ -169,7 +169,6 @@ jobs:
 
 
       - name: Re-version Installers
-        continue-on-error: true
         env:
           INSTALL4J_10_LICENSE: ${{ secrets.INSTALL4J_10_LICENSE }}
           INSTALL4J_APPLE_KEY_TESTING: ${{ secrets.INSTALL4J_APPLE_KEY_TESTING }}
