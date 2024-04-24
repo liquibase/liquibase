@@ -5,7 +5,7 @@ import liquibase.extension.testing.testsystem.wrapper.DatabaseWrapper;
 import liquibase.extension.testing.testsystem.wrapper.JdbcDatabaseWrapper;
 
 /**
- * Note, to run this in Intellij, you may need to add the following to your run configuration:
+ * When running against Localstack Snowflake, you may need to add the following to your run configuration:
  * <code>--add-opens=java.base/java.nio=ALL-UNNAMED</code>. See more information
  * <a href="https://arrow.apache.org/docs/java/install.html#java-compatibility">here</a>.
  */
