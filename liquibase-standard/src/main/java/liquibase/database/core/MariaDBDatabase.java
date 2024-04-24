@@ -86,7 +86,7 @@ public class MariaDBDatabase extends MySQLDatabase {
 
     @Override
     public boolean isCorrectDatabaseImplementation(DatabaseConnection conn) throws DatabaseException {
-        // Presumbably for compatiblity reasons, a MariaDB instance might identify with getDatabaseProductName()=MySQL.
+        // Presumably for compatibility reasons, a MariaDB instance might identify with getDatabaseProductName()=MySQL.
         // To be certain, We search for "mariadb" in the version string.
         if (PRODUCT_NAME.equalsIgnoreCase(conn.getDatabaseProductName())) {
             return true; // Identified as MariaDB product

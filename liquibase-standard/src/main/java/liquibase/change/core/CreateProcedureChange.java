@@ -377,7 +377,7 @@ public class CreateProcedureChange extends AbstractChange implements DbmsTargete
             procedureText = StringUtil.trimToNull(getProcedureText());
         } else {
             if (getChangeSet() == null) {
-                //only try to read a file when inside a changest. Not when analyizing supported
+                //only try to read a file when inside a changest. Not when analyzing supported
                 procedureText = "NO CHANGESET";
             } else {
                 try {
