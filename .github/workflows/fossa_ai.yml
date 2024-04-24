@@ -9,7 +9,7 @@ on:
 
 jobs:
   fossa:
-    uses: liquibase/build-logic/.github/workflows/fossa_ai.yml@v0.7.2
+    uses: liquibase/build-logic/.github/workflows/fossa_ai.yml@v0.7.3
     secrets: inherit
     with:
       check_snippets: true
