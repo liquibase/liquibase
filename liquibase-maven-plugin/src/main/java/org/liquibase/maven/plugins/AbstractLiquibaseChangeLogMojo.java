@@ -67,7 +67,7 @@ public abstract class AbstractLiquibaseChangeLogMojo extends AbstractLiquibaseMo
 
     /**
      * Specifies which Liquibase labels Liquibase will execute, which can be separated by a comma if multiple labels
-     are required or you need to designate a more complex expression.
+     * are required or you need to designate a more complex expression.
      * If a label is not specified, then ALL labels will be executed.
      *
      * @parameter property="liquibase.labelFilter" default-value=""
