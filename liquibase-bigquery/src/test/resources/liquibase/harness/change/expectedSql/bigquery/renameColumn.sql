@@ -1,1 +1,0 @@
-ALTER TABLE harness_test_ds.authors RENAME COLUMN first_name TO first_name_renameColumn_test

@@ -1,1 +1,0 @@
-CREATE TABLE `harness_test_ds.test_table_xml` (test_column INT);
