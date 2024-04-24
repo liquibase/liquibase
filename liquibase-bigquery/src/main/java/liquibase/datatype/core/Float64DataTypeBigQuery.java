@@ -17,10 +17,12 @@ public class Float64DataTypeBigQuery extends LiquibaseDataType {
     public Float64DataTypeBigQuery() {
     }
 
+    @Override
     public boolean supports(Database database) {
         return database instanceof BigqueryDatabase;
     }
 
+    @Override
     public DatabaseDataType toDatabaseDataType(Database database) {
         if (database instanceof BigqueryDatabase) {
 

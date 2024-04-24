@@ -16,23 +16,29 @@ import liquibase.datatype.LiquibaseDataType;
 )
 public class BignumericDataTypeBigQuery extends LiquibaseDataType {
 
-    private final static String BIGNUMERIC = "BIGNUMERIC";
+    private static final String BIGNUMERIC = "BIGNUMERIC";
 
     public BignumericDataTypeBigQuery() {
     }
 
+    @Override
     public boolean supports(Database database) {
         return database instanceof BigqueryDatabase;
     }
 
+    @Override
     public DatabaseDataType toDatabaseDataType(Database database) {
         if (database instanceof BigqueryDatabase) {
 
             DatabaseDataType type = new DatabaseDataType(BIGNUMERIC, this.getParameters());
             if (this.getParameters().length > 0) {
                 String firstParameter = String.valueOf(this.getParameters()[0]);
-                int typePrecision = Integer.parseInt(firstParameter);
-                if (typePrecision == 77) {
+                try {
+                    int typePrecision = Integer.parseInt(firstParameter);
+                    if (typePrecision == 77) {
+                        type.setType(BIGNUMERIC);
+                    }
+                } catch (NumberFormatException e) {
                     type.setType(BIGNUMERIC);
                 }
             }

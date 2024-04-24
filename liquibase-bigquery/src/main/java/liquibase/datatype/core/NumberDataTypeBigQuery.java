@@ -18,10 +18,12 @@ public class NumberDataTypeBigQuery extends LiquibaseDataType {
     public NumberDataTypeBigQuery() {
     }
 
+    @Override
     public boolean supports(Database database) {
         return database instanceof BigqueryDatabase;
     }
 
+    @Override
     public DatabaseDataType toDatabaseDataType(Database database) {
         if (database instanceof BigqueryDatabase) {
 

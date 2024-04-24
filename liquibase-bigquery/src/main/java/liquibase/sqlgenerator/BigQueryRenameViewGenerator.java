@@ -18,10 +18,12 @@ public class BigQueryRenameViewGenerator extends RenameViewGenerator {
     }
 
 
+    @Override
     public boolean supports(RenameViewStatement statement, Database database) {
         return database instanceof BigqueryDatabase;
     }
 
+    @Override
     public Sql[] generateSql(RenameViewStatement statement, Database database, SqlGeneratorChain sqlGeneratorChain) {
         return new Sql[]{new UnparsedSql("ALTER VIEW " + database.escapeTableName(statement.getCatalogName(), statement.getSchemaName(), statement.getOldViewName()) + " RENAME TO " + database.escapeTableName(statement.getCatalogName(), statement.getSchemaName(), statement.getNewViewName()), new DatabaseObject[]{this.getAffectedOldView(statement), this.getAffectedNewView(statement)})};
     }

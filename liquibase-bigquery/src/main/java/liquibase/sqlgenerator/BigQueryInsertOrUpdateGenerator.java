@@ -7,11 +7,13 @@ import liquibase.database.Database;
 import liquibase.datatype.DataTypeFactory;
 import liquibase.sqlgenerator.core.InsertOrUpdateGenerator;
 import liquibase.statement.core.InsertOrUpdateStatement;
+import liquibase.util.StringUtil;
 
 public class BigQueryInsertOrUpdateGenerator extends InsertOrUpdateGenerator {
     public BigQueryInsertOrUpdateGenerator() {
     }
 
+    @Override
     public boolean supports(InsertOrUpdateStatement statement, Database database) {
         return database instanceof BigqueryDatabase;
     }
@@ -54,7 +56,7 @@ public class BigQueryInsertOrUpdateGenerator extends InsertOrUpdateGenerator {
 
     @Override
     protected String getRecordCheck(InsertOrUpdateStatement insertOrUpdateStatement, Database database, String whereClause) {
-        if (whereClause == null || "".equals(whereClause)) {
+        if (StringUtil.isEmpty(whereClause)) {
             whereClause = "WHERE 1 = 1";
         }
         return "MERGE INTO " + insertOrUpdateStatement.getTableName() + " USING (SELECT 1) ON " + whereClause + " WHEN NOT MATCHED THEN ";
