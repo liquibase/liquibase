@@ -27,6 +27,7 @@
 		<db2.version>11.5.9.0</db2.version>
 		<firebird.version>5.0.4.java8</firebird.version>
 		<liquibase-pro.version>master-SNAPSHOT</liquibase-pro.version>
+		<liquibase-graalpy.version>master-SNAPSHOT</liquibase-graalpy.version>
 		<assemblyConfigFile>src/main/assembly/assembly-bin.xml</assemblyConfigFile>
 		<maven.deploy.skip>true</maven.deploy.skip>
 		<maven.install.skip>true</maven.install.skip>
@@ -346,10 +347,34 @@
 				<dependency>
 					<groupId>org.liquibase</groupId>
 					<artifactId>liquibase-commercial</artifactId>
-					<version>${liquibase-pro.version}</version>
+          <version>${liquibase-pro.version}</version>
 				</dependency>
 			</dependencies>
 		</profile>
+
+		<profile>
+			<id>liquibase-graalpy</id>
+
+			<activation>
+				<property>
+          <name>liquibase.graalpy</name>
+          <value>true</value>
+				</property>
+			</activation>
+
+			<properties>
+				<assemblyConfigFile>src/main/assembly/assembly-bin-graalpy.xml</assemblyConfigFile>
+			</properties>
+
+			<dependencies>
+				<dependency>
+					<groupId>org.liquibase</groupId>
+					<artifactId>liquibase-graalpy</artifactId>
+          <version>${liquibase-graalpy.version}</version>
+				</dependency>
+			</dependencies>
+		</profile>
+
 
 		<profile>
 			<id>remote-repositories</id>
