@@ -42,7 +42,7 @@ class SingleColumnRowMapper<T> implements RowMapper<T> {
      *
      * @see java.sql.ResultSetMetaData#getColumnCount()
      * @see #getColumnValue(java.sql.ResultSet,int,Class)
-     * @see #convertValueToRequiredType(Object,Class)
+     * @see #convertValueToRequiredType(Object)
      */
     @Override
     public T mapRow(ResultSet rs, int rowNum) throws SQLException {
@@ -60,7 +60,7 @@ class SingleColumnRowMapper<T> implements RowMapper<T> {
         if ((result != null) && (this.requiredType != null) && !this.requiredType.isInstance(result)) {
             // Extracted value does not match already: try to convert it.
             try {
-                return convertValueToRequiredType(result, this.requiredType);
+                return convertValueToRequiredType(result);
             }
             catch (IllegalArgumentException ex) {
                 throw new SQLException(
@@ -176,12 +176,10 @@ class SingleColumnRowMapper<T> implements RowMapper<T> {
      *
      * @param value        the column value as extracted from <code>getColumnValue()</code>
      *                     (never <code>null</code>)
-     * @param requiredType the type that each result object is expected to match
-     *                     (never <code>null</code>)
      * @return the converted value
      * @see #getColumnValue(java.sql.ResultSet,int,Class)
      */
-    protected <T> T convertValueToRequiredType(Object value, Class<T> requiredType) {
+    protected T convertValueToRequiredType(Object value) {
         if (String.class.equals(this.requiredType)) {
             return (T) value.toString();
         } else if (Number.class.isAssignableFrom(this.requiredType)) {

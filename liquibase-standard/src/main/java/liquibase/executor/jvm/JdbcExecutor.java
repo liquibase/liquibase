@@ -566,7 +566,7 @@ public class JdbcExecutor extends AbstractExecutor {
         }
     }
 
-    private class QueryCallableStatementCallback<T> implements CallableStatementCallback<List<T>> {
+    private static class QueryCallableStatementCallback<T> implements CallableStatementCallback<List<T>> {
 
         private final SqlStatement sql;
         private final ResultSetExtractor<T> rse;
