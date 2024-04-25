@@ -159,6 +159,9 @@ public class AddUniqueConstraintExecutorTest extends AbstractExecuteTest {
 
         assertCorrect("alter table [lbschem2].[adduqtest] add constraint [uq_test] unique ([coltomakeuq])", HsqlDatabase.class);
         assertCorrect("alter table \"lbcat2\".[adduqtest] add constraint [uq_test] unique ([coltomakeuq])", DB2Database.class, Db2zDatabase.class);
+
+        // Bigquery does not support UniqueConstraints, but as we are invoking the class from core and ignoring the override
+        // in Bigquery module we are adding a expected SQL for Bigquery to make this test happy - besides it won't work,
         assertCorrect("alter table [lbschem2].[adduqtest] add constraint [uq_test] unique ([coltomakeuq])", H2Database.class, BigqueryDatabase.class);
         assertCorrect("alter table [lbschem2].[adduqtest] add constraint [uq_test] unique ([coltomakeuq])", Ingres9Database.class);
         assertCorrect("alter table [lbcat2].[lbschem2].[adduqtest] add constraint [uq_test] unique ([coltomakeuq])", SnowflakeDatabase.class);

@@ -54,7 +54,7 @@ public class AddColumnExecutorTest extends AbstractExecuteTest {
         assertCorrect("alter table [table_name] add [column_name] [int] constraint df_table_name_column_name default 42 not null", MSSQLDatabase.class);
         assertCorrect("alter table table_name add column_name int default 42 not null", MySQLDatabase.class);
         assertCorrect("not supported. fixme!!", SQLiteDatabase.class);
-        assertCorrect("alter table [table_nam]e add column [column_name] int default 42 not null", BigqueryDatabase.class);
+        assertCorrect("alter table [table_name] add column [column_name] int default 42 not null", BigqueryDatabase.class);
         assertCorrect("ALTER TABLE [table_name] ADD [column_name] int DEFAULT 42 NOT NULL");
     }
 
