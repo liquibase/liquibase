@@ -126,4 +126,4 @@ jobs:
         uses: actions/upload-artifact@v3
         with:
           name: liquibase-pro-azure-artifacts
-          path: liquibase-pro/liquibase-azure-deps/target/liquibase-azure-deps-${{ inputs.liquibase-version }}.jar
+          path: liquibase-pro/liquibase-azure-deps/liquibase-azure-deps-${{ inputs.liquibase-version }}.jar
