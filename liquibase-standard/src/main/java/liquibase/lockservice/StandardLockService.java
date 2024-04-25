@@ -57,7 +57,7 @@ public class StandardLockService implements LockService {
 
 
     public StandardLockService() {
-        //Empty constructos
+        //Empty constructor
     }
 
     @Override
@@ -491,7 +491,7 @@ public class StandardLockService implements LockService {
 
         if (this.database != null) {
             ChangeLogHistoryService changelogService = Scope.getCurrentScope().getSingleton(ChangeLogHistoryServiceFactory.class).getChangeLogService(database);
-            // On reseting the lock the changelog service has to be invalidated due to the fact that
+            // On resetting the lock the changelog service has to be invalidated due to the fact that
             // some liquibase component released the lock temporarily. In this time span another JVM instance
             // might have acquired the database lock and could have applied further changesets to prevent that
             // liquibase works with an outdated changelog.

@@ -29,7 +29,7 @@ public class CreateTableStatement extends AbstractSqlStatement implements Compou
        they are merely a property of the column. In others, like Oracle DB, they can exist in both forms, and to be
        able to give the NN constraint a name in CREATE TABLE, we need to save both the NN property as well as the NN constraint. To make things even more complicated, you cannot just add a NN constraint after the list
        of columns, like you could do with UNIQUE, CHECK or FOREIGN KEY constraints. They must be defined
-       in line with the column (this implies that a NN constraint can always affects exactly one column). */
+       in line with the column (this implies that a NN constraint can always affect exactly one column). */
     private final HashMap<String, NotNullConstraint> notNullColumns = new HashMap<>();
 
     private final Set<UniqueConstraint> uniqueConstraints = new LinkedHashSet<>();
