@@ -2,7 +2,7 @@ package com.example.liquibase.change;
 
 import liquibase.serializer.AbstractLiquibaseSerializable;
 
-public class ColumnConfig extends AbstractLiquibaseSerializable {
+public class ColumnConfigExample extends AbstractLiquibaseSerializable {
     private String name;
     private String type;
     private Boolean nullable;
@@ -24,7 +24,7 @@ public class ColumnConfig extends AbstractLiquibaseSerializable {
         return name;
     }
 
-    public ColumnConfig setName(String name) {
+    public ColumnConfigExample setName(String name) {
         this.name = name;
         return this;
     }
@@ -33,7 +33,7 @@ public class ColumnConfig extends AbstractLiquibaseSerializable {
         return type;
     }
 
-    public ColumnConfig setType(String type) {
+    public ColumnConfigExample setType(String type) {
         this.type = type;
         return this;
     }
@@ -42,7 +42,7 @@ public class ColumnConfig extends AbstractLiquibaseSerializable {
         return nullable;
     }
 
-    public ColumnConfig setNullable(Boolean nullable) {
+    public ColumnConfigExample setNullable(Boolean nullable) {
         this.nullable = nullable;
         return this;
     }
@@ -51,7 +51,7 @@ public class ColumnConfig extends AbstractLiquibaseSerializable {
         return identity;
     }
 
-    public ColumnConfig setIdentity(IdentityConfig identity) {
+    public ColumnConfigExample setIdentity(IdentityConfig identity) {
         this.identity = identity;
         return this;
     }
@@ -60,7 +60,7 @@ public class ColumnConfig extends AbstractLiquibaseSerializable {
         return defaultConstraint;
     }
 
-    public ColumnConfig setDefaultConstraint(DefaultConstraintConfig defaultConstraint) {
+    public ColumnConfigExample setDefaultConstraint(DefaultConstraintConfig defaultConstraint) {
         this.defaultConstraint = defaultConstraint;
         return this;
     }
@@ -69,7 +69,7 @@ public class ColumnConfig extends AbstractLiquibaseSerializable {
         return computed;
     }
 
-    public ColumnConfig setComputed(ComputedConfig computed) {
+    public ColumnConfigExample setComputed(ComputedConfig computed) {
         this.computed = computed;
         return this;
     }

@@ -9,7 +9,7 @@ import java.io.File;
 import java.io.IOException;
 
 /**
- * Maven integration test. Run an update executing maven as if it was ran by the user
+ * Maven integration test. Run an update executing maven as if it was run by the user
  * @author lujop
  */
 public class MavenIntegrationTest {
