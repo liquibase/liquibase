@@ -233,7 +233,7 @@ public class ChangeSet implements Conditional, ChangeLogChild {
     private String created;
 
     /**
-     * Allow changeSet to be ran "first" or "last". Multiple changeSets with the same runOrder will preserve their order relative to each other.
+     * Allow changeSet to be run "first" or "last". Multiple changeSets with the same runOrder will preserve their order relative to each other.
      */
     @Getter
     private String runOrder;
