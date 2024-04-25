@@ -145,7 +145,7 @@ jobs:
       contents: write  # for softprops/action-gh-release to create GitHub release
     needs: [ setup, reversion ]
     name: Build Installers
-    runs-on: macos-latest #needs macos for apple notarization
+    runs-on: macos-13 #needs macos for apple notarization
     env:
       GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
     steps:
@@ -202,7 +202,6 @@ jobs:
           rm re-version/final/*.asc
           rm re-version/final/*.md5
           rm re-version/final/*.sha1
-          cat /Users/runner/work/liquibase/liquibase/liquibase-dist/target/liquibase-macos-installer-4.27.1.dmg.notarization.log
       - name: Attach Files to Draft Release
         uses: softprops/action-gh-release@v2
         with:
