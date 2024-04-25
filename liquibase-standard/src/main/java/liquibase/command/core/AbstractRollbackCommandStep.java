@@ -151,6 +151,9 @@ public abstract class AbstractRollbackCommandStep extends AbstractCommandStep {
                 rollbackReportParameters.getChangesetInfo().addAllToPendingChangesetInfoList(pendingChangeSetMap);
                 rollbackReportParameters.getChangesetInfo().setPendingChangesetCount(pendingChangeSetMap.size());
                 rollbackReportParameters.setFailedChangeset(failedChangeSets.stream().map(ChangeSet::toString).collect(Collectors.joining(", ")));
+                // Now that the command is completed reset the generated sql in case we are running these changes in some chain
+                // like during update-testing-rollback
+                rolledBackChangeSets.forEach(changeSet -> changeSet.setGeneratedSql(new ArrayList<>()));
             }
         }
     }

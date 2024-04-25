@@ -68,6 +68,7 @@ class FilenameUtilTest extends Specification {
         filename                         | expected
         "normalString"                   | "normalString"
         "<B>o\\b|I/s|*?Yo\"u\\r?Uncle:/" | "_B_o_b_I_s___Yo_u_r_Uncle__"
+        "this@that.com"                  | "this_that.com"
         null                             | null
     }
 

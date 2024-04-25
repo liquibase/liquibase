@@ -11,7 +11,7 @@ import java.util.concurrent.atomic.AtomicReference;
 import java.util.regex.Pattern;
 
 /**
- * A higher-level/detailed definition to provide type-safety, metadata, default values, etc..
+ * A higher-level/detailed definition to provide type-safety, metadata, default values, etc.
  * Any code that is working with configurations should be using an instance of this class, rather than the lower-level, generic {@link LiquibaseConfiguration}
  * <p>
  * ConfigurationDefinitions that are registered with {@link LiquibaseConfiguration#registerDefinition(ConfigurationDefinition)} will
