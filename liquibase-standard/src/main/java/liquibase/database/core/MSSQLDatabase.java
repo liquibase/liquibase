@@ -115,13 +115,17 @@ public class MSSQLDatabase extends AbstractJdbcDatabase {
 
     @Override
     public void executeStatements(Change change, DatabaseChangeLog changeLog, List<SqlVisitor> sqlVisitors) throws LiquibaseException {
-        String endDelimiter = StringUtil.trimToNull(((AbstractSQLChange) change).getEndDelimiter());
-        if (change instanceof AbstractSQLChange &&  (endDelimiter != null && !endDelimiter.contentEquals(";"))) {
-            super.executeStatements(change, changeLog, sqlVisitors);
+        if (change instanceof AbstractSQLChange) {
+            String endDelimiter = StringUtil.trimToNull(((AbstractSQLChange) change).getEndDelimiter());
+            if (endDelimiter != null && !endDelimiter.contentEquals(";")) {
+                super.executeStatements(change, changeLog, sqlVisitors);
+            } else {
+                super.executeStatements(change, changeLog, addSqlVisitors(sqlVisitors));
+            }
         }
         else {
-            super.executeStatements(change, changeLog, addSqlVisitors(sqlVisitors));
-        }
+                super.executeStatements(change, changeLog, addSqlVisitors(sqlVisitors));
+            }
     }
 
     //
