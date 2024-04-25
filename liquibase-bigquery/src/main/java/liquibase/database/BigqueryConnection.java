@@ -78,6 +78,11 @@ public class BigqueryConnection extends JdbcConnection {
     }
 
     @Override
+    public Connection getUnderlyingConnection() {
+        return con;
+    }
+
+    @Override
     public void open(String url, Driver driverObject, Properties driverProperties) throws DatabaseException {
         if (!driverProperties.stringPropertyNames().contains(LOCATION)) {
             String locationValue = getUrlParamValue(url, LOCATION, "US");
