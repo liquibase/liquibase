@@ -41,7 +41,9 @@ import static liquibase.statement.SqlStatement.EMPTY_SQL_STATEMENT;
  * Place the @DatabaseChangeProperty annotations on the read "get" methods to control property metadata.
  */
 public abstract class AbstractChange extends AbstractPlugin implements Change {
-
+    /**
+     * trigger build
+     */
     protected static final String NODENAME_COLUMN = "column";
     private static final Pattern ALPHABET = Pattern.compile("([A-Z])");
 
