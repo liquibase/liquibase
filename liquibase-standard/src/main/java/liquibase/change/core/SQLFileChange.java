@@ -124,18 +124,18 @@ public class SQLFileChange extends AbstractSQLChange {
             try {
                 Resource resource = getResource();
                 if (!resource.exists()) {
-                    alertOnNonExistantSqlFile(validationErrors);
+                    alertOnNonExistentSqlFile(validationErrors);
                 }
             } catch (IOException e) {
                 Scope.getCurrentScope().getLog(getClass()).warning("Failed to obtain sqlFile resource at path '" + path + "'while attempting to validate the existence of the sqlFile.", e);
-                alertOnNonExistantSqlFile(validationErrors);
+                alertOnNonExistentSqlFile(validationErrors);
             }
         }
 
         return validationErrors;
     }
 
-    private void alertOnNonExistantSqlFile(ValidationErrors validationErrors) {
+    private void alertOnNonExistentSqlFile(ValidationErrors validationErrors) {
         if (ChangeLogParserConfiguration.ON_MISSING_SQL_FILE.getCurrentValue().equals(ChangeLogParserConfiguration.MissingIncludeConfiguration.WARN)) {
             validationErrors.addWarning(FileUtil.getFileNotFoundMessage(path));
         } else {
