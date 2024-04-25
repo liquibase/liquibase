@@ -145,7 +145,7 @@ jobs:
       contents: write  # for softprops/action-gh-release to create GitHub release
     needs: [ setup, reversion ]
     name: Build Installers
-    runs-on: macos-latest #needs macos for apple notarization
+    runs-on: macos-13 #needs macos for apple notarization
     env:
       GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
     steps:
