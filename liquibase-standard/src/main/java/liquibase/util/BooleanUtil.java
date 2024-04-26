@@ -1,5 +1,7 @@
 package liquibase.util;
 
+import org.apache.commons.lang3.BooleanUtils;
+
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Set;
@@ -41,6 +43,6 @@ public class BooleanUtil {
      *  - isTrue(true)  = true
      */
     public static boolean isTrue(Boolean value) {
-        return Boolean.TRUE.equals(value);
+        return BooleanUtils.isTrue(value);
     }
 }

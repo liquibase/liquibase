@@ -5,6 +5,7 @@ import liquibase.exception.UnexpectedLiquibaseException;
 import liquibase.statement.DatabaseFunction;
 import liquibase.statement.SequenceCurrentValueFunction;
 import liquibase.statement.SequenceNextValueFunction;
+import org.apache.commons.lang3.ObjectUtils;
 
 import java.beans.IntrospectionException;
 import java.beans.Introspector;
@@ -428,11 +429,7 @@ public class ObjectUtil {
      * Return the defaultValue if the passed value is null. Otherwise, return the original value.
      */
     public static <T> T defaultIfNull(T value, T defaultValue) {
-        if (value == null) {
-            return defaultValue;
-        } else {
-            return value;
-        }
+        return ObjectUtils.defaultIfNull(value, defaultValue);
     }
 
     /**

@@ -1,5 +1,8 @@
 package liquibase.util;
 
+import org.apache.commons.collections4.ListUtils;
+import org.apache.commons.lang3.ArrayUtils;
+
 import java.util.*;
 
 public class CollectionUtil {
@@ -59,22 +62,14 @@ public class CollectionUtil {
      * Example: values = createIfNull(values)
      */
     public static <T> List<T> createIfNull(List<T> currentValue) {
-        if (currentValue == null) {
-            return new ArrayList<>();
-        } else {
-            return currentValue;
-        }
+        return ListUtils.defaultIfNull(currentValue, new ArrayList<>());
     }
 
     /**
      * Returns a new empty array if the passed array is null.
      */
     public static <T> T[] createIfNull(T[] arguments) {
-        if (arguments == null) {
-            return (T[]) new Object[0];
-        } else {
-            return arguments;
-        }
+        return (T[]) ArrayUtils.nullToEmpty(arguments);
     }
 
     /**
