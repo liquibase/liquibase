@@ -19,7 +19,6 @@ import liquibase.database.DatabaseFactory;
 import liquibase.database.core.*;
 import liquibase.database.jvm.JdbcConnection;
 import liquibase.datatype.DataTypeFactory;
-import liquibase.datatype.core.ClobType;
 import liquibase.diff.DiffGeneratorFactory;
 import liquibase.diff.DiffResult;
 import liquibase.diff.compare.CompareControl;
@@ -1093,7 +1092,7 @@ public abstract class AbstractIntegrationTest {
 
         CreateTableStatement clobTableCreator = new CreateTableStatement(
                 database.getLiquibaseCatalogName(), database.getLiquibaseSchemaName(), "tableWithClob");
-        clobTableCreator.addColumn("clobColumn", new ClobType());
+        clobTableCreator.addColumn("clobColumn", DataTypeFactory.getInstance().fromDescription("clob", database));
         InsertExecutablePreparedStatement insertStatement = new InsertExecutablePreparedStatement(
                 database, database.getLiquibaseCatalogName(), database.getLiquibaseSchemaName(),
                 "tableWithClob", Arrays.asList(clobColumn),
