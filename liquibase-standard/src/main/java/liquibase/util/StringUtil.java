@@ -6,11 +6,12 @@ import liquibase.Scope;
 import liquibase.changelog.ChangeSet;
 import liquibase.parser.LiquibaseSqlParser;
 import liquibase.parser.SqlParserFactory;
+import org.apache.commons.lang3.ArrayUtils;
 import org.apache.commons.lang3.RandomStringUtils;
+import org.apache.commons.lang3.StringUtils;
 
 import java.io.UnsupportedEncodingException;
 import java.nio.charset.StandardCharsets;
-import java.security.SecureRandom;
 import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -30,10 +31,7 @@ public class StringUtil {
      * @return the trimmed string, or an empty string if the input was null.
      */
     public static String trimToEmpty(String string) {
-        if (string == null) {
-            return "";
-        }
-        return string.trim();
+        return StringUtils.trimToEmpty(string);
     }
 
     /**
@@ -44,15 +42,7 @@ public class StringUtil {
      * @return the trimmed string or null
      */
     public static String trimToNull(String string) {
-        if (string == null) {
-            return null;
-        }
-        String returnString = string.trim();
-        if (returnString.isEmpty()) {
-            return null;
-        } else {
-            return returnString;
-        }
+        return StringUtils.trimToNull(string);
     }
 
     /**
@@ -219,9 +209,9 @@ public class StringUtil {
                         return false;
                     }
                 }
-                return piece.toLowerCase().equalsIgnoreCase(endDelimiter.toLowerCase());
+                return StringUtils.equalsIgnoreCase(piece, endDelimiter);
             } else {
-                return piece.toLowerCase().matches(endDelimiter.toLowerCase()) || (previousPiece + piece).toLowerCase().matches("[\\s\n\r]*" + endDelimiter.toLowerCase());
+                return StringUtils.equalsIgnoreCase(piece, endDelimiter) || (previousPiece + piece).toLowerCase().matches("[\\s\n\r]*" + endDelimiter.toLowerCase());
             }
         }
     }
@@ -468,42 +458,15 @@ public class StringUtil {
     }
 
     public static String repeat(String string, int times) {
-        StringBuilder result = new StringBuilder(string.length() * times);
-        for (int i = 0; i < times; i++) {
-            result.append(string);
-        }
-
-        return result.toString();
+        return StringUtils.repeat(string, times);
     }
 
     public static String join(Integer[] array, String delimiter) {
-        if (array == null) {
-            return null;
-        }
-
-        int[] ints = new int[array.length];
-        for (int i = 0; i < ints.length; i++) {
-            ints[i] = array[i];
-        }
-        return StringUtil.join(ints, delimiter);
+        return StringUtils.join(array, delimiter);
     }
 
     public static String join(int[] array, String delimiter) {
-        if (array == null) {
-            return null;
-        }
-
-        if (array.length == 0) {
-            return "";
-        }
-
-        StringBuilder buffer = new StringBuilder();
-        for (int val : array) {
-            buffer.append(val).append(delimiter);
-        }
-
-        String returnString = buffer.toString();
-        return returnString.substring(0, returnString.length() - delimiter.length());
+        return StringUtils.join(ArrayUtils.toObject(array), delimiter);
     }
 
     public static String indent(String string) {
@@ -519,24 +482,11 @@ public class StringUtil {
     }
 
     public static String lowerCaseFirst(String string) {
-        if (string == null) {
-            return null;
-        }
-        if (string.length() < 2) {
-            return string.toLowerCase();
-        }
-
-        return string.substring(0, 1).toLowerCase() + string.substring(1);
+        return StringUtils.uncapitalize(string);
     }
 
     public static String upperCaseFirst(String string) {
-        if (string == null) {
-            return null;
-        }
-        if (string.length() < 2) {
-            return string.toUpperCase();
-        }
-        return string.substring(0, 1).toUpperCase() + string.substring(1);
+        return StringUtils.capitalize(string);
     }
 
     public static boolean hasUpperCase(String string) {
@@ -562,15 +512,11 @@ public class StringUtil {
     }
 
     public static boolean isAscii(String string) {
+        // This is actually a violation, but is retained for backwards compatibility.
         if (string == null) {
             return true;
         }
-        for (char c : string.toCharArray()) {
-            if (!isAscii(c)) {
-                return false;
-            }
-        }
-        return true;
+        return StringUtils.isAsciiPrintable(string);
     }
 
     /**
@@ -580,7 +526,7 @@ public class StringUtil {
      * @return true if 7 bit-clean, false otherwise.
      */
     public static boolean isAscii(char ch) {
-        return ch < 128;
+        return StringUtils.isAsciiPrintable(Character.toString(ch));
     }
 
     public static String escapeHtml(String str) {
@@ -647,7 +593,7 @@ public class StringUtil {
      *
      */
     public static boolean contains(String value, String containsValue) {
-        return value != null && value.contains(containsValue);
+        return StringUtils.contains(value, containsValue);
     }
 
     /**
@@ -657,7 +603,7 @@ public class StringUtil {
      * @return true if String is null or empty
      */
     public static boolean isEmpty(String value) {
-        return (value == null) || value.isEmpty();
+        return StringUtils.isEmpty(value);
     }
 
     /**
@@ -667,7 +613,7 @@ public class StringUtil {
      * @return true if string is not null and not empty (length > 0)
      */
     public static boolean isNotEmpty(String value) {
-        return !isEmpty(value);
+        return StringUtils.isNotEmpty(value);
     }
 
     /**
@@ -679,11 +625,7 @@ public class StringUtil {
      * Returns <code>false</code> if either argument is <code>null</code>.
      */
     public static boolean startsWith(String value, String startsWith) {
-        if ((value == null) || (startsWith == null)) {
-            return false;
-        }
-
-        return value.startsWith(startsWith);
+        return StringUtils.startsWith(value, startsWith);
     }
 
     /**
@@ -695,11 +637,7 @@ public class StringUtil {
      * Returns <code>false</code> if either argument is <code>null</code>.
      */
     public static boolean endsWith(String value, String endsWith) {
-        if ((value == null) || (endsWith == null)) {
-            return false;
-        }
-
-        return value.endsWith(endsWith);
+        return StringUtils.endsWith(value, endsWith);
     }
 
     /**
@@ -712,7 +650,7 @@ public class StringUtil {
         if (string == null) {
             return true;
         }
-        return StringUtil.trimToNull(string.toString()) == null;
+        return StringUtils.isWhitespace(string);
     }
 
     /**
@@ -904,13 +842,8 @@ public class StringUtil {
         String clean2 = trimToNull(s2);
         if (clean1 == null && clean2 == null) {
             return true;
-        } else {
-            // Both cannot be null at this point
-            if (clean1 == null || clean2 == null) {
-                return false;
-            }
         }
-        return clean1.equalsIgnoreCase(clean2);
+        return StringUtils.equalsIgnoreCase(s1, s2);
     }
 
     /**
@@ -942,8 +875,7 @@ public class StringUtil {
         if (isEmpty(sqlString) || sqlString.length() < 4) {
             return null;
         }
-        StringBuilder reversedSqlStringBuilder = new StringBuilder(sqlString).reverse();
-        String reversedString = reversedSqlStringBuilder.toString();
+        String reversedString = StringUtils.reverse(sqlString);
         int idxClosingLastChar = -1, idxOpeningFirstChar = -1;
         for (int i = 0; i < reversedString.length(); i++) {
             if (idxClosingLastChar < 0) {
@@ -1103,35 +1035,7 @@ public class StringUtil {
      * @return an array of parsed Strings, {@code null} if null String input
      */
     public static String[] splitCamelCase(final String str) {
-        if (str == null) {
-            return null;
-        }
-        if (str.isEmpty()) {
-            return new String[0];
-        }
-        final char[] c = str.toCharArray();
-        final List<String> list = new ArrayList<>();
-        int tokenStart = 0;
-        int currentType = Character.getType(c[tokenStart]);
-        for (int pos = tokenStart + 1; pos < c.length; pos++) {
-            final int type = Character.getType(c[pos]);
-            if (type == currentType) {
-                continue;
-            }
-            if (type == Character.LOWERCASE_LETTER && currentType == Character.UPPERCASE_LETTER) {
-                final int newTokenStart = pos - 1;
-                if (newTokenStart != tokenStart) {
-                    list.add(new String(c, tokenStart, newTokenStart - tokenStart));
-                    tokenStart = newTokenStart;
-                }
-            } else {
-                list.add(new String(c, tokenStart, pos - tokenStart));
-                tokenStart = pos;
-            }
-            currentType = type;
-        }
-        list.add(new String(c, tokenStart, c.length - tokenStart));
-        return list.toArray(new String[0]);
+        return StringUtils.splitByCharacterTypeCamelCase(str);
     }
 
     public static byte[] getBytesWithEncoding(String string) {
@@ -1157,10 +1061,7 @@ public class StringUtil {
      * @return string without any whitespaces formatted to lowercase.
      */
     public static String toLowerWithoutWhitespaces(String value) {
-        if (value == null) {
-            return null;
-        }
-        return value.toLowerCase().replaceAll("\\s+", "");
+        return StringUtils.toRootLowerCase(StringUtils.deleteWhitespace(value));
     }
 
     /**
@@ -1173,23 +1074,11 @@ public class StringUtil {
      * @return true if convertible to numeric and false otherwise
      */
     public static boolean isNumeric(CharSequence cs) {
-        if (isEmpty(cs)) {
-            return false;
-        } else {
-            int sz = cs.length();
-
-            for (int i = 0; i < sz; ++i) {
-                if (!Character.isDigit(cs.charAt(i))) {
-                    return false;
-                }
-            }
-
-            return true;
-        }
+        return StringUtils.isNumeric(cs);
     }
 
     public static boolean isEmpty(CharSequence cs) {
-        return cs == null || cs.length() == 0;
+        return StringUtils.isEmpty(cs);
     }
 
     /**
