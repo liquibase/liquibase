@@ -5,7 +5,7 @@
         xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
         xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-latest.xsd">
 
-    <removeChangeSetProperty dbms="mysql, postgresql, hsqldb" change="addColumn" remove="afterColumn" />
+    <removeChangeSetProperty dbms="mysql, postgresql, hsqldb, snowflake" change="addColumn" remove="afterColumn" />
 
     <property name="table.name" value="paramter_table"/>
     <property file="changelogs/common/dynamic.parameters.properties"/>
@@ -88,7 +88,7 @@
 
     </changeSet>
 
-    <changeSet id="defaultValueTest-1" author="nvoxland" dbms="!mysql,!derby,!mariadb">
+    <changeSet id="defaultValueTest-1" author="nvoxland" dbms="!mysql,!derby,!mariadb,!snowflake">
         <createTable tableName="defaultValueTest">
             <column name="id" type="int"/>
             <column name="intA" type="int"/>
@@ -121,7 +121,7 @@
         </insert>
     </changeSet>
 
-    <changeSet id="defaultValueTest-2" author="nvoxland">
+    <changeSet id="defaultValueTest-2" author="nvoxland" dbms="!snowflake">
         <createTable tableName="defaultValueTest2">
             <column name="id" type="int" />
             <column name="intA" type="int" defaultValueNumeric="1"/>
@@ -160,7 +160,7 @@
     </changeSet>
 
 
-    <changeSet id="compoundIndexTest" author="nvoxland">
+    <changeSet id="compoundIndexTest" author="nvoxland" dbms="!snowflake">
         <createTable tableName="compoundIndexTest">
             <column name="id" type="int">
                 <constraints primaryKey="true" nullable="false"/>
@@ -174,7 +174,7 @@
         </createIndex>
     </changeSet>
 
-    <changeSet id="indexWithAscDescColumns" author="abuschka" dbms="!firebird">
+    <changeSet id="indexWithAscDescColumns" author="abuschka" dbms="!firebird,!snowflake">
         <createTable tableName="indexWithAscDescColumns">
             <column name="id" type="int">
                 <constraints primaryKey="true" nullable="false"/>
@@ -305,7 +305,7 @@
         </insert>
     </changeSet>
 
-    <changeSet id="datatype-conversion-teset" author="nvoxland">
+    <changeSet id="datatype-conversion-teset" author="nvoxland" dbms="!snowflake">
         <createTable tableName="datatypeConversionTest">
             <column name="booleanColumn" type="boolean"/>
             <column name="currencyColumn" type="currency"/>
@@ -672,7 +672,7 @@
         </preConditions>
     </changeSet>
 
-    <changeSet id="indexPrecondition" author="nvoxland">
+    <changeSet id="indexPrecondition" author="nvoxland" dbms="!snowflake">
         <preConditions>
             <indexExists indexName="idx_compoundtest"/>
         </preConditions>
@@ -781,7 +781,7 @@
         </preConditions>
     </changeSet>
 
-    <changeSet id="createTableWithDefault" author="nvoxland" dbms="!mysql">
+    <changeSet id="createTableWithDefault" author="nvoxland" dbms="!mysql,!snowflake">
         <createTable tableName="default_val_computed">
             <column name="id" type="int"/>
             <column name="testcol" type="datetime" defaultValueComputed="CURRENT_TIMESTAMP()">
@@ -793,7 +793,7 @@
         <sql>insert into default_val_computed (id) values (1);</sql>
     </changeSet>
 
-    <changeSet id="createTableWithDefault-checkConstraint" author="nvoxland" dbms="h2,oracle,db2,postgresql,mssql,!mysql"> <!-- not derby -->
+    <changeSet id="createTableWithDefault-checkConstraint" author="nvoxland" dbms="h2,oracle,db2,postgresql,mssql,!mysql,!snowflake"> <!-- not derby -->
         <addDefaultValue tableName="default_val_computed" columnName="added_col" defaultValueComputed="CURRENT_TIMESTAMP()"/>
     </changeSet>
 
@@ -1062,7 +1062,7 @@
             <column name="other" type="int"/>
         </createTable>
     </changeSet>
-    <changeSet id="CORE-977" author="nvoxland" dbms="!hsqldb"> <!-- currently failing due to a bug in hsql 2.2.9 -->
+    <changeSet id="CORE-977" author="nvoxland" dbms="!hsqldb,!snowflake"> <!-- currently failing due to a bug in hsql 2.2.9 -->
         <loadUpdateData tableName="instrument" file="changelogs/common/instrument.csv" primaryKey="name">
             <column header="name" type="STRING"/>
         </loadUpdateData>
