@@ -93,7 +93,11 @@ public class SelectFromDatabaseChangeLogStatement extends AbstractSqlStatement {
 
         @Override
         public String generateSql(Database database) {
-            return " WHERE " + database.escapeColumnName(null, null, null, "MD5SUM") + " IS NOT NULL AND NOT LIKE '" + notLikeCheckSumVersion + ":%'";
+            final String md5SUMColumnName = database.escapeColumnName(null, null, null, "MD5SUM");
+            return " WHERE " +
+                    md5SUMColumnName + " IS NOT NULL " +
+                    "AND " +
+                    md5SUMColumnName + " NOT LIKE '" + notLikeCheckSumVersion + ":%'";
         }
     }
 
