@@ -7,6 +7,7 @@ import liquibase.changelog.ChangeSet;
 import liquibase.parser.LiquibaseSqlParser;
 import liquibase.parser.SqlParserFactory;
 import org.apache.commons.lang3.ArrayUtils;
+import org.apache.commons.lang3.CharUtils;
 import org.apache.commons.lang3.RandomStringUtils;
 import org.apache.commons.lang3.StringUtils;
 
@@ -512,11 +513,15 @@ public class StringUtil {
     }
 
     public static boolean isAscii(String string) {
-        // This is actually a violation, but is retained for backwards compatibility.
         if (string == null) {
             return true;
         }
-        return StringUtils.isAsciiPrintable(string);
+        for (char c : string.toCharArray()) {
+            if (!isAscii(c)) {
+                return false;
+            }
+        }
+        return true;
     }
 
     /**
@@ -526,7 +531,7 @@ public class StringUtil {
      * @return true if 7 bit-clean, false otherwise.
      */
     public static boolean isAscii(char ch) {
-        return StringUtils.isAsciiPrintable(Character.toString(ch));
+        return CharUtils.isAscii(ch);
     }
 
     public static String escapeHtml(String str) {
