@@ -1,7 +1,6 @@
 package liquibase.util;
 
 import org.apache.commons.collections4.ListUtils;
-import org.apache.commons.lang3.ArrayUtils;
 
 import java.util.*;
 
@@ -69,7 +68,11 @@ public class CollectionUtil {
      * Returns a new empty array if the passed array is null.
      */
     public static <T> T[] createIfNull(T[] arguments) {
-        return (T[]) ArrayUtils.nullToEmpty(arguments);
+        if (arguments == null) {
+            return (T[]) new Object[0];
+        } else {
+            return arguments;
+        }
     }
 
     /**
