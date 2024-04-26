@@ -40,13 +40,13 @@
       <sql>select iD from mixedCase</sql>
     </changeSet>
 
-    <changeSet id="6" author="dbiggs">
+    <changeSet id="6" author="dbiggs" dbms="!snowflake">
         <createIndex tableName="mixedCase" indexName="testIndex">
           <column name="testId"/>
         </createIndex>
     </changeSet>
 
-     <changeSet id="7" author="dbiggs">
+     <changeSet id="7" author="dbiggs" dbms="!snowflake">
        <preConditions>
           <indexExists indexName="testIndex" />
        </preConditions>
