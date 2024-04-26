@@ -88,12 +88,12 @@ public class SelectFromDatabaseChangeLogStatement extends AbstractSqlStatement {
     }
 
     @Data
-    public static class ByCheckSumNotLike implements WhereClause {
+    public static class ByCheckSumNotNullAndNotLike implements WhereClause {
         private final int notLikeCheckSumVersion;
 
         @Override
         public String generateSql(Database database) {
-            return " WHERE " + database.escapeColumnName(null, null, null, "MD5SUM") + " NOT LIKE '" + notLikeCheckSumVersion + ":%'";
+            return " WHERE " + database.escapeColumnName(null, null, null, "MD5SUM") + " IS NOT NULL AND NOT LIKE '" + notLikeCheckSumVersion + ":%'";
         }
     }
 

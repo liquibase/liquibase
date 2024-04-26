@@ -245,7 +245,7 @@ public class StandardChangeLogHistoryService extends AbstractChangeLogHistorySer
             }
 
             SqlStatement databaseChangeLogStatement = new SelectFromDatabaseChangeLogStatement(
-                    new SelectFromDatabaseChangeLogStatement.ByCheckSumNotLike(ChecksumVersion.latest().getVersion()),
+                    new SelectFromDatabaseChangeLogStatement.ByCheckSumNotNullAndNotLike(ChecksumVersion.latest().getVersion()),
                     new ColumnConfig().setName("MD5SUM"));
             List<Map<String, ?>> md5sumRS = ChangelogJdbcMdcListener.query(getDatabase(), ex -> ex.queryForList(databaseChangeLogStatement));
 
