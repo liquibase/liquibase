@@ -71,7 +71,7 @@ liquibase:
 
       oracle:
         imageName: gvenzl/oracle-xe
-        version: 18-slim
+        version: 18-slim-faststart
         setup:
           username: system
 
