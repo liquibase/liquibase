@@ -1,7 +1,7 @@
 package liquibase.parser.core.xml
 
 import com.example.liquibase.change.ChangeWithPrimitiveFields
-import com.example.liquibase.change.ColumnConfig
+import com.example.liquibase.change.ColumnConfigExample
 import com.example.liquibase.change.ComputedConfig
 import com.example.liquibase.change.CreateTableExampleChange
 import com.example.liquibase.change.DefaultConstraintConfig
@@ -676,40 +676,40 @@ class XMLChangeLogSAXParser_RealFile_Test extends Specification {
         change1.getTableName() == "Test"
         change1.getDecimalValue() == 3.14159
         change1.getColumns().size() == 7
-        change1.getColumns().get(0).getClass() == ColumnConfig
+        change1.getColumns().get(0).getClass() == ColumnConfigExample
         change1.getColumns().get(0).getName() == "id"
         change1.getColumns().get(0).getType() == "bigint"
         change1.getColumns().get(0).getNullable() == false
         change1.getColumns().get(0).getIdentity().getClass() == IdentityConfig
         change1.getColumns().get(0).getIdentity().getSeed() == 1
         change1.getColumns().get(0).getIdentity().getIncrement() == 1
-        change1.getColumns().get(1).getClass() == ColumnConfig
+        change1.getColumns().get(1).getClass() == ColumnConfigExample
         change1.getColumns().get(1).getName() == "key1"
         change1.getColumns().get(1).getType() == "nvarchar(40)"
         change1.getColumns().get(1).getNullable() == false
         change1.getColumns().get(1).getIdentity() == null
         change1.getColumns().get(1).getDefaultConstraint() == null
         change1.getColumns().get(1).getComputed() == null
-        change1.getColumns().get(2).getClass() == ColumnConfig
+        change1.getColumns().get(2).getClass() == ColumnConfigExample
         change1.getColumns().get(2).getName() == "key2"
         change1.getColumns().get(2).getType() == "nvarchar(20)"
         change1.getColumns().get(2).getNullable() == false
-        change1.getColumns().get(3).getClass() == ColumnConfig
+        change1.getColumns().get(3).getClass() == ColumnConfigExample
         change1.getColumns().get(3).getName() == "key3"
         change1.getColumns().get(3).getType() == "nvarchar(10)"
         change1.getColumns().get(3).getNullable() == true
-        change1.getColumns().get(4).getClass() == ColumnConfig
+        change1.getColumns().get(4).getClass() == ColumnConfigExample
         change1.getColumns().get(4).getName() == "value"
         change1.getColumns().get(4).getType() == "nvarchar(MAX)"
         change1.getColumns().get(4).getNullable() == false
-        change1.getColumns().get(5).getClass() == ColumnConfig
+        change1.getColumns().get(5).getClass() == ColumnConfigExample
         change1.getColumns().get(5).getName() == "lastUpdateDate"
         change1.getColumns().get(5).getType() == "datetime2"
         change1.getColumns().get(5).getNullable() == false
         change1.getColumns().get(5).getDefaultConstraint().getClass() == DefaultConstraintConfig
         change1.getColumns().get(5).getDefaultConstraint().getName() == "DF_Test_lastUpdateDate"
         change1.getColumns().get(5).getDefaultConstraint().getExpression() == "GETDATE()"
-        change1.getColumns().get(6).getClass() == ColumnConfig
+        change1.getColumns().get(6).getClass() == ColumnConfigExample
         change1.getColumns().get(6).getName() == "partition"
         change1.getColumns().get(6).getType() == null
         change1.getColumns().get(6).getNullable() == false

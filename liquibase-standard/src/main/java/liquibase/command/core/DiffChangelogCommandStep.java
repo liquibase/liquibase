@@ -117,7 +117,7 @@ public class DiffChangelogCommandStep extends AbstractChangelogCommandStep {
             }
         } catch (Exception e) {
             try (MdcObject diffChangelogOutcome = Scope.getCurrentScope().addMdcValue(MdcKey.DIFF_CHANGELOG_OUTCOME, MdcValue.COMMAND_FAILED)) {
-                Scope.getCurrentScope().getLog(getClass()).warning("Diff changelog command failed");
+                Scope.getCurrentScope().getLog(getClass()).warning("Diff changelog command failed: " + e.getMessage());
             }
         }
 

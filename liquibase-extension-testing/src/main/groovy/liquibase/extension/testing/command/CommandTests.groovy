@@ -1227,7 +1227,7 @@ Long Description: ${commandDefinition.getLongDescription() ?: "NOT SET"}
     }
 
     public static String createRandomFilePath(String suffix) {
-        String rand = "target/test-classes/" + StringUtil.randomIdentifer(10) + "." + suffix
+        String rand = "target/test-classes/" + StringUtil.randomIdentifier(10) + "." + suffix
         rand
     }
 

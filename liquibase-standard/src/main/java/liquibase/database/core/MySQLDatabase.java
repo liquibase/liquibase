@@ -692,4 +692,9 @@ public class MySQLDatabase extends AbstractJdbcDatabase {
     public boolean supportsDatabaseChangeLogHistory() {
         return true;
     }
+
+    public boolean getUseAffectedRows() throws DatabaseException {
+        return getConnection().getURL().contains("useAffectedRows=true");
+    }
+
 }

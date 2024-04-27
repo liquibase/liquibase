@@ -13,11 +13,12 @@ import spock.lang.Unroll
 
 import java.text.ParseException
 
-public class ColumnConfigTest extends Specification {
+class ColumnConfigTest extends Specification {
 
     @Shared
-            resourceSupplier = new ResourceSupplier();
+    resourceSupplier = new ResourceSupplier();
 
+    @Unroll
     def constructor_everythingSet() {
         when:
         def table = new Table();
