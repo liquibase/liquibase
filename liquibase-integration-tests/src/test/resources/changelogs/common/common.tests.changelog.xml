@@ -1350,4 +1350,10 @@
         </preConditions>
     </changeSet>
 
+    <changeSet id="check-uniqueConstraintExists" author="mpvvliet">
+        <preConditions>
+            <uniqueConstraintExists tableName="createTableNamedUqConst" constraintName="uq_uqtest1"/>
+        </preConditions>
+    </changeSet>
+
 </databaseChangeLog>
