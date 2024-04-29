@@ -12,10 +12,7 @@ import liquibase.configuration.ConfigurationValueProvider;
 import liquibase.configuration.ConfiguredValue;
 import liquibase.configuration.LiquibaseConfiguration;
 import liquibase.configuration.core.DefaultsFileValueProvider;
-import liquibase.exception.CommandLineParsingException;
-import liquibase.exception.CommandValidationException;
-import liquibase.exception.ExitCodeException;
-import liquibase.exception.LiquibaseException;
+import liquibase.exception.*;
 import liquibase.integration.IntegrationDetails;
 import liquibase.license.LicenseInfo;
 import liquibase.license.LicenseService;
@@ -47,17 +44,12 @@ import java.security.AccessController;
 import java.security.PrivilegedAction;
 import java.time.Duration;
 import java.util.*;
-import java.util.jar.JarFile;
-import java.util.jar.Manifest;
 import java.util.logging.*;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
-import java.util.zip.ZipEntry;
 
 import static java.util.ResourceBundle.getBundle;
 import static liquibase.configuration.LiquibaseConfiguration.REGISTERED_VALUE_PROVIDERS_KEY;
-import static liquibase.integration.commandline.LiquibaseLauncherSettings.LiquibaseLauncherSetting.LIQUIBASE_HOME;
-import static liquibase.integration.commandline.LiquibaseLauncherSettings.getSetting;
 import static liquibase.integration.commandline.VersionUtils.*;
 import static liquibase.util.SystemUtil.isWindows;
 
@@ -626,31 +618,36 @@ public class LiquibaseCommandLine {
         }
 
         final PathHandlerFactory pathHandlerFactory = Scope.getCurrentScope().getSingleton(PathHandlerFactory.class);
-        Resource resource = pathHandlerFactory.getResource(defaultsFileConfig.getValue());
+        String defaultsFileConfigValue = defaultsFileConfig.getValue();
+        Resource resource = pathHandlerFactory.getResource(defaultsFileConfigValue);
         if (resource.exists()) {
             try (InputStream defaultsStream = resource.openInputStream()) {
                 if (defaultsStream != null) {
-                    final DefaultsFileValueProvider fileProvider = new DefaultsFileValueProvider(defaultsStream, "File exists at path " + defaultsFileConfig.getValue());
+                    final DefaultsFileValueProvider fileProvider = new DefaultsFileValueProvider(defaultsStream, "File exists at path " + defaultsFileConfigValue);
                     liquibaseConfiguration.registerProvider(fileProvider);
                     returnList.add(fileProvider);
                 }
             }
         } else {
-            InputStream inputStreamOnClasspath = Thread.currentThread().getContextClassLoader().getResourceAsStream(defaultsFileConfig.getValue());
+            InputStream inputStreamOnClasspath = Thread.currentThread().getContextClassLoader().getResourceAsStream(defaultsFileConfigValue);
             if (inputStreamOnClasspath == null) {
-                Scope.getCurrentScope().getLog(getClass()).fine("Cannot find defaultsFile " + defaultsFileConfig.getValue());
+                Scope.getCurrentScope().getLog(getClass()).fine("Cannot find defaultsFile " + defaultsFileConfigValue);
                 if (!defaultsFileConfig.wasDefaultValueUsed()) {
                             //can't use UI since it's not configured correctly yet
-                    System.err.println("Could not find defaults file " + defaultsFileConfig.getValue());
+                    if (GlobalConfiguration.STRICT.getCurrentValue()) {
+                        throw new UnexpectedLiquibaseException("ERROR: The file '"+defaultsFileConfigValue+"' was not found. The global argument 'strict' is enabled, which validates the existence of files specified in liquibase files, such as changelogs, flowfiles, checks packages files, and more. To prevent this message, check your configurations, or disable the 'strict' setting.");
+                    } else {
+                        System.err.println("Could not find defaults file " + defaultsFileConfigValue);
+                    }
                 }
             } else {
-                final DefaultsFileValueProvider fileProvider = new DefaultsFileValueProvider(inputStreamOnClasspath, "File in classpath " + defaultsFileConfig.getValue());
+                final DefaultsFileValueProvider fileProvider = new DefaultsFileValueProvider(inputStreamOnClasspath, "File in classpath " + defaultsFileConfigValue);
                 liquibaseConfiguration.registerProvider(fileProvider);
                 returnList.add(fileProvider);
             }
         }
 
-        final File defaultsFile = new File(defaultsFileConfig.getValue());
+        final File defaultsFile = new File(defaultsFileConfigValue);
         File localDefaultsFile = new File(defaultsFile.getAbsolutePath().replaceFirst(".properties$", ".local.properties"));
         if (localDefaultsFile.exists()) {
             final DefaultsFileValueProvider fileProvider = new DefaultsFileValueProvider(localDefaultsFile) {

@@ -1,4 +1,4 @@
-name: FOSSA AI License Compliance and Security Check
+name: FOSSA License Compliance and Security Check
 
 on:
   pull_request:
