@@ -19,6 +19,7 @@ import java.util.regex.Pattern;
 
 /**
  * Various utility methods for working with strings.
+ * @deprecated use {@link StringUtils} instead
  */
 public class StringUtil {
     private static final Pattern upperCasePattern = Pattern.compile(".*[A-Z].*");
@@ -30,7 +31,9 @@ public class StringUtil {
      *
      * @param string the input string to trim
      * @return the trimmed string, or an empty string if the input was null.
+     * @deprecated use {@link StringUtils#trimToEmpty(String)} instead
      */
+    @Deprecated
     public static String trimToEmpty(String string) {
         return StringUtils.trimToEmpty(string);
     }
@@ -41,7 +44,9 @@ public class StringUtil {
      *
      * @param string the string to trim
      * @return the trimmed string or null
+     * @deprecated use {@link StringUtils#trimToNull(String)} instead
      */
+    @Deprecated
     public static String trimToNull(String string) {
         return StringUtils.trimToNull(string);
     }
@@ -458,14 +463,26 @@ public class StringUtil {
         return returnList;
     }
 
+    /**
+     * @deprecated use {@link StringUtils#repeat(String, int)} instead
+     */
+    @Deprecated
     public static String repeat(String string, int times) {
         return StringUtils.repeat(string, times);
     }
 
+    /**
+     * @deprecated use {@link StringUtils#join(Object[], String)} instead
+     */
+    @Deprecated
     public static String join(Integer[] array, String delimiter) {
         return StringUtils.join(array, delimiter);
     }
 
+    /**
+     * @deprecated use {@link StringUtils#join(int[], char)} instead
+     */
+    @Deprecated
     public static String join(int[] array, String delimiter) {
         return StringUtils.join(ArrayUtils.toObject(array), delimiter);
     }
@@ -482,10 +499,18 @@ public class StringUtil {
         return pad + (string.replaceAll("\n", "\n" + pad));
     }
 
+    /**
+     * @deprecated use {@link StringUtils#uncapitalize(String)} instead
+     */
+    @Deprecated
     public static String lowerCaseFirst(String string) {
         return StringUtils.uncapitalize(string);
     }
 
+    /**
+     * @deprecated use {@link StringUtils#capitalize(String)} instead
+     */
+    @Deprecated
     public static String upperCaseFirst(String string) {
         return StringUtils.capitalize(string);
     }
@@ -529,7 +554,9 @@ public class StringUtil {
      *
      * @param ch the character to test
      * @return true if 7 bit-clean, false otherwise.
+     * @deprecated use {@link CharUtils#isAscii(char)} instead
      */
+    @Deprecated
     public static boolean isAscii(char ch) {
         return CharUtils.isAscii(ch);
     }
@@ -595,8 +622,9 @@ public class StringUtil {
      * @param  value                  String to be checked
      * @param  containsValue          String to look for
      * @return true if String contains the value
-     *
+     * @deprecated use {@link StringUtils#contains(CharSequence, CharSequence)} instead
      */
+    @Deprecated
     public static boolean contains(String value, String containsValue) {
         return StringUtils.contains(value, containsValue);
     }
@@ -606,7 +634,9 @@ public class StringUtil {
      *
      * @param value String to be checked
      * @return true if String is null or empty
+     * @deprecated use {@link StringUtils#isEmpty(CharSequence)} instead
      */
+    @Deprecated
     public static boolean isEmpty(String value) {
         return StringUtils.isEmpty(value);
     }
@@ -616,7 +646,9 @@ public class StringUtil {
      *
      * @param value String to be checked
      * @return true if string is not null and not empty (length > 0)
+     * @deprecated use {@link StringUtils#isNotEmpty(CharSequence)} instead
      */
+    @Deprecated
     public static boolean isNotEmpty(String value) {
         return StringUtils.isNotEmpty(value);
     }
@@ -628,7 +660,9 @@ public class StringUtil {
      * @param startsWith the prefix to check for
      * @return <code>true</code> if <code>value</code> starts with <code>startsWith</code>, <code>false</code> otherwise.
      * Returns <code>false</code> if either argument is <code>null</code>.
+     * @deprecated use {@link StringUtils#startsWith(CharSequence, CharSequence)} instead
      */
+    @Deprecated
     public static boolean startsWith(String value, String startsWith) {
         return StringUtils.startsWith(value, startsWith);
     }
@@ -640,7 +674,9 @@ public class StringUtil {
      * @param endsWith   the prefix to check for
      * @return <code>true</code> if <code>value</code> ends with <code>endsWith</code>, <code>false</code> otherwise.
      * Returns <code>false</code> if either argument is <code>null</code>.
+     * @deprecated use {@link StringUtils#endsWith(CharSequence, CharSequence)} instead
      */
+    @Deprecated
     public static boolean endsWith(String value, String endsWith) {
         return StringUtils.endsWith(value, endsWith);
     }
@@ -1036,7 +1072,9 @@ public class StringUtil {
      *
      * @param str the String to split, may be {@code null}
      * @return an array of parsed Strings, {@code null} if null String input
+     * @deprecated use {@link StringUtils#splitByCharacterTypeCamelCase(String)} instead
      */
+    @Deprecated
     public static String[] splitCamelCase(final String str) {
         return StringUtils.splitByCharacterTypeCamelCase(str);
     }
@@ -1062,7 +1100,9 @@ public class StringUtil {
     /**
      * @param value string to process
      * @return string without any whitespaces formatted to lowercase.
+     * @deprecated use {@link StringUtils#toRootLowerCase(String)} and {@link StringUtils#deleteWhitespace(String)} instead
      */
+    @Deprecated
     public static String toLowerWithoutWhitespaces(String value) {
         return StringUtils.toRootLowerCase(StringUtils.deleteWhitespace(value));
     }
@@ -1073,11 +1113,17 @@ public class StringUtil {
      *
      * @param cs the arg to check if it is numeric
      * @return true if convertible to numeric and false otherwise
+     * @deprecated use {@link StringUtils#isNumeric(CharSequence)} instead
      */
+    @Deprecated
     public static boolean isNumeric(CharSequence cs) {
         return StringUtils.isNumeric(cs);
     }
 
+    /**
+     * @deprecated use {@link StringUtils#isEmpty(CharSequence)}
+     */
+    @Deprecated
     public static boolean isEmpty(CharSequence cs) {
         return StringUtils.isEmpty(cs);
     }

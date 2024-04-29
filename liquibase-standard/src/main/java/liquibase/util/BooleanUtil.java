@@ -41,7 +41,9 @@ public class BooleanUtil {
      *  - isTrue(null)  = false
      *  - isTrue(false) = false
      *  - isTrue(true)  = true
+     * @deprecated use {@link BooleanUtils#isTrue(Boolean)} instead
      */
+    @Deprecated
     public static boolean isTrue(Boolean value) {
         return BooleanUtils.isTrue(value);
     }

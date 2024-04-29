@@ -427,7 +427,9 @@ public class ObjectUtil {
 
     /**
      * Return the defaultValue if the passed value is null. Otherwise, return the original value.
+     * @deprecated use {@link ObjectUtils#defaultIfNull(Object, Object)} instead
      */
+    @Deprecated
     public static <T> T defaultIfNull(T value, T defaultValue) {
         return ObjectUtils.defaultIfNull(value, defaultValue);
     }
