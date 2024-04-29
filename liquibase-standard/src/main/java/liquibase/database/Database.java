@@ -422,7 +422,7 @@ public interface Database extends PrioritizedService, AutoCloseable {
     RanChangeSet getRanChangeSet(ChangeSet changeSet) throws DatabaseException, DatabaseHistoryException;
 
     /**
-     * After the changeset has been ran against the database this method will update the change log table
+     * After the changeset has been run against the database this method will update the change log table
      * with the information.
      */
     void markChangeSetExecStatus(ChangeSet changeSet, ChangeSet.ExecType execType) throws DatabaseException;
@@ -613,7 +613,7 @@ public interface Database extends PrioritizedService, AutoCloseable {
 
     /**
      * Allows the database to perform actions after an update is finished,
-     * i. e. after the last change of a changelog was applied.
+     * i.e. after the last change of a changelog was applied.
      */
     default void afterUpdate() throws LiquibaseException {
         // Do nothing by default

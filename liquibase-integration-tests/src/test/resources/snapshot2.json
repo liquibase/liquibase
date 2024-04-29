@@ -2,10 +2,10 @@
   "snapshot": {
     "created": "2021-04-07T11:20:48.354",
     "database": {
-      "productVersion": "11.5",
+      "productVersion": "14.5",
       "shortName": "postgresql",
-      "majorVersion": "11",
-      "minorVersion": "5",
+      "majorVersion": "14",
+      "minorVersion": "13",
       "user": "proschema",
       "productName": "PostgreSQL",
       "url": "jdbc:postgresql://localhost:6432/intuserdb"
