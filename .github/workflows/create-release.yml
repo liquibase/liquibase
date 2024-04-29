@@ -112,7 +112,7 @@ jobs:
           
           ##Sign Files
           ## liquibase-azure-deps is already on its correct version. Check reusable workflow: build-azure-uber-jar.yml
-          mv liquibase-pro/liquibase-azure-deps/liquibase-azure-deps-v${{ needs.setup.outputs.version }}.jar re-version/out
+          mv liquibase-pro/liquibase-azure-deps/* re-version/out
           
           $PWD/.github/util/sign-artifacts.sh re-version/out
           
@@ -122,10 +122,9 @@ jobs:
           mv re-version/out/liquibase-commercial-${{ needs.setup.outputs.version }}.jar re-version/final
           mv re-version/out/liquibase-${{ needs.setup.outputs.version }}.tar.gz re-version/final
           mv re-version/out/liquibase-${{ needs.setup.outputs.version }}.zip re-version/final
-          mv re-version/out/liquibase-azure-deps-v${{ needs.setup.outputs.version }}.jar re-version/final
+          mv re-version/out/liquibase-azure-deps-v${{ needs.setup.outputs.version }}.jar re-version/final/liquibase-azure-deps-${{ needs.setup.outputs.version }}.jar
           
           (cd re-version/out/ && zip liquibase-additional-${{ needs.setup.outputs.version }}.zip *)
-          mv re-version/out/liquibase-additional-${{ needs.setup.outputs.version }}.zip re-version/final
 
       - name: Cache Completed Artifacts
         uses: actions/cache@v4.0.2
@@ -145,7 +144,7 @@ jobs:
       contents: write  # for softprops/action-gh-release to create GitHub release
     needs: [ setup, reversion ]
     name: Build Installers
-    runs-on: macos-latest #needs macos for apple notarization
+    runs-on: macos-13 #needs macos for apple notarization
     env:
       GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
     steps:
@@ -202,7 +201,6 @@ jobs:
           rm re-version/final/*.asc
           rm re-version/final/*.md5
           rm re-version/final/*.sha1
-          cat /Users/runner/work/liquibase/liquibase/liquibase-dist/target/liquibase-macos-installer-4.27.1.dmg.notarization.log
       - name: Attach Files to Draft Release
         uses: softprops/action-gh-release@v2
         with:
