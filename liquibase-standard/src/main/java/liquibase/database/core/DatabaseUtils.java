@@ -35,7 +35,7 @@ public class DatabaseUtils {
                     schema = defaultSchemaName;
                 }
                 executor.execute(
-                        new RawParameterizedSqlStatement("ALTER SESSION SET CURRENT_SCHEMA=?", database.escapeObjectName(schema, Schema.class)));
+                        new RawParameterizedSqlStatement(String.format("ALTER SESSION SET CURRENT_SCHEMA=%s", database.escapeObjectName(schema, Schema.class))));
             } else if (database instanceof PostgresDatabase && defaultSchemaName != null) {
                 String searchPath = executor.queryForObject(new RawParameterizedSqlStatement("SHOW SEARCH_PATH"), String.class);
 
