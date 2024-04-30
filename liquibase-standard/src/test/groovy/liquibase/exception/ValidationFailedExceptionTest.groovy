@@ -7,9 +7,9 @@ import liquibase.changelog.DatabaseChangeLog
 import liquibase.changelog.RanChangeSet
 import liquibase.changelog.visitor.ValidatingVisitor
 import liquibase.database.Database
+import liquibase.database.core.MockDatabase
 import liquibase.precondition.core.NotPrecondition
 import liquibase.precondition.core.PreconditionContainer
-import liquibase.database.core.MockDatabase
 import spock.lang.Specification
 
 /**

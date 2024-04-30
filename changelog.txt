@@ -1804,7 +1804,7 @@ Changes in version 4.16.0 (2022.09.08)
 * Tidy ExecutorService code, remove superfluous map access (Issue 1841) by @jamey-clari in #1842
 * Fixed order of enum values on MySQL 8 by @Tantalon in #3150
 * Removed invalid warning in Maven by @nvoxland in #3189
-* [PRO] QC: checks show changes (--show-cols flag, drop some, etc) by @dyadyushko in #3187
+* [PRO] QC: checks show changes (--show-cols flag, drop some, etc.) by @dyadyushko in #3187
 
 Changes in version 4.15.0 (2022.08.04)
 
