@@ -15,15 +15,15 @@ import java.sql.Connection;
 @LiquibaseService(skip=true)
 public class SybaseASAConnection extends JdbcConnection {
 
-	public SybaseASAConnection() {}
+    public SybaseASAConnection() {}
 
-	public SybaseASAConnection(Connection connection) {
-		super(connection);
-	}
+    public SybaseASAConnection(Connection connection) {
+        super(connection);
+    }
 
-	@Override
-	public String nativeSQL(String sql) throws DatabaseException {
-    	return sql;
+    @Override
+    public String nativeSQL(String sql) throws DatabaseException {
+        return sql;
     }
 
 }

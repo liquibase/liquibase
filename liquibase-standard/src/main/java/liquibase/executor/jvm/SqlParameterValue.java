@@ -68,9 +68,9 @@ class SqlParameterValue extends SqlParameter {
 
     /**
      * Return the value object that this parameter value holds.
-	 */
-	public Object getValue() {
-		return this.value;
-	}
+     */
+    public Object getValue() {
+        return this.value;
+    }
 
 }

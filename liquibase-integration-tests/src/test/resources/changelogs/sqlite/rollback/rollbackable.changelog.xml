@@ -79,14 +79,14 @@
         </createView>
     </changeSet>
 
-	<!-- Not supported in SQlite -->
-	<!--
+    <!-- Not supported in SQlite -->
+    <!--
     <changeSet id="10" author="nvoxland">
         <renameView oldViewName="publicationView" newViewName="v_publication"/>
     </changeSet>
-	-->
+    -->
 
-	<changeSet id="11" author="nvoxland">
+    <changeSet id="11" author="nvoxland">
         <createTable tableName="article">
             <column name="id" type="int" autoIncrement="true">
                 <constraints primaryKey="true" nullable="false"/>
@@ -107,15 +107,15 @@
     </changeSet>
 
 -->
-	<!-- Not supported in SQlite -->
-	<!--
+    <!-- Not supported in SQlite -->
+    <!--
     <changeSet id="13" author="nvoxland">
         <addLookupTable
             existingTableName="publication" existingColumnName="isbn"
             newTableName="isbn" newColumnName="code"
             newColumnDataType="varchar(50)"/>
     </changeSet>
-	-->
+    -->
 
     <!-- Rollback of AddDefaultValue is not supported in SQlite (dropDefaultValue is not supported)
     <changeSet id="14" author="nvoxland">

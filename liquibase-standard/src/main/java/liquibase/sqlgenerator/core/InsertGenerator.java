@@ -15,7 +15,7 @@ import java.util.Date;
 
 public class InsertGenerator extends AbstractSqlGenerator<InsertStatement> {
 
-	private boolean previousInsertHasHeader;
+    private boolean previousInsertHasHeader;
     @Override
     public ValidationErrors validate(InsertStatement insertStatement, Database database, SqlGeneratorChain sqlGeneratorChain) {
         ValidationErrors validationErrors = new ValidationErrors();
@@ -31,9 +31,9 @@ public class InsertGenerator extends AbstractSqlGenerator<InsertStatement> {
         StringBuilder sql = new StringBuilder();
         
         if(!previousInsertHasHeader) {
-        	generateHeader(sql,statement,database);
+            generateHeader(sql,statement,database);
         } else {
-            sql.append(",");        	
+            sql.append(",");            
         }
         generateValues(sql,statement,database);
 
@@ -43,7 +43,7 @@ public class InsertGenerator extends AbstractSqlGenerator<InsertStatement> {
     }
     
     public void setPreviousInsertStatement(boolean previousInsertHasHeader) {
-    	this.previousInsertHasHeader = previousInsertHasHeader;
+        this.previousInsertHasHeader = previousInsertHasHeader;
     }
     
     public void generateHeader(StringBuilder sql,InsertStatement statement, Database database) {

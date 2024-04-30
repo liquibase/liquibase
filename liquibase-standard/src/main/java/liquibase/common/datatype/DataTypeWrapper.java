@@ -15,31 +15,31 @@ import liquibase.servicelocator.LiquibaseService;
  */
 @LiquibaseService(skip = true)
 public class DataTypeWrapper extends LiquibaseDataType {
-	
-	private static LiquibaseDataType stripWrappedDataType(LiquibaseDataType candidate) {
-		
-		if (candidate instanceof DataTypeWrapper) {
-			
-			// Strip off any wrapped data type
-			
-			return((DataTypeWrapper) candidate).getUnderlyingDataType();
-		}
-		
-		return candidate; 
-	}
-	
-	private final LiquibaseDataType underlyingDataType;
-	
-	public LiquibaseDataType getUnderlyingDataType() {
-		return underlyingDataType;
-	}
-	
-	public DataTypeWrapper(LiquibaseDataType originalType) {
-		super(stripWrappedDataType(originalType));
-		this.underlyingDataType = stripWrappedDataType(originalType);
-	}
-	
-	@Override
+    
+    private static LiquibaseDataType stripWrappedDataType(LiquibaseDataType candidate) {
+        
+        if (candidate instanceof DataTypeWrapper) {
+            
+            // Strip off any wrapped data type
+            
+            return((DataTypeWrapper) candidate).getUnderlyingDataType();
+        }
+        
+        return candidate; 
+    }
+    
+    private final LiquibaseDataType underlyingDataType;
+    
+    public LiquibaseDataType getUnderlyingDataType() {
+        return underlyingDataType;
+    }
+    
+    public DataTypeWrapper(LiquibaseDataType originalType) {
+        super(stripWrappedDataType(originalType));
+        this.underlyingDataType = stripWrappedDataType(originalType);
+    }
+    
+    @Override
     public String getName() {
         return underlyingDataType.getName();
     }
@@ -66,12 +66,12 @@ public class DataTypeWrapper extends LiquibaseDataType {
 
     @Override
     public int getMaxParameters(Database database) {
-    	return underlyingDataType.getMaxParameters(database);
+        return underlyingDataType.getMaxParameters(database);
     }
 
     @Override
     public Object[] getParameters() {
-    	return underlyingDataType.getParameters();
+        return underlyingDataType.getParameters();
     }
     
     @Override
@@ -91,7 +91,7 @@ public class DataTypeWrapper extends LiquibaseDataType {
 
     @Override
     public String objectToSql(Object value, Database database) {
-    	return underlyingDataType.objectToSql(value, database);
+        return underlyingDataType.objectToSql(value, database);
     }
     
     public Object stringToObject(String value, Database database) {

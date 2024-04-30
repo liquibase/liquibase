@@ -132,10 +132,10 @@
         </au:expectfailure>
     </target>
 
-	
-	<!-- ADDED FOR THE NEW changeLogDirectory PROPERTY -->
+    
+    <!-- ADDED FOR THE NEW changeLogDirectory PROPERTY -->
 
-	<target name="testChangeLogSyncChangeLogDirectory">
+    <target name="testChangeLogSyncChangeLogDirectory">
         <db:assertTableDoesntExist driver="${jdbc.driver}" url="${jdbc.url}" user="${db.user}" password="${db.password}"
                                    table="DATABASECHANGELOG"/>
         <lb:changeLogSync changelogdirectory="${liquibase.test.ant.basedir}/changelog" changelogfile="simple-changelog.xml">
@@ -147,11 +147,11 @@
                             tag="version_2.0"/>
     </target>
 
-	<target name="testChangeLogSyncChangeLogDirectoryDoesNotExist">
+    <target name="testChangeLogSyncChangeLogDirectoryDoesNotExist">
         <au:expectfailure expectedmessage="Unable to initialize Liquibase: Unable to sync change log: liquibase.exception.ChangeLogParseException: The file simple-changelog.xml was not found">
-	        <lb:changeLogSync changelogdirectory="${liquibase.test.ant.basedir}/bad_changelog" changelogfile="simple-changelog.xml">
-	            <lb:database driver="${jdbc.driver}" url="${jdbc.url}" user="${db.user}" password="${db.password}"/>
-	        </lb:changeLogSync>
+            <lb:changeLogSync changelogdirectory="${liquibase.test.ant.basedir}/bad_changelog" changelogfile="simple-changelog.xml">
+                <lb:database driver="${jdbc.driver}" url="${jdbc.url}" user="${db.user}" password="${db.password}"/>
+            </lb:changeLogSync>
         </au:expectfailure>
     </target>
 

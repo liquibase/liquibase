@@ -193,7 +193,7 @@
         </addColumn>
     </changeSet>
 
-	<!--  not supported   deferrable="true" initiallyDeferred="true"  -->
+    <!--  not supported   deferrable="true" initiallyDeferred="true"  -->
     <changeSet id="25" author="nvoxland">
         <addForeignKeyConstraint
                 baseTableName="person" baseColumnNames="employer_id"

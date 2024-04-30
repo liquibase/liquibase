@@ -56,7 +56,7 @@ public class UpdateDataChange extends AbstractModifyDataChange implements Change
     @Override
     public SqlStatement[] generateStatements(Database database) {
 
-    	boolean needsPreparedStatement = false;
+        boolean needsPreparedStatement = false;
         for (ColumnConfig column : getColumns()) {
             if (column.getValueBlobFile() != null) {
                 needsPreparedStatement = true;
@@ -95,7 +95,7 @@ public class UpdateDataChange extends AbstractModifyDataChange implements Change
                     statement
             };
         }
-    	
+        
         UpdateStatement statement = new UpdateStatement(getCatalogName(), getSchemaName(), getTableName());
 
         for (ColumnConfig column : getColumns()) {

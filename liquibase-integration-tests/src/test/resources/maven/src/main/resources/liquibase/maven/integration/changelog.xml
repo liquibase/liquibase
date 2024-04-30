@@ -18,7 +18,7 @@
         </createTable>
 
     <!-- Load a custom change to checkConstraint that loading classes from maven project works correctly-->
-        <customChange class="liquibase.maven.integration.CustomChange"/>              	
+        <customChange class="liquibase.maven.integration.CustomChange"/>                  
     </changeSet>
 
     <!-- Include from project classpath-->

@@ -27,12 +27,12 @@ public class CDILiquibaseTest {
     }
 
     private void validateRunningState(boolean shouldBeRunning) {
-    	try (WeldContainer weld = new Weld().initialize()) {
-	        CDILiquibase cdiLiquibase = weld.select(CDILiquibase.class).get();
-	        assertNotNull(cdiLiquibase);
-	        assertEquals(shouldBeRunning, cdiLiquibase.isInitialized());
-	        assertEquals(shouldBeRunning, cdiLiquibase.isUpdateSuccessful());
-    	}
+        try (WeldContainer weld = new Weld().initialize()) {
+            CDILiquibase cdiLiquibase = weld.select(CDILiquibase.class).get();
+            assertNotNull(cdiLiquibase);
+            assertEquals(shouldBeRunning, cdiLiquibase.isInitialized());
+            assertEquals(shouldBeRunning, cdiLiquibase.isUpdateSuccessful());
+        }
     }
 
     @Test

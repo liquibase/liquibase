@@ -27,55 +27,55 @@ public class InsertSetGenerator extends AbstractSqlGenerator<InsertSetStatement>
     }
 
     @Override
-	public Sql[] generateSql(InsertSetStatement statement, Database database, SqlGeneratorChain sqlGeneratorChain) {
+    public Sql[] generateSql(InsertSetStatement statement, Database database, SqlGeneratorChain sqlGeneratorChain) {
 
-		if (statement.peek() == null) {
-			return new UnparsedSql[0];
-		}
-		StringBuilder sql = new StringBuilder();
-		generateHeader(sql, statement, database);
+        if (statement.peek() == null) {
+            return new UnparsedSql[0];
+        }
+        StringBuilder sql = new StringBuilder();
+        generateHeader(sql, statement, database);
 
-		ArrayList<Sql> result = new ArrayList<>();
-		int index = 0;
-		for (InsertStatement sttmnt : statement.getStatements()) {
-			index++;
-			getInsertGenerator(database).generateValues(sql, sttmnt, database);
-			sql.append(",");
-			if (index > statement.getBatchThreshold()) {
-				result.add(completeStatement(statement, sql));
+        ArrayList<Sql> result = new ArrayList<>();
+        int index = 0;
+        for (InsertStatement sttmnt : statement.getStatements()) {
+            index++;
+            getInsertGenerator(database).generateValues(sql, sttmnt, database);
+            sql.append(",");
+            if (index > statement.getBatchThreshold()) {
+                result.add(completeStatement(statement, sql));
 
-				index = 0;
-				sql.setLength(0);
-				generateHeader(sql, statement, database);
-			}
-		}
-		if (index > 0) {
-			result.add(completeStatement(statement, sql));
-		}
+                index = 0;
+                sql.setLength(0);
+                generateHeader(sql, statement, database);
+            }
+        }
+        if (index > 0) {
+            result.add(completeStatement(statement, sql));
+        }
 
-		return result.toArray(new UnparsedSql[0]);
-	}
+        return result.toArray(new UnparsedSql[0]);
+    }
     
-	private Sql completeStatement(InsertSetStatement statement, StringBuilder sql) {
-		sql.deleteCharAt(sql.lastIndexOf(","));
-		sql.append(";\n");
-		return new UnparsedSql(sql.toString(), getAffectedTable(statement));
-	}
+    private Sql completeStatement(InsertSetStatement statement, StringBuilder sql) {
+        sql.deleteCharAt(sql.lastIndexOf(","));
+        sql.append(";\n");
+        return new UnparsedSql(sql.toString(), getAffectedTable(statement));
+    }
     
     public void generateHeader(StringBuilder sql,InsertSetStatement statement, Database database) {
         InsertStatement insert=statement.peek();
-		getInsertGenerator(database).generateHeader(sql, insert, database);
-	}
+        getInsertGenerator(database).generateHeader(sql, insert, database);
+    }
 
-	protected InsertGenerator getInsertGenerator(Database database) {
-		SortedSet<SqlGenerator> generators = SqlGeneratorFactory.getInstance().getGenerators(new InsertStatement(null, null, null), database);
-		if ((generators == null) || generators.isEmpty()) {
-			return null;
-		}
-		return (InsertGenerator) generators.iterator().next();
-	}
+    protected InsertGenerator getInsertGenerator(Database database) {
+        SortedSet<SqlGenerator> generators = SqlGeneratorFactory.getInstance().getGenerators(new InsertStatement(null, null, null), database);
+        if ((generators == null) || generators.isEmpty()) {
+            return null;
+        }
+        return (InsertGenerator) generators.iterator().next();
+    }
 
-	protected Relation getAffectedTable(InsertSetStatement statement) {
+    protected Relation getAffectedTable(InsertSetStatement statement) {
         return new Table().setName(statement.getTableName()).setSchema(statement.getCatalogName(), statement.getSchemaName());
     }
 }

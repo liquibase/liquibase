@@ -28,19 +28,19 @@ public class LoadUpdateDataChangeTest extends StandardChangeTest {
         "Data loaded from 'FILE_NAME' into table 'TABLE_NAME'" == refactoring.getConfirmationMessage()
     }
 
-	def "loadUpdateEmpty database agnostic"() throws Exception {
-		when:
-		LoadUpdateDataChange refactoring = new LoadUpdateDataChange();
-		refactoring.setSchemaName("SCHEMA_NAME");
-		refactoring.setTableName("TABLE_NAME");
-		refactoring.setFile("liquibase/change/core/empty.data.csv");
-		refactoring.setSeparator(",");
+    def "loadUpdateEmpty database agnostic"() throws Exception {
+        when:
+        LoadUpdateDataChange refactoring = new LoadUpdateDataChange();
+        refactoring.setSchemaName("SCHEMA_NAME");
+        refactoring.setTableName("TABLE_NAME");
+        refactoring.setFile("liquibase/change/core/empty.data.csv");
+        refactoring.setSeparator(",");
 
-		SqlStatement[] sqlStatement = refactoring.generateRollbackStatements(new MSSQLDatabase());
-		
-		then:
-		sqlStatement.length == 0
-	}
+        SqlStatement[] sqlStatement = refactoring.generateRollbackStatements(new MSSQLDatabase());
+        
+        then:
+        sqlStatement.length == 0
+    }
 
     def "loadUpdate generates InsertOrUpdateStatements"() throws Exception {
         when:

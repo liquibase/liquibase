@@ -139,8 +139,8 @@ public class LiquibaseGenerateChangeLogMojo extends
     protected boolean useOrReplaceOption;
 
     @Override
-	protected void performLiquibaseTask(Liquibase liquibase)
-			throws LiquibaseException {
+    protected void performLiquibaseTask(Liquibase liquibase)
+            throws LiquibaseException {
 
         ClassLoader cl = null;
         try {
@@ -203,11 +203,11 @@ public class LiquibaseGenerateChangeLogMojo extends
     }
 
     @Override
-	protected void printSettings(String indent) {
-		super.printSettings(indent);
+    protected void printSettings(String indent) {
+        super.printSettings(indent);
         getLog().info(indent + "defaultSchemaName: " + defaultSchemaName);
         getLog().info(indent + "diffTypes: " + diffTypes);
         getLog().info(indent + "dataDir: " + dataDir);
-	}
+    }
 
 }

@@ -491,8 +491,8 @@
     <xsd:element name="addUniqueConstraint">
         <xsd:complexType>
             <xsd:choice maxOccurs="unbounded">
-				<xsd:any namespace="##other" processContents="lax" minOccurs="0" maxOccurs="unbounded" />
-			</xsd:choice>
+                <xsd:any namespace="##other" processContents="lax" minOccurs="0" maxOccurs="unbounded" />
+            </xsd:choice>
             <xsd:attributeGroup ref="changeAttributes"/>
             <xsd:attributeGroup ref="tableNameAttribute"/>
             <xsd:attribute name="columnNames" type="xsd:string"
@@ -1292,7 +1292,7 @@
             </xsd:sequence>
             <xsd:attributeGroup ref="changeAttributes"/>
             <xsd:attribute name="class" type="xsd:string" use="required"/>
-			<xsd:anyAttribute processContents="lax" />
+            <xsd:anyAttribute processContents="lax" />
         </xsd:complexType>
     </xsd:element>
 

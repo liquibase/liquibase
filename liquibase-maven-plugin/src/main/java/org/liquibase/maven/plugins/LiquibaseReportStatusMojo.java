@@ -18,14 +18,14 @@ import java.io.UnsupportedEncodingException;
  */
 public class LiquibaseReportStatusMojo extends AbstractLiquibaseChangeLogMojo {
 
-	@Override
-	protected void performLiquibaseTask(Liquibase liquibase)
-			throws LiquibaseException {
-		try {
-			liquibase.reportStatus(true, new Contexts(contexts), new LabelExpression(getLabelFilter()), new OutputStreamWriter(System.out, GlobalConfiguration.OUTPUT_FILE_ENCODING.getCurrentValue()));
-		} catch (UnsupportedEncodingException e) {
-			throw new UnexpectedLiquibaseException(e);
-		}
-	}
+    @Override
+    protected void performLiquibaseTask(Liquibase liquibase)
+            throws LiquibaseException {
+        try {
+            liquibase.reportStatus(true, new Contexts(contexts), new LabelExpression(getLabelFilter()), new OutputStreamWriter(System.out, GlobalConfiguration.OUTPUT_FILE_ENCODING.getCurrentValue()));
+        } catch (UnsupportedEncodingException e) {
+            throw new UnexpectedLiquibaseException(e);
+        }
+    }
 
 }

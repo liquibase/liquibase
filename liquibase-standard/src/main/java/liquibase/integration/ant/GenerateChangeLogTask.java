@@ -35,7 +35,7 @@ public class GenerateChangeLogTask extends BaseLiquibaseTask {
     private String excludeObjects;
 
     @Override
-	public void executeWithLiquibaseClassloader() throws BuildException {
+    public void executeWithLiquibaseClassloader() throws BuildException {
         Liquibase liquibase = getLiquibase();
         Database database = liquibase.getDatabase();
         CatalogAndSchema catalogAndSchema = buildCatalogAndSchema(database);
@@ -63,7 +63,7 @@ public class GenerateChangeLogTask extends BaseLiquibaseTask {
                 FileUtils.close(printStream);
             }
         }
-	}
+    }
 
     @Override
     protected void validateParameters() {

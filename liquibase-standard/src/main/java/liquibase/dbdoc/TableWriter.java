@@ -60,9 +60,9 @@ public class TableWriter extends HTMLWriter {
     private void writeTableRemarks(Writer fileWriter, Table table) throws IOException {
         final String tableRemarks = table.getRemarks();
         if ((tableRemarks != null) && !tableRemarks.isEmpty()) {
-        	final List<List<String>> cells = new ArrayList<>();
-        	cells.add(Collections.singletonList(tableRemarks));
-        	writeTable("Table Description", cells, fileWriter);
+            final List<List<String>> cells = new ArrayList<>();
+            cells.add(Collections.singletonList(tableRemarks));
+            writeTable("Table Description", cells, fileWriter);
         }
     }
 

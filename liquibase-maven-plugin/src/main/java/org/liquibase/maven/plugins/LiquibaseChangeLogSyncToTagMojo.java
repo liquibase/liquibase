@@ -17,12 +17,12 @@ import org.liquibase.maven.property.PropertyElement;
  */
 public class LiquibaseChangeLogSyncToTagMojo extends AbstractLiquibaseChangeLogMojo {
 
-	/**
-	 * Update to the changeSet with the given tag command.
-	 * @parameter property="liquibase.toTag"
-	 */
+    /**
+     * Update to the changeSet with the given tag command.
+     * @parameter property="liquibase.toTag"
+     */
     @PropertyElement
-	protected String toTag;
+    protected String toTag;
 
     @Override
     protected void checkRequiredParametersAreSpecified() throws MojoFailureException {

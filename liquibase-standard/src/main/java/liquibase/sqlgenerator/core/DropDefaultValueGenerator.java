@@ -59,11 +59,11 @@ public class DropDefaultValueGenerator extends AbstractSqlGenerator<DropDefaultV
         } else if (database instanceof DerbyDatabase) {
             sql = "ALTER TABLE " + escapedTableName + " ALTER COLUMN  " + database.escapeColumnName(statement.getCatalogName(), statement.getSchemaName(), statement.getTableName(), statement.getColumnName()) + " WITH DEFAULT NULL";
         } else if (database instanceof InformixDatabase) {
-        	/*
-        	 * TODO If dropped from a not null column the not null constraint will be dropped, too.
-        	 * If the column is "NOT NULL" it has to be added behind the datatype.
-        	 */
-        	sql = "ALTER TABLE " + escapedTableName + " MODIFY (" + database.escapeColumnName(statement.getCatalogName(), statement.getSchemaName(), statement.getTableName(), statement.getColumnName()) + " " + statement.getColumnDataType() + ")";
+            /*
+             * TODO If dropped from a not null column the not null constraint will be dropped, too.
+             * If the column is "NOT NULL" it has to be added behind the datatype.
+             */
+            sql = "ALTER TABLE " + escapedTableName + " MODIFY (" + database.escapeColumnName(statement.getCatalogName(), statement.getSchemaName(), statement.getTableName(), statement.getColumnName()) + " " + statement.getColumnDataType() + ")";
         } else if (database instanceof AbstractDb2Database) {
             sql = "ALTER TABLE " + escapedTableName + " ALTER COLUMN " + database.escapeColumnName(statement.getCatalogName(), statement.getSchemaName(), statement.getTableName(), statement.getColumnName()) + " DROP DEFAULT";
         } else if (database instanceof PostgresDatabase) {

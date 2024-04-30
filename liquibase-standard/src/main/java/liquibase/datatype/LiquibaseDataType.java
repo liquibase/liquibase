@@ -30,8 +30,8 @@ public abstract class LiquibaseDataType implements PrioritizedService {
     private String rawDefinition;
 
     protected LiquibaseDataType(LiquibaseDataType originalType) {
-    	name = originalType.name;
-    	this.minParameters = originalType.minParameters;
+        name = originalType.name;
+        this.minParameters = originalType.minParameters;
         this.maxParameters = originalType.maxParameters;
         this.aliases = originalType.aliases;
         this.priority = originalType.priority;

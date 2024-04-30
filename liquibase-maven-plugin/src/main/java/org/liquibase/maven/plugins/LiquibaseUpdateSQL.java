@@ -22,76 +22,76 @@ import java.io.Writer;
  */
 public class LiquibaseUpdateSQL extends AbstractLiquibaseUpdateMojo {
 
-	/**
-	 * The file to output the Migration SQL script to, if it exists it will be
-	 * overwritten.
-	 * 
-	 * @parameter property="liquibase.migrationSqlOutputFile"
-	 *            default-value=
-	 *            "${project.build.directory}/liquibase/migrate.sql"
-	 */
-	@PropertyElement
-	protected File migrationSqlOutputFile;
+    /**
+     * The file to output the Migration SQL script to, if it exists it will be
+     * overwritten.
+     * 
+     * @parameter property="liquibase.migrationSqlOutputFile"
+     *            default-value=
+     *            "${project.build.directory}/liquibase/migrate.sql"
+     */
+    @PropertyElement
+    protected File migrationSqlOutputFile;
 
-	/** The writer for writing the migration SQL. */
-	private Writer outputWriter;
+    /** The writer for writing the migration SQL. */
+    private Writer outputWriter;
 
-	@Override
-	protected void doUpdate(Liquibase liquibase) throws LiquibaseException {
-		if (changesToApply > 0) {
-			liquibase.update(changesToApply, new Contexts(contexts), new LabelExpression(getLabelFilter()), outputWriter);
-		} else {
-			liquibase.update(toTag, new Contexts(contexts), new LabelExpression(getLabelFilter()), outputWriter);
-		}
-	}
+    @Override
+    protected void doUpdate(Liquibase liquibase) throws LiquibaseException {
+        if (changesToApply > 0) {
+            liquibase.update(changesToApply, new Contexts(contexts), new LabelExpression(getLabelFilter()), outputWriter);
+        } else {
+            liquibase.update(toTag, new Contexts(contexts), new LabelExpression(getLabelFilter()), outputWriter);
+        }
+    }
 
-	@Override
-	@java.lang.SuppressWarnings("squid:S2095")
-	protected Liquibase createLiquibase(Database db)
-			throws MojoExecutionException {
-		Liquibase liquibase = super.createLiquibase(db);
+    @Override
+    @java.lang.SuppressWarnings("squid:S2095")
+    protected Liquibase createLiquibase(Database db)
+            throws MojoExecutionException {
+        Liquibase liquibase = super.createLiquibase(db);
 
-		// Setup the output file writer
-		try {
-			if (!migrationSqlOutputFile.exists()) {
-				// Ensure the parent directories exist
-				migrationSqlOutputFile.getParentFile().mkdirs();
-				// Create the actual file
-				if (!migrationSqlOutputFile.createNewFile()) {
-					throw new MojoExecutionException(
-							"Cannot create the migration SQL file; "
-									+ migrationSqlOutputFile.getAbsolutePath());
-				}
-			}
+        // Setup the output file writer
+        try {
+            if (!migrationSqlOutputFile.exists()) {
+                // Ensure the parent directories exist
+                migrationSqlOutputFile.getParentFile().mkdirs();
+                // Create the actual file
+                if (!migrationSqlOutputFile.createNewFile()) {
+                    throw new MojoExecutionException(
+                            "Cannot create the migration SQL file; "
+                                    + migrationSqlOutputFile.getAbsolutePath());
+                }
+            }
 
             outputWriter = getOutputWriter(migrationSqlOutputFile);
-		} catch (IOException e) {
-			getLog().error(e);
-			throw new MojoExecutionException(
-					"Failed to create SQL output writer", e);
-		}
-		getLog().info(
-				"Output SQL Migration File: "
-						+ migrationSqlOutputFile.getAbsolutePath());
-		return liquibase;
-	}
+        } catch (IOException e) {
+            getLog().error(e);
+            throw new MojoExecutionException(
+                    "Failed to create SQL output writer", e);
+        }
+        getLog().info(
+                "Output SQL Migration File: "
+                        + migrationSqlOutputFile.getAbsolutePath());
+        return liquibase;
+    }
 
-	@Override
-	protected void printSettings(String indent) {
-		super.printSettings(indent);
-		getLog().info(
-				indent + "migrationSQLOutputFile: " + migrationSqlOutputFile);
-	}
+    @Override
+    protected void printSettings(String indent) {
+        super.printSettings(indent);
+        getLog().info(
+                indent + "migrationSQLOutputFile: " + migrationSqlOutputFile);
+    }
 
-	@Override
-	protected void cleanup(Database db) {
-		super.cleanup(db);
-		if (outputWriter != null) {
-			try {
-				outputWriter.close();
-			} catch (IOException e) {
-				getLog().error(e);
-			}
-		}
-	}
+    @Override
+    protected void cleanup(Database db) {
+        super.cleanup(db);
+        if (outputWriter != null) {
+            try {
+                outputWriter.close();
+            } catch (IOException e) {
+                getLog().error(e);
+            }
+        }
+    }
 }

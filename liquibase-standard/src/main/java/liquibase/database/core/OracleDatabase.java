@@ -38,7 +38,7 @@ import static java.util.ResourceBundle.getBundle;
 public class OracleDatabase extends AbstractJdbcDatabase {
 
     private static final String PROXY_USER_REGEX = ".*(?:thin|oci)\\:(.+)/@.*";
-	public static final Pattern PROXY_USER_PATTERN = Pattern.compile(PROXY_USER_REGEX);
+    public static final Pattern PROXY_USER_PATTERN = Pattern.compile(PROXY_USER_REGEX);
 
     private static final String VERSION_REGEX = "(\\d+)\\.(\\d+)\\..*";
     private static final Pattern VERSION_PATTERN = Pattern.compile(VERSION_REGEX);

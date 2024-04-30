@@ -6,12 +6,12 @@ import java.util.Map;
 public class SqlVisitorFactory {
 
     @SuppressWarnings("unchecked")
-	private final Map<String, Class> tagToClassMap;
+    private final Map<String, Class> tagToClassMap;
 
     private static final SqlVisitorFactory instance = new SqlVisitorFactory();
 
     @SuppressWarnings("unchecked")
-	private SqlVisitorFactory() {
+    private SqlVisitorFactory() {
         tagToClassMap = new HashMap<>();
         Class[] visitors = new Class[]{
                 PrependSqlVisitor.class,

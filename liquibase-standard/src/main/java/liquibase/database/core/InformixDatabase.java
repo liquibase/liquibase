@@ -29,9 +29,9 @@ public class InformixDatabase extends AbstractJdbcDatabase {
 
     private final Set<String> systemTablesAndViews = new HashSet<>();
 
-	private static final String CREATE_VIEW_AS_REGEX ="^CREATE\\s+.*?VIEW\\s+.*?AS\\s+";
+    private static final String CREATE_VIEW_AS_REGEX ="^CREATE\\s+.*?VIEW\\s+.*?AS\\s+";
     private static final Pattern CREATE_VIEW_AS_PATTERN = Pattern.compile(CREATE_VIEW_AS_REGEX,
-    		Pattern.CASE_INSENSITIVE | Pattern.DOTALL);
+            Pattern.CASE_INSENSITIVE | Pattern.DOTALL);
 
     public InformixDatabase() {
         super.setCurrentDateTimeFunction("CURRENT " + DATETIME_FIELD_QUALIFIER);

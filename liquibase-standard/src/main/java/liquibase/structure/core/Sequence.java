@@ -79,21 +79,21 @@ public class Sequence extends AbstractDatabaseObject {
         return getName();
     }
 
-	/**
-	 * @return Returns the schema.
-	 */
-	@Override
+    /**
+     * @return Returns the schema.
+     */
+    @Override
     public Schema getSchema () {
-		return getAttribute("schema", Schema.class);
-	}
+        return getAttribute("schema", Schema.class);
+    }
 
-	/**
-	 * @param schema The schema to set.
-	 */
-	public Sequence setSchema (Schema schema) {
-		this.setAttribute("schema", schema);
+    /**
+     * @param schema The schema to set.
+     */
+    public Sequence setSchema (Schema schema) {
+        this.setAttribute("schema", schema);
         return this;
-	}
+    }
 
     public Sequence setSchema(String catalog, String schema) {
         return setSchema(new Schema(catalog, schema));

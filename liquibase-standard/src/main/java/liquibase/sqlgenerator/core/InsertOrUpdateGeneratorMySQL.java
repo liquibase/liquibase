@@ -34,21 +34,21 @@ public class InsertOrUpdateGeneratorMySQL extends InsertOrUpdateGenerator {
         for(String columnKey:insertOrUpdateStatement.getColumnValues().keySet())
         {
             if (!hashPkFields.contains(columnKey) && insertOrUpdateStatement.getAllowColumnUpdate(columnKey)) {
-            	hasFields = true;
-            	updateClause.append(database.escapeObjectName(columnKey, Column.class)).append(" = ");
+                hasFields = true;
+                updateClause.append(database.escapeObjectName(columnKey, Column.class)).append(" = ");
                 Object columnValue = insertOrUpdateStatement.getColumnValue(columnKey);
                 updateClause.append(DataTypeFactory.getInstance().fromObject(columnValue, database).objectToSql(columnValue, database));
-            	updateClause.append(",");
+                updateClause.append(",");
             }
         }
         
         if(hasFields) {
-        	// append the updateClause onto the end of the insert statement
+            // append the updateClause onto the end of the insert statement
             updateClause.deleteCharAt(updateClause.lastIndexOf(","));
-        	sql.append(updateClause);
+            sql.append(updateClause);
         } else {
-        	// insert IGNORE keyword into insert statement
-        	sql.insert(sql.indexOf("INSERT ")+"INSERT ".length(), "IGNORE ");
+            // insert IGNORE keyword into insert statement
+            sql.insert(sql.indexOf("INSERT ")+"INSERT ".length(), "IGNORE ");
         }
 
         return sql.toString();
@@ -56,11 +56,11 @@ public class InsertOrUpdateGeneratorMySQL extends InsertOrUpdateGenerator {
 
     @Override
     protected String getUpdateStatement(InsertOrUpdateStatement insertOrUpdateStatement, Database database, String whereClause, SqlGeneratorChain sqlGeneratorChain) throws LiquibaseException {
-    	if (insertOrUpdateStatement.getOnlyUpdate()) {
-    		return super.getUpdateStatement(insertOrUpdateStatement, database, whereClause, sqlGeneratorChain);
-    	} else {
+        if (insertOrUpdateStatement.getOnlyUpdate()) {
+            return super.getUpdateStatement(insertOrUpdateStatement, database, whereClause, sqlGeneratorChain);
+        } else {
             return "";
-    	}
+        }
     }
 
     @Override

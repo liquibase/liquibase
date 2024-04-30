@@ -187,11 +187,11 @@
             <column name="id" type="int" autoIncrement="true"/>
             <column name="line1" type="varchar(255)"/>
             <column name="line2" type="varchar(255)">
-            	<constraints nullable="true"/>
+                <constraints nullable="true"/>
             </column>
             <column name="city" type="varchar(255)"/>
             <column name="state" type="char(2)">
-            	<constraints nullable="true"/>
+                <constraints nullable="true"/>
             </column>
             <column name="postalcode" type="varchar(15)"/>
         </createTable>

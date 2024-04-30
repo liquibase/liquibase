@@ -32,13 +32,13 @@ public class LoadDataColumnConfig extends ColumnConfig {
     /**
      * Returns true if this Column should be updated. Returns null if update hasn't been explicitly assigned.
      */  
-	public Boolean getAllowUpdate() {
-		return allowUpdate;
-	}
+    public Boolean getAllowUpdate() {
+        return allowUpdate;
+    }
 
-	public void setAllowUpdate(Boolean getAllowUpdate) {
-		this.allowUpdate = getAllowUpdate;
-	}
+    public void setAllowUpdate(Boolean getAllowUpdate) {
+        this.allowUpdate = getAllowUpdate;
+    }
 
     @Override
     public void load(ParsedNode parsedNode, ResourceAccessor resourceAccessor) throws ParsedNodeException {

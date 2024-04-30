@@ -66,7 +66,7 @@ public class DropForeignKeyConstraintChange extends AbstractChange {
                         getBaseTableSchemaName(),
                         getBaseTableName(),
                         getConstraintName()),
-        };    	
+        };        
     }
 
     @Override

@@ -7,28 +7,28 @@ import java.util.HashSet;
 
 public class SingleLineComment implements Sql {
 
-	private final String sql;
-	private final String lineCommentToken;
-	
-	public SingleLineComment(String sql, String lineCommentToken) {
-		this.sql = sql;
-		this.lineCommentToken = lineCommentToken;
-	}
-	
-	@Override
+    private final String sql;
+    private final String lineCommentToken;
+    
+    public SingleLineComment(String sql, String lineCommentToken) {
+        this.sql = sql;
+        this.lineCommentToken = lineCommentToken;
+    }
+    
+    @Override
     public Collection<? extends DatabaseObject> getAffectedDatabaseObjects() {
-		return new HashSet<>();
-	}
+        return new HashSet<>();
+    }
 
-	@Override
+    @Override
     public String getEndDelimiter() {
-		return "\n";
-	}
+        return "\n";
+    }
 
-	@Override
+    @Override
     public String toSql() {
-		return lineCommentToken + ' ' + sql;
-	}
+        return lineCommentToken + ' ' + sql;
+    }
 
     @Override
     public String toString() {

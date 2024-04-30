@@ -13,7 +13,7 @@ import java.nio.file.Files;
 import java.util.Properties;
 
 public class ChangeExecListenerUtilsTest extends Assert {
-//	private Database database = createMock(Database.class);
+//    private Database database = createMock(Database.class);
     private ResourceAccessor resourceAccessor = new ClassLoaderResourceAccessor();
 
     private File tmpFile;
@@ -34,79 +34,79 @@ public class ChangeExecListenerUtilsTest extends Assert {
         tmpFile.delete();
     }
 
-//	@Test
-//	public void testWithProperties() throws Exception {
-//		ChangeExecListenerWithProperties listener =
-//				(ChangeExecListenerWithProperties) ChangeExecListenerUtils.getChangeExecListener(database, resourceAccessor,
-//			ChangeExecListenerWithProperties.class.getName(),
-//			tmpFile.getAbsolutePath());
+//    @Test
+//    public void testWithProperties() throws Exception {
+//        ChangeExecListenerWithProperties listener =
+//                (ChangeExecListenerWithProperties) ChangeExecListenerUtils.getChangeExecListener(database, resourceAccessor,
+//            ChangeExecListenerWithProperties.class.getName(),
+//            tmpFile.getAbsolutePath());
 //
-//		assertEquals("value", listener.getProperties().get("test"));
-//		assertEquals("table.name, table2.name2", listener.getProperties().get("exclusions"));
-//	}
+//        assertEquals("value", listener.getProperties().get("test"));
+//        assertEquals("table.name, table2.name2", listener.getProperties().get("exclusions"));
+//    }
 //
-//	@Test
-//	public void testWithPropertiesAndEmptyConstructor() throws Exception {
-//		ChangeExecListenerNoPropertiesOrDatabase listener =
-//				(ChangeExecListenerNoPropertiesOrDatabase) ChangeExecListenerUtils.getChangeExecListener(database, resourceAccessor,
-//						ChangeExecListenerNoPropertiesOrDatabase.class.getName(),
-//			tmpFile.getAbsolutePath());
-//		assertNotNull(listener);
-//	}
+//    @Test
+//    public void testWithPropertiesAndEmptyConstructor() throws Exception {
+//        ChangeExecListenerNoPropertiesOrDatabase listener =
+//                (ChangeExecListenerNoPropertiesOrDatabase) ChangeExecListenerUtils.getChangeExecListener(database, resourceAccessor,
+//                        ChangeExecListenerNoPropertiesOrDatabase.class.getName(),
+//            tmpFile.getAbsolutePath());
+//        assertNotNull(listener);
+//    }
 //
-//	@Test
-//	public void testNoPropertiesOrDatabase() throws Exception {
-//		ChangeExecListenerNoPropertiesOrDatabase listener = (ChangeExecListenerNoPropertiesOrDatabase)
-//		ChangeExecListenerUtils.getChangeExecListener(database, resourceAccessor,
-//				ChangeExecListenerNoPropertiesOrDatabase.class.getName(), null);
-//		assertNotNull(listener);
-//	}
+//    @Test
+//    public void testNoPropertiesOrDatabase() throws Exception {
+//        ChangeExecListenerNoPropertiesOrDatabase listener = (ChangeExecListenerNoPropertiesOrDatabase)
+//        ChangeExecListenerUtils.getChangeExecListener(database, resourceAccessor,
+//                ChangeExecListenerNoPropertiesOrDatabase.class.getName(), null);
+//        assertNotNull(listener);
+//    }
 //
-//	@Test
-//	public void testWithDatabaseNoProperties() throws Exception {
-//		ChangeExecListenerWithDatabase listener = (ChangeExecListenerWithDatabase)
-//				ChangeExecListenerUtils.getChangeExecListener(database, resourceAccessor,
-//				ChangeExecListenerWithDatabase.class.getName(), null);
+//    @Test
+//    public void testWithDatabaseNoProperties() throws Exception {
+//        ChangeExecListenerWithDatabase listener = (ChangeExecListenerWithDatabase)
+//                ChangeExecListenerUtils.getChangeExecListener(database, resourceAccessor,
+//                ChangeExecListenerWithDatabase.class.getName(), null);
 //
-//		assertEquals(database, listener.getDatabase());
-//	}
+//        assertEquals(database, listener.getDatabase());
+//    }
 //
-//	@Test
-//	public void testWithPropertiesAndDatabase() throws Exception {
-//		ChangeExecListenerWithPropertiesAndDatabase listener =
-//				(ChangeExecListenerWithPropertiesAndDatabase) ChangeExecListenerUtils.getChangeExecListener(
-//						database, resourceAccessor,
-//						ChangeExecListenerWithPropertiesAndDatabase.class.getName(),
-//			tmpFile.getAbsolutePath());
+//    @Test
+//    public void testWithPropertiesAndDatabase() throws Exception {
+//        ChangeExecListenerWithPropertiesAndDatabase listener =
+//                (ChangeExecListenerWithPropertiesAndDatabase) ChangeExecListenerUtils.getChangeExecListener(
+//                        database, resourceAccessor,
+//                        ChangeExecListenerWithPropertiesAndDatabase.class.getName(),
+//            tmpFile.getAbsolutePath());
 //
-//		assertEquals("value", listener.getProperties().get("test"));
-//		assertEquals("table.name, table2.name2", listener.getProperties().get("exclusions"));
-//		assertEquals(database, listener.getDatabase());
-//	}
+//        assertEquals("value", listener.getProperties().get("test"));
+//        assertEquals("table.name, table2.name2", listener.getProperties().get("exclusions"));
+//        assertEquals(database, listener.getDatabase());
+//    }
 //
-//	// make it a bit simpler by handling both combinations of Database and Properties
-//	@Test
-//	public void testWithDatabaseAndProperties() throws Exception {
-//		ChangeExecListenerWithDatabaseAndProperties listener =
-//		(ChangeExecListenerWithDatabaseAndProperties) ChangeExecListenerUtils.getChangeExecListener(
-//				database, resourceAccessor,
-//				ChangeExecListenerWithDatabaseAndProperties.class.getName(),
-//				tmpFile.getAbsolutePath());
+//    // make it a bit simpler by handling both combinations of Database and Properties
+//    @Test
+//    public void testWithDatabaseAndProperties() throws Exception {
+//        ChangeExecListenerWithDatabaseAndProperties listener =
+//        (ChangeExecListenerWithDatabaseAndProperties) ChangeExecListenerUtils.getChangeExecListener(
+//                database, resourceAccessor,
+//                ChangeExecListenerWithDatabaseAndProperties.class.getName(),
+//                tmpFile.getAbsolutePath());
 //
-//		assertEquals("value", listener.getProperties().get("test"));
-//		assertEquals("table.name, table2.name2", listener.getProperties().get("exclusions"));
-//		assertEquals(database, listener.getDatabase());
-//	}
+//        assertEquals("value", listener.getProperties().get("test"));
+//        assertEquals("table.name, table2.name2", listener.getProperties().get("exclusions"));
+//        assertEquals(database, listener.getDatabase());
+//    }
 //
-//	@Test
-//	public void testWithDatabaseAndNullProperties() throws Exception {
-//		ChangeExecListenerWithDatabaseAndProperties listener =
-//				(ChangeExecListenerWithDatabaseAndProperties) ChangeExecListenerUtils.getChangeExecListener(
-//						database, resourceAccessor,
-//						ChangeExecListenerWithDatabaseAndProperties.class.getName(),
-//			null);
+//    @Test
+//    public void testWithDatabaseAndNullProperties() throws Exception {
+//        ChangeExecListenerWithDatabaseAndProperties listener =
+//                (ChangeExecListenerWithDatabaseAndProperties) ChangeExecListenerUtils.getChangeExecListener(
+//                        database, resourceAccessor,
+//                        ChangeExecListenerWithDatabaseAndProperties.class.getName(),
+//            null);
 //
-//		assertNull(listener.getProperties());
-//		assertEquals(database, listener.getDatabase());
-//	}
+//        assertNull(listener.getProperties());
+//        assertEquals(database, listener.getDatabase());
+//    }
 }

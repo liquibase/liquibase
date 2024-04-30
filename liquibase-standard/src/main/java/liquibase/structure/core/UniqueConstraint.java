@@ -18,29 +18,29 @@ public class UniqueConstraint extends AbstractDatabaseObject {
         setAttribute("deferrable", false);
         setAttribute("initiallyDeferred", false);
         setAttribute("disabled", false);
-		setAttribute("validate", true);
+        setAttribute("validate", true);
     }
 
     public UniqueConstraint(String name, String tableCatalog, String tableSchema, String tableName, Column... columns) {
         this();
         setName(name);
         if ((tableName != null) && (columns != null)) {
-        	setRelation(new Table(tableCatalog, tableSchema, tableName));
+            setRelation(new Table(tableCatalog, tableSchema, tableName));
             setColumns(new ArrayList<>(Arrays.asList(columns)));
         }
     }
 
-	@Override
+    @Override
     public DatabaseObject[] getContainingObjects() {
-		return getColumns().toArray(new Column[0]);
-	}
+        return getColumns().toArray(new Column[0]);
+    }
 
-	@Override
+    @Override
     public String getName() {
-		return getAttribute("name", String.class);
-	}
+        return getAttribute("name", String.class);
+    }
 
-	@Override
+    @Override
     public UniqueConstraint setName(String constraintName) {
         this.setAttribute("name", constraintName);
         return this;
@@ -60,34 +60,34 @@ public class UniqueConstraint extends AbstractDatabaseObject {
      * @deprecated Use {@link #getRelation()}
      */
     @Deprecated
-	public Table getTable() {
-		Relation relation = getRelation();
-		if (relation instanceof Table)
-			return (Table) relation;
-		else
-			return null;
-	}
+    public Table getTable() {
+        Relation relation = getRelation();
+        if (relation instanceof Table)
+            return (Table) relation;
+        else
+            return null;
+    }
 
     /**
      * @deprecated Use {@link #setRelation(Relation)}
      */
     @Deprecated
-	public UniqueConstraint setTable(Table table) {
-		return setRelation(table);
+    public UniqueConstraint setTable(Table table) {
+        return setRelation(table);
     }
 
     public Relation getRelation() {
-    	return getAttribute("table", Relation.class);
+        return getAttribute("table", Relation.class);
     }
 
     public UniqueConstraint setRelation(Relation relation) {
-    	this.setAttribute("table", relation);
+        this.setAttribute("table", relation);
         return this;
     }
 
-	public List<Column> getColumns() {
-		return getAttribute("columns", List.class);
-	}
+    public List<Column> getColumns() {
+        return getAttribute("columns", List.class);
+    }
 
     public UniqueConstraint setColumns(List<Column> columns) {
         setAttribute("columns", columns);
@@ -111,11 +111,11 @@ public class UniqueConstraint extends AbstractDatabaseObject {
     }
 
     public boolean isDeferrable() {
-		return getAttribute("deferrable", Boolean.class);
-	}
+        return getAttribute("deferrable", Boolean.class);
+    }
 
-	public UniqueConstraint setDeferrable(boolean deferrable) {
-		this.setAttribute("deferrable",  deferrable);
+    public UniqueConstraint setDeferrable(boolean deferrable) {
+        this.setAttribute("deferrable",  deferrable);
         return this;
     }
 
@@ -125,9 +125,9 @@ public class UniqueConstraint extends AbstractDatabaseObject {
    * uniqueness constraint or not. 
    * @return true if ENABLE VALIDATE (this is the default), or false if ENABLE NOVALIDATE.
    */
-	public boolean shouldValidate() {
-		return getAttribute("validate", true);
-	}
+    public boolean shouldValidate() {
+        return getAttribute("validate", true);
+    }
 
   /**
    * @param shouldValidate - if shouldValidate is set to FALSE then the constraint will be created
@@ -136,32 +136,32 @@ public class UniqueConstraint extends AbstractDatabaseObject {
    * to see if it complies with the constraint logic. The default state for unique constraints is to
    * have 'ENABLE VALIDATE' set.
    */
-	public UniqueConstraint setShouldValidate(boolean shouldValidate) {
-		this.setAttribute("validate", shouldValidate);
-		return this;
-	}
-
-	public boolean isInitiallyDeferred() {
-		return getAttribute("initiallyDeferred", Boolean.class);
-	}
-
-	public UniqueConstraint setInitiallyDeferred(boolean initiallyDeferred) {
-		this.setAttribute("initiallyDeferred", initiallyDeferred);
+    public UniqueConstraint setShouldValidate(boolean shouldValidate) {
+        this.setAttribute("validate", shouldValidate);
         return this;
     }
 
-	public String getColumnNames() {
-		return StringUtil.join(getColumns(), ", ", obj -> ((Column) obj).toString(false));
-	}
+    public boolean isInitiallyDeferred() {
+        return getAttribute("initiallyDeferred", Boolean.class);
+    }
 
-	public UniqueConstraint setDisabled(boolean disabled) {
-		this.setAttribute("disabled", disabled);
+    public UniqueConstraint setInitiallyDeferred(boolean initiallyDeferred) {
+        this.setAttribute("initiallyDeferred", initiallyDeferred);
         return this;
     }
 
-	public boolean isDisabled() {
-		return getAttribute("disabled", Boolean.class);
-	}
+    public String getColumnNames() {
+        return StringUtil.join(getColumns(), ", ", obj -> ((Column) obj).toString(false));
+    }
+
+    public UniqueConstraint setDisabled(boolean disabled) {
+        this.setAttribute("disabled", disabled);
+        return this;
+    }
+
+    public boolean isDisabled() {
+        return getAttribute("disabled", Boolean.class);
+    }
 
     public Index getBackingIndex() {
         return getAttribute("backingIndex", Index.class);
@@ -173,64 +173,64 @@ public class UniqueConstraint extends AbstractDatabaseObject {
 
     }
 
-	public UniqueConstraint setClustered(boolean clustered) {
-		this.setAttribute("clustered", clustered);
-		return this;
-	}
+    public UniqueConstraint setClustered(boolean clustered) {
+        this.setAttribute("clustered", clustered);
+        return this;
+    }
 
-	public boolean isClustered() {
-		return getAttribute("clustered", false);
-	}
+    public boolean isClustered() {
+        return getAttribute("clustered", false);
+    }
 
-	@Override
-	public boolean equals(Object o) {
-		if (this == o)
-			return true;
-		if ((o == null) || (getClass() != o.getClass()))
-			return false;
-		if (null == this.getColumnNames())
-			return false;
-		UniqueConstraint that = (UniqueConstraint) o;
-		boolean result = false;
+    @Override
+    public boolean equals(Object o) {
+        if (this == o)
+            return true;
+        if ((o == null) || (getClass() != o.getClass()))
+            return false;
+        if (null == this.getColumnNames())
+            return false;
+        UniqueConstraint that = (UniqueConstraint) o;
+        boolean result = false;
         result = !((getColumnNames() != null) ? !getColumnNames().equalsIgnoreCase(that.getColumnNames()) : (that
             .getColumnNames() != null)) && (isDeferrable() == that.isDeferrable()) && (isInitiallyDeferred() == that
             .isInitiallyDeferred()) && (isDisabled() == that.isDisabled());
-		// Need check for nulls here due to NullPointerException using
-		// Postgres
-		if (result) {
-			if (null == this.getRelation()) {
-				result = null == that.getRelation();
-			} else if (null == that.getRelation()) {
-				result = false;
-			} else {
-				result = this.getRelation().equals(that.getRelation());
-			}
-		}
+        // Need check for nulls here due to NullPointerException using
+        // Postgres
+        if (result) {
+            if (null == this.getRelation()) {
+                result = null == that.getRelation();
+            } else if (null == that.getRelation()) {
+                result = false;
+            } else {
+                result = this.getRelation().equals(that.getRelation());
+            }
+        }
 
-		return result;
+        return result;
 
-	}
+    }
 
-	@Override
+    @Override
     public int compareTo(Object other) {
         UniqueConstraint o = (UniqueConstraint) other;
-		// Need check for nulls here due to NullPointerException using Postgres
-		int returnValue = 0;
-		if (getTable() != null && o.getTable() != null) {
-			returnValue = getTable().compareTo(o.getTable());
-		} else if (getTable() != null) {
-			return 1;
-		} else if (o.getTable() != null) {
-			return -1;
-		}
-		if (returnValue == 0) {
-			returnValue = this.getName().compareTo(o.getName());
-		}
-		if (returnValue == 0) {
-			returnValue = this.getColumnNames().compareTo(o.getColumnNames());
-		}
-		return returnValue;
-	}
+        // Need check for nulls here due to NullPointerException using Postgres
+        int returnValue = 0;
+        if (getTable() != null && o.getTable() != null) {
+            returnValue = getTable().compareTo(o.getTable());
+        } else if (getTable() != null) {
+            return 1;
+        } else if (o.getTable() != null) {
+            return -1;
+        }
+        if (returnValue == 0) {
+            returnValue = this.getName().compareTo(o.getName());
+        }
+        if (returnValue == 0) {
+            returnValue = this.getColumnNames().compareTo(o.getColumnNames());
+        }
+        return returnValue;
+    }
 
     @Override
     public void load(ParsedNode parsedNode, ResourceAccessor resourceAccessor) throws ParsedNodeException {
@@ -238,22 +238,22 @@ public class UniqueConstraint extends AbstractDatabaseObject {
     }
 
     @Override
-	public int hashCode() {
-		int result = 0;
-		if (this.getRelation() != null) {
-			result = this.getRelation().hashCode();
-		}
-		if (this.getName() != null) {
+    public int hashCode() {
+        int result = 0;
+        if (this.getRelation() != null) {
+            result = this.getRelation().hashCode();
+        }
+        if (this.getName() != null) {
             result = (31 * result) + this.getName().toUpperCase().hashCode();
-		}
-		if (getColumnNames() != null) {
+        }
+        if (getColumnNames() != null) {
             result = (31 * result) + getColumnNames().hashCode();
-		}
-		return result;
-	}
+        }
+        return result;
+    }
 
-	@Override
-	public String toString() {
+    @Override
+    public String toString() {
         if (getRelation() == null) {
             return getName();
         } else {

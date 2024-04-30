@@ -297,27 +297,27 @@ public class CreateViewChange extends AbstractChange implements ReplaceIfExists 
             fullDefinition = this.fullDefinition;
         }
 
-		String selectQuery;
-		String path = getPath();
-		if (path == null) {
-			selectQuery = StringUtil.trimToNull(getSelectQuery());
-		} else {
-			try {
-				InputStream stream = openSqlStream();
-				if (stream == null) {
-					throw new IOException(FileUtil.getFileNotFoundMessage(path));
-				}
-				selectQuery = StreamUtil.readStreamAsString(stream, encoding);
-			    if (getChangeSet() != null) {
-					ChangeLogParameters parameters = getChangeSet().getChangeLogParameters();
-					if (parameters != null) {
-						selectQuery = parameters.expandExpressions(selectQuery, getChangeSet().getChangeLog());
-					}
-				}
-			} catch (IOException e) {
-				throw new UnexpectedLiquibaseException(e);
-			}
-		}
+        String selectQuery;
+        String path = getPath();
+        if (path == null) {
+            selectQuery = StringUtil.trimToNull(getSelectQuery());
+        } else {
+            try {
+                InputStream stream = openSqlStream();
+                if (stream == null) {
+                    throw new IOException(FileUtil.getFileNotFoundMessage(path));
+                }
+                selectQuery = StreamUtil.readStreamAsString(stream, encoding);
+                if (getChangeSet() != null) {
+                    ChangeLogParameters parameters = getChangeSet().getChangeLogParameters();
+                    if (parameters != null) {
+                        selectQuery = parameters.expandExpressions(selectQuery, getChangeSet().getChangeLog());
+                    }
+                }
+            } catch (IOException e) {
+                throw new UnexpectedLiquibaseException(e);
+            }
+        }
 
         if (!supportsReplaceIfExistsOption(database) && replaceIfExists) {
             statements.add(new DropViewStatement(getCatalogName(), getSchemaName(), getViewName()));

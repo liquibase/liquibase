@@ -10,20 +10,20 @@
         <!-- JDBC connection pool (use the built-in) -->
         <property name="connection.pool_size">5</property>
 
-		<property name="connection.datasource">java:/data</property>
-		<!-- SQL dialect -->
+        <property name="connection.datasource">java:/data</property>
+        <!-- SQL dialect -->
         <!--<property name="dialect">org.hibernate.dialect.DB2Dialect</property>-->
         <!--<property name="dialect">org.hibernate.dialect.DaffodilDBDialect</property>  -->
         <property name="dialect">org.hibernate.dialect.MySQLDialect</property>
 
         <!-- Echo all executed SQL to stdout -->
-		<property name="cache.provider_class">org.hibernate.cache.HashtableCacheProvider</property>
+        <property name="cache.provider_class">org.hibernate.cache.HashtableCacheProvider</property>
         <property name="show_sql">false</property>
         <property name="hibernate.jdbc.batch_size">0</property>
-		<property name="hibernate.cglib.use_reflection_optimizer">false</property>
+        <property name="hibernate.cglib.use_reflection_optimizer">false</property>
 
         <mapping resource="org/hibernate/auction/AuctionItem.hbm.xml"/>
-		<mapping resource="org/hibernate/auction/Bid.hbm.xml"/>
+        <mapping resource="org/hibernate/auction/Bid.hbm.xml"/>
         <mapping resource="org/hibernate/auction/User.hbm.xml"/>
 
     </session-factory>

@@ -49,8 +49,8 @@ public class AddAutoIncrementGenerator extends AbstractSqlGenerator<AddAutoIncre
             AddAutoIncrementStatement statement,
             Database database,
             SqlGeneratorChain sqlGeneratorChain) {
-    	String sql;
-    	if (database instanceof SybaseASADatabase) {
+        String sql;
+        if (database instanceof SybaseASADatabase) {
             sql = "ALTER TABLE " +
                 database.escapeTableName(statement.getCatalogName(), statement.getSchemaName(),
                     statement.getTableName()) +
@@ -59,7 +59,7 @@ public class AddAutoIncrementGenerator extends AbstractSqlGenerator<AddAutoIncre
                     .getTableName(), statement.getColumnName()) +
                 " SET " +
                 database.getAutoIncrementClause(statement.getStartWith(), statement.getIncrementBy(), null, null);
-    	} else {
+        } else {
             sql = "ALTER TABLE " +
                 database.escapeTableName(statement.getCatalogName(), statement.getSchemaName(), statement
                     .getTableName()) +
@@ -71,7 +71,7 @@ public class AddAutoIncrementGenerator extends AbstractSqlGenerator<AddAutoIncre
                     "{autoIncrement:true}", database).toDatabaseDataType(database) +
                 " " +
                 database.getAutoIncrementClause(statement.getStartWith(), statement.getIncrementBy(), statement.getGenerationType(), statement.getDefaultOnNull());
-    	}
+        }
         return new Sql[]{
             new UnparsedSql(sql, getAffectedColumn(statement))
         };

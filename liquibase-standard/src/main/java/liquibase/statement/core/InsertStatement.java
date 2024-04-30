@@ -45,6 +45,6 @@ public class InsertStatement extends AbstractSqlStatement {
     }
     
     public InsertStatement addColumn(ColumnConfig columnConfig) {
-    	return addColumnValue(columnConfig.getName(), columnConfig.getValueObject());
+        return addColumnValue(columnConfig.getName(), columnConfig.getValueObject());
     }
 }

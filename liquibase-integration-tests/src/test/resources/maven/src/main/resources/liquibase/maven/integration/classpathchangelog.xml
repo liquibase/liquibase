@@ -8,6 +8,6 @@
     <changeSet id="1" author="lujop">
         <createTable tableName="hello">
             <column name="world" type="varchar(50)"/>
-        </createTable>		
+        </createTable>        
     </changeSet>
 </databaseChangeLog>

@@ -68,34 +68,34 @@ public class CreateIndexGenerator extends AbstractSqlGenerator<CreateIndexStatem
     @Override
     public Sql[] generateSql(CreateIndexStatement statement, Database database, SqlGeneratorChain sqlGeneratorChain)
     {
-	    if (database instanceof OracleDatabase) {
-		    /*
-		     * Oracle automatically creates indexes for PRIMARY KEY and UNIQUE constraints, but does not do so
-	         * for FOREIGN KEY constraints, though it is highly recommended to do to avoid potentially severe
-	         *  performance problems when deleting rows from the parent table or changing the key column(s) in the
-	         *  parent table.
-		      */
-		    List<String> associatedWith = StringUtil.splitAndTrim(statement.getAssociatedWith(), ",");
-		    if ((associatedWith != null) && (associatedWith.contains(Index.MARK_PRIMARY_KEY) || associatedWith
+        if (database instanceof OracleDatabase) {
+            /*
+             * Oracle automatically creates indexes for PRIMARY KEY and UNIQUE constraints, but does not do so
+             * for FOREIGN KEY constraints, though it is highly recommended to do to avoid potentially severe
+             *  performance problems when deleting rows from the parent table or changing the key column(s) in the
+             *  parent table.
+              */
+            List<String> associatedWith = StringUtil.splitAndTrim(statement.getAssociatedWith(), ",");
+            if ((associatedWith != null) && (associatedWith.contains(Index.MARK_PRIMARY_KEY) || associatedWith
                 .contains(Index.MARK_UNIQUE_CONSTRAINT))) {
-			    return EMPTY_SQL;
-		    }
-	    } else {
-		    // Default filter of index creation:
-		    // creation of all indexes with associations are switched off.
-		    List<String> associatedWith = StringUtil.splitAndTrim(statement.getAssociatedWith(), ",");
-		    if ((associatedWith != null) && (associatedWith.contains(Index.MARK_PRIMARY_KEY) || associatedWith
+                return EMPTY_SQL;
+            }
+        } else {
+            // Default filter of index creation:
+            // creation of all indexes with associations are switched off.
+            List<String> associatedWith = StringUtil.splitAndTrim(statement.getAssociatedWith(), ",");
+            if ((associatedWith != null) && (associatedWith.contains(Index.MARK_PRIMARY_KEY) || associatedWith
                 .contains(Index.MARK_UNIQUE_CONSTRAINT) || associatedWith.contains(Index.MARK_FOREIGN_KEY))) {
-			    return EMPTY_SQL;
-		    }
-	    }
+                return EMPTY_SQL;
+            }
+        }
 
-	    StringBuilder buffer = new StringBuilder();
+        StringBuilder buffer = new StringBuilder();
 
-	    buffer.append("CREATE ");
-	    if ((statement.isUnique() != null) && statement.isUnique()) {
-		    buffer.append("UNIQUE ");
-	    }
+        buffer.append("CREATE ");
+        if ((statement.isUnique() != null) && statement.isUnique()) {
+            buffer.append("UNIQUE ");
+        }
 
 
         if (database instanceof MSSQLDatabase) {
@@ -110,17 +110,17 @@ public class CreateIndexGenerator extends AbstractSqlGenerator<CreateIndexStatem
 
         buffer.append("INDEX ");
 
-	    if (statement.getIndexName() != null) {
+        if (statement.getIndexName() != null) {
             String indexSchema = statement.getTableSchemaName();
             buffer.append(database.escapeIndexName(statement.getTableCatalogName(), indexSchema, statement.getIndexName())).append(" ");
-	    }
-	    buffer.append("ON ");
+        }
+        buffer.append("ON ");
         if ((database instanceof OracleDatabase) && (statement.isClustered() != null) && statement.isClustered()){
             buffer.append("CLUSTER ");
         }
-	    buffer.append(database.escapeTableName(statement.getTableCatalogName(), statement.getTableSchemaName(), statement.getTableName())).append("(");
-	    Iterator<AddColumnConfig> iterator = Arrays.asList(statement.getColumns()).iterator();
-	    while (iterator.hasNext()) {
+        buffer.append(database.escapeTableName(statement.getTableCatalogName(), statement.getTableSchemaName(), statement.getTableName())).append("(");
+        Iterator<AddColumnConfig> iterator = Arrays.asList(statement.getColumns()).iterator();
+        while (iterator.hasNext()) {
             AddColumnConfig column = iterator.next();
             if (column.getComputed() == null) {
                 buffer.append(database.escapeColumnName(statement.getTableCatalogName(), statement.getTableSchemaName(), statement.getTableName(), column.getName(), false));
@@ -135,20 +135,20 @@ public class CreateIndexGenerator extends AbstractSqlGenerator<CreateIndexStatem
                 buffer.append(" DESC");
             }
             if (iterator.hasNext()) {
-			    buffer.append(", ");
-		    }
-	    }
-	    buffer.append(")");
+                buffer.append(", ");
+            }
+        }
+        buffer.append(")");
 
-	    if ((StringUtil.trimToNull(statement.getTablespace()) != null) && database.supportsTablespaces()) {
-		    if ((database instanceof MSSQLDatabase) || (database instanceof SybaseASADatabase)) {
-			    buffer.append(" ON ").append(statement.getTablespace());
-		    } else if ((database instanceof AbstractDb2Database) || (database instanceof InformixDatabase)) {
-			    buffer.append(" IN ").append(statement.getTablespace());
-		    } else {
-			    buffer.append(" TABLESPACE ").append(statement.getTablespace());
-		    }
-	    }
+        if ((StringUtil.trimToNull(statement.getTablespace()) != null) && database.supportsTablespaces()) {
+            if ((database instanceof MSSQLDatabase) || (database instanceof SybaseASADatabase)) {
+                buffer.append(" ON ").append(statement.getTablespace());
+            } else if ((database instanceof AbstractDb2Database) || (database instanceof InformixDatabase)) {
+                buffer.append(" IN ").append(statement.getTablespace());
+            } else {
+                buffer.append(" TABLESPACE ").append(statement.getTablespace());
+            }
+        }
 
         if ((database instanceof AbstractDb2Database) && (statement.isClustered() != null) && statement.isClustered()){
             buffer.append(" CLUSTER");

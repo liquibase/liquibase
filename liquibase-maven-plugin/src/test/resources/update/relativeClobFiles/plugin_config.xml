@@ -3,12 +3,12 @@
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
   <modelVersion>4.0.0</modelVersion>
 
-	<groupId>ch.inftec.ju.test</groupId>
-	<artifactId>project-to-test</artifactId>
-	<version>1.0-SNAPSHOT</version>
-	<packaging>jar</packaging>
-	<name>Test Mojo</name>
-	
+    <groupId>ch.inftec.ju.test</groupId>
+    <artifactId>project-to-test</artifactId>
+    <version>1.0-SNAPSHOT</version>
+    <packaging>jar</packaging>
+    <name>Test Mojo</name>
+    
   <build>
     <plugins>
       <plugin>
@@ -19,9 +19,9 @@
           <changeLogFile>src/test/resources/update/relativeClobFiles/relativeClobFileChangeLog.xml</changeLogFile>
           <driver>org.apache.derby.jdbc.EmbeddedDriver</driver>
           <url>jdbc:derby:memory:relativeClobFiles;create=true</url>
-		  
-		  <!-- Test Stubs -->
-		  <project implementation="org.liquibase.maven.plugins.LiquibaseUpdateMojoExecutionTest_MavenProject"/>
+          
+          <!-- Test Stubs -->
+          <project implementation="org.liquibase.maven.plugins.LiquibaseUpdateMojoExecutionTest_MavenProject"/>
         </configuration>
       </plugin>
     </plugins>

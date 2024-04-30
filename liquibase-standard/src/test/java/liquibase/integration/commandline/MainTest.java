@@ -689,13 +689,13 @@ public class MainTest {
         assertTrue(true); // Just want to test if the call goes through
     }
 
-	@Test
-	public void testSplitArgWithValueEndingByEqualSing() throws CommandLineParsingException {
-		final String argName = "password";
-		final String argValue = "s3-cr3t=";
-		Main tested = new Main();
+    @Test
+    public void testSplitArgWithValueEndingByEqualSing() throws CommandLineParsingException {
+        final String argName = "password";
+        final String argValue = "s3-cr3t=";
+        Main tested = new Main();
 
-		tested.parseOptions(new String[] { "--" + argName + "=" + argValue });
+        tested.parseOptions(new String[] { "--" + argName + "=" + argValue });
 
         assertEquals("Password containing an equal sign (=) is parsed correctly", argValue, tested.password);
     }

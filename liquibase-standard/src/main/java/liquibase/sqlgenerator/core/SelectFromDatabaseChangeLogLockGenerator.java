@@ -23,8 +23,8 @@ public class SelectFromDatabaseChangeLogLockGenerator extends AbstractSqlGenerat
 
     @Override
     public Sql[] generateSql(SelectFromDatabaseChangeLogLockStatement statement, final Database database, SqlGeneratorChain sqlGeneratorChain) {
-    	String liquibaseSchema;
-   		liquibaseSchema = database.getLiquibaseSchemaName();
+        String liquibaseSchema;
+           liquibaseSchema = database.getLiquibaseSchemaName();
 
         // use LEGACY quoting since we're dealing with system objects
         ObjectQuotingStrategy currentStrategy = database.getObjectQuotingStrategy();

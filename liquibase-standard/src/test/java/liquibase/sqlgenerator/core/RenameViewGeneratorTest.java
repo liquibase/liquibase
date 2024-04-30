@@ -30,11 +30,11 @@ public abstract class RenameViewGeneratorTest {
 //                    }
 //
 //                    @Override
-//					protected boolean supportsTest(Database database) {
+//                    protected boolean supportsTest(Database database) {
 //                        return !(database instanceof SybaseASADatabase);
-//					}
+//                    }
 //
-//					protected void postExecuteAssert(DatabaseSnapshotGenerator snapshot) {
+//                    protected void postExecuteAssert(DatabaseSnapshotGenerator snapshot) {
 //                        assertNull(snapshot.getView(VIEW_NAME));
 //                        assertNotNull(snapshot.getView(NEW_VIEW_NAME));
 //                    }
@@ -47,12 +47,12 @@ public abstract class RenameViewGeneratorTest {
 //        new DatabaseTestTemplate().testOnAvailableDatabases(
 //                new SqlStatementDatabaseTest(TestContext.ALT_SCHEMA, new RenameViewStatement(TestContext.ALT_SCHEMA, VIEW_NAME, NEW_VIEW_NAME)) {
 //
-//                	@Override
-//					protected boolean supportsTest(Database database) {
+//                    @Override
+//                    protected boolean supportsTest(Database database) {
 //                        return !(database instanceof SybaseASADatabase);
-//					}
+//                    }
 //
-//					protected boolean expectedException(Database database, DatabaseException exception) {
+//                    protected boolean expectedException(Database database, DatabaseException exception) {
 //                        return database instanceof OracleDatabase || !database.supportsSchemas();
 //                    }
 //

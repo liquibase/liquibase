@@ -35,7 +35,7 @@ public class DropDefaultValueStatement extends AbstractSqlStatement {
     }
     
     public String getColumnDataType() {
-		return columnDataType;
-	}
+        return columnDataType;
+    }
 
 }

@@ -33,12 +33,12 @@ public class SpringResourceAccessorLoaderTest {
     }
 
     @Test
-	public void resourceIsFile_should_be_true_for_native_file() throws IOException {
-	    when(resource.exists()).thenReturn(true);
-	    when(resource.isFile()).thenReturn(true);
-	    when(resource.getFile()).thenThrow(UnsupportedOperationException.class);
-	    assertTrue(springResourceAccessor.resourceIsFile(resource));
-	}
+    public void resourceIsFile_should_be_true_for_native_file() throws IOException {
+        when(resource.exists()).thenReturn(true);
+        when(resource.isFile()).thenReturn(true);
+        when(resource.getFile()).thenThrow(UnsupportedOperationException.class);
+        assertTrue(springResourceAccessor.resourceIsFile(resource));
+    }
 
     @Test
     public void resourceIsFile_should_be_true_for_normal_file() throws IOException {

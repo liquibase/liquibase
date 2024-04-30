@@ -17,7 +17,7 @@
           <username>root</username>
           <outputDefaultCatalog>false</outputDefaultCatalog>
           <outputDefaultSchema>false</outputDefaultSchema>
-		  <outputFileEncoding>UTF-8</outputFileEncoding>
+          <outputFileEncoding>UTF-8</outputFileEncoding>
         </configuration>
       </plugin>
     </plugins>

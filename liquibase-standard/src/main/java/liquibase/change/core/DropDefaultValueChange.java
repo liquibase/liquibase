@@ -62,12 +62,12 @@ public class DropDefaultValueChange extends AbstractChange {
 
     @DatabaseChangeProperty(supportsDatabase = ALL, description = "Data type of the column")
     public String getColumnDataType() {
-		return columnDataType;
-	}
+        return columnDataType;
+    }
     
     public void setColumnDataType(String columnDataType) {
-		this.columnDataType = columnDataType;
-	}
+        this.columnDataType = columnDataType;
+    }
 
     @Override
     public SqlStatement[] generateStatements(Database database) {

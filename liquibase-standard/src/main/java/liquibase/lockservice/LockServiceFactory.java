@@ -14,15 +14,15 @@ public class LockServiceFactory {
 
     private static LockServiceFactory instance;
 
-	  private final List<LockService> registry = new ArrayList<>();
+      private final List<LockService> registry = new ArrayList<>();
 
-	  private final Map<Database, LockService> openLockServices = new ConcurrentHashMap<>();
+      private final Map<Database, LockService> openLockServices = new ConcurrentHashMap<>();
 
-	  public static synchronized LockServiceFactory getInstance() {
+      public static synchronized LockServiceFactory getInstance() {
         if (instance == null) {
-			      instance = new LockServiceFactory();
-		    }
-		    return instance;
+                  instance = new LockServiceFactory();
+            }
+            return instance;
     }
 
     /**
@@ -37,14 +37,14 @@ public class LockServiceFactory {
     }
 
     private LockServiceFactory() {
-		    try {
-			      for (LockService lockService : Scope.getCurrentScope().getServiceLocator().findInstances(LockService.class)) {
-				        register(lockService);
-			      }
+            try {
+                  for (LockService lockService : Scope.getCurrentScope().getServiceLocator().findInstances(LockService.class)) {
+                        register(lockService);
+                  }
         } catch (Exception e) {
-		    	  throw new RuntimeException(e);
+                  throw new RuntimeException(e);
         }
-	  }
+      }
 
     public void register(LockService lockService) {
         registry.add(0, lockService);
@@ -52,17 +52,17 @@ public class LockServiceFactory {
 
     public LockService getLockService(Database database) {
         if (!openLockServices.containsKey(database)) {
-			      SortedSet<LockService> foundServices = new TreeSet<>((o1, o2) -> -1 * Integer.compare(o1.getPriority(), o2.getPriority()));
+                  SortedSet<LockService> foundServices = new TreeSet<>((o1, o2) -> -1 * Integer.compare(o1.getPriority(), o2.getPriority()));
 
             for (LockService lockService : registry) {
                 if (lockService.supports(database)) {
-					          foundServices.add(lockService);
-				        }
+                              foundServices.add(lockService);
+                        }
             }
 
             if (foundServices.isEmpty()) {
                 throw new UnexpectedLiquibaseException("Cannot find LockService for " + database.getShortName());
-			      }
+                  }
 
             try {
                 LockService lockService = foundServices.iterator().next().getClass().getConstructor().newInstance();

@@ -41,9 +41,9 @@
     </changeSet>
     
     <changeSet id="3" author="dag">
-    	<customChange class="liquibase.change.custom.ExampleCustomSqlChange">
-    		<param name="tableName" value="table"/>
-    		<param name="columnName">column</param>
-    	</customChange>
+        <customChange class="liquibase.change.custom.ExampleCustomSqlChange">
+            <param name="tableName" value="table"/>
+            <param name="columnName">column</param>
+        </customChange>
     </changeSet>
 </databaseChangeLog>

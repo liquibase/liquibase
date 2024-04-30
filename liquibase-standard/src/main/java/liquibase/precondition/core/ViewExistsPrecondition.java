@@ -55,9 +55,9 @@ public class ViewExistsPrecondition extends AbstractPrecondition {
     @Override
     public void check(Database database, DatabaseChangeLog changeLog, ChangeSet changeSet, ChangeExecListener changeExecListener)
             throws PreconditionFailedException, PreconditionErrorException {
-    	String currentSchemaName;
+        String currentSchemaName;
         String currentCatalogName;
-    	try {
+        try {
             currentCatalogName = getCatalogName();
             currentSchemaName = getSchemaName();
             if (!SnapshotGeneratorFactory.getInstance().has(new View().setName(database.correctObjectName(getViewName(), View.class)).setSchema(new Schema(currentCatalogName, currentSchemaName)), database)) {

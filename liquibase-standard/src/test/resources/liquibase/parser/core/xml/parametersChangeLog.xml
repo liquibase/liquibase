@@ -17,15 +17,15 @@
 
     <property file= "liquibase/parser/core/xml/parameters.properties"/>
 
-	<changeSet id="1" author="paikens">
+    <changeSet id="1" author="paikens">
         <comment>Some values: overridden: '${overridden}', not.overridden: '${not.overridden}', database: '${dbNote}', contextNote: '${contextNote}', contextNote2: '${contextNote2}'</comment>
-		<sql>
-			create table ${tablename};
-		</sql>
-		<rollback>
-			drop table ${tablename};
-		</rollback>
-	</changeSet>
+        <sql>
+            create table ${tablename};
+        </sql>
+        <rollback>
+            drop table ${tablename};
+        </rollback>
+    </changeSet>
 
     <changeSet id="2" author="nvoxland">
         <comment>Some values from the file: fileProperty1: '${fileProperty1}', fileProperty2: '${fileProperty2}'</comment>

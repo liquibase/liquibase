@@ -11,10 +11,10 @@ import liquibase.exception.LiquibaseException;
  */
 public class LiquibaseReleaseLocksMojo extends AbstractLiquibaseMojo {
 
-	@Override
-	protected void performLiquibaseTask(Liquibase liquibase)
-			throws LiquibaseException {
-		liquibase.forceReleaseLocks();
-	}
+    @Override
+    protected void performLiquibaseTask(Liquibase liquibase)
+            throws LiquibaseException {
+        liquibase.forceReleaseLocks();
+    }
 
 }

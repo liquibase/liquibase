@@ -350,25 +350,25 @@ class XMLChangeLogSAXParser_RealFile_Test extends Specification {
         assert change instanceof CreateTableChange
     }
 
-	def "changeLog parameters are correctly expanded"() throws Exception {
+    def "changeLog parameters are correctly expanded"() throws Exception {
         when:
         def params = new ChangeLogParameters(new MockDatabase())
         params.setContexts(new Contexts("prod"))
-		params.set("tablename", "my_table_name")
+        params.set("tablename", "my_table_name")
         params.set("tablename2", "my_table_name_2")
         params.set("columnName", "my_column_name")
         params.set("date", new Date(9999999))
         params.set("overridden", "Value passed in")
-		def changeLog = new XMLChangeLogSAXParser().parse("liquibase/parser/core/xml/parametersChangeLog.xml", params, new JUnitResourceAccessor())
+        def changeLog = new XMLChangeLogSAXParser().parse("liquibase/parser/core/xml/parametersChangeLog.xml", params, new JUnitResourceAccessor())
 
         then: "changeSet 1"
-		changeLog.getChangeSets().size() == 2
+        changeLog.getChangeSets().size() == 2
 
-		changeLog.getChangeSets()[0].getAuthor() == "paikens"
-		changeLog.getChangeSets()[0].getId() == "1"
+        changeLog.getChangeSets()[0].getAuthor() == "paikens"
+        changeLog.getChangeSets()[0].getId() == "1"
         changeLog.getChangeSets()[0].comments == "Some values: overridden: 'Value passed in', not.overridden: 'value from changelog 2', database: 'database mock', contextNote: 'context prod', contextNote2: '\${contextNote2}'"
-		((RawSQLChange) changeLog.getChangeSets()[0].getChanges()[0]).getSql() == "create table my_table_name;"
-		((RawSQLChange) changeLog.getChangeSets()[0].rollback.changes[0]).getSql() == "drop table my_table_name"
+        ((RawSQLChange) changeLog.getChangeSets()[0].getChanges()[0]).getSql() == "create table my_table_name;"
+        ((RawSQLChange) changeLog.getChangeSets()[0].rollback.changes[0]).getSql() == "drop table my_table_name"
 
         and: "changeSet 2"
         changeLog.getChangeSets().get(1).getAuthor() == "nvoxland"
@@ -379,7 +379,7 @@ class XMLChangeLogSAXParser_RealFile_Test extends Specification {
         ((CreateTableChange) changeLog.getChangeSets().get(1).getChanges()[0]).getColumns()[0].getName() == "my_column_name"
         ((CreateTableChange) changeLog.getChangeSets().get(1).getChanges()[0]).getColumns()[0].getDefaultValue() == "a string with an \${unused} param against database mock"
 
-	}
+    }
 
     def "changeLog parameters that are not global are correctly expanded"() throws Exception {
         when:
@@ -398,7 +398,7 @@ class XMLChangeLogSAXParser_RealFile_Test extends Specification {
         changeLog.getChangeSets()[1].getLogicalFilePath() == "create_table_financial_institution_enum.xml"
     }
 
-	def "tests for particular features and edge conditions part 1 testCasesChangeLog.xml"() throws Exception {
+    def "tests for particular features and edge conditions part 1 testCasesChangeLog.xml"() throws Exception {
         when:
         def path = "liquibase/parser/core/xml/testCasesChangeLog.xml"
         DatabaseChangeLog changeLog = new XMLChangeLogSAXParser().parse(path, new ChangeLogParameters(), new JUnitResourceAccessor())

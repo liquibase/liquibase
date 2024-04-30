@@ -85,7 +85,7 @@ public class SybaseDatabaseTest extends Specification {
             def connection = Mock(DatabaseConnection)
             connection.getDatabaseMajorVersion() >> 15
             connection.getDatabaseMinorVersion() >> 5
-		
+        
             def database = new SybaseDatabase()
             database.setConnection(connection)
 
@@ -93,7 +93,7 @@ public class SybaseDatabaseTest extends Specification {
             database.getDatabaseMajorVersion() == 15
             database.getDatabaseMinorVersion() == 5
     }
-	
+    
     def testGetDatabaseVersionWhenNotImplemented() throws Exception {
         when:
             def connection = Mock(DatabaseConnection)

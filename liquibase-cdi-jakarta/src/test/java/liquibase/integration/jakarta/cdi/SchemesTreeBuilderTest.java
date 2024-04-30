@@ -53,7 +53,7 @@ public class SchemesTreeBuilderTest {
         Collection<LiquibaseSchema> previous = new ArrayList<LiquibaseSchema>(resolved.size());
 
         for (LiquibaseSchema liquibaseSchema : resolved) {
-           	if (!isNullOrEmpty(liquibaseSchema.depends())) {
+               if (!isNullOrEmpty(liquibaseSchema.depends())) {
                 assertFalse(isDependencyMissed(liquibaseSchema, previous));
             }
             previous.add(liquibaseSchema);
@@ -63,7 +63,7 @@ public class SchemesTreeBuilderTest {
 
     @Test
     public void testMixed() throws Exception {
-    	@SuppressWarnings("serial")
+        @SuppressWarnings("serial")
         Collection<LiquibaseSchema> schemes = new ArrayList<LiquibaseSchema>() {{
             addAll(getNonDependent());
             addAll(getDependent());
@@ -79,7 +79,7 @@ public class SchemesTreeBuilderTest {
 
         Collection<LiquibaseSchema> previous = new ArrayList<LiquibaseSchema>(resolved.size());
         for (LiquibaseSchema liquibaseSchema : resolved) {
-        	if (!isNullOrEmpty(liquibaseSchema.depends())) {
+            if (!isNullOrEmpty(liquibaseSchema.depends())) {
                 assertFalse(isDependencyMissed(liquibaseSchema, previous));
             }
             previous.add(liquibaseSchema);

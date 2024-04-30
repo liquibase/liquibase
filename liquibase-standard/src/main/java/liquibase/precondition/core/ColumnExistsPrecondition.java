@@ -79,8 +79,8 @@ public class ColumnExistsPrecondition extends AbstractPrecondition {
     @Override
     public void check(Database database, DatabaseChangeLog changeLog, ChangeSet changeSet, ChangeExecListener changeExecListener)
             throws PreconditionFailedException, PreconditionErrorException {
-		if (canCheckFast(database)) {
-			checkFast(database, changeLog);
+        if (canCheckFast(database)) {
+            checkFast(database, changeLog);
 
         } else {
             checkUsingSnapshot(database, changeLog);

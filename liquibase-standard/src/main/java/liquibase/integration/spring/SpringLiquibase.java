@@ -354,7 +354,7 @@ public class SpringLiquibase implements InitializingBean, BeanNameAware, Resourc
         }
 
         Database database = DatabaseFactory.getInstance().findCorrectDatabaseImplementation(liquibaseConnection);
-		if (StringUtil.trimToNull(this.defaultSchema) != null) {
+        if (StringUtil.trimToNull(this.defaultSchema) != null) {
             if (database.supports(Schema.class)) {
                 database.setDefaultSchemaName(this.defaultSchema);
             } else if (database.supports(Catalog.class)) {

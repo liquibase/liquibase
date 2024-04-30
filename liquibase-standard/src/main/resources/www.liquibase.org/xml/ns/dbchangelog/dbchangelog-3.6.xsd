@@ -266,14 +266,14 @@
     <xsd:attribute name="created" type="xsd:string"/>
         <xsd:attribute name="runOrder" type="xsd:string"/>
     <xsd:attribute name="ignore" type="booleanExp" />
-	</xsd:attributeGroup>
+    </xsd:attributeGroup>
 
     <!-- Attributes for changes -->
     <xsd:attributeGroup name="changeAttributes">
         <xsd:anyAttribute namespace="##any" processContents="lax"/>
     </xsd:attributeGroup>
 
-	<!-- Attributes for constraints -->
+    <!-- Attributes for constraints -->
     <xsd:attributeGroup name="constraintsAttributes">
         <xsd:attribute name="nullable" type="booleanExp"/>
         <xsd:attribute name="notNullConstraintName" type="xsd:string"/>
@@ -482,7 +482,7 @@
             <xsd:attribute name="forIndexName" type="xsd:string" />
             <xsd:attribute name="clustered" type="booleanExp"/>
             <xsd:attribute name="validate" type="booleanExp" />
-			<xsd:anyAttribute namespace="##other" processContents="lax"/>
+            <xsd:anyAttribute namespace="##other" processContents="lax"/>
         </xsd:complexType>
     </xsd:element>
 
@@ -582,7 +582,7 @@
             <xsd:attribute name="file" type="xsd:string"/>
             <xsd:attribute name="relativeToChangelogFile" type="booleanExp"/>
             <xsd:attribute name="usePreparedStatements" type="booleanExp" />
-			<xsd:attribute name="encoding" type="xsd:string" default="UTF-8"/>
+            <xsd:attribute name="encoding" type="xsd:string" default="UTF-8"/>
             <xsd:attribute name="separator" type="xsd:string" default=","/>
             <xsd:attribute name="quotchar" type="xsd:string" default="&quot;"/>
             <xsd:attribute name="commentLineStartsWith" type="xsd:string" default="#" />
@@ -648,7 +648,7 @@
         <xsd:attribute name="onDelete" type="fkCascadeActionOptions"/>
         <xsd:attribute name="onUpdate" type="fkCascadeActionOptions"/>
         <xsd:attribute name="referencesUniqueColumn" type="booleanExp" />
-		<xsd:attribute name="validate" type="booleanExp" />
+        <xsd:attribute name="validate" type="booleanExp" />
     </xsd:attributeGroup>
 
     <xsd:attributeGroup name="addNotNullConstraintAttrib">
@@ -663,14 +663,14 @@
     <xsd:element name="addNotNullConstraint">
         <xsd:complexType>
             <xsd:attributeGroup ref="changeAttributes" />
-			<xsd:attributeGroup ref="addNotNullConstraintAttrib"/>
+            <xsd:attributeGroup ref="addNotNullConstraintAttrib"/>
         </xsd:complexType>
     </xsd:element>
 
     <xsd:element name="addForeignKeyConstraint">
         <xsd:complexType>
             <xsd:attributeGroup ref="changeAttributes" />
-			<xsd:attributeGroup ref="addForeignKeyConstraintAttrib"/>
+            <xsd:attributeGroup ref="addForeignKeyConstraintAttrib"/>
         </xsd:complexType>
     </xsd:element>
 
@@ -856,7 +856,7 @@
     <xsd:element name="dropForeignKeyConstraint">
         <xsd:complexType>
             <xsd:attributeGroup ref="changeAttributes" />
-			<xsd:attributeGroup ref="dropForeignKeyConstraintAttrib"/>
+            <xsd:attributeGroup ref="dropForeignKeyConstraintAttrib"/>
         </xsd:complexType>
     </xsd:element>
 
@@ -870,7 +870,7 @@
     <xsd:element name="dropAllForeignKeyConstraints">
         <xsd:complexType>
             <xsd:attributeGroup ref="changeAttributes" />
-			<xsd:attributeGroup ref="dropAllForeignKeyConstraintsAttrib"/>
+            <xsd:attributeGroup ref="dropAllForeignKeyConstraintsAttrib"/>
         </xsd:complexType>
     </xsd:element>
 
@@ -935,7 +935,7 @@
                 <xsd:any namespace="##other" processContents="lax" minOccurs="0" maxOccurs="unbounded" />
             </xsd:choice>
             <xsd:attributeGroup ref="changeAttributes" />
-			<xsd:attributeGroup ref="tableNameAttribute"/>
+            <xsd:attributeGroup ref="tableNameAttribute"/>
             <xsd:attribute name="tablespace" type="xsd:string" />
             <xsd:attribute name="remarks" type="xsd:string"/>
         </xsd:complexType>
@@ -969,7 +969,7 @@
                 <xsd:element ref="column" maxOccurs="unbounded"/>
             </xsd:sequence>
             <xsd:attributeGroup ref="changeAttributes" />
-			<xsd:attributeGroup ref="tableNameAttribute"/>
+            <xsd:attributeGroup ref="tableNameAttribute"/>
             <xsd:attribute name="dbms" type="xsd:string" />
         </xsd:complexType>
     </xsd:element>
@@ -982,7 +982,7 @@
                 <xsd:element ref="whereParams" minOccurs="0" maxOccurs="1" />
             </xsd:sequence>
             <xsd:attributeGroup ref="changeAttributes" />
-			<xsd:attributeGroup ref="tableNameAttribute"/>
+            <xsd:attributeGroup ref="tableNameAttribute"/>
         </xsd:complexType>
     </xsd:element>
 
@@ -1021,7 +1021,7 @@
                 </xsd:element>
             </xsd:sequence>
             <xsd:attributeGroup ref="changeAttributes" />
-			<xsd:attributeGroup ref="tableNameAttribute"/>
+            <xsd:attributeGroup ref="tableNameAttribute"/>
         </xsd:complexType>
     </xsd:element>
 
@@ -1047,7 +1047,7 @@
                 <xsd:element ref="comment" minOccurs="0" maxOccurs="1"/>
             </xsd:sequence>
             <xsd:attributeGroup ref="changeAttributes" />
-			<xsd:attribute name="stripComments" type="booleanExp"/>
+            <xsd:attribute name="stripComments" type="booleanExp"/>
             <xsd:attribute name="splitStatements" type="booleanExp"/>
             <xsd:attribute name="endDelimiter" type="xsd:string"/>
             <xsd:attribute name="dbms" type="xsd:string" />
@@ -1060,7 +1060,7 @@
                 <xsd:element ref="comment" minOccurs="0" maxOccurs="1"/>
             </xsd:sequence>
             <xsd:attributeGroup ref="changeAttributes" />
-			<xsd:attribute name="catalogName" type="xsd:string"/>
+            <xsd:attribute name="catalogName" type="xsd:string"/>
             <xsd:attribute name="schemaName" type="xsd:string" />
             <xsd:attribute name="procedureName" type="xsd:string" />
             <xsd:attribute name="path" type="xsd:string" />
@@ -1071,49 +1071,49 @@
         </xsd:complexType>
     </xsd:element>
 
-	<xsd:element name="executeCommand">
-		<xsd:complexType>
-			<xsd:sequence>
-				<xsd:element name="arg" minOccurs="0" maxOccurs="unbounded">
-					<xsd:complexType>
-						<xsd:attribute name="value" type="xsd:string" use="required" />
-					</xsd:complexType>
-				</xsd:element>
-			</xsd:sequence>
+    <xsd:element name="executeCommand">
+        <xsd:complexType>
+            <xsd:sequence>
+                <xsd:element name="arg" minOccurs="0" maxOccurs="unbounded">
+                    <xsd:complexType>
+                        <xsd:attribute name="value" type="xsd:string" use="required" />
+                    </xsd:complexType>
+                </xsd:element>
+            </xsd:sequence>
             <xsd:attributeGroup ref="changeAttributes" />
-			<xsd:attribute name="executable" type="xsd:string" use="required" />
-			<xsd:attribute name="os" type="xsd:string" />
-		<xsd:attribute name="timeout" type="xsd:string" />
-		</xsd:complexType>
-	</xsd:element>
+            <xsd:attribute name="executable" type="xsd:string" use="required" />
+            <xsd:attribute name="os" type="xsd:string" />
+        <xsd:attribute name="timeout" type="xsd:string" />
+        </xsd:complexType>
+    </xsd:element>
 
-	<xsd:element name="sqlFile">
-		<xsd:complexType>
+    <xsd:element name="sqlFile">
+        <xsd:complexType>
             <xsd:attributeGroup ref="changeAttributes" />
-			<xsd:attribute name="path" type="xsd:string" use="required" />
-			<xsd:attribute name="stripComments" type="booleanExp" />
-			<xsd:attribute name="splitStatements" type="booleanExp" />
-			<xsd:attribute name="encoding" type="xsd:string" default="UTF-8"/>
-			<xsd:attribute name="endDelimiter" type="xsd:string" />
+            <xsd:attribute name="path" type="xsd:string" use="required" />
+            <xsd:attribute name="stripComments" type="booleanExp" />
+            <xsd:attribute name="splitStatements" type="booleanExp" />
+            <xsd:attribute name="encoding" type="xsd:string" default="UTF-8"/>
+            <xsd:attribute name="endDelimiter" type="xsd:string" />
             <xsd:attribute name="relativeToChangelogFile" type="booleanExp" />
             <xsd:attribute name="dbms" type="xsd:string" />
-		<xsd:anyAttribute namespace="##other" processContents="lax"/>
+        <xsd:anyAttribute namespace="##other" processContents="lax"/>
     </xsd:complexType>
-	</xsd:element>
+    </xsd:element>
 
-	<xsd:element name="tagDatabase">
-		<xsd:complexType>
-			<xsd:attributeGroup ref="changeAttributes" />
-			<xsd:attribute name="tag" type="xsd:string" use="required" />
+    <xsd:element name="tagDatabase">
+        <xsd:complexType>
+            <xsd:attributeGroup ref="changeAttributes" />
+            <xsd:attribute name="tag" type="xsd:string" use="required" />
 
-		</xsd:complexType>
-	</xsd:element>
+        </xsd:complexType>
+    </xsd:element>
 
-	<xsd:element name="stop">
-		<xsd:complexType mixed="true" >
-	<xsd:attributeGroup ref="changeAttributes" />
-		</xsd:complexType>
-	</xsd:element>
+    <xsd:element name="stop">
+        <xsd:complexType mixed="true" >
+    <xsd:attributeGroup ref="changeAttributes" />
+        </xsd:complexType>
+    </xsd:element>
 
     <xsd:element name="empty">
         <xsd:complexType>
@@ -1132,14 +1132,14 @@
     <xsd:element name="renameTable">
         <xsd:complexType>
             <xsd:attributeGroup ref="changeAttributes" />
-			<xsd:attributeGroup ref="renameTableAttributes"/>
+            <xsd:attributeGroup ref="renameTableAttributes"/>
         </xsd:complexType>
     </xsd:element>
 
     <xsd:element name="renameView">
         <xsd:complexType>
             <xsd:attributeGroup ref="changeAttributes" />
-			<xsd:attributeGroup ref="renameViewAttributes"/>
+            <xsd:attributeGroup ref="renameViewAttributes"/>
         </xsd:complexType>
     </xsd:element>
 
@@ -1147,14 +1147,14 @@
     <xsd:element name="dropTable">
         <xsd:complexType>
             <xsd:attributeGroup ref="changeAttributes" />
-			<xsd:attributeGroup ref="dropTableAttributes"/>
+            <xsd:attributeGroup ref="dropTableAttributes"/>
         </xsd:complexType>
     </xsd:element>
 
     <xsd:element name="dropView">
         <xsd:complexType>
             <xsd:attributeGroup ref="changeAttributes" />
-			<xsd:attribute name="viewName" type="xsd:string" use="required"/>
+            <xsd:attribute name="viewName" type="xsd:string" use="required"/>
             <xsd:attribute name="catalogName" type="xsd:string" />
             <xsd:attribute name="schemaName" type="xsd:string"/>
         </xsd:complexType>
@@ -1173,7 +1173,7 @@
     <xsd:element name="renameColumn">
         <xsd:complexType>
             <xsd:attributeGroup ref="changeAttributes" />
-			<xsd:attributeGroup ref="renameColumnAttributes"/>
+            <xsd:attributeGroup ref="renameColumnAttributes"/>
         </xsd:complexType>
     </xsd:element>
 
@@ -1183,14 +1183,14 @@
                 <xsd:element name="column" minOccurs="0" maxOccurs="unbounded" type="columnType" />
             </xsd:sequence>
             <xsd:attributeGroup ref="changeAttributes" />
-			<xsd:attributeGroup ref="dropColumnAttributes"/>
+            <xsd:attributeGroup ref="dropColumnAttributes"/>
         </xsd:complexType>
     </xsd:element>
 
     <xsd:element name="mergeColumns">
         <xsd:complexType>
             <xsd:attributeGroup ref="changeAttributes" />
-			<xsd:attributeGroup ref="tableNameAttribute"/>
+            <xsd:attributeGroup ref="tableNameAttribute"/>
             <xsd:attribute name="column1Name" type="xsd:string"
                            use="required"/>
             <xsd:attribute name="joinString" type="xsd:string" use="required"/>
@@ -1206,28 +1206,28 @@
     <xsd:element name="createSequence">
         <xsd:complexType>
             <xsd:attributeGroup ref="changeAttributes" />
-			<xsd:attributeGroup ref="sequenceAttributes"/>
+            <xsd:attributeGroup ref="sequenceAttributes"/>
         </xsd:complexType>
     </xsd:element>
 
     <xsd:element name="alterSequence">
         <xsd:complexType>
             <xsd:attributeGroup ref="changeAttributes" />
-			<xsd:attributeGroup ref="sequenceAttributes"/>
+            <xsd:attributeGroup ref="sequenceAttributes"/>
         </xsd:complexType>
     </xsd:element>
 
     <xsd:element name="dropSequence">
         <xsd:complexType>
             <xsd:attributeGroup ref="changeAttributes" />
-			<xsd:attributeGroup ref="sequenceAttributes"/>
+            <xsd:attributeGroup ref="sequenceAttributes"/>
         </xsd:complexType>
     </xsd:element>
 
     <xsd:element name="renameSequence">
         <xsd:complexType>
             <xsd:attributeGroup ref="changeAttributes" />
-			<xsd:attributeGroup ref="renameSequenceAttributes"/>
+            <xsd:attributeGroup ref="renameSequenceAttributes"/>
         </xsd:complexType>
     </xsd:element>
 
@@ -1238,34 +1238,34 @@
                 <xsd:any namespace="##other" processContents="lax" minOccurs="0" maxOccurs="unbounded" />
             </xsd:choice>
             <xsd:attributeGroup ref="changeAttributes" />
-			<xsd:attributeGroup ref="createIndex"/>
+            <xsd:attributeGroup ref="createIndex"/>
         </xsd:complexType>
     </xsd:element>
 
     <xsd:element name="dropIndex">
         <xsd:complexType>
             <xsd:attributeGroup ref="changeAttributes" />
-			<xsd:attributeGroup ref="tableNameAttribute"/>
+            <xsd:attributeGroup ref="tableNameAttribute"/>
             <xsd:attributeGroup ref="indexName"/>
             <xsd:attribute name="associatedWith" type="xsd:string" use="optional" />
         </xsd:complexType>
     </xsd:element>
 
-	<xsd:element name="customChange">
-		<xsd:complexType>
-			<xsd:sequence>
-				<xsd:element name="param" minOccurs="0" maxOccurs="unbounded">
-					<xsd:complexType mixed="true">
-						<xsd:attribute name="name" type="xsd:string" use="required" />
-						<xsd:attribute name="value" type="xsd:string" />
-					</xsd:complexType>
-				</xsd:element>
-			</xsd:sequence>
-			<xsd:attributeGroup ref="changeAttributes" />
-			<xsd:attribute name="class" type="xsd:string" use="required" />
+    <xsd:element name="customChange">
+        <xsd:complexType>
+            <xsd:sequence>
+                <xsd:element name="param" minOccurs="0" maxOccurs="unbounded">
+                    <xsd:complexType mixed="true">
+                        <xsd:attribute name="name" type="xsd:string" use="required" />
+                        <xsd:attribute name="value" type="xsd:string" />
+                    </xsd:complexType>
+                </xsd:element>
+            </xsd:sequence>
+            <xsd:attributeGroup ref="changeAttributes" />
+            <xsd:attribute name="class" type="xsd:string" use="required" />
 
-		</xsd:complexType>
-	</xsd:element>
+        </xsd:complexType>
+    </xsd:element>
 
 
     <!-- Children for changeSet -->

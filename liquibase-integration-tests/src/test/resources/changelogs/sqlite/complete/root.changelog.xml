@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
 <databaseChangeLog
-				xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-				xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
-				xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-latest.xsd">
+                xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+                xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-latest.xsd">
     <preConditions>
         <dbms type="sqlite"/>
         <sqlCheck expectedResult="1">select 1</sqlCheck>
@@ -25,7 +25,7 @@
                 <constraints nullable="false"/>
             </column>
         </createTable>
-		<insert tableName="person">
+        <insert tableName="person">
             <column name="firstname" value="Jenny"/>
             <column name="lastname" value="Doe"/>
         </insert>
@@ -34,8 +34,8 @@
         <comment>Add a username column so we can use "person" for authentication</comment>
         <addColumn tableName="person">
             <column name="username" type="varchar(8)" defaultValue="default_username">
-				<constraints nullable="false"/>
-			</column>
+                <constraints nullable="false"/>
+            </column>
         </addColumn>
     </changeSet>
     <!--<changeSet id="3" author="nvoxland">-->
@@ -93,7 +93,7 @@
     <!--</changeSet>-->
     <!--<changeSet id="8.1" author="bjohnson">-->
         <!--<comment>I guess name needs to be not-null</comment>-->
-		<!--<insert tableName="employee">-->
+        <!--<insert tableName="employee">-->
             <!--<column name="company_id" value="5"/>-->
         <!--</insert>-->
         <!--<addNotNullConstraint tableName='employee' columnName="name" defaultNullValue="UNKNOWN_NAME"-->
@@ -115,7 +115,7 @@
             </column>
         </createTable>
     </changeSet>
-	<changeSet id="11" author="nvoxland">
+    <changeSet id="11" author="nvoxland">
         <dropTable tableName="testtable"/>
     </changeSet>
     <changeSet id="12" author="nvoxland">
@@ -184,10 +184,10 @@
                 <!--deleteCascade="true"/>-->
     <!--</changeSet>-->
 
-	<!-- not directly supported on SQLite ATM (need to reactivate the support code for table recreation)
-	<changeSet id="24" author="nvoxland">
-			<dropForeignKeyConstraint baseTableName="person" constraintName="fk_person_employer"/>
-	</changeSet> -->
+    <!-- not directly supported on SQLite ATM (need to reactivate the support code for table recreation)
+    <changeSet id="24" author="nvoxland">
+            <dropForeignKeyConstraint baseTableName="person" constraintName="fk_person_employer"/>
+    </changeSet> -->
     <changeSet id="25" author="nvoxland">
         <createTable tableName="address">
             <column name="id" type="int"/>
@@ -243,41 +243,41 @@
 -->
     <changeSet id="28" author="nvoxland">
         <addDefaultValue tableName="address" columnName="line2" defaultValue="N/A"/>
-		<insert tableName="address">
+        <insert tableName="address">
             <column name="line1" value="23 Park Ave"/>
             <column name="city" value="Houston"/>
-			<column name="state" value="TX"/>
+            <column name="state" value="TX"/>
             <column name="postalcode" value="77345"/>
         </insert>
     </changeSet>
-	
+    
     <!--<changeSet id="29" author="nvoxland">-->
         <!--<dropDefaultValue tableName="address" columnName="line2"/>-->
     <!--</changeSet>-->
-	
+    
     <changeSet id="30" author="nvoxland">
         <createTable tableName="pkTest">
             <column name="id" type="int"/>
             <column name="value" type="varchar(50)"/>
         </createTable>
     </changeSet>
-	
+    
     <!--<changeSet id="31" author="nvoxland">-->
         <!--<addPrimaryKey tableName="pkTest" columnNames="id" constraintName="pk_pktest"/>-->
     <!--</changeSet>-->
 
-	<!-- Note: The attribute "constraintName" is used to pass the column name instead of the constraint name -->
+    <!-- Note: The attribute "constraintName" is used to pass the column name instead of the constraint name -->
     <!--<changeSet id="32" author="nvoxland">-->
         <!--<dropPrimaryKey tableName="pkTest" constraintName="id"/>-->
     <!--</changeSet>-->
 
-	<!-- Note: Multiple columns for the columnNames attribute are interpreted as multiple unique contraints for each column. -->
-	<!-- Note: The value of the attribute "constraintName" is ignored, nevertheless it must not be omited -->
+    <!-- Note: Multiple columns for the columnNames attribute are interpreted as multiple unique contraints for each column. -->
+    <!-- Note: The value of the attribute "constraintName" is ignored, nevertheless it must not be omited -->
     <!--<changeSet id="33" author="nvoxland">-->
         <!--<addUniqueConstraint tableName="address" columnNames="line1"/>-->
     <!--</changeSet>-->
-	
-	<!-- Note: The attribute "constraintName" is used to pass the column name instead of the constraint name -->
+    
+    <!-- Note: The attribute "constraintName" is used to pass the column name instead of the constraint name -->
     <!--<changeSet id="34" author="nvoxland">-->
         <!--<dropUniqueConstraint tableName="address" constraintName="line1"/>-->
     <!--</changeSet>-->
@@ -291,8 +291,8 @@
     <!--<changeSet id="50" author="nvoxland">-->
         <!--<modifyDataType tableName="address" columnName="postalcode" newDataType="varchar(20)"/>-->
     <!--</changeSet>-->
-	
-	<!--
+    
+    <!--
     <changeSet id="51" author="nvoxland">
         <createTable tableName="nulldefaulttest">
             <column name="id" type="int" autoIncrement="true">
@@ -307,7 +307,7 @@
             <column name="foreign_id" type="bigint" defaultValue="null"/>
         </addColumn>
     </changeSet>
-	-->
+    -->
 
     <changeSet id="52" author="pkeeble">
         <sqlFile path="changelogs/sqlite/complete/sample.sql" stripComments="true"/>
@@ -317,9 +317,9 @@
 
     <include file="changelogs/sqlite/complete/renamed.changelog.xml"/>
 
-	<!--
+    <!--
     <include file="changelogs/common/schema.tests.changelog.xml" />
-	-->
+    -->
 
     <changeSet id="54" author="nvoxland">
         <addColumn tableName="address">

@@ -5,12 +5,12 @@ package org.hibernate.auction;
  * @author Gavin King
  */
 public class BuyNow extends Bid {
-	@Override
+    @Override
     public boolean isBuyNow() {
-		return true;
-	}
-	@Override
+        return true;
+    }
+    @Override
     public String toString() {
-		return super.toString() + " (buy now)";
-	}
+        return super.toString() + " (buy now)";
+    }
 }

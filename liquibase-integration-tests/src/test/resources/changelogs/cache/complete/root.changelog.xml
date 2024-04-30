@@ -40,19 +40,19 @@
     -->
     <changeSet id="5" author="nvoxland" contextFilter="test">
         <insert tableName="person">
-		<column name="id" value="1"/>
+        <column name="id" value="1"/>
             <column name="firstname" value="John"/>
             <column name="lastname" value="Doe"/>
             <column name="username" value="jdoe"/>
         </insert>
         <insert tableName="person">
-		<column name="id" value="2"/>
+        <column name="id" value="2"/>
             <column name="firstname" value="Jane"/>
             <column name="lastname" value="Doe"/>
             <column name="username" value="janedoe"/>
         </insert>
         <insert tableName="person">
-		<column name="id" value="3"/>
+        <column name="id" value="3"/>
             <column name="firstname" value="Bob"/>
             <column name="lastname" value="Johnson"/>
             <column name="username" value="bjohnson"/>
@@ -74,11 +74,11 @@
     </changeSet>
     <changeSet id="7" author="bjohnson" contextFilter="test">
         <insert tableName="employee">
-		<column name="id" value="1"/>
+        <column name="id" value="1"/>
             <column name="name" value="ACME Corp"/>
         </insert>
         <insert tableName="employee">
-		<column name="id" value="2"/>
+        <column name="id" value="2"/>
             <column name="name" value="Widgets Inc."/>
         </insert>
     </changeSet>
@@ -218,7 +218,7 @@
     -->
     <changeSet id="26" author="nvoxland">
         <insert tableName="address">
-		<column name="id" value="1"/>
+        <column name="id" value="1"/>
             <column name="line1" value="123 4th St"/>
             <column name="line2" value="Suite 432"/>
             <column name="city" value="New York"/>
@@ -226,21 +226,21 @@
             <column name="postalcode" value="01235"/>
         </insert>
         <insert tableName="address">
-		<column name="id" value="2"/>
+        <column name="id" value="2"/>
             <column name="line1" value="6123 64th St"/>
             <column name="city" value="New York"/>
             <column name="state" value="NY"/>
             <column name="postalcode" value="01235"/>
         </insert>
         <insert tableName="address">
-		<column name="id" value="3"/>
+        <column name="id" value="3"/>
             <column name="line1" value="One Liquibase Way"/>
             <column name="city" value="Fargo"/>
             <column name="state" value="ND"/>
             <column name="postalcode" value="58103"/>
         </insert>
         <insert tableName="address">
-		<column name="id" value="4"/>
+        <column name="id" value="4"/>
             <column name="line1" value="123 Main Ave"/>
             <column name="city" value="City With No State"/>
             <column name="postalcode" value="00000"/>

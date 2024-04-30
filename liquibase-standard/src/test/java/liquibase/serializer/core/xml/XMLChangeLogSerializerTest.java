@@ -885,29 +885,29 @@ public class XMLChangeLogSerializerTest {
 
     @Test
     public void createNode_ChangeSetParameters() throws Exception {
-    	ChangeSet changeSet = new ChangeSet("1", "tms", true, true, "path/to/file.json", "context", "mssql",null,null, false,ObjectQuotingStrategy.LEGACY, null);
-    	changeSet.setCreated("created");
-    	changeSet.setFailOnError(true);
-    	changeSet.setLabels(new Labels("label"));
-    	changeSet.setLogicalFilePath("path/to/file.json");
+        ChangeSet changeSet = new ChangeSet("1", "tms", true, true, "path/to/file.json", "context", "mssql",null,null, false,ObjectQuotingStrategy.LEGACY, null);
+        changeSet.setCreated("created");
+        changeSet.setFailOnError(true);
+        changeSet.setLabels(new Labels("label"));
+        changeSet.setLogicalFilePath("path/to/file.json");
 
-    	Element node = new XMLChangeLogSerializer(DocumentBuilderFactory.newInstance().newDocumentBuilder().newDocument()).createNode(changeSet);
+        Element node = new XMLChangeLogSerializer(DocumentBuilderFactory.newInstance().newDocumentBuilder().newDocument()).createNode(changeSet);
 
-    	assertEquals("element name","changeSet",node.getTagName());
-    	assertEquals("changeSet Attributes",
-    			attsMap("id","1",
-    					"author","tms",
-    					"runAlways","true",
-    					"runOnChange","true",
-    					"logicalFilePath","path/to/file.json",
-    					"contextFilter","context",
-    					"dbms","mssql",
-    					"objectQuotingStrategy","LEGACY",
-    					"failOnError","true",
-    					"labels","label",
-    					"created","created",
+        assertEquals("element name","changeSet",node.getTagName());
+        assertEquals("changeSet Attributes",
+                attsMap("id","1",
+                        "author","tms",
+                        "runAlways","true",
+                        "runOnChange","true",
+                        "logicalFilePath","path/to/file.json",
+                        "contextFilter","context",
+                        "dbms","mssql",
+                        "objectQuotingStrategy","LEGACY",
+                        "failOnError","true",
+                        "labels","label",
+                        "created","created",
                         "runInTransaction","false"),
-    			attsMap(node));
+                attsMap(node));
 
     }
 
@@ -930,29 +930,29 @@ public class XMLChangeLogSerializerTest {
 
     @Test
     public void serialize_pretty_ChangeSetParameters() throws Exception {
-    	ChangeSet changeSet = new ChangeSet("1", "tms", true, true, "path/to/file.json", "context", "mssql","runWith","runWithSpoolFile", false,ObjectQuotingStrategy.LEGACY, null);
-    	changeSet.setCreated("created");
-    	changeSet.setFailOnError(true);
-    	changeSet.setLabels(new Labels("label"));
-    	changeSet.setLogicalFilePath("path/to/file.json");
+        ChangeSet changeSet = new ChangeSet("1", "tms", true, true, "path/to/file.json", "context", "mssql","runWith","runWithSpoolFile", false,ObjectQuotingStrategy.LEGACY, null);
+        changeSet.setCreated("created");
+        changeSet.setFailOnError(true);
+        changeSet.setLabels(new Labels("label"));
+        changeSet.setLogicalFilePath("path/to/file.json");
         changeSet.setIgnore(true);
         changeSet.setRunOrder("last");
 
-    	String out = new XMLChangeLogSerializer().serialize(changeSet, true);
+        String out = new XMLChangeLogSerializer().serialize(changeSet, true);
 
-    	assertEquals("<changeSet author=\"tms\"\n"
-    			+ "        contextFilter=\"context\"\n"
-    			+ "        created=\"created\"\n"
-    			+ "        dbms=\"mssql\"\n"
-    			+ "        failOnError=\"true\"\n"
-    			+ "        id=\"1\"\n"
+        assertEquals("<changeSet author=\"tms\"\n"
+                + "        contextFilter=\"context\"\n"
+                + "        created=\"created\"\n"
+                + "        dbms=\"mssql\"\n"
+                + "        failOnError=\"true\"\n"
+                + "        id=\"1\"\n"
                 + "        ignore=\"true\"\n"
-    			+ "        labels=\"label\"\n"
-    			+ "        logicalFilePath=\"path/to/file.json\"\n"
-    			+ "        objectQuotingStrategy=\"LEGACY\"\n"
-    			+ "        runAlways=\"true\"\n"
+                + "        labels=\"label\"\n"
+                + "        logicalFilePath=\"path/to/file.json\"\n"
+                + "        objectQuotingStrategy=\"LEGACY\"\n"
+                + "        runAlways=\"true\"\n"
                 + "        runInTransaction=\"false\"\n"
-    			+ "        runOnChange=\"true\"\n"
+                + "        runOnChange=\"true\"\n"
                 + "        runOrder=\"last\"/>", out);
     }
 

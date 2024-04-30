@@ -18,7 +18,7 @@ public class UnlockDatabaseChangeLogGenerator extends AbstractSqlGenerator<Unloc
 
     @Override
     public Sql[] generateSql(UnlockDatabaseChangeLogStatement statement, Database database, SqlGeneratorChain sqlGeneratorChain) {
-    	String liquibaseSchema = database.getLiquibaseSchemaName();
+        String liquibaseSchema = database.getLiquibaseSchemaName();
         ObjectQuotingStrategy currentStrategy = database.getObjectQuotingStrategy();
         database.setObjectQuotingStrategy(ObjectQuotingStrategy.LEGACY);
         try {

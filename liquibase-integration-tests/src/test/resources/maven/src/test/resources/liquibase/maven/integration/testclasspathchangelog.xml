@@ -10,5 +10,5 @@
             <column name="id" type="int" autoIncrement="true"/>             
         </createTable>          
     </changeSet>
-	
+    
 </databaseChangeLog>

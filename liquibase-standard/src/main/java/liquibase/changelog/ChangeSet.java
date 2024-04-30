@@ -551,21 +551,21 @@ public class ChangeSet implements Conditional, ChangeLogChild {
             String changeSetPath = rollbackNode.getChildValue(null, "changeSetPath", getFilePath());
 
             DatabaseChangeLog changeLog = this.getChangeLog();
-	        List<ChangeSet> changeSets = changeLog.getChangeSets(changeSetPath, changeSetAuthor, changeSetId);
-	        while (changeSets.isEmpty() && (changeLog != null)) {
-		        changeLog = changeLog.getParentChangeLog();
-		        if (changeLog != null) {
-			        changeSets = changeLog.getChangeSets(changeSetPath, changeSetAuthor, changeSetId);
-		        }
-	        }
+            List<ChangeSet> changeSets = changeLog.getChangeSets(changeSetPath, changeSetAuthor, changeSetId);
+            while (changeSets.isEmpty() && (changeLog != null)) {
+                changeLog = changeLog.getParentChangeLog();
+                if (changeLog != null) {
+                    changeSets = changeLog.getChangeSets(changeSetPath, changeSetAuthor, changeSetId);
+                }
+            }
             if (changeSets.isEmpty()) {
                 throw new ParsedNodeException("Change set " + new ChangeSet(changeSetId, changeSetAuthor, false, false, changeSetPath, null, null, null).toString(false) + " does not exist");
             }
-	        for (ChangeSet changeSet : changeSets) {
-		        for (Change change : changeSet.getChanges()) {
-			        rollback.getChanges().add(change);
-		        }
-	        }
+            for (ChangeSet changeSet : changeSets) {
+                for (Change change : changeSet.getChanges()) {
+                    rollback.getChanges().add(change);
+                }
+            }
             return;
         }
 

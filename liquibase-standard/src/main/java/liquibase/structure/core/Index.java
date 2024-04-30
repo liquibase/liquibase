@@ -11,11 +11,11 @@ import java.util.*;
 
 public class Index extends AbstractDatabaseObject {
 
-	/** Marks Index as associated with Primary Key [PK] */
+    /** Marks Index as associated with Primary Key [PK] */
     public static final String MARK_PRIMARY_KEY = "primaryKey";
-	/** Marks Index as associated with Foreign Key [FK] */
+    /** Marks Index as associated with Foreign Key [FK] */
     public static final String MARK_FOREIGN_KEY = "foreignKey";
-	/** Marks Index as associated with Unique Constraint [UC] */
+    /** Marks Index as associated with Unique Constraint [UC] */
     public static final String MARK_UNIQUE_CONSTRAINT = "uniqueConstraint";
 
     public Index() {
@@ -42,7 +42,7 @@ public class Index extends AbstractDatabaseObject {
     @Override
     public DatabaseObject[] getContainingObjects() {
         return new DatabaseObject[] {
-        		getRelation()
+                getRelation()
         };
     }
 
@@ -70,39 +70,39 @@ public class Index extends AbstractDatabaseObject {
      * @deprecated Use {@link #getRelation()}
      */
     @Deprecated
-	public Table getTable() {
-		Relation relation = getRelation();
-		if (relation instanceof Table)
-		return (Table) relation;
-	else
-		return null;
-	}
+    public Table getTable() {
+        Relation relation = getRelation();
+        if (relation instanceof Table)
+        return (Table) relation;
+    else
+        return null;
+    }
 
     /**
      * @deprecated Use {@link #setRelation(Relation)}
      */
     @Deprecated
-	public Index setTable(Relation table) {
+    public Index setTable(Relation table) {
         return setRelation(table);
     }
 
     public Relation getRelation() {
-    	return getAttribute("table", Relation.class);
+        return getAttribute("table", Relation.class);
     }
 
     public Index setRelation(Relation relation) {
-    	this.setAttribute("table", relation);
+        this.setAttribute("table", relation);
         return this;
     }
 
-	public String getTablespace() {
-		return getAttribute("tablespace", String.class);
-	}
+    public String getTablespace() {
+        return getAttribute("tablespace", String.class);
+    }
 
-	public Index setTablespace(String tablespace) {
+    public Index setTablespace(String tablespace) {
         this.setAttribute("tablespace", tablespace);
         return this;
-	}
+    }
 
     public List<Column> getColumns() {
         return getAttribute("columns", List.class);
@@ -138,21 +138,21 @@ public class Index extends AbstractDatabaseObject {
         return getAttribute("unique", Boolean.class);
     }
 
-	public Set<String> getAssociatedWith() {
-		return getAttribute("associatedWith", Set.class);
-	}
+    public Set<String> getAssociatedWith() {
+        return getAttribute("associatedWith", Set.class);
+    }
 
-	public String getAssociatedWithAsString() {
-		return StringUtil.join(getAssociatedWith(), ",");
-	}
+    public String getAssociatedWithAsString() {
+        return StringUtil.join(getAssociatedWith(), ",");
+    }
 
-	public void addAssociatedWith(String item) {
-		getAssociatedWith().add(item);
-	}
+    public void addAssociatedWith(String item) {
+        getAssociatedWith().add(item);
+    }
 
-	public boolean isAssociatedWith(String keyword) {
-		return getAssociatedWith().contains(keyword);
-	}
+    public boolean isAssociatedWith(String keyword) {
+        return getAssociatedWith().contains(keyword);
+    }
 
     @Override
     public Object getSerializableFieldValue(String field) {

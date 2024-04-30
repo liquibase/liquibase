@@ -9,8 +9,8 @@ import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 
 public class DiffGeneratorFactoryTest {
-	@Test
-	public void getGenerator() throws DatabaseException {
+    @Test
+    public void getGenerator() throws DatabaseException {
         DiffGenerator generator = DiffGeneratorFactory.getInstance().getGenerator(new H2Database(), new H2Database());
         assertNotNull(generator);
         assertTrue(generator instanceof StandardDiffGenerator);

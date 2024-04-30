@@ -48,26 +48,26 @@ public class DropPrimaryKeyGenerator extends AbstractSqlGenerator<DropPrimaryKey
                 sql = "ALTER TABLE " + escapedTableName + " DROP CONSTRAINT " + database.escapeConstraintName(statement.getConstraintName());
             }
         } else if (database instanceof PostgresDatabase) {
-			if (statement.getConstraintName() == null) {
-				String schemaName = (statement.getSchemaName() != null) ? statement.getSchemaName() : database
+            if (statement.getConstraintName() == null) {
+                String schemaName = (statement.getSchemaName() != null) ? statement.getSchemaName() : database
                     .getDefaultSchemaName();
-				schemaName = database.correctObjectName(schemaName, Schema.class);
-				String tableName = database.correctObjectName(statement.getTableName(), Table.class);
+                schemaName = database.correctObjectName(schemaName, Schema.class);
+                String tableName = database.correctObjectName(statement.getTableName(), Table.class);
 
-				sql = String.format(""
-						+ "DO $$ DECLARE constraint_name varchar;\n"
-						+ "BEGIN\n"
-						+ "  SELECT tc.CONSTRAINT_NAME into strict constraint_name\n"
-						+ "    FROM INFORMATION_SCHEMA.TABLE_CONSTRAINTS tc\n"
-						+ "    WHERE CONSTRAINT_TYPE = 'PRIMARY KEY'\n"
-						+ "      AND TABLE_NAME = '%2$s' AND TABLE_SCHEMA = '%1$s';\n"
-						+ "    EXECUTE 'alter table %3$s.%4$s drop constraint \"' || constraint_name || '\"';\n"
-						+ "END $$;"
-						, schemaName, tableName
-						, database.escapeObjectName(schemaName, Schema.class), database.escapeObjectName(tableName, Table.class));
-			} else {
-				sql = "ALTER TABLE " + database.escapeTableName(statement.getCatalogName(), statement.getSchemaName(), statement.getTableName()) + " DROP CONSTRAINT " + database.escapeConstraintName(statement.getConstraintName());
-			}
+                sql = String.format(""
+                        + "DO $$ DECLARE constraint_name varchar;\n"
+                        + "BEGIN\n"
+                        + "  SELECT tc.CONSTRAINT_NAME into strict constraint_name\n"
+                        + "    FROM INFORMATION_SCHEMA.TABLE_CONSTRAINTS tc\n"
+                        + "    WHERE CONSTRAINT_TYPE = 'PRIMARY KEY'\n"
+                        + "      AND TABLE_NAME = '%2$s' AND TABLE_SCHEMA = '%1$s';\n"
+                        + "    EXECUTE 'alter table %3$s.%4$s drop constraint \"' || constraint_name || '\"';\n"
+                        + "END $$;"
+                        , schemaName, tableName
+                        , database.escapeObjectName(schemaName, Schema.class), database.escapeObjectName(tableName, Table.class));
+            } else {
+                sql = "ALTER TABLE " + database.escapeTableName(statement.getCatalogName(), statement.getSchemaName(), statement.getTableName()) + " DROP CONSTRAINT " + database.escapeConstraintName(statement.getConstraintName());
+            }
         } else if (database instanceof FirebirdDatabase) {
             sql = "ALTER TABLE " + database.escapeTableName(statement.getCatalogName(), statement.getSchemaName(), statement.getTableName()) + " DROP CONSTRAINT "+database.escapeConstraintName(statement.getConstraintName());
         } else if (database instanceof OracleDatabase) {

@@ -33,8 +33,8 @@ import java.util.Map;
  * Example:<br/>
  * <br/><pre>
  * &lt;bean id="liquibase" class="liquibase.integration.spring.MultiTenantSpringLiquibase"&gt;
- * 	&lt;property name="jndiBase" value="java:comp/env/jdbc/db" /&gt;
- * 	&lt;property name="changeLog" value="classpath:db/migration/db-changelog.xml" /&gt;
+ *     &lt;property name="jndiBase" value="java:comp/env/jdbc/db" /&gt;
+ *     &lt;property name="changeLog" value="classpath:db/migration/db-changelog.xml" /&gt;
  * &lt;/bean&gt;
  * </pre>
  *

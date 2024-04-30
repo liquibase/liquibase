@@ -54,7 +54,7 @@ public class AddUniqueConstraintExecutorTest extends AbstractExecuteTest {
 //                    protected void postExecuteAssert(DatabaseSnapshotGenerator snapshot) {
 //                        //todo: enable snapshot and assertion when snapshot can check for unique constraints
 //                        //snapshot = new DatabaseSnapshotGenerator(snapshot);
-//                    	assertTrue(snapshot.getTable(TABLE_NAME).getColumn(COLUMN_NAME).isUnique());
+//                        assertTrue(snapshot.getTable(TABLE_NAME).getColumn(COLUMN_NAME).isUnique());
 //                    }
 //                });
 //    }

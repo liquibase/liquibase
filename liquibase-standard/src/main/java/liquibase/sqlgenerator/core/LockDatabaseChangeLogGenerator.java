@@ -36,7 +36,7 @@ public class LockDatabaseChangeLogGenerator extends AbstractSqlGenerator<LockDat
 
     @Override
     public Sql[] generateSql(LockDatabaseChangeLogStatement statement, Database database, SqlGeneratorChain sqlGeneratorChain) {
-    	String liquibaseSchema = database.getLiquibaseSchemaName();
+        String liquibaseSchema = database.getLiquibaseSchemaName();
         String liquibaseCatalog = database.getLiquibaseCatalogName();
 
         // use LEGACY quoting since we're dealing with system objects

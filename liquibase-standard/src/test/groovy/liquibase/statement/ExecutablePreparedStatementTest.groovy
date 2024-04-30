@@ -17,7 +17,7 @@ import java.sql.SQLException
 class ExecutablePreparedStatementTest extends Specification {
 
     @Ignore
-	def testValueBlobFileFromClassLoader() throws DatabaseException, SQLException {
+    def testValueBlobFileFromClassLoader() throws DatabaseException, SQLException {
         expect:
         ColumnConfig columnConfig = new ColumnConfig()
 
@@ -37,7 +37,7 @@ class ExecutablePreparedStatementTest extends Specification {
     }
 
     @Ignore
-	def testValueBlobFileFromFile() throws DatabaseException, SQLException {
+    def testValueBlobFileFromFile() throws DatabaseException, SQLException {
         expect:
         ColumnConfig columnConfig = new ColumnConfig()
 
@@ -57,7 +57,7 @@ class ExecutablePreparedStatementTest extends Specification {
     }
 
     @Ignore
-	def testValueClobFileFromClassLoader() throws DatabaseException, SQLException {
+    def testValueClobFileFromClassLoader() throws DatabaseException, SQLException {
         expect:
         ColumnConfig columnConfig = new ColumnConfig()
 
@@ -78,7 +78,7 @@ class ExecutablePreparedStatementTest extends Specification {
     }
 
     @Ignore
-	def testValueClobFileFromFile() throws DatabaseException, SQLException {
+    def testValueClobFileFromFile() throws DatabaseException, SQLException {
         expect:
         ColumnConfig columnConfig = new ColumnConfig()
 
@@ -99,13 +99,13 @@ class ExecutablePreparedStatementTest extends Specification {
     }
 
     /**
-	 * Create a test context resource accessor.
-	 * @return
-	 */
-	private ResourceAccessor createResourceAccessor() {
-		ResourceAccessor resourceAccessor = new CompositeResourceAccessor(
-				new JUnitResourceAccessor(),
-				new DirectoryResourceAccessor(),
+     * Create a test context resource accessor.
+     * @return
+     */
+    private ResourceAccessor createResourceAccessor() {
+        ResourceAccessor resourceAccessor = new CompositeResourceAccessor(
+                new JUnitResourceAccessor(),
+                new DirectoryResourceAccessor(),
                 new ClassLoaderResourceAccessor(Thread.currentThread().getContextClassLoader()))
 
         return resourceAccessor

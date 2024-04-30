@@ -67,7 +67,7 @@ public class PreconditionFactoryTest {
     }
 
     @SuppressWarnings("unchecked")
-	@Test
+    @Test
     public void builtInGeneratorsAreFound() {
         Map<String, Class<? extends Precondition>> generators = PreconditionFactory.getInstance().getPreconditions();
         assertTrue(generators.size() > 5);

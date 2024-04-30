@@ -34,7 +34,7 @@ public class DateTimeType extends LiquibaseDataType {
 
         if (database instanceof AbstractDb2Database) {
             return new DatabaseDataType(SQL_DATETYPE_TIMESTAMP, getParameters());
-		}
+        }
 
         if (database instanceof OracleDatabase) {
             if (originalDefinition.toUpperCase(Locale.US).contains("TIME ZONE")) {

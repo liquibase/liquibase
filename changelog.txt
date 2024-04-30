@@ -2272,10 +2272,10 @@ Windows and Mac/Linux Liquibase installers and the .tar.gz and .zip installation
  - Quality checks have configurable severity and exit codes
  - The quality checks bulk-set command
  - New Quality checks
-	- Static check: Warn when a table truncation is detected
-	- Dynamic check: Warn when granting specific privileges
-	- Static check: Warn when the `GRANT WITH ADMIN OPTION` statement is detected
-	- Static check: Warn when the `GRANT WITH GRANT OPTION` statement is detected
+    - Static check: Warn when a table truncation is detected
+    - Dynamic check: Warn when granting specific privileges
+    - Static check: Warn when the `GRANT WITH ADMIN OPTION` statement is detected
+    - Static check: Warn when the `GRANT WITH GRANT OPTION` statement is detected
  - The `liquibase.checks-settings.conf` file is unencoded in version 4.6.0 and later versions for easier inspection that allows you to resolve a merge conflict in source control. Liquibase backs up encoded files in the working directory, and you can still use previous versions by specifying the `--checks-settings-file` parameter in the CLI, as an environment variable, or as a property in the liquibase.properties file.
  - Changed the XSD default `errorOnMissingOrEmpty` attribute to `true` for the `includeAll` attribute in the XML _changelog_ file (#1960)
  - Added support for deferrable primary keys in the `createTable` Change Type. (#1597)
@@ -3897,9 +3897,9 @@ Changes in version 3.0.6 (2013.10.08)
 
 - Major Changes:
      Split out CDI code to a separate jar
-	 Remove primary key on DATABASECHANGELOG and increased column sizes
-	 Case sensitivity fixes
-	 General bug fixes
+     Remove primary key on DATABASECHANGELOG and increased column sizes
+     Case sensitivity fixes
+     General bug fixes
 
 - [CORE-1485] - Extract CDI support into a separate module
 - [CORE-602] - Increase the default size of the FILENAME column

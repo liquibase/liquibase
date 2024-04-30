@@ -12,7 +12,7 @@ import java.lang.annotation.Target;
 @Retention(RetentionPolicy.RUNTIME)
 @Target({ElementType.TYPE})
 public @interface LiquibaseSchema {
-	String name();
-	String depends() default "";
-	String[] resource();
+    String name();
+    String depends() default "";
+    String[] resource();
 }

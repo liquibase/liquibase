@@ -45,12 +45,12 @@ public class DropUniqueConstraintStatement extends AbstractSqlStatement {
         return constraintName;
     }
 
-	public ColumnConfig[] getUniqueColumns() {
-		return uniqueColumns;
-	}
+    public ColumnConfig[] getUniqueColumns() {
+        return uniqueColumns;
+    }
 
-	public void setUniqueColumns(ColumnConfig[] uniqueColumns) {
-		this.uniqueColumns = uniqueColumns;
-	}
+    public void setUniqueColumns(ColumnConfig[] uniqueColumns) {
+        this.uniqueColumns = uniqueColumns;
+    }
 
 }

@@ -30,15 +30,15 @@ License Rights and Restrictions
 
 Oracle grants to You, as a recipient of this Program, a nonexclusive, nontransferable, limited license to, subject to the conditions stated herein, use the unmodified Programs, including, without limitation, for the purposes of:
 
-â€¢	developing, testing, prototyping and demonstrating applications; 
+â€¢    developing, testing, prototyping and demonstrating applications; 
 
-â€¢	running the unmodified Programs for training, personal use, your business operations, and the business operations of third parties;
+â€¢    running the unmodified Programs for training, personal use, your business operations, and the business operations of third parties;
 
-â€¢	making the unmodified Programs available for use by third parties in your hosted environment and in cloud services; 
+â€¢    making the unmodified Programs available for use by third parties in your hosted environment and in cloud services; 
 
-â€¢	redistributing unmodified Programs and Programs Documentation under the terms of this License; and
+â€¢    redistributing unmodified Programs and Programs Documentation under the terms of this License; and
 
-â€¢	copying the unmodified Programs and Program Documentation to the extent reasonably necessary to exercise the license rights granted herein and for backup purposes.
+â€¢    copying the unmodified Programs and Program Documentation to the extent reasonably necessary to exercise the license rights granted herein and for backup purposes.
 
 For the purposes of this license, compiling, interpreting or configuring an otherwise unmodified Program as necessary to run the Program shall not be considered modification.
 

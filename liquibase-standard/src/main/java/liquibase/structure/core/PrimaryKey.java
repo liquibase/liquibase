@@ -165,14 +165,14 @@ public class PrimaryKey extends AbstractDatabaseObject {
         return this;
     }
 
-	public String getTablespace() {
-		return getAttribute("tablespace",String.class);
-	}
+    public String getTablespace() {
+        return getAttribute("tablespace",String.class);
+    }
 
-	public PrimaryKey setTablespace(String tablespace) {
+    public PrimaryKey setTablespace(String tablespace) {
         setAttribute("tablespace", tablespace);
         return this;
-	}
+    }
 
     public Index getBackingIndex() {
         return getAttribute("backingIndex", Index.class);

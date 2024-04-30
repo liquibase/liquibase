@@ -182,8 +182,8 @@ public class UpdateExecutablePreparedStatementTest {
         verifyNoMoreInteractions(ps);
     }
 
-	@Test
-	public void testExecuteWithClobAndComputedValue() throws Exception {
+    @Test
+    public void testExecuteWithClobAndComputedValue() throws Exception {
         // given
         UpdateExecutablePreparedStatement statement = new UpdateExecutablePreparedStatement(
                         database,
@@ -205,9 +205,9 @@ public class UpdateExecutablePreparedStatementTest {
 
         // then
         verify(connection).prepareStatement("UPDATE DATABASECHANGELOG SET MD5SUM = ?, DATEEXECUTED = GETDATE()");
-		verify(ps).setString(1, "7:e27bf9c0c2313160ef960a15d44ced47");
-		verify(ps, never()).setNull(eq(2), anyInt());
-	}
+        verify(ps).setString(1, "7:e27bf9c0c2313160ef960a15d44ced47");
+        verify(ps, never()).setNull(eq(2), anyInt());
+    }
 
     @Test
     public void testExecute_ValueComputed() throws DatabaseException, SQLException {

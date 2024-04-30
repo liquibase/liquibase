@@ -44,17 +44,17 @@
             Refactorings that can't be automatically rolled back can be custom rolled back with a "rollback" tag.
         </comment>
         <insert tableName="magazine">
-		<column name="id" value="1"/>
+        <column name="id" value="1"/>
             <column name="title" value="Refactoring Times"/>
             <column name="sku" value="12981-512712-512"/>
         </insert>
         <insert tableName="magazine">
-		<column name="id" value="2"/>
+        <column name="id" value="2"/>
             <column name="title" value="Databases Today"/>
             <column name="sku" value="51235-632-6232623"/>
         </insert>
         <insert tableName="magazine">
-		<column name="id" value="3"/>
+        <column name="id" value="3"/>
             <column name="title" value="Newsweek"/>
             <column name="sku" value="623-6623-332262"/>
         </insert>

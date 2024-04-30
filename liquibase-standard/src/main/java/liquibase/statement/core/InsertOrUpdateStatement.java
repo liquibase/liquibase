@@ -26,15 +26,15 @@ public class InsertOrUpdateStatement extends InsertStatement {
 
     @DatabaseChangeProperty(description = "Whether records with no matching database record should be ignored")
     public Boolean getOnlyUpdate() {
-    	if ( onlyUpdate == null ) {
-    		return false;
-    	}
-		return onlyUpdate;
-	}
+        if ( onlyUpdate == null ) {
+            return false;
+        }
+        return onlyUpdate;
+    }
 
-	public void setOnlyUpdate(Boolean onlyUpdate) {
+    public void setOnlyUpdate(Boolean onlyUpdate) {
         this.onlyUpdate = ((onlyUpdate == null) ? Boolean.FALSE : onlyUpdate);
-	}
+    }
 
     public boolean getAllowColumnUpdate(String columnName) {
         final Boolean allow = this.allowUpdates.get(columnName);

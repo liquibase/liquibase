@@ -110,10 +110,10 @@
         </au:expectfailure>
     </target>
 
-	
-	<!-- ADDED FOR THE NEW changeLogDirectory PROPERTY -->
+    
+    <!-- ADDED FOR THE NEW changeLogDirectory PROPERTY -->
 
-	<target name="testUpdateDatabaseChangeLogDirectory">
+    <target name="testUpdateDatabaseChangeLogDirectory">
         <db:assertTableDoesntExist driver="${jdbc.driver}" url="${jdbc.url}" user="${db.user}" password="${db.password}"
                                    table="DATABASECHANGELOG"/>
         <lb:updateDatabase changelogdirectory="${liquibase.test.ant.basedir}/changelog" changelogfile="simple-changelog.xml">
@@ -123,7 +123,7 @@
                               table="DATABASECHANGELOG"/>
     </target>
 
-	<target name="testUpdateDatabaseChangeLogDirectoryDoesNotExist">
+    <target name="testUpdateDatabaseChangeLogDirectoryDoesNotExist">
         <au:expectfailure>
             <au:logcontains text="Unable to update database: The file simple-changelog.xml was not found">
                     <lb:updateDatabase changelogdirectory="${liquibase.test.ant.basedir}/bad_changelog" changelogfile="simple-changelog.xml">

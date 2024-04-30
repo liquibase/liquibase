@@ -1014,23 +1014,23 @@ public class CreateTableGeneratorTest extends AbstractSqlGeneratorTest<CreateTab
         }
     }
 
-	@Test
-	public void testAutoIncrementSybaseDatabaseWithSpecialCharacters() throws Exception {
-		for (Database database : TestContext.getInstance().getAllDatabases()) {
-			if (database instanceof SybaseDatabase) {
-				CreateTableStatement statement = new CreateTableStatement(CATALOG_NAME, "SCHEMA-NAME", "TABLE NAME");
-				statement.addColumn(
-						"1ST_COLUMN_NAME",
-						DataTypeFactory.getInstance().fromDescription("BIGINT{autoIncrement:true}", database),
-						new AutoIncrementConstraint("1ST_COLUMN_NAME")
-				);
+    @Test
+    public void testAutoIncrementSybaseDatabaseWithSpecialCharacters() throws Exception {
+        for (Database database : TestContext.getInstance().getAllDatabases()) {
+            if (database instanceof SybaseDatabase) {
+                CreateTableStatement statement = new CreateTableStatement(CATALOG_NAME, "SCHEMA-NAME", "TABLE NAME");
+                statement.addColumn(
+                        "1ST_COLUMN_NAME",
+                        DataTypeFactory.getInstance().fromDescription("BIGINT{autoIncrement:true}", database),
+                        new AutoIncrementConstraint("1ST_COLUMN_NAME")
+                );
 
-				Sql[] generatedSql = this.generatorUnderTest.generateSql(statement, database, null);
+                Sql[] generatedSql = this.generatorUnderTest.generateSql(statement, database, null);
 
-				assertEquals("Error with "+database, "CREATE TABLE [SCHEMA-NAME].[TABLE NAME] ([1ST_COLUMN_NAME] BIGINT IDENTITY NULL)", generatedSql[0].toSql());
-			}
-		}
-	}
+                assertEquals("Error with "+database, "CREATE TABLE [SCHEMA-NAME].[TABLE NAME] ([1ST_COLUMN_NAME] BIGINT IDENTITY NULL)", generatedSql[0].toSql());
+            }
+        }
+    }
 
     @Test
     public void testAutoIncrementStartWithSybaseDatabase() throws Exception {

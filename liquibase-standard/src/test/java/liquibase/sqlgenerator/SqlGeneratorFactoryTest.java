@@ -171,7 +171,7 @@ public class SqlGeneratorFactoryTest {
     }
 
     @SuppressWarnings("unchecked")
-	@Test
+    @Test
     public void builtInGeneratorsAreFound() {
         Collection<SqlGenerator> generators = factory.getGenerators();
         assertTrue(generators.size() > 10);

@@ -39,9 +39,9 @@ public abstract class AddDefaultValueGeneratorTest {
 //
 //                    protected void postExecuteAssert(DatabaseSnapshotGenerator snapshot) {
 //                        if (snapshot.getDatabase() instanceof MySQLDatabase
-//                        		|| snapshot.getDatabase() instanceof MSSQLDatabase
-//                        		|| snapshot.getDatabase() instanceof SybaseASADatabase
-//                		) {
+//                                || snapshot.getDatabase() instanceof MSSQLDatabase
+//                                || snapshot.getDatabase() instanceof SybaseASADatabase
+//                        ) {
 //                            assertEquals("true", snapshot.getTable(TABLE_NAME).getColumn(COLUMN_NAME).getDefaultValue().toString().toLowerCase());
 //                        } else {
 //                            assertEquals(snapshot.getDatabase().getTrueBooleanValue().toLowerCase(), snapshot.getTable(TABLE_NAME).getColumn(COLUMN_NAME).getDefaultValue().toString().toLowerCase());

@@ -191,19 +191,19 @@ public class MergeColumnChange extends AbstractChange {
             }
 
         } else {
-        	// ...if it is not a SQLite database 
-        	
-	        DropColumnChange dropColumn1Change = new DropColumnChange();
-	        dropColumn1Change.setSchemaName(schemaName);
-	        dropColumn1Change.setTableName(getTableName());
-	        dropColumn1Change.setColumnName(getColumn1Name());
-	        statements.addAll(Arrays.asList(dropColumn1Change.generateStatements(database)));
-	
-	        DropColumnChange dropColumn2Change = new DropColumnChange();
-	        dropColumn2Change.setSchemaName(schemaName);
-	        dropColumn2Change.setTableName(getTableName());
-	        dropColumn2Change.setColumnName(getColumn2Name());
-	        statements.addAll(Arrays.asList(dropColumn2Change.generateStatements(database)));
+            // ...if it is not a SQLite database 
+            
+            DropColumnChange dropColumn1Change = new DropColumnChange();
+            dropColumn1Change.setSchemaName(schemaName);
+            dropColumn1Change.setTableName(getTableName());
+            dropColumn1Change.setColumnName(getColumn1Name());
+            statements.addAll(Arrays.asList(dropColumn1Change.generateStatements(database)));
+    
+            DropColumnChange dropColumn2Change = new DropColumnChange();
+            dropColumn2Change.setSchemaName(schemaName);
+            dropColumn2Change.setTableName(getTableName());
+            dropColumn2Change.setColumnName(getColumn2Name());
+            statements.addAll(Arrays.asList(dropColumn2Change.generateStatements(database)));
         
         }
         return statements.toArray(SqlStatement.EMPTY_SQL_STATEMENT);

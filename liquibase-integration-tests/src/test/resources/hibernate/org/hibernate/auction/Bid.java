@@ -7,50 +7,50 @@ import java.util.Date;
  * @author Gavin King
  */
 public class Bid extends Persistent {
-	private AuctionItem item;
-	private float amount;
-	private Date datetime;
-	private User bidder;
-	
-	public AuctionItem getItem() {
-		return item;
-	}
+    private AuctionItem item;
+    private float amount;
+    private Date datetime;
+    private User bidder;
+    
+    public AuctionItem getItem() {
+        return item;
+    }
 
-	public void setItem(AuctionItem item) {
-		this.item = item;
-	}
+    public void setItem(AuctionItem item) {
+        this.item = item;
+    }
 
-	public float getAmount() {
-		return amount;
-	}
+    public float getAmount() {
+        return amount;
+    }
 
-	public Date getDatetime() {
-		return datetime;
-	}
+    public Date getDatetime() {
+        return datetime;
+    }
 
-	public void setAmount(float f) {
-		amount = f;
-	}
+    public void setAmount(float f) {
+        amount = f;
+    }
 
-	public void setDatetime(Date date) {
-		datetime = date;
-	}
+    public void setDatetime(Date date) {
+        datetime = date;
+    }
 
-	public User getBidder() {
-		return bidder;
-	}
+    public User getBidder() {
+        return bidder;
+    }
 
-	public void setBidder(User user) {
-		bidder = user;
-	}
+    public void setBidder(User user) {
+        bidder = user;
+    }
 
-	@Override
+    @Override
     public String toString() {
-		return bidder.getUserName() + " $" + amount;
-	}
-	
-	public boolean isBuyNow() {
-		return false;
-	}
+        return bidder.getUserName() + " $" + amount;
+    }
+    
+    public boolean isBuyNow() {
+        return false;
+    }
 
 }

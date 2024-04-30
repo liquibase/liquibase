@@ -28,19 +28,19 @@ public class InsertOrUpdateGeneratorH2Test {
     private static final String TABLE_NAME = "MYTABLE";
     //private static final String SEQUENCE_NAME = "my_sequence";
 
-	/**
-	 * Test method for {@link InsertOrUpdateGeneratorH2#getUpdateStatement(InsertOrUpdateStatement, Database, String, SqlGeneratorChain)}.
-	 * @throws LiquibaseException
-	 */
-	@Test
-	public void testGetUpdateStatement_notOnlyUpdate() throws LiquibaseException {
-		final InsertOrUpdateGeneratorH2 generator = new InsertOrUpdateGeneratorH2();
+    /**
+     * Test method for {@link InsertOrUpdateGeneratorH2#getUpdateStatement(InsertOrUpdateStatement, Database, String, SqlGeneratorChain)}.
+     * @throws LiquibaseException
+     */
+    @Test
+    public void testGetUpdateStatement_notOnlyUpdate() throws LiquibaseException {
+        final InsertOrUpdateGeneratorH2 generator = new InsertOrUpdateGeneratorH2();
 
-		final InsertOrUpdateStatement insertOrUpdateStatement = new InsertOrUpdateStatement(CATALOG_NAME, SCHEMA_NAME, TABLE_NAME, "pk1");
-		final Database database = new H2Database();
-		final SqlGeneratorChain sqlGeneratorChain = null;
+        final InsertOrUpdateStatement insertOrUpdateStatement = new InsertOrUpdateStatement(CATALOG_NAME, SCHEMA_NAME, TABLE_NAME, "pk1");
+        final Database database = new H2Database();
+        final SqlGeneratorChain sqlGeneratorChain = null;
 
-		ColumnConfig columnConfig;
+        ColumnConfig columnConfig;
         columnConfig = new ColumnConfig();
         columnConfig.setValue("value0");
         columnConfig.setName("col0");
@@ -49,25 +49,25 @@ public class InsertOrUpdateGeneratorH2Test {
         columnConfig.setValue("keyvalue1");
         columnConfig.setName("pk1");
         insertOrUpdateStatement.addColumn(columnConfig);
-		final String whereClause = generator.getWhereClause(insertOrUpdateStatement, database);
+        final String whereClause = generator.getWhereClause(insertOrUpdateStatement, database);
 
-		String result = generator.getUpdateStatement(insertOrUpdateStatement, database, whereClause, sqlGeneratorChain);
-		assertEquals("", result);
-	}
+        String result = generator.getUpdateStatement(insertOrUpdateStatement, database, whereClause, sqlGeneratorChain);
+        assertEquals("", result);
+    }
 
-	/**
-	 * Test method for {@link InsertOrUpdateGeneratorH2#getUpdateStatement(InsertOrUpdateStatement, Database, String, SqlGeneratorChain)}.
-	 * @throws LiquibaseException
-	 */
-	@Test
-	public void testGetUpdateStatement_onlyUpdate() throws LiquibaseException {
-		final InsertOrUpdateGeneratorH2 generator = new InsertOrUpdateGeneratorH2();
+    /**
+     * Test method for {@link InsertOrUpdateGeneratorH2#getUpdateStatement(InsertOrUpdateStatement, Database, String, SqlGeneratorChain)}.
+     * @throws LiquibaseException
+     */
+    @Test
+    public void testGetUpdateStatement_onlyUpdate() throws LiquibaseException {
+        final InsertOrUpdateGeneratorH2 generator = new InsertOrUpdateGeneratorH2();
 
-		final InsertOrUpdateStatement insertOrUpdateStatement = new InsertOrUpdateStatement(CATALOG_NAME, SCHEMA_NAME, TABLE_NAME, "pk1", true);
-		final Database database = new H2Database();
-		final SqlGeneratorChain sqlGeneratorChain = null;
+        final InsertOrUpdateStatement insertOrUpdateStatement = new InsertOrUpdateStatement(CATALOG_NAME, SCHEMA_NAME, TABLE_NAME, "pk1", true);
+        final Database database = new H2Database();
+        final SqlGeneratorChain sqlGeneratorChain = null;
 
-		ColumnConfig columnConfig;
+        ColumnConfig columnConfig;
         columnConfig = new ColumnConfig();
         columnConfig.setValue("value0");
         columnConfig.setName("col0");
@@ -76,24 +76,24 @@ public class InsertOrUpdateGeneratorH2Test {
         columnConfig.setValue("keyvalue1");
         columnConfig.setName("pk1");
         insertOrUpdateStatement.addColumn(columnConfig);
-		final String whereClause = generator.getWhereClause(insertOrUpdateStatement, database);
+        final String whereClause = generator.getWhereClause(insertOrUpdateStatement, database);
 
-		String result = generator.getUpdateStatement(insertOrUpdateStatement, database, whereClause, sqlGeneratorChain);
-		assertEquals(String.format("UPDATE %s.%s SET %s = '%s' WHERE %s = '%s';\n", SCHEMA_NAME, TABLE_NAME, "col0", "value0", "pk1", "keyvalue1"), result);
-	}
+        String result = generator.getUpdateStatement(insertOrUpdateStatement, database, whereClause, sqlGeneratorChain);
+        assertEquals(String.format("UPDATE %s.%s SET %s = '%s' WHERE %s = '%s';\n", SCHEMA_NAME, TABLE_NAME, "col0", "value0", "pk1", "keyvalue1"), result);
+    }
 
-	/**
-	 * Test method for {@link InsertOrUpdateGenerator#generateSql(InsertOrUpdateStatement, Database, SqlGeneratorChain)}.
-	 */
-	@Test
-	public void testGenerateSql_notOnlyUpdate() {
-		final InsertOrUpdateGeneratorH2 generator = new InsertOrUpdateGeneratorH2();
+    /**
+     * Test method for {@link InsertOrUpdateGenerator#generateSql(InsertOrUpdateStatement, Database, SqlGeneratorChain)}.
+     */
+    @Test
+    public void testGenerateSql_notOnlyUpdate() {
+        final InsertOrUpdateGeneratorH2 generator = new InsertOrUpdateGeneratorH2();
 
-		final InsertOrUpdateStatement insertOrUpdateStatement = new InsertOrUpdateStatement(CATALOG_NAME, SCHEMA_NAME, TABLE_NAME, "pk1");
-		final Database database = new H2Database();
-		final SqlGeneratorChain sqlGeneratorChain = null;
+        final InsertOrUpdateStatement insertOrUpdateStatement = new InsertOrUpdateStatement(CATALOG_NAME, SCHEMA_NAME, TABLE_NAME, "pk1");
+        final Database database = new H2Database();
+        final SqlGeneratorChain sqlGeneratorChain = null;
 
-		ColumnConfig columnConfig;
+        ColumnConfig columnConfig;
         columnConfig = new ColumnConfig();
         columnConfig.setValue("keyvalue1");
         columnConfig.setName("pk1");
@@ -102,26 +102,26 @@ public class InsertOrUpdateGeneratorH2Test {
         columnConfig.setValue("value0");
         columnConfig.setName("col0");
         insertOrUpdateStatement.addColumn(columnConfig);
-		//final String whereClause = generator.getWhereClause(insertOrUpdateStatement, database);
+        //final String whereClause = generator.getWhereClause(insertOrUpdateStatement, database);
 
-		Sql[] results = generator.generateSql(insertOrUpdateStatement, database, sqlGeneratorChain);
-		assertThat(results, is(arrayWithSize(1)));
+        Sql[] results = generator.generateSql(insertOrUpdateStatement, database, sqlGeneratorChain);
+        assertThat(results, is(arrayWithSize(1)));
         assertEquals(String.format("MERGE INTO %s.%s (%s, %s) KEY(%s) VALUES ('%s', '%s');", SCHEMA_NAME, TABLE_NAME, "pk1", "col0", "pk1", "keyvalue1", "value0"), results[0].toSql());
-	}
+    }
 
-	/**
-	 * Test method for {@link InsertOrUpdateGenerator#generateSql(InsertOrUpdateStatement, Database, SqlGeneratorChain)}.
-	 * Verify that " values " in the column value works.
-	 */
-	@Test
-	public void testGenerateSql_notOnlyUpdate_valuesInColumnValue() {
-		final InsertOrUpdateGeneratorH2 generator = new InsertOrUpdateGeneratorH2();
+    /**
+     * Test method for {@link InsertOrUpdateGenerator#generateSql(InsertOrUpdateStatement, Database, SqlGeneratorChain)}.
+     * Verify that " values " in the column value works.
+     */
+    @Test
+    public void testGenerateSql_notOnlyUpdate_valuesInColumnValue() {
+        final InsertOrUpdateGeneratorH2 generator = new InsertOrUpdateGeneratorH2();
 
-		final InsertOrUpdateStatement insertOrUpdateStatement = new InsertOrUpdateStatement(CATALOG_NAME, SCHEMA_NAME, TABLE_NAME, "pk1");
-		final Database database = new H2Database();
-		final SqlGeneratorChain sqlGeneratorChain = null;
+        final InsertOrUpdateStatement insertOrUpdateStatement = new InsertOrUpdateStatement(CATALOG_NAME, SCHEMA_NAME, TABLE_NAME, "pk1");
+        final Database database = new H2Database();
+        final SqlGeneratorChain sqlGeneratorChain = null;
 
-		ColumnConfig columnConfig;
+        ColumnConfig columnConfig;
         columnConfig = new ColumnConfig();
         columnConfig.setValue("keyvalue1");
         columnConfig.setName("pk1");
@@ -131,9 +131,9 @@ public class InsertOrUpdateGeneratorH2Test {
         columnConfig.setName("col0");
         insertOrUpdateStatement.addColumn(columnConfig);
 
-		Sql[] results = generator.generateSql(insertOrUpdateStatement, database, sqlGeneratorChain);
-		assertThat(results, is(arrayWithSize(1)));
+        Sql[] results = generator.generateSql(insertOrUpdateStatement, database, sqlGeneratorChain);
+        assertThat(results, is(arrayWithSize(1)));
         assertEquals(String.format("MERGE INTO %s.%s (%s, %s) KEY(%s) VALUES ('%s', '%s');", SCHEMA_NAME, TABLE_NAME, "pk1", "col0", "pk1", "keyvalue1", "scale values mean"), results[0].toSql());
-	}
+    }
 
 }

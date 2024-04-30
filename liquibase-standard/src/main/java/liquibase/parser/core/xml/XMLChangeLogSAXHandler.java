@@ -27,21 +27,21 @@ class XMLChangeLogSAXHandler extends DefaultHandler {
 
     protected Logger log;
 
-	private final DatabaseChangeLog databaseChangeLog;
-	private final ResourceAccessor resourceAccessor;
-	private final ChangeLogParameters changeLogParameters;
+    private final DatabaseChangeLog databaseChangeLog;
+    private final ResourceAccessor resourceAccessor;
+    private final ChangeLogParameters changeLogParameters;
     private final Stack<ParsedNode> nodeStack = new Stack<>();
     private final Stack<StringBuilder> textStack = new Stack<>();
     private ParsedNode databaseChangeLogTree;
 
 
     protected XMLChangeLogSAXHandler(String physicalChangeLogLocation, ResourceAccessor resourceAccessor, ChangeLogParameters changeLogParameters) {
-		log = Scope.getCurrentScope().getLog(getClass());
-		this.resourceAccessor = resourceAccessor;
+        log = Scope.getCurrentScope().getLog(getClass());
+        this.resourceAccessor = resourceAccessor;
 
-		databaseChangeLog = new DatabaseChangeLog();
-		databaseChangeLog.setPhysicalFilePath(physicalChangeLogLocation);
-		databaseChangeLog.setChangeLogParameters(changeLogParameters);
+        databaseChangeLog = new DatabaseChangeLog();
+        databaseChangeLog.setPhysicalFilePath(physicalChangeLogLocation);
+        databaseChangeLog.setChangeLogParameters(changeLogParameters);
 
         if (changeLogParameters == null) {
             this.changeLogParameters = new ChangeLogParameters();
@@ -55,9 +55,9 @@ class XMLChangeLogSAXHandler extends DefaultHandler {
         changeLogParserFactory = ChangeLogParserFactory.getInstance();
     }
 
-	public DatabaseChangeLog getDatabaseChangeLog() {
-		return databaseChangeLog;
-	}
+    public DatabaseChangeLog getDatabaseChangeLog() {
+        return databaseChangeLog;
+    }
 
     public ParsedNode getDatabaseChangeLogTree() {
         return databaseChangeLogTree;

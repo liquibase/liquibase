@@ -55,35 +55,35 @@ public class MarkChangeSetRanGenerator extends AbstractSqlGenerator<MarkChangeSe
 
                 final String tag = getTagFromChangeset(changeSet);
                 final int orderExecuted = Scope.getCurrentScope().getSingleton(ChangeLogHistoryServiceFactory.class).getChangeLogService(database).getNextSequenceValue();
-	            final DatabaseFunction dateExecuted = new DatabaseFunction(dateValue);
+                final DatabaseFunction dateExecuted = new DatabaseFunction(dateValue);
                 final String liquibaseVersion = getLiquibaseBuildVersion();
                 final String description = StringUtil.limitSize(changeSet.getDescription(), 250);
                 final String md5Sum = changeSet.generateCheckSum(ChecksumVersion.latest()).toString();
-				final String execType = statement.getExecType().value;
-				final String deploymentId = Scope.getCurrentScope().getSingleton(ChangeLogHistoryServiceFactory.class).getChangeLogService(database).getDeploymentId();
+                final String execType = statement.getExecType().value;
+                final String deploymentId = Scope.getCurrentScope().getSingleton(ChangeLogHistoryServiceFactory.class).getChangeLogService(database).getDeploymentId();
 
-				if (statement.getExecType().ranBefore) {
-	                runStatement = new UpdateStatement(database.getLiquibaseCatalogName(), database.getLiquibaseSchemaName(), database.getDatabaseChangeLogTableName())
-	                        .addNewColumnValue("DATEEXECUTED", dateExecuted)
-	                        .addNewColumnValue("ORDEREXECUTED", orderExecuted)
-	                        .addNewColumnValue("MD5SUM", md5Sum)
-	                        .addNewColumnValue("EXECTYPE", execType)
-	                        .addNewColumnValue("DEPLOYMENT_ID", deploymentId)
-	                        .addNewColumnValue(COMMENTS, getCommentsColumn(changeSet))
-	                        .addNewColumnValue(CONTEXTS, getContextsColumn(changeSet))
-	                        .addNewColumnValue(LABELS, getLabelsColumn(changeSet))
+                if (statement.getExecType().ranBefore) {
+                    runStatement = new UpdateStatement(database.getLiquibaseCatalogName(), database.getLiquibaseSchemaName(), database.getDatabaseChangeLogTableName())
+                            .addNewColumnValue("DATEEXECUTED", dateExecuted)
+                            .addNewColumnValue("ORDEREXECUTED", orderExecuted)
+                            .addNewColumnValue("MD5SUM", md5Sum)
+                            .addNewColumnValue("EXECTYPE", execType)
+                            .addNewColumnValue("DEPLOYMENT_ID", deploymentId)
+                            .addNewColumnValue(COMMENTS, getCommentsColumn(changeSet))
+                            .addNewColumnValue(CONTEXTS, getContextsColumn(changeSet))
+                            .addNewColumnValue(LABELS, getLabelsColumn(changeSet))
                             .addNewColumnValue("LIQUIBASE", liquibaseVersion)
                             .addNewColumnValue("DESCRIPTION", description)
-	                        .setWhereClause(database.escapeObjectName("ID", LiquibaseColumn.class) + " = ? " +
-	                                "AND " + database.escapeObjectName("AUTHOR", LiquibaseColumn.class) + " = ? " +
-	                                "AND " + database.escapeObjectName("FILENAME", LiquibaseColumn.class) + " = ?")
-	                        .addWhereParameters(changeSet.getId(), changeSet.getAuthor(), changeSet.getFilePath());
+                            .setWhereClause(database.escapeObjectName("ID", LiquibaseColumn.class) + " = ? " +
+                                    "AND " + database.escapeObjectName("AUTHOR", LiquibaseColumn.class) + " = ? " +
+                                    "AND " + database.escapeObjectName("FILENAME", LiquibaseColumn.class) + " = ?")
+                            .addWhereParameters(changeSet.getId(), changeSet.getAuthor(), changeSet.getFilePath());
 
                     if (tag != null) {
                         ((UpdateStatement) runStatement).addNewColumnValue("TAG", tag);
                     }
                 } else {
-					runStatement = new InsertStatement(database.getLiquibaseCatalogName(), database.getLiquibaseSchemaName(), database.getDatabaseChangeLogTableName())
+                    runStatement = new InsertStatement(database.getLiquibaseCatalogName(), database.getLiquibaseSchemaName(), database.getDatabaseChangeLogTableName())
                             .addColumnValue("ID", changeSet.getId())
                             .addColumnValue("AUTHOR", changeSet.getAuthor())
                             .addColumnValue("FILENAME", changeSet.getFilePath())

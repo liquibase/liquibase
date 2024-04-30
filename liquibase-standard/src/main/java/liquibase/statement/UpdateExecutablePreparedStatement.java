@@ -32,20 +32,20 @@ public class UpdateExecutablePreparedStatement extends ExecutablePreparedStateme
 
         StringBuilder sql = new StringBuilder("UPDATE ").append(database.escapeTableName(getCatalogName(), getSchemaName(), getTableName()));
 
-		StringBuilder params = new StringBuilder(" SET ");
-	    for(ColumnConfig column : getColumns()) {
-	    	params.append(database.escapeColumnName(getCatalogName(), getSchemaName(), getTableName(), column.getName()));
-	    	params.append(" = ");
-			if (column.getValueObject() instanceof DatabaseFunction) {
-				params.append(column.getValueObject()).append(", ");
-			} else {
-				params.append("?, ");
-				cols.add(column);
-			}
-	    }
-	    params.deleteCharAt(params.lastIndexOf(" "));
-	    params.deleteCharAt(params.lastIndexOf(","));
-	    sql.append(params);
+        StringBuilder params = new StringBuilder(" SET ");
+        for(ColumnConfig column : getColumns()) {
+            params.append(database.escapeColumnName(getCatalogName(), getSchemaName(), getTableName(), column.getName()));
+            params.append(" = ");
+            if (column.getValueObject() instanceof DatabaseFunction) {
+                params.append(column.getValueObject()).append(", ");
+            } else {
+                params.append("?, ");
+                cols.add(column);
+            }
+        }
+        params.deleteCharAt(params.lastIndexOf(" "));
+        params.deleteCharAt(params.lastIndexOf(","));
+        sql.append(params);
         if (getWhereClause() != null) {
             sql.append(" WHERE ").append(replacePredicatePlaceholders(database, getWhereClause(), getWhereColumnNames(), getWhereParameters()));
         }

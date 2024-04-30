@@ -52,7 +52,7 @@ CREATE OR REPLACE FORCE VIEW VIEWCHANGELOG3 (AMOUNT) AS SELECT AMOUNT FROM "PROS
 CREATE OR REPLACE FUNCTION             "FUNC_COMPUTE_TAX"(PRICE IN NUMBER) 
   RETURN NUMBER AS 
    BEGIN
-		  RETURN PRICE * 08.25;
+          RETURN PRICE * 08.25;
   END FUNC_COMPUTE_TAX;
 /
 
@@ -61,22 +61,22 @@ CREATE PUBLIC SYNONYM PUBLICTABLESYN FOR PRIMARY_TABLE;
 
 --changeset Erzsebet:1578520961284-13
 CREATE OR REPLACE PACKAGE             "PKG1" AS
-	PROCEDURE add_test (col1_in NUMBER, col2_in CHAR)
-	PROCEDURE del_test (col1_in NUMBER)
+    PROCEDURE add_test (col1_in NUMBER, col2_in CHAR)
+    PROCEDURE del_test (col1_in NUMBER)
 END PKG1;
 /
 
 --changeset Erzsebet:1578520961284-14
 CREATE OR REPLACE PACKAGE BODY             "PKG1" AS
-	PROCEDURE add_test(col1_in IN NUMBER,col2_in IN CHAR) AS
-		BEGIN
-			INSERT INTO test VALUES (col1_in,col2_in);
-		END add_test;
-	
-	PROCEDURE del_test(col1_in IN NUMBER) AS
-		  BEGIN
-		   DELETE FROM test WHERE col1_in = col1;
-		  END del_test;
+    PROCEDURE add_test(col1_in IN NUMBER,col2_in IN CHAR) AS
+        BEGIN
+            INSERT INTO test VALUES (col1_in,col2_in);
+        END add_test;
+    
+    PROCEDURE del_test(col1_in IN NUMBER) AS
+          BEGIN
+           DELETE FROM test WHERE col1_in = col1;
+          END del_test;
 END PKG1;
 /
 

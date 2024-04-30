@@ -30,7 +30,7 @@
         <mkdir dir="${temp.dir}"/>
         <lb:tagDatabase databaseref="test-db" tag="${tag}"/>
         <lb:updateDatabase databaseref="test-db"
-        	               changelogdirectory="${liquibase.test.ant.basedir}/changelog"
+                           changelogdirectory="${liquibase.test.ant.basedir}/changelog"
                            changelogfile="changelog-with-rollback.xml"/>
     </target>
 
@@ -76,14 +76,14 @@
                                        changelogfile="${liquibase.test.ant.basedir}/changelog/changelog-with-rollback.xml"/>
         </au:expectfailure>
     </target>
-	
-	
-	<!-- ADDED FOR THE NEW changeLogDirectory PROPERTY -->
+    
+    
+    <!-- ADDED FOR THE NEW changeLogDirectory PROPERTY -->
 
     <target name="testDatabaseRollbackFutureChangeLogDirectory">
         <lb:rollbackFutureDatabase outputfile="${temp.dir}/rollback-future.sql"
                                    changelogdirectory="${liquibase.test.ant.basedir}/changelog"
-        	                       changelogfile="changelog-with-rollback.xml">
+                                   changelogfile="changelog-with-rollback.xml">
             <lb:database driver="${jdbc.driver}" url="${jdbc.url}" user="${db.user}" password="${db.password}"/>
         </lb:rollbackFutureDatabase>
         <au:assertFileExists file="${temp.dir}/rollback-future.sql"/>
@@ -91,11 +91,11 @@
 
     <target name="testDatabaseRollbackFutureChangeLogDirectoryDoesNotExist">
         <au:expectfailure expectedmessage="Unable to initialize Liquibase: Unable to generate future rollback SQL: liquibase.exception.ChangeLogParseException: The file changelog-with-rollback.xml was not found in the configured search path">
-	        <lb:rollbackFutureDatabase outputfile="${temp.dir}/rollback-future.sql"
-	                                   changelogdirectory="${liquibase.test.ant.basedir}/bad_changelog"
-	        	                       changelogfile="changelog-with-rollback.xml">
-	            <lb:database driver="${jdbc.driver}" url="${jdbc.url}" user="${db.user}" password="${db.password}"/>
-	        </lb:rollbackFutureDatabase>
-		</au:expectfailure>
+            <lb:rollbackFutureDatabase outputfile="${temp.dir}/rollback-future.sql"
+                                       changelogdirectory="${liquibase.test.ant.basedir}/bad_changelog"
+                                       changelogfile="changelog-with-rollback.xml">
+                <lb:database driver="${jdbc.driver}" url="${jdbc.url}" user="${db.user}" password="${db.password}"/>
+            </lb:rollbackFutureDatabase>
+        </au:expectfailure>
     </target>
 </project>

@@ -8,11 +8,11 @@
     http://www.liquibase.org/xml/ns/pro http://www.liquibase.org/xml/ns/pro/liquibase-pro-latest.xsd ">
 
 <changeSet id="1" author="author name">
-	<!--Insert XML change objects here https://www.liquibase.org/documentation/xml_format.html-->
+    <!--Insert XML change objects here https://www.liquibase.org/documentation/xml_format.html-->
 </changeSet>
 
 <changeSet id="2" author="author name">
-	<!--Insert XML change objects here https://www.liquibase.org/documentation/xml_format.html-->
+    <!--Insert XML change objects here https://www.liquibase.org/documentation/xml_format.html-->
 </changeSet>
 
 </databaseChangeLog>

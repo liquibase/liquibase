@@ -20,7 +20,7 @@ public class AlterSequenceGeneratorTest extends AbstractSqlGeneratorTest<AlterSe
     protected static final String SEQUENCE_NAME = "SEQUENCE_NAME";
     protected static final String CATALOG_NAME = "CATALOG_NAME";
     protected static final String SCHEMA_NAME = "SCHEMA_NAME";
-//	private DatabaseConnection mockedUnsupportedMinMaxSequenceConnection;
+//    private DatabaseConnection mockedUnsupportedMinMaxSequenceConnection;
 //    private DatabaseConnection mockedSupportedMinMaxSequenceConnection;
     public AlterSequenceGeneratorTest() throws Exception {
         super(new AlterSequenceGenerator());
@@ -55,16 +55,16 @@ public class AlterSequenceGeneratorTest extends AbstractSqlGeneratorTest<AlterSe
     }
 
 //    @Test
-//	public void h2DatabaseSupportsSequenceMaxValue() throws Exception {
+//    public void h2DatabaseSupportsSequenceMaxValue() throws Exception {
 //
-//		H2Database h2Database = new H2Database();
+//        H2Database h2Database = new H2Database();
 //        h2Database.setConnection(mockedSupportedMinMaxSequenceConnection);
 //
-//		AlterSequenceStatement alterSequenceStatement = createSampleSqlStatement();
-//		alterSequenceStatement.setMaxValue(new BigInteger("1000"));
+//        AlterSequenceStatement alterSequenceStatement = createSampleSqlStatement();
+//        alterSequenceStatement.setMaxValue(new BigInteger("1000"));
 //
-//		assertFalse(generatorUnderTest.validate(alterSequenceStatement, h2Database, new MockSqlGeneratorChain()).hasErrors());
-//	}
+//        assertFalse(generatorUnderTest.validate(alterSequenceStatement, h2Database, new MockSqlGeneratorChain()).hasErrors());
+//    }
 
 //    @Test
 //    public void h2DatabaseDoesNotSupportsSequenceMaxValue() throws Exception {
@@ -78,17 +78,17 @@ public class AlterSequenceGeneratorTest extends AbstractSqlGeneratorTest<AlterSe
 //        assertTrue(generatorUnderTest.validate(alterSequenceStatement, h2Database, new MockSqlGeneratorChain()).hasErrors());
 //    }
 
-//	@Test
-//	public void h2DatabaseSupportsSequenceMinValue() throws Exception {
+//    @Test
+//    public void h2DatabaseSupportsSequenceMinValue() throws Exception {
 //
-//		H2Database h2Database = new H2Database();
+//        H2Database h2Database = new H2Database();
 //        h2Database.setConnection(mockedSupportedMinMaxSequenceConnection);
 //
-//		AlterSequenceStatement alterSequenceStatement = createSampleSqlStatement();
-//		alterSequenceStatement.setMinValue(new BigInteger("10"));
+//        AlterSequenceStatement alterSequenceStatement = createSampleSqlStatement();
+//        alterSequenceStatement.setMinValue(new BigInteger("10"));
 //
-//		assertFalse(generatorUnderTest.validate(alterSequenceStatement, h2Database, new MockSqlGeneratorChain()).hasErrors());
-//	}
+//        assertFalse(generatorUnderTest.validate(alterSequenceStatement, h2Database, new MockSqlGeneratorChain()).hasErrors());
+//    }
 //
 //    @Test
 //    public void h2DatabaseDoesNotSupportsSequenceMinValue() throws Exception {

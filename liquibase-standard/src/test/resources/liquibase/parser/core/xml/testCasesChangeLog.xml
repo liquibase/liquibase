@@ -10,9 +10,9 @@
     </changeSet>
 
     <changeSet id="using after column attribute" author="cmouttet">
-    	<addColumn tableName="person">
-    		<column name="middlename" type="varchar(50)" afterColumn="firstname"/>
-    	</addColumn>
+        <addColumn tableName="person">
+            <column name="middlename" type="varchar(50)" afterColumn="firstname"/>
+        </addColumn>
     </changeSet>
 
     <changeSet id="using before column attribute" author="cmouttet">

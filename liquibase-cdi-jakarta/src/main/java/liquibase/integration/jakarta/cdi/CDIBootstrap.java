@@ -30,9 +30,9 @@ public class CDIBootstrap implements Extension {
     void afterBeanDiscovery(@Observes AfterBeanDiscovery abd, BeanManager bm) {
         
         instance = new Bean<CDILiquibase>() {
-        	final AnnotatedType<CDILiquibase> at = bm.createAnnotatedType(CDILiquibase.class);	
-        	final InjectionTarget<CDILiquibase> it = bm.getInjectionTargetFactory(at).createInjectionTarget(this);
-        	
+            final AnnotatedType<CDILiquibase> at = bm.createAnnotatedType(CDILiquibase.class);    
+            final InjectionTarget<CDILiquibase> it = bm.getInjectionTargetFactory(at).createInjectionTarget(this);
+            
             @Override
             public Set<Type> getTypes() {
                 Set<Type> types = new HashSet<>();

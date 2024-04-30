@@ -79,8 +79,8 @@ public class DropPrimaryKeyChange extends AbstractChange {
     public SqlStatement[] generateStatements(Database database) {
 
         if (database instanceof SQLiteDatabase) {
-    		// return special statements for SQLite databases
-    		return generateStatementsForSQLiteDatabase(database);
+            // return special statements for SQLite databases
+            return generateStatementsForSQLiteDatabase(database);
         }
 
         DropPrimaryKeyStatement statement = new DropPrimaryKeyStatement(getCatalogName(), getSchemaName(), getTableName(), getConstraintName());
