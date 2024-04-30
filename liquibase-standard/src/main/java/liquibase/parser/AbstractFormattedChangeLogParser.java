@@ -20,6 +20,7 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.ResourceBundle;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -359,12 +360,9 @@ public abstract class AbstractFormattedChangeLogParser implements ChangeLogParse
                         handleRollbackSequence(physicalChangeLogLocation, changeLogParameters, changeLog, currentRollbackSequence, changeSet, rollbackSplitStatementsPatternMatcher, rollbackSplitStatements, rollbackEndDelimiter);
                     }
 
-                    Matcher stripCommentsPatternMatcher = STRIP_COMMENTS_PATTERN.matcher(line);
-                    Matcher splitStatementsPatternMatcher = SPLIT_STATEMENTS_PATTERN.matcher(line);
                     Matcher runWithMatcher = RUN_WITH_PATTERN.matcher(line);
                     Matcher runWithSpoolFileMatcher = RUN_WITH_SPOOL_FILE_PATTERN.matcher(line);
                     rollbackSplitStatementsPatternMatcher = ROLLBACK_SPLIT_STATEMENTS_PATTERN.matcher(line);
-                    Matcher endDelimiterPatternMatcher = END_DELIMITER_PATTERN.matcher(line);
                     Matcher rollbackEndDelimiterPatternMatcher = ROLLBACK_END_DELIMITER_PATTERN.matcher(line);
 
                     Matcher logicalFilePathMatcher = LOGICAL_FILE_PATH_PATTERN.matcher(line);
@@ -374,12 +372,9 @@ public abstract class AbstractFormattedChangeLogParser implements ChangeLogParse
                     Matcher contextFilterPatternMatcher = CONTEXT_FILTER_PATTERN.matcher(line);
                     Matcher labelsPatternMatcher = LABELS_PATTERN.matcher(line);
                     Matcher runInTransactionPatternMatcher = RUN_IN_TRANSACTION_PATTERN.matcher(line);
-                    Matcher dbmsPatternMatcher = DBMS_PATTERN.matcher(line);
                     Matcher ignorePatternMatcher = IGNORE_PATTERN.matcher(line);
                     Matcher failOnErrorPatternMatcher = FAIL_ON_ERROR_PATTERN.matcher(line);
 
-                    boolean stripComments = parseBoolean(stripCommentsPatternMatcher, changeSet, true);
-                    boolean splitStatements = parseBoolean(splitStatementsPatternMatcher, changeSet, true);
                     rollbackSplitStatements = parseBoolean(rollbackSplitStatementsPatternMatcher, changeSet, true);
                     boolean runOnChange = parseBoolean(runOnChangePatternMatcher, changeSet, false);
                     boolean runAlways = parseBoolean(runAlwaysPatternMatcher, changeSet, false);
@@ -394,7 +389,6 @@ public abstract class AbstractFormattedChangeLogParser implements ChangeLogParse
                     if (runWithSpoolFile != null) {
                         runWithSpoolFile = changeLogParameters.expandExpressions(runWithSpoolFile, changeLog);
                     }
-                    String endDelimiter = parseString(endDelimiterPatternMatcher);
                     rollbackEndDelimiter = parseString(rollbackEndDelimiterPatternMatcher);
                     String context = parseString(contextFilterPatternMatcher);
                     if (context == null || context.isEmpty()) {
@@ -415,10 +409,7 @@ public abstract class AbstractFormattedChangeLogParser implements ChangeLogParse
                     if (logicalFilePath != null) {
                         logicalFilePath = changeLogParameters.expandExpressions(logicalFilePath, changeLog);
                     }
-                    String dbms = parseString(dbmsPatternMatcher);
-                    if (dbms != null) {
-                        dbms = changeLogParameters.expandExpressions(dbms, changeLog);
-                    }
+                    String dbms = handleDbms(changeLogParameters, line, changeLog);
 
                     String ignore = parseString(ignorePatternMatcher);
                     if (ignore != null) {
@@ -453,15 +444,12 @@ public abstract class AbstractFormattedChangeLogParser implements ChangeLogParse
                     change = getChange();
                     setChangeSequence(change, finalCurrentSequence);
 
-                    if (splitStatementsPatternMatcher.matches()) {
-                        change.setSplitStatements(splitStatements);
-                    }
-                    change.setStripComments(stripComments);
-                    change.setEndDelimiter(endDelimiter);
+                    handleSplitStatements(line, changeSet, change);
+                    handleStripComments(line, changeSet, change);
+                    handleEndDelimiter(line, change);
                     changeSet.addChange(change);
 
-                    currentSequence.setLength(0);
-                    currentRollbackSequence.setLength(0);
+                    resetSequences(currentSequence, currentRollbackSequence);
                 } else {
                     Matcher altChangeSetOneDashPatternMatcher = ALT_CHANGE_SET_ONE_CHARACTER_PATTERN.matcher(line);
                     Matcher altChangeSetNoOtherInfoPatternMatcher = ALT_CHANGE_SET_NO_OTHER_INFO_PATTERN.matcher(line);
@@ -470,25 +458,25 @@ public abstract class AbstractFormattedChangeLogParser implements ChangeLogParse
                         throw new ChangeLogParseException("\n" + message);
                     }
                     if (changeSet != null) {
-                        configureChangeSet(physicalChangeLogLocation, changeLogParameters, reader, currentSequence, currentRollbackSequence, changeSet, count, line, commentMatcher, resourceAccessor);
+                        AtomicBoolean changeSetFinished = new AtomicBoolean(false);
+                        configureChangeSet(physicalChangeLogLocation, changeLogParameters, reader, currentSequence, currentRollbackSequence, changeSet, count, line, commentMatcher, resourceAccessor, changeLog, change, rollbackSplitStatementsPatternMatcher, rollbackSplitStatements, rollbackEndDelimiter, changeSetFinished);
+                        if (changeSetFinished.get()) {
+                            changeSet = null;
+                        }
                     } else {
                         if (commentMatcher.matches()) {
                             String message =
                                     String.format("Unexpected formatting at line %d. Formatted %s changelogs do not allow comment lines outside of changesets. Learn all the options at %s", count, getSequenceName(), getDocumentationLink());
                             throw new ChangeLogParseException("\n" + message);
+                        } else {
+                            handleAdditionalLines(changeLog, resourceAccessor, line);
                         }
                     }
                 }
             }
 
-            if (changeSet != null) {
-                setChangeSequence(changeLogParameters, currentSequence, changeSet, change);
-
-                if (isNotEndDelimiter(change)) {
-                    change.setEndDelimiter("\n/$");
-                }
-
-                handleRollbackSequence(physicalChangeLogLocation, changeLogParameters, changeLog, currentRollbackSequence, changeSet, rollbackSplitStatementsPatternMatcher, rollbackSplitStatements, rollbackEndDelimiter);
+            if (currentSequence.length() > 0) {
+                handleChangeSet(physicalChangeLogLocation, changeLogParameters, changeSet, currentSequence, change, changeLog, currentRollbackSequence, rollbackSplitStatementsPatternMatcher, rollbackSplitStatements, rollbackEndDelimiter);
             }
 
         } catch (IOException e) {
@@ -498,6 +486,58 @@ public abstract class AbstractFormattedChangeLogParser implements ChangeLogParse
         return changeLog;
     }
 
+    protected void handleChangeSet(String physicalChangeLogLocation,
+                                   ChangeLogParameters changeLogParameters,
+                                   ChangeSet changeSet,
+                                   StringBuilder currentSequence,
+                                   AbstractSQLChange change,
+                                   DatabaseChangeLog changeLog,
+                                   StringBuilder currentRollbackSequence,
+                                   Matcher rollbackSplitStatementsPatternMatcher,
+                                   boolean rollbackSplitStatements,
+                                   String rollbackEndDelimiter)
+            throws ChangeLogParseException {
+        if (changeSet != null) {
+            setChangeSequence(changeLogParameters, currentSequence, changeSet, change);
+
+            if (isNotEndDelimiter(change)) {
+                change.setEndDelimiter("\n/$");
+            }
+
+            handleRollbackSequence(physicalChangeLogLocation, changeLogParameters, changeLog, currentRollbackSequence, changeSet, rollbackSplitStatementsPatternMatcher, rollbackSplitStatements, rollbackEndDelimiter);
+        }
+    }
+
+
+    protected void handleStripComments(String line, ChangeSet changeSet, AbstractSQLChange change) throws ChangeLogParseException {
+        Matcher stripCommentsPatternMatcher = STRIP_COMMENTS_PATTERN.matcher(line);
+        boolean stripComments = parseBoolean(stripCommentsPatternMatcher, changeSet, true);
+        change.setStripComments(stripComments);
+    }
+
+    protected void handleEndDelimiter(String line, AbstractSQLChange change) {
+        Matcher endDelimiterPatternMatcher = END_DELIMITER_PATTERN.matcher(line);
+        String endDelimiter = parseString(endDelimiterPatternMatcher);
+        change.setEndDelimiter(endDelimiter);
+    }
+
+    protected String handleDbms(ChangeLogParameters changeLogParameters, String line, DatabaseChangeLog changeLog) {
+        Matcher dbmsPatternMatcher = DBMS_PATTERN.matcher(line);
+        String dbms = parseString(dbmsPatternMatcher);
+        if (dbms != null) {
+            dbms = changeLogParameters.expandExpressions(dbms, changeLog);
+        }
+        return dbms;
+    }
+
+    protected void handleSplitStatements(String line, ChangeSet changeSet, AbstractSQLChange change) throws ChangeLogParseException {
+        Matcher splitStatementsPatternMatcher = SPLIT_STATEMENTS_PATTERN.matcher(line);
+        boolean splitStatements = parseBoolean(splitStatementsPatternMatcher, changeSet, true);
+        if (splitStatementsPatternMatcher.matches()) {
+            change.setSplitStatements(splitStatements);
+        }
+    }
+
     /**
      * @deprecated use {@link AbstractFormattedChangeLogParser#configureChangeSet(String, ChangeLogParameters, BufferedReader, StringBuilder, StringBuilder, ChangeSet, int, String, Matcher, ResourceAccessor)} instead
      */
@@ -505,8 +545,62 @@ public abstract class AbstractFormattedChangeLogParser implements ChangeLogParse
     protected void configureChangeSet(String physicalChangeLogLocation, ChangeLogParameters changeLogParameters, BufferedReader reader, StringBuilder currentSequence, StringBuilder currentRollbackSequence, ChangeSet changeSet, int count, String line, Matcher commentMatcher) throws ChangeLogParseException, IOException {
         configureChangeSet(physicalChangeLogLocation, changeLogParameters, reader, currentSequence, currentRollbackSequence, changeSet, count, line, commentMatcher, null);
     }
+    protected void configureChangeSet(String physicalChangeLogLocation,
+                                      ChangeLogParameters changeLogParameters,
+                                      BufferedReader reader,
+                                      StringBuilder currentSequence,
+                                      StringBuilder currentRollbackSequence,
+                                      ChangeSet changeSet,
+                                      int count,
+                                      String line,
+                                      Matcher commentMatcher,
+                                      ResourceAccessor resourceAccessor)
+            throws ChangeLogParseException, IOException {
+        configureChangeSet(physicalChangeLogLocation, changeLogParameters, reader, currentSequence, currentRollbackSequence, changeSet, count, line, commentMatcher, resourceAccessor, null, null, null, false, null, new AtomicBoolean(false));
+    }
 
-    protected void configureChangeSet(String physicalChangeLogLocation, ChangeLogParameters changeLogParameters, BufferedReader reader, StringBuilder currentSequence, StringBuilder currentRollbackSequence, ChangeSet changeSet, int count, String line, Matcher commentMatcher, ResourceAccessor resourceAccessor) throws ChangeLogParseException, IOException {
+    /**
+     *
+     * Configure the change set with its attributes. An changeSetFinished flag is available for override versions
+     * to indicate that processing is done for the change set
+     *
+     * @param  physicalChangeLogLocation
+     * @param  changeLogParameters
+     * @param  reader
+     * @param  currentSequence
+     * @param  currentRollbackSequence
+     * @param  changeSet
+     * @param  count
+     * @param  line
+     * @param  commentMatcher
+     * @param  resourceAccessor
+     * @param  changeLog
+     * @param  change
+     * @param  rollbackSplitStatementsMatcher
+     * @param  rollbackSplitStatements
+     * @param  rollbackEndDelimiter
+     * @param  changeSetFinished
+     * @throws ChangeLogParseException
+     * @throws IOException
+     *
+     */
+    protected void configureChangeSet(String physicalChangeLogLocation,
+                                      ChangeLogParameters changeLogParameters,
+                                      BufferedReader reader,
+                                      StringBuilder currentSequence,
+                                      StringBuilder currentRollbackSequence,
+                                      ChangeSet changeSet,
+                                      int count,
+                                      String line,
+                                      Matcher commentMatcher,
+                                      ResourceAccessor resourceAccessor,
+                                      DatabaseChangeLog changeLog,
+                                      AbstractSQLChange change,
+                                      Matcher rollbackSplitStatementsMatcher,
+                                      boolean rollbackSplitStatements,
+                                      String rollbackEndDelimiter,
+                                      AtomicBoolean changeSetFinished)
+            throws ChangeLogParseException, IOException {
         Matcher altCommentOneDashMatcher = ALT_COMMENT_ONE_CHARACTER_PATTERN.matcher(line);
         Matcher altCommentPluralMatcher = ALT_COMMENT_PLURAL_PATTERN.matcher(line);
         Matcher rollbackMatcher = ROLLBACK_PATTERN.matcher(line);
@@ -519,7 +613,6 @@ public abstract class AbstractFormattedChangeLogParser implements ChangeLogParse
         Matcher altValidCheckSumOneDashMatcher = ALT_VALID_CHECK_SUM_ONE_CHARACTER_PATTERN.matcher(line);
         Matcher rollbackMultiLineStartMatcher = ROLLBACK_MULTI_LINE_START_PATTERN.matcher(line);
         Matcher invalidEmptyPreconditionMatcher = INVALID_EMPTY_PRECONDITION_PATTERN.matcher(line);
-
 
         if (commentMatcher.matches()) {
             if (commentMatcher.groupCount() == 0) {
@@ -571,6 +664,7 @@ public abstract class AbstractFormattedChangeLogParser implements ChangeLogParse
         } else {
             currentSequence.append(line).append(System.lineSeparator());
         }
+        changeSetFinished.set(false);
     }
 
     protected ChangeSet configureChangeSet(DatabaseChangeLog changeLog, boolean runOnChange, boolean runAlways,
@@ -611,6 +705,16 @@ public abstract class AbstractFormattedChangeLogParser implements ChangeLogParse
 
     protected void handleInvalidEmptyPreconditionCase(ChangeLogParameters changeLogParameters, ChangeSet changeSet, Matcher preconditionMatcher) throws ChangeLogParseException {
         throw new NotImplementedException("Invalid empty precondition found");
+    }
+
+    protected static void resetSequences(StringBuilder currentSequence, StringBuilder currentRollbackSequence) {
+        currentSequence.setLength(0);
+        currentRollbackSequence.setLength(0);
+    }
+
+    protected boolean handleAdditionalLines(DatabaseChangeLog changeLog, ResourceAccessor resourceAccessor, String line)
+        throws ChangeLogParseException {
+        return false;
     }
 
     private void handleRollbackSequence(String physicalChangeLogLocation, ChangeLogParameters changeLogParameters, DatabaseChangeLog changeLog, StringBuilder currentRollbackSequence, ChangeSet changeSet, Matcher rollbackSplitStatementsPatternMatcher, boolean rollbackSplitStatements, String rollbackEndDelimiter) throws ChangeLogParseException {
@@ -747,7 +851,7 @@ public abstract class AbstractFormattedChangeLogParser implements ChangeLogParse
         return value;
     }
 
-    private boolean parseBoolean(Matcher matcher, ChangeSet changeSet, boolean defaultValue) throws ChangeLogParseException {
+    protected boolean parseBoolean(Matcher matcher, ChangeSet changeSet, boolean defaultValue) throws ChangeLogParseException {
         boolean stripComments = defaultValue;
         if (matcher.matches()) {
             try {

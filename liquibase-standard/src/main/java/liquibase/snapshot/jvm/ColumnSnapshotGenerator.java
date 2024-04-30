@@ -647,7 +647,7 @@ public class ColumnSnapshotGenerator extends JdbcSnapshotGenerator {
 
     /**
      * {@link IndexSnapshotGenerator} fails to differentiate computed and non-computed column's for {@link PostgresDatabase}
-     * assume that if COLUMN_NAME contains parentesised expression -- its function reference.
+     * assume that if COLUMN_NAME contains parenthesized expression -- its function reference.
      * should handle cases like:
      * - ((name)::text)
      * - lower/upper((name)::text)
