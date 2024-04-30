@@ -13,7 +13,7 @@
 			<outputDirectory>internal/lib</outputDirectory>
 			<includes>
 				<include>
-					org.liquibase:liquibase-graalpy:jar:
+					org.liquibase:liquibase-scripting:jar:
 				</include>
 			</includes>
 		</dependencySet>

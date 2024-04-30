@@ -133,9 +133,6 @@
                 <exclude>com.github.spullara.mustache.java:compiler:jar:</exclude> <!-- from liquibase-commercial -->
                 <exclude>io.github.java-diff-utils:java-diff-utils:jar:</exclude> <!-- from liquibase-commercial -->
                 <exclude>com.github.vertical-blank:sql-formatter:jar:</exclude> <!-- from liquibase-commercial -->
-                <exclude>org.apache.groovy:groovy-jsr223:jar:</exclude> <!-- from liquibase-commercial -->
-                <exclude>org.apache.groovy:groovy-json:jar:</exclude> <!-- from liquibase-commercial -->
-                <exclude>org.apache.groovy:groovy:jar:</exclude> <!-- from liquibase-commercial -->
             </excludes>
         </dependencySet>
     </dependencySets>

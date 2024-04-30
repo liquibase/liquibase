@@ -27,7 +27,7 @@
 		<db2.version>11.5.9.0</db2.version>
 		<firebird.version>5.0.4.java8</firebird.version>
 		<liquibase-pro.version>master-SNAPSHOT</liquibase-pro.version>
-		<liquibase-graalpy.version>master-SNAPSHOT</liquibase-graalpy.version>
+		<liquibase-scripting.version>master-SNAPSHOT</liquibase-scripting.version>
 		<assemblyConfigFile>src/main/assembly/assembly-bin.xml</assemblyConfigFile>
 		<maven.deploy.skip>true</maven.deploy.skip>
 		<maven.install.skip>true</maven.install.skip>
@@ -353,24 +353,24 @@
 		</profile>
 
 		<profile>
-			<id>liquibase-graalpy</id>
+			<id>liquibase-scripting</id>
 
 			<activation>
 				<property>
-          <name>liquibase.graalpy</name>
+          <name>liquibase.scripting</name>
           <value>true</value>
 				</property>
 			</activation>
 
 			<properties>
-				<assemblyConfigFile>src/main/assembly/assembly-bin-graalpy.xml</assemblyConfigFile>
+				<assemblyConfigFile>src/main/assembly/assembly-bin-scripting.xml</assemblyConfigFile>
 			</properties>
 
 			<dependencies>
 				<dependency>
 					<groupId>org.liquibase</groupId>
-					<artifactId>liquibase-graalpy</artifactId>
-          <version>${liquibase-graalpy.version}</version>
+					<artifactId>liquibase-scripting</artifactId>
+          <version>${liquibase-scripting.version}</version>
 				</dependency>
 			</dependencies>
 		</profile>
