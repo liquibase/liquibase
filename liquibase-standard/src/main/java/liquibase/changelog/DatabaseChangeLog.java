@@ -1002,7 +1002,7 @@ public class DatabaseChangeLog implements Comparable<DatabaseChangeLog>, Conditi
                 }
                 changeLog.setIncludeContextFilter(includeContextFilter);
                 changeLog.setIncludeLabels(labels);
-                changeLog.setIncludeIgnore(ignore != null ? ignore.booleanValue() : false);
+                changeLog.setIncludeIgnore(ignore != null && ignore);
             } finally {
                 if (rootChangeLog == null) {
                     ROOT_CHANGE_LOG.remove();
