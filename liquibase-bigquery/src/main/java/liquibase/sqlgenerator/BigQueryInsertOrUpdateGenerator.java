@@ -1,13 +1,13 @@
 package liquibase.sqlgenerator;
 
-import java.util.Date;
-
 import liquibase.database.BigQueryDatabase;
 import liquibase.database.Database;
 import liquibase.datatype.DataTypeFactory;
 import liquibase.sqlgenerator.core.InsertOrUpdateGenerator;
 import liquibase.statement.core.InsertOrUpdateStatement;
-import liquibase.util.StringUtil;
+import org.apache.commons.lang3.StringUtils;
+
+import java.util.Date;
 
 public class BigQueryInsertOrUpdateGenerator extends InsertOrUpdateGenerator {
     public BigQueryInsertOrUpdateGenerator() {
@@ -56,7 +56,7 @@ public class BigQueryInsertOrUpdateGenerator extends InsertOrUpdateGenerator {
 
     @Override
     protected String getRecordCheck(InsertOrUpdateStatement insertOrUpdateStatement, Database database, String whereClause) {
-        if (StringUtil.isEmpty(whereClause)) {
+        if (StringUtils.isEmpty(whereClause)) {
             whereClause = "WHERE 1 = 1";
         }
         return "MERGE INTO " + insertOrUpdateStatement.getTableName() + " USING (SELECT 1) ON " + whereClause + " WHEN NOT MATCHED THEN ";

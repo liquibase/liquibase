@@ -12,7 +12,7 @@ import liquibase.statement.core.RawSqlStatement;
 import liquibase.structure.DatabaseObject;
 import liquibase.structure.core.Schema;
 import liquibase.structure.core.View;
-import liquibase.util.StringUtil;
+import org.apache.commons.lang3.StringUtils;
 
 import java.util.List;
 import java.util.Map;
@@ -72,7 +72,7 @@ public class BigQueryViewSnapshotGenerator extends ViewSnapshotGenerator {
                     definition = definition.substring(0, length - 1);
                 }
 
-                definition = StringUtil.trimToNull(definition);
+                definition = StringUtils.trimToNull(definition);
                 if (definition == null) {
                     definition = "[CANNOT READ VIEW DEFINITION]";
                 }
