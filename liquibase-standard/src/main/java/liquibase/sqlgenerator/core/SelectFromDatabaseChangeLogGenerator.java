@@ -3,12 +3,7 @@ package liquibase.sqlgenerator.core;
 import liquibase.change.ColumnConfig;
 import liquibase.database.Database;
 import liquibase.database.ObjectQuotingStrategy;
-import liquibase.database.core.AbstractDb2Database;
-import liquibase.database.core.MSSQLDatabase;
-import liquibase.database.core.MySQLDatabase;
-import liquibase.database.core.OracleDatabase;
-import liquibase.database.core.PostgresDatabase;
-import liquibase.exception.UnexpectedLiquibaseException;
+import liquibase.database.core.*;
 import liquibase.exception.ValidationErrors;
 import liquibase.sql.Sql;
 import liquibase.sql.UnparsedSql;
@@ -48,13 +43,7 @@ public class SelectFromDatabaseChangeLogGenerator extends AbstractSqlGenerator<S
 
             SelectFromDatabaseChangeLogStatement.WhereClause whereClause = statement.getWhereClause();
             if (whereClause != null) {
-                if (whereClause instanceof SelectFromDatabaseChangeLogStatement.ByTag) {
-                    sql += " WHERE "+database.escapeColumnName(null, null, null, "TAG")+"='" + ((SelectFromDatabaseChangeLogStatement.ByTag) whereClause).getTagName() + "'";
-                } else if (whereClause instanceof SelectFromDatabaseChangeLogStatement.ByNotNullCheckSum) {
-                    sql += " WHERE "+database.escapeColumnName(null, null, null, "MD5SUM")+" IS NOT NULL";
-                } else {
-                    throw new UnexpectedLiquibaseException("Unknown where clause type: " + whereClause.getClass().getName());
-                }
+                sql += whereClause.generateSql(database);
             }
 
             if ((statement.getOrderByColumns() != null) && (statement.getOrderByColumns().length > 0)) {

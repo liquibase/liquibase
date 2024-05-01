@@ -182,15 +182,12 @@ public class ShowSummaryUtil {
         ShowSummaryGenerator showSummaryGenerator = showSummaryGeneratorFactory.getShowSummaryGenerator();
         finalList.addAll(showSummaryGenerator.getAllAdditionalChangeSetStatus(runChangeLogIterator));
 
-        finalList.sort(new Comparator<ChangeSetStatus>() {
-            @Override
-            public int compare(ChangeSetStatus o1, ChangeSetStatus o2) {
-                ChangeSet c1 = o1.getChangeSet();
-                ChangeSet c2 = o2.getChangeSet();
-                int order1 = determineOrderInChangelog(c1);
-                int order2 = determineOrderInChangelog(c2);
-                return Integer.compare(order1, order2);
-            }
+        finalList.sort((o1, o2) -> {
+            ChangeSet c1 = o1.getChangeSet();
+            ChangeSet c2 = o2.getChangeSet();
+            int order1 = determineOrderInChangelog(c1);
+            int order2 = determineOrderInChangelog(c2);
+            return Integer.compare(order1, order2);
         });
 
         // Filtered because of labels or context

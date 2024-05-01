@@ -365,10 +365,10 @@ public class DiffToChangeLog {
     }
 
     private void setReplaceIfExistsTrueIfApplicable(Change[] changes) {
-        if(changes !=null && diffOutputControl.isReplaceIfExistsSet()) {
-            for(int i=0; i < changes.length; i++) {
-                if (changes[i] instanceof ReplaceIfExists) {
-                    ((ReplaceIfExists) changes[i]).setReplaceIfExists(true);
+        if (changes !=null && diffOutputControl.isReplaceIfExistsSet()) {
+            for (Change change : changes) {
+                if (change instanceof ReplaceIfExists) {
+                    ((ReplaceIfExists) change).setReplaceIfExists(true);
                 }
             }
         }
