@@ -11,6 +11,7 @@ import liquibase.statement.core.GetViewDefinitionStatement;
 import liquibase.structure.DatabaseObject;
 import liquibase.structure.core.Catalog;
 import liquibase.structure.core.Schema;
+import liquibase.structure.core.Sequence;
 import liquibase.structure.core.Table;
 
 import java.util.HashSet;
@@ -93,6 +94,14 @@ public class BigqueryDatabase extends AbstractJdbcDatabase {
     }
 
     @Override
+    public boolean supports(Class<? extends DatabaseObject> object) {
+        if (Sequence.class.isAssignableFrom(object)) {
+            return false;
+        }
+        return super.supports(object);
+    }
+
+    @Override
     public boolean supportsInitiallyDeferrableColumns() {
         return false;
     }
@@ -140,7 +149,7 @@ public class BigqueryDatabase extends AbstractJdbcDatabase {
 
     @Override
     public boolean supportsSequences() {
-        return false;
+        return this.supports(Sequence.class);
     }
 
     @Override
@@ -221,7 +230,7 @@ public class BigqueryDatabase extends AbstractJdbcDatabase {
     @Override
     public String getViewDefinition(CatalogAndSchema schema, String viewName) throws DatabaseException {
         schema = schema.customize(this);
-        String definition = (String) ((ExecutorService) Scope.getCurrentScope().getSingleton(ExecutorService.class))
+        String definition = (Scope.getCurrentScope().getSingleton(ExecutorService.class))
                 .getExecutor("jdbc", this)
                 .queryForObject(new GetViewDefinitionStatement(schema.getCatalogName(), schema.getSchemaName(), viewName), String.class);
         Scope.getCurrentScope().getLog(this.getClass()).info("getViewDefinition "+definition);
