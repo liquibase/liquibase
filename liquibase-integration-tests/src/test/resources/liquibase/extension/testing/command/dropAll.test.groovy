@@ -14,8 +14,6 @@ CommandTests.define {
 Short Description: Drop all database objects owned by the user
 Long Description: NOT SET
 Required Args:
-  force (Boolean) Argument to allow use of dropAll with values of 'true' or 'false'. The default is 'false'.
-  requireForce (Boolean) Argument to require user of dropAll to supply a 'force' argument, with values of 'true' or 'false'. The default is 'false'.
   url (String) The JDBC database connection URL
     OBFUSCATED
 Optional Args:
@@ -27,9 +25,13 @@ Optional Args:
     Default: null
   driverPropertiesFile (String) The JDBC driver properties file
     Default: null
+  force (Boolean) Argument to allow use of dropAll with values of 'true' or 'false'. The default is 'false'.
+    Default: false
   password (String) Password to use to connect to the database
     Default: null
     OBFUSCATED
+  requireForce (Boolean) Argument to require user of dropAll to supply a 'force' argument, with values of 'true' or 'false'. The default is 'false'.
+    Default: false
   schemas (String) Schemas to include in drop
     Default: null
   username (String) Username to use to connect to the database

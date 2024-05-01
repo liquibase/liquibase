@@ -234,7 +234,7 @@ public class Main {
                     try {
                         if ((args.length == 0) || ((args.length == 1) && ("--" + OPTIONS.HELP).equals(args[0]))) {
                             main.printHelp(outputStream);
-                            return Integer.valueOf(0);
+                            return 0;
                         } else if (("--" + OPTIONS.VERSION).equals(args[0])) {
                             main.command = "";
                             main.parseDefaultPropertyFiles();
@@ -260,7 +260,7 @@ public class Main {
                                     System.getProperties().getProperty("java.home"),
                                     SystemUtil.getJavaVersion()
                             ));
-                            return Integer.valueOf(0);
+                            return 0;
                         }
 
                         //
@@ -283,7 +283,7 @@ public class Main {
                             main.parseOptions(args);
                             if (main.command == null) {
                                 main.printHelp(outputStream);
-                                return Integer.valueOf(0);
+                                return 0;
                             }
                             Scope.getCurrentScope().addMdcValue(MdcKey.LIQUIBASE_COMMAND_NAME, main.command);
                         } catch (CommandLineParsingException e) {
@@ -373,14 +373,14 @@ public class Main {
                             Scope.getCurrentScope().getUI().sendErrorMessage((
                                     String.format(coreBundle.getString("did.not.run.because.param.was.set.to.false"),
                                             LiquibaseCommandLineConfiguration.SHOULD_RUN.getCurrentConfiguredValue().getProvidedValue().getActualKey())));
-                            return Integer.valueOf(0);
+                            return 0;
                         }
 
                         if (setupNeeded(main)) {
                             List<String> setupMessages = main.checkSetup();
                             if (!setupMessages.isEmpty()) {
                                 main.printHelp(setupMessages, isStandardOutputRequired(main.command) ? System.err : outputStream);
-                                return Integer.valueOf(1);
+                                return 1;
                             }
                         }
 
@@ -447,7 +447,7 @@ public class Main {
                         }
                     }
 
-                    return Integer.valueOf(0);
+                    return 0;
                 }
             });
     }
@@ -1116,11 +1116,12 @@ public class Main {
     protected static CodePointCheck checkArg(String arg) {
         char[] chars = arg.toCharArray();
         for (int i = 0; i < chars.length; i++) {
-            for (int j = 0; j < suspiciousCodePoints.length; j++) {
-                if (suspiciousCodePoints[j] == chars[i]) {
+            char ch = chars[i];
+            for (int suspiciousCodePoint : suspiciousCodePoints) {
+                if (suspiciousCodePoint == ch) {
                     CodePointCheck codePointCheck = new CodePointCheck();
                     codePointCheck.position = i;
-                    codePointCheck.ch = chars[i];
+                    codePointCheck.ch = ch;
                     return codePointCheck;
                 }
             }
