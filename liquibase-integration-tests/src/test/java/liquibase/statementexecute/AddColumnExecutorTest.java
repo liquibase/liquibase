@@ -1,6 +1,6 @@
 package liquibase.statementexecute;
 
-import liquibase.database.BigqueryDatabase;
+import liquibase.database.BigQueryDatabase;
 import liquibase.database.Database;
 import liquibase.database.core.*;
 import liquibase.datatype.DataTypeFactory;
@@ -54,7 +54,7 @@ public class AddColumnExecutorTest extends AbstractExecuteTest {
         assertCorrect("alter table [table_name] add [column_name] [int] constraint df_table_name_column_name default 42 not null", MSSQLDatabase.class);
         assertCorrect("alter table table_name add column_name int default 42 not null", MySQLDatabase.class);
         assertCorrect("not supported. fixme!!", SQLiteDatabase.class);
-        assertCorrect("alter table [table_name] add column [column_name] int default 42 not null", BigqueryDatabase.class);
+        assertCorrect("alter table [table_name] add column [column_name] int default 42 not null", BigQueryDatabase.class);
         assertCorrect("ALTER TABLE [table_name] ADD [column_name] int DEFAULT 42 NOT NULL");
     }
 
@@ -71,7 +71,7 @@ public class AddColumnExecutorTest extends AbstractExecuteTest {
         assertCorrect("alter table table_name add column_name int default 42", PostgresDatabase.class, InformixDatabase.class, OracleDatabase.class, DerbyDatabase.class, HsqlDatabase.class, DB2Database.class, H2Database.class, FirebirdDatabase.class);
         assertCorrect("alter table [table_name] add [column_name] int default 42 null", SybaseASADatabase.class);
         assertCorrect("alter table table_name add column_name int default 42 null", MySQLDatabase.class, MariaDBDatabase.class);
-        assertCorrect("alter table [table_name] add column [column_name] int default 42", BigqueryDatabase.class);
+        assertCorrect("alter table [table_name] add column [column_name] int default 42", BigQueryDatabase.class);
         assertCorrectOnRest("ALTER TABLE [table_name] ADD [column_name] int DEFAULT 42");
     }
 
@@ -85,7 +85,7 @@ public class AddColumnExecutorTest extends AbstractExecuteTest {
         assertCorrect("alter table [table_name] add [column_name] int identity null", SybaseDatabase.class);
         assertCorrect("alter table [table_name] add [column_name] serial", PostgresDatabase.class, InformixDatabase.class);
         assertCorrect("not supported. fixme!!", SQLiteDatabase.class);
-        assertCorrect("alter table [table_name] add column [column_name] int default 42", BigqueryDatabase.class);
+        assertCorrect("alter table [table_name] add column [column_name] int default 42", BigQueryDatabase.class);
         assertCorrectOnRest("ALTER TABLE [table_name] ADD [column_name] int auto_increment_clause");
     }
 
@@ -99,7 +99,7 @@ public class AddColumnExecutorTest extends AbstractExecuteTest {
         assertCorrect("alter table [table_name] add [column_name] int constraint df_table_name_column_name default 42 not null", MSSQLDatabase.class);
         assertCorrect("alter table table_name add column_name int default 42 not null", OracleDatabase.class, DerbyDatabase.class, HsqlDatabase.class, DB2Database.class, H2Database.class, FirebirdDatabase.class);
         assertCorrect("not supported. fixme!!", SQLiteDatabase.class);
-        assertCorrect("alter table [table_name] add column [column_name] int default 42 not null", BigqueryDatabase.class);
+        assertCorrect("alter table [table_name] add column [column_name] int default 42 not null", BigQueryDatabase.class);
         assertCorrectOnRest("ALTER TABLE [table_name] ADD [column_name] int default 42 not null");
     }
 
