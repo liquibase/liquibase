@@ -1,6 +1,6 @@
 package liquibase.executor;
 
-import liquibase.database.BigqueryDatabase;
+import liquibase.database.BigQueryDatabase;
 import liquibase.database.Database;
 import liquibase.exception.DatabaseException;
 import liquibase.executor.jvm.JdbcExecutor;
@@ -9,16 +9,16 @@ import liquibase.statement.SqlStatement;
 
 import java.util.List;
 
-public class BigqueryExecutor extends JdbcExecutor {
+public class BigQueryExecutor extends JdbcExecutor {
 
     @Override
     public int getPriority() {
-        return BigqueryDatabase.BIGQUERY_PRIORITY_DATABASE;
+        return BigQueryDatabase.BIGQUERY_PRIORITY_DATABASE;
     }
 
     @Override
     public boolean supports(Database database) {
-        return database instanceof BigqueryDatabase;
+        return database instanceof BigQueryDatabase;
     }
 
     @Override

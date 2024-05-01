@@ -3,7 +3,7 @@ package liquibase.diff.output.changelog.core;
 import liquibase.Scope;
 import liquibase.change.Change;
 import liquibase.change.core.SetTableRemarksChange;
-import liquibase.database.BigqueryDatabase;
+import liquibase.database.BigQueryDatabase;
 import liquibase.database.Database;
 import liquibase.diff.Difference;
 import liquibase.diff.ObjectDifferences;
@@ -20,7 +20,7 @@ public class BigQueryChangedTableChangeGenerator extends ChangedTableChangeGener
     @Override
     public int getPriority(Class<? extends DatabaseObject> objectType, Database database) {
         int priority = super.getPriority(objectType, database);
-        if (database instanceof BigqueryDatabase) {
+        if (database instanceof BigQueryDatabase) {
             priority += PRIORITY_DATABASE;
         }
         return priority;

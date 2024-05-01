@@ -1,6 +1,6 @@
 package liquibase.sqlgenerator;
 
-import liquibase.database.BigqueryDatabase;
+import liquibase.database.BigQueryDatabase;
 import liquibase.database.Database;
 import liquibase.sql.Sql;
 import liquibase.sql.UnparsedSql;
@@ -9,11 +9,11 @@ import liquibase.statement.core.DeleteStatement;
 
 import static liquibase.util.SqlUtil.replacePredicatePlaceholders;
 
-public class BigqueryDeleteGenerator extends DeleteGenerator {
+public class BigQueryDeleteGenerator extends DeleteGenerator {
 
     @Override
     public int getPriority() {
-        return BigqueryDatabase.BIGQUERY_PRIORITY_DATABASE;
+        return BigQueryDatabase.BIGQUERY_PRIORITY_DATABASE;
     }
 
     @Override
@@ -35,6 +35,6 @@ public class BigqueryDeleteGenerator extends DeleteGenerator {
 
     @Override
     public boolean supports(DeleteStatement statement, Database database) {
-        return database instanceof BigqueryDatabase;
+        return database instanceof BigQueryDatabase;
     }
 }

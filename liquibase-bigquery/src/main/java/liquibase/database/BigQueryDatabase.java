@@ -18,7 +18,7 @@ import java.util.HashSet;
 import java.util.Set;
 import java.util.regex.Pattern;
 
-public class BigqueryDatabase extends AbstractJdbcDatabase {
+public class BigQueryDatabase extends AbstractJdbcDatabase {
 
     public static final String PRODUCT_NAME = BQDriver.DATABASE_NAME;
     public static final int BIGQUERY_PRIORITY_DATABASE = 510;
@@ -26,7 +26,7 @@ public class BigqueryDatabase extends AbstractJdbcDatabase {
 
     private static final Pattern CREATE_VIEW_AS_PATTERN = Pattern.compile("^CREATE\\s+.*?VIEW\\s+.*?AS\\s+", 34);
 
-    public BigqueryDatabase() {
+    public BigQueryDatabase() {
         this.setCurrentDateTimeFunction("CURRENT_DATETIME()");
         this.unquotedObjectsAreUppercased = false;
         this.addReservedWords(getDefaultReservedWords());
@@ -172,7 +172,7 @@ public class BigqueryDatabase extends AbstractJdbcDatabase {
         if (connection == null) {
             return null;
         }
-        return BigqueryConnection.getUrlParamValue(connection.getURL(), "DefaultDataset");
+        return BigQueryConnection.getUrlParamValue(connection.getURL(), "DefaultDataset");
     }
 
     @Override

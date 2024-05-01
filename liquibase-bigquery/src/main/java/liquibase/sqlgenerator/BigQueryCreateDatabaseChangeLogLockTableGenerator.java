@@ -1,6 +1,6 @@
 package liquibase.sqlgenerator;
 
-import liquibase.database.BigqueryDatabase;
+import liquibase.database.BigQueryDatabase;
 import liquibase.database.Database;
 import liquibase.database.ObjectQuotingStrategy;
 import liquibase.datatype.DataTypeFactory;
@@ -10,16 +10,16 @@ import liquibase.statement.NotNullConstraint;
 import liquibase.statement.core.CreateDatabaseChangeLogLockTableStatement;
 import liquibase.statement.core.CreateTableStatement;
 
-public class BigqueryCreateDatabaseChangeLogLockTableGenerator extends CreateDatabaseChangeLogLockTableGenerator {
+public class BigQueryCreateDatabaseChangeLogLockTableGenerator extends CreateDatabaseChangeLogLockTableGenerator {
 
     @Override
     public int getPriority() {
-        return BigqueryDatabase.BIGQUERY_PRIORITY_DATABASE;
+        return BigQueryDatabase.BIGQUERY_PRIORITY_DATABASE;
     }
 
     @Override
     public boolean supports(CreateDatabaseChangeLogLockTableStatement statement, Database database) {
-        return database instanceof BigqueryDatabase;
+        return database instanceof BigQueryDatabase;
     }
 
     @Override

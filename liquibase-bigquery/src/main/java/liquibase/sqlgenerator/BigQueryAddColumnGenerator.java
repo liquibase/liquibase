@@ -1,6 +1,6 @@
 package liquibase.sqlgenerator;
 
-import liquibase.database.BigqueryDatabase;
+import liquibase.database.BigQueryDatabase;
 import liquibase.database.Database;
 import liquibase.sqlgenerator.core.AddColumnGenerator;
 import liquibase.statement.core.AddColumnStatement;
@@ -14,11 +14,11 @@ public class BigQueryAddColumnGenerator extends AddColumnGenerator {
 
 	@Override
 	public int getPriority() {
-		return BigqueryDatabase.BIGQUERY_PRIORITY_DATABASE;
+		return BigQueryDatabase.BIGQUERY_PRIORITY_DATABASE;
 	}
 
 	@Override
 	public boolean supports(AddColumnStatement statement, Database database) {
-		return database instanceof BigqueryDatabase;
+		return database instanceof BigQueryDatabase;
 	}
 }

@@ -2,11 +2,11 @@ package liquibase.database
 
 import spock.lang.Specification
 
-class BigqueryDatabaseTest extends Specification {
+class BigQueryDatabaseTest extends Specification {
 
     def checkSetup() {
         when:
-        def db = new BigqueryDatabase()
+        def db = new BigQueryDatabase()
 
         then:
         db.getShortName() == "bigquery"

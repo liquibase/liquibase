@@ -3,7 +3,7 @@ package liquibase.change;
 import liquibase.change.core.AddColumnChange;
 import liquibase.change.core.DropColumnChange;
 import liquibase.change.core.MergeColumnChange;
-import liquibase.database.BigqueryDatabase;
+import liquibase.database.BigQueryDatabase;
 import liquibase.database.Database;
 import liquibase.servicelocator.PrioritizedService;
 import liquibase.statement.SqlStatement;
@@ -21,7 +21,7 @@ public class BigQueryMergeColumnChange extends MergeColumnChange {
 
     @Override
     public boolean supports(Database database) {
-        return database instanceof BigqueryDatabase;
+        return database instanceof BigQueryDatabase;
     }
 
     @Override

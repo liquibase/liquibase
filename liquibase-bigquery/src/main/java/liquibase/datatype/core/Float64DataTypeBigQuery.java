@@ -1,7 +1,7 @@
 package liquibase.datatype.core;
 
 import liquibase.change.core.LoadDataChange;
-import liquibase.database.BigqueryDatabase;
+import liquibase.database.BigQueryDatabase;
 import liquibase.database.Database;
 import liquibase.datatype.DataTypeInfo;
 import liquibase.datatype.DatabaseDataType;
@@ -11,7 +11,7 @@ import liquibase.datatype.LiquibaseDataType;
         name = "float64",
         minParameters = 0,
         maxParameters = 0,
-        priority = BigqueryDatabase.BIGQUERY_PRIORITY_DATABASE
+        priority = BigQueryDatabase.BIGQUERY_PRIORITY_DATABASE
 )
 public class Float64DataTypeBigQuery extends LiquibaseDataType {
     public Float64DataTypeBigQuery() {
@@ -19,12 +19,12 @@ public class Float64DataTypeBigQuery extends LiquibaseDataType {
 
     @Override
     public boolean supports(Database database) {
-        return database instanceof BigqueryDatabase;
+        return database instanceof BigQueryDatabase;
     }
 
     @Override
     public DatabaseDataType toDatabaseDataType(Database database) {
-        if (database instanceof BigqueryDatabase) {
+        if (database instanceof BigQueryDatabase) {
 
             DatabaseDataType type = new DatabaseDataType("FLOAT64", this.getParameters());
             type.setType("FLOAT64");

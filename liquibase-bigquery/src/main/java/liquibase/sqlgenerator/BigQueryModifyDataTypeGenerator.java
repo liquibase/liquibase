@@ -1,6 +1,6 @@
 package liquibase.sqlgenerator;
 
-import liquibase.database.BigqueryDatabase;
+import liquibase.database.BigQueryDatabase;
 import liquibase.database.Database;
 import liquibase.datatype.DataTypeFactory;
 import liquibase.sql.Sql;
@@ -12,7 +12,7 @@ public class BigQueryModifyDataTypeGenerator extends ModifyDataTypeGenerator {
 
     @Override
     public boolean supports(ModifyDataTypeStatement statement, Database database) {
-        return database instanceof BigqueryDatabase;
+        return database instanceof BigQueryDatabase;
     }
 
     @Override

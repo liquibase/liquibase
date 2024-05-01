@@ -1,6 +1,6 @@
 package liquibase.sqlgenerator;
 
-import liquibase.database.BigqueryDatabase;
+import liquibase.database.BigQueryDatabase;
 import liquibase.database.Database;
 import liquibase.sql.Sql;
 import liquibase.sql.UnparsedSql;
@@ -16,7 +16,7 @@ public class BigQueryAddPrimaryKeyConstraintGenerator extends AddPrimaryKeyGener
 
     @Override
     public boolean supports(AddPrimaryKeyStatement statement, Database database) {
-        return database instanceof BigqueryDatabase;
+        return database instanceof BigQueryDatabase;
     }
 
     @Override

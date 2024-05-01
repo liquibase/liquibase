@@ -1,6 +1,6 @@
 package liquibase.sqlgenerator;
 
-import liquibase.database.BigqueryDatabase;
+import liquibase.database.BigQueryDatabase;
 import liquibase.database.Database;
 import liquibase.sql.Sql;
 import liquibase.sql.UnparsedSql;
@@ -12,12 +12,12 @@ import liquibase.structure.core.Table;
 public class BigQueryRenameTableGenerator extends RenameTableGenerator {
     @Override
     public int getPriority() {
-        return BigqueryDatabase.BIGQUERY_PRIORITY_DATABASE;
+        return BigQueryDatabase.BIGQUERY_PRIORITY_DATABASE;
     }
 
     @Override
     public boolean supports(RenameTableStatement statement, Database database) {
-        return database instanceof BigqueryDatabase;
+        return database instanceof BigQueryDatabase;
     }
 
     @Override

@@ -1,7 +1,7 @@
 package liquibase.sqlgenerator;
 
 import liquibase.Scope;
-import liquibase.database.BigqueryDatabase;
+import liquibase.database.BigQueryDatabase;
 import liquibase.database.Database;
 import liquibase.datatype.DatabaseDataType;
 import liquibase.sql.Sql;
@@ -18,12 +18,12 @@ public class BigQueryCreateTableGenerator extends CreateTableGenerator {
 
     @Override
     public int getPriority() {
-        return BigqueryDatabase.BIGQUERY_PRIORITY_DATABASE;
+        return BigQueryDatabase.BIGQUERY_PRIORITY_DATABASE;
     }
 
     @Override
     public boolean supports(CreateTableStatement statement, Database database) {
-        return database instanceof BigqueryDatabase;
+        return database instanceof BigQueryDatabase;
     }
 
     @Override

@@ -1,20 +1,20 @@
 package liquibase.sqlgenerator;
 
-import liquibase.database.BigqueryDatabase;
+import liquibase.database.BigQueryDatabase;
 import liquibase.database.Database;
 import liquibase.sqlgenerator.core.CreateDatabaseChangeLogTableGenerator;
 import liquibase.statement.core.CreateDatabaseChangeLogTableStatement;
 
-public class BigqueryCreateDatabaseChangeLogTableGenerator extends CreateDatabaseChangeLogTableGenerator {
+public class BigQueryCreateDatabaseChangeLogTableGenerator extends CreateDatabaseChangeLogTableGenerator {
 
     @Override
     public int getPriority() {
-        return BigqueryDatabase.BIGQUERY_PRIORITY_DATABASE;
+        return BigQueryDatabase.BIGQUERY_PRIORITY_DATABASE;
     }
 
     @Override
     public boolean supports(CreateDatabaseChangeLogTableStatement statement, Database database) {
-        return database instanceof BigqueryDatabase;
+        return database instanceof BigQueryDatabase;
     }
 
     @Override
