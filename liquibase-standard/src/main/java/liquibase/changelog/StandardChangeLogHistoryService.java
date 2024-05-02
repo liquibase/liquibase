@@ -245,14 +245,12 @@ public class StandardChangeLogHistoryService extends AbstractChangeLogHistorySer
             }
 
             SqlStatement databaseChangeLogStatement = new SelectFromDatabaseChangeLogStatement(
-                    new SelectFromDatabaseChangeLogStatement.ByNotNullCheckSum(),
+                    new SelectFromDatabaseChangeLogStatement.ByCheckSumNotNullAndNotLike(ChecksumVersion.latest().getVersion()),
                     new ColumnConfig().setName("MD5SUM"));
             List<Map<String, ?>> md5sumRS = ChangelogJdbcMdcListener.query(getDatabase(), ex -> ex.queryForList(databaseChangeLogStatement));
 
-            if (!md5sumRS.isEmpty()) {
-                //check if any checksum is not using the current version
-                databaseChecksumsCompatible = md5sumRS.stream().allMatch(m -> m.get("MD5SUM").toString().startsWith(ChecksumVersion.latest().getVersion() + ":"));
-            }
+            //check if any checksum is not using the current version
+            databaseChecksumsCompatible = md5sumRS.isEmpty();
 
 
         } else if (!changeLogCreateAttempted) {

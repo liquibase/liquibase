@@ -40,12 +40,10 @@ public class DropAllCommandStep extends AbstractCommandStep {
         SCHEMAS_ARG.setSupersededBy(CATALOG_AND_SCHEMAS_ARG);
         REQUIRE_FORCE_ARG = builder.argument("requireForce", Boolean.class)
                 .description("Argument to require user of dropAll to supply a 'force' argument, with values of 'true' or 'false'. The default is 'false'.")
-                .required()
                 .defaultValue(false)
                 .build();
         FORCE_ARG = builder.argument("force", Boolean.class)
                 .description("Argument to allow use of dropAll with values of 'true' or 'false'. The default is 'false'.")
-                .required()
                 .defaultValue(false)
                 .build();
     }

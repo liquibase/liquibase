@@ -124,7 +124,7 @@ public class GenerateChangelogCommandStep extends AbstractChangelogCommandStep {
         diffOutputControl.setDataDir(commandScope.getArgumentValue(DATA_OUTPUT_DIR_ARG));
         referenceDatabase.setOutputDefaultSchema(diffOutputControl.getIncludeSchema());
 
-        if(commandScope.getArgumentValue(GenerateChangelogCommandStep.USE_OR_REPLACE_OPTION).booleanValue()) {
+        if (commandScope.getArgumentValue(GenerateChangelogCommandStep.USE_OR_REPLACE_OPTION)) {
             diffOutputControl.setReplaceIfExistsSet(true);
         }
 

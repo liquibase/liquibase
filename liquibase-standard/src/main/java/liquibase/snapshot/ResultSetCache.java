@@ -77,7 +77,7 @@ public class ResultSetCache {
                         String rowSchema = CatalogAndSchema.CatalogAndSchemaCase.ORIGINAL_CASE.
                                 equals(resultSetExtractor.database.getSchemaAndCatalogCase())?resultSetExtractor.getSchemaKey(row):
                                 resultSetExtractor.getSchemaKey(row).toLowerCase();
-                        cache = cacheBySchema.computeIfAbsent(rowSchema, k -> new HashMap<String, List<CachedRow>>());
+                        cache = cacheBySchema.computeIfAbsent(rowSchema, k -> new HashMap<>());
                     }
                     if (!cache.containsKey(rowKey)) {
                         cache.put(rowKey, new ArrayList<>());

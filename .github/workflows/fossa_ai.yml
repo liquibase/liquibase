@@ -1,4 +1,4 @@
-name: FOSSA AI License Compliance and Security Check
+name: FOSSA License Compliance and Security Check
 
 on:
   pull_request:
@@ -9,7 +9,7 @@ on:
 
 jobs:
   fossa:
-    uses: liquibase/build-logic/.github/workflows/fossa_ai.yml@v0.7.2
+    uses: liquibase/build-logic/.github/workflows/fossa_ai.yml@main
     secrets: inherit
     with:
       check_snippets: true
