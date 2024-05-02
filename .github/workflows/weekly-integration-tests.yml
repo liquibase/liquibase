@@ -68,9 +68,9 @@ jobs:
         run: |
           ./mvnw -B "-DtrimStackTrace=false" \
             "-Dliquibase.sdk.testSystem.test=snowflake" \
-            "-Dliquibase.sdk.testSystem.snowflake.url=jdbc:${{ secrets.LIQUIBASEOSS_URL }}&schema=PUBLIC" \
-            "-Dliquibase.sdk.testSystem.snowflake.username=${{ secrets.LIQUIBASEOSS_USERNAME }}" \
-            "-Dliquibase.sdk.testSystem.snowflake.password=${{ secrets.LIQUIBASEOSS_PASSWORD }}" \
+            "-Dliquibase.sdk.testSystem.snowflake.url=jdbc:${{ secrets.LIQUIBASEPRO_URL }}&schema=PUBLIC" \
+            "-Dliquibase.sdk.testSystem.snowflake.username=${{ secrets.LIQUIBASEPRO_USERNAME }}" \
+            "-Dliquibase.sdk.testSystem.snowflake.password=${{ secrets.LIQUIBASEPRO_PASSWORD }}" \
             "-Dtest=*IntegrationTest,*ExecutorTest" \
             "-DfailIfNoTests=false" \
             "-Dsurefire.failIfNoSpecifiedTests=false" \
