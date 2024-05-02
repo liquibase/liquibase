@@ -115,7 +115,11 @@ public class LiquibaseIntegrationMethodInterceptor extends AbstractMethodInterce
     }
 
     private static TestSystem readContainerFromField(FieldInfo f, IMethodInvocation invocation) {
-        return (TestSystem) f.readValue(invocation.getInstance());
+        TestSystem testSystem = (TestSystem) f.readValue(invocation.getInstance());
+        if (testSystem == null) {
+            testSystem = (TestSystem) f.readValue(invocation.getSharedInstance());
+        }
+        return testSystem;
     }
 
     /**
