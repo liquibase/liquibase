@@ -160,6 +160,7 @@ public class AddUniqueConstraintExecutorTest extends AbstractExecuteTest {
         assertCorrect("alter table \"lbcat2\".[adduqtest] add constraint [uq_test] unique ([coltomakeuq])", DB2Database.class, Db2zDatabase.class);
         assertCorrect("alter table [lbschem2].[adduqtest] add constraint [uq_test] unique ([coltomakeuq])", H2Database.class);
         assertCorrect("alter table [lbschem2].[adduqtest] add constraint [uq_test] unique ([coltomakeuq])", Ingres9Database.class);
+        assertCorrect("alter table [lbschem2].[adduqtest] add constraint [uq_test] unique ([coltomakeuq])", TiberoDatabase.class);
         assertCorrect("alter table [lbcat2].[lbschem2].[adduqtest] add constraint [uq_test] unique ([coltomakeuq])", SnowflakeDatabase.class);
         assertCorrectOnRest("alter table [lbcat2].[adduqtest] add constraint [uq_test] unique ([coltomakeuq])");
 
@@ -178,7 +179,7 @@ public class AddUniqueConstraintExecutorTest extends AbstractExecuteTest {
         assertCorrect("alter table adduqtest add constraint uq_test unique (coltomakeuq)", MariaDBDatabase.class);
         assertCorrect("alter table adduqtest add constraint uq_test unique (coltomakeuq)", DerbyDatabase.class, HsqlDatabase.class, DB2Database.class, H2Database.class, FirebirdDatabase.class);
         assertCorrect("alter table [adduqtest] add constraint [uq_test] unique ([coltomakeuq])", Db2zDatabase.class);
-        assertCorrect("alter table [adduqtest] add constraint [uq_test] unique ([coltomakeuq]) USING INDEX TABLESPACE " + TABLESPACE_NAME, OracleDatabase.class);
+        assertCorrect("alter table [adduqtest] add constraint [uq_test] unique ([coltomakeuq]) USING INDEX TABLESPACE " + TABLESPACE_NAME, OracleDatabase.class, TiberoDatabase.class);
         assertCorrectOnRest("alter table [adduqtest] add constraint [uq_test] unique ([coltomakeuq])");
     }
 

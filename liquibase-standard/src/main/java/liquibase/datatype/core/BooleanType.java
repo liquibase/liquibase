@@ -41,6 +41,8 @@ public class BooleanType extends LiquibaseDataType {
                 return new DatabaseDataType("BIT", getParameters());
             }
             return database instanceof MariaDBDatabase ? new DatabaseDataType("TINYINT(1)") : new DatabaseDataType("TINYINT");
+        } else if (database instanceof TiberoDatabase) {
+            return new DatabaseDataType("NUMBER", 1);
         } else if (database instanceof OracleDatabase) {
             try {
                 if (database.getDatabaseMajorVersion() >= OracleDatabase.ORACLE_23C_MAJOR_VERSION) {
@@ -149,7 +151,7 @@ public class BooleanType extends LiquibaseDataType {
         return (database instanceof Db2zDatabase) || (database instanceof FirebirdDatabase) || (database instanceof
             MSSQLDatabase) || (database instanceof MySQLDatabase) || (database instanceof OracleDatabase) ||
             (database instanceof SQLiteDatabase) || (database instanceof SybaseASADatabase) || (database instanceof
-            SybaseDatabase);
+            SybaseDatabase || (database instanceof TiberoDatabase));
     }
 
     /**

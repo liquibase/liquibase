@@ -108,16 +108,16 @@ addForeignKeyConstraint: |
     Required For: all
   deferrable boolean 
     Description: Defines whether the foreign key is deferrable
-    Supported: asany,edb,oracle,postgresql,sqlite
+    Supported: asany,edb,oracle,postgresql,sqlite,tibero
   deleteCascade boolean 
     Description: Deprecated. This is true to set onDelete to Cascade, priority given to onDelete tag if one exists
-    Supported: asany,cockroachdb,db2,db2z,derby,edb,firebird,h2,hsqldb,informix,ingres,mariadb,mssql,mysql,oracle,postgresql
+    Supported: asany,cockroachdb,db2,db2z,derby,edb,firebird,h2,hsqldb,informix,ingres,mariadb,mssql,mysql,oracle,postgresql,tibero
   initiallyDeferred boolean 
     Description: Defines whether the foreign key is initially deferred
-    Supported: asany,edb,oracle,postgresql,sqlite
+    Supported: asany,edb,oracle,postgresql,sqlite,tibero
   onDelete string 
     Description: ON DELETE functionality. Possible values: 'CASCADE', 'SET NULL', 'SET DEFAULT', 'RESTRICT', 'NO ACTION'
-    Supported: asany,cockroachdb,db2,db2z,derby,edb,firebird,h2,hsqldb,informix,ingres,mariadb,mssql,mysql,oracle,postgresql
+    Supported: asany,cockroachdb,db2,db2z,derby,edb,firebird,h2,hsqldb,informix,ingres,mariadb,mssql,mysql,oracle,postgresql,tibero
   onUpdate string 
     Description: ON UPDATE functionality. Possible values: 'CASCADE', 'SET NULL', 'SET DEFAULT', 'RESTRICT', 'NO ACTION'
     Supported: all
@@ -307,19 +307,19 @@ alterSequence: |
     Supported: all
   dataType string 
     Description: Data type of the sequence
-    Supported: asany,cockroachdb,db2z,derby,edb,firebird,h2,informix,postgresql
+    Supported: asany,cockroachdb,db2z,derby,edb,firebird,h2,informix,postgresql,tibero
   incrementBy bigInteger 
     Description: New amount the sequence should increment by at each call
-    Supported: asany,cockroachdb,db2,db2z,derby,edb,firebird,informix,mariadb,mssql,oracle,postgresql
+    Supported: asany,cockroachdb,db2,db2z,derby,edb,firebird,informix,mariadb,mssql,oracle,postgresql,tibero
   maxValue bigInteger 
     Description: New maximum value for the sequence
-    Supported: asany,cockroachdb,db2,db2z,derby,edb,firebird,h2,informix,mariadb,mssql,oracle,postgresql
+    Supported: asany,cockroachdb,db2,db2z,derby,edb,firebird,h2,informix,mariadb,mssql,oracle,postgresql,tibero
   minValue bigInteger 
     Description: New minimum value for the sequence
     Supported: all
   ordered boolean 
     Description: Whether the sequence is generated in the requested order
-    Supported: asany,cockroachdb,db2z,derby,edb,firebird,h2,informix,mariadb,oracle,postgresql
+    Supported: asany,cockroachdb,db2z,derby,edb,firebird,h2,informix,mariadb,oracle,postgresql,tibero
   schemaName string 
     Description: Name of the database schema
     Supported: all
@@ -408,19 +408,19 @@ createSequence: |
     Supported: all
   dataType string 
     Description: Data type of the sequence
-    Supported: asany,cockroachdb,db2,db2z,derby,edb,h2,informix,postgresql
+    Supported: asany,cockroachdb,db2,db2z,derby,edb,h2,informix,postgresql,tibero
   incrementBy bigInteger 
     Description: Interval between sequence numbers
-    Supported: asany,cockroachdb,db2,db2z,derby,edb,h2,hsqldb,informix,mariadb,mssql,oracle,postgresql
+    Supported: asany,cockroachdb,db2,db2z,derby,edb,h2,hsqldb,informix,mariadb,mssql,oracle,postgresql,tibero
   maxValue bigInteger 
     Description: Maximum value of the sequence
-    Supported: asany,cockroachdb,db2,db2z,derby,edb,h2,informix,mariadb,mssql,oracle,postgresql
+    Supported: asany,cockroachdb,db2,db2z,derby,edb,h2,informix,mariadb,mssql,oracle,postgresql,tibero
   minValue bigInteger 
     Description: Minimum value of the sequence
-    Supported: asany,cockroachdb,db2,db2z,derby,edb,h2,informix,mariadb,mssql,oracle,postgresql
+    Supported: asany,cockroachdb,db2,db2z,derby,edb,h2,informix,mariadb,mssql,oracle,postgresql,tibero
   ordered boolean 
     Description: Whether the sequence is generated in the requested order
-    Supported: asany,db2,db2z,derby,firebird,h2,informix,mariadb,oracle
+    Supported: asany,db2,db2z,derby,firebird,h2,informix,mariadb,oracle,tibero
   schemaName string 
     Description: Name of the database schema
     Supported: all
@@ -430,7 +430,7 @@ createSequence: |
     Required For: all
   startValue bigInteger 
     Description: First sequence number to be generated.
-    Supported: asany,cockroachdb,db2,db2z,derby,edb,h2,hsqldb,informix,mariadb,mssql,oracle,postgresql
+    Supported: asany,cockroachdb,db2,db2z,derby,edb,h2,hsqldb,informix,mariadb,mssql,oracle,postgresql,tibero
 
 createTable: |
   catalogName string (since 3.0)
@@ -482,7 +482,7 @@ createView: |
     Supported: all
   replaceIfExists boolean (since 1.5)
     Description: Use 'CREATE OR REPLACE' syntax
-    Supported: asany,cockroachdb,db2,edb,firebird,h2,hsqldb,ingres,mariadb,mssql,mysql,oracle,postgresql,sqlite,sybase
+    Supported: asany,cockroachdb,db2,edb,firebird,h2,hsqldb,ingres,mariadb,mssql,mysql,oracle,postgresql,sqlite,sybase,tibero
   schemaName string 
     Description: Name of the database schema
     Supported: all
@@ -611,7 +611,7 @@ dropNotNullConstraint: |
   columnName string 
     Description: Name of the column to drop the constraint from
     Supported: all
-    Required For: asany,cockroachdb,db2,derby,edb,firebird,h2,hsqldb,informix,ingres,mariadb,mssql,mysql,postgresql,sybase,unsupported
+    Required For: asany,cockroachdb,db2,derby,edb,firebird,h2,hsqldb,informix,ingres,mariadb,mssql,mysql,postgresql,sybase,tibero,unsupported
   constraintName string 
     Description: Name of the constraint to drop (if database supports names for NOT NULL constraints)
     Supported: all
@@ -647,7 +647,7 @@ dropPrimaryKey: |
 dropProcedure: |
   catalogName string 
     Description: Name of the database catalog
-    Supported: asany,cockroachdb,db2,db2z,derby,edb,firebird,h2,hsqldb,informix,ingres,mariadb,mysql,oracle,postgresql,sybase
+    Supported: asany,cockroachdb,db2,db2z,derby,edb,firebird,h2,hsqldb,informix,ingres,mariadb,mysql,oracle,postgresql,sybase,tibero
   procedureName string 
     Description: Name of the stored procedure to drop
     Supported: all
@@ -975,7 +975,7 @@ renameView: |
     Required For: all
   schemaName string 
     Description: Name of the database schema
-    Supported: cockroachdb,edb,ingres,mariadb,mssql,mysql,postgresql,sqlite,sybase
+    Supported: cockroachdb,edb,ingres,mariadb,mssql,mysql,postgresql,sqlite,sybase,tibero
 
 setColumnRemarks: |
   catalogName string 

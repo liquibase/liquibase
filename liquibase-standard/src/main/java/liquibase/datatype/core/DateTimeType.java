@@ -36,7 +36,7 @@ public class DateTimeType extends LiquibaseDataType {
             return new DatabaseDataType(SQL_DATETYPE_TIMESTAMP, getParameters());
 		}
 
-        if (database instanceof OracleDatabase) {
+        if (database instanceof OracleDatabase || database instanceof TiberoDatabase) {
             if (originalDefinition.toUpperCase(Locale.US).contains("TIME ZONE")) {
                 // remove the last data type size that comes from column size
                 return new DatabaseDataType(originalDefinition.replaceFirst("\\(\\d+\\)$", ""));

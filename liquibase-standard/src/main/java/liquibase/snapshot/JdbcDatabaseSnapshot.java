@@ -1944,7 +1944,7 @@ public class JdbcDatabaseSnapshot extends DatabaseSnapshot {
             return null;
         }
 
-        if (database instanceof SQLiteDatabase) {
+        if (database instanceof SQLiteDatabase || database instanceof TiberoDatabase) {
             //sqlite jdbc's queries does not support escaped patterns.
             return string;
         }

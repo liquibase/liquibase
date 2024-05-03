@@ -17,4 +17,5 @@ liquibase.database.core.PostgresDatabase
 liquibase.database.core.SQLiteDatabase
 liquibase.database.core.SybaseASADatabase
 liquibase.database.core.SybaseDatabase
+liquibase.database.core.TiberoDatabase
 liquibase.database.core.UnsupportedDatabase
