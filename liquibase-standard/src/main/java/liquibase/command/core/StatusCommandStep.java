@@ -109,6 +109,8 @@ public class StatusCommandStep extends AbstractCommandStep {
         }
 
         out.flush();
+
+        resultsBuilder.addResult("undeployed", unrunChangeSets.size());
     }
 
     public List<ChangeSet> listUnrunChangeSets(Contexts contexts, LabelExpression labels, DatabaseChangeLog changeLog, Database database) throws Exception {
