@@ -148,7 +148,7 @@ public class ColumnSnapshotGenerator extends JdbcSnapshotGenerator {
 
     @Override
     protected void addTo(DatabaseObject foundObject, DatabaseSnapshot snapshot) throws DatabaseException {
-        if (!snapshot.getSnapshotControl().shouldInclude(Column.class)) {
+        if (!snapshot.getSnapshotControl().shouldInclude(Column.class) || !snapshot.getDatabase().supports(Column.class)) {
             return;
         }
         if (foundObject instanceof Relation) {
@@ -647,7 +647,7 @@ public class ColumnSnapshotGenerator extends JdbcSnapshotGenerator {
 
     /**
      * {@link IndexSnapshotGenerator} fails to differentiate computed and non-computed column's for {@link PostgresDatabase}
-     * assume that if COLUMN_NAME contains parentesised expression -- its function reference.
+     * assume that if COLUMN_NAME contains parenthesized expression -- its function reference.
      * should handle cases like:
      * - ((name)::text)
      * - lower/upper((name)::text)

@@ -6,8 +6,6 @@ import liquibase.configuration.*;
 import liquibase.database.Database;
 import liquibase.exception.CommandExecutionException;
 import liquibase.exception.CommandValidationException;
-import liquibase.exception.DatabaseException;
-import liquibase.exception.LiquibaseException;
 import liquibase.integration.commandline.LiquibaseCommandLineConfiguration;
 import liquibase.listener.LiquibaseListener;
 import liquibase.logging.mdc.MdcKey;
@@ -15,7 +13,6 @@ import liquibase.logging.mdc.MdcManager;
 import liquibase.logging.mdc.MdcObject;
 import liquibase.logging.mdc.MdcValue;
 import liquibase.logging.mdc.customobjects.ExceptionDetails;
-import liquibase.util.LiquibaseUtil;
 import liquibase.util.StringUtil;
 import lombok.Getter;
 
@@ -228,15 +225,14 @@ public class CommandScope {
                 }
                 executedCommands.add(command);
             }
-            String source = null;
+
+            // To find the correct database source if there was an exception
+            // we need to examine the database connection prior to closing it.
+            // That means this must run prior to any cleanup command steps.
             Database database = (Database) getDependency(Database.class);
+            String source = null;
             if (database != null) {
-                try {
-                    source = getDatabaseInfo(database);
-                } catch (Exception e) {
-                    Scope.getCurrentScope().getLog(CommandScope.class).warning("Unable to obtain database info: " + e.getMessage());
-                    source = database.getDisplayName();
-                }
+                source = ExceptionDetails.findSource(database);
             }
 
             // after executing our pipeline, runs cleanup in inverse order
@@ -276,46 +272,17 @@ public class CommandScope {
         return resultsBuilder.build();
     }
 
-    private static String getDatabaseInfo(Database database) {
-        String source = "Database";
-        try {
-            source = String.format("%s %s", database.getDatabaseProductName(), database.getDatabaseProductVersion());
-        } catch (DatabaseException dbe) {
-            source = database.getDatabaseProductName();
-        }
-        return source;
-    }
-
     private void logPrimaryExceptionToMdc(Throwable exception, String source) {
-        //
-        // Drill down to get the lowest level exception
-        //
-        Throwable primaryException = exception;
-        while (primaryException != null && primaryException.getCause() != null) {
-            primaryException = primaryException.getCause();
-        }
-        if (primaryException != null) {
-            if (primaryException instanceof LiquibaseException || source == null) {
-                source = LiquibaseUtil.getBuildVersionInfo();
-            }
-            ExceptionDetails exceptionDetails = new ExceptionDetails();
-            String simpleName = primaryException.getClass().getSimpleName();
-            exceptionDetails.setPrimaryException(simpleName);
-            exceptionDetails.setPrimaryExceptionReason(primaryException.getMessage());
-            exceptionDetails.setPrimaryExceptionSource(source);
-            StringWriter sw = new StringWriter();
-            PrintWriter pw = new PrintWriter(sw);
-            exception.printStackTrace(pw);
-            String exceptionString = sw.toString();
-            exceptionDetails.setException(exceptionString);
+        ExceptionDetails exceptionDetails = new ExceptionDetails(exception, source);
+        if (exceptionDetails.getPrimaryException() != null) {
             MdcManager mdcManager = Scope.getCurrentScope().getMdcManager();
             try (MdcObject primaryExceptionObject = mdcManager.put(MdcKey.EXCEPTION_DETAILS, exceptionDetails)) {
                 Scope.getCurrentScope().getLog(getClass()).info("Logging exception.");
             }
             Scope.getCurrentScope().getUI().sendMessage("ERROR: Exception Details");
-            Scope.getCurrentScope().getUI().sendMessage("ERROR: Exception Primary Class:  " + simpleName);
-            Scope.getCurrentScope().getUI().sendMessage("ERROR: Exception Primary Reason: " + primaryException.getMessage());
-            Scope.getCurrentScope().getUI().sendMessage("ERROR: Exception Primary Source: " + source);
+            Scope.getCurrentScope().getUI().sendMessage(exceptionDetails.getFormattedPrimaryException());
+            Scope.getCurrentScope().getUI().sendMessage(exceptionDetails.getFormattedPrimaryExceptionReason());
+            Scope.getCurrentScope().getUI().sendMessage(exceptionDetails.getFormattedPrimaryExceptionSource());
         }
     }
 

@@ -21,7 +21,7 @@ import java.util.Set;
 /**
  * Interface all changes (refactorings) implement.
  * <p>
- * Instances of these objects are normally created via the {@link ChangeFactory } by {@link liquibase.parser.ChangeLogParser} implementations.
+ * Instances of these objects are normally created via the {@link ChangeFactory} by {@link liquibase.parser.ChangeLogParser} implementations.
  *
  * @see ChangeFactory
  * @see Database
@@ -58,6 +58,7 @@ public interface Change extends LiquibaseSerializable, Plugin, ExtensibleObject 
     * Called automatically by Liquibase during the changelog parsing process.
      * @deprecated this is now set via {@link Scope}
     */
+    @Deprecated
     void setResourceAccessor(ResourceAccessor resourceAccessor);
 
     /**

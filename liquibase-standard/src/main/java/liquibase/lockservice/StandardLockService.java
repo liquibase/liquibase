@@ -10,6 +10,7 @@ import liquibase.database.ObjectQuotingStrategy;
 import liquibase.database.core.DB2Database;
 import liquibase.database.core.DerbyDatabase;
 import liquibase.database.core.MSSQLDatabase;
+import liquibase.database.core.MySQLDatabase;
 import liquibase.diff.output.DiffOutputControl;
 import liquibase.diff.output.changelog.ChangeGeneratorFactory;
 import liquibase.exception.DatabaseException;
@@ -56,7 +57,7 @@ public class StandardLockService implements LockService {
 
 
     public StandardLockService() {
-        //Empty constructos
+        //Empty constructor
     }
 
     @Override
@@ -370,6 +371,16 @@ public class StandardLockService implements LockService {
                 database.rollback();
                 SqlStatement unlockStatement = new UnlockDatabaseChangeLogStatement();
                 int updatedRows = ChangelogJdbcMdcListener.query(database, ex -> ex.update(unlockStatement));
+                if ((updatedRows == 0) && (database instanceof MySQLDatabase)) {
+                    Scope.getCurrentScope().getLog(getClass()).fine(
+                            "Database did not return a proper row count (Might have useAffectedRows enabled.)"
+                    );
+                    // NOTE: if using useAffectedRows, MySQL will return 0 rows affected if the changelog lock was not set or already released
+                    if (((MySQLDatabase) database).getUseAffectedRows()) {
+                        // Assume the lock was released successfully
+                        updatedRows = 1;
+                    }
+                }
                 if ((updatedRows == -1) && (database instanceof MSSQLDatabase)) {
                     Scope.getCurrentScope().getLog(getClass()).fine(
                             "Database did not return a proper row count (Might have NOCOUNT enabled.)"
@@ -480,7 +491,7 @@ public class StandardLockService implements LockService {
 
         if (this.database != null) {
             ChangeLogHistoryService changelogService = Scope.getCurrentScope().getSingleton(ChangeLogHistoryServiceFactory.class).getChangeLogService(database);
-            // On reseting the lock the changelog service has to be invalidated due to the fact that
+            // On resetting the lock the changelog service has to be invalidated due to the fact that
             // some liquibase component released the lock temporarily. In this time span another JVM instance
             // might have acquired the database lock and could have applied further changesets to prevent that
             // liquibase works with an outdated changelog.

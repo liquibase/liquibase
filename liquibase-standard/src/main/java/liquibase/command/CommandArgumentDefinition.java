@@ -1,7 +1,6 @@
 package liquibase.command;
 
 import liquibase.Scope;
-import liquibase.command.core.helpers.ReferenceDbUrlConnectionCommandStep;
 import liquibase.configuration.ConfigurationValueConverter;
 import liquibase.configuration.ConfigurationValueObfuscator;
 import liquibase.exception.CommandValidationException;
@@ -44,7 +43,7 @@ public class CommandArgumentDefinition<DataType> implements Comparable<CommandAr
     protected CommandArgumentDefinition(String name, Class<DataType> type) {
         this.name = name;
         this.dataType = type;
-        this.valueConverter = value -> ObjectUtil.convert(value, type);
+        this.valueConverter = value -> ObjectUtil.convert(value, type, name);
     }
 
     /**

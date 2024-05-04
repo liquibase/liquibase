@@ -15,10 +15,11 @@ import liquibase.logging.mdc.MdcKey;
 import liquibase.logging.mdc.MdcObject;
 import liquibase.logging.mdc.MdcValue;
 import liquibase.util.StringUtil;
-import liquibase.util.ValueHandlerUtil;
 
 import java.io.PrintStream;
-import java.util.*;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.List;
 
 public class DiffChangelogCommandStep extends AbstractChangelogCommandStep {
 
@@ -47,7 +48,6 @@ public class DiffChangelogCommandStep extends AbstractChangelogCommandStep {
         USE_OR_REPLACE_OPTION = builder.argument("useOrReplaceOption", Boolean.class)
                 .description("If true, will add 'OR REPLACE' option to the create view change object")
                 .defaultValue(false)
-                .setValueHandler(ValueHandlerUtil::booleanValueHandler)
                 .build();
         builder.addArgument(AbstractChangelogCommandStep.RUN_ON_CHANGE_TYPES_ARG).build();
         builder.addArgument(AbstractChangelogCommandStep.REPLACE_IF_EXISTS_TYPES_ARG).build();
@@ -81,7 +81,7 @@ public class DiffChangelogCommandStep extends AbstractChangelogCommandStep {
             CommandScope commandScope = resultsBuilder.getCommandScope();
             Database referenceDatabase = (Database) commandScope.getDependency(ReferenceDatabase.class);
             DiffOutputControl diffOutputControl = (DiffOutputControl) resultsBuilder.getResult(DiffOutputControlCommandStep.DIFF_OUTPUT_CONTROL.getName());
-            if(commandScope.getArgumentValue(DiffChangelogCommandStep.USE_OR_REPLACE_OPTION).booleanValue()) {
+            if (commandScope.getArgumentValue(DiffChangelogCommandStep.USE_OR_REPLACE_OPTION)) {
                 diffOutputControl.setReplaceIfExistsSet(true);
             }
             referenceDatabase.setOutputDefaultSchema(diffOutputControl.getIncludeSchema());
@@ -117,7 +117,7 @@ public class DiffChangelogCommandStep extends AbstractChangelogCommandStep {
             }
         } catch (Exception e) {
             try (MdcObject diffChangelogOutcome = Scope.getCurrentScope().addMdcValue(MdcKey.DIFF_CHANGELOG_OUTCOME, MdcValue.COMMAND_FAILED)) {
-                Scope.getCurrentScope().getLog(getClass()).warning("Diff changelog command failed");
+                Scope.getCurrentScope().getLog(getClass()).warning("Diff changelog command failed: " + e.getMessage());
             }
         }
 

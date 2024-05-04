@@ -101,7 +101,6 @@ do
   ls $workdir
   echo "debug"
   unzip -q $workdir/$jar -d $workdir/rebuild
-
   find $workdir/rebuild -name "*.html" -exec sed -i -e "s/0-SNAPSHOT/$version/g" {} \;
   find $workdir/rebuild -name "*.xml" -exec sed -i -e "s/<version>0-SNAPSHOT<\/version>/<version>$version<\/version>/g" {} \;
 

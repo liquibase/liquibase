@@ -1,7 +1,7 @@
 package liquibase.configuration;
 
 import liquibase.Scope;
-import liquibase.util.ValueHandlerUtil;
+import liquibase.util.ObjectUtil;
 
 import java.util.concurrent.atomic.AtomicReference;
 
@@ -19,7 +19,7 @@ public class ConfigurationValueUtils {
     public static <T> T convertDataType(String key, T value, ConfigurationValueConverter<T> converter) {
         AtomicReference<T> reference = new AtomicReference<>();
         try {
-            Scope.child(ValueHandlerUtil.ARGUMENT_KEY, key, () ->
+            Scope.child(ObjectUtil.ARGUMENT_KEY, key, () ->
                     reference.set(converter.convert(value)));
         } catch (Exception e) {
             throw new IllegalArgumentException(e);

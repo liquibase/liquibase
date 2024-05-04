@@ -93,7 +93,7 @@ public abstract class AbstractJdbcDatabase implements Database {
     protected List<String> unmodifiableDataTypes = new ArrayList<>();
     protected BigInteger defaultAutoIncrementStartWith = BigInteger.ONE;
     protected BigInteger defaultAutoIncrementBy = BigInteger.ONE;
-    // most databases either lowercase or uppercase unuqoted objects such as table and column names.
+    // most databases either lowercase or uppercase unquoted objects such as table and column names.
     protected Boolean unquotedObjectsAreUppercased;
     // whether object names should be quoted
     protected ObjectQuotingStrategy quotingStrategy = ObjectQuotingStrategy.LEGACY;
@@ -229,7 +229,7 @@ public abstract class AbstractJdbcDatabase implements Database {
     @Override
     public String getDefaultCatalogName() {
         if (defaultCatalogName == null) {
-            if ((defaultSchemaName != null) && !this.supportsSchemas()) {
+            if ((defaultSchemaName != null) && !this.supports(Schema.class)) {
                 return defaultSchemaName;
             }
 
@@ -303,7 +303,7 @@ public abstract class AbstractJdbcDatabase implements Database {
 
     @Override
     public String getDefaultSchemaName() {
-        if (!supportsSchemas()) {
+        if (!supports(Schema.class)) {
             return getDefaultCatalogName();
         }
 
@@ -326,7 +326,7 @@ public abstract class AbstractJdbcDatabase implements Database {
     @Override
     public void setDefaultSchemaName(final String schemaName) {
         this.defaultSchemaName = correctObjectName(schemaName, Schema.class);
-        if (!supportsSchemas()) {
+        if (!supports(Schema.class)) {
             defaultCatalogSet = schemaName != null;
         }
     }
@@ -731,7 +731,7 @@ public abstract class AbstractJdbcDatabase implements Database {
         if (caseSensitive == null) {
             return false;
         } else {
-            return caseSensitive.booleanValue();
+            return caseSensitive;
         }
     }
 
@@ -841,7 +841,7 @@ public abstract class AbstractJdbcDatabase implements Database {
     @Override
     public String escapeObjectName(String catalogName, String schemaName, final String objectName,
                                    final Class<? extends DatabaseObject> objectType) {
-        if (supportsSchemas()) {
+        if (supports(Schema.class)) {
             catalogName = StringUtil.trimToNull(catalogName);
             schemaName = StringUtil.trimToNull(schemaName);
 
@@ -873,7 +873,7 @@ public abstract class AbstractJdbcDatabase implements Database {
                     return escapeObjectName(catalogName, Catalog.class) + "." + escapeObjectName(schemaName, Schema.class) + "." + escapeObjectName(objectName, objectType);
                 }
             }
-        } else if (supportsCatalogs()) {
+        } else if (supports(Catalog.class)) {
             catalogName = StringUtil.trimToNull(catalogName);
             schemaName = StringUtil.trimToNull(schemaName);
 
@@ -1415,7 +1415,7 @@ public abstract class AbstractJdbcDatabase implements Database {
 
     @Override
     public boolean isDefaultSchema(final String catalog, final String schema) {
-        if (!supportsSchemas()) {
+        if (!supports(Schema.class)) {
             return true;
         }
 
@@ -1427,7 +1427,7 @@ public abstract class AbstractJdbcDatabase implements Database {
 
     @Override
     public boolean isDefaultCatalog(final String catalog) {
-        if (!supportsCatalogs()) {
+        if (!supports(Catalog.class)) {
             return true;
         }
 

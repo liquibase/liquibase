@@ -39,7 +39,7 @@ public class DB2Database extends AbstractDb2Database {
 				throw new DatabaseException("Error getting fix pack number");
 
 			return getDatabaseMajorVersion() > 11
-                                || getDatabaseMajorVersion() == 11 && ( getDatabaseMinorVersion() == 1 && fixPack.intValue() >= 1 || getDatabaseMinorVersion() > 1 );
+                                || getDatabaseMajorVersion() == 11 && ( getDatabaseMinorVersion() == 1 && fixPack >= 1 || getDatabaseMinorVersion() > 1 );
 
 		} catch (final DatabaseException e) {
 			return false; // assume not
