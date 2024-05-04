@@ -65,7 +65,6 @@ jobs:
             ]
 
       - name: Run tests
-        if: ${{ matrix.java != 8}}
         run: |
           ./mvnw -B "-DtrimStackTrace=false" \
             "-Dliquibase.sdk.testSystem.test=snowflake" \
@@ -81,7 +80,7 @@ jobs:
         if: ${{ inputs.archive_test_results == 'true' }}
         uses: actions/upload-artifact@v3
         with:
-          name: liquibase-test-results-jdk${{ matrix.java }}
+          name: liquibase-test-results-snowflake
           path: |
             ./**/target/surefire-reports
             ./**/target/site
