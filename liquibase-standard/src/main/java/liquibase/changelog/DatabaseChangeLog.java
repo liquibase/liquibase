@@ -722,7 +722,7 @@ public class DatabaseChangeLog implements Comparable<DatabaseChangeLog>, Conditi
                 includeContextFilter,
                 labels,
                 ignore,
-                0,
+                1,
                 Integer.MAX_VALUE);
     }
 
