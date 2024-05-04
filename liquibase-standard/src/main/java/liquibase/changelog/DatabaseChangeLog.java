@@ -535,7 +535,7 @@ public class DatabaseChangeLog implements Comparable<DatabaseChangeLog>, Conditi
                         includeContextFilter,
                         labels,
                         ignore,
-                        node.getChildValue(null, MIN_DEPTH, 1),
+                        node.getChildValue(null, MIN_DEPTH, 0),
                         node.getChildValue(null, MAX_DEPTH, Integer.MAX_VALUE),
                         node.getChildValue(null, ENDS_WITH_FILTER, ""),
                         (ModifyChangeSets) nodeScratch.get(MODIFY_CHANGE_SETS));
@@ -722,7 +722,7 @@ public class DatabaseChangeLog implements Comparable<DatabaseChangeLog>, Conditi
                 includeContextFilter,
                 labels,
                 ignore,
-                1,
+                0,
                 Integer.MAX_VALUE);
     }
 
