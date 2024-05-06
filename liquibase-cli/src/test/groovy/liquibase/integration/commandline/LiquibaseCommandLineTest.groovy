@@ -716,7 +716,7 @@ https://docs.liquibase.com
 
     def "help output" () {
         when:
-        Assumptions.assumeTrue(System.getProperty("skipHelpTests") == null, "Skipping help test")
+        Assumptions.assumeTrue(System.getProperty("skipHelpTests") != null, "Skipping help test")
         def oldOut = System.out
         def bytes = new ByteArrayOutputStream()
         def newOut = new PrintStream(bytes)
