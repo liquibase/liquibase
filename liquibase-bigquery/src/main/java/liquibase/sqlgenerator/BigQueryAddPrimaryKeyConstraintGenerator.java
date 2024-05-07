@@ -21,8 +21,9 @@ public class BigQueryAddPrimaryKeyConstraintGenerator extends AddPrimaryKeyGener
 
     @Override
     public Sql[] generateSql(AddPrimaryKeyStatement statement, Database database, SqlGeneratorChain sqlGeneratorChain) {
-        String sql = "SELECT 1";
-
+        String sql = String.format("ALTER TABLE %s ADD PRIMARY KEY (%s) NOT ENFORCED",
+                database.escapeTableName(statement.getCatalogName(), statement.getSchemaName(), statement.getTableName()),
+                database.escapeColumnNameList(statement.getColumnNames()));
         return new Sql[]{
                 new UnparsedSql(sql, getAffectedPrimaryKey(statement))
         };
