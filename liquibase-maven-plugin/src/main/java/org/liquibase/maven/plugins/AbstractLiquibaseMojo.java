@@ -3,7 +3,6 @@ package org.liquibase.maven.plugins;
 import liquibase.GlobalConfiguration;
 import liquibase.Liquibase;
 import liquibase.Scope;
-import liquibase.ThreadLocalScopeManager;
 import liquibase.changelog.visitor.ChangeExecListener;
 import liquibase.changelog.visitor.DefaultChangeExecListener;
 import liquibase.command.core.helpers.DbUrlConnectionCommandStep;
@@ -70,13 +69,8 @@ import static org.apache.commons.lang3.StringUtils.defaultIfBlank;
 @SuppressWarnings("java:S2583")
 public abstract class AbstractLiquibaseMojo extends AbstractMojo {
 
-    static {
-        // If maven is called with -T and a value larger than 1, it can get confused under heavy thread load
-        Scope.setScopeManager( new ThreadLocalScopeManager(null));
-    }
-
     /**
-     * Suffix for fields that are representing a default value for a another field.
+     * Suffix for fields that are representing a default value for another field.
      */
     private static final String DEFAULT_FIELD_SUFFIX = "Default";
 
@@ -151,6 +145,7 @@ public abstract class AbstractLiquibaseMojo extends AbstractMojo {
      * @parameter property="liquibase.emptyPassword" default-value="false"
      * @deprecated Use an empty or null value for the password instead.
      */
+    @Deprecated
     @PropertyElement
     protected boolean emptyPassword;
     /**
@@ -207,6 +202,7 @@ public abstract class AbstractLiquibaseMojo extends AbstractMojo {
      * @deprecated No longer prompts
      */
     @PropertyElement
+    @Deprecated
     protected boolean promptOnNonLocalDatabase;
 
     /**
@@ -242,6 +238,7 @@ public abstract class AbstractLiquibaseMojo extends AbstractMojo {
      * @deprecated Logging managed by maven
      */
     @PropertyElement
+    @Deprecated
     protected String logging;
 
     /**
@@ -1362,10 +1359,9 @@ public abstract class AbstractLiquibaseMojo extends AbstractMojo {
             systemProperties = new Properties();
         }
         // Add all system properties configured by the user
-        Iterator<Object> iter = systemProperties.keySet().iterator();
-        while (iter.hasNext()) {
-            String key = (String) iter.next();
-            String value = systemProperties.getProperty(key);
+        for (Map.Entry<?, ?> entry : systemProperties.entrySet()) {
+            String key = (String) entry.getKey();
+            String value = (String) entry.getValue();
             System.setProperty(key, value);
         }
     }

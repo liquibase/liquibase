@@ -342,6 +342,8 @@
                         <param>liquibase.changeset.ChangeSetService</param>
                         <param>liquibase.parser.LiquibaseSqlParser</param>
                         <param>liquibase.database.LiquibaseTableNames</param>
+                        <param>liquibase.changelog.visitor.ValidatingVisitorGenerator</param>
+                        <param>liquibase.io.OutputFileHandler</param>
                     </services>
                 </configuration>
                 <executions>

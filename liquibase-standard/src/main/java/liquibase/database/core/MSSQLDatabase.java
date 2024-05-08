@@ -3,6 +3,7 @@ package liquibase.database.core;
 import liquibase.CatalogAndSchema;
 import liquibase.GlobalConfiguration;
 import liquibase.Scope;
+import liquibase.change.AbstractSQLChange;
 import liquibase.change.Change;
 import liquibase.changelog.DatabaseChangeLog;
 import liquibase.database.AbstractJdbcDatabase;
@@ -114,7 +115,17 @@ public class MSSQLDatabase extends AbstractJdbcDatabase {
 
     @Override
     public void executeStatements(Change change, DatabaseChangeLog changeLog, List<SqlVisitor> sqlVisitors) throws LiquibaseException {
-        super.executeStatements(change, changeLog, addSqlVisitors(sqlVisitors));
+        if (change instanceof AbstractSQLChange) {
+            String endDelimiter = StringUtil.trimToNull(((AbstractSQLChange) change).getEndDelimiter());
+            if (endDelimiter != null && !endDelimiter.contentEquals(";")) {
+                super.executeStatements(change, changeLog, sqlVisitors);
+            } else {
+                super.executeStatements(change, changeLog, addSqlVisitors(sqlVisitors));
+            }
+        }
+        else {
+                super.executeStatements(change, changeLog, addSqlVisitors(sqlVisitors));
+            }
     }
 
     //
@@ -185,15 +196,24 @@ public class MSSQLDatabase extends AbstractJdbcDatabase {
     }
 
     @Override
+    public boolean supports(Class<? extends DatabaseObject> object) {
+        if (Sequence.class.isAssignableFrom(object)) {
+            try {
+                return isAzureDb() || this.getDatabaseMajorVersion() >= MSSQL_SERVER_VERSIONS.MSSQL2012;
+            } catch (DatabaseException e) {
+                throw new UnexpectedLiquibaseException(e);
+            }
+        }
+        return super.supports(object);
+    }
+
+    @Override
     public boolean supportsSequences() {
         try {
-            if (isAzureDb() || this.getDatabaseMajorVersion() >= MSSQL_SERVER_VERSIONS.MSSQL2012) {
-                return true;
-            }
+            return isAzureDb() || this.getDatabaseMajorVersion() >= MSSQL_SERVER_VERSIONS.MSSQL2012;
         } catch (DatabaseException e) {
             throw new UnexpectedLiquibaseException(e);
         }
-        return false;
     }
 
     @Override

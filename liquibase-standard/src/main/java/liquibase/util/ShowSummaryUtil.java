@@ -182,15 +182,12 @@ public class ShowSummaryUtil {
         ShowSummaryGenerator showSummaryGenerator = showSummaryGeneratorFactory.getShowSummaryGenerator();
         finalList.addAll(showSummaryGenerator.getAllAdditionalChangeSetStatus(runChangeLogIterator));
 
-        finalList.sort(new Comparator<ChangeSetStatus>() {
-            @Override
-            public int compare(ChangeSetStatus o1, ChangeSetStatus o2) {
-                ChangeSet c1 = o1.getChangeSet();
-                ChangeSet c2 = o2.getChangeSet();
-                int order1 = determineOrderInChangelog(c1);
-                int order2 = determineOrderInChangelog(c2);
-                return Integer.compare(order1, order2);
-            }
+        finalList.sort((o1, o2) -> {
+            ChangeSet c1 = o1.getChangeSet();
+            ChangeSet c2 = o2.getChangeSet();
+            int order1 = determineOrderInChangelog(c1);
+            int order2 = determineOrderInChangelog(c2);
+            return Integer.compare(order1, order2);
         });
 
         // Filtered because of labels or context
@@ -300,13 +297,9 @@ public class ShowSummaryUtil {
         builder.append(System.lineSeparator());
         int skipped = skippedChangeSets.size();
         int filtered = filterDenied.size();
-        ShowSummaryGeneratorFactory showSummaryGeneratorFactory = Scope.getCurrentScope().getSingleton(ShowSummaryGeneratorFactory.class);
-        ShowSummaryGenerator showSummaryGenerator = showSummaryGeneratorFactory.getShowSummaryGenerator();
-        List<ChangeSetStatus> additionalChangeSetStatus = showSummaryGenerator.getAllAdditionalChangeSetStatus(runChangeLogIterator);
         int totalAccepted = calculateAccepted(statusVisitor, changeExecListener);
         int totalPreviouslyRun = calculatePreviouslyRun(statusVisitor);
-        int additionalStatusCount = additionalChangeSetStatus.size();
-        int totalInChangelog = totalAccepted + totalPreviouslyRun + skipped + filtered + additionalStatusCount;
+        int totalInChangelog = CollectionUtil.createIfNull(changeLog.getChangeSets()).size() + CollectionUtil.createIfNull(changeLog.getSkippedChangeSets()).size();
         UpdateSummary updateSummaryMdc = new UpdateSummary(null, totalAccepted, totalPreviouslyRun, null, totalInChangelog);
 
         String message = "UPDATE SUMMARY";
@@ -325,6 +318,8 @@ public class ShowSummaryUtil {
         builder.append(message);
         builder.append(System.lineSeparator());
 
+        ShowSummaryGeneratorFactory showSummaryGeneratorFactory = Scope.getCurrentScope().getSingleton(ShowSummaryGeneratorFactory.class);
+        ShowSummaryGenerator showSummaryGenerator = showSummaryGeneratorFactory.getShowSummaryGenerator();
         showSummaryGenerator.appendAdditionalSummaryMessages(builder, runChangeLogIterator);
 
         message = "-------------------------------";

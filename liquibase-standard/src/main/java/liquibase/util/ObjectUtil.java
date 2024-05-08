@@ -5,6 +5,7 @@ import liquibase.exception.UnexpectedLiquibaseException;
 import liquibase.statement.DatabaseFunction;
 import liquibase.statement.SequenceCurrentValueFunction;
 import liquibase.statement.SequenceNextValueFunction;
+import org.apache.commons.lang3.ObjectUtils;
 
 import java.beans.IntrospectionException;
 import java.beans.Introspector;
@@ -294,19 +295,19 @@ public class ObjectUtil {
                     numberAsString = numberAsString.replaceFirst("\\.0+$", ""); //remove zero decimal so int/long/etc. can parse it correctly.
 
                     if (targetClass.equals(Byte.class)) {
-                        long value = Long.valueOf(numberAsString);
+                        long value = Long.parseLong(numberAsString);
                         if (value < Byte.MIN_VALUE || value > Byte.MAX_VALUE) {
                             raiseOverflowException(number, targetClass);
                         }
                         return (T) (Byte) number.byteValue();
                     } else if (targetClass.equals(Short.class)) {
-                        long value = Long.valueOf(numberAsString);
+                        long value = Long.parseLong(numberAsString);
                         if (value < Short.MIN_VALUE || value > Short.MAX_VALUE) {
                             raiseOverflowException(number, targetClass);
                         }
                         return (T) (Short) number.shortValue();
                     } else if (targetClass.equals(Integer.class)) {
-                        long value = Long.valueOf(numberAsString);
+                        long value = Long.parseLong(numberAsString);
                         if (value < Integer.MIN_VALUE || value > Integer.MAX_VALUE) {
                             raiseOverflowException(number, targetClass);
                         }
@@ -409,9 +410,7 @@ public class ObjectUtil {
             }
 
             return (T) object;
-        } catch (NumberFormatException e) {
-            throw new IllegalArgumentException(e);
-        } catch (ParseException e) {
+        } catch (NumberFormatException | ParseException e) {
             throw new IllegalArgumentException(e);
         }
     }
@@ -426,13 +425,11 @@ public class ObjectUtil {
 
     /**
      * Return the defaultValue if the passed value is null. Otherwise, return the original value.
+     * @deprecated use {@link ObjectUtils#defaultIfNull(Object, Object)} instead
      */
+    @Deprecated
     public static <T> T defaultIfNull(T value, T defaultValue) {
-        if (value == null) {
-            return defaultValue;
-        } else {
-            return value;
-        }
+        return ObjectUtils.defaultIfNull(value, defaultValue);
     }
 
     /**

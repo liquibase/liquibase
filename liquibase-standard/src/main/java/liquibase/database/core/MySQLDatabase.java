@@ -12,6 +12,8 @@ import liquibase.statement.core.RawSqlStatement;
 import liquibase.structure.DatabaseObject;
 import liquibase.structure.core.Index;
 import liquibase.structure.core.PrimaryKey;
+import liquibase.structure.core.Schema;
+import liquibase.structure.core.Sequence;
 import liquibase.structure.core.Table;
 import liquibase.util.StringUtil;
 
@@ -113,7 +115,6 @@ public class MySQLDatabase extends AbstractJdbcDatabase {
 
     @Override
     public boolean supportsSequences() {
-
         return false;
     }
 
@@ -183,6 +184,19 @@ public class MySQLDatabase extends AbstractJdbcDatabase {
     @Override
     public boolean supportsTablespaces() {
         return false;
+    }
+
+
+
+    @Override
+    public boolean supports(Class<? extends DatabaseObject> object) {
+        if (Schema.class.isAssignableFrom(object)) {
+            return false;
+        }
+        if (Sequence.class.isAssignableFrom(object)) {
+            return false;
+        }
+        return super.supports(object);
     }
 
     @Override
@@ -678,4 +692,9 @@ public class MySQLDatabase extends AbstractJdbcDatabase {
     public boolean supportsDatabaseChangeLogHistory() {
         return true;
     }
+
+    public boolean getUseAffectedRows() throws DatabaseException {
+        return getConnection().getURL().contains("useAffectedRows=true");
+    }
+
 }

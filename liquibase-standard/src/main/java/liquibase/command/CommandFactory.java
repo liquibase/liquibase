@@ -198,6 +198,9 @@ public class CommandFactory implements SingletonObject {
         if (commandArgumentDefinitions.get(commandNameKey).contains(definition)) {
            throw new IllegalArgumentException("Duplicate argument '" + definition.getName() + "' found for command '" + commandNameKey + "'");
         }
+        if (definition.isRequired() && definition.getDefaultValue() != null) {
+            throw new IllegalArgumentException("Argument '" + definition.getName() + "' for command '" + commandNameKey + "' has both a default value and the isRequired flag set to true. Arguments with default values cannot be marked as required.");
+        }
         this.commandArgumentDefinitions.get(commandNameKey).add(definition);
     }
 

@@ -20,6 +20,7 @@ import liquibase.sql.UnparsedSql;
 import liquibase.sqlgenerator.SqlGeneratorChain;
 import liquibase.statement.*;
 import liquibase.statement.core.CreateTableStatement;
+import liquibase.structure.core.Catalog;
 import liquibase.structure.core.ForeignKey;
 import liquibase.structure.core.Relation;
 import liquibase.structure.core.Schema;
@@ -261,7 +262,7 @@ public class CreateTableGenerator extends AbstractSqlGenerator<CreateTableStatem
                 buffer.append(" PRIMARY KEY (");
                 buffer.append(database.escapeColumnNameList(StringUtil.join(getPrimaryKeyColumns(statement.getPrimaryKeyConstraint().getColumns(), database, autoIncrementColumns), ", ")));
                 buffer.append(")");
-                // Setting up table space for PK's index if it exist
+                // Setting up table space for PK's index if it exists
                 if (((database instanceof OracleDatabase) || (database instanceof PostgresDatabase)) && (StringUtil.isNotEmpty(statement
                         .getPrimaryKeyConstraint().getTablespace()))) {
                     buffer.append(" USING INDEX TABLESPACE ");
@@ -294,7 +295,7 @@ public class CreateTableGenerator extends AbstractSqlGenerator<CreateTableStatem
                     .append(") REFERENCES ");
             if (referencesString != null) {
                 if (!referencesString.contains(".") && (database.getDefaultSchemaName() != null) && database
-                        .getOutputDefaultSchema() && (database.supportsSchemas() || database.supportsCatalogs())) {
+                        .getOutputDefaultSchema() && (database.supports(Schema.class) || database.supports(Catalog.class))) {
                     referencesString = database.escapeObjectName(database.getDefaultSchemaName(), Schema.class) + "." + referencesString;
                 }
                 buffer.append(referencesString);

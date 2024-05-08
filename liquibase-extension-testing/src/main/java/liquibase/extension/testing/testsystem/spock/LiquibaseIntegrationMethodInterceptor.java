@@ -64,13 +64,13 @@ public class LiquibaseIntegrationMethodInterceptor extends AbstractMethodInterce
     public void interceptSetupSpecMethod(IMethodInvocation invocation) throws Throwable {
         final List<FieldInfo> containers = findAllContainers();
         startContainers(containers, invocation);
-        dropAllDatabases();
+        dropAllDatabases(invocation);
         invocation.proceed();
     }
 
     @Override
     public void interceptSetupMethod(IMethodInvocation invocation) throws Throwable {
-        dropAllDatabases();
+        dropAllDatabases(invocation);
         invocation.proceed();
     }
 
@@ -115,7 +115,11 @@ public class LiquibaseIntegrationMethodInterceptor extends AbstractMethodInterce
     }
 
     private static TestSystem readContainerFromField(FieldInfo f, IMethodInvocation invocation) {
-        return (TestSystem) f.readValue(invocation.getInstance());
+        TestSystem testSystem = (TestSystem) f.readValue(invocation.getInstance());
+        if (testSystem == null) {
+            testSystem = (TestSystem) f.readValue(invocation.getSharedInstance());
+        }
+        return testSystem;
     }
 
     /**
@@ -125,14 +129,21 @@ public class LiquibaseIntegrationMethodInterceptor extends AbstractMethodInterce
      */
     @Override
     public void interceptCleanupSpecMethod(IMethodInvocation invocation) throws Throwable {
-        dropAllDatabases();
+        dropAllDatabases(invocation);
         invocation.proceed();
     }
 
-    private static void dropAllDatabases() throws Exception {
+    private void dropAllDatabases(IMethodInvocation invocation) throws Exception {
         for (TestSystem startedTestSystem : startedTestSystems) {
             if (startedTestSystem instanceof DatabaseTestSystem) {
-                runDropAll(((DatabaseTestSystem) startedTestSystem));
+                // Only drop the database if it was used in this test.
+                final List<FieldInfo> containers = findAllContainers();
+                for (FieldInfo field : containers) {
+                    TestSystem testSystem = readContainerFromField(field, invocation);
+                    if (testSystem == startedTestSystem) {
+                        runDropAll(((DatabaseTestSystem) startedTestSystem));
+                    }
+                }
             }
         }
         // Start tests from a clean slate, otherwise the MDC will be polluted with info about the dropAll command.
@@ -142,7 +153,7 @@ public class LiquibaseIntegrationMethodInterceptor extends AbstractMethodInterce
 
     @Override
     public void interceptCleanupMethod(IMethodInvocation invocation) throws Throwable {
-        dropAllDatabases();
+        dropAllDatabases(invocation);
         invocation.proceed();
     }
 

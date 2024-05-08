@@ -140,6 +140,11 @@ public interface Database extends PrioritizedService, AutoCloseable {
      */
     boolean supportsInitiallyDeferrableColumns();
 
+    /**
+     * Whether this database supports sequences
+     * @deprecated please call {@link Database#supports(Class)} with the {@link liquibase.structure.core.Sequence} type instead
+     */
+    @Deprecated
     boolean supportsSequences();
 
     boolean supportsDropTableCascadeConstraints();
@@ -380,10 +385,25 @@ public interface Database extends PrioritizedService, AutoCloseable {
 
     boolean supportsTablespaces();
 
+    /**
+     * Whether this database supports catalogs
+     * @deprecated please call {@link Database#supports(Class)} with the {@link liquibase.structure.core.Catalog} type instead
+     */
+    @Deprecated
     boolean supportsCatalogs();
+
+    default boolean supports(Class<? extends DatabaseObject> object) {
+        return true;
+    }
+
 
     CatalogAndSchema.CatalogAndSchemaCase getSchemaAndCatalogCase();
 
+    /**
+     * Whether this database supports schemas
+     * @deprecated please call {@link Database#supports(Class)} with the {@link liquibase.structure.core.Schema} type instead
+     */
+    @Deprecated
     boolean supportsSchemas();
 
     boolean supportsCatalogInObjectName(Class<? extends DatabaseObject> type);
@@ -402,7 +422,7 @@ public interface Database extends PrioritizedService, AutoCloseable {
     RanChangeSet getRanChangeSet(ChangeSet changeSet) throws DatabaseException, DatabaseHistoryException;
 
     /**
-     * After the changeset has been ran against the database this method will update the change log table
+     * After the changeset has been run against the database this method will update the change log table
      * with the information.
      */
     void markChangeSetExecStatus(ChangeSet changeSet, ChangeSet.ExecType execType) throws DatabaseException;
@@ -593,7 +613,7 @@ public interface Database extends PrioritizedService, AutoCloseable {
 
     /**
      * Allows the database to perform actions after an update is finished,
-     * i. e. after the last change of a changelog was applied.
+     * i.e. after the last change of a changelog was applied.
      */
     default void afterUpdate() throws LiquibaseException {
         // Do nothing by default
@@ -628,6 +648,16 @@ public interface Database extends PrioritizedService, AutoCloseable {
      */
     default boolean supportsDatabaseChangeLogHistory() {
         return false;
+    }
+
+    /**
+     * Some databases (such as MongoDB) require you to verify the connection to the database
+     * to ensure that the database is accessible.
+     * It can be "ping" signal to the database
+     */
+    default void checkDatabaseConnection() throws DatabaseException {
+        // Do nothing by default
+        // Implementation required only for some specific databases in extensions
     }
 
     /**

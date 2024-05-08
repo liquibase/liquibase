@@ -8,7 +8,7 @@ on:
 
 jobs:
   automated-os-extensions-release:
-    uses: liquibase/build-logic/.github/workflows/os-extension-automated-release.yml@v0.6.7
+    uses: liquibase/build-logic/.github/workflows/os-extension-automated-release.yml@v0.7.6
     secrets: inherit
     with:
       version: ${{ inputs.version }}

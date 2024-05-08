@@ -47,7 +47,7 @@ public class SequenceSnapshotGenerator extends JdbcSnapshotGenerator {
 
     @Override
     protected void addTo(DatabaseObject foundObject, DatabaseSnapshot snapshot) throws DatabaseException, InvalidExampleException {
-        if (!(foundObject instanceof Schema) || !snapshot.getDatabase().supportsSequences()) {
+        if (!(foundObject instanceof Schema) || !snapshot.getDatabase().supports(Sequence.class)) {
             return;
         }
         Schema schema = (Schema) foundObject;
@@ -82,10 +82,9 @@ public class SequenceSnapshotGenerator extends JdbcSnapshotGenerator {
                 return example;
             }
 
-            if (!database.supportsSequences()) {
+            if (!database.supports(Sequence.class)) {
                 return null;
             }
-
             sequences = Scope.getCurrentScope().getSingleton(ExecutorService.class)
                     .getExecutor("jdbc", database)
                     .queryForList(getSelectSequenceStatement(example.getSchema(), database));

@@ -17,6 +17,7 @@ import liquibase.statement.SequenceNextValueFunction;
 import liquibase.statement.core.AddDefaultValueStatement;
 import liquibase.structure.core.Column;
 import liquibase.structure.core.Schema;
+import liquibase.structure.core.Sequence;
 import liquibase.structure.core.Table;
 
 public class AddDefaultValueGenerator extends AbstractSqlGenerator<AddDefaultValueStatement> {
@@ -29,7 +30,7 @@ public class AddDefaultValueGenerator extends AbstractSqlGenerator<AddDefaultVal
         validationErrors.checkRequiredField("defaultValue", defaultValue, true);
         validationErrors.checkRequiredField("columnName", addDefaultValueStatement.getColumnName());
         validationErrors.checkRequiredField("tableName", addDefaultValueStatement.getTableName());
-        if (!database.supportsSequences() && (defaultValue instanceof SequenceNextValueFunction)) {
+        if (!database.supports(Sequence.class) && (defaultValue instanceof SequenceNextValueFunction)) {
             validationErrors.addError("Database "+database.getShortName()+" does not support sequences");
         }
         if (database instanceof HsqlDatabase) {

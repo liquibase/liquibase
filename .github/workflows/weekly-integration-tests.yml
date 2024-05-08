@@ -1,0 +1,86 @@
+name: Weekly Integration Tests
+
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: '0 1 * * 0'
+
+jobs:
+  snowflake-its:
+    name: Run Snowflake Cloud integration tests
+    timeout-minutes: 240
+    runs-on: ubuntu-latest
+    env:
+      GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Java
+        uses: actions/setup-java@v4
+        with:
+          java-version: 17
+          distribution: 'temurin'
+          cache: 'maven'
+
+      - name: Set up Maven settings.xml
+        uses: whelk-io/maven-settings-xml-action@v22
+        with:
+          repositories: |
+            [
+              {
+                "id": "liquibase",
+                "url": "https://maven.pkg.github.com/liquibase/liquibase",
+                "releases": {
+                  "enabled": "false"
+                },
+                "snapshots": {
+                  "enabled": "true",
+                  "updatePolicy": "always"
+                }
+              },
+              {
+                "id": "liquibase-pro",
+                "url": "https://maven.pkg.github.com/liquibase/liquibase-pro",
+                "releases": {
+                  "enabled": "false"
+                },
+                "snapshots": {
+                  "enabled": "true",
+                  "updatePolicy": "always"
+                }
+              }
+            ]
+          servers: |
+            [
+              {
+                "id": "liquibase-pro",
+                "username": "liquibot",
+                "password": "${{ secrets.LIQUIBOT_PAT }}"
+              },
+              {
+                "id": "liquibase",
+                "username": "liquibot",
+                "password": "${{ secrets.LIQUIBOT_PAT }}"
+              }
+            ]
+
+      - name: Run tests
+        run: |
+          ./mvnw -B "-DtrimStackTrace=false" \
+            "-Dliquibase.sdk.testSystem.test=snowflake" \
+            "-Dliquibase.sdk.testSystem.snowflake.url=jdbc:${{ secrets.LIQUIBASEOSS_URL }}&schema=PUBLIC" \
+            "-Dliquibase.sdk.testSystem.snowflake.username=${{ secrets.LIQUIBASEOSS_USERNAME }}" \
+            "-Dliquibase.sdk.testSystem.snowflake.password=${{ secrets.LIQUIBASEOSS_PASSWORD }}" \
+            "-Dtest=*IntegrationTest,*ExecutorTest" \
+            "-DfailIfNoTests=false" \
+            "-Dsurefire.failIfNoSpecifiedTests=false" \
+            clean verify
+
+      - name: Archive Test Results
+        if: ${{ inputs.archive_test_results == 'true' }}
+        uses: actions/upload-artifact@v3
+        with:
+          name: liquibase-test-results-snowflake
+          path: |
+            ./**/target/surefire-reports
+            ./**/target/site
