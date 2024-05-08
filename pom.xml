@@ -451,16 +451,16 @@
 
     <distributionManagement>
         <repository>
-            <id>sonatype-nexus-staging</id>
-            <name>Sonatype Production Repository</name>
-            <url>https://oss.sonatype.org/service/local/staging/deploy/maven2</url>
+          <id>daticalrepo</id>
+          <url>https://repo.liquibase.net/repository/libs-release-local</url>
+          <layout>default</layout>
         </repository>
         <snapshotRepository>
-            <id>sonatype-nexus-snapshots</id>
-            <name>Sontatype Snapshot Repository</name>
-            <url>https://oss.sonatype.org/content/repositories/snapshots</url>
+          <id>daticalrepo</id>
+          <url>https://repo.liquibase.net/repository/libs-snapshot-local</url>
+          <layout>default</layout>
         </snapshotRepository>
-    </distributionManagement>
+      </distributionManagement>
 
     <repositories>
         <repository>
@@ -469,13 +469,13 @@
             </snapshots>
             <id>central</id>
             <name>libs-release</name>
-            <url>https://artifactory.datical.net/artifactory/libs-release</url>
+            <url>https://repo.liquibase.net/repository/libs-release</url>
         </repository>
         <repository>
             <snapshots />
             <id>snapshots</id>
             <name>libs-snapshot</name>
-            <url>https://artifactory.datical.net/artifactory/libs-snapshot</url>
+            <url>https://repo.liquibase.net/repository/libs-snapshot</url>
         </repository>
         <repository>
             <id>mvnrepository</id>
