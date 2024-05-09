@@ -10,7 +10,7 @@ import liquibase.executor.ExecutorService;
 import liquibase.snapshot.DatabaseSnapshot;
 import liquibase.snapshot.InvalidExampleException;
 import liquibase.snapshot.SnapshotGenerator;
-import liquibase.statement.core.RawSqlStatement;
+import liquibase.statement.core.RawParameterizedSqlStatement;
 import liquibase.structure.DatabaseObject;
 import liquibase.structure.core.Column;
 import liquibase.structure.core.Index;
@@ -51,9 +51,9 @@ public class BigQueryPrimaryKeySnapshotGenerator extends PrimaryKeySnapshotGener
         }
         PrimaryKey returnKey = null;
 
-        String keyColumnUsageStatement = String.format("SELECT * FROM %s.INFORMATION_SCHEMA.KEY_COLUMN_USAGE WHERE table_name = '%s';", schema.getSchema(), searchTableName);
+        String keyColumnUsageStatement = String.format("SELECT * FROM %s.INFORMATION_SCHEMA.KEY_COLUMN_USAGE WHERE table_name = ?", schema.getSchema());
         Executor executor = Scope.getCurrentScope().getSingleton(ExecutorService.class).getExecutor("jdbc", database);
-        List<Map<String, ?>> maps = executor.queryForList(new RawSqlStatement(keyColumnUsageStatement));
+        List<Map<String, ?>> maps = executor.queryForList(new RawParameterizedSqlStatement(keyColumnUsageStatement, searchTableName));
         String columnName;
         for (Map<String, ?> map : maps) {
             columnName = map.get("COLUMN_NAME").toString();
@@ -91,9 +91,8 @@ public class BigQueryPrimaryKeySnapshotGenerator extends PrimaryKeySnapshotGener
             Schema schema = table.getSchema();
 
             Executor executor = Scope.getCurrentScope().getSingleton(ExecutorService.class).getExecutor("jdbc", database);
-            List<Map<String, ?>> maps = executor.queryForList(
-                    new RawSqlStatement(
-                            String.format("SELECT * FROM %s.INFORMATION_SCHEMA.TABLE_CONSTRAINTS WHERE table_name = '%s';", schema.getSchema(), table.getName())));
+            String tableConstraintsStatement = String.format("SELECT * FROM %s.INFORMATION_SCHEMA.TABLE_CONSTRAINTS WHERE table_name = ?;", schema.getSchema());
+            List<Map<String, ?>> maps = executor.queryForList(new RawParameterizedSqlStatement(tableConstraintsStatement, table.getName()));
 
             for (Map<String, ?> map : maps) {
                 if (map.containsKey("CONSTRAINT_NAME")) {
