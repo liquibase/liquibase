@@ -164,13 +164,13 @@ jobs:
 
       # getting from build results page. If we remove 0-snapshot then we will need settings.xml
 
-      - name: Build & Test Java 8
-        if: ${{ matrix.java == 8}}
+      - name: Build & Test Java below 11
+        if: ${{ matrix.java == 8}} || ${{ matrix.java == 11}}
         run: |
           ./mvnw -B "-Dbuild.repository.owner=liquibase" "-Dbuild.repository.name=liquibase" "-Dbuild.branch=${{ needs.setup.outputs.thisBranchName }}" "-Dbuild.number=${{ github.run_number }}" "-Dbuild.commit=${{ needs.setup.outputs.latestMergeSha }}" "-DtrimStackTrace=false" -P 'skip-integration-tests'  -pl '!liquibase-cdi-jakarta' clean test package surefire-report:report
 
-      - name: Build & Test Java non-jdk-8
-        if: ${{ matrix.java != 8}}
+      - name: Build & Test Java 11+
+        if: ${{ matrix.java != 8}} && ${{ matrix.java != 11}}
         run: |
           ./mvnw -B "-Dbuild.repository.owner=liquibase" "-Dbuild.repository.name=liquibase" "-Dbuild.branch=${{ needs.setup.outputs.thisBranchName }}" "-Dbuild.number=${{ github.run_number }}" "-Dbuild.commit=${{ needs.setup.outputs.latestMergeSha }}" "-DtrimStackTrace=false" -P 'skip-integration-tests' clean test package surefire-report:report
 
