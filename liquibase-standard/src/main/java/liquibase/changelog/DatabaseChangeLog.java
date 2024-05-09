@@ -33,6 +33,7 @@ import liquibase.resource.ResourceAccessor;
 import liquibase.servicelocator.LiquibaseService;
 import liquibase.util.FileUtil;
 import liquibase.util.StringUtil;
+import org.apache.commons.io.FilenameUtils;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -535,7 +536,7 @@ public class DatabaseChangeLog implements Comparable<DatabaseChangeLog>, Conditi
                         includeContextFilter,
                         labels,
                         ignore,
-                        node.getChildValue(null, MIN_DEPTH, 1),
+                        node.getChildValue(null, MIN_DEPTH, 0),
                         node.getChildValue(null, MAX_DEPTH, Integer.MAX_VALUE),
                         node.getChildValue(null, ENDS_WITH_FILTER, ""),
                         (ModifyChangeSets) nodeScratch.get(MODIFY_CHANGE_SETS));
@@ -1086,7 +1087,15 @@ public class DatabaseChangeLog implements Comparable<DatabaseChangeLog>, Conditi
             filePath = filePath.substring(1);
         }
 
-        filePath = Paths.get(filePath).normalize().toString();
+        String normalized = FilenameUtils.normalizeNoEndSeparator(filePath);
+        /*
+        Commons IO will return null if the double dot has no parent path segment to work with. In this case,
+        we fall back to path normalization using Paths.get(), which might fail on Windows.
+         */
+        if (normalized == null) {
+            normalized = Paths.get(filePath).normalize().toString();
+        }
+        filePath = normalized;
 
         if (filePath.contains("\\")) {
             filePath = filePath.replace("\\", "/");
