@@ -287,7 +287,7 @@
 			</plugin>
 			<plugin>
 				<artifactId>maven-deploy-plugin</artifactId>
-				<version>3.1.1</version>
+				<version>3.1.2</version>
 				<configuration>
 					<groupId>${project.groupId}</groupId>
 					<version>${artifact.version}</version>
