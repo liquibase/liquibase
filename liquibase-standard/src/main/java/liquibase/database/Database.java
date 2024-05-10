@@ -25,10 +25,7 @@ import liquibase.sqlgenerator.SqlGeneratorFactory;
 import liquibase.statement.DatabaseFunction;
 import liquibase.statement.SqlStatement;
 import liquibase.structure.DatabaseObject;
-import liquibase.structure.core.ForeignKey;
-import liquibase.structure.core.Index;
-import liquibase.structure.core.PrimaryKey;
-import liquibase.structure.core.UniqueConstraint;
+import liquibase.structure.core.*;
 import liquibase.util.StringUtil;
 
 import java.io.IOException;
@@ -372,6 +369,7 @@ public interface Database extends PrioritizedService, AutoCloseable {
      *
      * @deprecated Know if you should quote the name or not, and use {@link #escapeColumnName(String, String, String, String)} which will quote things that look like functions, or leave it along as you see fit. Don't rely on this function guessing.
      */
+    @Deprecated
     String escapeColumnName(String catalogName, String schemaName, String tableName, String columnName, boolean quoteNamesThatMayBeFunctions);
 
     /**
@@ -392,7 +390,22 @@ public interface Database extends PrioritizedService, AutoCloseable {
     @Deprecated
     boolean supportsCatalogs();
 
+    /**
+     * Whether this database supports the specified object type.
+     * It is invoking the deprecated methods to ensure that extensions are not broken, but
+     * once those are removed it will return only true
+     *
+     * @param object the object type to check
+     * @return true if the database supports the object type, false otherwise
+     */
     default boolean supports(Class<? extends DatabaseObject> object) {
+        if (Sequence.class.isAssignableFrom(object)) {
+            return supportsSequences();
+        } else if (Schema.class.isAssignableFrom(object)) {
+            return supportsSchemas();
+        } else if (Catalog.class.isAssignableFrom(object)) {
+            return supportsCatalogs();
+        }
         return true;
     }
 
@@ -500,6 +513,7 @@ public interface Database extends PrioritizedService, AutoCloseable {
      * removing set schema or catalog names if they are not supported
      * @deprecated use {@link liquibase.CatalogAndSchema#standardize(Database)}
      */
+    @Deprecated
     CatalogAndSchema correctSchema(CatalogAndSchema schema);
 
     /**
