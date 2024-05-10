@@ -172,7 +172,7 @@ public class UniqueConstraintSnapshotGenerator extends JdbcSnapshotGenerator {
                         + "on const.constraint_schema=col.constraint_schema "
                         + "and const.table_name=col.table_name "
                         + "and const.constraint_name=col.constraint_name "
-                        + "where const.constraint_schema='" + database.correctObjectName(schema.getCatalogName(), Catalog.class) + "' ";
+                        + "where const.constraint_schema='" + database.correctObjectName(schema.getSchema().getName(), Schema.class) + "' ";
                 if (!bulkQuery) {
                     sql += "and const.table_name='" + database.correctObjectName(example.getRelation().getName(), Table.class) + "' "
                             + "and const.constraint_name='" + database.correctObjectName(name, UniqueConstraint.class) + "'";
