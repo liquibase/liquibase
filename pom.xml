@@ -70,9 +70,10 @@
         <liquibase-pro.version>0-SNAPSHOT</liquibase-pro.version>
         <argLine></argLine>
         <commons-lang3.version>3.14.0</commons-lang3.version>
+        <commons-io.version>2.16.1</commons-io.version>
         <ant.version>1.10.14</ant.version>
         <junit-jupiter.version>5.10.2</junit-jupiter.version>
-        <groovy.version>4.0.20</groovy.version>
+        <groovy.version>4.0.21</groovy.version>
         <spock.version>2.3-groovy-4.0</spock.version>
         <spring.version>5.3.28</spring.version>
         <maven-failsafe-plugin.version>3.2.5</maven-failsafe-plugin.version>
@@ -234,7 +235,7 @@
             CGLIB) -->
             <groupId>org.objenesis</groupId>
             <artifactId>objenesis</artifactId>
-            <version>3.3</version>
+            <version>3.4</version>
             <scope>test</scope>
         </dependency>
 
@@ -296,7 +297,7 @@
         <dependency>
             <groupId>org.xerial</groupId>
             <artifactId>sqlite-jdbc</artifactId>
-            <version>3.45.2.0</version>
+            <version>3.45.3.0</version>
             <scope>test</scope>
         </dependency>
 
@@ -465,7 +466,7 @@
 
             <plugin>
                 <artifactId>maven-deploy-plugin</artifactId>
-                <version>3.1.1</version>
+                <version>3.1.2</version>
             </plugin>
 
             <plugin>
@@ -563,7 +564,7 @@
             <plugins>
                 <plugin>
                     <artifactId>maven-install-plugin</artifactId>
-                    <version>3.1.1</version>
+                    <version>3.1.2</version>
                 </plugin>
             </plugins>
         </pluginManagement>

@@ -23,7 +23,7 @@
 		<mysql.version>8.0.21</mysql.version>
 		<mariadb.version>3.3.3</mariadb.version>
 		<oracle.version>19.22.0.0</oracle.version>
-		<sqlite.version>3.45.2.0</sqlite.version>
+		<sqlite.version>3.45.3.0</sqlite.version>
 		<db2.version>11.5.9.0</db2.version>
 		<firebird.version>5.0.4.java8</firebird.version>
 		<liquibase-pro.version>master-SNAPSHOT</liquibase-pro.version>
@@ -219,7 +219,7 @@
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-jar-plugin</artifactId>
-				<version>3.3.0</version>
+				<version>3.4.1</version>
 				<executions>
 					<execution>
 						<id>default-jar</id>
@@ -267,7 +267,7 @@
 			</plugin>
 			<plugin>
 				<artifactId>maven-install-plugin</artifactId>
-				<version>3.1.1</version>
+				<version>3.1.2</version>
 				<configuration>
 					<groupId>${project.groupId}</groupId>
 					<version>${artifact.version}</version>
@@ -287,7 +287,7 @@
 			</plugin>
 			<plugin>
 				<artifactId>maven-deploy-plugin</artifactId>
-				<version>3.1.1</version>
+				<version>3.1.2</version>
 				<configuration>
 					<groupId>${project.groupId}</groupId>
 					<version>${artifact.version}</version>

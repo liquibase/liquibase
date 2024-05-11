@@ -97,10 +97,12 @@ public class UniqueConstraintExistsPrecondition extends AbstractPrecondition {
 	public void check(Database database, DatabaseChangeLog changeLog, ChangeSet changeSet, ChangeExecListener changeExecListener)
 		throws PreconditionFailedException, PreconditionErrorException {
 
+		String schemaName = getSchema(database);
+
 		UniqueConstraint example = new UniqueConstraint(
 			StringUtil.trimToNull(getConstraintName()),
 			StringUtil.trimToNull(getCatalogName()),
-			StringUtil.trimToNull(getSchemaName()),
+			StringUtil.trimToNull(schemaName),
 			StringUtil.trimToNull(getTableName()));
 
 		String columnNames = StringUtil.trimToNull(getColumnNames());
@@ -115,6 +117,14 @@ public class UniqueConstraintExistsPrecondition extends AbstractPrecondition {
 		} catch (DatabaseException | InvalidExampleException e) {
 			throw new PreconditionErrorException(e, changeLog, this);
 		}
+	}
+
+	private String getSchema(Database database) {
+		String schemaName = getSchemaName();
+		if (schemaName == null) {
+			schemaName = database.getDefaultSchemaName();
+		}
+		return schemaName;
 	}
 
 	private List<Column> toColumns(Database database, String columnNames) {
