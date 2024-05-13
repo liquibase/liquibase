@@ -10,6 +10,7 @@ import liquibase.plugin.Plugin;
 import liquibase.servicelocator.ServiceLocator;
 import liquibase.SupportsMethodValidationLevelsEnum;
 import liquibase.util.LiquibaseUtil;
+import lombok.Setter;
 
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
@@ -24,9 +25,14 @@ import java.util.concurrent.ConcurrentHashMap;
 public class ChangeFactory extends AbstractPluginFactory<Change>{
 
     private final Map<String, ChangeMetaData> cachedMetadata = new ConcurrentHashMap<>();
+
+    /**
+     * Should the change be checked to see if it supports the current database?
+     */
+    @Setter
     private boolean performSupportsDatabaseValidation = true;
 
-    private static final String SUPPORTS_METHOD_REQUIRED_MESSAGE = "%s class does not implement the 'supports(Database)' method and may incorrectly override other databases changes causing unexpected behavior. Please report this to the Liquibase developers or if you are are developing this change please fix it ;)";
+    private static final String SUPPORTS_METHOD_REQUIRED_MESSAGE = "%s class does not implement the 'supports(Database)' method and may incorrectly override other databases changes causing unexpected behavior. Please report this to the Liquibase developers or if you are developing this change please fix it ;)";
 
     private ChangeFactory() {
 
@@ -189,14 +195,4 @@ public class ChangeFactory extends AbstractPluginFactory<Change>{
         return Scope.getCurrentScope().getSingleton(ChangeFactory.class);
     }
 
-    /**
-     * Should the change be checked to see if it supports
-     * the current database?
-     * Default is true
-     *
-     * @param performSupportsDatabaseValidation
-     */
-    public void setPerformSupportsDatabaseValidation(boolean performSupportsDatabaseValidation) {
-        this.performSupportsDatabaseValidation = performSupportsDatabaseValidation;
-    }
 }
