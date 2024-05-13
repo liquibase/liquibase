@@ -149,10 +149,8 @@ public class ChangeFactory extends AbstractPluginFactory<Change>{
             }
 
             try {
-                // make sure that the supports method is implemented in the plugin
-                if (!plugin.getClass().getMethod("supports", Database.class).getDeclaringClass().getPackage().getName().startsWith("liquibase.change")) {
-                    return;
-                } else {
+                // if the supports method is not implemented in the plugin show the wraning according to the defined level
+                if (plugin.getClass().getMethod("supports", Database.class).getDeclaringClass().getPackage().getName().startsWith("liquibase.change")) {
                     switch (GlobalConfiguration.SUPPORTS_METHOD_VALIDATION_LEVELS.getCurrentValue()) {
                         case WARN:
                             Scope.getCurrentScope().getLog(getClass()).warning(String.format(SUPPORTS_METHOD_REQUIRED_MESSAGE, plugin.getClass().getName()));
