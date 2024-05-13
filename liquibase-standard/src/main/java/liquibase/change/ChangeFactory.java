@@ -144,8 +144,7 @@ public class ChangeFactory extends AbstractPluginFactory<Change>{
         //we only verify supports method if this is not part of the default liquibase changes
         for (Change plugin : plugins) {
             String packageName = plugin.getClass().getPackage().getName();
-            if (packageName.startsWith("liquibase.change") ||
-                packageName.startsWith("com.datical.liquibase.ext")) {
+            if (packageName.startsWith("liquibase.change") || packageName.startsWith("com.datical.liquibase.ext")) {
                 continue;
             }
 
