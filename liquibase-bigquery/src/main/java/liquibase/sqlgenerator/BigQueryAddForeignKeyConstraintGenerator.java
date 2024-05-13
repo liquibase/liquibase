@@ -21,9 +21,22 @@ public class BigQueryAddForeignKeyConstraintGenerator extends AddForeignKeyConst
 
     @Override
     public Sql[] generateSql(AddForeignKeyConstraintStatement statement, Database database, SqlGeneratorChain sqlGeneratorChain) {
-        String sql = "SELECT 1";
+        StringBuilder sb = new StringBuilder();
+        sb.append("ALTER TABLE ")
+                .append(database.escapeTableName(statement.getBaseTableCatalogName(), statement.getBaseTableSchemaName(), statement.getBaseTableName()))
+                .append(" ADD CONSTRAINT ")
+                .append(database.escapeConstraintName(statement.getConstraintName()))
+                .append(" FOREIGN KEY (")
+                .append(database.escapeColumnNameList(statement.getBaseColumnNames()))
+                .append(") REFERENCES ")
+                .append(database.escapeTableName(statement.getReferencedTableCatalogName(), statement.getReferencedTableSchemaName(),
+                        statement.getReferencedTableName()))
+                .append(" (")
+                .append(database.escapeColumnNameList(statement.getReferencedColumnNames()))
+                .append(") NOT ENFORCED");
+
         return new Sql[]{
-                new UnparsedSql(sql, getAffectedForeignKey(statement))
+                new UnparsedSql(sb.toString(), getAffectedForeignKey(statement))
         };
     }
 }

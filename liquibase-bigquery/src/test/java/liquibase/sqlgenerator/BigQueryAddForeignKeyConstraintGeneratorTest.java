@@ -24,11 +24,11 @@ class BigQueryAddForeignKeyConstraintGeneratorTest {
                 "baseTableCatalogName",
                 "baseTableSchemaName",
                 "baseTableName",
-                new ColumnConfig[]{new ColumnConfig()},
+                new ColumnConfig[]{ColumnConfig.fromName("baseColumn1"), ColumnConfig.fromName("baseColumn2")},
                 "referencedTableCatalogName",
                 "referencedTableSchemaName",
                 "referencedTableName",
-                new ColumnConfig[]{new ColumnConfig()});
+                new ColumnConfig[]{ColumnConfig.fromName("referenceColumn1"), ColumnConfig.fromName("referenceColumn2")});
     }
 
     @Test
@@ -36,6 +36,7 @@ class BigQueryAddForeignKeyConstraintGeneratorTest {
         Sql[] sql = generator.generateSql(statement, database, null);
         assertEquals(1, sql.length);
         assertEquals(";", sql[0].getEndDelimiter());
-        assertEquals("SELECT 1", sql[0].toSql());
+        assertEquals("ALTER TABLE baseTableSchemaName.baseTableName ADD CONSTRAINT constraintName FOREIGN KEY (baseColumn1, baseColumn2) REFERENCES " +
+                "referencedTableSchemaName.referencedTableName (referenceColumn1, referenceColumn2) NOT ENFORCED", sql[0].toSql());
     }
 }
