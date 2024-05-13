@@ -430,6 +430,16 @@ Global Options
                                supportPropertyEscaping', environment variable:
                                'LIQUIBASE_SUPPORT_PROPERTY_ESCAPING')
 
+      --supports-method-validation-levels=PARAM
+                             Controls the level of validation performed on the
+                               supports method of Change classes. Options are
+                               OFF, WARN, FAIL.
+                             DEFAULT: WARN
+                             (defaults file: 'liquibase.
+                               supportsMethodValidationLevels', environment
+                               variable:
+                               'LIQUIBASE_SUPPORTS_METHOD_VALIDATION_LEVELS')
+
       --ui-service=PARAM     Changes the default UI Service Logger used by
                                Liquibase. Options are CONSOLE or LOGGER.
                              DEFAULT: CONSOLE
