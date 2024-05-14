@@ -18,7 +18,7 @@ Changes in version 4.28.0 (2024.05.15)
 * DAT-15920: error if native executor conf file or rollback file is not found and pro-strict is true in https://github.com/liquibase/liquibase-pro/pull/1663 by StevenMassaro
 
 
-## 🤖 [PRO] Security, Driver and Other Updates
+## [PRO] Security, Driver and Other Updates
 
 (#1652) Bump org.apache.groovy:groovy-all from 4.0.20 to 4.0.21 @dependabot
 (#1673) Bump org.apache.maven.plugins:maven-shade-plugin from 3.5.2 to 3.5.3 @dependabot
