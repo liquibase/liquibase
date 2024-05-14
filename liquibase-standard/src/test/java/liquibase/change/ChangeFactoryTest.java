@@ -92,7 +92,7 @@ public class ChangeFactoryTest {
                 assertEquals(e.getMessage(), String.format(SUPPORTS_METHOD_REQUIRED_MESSAGE, "liquibase.wrong.BadlyImplementedChange"));
             }
         });
-        Scope.setScopeManager(new TestScopeManager(Scope.getCurrentScope()));
+        Scope.setScopeManager(null);
     }
 
     @Test
