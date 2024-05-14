@@ -32,7 +32,7 @@ public class ChangeFactory extends AbstractPluginFactory<Change>{
     @Setter
     private boolean performSupportsDatabaseValidation = true;
 
-    protected static final String SUPPORTS_METHOD_REQUIRED_MESSAGE = "%s class does not implement the 'supports(Database)' method and may incorrectly override other databases changes causing unexpected behavior. Please report this to the Liquibase developers or if you are developing this change please fix it ;)";
+    private static final String SUPPORTS_METHOD_REQUIRED_MESSAGE = "%s class does not implement the 'supports(Database)' method and may incorrectly override other databases changes causing unexpected behavior. Please report this to the Liquibase developers or if you are developing this change please fix it ;)";
 
     private ChangeFactory() {
 

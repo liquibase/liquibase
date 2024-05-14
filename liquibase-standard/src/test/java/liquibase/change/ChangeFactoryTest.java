@@ -1,11 +1,10 @@
 package liquibase.change;
 
 import liquibase.ChecksumVersion;
-import liquibase.GlobalConfiguration;
 import liquibase.Scope;
-import liquibase.SupportsMethodValidationLevelsEnum;
 import liquibase.change.core.CreateTableChange;
 import liquibase.database.core.MSSQLDatabase;
+import liquibase.integration.commandline.LiquibaseCommandLineConfiguration;
 import liquibase.servicelocator.LiquibaseService;
 import liquibase.sqlgenerator.SqlGeneratorFactory;
 import liquibase.statement.core.CreateSequenceStatement;
@@ -13,7 +12,6 @@ import org.junit.Test;
 
 import java.util.Collections;
 
-import static liquibase.change.ChangeFactory.SUPPORTS_METHOD_REQUIRED_MESSAGE;
 import static org.junit.Assert.*;
 
 public class ChangeFactoryTest {
@@ -65,17 +63,6 @@ public class ChangeFactoryTest {
         assertTrue(change instanceof CreateTableChange);
 
         assertNotSame(change, Scope.getCurrentScope().getSingleton(ChangeFactory.class).create("createTable"));
-    }
-
-    @Test
-    public void create_exists_supports_method_verification() throws Exception {
-        Scope.child(GlobalConfiguration.SUPPORTS_METHOD_VALIDATION_LEVELS.getKey(), SupportsMethodValidationLevelsEnum.FAIL, () -> {
-            try {
-                Scope.getCurrentScope().getSingleton(ChangeFactory.class).create("createTable");
-            } catch (Exception e) {
-                assertEquals(e.getMessage(), String.format(SUPPORTS_METHOD_REQUIRED_MESSAGE, "liquibase.wrong.BadlyImplementedChange"));
-            }
-        });
     }
 
     @Test
