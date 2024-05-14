@@ -138,7 +138,7 @@ public class ChangeFactory extends AbstractPluginFactory<Change>{
      * Verify if the supports method is implemented in the change if it's not part of the default liquibase changes
      */
     private void verifySupportsMethodImplementation(Set<Change> plugins) {
-        if (GlobalConfiguration.SUPPORTS_METHOD_VALIDATION_LEVELS.getCurrentValue().equals(SupportsMethodValidationLevelsEnum.OFF)) {
+        if (GlobalConfiguration.SUPPORTS_METHOD_VALIDATION_LEVEL.getCurrentValue().equals(SupportsMethodValidationLevelsEnum.OFF)) {
             return;
         }
         //we only verify supports method if this is not part of the default liquibase changes
@@ -154,7 +154,7 @@ public class ChangeFactory extends AbstractPluginFactory<Change>{
                     if (LiquibaseUtil.getBuildVersion().equals(LiquibaseUtil.DEV_VERSION)) {
                         throw new UnexpectedLiquibaseException(String.format(SUPPORTS_METHOD_REQUIRED_MESSAGE, plugin.getClass().getName()));
                     }
-                    switch (GlobalConfiguration.SUPPORTS_METHOD_VALIDATION_LEVELS.getCurrentValue()) {
+                    switch (GlobalConfiguration.SUPPORTS_METHOD_VALIDATION_LEVEL.getCurrentValue()) {
                         case WARN:
                             Scope.getCurrentScope().getLog(getClass()).warning(String.format(SUPPORTS_METHOD_REQUIRED_MESSAGE, plugin.getClass().getName()));
                             plugins.remove(plugin);

@@ -438,7 +438,7 @@ Global Options
                              (defaults file: 'liquibase.
                                supportsMethodValidationLevels', environment
                                variable:
-                               'LIQUIBASE_SUPPORTS_METHOD_VALIDATION_LEVELS')
+                               'LIQUIBASE_SUPPORTS_METHOD_VALIDATION_LEVEL')
 
       --ui-service=PARAM     Changes the default UI Service Logger used by
                                Liquibase. Options are CONSOLE or LOGGER.

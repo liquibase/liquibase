@@ -51,7 +51,7 @@ public class GlobalConfiguration implements AutoloadedConfigurations {
     public static final ConfigurationDefinition<String> SEARCH_PATH;
 
     public static final ConfigurationDefinition<UIServiceEnum> UI_SERVICE;
-    public static final ConfigurationDefinition<SupportsMethodValidationLevelsEnum> SUPPORTS_METHOD_VALIDATION_LEVELS;
+    public static final ConfigurationDefinition<SupportsMethodValidationLevelsEnum> SUPPORTS_METHOD_VALIDATION_LEVEL;
 
     static {
         ConfigurationDefinition.Builder builder = new ConfigurationDefinition.Builder("liquibase");
@@ -244,7 +244,7 @@ public class GlobalConfiguration implements AutoloadedConfigurations {
                 .setDefaultValue(UIServiceEnum.CONSOLE)
                 .build();
 
-        SUPPORTS_METHOD_VALIDATION_LEVELS = builder.define("supportsMethodValidationLevels", SupportsMethodValidationLevelsEnum.class)
+        SUPPORTS_METHOD_VALIDATION_LEVEL = builder.define("supportsMethodValidationLevels", SupportsMethodValidationLevelsEnum.class)
                 .setDescription("Controls the level of validation performed on the supports method of Change classes. Options are OFF, WARN, FAIL.")
                 .setDefaultValue(SupportsMethodValidationLevelsEnum.WARN)
                 .build();

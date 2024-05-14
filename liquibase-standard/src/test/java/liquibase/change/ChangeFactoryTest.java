@@ -82,7 +82,7 @@ public class ChangeFactoryTest {
 
         Map<String, Object> args = new HashMap<>();
         args.put(Scope.Attr.serviceLocator.name(), sl);
-        args.put(GlobalConfiguration.SUPPORTS_METHOD_VALIDATION_LEVELS.getKey(), SupportsMethodValidationLevelsEnum.FAIL);
+        args.put(GlobalConfiguration.SUPPORTS_METHOD_VALIDATION_LEVEL.getKey(), SupportsMethodValidationLevelsEnum.FAIL);
 
         Scope.child(args, () -> {
             try {
@@ -92,7 +92,6 @@ public class ChangeFactoryTest {
                 assertEquals(e.getMessage(), String.format(SUPPORTS_METHOD_REQUIRED_MESSAGE, "liquibase.wrong.BadlyImplementedChange"));
             }
         });
-        Scope.setScopeManager(null);
     }
 
     @Test
