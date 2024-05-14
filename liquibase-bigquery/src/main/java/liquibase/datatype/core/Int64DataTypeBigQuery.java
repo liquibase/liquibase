@@ -12,7 +12,7 @@ import liquibase.datatype.LiquibaseDataType;
         name = "int64",
         minParameters = 0,
         maxParameters = 0,
-        priority = 1
+        priority = LiquibaseDataType.PRIORITY_DATABASE
 )
 public class Int64DataTypeBigQuery extends LiquibaseDataType {
     public Int64DataTypeBigQuery() {

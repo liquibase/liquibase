@@ -12,7 +12,7 @@ import liquibase.datatype.LiquibaseDataType;
         name = "boolean",
         minParameters = 0,
         maxParameters = 0,
-        priority = BigQueryDatabase.BIGQUERY_PRIORITY_DATABASE
+        priority = LiquibaseDataType.PRIORITY_DATABASE
 )
 public class BoolDataTypeBigQuery extends LiquibaseDataType {
     public BoolDataTypeBigQuery() {

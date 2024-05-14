@@ -16,6 +16,11 @@ public class BigQueryModifyDataTypeGenerator extends ModifyDataTypeGenerator {
     }
 
     @Override
+    public int getPriority() {
+        return SqlGenerator.PRIORITY_DATABASE;
+    }
+
+    @Override
     public Sql[] generateSql(ModifyDataTypeStatement statement, Database database, SqlGeneratorChain sqlGeneratorChain) {
         String alterTable;
 
