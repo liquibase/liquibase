@@ -20,6 +20,7 @@ import liquibase.structure.core.Table;
 
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 
 public class BigQueryPrimaryKeySnapshotGenerator extends PrimaryKeySnapshotGenerator {
 
@@ -56,7 +57,7 @@ public class BigQueryPrimaryKeySnapshotGenerator extends PrimaryKeySnapshotGener
         List<Map<String, ?>> maps = executor.queryForList(new RawParameterizedSqlStatement(keyColumnUsageStatement, searchTableName));
         String columnName;
         for (Map<String, ?> map : maps) {
-            columnName = map.get("COLUMN_NAME").toString();
+            columnName = Objects.toString(map.get("COLUMN_NAME"), null);
             int position = ((Long) map.get("ORDINAL_POSITION")).intValue();
 
             if (returnKey == null) {
@@ -64,8 +65,8 @@ public class BigQueryPrimaryKeySnapshotGenerator extends PrimaryKeySnapshotGener
                 String catalogName = (String) map.get("TABLE_CATALOG");
                 String schemaName = (String) map.get("TABLE_SCHEMA");
                 CatalogAndSchema tableSchema = new CatalogAndSchema(catalogName, schemaName);
-                returnKey.setTable((Table) new Table().setName(map.get("TABLE_NAME").toString()).setSchema(new Schema(tableSchema.getCatalogName(), tableSchema.getSchemaName())));
-                returnKey.setName(map.get("CONSTRAINT_NAME").toString());
+                returnKey.setTable((Table) new Table().setName(Objects.toString(map.get("TABLE_NAME"), null)).setSchema(new Schema(tableSchema.getCatalogName(), tableSchema.getSchemaName())));
+                returnKey.setName(Objects.toString(map.get("CONSTRAINT_NAME"), null));
             }
 
             returnKey.addColumn(position - 1, new Column(columnName)
@@ -96,7 +97,7 @@ public class BigQueryPrimaryKeySnapshotGenerator extends PrimaryKeySnapshotGener
 
             for (Map<String, ?> map : maps) {
                 if (map.containsKey("CONSTRAINT_NAME")) {
-                    String constraintName = map.get("CONSTRAINT_NAME").toString();
+                    String constraintName = Objects.toString(map.get("CONSTRAINT_NAME"), null);
                     PrimaryKey primaryKey = new PrimaryKey().setName(constraintName);
                     primaryKey.setTable((Table) foundObject);
                     if (!database.isSystemObject(primaryKey)) {
