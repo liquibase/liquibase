@@ -37,6 +37,8 @@ import liquibase.serializer.ChangeLogSerializer;
 import liquibase.structure.DatabaseObject;
 import liquibase.util.LoggingExecutorTextUtil;
 import liquibase.util.StringUtil;
+import lombok.Getter;
+import lombok.Setter;
 
 import java.io.IOException;
 import java.io.PrintStream;
@@ -66,6 +68,10 @@ public class Liquibase implements AutoCloseable {
     private ChangeExecListener changeExecListener;
     private final DefaultChangeExecListener defaultChangeExecListener = new DefaultChangeExecListener();
     private final Map<String, Boolean> upToDateFastCheck = new HashMap<>();
+
+    @Getter
+    @Setter
+    private Boolean fast_check_disabled = Boolean.FALSE;
 
     /**
      * Creates a Liquibase instance for a given DatabaseConnection. The Database instance used will be found with {@link DatabaseFactory#findCorrectDatabaseImplementation(liquibase.database.DatabaseConnection)}
@@ -242,6 +248,10 @@ public class Liquibase implements AutoCloseable {
             updateCommand.addArgumentValue(ShowSummaryArgument.SHOW_SUMMARY_OUTPUT, showSummaryOutput);
             updateCommand.addArgumentValue(DatabaseChangelogCommandStep.CHANGELOG_PARAMETERS, changeLogParameters);
             updateCommand.addArgumentValue(ShowSummaryArgument.SHOW_SUMMARY, showSummary);
+            if(getFast_check_disabled()){
+                updateCommand.addArgumentValue(UpdateCommandStep.FAST_CHECK_DISABLED, Boolean.TRUE);
+            }
+
             updateCommand.execute();
         });
     }

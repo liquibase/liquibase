@@ -254,6 +254,7 @@ public class SpringLiquibase implements InitializingBean, BeanNameAware, Resourc
                             final Connection c = getDataSource().getConnection();
                             liquibase = createLiquibase(c);
                             generateRollbackFile(liquibase);
+                            liquibase.setFast_check_disabled(Boolean.TRUE);
                             performUpdate(liquibase);
                         } catch (SQLException e) {
                             throw new DatabaseException(e);

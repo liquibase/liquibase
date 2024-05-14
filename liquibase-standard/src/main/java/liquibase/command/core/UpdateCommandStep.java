@@ -23,6 +23,7 @@ public class UpdateCommandStep extends AbstractUpdateCommandStep implements Clea
     public static final CommandArgumentDefinition<DatabaseChangeLog> CHANGELOG_ARG;
     public static final CommandArgumentDefinition<String> LABEL_FILTER_ARG;
     public static final CommandArgumentDefinition<String> CONTEXTS_ARG;
+    public static final CommandArgumentDefinition<Boolean> FAST_CHECK_DISABLED;
 
     static {
         CommandBuilder builder = new CommandBuilder(COMMAND_NAME, LEGACY_COMMAND_NAME);
@@ -37,6 +38,11 @@ public class UpdateCommandStep extends AbstractUpdateCommandStep implements Clea
         CONTEXTS_ARG = builder.argument("contextFilter", String.class)
                 .addAlias("contexts")
                 .description("Changeset contexts to match")
+                .build();
+        FAST_CHECK_DISABLED = builder.argument("fastCheckDisabled", Boolean.class)
+                .defaultValue(Boolean.FALSE)
+                .description("If true invalidate the upToDateFastCheck cache.")
+                .hidden()
                 .build();
     }
 
@@ -102,6 +108,9 @@ public class UpdateCommandStep extends AbstractUpdateCommandStep implements Clea
     @Override
     public void run(CommandResultsBuilder resultsBuilder) throws Exception {
         setDBLock(false);
+        if(resultsBuilder.getCommandScope().getArgumentValue(FAST_CHECK_DISABLED)){
+            setFastCheckEnabled(false);
+        }
         super.run(resultsBuilder);
     }
 }
