@@ -3,12 +3,12 @@ package liquibase.change;
 import liquibase.ChecksumVersion;
 import liquibase.GlobalConfiguration;
 import liquibase.Scope;
+import liquibase.SupportsMethodValidationLevelsEnum;
 import liquibase.database.Database;
 import liquibase.exception.UnexpectedLiquibaseException;
 import liquibase.plugin.AbstractPluginFactory;
 import liquibase.plugin.Plugin;
 import liquibase.servicelocator.ServiceLocator;
-import liquibase.SupportsMethodValidationLevelsEnum;
 import liquibase.util.LiquibaseUtil;
 import lombok.Setter;
 
@@ -144,7 +144,7 @@ public class ChangeFactory extends AbstractPluginFactory<Change>{
         //we only verify supports method if this is not part of the default liquibase changes
         for (Change plugin : plugins) {
             String packageName = plugin.getClass().getPackage().getName();
-            if (packageName.startsWith("liquibase.change") || packageName.startsWith("com.datical.liquibase.ext")) {
+            if (packageName.startsWith("liquibase.change")) {
                 continue;
             }
 
