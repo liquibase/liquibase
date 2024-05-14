@@ -32,6 +32,6 @@ class BigQueryAddPrimaryKeyConstraintGeneratorTest {
         Sql[] sql = generator.generateSql(statement, database, null);
         assertEquals(1, sql.length);
         assertEquals(";", sql[0].getEndDelimiter());
-        assertEquals("SELECT 1", sql[0].toSql());
+        assertEquals("ALTER TABLE schemaName.tableName ADD PRIMARY KEY (`null`) NOT ENFORCED", sql[0].toSql());
     }
 }
