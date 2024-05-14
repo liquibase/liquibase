@@ -70,13 +70,18 @@ public class ChangeFactoryTest {
 
     @Test
     public void create_exists_supports_method_verification() throws Exception {
-        ServiceLocator sl = new StandardServiceLocator() {
+        ServiceLocator sl = new ServiceLocator() {
             @Override
             public <T> List<T> findInstances(Class<T> interfaceType) throws ServiceNotFoundException {
                 if (interfaceType.equals(Change.class)) {
                     return (List<T>) Arrays.asList(new CreateTableChange(), new BadlyImplementedChange());
                 }
-                return super.findInstances(interfaceType);
+                return new ArrayList<>();
+            }
+
+            @Override
+            public int getPriority() {
+                return PRIORITY_NOT_APPLICABLE;
             }
         };
 
@@ -92,6 +97,8 @@ public class ChangeFactoryTest {
                 assertEquals(e.getMessage(), String.format(SUPPORTS_METHOD_REQUIRED_MESSAGE, "liquibase.wrong.BadlyImplementedChange"));
             }
         });
+
+        Scope.setScopeManager(null);
     }
 
     @Test
