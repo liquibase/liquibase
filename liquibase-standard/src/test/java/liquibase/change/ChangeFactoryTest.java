@@ -7,11 +7,15 @@ import liquibase.SupportsMethodValidationLevelsEnum;
 import liquibase.change.core.CreateTableChange;
 import liquibase.database.core.MSSQLDatabase;
 import liquibase.servicelocator.LiquibaseService;
+import liquibase.servicelocator.ServiceLocator;
+import liquibase.servicelocator.StandardServiceLocator;
 import liquibase.sqlgenerator.SqlGeneratorFactory;
 import liquibase.statement.core.CreateSequenceStatement;
+import liquibase.wrong.BadlyImplementedChange;
 import org.junit.Test;
+import org.mockito.Mockito;
 
-import java.util.Collections;
+import java.util.*;
 
 import static liquibase.change.ChangeFactory.SUPPORTS_METHOD_REQUIRED_MESSAGE;
 import static org.junit.Assert.*;
@@ -69,9 +73,17 @@ public class ChangeFactoryTest {
 
     @Test
     public void create_exists_supports_method_verification() throws Exception {
-        Scope.child(GlobalConfiguration.SUPPORTS_METHOD_VALIDATION_LEVELS.getKey(), SupportsMethodValidationLevelsEnum.FAIL, () -> {
+        ServiceLocator sl = Mockito.mock(StandardServiceLocator.class);
+        Mockito.when(sl.findInstances(Change.class)).thenReturn(Arrays.asList(new CreateTableChange(), new BadlyImplementedChange()));
+
+        Map<String, Object> args = new HashMap<>();
+        args.put(Scope.Attr.serviceLocator.name(), sl);
+        args.put(GlobalConfiguration.SUPPORTS_METHOD_VALIDATION_LEVELS.getKey(), SupportsMethodValidationLevelsEnum.WARN);
+
+        Scope.child(args, () -> {
             try {
                 Scope.getCurrentScope().getSingleton(ChangeFactory.class).create("createTable");
+                fail("Should not get here");
             } catch (Exception e) {
                 assertEquals(e.getMessage(), String.format(SUPPORTS_METHOD_REQUIRED_MESSAGE, "liquibase.wrong.BadlyImplementedChange"));
             }
