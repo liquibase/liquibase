@@ -94,7 +94,7 @@ public class ChangeFactoryTest {
                changeFactory.create("createTable");
                 fail("Should not get here");
             } catch (UnexpectedLiquibaseException e) {
-                assertEquals(e.getMessage(), String.format(SUPPORTS_METHOD_REQUIRED_MESSAGE, "liquibase.wrong.BadlyImplementedChange"));
+                assertEquals(String.format(SUPPORTS_METHOD_REQUIRED_MESSAGE, "liquibase.wrong.BadlyImplementedChange"), e.getMessage());
             }
         });
     }
