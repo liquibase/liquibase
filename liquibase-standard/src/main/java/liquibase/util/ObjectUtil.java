@@ -1,7 +1,5 @@
 package liquibase.util;
 
-import static java.util.Locale.ENGLISH;
-
 import liquibase.Scope;
 import liquibase.exception.UnexpectedLiquibaseException;
 import liquibase.statement.DatabaseFunction;
@@ -35,11 +33,7 @@ public class ObjectUtil {
     /**
      * Cache for the methods of classes that we have been queried about so far.
      */
-    private static final Map<Class<?>, Method[]> methodCache = new ConcurrentHashMap<>();
-
-    private static final Map<String, String> getMethodCache = new ConcurrentHashMap<>();
-    private static final Map<String, String> isMethodCache = new ConcurrentHashMap<>();
-    private static final Map<String, String> setMethodCache = new ConcurrentHashMap<>();
+    private static final Map<Class<?>, ObjectMethods> methodCache = new ConcurrentHashMap<>();
 
     public static String ARGUMENT_KEY = "key";
 
@@ -213,18 +207,7 @@ public class ObjectUtil {
      * @return the {@link Method} if found, null in all other cases.
      */
     private static Method getReadMethod(Object object, String propertyName) {
-        String getMethodName = getMethodCache.computeIfAbsent(propertyName, (key) -> methodName("get", propertyName));
-        String isMethodName = isMethodCache.computeIfAbsent(propertyName, (key) -> methodName("is", propertyName));
-
-        Method[] methods = getMethods(object);
-
-        for (Method method : methods) {
-            if ((method.getName().equals(getMethodName) || method.getName().equals(isMethodName)) && (method
-                .getParameterTypes().length == 0)) {
-                return method;
-            }
-        }
-        return null;
+      return getMethods(object).getReadMethod(propertyName);
     }
 
     /**
@@ -234,19 +217,7 @@ public class ObjectUtil {
      * @return the {@link Method} if found, null in all other cases.
      */
     private static Method getWriteMethod(Object object, String propertyName) {
-        String methodName = setMethodCache.computeIfAbsent(propertyName, (key) -> methodName("set", propertyName));
-        Method[] methods = getMethods(object);
-
-        for (Method method : methods) {
-            if (method.getName().equals(methodName) && (method.getParameterTypes().length == 1)) {
-                return method;
-            }
-        }
-        return null;
-    }
-
-    private static String methodName(String prefix, String propertyName) {
-        return prefix + propertyName.substring(0, 1).toUpperCase(ENGLISH) + propertyName.substring(1);
+      return getMethods(object).getWriteMethod(propertyName);
     }
 
     /**
@@ -255,8 +226,8 @@ public class ObjectUtil {
      * @param object the object to examine
      * @return array of {@link Method} belonging to the class of the object
      */
-    private static Method[] getMethods(Object object) {
-        return methodCache.computeIfAbsent(object.getClass(), k -> object.getClass().getMethods());
+    private static ObjectMethods getMethods(Object object) {
+        return methodCache.computeIfAbsent(object.getClass(), k -> new ObjectMethods(object.getClass().getMethods()));
     }
 
     /**
