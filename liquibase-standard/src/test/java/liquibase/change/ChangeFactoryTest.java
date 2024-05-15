@@ -1,9 +1,12 @@
 package liquibase.change;
 
-import liquibase.*;
+import liquibase.ChecksumVersion;
+import liquibase.GlobalConfiguration;
+import liquibase.Scope;
+import liquibase.SupportsMethodValidationLevelsEnum;
 import liquibase.change.core.CreateTableChange;
 import liquibase.database.core.MSSQLDatabase;
-import liquibase.exception.ServiceNotFoundException;
+import liquibase.exception.UnexpectedLiquibaseException;
 import liquibase.servicelocator.LiquibaseService;
 import liquibase.servicelocator.ServiceLocator;
 import liquibase.servicelocator.StandardServiceLocator;
@@ -11,8 +14,13 @@ import liquibase.sqlgenerator.SqlGeneratorFactory;
 import liquibase.statement.core.CreateSequenceStatement;
 import liquibase.wrong.BadlyImplementedChange;
 import org.junit.Test;
+import org.mockito.Mockito;
 
-import java.util.*;
+import java.lang.reflect.Constructor;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.Map;
 
 import static liquibase.change.ChangeFactory.SUPPORTS_METHOD_REQUIRED_MESSAGE;
 import static org.junit.Assert.*;
@@ -70,35 +78,25 @@ public class ChangeFactoryTest {
 
     @Test
     public void create_exists_supports_method_verification() throws Exception {
-        ServiceLocator sl = new ServiceLocator() {
-            @Override
-            public <T> List<T> findInstances(Class<T> interfaceType) throws ServiceNotFoundException {
-                if (interfaceType.equals(Change.class)) {
-                    return (List<T>) Arrays.asList(new CreateTableChange(), new BadlyImplementedChange());
-                }
-                return new ArrayList<>();
-            }
 
-            @Override
-            public int getPriority() {
-                return PRIORITY_NOT_APPLICABLE;
-            }
-        };
-
+        ServiceLocator sl = Mockito.mock(StandardServiceLocator.class);
+        Mockito.when(sl.findInstances(Change.class)).thenReturn(Arrays.asList(new CreateTableChange(), new BadlyImplementedChange()));
         Map<String, Object> args = new HashMap<>();
         args.put(Scope.Attr.serviceLocator.name(), sl);
         args.put(GlobalConfiguration.SUPPORTS_METHOD_VALIDATION_LEVEL.getKey(), SupportsMethodValidationLevelsEnum.FAIL);
 
+        Constructor<ChangeFactory> changeFactoryConstructor = ChangeFactory.class.getDeclaredConstructor();
+        changeFactoryConstructor.setAccessible(true); // make private constructor accessible the same way as it is done in Scope.getSingleton method
+        ChangeFactory changeFactory = changeFactoryConstructor.newInstance();
+
         Scope.child(args, () -> {
             try {
-                Scope.getCurrentScope().getSingleton(ChangeFactory.class).create("createTable");
+               changeFactory.create("createTable");
                 fail("Should not get here");
-            } catch (Exception e) {
+            } catch (UnexpectedLiquibaseException e) {
                 assertEquals(e.getMessage(), String.format(SUPPORTS_METHOD_REQUIRED_MESSAGE, "liquibase.wrong.BadlyImplementedChange"));
             }
         });
-
-        Scope.setScopeManager(null);
     }
 
     @Test
