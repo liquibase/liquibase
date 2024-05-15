@@ -29,11 +29,16 @@ import java.util.logging.Level;
 public class ObjectUtil {
 
     private static final List<BeanIntrospector> introspectors = new ArrayList<>(Arrays.asList(new DefaultBeanIntrospector(), new FluentPropertyBeanIntrospector()));
-    
+
     /**
      * Cache for the methods of classes that we have been queried about so far.
      */
     private static final Map<Class<?>, Method[]> methodCache = new ConcurrentHashMap<>();
+
+    private static final Map<String, String> getMethodCache = new ConcurrentHashMap<>();
+    private static final Map<String, String> isMethodCache = new ConcurrentHashMap<>();
+    private static final Map<String, String> setMethodCache = new ConcurrentHashMap<>();
+
     public static String ARGUMENT_KEY = "key";
 
     /**
@@ -206,10 +211,10 @@ public class ObjectUtil {
      * @return the {@link Method} if found, null in all other cases.
      */
     private static Method getReadMethod(Object object, String propertyName) {
-        String getMethodName = "get" + propertyName.substring(0, 1).toUpperCase(Locale.ENGLISH)
-            + propertyName.substring(1);
-        String isMethodName = "is" + propertyName.substring(0, 1).toUpperCase(Locale.ENGLISH)
-            + propertyName.substring(1);
+        String getMethodName = getMethodCache.computeIfAbsent(propertyName, (key) -> "get" + propertyName.substring(0, 1).toUpperCase(Locale.ENGLISH)
+            + propertyName.substring(1));
+        String isMethodName = isMethodCache.computeIfAbsent(propertyName, (key) -> "is" + propertyName.substring(0, 1).toUpperCase(Locale.ENGLISH)
+            + propertyName.substring(1));
 
         Method[] methods = getMethods(object);
 
@@ -229,8 +234,8 @@ public class ObjectUtil {
      * @return the {@link Method} if found, null in all other cases.
      */
     private static Method getWriteMethod(Object object, String propertyName) {
-        String methodName = "set"
-            + propertyName.substring(0, 1).toUpperCase(Locale.ENGLISH) + propertyName.substring(1);
+        String methodName = setMethodCache.computeIfAbsent(propertyName, (key) -> "set"
+          + propertyName.substring(0, 1).toUpperCase(Locale.ENGLISH) + propertyName.substring(1));
         Method[] methods = getMethods(object);
 
         for (Method method : methods) {
