@@ -10,6 +10,7 @@ import liquibase.extension.testing.testsystem.DatabaseTestSystem
 import liquibase.extension.testing.testsystem.TestSystemFactory
 import liquibase.extension.testing.testsystem.spock.LiquibaseIntegrationTest
 import liquibase.util.FileUtil
+import org.apache.commons.io.FileUtils
 import org.apache.commons.lang3.RandomStringUtils
 import spock.lang.Shared
 import spock.lang.Specification
@@ -21,7 +22,7 @@ class DiffChangelogMssqlIntegrationTest extends Specification {
     private DatabaseTestSystem mssql =
             (DatabaseTestSystem) Scope.getCurrentScope().getSingleton(TestSystemFactory.class).getTestSystem("mssql")
 
-    def "auto increment on varchar column" () {
+    def "column direction is not included in addPrimaryKey change" () {
         def snapshotFilename = "target-${RandomStringUtils.randomAlphabetic(10)}.json"
         def snapshotFilepath = "target/test-classes/" + snapshotFilename
         def changelogFile = "target/test-classes/diffChangelog-${RandomStringUtils.randomAlphabetic(10)}.xml"
@@ -50,7 +51,7 @@ ADD CONSTRAINT PK_MyTest PRIMARY KEY (ID DESC);""")
 
         cleanup:
         generatedChangelog.delete()
-        new File(snapshotFilename).delete()
+        FileUtils.forceDelete(new File(snapshotFilepath))
     }
 
 }
