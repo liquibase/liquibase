@@ -244,7 +244,7 @@ public class GlobalConfiguration implements AutoloadedConfigurations {
                 .setDefaultValue(UIServiceEnum.CONSOLE)
                 .build();
 
-        SUPPORTS_METHOD_VALIDATION_LEVEL = builder.define("supportsMethodValidationLevels", SupportsMethodValidationLevelsEnum.class)
+        SUPPORTS_METHOD_VALIDATION_LEVEL = builder.define("supportsMethodValidationLevel", SupportsMethodValidationLevelsEnum.class)
                 .setDescription("Controls the level of validation performed on the supports method of Change classes. Options are OFF, WARN, FAIL.")
                 .setDefaultValue(SupportsMethodValidationLevelsEnum.WARN)
                 .build();

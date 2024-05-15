@@ -430,13 +430,13 @@ Global Options
                                supportPropertyEscaping', environment variable:
                                'LIQUIBASE_SUPPORT_PROPERTY_ESCAPING')
 
-      --supports-method-validation-levels=PARAM
+      --supports-method-validation-level=PARAM
                              Controls the level of validation performed on the
                                supports method of Change classes. Options are
                                OFF, WARN, FAIL.
                              DEFAULT: WARN
                              (defaults file: 'liquibase.
-                               supportsMethodValidationLevels', environment
+                               supportsMethodValidationLevel', environment
                                variable:
                                'LIQUIBASE_SUPPORTS_METHOD_VALIDATION_LEVEL')
 
