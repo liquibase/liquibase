@@ -81,6 +81,7 @@ class CommandUtil {
         OutputStream outputStream = new FileOutputStream(new File(outputFile))
         commandScope.setOutput(outputStream)
         commandScope.execute()
+        outputStream.close()
     }
 
     static void runDiff(DatabaseTestSystem db, Database targetDatabase, Database referenceDatabase,
