@@ -1,5 +1,7 @@
 package liquibase.util;
 
+import static java.util.Locale.ENGLISH;
+
 import liquibase.Scope;
 import liquibase.exception.UnexpectedLiquibaseException;
 import liquibase.statement.DatabaseFunction;
@@ -211,10 +213,8 @@ public class ObjectUtil {
      * @return the {@link Method} if found, null in all other cases.
      */
     private static Method getReadMethod(Object object, String propertyName) {
-        String getMethodName = getMethodCache.computeIfAbsent(propertyName, (key) -> "get" + propertyName.substring(0, 1).toUpperCase(Locale.ENGLISH)
-            + propertyName.substring(1));
-        String isMethodName = isMethodCache.computeIfAbsent(propertyName, (key) -> "is" + propertyName.substring(0, 1).toUpperCase(Locale.ENGLISH)
-            + propertyName.substring(1));
+        String getMethodName = getMethodCache.computeIfAbsent(propertyName, (key) -> methodName("get", propertyName));
+        String isMethodName = isMethodCache.computeIfAbsent(propertyName, (key) -> methodName("is", propertyName));
 
         Method[] methods = getMethods(object);
 
@@ -234,8 +234,7 @@ public class ObjectUtil {
      * @return the {@link Method} if found, null in all other cases.
      */
     private static Method getWriteMethod(Object object, String propertyName) {
-        String methodName = setMethodCache.computeIfAbsent(propertyName, (key) -> "set"
-          + propertyName.substring(0, 1).toUpperCase(Locale.ENGLISH) + propertyName.substring(1));
+        String methodName = setMethodCache.computeIfAbsent(propertyName, (key) -> methodName("set", propertyName));
         Method[] methods = getMethods(object);
 
         for (Method method : methods) {
@@ -244,6 +243,10 @@ public class ObjectUtil {
             }
         }
         return null;
+    }
+
+    private static String methodName(String prefix, String propertyName) {
+        return prefix + propertyName.substring(0, 1).toUpperCase(ENGLISH) + propertyName.substring(1);
     }
 
     /**
