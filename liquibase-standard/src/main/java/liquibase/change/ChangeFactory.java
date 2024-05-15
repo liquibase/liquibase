@@ -157,7 +157,6 @@ public class ChangeFactory extends AbstractPluginFactory<Change>{
                     switch (GlobalConfiguration.SUPPORTS_METHOD_VALIDATION_LEVEL.getCurrentValue()) {
                         case WARN:
                             Scope.getCurrentScope().getLog(getClass()).warning(String.format(SUPPORTS_METHOD_REQUIRED_MESSAGE, plugin.getClass().getName()));
-                            plugins.remove(plugin);
                             break;
                         case FAIL:
                             throw new UnexpectedLiquibaseException(String.format(SUPPORTS_METHOD_REQUIRED_MESSAGE, plugin.getClass().getName()));
