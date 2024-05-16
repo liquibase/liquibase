@@ -607,9 +607,9 @@ public class ColumnSnapshotGenerator extends JdbcSnapshotGenerator {
             parameters.add(column.getRelation().getName());
             parameters.add(column.getName());
             StringBuilder selectQuery = new StringBuilder("SELECT EXTRA FROM INFORMATION_SCHEMA.COLUMNS\n")
-                    .append("WHERE TABLE_SCHEMA = '?'\n")
-                    .append("AND TABLE_NAME = '?'\n")
-                    .append( "AND COLUMN_NAME = '?'");
+                    .append("WHERE TABLE_SCHEMA = ?\n")
+                    .append("AND TABLE_NAME = ?\n")
+                    .append( "AND COLUMN_NAME = ?");
             String extraValue = Scope.getCurrentScope().getSingleton(ExecutorService.class)
                     .getExecutor("jdbc", database)
                     .queryForObject(new RawParameterizedSqlStatement(selectQuery.toString(), parameters), String.class);
