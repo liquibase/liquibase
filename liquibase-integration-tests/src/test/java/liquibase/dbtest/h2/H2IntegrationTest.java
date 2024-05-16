@@ -21,6 +21,7 @@ import liquibase.exception.ValidationFailedException;
 import liquibase.executor.Executor;
 import liquibase.executor.ExecutorService;
 import liquibase.statement.core.RawParameterizedSqlStatement;
+import liquibase.structure.core.DatabaseObjectFactory;
 import org.junit.Assert;
 import org.junit.Test;
 
