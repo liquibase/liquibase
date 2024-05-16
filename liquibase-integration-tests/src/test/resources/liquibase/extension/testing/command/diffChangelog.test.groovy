@@ -153,7 +153,7 @@ Optional Args:
         }
 
         expectedException = CommandExecutionException.class
-        expectedExceptionMessage = "java.io.IOException: Cannot parse resource location: 'nonexistant://thisfileshouldnotbecreated.xml'"
+        expectedExceptionMessage = "java.io.IOException: Cannot parse resource location: 'nonexistant://thisfileshouldnotbecreateaslkdjaslkjdd.xml'"
     }
 
     run "Running diffChangelog should add changesets with specified author", {
