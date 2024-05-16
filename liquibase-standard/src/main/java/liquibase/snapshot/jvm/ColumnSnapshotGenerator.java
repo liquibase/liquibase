@@ -398,17 +398,13 @@ public class ColumnSnapshotGenerator extends JdbcSnapshotGenerator {
                 (columnTypeName))) {
             try {
 
-                List<String> parameter = new ArrayList<>(3);
-                parameter.add(column.getSchema().getName());
-                parameter.add(column.getRelation().getName());
-                parameter.add(column.getName());
                 StringBuilder sql = new StringBuilder("SELECT COLUMN_TYPE FROM INFORMATION_SCHEMA.COLUMNS\n")
                         .append("WHERE TABLE_SCHEMA = ?\n")
                         .append("AND TABLE_NAME = ?\n")
                         .append("AND COLUMN_NAME = ?");
                 String enumValue = Scope.getCurrentScope().getSingleton(ExecutorService.class)
                         .getExecutor("jdbc", database)
-                        .queryForObject(new RawParameterizedSqlStatement(sql.toString(), parameter.toArray()), String.class);
+                        .queryForObject(new RawParameterizedSqlStatement(sql.toString(), column.getSchema().getName(), column.getRelation().getName(), column.getName()), String.class);
 
                 enumValue = enumValue.replace("enum(", "ENUM(");
                 enumValue = enumValue.replace("set(", "SET(");
@@ -602,17 +598,13 @@ public class ColumnSnapshotGenerator extends JdbcSnapshotGenerator {
 
     private void readDefaultValueForMysqlDatabase(CachedRow columnMetadataResultSet, Column column, Database database) {
         try {
-            List<String> parameters = new ArrayList<>(3);
-            parameters.add(column.getSchema().getName());
-            parameters.add(column.getRelation().getName());
-            parameters.add(column.getName());
             StringBuilder selectQuery = new StringBuilder("SELECT EXTRA FROM INFORMATION_SCHEMA.COLUMNS\n")
                     .append("WHERE TABLE_SCHEMA = ?\n")
                     .append("AND TABLE_NAME = ?\n")
                     .append( "AND COLUMN_NAME = ?");
             String extraValue = Scope.getCurrentScope().getSingleton(ExecutorService.class)
                     .getExecutor("jdbc", database)
-                    .queryForObject(new RawParameterizedSqlStatement(selectQuery.toString(), parameters), String.class);
+                    .queryForObject(new RawParameterizedSqlStatement(selectQuery.toString(), column.getSchema().getName(), column.getRelation().getName(), column.getName()), String.class);
             if (extraValue != null && !extraValue.isEmpty() &&
                 (extraValue.startsWith(MYSQL_DEFAULT_GENERATED + " ") || extraValue.toLowerCase(Locale.ENGLISH).contains("on update"))
             ) {
