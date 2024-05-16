@@ -12,7 +12,7 @@ import liquibase.datatype.LiquibaseDataType;
         name = "bignumeric",
         minParameters = 0,
         maxParameters = 0,
-        priority = 1
+        priority = LiquibaseDataType.PRIORITY_DATABASE
 )
 public class BignumericDataTypeBigQuery extends LiquibaseDataType {
 

@@ -3,5 +3,5 @@ liquibase.datatype.core.GeographyDataTypeBigQuery
 liquibase.datatype.core.Float64DataTypeBigQuery
 liquibase.datatype.core.BoolDataTypeBigQuery
 liquibase.datatype.core.Int64DataTypeBigQuery
-liquibase.datatype.core.NumberDataTypeBigQuery
+liquibase.datatype.core.NumericDataTypeBigQuery
 liquibase.datatype.core.BignumericDataTypeBigQuery

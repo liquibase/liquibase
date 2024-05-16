@@ -11,7 +11,7 @@ import liquibase.datatype.LiquibaseDataType;
         name = "float64",
         minParameters = 0,
         maxParameters = 0,
-        priority = BigQueryDatabase.BIGQUERY_PRIORITY_DATABASE
+        priority = LiquibaseDataType.PRIORITY_DATABASE
 )
 public class Float64DataTypeBigQuery extends LiquibaseDataType {
     public Float64DataTypeBigQuery() {
