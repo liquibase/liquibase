@@ -151,6 +151,11 @@
             <version>1.18.32</version>
             <scope>provided</scope>
         </dependency>
+        <dependency>
+            <groupId>commons-io</groupId>
+            <artifactId>commons-io</artifactId>
+            <version>${commons-io.version}</version>
+        </dependency>
     </dependencies>
 
     <build>
@@ -298,7 +303,7 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-jar-plugin</artifactId>
-                <version>3.3.0</version>
+                <version>3.4.1</version>
                 <executions>
                     <execution>
                         <id>default-jar</id>

@@ -41,6 +41,12 @@ public class H2IntegrationTest extends AbstractIntegrationTest {
         super("h2", DatabaseFactory.getInstance().getDatabase("h2"));
         this.changeSpecifyDbmsChangeLog = "changelogs/h2/complete/change.specify.dbms.changelog.xml";
         this.dbmsExcludeChangelog = "changelogs/h2/complete/dbms.exclude.changelog.xml";
+        //
+        // Reset the factory so that the standard types will be repopulated
+        // They might have been changed by a previous test.  Without the correct
+        // list of types, not all objects will be correctly dropped.
+        //
+        DatabaseObjectFactory.getInstance().reset();
     }
 
     @Test
