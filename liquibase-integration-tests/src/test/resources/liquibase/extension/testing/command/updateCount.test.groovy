@@ -116,7 +116,7 @@ Optional Args:
         ]
 
         expectedUI = [
-            "Running Changeset: changelogasdddddassds/h2/complete/summary-changelog.xml::4-table::lbuser"
+            "Running Changeset: changelogs/h2/complete/summary-changelog.xml::4-table::lbuser"
         ]
 
     }

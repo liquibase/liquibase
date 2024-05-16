@@ -107,7 +107,7 @@ Optional Args:
 
         expectedFileContent = [ "target/test-classes/happyPath.txt":
                 [
-                  "UPDATE SUMaslkdjaslkdjMARY",
+                  "UPDATE SUMMARY",
                   "Run:                         41",
                   "Previously run:               0",
                   "Filtered out:                 0",
@@ -534,13 +534,13 @@ Total change sets:            1
 UPDATE SUMMARY
 Run:                          1
 Previously run:               0
-Filtered out:asasdasd                 1
+Filtered out:                 1
 -------------------------------
 Total change sets:            2
 
 
 FILTERED CHANGE SETS SUMMARY
-Ignored:      asdasdas                1
+Ignored:                      1
 
 +--------------------------------------------------------------+----------------------+
 | Changeset Info                                               | Reason Skipped       |
