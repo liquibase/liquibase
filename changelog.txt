@@ -10,7 +10,6 @@ Changes in version 4.28.0 (2024.05.15)
 * DAT-17543: Handle chained checks which have been skipped because of a scope mismatch in https://github.com/liquibase/liquibase-pro/pull/1697 by wwillard7800
 * DAT-16725: automatically open generated reports in browser in https://github.com/liquibase/liquibase-pro/pull/1703 by StevenMassaro
 * DAT-17485: always show update summary message in update report in https://github.com/liquibase/liquibase-pro/pull/1708 by StevenMassaro
-* DAT-17096: Turn on reports by default in https://github.com/liquibase/liquibase-pro/pull/1675 by @abrackx
 * DAT-17630: Rework logic for checking for database connection in https://github.com/liquibase/liquibase-pro/pull/1706 by wwillard7800
 * DAT-17400: add Snowflake integration tests in https://github.com/liquibase/liquibase-pro/pull/1693 by StevenMassaro
 * DAT-17540: Rename MaxRowsAllowed and added two more checks for update and delete in https://github.com/liquibase/liquibase-pro/pull/1686 by wwillard7800
