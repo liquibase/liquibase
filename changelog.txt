@@ -15,6 +15,7 @@ Changes in version 4.28.0 (2024.05.15)
 * DAT-17540: Rename MaxRowsAllowed and added two more checks for update and delete in https://github.com/liquibase/liquibase-pro/pull/1686 by wwillard7800
 * DAT-17348: add condition evaluation details to conditions which evaluate to true in https://github.com/liquibase/liquibase-pro/pull/1688 by StevenMassaro
 * DAT-15920: error if native executor conf file or rollback file is not found and pro-strict is true in https://github.com/liquibase/liquibase-pro/pull/1663 by StevenMassaro
+* DAT-17601: Expand variables that are included in flow files in https://github.com/liquibase/liquibase-pro/pull/1694 by wwillard7800
 
 
 ## [PRO] Security, Driver and Other Updates
