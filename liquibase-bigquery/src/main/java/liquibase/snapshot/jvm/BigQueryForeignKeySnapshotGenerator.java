@@ -67,7 +67,7 @@ public class BigQueryForeignKeySnapshotGenerator extends ForeignKeySnapshotGener
                 String foreignKeyName =
                         Optional.ofNullable((String) resultMap.get("CONSTRAINT_NAME"))
                                 .map(s -> s.replace(foreignKeyTable.getName() + ".", ""))
-                                .orElse("null");
+                                .orElse("undefined");
 
                 foreignKeyTable.setSchema(new Schema(new Catalog(Objects.toString(resultMap.get("FOREIGN_KEY_TABLE_CATALOG"))),
                         Objects.toString(resultMap.get("FOREIGN_KEY_TABLE_SCHEMA"))));
