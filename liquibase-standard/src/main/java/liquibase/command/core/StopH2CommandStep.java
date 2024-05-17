@@ -5,6 +5,8 @@ import liquibase.command.AbstractCommandStep;
 import liquibase.command.CommandDefinition;
 import liquibase.command.CommandResultsBuilder;
 
+import java.util.Iterator;
+
 public class StopH2CommandStep extends AbstractCommandStep {
 
     public static final String[] COMMAND_NAME = {"init", "stopH2"};
@@ -22,9 +24,11 @@ public class StopH2CommandStep extends AbstractCommandStep {
 
     @Override
     public void run(CommandResultsBuilder resultsBuilder) throws Exception {
-        for (Thread runningThread : StartH2CommandStep.RUNNING_THREADS) {
+        for (Iterator<Thread> iterator = StartH2CommandStep.RUNNING_THREADS.iterator(); iterator.hasNext(); ) {
+            Thread runningThread = iterator.next();
             try {
                 runningThread.interrupt();
+                iterator.remove();
             } catch (Exception e) {
                 Scope.getCurrentScope().getLog(getClass()).warning("Error stopping H2 thread", e);
             }
