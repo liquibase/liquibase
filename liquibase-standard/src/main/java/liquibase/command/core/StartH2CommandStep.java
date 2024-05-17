@@ -60,7 +60,7 @@ public class StartH2CommandStep extends AbstractCommandStep {
                 .build();
 
         DETACHED = builder.argument("detached", Boolean.class)
-                .description("Start the included H2 database in this session, which means it will close at the end of the command, when the JVM exits. To persist H2, do not set to true.")
+                .description("When set to true, Liquibase initiates the H2 database in a new thread without blocking, allowing use within the flow command. Regardless of the parameter setting, data stored in the H2 database is cleared when the JVM exits, such as at the end of the flow command.")
                 .defaultValue(false)
                 .build();
     }
