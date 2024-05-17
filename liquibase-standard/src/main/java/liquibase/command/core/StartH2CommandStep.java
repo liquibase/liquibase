@@ -119,8 +119,6 @@ public class StartH2CommandStep extends AbstractCommandStep {
                 }));
 
                 Thread.sleep(Long.MAX_VALUE);
-            } catch (InterruptedException e) {
-                throw new RuntimeException(e);
             } catch (Throwable e) {
                 e.printStackTrace();
                 System.exit(-1);
