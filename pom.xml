@@ -398,6 +398,7 @@
                         <include>**/*TestCase.java</include>
                         <include>**/*Spec.java</include>
                     </includes>
+                    <failIfNoTests>true</failIfNoTests>
                 </configuration>
             </plugin>
 
