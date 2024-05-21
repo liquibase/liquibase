@@ -25,6 +25,10 @@ public abstract class StreamUtil {
         IOUtils.copy(inputStream, outputStream);
     }
 
+    /**
+     * @deprecated use {@link IOUtils#toByteArray(InputStream)}
+     */
+    @Deprecated
     public static byte[] readStream(InputStream stream) throws IOException {
         return IOUtils.toByteArray(stream);
     }

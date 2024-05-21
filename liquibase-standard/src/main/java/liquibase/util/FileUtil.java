@@ -24,6 +24,10 @@ public class FileUtil {
         write(contents, file, false);
     }
 
+    /**
+     * @deprecated use {@link FileUtils#write(File, CharSequence, String, boolean)}
+     */
+    @Deprecated
     public static void write(String contents, File file, boolean append) throws IOException {
         FileUtils.write(file, contents, GlobalConfiguration.OUTPUT_FILE_ENCODING.getCurrentValue(), append);
     }
