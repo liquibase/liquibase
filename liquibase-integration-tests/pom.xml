@@ -56,7 +56,7 @@
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-surefire-plugin</artifactId>
                 <configuration>
-                    <failIfNoTests>true</failIfNoTests>
+                    <failIfNoTests>${surefire.failIfNoTests}</failIfNoTests>
                 </configuration>
                 </plugin>
         </plugins>
