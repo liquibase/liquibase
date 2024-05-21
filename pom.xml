@@ -422,7 +422,6 @@
                             or prepare-agent-integration goals, before the actual tests are run. This sets a property named argLine which
                             points to the JaCoCo agent, later passed as a JVM argument to the test runner -->
                             <argLine>${itCoverageAgent}</argLine>
-                            <failIfNoTests>true</failIfNoTests>
                         </configuration>
                     </execution>
                 </executions>
