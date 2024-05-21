@@ -9,6 +9,7 @@ import liquibase.sql.UnparsedSql;
 import liquibase.sqlgenerator.core.CreateTableGenerator;
 import liquibase.statement.DatabaseFunction;
 import liquibase.statement.ForeignKeyConstraint;
+import liquibase.statement.PrimaryKeyConstraint;
 import liquibase.statement.core.CreateTableStatement;
 import liquibase.structure.core.Schema;
 import liquibase.structure.core.Table;
@@ -61,6 +62,21 @@ public class BigQueryCreateTableGenerator extends CreateTableGenerator {
                 } else {
                     buffer.append(statement.getColumnTypes().get(column).objectToSql(defaultValue, database));
                 }
+            }
+
+            PrimaryKeyConstraint primaryKeyConstraint = statement.getPrimaryKeyConstraint();
+            if (primaryKeyConstraint != null) {
+                buffer.append(", PRIMARY KEY (");
+
+                for (int i = 0; i < primaryKeyConstraint.getColumns().size(); i++) {
+                    String primaryKeyColumnName = primaryKeyConstraint.getColumns().get(i);
+                    buffer.append(database.escapeColumnName(statement.getCatalogName(), statement.getSchemaName(), statement.getTableName(), primaryKeyColumnName));
+                    if (i < primaryKeyConstraint.getColumns().size() - 1) {
+                        buffer.append(", ");
+                    }
+                }
+
+                buffer.append(")").append(" NOT ENFORCED");
             }
 
             if (statement.getNotNullColumns().get(column) != null) {
