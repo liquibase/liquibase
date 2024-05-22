@@ -8,7 +8,10 @@ import liquibase.sql.Sql;
 import liquibase.sql.UnparsedSql;
 import liquibase.sqlgenerator.core.CreateTableGenerator;
 import liquibase.statement.DatabaseFunction;
+import liquibase.statement.ForeignKeyConstraint;
 import liquibase.statement.core.CreateTableStatement;
+import liquibase.structure.core.Schema;
+import liquibase.structure.core.Table;
 
 import java.util.ArrayList;
 import java.util.Iterator;
@@ -67,9 +70,33 @@ public class BigQueryCreateTableGenerator extends CreateTableGenerator {
                 buffer.append(", ");
             }
         }
-
-
         buffer.append(",");
+
+        for (ForeignKeyConstraint fkConstraint : statement.getForeignKeyConstraints()) {
+            if(fkConstraint.getForeignKeyName()!=null) {
+                buffer.append(" CONSTRAINT ");
+                buffer.append(database.escapeConstraintName(fkConstraint.getForeignKeyName()));
+            }
+            String referencesString = fkConstraint.getReferences();
+            buffer.append(" FOREIGN KEY (")
+                    .append(database.escapeColumnName(statement.getCatalogName(), statement.getSchemaName(), statement.getTableName(), fkConstraint.getColumn()))
+                    .append(") REFERENCES ");
+            if (referencesString != null) {
+                if (!referencesString.contains(".") && (database.getDefaultSchemaName() != null) && database
+                        .getOutputDefaultSchema() && (database.supportsSchemas() || database.supportsCatalogs())) {
+                    referencesString = database.escapeObjectName(database.getDefaultSchemaName(), Schema.class) + "." + referencesString;
+                }
+                buffer.append(referencesString);
+            } else {
+                buffer.append(database.escapeObjectName(fkConstraint.getReferencedTableCatalogName(), fkConstraint.getReferencedTableSchemaName(), fkConstraint.getReferencedTableName(), Table.class))
+                        .append("(")
+                        .append(database.escapeColumnNameList(fkConstraint.getReferencedColumnNames()))
+                        .append(")");
+
+            }
+            buffer.append(" NOT ENFORCED");//BiqQuery support only NOT ENFORCED FKs, and Liquibase doesn't have attribute to specify that in changelog
+            buffer.append(",");            // so hardcoding this property here
+        }
         String sql = buffer.toString().replaceFirst(",\\s*$", "") + ")";
 
         additionalSql.add(0, new UnparsedSql(sql, this.getAffectedTable(statement)));
