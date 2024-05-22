@@ -91,7 +91,7 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-shade-plugin</artifactId>
-                <version>3.5.2</version>
+                <version>3.5.3</version>
                 <dependencies>
                     <dependency>
                         <groupId>com.github.marcosemiao.maven.plugins.shade.resource</groupId>

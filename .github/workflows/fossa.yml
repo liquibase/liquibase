@@ -68,7 +68,7 @@ jobs:
     needs: [ fossa-scan ]
     steps:
       - name: Dispatch event to PRO repository
-        uses: peter-evans/repository-dispatch@v1
+        uses: peter-evans/repository-dispatch@v3
         with:
           token: ${{ secrets.LIQUIBOT_PAT_GPM_ACCESS }}
           repository: liquibase/liquibase-pro
