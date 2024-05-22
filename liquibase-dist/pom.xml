@@ -356,7 +356,7 @@
 			<id>liquibase-scripting</id>
 			<activation>
 				<property>
-            <name>env.CI</name>
+            <name>liquibase.scripting</name>
             <value>true</value>
 				</property>
 			</activation>
