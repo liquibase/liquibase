@@ -15,7 +15,6 @@ import liquibase.diff.output.report.DiffToReport;
 import liquibase.exception.DatabaseException;
 import liquibase.logging.mdc.MdcKey;
 import liquibase.logging.mdc.MdcValue;
-import liquibase.logging.mdc.customobjects.DiffResultsSummary;
 import liquibase.snapshot.*;
 import liquibase.structure.DatabaseObject;
 import liquibase.structure.core.DatabaseObjectFactory;
@@ -115,9 +114,8 @@ public class DiffCommandStep extends AbstractCommandStep {
         DatabaseSnapshot referenceSnapshot = createReferenceSnapshot(resultsBuilder);
         DatabaseSnapshot targetSnapshot = getTargetSnapshot(resultsBuilder);
         final CompareControl compareControl = (CompareControl) resultsBuilder.getResult(PreCompareCommandStep.COMPARE_CONTROL_RESULT.getName());
-        DiffResult result = DiffGeneratorFactory.getInstance().compare(referenceSnapshot, targetSnapshot, compareControl);
-        Scope.getCurrentScope().getMdcManager().put(MdcKey.DIFF_RESULTS_SUMMARY, new DiffResultsSummary(result));
-        return result;
+
+        return DiffGeneratorFactory.getInstance().compare(referenceSnapshot, targetSnapshot, compareControl);
     }
 
     protected DatabaseSnapshot getTargetSnapshot(CommandResultsBuilder resultsBuilder) throws DatabaseException, InvalidExampleException {
