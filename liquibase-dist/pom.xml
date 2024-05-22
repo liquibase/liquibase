@@ -356,7 +356,7 @@
 			<id>liquibase-scripting</id>
 			<activation>
 				<property>
-            <name>liquibase.scripting</name>
+            <name>env.CI</name>
             <value>true</value>
 				</property>
 			</activation>
@@ -371,6 +371,7 @@
 				</dependency>
 			</dependencies>
 		</profile>
+
 		<profile>
 			<id>remote-repositories</id>
 			<activation>
