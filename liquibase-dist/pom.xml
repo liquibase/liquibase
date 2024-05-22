@@ -347,7 +347,7 @@
 				<dependency>
 					<groupId>org.liquibase</groupId>
 					<artifactId>liquibase-commercial</artifactId>
-          <version>${liquibase-pro.version}</version>
+                    <version>${liquibase-pro.version}</version>
 				</dependency>
 			</dependencies>
 		</profile>
@@ -357,8 +357,8 @@
 
 			<activation>
 				<property>
-          <name>liquibase.scripting</name>
-          <value>true</value>
+                    <name>env.CI</name>
+                    <value>true</value>
 				</property>
 			</activation>
 
