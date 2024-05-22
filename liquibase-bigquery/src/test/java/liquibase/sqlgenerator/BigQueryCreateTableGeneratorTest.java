@@ -1,8 +1,7 @@
 package liquibase.sqlgenerator;
 
 import liquibase.database.BigQueryDatabase;
-import liquibase.datatype.LiquibaseDataType;
-import liquibase.datatype.core.NumberDataTypeBigQuery;
+import liquibase.datatype.core.NumericDataTypeBigQuery;
 import liquibase.sql.Sql;
 import liquibase.statement.PrimaryKeyConstraint;
 import liquibase.statement.core.CreateTableStatement;
@@ -36,7 +35,7 @@ class BigQueryCreateTableGeneratorTest {
         CreateTableStatement statement = new CreateTableStatement("catalog", "schema", "table");
         PrimaryKeyConstraint primaryKeyConstraint = new PrimaryKeyConstraint();
         primaryKeyConstraint.addColumns("column");
-        statement.addColumn("column", new NumberDataTypeBigQuery(), primaryKeyConstraint);
+        statement.addColumn("column", new NumericDataTypeBigQuery(), primaryKeyConstraint);
         Sql[] sql = generator.generateSql(statement, database, null);
         assertEquals(1, sql.length);
         assertEquals(";", sql[0].getEndDelimiter());
