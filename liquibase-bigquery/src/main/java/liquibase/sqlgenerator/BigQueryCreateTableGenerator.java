@@ -64,21 +64,6 @@ public class BigQueryCreateTableGenerator extends CreateTableGenerator {
                 }
             }
 
-            PrimaryKeyConstraint primaryKeyConstraint = statement.getPrimaryKeyConstraint();
-            if (primaryKeyConstraint != null) {
-                buffer.append(", PRIMARY KEY (");
-
-                for (int i = 0; i < primaryKeyConstraint.getColumns().size(); i++) {
-                    String primaryKeyColumnName = primaryKeyConstraint.getColumns().get(i);
-                    buffer.append(database.escapeColumnName(statement.getCatalogName(), statement.getSchemaName(), statement.getTableName(), primaryKeyColumnName));
-                    if (i < primaryKeyConstraint.getColumns().size() - 1) {
-                        buffer.append(", ");
-                    }
-                }
-
-                buffer.append(")").append(" NOT ENFORCED");
-            }
-
             if (statement.getNotNullColumns().get(column) != null) {
                 Scope.getCurrentScope().getLog(this.getClass()).fine("Not null constraints are not supported by BigQuery");
             }
@@ -87,6 +72,23 @@ public class BigQueryCreateTableGenerator extends CreateTableGenerator {
             }
         }
         buffer.append(",");
+
+        PrimaryKeyConstraint primaryKeyConstraint = statement.getPrimaryKeyConstraint();
+        if (primaryKeyConstraint != null) {
+            buffer.append(" PRIMARY KEY (");
+
+            for (int i = 0; i < primaryKeyConstraint.getColumns().size(); i++) {
+                String primaryKeyColumnName = primaryKeyConstraint.getColumns().get(i);
+                buffer.append(database.escapeColumnName(statement.getCatalogName(), statement.getSchemaName(), statement.getTableName(), primaryKeyColumnName));
+                if (i < primaryKeyConstraint.getColumns().size() - 1) {
+                    buffer.append(", ");
+                }
+            }
+
+            buffer.append(")")
+                    .append(" NOT ENFORCED")
+                    .append(",");
+        }
 
         for (ForeignKeyConstraint fkConstraint : statement.getForeignKeyConstraints()) {
             if(fkConstraint.getForeignKeyName()!=null) {
@@ -113,6 +115,7 @@ public class BigQueryCreateTableGenerator extends CreateTableGenerator {
             buffer.append(" NOT ENFORCED");//BiqQuery support only NOT ENFORCED FKs, and Liquibase doesn't have attribute to specify that in changelog
             buffer.append(",");            // so hardcoding this property here
         }
+
         String sql = buffer.toString().replaceFirst(",\\s*$", "") + ")";
 
         additionalSql.add(0, new UnparsedSql(sql, this.getAffectedTable(statement)));
