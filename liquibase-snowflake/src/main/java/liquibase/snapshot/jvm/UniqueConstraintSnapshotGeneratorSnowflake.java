@@ -10,7 +10,10 @@ import liquibase.snapshot.DatabaseSnapshot;
 import liquibase.snapshot.SnapshotGenerator;
 import liquibase.statement.core.RawParameterizedSqlStatement;
 import liquibase.structure.DatabaseObject;
-import liquibase.structure.core.*;
+import liquibase.structure.core.Relation;
+import liquibase.structure.core.Schema;
+import liquibase.structure.core.Table;
+import liquibase.structure.core.UniqueConstraint;
 
 import java.sql.SQLException;
 import java.util.List;
