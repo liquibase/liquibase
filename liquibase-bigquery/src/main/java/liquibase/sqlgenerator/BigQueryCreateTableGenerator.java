@@ -9,6 +9,7 @@ import liquibase.sql.UnparsedSql;
 import liquibase.sqlgenerator.core.CreateTableGenerator;
 import liquibase.statement.DatabaseFunction;
 import liquibase.statement.ForeignKeyConstraint;
+import liquibase.statement.PrimaryKeyConstraint;
 import liquibase.statement.core.CreateTableStatement;
 import liquibase.structure.core.Schema;
 import liquibase.structure.core.Table;
@@ -72,6 +73,23 @@ public class BigQueryCreateTableGenerator extends CreateTableGenerator {
         }
         buffer.append(",");
 
+        PrimaryKeyConstraint primaryKeyConstraint = statement.getPrimaryKeyConstraint();
+        if (primaryKeyConstraint != null) {
+            buffer.append(" PRIMARY KEY (");
+
+            for (int i = 0; i < primaryKeyConstraint.getColumns().size(); i++) {
+                String primaryKeyColumnName = primaryKeyConstraint.getColumns().get(i);
+                buffer.append(database.escapeColumnName(statement.getCatalogName(), statement.getSchemaName(), statement.getTableName(), primaryKeyColumnName));
+                if (i < primaryKeyConstraint.getColumns().size() - 1) {
+                    buffer.append(", ");
+                }
+            }
+
+            buffer.append(")")
+                    .append(" NOT ENFORCED")
+                    .append(",");
+        }
+
         for (ForeignKeyConstraint fkConstraint : statement.getForeignKeyConstraints()) {
             if(fkConstraint.getForeignKeyName()!=null) {
                 buffer.append(" CONSTRAINT ");
@@ -97,6 +115,7 @@ public class BigQueryCreateTableGenerator extends CreateTableGenerator {
             buffer.append(" NOT ENFORCED");//BiqQuery support only NOT ENFORCED FKs, and Liquibase doesn't have attribute to specify that in changelog
             buffer.append(",");            // so hardcoding this property here
         }
+
         String sql = buffer.toString().replaceFirst(",\\s*$", "") + ")";
 
         additionalSql.add(0, new UnparsedSql(sql, this.getAffectedTable(statement)));
