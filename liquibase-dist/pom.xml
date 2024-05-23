@@ -343,33 +343,33 @@
 				<assemblyConfigFile>src/main/assembly/assembly-bin-pro.xml</assemblyConfigFile>
 			</properties>
 
-			<dependencies>
-				<dependency>
-					<groupId>org.liquibase</groupId>
-					<artifactId>liquibase-commercial</artifactId>
-                    <version>${liquibase-pro.version}</version>
-				</dependency>
-			</dependencies>
-		</profile>
+      <dependencies>
+        <dependency>
+          <groupId>org.liquibase</groupId>
+          <artifactId>liquibase-commercial</artifactId>
+          <version>${liquibase-pro.version}</version>
+        </dependency>
+      </dependencies>
+    </profile>
 
-		<profile>
-			<id>liquibase-scripting</id>
-			<activation>
-				<property>
-            <name>liquibase.scripting</name>
-            <value>true</value>
-				</property>
-			</activation>
-			<properties>
-				<assemblyConfigFile>src/main/assembly/assembly-bin-scripting.xml</assemblyConfigFile>
-			</properties>
-			<dependencies>
-				<dependency>
-					<groupId>org.liquibase</groupId>
-					<artifactId>liquibase-scripting</artifactId>
+    <profile>
+      <id>liquibase-scripting</id>
+      <activation>
+        <property>
+          <name>liquibase.scripting</name>
+          <value>true</value>
+        </property>
+      </activation>
+      <properties>
+        <assemblyConfigFile>src/main/assembly/assembly-bin-scripting.xml</assemblyConfigFile>
+      </properties>
+      <dependencies>
+        <dependency>
+          <groupId>org.liquibase</groupId>
+          <artifactId>liquibase-scripting</artifactId>
           <version>${liquibase-scripting.version}</version>
-				</dependency>
-			</dependencies>
+        </dependency>
+      </dependencies>
 		</profile>
 
 		<profile>
