@@ -16,6 +16,8 @@ public class LiquibaseConnectMojo extends AbstractLiquibaseMojo {
     protected void performLiquibaseTask(Liquibase liquibase) throws LiquibaseException {
       CommandScope connectCommand = new CommandScope("connect");
       connectCommand.addArgumentValue("url", url);
+      connectCommand.addArgumentValue("username", username);
+      connectCommand.addArgumentValue("password", password);
       connectCommand.addArgumentValue("catalog", defaultCatalogName);
       connectCommand.addArgumentValue("schema", defaultSchemaName);
       connectCommand.provideDependency(Database.class, getLiquibase().getDatabase());
