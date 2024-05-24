@@ -1,6 +1,156 @@
 Liquibase Core Changelog
 ===========================================
 
+Changes in version 4.28.0 (2024.05.15)
+
+### Liquibase 4.28.0 is a major release
+
+### [PRO] Changelog
+
+* DAT-17543: Handle chained checks which have been skipped because of a scope mismatch in https://github.com/liquibase/liquibase-pro/pull/1697 by wwillard7800
+* DAT-16725: automatically open generated reports in browser in https://github.com/liquibase/liquibase-pro/pull/1703 by StevenMassaro
+* DAT-17485: always show update summary message in update report in https://github.com/liquibase/liquibase-pro/pull/1708 by StevenMassaro
+* DAT-17630: Rework logic for checking for database connection in https://github.com/liquibase/liquibase-pro/pull/1706 by wwillard7800
+* DAT-17400: add Snowflake integration tests in https://github.com/liquibase/liquibase-pro/pull/1693 by StevenMassaro
+* DAT-17540: Rename MaxRowsAllowed and added two more checks for update and delete in https://github.com/liquibase/liquibase-pro/pull/1686 by wwillard7800
+* DAT-17348: add condition evaluation details to conditions which evaluate to true in https://github.com/liquibase/liquibase-pro/pull/1688 by StevenMassaro
+* DAT-15920: error if native executor conf file or rollback file is not found and pro-strict is true in https://github.com/liquibase/liquibase-pro/pull/1663 by StevenMassaro
+* DAT-17601: Expand variables that are included in flow files in https://github.com/liquibase/liquibase-pro/pull/1694 by wwillard7800
+
+
+## [PRO] Security, Driver and Other Updates
+
+(#1652) Bump org.apache.groovy:groovy-all from 4.0.20 to 4.0.21 @dependabot
+(#1673) Bump org.apache.maven.plugins:maven-shade-plugin from 3.5.2 to 3.5.3 @dependabot
+(#1700) Bump com.fasterxml.jackson.module:jackson-module-jaxb-annotations from 2.17.0 to 2.17.1 @dependabot
+(#1701) Bump com.fasterxml.jackson.core:jackson-databind from 2.17.0 to 2.17.1  @dependabot
+(#1710) Bump info.picocli:picocli from 4.7.5 to 4.7.6 @dependabot
+(#1702) Bump liquibase/build-logic from 0.7.5 to 0.7.7 @dependabot
+(#1699) Bump com.fasterxml.jackson.core:jackson-annotations from 2.17.0 to 2.17.1 @dependabot
+(#1698) Bump com.fasterxml.jackson.core:jackson-core from 2.17.0 to 2.17.1 @dependabot
+(#1684) Bump commons-codec:commons-codec from 1.16.1 to 1.17.0 @dependabot
+(#1668) Bump org.apache.maven.plugins:maven-jar-plugin from 3.3.0 to 3.4.1 @dependabot
+(#1707) Bump net.snowflake:snowflake-jdbc from 3.15.1 to 3.16.0 @dependabot
+(#1695) Bump com.github.spullara.mustache.java:compiler from 0.9.11 to 0.9.13 @dependabot
+(#1690) Bump liquibase/build-logic from 0.7.2 to 0.7.5 @dependabot
+(#1680) Bump liquibase/build-logic from 0.7.2 to 0.7.5  AI Generated Code @dependabot
+(#1666) Bump actions/upload-artifact from 2 to 3 @dependabot
+
+
+### [OSS] Changelog
+
+## Breaking Changes
+
+- (#5619) Improve snapshot extensibility for NoSQL databases @fbiville
+- (#5729) remove ValueHandlerUtil and improve CLI argument parsing (DAT-15398) @StevenMassaro
+
+## New Features
+
+- (#5899) H2 tests may end up with an incorrect list of the standard DatabaseObject types, so we need to reset the factory @wwillard7800
+- (#5897) chore: invoke deprecated methods in default supports method for backwards compatibility @filipelautert
+- (#5870) only run drop all if database was used in the test @StevenMassaro
+- (#5848) do not allow arguments with default values to be required (DAT-17436) @StevenMassaro
+- (#5833) Use Java 8 features @asashour
+- (#5767) Ensure a new-line at the end of text files. @asashour
+- (#5814) refactor ValidatingVisitor to use factory pattern, error if strict is set and defaults file does not exist (DAT-15920) @StevenMassaro
+- (#5716) Fix typos @asashour
+- (#5782) Update ChangeSetService to handle new ModifyChangeset creation (DAT-17322) @wwillard7800
+- (#5715) Add `@Deprecated` annotation. @asashour
+- (#5828) Improve diffChangelog error message @filipelautert
+- (#5799) Add new lifecycle methods for UpdateTestingRollbackCommandStep (DAT-15641) @abrackx
+- (#5780) Deprecate ThreadLocalScopeManager as it is no longer required @filipelautert
+- (#5714) Introduce a method with a correct name of `StringUtil.randomIdentifer()`. @asashour
+- (#5793) move output file handling into factory pattern (DAT-17290) @StevenMassaro
+- (#5741) Implement Customizer for SpringLiquibase. @asashour
+- (#5777) Prevent error when unlocking the changelog in MySQL affects zero rows and useAffectedRows is true. Fixes #5502 @mpvvliet
+- (#5619) Improve snapshot extensibility for NoSQL databases @fbiville
+- (#5658) User lombok Getter and Setter. @asashour
+- (#5532) Record current Liquibase version on a RERUN changeset (#5529) @jdvorak001
+- (#5745) Add method that can be used to verify database connection (DAT-16600) @vitaliimak
+- (#5705) upgrade groovy, spock and mockito to later versions (DAT-10403) @StevenMassaro
+- (#5861) Update db2 docker location by @filipelautert
+- (#5860) chore: increasing test coverage by @filipelautert
+- (#5853) use Apache Commons where possible, instead of homegrown solutions (DAT-17303) by @StevenMassaro
+- (#5867) cleanup weekly-integration-tests.yml (DAT-17400) by @StevenMassaro
+- (#4240) PD-3241: failOnError syntax by @adrian-velonis1
+- (#5871) load shared database fields in tests by @StevenMassaro
+
+
+## Bug Fixes
+
+- (#5795) Fixes issue with incorrect schema in column exists precondition when checking using a snapshot @mpvvliet
+- (#5783) Fixed issue that unique constraint precondition does not honor schemaName attribute on MySQL @mpvvliet
+- (#5874) refactor cached prepared statement to become ThreadLocal (#5635) @adaryin
+- (#5888) normalize paths in DatabaseChangeLog using commons-io (DAT-17592) @StevenMassaro
+- (#5887) Fix ordering of clause for Oracle global temporary tables SQL generation @wwillard7800
+- (#5869) Update diff summary results in mdc to not be recalculated (DAT-17096) @abrackx
+- (#5756) Fix (MSSQL): end delimiter logic broken by BEGIN DIALOG/BEGIN CONVERSATION  @MalloD12
+- (#5781) Fix (MSSQL): default end delimiter applied when there is an endDelimiter applied for a given chanset @MalloD12
+- (#5883) Issue 5654 includeall min max depth fixes @jasonlyle88
+- (#5842) optimize DBCL checksum query and set fetch size on all statements (DAT-17267) @StevenMassaro
+- (#5794) fix calculation of total change sets in update summary (DAT-17262) @StevenMassaro
+- (#5792) fix: keep indexes list in the order returned by database @filipelautert
+- (#5703) Also replace '@' character in temporary file names DAT-17292 @wwillard7800
+- (#5727) fixes #5724: compare normalized file paths @jgarec
+- (#5755) detect duplicate jars that do not have a version (DAT-16044) @StevenMassaro
+- (#5687) fix: addColumn changes are not respecting Datatypes definitions @filipelautert
+- (#5580) Support to generate a ChangeSetStatus with setting all its attributes when a changeset will be skipped  @MalloD12
+- (#5751) New boolean input logic allows 'off' to be valid, so fix test @wwillard7800
+
+## Security, Driver and Other Updates
+
+- (#5864) Bump net.snowflake:snowflake-jdbc from 3.15.1 to 3.16.0 @dependabot
+- (#5797) Bump org.slf4j:slf4j-jdk14 from 2.0.12 to 2.0.13 @dependabot
+- (#5884) Bump org.objenesis:objenesis from 3.3 to 3.4 @dependabot
+- (#5863) Bump org.apache.maven.plugins:maven-install-plugin from 3.1.1 to 3.1.2 @dependabot
+- (#5839) Bump org.apache.maven.plugins:maven-shade-plugin from 3.5.2 to 3.5.3 @dependabot
+- (#5829) Bump org.apache.maven.plugins:maven-jar-plugin from 3.3.0 to 3.4.1 @dependabot
+- (#5811) Bump org.xerial:sqlite-jdbc from 3.45.2.0 to 3.45.3.0 @dependabot
+- (#5785) Bump groovy.version from 4.0.20 to 4.0.21 @dependabot
+- (#5879) Bump org.apache.maven.plugins:maven-plugin-plugin from 3.12.0 to 3.13.0 @dependabot
+- (#5880) Bump liquibase/build-logic from 0.7.6 to 0.7.7 @dependabot
+- (#5865) Bump org.apache.maven.plugins:maven-deploy-plugin from 3.1.1 to 3.1.2 @dependabot
+- (#5851) Bump liquibase/build-logic from 0.7.2 to 0.7.5 @dependabot
+- (#5845) Bump liquibase/build-logic from 0.7.2 to 0.7.5 @dependabot
+- (#5841) Bump liquibase/build-logic from 0.6.9 to 0.7.3 @dependabot
+- (#5779) Bump net.snowflake:snowflake-jdbc from 3.15.0 to 3.15.1 @dependabot
+- (#5787) Bump robinraju/release-downloader from 1.9 to 1.10 @dependabot
+- (#5699) Bump org.postgresql:postgresql from 42.7.2 to 42.7.3 @dependabot
+- (#5675) Bump org.firebirdsql.jdbc:jaybird from 5.0.3.java8 to 5.0.4.java8 @dependabot
+- (#5689) Bump org.xerial:sqlite-jdbc from 3.44.1.0 to 3.45.2.0 @dependabot
+- (#5757) Bump org.jacoco:jacoco-maven-plugin from 0.8.11 to 0.8.12 @dependabot
+- (#5764) Bump org.apache.maven.plugins:maven-plugin-plugin from 3.11.0 to 3.12.0 @dependabot
+- (#5765) Bump liquibase/build-logic from 0.6.7 to 0.6.9 @dependabot
+- (#5773) Bump org.apache.maven.plugins:maven-source-plugin from 3.3.0 to 3.3.1 @dependabot
+- (#5752) Bump actions/setup-python from 5.0.0 to 5.1.0 @dependabot
+- (#5713) Bump actions/cache from 3.3.1 to 4.0.2 @dependabot
+- (#5678) Bump softprops/action-gh-release from 1 to 2 @dependabot
+- (#5711) Bump org.apache.maven.plugins:maven-compiler-plugin from 3.12.1 to 3.13.0 @dependabot
+- (#5710) Bump org.apache.maven.plugins:maven-assembly-plugin from 3.6.0 to 3.7.1 @dependabot
+- (#5673) Bump org.glassfish.jaxb:jaxb-core from 4.0.4 to 4.0.5 @dependabot
+- (#5672) Bump org.glassfish.jaxb:jaxb-runtime from 4.0.4 to 4.0.5 @dependabot
+- (#5662) Bump org.testcontainers:testcontainers-bom from 1.19.6 to 1.19.7 @dependabot
+- (#5690) Bump org.sonarsource.scanner.maven:sonar-maven-plugin from 3.10.0.2594 to 3.11.0.3922 @dependabot
+- (#5685) Bump net.snowflake:snowflake-jdbc from 3.14.4 to 3.15.0 @dependabot
+- (#5868) Bump liquibase/build-logic from 0.7.5 to 0.7.6 by @dependabot
+
+### Get Certified
+Learn all the Liquibase fundamentals from free online courses by Liquibase experts and see how to apply them in the real world at https://learn.liquibase.com/.
+
+### Read the Documentation
+Please check out and contribute to the continually improving docs, now at https://docs.liquibase.com/.
+
+### Meet the Community
+Our community has built a lot. From extensions to integrations, you’ve helped make Liquibase the amazing open source project that it is today. Keep contributing to making it stronger:
+
+[Contribute code](https://www.liquibase.org/development/contribute.html)
+[Make doc updates](https://github.com/Datical/liquibase-docs)
+[Help by asking and answering questions](https://forum.liquibase.org/)
+[Set up a chat with the Product team](https://calendly.com/liquibase-outreach/product-feedback)
+
+Thanks to everyone who helps make the Liquibase community strong!
+
+
 Changes in version 4.27.0 (2024.03.26)
 
 ### Liquibase 4.27.0 is a major release

@@ -51,6 +51,7 @@ public class GlobalConfiguration implements AutoloadedConfigurations {
     public static final ConfigurationDefinition<String> SEARCH_PATH;
 
     public static final ConfigurationDefinition<UIServiceEnum> UI_SERVICE;
+    public static final ConfigurationDefinition<SupportsMethodValidationLevelsEnum> SUPPORTS_METHOD_VALIDATION_LEVEL;
 
     static {
         ConfigurationDefinition.Builder builder = new ConfigurationDefinition.Builder("liquibase");
@@ -242,10 +243,16 @@ public class GlobalConfiguration implements AutoloadedConfigurations {
                 .setDescription("Changes the default UI Service Logger used by Liquibase. Options are CONSOLE or LOGGER.")
                 .setDefaultValue(UIServiceEnum.CONSOLE)
                 .build();
+
+        SUPPORTS_METHOD_VALIDATION_LEVEL = builder.define("supportsMethodValidationLevel", SupportsMethodValidationLevelsEnum.class)
+                .setDescription("Controls the level of validation performed on the supports method of Change classes. Options are OFF, WARN, FAIL.")
+                .setDefaultValue(SupportsMethodValidationLevelsEnum.WARN)
+                .build();
     }
 
     public enum DuplicateFileMode {
         WARN,
         ERROR,
     }
+
 }
