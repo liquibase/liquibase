@@ -1071,10 +1071,6 @@ public class DatabaseChangeLog implements Comparable<DatabaseChangeLog>, Conditi
             return null;
         }
 
-        if (filePath.startsWith("classpath:")) {
-            filePath = filePath.substring("classpath:".length());
-        }
-
         if (filePath.contains("\\")) {
             filePath = filePath.replace("\\", "/");
         }
