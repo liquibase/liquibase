@@ -79,3 +79,5 @@ LIQUIBASE is a registered trademark of [Liquibase Inc.](https://www.liquibase.co
 2. When a release is triggered, the workflow file will stop after `Setup` step and an email will be sent out to the list of `approvers` mentioned in job `manual_trigger_deployment`. You can click on the link and perform anyone of the options mentioned in description. 
 3. A minimum of 2 approvers are needed in order for the other jobs such as `deploy_maven`, `deploy_javadocs`, `publish_to_github_packages`, etc to be executed.
 4. When you view the GitHub PR, make sure to verify the version which is being published. It should say something like `Deploying v4.20.0 to sonatype`
+
+

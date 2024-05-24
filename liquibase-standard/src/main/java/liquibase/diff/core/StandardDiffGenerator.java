@@ -56,6 +56,8 @@ public class StandardDiffGenerator implements DiffGenerator {
             compareObjectType(typeToCompare, referenceSnapshot, comparisonSnapshot, diffResult);
         }
 
+        Scope.getCurrentScope().addMdcValue(MdcKey.DIFF_RESULTS_SUMMARY, new DiffResultsSummary(diffResult));
+
         return diffResult;
     }
 

@@ -1,12 +1,16 @@
 package liquibase.change;
 
 import liquibase.ChecksumVersion;
+import liquibase.GlobalConfiguration;
 import liquibase.Scope;
+import liquibase.SupportsMethodValidationLevelsEnum;
 import liquibase.database.Database;
 import liquibase.exception.UnexpectedLiquibaseException;
 import liquibase.plugin.AbstractPluginFactory;
 import liquibase.plugin.Plugin;
 import liquibase.servicelocator.ServiceLocator;
+import liquibase.util.LiquibaseUtil;
+import lombok.Setter;
 
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
@@ -21,7 +25,14 @@ import java.util.concurrent.ConcurrentHashMap;
 public class ChangeFactory extends AbstractPluginFactory<Change>{
 
     private final Map<String, ChangeMetaData> cachedMetadata = new ConcurrentHashMap<>();
+
+    /**
+     * Should the change be checked to see if it supports the current database?
+     */
+    @Setter
     private boolean performSupportsDatabaseValidation = true;
+
+    protected static final String SUPPORTS_METHOD_REQUIRED_MESSAGE = "%s class does not implement the 'supports(Database)' method and may incorrectly override other databases changes causing unexpected behavior. Please report this to the Liquibase developers or if you are developing this change please fix it ;)";
 
     private ChangeFactory() {
 
@@ -104,6 +115,9 @@ public class ChangeFactory extends AbstractPluginFactory<Change>{
         if (plugins.isEmpty()) {
             return null;
         } else if (plugins.size() > 1) {
+            // we only verify supports method if we have more than 1 implementation for this change,
+            // otherwise there is no use in doing that as we will use the only implementation available
+            this.verifySupportsMethodImplementation(plugins);
             Database database = Scope.getCurrentScope().getDatabase();
             if (database != null && performSupportsDatabaseValidation) {
                 plugins.removeIf(a -> !a.supports(database));
@@ -117,6 +131,42 @@ public class ChangeFactory extends AbstractPluginFactory<Change>{
             return plugins.iterator().next().getClass().getConstructor().newInstance();
         } catch (Exception e) {
             throw new UnexpectedLiquibaseException(e);
+        }
+    }
+
+    /**
+     * Verify if the supports method is implemented in the change if it's not part of the default liquibase changes
+     */
+    private void verifySupportsMethodImplementation(Set<Change> plugins) {
+        if (GlobalConfiguration.SUPPORTS_METHOD_VALIDATION_LEVEL.getCurrentValue().equals(SupportsMethodValidationLevelsEnum.OFF)) {
+            return;
+        }
+        //we only verify supports method if this is not part of the default liquibase changes
+        for (Change plugin : plugins) {
+            String packageName = plugin.getClass().getPackage().getName();
+            if (packageName.startsWith("liquibase.change")) {
+                continue;
+            }
+
+            try {
+                // if the supports method is not implemented in the plugin show the warning according to the defined level
+                if (plugin.getClass().getMethod("supports", Database.class).getDeclaringClass().getPackage().getName().startsWith("liquibase.change")) {
+                    if (LiquibaseUtil.getBuildVersion().equals(LiquibaseUtil.DEV_VERSION)) {
+                        throw new UnexpectedLiquibaseException(String.format(SUPPORTS_METHOD_REQUIRED_MESSAGE, plugin.getClass().getName()));
+                    }
+                    switch (GlobalConfiguration.SUPPORTS_METHOD_VALIDATION_LEVEL.getCurrentValue()) {
+                        case WARN:
+                            Scope.getCurrentScope().getLog(getClass()).warning(String.format(SUPPORTS_METHOD_REQUIRED_MESSAGE, plugin.getClass().getName()));
+                            break;
+                        case FAIL:
+                            throw new UnexpectedLiquibaseException(String.format(SUPPORTS_METHOD_REQUIRED_MESSAGE, plugin.getClass().getName()));
+                        default:
+                            break;
+                    }
+                }
+            } catch (NoSuchMethodException e) {
+                throw new UnexpectedLiquibaseException(String.format(SUPPORTS_METHOD_REQUIRED_MESSAGE, plugin.getClass().getName()));
+            }
         }
     }
 
@@ -141,14 +191,4 @@ public class ChangeFactory extends AbstractPluginFactory<Change>{
         return Scope.getCurrentScope().getSingleton(ChangeFactory.class);
     }
 
-    /**
-     * Should the change be checked to see if it supports
-     * the current database?
-     * Default is true
-     *
-     * @param performSupportsDatabaseValidation
-     */
-    public void setPerformSupportsDatabaseValidation(boolean performSupportsDatabaseValidation) {
-        this.performSupportsDatabaseValidation = performSupportsDatabaseValidation;
-    }
 }
