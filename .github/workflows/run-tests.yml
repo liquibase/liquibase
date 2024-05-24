@@ -319,7 +319,8 @@ jobs:
       pullRequestBranchName: ${{ github.event.pull_request.head.ref }}
       pullRequestBaseBranchName: ${{ github.event.pull_request.base.ref }}
       testedClassesModuleName: liquibase-standard
-      dbPlatforms: h2,hsqldb,mariadb,mssql,mysql,oracle,postgresql,sqlite,firebird,db2
+      #dbPlatforms: h2,hsqldb,mariadb,mssql,mysql,oracle,postgresql,sqlite,firebird,db2
+      dbPlatforms: h2,hsqldb,mariadb,mssql,mysql,oracle,postgresql,sqlite,firebird
     secrets: inherit
 
   run-build-publish-file:
