@@ -9,9 +9,8 @@ import liquibase.structure.DatabaseObject;
 import liquibase.structure.core.Catalog;
 import liquibase.structure.core.Column;
 import liquibase.structure.core.Schema;
-import liquibase.util.StringUtils;
 
-import java.io.*;
+import java.io.IOException;
 import java.util.*;
 
 public class DiffResult {
@@ -24,8 +23,8 @@ public class DiffResult {
     private StringDiff productNameDiff;
     private StringDiff productVersionDiff;
 
-    private Set<DatabaseObject> missingObjects = new HashSet<DatabaseObject>();
-    private Set<DatabaseObject> unexpectedObjects = new HashSet<DatabaseObject>();
+    private Set<DatabaseObject> missingObjects = new LinkedHashSet<>();
+    private Set<DatabaseObject> unexpectedObjects = new LinkedHashSet<>();
     private Map<DatabaseObject, ObjectDifferences> changedObjects = new HashMap<DatabaseObject, ObjectDifferences>();
 
 
@@ -69,7 +68,7 @@ public class DiffResult {
     }
 
     public <T extends DatabaseObject> Set<T> getMissingObjects(Class<T> type) {
-        Set returnSet = new HashSet();
+        Set returnSet = new LinkedHashSet();
         for (DatabaseObject obj : missingObjects) {
             if (type.isAssignableFrom(obj.getClass())) {
                 returnSet.add(obj);
@@ -107,7 +106,7 @@ public class DiffResult {
     }
 
     public <T extends DatabaseObject> Set<T> getUnexpectedObjects(Class<T> type) {
-        Set returnSet = new HashSet();
+        Set returnSet = new LinkedHashSet();
         for (DatabaseObject obj : unexpectedObjects) {
             if (type.isAssignableFrom(obj.getClass())) {
                 returnSet.add(obj);

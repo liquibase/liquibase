@@ -142,7 +142,7 @@ public class Schema extends AbstractDatabaseObject {
         }
         Set<DatabaseObject> objects = this.getObjects().get(databaseObject.getClass());
         if (objects == null) {
-            objects = new HashSet<DatabaseObject>();
+            objects = new LinkedHashSet<DatabaseObject>();
             this.getObjects().put(databaseObject.getClass(), objects);
         }
         objects.add(databaseObject);

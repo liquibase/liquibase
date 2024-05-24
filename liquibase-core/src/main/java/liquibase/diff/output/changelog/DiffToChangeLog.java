@@ -245,12 +245,8 @@ public class DiffToChangeLog {
                     if (i != 0) {
                         return i;
                     }
-                } else if (o1 instanceof StoredDatabaseLogic && o1.getAttribute("order", Integer.class) != null
-                        && o2.getAttribute("order", Integer.class) != null) {
-                    int order = o1.getAttribute("order", Integer.class).compareTo(o2.getAttribute("order", Integer.class));
-                    if (order != 0) {
-                        return order;
-                    }
+                } else if (o1 instanceof StoredDatabaseLogic) {
+                    return 1; //DAT-16941 - we should keep 'native' order of StoredLogic objects retrieved from database
                 }
                 return super.compare(o1, o2);
 
