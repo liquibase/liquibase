@@ -94,7 +94,6 @@ jobs:
           secret-ids: |
             LIQUIBASEOSS_PASSWORD, liquibaseoss_password
 
-
       - name: Run tests
         run: |
           ./mvnw -B "-DtrimStackTrace=false" \
