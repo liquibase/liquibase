@@ -124,7 +124,7 @@ jobs:
     with:
         destroy: true
         stack_id: ${{ needs.deploy-ephemeral-cloud-infra.outputs.stack_id }}
-        dynamodb: true
+        snowflake_oss: true
 
   run-slack-notification:
     runs-on: ubuntu-latest
