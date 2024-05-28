@@ -6,11 +6,11 @@ import liquibase.util.LiquibaseUtil;
 import liquibase.util.StringUtil;
 import lombok.Getter;
 import lombok.Setter;
+import org.apache.commons.io.IOUtils;
 
-import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.InputStreamReader;
+import java.nio.charset.StandardCharsets;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.ResourceBundle;
@@ -42,7 +42,7 @@ public class Banner {
             Class<CommandLineUtils> commandLinUtilsClass = CommandLineUtils.class;
             InputStream inputStream = commandLinUtilsClass.getResourceAsStream("/liquibase/banner.txt");
             try {
-                banner.append(readFromInputStream(inputStream));
+                banner.append(IOUtils.toString(inputStream, StandardCharsets.UTF_8));
             } catch (IOException e) {
                 Scope.getCurrentScope().getLog(commandLinUtilsClass).fine("Unable to locate banner file.");
             }
@@ -62,17 +62,4 @@ public class Banner {
 
         return banner.toString();
     }
-
-    private static String readFromInputStream(InputStream inputStream) throws IOException {
-        StringBuilder resultStringBuilder = new StringBuilder();
-        try (BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(inputStream))) {
-            String line;
-            while ((line = bufferedReader.readLine()) != null) {
-                resultStringBuilder.append(line + "\n");
-
-            }
-        }
-        return resultStringBuilder.toString();
-    }
-
 }

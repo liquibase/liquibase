@@ -30,7 +30,6 @@ import liquibase.serializer.ChangeLogSerializerFactory;
 import liquibase.snapshot.DatabaseSnapshot;
 import liquibase.snapshot.EmptyDatabaseSnapshot;
 import liquibase.statement.core.RawParameterizedSqlStatement;
-import liquibase.statement.core.RawSqlStatement;
 import liquibase.structure.DatabaseObject;
 import liquibase.structure.core.Column;
 import liquibase.structure.core.StoredDatabaseLogic;
@@ -580,10 +579,10 @@ public class DiffToChangeLog {
         List<Map<String, ?>> rs = null;
         try {
             if (tryDbaDependencies) {
-                rs = executor.queryForList(new RawSqlStatement("select OWNER, NAME, REFERENCED_OWNER, REFERENCED_NAME from DBA_DEPENDENCIES where REFERENCED_OWNER != 'SYS' AND NOT(NAME LIKE 'BIN$%') AND NOT(OWNER = REFERENCED_OWNER AND NAME = REFERENCED_NAME) AND (" + StringUtil.join(schemas, " OR ", (StringUtil.StringUtilFormatter<String>) obj -> "OWNER='" + obj + "'"
+                rs = executor.queryForList(new RawParameterizedSqlStatement("select OWNER, NAME, REFERENCED_OWNER, REFERENCED_NAME from DBA_DEPENDENCIES where REFERENCED_OWNER != 'SYS' AND NOT(NAME LIKE 'BIN$%') AND NOT(OWNER = REFERENCED_OWNER AND NAME = REFERENCED_NAME) AND (" + StringUtil.join(schemas, " OR ", (StringUtil.StringUtilFormatter<String>) obj -> "OWNER='" + obj + "'"
                 ) + ")"));
             } else {
-                rs = executor.queryForList(new RawSqlStatement("select NAME, REFERENCED_OWNER, REFERENCED_NAME from USER_DEPENDENCIES where REFERENCED_OWNER != 'SYS' AND NOT(NAME LIKE 'BIN$%') AND NOT(NAME = REFERENCED_NAME) AND (" + StringUtil.join(schemas, " OR ", (StringUtil.StringUtilFormatter<String>) obj -> "REFERENCED_OWNER='" + obj + "'"
+                rs = executor.queryForList(new RawParameterizedSqlStatement("select NAME, REFERENCED_OWNER, REFERENCED_NAME from USER_DEPENDENCIES where REFERENCED_OWNER != 'SYS' AND NOT(NAME LIKE 'BIN$%') AND NOT(NAME = REFERENCED_NAME) AND (" + StringUtil.join(schemas, " OR ", (StringUtil.StringUtilFormatter<String>) obj -> "REFERENCED_OWNER='" + obj + "'"
                 ) + ")"));
             }
         } catch (DatabaseException dbe) {
@@ -718,7 +717,7 @@ public class DiffToChangeLog {
             //get non-clustered indexes -> unique clustered indexes on views dependencies
             sql += " UNION select object_schema_name(c.object_id) as referencing_schema_name, c.name as referencing_name, object_schema_name(nc.object_id) as referenced_schema_name, nc.name as referenced_name from sys.indexes c join sys.indexes nc on c.object_id=nc.object_id JOIN sys.objects o ON c.object_id = o.object_id where  c.index_id != nc.index_id and c.type_desc='CLUSTERED' and c.is_unique='true' and (not(nc.type_desc='CLUSTERED') OR nc.is_unique='false') AND o.type_desc='VIEW' AND o.name='AR_DETAIL_OPEN'";
 
-            List<Map<String, ?>> rs = executor.queryForList(new RawSqlStatement(sql));
+            List<Map<String, ?>> rs = executor.queryForList(new RawParameterizedSqlStatement(sql));
             if (!rs.isEmpty()) {
                 for (Map<String, ?> row : rs) {
                     String bName = StringUtil.trimToNull((String) row.get("REFERENCED_SCHEMA_NAME")) + "." + StringUtil.trimToNull((String) row.get("REFERENCED_NAME"));
@@ -732,7 +731,7 @@ public class DiffToChangeLog {
         } else if (database instanceof PostgresDatabase) {
             final String sql = queryForDependenciesPostgreSql(schemas);
             final Executor executor = Scope.getCurrentScope().getSingleton(ExecutorService.class).getExecutor("jdbc", database);
-            final List<Map<String, ?>> queryForListResult = executor.queryForList(new RawSqlStatement(sql));
+            final List<Map<String, ?>> queryForListResult = executor.queryForList(new RawParameterizedSqlStatement(sql));
 
             for (Map<String, ?> row : queryForListResult) {
                 String bName = StringUtil.trimToEmpty((String) row.get("REFERENCING_SCHEMA_NAME")) +

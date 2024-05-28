@@ -20,7 +20,7 @@ import liquibase.exception.PreconditionFailedException;
 import liquibase.exception.ValidationFailedException;
 import liquibase.executor.Executor;
 import liquibase.executor.ExecutorService;
-import liquibase.statement.core.RawSqlStatement;
+import liquibase.statement.core.RawParameterizedSqlStatement;
 import liquibase.structure.core.DatabaseObjectFactory;
 import org.junit.Assert;
 import org.junit.Test;
@@ -154,13 +154,13 @@ public class H2IntegrationTest extends AbstractIntegrationTest {
             clearDatabase();
 
             Scope.getCurrentScope().getSingleton(ExecutorService.class).getExecutor("jdbc", getDatabase())
-                    .execute(new RawSqlStatement(String.format("CREATE TABLE %s (%s varchar(50))", tableName, colName)));
+                    .execute(new RawParameterizedSqlStatement(String.format("CREATE TABLE %s (%s varchar(50))", tableName, colName)));
 
             Liquibase liquibase = createLiquibase("changelogs/h2/complete/rollback.different.contexts.changelog.xml");
             liquibase.update(context);
 
             List<Map<String, ?>> queryResult = Scope.getCurrentScope().getSingleton(ExecutorService.class).getExecutor("jdbc", getDatabase())
-                    .queryForList(new RawSqlStatement(String.format("select * from %s", tableName)));
+                    .queryForList(new RawParameterizedSqlStatement(String.format("select * from %s", tableName)));
 
             Assert.assertEquals(1, queryResult.size());
             Assert.assertEquals(insertedValue.toString(), queryResult.get(0).get(colName));
@@ -168,7 +168,7 @@ public class H2IntegrationTest extends AbstractIntegrationTest {
 
             liquibase.rollback(1, context);
             queryResult = Scope.getCurrentScope().getSingleton(ExecutorService.class).getExecutor("jdbc", getDatabase())
-                    .queryForList(new RawSqlStatement(String.format("select * from %s", tableName)));
+                    .queryForList(new RawParameterizedSqlStatement(String.format("select * from %s", tableName)));
             Assert.assertEquals("Rollbacking for " + insertedValue, 2, queryResult.size());
             Assert.assertEquals(insertedValue.toString(), queryResult.get(1).get(colName));
             insertedValue++;
@@ -182,15 +182,13 @@ public class H2IntegrationTest extends AbstractIntegrationTest {
         String tableName = "tmp_tbl";
 
         clearDatabase();
-
         Scope.getCurrentScope().getSingleton(ExecutorService.class).getExecutor("jdbc", getDatabase())
-                .execute(new RawSqlStatement(String.format("CREATE TABLE %s (%s varchar(50))", tableName, colName)));
+                .execute(new RawParameterizedSqlStatement(String.format("CREATE TABLE %s (%s varchar(50))", tableName, colName)));
 
         Liquibase liquibase = createLiquibase("changelogs/h2/complete/rollback.sql.changelog.xml");
         liquibase.update();
-
         List<Map<String, ?>> queryResult = Scope.getCurrentScope().getSingleton(ExecutorService.class).getExecutor("jdbc", getDatabase())
-                .queryForList(new RawSqlStatement(String.format("select * from %s", tableName)));
+                .queryForList(new RawParameterizedSqlStatement(String.format("select * from %s", tableName)));
 
         Assert.assertEquals(1, queryResult.size());
         Assert.assertEquals(insertedValue.toString(), queryResult.get(0).get(colName));
@@ -198,7 +196,7 @@ public class H2IntegrationTest extends AbstractIntegrationTest {
 
         liquibase.rollback(1, null);
         queryResult = Scope.getCurrentScope().getSingleton(ExecutorService.class).getExecutor("jdbc", getDatabase())
-                .queryForList(new RawSqlStatement(String.format("select * from %s", tableName)));
+                .queryForList(new RawParameterizedSqlStatement(String.format("select * from %s", tableName)));
         Assert.assertEquals("Rollbacking for " + insertedValue, 2, queryResult.size());
         Assert.assertEquals(insertedValue.toString(), queryResult.get(1).get(colName));
     }
@@ -210,14 +208,14 @@ public class H2IntegrationTest extends AbstractIntegrationTest {
 
         try {
             Scope.getCurrentScope().getSingleton(ExecutorService.class).getExecutor("jdbc", getDatabase())
-                    .queryForList(new RawSqlStatement("select * from oraculo"));
+                    .queryForList(new RawParameterizedSqlStatement("select * from oraculo"));
         }
         catch (DatabaseException e) {
             Assert.assertTrue(e.getMessage().contains("Table \"ORACULO\" not found"));
         }
         try {
             Scope.getCurrentScope().getSingleton(ExecutorService.class).getExecutor("jdbc", getDatabase())
-                    .queryForList(new RawSqlStatement("select * from anydb"));
+                    .queryForList(new RawParameterizedSqlStatement("select * from anydb"));
         }
         catch (DatabaseException e) {
             Assert.assertTrue(e.getMessage().contains("Table \"ANYDB\" not found"));
