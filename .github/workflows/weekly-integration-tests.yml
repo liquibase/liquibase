@@ -6,10 +6,22 @@ on:
     - cron: '0 1 * * 0'
 
 jobs:
+
+  deploy-ephemeral-cloud-infra:
+    uses: liquibase/build-logic/.github/workflows/ephemeral-cloud-infra.yml@DAT-16824-snowflake
+    secrets: inherit
+    with:
+        deploy: true
+        snowflake_oss: true
+
   snowflake-its:
     name: Run Snowflake Cloud integration tests
+    needs: deploy-ephemeral-cloud-infra
     timeout-minutes: 240
     runs-on: ubuntu-latest
+    permissions: 
+      contents: read
+      id-token: write
     env:
       GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
     steps:
@@ -64,13 +76,32 @@ jobs:
               }
             ]
 
+      - name: Configure AWS Credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+            role-to-assume: ${{ secrets.AWS_DEV_GITHUB_OIDC_ROLE_ARN_BUILD_LOGIC }}
+            aws-region: us-east-1
+
+      - name: Get LIQUIBASEOSS_USERNAME secret
+        uses: aws-actions/aws-secretsmanager-get-secrets@v2
+        with:
+          secret-ids: |
+            LIQUIBASEOSS_USERNAME, liquibaseoss_username
+    
+      - name: Get LIQUIBASEOSS_PASSWORD secret
+        uses: aws-actions/aws-secretsmanager-get-secrets@v2
+        with:
+          secret-ids: |
+            LIQUIBASEOSS_PASSWORD, liquibaseoss_password
+
+
       - name: Run tests
         run: |
           ./mvnw -B "-DtrimStackTrace=false" \
             "-Dliquibase.sdk.testSystem.test=snowflake" \
             "-Dliquibase.sdk.testSystem.snowflake.url=jdbc:${{ secrets.LIQUIBASEOSS_URL }}&schema=PUBLIC" \
-            "-Dliquibase.sdk.testSystem.snowflake.username=${{ secrets.LIQUIBASEOSS_USERNAME }}" \
-            "-Dliquibase.sdk.testSystem.snowflake.password=${{ secrets.LIQUIBASEOSS_PASSWORD }}" \
+            "-Dliquibase.sdk.testSystem.snowflake.username=${{ env.LIQUIBASEOSS_USERNAME }}" \
+            "-Dliquibase.sdk.testSystem.snowflake.password=${{ env.LIQUIBASEOSS_PASSWORD }}" \
             "-Dtest=*IntegrationTest,*ExecutorTest" \
             "-DfailIfNoTests=false" \
             "-Dsurefire.failIfNoSpecifiedTests=false" \
@@ -85,10 +116,20 @@ jobs:
             ./**/target/surefire-reports
             ./**/target/site
 
+  destroy-ephemeral-cloud-infra:
+    if: always()
+    needs: [ deploy-ephemeral-cloud-infra, snowflake-its ]
+    uses: liquibase/build-logic/.github/workflows/ephemeral-cloud-infra.yml@DAT-16824-snowflake
+    secrets: inherit
+    with:
+        destroy: true
+        stack_id: ${{ needs.deploy-ephemeral-cloud-infra.outputs.stack_id }}
+        dynamodb: true
+
   run-slack-notification:
     runs-on: ubuntu-latest
     if: failure()
-    needs: [ snowflake-its ]
+    needs: [ snowflake-its, destroy-ephemeral-cloud-infra ]
     steps:
       - name: Dispatch event to build-logic repository
         uses: peter-evans/repository-dispatch@v3
