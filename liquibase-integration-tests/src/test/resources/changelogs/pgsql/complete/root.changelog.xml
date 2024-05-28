@@ -476,4 +476,31 @@
         </createTable>
     </changeSet>
 
+    <changeSet author="davidecavestro" id="uppercase-sequence-exists-create">
+        <!--
+            Create a new sequence using an uppercase name
+            Postgres by default will convert it to lowercase
+
+            The next changeset will assert it exists
+        --> 
+        <createSequence sequenceName="SQ_TEST_UPPERCASE"/>
+    </changeSet>
+
+    <changeSet author="davidecavestro" id="uppercase-sequence-exists-assert">
+        <!--
+            Check for sequence existence using the same uppercase name
+            just passed to create it
+        --> 
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <sequenceExists sequenceName="SQ_TEST_UPPERCASE"/>
+            </not>
+        </preConditions>
+        <!--
+            If the sequence created above is not detected by uppercase name
+            the following statement will fail, as it already exists
+        --> 
+        <createSequence sequenceName="SQ_TEST_UPPERCASE"/>
+    </changeSet>
+
 </databaseChangeLog>
