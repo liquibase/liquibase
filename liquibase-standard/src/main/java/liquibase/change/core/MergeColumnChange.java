@@ -6,7 +6,7 @@ import liquibase.database.core.*;
 import liquibase.exception.DatabaseException;
 import liquibase.exception.UnexpectedLiquibaseException;
 import liquibase.statement.SqlStatement;
-import liquibase.statement.core.RawSqlStatement;
+import liquibase.statement.core.RawParameterizedSqlStatement;
 import liquibase.structure.core.Column;
 import liquibase.structure.core.Index;
 
@@ -126,19 +126,19 @@ public class MergeColumnChange extends AbstractChange {
         addNewColumnChange.addColumn(columnConfig);
         List<SqlStatement> statements = new ArrayList<>(Arrays.asList(addNewColumnChange.generateStatements(database)));
 
-        String updateStatement = "";
+        StringBuilder updateStatement;
         if (database instanceof MySQLDatabase || database instanceof MariaDBDatabase) {
-            updateStatement = "UPDATE " + database.escapeTableName(getCatalogName(), getSchemaName(), getTableName()) +
-                    " SET " + database.escapeObjectName(getFinalColumnName(), Column.class)
-                    + " = " + database.getConcatSql("'" + getJoinString() + "'"
-                    , database.escapeObjectName(getColumn1Name(), Column.class), database.escapeObjectName(getColumn2Name(), Column.class));
+            updateStatement = new StringBuilder(String.format("UPDATE %s", database.escapeTableName(getCatalogName(), getSchemaName(), getTableName())))
+                    .append(String.format(" SET %s", database.escapeObjectName(getFinalColumnName(), Column.class)))
+                    .append(String.format(" = %s", database.getConcatSql("'" + getJoinString() + "'"
+                            , database.escapeObjectName(getColumn1Name(), Column.class), database.escapeObjectName(getColumn2Name(), Column.class))));
         } else {
-            updateStatement = "UPDATE " + database.escapeTableName(getCatalogName(), getSchemaName(), getTableName()) +
-                    " SET " + database.escapeObjectName(getFinalColumnName(), Column.class)
-                    + " = " + database.getConcatSql(database.escapeObjectName(getColumn1Name(), Column.class)
-                    , "'" + getJoinString() + "'", database.escapeObjectName(getColumn2Name(), Column.class));
+            updateStatement = new StringBuilder(String.format("UPDATE %s", database.escapeTableName(getCatalogName(), getSchemaName(), getTableName())))
+                    .append(String.format(" SET %s", database.escapeObjectName(getFinalColumnName(), Column.class)))
+                    .append(String.format(" = %s", database.getConcatSql(database.escapeObjectName(getColumn1Name(), Column.class)
+                            , "'" + getJoinString() + "'", database.escapeObjectName(getColumn2Name(), Column.class))));
         }
-        statements.add(new RawSqlStatement(updateStatement));
+        statements.add(new RawParameterizedSqlStatement(updateStatement.toString()));
         
         if (database instanceof SQLiteDatabase) {
            /* nolgpl: implement */
