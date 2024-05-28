@@ -7,6 +7,10 @@ import liquibase.sql.UnparsedSql;
 import liquibase.sqlgenerator.SqlGeneratorChain;
 import liquibase.statement.core.RawSqlStatement;
 
+/**
+ * @deprecated use {@link RawParameterizedSqlGenerator}
+ */
+@Deprecated
 public class RawSqlGenerator extends AbstractSqlGenerator<RawSqlStatement> {
 
     @Override

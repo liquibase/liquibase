@@ -2,6 +2,10 @@ package liquibase.statement.core;
 
 import liquibase.statement.AbstractSqlStatement;
 
+/**
+ * @deprecated use {@link RawParameterizedSqlStatement}
+ */
+@Deprecated
 public class RawSqlStatement extends AbstractSqlStatement {
 
     private final String sql;

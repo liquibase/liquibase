@@ -85,6 +85,7 @@ class CommandUtil {
         OutputStream outputStream = new FileOutputStream(new File(outputFile))
         commandScope.setOutput(outputStream)
         commandScope.execute()
+        outputStream.close()
     }
 
     /**
