@@ -12,7 +12,7 @@ import liquibase.snapshot.CachedRow;
 import liquibase.snapshot.DatabaseSnapshot;
 import liquibase.snapshot.JdbcDatabaseSnapshot;
 import liquibase.statement.DatabaseFunction;
-import liquibase.statement.core.RawSqlStatement;
+import liquibase.statement.core.RawParameterizedSqlStatement;
 import liquibase.structure.DatabaseObject;
 import liquibase.structure.core.*;
 import liquibase.util.BooleanUtil;
@@ -398,12 +398,13 @@ public class ColumnSnapshotGenerator extends JdbcSnapshotGenerator {
                 (columnTypeName))) {
             try {
 
+                StringBuilder sql = new StringBuilder("SELECT COLUMN_TYPE FROM INFORMATION_SCHEMA.COLUMNS\n")
+                        .append("WHERE TABLE_SCHEMA = ?\n")
+                        .append("AND TABLE_NAME = ?\n")
+                        .append("AND COLUMN_NAME = ?");
                 String enumValue = Scope.getCurrentScope().getSingleton(ExecutorService.class)
                         .getExecutor("jdbc", database)
-                        .queryForObject(new RawSqlStatement("SELECT COLUMN_TYPE FROM INFORMATION_SCHEMA.COLUMNS\n" +
-                                "WHERE TABLE_SCHEMA = '" + column.getSchema().getName() + "'\n" +
-                                "AND TABLE_NAME = '" + column.getRelation().getName() + "'\n" +
-                                "AND COLUMN_NAME = '" + column.getName() + "'"), String.class);
+                        .queryForObject(new RawParameterizedSqlStatement(sql.toString(), column.getSchema().getName(), column.getRelation().getName(), column.getName()), String.class);
 
                 enumValue = enumValue.replace("enum(", "ENUM(");
                 enumValue = enumValue.replace("set(", "SET(");
@@ -597,12 +598,13 @@ public class ColumnSnapshotGenerator extends JdbcSnapshotGenerator {
 
     private void readDefaultValueForMysqlDatabase(CachedRow columnMetadataResultSet, Column column, Database database) {
         try {
+            StringBuilder selectQuery = new StringBuilder("SELECT EXTRA FROM INFORMATION_SCHEMA.COLUMNS\n")
+                    .append("WHERE TABLE_SCHEMA = ?\n")
+                    .append("AND TABLE_NAME = ?\n")
+                    .append( "AND COLUMN_NAME = ?");
             String extraValue = Scope.getCurrentScope().getSingleton(ExecutorService.class)
                     .getExecutor("jdbc", database)
-                    .queryForObject(new RawSqlStatement("SELECT EXTRA FROM INFORMATION_SCHEMA.COLUMNS\n" +
-                            "WHERE TABLE_SCHEMA = '" + column.getSchema().getName() + "'\n" +
-                            "AND TABLE_NAME = '" + column.getRelation().getName() + "'\n" +
-                            "AND COLUMN_NAME = '" + column.getName() + "'"), String.class);
+                    .queryForObject(new RawParameterizedSqlStatement(selectQuery.toString(), column.getSchema().getName(), column.getRelation().getName(), column.getName()), String.class);
             if (extraValue != null && !extraValue.isEmpty() &&
                 (extraValue.startsWith(MYSQL_DEFAULT_GENERATED + " ") || extraValue.toLowerCase(Locale.ENGLISH).contains("on update"))
             ) {

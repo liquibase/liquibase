@@ -24,7 +24,6 @@ import liquibase.exception.LiquibaseException;
 import liquibase.executor.Executor;
 import liquibase.executor.ExecutorService;
 import liquibase.executor.LoggingExecutor;
-import liquibase.io.WriterOutputStream;
 import liquibase.lockservice.DatabaseChangeLogLock;
 import liquibase.lockservice.LockServiceFactory;
 import liquibase.logging.Logger;
@@ -37,6 +36,7 @@ import liquibase.serializer.ChangeLogSerializer;
 import liquibase.structure.DatabaseObject;
 import liquibase.util.LoggingExecutorTextUtil;
 import liquibase.util.StringUtil;
+import org.apache.commons.io.output.WriterOutputStream;
 
 import java.io.IOException;
 import java.io.PrintStream;
