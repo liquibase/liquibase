@@ -89,8 +89,8 @@ class SingleColumnRowMapper implements RowMapper {
 
     /**
      * Retrieve a JDBC object value for the specified column.
-     * <p>The default implementation calls <code>ResultSet.getString(index)</code> etc
-     * for all standard value types (String, Boolean, number types, date types, etc).
+     * <p>The default implementation calls <code>ResultSet.getString(index)</code> etc.
+     * for all standard value types (String, Boolean, number types, date types, etc.).
      * It calls <code>ResultSet.getObject(index)</code> else.
      * <p>If no required type has been specified, this method delegates to
      * <code>getColumnValue(rs, index)</code>, which basically calls

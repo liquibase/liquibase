@@ -153,15 +153,15 @@ public interface ResourceAccessor extends AutoCloseable {
         String endsWithFilter = searchOptions.getEndsWithFilter();
 
         for (Resource res: CollectionUtil.createIfNull(recursiveResourceList)) {
-            String relativePath = res.getPath();
-            int depth = (int) relativePath.chars().filter(ch -> ch == '/').count();
+            String resourcePath = res.getPath();
+            int depth = ((int) resourcePath.chars().filter(ch -> ch == '/').count()) - ((int) path.chars().filter(ch -> ch == '/').count()) + 1 ;
 
             if (depth < minDepth || depth > maxDepth) {
                 continue;
             }
 
             if (endsWithFilterIsSet) {
-                if (!relativePath.toLowerCase().endsWith(endsWithFilter.toLowerCase())) {
+                if (!resourcePath.toLowerCase().endsWith(endsWithFilter.toLowerCase())) {
                     continue;
                 }
             }
@@ -225,7 +225,7 @@ public interface ResourceAccessor extends AutoCloseable {
     }
 
     /**
-     * Finds a single specific {@link }. If multiple files match the given path, handle based on the {@link GlobalConfiguration#DUPLICATE_FILE_MODE} setting.
+     * Finds a single specific {@link Resource}. If multiple files match the given path, handle based on the {@link GlobalConfiguration#DUPLICATE_FILE_MODE} setting.
      * Default implementation calls {@link #getAll(String)}.
      *
      * @return a Resource even if the path does not exist

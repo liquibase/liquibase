@@ -30,8 +30,8 @@ liquibase:
         url: jdbc:derby:memory:${catalog}
 
       db2:
-        imageName: ibmcom/db2
-        version: 11.5.6.0a
+        imageName: icr.io/db2_community/db2
+        version: 11.5.7.0a
 
       h2:
         url: jdbc:h2:mem:${catalog};DB_CLOSE_DELAY=-1

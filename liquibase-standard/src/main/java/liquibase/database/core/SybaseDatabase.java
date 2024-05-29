@@ -9,7 +9,7 @@ import liquibase.executor.Executor;
 import liquibase.executor.ExecutorService;
 import liquibase.statement.SqlStatement;
 import liquibase.statement.core.GetViewDefinitionStatement;
-import liquibase.statement.core.RawSqlStatement;
+import liquibase.statement.core.RawParameterizedSqlStatement;
 import liquibase.structure.DatabaseObject;
 import liquibase.structure.core.Column;
 import liquibase.structure.core.Sequence;
@@ -187,7 +187,7 @@ public class SybaseDatabase extends AbstractJdbcDatabase {
 
     @Override
     protected SqlStatement getConnectionSchemaNameCallStatement() {
-        return new RawSqlStatement("select user_name()");
+        return new RawParameterizedSqlStatement("select user_name()");
     }
 
     @Override
@@ -286,7 +286,7 @@ public class SybaseDatabase extends AbstractJdbcDatabase {
 
     @Override
     public boolean requiresExplicitNullForColumns() {
-        /* SAP Adaptive Server Enterprise and, by extension, SQL Anywhere in ASE compatiblity mode have the
+        /* SAP Adaptive Server Enterprise and, by extension, SQL Anywhere in ASE compatibility mode have the
          * strange requirement of setting the nullability of a column to NOT NULL if neither NULL nor
          * NOT NULL are specified. See:
          * http://dcx.sap.com/index.html#sqla170/en/html/819378356ce21014a17f8d51529119ee.html

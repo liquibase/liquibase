@@ -35,13 +35,13 @@ class LiquibaseUtilTest extends Specification {
         LiquibaseUtil.getBuildVersion() == version
 
         where:
-        version | localBuild | proData | expected
-        "1.2.3" | false      | true    | "1.2.3"
-        "1.2.3" | false      | false   | "1.2.3"
-        "DEV"   | false      | true    | "[Core: liquibase/liquibase/test-branch/524/7904bb/2021-09-17 14:06+0000, Pro: other-branch/58/e5195b/2021-09-17T14:04:58Z]"
-        "DEV"   | false      | false   | "[Core: liquibase/liquibase/test-branch/524/7904bb/2021-09-17 14:06+0000]"
-        "DEV"   | true       | true    | "[local build]"
-        "DEV"   | true       | false   | "[local build]"
+        version                   | localBuild | proData | expected
+        "1.2.3"                   | false      | true    | "1.2.3"
+        "1.2.3"                   | false      | false   | "1.2.3"
+        LiquibaseUtil.DEV_VERSION | false      | true    | "[Core: liquibase/liquibase/test-branch/524/7904bb/2021-09-17 14:06+0000, Pro: other-branch/58/e5195b/2021-09-17T14:04:58Z]"
+        LiquibaseUtil.DEV_VERSION | false      | false   | "[Core: liquibase/liquibase/test-branch/524/7904bb/2021-09-17 14:06+0000]"
+        LiquibaseUtil.DEV_VERSION | true       | true    | "[local build]"
+        LiquibaseUtil.DEV_VERSION | true       | false   | "[local build]"
     }
 
     def "getBuildVersionInfo actuallyRead"() {

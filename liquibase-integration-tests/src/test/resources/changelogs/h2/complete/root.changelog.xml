@@ -36,7 +36,7 @@
         <preConditions>
             <or>
                 <dbms type="h2"/>
-                <sqlCheck expectedResult="3">INVALID SQL HERE, SHOULD NOT HIT DUE TO SHORT CIRCUT</sqlCheck>
+                <sqlCheck expectedResult="3">INVALID SQL HERE, SHOULD NOT HIT DUE TO SHORT CIRCUIT</sqlCheck>
             </or>
         </preConditions>
         <createSequence sequenceName="seq_person"/>

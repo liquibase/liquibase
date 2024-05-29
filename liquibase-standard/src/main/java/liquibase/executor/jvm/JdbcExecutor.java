@@ -75,6 +75,9 @@ public class JdbcExecutor extends AbstractExecutor {
                 throw new DatabaseException("Cannot execute commands against an offline database");
             }
             stmt = ((JdbcConnection) con).getUnderlyingConnection().createStatement();
+            if (Boolean.TRUE.equals(SqlConfiguration.ALWAYS_SET_FETCH_SIZE.getCurrentValue())) {
+                stmt.setFetchSize(database.getFetchSize());
+            }
             Statement stmtToUse = stmt;
 
             Object object = action.doInStatement(stmtToUse);
