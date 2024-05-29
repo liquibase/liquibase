@@ -1,6 +1,6 @@
 package liquibase.statement.core;
 
-public class RawSqStatementTest extends AbstractSqStatementTest<RawSqlStatement> {
+public class RawSqlStatementTest extends AbstractSqStatementTest<RawSqlStatement> {
 
     @Override
     protected RawSqlStatement createStatementUnderTest() {

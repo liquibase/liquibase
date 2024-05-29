@@ -1,17 +1,28 @@
 package liquibase.change;
 
 import liquibase.ChecksumVersion;
+import liquibase.GlobalConfiguration;
 import liquibase.Scope;
+import liquibase.SupportsMethodValidationLevelsEnum;
 import liquibase.change.core.CreateTableChange;
 import liquibase.database.core.MSSQLDatabase;
-import liquibase.integration.commandline.LiquibaseCommandLineConfiguration;
+import liquibase.exception.UnexpectedLiquibaseException;
 import liquibase.servicelocator.LiquibaseService;
+import liquibase.servicelocator.ServiceLocator;
+import liquibase.servicelocator.StandardServiceLocator;
 import liquibase.sqlgenerator.SqlGeneratorFactory;
 import liquibase.statement.core.CreateSequenceStatement;
+import liquibase.wrong.BadlyImplementedChange;
 import org.junit.Test;
+import org.mockito.Mockito;
 
+import java.lang.reflect.Constructor;
+import java.util.Arrays;
 import java.util.Collections;
+import java.util.HashMap;
+import java.util.Map;
 
+import static liquibase.change.ChangeFactory.SUPPORTS_METHOD_REQUIRED_MESSAGE;
 import static org.junit.Assert.*;
 
 public class ChangeFactoryTest {
@@ -63,6 +74,29 @@ public class ChangeFactoryTest {
         assertTrue(change instanceof CreateTableChange);
 
         assertNotSame(change, Scope.getCurrentScope().getSingleton(ChangeFactory.class).create("createTable"));
+    }
+
+    @Test
+    public void create_exists_supports_method_verification() throws Exception {
+
+        ServiceLocator sl = Mockito.mock(StandardServiceLocator.class);
+        Mockito.when(sl.findInstances(Change.class)).thenReturn(Arrays.asList(new CreateTableChange(), new BadlyImplementedChange()));
+        Map<String, Object> args = new HashMap<>();
+        args.put(Scope.Attr.serviceLocator.name(), sl);
+        args.put(GlobalConfiguration.SUPPORTS_METHOD_VALIDATION_LEVEL.getKey(), SupportsMethodValidationLevelsEnum.FAIL);
+
+        Constructor<ChangeFactory> changeFactoryConstructor = ChangeFactory.class.getDeclaredConstructor();
+        changeFactoryConstructor.setAccessible(true); // make private constructor accessible the same way as it is done in Scope.getSingleton method
+        ChangeFactory changeFactory = changeFactoryConstructor.newInstance();
+
+        Scope.child(args, () -> {
+            try {
+               changeFactory.create("createTable");
+                fail("Should not get here");
+            } catch (UnexpectedLiquibaseException e) {
+                assertEquals(String.format(SUPPORTS_METHOD_REQUIRED_MESSAGE, "liquibase.wrong.BadlyImplementedChange"), e.getMessage());
+            }
+        });
     }
 
     @Test

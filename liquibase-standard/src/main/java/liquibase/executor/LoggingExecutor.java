@@ -14,6 +14,7 @@ import liquibase.statement.ExecutablePreparedStatement;
 import liquibase.statement.SqlStatement;
 import liquibase.statement.core.*;
 import liquibase.util.StreamUtil;
+import liquibase.statement.core.RawParameterizedSqlStatement;
 
 import java.io.IOException;
 import java.io.Writer;
@@ -146,8 +147,8 @@ public class LoggingExecutor extends AbstractExecutor {
                 } else {
                     String endDelimiter = ";";
                     String potentialDelimiter = null;
-                    if (sql instanceof RawSqlStatement) {
-                        potentialDelimiter = ((RawSqlStatement) sql).getEndDelimiter();
+                    if (sql instanceof RawParameterizedSqlStatement) {
+                        potentialDelimiter = ((RawParameterizedSqlStatement) sql).getEndDelimiter();
                     } else if (sql instanceof CreateProcedureStatement) {
                         potentialDelimiter = ((CreateProcedureStatement) sql).getEndDelimiter();
                     }
