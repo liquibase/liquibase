@@ -352,6 +352,7 @@
       </dependencies>
     </profile>
 
+    <!-- Profile to include liquibase-scripting in the tarball -->
     <profile>
       <id>liquibase-scripting</id>
       <activation>
