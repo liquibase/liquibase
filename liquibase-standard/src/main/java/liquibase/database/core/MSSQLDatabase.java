@@ -3,6 +3,7 @@ package liquibase.database.core;
 import liquibase.CatalogAndSchema;
 import liquibase.GlobalConfiguration;
 import liquibase.Scope;
+import liquibase.change.AbstractSQLChange;
 import liquibase.change.Change;
 import liquibase.changelog.DatabaseChangeLog;
 import liquibase.database.AbstractJdbcDatabase;
@@ -17,7 +18,7 @@ import liquibase.sql.visitor.AppendSqlIfNotPresentVisitor;
 import liquibase.sql.visitor.SqlVisitor;
 import liquibase.statement.SqlStatement;
 import liquibase.statement.core.GetViewDefinitionStatement;
-import liquibase.statement.core.RawSqlStatement;
+import liquibase.statement.core.RawParameterizedSqlStatement;
 import liquibase.structure.DatabaseObject;
 import liquibase.structure.core.*;
 import liquibase.util.JdbcUtil;
@@ -114,7 +115,17 @@ public class MSSQLDatabase extends AbstractJdbcDatabase {
 
     @Override
     public void executeStatements(Change change, DatabaseChangeLog changeLog, List<SqlVisitor> sqlVisitors) throws LiquibaseException {
-        super.executeStatements(change, changeLog, addSqlVisitors(sqlVisitors));
+        if (change instanceof AbstractSQLChange) {
+            String endDelimiter = StringUtil.trimToNull(((AbstractSQLChange) change).getEndDelimiter());
+            if (endDelimiter != null && !endDelimiter.contentEquals(";")) {
+                super.executeStatements(change, changeLog, sqlVisitors);
+            } else {
+                super.executeStatements(change, changeLog, addSqlVisitors(sqlVisitors));
+            }
+        }
+        else {
+                super.executeStatements(change, changeLog, addSqlVisitors(sqlVisitors));
+            }
     }
 
     //
@@ -272,7 +283,7 @@ public class MSSQLDatabase extends AbstractJdbcDatabase {
 
     @Override
     protected SqlStatement getConnectionSchemaNameCallStatement() {
-        return new RawSqlStatement("select schema_name()");
+        return new RawParameterizedSqlStatement("select schema_name()");
     }
 
     @Override
@@ -439,11 +450,9 @@ public class MSSQLDatabase extends AbstractJdbcDatabase {
             try {
                 if (getConnection() instanceof JdbcConnection) {
                     String catalog = getConnection().getCatalog();
-                    String sql =
-                        "SELECT CONVERT([sysname], DATABASEPROPERTYEX(N'" + escapeStringForDatabase(catalog) +
-                            "', 'Collation'))";
+                    String sql = String.format("SELECT CONVERT([sysname], DATABASEPROPERTYEX(N'%s', 'Collation'))", escapeStringForDatabase(catalog));
                     String collation = Scope.getCurrentScope().getSingleton(ExecutorService.class).getExecutor("jdbc", this)
-                        .queryForObject(new RawSqlStatement(sql), String.class);
+                        .queryForObject(new RawParameterizedSqlStatement(sql), String.class);
                     caseSensitive = (collation != null) && !collation.contains("_CI_");
                 } else if (getConnection() instanceof OfflineConnection) {
                     caseSensitive = ((OfflineConnection) getConnection()).isCaseSensitive();
@@ -627,7 +636,7 @@ public class MSSQLDatabase extends AbstractJdbcDatabase {
                     "         ELSE 'Unknown'\n" +
                     "       END";
                 return Scope.getCurrentScope().getSingleton(ExecutorService.class).getExecutor("jdbc", this)
-                    .queryForObject(new RawSqlStatement(sql), String.class);
+                    .queryForObject(new RawParameterizedSqlStatement(sql), String.class);
             }
         } catch (DatabaseException e) {
             Scope.getCurrentScope().getLog(getClass()).warning("Could not determine engine edition", e);

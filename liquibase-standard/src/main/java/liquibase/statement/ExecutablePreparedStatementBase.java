@@ -56,11 +56,11 @@ public abstract class ExecutablePreparedStatementBase implements ExecutablePrepa
     //Ideally the creation of the prepared statements would happen at the spot where we know we should be re-using it and that code can close it.
     // But that will have to wait for a refactoring of this code.
     // So for now we're trading leaving at most one prepared statement unclosed at the end of the liquibase run for better re-using statements to avoid overhead
-    private static PreparedStatement lastPreparedStatement;
-    private static String lastPreparedStatementSql;
+    private static final ThreadLocal<PreparedStatement> LAST_PREPARED_STATEMENT = new ThreadLocal<>();
+    private static final ThreadLocal<String> LAST_PREPARED_STATEMENT_SQL = new ThreadLocal<>();
 
     //Cache the executeWithFlags method to avoid reflection overhead
-    private static Method executeWithFlagsMethod;
+    private static final ThreadLocal<Method> EXECUTE_WITH_FLAGS_METHOD = new ThreadLocal<>();
 
     private final Map<String, Object> snapshotScratchPad = new HashMap<>();
 
@@ -103,8 +103,8 @@ public abstract class ExecutablePreparedStatementBase implements ExecutablePrepa
             // create prepared statement
             stmt = factory.create(sql);
 
-            lastPreparedStatement = stmt;
-            lastPreparedStatementSql = sql;
+            LAST_PREPARED_STATEMENT.set(stmt);
+            LAST_PREPARED_STATEMENT_SQL.set(sql);
         } else {
             try {
                 stmt.clearParameters();
@@ -142,18 +142,18 @@ public abstract class ExecutablePreparedStatementBase implements ExecutablePrepa
     }
 
     protected PreparedStatement getCachedStatement(String sql) {
-        if (lastPreparedStatement == null || lastPreparedStatementSql == null) {
+        if (LAST_PREPARED_STATEMENT.get() == null || LAST_PREPARED_STATEMENT_SQL.get() == null) {
             return null;
         }
 
         boolean statementIsValid = true;
-        if (lastPreparedStatementSql.equals(sql)) {
+        if (LAST_PREPARED_STATEMENT_SQL.get().equals(sql)) {
             try {
-                if (lastPreparedStatement.isClosed()) {
+                if (LAST_PREPARED_STATEMENT.get().isClosed()) {
                     statementIsValid = false;
                 }
                 if (statementIsValid) {
-                    final Connection connection = lastPreparedStatement.getConnection();
+                    final Connection connection = LAST_PREPARED_STATEMENT.get().getConnection();
                     if (connection == null || connection.isClosed()) {
                         statementIsValid = false;
                     }
@@ -167,24 +167,26 @@ public abstract class ExecutablePreparedStatementBase implements ExecutablePrepa
         }
 
         if (!statementIsValid) {
-            JdbcUtil.closeStatement(lastPreparedStatement);
-            lastPreparedStatement = null;
-            lastPreparedStatementSql = null;
+            JdbcUtil.closeStatement(LAST_PREPARED_STATEMENT.get());
+            LAST_PREPARED_STATEMENT.remove();
+            LAST_PREPARED_STATEMENT_SQL.remove();
+            EXECUTE_WITH_FLAGS_METHOD.remove();
         }
 
-        return lastPreparedStatement;
+        return LAST_PREPARED_STATEMENT.get();
     }
 
     protected void executePreparedStatement(PreparedStatement stmt) throws SQLException {
         if (database instanceof PostgresDatabase) {
             //postgresql's default prepared statement setup is slow for normal liquibase usage. Calling with QUERY_ONESHOT seems faster, even when we keep re-calling the same prepared statement for many rows in loadData
             try {
-                if (executeWithFlagsMethod == null) {
-                    executeWithFlagsMethod = stmt.getClass().getMethod("executeWithFlags", int.class);
-                    executeWithFlagsMethod.setAccessible(true);
+                if (EXECUTE_WITH_FLAGS_METHOD.get() == null) {
+                    Method executeWithFlags = stmt.getClass().getMethod("executeWithFlags", int.class);
+                    executeWithFlags.setAccessible(true);
+                    EXECUTE_WITH_FLAGS_METHOD.set(executeWithFlags);
                 }
 
-                executeWithFlagsMethod.invoke(stmt, 1); //QueryExecutor.QUERY_ONESHOT
+                EXECUTE_WITH_FLAGS_METHOD.get().invoke(stmt, 1); //QueryExecutor.QUERY_ONESHOT
             } catch (IllegalAccessException | InvocationTargetException | NoSuchMethodException e) {
                 stmt.execute();
             }

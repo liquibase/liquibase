@@ -13,13 +13,12 @@ import liquibase.exception.DatabaseException;
 import liquibase.exception.LiquibaseException;
 import liquibase.exception.UnexpectedLiquibaseException;
 import liquibase.statement.SqlStatement;
-import liquibase.statement.core.RawSqlStatement;
+import liquibase.statement.core.RawParameterizedSqlStatement;
 import liquibase.structure.core.Index;
 
 import java.math.BigInteger;
 import java.sql.Connection;
 import java.sql.SQLException;
-import java.sql.Statement;
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Set;
@@ -338,7 +337,7 @@ public class SybaseASADatabase extends AbstractJdbcDatabase {
          * SQL Anywhere needs recompilation of views after an update, when the underlying tables have changed.
          * It is safe to always recompile as long as we ignore any compilation failures.
          */
-        this.execute(new SqlStatement[] {new RawSqlStatement("sa_recompile_views(1)")}, null);
+        this.execute(new SqlStatement[] {new RawParameterizedSqlStatement("sa_recompile_views(1)")}, null);
     }
 
 }

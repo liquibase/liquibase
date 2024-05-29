@@ -7,7 +7,7 @@ import liquibase.extension.testing.testsystem.DatabaseTestSystem
 import liquibase.extension.testing.testsystem.TestSystemFactory
 import liquibase.extension.testing.testsystem.spock.LiquibaseIntegrationTest
 import liquibase.statement.SqlStatement
-import liquibase.statement.core.RawSqlStatement
+import liquibase.statement.core.RawParameterizedSqlStatement
 import liquibase.structure.core.Column
 import liquibase.structure.core.Table
 import liquibase.structure.core.View
@@ -27,10 +27,10 @@ class JdbcDatabaseSnapshotH2IntegrationTest extends Specification {
         def connection = h2.getConnection()
         def db = DatabaseFactory.instance.findCorrectDatabaseImplementation(new JdbcConnection(connection))
         db.execute([
-                new RawSqlStatement("create schema if not exists \"TEST_SCHEMA\""),
-                new RawSqlStatement("create schema if not exists \"TEST-SCHEMA\""),
-                new RawSqlStatement("create table if not exists \"TEST-SCHEMA\".test_table (id int)"),
-                new RawSqlStatement("create view if not exists \"TEST-SCHEMA\".test_view as select * from \"TEST-SCHEMA\".test_table"),
+                new RawParameterizedSqlStatement("create schema if not exists \"TEST_SCHEMA\""),
+                new RawParameterizedSqlStatement("create schema if not exists \"TEST-SCHEMA\""),
+                new RawParameterizedSqlStatement("create table if not exists \"TEST-SCHEMA\".test_table (id int)"),
+                new RawParameterizedSqlStatement("create view if not exists \"TEST-SCHEMA\".test_view as select * from \"TEST-SCHEMA\".test_table"),
         ] as SqlStatement[], null)
 
         then:
@@ -45,8 +45,8 @@ class JdbcDatabaseSnapshotH2IntegrationTest extends Specification {
 
         cleanup:
         db.execute([
-                new RawSqlStatement("drop schema \"test_schema\" if exists"),
-                new RawSqlStatement("drop schema \"test-schema\" if exists"),
+                new RawParameterizedSqlStatement("drop schema \"test_schema\" if exists"),
+                new RawParameterizedSqlStatement("drop schema \"test-schema\" if exists"),
         ] as SqlStatement[], null)
     }
 }
