@@ -84,3 +84,15 @@ jobs:
           path: |
             ./**/target/surefire-reports
             ./**/target/site
+
+  run-slack-notification:
+    runs-on: ubuntu-latest
+    if: failure()
+    needs: [ snowflake-its ]
+    steps:
+      - name: Dispatch event to build-logic repository
+        uses: peter-evans/repository-dispatch@v3
+        with:
+          token: ${{ secrets.LIQUIBOT_PAT_GPM_ACCESS }}
+          repository: liquibase/build-logic
+          event-type: test-failure           

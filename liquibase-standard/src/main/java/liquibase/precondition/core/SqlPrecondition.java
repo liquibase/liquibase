@@ -5,11 +5,10 @@ import liquibase.changelog.ChangeSet;
 import liquibase.changelog.DatabaseChangeLog;
 import liquibase.changelog.visitor.ChangeExecListener;
 import liquibase.database.Database;
-import liquibase.database.DatabaseConnection;
 import liquibase.exception.*;
 import liquibase.executor.ExecutorService;
 import liquibase.precondition.AbstractPrecondition;
-import liquibase.statement.core.RawSqlStatement;
+import liquibase.statement.core.RawParameterizedSqlStatement;
 
 public class SqlPrecondition extends AbstractPrecondition {
 
@@ -47,7 +46,7 @@ public class SqlPrecondition extends AbstractPrecondition {
     public void check(Database database, DatabaseChangeLog changeLog, ChangeSet changeSet, ChangeExecListener changeExecListener)
             throws PreconditionFailedException, PreconditionErrorException {
         try {
-            Object oResult = Scope.getCurrentScope().getSingleton(ExecutorService.class).getExecutor("jdbc", database).queryForObject(new RawSqlStatement(getSql().replaceFirst(";$","")), String.class);
+            Object oResult = Scope.getCurrentScope().getSingleton(ExecutorService.class).getExecutor("jdbc", database).queryForObject(new RawParameterizedSqlStatement(getSql().replaceFirst(";$","")), String.class);
             if (oResult == null) {
                 throw new PreconditionFailedException("No rows returned from SQL Precondition", changeLog, this);
             }

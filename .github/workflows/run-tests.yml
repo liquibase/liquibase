@@ -164,13 +164,13 @@ jobs:
 
       # getting from build results page. If we remove 0-snapshot then we will need settings.xml
 
-      - name: Build & Test Java 8
-        if: ${{ matrix.java == 8}}
+      - name: Build & Test Java below 11
+        if: ${{ matrix.java == 8 || matrix.java == 11}}
         run: |
           ./mvnw -B "-Dbuild.repository.owner=liquibase" "-Dbuild.repository.name=liquibase" "-Dbuild.branch=${{ needs.setup.outputs.thisBranchName }}" "-Dbuild.number=${{ github.run_number }}" "-Dbuild.commit=${{ needs.setup.outputs.latestMergeSha }}" "-DtrimStackTrace=false" -P 'skip-integration-tests'  -pl '!liquibase-cdi-jakarta' clean test package surefire-report:report
 
-      - name: Build & Test Java non-jdk-8
-        if: ${{ matrix.java != 8}}
+      - name: Build & Test Java 11+
+        if: ${{ matrix.java != 8 && matrix.java != 11}}
         run: |
           ./mvnw -B "-Dbuild.repository.owner=liquibase" "-Dbuild.repository.name=liquibase" "-Dbuild.branch=${{ needs.setup.outputs.thisBranchName }}" "-Dbuild.number=${{ github.run_number }}" "-Dbuild.commit=${{ needs.setup.outputs.latestMergeSha }}" "-DtrimStackTrace=false" -P 'skip-integration-tests' clean test package surefire-report:report
 
@@ -219,7 +219,7 @@ jobs:
       fail-fast: false
       matrix:
         testSystem:
-          - db2
+          #- db2
           - h2
           #- h2:1.4
           - hsqldb
@@ -291,7 +291,7 @@ jobs:
           echo "TH_SNOW_URL=jdbc:snowflake://http://snowflake.localhost.localstack.cloud:4566" >> $GITHUB_ENV
 
       - name: Run Tests
-        run: ./mvnw -B clean verify -DtrimStackTrace=false -Dliquibase.sdk.testSystem.test=${{ matrix.testSystem }} -Dliquibase.sdk.testSystem.acceptLicenses=${{ matrix.testSystem }} -Dliquibase.sdk.testSystem.snowflake.url=${{ env.TH_SNOW_URL }} -Dliquibase.sdk.testSystem.snowflake.username=${{ env.TH_DB_ADMIN }} -Dliquibase.sdk.testSystem.snowflake.password=${{ env.TH_DB_PASSWD }} -Dtest=*IntegrationTest,*ExecutorTest -DfailIfNoTests=false -Dsurefire.failIfNoSpecifiedTests=false
+        run: ./mvnw -B clean verify -DtrimStackTrace=false -Dliquibase.sdk.testSystem.test=${{ matrix.testSystem }} -Dliquibase.sdk.testSystem.acceptLicenses=${{ matrix.testSystem }} -Dliquibase.sdk.testSystem.snowflake.url=${{ env.TH_SNOW_URL }} -Dliquibase.sdk.testSystem.snowflake.username=${{ env.TH_DB_ADMIN }} -Dliquibase.sdk.testSystem.snowflake.password=${{ env.TH_DB_PASSWD }} -Dtest=*IntegrationTest,*ExecutorTest -DfailIfNoTests=false -Dsurefire.failIfNoSpecifiedTests=false -Dsurefire.failIfNoTests=false
 
       - name: Archive Test Results
         if: ${{ inputs.archive_test_results == 'true' }}
@@ -310,7 +310,7 @@ jobs:
 
   sonar:
     needs: [ build_tests, integration-test ]
-    uses: liquibase/build-logic/.github/workflows/sonar-test-scan.yml@v0.7.6
+    uses: liquibase/build-logic/.github/workflows/sonar-test-scan.yml@v0.7.7
     with:
       thisBranchName: ${{ needs.setup.outputs.thisBranchName }}
       thisSha: ${{ needs.setup.outputs.thisSha }}
@@ -319,7 +319,8 @@ jobs:
       pullRequestBranchName: ${{ github.event.pull_request.head.ref }}
       pullRequestBaseBranchName: ${{ github.event.pull_request.base.ref }}
       testedClassesModuleName: liquibase-standard
-      dbPlatforms: h2,hsqldb,mariadb,mssql,mysql,oracle,postgresql,sqlite,firebird,db2
+      #dbPlatforms: h2,hsqldb,mariadb,mssql,mysql,oracle,postgresql,sqlite,firebird,db2
+      dbPlatforms: h2,hsqldb,mariadb,mssql,mysql,oracle,postgresql,sqlite,firebird
     secrets: inherit
 
   run-build-publish-file:

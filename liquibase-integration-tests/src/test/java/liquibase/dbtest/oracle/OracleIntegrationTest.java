@@ -19,7 +19,7 @@ import liquibase.exception.ValidationFailedException;
 import liquibase.executor.ExecutorService;
 import liquibase.snapshot.DatabaseSnapshot;
 import liquibase.sql.visitor.AbstractSqlVisitor;
-import liquibase.statement.core.RawSqlStatement;
+import liquibase.statement.core.RawParameterizedSqlStatement;
 import liquibase.structure.core.Index;
 import org.junit.Assert;
 import org.junit.Test;
@@ -224,7 +224,7 @@ public class OracleIntegrationTest extends AbstractIntegrationTest {
         clearDatabase();
         String textToTest = "GENERATED ALWAYS AS (QTY*PRICE)";
 
-        Scope.getCurrentScope().getSingleton(ExecutorService.class).getExecutor("jdbc", getDatabase()).execute(new RawSqlStatement(
+        Scope.getCurrentScope().getSingleton(ExecutorService.class).getExecutor("jdbc", getDatabase()).execute(new RawParameterizedSqlStatement(
             String.format("CREATE TABLE GENERATED_COLUMN_TEST(QTY INT, PRICE INT, TOTALVALUE INT %s)", textToTest)));
 
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
