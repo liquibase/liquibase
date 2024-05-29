@@ -15,6 +15,7 @@ public abstract class YamlParser implements LiquibaseParser {
         LoaderOptions options = new LoaderOptions();
         SnakeYamlUtil.setCodePointLimitSafely(options, Integer.MAX_VALUE);
         SnakeYamlUtil.setProcessCommentsSafely(options, false);
+        options.setAllowDuplicateKeys(false);
         options.setAllowRecursiveKeys(false);
         return options;
     }
