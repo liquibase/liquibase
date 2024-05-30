@@ -86,13 +86,13 @@ jobs:
         uses: aws-actions/aws-secretsmanager-get-secrets@v2
         with:
           secret-ids: |
-            LIQUIBASEOSS_USERNAME, liquibaseoss_username
+            LIQUIBASEOSS_USERNAME, liquibaseoss_usrname
     
       - name: Get LIQUIBASEOSS_PASSWORD secret
         uses: aws-actions/aws-secretsmanager-get-secrets@v2
         with:
           secret-ids: |
-            LIQUIBASEOSS_PASSWORD, liquibaseoss_password
+            LIQUIBASEOSS_PASSWORD, liquibaseoss_pwd
 
       - name: Run tests
         run: |
