@@ -104,7 +104,7 @@ jobs:
             "-Dtest=*IntegrationTest,*ExecutorTest" \
             "-DfailIfNoTests=false" \
             "-Dsurefire.failIfNoSpecifiedTests=false" \
-            "-Dsurefire.failIfNoTests=false"
+            "-Dsurefire.failIfNoTests=false" \
             clean verify
 
       - name: Archive Test Results
