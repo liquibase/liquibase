@@ -19,6 +19,6 @@ public class RawParameterizedSqlGenerator extends AbstractSqlGenerator<RawParame
 
     @Override
     public Sql[] generateSql(RawParameterizedSqlStatement statement, Database database, SqlGeneratorChain<RawParameterizedSqlStatement> sqlGeneratorChain) {
-        return new Sql[] {new UnparsedSql(statement.getSql())};
+        return new Sql[] {new UnparsedSql(statement.getSql(), statement.getEndDelimiter())};
     }
 }

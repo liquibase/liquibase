@@ -245,7 +245,9 @@ public class LiquibaseCommandLine {
         //
         Level level = determineLogLevel(exception);
 
-        Scope.getCurrentScope().getLog(getClass()).log(level, uiMessage, exception);
+        if (showExceptionInLog(exception)) {
+            Scope.getCurrentScope().getLog(getClass()).log(level, uiMessage, exception);
+        }
 
         boolean printUsage = false;
         try (final StringWriter suggestionWriter = new StringWriter();
@@ -264,7 +266,7 @@ public class LiquibaseCommandLine {
                     || exception instanceof CommandLineParsingException) {
                 System.err.println("Error parsing command line: " + uiMessage);
                 printUsage = true;
-            } else if (exception.getCause() != null && exception.getCause() instanceof CommandFailedException) {
+            } else if (exception.getCause() instanceof CommandFailedException) {
                 System.err.println(uiMessage);
             } else {
                 System.err.println("\nUnexpected error running Liquibase: " + uiMessage);
@@ -286,7 +288,7 @@ public class LiquibaseCommandLine {
 
             suggestionsPrintWriter.flush();
             final String suggestions = suggestionWriter.toString();
-            if (suggestions.length() > 0) {
+            if (!suggestions.isEmpty()) {
                 System.err.println();
                 System.err.println(suggestions);
             }
@@ -301,6 +303,20 @@ public class LiquibaseCommandLine {
             }
         }
         return 1;
+    }
+
+    //
+    // Honor the expected flag on a CommandFailedException
+    //
+    private boolean showExceptionInLog(Throwable exception) {
+        Throwable t = exception;
+        while (t != null) {
+            if (t instanceof CommandFailedException && ((CommandFailedException) t).isExpected()) {
+                return false;
+            }
+            t = t.getCause();
+        }
+        return true;
     }
 
     //
