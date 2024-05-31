@@ -21,7 +21,7 @@ class JdbcDatabaseConnectionCloseTest extends Specification {
     @Shared
     public DatabaseTestSystem h2 = Scope.currentScope.getSingleton(TestSystemFactory).getTestSystem("h2")
 
-    def "Test Exception"() {
+    def "Validate connection thrown during close is handled correctly"() {
         when:
         JdbcConnection connection = new TestJdbcConnection(h2.getConnection())
         Database database = h2.getDatabaseFromFactory()
