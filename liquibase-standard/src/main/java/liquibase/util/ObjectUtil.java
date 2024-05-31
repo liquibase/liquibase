@@ -227,7 +227,7 @@ public class ObjectUtil {
      * @return array of {@link Method} belonging to the class of the object
      */
     private static ObjectMethods getMethods(Object object) {
-        return methodCache.computeIfAbsent(object.getClass(), k -> new ObjectMethods(object.getClass().getMethods()));
+        return methodCache.computeIfAbsent(object.getClass(), k -> new ObjectMethods(object.getClass()));
     }
 
     /**

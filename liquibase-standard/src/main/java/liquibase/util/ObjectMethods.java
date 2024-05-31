@@ -15,6 +15,10 @@ final class ObjectMethods {
   private final Map<String, Method> writeMethods;
   private final Map<String, Method> readMethods;
 
+  ObjectMethods(Class klass) {
+    this(klass.getMethods());
+  }
+
   ObjectMethods(Method[] methods) {
     readMethods = new HashMap<>(methods.length);
     readMethods.putAll(find(methods, 0, "get"));
