@@ -11,6 +11,7 @@ public class LoadDataColumnConfig extends ColumnConfig {
     private String header;
     private Boolean allowUpdate;
     private LoadDataChange.LOAD_DATA_TYPE loadType;
+    private String nullPlaceholder;
 
 
     public Integer getIndex() {
@@ -40,12 +41,21 @@ public class LoadDataColumnConfig extends ColumnConfig {
 		this.allowUpdate = getAllowUpdate;
 	}
 
+    public String getNullPlaceholder() {
+        return nullPlaceholder;
+    }
+
+    public void setNullPlaceholder(String nullPlaceholder) {
+        this.nullPlaceholder = nullPlaceholder;
+    }
+
     @Override
     public void load(ParsedNode parsedNode, ResourceAccessor resourceAccessor) throws ParsedNodeException {
         super.load(parsedNode, resourceAccessor);
         this.index = parsedNode.getChildValue(null, "index", Integer.class);
         this.header = parsedNode.getChildValue(null, "header", String.class);
         this.allowUpdate = parsedNode.getChildValue(null, "allowUpdate", Boolean.class);
+        this.nullPlaceholder = parsedNode.getChildValue(null, "nullPlaceholder", String.class);
     }
 
     public ColumnConfig setType(LoadDataChange.LOAD_DATA_TYPE value) {
