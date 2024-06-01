@@ -1079,7 +1079,7 @@ public class DatabaseChangeLog implements Comparable<DatabaseChangeLog>, Conditi
             return null;
         }
 
-        if (filePath.startsWith("classpath:")) {
+        if (!GlobalConfiguration.PRESERVE_CLASSPATH_PREFIX_IN_NORMALIZED_PATHS.getCurrentValue() && filePath.startsWith("classpath:")) {
             filePath = filePath.substring("classpath:".length());
         }
 
