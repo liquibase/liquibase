@@ -7,7 +7,7 @@ import liquibase.database.DatabaseConnection;
 import liquibase.database.jvm.JdbcConnection;
 import liquibase.exception.DatabaseException;
 import liquibase.executor.ExecutorService;
-import liquibase.statement.core.RawSqlStatement;
+import liquibase.statement.core.RawParameterizedSqlStatement;
 import liquibase.structure.DatabaseObject;
 import liquibase.structure.core.StoredProcedure;
 import liquibase.structure.core.Table;
@@ -188,7 +188,7 @@ public class SnowflakeDatabase extends AbstractJdbcDatabase {
         //We don't force it if we are running under java 17 since arrow does work for those versions
         if (SystemUtil.getJavaMajorVersion() >= 17) {
             try {
-                Scope.getCurrentScope().getSingleton(ExecutorService.class).getExecutor("jdbc", this).execute(new RawSqlStatement("alter session set jdbc_query_result_format = 'JSON'"));
+                Scope.getCurrentScope().getSingleton(ExecutorService.class).getExecutor("jdbc", this).execute(new RawParameterizedSqlStatement("alter session set jdbc_query_result_format = 'JSON'"));
             } catch (DatabaseException e) {
                 Scope.getCurrentScope().getLog(getClass()).warning(e.getMessage(), e);
             }

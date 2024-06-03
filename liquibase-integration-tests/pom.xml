@@ -38,7 +38,7 @@
         <dependency>
             <groupId>info.picocli</groupId>
             <artifactId>picocli</artifactId>
-            <version>4.7.5</version>
+            <version>4.7.6</version>
             <scope>test</scope>
         </dependency>
 
@@ -55,6 +55,9 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-surefire-plugin</artifactId>
+                <configuration>
+                    <failIfNoTests>${surefire.failIfNoTests}</failIfNoTests>
+                </configuration>
                 </plugin>
         </plugins>
         <testResources>
@@ -76,9 +79,20 @@
             <activation>
                 <activeByDefault>false</activeByDefault>
             </activation>
-            <properties>
-                <skipTests>true</skipTests>
-            </properties>
+
+            <build>
+                <plugins>
+                    <plugin>
+                        <artifactId>maven-surefire-plugin</artifactId>
+                        <configuration>
+                            <includes>
+                                <include>**/*ExtensionTests.java</include>
+                                <include>**/*ExtensionTests.groovy</include>
+                            </includes>
+                        </configuration>
+                    </plugin>
+                </plugins>
+            </build>
         </profile>
     </profiles>
 

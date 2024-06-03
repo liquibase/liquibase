@@ -1,8 +1,9 @@
 package liquibase.util;
 
-import liquibase.changelog.ChangeSet;
 import liquibase.GlobalConfiguration;
+import liquibase.changelog.ChangeSet;
 import liquibase.resource.ResourceAccessor;
+import org.apache.commons.io.IOUtils;
 
 import java.io.*;
 import java.nio.charset.Charset;
@@ -16,23 +17,20 @@ public abstract class StreamUtil {
         return GlobalConfiguration.OUTPUT_LINE_SEPARATOR.getCurrentValue();
     }
 
+    /**
+     * @deprecated use {@link IOUtils#copy(InputStream, OutputStream)}
+     */
+    @Deprecated
     public static void copy(InputStream inputStream, OutputStream outputStream) throws IOException {
-        byte[] bytes = new byte[1024];
-        int r = inputStream.read(bytes);
-        while (r > 0) {
-            outputStream.write(bytes, 0, r);
-            r = inputStream.read(bytes);
-        }
+        IOUtils.copy(inputStream, outputStream);
     }
 
+    /**
+     * @deprecated use {@link IOUtils#toByteArray(InputStream)}
+     */
+    @Deprecated
     public static byte[] readStream(InputStream stream) throws IOException {
-        try (ByteArrayOutputStream buffer = new ByteArrayOutputStream()) {
-
-            copy(stream, buffer);
-            buffer.flush();
-
-            return buffer.toByteArray();
-        }
+        return IOUtils.toByteArray(stream);
     }
 
     /**
@@ -47,16 +45,8 @@ public abstract class StreamUtil {
      * If encoding is null, use {@link GlobalConfiguration#FILE_ENCODING}
      */
     public static String readStreamAsString(InputStream stream, String encoding) throws IOException {
-        StringBuilder result = new StringBuilder();
-
         try (Reader reader = readStreamWithReader(stream, encoding)) {
-
-            char[] buffer = new char[2048];
-            int read;
-            while ((read = reader.read(buffer)) > -1) {
-                result.append(buffer, 0, read);
-            }
-            return result.toString();
+            return IOUtils.toString(reader);
         }
     }
 

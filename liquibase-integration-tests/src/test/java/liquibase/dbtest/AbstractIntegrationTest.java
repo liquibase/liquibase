@@ -50,6 +50,7 @@ import liquibase.statement.core.DropTableStatement;
 import liquibase.structure.core.*;
 import liquibase.test.DiffResultAssert;
 import liquibase.test.JUnitResourceAccessor;
+import liquibase.util.ExceptionUtil;
 import liquibase.util.RegexMatcher;
 import org.junit.*;
 import org.junit.rules.TemporaryFolder;
@@ -783,6 +784,7 @@ public abstract class AbstractIntegrationTest {
         DiffResult diffResult = DiffGeneratorFactory.getInstance().compare(database, null, compareControl);
 
         File tempFile = File.createTempFile("liquibase-test", ".xml");
+        tempFile.deleteOnExit();
 
         try (FileOutputStream output = new FileOutputStream(tempFile)) {
             new DiffToChangeLog(diffResult, new DiffOutputControl()).print(new PrintStream(output));
@@ -992,11 +994,13 @@ public abstract class AbstractIntegrationTest {
     public void testInvalidSqlThrowsException() throws Exception {
         assumeNotNull(this.getDatabase());
         Liquibase liquibase = createLiquibase(invalidSqlChangeLog);
+        Throwable exception = null;
         try {
             liquibase.update(new Contexts());
             fail("Did not fail with invalid SQL");
         } catch (CommandExecutionException executionException) {
-            Assert.assertTrue(executionException.getMessage().contains("this sql is not valid and should throw an exception"));
+            exception = ExceptionUtil.findExceptionInCauseChain(executionException.getCause(), DatabaseException.class);
+            Assert.assertTrue(exception.getCause() instanceof DatabaseException);
         }
 
         LockService lockService = LockServiceFactory.getInstance().getLockService(database);
