@@ -8,7 +8,7 @@ import liquibase.diff.compare.DatabaseObjectComparatorFactory;
 import liquibase.exception.DatabaseException;
 import liquibase.exception.UnexpectedLiquibaseException;
 import liquibase.executor.ExecutorService;
-import liquibase.statement.core.RawSqlStatement;
+import liquibase.statement.core.RawParameterizedSqlStatement;
 import liquibase.structure.DatabaseObject;
 import liquibase.structure.core.Schema;
 import liquibase.structure.core.Table;
@@ -108,9 +108,9 @@ public class SnapshotGeneratorFactory {
         if ((example instanceof Table) && (liquibaseTableNames.stream().anyMatch(tableName -> example.getName().equals(tableName)))) {
             try {
                 Scope.getCurrentScope().getSingleton(ExecutorService.class).getExecutor("jdbc", database).queryForInt(
-                        new RawSqlStatement("SELECT COUNT(*) FROM " +
+                        new RawParameterizedSqlStatement(String.format("SELECT COUNT(*) FROM %s",
                                 database.escapeObjectName(database.getLiquibaseCatalogName(),
-                                        database.getLiquibaseSchemaName(), example.getName(), Table.class)));
+                                        database.getLiquibaseSchemaName(), example.getName(), Table.class))));
                 return true;
             } catch (DatabaseException e) {
                 if (database instanceof PostgresDatabase) { // throws "current transaction is aborted" unless we roll back the connection

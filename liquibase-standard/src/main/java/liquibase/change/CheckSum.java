@@ -24,13 +24,13 @@ import java.util.regex.Pattern;
  * It is not up to this class to determine what should be storedCheckSum-ed, it simply hashes what is passed to it.
  */
 @NoArgsConstructor
+@Getter
 @Setter
 public final class CheckSum {
     /**
      * -- GETTER --
      *  Return the Checksum Algorithm version for this CheckSum
      */
-    @Getter
     private int version;
     private String storedCheckSum;
 
