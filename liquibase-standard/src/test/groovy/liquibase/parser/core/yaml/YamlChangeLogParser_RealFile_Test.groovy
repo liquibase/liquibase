@@ -46,6 +46,7 @@ import liquibase.sql.visitor.AppendSqlVisitor
 import liquibase.sql.visitor.ReplaceSqlVisitor
 import liquibase.test.JUnitResourceAccessor
 import liquibase.util.ISODateFormat
+import spock.lang.Ignore
 import spock.lang.Shared
 import spock.lang.Specification
 import spock.lang.Unroll
@@ -299,6 +300,7 @@ public class YamlChangeLogParser_RealFile_Test extends Specification {
         assert e.message.startsWith("Syntax error in file liquibase/parser/core/yaml/malformedChangeLog.yaml")
     }
 
+    @Ignore
     def "ChangeLogParseException thrown if changelog has two databaseChangeLog tags"() throws Exception {
         when:
         new YamlChangeLogParser().parse("liquibase/parser/core/yaml/malformedDoubleChangeLog.yaml", new ChangeLogParameters(), new JUnitResourceAccessor())

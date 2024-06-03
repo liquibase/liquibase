@@ -6,7 +6,6 @@ Liquibase ships with 3rd party components using the following licenses:
 - Apache 2.0 License - https://opensource.org/licenses/Apache-2.0
 - BSD 3-Clause License - https://opensource.org/licenses/BSD-3-Clause
 - MIT License - https://opensource.org/licenses/MIT
-- TrueLicense Commercial License
 - Oracle FDHUT License
 
 Libraries and their licenses:
@@ -21,6 +20,7 @@ Apache 2.0 License
 - org.liquibase:liquibase-core
 - io.github.java-diff-utils:java-diff-utils
 - org.mvel:mvel2
+- net.java.truelicense:truelicense
 
 MIT License
 - com.github.vertical-blank:sql-formatter
@@ -28,9 +28,6 @@ MIT License
 
 BSD 3-Clause License
 - highlight.js
-
-TrueLicense Commercial License
-- net.java.truelicense:truelicense
 
 Oracle FDHUT License
 - ojdbc8.jar
