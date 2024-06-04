@@ -88,13 +88,12 @@ jobs:
           secret-ids: |
             LIQUIBASEOSS_USERNAME, liquibaseoss_usrname
             LIQUIBASEOSS_PASSWORD, liquibaseoss_pwd
-            LIQUIBASEOSS_URL, liquibaseoss_url
 
       - name: Run tests
         run: |
           ./mvnw -B "-DtrimStackTrace=false" \
             "-Dliquibase.sdk.testSystem.test=snowflake" \
-            "-Dliquibase.sdk.testSystem.snowflake.url=${{ env.LIQUIBASEOSS_URL }}" \
+            "-Dliquibase.sdk.testSystem.snowflake.url=jdbc:${{ secrets.LIQUIBASEOSS_URL }}&schema=PUBLIC&db=LIQUIBASEOSS" \
             "-Dliquibase.sdk.testSystem.snowflake.username=${{ env.LIQUIBASEOSS_USERNAME }}" \
             "-Dliquibase.sdk.testSystem.snowflake.password=${{ env.LIQUIBASEOSS_PASSWORD }}" \
             "-Dtest=*IntegrationTest,*ExecutorTest" \
