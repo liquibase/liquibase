@@ -93,7 +93,7 @@ jobs:
         run: |
           ./mvnw -B "-DtrimStackTrace=false" \
             "-Dliquibase.sdk.testSystem.test=snowflake" \
-            "-Dliquibase.sdk.testSystem.snowflake.url=jdbc:${{ secrets.LIQUIBASEOSS_URL }}&schema=PUBLIC&db=SMASSARO" \
+            "-Dliquibase.sdk.testSystem.snowflake.url=jdbc:${{ secrets.LIQUIBASEOSS_URL }}&schema=PUBLIC&db=LIQUIBASEOSS" \
             "-Dliquibase.sdk.testSystem.snowflake.username=${{ env.LIQUIBASEOSS_USERNAME }}" \
             "-Dliquibase.sdk.testSystem.snowflake.password=${{ env.LIQUIBASEOSS_PASSWORD }}" \
             "-Dtest=*IntegrationTest,*ExecutorTest" \
