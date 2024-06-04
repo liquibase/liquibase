@@ -121,14 +121,14 @@ jobs:
         stack_id: ${{ needs.deploy-ephemeral-cloud-infra.outputs.stack_id }}
         snowflake_oss: true
 
-  # run-slack-notification:
-  #   runs-on: ubuntu-latest
-  #   if: failure()
-  #   needs: [ snowflake-its, destroy-ephemeral-cloud-infra ]
-  #   steps:
-  #     - name: Dispatch event to build-logic repository
-  #       uses: peter-evans/repository-dispatch@v3
-  #       with:
-  #         token: ${{ secrets.LIQUIBOT_PAT_GPM_ACCESS }}
-  #         repository: liquibase/build-logic
-  #         event-type: test-failure           
+  run-slack-notification:
+    runs-on: ubuntu-latest
+    if: failure()
+    needs: [ snowflake-its, destroy-ephemeral-cloud-infra ]
+    steps:
+      - name: Dispatch event to build-logic repository
+        uses: peter-evans/repository-dispatch@v3
+        with:
+          token: ${{ secrets.LIQUIBOT_PAT_GPM_ACCESS }}
+          repository: liquibase/build-logic
+          event-type: test-failure           
