@@ -124,7 +124,7 @@ jobs:
   run-slack-notification:
     runs-on: ubuntu-latest
     if: failure()
-    needs: [ snowflake-its, destroy-ephemeral-cloud-infra ]
+    needs: [ snowflake-its ]
     steps:
       - name: Dispatch event to build-logic repository
         uses: peter-evans/repository-dispatch@v3
