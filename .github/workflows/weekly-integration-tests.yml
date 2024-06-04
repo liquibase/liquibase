@@ -8,7 +8,7 @@ on:
 jobs:
 
   deploy-ephemeral-cloud-infra:
-    uses: liquibase/build-logic/.github/workflows/ephemeral-cloud-infra.yml@DAT-16824-snowflake
+    uses: liquibase/build-logic/.github/workflows/ephemeral-cloud-infra.yml@main
     secrets: inherit
     with:
         deploy: true
@@ -115,7 +115,7 @@ jobs:
   destroy-ephemeral-cloud-infra:
     if: always()
     needs: [ deploy-ephemeral-cloud-infra, snowflake-its ]
-    uses: liquibase/build-logic/.github/workflows/ephemeral-cloud-infra.yml@DAT-16824-snowflake
+    uses: liquibase/build-logic/.github/workflows/ephemeral-cloud-infra.yml@main
     secrets: inherit
     with:
         destroy: true
