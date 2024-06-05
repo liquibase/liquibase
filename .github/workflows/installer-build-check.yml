@@ -34,7 +34,7 @@ jobs:
         with:
           workflow: run-tests.yml
           workflow_conclusion: success
-          branch: master
+          branch: ${{ github.head_ref }}
           name: liquibase-artifacts
           path: re-version/final
 
