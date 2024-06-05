@@ -37,6 +37,9 @@ jobs:
           branch: ${{ github.head_ref }}
           name: liquibase-artifacts
           path: re-version/final
+      
+      - name: Set branch variable
+        run: echo "BRANCH=${GITHUB_REF#refs/heads/}" >> $GITHUB_ENV
 
       - name: Re-version Installers
         env:
@@ -48,7 +51,7 @@ jobs:
           INSTALL4J_WINDOWS_KEY: ${{ secrets.INSTALL4J_WINDOWS_KEY }}
           INSTALL4J_WINDOWS_KEY_PASSWORD: ${{ secrets.INSTALL4J_WINDOWS_KEY_PASSWORD }}
           GPG_PASSWORD: ${{ secrets.GPG_PASSPHRASE }}
-          BRANCH: ${{ github.head_ref }}
+          BRANCH: ${{ github.ref_name || github.head_ref }}
         run: |
           mkdir -p liquibase-dist/target/keys
           echo "Saving apple key"
