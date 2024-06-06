@@ -18,7 +18,16 @@ jobs:
     # Checkout the code to the GitHub runner
     - name: Checkout Code
       uses: actions/checkout@v4
+      
+    - name: Set up JDK
+      uses: actions/setup-java@v4
+      with:
+        distribution: 'temurin'
+        java-version: '17'
 
+    - name: Install Maven dependencies (excluding test scope)
+      run: mvn install -DskipTests -Dmaven.test.skip=true
+      
     - name: run FOSSA CLI
       uses: fossas/fossa-action@main
       with:
