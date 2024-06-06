@@ -170,6 +170,7 @@ public class LiquibaseLauncher {
                 new File("./liquibase_libs"),
                 new File(liquibaseHome, "lib"),
                 new File(liquibaseHome, "internal/lib"),
+                new File(liquibaseHome, "internal/ext"),
         };
 
         for (File libDirFile : libDirs) {
