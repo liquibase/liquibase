@@ -139,7 +139,7 @@
 
 		<dependencySet>
 			<outputFileNameMapping>${artifact.artifactId}${dashClassifier?}.${artifact.extension}</outputFileNameMapping>
-			<outputDirectory>internal/ext</outputDirectory>
+			<outputDirectory>internal/extensions</outputDirectory>
 			<useTransitiveFiltering>true</useTransitiveFiltering>
 			<scope>runtime</scope>
 			<includes>
