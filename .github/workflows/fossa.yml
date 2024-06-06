@@ -69,7 +69,7 @@ jobs:
           ]
 
     - name: Install Maven dependencies (excluding test scope)
-      run: mvn install -DskipTests -Dmaven.test.skip=true
+      run: mvn clean install -DskipTests -pl '!liquibase-cdi-jakarta'
       
     - name: run FOSSA CLI
       uses: fossas/fossa-action@main
