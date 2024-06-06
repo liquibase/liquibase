@@ -106,6 +106,7 @@
                             <include>${project.groupId}:liquibase-standard</include>
                             <include>${project.groupId}:liquibase-cli</include>
                             <include>${project.groupId}:liquibase-snowflake</include>
+                            <include>com.google.code.gson:gson</include>
                         </includes>
                     </artifactSet>
                     <filters>

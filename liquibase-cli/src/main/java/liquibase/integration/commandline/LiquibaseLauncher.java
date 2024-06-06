@@ -1,9 +1,11 @@
 package liquibase.integration.commandline;
 
+import com.google.gson.Gson;
 import liquibase.Scope;
+import liquibase.ui.DefaultInputHandler;
 import liquibase.util.StringUtil;
 
-import java.io.File;
+import java.io.*;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLClassLoader;
@@ -89,7 +91,8 @@ public class LiquibaseLauncher {
         }
         File liquibaseHome = new File(liquibaseHomeEnv);
 
-        List<URL> libUrls = getLibUrls(liquibaseHome);
+        List<Map<String, Object>> lpmJson = getLpmJson();
+        List<URL> libUrls = getLibUrls(liquibaseHome, lpmJson);
         checkForDuplicatedJars(libUrls);
 
         if (debug) {
@@ -114,6 +117,14 @@ public class LiquibaseLauncher {
         }
 
         cli.getMethod("main", String[].class).invoke(null, new Object[]{args});
+    }
+
+    private static List<Map<String, Object>> getLpmJson() throws IOException {
+        String url = "https://raw.githubusercontent.com/liquibase/liquibase-package-manager/master/internal/app/packages.json";
+        ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
+        download(url, outputStream);
+        Gson gson = new Gson();
+        return gson.fromJson(outputStream.toString(), List.class);
     }
 
     private static ClassLoader getClassLoader(String parentLoaderSetting) {
@@ -162,7 +173,7 @@ public class LiquibaseLauncher {
         });
     }
 
-    private static List<URL> getLibUrls(File liquibaseHome) throws MalformedURLException {
+    private static List<URL> getLibUrls(File liquibaseHome, List<Map<String, Object>> lpmJson) throws MalformedURLException {
         List<URL> urls = new ArrayList<>();
         urls.add(new File(liquibaseHome, "internal/lib/liquibase-core.jar").toURI().toURL()); //make sure liquibase-core.jar is first in the list
 
@@ -188,6 +199,7 @@ public class LiquibaseLauncher {
             for (File lib : files) {
                 if (lib.getName().toLowerCase(Locale.US).endsWith(".jar") && !lib.getName().toLowerCase(Locale.US).equals("liquibase-core.jar")) {
                     try {
+                        checkForUpdate(lib, lpmJson);
                         urls.add(lib.toURI().toURL());
                         debug("Added " + lib.getAbsolutePath() + " to classpath");
                     } catch (Exception e) {
@@ -205,6 +217,59 @@ public class LiquibaseLauncher {
             }
         }
         return urls;
+    }
+
+    private static void checkForUpdate(File lib, List<Map<String, Object>> lpmJson) throws IOException {
+        VersionUtils.LibraryInfo libraryInfo = VersionUtils.getLibraryInfo(lib);
+        Matcher m = Pattern.compile(DEPENDENCY_JAR_VERSION_PATTERN).matcher(lib.getName());
+        boolean found = m.find();
+        if (!found) {
+            return;
+        }
+        String currentName = m.group(1);
+        Optional<Map<String, Object>> lpmDep = lpmJson.stream().filter(pkg -> pkg.get("name").equals(currentName)).findFirst();
+        if (lpmDep.isPresent()) {
+            String currentVersion = libraryInfo.version;
+            List<Map<String, String>> lpmVersions = (List<Map<String, String>>) lpmDep.get().get("versions");
+            Map<String, String> latestLpmDep = lpmVersions.stream().skip(lpmVersions.size() - 1).findFirst().orElse(null);
+            if (latestLpmDep != null) {
+                String latestVersion = latestLpmDep.get("tag");
+                // todo this needs to intelligently compare versions
+                if (!currentVersion.equals(latestVersion)) {
+                    Scope.getCurrentScope().getUI().sendMessage(String.format("WARNING: %s is out of date. Current version: %s, Latest version: %s", libraryInfo.name, currentVersion, latestVersion));
+                    String update = Scope.getCurrentScope().getUI().prompt("Would you like to update this dependency? (y/n)", "y", new DefaultInputHandler<>(), String.class);
+                    if (update.equalsIgnoreCase("y")) {
+                        boolean delete = lib.delete();
+                        if (!delete) {
+                            throw new IOException("Could not delete " + lib.getAbsolutePath());
+                        }
+                        String url = latestLpmDep.get("path");
+                        String newName = url.substring(url.lastIndexOf("/") + 1);
+                        File newFile = new File(lib.getParentFile(), newName);
+                        Scope.getCurrentScope().getUI().sendMessage("Downloading " + url + " to " + newFile.getAbsolutePath());
+                        downloadFile(url, newFile);
+                    }
+                }
+            }
+        }
+    }
+
+    private static void downloadFile(String fileURL, File destinationFile) throws IOException {
+        try (FileOutputStream outputStream = new FileOutputStream(destinationFile)) {
+            download(fileURL, outputStream);
+        }
+    }
+
+
+    private static void download(String fileURL, OutputStream destination) throws IOException {
+        try (InputStream inputStream = new BufferedInputStream(new URL(fileURL).openStream())) {
+
+            byte[] buffer = new byte[4096];
+            int bytesRead;
+            while ((bytesRead = inputStream.read(buffer)) != -1) {
+                destination.write(buffer, 0, bytesRead);
+            }
+        }
     }
 
     //

@@ -73,7 +73,7 @@ public class VersionUtils {
         return libraryInfo;
     }
 
-    private static LibraryInfo getLibraryInfo(File pathEntryFile) throws IOException {
+    public static LibraryInfo getLibraryInfo(File pathEntryFile) throws IOException {
         try (final JarFile jarFile = new JarFile(pathEntryFile)) {
             final LibraryInfo libraryInfo = new LibraryInfo();
             libraryInfo.file = pathEntryFile;
