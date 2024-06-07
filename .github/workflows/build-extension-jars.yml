@@ -45,7 +45,12 @@ jobs:
       - uses: actions/checkout@v4
 
       - name: Checkout Dependencies
+        env:
+          GIT_USERNAME: "liquibot"
+          GIT_PASSWORD: ${{ secrets.GITHUB_TOKEN }}
         run: |
+          git config --global credential.helper store
+          echo "https://$GIT_USERNAME:$GIT_PASSWORD@github.com" > ~/.git-credentials
           for dep in ${{ fromJson(inputs.dependencies) }}; do
             echo "Checking out $dep"
             git clone https://github.com/liquibase/$dep.git $dep
