@@ -78,16 +78,16 @@ jobs:
           run_id=${{ github.run_id }}
           echo "uber_jar_runId=${run_id}" >> $GITHUB_OUTPUT
 
-      - name: Download liquibase-pro-azure-artifacts
-        uses: liquibase/action-download-artifact@v2-liquibase
-        with:
-          workflow: build-azure-uber-jar.yml
-          run_id: ${{ steps.get_run_id.outputs.run_id }}
-          name: liquibase-pro-azure-artifacts
-          path: liquibase-pro/liquibase-azure-deps
+      # - name: Download liquibase-pro-azure-artifacts
+      #   uses: liquibase/action-download-artifact@v2-liquibase
+      #   with:
+      #     workflow: build-azure-uber-jar.yml
+      #     run_id: ${{ steps.get_run_id.outputs.run_id }}
+      #     name: liquibase-pro-azure-artifacts
+      #     path: liquibase-pro/liquibase-azure-deps
 
       - name: Download liquibase-bigquery-artifacts
-        uses: liquibase/action-download-artifact@v2-liquibase
+        uses: dawidd6/action-download-artifact@v5
         with:
           workflow: build-bigquery-jars.yml
           run_id: ${{ steps.get_run_id.outputs.run_id }}
@@ -95,7 +95,7 @@ jobs:
           path: liquibase-bigquery-artifacts
 
       - name: Download liquibase-commercial-bigquery-artifacts
-        uses: liquibase/action-download-artifact@v2-liquibase
+        uses: dawidd6/action-download-artifact@v5
         with:
           workflow: build-bigquery-jars.yml
           run_id: ${{ steps.get_run_id.outputs.run_id }}
@@ -134,7 +134,7 @@ jobs:
           
           ##Sign Files
           ## liquibase-azure-deps, liquibase-bigquery and liquibase-commercial-bigquery are already on its correct version. Check reusable workflow: build-azure-uber-jar.yml and build-bigquery-jars.yml
-          mv liquibase-pro/liquibase-azure-deps/* re-version/out
+          #mv liquibase-pro/liquibase-azure-deps/* re-version/out
           mv liquibase-bigquery/* re-version/out
           mv liquibase-commercial-bigquery/* re-version/out
           
@@ -146,7 +146,7 @@ jobs:
           mv re-version/out/liquibase-commercial-${{ needs.setup.outputs.version }}.jar re-version/final
           mv re-version/out/liquibase-${{ needs.setup.outputs.version }}.tar.gz re-version/final
           mv re-version/out/liquibase-${{ needs.setup.outputs.version }}.zip re-version/final
-          mv re-version/out/liquibase-azure-deps-${{ needs.setup.outputs.version }}.jar re-version/final/liquibase-azure-deps-${{ needs.setup.outputs.version }}.jar
+          #mv re-version/out/liquibase-azure-deps-${{ needs.setup.outputs.version }}.jar re-version/final/liquibase-azure-deps-${{ needs.setup.outputs.version }}.jar
           mv re-version/out/liquibase-bigquery-${{ needs.setup.outputs.version }}.jar re-version/final/liquibase-bigquery-${{ needs.setup.outputs.version }}.jar
           mv re-version/out/liquibase-commercial-bigquery-${{ needs.setup.outputs.version }}.jar re-version/final/liquibase-commercial-bigquery-${{ needs.setup.outputs.version }}.jar
           
