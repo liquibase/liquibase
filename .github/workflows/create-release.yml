@@ -12,6 +12,9 @@ on:
         description: 'RunId of liquibase/liquibase artifacts to attach'
         required: true
 
+env:
+  MAVEN_VERSION: '3.9.2'
+  
 jobs:
   setup:
     name: Setup
@@ -64,13 +67,13 @@ jobs:
           token: ${{ secrets.BOT_TOKEN }}
 
 
-      # - name: Download liquibase-artifacts
-      #   uses: liquibase/action-download-artifact@v2-liquibase
-      #   with:
-      #     workflow: run-tests.yml
-      #     run_id: ${{ needs.setup.outputs.runId }}
-      #     name: liquibase-artifacts
-      #     path: download/liquibase-artifacts
+      - name: Download liquibase-artifacts
+        uses: liquibase/action-download-artifact@v2-liquibase
+        with:
+          workflow: run-tests.yml
+          run_id: ${{ needs.setup.outputs.runId }}
+          name: liquibase-artifacts
+          path: download/liquibase-artifacts
 
       - name: Get Current Run ID
         id: get_run_id
@@ -85,6 +88,11 @@ jobs:
       #     run_id: ${{ steps.get_run_id.outputs.run_id }}
       #     name: liquibase-pro-azure-artifacts
       #     path: liquibase-pro/liquibase-azure-deps
+
+      - name: Set up Maven
+        uses: stCarolas/setup-maven@v5
+        with:
+          maven-version: ${{ env.MAVEN_VERSION }}
 
       - name: maven-settings-xml-action
         uses: whelk-io/maven-settings-xml-action@v22
@@ -127,12 +135,8 @@ jobs:
                 "password": "${{ secrets.LIQUIBOT_PAT_GPM_ACCESS }}"
               }
             ]
-
+              
       - name: Get bigquery artifacts
-        env:
-          GITHUB_TOKEN: ${{ secrets.LIQUIBOT_PAT_GPM_ACCESS }}
-          MAVEN_USERNAME: liquibot
-          MAVEN_PASSWORD: ${{ secrets.LIQUIBOT_PAT_GPM_ACCESS }}
         run: |
           mvn dependency:get -DgroupId=org.liquibase.ext -DartifactId=liquibase-bigquery -Dversion=${{ needs.setup.outputs.version }} -Dtransitive=false || echo "Failed to download liquibase-bigquery artifact"
           mvn dependency:get -DgroupId=org.liquibase.ext -DartifactId=liquibase-commercial-bigquery -Dversion=${{ needs.setup.outputs.version }} -Dtransitive=false || echo "Failed to download liquibase-commercial-bigquery artifact"
