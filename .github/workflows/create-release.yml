@@ -87,7 +87,7 @@ jobs:
       #     path: liquibase-pro/liquibase-azure-deps
 
       - name: Download liquibase-bigquery-artifacts
-        uses: dawidd6/action-download-artifact@v5
+        uses: liquibase/action-download-artifact@v2-liquibase
         with:
           workflow: build-bigquery-jars.yml
           run_id: ${{ steps.get_run_id.outputs.run_id }}
@@ -95,7 +95,7 @@ jobs:
           path: liquibase-bigquery-artifacts
 
       - name: Download liquibase-commercial-bigquery-artifacts
-        uses: dawidd6/action-download-artifact@v5
+        uses: liquibase/action-download-artifact@v2-liquibase
         with:
           workflow: build-bigquery-jars.yml
           run_id: ${{ steps.get_run_id.outputs.run_id }}
