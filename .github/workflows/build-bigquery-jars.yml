@@ -21,6 +21,7 @@ jobs:
   build:
     name: Build & Deploy
     runs-on: ubuntu-22.04
+    continue-on-error: true
     strategy:
       fail-fast: false
       matrix:
@@ -87,8 +88,8 @@ jobs:
                 }
               },
               {
-                "id": "liquibase-bigquery-commercial",
-                "url": "https://maven.pkg.github.com/liquibase/liquibase-bigquery-commercial",
+                "id": "liquibase-commercial-bigquery",
+                "url": "https://maven.pkg.github.com/liquibase/liquibase-commercial-bigquery",
                 "releases": {
                   "enabled": "true"
                 },
@@ -116,7 +117,7 @@ jobs:
                 "password": "${{ secrets.LIQUIBOT_PAT }}"
               },
               {
-                "id": "liquibase-bigquery-commercial",
+                "id": "liquibase-commercial-bigquery",
                 "username": "liquibot",
                 "password": "${{ secrets.LIQUIBOT_PAT }}"
               }
@@ -134,7 +135,6 @@ jobs:
           cd ..
 
       - name: Deploy ${{ matrix.repo }} extension to GitHub Packages
-        continue-on-error: true
         env:
           MAVEN_USERNAME: liquibot
           MAVEN_PASSWORD: ${{ secrets.LIQUIBOT_PAT }}
