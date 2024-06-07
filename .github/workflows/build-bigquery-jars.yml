@@ -81,7 +81,7 @@ jobs:
               {
                 "id": "liquibase",
                 "username": "liquibot",
-                "password": "${{ secrets.LIQUIBOT_PAT }}"
+                "password": "${{ secrets.LIQUIBOT_PAT_GPM_ACCESS }}"
               },
               {
                 "id": "liquibase-pro",
@@ -102,9 +102,6 @@ jobs:
           cd ..
 
       - name: Deploy ${{ matrix.repo }} extension to GitHub Packages
-        env:
-          MAVEN_USERNAME: liquibot
-          MAVEN_PASSWORD: ${{ secrets.LIQUIBOT_PAT_GPM_ACCESS }}
         run: |
           cd ${{ matrix.repo }}
           OUTPUT=$(mvn deploy:deploy-file -Dfile=./target/${{ matrix.repo }}-${{ inputs.liquibase-version }}.jar -DpomFile=pom.xml -DrepositoryId=liquibase -Durl=https://maven.pkg.github.com/liquibase/${{ matrix.repo }} | tee /dev/fd/2)
