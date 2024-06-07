@@ -112,6 +112,15 @@ jobs:
               }
             ]
 
+      - name: Prepare reversion scripts
+        run: |
+          scripts_branch=${{ github.ref }}
+          mkdir -p $PWD/.github/util/
+          curl -o $PWD/.github/util/re-version.sh https://raw.githubusercontent.com/liquibase/liquibase/$scripts_branch/.github/util/re-version.sh
+          curl -o $PWD/.github/util/ManifestReversion.java https://raw.githubusercontent.com/liquibase/liquibase/$scripts_branch/.github/util/ManifestReversion.java
+          chmod +x $PWD/.github/util/re-version.sh
+          chmod +x $PWD/.github/util/ManifestReversion.java
+
       - name: Re-version and build Dependencies
         continue-on-error: true
         run: |
@@ -120,9 +129,12 @@ jobs:
             dep=$(echo $dep | xargs)  # Remove leading and trailing whitespaces
             echo "Re-versioning $dep"
             cd $dep
-            mvn versions:set -DnewVersion=${{ inputs.liquibase-version }}
+            sed -i "s/<liquibase.version>.*<\/liquibase.version>/<liquibase.version>0-SNAPSHOT<\/liquibase.version>/" pom.xml
             mvn clean install -DskipTests
+            $PWD/.github/util/re-version.sh ./target "${{ inputs.liquibase-version  }}" "${{ github.ref }}" ${dep}
             mvn deploy:deploy-file -Dfile=./target/${dep}-${{ inputs.liquibase-version }}.jar -DpomFile=pom.xml -DrepositoryId=liquibase -Durl=https://maven.pkg.github.com/liquibase/$dep
+            mvn deploy:deploy-file -Dfile=./target/${dep}-${{ inputs.liquibase-version }}-sources.jar -DpomFile=pom.xml -DrepositoryId=liquibase -Durl=https://maven.pkg.github.com/liquibase/$dep
+            mvn deploy:deploy-file -Dfile=./target/${dep}-${{ inputs.liquibase-version }}-javadoc.jar -DpomFile=pom.xml -DrepositoryId=liquibase -Durl=https://maven.pkg.github.com/liquibase/$dep
             cd ..
           done
 
@@ -140,8 +152,11 @@ jobs:
             echo "Checking out and building $ext"
             git clone https://github.com/liquibase/$ext.git $ext
             cd $ext
-            mvn versions:set -DnewVersion=${{ inputs.liquibase-version }}
+            sed -i "s/<liquibase.version>.*<\/liquibase.version>/<liquibase.version>0-SNAPSHOT<\/liquibase.version>/" pom.xml
             mvn clean install -DskipTests
+            $PWD/.github/util/re-version.sh ./target "${{ inputs.liquibase-version  }}" "${{ github.ref }}" ${ext}
             mvn deploy:deploy-file -Dfile=./target/${ext}-${{ inputs.liquibase-version }}.jar -DpomFile=pom.xml -DrepositoryId=liquibase -Durl=https://maven.pkg.github.com/liquibase/$ext
+            mvn deploy:deploy-file -Dfile=./target/${ext}-${{ inputs.liquibase-version }}-sources.jar -DpomFile=pom.xml -DrepositoryId=liquibase -Durl=https://maven.pkg.github.com/liquibase/$ext
+            mvn deploy:deploy-file -Dfile=./target/${ext}-${{ inputs.liquibase-version }}-javadoc.jar -DpomFile=pom.xml -DrepositoryId=liquibase -Durl=https://maven.pkg.github.com/liquibase/$ext
             cd ..
           done
