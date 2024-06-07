@@ -69,7 +69,7 @@ jobs:
           ]
 
     - name: Install Maven dependencies (excluding test scope)
-      run: mvn clean install -Pexclude-tests
+      run: mvn clean install -DskipTests
       
     - name: run FOSSA CLI
       uses: fossas/fossa-action@main
