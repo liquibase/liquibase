@@ -41,88 +41,60 @@ jobs:
   #    liquibase-version: ${{ needs.setup.outputs.version }}
   #  secrets: inherit
   
+  build-bigquery-jars:
+   needs: [ setup ]
+   uses: liquibase/liquibase/.github/workflows/build-bigquery-jars.yml@DAT-17770
+   with:
+     liquibase-version: ${{ needs.setup.outputs.version }}
+   secrets: inherit
 
-  reversion:
-    needs: [ setup, build-azure-uber-jar ]
-    name: Re-version artifacts ${{ needs.setup.outputs.version }}
-    runs-on: ubuntu-22.04
-    steps:
-      - uses: actions/checkout@v4
+  # reversion:
+  #   needs: [ setup, build-azure-uber-jar ]
+  #   name: Re-version artifacts ${{ needs.setup.outputs.version }}
+  #   runs-on: ubuntu-22.04
+  #   steps:
+  #     - uses: actions/checkout@v4
 
-      - uses: actions/checkout@v4
-        name: Checkout liquibase-pro
-        with:
-          repository: liquibase/liquibase-pro
-          ref: "${{ needs.setup.outputs.branch }}"
-          path: download/repo/liquibase-pro
-          token: ${{ secrets.BOT_TOKEN }}
+  #     - uses: actions/checkout@v4
+  #       name: Checkout liquibase-pro
+  #       with:
+  #         repository: liquibase/liquibase-pro
+  #         ref: "${{ needs.setup.outputs.branch }}"
+  #         path: download/repo/liquibase-pro
+  #         token: ${{ secrets.BOT_TOKEN }}
 
 
-      - name: Download liquibase-artifacts
-        uses: liquibase/action-download-artifact@v2-liquibase
-        with:
-          workflow: run-tests.yml
-          run_id: ${{ needs.setup.outputs.runId }}
-          name: liquibase-artifacts
-          path: download/liquibase-artifacts
+  #     - name: Download liquibase-artifacts
+  #       uses: liquibase/action-download-artifact@v2-liquibase
+  #       with:
+  #         workflow: run-tests.yml
+  #         run_id: ${{ needs.setup.outputs.runId }}
+  #         name: liquibase-artifacts
+  #         path: download/liquibase-artifacts
 
-      - name: Get Current Run ID
-        id: get_run_id
-        run: |
-          run_id=${{ github.run_id }}
-          echo "uber_jar_runId=${run_id}" >> $GITHUB_OUTPUT
+  #     - name: Get Current Run ID
+  #       id: get_run_id
+  #       run: |
+  #         run_id=${{ github.run_id }}
+  #         echo "uber_jar_runId=${run_id}" >> $GITHUB_OUTPUT
 
-      - name: Download liquibase-pro-azure-artifacts
-        uses: liquibase/action-download-artifact@v2-liquibase
-        with:
-          workflow: build-azure-uber-jar.yml
-          run_id: ${{ steps.get_run_id.outputs.run_id }}
-          name: liquibase-pro-azure-artifacts
-          path: liquibase-pro/liquibase-azure-deps
+  #     - name: Download liquibase-pro-azure-artifacts
+  #       uses: liquibase/action-download-artifact@v2-liquibase
+  #       with:
+  #         workflow: build-azure-uber-jar.yml
+  #         run_id: ${{ steps.get_run_id.outputs.run_id }}
+  #         name: liquibase-pro-azure-artifacts
+  #         path: liquibase-pro/liquibase-azure-deps
 
-      - name: Set up JDK
-        uses: actions/setup-java@v4
-        with:
-          java-version: '8'
-          distribution: 'adopt'
-          gpg-private-key: ${{ secrets.GPG_SECRET }}
-          gpg-passphrase: GPG_PASSPHRASE
-        env:
-          GPG_PASSWORD: ${{ secrets.GPG_PASSPHRASE }}
-          
-      - uses: actions/checkout@v4
-        name: Checkout liquibase-bigquery
-        with:
-          repository: liquibase/liquibase-bigquery
-          ref: main
-          token: ${{ secrets.BOT_TOKEN }}
-          path: liquibase-bigquery
-          
-      - uses: actions/checkout@v4
-        name: Checkout liquibase-commercial-bigquery
-        with:
-          repository: liquibase/liquibase-bigquery
-          ref: main
-          token: ${{ secrets.BOT_TOKEN }}
-          path: liquibase-commercial-bigquery
-          
-      - name: Re-version BigQuery extensions
-        run: |
-          cd liquibase-bigquery
-          mvn versions:set -DnewVersion=${{ needs.setup.outputs.version }}
-          cd ..
-          cd liquibase-commercial-bigquery
-          mvn versions:set -DnewVersion=${{ needs.setup.outputs.version }}
-          cd ..
-          
-      - name: Build and install BigQuery extensions
-        run: |
-          cd liquibase-bigquery
-          mvn clean install -DskipTests
-          cd ..
-          cd liquibase-commercial-bigquery
-          mvn clean install -DskipTests
-          cd ..
+  #     - name: Set up JDK
+  #       uses: actions/setup-java@v4
+  #       with:
+  #         java-version: '8'
+  #         distribution: 'adopt'
+  #         gpg-private-key: ${{ secrets.GPG_SECRET }}
+  #         gpg-passphrase: GPG_PASSPHRASE
+  #       env:
+  #         GPG_PASSWORD: ${{ secrets.GPG_PASSPHRASE }}
 
   #     - name: Re-version Artifacts
   #       env:
