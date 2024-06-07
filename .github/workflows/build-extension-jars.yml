@@ -120,7 +120,7 @@ jobs:
         uses: actions/upload-artifact@v3
         with:
           name: ${{ matrix.repo }}-artifacts
-          path: ./target/*.jar
+          path: ${{ matrix.repo }}/target/*.jar
 
   build-deploy-extensions:
     runs-on: ubuntu-22.04
