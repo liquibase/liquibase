@@ -7,6 +7,12 @@ on:
         description: 'liquibase version'
         required: true
         type: string
+  workflow_dispatch:
+    inputs:
+      liquibase-version:
+        description: 'liquibase version'
+        required: true
+        type: string
 
 env:
   MAVEN_VERSION: '3.9.2'
@@ -129,8 +135,24 @@ jobs:
       - name: Deploy BigQuery extensions to GitHub Packages
         run: |
           cd liquibase-bigquery
+          mvn help:evaluate -Dexpression="project.distributionManagement.repository.url" -Doutput=distMgmt.txt
+          if grep -q "https://maven.pkg.github.com/liquibase/liquibase-bigquery" distMgmt.txt; then
+            echo "Distribution Management already set"
+          else
+            mvn versions:set-property -Dproperty=distributionManagement.repository.url -DnewVersion=https://maven.pkg.github.com/liquibase/liquibase-bigquery
+            mvn versions:set-property -Dproperty=distributionManagement.repository.id -DnewVersion=github
+            mvn versions:set-property -Dproperty=distributionManagement.repository.name -DnewVersion="GitHub liquibase Apache Maven Packages"
+          fi
           mvn deploy -DskipTests
           cd ..
           cd liquibase-commercial-bigquery
+          mvn help:evaluate -Dexpression="project.distributionManagement.repository.url" -Doutput=distMgmt.txt
+          if grep -q "https://maven.pkg.github.com/liquibase/liquibase-commercial-bigquery" distMgmt.txt; then
+            echo "Distribution Management already set"
+          else
+            mvn versions:set-property -Dproperty=distributionManagement.repository.url -DnewVersion=https://maven.pkg.github.com/liquibase/liquibase-commercial-bigquery
+            mvn versions:set-property -Dproperty=distributionManagement.repository.id -DnewVersion=github
+            mvn versions:set-property -Dproperty=distributionManagement.repository.name -DnewVersion="GitHub liquibase Apache Maven Packages"
+          fi
           mvn deploy -DskipTests
           cd ..
