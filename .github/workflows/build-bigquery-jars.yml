@@ -123,7 +123,7 @@ jobs:
                 "id": "liquibase-bigquery-commercial",
                 "username": "liquibot",
                 "password": "${{ secrets.LIQUIBOT_PAT }}"
-              },
+              }
             ]
 
       - name: Re-version BigQuery extensions
