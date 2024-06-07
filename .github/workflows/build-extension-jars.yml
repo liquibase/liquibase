@@ -130,7 +130,7 @@ jobs:
         continue-on-error: true
         env:
           GIT_USERNAME: "liquibot"
-          GIT_PASSWORD: ${{ secrets.GITHUB_TOKEN }}
+          GIT_PASSWORD: ${{ secrets.LIQUIBOT_PAT_GPM_ACCESS }}
         run: |
           git config --global credential.helper store
           echo "https://$GIT_USERNAME:$GIT_PASSWORD@github.com" > ~/.git-credentials
