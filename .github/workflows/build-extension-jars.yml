@@ -113,6 +113,7 @@ jobs:
             ]
 
       - name: Re-version and build Dependencies
+        continue-on-error: true
         run: |
           IFS=',' read -ra DEP_ARRAY <<< "${{ inputs.dependencies }}"
           for dep in "${DEP_ARRAY[@]}"; do
@@ -121,11 +122,18 @@ jobs:
             cd $dep
             mvn versions:set -DnewVersion=${{ inputs.liquibase-version }}
             mvn clean install -DskipTests
+            mvn deploy:deploy-file -Dfile=./target/${dep}-${{ inputs.liquibase-version }}.jar -DpomFile=pom.xml -DrepositoryId=liquibase -Durl=https://maven.pkg.github.com/liquibase/$dep
             cd ..
           done
 
       - name: Checkout and build Extensions
+        continue-on-error: true
+        env:
+          GIT_USERNAME: "liquibot"
+          GIT_PASSWORD: ${{ secrets.GITHUB_TOKEN }}
         run: |
+          git config --global credential.helper store
+          echo "https://$GIT_USERNAME:$GIT_PASSWORD@github.com" > ~/.git-credentials
           IFS=',' read -ra EXT_ARRAY <<< "${{ inputs.extensions }}"
           for ext in "${EXT_ARRAY[@]}"; do
             ext=$(echo $ext | xargs)  # Remove leading and trailing whitespaces
