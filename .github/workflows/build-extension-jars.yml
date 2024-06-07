@@ -119,8 +119,8 @@ jobs:
       - name: Upload artifact
         uses: actions/upload-artifact@v3
         with:
-          name: ${{ matrix.repo }}-artifact
-          path: ~/.m2/repository
+          name: ${{ matrix.repo }}-artifacts
+          path: ./target/*.jar
 
   build-deploy-extensions:
     runs-on: ubuntu-22.04
@@ -137,8 +137,8 @@ jobs:
           for artifact in $(echo ${{ inputs.dependencies }} | tr "," "\n"); do
             actions/download-artifact@v3
             with:
-              name: "${artifact}-artifact"
-              path: ~/.m2/repository/${artifact}
+              name: "${artifact}-artifacts"
+              path: ~/.m2/repository/org/liquibase/ext/${artifact}/${{ inputs.liquibase-version }}
             done
           done
 
