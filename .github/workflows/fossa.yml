@@ -75,7 +75,7 @@ jobs:
       uses: fossas/fossa-action@main
       with:
         api-key: ${{ secrets.FOSSA_API_KEY }}
-        branch: DAT-17797
+      
 
     - name: Get the commit sha
       id: get_commit_sha_oss
