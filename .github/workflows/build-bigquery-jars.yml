@@ -21,20 +21,24 @@ jobs:
   build-deploy:
     runs-on: ubuntu-22.04
     continue-on-error: true
-    strategy:
-      fail-fast: false
-      matrix:
-        repo: ['liquibase-bigquery', 'liquibase-commercial-bigquery']
     env:
       GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
     steps:
       - uses: actions/checkout@v4
-        name: Checkout ${{ matrix.repo }}
+        name: Checkout liquibase-bigquery
         with:
-          repository: liquibase/${{ matrix.repo }}
+          repository: liquibase/liquibase-bigquery
           ref: main
           token: ${{ secrets.BOT_TOKEN }}
-          path: ${{ matrix.repo }}
+          path: liquibase-bigquery
+
+      - uses: actions/checkout@v4
+        name: Checkout liquibase-commercial-bigquery
+        with:
+          repository: liquibase/liquibase-commercial-bigquery
+          ref: main
+          token: ${{ secrets.BOT_TOKEN }}
+          path: liquibase-commercial-bigquery
 
       - name: Set up JDK 17
         uses: actions/setup-java@v4
@@ -90,21 +94,32 @@ jobs:
               }
             ]
 
-      - name: Re-version ${{ matrix.repo }} extension
+      - name: Re-version extensions
         run: |
-          cd ${{ matrix.repo }}
+          cd liquibase-bigquery
           mvn versions:set -DnewVersion=${{ inputs.liquibase-version }}
+          cd ..
+          cd liquibase-commercial-bigquery
+          mvn versions:set -DnewVersion=${{ inputs.liquibase-version }}
+          cd ..
           
-      - name: Build and install ${{ matrix.repo }} extension
+      - name: Build and install
         run: |
-          cd ${{ matrix.repo }}
+          cd liquibase-bigquery
+          mvn clean package -DskipTests
+          cd ..
+          cd liquibase-commercial-bigquery
           mvn clean package -DskipTests
           cd ..
 
-      - name: Deploy ${{ matrix.repo }} extension to GitHub Packages
+      - name: Deploy to GitHub Packages
         continue-on-error: true
         run: |
-          cd ${{ matrix.repo }}
-          OUTPUT=$(mvn deploy:deploy-file -Dfile=./target/${{ matrix.repo }}-${{ inputs.liquibase-version }}.jar -DpomFile=pom.xml -DrepositoryId=liquibase -Durl=https://maven.pkg.github.com/liquibase/${{ matrix.repo }} | tee /dev/fd/2)
-          echo "$OUTPUT" | grep -q "status code: 409, reason phrase: Conflict (409)" && echo "${{ matrix.repo }} ${{ inputs.liquibase-version }} is already deployed in GitHub Packages"
+          cd liquibase-bigquery
+          OUTPUT=$(mvn deploy:deploy-file -Dfile=./target/liquibase-bigquery-${{ inputs.liquibase-version }}.jar -DpomFile=pom.xml -DrepositoryId=liquibase -Durl=https://maven.pkg.github.com/liquibase/liquibase-bigquery | tee /dev/fd/2)
+          echo "$OUTPUT" | grep -q "status code: 409, reason phrase: Conflict (409)" && echo "liquibase-bigquery ${{ inputs.liquibase-version }} is already deployed in GitHub Packages"
+          cd ..
+          cd liquibase-commercial-bigquery
+          OUTPUT=$(mvn deploy:deploy-file -Dfile=./target/liquibase-commercial-bigquery-${{ inputs.liquibase-version }}.jar -DpomFile=pom.xml -DrepositoryId=liquibase-pro -Durl=https://maven.pkg.github.com/liquibase/liquibase-pro | tee /dev/fd/2)
+          echo "$OUTPUT" | grep -q "status code: 409, reason phrase: Conflict (409)" && echo "liquibase-commercial-bigquery ${{ inputs.liquibase-version }} is already deployed in GitHub Packages"
           cd ..
