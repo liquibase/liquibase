@@ -18,7 +18,7 @@ env:
   MAVEN_VERSION: '3.9.2'
 
 jobs:
-  build:
+  build-deploy:
     runs-on: ubuntu-22.04
     continue-on-error: true
     strategy:
@@ -74,28 +74,6 @@ jobs:
                   "enabled": "true",
                   "updatePolicy": "always"
                 }
-              },
-              {
-                "id": "liquibase-bigquery",
-                "url": "https://maven.pkg.github.com/liquibase/liquibase-bigquery",
-                "releases": {
-                  "enabled": "true"
-                },
-                "snapshots": {
-                  "enabled": "true",
-                  "updatePolicy": "always"
-                }
-              },
-              {
-                "id": "liquibase-commercial-bigquery",
-                "url": "https://maven.pkg.github.com/liquibase/liquibase-commercial-bigquery",
-                "releases": {
-                  "enabled": "true"
-                },
-                "snapshots": {
-                  "enabled": "true",
-                  "updatePolicy": "always"
-                }
               }
             ]
           servers: |
@@ -107,16 +85,6 @@ jobs:
               },
               {
                 "id": "liquibase-pro",
-                "username": "liquibot",
-                "password": "${{ secrets.LIQUIBOT_PAT }}"
-              },
-              {
-                "id": "liquibase-bigquery",
-                "username": "liquibot",
-                "password": "${{ secrets.LIQUIBOT_PAT }}"
-              },
-              {
-                "id": "liquibase-commercial-bigquery",
                 "username": "liquibot",
                 "password": "${{ secrets.LIQUIBOT_PAT }}"
               }
@@ -139,6 +107,6 @@ jobs:
           MAVEN_PASSWORD: ${{ secrets.LIQUIBOT_PAT }}
         run: |
           cd ${{ matrix.repo }}
-          OUTPUT=$(mvn deploy:deploy-file -Dfile=./target/${{ matrix.repo }}-${{ inputs.liquibase-version }}.jar -DpomFile=pom.xml -DrepositoryId=${{ matrix.repo }} -Durl=https://maven.pkg.github.com/liquibase/${{ matrix.repo }} -Dtoken=${{ secrets.BOT_TOKEN }} | tee /dev/fd/2)
+          OUTPUT=$(mvn deploy:deploy-file -Dfile=./target/${{ matrix.repo }}-${{ inputs.liquibase-version }}.jar -DpomFile=pom.xml -DrepositoryId=liquibase -Durl=https://maven.pkg.github.com/liquibase/${{ matrix.repo }} | tee /dev/fd/2)
           echo "$OUTPUT" | grep -q "status code: 409, reason phrase: Conflict (409)" && echo "${{ matrix.repo }} ${{ inputs.liquibase-version }} is already deployed in GitHub Packages"
           cd ..
