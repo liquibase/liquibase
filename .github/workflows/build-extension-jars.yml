@@ -130,6 +130,7 @@ jobs:
           cd ..
 
       - name: Re-version and build Dependencies
+        if: ${{ inputs.dependencies != '' }}
         continue-on-error: true
         run: |
           scripts_branch=${{ github.ref }}
@@ -149,9 +150,9 @@ jobs:
             $PWD/.github/util/re-version.sh ./target "${{ inputs.liquibase-version  }}" "${{ github.ref }}" ${dep}
             ls -ltr
             ls -ltr re-version/out
-            mvn deploy:deploy-file -Dfile=./re-version/out/${dep}-${{ inputs.liquibase-version }}.jar -DpomFile=pom.xml -DrepositoryId=liquibase -Durl=https://maven.pkg.github.com/liquibase/$dep
-            mvn deploy:deploy-file -Dfile=./re-version/out/${dep}-${{ inputs.liquibase-version }}-sources.jar -DpomFile=pom.xml -DrepositoryId=liquibase -Durl=https://maven.pkg.github.com/liquibase/$dep
-            mvn deploy:deploy-file -Dfile=./re-version/out/${dep}-${{ inputs.liquibase-version }}-javadoc.jar -DpomFile=pom.xml -DrepositoryId=liquibase -Durl=https://maven.pkg.github.com/liquibase/$dep
+            mvn deploy:deploy-file -Dfile=./re-version/out/${dep}-${{ inputs.liquibase-version }}.jar -DrepositoryId=liquibase -Durl=https://maven.pkg.github.com/liquibase/$dep
+            mvn deploy:deploy-file -Dfile=./re-version/out/${dep}-${{ inputs.liquibase-version }}-sources.jar -DrepositoryId=liquibase -Durl=https://maven.pkg.github.com/liquibase/$dep
+            mvn deploy:deploy-file -Dfile=./re-version/out/${dep}-${{ inputs.liquibase-version }}-javadoc.jar -DrepositoryId=liquibase -Durl=https://maven.pkg.github.com/liquibase/$dep
             cd ..
           done
 
@@ -178,8 +179,8 @@ jobs:
             $PWD/.github/util/re-version.sh ./target "${{ inputs.liquibase-version  }}" "${{ github.ref }}" ${ext}
             ls -ltr
             ls -ltr re-version/out
-            mvn deploy:deploy-file -Dfile=./re-version/out/${ext}-${{ inputs.liquibase-version }}.jar -DpomFile=pom.xml -DrepositoryId=liquibase -Durl=https://maven.pkg.github.com/liquibase/$ext
-            mvn deploy:deploy-file -Dfile=./re-version/out/${ext}-${{ inputs.liquibase-version }}-sources.jar -DpomFile=pom.xml -DrepositoryId=liquibase -Durl=https://maven.pkg.github.com/liquibase/$ext
-            mvn deploy:deploy-file -Dfile=./re-version/out/${ext}-${{ inputs.liquibase-version }}-javadoc.jar -DpomFile=pom.xml -DrepositoryId=liquibase -Durl=https://maven.pkg.github.com/liquibase/$ext
+            mvn deploy:deploy-file -Dfile=./re-version/out/${ext}-${{ inputs.liquibase-version }}.jar -DrepositoryId=liquibase -Durl=https://maven.pkg.github.com/liquibase/$ext
+            mvn deploy:deploy-file -Dfile=./re-version/out/${ext}-${{ inputs.liquibase-version }}-sources.jar -DrepositoryId=liquibase -Durl=https://maven.pkg.github.com/liquibase/$ext
+            mvn deploy:deploy-file -Dfile=./re-version/out/${ext}-${{ inputs.liquibase-version }}-javadoc.jar -DrepositoryId=liquibase -Durl=https://maven.pkg.github.com/liquibase/$ext
             cd ..
           done
