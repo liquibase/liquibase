@@ -7,8 +7,12 @@ on:
         description: 'liquibase version'
         required: true
         type: string
+      dependencies:
+        description: 'Comma separated list of needed dependencies to release the extensions list'
+        required: false
+        type: string
       extensions:
-        description: 'List of extensions and their dependencies to release to GPM'
+        description: 'Comma separated list of extensions to release to GPM'
         required: true
         type: string
   workflow_dispatch:
@@ -17,8 +21,12 @@ on:
         description: 'liquibase version'
         required: true
         type: string
+      dependencies:
+        description: 'Comma separated list of needed dependencies to release the extensions list'
+        required: false
+        type: string
       extensions:
-        description: 'List of extensions and their dependencies to release to GPM'
+        description: 'Comma separated list of extensions to release to GPM'
         required: true
         type: string
 
@@ -26,48 +34,22 @@ env:
   MAVEN_VERSION: '3.9.2'
 
 jobs:
-  parse-input:
+  build-and-deploy-extensions:
     runs-on: ubuntu-22.04
-    outputs:
-      dependencies: ${{ steps.set-dependencies.outputs.dependencies }}
-      extensions: ${{ steps.set-extensions.outputs.extensions }}
-    steps:
-      - name: Set outputs
-        id: set-outputs
-        run: |
-          dependencies=""
-          extensions=""
-          length=$(echo "${{ inputs.extensions }}" | jq 'length')
-          for (( i=0; i<$length; i++ ))
-          do
-            dependency=$(echo "${{ inputs.extensions }}" | jq -r ".[$i][0]")
-            extension=$(echo "${{ inputs.extensions }}" | jq -r ".[$i][1] | join(\",\")")
-            dependencies="$dependencies,$dependency"
-            extensions="$extensions,$extension"
-          done
-          dependencies=${dependencies:1}
-          extensions=${extensions:1}
-          echo "::set-output name=dependencies::$dependencies"
-          echo "::set-output name=extensions::$extensions"
-
-  build-dependencies:
-    runs-on: ubuntu-22.04
-    needs: parse-input
-    if: ${{ needs.parse-input.outputs.dependencies }}
     strategy:
-      matrix:
-        repo: ${{ fromJson(needs.parse-input.outputs.dependencies) }}
-    continue-on-error: true
+      fail-fast: false
     env:
       GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
     steps:
+
       - uses: actions/checkout@v4
-        name: Checkout ${{ matrix.repo }}
-        with:
-          repository: liquibase/${{ matrix.repo }}
-          ref: main
-          token: ${{ secrets.BOT_TOKEN }}
-          path: ${{ matrix.repo }}
+
+      - name: Checkout Dependencies
+        run: |
+          for dep in ${{ fromJson(inputs.dependencies) }}; do
+            echo "Checking out $dep"
+            git clone https://github.com/liquibase/$dep.git $dep
+          done
 
       - name: Set up JDK 17
         uses: actions/setup-java@v4
@@ -123,114 +105,24 @@ jobs:
               }
             ]
 
-      - name: Re-version ${{ matrix.repo }}
+      - name: Re-version and build Dependencies
         run: |
-          cd ${{ matrix.repo }}
-          mvn versions:set -DnewVersion=${{ inputs.liquibase-version }}
-
-      - name: Build and install ${{ matrix.repo }}
-        run: |
-          cd ${{ matrix.repo }}
-          mvn clean install -DskipTests
-
-      - name: Upload artifact
-        uses: actions/upload-artifact@v3
-        with:
-          name: ${{ matrix.repo }}-artifacts
-          path: ${{ matrix.repo }}/target/*.jar
-
-  build-deploy-extensions:
-    runs-on: ubuntu-22.04
-    needs: build-dependencies
-    strategy:
-      matrix:
-        repo: ${{ fromJson(needs.parse-input.outputs.extensions) }}
-    continue-on-error: true
-    env:
-      GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-    steps:
-      - name: Download dependency artifacts
-        run: |
-          for artifact in ${{ steps.set-dependencies.outputs.dependencies }}; do
-            echo "Downloading $artifact-artifacts..."
-            curl -L -o $artifact-artifacts.zip "https://github.com/${{ github.repository }}/actions/artifacts/$artifact-artifacts/zip"
-            unzip $artifact-artifacts.zip -d ~/.m2/repository
-            rm $artifact-artifacts.zip
+          for dep in ${{ fromJson(inputs.dependencies) }}; do
+            echo "Re-versioning $dep"
+            cd $dep
+            mvn versions:set -DnewVersion=${{ inputs.liquibase-version }}
+            mvn clean install -DskipTests
+            cd ..
           done
 
-      - uses: actions/checkout@v4
-        name: Checkout ${{ matrix.repo }}
-        with:
-          repository: liquibase/${{ matrix.repo }}
-          ref: main
-          token: ${{ secrets.BOT_TOKEN }}
-          path: ${{ matrix.repo }}
-
-      - name: Set up JDK 17
-        uses: actions/setup-java@v4
-        with:
-          java-version: 17
-          distribution: 'temurin'
-          cache: 'maven'
-
-      - name: Set up Maven
-        uses: stCarolas/setup-maven@v5
-        with:
-          maven-version: ${{ env.MAVEN_VERSION }}
-
-      - name: maven-settings-xml-action
-        uses: whelk-io/maven-settings-xml-action@v22
-        with:
-          repositories: |
-            [
-              {
-                "id": "liquibase",
-                "url": "https://maven.pkg.github.com/liquibase/liquibase",
-                "releases": {
-                  "enabled": "true"
-                },
-                "snapshots": {
-                  "enabled": "true",
-                  "updatePolicy": "always"
-                }
-              },
-              {
-                "id": "liquibase-pro",
-                "url": "https://maven.pkg.github.com/liquibase/liquibase-pro",
-                "releases": {
-                  "enabled": "true"
-                },
-                "snapshots": {
-                  "enabled": "true",
-                  "updatePolicy": "always"
-                }
-              }
-            ]
-          servers: |
-            [
-              {
-                "id": "liquibase",
-                "username": "liquibot",
-                "password": "${{ secrets.LIQUIBOT_PAT_GPM_ACCESS }}"
-              },
-              {
-                "id": "liquibase-pro",
-                "username": "liquibot",
-                "password": "${{ secrets.LIQUIBOT_PAT_GPM_ACCESS }}"
-              }
-            ]
-
-      - name: Re-version ${{ matrix.repo }}
+      - name: Checkout and build Extensions
         run: |
-          cd ${{ matrix.repo }}
-          mvn versions:set -DnewVersion=${{ inputs.liquibase-version }}
-
-      - name: Build and install ${{ matrix.repo }}
-        run: |
-          cd ${{ matrix.repo }}
-          mvn clean install -DskipTests
-
-      - name: Deploy to GitHub Packages
-        run: |
-          cd ${{ matrix.repo }}
-          OUTPUT=$(mvn deploy:deploy-file -Dfile=./target/${{ matrix.repo }}-${{ inputs.liquibase-version }}.jar -DpomFile=pom.xml -DrepositoryId=liquibase -Durl=
+          for ext in ${{ fromJson(inputs.extensions) }}; do
+            echo "Checking out and building $ext"
+            git clone https://github.com/liquibase/$ext.git $ext
+            cd $ext
+            mvn versions:set -DnewVersion=${{ inputs.liquibase-version }}
+            mvn clean install -DskipTests
+            mvn deploy:deploy-file -Dfile=./target/${ext}-${{ inputs.liquibase-version }}.jar -DpomFile=pom.xml -DrepositoryId=liquibase -Durl=https://maven.pkg.github.com/liquibase/$ext
+            cd ..
+          done

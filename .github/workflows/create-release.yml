@@ -49,7 +49,9 @@ jobs:
    uses: liquibase/liquibase/.github/workflows/build-extension-jars.yml@DAT-17770
    with:
      liquibase-version: ${{ needs.setup.outputs.version }}
-     extensions: '[["liquibase-commercial-bigquery", ["liquibase-bigquery"]]]'
+     # A list of repositories needed to build commercial extensions
+     dependencies: '["liquibase-bigquery"]'
+     extensions: '["liquibase-commercial-bigquery"]'
    secrets: inherit
 
   # reversion:
