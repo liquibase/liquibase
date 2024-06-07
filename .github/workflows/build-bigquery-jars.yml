@@ -19,7 +19,6 @@ env:
 
 jobs:
   build:
-    name: Build & Deploy
     runs-on: ubuntu-22.04
     continue-on-error: true
     strategy:
