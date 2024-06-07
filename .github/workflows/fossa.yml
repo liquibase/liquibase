@@ -75,7 +75,7 @@ jobs:
       uses: fossas/fossa-action@main
       with:
         api-key: ${{ secrets.FOSSA_API_KEY }}
-      
+        branch: ${{ github.ref }}
 
     - name: Get the commit sha
       id: get_commit_sha_oss
@@ -87,18 +87,18 @@ jobs:
     - name: Set the dependency metadata information
       run: |
         mkdir /home/runner/fossa_reports
-        curl -f --location --request PUT 'https://app.fossa.com/api/projects/git+github.com/liquibase/liquibase' \
+        curl --location --request PUT 'https://app.fossa.com/api/projects/git+github.com/liquibase/liquibase' \
         --header 'Authorization: Bearer ${{ secrets.FOSSA_API_KEY }}' \
         --header 'Content-Type: application/x-www-form-urlencoded' \
           --data-urlencode 'bom_column_settings%5B%5D=Title' \
           --data-urlencode 'bom_column_settings%5B%5D=Version' \
           --data-urlencode 'bom_column_settings%5B%5D=Authors' \
           --data-urlencode 'bom_column_settings%5B%5D=DeclaredLicense' \
-          --data-urlencode 'bom_column_settings%5B%5D=PackageHomepage' || echo "Curl request failed"
+          --data-urlencode 'bom_column_settings%5B%5D=PackageHomepage'
         
 
-        curl -f --location 'https://app.fossa.com/api/revisions/git%2Bgithub.com%2Fliquibase%2Fliquibase%24${{ steps.get_commit_sha_oss.outputs.commit_sha_lb }}/attribution/download?format=CSV&includeDeepDependencies=true&download=true' \
-        --header 'Authorization: Bearer ${{ secrets.FOSSA_API_KEY }}' -o /home/runner/fossa_reports/liquibase.csv || echo "Curl request failed"
+        curl --location 'https://app.fossa.com/api/revisions/git%2Bgithub.com%2Fliquibase%2Fliquibase%24${{ steps.get_commit_sha_oss.outputs.commit_sha_lb }}/attribution/download?format=CSV&includeDeepDependencies=true&download=true' \
+        --header 'Authorization: Bearer ${{ secrets.FOSSA_API_KEY }}' -o /home/runner/fossa_reports/liquibase.csv 
 
       # Upload to build page for the team to check the csv file contents.
     - name: Upload to build page
@@ -127,4 +127,4 @@ jobs:
           token: ${{ secrets.LIQUIBOT_PAT_GPM_ACCESS }}
           repository: liquibase/liquibase-pro
           event-type: FOSSA_Scan_PRO
-          #client-payload: '{"ref": "DAT-17797"}'
+          client-payload: '{"ref": "DAT-17797"}'
