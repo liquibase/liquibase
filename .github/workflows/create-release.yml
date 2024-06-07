@@ -100,8 +100,8 @@ jobs:
           repositories: |
             [
               {
-                "id": "liquibase",
-                "url": "https://maven.pkg.github.com/liquibase/liquibase",
+                "id": "liquibase-bigquery",
+                "url": "https://maven.pkg.github.com/liquibase/liquibase-bigquery",
                 "releases": {
                   "enabled": "false"
                 },
@@ -111,8 +111,8 @@ jobs:
                 }
               },
               {
-                "id": "liquibase-pro",
-                "url": "https://maven.pkg.github.com/liquibase/liquibase-pro",
+                "id": "liquibase-commercial-bigquery",
+                "url": "https://maven.pkg.github.com/liquibase/liquibase-commercial-bigquery",
                 "releases": {
                   "enabled": "false"
                 },
@@ -125,12 +125,12 @@ jobs:
           servers: |
             [
               {
-                "id": "liquibase",
+                "id": "liquibase-bigquery",
                 "username": "liquibot",
                 "password": "${{ secrets.LIQUIBOT_PAT_GPM_ACCESS }}"
               },
               {
-                "id": "liquibase-pro",
+                "id": "liquibase-commercial-bigquery",
                 "username": "liquibot",
                 "password": "${{ secrets.LIQUIBOT_PAT_GPM_ACCESS }}"
               }
