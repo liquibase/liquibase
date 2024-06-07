@@ -126,7 +126,7 @@ jobs:
       - name: Install liquibase-commercial 0-SNAPSHOT
         run: |
           cd liquibase-pro
-          mvn clean install -DskipTests
+          mvn clean install -DskipTests -P '!run-proguard'
           cd ..
 
       - name: Prepare reversion scripts
