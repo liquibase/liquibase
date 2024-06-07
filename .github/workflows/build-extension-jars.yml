@@ -35,8 +35,18 @@ jobs:
       - name: Set outputs
         id: set-outputs
         run: |
-          dependencies=$(echo "${{ inputs.extensions }}" | jq -r 'map(.[0]) | join(",")')
-          extensions=$(echo "${{ inputs.extensions }}" | jq -r 'map(.[1] | join(",")) | join(",")')
+          dependencies=""
+          extensions=""
+          length=$(echo "${{ inputs.extensions }}" | jq 'length')
+          for (( i=0; i<$length; i++ ))
+          do
+            dependency=$(echo "${{ inputs.extensions }}" | jq -r ".[$i][0]")
+            extension=$(echo "${{ inputs.extensions }}" | jq -r ".[$i][1] | join(\",\")")
+            dependencies="$dependencies,$dependency"
+            extensions="$extensions,$extension"
+          done
+          dependencies=${dependencies:1}
+          extensions=${extensions:1}
           echo "::set-output name=dependencies::$dependencies"
           echo "::set-output name=extensions::$extensions"
 
