@@ -7,12 +7,8 @@ on:
         description: 'liquibase version'
         required: true
         type: string
-      dependencies:
-        description: 'Comma separated list of needed dependencies to release the extensions list'
-        required: false
-        type: string
       extensions:
-        description: 'Comma separated list of extensions to release to GPM'
+        description: 'List of extensions and their dependencies to release to GPM'
         required: true
         type: string
   workflow_dispatch:
@@ -21,12 +17,8 @@ on:
         description: 'liquibase version'
         required: true
         type: string
-      dependencies:
-        description: 'Comma separated list of needed dependencies to release the extensions list'
-        required: false
-        type: string
       extensions:
-        description: 'Comma separated list of extensions to release to GPM'
+        description: 'List of extensions and their dependencies to release to GPM'
         required: true
         type: string
 
@@ -34,12 +26,27 @@ env:
   MAVEN_VERSION: '3.9.2'
 
 jobs:
+  parse-input:
+    runs-on: ubuntu-22.04
+    outputs:
+      dependencies: ${{ steps.set-dependencies.outputs.dependencies }}
+      extensions: ${{ steps.set-extensions.outputs.extensions }}
+    steps:
+      - name: Set outputs
+        id: set-outputs
+        run: |
+          dependencies=$(echo "${{ inputs.extensions }}" | jq -r 'map(.[0]) | join(",")')
+          extensions=$(echo "${{ inputs.extensions }}" | jq -r 'map(.[1] | join(",")) | join(",")')
+          echo "::set-output name=dependencies::$dependencies"
+          echo "::set-output name=extensions::$extensions"
+
   build-dependencies:
     runs-on: ubuntu-22.04
-    if: ${{ inputs.dependencies }}
+    needs: parse-input
+    if: ${{ needs.parse-input.outputs.dependencies }}
     strategy:
       matrix:
-        repo: ${{ fromJson(inputs.dependencies) }}
+        repo: ${{ fromJson(needs.parse-input.outputs.dependencies) }}
     continue-on-error: true
     env:
       GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
@@ -127,19 +134,18 @@ jobs:
     needs: build-dependencies
     strategy:
       matrix:
-        repo: ${{ fromJson(inputs.extensions) }}
+        repo: ${{ fromJson(needs.parse-input.outputs.extensions) }}
     continue-on-error: true
     env:
       GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
     steps:
-      - name: Download and copy all artifacts
+      - name: Download dependency artifacts
         run: |
-          for artifact in $(echo ${{ inputs.dependencies }} | tr "," "\n"); do
-            actions/download-artifact@v3
-            with:
-              name: "${artifact}-artifacts"
-              path: ~/.m2/repository/org/liquibase/ext/${artifact}/${{ inputs.liquibase-version }}
-            done
+          for artifact in ${{ steps.set-dependencies.outputs.dependencies }}; do
+            echo "Downloading $artifact-artifacts..."
+            curl -L -o $artifact-artifacts.zip "https://github.com/${{ github.repository }}/actions/artifacts/$artifact-artifacts/zip"
+            unzip $artifact-artifacts.zip -d ~/.m2/repository
+            rm $artifact-artifacts.zip
           done
 
       - uses: actions/checkout@v4
@@ -217,5 +223,4 @@ jobs:
       - name: Deploy to GitHub Packages
         run: |
           cd ${{ matrix.repo }}
-          OUTPUT=$(mvn deploy:deploy-file -Dfile=./target/${{ matrix.repo }}-${{ inputs.liquibase-version }}.jar -DpomFile=pom.xml -DrepositoryId=liquibase -Durl=https://maven.pkg.github.com/liquibase/${{ matrix.repo }} | tee /dev/fd/2)
-          echo "$OUTPUT" | grep -q "status code: 409, reason phrase: Conflict (409)" && echo "${{ matrix.repo }} ${{ inputs.liquibase-version }} is already deployed in GitHub Packages"
+          OUTPUT=$(mvn deploy:deploy-file -Dfile=./target/${{ matrix.repo }}-${{ inputs.liquibase-version }}.jar -DpomFile=pom.xml -DrepositoryId=liquibase -Durl=
