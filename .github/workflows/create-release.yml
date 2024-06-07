@@ -152,19 +152,25 @@ jobs:
           
           (cd re-version/out/ && zip liquibase-additional-${{ needs.setup.outputs.version }}.zip *)
           mv re-version/out/liquibase-additional-${{ needs.setup.outputs.version }}.zip re-version/final
-          
+
       - name: Cache Completed Artifacts
         uses: actions/cache@v4.0.2
         with:
           key: completed-artifacts-${{ github.run_number }}-${{ github.run_attempt }}
           path: re-version/final
 
-      - name: Set repository tags
-        run: |
-          git tag -f v${{ needs.setup.outputs.version }}
-          git push -f origin v${{ needs.setup.outputs.version }}
-          (cd download/repo/liquibase-pro && git tag -f v${{ needs.setup.outputs.version }})
-          (cd download/repo/liquibase-pro && git push -f origin v${{ needs.setup.outputs.version }})
+      - name: Upload Artifacts
+        uses: actions/upload-artifact@v2
+        with:
+          name: re-version
+          path: re-version/final
+
+      # - name: Set repository tags
+      #   run: |
+      #     git tag -f v${{ needs.setup.outputs.version }}
+      #     git push -f origin v${{ needs.setup.outputs.version }}
+      #     (cd download/repo/liquibase-pro && git tag -f v${{ needs.setup.outputs.version }})
+      #     (cd download/repo/liquibase-pro && git push -f origin v${{ needs.setup.outputs.version }})
 
   # build-installers:
   #   permissions:
