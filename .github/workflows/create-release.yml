@@ -86,21 +86,10 @@ jobs:
       #     name: liquibase-pro-azure-artifacts
       #     path: liquibase-pro/liquibase-azure-deps
 
-      - name: Download liquibase-bigquery-artifacts
-        uses: liquibase/action-download-artifact@v2-liquibase
-        with:
-          workflow: build-bigquery-jars.yml
-          run_id: ${{ steps.get_run_id.outputs.run_id }}
-          name: liquibase-bigquery-artifacts
-          path: liquibase-bigquery-artifacts
-
-      - name: Download liquibase-commercial-bigquery-artifacts
-        uses: liquibase/action-download-artifact@v2-liquibase
-        with:
-          workflow: build-bigquery-jars.yml
-          run_id: ${{ steps.get_run_id.outputs.run_id }}
-          name: liquibase-commercial-bigquery-artifacts
-          path: liquibase-commercial-bigquery-artifacts
+      - name: Get bigquery artifacts
+        run: |
+          mvn dependency:get -DgroupId=org.liquibase.ext -DartifactId=liquibase-bigquery -Dversion=${{ needs.setup.outputs.version }} -Dtransitive=false
+          mvn dependency:get -DgroupId=org.liquibase.ext -DartifactId=liquibase-commercial-bigquery -Dversion=${{ needs.setup.outputs.version }} -Dtransitive=false
 
       - name: Set up JDK
         uses: actions/setup-java@v4
@@ -135,8 +124,9 @@ jobs:
           ##Sign Files
           ## liquibase-azure-deps, liquibase-bigquery and liquibase-commercial-bigquery are already on its correct version. Check reusable workflow: build-azure-uber-jar.yml and build-bigquery-jars.yml
           #mv liquibase-pro/liquibase-azure-deps/* re-version/out
-          mv liquibase-bigquery/* re-version/out
-          mv liquibase-commercial-bigquery/* re-version/out
+          # Get liquibase-bigquery and liquibase-commercial-bigquery from the local maven repository
+          mv ~/.m2/repository/org/liquibase/ext/liquibase-bigquery/${{ needs.setup.outputs.version }}/liquibase-bigquery-${{ needs.setup.outputs.version }}.jar re-version/out
+          mv ~/.m2/repository/org/liquibase/ext/liquibase-commercial-bigquery/${{ needs.setup.outputs.version }}/liquibase-commercial-bigquery-${{ needs.setup.outputs.version }}.jar re-version/out
           
           $PWD/.github/util/sign-artifacts.sh re-version/out
           

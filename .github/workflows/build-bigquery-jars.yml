@@ -108,9 +108,3 @@ jobs:
           OUTPUT=$(mvn deploy:deploy-file -Dfile=./target/${{ matrix.repo }}-${{ inputs.liquibase-version }}.jar -DpomFile=pom.xml -DrepositoryId=liquibase -Durl=https://maven.pkg.github.com/liquibase/${{ matrix.repo }} | tee /dev/fd/2)
           echo "$OUTPUT" | grep -q "status code: 409, reason phrase: Conflict (409)" && echo "${{ matrix.repo }} ${{ inputs.liquibase-version }} is already deployed in GitHub Packages"
           cd ..
-
-      - name: Archive Modules
-        uses: actions/upload-artifact@v3
-        with:
-          name: ${{ matrix.repo }}-artifacts
-          path: ${{ matrix.repo }}/target/${{ matrix.repo }}-${{ inputs.liquibase-version }}.jar
