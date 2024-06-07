@@ -57,7 +57,7 @@ jobs:
                 "id": "liquibase",
                 "url": "https://maven.pkg.github.com/liquibase/liquibase",
                 "releases": {
-                  "enabled": "false"
+                  "enabled": "true"
                 },
                 "snapshots": {
                   "enabled": "true",
@@ -68,7 +68,7 @@ jobs:
                 "id": "liquibase-pro",
                 "url": "https://maven.pkg.github.com/liquibase/liquibase-pro",
                 "releases": {
-                  "enabled": "false"
+                  "enabled": "true"
                 },
                 "snapshots": {
                   "enabled": "true",
