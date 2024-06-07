@@ -46,15 +46,17 @@ jobs:
 
       - name: Checkout Dependencies
         env:
-          GIT_USERNAME: "liquibot"
-          GIT_PASSWORD: ${{ secrets.GITHUB_TOKEN }}
+            GIT_USERNAME: "liquibot"
+            GIT_PASSWORD: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          git config --global credential.helper store
-          echo "https://$GIT_USERNAME:$GIT_PASSWORD@github.com" > ~/.git-credentials
-          for dep in ${{ fromJson(inputs.dependencies) }}; do
-            echo "Checking out $dep"
-            git clone https://github.com/liquibase/$dep.git $dep
-          done
+            git config --global credential.helper store
+            echo "https://$GIT_USERNAME:$GIT_PASSWORD@github.com" > ~/.git-credentials
+            IFS=',' read -ra DEP_ARRAY <<< "${{ inputs.dependencies }}"
+            for dep in "${DEP_ARRAY[@]}"; do
+                dep=$(echo $dep | xargs)  # Remove leading and trailing whitespaces
+                echo "Checking out $dep"
+                git clone https://github.com/liquibase/$dep.git $dep
+            done
 
       - name: Set up JDK 17
         uses: actions/setup-java@v4
@@ -122,7 +124,9 @@ jobs:
 
       - name: Checkout and build Extensions
         run: |
-          for ext in ${{ fromJson(inputs.extensions) }}; do
+          IFS=',' read -ra EXT_ARRAY <<< "${{ inputs.extensions }}"
+          for ext in "${EXT_ARRAY[@]}"; do
+            ext=$(echo $ext | xargs)  # Remove leading and trailing whitespaces
             echo "Checking out and building $ext"
             git clone https://github.com/liquibase/$ext.git $ext
             cd $ext

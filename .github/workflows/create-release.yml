@@ -50,8 +50,8 @@ jobs:
    with:
      liquibase-version: ${{ needs.setup.outputs.version }}
      # A list of repositories needed to build commercial extensions
-     dependencies: '["liquibase-bigquery"]'
-     extensions: '["liquibase-commercial-bigquery"]'
+     dependencies: "liquibase-bigquery"
+     extensions: "liquibase-commercial-bigquery"
    secrets: inherit
 
   # reversion:
