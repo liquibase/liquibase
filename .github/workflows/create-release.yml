@@ -33,13 +33,13 @@ jobs:
       - run: |
           echo "Creating version ${{ steps.collect-data.outputs.version }} from ${{ steps.collect-data.outputs.branch }} with artifacts from build ${{ steps.collect-data.outputs.runId }} "
           
-  build-azure-uber-jar:
-   needs: [ setup ]
-   uses: liquibase/liquibase/.github/workflows/build-azure-uber-jar.yml@master
-   with:
-     branch: ${{ needs.setup.outputs.branch }}
-     liquibase-version: ${{ needs.setup.outputs.version }}
-   secrets: inherit
+  # build-azure-uber-jar:
+  #  needs: [ setup ]
+  #  uses: liquibase/liquibase/.github/workflows/build-azure-uber-jar.yml@master
+  #  with:
+  #    branch: ${{ needs.setup.outputs.branch }}
+  #    liquibase-version: ${{ needs.setup.outputs.version }}
+  #  secrets: inherit
   
   build-bigquery-jars:
    needs: [ setup ]
@@ -49,7 +49,7 @@ jobs:
    secrets: inherit
 
   reversion:
-    needs: [ setup, build-azure-uber-jar, build-bigquery-jars ]
+    needs: [ setup, build-bigquery-jars ]
     name: Re-version artifacts ${{ needs.setup.outputs.version }}
     runs-on: ubuntu-22.04
     steps:
@@ -88,8 +88,8 @@ jobs:
 
       - name: Get bigquery artifacts
         run: |
-          mvn dependency:get -DgroupId=org.liquibase.ext -DartifactId=liquibase-bigquery -Dversion=${{ needs.setup.outputs.version }} -Dtransitive=false
-          mvn dependency:get -DgroupId=org.liquibase.ext -DartifactId=liquibase-commercial-bigquery -Dversion=${{ needs.setup.outputs.version }} -Dtransitive=false
+          mvn dependency:get -DgroupId=org.liquibase.ext -DartifactId=liquibase-bigquery -Dversion=${{ needs.setup.outputs.version }} -Dtransitive=false || echo "Failed to download liquibase-bigquery artifact"
+          mvn dependency:get -DgroupId=org.liquibase.ext -DartifactId=liquibase-commercial-bigquery -Dversion=${{ needs.setup.outputs.version }} -Dtransitive=false || echo "Failed to download liquibase-commercial-bigquery artifact"
 
       - name: Set up JDK
         uses: actions/setup-java@v4
