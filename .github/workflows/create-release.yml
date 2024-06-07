@@ -87,6 +87,10 @@ jobs:
       #     path: liquibase-pro/liquibase-azure-deps
 
       - name: Get bigquery artifacts
+        env:
+          GITHUB_TOKEN: ${{ secrets.LIQUIBOT_PAT_GPM_ACCESS }}
+          MAVEN_USERNAME: liquibot
+          MAVEN_PASSWORD: ${{ secrets.LIQUIBOT_PAT_GPM_ACCESS }}
         run: |
           mvn dependency:get -DgroupId=org.liquibase.ext -DartifactId=liquibase-bigquery -Dversion=${{ needs.setup.outputs.version }} -Dtransitive=false || echo "Failed to download liquibase-bigquery artifact"
           mvn dependency:get -DgroupId=org.liquibase.ext -DartifactId=liquibase-commercial-bigquery -Dversion=${{ needs.setup.outputs.version }} -Dtransitive=false || echo "Failed to download liquibase-commercial-bigquery artifact"
