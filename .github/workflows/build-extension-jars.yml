@@ -114,7 +114,9 @@ jobs:
 
       - name: Re-version and build Dependencies
         run: |
-          for dep in ${{ fromJson(inputs.dependencies) }}; do
+          IFS=',' read -ra DEP_ARRAY <<< "${{ inputs.dependencies }}"
+          for dep in "${DEP_ARRAY[@]}"; do
+            dep=$(echo $dep | xargs)  # Remove leading and trailing whitespaces
             echo "Re-versioning $dep"
             cd $dep
             mvn versions:set -DnewVersion=${{ inputs.liquibase-version }}
