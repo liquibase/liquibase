@@ -64,13 +64,13 @@ jobs:
           token: ${{ secrets.BOT_TOKEN }}
 
 
-      - name: Download liquibase-artifacts
-        uses: liquibase/action-download-artifact@v2-liquibase
-        with:
-          workflow: run-tests.yml
-          run_id: ${{ needs.setup.outputs.runId }}
-          name: liquibase-artifacts
-          path: download/liquibase-artifacts
+      # - name: Download liquibase-artifacts
+      #   uses: liquibase/action-download-artifact@v2-liquibase
+      #   with:
+      #     workflow: run-tests.yml
+      #     run_id: ${{ needs.setup.outputs.runId }}
+      #     name: liquibase-artifacts
+      #     path: download/liquibase-artifacts
 
       - name: Get Current Run ID
         id: get_run_id
@@ -85,6 +85,48 @@ jobs:
       #     run_id: ${{ steps.get_run_id.outputs.run_id }}
       #     name: liquibase-pro-azure-artifacts
       #     path: liquibase-pro/liquibase-azure-deps
+
+      - name: maven-settings-xml-action
+        uses: whelk-io/maven-settings-xml-action@v22
+        with:
+          repositories: |
+            [
+              {
+                "id": "liquibase",
+                "url": "https://maven.pkg.github.com/liquibase/liquibase",
+                "releases": {
+                  "enabled": "false"
+                },
+                "snapshots": {
+                  "enabled": "true",
+                  "updatePolicy": "always"
+                }
+              },
+              {
+                "id": "liquibase-pro",
+                "url": "https://maven.pkg.github.com/liquibase/liquibase-pro",
+                "releases": {
+                  "enabled": "false"
+                },
+                "snapshots": {
+                  "enabled": "true",
+                  "updatePolicy": "always"
+                }
+              }
+            ]
+          servers: |
+            [
+              {
+                "id": "liquibase",
+                "username": "liquibot",
+                "password": "${{ secrets.LIQUIBOT_PAT_GPM_ACCESS }}"
+              },
+              {
+                "id": "liquibase-pro",
+                "username": "liquibot",
+                "password": "${{ secrets.LIQUIBOT_PAT_GPM_ACCESS }}"
+              }
+            ]
 
       - name: Get bigquery artifacts
         env:
