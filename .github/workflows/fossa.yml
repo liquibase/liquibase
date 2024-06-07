@@ -127,4 +127,4 @@ jobs:
           token: ${{ secrets.LIQUIBOT_PAT_GPM_ACCESS }}
           repository: liquibase/liquibase-pro
           event-type: FOSSA_Scan_PRO
-          client-payload: '{"ref": "DAT-17797"}'
+          client-payload: '{"repository": "${{ github.repository }}", "branch": "${{ github.ref }}", "sha": "${{ github.sha }}", "server_url": "${{ github.server_url }}", "run_id": "${{ github.run_id }}"}'
