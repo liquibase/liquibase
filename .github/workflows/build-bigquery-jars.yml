@@ -102,6 +102,7 @@ jobs:
           cd ..
 
       - name: Deploy ${{ matrix.repo }} extension to GitHub Packages
+        continue-on-error: true
         run: |
           cd ${{ matrix.repo }}
           OUTPUT=$(mvn deploy:deploy-file -Dfile=./target/${{ matrix.repo }}-${{ inputs.liquibase-version }}.jar -DpomFile=pom.xml -DrepositoryId=liquibase -Durl=https://maven.pkg.github.com/liquibase/${{ matrix.repo }} | tee /dev/fd/2)
@@ -112,4 +113,4 @@ jobs:
         uses: actions/upload-artifact@v3
         with:
           name: ${{ matrix.repo }}-artifacts
-          path: ./target/${{ matrix.repo }}-${{ inputs.liquibase-version }}.jar
+          path: ${{ matrix.repo }}/target/${{ matrix.repo }}-${{ inputs.liquibase-version }}.jar
