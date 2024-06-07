@@ -103,7 +103,7 @@ jobs:
                 "id": "liquibase-bigquery",
                 "url": "https://maven.pkg.github.com/liquibase/liquibase-bigquery",
                 "releases": {
-                  "enabled": "false"
+                  "enabled": "true"
                 },
                 "snapshots": {
                   "enabled": "true",
@@ -114,7 +114,7 @@ jobs:
                 "id": "liquibase-commercial-bigquery",
                 "url": "https://maven.pkg.github.com/liquibase/liquibase-commercial-bigquery",
                 "releases": {
-                  "enabled": "false"
+                  "enabled": "true"
                 },
                 "snapshots": {
                   "enabled": "true",
