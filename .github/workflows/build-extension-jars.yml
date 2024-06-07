@@ -40,14 +40,22 @@ jobs:
       fail-fast: false
     env:
       GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      GIT_USERNAME: "liquibot"
+      GIT_PASSWORD: ${{ secrets.LIQUIBOT_PAT_GPM_ACCESS }}
     steps:
 
       - uses: actions/checkout@v4
+        name: Checkout liquibase
+
+      - uses: actions/checkout@v4
+        name: Checkout liquibase-pro
+        with:
+          repository: liquibase/liquibase-pro
+          ref: "${{ github.ref }}"
+          path: liquibase-pro
+          token: ${{ secrets.BOT_TOKEN }}
 
       - name: Checkout Dependencies
-        env:
-            GIT_USERNAME: "liquibot"
-            GIT_PASSWORD: ${{ secrets.GITHUB_TOKEN }}
         run: |
             git config --global credential.helper store
             echo "https://$GIT_USERNAME:$GIT_PASSWORD@github.com" > ~/.git-credentials
@@ -115,6 +123,12 @@ jobs:
       - name: Install liquibase 0-SNAPSHOT
         run: mvn clean install -DskipTests
 
+      - name: Install liquibase-commercial 0-SNAPSHOT
+        run: |
+          cd liquibase-pro
+          mvn clean install -DskipTests
+          cd ..
+
       - name: Prepare reversion scripts
         run: |
           scripts_branch=${{ github.ref }}
@@ -144,9 +158,6 @@ jobs:
 
       - name: Checkout and build Extensions
         continue-on-error: true
-        env:
-          GIT_USERNAME: "liquibot"
-          GIT_PASSWORD: ${{ secrets.LIQUIBOT_PAT_GPM_ACCESS }}
         run: |
           git config --global credential.helper store
           echo "https://$GIT_USERNAME:$GIT_PASSWORD@github.com" > ~/.git-credentials
