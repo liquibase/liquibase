@@ -73,16 +73,23 @@ jobs:
                   "enabled": "true",
                   "updatePolicy": "always"
                 }
-              }
-            ]
-          plugin_repositories: |
-            [
+              },
               {
-                "id": "file-replacer-maven-plugin",
-                "url": "https://maven.pkg.github.com/StevenMassaro/file-replacer-maven-plugin",
+                "id": "liquibase-bigquery",
+                "url": "https://maven.pkg.github.com/liquibase/liquibase-bigquery",
                 "releases": {
-                  "updatePolicy": "always",
-                  "enabled": "true"
+                  "enabled": "false"
+                },
+                "snapshots": {
+                  "enabled": "true",
+                  "updatePolicy": "always"
+                }
+              },
+              {
+                "id": "liquibase-commercial-bigquery",
+                "url": "https://maven.pkg.github.com/liquibase/liquibase-commercial-bigquery",
+                "releases": {
+                  "enabled": "false"
                 },
                 "snapshots": {
                   "enabled": "true",
@@ -104,6 +111,16 @@ jobs:
               },
               {
                 "id": "file-replacer-maven-plugin",
+                "username": "liquibot",
+                "password": "${{ secrets.LIQUIBOT_PAT }}"
+              },
+              {
+                "id": "liquibase-bigquery",
+                "username": "liquibot",
+                "password": "${{ secrets.LIQUIBOT_PAT }}"
+              },
+              {
+                "id": "liquibase-commercial-bigquery",
                 "username": "liquibot",
                 "password": "${{ secrets.LIQUIBOT_PAT }}"
               }
@@ -139,21 +156,13 @@ jobs:
 
       - name: Deploy BigQuery extensions to GitHub Packages
         run: |
+
+      - name: Deploy BigQuery extensions to GitHub Packages
+        run: |
           cd liquibase-bigquery
-          xmlstarlet ed --inplace -s /project -t elem -n distributionManagement -v "" \
-            -s /project/distributionManagement -t elem -n repository -v "" \
-            -s /project/distributionManagement/repository -t elem -n id -v "github" \
-            -s /project/distributionManagement/repository -t elem -n name -v "GitHub liquibase Apache Maven Packages" \
-            -s /project/distributionManagement/repository -t elem -n url -v "https://maven.pkg.github.com/liquibase/liquibase-bigquery" pom.xml
-            cat pom.xml
-          mvn deploy -DskipTests
+          mvn deploy -DskipTests -DrepositoryId=liquibase-bigquery
           cd ..
           cd liquibase-commercial-bigquery
-          xmlstarlet ed --inplace -s /project -t elem -n distributionManagement -v "" \
-            -s /project/distributionManagement -t elem -n repository -v "" \
-            -s /project/distributionManagement/repository -t elem -n id -v "github" \
-            -s /project/distributionManagement/repository -t elem -n name -v "GitHub liquibase Apache Maven Packages" \
-            -s /project/distributionManagement/repository -t elem -n url -v "https://maven.pkg.github.com/liquibase/liquibase-commercial-bigquery" pom.xml
-          cat pom.xml
-          mvn deploy -DskipTests
+          mvn deploy -DskipTests -DrepositoryId=liquibase-commercial-bigquery
           cd ..
+          
