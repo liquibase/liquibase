@@ -47,11 +47,6 @@ jobs:
           distribution: 'temurin'
           cache: 'maven'
 
-      - name: Set up Python
-        uses: actions/setup-python@v5
-        with:
-          python-version: '3.12'
-
       - name: Set up Maven
         uses: stCarolas/setup-maven@v5
         with:
@@ -83,28 +78,6 @@ jobs:
                   "enabled": "true",
                   "updatePolicy": "always"
                 }
-              },
-              {
-                "id": "liquibase-bigquery",
-                "url": "https://maven.pkg.github.com/liquibase/liquibase-bigquery",
-                "releases": {
-                  "enabled": "false"
-                },
-                "snapshots": {
-                  "enabled": "true",
-                  "updatePolicy": "always"
-                }
-              },
-              {
-                "id": "liquibase-commercial-bigquery",
-                "url": "https://maven.pkg.github.com/liquibase/liquibase-commercial-bigquery",
-                "releases": {
-                  "enabled": "false"
-                },
-                "snapshots": {
-                  "enabled": "true",
-                  "updatePolicy": "always"
-                }
               }
             ]
           servers: |
@@ -123,16 +96,6 @@ jobs:
                 "id": "file-replacer-maven-plugin",
                 "username": "liquibot",
                 "password": "${{ secrets.LIQUIBOT_PAT }}"
-              },
-              {
-                "id": "liquibase-bigquery",
-                "username": "liquibot",
-                "password": "${{ secrets.LIQUIBOT_PAT }}"
-              },
-              {
-                "id": "liquibase-commercial-bigquery",
-                "username": "liquibot",
-                "password": "${{ secrets.LIQUIBOT_PAT }}"
               }
             ]
 
@@ -148,34 +111,17 @@ jobs:
       - name: Build and install BigQuery extensions
         run: |
           cd liquibase-bigquery
-          mvn clean install -DskipTests
+          mvn clean package -DskipTests
           cd ..
           cd liquibase-commercial-bigquery
-          mvn clean install -DskipTests
+          mvn clean package -DskipTests
           cd ..
-
-      - name: Add temporal distributionManagement to pom.xml
-        run: |
-          python3 -c "
-          import xml.etree.ElementTree as ET
-          for pom_file in ['liquibase-bigquery/pom.xml', 'liquibase-commercial-bigquery/pom.xml']:
-              tree = ET.parse(pom_file)
-              root = tree.getroot()
-              ns = {'mvn': 'http://maven.apache.org/POM/4.0.0'}
-              ET.register_namespace('', ns['mvn'])
-              distributionManagement = ET.SubElement(root, 'distributionManagement')
-              repository = ET.SubElement(distributionManagement, 'repository')
-              ET.SubElement(repository, 'id').text = pom_file.split('/')[0]
-              ET.SubElement(repository, 'name').text = 'GitHub liquibase Apache Maven Packages'
-              ET.SubElement(repository, 'url').text = f'https://maven.pkg.github.com/liquibase/{pom_file.split('/')[0]}'
-              tree.write(pom_file)
-          "
 
       - name: Deploy BigQuery extensions to GitHub Packages
         run: |
           cd liquibase-bigquery
-          mvn deploy -DskipTests -DrepositoryId=liquibase-bigquery
+          mvn deploy:deploy-file -Dfile=./target/liquibase-bigquery-${{ inputs.liquibase-version }}.jar .jar -DpomFile=pom.xml -DrepositoryId=github -Durl=https://maven.pkg.github.com/liquibase/liquibase-bigquery
           cd ..
           cd liquibase-commercial-bigquery
-          mvn deploy -DskipTests -DrepositoryId=liquibase-commercial-bigquery
+          mvn deploy:deploy-file -Dfile=./target/liquibase-bigquery-commercial-${{ inputs.liquibase-version }}.jar -DpomFile=pom.xml -DrepositoryId=github -Durl=https://maven.pkg.github.com/liquibase/liquibase-bigquery-commercial
           cd ..
