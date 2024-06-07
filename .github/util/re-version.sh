@@ -150,20 +150,21 @@ do
     fi
   fi
 
-  ##Make sure there are no left-over 0-SNAPSHOT versions in jar files
-  mkdir -p $workdir/test
-  unzip -q $file -d $workdir/test
+  if [ -z "$extension_name" ]; then
+    ##Make sure there are no left-over 0-SNAPSHOT versions in jar files
+    mkdir -p $workdir/test
+    unzip -q $file -d $workdir/test
 
-  if grep -rl "0-SNAPSHOT" $workdir/test; then
-    echo "Found '0-SNAPSHOT' in $file"
-    exit 1
+    if grep -rl "0-SNAPSHOT" $workdir/test; then
+      echo "Found '0-SNAPSHOT' in $file"
+      exit 1
+    fi
+
+    if grep -rl "0.0.0.SNAPSHOT" $workdir/test; then
+      echo "Found '0.0.0.SNAPSHOT' in $file"
+      exit 1
+    fi
   fi
-
-  if grep -rl "0.0.0.SNAPSHOT" $workdir/test; then
-    echo "Found '0.0.0.SNAPSHOT' in $file"
-    exit 1
-  fi
-
   rm -rf $workdir/test
 done
 

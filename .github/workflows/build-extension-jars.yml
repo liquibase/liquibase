@@ -150,6 +150,8 @@ jobs:
             mvn deploy:deploy-file -Dfile=./target/${dep}-${{ inputs.liquibase-version }}.jar -DpomFile=pom.xml -DrepositoryId=liquibase -Durl=https://maven.pkg.github.com/liquibase/$dep
             mvn deploy:deploy-file -Dfile=./target/${dep}-${{ inputs.liquibase-version }}-sources.jar -DpomFile=pom.xml -DrepositoryId=liquibase -Durl=https://maven.pkg.github.com/liquibase/$dep
             mvn deploy:deploy-file -Dfile=./target/${dep}-${{ inputs.liquibase-version }}-javadoc.jar -DpomFile=pom.xml -DrepositoryId=liquibase -Durl=https://maven.pkg.github.com/liquibase/$dep
+            ls -ltr
+            ls -ltr re-version/out
             cd ..
           done
 
