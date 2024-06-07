@@ -148,14 +148,6 @@ jobs:
           cd liquibase-commercial-bigquery
           mvn clean install -DskipTests
           cd ..
-          
-      - name: Install xmlstarlet
-        run: |
-          sudo apt-get update
-          sudo apt-get install -y xmlstarlet
-
-      - name: Deploy BigQuery extensions to GitHub Packages
-        run: |
 
       - name: Deploy BigQuery extensions to GitHub Packages
         run: |
@@ -165,4 +157,3 @@ jobs:
           cd liquibase-commercial-bigquery
           mvn deploy -DskipTests -DrepositoryId=liquibase-commercial-bigquery
           cd ..
-          
