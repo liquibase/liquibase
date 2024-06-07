@@ -147,17 +147,18 @@ jobs:
             chmod +x $PWD/.github/util/re-version.sh
             chmod +x $PWD/.github/util/ManifestReversion.java
             $PWD/.github/util/re-version.sh ./target "${{ inputs.liquibase-version  }}" "${{ github.ref }}" ${dep}
-            mvn deploy:deploy-file -Dfile=./target/${dep}-${{ inputs.liquibase-version }}.jar -DpomFile=pom.xml -DrepositoryId=liquibase -Durl=https://maven.pkg.github.com/liquibase/$dep
-            mvn deploy:deploy-file -Dfile=./target/${dep}-${{ inputs.liquibase-version }}-sources.jar -DpomFile=pom.xml -DrepositoryId=liquibase -Durl=https://maven.pkg.github.com/liquibase/$dep
-            mvn deploy:deploy-file -Dfile=./target/${dep}-${{ inputs.liquibase-version }}-javadoc.jar -DpomFile=pom.xml -DrepositoryId=liquibase -Durl=https://maven.pkg.github.com/liquibase/$dep
             ls -ltr
             ls -ltr re-version/out
+            mvn deploy:deploy-file -Dfile=./re-version/out/${dep}-${{ inputs.liquibase-version }}.jar -DpomFile=pom.xml -DrepositoryId=liquibase -Durl=https://maven.pkg.github.com/liquibase/$dep
+            mvn deploy:deploy-file -Dfile=./re-version/out/${dep}-${{ inputs.liquibase-version }}-sources.jar -DpomFile=pom.xml -DrepositoryId=liquibase -Durl=https://maven.pkg.github.com/liquibase/$dep
+            mvn deploy:deploy-file -Dfile=./re-version/out/${dep}-${{ inputs.liquibase-version }}-javadoc.jar -DpomFile=pom.xml -DrepositoryId=liquibase -Durl=https://maven.pkg.github.com/liquibase/$dep
             cd ..
           done
 
       - name: Checkout and build Extensions
         continue-on-error: true
         run: |
+          scripts_branch=${{ github.ref }}
           git config --global credential.helper store
           echo "https://$GIT_USERNAME:$GIT_PASSWORD@github.com" > ~/.git-credentials
           IFS=',' read -ra EXT_ARRAY <<< "${{ inputs.extensions }}"
@@ -175,8 +176,10 @@ jobs:
             chmod +x $PWD/.github/util/re-version.sh
             chmod +x $PWD/.github/util/ManifestReversion.java
             $PWD/.github/util/re-version.sh ./target "${{ inputs.liquibase-version  }}" "${{ github.ref }}" ${ext}
-            mvn deploy:deploy-file -Dfile=./target/${ext}-${{ inputs.liquibase-version }}.jar -DpomFile=pom.xml -DrepositoryId=liquibase -Durl=https://maven.pkg.github.com/liquibase/$ext
-            mvn deploy:deploy-file -Dfile=./target/${ext}-${{ inputs.liquibase-version }}-sources.jar -DpomFile=pom.xml -DrepositoryId=liquibase -Durl=https://maven.pkg.github.com/liquibase/$ext
-            mvn deploy:deploy-file -Dfile=./target/${ext}-${{ inputs.liquibase-version }}-javadoc.jar -DpomFile=pom.xml -DrepositoryId=liquibase -Durl=https://maven.pkg.github.com/liquibase/$ext
+            ls -ltr
+            ls -ltr re-version/out
+            mvn deploy:deploy-file -Dfile=./re-version/out/${ext}-${{ inputs.liquibase-version }}.jar -DpomFile=pom.xml -DrepositoryId=liquibase -Durl=https://maven.pkg.github.com/liquibase/$ext
+            mvn deploy:deploy-file -Dfile=./re-version/out/${ext}-${{ inputs.liquibase-version }}-sources.jar -DpomFile=pom.xml -DrepositoryId=liquibase -Durl=https://maven.pkg.github.com/liquibase/$ext
+            mvn deploy:deploy-file -Dfile=./re-version/out/${ext}-${{ inputs.liquibase-version }}-javadoc.jar -DpomFile=pom.xml -DrepositoryId=liquibase -Durl=https://maven.pkg.github.com/liquibase/$ext
             cd ..
           done
