@@ -8,7 +8,7 @@ on:
         required: true
         type: string
       dependencies:
-        description: 'Comma separated list of needed dependencies to release the extension list'
+        description: 'Comma separated list of needed dependencies to release the extensions list'
         required: false
         type: string
       extensions:
@@ -22,7 +22,7 @@ on:
         required: true
         type: string
       dependencies:
-        description: 'Comma separated list of needed dependencies to release the extension list'
+        description: 'Comma separated list of needed dependencies to release the extensions list'
         required: false
         type: string
       extensions:
@@ -34,20 +34,23 @@ env:
   MAVEN_VERSION: '3.9.2'
 
 jobs:
-  build-deploy:
+  build-dependencies:
     runs-on: ubuntu-22.04
+    if: ${{ inputs.dependencies }}
+    strategy:
+      matrix:
+        repo: ${{ fromJson(inputs.dependencies) }}
     continue-on-error: true
     env:
       GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
     steps:
-      - name: Split dependencies
-        id: split-dependencies
-        if: ${{ inputs.dependencies != '' }}
-        run: echo "REPOS=$(echo '${{ inputs.dependencies }}' | tr ',' '\n')" >> $GITHUB_ENV
-
-      - name: Split extensions
-        id: split-extensions
-        run: echo "EXTENSIONS=$(echo '${{ inputs.extensions }}' | tr ',' '\n')" >> $GITHUB_ENV
+      - uses: actions/checkout@v4
+        name: Checkout ${{ matrix.repo }}
+        with:
+          repository: liquibase/${{ matrix.repo }}
+          ref: main
+          token: ${{ secrets.BOT_TOKEN }}
+          path: ${{ matrix.repo }}
 
       - name: Set up JDK 17
         uses: actions/setup-java@v4
@@ -103,27 +106,116 @@ jobs:
               }
             ]
 
-      - name: Build and install dependencies
-        if: ${{ inputs.dependencies != '' }}
+      - name: Re-version ${{ matrix.repo }}
         run: |
-          for repo in $REPOS; do
-            echo "Processing $repo..."
-            git clone https://github.com/liquibase/$repo.git $repo
-            cd $repo
-            mvn versions:set -DnewVersion=${{ inputs.liquibase-version }}
-            mvn clean install -DskipTests
-            cd ..
+          cd ${{ matrix.repo }}
+          mvn versions:set -DnewVersion=${{ inputs.liquibase-version }}
+
+      - name: Build and install ${{ matrix.repo }}
+        run: |
+          cd ${{ matrix.repo }}
+          mvn clean install -DskipTests
+
+      - name: Upload artifact
+        uses: actions/upload-artifact@v3
+        with:
+          name: ${{ matrix.repo }}-artifact
+          path: ~/.m2/repository
+
+  build-deploy-extensions:
+    runs-on: ubuntu-22.04
+    needs: build-dependencies
+    strategy:
+      matrix:
+        repo: ${{ fromJson(inputs.extensions) }}
+    continue-on-error: true
+    env:
+      GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+    steps:
+      - name: Download and copy all artifacts
+        run: |
+          for artifact in $(echo ${{ inputs.dependencies }} | tr "," "\n"); do
+            actions/download-artifact@v3
+            with:
+              name: "${artifact}-artifact"
+              path: ~/.m2/repository/${artifact}
+            done
           done
 
-      - name: Build and deploy extensions
+      - uses: actions/checkout@v4
+        name: Checkout ${{ matrix.repo }}
+        with:
+          repository: liquibase/${{ matrix.repo }}
+          ref: main
+          token: ${{ secrets.BOT_TOKEN }}
+          path: ${{ matrix.repo }}
+
+      - name: Set up JDK 17
+        uses: actions/setup-java@v4
+        with:
+          java-version: 17
+          distribution: 'temurin'
+          cache: 'maven'
+
+      - name: Set up Maven
+        uses: stCarolas/setup-maven@v5
+        with:
+          maven-version: ${{ env.MAVEN_VERSION }}
+
+      - name: maven-settings-xml-action
+        uses: whelk-io/maven-settings-xml-action@v22
+        with:
+          repositories: |
+            [
+              {
+                "id": "liquibase",
+                "url": "https://maven.pkg.github.com/liquibase/liquibase",
+                "releases": {
+                  "enabled": "true"
+                },
+                "snapshots": {
+                  "enabled": "true",
+                  "updatePolicy": "always"
+                }
+              },
+              {
+                "id": "liquibase-pro",
+                "url": "https://maven.pkg.github.com/liquibase/liquibase-pro",
+                "releases": {
+                  "enabled": "true"
+                },
+                "snapshots": {
+                  "enabled": "true",
+                  "updatePolicy": "always"
+                }
+              }
+            ]
+          servers: |
+            [
+              {
+                "id": "liquibase",
+                "username": "liquibot",
+                "password": "${{ secrets.LIQUIBOT_PAT_GPM_ACCESS }}"
+              },
+              {
+                "id": "liquibase-pro",
+                "username": "liquibot",
+                "password": "${{ secrets.LIQUIBOT_PAT_GPM_ACCESS }}"
+              }
+            ]
+
+      - name: Re-version ${{ matrix.repo }}
         run: |
-          for repo in $EXTENSIONS; do
-            echo "Processing $repo..."
-            git clone https://github.com/liquibase/$repo.git $repo
-            cd $repo
-            mvn versions:set -DnewVersion=${{ inputs.liquibase-version }}
-            mvn clean package -DskipTests
-            OUTPUT=$(mvn deploy:deploy-file -Dfile=./target/${repo}-${{ inputs.liquibase-version }}.jar -DpomFile=pom.xml -DrepositoryId=liquibase -Durl=https://maven.pkg.github.com/liquibase/$repo | tee /dev/fd/2)
-            echo "$OUTPUT" | grep -q "status code: 409, reason phrase: Conflict (409)" && echo "$repo ${{ inputs.liquibase-version }} is already deployed in GitHub Packages"
-            cd ..
-          done
+          cd ${{ matrix.repo }}
+          mvn versions:set -DnewVersion=${{ inputs.liquibase-version }}
+
+      - name: Build and install ${{ matrix.repo }}
+        run: |
+          cd ${{ matrix.repo }}
+          mvn clean install -DskipTests
+
+      - name: Deploy to GitHub Packages
+        run: |
+          cd ${{ matrix.repo }}
+          OUTPUT=$(mvn deploy:deploy-file -Dfile=./target/${{ matrix.repo }}-${{ inputs.liquibase-version }}.jar -DpomFile=pom.xml -DrepositoryId=liquibase -Durl=https://maven.pkg.github.com/liquibase/${{ matrix.repo }} | tee /dev/fd/2)
+          echo "$OUTPUT" | grep -q "status code: 409, reason phrase: Conflict (409)" && echo "${{ matrix.repo }} ${{ inputs.liquibase-version }} is already deployed in GitHub Packages"
