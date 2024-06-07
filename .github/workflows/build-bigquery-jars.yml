@@ -150,7 +150,7 @@ jobs:
           MAVEN_PASSWORD: ${{ secrets.LIQUIBOT_PAT }}
         run: |
           cd liquibase-bigquery
-          mvn deploy:deploy-file -Dfile=./target/liquibase-bigquery-${{ inputs.liquibase-version }}.jar .jar -DpomFile=pom.xml -DrepositoryId=liquibase-bigquery -Durl=https://maven.pkg.github.com/liquibase/liquibase-bigquery -Dtoken=${{ secrets.BOT_TOKEN }}
+          mvn deploy:deploy-file -Dfile=./target/liquibase-bigquery-${{ inputs.liquibase-version }}.jar -DpomFile=pom.xml -DrepositoryId=liquibase-bigquery -Durl=https://maven.pkg.github.com/liquibase/liquibase-bigquery -Dtoken=${{ secrets.BOT_TOKEN }}
           cd ..
           cd liquibase-commercial-bigquery
           mvn deploy:deploy-file -Dfile=./target/liquibase-bigquery-commercial-${{ inputs.liquibase-version }}.jar -DpomFile=pom.xml -DrepositoryId=liquibase-bigquery-commercial -Durl=https://maven.pkg.github.com/liquibase/liquibase-bigquery-commercial -Dtoken=${{ secrets.BOT_TOKEN }}
