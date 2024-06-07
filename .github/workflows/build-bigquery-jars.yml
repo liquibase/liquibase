@@ -106,7 +106,7 @@ jobs:
       - name: Build and install
         run: |
           cd liquibase-bigquery
-          mvn clean package -DskipTests
+          mvn clean install -DskipTests
           cd ..
           cd liquibase-commercial-bigquery
           mvn clean package -DskipTests
