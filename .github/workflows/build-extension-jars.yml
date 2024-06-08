@@ -150,7 +150,7 @@ jobs:
             $PWD/.github/util/re-version.sh ./target "${{ inputs.liquibase-version  }}" "${{ github.ref }}" ${dep}
             mvn versions:set -DnewVersion=${{ inputs.liquibase-version }}
             mvn deploy:deploy-file \
-            -Dfiles=./re-version/out/${dep}-${{ inputs.liquibase-version }}.jar \
+            -Dfile=./re-version/out/${dep}-${{ inputs.liquibase-version }}.jar \
             -Dsources=./re-version/out/${dep}-${{ inputs.liquibase-version }}-sources.jar \
             -Djavadoc=./re-version/out/${dep}-${{ inputs.liquibase-version }}-javadoc.jar \
             -DrepositoryId=liquibase \
@@ -182,7 +182,7 @@ jobs:
             $PWD/.github/util/re-version.sh ./target "${{ inputs.liquibase-version  }}" "${{ github.ref }}" ${ext}
             mvn versions:set -DnewVersion=${{ inputs.liquibase-version }}
             mvn deploy:deploy-file \
-            -Dfiles=./re-version/out/${ext}-${{ inputs.liquibase-version }}.jar \
+            -Dfile=./re-version/out/${ext}-${{ inputs.liquibase-version }}.jar \
             -Dsources=./re-version/out/${ext}-${{ inputs.liquibase-version }}-sources.jar \
             -Djavadoc=./re-version/out/${ext}-${{ inputs.liquibase-version }}-javadoc.jar \
             -DrepositoryId=liquibase \
