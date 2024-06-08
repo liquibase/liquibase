@@ -72,6 +72,10 @@ jobs:
           java-version: 17
           distribution: 'temurin'
           cache: 'maven'
+          gpg-private-key: ${{ secrets.GPG_SECRET }}
+          gpg-passphrase: GPG_PASSPHRASE
+        env:
+           GPG_PASSWORD: ${{ secrets.GPG_PASSPHRASE }}
 
       - name: Set up Maven
         uses: stCarolas/setup-maven@v5
@@ -130,6 +134,8 @@ jobs:
           cd ..
 
       - name: Re-version and build Dependencies
+        env:
+           GPG_PASSWORD: ${{ secrets.GPG_PASSPHRASE }}
         if: ${{ inputs.dependencies != '' }}
         continue-on-error: true
         run: |
@@ -144,10 +150,13 @@ jobs:
             mvn clean install -DskipTests
             mkdir -p $PWD/.github/util/
             curl -o $PWD/.github/util/re-version.sh https://raw.githubusercontent.com/liquibase/liquibase/$scripts_branch/.github/util/re-version.sh
+            curl -o $PWD/.github/util/sign-artifacts.sh https://raw.githubusercontent.com/liquibase/liquibase/$scripts_branch/.github/util/sign-artifacts.sh
             curl -o $PWD/.github/util/ManifestReversion.java https://raw.githubusercontent.com/liquibase/liquibase/$scripts_branch/.github/util/ManifestReversion.java
             chmod +x $PWD/.github/util/re-version.sh
+            chmod +x $PWD/.github/util/sign-artifacts.sh
             chmod +x $PWD/.github/util/ManifestReversion.java
             $PWD/.github/util/re-version.sh ./target "${{ inputs.liquibase-version  }}" "${{ github.ref }}" ${dep}
+            $PWD/.github/util/sign-artifacts.sh ./target "${{ inputs.liquibase-version }}" "${{ github.ref }}"
             mvn versions:set -DnewVersion=${{ inputs.liquibase-version }}
             mvn deploy:deploy-file \
             -Dfile=./re-version/out/${dep}-${{ inputs.liquibase-version }}.jar \
@@ -160,6 +169,8 @@ jobs:
           done
 
       - name: Checkout and build Extensions
+        env:
+          GPG_PASSWORD: ${{ secrets.GPG_PASSPHRASE }}
         continue-on-error: true
         run: |
           scripts_branch=${{ github.ref }}
@@ -176,10 +187,13 @@ jobs:
             mvn clean install -DskipTests
             mkdir -p $PWD/.github/util/
             curl -o $PWD/.github/util/re-version.sh https://raw.githubusercontent.com/liquibase/liquibase/$scripts_branch/.github/util/re-version.sh
+            curl -o $PWD/.github/util/sign-artifacts.sh https://raw.githubusercontent.com/liquibase/liquibase/$scripts_branch/.github/util/sign-artifacts.sh
             curl -o $PWD/.github/util/ManifestReversion.java https://raw.githubusercontent.com/liquibase/liquibase/$scripts_branch/.github/util/ManifestReversion.java
             chmod +x $PWD/.github/util/re-version.sh
+            chmod +x $PWD/.github/util/sign-artifacts.sh
             chmod +x $PWD/.github/util/ManifestReversion.java
             $PWD/.github/util/re-version.sh ./target "${{ inputs.liquibase-version  }}" "${{ github.ref }}" ${ext}
+            $PWD/.github/util/sign-artifacts.sh ./target "${{ inputs.liquibase-version }}" "${{ github.ref }}"
             mvn versions:set -DnewVersion=${{ inputs.liquibase-version }}
             mvn deploy:deploy-file \
             -Dfile=./re-version/out/${ext}-${{ inputs.liquibase-version }}.jar \
