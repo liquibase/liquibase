@@ -28,11 +28,12 @@ import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.lang.reflect.Type;
 import java.util.*;
+import java.util.regex.Pattern;
 
 import static liquibase.statement.SqlStatement.EMPTY_SQL_STATEMENT;
 
 /**
- * Standard superclass to simplify {@link Change } implementations. You can implement Change directly, this class is
+ * Standard superclass to simplify {@link Change} implementations. You can implement Change directly, this class is
  * purely for convenience but recommended.
  * <p></p>
  * By default, this base class relies on annotations such as {@link DatabaseChange} and {@link DatabaseChangeProperty}
@@ -42,6 +43,7 @@ import static liquibase.statement.SqlStatement.EMPTY_SQL_STATEMENT;
 public abstract class AbstractChange extends AbstractPlugin implements Change {
 
     protected static final String NODENAME_COLUMN = "column";
+    private static final Pattern ALPHABET = Pattern.compile("([A-Z])");
 
     private ChangeSet changeSet;
 
@@ -57,7 +59,7 @@ public abstract class AbstractChange extends AbstractPlugin implements Change {
     }
 
     /**
-     * Generate the ChangeMetaData for this class. Default implementation reads from the @{@link DatabaseChange } annotation
+     * Generate the ChangeMetaData for this class. Default implementation reads from the @{@link DatabaseChange} annotation
      * and calls out to {@link #createChangeParameterMetadata(String)} for each property.
      *
      * @throws UnexpectedLiquibaseException if no @DatabaseChange annotation on this Change class
@@ -182,7 +184,7 @@ public abstract class AbstractChange extends AbstractPlugin implements Change {
     private ChangeParameterMetaData createChangeParameterMetadata(PropertyDescriptor property, Method readMethod) {
         try {
             String parameterName = property.getDisplayName();
-            String displayName = parameterName.replaceAll("([A-Z])", " $1");
+            String displayName = ALPHABET.matcher(parameterName).replaceAll(" $1");
             displayName = displayName.substring(0, 1).toUpperCase() + displayName.substring(1);
 
             Type type = readMethod.getGenericReturnType();
@@ -198,9 +200,10 @@ public abstract class AbstractChange extends AbstractPlugin implements Change {
             );
             String[] requiredForDatabase = createRequiredDatabasesMetaData(parameterName, changePropertyAnnotation);
             String[] supportsDatabase = createSupportedDatabasesMetaData(parameterName, changePropertyAnnotation);
+            String[] alternatePropertyNames = createAlternateParameterNames(changePropertyAnnotation);
 
             return new ChangeParameterMetaData(this, parameterName, displayName, description, examples, since,
-                type, requiredForDatabase, supportsDatabase, mustEqualExisting, serializationType).withAccessors(readMethod, property.getWriteMethod());
+                type, requiredForDatabase, supportsDatabase, mustEqualExisting, serializationType, alternatePropertyNames).withAccessors(readMethod, property.getWriteMethod());
         } catch (UnexpectedLiquibaseException e) {
             throw e;
         }
@@ -313,6 +316,14 @@ public abstract class AbstractChange extends AbstractPlugin implements Change {
 
     }
 
+    protected String[] createAlternateParameterNames(DatabaseChangeProperty changePropertyAnnotation) {
+        if (changePropertyAnnotation == null) {
+            return new String[]{};
+        } else {
+            return changePropertyAnnotation.alternatePropertyNames();
+        }
+    }
+
     /**
      * {@inheritDoc}
      */
@@ -333,7 +344,7 @@ public abstract class AbstractChange extends AbstractPlugin implements Change {
     /**
      * Implementation delegates logic to the
      * {@link liquibase.sqlgenerator.SqlGenerator#generateStatementsIsVolatile(Database) } method on the
-     * {@link SqlStatement} objects returned by {@link #generateStatements }.
+     * {@link SqlStatement} objects returned by {@link #generateStatements}.
      * If zero or null SqlStatements are returned by generateStatements then this method returns false.
      */
     @Override
@@ -353,7 +364,7 @@ public abstract class AbstractChange extends AbstractPlugin implements Change {
     /**
      * Implementation delegates logic to the
      * {@link liquibase.sqlgenerator.SqlGenerator#generateRollbackStatementsIsVolatile(Database) }
-     * method on the {@link SqlStatement} objects returned by {@link #generateStatements }
+     * method on the {@link SqlStatement} objects returned by {@link #generateStatements}
      * If no or null SqlStatements are returned by generateRollbackStatements then this method returns false.
      */
     @Override
@@ -376,7 +387,7 @@ public abstract class AbstractChange extends AbstractPlugin implements Change {
     /**
      * Implementation delegates logic to the
      * {@link liquibase.sqlgenerator.SqlGenerator#supports(liquibase.statement.SqlStatement, liquibase.database.Database)}
-     * method on the {@link SqlStatement} objects returned by {@link #generateStatements }.
+     * method on the {@link SqlStatement} objects returned by {@link #generateStatements}.
      * If no or null SqlStatements are returned by generateStatements then this method returns true.
      * If {@link #generateStatementsVolatile(liquibase.database.Database)} returns true, we cannot call generateStatements and so assume true.
      */
@@ -401,7 +412,7 @@ public abstract class AbstractChange extends AbstractPlugin implements Change {
      * Implementation delegates logic to the
      * {@link liquibase.sqlgenerator.SqlGenerator#warn(liquibase.statement.SqlStatement, liquibase.database.Database,
      * liquibase.sqlgenerator.SqlGeneratorChain)} method on the {@link SqlStatement} objects returned by
-     * {@link #generateStatements }.
+     * {@link #generateStatements}.
      * If a generated statement is not supported for the given database, no warning will be added since that is a
      * validation error. If no or null SqlStatements are returned by generateStatements then this method returns no
      * warnings.
@@ -436,7 +447,7 @@ public abstract class AbstractChange extends AbstractPlugin implements Change {
      * and also delegates logic to the
      * {@link liquibase.sqlgenerator.SqlGenerator#validate(liquibase.statement.SqlStatement,
      * liquibase.database.Database, liquibase.sqlgenerator.SqlGeneratorChain)}  method on the {@link SqlStatement}
-     * objects returned by {@link #generateStatements }.
+     * objects returned by {@link #generateStatements}.
      * If no or null SqlStatements are returned by generateStatements then this method returns no errors.
      * If there are no parameters than this method returns no errors
      */
@@ -592,6 +603,7 @@ public abstract class AbstractChange extends AbstractPlugin implements Change {
      * @deprecated Should get from {@link Scope}
      */
     @DatabaseChangeProperty(isChangeProperty = false)
+    @Deprecated
     public ResourceAccessor getResourceAccessor() {
         return Scope.getCurrentScope().getResourceAccessor();
     }
@@ -604,7 +616,7 @@ public abstract class AbstractChange extends AbstractPlugin implements Change {
     /**
      * Implementation delegates logic to the
      * {@link liquibase.sqlgenerator.SqlGeneratorFactory#getAffectedDatabaseObjects(liquibase.statement.SqlStatement,
-     * liquibase.database.Database)} method on the {@link SqlStatement} objects returned by {@link #generateStatements }
+     * liquibase.database.Database)} method on the {@link SqlStatement} objects returned by {@link #generateStatements}
      * Returns empty set if change is not supported for the passed database
      */
     @Override
@@ -775,14 +787,22 @@ public abstract class AbstractChange extends AbstractPlugin implements Change {
                         }
                     }
                 } else {
-                    Object childValue = parsedNode.getChildValue(
-                        null, param.getParameterName(), param.getDataTypeClass()
-                    );
-                    if ((childValue == null) && (param.getSerializationType() == SerializationType.DIRECT_VALUE)) {
-                        childValue = parsedNode.getValue();
+                    List<String> parameterNamesToCheck = new ArrayList<>();
+                    parameterNamesToCheck.add(param.getParameterName());
+                    if (param.getAlternateParameterNames() != null) {
+                        parameterNamesToCheck.addAll(Arrays.asList(param.getAlternateParameterNames()));
                     }
-                    if(null != childValue) {
-                        param.setValue(this, childValue);
+                    for (String paramName : parameterNamesToCheck) {
+                        Object childValue = parsedNode.getChildValue(
+                                null, paramName, param.getDataTypeClass()
+                        );
+                        if ((childValue == null) && (param.getSerializationType() == SerializationType.DIRECT_VALUE)) {
+                            childValue = parsedNode.getValue();
+                        }
+                        if(null != childValue) {
+                            param.setValue(this, childValue);
+                            break;
+                        }
                     }
                 }
             }

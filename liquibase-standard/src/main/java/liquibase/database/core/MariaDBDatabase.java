@@ -4,6 +4,7 @@ import liquibase.Scope;
 import liquibase.database.DatabaseConnection;
 import liquibase.exception.DatabaseException;
 import liquibase.structure.DatabaseObject;
+import liquibase.structure.core.Sequence;
 import liquibase.structure.core.Table;
 import liquibase.util.StringUtil;
 
@@ -85,7 +86,7 @@ public class MariaDBDatabase extends MySQLDatabase {
 
     @Override
     public boolean isCorrectDatabaseImplementation(DatabaseConnection conn) throws DatabaseException {
-        // Presumbably for compatiblity reasons, a MariaDB instance might identify with getDatabaseProductName()=MySQL.
+        // Presumably for compatibility reasons, a MariaDB instance might identify with getDatabaseProductName()=MySQL.
         // To be certain, We search for "mariadb" in the version string.
         if (PRODUCT_NAME.equalsIgnoreCase(conn.getDatabaseProductName())) {
             return true; // Identified as MariaDB product
@@ -105,12 +106,29 @@ public class MariaDBDatabase extends MySQLDatabase {
         return "5.3.0";
     }
 
+
+    @Override
+    public boolean supports(Class<? extends DatabaseObject> object) {
+        if (Sequence.class.isAssignableFrom(object)) {
+            try {
+                // From https://liquibase.jira.com/browse/CORE-3457 (by Lijun Liao) corrected
+                int majorVersion = getDatabaseMajorVersion();
+                return majorVersion > 10 || (majorVersion == 10 && getDatabaseMinorVersion() >= 3);
+            } catch (DatabaseException e) {
+                Scope.getCurrentScope().getLog(getClass()).fine("Cannot retrieve database version", e);
+                return false;
+            }
+        }
+        return super.supports(object);
+    }
+
     @Override
     public boolean supportsSequences() {
         try {
             // From https://liquibase.jira.com/browse/CORE-3457 (by Lijun Liao) corrected
             int majorVersion = getDatabaseMajorVersion();
-            return majorVersion > 10 || (majorVersion == 10 && getDatabaseMinorVersion() >= 3);        } catch (DatabaseException e) {
+            return majorVersion > 10 || (majorVersion == 10 && getDatabaseMinorVersion() >= 3);
+        } catch (DatabaseException e) {
             Scope.getCurrentScope().getLog(getClass()).fine("Cannot retrieve database version", e);
             return false;
         }
@@ -119,5 +137,10 @@ public class MariaDBDatabase extends MySQLDatabase {
     @Override
     public boolean supportsCreateIfNotExists(Class<? extends DatabaseObject> type) {
         return type.isAssignableFrom(Table.class);
+    }
+
+    @Override
+    public boolean supportsDatabaseChangeLogHistory() {
+        return true;
     }
 }

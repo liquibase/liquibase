@@ -17,7 +17,6 @@ class ChangelogSyncIntegrationTest extends Specification {
     @Shared
     private DatabaseTestSystem h2 = Scope.currentScope.getSingleton(TestSystemFactory).getTestSystem("h2") as DatabaseTestSystem
 
-    @Ignore
     def "Verify deploymentId is populated when running changelogSync"() {
         when:
         def changelogSync = new CommandScope(ChangelogSyncCommandStep.COMMAND_NAME)

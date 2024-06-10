@@ -114,6 +114,7 @@ public class CreateProcedureChange extends AbstractChange implements DbmsTargete
     /**
      * @deprecated Use getProcedureText() instead
      */
+    @Deprecated
     public String getProcedureBody() {
         return procedureText;
     }
@@ -133,7 +134,8 @@ public class CreateProcedureChange extends AbstractChange implements DbmsTargete
             isChangeProperty = false, version = {ChecksumVersion.V8})
     @DatabaseChangeProperty(
         description = procedureTextDescription,
-            serializationType = SerializationType.DIRECT_VALUE)
+            serializationType = SerializationType.DIRECT_VALUE,
+            alternatePropertyNames = {"procedureBody"})
     public String getProcedureText() {
         return procedureText;
     }
@@ -375,7 +377,7 @@ public class CreateProcedureChange extends AbstractChange implements DbmsTargete
             procedureText = StringUtil.trimToNull(getProcedureText());
         } else {
             if (getChangeSet() == null) {
-                //only try to read a file when inside a changest. Not when analyizing supported
+                //only try to read a file when inside a changest. Not when analyzing supported
                 procedureText = "NO CHANGESET";
             } else {
                 try {

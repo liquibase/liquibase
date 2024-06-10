@@ -11,5 +11,6 @@ liquibase.extension.testing.testsystem.core.MSSQLTestSystem
 liquibase.extension.testing.testsystem.core.MySQLTestSystem
 liquibase.extension.testing.testsystem.core.OracleTestSystem
 liquibase.extension.testing.testsystem.core.PostgresTestSystem
+liquibase.extension.testing.testsystem.core.SnowflakeTestSystem
 liquibase.extension.testing.testsystem.core.SQLiteTestSystem
 liquibase.extension.testing.testsystem.core.SybaseASATestSystem

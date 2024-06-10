@@ -14,12 +14,13 @@ jobs:
       matrix:
         packages_to_delete: [org.liquibase.liquibase-core, org.liquibase.liquibase-extension-testing, org.liquibase.liquibase-integration-tests, org.liquibase.liquibase-maven-plugin, org.liquibase.liquibase-cdi-jakarta, org.liquibase.liquibase-cdi, org.liquibase.liquibase]
     steps:
-    - uses: actions/delete-package-versions@v3
+    - uses: actions/delete-package-versions@v5
       with:
         # Name of the package.
         # Defaults to an empty string.
         # Required if `package-version-ids` input is not given.
         package-name: ${{ matrix.packages_to_delete }}
+        package-type: maven
 
         # The number of latest versions to keep.
         # This cannot be specified with `num-old-versions-to-delete`. By default, `num-old-versions-to-delete` takes precedence over `min-versions-to-keep`.

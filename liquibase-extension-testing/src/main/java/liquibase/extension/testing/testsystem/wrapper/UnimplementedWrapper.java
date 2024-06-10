@@ -7,6 +7,7 @@ import liquibase.exception.UnexpectedLiquibaseException;
  *
  * @deprecated will remove when all TestSystems are created.
  */
+@Deprecated
 public class UnimplementedWrapper extends DatabaseWrapper {
     @Override
     public void start() throws Exception {

@@ -24,7 +24,6 @@ import liquibase.exception.LiquibaseException;
 import liquibase.executor.Executor;
 import liquibase.executor.ExecutorService;
 import liquibase.executor.LoggingExecutor;
-import liquibase.io.WriterOutputStream;
 import liquibase.lockservice.DatabaseChangeLogLock;
 import liquibase.lockservice.LockServiceFactory;
 import liquibase.logging.Logger;
@@ -37,6 +36,7 @@ import liquibase.serializer.ChangeLogSerializer;
 import liquibase.structure.DatabaseObject;
 import liquibase.util.LoggingExecutorTextUtil;
 import liquibase.util.StringUtil;
+import org.apache.commons.io.output.WriterOutputStream;
 
 import java.io.IOException;
 import java.io.PrintStream;
@@ -995,15 +995,32 @@ public class Liquibase implements AutoCloseable {
     }
 
     /**
+     * Drops all database objects in the default schema.
+     * @param dropDbclhistory If true, the database changelog history table will be dropped. Requires pro license.
+     */
+    public final void dropAll(Boolean dropDbclhistory) throws DatabaseException {
+        dropAll(dropDbclhistory, new CatalogAndSchema(getDatabase().getDefaultCatalogName(), getDatabase().getDefaultSchemaName()));
+    }
+
+    /**
      * Drops all database objects in the passed schema(s).
      */
     public final void dropAll(CatalogAndSchema... schemas) throws DatabaseException {
+        dropAll(null, schemas);
+    }
+
+    /**
+     * Drops all database objects in the passed schema(s).
+     * @param dropDbclhistory If true, the database changelog history table will be dropped. Requires pro license.
+     */
+    public final void dropAll(Boolean dropDbclhistory, CatalogAndSchema... schemas) throws DatabaseException {
 
         CatalogAndSchema[] finalSchemas = schemas;
         try {
             CommandScope dropAll = new CommandScope("dropAll")
                     .addArgumentValue(DbUrlConnectionArgumentsCommandStep.DATABASE_ARG, Liquibase.this.getDatabase())
-                    .addArgumentValue(DropAllCommandStep.CATALOG_AND_SCHEMAS_ARG, finalSchemas);
+                    .addArgumentValue(DropAllCommandStep.CATALOG_AND_SCHEMAS_ARG, finalSchemas)
+                    .addArgumentValue("dropDbclhistory", dropDbclhistory);
 
             try {
                 dropAll.execute();

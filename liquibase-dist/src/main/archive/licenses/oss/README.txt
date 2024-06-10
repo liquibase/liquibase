@@ -26,6 +26,7 @@ Apache 2.0 License
 - org.apache.commons:commons-lang3
 - org.apache.commons:commons-text
 - org.apache.commons:commons-collections4
+- commons-io:commons-io
 
 BSD 2 Clause License
 - org.hsqldb:hsqldb

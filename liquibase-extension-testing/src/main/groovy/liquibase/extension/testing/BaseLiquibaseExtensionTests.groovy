@@ -1,10 +1,10 @@
 package liquibase.extension.testing
 
 import liquibase.extension.testing.command.CommandTests
-import org.junit.runner.RunWith
-import org.junit.runners.Suite
+import org.junit.platform.suite.api.SelectClasses
+import org.junit.platform.suite.api.Suite
 
-@RunWith(Suite.class)
-@Suite.SuiteClasses([CommandTests])
+@Suite
+@SelectClasses([CommandTests])
 abstract class BaseLiquibaseExtensionTests {
 }

@@ -12,9 +12,7 @@ import liquibase.configuration.ConfigurationValueProvider;
 import liquibase.configuration.ConfiguredValue;
 import liquibase.configuration.LiquibaseConfiguration;
 import liquibase.configuration.core.DefaultsFileValueProvider;
-import liquibase.exception.CommandLineParsingException;
-import liquibase.exception.CommandValidationException;
-import liquibase.exception.LiquibaseException;
+import liquibase.exception.*;
 import liquibase.integration.IntegrationDetails;
 import liquibase.license.LicenseInfo;
 import liquibase.license.LicenseService;
@@ -46,17 +44,13 @@ import java.security.AccessController;
 import java.security.PrivilegedAction;
 import java.time.Duration;
 import java.util.*;
-import java.util.jar.JarFile;
-import java.util.jar.Manifest;
 import java.util.logging.*;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
-import java.util.zip.ZipEntry;
 
 import static java.util.ResourceBundle.getBundle;
 import static liquibase.configuration.LiquibaseConfiguration.REGISTERED_VALUE_PROVIDERS_KEY;
-import static liquibase.integration.commandline.LiquibaseLauncherSettings.LiquibaseLauncherSetting.LIQUIBASE_HOME;
-import static liquibase.integration.commandline.LiquibaseLauncherSettings.getSetting;
+import static liquibase.integration.commandline.VersionUtils.*;
 import static liquibase.util.SystemUtil.isWindows;
 
 
@@ -251,7 +245,9 @@ public class LiquibaseCommandLine {
         //
         Level level = determineLogLevel(exception);
 
-        Scope.getCurrentScope().getLog(getClass()).log(level, uiMessage, exception);
+        if (showExceptionInLog(exception)) {
+            Scope.getCurrentScope().getLog(getClass()).log(level, uiMessage, exception);
+        }
 
         boolean printUsage = false;
         try (final StringWriter suggestionWriter = new StringWriter();
@@ -270,7 +266,7 @@ public class LiquibaseCommandLine {
                     || exception instanceof CommandLineParsingException) {
                 System.err.println("Error parsing command line: " + uiMessage);
                 printUsage = true;
-            } else if (exception.getCause() != null && exception.getCause() instanceof CommandFailedException) {
+            } else if (exception.getCause() instanceof CommandFailedException) {
                 System.err.println(uiMessage);
             } else {
                 System.err.println("\nUnexpected error running Liquibase: " + uiMessage);
@@ -292,18 +288,35 @@ public class LiquibaseCommandLine {
 
             suggestionsPrintWriter.flush();
             final String suggestions = suggestionWriter.toString();
-            if (suggestions.length() > 0) {
+            if (!suggestions.isEmpty()) {
                 System.err.println();
                 System.err.println(suggestions);
             }
         } catch (IOException e) {
             Scope.getCurrentScope().getLog(getClass()).warning("Error closing stream: " + e.getMessage(), e);
         }
-        if (exception.getCause() != null && exception.getCause() instanceof CommandFailedException) {
-            CommandFailedException cfe = (CommandFailedException) exception.getCause();
-            return cfe.getExitCode();
+        Throwable exitCodeException = ExceptionUtil.findExceptionInCauseChain(exception, ExitCodeException.class);
+        if (exitCodeException != null) {
+            Integer exitCode = ((ExitCodeException) exitCodeException.getCause()).getExitCode();
+            if (exitCode != null) {
+                return exitCode;
+            }
         }
         return 1;
+    }
+
+    //
+    // Honor the expected flag on a CommandFailedException
+    //
+    private boolean showExceptionInLog(Throwable exception) {
+        Throwable t = exception;
+        while (t != null) {
+            if (t instanceof CommandFailedException && ((CommandFailedException) t).isExpected()) {
+                return false;
+            }
+            t = t.getCause();
+        }
+        return true;
     }
 
     //
@@ -621,31 +634,36 @@ public class LiquibaseCommandLine {
         }
 
         final PathHandlerFactory pathHandlerFactory = Scope.getCurrentScope().getSingleton(PathHandlerFactory.class);
-        Resource resource = pathHandlerFactory.getResource(defaultsFileConfig.getValue());
+        String defaultsFileConfigValue = defaultsFileConfig.getValue();
+        Resource resource = pathHandlerFactory.getResource(defaultsFileConfigValue);
         if (resource.exists()) {
             try (InputStream defaultsStream = resource.openInputStream()) {
                 if (defaultsStream != null) {
-                    final DefaultsFileValueProvider fileProvider = new DefaultsFileValueProvider(defaultsStream, "File exists at path " + defaultsFileConfig.getValue());
+                    final DefaultsFileValueProvider fileProvider = new DefaultsFileValueProvider(defaultsStream, "File exists at path " + defaultsFileConfigValue);
                     liquibaseConfiguration.registerProvider(fileProvider);
                     returnList.add(fileProvider);
                 }
             }
         } else {
-            InputStream inputStreamOnClasspath = Thread.currentThread().getContextClassLoader().getResourceAsStream(defaultsFileConfig.getValue());
+            InputStream inputStreamOnClasspath = Thread.currentThread().getContextClassLoader().getResourceAsStream(defaultsFileConfigValue);
             if (inputStreamOnClasspath == null) {
-                Scope.getCurrentScope().getLog(getClass()).fine("Cannot find defaultsFile " + defaultsFileConfig.getValue());
+                Scope.getCurrentScope().getLog(getClass()).fine("Cannot find defaultsFile " + defaultsFileConfigValue);
                 if (!defaultsFileConfig.wasDefaultValueUsed()) {
                             //can't use UI since it's not configured correctly yet
-                    System.err.println("Could not find defaults file " + defaultsFileConfig.getValue());
+                    if (GlobalConfiguration.STRICT.getCurrentValue()) {
+                        throw new UnexpectedLiquibaseException("ERROR: The file '"+defaultsFileConfigValue+"' was not found. The global argument 'strict' is enabled, which validates the existence of files specified in liquibase files, such as changelogs, flowfiles, checks packages files, and more. To prevent this message, check your configurations, or disable the 'strict' setting.");
+                    } else {
+                        System.err.println("Could not find defaults file " + defaultsFileConfigValue);
+                    }
                 }
             } else {
-                final DefaultsFileValueProvider fileProvider = new DefaultsFileValueProvider(inputStreamOnClasspath, "File in classpath " + defaultsFileConfig.getValue());
+                final DefaultsFileValueProvider fileProvider = new DefaultsFileValueProvider(inputStreamOnClasspath, "File in classpath " + defaultsFileConfigValue);
                 liquibaseConfiguration.registerProvider(fileProvider);
                 returnList.add(fileProvider);
             }
         }
 
-        final File defaultsFile = new File(defaultsFileConfig.getValue());
+        final File defaultsFile = new File(defaultsFileConfigValue);
         File localDefaultsFile = new File(defaultsFile.getAbsolutePath().replaceFirst(".properties$", ".local.properties"));
         if (localDefaultsFile.exists()) {
             final DefaultsFileValueProvider fileProvider = new DefaultsFileValueProvider(localDefaultsFile) {
@@ -1263,7 +1281,7 @@ public class LiquibaseCommandLine {
         returnList.add(key);
     }
 
-    private static class LiquibaseVersionProvider implements CommandLine.IVersionProvider {
+    public static class LiquibaseVersionProvider implements CommandLine.IVersionProvider {
 
         @Override
         public String[] getVersion() throws Exception {
@@ -1281,56 +1299,25 @@ public class LiquibaseCommandLine {
             String liquibaseHome;
             Path liquibaseHomePath = null;
             try {
-                liquibaseHomePath = new File(ObjectUtil.defaultIfNull(getSetting(LIQUIBASE_HOME), workingDirectory.toAbsolutePath().toString())).getAbsoluteFile().getCanonicalFile().toPath();
+                liquibaseHomePath = getLiquibaseHomePath(workingDirectory);
                 liquibaseHome = liquibaseHomePath.toString();
             } catch (IOException e) {
                 liquibaseHome = "Cannot resolve LIQUIBASE_HOME: " + e.getMessage();
             }
 
-            Map<String, LibraryInfo> libraryInfo = new HashMap<>();
-
-            final ClassLoader classLoader = getClass().getClassLoader();
-            if (classLoader instanceof URLClassLoader) {
-                for (URL url : ((URLClassLoader) classLoader).getURLs()) {
-                    if (!url.toExternalForm().startsWith("file:")) {
-                        continue;
-                    }
-                    final File file = new File(url.toURI());
-                    if (file.getName().equals("liquibase-core.jar")) {
-                        continue;
-                    }
-                    if (file.exists() && file.getName().toLowerCase().endsWith(".jar")) {
-                        final LibraryInfo thisInfo = getLibraryInfo(file);
-                        libraryInfo.putIfAbsent(thisInfo.name, thisInfo);
-                    }
-                }
-            }
+            Map<String, LibraryInfo> libraryInfo = getLibraryInfoMap();
 
             final StringBuilder libraryDescription = new StringBuilder("Libraries:\n");
             if (libraryInfo.size() == 0) {
                 libraryDescription.append("- UNKNOWN");
             } else {
-                List<Version.Library> mdcLibraries = new ArrayList<>(libraryInfo.size());
-                for (LibraryInfo info : new TreeSet<>(libraryInfo.values())) {
-                    String filePath = info.file.getCanonicalPath();
+                List<String> libraries = listLibraries(libraryInfo, liquibaseHomePath, workingDirectory, mdcVersion);
 
-                    if (liquibaseHomePath != null && info.file.toPath().startsWith(liquibaseHomePath)) {
-                        filePath = liquibaseHomePath.relativize(info.file.toPath()).toString();
-                    }
-                    if (info.file.toPath().startsWith(workingDirectory)) {
-                        filePath = workingDirectory.relativize(info.file.toPath()).toString();
-                    }
-
+                for (String library : libraries) {
                     libraryDescription.append("- ")
-                            .append(filePath).append(":")
-                            .append(" ").append(info.name)
-                            .append(" ").append(info.version == null ? "UNKNOWN" : info.version)
-                            .append(info.vendor == null ? "" : " By " + info.vendor)
+                            .append(library)
                             .append("\n");
-
-                    mdcLibraries.add(new Version.Library(info.name, filePath));
                 }
-                mdcVersion.setLiquibaseLibraries(new Version.LiquibaseLibraries(libraryInfo.size(), mdcLibraries));
             }
             String javaHome = System.getProperties().getProperty("java.home");
             String javaVersion = System.getProperty("java.version");
@@ -1365,73 +1352,6 @@ public class LiquibaseCommandLine {
             mdcVersion.setLiquibaseVersion(banner);
             try (MdcObject version = Scope.getCurrentScope().addMdcValue(MdcKey.VERSION, mdcVersion)) {
                 Scope.getCurrentScope().getLog(getClass()).info("Generated version info");
-            }
-        }
-
-        private LibraryInfo getLibraryInfo(File pathEntryFile) throws IOException {
-            try (final JarFile jarFile = new JarFile(pathEntryFile)) {
-                final LibraryInfo libraryInfo = new LibraryInfo();
-                libraryInfo.file = pathEntryFile;
-
-                final Manifest manifest = jarFile.getManifest();
-                if (manifest != null) {
-                    libraryInfo.name = getValue(manifest, "Bundle-Name", "Implementation-Title", "Specification-Title");
-                    libraryInfo.version = getValue(manifest, "Bundle-Version", "Implementation-Version", "Specification-Version");
-                    libraryInfo.vendor = getValue(manifest, "Bundle-Vendor", "Implementation-Vendor", "Specification-Vendor");
-                }
-
-                handleCompilerJarEdgeCase(pathEntryFile, jarFile, libraryInfo);
-
-                if (libraryInfo.name == null) {
-                    libraryInfo.name = pathEntryFile.getName().replace(".jar", "");
-                }
-                return libraryInfo;
-            }
-        }
-
-        /**
-         * The compiler.jar file was accidentally added to the liquibase tar.gz distribution, and the compiler.jar
-         * file does not contain a completed MANIFEST.MF file. This method loads the version out of the pom.xml
-         * instead of using the manifest, only for the compiler.jar file.
-         */
-        private void handleCompilerJarEdgeCase(File pathEntryFile, JarFile jarFile, LibraryInfo libraryInfo) {
-            try {
-                if (pathEntryFile.toString().endsWith("compiler.jar") && StringUtil.isEmpty(libraryInfo.version)) {
-                    ZipEntry entry = jarFile.getEntry("META-INF/maven/com.github.spullara.mustache.java/compiler/pom.properties");
-                    InputStream inputStream = jarFile.getInputStream(entry);
-
-                    Properties jarProperties = new Properties();
-                    jarProperties.load(inputStream);
-
-                    libraryInfo.version = jarProperties.getProperty("version");
-                }
-            } catch (Exception e) {
-                Scope.getCurrentScope().getLog(getClass()).fine("Failed to load the version of compiler.jar from " +
-                        "its pom.properties, this is relatively harmless, but could mean that the version of compiler.jar will " +
-                        "not appear in the liquibase --version console output.", e);
-            }
-        }
-
-        private String getValue(Manifest manifest, String... keys) {
-            for (String key : keys) {
-                String value = manifest.getMainAttributes().getValue(key);
-                if (value != null) {
-                    return value;
-                }
-            }
-            return null;
-        }
-
-
-        private static class LibraryInfo implements Comparable<LibraryInfo> {
-            private String vendor;
-            private String name;
-            private File file;
-            private String version;
-
-            @Override
-            public int compareTo(LibraryInfo o) {
-                return this.file.compareTo(o.file);
             }
         }
     }

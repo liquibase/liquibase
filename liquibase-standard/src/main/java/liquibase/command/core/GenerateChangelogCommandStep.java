@@ -17,7 +17,6 @@ import liquibase.exception.CommandValidationException;
 import liquibase.resource.PathHandlerFactory;
 import liquibase.resource.Resource;
 import liquibase.util.StringUtil;
-import liquibase.util.ValueHandlerUtil;
 
 import java.io.IOException;
 import java.io.PrintStream;
@@ -94,7 +93,6 @@ public class GenerateChangelogCommandStep extends AbstractChangelogCommandStep {
         USE_OR_REPLACE_OPTION = builder.argument("useOrReplaceOption", Boolean.class)
                 .description("If true, will add 'OR REPLACE' option to the create view change object")
                 .defaultValue(false)
-                .setValueHandler(ValueHandlerUtil::booleanValueHandler)
                 .build();
         builder.addArgument(AbstractChangelogCommandStep.RUN_ON_CHANGE_TYPES_ARG).build();
         builder.addArgument(AbstractChangelogCommandStep.REPLACE_IF_EXISTS_TYPES_ARG).build();
@@ -126,7 +124,7 @@ public class GenerateChangelogCommandStep extends AbstractChangelogCommandStep {
         diffOutputControl.setDataDir(commandScope.getArgumentValue(DATA_OUTPUT_DIR_ARG));
         referenceDatabase.setOutputDefaultSchema(diffOutputControl.getIncludeSchema());
 
-        if(commandScope.getArgumentValue(GenerateChangelogCommandStep.USE_OR_REPLACE_OPTION).booleanValue()) {
+        if (commandScope.getArgumentValue(GenerateChangelogCommandStep.USE_OR_REPLACE_OPTION)) {
             diffOutputControl.setReplaceIfExistsSet(true);
         }
 

@@ -9,6 +9,7 @@ import liquibase.exception.DatabaseHistoryException;
 import liquibase.executor.ExecutorService;
 import liquibase.resource.ResourceAccessor;
 import liquibase.statement.core.UpdateChangeSetChecksumStatement;
+import lombok.Getter;
 
 import java.text.DecimalFormat;
 import java.util.Comparator;
@@ -17,11 +18,8 @@ import java.util.List;
 
 public abstract class AbstractChangeLogHistoryService implements ChangeLogHistoryService {
 
+    @Getter
     private Database database;
-
-    public Database getDatabase() {
-        return database;
-    }
 
     @Override
     public void setDatabase(Database database) {
@@ -30,7 +28,6 @@ public abstract class AbstractChangeLogHistoryService implements ChangeLogHistor
 
     @Override
     public void reset() {
-
     }
 
     @Override

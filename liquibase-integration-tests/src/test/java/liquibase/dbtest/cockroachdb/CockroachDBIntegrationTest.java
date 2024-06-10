@@ -8,7 +8,7 @@ import liquibase.executor.ExecutorService;
 import liquibase.snapshot.DatabaseSnapshot;
 import liquibase.snapshot.SnapshotControl;
 import liquibase.snapshot.SnapshotGeneratorFactory;
-import liquibase.statement.core.RawSqlStatement;
+import liquibase.statement.core.RawParameterizedSqlStatement;
 import liquibase.structure.core.Column;
 import liquibase.structure.core.PrimaryKey;
 import liquibase.structure.core.Table;
@@ -33,9 +33,9 @@ public class CockroachDBIntegrationTest extends AbstractIntegrationTest {
         }
         final Executor executor = Scope.getCurrentScope().getSingleton(ExecutorService.class).getExecutor("jdbc", getDatabase());
 
-        executor.execute(new RawSqlStatement("DROP TABLE IF EXISTS pk"));
+        executor.execute(new RawParameterizedSqlStatement("DROP TABLE IF EXISTS pk"));
 
-        executor.execute(new RawSqlStatement("CREATE TABLE pk (\n" +
+        executor.execute(new RawParameterizedSqlStatement("CREATE TABLE pk (\n" +
                 "a INT8 NOT NULL,\n" +
                 "b INT8 NOT NULL,\n" +
                 "c INT8 NOT NULL,\n" +

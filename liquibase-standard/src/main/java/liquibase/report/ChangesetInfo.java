@@ -40,6 +40,7 @@ public class ChangesetInfo {
                     changesetOutcome = ChangeSet.ExecType.FAILED.value;
                     success = false;
                 }
+                // This list assumes that the generated sql is only related to the current operation's generated sql.
                 List<String> generatedSql = deployedChangeSet.getGeneratedSql()
                         .stream()
                         .filter(sql -> sql != null && !sql.isEmpty())

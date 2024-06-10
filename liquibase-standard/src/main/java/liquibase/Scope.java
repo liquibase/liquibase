@@ -61,12 +61,17 @@ public class Scope {
         /**
          * @deprecated use {@link GlobalConfiguration#FILE_ENCODING}
          */
+        @Deprecated
         fileEncoding,
         databaseChangeLog,
         changeSet,
         osgiPlatform,
         checksumVersion,
-        latestChecksumVersion
+        latestChecksumVersion,
+        /**
+         * A <code>Map<String, String></code> of arguments/configuration properties used in the maven invocation of Liquibase.
+         */
+        mavenConfigurationProperties
     }
 
     public static final String JAVA_PROPERTIES = "javaProperties";
@@ -149,7 +154,7 @@ public class Scope {
     }
 
     private String generateScopeId() {
-        return StringUtil.randomIdentifer(10).toLowerCase();
+        return StringUtil.randomIdentifier(10).toLowerCase();
     }
 
     /**
@@ -395,6 +400,7 @@ public class Scope {
     /**
      * @deprecated use {@link GlobalConfiguration#FILE_ENCODING}
      */
+    @Deprecated
     public Charset getFileEncoding() {
         return get(Attr.fileEncoding, Charset.defaultCharset());
     }

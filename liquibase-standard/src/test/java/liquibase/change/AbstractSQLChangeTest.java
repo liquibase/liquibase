@@ -4,7 +4,7 @@ import liquibase.ChecksumVersion;
 import liquibase.Scope;
 import liquibase.database.core.MSSQLDatabase;
 import liquibase.statement.SqlStatement;
-import liquibase.statement.core.RawSqlStatement;
+import liquibase.statement.core.RawParameterizedSqlStatement;
 import liquibase.util.StreamUtil;
 import org.junit.Test;
 
@@ -147,9 +147,9 @@ public class AbstractSQLChangeTest {
 //        change.setStripComments(true);
 //        SqlStatement[] statements = change.generateStatements(mock(Database.class));
 //        assertEquals(3, statements.length);
-//        assertEquals("LINE 1", ((RawSqlStatement) statements[0]).getSql());
-//        assertEquals("LINE 2", ((RawSqlStatement) statements[1]).getSql());
-//        assertEquals("LINE 3", ((RawSqlStatement) statements[2]).getSql());
+//        assertEquals("LINE 1", ((RawParameterizedSqlStatement) statements[0]).getSql());
+//        assertEquals("LINE 2", ((RawParameterizedSqlStatement) statements[1]).getSql());
+//        assertEquals("LINE 3", ((RawParameterizedSqlStatement) statements[2]).getSql());
 //    }
 //
 //    @Test
@@ -160,9 +160,9 @@ public class AbstractSQLChangeTest {
 //        change.setStripComments(true);
 //        SqlStatement[] statements = change.generateStatements(mock(Database.class));
 //        assertEquals(3, statements.length);
-//        assertEquals("LINE 1", ((RawSqlStatement) statements[0]).getSql());
-//        assertEquals("LINE 2", ((RawSqlStatement) statements[1]).getSql());
-//        assertEquals("LINE 3", ((RawSqlStatement) statements[2]).getSql());
+//        assertEquals("LINE 1", ((RawParameterizedSqlStatement) statements[0]).getSql());
+//        assertEquals("LINE 2", ((RawParameterizedSqlStatement) statements[1]).getSql());
+//        assertEquals("LINE 3", ((RawParameterizedSqlStatement) statements[2]).getSql());
 //    }
 
     @Test
@@ -173,7 +173,7 @@ public class AbstractSQLChangeTest {
         change.setStripComments(true);
         SqlStatement[] statements = change.generateStatements(new MSSQLDatabase());
         assertEquals(1, statements.length);
-        assertEquals("LINE 1;\r\n\r\nLINE 2;\r\nLINE 3;", ((RawSqlStatement) statements[0]).getSql());
+        assertEquals("LINE 1;\r\n\r\nLINE 2;\r\nLINE 3;", ((RawParameterizedSqlStatement) statements[0]).getSql());
     }
 
 //    @Test
@@ -184,9 +184,9 @@ public class AbstractSQLChangeTest {
 //        change.setStripComments(false);
 //        SqlStatement[] statements = change.generateStatements(mock(Database.class));
 //        assertEquals(3, statements.length);
-//        assertEquals("LINE 1", ((RawSqlStatement) statements[0]).getSql());
-//        assertEquals("--a comment\nLINE 2", ((RawSqlStatement) statements[1]).getSql());
-//        assertEquals("LINE 3", ((RawSqlStatement) statements[2]).getSql());
+//        assertEquals("LINE 1", ((RawParameterizedSqlStatement) statements[0]).getSql());
+//        assertEquals("--a comment\nLINE 2", ((RawParameterizedSqlStatement) statements[1]).getSql());
+//        assertEquals("LINE 3", ((RawParameterizedSqlStatement) statements[2]).getSql());
 //    }
 //
 //    @Test
@@ -197,7 +197,7 @@ public class AbstractSQLChangeTest {
 //        change.setStripComments(true);
 //        SqlStatement[] statements = change.generateStatements(mock(Database.class));
 //        assertEquals(1, statements.length);
-//        assertEquals("LINE 1;\n\nLINE 2;\nLINE 3;", ((RawSqlStatement) statements[0]).getSql());
+//        assertEquals("LINE 1;\n\nLINE 2;\nLINE 3;", ((RawParameterizedSqlStatement) statements[0]).getSql());
 //    }
 //
 //    @Test
@@ -208,7 +208,7 @@ public class AbstractSQLChangeTest {
 //        change.setStripComments(false);
 //        SqlStatement[] statements = change.generateStatements(mock(Database.class));
 //        assertEquals(1, statements.length);
-//        assertEquals("LINE 1;\n--a comment\nLINE 2;\nLINE 3;", ((RawSqlStatement) statements[0]).getSql());
+//        assertEquals("LINE 1;\n--a comment\nLINE 2;\nLINE 3;", ((RawParameterizedSqlStatement) statements[0]).getSql());
 //    }
 
     @Test
@@ -302,13 +302,13 @@ public class AbstractSQLChangeTest {
 //
 //        SqlStatement[] statements = change.generateStatements(database);
 //        assertEquals(1, statements.length);
-//        assertEquals("SOME NATIVE SQL", ((RawSqlStatement) statements[0]).getSql());
+//        assertEquals("SOME NATIVE SQL", ((RawParameterizedSqlStatement) statements[0]).getSql());
 //
 //        //If there is an error, it falls back to passed SQL
 //        when(connection.nativeSQL("SOME SQL")).thenThrow(new DatabaseException("Testing exception"));
 //        statements = change.generateStatements(database);
 //        assertEquals(1, statements.length);
-//        assertEquals("SOME SQL", ((RawSqlStatement) statements[0]).getSql());
+//        assertEquals("SOME SQL", ((RawParameterizedSqlStatement) statements[0]).getSql());
 //    }
 
     @DatabaseChange(name = "exampleAbstractSQLChange", description = "Used for the AbstractSQLChangeTest unit test", priority = 1)
