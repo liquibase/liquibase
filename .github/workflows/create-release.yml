@@ -159,7 +159,7 @@ jobs:
           $PWD/.github/util/sign-artifacts.sh download/liquibase-artifacts "${{ needs.setup.outputs.version }}" "${{ needs.setup.outputs.branch }}"
           
           ## Sign Files
-          ## liquibase-azure-deps and liquibase-commercial-bigquery are already on its correct version. Check reusable workflow: build-azure-uber-jar.yml and build-bigquery-jars.yml
+          ## liquibase-azure-deps and liquibase extensions are already on its correct version. Check reusable workflow: build-azure-uber-jar.yml and build-extension-jars.yml
           mv liquibase-pro/liquibase-azure-deps/* re-version/out
           # Get extensions defined in needs.setup.outputs.extensions from the local maven repository
           IFS=',' read -ra EXT <<< "${{ needs.setup.outputs.extensions }}"
