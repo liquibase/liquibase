@@ -46,8 +46,14 @@ import java.util.function.Supplier;
 import static java.util.ResourceBundle.getBundle;
 
 /**
- * Primary facade class for interacting with Liquibase.
- * The built-in command line, Ant, Maven and other ways of running Liquibase are wrappers around methods in this class.
+ * Primary facade class for interacting with Liquibase. The methods are in their majority wrappers around CommandScope instances
+ * that exists here to provide a simple and single point of entry for all Liquibase operations. If a method is not provided here,
+ * it can be accessed by creating the correspoding CommandScope instance and executing it.
+ * <p>
+ * As of Liquibase 4.* some of the built-in command line, Ant, Maven, tests and other ways of running Liquibase are wrappers around
+ * methods in this class, but this may change in future releases as we continue to refactor the codebase and move to CommandScope instances.
+ *
+ * @see <a href="https://contribute.liquibase.com/code/api/command-commandscope/"> CommandScope documentation</a>
  */
 public class Liquibase implements AutoCloseable {
 
