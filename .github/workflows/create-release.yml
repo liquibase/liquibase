@@ -40,25 +40,25 @@ jobs:
       - run: |
           echo "Creating version ${{ steps.collect-data.outputs.version }} from ${{ steps.collect-data.outputs.branch }} with artifacts from build ${{ steps.collect-data.outputs.runId }} "
           
-  build-azure-uber-jar:
-   needs: [ setup ]
-   uses: liquibase/liquibase/.github/workflows/build-azure-uber-jar.yml@master
-   with:
-     branch: ${{ needs.setup.outputs.branch }}
-     liquibase-version: ${{ needs.setup.outputs.version }}
-   secrets: inherit
+  # build-azure-uber-jar:
+  #  needs: [ setup ]
+  #  uses: liquibase/liquibase/.github/workflows/build-azure-uber-jar.yml@master
+  #  with:
+  #    branch: ${{ needs.setup.outputs.branch }}
+  #    liquibase-version: ${{ needs.setup.outputs.version }}
+  #  secrets: inherit
   
-  build-extension-jars:
-   needs: [ setup ]
-   uses: liquibase/liquibase/.github/workflows/build-extension-jars.yml@DAT-17770
-   with:
-     liquibase-version: ${{ needs.setup.outputs.version }}
-     dependencies: ${{ needs.setup.outputs.dependencies }}
-     extensions: ${{ needs.setup.outputs.extensions }}
-   secrets: inherit
+  # build-extension-jars:
+  #  needs: [ setup ]
+  #  uses: liquibase/liquibase/.github/workflows/build-extension-jars.yml@DAT-17770
+  #  with:
+  #    liquibase-version: ${{ needs.setup.outputs.version }}
+  #    dependencies: ${{ needs.setup.outputs.dependencies }}
+  #    extensions: ${{ needs.setup.outputs.extensions }}
+  #  secrets: inherit
 
   reversion:
-    needs: [ setup, build-azure-uber-jar, build-extension-jars ]
+    needs: [ setup ]
     name: Re-version artifacts ${{ needs.setup.outputs.version }}
     runs-on: ubuntu-22.04
     steps:
@@ -104,14 +104,15 @@ jobs:
         id: generate-json
         run: |
           IFS=',' read -ra EXT <<< "${{ needs.setup.outputs.extensions }}"
-          repositories="["
-          servers="["
+          repositories=""
+          servers=""
           for i in "${EXT[@]}"; do
             repositories+="{\"id\": \"$i\",\"url\": \"https://maven.pkg.github.com/liquibase/$i\",\"releases\": {\"enabled\": \"true\"},\"snapshots\": {\"enabled\": \"true\",\"updatePolicy\": \"always\"}},"
             servers+="{\"id\": \"$i\",\"username\": \"liquibot\",\"password\": \"${{ secrets.LIQUIBOT_PAT_GPM_ACCESS }}\"},"
           done
-          repositories+="]"
-          servers+="]"
+          # Remove trailing comma and wrap with brackets
+          repositories="["${repositories::-1}"]"
+          servers="["${servers::-1}"]"
           echo "REPOSITORIES_JSON=$repositories" >> $GITHUB_ENV
           echo "SERVERS_JSON=$servers" >> $GITHUB_ENV
 
@@ -175,7 +176,10 @@ jobs:
           mv re-version/out/liquibase-${{ needs.setup.outputs.version }}.tar.gz re-version/final
           mv re-version/out/liquibase-${{ needs.setup.outputs.version }}.zip re-version/final
           #mv re-version/out/liquibase-azure-deps-${{ needs.setup.outputs.version }}.jar re-version/final/liquibase-azure-deps-${{ needs.setup.outputs.version }}.jar
-          mv re-version/out/liquibase-commercial-bigquery-${{ needs.setup.outputs.version }}.jar re-version/final/liquibase-commercial-bigquery-${{ needs.setup.outputs.version }}.jar
+          IFS=',' read -ra EXT <<< "${{ needs.setup.outputs.extensions }}"
+          for i in "${EXT[@]}"; do
+            mv re-version/out/$i-${{ needs.setup.outputs.version }}.jar re-version/final/$i-${{ needs.setup.outputs.version }}.jar
+          done  
           
           (cd re-version/out/ && zip liquibase-additional-${{ needs.setup.outputs.version }}.zip *)
           mv re-version/out/liquibase-additional-${{ needs.setup.outputs.version }}.zip re-version/final
