@@ -6,6 +6,7 @@ import liquibase.changelog.visitor.ListVisitor;
 import liquibase.database.Database;
 import liquibase.exception.DatabaseException;
 import liquibase.exception.LiquibaseException;
+import org.apache.commons.lang3.BooleanUtils;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -35,7 +36,7 @@ public class FastCheckService implements SingletonObject {
      */
     public boolean isUpToDateFastCheck(List<ChangeSetFilter> changesetFilters, Database database, DatabaseChangeLog databaseChangeLog, Contexts contexts, LabelExpression labelExpression) throws LiquibaseException {
         String cacheKey = String.format("%s/%s/%s/%s/%s/%s", contexts, labelExpression, database.getDefaultSchemaName(), database.getDefaultCatalogName(), database.getConnection().getURL(), databaseChangeLog.getLogicalFilePath());
-        if (!upToDateFastCheck.containsKey(cacheKey)) {
+        if (!upToDateFastCheck.containsKey(cacheKey) || BooleanUtils.isFalse(upToDateFastCheck.get(cacheKey))) {
             ChangeLogHistoryService changeLogService = Scope.getCurrentScope().getSingleton(ChangeLogHistoryServiceFactory.class).getChangeLogService(database);
             try {
                 if (changeLogService.isDatabaseChecksumsCompatible() && listUnrunChangeSets(changesetFilters, database, databaseChangeLog, contexts, labelExpression).isEmpty()) {
