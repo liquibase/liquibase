@@ -360,7 +360,7 @@ public class PostgreSQLIntegrationTest extends AbstractIntegrationTest {
         //external database cleanup
         dropTablesOutsidefastCheck();
 
-        // FsatCheck should have been reset so it should have been able to detect the missing tables
+        // FastCheck should have been reset so it will be able to detect the missing tables
         liquibase.update();
 
         assertTableExists("DATABASECHANGELOG");
