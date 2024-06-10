@@ -83,13 +83,13 @@ jobs:
           run_id=${{ github.run_id }}
           echo "uber_jar_runId=${run_id}" >> $GITHUB_OUTPUT
 
-      - name: Download liquibase-pro-azure-artifacts
-        uses: liquibase/action-download-artifact@v2-liquibase
-        with:
-          workflow: build-azure-uber-jar.yml
-          run_id: ${{ steps.get_run_id.outputs.run_id }}
-          name: liquibase-pro-azure-artifacts
-          path: liquibase-pro/liquibase-azure-deps
+      # - name: Download liquibase-pro-azure-artifacts
+      #   uses: liquibase/action-download-artifact@v2-liquibase
+      #   with:
+      #     workflow: build-azure-uber-jar.yml
+      #     run_id: ${{ steps.get_run_id.outputs.run_id }}
+      #     name: liquibase-pro-azure-artifacts
+      #     path: liquibase-pro/liquibase-azure-deps
 
       - name: Set up Maven
         uses: stCarolas/setup-maven@v5
@@ -163,7 +163,7 @@ jobs:
           
           ##Sign Files
           ## liquibase-azure-deps and liquibase-commercial-bigquery are already on its correct version. Check reusable workflow: build-azure-uber-jar.yml and build-bigquery-jars.yml
-          mv liquibase-pro/liquibase-azure-deps/* re-version/out
+          #mv liquibase-pro/liquibase-azure-deps/* re-version/out
           # Get liquibase-commercial-bigquery from the local maven repository
           mv ~/.m2/repository/org/liquibase/ext/liquibase-commercial-bigquery/${{ needs.setup.outputs.version }}/liquibase-commercial-bigquery-${{ needs.setup.outputs.version }}.jar re-version/out
           
@@ -175,11 +175,12 @@ jobs:
           mv re-version/out/liquibase-commercial-${{ needs.setup.outputs.version }}.jar re-version/final
           mv re-version/out/liquibase-${{ needs.setup.outputs.version }}.tar.gz re-version/final
           mv re-version/out/liquibase-${{ needs.setup.outputs.version }}.zip re-version/final
-          mv re-version/out/liquibase-azure-deps-${{ needs.setup.outputs.version }}.jar re-version/final/liquibase-azure-deps-${{ needs.setup.outputs.version }}.jar
+          #mv re-version/out/liquibase-azure-deps-${{ needs.setup.outputs.version }}.jar re-version/final/liquibase-azure-deps-${{ needs.setup.outputs.version }}.jar
           mv re-version/out/liquibase-commercial-bigquery-${{ needs.setup.outputs.version }}.jar re-version/final/liquibase-commercial-bigquery-${{ needs.setup.outputs.version }}.jar
           
           (cd re-version/out/ && zip liquibase-additional-${{ needs.setup.outputs.version }}.zip *)
           mv re-version/out/liquibase-additional-${{ needs.setup.outputs.version }}.zip re-version/final
+          ls -ltr re-version/final
 
   #     - name: Cache Completed Artifacts
   #       uses: actions/cache@v4.0.2
