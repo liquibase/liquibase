@@ -16,7 +16,6 @@ on:
 
 jobs:
   functional-tests-build:
-    if: ${{ github.event.label.name == 'runFunctionalTests' }}
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
