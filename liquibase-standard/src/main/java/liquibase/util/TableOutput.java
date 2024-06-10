@@ -323,7 +323,7 @@ public class TableOutput {
      * @return the new current running width (which is always 0, since the line has been filled to the end with spaces)
      */
     private static int fillLineWithSpaces(int runningWidth, int maxWidth, StringBuilder result) {
-        for (int i=0; i < (maxWidth - runningWidth); i++) {
+        for (int i=0; i < (maxWidth - (runningWidth % maxWidth)); i++) {
             result.append(" ");
         }
         return 0;
