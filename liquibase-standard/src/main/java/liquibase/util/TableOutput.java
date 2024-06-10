@@ -302,7 +302,8 @@ public class TableOutput {
             runningWidth = runningWidth % maxWidth;
         }
         int spaceWidth = runningWidth > 0 ? 1 : 0;
-        if (runningWidth + (part.length() + spaceWidth) > maxWidth) {
+        // If runningWidth is 0, then no need to add a space before the part because it is the first part of the line.
+        if (runningWidth + (part.length() + spaceWidth) > maxWidth && runningWidth > 0) {
             runningWidth = fillLineWithSpaces(runningWidth, maxWidth, result);
         }
         if (runningWidth > 0) {
