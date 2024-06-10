@@ -18,9 +18,12 @@ on:
       - opened
       - reopened
       - synchronize
+      - labeled
 
     paths-ignore:
       - '**.md'
+  pull_request:
+    types: [labeled]
 
 jobs:
   authorize:
