@@ -136,5 +136,61 @@
 				<exclude>com.github.vertical-blank:sql-formatter:jar:</exclude> <!-- from liquibase-commercial -->
 			</excludes>
 		</dependencySet>
+
+		<dependencySet>
+			<outputFileNameMapping>${artifact.artifactId}${dashClassifier?}.${artifact.extension}</outputFileNameMapping>
+			<outputDirectory>internal/extensions</outputDirectory>
+			<useTransitiveFiltering>true</useTransitiveFiltering>
+			<scope>runtime</scope>
+			<includes>
+<!--			<include>org.liquibase.ext:liquibase-commercial-bigquery:</include>-->
+			</includes>
+
+			<!-- some libraries lie about compile vs. runtime dependencies. Or we don't hit code that uses these. So exclude them manually. -->
+			<excludes>
+				<exclude>org.liquibase:liquibase-core:</exclude> <!-- from internal/lib -->
+				<exclude>org.liquibase:liquibase-commercial:</exclude> <!-- from internal/lib -->
+				<exclude>com.opencsv:opencsv:</exclude> <!-- from internal/lib -->
+				<exclude>org.yaml:snakeyaml:jar:</exclude> <!-- from internal/lib -->
+				<exclude>javax.xml.bind:jaxb-api:jar:</exclude> <!-- from internal/lib -->
+				<exclude>org.glassfish.jaxb:jaxb-runtime:jar:</exclude> <!-- from internal/lib -->
+				<exclude>org.glassfish.jaxb:jaxb-core:jar:</exclude> <!-- from internal/lib -->
+				<exclude>info.picocli:picocli:jar:</exclude> <!-- from internal/lib -->
+				<exclude>com.h2database:h2:jar:</exclude> <!-- from internal/lib -->
+				<exclude>org.hsqldb:hsqldb:jar:</exclude> <!-- from internal/lib -->
+				<exclude>org.postgresql:postgresql:jar</exclude> <!-- from internal/lib -->
+				<exclude>org.mariadb.jdbc:mariadb-java-client:jar</exclude> <!-- from internal/lib -->
+				<exclude>com.oracle.database.jdbc:ojdbc8:jar</exclude> <!-- from internal/lib -->
+				<exclude>com.microsoft.sqlserver:mssql-jdbc:jar</exclude> <!-- from internal/lib -->
+				<exclude>org.xerial:sqlite-jdbc:jar:</exclude> <!-- from internal/lib -->
+				<exclude>com.ibm.db2:jcc:jar:</exclude> <!-- from internal/lib -->
+				<exclude>org.firebirdsql.jdbc:jaybird:</exclude> <!-- from internal/lib -->
+				<exclude>net.snowflake:snowflake-jdbc:</exclude> <!-- from internal/lib -->
+				<exclude>javax.resource:connector-api:</exclude> <!-- from internal/lib -->
+				<exclude>org.slf4j:slf4j-api:jar:</exclude> <!-- from sqlite-jdbc -->
+				<exclude>org.antlr:antlr4-runtime:jar:</exclude>  <!-- from connector-api -->
+				<exclude>org.checkerframework:checker-qual:jar:</exclude> <!-- from postgresql -->
+				<exclude>commons-beanutils:commons-beanutils:jar:</exclude> <!-- from opencsv -->
+				<exclude>org.glassfish.jaxb:txw2:jar:</exclude> <!-- from jaxb-core -->
+				<exclude>org.eclipse.angus:angus-activation:jar:</exclude> <!-- from jaxb-core -->
+				<exclude>com.sun.istack:istack-commons-runtime:jar:</exclude> <!-- from jaxb-core -->
+				<exclude>jakarta.activation:jakarta.activation-api:jar:</exclude> <!-- from jaxb-core -->
+				<exclude>jakarta.xml.bind:jakarta.xml.bind-api:jar:</exclude> <!-- from jaxb-runtime -->
+				<exclude>com.sun.activation:jakarta.activation:jar:</exclude> <!-- from jaxb-runtime -->
+				<exclude>javax.activation:javax.activation-api:jar:</exclude> <!-- from jaxb-api -->
+				<exclude>org.liquibase:liquibase-snowflake:jar:</exclude> <!-- from liquibase-core -->
+				<exclude>org.liquibase:liquibase-cli:jar:</exclude> <!-- from liquibase-core  -->
+				<exclude>org.liquibase:liquibase-standard:jar:</exclude> <!-- from liquibase-standard  -->
+				<exclude>net.java.truelicense:*:jar:</exclude> <!-- from liquibase-commercial -->
+				<exclude>com.github.jsqlparser:jsqlparser:jar:</exclude> <!-- from liquibase-commercial -->
+				<exclude>org.mvel:mvel2:jar:</exclude> <!-- from liquibase-commercial -->
+				<exclude>commons-codec:commons-codec:jar:</exclude> <!-- from liquibase-commercial -->
+				<exclude>com.fasterxml.jackson.core:*:jar:</exclude> <!-- from liquibase-commercial -->
+				<exclude>com.fasterxml.jackson.module:*:jar:</exclude> <!-- from liquibase-commercial -->
+				<exclude>com.github.spullara.mustache.java:compiler:jar:</exclude> <!-- from liquibase-commercial -->
+				<exclude>io.github.java-diff-utils:java-diff-utils:jar:</exclude> <!-- from liquibase-commercial -->
+				<exclude>com.github.vertical-blank:sql-formatter:jar:</exclude> <!-- from liquibase-commercial -->
+			</excludes>
+		</dependencySet>
 	</dependencySets>
 </component>
