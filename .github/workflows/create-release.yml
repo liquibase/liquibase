@@ -100,33 +100,26 @@ jobs:
         with:
           maven-version: ${{ env.MAVEN_VERSION }}
 
-      - name: Download Scripts
+      - name: Generate repositories and servers JSON
+        id: generate-json
         run: |
-          scripts_branch=${{ github.ref }}
-          mkdir -p $PWD/.github/util/
-          # Download a script (re-version.sh) from a URL and save it to the specified directory
-          curl -o $PWD/.github/util/re-version.sh https://raw.githubusercontent.com/liquibase/liquibase/$scripts_branch/.github/util/re-version.sh
-          # Download another script (sign-artifacts.sh) from a URL and save it to the specified directory
-          curl -o $PWD/.github/util/sign-artifacts.sh https://raw.githubusercontent.com/liquibase/liquibase/$scripts_branch/.github/util/sign-artifacts.sh
-          curl -o $PWD/.github/util/ManifestReversion.java https://raw.githubusercontent.com/liquibase/liquibase/$scripts_branch/.github/util/ManifestReversion.java
-          # Download another scripts (generate_repositories.sh and generate_servers.sh) from a URL and save it to the specified directory
-          curl -o $PWD/.github/util/generate_repositories.sh https://raw.githubusercontent.com/liquibase/liquibase/$scripts_branch/.github/util/generate_repositories.sh
-          curl -o $PWD/.github/util/generate_servers.sh https://raw.githubusercontent.com/liquibase/liquibase/$scripts_branch/.github/util/generate_servers.sh
-          chmod +x $PWD/.github/util/re-version.sh
-          chmod +x $PWD/.github/util/ManifestReversion.java
-          chmod +x $PWD/.github/util/sign-artifacts.sh
-          chmod +x $PWD/.github/util/generate_repositories.sh
-          chmod +x $PWD/.github/util/generate_servers.sh
+          IFS=',' read -ra EXT <<< "${{ needs.setup.outputs.extensions }}"
+          repositories="["
+          servers="["
+          for i in "${EXT[@]}"; do
+            repositories+="{\"id\": \"$i\",\"url\": \"https://maven.pkg.github.com/liquibase/$i\",\"releases\": {\"enabled\": \"true\"},\"snapshots\": {\"enabled\": \"true\",\"updatePolicy\": \"always\"}},"
+            servers+="{\"id\": \"$i\",\"username\": \"liquibot\",\"password\": \"${{ secrets.LIQUIBOT_PAT_GPM_ACCESS }}\"},"
+          done
+          repositories+="]"
+          servers+="]"
+          echo "REPOSITORIES_JSON=$repositories" >> $GITHUB_ENV
+          echo "SERVERS_JSON=$servers" >> $GITHUB_ENV
 
       - name: maven-settings-xml-action
         uses: whelk-io/maven-settings-xml-action@v22
-        env:
-          EXTENSIONS: ${{ needs.setup.outputs.extensions }}
         with:
-          repositories: |
-            $PWD/.github/util/generate_repositories.sh
-          servers: |
-            $PWD/.github/util/generate_servers.sh ${{ secrets.LIQUIBOT_PAT_GPM_ACCESS }}
+          repositories: ${{ env.REPOSITORIES_JSON }}
+          servers: ${{ env.SERVERS_JSON }}
               
       - name: Get extensions artifacts
         run: |
@@ -149,6 +142,17 @@ jobs:
         env:
           GPG_PASSWORD: ${{ secrets.GPG_PASSPHRASE }}
         run: |
+          scripts_branch=${{ github.ref }}
+          mkdir -p $PWD/.github/util/
+          # Download a script (re-version.sh) from a URL and save it to the specified directory
+          curl -o $PWD/.github/util/re-version.sh https://raw.githubusercontent.com/liquibase/liquibase/$scripts_branch/.github/util/re-version.sh
+          
+          # Download another script (sign-artifacts.sh) from a URL and save it to the specified directory
+          curl -o $PWD/.github/util/sign-artifacts.sh https://raw.githubusercontent.com/liquibase/liquibase/$scripts_branch/.github/util/sign-artifacts.sh
+          curl -o $PWD/.github/util/ManifestReversion.java https://raw.githubusercontent.com/liquibase/liquibase/$scripts_branch/.github/util/ManifestReversion.java
+          chmod +x $PWD/.github/util/re-version.sh
+          chmod +x $PWD/.github/util/ManifestReversion.java
+          chmod +x $PWD/.github/util/sign-artifacts.sh
           $PWD/.github/util/re-version.sh download/liquibase-artifacts "${{ needs.setup.outputs.version }}" "${{ needs.setup.outputs.branch }}"
 
           # Execute the sign-artifacts.sh script with specific arguments
