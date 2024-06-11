@@ -34,9 +34,12 @@ jobs:
         with:
           workflow: run-tests.yml
           workflow_conclusion: success
-          branch: master
+          branch: ${{ github.head_ref }}
           name: liquibase-artifacts
           path: re-version/final
+      
+      - name: Set branch variable
+        run: echo "BRANCH=${GITHUB_REF#refs/heads/}" >> $GITHUB_ENV
 
       - name: Re-version Installers
         env:
@@ -48,6 +51,7 @@ jobs:
           INSTALL4J_WINDOWS_KEY: ${{ secrets.INSTALL4J_WINDOWS_KEY }}
           INSTALL4J_WINDOWS_KEY_PASSWORD: ${{ secrets.INSTALL4J_WINDOWS_KEY_PASSWORD }}
           GPG_PASSWORD: ${{ secrets.GPG_PASSPHRASE }}
+          BRANCH: ${{ github.ref_name || github.head_ref }}
         run: |
           mkdir -p liquibase-dist/target/keys
           echo "Saving apple key"
@@ -56,7 +60,7 @@ jobs:
           echo "$INSTALL4J_WINDOWS_KEY" | base64 -d > liquibase-dist/target/keys/datical_windows.pfx
           
           ##### Rebuild installers
-          tarFile=$(pwd)/re-version/final/liquibase-master-SNAPSHOT.tar.gz
+          tarFile=$(pwd)/re-version/final/liquibase-${BRANCH}-SNAPSHOT.tar.gz
           scriptDir=$(pwd)/.github/util/
           
           mkdir -p liquibase-dist/target/liquibase-0-SNAPSHOT

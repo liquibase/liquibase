@@ -167,6 +167,12 @@ public class ChangeSet implements Conditional, ChangeLogChild {
     private Set<String> dbmsSet;
 
     /**
+     * The original string used in the dbms attribute.
+     */
+    @Getter
+    private String dbmsOriginalString;
+
+    /**
      * If false, do not stop liquibase update execution if an error is thrown executing the changeSet.  Defaults to true
      */
     private Boolean failOnError;
@@ -317,6 +323,7 @@ public class ChangeSet implements Conditional, ChangeLogChild {
 
     protected void setDbms(String dbmsList) {
         this.dbmsSet = DatabaseList.toDbmsSet(dbmsList);
+        this.dbmsOriginalString = dbmsList;
     }
 
     /**
