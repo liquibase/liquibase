@@ -24,18 +24,18 @@ jobs:
         with:
           ref: ${{ github.event.pull_request.head.sha || github.event.after}} # get the sha of the commit or the new commit created when branch is merged to master
 
-      - name: Check runFunctionalTests label
-        if: github.event.label.name != 'runFunctionalTests'
-        run: |
-          echo "Add the runFunctionalTests label to the PR to trigger the Functional Tests workflow."
-          exit 1
-
   run-pro-tests:
     runs-on: ubuntu-latest
     needs: [ functional-tests-build ]
     name: Trigger Functional Tests
     steps:
       - uses: actions/checkout@v4
+
+      - name: Check runFunctionalTests label
+        if: github.event.label.name != 'runFunctionalTests'
+        run: |
+          echo "Add the runFunctionalTests label to the PR to trigger the Functional Tests workflow."
+          exit 1
 
       - name: Get OSS Workflow Run URL
         id: get-workflow-url
