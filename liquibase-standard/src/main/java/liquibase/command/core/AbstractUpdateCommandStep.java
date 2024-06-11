@@ -33,6 +33,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
 
 import static liquibase.Liquibase.MSG_COULD_NOT_RELEASE_LOCK;
+import static liquibase.executor.jvm.JdbcExecutor.ROWS_AFFECTED_SCOPE_KEY;
 
 public abstract class AbstractUpdateCommandStep extends AbstractCommandStep implements CleanUpCommandStep {
     public static final String DEFAULT_CHANGE_EXEC_LISTENER_RESULT_KEY = "defaultChangeExecListener";
@@ -69,10 +70,13 @@ public abstract class AbstractUpdateCommandStep extends AbstractCommandStep impl
         Database database = (Database) commandScope.getDependency(Database.class);
         updateReportParameters.getDatabaseInfo().setDatabaseType(database.getDatabaseProductName());
         updateReportParameters.getDatabaseInfo().setVersion(database.getDatabaseProductVersion());
+        updateReportParameters.getDatabaseInfo().setDatabaseUrl(database.getConnection().getURL());
         updateReportParameters.setJdbcUrl(database.getConnection().getURL());
         final ChangeLogParameters changeLogParameters = (ChangeLogParameters) commandScope.getDependency(ChangeLogParameters.class);
         Contexts contexts = new Contexts(getContextsArg(commandScope));
         LabelExpression labelExpression = new LabelExpression(getLabelFilterArg(commandScope));
+        updateReportParameters.getOperationInfo().setLabels(labelExpression.getOriginalString());
+        updateReportParameters.getOperationInfo().setContexts(contexts.toString());
         DatabaseChangelogCommandStep.addCommandFiltersMdc(labelExpression, contexts);
         customMdcLogging(commandScope);
 
@@ -102,13 +106,13 @@ public abstract class AbstractUpdateCommandStep extends AbstractCommandStep impl
             AtomicInteger rowsAffected = new AtomicInteger(0);
             HashMap<String, Object> scopeValues = new HashMap<>();
             scopeValues.put("showSummary", getShowSummary(commandScope));
-            scopeValues.put("rowsAffected", rowsAffected);
+            scopeValues.put(ROWS_AFFECTED_SCOPE_KEY, rowsAffected);
             Scope.child(scopeValues, () -> {
                 try {
                     runChangeLogIterator.run(new UpdateVisitor(database, changeExecListener, new ShouldRunChangeSetFilter(database)),
                             new RuntimeEnvironment(database, contexts, labelExpression));
                 } finally {
-                    UpdateSummaryDetails details = ShowSummaryUtil.buildSummaryDetails(databaseChangeLog, getShowSummary(commandScope), getShowSummaryOutput(commandScope), statusVisitor, resultsBuilder.getOutputStream(), runChangeLogIterator);
+                    UpdateSummaryDetails details = ShowSummaryUtil.buildSummaryDetails(databaseChangeLog, getShowSummary(commandScope), getShowSummaryOutput(commandScope), statusVisitor, resultsBuilder.getOutputStream(), runChangeLogIterator, changeExecListener);
                     if (details != null) {
                         updateReportParameters.getOperationInfo().setUpdateSummaryMsg(details.getOutput());
                         updateReportParameters.getChangesetInfo().addAllToPendingChangesetInfoList(details.getSkipped());
@@ -127,7 +131,7 @@ public abstract class AbstractUpdateCommandStep extends AbstractCommandStep impl
             DatabaseChangeLog databaseChangeLog = (DatabaseChangeLog) commandScope.getDependency(DatabaseChangeLog.class);
             addChangelogFileToMdc(getChangelogFileArg(commandScope), databaseChangeLog);
             logDeploymentOutcomeMdc(changeExecListener, false, updateReportParameters);
-            updateReportParameters.getOperationInfo().setException(e.getCause().getMessage());
+            updateReportParameters.getOperationInfo().setException(e.getCause() != null ? e.getCause().getMessage() : e.getMessage());
             resultsBuilder.addResult("statusCode", 1);
             throw e;
         } finally {
@@ -211,6 +215,9 @@ public abstract class AbstractUpdateCommandStep extends AbstractCommandStep impl
             }
             Scope.getCurrentScope().addMdcValue(MdcKey.DEPLOYMENT_OUTCOME_COUNT, String.valueOf(deployedChangeSetCount));
             Scope.getCurrentScope().addMdcValue(MdcKey.CHANGESETS_UPDATED, changesetsUpdated);
+            // Now that the command is completed reset the generated sql in case we are running these changes in some chain
+            // like during update-testing-rollback
+            deployedChangeSets.forEach(changeSet -> changeSet.setGeneratedSql(new ArrayList<>()));
         }
         String deploymentOutcome = success ? MdcValue.COMMAND_SUCCESSFUL : MdcValue.COMMAND_FAILED;
         updateReportParameters.setSuccess(success);

@@ -4,6 +4,7 @@ import liquibase.ChecksumVersion;
 import liquibase.change.CheckSum;
 import liquibase.changelog.filter.ChangeSetFilter;
 import liquibase.changelog.filter.ChangeSetFilterResult;
+import liquibase.exception.LiquibaseException;
 import liquibase.integration.commandline.LiquibaseCommandLineConfiguration;
 
 import java.util.Date;
@@ -11,7 +12,7 @@ import java.util.Set;
 
 /**
  * Contains the current status of a ChangeSet. Normally returned by {@link liquibase.changelog.visitor.StatusVisitor}.
- * Contains information on whether the changeSet has ran before and will run next time.
+ * Contains information on whether the changeSet has run before and will run next time.
  */
 public class ChangeSetStatus {
 
@@ -37,6 +38,18 @@ public class ChangeSetStatus {
         this.currentCheckSum = changeSet.generateCheckSum(version);
         this.description = changeSet.getDescription();
         this.comments = changeSet.getComments();
+    }
+
+    public ChangeSetStatus(ChangeSet changeSet, boolean skipChangeSetStatusGeneration) throws LiquibaseException {
+        if(skipChangeSetStatusGeneration) {
+            this.changeSet = changeSet;
+            this.currentCheckSum = null;
+            this.description = null;
+            this.comments = null;
+        }
+        else {
+            throw new LiquibaseException(String.format("ChangeSetStatus for ChangeSet %s cannot generated", changeSet.toString()));
+        }
     }
 
     public ChangeSet getChangeSet() {
@@ -112,7 +125,7 @@ public class ChangeSetStatus {
     }
 
     /**
-     * Return the checksum stored from the last execution of the changeset. Returns null if it has not ran before
+     * Return the checksum stored from the last execution of the changeset. Returns null if it has not run before
      */
     public CheckSum getStoredCheckSum() {
         return storedCheckSum;
@@ -123,7 +136,7 @@ public class ChangeSetStatus {
     }
 
     /**
-     * Return the date the changeset was last executed. Returns null if it has not ran before
+     * Return the date the changeset was last executed. Returns null if it has not run before
      */
     public Date getDateLastExecuted() {
         return dateLastExecuted;
@@ -134,7 +147,7 @@ public class ChangeSetStatus {
     }
 
     /**
-     * Returns true if the changeset was ran previously.
+     * Returns true if the changeset was run previously.
      */
     public boolean getPreviouslyRan() {
         return previouslyRan;

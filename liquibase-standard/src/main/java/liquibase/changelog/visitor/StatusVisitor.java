@@ -30,21 +30,29 @@ public class StatusVisitor implements ChangeSetVisitor, SkippedChangeSetVisitor 
 
     @Override
     public void visit(ChangeSet changeSet, DatabaseChangeLog databaseChangeLog, Database database, Set<ChangeSetFilterResult> filterResults) throws LiquibaseException {
-        ChangeSetStatus status = addStatus(changeSet, databaseChangeLog, database);
+        ChangeSetStatus status = addStatus(changeSet);
         status.setWillRun(true);
         status.setFilterResults(filterResults);
     }
 
     @Override
     public void skipped(ChangeSet changeSet, DatabaseChangeLog databaseChangeLog, Database database, Set<ChangeSetFilterResult> filterResults) throws LiquibaseException {
-        ChangeSetStatus status = addStatus(changeSet, databaseChangeLog, database);
+        boolean needsChangeSetToBeSkipped = filterResults.stream().anyMatch(filter -> !filter.isAccepted());
+        ChangeSetStatus status = new ChangeSetStatus(changeSet, needsChangeSetToBeSkipped);
         status.setWillRun(false);
         status.setFilterResults(filterResults);
+        removeRanChangeSets(changeSet, status);
+        changeSetStatuses.put(changeSet, status);
     }
 
-    protected ChangeSetStatus addStatus(ChangeSet changeSet, DatabaseChangeLog databaseChangeLog, Database database) throws LiquibaseException {
+    protected ChangeSetStatus addStatus(ChangeSet changeSet) {
         ChangeSetStatus status = new ChangeSetStatus(changeSet);
+        removeRanChangeSets(changeSet, status);
+        changeSetStatuses.put(changeSet, status);
+        return status;
+    }
 
+    private void removeRanChangeSets(ChangeSet changeSet, ChangeSetStatus status) {
         RanChangeSet ranChangeSetToRemove = null;
         for (RanChangeSet ranChangeSet : ranChangeSets) {
             if (ranChangeSet.isSameAs(changeSet)) {
@@ -61,10 +69,6 @@ public class StatusVisitor implements ChangeSetVisitor, SkippedChangeSetVisitor 
         if (ranChangeSetToRemove != null) {
             ranChangeSets.remove(ranChangeSetToRemove);
         }
-
-        changeSetStatuses.put(changeSet, status);
-
-        return status;
     }
 
     /**

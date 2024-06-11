@@ -1,14 +1,16 @@
 package liquibase.changelog;
 
-import liquibase.ContextExpression;
-import liquibase.Contexts;
-import liquibase.LabelExpression;
-import liquibase.Labels;
+import liquibase.*;
 import liquibase.database.Database;
 import liquibase.database.DatabaseList;
 import liquibase.exception.DatabaseException;
 import liquibase.exception.UnknownChangeLogParameterException;
+import liquibase.parser.core.ParsedNode;
+import liquibase.parser.core.ParsedNodeException;
+import liquibase.structure.core.Schema;
+import liquibase.structure.core.Sequence;
 import liquibase.util.StringUtil;
+import lombok.Getter;
 
 import java.util.*;
 import java.util.stream.Collectors;
@@ -35,6 +37,64 @@ public class ChangeLogParameters {
     private String filterDatabase;
     private Contexts filterContexts;
     private LabelExpression filterLabels;
+
+    private enum LiquibaseExecutionParameter {
+        LIQUIBASE_EXECUTION_CHANGELOG_FILE {
+            @Override
+            public String getValue(DatabaseChangeLog changeLog) {
+                return changeLog.getFilePath();
+            }
+        },
+        LIQUIBASE_EXECUTION_CHANGESET_ID {
+            @Override
+            public String getValue(DatabaseChangeLog changeLog) {
+                ParsedNode changeSetParsedNode = changeLog.getCurrentlyLoadedChangeSetNode();
+                String changesetId;
+
+                try {
+                    changesetId = changeSetParsedNode.getChildValue(null, "id", String.class);
+                    return changesetId;
+                }
+                catch (ParsedNodeException e) {
+                    return null;
+                }
+            }
+        },
+        LIQUIBASE_EXECUTION_CHANGESET_AUTHOR {
+            @Override
+            public String getValue(DatabaseChangeLog changeLog) {
+                ParsedNode changeSetParsedNode = changeLog.getCurrentlyLoadedChangeSetNode();
+                String changesetAuthor;
+
+                try {
+                    changesetAuthor = changeSetParsedNode.getChildValue(null, "author", String.class);
+                    return changesetAuthor;
+                }
+                catch (ParsedNodeException e) {
+                    return null;
+                }
+            }
+        };
+
+        public abstract String getValue(DatabaseChangeLog changeLog);
+
+        /**
+         * @param name the name of the {@link LiquibaseExecutionParameter} to find
+         * @return The {@link LiquibaseExecutionParameter} if found, else null
+         */
+        public static LiquibaseExecutionParameter findByName(String name) {
+            LiquibaseExecutionParameter result = null;
+
+            for (LiquibaseExecutionParameter param: LiquibaseExecutionParameter.values()) {
+                if (param.name().equalsIgnoreCase(name)) {
+                    result = param;
+                    break;
+                }
+            }
+
+            return result;
+        }
+    }
 
     /**
      * Calls {@link #ChangeLogParameters(Database)} with a null database.
@@ -87,8 +147,8 @@ public class ChangeLogParameters {
             this.set("database.supportsForeignKeyDisable", database.supportsForeignKeyDisable());
             this.set("database.supportsInitiallyDeferrableColumns", database.supportsInitiallyDeferrableColumns());
             this.set("database.supportsRestrictForeignKeys", database.supportsRestrictForeignKeys());
-            this.set("database.supportsSchemas", database.supportsSchemas());
-            this.set("database.supportsSequences", database.supportsSequences());
+            this.set("database.supportsSchemas", database.supports(Schema.class));
+            this.set("database.supportsSequences", database.supports(Sequence.class));
             this.set("database.supportsTablespaces", database.supportsTablespaces());
             this.set("database.supportsNotNullConstraintNames", database.supportsNotNullConstraintNames());
 
@@ -246,6 +306,11 @@ public class ChangeLogParameters {
     private ChangeLogParameter getChangelogParameter(String key, DatabaseChangeLog changeLog, Filter filter) {
         List<ChangeLogParameter> localList = null;
         if (changeLog != null) {
+            LiquibaseExecutionParameter executionParameter = LiquibaseExecutionParameter.findByName(key);
+            if (executionParameter != null) {
+                return new ChangeLogParameter(executionParameter.name(), executionParameter.getValue(changeLog));
+            }
+
             localList = localParameters.get(getLocalKey(changeLog));
             if (localList != null) {
                 localList = new ArrayList<>(localList); // make a copy as we don't want to reverse the original list
@@ -280,11 +345,15 @@ public class ChangeLogParameters {
     }
 
     private static class ChangeLogParameter {
+        @Getter
         private final String key;
+        @Getter
         private final Object value;
 
+        @Getter
         private final ContextExpression validContexts;
         private final Labels validLabels;
+        @Getter
         private final List<String> validDatabases;
 
         public ChangeLogParameter(String key, Object value) {
@@ -302,22 +371,6 @@ public class ChangeLogParameters {
             } else {
                 this.validDatabases = Arrays.asList(validDatabases);
             }
-        }
-
-        public String getKey() {
-            return key;
-        }
-
-        public Object getValue() {
-            return value;
-        }
-
-        public List<String> getValidDatabases() {
-            return validDatabases;
-        }
-
-        public ContextExpression getValidContexts() {
-            return validContexts;
         }
 
         public Labels getLabels() {

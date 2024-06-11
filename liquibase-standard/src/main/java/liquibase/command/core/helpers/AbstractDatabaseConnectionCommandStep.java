@@ -10,6 +10,7 @@ import liquibase.database.core.DatabaseUtils;
 import liquibase.exception.DatabaseException;
 import liquibase.integration.commandline.LiquibaseCommandLineConfiguration;
 import liquibase.resource.ResourceAccessor;
+import liquibase.structure.core.Schema;
 import liquibase.util.StringUtil;
 
 import java.util.ResourceBundle;
@@ -73,7 +74,7 @@ public abstract class AbstractDatabaseConnectionCommandStep extends AbstractHelp
             database = DatabaseFactory.getInstance().openDatabase(url, username, password, driver,
                     databaseClassName, driverPropertiesFile, propertyProviderClass, resourceAccessor);
 
-            if (!database.supportsSchemas()) {
+            if (!database.supports(Schema.class)) {
                 if ((defaultSchemaName != null) && (defaultCatalogName == null)) {
                     defaultCatalogName = defaultSchemaName;
                 }

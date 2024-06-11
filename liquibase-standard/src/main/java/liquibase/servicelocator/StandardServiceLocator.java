@@ -25,12 +25,22 @@ public class StandardServiceLocator implements ServiceLocator {
                 log.fine("Loaded "+interfaceType.getName()+" instance "+service.getClass().getName());
                 allInstances.add(service);
             } catch (Throwable e) {
-                log.info("Cannot load service", e);
+                new ServiceLoadExceptionHandler().handleException(e);
                 log.fine(e.getMessage(), e);
             }
         }
 
         return Collections.unmodifiableList(allInstances);
 
+    }
+
+    /**
+     * Exception handler for when a service cannot be loaded. Created as an inner class so logs can be suppressed if desired.
+     */
+    static class ServiceLoadExceptionHandler {
+        void handleException(Throwable e) {
+            Logger log = Scope.getCurrentScope().getLog(getClass());
+            log.info("Cannot load service", e);
+        }
     }
 }

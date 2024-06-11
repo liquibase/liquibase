@@ -14,14 +14,11 @@ on:
         default: ''
         type: string
 
-env:
-  MAVEN_VERSION: '3.9.2'
-
 jobs:
   test-harness-build:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
         with:
           ref: ${{ github.event.pull_request.head.sha || github.event.after}} #sets the Git reference (commit or branch) to be checked out in the workflow
 
@@ -44,7 +41,7 @@ jobs:
         id: return_dispatch
         with:
           token: ${{ secrets.RUN_FUNCTIONAL_TEST_HARNESS_TESTS_TOKEN  }}
-          ref: "main"
+          ref: "develop"
           repo: liquibase-test-harness
           owner: liquibase
           workflow: main.yml
@@ -58,7 +55,7 @@ jobs:
         run: echo ${{ steps.return_dispatch.outputs.run_id }}
 
       - name: Report TestHarness Run URL
-        uses: actions/github-script@v6.4.1
+        uses: actions/github-script@v7
         with:
           script: |
             const targetURL = "https://github.com/liquibase/liquibase-test-harness/actions/runs/${{ steps.return_dispatch.outputs.run_id }}"

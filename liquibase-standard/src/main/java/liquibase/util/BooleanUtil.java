@@ -1,5 +1,7 @@
 package liquibase.util;
 
+import org.apache.commons.lang3.BooleanUtils;
+
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Set;
@@ -22,7 +24,7 @@ public class BooleanUtil {
         }
         String value = booleanStr.trim().toLowerCase();
 
-        // Check is made to parse int as later as possible
+        // Check is made to parse int as late as possible
         return trueValues.contains(value) || (!falseValues.contains(value) && isTrue(value));
     }
 
@@ -39,8 +41,10 @@ public class BooleanUtil {
      *  - isTrue(null)  = false
      *  - isTrue(false) = false
      *  - isTrue(true)  = true
+     * @deprecated use {@link BooleanUtils#isTrue(Boolean)} instead
      */
+    @Deprecated
     public static boolean isTrue(Boolean value) {
-        return Boolean.TRUE.equals(value);
+        return BooleanUtils.isTrue(value);
     }
 }

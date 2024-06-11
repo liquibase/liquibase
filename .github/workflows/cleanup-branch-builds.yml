@@ -19,9 +19,10 @@ jobs:
       with:
         version: "${{ github.event.ref }}-SNAPSHOT"
     
-    - uses: actions/delete-package-versions@v3
+    - uses: actions/delete-package-versions@v5
       if: ${{ steps.version.outputs.ids != '' }}
-      with: 
+      with:
+        package-type: maven
         # The number of latest versions to keep.
         # This cannot be specified with `num-old-versions-to-delete`. By default, `num-old-versions-to-delete` takes precedence over `min-versions-to-keep`.
         # When set to 0, all deletable versions will be deleted.

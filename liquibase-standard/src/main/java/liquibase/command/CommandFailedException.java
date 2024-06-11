@@ -1,11 +1,13 @@
 package liquibase.command;
 
+import liquibase.exception.ExitCodeException;
+
 /**
  * CommandFailedException is thrown any time a command did not succeed. If it did not succeed due to normal and expected
  * reasons, mark it as expected=true. If the CommandFailedException is marked as expected=false, the code calling the
  * command may want to do additional logging or handling of the exception because it knows the command was surprised by the result.
  */
-public class CommandFailedException extends Exception {
+public class CommandFailedException extends Exception implements ExitCodeException {
 
     private static final long serialVersionUID = -394350095952659571L;
     private final CommandResults results;
@@ -23,7 +25,7 @@ public class CommandFailedException extends Exception {
         return results;
     }
 
-    public int getExitCode() {
+    public Integer getExitCode() {
         return exitCode;
     }
 

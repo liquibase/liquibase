@@ -469,4 +469,11 @@
         <renameSequence oldSequenceName="serial_sequence_test_id_seq" newSequenceName="new_test_id_seq"/>
     </changeSet>
 
+    <changeSet author="mallod" id="test-column-def-with-autoincrement-and-startWith"
+               logicalFilePath="empty">
+        <createTable tableName="test_col_def_autoIncrement_and_startWith">
+            <column name="id" type="integer" autoIncrement="true" startWith="100" incrementBy="5"/>
+        </createTable>
+    </changeSet>
+
 </databaseChangeLog>

@@ -15,10 +15,7 @@ import liquibase.util.ObjectUtil;
 import liquibase.util.StringUtil;
 
 import java.sql.DatabaseMetaData;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 /**
  * Analyses the properties of a database index and creates an object representation ("snapshot").
@@ -30,7 +27,7 @@ public class IndexSnapshotGenerator extends JdbcSnapshotGenerator {
 
     @Override
     protected void addTo(DatabaseObject foundObject, DatabaseSnapshot snapshot) throws DatabaseException, InvalidExampleException {
-        if (!snapshot.getSnapshotControl().shouldInclude(Index.class)) {
+        if (!snapshot.getSnapshotControl().shouldInclude(Index.class) || !snapshot.getDatabase().supports(Index.class)) {
             return;
         }
 
@@ -154,7 +151,7 @@ public class IndexSnapshotGenerator extends JdbcSnapshotGenerator {
             exampleName = database.correctObjectName(exampleName, Index.class);
         }
 
-        Map<String, Index> foundIndexes = new HashMap<>();
+        Map<String, Index> foundIndexes = new LinkedHashMap <>();
         JdbcDatabaseSnapshot.CachingDatabaseMetaData databaseMetaData = null;
         List<CachedRow> rs = null;
         try {
@@ -284,12 +281,12 @@ public class IndexSnapshotGenerator extends JdbcSnapshotGenerator {
                         // Is this column a simple column (definition == null)
                         // or is it a computed expression (definition != null)
                         if (definition == null || database instanceof PostgresDatabase ||  database instanceof MSSQLDatabase) {
-                        String ascOrDesc;
-                        if (database instanceof Db2zDatabase) {
-                            ascOrDesc = row.getString("ORDER");
-                        } else {
-                            ascOrDesc = row.getString("ASC_OR_DESC");
-                        }
+                            String ascOrDesc;
+                            if (database instanceof Db2zDatabase) {
+                                ascOrDesc = row.getString("ORDER");
+                            } else {
+                                ascOrDesc = row.getString("ASC_OR_DESC");
+                            }
                             Boolean descending = "D".equals(ascOrDesc) ? Boolean.TRUE : ("A".equals(ascOrDesc) ?
                                 Boolean.FALSE : null);
                             returnIndex.getColumns().set(position - 1, new Column(columnName)
@@ -333,7 +330,7 @@ public class IndexSnapshotGenerator extends JdbcSnapshotGenerator {
                 }
             }
             if (!nonClusteredIndexes.isEmpty()) {
-                return finalizeIndex(schema, tableName, nonClusteredIndexes.get(0), snapshot);
+                return finalizeIndex(schema, tableName, nonClusteredIndexes.get(0), snapshot); // why 0?
             }
             return null;
         }

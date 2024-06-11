@@ -1,3 +1,4 @@
+
 name: Build and Publish
 
 #the concurrency check will cancel in-progress runs on non-master branches and pull requests on forked repositories regardless of the target branch.
@@ -9,9 +10,6 @@ on:
   workflow_call:
 
   workflow_dispatch:
-
-env:
-  MAVEN_VERSION: '3.9.2'
 
 jobs:
 
@@ -30,7 +28,7 @@ jobs:
 
     steps:
 
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
         with:
           ref: ${{ github.event.pull_request.head.sha || github.event.after}}
       - name: Get Latest Merge Commit SHA
@@ -66,7 +64,7 @@ jobs:
           echo "Original Branch Name thisBranchName:" $branch_name
 
       - name: Checkout OSS Repo
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
         with:
           repository: liquibase/liquibase
 
@@ -77,7 +75,7 @@ jobs:
       # if the value of branchExistsInBoth = true then set liquibaseProVersionPrefix = thisBranchName else $currentBranch as PRO also has replacement logic for / with _
       - name: Check branch existence
         id: check-branch
-        uses: actions/github-script@v6
+        uses: actions/github-script@v7
         with:
           github-token: ${{ secrets.LIQUIBOT_PAT_GPM_ACCESS }}
           script: |
@@ -112,7 +110,7 @@ jobs:
       contents: read
       packages: write
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
         with:
           ref: ${{ github.event.pull_request.head.sha || github.event.after}}
       # this includes all the tar files included in the previous runs. So in the next step we deploy what was previously build
@@ -123,13 +121,13 @@ jobs:
 
       ##Cache based on install4j file, since changes to JVM is seen in there. If install4j version changes without changing the file, change the prefix letter before hashFiles to force a new cache
       - name: Install4j Cache
-        uses: actions/cache@v3.3.1
+        uses: actions/cache@v4.0.2
         with:
           key: install4j-A${{ hashFiles('liquibase-dist/src/main/install4j/liquibase.install4j') }}
           path: ~/.install4j8/**
 
       - name: Set up JDK 11
-        uses: actions/setup-java@v3
+        uses: actions/setup-java@v4
         with:
           java-version: '11'
           distribution: 'temurin'
@@ -142,7 +140,7 @@ jobs:
 
       #look for dependencies in maven
       - name: maven-settings-xml-action
-        uses: whelk-io/maven-settings-xml-action@v21
+        uses: whelk-io/maven-settings-xml-action@v22
         with:
           repositories: |
             [
@@ -182,16 +180,12 @@ jobs:
                 "password": "${{ secrets.LIQUIBOT_PAT }}"
               }
             ]
-      - name: Set up Maven
-        uses: stCarolas/setup-maven@v4.5
-        with:
-          maven-version: ${{ env.MAVEN_VERSION }}
 
       # Version artifact based off of branch
       - name: Version Artifact
         run: |
           version=${{ needs.setup.outputs.thisBranchName }}-SNAPSHOT
-          mvn versions:set -DnewVersion="$version"
+          ./mvnw versions:set -DnewVersion="$version"
 
       - name: Artifacts- Build & Sign
         env:
@@ -213,7 +207,7 @@ jobs:
           echo "Saving windows key"
           echo "$INSTALL4J_WINDOWS_KEY" | base64 -d > liquibase-dist/target/keys/datical_windows.pfx
           # we are packaging and deploying liquibase tar which includes liquibase-commercial
-          mvn -B -pl liquibase-dist -P liquibase-commercial source:jar package "-Dliquibase-pro.version=${{ needs.setup.outputs.proBranchNamePrefix }}-SNAPSHOT" "-Dbuild.repository.owner=liquibase" "-Dbuild.repository.name=liquibase" "-Dbuild.branch=${{ needs.setup.outputs.thisBranchName }}" "-Dbuild.number=${{ github.run_number }}" "-Dbuild.commit=${{ needs.setup.outputs.latestMergeSha }}-SNAPSHOT" "-Dbuild.timestamp=${{ needs.setup.outputs.timeStamp }}"
+          ./mvnw -B -pl liquibase-dist -P liquibase-commercial source:jar package "-Dliquibase.scripting=true" "-Dliquibase-pro.version=${{ needs.setup.outputs.proBranchNamePrefix }}-SNAPSHOT" "-Dbuild.repository.owner=liquibase" "-Dbuild.repository.name=liquibase" "-Dbuild.branch=${{ needs.setup.outputs.thisBranchName }}" "-Dbuild.number=${{ github.run_number }}" "-Dbuild.commit=${{ needs.setup.outputs.latestMergeSha }}-SNAPSHOT" "-Dbuild.timestamp=${{ needs.setup.outputs.timeStamp }}"
 
           ## extract tar content for other artifacts
           mkdir -p liquibase-dist/target/liquibase-${{ needs.setup.outputs.thisBranchName }}-SNAPSHOT
@@ -321,17 +315,17 @@ jobs:
       # Publish <commitsha>-SNAPSHOT version to GPM
       - name: Version Artifact Publish <commitsha>-SNAPSHOT version to GPM
         run: |
-          mvn versions:set "-DnewVersion=${{ needs.setup.outputs.latestMergeSha }}-SNAPSHOT"
+          ./mvnw versions:set "-DnewVersion=${{ needs.setup.outputs.latestMergeSha }}-SNAPSHOT"
       - name: Publish <commitsha>-SNAPSHOT package
         run: |
-          mvn -B clean deploy -pl '!liquibase-dist' -DskipTests=true "-Dbuild.repository.owner=liquibase" "-Dbuild.repository.name=liquibase" "-Dbuild.branch=${{ needs.setup.outputs.thisBranchName }}" "-Dbuild.number=${{ github.run_number }}" "-Dbuild.commit=${{ needs.setup.outputs.latestMergeSha }}" "-Dbuild.timestamp=${{ needs.setup.outputs.timeStamp }}"
+          ./mvnw -B clean deploy -pl '!liquibase-dist' -DskipTests=true "-Dbuild.repository.owner=liquibase" "-Dbuild.repository.name=liquibase" "-Dbuild.branch=${{ needs.setup.outputs.thisBranchName }}" "-Dbuild.number=${{ github.run_number }}" "-Dbuild.commit=${{ needs.setup.outputs.latestMergeSha }}" "-Dbuild.timestamp=${{ needs.setup.outputs.timeStamp }}"
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
       #Publish to GitHub Packages. We are building a tar file which includes liquibase-commercial hence we need "-Dliquibase-pro.version"
       - name: Publish tar.gz package to GPM
         run: |
-          mvn -B -pl liquibase-dist -P liquibase-commercial clean deploy -DskipTests=true "-Dliquibase-pro.version=${{ needs.setup.outputs.proBranchNamePrefix }}-SNAPSHOT" "-Dbuild.timestamp=${{ needs.setup.outputs.timestamp }}" "-Dbuild.repository.owner=liquibase" "-Dbuild.repository.name=liquibase" "-Dbuild.branch=${{ needs.setup.outputs.thisBranchName }}" "-Dbuild.number=${{ github.run_number }}" "-Dbuild.commit=${{ needs.setup.outputs.thisSha }}"
+          ./mvnw -B -pl liquibase-dist -P liquibase-commercial clean deploy -DskipTests=true "-Dliquibase-pro.version=${{ needs.setup.outputs.proBranchNamePrefix }}-SNAPSHOT" "-Dbuild.timestamp=${{ needs.setup.outputs.timestamp }}" "-Dbuild.repository.owner=liquibase" "-Dbuild.repository.name=liquibase" "-Dbuild.branch=${{ needs.setup.outputs.thisBranchName }}" "-Dbuild.number=${{ github.run_number }}" "-Dbuild.commit=${{ needs.setup.outputs.thisSha }}"
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 

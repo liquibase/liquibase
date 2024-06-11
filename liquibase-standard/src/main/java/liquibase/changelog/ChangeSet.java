@@ -167,6 +167,12 @@ public class ChangeSet implements Conditional, ChangeLogChild {
     private Set<String> dbmsSet;
 
     /**
+     * The original string used in the dbms attribute.
+     */
+    @Getter
+    private String dbmsOriginalString;
+
+    /**
      * If false, do not stop liquibase update execution if an error is thrown executing the changeSet.  Defaults to true
      */
     private Boolean failOnError;
@@ -223,15 +229,19 @@ public class ChangeSet implements Conditional, ChangeLogChild {
      */
     private final List<SqlVisitor> sqlVisitors = new ArrayList<>();
 
+    @Getter
     private ObjectQuotingStrategy objectQuotingStrategy;
 
     private final DatabaseChangeLog changeLog;
 
+    @Getter
+    @Setter
     private String created;
 
     /**
-     * Allow changeSet to be ran "first" or "last". Multiple changeSets with the same runOrder will preserve their order relative to each other.
+     * Allow changeSet to be run "first" or "last". Multiple changeSets with the same runOrder will preserve their order relative to each other.
      */
+    @Getter
     private String runOrder;
 
     private final Map<String, Object> attributes = new HashMap<>();
@@ -256,6 +266,14 @@ public class ChangeSet implements Conditional, ChangeLogChild {
     @Getter
     @Setter
     private ExecType rollbackExecType;
+
+    @Getter
+    @Setter
+    private Date operationStartTime;
+
+    @Getter
+    @Setter
+    private Date operationStopTime;
 
     public boolean shouldAlwaysRun() {
         return alwaysRun;
@@ -305,6 +323,7 @@ public class ChangeSet implements Conditional, ChangeLogChild {
 
     protected void setDbms(String dbmsList) {
         this.dbmsSet = DatabaseList.toDbmsSet(dbmsList);
+        this.dbmsOriginalString = dbmsList;
     }
 
     /**
@@ -635,7 +654,8 @@ public class ChangeSet implements Conditional, ChangeLogChild {
             return ExecType.MARK_RAN;
         }
 
-        long startTime = new Date().getTime();
+        operationStartTime = new Date();
+        long startTime = operationStartTime.getTime();
         Scope.getCurrentScope().addMdcValue(MdcKey.CHANGESET_OPERATION_START_TIME, Instant.ofEpochMilli(startTime).toString());
 
         boolean skipChange = false;
@@ -768,7 +788,8 @@ public class ChangeSet implements Conditional, ChangeLogChild {
                 if (execType == null) {
                     execType = ExecType.EXECUTED;
                 }
-                long stopTime = new Date().getTime();
+                operationStopTime = new Date();
+                long stopTime = operationStopTime.getTime();
                 Scope.getCurrentScope().addMdcValue(MdcKey.CHANGESET_OPERATION_STOP_TIME, Instant.ofEpochMilli(stopTime).toString());
                 Scope.getCurrentScope().addMdcValue(MdcKey.CHANGESET_OUTCOME, execType.value.toLowerCase());
                 log.info("ChangeSet " + toString(false) + " ran successfully in " + (stopTime - startTime) + "ms");
@@ -777,7 +798,8 @@ public class ChangeSet implements Conditional, ChangeLogChild {
             }
 
         } catch (Exception e) {
-            Scope.getCurrentScope().addMdcValue(MdcKey.CHANGESET_OPERATION_STOP_TIME, Instant.ofEpochMilli(new Date().getTime()).toString());
+            operationStopTime = new Date();
+            Scope.getCurrentScope().addMdcValue(MdcKey.CHANGESET_OPERATION_STOP_TIME, Instant.ofEpochMilli(operationStopTime.getTime()).toString());
             Scope.getCurrentScope().addMdcValue(MdcKey.CHANGESET_OUTCOME, ExecType.FAILED.value.toLowerCase());
             log.severe(String.format("ChangeSet %s encountered an exception.", toString(false)), e);
             setErrorMsg(e.getMessage());
@@ -873,7 +895,8 @@ public class ChangeSet implements Conditional, ChangeLogChild {
     }
 
     public void rollback(Database database, ChangeExecListener listener) throws RollbackFailedException {
-        Scope.getCurrentScope().addMdcValue(MdcKey.CHANGESET_OPERATION_START_TIME, Instant.ofEpochMilli(new Date().getTime()).toString());
+        operationStartTime = new Date();
+        Scope.getCurrentScope().addMdcValue(MdcKey.CHANGESET_OPERATION_START_TIME, Instant.ofEpochMilli(operationStartTime.getTime()).toString());
         addChangeSetMdcProperties();
         Scope.getCurrentScope().addMdcValue(MdcKey.DEPLOYMENT_ID, getDeploymentId());
         Executor originalExecutor = setupCustomExecutorIfNecessary(database);
@@ -940,11 +963,13 @@ public class ChangeSet implements Conditional, ChangeLogChild {
             }
             rollbackExecType = ExecType.EXECUTED;
             Scope.getCurrentScope().addMdcValue(MdcKey.CHANGESET_OUTCOME, ExecType.EXECUTED.value.toLowerCase());
-            Scope.getCurrentScope().addMdcValue(MdcKey.CHANGESET_OPERATION_STOP_TIME, Instant.ofEpochMilli(new Date().getTime()).toString());
+            operationStopTime = new Date();
+            Scope.getCurrentScope().addMdcValue(MdcKey.CHANGESET_OPERATION_STOP_TIME, Instant.ofEpochMilli(operationStopTime.getTime()).toString());
             Scope.getCurrentScope().getLog(getClass()).fine("ChangeSet " + toString() + " has been successfully rolled back.");
         } catch (Exception e) {
             setErrorMsg(e.getMessage());
-            Scope.getCurrentScope().addMdcValue(MdcKey.CHANGESET_OPERATION_STOP_TIME, Instant.ofEpochMilli(new Date().getTime()).toString());
+            operationStopTime = new Date();
+            Scope.getCurrentScope().addMdcValue(MdcKey.CHANGESET_OPERATION_STOP_TIME, Instant.ofEpochMilli(operationStopTime.getTime()).toString());
             try {
                 rollbackExecType = ExecType.FAILED;
                 Scope.getCurrentScope().addMdcValue(MdcKey.CHANGESET_OUTCOME, ExecType.FAILED.value.toLowerCase());
@@ -1020,6 +1045,7 @@ public class ChangeSet implements Conditional, ChangeLogChild {
     /**
      * @deprecated use {@link #getContextFilter()}
      */
+    @Deprecated
     public ContextExpression getContexts() {
         return getContextFilter();
     }
@@ -1027,6 +1053,7 @@ public class ChangeSet implements Conditional, ChangeLogChild {
     /**
      * @deprecated use {@link #setContextFilter(ContextExpression)}
      */
+    @Deprecated
     public ChangeSet setContexts(ContextExpression contexts) {
         return setContextFilter(contexts);
     }
@@ -1340,22 +1367,6 @@ public class ChangeSet implements Conditional, ChangeLogChild {
      */
     public void setFilePath(String filePath) {
         this.filePath = filePath;
-    }
-
-    public ObjectQuotingStrategy getObjectQuotingStrategy() {
-        return objectQuotingStrategy;
-    }
-
-    public String getCreated() {
-        return created;
-    }
-
-    public void setCreated(String created) {
-        this.created = created;
-    }
-
-    public String getRunOrder() {
-        return runOrder;
     }
 
     public void setRunOrder(String runOrder) {

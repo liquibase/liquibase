@@ -25,12 +25,12 @@ public class AddUniqueConstraintGenerator extends AbstractSqlGenerator<AddUnique
     }
 
     @Override
-    public ValidationErrors validate(AddUniqueConstraintStatement addUniqueConstraintStatement, Database database, SqlGeneratorChain sqlGeneratorChain) {
+    public ValidationErrors validate(AddUniqueConstraintStatement addUniqueConstraintStatement, Database database, SqlGeneratorChain<AddUniqueConstraintStatement> sqlGeneratorChain) {
         ValidationErrors validationErrors = new ValidationErrors();
         validationErrors.checkRequiredField("columnNames", addUniqueConstraintStatement.getColumnNames());
         validationErrors.checkRequiredField("tableName", addUniqueConstraintStatement.getTableName());
 
-        if (!(database instanceof OracleDatabase)) {
+        if (!((database instanceof OracleDatabase) || (database instanceof PostgresDatabase))) {
             validationErrors.checkDisallowedField("forIndexName", addUniqueConstraintStatement.getForIndexName(), database);
         }
 
@@ -41,7 +41,7 @@ public class AddUniqueConstraintGenerator extends AbstractSqlGenerator<AddUnique
     }
 
     @Override
-    public Sql[] generateSql(AddUniqueConstraintStatement statement, Database database, SqlGeneratorChain sqlGeneratorChain) {
+    public Sql[] generateSql(AddUniqueConstraintStatement statement, Database database, SqlGeneratorChain<AddUniqueConstraintStatement> sqlGeneratorChain) {
 
         String sql;
         if (statement.getConstraintName() == null) {
@@ -71,7 +71,7 @@ public class AddUniqueConstraintGenerator extends AbstractSqlGenerator<AddUnique
 
         boolean isInUsingIndexClause = false;
 
-        if (statement.getForIndexName() != null) {
+        if (statement.getForIndexName() != null && !(database instanceof H2Database)) {
             sql += " USING INDEX ";
             sql += database.escapeObjectName(statement.getForIndexCatalogName(), statement.getForIndexSchemaName(),
                 statement.getForIndexName(), Index.class);

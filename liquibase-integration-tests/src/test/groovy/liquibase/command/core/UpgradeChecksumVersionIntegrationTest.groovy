@@ -17,7 +17,7 @@ import liquibase.extension.testing.testsystem.TestSystemFactory
 import liquibase.extension.testing.testsystem.spock.LiquibaseIntegrationTest
 import liquibase.statement.SqlStatement
 import liquibase.statement.core.MarkChangeSetRanStatement
-import liquibase.statement.core.RawSqlStatement
+import liquibase.statement.core.RawParameterizedSqlStatement
 import spock.lang.Shared
 import spock.lang.Specification
 import spock.lang.Unroll
@@ -34,7 +34,7 @@ class UpgradeChecksumVersionIntegrationTest extends Specification{
     }
 
     private insertDbclRecord(String changelogfile) {
-        h2.execute(new RawSqlStatement("""
+        h2.execute(new RawParameterizedSqlStatement("""
 INSERT INTO DATABASECHANGELOG
 (ID, AUTHOR, FILENAME, DATEEXECUTED, ORDEREXECUTED, EXECTYPE, MD5SUM, DESCRIPTION, COMMENTS, TAG, LIQUIBASE, CONTEXTS, LABELS, DEPLOYMENT_ID)
 VALUES('1', 'your.name', '$changelogfile', '2023-05-31 14:33:39.108', 1, 'EXECUTED', '8:d925207397a5bb8863a41d513a65afd1', 'sql', 'example comment', NULL, 'DEV', 'example-context1', 'example-label', '5561619071');
@@ -298,12 +298,12 @@ VALUES('1', 'your.name', '$changelogfile', '2023-05-31 14:33:39.108', 1, 'EXECUT
         def changesetFilepath = "changelogs/h2/checksum/dbms-filter-changelog.xml"
         final ChangeLogHistoryService changeLogService = Scope.getCurrentScope().getSingleton(ChangeLogHistoryServiceFactory.class).getChangeLogService(h2.getDatabaseFromFactory())
         changeLogService.init()
-        h2.execute(new RawSqlStatement("""
+        h2.execute(new RawParameterizedSqlStatement("""
 INSERT INTO DATABASECHANGELOG
 (ID, AUTHOR, FILENAME, DATEEXECUTED, ORDEREXECUTED, EXECTYPE, MD5SUM, DESCRIPTION, COMMENTS, TAG, LIQUIBASE, CONTEXTS, LABELS, DEPLOYMENT_ID)
 VALUES('1', 'fl', '$changesetFilepath', '2023-09-29 14:33:39.108', 1, 'EXECUTED', '8:0a36c7b201a287dd3348e8dd19e44be7', 'sql', 'example comment', NULL, 'DEV', 'example-context1', 'example-label', '5561619071');
 """))
-        h2.execute(new RawSqlStatement("""
+        h2.execute(new RawParameterizedSqlStatement("""
 INSERT INTO DATABASECHANGELOG
 (ID, AUTHOR, FILENAME, DATEEXECUTED, ORDEREXECUTED, EXECTYPE, MD5SUM, DESCRIPTION, COMMENTS, TAG, LIQUIBASE, CONTEXTS, LABELS, DEPLOYMENT_ID)
 VALUES('2', 'fl', '$changesetFilepath', '2023-09-29 14:33:39.112', 2, 'EXECUTED', '8:a6a54dbc65048ebf1388da78c31ef1a9', 'sqlFile; sqlFile', '', NULL, 'DEV', 'example-context1', 'example-label', '5561619071');
@@ -342,12 +342,12 @@ VALUES('2', 'fl', '$changesetFilepath', '2023-09-29 14:33:39.112', 2, 'EXECUTED'
         def changesetFilepath = "changelogs/h2/checksum/dbms-filter-changelog.xml"
         final ChangeLogHistoryService changeLogService = Scope.getCurrentScope().getSingleton(ChangeLogHistoryServiceFactory.class).getChangeLogService(h2.getDatabaseFromFactory())
         changeLogService.init()
-        h2.execute(new RawSqlStatement("""
+        h2.execute(new RawParameterizedSqlStatement("""
 INSERT INTO DATABASECHANGELOG
 (ID, AUTHOR, FILENAME, DATEEXECUTED, ORDEREXECUTED, EXECTYPE, MD5SUM, DESCRIPTION, COMMENTS, TAG, LIQUIBASE, CONTEXTS, LABELS, DEPLOYMENT_ID)
 VALUES('1', 'fl', '$changesetFilepath', '2023-09-29 14:33:39.108', 1, 'EXECUTED', '8:0a36c7b201a287dd3348e8dd19e44be7', 'sql', 'example comment', NULL, 'DEV', 'example-context1', 'example-label', '5561619071');
 """))
-        h2.execute(new RawSqlStatement("""
+        h2.execute(new RawParameterizedSqlStatement("""
 INSERT INTO DATABASECHANGELOG
 (ID, AUTHOR, FILENAME, DATEEXECUTED, ORDEREXECUTED, EXECTYPE, MD5SUM, DESCRIPTION, COMMENTS, TAG, LIQUIBASE, CONTEXTS, LABELS, DEPLOYMENT_ID)
 VALUES('2', 'fl', '$changesetFilepath', '2023-09-29 14:33:39.112', 2, 'EXECUTED', '8:a6a54dbc65048ebf1388da78c31ef1a9', 'sqlFile; sqlFile', '', NULL, 'DEV', 'example-context1', 'example-label', '5561619071');

@@ -6,7 +6,7 @@ import liquibase.exception.SetupException;
 import liquibase.exception.ValidationErrors;
 import liquibase.resource.ResourceAccessor;
 import liquibase.statement.SqlStatement;
-import liquibase.statement.core.RawSqlStatement;
+import liquibase.statement.core.RawParameterizedSqlStatement;
 import liquibase.structure.core.Column;
 import liquibase.structure.core.Table;
 
@@ -56,16 +56,16 @@ public class ExampleCustomSqlChange implements CustomSqlChange, CustomSqlRollbac
     @Override
     public SqlStatement[] generateStatements(Database database) {
         return new SqlStatement[]{
-                new RawSqlStatement("UPDATE "+database.escapeObjectName(null, schemaName, tableName, Table.class)
-                        +" SET "+database.escapeObjectName(columnName, Column.class)+" = "+newValue)
+                new RawParameterizedSqlStatement(String.format("UPDATE %s SET %s = %s", database.escapeObjectName(null, schemaName, tableName, Table.class),
+                        database.escapeObjectName(columnName, Column.class), newValue))
         };
     }
 
     @Override
     public SqlStatement[] generateRollbackStatements(Database database) throws RollbackImpossibleException {
         return new SqlStatement[]{
-                new RawSqlStatement("UPDATE "+database.escapeObjectName(null, schemaName, tableName, Table.class)
-                        +" SET "+database.escapeObjectName(columnName, Column.class)+" = NULL")
+                new RawParameterizedSqlStatement(String.format("UPDATE %s SET %s = NULL", database.escapeObjectName(null, schemaName, tableName, Table.class),
+                        database.escapeObjectName(columnName, Column.class)))
         };
     }
 

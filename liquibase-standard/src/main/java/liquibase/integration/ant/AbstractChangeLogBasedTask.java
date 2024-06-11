@@ -2,6 +2,8 @@ package liquibase.integration.ant;
 
 import liquibase.LabelExpression;
 import liquibase.util.StringUtil;
+import lombok.Getter;
+import lombok.Setter;
 import org.apache.tools.ant.BuildException;
 import org.apache.tools.ant.types.resources.FileResource;
 
@@ -11,12 +13,21 @@ import java.io.Writer;
 
 public abstract class AbstractChangeLogBasedTask extends BaseLiquibaseTask {
 
+    @Setter
     private String searchPath;
+    @Setter
     private String changeLogDirectory;
+    @Setter
     private String changeLogFile;
+    @Getter
+    @Setter
     private String contexts;
+    @Getter
     private LabelExpression labelFilter;
+    @Getter
+    @Setter
     private FileResource outputFile;
+    @Setter
     private String outputEncoding;
 
     @Override
@@ -40,10 +51,6 @@ public abstract class AbstractChangeLogBasedTask extends BaseLiquibaseTask {
     public String getChangeLogDirectory() {
         return changeLogDirectory;
     }
-    
-    public void setChangeLogDirectory(String changeLogDirectory) {
-        this.changeLogDirectory = changeLogDirectory;
-    }
 
     /**
      * Gets the change log directory set from Ant.
@@ -54,10 +61,6 @@ public abstract class AbstractChangeLogBasedTask extends BaseLiquibaseTask {
         return searchPath;
     }
 
-    public void setSearchPath(String searchPath) {
-        this.searchPath = searchPath;
-    }
-
     /**
      * Gets the change log file set from Ant.
      * @return The change log file resource.
@@ -65,18 +68,6 @@ public abstract class AbstractChangeLogBasedTask extends BaseLiquibaseTask {
     @Override
     public String getChangeLogFile() {
         return changeLogFile;
-    }
-
-    public void setChangeLogFile(String changeLogFile) {
-        this.changeLogFile = changeLogFile;
-    }
-
-    public String getContexts() {
-        return contexts;
-    }
-
-    public void setContexts(String contexts) {
-        this.contexts = contexts;
     }
 
     /**
@@ -93,27 +84,12 @@ public abstract class AbstractChangeLogBasedTask extends BaseLiquibaseTask {
         this.setLabelFilter(labelFilter);
     }
 
-    public LabelExpression getLabelFilter() {
-        return labelFilter;
-    }
-
     public void setLabelFilter(String labelFilter) {
         this.labelFilter = new LabelExpression(labelFilter);
-    }
-
-    public FileResource getOutputFile() {
-        return outputFile;
-    }
-
-    public void setOutputFile(FileResource outputFile) {
-        this.outputFile = outputFile;
     }
 
     public String getOutputEncoding() {
         return (StringUtil.trimToNull(outputEncoding) == null) ? getDefaultOutputEncoding() : outputEncoding.trim();
     }
 
-    public void setOutputEncoding(String outputEncoding) {
-        this.outputEncoding = outputEncoding;
-    }
 }

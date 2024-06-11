@@ -6,34 +6,36 @@ import liquibase.Scope;
 import liquibase.changelog.ChangeSet;
 import liquibase.parser.LiquibaseSqlParser;
 import liquibase.parser.SqlParserFactory;
+import org.apache.commons.lang3.ArrayUtils;
+import org.apache.commons.lang3.CharUtils;
+import org.apache.commons.lang3.RandomStringUtils;
+import org.apache.commons.lang3.StringUtils;
 
 import java.io.UnsupportedEncodingException;
 import java.nio.charset.StandardCharsets;
-import java.security.SecureRandom;
 import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 /**
  * Various utility methods for working with strings.
+ * @deprecated use {@link StringUtils} instead
  */
 public class StringUtil {
     private static final Pattern upperCasePattern = Pattern.compile(".*[A-Z].*");
     private static final Pattern lowerCasePattern = Pattern.compile(".*[a-z].*");
     private static final Pattern spacePattern = Pattern.compile(" ");
-    private static final SecureRandom rnd = new SecureRandom();
 
     /**
      * Returns the trimmed (left and right) version of the input string. If null is passed, an empty string is returned.
      *
      * @param string the input string to trim
      * @return the trimmed string, or an empty string if the input was null.
+     * @deprecated use {@link StringUtils#trimToEmpty(String)} instead
      */
+    @Deprecated
     public static String trimToEmpty(String string) {
-        if (string == null) {
-            return "";
-        }
-        return string.trim();
+        return StringUtils.trimToEmpty(string);
     }
 
     /**
@@ -42,17 +44,11 @@ public class StringUtil {
      *
      * @param string the string to trim
      * @return the trimmed string or null
+     * @deprecated use {@link StringUtils#trimToNull(String)} instead
      */
+    @Deprecated
     public static String trimToNull(String string) {
-        if (string == null) {
-            return null;
-        }
-        String returnString = string.trim();
-        if (returnString.isEmpty()) {
-            return null;
-        } else {
-            return returnString;
-        }
+        return StringUtils.trimToNull(string);
     }
 
     /**
@@ -100,7 +96,10 @@ public class StringUtil {
             if (piece instanceof String && ((String) piece).equalsIgnoreCase("BEGIN")
                     && (!"transaction".equalsIgnoreCase(nextPiece)
                     && !"trans".equalsIgnoreCase(nextPiece)
-                    && !"tran".equalsIgnoreCase(nextPiece))) {
+                    && !"tran".equalsIgnoreCase(nextPiece))
+                    && !"dialog".equalsIgnoreCase(nextPiece)
+                    && !"conversation".equalsIgnoreCase(nextPiece)
+                    && !"distributed".equalsIgnoreCase(nextPiece)) {
                 isInClause++;
             }
             if (piece instanceof String && ((String) piece).equalsIgnoreCase("END") && isInClause > 0
@@ -144,6 +143,7 @@ public class StringUtil {
      * @param stripComments If true then comments will be stripped, if false then they will be left in the code
      * @deprecated The new method is {@link #processMultiLineSQL(String, boolean, boolean, String, ChangeSet)} (String)}
      */
+    @Deprecated
     public static String[] processMutliLineSQL(String multiLineSQL, boolean stripComments, boolean splitStatements, String endDelimiter) {
         return processMultiLineSQL(multiLineSQL, stripComments, splitStatements, endDelimiter, null);
     }
@@ -157,6 +157,7 @@ public class StringUtil {
      * @param changeSet     the changeset associated with the sql being parsed
      * @deprecated The new method is {@link #processMultiLineSQL(String, boolean, boolean, String, ChangeSet)} (String)}
      */
+    @Deprecated
     public static String[] processMutliLineSQL(String multiLineSQL, boolean stripComments, boolean splitStatements, String endDelimiter, ChangeSet changeSet) {
         return processMultiLineSQL(multiLineSQL, stripComments, splitStatements, endDelimiter, changeSet);
     }
@@ -217,9 +218,9 @@ public class StringUtil {
                         return false;
                     }
                 }
-                return piece.toLowerCase().equalsIgnoreCase(endDelimiter.toLowerCase());
+                return StringUtils.equalsIgnoreCase(piece, endDelimiter);
             } else {
-                return piece.toLowerCase().matches(endDelimiter.toLowerCase()) || (previousPiece + piece).toLowerCase().matches("[\\s\n\r]*" + endDelimiter.toLowerCase());
+                return StringUtils.equalsIgnoreCase(piece, endDelimiter) || (previousPiece + piece).toLowerCase().matches("[\\s\n\r]*" + endDelimiter.toLowerCase());
             }
         }
     }
@@ -465,43 +466,28 @@ public class StringUtil {
         return returnList;
     }
 
+    /**
+     * @deprecated use {@link StringUtils#repeat(String, int)} instead
+     */
+    @Deprecated
     public static String repeat(String string, int times) {
-        StringBuilder result = new StringBuilder(string.length() * times);
-        for (int i = 0; i < times; i++) {
-            result.append(string);
-        }
-
-        return result.toString();
+        return StringUtils.repeat(string, times);
     }
 
+    /**
+     * @deprecated use {@link StringUtils#join(Object[], String)} instead
+     */
+    @Deprecated
     public static String join(Integer[] array, String delimiter) {
-        if (array == null) {
-            return null;
-        }
-
-        int[] ints = new int[array.length];
-        for (int i = 0; i < ints.length; i++) {
-            ints[i] = array[i];
-        }
-        return StringUtil.join(ints, delimiter);
+        return StringUtils.join(array, delimiter);
     }
 
+    /**
+     * @deprecated use {@link StringUtils#join(int[], char)} instead
+     */
+    @Deprecated
     public static String join(int[] array, String delimiter) {
-        if (array == null) {
-            return null;
-        }
-
-        if (array.length == 0) {
-            return "";
-        }
-
-        StringBuilder buffer = new StringBuilder();
-        for (int val : array) {
-            buffer.append(val).append(delimiter);
-        }
-
-        String returnString = buffer.toString();
-        return returnString.substring(0, returnString.length() - delimiter.length());
+        return StringUtils.join(ArrayUtils.toObject(array), delimiter);
     }
 
     public static String indent(String string) {
@@ -516,25 +502,20 @@ public class StringUtil {
         return pad + (string.replaceAll("\n", "\n" + pad));
     }
 
+    /**
+     * @deprecated use {@link StringUtils#uncapitalize(String)} instead
+     */
+    @Deprecated
     public static String lowerCaseFirst(String string) {
-        if (string == null) {
-            return null;
-        }
-        if (string.length() < 2) {
-            return string.toLowerCase();
-        }
-
-        return string.substring(0, 1).toLowerCase() + string.substring(1);
+        return StringUtils.uncapitalize(string);
     }
 
+    /**
+     * @deprecated use {@link StringUtils#capitalize(String)} instead
+     */
+    @Deprecated
     public static String upperCaseFirst(String string) {
-        if (string == null) {
-            return null;
-        }
-        if (string.length() < 2) {
-            return string.toUpperCase();
-        }
-        return string.substring(0, 1).toUpperCase() + string.substring(1);
+        return StringUtils.capitalize(string);
     }
 
     public static boolean hasUpperCase(String string) {
@@ -576,9 +557,11 @@ public class StringUtil {
      *
      * @param ch the character to test
      * @return true if 7 bit-clean, false otherwise.
+     * @deprecated use {@link CharUtils#isAscii(char)} instead
      */
+    @Deprecated
     public static boolean isAscii(char ch) {
-        return ch < 128;
+        return CharUtils.isAscii(ch);
     }
 
     public static String escapeHtml(String str) {
@@ -636,13 +619,29 @@ public class StringUtil {
     }
 
     /**
+     *
+     * Returns true if the input string contains the specified value
+     *
+     * @param  value                  String to be checked
+     * @param  containsValue          String to look for
+     * @return true if String contains the value
+     * @deprecated use {@link StringUtils#contains(CharSequence, CharSequence)} instead
+     */
+    @Deprecated
+    public static boolean contains(String value, String containsValue) {
+        return StringUtils.contains(value, containsValue);
+    }
+
+    /**
      * Returns true if the input string is the empty string (null-safe).
      *
      * @param value String to be checked
      * @return true if String is null or empty
+     * @deprecated use {@link StringUtils#isEmpty(CharSequence)} instead
      */
+    @Deprecated
     public static boolean isEmpty(String value) {
-        return (value == null) || value.isEmpty();
+        return StringUtils.isEmpty(value);
     }
 
     /**
@@ -650,9 +649,11 @@ public class StringUtil {
      *
      * @param value String to be checked
      * @return true if string is not null and not empty (length > 0)
+     * @deprecated use {@link StringUtils#isNotEmpty(CharSequence)} instead
      */
+    @Deprecated
     public static boolean isNotEmpty(String value) {
-        return !isEmpty(value);
+        return StringUtils.isNotEmpty(value);
     }
 
     /**
@@ -662,13 +663,25 @@ public class StringUtil {
      * @param startsWith the prefix to check for
      * @return <code>true</code> if <code>value</code> starts with <code>startsWith</code>, <code>false</code> otherwise.
      * Returns <code>false</code> if either argument is <code>null</code>.
+     * @deprecated use {@link StringUtils#startsWith(CharSequence, CharSequence)} instead
      */
+    @Deprecated
     public static boolean startsWith(String value, String startsWith) {
-        if ((value == null) || (startsWith == null)) {
-            return false;
-        }
+        return StringUtils.startsWith(value, startsWith);
+    }
 
-        return value.startsWith(startsWith);
+    /**
+     * Checks whether the given <code>value</code> ends with the specified <code>endsWith</code> string.
+     *
+     * @param value      the string to check
+     * @param endsWith   the prefix to check for
+     * @return <code>true</code> if <code>value</code> ends with <code>endsWith</code>, <code>false</code> otherwise.
+     * Returns <code>false</code> if either argument is <code>null</code>.
+     * @deprecated use {@link StringUtils#endsWith(CharSequence, CharSequence)} instead
+     */
+    @Deprecated
+    public static boolean endsWith(String value, String endsWith) {
+        return StringUtils.endsWith(value, endsWith);
     }
 
     /**
@@ -681,7 +694,7 @@ public class StringUtil {
         if (string == null) {
             return true;
         }
-        return StringUtil.trimToNull(string.toString()) == null;
+        return StringUtils.isWhitespace(string);
     }
 
     /**
@@ -726,18 +739,25 @@ public class StringUtil {
     }
 
     /**
-     * Produce a random identifer of the given length, consisting only of uppercase letters.
+     * Produce a random identifier of the given length, consisting only of uppercase letters.
+     *
+     * @param len desired length of the string
+     * @return an identifier of the desired length
+     * @deprecated use {@link #randomIdentifier}
+     */
+    @Deprecated
+    public static String randomIdentifer(int len) {
+        return randomIdentifier(len);
+    }
+
+    /**
+     * Produce a random identifier of the given length, consisting only of uppercase letters.
      *
      * @param len desired length of the string
      * @return an identifier of the desired length
      */
-    public static String randomIdentifer(int len) {
-        final String AB = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
-
-        StringBuilder sb = new StringBuilder(len);
-        for (int i = 0; i < len; i++)
-            sb.append(AB.charAt(rnd.nextInt(AB.length())));
-        return sb.toString();
+    public static String randomIdentifier(int len) {
+        return RandomStringUtils.random(len, true, false);
     }
 
     /**
@@ -866,13 +886,8 @@ public class StringUtil {
         String clean2 = trimToNull(s2);
         if (clean1 == null && clean2 == null) {
             return true;
-        } else {
-            // Both cannot be null at this point
-            if (clean1 == null || clean2 == null) {
-                return false;
-            }
         }
-        return clean1.equalsIgnoreCase(clean2);
+        return StringUtils.equalsIgnoreCase(s1, s2);
     }
 
     /**
@@ -904,8 +919,7 @@ public class StringUtil {
         if (isEmpty(sqlString) || sqlString.length() < 4) {
             return null;
         }
-        StringBuilder reversedSqlStringBuilder = new StringBuilder(sqlString).reverse();
-        String reversedString = reversedSqlStringBuilder.toString();
+        String reversedString = StringUtils.reverse(sqlString);
         int idxClosingLastChar = -1, idxOpeningFirstChar = -1;
         for (int i = 0; i < reversedString.length(); i++) {
             if (idxClosingLastChar < 0) {
@@ -1058,42 +1072,14 @@ public class StringUtil {
 
     /**
      * <p>Splits a camel-case string into words based on the came casing.
-     * <p>
-     * This code originated from the StringUtils class of <a href="https://github.com/apache/commons-lang">commons-lang</a>
      *
      * @param str the String to split, may be {@code null}
      * @return an array of parsed Strings, {@code null} if null String input
+     * @deprecated use {@link StringUtils#splitByCharacterTypeCamelCase(String)} instead
      */
+    @Deprecated
     public static String[] splitCamelCase(final String str) {
-        if (str == null) {
-            return null;
-        }
-        if (str.isEmpty()) {
-            return new String[0];
-        }
-        final char[] c = str.toCharArray();
-        final List<String> list = new ArrayList<>();
-        int tokenStart = 0;
-        int currentType = Character.getType(c[tokenStart]);
-        for (int pos = tokenStart + 1; pos < c.length; pos++) {
-            final int type = Character.getType(c[pos]);
-            if (type == currentType) {
-                continue;
-            }
-            if (type == Character.LOWERCASE_LETTER && currentType == Character.UPPERCASE_LETTER) {
-                final int newTokenStart = pos - 1;
-                if (newTokenStart != tokenStart) {
-                    list.add(new String(c, tokenStart, newTokenStart - tokenStart));
-                    tokenStart = newTokenStart;
-                }
-            } else {
-                list.add(new String(c, tokenStart, pos - tokenStart));
-                tokenStart = pos;
-            }
-            currentType = type;
-        }
-        list.add(new String(c, tokenStart, c.length - tokenStart));
-        return list.toArray(new String[0]);
+        return StringUtils.splitByCharacterTypeCamelCase(str);
     }
 
     public static byte[] getBytesWithEncoding(String string) {
@@ -1117,40 +1103,49 @@ public class StringUtil {
     /**
      * @param value string to process
      * @return string without any whitespaces formatted to lowercase.
+     * @deprecated use {@link StringUtils#toRootLowerCase(String)} and {@link StringUtils#deleteWhitespace(String)} instead
      */
+    @Deprecated
     public static String toLowerWithoutWhitespaces(String value) {
-        if (value == null) {
-            return null;
-        }
-        return value.toLowerCase().replaceAll("\\s+", "");
+        return StringUtils.toRootLowerCase(StringUtils.deleteWhitespace(value));
     }
 
     /**
      * <p>Checks whether the char sequence is numeric by checking that all chars in the sequence are
      * numbers, so (-1, 1.0 and 1F) will return false
-     * <p>
-     * This code originated from the StringUtils class of <a href="https://github.com/apache/commons-lang">commons-lang</a>
      *
      * @param cs the arg to check if it is numeric
      * @return true if convertible to numeric and false otherwise
+     * @deprecated use {@link StringUtils#isNumeric(CharSequence)} instead
      */
+    @Deprecated
     public static boolean isNumeric(CharSequence cs) {
-        if (isEmpty(cs)) {
-            return false;
-        } else {
-            int sz = cs.length();
-
-            for (int i = 0; i < sz; ++i) {
-                if (!Character.isDigit(cs.charAt(i))) {
-                    return false;
-                }
-            }
-
-            return true;
-        }
+        return StringUtils.isNumeric(cs);
     }
 
+    /**
+     * @deprecated use {@link StringUtils#isEmpty(CharSequence)}
+     */
+    @Deprecated
     public static boolean isEmpty(CharSequence cs) {
-        return cs == null || cs.length() == 0;
+        return StringUtils.isEmpty(cs);
+    }
+
+    /**
+     * Split the input string into chunks no larger than the supplied chunkSize. If the string is shorter than the
+     * chunkSize, the resultant list will contain only a single entry.
+     */
+    public static List<String> splitToChunks(String input, int chunkSize) {
+        int length = input.length();
+        if (length < chunkSize) {
+            return Collections.singletonList(input);
+        }
+        List<String> chunks = new ArrayList<>((length / chunkSize) + 1);
+        for (int i = 0; i < length; i += chunkSize) {
+            int end = Math.min(i + chunkSize, length);
+            String chunk = input.substring(i, end);
+            chunks.add(chunk);
+        }
+        return chunks;
     }
 }

@@ -19,7 +19,7 @@ jobs:
     steps:
       - name: Collect Data
         id: collect-data
-        uses: actions/github-script@v6
+        uses: actions/github-script@v7
         with:
           script: |
             let tag;
@@ -55,11 +55,11 @@ jobs:
 
   deploy_maven:
     name: Deploy to Maven
-    needs: [ setup, manual_trigger_deployment ]
+    needs: [ setup, manual_trigger_deployment, deploy_javadocs, publish_to_github_packages, deploy_xsd, release-docker ]
     runs-on: ubuntu-22.04
     steps:
       - name: Download release assets
-        uses: robinraju/release-downloader@v1.8
+        uses: robinraju/release-downloader@v1.10
         with:
           repository: "liquibase/liquibase"
           tag: "${{ needs.setup.outputs.tag }}"
@@ -67,7 +67,7 @@ jobs:
           out-file-path: "."
 
       - name: Set up Java for publishing to Maven Central Repository
-        uses: actions/setup-java@v3
+        uses: actions/setup-java@v4
         with:
           java-version: '11'
           distribution: 'adopt'
@@ -206,7 +206,7 @@ jobs:
 
   deploy_javadocs:
     name: Upload Javadocs
-    needs: [ setup ]
+    needs: [ setup, manual_trigger_deployment ]
     runs-on: ubuntu-22.04
     # These permissions are needed to interact with GitHub's OIDC Token endpoint.
     permissions:
@@ -214,7 +214,7 @@ jobs:
       contents: read
     steps:
       - name: Download release javadocs
-        uses: robinraju/release-downloader@v1.8
+        uses: robinraju/release-downloader@v1.10
         with:
           repository: "liquibase/liquibase"
           tag: "${{ needs.setup.outputs.tag }}"
@@ -243,7 +243,7 @@ jobs:
   publish_to_github_packages:
     name: Publish artifacts to Github Packages
     runs-on: ubuntu-22.04
-    needs: [ setup ]
+    needs: [ setup, manual_trigger_deployment ]
     permissions:
       contents: read
       packages: write
@@ -251,14 +251,14 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - name: Set up Java for publishing to GitHub Repository
-        uses: actions/setup-java@v3
+        uses: actions/setup-java@v4
         with:
           java-version: '17'
           distribution: 'temurin'
           cache: 'maven'
           server-id: liquibase
       - name: Set up Maven
-        uses: stCarolas/setup-maven@v4.5
+        uses: stCarolas/setup-maven@v5
         with:
           maven-version: ${{ env.MAVEN_VERSION }}
 
@@ -274,7 +274,7 @@ jobs:
 
   deploy_xsd:
     name: Upload xsds
-    needs: [ setup ]
+    needs: [ setup, manual_trigger_deployment]
     runs-on: ubuntu-22.04
     outputs:
       tag: ${{ steps.collect-data.outputs.tag }}
@@ -290,6 +290,7 @@ jobs:
       - name: Download liquibase-pro xsd
         uses: actions/checkout@v4
         with:
+          ref: release
           token: ${{ secrets.BOT_TOKEN }}
           # Relative path under $GITHUB_WORKSPACE to place the repository
           path: liquibase-pro-repo
@@ -373,11 +374,11 @@ jobs:
 
   release-docker:
     name: Release docker images
-    needs: [ setup ]
+    needs: [ setup, manual_trigger_deployment ]
     runs-on: ubuntu-22.04
     steps:
       - name: Release liquibase/docker v${{ needs.setup.outputs.version }}
-        uses: actions/github-script@v6
+        uses: actions/github-script@v7
         with:
           github-token: ${{ secrets.BOT_TOKEN }}
           script: |
@@ -392,8 +393,21 @@ jobs:
                 }
              });
 
-  package-linux:
-    uses: liquibase/build-logic/.github/workflows/package-linux.yml@v0.5.8
+
+  generate-PRO-tag:
+    name: Generate PRO tags based on OSS release
+    needs: [ setup ]
+    runs-on: ubuntu-22.04
+    steps:
+      - name: Repository Dispatch
+        uses: peter-evans/repository-dispatch@v3
+        with:
+          token: ${{ secrets.LIQUIBOT_PAT_GPM_ACCESS }}
+          repository: liquibase/liquibase-pro
+          event-type: oss-released-tag
+
+  package:
+    uses: liquibase/build-logic/.github/workflows/package.yml@v0.7.7
     needs: [ setup ]
     secrets: inherit
     with:

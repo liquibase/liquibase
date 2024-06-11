@@ -9,6 +9,7 @@ import liquibase.diff.compare.CompareControl;
 import liquibase.diff.compare.DatabaseObjectCollectionComparator;
 import liquibase.exception.DatabaseException;
 import liquibase.structure.DatabaseObject;
+import liquibase.structure.core.Catalog;
 import liquibase.structure.core.Schema;
 import liquibase.util.StringUtil;
 
@@ -41,12 +42,12 @@ public class DiffToReport {
                 Database referenceDatabase = diffResult.getReferenceSnapshot().getDatabase();
                 Database comparisonDatabase = diffResult.getComparisonSnapshot().getDatabase();
 
-                if (referenceDatabase.supportsSchemas()) {
+                if (referenceDatabase.supports(Schema.class)) {
                     referenceName = obj.getReferenceSchema().getSchemaName();
                     if (referenceName == null) {
                         referenceName = referenceDatabase.getDefaultSchemaName();
                     }
-                } else if (referenceDatabase.supportsCatalogs()) {
+                } else if (referenceDatabase.supports(Catalog.class)) {
                     referenceName = obj.getReferenceSchema().getCatalogName();
                     if (referenceName == null) {
                         referenceName = referenceDatabase.getDefaultCatalogName();
@@ -55,12 +56,12 @@ public class DiffToReport {
                     return "";
                 }
 
-                if (comparisonDatabase.supportsSchemas()) {
+                if (comparisonDatabase.supports(Schema.class)) {
                     comparisonName = obj.getComparisonSchema().getSchemaName();
                     if (comparisonName == null) {
                         comparisonName = comparisonDatabase.getDefaultSchemaName();
                     }
-                } else if (comparisonDatabase.supportsCatalogs()) {
+                } else if (comparisonDatabase.supports(Catalog.class)) {
                     comparisonName = obj.getComparisonSchema().getCatalogName();
                     if (comparisonName == null) {
                         comparisonName = comparisonDatabase.getDefaultCatalogName();
@@ -92,7 +93,7 @@ public class DiffToReport {
         TreeSet<Class<? extends DatabaseObject>> types = new TreeSet<>(Comparator.comparing(Class::getSimpleName));
         types.addAll(diffResult.getCompareControl().getComparedTypes());
         for (Class<? extends DatabaseObject> type : types) {
-            if (type.equals(Schema.class) && !diffResult.getComparisonSnapshot().getDatabase().supportsSchemas()) {
+            if (type.equals(Schema.class) && !diffResult.getComparisonSnapshot().getDatabase().supports(Schema.class)) {
                 continue;
             }
             printSetComparison("Missing " + getTypeName(type), diffResult.getMissingObjects(type, comparator), out);
@@ -208,12 +209,12 @@ public class DiffToReport {
                     Database referenceDatabase = diffResult.getReferenceSnapshot().getDatabase();
                     Database comparisonDatabase = diffResult.getComparisonSnapshot().getDatabase();
 
-                    if (referenceDatabase.supportsSchemas()) {
+                    if (referenceDatabase.supports(Schema.class)) {
                         referenceName = obj.getReferenceSchema().getSchemaName();
                         if (referenceName == null) {
                             referenceName = referenceDatabase.getDefaultSchemaName();
                         }
-                    } else if (referenceDatabase.supportsCatalogs()) {
+                    } else if (referenceDatabase.supports(Catalog.class)) {
                         referenceName = obj.getReferenceSchema().getCatalogName();
                         if (referenceName == null) {
                             referenceName = referenceDatabase.getDefaultCatalogName();
@@ -222,12 +223,12 @@ public class DiffToReport {
                         return "";
                     }
 
-                    if (comparisonDatabase.supportsSchemas()) {
+                    if (comparisonDatabase.supports(Schema.class)) {
                         comparisonName = obj.getComparisonSchema().getSchemaName();
                         if (comparisonName == null) {
                             comparisonName = comparisonDatabase.getDefaultSchemaName();
                         }
-                    } else if (comparisonDatabase.supportsCatalogs()) {
+                    } else if (comparisonDatabase.supports(Catalog.class)) {
                         comparisonName = obj.getComparisonSchema().getCatalogName();
                         if (comparisonName == null) {
                             comparisonName = comparisonDatabase.getDefaultCatalogName();

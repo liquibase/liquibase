@@ -9,7 +9,9 @@ import liquibase.serializer.SnapshotSerializerFactory;
 import liquibase.snapshot.DatabaseSnapshot;
 import liquibase.snapshot.SnapshotControl;
 import liquibase.snapshot.SnapshotGeneratorFactory;
+import liquibase.structure.DatabaseObject;
 import liquibase.util.StringUtil;
+import lombok.Getter;
 
 import java.io.IOException;
 import java.io.OutputStream;
@@ -17,6 +19,7 @@ import java.io.OutputStreamWriter;
 import java.io.Writer;
 import java.util.*;
 
+@Getter
 public class SnapshotCommandStep extends AbstractCommandStep {
 
     public static final String[] COMMAND_NAME = {"snapshot"};
@@ -50,43 +53,17 @@ public class SnapshotCommandStep extends AbstractCommandStep {
         commandDefinition.setShortDescription("Capture the current state of the database");
     }
 
-    private CatalogAndSchema[] parseSchemas(Database database, String... schemas) {
-        if ((schemas == null) || (schemas.length == 0) || (schemas[0] == null)) {
-            return null;
-        }
-
-        schemas = StringUtil.join(schemas, ",").split("\\s*,\\s*");
-        List<CatalogAndSchema> finalList = new ArrayList<>();
-        for (String schema : schemas) {
-            finalList.add(new CatalogAndSchema(null, schema).customize(database));
-        }
-
-        return finalList.toArray(new CatalogAndSchema[0]);
-    }
-
-    public Map<String, Object> getSnapshotMetadata() {
-        return snapshotMetadata;
-    }
-
-    public void setSnapshotMetadata(Map<String, Object> snapshotMetadata) {
-        this.snapshotMetadata = snapshotMetadata;
-    }
-
     @Override
     public void run(CommandResultsBuilder resultsBuilder) throws Exception {
         CommandScope commandScope = resultsBuilder.getCommandScope();
 
         Database database = (Database) commandScope.getDependency(Database.class);
 
-        CatalogAndSchema[] schemas = parseSchemas(database, commandScope.getArgumentValue(SCHEMAS_ARG));
+        CatalogAndSchema[] schemas = InternalSnapshotCommandStep.parseSchemas(database, commandScope.getArgumentValue(SCHEMAS_ARG));
 
         InternalSnapshotCommandStep.logUnsupportedDatabase(database, this.getClass());
         SnapshotControl snapshotControl;
-        if (commandScope.getArgumentValue(SNAPSHOT_CONTROL_ARG) == null) {
-            snapshotControl = new SnapshotControl(database);
-        } else {
-            snapshotControl = commandScope.getArgumentValue(SnapshotCommandStep.SNAPSHOT_CONTROL_ARG);
-        }
+        snapshotControl = createSnapshotControl(commandScope, database);
 
         if (schemas == null) {
             schemas = new CatalogAndSchema[]{database.getDefaultSchema()};
@@ -117,6 +94,16 @@ public class SnapshotCommandStep extends AbstractCommandStep {
             //
             database.setObjectQuotingStrategy(originalQuotingStrategy);
         }
+    }
+
+    protected SnapshotControl createSnapshotControl(CommandScope commandScope, Database database) {
+        SnapshotControl snapshotControl;
+        if (commandScope.getArgumentValue(SNAPSHOT_CONTROL_ARG) == null) {
+            snapshotControl = new SnapshotControl(database);
+        } else {
+            snapshotControl = commandScope.getArgumentValue(SnapshotCommandStep.SNAPSHOT_CONTROL_ARG);
+        }
+        return snapshotControl;
     }
 
     private Writer getOutputWriter(final OutputStream outputStream) throws IOException {

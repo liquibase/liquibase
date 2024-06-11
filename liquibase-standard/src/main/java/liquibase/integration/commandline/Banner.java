@@ -4,17 +4,21 @@ import liquibase.GlobalConfiguration;
 import liquibase.Scope;
 import liquibase.util.LiquibaseUtil;
 import liquibase.util.StringUtil;
+import lombok.Getter;
+import lombok.Setter;
+import org.apache.commons.io.IOUtils;
 
-import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.InputStreamReader;
+import java.nio.charset.StandardCharsets;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.ResourceBundle;
 
 import static java.util.ResourceBundle.getBundle;
 
+@Getter
+@Setter
 public class Banner {
     private String version;
     private String build;
@@ -38,7 +42,7 @@ public class Banner {
             Class<CommandLineUtils> commandLinUtilsClass = CommandLineUtils.class;
             InputStream inputStream = commandLinUtilsClass.getResourceAsStream("/liquibase/banner.txt");
             try {
-                banner.append(readFromInputStream(inputStream));
+                banner.append(IOUtils.toString(inputStream, StandardCharsets.UTF_8));
             } catch (IOException e) {
                 Scope.getCurrentScope().getLog(commandLinUtilsClass).fine("Unable to locate banner file.");
             }
@@ -57,65 +61,5 @@ public class Banner {
         }
 
         return banner.toString();
-    }
-
-    private static String readFromInputStream(InputStream inputStream) throws IOException {
-        StringBuilder resultStringBuilder = new StringBuilder();
-        try (BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(inputStream))) {
-            String line;
-            while ((line = bufferedReader.readLine()) != null) {
-                resultStringBuilder.append(line + "\n");
-
-            }
-        }
-        return resultStringBuilder.toString();
-    }
-
-    public String getVersion() {
-        return version;
-    }
-
-    public void setVersion(String version) {
-        this.version = version;
-    }
-
-    public String getBuild() {
-        return build;
-    }
-
-    public void setBuild(String build) {
-        this.build = build;
-    }
-
-    public String getBuilt() {
-        return built;
-    }
-
-    public void setBuilt(String built) {
-        this.built = built;
-    }
-
-    public String getPath() {
-        return path;
-    }
-
-    public void setPath(String path) {
-        this.path = path;
-    }
-
-    public String getLicensee() {
-        return licensee;
-    }
-
-    public void setLicensee(String licensee) {
-        this.licensee = licensee;
-    }
-
-    public String getLicenseEndDate() {
-        return licenseEndDate;
-    }
-
-    public void setLicenseEndDate(String licenseEndDate) {
-        this.licenseEndDate = licenseEndDate;
     }
 }

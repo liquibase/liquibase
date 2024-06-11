@@ -21,6 +21,7 @@ import liquibase.logging.mdc.MdcKey;
 import liquibase.logging.mdc.MdcObject;
 import liquibase.logging.mdc.MdcValue;
 import liquibase.logging.mdc.customobjects.ChangesetsRolledback;
+import liquibase.logging.mdc.customobjects.ExceptionDetails;
 import liquibase.report.RollbackReportParameters;
 import liquibase.resource.Resource;
 import liquibase.util.StreamUtil;
@@ -28,10 +29,8 @@ import liquibase.util.StringUtil;
 
 import java.io.IOException;
 import java.io.InputStream;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
+import java.util.stream.Collectors;
 
 /**
  * AbstractRollbackCommandStep provides the common operations to all the rollback* commands.
@@ -128,13 +127,33 @@ public abstract class AbstractRollbackCommandStep extends AbstractCommandStep {
                     rollbackReportParameters.getOperationInfo().setOperationOutcome(MdcValue.COMMAND_SUCCESSFUL);
                 }
             }
+        } catch (Exception exception) {
+            if (rollbackReportParameters != null) {
+                rollbackReportParameters.setSuccess(false);
+                String source = ExceptionDetails.findSource(database);
+                ExceptionDetails exceptionDetails = new ExceptionDetails(exception, source);
+                rollbackReportParameters.setRollbackException(exceptionDetails);
+                // Rethrow the exception to be handled by child classes.
+                throw exception;
+            }
         } finally {
             if (rollbackReportParameters != null && changeExecListener instanceof DefaultChangeExecListener) {
-                List<ChangeSet> failedChangeSets = ((DefaultChangeExecListener) changeExecListener).getFailedRollbackChangeSets();
-                List<ChangeSet> rolledBackChangeSets = ((DefaultChangeExecListener) changeExecListener).getRolledBackChangeSets();
+                DefaultChangeExecListener defaultListener = (DefaultChangeExecListener) changeExecListener;
+                List<ChangeSet> failedChangeSets = defaultListener.getFailedRollbackChangeSets();
+                List<ChangeSet> rolledBackChangeSets = defaultListener.getRolledBackChangeSets();
+                List<ChangeSet> pendingChangeSets = logIterator.getSkippedDueToExceptionChangeSets();
+                Map<ChangeSet, String> pendingChangeSetMap = new HashMap<>();
+                pendingChangeSets.forEach(changeSet -> pendingChangeSetMap.put(changeSet, "Unexpected error running Liquibase."));
                 rollbackReportParameters.getChangesetInfo().setChangesetCount(failedChangeSets.size() + rolledBackChangeSets.size());
                 rollbackReportParameters.getChangesetInfo().addAllToChangesetInfoList(rolledBackChangeSets, true);
                 rollbackReportParameters.getChangesetInfo().addAllToChangesetInfoList(failedChangeSets, true);
+                rollbackReportParameters.getChangesetInfo().setFailedChangesetCount(failedChangeSets.size());
+                rollbackReportParameters.getChangesetInfo().addAllToPendingChangesetInfoList(pendingChangeSetMap);
+                rollbackReportParameters.getChangesetInfo().setPendingChangesetCount(pendingChangeSetMap.size());
+                rollbackReportParameters.setFailedChangeset(failedChangeSets.stream().map(ChangeSet::toString).collect(Collectors.joining(", ")));
+                // Now that the command is completed reset the generated sql in case we are running these changes in some chain
+                // like during update-testing-rollback
+                rolledBackChangeSets.forEach(changeSet -> changeSet.setGeneratedSql(new ArrayList<>()));
             }
         }
     }
@@ -243,6 +262,7 @@ public abstract class AbstractRollbackCommandStep extends AbstractCommandStep {
             Scope.getCurrentScope().getLog(AbstractRollbackCommandStep.class).info(operationName + " command encountered an exception.");
             if (rollbackReportParameters != null) {
                 rollbackReportParameters.getOperationInfo().setOperationOutcome(MdcValue.COMMAND_FAILED);
+                rollbackReportParameters.setSuccess(false);
             }
         }
     }

@@ -108,16 +108,9 @@
         </dependency>
 
         <dependency>
-            <groupId>com.github.stefanbirkner</groupId>
-            <artifactId>system-rules</artifactId>
-            <version>1.19.0</version>
-            <scope>test</scope>
-        </dependency>
-
-        <dependency>
             <groupId>org.junit.jupiter</groupId>
             <artifactId>junit-jupiter</artifactId>
-            <version>5.10.1</version>
+            <version>5.10.2</version>
             <scope>test</scope>
         </dependency>
 
@@ -155,8 +148,13 @@
         <dependency>
             <groupId>org.projectlombok</groupId>
             <artifactId>lombok</artifactId>
-            <version>1.18.30</version>
+            <version>1.18.32</version>
             <scope>provided</scope>
+        </dependency>
+        <dependency>
+            <groupId>commons-io</groupId>
+            <artifactId>commons-io</artifactId>
+            <version>${commons-io.version}</version>
         </dependency>
     </dependencies>
 
@@ -248,7 +246,8 @@
                             osgi.serviceloader; osgi.serviceloader=liquibase.logging.mdc.CustomMdcObject,
                             osgi.serviceloader; osgi.serviceloader=liquibase.resource.PathHandler,
                             osgi.serviceloader; osgi.serviceloader=liquibase.report.ShowSummaryGenerator,
-                            osgi.serviceloader; osgi.serviceloader=liquibase.parser.LiquibaseSqlParser
+                            osgi.serviceloader; osgi.serviceloader=liquibase.parser.LiquibaseSqlParser,
+                            osgi.serviceloader; osgi.serviceloader=liquibase.changeset.ChangeSetService
                         </Provide-Capability>
                         <Require-Capability>
                             osgi.extender; filter:="(osgi.extender=osgi.serviceloader.registrar)",
@@ -284,7 +283,8 @@
                             osgi.serviceloader; filter:="(osgi.serviceloader=liquibase.logging.mdc.CustomMdcObject)"; cardinality:=multiple,
                             osgi.serviceloader; filter:="(osgi.serviceloader=liquibase.resource.PathHandler)"; cardinality:=multiple,
                             osgi.serviceloader; filter:="(osgi.serviceloader=liquibase.report.ShowSummaryGenerator)"; cardinality:=multiple,
-                            osgi.serviceloader; filter:="(osgi.serviceloader=liquibase.parser.LiquibaseSqlParser)"; cardinality:=multiple
+                            osgi.serviceloader; filter:="(osgi.serviceloader=liquibase.parser.LiquibaseSqlParser)"; cardinality:=multiple,
+                            osgi.serviceloader; filter:="(osgi.serviceloader=liquibase.changeset.ChangeSetService)"; cardinality:=multiple
                         </Require-Capability>
                     </instructions>
                 </configuration>
@@ -303,7 +303,7 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-jar-plugin</artifactId>
-                <version>3.3.0</version>
+                <version>3.4.1</version>
                 <executions>
                     <execution>
                         <id>default-jar</id>
@@ -346,6 +346,9 @@
                         <param>liquibase.report.ShowSummaryGenerator</param>
                         <param>liquibase.changeset.ChangeSetService</param>
                         <param>liquibase.parser.LiquibaseSqlParser</param>
+                        <param>liquibase.database.LiquibaseTableNames</param>
+                        <param>liquibase.changelog.visitor.ValidatingVisitorGenerator</param>
+                        <param>liquibase.io.OutputFileHandler</param>
                     </services>
                 </configuration>
                 <executions>

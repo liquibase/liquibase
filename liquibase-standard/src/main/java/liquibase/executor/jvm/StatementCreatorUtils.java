@@ -77,7 +77,7 @@ abstract class StatementCreatorUtils {
             if (sqlType == SqlTypeValue.TYPE_UNKNOWN) {
                 boolean useSetObject = false;
                 try {
-                    useSetObject = (ps.getConnection().getMetaData().getDatabaseProductName().indexOf("Informix") != -1);
+                    useSetObject = (ps.getConnection().getMetaData().getDatabaseProductName().contains("Informix"));
                 }
                 catch (Throwable ex) {
 //                    logger.debug("Could not check database product name", ex);

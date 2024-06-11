@@ -13,7 +13,7 @@ import liquibase.executor.ExecutorService;
 import liquibase.lockservice.LockService;
 import liquibase.resource.PathHandlerFactory;
 import liquibase.resource.Resource;
-import liquibase.statement.core.RawSqlStatement;
+import liquibase.statement.core.RawParameterizedSqlStatement;
 import liquibase.util.FileUtil;
 import liquibase.util.StreamUtil;
 import liquibase.util.StringUtil;
@@ -73,7 +73,7 @@ public class ExecuteSqlCommandStep extends AbstractCommandStep {
             if (sqlString.toLowerCase().matches("\\s*select .*")) {
                 out.append(handleSelect(sqlString, executor));
             } else {
-                executor.execute(new RawSqlStatement(sqlString));
+                executor.execute(new RawParameterizedSqlStatement(sqlString));
                 out.append("Successfully Executed: ").append(sqlString).append("\n");
             }
             out.append("\n");
@@ -84,7 +84,7 @@ public class ExecuteSqlCommandStep extends AbstractCommandStep {
         resultsBuilder.addResult("output", out.toString());
     }
 
-    private static String determineEndDelimiter(CommandScope commandScope) {
+    protected static String determineEndDelimiter(CommandScope commandScope) {
         String delimiter = commandScope.getArgumentValue(DELIMITER_ARG);
         if (delimiter == null) {
             ChangeSetService service = ChangeSetServiceFactory.getInstance().createChangeSetService();
@@ -93,14 +93,14 @@ public class ExecuteSqlCommandStep extends AbstractCommandStep {
         return delimiter;
     }
 
-    private void handleOutput(CommandResultsBuilder resultsBuilder, String output) throws IOException {
+    protected void handleOutput(CommandResultsBuilder resultsBuilder, String output) throws IOException {
         String charsetName = GlobalConfiguration.OUTPUT_FILE_ENCODING.getCurrentValue();
         Writer outputWriter = new OutputStreamWriter(resultsBuilder.getOutputStream(), charsetName);
         outputWriter.write(output);
         outputWriter.flush();
     }
 
-    private String getSqlScript(String sql, String sqlFile) throws IOException, LiquibaseException {
+    protected String getSqlScript(String sql, String sqlFile) throws IOException, LiquibaseException {
         if (sqlFile == null) {
             return sql;
         } else {
@@ -115,7 +115,7 @@ public class ExecuteSqlCommandStep extends AbstractCommandStep {
 
     private String handleSelect(String sqlString, Executor executor) throws DatabaseException {
         StringBuilder out = new StringBuilder();
-        List<Map<String, ?>> rows = executor.queryForList(new RawSqlStatement(sqlString));
+        List<Map<String, ?>> rows = executor.queryForList(new RawParameterizedSqlStatement(sqlString));
         out.append("Output of ").append(sqlString).append(":\n");
         if (rows.isEmpty()) {
             out.append("-- Empty Resultset --\n");
