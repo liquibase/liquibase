@@ -20,6 +20,12 @@ jobs:
   test-harness-build:
     runs-on: ubuntu-latest
     steps:
+      - name: Check runTestHarnessTests label
+        if: "!contains(github.event.pull_request.labels.*.name, 'runTestHarnessTests')"
+        run: |
+          echo "Add the runTestHarnessTests label to the PR to trigger the Test Harness Tests workflow."
+          exit 1
+
       - uses: actions/checkout@v4
         with:
           ref: ${{ github.event.pull_request.head.sha || github.event.after}} #sets the Git reference (commit or branch) to be checked out in the workflow
@@ -30,12 +36,6 @@ jobs:
     name: Trigger Test Harness Tests
     steps:
       - uses: actions/checkout@v4
-
-      - name: Check runTestHarnessTests label
-        if: "!contains(github.event.pull_request.labels.*.name, 'runTestHarnessTests')"
-        run: |
-          echo "Add the runTestHarnessTests label to the PR to trigger the Test Harness Tests workflow."
-          exit 1
 
       - name: Get OSS Workflow Run URL
         id: get-workflow-url
