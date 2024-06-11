@@ -24,8 +24,13 @@ jobs:
         with:
           ref: ${{ github.event.pull_request.head.sha || github.event.after}} #sets the Git reference (commit or branch) to be checked out in the workflow
 
+      - name: Check runTestHarnessTests label
+        if: github.event.label.name != 'runTestHarnessTests'
+        run: |
+          echo "Add the runTestHarnessTests label to the PR to trigger the Test Harness Tests workflow."
+          exit 1
+          
   run-test-harness-tests:
-    if: ${{ contains(github.event.pull_request.labels.*.name, 'runTestHarnessTests') }}
     runs-on: ubuntu-latest
     needs: [ test-harness-build ]
     name: Trigger Test Harness Tests

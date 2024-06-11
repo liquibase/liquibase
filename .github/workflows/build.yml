@@ -331,7 +331,6 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
   run-functional-tests:
-    if: ${{ contains(github.event.pull_request.labels.*.name, 'runFunctionalTests') }}
     needs: [ setup, build_publish_branch ]
     uses: liquibase/liquibase/.github/workflows/run-functional-tests.yml@master
     secrets: inherit
@@ -340,7 +339,6 @@ jobs:
       thisBranchName: ${{ needs.setup.outputs.unmodifiedBranchName }}
 
   run-tests-harness:
-    if: ${{ contains(github.event.pull_request.labels.*.name, 'runTestHarnessTests') }}
     needs: [ setup,build_publish_branch ]
     uses: liquibase/liquibase/.github/workflows/run-test-harness.yml@master
     secrets: inherit
