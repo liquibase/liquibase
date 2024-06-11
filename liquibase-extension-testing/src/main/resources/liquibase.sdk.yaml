@@ -31,7 +31,7 @@ liquibase:
 
       db2:
         imageName: icr.io/db2_community/db2
-        version: 11.5.7.0a
+        version: 11.5.9.0
 
       h2:
         url: jdbc:h2:mem:${catalog};DB_CLOSE_DELAY=-1
