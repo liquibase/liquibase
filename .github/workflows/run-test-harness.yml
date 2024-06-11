@@ -32,7 +32,7 @@ jobs:
       - uses: actions/checkout@v4
 
       - name: Check runTestHarnessTests label
-        if: github.event.label.name != 'runTestHarnessTests'
+        if: contains(github.event.pull_request.labels.*.name, 'runTestHarnessTests')
         run: |
           echo "Add the runTestHarnessTests label to the PR to trigger the Test Harness Tests workflow."
           exit 1
