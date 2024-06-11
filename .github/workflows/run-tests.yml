@@ -310,7 +310,7 @@ jobs:
 
   sonar:
     needs: [ build_tests, integration-test ]
-    uses: liquibase/build-logic/.github/workflows/sonar-test-scan.yml@v0.7.7
+    uses: liquibase/build-logic/.github/workflows/sonar-test-scan.yml@v0.7.8
     with:
       thisBranchName: ${{ needs.setup.outputs.thisBranchName }}
       thisSha: ${{ needs.setup.outputs.thisSha }}
