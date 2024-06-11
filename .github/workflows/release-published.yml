@@ -194,6 +194,7 @@ jobs:
             else
                 echo "Relative path does not contain '/org/liquibase/ext/'. It is not an extension."
                 stagingRepositoryId=$repo_id
+                break
             fi
           done
 
