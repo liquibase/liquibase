@@ -18,7 +18,7 @@ import java.util.*;
 
 import static liquibase.sqlgenerator.core.CreateProcedureGenerator.splitSetStatementsOutForMssql;
 
-public class CreateViewGenerator extends AbstractSqlGenerator<CreateViewStatement> {
+public class CreateViewGenerator extends AbstractStoLoSqlGenerator<CreateViewStatement> {
 
     private static final Set<String> ORACLE_STATEMENT_DELIMITERS = Set.of(";", "/");
 
@@ -94,9 +94,7 @@ public class CreateViewGenerator extends AbstractSqlGenerator<CreateViewStatemen
                 CatalogAndSchema schema = new CatalogAndSchema(statement.getCatalogName(), statement.getSchemaName()).customize(database);
                 sql.add(new UnparsedSql("IF NOT EXISTS (SELECT * FROM sys.views WHERE object_id = OBJECT_ID(N'[" + schema.getSchemaName() + "].[" + statement.getViewName() + "]'))\n" +
                         "    EXEC sp_executesql N'CREATE VIEW [" + schema.getSchemaName() + "].[" + statement.getViewName() + "] AS SELECT ''This is a code stub which will be replaced by an Alter Statement'' as [code_stub]'"));
-                if (!CreateProcedureGenerator.isCreateOrAlterStatement(viewDefinition) && viewDefinition.contains("CREATE")) {
-                    viewDefinition.replace("CREATE", "ALTER");
-                }
+                replaceCreateByAlterIfNotCreateOrReplaceStatement(viewDefinition);
             } else if (database instanceof PostgresDatabase) {
                 sql.add(new UnparsedSql("DROP VIEW IF EXISTS " + database.escapeViewName(statement.getCatalogName(), statement.getSchemaName(), statement.getViewName())));
             } else {

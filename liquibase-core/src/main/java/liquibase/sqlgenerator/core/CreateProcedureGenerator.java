@@ -22,7 +22,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
-public class CreateProcedureGenerator extends AbstractSqlGenerator<CreateProcedureStatement> {
+public class CreateProcedureGenerator extends AbstractStoLoSqlGenerator<CreateProcedureStatement> {
 
     @Override
     public ValidationErrors validate(CreateProcedureStatement statement, Database database, SqlGeneratorChain sqlGeneratorChain) {
@@ -71,9 +71,7 @@ public class CreateProcedureGenerator extends AbstractSqlGenerator<CreateProcedu
             sql.add(new UnparsedSql("if object_id('" + fullyQualifiedName + "', 'p') is null exec ('create procedure " + fullyQualifiedName + " as select 1 a')"));
 
             StringClauses parsedProcedureDefinition = SqlParser.parse(procedureText, true, true);
-            if (!isCreateOrAlterStatement(parsedProcedureDefinition) && parsedProcedureDefinition.contains("CREATE")) {
-                parsedProcedureDefinition.replace("CREATE", "ALTER");
-            }
+            replaceCreateByAlterIfNotCreateOrReplaceStatement(parsedProcedureDefinition);
             procedureText = parsedProcedureDefinition.toString();
         }
 
@@ -234,19 +232,6 @@ public class CreateProcedureGenerator extends AbstractSqlGenerator<CreateProcedu
         mssqlSplitStatements.setSetStatementsAfter(afterStatements);
 
         return mssqlSplitStatements;
-    }
-
-    public static boolean isCreateOrAlterStatement(StringClauses definition) {
-        StringClauses.ClauseIterator procedureClauseIterator = definition.getClauseIterator();
-        Object next = "START";
-        while (next != null && !(next.toString().equalsIgnoreCase("create") || next.toString().equalsIgnoreCase("alter")) && procedureClauseIterator.hasNext()) {
-            next = procedureClauseIterator.nextNonWhitespace();
-            if ((procedureClauseIterator.hasNext() && procedureClauseIterator.nextNonWhitespace().toString().equalsIgnoreCase("or"))
-                    && (procedureClauseIterator.hasNext() && procedureClauseIterator.nextNonWhitespace().toString().equalsIgnoreCase("alter"))) {
-                return true;
-            }
-        }
-        return false;
     }
 
     private static Object splitOutIfSetStatement(Object next, StringClauses.ClauseIterator clauseIterator,

@@ -37,6 +37,7 @@ public class CreateViewGeneratorTest {
 
         CreateViewStatement statement =
                 new CreateViewStatement("", "dbo", "some_view", viewBody, true);
+        statement.setFullDefinition(true);
 
         Sql[] sqls = generator.generateSql(statement, new MSSQLDatabase(), new SqlGeneratorChain(new TreeSet<>()));
 
@@ -47,7 +48,7 @@ public class CreateViewGeneratorTest {
         assertEquals("SET ANSI_NULLS OFF", sqls[1].toSql());
         assertEquals("SET QUOTED_IDENTIFIER OFF", sqls[2].toSql());
         assertEquals(
-                "CREATE VIEW [dbo].[some_view] AS ALTER VIEW dbo.some_view \n" +
+                "ALTER VIEW dbo.some_view \n" +
                         "AS \n" +
                         "   SELECT LastName FROM dbo.Persons\n" +
                         ";",

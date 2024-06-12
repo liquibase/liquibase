@@ -6,12 +6,14 @@ import liquibase.sql.Sql
 import liquibase.sqlgenerator.SqlGeneratorChain
 import liquibase.statement.core.CreateViewStatement
 import spock.lang.Specification
+import spock.lang.Unroll
 
 class CreateViewGeneratorSpockTest extends Specification {
 
     private static final String DEFAULT_SET_ANSI_STATEMENT = "SET ANSI_NULLS ON"
     private static final String DEFAULT_SET_QUOTED_IDENTIFIER_STATEMENT = "SET QUOTED_IDENTIFIER ON"
 
+    @Unroll
     def "Verify CreateViewGenerator logic correctly generates create view sql statement based on given procedureText and replaceIfExists attributes for MSSQL"() {
         given:
         Database database = new MSSQLDatabase()

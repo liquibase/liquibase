@@ -1,9 +1,49 @@
 package liquibase.sqlgenerator.core
 
+import liquibase.database.Database
+import liquibase.database.core.MSSQLDatabase
+import liquibase.sql.Sql
+import liquibase.sqlgenerator.SqlGeneratorChain
+import liquibase.statement.core.CreateProcedureStatement
 import spock.lang.Specification
 import spock.lang.Unroll
 
 class CreateProcedureGeneratorTest extends Specification {
+
+    private static final String DEFAULT_SET_ANSI_STATEMENT = "SET ANSI_NULLS ON"
+    private static final String DEFAULT_SET_QUOTED_IDENTIFIER_STATEMENT = "SET QUOTED_IDENTIFIER ON"
+
+    @Unroll
+    def "Verify CreateProcedureGenerator logic correctly generates create procedure sql statement based on given procedureText and replaceIfExists attributes for MSSQL"() {
+        given:
+        Database database = new MSSQLDatabase()
+        SqlGeneratorChain chain = new SqlGeneratorChain(new TreeSet<>())
+        CreateProcedureGenerator generator = new CreateProcedureGenerator()
+        CreateProcedureStatement statement = new CreateProcedureStatement(null, schemaName, procedureName, procedureText, ";")
+        statement.setReplaceIfExists(reaplceIfExists)
+
+        when:
+        Sql[] generatedSql = generator.generateSql(statement, database, chain)
+
+        then:
+        generatedSql.size() == expectedSql.size()
+        generatedSql.collect { it.toSql() } == expectedSql
+
+        where:
+        procedureText                                                                                                                         | schemaName | procedureName       | reaplceIfExists | expectedSql
+        "CREATE PROCEDURE [dbo].[procedure_1]"                                                                                                | "dbo"      | "procedure_1"       | true            | ["if object_id('[dbo].[procedure_1]', 'p') is null exec ('create procedure [dbo].[procedure_1] as select 1 a')", "ALTER PROCEDURE [dbo].[procedure_1]", DEFAULT_SET_ANSI_STATEMENT, DEFAULT_SET_QUOTED_IDENTIFIER_STATEMENT]
+        "CREATE PROCEDURE [dbo].[procedure_1] AS CREATE OR ALTER PROCEDURE dbo.inner_procedure"                                               | "dbo"      | "procedure_1"       | true            | ["if object_id('[dbo].[procedure_1]', 'p') is null exec ('create procedure [dbo].[procedure_1] as select 1 a')", "ALTER PROCEDURE [dbo].[procedure_1] AS CREATE OR ALTER PROCEDURE dbo.inner_procedure", DEFAULT_SET_ANSI_STATEMENT, DEFAULT_SET_QUOTED_IDENTIFIER_STATEMENT]
+        "CREATE PROCEDURE [dbo].[procedure_1] AS CREATE PROCEDURE dbo.inner_procedure"                                                        | "dbo"      | "procedure_1"       | true            | ["if object_id('[dbo].[procedure_1]', 'p') is null exec ('create procedure [dbo].[procedure_1] as select 1 a')", "ALTER PROCEDURE [dbo].[procedure_1] AS CREATE PROCEDURE dbo.inner_procedure", DEFAULT_SET_ANSI_STATEMENT, DEFAULT_SET_QUOTED_IDENTIFIER_STATEMENT]
+        "CREATE PROCEDURE [dbo].[procedure_1]"                                                                                                | "dbo"      | "procedure_1"       | false           | ["CREATE PROCEDURE [dbo].[procedure_1]", DEFAULT_SET_ANSI_STATEMENT, DEFAULT_SET_QUOTED_IDENTIFIER_STATEMENT]
+        "CREATE OR ALTER PROCEDURE [dbo].[procedure_1]"                                                                                       | "dbo"      | "procedure_1"       | true            | ["if object_id('[dbo].[procedure_1]', 'p') is null exec ('create procedure [dbo].[procedure_1] as select 1 a')", "CREATE OR ALTER PROCEDURE [dbo].[procedure_1]", DEFAULT_SET_ANSI_STATEMENT, DEFAULT_SET_QUOTED_IDENTIFIER_STATEMENT]
+        "CREATE OR ALTER PROCEDURE [dbo].[procedure_1] AS CREATE OR ALTER PROCEDURE dbo.inner_procedure"                                      | "dbo"      | "procedure_1"       | true            | ["if object_id('[dbo].[procedure_1]', 'p') is null exec ('create procedure [dbo].[procedure_1] as select 1 a')", "CREATE OR ALTER PROCEDURE [dbo].[procedure_1] AS CREATE OR ALTER PROCEDURE dbo.inner_procedure", DEFAULT_SET_ANSI_STATEMENT, DEFAULT_SET_QUOTED_IDENTIFIER_STATEMENT]
+        "CREATE OR ALTER PROCEDURE [dbo].[procedure_1] AS CREATE PROCEDURE dbo.inner_procedure"                                               | "dbo"      | "procedure_1"       | true            | ["if object_id('[dbo].[procedure_1]', 'p') is null exec ('create procedure [dbo].[procedure_1] as select 1 a')", "CREATE OR ALTER PROCEDURE [dbo].[procedure_1] AS CREATE PROCEDURE dbo.inner_procedure", DEFAULT_SET_ANSI_STATEMENT, DEFAULT_SET_QUOTED_IDENTIFIER_STATEMENT]
+        "CREATE OR ALTER PROCEDURE [dbo].[procedure_1]"                                                                                       | "dbo"      | "procedure_1"       | false           | ["CREATE OR ALTER PROCEDURE [dbo].[procedure_1]", DEFAULT_SET_ANSI_STATEMENT, DEFAULT_SET_QUOTED_IDENTIFIER_STATEMENT]
+        // We can deploy ALTER PROCEDURE ... statement using 'createProcedure' change type
+        "ALTER PROCEDURE [dbo].[procedure_1]"                                                                                                 | "dbo"      | "procedure_1"       | true            | ["if object_id('[dbo].[procedure_1]', 'p') is null exec ('create procedure [dbo].[procedure_1] as select 1 a')", "ALTER PROCEDURE [dbo].[procedure_1]", DEFAULT_SET_ANSI_STATEMENT, DEFAULT_SET_QUOTED_IDENTIFIER_STATEMENT]
+        "ALTER PROCEDURE [dbo].[procedure_1]"                                                                                                 | "dbo"      | "procedure_1"       | false           | ["ALTER PROCEDURE [dbo].[procedure_1]", DEFAULT_SET_ANSI_STATEMENT, DEFAULT_SET_QUOTED_IDENTIFIER_STATEMENT]
+        "ALTER PROCEDURE [dbo].create_table_proc @TableName NVARCHAR(128) AS BEGIN CREATE TABLE #tmpReporte(NroPreorden\tint\tNOT NULL); END" | "dbo"      | "create_table_proc" | true            | ["if object_id('[dbo].[create_table_proc]', 'p') is null exec ('create procedure [dbo].[create_table_proc] as select 1 a')", "ALTER PROCEDURE [dbo].create_table_proc @TableName NVARCHAR(128) AS BEGIN CREATE TABLE #tmpReporte(NroPreorden\tint\tNOT NULL); END", DEFAULT_SET_ANSI_STATEMENT, DEFAULT_SET_QUOTED_IDENTIFIER_STATEMENT]
+    }
 
     @Unroll
     def "removeTrailingDelimiter"() {
