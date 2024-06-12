@@ -21,7 +21,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Check runFunctionalTests label
-        if: "!contains(github.event.pull_request.labels.*.name, 'runFunctionalTests')"
+        if: github.ref != 'refs/heads/master' && !contains(github.event.pull_request.labels.*.name, 'runFunctionalTests')
         run: |
           echo "Add the runFunctionalTests label to the PR to trigger the Functional Tests workflow."
           exit 1  
