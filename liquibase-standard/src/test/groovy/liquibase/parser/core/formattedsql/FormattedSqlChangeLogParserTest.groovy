@@ -2,6 +2,7 @@ package liquibase.parser.core.formattedsql
 
 import liquibase.Contexts
 import liquibase.LabelExpression
+import liquibase.change.AbstractSQLChange
 import liquibase.change.core.EmptyChange
 import liquibase.change.core.RawSQLChange
 import liquibase.changelog.ChangeLogParameters
@@ -191,7 +192,7 @@ create table changeSetToIgnore (
     private static final String END_DELIMITER_CHANGELOG = """
 --liquibase formatted sql
 
--- changeset abcd:1 runOnChange:true endDelimiter:/
+-- changeset abcd:1 runOnChange:true endDelimiter:/ rollbackEndDelimiter:;
 CREATE OR REPLACE PROCEDURE any_procedure_name is
 BEGIN
     DBMS_MVIEW.REFRESH('LEAD_INST_FOS_MV', method => '?', atomic_refresh => FALSE, out_of_place => true);
@@ -208,6 +209,30 @@ grant execute on any_procedure_name to ANY_USER3
 /
 -- rollback drop PROCEDURE refresh_all_fos_permission_views/
 """
+
+    private static final String ANOTHER_END_DELIMITER_CHANGELOG =
+"""
+--liquibase formatted sql
+
+--changeset jlyle:mytest stripComments:false runOnChange:true runAlways:true endDelimiter:/ rollbackEndDelimiter:;
+
+select 1 from sys.dual
+/
+
+select 1 from sys.dual
+/
+
+select 1 from sys.dual
+/
+
+begin
+    null;
+end;
+/
+
+-- rollback drop PROCEDURE refresh_all_fos_permission_views/ ;
+"""
+
     private static final String VALID_CHANGELOG_WITH_LEAD_SPACES =
 """
   --liquibase formatted sql
@@ -947,6 +972,8 @@ not ignoreLines here
         changeLog.getLogicalFilePath() == "asdf.sql"
         changeLog.getChangeSets().size() == 1
         changeLog.getChangeSets().get(0).getChanges().size() == 1
+        AbstractSQLChange sqlChange = (AbstractSQLChange)changeLog.getChangeSets().get(0).getChanges().get(0)
+        sqlChange.getEndDelimiter() == "/"
         def statements = changeLog.getChangeSets().get(0).getChanges().get(0).generateStatements(new MockDatabase())
         statements*.toString() == [
                 "CREATE OR REPLACE PROCEDURE any_procedure_name is\nBEGIN\n" +
@@ -956,6 +983,13 @@ not ignoreLines here
                 "grant execute on any_procedure_name to ANY_USER2",
                 "grant execute on any_procedure_name to ANY_USER3",
         ]
+
+        ChangeLogParameters rollbackParams = new ChangeLogParameters()
+        DatabaseChangeLog rollbackChangelog =
+                new MockFormattedSqlChangeLogParser(ANOTHER_END_DELIMITER_CHANGELOG).parse("asdf.sql", rollbackParams, new JUnitResourceAccessor())
+        AbstractSQLChange rollbackSqlChange =
+                (AbstractSQLChange)rollbackChangelog.getChangeSets().get(0).getRollback().getChanges().get(0)
+        rollbackSqlChange.getEndDelimiter() == ";"
     }
 
     @Unroll("#featureName: #example")
