@@ -27,11 +27,12 @@
 		<db2.version>11.5.9.0</db2.version>
 		<firebird.version>5.0.4.java8</firebird.version>
 		<liquibase-pro.version>master-SNAPSHOT</liquibase-pro.version>
+		<liquibase-scripting.version>0-SNAPSHOT</liquibase-scripting.version>
 		<assemblyConfigFile>src/main/assembly/assembly-bin.xml</assemblyConfigFile>
 		<maven.deploy.skip>true</maven.deploy.skip>
 		<maven.install.skip>true</maven.install.skip>
 		<artifact.version>${project.version}</artifact.version>
-        <sonar.coverage.jacoco.xmlReportPaths>../target/jacoco.xml</sonar.coverage.jacoco.xmlReportPaths>
+    <sonar.coverage.jacoco.xmlReportPaths>../target/jacoco.xml</sonar.coverage.jacoco.xmlReportPaths>
 	</properties>
 	<dependencies>
 		<dependency>
@@ -342,13 +343,34 @@
 				<assemblyConfigFile>src/main/assembly/assembly-bin-pro.xml</assemblyConfigFile>
 			</properties>
 
-			<dependencies>
-				<dependency>
-					<groupId>org.liquibase</groupId>
-					<artifactId>liquibase-commercial</artifactId>
-					<version>${liquibase-pro.version}</version>
-				</dependency>
-			</dependencies>
+      <dependencies>
+        <dependency>
+          <groupId>org.liquibase</groupId>
+          <artifactId>liquibase-commercial</artifactId>
+          <version>${liquibase-pro.version}</version>
+        </dependency>
+      </dependencies>
+    </profile>
+
+    <!-- Profile to include liquibase-scripting in the tarball -->
+    <profile>
+      <id>liquibase-scripting</id>
+      <activation>
+        <property>
+          <name>liquibase.scripting</name>
+          <value>true</value>
+        </property>
+      </activation>
+      <properties>
+        <assemblyConfigFile>src/main/assembly/assembly-bin-scripting.xml</assemblyConfigFile>
+      </properties>
+      <dependencies>
+        <dependency>
+          <groupId>org.liquibase</groupId>
+          <artifactId>liquibase-scripting</artifactId>
+          <version>${liquibase-scripting.version}</version>
+        </dependency>
+      </dependencies>
 		</profile>
 
 		<profile>
