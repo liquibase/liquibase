@@ -309,7 +309,7 @@ jobs:
             ./liquibase-integration-tests/target/jacoco.exec
 
   sonar:
-    needs: [ build_tests, integration-test ]
+    needs: [ setup, build_tests, integration-test ]
     uses: liquibase/build-logic/.github/workflows/sonar-test-scan.yml@DAT-17704
     with:
       thisBranchName: ${{ needs.setup.outputs.thisBranchName }}
