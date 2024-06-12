@@ -20,6 +20,9 @@ jobs:
   functional-tests-build:
     runs-on: ubuntu-latest
     steps:
+      - name: Echo GitHub Ref
+        run: echo "The current ref is ${{ github.ref }}"
+
       - name: Check runFunctionalTests label
         if: github.ref != 'refs/heads/master' && !contains(github.event.pull_request.labels.*.name, 'runFunctionalTests')
         run: |
