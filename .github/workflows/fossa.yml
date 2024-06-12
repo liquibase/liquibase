@@ -71,7 +71,7 @@ jobs:
     - name: Install Maven dependencies (excluding test scope)
       run: mvn clean install -DskipTests
       
-    - name: run FOSSA CLI
+    - name: run FOSSA CLI # navigates to custom Project Locator
       uses: fossas/fossa-action@main
       with:
         api-key: ${{ secrets.FOSSA_API_KEY }}
@@ -83,11 +83,12 @@ jobs:
         commit_sha_lb=`(git rev-parse HEAD)`
         echo "commit_sha_lb=${commit_sha_lb}" >> $GITHUB_OUTPUT
 
-      # from the below curl commands we output the fossa report with the headers we need. Following this documentation : https://docs.fossa.com/docs/download-fossa-project-attribution-reports
+      # from the below curl commands we output the fossa report with the headers we need. Following this documentation : https://docs.fossa.com/docs/download-fossa-project-attribution-reports 
+      # navigate to custom Project Locator
     - name: Set the dependency metadata information
       run: |
         mkdir /home/runner/fossa_reports
-        curl --location --request PUT 'https://app.fossa.com/api/projects/git+github.com/liquibase/liquibase' \
+        curl --location --request PUT 'https://app.fossa.com/api/projects/custom+40163/github.com/liquibase/liquibase' \
         --header 'Authorization: Bearer ${{ secrets.FOSSA_API_KEY }}' \
         --header 'Content-Type: application/x-www-form-urlencoded' \
           --data-urlencode 'bom_column_settings%5B%5D=Title' \
