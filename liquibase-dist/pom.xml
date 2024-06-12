@@ -22,7 +22,7 @@
 		<mssql.version>12.6.1.jre8</mssql.version>
 		<mysql.version>8.0.21</mysql.version>
 		<mariadb.version>3.3.3</mariadb.version>
-		<oracle.version>19.22.0.0</oracle.version>
+		<oracle.version>19.23.0.0</oracle.version>
 		<sqlite.version>3.45.3.0</sqlite.version>
 		<db2.version>11.5.9.0</db2.version>
 		<firebird.version>5.0.4.java8</firebird.version>

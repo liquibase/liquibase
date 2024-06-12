@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<databaseChangeLog
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-latest.xsd">
+
+    <changeSet author="jlyle" id="1.1">
+        <insert tableName="parameter_value_tests">
+            <column name="changelog_file" value="${LIQUIBASE_EXECUTION_CHANGELOG_FILE}" />
+            <column name="changeset_id" value="${LIQUIBASE_EXECUTION_CHANGESET_ID}" />
+            <column name="changeset_author" value="${LIQUIBASE_EXECUTION_CHANGESET_AUTHOR}" />
+        </insert>
+    </changeSet>
+
+    <changeSet author="not_jlyle" id="1.2">
+        <insert tableName="parameter_value_tests">
+            <column name="changelog_file" value="${LIQUIBASE_EXECUTION_CHANGELOG_FILE}" />
+            <column name="changeset_id" value="${LIQUIBASE_EXECUTION_CHANGESET_ID}" />
+            <column name="changeset_author" value="${LIQUIBASE_EXECUTION_CHANGESET_AUTHOR}" />
+        </insert>
+    </changeSet>
+
+    <changeSet author="jlyle" id="1.3">
+        <insert tableName="parameter_value_tests">
+            <column name="changelog_file" value="${LIQUIBASE_EXECUTION_CHANGELOG_FILE}" />
+            <column name="changeset_id" value="${LIQUIBASE_EXECUTION_CHANGESET_ID}" />
+            <column name="changeset_author" value="${LIQUIBASE_EXECUTION_CHANGESET_AUTHOR}" />
+        </insert>
+    </changeSet>
+
+</databaseChangeLog>
