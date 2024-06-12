@@ -21,7 +21,7 @@ public class SequenceExistsPrecondition extends AbstractPrecondition {
     private String schemaName;
     private String sequenceName;
 
-    private static final String SQL_CHECK_POSTGRES_SEQUENCE_EXISTS = "SELECT c.relname FROM pg_class c JOIN pg_namespace ns on c.relnamespace = ns.oid WHERE c.relkind = 'S' AND ns.nspname = ? and c.relname = ?";
+    private static final String SQL_CHECK_POSTGRES_SEQUENCE_EXISTS = "SELECT c.relname FROM pg_class c JOIN pg_namespace ns on c.relnamespace = ns.oid WHERE c.relkind = 'S' AND ns.nspname = ? and c.relname ILIKE ?";
 
     public String getCatalogName() {
         return catalogName;
