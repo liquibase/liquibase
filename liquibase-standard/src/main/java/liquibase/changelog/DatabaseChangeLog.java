@@ -33,6 +33,7 @@ import liquibase.resource.ResourceAccessor;
 import liquibase.servicelocator.LiquibaseService;
 import liquibase.util.FileUtil;
 import liquibase.util.StringUtil;
+import lombok.Getter;
 import org.apache.commons.io.FilenameUtils;
 
 import java.io.IOException;
@@ -103,6 +104,9 @@ public class DatabaseChangeLog implements Comparable<DatabaseChangeLog>, Conditi
 
     private Labels includeLabels;
     private boolean includeIgnore;
+
+    @Getter
+    private ParsedNode currentlyLoadedChangeSetNode;
 
     public DatabaseChangeLog() {
     }
@@ -418,8 +422,12 @@ public class DatabaseChangeLog implements Comparable<DatabaseChangeLog>, Conditi
             setObjectQuotingStrategy(ObjectQuotingStrategy.valueOf(nodeObjectQuotingStrategy));
         }
         for (ParsedNode childNode : parsedNode.getChildren()) {
+            if (childNode.getName().equals((new ChangeSet(null)).getSerializedObjectName())) {
+                this.currentlyLoadedChangeSetNode = childNode;
+            }
             handleChildNode(childNode, resourceAccessor, new HashMap<>());
         }
+        this.currentlyLoadedChangeSetNode = null;
     }
 
     protected void expandExpressions(ParsedNode parsedNode) throws UnknownChangeLogParameterException {
