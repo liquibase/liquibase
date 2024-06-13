@@ -327,5 +327,3 @@ jobs:
     needs: [ build_tests,integration-test ]
     uses: liquibase/liquibase/.github/workflows/build.yml@master
     secrets: inherit
-
-
