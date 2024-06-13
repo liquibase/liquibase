@@ -37,6 +37,7 @@ import liquibase.util.ObjectUtil;
 import liquibase.util.StreamUtil;
 import liquibase.util.StringUtil;
 import liquibase.util.csv.CSVReader;
+import lombok.Setter;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -61,14 +62,19 @@ public class LoadDataChange extends AbstractTableChange implements ChangeWithCol
     public static final Pattern BASE64_PATTERN = Pattern.compile("^(?:[A-Za-z0-9+/]{4})*(?:[A-Za-z0-9+/]{2}==|[A-Za-z0-9+/]{3}=)?$");
     private static final Logger LOG = Scope.getCurrentScope().getLog(LoadDataChange.class);
     private static final ResourceBundle coreBundle = getBundle("liquibase/i18n/liquibase-core");
+    @Setter
     private String file;
     private String commentLineStartsWith = DEFAULT_COMMENT_PATTERN;
+    @Setter
     private Boolean relativeToChangelogFile;
+    @Setter
     private String encoding;
     private String separator = CSVReader.DEFAULT_SEPARATOR + "";
+    @Setter
     private String quotchar = CSVReader.DEFAULT_QUOTE_CHARACTER + "";
     private List<LoadDataColumnConfig> columns = new ArrayList<>();
 
+    @Setter
     private Boolean usePreparedStatements;
 
     /**
@@ -117,18 +123,10 @@ public class LoadDataChange extends AbstractTableChange implements ChangeWithCol
         return file;
     }
 
-    public void setFile(String file) {
-        this.file = file;
-    }
-
     @DatabaseChangeProperty(
         description = "Whether to use prepared statements instead of INSERT statement strings (if the database supports it)")
     public Boolean getUsePreparedStatements() {
         return usePreparedStatements;
-    }
-
-    public void setUsePreparedStatements(Boolean usePreparedStatements) {
-        this.usePreparedStatements = usePreparedStatements;
     }
 
     @DatabaseChangeProperty(supportsDatabase = ALL,
@@ -155,18 +153,10 @@ public class LoadDataChange extends AbstractTableChange implements ChangeWithCol
         return relativeToChangelogFile;
     }
 
-    public void setRelativeToChangelogFile(Boolean relativeToChangelogFile) {
-        this.relativeToChangelogFile = relativeToChangelogFile;
-    }
-
     @DatabaseChangeProperty(exampleValue = "UTF-8", supportsDatabase = ALL,
         description = "Encoding of the CSV file (defaults to UTF-8)")
     public String getEncoding() {
         return encoding;
-    }
-
-    public void setEncoding(String encoding) {
-        this.encoding = encoding;
     }
 
     @DatabaseChangeProperty(exampleValue = ",", supportsDatabase = ALL,
@@ -187,10 +177,6 @@ public class LoadDataChange extends AbstractTableChange implements ChangeWithCol
             "Default: " + CSVReader.DEFAULT_QUOTE_CHARACTER)
     public String getQuotchar() {
         return quotchar;
-    }
-
-    public void setQuotchar(String quotchar) {
-        this.quotchar = quotchar;
     }
 
     @Override

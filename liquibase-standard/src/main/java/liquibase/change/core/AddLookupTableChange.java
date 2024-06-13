@@ -25,6 +25,7 @@ import liquibase.statement.core.ReorganizeTableStatement;
 import liquibase.structure.core.Column;
 import liquibase.structure.core.ForeignKey;
 import liquibase.structure.core.Table;
+import lombok.Setter;
 
 import static liquibase.statement.SqlStatement.EMPTY_SQL_STATEMENT;
 
@@ -34,6 +35,7 @@ import static liquibase.statement.SqlStatement.EMPTY_SQL_STATEMENT;
  */
 @DatabaseChange(name = "addLookupTable", priority = ChangeMetaData.PRIORITY_DEFAULT, appliesTo = "column",
         description = "Creates a lookup table containing values stored in a column and creates a foreign key to the new table.")
+@Setter
 public class AddLookupTableChange extends AbstractChange {
 
     private String existingTableCatalogName;
@@ -64,17 +66,9 @@ public class AddLookupTableChange extends AbstractChange {
         return existingTableCatalogName;
     }
 
-    public void setExistingTableCatalogName(String existingTableCatalogName) {
-        this.existingTableCatalogName = existingTableCatalogName;
-    }
-
     @DatabaseChangeProperty(mustEqualExisting ="column.relation.schema", description = "Name of the database schema where the table containing data to extract resides")
     public String getExistingTableSchemaName() {
         return existingTableSchemaName;
-    }
-
-    public void setExistingTableSchemaName(String existingTableSchemaName) {
-        this.existingTableSchemaName = existingTableSchemaName;
     }
 
     @DatabaseChangeProperty(mustEqualExisting = "column.relation", description = "Name of the table containing the data to extract",
@@ -83,18 +77,10 @@ public class AddLookupTableChange extends AbstractChange {
         return existingTableName;
     }
 
-    public void setExistingTableName(String existingTableName) {
-        this.existingTableName = existingTableName;
-    }
-
     @DatabaseChangeProperty(mustEqualExisting = "column", description = "Name of the column containing the data to extract",
         exampleValue = "state")
     public String getExistingColumnName() {
         return existingColumnName;
-    }
-
-    public void setExistingColumnName(String existingColumnName) {
-        this.existingColumnName = existingColumnName;
     }
 
     @DatabaseChangeProperty(since = "3.0", description = "Name of the database catalog for the lookup table")
@@ -102,17 +88,9 @@ public class AddLookupTableChange extends AbstractChange {
         return newTableCatalogName;
     }
 
-    public void setNewTableCatalogName(String newTableCatalogName) {
-        this.newTableCatalogName = newTableCatalogName;
-    }
-
     @DatabaseChangeProperty(description = "Name of the database schema for the lookup table")
     public String getNewTableSchemaName() {
         return newTableSchemaName;
-    }
-
-    public void setNewTableSchemaName(String newTableSchemaName) {
-        this.newTableSchemaName = newTableSchemaName;
     }
 
     @DatabaseChangeProperty(description = "Name of lookup table to create", exampleValue = "state")
@@ -120,26 +98,14 @@ public class AddLookupTableChange extends AbstractChange {
         return newTableName;
     }
 
-    public void setNewTableName(String newTableName) {
-        this.newTableName = newTableName;
-    }
-
     @DatabaseChangeProperty(description = "Name of the column in the new table to create", exampleValue = "abbreviation")
     public String getNewColumnName() {
         return newColumnName;
     }
 
-    public void setNewColumnName(String newColumnName) {
-        this.newColumnName = newColumnName;
-    }
-
     @DatabaseChangeProperty(description = "Data type of the new table column", exampleValue = "char(2)")
     public String getNewColumnDataType() {
         return newColumnDataType;
-    }
-
-    public void setNewColumnDataType(String newColumnDataType) {
-        this.newColumnDataType = newColumnDataType;
     }
 
     @DatabaseChangeProperty(description = "Name of the foreign key constraint to create between the existing table and the lookup table",
@@ -154,10 +120,6 @@ public class AddLookupTableChange extends AbstractChange {
         } else {
             return constraintName;
         }
-    }
-
-    public void setConstraintName(String constraintName) {
-        this.constraintName = constraintName;
     }
 
     @Override

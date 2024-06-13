@@ -21,8 +21,10 @@ import liquibase.snapshot.SnapshotGeneratorFactory;
 import liquibase.statement.SqlStatement;
 import liquibase.structure.core.ForeignKey;
 import liquibase.structure.core.Table;
+import lombok.Setter;
 
 @DatabaseChange(name = "dropAllForeignKeyConstraints", description = "Drops all foreign key constraints on a table", priority = ChangeMetaData.PRIORITY_DEFAULT, appliesTo = "table")
+@Setter
 public class DropAllForeignKeyConstraintsChange extends AbstractChange {
 
     private String baseTableCatalogName;
@@ -34,27 +36,15 @@ public class DropAllForeignKeyConstraintsChange extends AbstractChange {
         return baseTableCatalogName;
     }
 
-    public void setBaseTableCatalogName(String baseTableCatalogName) {
-        this.baseTableCatalogName = baseTableCatalogName;
-    }
-
     @DatabaseChangeProperty(mustEqualExisting ="table.schema", description = "Name of the database schema of the base table")
     public String getBaseTableSchemaName() {
         return baseTableSchemaName;
-    }
-
-    public void setBaseTableSchemaName(String baseTableSchemaName) {
-        this.baseTableSchemaName = baseTableSchemaName;
     }
 
     @DatabaseChangeProperty(mustEqualExisting = "table", requiredForDatabase = "all",
         description = "Name of the table containing columns constrained by foreign keys")
     public String getBaseTableName() {
         return baseTableName;
-    }
-
-    public void setBaseTableName(String baseTableName) {
-        this.baseTableName = baseTableName;
     }
 
     @Override
