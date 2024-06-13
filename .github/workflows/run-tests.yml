@@ -174,6 +174,15 @@ jobs:
         run: |
           ./mvnw -B "-Dbuild.repository.owner=liquibase" "-Dbuild.repository.name=liquibase" "-Dbuild.branch=${{ needs.setup.outputs.thisBranchName }}" "-Dbuild.number=${{ github.run_number }}" "-Dbuild.commit=${{ needs.setup.outputs.latestMergeSha }}" "-DtrimStackTrace=false" -P 'skip-integration-tests' clean test package surefire-report:report
 
+      - name: Check Test Count
+        run: |
+          TEST_COUNT=$(grep -oP 'Tests run: \K[0-9]+' **/target/surefire-reports/*.txt | awk '{s+=$1} END {print s}')
+          echo "Total tests run: $TEST_COUNT"
+          if [ "$TEST_COUNT" -eq 0 ]; then
+            echo "No tests were run."
+            exit 1
+          fi
+
       - name: Remove Original Jars for *nix
         if: env.OS_TYPE != 'windows-2019'
         run: |
@@ -292,6 +301,15 @@ jobs:
 
       - name: Run Tests
         run: ./mvnw -B clean verify -DtrimStackTrace=false -Dliquibase.sdk.testSystem.test=${{ matrix.testSystem }} -Dliquibase.sdk.testSystem.acceptLicenses=${{ matrix.testSystem }} -Dliquibase.sdk.testSystem.snowflake.url=${{ env.TH_SNOW_URL }} -Dliquibase.sdk.testSystem.snowflake.username=${{ env.TH_DB_ADMIN }} -Dliquibase.sdk.testSystem.snowflake.password=${{ env.TH_DB_PASSWD }} -Dtest=*IntegrationTest,*ExecutorTest -DfailIfNoTests=false -Dsurefire.failIfNoSpecifiedTests=false -Dsurefire.failIfNoTests=false
+
+      - name: Check Test Count
+        run: |
+          TEST_COUNT=$(grep -oP 'Tests run: \K[0-9]+' **/target/surefire-reports/*.txt | awk '{s+=$1} END {print s}')
+          echo "Total integration tests run: $TEST_COUNT"
+          if [ "$TEST_COUNT" -eq 0 ]; then
+            echo "No integration tests were run."
+            exit 1
+          fi
 
       - name: Archive Test Results
         if: ${{ inputs.archive_test_results == 'true' }}
