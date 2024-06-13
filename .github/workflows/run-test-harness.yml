@@ -21,7 +21,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Check runTestHarnessTests label
-        if: github.ref != 'refs/heads/master' && !contains(github.event.pull_request.labels.*.name, 'runTestHarnessTests')
+        if: github.event_name == 'pull_request' && !contains(github.event.pull_request.labels.*.name, 'runFunctionalTests') && !(github.event.pull_request.merged == true && github.base_ref == 'master')
         run: |
           echo "Add the runTestHarnessTests label to the PR to trigger the Test Harness Tests workflow."
           exit 1
