@@ -1,5 +1,10 @@
 name: Run Tests
 
+#the concurrency check will cancel in-progress runs on non-master branches and pull requests on forked repositories regardless of the target branch.
+concurrency:
+  group: ${{ github.workflow }}-${{ github.head_ref == 'master' && 'master' || github.run_id }}
+  cancel-in-progress: true
+
 on:
   workflow_call:
 
@@ -35,10 +40,6 @@ jobs:
       - run: true
 
   setup:
-    #the concurrency check will cancel in-progress runs on non-master branches and pull requests on forked repositories regardless of the target branch.
-    concurrency:
-      group: ${{ github.workflow }}-${{ github.head_ref == 'master' && 'master' || github.run_id }}
-      cancel-in-progress: true
     name: setup
     needs: authorize
     runs-on: ubuntu-20.04
