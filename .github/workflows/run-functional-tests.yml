@@ -13,11 +13,29 @@ on:
         required: false
         default: ''
         type: string
+  pull_request:
+    types: [ labeled ]
 
 jobs:
   functional-tests-build:
     runs-on: ubuntu-latest
     steps:
+      
+      - name: Check variables
+        run: |
+          echo "github.event_name: ${{ github.event_name }}"
+          echo "github.event.pull_request.labels.*.name: ${{ contains(github.event.pull_request.labels.*.name, 'runFunctionalTests') }}"
+          echo "github.event.after: ${{ github.event.after }}"
+          echo "github.base_ref: ${{ github.base_ref }}"
+          echo "github.event.pull_request.merged: ${{ github.event.pull_request.merged }}"
+          echo "github.event_name: ${{ github.event_name }}"
+        
+      - name: Check runFunctionalTests label
+        if: (github.event_name == 'pull_request' || github.event_name == 'pull_request_target') && !contains(github.event.pull_request.labels.*.name, 'runFunctionalTests') && (github.event.pull_request.merged == false || github.base_ref != 'master')
+        run: |
+            echo "Add the runFunctionalTests label to the PR to trigger the Functional Tests workflow."
+            exit 1  
+
       - uses: actions/checkout@v4
         with:
           ref: ${{ github.event.pull_request.head.sha || github.event.after}} # get the sha of the commit or the new commit created when branch is merged to master

@@ -83,10 +83,10 @@ public abstract class AbstractFormattedChangeLogParser implements ChangeLogParse
     protected static final String ROLLBACK_SPLIT_STATEMENTS_REGEX = ".*rollbackSplitStatements:(\\w+).*";
     protected final Pattern ROLLBACK_SPLIT_STATEMENTS_PATTERN = Pattern.compile(ROLLBACK_SPLIT_STATEMENTS_REGEX, Pattern.CASE_INSENSITIVE);
 
-    protected static final String END_DELIMITER_REGEX = ".*endDelimiter:(\\S*).*";
+    protected static final String END_DELIMITER_REGEX = ".*\\bendDelimiter:(\\S*).*";
     protected final Pattern END_DELIMITER_PATTERN = Pattern.compile(END_DELIMITER_REGEX, Pattern.CASE_INSENSITIVE);
 
-    protected static final String ROLLBACK_END_DELIMITER_REGEX = ".*rollbackEndDelimiter:(\\S*).*";
+    protected static final String ROLLBACK_END_DELIMITER_REGEX = ".*\\brollbackEndDelimiter:(\\S*).*";
     protected final Pattern ROLLBACK_END_DELIMITER_PATTERN = Pattern.compile(ROLLBACK_END_DELIMITER_REGEX, Pattern.CASE_INSENSITIVE);
 
     protected final String COMMENT_REGEX = String.format("%s[\\s]*comment:? (.*)", getSingleLineCommentSequence());
