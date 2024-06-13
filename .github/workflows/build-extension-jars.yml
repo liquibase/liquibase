@@ -1,0 +1,206 @@
+name: Build & Deploy extensions
+
+on:
+  workflow_call:
+    inputs:
+      liquibase-version:
+        description: 'liquibase version'
+        required: true
+        type: string
+      dependencies:
+        description: 'Comma separated list of needed dependencies to release the extensions list'
+        required: false
+        type: string
+      extensions:
+        description: 'Comma separated list of extensions to release to GPM'
+        required: true
+        type: string
+  workflow_dispatch:
+    inputs:
+      liquibase-version:
+        description: 'liquibase version'
+        required: true
+        type: string
+      dependencies:
+        description: 'Comma separated list of needed dependencies to release the extensions list'
+        required: false
+        type: string
+      extensions:
+        description: 'Comma separated list of extensions to release to GPM'
+        required: true
+        type: string
+
+env:
+  MAVEN_VERSION: '3.9.2'
+
+jobs:
+  build-and-deploy-extensions:
+    runs-on: ubuntu-22.04
+    strategy:
+      fail-fast: false
+    env:
+      GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      GIT_USERNAME: "liquibot"
+      GIT_PASSWORD: ${{ secrets.LIQUIBOT_PAT_GPM_ACCESS }}
+    steps:
+
+      - uses: actions/checkout@v4
+        name: Checkout liquibase
+
+      - uses: actions/checkout@v4
+        name: Checkout liquibase-pro
+        with:
+          repository: liquibase/liquibase-pro
+          ref: "${{ github.ref }}"
+          path: liquibase-pro
+          token: ${{ secrets.BOT_TOKEN }}
+
+      - name: Checkout Dependencies
+        run: |
+            git config --global credential.helper store
+            echo "https://$GIT_USERNAME:$GIT_PASSWORD@github.com" > ~/.git-credentials
+            IFS=',' read -ra DEP_ARRAY <<< "${{ inputs.dependencies }}"
+            for dep in "${DEP_ARRAY[@]}"; do
+                dep=$(echo $dep | xargs)  # Remove leading and trailing whitespaces
+                echo "Checking out $dep"
+                git clone https://github.com/liquibase/$dep.git $dep
+            done
+
+      - name: Set up JDK 17
+        uses: actions/setup-java@v4
+        with:
+          java-version: 17
+          distribution: 'temurin'
+          cache: 'maven'
+          gpg-private-key: ${{ secrets.GPG_SECRET }}
+          gpg-passphrase: GPG_PASSPHRASE
+        env:
+           GPG_PASSWORD: ${{ secrets.GPG_PASSPHRASE }}
+
+      - name: Set up Maven
+        uses: stCarolas/setup-maven@v5
+        with:
+          maven-version: ${{ env.MAVEN_VERSION }}
+
+      - name: maven-settings-xml-action
+        uses: whelk-io/maven-settings-xml-action@v22
+        with:
+          repositories: |
+            [
+              {
+                "id": "liquibase",
+                "url": "https://maven.pkg.github.com/liquibase/liquibase",
+                "releases": {
+                  "enabled": "true"
+                },
+                "snapshots": {
+                  "enabled": "true",
+                  "updatePolicy": "always"
+                }
+              },
+              {
+                "id": "liquibase-pro",
+                "url": "https://maven.pkg.github.com/liquibase/liquibase-pro",
+                "releases": {
+                  "enabled": "true"
+                },
+                "snapshots": {
+                  "enabled": "true",
+                  "updatePolicy": "always"
+                }
+              }
+            ]
+          servers: |
+            [
+              {
+                "id": "liquibase",
+                "username": "liquibot",
+                "password": "${{ secrets.LIQUIBOT_PAT_GPM_ACCESS }}"
+              },
+              {
+                "id": "liquibase-pro",
+                "username": "liquibot",
+                "password": "${{ secrets.LIQUIBOT_PAT_GPM_ACCESS }}"
+              }
+            ]
+
+      - name: Install liquibase 0-SNAPSHOT
+        run: mvn clean install -DskipTests
+
+      - name: Install liquibase-commercial 0-SNAPSHOT
+        run: |
+          cd liquibase-pro
+          mvn clean install -DskipTests -P '!run-proguard'
+          cd ..
+
+      - name: Re-version and build Dependencies
+        env:
+           GPG_PASSWORD: ${{ secrets.GPG_PASSPHRASE }}
+        if: ${{ inputs.dependencies != '' }}
+        continue-on-error: true
+        run: |
+          scripts_branch=${{ github.ref }}
+          IFS=',' read -ra DEP_ARRAY <<< "${{ inputs.dependencies }}"
+          for dep in "${DEP_ARRAY[@]}"; do
+            dep=$(echo $dep | xargs)  # Remove leading and trailing whitespaces
+            echo "Re-versioning $dep"
+            cd $dep
+            sed -i "s/<liquibase.version>.*<\/liquibase.version>/<liquibase.version>0-SNAPSHOT<\/liquibase.version>/" pom.xml
+            mvn versions:set -DnewVersion=0-SNAPSHOT
+            mvn clean install -DskipTests
+            mkdir -p $PWD/.github/util/
+            curl -o $PWD/.github/util/re-version.sh https://raw.githubusercontent.com/liquibase/liquibase/$scripts_branch/.github/util/re-version.sh
+            curl -o $PWD/.github/util/sign-artifacts.sh https://raw.githubusercontent.com/liquibase/liquibase/$scripts_branch/.github/util/sign-artifacts.sh
+            curl -o $PWD/.github/util/ManifestReversion.java https://raw.githubusercontent.com/liquibase/liquibase/$scripts_branch/.github/util/ManifestReversion.java
+            chmod +x $PWD/.github/util/re-version.sh
+            chmod +x $PWD/.github/util/sign-artifacts.sh
+            chmod +x $PWD/.github/util/ManifestReversion.java
+            $PWD/.github/util/re-version.sh ./target "${{ inputs.liquibase-version  }}" "${{ github.ref }}" ${dep}
+            $PWD/.github/util/sign-artifacts.sh ./target "${{ inputs.liquibase-version }}" "${{ github.ref }}"
+            mvn versions:set -DnewVersion=${{ inputs.liquibase-version }}
+            mvn deploy:deploy-file \
+            -Dfile=./re-version/out/${dep}-${{ inputs.liquibase-version }}.jar \
+            -Dsources=./re-version/out/${dep}-${{ inputs.liquibase-version }}-sources.jar \
+            -Djavadoc=./re-version/out/${dep}-${{ inputs.liquibase-version }}-javadoc.jar \
+            -DrepositoryId=liquibase \
+            -Durl=https://maven.pkg.github.com/liquibase/$dep \
+            -DpomFile=pom.xml
+            cd ..
+          done
+
+      - name: Checkout and build Extensions
+        env:
+          GPG_PASSWORD: ${{ secrets.GPG_PASSPHRASE }}
+        continue-on-error: true
+        run: |
+          scripts_branch=${{ github.ref }}
+          git config --global credential.helper store
+          echo "https://$GIT_USERNAME:$GIT_PASSWORD@github.com" > ~/.git-credentials
+          IFS=',' read -ra EXT_ARRAY <<< "${{ inputs.extensions }}"
+          for ext in "${EXT_ARRAY[@]}"; do
+            ext=$(echo $ext | xargs)  # Remove leading and trailing whitespaces
+            echo "Checking out and building $ext"
+            git clone https://github.com/liquibase/$ext.git $ext
+            cd $ext
+            sed -i "s/<liquibase.version>.*<\/liquibase.version>/<liquibase.version>0-SNAPSHOT<\/liquibase.version>/" pom.xml
+            mvn versions:set -DnewVersion=0-SNAPSHOT
+            mvn clean install -DskipTests
+            mkdir -p $PWD/.github/util/
+            curl -o $PWD/.github/util/re-version.sh https://raw.githubusercontent.com/liquibase/liquibase/$scripts_branch/.github/util/re-version.sh
+            curl -o $PWD/.github/util/sign-artifacts.sh https://raw.githubusercontent.com/liquibase/liquibase/$scripts_branch/.github/util/sign-artifacts.sh
+            curl -o $PWD/.github/util/ManifestReversion.java https://raw.githubusercontent.com/liquibase/liquibase/$scripts_branch/.github/util/ManifestReversion.java
+            chmod +x $PWD/.github/util/re-version.sh
+            chmod +x $PWD/.github/util/sign-artifacts.sh
+            chmod +x $PWD/.github/util/ManifestReversion.java
+            $PWD/.github/util/re-version.sh ./target "${{ inputs.liquibase-version  }}" "${{ github.ref }}" ${ext}
+            $PWD/.github/util/sign-artifacts.sh ./target "${{ inputs.liquibase-version }}" "${{ github.ref }}"
+            mvn versions:set -DnewVersion=${{ inputs.liquibase-version }}
+            mvn deploy:deploy-file \
+            -Dfile=./re-version/out/${ext}-${{ inputs.liquibase-version }}.jar \
+            -Dsources=./re-version/out/${ext}-${{ inputs.liquibase-version }}-sources.jar \
+            -Djavadoc=./re-version/out/${ext}-${{ inputs.liquibase-version }}-javadoc.jar \
+            -DrepositoryId=liquibase \
+            -Durl=https://maven.pkg.github.com/liquibase/$ext \
+            -DpomFile=pom.xml
+            cd ..
+          done

@@ -13,11 +13,29 @@ on:
         required: false
         default: ''
         type: string
+  pull_request:
+    types: [labeled]
 
 jobs:
   test-harness-build:
     runs-on: ubuntu-latest
     steps:
+      
+      - name: Check variables
+        run: |
+          echo "github.event_name: ${{ github.event_name }}"
+          echo "github.event.pull_request.labels.*.name: ${{ contains(github.event.pull_request.labels.*.name, 'runFunctionalTests') }}"
+          echo "github.event.after: ${{ github.event.after }}"
+          echo "github.base_ref: ${{ github.base_ref }}"
+          echo "github.event.pull_request.merged: ${{ github.event.pull_request.merged }}"
+          echo "github.event_name: ${{ github.event_name }}"
+        
+      - name: Check runTestHarnessTests label
+        if: (github.event_name == 'pull_request' || github.event_name == 'pull_request_target') && !contains(github.event.pull_request.labels.*.name, 'runTestHarnessTests') && (github.event.pull_request.merged == false || github.base_ref != 'master')
+        run: |
+          echo "Add the runTestHarnessTests label to the PR to trigger the Test Harness Tests workflow."
+          exit 1
+
       - uses: actions/checkout@v4
         with:
           ref: ${{ github.event.pull_request.head.sha || github.event.after}} #sets the Git reference (commit or branch) to be checked out in the workflow
