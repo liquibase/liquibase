@@ -322,6 +322,7 @@ jobs:
       dbPlatforms: h2,hsqldb,mariadb,mssql,mysql,oracle,postgresql,sqlite,firebird,db2
     secrets: inherit
 
+
   run-build-publish-file:
     needs: [ build_tests,integration-test ]
     uses: liquibase/liquibase/.github/workflows/build.yml@master
