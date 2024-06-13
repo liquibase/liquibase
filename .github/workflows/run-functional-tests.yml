@@ -31,10 +31,10 @@ jobs:
           echo "github.event_name: ${{ github.event_name }}"
         
       - name: Check runFunctionalTests label
-        if: github.event_name == 'pull_request' && !contains(github.event.pull_request.labels.*.name, 'runFunctionalTests') && !(github.event.pull_request.merged == true && github.base_ref == 'master')
+        if: (github.event_name == 'pull_request' || github.event_name == 'pull_request_target') && !contains(github.event.pull_request.labels.*.name, 'runFunctionalTests') && (github.event.pull_request.merged == false || github.base_ref != 'master')
         run: |
-          echo "Add the runFunctionalTests label to the PR to trigger the Functional Tests workflow."
-          exit 1  
+            echo "Add the runFunctionalTests label to the PR to trigger the Functional Tests workflow."
+            exit 1  
 
       - uses: actions/checkout@v4
         with:
