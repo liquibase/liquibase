@@ -20,6 +20,16 @@ jobs:
   functional-tests-build:
     runs-on: ubuntu-latest
     steps:
+      
+      - name: Check variables
+        run: |
+          echo "github.event_name: ${{ github.event_name }}"
+          echo "github.event.pull_request.labels.*.name: ${{ contains(github.event.pull_request.labels.*.name, 'runFunctionalTests') }}"
+          echo "github.event.after: ${{ github.event.after }}"
+          echo "github.base_ref: ${{ github.base_ref }}"
+          echo "github.event.pull_request.merged: ${{ github.event.pull_request.merged }}"
+          echo "github.event_name: ${{ github.event_name }}"
+        
       - name: Check runFunctionalTests label
         if: github.event_name == 'pull_request' && !contains(github.event.pull_request.labels.*.name, 'runFunctionalTests') && !(github.event.pull_request.merged == true && github.base_ref == 'master')
         run: |
