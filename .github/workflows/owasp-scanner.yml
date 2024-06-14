@@ -1,0 +1,34 @@
+name: OWASP Scanner
+
+on:
+  workflow_call:
+    inputs:
+      liquibase-version:
+        description: 'liquibase version'
+        required: true
+        type: string
+  workflow_dispatch:
+    inputs:
+      liquibase-version:
+        description: 'liquibase version'
+        required: true
+        type: string
+
+
+jobs:
+  scan:
+    runs-on: ubuntu-22.04
+    env:
+      GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      GIT_USERNAME: "liquibot"
+      GIT_PASSWORD: ${{ secrets.LIQUIBOT_PAT_GPM_ACCESS }}
+    steps:
+
+     - name: Download OWASP Dependency-Check
+       run: |
+         wget https://github.com/jeremylong/DependencyCheck/releases/download/v9.2.0/dependency-check-9.2.0-release.zip
+         unzip dependency-check-9.2.0-release.zip
+         mv dependency-check /opt/dependency-check
+         echo 'export PATH=$PATH:/opt/dependency-check/bin' >> ~/.bashrc
+         source ~/.bashrc
+         dependency-check --version
