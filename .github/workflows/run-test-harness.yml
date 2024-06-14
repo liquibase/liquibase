@@ -31,10 +31,10 @@ jobs:
           echo "github.event_name: ${{ github.event_name }}"
         
       - name: Check runTestHarnessTests label
-        if: (github.event_name == 'pull_request' || github.event_name == 'pull_request_target') && !contains(github.event.pull_request.labels.*.name, 'runTestHarnessTests') && (github.event.pull_request.merged == false || github.base_ref != 'master')
+        if: (github.event_name == 'pull_request' || github.event_name == 'pull_request_target') && !contains(github.event.pull_request.labels.*.name, 'runFunctional&HarnessTests') && (github.event.pull_request.merged == false || github.base_ref != 'master')
         run: |
           echo "Add the runTestHarnessTests label to the PR to trigger the Test Harness Tests workflow."
-          exit 1
+          exit 0
 
       - uses: actions/checkout@v4
         with:
