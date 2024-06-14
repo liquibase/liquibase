@@ -3,25 +3,31 @@ name: OWASP Scanner
 on:
   workflow_call:
     inputs:
-      liquibase-version:
-        description: 'liquibase version'
+      version:
+        description: 'Artifact version'
         required: true
         type: string
+      component:
+        description: 'Artifact component'
+        required: true
+        type: string
+        default: 'liquibase'
   workflow_dispatch:
     inputs:
-      liquibase-version:
-        description: 'liquibase version'
+      version:
+        description: 'Artifact version'
         required: true
         type: string
+      component:
+        description: 'Artifact component'
+        required: true
+        type: string
+        default: 'liquibase'
 
 
 jobs:
   scan:
     runs-on: ubuntu-22.04
-    env:
-      GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      GIT_USERNAME: "liquibot"
-      GIT_PASSWORD: ${{ secrets.LIQUIBOT_PAT_GPM_ACCESS }}
     steps:
 
      - name: Download OWASP Dependency-Check
@@ -30,12 +36,12 @@ jobs:
         unzip dependency-check-9.2.0-release.zip
         ./dependency-check/bin/dependency-check.sh --version
 
-     - name: Download liquibase zip file
+     - name: Download ${{ inputs.component }} zip file
        run: |
-        wget https://github.com/liquibase/liquibase/releases/download/v${{ inputs.liquibase-version }}/liquibase-${{ inputs.liquibase-version }}.zip
-        unzip liquibase-${{ inputs.liquibase-version }}.zip
+        wget https://github.com/liquibase/${{ inputs.component }}/releases/download/v${{ inputs.version }}/${{ inputs.component }}-${{ inputs.version }}.zip
+        unzip ${{ inputs.component }}-${{ inputs.version }}.zip
 
      - name: Run OWASP Dependency-Check
        run: |
         ls -ltr
-        ./dependency-check/bin/dependency-check.sh --project "liquibase" --scan .
+        ./dependency-check/bin/dependency-check.sh --project "${{ inputs.component }}" --scan .
