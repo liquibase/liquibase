@@ -9,6 +9,7 @@ import liquibase.statement.SqlStatement;
 import liquibase.statement.core.SetNullableStatement;
 import liquibase.structure.core.Column;
 import liquibase.structure.core.Table;
+import lombok.Setter;
 
 /**
  * Drops a not-null constraint from an existing column.
@@ -20,11 +21,17 @@ import liquibase.structure.core.Table;
     appliesTo = "column")
 public class DropNotNullConstraintChange extends AbstractChange {
 
+    @Setter
     private String catalogName;
+    @Setter
     private String schemaName;
+    @Setter
     private String tableName;
+    @Setter
     private String columnName;
+    @Setter
     private String columnDataType;
+    @Setter
     private String constraintName;
     private Boolean shouldValidate;
 
@@ -34,17 +41,9 @@ public class DropNotNullConstraintChange extends AbstractChange {
         return catalogName;
     }
 
-    public void setCatalogName(String catalogName) {
-        this.catalogName = catalogName;
-    }
-
     @DatabaseChangeProperty(mustEqualExisting ="notNullConstraint.table.schema", description = "Name of the database schema")
     public String getSchemaName() {
         return schemaName;
-    }
-
-    public void setSchemaName(String schemaName) {
-        this.schemaName = schemaName;
     }
 
     @DatabaseChangeProperty(
@@ -55,20 +54,12 @@ public class DropNotNullConstraintChange extends AbstractChange {
         return tableName;
     }
 
-    public void setTableName(String tableName) {
-        this.tableName = tableName;
-    }
-
     @DatabaseChangeProperty(
         description = "Name of the column to drop the constraint from",
         mustEqualExisting = "notNullConstraint.column"
     )
     public String getColumnName() {
         return columnName;
-    }
-
-    public void setColumnName(String columnName) {
-        this.columnName = columnName;
     }
 
     @DatabaseChangeProperty(description = "Current data type of the column",
@@ -78,17 +69,9 @@ public class DropNotNullConstraintChange extends AbstractChange {
         return columnDataType;
     }
 
-    public void setColumnDataType(String columnDataType) {
-        this.columnDataType = columnDataType;
-    }
-
     @DatabaseChangeProperty(description = "Name of the constraint to drop (if database supports names for NOT NULL constraints)")
     public String getConstraintName() {
         return constraintName;
-    }
-
-    public void setConstraintName(String constraintName) {
-        this.constraintName = constraintName;
     }
 
     @Override
