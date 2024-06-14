@@ -29,3 +29,12 @@ jobs:
         wget https://github.com/jeremylong/DependencyCheck/releases/download/v9.2.0/dependency-check-9.2.0-release.zip
         unzip dependency-check-9.2.0-release.zip
         ./dependency-check/bin/dependency-check.sh --version
+
+     - name: Download liquibase zip file
+       run: |
+        wget https://github.com/liquibase/liquibase/releases/download/v${{ inputs.liquibase-version }}/liquibase-${{ inputs.liquibase-version }}.zip
+        unzip liquibase-${{ inputs.liquibase-version }}.zip
+
+     - name: Run OWASP Dependency-Check
+       run: |
+        dependency-check --project "liquibase" --scan ./liquibase-${{ inputs.liquibase-version }} --out . --format HTML
