@@ -26,9 +26,6 @@ jobs:
 
      - name: Download OWASP Dependency-Check
        run: |
-         wget https://github.com/jeremylong/DependencyCheck/releases/download/v9.2.0/dependency-check-9.2.0-release.zip
-         unzip dependency-check-9.2.0-release.zip
-         mv dependency-check /opt/dependency-check
-         echo 'export PATH=$PATH:/opt/dependency-check/bin' >> ~/.bashrc
-         source ~/.bashrc
-         dependency-check --version
+        wget https://github.com/jeremylong/DependencyCheck/releases/download/v9.2.0/dependency-check-9.2.0-release.zip
+        unzip dependency-check-9.2.0-release.zip
+        ./dependency-check/bin/dependency-check.sh --version
