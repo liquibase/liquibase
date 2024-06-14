@@ -252,6 +252,7 @@ jobs:
           rm re-version/final/*.asc
           rm re-version/final/*.md5
           rm re-version/final/*.sha1
+
       - name: Attach Files to Draft Release
         uses: softprops/action-gh-release@v2
         with:
@@ -263,3 +264,11 @@ jobs:
           files: re-version/final/*
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+
+  owasp-scanner:
+    needs: [ setup, build-installers ]
+    uses: liquibase/liquibase/.github/workflows/owasp-scanner.yml@master
+    with:
+      version: ${{ needs.setup.outputs.version }}
+    secrets: inherit

@@ -9,7 +9,7 @@ on:
         type: string
       component:
         description: 'Artifact component'
-        required: true
+        required: false
         type: string
         default: 'liquibase'
   workflow_dispatch:
