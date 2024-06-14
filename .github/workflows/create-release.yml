@@ -265,7 +265,6 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
-
   owasp-scanner:
     needs: [ setup, build-installers ]
     uses: liquibase/liquibase/.github/workflows/owasp-scanner.yml@master
