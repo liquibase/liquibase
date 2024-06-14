@@ -38,4 +38,4 @@ jobs:
      - name: Run OWASP Dependency-Check
        run: |
         ls -ltr
-        ./dependency-check/bin/dependency-check.sh --project "liquibase" --scan ./liquibase-${{ inputs.liquibase-version }} --out . --format HTML
+        ./dependency-check/bin/dependency-check.sh --project "liquibase" --scan .
