@@ -19,7 +19,7 @@ on:
 jobs:
   test-harness-build:
     runs-on: ubuntu-latest
-    if: (github.event_name != 'pull_request' || github.event_name != 'pull_request_target') || ((github.event_name == 'pull_request' || github.event_name == 'pull_request_target') && contains(github.event.pull_request.labels.*.name, 'runFunctional&HarnessTests'))
+    if: contains(github.event.pull_request.labels.*.name, 'runFunctional&HarnessTests') || (github.event.pull_request.merged == true)
     steps:
       
       - name: Check variables
