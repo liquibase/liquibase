@@ -46,7 +46,7 @@ jobs:
         ./dependency-check/bin/dependency-check.sh --nvdApiKey ${{ secrets.NVD_API_KEY }} --project "${{ inputs.component }}" --scan .
 
      - name: Upload OWASP Dependency-Check results
-       uses: actions/upload-artifact@v3
+       uses: actions/upload-artifact@v4
        with:
           name: owasp-dependency-check
           path: ./dependency-check-report.html
