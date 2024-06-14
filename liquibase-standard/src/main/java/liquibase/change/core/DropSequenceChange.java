@@ -6,12 +6,14 @@ import liquibase.snapshot.SnapshotGeneratorFactory;
 import liquibase.statement.SqlStatement;
 import liquibase.statement.core.DropSequenceStatement;
 import liquibase.structure.core.Sequence;
+import lombok.Setter;
 
 /**
  * Drops an existing sequence.
  */
 @DatabaseChange(name = "dropSequence", description = "Drop an existing sequence", priority = ChangeMetaData.PRIORITY_DEFAULT,
     appliesTo = "sequence")
+@Setter
 public class DropSequenceChange extends AbstractChange {
 
     private String catalogName;
@@ -23,26 +25,14 @@ public class DropSequenceChange extends AbstractChange {
         return catalogName;
     }
 
-    public void setCatalogName(String catalogName) {
-        this.catalogName = catalogName;
-    }
-
     @DatabaseChangeProperty(mustEqualExisting ="sequence.schema", description = "Name of the database schema")
     public String getSchemaName() {
         return schemaName;
     }
 
-    public void setSchemaName(String schemaName) {
-        this.schemaName = schemaName;
-    }
-
     @DatabaseChangeProperty(mustEqualExisting = "sequence", description = "Name of the sequence to drop")
     public String getSequenceName() {
         return sequenceName;
-    }
-
-    public void setSequenceName(String sequenceName) {
-        this.sequenceName = sequenceName;
     }
 
     @Override

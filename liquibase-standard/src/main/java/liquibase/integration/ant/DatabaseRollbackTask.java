@@ -3,6 +3,8 @@ package liquibase.integration.ant;
 import liquibase.Contexts;
 import liquibase.Liquibase;
 import liquibase.exception.LiquibaseException;
+import lombok.Getter;
+import lombok.Setter;
 import org.apache.tools.ant.BuildException;
 import org.apache.tools.ant.types.resources.FileResource;
 import org.apache.tools.ant.util.DateUtils;
@@ -19,8 +21,12 @@ import java.util.Date;
  */
 public class DatabaseRollbackTask extends AbstractChangeLogBasedTask {
     private Date rollbackDate;
+    @Getter
     private String rollbackTag;
+    @Getter
     private Integer rollbackCount;
+    @Setter
+    @Getter
     private String rollbackScript;
 
     @Override
@@ -82,19 +88,11 @@ public class DatabaseRollbackTask extends AbstractChangeLogBasedTask {
         }
     }
 
-    public String getRollbackTag() {
-        return rollbackTag;
-    }
-
     public void setRollbackTag(String rollbackTag) {
         if((rollbackDate != null) || (rollbackCount != null)) {
             throw new BuildException("Unable to rollback database. A date or count has already been set.");
         }
         this.rollbackTag = rollbackTag;
-    }
-
-    public Integer getRollbackCount() {
-        return rollbackCount;
     }
 
     public void setRollbackCount(Integer rollbackCount) {
@@ -104,11 +102,4 @@ public class DatabaseRollbackTask extends AbstractChangeLogBasedTask {
         this.rollbackCount = rollbackCount;
     }
 
-    public String getRollbackScript() {
-        return rollbackScript;
-    }
-
-    public void setRollbackScript(String rollbackScript) {
-        this.rollbackScript = rollbackScript;
-    }
 }
