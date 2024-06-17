@@ -186,7 +186,7 @@ jobs:
             echo "No integration tests were run."
             exit 1
           fi
-          echo "TEST_COUNT=$TEST_COUNT" >> $GITHUB_ENV
+          echo "TEST_COUNT_JAVA_UBUNTU=$TEST_COUNT" >> $GITHUB_ENV
 
       - name: Check Test Count for Java 8 macos-13
         id: test-count-java-macos
@@ -199,7 +199,7 @@ jobs:
             echo "No test result files found or test count is zero."
             exit 1
           fi  
-          echo "TEST_COUNT=$TEST_COUNT" >> $GITHUB_ENV
+          echo "TEST_COUNT_JAVA_MACOS=$TEST_COUNT" >> $GITHUB_ENV
 
       - name: Check Test Count for windows-2019
         id: test-count-java-windows
@@ -212,10 +212,10 @@ jobs:
             Write-Output "No integration tests were run."
             exit 1
           }
-          echo "TEST_COUNT=$TEST_COUNT" | Out-File -Append -Encoding utf8 -FilePath $env:GITHUB_ENV
+          echo "TEST_COUNT_JAVA_WINDOWS=$TEST_COUNT" | Out-File -Append -Encoding utf8 -FilePath $env:GITHUB_ENV
 
       - name: Notify slack if Test Count decreases
-        if: steps.test-count-java-ubuntu.outputs.test-count < 5981 || steps.test-count-java-macos.outputs.test-count < 5999 || steps.test-count-java-windows.outputs.test-count < 5999
+        if: ${{ env.TEST_COUNT_JAVA_MACOS }} < 5999 || ${{ env.TEST_COUNT_JAVA_UBUNTU }} < 5981 || ${{ env.TEST_COUNT_JAVA_WINDOWS }} < 5999
         uses: rtCamp/action-slack-notify@v2
         env:
           SLACK_WEBHOOK: ${{ secrets.NIGHTLY_BUILDS_SLACK_WEBHOOK }}
