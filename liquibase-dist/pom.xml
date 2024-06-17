@@ -92,7 +92,7 @@
         <dependency>
             <groupId>net.snowflake</groupId>
             <artifactId>snowflake-jdbc</artifactId>
-            <version>3.16.0</version>
+            <version>3.16.1</version>
         </dependency>
 
 		<!--        CANNOT INCLUDE MYSQL FOR LICENSING REASONS -->
