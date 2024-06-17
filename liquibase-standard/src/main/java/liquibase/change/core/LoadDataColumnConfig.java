@@ -4,40 +4,26 @@ import liquibase.change.ColumnConfig;
 import liquibase.parser.core.ParsedNode;
 import liquibase.parser.core.ParsedNodeException;
 import liquibase.resource.ResourceAccessor;
+import lombok.Getter;
+import lombok.Setter;
 
 public class LoadDataColumnConfig extends ColumnConfig {
 
+    @Setter
+    @Getter
     private Integer index;
+    @Setter
+    @Getter
     private String header;
+    @Setter
     private Boolean allowUpdate;
     private LoadDataChange.LOAD_DATA_TYPE loadType;
 
-
-    public Integer getIndex() {
-        return index;
-    }
-
-    public void setIndex(Integer index) {
-        this.index = index;
-    }
-
-    public String getHeader() {
-        return header;
-    }
-
-    public void setHeader(String header) {
-        this.header = header;
-    }
-    
     /**
      * Returns true if this Column should be updated. Returns null if update hasn't been explicitly assigned.
      */  
 	public Boolean getAllowUpdate() {
 		return allowUpdate;
-	}
-
-	public void setAllowUpdate(Boolean getAllowUpdate) {
-		this.allowUpdate = getAllowUpdate;
 	}
 
     @Override
