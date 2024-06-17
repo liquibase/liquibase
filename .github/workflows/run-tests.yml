@@ -175,6 +175,7 @@ jobs:
           ./mvnw -B "-Dbuild.repository.owner=liquibase" "-Dbuild.repository.name=liquibase" "-Dbuild.branch=${{ needs.setup.outputs.thisBranchName }}" "-Dbuild.number=${{ github.run_number }}" "-Dbuild.commit=${{ needs.setup.outputs.latestMergeSha }}" "-DtrimStackTrace=false" -P 'skip-integration-tests' clean test package surefire-report:report
 
       - name: Check Test Count for Java 8, 11, 17, 21 Ubuntu
+        id: test-count-java-ubuntu
         if: matrix.os != 'macos-13' && matrix.os != 'windows-2019'
         run: |
           if [[ "${{ matrix.os }}" != "macos-13" ]]; then
@@ -185,8 +186,10 @@ jobs:
             echo "No integration tests were run."
             exit 1
           fi
+          echo "TEST_COUNT=$TEST_COUNT" >> $GITHUB_ENV
 
       - name: Check Test Count for Java 8 macos-13
+        id: test-count-java-macos
         if: matrix.os == 'macos-13' && always()
         shell: bash
         run: |
@@ -195,10 +198,11 @@ jobs:
           if [ -z "$TEST_COUNT" ] || [ "$TEST_COUNT" -eq 0 ]; then
             echo "No test result files found or test count is zero."
             exit 1
-          fi
-      
+          fi  
+          echo "TEST_COUNT=$TEST_COUNT" >> $GITHUB_ENV
 
-      - name: Check windows
+      - name: Check Test Count for windows-2019
+        id: test-count-java-windows
         if: matrix.os == 'windows-2019' && always()
         shell: pwsh
         run: |
@@ -208,7 +212,16 @@ jobs:
             Write-Output "No integration tests were run."
             exit 1
           }
+          echo "TEST_COUNT=$TEST_COUNT" | Out-File -Append -Encoding utf8 -FilePath $env:GITHUB_ENV
 
+      - name: Notify slack if Test Count decreases
+        if: matrix.os == 'ubuntu-20.04' && (matrix.java == 8 || matrix.java == 11 || matrix.java == 17 || matrix.java == 21) && steps.test-count-java-ubuntu.outputs.test-count < 5981 || matrix.os == 'macos-13' && matrix.java == 8 && steps.test-count-java-macos.outputs.test-count < 5999 || matrix.os == 'windows-2019' && matrix.java == 8 && steps.test-count-java-windows.outputs.test-count < 5999
+        uses: rtCamp/action-slack-notify@v2
+        env:
+          SLACK_WEBHOOK: ${{ secrets.NIGHTLY_BUILDS_SLACK_WEBHOOK }}
+          SLACK_MESSAGE: 'Test count decreased. Please check the test results.'
+
+          
       - name: Remove Original Jars for *nix
         if: env.OS_TYPE != 'windows-2019' && always()
         run: |
