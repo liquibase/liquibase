@@ -304,7 +304,7 @@ jobs:
 
       - name: Check Test Count
         run: |
-          TEST_COUNT=$(grep -oP 'Tests run: \K[0-9]+' **/target/surefire-reports/*.txt | awk '{s+=$1} END {print s}')
+          TEST_COUNT=$(grep -oP 'Tests run: \K[0-9]+' **/target/surefire-reports/*.txt | awk -F ':' '{s+=$2} END {print(s)}')
           echo "Total integration tests run: $TEST_COUNT"
           if [ "$TEST_COUNT" -eq 0 ]; then
             echo "No integration tests were run."
