@@ -215,7 +215,7 @@ jobs:
           echo "TEST_COUNT_JAVA_WINDOWS=$TEST_COUNT" | Out-File -Append -Encoding utf8 -FilePath $env:GITHUB_ENV
 
       - name: Notify slack if Test Count decreases
-        if: ${{ fromJSON(env.TEST_COUNT_JAVA_WINDOWS) < 5999 || fromJSON(env.TEST_COUNT_JAVA_UBUNTU) < 5981 || fromJSON(env.TEST_COUNT_JAVA_MACOS) < 5981 }} 
+        if: ${{ fromJSON(env.TEST_COUNT_JAVA_WINDOWS) || '0' < 5999 || fromJSON(env.TEST_COUNT_JAVA_UBUNTU) || '0' < 5981 || fromJSON(env.TEST_COUNT_JAVA_MACOS) || '0' < 5981 }} 
         uses: rtCamp/action-slack-notify@v2
         env:
           SLACK_WEBHOOK: ${{ secrets.NIGHTLY_BUILDS_SLACK_WEBHOOK }}
@@ -353,7 +353,7 @@ jobs:
           echo "TEST_COUNT_INTEGRATION=$TEST_COUNT" >> $GITHUB_ENV
 
       - name: Notify slack if Test Count decreases
-        if: ${{ fromJSON(env.TEST_COUNT_INTEGRATION) < 739 }}
+        if: ${{ fromJSON(env.TEST_COUNT_INTEGRATION) || '0' < 739 }}
         uses: rtCamp/action-slack-notify@v2
         env:
           SLACK_WEBHOOK: ${{ secrets.NIGHTLY_BUILDS_SLACK_WEBHOOK }}
