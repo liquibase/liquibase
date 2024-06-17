@@ -178,9 +178,9 @@ jobs:
         shell: bash
         run: |
           if [[ "${{ matrix.os }}" == "macos-13" ]]; then
-            TEST_COUNT=$(find . -name '*.txt' -print0 | xargs -0 ggrep -oP 'Tests run: \K[0-9]+' | awk '{s+=$1} END {print(s)}')
+          TEST_COUNT=$(find . -name '*.txt' | xargs ggrep -oP 'Tests run: \K[0-9]+' | awk '{s+=$1} END {print(s)}'
           else
-            TEST_COUNT=$(find . -name '*.txt' -print0 | xargs -0 grep -oP 'Tests run: \K[0-9]+' | awk '{s+=$1} END {print(s)}')
+            TEST_COUNT=$(find . -name '*.txt' | xargs grep -oP 'Tests run: \K[0-9]+' | awk -F ':' '{s+=$2} END {print(s)}')
           fi
           echo "Total integration tests run: $TEST_COUNT"
           if [ "$TEST_COUNT" -eq 0 ]; then
@@ -189,12 +189,12 @@ jobs:
           fi
 
       - name: Remove Original Jars for *nix
-        if: env.OS_TYPE != 'windows-2019'
+        if: env.OS_TYPE != 'windows-2019' && always()
         run: |
           find . -name original-*.jar -exec rm {} \;
 
       - name: Upload Artifacts for build.yml
-        if: ${{ matrix.java == 17 && matrix.os == 'ubuntu-20.04'}}
+        if: ${{ matrix.java == 17 && matrix.os == 'ubuntu-20.04'}} && always()
         uses: actions/upload-artifact@v3
         with:
           name: temp-artifact
@@ -202,7 +202,7 @@ jobs:
             ./**/target/*.jar
 
       - name: Archive Test Results
-        if: ${{ inputs.archive_test_results == 'true' }}
+        if: ${{ inputs.archive_test_results == 'true' }} && always()
         uses: actions/upload-artifact@v3
         with:
           name: liquibase-test-results-jdk${{ matrix.java }}
@@ -211,7 +211,7 @@ jobs:
             ./**/target/site
 
       - name: Save Jacoco Report for Sonar
-        if: ${{ matrix.java == 17 && matrix.os == 'ubuntu-20.04'}}
+        if: ${{ matrix.java == 17 && matrix.os == 'ubuntu-20.04'}} && always()
         uses: actions/upload-artifact@v3
         with:
           name: liquibase-jacoco-test-results
@@ -219,7 +219,7 @@ jobs:
             ./liquibase-standard/target/jacoco.exec
 
       - name: Archive Modules
-        if: ${{ matrix.java == 17 && matrix.os == 'ubuntu-20.04'}}
+        if: ${{ matrix.java == 17 && matrix.os == 'ubuntu-20.04'}} && always()
         uses: actions/upload-artifact@v3
         with:
           name: liquibase-modules
@@ -229,6 +229,7 @@ jobs:
   integration-test:
     name: Integration Test
     runs-on: ubuntu-20.04
+    if: always()
     strategy:
       fail-fast: false
       matrix:
@@ -308,12 +309,11 @@ jobs:
         run: ./mvnw -B clean verify -DtrimStackTrace=false -Dliquibase.sdk.testSystem.test=${{ matrix.testSystem }} -Dliquibase.sdk.testSystem.acceptLicenses=${{ matrix.testSystem }} -Dliquibase.sdk.testSystem.snowflake.url=${{ env.TH_SNOW_URL }} -Dliquibase.sdk.testSystem.snowflake.username=${{ env.TH_DB_ADMIN }} -Dliquibase.sdk.testSystem.snowflake.password=${{ env.TH_DB_PASSWD }} -Dtest=*IntegrationTest,*ExecutorTest -DfailIfNoTests=false -Dsurefire.failIfNoSpecifiedTests=false -Dsurefire.failIfNoTests=false
 
       - name: Check Test Count
-        shell: bash
         run: |
-          if [[ "${{ matrix.os }}" == "macos-13" ]]; then
-            TEST_COUNT=$(find . -name '*.txt' -print0 | xargs -0 ggrep -oP 'Tests run: \K[0-9]+' | awk '{s+=$1} END {print(s)}')
+          if [[ "${{ matrix.testSystem }}" == "macos-13" ]]; then
+            TEST_COUNT=$(find . -name '*.txt' | xargs ggrep -oP 'Tests run: \K[0-9]+' | awk -F ':' '{s+=$2} END {print(s)}')
           else
-            TEST_COUNT=$(find . -name '*.txt' -print0 | xargs -0 grep -oP 'Tests run: \K[0-9]+' | awk '{s+=$1} END {print(s)}')
+            TEST_COUNT=$(find . -name '*.txt' | xargs grep -oP 'Tests run: \K[0-9]+' | awk -F ':' '{s+=$2} END {print(s)}')
           fi
           echo "Total integration tests run: $TEST_COUNT"
           if [ "$TEST_COUNT" -eq 0 ]; then
