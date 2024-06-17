@@ -1,6 +1,9 @@
 package liquibase.changelog;
 
 import liquibase.*;
+import liquibase.configuration.ConfigurationValueProvider;
+import liquibase.configuration.LiquibaseConfiguration;
+import liquibase.configuration.core.DefaultsFileValueProvider;
 import liquibase.database.Database;
 import liquibase.database.DatabaseList;
 import liquibase.exception.DatabaseException;
@@ -399,6 +402,31 @@ public class ChangeLogParameters {
                     && (contexts == null || parameter.getValidContexts().matches(contexts))
                     && (database == null || DatabaseList.definitionMatches(parameter.getValidDatabases(), database, true))
                     ;
+        }
+    }
+
+    /**
+     * Add java property arguments to changelog parameters
+     */
+    public void addJavaProperties() {
+        HashMap javaProperties = Scope.getCurrentScope().get("javaProperties", HashMap.class);
+        if (javaProperties != null) {
+            javaProperties.forEach((key, value) -> this.set((String) key, value));
+        }
+    }
+
+    /**
+     * Add default-file properties to changelog parameters
+     */
+    public void addDefaultFileProperties() {
+        final LiquibaseConfiguration liquibaseConfiguration = Scope.getCurrentScope().getSingleton(LiquibaseConfiguration.class);
+        for (ConfigurationValueProvider cvp : liquibaseConfiguration.getProviders()) {
+            if (cvp instanceof DefaultsFileValueProvider) {
+                DefaultsFileValueProvider dfvp = (DefaultsFileValueProvider) cvp;
+                dfvp.getMap().entrySet().stream()
+                        .filter(entry -> ((String) entry.getKey()).startsWith("parameter."))
+                        .forEach(entry -> this.set(((String) entry.getKey()).replaceFirst("^parameter.", ""), entry.getValue()));
+            }
         }
     }
 }
