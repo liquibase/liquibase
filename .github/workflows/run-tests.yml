@@ -173,8 +173,21 @@ jobs:
         if: ${{ matrix.java != 8 && matrix.java != 11}}
         run: |
           ./mvnw -B "-Dbuild.repository.owner=liquibase" "-Dbuild.repository.name=liquibase" "-Dbuild.branch=${{ needs.setup.outputs.thisBranchName }}" "-Dbuild.number=${{ github.run_number }}" "-Dbuild.commit=${{ needs.setup.outputs.latestMergeSha }}" "-DtrimStackTrace=false" -P 'skip-integration-tests' clean test package surefire-report:report
+      
+      - name: Check windows
+        if: matrix.os == 'windows-2019'
+        run: |
+          if ("${{ matrix.os }}" -ne "macos-13") {
+            $TEST_COUNT = $(find . -name '*.txt' | %{Select-String -Pattern 'Tests run: \K[0-9]+' $_} | %{$_ -split ':'}[1] | Measure-Object -Sum | Select-Object -ExpandProperty Sum)
+          }
+          echo "Total integration tests run: $TEST_COUNT"
+          if ($TEST_COUNT -eq 0) {
+              echo "No integration tests were run."
+              exit 1
+          }
 
       - name: Check Test Count for Java 8, 11, 17, 21 Ubuntu
+        if: matrix.os != 'macos-13'
         run: |
           if [[ "${{ matrix.os }}" != "macos-13" ]]; then
             TEST_COUNT=$(find . -name '*.txt' | xargs grep -oP 'Tests run: \K[0-9]+' | awk -F ':' '{s+=$2} END {print(s)}')
@@ -185,7 +198,14 @@ jobs:
             exit 1
           fi
       
+      - name: Install GNU grep
+        run: |
+          brew update
+          brew install grep
+          ln -s /usr/local/bin/ggrep /usr/local/bin/grep
+
       - name: Check Test Count for Java 8 macos 
+        if: matrix.os == 'macos-13'
         shell: bash
         run: |
           if [[ "${{ matrix.os }}" == "macos-13" ]]; then
