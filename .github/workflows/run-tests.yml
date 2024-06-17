@@ -176,10 +176,14 @@ jobs:
 
       - name: Check Test Count
         run: |
-          TEST_COUNT=$(grep -oP 'Tests run: \K[0-9]+' **/target/surefire-reports/*.txt | awk '{s+=$1} END {print s}')
-          echo "Total tests run: $TEST_COUNT"
+          if [[ "${{ matrix.os }}" == "macos-13" ]]; then
+            TEST_COUNT=$(find . -name '*.txt' | xargs ggrep -oP 'Tests run: \K[0-9]+' | awk -F ':' '{s+=$2} END {print(s)}')
+          else
+            TEST_COUNT=$(find . -name '*.txt' | xargs grep -oP 'Tests run: \K[0-9]+' | awk -F ':' '{s+=$2} END {print(s)}')
+          fi
+          echo "Total integration tests run: $TEST_COUNT"
           if [ "$TEST_COUNT" -eq 0 ]; then
-            echo "No tests were run."
+            echo "No integration tests were run."
             exit 1
           fi
 
@@ -304,7 +308,11 @@ jobs:
 
       - name: Check Test Count
         run: |
-          TEST_COUNT=$(grep -oP 'Tests run: \K[0-9]+' **/target/surefire-reports/*.txt | awk -F ':' '{s+=$2} END {print(s)}')
+          if [[ "${{ matrix.os }}" == "macos-13" ]]; then
+            TEST_COUNT=$(find . -name '*.txt' | xargs ggrep -oP 'Tests run: \K[0-9]+' | awk -F ':' '{s+=$2} END {print(s)}')
+          else
+            TEST_COUNT=$(find . -name '*.txt' | xargs grep -oP 'Tests run: \K[0-9]+' | awk -F ':' '{s+=$2} END {print(s)}')
+          fi
           echo "Total integration tests run: $TEST_COUNT"
           if [ "$TEST_COUNT" -eq 0 ]; then
             echo "No integration tests were run."
