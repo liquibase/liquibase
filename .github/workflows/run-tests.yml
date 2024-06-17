@@ -187,6 +187,10 @@ jobs:
             exit 1
           fi
           echo "TEST_COUNT_JAVA_UBUNTU=$TEST_COUNT" >> $GITHUB_ENV
+          if [ "$TEST_COUNT" -lt 5981 ]; then
+            echo "NOTIFY_SLACK_UBUNTU=true" >> $GITHUB_ENV
+          else
+            echo "NOTIFY_SLACK_UBUNTU=false" >> $GITHUB_ENV
 
       - name: Check Unit Test Count for Java 8 macos-13
         id: test-count-java-macos
@@ -200,6 +204,10 @@ jobs:
             exit 1
           fi  
           echo "TEST_COUNT_JAVA_MACOS=$TEST_COUNT" >> $GITHUB_ENV
+          if [ "$TEST_COUNT" -lt 5981 ]; then
+            echo "NOTIFY_SLACK_MACOS=true" >> $GITHUB_ENV
+          else
+            echo "NOTIFY_SLACK_MACOS=false" >> $GITHUB_ENV
 
       - name: Check Test Count for windows-2019
         id: test-count-java-windows
@@ -213,9 +221,15 @@ jobs:
             exit 1
           }
           echo "TEST_COUNT_JAVA_WINDOWS=$TEST_COUNT" | Out-File -Append -Encoding utf8 -FilePath $env:GITHUB_ENV
+          if ($TEST_COUNT -lt 5999) {
+            Write-Output "NOTIFY_SLACK_WINDOWS=true" | Out-File -Append -Encoding utf8 -FilePath $env:GITHUB_ENV
+          }
+          else {
+            Write-Output "NOTIFY_SLACK_WINDOWS=false" | Out-File -Append -Encoding utf8 -FilePath $env:GITHUB_ENV
+          }
 
       - name: Notify slack if Test Count decreases
-        if: ${{ fromJSON(env.TEST_COUNT_JAVA_WINDOWS) || '0' < 5999 || fromJSON(env.TEST_COUNT_JAVA_UBUNTU) || '0' < 5981 || fromJSON(env.TEST_COUNT_JAVA_MACOS) || '0' < 5981 }} 
+        if: ${{ env.NOTIFY_SLACK_UBUNTU == 'true' || env.NOTIFY_SLACK_MACOS == 'true' || env.NOTIFY_SLACK_WINDOWS == 'true' }}
         uses: rtCamp/action-slack-notify@v2
         env:
           SLACK_WEBHOOK: ${{ secrets.NIGHTLY_BUILDS_SLACK_WEBHOOK }}
