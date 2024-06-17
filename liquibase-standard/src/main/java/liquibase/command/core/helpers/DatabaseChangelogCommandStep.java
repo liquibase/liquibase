@@ -99,8 +99,8 @@ public class DatabaseChangelogCommandStep extends AbstractHelperCommandStep impl
         ChangeLogParameters changeLogParameters = commandScope.getArgumentValue(CHANGELOG_PARAMETERS);
         if (changeLogParameters == null) {
             changeLogParameters = new ChangeLogParameters(database);
-            addJavaProperties(changeLogParameters);
-            addDefaultFileProperties(changeLogParameters);
+            changeLogParameters.addJavaProperties();
+            changeLogParameters.addDefaultFileProperties();
         }
         Contexts contexts = new Contexts(commandScope.getArgumentValue(CONTEXTS_ARG));
         changeLogParameters.setContexts(contexts);
@@ -157,29 +157,11 @@ public class DatabaseChangelogCommandStep extends AbstractHelperCommandStep impl
 
     /**
      * Add java property arguments to changelog parameters
+     * @deprecated use {@link ChangeLogParameters#addJavaProperties()} instead.
      * @param changeLogParameters the changelog parameters to update
      */
+    @Deprecated
     public void addJavaProperties(ChangeLogParameters changeLogParameters) {
-        HashMap javaProperties = Scope.getCurrentScope().get("javaProperties", HashMap.class);
-        if (javaProperties != null) {
-            javaProperties.forEach((key, value) -> changeLogParameters.set((String) key, value));
-        }
+        changeLogParameters.addJavaProperties();
     }
-
-    /**
-     * Add default-file properties to changelog parameters
-     * @param changeLogParameters the changelog parameters to update
-     */
-    private void addDefaultFileProperties(ChangeLogParameters changeLogParameters) {
-        final LiquibaseConfiguration liquibaseConfiguration = Scope.getCurrentScope().getSingleton(LiquibaseConfiguration.class);
-        for (ConfigurationValueProvider cvp : liquibaseConfiguration.getProviders()) {
-            if (cvp instanceof DefaultsFileValueProvider) {
-                DefaultsFileValueProvider dfvp = (DefaultsFileValueProvider)  cvp;
-                dfvp.getMap().entrySet().stream()
-                        .filter(entry -> ((String) entry.getKey()).startsWith("parameter."))
-                        .forEach(entry -> changeLogParameters.set(((String) entry.getKey()).replaceFirst("^parameter.", ""), entry.getValue()));
-            }
-        }
-    }
-
 }
