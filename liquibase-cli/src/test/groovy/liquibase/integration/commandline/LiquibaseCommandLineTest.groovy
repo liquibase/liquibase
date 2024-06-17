@@ -440,6 +440,14 @@ Global Options
                                variable:
                                'LIQUIBASE_SUPPORTS_METHOD_VALIDATION_LEVEL')
 
+      --trim-load-data-file-header=PARAM
+                             If true column headers will be trimmed in case
+                               they were specified with spaces in the file.
+                             DEFAULT: false
+                             (defaults file: 'liquibase.
+                               trimLoadDataFileHeader', environment variable:
+                               'LIQUIBASE_TRIM_LOAD_DATA_FILE_HEADER')
+
       --ui-service=PARAM     Changes the default UI Service Logger used by
                                Liquibase. Options are CONSOLE or LOGGER.
                              DEFAULT: CONSOLE
