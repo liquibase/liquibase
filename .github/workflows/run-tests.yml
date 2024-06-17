@@ -174,27 +174,27 @@ jobs:
         run: |
           ./mvnw -B "-Dbuild.repository.owner=liquibase" "-Dbuild.repository.name=liquibase" "-Dbuild.branch=${{ needs.setup.outputs.thisBranchName }}" "-Dbuild.number=${{ github.run_number }}" "-Dbuild.commit=${{ needs.setup.outputs.latestMergeSha }}" "-DtrimStackTrace=false" -P 'skip-integration-tests' clean test package surefire-report:report
 
-      - name: Check Test Count for Java 8, 11, 17, 21 Ubuntu
+      - name: Check Unit Test Count for Java 8, 11, 17, 21 Ubuntu
         id: test-count-java-ubuntu
         if: matrix.os != 'macos-13' && matrix.os != 'windows-2019'
         run: |
           if [[ "${{ matrix.os }}" != "macos-13" ]]; then
             TEST_COUNT=$(find . -name '*.txt' | xargs grep -oP 'Tests run: \K[0-9]+' | awk -F ':' '{s+=$2} END {print(s)}')
           fi
-          echo "Total integration tests run: $TEST_COUNT"
+          echo "Total Unit tests run: $TEST_COUNT"
           if [ "$TEST_COUNT" -eq 0 ]; then
-            echo "No integration tests were run."
+            echo "No Unit tests were run."
             exit 1
           fi
           echo "TEST_COUNT_JAVA_UBUNTU=$TEST_COUNT" >> $GITHUB_ENV
 
-      - name: Check Test Count for Java 8 macos-13
+      - name: Check Unit Test Count for Java 8 macos-13
         id: test-count-java-macos
         if: matrix.os == 'macos-13' && always()
         shell: bash
         run: |
           TEST_COUNT=$(grep -r -o -E 'Tests run: [0-9]+' . | awk -F: '{s+=$NF} END {print s}')
-          echo "Total integration tests run: $TEST_COUNT"
+          echo "Total Unit tests run: $TEST_COUNT"
           if [ -z "$TEST_COUNT" ] || [ "$TEST_COUNT" -eq 0 ]; then
             echo "No test result files found or test count is zero."
             exit 1
@@ -207,19 +207,19 @@ jobs:
         shell: pwsh
         run: |
           $TEST_COUNT = (Get-ChildItem -Recurse -Filter "*.txt" | Select-String -Pattern 'Tests run: (\d+)' | ForEach-Object { $_.Matches.Groups[1].Value } | Measure-Object -Sum).Sum
-          Write-Output "Total integration tests run: $TEST_COUNT"
+          Write-Output "Total Unit tests run: $TEST_COUNT"
           if ($TEST_COUNT -eq 0) {
-            Write-Output "No integration tests were run."
+            Write-Output "No Unit tests were run."
             exit 1
           }
           echo "TEST_COUNT_JAVA_WINDOWS=$TEST_COUNT" | Out-File -Append -Encoding utf8 -FilePath $env:GITHUB_ENV
 
       - name: Notify slack if Test Count decreases
-        if: ${{ env.TEST_COUNT_JAVA_MACOS }} < 5999 || ${{ env.TEST_COUNT_JAVA_UBUNTU }} < 5981 || ${{ env.TEST_COUNT_JAVA_WINDOWS }} < 5999
+        if: ${{ env.TEST_COUNT_JAVA_MACOS }} < 5981 || ${{ env.TEST_COUNT_JAVA_UBUNTU }} < 5981 || ${{ env.TEST_COUNT_JAVA_WINDOWS }} < 5999
         uses: rtCamp/action-slack-notify@v2
         env:
           SLACK_WEBHOOK: ${{ secrets.NIGHTLY_BUILDS_SLACK_WEBHOOK }}
-          SLACK_MESSAGE: 'OSS Test count decreased. Please check the unit tests and integration test results.'
+          SLACK_MESSAGE: 'OSS Unit Test count decreased. Please check the unit tests and integration test results.'
           SLACK_ICON_EMOJI: ":robot_face:"
           
       - name: Remove Original Jars for *nix
@@ -344,16 +344,21 @@ jobs:
 
       - name: Check Test Count
         run: |
-          if [[ "${{ matrix.testSystem }}" == "macos-13" ]]; then
-            TEST_COUNT=$(find . -name '*.txt' | xargs ggrep -oP 'Tests run: \K[0-9]+' | awk -F ':' '{s+=$2} END {print(s)}')
-          else
-            TEST_COUNT=$(find . -name '*.txt' | xargs grep -oP 'Tests run: \K[0-9]+' | awk -F ':' '{s+=$2} END {print(s)}')
-          fi
+          TEST_COUNT=$(find . -name '*.txt' | xargs grep -oP 'Tests run: \K[0-9]+' | awk -F ':' '{s+=$2} END {print(s)}')
           echo "Total integration tests run: $TEST_COUNT"
           if [ "$TEST_COUNT" -eq 0 ]; then
             echo "No integration tests were run."
             exit 1
           fi
+          echo "TEST_COUNT_INTEGRATION=$TEST_COUNT" >> $GITHUB_ENV
+
+      - name: Notify slack if Test Count decreases
+        if: ${{ env.TEST_COUNT_INTEGRATION }} < 739
+        uses: rtCamp/action-slack-notify@v2
+        env:
+          SLACK_WEBHOOK: ${{ secrets.NIGHTLY_BUILDS_SLACK_WEBHOOK }}
+          SLACK_MESSAGE: 'OSS Integration Test count decreased. Please check the unit tests and integration test results.'
+          SLACK_ICON_EMOJI: ":robot_face:"    
 
       - name: Archive Test Results
         if: ${{ inputs.archive_test_results == 'true' }}
