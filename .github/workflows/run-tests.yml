@@ -178,9 +178,9 @@ jobs:
         shell: bash
         run: |
           if [[ "${{ matrix.os }}" == "macos-13" ]]; then
-            TEST_COUNT=$(find . -name '*.txt' -print0 | xargs ggrep -oP 'Tests run: \K[0-9]+' | awk -F ':' '{s+=$2} END {print(s)}')
+            TEST_COUNT=$(find . -name '*.txt' -print0 | xargs -0 ggrep -oP 'Tests run: \K[0-9]+' | awk '{s+=$1} END {print(s)}')
           else
-            TEST_COUNT=$(find . -name '*.txt' -print0 | xargs grep -oP 'Tests run: \K[0-9]+' | awk -F ':' '{s+=$2} END {print(s)}')
+            TEST_COUNT=$(find . -name '*.txt' -print0 | xargs -0 grep -oP 'Tests run: \K[0-9]+' | awk '{s+=$1} END {print(s)}')
           fi
           echo "Total integration tests run: $TEST_COUNT"
           if [ "$TEST_COUNT" -eq 0 ]; then
@@ -311,9 +311,9 @@ jobs:
         shell: bash
         run: |
           if [[ "${{ matrix.os }}" == "macos-13" ]]; then
-            TEST_COUNT=$(find . -name '*.txt' -print0 | xargs ggrep -oP 'Tests run: \K[0-9]+' | awk -F ':' '{s+=$2} END {print(s)}')
+            TEST_COUNT=$(find . -name '*.txt' -print0 | xargs -0 ggrep -oP 'Tests run: \K[0-9]+' | awk '{s+=$1} END {print(s)}')
           else
-            TEST_COUNT=$(find . -name '*.txt' -print0 | xargs grep -oP 'Tests run: \K[0-9]+' | awk -F ':' '{s+=$2} END {print(s)}')
+            TEST_COUNT=$(find . -name '*.txt' -print0 | xargs -0 grep -oP 'Tests run: \K[0-9]+' | awk '{s+=$1} END {print(s)}')
           fi
           echo "Total integration tests run: $TEST_COUNT"
           if [ "$TEST_COUNT" -eq 0 ]; then
