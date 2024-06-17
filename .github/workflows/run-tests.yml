@@ -178,7 +178,7 @@ jobs:
         shell: bash
         run: |
           if [[ "${{ matrix.os }}" == "macos-13" ]]; then
-          TEST_COUNT=$(find . -name '*.txt' | xargs ggrep -oP 'Tests run: \K[0-9]+' | awk '{s+=$1} END {print(s)}'
+            TEST_COUNT=$(find . -name '*.txt' | xargs ggrep -oP 'Tests run: \K[0-9]+' | awk '{s+=$1} END {print(s)}')
           else
             TEST_COUNT=$(find . -name '*.txt' | xargs grep -oP 'Tests run: \K[0-9]+' | awk -F ':' '{s+=$2} END {print(s)}')
           fi
