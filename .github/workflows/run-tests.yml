@@ -186,16 +186,17 @@ jobs:
             exit 1
           fi
 
-      - name: Check Test Count for Java 8 macos 
+      - name: Check Test Count for Java 8 macos-13
         if: matrix.os == 'macos-13' && always()
         shell: bash
         run: |
-          TEST_COUNT=$(find . -name '*.txt' | xargs cat | perl -nle'print$& if m{Tests run: \K\d+}' | awk '{s+=$1} END {print s}')
+          TEST_COUNT=$(grep -r -o -E 'Tests run: [0-9]+' . | awk -F: '{s+=$NF} END {print s}')
           echo "Total integration tests run: $TEST_COUNT"
-          if [ "$TEST_COUNT" -eq 0 ]; then
-            echo "No integration tests were run."
+          if [ -z "$TEST_COUNT" ] || [ "$TEST_COUNT" -eq 0 ]; then
+            echo "No test result files found or test count is zero."
             exit 1
           fi
+      
 
       - name: Check windows
         if: matrix.os == 'windows-2019' && always()
