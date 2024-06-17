@@ -174,19 +174,19 @@ jobs:
         run: |
           ./mvnw -B "-Dbuild.repository.owner=liquibase" "-Dbuild.repository.name=liquibase" "-Dbuild.branch=${{ needs.setup.outputs.thisBranchName }}" "-Dbuild.number=${{ github.run_number }}" "-Dbuild.commit=${{ needs.setup.outputs.latestMergeSha }}" "-DtrimStackTrace=false" -P 'skip-integration-tests' clean test package surefire-report:report
 
-          - name: Check Unit Test Count for Java 8, 11, 17, 21 Ubuntu
-          id: test-count-java-ubuntu
-          if: matrix.os != 'macos-13' && matrix.os != 'windows-2019'
-          run: |
-            if [[ "${{ matrix.os }}" != "macos-13" ]]; then
-              TEST_COUNT=$(find . -name '*.txt' | xargs grep -oP 'Tests run: \K[0-9]+' | awk -F ':' '{s+=$2} END {print(s)}')
-            fi
-            echo "Total Unit tests run: $TEST_COUNT"
-            if [ "$TEST_COUNT" -eq 0 ]; then
-              echo "No Unit tests were run."
-              exit 1
-            fi
-            echo "TEST_COUNT_JAVA_UBUNTU=$TEST_COUNT" >> $GITHUB_ENV
+      - name: Check Unit Test Count for Java 8, 11, 17, 21 Ubuntu
+        id: test-count-java-ubuntu
+        if: matrix.os != 'macos-13' && matrix.os != 'windows-2019'
+        run: |
+          if [[ "${{ matrix.os }}" != "macos-13" ]]; then
+            TEST_COUNT=$(find . -name '*.txt' | xargs grep -oP 'Tests run: \K[0-9]+' | awk -F ':' '{s+=$2} END {print(s)}')
+          fi
+          echo "Total Unit tests run: $TEST_COUNT"
+          if [ "$TEST_COUNT" -eq 0 ]; then
+            echo "No Unit tests were run."
+            exit 1
+          fi
+          echo "TEST_COUNT_JAVA_UBUNTU=$TEST_COUNT" >> $GITHUB_ENV
   
       - name: Check Unit Test Count for Java 8 macos-13
         id: test-count-java-macos
