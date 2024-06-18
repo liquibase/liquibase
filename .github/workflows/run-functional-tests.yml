@@ -19,7 +19,7 @@ on:
 jobs:
   functional-tests-build:
     runs-on: ubuntu-latest
-    if: contains(github.event.pull_request.labels.*.name, 'runFunctionalTests') || (github.event_name != 'pull_request' && github.event_name != 'pull_request_target')
+    if: contains(github.event.pull_request.labels.*.name, 'runFunctional&HarnessTests') || (github.event_name != 'pull_request' && github.event_name != 'pull_request_target')
     steps:
       
       - name: Check variables
