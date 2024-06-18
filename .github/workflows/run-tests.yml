@@ -221,6 +221,7 @@ jobs:
           SLACK_WEBHOOK: ${{ secrets.NIGHTLY_BUILDS_SLACK_WEBHOOK }}
           SLACK_MESSAGE: 'OSS Unit Test count decreased. Please check the unit tests and integration test results.'
           SLACK_ICON_EMOJI: ":robot_face:"
+          SLACK_COLOR: 'danger'
           
       - name: Remove Original Jars for *nix
         if: env.OS_TYPE != 'windows-2019'
