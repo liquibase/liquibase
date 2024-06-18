@@ -223,12 +223,12 @@ jobs:
           SLACK_ICON_EMOJI: ":robot_face:"
           
       - name: Remove Original Jars for *nix
-        if: env.OS_TYPE != 'windows-2019' && always()
+        if: env.OS_TYPE != 'windows-2019'
         run: |
           find . -name original-*.jar -exec rm {} \;
 
       - name: Upload Artifacts for build.yml
-        if: ${{ matrix.java == 17 && matrix.os == 'ubuntu-20.04'}} && always()
+        if: ${{ matrix.java == 17 && matrix.os == 'ubuntu-20.04'}}
         uses: actions/upload-artifact@v3
         with:
           name: temp-artifact
@@ -236,7 +236,7 @@ jobs:
             ./**/target/*.jar
 
       - name: Archive Test Results
-        if: ${{ inputs.archive_test_results == 'true' }} && always()
+        if: ${{ inputs.archive_test_results == 'true' }}
         uses: actions/upload-artifact@v3
         with:
           name: liquibase-test-results-jdk${{ matrix.java }}
@@ -245,7 +245,7 @@ jobs:
             ./**/target/site
 
       - name: Save Jacoco Report for Sonar
-        if: ${{ matrix.java == 17 && matrix.os == 'ubuntu-20.04'}} && always()
+        if: ${{ matrix.java == 17 && matrix.os == 'ubuntu-20.04'}}
         uses: actions/upload-artifact@v3
         with:
           name: liquibase-jacoco-test-results
@@ -253,7 +253,7 @@ jobs:
             ./liquibase-standard/target/jacoco.exec
 
       - name: Archive Modules
-        if: ${{ matrix.java == 17 && matrix.os == 'ubuntu-20.04'}} && always()
+        if: ${{ matrix.java == 17 && matrix.os == 'ubuntu-20.04'}}
         uses: actions/upload-artifact@v3
         with:
           name: liquibase-modules
@@ -263,7 +263,6 @@ jobs:
   integration-test:
     name: Integration Test
     runs-on: ubuntu-20.04
-    if: always()
     strategy:
       fail-fast: false
       matrix:
@@ -377,7 +376,7 @@ jobs:
 
   sonar:
     needs: [ setup, build_tests, integration-test ]
-    uses: liquibase/build-logic/.github/workflows/sonar-test-scan.yml@DAT-17704
+    uses: liquibase/build-logic/.github/workflows/sonar-test-scan.yml@v0.7.8
     with:
       thisBranchName: ${{ needs.setup.outputs.thisBranchName }}
       thisSha: ${{ needs.setup.outputs.latestMergeSha }}
