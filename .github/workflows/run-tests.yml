@@ -217,7 +217,7 @@ jobs:
       - name: Read threshold values from test_counts.json
         id: read-thresholds
         run: |
-          THRESHOLDS=$(cat ./test_counts.json)
+          THRESHOLDS=$(cat ../test_counts.json)
           echo "WINDOWS_THRESHOLD=$(echo $THRESHOLDS | jq -r '.TEST_COUNT_JAVA_WINDOWS')" >> $GITHUB_ENV
           echo "UBUNTU_THRESHOLD=$(echo $THRESHOLDS | jq -r '.TEST_COUNT_JAVA_UBUNTU')" >> $GITHUB_ENV
           echo "MACOS_THRESHOLD=$(echo $THRESHOLDS | jq -r '.TEST_COUNT_JAVA_MACOS')" >> $GITHUB_ENV
@@ -368,7 +368,7 @@ jobs:
       - name: Read threshold values from test_counts.json
         id: read-thresholds
         run: |
-          THRESHOLDS=$(cat ./test_counts.json)
+          THRESHOLDS=$(cat ../test_counts.json)
           echo "INTEGRATION_THRESHOLD=$(echo $THRESHOLDS | jq -r '.TEST_COUNT_INTEGRATION')" >> $GITHUB_ENV
         
       - name: Notify slack if Test Count decreases
