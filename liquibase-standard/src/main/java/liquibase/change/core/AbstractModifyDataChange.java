@@ -3,6 +3,7 @@ package liquibase.change.core;
 import liquibase.change.AbstractChange;
 import liquibase.change.ColumnConfig;
 import liquibase.change.DatabaseChangeProperty;
+import lombok.Setter;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -12,12 +13,16 @@ import java.util.List;
  */
 public abstract class AbstractModifyDataChange extends AbstractChange {
 
+    @Setter
     protected String catalogName;
+    @Setter
     protected String schemaName;
+    @Setter
     protected String tableName;
 
     protected List<ColumnConfig> whereParams = new ArrayList<>();
 
+    @Setter
     protected String where;
 
     @DatabaseChangeProperty(mustEqualExisting ="table.catalog", description = "Name of the database catalog")
@@ -25,17 +30,9 @@ public abstract class AbstractModifyDataChange extends AbstractChange {
         return catalogName;
     }
 
-    public void setCatalogName(String catalogName) {
-        this.catalogName = catalogName;
-    }
-
     @DatabaseChangeProperty(mustEqualExisting ="table.schema", description = "Name of the database schema")
     public String getSchemaName() {
         return schemaName;
-    }
-
-    public void setSchemaName(String schemaName) {
-        this.schemaName = schemaName;
     }
 
     @DatabaseChangeProperty(mustEqualExisting= "table", description = "Name of the table")
@@ -43,18 +40,10 @@ public abstract class AbstractModifyDataChange extends AbstractChange {
         return tableName;
     }
 
-    public void setTableName(String tableName) {
-        this.tableName = tableName;
-    }
-
     @DatabaseChangeProperty(serializationType = SerializationType.NESTED_OBJECT, exampleValue = "name='Bob'",
         description = "SQL WHERE condition string")
     public String getWhere() {
         return where;
-    }
-
-    public void setWhere(String where) {
-        this.where = where;
     }
 
     /**

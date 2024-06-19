@@ -2,14 +2,19 @@ package liquibase.integration.ant;
 
 import liquibase.Liquibase;
 import liquibase.exception.LiquibaseException;
+import lombok.Getter;
+import lombok.Setter;
 import org.apache.tools.ant.BuildException;
 import org.apache.tools.ant.types.resources.FileResource;
 
 import java.io.File;
 
 public class DBDocTask extends BaseLiquibaseTask {
+    @Setter
+    @Getter
     private FileResource outputDirectory;
     private String changeLog;
+    @Setter
     private String contexts;
 
     @Override
@@ -58,15 +63,4 @@ public class DBDocTask extends BaseLiquibaseTask {
         this.changeLog = changeLog;
     }
 
-    public FileResource getOutputDirectory() {
-        return outputDirectory;
-    }
-
-    public void setOutputDirectory(FileResource outputDirectory) {
-        this.outputDirectory = outputDirectory;
-    }
-
-    public void setContexts(String contexts) {
-        this.contexts = contexts;
-    }
 }
