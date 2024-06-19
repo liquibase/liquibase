@@ -4,7 +4,6 @@ import liquibase.database.Database;
 import liquibase.diff.compare.CompareControl;
 import liquibase.diff.compare.DatabaseObjectComparatorFactory;
 import liquibase.exception.UnexpectedLiquibaseException;
-import liquibase.parser.NamespaceDetails;
 import liquibase.parser.core.ParsedNode;
 import liquibase.parser.core.ParsedNodeException;
 import liquibase.resource.ResourceAccessor;
@@ -75,7 +74,7 @@ public class DatabaseObjectCollection implements LiquibaseSerializable {
         }
         Map<String, Set<DatabaseObject>> collectionMap = cache.get(databaseObject.getClass());
         if (collectionMap == null) {
-            collectionMap = new HashMap<String, Set<DatabaseObject>>();
+            collectionMap = new LinkedHashMap<>();
             cache.put(databaseObject.getClass(), collectionMap);
         }
 
@@ -84,7 +83,7 @@ public class DatabaseObjectCollection implements LiquibaseSerializable {
         for (String hash : hashes) {
             Set<DatabaseObject> collection = collectionMap.get(hash);
             if (collection == null) {
-                collection = new HashSet<DatabaseObject>();
+                collection = new HashSet<>();
                 collectionMap.put(hash, collection);
             }
             collection.add(databaseObject);
@@ -138,7 +137,7 @@ public class DatabaseObjectCollection implements LiquibaseSerializable {
      */
     public <DatabaseObjectType extends DatabaseObject> Set<DatabaseObjectType> get(Class<DatabaseObjectType> type) {
 
-        Set<DatabaseObject> returnSet = new HashSet<DatabaseObject>();
+        Set<DatabaseObject> returnSet = new LinkedHashSet<>();
 
         Map<String, Set<DatabaseObject>> allFound = cache.get(type);
         if (allFound != null) {

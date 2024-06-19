@@ -1146,6 +1146,8 @@
             <xsd:attribute name="procedureName" type="xsd:string" use="required" />
             <xsd:attribute name="catalogName" type="xsd:string" />
             <xsd:attribute name="schemaName" type="xsd:string" />
+            <xsd:attribute name="procedureArguments" type="xsd:string" />
+            <xsd:attribute name="dropName" type="xsd:string" />
         </xsd:complexType>
     </xsd:element>
 
