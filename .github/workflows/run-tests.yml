@@ -175,7 +175,6 @@ jobs:
           ./mvnw -B "-Dbuild.repository.owner=liquibase" "-Dbuild.repository.name=liquibase" "-Dbuild.branch=${{ needs.setup.outputs.thisBranchName }}" "-Dbuild.number=${{ github.run_number }}" "-Dbuild.commit=${{ needs.setup.outputs.latestMergeSha }}" "-DtrimStackTrace=false" -P 'skip-integration-tests' clean test package surefire-report:report
 
       - name: Check Unit Test Count for Java 8, 11, 17, 21 Ubuntu
-        id: test-count-java-ubuntu
         if: matrix.os != 'macos-13' && matrix.os != 'windows-2019'
         run: |
           if [[ "${{ matrix.os }}" != "macos-13" ]]; then
@@ -189,7 +188,6 @@ jobs:
           echo "TEST_COUNT_JAVA_UBUNTU=$TEST_COUNT" >> $GITHUB_ENV
   
       - name: Check Unit Test Count for Java 8 macos-13
-        id: test-count-java-macos
         if: matrix.os == 'macos-13'
         shell: bash
         run: |
@@ -201,8 +199,7 @@ jobs:
           fi  
           echo "TEST_COUNT_JAVA_MACOS=$TEST_COUNT" >> $GITHUB_ENV
 
-      - name: Read threshold values from test_counts.json
-        id: read-thresholds
+      - name: Read threshold values for macos-13 and ubuntu-20.04
         run: |
           THRESHOLDS=$(cat ${{ github.workspace }}/.github/test_counts.json)
           echo "WINDOWS_THRESHOLD=$(echo $THRESHOLDS | jq -r '.TEST_COUNT_JAVA_WINDOWS')" >> $GITHUB_ENV
@@ -219,8 +216,12 @@ jobs:
           SLACK_COLOR: 'danger'
          
         # separate step for windows due to different os
+      - name: Read threshold values for windows-2019
+        run: |
+          $THRESHOLDS = Get-Content "${{ github.workspace }}/.github/test_counts.json" -Raw | ConvertFrom-Json
+          echo "WINDOWS_THRESHOLD=$(echo $THRESHOLDS | jq -r '.TEST_COUNT_JAVA_WINDOWS')" >> $GITHUB_ENV
+
       - name: Check Test Count for windows-2019 
-        id: test-count-java-windows
         if: matrix.os == 'windows-2019'
         shell: pwsh
         run: |
