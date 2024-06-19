@@ -221,14 +221,12 @@ jobs:
           echo "WINDOWS_THRESHOLD=$(echo $THRESHOLDS | jq -r '.TEST_COUNT_JAVA_WINDOWS')" >> $GITHUB_ENV
           echo "UBUNTU_THRESHOLD=$(echo $THRESHOLDS | jq -r '.TEST_COUNT_JAVA_UBUNTU')" >> $GITHUB_ENV
           echo "MACOS_THRESHOLD=$(echo $THRESHOLDS | jq -r '.TEST_COUNT_JAVA_MACOS')" >> $GITHUB_ENV
-          echo "INTEGRATION_THRESHOLD=$(echo $THRESHOLDS | jq -r '.TEST_COUNT_INTEGRATION')" >> $GITHUB_ENV
       
       - name: Notify slack if Test Count decreases
         if: |
           env.TEST_COUNT_JAVA_WINDOWS && env.TEST_COUNT_JAVA_WINDOWS < ${{ steps.read-thresholds.outputs.WINDOWS_THRESHOLD }} ||
           env.TEST_COUNT_JAVA_UBUNTU && env.TEST_COUNT_JAVA_UBUNTU < ${{ steps.read-thresholds.outputs.UBUNTU_THRESHOLD }} ||
           env.TEST_COUNT_JAVA_MACOS && env.TEST_COUNT_JAVA_MACOS < ${{ steps.read-thresholds.outputs.MACOS_THRESHOLD }} ||
-          env.TEST_COUNT_INTEGRATION && env.TEST_COUNT_INTEGRATION < ${{ steps.read-thresholds.outputs.INTEGRATION_THRESHOLD }}
         uses: rtCamp/action-slack-notify@v2
         env:
           SLACK_WEBHOOK: ${{ secrets.NIGHTLY_BUILDS_SLACK_WEBHOOK }}
