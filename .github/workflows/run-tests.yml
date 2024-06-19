@@ -200,6 +200,7 @@ jobs:
           echo "TEST_COUNT_JAVA_MACOS=$TEST_COUNT" >> $GITHUB_ENV
 
       - name: Read threshold values for macos-13 and ubuntu-20.04
+        if: matrix.os != 'macos-13' && matrix.os != 'windows-2019'
         run: |
           THRESHOLDS=$(cat ${{ github.workspace }}/.github/test_counts.json)
           echo "UBUNTU_THRESHOLD=$(echo $THRESHOLDS | jq -r '.TEST_COUNT_JAVA_UBUNTU')" >> $GITHUB_ENV
