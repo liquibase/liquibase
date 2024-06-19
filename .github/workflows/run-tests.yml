@@ -224,9 +224,9 @@ jobs:
       
       - name: Notify slack if Test Count decreases
         if: |
-          env.TEST_COUNT_JAVA_WINDOWS && env.TEST_COUNT_JAVA_WINDOWS < ${{ steps.read-thresholds.outputs.WINDOWS_THRESHOLD }} ||
-          env.TEST_COUNT_JAVA_UBUNTU && env.TEST_COUNT_JAVA_UBUNTU < ${{ steps.read-thresholds.outputs.UBUNTU_THRESHOLD }} ||
-          env.TEST_COUNT_JAVA_MACOS && env.TEST_COUNT_JAVA_MACOS < ${{ steps.read-thresholds.outputs.MACOS_THRESHOLD }} ||
+          env.TEST_COUNT_JAVA_WINDOWS && env.TEST_COUNT_JAVA_WINDOWS < env.WINDOWS_THRESHOLD ||
+          env.TEST_COUNT_JAVA_UBUNTU && env.TEST_COUNT_JAVA_UBUNTU < env.UBUNTU_THRESHOLD ||
+          env.TEST_COUNT_JAVA_MACOS && env.TEST_COUNT_JAVA_MACOS < env.MACOS_THRESHOLD
         uses: rtCamp/action-slack-notify@v2
         env:
           SLACK_WEBHOOK: ${{ secrets.NIGHTLY_BUILDS_SLACK_WEBHOOK }}
@@ -372,7 +372,7 @@ jobs:
         
       - name: Notify slack if Test Count decreases
         if: |
-          env.TEST_COUNT_INTEGRATION && env.TEST_COUNT_INTEGRATION < ${{ steps.read-thresholds.outputs.INTEGRATION_THRESHOLD }}
+          env.TEST_COUNT_INTEGRATION && env.TEST_COUNT_INTEGRATION < env.INTEGRATION_THRESHOLD
         uses: rtCamp/action-slack-notify@v2
         env:
           SLACK_WEBHOOK: ${{ secrets.NIGHTLY_BUILDS_SLACK_WEBHOOK }}
