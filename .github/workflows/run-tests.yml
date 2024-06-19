@@ -217,6 +217,7 @@ jobs:
          
         # separate step for windows due to different os
       - name: Read threshold values for windows-2019
+        shell: pwsh
         run: |
           $THRESHOLDS = Get-Content "${{ github.workspace }}/.github/test_counts.json" -Raw | ConvertFrom-Json
           echo "WINDOWS_THRESHOLD=$(echo $THRESHOLDS | jq -r '.TEST_COUNT_JAVA_WINDOWS')" >> $GITHUB_ENV
@@ -234,7 +235,7 @@ jobs:
           echo "TEST_COUNT_JAVA_WINDOWS=$TEST_COUNT" | Out-File -Append -Encoding utf8 -FilePath $env:GITHUB_ENV
 
       - name: Notify slack if Test Count decreases for windows-2019
-        if: env.TEST_COUNT_JAVA_WINDOWS && env.TEST_COUNT_JAVA_WINDOWS < env.WINDOWS_THRESHOLD
+        if: matrix.os == 'windows-2019' && env.TEST_COUNT_JAVA_WINDOWS && env.TEST_COUNT_JAVA_WINDOWS < env.WINDOWS_THRESHOLD
         uses: rtCamp/action-slack-notify@v2
         env:
           SLACK_WEBHOOK: ${{ secrets.NIGHTLY_BUILDS_SLACK_WEBHOOK }}
