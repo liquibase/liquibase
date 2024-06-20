@@ -184,7 +184,8 @@ jobs:
             exit 1
           fi
           echo "CURRENT_TEST_COUNT_JAVA_UBUNTU=$TEST_COUNT" >> $GITHUB_ENV
-  
+          echo $CURRENT_TEST_COUNT_JAVA_UBUNTU
+
       - name: Check Unit Test Count for Java 8 macos-13
         if: matrix.os == 'macos-13'
         shell: bash
@@ -203,7 +204,7 @@ jobs:
           THRESHOLDS_UBUNTU: ${{ secrets.TEST_COUNT_JAVA_UBUNTU }}
           THRESHOLDS_MACOS: ${{ secrets.TEST_COUNT_JAVA_MACOS }}
         run: |
-          if [[ (${CURRENT_TEST_COUNT_JAVA_UBUNTU:+0} -lt ${THRESHOLDS_UBUNTU:+0}) || (${CURRENT_TEST_COUNT_JAVA_MACOS:+0} -lt ${THRESHOLDS_MACOS:+0}) ]]; then
+          if [[ ($CURRENT_TEST_COUNT_JAVA_UBUNTU -lt $THRESHOLDS_UBUNTU:+0) || (CURRENT_TEST_COUNT_JAVA_MACOS -lt $THRESHOLDS_MACOS) ]]; then
           echo "Ubuntu/MacOS Unit Test count decreased. Please check the test count."
           exit 1
           fi
@@ -367,7 +368,7 @@ jobs:
         env: 
           INTEGRATION_THRESHOLD: ${{ secrets.TEST_COUNT_INTEGRATION }}
         run: |
-            if [[ (${CURRENT_TEST_COUNT_INTEGRATION:+0} -lt ${INTEGRATION_THRESHOLD:+0}) ]]; then
+            if [[ ($CURRENT_TEST_COUNT_INTEGRATION: -lt $INTEGRATION_THRESHOLD) ]]; then
               echo "Integration Test count decreased. Please check the test count."
               exit 1
             fi
