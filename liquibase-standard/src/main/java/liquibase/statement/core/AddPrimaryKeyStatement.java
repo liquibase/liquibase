@@ -9,12 +9,6 @@ import lombok.Setter;
 public class AddPrimaryKeyStatement extends AbstractSqlStatement {
 
     @Getter
-    private final String catalogName;
-    @Getter
-    private final String schemaName;
-    @Getter
-    private final String tableName;
-    @Getter
     private String tablespace;
     @Getter
     private final ColumnConfig[] columns;
@@ -32,6 +26,7 @@ public class AddPrimaryKeyStatement extends AbstractSqlStatement {
     @Setter
     private String forIndexCatalogName;
     private boolean shouldValidate = true;
+    private DatabaseTableIdentifier databaseTableIdentifier = new DatabaseTableIdentifier(null, null, null);
 
     /**
      * @deprecated
@@ -41,9 +36,9 @@ public class AddPrimaryKeyStatement extends AbstractSqlStatement {
     }
 
     public AddPrimaryKeyStatement(String catalogName, String schemaName, String tableName, ColumnConfig[] columns, String constraintName) {
-        this.catalogName = catalogName;
-        this.schemaName = schemaName;
-        this.tableName = tableName;
+        this.databaseTableIdentifier.setCatalogName(catalogName);
+        this.databaseTableIdentifier.setSchemaName(schemaName);
+        this.databaseTableIdentifier.setTableName(tableName);
         this.columns = columns;
         this.constraintName = constraintName;
     }
@@ -85,5 +80,17 @@ public class AddPrimaryKeyStatement extends AbstractSqlStatement {
     public AddPrimaryKeyStatement setShouldValidate(boolean shouldValidate) {
         this.shouldValidate = shouldValidate;
         return this;
+    }
+
+    public String getCatalogName() {
+        return databaseTableIdentifier.getCatalogName();
+    }
+
+    public String getSchemaName() {
+        return databaseTableIdentifier.getSchemaName();
+    }
+
+    public String getTableName() {
+        return databaseTableIdentifier.getTableName();
     }
 }
