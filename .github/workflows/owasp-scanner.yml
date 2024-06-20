@@ -87,12 +87,12 @@ jobs:
 
       - name: Run the scanner
         id: run_owasp
-        run: mvn clean org.owasp:dependency-check-maven:aggregate -DoutputDirectory=. -DnvdApiKey=${{ secrets.NVD_API_KEY }} -DfailOnError=true
+        run: mvn clean org.owasp:dependency-check-maven:aggregate -DnvdApiKey=${{ secrets.NVD_API_KEY }} -DfailOnError=true
     
       - name: Upload OWASP Dependency-Check results
         if: always()
         uses: actions/upload-artifact@v4
         with:
             name: owasp-dependency-check
-            path: ./dependency-check-report.html
+            path: ./target/dependency-check-report.html
   
