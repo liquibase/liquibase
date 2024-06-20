@@ -185,7 +185,7 @@ jobs:
             echo "No Unit tests were run."
             exit 1
           fi
-          echo "TEST_COUNT_JAVA_UBUNTU=$TEST_COUNT" >> $GITHUB_ENV
+          echo "CURRENT_TEST_COUNT_JAVA_UBUNTU=$TEST_COUNT" >> $GITHUB_ENV
   
       - name: Check Unit Test Count for Java 8 macos-13
         if: matrix.os == 'macos-13'
@@ -197,15 +197,15 @@ jobs:
             echo "No test result files found or test count is zero."
             exit 1
           fi  
-          echo "TEST_COUNT_JAVA_MACOS=$TEST_COUNT" >> $GITHUB_ENV
+          echo "CURRENT_TEST_COUNT_JAVA_MACOS=$TEST_COUNT" >> $GITHUB_ENV
 
       - name: Read threshold values for macos-13 and ubuntu-20.04
         if: matrix.os != 'windows-2019'
+        env: 
+          THRESHOLDS_UBUNTU: ${{ secrets.TEST_COUNT_JAVA_UBUNTU }}
+          THRESHOLDS_MACOS: ${{ secrets.TEST_COUNT_JAVA_MACOS }}
         run: |
-          THRESHOLDS=$(cat ${{ github.workspace }}/.github/test_counts.json)
-          echo "UBUNTU_THRESHOLD=$(echo $THRESHOLDS | jq -r '.TEST_COUNT_JAVA_UBUNTU')" >> $GITHUB_ENV
-          echo "MACOS_THRESHOLD=$(echo $THRESHOLDS | jq -r '.TEST_COUNT_JAVA_MACOS')" >> $GITHUB_ENV
-          if [[ ( $TEST_COUNT_JAVA_UBUNTU -lt $UBUNTU_THRESHOLD ) || ( $TEST_COUNT_JAVA_MACOS -lt $MACOS_THRESHOLD ) ]]; then
+          if [[ ( $CURRENT_TEST_COUNT_JAVA_UBUNTU -lt $THRESHOLDS_UBUNTU ) || ( $CURRENT_TEST_COUNT_JAVA_MACOS -lt $THRESHOLDS_MACOS ) ]]; then
             echo "Ubuntu/ MacOS Unit Test count decreased. Please check the test_count.json file for the threshold values."
             exit 1
           fi
@@ -221,27 +221,16 @@ jobs:
             Write-Output "No Unit tests were run."
             exit 1
           }
-          echo "TEST_COUNT_JAVA_WINDOWS=$TEST_COUNT" >> $env:GITHUB_ENV
-
-      - name: Set GitHub Secret for TEST_COUNT_JAVA_WINDOWS
-        if: matrix.os == 'windows-2019'
-        shell: bash
-        env:
-          TEST_COUNT_JAVA_WINDOWS: ${{ env.TEST_COUNT_JAVA_WINDOWS }}
-          GITHUB_TOKEN: ${{ secrets.TEST_COUNT_SECRET }}
-        run: |
-          echo $GITHUB_TOKEN | gh auth login --with-token
-          repository='${{ github.repository }}'
-          gh secret set TEST_COUNT_WINDOWS --body "$TEST_COUNT_JAVA_WINDOWS" --repository $repository
+          echo "CURRENT_TEST_COUNT_JAVA_WINDOWS=$TEST_COUNT" >> $env:GITHUB_ENV
           
       # separate step for windows due to different os
       - name: Read threshold values for windows-2019
         shell: pwsh
         if: matrix.os == 'windows-2019'
+        env: 
+          THRESHOLDS_WINDOWS: ${{ secrets.TEST_COUNT_JAVA_WINDOWS }}
         run: |
-          $WINDOWS_THRESHOLD = ${{ secrets.TEST_COUNT_JAVA_WINDOWS }}
-          echo "WINDOWS_THRESHOLD=$WINDOWS_THRESHOLD" | Out-File -FilePath $env:GITHUB_ENV -Append
-          if ($env:TEST_COUNT_JAVA_WINDOWS -lt $WINDOWS_THRESHOLD) {
+          if ($env:CURRENT_TEST_COUNT_JAVA_WINDOWS -lt $THRESHOLDS_WINDOWS) {
             Write-Host "Windows Unit Test count decreased. Please check the test count."
             exit 1
           }
@@ -374,18 +363,17 @@ jobs:
             echo "No integration tests were run."
             exit 1
           fi
-          echo "TEST_COUNT_INTEGRATION=$TEST_COUNT" >> $GITHUB_ENV
+          echo "CURRENT_TEST_COUNT_INTEGRATION=$TEST_COUNT" >> $GITHUB_ENV
 
       - uses: actions/checkout@v4    
       - name: Read threshold values from test_counts.json
-        id: read-thresholds
+        env: 
+          INTEGRATION_THRESHOLD: ${{ secrets.TEST_COUNT_INTEGRATION }}
         run: |
-          THRESHOLDS=$(cat ${{ github.workspace }}/.github/test_counts.json)
-          echo "INTEGRATION_THRESHOLD=$(echo $THRESHOLDS | jq -r '.TEST_COUNT_INTEGRATION')" >> $GITHUB_ENV
-          if [[ ( $TEST_COUNT_INTEGRATION -lt $INTEGRATION_THRESHOLD ) ]]; then
-            echo "Integration Test count decreased. Please check the test_count.json file for the threshold values."
-            exit 1
-          fi
+            if [[ ( $CURRENT_TEST_COUNT_INTEGRATION -lt $INTEGRATION_THRESHOLD ) ]]; then
+              echo "Integration Test count decreased. Please check the test_count.json file for the threshold values."
+              exit 1
+            fi
         continue-on-error: false
 
       - name: Archive Test Results
@@ -421,3 +409,23 @@ jobs:
     needs: [ build_tests,integration-test ]
     uses: liquibase/liquibase/.github/workflows/build.yml@master
     secrets: inherit
+
+  update-test-count-secrets:
+    needs: [setup]
+    runs-on: ubuntu-20.04
+    if: github.ref == 'refs/heads/master'
+    steps:
+      - name: Set GitHub Secret for Test Count
+        env:
+          TEST_COUNT_JAVA_WINDOWS: ${{ env.TEST_COUNT_JAVA_WINDOWS }}
+          TEST_COUNT_JAVA_MACOS: ${{ env.TEST_COUNT_JAVA_MACOS }}
+          TEST_COUNT_JAVA_UBUNTU: ${{ env.TEST_COUNT_JAVA_UBUNTU }}
+          TEST_COUNT_INTEGRATION: ${{ env.TEST_COUNT_INTEGRATION }}
+          TEST_COUNT_SECRET: ${{ secrets.TEST_COUNT_SECRET }}
+        run: |
+          echo $GITHUB_TOKEN | gh auth login --with-token
+          repository='${{ github.repository }}'
+          gh secret set TEST_COUNT_WINDOWS --body "$TEST_COUNT_JAVA_WINDOWS" --repository $repository
+          gh secret set TEST_COUNT_MACOS --body "$TEST_COUNT_JAVA_MACOS" --repository $repository
+          gh secret set TEST_COUNT_UBUNTU --body "$TEST_COUNT_JAVA_UBUNTU" --repository $repository    
+          gh secret set TEST_COUNT_INTEGRATION --body "$TEST_COUNT_INTEGRATION" --repository $repository
