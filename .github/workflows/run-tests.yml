@@ -225,16 +225,17 @@ jobs:
 
       # separate step for windows due to different os
       - name: Read threshold values for windows-2019
-        if: matrix.os == 'windows-2019'
         shell: pwsh
+        if: matrix.os == 'windows-2019'
         run: |
           $THRESHOLDS = Get-Content "${{ github.workspace }}/.github/test_counts.json" -Raw | ConvertFrom-Json
           $WINDOWS_THRESHOLD = $THRESHOLDS.TEST_COUNT_JAVA_WINDOWS
-          echo "WINDOWS_THRESHOLD=$WINDOWS_THRESHOLD" >> $GITHUB_ENV
-          if [[ ( $TEST_COUNT_JAVA_WINDOWS -lt $WINDOWS_THRESHOLD ) ]]; then
-            echo "Windows Unit Test count decreased. Please check the test_count.json file for the threshold values."
+          echo "WINDOWS_THRESHOLD=$WINDOWS_THRESHOLD" | Out-File -FilePath $env:GITHUB_ENV -Append
+          if ($env:TEST_COUNT_JAVA_WINDOWS -lt $WINDOWS_THRESHOLD) {
+            Write-Host "Windows Unit Test count decreased. Please check the test_count.json file for the threshold values."
             exit 1
-          fi
+          }
+
         continue-on-error: false
 
       - name: Remove Original Jars for *nix
