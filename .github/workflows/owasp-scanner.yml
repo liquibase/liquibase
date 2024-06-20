@@ -3,8 +3,8 @@ name: OWASP Scanner
 on:
   workflow_call:
     inputs:
-      version:
-        description: 'Artifact version'
+      branch:
+        description: 'Branch to scan'
         required: true
         type: string
       component:
@@ -14,15 +14,15 @@ on:
         default: 'liquibase'
   workflow_dispatch:
     inputs:
-      version:
-        description: 'Artifact version'
+      branch:
+        description: 'Branch to scan'
         required: true
         type: string
       component:
         description: 'Artifact component'
         required: true
         type: string
-        default: 'liquibase'
+        default: 'liquibase/liquibase'
 
 
 jobs:
@@ -30,23 +30,20 @@ jobs:
     runs-on: ubuntu-22.04
     steps:
 
-     - name: Download OWASP Dependency-Check
-       run: |
-        wget https://github.com/jeremylong/DependencyCheck/releases/download/v9.2.0/dependency-check-9.2.0-release.zip
-        unzip dependency-check-9.2.0-release.zip
-        ./dependency-check/bin/dependency-check.sh --version
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ inputs.branch }}
+          repository: ${{ inputs.component }}
 
-     - name: Download ${{ inputs.component }} zip file
-       run: |
-        wget https://github.com/liquibase/${{ inputs.component }}/releases/download/v${{ inputs.version }}/${{ inputs.component }}-${{ inputs.version }}.zip
-        unzip ${{ inputs.component }}-${{ inputs.version }}.zip
-
-     - name: Run OWASP Dependency-Check
-       run: |
-        ./dependency-check/bin/dependency-check.sh --nvdApiKey ${{ secrets.NVD_API_KEY }} --project "${{ inputs.component }}" --scan .
-
-     - name: Upload OWASP Dependency-Check results
-       uses: actions/upload-artifact@v4
-       with:
-          name: owasp-dependency-check
-          path: ./dependency-check-report.html
+      - name: Run the scanner
+        id: run_owasp
+        run: mvn clean org.owasp:dependency-check-maven:aggregate -Dodc.outputDirectory=. -Dodc.nvdApiKey=${{ secrets.NVD_API_KEY }} -Dodc.failOnError=true
+    
+      - name: Upload OWASP Dependency-Check results
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+            name: owasp-dependency-check
+            path: ./dependency-check-report.html
+  
