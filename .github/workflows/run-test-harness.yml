@@ -19,6 +19,7 @@ on:
 jobs:
   test-harness-build:
     runs-on: ubuntu-latest
+    if: contains(github.event.pull_request.labels.*.name, 'runFunctional&HarnessTests') || (github.event_name != 'pull_request' && github.event_name != 'pull_request_target')
     steps:
       
       - name: Check variables
@@ -29,12 +30,6 @@ jobs:
           echo "github.base_ref: ${{ github.base_ref }}"
           echo "github.event.pull_request.merged: ${{ github.event.pull_request.merged }}"
           echo "github.event_name: ${{ github.event_name }}"
-        
-      - name: Check runTestHarnessTests label
-        if: (github.event_name == 'pull_request' || github.event_name == 'pull_request_target') && !contains(github.event.pull_request.labels.*.name, 'runTestHarnessTests') && (github.event.pull_request.merged == false || github.base_ref != 'master')
-        run: |
-          echo "Add the runTestHarnessTests label to the PR to trigger the Test Harness Tests workflow."
-          exit 1
 
       - uses: actions/checkout@v4
         with:
