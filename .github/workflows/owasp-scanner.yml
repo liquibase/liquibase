@@ -87,7 +87,7 @@ jobs:
 
       - name: Run the scanner
         id: run_owasp
-        run: mvn clean package -DskipTests org.owasp:dependency-check-maven:aggregate -DnvdApiKey=${{ secrets.NVD_API_KEY }} -DfailOnError=true
+        run: mvn org.owasp:dependency-check-maven:aggregate -DnvdApiKey=${{ secrets.NVD_API_KEY }} -DfailOnError=true
     
       - name: Upload OWASP Dependency-Check results
         if: always()
