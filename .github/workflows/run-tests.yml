@@ -205,25 +205,12 @@ jobs:
           THRESHOLDS=$(cat ${{ github.workspace }}/.github/test_counts.json)
           echo "UBUNTU_THRESHOLD=$(echo $THRESHOLDS | jq -r '.TEST_COUNT_JAVA_UBUNTU')" >> $GITHUB_ENV
           echo "MACOS_THRESHOLD=$(echo $THRESHOLDS | jq -r '.TEST_COUNT_JAVA_MACOS')" >> $GITHUB_ENV
-      
-      - name: Notify slack if Test Count decreases for macos-13 and ubuntu-20.04
-        if: env.TEST_COUNT_JAVA_UBUNTU && env.TEST_COUNT_JAVA_UBUNTU < env.UBUNTU_THRESHOLD || env.TEST_COUNT_JAVA_MACOS && env.TEST_COUNT_JAVA_MACOS < env.MACOS_THRESHOLD
-        uses: rtCamp/action-slack-notify@v2
-        env:
-          SLACK_WEBHOOK: ${{ secrets.NIGHTLY_BUILDS_SLACK_WEBHOOK }}
-          SLACK_MESSAGE: 'OSS Unit Test count decreased. Please check the unit tests and integration test results.'
-          SLACK_ICON_EMOJI: ":robot_face:"
-          SLACK_COLOR: 'danger'
-         
-        # separate step for windows due to different os
-      - name: Read threshold values for windows-2019
-        if: matrix.os == 'windows-2019'
-        shell: pwsh
-        run: |
-          $THRESHOLDS = Get-Content "${{ github.workspace }}/.github/test_counts.json" -Raw | ConvertFrom-Json
-          $WINDOWS_THRESHOLD = $THRESHOLDS.TEST_COUNT_JAVA_WINDOWS
-          echo "WINDOWS_THRESHOLD=$WINDOWS_THRESHOLD" >> $GITHUB_ENV
-      
+          if [[ ( $TEST_COUNT_JAVA_UBUNTU -lt $UBUNTU_THRESHOLD ) || ( $TEST_COUNT_JAVA_MACOS -lt $MACOS_THRESHOLD ) ]]; then
+            echo "Ubuntu/ MacOS Unit Test count decreased. Please check the test_count.json file for the threshold values."
+            exit 1
+          fi
+        continue-on-error: false
+
       - name: Check Test Count for windows-2019 
         if: matrix.os == 'windows-2019'
         shell: pwsh
@@ -236,14 +223,19 @@ jobs:
           }
           echo "TEST_COUNT_JAVA_WINDOWS=$TEST_COUNT" | Out-File -Append -Encoding utf8 -FilePath $env:GITHUB_ENV
 
-      - name: Notify slack if Test Count decreases for windows-2019
-        if: env.TEST_COUNT_JAVA_WINDOWS && env.TEST_COUNT_JAVA_WINDOWS < env.WINDOWS_THRESHOLD
-        uses: rtCamp/action-slack-notify@v2
-        env:
-          SLACK_WEBHOOK: ${{ secrets.NIGHTLY_BUILDS_SLACK_WEBHOOK }}
-          SLACK_MESSAGE: 'OSS Unit Test count decreased. Please check the unit tests and integration test results.'
-          SLACK_ICON_EMOJI: ":robot_face:"
-          SLACK_COLOR: 'danger'
+      # separate step for windows due to different os
+      - name: Read threshold values for windows-2019
+        if: matrix.os == 'windows-2019'
+        shell: pwsh
+        run: |
+          $THRESHOLDS = Get-Content "${{ github.workspace }}/.github/test_counts.json" -Raw | ConvertFrom-Json
+          $WINDOWS_THRESHOLD = $THRESHOLDS.TEST_COUNT_JAVA_WINDOWS
+          echo "WINDOWS_THRESHOLD=$WINDOWS_THRESHOLD" >> $GITHUB_ENV
+          if [[ ( $TEST_COUNT_JAVA_WINDOWS -lt $WINDOWS_THRESHOLD ) ]]; then
+            echo "Windows Unit Test count decreased. Please check the test_count.json file for the threshold values."
+            exit 1
+          fi
+        continue-on-error: false
 
       - name: Remove Original Jars for *nix
         if: env.OS_TYPE != 'windows-2019'
