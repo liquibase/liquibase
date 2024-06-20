@@ -4,11 +4,15 @@ import liquibase.CatalogAndSchema;
 import liquibase.Liquibase;
 import liquibase.exception.LiquibaseException;
 import liquibase.util.StringUtil;
+import lombok.Getter;
+import lombok.Setter;
 import org.apache.tools.ant.BuildException;
 
 import java.util.ArrayList;
 import java.util.List;
 
+@Getter
+@Setter
 public class DropAllTask extends BaseLiquibaseTask {
     private String schemas;
     private String catalog;
@@ -32,19 +36,4 @@ public class DropAllTask extends BaseLiquibaseTask {
         }
     }
 
-    public String getCatalog() {
-        return catalog;
-    }
-
-    public void setCatalog(String catalog) {
-        this.catalog = catalog;
-    }
-
-    public String getSchemas() {
-        return schemas;
-    }
-
-    public void setSchemas(String schemas) {
-        this.schemas = schemas;
-    }
 }

@@ -168,33 +168,29 @@ Optional Args:
 
         expectedFileContent = [ "target/test-classes/changeSetWithLabels.txt":
                    [
-                     "UPDATE SUMMARY",
-                     "Run:                          1",
-                     "Previously run:               0",
-                     "Filtered out:                40",
-                     "-------------------------------",
-                     "Total change sets:           41",
-                     "FILTERED CHANGE SETS SUMMARY",
-                     "Label mismatch:              40",
-                     "+--------------------------------------------------------------+-------------------------------+",
-                     "| Changeset Info                                               | Reason Skipped                |",
-                     "+--------------------------------------------------------------+-------------------------------+",
-                     "|                                                              | Labels does not match 'first' |",
-                     "| changelogs/h2/complete/simple.changelog.labels.xml::1.1::nvo |                               |",
-                     "| xland                                                        |                               |",
-                     "+--------------------------------------------------------------+-------------------------------+",
-                     "|                                                              | Labels does not match 'first' |",
-                     "| changelogs/h2/complete/simple.changelog.labels.xml::2::nvoxl |                               |",
-                     "| and                                                          |                               |",
-                     "+--------------------------------------------------------------+-------------------------------+",
-                     "|                                                              | Labels does not match 'first' |",
-                     "| changelogs/h2/complete/simple.changelog.labels.xml::3::nvoxl |                               |",
-                     "| and                                                          |                               |",
-                     "+--------------------------------------------------------------+-------------------------------+",
-                     "|                                                              | Labels does not match 'first' |",
-                     "| changelogs/h2/complete/simple.changelog.labels.xml::5::nvoxl |                               |",
-                     "| and                                                          |                               |",
-                     "+--------------------------------------------------------------+-------------------------------+"
+                     """UPDATE SUMMARY
+                     Run:                          1
+                     Previously run:               0
+                     Filtered out:                40
+                     -------------------------------
+                     Total change sets:           41
+                     FILTERED CHANGE SETS SUMMARY
+                     Label mismatch:              40
+                     +--------------------------------------------------------------+-------------------------------+
+                     | Changeset Info                                               | Reason Skipped                |
+                     +--------------------------------------------------------------+-------------------------------+
+                     | changelogs/h2/complete/simple.changelog.labels.xml::1.1::nvo | Labels does not match 'first' |
+                     | xland                                                        |                               |
+                     +--------------------------------------------------------------+-------------------------------+
+                     | changelogs/h2/complete/simple.changelog.labels.xml::2::nvoxl | Labels does not match 'first' |
+                     | and                                                          |                               |
+                     +--------------------------------------------------------------+-------------------------------+
+                     | changelogs/h2/complete/simple.changelog.labels.xml::3::nvoxl | Labels does not match 'first' |
+                     | and                                                          |                               |
+                     +--------------------------------------------------------------+-------------------------------+
+                     | changelogs/h2/complete/simple.changelog.labels.xml::5::nvoxl | Labels does not match 'first' |
+                     | and                                                          |                               |
+                     +--------------------------------------------------------------+-------------------------------+"""
                      ]
         ]
 
@@ -221,22 +217,21 @@ Optional Args:
 
         expectedFileContent = [ "target/test-classes/changeSetWithLabels.txt":
            [
-                "UPDATE SUMMARY",
-                "Run:                          2",
-                "Previously run:               0",
-                "Filtered out:                 1",
-                "-------------------------------",
-                "Total change sets:            3",
-                "FILTERED CHANGE SETS SUMMARY",
-                "Context mismatch:             1",
-                "Label mismatch:               1",
-                "+--------------------------------------------------------------+------------------------------------------+",
-                "| Changeset Info                                               | Reason Skipped                           |",
-                "+--------------------------------------------------------------+------------------------------------------+",
-                "|                                                              | Context does not match 'firstcontext'    |",
-                "| changelogs/h2/complete/simple.changelog.labels.context.xml:: | Labels does not match 'first'            |",
-                "| 2::nvoxland                                                  |                                          |",
-                "+--------------------------------------------------------------+------------------------------------------+"
+                """UPDATE SUMMARY
+                Run:                          2
+                Previously run:               0
+                Filtered out:                 1
+                -------------------------------
+                Total change sets:            3
+                FILTERED CHANGE SETS SUMMARY
+                Context mismatch:             1
+                Label mismatch:               1
+                +--------------------------------------------------------------+------------------------------------------+
+                | Changeset Info                                               | Reason Skipped                           |
+                +--------------------------------------------------------------+------------------------------------------+
+                | changelogs/h2/complete/simple.changelog.labels.context.xml:: | Context does not match 'firstcontext'    |
+                | 2::nvoxland                                                  | Labels does not match 'first'            |
+                +--------------------------------------------------------------+------------------------------------------+"""
            ]
         ]
     }
@@ -362,21 +357,20 @@ Optional Args:
 
         expectedFileContent = [ "target/test-classes/mismatchedDBMS.txt":
             [
-              "UPDATE SUMMARY",
-              "Run:                          2",
-              "Previously run:               0",
-              "Filtered out:                 1",
-              "-------------------------------",
-              "Total change sets:            3",
-              "FILTERED CHANGE SETS SUMMARY",
-              "DBMS mismatch:                1",
-              "+--------------------------------------------------------------+--------------------------------+",
-              "| Changeset Info                                               | Reason Skipped                 |",
-              "+--------------------------------------------------------------+--------------------------------+",
-              "|                                                              | mismatched DBMS value of 'foo' |",
-              "| changelogs/h2/complete/mismatchedDbms.changelog.xml::1::nvox |                                |",
-              "| land                                                         |                                |",
-              "+--------------------------------------------------------------+--------------------------------+"
+              """UPDATE SUMMARY
+              Run:                          2
+              Previously run:               0
+              Filtered out:                 1
+              -------------------------------
+              Total change sets:            3
+              FILTERED CHANGE SETS SUMMARY
+              DBMS mismatch:                1
+              +--------------------------------------------------------------+--------------------------------+
+              | Changeset Info                                               | Reason Skipped                 |
+              +--------------------------------------------------------------+--------------------------------+
+              | changelogs/h2/complete/mismatchedDbms.changelog.xml::1::nvox | mismatched DBMS value of 'foo' |
+              | land                                                         |                                |
+              +--------------------------------------------------------------+--------------------------------+"""
            ]
         ]
     }
@@ -545,8 +539,7 @@ Ignored:                      1
 +--------------------------------------------------------------+----------------------+
 | Changeset Info                                               | Reason Skipped       |
 +--------------------------------------------------------------+----------------------+
-|                                                              | Changeset is ignored |
-| changelogs/common/includerelative/includeAll/pathinclude2.ch |                      |
+| changelogs/common/includerelative/includeAll/pathinclude2.ch | Changeset is ignored |
 | angelog.xml::1::nvoxland                                     |                      |
 +--------------------------------------------------------------+----------------------+
 """

@@ -9,6 +9,7 @@ import liquibase.statement.SqlStatement;
 import liquibase.statement.core.DropDefaultValueStatement;
 import liquibase.structure.core.Column;
 import liquibase.structure.core.Table;
+import lombok.Setter;
 
 /**
  * Removes the default value from an existing column.
@@ -16,6 +17,7 @@ import liquibase.structure.core.Table;
 @DatabaseChange(name = "dropDefaultValue", description = "Removes the database default value for a column",
     priority = ChangeMetaData.PRIORITY_DEFAULT,
     appliesTo = "column")
+@Setter
 public class DropDefaultValueChange extends AbstractChange {
 
     private String catalogName;
@@ -29,17 +31,9 @@ public class DropDefaultValueChange extends AbstractChange {
         return catalogName;
     }
 
-    public void setCatalogName(String catalogName) {
-        this.catalogName = catalogName;
-    }
-
     @DatabaseChangeProperty(mustEqualExisting ="column.relation.schema", description = "Name of the database schema")
     public String getSchemaName() {
         return schemaName;
-    }
-
-    public void setSchemaName(String schemaName) {
-        this.schemaName = schemaName;
     }
 
     @DatabaseChangeProperty(mustEqualExisting = "column.relation", description = "Name of the table containing the column")
@@ -47,26 +41,14 @@ public class DropDefaultValueChange extends AbstractChange {
         return tableName;
     }
 
-    public void setTableName(String tableName) {
-        this.tableName = tableName;
-    }
-
     @DatabaseChangeProperty(mustEqualExisting = "column", description = "Name of the column to drop the default value from")
     public String getColumnName() {
         return columnName;
     }
 
-    public void setColumnName(String columnName) {
-        this.columnName = columnName;
-    }
-
     @DatabaseChangeProperty(supportsDatabase = ALL, description = "Data type of the column")
     public String getColumnDataType() {
 		return columnDataType;
-	}
-    
-    public void setColumnDataType(String columnDataType) {
-		this.columnDataType = columnDataType;
 	}
 
     @Override
