@@ -3,26 +3,26 @@ name: OWASP Scanner
 on:
   workflow_call:
     inputs:
-      branch:
-        description: 'Branch to scan'
-        required: true
-        type: string
-      component:
-        description: 'Artifact component'
+      repository:
+        description: 'Repository to scan'
         required: false
         type: string
         default: 'liquibase'
-  workflow_dispatch:
-    inputs:
       branch:
         description: 'Branch to scan'
         required: true
         type: string
-      component:
-        description: 'Artifact component'
+  workflow_dispatch:
+    inputs:
+      repository:
+        description: 'Repository to scan'
+        required: false
+        type: string
+        default: 'liquibase'
+      branch:
+        description: 'Branch to scan'
         required: true
         type: string
-        default: 'liquibase/liquibase'
 
 
 jobs:
@@ -33,7 +33,7 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
         with:
-          repository: ${{ inputs.component }}
+          repository: ${{ inputs.repository }}
           ref: ${{ inputs.branch }}
 
       - name: Set up Java for publishing to GitHub Repository
