@@ -211,7 +211,7 @@ jobs:
           fi
         continue-on-error: false
 
-      - name: Check Test Count for windows-2019 
+      - name: Check Test Count for windows-2019
         if: matrix.os == 'windows-2019'
         shell: pwsh
         run: |
@@ -221,21 +221,30 @@ jobs:
             Write-Output "No Unit tests were run."
             exit 1
           }
-          echo "TEST_COUNT_JAVA_WINDOWS=$TEST_COUNT" | Out-File -Append -Encoding utf8 -FilePath $env:GITHUB_ENV
+          echo "TEST_COUNT_JAVA_WINDOWS=$TEST_COUNT" >> $env:GITHUB_ENV
 
+      - name: Set GitHub Secret for TEST_COUNT_JAVA_WINDOWS
+        if: matrix.os == 'windows-2019'
+        shell: bash
+        env:
+          TEST_COUNT_JAVA_WINDOWS: ${{ env.TEST_COUNT_JAVA_WINDOWS }}
+          GITHUB_TOKEN: ${{ secrets.TEST_COUNT_SECRET }}
+        run: |
+          echo $GITHUB_TOKEN | gh auth login --with-token
+          repository='${{ github.repository }}'
+          gh secret set TEST_COUNT_WINDOWS --body "$TEST_COUNT_JAVA_WINDOWS" --repository $repository
+          
       # separate step for windows due to different os
       - name: Read threshold values for windows-2019
         shell: pwsh
         if: matrix.os == 'windows-2019'
         run: |
-          $THRESHOLDS = Get-Content "${{ github.workspace }}/.github/test_counts.json" -Raw | ConvertFrom-Json
-          $WINDOWS_THRESHOLD = $THRESHOLDS.TEST_COUNT_JAVA_WINDOWS
+          $WINDOWS_THRESHOLD = ${{ secrets.TEST_COUNT_JAVA_WINDOWS }}
           echo "WINDOWS_THRESHOLD=$WINDOWS_THRESHOLD" | Out-File -FilePath $env:GITHUB_ENV -Append
           if ($env:TEST_COUNT_JAVA_WINDOWS -lt $WINDOWS_THRESHOLD) {
-            Write-Host "Windows Unit Test count decreased. Please check the test_count.json file for the threshold values."
+            Write-Host "Windows Unit Test count decreased. Please check the test count."
             exit 1
           }
-
         continue-on-error: false
 
       - name: Remove Original Jars for *nix
