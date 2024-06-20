@@ -177,9 +177,7 @@ jobs:
       - name: Check Unit Test Count for Java 8, 11, 17, 21 Ubuntu
         if: matrix.os != 'macos-13' && matrix.os != 'windows-2019'
         run: |
-          if [[ "${{ matrix.os }}" != "macos-13" ]]; then
-            TEST_COUNT=$(find . -name '*.txt' | xargs grep -oP 'Tests run: \K[0-9]+' | awk -F ':' '{s+=$2} END {print(s)}')
-          fi
+          TEST_COUNT=$(find . -name '*.txt' | xargs grep -oP 'Tests run: \K[0-9]+' | awk -F ':' '{s+=$2} END {print(s)}')
           echo "Total Unit tests run: $TEST_COUNT"
           if [ "$TEST_COUNT" -eq 0 ]; then
             echo "No Unit tests were run."
