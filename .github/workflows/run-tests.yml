@@ -221,7 +221,9 @@ jobs:
         shell: pwsh
         run: |
           $THRESHOLDS = Get-Content "${{ github.workspace }}/.github/test_counts.json" -Raw | ConvertFrom-Json
-          echo "WINDOWS_THRESHOLD=$(echo $THRESHOLDS | jq -r '.TEST_COUNT_JAVA_WINDOWS')" >> $GITHUB_ENV
+          $WINDOWS_THRESHOLD = $THRESHOLDS.TEST_COUNT_JAVA_WINDOWS
+          echo "WINDOWS_THRESHOLD=$WINDOWS_THRESHOLD" >> $GITHUB_ENV
+      
           
       - name: Check Test Count for windows-2019 
         if: matrix.os == 'windows-2019'
