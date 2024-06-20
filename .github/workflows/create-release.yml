@@ -11,6 +11,11 @@ on:
       runId:
         description: 'RunId of liquibase/liquibase artifacts to attach'
         required: true
+      standaloneZip:
+        description: 'This only generates a zip file with all extension artifacts'
+        required: false
+        type: boolean
+        default: false
 
 env:
   DEPENDENCIES: "liquibase-bigquery" # Comma separated list of dependencies to release the extensions list
@@ -184,13 +189,23 @@ jobs:
           path: re-version/final
 
       - name: Set repository tags
+        if: ${{ inputs.standaloneZip == 'false' }}
         run: |
           git tag -f v${{ needs.setup.outputs.version }}
           git push -f origin v${{ needs.setup.outputs.version }}
           (cd download/repo/liquibase-pro && git tag -f v${{ needs.setup.outputs.version }})
           (cd download/repo/liquibase-pro && git push -f origin v${{ needs.setup.outputs.version }})
 
+      - name: Attach standalone zip file
+        if: ${{ inputs.standaloneZip == 'true' }}
+        uses: actions/upload-artifact@v4
+        with:
+            name: liquibase-standalone-${{ needs.setup.outputs.version }}.zip
+            path: re-version/final/*.zip
+  
+
   build-installers:
+    if: ${{ inputs.standaloneZip == 'false' }}
     permissions:
       contents: write  # for softprops/action-gh-release to create GitHub release
     needs: [ setup, reversion ]
@@ -252,6 +267,7 @@ jobs:
           rm re-version/final/*.asc
           rm re-version/final/*.md5
           rm re-version/final/*.sha1
+
       - name: Attach Files to Draft Release
         uses: softprops/action-gh-release@v2
         with:
