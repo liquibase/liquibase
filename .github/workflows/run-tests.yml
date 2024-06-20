@@ -205,9 +205,9 @@ jobs:
           THRESHOLDS_UBUNTU: ${{ secrets.TEST_COUNT_JAVA_UBUNTU }}
           THRESHOLDS_MACOS: ${{ secrets.TEST_COUNT_JAVA_MACOS }}
         run: |
-          if [[ ( $CURRENT_TEST_COUNT_JAVA_UBUNTU -lt $THRESHOLDS_UBUNTU ) || ( $CURRENT_TEST_COUNT_JAVA_MACOS -lt $THRESHOLDS_MACOS ) ]]; then
-            echo "Ubuntu/ MacOS Unit Test count decreased. Please check the test_count.json file for the threshold values."
-            exit 1
+          if [[ (${CURRENT_TEST_COUNT_JAVA_UBUNTU:+0} -lt ${THRESHOLDS_UBUNTU:+0}) || (${CURRENT_TEST_COUNT_JAVA_MACOS:+0} -lt ${THRESHOLDS_MACOS:+0}) ]]; then
+          echo "Ubuntu/MacOS Unit Test count decreased. Please check the test_count.json file for the threshold values."
+          exit 1
           fi
         continue-on-error: false
 
@@ -370,8 +370,8 @@ jobs:
         env: 
           INTEGRATION_THRESHOLD: ${{ secrets.TEST_COUNT_INTEGRATION }}
         run: |
-            if [[ ( $CURRENT_TEST_COUNT_INTEGRATION -lt $INTEGRATION_THRESHOLD ) ]]; then
-              echo "Integration Test count decreased. Please check the test_count.json file for the threshold values."
+            if [[ (${CURRENT_TEST_COUNT_INTEGRATION:+0} -lt ${INTEGRATION_THRESHOLD:+0}) ]]; then
+              echo "Ubuntu/MacOS Unit Test count decreased. Please check the test_count.json file for the threshold values."
               exit 1
             fi
         continue-on-error: false
@@ -411,16 +411,16 @@ jobs:
     secrets: inherit
 
   update-test-count-secrets:
-    needs: [setup]
+    needs: [build_tests, integration-test]
     runs-on: ubuntu-20.04
     if: github.ref == 'refs/heads/master'
     steps:
       - name: Set GitHub Secret for Test Count
         env:
-          TEST_COUNT_JAVA_WINDOWS: ${{ env.TEST_COUNT_JAVA_WINDOWS }}
-          TEST_COUNT_JAVA_MACOS: ${{ env.TEST_COUNT_JAVA_MACOS }}
-          TEST_COUNT_JAVA_UBUNTU: ${{ env.TEST_COUNT_JAVA_UBUNTU }}
-          TEST_COUNT_INTEGRATION: ${{ env.TEST_COUNT_INTEGRATION }}
+          TEST_COUNT_JAVA_WINDOWS: ${{ env.CURRENT_TEST_COUNT_JAVA_WINDOWS }}
+          TEST_COUNT_JAVA_MACOS: ${{ env.CURRENT_TEST_COUNT_JAVA_MACOS }}
+          TEST_COUNT_JAVA_UBUNTU: ${{ env.CURRENT_TEST_COUNT_JAVA_UBUNTU }}
+          TEST_COUNT_INTEGRATION: ${{ env.CURRENT_TEST_COUNT_INTEGRATION }}
           TEST_COUNT_SECRET: ${{ secrets.TEST_COUNT_SECRET }}
         run: |
           echo $GITHUB_TOKEN | gh auth login --with-token
