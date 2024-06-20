@@ -204,7 +204,7 @@ jobs:
           THRESHOLDS_MACOS: ${{ secrets.TEST_COUNT_JAVA_MACOS }}
         run: |
           if [[ (${CURRENT_TEST_COUNT_JAVA_UBUNTU:+0} -lt ${THRESHOLDS_UBUNTU:+0}) || (${CURRENT_TEST_COUNT_JAVA_MACOS:+0} -lt ${THRESHOLDS_MACOS:+0}) ]]; then
-          echo "Ubuntu/MacOS Unit Test count decreased. Please check the test_count.json file for the threshold values."
+          echo "Ubuntu/MacOS Unit Test count decreased. Please check the test count."
           exit 1
           fi
         continue-on-error: false
