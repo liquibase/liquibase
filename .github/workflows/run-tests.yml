@@ -200,14 +200,14 @@ jobs:
           echo "TEST_COUNT_JAVA_MACOS=$TEST_COUNT" >> $GITHUB_ENV
 
       - name: Read threshold values for macos-13 and ubuntu-20.04
-        if: matrix.os != 'macos-13' && matrix.os != 'windows-2019'
+        if: matrix.os != 'windows-2019'
         run: |
           THRESHOLDS=$(cat ${{ github.workspace }}/.github/test_counts.json)
           echo "UBUNTU_THRESHOLD=$(echo $THRESHOLDS | jq -r '.TEST_COUNT_JAVA_UBUNTU')" >> $GITHUB_ENV
           echo "MACOS_THRESHOLD=$(echo $THRESHOLDS | jq -r '.TEST_COUNT_JAVA_MACOS')" >> $GITHUB_ENV
       
       - name: Notify slack if Test Count decreases for macos-13 and ubuntu-20.04
-        if: env.TEST_COUNT_JAVA_WINDOWS && env.TEST_COUNT_JAVA_WINDOWS < env.WINDOWS_THRESHOLD || env.TEST_COUNT_JAVA_UBUNTU && env.TEST_COUNT_JAVA_UBUNTU < env.UBUNTU_THRESHOLD || env.TEST_COUNT_JAVA_MACOS && env.TEST_COUNT_JAVA_MACOS < env.MACOS_THRESHOLD
+        if: env.TEST_COUNT_JAVA_UBUNTU && env.TEST_COUNT_JAVA_UBUNTU < env.UBUNTU_THRESHOLD || env.TEST_COUNT_JAVA_MACOS && env.TEST_COUNT_JAVA_MACOS < env.MACOS_THRESHOLD
         uses: rtCamp/action-slack-notify@v2
         env:
           SLACK_WEBHOOK: ${{ secrets.NIGHTLY_BUILDS_SLACK_WEBHOOK }}
@@ -224,7 +224,6 @@ jobs:
           $WINDOWS_THRESHOLD = $THRESHOLDS.TEST_COUNT_JAVA_WINDOWS
           echo "WINDOWS_THRESHOLD=$WINDOWS_THRESHOLD" >> $GITHUB_ENV
       
-          
       - name: Check Test Count for windows-2019 
         if: matrix.os == 'windows-2019'
         shell: pwsh
