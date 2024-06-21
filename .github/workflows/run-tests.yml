@@ -204,7 +204,7 @@ jobs:
           THRESHOLDS_UBUNTU: ${{ secrets.TEST_COUNT_JAVA_UBUNTU }}
           THRESHOLDS_MACOS: ${{ secrets.TEST_COUNT_JAVA_MACOS }}
         run: |
-          if [[ (${CURRENT_TEST_COUNT_JAVA_UBUNTU} -lt ${THRESHOLDS_UBUNTU}) || (${CURRENT_TEST_COUNT_JAVA_MACOS} -lt ${THRESHOLDS_MACOS}) ]]; then
+          if [[ ($CURRENT_TEST_COUNT_JAVA_UBUNTU -lt $THRESHOLDS_UBUNTU) || ($CURRENT_TEST_COUNT_JAVA_MACOS -lt $THRESHOLDS_MACOS) ]]; then
           echo "Ubuntu/MacOS Unit Test count decreased. Please check the test count."
           exit 1
           fi
