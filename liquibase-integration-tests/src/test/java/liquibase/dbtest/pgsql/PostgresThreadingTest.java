@@ -9,8 +9,10 @@ import liquibase.command.core.helpers.DatabaseChangelogCommandStep;
 import liquibase.command.core.helpers.DbUrlConnectionArgumentsCommandStep;
 import liquibase.database.DatabaseFactory;
 import liquibase.dbtest.AbstractIntegrationTest;
+import liquibase.exception.CommandExecutionException;
 import liquibase.exception.LiquibaseException;
 import liquibase.logging.mdc.customobjects.SimpleStatus;
+import org.jetbrains.annotations.NotNull;
 import org.junit.Test;
 
 import java.util.concurrent.CompletableFuture;
@@ -35,11 +37,7 @@ public class PostgresThreadingTest extends AbstractIntegrationTest {
         Liquibase liquibase = createLiquibase(this.dependenciesChangeLog);
         clearDatabase();
 
-        CommandScope commandScope = new CommandScope(StatusCommandStep.COMMAND_NAME);
-        commandScope.addArgumentValue(DbUrlConnectionArgumentsCommandStep.URL_ARG, testSystem.getConnectionUrl());
-        commandScope.addArgumentValue(DbUrlConnectionArgumentsCommandStep.USERNAME_ARG, testSystem.getUsername());
-        commandScope.addArgumentValue(DbUrlConnectionArgumentsCommandStep.PASSWORD_ARG, testSystem.getPassword());
-        commandScope.addArgumentValue(DatabaseChangelogCommandStep.CHANGELOG_FILE_ARG, dependenciesChangeLog);
+        CommandScope commandScope = getStatusCommandScope();
         CommandResults statusCheckBefore = commandScope.execute();
 
         CompletableFuture<Boolean> updateFuture =
@@ -52,10 +50,11 @@ public class PostgresThreadingTest extends AbstractIntegrationTest {
                 }
             });
 
-        Thread.sleep(3000);
+        Thread.sleep(3000); // wait for update to start running
         CommandResults statusCheckDuring = commandScope.execute();
 
         assertTrue(updateFuture.get());
+
         CommandResults statusCheckAfter = commandScope.execute();
 
         assertEquals("undeployed", ((SimpleStatus)statusCheckBefore.getResult("status")).getMessage());
@@ -66,6 +65,15 @@ public class PostgresThreadingTest extends AbstractIntegrationTest {
         assertEquals(0, ((SimpleStatus)statusCheckAfter.getResult("status")).getChangesetCount());
 
 
+    }
+
+    private CommandScope getStatusCommandScope() throws CommandExecutionException {
+        CommandScope commandScope = new CommandScope(StatusCommandStep.COMMAND_NAME);
+        commandScope.addArgumentValue(DbUrlConnectionArgumentsCommandStep.URL_ARG, testSystem.getConnectionUrl());
+        commandScope.addArgumentValue(DbUrlConnectionArgumentsCommandStep.USERNAME_ARG, testSystem.getUsername());
+        commandScope.addArgumentValue(DbUrlConnectionArgumentsCommandStep.PASSWORD_ARG, testSystem.getPassword());
+        commandScope.addArgumentValue(DatabaseChangelogCommandStep.CHANGELOG_FILE_ARG, dependenciesChangeLog);
+        return commandScope;
     }
 
 }
