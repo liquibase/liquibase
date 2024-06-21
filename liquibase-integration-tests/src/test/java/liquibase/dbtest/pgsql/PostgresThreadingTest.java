@@ -12,7 +12,6 @@ import liquibase.dbtest.AbstractIntegrationTest;
 import liquibase.exception.CommandExecutionException;
 import liquibase.exception.LiquibaseException;
 import liquibase.logging.mdc.customobjects.SimpleStatus;
-import org.jetbrains.annotations.NotNull;
 import org.junit.Test;
 
 import java.util.concurrent.CompletableFuture;
