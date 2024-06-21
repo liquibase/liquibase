@@ -52,7 +52,7 @@ jobs:
             core.setOutput("runId", context.payload.inputs.runId);
       - run: |
           echo "Creating version ${{ steps.collect-data.outputs.version }} from ${{ steps.collect-data.outputs.branch }} with artifacts from build ${{ steps.collect-data.outputs.runId }} "
-          The ${{ github.event_name }} event triggered this step.
+          echo "The ${{ github.event_name }} event triggered this step"
           
   owasp-scanner:
     if: ${{ github.event_name == 'workflow_dispatch' }}
