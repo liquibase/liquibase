@@ -11,6 +11,8 @@ import liquibase.serializer.ChangeLogSerializer;
 import liquibase.serializer.ChangeLogSerializerFactory;
 import liquibase.serializer.core.json.JsonChangeLogSerializer;
 import liquibase.serializer.core.string.StringChangeLogSerializer;
+import lombok.Getter;
+import lombok.Setter;
 import org.apache.tools.ant.BuildException;
 import org.apache.tools.ant.types.resources.FileResource;
 import org.apache.tools.ant.util.FileUtils;
@@ -24,10 +26,17 @@ import java.util.Set;
 
 public class DiffDatabaseToChangeLogTask extends AbstractDatabaseDiffTask {
     private final Set<ChangeLogOutputFile> changeLogOutputFiles = new LinkedHashSet<>();
+    @Setter
     private boolean includeSchema = true;
+    @Setter
     private boolean includeCatalog = true;
+    @Setter
     private boolean includeTablespace = true;
+    @Setter
+    @Getter
     private String includeObjects;
+    @Setter
+    @Getter
     private String excludeObjects;
 
     @Override
@@ -111,39 +120,12 @@ public class DiffDatabaseToChangeLogTask extends AbstractDatabaseDiffTask {
         return includeCatalog;
     }
 
-    public void setIncludeCatalog(boolean includeCatalog) {
-        this.includeCatalog = includeCatalog;
-    }
-
     public boolean getIncludeSchema() {
         return includeSchema;
-    }
-
-    public void setIncludeSchema(boolean includeSchema) {
-        this.includeSchema = includeSchema;
     }
 
     public boolean getIncludeTablespace() {
         return includeTablespace;
     }
 
-    public void setIncludeTablespace(boolean includeTablespace) {
-        this.includeTablespace = includeTablespace;
-    }
-
-    public String getIncludeObjects() {
-        return includeObjects;
-    }
-
-    public void setIncludeObjects(String includeObjects) {
-        this.includeObjects = includeObjects;
-    }
-
-    public String getExcludeObjects() {
-        return excludeObjects;
-    }
-
-    public void setExcludeObjects(String excludeObjects) {
-        this.excludeObjects = excludeObjects;
-    }
 }

@@ -9,9 +9,6 @@ public class CreateTableStatement extends AbstractSqlStatement implements Compou
     /** Table type used by some RDBMS (Snowflake, SAP HANA) supporting different ... types ... of tables (e.g. column- vs. row-based) */
     private String tableType;
 
-    private final String catalogName;
-    private String schemaName;
-    private final String tableName;
     private String tablespace;
     private String remarks;
     private final List<String> columns = new ArrayList<>();
@@ -36,6 +33,7 @@ public class CreateTableStatement extends AbstractSqlStatement implements Compou
     private final Set<String> computedColumns = new HashSet<>();
 
     private boolean ifNotExists;
+    private DatabaseTableIdentifier databaseTableIdentifier = new DatabaseTableIdentifier(null, null, null);
 
     public CreateTableStatement(String catalogName, String schemaName, String tableName) {
         this(catalogName, schemaName, tableName, null, null);
@@ -46,9 +44,9 @@ public class CreateTableStatement extends AbstractSqlStatement implements Compou
     }
 
     public CreateTableStatement(String catalogName, String schemaName, String tableName, String remarks, String tableType) {
-        this.catalogName = catalogName;
-        this.schemaName = schemaName;
-        this.tableName = tableName;
+        this.databaseTableIdentifier.setCatalogName(catalogName);
+        this.databaseTableIdentifier.setSchemaName(schemaName);
+        this.databaseTableIdentifier.setTableName(tableName);
         this.remarks = remarks;
         this.tableType = tableType;
     }
@@ -64,15 +62,15 @@ public class CreateTableStatement extends AbstractSqlStatement implements Compou
     }
 
     public String getCatalogName() {
-        return catalogName;
+        return databaseTableIdentifier.getCatalogName();
     }
 
     public String getSchemaName() {
-        return schemaName;
+        return databaseTableIdentifier.getSchemaName();
     }
 
     public String getTableName() {
-        return tableName;
+        return databaseTableIdentifier.getTableName();
     }
 
     public List<String> getColumns() {
@@ -278,7 +276,7 @@ public class CreateTableStatement extends AbstractSqlStatement implements Compou
     }
 
     public void setSchemaName(String schemaName) {
-        this.schemaName = schemaName;
+        this.databaseTableIdentifier.setSchemaName(schemaName);
     }
 
     public void setComputed(String columnName) {

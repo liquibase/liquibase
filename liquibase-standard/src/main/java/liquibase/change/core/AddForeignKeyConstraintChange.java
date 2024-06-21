@@ -11,6 +11,7 @@ import liquibase.structure.core.Column;
 import liquibase.structure.core.ForeignKey;
 import liquibase.structure.core.ForeignKeyConstraintType;
 import liquibase.structure.core.Table;
+import lombok.Setter;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -24,19 +25,30 @@ import java.util.List;
                 appliesTo = "column")
 public class AddForeignKeyConstraintChange extends AbstractChange {
 
+    @Setter
     private String baseTableCatalogName;
+    @Setter
     private String baseTableSchemaName;
+    @Setter
     private String baseTableName;
+    @Setter
     private String baseColumnNames;
 
+    @Setter
     private String referencedTableCatalogName;
+    @Setter
     private String referencedTableSchemaName;
+    @Setter
     private String referencedTableName;
+    @Setter
     private String referencedColumnNames;
 
+    @Setter
     private String constraintName;
 
+    @Setter
     private Boolean deferrable;
+    @Setter
     private Boolean initiallyDeferred;
     private Boolean shouldValidate;
 
@@ -67,17 +79,9 @@ public class AddForeignKeyConstraintChange extends AbstractChange {
         return baseTableCatalogName;
     }
 
-    public void setBaseTableCatalogName(String baseTableCatalogName) {
-        this.baseTableCatalogName = baseTableCatalogName;
-    }
-
     @DatabaseChangeProperty(mustEqualExisting ="column.relation.schema", description = "Name of the database schema of the base table")
     public String getBaseTableSchemaName() {
         return baseTableSchemaName;
-    }
-
-    public void setBaseTableSchemaName(String baseTableSchemaName) {
-        this.baseTableSchemaName = baseTableSchemaName;
     }
 
     @DatabaseChangeProperty(
@@ -89,10 +93,6 @@ public class AddForeignKeyConstraintChange extends AbstractChange {
         return baseTableName;
     }
 
-    public void setBaseTableName(String baseTableName) {
-        this.baseTableName = baseTableName;
-    }
-
     @DatabaseChangeProperty(
         description = "Name of the column(s) to place the foreign key constraint on. Comma-separate if multiple",
         exampleValue = "person_id",
@@ -102,27 +102,15 @@ public class AddForeignKeyConstraintChange extends AbstractChange {
         return baseColumnNames;
     }
 
-    public void setBaseColumnNames(String baseColumnNames) {
-        this.baseColumnNames = baseColumnNames;
-    }
-
     @DatabaseChangeProperty(since = "3.0", mustEqualExisting = "column",
         description = "Name of the database catalog of the referenced table")
     public String getReferencedTableCatalogName() {
         return referencedTableCatalogName;
     }
 
-    public void setReferencedTableCatalogName(String referencedTableCatalogName) {
-        this.referencedTableCatalogName = referencedTableCatalogName;
-    }
-
     @DatabaseChangeProperty(description = "Name of the database schema of the referenced table")
     public String getReferencedTableSchemaName() {
         return referencedTableSchemaName;
-    }
-
-    public void setReferencedTableSchemaName(String referencedTableSchemaName) {
-        this.referencedTableSchemaName = referencedTableSchemaName;
     }
 
     @DatabaseChangeProperty(
@@ -132,10 +120,6 @@ public class AddForeignKeyConstraintChange extends AbstractChange {
         return referencedTableName;
     }
 
-    public void setReferencedTableName(String referencedTableName) {
-        this.referencedTableName = referencedTableName;
-    }
-
     @DatabaseChangeProperty(
         description = "Name of the column(s) the foreign key points to. Comma-separate if multiple",
         exampleValue = "id")
@@ -143,17 +127,9 @@ public class AddForeignKeyConstraintChange extends AbstractChange {
         return referencedColumnNames;
     }
 
-    public void setReferencedColumnNames(String referencedColumnNames) {
-        this.referencedColumnNames = referencedColumnNames;
-    }
-
     @DatabaseChangeProperty(description = "Name of the new foreign key constraint", exampleValue = "fk_address_person")
     public String getConstraintName() {
         return constraintName;
-    }
-
-    public void setConstraintName(String constraintName) {
-        this.constraintName = constraintName;
     }
 
     @DatabaseChangeProperty(description = "Defines whether the foreign key is deferrable")
@@ -161,17 +137,9 @@ public class AddForeignKeyConstraintChange extends AbstractChange {
         return deferrable;
     }
 
-    public void setDeferrable(Boolean deferrable) {
-        this.deferrable = deferrable;
-    }
-
     @DatabaseChangeProperty(description = "Defines whether the foreign key is initially deferred")
     public Boolean getInitiallyDeferred() {
         return initiallyDeferred;
-    }
-    
-    public void setInitiallyDeferred(Boolean initiallyDeferred) {
-        this.initiallyDeferred = initiallyDeferred;
     }
 
     /**

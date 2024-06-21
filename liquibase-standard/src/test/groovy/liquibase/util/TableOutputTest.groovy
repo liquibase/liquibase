@@ -18,6 +18,19 @@ class TableOutputTest extends Specification {
          where:
          table                  | maxWidths     | leftJustified | expected
          [["data1","data2"]]    | [30,30]       | true          | "+-------+-------+\n| data1 | data2 |\n+-------+-------+"
+         [["really_really_really_really_really_really_really_really_really_long_string"+System.lineSeparator()+"anotherString","data2"]]    | [30,30]       | true          |
+"""+--------------------------------+-------+
+| really_really_really_really_re | data2 |
+| ally_really_really_really_real |       |
+| ly_long_string                 |       |
+| anotherString                  |       |
++--------------------------------+-------+"""
+         [["data1","Alerts when a changeset ID does not follow the 8-4-4-4-12 pattern of UUID or GUID."]]    | [30,30]       | true          |
+"""+-------+--------------------------------+
+| data1 | Alerts when a changeset ID     |
+|       | does not follow the 8-4-4-4-12 |
+|       | pattern of UUID or GUID.       |
++-------+--------------------------------+"""
     }
 
     def "Data array length must match widths"() {

@@ -4,19 +4,15 @@ import liquibase.Contexts
 import liquibase.LabelExpression
 import liquibase.Liquibase
 import liquibase.Scope
-import liquibase.UpdateSummaryEnum
-import liquibase.command.core.GenerateChangelogCommandStep
+import liquibase.changelog.FastCheckService
 import liquibase.command.core.UpdateCommandStep
 import liquibase.command.core.helpers.DbUrlConnectionArgumentsCommandStep
-import liquibase.command.core.helpers.ShowSummaryArgument
-import liquibase.command.util.CommandUtil
 import liquibase.extension.testing.testsystem.DatabaseTestSystem
 import liquibase.extension.testing.testsystem.TestSystemFactory
 import liquibase.extension.testing.testsystem.spock.LiquibaseIntegrationTest
 import liquibase.report.UpdateReportParameters
 import liquibase.resource.ClassLoaderResourceAccessor
 import liquibase.resource.SearchPathResourceAccessor
-import liquibase.util.FileUtil
 import spock.lang.Shared
 import spock.lang.Specification
 
@@ -34,7 +30,7 @@ class UpdateCommandStepIntegrationTest extends Specification {
                 h2.getDatabaseFromFactory())
 
         then:
-        !new UpdateCommandStep().isUpToDateFastCheck(null, h2.getDatabaseFromFactory(), liquibase.getDatabaseChangeLog(), context, label)
+        !Scope.currentScope.getSingleton(FastCheckService.class).isUpToDateFastCheck(null, h2.getDatabaseFromFactory(), liquibase.getDatabaseChangeLog(), context, label)
     }
 
     def "validate context and label entry has been added previously"() {
@@ -46,7 +42,7 @@ class UpdateCommandStepIntegrationTest extends Specification {
         liquibase.update()
 
         then:
-        new UpdateCommandStep().isUpToDateFastCheck(null, h2.getDatabaseFromFactory(), liquibase.getDatabaseChangeLog(), context, label)
+        Scope.currentScope.getSingleton(FastCheckService.class).isUpToDateFastCheck(null, h2.getDatabaseFromFactory(), liquibase.getDatabaseChangeLog(), context, label)
     }
 
     def "validate update is successfully executed even when there is by a context mismatch and a non-existent file is referenced in a changeSet"() {
