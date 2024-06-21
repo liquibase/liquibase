@@ -11,6 +11,7 @@ import liquibase.exception.ValidationErrors;
 import liquibase.exception.Warnings;
 import liquibase.executor.ExecutorService;
 import liquibase.precondition.AbstractPrecondition;
+import liquibase.statement.core.DatabaseTableIdentifier;
 import liquibase.statement.core.TableIsEmptyStatement;
 import lombok.Getter;
 import lombok.Setter;
@@ -28,7 +29,8 @@ public class TableIsEmptyPrecondition extends AbstractPrecondition {
     @Override
     public void check(Database database, DatabaseChangeLog changeLog, ChangeSet changeSet, ChangeExecListener changeExecListener) throws PreconditionFailedException, PreconditionErrorException {
         try {
-            TableIsEmptyStatement statement = new TableIsEmptyStatement(getCatalogName(), getSchemaName(), getTableName());
+            TableIsEmptyStatement statement = 
+                new TableIsEmptyStatement( new DatabaseTableIdentifier(getCatalogName(), getSchemaName(), getTableName()));
 
             int result = Scope.getCurrentScope().getSingleton(ExecutorService.class).getExecutor("jdbc", database).queryForInt(statement);
             if (result > 0) {
