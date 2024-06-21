@@ -52,10 +52,9 @@ jobs:
             core.setOutput("runId", context.payload.inputs.runId);
       - run: |
           echo "Creating version ${{ steps.collect-data.outputs.version }} from ${{ steps.collect-data.outputs.branch }} with artifacts from build ${{ steps.collect-data.outputs.runId }} "
-          echo "The ${{ github.event_name }} event triggered this step"
           
   owasp-scanner:
-    if: ${{ github.event_name == 'workflow_dispatch' }}
+    if: ${{ github.event_name == 'workflow_call' }}
     needs: [ setup ]
     uses: liquibase/build-logic/.github/workflows/owasp-scanner.yml@main
     with:
@@ -207,7 +206,7 @@ jobs:
           path: re-version/final
 
       - name: Set repository tags
-        if: ${{ github.event_name == 'workflow_dispatch' }}
+        if: ${{ github.event_name == 'workflow_call' }}
         run: |
           git tag -f v${{ needs.setup.outputs.version }}
           git push -f origin v${{ needs.setup.outputs.version }}
@@ -223,7 +222,7 @@ jobs:
   
 
   build-installers:
-    if: ${{ github.event_name == 'workflow_dispatch' }}
+    if: ${{ github.event_name == 'workflow_call' }}
     permissions:
       contents: write  # for softprops/action-gh-release to create GitHub release
     needs: [ setup, reversion ]
