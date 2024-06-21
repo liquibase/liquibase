@@ -39,6 +39,8 @@ public class GlobalConfiguration implements AutoloadedConfigurations {
 
     public static final ConfigurationDefinition<Boolean> VALIDATE_XML_CHANGELOG_FILES;
 
+    public static final ConfigurationDefinition<Boolean> TRIM_LOAD_DATA_FILE_HEADER;
+
     /**
      * @deprecated No longer used
      */
@@ -247,6 +249,10 @@ public class GlobalConfiguration implements AutoloadedConfigurations {
         SUPPORTS_METHOD_VALIDATION_LEVEL = builder.define("supportsMethodValidationLevel", SupportsMethodValidationLevelsEnum.class)
                 .setDescription("Controls the level of validation performed on the supports method of Change classes. Options are OFF, WARN, FAIL.")
                 .setDefaultValue(SupportsMethodValidationLevelsEnum.WARN)
+                .build();
+        TRIM_LOAD_DATA_FILE_HEADER = builder.define("trimLoadDataFileHeader", Boolean.class)
+                .setDescription("If true column headers will be trimmed in case they were specified with spaces in the file.")
+                .setDefaultValue(false)
                 .build();
     }
 
