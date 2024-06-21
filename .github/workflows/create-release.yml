@@ -11,6 +11,20 @@ on:
       runId:
         description: 'RunId of liquibase/liquibase artifacts to attach'
         required: true
+  workflow_call:
+    inputs:
+      version:
+        description: 'Version (example: 4.8.2)'
+        required: true
+        type: string
+      branch:
+        description: 'Branch to release (Defaults to master)'
+        required: false
+        type: string
+      runId:
+        description: 'RunId of liquibase/liquibase artifacts to attach'
+        required: true
+        type: string
 
 env:
   DEPENDENCIES: "liquibase-bigquery" # Comma separated list of dependencies to release the extensions list
@@ -191,13 +205,23 @@ jobs:
           path: re-version/final
 
       - name: Set repository tags
+        if: ${{ github.event_name == 'workflow_dispatch' }}
         run: |
           git tag -f v${{ needs.setup.outputs.version }}
           git push -f origin v${{ needs.setup.outputs.version }}
           (cd download/repo/liquibase-pro && git tag -f v${{ needs.setup.outputs.version }})
           (cd download/repo/liquibase-pro && git push -f origin v${{ needs.setup.outputs.version }})
 
+      - name: Attach standalone zip file
+        if: ${{ github.event_name == 'workflow_call' }}
+        uses: actions/upload-artifact@v4
+        with:
+            name: liquibase-standalone-${{ needs.setup.outputs.version }}.zip
+            path: re-version/final/*.zip
+  
+
   build-installers:
+    if: ${{ github.event_name == 'workflow_dispatch' }}
     permissions:
       contents: write  # for softprops/action-gh-release to create GitHub release
     needs: [ setup, reversion ]
