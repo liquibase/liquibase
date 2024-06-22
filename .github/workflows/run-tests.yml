@@ -175,7 +175,7 @@ jobs:
           ./mvnw -B "-Dbuild.repository.owner=liquibase" "-Dbuild.repository.name=liquibase" "-Dbuild.branch=${{ needs.setup.outputs.thisBranchName }}" "-Dbuild.number=${{ github.run_number }}" "-Dbuild.commit=${{ needs.setup.outputs.latestMergeSha }}" "-DtrimStackTrace=false" -P 'skip-integration-tests' clean test package surefire-report:report
 
       - name: Check Unit Test Count for Java 8, 11, 17, 21 Ubuntu
-        if: matrix.os != 'macos-13' && matrix.os != 'windows-2019'
+        if: matrix.os == 'ubuntu-20.04'
         run: |
           TEST_COUNT=$(find . -name '*.txt' | xargs grep -oP 'Tests run: \K[0-9]+' | awk -F ':' '{s+=$2} END {print(s)}')
           echo "Total Unit tests run: $TEST_COUNT"
@@ -183,8 +183,10 @@ jobs:
             echo "No Unit tests were run."
             exit 1
           fi
-          echo "CURRENT_TEST_COUNT_JAVA_UBUNTU=$TEST_COUNT" >> $GITHUB_ENV
-          echo $CURRENT_TEST_COUNT_JAVA_UBUNTU
+          if [[ ($TEST_COUNT -lt ${{ vars.TEST_COUNT_JAVA_UBUNTU }}) ]]; then
+            echo "Ubuntu Unit Test count decreased. Please check the test count."
+            exit 1
+          fi
 
       - name: Check Unit Test Count for Java 8 macos-13
         if: matrix.os == 'macos-13'
@@ -196,19 +198,10 @@ jobs:
             echo "No test result files found or test count is zero."
             exit 1
           fi  
-          echo "CURRENT_TEST_COUNT_JAVA_MACOS=$TEST_COUNT" >> $GITHUB_ENV
-
-      - name: Read threshold values for macos-13 and ubuntu-20.04
-        if: matrix.os != 'windows-2019'
-        env: 
-          THRESHOLDS_UBUNTU: ${{ secrets.TEST_COUNT_JAVA_UBUNTU }}
-          THRESHOLDS_MACOS: ${{ secrets.TEST_COUNT_JAVA_MACOS }}
-        run: |
-          if [[ ($CURRENT_TEST_COUNT_JAVA_UBUNTU -lt $THRESHOLDS_UBUNTU) || ($CURRENT_TEST_COUNT_JAVA_MACOS -lt $THRESHOLDS_MACOS) ]]; then
-          echo "Ubuntu/MacOS Unit Test count decreased. Please check the test count."
-          exit 1
+          if [[ ($TEST_COUNT -lt ${{ vars.TEST_COUNT_JAVA_MACOS }}) ]]; then
+            echo "MacOS Unit Test count decreased. Please check the test count."
+            exit 1
           fi
-        continue-on-error: false
 
       - name: Check Test Count for windows-2019
         if: matrix.os == 'windows-2019'
@@ -217,23 +210,13 @@ jobs:
           $TEST_COUNT = (Get-ChildItem -Recurse -Filter "*.txt" | Select-String -Pattern 'Tests run: (\d+)' | ForEach-Object { $_.Matches.Groups[1].Value } | Measure-Object -Sum).Sum
           Write-Output "Total Unit tests run: $TEST_COUNT"
           if ($TEST_COUNT -eq 0) {
-            Write-Output "No Unit tests were run."
-            exit 1
+              Write-Output "No Unit tests were run."
+              exit 1
           }
-          echo "CURRENT_TEST_COUNT_JAVA_WINDOWS=$TEST_COUNT" >> $env:GITHUB_ENV
-          
-      # separate step for windows due to different os
-      - name: Read threshold values for windows-2019
-        shell: pwsh
-        if: matrix.os == 'windows-2019'
-        env: 
-          THRESHOLDS_WINDOWS: ${{ secrets.TEST_COUNT_JAVA_WINDOWS }}
-        run: |
-          if ($env:CURRENT_TEST_COUNT_JAVA_WINDOWS -lt ${THRESHOLDS_WINDOWS}) {
-            Write-Host "Windows Unit Test count decreased. Please check the test count."
-            exit 1
+          if ($TEST_COUNT -lt ${{ vars.TEST_COUNT_JAVA_WINDOWS }}) {
+              Write-Host "Windows Unit Test count decreased. Please check the test count."
+              exit 1
           }
-        continue-on-error: false
 
       - name: Remove Original Jars for *nix
         if: env.OS_TYPE != 'windows-2019'
@@ -362,17 +345,32 @@ jobs:
             echo "No integration tests were run."
             exit 1
           fi
-          echo "CURRENT_TEST_COUNT_INTEGRATION=$TEST_COUNT" >> $GITHUB_ENV
+          if [[ ${{ matrix.testSystem }} == 'db2'  ]]; then
+              EXPECTED_TEST_COUNT=${{ vars.TEST_COUNT_INTEGRATION_DB2 }}
+            elif [[ ${{ matrix.testSystem }} == 'h2'  ]]; then
+              EXPECTED_TEST_COUNT=${{ vars.TEST_COUNT_INTEGRATION_H2 }}
+            elif [[ ${{ matrix.testSystem }} == 'hsqldb'  ]]; then
+              EXPECTED_TEST_COUNT=${{ vars.TEST_COUNT_INTEGRATION_HSQLDB }}
+            elif [[ ${{ matrix.testSystem }} == 'mariadb'  ]]; then
+              EXPECTED_TEST_COUNT=${{ vars.TEST_COUNT_INTEGRATION_MARIADB }}
+            elif [[ ${{ matrix.testSystem }} == 'mssql'  ]]; then
+              EXPECTED_TEST_COUNT=${{ vars.TEST_COUNT_INTEGRATION_MSSQL }}
+            elif [[ ${{ matrix.testSystem }} == 'mysql'  ]]; then
+              EXPECTED_TEST_COUNT=${{ vars.TEST_COUNT_INTEGRATION_MYSQL }}
+            elif [[ ${{ matrix.testSystem }} == 'oracle'  ]]; then
+              EXPECTED_TEST_COUNT=${{ vars.TEST_COUNT_INTEGRATION_ORACLE }}
+            elif [[ ${{ matrix.testSystem }} == 'postgresql'  ]]; then
+              EXPECTED_TEST_COUNT=${{ vars.TEST_COUNT_INTEGRATION_POSTGRESQL }}
+            elif [[ ${{ matrix.testSystem }} == 'sqlite'  ]]; then
+              EXPECTED_TEST_COUNT=${{ vars.TEST_COUNT_INTEGRATION_SQLITE }}
+            elif [[ ${{ matrix.testSystem }} == 'firebird'  ]]; then
+              EXPECTED_TEST_COUNT=${{ vars.TEST_COUNT_INTEGRATION_FIREBIRD }} 
+            fi
 
-      - name: Read threshold values for integration tests
-        env: 
-          INTEGRATION_THRESHOLD: ${{ secrets.TEST_COUNT_INTEGRATION }}
-        run: |
-            if [[ (${CURRENT_TEST_COUNT_INTEGRATION}: -lt ${INTEGRATION_THRESHOLD}) ]]; then
+            if [[ (${TEST_COUNT} -lt $EXPECTED_TEST_COUNT) ]]; then
               echo "Integration Test count decreased. Please check the test count."
               exit 1
             fi
-        continue-on-error: false
 
       - name: Archive Test Results
         if: ${{ inputs.archive_test_results == 'true' }}
