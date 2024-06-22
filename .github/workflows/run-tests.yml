@@ -34,10 +34,12 @@ env:
   TEST_COUNT_INTEGRATION_POSTGRESQL: 748
   TEST_COUNT_INTEGRATION_SQLITE: 739
   TEST_COUNT_INTEGRATION_FIREBIRD: 739
-  TEST_COUNT_JAVA_UBUNTU: 1573
-  TEST_COUNT_JAVA_MACOS: 1698
-  TEST_COUNT_JAVA_WINDOWS: 1698
-  TEST_COUNT_JAVA_UBUNTU_ALL: 1698
+  TEST_COUNT_JAVA_8_UBUNTU: 5985
+  TEST_COUNT_JAVA_11_UBUNTU: 5985
+  TEST_COUNT_JAVA_17_UBUNTU: 5999
+  TEST_COUNT_JAVA_21_UBUNTU: 5999
+  TEST_COUNT_JAVA_MACOS: 5985
+  TEST_COUNT_JAVA_WINDOWS: 6003
   
 jobs:
   authorize:
@@ -200,8 +202,19 @@ jobs:
             echo "No Unit tests were run."
             exit 1
           fi
-          if [[ ($TEST_COUNT -ne ${{ env.TEST_COUNT_JAVA_UBUNTU }} ) ]]; then
-            echo "Ubuntu Unit Test count decreased. Please check the test count."
+          EXPECTED_TEST_COUNT=0
+          if [[ ${{ matrix.java }} == 8 ]]; then
+            EXPECTED_TEST_COUNT=${{ env.TEST_COUNT_JAVA_8_UBUNTU }}
+          elif [[ ${{ matrix.java }} == 11 ]]; then
+            EXPECTED_TEST_COUNT=${{ env.TEST_COUNT_JAVA_11_UBUNTU }}
+          elif [[ ${{ matrix.java }} == 17 ]]; then
+            EXPECTED_TEST_COUNT=${{ env.TEST_COUNT_JAVA_17_UBUNTU }}
+          elif [[ ${{ matrix.java }} == 21 ]]; then
+            EXPECTED_TEST_COUNT=${{ env.TEST_COUNT_JAVA_21_UBUNTU }}
+          fi
+
+          if [[ ($TEST_COUNT -ne $EXPECTED_TEST_COUNT ) ]]; then
+            echo "Ubuntu Unit Test count has changed. Expected $EXPECTED_TEST_COUNT. Actual $TEST_COUNT."
             exit 1
           fi
 
@@ -215,8 +228,8 @@ jobs:
             echo "No test result files found or test count is zero."
             exit 1
           fi  
-          if [[ ($TEST_COUNT -ne ${{ env.TEST_COUNT_JAVA_MACOS }}) ]]; then
-            echo "MacOS Unit Test count decreased. Please check the test count."
+          if [[ ($TEST_COUNT -ne ${{ env.TEST_COUNT_JAVA_MACOS }}) ]]; 
+            echo "MacOS Unit Test count has changed. Expected ${{ env.TEST_COUNT_JAVA_MACOS }}. Actual $TEST_COUNT."
             exit 1
           fi
 
@@ -231,7 +244,7 @@ jobs:
               exit 1
           }
           if ($TEST_COUNT -ne ${{ env.TEST_COUNT_JAVA_WINDOWS }} ) {
-              Write-Host "Windows Unit Test count decreased. Please check the test count."
+              Write-Host "Windows Unit Test count has changed. Expected ${{ env.TEST_COUNT_JAVA_WINDOWS }}. Actual $TEST_COUNT."
               exit 1
           }
 
@@ -362,6 +375,7 @@ jobs:
             echo "No integration tests were run."
             exit 1
           fi
+          EXPECTED_TEST_COUNT=0
           if [[ ${{ matrix.testSystem }} == 'db2'  ]]; then
               EXPECTED_TEST_COUNT=${{ env.TEST_COUNT_INTEGRATION_DB2 }}
             elif [[ ${{ matrix.testSystem }} == 'h2'  ]]; then
@@ -385,7 +399,7 @@ jobs:
             fi
 
             if [[ (${TEST_COUNT} -ne $EXPECTED_TEST_COUNT) ]]; then
-              echo "Integration Test count decreased. Please check the test count."
+              echo "Integration Test count has changed. Expected $EXPECTED_TEST_COUNT. Actual $TEST_COUNT."
               exit 1
             fi
 
