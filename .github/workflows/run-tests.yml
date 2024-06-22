@@ -228,7 +228,7 @@ jobs:
             echo "No test result files found or test count is zero."
             exit 1
           fi  
-          if [[ ($TEST_COUNT -ne ${{ env.TEST_COUNT_JAVA_MACOS }}) ]]; 
+          if [[ ($TEST_COUNT -ne ${{ env.TEST_COUNT_JAVA_MACOS }}) ]]; then
             echo "MacOS Unit Test count has changed. Expected ${{ env.TEST_COUNT_JAVA_MACOS }}. Actual $TEST_COUNT."
             exit 1
           fi
