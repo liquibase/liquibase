@@ -656,6 +656,15 @@ public interface Database extends PrioritizedService, AutoCloseable {
     }
 
     /**
+     * Does the database support the "ROWDEPENDENCIES" syntax?
+     * @param type the DatabaseObject type to be checked.
+     * @return true if the "ROWDEPENDENCIES" syntax is supported, false otherwise.
+     */
+    default boolean supportsCreateRowDependencies(Class<? extends DatabaseObject> type) {
+        return false;
+    }
+
+    /**
      * Does the particular database implementation support the database changelog history feature and associated
      * table?
      * @return true if supported, false otherwise

@@ -1255,4 +1255,17 @@ public class CreateTableGeneratorTest extends AbstractSqlGeneratorTest<CreateTab
             }
         }
     }
+
+    @Test
+    public void testWithCreateRowDependencies() {
+        for (Database database : TestContext.getInstance().getAllDatabases()) {
+            if (database.supportsCreateRowDependencies(Table.class)) {
+                CreateTableStatement statement = new CreateTableStatement(CATALOG_NAME, SCHEMA_NAME, TABLE_NAME, true, true);
+                statement.addColumn(COLUMN_NAME1, DataTypeFactory.getInstance().fromDescription("java.sql.Types.TIMESTAMP", database), new ColumnConfig().setDefaultValue("null").getDefaultValueObject());
+                if (shouldBeImplementation(database)) {
+                    assertTrue(this.generatorUnderTest.generateSql(statement, database, null)[0].toSql().contains("ROWDEPENDENCIES"));
+                }
+            }
+        }
+    }
 }

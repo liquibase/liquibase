@@ -446,6 +446,9 @@ createTable: |
   remarks string 
     Description: A brief descriptive comment to store in the table metadata
     Supported: all
+  rowDependencies boolean 
+    Description: If the Database supports it, when true, creates the table with ROWDEPENDENCIES
+    Supported: all
   schemaName string 
     Description: Name of the database schema
     Supported: all
