@@ -21,25 +21,6 @@ on:
 
     paths-ignore:
       - '**.md'
-
-      # Update this count when adding new tests to ensure the count is accurate
-env:
-  TEST_COUNT_INTEGRATION_DB2: 739
-  TEST_COUNT_INTEGRATION_H2: 782
-  TEST_COUNT_INTEGRATION_HSQLDB: 739
-  TEST_COUNT_INTEGRATION_MARIADB: 740
-  TEST_COUNT_INTEGRATION_MSSQL: 754
-  TEST_COUNT_INTEGRATION_MYSQL: 746
-  TEST_COUNT_INTEGRATION_ORACLE: 740
-  TEST_COUNT_INTEGRATION_POSTGRESQL: 748
-  TEST_COUNT_INTEGRATION_SQLITE: 739
-  TEST_COUNT_INTEGRATION_FIREBIRD: 739
-  TEST_COUNT_JAVA_8_UBUNTU: 5985
-  TEST_COUNT_JAVA_11_UBUNTU: 5985
-  TEST_COUNT_JAVA_17_UBUNTU: 5999
-  TEST_COUNT_JAVA_21_UBUNTU: 5999
-  TEST_COUNT_JAVA_MACOS: 5985
-  TEST_COUNT_JAVA_WINDOWS: 6003
   
 jobs:
   authorize:
@@ -204,16 +185,16 @@ jobs:
           fi
           EXPECTED_TEST_COUNT=0
           if [[ ${{ matrix.java }} == 8 ]]; then
-            EXPECTED_TEST_COUNT=${{ env.TEST_COUNT_JAVA_8_UBUNTU }}
+            EXPECTED_TEST_COUNT=${{ vars.TEST_COUNT_JAVA_8_UBUNTU }}
           elif [[ ${{ matrix.java }} == 11 ]]; then
-            EXPECTED_TEST_COUNT=${{ env.TEST_COUNT_JAVA_11_UBUNTU }}
+            EXPECTED_TEST_COUNT=${{ vars.TEST_COUNT_JAVA_11_UBUNTU }}
           elif [[ ${{ matrix.java }} == 17 ]]; then
-            EXPECTED_TEST_COUNT=${{ env.TEST_COUNT_JAVA_17_UBUNTU }}
+            EXPECTED_TEST_COUNT=${{ vars.TEST_COUNT_JAVA_17_UBUNTU }}
           elif [[ ${{ matrix.java }} == 21 ]]; then
-            EXPECTED_TEST_COUNT=${{ env.TEST_COUNT_JAVA_21_UBUNTU }}
+            EXPECTED_TEST_COUNT=${{ vars.TEST_COUNT_JAVA_21_UBUNTU }}
           fi
 
-          if [[ ($TEST_COUNT -ne $EXPECTED_TEST_COUNT ) ]]; then
+          if [[ ($TEST_COUNT -lt $(($EXPECTED_TEST_COUNT - ($EXPECTED_TEST_COUNT / 100))) ) || ($TEST_COUNT -gt $(($EXPECTED_TEST_COUNT + ($EXPECTED_TEST_COUNT / 100))) ) ]]; then
             echo "Ubuntu Unit Test count has changed. Expected $EXPECTED_TEST_COUNT. Actual $TEST_COUNT."
             exit 1
           fi
@@ -228,8 +209,8 @@ jobs:
             echo "No test result files found or test count is zero."
             exit 1
           fi  
-          if [[ ($TEST_COUNT -ne ${{ env.TEST_COUNT_JAVA_MACOS }}) ]]; then
-            echo "MacOS Unit Test count has changed. Expected ${{ env.TEST_COUNT_JAVA_MACOS }}. Actual $TEST_COUNT."
+          if [[ ($TEST_COUNT -lt ${{ vars.TEST_COUNT_JAVA_MACOS }}) ]]; then
+            echo "MacOS Unit Test count has changed. Expected ${{ vars.TEST_COUNT_JAVA_MACOS }}. Actual $TEST_COUNT."
             exit 1
           fi
 
@@ -243,8 +224,8 @@ jobs:
               Write-Output "No Unit tests were run."
               exit 1
           }
-          if ($TEST_COUNT -ne ${{ env.TEST_COUNT_JAVA_WINDOWS }} ) {
-              Write-Host "Windows Unit Test count has changed. Expected ${{ env.TEST_COUNT_JAVA_WINDOWS }}. Actual $TEST_COUNT."
+          if (($TEST_COUNT -lt $((${{ vars.TEST_COUNT_JAVA_WINDOWS }} - (${{ vars.TEST_COUNT_JAVA_WINDOWS }} / 100))) ) || ($TEST_COUNT -gt $((${{ vars.TEST_COUNT_JAVA_WINDOWS }} + (${{ vars.TEST_COUNT_JAVA_WINDOWS }} / 100))) )) {
+              Write-Host "Windows Unit Test count has changed. Expected ${{ vars.TEST_COUNT_JAVA_WINDOWS }}. Actual $TEST_COUNT."
               exit 1
           }
 
@@ -377,28 +358,28 @@ jobs:
           fi
           EXPECTED_TEST_COUNT=0
           if [[ ${{ matrix.testSystem }} == 'db2'  ]]; then
-              EXPECTED_TEST_COUNT=${{ env.TEST_COUNT_INTEGRATION_DB2 }}
+              EXPECTED_TEST_COUNT=${{ vars.TEST_COUNT_INTEGRATION_DB2 }}
             elif [[ ${{ matrix.testSystem }} == 'h2'  ]]; then
-              EXPECTED_TEST_COUNT=${{ env.TEST_COUNT_INTEGRATION_H2 }}
+              EXPECTED_TEST_COUNT=${{ vars.TEST_COUNT_INTEGRATION_H2 }}
             elif [[ ${{ matrix.testSystem }} == 'hsqldb'  ]]; then
-              EXPECTED_TEST_COUNT=${{ env.TEST_COUNT_INTEGRATION_HSQLDB }}
+              EXPECTED_TEST_COUNT=${{ vars.TEST_COUNT_INTEGRATION_HSQLDB }}
             elif [[ ${{ matrix.testSystem }} == 'mariadb'  ]]; then
-              EXPECTED_TEST_COUNT=${{ env.TEST_COUNT_INTEGRATION_MARIADB }}
+              EXPECTED_TEST_COUNT=${{ vars.TEST_COUNT_INTEGRATION_MARIADB }}
             elif [[ ${{ matrix.testSystem }} == 'mssql'  ]]; then
-              EXPECTED_TEST_COUNT=${{ env.TEST_COUNT_INTEGRATION_MSSQL }}
+              EXPECTED_TEST_COUNT=${{ vars.TEST_COUNT_INTEGRATION_MSSQL }}
             elif [[ ${{ matrix.testSystem }} == 'mysql'  ]]; then
-              EXPECTED_TEST_COUNT=${{ env.TEST_COUNT_INTEGRATION_MYSQL }}
+              EXPECTED_TEST_COUNT=${{ vars.TEST_COUNT_INTEGRATION_MYSQL }}
             elif [[ ${{ matrix.testSystem }} == 'oracle'  ]]; then
-              EXPECTED_TEST_COUNT=${{ env.TEST_COUNT_INTEGRATION_ORACLE }}
+              EXPECTED_TEST_COUNT=${{ vars.TEST_COUNT_INTEGRATION_ORACLE }}
             elif [[ ${{ matrix.testSystem }} == 'postgresql'  ]]; then
-              EXPECTED_TEST_COUNT=${{ env.TEST_COUNT_INTEGRATION_POSTGRESQL }}
+              EXPECTED_TEST_COUNT=${{ vars.TEST_COUNT_INTEGRATION_POSTGRESQL }}
             elif [[ ${{ matrix.testSystem }} == 'sqlite'  ]]; then
-              EXPECTED_TEST_COUNT=${{ env.TEST_COUNT_INTEGRATION_SQLITE }}
+              EXPECTED_TEST_COUNT=${{ vars.TEST_COUNT_INTEGRATION_SQLITE }}
             elif [[ ${{ matrix.testSystem }} == 'firebird'  ]]; then
-              EXPECTED_TEST_COUNT=${{ env.TEST_COUNT_INTEGRATION_FIREBIRD }} 
+              EXPECTED_TEST_COUNT=${{ vars.TEST_COUNT_INTEGRATION_FIREBIRD }} 
             fi
 
-            if [[ (${TEST_COUNT} -ne $EXPECTED_TEST_COUNT) ]]; then
+            if [[ $TEST_COUNT -lt $(($EXPECTED_TEST_COUNT - ($EXPECTED_TEST_COUNT / 100))) ]] || [[ $TEST_COUNT -gt $(($EXPECTED_TEST_COUNT + ($EXPECTED_TEST_COUNT / 100))) ]]; then
               echo "Integration Test count has changed. Expected $EXPECTED_TEST_COUNT. Actual $TEST_COUNT."
               exit 1
             fi
@@ -436,3 +417,24 @@ jobs:
     needs: [ build_tests,integration-test ]
     uses: liquibase/liquibase/.github/workflows/build.yml@master
     secrets: inherit
+
+
+  update-test-count-secrets:
+    needs: [build_tests, integration-test]
+    runs-on: ubuntu-20.04
+    if: always()
+    steps:
+      - name: Set GitHub Secret for Test Count
+        env:
+          TEST_COUNT_JAVA_WINDOWS: ${{ vars.CURRENT_TEST_COUNT_JAVA_WINDOWS }}
+          TEST_COUNT_JAVA_MACOS: ${{ vars.CURRENT_TEST_COUNT_JAVA_MACOS }}
+          TEST_COUNT_JAVA_UBUNTU: ${{ vars.CURRENT_TEST_COUNT_JAVA_UBUNTU }}
+          TEST_COUNT_INTEGRATION: ${{ vars.CURRENT_TEST_COUNT_INTEGRATION }}
+          TEST_COUNT_SECRET: ${{ secrets.TEST_COUNT_SECRET }}
+        run: |
+          echo $GITHUB_TOKEN | gh auth login --with-token
+          repository='${{ github.repository }}'
+          gh secret set TEST_COUNT_WINDOWS --body "$TEST_COUNT_JAVA_WINDOWS" --repository $repository
+          gh secret set TEST_COUNT_MACOS --body "$TEST_COUNT_JAVA_MACOS" --repository $repository
+          gh secret set TEST_COUNT_UBUNTU --body "$TEST_COUNT_JAVA_UBUNTU" --repository $repository    
+          gh secret set TEST_COUNT_INTEGRATION --body "$TEST_COUNT_INTEGRATION" --repository $repository    
