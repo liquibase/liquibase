@@ -12,6 +12,7 @@ import liquibase.statement.SequenceCurrentValueFunction;
 import liquibase.statement.SequenceNextValueFunction;
 import liquibase.structure.core.*;
 import liquibase.util.*;
+import lombok.Getter;
 
 import java.math.BigInteger;
 import java.text.NumberFormat;
@@ -340,7 +341,6 @@ public class ColumnConfig extends AbstractLiquibaseSerializable {
      * Return the function this column should be set from.
      * @see #setValue(String)
      */
-
     public DatabaseFunction getValueComputed() {
         return valueComputed;
     }
@@ -886,6 +886,7 @@ public class ColumnConfig extends AbstractLiquibaseSerializable {
     public static class ValueNumeric extends Number {
         private static final long serialVersionUID = 1381154777956917462L;
 
+        @Getter
         private final Number delegate;
         private final String value;
 
@@ -942,9 +943,6 @@ public class ColumnConfig extends AbstractLiquibaseSerializable {
             return this.toString().hashCode();
         }
 
-        public Number getDelegate() {
-            return delegate;
-        }
     }
 
     @Override
