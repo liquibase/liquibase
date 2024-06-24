@@ -1,7 +1,10 @@
 package liquibase.change;
 
+import lombok.Getter;
+
 public class ChangeStatus {
 
+    @Getter
     protected Throwable exception;
     private String message;
     private Status status;
@@ -69,10 +72,6 @@ public class ChangeStatus {
             return null;
         }
         return message;
-    }
-
-    public Throwable getException() {
-        return exception;
     }
 
     @Override
