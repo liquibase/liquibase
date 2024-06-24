@@ -449,20 +449,20 @@ jobs:
         run: |
           echo $TEST_COUNT_SECRET | gh auth login --with-token
           repository='${{ github.repository }}'
-          gh variable set TEST_COUNT_JAVA_11_UBUNTU --body "$TEST_COUNT_JAVA_11_UBUNTU
-          gh variable set TEST_COUNT_JAVA_17_UBUNTU --body "$TEST_COUNT_JAVA_17_UBUNTU
-          gh variable set TEST_COUNT_JAVA_21_UBUNTU --body "$TEST_COUNT_JAVA_21_UBUNTU
-          gh variable set TEST_COUNT_JAVA_8_UBUNTU --body "$TEST_COUNT_JAVA_8_UBUNTU  
-          gh variable set TEST_COUNT_JAVA_MACOS --body "$TEST_COUNT_JAVA_MACOS
-          gh variable set TEST_COUNT_JAVA_WINDOWS --body "$TEST_COUNT_JAVA_WINDOWS
-          gh variable set TEST_COUNT_INTEGRATION_DB2 --body "$TEST_COUNT_INTEGRATION_DB2
-          gh variable set TEST_COUNT_INTEGRATION_H2 --body "$TEST_COUNT_INTEGRATION_H2
-          gh variable set TEST_COUNT_INTEGRATION_HSQLDB --body "$TEST_COUNT_INTEGRATION_HSQLDB
-          gh variable set TEST_COUNT_INTEGRATION_MARIADB --body "$TEST_COUNT_INTEGRATION_MARIADB
-          gh variable set TEST_COUNT_INTEGRATION_MSSQL --body "$TEST_COUNT_INTEGRATION_MSSQL
-          gh variable set TEST_COUNT_INTEGRATION_MYSQL --body "$TEST_COUNT_INTEGRATION_MYSQL
-          gh variable set TEST_COUNT_INTEGRATION_ORACLE --body "$TEST_COUNT_INTEGRATION_ORACLE
-          gh variable set TEST_COUNT_INTEGRATION_POSTGRESQL --body "$TEST_COUNT_INTEGRATION_POSTGRESQL
-          gh variable set TEST_COUNT_INTEGRATION_SQLITE --body "$TEST_COUNT_INTEGRATION_SQLITE
-          gh variable set TEST_COUNT_INTEGRATION_FIREBIRD --body "$TEST_COUNT_INTEGRATION_FIREBIRD
+          gh variable set TEST_COUNT_JAVA_11_UBUNTU --body "$TEST_COUNT_JAVA_11_UBUNTU"
+          gh variable set TEST_COUNT_JAVA_17_UBUNTU --body "$TEST_COUNT_JAVA_17_UBUNTU"
+          gh variable set TEST_COUNT_JAVA_21_UBUNTU --body "$TEST_COUNT_JAVA_21_UBUNTU"
+          gh variable set TEST_COUNT_JAVA_8_UBUNTU --body "$TEST_COUNT_JAVA_8_UBUNTU"
+          gh variable set TEST_COUNT_JAVA_MACOS --body "$TEST_COUNT_JAVA_MACOS"
+          gh variable set TEST_COUNT_JAVA_WINDOWS --body "$TEST_COUNT_JAVA_WINDOWS"
+          gh variable set TEST_COUNT_INTEGRATION_DB2 --body "$TEST_COUNT_INTEGRATION_DB2"
+          gh variable set TEST_COUNT_INTEGRATION_H2 --body "$TEST_COUNT_INTEGRATION_H2"
+          gh variable set TEST_COUNT_INTEGRATION_HSQLDB --body "$TEST_COUNT_INTEGRATION_HSQLDB"
+          gh variable set TEST_COUNT_INTEGRATION_MARIADB --body "$TEST_COUNT_INTEGRATION_MARIADB"
+          gh variable set TEST_COUNT_INTEGRATION_MSSQL --body "$TEST_COUNT_INTEGRATION_MSSQL"
+          gh variable set TEST_COUNT_INTEGRATION_MYSQL --body "$TEST_COUNT_INTEGRATION_MYSQL"
+          gh variable set TEST_COUNT_INTEGRATION_ORACLE --body "$TEST_COUNT_INTEGRATION_ORACLE"
+          gh variable set TEST_COUNT_INTEGRATION_POSTGRESQL --body "$TEST_COUNT_INTEGRATION_POSTGRESQL"
+          gh variable set TEST_COUNT_INTEGRATION_SQLITE --body "$TEST_COUNT_INTEGRATION_SQLITE"
+          gh variable set TEST_COUNT_INTEGRATION_FIREBIRD --body "$TEST_COUNT_INTEGRATION_FIREBIRD"
 
