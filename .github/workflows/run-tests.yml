@@ -424,6 +424,8 @@ jobs:
     runs-on: ubuntu-20.04
     if: always()
     steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
       - name: Set GitHub Secret for Test Count
         env:
           TEST_COUNT_JAVA_11_UBUNTU: ${{ vars.TEST_COUNT_JAVA_11_UBUNTU }}
