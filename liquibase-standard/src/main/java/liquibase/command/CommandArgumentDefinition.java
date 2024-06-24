@@ -8,6 +8,8 @@ import liquibase.exception.MissingRequiredArgumentException;
 import liquibase.integration.commandline.LiquibaseCommandLineConfiguration;
 import liquibase.util.ObjectUtil;
 import liquibase.util.StringUtil;
+import lombok.Getter;
+import lombok.Setter;
 
 import java.util.*;
 import java.util.regex.Pattern;
@@ -25,30 +27,72 @@ public class CommandArgumentDefinition<DataType> implements Comparable<CommandAr
     private static final String ALLOWED_ARGUMENT_REGEX = "[a-zA-Z0-9]+";
     private static final Pattern ALLOWED_ARGUMENT_PATTERN = Pattern.compile(ALLOWED_ARGUMENT_REGEX);
 
+    /**
+     * -- GETTER --
+     *  The name of the argument. Must be camelCase alphanumeric.
+     */
+    @Getter
     private final String name;
     private final SortedSet<String> aliases = new TreeSet<>();
     private final Set<String> forcePrintedAliases = new HashSet<>();
+    /**
+     * -- GETTER --
+     *  The datatype this argument will return.
+     */
+    @Getter
     private final Class<DataType> dataType;
+    /**
+     * -- GETTER --
+     *  The description of the argument. Used in generated help documentation.
+     */
+    @Getter
     private String description;
+    /**
+     * -- GETTER --
+     *  Whether this argument is required. Exposed as a separate setting for help doc purposes.
+     *  will ensure required values are set.
+     */
+    @Getter
     private boolean required;
     private boolean hidden;
+    /**
+     * -- GETTER --
+     *  The default value to use for this argument
+     */
+    @Getter
     private DataType defaultValue;
+    /**
+     * -- GETTER --
+     *  A description of the default value. Defaults to
+     *  of
+     *  but
+     *  can be explicitly with
+     * .
+     */
+    @Getter
     private String defaultValueDescription;
+    /**
+     * -- GETTER --
+     *  Function for converting values set in underlying
+     * s into the
+     *  type needed for this command.
+     */
+    @Getter
     private ConfigurationValueConverter<DataType> valueConverter;
+    /**
+     * -- GETTER --
+     *  Used when sending the value to user output to protect secure values.
+     */
+    @Getter
     private ConfigurationValueObfuscator<DataType> valueObfuscator;
+    @Setter
+    @Getter
     private CommandArgumentDefinition<?> supersededBy;
 
     protected CommandArgumentDefinition(String name, Class<DataType> type) {
         this.name = name;
         this.dataType = type;
         this.valueConverter = value -> ObjectUtil.convert(value, type, name);
-    }
-
-    /**
-     * The name of the argument. Must be camelCase alphanumeric.
-     */
-    public String getName() {
-        return name;
     }
 
     /**
@@ -63,70 +107,10 @@ public class CommandArgumentDefinition<DataType> implements Comparable<CommandAr
     }
 
     /**
-     * The description of the argument. Used in generated help documentation.
-     */
-    public String getDescription() {
-        return description;
-    }
-
-    /**
-     * The datatype this argument will return.
-     */
-    public Class<DataType> getDataType() {
-        return dataType;
-    }
-
-    /**
-     * Whether this argument is required. Exposed as a separate setting for help doc purposes.
-     * {@link #validate(CommandScope)} will ensure required values are set.
-     */
-    public boolean isRequired() {
-        return required;
-    }
-
-    public CommandArgumentDefinition<?> getSupersededBy() {
-        return this.supersededBy;
-    }
-
-    public void setSupersededBy(CommandArgumentDefinition<?> supersededBy) {
-        this.supersededBy = supersededBy;
-    }
-
-    /**
      * Hidden arguments are ones that can be called via integrations, but should not be normally shown in help to users.
      */
     public boolean getHidden() {
         return hidden;
-    }
-
-    /**
-     * The default value to use for this argument
-     */
-    public DataType getDefaultValue() {
-        return defaultValue;
-    }
-
-    /**
-     * A description of the default value. Defaults to {@link String#valueOf(Object)} of {@link #getDefaultValue()} but
-     * can be explicitly with {@link Building#defaultValue(Object, String)}.
-     */
-    public String getDefaultValueDescription() {
-        return defaultValueDescription;
-    }
-
-    /**
-     * Function for converting values set in underlying {@link liquibase.configuration.ConfigurationValueProvider}s into the
-     * type needed for this command.
-     */
-    public ConfigurationValueConverter<DataType> getValueConverter() {
-        return valueConverter;
-    }
-
-    /**
-     * Used when sending the value to user output to protect secure values.
-     */
-    public ConfigurationValueObfuscator<DataType> getValueObfuscator() {
-        return valueObfuscator;
     }
 
     /**
