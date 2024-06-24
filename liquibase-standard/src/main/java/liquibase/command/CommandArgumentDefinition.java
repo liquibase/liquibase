@@ -9,10 +9,7 @@ import liquibase.integration.commandline.LiquibaseCommandLineConfiguration;
 import liquibase.util.ObjectUtil;
 import liquibase.util.StringUtil;
 
-import java.util.Collections;
-import java.util.Objects;
-import java.util.SortedSet;
-import java.util.TreeSet;
+import java.util.*;
 import java.util.regex.Pattern;
 
 /**
@@ -30,6 +27,7 @@ public class CommandArgumentDefinition<DataType> implements Comparable<CommandAr
 
     private final String name;
     private final SortedSet<String> aliases = new TreeSet<>();
+    private final Set<String> forcePrintedAliases = new HashSet<>();
     private final Class<DataType> dataType;
     private String description;
     private boolean required;
@@ -58,6 +56,10 @@ public class CommandArgumentDefinition<DataType> implements Comparable<CommandAr
      */
     public SortedSet<String> getAliases() {
         return Collections.unmodifiableSortedSet(aliases);
+    }
+
+    public Set<String> getForcePrintedAliases() {
+        return Collections.unmodifiableSet(forcePrintedAliases);
     }
 
     /**
@@ -281,6 +283,15 @@ public class CommandArgumentDefinition<DataType> implements Comparable<CommandAr
          */
         public Building<DataType> addAlias(String alias) {
             newCommandArgument.aliases.add(alias);
+            return this;
+        }
+
+        /**
+         * Adds an alias for this command argument that will be printed to the help output as a new entry
+         */
+        public Building<DataType> addForcePrintAlias(String alias) {
+            addAlias(alias);
+            newCommandArgument.forcePrintedAliases.add(alias);
             return this;
         }
 

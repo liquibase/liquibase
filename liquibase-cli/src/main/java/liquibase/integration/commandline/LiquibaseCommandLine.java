@@ -935,12 +935,13 @@ public class LiquibaseCommandLine {
 
 
             for (CommandArgumentDefinition<?> def : commandDefinition.getArguments().values()) {
-                final String[] argNames = toArgNames(def);
-                for (int i = 0; i < argNames.length; i++) {
-                    final CommandLine.Model.OptionSpec.Builder builder = createArgBuilder(def, argNames[i]);
+                final List<ArgumentName> argNames = toArgNames(def);
+                for (int i = 0; i < argNames.size(); i++) {
+                    ArgumentName argument = argNames.get(i);
+                    String argName = argument.getArgumentName();
+                    final CommandLine.Model.OptionSpec.Builder builder = createArgBuilder(def, argName);
 
                     String argDisplaySuffix = "";
-                    String argName = argNames[i];
 
                     //
                     // Determine if this is a group command and set the property/environment display strings accordingly
@@ -983,8 +984,9 @@ public class LiquibaseCommandLine {
                         builder.arity("0..1");
                     }
 
-
-                    if (i > 0) {
+                    if (argument.isForcePrintAlias()) {
+                        builder.hidden(false);
+                    } else if (i > 0) {
                         builder.hidden(true);
                     } else {
                         builder.hidden(def.getHidden() && !LiquibaseCommandLineConfiguration.SHOW_HIDDEN_ARGS.getCurrentValue());
@@ -1227,22 +1229,23 @@ public class LiquibaseCommandLine {
 
     }
 
-    protected static String[] toArgNames(CommandArgumentDefinition<?> def) {
+    protected static List<ArgumentName> toArgNames(CommandArgumentDefinition<?> def) {
         //
         // Use an ordered Set so that the command name shows up first
         // and is listed as the argument in the help
         //
-        LinkedHashSet<String> returnList = new LinkedHashSet<>();
+        LinkedHashSet<ArgumentName> returnList = new LinkedHashSet<>();
         Set<String> baseNames = new LinkedHashSet<>();
         baseNames.add(def.getName());
         baseNames.addAll(def.getAliases());
 
         for (String baseName : baseNames) {
-            returnList.add("--" + StringUtil.toKabobCase(baseName).replace(".", "-"));
-            returnList.add("--" + baseName.replace("\\.", ""));
+            returnList.add(new ArgumentName("--" + StringUtil.toKabobCase(baseName).replace(".", "-"), def.getForcePrintedAliases().contains(baseName)));
+            // forcePrintAlias is false here because we never print to out a second copy of the alias to the help, only the first entry should be printed.
+            returnList.add(new ArgumentName("--" + baseName.replace("\\.", ""), false));
         }
 
-        return returnList.toArray(new String[0]);
+        return new ArrayList<>(returnList);
     }
 
     protected static String[] toArgNames(ConfigurationDefinition<?> def) {
