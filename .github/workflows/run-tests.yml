@@ -422,7 +422,7 @@ jobs:
   update-test-count-secrets:
     needs: [build_tests, integration-test]
     runs-on: ubuntu-20.04
-    if: always()
+    if: github.event_name == 'push' && github.ref == 'refs/heads/master'
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
