@@ -34,40 +34,27 @@ env:
   MAVEN_VERSION: '3.9.2'
 
 jobs:
-
-  prepare-package-versions:
-    runs-on: ubuntu-22.04
+  setup_matrix:
+    runs-on: ubuntu-latest
     outputs:
-      dependencies: ${{ steps.set_dependencies.outputs.dependencies }}
+      dependencies_matrix: ${{ steps.setup_dependencies_matrix.outputs.matrix_output }}
+      extensions_matrix: ${{ steps.setup_extensions_matrix.outputs.matrix_output }}
     steps:
-      - name: Set up dependencies
-        id: set_dependencies
-        run: |
-          dependencies="${{ github.event.inputs.dependencies }}"
-          if [ -z "$dependencies" ]; then
-            echo '{"dependencies":[]}' > dependencies.json
-          else
-            dependencies_json=$(echo '["'"${dependencies//,/\",\"}"'"]')
-            cat dependencies.json
-            echo "{\"dependencies\":${dependencies_json}}" > dependencies.json
-            cat dependencies.json
-          fi
-          echo "::set-output name=dependencies::$(cat dependencies.json)"
-          extensions="${{ github.event.inputs.extensions }}"
-          if [ -z "$extensions" ]; then
-            echo '{"extensions":[]}' > extensions.json
-          else
-            extensions_json=$(echo '["'"${extensions//,/\",\"}"'"]')
-            echo "{\"extensions\":${extensions_json}}" > extensions.json
-          fi
-          echo "::set-output name=extensions::$(cat extensions.json)"
+      - id: setup_dependencies_matrix
+        uses: cschadewitz/dynamic-matrix-input@v1.0.0
+        with:
+          matrix_input: ${{ inputs.dependencies }}
+      - id: setup_extensions_matrix
+        uses: cschadewitz/dynamic-matrix-input@v1.0.0
+        with:
+          matrix_input: ${{ inputs.extensions }}
 
   delete-dependency-packages:
-    needs: prepare-package-versions
+    needs: setup_matrix
     runs-on: ubuntu-22.04
     strategy:
       matrix:
-        dependencies: ${{ fromJson(needs.prepare-package-versions.outputs.dependencies).dependencies }}
+        dependencies: ${{ fromJson(needs.setup_matrix.outputs.dependencies_matrix) }}
     steps:
       - name: Checkout ${{ matrix.dependencies }}
         uses: actions/checkout@v4
@@ -76,21 +63,21 @@ jobs:
           token: ${{ secrets.BOT_TOKEN }}
 
       - uses: castlabs/get-package-version-id-action@v2.0
-        id: version
+        id: versions
         with:
           version: ${{ inputs.liquibase-version }}
 
       - uses: actions/delete-package-versions@v2
-        if: ${{ steps.version.outputs.ids != '' }}
+        if: ${{ steps.versions.outputs.ids != '' }}
         with:
           package-version-ids: "${{ steps.versions.outputs.ids }}"
         
   delete-extension-packages:
-    needs: prepare-package-versions
+    needs: setup_matrix
     runs-on: ubuntu-22.04
     strategy:
       matrix:
-        dependencies: ${{ fromJson(needs.prepare-package-versions.outputs.dependencies).extensions }}
+        extensions: ${{ fromJson(needs.setup_matrix.outputs.extensions_matrix) }}
     steps:
       - name: Checkout ${{ matrix.extensions }}
         uses: actions/checkout@v4
@@ -99,12 +86,12 @@ jobs:
           token: ${{ secrets.BOT_TOKEN }}
 
       - uses: castlabs/get-package-version-id-action@v2.0
-        id: version
+        id: versions
         with:
           version: ${{ inputs.liquibase-version }}
 
       - uses: actions/delete-package-versions@v2
-        if: ${{ steps.version.outputs.ids != '' }}
+        if: ${{ steps.versions.outputs.ids != '' }}
         with:
           package-version-ids: "${{ steps.versions.outputs.ids }}"
 
