@@ -979,7 +979,7 @@ public class LiquibaseCommandLine {
                     }
                     if (!def.getForcePrintedAliases().isEmpty()) {
                         String pluralized = def.getForcePrintedAliases().size() > 1 ? "aliases" : "alias";
-                        description = pluralized + ": '" + StringUtils.join(def.getForcePrintedAliases().stream().map(LiquibaseCommandLine::convertArgumentNameToKabobCase).collect(Collectors.toList()), "', '") + "'\n" + description;
+                        description = pluralized + ": " + def.getForcePrintedAliases().stream().map(LiquibaseCommandLine::convertArgumentNameToKabobCase).collect(Collectors.joining("', '", "'", "'")) + "\n" + description;
                     }
 
                     builder.description(description + "\n");
