@@ -49,8 +49,8 @@ public class CommandArgumentDefinition<DataType> implements Comparable<CommandAr
     private String description;
     /**
      * -- GETTER --
-     *  Whether this argument is required. Exposed as a separate setting for help doc purposes.
-     *  will ensure required values are set.
+     * Whether this argument is required. Exposed as a separate setting for help doc purposes.
+     * {@link #validate(CommandScope)} will ensure required values are set.
      */
     @Getter
     private boolean required;
@@ -63,19 +63,15 @@ public class CommandArgumentDefinition<DataType> implements Comparable<CommandAr
     private DataType defaultValue;
     /**
      * -- GETTER --
-     *  A description of the default value. Defaults to
-     *  of
-     *  but
-     *  can be explicitly with
-     * .
+     * A description of the default value. Defaults to {@link String#valueOf(Object)} of {@link #getDefaultValue()} but
+     * can be explicitly with {@link Building#defaultValue(Object, String)}.
      */
     @Getter
     private String defaultValueDescription;
     /**
      * -- GETTER --
-     *  Function for converting values set in underlying
-     * s into the
-     *  type needed for this command.
+     * Function for converting values set in underlying {@link liquibase.configuration.ConfigurationValueProvider}s into the
+     * type needed for this command.
      */
     @Getter
     private ConfigurationValueConverter<DataType> valueConverter;
