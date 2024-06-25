@@ -40,7 +40,7 @@ jobs:
       matrix:
         dependencies: ${{ fromJson(inputs.dependencies) }}
     steps:
-      - name: Checkout repository
+      - name: Checkout ${{ matrix.dependencies }}
         uses: actions/checkout@v4
         with:
           repository: liquibase/${{ matrix.dependencies }}
@@ -62,7 +62,7 @@ jobs:
       matrix:
         dependencies: ${{ fromJson(inputs.extensions) }}
     steps:
-      - name: Checkout repository
+      - name: Checkout ${{ matrix.extensions }}
         uses: actions/checkout@v4
         with:
           repository: liquibase/${{ matrix.extensions }}
