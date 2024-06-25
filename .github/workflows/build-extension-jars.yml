@@ -177,17 +177,6 @@ jobs:
           mvn clean install -DskipTests -P '!run-proguard'
           cd ..
 
-      - uses: castlabs/get-package-version-id-action@v2.0
-        id: version
-        with:
-          version: "1.0-SNAPSHOT"
-
-      - uses: actions/delete-package-versions@v2
-        if: ${{ steps.version.outputs.ids != '' }}
-        with:
-          package-version-ids: "${{ steps.versions.outputs.ids }}"
-
-
       - name: Re-version and build Dependencies
         env:
            GPG_PASSWORD: ${{ secrets.GPG_PASSPHRASE }}
