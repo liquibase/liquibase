@@ -79,7 +79,7 @@ jobs:
    secrets: inherit
 
   reversion:
-    needs: [ setup ]
+    needs: [ setup, build-extension-jars ]
     #needs: [ setup, build-azure-uber-jar, build-extension-jars]
     name: Re-version artifacts ${{ needs.setup.outputs.version }}
     runs-on: ubuntu-22.04
