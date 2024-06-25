@@ -61,7 +61,15 @@ jobs:
           package-name: ${{ matrix.dependencies }}
           package-type: 'maven'
           token: ${{ secrets.BOT_TOKEN }}
-          ignore-versions: '^(?!4\.29\.0$).*'
+          ignore-versions: '^((?!${{ inputs.liquibase-version }}$).)*$'
+
+      - uses: actions/delete-package-versions@v5
+        if: failure()
+        with:
+          package-name: ${{ matrix.dependencies }}
+          package-type: 'maven'
+          token: ${{ secrets.BOT_TOKEN }}
+          min-versions-to-keep: 0
         
   delete-extension-packages:
     needs: setup_matrix
@@ -75,7 +83,15 @@ jobs:
           package-name: ${{ matrix.extensions }}
           package-type: 'maven'
           token: ${{ secrets.BOT_TOKEN }}
-          ignore-versions: '^(?!4\.29\.0$).*'
+          ignore-versions: '^((?!${{ inputs.liquibase-version }}$).)*$'
+
+      - uses: actions/delete-package-versions@v5
+        if: failure()
+        with:
+          package-name: ${{ matrix.extensions }}
+          package-type: 'maven'
+          token: ${{ secrets.BOT_TOKEN }}
+          min-versions-to-keep: 0
 
   # build-and-deploy-extensions:
   #   needs: [delete-dependency-packages, delete-extension-packages]
