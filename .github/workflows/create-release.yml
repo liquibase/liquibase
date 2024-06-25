@@ -192,7 +192,7 @@ jobs:
           #mv re-version/out/liquibase-azure-deps-${{ needs.setup.outputs.version }}.jar re-version/final/liquibase-azure-deps-${{ needs.setup.outputs.version }}.jar
           IFS=',' read -ra EXT <<< "${{ needs.setup.outputs.extensions }}"
           for i in "${EXT[@]}"; do
-            mv re-version/out/$i-${{ needs.setup.outputs.version }}.jar re-version/final/$i-${{ needs.setup.outputs.version }}.jar
+            cp re-version/out/$i-${{ needs.setup.outputs.version }}.jar re-version/final/$i-${{ needs.setup.outputs.version }}.jar
           done  
           
           (cd re-version/out/ && zip liquibase-additional-${{ needs.setup.outputs.version }}.zip *)
@@ -217,7 +217,7 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
             name: liquibase-standalone-${{ needs.setup.outputs.version }}.zip
-            path: re-version/final/*.zip
+            path: re-version/final/*.jar
   
 
   build-installers:
