@@ -3,15 +3,16 @@ package org.liquibase.maven.plugins;
 import liquibase.Liquibase;
 import liquibase.command.CommandExecutionException;
 import liquibase.command.CommandFactory;
+import liquibase.command.CommandScope;
 import liquibase.command.core.SnapshotCommand;
+import liquibase.command.core.SnapshotCommandStep;
+import liquibase.command.core.helpers.DbUrlConnectionArgumentsCommandStep;
 import liquibase.database.Database;
 import liquibase.exception.LiquibaseException;
+import liquibase.util.StringUtil;
 import org.apache.maven.plugin.MojoExecutionException;
 
-import java.io.File;
-import java.io.IOException;
-import java.io.OutputStreamWriter;
-import java.io.Writer;
+import java.io.*;
 
 /**
  * <p>The snapshot command captures the current state of the url database, which is the target database.<p/>
@@ -42,26 +43,24 @@ public class LiquibaseSnapshotMojo extends AbstractLiquibaseChangeLogMojo {
 
     @Override
     protected void performLiquibaseTask(Liquibase liquibase) throws LiquibaseException {
-
-        SnapshotCommand snapshotCommand = (SnapshotCommand) CommandFactory.getInstance().getCommand("snapshot");
-        snapshotCommand.setDatabase(liquibase.getDatabase());
-        snapshotCommand.setSchemas(liquibase.getDatabase().getDefaultSchema());
-        snapshotCommand.setSerializerFormat(snapshotFormat);
-
-        String result;
-
+        Database db = liquibase.getDatabase();
+        CommandScope commandScope = new CommandScope(SnapshotCommandStep.COMMAND_NAME);
+        commandScope.addArgumentValue(DbUrlConnectionArgumentsCommandStep.DATABASE_ARG, db);
+        commandScope.addArgumentValue(DbUrlConnectionArgumentsCommandStep.URL_ARG, db.getConnection().getURL());
+        commandScope.addArgumentValue(SnapshotCommandStep.SNAPSHOT_FORMAT_ARG, snapshotFormat);
+        OutputStream outputStream;
         try {
-            result = snapshotCommand.execute().print();
-        } catch (CommandExecutionException cee) {
-            throw new LiquibaseException(cee);
+            outputStream = new FileOutputStream(outputFile);
+        } catch (FileNotFoundException e) {
+            throw new RuntimeException(e);
         }
+        commandScope.setOutput(outputStream);
 
         try {
-            outputWriter.write(result);
-            outputWriter.flush();
-            outputWriter.close();
-        } catch (IOException ioe) {
-            throw new LiquibaseException(ioe);
+            commandScope.execute();
+            outputStream.flush();
+        } catch (IOException cee) {
+            throw new LiquibaseException(cee);
         }
     }
 
