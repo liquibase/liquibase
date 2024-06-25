@@ -190,6 +190,8 @@ jobs:
               sed -i "/<artifactId>${dep//./\\.}<\/artifactId>/{N; s/<version>.*<\/version>/<version>${{ inputs.liquibase-version }}<\/version>/}" pom.xml || true
             done
 
+            cat pom.xml
+
             mvn clean install -DskipTests
 
             mkdir -p $PWD/.github/util/
