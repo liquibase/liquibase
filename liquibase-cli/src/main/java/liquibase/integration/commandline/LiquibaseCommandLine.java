@@ -1242,7 +1242,7 @@ public class LiquibaseCommandLine {
         baseNames.addAll(def.getAliases());
 
         for (String baseName : baseNames) {
-            returnList.add("--" + StringUtil.toKabobCase(baseName).replace(".", "-"));
+            returnList.add(convertArgumentNameToKabobCase(baseName));
             returnList.add("--" + baseName.replace("\\.", ""));
         }
 
