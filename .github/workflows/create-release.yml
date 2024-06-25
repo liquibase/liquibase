@@ -205,7 +205,7 @@ jobs:
           path: re-version/final
 
       - name: Set repository tags
-        if: ${{ github.event_name == 'workflow_dispatch' }}
+        if: ${{ github.event_name == 'workflow_call' }}
         run: |
           git tag -f v${{ needs.setup.outputs.version }}
           git push -f origin v${{ needs.setup.outputs.version }}
@@ -213,7 +213,7 @@ jobs:
           (cd download/repo/liquibase-pro && git push -f origin v${{ needs.setup.outputs.version }})
 
       - name: Attach standalone zip file
-        if: ${{ github.event_name == 'workflow_call' }}
+        if: ${{ github.event_name == 'workflow_dispatch' }}
         uses: actions/upload-artifact@v4
         with:
             name: liquibase-standalone-${{ needs.setup.outputs.version }}.zip
@@ -221,7 +221,7 @@ jobs:
   
 
   build-installers:
-    if: ${{ github.event_name == 'workflow_dispatch' }}
+    if: ${{ github.event_name == 'workflow_call' }}
     permissions:
       contents: write  # for softprops/action-gh-release to create GitHub release
     needs: [ setup, reversion ]
