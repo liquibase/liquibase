@@ -48,7 +48,9 @@ jobs:
             echo '{"dependencies":[]}' > dependencies.json
           else
             dependencies_json=$(echo '["'"${dependencies//,/\",\"}"'"]')
+            cat dependencies.json
             echo "{\"dependencies\":${dependencies_json}}" > dependencies.json
+            cat dependencies.json
           fi
           echo "::set-output name=dependencies::$(cat dependencies.json)"
           extensions="${{ github.event.inputs.extensions }}"
@@ -88,7 +90,7 @@ jobs:
     runs-on: ubuntu-22.04
     strategy:
       matrix:
-        dependencies: ${{ fromJson(needs.prepare-package-versions.outputs.extensions).extensions }}
+        dependencies: ${{ fromJson(needs.prepare-package-versions.outputs.dependencies).extensions }}
     steps:
       - name: Checkout ${{ matrix.extensions }}
         uses: actions/checkout@v4
