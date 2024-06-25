@@ -77,6 +77,14 @@ jobs:
   build_tests:
     name: Run Test for (Java ${{ matrix.java }} ${{ matrix.os }})
     needs: setup
+    outputs:
+      test_count_unit_test_java_8_ubuntu: ${{ steps.check-test-counts-java-all-ubuntu.outputs.test_count_unit_test_java_8_ubuntu }}
+      test_count_unit_test_java_11_ubuntu: ${{ steps.check-test-counts-java-all-ubuntu.outputs.test_count_unit_test_java_11_ubuntu }}
+      test_count_unit_test_java_17_ubuntu: ${{ steps.check-test-counts-java-all-ubuntu.outputs.test_count_unit_test_java_17_ubuntu }}
+      test_count_unit_test_java_21_ubuntu: ${{ steps.check-test-counts-java-all-ubuntu.outputs.test_count_unit_test_java_21_ubuntu }}
+      test_count_unit_test_java_macos: ${{ steps.check-test-counts-java-macos.outputs.test_count_unit_test_java_macos }}
+      test_count_unit_test_java_windows: ${{ steps.check-test-counts-java-windows.outputs.test_count_unit_test_java_windows }}
+
     strategy:
       fail-fast: false
       matrix:
@@ -99,7 +107,7 @@ jobs:
     runs-on: ${{ matrix.os }}
     env:
       OS_TYPE: ${{ matrix.os }}
-      GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}  
     steps:
       - uses: actions/checkout@v4
         with:
@@ -175,6 +183,7 @@ jobs:
           ./mvnw -B "-Dbuild.repository.owner=liquibase" "-Dbuild.repository.name=liquibase" "-Dbuild.branch=${{ needs.setup.outputs.thisBranchName }}" "-Dbuild.number=${{ github.run_number }}" "-Dbuild.commit=${{ needs.setup.outputs.latestMergeSha }}" "-DtrimStackTrace=false" -P 'skip-integration-tests' clean test package surefire-report:report
 
       - name: Check Unit Test Count for Java 8, 11, 17, 21 Ubuntu
+        id: check-test-counts-java-all-ubuntu
         if: matrix.os == 'ubuntu-20.04'
         run: |
           TEST_COUNT=$(find . -name '*.txt' | xargs grep -oP 'Tests run: \K[0-9]+' | awk -F ':' '{s+=$2} END {print(s)}')
@@ -198,8 +207,11 @@ jobs:
             echo "Unit Test count is outside the acceptable range of +/- 1% of the expected count. Expected $EXPECTED_TEST_COUNT. Actual $TEST_COUNT."
             exit 1
           fi
+          echo "test_count_unit_test_java_${{ matrix.java }}_ubuntu=$TEST_COUNT" >> $GITHUB_OUTPUT
+
 
       - name: Check Unit Test Count for Java 8 macos-13
+        id: check-test-counts-java-macos
         if: matrix.os == 'macos-13'
         shell: bash
         run: |
@@ -213,8 +225,10 @@ jobs:
             echo "MacOS Unit Test count is outside the acceptable range of +/- 1% of the expected count. Expected ${{ vars.TEST_COUNT_JAVA_MACOS }}. Actual $TEST_COUNT."
             exit 1
           fi
+          echo "test_count_unit_test_java_macos=$TEST_COUNT" >> $GITHUB_OUTPUT
 
       - name: Check Test Count for windows-2019
+        id: check-test-counts-java-windows
         if: matrix.os == 'windows-2019'
         shell: pwsh
         run: |
@@ -228,6 +242,7 @@ jobs:
               Write-Host "Windows Unit Test count is outside the acceptable range of +/- 1% of the expected count. Expected ${{ vars.TEST_COUNT_JAVA_WINDOWS }}. Actual $TEST_COUNT."
               exit 1
           }
+          echo "test_count_unit_test_java_windows=$TEST_COUNT" >> $GITHUB_OUTPUT
 
       - name: Remove Original Jars for *nix
         if: env.OS_TYPE != 'windows-2019'
@@ -270,6 +285,18 @@ jobs:
   integration-test:
     name: Integration Test
     runs-on: ubuntu-20.04
+    outputs:
+      test_count_integration_db2: ${{ steps.check-test-count-integration.outputs.test_count_integration_db2 }}
+      test_count_integration_h2: ${{ steps.check-test-count-integration.outputs.test_count_integration_h2 }}
+      test_count_integration_mariadb: ${{ steps.check-test-count-integration.outputs.test_count_integration_mariadb }}
+      test_count_integration_mssql: ${{ steps.check-test-count-integration.outputs.test_count_integration_mssql }}
+      test_count_integration_mysql: ${{ steps.check-test-count-integration.outputs.test_count_integration_mysql }}
+      test_count_integration_oracle: ${{ steps.check-test-count-integration.outputs.test_count_integration_oracle }}
+      test_count_integration_postgresql: ${{ steps.check-test-count-integration.outputs.test_count_integration_postgresql }}
+      test_count_integration_sqlite: ${{ steps.check-test-count-integration.outputs.test_count_integration_sqlite }}
+      test_count_integration_firebird: ${{ steps.check-test-count-integration.outputs.test_count_integration_firebird }}
+      test_count_integration_hsqldb: ${{ steps.check-test-count-integration.outputs.test_count_integration_hsqldb }}
+
     strategy:
       fail-fast: false
       matrix:
@@ -349,6 +376,7 @@ jobs:
         run: ./mvnw -B clean verify -DtrimStackTrace=false -Dliquibase.sdk.testSystem.test=${{ matrix.testSystem }} -Dliquibase.sdk.testSystem.acceptLicenses=${{ matrix.testSystem }} -Dliquibase.sdk.testSystem.snowflake.url=${{ env.TH_SNOW_URL }} -Dliquibase.sdk.testSystem.snowflake.username=${{ env.TH_DB_ADMIN }} -Dliquibase.sdk.testSystem.snowflake.password=${{ env.TH_DB_PASSWD }} -Dtest=*IntegrationTest,*ExecutorTest -DfailIfNoTests=false -Dsurefire.failIfNoSpecifiedTests=false -Dsurefire.failIfNoTests=false
 
       - name: Check Test Count
+        id: check-test-count-integration
         run: |
           TEST_COUNT=$(find . -name '*.txt' | xargs grep -oP 'Tests run: \K[0-9]+' | awk -F ':' '{s+=$2} END {print(s)}')
           echo "Total integration tests run: $TEST_COUNT"
@@ -383,6 +411,7 @@ jobs:
               echo "Integration Test count is outside the acceptable range of +/- 1% of the expected count. Expected $EXPECTED_TEST_COUNT. Actual $TEST_COUNT."
               exit 1
             fi
+            echo "test_count_integration_${{ matrix.testSystem }}=$TEST_COUNT" >> $GITHUB_OUTPUT
 
       - name: Archive Test Results
         if: ${{ inputs.archive_test_results == 'true' }}
@@ -421,48 +450,31 @@ jobs:
 
   update-test-count-secrets:
     needs: [build_tests, integration-test]
-    runs-on: ubuntu-20.04
-    if: github.event_name == 'push' && github.ref == 'refs/heads/master'
+    runs-on: ubuntu-latest
+    if: always()
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
       - name: Set GitHub Secret for Test Count
         env:
-          TEST_COUNT_JAVA_11_UBUNTU: ${{ vars.TEST_COUNT_JAVA_11_UBUNTU }}
-          TEST_COUNT_JAVA_17_UBUNTU: ${{ vars.TEST_COUNT_JAVA_17_UBUNTU }}
-          TEST_COUNT_JAVA_21_UBUNTU: ${{ vars.TEST_COUNT_JAVA_21_UBUNTU }}
-          TEST_COUNT_JAVA_8_UBUNTU: ${{ vars.TEST_COUNT_JAVA_8_UBUNTU }}
-          TEST_COUNT_JAVA_MACOS: ${{ vars.TEST_COUNT_JAVA_MACOS }}
-          TEST_COUNT_JAVA_WINDOWS: ${{ vars.TEST_COUNT_JAVA_WINDOWS }}
-
-          TEST_COUNT_INTEGRATION_DB2: ${{ vars.TEST_COUNT_INTEGRATION_DB2 }}
-          TEST_COUNT_INTEGRATION_H2: ${{ vars.TEST_COUNT_INTEGRATION_H2 }}
-          TEST_COUNT_INTEGRATION_HSQLDB: ${{ vars.TEST_COUNT_INTEGRATION_HSQLDB }}
-          TEST_COUNT_INTEGRATION_MARIADB: ${{ vars.TEST_COUNT_INTEGRATION_MARIADB }}
-          TEST_COUNT_INTEGRATION_MSSQL: ${{ vars.TEST_COUNT_INTEGRATION_MSSQL }}
-          TEST_COUNT_INTEGRATION_MYSQL: ${{ vars.TEST_COUNT_INTEGRATION_MYSQL }}
-          TEST_COUNT_INTEGRATION_ORACLE: ${{ vars.TEST_COUNT_INTEGRATION_ORACLE }}
-          TEST_COUNT_INTEGRATION_POSTGRESQL: ${{ vars.TEST_COUNT_INTEGRATION_POSTGRESQL }}
-          TEST_COUNT_INTEGRATION_SQLITE: ${{ vars.TEST_COUNT_INTEGRATION_SQLITE }}
-          TEST_COUNT_INTEGRATION_FIREBIRD: ${{ vars.TEST_COUNT_INTEGRATION_FIREBIRD }}
           TEST_COUNT_SECRET: ${{ secrets.TEST_COUNT_SECRET }}
         run: |
           echo $TEST_COUNT_SECRET | gh auth login --with-token
           repository='${{ github.repository }}'
-          gh variable set TEST_COUNT_JAVA_11_UBUNTU --body "$TEST_COUNT_JAVA_11_UBUNTU"
-          gh variable set TEST_COUNT_JAVA_17_UBUNTU --body "$TEST_COUNT_JAVA_17_UBUNTU"
-          gh variable set TEST_COUNT_JAVA_21_UBUNTU --body "$TEST_COUNT_JAVA_21_UBUNTU"
-          gh variable set TEST_COUNT_JAVA_8_UBUNTU --body "$TEST_COUNT_JAVA_8_UBUNTU"
-          gh variable set TEST_COUNT_JAVA_MACOS --body "$TEST_COUNT_JAVA_MACOS"
-          gh variable set TEST_COUNT_JAVA_WINDOWS --body "$TEST_COUNT_JAVA_WINDOWS"
-          gh variable set TEST_COUNT_INTEGRATION_DB2 --body "$TEST_COUNT_INTEGRATION_DB2"
-          gh variable set TEST_COUNT_INTEGRATION_H2 --body "$TEST_COUNT_INTEGRATION_H2"
-          gh variable set TEST_COUNT_INTEGRATION_HSQLDB --body "$TEST_COUNT_INTEGRATION_HSQLDB"
-          gh variable set TEST_COUNT_INTEGRATION_MARIADB --body "$TEST_COUNT_INTEGRATION_MARIADB"
-          gh variable set TEST_COUNT_INTEGRATION_MSSQL --body "$TEST_COUNT_INTEGRATION_MSSQL"
-          gh variable set TEST_COUNT_INTEGRATION_MYSQL --body "$TEST_COUNT_INTEGRATION_MYSQL"
-          gh variable set TEST_COUNT_INTEGRATION_ORACLE --body "$TEST_COUNT_INTEGRATION_ORACLE"
-          gh variable set TEST_COUNT_INTEGRATION_POSTGRESQL --body "$TEST_COUNT_INTEGRATION_POSTGRESQL"
-          gh variable set TEST_COUNT_INTEGRATION_SQLITE --body "$TEST_COUNT_INTEGRATION_SQLITE"
-          gh variable set TEST_COUNT_INTEGRATION_FIREBIRD --body "$TEST_COUNT_INTEGRATION_FIREBIRD"
+          gh variable set TEST_COUNT_JAVA_11_UBUNTU --body "${{ needs.build_tests.outputs.test_count_unit_test_java_11_ubuntu }}"
+          gh variable set TEST_COUNT_JAVA_17_UBUNTU --body "${{ needs.build_tests.outputs.test_count_unit_test_java_17_ubuntu }}"
+          gh variable set TEST_COUNT_JAVA_21_UBUNTU --body "${{ needs.build_tests.outputs.test_count_unit_test_java_21_ubuntu }}"
+          gh variable set TEST_COUNT_JAVA_8_UBUNTU --body "${{ needs.build_tests.outputs.test_count_unit_test_java_8_ubuntu }}"
+          gh variable set TEST_COUNT_JAVA_MACOS --body "${{ needs.build_tests.outputs.test_count_unit_test_java_macos }}"
+          gh variable set TEST_COUNT_JAVA_WINDOWS --body "${{ needs.build_tests.outputs.test_count_unit_test_java_windows }}"
+          gh variable set TEST_COUNT_INTEGRATION_DB2 --body "${{ needs.integration-test.outputs.test_count_integration_db2 }}"
+          gh variable set TEST_COUNT_INTEGRATION_H2 --body "${{ needs.integration-test.outputs.test_count_integration_h2 }}"
+          gh variable set TEST_COUNT_INTEGRATION_HSQLDB --body "${{ needs.integration-test.outputs.test_count_integration_hsqldb }}"
+          gh variable set TEST_COUNT_INTEGRATION_MARIADB --body "${{ needs.integration-test.outputs.test_count_integration_mariadb}}
+          gh variable set TEST_COUNT_INTEGRATION_MSSQL --body "${{ needs.integration-test.outputs.test_count_integration_mssql }}"
+          gh variable set TEST_COUNT_INTEGRATION_MYSQL --body "${{ needs.integration-test.outputs.test_count_integration_mysql }}"
+          gh variable set TEST_COUNT_INTEGRATION_ORACLE --body "${{ needs.integration-test.outputs.test_count_integration_oracle }}"
+          gh variable set TEST_COUNT_INTEGRATION_POSTGRESQL --body "${{ needs.integration-test.outputs.test_count_integration_postgresql }}"
+          gh variable set TEST_COUNT_INTEGRATION_SQLITE --body "${{ needs.integration-test.outputs.test_count_integration_sqlite }}"
+          gh variable set TEST_COUNT_INTEGRATION_FIREBIRD --body "${{ needs.integration-test.outputs.test_count_integration_firebird }}"
 
