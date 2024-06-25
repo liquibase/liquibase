@@ -263,7 +263,7 @@ public class CommandArgumentDefinition<DataType> implements Comparable<CommandAr
 
 
         /**
-         * Adds an alias for this command argument
+         * Adds an alias for this command argument; an alias added this way is not shown in the help output.
          */
         public Building<DataType> addAlias(String alias) {
             newCommandArgument.aliases.add(alias);
@@ -271,7 +271,8 @@ public class CommandArgumentDefinition<DataType> implements Comparable<CommandAr
         }
 
         /**
-         * Adds an alias for this command argument that will be printed to the help output as a new entry
+         * Adds an alias for this command argument that will be printed to the help output inline with the existing
+         * parameter (for which this is an alias).
          */
         public Building<DataType> addForcePrintAlias(String alias) {
             addAlias(alias);
