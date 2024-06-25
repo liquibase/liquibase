@@ -61,7 +61,7 @@ jobs:
           package-name: ${{ matrix.dependencies }}
           package-type: 'maven'
           token: ${{ secrets.BOT_TOKEN }}
-          ignore-versions: '^((?!${{ inputs.liquibase-version }}$).)*$'
+          ignore-versions: '^(?!4\.29\.0$).*'
         
   delete-extension-packages:
     needs: setup_matrix
@@ -75,7 +75,7 @@ jobs:
           package-name: ${{ matrix.extensions }}
           package-type: 'maven'
           token: ${{ secrets.BOT_TOKEN }}
-          ignore-versions: '^((?!${{ inputs.liquibase-version }}$).)*$'
+          ignore-versions: '^(?!4\.29\.0$).*'
 
   # build-and-deploy-extensions:
   #   needs: [delete-dependency-packages, delete-extension-packages]
