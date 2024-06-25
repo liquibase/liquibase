@@ -936,13 +936,12 @@ public class LiquibaseCommandLine {
 
 
             for (CommandArgumentDefinition<?> def : commandDefinition.getArguments().values()) {
-                final List<ArgumentName> argNames = toArgNames(def);
-                for (int i = 0; i < argNames.size(); i++) {
-                    ArgumentName argument = argNames.get(i);
-                    String argName = argument.getArgumentName();
-                    final CommandLine.Model.OptionSpec.Builder builder = createArgBuilder(def, argName);
+                final String[] argNames = toArgNames(def);
+                for (int i = 0; i < argNames.length; i++) {
+                    final CommandLine.Model.OptionSpec.Builder builder = createArgBuilder(def, argNames[i]);
 
                     String argDisplaySuffix = "";
+                    String argName = argNames[i];
 
                     //
                     // Determine if this is a group command and set the property/environment display strings accordingly
@@ -1232,23 +1231,22 @@ public class LiquibaseCommandLine {
 
     }
 
-    protected static List<ArgumentName> toArgNames(CommandArgumentDefinition<?> def) {
+    protected static String[] toArgNames(CommandArgumentDefinition<?> def) {
         //
         // Use an ordered Set so that the command name shows up first
         // and is listed as the argument in the help
         //
-        LinkedHashSet<ArgumentName> returnList = new LinkedHashSet<>();
+        LinkedHashSet<String> returnList = new LinkedHashSet<>();
         Set<String> baseNames = new LinkedHashSet<>();
         baseNames.add(def.getName());
         baseNames.addAll(def.getAliases());
 
         for (String baseName : baseNames) {
-            returnList.add(new ArgumentName(convertArgumentNameToKabobCase(baseName), def.getForcePrintedAliases().contains(baseName)));
-            // forcePrintAlias is false here because we never print to out a second copy of the alias to the help, only the first entry should be printed.
-            returnList.add(new ArgumentName("--" + baseName.replace("\\.", ""), false));
+            returnList.add("--" + StringUtil.toKabobCase(baseName).replace(".", "-"));
+            returnList.add("--" + baseName.replace("\\.", ""));
         }
 
-        return new ArrayList<>(returnList);
+        return returnList.toArray(new String[0]);
     }
 
     private static String convertArgumentNameToKabobCase(String baseName) {
