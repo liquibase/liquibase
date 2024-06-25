@@ -242,6 +242,7 @@ jobs:
               Write-Host "Windows Unit Test count is outside the acceptable range of +/- 1% of the expected count. Expected ${{ vars.TEST_COUNT_JAVA_WINDOWS }}. Actual $TEST_COUNT."
               exit 1
           }
+          fi
           echo "test_count_unit_test_java_windows=$TEST_COUNT" >> $GITHUB_OUTPUT
 
       - name: Remove Original Jars for *nix
