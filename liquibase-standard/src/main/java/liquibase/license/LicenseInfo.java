@@ -1,30 +1,19 @@
 package liquibase.license;
 
+import lombok.Getter;
+import lombok.Setter;
+
 import java.text.SimpleDateFormat;
 import java.util.Date;
 
+@Setter
+@Getter
 public class LicenseInfo {
     private String issuedTo;
     private Date expirationDate;
 
     public LicenseInfo(String issuedTo, Date expirationDate) {
         this.issuedTo = issuedTo;
-        this.expirationDate = expirationDate;
-    }
-
-    public String getIssuedTo() {
-        return issuedTo;
-    }
-
-    public void setIssuedTo(String issuedTo) {
-        this.issuedTo = issuedTo;
-    }
-
-    public Date getExpirationDate() {
-        return expirationDate;
-    }
-
-    public void setExpirationDate(Date expirationDate) {
         this.expirationDate = expirationDate;
     }
 

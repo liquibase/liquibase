@@ -1,5 +1,7 @@
 package liquibase.change.visitor;
 
+import lombok.Getter;
+
 import java.util.HashMap;
 import java.util.Map;
 /**
@@ -11,6 +13,7 @@ public class ChangeVisitorFactory {
     @SuppressWarnings("unchecked")
     private final Map<String, Class> tagToClassMap;
 
+    @Getter
     private static final ChangeVisitorFactory instance = new ChangeVisitorFactory();
 
     @SuppressWarnings("unchecked")
@@ -28,10 +31,6 @@ public class ChangeVisitorFactory {
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
-    }
-
-    public static ChangeVisitorFactory getInstance() {
-        return instance;
     }
 
     /**

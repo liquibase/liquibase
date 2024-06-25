@@ -30,6 +30,7 @@ liquibase.command.core.SnapshotCommandStep
 liquibase.command.core.SnapshotReferenceCommandStep
 liquibase.command.core.StartH2CommandStep
 liquibase.command.core.StatusCommandStep
+liquibase.command.core.StopH2CommandStep
 liquibase.command.core.TagCommandStep
 liquibase.command.core.TagExistsCommandStep
 liquibase.command.core.UnexpectedChangesetsCommandStep
