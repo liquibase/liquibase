@@ -312,7 +312,7 @@
         <dependency>
             <groupId>org.firebirdsql.jdbc</groupId>
             <artifactId>jaybird</artifactId>
-            <version>5.0.4.java8</version>
+            <version>5.0.5.java8</version>
             <scope>test</scope>
         </dependency>
 
