@@ -232,7 +232,7 @@ jobs:
       - name: Remove Original Jars for *nix
         if: env.OS_TYPE != 'windows-2019'
         run: |
-          find . -name original-*.jar -exec rm } \;
+          find . -name original-*.jar -exec rm {} \;
 
       - name: Upload Artifacts for build.yml
         if: ${{ matrix.java == 17 && matrix.os == 'ubuntu-20.04'}}
