@@ -16,6 +16,7 @@ import liquibase.exception.Warnings;
 import liquibase.statement.SqlStatement;
 import liquibase.statement.core.RawCompoundStatement;
 import liquibase.statement.core.RawParameterizedSqlStatement;
+import liquibase.statement.core.RawSqlStatement;
 import liquibase.util.BooleanUtil;
 import liquibase.util.StringUtil;
 
@@ -290,9 +291,8 @@ public abstract class AbstractSQLChange extends AbstractChange implements DbmsTa
 
         String processedSQL = normalizeLineEndings(sql);
         if (this instanceof RawSQLChange && ((RawSQLChange) this).isRerunnable()) {
-            RawParameterizedSqlStatement parameterizedSqlStatement = new RawParameterizedSqlStatement(processedSQL);
-            parameterizedSqlStatement.setEndDelimiter(getEndDelimiter());
-            returnStatements.add(parameterizedSqlStatement);
+            //For some reason PRINT statement execution is not working properly with PreparedStatement, so we are reverting this change for now.
+            returnStatements.add(new RawSqlStatement(processedSQL, getEndDelimiter()));
             return returnStatements.toArray(EMPTY_SQL_STATEMENT);
         }
         for (String statement : StringUtil.processMultiLineSQL(processedSQL, isStripComments(), isSplitStatements(), getEndDelimiter(), getChangeSet())) {
@@ -312,9 +312,8 @@ public abstract class AbstractSQLChange extends AbstractChange implements DbmsTa
             if (database instanceof Db2zDatabase && escapedStatement.toUpperCase().startsWith("CALL")) {
                 returnStatements.add(new RawCompoundStatement(escapedStatement, getEndDelimiter()));
             } else {
-                RawParameterizedSqlStatement parameterizedSqlStatement = new RawParameterizedSqlStatement(escapedStatement);
-                parameterizedSqlStatement.setEndDelimiter(getEndDelimiter());
-                returnStatements.add(parameterizedSqlStatement);
+                //For some reason PRINT statement execution is not working properly with PreparedStatement, so we are reverting this change for now.
+                returnStatements.add(new RawSqlStatement(processedSQL, getEndDelimiter()));
             }
         }
 
