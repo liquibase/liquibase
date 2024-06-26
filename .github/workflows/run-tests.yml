@@ -162,7 +162,7 @@ jobs:
               }
             ]
 
-      # getting from build results page. If we remove 0-snapshot then we will need settings.xml
+      # getting from build results page. If we remove 0-SNAPSHOT then we will need settings.xml
 
       - name: Build & Test Java below 11
         if: ${{ matrix.java == 8 || matrix.java == 11}}
@@ -219,7 +219,7 @@ jobs:
       fail-fast: false
       matrix:
         testSystem:
-          #- db2
+          - db2
           - h2
           #- h2:1.4
           - hsqldb
@@ -260,7 +260,7 @@ jobs:
           distribution: 'temurin'
           cache: 'maven'
 
-      # getting from build results page. If we remove 0-snapshot then we will need settings.xml
+      # getting from build results page. If we remove 0-SNAPSHOT then we will need settings.xml
 
       - name: Restore Built Code Cache
         uses: actions/cache@v4.0.2
@@ -310,7 +310,7 @@ jobs:
 
   sonar:
     needs: [ build_tests, integration-test ]
-    uses: liquibase/build-logic/.github/workflows/sonar-test-scan.yml@v0.7.7
+    uses: liquibase/build-logic/.github/workflows/sonar-test-scan.yml@v0.7.8
     with:
       thisBranchName: ${{ needs.setup.outputs.thisBranchName }}
       thisSha: ${{ needs.setup.outputs.thisSha }}
@@ -319,8 +319,7 @@ jobs:
       pullRequestBranchName: ${{ github.event.pull_request.head.ref }}
       pullRequestBaseBranchName: ${{ github.event.pull_request.base.ref }}
       testedClassesModuleName: liquibase-standard
-      #dbPlatforms: h2,hsqldb,mariadb,mssql,mysql,oracle,postgresql,sqlite,firebird,db2
-      dbPlatforms: h2,hsqldb,mariadb,mssql,mysql,oracle,postgresql,sqlite,firebird
+      dbPlatforms: h2,hsqldb,mariadb,mssql,mysql,oracle,postgresql,sqlite,firebird,db2
     secrets: inherit
 
   run-build-publish-file:

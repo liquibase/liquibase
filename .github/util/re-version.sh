@@ -22,6 +22,14 @@ if [ -z ${3+x} ]; then
   exit 1;
 fi
 
+extension_name=${4:-}
+
+if [ -n "$extension_name" ]; then
+  echo "Extension name provided: $extension_name"
+else
+  echo "No extension name provided."
+fi
+
 ## Check filesystem case sensitivity. Otherwise the unzip/zip of jars may overwrite files that only differ in case
 touch case-test-abc
 touch case-test-ABC
@@ -53,6 +61,11 @@ MODIFIED_BRANCH_NAME=$(echo "$branch" | sed -e "s/[^a-zA-Z0-9-]/_/g")
 
 #### Update  jars
 declare -a jars=("liquibase-core-0-SNAPSHOT.jar" "liquibase-core-0-SNAPSHOT-sources.jar" "liquibase-commercial-$MODIFIED_BRANCH_NAME-SNAPSHOT.jar" "liquibase-commercial-$MODIFIED_BRANCH_NAME-SNAPSHOT-sources.jar" "liquibase-cdi-0-SNAPSHOT.jar" "liquibase-cdi-0-SNAPSHOT-sources.jar" "liquibase-cdi-jakarta-0-SNAPSHOT.jar" "liquibase-cdi-jakarta-0-SNAPSHOT-sources.jar" "liquibase-maven-plugin-0-SNAPSHOT.jar" "liquibase-maven-plugin-0-SNAPSHOT-sources.jar")
+
+# If extension_name is specified, only reversion those jars
+if [ -n "$extension_name" ]; then
+  jars=("$extension_name-0-SNAPSHOT.jar" "$extension_name-0-SNAPSHOT-sources.jar")
+fi
 
 for jar in "${jars[@]}"
 do
@@ -95,6 +108,11 @@ done
 #### Update  javadoc jars
 declare -a javadocJars=("liquibase-core-0-SNAPSHOT-javadoc.jar" "liquibase-cdi-0-SNAPSHOT-javadoc.jar" "liquibase-cdi-jakarta-0-SNAPSHOT-javadoc.jar" "liquibase-maven-plugin-0-SNAPSHOT-javadoc.jar" "liquibase-commercial-$MODIFIED_BRANCH_NAME-SNAPSHOT-javadoc.jar")
 
+# If extension_name is specified, only reversion those jars
+if [ -n "$extension_name" ]; then
+  javadocJars=("$extension_name-0-SNAPSHOT-javadoc.jar")
+fi
+
 for jar in "${javadocJars[@]}"
 do
   mkdir $workdir/rebuild
@@ -132,34 +150,36 @@ do
     fi
   fi
 
-  ##Make sure there are no left-over 0-SNAPSHOT versions in jar files
-  mkdir -p $workdir/test
-  unzip -q $file -d $workdir/test
+  if [ -z "$extension_name" ]; then
+    ##Make sure there are no left-over 0-SNAPSHOT versions in jar files
+    mkdir -p $workdir/test
+    unzip -q $file -d $workdir/test
 
-  if grep -rl "0-SNAPSHOT" $workdir/test; then
-    echo "Found '0-SNAPSHOT' in $file"
-    exit 1
+    if grep -rl "0-SNAPSHOT" $workdir/test; then
+      echo "Found '0-SNAPSHOT' in $file"
+      exit 1
+    fi
+
+    if grep -rl "0.0.0.SNAPSHOT" $workdir/test; then
+      echo "Found '0.0.0.SNAPSHOT' in $file"
+      exit 1
+    fi
   fi
-
-  if grep -rl "0.0.0.SNAPSHOT" $workdir/test; then
-    echo "Found '0.0.0.SNAPSHOT' in $file"
-    exit 1
-  fi
-
   rm -rf $workdir/test
 done
 
+if [ -z "$extension_name" ]; then
+  ##### update zip/tar files
+  mkdir -p $workdir/internal/lib
+  cp $outdir/liquibase-core-$version.jar $workdir/internal/lib/liquibase-core.jar ##save versioned jar as unversioned to include in zip/tar
+  cp $outdir/liquibase-commercial-$version.jar $workdir/internal/lib/liquibase-commercial.jar ##save versioned jar as unversioned to include in zip/tar
 
-##### update zip/tar files
-mkdir -p $workdir/internal/lib
-cp $outdir/liquibase-core-$version.jar $workdir/internal/lib/liquibase-core.jar ##save versioned jar as unversioned to include in zip/tar
-cp $outdir/liquibase-commercial-$version.jar $workdir/internal/lib/liquibase-commercial.jar ##save versioned jar as unversioned to include in zip/tar
-
-## Extract tar.gz and rebuild it back into the tar.gz and zip
-mkdir $workdir/tgz-repackage
-tar -xzf $workdir/liquibase-$MODIFIED_BRANCH_NAME-SNAPSHOT.tar.gz -C $workdir/tgz-repackage --strip-components=1
-cp $workdir/internal/lib/liquibase-core.jar $workdir/tgz-repackage/internal/lib/liquibase-core.jar
-cp $workdir/internal/lib/liquibase-commercial.jar $workdir/tgz-repackage/internal/lib/liquibase-commercial.jar
-find $workdir/tgz-repackage -name "*.txt" -exec sed -i -e "s/0-SNAPSHOT/$version/" -e "s/release-SNAPSHOT/$version/" {} \;
-(cd $workdir/tgz-repackage && tar -czf $outdir/liquibase-$version.tar.gz *)
-(cd $workdir/tgz-repackage && zip -qr $outdir/liquibase-$version.zip *)
+  ## Extract tar.gz and rebuild it back into the tar.gz and zip
+  mkdir $workdir/tgz-repackage
+  tar -xzf $workdir/liquibase-$MODIFIED_BRANCH_NAME-SNAPSHOT.tar.gz -C $workdir/tgz-repackage --strip-components=1
+  cp $workdir/internal/lib/liquibase-core.jar $workdir/tgz-repackage/internal/lib/liquibase-core.jar
+  cp $workdir/internal/lib/liquibase-commercial.jar $workdir/tgz-repackage/internal/lib/liquibase-commercial.jar
+  find $workdir/tgz-repackage -name "*.txt" -exec sed -i -e "s/0-SNAPSHOT/$version/" -e "s/release-SNAPSHOT/$version/" {} \;
+  (cd $workdir/tgz-repackage && tar -czf $outdir/liquibase-$version.tar.gz *)
+  (cd $workdir/tgz-repackage && zip -qr $outdir/liquibase-$version.zip *)
+fi

@@ -7,6 +7,7 @@ import liquibase.statement.SqlStatement;
 import liquibase.statement.core.AddUniqueConstraintStatement;
 import liquibase.structure.core.Column;
 import liquibase.structure.core.UniqueConstraint;
+import lombok.Setter;
 
 /**
  * Adds a unique constraint to an existing column.
@@ -17,22 +18,35 @@ import liquibase.structure.core.UniqueConstraint;
     appliesTo = "column")
 public class AddUniqueConstraintChange extends AbstractChange {
 
+    @Setter
     private String catalogName;
+    @Setter
     private String schemaName;
+    @Setter
     private String tableName;
+    @Setter
     private String columnNames;
+    @Setter
     private String constraintName;
+    @Setter
     private String tablespace;
 
+    @Setter
     private Boolean clustered;
     private Boolean shouldValidate;
 
+    @Setter
     private String forIndexName;
+    @Setter
     private String forIndexSchemaName;
+    @Setter
     private String forIndexCatalogName;
 
+    @Setter
     private Boolean deferrable;
+    @Setter
     private Boolean initiallyDeferred;
+    @Setter
     private Boolean disabled;
 
     @DatabaseChangeProperty(mustEqualExisting ="column.relation.catalog", since = "3.0",
@@ -41,18 +55,10 @@ public class AddUniqueConstraintChange extends AbstractChange {
         return catalogName;
     }
 
-    public void setCatalogName(String catalogName) {
-        this.catalogName = catalogName;
-    }
-
     @DatabaseChangeProperty(mustEqualExisting ="column.relation.schema",
         description = "Name of the database schema")
     public String getSchemaName() {
         return schemaName;
-    }
-
-    public void setSchemaName(String schemaName) {
-        this.schemaName = schemaName;
     }
 
     @DatabaseChangeProperty(mustEqualExisting = "column.relation",
@@ -61,18 +67,10 @@ public class AddUniqueConstraintChange extends AbstractChange {
         return tableName;
     }
 
-    public void setTableName(String tableName) {
-        this.tableName = tableName;
-    }
-
     @DatabaseChangeProperty(mustEqualExisting = "column",
         description = "Name of the column(s) to create the unique constraint on. Comma separated if multiple")
     public String getColumnNames() {
         return columnNames;
-    }
-
-    public void setColumnNames(String columnNames) {
-        this.columnNames = columnNames;
     }
 
     @DatabaseChangeProperty(description = "Name of the unique constraint")
@@ -80,17 +78,9 @@ public class AddUniqueConstraintChange extends AbstractChange {
         return constraintName;
     }
 
-    public void setConstraintName(String constraintName) {
-        this.constraintName = constraintName;
-    }
-
     @DatabaseChangeProperty(description = "Tablespace to create the index in. Corresponds to file group in mssql")
     public String getTablespace() {
         return tablespace;
-    }
-
-    public void setTablespace(String tablespace) {
-        this.tablespace = tablespace;
     }
 
     @DatabaseChangeProperty(description = "Defines whether the constraint is deferrable")
@@ -98,26 +88,14 @@ public class AddUniqueConstraintChange extends AbstractChange {
         return deferrable;
     }
 
-    public void setDeferrable(Boolean deferrable) {
-        this.deferrable = deferrable;
-    }
-
     @DatabaseChangeProperty(description = "Defines whether the constraint is initially deferred")
     public Boolean getInitiallyDeferred() {
         return initiallyDeferred;
     }
 
-    public void setInitiallyDeferred(Boolean initiallyDeferred) {
-        this.initiallyDeferred = initiallyDeferred;
-    }
-
     @DatabaseChangeProperty(description = "Specifies whether the constraint is disabled")
     public Boolean getDisabled() {
         return disabled;
-    }
-
-    public void setDisabled(Boolean disabled) {
-        this.disabled = disabled;
     }
 
     /**
@@ -148,17 +126,9 @@ public class AddUniqueConstraintChange extends AbstractChange {
         return clustered;
     }
 
-    public void setClustered(Boolean clustered) {
-        this.clustered = clustered;
-    }
-
     @DatabaseChangeProperty(description = "Name of the index to associate with the constraint")
     public String getForIndexName() {
         return forIndexName;
-    }
-
-    public void setForIndexName(String forIndexName) {
-        this.forIndexName = forIndexName;
     }
 
     @DatabaseChangeProperty(description = "Name of the schema of the index to associate with the constraint")
@@ -166,17 +136,9 @@ public class AddUniqueConstraintChange extends AbstractChange {
         return forIndexSchemaName;
     }
 
-    public void setForIndexSchemaName(String forIndexSchemaName) {
-        this.forIndexSchemaName = forIndexSchemaName;
-    }
-
     @DatabaseChangeProperty(description = "Name of the catalog of the index to associate with the constraint")
     public String getForIndexCatalogName() {
         return forIndexCatalogName;
-    }
-
-    public void setForIndexCatalogName(String forIndexCatalogName) {
-        this.forIndexCatalogName = forIndexCatalogName;
     }
 
     @Override
