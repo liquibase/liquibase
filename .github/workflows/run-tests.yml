@@ -242,7 +242,7 @@ jobs:
               Write-Host "Windows Unit Test count is outside the acceptable range of +/- 1% of the expected count. Expected ${{ vars.TEST_COUNT_JAVA_WINDOWS }}. Actual $TEST_COUNT."
               exit 1
           }
-          "test_count_unit_test_java_windows=$TEST_COUNT" | Out-File --FilePath $env:$GITHUB_OUTPUT -Append
+          echo "test_count_unit_test_java_windows=$TEST_COUNT" >> $env:GITHUB_OUTPUT
 
       - name: Remove Original Jars for *nix
         if: env.OS_TYPE != 'windows-2019'
@@ -458,7 +458,6 @@ jobs:
       - name: Set GitHub Secret for Test Count
         env:
           TEST_COUNT_SECRET: ${{ secrets.TEST_COUNT_SECRET }}
-          test_count_unit_test_java_windows: ${{ needs.build_tests.outputs.test_count_unit_test_java_windows }}
         run: |
           echo $TEST_COUNT_SECRET | gh auth login --with-token
           repository='${{ github.repository }}'
@@ -467,7 +466,7 @@ jobs:
           gh variable set TEST_COUNT_JAVA_21_UBUNTU --body "${{ needs.build_tests.outputs.test_count_unit_test_java_21_ubuntu }}"
           gh variable set TEST_COUNT_JAVA_8_UBUNTU --body "${{ needs.build_tests.outputs.test_count_unit_test_java_8_ubuntu }}"
           gh variable set TEST_COUNT_JAVA_MACOS --body "${{ needs.build_tests.outputs.test_count_unit_test_java_macos }}"
-          gh variable set TEST_COUNT_JAVA_WINDOWS --body "${{ env.test_count_unit_test_java_windows}}"
+          gh variable set TEST_COUNT_JAVA_WINDOWS --body "${{ needs.build_tests.outputs.test_count_unit_test_java_windows}}"
           gh variable set TEST_COUNT_INTEGRATION_DB2 --body "${{ needs.integration-test.outputs.test_count_integration_db2 }}"
           gh variable set TEST_COUNT_INTEGRATION_H2 --body "${{ needs.integration-test.outputs.test_count_integration_h2 }}"
           gh variable set TEST_COUNT_INTEGRATION_HSQLDB --body "${{ needs.integration-test.outputs.test_count_integration_hsqldb }}"
