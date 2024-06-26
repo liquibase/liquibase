@@ -21,6 +21,7 @@ import liquibase.statement.core.AddDefaultValueStatement;
 import liquibase.structure.core.Column;
 import liquibase.structure.core.Table;
 import liquibase.util.ISODateFormat;
+import lombok.Setter;
 
 /**
  * Sets a new default value to an existing column.
@@ -29,6 +30,7 @@ import liquibase.util.ISODateFormat;
         description = "Adds a default value to the database definition for the specified column.\n" +
                 "One of defaultValue, defaultValueNumeric, defaultValueBoolean or defaultValueDate must be set",
         priority = ChangeMetaData.PRIORITY_DEFAULT, appliesTo = "column")
+@Setter
 public class AddDefaultValueChange extends AbstractChange {
 
     private String catalogName;
@@ -83,17 +85,9 @@ public class AddDefaultValueChange extends AbstractChange {
         return catalogName;
     }
 
-    public void setCatalogName(String catalogName) {
-        this.catalogName = catalogName;
-    }
-
     @DatabaseChangeProperty(mustEqualExisting = "column.relation.schema", description = "Name of the database schema")
     public String getSchemaName() {
         return schemaName;
-    }
-
-    public void setSchemaName(String schemaName) {
-        this.schemaName = schemaName;
     }
 
     @DatabaseChangeProperty(mustEqualExisting = "column.relation", description = "Name of the table containing the column to modify",
@@ -102,27 +96,15 @@ public class AddDefaultValueChange extends AbstractChange {
         return tableName;
     }
 
-    public void setTableName(String tableName) {
-        this.tableName = tableName;
-    }
-
     @DatabaseChangeProperty(mustEqualExisting = "column", description = "Name of the column to add a default value to",
         exampleValue = "fileName")
     public String getColumnName() {
         return columnName;
     }
 
-    public void setColumnName(String columnName) {
-        this.columnName = columnName;
-    }
-
     @DatabaseChangeProperty(description = "Current data type of the column to add a default value to", exampleValue = "varchar(50)")
     public String getColumnDataType() {
         return columnDataType;
-    }
-
-    public void setColumnDataType(String columnDataType) {
-        this.columnDataType = columnDataType;
     }
 
     @DatabaseChangeProperty(exampleValue = "Something Else", requiredForDatabase = "none",
@@ -131,18 +113,10 @@ public class AddDefaultValueChange extends AbstractChange {
         return defaultValue;
     }
 
-    public void setDefaultValue(String defaultValue) {
-        this.defaultValue = defaultValue;
-    }
-
     @DatabaseChangeProperty(requiredForDatabase = "none", exampleValue = "439.2",
         description = "Default value for a column of a numeric type. For example: integer, bigint, bigdecimal, and others.")
     public String getDefaultValueNumeric() {
         return defaultValueNumeric;
-    }
-
-    public void setDefaultValueNumeric(String defaultValueNumeric) {
-        this.defaultValueNumeric = defaultValueNumeric;
     }
 
     @DatabaseChangeProperty(requiredForDatabase = "none", exampleValue = "2008-02-12T12:34:03",
@@ -152,17 +126,9 @@ public class AddDefaultValueChange extends AbstractChange {
         return defaultValueDate;
     }
 
-    public void setDefaultValueDate(String defaultValueDate) {
-        this.defaultValueDate = defaultValueDate;
-    }
-
     @DatabaseChangeProperty(requiredForDatabase = "none", description = "Default value for a column of a boolean type.")
     public Boolean getDefaultValueBoolean() {
         return defaultValueBoolean;
-    }
-
-    public void setDefaultValueBoolean(Boolean defaultValueBoolean) {
-        this.defaultValueBoolean = defaultValueBoolean;
     }
 
     @DatabaseChangeProperty(requiredForDatabase = "none",
@@ -173,10 +139,6 @@ public class AddDefaultValueChange extends AbstractChange {
         return defaultValueComputed;
     }
 
-    public void setDefaultValueComputed(DatabaseFunction defaultValueComputed) {
-        this.defaultValueComputed = defaultValueComputed;
-    }
-
     @DatabaseChangeProperty(requiredForDatabase = "none",
         description = "Sets value for a specified column by using the value of the existing sequence. " +
             "With every new input, the next value of the sequence will be taken.")
@@ -184,18 +146,10 @@ public class AddDefaultValueChange extends AbstractChange {
         return defaultValueSequenceNext;
     }
 
-    public void setDefaultValueSequenceNext(SequenceNextValueFunction defaultValueSequenceNext) {
-        this.defaultValueSequenceNext = defaultValueSequenceNext;
-    }
-
     @DatabaseChangeProperty(description = "Sets a unique name for the default constraint used for a specific column. " +
         "Works only along with any of the defaultValue* properties listed.")
     public String getDefaultValueConstraintName() {
         return defaultValueConstraintName;
-    }
-
-    public void setDefaultValueConstraintName(String defaultValueConstraintName) {
-        this.defaultValueConstraintName = defaultValueConstraintName;
     }
 
     @Override

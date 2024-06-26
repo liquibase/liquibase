@@ -6,6 +6,8 @@ import liquibase.parser.core.ParsedNodeException;
 import liquibase.resource.ResourceAccessor;
 import liquibase.serializer.AbstractLiquibaseSerializable;
 import liquibase.util.StringUtil;
+import lombok.Getter;
+import lombok.Setter;
 
 /**
  * The standard configuration used by Change classes to represent a constraints on a column.
@@ -18,9 +20,17 @@ public class ConstraintsConfig extends AbstractLiquibaseSerializable {
     private String primaryKeyName;
     private String primaryKeyTablespace;
     private String references;
+    @Setter
+    @Getter
     private String referencedTableCatalogName;
+    @Getter
+    @Setter
     private String referencedTableSchemaName;
+    @Setter
+    @Getter
     private String referencedTableName;
+    @Setter
+    @Getter
     private String referencedColumnNames;
     private Boolean unique;
     private String uniqueConstraintName;
@@ -372,38 +382,6 @@ public class ConstraintsConfig extends AbstractLiquibaseSerializable {
     public ConstraintsConfig setPrimaryKeyTablespace(String primaryKeyTablespace) {
         this.primaryKeyTablespace = primaryKeyTablespace;
         return this;
-    }
-
-    public String getReferencedTableCatalogName() {
-        return referencedTableCatalogName;
-    }
-
-    public void setReferencedTableCatalogName(String referencedTableCatalogName) {
-        this.referencedTableCatalogName = referencedTableCatalogName;
-    }
-
-    public String getReferencedTableSchemaName() {
-        return referencedTableSchemaName;
-    }
-
-    public void setReferencedTableSchemaName(String referencedTableSchemaName) {
-        this.referencedTableSchemaName = referencedTableSchemaName;
-    }
-
-    public String getReferencedTableName() {
-        return referencedTableName;
-    }
-
-    public void setReferencedTableName(String referencedTableName) {
-        this.referencedTableName = referencedTableName;
-    }
-
-    public String getReferencedColumnNames() {
-        return referencedColumnNames;
-    }
-
-    public void setReferencedColumnNames(String referencedColumnNames) {
-        this.referencedColumnNames = referencedColumnNames;
     }
 
     private Boolean parseBoolean(String value) {

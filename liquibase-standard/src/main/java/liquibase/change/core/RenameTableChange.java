@@ -8,6 +8,7 @@ import liquibase.statement.SqlStatement;
 import liquibase.statement.core.RenameTableStatement;
 import liquibase.statement.core.ReorganizeTableStatement;
 import liquibase.structure.core.Table;
+import lombok.Setter;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -17,6 +18,7 @@ import java.util.List;
  */
 @DatabaseChange(name = "renameTable", description = "Renames an existing table", priority = ChangeMetaData.PRIORITY_DEFAULT,
     appliesTo = "table")
+@Setter
 public class RenameTableChange extends AbstractChange {
 
     private String catalogName;
@@ -33,17 +35,9 @@ public class RenameTableChange extends AbstractChange {
         return catalogName;
     }
 
-    public void setCatalogName(String catalogName) {
-        this.catalogName = catalogName;
-    }
-
     @DatabaseChangeProperty(mustEqualExisting = "table.schema", description = "Name of the database schema")
     public String getSchemaName() {
         return schemaName;
-    }
-
-    public void setSchemaName(String schemaName) {
-        this.schemaName = schemaName;
     }
 
     @DatabaseChangeProperty(mustEqualExisting = "table", description = "Name of the existing table to rename",
@@ -52,17 +46,9 @@ public class RenameTableChange extends AbstractChange {
         return oldTableName;
     }
 
-    public void setOldTableName(String oldTableName) {
-        this.oldTableName = oldTableName;
-    }
-
     @DatabaseChangeProperty(description = "New name for the table", exampleValue = "employee")
     public String getNewTableName() {
         return newTableName;
-    }
-
-    public void setNewTableName(String newTableName) {
-        this.newTableName = newTableName;
     }
 
     @Override

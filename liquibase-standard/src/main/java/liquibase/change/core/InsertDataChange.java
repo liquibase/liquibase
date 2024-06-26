@@ -12,6 +12,7 @@ import liquibase.statement.SequenceNextValueFunction;
 import liquibase.statement.SqlStatement;
 import liquibase.statement.core.InsertStatement;
 import liquibase.structure.core.Column;
+import lombok.Setter;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -22,8 +23,11 @@ import java.util.List;
 @DatabaseChange(name="insert", description = "Inserts data into an existing table", priority = ChangeMetaData.PRIORITY_DEFAULT, appliesTo = "table")
 public class InsertDataChange extends AbstractChange implements ChangeWithColumns<ColumnConfig>, DbmsTargetedChange {
 
+    @Setter
     private String catalogName;
+    @Setter
     private String schemaName;
+    @Setter
     private String tableName;
     private List<ColumnConfig> columns;
     private String dbms;
@@ -44,26 +48,14 @@ public class InsertDataChange extends AbstractChange implements ChangeWithColumn
         return catalogName;
     }
 
-    public void setCatalogName(String catalogName) {
-        this.catalogName = catalogName;
-    }
-
     @DatabaseChangeProperty(mustEqualExisting ="table.schema", description = "Name of the database schema")
     public String getSchemaName() {
         return schemaName;
     }
 
-    public void setSchemaName(String schemaName) {
-        this.schemaName = schemaName;
-    }
-
     @DatabaseChangeProperty(mustEqualExisting = "table", description = "Name of the table to insert data into")
     public String getTableName() {
         return tableName;
-    }
-
-    public void setTableName(String tableName) {
-        this.tableName = tableName;
     }
 
     @Override

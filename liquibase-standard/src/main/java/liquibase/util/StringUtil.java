@@ -110,7 +110,8 @@ public class StringUtil {
             }
 
             if (isInClause == 0 && splitStatements && (piece instanceof String) && isDelimiter((String) piece, previousPiece, endDelimiter)) {
-                String trimmedString = StringUtil.trimToNull(currentString.toString());
+                String sentenceWithoutDelimiter = removeEndDelimiterIfItsASlash(endDelimiter, currentString);
+                String trimmedString = sentenceWithoutDelimiter.isEmpty() ? StringUtil.trimToNull(currentString.toString()):StringUtil.trimToNull(sentenceWithoutDelimiter);
                 if (trimmedString != null) {
                     returnArray.add(trimmedString);
                 }
@@ -133,6 +134,17 @@ public class StringUtil {
         }
 
         return returnArray.toArray(new String[0]);
+    }
+
+    private static String removeEndDelimiterIfItsASlash(String endDelimiter, StringBuilder currentString) {
+        String sentenceWithoutDelimiter = "";
+        if(endDelimiter != null && "/".contentEquals(endDelimiter)) {
+            int lastIndexEndDelimiter = currentString.toString().lastIndexOf(endDelimiter);
+            if(lastIndexEndDelimiter >= 0) {
+                sentenceWithoutDelimiter = currentString.substring(0, lastIndexEndDelimiter);
+            }
+        }
+        return sentenceWithoutDelimiter;
     }
 
     /**
@@ -213,9 +225,8 @@ public class StringUtil {
         } else {
             if (endDelimiter.length() == 1) {
                 if ("/".equals(endDelimiter)) {
-                    if (previousPiece != null && !previousPiece.endsWith("\n")) {
-                        //don't count /'s the are there for comments for division signs or any other use besides a / at the beginning of a line
-                        return false;
+                    if (previousPiece != null) {
+                        return previousPiece.contentEquals(endDelimiter) && piece.startsWith("\n");
                     }
                 }
                 return StringUtils.equalsIgnoreCase(piece, endDelimiter);

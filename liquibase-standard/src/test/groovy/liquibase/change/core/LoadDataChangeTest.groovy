@@ -1,6 +1,7 @@
 package liquibase.change.core
 
 import liquibase.ChecksumVersion
+import liquibase.GlobalConfiguration
 import liquibase.Scope
 import liquibase.change.ChangeStatus
 import liquibase.change.StandardChangeTest
@@ -9,13 +10,15 @@ import liquibase.changelog.DatabaseChangeLog
 import liquibase.database.Database
 import liquibase.database.DatabaseConnection
 import liquibase.database.DatabaseFactory
+import liquibase.database.core.H2Database
 import liquibase.database.core.MSSQLDatabase
 import liquibase.database.core.MockDatabase
 import liquibase.exception.ValidationErrors
-import liquibase.integration.commandline.LiquibaseCommandLineConfiguration
+import liquibase.parser.core.ParsedNode
 import liquibase.parser.core.ParsedNodeException
 import liquibase.resource.ClassLoaderResourceAccessor
 import liquibase.resource.ResourceAccessor
+import liquibase.resource.SearchPathResourceAccessor
 import liquibase.snapshot.MockSnapshotGeneratorFactory
 import liquibase.snapshot.SnapshotGeneratorFactory
 import liquibase.statement.DatabaseFunction
@@ -40,7 +43,7 @@ import java.time.LocalDate
 import java.time.LocalDateTime
 import java.time.LocalTime
 
-public class LoadDataChangeTest extends StandardChangeTest {
+class LoadDataChangeTest extends StandardChangeTest {
 
     MSSQLDatabase mssqlDb;
     MockDatabase mockDb;
@@ -935,6 +938,49 @@ public class LoadDataChangeTest extends StandardChangeTest {
                 ["needsPreparedStatement": false, "name": "name", "value": "John Doe"],
                 ["needsPreparedStatement": false, "name": "username", "value": "jdoe"]
         ]
+    }
+
+    def "validate CSV column headers are trimmed when TRIM_LOAD_DATA_FILE_HEADER is set to true"() {
+        when:
+        LoadDataChange change = new LoadDataChange()
+        SqlStatement[] sqlStatements
+
+        Scope.child([(GlobalConfiguration.TRIM_LOAD_DATA_FILE_HEADER.key): true], {
+
+        change.load(new ParsedNode(null, "loadData").addChildren([
+                file     : "liquibase/load-data.test.csv",
+                tableName: "CONFIG_STATE"
+                ]), new SearchPathResourceAccessor("target/test-classes/"))
+
+        sqlStatements = change.generateStatements(new H2Database())
+        } as Scope.ScopedRunner)
+
+        then:
+        def sqlStatement = ((InsertStatement) sqlStatements[0])
+        sqlStatement.getColumnValues().keySet()[0] == "config_state_id"
+        sqlStatement.getColumnValues().keySet()[1] == "code"
+        sqlStatement.getColumnValues().keySet()[2] == "name"
+        sqlStatement.getColumnValues().keySet()[3] == "description"
+    }
+
+    def "validate CSV column headers are NOT trimmed when TRIM_LOAD_DATA_FILE_HEADER is set to its default value"() {
+        when:
+        LoadDataChange change = new LoadDataChange()
+        SqlStatement[] sqlStatements
+
+        change.load(new ParsedNode(null, "loadData").addChildren([
+                file     : "liquibase/load-data.test.csv",
+                tableName: "CONFIG_STATE"
+        ]), new SearchPathResourceAccessor("target/test-classes/"))
+
+        sqlStatements = change.generateStatements(new H2Database())
+
+        then:
+        def sqlStatement = ((InsertStatement) sqlStatements[0])
+        sqlStatement.getColumnValues().keySet()[0] == "config_state_id"
+        sqlStatement.getColumnValues().keySet()[1] == " code"
+        sqlStatement.getColumnValues().keySet()[2] == " name"
+        sqlStatement.getColumnValues().keySet()[3] == " description"
     }
 
 
