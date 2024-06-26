@@ -470,7 +470,7 @@ jobs:
           gh variable set TEST_COUNT_INTEGRATION_DB2 --body "${{ needs.integration-test.outputs.test_count_integration_db2 }}"
           gh variable set TEST_COUNT_INTEGRATION_H2 --body "${{ needs.integration-test.outputs.test_count_integration_h2 }}"
           gh variable set TEST_COUNT_INTEGRATION_HSQLDB --body "${{ needs.integration-test.outputs.test_count_integration_hsqldb }}"
-          gh variable set TEST_COUNT_INTEGRATION_MARIADB --body "${{ needs.integration-test.outputs.test_count_integration_mariadb}}
+          gh variable set TEST_COUNT_INTEGRATION_MARIADB --body "${{ needs.integration-test.outputs.test_count_integration_mariadb}}"
           gh variable set TEST_COUNT_INTEGRATION_MSSQL --body "${{ needs.integration-test.outputs.test_count_integration_mssql }}"
           gh variable set TEST_COUNT_INTEGRATION_MYSQL --body "${{ needs.integration-test.outputs.test_count_integration_mysql }}"
           gh variable set TEST_COUNT_INTEGRATION_ORACLE --body "${{ needs.integration-test.outputs.test_count_integration_oracle }}"
