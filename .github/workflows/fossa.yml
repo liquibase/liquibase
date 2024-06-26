@@ -86,7 +86,16 @@ jobs:
       run: |
         sleep 60
         mkdir /home/runner/work/fossa_reports
-        
+
+        curl --location --request PUT 'https://app.fossa.com/api/projects/git+github.com/liquibase/liquibase' \
+        --header 'Authorization: Bearer ${{ secrets.FOSSA_COMBINED_REPORT }}' \
+        --header 'Content-Type: application/x-www-form-urlencoded' \
+          --data-urlencode 'bom_column_settings%5B%5D=Title' \
+          --data-urlencode 'bom_column_settings%5B%5D=Version' \
+          --data-urlencode 'bom_column_settings%5B%5D=Authors' \
+          --data-urlencode 'bom_column_settings%5B%5D=DeclaredLicense' \
+          --data-urlencode 'bom_column_settings%5B%5D=PackageHomepage' \
+
         curl --location 'https://app.fossa.com/api/revisions/git%2Bgithub.com%2Fliquibase%2Fliquibase%24${{ steps.get_commit_sha_oss.outputs.commit_sha_lb }}/attribution/download?format=CSV&includeDeepDependencies=true&download=true' \
         --header 'Authorization: Bearer ${{ secrets.FOSSA_COMBINED_REPORT }}' -o /home/runner/work/fossa_reports/liquibase.csv
 
