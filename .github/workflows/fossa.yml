@@ -89,6 +89,8 @@ jobs:
 
         curl --location 'https://app.fossa.com/api/revisions/custom%2B40163%2Fgithub.com%2Fliquibase%2Fliquibase%24${{ steps.get_commit_sha_oss.outputs.commit_sha_lb }}/attribution/download?format=CSV&includeDeepDependencies=true&download=true' \
         --header 'Authorization: Bearer ${{ secrets.FOSSA_COMBINED_REPORT }}' -o /home/runner/work/fossa_reports/liquibase.csv
+        ls -l /home/runner/work/fossa_reports
+        cat /home/runner/work/fossa_reports/liquibase.csv || echo "File is empty or not found"
 
       # Upload to build page for the team to check the csv file contents.
     - name: Upload to build page
