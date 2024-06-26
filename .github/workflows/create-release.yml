@@ -11,6 +11,20 @@ on:
       runId:
         description: 'RunId of liquibase/liquibase artifacts to attach'
         required: true
+  workflow_call:
+    inputs:
+      version:
+        description: 'Version (example: 4.8.2)'
+        required: true
+        type: string
+      branch:
+        description: 'Branch to release (Defaults to master)'
+        required: false
+        type: string
+      runId:
+        description: 'RunId of liquibase/liquibase artifacts to attach'
+        required: true
+        type: string
 
 env:
   DEPENDENCIES: "liquibase-bigquery" # Comma separated list of dependencies to release the extensions list
@@ -39,8 +53,15 @@ jobs:
       - run: |
           echo "Creating version ${{ steps.collect-data.outputs.version }} from ${{ steps.collect-data.outputs.branch }} with artifacts from build ${{ steps.collect-data.outputs.runId }} "
           
+  owasp-scanner:
+    needs: [ setup ]
+    uses: liquibase/build-logic/.github/workflows/owasp-scanner.yml@main
+    with:
+      branch: ${{ needs.setup.outputs.branch }}
+    secrets: inherit
+
   build-azure-uber-jar:
-   needs: [ setup ]
+   needs: [ setup, owasp-scanner]
    uses: liquibase/liquibase/.github/workflows/build-azure-uber-jar.yml@master
    with:
      branch: ${{ needs.setup.outputs.branch }}
@@ -48,8 +69,8 @@ jobs:
    secrets: inherit
   
   build-extension-jars:
-   needs: [ setup ]
-   uses: liquibase/liquibase/.github/workflows/build-extension-jars.yml@DAT-17770
+   needs: [ setup, owasp-scanner ]
+   uses: liquibase/liquibase/.github/workflows/build-extension-jars.yml@master
    with:
      liquibase-version: ${{ needs.setup.outputs.version }}
      dependencies: ${{ needs.setup.outputs.dependencies }}
@@ -184,13 +205,23 @@ jobs:
           path: re-version/final
 
       - name: Set repository tags
+        if: ${{ github.event_name == 'workflow_call' }}
         run: |
           git tag -f v${{ needs.setup.outputs.version }}
           git push -f origin v${{ needs.setup.outputs.version }}
           (cd download/repo/liquibase-pro && git tag -f v${{ needs.setup.outputs.version }})
           (cd download/repo/liquibase-pro && git push -f origin v${{ needs.setup.outputs.version }})
 
+      - name: Attach standalone zip file
+        if: ${{ github.event_name == 'workflow_call' }}
+        uses: actions/upload-artifact@v4
+        with:
+            name: liquibase-standalone-${{ needs.setup.outputs.version }}.zip
+            path: re-version/final/*.zip
+  
+
   build-installers:
+    if: ${{ github.event_name == 'workflow_call' }}
     permissions:
       contents: write  # for softprops/action-gh-release to create GitHub release
     needs: [ setup, reversion ]
@@ -252,6 +283,7 @@ jobs:
           rm re-version/final/*.asc
           rm re-version/final/*.md5
           rm re-version/final/*.sha1
+
       - name: Attach Files to Draft Release
         uses: softprops/action-gh-release@v2
         with:

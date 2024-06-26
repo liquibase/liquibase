@@ -230,7 +230,7 @@ public class Liquibase implements AutoCloseable {
      */
     @Deprecated
     protected boolean isUpToDateFastCheck(Contexts contexts, LabelExpression labelExpression) throws LiquibaseException {
-        return new UpdateCommandStep().isUpToDateFastCheck(null, database, databaseChangeLog, contexts, labelExpression);
+        return Scope.getCurrentScope().getSingleton(FastCheckService.class).isUpToDateFastCheck(null, database, databaseChangeLog, contexts, labelExpression);
     }
 
     public DatabaseChangeLog getDatabaseChangeLog() throws LiquibaseException {

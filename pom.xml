@@ -76,9 +76,9 @@
         <groovy.version>4.0.21</groovy.version>
         <spock.version>2.3-groovy-4.0</spock.version>
         <spring.version>5.3.37</spring.version>
-        <maven-failsafe-plugin.version>3.2.5</maven-failsafe-plugin.version>
+        <maven-failsafe-plugin.version>3.3.0</maven-failsafe-plugin.version>
         <jacoco-maven-plugin.version>0.8.12</jacoco-maven-plugin.version>
-        <maven-surefire-plugin.version>3.2.5</maven-surefire-plugin.version>
+        <maven-surefire-plugin.version>3.3.0</maven-surefire-plugin.version>
         <sonar.projectName>Liquibase</sonar.projectName>
         <sonar.projectDescription>Liquibase</sonar.projectDescription>
         <sonar.projectKey>liquibase</sonar.projectKey>
@@ -305,14 +305,14 @@
         <dependency>
             <groupId>net.snowflake</groupId>
             <artifactId>snowflake-jdbc</artifactId>
-            <version>3.16.0</version>
+            <version>3.16.1</version>
             <scope>test</scope>
         </dependency>
 
         <dependency>
             <groupId>org.firebirdsql.jdbc</groupId>
             <artifactId>jaybird</artifactId>
-            <version>5.0.4.java8</version>
+            <version>5.0.5.java8</version>
             <scope>test</scope>
         </dependency>
 
