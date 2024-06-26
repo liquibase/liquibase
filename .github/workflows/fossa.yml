@@ -87,31 +87,23 @@ jobs:
       # navigate to custom Project Locator
     - name: Set the dependency metadata information
       run: |
-        mkdir /home/runner/fossa_reports
-        curl --location --request PUT 'https://app.fossa.com/api/projects/custom+40163/github.com/liquibase/liquibase' \
-        --header 'Authorization: Bearer ${{ secrets.FOSSA_API_KEY }}' \
-        --header 'Content-Type: application/x-www-form-urlencoded' \
-          --data-urlencode 'bom_column_settings%5B%5D=Title' \
-          --data-urlencode 'bom_column_settings%5B%5D=Version' \
-          --data-urlencode 'bom_column_settings%5B%5D=Authors' \
-          --data-urlencode 'bom_column_settings%5B%5D=DeclaredLicense' \
-          --data-urlencode 'bom_column_settings%5B%5D=PackageHomepage' \
-        
+        sleep 120
+        mkdir /home/runner/work/fossa_reports
 
-        curl --location 'https://app.fossa.com/api/revisions/git%2Bgithub.com%2Fliquibase%2Fliquibase%24${{ steps.get_commit_sha_oss.outputs.commit_sha_lb }}/attribution/download?format=CSV&includeDeepDependencies=true&download=true' \
-        --header 'Authorization: Bearer ${{ secrets.FOSSA_API_KEY }}' -o /home/runner/fossa_reports/liquibase.csv
+        curl --location 'https://app.fossa.com/api/revisions/custom%2B40163%2Fgithub.com%2Fliquibase%2Fliquibase%24${{ steps.get_commit_sha_oss.outputs.commit_sha_lb }}/attribution/download?format=CSV&includeDeepDependencies=true&download=true' \
+        --header 'Authorization: Bearer ${{ secrets.FOSSA_API_KEY }}' -o /home/runner/work/fossa_reports/liquibase.csv
 
       # Upload to build page for the team to check the csv file contents.
     - name: Upload to build page
       uses: actions/upload-artifact@v2
       with:
         name: fossa-reports
-        path: /home/runner/fossa_reports/liquibase.csv
+        path: /home/runner/work/fossa_reports/liquibase.csv
 
       # Upload report to S3
     - name: Upload report to S3
       if: always()
-      run: aws s3 cp /home/runner/fossa_reports/liquibase.csv s3://liquibaseorg-origin/fossa_reports_liquibase-pro/
+      run: aws s3 cp /home/runner/work/fossa_reports/liquibase.csv s3://liquibaseorg-origin/fossa_reports_liquibase-pro/
       env:
         AWS_ACCESS_KEY_ID: ${{ secrets.LIQUIBASEORIGIN_ACCESS_KEY_ID }}
         AWS_SECRET_ACCESS_KEY: ${{ secrets.LIQUIBASEORIGIN_SECRET_ACCESS_KEY }}
