@@ -2,6 +2,7 @@ package liquibase.change.core;
 
 import com.opencsv.exceptions.CsvMalformedLineException;
 import liquibase.CatalogAndSchema;
+import liquibase.GlobalConfiguration;
 import liquibase.Scope;
 import liquibase.change.*;
 import liquibase.changelog.ChangeSet;
@@ -653,8 +654,16 @@ public class LoadDataChange extends AbstractTableChange implements ChangeWithCol
      */
     private void addColumnsFromHeaders(String[] headers) {
         int i = 0;
+        boolean shouldTrimHeader = GlobalConfiguration.TRIM_LOAD_DATA_FILE_HEADER.getCurrentValue();
+        LoadDataColumnConfig loadDataColumnConfig;
         for (String columnNameFromHeader : headers) {
-            LoadDataColumnConfig loadDataColumnConfig = columnConfigFromName(columnNameFromHeader, i);
+            if(shouldTrimHeader) {
+                loadDataColumnConfig = columnConfigFromName(columnNameFromHeader.trim(), i);
+            }
+            else {
+                loadDataColumnConfig = columnConfigFromName(columnNameFromHeader, i);
+            }
+
             loadDataColumnConfig.setIndex(i);
             loadDataColumnConfig.setHeader(columnNameFromHeader);
             i++;

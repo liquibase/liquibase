@@ -456,5 +456,17 @@ END testSP;
     <changeSet id="8" author="constraint-check">
         <dropNotNullConstraint tableName="unnamed_constraint" columnName="id"/>
     </changeSet>
+    <changeSet id="SlashEndDelimiterTest" author="mallod">
+        <sql endDelimiter="/" splitStatements="true" stripComments="false">
+            SELECT * FROM unnamed_constraint/
+            update liquibaseRunInfo set timesRan=timesRan+1/
+        </sql>
+    </changeSet>
+    <changeSet id="dividedAndSlashEndDelimiterTest" author="mallod">
+        <sql endDelimiter="/" splitStatements="true" stripComments="false">
+            SELECT 6 / 3 FROM unnamed_constraint/
+            update liquibaseRunInfo set timesRan=timesRan+1/
+        </sql>
+    </changeSet>
 
 </databaseChangeLog>
