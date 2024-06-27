@@ -34,7 +34,51 @@ env:
   MAVEN_VERSION: '3.9.2'
 
 jobs:
+  setup_matrix:
+    runs-on: ubuntu-latest
+    outputs:
+      dependencies_matrix: ${{ steps.setup_dependencies_matrix.outputs.matrix_output }}
+      extensions_matrix: ${{ steps.setup_extensions_matrix.outputs.matrix_output }}
+    steps:
+      - id: setup_dependencies_matrix
+        uses: cschadewitz/dynamic-matrix-input@v1.0.0
+        with:
+          matrix_input: ${{ inputs.dependencies }}
+      - id: setup_extensions_matrix
+        uses: cschadewitz/dynamic-matrix-input@v1.0.0
+        with:
+          matrix_input: ${{ inputs.extensions }}
+
+  delete-dependency-packages:
+    needs: setup_matrix
+    runs-on: ubuntu-22.04
+    strategy:
+      matrix:
+        dependencies: ${{ fromJson(needs.setup_matrix.outputs.dependencies_matrix) }}
+    steps:
+      - uses: actions/delete-package-versions@v5
+        with:
+          package-name: org.liquibase.ext.${{ matrix.dependencies }}
+          package-type: 'maven'
+          token: ${{ secrets.BOT_TOKEN }}
+          ignore-versions: '^((?!${{ inputs.liquibase-version }}$).)*$'
+        
+  delete-extension-packages:
+    needs: setup_matrix
+    runs-on: ubuntu-22.04
+    strategy:
+      matrix:
+        extensions: ${{ fromJson(needs.setup_matrix.outputs.extensions_matrix) }}
+    steps:
+      - uses: actions/delete-package-versions@v5
+        with:
+          package-name: org.liquibase.ext.${{ matrix.extensions }}
+          package-type: 'maven'
+          token: ${{ secrets.BOT_TOKEN }}
+          ignore-versions: '^((?!${{ inputs.liquibase-version }}$).)*$'
+
   build-and-deploy-extensions:
+    needs: [delete-dependency-packages, delete-extension-packages]
     runs-on: ubuntu-22.04
     strategy:
       fail-fast: false
@@ -184,7 +228,14 @@ jobs:
             cd $ext
             sed -i "s/<liquibase.version>.*<\/liquibase.version>/<liquibase.version>0-SNAPSHOT<\/liquibase.version>/" pom.xml
             mvn versions:set -DnewVersion=0-SNAPSHOT
+
+            for dep in "${DEP_ARRAY[@]}"; do
+              dep=$(echo $dep | xargs)
+              sed -i "/<artifactId>${dep//./\\.}<\/artifactId>/{N; s/<version>.*<\/version>/<version>${{ inputs.liquibase-version }}<\/version>/}" pom.xml || true
+            done
+
             mvn clean install -DskipTests
+
             mkdir -p $PWD/.github/util/
             curl -o $PWD/.github/util/re-version.sh https://raw.githubusercontent.com/liquibase/liquibase/$scripts_branch/.github/util/re-version.sh
             curl -o $PWD/.github/util/sign-artifacts.sh https://raw.githubusercontent.com/liquibase/liquibase/$scripts_branch/.github/util/sign-artifacts.sh
