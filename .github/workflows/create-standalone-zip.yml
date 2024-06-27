@@ -15,11 +15,10 @@ on:
 
 jobs:
   create-zip:
-   uses: liquibase/liquibase/.github/workflows/create-release.yml@DAT-17939
+   uses: liquibase/liquibase/.github/workflows/create-release.yml@master
    with:
      version: ${{ inputs.version}}
      branch: ${{ inputs.branch}}
      runId: ${{ inputs.runId}}
    secrets: inherit
-  
   
