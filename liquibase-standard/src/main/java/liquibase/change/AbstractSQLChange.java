@@ -313,7 +313,7 @@ public abstract class AbstractSQLChange extends AbstractChange implements DbmsTa
                 returnStatements.add(new RawCompoundStatement(escapedStatement, getEndDelimiter()));
             } else {
                 //For some reason PRINT statement execution is not working properly with PreparedStatement, so we are reverting this change for now.
-                returnStatements.add(new RawSqlStatement(processedSQL, getEndDelimiter()));
+                returnStatements.add(new RawSqlStatement(escapedStatement, getEndDelimiter()));
             }
         }
 
