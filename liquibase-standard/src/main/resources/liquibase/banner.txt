@@ -7,8 +7,8 @@
 ##  \_____/_|\__, |\__,_|_|_.__/ \__,_|___/\___|  ##
 ##              | |                               ##
 ##              |_|                               ##
-##                                                ## 
+##                                                ##
 ##  Get documentation at docs.liquibase.com       ##
-##  Get certified courses at learn.liquibase.com  ## 
+##  Get certified courses at learn.liquibase.com  ##
 ##                                                ##
 ####################################################
