@@ -204,7 +204,7 @@ Global Options
 
   -h, --help                 Show this help message and exit
 
-      --headless=PARAM       Force liquibase to think it has no access to a
+      --headless=PARAM       Force Liquibase to think it has no access to a
                                keyboard
                              DEFAULT: false
                              (defaults file: 'liquibase.headless', environment
@@ -351,8 +351,8 @@ Global Options
                                'LIQUIBASE_OUTPUT_LINE_SEPARATOR')
 
       --preserve-schema-case=PARAM
-                             Should liquibase treat schema and catalog names as
-                               case sensitive?
+                             If true, Liquibase treats schema and catalog names
+                               as case sensitive
                              DEFAULT: false
                              (defaults file: 'liquibase.preserveSchemaCase',
                                environment variable:
@@ -416,8 +416,8 @@ Global Options
                                environment variable:
                                'LIQUIBASE_SQL_SHOW_SQL_WARNINGS')
 
-      --strict=PARAM         Be stricter on allowed Liquibase configuration and
-                               setup?
+      --strict=PARAM         If true, Liquibase enforces certain best practices
+                               and proactively looks for common errors
                              DEFAULT: false
                              (defaults file: 'liquibase.strict', environment
                                variable: 'LIQUIBASE_STRICT')
@@ -466,9 +466,9 @@ Global Options
   -v, --version              Print version information and exit
 
       --validate-xml-changelog-files=PARAM
-                             Will perform xsd validation of XML changelog
+                             Will perform XSD validation of XML changelog
                                files. When many XML changelog files are
-                               included this validation may impact Liquibase
+                               included, this validation may impact Liquibase
                                performance. Defaults to true.
                              DEFAULT: true
                              (defaults file: 'liquibase.
