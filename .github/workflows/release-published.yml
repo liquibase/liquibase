@@ -429,12 +429,14 @@ jobs:
     needs: [ setup ]
     runs-on: ubuntu-latest
     steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
       - name: Get the oss release version
         id: get_latest_oss_version
         run: |
           echo "latest_version=$(git describe --tags $(git rev-list --tags --max-count=1) | sed 's/^v//')" 
           echo "previous_version=$(git describe --tags $(git rev-list --tags --max-count=2 | tail -n 1) | sed -E 's/^v//; s/-.*//')"
-
 
       - name: Repository Dispatch
         uses: peter-evans/repository-dispatch@v3
