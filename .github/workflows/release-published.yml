@@ -434,27 +434,17 @@ jobs:
         with:
           repository: liquibase/liquibase
           ref: master
-          token: ${{ secrets.LIQUIBOT_PAT_GPM_ACCESS }}
 
-      - name: Get Latest Release
-        id: get_latest_release
-        uses: actions/github-script@v6
-        with:
-          script: |
-            const { data: latestRelease } = await github.repos.getLatestRelease({
-              owner: 'liquibase',
-              repo: 'liquibase',
-            });
-            console.log(response.data.tag_name);
-            core.setOutput('tag_name', latestRelease.tag_name);
-
-      - name: Output Latest Release
-        run: echo "The latest release is ${{ steps.get_latest_release.outputs.tag_name }}"  
       - name: Get the oss release version
         id: get_latest_oss_version
         run: |
-          echo "latest_version=$(git describe --tags $(git rev-list --tags --max-count=1) | sed 's/^v//')" 
-          echo "previous_version=$(git describe --tags $(git rev-list --tags --max-count=2 | tail -n 1) | sed -E 's/^v//; s/-.*//')"
+          if git rev-list --tags --max-count=1 | grep -q .; then
+            echo "latest_version=$(git describe --tags $(git rev-list --tags --max-count=1) | sed 's/^v//')" 
+            echo "previous_version=$(git describe --tags $(git rev-list --tags --max-count=2 | tail -n 1) | sed -E 's/^v//; s/-.*//')"
+          else
+            echo "latest_version=0.0.0"
+            echo "previous_version=0.0.0"
+          fi
 
       - name: Repository Dispatch
         uses: peter-evans/repository-dispatch@v3
