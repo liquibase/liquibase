@@ -68,11 +68,11 @@
         <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
         <trimStackTrace>false</trimStackTrace>
         <liquibase-pro.version>0-SNAPSHOT</liquibase-pro.version>
-        <argLine></argLine>
+        <argLine/>
         <commons-lang3.version>3.14.0</commons-lang3.version>
         <commons-io.version>2.16.1</commons-io.version>
         <commons-collections4.version>4.4</commons-collections4.version>
-        <commons-text.version>1.11.0</commons-text.version>
+        <commons-text.version>1.12.0</commons-text.version>
         <ant.version>1.10.14</ant.version>
         <junit-jupiter.version>5.10.2</junit-jupiter.version>
         <groovy.version>4.0.21</groovy.version>
@@ -87,7 +87,7 @@
         <sonar.moduleKey>${project.groupId}:${project.artifactId}</sonar.moduleKey>
         <code.coverage.project.folder>${basedir}/../</code.coverage.project.folder>
         <code.coverage.overall.data.folder>${basedir}/target/</code.coverage.overall.data.folder>      
-        <itCoverageAgent></itCoverageAgent>
+        <itCoverageAgent/>
         <sonar.coverage.jacoco.xmlReportPaths>target/jacoco.xml</sonar.coverage.jacoco.xmlReportPaths>
         <surefire.failIfNoTests>true</surefire.failIfNoTests>
     </properties>
