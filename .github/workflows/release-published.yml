@@ -431,6 +431,10 @@ jobs:
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
+        with:
+          repository: liquibase/liquibase
+          ref: master
+          token: ${{ secrets.LIQUIBOT_PAT_GPM_ACCESS }}
 
       - name: Get Latest Release
         id: get_latest_release
