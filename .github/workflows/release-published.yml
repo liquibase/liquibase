@@ -434,6 +434,7 @@ jobs:
         with:
           repository: liquibase/liquibase
           ref: master
+          fetch-depth: 0
 
       - name: Get the oss release version
         id: get_latest_oss_version
