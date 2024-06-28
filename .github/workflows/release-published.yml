@@ -432,6 +432,20 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
 
+      - name: Get Latest Release
+        id: get_latest_release
+        uses: actions/github-script@v6
+        with:
+          script: |
+            const { data: latestRelease } = await github.repos.getLatestRelease({
+              owner: 'liquibase',
+              repo: 'liquibase',
+            });
+            console.log(response.data.tag_name);
+            core.setOutput('tag_name', latestRelease.tag_name);
+
+      - name: Output Latest Release
+        run: echo "The latest release is ${{ steps.get_latest_release.outputs.tag_name }}"  
       - name: Get the oss release version
         id: get_latest_oss_version
         run: |
