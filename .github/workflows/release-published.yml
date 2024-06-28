@@ -423,3 +423,30 @@ jobs:
       groupId: 'org.liquibase'
       artifactId: 'liquibase'
       version: ${{ needs.setup.outputs.version }}
+
+  update-docs-oss-pro-version:
+    name: Update OSS and PRO tags based on OSS release
+    needs: [ setup ]
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          repository: liquibase/liquibase
+          ref: master
+          fetch-depth: 0
+
+      - name: Get the oss release version
+        id: get_latest_oss_version
+        run: |
+            echo "latest_version=$(git describe --tags $(git rev-list --tags --max-count=1) | sed 's/^v//')" 
+            echo "previous_version=$(git describe --tags $(git rev-list --tags --max-count=2 | tail -n 1) | sed -E 's/^v//; s/-.*//')"
+
+
+      - name: Repository Dispatch
+        uses: peter-evans/repository-dispatch@v3
+        with:
+          token: ${{ secrets.LIQUIBOT_PAT_GPM_ACCESS }}
+          repository: liquibase/liquibase-docs
+          event-type: oss-released-version       
+          client-payload: '{"latest_version": "${{ steps.get_latest_oss_version.outputs.version }}", "previous_version": "${{ steps.get_latest_oss_version.outputs.previous_version }}"}'
