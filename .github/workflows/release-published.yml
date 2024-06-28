@@ -428,6 +428,9 @@ jobs:
     name: Update OSS and PRO tags based on OSS release
     needs: [ setup ]
     runs-on: ubuntu-latest
+    outputs:
+      latest_version: ${{ steps.get_latest_oss_version.outputs.latest_version }}
+      previous_version: ${{ steps.get_latest_oss_version.outputs.previous_version }}
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
@@ -439,8 +442,8 @@ jobs:
       - name: Get the oss release version
         id: get_latest_oss_version
         run: |
-            echo "latest_version=$(git describe --tags $(git rev-list --tags --max-count=1) | sed 's/^v//')" 
-            echo "previous_version=$(git describe --tags $(git rev-list --tags --max-count=2 | tail -n 1) | sed -E 's/^v//; s/-.*//')"
+            echo "latest_version=$(git describe --tags $(git rev-list --tags --max-count=1) | sed 's/^v//')" >> $GITHUB_OUTPUT
+            echo "previous_version=$(git describe --tags $(git rev-list --tags --max-count=2 | tail -n 1) | sed -E 's/^v//; s/-.*//')" >> GIT_OUTPUT
 
 
       - name: Repository Dispatch
