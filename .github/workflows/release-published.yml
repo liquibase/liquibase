@@ -449,4 +449,4 @@ jobs:
           token: ${{ secrets.LIQUIBOT_PAT_GPM_ACCESS }}
           repository: liquibase/liquibase-docs
           event-type: oss-released-version       
-          client-payload: '{"latest_version": "${{ steps.get_latest_oss_version.outputs.version }}", "previous_version": "${{ steps.get_latest_oss_version.outputs.previous_version }}"}'
+          client-payload: '{"latest_version": "${{ steps.get_latest_oss_version.outputs.latest_version }}", "previous_version": "${{ steps.get_latest_oss_version.outputs.previous_version }}"}'
