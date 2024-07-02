@@ -151,8 +151,10 @@ Global Options
       --duplicate-file-mode=PARAM
                              How to handle multiple files being found in the
                                search path that have duplicate paths. Options
-                               are WARN (log warning and choose one at random)
-                               or ERROR (fail current operation)
+                               are SILENT (do not log and choose one at
+                               random), DEBUG, INFO, WARN (log at the given
+                               level and choose one at random), or ERROR (fail
+                               current operation).
                              DEFAULT: ERROR
                              (defaults file: 'liquibase.duplicateFileMode',
                                environment variable:
