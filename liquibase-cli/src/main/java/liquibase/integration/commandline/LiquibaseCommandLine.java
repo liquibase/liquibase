@@ -31,6 +31,7 @@ import liquibase.ui.ConsoleUIService;
 import liquibase.ui.LoggerUIService;
 import liquibase.ui.UIService;
 import liquibase.util.*;
+import org.apache.commons.lang3.StringUtils;
 import picocli.CommandLine;
 
 import java.io.*;
@@ -976,13 +977,16 @@ public class LiquibaseCommandLine {
                     if (def.isRequired()) {
                         description = "[REQUIRED] " + description;
                     }
+                    if (!def.getForcePrintedAliases().isEmpty()) {
+                        String pluralized = def.getForcePrintedAliases().size() > 1 ? "aliases" : "alias";
+                        description = pluralized + ": " + def.getForcePrintedAliases().stream().map(LiquibaseCommandLine::convertArgumentNameToKabobCase).collect(Collectors.joining("', '", "'", "'")) + "\n" + description;
+                    }
 
                     builder.description(description + "\n");
 
                     if (def.getDataType().equals(Boolean.class)) {
                         builder.arity("0..1");
                     }
-
 
                     if (i > 0) {
                         builder.hidden(true);
@@ -1238,11 +1242,22 @@ public class LiquibaseCommandLine {
         baseNames.addAll(def.getAliases());
 
         for (String baseName : baseNames) {
-            returnList.add("--" + StringUtil.toKabobCase(baseName).replace(".", "-"));
+            returnList.add(convertArgumentNameToKabobCase(baseName));
             returnList.add("--" + baseName.replace("\\.", ""));
         }
 
         return returnList.toArray(new String[0]);
+    }
+
+    /**
+     * Converts a given argument name to kabob case and formats it as a command line argument.
+     * The resulting string will be prefixed with "--" and all periods in the baseName will be replaced with hyphens.
+     *
+     * @param baseName the base argument name to be converted
+     * @return the kabob case formatted argument name prefixed with "--"
+     */
+    private static String convertArgumentNameToKabobCase(String baseName) {
+        return "--" + StringUtil.toKabobCase(baseName).replace(".", "-");
     }
 
     protected static String[] toArgNames(ConfigurationDefinition<?> def) {
@@ -1252,7 +1267,7 @@ public class LiquibaseCommandLine {
 
         List<String> returns = new CaseInsensitiveList();
         for (String key : keys) {
-            insertWithoutDuplicates(returns, "--" + StringUtil.toKabobCase(key.replaceFirst("^liquibase.", "")).replace(".", "-"));
+            insertWithoutDuplicates(returns, convertArgumentNameToKabobCase(key.replaceFirst("^liquibase.", "")));
             insertWithoutDuplicates(returns, "--" + StringUtil.toKabobCase(key.replace(".", "-")));
             insertWithoutDuplicates(returns, "--" + key.replaceFirst("^liquibase.", "").replaceAll("\\.", ""));
             insertWithoutDuplicates(returns, "--" + key.replaceAll("\\.", ""));
