@@ -2,6 +2,8 @@ package liquibase.command;
 
 import liquibase.GlobalConfiguration;
 import liquibase.Scope;
+import liquibase.analytics.Event;
+import liquibase.analytics.UsageAnalyticsFactory;
 import liquibase.configuration.*;
 import liquibase.database.Database;
 import liquibase.exception.CommandExecutionException;
@@ -202,8 +204,9 @@ public class CommandScope {
         Scope.getCurrentScope().addMdcValue(MdcKey.OPERATION_START_TIME, Instant.ofEpochMilli(operationStartTime.getTime()).toString());
         // We don't want to reset the command name even when defining another CommandScope during execution
         // because we intend on keeping this value as the command entered to the console
+        String commandName = String.join(" ", commandDefinition.getName());
         if (!Scope.getCurrentScope().isMdcKeyPresent(MdcKey.LIQUIBASE_COMMAND_NAME)) {
-            Scope.getCurrentScope().addMdcValue(MdcKey.LIQUIBASE_COMMAND_NAME, String.join(" ", commandDefinition.getName()));
+            Scope.getCurrentScope().addMdcValue(MdcKey.LIQUIBASE_COMMAND_NAME, commandName);
         }
         CommandResultsBuilder resultsBuilder = new CommandResultsBuilder(this, outputStream);
         final List<CommandStep> pipeline = commandDefinition.getPipeline();
@@ -267,6 +270,8 @@ public class CommandScope {
             } catch (Exception e) {
                 Scope.getCurrentScope().getLog(getClass()).warning("Error flushing command output stream: " + e.getMessage(), e);
             }
+            UsageAnalyticsFactory usageAnalyticsFactory = Scope.getCurrentScope().getSingleton(UsageAnalyticsFactory.class);
+            usageAnalyticsFactory.handleEvent(new Event(commandName));
         }
 
         return resultsBuilder.build();
