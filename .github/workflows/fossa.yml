@@ -1,5 +1,5 @@
 # Name of the GitHub Action workflow
-name: FOSSA License Compliance and Security Check
+name: FOSSA Report Generation
 
 # Event triggers for the workflow
 on:
@@ -87,7 +87,7 @@ jobs:
         sleep 60
         mkdir /home/runner/work/fossa_reports
 
-        curl --location --request PUT 'https://app.fossa.com/api/projects/custom+40163/github.com/liquibase/liquibase' \
+        curl --location --request PUT 'https://app.fossa.com/api/projects/git+github.com/liquibase/liquibase' \
         --header 'Authorization: Bearer ${{ secrets.FOSSA_API_KEY }}' \
         --header 'Content-Type: application/x-www-form-urlencoded' \
           --data-urlencode 'bom_column_settings%5B%5D=Title' \
@@ -96,7 +96,7 @@ jobs:
           --data-urlencode 'bom_column_settings%5B%5D=DeclaredLicense' \
           --data-urlencode 'bom_column_settings%5B%5D=PackageHomepage' \
 
-        curl --location 'https://app.fossa.com/api/revisions/custom%2B40163%2Fgithub.com%2Fliquibase%2Fliquibase%24${{ steps.get_commit_sha_oss.outputs.commit_sha_lb }}/attribution/download?format=CSV&includeDeepDependencies=true&includeDirectDependencies=false&download=true' \
+        curl --location 'https://app.fossa.com/api/revisions/git%2Bgithub.com%2Fliquibase%2Fliquibase%24${{ steps.get_commit_sha_oss.outputs.commit_sha_lb }}/attribution/download?format=CSV&includeDeepDependencies=true&download=true \
         --header 'Authorization: Bearer ${{ secrets.FOSSA_COMBINED_REPORT }}' -o /home/runner/work/fossa_reports/liquibase.csv
         ls -l /home/runner/work/fossa_reports
         cat /home/runner/work/fossa_reports/liquibase.csv || echo "File is empty or not found"
