@@ -2,7 +2,10 @@ package liquibase.analytics;
 
 import liquibase.Scope;
 import liquibase.plugin.AbstractPluginFactory;
+import lombok.AccessLevel;
+import lombok.NoArgsConstructor;
 
+@NoArgsConstructor(access = AccessLevel.PRIVATE)
 public class UsageAnalyticsFactory extends AbstractPluginFactory<UsageAnalyticsListener> {
     @Override
     protected Class<UsageAnalyticsListener> getPluginClass() {
