@@ -70,11 +70,11 @@ jobs:
     - name: Install Maven dependencies (excluding test scope)
       run: mvn clean install -DskipTests
       
-    - name: run FOSSA CLI
-      uses: fossas/fossa-action@main
-      with:
-        api-key: ${{ secrets.FOSSA_API_KEY }}
-        branch: ${{ github.ref }}
+    # - name: run FOSSA CLI
+    #   uses: fossas/fossa-action@main
+    #   with:
+    #     api-key: ${{ secrets.FOSSA_API_KEY }}
+    #     branch: ${{ github.ref }}
 
     - name: Get the commit sha
       id: get_commit_sha_oss
