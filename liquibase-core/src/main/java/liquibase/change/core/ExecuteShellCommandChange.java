@@ -7,6 +7,7 @@ import liquibase.change.DatabaseChangeProperty;
 import liquibase.configuration.GlobalConfiguration;
 import liquibase.configuration.LiquibaseConfiguration;
 import liquibase.database.Database;
+import liquibase.database.core.PostgresDatabase;
 import liquibase.exception.UnexpectedLiquibaseException;
 import liquibase.exception.ValidationErrors;
 import liquibase.exception.Warnings;
@@ -49,6 +50,9 @@ public class ExecuteShellCommandChange extends AbstractChange {
     private static final Long HOUR_IN_MILLIS = MIN_IN_MILLIS * 60;
 
     protected Integer maxStreamGobblerOutput = null;
+    // It is impossible to tell if process was timed out just by an exit code because some tools return 0 exit code
+    // when they are killed in Linux (e.g. sqlcmd) and on Windows when the process is killed it just returns 1
+    protected boolean isShellCommandTimedOut = false;
 
     @Override
     public boolean generateStatementsVolatile(Database database) {
@@ -197,7 +201,7 @@ public class ExecuteShellCommandChange extends AbstractChange {
             // can't use Process's new api with timeout, so just workaround it for now
             long timeoutInMillis = getTimeoutInMillis();
             if (timeoutInMillis > 0) {
-                returnCode = waitForOrKill(p, timeoutInMillis);
+                returnCode = waitForOrKill(p, timeoutInMillis, database);
             } else {
                 // do default behavior for any value equal to or less than 0
                 returnCode = p.waitFor();
@@ -240,41 +244,52 @@ public class ExecuteShellCommandChange extends AbstractChange {
      * @param timeoutInMillis waits for specified timeoutInMillis before destroying the process.
      *                        It will wait indefinitely if timeoutInMillis is 0.
      */
-    private int waitForOrKill(final Process process, final long timeoutInMillis) throws ExecutionException, TimeoutException {
-        int ret = -1;
+    private int waitForOrKill(final Process process, final long timeoutInMillis, Database database) throws TimeoutException {
+        int processExitCode = -1;
         final AtomicBoolean timedOut = new AtomicBoolean(false);
         Timer timer = new Timer();
+
         if (timeoutInMillis > 0) {
             timer.schedule(new TimerTask() {
                 @Override
                 public void run() {
-                    // timed out
-                    timedOut.set(true);
                     process.destroy();
+                    timedOut.set(true);
+                    String timeoutStr = timeout != null ? timeout : timeoutInMillis + " ms";
+                    LogFactory.getInstance().getLog().severe("Process timed out (" + timeoutStr + ")");
                 }
             }, timeoutInMillis);
         }
 
+        // Looks like the loop was added for an additional retry in case of InterruptedException (although I wasn't able to find exact reason why)
         boolean stop = false;
         while (!stop) {
             try {
-                ret = process.waitFor();
+                processExitCode = process.waitFor();
                 stop = true;
-                // if process already returned, then cancel the killer task if it is still running
-                timer.cancel();
-                // check if we timed out or not
                 if (timedOut.get()) {
+                    // Having specifying class variable from AtomicBoolean instead of just using AtomicBoolean because AtomicBoolean is not serializable
+                    isShellCommandTimedOut = true;
+                    // DAT-17735 Fix for PostgreSQL and EDB only because other native tools have different issues if we don't throw TimeoutException.
+                    // A common fix will be applied in next releases (target is 8.8).
+                    if (database instanceof PostgresDatabase) {
+                        return processExitCode;
+                    }
                     String timeoutStr = timeout != null ? timeout : timeoutInMillis + " ms";
                     throw new TimeoutException("Process timed out (" + timeoutStr + ")");
                 }
-            } catch (InterruptedException ignore) {
+            } catch (InterruptedException ex) {
                 // check again
                 // Restore interrupted state...
+                LogFactory.getInstance().getLog().severe("Process interrupted due to ", ex);
                 Thread.currentThread().interrupt();
+            } finally {
+                // if process already returned, then cancel the killer task if it is still running
+                timer.cancel();
             }
         }
 
-        return ret;
+        return processExitCode;
     }
 
     /**
@@ -318,7 +333,11 @@ public class ExecuteShellCommandChange extends AbstractChange {
      */
     protected void processResult(int returnCode, String errorStreamOut, String infoStreamOut, Database database) {
         if (returnCode != 0) {
-            throw new RuntimeException(getCommandString() + " returned a code of " + returnCode);
+            String errorMessage = getCommandString() + " returned a code of " + returnCode;
+            if (isShellCommandTimedOut) {
+                errorMessage += " (process timed out)";
+            }
+            throw new RuntimeException(errorMessage);
         }
     }
 
@@ -402,7 +421,8 @@ public class ExecuteShellCommandChange extends AbstractChange {
             try {
                 copy(processStream, outputStream);
             } catch (IOException e) {
-                e.printStackTrace();
+                // [DAT-17735] Instead of printing stack trace logging as warn as IOException is expected if process was timed out
+                LogFactory.getInstance().getLog().warning("Exception was thrown when tried to close native tool's InputStream (expected if process was timed out)", e);
             }
 
         }
