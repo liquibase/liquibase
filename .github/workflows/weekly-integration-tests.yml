@@ -127,10 +127,11 @@ jobs:
     needs: [ snowflake-its ]
     steps:
       - name: Dispatch event to build-logic repository
+        id: weekly-integration-tests
         uses: peter-evans/repository-dispatch@v3
         with:
           token: ${{ secrets.LIQUIBOT_PAT_GPM_ACCESS }}
           repository: liquibase/build-logic
           event-type: test-failure       
-          client-payload: '{"repository": "${{ github.repository }}", "branch": "${{ github.ref }}", "sha": "${{ github.sha }}", "server_url": "${{ github.server_url }}", "run_id": "${{ github.run_id }}"}'
+          client-payload: '{"repository": "${{ github.repository }}", "branch": "${{ github.ref }}", "sha": "${{ github.sha }}", "server_url": "${{ github.server_url }}", "run_id": "${{ github.run_id }}", "workflow_name": "${{ github.action }}"}'
 
