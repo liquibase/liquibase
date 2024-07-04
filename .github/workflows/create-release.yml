@@ -28,7 +28,7 @@ on:
 
 env:
   DEPENDENCIES: "liquibase-bigquery" # Comma separated list of dependencies to release the extensions list
-  EXTENSIONS: "liquibase-commercial-bigquery" # Comma separated list of extensions to release to GPM
+  EXTENSIONS: "liquibase-commercial-bigquery,liquibase-scripting" # Comma separated list of extensions to release to GPM
 
 jobs:
   setup:
