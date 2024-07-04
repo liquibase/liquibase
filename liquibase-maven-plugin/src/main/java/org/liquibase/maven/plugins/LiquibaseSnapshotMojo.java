@@ -9,9 +9,7 @@ import liquibase.exception.LiquibaseException;
 
 import java.io.File;
 import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.OutputStream;
+import java.io.PrintStream;
 
 /**
  * <p>The snapshot command captures the current state of the url database, which is the target database.<p/>
@@ -42,20 +40,10 @@ public class LiquibaseSnapshotMojo extends AbstractLiquibaseChangeLogMojo {
         commandScope.addArgumentValue(DbUrlConnectionArgumentsCommandStep.DATABASE_ARG, db);
         commandScope.addArgumentValue(DbUrlConnectionArgumentsCommandStep.URL_ARG, db.getConnection().getURL());
         commandScope.addArgumentValue(SnapshotCommandStep.SNAPSHOT_FORMAT_ARG, snapshotFormat);
-        OutputStream outputStream;
-        try {
-            outputStream = new FileOutputStream(outputFile);
-        } catch (FileNotFoundException e) {
-            throw new RuntimeException(e);
-        }
-        commandScope.setOutput(outputStream);
+        PrintStream output = createPrintStream();
+        commandScope.setOutput(output);
 
-        try {
-            commandScope.execute();
-            outputStream.flush();
-        } catch (IOException cee) {
-            throw new LiquibaseException(cee);
-        }
+        commandScope.execute();
     }
 
     @Override
@@ -63,5 +51,13 @@ public class LiquibaseSnapshotMojo extends AbstractLiquibaseChangeLogMojo {
         super.printSettings(indent);
         getLog().info(indent + "snapshotFormat: " + snapshotFormat);
         getLog().info(indent + "outputFile: " + outputFile);
+    }
+
+    private PrintStream createPrintStream() throws LiquibaseException {
+        try {
+            return (outputFile != null ? new PrintStream(outputFile) : System.out);
+        } catch (FileNotFoundException e) {
+            throw new LiquibaseException(e);
+        }
     }
 }
