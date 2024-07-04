@@ -52,6 +52,7 @@ jobs:
   delete-dependency-packages:
     needs: setup_matrix
     runs-on: ubuntu-22.04
+    continue-on-error: true
     strategy:
       matrix:
         dependencies: ${{ fromJson(needs.setup_matrix.outputs.dependencies_matrix) }}
@@ -66,6 +67,7 @@ jobs:
   delete-extension-packages:
     needs: setup_matrix
     runs-on: ubuntu-22.04
+    continue-on-error: true
     strategy:
       matrix:
         extensions: ${{ fromJson(needs.setup_matrix.outputs.extensions_matrix) }}
