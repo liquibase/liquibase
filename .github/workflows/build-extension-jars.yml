@@ -176,6 +176,7 @@ jobs:
       - name: Install liquibase-commercial 0-SNAPSHOT
         run: |
           cd liquibase-pro
+          ls -ltr
           mvn -f pom-combined.xml clean install -DskipTests -P '!run-proguard' "-Dliquibase.version=0-SNAPSHOT"
           cd ..
 
