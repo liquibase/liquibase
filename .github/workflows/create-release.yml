@@ -70,7 +70,7 @@ jobs:
   
   build-extension-jars:
    needs: [ setup, owasp-scanner ]
-   uses: liquibase/liquibase/.github/workflows/build-extension-jars.yml@master
+   uses: liquibase/liquibase/.github/workflows/build-extension-jars.yml@DAT-18103
    with:
      liquibase-version: ${{ needs.setup.outputs.version }}
      dependencies: ${{ needs.setup.outputs.dependencies }}
