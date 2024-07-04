@@ -32,6 +32,7 @@
 #       set MAVEN_OPTS=-Xdebug -Xrunjdwp:transport=dt_socket,server=y,suspend=y,address=8000
 #   MAVEN_SKIP_RC - flag to disable loading of mavenrc files
 # ----------------------------------------------------------------------------
+time echo "Benchmark 1"
 
 if [ -z "$MAVEN_SKIP_RC" ] ; then
 
@@ -82,7 +83,7 @@ if $cygwin ; then
   [ -n "$CLASSPATH" ] &&
     CLASSPATH=$(cygpath --path --unix "$CLASSPATH")
 fi
-
+time echo "Benchmark 2"
 # For Mingw, ensure paths are in UNIX format before anything is touched
 if $mingw ; then
   [ -n "$JAVA_HOME" ] && [ -d "$JAVA_HOME" ] &&
@@ -306,3 +307,5 @@ exec "$JAVACMD" \
   -classpath "$MAVEN_PROJECTBASEDIR/.mvn/wrapper/maven-wrapper.jar" \
   "-Dmaven.multiModuleProjectDirectory=${MAVEN_PROJECTBASEDIR}" \
   ${WRAPPER_LAUNCHER} $MAVEN_CONFIG "$@"
+
+time echo "Benchmark 3"
