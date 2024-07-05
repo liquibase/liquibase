@@ -225,7 +225,7 @@ jobs:
           IFS=',' read -ra EXT_ARRAY <<< "${{ inputs.extensions }}"
           for ext in "${EXT_ARRAY[@]}"; do
             ext=$(echo $ext | xargs)  # Remove leading and trailing whitespaces
-            if [ "$ext" == "liquibase-scripting" ]; then
+            if [ "$ext" != "liquibase-scripting" ]; then
               echo "Checking out and building $ext"
               git clone https://github.com/liquibase/$ext.git $ext
               cd $ext
