@@ -92,17 +92,12 @@ jobs:
 
       - uses: actions/checkout@v4
         name: Checkout liquibase
-        with:
-          repository: liquibase/liquibase
-          ref: "DAT-16671"
-          #ref: "${{ github.ref }}"
 
       - uses: actions/checkout@v4
         name: Checkout liquibase-pro
         with:
           repository: liquibase/liquibase-pro
-          ref: "DAT-16671"
-          #ref: "${{ github.ref }}"
+          ref: "${{ github.ref }}"
           path: liquibase-pro
           token: ${{ secrets.BOT_TOKEN }}
 
