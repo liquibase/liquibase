@@ -73,8 +73,17 @@ jobs:
         extensions: ${{ fromJson(needs.setup_matrix.outputs.extensions_matrix) }}
     steps:
       - uses: actions/delete-package-versions@v5
+        id: org_liquibase_ext
         with:
           package-name: org.liquibase.ext.${{ matrix.extensions }}
+          package-type: 'maven'
+          token: ${{ secrets.BOT_TOKEN }}
+          ignore-versions: '^((?!${{ inputs.liquibase-version }}$).)*$'
+      - uses: actions/delete-package-versions@v5
+        id: org_liquibase
+        if: always()
+        with:
+          package-name: org.liquibase.${{ matrix.extensions }}
           package-type: 'maven'
           token: ${{ secrets.BOT_TOKEN }}
           ignore-versions: '^((?!${{ inputs.liquibase-version }}$).)*$'
@@ -236,6 +245,8 @@ jobs:
                 dep=$(echo $dep | xargs)
                 sed -i "/<artifactId>${dep//./\\.}<\/artifactId>/{N; s/<version>.*<\/version>/<version>${{ inputs.liquibase-version }}<\/version>/}" pom.xml || true
               done
+
+              mvn clean install -DskipTests
 
               mkdir -p $PWD/.github/util/
               curl -o $PWD/.github/util/re-version.sh https://raw.githubusercontent.com/liquibase/liquibase/$scripts_branch/.github/util/re-version.sh
