@@ -225,41 +225,35 @@ jobs:
           IFS=',' read -ra EXT_ARRAY <<< "${{ inputs.extensions }}"
           for ext in "${EXT_ARRAY[@]}"; do
             ext=$(echo $ext | xargs)  # Remove leading and trailing whitespaces
-            echo "Checking out and building $ext"
-            git clone https://github.com/liquibase/$ext.git $ext
-            cd $ext
-            sed -i "s/<liquibase.version>.*<\/liquibase.version>/<liquibase.version>0-SNAPSHOT<\/liquibase.version>/" pom.xml
-            mvn versions:set -DnewVersion=0-SNAPSHOT
-
-            for dep in "${DEP_ARRAY[@]}"; do
-              dep=$(echo $dep | xargs)
-              sed -i "/<artifactId>${dep//./\\.}<\/artifactId>/{N; s/<version>.*<\/version>/<version>${{ inputs.liquibase-version }}<\/version>/}" pom.xml || true
-            done
-
             if [ "$ext" == "liquibase-scripting" ]; then
-              mvn clean install -DskipTests=true -pl '!liquibase-scripting-integration-tests' "-Dliquibase.version=DAT-16671-SNAPSHOT"
-              mkdir target
-              mv scripting/target/*.* target/
-            else
-              mvn clean install -DskipTests
-            fi
+              echo "Checking out and building $ext"
+              git clone https://github.com/liquibase/$ext.git $ext
+              cd $ext
+              sed -i "s/<liquibase.version>.*<\/liquibase.version>/<liquibase.version>0-SNAPSHOT<\/liquibase.version>/" pom.xml
+              mvn versions:set -DnewVersion=0-SNAPSHOT
 
-            mkdir -p $PWD/.github/util/
-            curl -o $PWD/.github/util/re-version.sh https://raw.githubusercontent.com/liquibase/liquibase/$scripts_branch/.github/util/re-version.sh
-            curl -o $PWD/.github/util/sign-artifacts.sh https://raw.githubusercontent.com/liquibase/liquibase/$scripts_branch/.github/util/sign-artifacts.sh
-            curl -o $PWD/.github/util/ManifestReversion.java https://raw.githubusercontent.com/liquibase/liquibase/$scripts_branch/.github/util/ManifestReversion.java
-            chmod +x $PWD/.github/util/re-version.sh
-            chmod +x $PWD/.github/util/sign-artifacts.sh
-            chmod +x $PWD/.github/util/ManifestReversion.java
-            $PWD/.github/util/re-version.sh ./target "${{ inputs.liquibase-version  }}" "${{ github.ref }}" ${ext}
-            $PWD/.github/util/sign-artifacts.sh ./target "${{ inputs.liquibase-version }}" "${{ github.ref }}"
-            mvn versions:set -DnewVersion=${{ inputs.liquibase-version }}
-            mvn deploy:deploy-file \
-            -Dfile=./re-version/out/${ext}-${{ inputs.liquibase-version }}.jar \
-            -Dsources=./re-version/out/${ext}-${{ inputs.liquibase-version }}-sources.jar \
-            -Djavadoc=./re-version/out/${ext}-${{ inputs.liquibase-version }}-javadoc.jar \
-            -DrepositoryId=liquibase \
-            -Durl=https://maven.pkg.github.com/liquibase/$ext \
-            -DpomFile=pom.xml
-            cd ..
+              for dep in "${DEP_ARRAY[@]}"; do
+                dep=$(echo $dep | xargs)
+                sed -i "/<artifactId>${dep//./\\.}<\/artifactId>/{N; s/<version>.*<\/version>/<version>${{ inputs.liquibase-version }}<\/version>/}" pom.xml || true
+              done
+
+              mkdir -p $PWD/.github/util/
+              curl -o $PWD/.github/util/re-version.sh https://raw.githubusercontent.com/liquibase/liquibase/$scripts_branch/.github/util/re-version.sh
+              curl -o $PWD/.github/util/sign-artifacts.sh https://raw.githubusercontent.com/liquibase/liquibase/$scripts_branch/.github/util/sign-artifacts.sh
+              curl -o $PWD/.github/util/ManifestReversion.java https://raw.githubusercontent.com/liquibase/liquibase/$scripts_branch/.github/util/ManifestReversion.java
+              chmod +x $PWD/.github/util/re-version.sh
+              chmod +x $PWD/.github/util/sign-artifacts.sh
+              chmod +x $PWD/.github/util/ManifestReversion.java
+              $PWD/.github/util/re-version.sh ./target "${{ inputs.liquibase-version  }}" "${{ github.ref }}" ${ext}
+              $PWD/.github/util/sign-artifacts.sh ./target "${{ inputs.liquibase-version }}" "${{ github.ref }}"
+              mvn versions:set -DnewVersion=${{ inputs.liquibase-version }}
+              mvn deploy:deploy-file \
+              -Dfile=./re-version/out/${ext}-${{ inputs.liquibase-version }}.jar \
+              -Dsources=./re-version/out/${ext}-${{ inputs.liquibase-version }}-sources.jar \
+              -Djavadoc=./re-version/out/${ext}-${{ inputs.liquibase-version }}-javadoc.jar \
+              -DrepositoryId=liquibase \
+              -Durl=https://maven.pkg.github.com/liquibase/$ext \
+              -DpomFile=pom.xml
+              cd ..
+            fi
           done
