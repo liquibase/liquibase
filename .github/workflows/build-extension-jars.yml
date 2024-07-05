@@ -112,10 +112,10 @@ jobs:
                 git clone https://github.com/liquibase/$dep.git $dep
             done
 
-      - name: Set up JDK 17
+      - name: Set up JDK 21
         uses: actions/setup-java@v4
         with:
-          java-version: 17
+          java-version: 21
           distribution: 'temurin'
           cache: 'maven'
           gpg-private-key: ${{ secrets.GPG_SECRET }}
@@ -240,7 +240,6 @@ jobs:
               mvn clean install -DskipTests=true -pl '!liquibase-scripting-integration-tests' "-Dliquibase.version=DAT-16671-SNAPSHOT"
               mkdir target
               mv scripting/target/*.* target/
-              ls -l target/
             else
               mvn clean install -DskipTests
             fi
@@ -264,10 +263,3 @@ jobs:
             -DpomFile=pom.xml
             cd ..
           done
-
-      - name: debug
-        if: always()
-        run: |
-          ls -ltr /home/runner/work/liquibase/liquibase/liquibase-scripting
-          ls -ltr /home/runner/work/liquibase/liquibase/liquibase-scripting/target
-          ls -ltr /home/runner/work/liquibase/liquibase/liquibase-scripting/scripting/target
