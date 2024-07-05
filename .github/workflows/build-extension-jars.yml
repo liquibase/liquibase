@@ -241,8 +241,12 @@ jobs:
               sed -i "/<artifactId>${dep//./\\.}<\/artifactId>/{N; s/<version>.*<\/version>/<version>${{ inputs.liquibase-version }}<\/version>/}" pom.xml || true
             done
 
-            #mvn clean install -DskipTests
-            mvn clean install -DskipTests=true -pl '!liquibase-scripting-integration-tests' "-Dliquibase.version=DAT-16671-SNAPSHOT"
+            if ext == "liquibase-scripting-extension"; then
+              mvn clean install -DskipTests=true -pl '!liquibase-scripting-integration-tests' "-Dliquibase.version=DAT-16671-SNAPSHOT"
+            fi
+            else
+              mvn clean install -DskipTests
+            fi            
 
             mkdir -p $PWD/.github/util/
             curl -o $PWD/.github/util/re-version.sh https://raw.githubusercontent.com/liquibase/liquibase/$scripts_branch/.github/util/re-version.sh
