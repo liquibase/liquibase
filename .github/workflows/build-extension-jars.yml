@@ -238,6 +238,9 @@ jobs:
 
             if [ "$ext" == "liquibase-scripting" ]; then
               mvn clean install -DskipTests=true -pl '!liquibase-scripting-integration-tests' "-Dliquibase.version=DAT-16671-SNAPSHOT"
+              mkdir target
+              mv scripting/target/*.* target/
+              ls -l target/
             else
               mvn clean install -DskipTests
             fi
