@@ -141,6 +141,7 @@ jobs:
           IFS=',' read -ra ADDR <<< "${{ needs.setup.outputs.extensions }}"
           for extension in "${ADDR[@]}"; do
             mvn dependency:get -DgroupId=org.liquibase.ext -DartifactId=$extension -Dversion=${{ needs.setup.outputs.version }} -Dtransitive=false || echo "Failed to download $extension artifact"
+            mvn dependency:get -DgroupId=org.liquibase -DartifactId=$extension -Dversion=${{ needs.setup.outputs.version }} -Dtransitive=false || echo "Failed to download $extension artifact"
           done
 
       - name: Set up JDK
@@ -181,7 +182,8 @@ jobs:
           rm -rf re-version/out/liquibase-${{ needs.setup.outputs.version }}.zip
           IFS=',' read -ra EXT <<< "${{ needs.setup.outputs.extensions }}"
           for i in "${EXT[@]}"; do
-            mv ~/.m2/repository/org/liquibase/ext/$i/${{ needs.setup.outputs.version }}/$i-${{ needs.setup.outputs.version }}.jar re-version/out/liquibase-${{ needs.setup.outputs.version }}/internal/extensions/$i-${{ needs.setup.outputs.version }}.jar
+            mv ~/.m2/repository/org/liquibase/ext/$i/${{ needs.setup.outputs.version }}/$i-${{ needs.setup.outputs.version }}.jar re-version/out/liquibase-${{ needs.setup.outputs.version }}/internal/extensions/$i-${{ needs.setup.outputs.version }}.jar || echo "Failed to move $i artifact"
+            mv ~/.m2/repository/org/liquibase/$i/${{ needs.setup.outputs.version }}/$i-${{ needs.setup.outputs.version }}.jar re-version/out/liquibase-${{ needs.setup.outputs.version }}/internal/extensions/$i-${{ needs.setup.outputs.version }}.jar || echo "Failed to move $i artifact"
           done
           (cd re-version/out/ && zip -r liquibase-${{ needs.setup.outputs.version }}.zip liquibase-${{ needs.setup.outputs.version }} && rm -rf liquibase-${{ needs.setup.outputs.version }} && cd ../..)      
           $PWD/.github/util/sign-artifacts.sh re-version/out
