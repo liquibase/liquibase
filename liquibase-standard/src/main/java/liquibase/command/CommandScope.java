@@ -6,6 +6,7 @@ import liquibase.analytics.Event;
 import liquibase.analytics.UsageAnalyticsFactory;
 import liquibase.configuration.*;
 import liquibase.database.Database;
+import liquibase.database.jvm.JdbcConnection;
 import liquibase.exception.CommandExecutionException;
 import liquibase.exception.CommandValidationException;
 import liquibase.integration.commandline.LiquibaseCommandLineConfiguration;
@@ -17,6 +18,7 @@ import liquibase.logging.mdc.MdcValue;
 import liquibase.logging.mdc.customobjects.ExceptionDetails;
 import liquibase.util.StringUtil;
 import lombok.Getter;
+import org.apache.commons.lang3.StringUtils;
 
 import java.io.*;
 import java.time.Instant;
@@ -212,6 +214,8 @@ public class CommandScope {
         final List<CommandStep> pipeline = commandDefinition.getPipeline();
         final List<CommandStep> executedCommands = new ArrayList<>();
         Optional<Exception> thrownException = Optional.empty();
+        String operationOutcome = null;
+        String url = null;
         validate();
         try {
             addOutputFileToMdc();
@@ -220,9 +224,14 @@ public class CommandScope {
                     Scope.getCurrentScope().addMdcValue(MdcKey.LIQUIBASE_INTERNAL_COMMAND, getCommandStepName(command));
                     Scope.getCurrentScope().getLog(CommandScope.class).fine(String.format("Executing internal command %s", getCommandStepName(command)));
                     command.run(resultsBuilder);
+                    String possibleUrl = (String) Scope.getCurrentScope().getMdcManager().getAll().get(MdcKey.LIQUIBASE_TARGET_URL);
+                    if (StringUtils.isNotEmpty(possibleUrl)) {
+                        url = possibleUrl;
+                    }
                 } catch (Exception runException) {
                     // Suppress the exception for now so that we can run the cleanup steps even when encountering an exception.
                     thrownException = Optional.of(runException);
+                    operationOutcome = MdcValue.COMMAND_FAILED;
                     Scope.getCurrentScope().addMdcValue(MdcKey.OPERATION_OUTCOME, MdcValue.COMMAND_FAILED, false);
                     break;
                 }
@@ -251,6 +260,7 @@ public class CommandScope {
                 }
                 throw thrownException.get();
             } else {
+                operationOutcome = MdcValue.COMMAND_SUCCESSFUL;
                 Scope.getCurrentScope().addMdcValue(MdcKey.OPERATION_OUTCOME, MdcValue.COMMAND_SUCCESSFUL, false);
             }
         } catch (Exception e) {
@@ -271,7 +281,7 @@ public class CommandScope {
                 Scope.getCurrentScope().getLog(getClass()).warning("Error flushing command output stream: " + e.getMessage(), e);
             }
             UsageAnalyticsFactory usageAnalyticsFactory = Scope.getCurrentScope().getSingleton(UsageAnalyticsFactory.class);
-            usageAnalyticsFactory.handleEvent(new Event(commandName));
+            usageAnalyticsFactory.handleEvent(new Event(commandName, operationOutcome, url));
         }
 
         return resultsBuilder.build();
