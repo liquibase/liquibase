@@ -241,7 +241,7 @@ jobs:
               sed -i "/<artifactId>${dep//./\\.}<\/artifactId>/{N; s/<version>.*<\/version>/<version>${{ inputs.liquibase-version }}<\/version>/}" pom.xml || true
             done
 
-            if ext == "liquibase-scripting-extension"; then
+            if ext == "liquibase-scripting"; then
               mvn clean install -DskipTests=true -pl '!liquibase-scripting-integration-tests' "-Dliquibase.version=DAT-16671-SNAPSHOT"
             fi
             else
