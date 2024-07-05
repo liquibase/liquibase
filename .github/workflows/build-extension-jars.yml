@@ -261,7 +261,7 @@ jobs:
   build-liquibase-scripting:
     if: contains(${{ inputs.extensions }}, 'liquibase-scripting')
     needs: [ delete-extension-packages ]
-    uses: liquibase/liquibase-scripting/.github/workflows/test.yml@main
+    uses: liquibase/build-logic/.github/workflows/build-publish-liquibase-scripting.yml@main
     with:
       version: ${{ inputs.liquibase-version }}
     secrets: inherit
