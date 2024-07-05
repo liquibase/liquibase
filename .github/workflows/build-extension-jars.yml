@@ -264,3 +264,10 @@ jobs:
             -DpomFile=pom.xml
             cd ..
           done
+
+      - name: debug
+        if: always()
+        run: |
+          ls -ltr /home/runner/work/liquibase/liquibase/liquibase-scripting
+          ls -ltr /home/runner/work/liquibase/liquibase/liquibase-scripting/target
+          ls -ltr /home/runner/work/liquibase/liquibase/liquibase-scripting/scripting/target
