@@ -73,7 +73,6 @@ jobs:
         extensions: ${{ fromJson(needs.setup_matrix.outputs.extensions_matrix) }}
     steps:
       - uses: actions/delete-package-versions@v5
-        if: ${{ matrix.extensions }} != 'liquibase-scripting'
         id: org_liquibase_ext
         with:
           package-name: org.liquibase.ext.${{ matrix.extensions }}
@@ -82,7 +81,7 @@ jobs:
           ignore-versions: '^((?!${{ inputs.liquibase-version }}$).)*$'
       - uses: actions/delete-package-versions@v5
         id: org_liquibase
-        if: always() && ${{ matrix.extensions }} == 'liquibase-scripting'
+        if: always()
         with:
           package-name: org.liquibase.${{ matrix.extensions }}
           package-type: 'maven'
