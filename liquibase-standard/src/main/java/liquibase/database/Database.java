@@ -656,11 +656,10 @@ public interface Database extends PrioritizedService, AutoCloseable {
     }
 
     /**
-     * Does the database support the "ROWDEPENDENCIES" syntax?
-     * @param type the DatabaseObject type to be checked.
-     * @return true if the "ROWDEPENDENCIES" syntax is supported, false otherwise.
+     * Does the database support the "ROWDEPENDENCIES" syntax for table creation?
+     * @return true if the "ROWDEPENDENCIES" syntax is supported for table creation, false otherwise.
      */
-    default boolean supportsCreateRowDependencies(Class<? extends DatabaseObject> type) {
+    default boolean supportsCreateRowDependencies() {
         return false;
     }
 

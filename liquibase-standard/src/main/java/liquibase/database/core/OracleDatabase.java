@@ -273,7 +273,7 @@ public class OracleDatabase extends AbstractJdbcDatabase {
     }
 
     @Override
-    public boolean supportsCreateRowDependencies(Class<? extends DatabaseObject> type) {
+    public boolean supportsCreateRowDependencies() {
         return true;
     }
 
