@@ -29,11 +29,12 @@ import java.util.logging.Level;
 public class ObjectUtil {
 
     private static final List<BeanIntrospector> introspectors = new ArrayList<>(Arrays.asList(new DefaultBeanIntrospector(), new FluentPropertyBeanIntrospector()));
-    
+
     /**
      * Cache for the methods of classes that we have been queried about so far.
      */
-    private static final Map<Class<?>, Method[]> methodCache = new ConcurrentHashMap<>();
+    private static final Map<Class<?>, ObjectMethods> methodCache = new ConcurrentHashMap<>();
+
     public static String ARGUMENT_KEY = "key";
 
     /**
@@ -206,20 +207,7 @@ public class ObjectUtil {
      * @return the {@link Method} if found, null in all other cases.
      */
     private static Method getReadMethod(Object object, String propertyName) {
-        String getMethodName = "get" + propertyName.substring(0, 1).toUpperCase(Locale.ENGLISH)
-            + propertyName.substring(1);
-        String isMethodName = "is" + propertyName.substring(0, 1).toUpperCase(Locale.ENGLISH)
-            + propertyName.substring(1);
-
-        Method[] methods = getMethods(object);
-
-        for (Method method : methods) {
-            if ((method.getName().equals(getMethodName) || method.getName().equals(isMethodName)) && (method
-                .getParameterTypes().length == 0)) {
-                return method;
-            }
-        }
-        return null;
+      return getMethods(object).getReadMethod(propertyName);
     }
 
     /**
@@ -229,16 +217,7 @@ public class ObjectUtil {
      * @return the {@link Method} if found, null in all other cases.
      */
     private static Method getWriteMethod(Object object, String propertyName) {
-        String methodName = "set"
-            + propertyName.substring(0, 1).toUpperCase(Locale.ENGLISH) + propertyName.substring(1);
-        Method[] methods = getMethods(object);
-
-        for (Method method : methods) {
-            if (method.getName().equals(methodName) && (method.getParameterTypes().length == 1)) {
-                return method;
-            }
-        }
-        return null;
+      return getMethods(object).getWriteMethod(propertyName);
     }
 
     /**
@@ -247,8 +226,8 @@ public class ObjectUtil {
      * @param object the object to examine
      * @return array of {@link Method} belonging to the class of the object
      */
-    private static Method[] getMethods(Object object) {
-        return methodCache.computeIfAbsent(object.getClass(), k -> object.getClass().getMethods());
+    private static ObjectMethods getMethods(Object object) {
+        return methodCache.computeIfAbsent(object.getClass(), k -> new ObjectMethods(object.getClass()));
     }
 
     /**
