@@ -242,7 +242,7 @@ jobs:
               Write-Host "Windows Unit Test count is outside the acceptable range of +/- 1% of the expected count. Expected ${{ vars.TEST_COUNT_JAVA_WINDOWS }}. Actual $TEST_COUNT."
               exit 1
           }
-          Write-Output "test_count_unit_test_java_windows=$TEST_COUNT" >> $GITHUB_OUTPUT
+          echo "test_count_unit_test_java_windows=$TEST_COUNT" >> $env:GITHUB_OUTPUT
 
       - name: Remove Original Jars for *nix
         if: env.OS_TYPE != 'windows-2019'
@@ -466,11 +466,11 @@ jobs:
           gh variable set TEST_COUNT_JAVA_21_UBUNTU --body "${{ needs.build_tests.outputs.test_count_unit_test_java_21_ubuntu }}"
           gh variable set TEST_COUNT_JAVA_8_UBUNTU --body "${{ needs.build_tests.outputs.test_count_unit_test_java_8_ubuntu }}"
           gh variable set TEST_COUNT_JAVA_MACOS --body "${{ needs.build_tests.outputs.test_count_unit_test_java_macos }}"
-          gh variable set TEST_COUNT_JAVA_WINDOWS --body "${{ needs.build_tests.outputs.test_count_unit_test_java_windows }}"
+          gh variable set TEST_COUNT_JAVA_WINDOWS --body "${{ needs.build_tests.outputs.test_count_unit_test_java_windows}}"
           gh variable set TEST_COUNT_INTEGRATION_DB2 --body "${{ needs.integration-test.outputs.test_count_integration_db2 }}"
           gh variable set TEST_COUNT_INTEGRATION_H2 --body "${{ needs.integration-test.outputs.test_count_integration_h2 }}"
           gh variable set TEST_COUNT_INTEGRATION_HSQLDB --body "${{ needs.integration-test.outputs.test_count_integration_hsqldb }}"
-          gh variable set TEST_COUNT_INTEGRATION_MARIADB --body "${{ needs.integration-test.outputs.test_count_integration_mariadb}}
+          gh variable set TEST_COUNT_INTEGRATION_MARIADB --body "${{ needs.integration-test.outputs.test_count_integration_mariadb}}"
           gh variable set TEST_COUNT_INTEGRATION_MSSQL --body "${{ needs.integration-test.outputs.test_count_integration_mssql }}"
           gh variable set TEST_COUNT_INTEGRATION_MYSQL --body "${{ needs.integration-test.outputs.test_count_integration_mysql }}"
           gh variable set TEST_COUNT_INTEGRATION_ORACLE --body "${{ needs.integration-test.outputs.test_count_integration_oracle }}"
