@@ -72,7 +72,7 @@
 │       ├── jcc.jar
 │       ├── liquibase-commercial.jar
 │       ├── liquibase-core.jar
-│       ├── liquibase-scripting.jar
+│       ├── liquibase-checks.jar
 │       ├── mariadb-java-client.jar
 │       ├── mssql-jdbc.jar
 │       ├── ojdbc8.jar

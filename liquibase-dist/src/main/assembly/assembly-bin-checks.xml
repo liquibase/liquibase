@@ -13,7 +13,7 @@
 			<outputDirectory>internal/lib</outputDirectory>
 			<includes>
 				<include>
-					org.liquibase:liquibase-scripting:jar:
+					org.liquibase:liquibase-checks:jar:
 				</include>
 			</includes>
 		</dependencySet>
