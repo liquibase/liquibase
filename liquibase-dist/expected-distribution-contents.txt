@@ -57,7 +57,7 @@
 │       ├── liquibase.flowfile.yaml
 │       ├── liquibase.flowvariables.yaml
 │       └── liquibase.properties
-── internal
+├── internal
 │   ├── extensions
 │   │   └── liquibase-checks.jar
 │   └── lib
