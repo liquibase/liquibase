@@ -15,7 +15,7 @@ class LoadDataColumnConfigTest extends Specification {
         when:
         def node = new ParsedNode(null, "column")
                 .addChildren([index: "5", header: "header_col", name: "col_name", defaultValue: "defVal",
-                              defaultValueNumeric: "1", type: "NUMERIC"])
+                              defaultValueNumeric: "1", type: "NUMERIC", nullPlaceholder: "myNullRef"])
         def column = new LoadDataColumnConfig()
         try {
             column.load(node, resourceSupplier.simpleResourceAccessor)
@@ -32,6 +32,7 @@ class LoadDataColumnConfigTest extends Specification {
         column.getTypeEnum() == LoadDataChange.LOAD_DATA_TYPE.NUMERIC
         column.defaultValue == "defVal"
         column.defaultValueNumeric == 1
+        column.nullPlaceholder == "myNullRef"
     }
 
 }

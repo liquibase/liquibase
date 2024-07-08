@@ -304,11 +304,11 @@ public class LoadDataChange extends AbstractTableChange implements ChangeWithCol
                         if (columnConfig.getName() != null) {
                             columnName = columnConfig.getName();
                         }
-
+                        final boolean isNull = isNullValue(value, columnConfig);
                         //
                         // Always set the type for the valueConfig if the value is NULL
                         //
-                        if ("NULL".equalsIgnoreCase(value)) {
+                        if (isNull) {
                             valueConfig.setType(columnConfig.getType());
                         }
                         valueConfig.setName(columnName);
@@ -317,7 +317,7 @@ public class LoadDataChange extends AbstractTableChange implements ChangeWithCol
                         if (value.isEmpty()) {
                             value = columnConfig.getDefaultValue();
                         }
-                        if (StringUtil.equalsWordNull(value)) {
+                        if (isNull) {
                             valueConfig.setValue(null);
                         } else if (columnConfig.getType() == null) {
                             // columnConfig did not specify a type
@@ -886,6 +886,17 @@ public class LoadDataChange extends AbstractTableChange implements ChangeWithCol
                 return statementSet.getStatementsArray();
             }
         }
+    }
+
+    protected boolean isNullValue(final String value, final LoadDataColumnConfig column) {
+        final String nullPlaceholder = column.getNullPlaceholder();
+        final boolean retValue;
+        if (nullPlaceholder == null) {
+            retValue = StringUtil.equalsWordNull(value);
+        } else {
+            retValue = nullPlaceholder.equals(value);
+        }
+        return retValue;
     }
 
     @SuppressWarnings("HardCodedStringLiteral")
