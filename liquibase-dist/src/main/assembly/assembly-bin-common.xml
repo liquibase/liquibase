@@ -201,7 +201,7 @@
                 <exclude>org.graalvm.sdk:jniutils:jar</exclude>
                 <exclude>org.graalvm.shadowed:json:jar</exclude>
                 <exclude>org.graalvm.sdk:launcher-common:jar</exclude>
-                <exclude>org.liquibase:liquibase-scripting:jar</exclude>
+                <exclude>org.liquibase:liquibase-checks:jar</exclude>
                 <exclude>org.graalvm.llvm:llvm-api:jar</exclude>
                 <exclude>org.graalvm.sdk:maven-downloader:jar</exclude>
                 <exclude>org.graalvm.sdk:nativebridge:jar</exclude>
