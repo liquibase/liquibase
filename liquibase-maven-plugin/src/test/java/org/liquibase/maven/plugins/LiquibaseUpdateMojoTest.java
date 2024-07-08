@@ -1,11 +1,8 @@
 package org.liquibase.maven.plugins;
 
-import org.codehaus.plexus.configuration.PlexusConfiguration;
-import org.junit.Test;
-
+import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Properties;
 
 /**
  * Some basic tests that validate the setting of properties for the LiquibaseUpdate mojo.
@@ -29,7 +26,7 @@ public class LiquibaseUpdateMojoTest extends AbstractLiquibaseMojoTest {
     DEFAULT_PROPERTIES.put("verbose", true);
     DEFAULT_PROPERTIES.put("outputDefaultSchema", false);
     DEFAULT_PROPERTIES.put("outputDefaultCatalog", false);
-    DEFAULT_PROPERTIES.put("outputFileEncoding", "UTF-8");
+    DEFAULT_PROPERTIES.put("outputFileEncoding", StandardCharsets.UTF_8.name());
 
     DIRECTORY_PROPERTIES = new HashMap<String, Object>();
     DIRECTORY_PROPERTIES.put("changeLogDirectory", "org/liquibase/");
@@ -41,7 +38,7 @@ public class LiquibaseUpdateMojoTest extends AbstractLiquibaseMojoTest {
     DIRECTORY_PROPERTIES.put("verbose", true);
     DIRECTORY_PROPERTIES.put("outputDefaultSchema", false);
     DIRECTORY_PROPERTIES.put("outputDefaultCatalog", false);
-    DIRECTORY_PROPERTIES.put("outputFileEncoding", "UTF-8");
+    DIRECTORY_PROPERTIES.put("outputFileEncoding", StandardCharsets.UTF_8.name());
   }
 
   public void testPlaceholder() {

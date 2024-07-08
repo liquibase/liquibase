@@ -3,6 +3,8 @@ package liquibase.dbtest.hsqldb;
 import liquibase.database.DatabaseFactory;
 import liquibase.database.jvm.JdbcConnection;
 import liquibase.dbtest.AbstractIntegrationTest;
+import liquibase.util.SystemUtil;
+import org.junit.Assume;
 
 import java.sql.SQLSyntaxErrorException;
 
@@ -11,18 +13,13 @@ public class HsqlIntegrationTest extends AbstractIntegrationTest {
     public static final String OBJECT_ALREADY_EXISTS = "42504";
 
     public HsqlIntegrationTest() throws Exception {
-        super("hsqldb", DatabaseFactory.getInstance().getDatabase("hsqldb"));
-    }
-
-    @Override
-    protected boolean isDatabaseProvidedByTravisCI() {
-        // Hsqldb is an in-process database
-        return true;
+        super("hsqldb", DatabaseFactory.getInstance().getDatabase(SystemUtil.isAtLeastJava11() ? "hsqldb": "none"));
     }
 
 
     @Override
     public void setUp() throws Exception {
+        Assume.assumeTrue(SystemUtil.isAtLeastJava11()) ; // Since HSQLDB 2.7.1 it requires java 11
         super.setUp();
         try {
             // Create schemas for tests testRerunDiffChangeLogAltSchema

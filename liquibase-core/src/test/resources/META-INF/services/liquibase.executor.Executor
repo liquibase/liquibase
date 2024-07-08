@@ -1,2 +1,0 @@
-liquibase.executor.jvm.JdbcExecutor
-liquibase.executor.jvm.ExampleExecutor

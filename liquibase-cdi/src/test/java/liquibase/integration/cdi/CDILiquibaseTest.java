@@ -1,11 +1,14 @@
 package liquibase.integration.cdi;
 
-import liquibase.configuration.LiquibaseConfiguration;
+import liquibase.Scope;
+import liquibase.logging.core.BufferedLogService;
 import org.jboss.weld.environment.se.Weld;
 import org.jboss.weld.environment.se.WeldContainer;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
+
+import java.util.logging.Level;
 
 import static org.junit.Assert.*;
 
@@ -21,7 +24,6 @@ public class CDILiquibaseTest {
     public void clearProperty() {
         System.clearProperty("liquibase.shouldRun");
         System.clearProperty("liquibase.config.shouldRun");
-        LiquibaseConfiguration.getInstance().reset();
     }
 
     private void validateRunningState(boolean shouldBeRunning) {
@@ -54,5 +56,28 @@ public class CDILiquibaseTest {
     public void shouldRunWhenConfigShouldRunIsTrue() {
         System.setProperty("liquibase.config.shouldRun", "true");
         validateRunningState(true);
+    }
+
+    @Test
+    public void onStartupExceptionsAreCorrectlyHandled() throws Exception {
+        System.setProperty("liquibase.config.shouldRun", "true");
+        final CDILiquibase cdi = new CDILiquibase() {
+            @Override
+            protected void performUpdate() {
+                throw new IllegalArgumentException("Tested Exception");
+            }
+        };
+        cdi.config = new CDILiquibaseConfig();
+
+        BufferedLogService bufferLog = new BufferedLogService();
+        Scope.child(Scope.Attr.logService.name(), bufferLog, () -> {
+            try {
+                cdi.onStartup();
+                fail("Did not throw exception");
+            } catch (IllegalArgumentException e) {
+                assert e.getMessage().equals("Tested Exception");
+                assert bufferLog.getLogAsString(Level.SEVERE).contains("SEVERE Tested Exception");
+            }
+        });
     }
 }

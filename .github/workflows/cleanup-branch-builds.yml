@@ -1,0 +1,33 @@
+name: Cleanup on Branch Delete
+
+on:
+  workflow_dispatch:
+  delete:
+    branches:
+      - '**DAT-**'
+      - 'github-action-**'
+      - 'dependabot-**'
+      - 'feat/**'
+jobs:
+  delete-package:
+    name: Delete Github Package for Branch
+    runs-on: ubuntu-22.04
+    steps:
+      # Get version id(s) based on version name
+    - uses: castlabs/get-package-version-id-action@v2.2
+      id: version
+      with:
+        version: "${{ github.event.ref }}-SNAPSHOT"
+    
+    - uses: actions/delete-package-versions@v5
+      if: ${{ steps.version.outputs.ids != '' }}
+      with:
+        package-type: maven
+        # The number of latest versions to keep.
+        # This cannot be specified with `num-old-versions-to-delete`. By default, `num-old-versions-to-delete` takes precedence over `min-versions-to-keep`.
+        # When set to 0, all deletable versions will be deleted.
+        # When set greater than 0, all deletable package versions except the specified number will be deleted.
+        min-versions-to-keep: 0
+        
+        # on branch id's deletion we only want to delete that particular branch version
+        package-version-ids: "${{ steps.version.outputs.ids }}"

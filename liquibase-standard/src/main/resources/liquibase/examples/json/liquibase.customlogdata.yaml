@@ -1,0 +1,66 @@
+#### USE THIS FILE TO INJECT OR EXCLUDE METADATA FROM STRUCTURED LOGS
+#### on the CLI: --custom-log-data-file=liquibase.customlogdata.yaml
+#### via Env var: LIQUIBASE_CUSTOM_LOG_DATA_FILE=liquibase.customlogdata.yaml
+#### or other standard property setting method. For more info, see
+#### https://docs.liquibase.com/structured-logging
+####
+## Using liquibase.userMetadata, the subset key-values
+## are added to that command's MDC structured log output
+## These are just examples! Please adjust before using.
+
+
+## template of standalone object for all commands
+liquibase.userMetadata:
+  - data:
+      FINDME: "example custom log data"
+      teamsize: 3
+      members:
+        - name: danthedev
+        - name: debthedba
+        - name: annthearchitect
+
+
+## By specifying the command, these objects will be added only
+## to the logs of the update command, in this example.
+liquibase.command.update:
+  - data:
+      awsRegion: "us-example"
+      deploymentlead: "name@example.com"
+      partridges:
+        count: 1
+        location: "a pear tree"
+      turtledoves: two
+      frenchhens: 3
+      callingbirds: four
+      goldenrings: "five"
+    excludeData:
+      - liquibaseTargetUrl
+      - commandLabelFilter
+      - commandContextFilter
+
+
+## EXCLUDE data from structured logs.
+## In this example, these keys will be excluded from all commands
+liquibase.excludeData:
+## These are the default minimum keys. Uncomment (remove the ##) to exclude these keys
+## or add other keys which are not useful for your logs
+
+## - deploymentId
+## - deploymentOutcome
+## - deploymentOutcomeCount
+## - rowsAffected
+## - changelog
+## - changesetId
+## - changesetAuthor
+## - changesetOutcome
+## - changesetCount
+## - operationStart
+## - operationStop
+## - liquibaseCommandName
+## - liquibaseSystemName
+## - liquibaseSystemUser
+## - liquibaseTargetUrl-
+## - liquibaseVersion
+## - liquibaseSchemaName
+## - liquibaseCatalogName
+

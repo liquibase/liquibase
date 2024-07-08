@@ -1,0 +1,42 @@
+databaseChangeLog:
+
+    - changeSet:
+        id: 1
+        author: nvoxland
+        changes:
+            - createTable:
+                tableName: employee_yaml
+                columns:
+                    - column:
+                        name: id
+                        type: int
+                        constraints:
+                            primaryKey: true
+                            nullable: false
+                    - column:
+                        name: name
+                        type: varchar(255)
+                        constraints:
+                            nullable: false
+                    - column:
+                        name: age
+                        type: int
+
+    - include:
+        file: simpleChangeLog.yaml
+        relativeToChangelogFile: true
+
+    - changeSet:
+        id: 2
+        author: nvoxland
+        changes:
+            - addColumn:
+                tableName: employee
+                columns:
+                    - column:
+                        name: username
+                        type: varchar(255)
+
+    - includeAll:
+        path: included
+        relativeToChangelogFile: true

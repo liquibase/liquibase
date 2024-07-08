@@ -1,11 +1,5 @@
 package org.liquibase.maven.plugins;
 
-import java.io.File;
-import java.util.List;
-import java.util.Optional;
-
-import liquibase.changelog.ChangeLogParameters;
-
 /**
  * Test class for the Liquibase Update Mojo.
  * <p>
@@ -53,12 +47,12 @@ public class LiquibaseUpdateMojoExecutionTest extends AbstractLiquibaseMojoTest 
 //        assertEquals("wrong value for notoverridden", "notoverridden", notoverridden.get());
 //
 //    }
-
-    private static Optional<String> getChangeLogParameter(List<ChangeLogParameters.ChangeLogParameter> params, String paramName){
-        return params.stream()
-                .filter(p -> paramName.equalsIgnoreCase(p.getKey()))
-                .map(ChangeLogParameters.ChangeLogParameter::getValue)
-                .map(Object::toString)
-                .findFirst();
-    }
+//
+//    private static Optional<String> getChangeLogParameter(List<ChangeLogParameters.ChangeLogParameter> params, String paramName){
+//        return params.stream()
+//                .filter(p -> paramName.equalsIgnoreCase(p.getKey()))
+//                .map(ChangeLogParameters.ChangeLogParameter::getValue)
+//                .map(Object::toString)
+//                .findFirst();
+//    }
 }

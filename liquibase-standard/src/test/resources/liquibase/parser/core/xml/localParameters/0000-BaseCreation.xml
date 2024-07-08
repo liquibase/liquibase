@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+                            http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.3.xsd" logicalFilePath="base.xml">
+
+    <changeSet author="${table.author}" logicalFilePath="create_table_${table.name}.xml"  id="createTable_${table.name}" >
+        <createTable schemaName="${table.schema}" tableName="${table.name}">
+            <column name="id" type="bigint" autoIncrement="true">
+                <constraints primaryKey="true"/>
+            </column>
+            <column name="createDate" type="datetime">
+                <constraints nullable="false"/>
+            </column>
+            <column name="updateDate" type="datetime">
+                <constraints nullable="true"/>
+            </column>
+            <column name="removeDate" type="datetime">
+                <constraints nullable="true"/>
+            </column>
+        </createTable>
+    </changeSet>
+</databaseChangeLog>

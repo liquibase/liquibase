@@ -7,9 +7,9 @@
   <property name="temp.dir" value="c:\temp" />
   <property name="installs.dir" value="${temp.dir}" />
 
-  <property name="liquibase.jar.file.dir" value="C:\Tools\liquibase\2.0-123" />
-  <property name="liquibase.jar.file.name" value="liquibase.jar" />
-  <property name="liquibase.jar.file.path" value="${liquibase.jar.file.dir}\liquibase.jar" />
+  <property name="liquibase.jar.file.dir" value="C:\Tools\liquibase\2.0-123\internal\lib" />
+  <property name="liquibase.jar.file.name" value="liquibase-core.jar" />
+  <property name="liquibase.jar.file.path" value="${liquibase.jar.file.dir}\internal\lib\liquibase-core.jar" />
 
   <property name="oracle.install" value="true" />
   <property name="install.sqlexpress2005" value="true" />

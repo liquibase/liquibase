@@ -1,8 +1,8 @@
-Liquibase Version ${liquibase.version}
+Liquibase Version ${project.version}
 
 Introduction
 --------------------------------------------
-Thanks for downloading and installing Liquibase ${liquibase.version} from Datical.
+Thanks for downloading and installing Liquibase ${project.version} from Liquibase.
 By using the installer, you already have all the dependencies, directories, config, 
 and properties files to get started exploring the Liquibase examples provided.
 
@@ -16,9 +16,9 @@ The default install location on Windows is "\Program Files\liquibase"
 The default install location on Mac is "/usr/local/opt/liquibase"
 
 The following software was installed:
-	* Liquibase ( http://liquibase.org )
+	* Liquibase ( https://liquibase.com )
 	* H2 Database ( https://www.h2database.com )
-	* AdoptOpenJDK 13 ( https://adoptopenjdk.net )
+	* Latest LTS AdoptOpenJDK Java version ( https://adoptopenjdk.net )
 
 This installer creates the following directories:
 	* liquibase/lib
@@ -34,7 +34,6 @@ Files are:
 	* liquibase/LICENSE.txt
 	* liquibase/liquibase.sh
 	* liquibase/liquibase.bat
-	* liquibase/liquibase.jar
 	* liquibase/README.txt
 	* liquibase/GETTING_STARTED.txt
 	* liquibase/examples/start-h2
@@ -42,11 +41,11 @@ Files are:
 
 H2 Database Program
 ----------------------------------------
-As Liquibase ships with an h2 database example, the h2 jdbc driver was placed into 
+As Liquibase ships with an h2 database example, the h2 jdbc driver was placed into
 your chosen installation directory.
 
 For information on using and configuring the h2 database see: 
-https://www.liquibase.org/documentation/tutorials/h2.html
+https://contribute.liquibase.com/extensions-integrations/directory/database-tutorials/h2/
 
 
 Open JDK
@@ -65,17 +64,15 @@ For questions regarding Liquibase, you can submit an email to support@liquibase.
 or submit a post on stack overflow and use the #liquibase tag: 
 https://stackoverflow.com/questions/tagged/liquibase
 
-You can also post questions to these Liquibase forums:
-Liquibase User Forum: https://forum.liquibase.org/#Forum/liquibase-users
-Liquibase Developer Forum: https://forum.liquibase.org/#Forum/liquibase-development
+You can also post questions to the Liquibase forum: https://forum.liquibase.org
 
-Liquibase Documentation: http://liquibase.org/documentation
+Liquibase Documentation: https://docs.liquibase.com
 
-Need Liquibase Support? Get customer support by upgrading to Liquibase Pro here: https://support.liquibase.org
+Need Liquibase Support? Get customer support by upgrading to Liquibase Pro here: https://liquibase.com/pricing
 
 
 ----------------------------------------
 The program is subject to the license agreement, copyright, trademark, patent, and other laws.
-Copyright 2020 Datical, Inc. All rights reserved.
+Copyright ${current.year} Liquibase, Inc. All rights reserved.
 
 

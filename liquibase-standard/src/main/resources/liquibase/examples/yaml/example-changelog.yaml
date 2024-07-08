@@ -1,0 +1,78 @@
+databaseChangeLog:
+- changeSet:
+      id:  1
+      author:  your.name
+      labels: example-label
+      context: example-context
+      comment: example-comment
+      changes:
+       - createTable:
+            tableName:  person
+            columns:
+              - column:
+                  name:  id
+                  type:  int
+                  autoIncrement:  true
+                  constraints:
+                    primaryKey:  true
+                    nullable:  false
+              - column:
+                  name:  name
+                  type:  varchar(50)
+                  constraints:
+                    nullable:  false
+              - column:
+                  name:  address1
+                  type:  varchar(50)
+              - column:
+                  name:  address2
+                  type:  varchar(50)
+              - column:
+                  name:  city
+                  type:  varchar(30)
+
+- changeSet:
+      id:  2
+      author:  your.name
+      labels: example-label
+      context: example-context
+      comment: example-comment
+      changes:
+       - createTable:
+            tableName:  company
+            columns:
+              - column:
+                  name:  id
+                  type:  int
+                  autoIncrement:  true
+                  constraints:
+                    primaryKey:  true
+                    nullable:  false
+              - column:
+                  name:  name
+                  type:  varchar(50)
+                  constraints:
+                    nullable:  false
+              - column:
+                  name:  address1
+                  type:  varchar(50)
+              - column:
+                  name:  address2
+                  type:  varchar(50)
+              - column:
+                  name:  city
+                  type:  varchar(30)
+
+- changeSet:
+      id:  3
+      author:  other.dev
+      labels: example-label
+      context: example-context
+      comment: example-comment
+      changes:
+       - addColumn:
+            tableName:  person
+            columns:
+              - column:
+                  name:  country
+                  type:  varchar(2) 

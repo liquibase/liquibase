@@ -1,0 +1,296 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!-- ChangeLog used to hold general test cases -->
+<databaseChangeLog xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                   xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+                   xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.2.xsd">
+
+    <changeSet id="standard changeSet" author="nvoxland">
+        <sql>select * from simple</sql>
+    </changeSet>
+
+    <changeSet id="using after column attribute" author="cmouttet">
+    	<addColumn tableName="person">
+    		<column name="middlename" type="varchar(50)" afterColumn="firstname"/>
+    	</addColumn>
+    </changeSet>
+
+    <changeSet id="using before column attribute" author="cmouttet">
+        <comment>add column after</comment>
+        <addColumn tableName="person">
+            <column name="middlename" type="varchar(50)" beforeColumn="lastname"/>
+        </addColumn>
+    </changeSet>
+
+    <changeSet id="using position attribute" author="cmouttet">
+        <addColumn tableName="person">
+            <column name="middlename" type="varchar(50)" position="1"/>
+        </addColumn>
+    </changeSet>
+
+    <changeSet id="validCheckSums set" author="nvoxland">
+        <validCheckSum>a9b7b29ce3a75940858cd022501852e2</validCheckSum>
+        <validCheckSum>8:b3d6a29ce3a75940858cd093501151d1</validCheckSum>
+        <sql>select count(*) from validchecksum_set</sql>
+    </changeSet>
+
+    <changeSet id="validCheckSums any" author="nvoxland">
+        <validCheckSum>ANY</validCheckSum>
+        <sql>select count(*) from validchecksum_all</sql>
+    </changeSet>
+
+    <changeSet id="only preconditions" author="nvoxland">
+        <preConditions>
+            <sqlCheck expectedResult="1">select count(*) from only_preconditions</sqlCheck>
+        </preConditions>
+    </changeSet>
+
+    <changeSet id="complex preconditions" author="nvoxland">
+        <preConditions>
+            <or>
+                <and>
+                    <not>
+                        <dbms type="oracle"/>
+                        <dbms type="mysql"/>
+                    </not>
+                    <runningAs username="${loginUser}"/>
+                </and>
+                <not>
+                    <sqlCheck expectedResult="3">select count(*) from test</sqlCheck>
+                    <or>
+                        <tableExists tableName="test_table"/>
+                        <sequenceExists sequenceName="test_seq"/>
+                    </or>
+                </not>
+            </or>
+            <and>
+                <indexExists indexName="test_idx"/>
+                <primaryKeyExists primaryKeyName="test_pk"/>
+            </and>
+        </preConditions>
+    </changeSet>
+
+    <changeSet id="multiple changes" author="nvoxland">
+        <insert tableName="multiple_changes">
+            <column name="id" valueNumeric="1"/>
+        </insert>
+        <insert tableName="multiple_changes">
+            <column name="id" valueNumeric="2"/>
+        </insert>
+        <update tableName="multiple_changes">
+            <column name="id" valueNumeric="3"/>
+        </update>
+        <insert tableName="multiple_changes">
+            <column name="id" valueNumeric="4"/>
+        </insert>
+    </changeSet>
+
+    <changeSet id="context and dbms" author="nvoxland" context="test, qa" dbms="mock, oracle">
+        <sql>select * from context_and_dbms</sql>
+    </changeSet>
+    <changeSet id="runAlways set" author="nvoxland" runAlways="true">
+        <sql>select * from run_always</sql>
+    </changeSet>
+    <changeSet id="runOnChange set" author="nvoxland" runOnChange="true">
+        <sql>select * from run_on_change</sql>
+    </changeSet>
+    <changeSet id="failOnError set" author="nvoxland" failOnError="false">
+        <sql>select * from fail_on_error</sql>
+    </changeSet>
+    <changeSet id="logicalFilePath set" author="nvoxland" logicalFilePath="com/example/other/path.xml">
+        <sql>select * from logical_file_path</sql>
+    </changeSet>
+    <changeSet id="objectQuotingStrategy LEGACY" author="nvoxland" objectQuotingStrategy="LEGACY">
+        <sql>select * from legacy_strategy</sql>
+    </changeSet>
+    <changeSet id="objectQuotingStrategy ALL" author="nvoxland" objectQuotingStrategy="QUOTE_ALL_OBJECTS">
+        <sql>select * from all_strategy</sql>
+    </changeSet>
+    <changeSet id="objectQuotingStrategy RESERVED" author="nvoxland" objectQuotingStrategy="QUOTE_ONLY_RESERVED_WORDS">
+        <sql>select * from reserved</sql>
+    </changeSet>
+    <changeSet id="onValidationFail HALT" author="nvoxland" onValidationFail="HALT">
+        <sql>select * from halt_on_validation_fail</sql>
+    </changeSet>
+    <changeSet id="onValidationFail MARK_RAN" author="nvoxland" onValidationFail="MARK_RAN">
+        <sql>select * from mark_ran_on_validation_fail</sql>
+    </changeSet>
+    <changeSet id="runInTransaction set" author="nvoxland" runInTransaction="false">
+        <sql>select * from run_in_transaction</sql>
+    </changeSet>
+
+    <changeSet id="comment in sql" author="nvoxland">
+        <comment>This is a changeSet level comment</comment>
+        <sql>
+            <comment>There is a comment in the SQL</comment>
+            select * from comment_in_sql
+        </sql>
+    </changeSet>
+
+    <changeSet id="nested column and constraint objects" author="nvoxland">
+        <createTable tableName="nested_objects">
+            <column name="id" type="int">
+                <constraints nullable="false" primaryKey="true" primaryKeyName="pk_name"/>
+            </column>
+        </createTable>
+    </changeSet>
+
+    <changeSet id="precondition attributes 1" author="nvoxland">
+        <preConditions onSqlOutput="FAIL" onErrorMessage="My Error Message" onError="HALT" onFail="HALT" onFailMessage="My Fail Message">
+            <sqlCheck expectedResult="1">select count(*) from precondition_check_1</sqlCheck>
+        </preConditions>
+    </changeSet>
+    <changeSet id="precondition attributes 2" author="nvoxland">
+        <preConditions onSqlOutput="IGNORE" onError="CONTINUE" onFail="CONTINUE">
+            <sqlCheck expectedResult="1">select count(*) from precondition_check_2</sqlCheck>
+        </preConditions>
+    </changeSet>
+    <changeSet id="precondition attributes 3" author="nvoxland">
+        <preConditions onSqlOutput="TEST" onError="MARK_RAN" onFail="MARK_RAN">
+            <sqlCheck expectedResult="1">select count(*) from precondition_check_3</sqlCheck>
+        </preConditions>
+    </changeSet>
+    <changeSet id="precondition attributes 4" author="nvoxland">
+        <preConditions onError="WARN" onFail="WARN">
+            <sqlCheck expectedResult="1">select count(*) from precondition_check_4</sqlCheck>
+        </preConditions>
+    </changeSet>
+
+    <changeSet id="changeSet with modifySql" author="nvoxland">
+        <createTable tableName="with_modifysql">
+            <column name="id" type="int"/>
+        </createTable>
+        <modifySql>
+            <replace replace="with_modifysql" with="after_modifysql"/>
+        </modifySql>
+        <modifySql dbms="mysql,mock" applyToRollback="true">
+            <replace replace=")" with=""/>
+            <append value=", name varchar(255) )"/>
+        </modifySql>
+        <modifySql context="prod,qa">
+            <append value=" partitioned by stuff"/>
+        </modifySql>
+        <modifySql dbms="mysql" context="prod">
+            <append value=" engine innodb"/>
+        </modifySql>
+    </changeSet>
+
+    <changeSet id="changeSet with UTF8" author="nvoxland">
+        <sql>
+            insert into testutf8insert (stringvalue) values ('string with € and £')
+        </sql>
+    </changeSet>
+
+    <changeSet id="one rollback block" author="nvoxland">
+        <sql>create 1 tables</sql>
+        <rollback>drop table rollback_test</rollback>
+    </changeSet>
+    <changeSet id="empty rollback block" author="nvoxland">
+        <sql>create 1 tables</sql>
+        <rollback></rollback>
+    </changeSet>
+    <changeSet id="multiple rollback blocks" author="nvoxland">
+        <sql>create multiple tables</sql>
+        <rollback>
+            drop table multiRollback1;
+            drop table multiRollback2;
+        </rollback>
+        <rollback>drop table multiRollback3</rollback>
+        <rollback>
+            <dropTable tableName="multiRollback4"/>
+        </rollback>
+        <rollback>
+            <dropTable tableName="multiRollback5"/>
+            <dropTable tableName="multiRollback6"/>
+        </rollback>
+        <rollback changeSetId="standard changeSet" changeSetAuthor="nvoxland" changeSetPath="liquibase/parser/core/xml/testCasesChangeLog.xml"/>
+    </changeSet>
+
+    <include file="liquibase/parser/core/xml/simpleChangeLog.xml"/>
+    <include file="liquibase/parser/core/xml/simpleChangeLog.xml"/> <!-- can include twice but only actually imported once -->
+
+    <changeSet id="custom precondition and change" author="nvoxland">
+        <preConditions>
+            <customPrecondition className="liquibase.precondition.ExampleCustomPrecondition">
+                <param name="name" value="test_1"/>
+                <param name="count" value="31"/>
+            </customPrecondition>
+        </preConditions>
+        <customChange class="liquibase.change.custom.ExampleCustomSqlChange">
+            <param name="tableName" value="tab_name"/>
+            <param name="columnName" value="col_name"/>
+            <param name="newValue" value=""/>
+        </customChange>
+    </changeSet>
+
+    <changeSet id="different object types for column" author="nvoxland">
+        <createTable tableName="new_table">
+            <column name="id" type="int" autoIncrement="true">
+                <constraints primaryKey="true" nullable="false" primaryKeyName="pk_name"/>
+            </column>
+        </createTable>
+        <addColumn tableName="new_table">
+            <column name="new_col" type="varchar(10)" defaultValue="new value">
+                <constraints nullable="false"/>
+            </column>
+            <column name="new_col_int" type="int" defaultValueNumeric="12"/>
+            <column name="new_col_bool" type="boolean" defaultValueBoolean="true"/>
+            <column name="new_col_computed" type="int" defaultValueComputed="average_size()"/>
+            <column name="new_col_datetime" type="datetime" defaultValueDate="2014-12-01T13:15:33"/>
+            <column name="new_col_seq" type="int" defaultValueSequenceNext="seq_test"/>
+        </addColumn>
+        <createIndex tableName="new_table" indexName="idx_new">
+            <column name="id">
+                <constraints unique="true"/>
+            </column>
+        </createIndex>
+        <loadData tableName="new_table">
+            <column name="id"/>
+            <column name="new_col" header="new_col_header"/>
+        </loadData>
+        <update tableName="new_table">
+            <column name="new_col_boolean" value="false"/>
+            <where>id=3</where>
+        </update>
+    </changeSet>
+
+    <changeSet id="update with whereParams" author="nvoxland">
+        <update tableName="updateTest">
+            <column name="varcharColumn" value="new column 1 value"/>
+            <column name="dateCol" valueDate="2008-01-01"/>
+            <column name="intCol" valueNumeric="11"/>
+            <where>id=:value and other_val=:value</where>
+            <whereParams>
+                <param valueNumeric="134"/>
+                <param name="other_val" valueNumeric="768"/>
+            </whereParams>
+        </update>
+        <update tableName="updateTest">
+            <column name="varcharColumn" value="new column 2 value"/>
+            <column name="dateCol" valueDate="2008-01-02"/>
+            <column name="intCol" valueNumeric="12"/>
+            <where>id=2</where>
+        </update>
+    </changeSet>
+
+    <changeSet id="shell command" author="nvoxland">
+        <executeCommand executable="/usr/bin/test" os="linux,mac">
+            <arg value="-out"/>
+            <arg value="-test"/>
+        </executeCommand>
+    </changeSet>
+
+    <changeSet id="view creation" author="nvoxland">
+        <createView viewName="test_view">select * from test_table</createView>
+    </changeSet>
+
+    <changeSet id="stop change" author="nvoxland">
+        <stop>Stop message!</stop>
+    </changeSet>
+
+    <changeSet id="large number" author="nvoxland">
+        <createSequence cacheSize="20" cycle="false" incrementBy="1" maxValue="9999999999999999999999999999"
+                        minValue="1" ordered="false" sequenceName="BATCH_JOB_EXECUTION_SEQ" startValue="1"/>
+    </changeSet>
+
+</databaseChangeLog>

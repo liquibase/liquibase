@@ -1,0 +1,67 @@
+name: Build Main/Master SNAPSHOT
+
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: "5 6 * * *"
+  push:
+    branches:
+      - 'main'
+      - 'master'
+
+jobs:
+  setup:
+    name: Setup
+    runs-on: ubuntu-22.04
+    outputs:
+      timeStamp: ${{ steps.get-timestamp.outputs.timeStamp }}
+      latestMergeSha: ${{ steps.get-sha.outputs.latestMergeSha }}
+      setupSuccessful: "true"
+
+    steps:
+      - uses: actions/checkout@v4
+      - name: Get Latest Merge Commit SHA
+        id: get-sha
+        run: |
+          latest_merge_sha=`(git rev-parse --short HEAD)`
+          echo "latestMergeSha=${latest_merge_sha}" >> $GITHUB_OUTPUT
+
+      - name: Get Timestamp
+        id: get-timestamp
+        run: |
+          timestamp=`(date +'%Y-%m-%d %H:%M:%S %Z')`
+          echo "timeStamp=${timestamp}" >> $GITHUB_OUTPUT
+
+
+  build-and-publish:
+    name: Build & Publish
+    runs-on: ubuntu-22.04
+    needs: setup
+    permissions:
+      contents: read
+      packages: write
+    env:
+      GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+    steps:
+      - uses: actions/checkout@v4
+      - name: Set up Java for publishing to GitHub Repository
+        uses: actions/setup-java@v4
+        with:
+          java-version: '17'
+          distribution: 'temurin'
+          cache: 'maven'
+          server-id: liquibase
+
+        # Publish master-SNAPSHOT version to GPM
+      - name: Version Artifact as master-SNAPSHOT
+        run: ./mvnw versions:set "-DnewVersion=master-SNAPSHOT"
+
+      - name: Publish master-SNAPSHOT
+        run: ./mvnw -B clean deploy -pl '!liquibase-dist' -DskipTests=true "-Dbuild.repository.owner=liquibase" "-Dbuild.repository.name=liquibase" "-Dbuild.branch=master" "-Dbuild.number=${{ github.run_number }}" "-Dbuild.commit=${{ needs.setup.outputs.latestMergeSha }}" "-Dbuild.timestamp=${{ needs.setup.outputs.timeStamp }}"
+
+      # Publish <commitsha>-SNAPSHOT version to GPM
+      - name: Version Artifact as commit-SNAPSHOT
+        run: ./mvnw versions:set -DnewVersion="${{ needs.setup.outputs.latestMergeSha }}-SNAPSHOT"
+
+      - name: Publish commit-SNAPSHOT
+        run: ./mvnw -B clean deploy -pl '!liquibase-dist' -DskipTests=true "-Dbuild.repository.owner=liquibase" "-Dbuild.repository.name=liquibase" "-Dbuild.branch=master" "-Dbuild.number=${{ github.run_number }}" "-Dbuild.commit=${{ needs.setup.outputs.latestMergeSha }}" "-Dbuild.timestamp=${{ needs.setup.outputs.timeStamp }}"

@@ -654,7 +654,7 @@
             "changeSet": {
                 "id": "hasIndexPrecondition",
                 "author": "nvoxland",
-                "dbms": "oracle,mssql,mysql,h2,hsql,postgresql",
+                "dbms": "oracle,mssql,mysql,h2,hsqldb,postgresql",
                 "preConditions": [
                     {
                         "indexExists": {
@@ -822,7 +822,7 @@
             "changeSet": {
                 "id": "contextstest-2",
                 "author": "nvoxland",
-                "context": "context-a",
+                "contextFilter": "context-a",
                 "changes": [
                     {
                         "insert": {
@@ -845,7 +845,7 @@
             "changeSet": {
                 "id": "contextstest-3",
                 "author": "nvoxland",
-                "context": "context-a, context-b",
+                "contextFilter": "context-a, context-b",
                 "changes": [
                     {
                         "insert": {
@@ -868,7 +868,7 @@
             "changeSet": {
                 "id": "contextstest-4",
                 "author": "nvoxland",
-                "context": "context-b",
+                "contextFilter": "context-b",
                 "changes": [
                     {
                         "insert": {
@@ -891,7 +891,7 @@
             "changeSet": {
                 "id": "contextstest-5",
                 "author": "nvoxland",
-                "context": "",
+                "contextFilter": "",
                 "changes": [
                     {
                         "insert": {
@@ -1155,7 +1155,7 @@
                 "modifySql": [
                     {
                         "replace": {
-                            "context": "test",
+                            "contextFilter": "test",
                             "replace": "INVALID TABLE NAME",
                             "with": "validTableName"
                         }

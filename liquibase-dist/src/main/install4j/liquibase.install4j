@@ -1,14 +1,23 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<install4j version="8.0.3" transformSequenceNumber="8">
+<install4j version="10.0.7" transformSequenceNumber="10">
   <directoryPresets config="../../../target/liquibase-${compiler:liquibaseVersion}/examples/start-h2" />
-  <application name="Liquibase" applicationId="3799-9228-0984-2853" mediaDir="../../../target" mediaFilePattern="${compiler:sys.shortName}-${compiler:sys.platform}-installer-${compiler:sys.version}" shortName="liquibase" publisher="Datical" publisherWeb="http://liquibase.org" version="${liquibase.version}" allPathsRelative="true" convertDotsToUnderscores="false" macVolumeId="3059500009ae915e" javaMinVersion="1.8">
+  <application name="Liquibase" applicationId="3799-9228-0984-2853" mediaDir="../../../target" mediaFilePattern="${compiler:sys.shortName}-${compiler:sys.platform}-installer-${compiler:sys.version}" shortName="liquibase" publisher="Liquibase" publisherWeb="http://liquibase.org" version="0-SNAPSHOT" allPathsRelative="true" convertDotsToUnderscores="false" macVolumeId="3059500009ae915e" javaMinVersion="1.8">
     <languages>
       <principalLanguage id="en" customLocalizationFile="./messages.properties" />
     </languages>
     <variables>
-      <variable name="liquibaseVersion" value="3.8.6-local-SNAPSHOT" />
+      <variable name="liquibaseVersion" value="0-SNAPSHOT" />
     </variables>
-    <codeSigning macEnabled="true" macPkcs12File="../../../../../build-logic/certs/code-signing/datical_apple.p12" windowsEnabled="true" windowsPkcs12File="../../../../../build-logic/certs/code-signing/datical_windows.pfx" />
+    <codeSigning macEnabled="true" macPkcs12File="../../../target/keys/datical_apple.p12" windowsEnabled="true" windowsPkcs12File="../../../target/keys/datical_windows.pfx" macNotarize="true" appleId="daticaldev@datical.com" useAscProvider="true" ascProvider="BQ3PYUB226">
+      <macSearchedJars>
+        <entry>jna-*</entry>
+        <entry>swt-*</entry>
+        <entry>javafx-*</entry>
+        <entry>sqlite-*</entry>
+        <entry>snowflake-*</entry>
+      </macSearchedJars>
+    </codeSigning>
+    <jreBundles jdkProviderId="Adoptium" release="21/jdk-21.0.2+13" />
   </application>
   <files>
     <mountPoints>
@@ -317,11 +326,19 @@ return console.askYesNo(message, true);
           <group id="42" beanClass="com.install4j.runtime.beans.groups.VerticalFormComponentGroup" useExternalParametrization="true" externalParametrizationName="Customize banner image" externalParametrizationMode="include">
             <serializedBean>
               <property name="backgroundColor">
-                <object class="java.awt.Color">
-                  <int>255</int>
-                  <int>255</int>
-                  <int>255</int>
-                  <int>255</int>
+                <object class="com.install4j.runtime.beans.LightOrDarkColor">
+                  <object class="java.awt.Color">
+                    <int>255</int>
+                    <int>255</int>
+                    <int>255</int>
+                    <int>255</int>
+                  </object>
+                  <object class="java.awt.Color">
+                    <int>49</int>
+                    <int>52</int>
+                    <int>53</int>
+                    <int>255</int>
+                  </object>
                 </object>
               </property>
               <property name="borderSides">
@@ -330,11 +347,19 @@ return console.askYesNo(message, true);
                 </object>
               </property>
               <property name="imageEdgeBackgroundColor">
-                <object class="java.awt.Color">
-                  <int>25</int>
-                  <int>143</int>
-                  <int>220</int>
-                  <int>255</int>
+                <object class="com.install4j.runtime.beans.LightOrDarkColor">
+                  <object class="java.awt.Color">
+                    <int>25</int>
+                    <int>143</int>
+                    <int>220</int>
+                    <int>255</int>
+                  </object>
+                  <object class="java.awt.Color">
+                    <int>0</int>
+                    <int>74</int>
+                    <int>151</int>
+                    <int>255</int>
+                  </object>
                 </object>
               </property>
               <property name="imageEdgeBorder" type="boolean" value="true" />
@@ -388,11 +413,19 @@ return console.askYesNo(message, true);
               <group id="49" beanClass="com.install4j.runtime.beans.groups.VerticalFormComponentGroup" useExternalParametrization="true" externalParametrizationName="Customize title bar" externalParametrizationMode="include">
                 <serializedBean>
                   <property name="backgroundColor">
-                    <object class="java.awt.Color">
-                      <int>255</int>
-                      <int>255</int>
-                      <int>255</int>
-                      <int>255</int>
+                    <object class="com.install4j.runtime.beans.LightOrDarkColor">
+                      <object class="java.awt.Color">
+                        <int>255</int>
+                        <int>255</int>
+                        <int>255</int>
+                        <int>255</int>
+                      </object>
+                      <object class="java.awt.Color">
+                        <int>49</int>
+                        <int>52</int>
+                        <int>53</int>
+                        <int>255</int>
+                      </object>
                     </object>
                   </property>
                   <property name="borderSides">
@@ -495,8 +528,8 @@ return console.askYesNo(message, true);
     </styles>
   </installerGui>
   <mediaSets>
-    <windows name="Windows" id="153">
-      <jreBundle jreBundleSource="preCreated" includedJre="../../../target/downloaded/adopt-openjdk-windows-amd64-13.0.1.tar.gz" manualJreEntry="true">
+    <windows name="Windows" id="153" architecture="64">
+      <jreBundle>
         <modules>
           <defaultModules set="jre" />
         </modules>
@@ -507,7 +540,7 @@ return console.askYesNo(message, true);
         <launcher id="156" />
         <launcher id="158" />
       </excludedLaunchers>
-      <jreBundle jreBundleSource="preCreated" includedJre="../../../target/downloaded/adopt-openjdk-macos-amd64-13.0.1.tar.gz" manualJreEntry="true">
+      <jreBundle>
         <modules>
           <defaultModules set="jre" />
         </modules>

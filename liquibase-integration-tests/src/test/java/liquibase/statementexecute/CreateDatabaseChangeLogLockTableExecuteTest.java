@@ -62,7 +62,7 @@ public class CreateDatabaseChangeLogLockTableExecuteTest extends AbstractExecute
     
         assertCorrect(new String[]{"create table databasechangeloglock (" +
                 "id integer not null, " +
-                "locked number(1) not null, " +
+                "locked boolean not null, " +
                 "lockgranted timestamp, " +
                 "lockedby varchar2(255), " +
                 "constraint pk_databasechangeloglock primary key (id))"}, OracleDatabase.class);
@@ -86,7 +86,7 @@ public class CreateDatabaseChangeLogLockTableExecuteTest extends AbstractExecute
                 "[locked] boolean not null, " +
                 "[lockgranted] datetime, " +
                 "[lockedby] varchar(255), " +
-                "constraint [databasechangeloglock_pkey] primary key ([id]))"}, PostgresDatabase.class);
+                "constraint [databasechangeloglock_pkey] primary key ([id]))"}, PostgresDatabase.class, CockroachDatabase.class, EnterpriseDBDatabase.class);
 
         assertCorrect(new String[]{"create table [databasechangeloglock] (" +
                 "[id] int not null, " +

@@ -3,8 +3,7 @@ package org.liquibase.maven.plugins;
 import liquibase.Contexts;
 import liquibase.LabelExpression;
 import liquibase.Liquibase;
-import liquibase.configuration.GlobalConfiguration;
-import liquibase.configuration.LiquibaseConfiguration;
+import liquibase.GlobalConfiguration;
 import liquibase.exception.LiquibaseException;
 import liquibase.exception.UnexpectedLiquibaseException;
 
@@ -23,7 +22,7 @@ public class LiquibaseReportStatusMojo extends AbstractLiquibaseChangeLogMojo {
 	protected void performLiquibaseTask(Liquibase liquibase)
 			throws LiquibaseException {
 		try {
-			liquibase.reportStatus(true, new Contexts(contexts), new LabelExpression(labels), new OutputStreamWriter(System.out, LiquibaseConfiguration.getInstance().getConfiguration(GlobalConfiguration.class).getOutputEncoding()));
+			liquibase.reportStatus(true, new Contexts(contexts), new LabelExpression(getLabelFilter()), new OutputStreamWriter(System.out, GlobalConfiguration.OUTPUT_FILE_ENCODING.getCurrentValue()));
 		} catch (UnsupportedEncodingException e) {
 			throw new UnexpectedLiquibaseException(e);
 		}

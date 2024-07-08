@@ -3,7 +3,9 @@
 <databaseChangeLog
         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
         xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
-        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.6.xsd">
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-latest.xsd">
+
+    <removeChangeSetProperty dbms="mysql, postgresql, hsqldb, snowflake" change="addColumn" remove="afterColumn" />
 
     <property name="table.name" value="paramter_table"/>
     <property file="changelogs/common/dynamic.parameters.properties"/>
@@ -76,7 +78,7 @@
             <column name="dateTimeCol" valueDate="2007-08-09T13:14:15"/>
             <column name="bigintcol" valueNumeric="2"/>
         </insert>
-        <insert tableName="dataTypeTest" dbms="!derby">
+        <insert tableName="dataTypeTest" dbms="!derby,!cockroachdb">
           <column name="id" valueNumeric="2"/>
           <column name="dateCol" valueDate="current_datetime"/>
           <column name="timeCol" valueComputed="current_datetime"/>
@@ -86,12 +88,7 @@
 
     </changeSet>
 
-    <changeSet id="defaultValueTest-1" author="nvoxland">
-        <preConditions onFail="MARK_RAN">
-            <not><dbms type="derby"/></not>
-            <not><dbms type="mysql"/></not> <!-- @todo: fails on set default now() -->
-            <not><dbms type="mariadb"/></not>
-        </preConditions>
+    <changeSet id="defaultValueTest-1" author="nvoxland" dbms="!mysql,!derby,!mariadb,!snowflake">
         <createTable tableName="defaultValueTest">
             <column name="id" type="int"/>
             <column name="intA" type="int"/>
@@ -124,7 +121,7 @@
         </insert>
     </changeSet>
 
-    <changeSet id="defaultValueTest-2" author="nvoxland">
+    <changeSet id="defaultValueTest-2" author="nvoxland" dbms="!snowflake">
         <createTable tableName="defaultValueTest2">
             <column name="id" type="int" />
             <column name="intA" type="int" defaultValueNumeric="1"/>
@@ -163,7 +160,7 @@
     </changeSet>
 
 
-    <changeSet id="compoundIndexTest" author="nvoxland">
+    <changeSet id="compoundIndexTest" author="nvoxland" dbms="!snowflake">
         <createTable tableName="compoundIndexTest">
             <column name="id" type="int">
                 <constraints primaryKey="true" nullable="false"/>
@@ -177,7 +174,7 @@
         </createIndex>
     </changeSet>
 
-    <changeSet id="indexWithAscDescColumns" author="abuschka" dbms="!firebird">
+    <changeSet id="indexWithAscDescColumns" author="abuschka" dbms="!firebird,!snowflake">
         <createTable tableName="indexWithAscDescColumns">
             <column name="id" type="int">
                 <constraints primaryKey="true" nullable="false"/>
@@ -195,7 +192,7 @@
         </createIndex>
     </changeSet>
 
-    <changeSet id="hasIndexPrecondition" author="nvoxland" dbms="oracle,mssql,mysql,h2,hsql,postgresql"> <!-- can checkConstraint with or without table name, derby doesn't work with just column names -->
+    <changeSet id="hasIndexPrecondition" author="nvoxland" dbms="oracle,mssql,mysql,h2,hsqldb,postgresql"> <!-- can checkConstraint with or without table name, derby doesn't work with just column names -->
         <preConditions>
             <indexExists indexName="idx_compoundtest"/>
             <indexExists tableName="compoundIndexTest" indexName="idx_compoundtest"/>
@@ -243,6 +240,21 @@
         </addColumn>
     </changeSet>
 
+    <changeSet id="column-exists-test" author="januson">
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <columnExists columnName="A_NEW_COLUMN" tableName="COLUMN_EXISTS_TEST_TABLE"/>
+            </not>
+        </preConditions>
+        <comment>Testing column exists precondition regression</comment>
+        <createTable tableName="COLUMN_EXISTS_TEST_TABLE">
+            <column name="id" type="int"/>
+        </createTable>
+        <addColumn tableName="COLUMN_EXISTS_TEST_TABLE">
+            <column name="A_NEW_COLUMN" type="int" defaultValueNumeric="1"/>
+        </addColumn>
+    </changeSet>
+
     <changeSet id="tablespace-test1" author="alan">
         <comment>Test tablespace support. Ignored if database does not support tablespaces</comment>
         <createTable tableName="TABLESPACE_TEST_TABLE" tablespace="liquibase2">
@@ -267,22 +279,22 @@
             <column name="id" type="varchar(255)"/>
         </createTable>
     </changeSet>
-    <changeSet id="contextstest-2" author="nvoxland" context="context-a">
+    <changeSet id="contextstest-2" author="nvoxland" contextFilter="context-a">
         <insert tableName="contextsTest">
             <column name="id" value="context a"/>
         </insert>
     </changeSet>
-    <changeSet id="contextstest-3" author="nvoxland" context="context-a, context-b">
+    <changeSet id="contextstest-3" author="nvoxland" contextFilter="context-a, context-b">
         <insert tableName="contextsTest">
             <column name="id" value="a and b"/>
         </insert>
     </changeSet>
-    <changeSet id="contextstest-4" author="nvoxland" context="context-b">
+    <changeSet id="contextstest-4" author="nvoxland" contextFilter="context-b">
         <insert tableName="contextsTest">
             <column name="id" value="context b"/>
         </insert>
     </changeSet>
-    <changeSet id="contextstest-5" author="nvoxland" context="">
+    <changeSet id="contextstest-5" author="nvoxland" contextFilter="">
         <insert tableName="contextsTest">
             <column name="id" value="empty contexts"/>
         </insert>
@@ -293,7 +305,7 @@
         </insert>
     </changeSet>
 
-    <changeSet id="datatype-conversion-teset" author="nvoxland">
+    <changeSet id="datatype-conversion-teset" author="nvoxland" dbms="!snowflake">
         <createTable tableName="datatypeConversionTest">
             <column name="booleanColumn" type="boolean"/>
             <column name="currencyColumn" type="currency"/>
@@ -486,9 +498,21 @@
             <column name="locked" type="boolean"/>
         </createTable>
     </changeSet>
-    <changeSet id="sampleCSVData" author="nvoxland">
+    <changeSet id="sampleCSVData1" author="nvoxland">
+        <preConditions>
+            <tableIsEmpty tableName="csvdata"/>
+        </preConditions>
         <loadData tableName="csvdata" file="changelogs/sample.data1.csv"/>
     </changeSet>
+
+    <changeSet id="tableIsEmptyShouldFail" author="flautert">
+        <preConditions onFail="MARK_RAN">
+            <tableIsEmpty tableName="csvdata"/>
+        </preConditions>
+        <!-- if table is dropped then next changesets will fail, thus it is an indirect check -->
+        <dropTable tableName="csvdata" />
+    </changeSet>
+
     <changeSet id="sampleTSVData" author="nvoxland">
         <loadData tableName="csvdata" file="changelogs/sample.data1.tsv" separator="&#9;"/>
     </changeSet>
@@ -512,7 +536,22 @@
         </loadData>
     </changeSet>
 
-    <changeSet id="createTableNamedPKRef" author="nvoxland">
+    <changeSet id="sampleCSVData4" author="nvoxland">
+        <loadData tableName="csvdata" file="changelogs/sample.data1.csv.gz"/>
+    </changeSet>
+
+    <changeSet id="createTableNamedPKRef" author="nvoxland" dbms="db2">
+        <createTable tableName="createtablenamedpkref">
+            <column name="id" type="int">
+                <constraints primaryKey="true"/>
+            </column>
+            <column name="referee" type="int">
+                <constraints foreignKeyName="FK_REFTEST" references="CREATETABLENAMEDPK(id)"/>
+            </column>
+        </createTable>
+    </changeSet>
+
+    <changeSet id="createTableNamedPKRef" author="nvoxland" dbms="!db2">
         <createTable tableName="createtablenamedpkref">
             <column name="id" type="int">
                 <constraints primaryKey="true"/>
@@ -621,13 +660,19 @@
         </preConditions>
     </changeSet>
 
-    <changeSet id="fkExistsPrecondition" author="nvoxland">
+    <changeSet id="fkExistsPrecondition" author="nvoxland" dbms="db2">
+        <preConditions>
+            <foreignKeyConstraintExists foreignKeyTableName="CREATETABLENAMEDPKREF" foreignKeyName="FK_REFTEST"/>
+        </preConditions>
+    </changeSet>
+
+    <changeSet id="fkExistsPrecondition" author="nvoxland" dbms="!db2">
         <preConditions>
             <foreignKeyConstraintExists foreignKeyTableName="createtablenamedpkref" foreignKeyName="fk_reftest"/>
         </preConditions>
     </changeSet>
 
-    <changeSet id="indexPrecondition" author="nvoxland">
+    <changeSet id="indexPrecondition" author="nvoxland" dbms="!snowflake">
         <preConditions>
             <indexExists indexName="idx_compoundtest"/>
         </preConditions>
@@ -649,7 +694,9 @@
         </modifySql>
     </changeSet>
 
-    <includeAll path="changelogs/common/pathincluded/"/>
+    <includeAll path="changelogs/common/pathincluded/" minDepth="0" maxDepth="1"/>
+
+    <include relativeToChangelogFile="true" file="depthboundincludeall/changelog.xml" />
 
     <include file="includerelative\pathinclude1.changelog.xml" relativeToChangelogFile="true"/> <!-- try with dos style path -->
 
@@ -702,7 +749,13 @@
         </addColumn>
     </changeSet>
 
-    <changeSet id="addColWithFK-checkConstraint" author="nvoxland">
+    <changeSet id="addColWithFK-checkConstraint" author="nvoxland" dbms="db2">
+        <preConditions onFailMessage="I couldn't find the FK set in addColWithFK">
+            <foreignKeyConstraintExists foreignKeyName="FK_TEST_FK_ADDCOL" foreignKeyTableName="COMMATEST"/>
+        </preConditions>
+    </changeSet>
+
+    <changeSet id="addColWithFK-checkConstraint" author="nvoxland" dbms="!db2">
         <preConditions onFailMessage="I couldn't find the FK set in addColWithFK">
             <foreignKeyConstraintExists foreignKeyName="fk_test_fk_addCol" foreignKeyTableName="commatest"/>
         </preConditions>
@@ -715,10 +768,10 @@
         <createTable tableName="keepmodifysqltest">
             <column name="id" type="int"/>
         </createTable>
-        <modifySql context="test">
+        <modifySql contextFilter="test">
             <replace replace="change" with="newchange"/>
         </modifySql>
-        <modifySql context="not-context">
+        <modifySql contextFilter="not-context">
             <replace replace="keep" with="newkeep"/>
         </modifySql>
     </changeSet>
@@ -730,10 +783,7 @@
         </preConditions>
     </changeSet>
 
-    <changeSet id="createTableWithDefault" author="nvoxland">
-        <preConditions onFail="MARK_RAN">
-            <not><dbms type="mysql"/></not> <!-- doesn't support default values as function -->
-        </preConditions>
+    <changeSet id="createTableWithDefault" author="nvoxland" dbms="!mysql,!snowflake">
         <createTable tableName="default_val_computed">
             <column name="id" type="int"/>
             <column name="testcol" type="datetime" defaultValueComputed="CURRENT_TIMESTAMP()">
@@ -745,10 +795,7 @@
         <sql>insert into default_val_computed (id) values (1);</sql>
     </changeSet>
 
-    <changeSet id="createTableWithDefault-checkConstraint" author="nvoxland" dbms="h2,hsql,oracle,db2,mysql,postgresql,mssql"> <!-- not derby -->
-        <preConditions onFail="MARK_RAN">
-            <not><dbms type="mysql"/></not> <!-- doesn't support default values as function -->
-        </preConditions>
+    <changeSet id="createTableWithDefault-checkConstraint" author="nvoxland" dbms="h2,oracle,db2,postgresql,mssql,!mysql,!snowflake"> <!-- not derby -->
         <addDefaultValue tableName="default_val_computed" columnName="added_col" defaultValueComputed="CURRENT_TIMESTAMP()"/>
     </changeSet>
 
@@ -766,7 +813,7 @@
         <createTable tableName="INVALID TABLE NAME">
             <column name="id" type="int"/>
         </createTable>
-        <modifySql context="test">
+        <modifySql contextFilter="test">
             <replace replace="INVALID TABLE NAME" with="validTableName"/>
         </modifySql>
     </changeSet>
@@ -822,6 +869,11 @@
     <changeSet id="seq-test" author="nvoxland" onValidationFail="MARK_RAN">
         <comment>Database that don't support sequences will just continue on</comment>
         <createSequence sequenceName="seqtestonall"/>
+    </changeSet>
+
+    <changeSet id="seq-test-datatype" author="flautert" onValidationFail="MARK_RAN">
+        <comment>Database that don't support sequences datatype field will just continue on</comment>
+        <createSequence sequenceName="seqtestdatatypeonall" dataType="int"/>
     </changeSet>
 
     <changeSet id="nvoxland" author="pending-some">
@@ -1012,7 +1064,7 @@
             <column name="other" type="int"/>
         </createTable>
     </changeSet>
-    <changeSet id="CORE-977" author="nvoxland" dbms="!hsqldb"> <!-- currently failing due to a bug in hsql 2.2.9 -->
+    <changeSet id="CORE-977" author="nvoxland" dbms="!hsqldb,!snowflake"> <!-- currently failing due to a bug in hsql 2.2.9 -->
         <loadUpdateData tableName="instrument" file="changelogs/common/instrument.csv" primaryKey="name">
             <column header="name" type="STRING"/>
         </loadUpdateData>
@@ -1064,7 +1116,7 @@
     </changeSet>
 
     <changeSet id="timestamp_column_precision9" author="abuschka"
-               dbms="db2,derby,firebird,h2,hsql,informix,mssql,oracle,postgres,sqlite,asany,sybase">
+               dbms="db2,derby,firebird,h2,hsqldb,informix,mssql,oracle,sqlite,sybase">
         <comment>Test if we (and the JDBC driver) correctly support TIMESTAMP columns with a extra-large precision
             of 9 for supported DBMS.
         </comment>
@@ -1124,6 +1176,186 @@
         <output>Message using default target</output>
         <output target="stdout">Message using stdout target</output>
         <output target="stderr">Message using stderr target</output>
+    </changeSet>
+
+    <changeSet id="fkexists-without-table-setup" author="example" dbms="db2">
+        <sql>
+            CREATE TABLE fkexists_table1 (
+                id INT PRIMARY KEY NOT NULL
+            )
+        </sql>
+        <sql>
+            CREATE TABLE fkexists_table2 (
+                id INT,
+                id2 INT,
+                CONSTRAINT fkexists_1
+                    FOREIGN KEY (id)
+                        REFERENCES fkexists_table1 (id)
+            )
+        </sql>
+        <rollback>
+            <sql>
+                DROP TABLE fkexists_table1
+            </sql>
+            <sql>
+                DROP TABLE fkexists_table2
+            </sql>
+        </rollback>
+    </changeSet>
+    <changeSet id="fkexists-without-table-setup" author="example" dbms="!db2">
+        <sql>
+            CREATE TABLE fkexists_table1 (
+                id INT PRIMARY KEY
+            )
+        </sql>
+        <sql>
+            CREATE TABLE fkexists_table2 (
+                                             id INT,
+                                             id2 INT,
+                                             CONSTRAINT fkexists_1
+                                                 FOREIGN KEY (id)
+                                                     REFERENCES fkexists_table1 (id)
+            )
+        </sql>
+        <rollback>
+            <sql>
+                DROP TABLE fkexists_table1
+            </sql>
+            <sql>
+                DROP TABLE fkexists_table2
+            </sql>
+        </rollback>
+    </changeSet>
+
+    <changeSet author="example" id="fkexists-without-table-check" dbms="db2">
+        <preConditions>
+            <foreignKeyConstraintExists foreignKeyName="FKEXISTS_1"/>
+            <not>
+                <foreignKeyConstraintExists foreignKeyName="FKEXISTS_2"/>
+            </not>
+        </preConditions>
+        <addForeignKeyConstraint baseColumnNames="id2" baseTableName="fkexists_table2"
+                                 constraintName="fkexists_2"
+                                 referencedColumnNames="id" referencedTableName="fkexists_table1"/>
+    </changeSet>
+
+    <changeSet author="example" id="fkexists-without-table-check" dbms="!db2">
+        <preConditions>
+            <foreignKeyConstraintExists foreignKeyName="fkexists_1"/>
+            <not>
+                <foreignKeyConstraintExists foreignKeyName="fkexists_2"/>
+            </not>
+        </preConditions>
+        <addForeignKeyConstraint baseColumnNames="id2" baseTableName="fkexists_table2"
+                                 constraintName="fkexists_2"
+                                 referencedColumnNames="id" referencedTableName="fkexists_table1"/>
+    </changeSet>
+
+    <changeSet author="example" id="fkexists-without-table-check2" dbms="db2">
+        <preConditions>
+            <foreignKeyConstraintExists foreignKeyName="FKEXISTS_1"/>
+            <foreignKeyConstraintExists foreignKeyName="FKEXISTS_2"/>
+        </preConditions>
+    </changeSet>
+
+    <changeSet author="example" id="fkexists-without-table-check2" dbms="!db2">
+        <preConditions>
+            <foreignKeyConstraintExists foreignKeyName="fkexists_1"/>
+            <foreignKeyConstraintExists foreignKeyName="fkexists_2"/>
+        </preConditions>
+    </changeSet>
+
+    <changeSet id="example" author="view-if-exists" dbms="!oracle,!firebird,!db2">
+        <dropView viewName="does_not_exist" ifExists="true"/>
+    </changeSet>
+
+    <changeSet id="relative-import" author="mallod">
+        <createTable tableName="my_table">
+            <column name="test_col" type="int"/>
+            <column name="other_col" type="varchar(100)">
+                <constraints primaryKey="true" primaryKeyName="pk_other_col"/>
+            </column>
+        </createTable>
+        <loadData tableName="my_table"
+                  file="computedValueData.csv"
+                  relativeToChangelogFile="true">
+            <column name="test_col" type="COMPUTED"/>
+            <column name="other_col" type="varchar(100)"/>
+        </loadData>
+        <insert tableName="my_table">
+            <column name="test_col" valueComputed="1 + 1"/>
+            <column name="other_col" value="test"/>
+        </insert>
+        <update tableName="my_table">
+            <column name="test_col" valueComputed="2 + 2"/>
+        </update>
+    </changeSet>
+    <changeSet id="load-update-data-with-csv-file" author="mallod">
+        <loadUpdateData tableName="my_table"
+                  file="updatedComputedValueData.csv"
+                  relativeToChangelogFile="true"
+                        primaryKey="other_col">
+            <column name="test_col" type="COMPUTED"/>
+            <column name="other_col" type="varchar(100)"/>
+        </loadUpdateData>
+    </changeSet>
+    <changeSet id="addColumn" author="kiran" dbms="!oracle, !mssql, !firebird, !db2">
+        <addColumn tableName="my_table">
+            <column name="new_column" type="varchar(50)" afterColumn="test_col">
+            </column>
+        </addColumn>
+    </changeSet>
+    <changeSet id="prepare-rowCount" author="kzander91">
+        <createTable tableName="empty_table">
+            <column name="col" type="varchar(50)"/>
+        </createTable>
+
+        <createTable tableName="single_row_table">
+            <column name="col" type="varchar(50)"/>
+        </createTable>
+        <insert tableName="single_row_table">
+            <column name="col" value="row1"/>
+        </insert>
+
+        <createTable tableName="multi_row_table">
+            <column name="col" type="varchar(50)"/>
+        </createTable>
+        <insert tableName="multi_row_table">
+            <column name="col" value="row1"/>
+        </insert>
+        <insert tableName="multi_row_table">
+            <column name="col" value="row2"/>
+        </insert>
+    </changeSet>
+
+    <changeSet id="check-rowCount" author="kzander91">
+        <preConditions>
+            <rowCount tableName="empty_table" expectedRows="0"/>
+            <rowCount tableName="single_row_table" expectedRows="1"/>
+            <rowCount tableName="multi_row_table" expectedRows="2"/>
+            <not>
+                <!--                                                Long.MAX_VALUE -->
+                <rowCount tableName="multi_row_table" expectedRows="9223372036854775807"/>
+            </not>
+        </preConditions>
+    </changeSet>
+
+    <changeSet id="check-tableIsEmpty" author="kzander91">
+        <preConditions>
+            <tableIsEmpty tableName="empty_table"/>
+            <not>
+                <tableIsEmpty tableName="single_row_table"/>
+            </not>
+            <not>
+                <tableIsEmpty tableName="multi_row_table"/>
+            </not>
+        </preConditions>
+    </changeSet>
+
+    <changeSet id="check-uniqueConstraintExists" author="mpvvliet">
+        <preConditions onFail="WARN">
+            <uniqueConstraintExists tableName="createTableNamedUqConst" constraintName="uq_uqtest1"/>
+        </preConditions>
     </changeSet>
 
 </databaseChangeLog>

@@ -1,0 +1,30 @@
+name: Release Drafter
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - master
+
+permissions:
+  contents: read
+
+jobs:
+  create_draft_release_master_branch:
+    permissions:
+      # write permission is required to create a github release
+      contents: write
+      # write permission is required for autolabeler
+      # otherwise, read permission is required at least
+      pull-requests: write
+    runs-on: ubuntu-latest
+    steps:
+      - name: Create Draft Release (Master)
+        if: github.ref == 'refs/heads/master'
+
+        # Drafts your next Release notes as Pull Requests are merged into the default branch
+        uses: release-drafter/release-drafter@v6
+        with:
+          config-name: release-drafter-master.yml # located in .github/ in default branch
+        env:
+          GITHUB_TOKEN: ${{ secrets.RELEASE_DRAFTER_TOKEN }}

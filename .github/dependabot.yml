@@ -1,0 +1,24 @@
+version: 2
+updates:
+
+  - package-ecosystem: "github-actions"
+    directory: "/"
+    open-pull-requests-limit: 50
+    schedule:
+      interval: "daily"
+    labels:
+      - "sdou"
+      - "dependencies"
+
+  - package-ecosystem: "maven"
+    directory: "/"
+    open-pull-requests-limit: 50
+    schedule:
+      interval: "daily"
+    pull-request-branch-name:
+      # Separate sections of the branch name with a hyphen
+      # for example, `dependabot-npm_and_yarn-next_js-acorn-6.4.1`
+      separator: "-"
+    ignore:
+      - dependency-name: "actions/delete-package-versions"
+        update-types: ["version-update:semver-major"]  

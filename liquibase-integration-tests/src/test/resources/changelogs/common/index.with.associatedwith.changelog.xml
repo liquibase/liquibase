@@ -1,0 +1,22 @@
+<databaseChangeLog
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-latest.xsd">
+    <changeSet id="createIndexTable" author="mallod">
+        <createTable tableName="indexTestTable">
+            <column name="id" type="int"/>
+            <column name="firstname" type="varchar(10)"/>
+            <column name="lastname" type="varchar(10)"/>
+        </createTable>
+    </changeSet>
+    <changeSet id="createIndexTest" author="mallod">
+        <createIndex indexName="idx_test" tableName="indexTestTable" associatedWith="none">
+            <column name="firstname"/>
+        </createIndex>
+    </changeSet>
+    <changeSet id="createIndexTest2" author="mallod" dbms="oracle">
+        <createIndex indexName="idx_test_oracle" tableName="indexTestTable" associatedWith="foreignKey">
+            <column name="lastname"/>
+        </createIndex>
+    </changeSet>
+</databaseChangeLog>

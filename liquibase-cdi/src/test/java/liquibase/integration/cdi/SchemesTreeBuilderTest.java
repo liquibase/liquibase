@@ -13,7 +13,7 @@ import java.util.*;
 import static org.junit.Assert.*;
 
 /**
- * @author Nikita Lipatov (https://github.com/islonik), antoermo (https://github.com/dikeert)
+ * @author  <a href="https://github.com/islonik)">Nikita Lipatov</a>,  <a href="https://github.com/dikeert">antoermo</a>
  * @since 27/5/17.
  */
 public class SchemesTreeBuilderTest {

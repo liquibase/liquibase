@@ -1,0 +1,44 @@
+
+name: Liquibase Url Prerequisites Check
+
+# Job will run nightly at 02:10 EDT / 01:10 CDT
+# Time below is UTC
+on:
+  schedule:
+    - cron: "10 6 * * *"
+  workflow_dispatch:
+
+jobs:
+  urlcheck:
+    runs-on: ubuntu-22.04
+    steps:
+      - uses: actions/checkout@v4
+      - name: Check URLs
+        uses: urlstechie/urlchecker-action@master
+        with:
+          # A comma-separated list of file types to cover in the URL checks
+          include_files: url-test.md
+          # Choose whether to include file with no URLs in the printouts.
+          print_all: false
+          # Choose whether to print a more verbose end summary with files and broken URLs.
+          verbose: true
+          # The timeout seconds to provide to requests, defaults to 5 seconds
+          timeout: 5
+          # How many times to retry a failed request (each is logged, defaults to 1)
+          retry_count: 2
+          # choose if the force pass or not
+          force_pass : false
+
+      - name: Slack Notification
+        if: ${{ failure() }}
+        uses: rtCamp/action-slack-notify@v2
+        env:
+          SLACK_CHANNEL: team-liquibase-foundation
+          SLACK_COLOR: ${{ job.status }} # or a specific color like 'good' or '#ff00ff'
+          SLACK_MESSAGE: "${{ github.job }}: ${{ job.status }} @here"
+          SLACK_USERNAME: "liquibot"
+          SLACK_WEBHOOK: ${{ secrets.SNYK_LIQUIBASE_SLACK_WEBHOOK }}
+          MSG_MINIMAL: actions url
+          SLACK_ICON_EMOJI: ':liquibase:'
+          SLACK_LINK_NAMES: true
+          

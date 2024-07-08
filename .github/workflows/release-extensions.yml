@@ -1,0 +1,15 @@
+name: Release Extensions
+on:
+  workflow_dispatch:
+    inputs:
+      version:
+        description: 'Liquibase Version'
+        required: true
+
+jobs:
+  automated-os-extensions-release:
+    uses: liquibase/build-logic/.github/workflows/os-extension-automated-release.yml@v0.7.8
+    secrets: inherit
+    with:
+      version: ${{ inputs.version }}
+

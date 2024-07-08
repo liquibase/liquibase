@@ -2,6 +2,7 @@ package org.liquibase.maven.plugins;
 
 import liquibase.Liquibase;
 import liquibase.exception.LiquibaseException;
+import org.liquibase.maven.property.PropertyElement;
 
 /**
  * <p>Generates dbDocs against the database.</p>
@@ -16,6 +17,7 @@ public class LiquibaseDBDocMojo extends AbstractLiquibaseChangeLogMojo {
      *      property="liquibase.outputDirectory"
      *      default-value="${project.build.directory}/liquibase/dbDoc"
      */
+    @PropertyElement
     private String outputDirectory;
 
 

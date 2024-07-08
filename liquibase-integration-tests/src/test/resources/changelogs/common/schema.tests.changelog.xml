@@ -3,7 +3,7 @@
 <databaseChangeLog
         xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-2.0.xsd">
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-latest.xsd">
 
     <changeSet id="1" author="nvoxland">
         <createTable schemaName="lbcat2" tableName="person2">
@@ -22,7 +22,7 @@
             <column name="username" type="varchar(8)"/>
         </addColumn>
     </changeSet>
-    <changeSet id="5" author="nvoxland" context="test">
+    <changeSet id="5" author="nvoxland" contextFilter="test">
         <insert schemaName="lbcat2" tableName="person2">
             <column name="id" valueNumeric="1"/>
             <column name="firstname" value="John"/>
@@ -55,7 +55,7 @@
             </column>
         </createTable>
     </changeSet>
-    <changeSet id="7" author="bjohnson" context="test">
+    <changeSet id="7" author="bjohnson" contextFilter="test">
         <insert schemaName="lbcat2" tableName="company2">
             <column name="id" valueNumeric="1"/>
             <column name="name" value="ACME Corp"/>

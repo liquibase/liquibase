@@ -1,0 +1,16 @@
+#!/usr/bin/env bash
+
+if [ -z "${LIQUIBASE_HOME}" ]; then
+  #liquibase home is not set
+
+  LIQUIBASE_PATH="$(which liquibase)"
+
+  if [ -z "${LIQUIBASE_PATH}" ]; then
+    echo "Must set LIQUIBASE_HOME environment variable, or have liquibase in your PATH"
+    exit 1
+  fi
+
+  LIQUIBASE_HOME=$(dirname "$(which liquibase)")
+fi
+
+"${LIQUIBASE_HOME}/liquibase" init start-h2

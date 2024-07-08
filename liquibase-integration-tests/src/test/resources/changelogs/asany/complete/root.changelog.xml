@@ -3,11 +3,30 @@
 <databaseChangeLog
         xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-2.0.xsd">
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-latest.xsd">
     <preConditions>
             <dbms type="asany"/>
             <runningAs username="${loginUser}"/>
     </preConditions>
+
+    <changeSet id="test-check-on-commit" author="mkarg">
+        <createTable tableName="SomeReferencedTable">
+            <column name="pc" type="INTEGER">
+                <constraints nullable="false" primaryKey="true" primaryKeyName="pk"/>
+            </column>
+        </createTable>
+        <createTable tableName="SomeTableWithCheckOnCommit">
+            <column name="sc" type="INTEGER">
+                <constraints foreignKeyName="fk" referencedColumnNames="pc" referencedTableName="SomeReferencedTable" deferrable="true" initiallyDeferred="true"/>
+            </column>
+        </createTable>
+    </changeSet>
+
+    <changeSet id="test-timestamp-with-timezone" author="mkarg">
+        <createTable tableName="SomeTableWithSomeTimezonedColumn">
+            <column defaultValueComputed="CURRENT UTC TIMESTAMP" name="someTimezonedColumn" type="TIMESTAMP WITH TIME ZONE" />
+        </createTable>
+    </changeSet>
 
     <changeSet id="1" author="nvoxland">
         <comment>
@@ -35,7 +54,7 @@
         <!--<comment>Fix misspelled "username" column</comment>-->
         <!--<renameColumn tableName="person" oldColumnName="usernae" newColumnName="username"/>-->
     <!--</changeSet>-->
-    <changeSet id="5" author="nvoxland" context="test">
+    <changeSet id="5" author="nvoxland" contextFilter="test">
         <insert tableName="person">
             <column name="firstname" value="John"/>
             <column name="lastname" value="Doe"/>
@@ -66,7 +85,7 @@
             </column>
         </createTable>
     </changeSet>
-    <changeSet id="7" author="bjohnson" context="test">
+    <changeSet id="7" author="bjohnson" contextFilter="test">
         <insert tableName="employee">
             <column name="name" value="ACME Corp"/>
         </insert>
@@ -136,7 +155,7 @@
 
     <changeSet id="16" author="nvoxland">
         <createView viewName="personView">
-            select * from liquibase.person
+            select * from ${loginUser}.person
         </createView>
     </changeSet>
 
@@ -285,10 +304,16 @@
         </customChange>
     </changeSet>
     <changeSet id="57" author="nvoxland">
-        <customChange class="liquibase.change.custom.ExampleCustomSqlChange" tableName="person" columnName="employer_id" newValue="4"/>
+        <customChange class="liquibase.change.custom.ExampleCustomSqlChange">
+            <param name="tableName" value="person"/>
+            <param name="columnName" value="employer_id"/>
+            <param name="newValue" value="4"/>
+        </customChange>
     </changeSet>
     <changeSet id="58" author="nvoxland">
-        <customChange class="liquibase.change.custom.ExampleCustomTaskChange" helloTo="world"/>
+        <customChange class="liquibase.change.custom.ExampleCustomTaskChange">
+            <param name="helloTo" value="world"/>
+        </customChange>
     </changeSet>   
 
     <changeSet id="60" author="nvoxland">

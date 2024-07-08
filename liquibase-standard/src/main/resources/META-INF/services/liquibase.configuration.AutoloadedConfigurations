@@ -1,0 +1,5 @@
+liquibase.GlobalConfiguration
+liquibase.integration.commandline.LiquibaseCommandLineConfiguration
+liquibase.logging.core.DefaultLoggerConfiguration
+liquibase.sql.SqlConfiguration
+liquibase.parser.ChangeLogParserConfiguration

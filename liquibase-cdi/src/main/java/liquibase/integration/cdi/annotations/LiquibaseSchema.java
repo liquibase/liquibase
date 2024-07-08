@@ -6,7 +6,7 @@ import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
 /**
- * @author antoermo (https://github.com/dikeert)
+  * @author <a href="https://github.com/dikeert">antoermo</a>
  * @since 31/07/2015
  */
 @Retention(RetentionPolicy.RUNTIME)

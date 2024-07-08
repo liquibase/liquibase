@@ -49,7 +49,7 @@ public class MssqlIntegrationTest extends AbstractMssqlIntegrationTest {
                     assertNotNull("Null default value for " + table.getName() + "." + column.getName(), defaultValue);
                     if (column.getName().toLowerCase().contains("date") || column.getName().toLowerCase().contains("time")) {
                         if (defaultValue instanceof String) {
-                            assertTrue(defaultValue.equals("2017-12-09 23:52:39.1234567 +01:00"));
+                            assertEquals("2017-12-09 23:52:39.1234567 +01:00", defaultValue);
                         } else if (defaultValue instanceof DatabaseFunction) {
                             ((DatabaseFunction) defaultValue).getValue().contains("type datetimeoffset");
                         } else if (defaultValue instanceof Time) {

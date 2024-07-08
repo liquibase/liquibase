@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<databaseChangeLog
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog/1.0"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog/1.0 http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-1.0.xsd">
+
+    <changeSet id="2" author="Alice">
+        <insert tableName="People">
+            <column name="id" value="211"/>
+            <column name="lastname" value="AAA"/>
+            <column name="dealer_id" value="222"/>
+        </insert>
+        <insert tableName="People">
+            <column name="id" value="212"/>
+            <column name="lastname" value="BBB"/>
+            <column name="dealer_id" value="222"/>
+        </insert>
+        <insert tableName="People">
+            <column name="id" value="213"/>
+            <column name="lastname" value="CCC"/>
+            <column name="dealer_id" value="222"/>
+        </insert>
+    </changeSet>
+
+    <include file="liquibase/database/Migrator3.xml"/>
+</databaseChangeLog>

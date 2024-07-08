@@ -1,0 +1,99 @@
+name: Bug report or Feature request
+labels: Status:Discovery
+
+description: Create a report to help us improve
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thank you very much for opening a bug report/feature request with Liquibase.
+
+        If you have a question or need help, please go to [our Forum](https://forum.liquibase.org/) or [our Discord](https://discord.gg/pDB5DfE).
+
+  - type: checkboxes
+    id: confirm-search
+    attributes:
+      label: Search first
+      description: Please search [existing issues](https://github.com/liquibase/liquibase/issues) and the [Liquibase Forum](https://forum.liquibase.org/) before reporting.
+      options:
+        - label: I searched and no similar issues were found
+          required: true
+  - type: textarea
+    id: problem
+    attributes:
+      label: Description
+      description: |
+        A clear and concise description of the issue being addressed.
+        - Describe the actual problematic behavior.
+        - Ensure private information is redacted.
+        - Include console output or log files if relevant.
+        - If applicable, add screenshots or screen recordings to help explain your problem.
+    validations:
+      required: true
+  - type: textarea
+    id: reproduce
+    attributes:
+      label: Steps To Reproduce
+      description: |
+        List the steps to reproduce the behavior.       
+        - Please be precise and ensure private information is redacted
+        - Include things like
+          - Files used - sql scripts, changelog file(s), property file(s), config files, POM Files
+          - Exact commands used - CLI, maven, gradle, spring boot, servlet, etc.
+    validations:
+      required: true
+  - type: textarea
+    id: expected
+    attributes:
+      label: Expected/Desired Behavior
+      description: |
+        A clear and concise description of what happens in the software **after** a fix is created and merged.
+    validations:
+      required: true
+
+  - type: input
+    id: version
+    attributes:
+      label: Liquibase Version
+
+  - type: input
+    id: database
+    attributes:
+      label: Database Vendor & Version
+      placeholder: PostgreSQL 15.1.3
+
+  - type: input
+    id: integration
+    attributes:
+      label: Liquibase Integration
+      placeholder: CLI, maven, gradle, spring boot, servlet, etc.
+
+  - type: input
+    id: extensions
+    attributes:
+      label: Liquibase Extensions
+      placeholder: liquibase-redshift, etc.
+
+  - type: input
+    id: platform
+    attributes:
+      label: OS and/or Infrastructure Type/Provider
+      placeholder: Ubuntu, Windows 11, Ubuntu on EC2, VM, etc.
+
+
+  - type: textarea
+    id: additional
+    attributes:
+      label: Additional Context
+      description: |
+        If applicable, add additional context to help explain your problem.
+    validations:
+      required: false
+
+  - type: checkboxes
+    id: ask-pr
+    attributes:
+      label: Are you willing to submit a PR?
+      description: Your contributions are greatly appreciated and play a vital role in helping to improve the project!
+      options:
+        - label: I'm willing to submit a PR (Thank you!)

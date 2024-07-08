@@ -1,0 +1,22 @@
+<project xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xmlns="http://maven.apache.org/POM/4.0.0"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+
+  <modelVersion>4.0.0</modelVersion>
+
+  <build>
+    <plugins>
+      <plugin>
+          <groupId>org.liquibase</groupId>
+          <artifactId>liquibase-plugin</artifactId>
+        <configuration>
+          <verbose>true</verbose>
+          <driver>com.mysql.cj.jdbc.Driver</driver>
+          <url>jdbc:mysql://localhost/eformat</url>
+          <username>root</username>
+        </configuration>
+      </plugin>
+    </plugins>
+  </build>
+
+</project>
