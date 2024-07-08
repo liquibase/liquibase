@@ -111,7 +111,6 @@
 
             <!-- some libraries lie about compile vs. runtime dependencies. Or we don't hit code that uses these. So exclude them manually. -->
             <excludes>
-                <exclude>org.slf4j:slf4j-api:jar:</exclude> <!-- from sqlite-jdbc -->
                 <exclude>org.antlr:antlr4-runtime:jar:</exclude>  <!-- from connector-api -->
                 <exclude>org.checkerframework:checker-qual:jar:</exclude> <!-- from postgresql -->
                 <exclude>commons-beanutils:commons-beanutils:jar:</exclude> <!-- from opencsv -->
@@ -167,7 +166,6 @@
 				<exclude>org.firebirdsql.jdbc:jaybird:</exclude> <!-- from internal/lib -->
 				<exclude>net.snowflake:snowflake-jdbc:</exclude> <!-- from internal/lib -->
 				<exclude>javax.resource:connector-api:</exclude> <!-- from internal/lib -->
-				<exclude>org.slf4j:slf4j-api:jar:</exclude> <!-- from sqlite-jdbc -->
 				<exclude>org.antlr:antlr4-runtime:jar:</exclude>  <!-- from connector-api -->
 				<exclude>org.checkerframework:checker-qual:jar:</exclude> <!-- from postgresql -->
 				<exclude>commons-beanutils:commons-beanutils:jar:</exclude> <!-- from opencsv -->
