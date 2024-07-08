@@ -58,6 +58,8 @@
 │       ├── liquibase.flowvariables.yaml
 │       └── liquibase.properties
 ├── internal
+│   ├── extensions
+│   │   └── liquibase-checks.jar
 │   └── lib
 │       ├── commons-collections4.jar
 │       ├── commons-io.jar
@@ -72,7 +74,6 @@
 │       ├── jcc.jar
 │       ├── liquibase-commercial.jar
 │       ├── liquibase-core.jar
-│       ├── liquibase-checks.jar
 │       ├── mariadb-java-client.jar
 │       ├── mssql-jdbc.jar
 │       ├── ojdbc8.jar
