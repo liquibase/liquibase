@@ -234,7 +234,7 @@ jobs:
           IFS=',' read -ra EXT_ARRAY <<< "${{ inputs.extensions }}"
           for ext in "${EXT_ARRAY[@]}"; do
             ext=$(echo $ext | xargs)  # Remove leading and trailing whitespaces
-            if [ "$ext" != "liquibase-scripting" ]; then
+            if [ "$ext" != "liquibase-checks" ]; then
               echo "Checking out and building $ext"
               git clone https://github.com/liquibase/$ext.git $ext
               cd $ext
@@ -269,10 +269,10 @@ jobs:
             fi
           done
 
-  build-liquibase-scripting:
-    if: contains(${{ inputs.extensions }}, 'liquibase-scripting')
+  build-liquibase-checks:
+    if: contains(${{ inputs.extensions }}, 'liquibase-checks')
     needs: [ delete-extension-packages ]
-    uses: liquibase/build-logic/.github/workflows/build-publish-liquibase-scripting.yml@main
+    uses: liquibase/build-logic/.github/workflows/build-publish-liquibase-checks.yml@main
     with:
       version: ${{ inputs.liquibase-version }}
     secrets: inherit
