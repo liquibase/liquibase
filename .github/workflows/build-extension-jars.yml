@@ -79,14 +79,6 @@ jobs:
           package-type: 'maven'
           token: ${{ secrets.BOT_TOKEN }}
           ignore-versions: '^((?!${{ inputs.liquibase-version }}$).)*$'
-      - uses: actions/delete-package-versions@v5
-        id: org_liquibase
-        if: always()
-        with:
-          package-name: org.liquibase.${{ matrix.extensions }}
-          package-type: 'maven'
-          token: ${{ secrets.BOT_TOKEN }}
-          ignore-versions: '^((?!${{ inputs.liquibase-version }}$).)*$'
 
   build-and-deploy-extensions:
     needs: [delete-dependency-packages, delete-extension-packages]
