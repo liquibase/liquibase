@@ -204,9 +204,9 @@
                 <exclude>org.graalvm.sdk:maven-downloader:jar</exclude>
                 <exclude>org.graalvm.sdk:nativebridge:jar</exclude>
                 <exclude>org.graalvm.sdk:nativeimage:jar</exclude>
-                <exclude>org.graalvm.polyglot:olyglot:jar</exclude>
+                <exclude>org.graalvm.polyglot:polyglot:jar</exclude>
                 <exclude>org.graalvm.tools:profiler-tool:jar</exclude>
-                <exclude>org.graalvm.polyglog:python-community:pom</exclude>
+                <exclude>org.graalvm.polyglot:python-community:pom</exclude>
                 <exclude>org.graalvm.python:python-embedding:jar</exclude>
                 <exclude>org.graalvm.python:python-language-enterprise:jar</exclude>
                 <exclude>org.graalvm.python:python-language:jar</exclude>
