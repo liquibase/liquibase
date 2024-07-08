@@ -27,7 +27,7 @@
 		<db2.version>11.5.9.0</db2.version>
 		<firebird.version>5.0.5.java8</firebird.version>
 		<liquibase-pro.version>master-SNAPSHOT</liquibase-pro.version>
-		<liquibase-scripting.version>0-SNAPSHOT</liquibase-scripting.version>
+		<liquibase-checks.version>0-SNAPSHOT</liquibase-checks.version>
 		<assemblyConfigFile>src/main/assembly/assembly-bin.xml</assemblyConfigFile>
 		<maven.deploy.skip>true</maven.deploy.skip>
 		<maven.install.skip>true</maven.install.skip>
@@ -352,23 +352,23 @@
       </dependencies>
     </profile>
 
-    <!-- Profile to include liquibase-scripting in the tarball -->
+    <!-- Profile to include liquibase-checks in the tarball -->
     <profile>
-      <id>liquibase-scripting</id>
+      <id>liquibase-checks</id>
       <activation>
         <property>
-          <name>liquibase.scripting</name>
+          <name>liquibase.checks</name>
           <value>true</value>
         </property>
       </activation>
       <properties>
-        <assemblyConfigFile>src/main/assembly/assembly-bin-scripting.xml</assemblyConfigFile>
+        <assemblyConfigFile>src/main/assembly/assembly-bin-checks.xml</assemblyConfigFile>
       </properties>
       <dependencies>
         <dependency>
-          <groupId>org.liquibase</groupId>
-          <artifactId>liquibase-scripting</artifactId>
-          <version>${liquibase-scripting.version}</version>
+          <groupId>org.liquibase.ext</groupId>
+          <artifactId>liquibase-checks</artifactId>
+          <version>${liquibase-checks.version}</version>
         </dependency>
       </dependencies>
 		</profile>
