@@ -231,6 +231,8 @@
                             javax.sql.*,
                             org.osgi.*,
                             org.yaml.snakeyaml.*,
+                            org.apache.commons.io.*;version="[${commons-io.version},3)",
+                            org.apache.commons.lang3.*,
                             *;resolution:=optional
                         </Import-Package>
                         <Export-Package>
