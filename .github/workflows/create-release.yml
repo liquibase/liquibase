@@ -188,14 +188,14 @@ jobs:
           (cd re-version/out/ && zip -r liquibase-${{ needs.setup.outputs.version }}.zip liquibase-${{ needs.setup.outputs.version }} && rm -rf liquibase-${{ needs.setup.outputs.version }} && cd ../..)  
           
           # Modify the tar.gz file
-          mkdir -p re-version/out/liquibase-${{ needs.setup.outputs.version }}
-          tar -xzvf re-version/out/liquibase-${{ needs.setup.outputs.version }}.tar.gz -C re-version/out/liquibase-${{ needs.setup.outputs.version }}
-          rm -rf re-version/out/liquibase-${{ needs.setup.outputs.version }}.tar.gz
-          mkdir -p re-version/out/liquibase-${{ needs.setup.outputs.version }}/internal/extensions
-          for I in "${EXT[@]}"; do
-            cp ~/.m2/repository/org/liquibase/ext/$I/${{ needs.setup.outputs.version }}/$I-${{ needs.setup.outputs.version }}.jar re-version/out/liquibase-${{ needs.setup.outputs.version }}/internal/extensions/$I-${{ needs.setup.outputs.version }}.jar || echo "Failed to move $I artifact"
-          done
-          (cd re-version/out/ && tar -czvf liquibase-${{ needs.setup.outputs.version }}.tar.gz liquibase-${{ needs.setup.outputs.version }} && rm -rf liquibase-${{ needs.setup.outputs.version }} && cd ../..)
+          #mkdir -p re-version/out/liquibase-${{ needs.setup.outputs.version }}
+          #tar -xzvf re-version/out/liquibase-${{ needs.setup.outputs.version }}.tar.gz -C re-version/out/liquibase-${{ needs.setup.outputs.version }}
+          #rm -rf re-version/out/liquibase-${{ needs.setup.outputs.version }}.tar.gz
+          #mkdir -p re-version/out/liquibase-${{ needs.setup.outputs.version }}/internal/extensions
+          #for I in "${EXT[@]}"; do
+            #cp ~/.m2/repository/org/liquibase/ext/$I/${{ needs.setup.outputs.version }}/$I-${{ needs.setup.outputs.version }}.jar re-version/out/liquibase-${{ needs.setup.outputs.version }}/internal/extensions/$I-${{ needs.setup.outputs.version }}.jar || echo "Failed to move $I artifact"
+          #done
+          #(cd re-version/out/ && tar -czvf liquibase-${{ needs.setup.outputs.version }}.tar.gz liquibase-${{ needs.setup.outputs.version }} && rm -rf liquibase-${{ needs.setup.outputs.version }} && cd ../..)
 
           $PWD/.github/util/sign-artifacts.sh re-version/out
           
