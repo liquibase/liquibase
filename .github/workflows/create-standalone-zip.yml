@@ -1,0 +1,24 @@
+name: Create Standalone Zip
+on:
+  workflow_dispatch:
+    inputs:
+      version:
+        description: 'Version (example: 4.8.2)'
+        required: true
+      branch:
+        description: 'Branch to get the artifacts from (default: master)'
+        required: false
+        default: 'master'
+      runId:
+        description: 'RunId of liquibase/liquibase artifacts to attach'
+        required: true
+
+jobs:
+  create-zip:
+   uses: liquibase/liquibase/.github/workflows/create-release.yml@master
+   with:
+     version: ${{ inputs.version}}
+     branch: ${{ inputs.branch}}
+     runId: ${{ inputs.runId}}
+   secrets: inherit
+  

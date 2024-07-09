@@ -281,8 +281,10 @@ public class StandardChangeLogHistoryService extends AbstractChangeLogHistorySer
         }
 
         if (!statementsToExecute.isEmpty()) {
-            //reset the cache if there was a change to the table. Especially catches things like md5 changes which might have been updated but would still be wrong in the cache
+            //reset the cache if there was a change to the table. Especially catches things like md5 changes
+            // which might have been updated but would still be wrong in the cache
             this.ranChangeSetList = null;
+            Scope.getCurrentScope().getSingleton(FastCheckService.class).clearCache();
         }
         serviceInitialized = true;
     }

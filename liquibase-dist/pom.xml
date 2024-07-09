@@ -17,15 +17,15 @@
 		<deploy.repositoryId>liquibase</deploy.repositoryId>
 		<deploy.url>https://maven.pkg.github.com/liquibase/liquibase</deploy.url>
 		<h2.version>2.2.224</h2.version>
-		<hsqldb.version>2.7.2</hsqldb.version>
+		<hsqldb.version>2.7.3</hsqldb.version>
 		<postgresql.version>42.7.3</postgresql.version>
 		<mssql.version>12.6.1.jre8</mssql.version>
 		<mysql.version>8.0.21</mysql.version>
 		<mariadb.version>3.3.3</mariadb.version>
-		<oracle.version>19.22.0.0</oracle.version>
-		<sqlite.version>3.45.3.0</sqlite.version>
+		<oracle.version>19.23.0.0</oracle.version>
+		<sqlite.version>3.46.0.0</sqlite.version>
 		<db2.version>11.5.9.0</db2.version>
-		<firebird.version>5.0.4.java8</firebird.version>
+		<firebird.version>5.0.5.java8</firebird.version>
 		<liquibase-pro.version>master-SNAPSHOT</liquibase-pro.version>
 		<assemblyConfigFile>src/main/assembly/assembly-bin.xml</assemblyConfigFile>
 		<maven.deploy.skip>true</maven.deploy.skip>
@@ -92,7 +92,7 @@
         <dependency>
             <groupId>net.snowflake</groupId>
             <artifactId>snowflake-jdbc</artifactId>
-            <version>3.16.0</version>
+            <version>3.16.1</version>
         </dependency>
 
 		<!--        CANNOT INCLUDE MYSQL FOR LICENSING REASONS -->
@@ -219,7 +219,7 @@
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-jar-plugin</artifactId>
-				<version>3.4.1</version>
+				<version>3.4.2</version>
 				<executions>
 					<execution>
 						<id>default-jar</id>

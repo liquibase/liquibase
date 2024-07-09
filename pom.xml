@@ -71,14 +71,16 @@
         <argLine></argLine>
         <commons-lang3.version>3.14.0</commons-lang3.version>
         <commons-io.version>2.16.1</commons-io.version>
+        <commons-collections4.version>4.4</commons-collections4.version>
+        <commons-text.version>1.12.0</commons-text.version>
         <ant.version>1.10.14</ant.version>
-        <junit-jupiter.version>5.10.2</junit-jupiter.version>
-        <groovy.version>4.0.21</groovy.version>
+        <junit-jupiter.version>5.10.3</junit-jupiter.version>
+        <groovy.version>4.0.22</groovy.version>
         <spock.version>2.3-groovy-4.0</spock.version>
-        <spring.version>5.3.28</spring.version>
-        <maven-failsafe-plugin.version>3.2.5</maven-failsafe-plugin.version>
+        <spring.version>5.3.37</spring.version>
+        <maven-failsafe-plugin.version>3.3.0</maven-failsafe-plugin.version>
         <jacoco-maven-plugin.version>0.8.12</jacoco-maven-plugin.version>
-        <maven-surefire-plugin.version>3.2.5</maven-surefire-plugin.version>
+        <maven-surefire-plugin.version>3.3.0</maven-surefire-plugin.version>
         <sonar.projectName>Liquibase</sonar.projectName>
         <sonar.projectDescription>Liquibase</sonar.projectDescription>
         <sonar.projectKey>liquibase</sonar.projectKey>
@@ -190,7 +192,7 @@
         <dependency>
             <groupId>org.assertj</groupId>
             <artifactId>assertj-core</artifactId>
-            <version>3.25.3</version>
+            <version>3.26.0</version>
             <scope>test</scope>
         </dependency>
 
@@ -249,7 +251,7 @@
         <dependency>
             <groupId>org.hsqldb</groupId>
             <artifactId>hsqldb</artifactId>
-            <version>2.7.2</version>
+            <version>2.7.3</version>
             <scope>test</scope>
         </dependency>
 
@@ -291,28 +293,28 @@
         <dependency>
             <groupId>com.oracle.database.jdbc</groupId>
             <artifactId>ojdbc8</artifactId>
-            <version>19.22.0.0</version>
+            <version>19.23.0.0</version>
             <scope>test</scope>
         </dependency>
 
         <dependency>
             <groupId>org.xerial</groupId>
             <artifactId>sqlite-jdbc</artifactId>
-            <version>3.45.3.0</version>
+            <version>3.46.0.0</version>
             <scope>test</scope>
         </dependency>
 
         <dependency>
             <groupId>net.snowflake</groupId>
             <artifactId>snowflake-jdbc</artifactId>
-            <version>3.16.0</version>
+            <version>3.16.1</version>
             <scope>test</scope>
         </dependency>
 
         <dependency>
             <groupId>org.firebirdsql.jdbc</groupId>
             <artifactId>jaybird</artifactId>
-            <version>5.0.4.java8</version>
+            <version>5.0.5.java8</version>
             <scope>test</scope>
         </dependency>
 
@@ -349,7 +351,7 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-enforcer-plugin</artifactId>
-                <version>3.4.1</version>
+                <version>3.5.0</version>
                 <executions>
                     <execution>
                         <id>enforce-maven</id>
@@ -455,7 +457,7 @@
             <plugin>
                 <groupId>org.sonarsource.scanner.maven</groupId>
                 <artifactId>sonar-maven-plugin</artifactId>
-                <version>3.11.0.3922</version>
+                <version>4.0.0.4121</version>
                 <executions>
                     <execution>
                         <id>sonar</id>
@@ -489,7 +491,7 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-javadoc-plugin</artifactId>
-                <version>3.6.3</version>
+                <version>3.7.0</version>
                 <configuration>
                     <attach>true</attach>
                     <author>false</author>

@@ -11,6 +11,24 @@ on:
       runId:
         description: 'RunId of liquibase/liquibase artifacts to attach'
         required: true
+  workflow_call:
+    inputs:
+      version:
+        description: 'Version (example: 4.8.2)'
+        required: true
+        type: string
+      branch:
+        description: 'Branch to release (Defaults to master)'
+        required: false
+        type: string
+      runId:
+        description: 'RunId of liquibase/liquibase artifacts to attach'
+        required: true
+        type: string
+
+env:
+  DEPENDENCIES: "liquibase-bigquery" # Comma separated list of dependencies to release the extensions list
+  EXTENSIONS: "liquibase-commercial-bigquery" # Comma separated list of extensions to release to GPM
 
 jobs:
   setup:
@@ -21,6 +39,8 @@ jobs:
       branch: ${{ steps.collect-data.outputs.branch }}
       runId: ${{ steps.collect-data.outputs.runId }}
       uber_jar_runId: ${{ steps.get_run_id.outputs.run_id }}
+      dependencies: ${{ env.DEPENDENCIES }}
+      extensions: ${{ env.EXTENSIONS }}
     steps:
       - name: Collect Data
         id: collect-data
@@ -33,17 +53,32 @@ jobs:
       - run: |
           echo "Creating version ${{ steps.collect-data.outputs.version }} from ${{ steps.collect-data.outputs.branch }} with artifacts from build ${{ steps.collect-data.outputs.runId }} "
           
+  owasp-scanner:
+    needs: [ setup ]
+    uses: liquibase/build-logic/.github/workflows/owasp-scanner.yml@main
+    with:
+      branch: ${{ needs.setup.outputs.branch }}
+    secrets: inherit
+
   build-azure-uber-jar:
-   needs: [ setup ]
+   needs: [ setup, owasp-scanner]
    uses: liquibase/liquibase/.github/workflows/build-azure-uber-jar.yml@master
    with:
      branch: ${{ needs.setup.outputs.branch }}
      liquibase-version: ${{ needs.setup.outputs.version }}
    secrets: inherit
   
+  build-extension-jars:
+   needs: [ setup, owasp-scanner ]
+   uses: liquibase/liquibase/.github/workflows/build-extension-jars.yml@master
+   with:
+     liquibase-version: ${{ needs.setup.outputs.version }}
+     dependencies: ${{ needs.setup.outputs.dependencies }}
+     extensions: ${{ needs.setup.outputs.extensions }}
+   secrets: inherit
 
   reversion:
-    needs: [ setup, build-azure-uber-jar ]
+    needs: [ setup, build-azure-uber-jar, build-extension-jars]
     name: Re-version artifacts ${{ needs.setup.outputs.version }}
     runs-on: ubuntu-22.04
     steps:
@@ -56,7 +91,6 @@ jobs:
           ref: "${{ needs.setup.outputs.branch }}"
           path: download/repo/liquibase-pro
           token: ${{ secrets.BOT_TOKEN }}
-
 
       - name: Download liquibase-artifacts
         uses: liquibase/action-download-artifact@v2-liquibase
@@ -79,6 +113,35 @@ jobs:
           run_id: ${{ steps.get_run_id.outputs.run_id }}
           name: liquibase-pro-azure-artifacts
           path: liquibase-pro/liquibase-azure-deps
+
+      - name: Generate repositories and servers JSON
+        id: generate-json
+        run: |
+          IFS=',' read -ra EXT <<< "${{ needs.setup.outputs.extensions }}"
+          repositories=""
+          servers=""
+          for i in "${EXT[@]}"; do
+            repositories+="{\"id\": \"$i\",\"url\": \"https://maven.pkg.github.com/liquibase/$i\",\"releases\": {\"enabled\": \"true\"},\"snapshots\": {\"enabled\": \"true\",\"updatePolicy\": \"always\"}},"
+            servers+="{\"id\": \"$i\",\"username\": \"liquibot\",\"password\": \"${{ secrets.LIQUIBOT_PAT_GPM_ACCESS }}\"},"
+          done
+          # Remove trailing comma and wrap with brackets
+          repositories="["${repositories::-1}"]"
+          servers="["${servers::-1}"]"
+          echo "REPOSITORIES_JSON=$repositories" >> $GITHUB_ENV
+          echo "SERVERS_JSON=$servers" >> $GITHUB_ENV
+
+      - name: maven-settings-xml-action
+        uses: whelk-io/maven-settings-xml-action@v22
+        with:
+          repositories: ${{ env.REPOSITORIES_JSON }}
+          servers: ${{ env.SERVERS_JSON }}
+              
+      - name: Get extensions artifacts
+        run: |
+          IFS=',' read -ra ADDR <<< "${{ needs.setup.outputs.extensions }}"
+          for extension in "${ADDR[@]}"; do
+            mvn dependency:get -DgroupId=org.liquibase.ext -DartifactId=$extension -Dversion=${{ needs.setup.outputs.version }} -Dtransitive=false || echo "Failed to download $extension artifact"
+          done
 
       - name: Set up JDK
         uses: actions/setup-java@v4
@@ -110,10 +173,17 @@ jobs:
           # Execute the sign-artifacts.sh script with specific arguments
           $PWD/.github/util/sign-artifacts.sh download/liquibase-artifacts "${{ needs.setup.outputs.version }}" "${{ needs.setup.outputs.branch }}"
           
-          ##Sign Files
-          ## liquibase-azure-deps is already on its correct version. Check reusable workflow: build-azure-uber-jar.yml
+          ## Sign Files
+          ## liquibase-azure-deps and liquibase extensions are already on its correct version. Check reusable workflow: build-azure-uber-jar.yml and build-extension-jars.yml
           mv liquibase-pro/liquibase-azure-deps/* re-version/out
-          
+          unzip re-version/out/liquibase-${{ needs.setup.outputs.version }}.zip -d re-version/out/liquibase-${{ needs.setup.outputs.version }}
+          mkdir -p re-version/out/liquibase-${{ needs.setup.outputs.version }}/internal/extensions
+          rm -rf re-version/out/liquibase-${{ needs.setup.outputs.version }}.zip
+          IFS=',' read -ra EXT <<< "${{ needs.setup.outputs.extensions }}"
+          for i in "${EXT[@]}"; do
+            mv ~/.m2/repository/org/liquibase/ext/$i/${{ needs.setup.outputs.version }}/$i-${{ needs.setup.outputs.version }}.jar re-version/out/liquibase-${{ needs.setup.outputs.version }}/internal/extensions/$i-${{ needs.setup.outputs.version }}.jar
+          done
+          (cd re-version/out/ && zip -r liquibase-${{ needs.setup.outputs.version }}.zip liquibase-${{ needs.setup.outputs.version }} && rm -rf liquibase-${{ needs.setup.outputs.version }} && cd ../..)      
           $PWD/.github/util/sign-artifacts.sh re-version/out
           
           # Move files to a specific directory
@@ -123,9 +193,9 @@ jobs:
           mv re-version/out/liquibase-${{ needs.setup.outputs.version }}.tar.gz re-version/final
           mv re-version/out/liquibase-${{ needs.setup.outputs.version }}.zip re-version/final
           mv re-version/out/liquibase-azure-deps-${{ needs.setup.outputs.version }}.jar re-version/final/liquibase-azure-deps-${{ needs.setup.outputs.version }}.jar
-          
           (cd re-version/out/ && zip liquibase-additional-${{ needs.setup.outputs.version }}.zip *)
           mv re-version/out/liquibase-additional-${{ needs.setup.outputs.version }}.zip re-version/final
+
       - name: Cache Completed Artifacts
         uses: actions/cache@v4.0.2
         with:
@@ -133,13 +203,23 @@ jobs:
           path: re-version/final
 
       - name: Set repository tags
+        if: ${{ github.event_name == 'workflow_call' }}
         run: |
           git tag -f v${{ needs.setup.outputs.version }}
           git push -f origin v${{ needs.setup.outputs.version }}
           (cd download/repo/liquibase-pro && git tag -f v${{ needs.setup.outputs.version }})
           (cd download/repo/liquibase-pro && git push -f origin v${{ needs.setup.outputs.version }})
 
+      - name: Attach standalone zip file
+        if: ${{ github.event_name == 'workflow_dispatch' }}
+        uses: actions/upload-artifact@v4
+        with:
+            name: liquibase-${{ needs.setup.outputs.version }}
+            path: re-version/final/liquibase-${{ needs.setup.outputs.version }}.zip
+  
+
   build-installers:
+    if: ${{ github.event_name == 'workflow_call' }}
     permissions:
       contents: write  # for softprops/action-gh-release to create GitHub release
     needs: [ setup, reversion ]
@@ -201,6 +281,7 @@ jobs:
           rm re-version/final/*.asc
           rm re-version/final/*.md5
           rm re-version/final/*.sha1
+
       - name: Attach Files to Draft Release
         uses: softprops/action-gh-release@v2
         with:

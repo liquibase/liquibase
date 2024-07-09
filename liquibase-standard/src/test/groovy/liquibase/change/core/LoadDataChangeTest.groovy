@@ -1,6 +1,7 @@
 package liquibase.change.core
 
 import liquibase.ChecksumVersion
+import liquibase.GlobalConfiguration
 import liquibase.Scope
 import liquibase.change.ChangeStatus
 import liquibase.change.StandardChangeTest
@@ -9,13 +10,15 @@ import liquibase.changelog.DatabaseChangeLog
 import liquibase.database.Database
 import liquibase.database.DatabaseConnection
 import liquibase.database.DatabaseFactory
+import liquibase.database.core.H2Database
 import liquibase.database.core.MSSQLDatabase
 import liquibase.database.core.MockDatabase
 import liquibase.exception.ValidationErrors
-import liquibase.integration.commandline.LiquibaseCommandLineConfiguration
+import liquibase.parser.core.ParsedNode
 import liquibase.parser.core.ParsedNodeException
 import liquibase.resource.ClassLoaderResourceAccessor
 import liquibase.resource.ResourceAccessor
+import liquibase.resource.SearchPathResourceAccessor
 import liquibase.snapshot.MockSnapshotGeneratorFactory
 import liquibase.snapshot.SnapshotGeneratorFactory
 import liquibase.statement.DatabaseFunction
@@ -40,7 +43,7 @@ import java.time.LocalDate
 import java.time.LocalDateTime
 import java.time.LocalTime
 
-public class LoadDataChangeTest extends StandardChangeTest {
+class LoadDataChangeTest extends StandardChangeTest {
 
     MSSQLDatabase mssqlDb;
     MockDatabase mockDb;
@@ -771,6 +774,47 @@ public class LoadDataChangeTest extends StandardChangeTest {
         columnValue(sqlStatements[3], Col.date) == " s"   // FIX this was "s"
     }
 
+
+    def "NULL placeholder handling"() {
+        when:
+        LoadDataChange change = new LoadDataChange()
+
+        change.load(new liquibase.parser.core.ParsedNode(null, "loadData").addChildren([
+                file     : "liquibase/change/core/sample.data.with.nulls.csv",
+                tableName: "table.name"
+        ]).setValue([
+                [column: [name: "name", type: "STRING"]],
+                [column: [name: "middlename", type: "STRING", nullPlaceholder: ""]],
+                [column: [name: "surname", nullPlaceholder: ""]],
+                [column: [name: "job", type: "STRING", nullPlaceholder: "NONE"]],
+        ]), new ClassLoaderResourceAccessor())
+
+        SnapshotGeneratorFactory.instance = new MockSnapshotGeneratorFactory()
+
+        SqlStatement[] sqlStatements = change.generateStatements(mockDB)
+        then: // any NULL value for the statement is seen here as a 'NULL' string
+        //Fred,Twinkletoes,Flintstone,Crane operator
+        columnValue(sqlStatements[0], WorkerCol.name) == "Fred"
+        columnValue(sqlStatements[0], WorkerCol.middlename) == "Twinkletoes"
+        columnValue(sqlStatements[0], WorkerCol.surname) == "Flintstone"
+        columnValue(sqlStatements[0], WorkerCol.job) == "Crane operator"
+        //null,null,null,null
+        columnValue(sqlStatements[1], WorkerCol.name) == "NULL" // NULL sql ref
+        columnValue(sqlStatements[1], WorkerCol.middlename) == "null"
+        columnValue(sqlStatements[1], WorkerCol.surname) == "null"
+        columnValue(sqlStatements[1], WorkerCol.job) == "null"
+        //,,,
+        columnValue(sqlStatements[2], WorkerCol.name) == ""
+        columnValue(sqlStatements[2], WorkerCol.middlename) == "NULL" // NULL sql ref
+        columnValue(sqlStatements[2], WorkerCol.surname) == "NULL" // NULL sql ref
+        columnValue(sqlStatements[2], WorkerCol.job) == ""
+        //NONE,NONE,NONE,NONE
+        columnValue(sqlStatements[3], WorkerCol.name) == "NONE"
+        columnValue(sqlStatements[3], WorkerCol.middlename) == "NONE"
+        columnValue(sqlStatements[3], WorkerCol.surname) == "NONE"
+        columnValue(sqlStatements[3], WorkerCol.job) == "NULL" // NULL sql ref
+    }
+
     def "temporal values work for DATE, DATETIME and TIME column configs"() {
         when:
         LoadDataChange change = new LoadDataChange()
@@ -896,6 +940,49 @@ public class LoadDataChangeTest extends StandardChangeTest {
         ]
     }
 
+    def "validate CSV column headers are trimmed when TRIM_LOAD_DATA_FILE_HEADER is set to true"() {
+        when:
+        LoadDataChange change = new LoadDataChange()
+        SqlStatement[] sqlStatements
+
+        Scope.child([(GlobalConfiguration.TRIM_LOAD_DATA_FILE_HEADER.key): true], {
+
+        change.load(new ParsedNode(null, "loadData").addChildren([
+                file     : "liquibase/load-data.test.csv",
+                tableName: "CONFIG_STATE"
+                ]), new SearchPathResourceAccessor("target/test-classes/"))
+
+        sqlStatements = change.generateStatements(new H2Database())
+        } as Scope.ScopedRunner)
+
+        then:
+        def sqlStatement = ((InsertStatement) sqlStatements[0])
+        sqlStatement.getColumnValues().keySet()[0] == "config_state_id"
+        sqlStatement.getColumnValues().keySet()[1] == "code"
+        sqlStatement.getColumnValues().keySet()[2] == "name"
+        sqlStatement.getColumnValues().keySet()[3] == "description"
+    }
+
+    def "validate CSV column headers are NOT trimmed when TRIM_LOAD_DATA_FILE_HEADER is set to its default value"() {
+        when:
+        LoadDataChange change = new LoadDataChange()
+        SqlStatement[] sqlStatements
+
+        change.load(new ParsedNode(null, "loadData").addChildren([
+                file     : "liquibase/load-data.test.csv",
+                tableName: "CONFIG_STATE"
+        ]), new SearchPathResourceAccessor("target/test-classes/"))
+
+        sqlStatements = change.generateStatements(new H2Database())
+
+        then:
+        def sqlStatement = ((InsertStatement) sqlStatements[0])
+        sqlStatement.getColumnValues().keySet()[0] == "config_state_id"
+        sqlStatement.getColumnValues().keySet()[1] == " code"
+        sqlStatement.getColumnValues().keySet()[2] == " name"
+        sqlStatement.getColumnValues().keySet()[3] == " description"
+    }
+
 
     class ColDef {
         ColDef(Object n, String type) {
@@ -918,6 +1005,13 @@ public class LoadDataChangeTest extends StandardChangeTest {
         regular, space_left, space_right, space_both, empty
     }
 
+    enum WorkerCol {
+        name, middlename, surname, job
+
+        String s() {
+            return name();
+        }
+    }
     class FakeLoadDataChangeExtension extends LoadDataChange {
         def rows
 

@@ -4,41 +4,40 @@ import liquibase.change.ColumnConfig;
 import liquibase.parser.core.ParsedNode;
 import liquibase.parser.core.ParsedNodeException;
 import liquibase.resource.ResourceAccessor;
+import lombok.Getter;
+import lombok.Setter;
 
 public class LoadDataColumnConfig extends ColumnConfig {
 
+    @Setter
+    @Getter
     private Integer index;
+    @Setter
+    @Getter
     private String header;
+    @Setter
     private Boolean allowUpdate;
     private LoadDataChange.LOAD_DATA_TYPE loadType;
+    private String nullPlaceholder;
 
-
-    public Integer getIndex() {
-        return index;
-    }
-
-    public void setIndex(Integer index) {
-        this.index = index;
-    }
-
-    public String getHeader() {
-        return header;
-    }
-
-    public void setHeader(String header) {
-        this.header = header;
-    }
-    
     /**
      * Returns true if this Column should be updated. Returns null if update hasn't been explicitly assigned.
      */  
-	public Boolean getAllowUpdate() {
-		return allowUpdate;
-	}
+    public Boolean getAllowUpdate() {
+        return allowUpdate;
+    }
 
-	public void setAllowUpdate(Boolean getAllowUpdate) {
-		this.allowUpdate = getAllowUpdate;
-	}
+    public void setAllowUpdate(Boolean getAllowUpdate) {
+        this.allowUpdate = getAllowUpdate;
+    }
+
+    public String getNullPlaceholder() {
+        return nullPlaceholder;
+    }
+
+    public void setNullPlaceholder(String nullPlaceholder) {
+        this.nullPlaceholder = nullPlaceholder;
+    }
 
     @Override
     public void load(ParsedNode parsedNode, ResourceAccessor resourceAccessor) throws ParsedNodeException {
@@ -46,6 +45,7 @@ public class LoadDataColumnConfig extends ColumnConfig {
         this.index = parsedNode.getChildValue(null, "index", Integer.class);
         this.header = parsedNode.getChildValue(null, "header", String.class);
         this.allowUpdate = parsedNode.getChildValue(null, "allowUpdate", Boolean.class);
+        this.nullPlaceholder = parsedNode.getChildValue(null, "nullPlaceholder", String.class);
     }
 
     public ColumnConfig setType(LoadDataChange.LOAD_DATA_TYPE value) {
