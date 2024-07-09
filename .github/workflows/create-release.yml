@@ -286,6 +286,10 @@ jobs:
           rm re-version/final/*.md5
           rm re-version/final/*.sha1
 
+      - name: Debug notarization log
+        if:  always()
+        run: cat /Users/runner/work/liquibase/liquibase/liquibase-dist/target/liquibase-macos-installer-4.29.0.dmg.notarization.log
+
       # Only attach installers when the workflow is triggered by the create release process
       - name: Attach Files to Draft Release
         if: ${{ github.event_name == 'workflow_call' }}
