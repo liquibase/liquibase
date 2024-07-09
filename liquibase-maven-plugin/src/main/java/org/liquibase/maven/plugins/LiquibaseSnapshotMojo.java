@@ -20,9 +20,9 @@ import java.io.PrintStream;
 public class LiquibaseSnapshotMojo extends AbstractLiquibaseChangeLogMojo {
 
     /**
-     * Creates a JSON or YAML file that represents the current state of the database.
+     * Creates a TXT, JSON or YAML file that represents the current state of the database.
      *
-     * @parameter property="liquibase.snapshotFormat" default-value="json"
+     * @parameter property="liquibase.snapshotFormat" default-value="txt"
      */
     protected String snapshotFormat;
 
