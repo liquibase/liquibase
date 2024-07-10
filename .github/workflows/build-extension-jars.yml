@@ -260,11 +260,3 @@ jobs:
               cd ..
             fi
           done
-
-  build-liquibase-checks:
-    if: contains(${{ inputs.extensions }}, 'liquibase-checks')
-    needs: [ delete-extension-packages ]
-    uses: liquibase/build-logic/.github/workflows/build-publish-liquibase-checks.yml@main
-    with:
-      version: ${{ inputs.liquibase-version }}
-    secrets: inherit
