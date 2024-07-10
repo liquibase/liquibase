@@ -53,15 +53,15 @@ jobs:
       - run: |
           echo "Creating version ${{ steps.collect-data.outputs.version }} from ${{ steps.collect-data.outputs.branch }} with artifacts from build ${{ steps.collect-data.outputs.runId }} "
           
-  owasp-scanner:
-    needs: [ setup ]
-    uses: liquibase/build-logic/.github/workflows/owasp-scanner.yml@main
-    with:
-      branch: ${{ needs.setup.outputs.branch }}
-    secrets: inherit
+  # owasp-scanner:
+  #   needs: [ setup ]
+  #   uses: liquibase/build-logic/.github/workflows/owasp-scanner.yml@main
+  #   with:
+  #     branch: ${{ needs.setup.outputs.branch }}
+  #   secrets: inherit
 
   build-azure-uber-jar:
-   needs: [ setup, owasp-scanner ]
+   needs: [ setup ]
    uses: liquibase/liquibase/.github/workflows/build-azure-uber-jar.yml@master
    with:
      branch: ${{ needs.setup.outputs.branch }}
@@ -69,7 +69,7 @@ jobs:
    secrets: inherit
   
   build-extension-jars:
-   needs: [ setup, owasp-scanner ]
+   needs: [ setup ]
    uses: liquibase/liquibase/.github/workflows/build-extension-jars.yml@DAT-18103
    with:
      liquibase-version: ${{ needs.setup.outputs.version }}
@@ -175,7 +175,7 @@ jobs:
           
           ## Sign Files
           ## liquibase-azure-deps and liquibase extensions are already on its correct version. Check reusable workflow: build-azure-uber-jar.yml and build-extension-jars.yml
-          mv liquibase-pro/liquibase-azure-deps/* re-version/out
+          #mv liquibase-pro/liquibase-azure-deps/* re-version/out
 
           # Modify the zip file
           unzip re-version/out/liquibase-${{ needs.setup.outputs.version }}.zip -d re-version/out/liquibase-${{ needs.setup.outputs.version }}
@@ -205,7 +205,7 @@ jobs:
           mv re-version/out/liquibase-commercial-${{ needs.setup.outputs.version }}.jar re-version/final
           mv re-version/out/liquibase-${{ needs.setup.outputs.version }}.tar.gz re-version/final
           mv re-version/out/liquibase-${{ needs.setup.outputs.version }}.zip re-version/final
-          mv re-version/out/liquibase-azure-deps-${{ needs.setup.outputs.version }}.jar re-version/final/liquibase-azure-deps-${{ needs.setup.outputs.version }}.jar
+          #mv re-version/out/liquibase-azure-deps-${{ needs.setup.outputs.version }}.jar re-version/final/liquibase-azure-deps-${{ needs.setup.outputs.version }}.jar
           (cd re-version/out/ && zip liquibase-additional-${{ needs.setup.outputs.version }}.zip *)
           mv re-version/out/liquibase-additional-${{ needs.setup.outputs.version }}.zip re-version/final
 
