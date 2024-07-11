@@ -52,6 +52,7 @@ jobs:
   delete-dependency-packages:
     needs: setup_matrix
     runs-on: ubuntu-22.04
+    continue-on-error: true
     strategy:
       matrix:
         dependencies: ${{ fromJson(needs.setup_matrix.outputs.dependencies_matrix) }}
@@ -66,6 +67,7 @@ jobs:
   delete-extension-packages:
     needs: setup_matrix
     runs-on: ubuntu-22.04
+    continue-on-error: true
     strategy:
       matrix:
         extensions: ${{ fromJson(needs.setup_matrix.outputs.extensions_matrix) }}
@@ -110,10 +112,10 @@ jobs:
                 git clone https://github.com/liquibase/$dep.git $dep
             done
 
-      - name: Set up JDK 17
+      - name: Set up JDK 21
         uses: actions/setup-java@v4
         with:
-          java-version: 17
+          java-version: 21
           distribution: 'temurin'
           cache: 'maven'
           gpg-private-key: ${{ secrets.GPG_SECRET }}
