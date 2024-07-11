@@ -78,7 +78,7 @@ jobs:
    secrets: inherit
 
   reversion:
-    needs: [ setup, build-extension-jars]
+    needs: [ setup, build-azure-uber-jar, build-extension-jars ]
     name: Re-version artifacts ${{ needs.setup.outputs.version }}
     runs-on: ubuntu-22.04
     steps:
@@ -195,7 +195,7 @@ jobs:
           for I in "${EXT[@]}"; do
             cp ~/.m2/repository/org/liquibase/ext/$I/${{ needs.setup.outputs.version }}/$I-${{ needs.setup.outputs.version }}.jar re-version/out/liquibase-${{ needs.setup.outputs.version }}/internal/extensions/$I-${{ needs.setup.outputs.version }}.jar || echo "Failed to move $I artifact"
           done
-          (cd re-version/out/ && tar -czvf liquibase-${{ needs.setup.outputs.version }}.tar.gz liquibase-${{ needs.setup.outputs.version }} && rm -rf liquibase-${{ needs.setup.outputs.version }} && cd ../..)
+          (cd re-version/out/ && tar -czvf liquibase-${{ needs.setup.outputs.version }}.tar.gz -C liquibase-${{ needs.setup.outputs.version }} . && rm -rf liquibase-${{ needs.setup.outputs.version }} && cd ../..)
 
           $PWD/.github/util/sign-artifacts.sh re-version/out
           

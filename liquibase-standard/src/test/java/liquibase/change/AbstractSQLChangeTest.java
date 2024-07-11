@@ -5,6 +5,7 @@ import liquibase.Scope;
 import liquibase.database.core.MSSQLDatabase;
 import liquibase.statement.SqlStatement;
 import liquibase.statement.core.RawParameterizedSqlStatement;
+import liquibase.statement.core.RawSqlStatement;
 import liquibase.util.StreamUtil;
 import org.junit.Test;
 
@@ -173,7 +174,7 @@ public class AbstractSQLChangeTest {
         change.setStripComments(true);
         SqlStatement[] statements = change.generateStatements(new MSSQLDatabase());
         assertEquals(1, statements.length);
-        assertEquals("LINE 1;\r\n\r\nLINE 2;\r\nLINE 3;", ((RawParameterizedSqlStatement) statements[0]).getSql());
+        assertEquals("LINE 1;\r\n\r\nLINE 2;\r\nLINE 3;", ((RawSqlStatement) statements[0]).getSql());
     }
 
 //    @Test
