@@ -20,6 +20,7 @@ import liquibase.structure.DatabaseObject;
 import liquibase.structure.core.*;
 import liquibase.util.JdbcUtil;
 import liquibase.util.StringUtil;
+import org.apache.commons.lang3.StringUtils;
 
 import java.lang.reflect.Method;
 import java.sql.*;
@@ -684,7 +685,7 @@ public class OracleDatabase extends AbstractJdbcDatabase {
     @Override
     public String correctObjectName(String objectName, Class<? extends DatabaseObject> objectType) {
         // Internally Oracle converts int/integer to number, so when we need to extract and compare it we need number too
-        if (objectType.equals(Column.class) && objectName.toLowerCase().startsWith("int")) {
+        if (objectType.equals(Column.class) && StringUtils.startsWithIgnoreCase(objectName, "int")) {
             return "NUMBER(*, 0)";
         }
         return super.correctObjectName(objectName, objectType);
