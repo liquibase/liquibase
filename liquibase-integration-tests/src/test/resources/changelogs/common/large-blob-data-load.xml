@@ -10,7 +10,7 @@
             <column name="id" type="int" autoIncrement="true">
                 <constraints primaryKey="true" nullable="false"/>
             </column>
-            <column name="name" type="clob">
+            <column name="name" type="blob">
                 <constraints nullable="false"/>
             </column>
         </createTable>
