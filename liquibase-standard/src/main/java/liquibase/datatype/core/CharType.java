@@ -61,7 +61,7 @@ public class CharType extends LiquibaseDataType {
                 return type;
             }
         } else if (database instanceof H2Database) {
-            if (getRawDefinition().toLowerCase(Locale.US).contains("large object")) {
+            if (getRawDefinition() != null && getRawDefinition().toLowerCase(Locale.US).contains("large object")) {
                 return new DatabaseDataType("CHARACTER LARGE OBJECT");
             }
         }
