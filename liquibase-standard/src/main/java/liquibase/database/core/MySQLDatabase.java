@@ -272,22 +272,10 @@ public class MySQLDatabase extends AbstractJdbcDatabase {
     }
 
     public Integer getTimeStampFSPWith(int columnSize) {
-        switch (columnSize) {
-            case 21:
-                return 1;
-            case 22:
-                return 2;
-            case 23:
-                return 3;
-            case 24:
-                return 4;
-            case 25:
-                return 5;
-            case 26:
-                return 6;
-            default:
-                return null;
+        if (columnSize > 20 && columnSize < 27) {
+            return columnSize % 10;
         }
+        return 0;
     }
 
     @Override
