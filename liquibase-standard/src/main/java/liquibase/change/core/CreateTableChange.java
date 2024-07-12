@@ -310,7 +310,7 @@ public class CreateTableChange extends AbstractChange implements ChangeWithColum
         return ifNotExists;
     }
 
-    @DatabaseChangeProperty(description = "If the Database supports it, when true, creates the table with ROWDEPENDENCIES")
+    @DatabaseChangeProperty(description = "When true, creates the table with ROWDEPENDENCIES", supportsDatabase = "oracle")
     public Boolean getRowDependencies() {
         return rowDependencies;
     }
