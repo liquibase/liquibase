@@ -656,14 +656,6 @@ public interface Database extends PrioritizedService, AutoCloseable {
     }
 
     /**
-     * Does the database support the "ROWDEPENDENCIES" syntax for table creation?
-     * @return true if the "ROWDEPENDENCIES" syntax is supported for table creation, false otherwise.
-     */
-    default boolean supportsCreateRowDependencies() {
-        return false;
-    }
-
-    /**
      * Does the particular database implementation support the database changelog history feature and associated
      * table?
      * @return true if supported, false otherwise

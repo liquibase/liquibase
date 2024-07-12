@@ -404,7 +404,7 @@ public class CreateTableGenerator extends AbstractSqlGenerator<CreateTableStatem
             sql += " COMMENT='" + database.escapeStringForDatabase(statement.getRemarks()) + "' ";
         }
 
-        if (statement.isRowDependencies() && database.supportsCreateRowDependencies()) {
+        if (database instanceof OracleDatabase && statement.isRowDependencies()) {
             sql += " ROWDEPENDENCIES ";
         }
 

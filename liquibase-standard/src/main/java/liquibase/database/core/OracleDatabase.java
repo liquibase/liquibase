@@ -273,11 +273,6 @@ public class OracleDatabase extends AbstractJdbcDatabase {
     }
 
     @Override
-    public boolean supportsCreateRowDependencies() {
-        return true;
-    }
-
-    @Override
     public boolean isReservedWord(String objectName) {
         return reservedWords.contains(objectName.toUpperCase());
     }
