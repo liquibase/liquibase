@@ -104,9 +104,18 @@
                 <include>org.firebirdsql.jdbc:jaybird:</include>
                 <include>net.snowflake:snowflake-jdbc:</include>
                 <include>javax.resource:connector-api:</include>
+<<<<<<< HEAD
                 <!-- CANNOT SHIP FOR LICENSE REASONS -->
                 <!-- <include>mysql:mysql-connector-java:jar</include> -->
             </includes>
+=======
+				<include>org.slf4j:slf4j-api:</include>
+				<include>org.slf4j:slf4j-simple:</include>
+
+				<!-- CANNOT SHIP FOR LICENSE REASONS -->
+				<!-- <include>mysql:mysql-connector-java:jar</include> -->
+			</includes>
+>>>>>>> origin/master
 
             <!-- some libraries lie about compile vs. runtime dependencies. Or we don't hit code that uses these. So exclude them manually. -->
             <excludes>
@@ -165,6 +174,8 @@
                 <exclude>org.firebirdsql.jdbc:jaybird:</exclude> <!-- from internal/lib -->
                 <exclude>net.snowflake:snowflake-jdbc:</exclude> <!-- from internal/lib -->
                 <exclude>javax.resource:connector-api:</exclude> <!-- from internal/lib -->
+                <exclude>org.slf4j:slf4j-api:</exclude> <!-- from internal/lib -->
+                <exclude>org.slf4j:slf4j-simple:</exclude> <!-- from internal/lib -->
                 <exclude>org.antlr:antlr4-runtime:jar:</exclude>  <!-- from connector-api -->
                 <exclude>org.checkerframework:checker-qual:jar:</exclude> <!-- from postgresql -->
                 <exclude>commons-beanutils:commons-beanutils:jar:</exclude> <!-- from opencsv -->
@@ -187,41 +198,6 @@
                 <exclude>com.github.spullara.mustache.java:compiler:jar:</exclude> <!-- from liquibase-commercial -->
                 <exclude>io.github.java-diff-utils:java-diff-utils:jar:</exclude> <!-- from liquibase-commercial -->
                 <exclude>com.github.vertical-blank:sql-formatter:jar:</exclude> <!-- from liquibase-commercial -->
-                <exclude>org.bouncycastle:bcpkix-jdk18on:jar</exclude>
-                <exclude>org.bouncycastle:bcprov-jdk18on:jar</exclude>
-                <exclude>org.bouncycastle:jdk18on:jar</exclude>
-                <exclude>org.apache.commons:common-collections4:jar</exclude>
-                <exclude>org.apache.groovy:groovy-json:jar</exclude>
-                <exclude>org.apache.groovy:groovy-jsr223:jar</exclude>
-                <exclude>org.apache.groovy:groovy:jar</exclude>
-                <exclude>com.ibm.icu:icu4j:jar</exclude>
-                <exclude>jline:jline:jar</exclude>
-                <exclude>org.graalvm.sdk:jniutils:jar</exclude>
-                <exclude>org.graalvm.shadowed:json:jar</exclude>
-                <exclude>org.graalvm.sdk:launcher-common:jar</exclude>
-                <exclude>org.liquibase:liquibase-checks:jar</exclude>
-                <exclude>org.graalvm.llvm:llvm-api:jar</exclude>
-                <exclude>org.graalvm.sdk:maven-downloader:jar</exclude>
-                <exclude>org.graalvm.sdk:nativebridge:jar</exclude>
-                <exclude>org.graalvm.sdk:nativeimage:jar</exclude>
-                <exclude>org.graalvm.polyglot:polyglot:jar</exclude>
-                <exclude>org.graalvm.tools:profiler-tool:jar</exclude>
-                <exclude>org.graalvm.polyglot:python-community:pom</exclude>
-                <exclude>org.graalvm.python:python-embedding:jar</exclude>
-                <exclude>org.graalvm.python:python-language-enterprise:jar</exclude>
-                <exclude>org.graalvm.python:python-language:jar</exclude>
-                <exclude>org.graalvm.python:python-launcher:jar</exclude>
-                <exclude>org.graalvm.python:python-resources:jar</exclude>
-                <exclude>org.graalvm.polyglot:python:pom</exclude>
-                <exclude>org.graalvm.regex:regex:jar</exclude>
-                <exclude>org.graalvm.truffle:truffle-api:jar</exclude>
-                <exclude>org.graalvm.truffle:truffle-compiler:jar</exclude>
-                <exclude>org.graalvm.truffle:truffle-enterprise:jar</exclude>
-                <exclude>org.graalvm.truffle:truffle-nfi-libffi:jar</exclude>
-                <exclude>org.graalvm.truffle:truffle-nfi:jar</exclude>
-                <exclude>org.graalvm.truffle:truffle-runtime:jar</exclude>
-                <exclude>org.graalvm.sdk:word:jar</exclude>
-                <exclude>org.graalvm.vm.shadowed:xz:jar</exclude>
             </excludes>
         </dependencySet>
     </dependencySets>
