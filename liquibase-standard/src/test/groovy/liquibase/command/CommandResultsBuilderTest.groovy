@@ -1,6 +1,6 @@
 package liquibase.command
 
-import liquibase.command.core.InternalHistoryCommandStep
+import liquibase.command.core.HistoryCommandStep
 import spock.lang.Specification
 
 class CommandResultsBuilderTest extends Specification {
@@ -14,7 +14,7 @@ class CommandResultsBuilderTest extends Specification {
         builder.getOutputStream().write("getOutputStream output".bytes)
         builder.addResult("a", "result from a")
         builder.addResult("bool", true)
-        builder.addResult(InternalHistoryCommandStep.DEPLOYMENTS_RESULT, new InternalHistoryCommandStep.DeploymentHistory())
+        builder.addResult(HistoryCommandStep.DEPLOYMENTS_RESULT, new HistoryCommandStep.DeploymentHistory())
 
         builder.build()
 
