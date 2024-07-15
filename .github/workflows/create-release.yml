@@ -93,8 +93,10 @@ jobs:
           token: ${{ secrets.BOT_TOKEN }}
 
       - name: Download liquibase-artifacts
-        uses: actions/download-artifact@v4
+        uses: liquibase/action-download-artifact@v2-liquibase
         with:
+          workflow: run-tests.yml
+          run_id: ${{ needs.setup.outputs.runId }}
           name: liquibase-artifacts
           path: download/liquibase-artifacts
 
@@ -105,10 +107,8 @@ jobs:
           echo "uber_jar_runId=${run_id}" >> $GITHUB_OUTPUT
 
       - name: Download liquibase-pro-azure-artifacts
-        uses: liquibase/action-download-artifact@v2-liquibase
+        uses: actions/upload-artifact@v4
         with:
-          workflow: build-azure-uber-jar.yml
-          run_id: ${{ github.run_id }}
           name: liquibase-pro-azure-artifacts
           path: liquibase-pro/liquibase-azure-deps
 
