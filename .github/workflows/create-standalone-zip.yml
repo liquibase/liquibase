@@ -15,7 +15,7 @@ on:
 
 jobs:
   create-zip:
-   uses: liquibase/liquibase/.github/workflows/create-release.yml@DAT-18077
+   uses: liquibase/liquibase/.github/workflows/create-release.yml@master
    with:
      version: ${{ inputs.version}}
      branch: ${{ inputs.branch}}
