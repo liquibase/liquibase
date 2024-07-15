@@ -81,8 +81,6 @@ jobs:
     needs: [ setup, build-azure-uber-jar, build-extension-jars ]
     name: Re-version artifacts ${{ needs.setup.outputs.version }}
     runs-on: ubuntu-22.04
-    outputs:
-      runId: ${{ needs.get_run_id.outputs.runId }}
     steps:
       - uses: actions/checkout@v4
 
@@ -112,7 +110,7 @@ jobs:
         uses: liquibase/action-download-artifact@v2-liquibase
         with:
           workflow: build-azure-uber-jar.yml
-          run_id: ${{ steps.get_run_id.outputs.run_id }}
+          run_id: ${{ needs.get_run_id.outputs.uber_jar_runId }}
           name: liquibase-pro-azure-artifacts
           path: liquibase-pro/liquibase-azure-deps
 
