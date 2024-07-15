@@ -93,10 +93,8 @@ jobs:
           token: ${{ secrets.BOT_TOKEN }}
 
       - name: Download liquibase-artifacts
-        uses: liquibase/action-download-artifact@v2-liquibase
+        uses: actions/download-artifact@v4
         with:
-          workflow: run-tests.yml
-          run_id: ${{ needs.setup.outputs.runId }}
           name: liquibase-artifacts
           path: download/liquibase-artifacts
 
