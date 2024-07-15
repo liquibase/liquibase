@@ -62,7 +62,7 @@ jobs:
 
   build-azure-uber-jar:
    needs: [ setup, owasp-scanner ]
-   uses: liquibase/liquibase/.github/workflows/build-azure-uber-jar.yml@release-liquibase-cli-to-maven
+   uses: liquibase/liquibase/.github/workflows/build-azure-uber-jar.yml@master
    with:
      branch: ${{ needs.setup.outputs.branch }}
      liquibase-version: ${{ needs.setup.outputs.version }}
@@ -107,8 +107,10 @@ jobs:
           echo "uber_jar_runId=${run_id}" >> $GITHUB_OUTPUT
 
       - name: Download liquibase-pro-azure-artifacts
-        uses: actions/download-artifact@v4
+        uses: liquibase/action-download-artifact@v2-liquibase
         with:
+          workflow: build-azure-uber-jar.yml
+          run_id: ${{ steps.get_run_id.outputs.run_id }}
           name: liquibase-pro-azure-artifacts
           path: liquibase-pro/liquibase-azure-deps
 
@@ -174,9 +176,6 @@ jobs:
           ## Sign Files
           ## liquibase-azure-deps and liquibase extensions are already on its correct version. Check reusable workflow: build-azure-uber-jar.yml and build-extension-jars.yml
           mv liquibase-pro/liquibase-azure-deps/* re-version/out
-
-          echo "REVERSION 1"
-          ls re-version/out
           
           # Modify the zip file
           unzip re-version/out/liquibase-${{ needs.setup.outputs.version }}.zip -d re-version/out/liquibase-${{ needs.setup.outputs.version }}
@@ -199,10 +198,7 @@ jobs:
           (cd re-version/out/ && tar -czvf liquibase-${{ needs.setup.outputs.version }}.tar.gz -C liquibase-${{ needs.setup.outputs.version }} . && rm -rf liquibase-${{ needs.setup.outputs.version }} && cd ../..)
 
           $PWD/.github/util/sign-artifacts.sh re-version/out
-          
-          echo "REVERSION 2"
-          ls re-version/out
-          
+   
           # Move files to a specific directory
           mkdir re-version/final
           mv re-version/out/liquibase-core-${{ needs.setup.outputs.version }}.jar re-version/final
