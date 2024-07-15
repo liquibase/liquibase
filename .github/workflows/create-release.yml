@@ -107,10 +107,8 @@ jobs:
           echo "uber_jar_runId=${run_id}" >> $GITHUB_OUTPUT
 
       - name: Download liquibase-pro-azure-artifacts
-        uses: liquibase/action-download-artifact@v2-liquibase
-        with:
-          workflow: build-azure-uber-jar.yml
-          run_id: ${{ steps.get_run_id.outputs.run_id }}
+        uses: actions/upload-artifact@v4
+        with: 
           name: liquibase-pro-azure-artifacts
           path: liquibase-pro/liquibase-azure-deps
 
