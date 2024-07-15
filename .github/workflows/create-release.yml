@@ -176,7 +176,9 @@ jobs:
           ## Sign Files
           ## liquibase-azure-deps and liquibase extensions are already on its correct version. Check reusable workflow: build-azure-uber-jar.yml and build-extension-jars.yml
           mv liquibase-pro/liquibase-azure-deps/* re-version/out
-
+          echo "REVERSIONTHIS"
+          ls re-version/out
+          
           # Modify the zip file
           unzip re-version/out/liquibase-${{ needs.setup.outputs.version }}.zip -d re-version/out/liquibase-${{ needs.setup.outputs.version }}
           mkdir -p re-version/out/liquibase-${{ needs.setup.outputs.version }}/internal/extensions
@@ -198,6 +200,9 @@ jobs:
           (cd re-version/out/ && tar -czvf liquibase-${{ needs.setup.outputs.version }}.tar.gz -C liquibase-${{ needs.setup.outputs.version }} . && rm -rf liquibase-${{ needs.setup.outputs.version }} && cd ../..)
 
           $PWD/.github/util/sign-artifacts.sh re-version/out
+
+          echo "REVERSIONTHIS-2"
+          ls re-version/out
           
           # Move files to a specific directory
           mkdir re-version/final
