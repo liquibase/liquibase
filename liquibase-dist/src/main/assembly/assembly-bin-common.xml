@@ -104,6 +104,8 @@
 				<include>org.firebirdsql.jdbc:jaybird:</include>
                 <include>net.snowflake:snowflake-jdbc:</include>
                 <include>javax.resource:connector-api:</include>
+				<include>org.slf4j:slf4j-api:</include>
+				<include>org.slf4j:slf4j-simple:</include>
 
 				<!-- CANNOT SHIP FOR LICENSE REASONS -->
 				<!-- <include>mysql:mysql-connector-java:jar</include> -->
@@ -166,6 +168,8 @@
 				<exclude>org.firebirdsql.jdbc:jaybird:</exclude> <!-- from internal/lib -->
 				<exclude>net.snowflake:snowflake-jdbc:</exclude> <!-- from internal/lib -->
 				<exclude>javax.resource:connector-api:</exclude> <!-- from internal/lib -->
+				<exclude>org.slf4j:slf4j-api:</exclude> <!-- from internal/lib -->
+				<exclude>org.slf4j:slf4j-simple:</exclude> <!-- from internal/lib -->
 				<exclude>org.antlr:antlr4-runtime:jar:</exclude>  <!-- from connector-api -->
 				<exclude>org.checkerframework:checker-qual:jar:</exclude> <!-- from postgresql -->
 				<exclude>commons-beanutils:commons-beanutils:jar:</exclude> <!-- from opencsv -->
