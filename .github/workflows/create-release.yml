@@ -110,6 +110,7 @@ jobs:
         uses: liquibase/action-download-artifact@v2-liquibase
         with:
           workflow: build-azure-uber-jar.yml
+          workflow_conclusion: in_progress
           run_id: ${{ github.run_id }}
           name: liquibase-pro-azure-artifacts
           path: liquibase-pro/liquibase-azure-deps
