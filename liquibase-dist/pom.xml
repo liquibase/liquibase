@@ -141,13 +141,6 @@
 			<artifactId>slf4j-simple</artifactId>
 			<version>${slf4j.version}</version>
 		</dependency>
-		<dependency>
-			<groupId>org.slf4j</groupId>
-			<artifactId>slf4j-simple</artifactId>
-			<version>1.7.36</version>
-			<scope>test</scope>
-		</dependency>
-
 
 		<dependency>
 			<groupId>com.ibm.db2</groupId>
