@@ -12,7 +12,7 @@ on:
         description: 'RunId of liquibase/liquibase artifacts to attach'
         required: true
       standalone_zip:
-        description: 'Flag to indicate if the workflow is triggered by the create standalone_zip zip workflow'
+        description: 'Flag to indicate if the workflow is triggered by the create standalone zip workflow'
         required: true
         type: boolean
         default: false
@@ -31,7 +31,7 @@ on:
         required: true
         type: string
       standalone_zip:
-        description: 'Flag to indicate if the workflow is triggered by the create standalone_zip zip workflow'
+        description: 'Flag to indicate if the workflow is triggered by the create standalone zip workflow'
         required: true
         type: boolean
         default: false
