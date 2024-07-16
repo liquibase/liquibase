@@ -11,8 +11,8 @@ on:
       runId:
         description: 'RunId of liquibase/liquibase artifacts to attach'
         required: true
-      standalone:
-        description: 'Flag to indicate if the workflow is triggered by the create standalone zip workflow'
+      standalone_zip:
+        description: 'Flag to indicate if the workflow is triggered by the create standalone_zip zip workflow'
         required: true
         type: boolean
         default: false
@@ -30,8 +30,8 @@ on:
         description: 'RunId of liquibase/liquibase artifacts to attach'
         required: true
         type: string
-      standalone:
-        description: 'Flag to indicate if the workflow is triggered by the create standalone zip workflow'
+      standalone_zip:
+        description: 'Flag to indicate if the workflow is triggered by the create standalone_zip zip workflow'
         required: true
         type: boolean
         default: false
@@ -224,7 +224,7 @@ jobs:
           path: re-version/final
 
       - name: Set repository tags
-        if: ${{ inputs.standalone == false }}
+        if: ${{ inputs.standalone_zip == false }}
         run: |
           git tag -f v${{ needs.setup.outputs.version }}
           git push -f origin v${{ needs.setup.outputs.version }}
@@ -296,7 +296,7 @@ jobs:
 
       # Only attach installers when the workflow is triggered by the create release process
       - name: Attach Files to Draft Release
-        if: ${{ inputs.standalone == false }}
+        if: ${{ inputs.standalone_zip == false }}
         uses: softprops/action-gh-release@v2
         with:
           tag_name: v${{ needs.setup.outputs.version }}
@@ -308,9 +308,9 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
-      # Only attach installers when the workflow is triggered manually (from create-standalone-zip.yml)
-      - name: Attach Standalone zip to Build
-        if: ${{ inputs.standalone == true }}
+      # Only attach installers when the workflow is triggered manually (from create-standalone_zip.yml)
+      - name: Attach standalone zip to Build
+        if: ${{ inputs.standalone_zip == true }}
         uses: actions/upload-artifact@v4
         with:
             name: liquibase-installers-${{ needs.setup.outputs.version }}

@@ -20,6 +20,6 @@ jobs:
      version: ${{ inputs.version}}
      branch: ${{ inputs.branch}}
      runId: ${{ inputs.runId}}
-     standalone: true
+     standalone_zip: true
    secrets: inherit
   
