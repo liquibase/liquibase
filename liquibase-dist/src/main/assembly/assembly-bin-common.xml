@@ -104,12 +104,18 @@
                 <include>org.firebirdsql.jdbc:jaybird:</include>
                 <include>net.snowflake:snowflake-jdbc:</include>
                 <include>javax.resource:connector-api:</include>
-                <include>org.slf4j:slf4j-api:</include>
-                <include>org.slf4j:slf4j-simple:</include>
-
+<<<<<<< HEAD
                 <!-- CANNOT SHIP FOR LICENSE REASONS -->
                 <!-- <include>mysql:mysql-connector-java:jar</include> -->
             </includes>
+=======
+				<include>org.slf4j:slf4j-api:</include>
+				<include>org.slf4j:slf4j-simple:</include>
+
+				<!-- CANNOT SHIP FOR LICENSE REASONS -->
+				<!-- <include>mysql:mysql-connector-java:jar</include> -->
+			</includes>
+>>>>>>> origin/master
 
             <!-- some libraries lie about compile vs. runtime dependencies. Or we don't hit code that uses these. So exclude them manually. -->
             <excludes>
