@@ -12,7 +12,7 @@ on:
         description: 'RunId of liquibase/liquibase artifacts to attach'
         required: true
       standalone_zip:
-        description: 'Flag to indicate if the workflow is triggered by the create standalone zip workflow'
+        description: 'Flag to indicate if the workflow is triggered to create a standalone zip'
         required: true
         type: boolean
         default: false
@@ -31,7 +31,7 @@ on:
         required: true
         type: string
       standalone_zip:
-        description: 'Flag to indicate if the workflow is triggered by the create standalone zip workflow'
+        description: 'Flag to indicate if the workflow is triggered to create a standalone zip'
         required: true
         type: boolean
         default: false
@@ -294,7 +294,6 @@ jobs:
           rm re-version/final/*.md5
           rm re-version/final/*.sha1
 
-      # Only attach installers when the workflow is triggered by the create release process
       - name: Attach Files to Draft Release
         if: ${{ inputs.standalone_zip == false }}
         uses: softprops/action-gh-release@v2
@@ -308,7 +307,6 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
-      # Only attach installers when the workflow is triggered manually (from create-standalone_zip.yml)
       - name: Attach standalone zip to Build
         if: ${{ inputs.standalone_zip == true }}
         uses: actions/upload-artifact@v4
