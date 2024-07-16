@@ -16,25 +16,6 @@ on:
         required: true
         type: boolean
         default: false
-  workflow_call:
-    inputs:
-      version:
-        description: 'Version (example: 4.8.2)'
-        required: true
-        type: string
-      branch:
-        description: 'Branch to release (Defaults to master)'
-        required: false
-        type: string
-      runId:
-        description: 'RunId of liquibase/liquibase artifacts to attach'
-        required: true
-        type: string
-      standalone_zip:
-        description: 'Flag to indicate if the workflow is triggered to create a standalone zip'
-        required: true
-        type: boolean
-        default: false
 
 env:
   DEPENDENCIES: "liquibase-bigquery" # Comma separated list of dependencies to release the extensions list
