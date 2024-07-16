@@ -364,27 +364,6 @@
             </dependencies>
         </profile>
 
-        <!-- Profile to include liquibase-checks in the tarball -->
-        <profile>
-            <id>liquibase-checks</id>
-            <activation>
-                <property>
-                    <name>liquibase.checks</name>
-                    <value>true</value>
-                </property>
-            </activation>
-            <properties>
-                <assemblyConfigFile>src/main/assembly/assembly-bin-checks.xml</assemblyConfigFile>
-            </properties>
-            <dependencies>
-                <dependency>
-                    <groupId>org.liquibase.ext</groupId>
-                    <artifactId>liquibase-checks</artifactId>
-                    <version>${liquibase-checks.version}</version>
-                </dependency>
-            </dependencies>
-        </profile>
-
         <profile>
             <id>remote-repositories</id>
             <activation>
