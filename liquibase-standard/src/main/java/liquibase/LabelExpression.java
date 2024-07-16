@@ -84,16 +84,22 @@ public class LabelExpression {
     /**
      * Returns true if the passed runtime labels match this label expression
      */
-    public boolean matches(Labels runtimeLabels) {
-        if (runtimeLabels == null) {
-            runtimeLabels = new Labels();
-        }
-        if (this.labels.isEmpty()) {
+    public boolean matches(Labels changeSetLabels) {
+        boolean isThereAnyRequiredLabel = changeSetLabels != null ? changeSetLabels.getLabels().stream().anyMatch(label -> label.startsWith("@")) : false;
+
+        //Check whether changeset labels are empty or have not been specified
+        if (changeSetLabels == null || changeSetLabels.isEmpty()) {
             return true;
         }
 
+        //Check whether runtime labels are empty (which also means they might not be specified), plus if there is not any required changeset label
+        if (this.labels.isEmpty() && !isThereAnyRequiredLabel) {
+            return true;
+        }
+
+        //Check whether there is match between changeset labels and runtime labels
         for (String expression : this.labels) {
-            if (matches(expression, runtimeLabels)) {
+            if (matches(expression, changeSetLabels)) {
                 return true;
             }
         }
@@ -135,5 +141,13 @@ public class LabelExpression {
 
     public String getOriginalString() {
         return originalString;
+    }
+
+    public static boolean isThereAnyRequiredLabel(Labels labels) {
+        return !labels.isEmpty() ? labels.getLabels().stream().anyMatch(label -> label.startsWith("@")) : false;
+    }
+
+    public static boolean isThereAnyRequiredLabel(Collection<Labels> labels) {
+        return !labels.isEmpty() ? labels.stream().anyMatch(label -> isThereAnyRequiredLabel(label)) : false;
     }
 }
