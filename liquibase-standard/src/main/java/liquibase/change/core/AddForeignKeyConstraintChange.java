@@ -61,11 +61,12 @@ public class AddForeignKeyConstraintChange extends AbstractChange {
         String parameterName, DatabaseChangeProperty changePropertyAnnotation) {
         if ("deferrable".equals(parameterName) || "initiallyDeferred".equals(parameterName)) {
             List<String> supported = new ArrayList<>();
-            for (Database database : DatabaseFactory.getInstance().getImplementedDatabases()) {
-                if (database.supportsInitiallyDeferrableColumns()) {
-                    supported.add(database.getShortName());
-                }
-            }
+            //FIXME we need another way to accomplish that, maybe by a static list
+//            for (Database database : DatabaseFactory.getInstance().getImplementedDatabases()) {
+//                if (database.supportsInitiallyDeferrableColumns()) {
+//                    supported.add(database.getShortName());
+//                }
+//            }
             return supported.toArray(new String[0]);
 
         } else {
