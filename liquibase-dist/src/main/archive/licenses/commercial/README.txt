@@ -7,8 +7,6 @@ Liquibase ships with 3rd party components using the following licenses:
 - BSD 3-Clause License - https://opensource.org/licenses/BSD-3-Clause
 - MIT License - https://opensource.org/licenses/MIT
 - Oracle FDHUT License
-- The Universal Permissive License (UPL), Version 1.0 - https://opensource.org/licenses/UPL
-- Python Software Foundation License (PSF) - https://opensource.org/license/python-2-0
 
 Libraries and their licenses:
 
@@ -33,9 +31,3 @@ BSD 3-Clause License
 
 Oracle FDHUT License
 - ojdbc8.jar
-
-The Universal Permissive License (UPL)
-- org.graalvm.polyglot:polyglot
-- org.graalvm.polyglot:python (Multi license: MIT, PSF)
-- org.graalvm.python:python-launcher
-- org.graalvm.python:python-embedding

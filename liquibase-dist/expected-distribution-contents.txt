@@ -58,8 +58,6 @@
 │       ├── liquibase.flowvariables.yaml
 │       └── liquibase.properties
 ├── internal
-│   ├── extensions
-│   │   └── liquibase-checks.jar
 │   └── lib
 │       ├── commons-collections4.jar
 │       ├── commons-io.jar
@@ -97,9 +95,7 @@
 │   │   ├── README.txt
 │   │   ├── apache-2.0.txt
 │   │   ├── bsd-3-clause.txt
-│   │   ├── mit.txt
-│   │   ├── psf.txt
-│   │   └── upl.txt
+│   │   └── mit.txt
 │   └── oss
 │       ├── README.txt
 │       ├── apache-2.0.txt
