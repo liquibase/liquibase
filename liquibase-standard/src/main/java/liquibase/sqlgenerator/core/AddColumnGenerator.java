@@ -9,6 +9,7 @@ import liquibase.database.core.HsqlDatabase;
 import liquibase.database.core.MSSQLDatabase;
 import liquibase.database.core.MySQLDatabase;
 import liquibase.database.core.OracleDatabase;
+import liquibase.database.core.PostgresDatabase;
 import liquibase.database.core.SQLiteDatabase;
 import liquibase.database.core.SybaseASADatabase;
 import liquibase.database.core.SybaseDatabase;
@@ -280,7 +281,7 @@ public class AddColumnGenerator extends AbstractSqlGenerator<AddColumnStatement>
         String clause = "";
         Object defaultValue = statement.getDefaultValue();
         if (defaultValue != null) {
-            if ((database instanceof OracleDatabase) && defaultValue.toString().startsWith("GENERATED ALWAYS ")) {
+            if ((database instanceof OracleDatabase || database instanceof PostgresDatabase) && defaultValue.toString().startsWith("GENERATED ALWAYS ")) {
                 clause += " " + DataTypeFactory.getInstance().fromObject(defaultValue, database).objectToSql(defaultValue, database);
             } else {
                 if (database instanceof MSSQLDatabase) {
