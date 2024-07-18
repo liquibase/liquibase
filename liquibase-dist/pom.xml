@@ -26,6 +26,7 @@
 		<sqlite.version>3.46.0.0</sqlite.version>
 		<db2.version>11.5.9.0</db2.version>
 		<firebird.version>5.0.5.java8</firebird.version>
+		<slf4j.version>1.7.36</slf4j.version>
 		<liquibase-pro.version>master-SNAPSHOT</liquibase-pro.version>
 		<assemblyConfigFile>src/main/assembly/assembly-bin.xml</assemblyConfigFile>
 		<maven.deploy.skip>true</maven.deploy.skip>
@@ -127,6 +128,18 @@
 			<artifactId>sqlite-jdbc</artifactId>
 			<version>${sqlite.version}</version>
 			<optional>true</optional>
+		</dependency>
+		<!-- sqlite requires slf4j, so we add simple to prevent log warning messages.
+		We also add it here to be able to manage the version for it -->
+		<dependency>
+			<groupId>org.slf4j</groupId>
+			<artifactId>slf4j-api</artifactId>
+			<version>${slf4j.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>org.slf4j</groupId>
+			<artifactId>slf4j-simple</artifactId>
+			<version>${slf4j.version}</version>
 		</dependency>
 
 		<dependency>

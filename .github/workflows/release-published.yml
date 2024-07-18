@@ -99,6 +99,11 @@ jobs:
           sed -i -e "s/<version>release-SNAPSHOT<\/version>/<version>${version}<\/version>/" pom.xml
           mv pom.xml liquibase-maven-plugin-${version}.pom
           gpg --batch --pinentry-mode=loopback --passphrase "$GPG_PASSWORD" -ab liquibase-maven-plugin-${version}.pom
+          
+          unzip -j liquibase-cli-${version}.jar META-INF/maven/org.liquibase/liquibase-cli/pom.xml
+          sed -i -e "s/<version>release-SNAPSHOT<\/version>/<version>${version}<\/version>/" pom.xml
+          mv pom.xml liquibase-cli-${version}.pom
+          gpg --batch --pinentry-mode=loopback --passphrase "$GPG_PASSWORD" -ab liquibase-cli-${version}.pom
 
           unzip -j liquibase-cdi-${version}.jar META-INF/maven/org.liquibase/liquibase-cdi/pom.xml
           sed -i -e "s/<version>release-SNAPSHOT<\/version>/<version>${version}<\/version>/" pom.xml
@@ -151,6 +156,18 @@ jobs:
             -Dsources=liquibase-maven-plugin-${version}-sources.jar \
             -Djavadoc=liquibase-maven-plugin-${version}-javadoc.jar \
             -Dfiles=liquibase-maven-plugin-${version}.jar.asc,liquibase-maven-plugin-${version}-sources.jar.asc,liquibase-maven-plugin-${version}-javadoc.jar.asc,liquibase-maven-plugin-${version}.pom.asc \
+            -Dtypes=jar.asc,jar.asc,jar.asc,pom.asc \
+            -Dclassifiers=,sources,javadoc,
+          
+          mvn -B org.apache.maven.plugins:maven-deploy-plugin:3.0.0-M1:deploy-file \
+            -Durl=https://oss.sonatype.org/service/local/staging/deploy/maven2/ \
+            -DrepositoryId=sonatype-nexus-staging \
+            -DpomFile=liquibase-cli-${version}.pom \
+            -DgeneratePom=false \
+            -Dfile=liquibase-cli-${version}.jar \
+            -Dsources=liquibase-cli-${version}-sources.jar \
+            -Djavadoc=liquibase-cli-${version}-javadoc.jar \
+            -Dfiles=liquibase-cli-${version}.jar.asc,liquibase-cli-${version}-sources.jar.asc,liquibase-cli-${version}-javadoc.jar.asc,liquibase-cli-${version}.pom.asc \
             -Dtypes=jar.asc,jar.asc,jar.asc,pom.asc \
             -Dclassifiers=,sources,javadoc,
 
