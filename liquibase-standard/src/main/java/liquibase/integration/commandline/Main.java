@@ -1653,9 +1653,9 @@ public class Main {
                         handleUpdateException(database, updateException, defaultChangeExecListener, rollbackOnError);
                     }
                 } else if (COMMANDS.HISTORY.equalsIgnoreCase(command)) {
-                    CommandScope historyCommand = new CommandScope("internalHistory");
-                    historyCommand.addArgumentValue(InternalHistoryCommandStep.DATABASE_ARG, database);
-                    historyCommand.addArgumentValue(InternalHistoryCommandStep.FORMAT_ARG, HistoryFormat.valueOf(format));
+                    CommandScope historyCommand = new CommandScope(HistoryCommandStep.COMMAND_NAME);
+                    historyCommand.addArgumentValue(DbUrlConnectionArgumentsCommandStep.DATABASE_ARG, database);
+                    historyCommand.addArgumentValue(HistoryCommandStep.FORMAT_ARG, HistoryFormat.valueOf(format));
                     historyCommand.setOutput(getOutputStream());
 
                     historyCommand.execute();

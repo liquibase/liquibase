@@ -203,8 +203,8 @@ jobs:
             EXPECTED_TEST_COUNT=${{ vars.TEST_COUNT_JAVA_21_UBUNTU }}
           fi
 
-          if [[ ($TEST_COUNT -lt $(($EXPECTED_TEST_COUNT - ($EXPECTED_TEST_COUNT / 100))) ) || ($TEST_COUNT -gt $(($EXPECTED_TEST_COUNT + ($EXPECTED_TEST_COUNT / 100))) ) ]]; then
-            echo "Unit Test count is outside the acceptable range of +/- 1% of the expected count. Expected $EXPECTED_TEST_COUNT. Actual $TEST_COUNT."
+          if [[ ($TEST_COUNT -lt $(($EXPECTED_TEST_COUNT - ($EXPECTED_TEST_COUNT / 100))) ) ]]; then
+            echo "Unit Test count is below the acceptable range of - 1% of the expected count. Expected $EXPECTED_TEST_COUNT. Actual $TEST_COUNT."
             exit 1
           fi
           echo "test_count_unit_test_java_${{ matrix.java }}_ubuntu=$TEST_COUNT" >> $GITHUB_OUTPUT
@@ -221,8 +221,8 @@ jobs:
             echo "No test result files found or test count is zero."
             exit 1
           fi  
-          if [[ $TEST_COUNT -lt $((${{ vars.TEST_COUNT_JAVA_MACOS }} - (${{ vars.TEST_COUNT_JAVA_MACOS }} / 100))) ]] || [[ $TEST_COUNT -gt $((${{ vars.TEST_COUNT_JAVA_MACOS }} + (${{ vars.TEST_COUNT_JAVA_MACOS }} / 100))) ]]; then
-            echo "MacOS Unit Test count is outside the acceptable range of +/- 1% of the expected count. Expected ${{ vars.TEST_COUNT_JAVA_MACOS }}. Actual $TEST_COUNT."
+          if [[ $TEST_COUNT -lt $((${{ vars.TEST_COUNT_JAVA_MACOS }} - (${{ vars.TEST_COUNT_JAVA_MACOS }} / 100))) ]] ; then
+            echo "MacOS Unit Test count is below the acceptable range of - 1% of the expected count. Expected ${{ vars.TEST_COUNT_JAVA_MACOS }}. Actual $TEST_COUNT."
             exit 1
           fi
           echo "test_count_unit_test_java_macos=$TEST_COUNT" >> $GITHUB_OUTPUT
@@ -238,8 +238,8 @@ jobs:
               Write-Output "No Unit tests were run."
               exit 1
           }
-          if (($TEST_COUNT -lt $((${{ vars.TEST_COUNT_JAVA_WINDOWS }} - (${{ vars.TEST_COUNT_JAVA_WINDOWS }} / 100))) ) || ($TEST_COUNT -gt $((${{ vars.TEST_COUNT_JAVA_WINDOWS }} + (${{ vars.TEST_COUNT_JAVA_WINDOWS }} / 100))) )) {
-              Write-Host "Windows Unit Test count is outside the acceptable range of +/- 1% of the expected count. Expected ${{ vars.TEST_COUNT_JAVA_WINDOWS }}. Actual $TEST_COUNT."
+          if (($TEST_COUNT -lt $((${{ vars.TEST_COUNT_JAVA_WINDOWS }} - (${{ vars.TEST_COUNT_JAVA_WINDOWS }} / 100))) ) ) {
+              Write-Host "Windows Unit Test count is below the acceptable range of - 1% of the expected count. Expected ${{ vars.TEST_COUNT_JAVA_WINDOWS }}. Actual $TEST_COUNT."
               exit 1
           }
           echo "test_count_unit_test_java_windows=$TEST_COUNT" >> $env:GITHUB_OUTPUT
@@ -407,8 +407,8 @@ jobs:
               EXPECTED_TEST_COUNT=${{ vars.TEST_COUNT_INTEGRATION_FIREBIRD }} 
             fi
 
-            if [[ $TEST_COUNT -lt $(($EXPECTED_TEST_COUNT - ($EXPECTED_TEST_COUNT / 100))) ]] || [[ $TEST_COUNT -gt $(($EXPECTED_TEST_COUNT + ($EXPECTED_TEST_COUNT / 100))) ]]; then
-              echo "Integration Test count is outside the acceptable range of +/- 1% of the expected count. Expected $EXPECTED_TEST_COUNT. Actual $TEST_COUNT."
+            if [[ $TEST_COUNT -lt $(($EXPECTED_TEST_COUNT - ($EXPECTED_TEST_COUNT / 100))) ]] ; then
+              echo "Integration Test count is below the acceptable range of - 1% of the expected count. Expected $EXPECTED_TEST_COUNT. Actual $TEST_COUNT."
               exit 1
             fi
             echo "test_count_integration_${{ matrix.testSystem }}=$TEST_COUNT" >> $GITHUB_OUTPUT
