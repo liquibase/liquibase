@@ -1019,6 +1019,7 @@
             <xsd:attribute name="tableType" type="xsd:string"/>
             <xsd:attribute name="remarks" type="xsd:string"/>
             <xsd:attribute name="ifNotExists" type="xsd:boolean"/>
+            <xsd:attribute name="rowDependencies" type="xsd:boolean" default="false"/>
             <xsd:anyAttribute namespace="##other" processContents="lax"/>
         </xsd:complexType>
     </xsd:element>

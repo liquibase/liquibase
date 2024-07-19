@@ -11,20 +11,11 @@ on:
       runId:
         description: 'RunId of liquibase/liquibase artifacts to attach'
         required: true
-  workflow_call:
-    inputs:
-      version:
-        description: 'Version (example: 4.8.2)'
+      standalone_zip:
+        description: 'Flag to indicate if the workflow is triggered to create a standalone zip'
         required: true
-        type: string
-      branch:
-        description: 'Branch to release (Defaults to master)'
-        required: false
-        type: string
-      runId:
-        description: 'RunId of liquibase/liquibase artifacts to attach'
-        required: true
-        type: string
+        type: boolean
+        default: false
 
 env:
   DEPENDENCIES: "liquibase-bigquery" # Comma separated list of dependencies to release the extensions list
@@ -214,7 +205,7 @@ jobs:
           path: re-version/final
 
       - name: Set repository tags
-        if: ${{ github.event_name == 'workflow_call' }}
+        if: ${{ inputs.standalone_zip == false }}
         run: |
           git tag -f v${{ needs.setup.outputs.version }}
           git push -f origin v${{ needs.setup.outputs.version }}
@@ -284,9 +275,8 @@ jobs:
           rm re-version/final/*.md5
           rm re-version/final/*.sha1
 
-      # Only attach installers when the workflow is triggered by the create release process
       - name: Attach Files to Draft Release
-        if: ${{ github.event_name == 'workflow_call' }}
+        if: ${{ inputs.standalone_zip == false }}
         uses: softprops/action-gh-release@v2
         with:
           tag_name: v${{ needs.setup.outputs.version }}
@@ -298,9 +288,8 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
-      # Only attach installers when the workflow is triggered manually (from create-standalone-zip.yml)
-      - name: Attach Standalone zip to Build
-        if: ${{ github.event_name == 'workflow_dispatch' }}
+      - name: Attach standalone zip to Build
+        if: ${{ inputs.standalone_zip == true }}
         uses: actions/upload-artifact@v4
         with:
             name: liquibase-installers-${{ needs.setup.outputs.version }}
