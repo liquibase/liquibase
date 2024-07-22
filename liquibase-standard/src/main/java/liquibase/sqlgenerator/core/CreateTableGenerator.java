@@ -403,6 +403,11 @@ public class CreateTableGenerator extends AbstractSqlGenerator<CreateTableStatem
         if ((database instanceof MySQLDatabase) && (statement.getRemarks() != null)) {
             sql += " COMMENT='" + database.escapeStringForDatabase(statement.getRemarks()) + "' ";
         }
+
+        if (database instanceof OracleDatabase && statement.isRowDependencies()) {
+            sql += " ROWDEPENDENCIES ";
+        }
+
         additionalSql.add(0, new UnparsedSql(sql, getAffectedTable(statement)));
         return additionalSql.toArray(EMPTY_SQL);
     }

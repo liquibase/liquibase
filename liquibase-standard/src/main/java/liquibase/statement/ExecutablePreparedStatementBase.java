@@ -16,6 +16,7 @@ import liquibase.exception.UnexpectedLiquibaseException;
 import liquibase.listener.SqlListener;
 import liquibase.logging.Logger;
 import liquibase.resource.ResourceAccessor;
+import liquibase.snapshot.SnapshotControl;
 import liquibase.snapshot.SnapshotGeneratorFactory;
 import liquibase.sql.SqlConfiguration;
 import liquibase.sql.visitor.SqlVisitor;
@@ -311,7 +312,8 @@ public abstract class ExecutablePreparedStatementBase implements ExecutablePrepa
                     Column snapshot = (Column) this.getScratchData(snapshotKeyName);
                     if (snapshot == null) {
                         snapshot = SnapshotGeneratorFactory.getInstance().createSnapshot(
-                                new Column(Table.class, getCatalogName(), getSchemaName(), getTableName(), col.getName()), database);
+                                new Column(Table.class, getCatalogName(), getSchemaName(), getTableName(), col.getName()),
+                                database, new SnapshotControl(database, false, Column.class));
                         this.setScratchData(snapshotKeyName, snapshot);
                     }
 

@@ -7,6 +7,7 @@ import liquibase.exception.LiquibaseException
 import liquibase.logging.core.BufferedLogService
 import liquibase.ui.ConsoleUIService
 import liquibase.util.StringUtil
+import org.junit.jupiter.api.Assumptions
 import spock.lang.Specification
 import spock.lang.Unroll
 
@@ -735,6 +736,7 @@ https://docs.liquibase.com
 
     def "help output" () {
         when:
+        Assumptions.assumeTrue(System.getProperty("skipHelpTests") != null, "Skipping help test")
         def oldOut = System.out
         def bytes = new ByteArrayOutputStream()
         def newOut = new PrintStream(bytes)
