@@ -116,8 +116,8 @@ public abstract class YamlSerializer implements LiquibaseSerializer {
                             value = toMap((LiquibaseSerializable) value);
                         }
                     }
-                    if(value instanceof PreconditionContainer) {
-                        value = toMap((PreconditionContainer) value);
+                    else {
+                        value = toMap((LiquibaseSerializable) value);
                     }
                 }
                 if (value instanceof Collection) {
