@@ -6,6 +6,7 @@ import liquibase.changelog.ChangeSet;
 import liquibase.changelog.RollbackContainer;
 import liquibase.exception.UnexpectedLiquibaseException;
 import liquibase.parser.core.yaml.YamlParser;
+import liquibase.precondition.core.PreconditionContainer;
 import liquibase.serializer.LiquibaseSerializable;
 import liquibase.serializer.LiquibaseSerializer;
 import liquibase.statement.DatabaseFunction;
@@ -109,13 +110,14 @@ public abstract class YamlSerializer implements LiquibaseSerializer {
                 if (value instanceof LiquibaseSerializable) {
                     if(value instanceof RollbackContainer) {
                         List<Change> changesToRollback = ((RollbackContainer) value).getChanges();
-                        if(changesToRollback.size() == 1) {
+                        if (changesToRollback.size() == 1) {
                             value = toMap(changesToRollback.get(0));
                         } else {
                             value = toMap((LiquibaseSerializable) value);
                         }
-                    } else {
-                        value = toMap((LiquibaseSerializable) value);
+                    }
+                    if(value instanceof PreconditionContainer) {
+                        value = toMap((PreconditionContainer) value);
                     }
                 }
                 if (value instanceof Collection) {
