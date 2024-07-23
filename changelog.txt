@@ -6,7 +6,7 @@ Changes in version 4.29.0 (2024.07.25)
 ### Liquibase 4.29.0 is a major release
 
 > [!IMPORTANT]
-> Liquibase 4.29.0 contains several New Capabilities and Notable Enhancements for Liquibase Pro users: Python-based Custom Policy Checks, DynamoDB checks, and a new Big Query extension.
+> Liquibase 4.29.0 contains several New Capabilities and Notable Enhancements for Liquibase Pro users: Python-based Custom Policy Checks and a new Big Query extension.
 > [!NOTE]
 > See the [Liquibase 4.29.0 Release Notes](https://docs.liquibase.com/start/release-notes/liquibase-release-notes/liquibase-4.29.0.html) for the complete set of release information.
 
@@ -16,10 +16,6 @@ Changes in version 4.29.0 (2024.07.25)
 #### Custom Policy Checks: Create and run Python-based checks which fit your specific needs.
 * Liquibase checks have been opened to the world of Python development! With this release, you can point your custom checks to your custom Python scripts to solve your nuanced conditions for better risk mitigation, compliance, code quality, security, and more.
 * Learn more https://docs.liquibase.com/custom-policy-checks
-
-#### DynamoDB Checks: Liquibase users of DynamoDB can ensure compliance for DynamoDB specific table attributes, index attributes, and much more.
-* Check the quality and security of your DynamoDB database code on-demand or in automation before deployment with these customizable rules.
-* Learn more https://docs.liquibase.com/quality-checks
 
 #### Big Query Extension: using Liquibase Pro with Google Big Query
 * With Liquibase 4.29.0, Google BigQuery is now supported as an ‘out of the box’ database enabling users to more quickly achieve value. Also included is support for Liquibase Pro features such as Flows, Policy Checks, and Reports with Google BigQuery so that users will have the efficiency and productivity benefits of Liquibase Pro when working with the platform.
