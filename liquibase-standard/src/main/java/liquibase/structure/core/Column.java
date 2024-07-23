@@ -25,6 +25,7 @@ public class Column extends AbstractDatabaseObject {
     private Boolean computed;
     private Boolean descending;
     private boolean forIndex;
+    private boolean included;
 
     public Column() {
     }
@@ -45,6 +46,7 @@ public class Column extends AbstractDatabaseObject {
     public Column(ColumnConfig columnConfig) {
         setName(columnConfig.getName());
         setDescending(columnConfig.getDescending());
+        setIncluded(columnConfig.getIncluded());
         setType(new DataType(columnConfig.getType()));
 
         if (columnConfig.getDefaultValueObject() != null) {
@@ -191,6 +193,20 @@ public class Column extends AbstractDatabaseObject {
         return descending;
     }
 
+    public Boolean getIncluded() {
+        return included;
+    }
+
+    public Column setIncluded(Boolean included) {
+        if(included==null){
+            included=false;
+        }
+        this.included = included;
+        setAttribute("included", included);
+
+        return this;
+    }
+    
     public Column setDescending(Boolean descending) {
         this.descending = descending;
         setAttribute("descending", descending);
