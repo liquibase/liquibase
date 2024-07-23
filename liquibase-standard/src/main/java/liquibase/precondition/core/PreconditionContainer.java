@@ -15,6 +15,7 @@ import liquibase.parser.core.ParsedNode;
 import liquibase.parser.core.ParsedNodeException;
 import liquibase.precondition.ErrorPrecondition;
 import liquibase.precondition.FailedPrecondition;
+import liquibase.precondition.Precondition;
 import liquibase.resource.ResourceAccessor;
 import liquibase.util.StreamUtil;
 import liquibase.util.StringUtil;
@@ -275,6 +276,7 @@ public class PreconditionContainer extends AndPrecondition implements ChangeLogC
         this.setOnFail(parsedNode.getChildValue(null, "onFail", String.class));
         this.setOnFailMessage(parsedNode.getChildValue(null, "onFailMessage", String.class));
         this.setOnSqlOutput(parsedNode.getChildValue(null, "onSqlOutput", String.class));
+        this.addNestedPrecondition(parsedNode.getChildValue(null, "nestedPreconditions", Precondition.class));
 
         super.load(parsedNode, resourceAccessor);
     }
