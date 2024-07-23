@@ -23,6 +23,7 @@ import liquibase.util.StringUtil;
 import java.util.Arrays;
 import java.util.Iterator;
 import java.util.List;
+import java.util.LinkedList;
 
 public class CreateIndexGenerator extends AbstractSqlGenerator<CreateIndexStatement> {
 
@@ -119,7 +120,20 @@ public class CreateIndexGenerator extends AbstractSqlGenerator<CreateIndexStatem
             buffer.append("CLUSTER ");
         }
 	    buffer.append(database.escapeTableName(statement.getTableCatalogName(), statement.getTableSchemaName(), statement.getTableName())).append("(");
-	    Iterator<AddColumnConfig> iterator = Arrays.asList(statement.getColumns()).iterator();
+	    Iterator<AddColumnConfig> spliterator = Arrays.asList(statement.getColumns()).iterator();
+        List <AddColumnConfig> includedColumns = new LinkedList<>();
+        List <AddColumnConfig> normalColumns = new LinkedList<>();
+        while(spliterator.hasNext()){
+            AddColumnConfig curr = spliterator.next();
+            if(curr.getIncluded()){
+                includedColumns.add(curr);
+            }
+            else{
+                normalColumns.add(curr);
+            }
+        }
+
+         Iterator<AddColumnConfig> iterator =normalColumns.iterator();
 	    while (iterator.hasNext()) {
             AddColumnConfig column = iterator.next();
             if (column.getComputed() == null) {
@@ -139,6 +153,33 @@ public class CreateIndexGenerator extends AbstractSqlGenerator<CreateIndexStatem
 		    }
 	    }
 	    buffer.append(")");
+
+        //TODO: add support for include statements.
+        // Include (SuperUser, SuperViewer, RefUserTypeId, [ActiveRole])
+        if (includedColumns.size()==0){
+            buffer.append("Include (");
+	        Iterator<AddColumnConfig> includerator = includedColumns.iterator();
+	        while (includerator.hasNext()) {
+                AddColumnConfig column = includerator.next();
+                if (column.getComputed() == null) {
+                    buffer.append(database.escapeColumnName(statement.getTableCatalogName(), statement.getTableSchemaName(), statement.getTableName(), column.getName(), false));
+                } else {
+                    if (column.getComputed()) {
+                        buffer.append(column.getName());
+                    } else {
+                        buffer.append(database.escapeColumnName(statement.getTableCatalogName(), statement.getTableSchemaName(), statement.getTableName(), column.getName()));
+                    }
+                }
+                //not supported on include columns
+                //if ((column.getDescending() != null) && column.getDescending()) {
+                //    buffer.append(" DESC");
+                //}
+                if (includerator.hasNext()) {
+			        buffer.append(", ");
+    		    }
+	        }
+	        buffer.append(")");
+        }
 
 	    if ((StringUtil.trimToNull(statement.getTablespace()) != null) && database.supportsTablespaces()) {
 		    if ((database instanceof MSSQLDatabase) || (database instanceof SybaseASADatabase)) {
