@@ -156,8 +156,8 @@ public class CreateIndexGenerator extends AbstractSqlGenerator<CreateIndexStatem
 
         //TODO: add support for include statements.
         // Include (SuperUser, SuperViewer, RefUserTypeId, [ActiveRole])
-        if (includedColumns.size()==0){
-            buffer.append("Include (");
+        if (includedColumns.size()>0){
+            buffer.append(" Include (");
 	        Iterator<AddColumnConfig> includerator = includedColumns.iterator();
 	        while (includerator.hasNext()) {
                 AddColumnConfig column = includerator.next();
