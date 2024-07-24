@@ -353,6 +353,19 @@ public class MySQLDatabase extends AbstractJdbcDatabase {
         return 0;
     }
 
+    public void addReservedWord(String rword) throws DatabaseException {
+        MySQLDatabase db = new MySQLDatabase();
+        db.setConnection(getConnection());
+        if(db.getDatabaseMinorVersion() == 4) {
+            if(!isReservedWord(rword)) {
+                RESERVED_WORDS.add(rword);
+            }
+            else {
+                System.out.println("sadasd");
+            }
+        }
+    }
+
     /*
      * list from http://dev.mysql.com/doc/refman/5.6/en/reserved-words.html
      */
@@ -507,8 +520,6 @@ public class MySQLDatabase extends AbstractJdbcDatabase {
                 "LONGTEXT",
                 "LOOP",
                 "LOW_PRIORITY",
-                //The below reserved word is available from MySQL v8.4
-                "MANUAL",
                 "MASTER_PUBLIC_KEY_PATH",
                 "MASTER_SSL_VERIFY_SERVER_CERT",
                 "MATCH",
