@@ -25,7 +25,7 @@ public class Column extends AbstractDatabaseObject {
     private Boolean computed;
     private Boolean descending;
     private boolean forIndex;
-    private boolean included;
+    private Boolean included;
 
     public Column() {
     }
@@ -198,15 +198,12 @@ public class Column extends AbstractDatabaseObject {
     }
 
     public Column setIncluded(Boolean included) {
-        if(included==null){
-            included=false;
-        }
         this.included = included;
         setAttribute("included", included);
 
         return this;
     }
-    
+
     public Column setDescending(Boolean descending) {
         this.descending = descending;
         setAttribute("descending", descending);

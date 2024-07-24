@@ -58,7 +58,7 @@ public class ColumnConfig extends AbstractLiquibaseSerializable {
     private BigInteger incrementBy;
     private String remarks;
     private Boolean descending;
-    private boolean included;
+    private Boolean included;
 
     /**
      * Create a ColumnConfig object based on a {@link Column} snapshot.
@@ -68,7 +68,7 @@ public class ColumnConfig extends AbstractLiquibaseSerializable {
         setName(columnSnapshot.getName());
         setComputed(BooleanUtil.isTrue(columnSnapshot.getComputed()) ? Boolean.TRUE : null);
         setDescending(BooleanUtil.isTrue(columnSnapshot.getDescending()) ? Boolean.TRUE : null);
-        setIncluded(BooleanUtil.isTrue(columnSnapshot.getIncluded()) ? Boolean.FALSE : null);
+        setIncluded(BooleanUtil.isTrue(columnSnapshot.getIncluded()) ? Boolean.TRUE : null);
         if (columnSnapshot.getType() != null) {
             setType(columnSnapshot.getType().toString());
         }
@@ -806,7 +806,12 @@ public class ColumnConfig extends AbstractLiquibaseSerializable {
         incrementBy = parsedNode.getChildValue(null, "incrementBy", BigInteger.class);
         remarks = parsedNode.getChildValue(null, "remarks", String.class);
         descending = parsedNode.getChildValue(null, "descending", Boolean.class);
-        included = parsedNode.getChildValue(null, "included", Boolean.class);
+        included= parsedNode.getChildValue(null, "included", Boolean.class);
+        //Object obj_included= parsedNode.getChildValue(null, "included", Boolean.class);
+        //Added to make a test work. not sure why just passing in Boolean.class directly does not work.
+        //if (obj_included!=null){
+        //    included = Boolean.valueOf(obj_included.toString());
+        //}
 
 
         value = parsedNode.getChildValue(null, "value", String.class);
