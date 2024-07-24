@@ -125,7 +125,7 @@ public class CreateIndexGenerator extends AbstractSqlGenerator<CreateIndexStatem
         List <AddColumnConfig> normalColumns = new LinkedList<>();
         while(spliterator.hasNext()){
             AddColumnConfig curr = spliterator.next();
-            if(curr.getIncluded()){
+            if(curr.getIncluded() != null && curr.getIncluded()){
                 includedColumns.add(curr);
             }
             else{
