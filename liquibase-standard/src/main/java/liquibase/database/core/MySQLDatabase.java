@@ -507,6 +507,8 @@ public class MySQLDatabase extends AbstractJdbcDatabase {
                 "LONGTEXT",
                 "LOOP",
                 "LOW_PRIORITY",
+                //The below reserved word is available from MySQL v8.4
+                "MANUAL",
                 "MASTER_PUBLIC_KEY_PATH",
                 "MASTER_SSL_VERIFY_SERVER_CERT",
                 "MATCH",
