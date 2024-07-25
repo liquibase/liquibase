@@ -193,22 +193,23 @@ public class JdbcExecutor extends AbstractExecutor {
                 int finalI = i;
                 ((ArrayList<?>) parameter).forEach(param -> {
                     try {
-                        if (param instanceof String) {
-                            pstmt.setString(finalI + 1, (String) param);
-                        } else {
-                            pstmt.setObject(finalI + 1, param);
-                        }
-                    }catch (SQLException e) {
+                        setParameter(pstmt, finalI, param);
+                    } catch (SQLException e) {
+                        throw new RuntimeException(e);
                     }
                 });
             }
             else {
-                if (parameter instanceof String) {
-                    pstmt.setString(i + 1, (String) parameter);
-                } else {
-                    pstmt.setObject(i + 1, parameters.get(i));
-                }
+                setParameter(pstmt, i, parameter);
             }
+        }
+    }
+
+    private static void setParameter(PreparedStatement pstmt, int parameterIndex, Object parameter) throws SQLException {
+        if (parameter instanceof String) {
+            pstmt.setString(parameterIndex + 1, (String) parameter);
+        } else {
+            pstmt.setObject(parameterIndex + 1, parameter);
         }
     }
 
