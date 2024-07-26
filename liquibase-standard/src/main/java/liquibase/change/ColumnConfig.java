@@ -807,11 +807,7 @@ public class ColumnConfig extends AbstractLiquibaseSerializable {
         remarks = parsedNode.getChildValue(null, "remarks", String.class);
         descending = parsedNode.getChildValue(null, "descending", Boolean.class);
         included= parsedNode.getChildValue(null, "included", Boolean.class);
-        //Object obj_included= parsedNode.getChildValue(null, "included", Boolean.class);
-        //Added to make a test work. not sure why just passing in Boolean.class directly does not work.
-        //if (obj_included!=null){
-        //    included = Boolean.valueOf(obj_included.toString());
-        //}
+
 
 
         value = parsedNode.getChildValue(null, "value", String.class);
