@@ -113,8 +113,10 @@ public class Index extends AbstractDatabaseObject {
     	return (toRet==null)?Collections.EMPTY_LIST:toRet;
     }
 
-    public Index addColumn(Column column) {        column.setRelation(getRelation());
+    public Index addColumn(Column column) {
+    	column.setRelation(getRelation());
         getColumns().add(column);
+        
         return this;
     }
 
