@@ -178,7 +178,7 @@ if [ -z "$extension_name" ]; then
   tar -xzf $workdir/liquibase-$MODIFIED_BRANCH_NAME-SNAPSHOT.tar.gz -C $workdir/tgz-repackage --strip-components=1
   cp $workdir/internal/lib/liquibase-core.jar $workdir/tgz-repackage/internal/lib/liquibase-core.jar
   cp $workdir/internal/lib/liquibase-commercial.jar $workdir/tgz-repackage/internal/lib/liquibase-commercial.jar
-  find $workdir/tgz-repackage -name "*.txt" -exec sed -i -e "s/0-SNAPSHOT/$version/" -e "s/release-SNAPSHOT/$version/" {} \;
+  find $workdir/tgz-repackage -name "*.txt" -exec sed -i -e "s/\(0\|release\|master\)-SNAPSHOT/$version/" {} \;
   (cd $workdir/tgz-repackage && tar -czf $outdir/liquibase-$version.tar.gz *)
   (cd $workdir/tgz-repackage && zip -qr $outdir/liquibase-$version.zip *)
 fi

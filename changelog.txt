@@ -83,7 +83,7 @@ Changes in version 4.29.0 (2024.07.25)
 ### [OSS] Changelog
 
 ## Breaking Changes
-- None
+- (#6089) refactor history command to use command framework (DAT-17970) @StevenMassaro
 
 ## Changes
 - (#5988) High Level API (aka undeprecate Liquibase class) @filipelautert
