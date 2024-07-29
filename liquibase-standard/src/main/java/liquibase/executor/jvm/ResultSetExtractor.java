@@ -2,6 +2,7 @@ package liquibase.executor.jvm;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.List;
 
 /**
  * Callback interface used by {@link liquibase.executor.Executor}'s query methods.
@@ -16,7 +17,7 @@ import java.sql.SQLException;
  * @see RowCallbackHandler
  * @see RowMapper
  */
-interface ResultSetExtractor {
+interface ResultSetExtractor<T> {
 
     /**
      * Implementations must implement this method to process the entire ResultSet.
@@ -29,6 +30,5 @@ interface ResultSetExtractor {
      *                               values or navigating (that is, there's no need to catch SQLException)
      * @throws liquibase.exception.DatabaseException         in case of custom exceptions
      */
-    Object extractData(ResultSet rs) throws SQLException;
-
+    List<T> extractData(ResultSet rs) throws SQLException;
 }

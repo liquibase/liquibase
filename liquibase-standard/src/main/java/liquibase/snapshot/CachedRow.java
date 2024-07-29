@@ -5,11 +5,9 @@ import java.util.Map;
 public class CachedRow {
     private final Map row;
 
-    public CachedRow(Map row) {
+    public CachedRow(Map<String,?> row) {
         this.row = row;
     }
-
-
 
     public Object get(String columnName) {
         return row.get(columnName);
@@ -18,7 +16,6 @@ public class CachedRow {
     public void set(String columnName, Object value) {
         row.put(columnName, value);
     }
-
 
     public boolean containsColumn(String columnName) {
         return row.containsKey(columnName);

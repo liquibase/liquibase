@@ -3,7 +3,7 @@ package liquibase.diff;
 import liquibase.serializer.AbstractLiquibaseSerializable;
 import liquibase.serializer.LiquibaseSerializable;
 
-public class Difference extends AbstractLiquibaseSerializable implements Comparable, LiquibaseSerializable {
+public class Difference extends AbstractLiquibaseSerializable implements Comparable<Difference>, LiquibaseSerializable {
     private final String message;
     private final String field;
     private final Object referenceValue;
@@ -55,7 +55,7 @@ public class Difference extends AbstractLiquibaseSerializable implements Compara
     }
 
     @Override
-    public int compareTo(Object o) {
-        return this.getField().compareTo(((Difference) o).getField());
+    public int compareTo(Difference o) {
+        return this.getField().compareTo(o.getField());
     }
 }

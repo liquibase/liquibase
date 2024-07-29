@@ -126,9 +126,9 @@ public interface Executor extends Plugin {
      */
     int queryForInt(SqlStatement sql, List<SqlVisitor> sqlVisitors) throws DatabaseException;
 
-    List queryForList(SqlStatement sql, Class elementType) throws DatabaseException;
+    <T> List<T> queryForList(SqlStatement sql, Class<T> elementType) throws DatabaseException;
 
-    List queryForList(SqlStatement sql, Class elementType, List<SqlVisitor> sqlVisitors) throws DatabaseException;
+    <T> List<T> queryForList(SqlStatement sql, Class<T> elementType, List<SqlVisitor> sqlVisitors) throws DatabaseException;
 
     /**
      * Executes a given SQL statement and returns a List of rows. Each row is represented a a Map<String, ?>,

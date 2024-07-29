@@ -16,7 +16,7 @@ import static liquibase.command.core.HistoryCommandStep.FORMAT_ARG;
 /**
  * @deprecated Implement commands with {@link liquibase.command.CommandStep} and call them with {@link liquibase.command.CommandFactory#getCommandDefinition(String...)}.
  */
-public class HistoryCommand extends AbstractCommand {
+public class HistoryCommand extends AbstractCommand<CommandResult> {
 
     private Database database;
     private final DateFormat dateFormat;

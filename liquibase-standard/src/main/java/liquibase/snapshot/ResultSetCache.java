@@ -50,7 +50,7 @@ public class ResultSetCache {
 
                 //remove any existing single fetches that may be duplicated
                 if (resultSetExtractor.bulkContainsSchema(schemaKey)) {
-                    for (Map cachedValue : cacheBySchema.values()) {
+                    for (Map<String,List<CachedRow>> cachedValue : cacheBySchema.values()) {
                         cachedValue.clear();
                     }
                 } else {
@@ -288,7 +288,7 @@ public class ResultSetCache {
             resultSet.setFetchSize(database.getFetchSize());
             List<CachedRow> returnList = new ArrayList<>();
             try {
-                List<Map> result = (List<Map>) new RowMapperResultSetExtractor(new ColumnMapRowMapper(database.isCaseSensitive()) {
+                List<Map<String,?>> result = new RowMapperResultSetExtractor<>(new ColumnMapRowMapper(database.isCaseSensitive()) {
                     @Override
                     protected Object getColumnValue(ResultSet rs, int index) throws SQLException {
                         Object value = super.getColumnValue(rs, index);
@@ -313,7 +313,7 @@ public class ResultSetCache {
                     }
                 }).extractData(resultSet);
 
-                for (Map row : result) {
+                for (Map<String,?> row : result) {
                     returnList.add(new CachedRow(row));
                 }
             } finally {

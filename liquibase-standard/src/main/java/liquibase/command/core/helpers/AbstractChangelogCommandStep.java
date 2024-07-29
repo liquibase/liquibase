@@ -37,7 +37,7 @@ public abstract class AbstractChangelogCommandStep extends AbstractCommandStep {
     }
 
     protected static void validateRunOnChangeTypes(final CommandScope commandScope) throws CommandValidationException {
-        final Collection<String> runOnChangeTypes = new ArrayList(Arrays.asList(commandScope.getArgumentValue(RUN_ON_CHANGE_TYPES_ARG).split("\\s*,\\s*")));
+        final Collection<String> runOnChangeTypes = new ArrayList<>(Arrays.asList(commandScope.getArgumentValue(RUN_ON_CHANGE_TYPES_ARG).split("\\s*,\\s*")));
         final Collection<String> supportedRunOnChangeTypes = supportedRunOnChangeTypes().collect(Collectors.toList());
         supportedRunOnChangeTypes.add("none");
         runOnChangeTypes.removeAll(supportedRunOnChangeTypes);
@@ -46,7 +46,7 @@ public abstract class AbstractChangelogCommandStep extends AbstractCommandStep {
     }
 
     protected static void validateReplaceIfExistsTypes(final CommandScope commandScope) throws CommandValidationException {
-        final Collection<String> replaceIfExistsTypes = new ArrayList(Arrays.asList(commandScope.getArgumentValue(REPLACE_IF_EXISTS_TYPES_ARG).split("\\s*,\\s*")));
+        final Collection<String> replaceIfExistsTypes = new ArrayList<>(Arrays.asList(commandScope.getArgumentValue(REPLACE_IF_EXISTS_TYPES_ARG).split("\\s*,\\s*")));
         final Collection<String> supportedReplaceIfExistsTypes = supportedReplaceIfExistsTypes().collect(Collectors.toList());
         supportedReplaceIfExistsTypes.add("none");
         replaceIfExistsTypes.removeAll(supportedReplaceIfExistsTypes);

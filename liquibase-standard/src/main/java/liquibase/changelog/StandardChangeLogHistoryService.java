@@ -309,7 +309,7 @@ public class StandardChangeLogHistoryService extends AbstractChangeLogHistorySer
             if (hasDatabaseChangeLogTable()) {
                 Scope.getCurrentScope().getLog(getClass()).info("Reading from " + databaseChangeLogTableName);
                 List<Map<String, ?>> results = queryDatabaseChangeLogTable(database);
-                for (Map rs : results) {
+                for (Map<String, ?> rs : results) {
                     String storedFileName = rs.get("FILENAME").toString();
                     String fileName = DatabaseChangeLog.normalizePath(storedFileName);
                     String author = rs.get("AUTHOR").toString();

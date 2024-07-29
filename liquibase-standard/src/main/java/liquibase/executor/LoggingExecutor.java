@@ -223,12 +223,12 @@ public class LoggingExecutor extends AbstractExecutor {
     }
 
     @Override
-    public List queryForList(SqlStatement sql, Class elementType) throws DatabaseException {
+    public <T> List<T> queryForList(SqlStatement sql, Class<T> elementType) throws DatabaseException {
         return delegatedReadExecutor.queryForList(sql, elementType);
     }
 
     @Override
-    public List queryForList(SqlStatement sql, Class elementType, List<SqlVisitor> sqlVisitors)
+    public <T> List<T> queryForList(SqlStatement sql, Class<T> elementType, List<SqlVisitor> sqlVisitors)
             throws DatabaseException {
         return delegatedReadExecutor.queryForList(sql, elementType, sqlVisitors);
     }
@@ -266,6 +266,4 @@ public class LoggingExecutor extends AbstractExecutor {
         }
 
     }
-
-    
 }

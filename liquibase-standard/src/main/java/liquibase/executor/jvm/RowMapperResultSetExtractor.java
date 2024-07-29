@@ -35,9 +35,9 @@ import java.util.List;
  * @see liquibase.executor.Executor
  */
 @SuppressWarnings({"unchecked"})
-public class RowMapperResultSetExtractor implements ResultSetExtractor {
+public class RowMapperResultSetExtractor<T> implements ResultSetExtractor<T> {
 
-    protected final RowMapper rowMapper;
+    protected final RowMapper<T> rowMapper;
 
     protected final int rowsExpected;
 
@@ -47,7 +47,7 @@ public class RowMapperResultSetExtractor implements ResultSetExtractor {
      *
      * @param rowMapper the RowMapper which creates an object for each row
      */
-    public RowMapperResultSetExtractor(RowMapper rowMapper) {
+    public RowMapperResultSetExtractor(RowMapper<T> rowMapper) {
         this(rowMapper, 0);
     }
 
@@ -58,20 +58,19 @@ public class RowMapperResultSetExtractor implements ResultSetExtractor {
      * @param rowsExpected the number of expected rows
      *                     (just used for optimized collection handling)
      */
-    public RowMapperResultSetExtractor(RowMapper rowMapper, int rowsExpected) {
+    public RowMapperResultSetExtractor(RowMapper<T> rowMapper, int rowsExpected) {
         this.rowMapper = rowMapper;
         this.rowsExpected = rowsExpected;
     }
 
 
     @Override
-    public Object extractData(ResultSet rs) throws SQLException {
-        List results = ((this.rowsExpected > 0) ? new ArrayList(this.rowsExpected) : new ArrayList());
+    public List<T> extractData(ResultSet rs) throws SQLException {
+        List<T> results = ((this.rowsExpected > 0) ? new ArrayList<>(this.rowsExpected) : new ArrayList<>());
         int rowNum = 0;
         while (rs.next()) {
             results.add(this.rowMapper.mapRow(rs, rowNum++));
         }
         return results;
     }
-
 }
