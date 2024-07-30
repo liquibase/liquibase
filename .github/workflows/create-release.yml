@@ -174,7 +174,7 @@ jobs:
           for i in "${EXT[@]}"; do
             cp ~/.m2/repository/org/liquibase/ext/$i/${{ needs.setup.outputs.version }}/$i-${{ needs.setup.outputs.version }}.jar re-version/out/liquibase-${{ needs.setup.outputs.version }}/internal/extensions/$i-${{ needs.setup.outputs.version }}.jar || echo "Failed to move $i artifact"
           done
-          (cd re-version/out/ && zip -r liquibase-${{ needs.setup.outputs.version }}.zip liquibase-${{ needs.setup.outputs.version }} && rm -rf liquibase-${{ needs.setup.outputs.version }} && cd ../..)  
+          (cd re-version/out/liquibase-${{ needs.setup.outputs.version }} && zip -r ../liquibase-${{ needs.setup.outputs.version }}.zip . && cd .. && rm -rf liquibase-${{ needs.setup.outputs.version }})
           
           # Modify the tar.gz file
           mkdir -p re-version/out/liquibase-${{ needs.setup.outputs.version }}
