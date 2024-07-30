@@ -1,12 +1,23 @@
 Liquibase Core Changelog
 ===========================================
 
-
 Changes in version 4.29.1 (2024.07.31)
 
 ### Liquibase 4.29.1 is a patch release
 
+* Liquibase 4.29.1 patches a pom mismatch in the Liquibase BigQuery Commercial Extension.
 
+* Liquibase 4.29.1 resolves an issue with the zip distribution where all files were incorrectly placed inside liquibase-4.29.1 directory. This update ensures proper file organization and installation.
+
+
+### [PRO] Changelog
+
+## [PRO] Bug Fixes
+
+* DAT-18294: Correctly default check scope parameter in https://github.com/liquibase/liquibase-pro/pull/1880 by @wwillard7800
+
+
+**Full Changelog**: https://github.com/liquibase/liquibase/compare/v4.29.0...v4.29.1
 
 
 Changes in version 4.29.0 (2024.07.25)
